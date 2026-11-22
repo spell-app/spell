@@ -84,6 +84,14 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
     case "saga":
       // its own verbs and arguments (`saga set seo epics`):  no epic page to aim at
       return [["saga", ...args]]
+    case "badges": {
+      // `badges seo#J3 set --care 80`:  the item goes after its verb (`BadgeCommands`, epic `epic-engine` P81)
+      if (ref === undefined) return [["badges", ...args]]
+      const [verbWord, ...after] = args.slice(at + 1)
+      if (!verbWord || verbWord.startsWith("--"))
+        throw new EpicCommandError(`badges:  what?  epic badges ${addressOf(target!.epic, ref)} set --care 80`)
+      return [["badges", ...args.slice(0, at), target!.epic, verbWord, ref, ...after]]
+    }
     case "test":
       // `test seo#M3`:  the run, landing on M3;  `test --all`:  no epic
       return [["test", ...around([]), ...(ref === undefined ? [] : ["--at", ref])]]

@@ -31,9 +31,9 @@ export class PlanItem {
     return slot ? PlanMarkup.squeeze(slot.textContent ?? "") : element.id
   }
 
-  /** `item`'s title as a listing says it, behind the word its line starts with:  `FIXED - It jumps` (`TitlePrefix`). */
+  /** `item`'s title as a listing says it, behind the word or badge its line starts with:  `WILL FIX - It jumps`. */
   static listedTitle(item: Element): string {
-    return TitlePrefix.titled(PlanItem.titleOf(item), TitlePrefix.ofItem(item))
+    return TitlePrefix.titled(PlanItem.titleOf(item), item)
   }
 
   /**

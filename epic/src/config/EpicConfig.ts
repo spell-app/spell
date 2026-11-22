@@ -16,6 +16,8 @@ import { PeopleColors } from "./PeopleColors.ts"
 import { CodeHost, type CodeHostKind } from "./CodeHost.ts"
 import { Editor, EDITOR_IDS } from "./Editor.ts"
 import { VoiceColor } from "./VoiceColor.ts"
+// the badges' ONE rule:  plain data and one class, no imports but types, so plain node loads it
+import { BADGE_LIMITS, type BadgeLimits } from "spell/epic/components/epic-item/ItemBadge.ts"
 
 /****************
  * ### `EpicConfig`
@@ -56,6 +58,7 @@ import { VoiceColor } from "./VoiceColor.ts"
  *     (`SRV.checkoutOf()`), or are told by epics' route module (`PageServer.serveWorktrees()`).
  * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path (`spell/epic/config/EpicConfig`).
  * - Its position:  imports only node's own modules, the server's `checkout.ts` by its entry and `RealPath` beside it,
+ *   and `ItemBadge`'s defaults (types its only imports),
  *   so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
  * - A MULTI-REPO top (epic `epic-engine` P10, repo-split's Q9 A):  one repo holding others, its child repos.
  *   - The top repo's file names them (`"repos": "repos.json5"`).
@@ -100,6 +103,7 @@ export class EpicConfig {
     checkoutPatches: [],
     promptAck: true,
     freshHintMB: 8,
+    issueBadges: BADGE_LIMITS,
     editor: "",
     renamedRepos: {},
     colors: { people: {}, agents: {} },
@@ -671,6 +675,14 @@ export class EpicConfig {
   }
 
   /**
+   * The percentages this repo's item badges are worked out by (`issueBadges`, epic `epic-engine` P81;  Owen:
+   * "Other epic users will probably want to tune the percentage"):  `recheckAt`, `closeBelow`, `fixAbove`.
+   */
+  get issueBadges(): BadgeLimits {
+    return this.settings.issueBadges
+  }
+
+  /**
    * The editor the tools drive, VS Code or Cursor (`Editor`, epic `epic-friend` P16):  this machine's
    * (`$SPELL_EPIC_EDITOR`), else the window's, else the repo's `editor`, else VS Code
    */
@@ -1098,6 +1110,7 @@ export class EpicConfig {
       checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
       promptAck: this.promptAck,
       freshHintMB: this.freshHintMB,
+      ...Object.fromEntries(Object.entries(this.issueBadges).map(([key, value]) => [`issueBadges.${key}`, value])),
       editor: this.editor.id,
       renamedRepos: JSON.stringify(this.renamedRepos),
       colors: JSON.stringify(this.colors),
@@ -1322,6 +1335,7 @@ export class EpicConfig {
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
       freshHintMB: sizeOf(given, "freshHintMB", defaults.freshHintMB, file),
+      issueBadges: badgeLimitsOf(given, defaults.issueBadges, file),
       editor: editorOf(given, defaults.editor, file),
       renamedRepos: urlsTo(given, "renamedRepos", defaults.renamedRepos, file),
       colors: colorsOf(given, defaults.colors, file),
@@ -1508,6 +1522,9 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
  * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
  *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off
+ * - `issueBadges`:  the percentages the item badges are worked out by (`ItemBadge`, epic `epic-engine` P81):
+ *   `recheckAt` (doubt, this or more is rechecked first), `closeBelow` (care, under this is closed),
+ *   `fixAbove` (care, over this is fixed);  one left out takes its default, 50, 25 and 60
  * - `freshHintMB`:  the size, in MB, past which a session's transcript gets the one line suggesting
  *   `/epic fresh` (`FreshHint`, epic `epic-engine` T110);  `8` (the default);  `0`:  never
  * - `editor`:  the editor the tools drive when neither this machine (`$SPELL_EPIC_EDITOR`) nor the window says,
@@ -1555,6 +1572,7 @@ export type EpicSettings = {
   checkoutPatches: CheckoutPatch[]
   promptAck: boolean
   freshHintMB: number
+  issueBadges: BadgeLimits
   editor: string
   renamedRepos: Record<string, string>
   colors: EpicColors
@@ -1676,6 +1694,30 @@ function codeHostOf(given: Record<string, unknown>, fallback: CodeHostKind, file
   if (!CodeHost.isKind(value))
     throw new TypeError(`EpicConfig:  ${file}'s "codeHost" must be "github" or "gitlab", not ${JSON.stringify(value)}`)
   return value
+}
+
+/**
+ * `given.issueBadges`, the item badges' percentages;  one left out takes `fallback`'s (epic `epic-engine` P81).
+ * - throws `TypeError` naming the file and the key when one isn't 0 to 100, or `closeBelow` is over `fixAbove`
+ */
+function badgeLimitsOf(given: Record<string, unknown>, fallback: BadgeLimits, file: string): BadgeLimits {
+  const value = given.issueBadges
+  if (value === undefined) return fallback
+  const limits = { ...fallback }
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new TypeError(`EpicConfig:  ${file}'s "issueBadges" must be { recheckAt, closeBelow, fixAbove }`)
+  for (const key of Object.keys(fallback) as (keyof BadgeLimits)[]) {
+    const percent = (value as Record<string, unknown>)[key]
+    if (percent === undefined) continue
+    if (typeof percent !== "number" || !(percent >= 0 && percent <= 100))
+      throw new TypeError(
+        `EpicConfig:  ${file}'s "issueBadges.${key}" must be a percentage, 0 to 100, not ${JSON.stringify(percent)}`
+      )
+    limits[key] = percent
+  }
+  if (limits.closeBelow > limits.fixAbove)
+    throw new TypeError(`EpicConfig:  ${file}'s "issueBadges.closeBelow" must be no more than its "fixAbove"`)
+  return limits
 }
 
 /**

@@ -429,11 +429,12 @@ export class AnswerForm extends PageStore {
   /** `load()`'s work;  tried again every `ANSWER_RETRY_MS` while the page server doesn't answer. */
   private async read() {
     if (!this.keepsDrafts) return
-    const [reply, draft] = await Promise.all([
+    const [reply, draftReply] = await Promise.all([
       this.fetchReply<{ answer?: SentAnswer | null; listening?: AnswerListener | null }>(DETAILS_API),
-      this.fetchJson<DetailsDraft>(DETAILS_DRAFT_API, "draft")
+      this.fetchReply<{ draft?: DetailsDraft | null }>(DETAILS_DRAFT_API)
     ])
-    if (!reply && this.link.isServed) {
+    // either unread:  this browser's copy would be saved over what the page server has
+    if ((!reply || !draftReply) && this.link.isServed) {
       this.readAgainSoon()
       return
     }
@@ -441,6 +442,7 @@ export class AnswerForm extends PageStore {
     this.hasRead = true
     if (this.error === STILL_READING) this.error = ""
     const answer = reply?.answer ?? undefined
+    const draft = draftReply?.draft ?? undefined
     if (reply && reply.listening !== undefined) this.listening = reply.listening
     if (answer) {
       this.sent = answer
@@ -653,14 +655,6 @@ export class AnswerForm extends PageStore {
   private readLocal(): DetailsDraft | undefined {
     const draft = this.drafts.kept<DetailsDraft>()
     return draft && typeof draft.saved === "string" && draft.answers && draft.labels ? draft : undefined
-  }
-
-  /**
-   * `GET <api>?page=` for this page:  the reply's `what`, or `undefined` (none, no route, no page server).
-   * - NEVER throws
-   */
-  private async fetchJson<T>(api: string, what: string): Promise<T | undefined> {
-    return (await this.fetchReply<Record<string, T | null>>(api))?.[what] ?? undefined
   }
 
   /**

@@ -40,7 +40,9 @@ import { EpicParts } from "./EpicParts"
 import { EpicTargets } from "./EpicTargets"
 import { FocusCommands } from "./FocusCommands"
 import { FreshCommands } from "./FreshCommands"
+import { BadgeCommands } from "./BadgeCommands"
 import { Hush, type HushCall, type HushJudge } from "./Hush"
+import { ItemJudge } from "./ItemJudge"
 import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
 import { ItemPictures, type PastedReader } from "./ItemPictures"
@@ -55,7 +57,7 @@ import type { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { ReviewBackfill } from "./ReviewBackfill"
 import { ReviewInbox } from "./ReviewInbox"
-import { StaleFacts } from "./StaleFacts"
+import { StaleFacts, type StaleFactsOptions } from "./StaleFacts"
 import { StaleUnderway } from "./StaleUnderway"
 import { SagaCommands } from "./SagaCommands"
 import { SagaPage } from "./SagaPage"
@@ -142,6 +144,15 @@ export class PlanDocCommands {
    */
   readonly hushJudge: HushJudge | undefined
 
+  /** the `badges` command (epic `epic-engine` P81):  a page's item badges */
+  readonly badges: BadgeCommands
+
+  /**
+   * scores an item's care and doubt, as it's made on a page with badges and for `badges score` (epic `epic-engine` P81):
+   * default `claude -p` (`ItemJudge`);  a test's gives its own;  STATIC for the object's life
+   */
+  readonly itemJudge: ItemJudge
+
   /**
    * reads a new or changed title cold, for `add` and `rename` (epic `epic-engine` T123):  default `claude -p`
    * (`TitleReader`);  a test's gives its own;  STATIC for the object's life
@@ -156,6 +167,7 @@ export class PlanDocCommands {
    * - `pastedReader`:  default the transcript's;  a test's gives its own
    * - `hushJudge`:  default `claude -p`;  a test's gives its own
    * - `titleReader`:  default `claude -p`, skipped under a test runner;  a test's gives its own
+   * - `itemJudge`:  the same
    */
   constructor({
     files = new PlanDocFiles(),
@@ -163,7 +175,8 @@ export class PlanDocCommands {
     phaseTimer = (request) => new WorkTime().ofPhase(request).minutes,
     pastedReader,
     hushJudge,
-    titleReader
+    titleReader,
+    itemJudge
   }: {
     files?: PlanDocFiles
     sessionsOf?: SessionFinder
@@ -171,12 +184,15 @@ export class PlanDocCommands {
     pastedReader?: PastedReader
     hushJudge?: HushJudge
     titleReader?: TitleReader
+    itemJudge?: ItemJudge
   } = {}) {
     this.files = files
     this.phaseTimer = phaseTimer
     this.pastedReader = pastedReader
     this.hushJudge = hushJudge
     this.titleReader = titleReader ?? new TitleReader({ warn: (line) => this.warn(line) })
+    this.itemJudge = itemJudge ?? new ItemJudge()
+    this.badges = new BadgeCommands(this)
     this.inbox = new InboxCommands(this)
     this.migrator = new MigrateCommands(this, sessionsOf)
     this.sagas = new SagaCommands(this)
@@ -461,6 +477,8 @@ export class PlanDocCommands {
         return this.options.choose(file, rest, flags)
       case "option":
         return this.options.run(file, rest, flags)
+      case "badges":
+        return this.badges.run(name, file, rest, flags)
       case "commit":
         return this.commit(file, rest, flags)
       case "commits":
@@ -663,9 +681,30 @@ export class PlanDocCommands {
     return this.files.read(file)
   }
 
-  /** Change the doc at `file` under its lock, and write it:  `PlanDocFiles.edit()`. */
-  edit<T>(file: string, change: (plan: PlanDoc) => T, options?: { split?: boolean }): Promise<T> {
-    return this.files.edit(file, change, options)
+  /**
+   * Change the doc at `file` under its lock, and write it:  `PlanDocFiles.edit()`.
+   * - on a page with badges, the items the change made are judged after it, the lock let go (epic `epic-engine`
+   *   P81:  every way an item is created comes through here)
+   *   - no page without badges is ever scored
+   */
+  async edit<T>(file: string, change: (plan: PlanDoc) => T, options?: { split?: boolean }): Promise<T> {
+    let made: string[] = []
+    let epic = ""
+    const result = await this.files.edit(
+      file,
+      (plan) => {
+        const before = plan.badges.mode && new Set(plan.allItems.map((item) => item.id))
+        const changed = change(plan)
+        if (before) {
+          made = plan.allItems.flatMap((item) => (before.has(item.id) ? [] : item.id))
+          epic = plan.page.getAttribute("epic") ?? ""
+        }
+        return changed
+      },
+      options
+    )
+    if (made.length) await this.badges.judgeNew(epic, file, made)
+    return result
   }
 
   /**
@@ -1114,19 +1153,23 @@ export class PlanDocCommands {
    * nobody here;  in the epic's own worktree, when it has one, else the main checkout.
    */
   private printStale(name: string, file: string, json: boolean): void {
+    const report = new StaleFacts(this.staleOptions(name, this.read(file), file)).report()
+    this.print(json ? JSON.stringify(report, null, 2) : StaleFacts.lines(report).join("\n"))
+  }
+
+  /** What `StaleFacts` reads of epic `name`'s page `file`, read as `plan`:  its checkout, `main`, the inbox. */
+  staleOptions(name: string, plan: PlanDoc, file: string): StaleFactsOptions {
     const main = this.files.mainRoot()
     const where = this.files.epicCheckout(name, main)
-    const checkout = where === PlanDocFiles.MAIN_CHECKOUT ? main : resolve(main, where)
-    const report = new StaleFacts({
-      plan: this.read(file),
+    return {
+      plan,
       epic: name,
-      checkout,
+      checkout: where === PlanDocFiles.MAIN_CHECKOUT ? main : resolve(main, where),
       marked: PlanDocCommands.pendingMarks(file),
       main,
       file,
       epics: new Set(this.files.epicNames())
-    }).report()
-    this.print(json ? JSON.stringify(report, null, 2) : StaleFacts.lines(report).join("\n"))
+    }
   }
 
   /**
@@ -1892,6 +1935,11 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    open items whose Underway card is older than n hours (3),
                                                    nobody working them:  on main => fixed;  else a
                                                    Stale card, once (--apply);  every turn's end runs it (T78)
+  badges <name> [list [--json] | trial | on | off | score [ids] [--model sonnet]
+      | set <ids> [--care 80] [--doubt 10] [--severe yes|no] [--your-call yes|no] [--why "..."]
+      | close <ids> [--as vanished|moot|duplicate|declined] [--why "..."]]
+                                                   item badges (P81):  each line starts with what happens next, from
+                                                   care and doubt;  off undoes them all;  a trial closes nothing
   hush [<name> | all] [--dryrun] [--json] [--model sonnet]
                                                    grey the green, yellow and orange items settled 3+ days ago Owen
                                                    almost surely won't look at again (80%, a fresh claude -p judges

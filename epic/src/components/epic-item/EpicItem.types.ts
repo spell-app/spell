@@ -6,7 +6,7 @@
 import type { ReviewButtonSpec, ReviewColor, ReviewFill } from "spell/epic/components/epic-review/EpicReview.types"
 import { reopensCanceled } from "spell/epic/review/review.types"
 
-import type { epicItemVocabulary } from "./EpicItem.en"
+import type { BadgeWord, epicItemVocabulary } from "./EpicItem.en"
 
 /** `epicItemVocabulary`'s type. */
 export type EpicItemVocabulary = typeof epicItemVocabulary
@@ -20,9 +20,11 @@ export const ITEM_STATES = [
   "attention",
   "replied",
   "requested",
+  "recheck",
   "progress",
   "handed",
   "open",
+  "someday",
   "scheduled",
   "recent",
   "handled",
@@ -38,6 +40,7 @@ export type ItemState = (typeof ITEM_STATES)[number]
  * `attention` (red), `replied` (orange:  their turn to pick or review), `requested` (light orange:  what they asked
  * for is finished, their turn to see it), and a phase's `waiting` (orange:  its plan waits for their Accept).
  * - what a section's count and its "only what needs you" filter take (`<epic-section>`)
+ * - NOT `recheck`, though it's light orange too:  a recheck waits on Claude (epic `epic-engine` Q82)
  */
 export const NEEDS_PERSON: ReadonlySet<string> = new Set(["attention", "replied", "requested", "waiting"])
 
@@ -170,6 +173,8 @@ export type ItemLook = {
   state: ItemState
   /** struck through */
   canceled: boolean
+  /** the badge its line starts with (`ItemBadge`, epic `epic-engine` P81);  none on a page without badges */
+  badge?: BadgeWord
 }
 
 /** No live review:  outside a review, or a server render. */
@@ -285,6 +290,8 @@ export const STATE_TIP_KEYS = {
   handed: "stateHanded",
   open: "stateOpen",
   scheduled: "stateScheduled",
+  recheck: "stateRecheck",
+  someday: "stateSomeday",
   recent: "stateRecent",
   handled: "stateHandled",
   quiet: "stateQuiet",
@@ -314,6 +321,8 @@ export const CHIP = "chip"
 export const TITLE = "title"
 /** The word before the title (`TitlePrefix`:  `FIXED -`, epic `epic-engine` T143). */
 export const TITLE_PREFIX = "title-prefix"
+/** The badge before the title (`ItemBadge`, epic `epic-engine` P81). */
+export const BADGE = "badge"
 export const EXTRAS = "extras"
 /** The end of the line's first row:  the page's buttons, the item's marks and review buttons. */
 export const MARKS = "marks"

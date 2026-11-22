@@ -14,6 +14,7 @@
 
 // By file, with its extension:  plain `node` loads this file (`Sagas`, for the docs index), and the barrel too would load
 // every vocabulary
+import type { BadgeLimits } from "spell/epic/components/epic-item/ItemBadge"
 import { ItemLetters, type ItemSectionKind } from "spell/epic/definitions/definitions.types.ts"
 import { PhaseStatuses, type PhaseStatus } from "spell/epic/phases/PhaseStatuses.ts"
 
@@ -433,6 +434,15 @@ export const MANUAL_TEST_ID = /^m\d+$/
  */
 export const OBSOLETE_ID = /^[ijt]\d+$/
 
+/** A status card's start, saying a follow-up was made:  its todo's id. */
+export const MADE_TODO = /^Made todo (T\d+)\b/
+
+/** A follow-up todo's line naming what it came from (`PlanDoc.followUp()`). */
+export const FROM_LINE = /^\s*From [A-Z]\d+\b/
+
+/** A page's item badges (`<epic-page badges>`, epic `epic-engine` P81):  tried on it, or on. */
+export type BadgeMode = "trial" | "on"
+
 /**
  * How a status card starts when an item says it waits for finished work, and the promised thing never came
  * (`PlanDoc.promiseUnkept()`):  a later `/epic tidy` knows it by this.
@@ -664,9 +674,11 @@ export const STATE_COLORS = {
   attention: "red",
   replied: "orange",
   requested: "orange",
+  recheck: "orange",
   progress: "blue",
   handed: "blue",
   open: "yellow",
+  someday: "yellow",
   scheduled: "blue",
   recent: "green",
   handled: "grey",
@@ -1107,6 +1119,12 @@ export type PlanDocOptions = {
    * - the command line passes the one running `epic` (`EpicHome.agentName()`)
    */
   agent?: string | (() => string)
+  /**
+   * the percentages the item badges are worked out by (epic `epic-engine` P81):  a function is asked as they're used.
+   * Default:  `BADGE_LIMITS`
+   * - the command line passes the repo's (`issueBadges` in its `.epic/config.json5`)
+   */
+  badgeLimits?: () => BadgeLimits
 }
 
 /**

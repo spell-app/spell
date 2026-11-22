@@ -24,6 +24,7 @@ export class SelfFix {
   /**
    * Does fixing `item` need nothing from the person:  an issue, not `requested`, that they hadn't got to?
    * - `actedOn`:  the items they acted on in the page's review inbox (`actedOn()`)
+   * - the badges ask `isGotTo()` too (`ItemBadges`, P81):  what they got to is never closed unseen
    */
   static isTheirsToSkip(item: Element, actedOn: ReadonlySet<string> = new Set()): boolean {
     return ISSUE_ID.test(item.id) && !item.hasAttribute("requested") && !SelfFix.isGotTo(item, actedOn)
@@ -39,16 +40,24 @@ export class SelfFix {
    *   - a review, deferral or queued work:  a fix for their review takes `reviewed` off, and starting the work
    *     `queued` (I375, 2026-11-22:  OK'd, then greyed by the migration)
    */
-  static isGotTo(item: Element, actedOn: ReadonlySet<string> = new Set()): boolean {
+  static isGotTo(item: Element, actedOn: ReadonlySet<string> = new Set(), logged?: ReadonlySet<string>): boolean {
     if (actedOn.has(item.id.toLowerCase()) || ACTED_ATTRIBUTES.some((name) => item.hasAttribute(name))) return true
     const replies = Array.from(item.querySelectorAll("epic-reply"))
     if (replies.some((reply) => !PlanItem.inOriginal(reply) && !ThreadFacts.isAgents(reply))) return true
-    const label = item.id.toUpperCase()
-    const events = item.ownerDocument.querySelectorAll('epic-page > epic-section[kind="log"] epic-event')
-    return Array.from(events).some((event) => {
+    return (logged ?? SelfFix.loggedGotTo(item.ownerDocument)).has(item.id.toLowerCase())
+  }
+
+  /** The ids (lower case) of what `document`'s Log says the person got to (`ACTED_LINES`). */
+  static loggedGotTo(document: Document): Set<string> {
+    const ids = new Set<string>()
+    for (const event of Array.from(document.querySelectorAll('epic-page > epic-section[kind="log"] epic-event'))) {
       const line = event.textContent?.trim() ?? ""
-      return ACTED_LINES.some((acted) => acted.exec(line)?.[1] === label)
-    })
+      for (const acted of ACTED_LINES) {
+        const id = acted.exec(line)?.[1]
+        if (id) ids.add(id.toLowerCase())
+      }
+    }
+    return ids
   }
 
   /**
@@ -86,5 +95,13 @@ const ACTED_ATTRIBUTES = ["urgent", "reviewed", "deferred", "queued", "review-as
  * The Log's lines saying the person got to an item;  each one's id.
  * - their click on its id chip (`AuthorWords.fromChip()`)
  * - `epic review`, `epic defer`, `epic queue`:  it was talked through with them
+ * - their marks and test runs, applied (P81)
  */
-const ACTED_LINES = [/^([A-Z]+\d+) (?:not )?urgent\b.*from its id chip\)/, /^([A-Z]+\d+) (?:reviewed|deferred|to do):/]
+const ACTED_LINES = [
+  /^([A-Z]+\d+) (?:not )?urgent\b.*from its id chip\)/,
+  /^([A-Z]+\d+) (?:reviewed|deferred|to do):/,
+  // their marks, as `inbox apply` logged them (P81:  a fix since took the item's own `reviewed` off, as I375's)
+  /^([A-Z]+\d+) (?:approved:|to todo |do this, in |start now:|queued for |(?:\S+ )?picked [A-Z])/,
+  // their test run
+  /^([A-Z]+\d+) (?:passed|failed|canceled|deferred)\b.*\brun\)/
+]

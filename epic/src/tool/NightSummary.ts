@@ -254,8 +254,26 @@ const CLOSED = /^(done|decided|canceled)$/
  * - a manual test to run
  */
 const NEED_ORDER: readonly [NeedPart, string, (item: Element) => boolean][] = [
-  ["asks", "needs your call", (item) => item.getAttribute("state") === "attention" && !/^[im]\d/.test(item.id)],
+  [
+    "asks",
+    "needs your call",
+    (item) =>
+      (item.getAttribute("state") === "attention" && !/^[im]\d/.test(item.id)) ||
+      // a page with badges:  YOUR CALL asks, whatever its kind and colour (epic `epic-engine` P81)
+      item.getAttribute("badge") === "yourCall"
+  ],
   ["fixed", "fixed, to review", (item) => item.hasAttribute("fixed")],
-  ["issues", "open issue", (item) => /^i\d/.test(item.id) && !item.hasAttribute("fixed")],
-  ["tests", "to test", (item) => /^m\d/.test(item.id)]
+  [
+    "issues",
+    "open issue",
+    (item) =>
+      /^i\d/.test(item.id) &&
+      !item.hasAttribute("fixed") &&
+      item.getAttribute("badge") !== "yourCall" &&
+      !WAITS_ON_CLAUDE.has(item.getAttribute("state") ?? "")
+  ],
+  ["tests", "to test", (item) => /^m\d/.test(item.id) && !WAITS_ON_CLAUDE.has(item.getAttribute("state") ?? "")]
 ]
+
+/** The states of a page with badges that wait on Claude, not the person (epic `epic-engine` Q82). */
+const WAITS_ON_CLAUDE: ReadonlySet<string> = new Set(["recheck"])

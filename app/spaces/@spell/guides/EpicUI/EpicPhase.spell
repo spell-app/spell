@@ -394,6 +394,14 @@
 			</>
 			<row>
 				<cell>
+					<text code>badged</>
+				</>
+				<cell>present or absent</>
+				<cell>Its page has item badges: its title starts with the badge of where it stands (YOUR CALL, QUEUED, UNDERWAY, HELD, DONE). Written by the epic tool.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
 					<text code>plan</>
 				</>
 				<cell><text code>waiting</> | <text code>accepted</></>

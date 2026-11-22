@@ -16,6 +16,8 @@
  *   while its work isn't merged.
  *   - `UNDERWAY` is solid blue, as its item's id chip (epic `epic-engine` T146).
  * - Public tokens (`--epic-update-*`) are never declared here:  read through private aliases.
+ *   - `--epic-update-word-display`, `--epic-update-unmerged-display`:  any word's and the `Not in main` pill's
+ *     `display`;  `none` where the line starts with a badge that says it (epic `epic-engine` P81)
  *   - `--epic-update-fixed-display`:  the `FIXED` word's `display`;  `none` where the line already starts with it
  *     (epic `epic-engine` T143), its `Not in main` pill still showing
  *   - `--epic-update-accent`:  the orange of the box, its outline and the label:  by default the pages' own amber orange,
@@ -30,7 +32,9 @@
 @layer ui.components.epic-update.types {
   :host {
     --_epic-update-accent: var(--epic-update-accent, var(--epic-state-replied, var(--ui-orange)));
-    --_epic-update-fixed-display: var(--epic-update-fixed-display, inline-flex);
+    --_epic-update-word-display: var(--epic-update-word-display, inline-flex);
+    --_epic-update-fixed-display: var(--epic-update-fixed-display, var(--_epic-update-word-display));
+    --_epic-update-unmerged-display: var(--epic-update-unmerged-display, inline-flex);
     --_epic-update-background: var(
       --epic-update-background,
       color-mix(in srgb, var(--_epic-update-accent) 8%, var(--epic-bg, var(--ui-background)))
@@ -114,7 +118,7 @@
 
   /* ## The bare label */
   .label {
-    display: inline-flex;
+    display: var(--_epic-update-word-display);
     align-items: center;
     box-sizing: border-box;
     height: 18px;
@@ -136,7 +140,7 @@
   }
   /* its status change's work not in main yet (T75):  a small blue outlined pill, as a status card's (I273) */
   .unmerged {
-    display: inline-flex;
+    display: var(--_epic-update-unmerged-display);
     align-items: center;
     box-sizing: border-box;
     height: 18px;
