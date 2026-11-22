@@ -223,7 +223,7 @@ export function titleInside(host, part = "button") {
  * page defined EARLY (every Spell UI tag the docs bundle knows, a pack's on first use;  epic `solid-2-final` P7), its
  * family attached (the element layer's `whenAttached()`, a static every tag's class has).
  * - `whenDefined()` alone resolves at once for a tag defined early:  its elements are still pending then.
- * - may NEVER resolve for a tag the page has none of:  its family loads once one is made, so wait only for a tag it holds
+ * - may NEVER resolve for a tag the page has none of, whose family loads once one is made:  wait only for tags it holds
  *   (epic `epic-engine` I408).
  * - Plain DOM, no import:  the comments' own script (`spell-comments.js`) holds no Spell UI.
  */
