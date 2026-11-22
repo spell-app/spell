@@ -81,7 +81,8 @@
       id: "warm-visit",
       name: "A warm visit to the editor",
       budget: 10,
-      ceiling: 2115,
+      // Compress And Cache (epic solid-2-final P2):  2,115 KB => 98 KB, the hashed chunks kept a year
+      ceiling: 100,
       run: "load editor/desktop warmBrotli"
     }
   ]

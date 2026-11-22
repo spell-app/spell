@@ -9,8 +9,8 @@ import { PerfBrowser, median, type DomCensus, type LoadTimes, type PerfMetrics }
  * - memory:  the heap, DOM nodes and listeners, after load and after a forced garbage collection
  * - the DOM:  elements through shadow roots, custom elements, shadow roots, their adopted sheets
  * - a WARM visit too, once:  the same page again in the same browser, and what it fetched past the browser's cache
- *   (`warmBrotli`), the warm-visit budget's number:  a "not modified" answer counts what crossed the network, its
- *   headers;  anything else its body brotli'd
+ *   (`warmBrotli`), the warm-visit budget's number:  what crossed the network (a "not modified" answer, its headers),
+ *   its body brotli'd only where Chrome didn't say
  * - the live-reload messages the page got while it loaded (`liveMessages`):  each one used to make the live client
  *   walk every script (epic `solid-2-final` P1)
  */
@@ -140,7 +140,7 @@ export class LoadMeasure {
     await browser.sized()
     return [...browser.responses.values()]
       .filter((response) => !response.fromCache)
-      .reduce((total, response) => total + ((response.notModified ? response.wire : response.brotli) ?? 0), 0)
+      .reduce((total, response) => total + (response.wire ?? response.brotli ?? 0), 0)
   }
 }
 
@@ -177,8 +177,8 @@ export type LoadRun = {
   jsRaw: number
   jsBrotli: number
   /**
-   * a warm visit's bytes past the cache:  a "not modified" answer's as they crossed the network, anything else brotli'd;
-   * the first run only
+   * a warm visit's bytes past the cache, as they crossed the network (a "not modified" answer, its headers), brotli'd
+   * only where Chrome didn't say;  the first run only
    */
   warmBrotli?: number
   afterLoad: PerfMetrics

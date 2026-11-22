@@ -53,7 +53,7 @@ export class PerfBrowser {
   readonly responses = new Map<string, PerfResponse>()
 
   /** what the network said of each URL (Chrome's own events):  laid onto `responses` by `sized()` */
-  private readonly network = new Map<string, Pick<PerfResponse, "fromCache" | "notModified" | "wire">>()
+  private readonly network = new Map<string, Pick<PerfResponse, "fromCache" | "wire">>()
 
   /** the response bodies being read and sized (`sized()`) */
   private readonly reading = new Set<Promise<void>>()
@@ -185,15 +185,24 @@ export class PerfBrowser {
    */
   private async watch(): Promise<void> {
     const { page, spec, cdp } = this
+    // through Chrome's own interception, never Playwright's `page.route()`:  that turns the browser's cache off,
+    // so a warm visit fetched everything again (epic `solid-2-final` P2)
     if (spec.blockWrites) {
-      await page.route("**/*", (route) => {
-        const request = route.request()
-        if (WRITES.test(request.method()) && !COMPILES.test(request.url())) {
-          this.writesBlocked.push(`${request.method()} ${request.url()}`)
-          return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
-        }
-        return route.fallback()
+      cdp.on("Fetch.requestPaused", ({ requestId, request }) => {
+        const refused = WRITES.test(request.method) && !COMPILES.test(request.url)
+        if (refused) this.writesBlocked.push(`${request.method} ${request.url}`)
+        const answer = refused
+          ? cdp.send("Fetch.fulfillRequest", {
+              requestId,
+              responseCode: 200,
+              responseHeaders: [{ name: "Content-Type", value: "application/json" }],
+              body: Buffer.from("{}").toString("base64")
+            })
+          : cdp.send("Fetch.continueRequest", { requestId })
+        // the page went:  nothing left to answer
+        answer.catch(() => {})
       })
+      await cdp.send("Fetch.enable", { patterns: [{ urlPattern: "*", requestStage: "Request" }] })
     }
     if (spec.storage) {
       await page.addInitScript((storage) => {
@@ -227,10 +236,13 @@ export class PerfBrowser {
     // what really crossed the network (epic `solid-2-final` P2):  a compressed body, a "not modified" answer's headers;
     // kept by URL, and laid onto `responses` once they're sized (`sized()`), as Playwright's answer may come later
     const urls = new Map<string, string>()
+    // a copy from the memory cache says so only here:  its response says neither disk nor service worker
+    const fromMemory = new Set<string>()
+    cdp.on("Network.requestServedFromCache", ({ requestId }) => fromMemory.add(requestId))
     cdp.on("Network.responseReceived", ({ requestId, response }) => {
       urls.set(requestId, response.url)
-      const fromCache = response.fromDiskCache || response.fromServiceWorker
-      this.network.set(response.url, { fromCache, notModified: response.status === 304 })
+      const fromCache = response.fromDiskCache || response.fromServiceWorker || fromMemory.has(requestId)
+      this.network.set(response.url, { fromCache })
       const entry = this.responses.get(response.url)
       if (entry) entry.fromCache = fromCache
     })
@@ -463,8 +475,6 @@ export type PerfResponse = {
   fromCache?: boolean
   /** the bytes that crossed the network, headers included, as the server sent them (compressed or not) */
   wire?: number
-  /** the server answered "not modified" (304):  the browser's copy was current */
-  notModified?: boolean
 }
 
 /** What `domCensus()` counts. */
