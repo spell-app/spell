@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 import { readFileSync } from "fs"
 
 import { LSP } from "spell/app/lsp"
@@ -89,6 +89,29 @@ describe("LanguageHost", () => {
     watched.open({ uri, projectId: solitaire, text })
     await watched.request("textDocument/documentSymbol", { textDocument })
     expect(sent.at(-1)).toMatchObject({ version: 0, diagnostics: [] })
+  })
+
+  test("sends with them what the editor draws the file with:  its folds, its types, its look in the look asked for", async () => {
+    const sent: LSP.LanguageParsed[] = []
+    const lookOf = (_file: unknown, at: string, look: LSP.CodeLook): LSP.LanguageLook =>
+      look === "bubbly" ? { drawing: { nodes: [], declaringTags: [at.length] } } : { colours: [] }
+    const watched = new LSP.LanguageHost({ onParsed: (parsed) => sent.push(parsed), lookOf })
+    watched.open({ uri, projectId: solitaire, text })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+    const parsed = sent.at(-1)!
+    const file = watched.service.addresses.fileFor(uri)!
+    const firstFold = watched.service.foldingRanges(file)[0]!
+    expect(parsed.folds).toContainEqual([firstFold.startLine, firstFold.endLine])
+    expect(parsed.types).toContain("Card")
+    expect(parsed.views).toContain("Card")
+    // its look, of the editor's text
+    expect(parsed.drawing).toEqual({ nodes: [], declaringTags: [text.length] })
+    expect(parsed.colours).toBeUndefined()
+    // the look switched:  sent again in it, the parse unchanged
+    watched.look({ look: "tokens" })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+    await vi.waitFor(() => expect(sent.at(-1)!.colours).toEqual([]))
+    expect(sent.at(-1)!.drawing).toBeUndefined()
   })
 
   test("a project it can't load is said, and holds nothing else up", async () => {

@@ -27,6 +27,7 @@ import { LSP } from "spell/app/lsp"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
 import { CodeRules } from "spell/app/app/ui/CodeRules"
+import { codeLook } from "spell/app/app/ui/codePopups"
 import { CodeMirrorBubbly, type Slice } from "./CodeMirrorBubbly"
 import { CodeMirrorCodeOrText } from "./CodeMirrorCodeOrText"
 import { CodeMirrorDebug } from "./CodeMirrorDebug"
@@ -103,6 +104,10 @@ export class FileStates {
     })
     this.onEdit = onEdit
     this.onTaken = onTaken
+    // the worker draws its parses in the editors' look
+    const sendLook = () => client.look(codeLook.isBubbly ? "bubbly" : "tokens")
+    codeLook.followers.add(sendLook)
+    sendLook()
     // a click or a focus elsewhere acts on the parse, e.g. the side bar's edits:  it mustn't be one keystroke behind
     const parseNow = () => this.parseNow()
     globalThis.document?.addEventListener("pointerdown", parseNow, { capture: true })
@@ -373,7 +378,7 @@ export class FileStates {
           ? [
               closeBrackets(),
               keymap.of(closeBracketsKeymap),
-              CodeMirrorTyping.extension(fileOf, entry.language.file.language.lang),
+              CodeMirrorTyping.extension(fileOf, entry.language.file.language.lang, entry.language.elsewhere),
               CodeMirrorCodeOrText.extension(),
               CodeMirrorHovers.extension(),
               CodeMirrorHeadings.extension()
@@ -383,8 +388,8 @@ export class FileStates {
         CodeMirrorPopups.extension(),
         CodeMirrorLook.extension((isBubbly) =>
           isBubbly
-            ? CodeMirrorBubbly.extension(fileOf, (state) => drawnSlice(state))
-            : CodeMirrorTokens.extension(fileOf)
+            ? CodeMirrorBubbly.extension(fileOf, (state) => drawnSlice(state), entry.language?.elsewhere)
+            : CodeMirrorTokens.extension(fileOf, entry.language?.elsewhere)
         ),
         CodeMirrorSetup.extensions()
       ]
@@ -503,7 +508,7 @@ export class FileStates {
           closeBrackets(),
           keymap.of(closeBracketsKeymap),
           autocompletion({ override: [language.completions], icons: false }),
-          CodeMirrorTyping.extension(() => language.file, language.file.language.lang),
+          CodeMirrorTyping.extension(() => language.file, language.file.language.lang, language.elsewhere),
           CodeMirrorCodeOrText.extension(),
           CodeMirrorValues.extension(language.attributeValuesAt),
           CodeMirrorHovers.extension(),
@@ -512,7 +517,9 @@ export class FileStates {
           CodeMirrorDebug.extension(file.path),
           language.extensions(),
           CodeMirrorLook.extension((isBubbly) =>
-            isBubbly ? CodeMirrorBubbly.extension(() => language.file) : CodeMirrorTokens.extension(() => language.file)
+            isBubbly
+              ? CodeMirrorBubbly.extension(() => language.file, undefined, language.elsewhere)
+              : CodeMirrorTokens.extension(() => language.file, language.elsewhere)
           )
         ]
       : SP.isPropertyEditorsName(file.path) || SP.isSamplesName(file.path)
@@ -778,21 +785,31 @@ export class FileStates {
   }
 
   /**
-   * The language worker's problems for a file it parsed:  they become its state's, with their "Fix it" buttons,
-   * if they're of the text the state holds (`version`, its edits since it was opened);  a later parse's come after.
+   * The language worker's parse of a file:  if it's of the text the state holds (`version`, its edits since it was
+   * opened), its problems become the state's, with their "Fix it" buttons, and what the code's drawn with is kept
+   * (`CodeMirrorLanguage.tookParse()`), its slices' too;  a later parse's come after.
+   * - Its problems only where the worker diagnoses:  the editor's own Spell keeps the page's (`diagnosesOnPage()`).
    */
-  private parsedElsewhere({ uri, version, diagnostics, fixItStarts }: LSP.LanguageParsed): void {
+  private parsedElsewhere(parsed: LSP.LanguageParsed): void {
+    const { uri, version, diagnostics, fixItStarts } = parsed
     const path = LSP.AppAddresses.pathOf(uri)
     const entry = path === undefined ? undefined : this.entries.get(path)
     const file = entry?.file
-    if (!entry || entry.version !== version || !(file instanceof SP.SpellFile) || this.diagnosesOnPage(file)) return
+    if (!entry || entry.version !== version || !(file instanceof SP.SpellFile)) return
     const { state } = entry
-    const problems = this.withFixIt(
-      file,
-      diagnostics.map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic)),
-      new Set(fixItStarts)
-    )
-    this.dispatch(entry, { effects: asList(setDiagnostics(state, problems).effects) })
+    // what the code's drawn with:  its fold arrows, its look, the types its tags name
+    entry.language?.tookParse(parsed, state.doc, state.doc.toString())
+    const effects: StateEffect<unknown>[] = [CodeMirrorSetup.PARSED.of(null)]
+    if (!this.diagnosesOnPage(file)) {
+      const problems = this.withFixIt(
+        file,
+        diagnostics.map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic)),
+        new Set(fixItStarts)
+      )
+      effects.unshift(...asList(setDiagnostics(state, problems).effects))
+    }
+    this.dispatch(entry, { effects })
+    for (const slice of entry.slices) slice.dispatch({ effects: CodeMirrorSetup.PARSED.of(null) })
   }
 }
 
