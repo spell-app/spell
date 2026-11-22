@@ -153,6 +153,7 @@
         {"id":"spell-ui-s-own-device","title":"Device","parent":68},
         {"id":"spell-ui-s-own-dimension","title":"Dimension","parent":68},
         {"id":"spell-ui-s-own-example","title":"Example","parent":68},
+        {"id":"spell-ui-s-own-icon-browser","title":"Icon Browser","parent":68},
         {"id":"spell-ui-s-own-icon-picker","title":"Icon Picker","parent":68},
         {"id":"spell-ui-s-own-keys","title":"Keys","parent":68},
         {"id":"spell-ui-s-own-markdown","title":"Markdown","parent":68},
