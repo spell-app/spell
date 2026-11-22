@@ -13,6 +13,7 @@ import { parseHTML } from "linkedom"
 import { transform } from "lightningcss"
 import postcss from "postcss"
 
+import { escapeRegExp } from "spell/util/string"
 import { SSR } from "spell/ui/static"
 
 import type {
@@ -44,6 +45,7 @@ export class StaticDocument {
    */
   static async render(html: string, options: StaticDocumentOptions = {}): Promise<StaticDocumentResult> {
     await SSR.StaticCatalog.define()
+    if (options.staticOutput === "shadow") return StaticDocument.renderShadow(html, options.sheetsHref)
     if (options.shared && !options.href) {
       throw new TypeError("StaticDocument.render():  a `shared` stylesheet has no `href`;  pass the sheet's URL")
     }
@@ -78,6 +80,56 @@ export class StaticDocument {
       dropped,
       inlined
     }
+  }
+
+  /**
+   * Render `html` to the SHADOW output (`StaticRender.page(html, { output: "shadow" })`):  each element's shadow root
+   * drawn ahead:  it paints before any script, and each element draws again in its place when the scripts start it.
+   * - The page keeps its scripts:  they start the elements.
+   * - Its `<head>` links the page's own sheet first (the tokens, which reach every shadow root), unless the page
+   *   already links Spell UI's;  then a `preload` of each sheet the roots link, so they load beside it, not after
+   *   the body is parsed.
+   * - Returns the files it links as `sheets`, for the caller to write into `sheetsHref`'s folder.
+   */
+  private static async renderShadow(
+    html: string,
+    sheetsHref = SSR.SHADOW_SHEETS_FOLDER
+  ): Promise<StaticDocumentResult> {
+    await SSR.StaticRender.prepare(html)
+    const rendered = SSR.StaticRender.page(html, { output: "shadow", sheets: { href: sheetsHref } })
+    const { document } = parseHTML(rendered)
+    const all = SSR.StaticStylesheet.shadowSheets()
+    const linked = new Set<string>()
+    for (const [, file] of rendered.matchAll(new RegExp(`href="${escapeRegExp(sheetsHref)}([^"]+)"`, "g"))) {
+      linked.add(file!)
+    }
+    const head = StaticDocument.head(document)
+    const first = head.firstChild
+    const page = SSR.StaticStylesheet.pageFile
+    if (!head.querySelector(`link[rel~="stylesheet"][href$="${page}"]`)) {
+      head.insertBefore(StaticDocument.link(document, "stylesheet", sheetsHref + page), first)
+    }
+    for (const file of linked) {
+      head.insertBefore(StaticDocument.link(document, "preload", sheetsHref + file), first)
+    }
+    const sheets = Object.fromEntries([page, ...linked].map((file) => [file, all.get(file)!]))
+    return {
+      html: (document.doctype ? "<!doctype html>\n" : "") + document.documentElement.outerHTML,
+      tags: [...SSR.StaticRender.lastTags],
+      unrendered: StaticDocument.unrendered(document),
+      dropped: [],
+      inlined: [],
+      sheets
+    }
+  }
+
+  /** A `<link rel="stylesheet">`, or a style `preload`, of `href`. */
+  private static link(document: Document, rel: "stylesheet" | "preload", href: string): HTMLLinkElement {
+    const link = document.createElement("link")
+    link.setAttribute("rel", rel)
+    if (rel === "preload") link.setAttribute("as", "style")
+    link.setAttribute("href", href)
+    return link
   }
 
   /**
@@ -205,11 +257,13 @@ export class StaticDocument {
     return head
   }
 
-  /** `ui-*` tags left in `document`, with how many. */
+  /** `ui-*` tags left in `document` with no render (the shadow output's:  with no shadow root), with how many. */
   private static unrendered(document: Document): Record<string, number> {
     const counts: Record<string, number> = {}
     for (const element of document.querySelectorAll("*")) {
-      if (element.localName.startsWith("ui-")) counts[element.localName] = (counts[element.localName] ?? 0) + 1
+      if (!element.localName.startsWith("ui-")) continue
+      const hasRoot = element.firstElementChild?.localName === "template"
+      if (!hasRoot) counts[element.localName] = (counts[element.localName] ?? 0) + 1
     }
     return counts
   }

@@ -1,7 +1,8 @@
 /**
  * Spell UI's `spell` commands (its `package.json`'s `"spell": { "commands" }`, epic `repo-split` Q33, Q42):
  * - `spell icon [query...]`:  find Spell UI's icons
- * - `spell ssr <pages...>`:  `ui-*` pages as plain HTML, Spell UI's server render
+ * - `spell ssr <pages...>`:  `ui-*` pages as plain HTML, Spell UI's server render;
+ *   `--shadow-roots`, each element's shadow root drawn ahead
  * - `spell pack create | add | build | check`:  component packs, built on the kit's pack tooling
  * - `spell design build | bundle | check | pull | changed | pushed | state`:  Spell's claude.ai design system
  * - `spell ui rename [--write] <paths...>`:  old attribute names rewritten into their new ones (epic `ui-gaps` P6)
@@ -40,6 +41,10 @@ const uiCommands: CLI.CommandList = (spell) => {
     .option("--inline-css", "put each page's stylesheet in a <style> in the page, not the folder's ui.static.css")
     .option("--css <file>", "write ONE stylesheet, for every page, here (default:  ui.static.css per folder)")
     .option("--no-minify", "leave the stylesheet readable")
+    .option(
+      "--shadow-roots",
+      "draw each element's shadow root ahead instead, for its scripts to start:  page.shadow.html + ui-sheets/"
+    )
     .action((pages: string[], _options, command: Program) =>
       CLI.runCommand(async () =>
         (await import("spell/ui/cli/ssrCommand")).ssrCommand(pages, command.optsWithGlobals<SsrOptions>())

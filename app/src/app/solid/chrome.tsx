@@ -25,7 +25,7 @@ import "./chrome.css"
  * - Its start section starts with Spell's hat (`<Submenu left mark>`).
  * - Goes straight in its page, outside any padding:  the bar runs the window's whole width.
  *   - The violet bar it was under any other theme went in epic `debut` P17:  every theme of the set dresses it.
- * - SEE:  its App UI components page, `app/docs/chrome.html` (`/components/app/chrome.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/chrome`.
  ****************/
 export function AppMenu(props: AppMenuProps) {
   return (

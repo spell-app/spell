@@ -215,7 +215,19 @@ export function titleInside(host, part = "button") {
     if (inner) inner.title = host.title
     return !!inner
   }
-  if (!copy()) void customElements.whenDefined(host.localName).then(() => requestAnimationFrame(copy))
+  if (!copy()) void whenAttached(host.localName).then(() => requestAnimationFrame(copy))
+}
+
+/**
+ * Resolves once `tag`'s family has loaded, so its elements draw:  `customElements.whenDefined()`, then, for a tag the
+ * page defined EARLY (every Spell UI tag the docs bundle knows, a pack's on first use;  epic `solid-2-final` P7), its
+ * family attached (the element layer's `whenAttached()`, a static every tag's class has).
+ * - `whenDefined()` alone resolves at once for a tag defined early:  its elements are still pending then.
+ * - Plain DOM, no import:  the comments' own script (`spell-comments.js`) holds no Spell UI.
+ */
+export async function whenAttached(tag) {
+  const Class = await customElements.whenDefined(tag)
+  await Class.whenAttached?.(tag)
 }
 
 /**

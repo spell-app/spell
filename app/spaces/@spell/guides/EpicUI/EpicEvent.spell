@@ -1,0 +1,159 @@
+"epic event" is a notebook page
+	<header level="1">
+		&lt;epic-event&gt;
+		<header>The &lt;epic-event&gt; element: one review line of an epic page's log, written but not shown there (the Log shows commits).</>
+	</>
+
+	<text class="lede" paragraph>One line of an epic page's log. It draws an icon and the time, to the minute, then what happened.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
+		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-event-epicevent-en-ts" link="/epic/src/components/epic-event/EpicEvent.en.ts"><text title="epic/src/components/epic-event/EpicEvent.en.ts" code>EpicEvent.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-event-epicevent-tsx" link="/epic/src/components/epic-event/EpicEvent.tsx"><text title="epic/src/components/epic-event/EpicEvent.tsx" code>EpicEvent.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>The first two are real lines from this epic's log. The third is given <text code>icon="flag"</> and a date alone, to show both.</>
+		<html>
+			<ui-stack>
+				<epic-event at="2026-10-08T11:17-04:00">P13 done</>
+				<epic-event at="2026-10-08T23:56-04:00">T21 to do: P15 · Cleanup</>
+				<epic-event at="2026-10-01" icon="flag">plan doc created</>
+			</>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From <link title="epics/epic-components/parts/log.html" target="src-epics-epic-components-parts-log-html" link="/epics/epic-components/parts/log.html"><text code>log.html</></>, the log's body:</>
+		<text paragraph>log.html · two lines:</>
+		<markdown>
+			```html
+			<epic-event at="2026-10-08T11:17-04:00">P13 done</epic-event>
+			<epic-event at="2026-10-08T23:56-04:00">T21 to do: P15 · Cleanup</epic-event>
+			```
+		</>
+		<text paragraph>In the doc they sit in <text code>&lt;epic-section id="log" kind="log"&gt;</>; a split doc keeps them in that part file.</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><text code>&lt;epic-section&gt;</></> with <text code>kind="log"</>: the review lines, oldest first, among the Log's commits</>
+		</>
+		<text paragraph>Not drawn on an epic page since epic <text code>epic-engine</> P52: the Log is the epic's change log, its <link target="src-packages-epics-docs-epic-commit-html" link="/epic-commit"><text code>&lt;epic-commit&gt;</></>s. These lines are still written, for Actual Time and "last worked on"; <text code>epic log &lt;epic&gt;</> prints them.</>
+		<text paragraph>
+			<text bold>Its children:</>
+		</>
+		<list bulleted>
+			<item>prose: what happened, one line</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>at</>
+				</>
+				<cell>local time with its offset, <text code>2026-10-06T08:12-04:00</>; a bare date works too</>
+				<cell>When it happened. Drawn <text code>2026-10-06 08:12</>.</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>icon</>
+				</>
+				<cell>a Spell UI icon name</>
+				<cell>Its icon. Default <text code>pen to square</>: written only when it's another.</>
+				<cell>no</>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">slot</><ui-popup heading="slot" label="Where the element shows its own children:  the doc's prose, inside its drawing."></> is where the element's own children show.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>Holds</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>What happened, one line.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">part</><ui-popup heading="part" label="A named piece of the element's drawing, which a page's CSS can reach from outside:  epic-note::part(label)."></> is a piece of the drawing a page's CSS can reach.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>Is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The line: icon, time, text.</>
+				</>
+				<row>
+					<cell>
+						<text code>icon</>
+					</>
+					<cell>Its icon, centred on its first line.</>
+				</>
+				<row>
+					<cell>
+						<text code>time</>
+					</>
+					<cell>Its time, to the minute (a <text code>&lt;time datetime&gt;</>).</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>The icon in a column of its own, muted, centred on the first line.</>
+			<item>The time in mono, muted, in its own format, <text code>2026-10-06 08:12</>. It's the ONE element that doesn't draw dates as <text code>10/6/26 08:12</> (<text code>PlanDates</>).</>
+			<item>A hairline between lines. The text wraps beside the time; too narrow, it wraps under it.</>
+			<item>No state colour, and it doesn't fold (the log section does).</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic log &lt;epic&gt; "&lt;text&gt;"</>: a line of your own.</>
+			<item>Every command that changes the doc writes one: <text code>phase</> (<text code>P2 active</>), <text code>add-phase</>, <text code>phase-body</>, <text code>estimate</>, <text code>updated</>, <text code>decide</>, <text code>close</> / <text code>reopen</>, <text code>cancel</>, <text code>review</>, <text code>defer</>, <text code>queue</> / <text code>unqueue</>, <text code>details</>, <text code>original</>, <text code>split</> / <text code>join</>, <text code>bedtime</>, <text code>inbox apply</> ...</>
+			<item><text code>epic create</>: the template's first line, <text code>epic page created</> (<text code>plan doc created</> on pages made before 2026-10-14).</>
+			<item>The time is now, local, with its offset (<text code>PlanTime.isoMinutes()</>).</>
+			<item>The converter turned the old log (a feed of <text code>ui-event</>s, or a <text code>ul.plan-log</>) into these (<text code>LogConverter</>).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>.</>
+		</>
+	</>

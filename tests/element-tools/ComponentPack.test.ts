@@ -172,7 +172,7 @@ describe("ComponentPack.hash() / sources()", () => {
 })
 
 describe("ComponentPack.check() / build()", () => {
-  test("an unbuilt pack is STALE:  every generated file missing, by its absolute path", async () => {
+  test("an unbuilt pack is STALE:  every committed file missing, by its absolute path;  its script is built, never committed", async () => {
     const folder = writePack("fresh", card("fresh"))
     const pack = ComponentPack.read(folder)
     const { files } = pack
@@ -181,8 +181,7 @@ describe("ComponentPack.check() / build()", () => {
       hash: pack.hash(),
       stale: [
         { file: files.catalog, reason: "missing" },
-        { file: files.entry, reason: "missing" },
-        { file: files.script, reason: "missing" }
+        { file: files.entry, reason: "missing" }
       ]
     })
     expect(files.script).toBe(join(folder, "components", "__pack", "fresh.pack.js"))
@@ -219,7 +218,7 @@ describe("ComponentPack.main()", () => {
       expect(await ComponentPack.main(["check", folder])).toBe(1)
       const printed = out.mock.calls.map(([text]) => String(text)).join("")
       expect(printed).toContain("late:  STALE\n")
-      expect(printed).toContain("late.pack.js:  missing")
+      expect(printed).toContain("late.entry.ts:  missing")
       expect(printed).toMatch(/fix:  spell-pack build \S+late\n/)
     } finally {
       out.mockRestore()
@@ -270,3 +269,24 @@ function card(name: string, tag = `${name}-card`): PackFiles {
     [`components/${name}-card/${Class}.tsx`]: `import { vocabulary } from "./${Class}.en"\nexport const CARD = vocabulary\n`
   }
 }
+
+describe("ComponentPack.withPageModules()", () => {
+  const page = (specifier: string) => `globalThis.SpellUI.packModules[${JSON.stringify(specifier)}]`
+
+  test("each import of a page module, in every form the build writes, reads the page's;  its own chunks stay", () => {
+    const code =
+      `import"./rolldown-runtime-x.js";import{a as e,b as t}from"solid-js";import*as n from"spell/ui/core";` +
+      `import r,{c}from"@solidjs/web";import"spell/ui/forms";import{d}from"./shared-y.js";e(t,n,r,c,d)`
+    expect(ComponentPack.withPageModules(code, "one.js")).toBe(
+      `import"./rolldown-runtime-x.js";const{a:e,b:t}=${page("solid-js")};const n=${page("spell/ui/core")};` +
+        `const{default:r,c}=${page("@solidjs/web")};import{d}from"./shared-y.js";e(t,n,r,c,d)`
+    )
+  })
+
+  test("unminified, with spaces, as Vite writes it without minifying", () => {
+    const code = `import { createSignal, untrack as u } from "solid-js";\ncreateSignal(u)`
+    expect(ComponentPack.withPageModules(code, "one.js")).toBe(
+      `const{createSignal,untrack:u}=${page("solid-js")};\ncreateSignal(u)`
+    )
+  })
+})

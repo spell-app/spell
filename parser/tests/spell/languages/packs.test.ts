@@ -72,15 +72,15 @@ const SOURCE: PackModuleSource = { module: "async", english: ENGLISH, other: SPA
 
 describe("checkPack()", () => {
   test("Spanish's pack is COMPLETE:  every English registration, word table and rule class", () => {
-    const report = checkPack(packSources("es"), SP.english, SP.spanish)
+    const report = checkPack(packSources("es"), SP.english, SP.Language.for("es"))
     expect(problemsIn(report)).toEqual([])
   })
 })
 
 describe("checkWords()", () => {
   test("a parser message the pack lacks is reported, by its key (epic `spanish` P17)", () => {
-    const { "dont-understand": _left, ...messages } = SP.spanish.parserMessages
-    const lacking = { ...SP.spanish, parserMessages: messages } as SP.Language
+    const { "dont-understand": _left, ...messages } = SP.Language.for("es").parserMessages
+    const lacking = { ...SP.Language.for("es"), parserMessages: messages } as SP.Language
     expect(checkWords(SP.english, lacking)).toEqual([
       { table: "parserMessages", key: "dont-understand", problem: "missing" }
     ])

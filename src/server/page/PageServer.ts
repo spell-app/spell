@@ -152,7 +152,18 @@ export class PageServer {
   /** CDN URLs pages load, each with its local copy's URL (`"localCopies"`, `withLocalCopies()`) */
   private readonly localCopies: Record<string, string>
 
-  constructor({ root, token }: { root: string; token?: string }) {
+  /**
+   * what pages show drawn ahead (`SRV.Drawings`, epic `solid-2-final` P15):  route modules add their drawers
+   * (`RouteContext.drawings`);  each page filled in as it's served, the rest asked for at `SRV.Drawings.API`
+   * - its cache under the settings' `cacheLimit`, as the compile cache's
+   * - `SPELL_DRAWINGS=0` in its environment:  route modules get no `drawings`, so nothing is drawn ahead
+   */
+  readonly drawings: SRV.Drawings
+
+  /**
+   * - `certificate`:  HTTPS and HTTP/2 too, on the same port (`certificateFor()`);  plain HTTP stays for the tools
+   */
+  constructor({ root, token, certificate }: { root: string; token?: string; certificate?: SRV.CertificateFiles }) {
     this.root = resolve(root)
     // its spaces' own record (`--spaces`, `SPELL_SPACES_DIR`)
     this.pidFile = SRV.PidFile.forPageServer(this.root)
@@ -165,7 +176,11 @@ export class PageServer {
       ...(this.pidFile.spaces && { spaces: this.pidFile.spaces })
     }
     const settings = this.settings()
-    const { writable, pageScripts = [], siteTabs, localCopies = {}, gone = [] } = settings
+    const { writable, pageScripts = [], siteTabs, localCopies = {}, gone = [], cacheLimit } = settings
+    this.drawings = new SRV.Drawings({
+      ...(cacheLimit !== undefined && { limit: SRV.sizeInBytes(cacheLimit) }),
+      log: new SRV.ServerLog({ prefix: "drawings" })
+    })
     this.pageScripts = pageScripts
     this.localCopies = localCopies
     this.componentSets = componentSets(settings)
@@ -180,11 +195,14 @@ export class PageServer {
     this.web = new SRV.WebServer({
       root: this.root,
       token,
+      certificate,
       live: true,
       caching: this.info.worktree ? "never" : "normal",
       mounts: [{ prefix: "/", dir: this.root, hashed: this.hashed.own }],
       html: [
         (page) => this.withLocalCopies(page),
+        // before the page scripts:  a page whose drawings are all in needs none of the scripts that draw them
+        (page, served) => this.drawings.fillServed(page, served),
         (page, served) => this.withPageScripts(page, served),
         (page, served) => this.withWorktreeLoads(page, served)
       ],
@@ -205,6 +223,8 @@ export class PageServer {
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
         // the site header's tabs:  what the settings name (`"siteTabs"`)
         ...(this.siteTabs && { siteTabs: this.siteTabs }),
+        // what it draws ahead, and where a page asks for the rest (`SRV.Drawings`)
+        ...(this.drawings.pageConfig() && { drawings: this.drawings.pageConfig() }),
         // e.g. Owen is offline, no Claude:  pages say "queued for when you land" (epics' airplane mode)
         ...Object.assign({}, ...this.pageConfigs.map((add) => add(served)))
       })
@@ -215,7 +235,9 @@ export class PageServer {
       this.web.files.mount({ prefix: folderUrl(folder), dir: join(this.root, folder) })
     this.web.files.overlays.push(
       (path) => componentSetPath(path, this.componentSets),
-      (path) => engineRoutePath(path, this.engineRoutes)
+      (path) => engineRoutePath(path, this.engineRoutes),
+      // last:  a Spell site's address, which has no file of its own
+      (path) => componentSetSitePath(path, this.componentSets)
     )
     const router = this.web.router
     // a request for a bundle's missing file waits while the bundles build (`start()`)
@@ -237,6 +259,8 @@ export class PageServer {
     router.get(SERVER_API, (_request, reply) => reply.noStore().json(this.info))
     router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
     router.get(SERVER_REPORTS_API, this.onReportsAsked)
+    // drawings asked for by a page:  its own origin only, no token (a page from an earlier run asks too)
+    router.use(SRV.Drawings.API, this.web.guard.originCheck, this.drawings.router())
     // NOTE: no body parsing here:  each route parses its own (the app's `/api` is JSON5), and the proxy streams.
 
     // `/api/pages` and `/api/files`:  saving, making, moving and deleting files, only inside the `"writable"` folders
@@ -279,6 +303,7 @@ export class PageServer {
     }
     const { port: actual } = await this.web.listen({ port: wanted, fallback: false })
     this.info.port = actual
+    if (this.web.secureUrl) this.info.https = this.web.secureUrl
     if (pidFile) {
       this.pidFile.write(this.info)
       // for a program this machine's person runs against it:  a Python program's places (epic `data` P40)
@@ -291,9 +316,32 @@ export class PageServer {
     return this
   }
 
+  /**
+   * The certificate a page server listens with for HTTPS and HTTP/2, when this machine has one it trusts
+   * (`SRV.LocalCertificate.forPageServer()`, made and trusted by `spell server certificate`);
+   * else why not, in a line for its log.
+   * - makes NOTHING and asks for nothing:  a server started from a skill has no terminal, and every page keeps working
+   *   on plain HTTP until the person runs `spell server certificate`
+   * - none in tests and CI (`VITEST`, `CI`), nor with `SPELL_HTTPS=0`:  `env`, default `process.env`
+   * - NEVER throws
+   */
+  static certificateFor(
+    certificate = SRV.LocalCertificate.forPageServer(),
+    env: Record<string, string | undefined> = process.env
+  ): { tls?: SRV.CertificateFiles; why?: string } {
+    if (env.VITEST || env.CI || env.SPELL_HTTPS === "0") return {}
+    const state = certificate.state
+    if (state === "ready") {
+      const tls = certificate.tls
+      return tls ? { tls } : { why: PLAIN_HTTP_WHY.missing }
+    }
+    return { why: PLAIN_HTTP_WHY[state] }
+  }
+
   /** stop:  the bundles' build, route modules' stops, the pid file (if ours), the server */
   async stop(): Promise<void> {
     this.bundles.stop()
+    await this.drawings.stop()
     for (const build of this.worktreeBuilds.values()) build.stop()
     for (const stop of this.stops) await Promise.resolve(stop()).catch(() => {})
     this.pidFile.removeIfOurs()
@@ -510,15 +558,21 @@ export class PageServer {
    * each one whose file exists, unless `served`'s path is under one of its `skip` prefixes.
    * - The settings are read as the server starts;  the files at each page, so a build that lands meanwhile counts.
    * - The server knows nothing of what they are (the app's `spell-language.js`):  the paths come from the settings.
+   * - a script a drawer replaces (`SRV.Drawer.replaces`) is left out of a page whose items that drawer takes are all
+   *   filled in (`SRV.Drawings.fill()`):  spell's `spell-language.js`, on a page whose spell is drawn already
    * - each tag is marked `data-spell-page-script`:  the docs runtime patches a page in place only when every script
    *   on it is one it knows, and without the mark this one made every epic page reload on every edit (2026-10-25)
    */
   withPageScripts(page: string, served: ServedFile): string {
     const path = served.path.replace(WORKTREE_ADDRESS, "/")
+    const filled = this.drawings.filledFor(served)
+    const replaced = filled ? this.drawings.replacedScripts(filled) : new Set<string>()
     const tags = this.pageScripts
       .filter(
-        ({ file, skip }) =>
-          !skip?.some((prefix) => path.startsWith(prefix)) && (!file || existsSync(join(this.root, file)))
+        ({ src, file, skip }) =>
+          !replaced.has(src) &&
+          !skip?.some((prefix) => path.startsWith(prefix)) &&
+          (!file || existsSync(join(this.root, file)))
       )
       // marked, so a page patching itself in place knows the server added it (`PAGE_SCRIPT_ATTRIBUTE`)
       .map(({ src }) => `<script type="module" src="${src}" ${PAGE_SCRIPT_ATTRIBUTE}></script>\n`)
@@ -660,6 +714,8 @@ export class PageServer {
       serveWorktrees: (...dirs) => void this.serveWorktrees(...dirs),
       serveContent: (dir) => void this.serveContent(dir),
       addPageConfig: (add) => void this.addPageConfig(add),
+      // `SPELL_DRAWINGS=0`:  none, so every page draws as it did before (a before / after measure)
+      ...(process.env.SPELL_DRAWINGS !== "0" && { drawings: this.drawings }),
       onListening: (start) => this.listenings.push(start),
       onStop: (stop) => this.stops.push(stop),
       addServerReport: (report) => this.reports.push(report)
@@ -715,6 +771,15 @@ const WORKTREES_PREFIX = "/worktrees/"
 
 /** A worktree's address, `/worktrees/<w>/...`:  `[1]` is `<w>`. */
 const WORKTREE_ADDRESS = /^\/worktrees\/([^/]+)\//
+
+/** Why a page server speaks plain HTTP only, by its certificate's state:  a line in its log. */
+const PLAIN_HTTP_WHY: Record<Exclude<SRV.CertificateState, "ready">, string> = {
+  "no-mkcert": "plain HTTP only:  HTTPS needs mkcert (brew install mkcert), then spell server certificate",
+  missing: "plain HTTP only:  for HTTPS, run spell server certificate",
+  uncovered: "plain HTTP only:  its certificate is out of date;  run spell server certificate",
+  expired: "plain HTTP only:  its certificate is out of date;  run spell server certificate",
+  untrusted: "plain HTTP only:  this computer doesn't trust its certificate yet;  run spell server certificate"
+}
 
 /** Port the page server asks for first:  `SPELL_SERVER_PORT`, else 4747 (the goals server's old port). */
 export const DEFAULT_PORT = Number(process.env.SPELL_SERVER_PORT) || 4747
@@ -828,6 +893,24 @@ export function componentSetPath(path: string, sets: readonly ComponentSet[]): s
   const assets = rest.startsWith(`/${SET_ASSETS}/`)
   const folder = assets ? set.assets : set.dir
   return `${isBeside(folder) ? "" : base}${folderUrl(folder)}${assets ? rest.slice(SET_ASSETS.length + 1) : rest}`
+}
+
+/**
+ * The URL path of the page that shows a component set's Spell site, for one of its site's addresses
+ * (`ComponentSet.sitePage`, epic `editor` P43):  `/components/ui/button/api` => `/ui/docs/index.html`;  else
+ * `undefined`.
+ * - only for a path with no `.` in its last part, and not in the set's bundle (`_assets/`), data (`__data/`) or
+ *   page parts:  a missing picture is still a 404
+ * - a `StaticHandler` overlay, after `componentSetPath()`:  a real file or folder at the address wins
+ * - the same under `/worktrees/<w>/`, as `componentSetPath()`
+ */
+export function componentSetSitePath(path: string, sets: readonly ComponentSet[]): string | undefined {
+  const match = /^((?:\/worktrees\/[^/]+)?)(\/[^/]+\/[^/]+)(\/.*)$/.exec(path)
+  const set = match && sets.find((each) => each.prefix === match[2])
+  if (!match || !set?.sitePage) return undefined
+  const [, base = "", , rest = "/"] = match
+  if (/\/_|\.[^/]*$/.test(rest)) return undefined
+  return `${isBeside(set.dir) ? "" : base}${folderUrl(set.dir)}/${set.sitePage}`
 }
 
 /**

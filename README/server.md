@@ -91,7 +91,7 @@ A `.js` file is served as the file on disk, and so is a `.css`.
 
 - So what you debug in the browser is the file you wrote:  no source maps, no generated code in between.
 - Scripts arrive already built.
-  The bundles a page loads, such as Spell UI's docs site, are built by their own package's script, when they're
+  The bundles a page loads, such as Spell UI's site bundle, are built by their own package's script, when they're
   stale ([below](#bundles-built-on-demand-never-committed)).
 - The cost:  no TypeScript, since a `.ts` file goes out as `text/plain`, to read and not to run;
   and no module swapped in place.
@@ -223,11 +223,40 @@ the rest of `/api/` is the editor's:  spell-app's module is listed last, and see
   A page server with its own `--spaces` names both by them (`.spell-server.editor.<folder>-<hash>.json`):  one editor each.
 - Old addresses get no redirect:  they answer "not found".
 - The docs home comes from the epic folder, which someone new hasn't got:
-  start at `/components/ui/`, Spell UI's pages, which need nothing but the repo.
+  start at `/components/ui/`, the Spell UI site, which needs nothing but the repo.
 
 Each folder brings its own part:
 - the app folder's:  the editor, `/api/projects/`, Spell colouring, and the App/UI tab
 - the `epic/` folder's:  the epic folder itself, so the epic pages and the guides come from one of its modules
+
+### HTTPS and HTTP/2, on the same port
+
+Over plain HTTP a browser opens at most 6 connections to a server, so the editor's 85 first-load files wait their turn.
+HTTP/2 sends them all over one connection, and browsers speak it only over HTTPS.
+So the page server speaks both, on one port, once this computer trusts its certificate:
+
+```sh
+brew install mkcert
+spell server certificate
+spell server stop && spell server start
+```
+
+- `spell server certificate` has mkcert make a certificate for `localhost`, `127.0.0.1` and `::1`, kept in
+  `~/.spell/localhost/`, and has this computer trust mkcert's own authority:  it asks for the password once, in the
+  terminal.
+  - `--check` only says what's missing, and exits 1 until it's ready.
+  - `--undo` deletes the certificate;  the authority stays trusted, since `spell space local setup` uses it too.
+- Each connection is handed on by its first byte:  a TLS hello to node's HTTP/2 server, anything else to the plain one.
+  - Browsers open `https://localhost:4747`:  `spell server url` prints it, and `spell server status` says `https`.
+  - The `spell` and `epic` tools keep `http://127.0.0.1:4747`:  node trusts no keychain.
+  - Websockets (live reload) upgrade on HTTP/1.1 over TLS, as on plain HTTP.
+- Without a trusted certificate nothing changes:  plain HTTP, and one line in the log saying how to turn HTTPS on.
+  - `spell server start` never makes or trusts one itself:  it often runs from a skill, with no terminal to ask in.
+  - Tests and CI never use one (`VITEST`, `CI`);  `SPELL_HTTPS=0` turns it off.
+- Firefox keeps a list of its own:  mkcert fills it only when `certutil` is installed (`brew install nss`).
+- Not yet over HTTPS:  the VS Code side bar and `epic pages link` (their tools check the address from node first),
+  and the editor's dev server (Vite), which Caddy's house-network site and the tests reach over plain HTTP.
+- The code:  `LocalCertificate`, and `WebServer`'s `certificate`.
 
 ## Five flows, a picture each
 
@@ -514,7 +543,7 @@ In memory, a 75 KB guide takes about 110 ms the first time (most of it loading o
 
 ### Bundles built on demand, never committed
 
-Some bundles only the page server serves, like Spell UI's docs site.
+Some bundles only the page server serves, like Spell UI's site bundle, which the component sets' HTML pages load.
 Each is git-ignored, and built when it's stale:
 
 ```sh
@@ -673,13 +702,14 @@ Spell UI's whole part:
 
 ```json
 "pageServer": {
-  "bundles": ["site/_assets"],
-  "componentSets": { "ui": { "name": "Spell UI", "dir": "docs", "assets": "site/_assets" } }
+  "bundles": ["src/components/ui-root", "site/_assets"],
+  "componentSets": { "ui": { "name": "Spell UI", "dir": "docs", "assets": "site/_assets", "sitePage": "index.html" } }
 }
 ```
 
 _From [spell-ui's package.json](https://github.com/spell-app/spell/blob/main/ui/package.json):
-its site bundle, built on demand, and its component set, at `/components/ui/`._
+its bundles, built on demand, and its component set, at `/components/ui/`, where one page (`sitePage`) answers every
+address with the Spell UI site._
 
 `pageServerSettings()` merges the parts as the server starts, in a fixed order:
 1. the kit's own:  none today
@@ -772,14 +802,16 @@ export default helloRoutes
 
 | Id | Name | Served at | Its pages | Whose part |
 | --- | --- | --- | --- | --- |
-| `ui` | Spell UI | `/components/ui/` | [spell-ui's docs/](https://github.com/spell-app/spell/tree/main/ui/docs) | spell-ui's |
-| `epics` | Epic UI | `/components/epics/` | [spell-epic's src/docs/](https://github.com/spell-app/spell/tree/main/epic/src/docs) | spell-epic's |
-| `app` | App UI | `/components/app/` | [spell-app's app/docs/](https://github.com/spell-app/spell/tree/main/app/app/docs) | spell-app's |
+| `ui` | Spell UI | `/components/ui/` | the Spell UI site, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/ui/docs/index.html) at every address under it (the set's `sitePage`) | spell-ui's |
+| `epics` | Epic UI | `/components/epics/` | Epic UI's guide, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/epic/src/docs/index.html) the same way | spell-epic's |
+| `app` | App UI | `/components/app/` | App UI's guide, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/app/app/docs/index.html) the same way | spell-app's |
 
-- Every set's site bundle is Spell UI's, `ui/site/_assets`:
-  its pages load `site.js` and `site.css` from their own `_assets/`.
+- Every set's site bundle is Spell UI's, `ui/site/_assets`, laid over its folder at `_assets/`:
+  no set's pages load it since every set's guide became Spell.
   What's in it:  [Spell UI's site](https://github.com/spell-app/spell/blob/main/ui/README-site.md).
 - `/components/ui` without its slash redirects to `/components/ui/`, so the pages' relative links hold.
+- A link written for a set's old HTML pages (`/components/ui/ui-button.html`, `/components/app/MenuBar.html`) is
+  mended to its guide's address (`/components/ui/button`, `/components/app/menu-bar`) by the link mender.
 
 </details>
 

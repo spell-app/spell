@@ -1,0 +1,238 @@
+"epic code" is a notebook page
+	<header level="1">
+		&lt;epic-code&gt;
+		<header>The &lt;epic-code&gt; element: a folded, highlighted code block in an epic page's prose.</>
+	</>
+
+	<text class="lede" paragraph>A folded, highlighted code block in prose. It draws a code-well panel headed by its title, and the code inside, coloured, with a copy button; the code itself is the doc's own <text code>&lt;pre&gt;</>.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
+		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-code-epiccode-en-ts" link="/epic/src/components/epic-code/EpicCode.en.ts"><text title="epic/src/components/epic-code/EpicCode.en.ts" code>EpicCode.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-code-epiccode-tsx" link="/epic/src/components/epic-code/EpicCode.tsx"><text title="epic/src/components/epic-code/EpicCode.tsx" code>EpicCode.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Two real ones: the first starts open (<text code>open</>, epic <text code>ui-docs-rework</>, J6); the second starts folded (epic <text code>wwod-spell-ui</>, J44).</>
+		<html>
+			<epic-code title="themes.ts · the new list · 1 line" language="ts" open>
+				<pre>static readonly OWN: readonly string\[] = \["spell"]</>
+			</>
+			<epic-code title="Subclass, markup, form data · 9 lines" language="ts">
+				<pre>class UIDoor extends UICheckbox &#123; @E.proto static onValue = "open" @E.proto static offValue = "closed" &#125; // &lt;ui-door name="panel"&gt;Open&lt;/ui-door&gt; chosen:    panel=open unchosen:  panel=closed values:    &#123; panel: "closed" &#125;</>
+			</>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+
+		<section label="With buttons in its title row" sticky collapsible dividing open="false">
+			<text paragraph>A page's own buttons go in its title row: <text code>&lt;ui-button slot="actions"&gt;</> children (epic <text code>epic-workflow</> P25).</>
+			<list bulleted>
+				<item>They sit at the right of the title row, after the heading. The heading is its fold button, and it ends where they start.</>
+				<item>A click on one never folds or unfolds it.</>
+				<item>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</>
+				<item>A slotted button's text is never part of the code.</>
+			</>
+			<example "With buttons in its title row">
+				<html>
+					<epic-code title="run.sh · 1 line" language="sh">
+						<pre>spell run app.spell</pre>
+						<ui-button slot="actions" appearance="circular basic" size="mini" icon="play" title="Run it" aria-label="Run it"></ui-button>
+					</epic-code>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From <link title="epics/ui-docs-rework/parts/j6.html" target="src-epics-ui-docs-rework-parts-j6-html" link="/epics/ui-docs-rework/parts/j6.html"><text code>j6.html</></>. The code is text: <text code>&lt;</> for a <text code>&lt;</>.</>
+		<text paragraph>j6.html · its code block:</>
+		<markdown>
+			```html
+			<epic-code title="themes.ts · the new list · 1 line" language="ts" open>
+			  <pre>static readonly OWN: readonly string[] = ["spell"]</pre>
+			</epic-code>
+			```
+		</>
+		<text paragraph>145 live ones, in 82 files under <link target="src-epics" link="/epics/"><text code>epics/</></>.</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<html>
+			<ui-list bulleted>
+				<ui-item>Anywhere prose goes: it's a <dfn class="spell-term" tabindex="0">prose element</><ui-popup heading="prose element" label="An <epic-*> element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."></>: <ui-list bulleted><ui-item><ui-link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><ui-text code>&lt;epic-item&gt;</></>: among an item's own text, before its cards</> <ui-item><ui-link target="src-packages-epics-docs-epic-answer-html" link="/epic-answer"><ui-text code>&lt;epic-answer&gt;</></>, <ui-link target="src-packages-epics-docs-epic-more-html" link="/epic-more"><ui-text code>&lt;epic-more&gt;</></>, <ui-link target="src-packages-epics-docs-epic-reply-html" link="/epic-reply"><ui-text code>&lt;epic-reply&gt;</></>: the cards under an item</> <ui-item><ui-link target="src-packages-epics-docs-epic-option-html" link="/epic-option"><ui-text code>&lt;epic-option&gt;</></>: an option card's pros and cons</> <ui-item><ui-link target="src-packages-epics-docs-epic-field-html" link="/epic-field"><ui-text code>&lt;epic-field&gt;</></>: a phase's field, or a labelled block</> <ui-item><ui-link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated"><ui-text code>&lt;epic-updated&gt;</></>: a change to a phase's plan</> <ui-item><ui-link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><ui-text code>&lt;epic-section&gt;</></>: an Overview sub-section's prose, or a report's</> <ui-item><ui-link target="src-packages-epics-docs-epic-version-html" link="/epic-version"><ui-text code>&lt;epic-version&gt;</></>: an earlier version, kept as it was</> <ui-item>another prose element (a note inside an aside), or plain HTML around it (a <ui-text code>&lt;li&gt;</>, a <ui-text code>&lt;div&gt;</>)</></></>
+			</>
+		</>
+		<text paragraph>
+			<text bold>Its children:</>
+		</>
+		<list bulleted>
+			<item>ONE <text code>&lt;pre&gt;</> holding the code as text. A <text code>&lt;pre&gt;</>, so a formatter keeps its white space, and the page shows the code before the pack loads.</>
+		</>
+		<text paragraph>The <text code>&lt;pre&gt;</> is never shown once the element draws: <text code>&lt;ui-code&gt;</> in its drawing shows the code, so it appears once. It follows its <text code>&lt;pre&gt;</> live: an edit to the file redraws it.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>title</>
+				</>
+				<cell>text</>
+				<cell>Its heading: what the code is (<text code>design.ts · 12 lines</>). None: <text code>Code</>.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>language</>
+				</>
+				<cell>as <text code>&lt;ui-code language&gt;</> takes it: <text code>ts</>, <text code>html</>, <text code>css</>, <text code>json</>, <text code>spell</>, <text code>text</> for none</>
+				<cell>The code's language, for its colours. None: guessed.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>open</>
+				</>
+				<cell>present or absent (a boolean)</>
+				<cell>Open to start with; a click still folds it, and from then on it's the page's.</>
+				<cell>no</>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">slot</><ui-popup heading="slot" label="Where the element shows its own children:  the doc's prose, inside its drawing."></> is where the element's own children show.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>Holds</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>The code: ONE <text code>&lt;pre&gt;</>, its text the code (never drawn itself).</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>Buttons of the page's own in its title row (<text code>&lt;ui-button slot="actions"&gt;</>): after the title, before its own buttons; a click on one never folds it. The docs runtime puts the block's bullhorn here too.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">part</><ui-popup heading="part" label="A named piece of the element's drawing, which a page's CSS can reach from outside:  epic-note::part(label)."></> is a piece of the drawing a page's CSS can reach.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>Is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The panel.</>
+				</>
+				<row>
+					<cell>
+						<text code>head</>
+					</>
+					<cell>Its title row: <text code>toggle</>, then <text code>actions</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>Its heading, a <text code>&lt;button&gt;</> that folds it: the chevron, then <text code>heading</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>heading</>
+					</>
+					<cell>The heading's words.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>What it folds; hidden (<text code>until-found</>) while folded.</>
+				</>
+				<row>
+					<cell>
+						<text code>code</>
+					</>
+					<cell>The <text code>&lt;ui-code&gt;</> that draws the code, highlighted, with its copy button.</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>In its title row, after the title and before its own buttons: the <text code>actions</> slot.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">state</><ui-popup heading="state" label="A CSS custom state the element sets on itself as it changes:  epic-aside:state(open)."></> is set by the element on itself; none is ever written in the doc.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>Unfolded: the reader opened it, or it started so.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Its heading: always in full, as many lines as it needs, folded or open. The chevron and the slot's buttons sit on its first line, so nothing moves as it folds (2026-10-19).</>
+			<item>The brand's code well, as the docs' code blocks (<text code>ui-accordion.spell-code</>): a frame with a hairline, its heading small, mono and muted, the code on a card inside.</>
+			<item>Coloured by its <text code>language</> (else guessed), with a copy button: Spell UI's <text code>&lt;ui-code&gt;</>.</>
+			<item>A long listing scrolls inside itself (at most 70% of the window's height); a wide one scrolls sideways. Never the page.</>
+			<item>Folded to start with, unless <text code>open</>. A click on the heading, or find-in-page, unfolds it.</>
+			<item>No state colour. It shares its shape with <text code>&lt;epic-aside&gt;</> (<text code>EpicPanel</>).</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Claude writes it inside the HTML it passes to <text code>epic</> (<text code>add ... --details</>, <text code>decide --details</>, <text code>details --file</>, <text code>updated</>): no command makes one by itself. Code in an epic page is ALWAYS one of these (<link title="epic/templates/epics/plan-doc.md" target="src-spell-epic-templates-epics-plan-doc-md" link="/epic/templates/epics/plan-doc.md"><text code>plan-doc.md</></>, "Prose").</>
+			<item>The epic tool turns the OLD hand-shaped markup into this element, so a doc never holds the old shape. <list bulleted><item>It does this in any HTML a command takes: <text code>add --details</>, <text code>decide --details</>, <text code>details --file</>, <text code>updated</>.</> <item>The code that does it: <text code>IncomingHtml</> and <text code>ProseRewrite</>.</> <item>Prose edited by hand in a part file isn't passed through it.</> <item>The old shape: <text code>ui-accordion.spell-code</> (and its four wrappers).</></></>
+			<item>The converter did the same to every converted doc, keeping <text code>title</>, <text code>language</> and <text code>open</> (<text code>ProseUpgrader</>).</>
+			<item>On a details page it goes as plain prose: its title over its <text code>&lt;pre&gt;</> (<text code>PlanItem.asProse()</>).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>.</>
+		</>
+	</>

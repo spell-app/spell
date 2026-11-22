@@ -25,7 +25,8 @@ with live elements to click.
   - the `ui-*` elements (`src/components/`)
   - the element core and runtime (`src/elements/`, `src/runtime/` ...)
   - its test helpers (`src/test-helpers/`), its node tools (`src/tools/`), its `spell` commands (`src/cli/`)
-  - outside `src/`:  its docs pages (`docs/`) and site bundle (`site/`), `scripts/`, `tests/`, the configs
+  - outside `src/`:  its docs folder (`docs/`:  the Spell UI site's viewer page and data), the site bundle (`site/`),
+    `scripts/`, `tests/`, the configs
 - Its [package.json](package.json) is a FOLDER MANIFEST, not a package:
   a private workspace of the kit's install, still named `spell-ui`.
   - It holds the folder's scripts (so `yarn test` works here), its settings (`"spell"`, `"pageServer"`,
@@ -191,9 +192,24 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - They read the site's data through `SiteData` ([the components data](docs/__data/components.json5)),
     NEVER the vocabularies.
   - The barrel's header says how to add one.
+- [`src/drawings/`](src/drawings/) (`spell/ui/drawings/...`, by file):  what Spell UI's elements show, DRAWN AHEAD on
+  the page server (the kit's `SRV.Drawings`, epic `solid-2-final` P15).
+  - `CodeOnServer`:  `<ui-code>`'s colours, highlight.js in the server's process;  `MermaidOnServer`:
+    `<ui-mermaid-diagram>`'s diagrams, in ONE headless page (the site bundle's second entry, `site/_src/drawings.ts`)
+  - Spell UI's route module adds them (`drawingRoutes.server.ts`, its part of the page server's settings, `"routes"`).
+  - The elements' half:  `GivenDrawings` (`src/elements/`, imported by file:  in no page's first load), which both
+    elements ask before loading their engine;
+    a text edited since, or a server that can't, draws in the page as always.
+  - Node only, every file `.server.ts`;  its tests run in node (`tests/drawings/`, the `ssr` project).
 - [`src/static/`](src/static/) (`spell/ui/static`, `SSR`):  the STATIC server render, for SEO.
   - `StaticRender.page()` / `fragment()` turn `ui-*` markup into plain light-DOM HTML in node:
     no shadow DOM, no JS.
+  - Or, its SHADOW output (`{ output: "shadow" }`, `spell ssr --shadow-roots`;  epic `solid-2-final` P16):
+    each element keeps its tag and gets its shadow root drawn ahead, a declarative template (`StaticShadowRoots`).
+    - It paints before any script;  each root links the sheets it adopts in a browser (`StaticStylesheet.shadowLinks()`),
+      the same files for every root, and its custom states come as `data-ui-states`.
+    - The page keeps its scripts:  each element waits for the runtime, then draws again in place, in the same task
+      (`UIComponent`, "Server-drawn shadow roots";  not hydrated:  that was slower, J62).
   - How:
     - stand-in DOM elements are linkedom elements (`ServerDOMElement`)
     - components render with `renderToString`
@@ -270,7 +286,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
 - [`scripts/`](scripts/):  one file per yarn script, named for it (WWOD §8 › "File naming").
   - `<group>:<verb>` runs `<group>-<verb>.ts` here:  `site:data` -> `site-data.ts`, `gen:root` -> `gen-root.ts`.
   - generators:  `gen-*.ts`
-  - the site's writers:  `site-data.ts`, `site-index.ts`, `site-kitchen.ts`, `site-sections.ts`, `site-new.ts`
+  - the site's writers:  `site-data.ts`, `site-kitchen.ts`, `site-new.ts`
   - the site bundle's build, `site-bundle.ts`, watched by `site-dev.ts`
   - `site-check.ts`, `tokens-alias.ts`, `design-build.ts`
   - What several scripts share:
@@ -435,37 +451,45 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
 
 ### The docs site
 
-- Modelled on Fomantic's docs, served at `/components/ui/` by the page server
-  (static, live-reloading;  the page server's `componentSets` setting).
-  - Plain `.html` pages on `<ui-*>` widgets:  no build step to view one.
-  - From epic `spell-ui-pages`, which replaced the old Astro site.
-  - A COMPONENT SET, laid out as every set is
-    (epic `people-and-orgs` P18;  [spell-app's AGENTS.md](../app/AGENTS.md), "COMPONENT SETS"):
-    - its pages in this folder's `docs/`, served at `/components/ui/`
-    - the site bundle laid over them, at `_assets/`
-    - From 2026-10-05 (claude-design P6) until P18, the pages were in the epic repo, the checkout's `ui/`.
-- In two halves, one constant each in [the tools' types](src/tools/tools.types.ts).
-- `SITE_PAGES`, the PAGES:  [`docs/`](docs/index.html), tracked here.
-  - So a page changes in the same commit as its element.
+- Spell UI's docs are the Spell UI site:  a Spell guide, `@spell/guides/SpellUI`, one project of notebook pages in
+  the app folder's built-in projects (`app/spaces/@spell/guides/SpellUI/`, `SPELL_UI_SITE_FOLDER`).
+  - Modelled on Fomantic's docs:  a component has four pages, Usage (its address, `/button`), Examples, API, Theming.
+  - Its site file, `SpellUI.spell`, says where each page is and what the side navigation calls it.
+  - Shown at `/components/ui/` by the page server, with no editor (epic `editor` P43, Q78):
+    every address there gets [the viewer page](docs/index.html), whose `<spell-viewer>` shows the page it names
+    (`/components/ui/button/api`).
+  - In the editor:  `/run/@spell/guides/SpellUI`, where a page is changed (Change this, Q83).
   - How pages are made:  [README-site.md](README-site.md), "Writing a page".
-  - ONE flat folder:
-    - the pages:  `*.html`, an element's named for its tag (`ui-button.html`)
-    - the component index:  `components.html`
-    - `__parts/`:  the layout and footer every page shares
-    - `__data/` (`SITE_DATA`):  the data (below)
+- ONE place says where the site is and each page's address:  [SpellUIGuide](src/util/SpellUIGuide.ts).
+  - The Inspector's docs links, the theme bench, `spell ui icon`, the components catalogue and the page server's
+    link mender ask it.
+  - It takes the old components pages' names too (`ui-button.html`, `ui-grid.html#ui-column`):
+    a link written for them lands on the Spell page.
+  - And the other sets' guides, Epic UI's and App UI's (`sets`, `setAddressOf()`, `setMendedPath()`;  epic `editor`
+    P44):  `/components/epics/epic-card`, `/components/app/menu-bar`.
+- Spell UI's components pages, the HTML ones in `docs/` (`ui-button.html` ...), are gone (epic `editor` P43).
+  - With them went `yarn site:index`, `yarn site:sections`, the pages' layout (`__parts/`) and `icons.json5`.
+  - The other component sets' followed in P44 (Q82):  Epic UI's and App UI's guides are Spell guides too
+    (`@spell/guides/EpicUI`, `AppUI`), and with their HTML pages went the components page template (now `yarn
+    site:new`'s own, `src/tools/ComponentPage.template.html`), the component set page template, `SiteDataBuilder`'s
+    set mode (`forSet()`), the search file read from HTML pages, and the comments on those pages.
+  - The site bundle below stays, though no page of the sets loads it now (Brand's, which may bitrot, aside).
+- In two halves, one constant each in [the tools' types](src/tools/tools.types.ts).
+- `SITE_PAGES`, the DOCS FOLDER:  [`docs/`](docs/index.html), tracked here, a component set laid out as every set is
+  (epic `people-and-orgs` P18;  [spell-app's AGENTS.md](../app/AGENTS.md), "COMPONENT SETS").
+  - Served at `/components/ui/`;  its `sitePage` is `index.html` (`"pageServer"` in [package.json](package.json)).
+  - What's in it:
+    - `index.html`:  the viewer page
+    - `__data/` (`SITE_DATA`):  the data the Spell pages read (below)
     - `examples/`:  files the examples load
     - `images/`:  Fomantic's docs images
-  - Links are written as from the page's served address (`/components/ui/ui-button.html`):
-    - `_assets/` is beside it
-    - `../../` is the checkout's root
-    - `../epics/epic-item.html` is another set's page
-  - The `site:*` scripts that WRITE pages (`site:new`, `site:index`, `site:kitchen`, `site:sections`) write here.
 - `SITE_BUILD`, the BUILD:  `site/`, tracked per branch ([README-site.md](README-site.md):  its files).
+  - No set's pages load it since epic `editor` P44 (the brand's aside):  every set's guide is Spell.
   - `site/_assets/`:  GENERATED, NOT committed.
     - Git-ignored since 2026-10-07:  its hashed chunk names churned every diff and merge.
-    - The site bundle (`yarn site:bundle`):  `site.js` + `site.css`, which every page loads.
+    - The site bundle (`yarn site:bundle`):  `site.js` + `site.css`, which every set's page loads.
       Each family is a lazy chunk;  `icon-packs` is a symlink to [the built-in packs](src/icons/icon-packs/).
-    - The page server lays it over the pages at `/components/ui/_assets/`:
+    - The page server lays it over each set's pages at `/components/<set>/_assets/`:
 
       ```html
       <link rel="stylesheet" href="_assets/site.css">
@@ -485,8 +509,7 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
     - It takes the folder above its `_assets/` as the site's root:
       - its layout is `__parts/layout.html` there
       - its data is `__data/components.json5` there
-  - EVERY component set's pages load it (the page server's `componentSets` setting):
-    pages in Spell UI's shape, each set in its own `docs/` (a folder of the kit, or a project beside it),
+  - The sets that load it:  pages in the components pages' shape, each set in its own `docs/`,
     which the page server serves with this bundle as their `_assets/`.
     - Epic UI at `/components/epics/`, App UI at `/components/app/`
     - It holds `SitePacks.ts`:  `globalThis.SpellUI` (`registerPack`, `packModules`).
@@ -497,27 +520,29 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
         which every page loads in its `<head>`:
         `/_epic/assets/spell-comments.js`, spell-epic's (epic `epic-engine`).
     - The pack modules stay whole:
-      Spell UI's pages' eager script 305 KB => 555 KB (79 => 155 KB gzipped, measured 2026-10-20).
+      a page's eager script 305 KB => 555 KB (79 => 155 KB gzipped, measured 2026-10-20).
       - So from epic `epic-workflow` P10 the other sets had a build of their own, `sets.ts` into `site/_assets/sets/`.
       - Then Spell UI's pages loaded the epics pack for the comments too (epic `epic-engine`):  one build since.
     - Each set's side column reads its own `__data/`:
       `SiteDataFile.nav` gives `<ui-docs-nav>` its own start and Foundation links and band titles (absent:  Spell UI's).
 - The DATA, `docs/__data/`:  GENERATED, committed.
   - `components.json5`
-  - `icons.json5`:  the icon browser's search terms
-  - `search.json5`:  every page's sections
-  - Written by `yarn site:data`, with the editors' manifests beside them:
+  - `search.json5`:  every page and its sections, for the site's search
+    - Written by `yarn site:check --all` (or `--search`, which only reads), from the Spell pages as drawn
+      (epic `editor` P43):  rerun it after adding, renaming or moving a section.
+  - The rest written by `yarn site:data`, with the editors' manifests beside them:
     `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`.
   - And, in `src/`, the JSX types of every `<ui-*>` tag, [`spell/ui/jsx`](src/jsx.ts):
     - each tag's attributes and events
     - each tag's element in the DOM's types (`querySelector("ui-button")`)
     - They type-check in Spell UI's main program, so its own JSX (the docs elements') uses them.
     - Their test, [the JSX check](tests/jsx/jsx.check.tsx), type-checks in the tests' program.
-  - Their shapes, `SiteDataFile` / `SiteIconsFile` / `SiteSearchFile`:
+  - Their shapes, `SiteDataFile` / `SiteSearchFile`:
     [the docs components' types](src/docs-components/docs-components.types.ts).
   - And `pages.json5`, hand-kept per-family facts it reads:
     title, summary, status, token-table overrides, `pages` (the sub-tags with a page of their own).
-  - Rerun `yarn site:data` after renaming or moving a section.
+  - A tag's `href` there is still its old components page's name (`ui-button.html`, `ui-button.html#ui-or`):
+    `SpellUIGuide` turns it into the site's address.
 
 ### Commands
 
@@ -529,7 +554,7 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
   - entries:  `core`, `forms`, one per family, `styles`, `index`;  and `dist/icon-packs/`
   - `.d.ts` files beside the bundle's `exports` paths, from `declarations()` in `vite.config.ts`
 - `yarn test`:  the `ssr` project, then `browser`.
-  - `ssr` first:  it writes `ssr-button.html` in `.cache/`,
+  - `ssr` first:  it writes `ssr-shadow.html` and its sheets in `.cache/`,
     which [the DSD test](./tests/test-helpers/dsd.test.ts) reads.
 - `yarn test:all`:  chromium + firefox + webkit (`yarn test:browsers` once first).
 - `yarn test:visual`:  screenshot tests of every element example, light + dark,
@@ -566,49 +591,40 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
   see [README-site.md](README-site.md), "The tools".
   - `yarn report` rewrites the tables of [the report](../spell.epics/guides/ui/notes/report.md).
     Run it twice:  no diff.
-- `yarn site:build` ~== these four, in turn:
-  - `yarn site:data`:  `components.json5`, `icons.json5` and `search.json5`, in `docs/__data/`
-  - `yarn site:index`:  the cards of [the component index](docs/components.html) (`--check`)
-  - `yarn site:kitchen`:  the examples of [the kitchen sink](docs/kitchen-sink.html) (`--check`),
+- `yarn site:build` ~== these three, in turn:
+  - `yarn site:data`:  `components.json5`, in `docs/__data/`, and the editors' manifests
+  - `yarn site:kitchen`:  the examples of the Spell UI site's Kitchen Sink page, `KitchenSink.spell` (`--check`),
     from every family's `types.html` in `examples/elements/`
-    - and every component page's Theming playground:  its family's main example, the kitchen sink's first
-  - `yarn site:bundle`:  `site/_assets/`, sizes printed
+  - `yarn site:bundle`:  `site/_assets/`, the other component sets' bundle, sizes printed
   - Rerun it after changing a vocabulary, a family sheet, an example, or any source the site shows.
-  - Then commit `docs/`:  `site/_assets/` is git-ignored.
+  - Then commit `docs/__data/` and the Spell UI site:  `site/_assets/` is git-ignored.
     - `spell bundle ui-site` records its sources' hash, so the page server doesn't build it again.
 - `yarn site:dev` ([its script](scripts/site-dev.ts)):  `yarn site:bundle`, then live editing.
-  - The page server (started if needed) serves `/components/ui/`,
+  - The page server (started if needed),
     while a Vite WATCH build rebuilds `site/_assets/` on every `src/` / `site/_src/` edit,
     and live reload reloads the open pages.
-  - Not watched:  `site:data` / `site:index` / `site:kitchen`.
+  - Not watched:  `site:data` / `site:kitchen`.
   - A watch rebuild leaves stale hashed chunks:  harmless, they're not committed.
     The page server's next start rebuilds the bundle clean.
-- `yarn site:new`:  a new component's pages ([its script](scripts/site-new.ts)):
-  its four pages in the Spell UI site, and its components page from spell-epic's
-  [template](../epic/templates/spell-ui-docs.html).
+- `yarn site:new`:  a new component's four pages in the Spell UI site ([its script](scripts/site-new.ts)).
 
   ```sh
-  yarn site:new <tag|page> [--title ...] [--summary ...] [--force]
+  yarn site:new <tag> [--title ...] [--summary ...] [--force]
   ```
 
-  - For a tag:  the Spell UI site's `<Title>/Usage.spell`, `Examples.spell`, `API.spell` and `Theming.spell`
-    (`app/spaces/@spell/guides/SpellUI/`), their lines in its site file (`SpellUI.spell`) and its project file,
-    A to Z;  written as Spell from its components page ([SpellUISite](src/tools/SpellUISite.ts), on
-    [SpellMarkup](src/tools/SpellMarkup.ts);  epic `editor` P42).
-    - And `docs/<main tag>.html`, from the template, when it isn't there yet;
-      a sub-tag its family's `pages` lists gets `<tag>.html` (`ui-radio`).
+  - `<Title>/Usage.spell`, `Examples.spell`, `API.spell` and `Theming.spell` (`app/spaces/@spell/guides/SpellUI/`),
+    their lines in its site file (`SpellUI.spell`) and its project file, A to Z.
+    - A sub-tag its family's `pages` lists gets pages of its own (`ui-radio`).
+  - Written as Spell from its [template](src/tools/ComponentPage.template.html), filled in
+    memory ([SpellUISite](src/tools/SpellUISite.ts), on [SpellMarkup](src/tools/SpellMarkup.ts);  epic `editor` P42).
+    - Its API page gets a section per kind of table its tags have (`<ui-docs-api family only="attributes">` ...),
+      from the site's data;  a family of 2+ tags a Tags section first (`only="tags"`).
     - What it couldn't write as Spell (a script that drives an example) it lists, to tidy by hand.
-  - Else a guide page, `<page>.html`, in `docs/` too:  the Spell UI site's own is written by hand.
-  - Leaves what's there as it is:  `--force` writes it again.
+    - Until epic `editor` P43 it wrote the HTML components page too, `docs/<tag>.html`.
+  - A guide page (not a tag) is written in the Spell UI site by hand:  it says so, and writes nothing.
+  - Leaves a component the site has as it is:  `--force` writes it again.
   - Title, summary and status come from [the pages data](docs/__data/pages.json5).
   - How to write one:  [the pages guide](../spell.epics/epics/spell-ui-pages/PAGES.md).
-- `yarn site:sections [--check] [page...]` ([its script](scripts/site-sections.ts)):
-  nests every page's flat level 2 / 3 headers and headed examples into `<ui-section>`s.
-  - It writes (or fixes) their ids, `<tab>-<section>-<example>`;  idempotent.
-  - It splits a components page's API tab into a section per kind of table its tags have
-    (`<ui-docs-api family only="attributes">` ...), from the site's data:  rerun it after `yarn site:data`.
-    - A family of 2+ tags gets a Tags section first (`only="tags"`):  its tags, their summaries, links to their tables.
-  - `site:index`, `site:kitchen` and `site:new` run it on what they write.
 - `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (`spell design build`):
   the claude.ai design system's files (epic `claude-design`).
   - [Its script](scripts/design-build.ts), on [the design export](src/tools/DesignExport.ts).
@@ -631,8 +647,12 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
       `src/vocabulary/partsOfSpeech.generated.ts`, a small table the bubbly look reads (the app's `BubblyMarkup`)
       to colour a tag's band, without loading Spell UI.
 - `yarn site:check <page...> | --all`:
-  loads the Spell UI site's pages (`@spell/guides/SpellUI`) as this checkout's editor runs them (Playwright),
-  a page by its address (`/button/examples`) or its tag.
+  loads the Spell UI site's pages (`@spell/guides/SpellUI`) as the page server shows them at `/components/ui/`,
+  with no editor (Playwright), a page by its address (`/button/examples`) or its tag.
+  - `--server <origin>`:  another page server than this checkout's (started if needed).
+  - `--site epics` / `--site app`:  Epic UI's or App UI's guide instead, at `/components/epics/` and
+    `/components/app/` (epic `editor` P44);  a page by its address or its old page's name (`epic-card`, `MenuBar`);
+    no search file.
   - [Its script](scripts/site-check.ts), on [the site check](src/tools/SiteCheck.ts).
   - It fails on:
     - console errors, 404s
@@ -641,6 +661,8 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
     - phone-width overflow
     - a nav drawer that won't open
   - Screenshots go in `results/`, its `site-check/`.  LOOK at them.
+  - `--all` also writes the site's search file, `docs/__data/search.json5`, from every page as drawn;
+    `--search` only does that, clicking through the site in one browser page, with no checks.
 - Generators, each writing COMMITTED files (never edit their output):
   - `yarn gen:styles`:  the token sheets in `src/styles/`
   - `gen:icons`:  the built-in icon packs.  Downloads Font Awesome, needs `reference/Fomantic-UI/`.
@@ -767,7 +789,9 @@ As WWOD §18, plus:
     E.g. `styleSheets: { nag: nagCSS }`, `DOMElement: DOMNagElement`, `delegatesFocus: false`, a form control's `Fallback` ...
   - reactive members (below)
   - `render()`, returning JSX
-  - The DOM element creates one on its first connect, and keeps it (`keepAlive`) until `domElement.dispose()`.
+  - The DOM element creates one on its first connect, and keeps it (`keepAlive`) until `domElement.dispose()`:
+    one Solid draws is disposed by itself once its drawing is let go and it's off the page (DOMElement's
+    "Disposed with its drawing", epic `solid-2-final` I34).
   - `UI<Name>.define()` in the family's `index.ts` registers it.
 - A FORM CONTROL (`F.FormComponent`) inherits what every control needs:
   - `isDisabled`:  `disabled`, or a disabled fieldset, with its class
@@ -1123,8 +1147,13 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     - `ShadowEvents` guarantees it, by undoing what Solid's shadow-root delegation leaves on the event:
       `target`, `currentTarget`, its handled marker.
     - NEVER work around a wrong `target` in a component:  fix it there.
-- **`keepAlive`:**  a removed element keeps its reactive root, until `dispose()` or garbage collection.
+- **`keepAlive`:**  a removed element keeps its reactive root, until `dispose()`.
   - So anything page-wide (overlay entries, document listeners) follows `isConnected`, never disposal.
+  - Moved, or on a page kept drawn (`KeptPages`), it lives on;  taken off for good, it's disposed:
+    - one Solid drew, once the drawing that made it is let go (a `<For>` row taken out, a kept page let go)
+    - one in a shadow root, with its host, drawn or made from HTML (a `<ui-markdown>`'s `<ui-code>`)
+  - An element made in an effect's callback has no drawing (the callback has no owner):  make it under the
+    drawing's owner (`runWithOwner()`), or it lives until `dispose()` (a table's header row did, I34).
 - **Slots carry no Solid context:**  an element's root is owned by whoever CREATED it,
   never by the `<slot>` it's assigned to (epic `spell-element`, Q8).
   - So a `<slot>` may live in any `<Show>` / `<Dynamic>` branch.
@@ -1208,7 +1237,9 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
   - From epic `epic-components` P1.
   - Restated in `wwod-spell-ui`'s names when `main` merged in (2026-10-08),
     in place of `wwod-spell-ui` P12's JSON packs.
-- The pack is ONE classic script, so it works from `file://`.
+- The pack is ONE classic script a page names, which registers it at once;  its families are ES modules beside it,
+  each loaded the first time one of its elements is made on the docs pages, all at once elsewhere (`loadFamily`,
+  `define()`;  epic `solid-2-final` P7).
   - Built by the kit's pack tooling, [ComponentPack](../src/element-tools/ComponentPack.ts)
     (Spell UI's from epic `repo-split` P5 to P10):
     - `spell-pack build | check [<folder>]`, the kit's bin ([its script](../bin/spell-pack.mjs)),

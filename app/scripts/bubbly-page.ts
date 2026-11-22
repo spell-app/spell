@@ -19,6 +19,9 @@ import { parseSpellProject } from "spell/parser/spell/test"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
 
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
+
 const outIndex = process.argv.indexOf("--out")
 const OUT = resolve(
   outIndex > 0

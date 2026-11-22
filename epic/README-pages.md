@@ -865,9 +865,8 @@ Adding a new element:
 | [src/answers/](src/answers/) | the pages you answer on:  a details page's answer, gathered from its questions and text boxes;  a choice page's boxes, the draft and "Do it";  a run page's answers, saved row by row, and Send |
 | [src/links/](src/links/) | short addresses (`SAGA:/<saga>/<epic>#<id>`) and `<epic-link>`'s attributes as a page and an id;  what a page holds to land on;  pure, for the elements, the docs runtime and the tool |
 | [src/tool/](src/tool/) | the epic tool behind `epic`'s page verbs, node only, not in the pack;  [PLAN-DOC.md](src/tool/PLAN-DOC.md), the rules for a page's data;  [the template](src/tool/templates/plan.html) a new epic page starts from |
-| [src/docs/](src/docs/) | Epic UI, the elements' docs pages, served at `/components/epics/`:  an index, a page per tag, the layout and the data |
-| [src/site/](src/site/) | Epic UI's generated data (`yarn site:data`) |
-| [tests/pack.test.ts](tests/pack.test.ts) | runs `spell-pack check`:  the pack and Epic UI's data are current |
+| [src/docs/](src/docs/) | the one page that shows Epic UI, the elements' guide (a Spell guide), at `/components/epics/` |
+| [tests/pack.test.ts](tests/pack.test.ts) | runs `spell-pack check`:  the pack is current |
 | [vite.config.ts](vite.config.ts) | lint and format only:  the pack's build is the kit's |
 | [vitest.config.ts](vitest.config.ts) | two projects over `tests/`:  `node` for the code, `browser` (chromium) for the elements |
 

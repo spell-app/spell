@@ -5,7 +5,7 @@
  * TODO: pass/etc events
  */
 
-import _remove from "lodash/remove"
+import { remove as _remove } from "lodash-es"
 
 /**
  * Callback registered via `on`/`off`/`once`/`trigger`.

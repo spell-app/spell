@@ -1,0 +1,68 @@
+"input editor" is a notebook page
+	<header level="1">
+		InputEditor
+		<header>The spell source editor on the open file, with its toolbar.</>
+	</>
+
+	<text class="lede" paragraph>Where you write spell in the editor: the open file, coloured as spell, top left, with a toolbar to pick another file, save, reload or make a new one. It's a <link target="src-packages-app-docs-codemirroreditor-html" link="/code-mirror-editor">CodeMirror editor</> on the file, so it has hovers, references and "go to definition" too.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or reading its code</>
+		<item icon="image">A picture, not live: it needs the whole editor, and a project open in it</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The editor's code pane on Solitaire's Card.spell: its file tabs, then the code.</>
+		<image src="/components/app/_images/InputEditor.png" alt="The code pane:  the Solitaire example's files as tabs, Card.spell chosen, over spell code" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The editor's page draws it as <text code>InputRoot</>, its file tabs on top, above the Program panel on the left:</>
+		<text paragraph>SpellEditor.tsx · the editor's page:</>
+		<markdown>
+			```typescript
+			<ui-split-panel rows={codeRows.sizes()} resizable on-ui-changed={codeRows.keep}>
+			  <div class="SplitPane"><InputRoot /></div>
+			  <Show when={showsProgramPanel()}>
+			    <div class="SplitPane"><ProgramPanel onClose={() => ProgramPanelShown.set(false)} /></div>
+			  </Show>
+			</ui-split-panel>
+			```
+		</>
+		<list bulleted>
+			<item><link link="#InputRoot">InputRoot</> is the pane: the project's files as tabs (<text title="app/src/app/solid/FileTabs.tsx" code>&lt;FileTabs&gt;</>) above an <text code>InputEditor</>.</>
+			<item>The tabs: every file of the project, in the theme's tab look, none closing; a dot on one not saved; too many, ‹ › scroll them; too narrow for two tabs, one dropdown of every file. Save, Revert File and New File are the top bar's File menu's.</>
+			<item>No Compile button: the editor compiles two seconds after typing stops, and on Cmd+Enter.</>
+			<item>The code is 17px, with no line numbers until the top bar's View › Line Numbers turns them on; the browser remembers that choice (<text code>LineNumbers</>).</>
+			<item><text code>InputEditor</> edits the editor's open file. CodeMirror loads once the program has compiled and run, so it says "Loading editor…" till then. One editor shows every file, each keeping its own undo, folds and caret.</>
+			<item>Once it's made, the editor gets it: for its save, reload and compile keys, and to follow the caret and scrolling. It selects where the file asked to open, such as a definition jumped to.</>
+			<item>On an error, <text code>showError</> is told, and a plain editor with no spell colouring takes over, in case the colouring is what failed. It comes back by itself when what failed changes.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="InputEditor"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-inputeditor-tsx" link="/src/app/solid/InputEditor.tsx"><text title="src/app/solid/InputEditor.tsx" code>InputEditor.tsx</></>: the pane, its toolbar and the editor, and their props</>
+			<item><link target="src-packages-app-src-solid-inputeditor-css" link="/src/app/solid/InputEditor.css"><text title="src/app/solid/InputEditor.css" code>InputEditor.css</></>: its look</>
+			<item>Its tests: <link target="src-tests-app-src-solid-inputeditor-browser-test-tsx" link="/tests/app/solid/InputEditor.browser.test.tsx"><text title="tests/app/solid/InputEditor.browser.test.tsx" code>InputEditor.browser.test.tsx</></></>
+			<item>What it edits with: a <link target="src-packages-app-docs-fileeditor-html" link="/file-editor">FileEditor</>, a <link target="src-packages-app-docs-codemirroreditor-html" link="/code-mirror-editor">CodeMirrorEditor</> on a file, loaded by <link target="src-app-src-app-solid-lazycodemirror-tsx" link="/src/app/solid/LazyCodeMirror.tsx"><text title="src/app/solid/LazyCodeMirror.tsx" code>LazyCodeMirror.tsx</></></>
+			<item>Where it's drawn: <link target="src-packages-app-src-pages-spelleditor-tsx" link="/src/app/pages/SpellEditor.tsx"><text title="src/app/pages/SpellEditor.tsx" code>SpellEditor.tsx</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-16 against branch <ui-text code>codemirror</>.</>
+		</>
+	</>

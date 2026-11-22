@@ -15,6 +15,12 @@ export const SITE_ASSETS = `${ROOT}site/_assets`
 export const SITE_ENTRY = `${ROOT}site/_src/site.ts`
 
 /**
+ * The second entry:  `site/_src/drawings.ts`, the headless page the page server draws Mermaid in
+ * (`spell/ui/drawings`), sharing the site's chunks.
+ */
+export const DRAWINGS_ENTRY = `${ROOT}site/_src/drawings.ts`
+
+/**
  * The Spell UI site's bundle (`yarn site:bundle`, run by `scripts/site-bundle.ts`):
  * `site/_src/site.ts` => `site/_assets/site.js` + `site.css` + lazy chunks.  See the entry for what's in it.
  * - `baseConfig()`:  the library's own plugins (decorators BEFORE Solid), Solid dedupe, Lightning CSS targets.
@@ -53,7 +59,7 @@ export default defineConfig(() => {
       // `brands.json`-sized icon data and highlight.js's languages are lazy chunks, loaded only when used
       chunkSizeWarningLimit: 700,
       rolldownOptions: {
-        input: { site: SITE_ENTRY },
+        input: { site: SITE_ENTRY, drawings: DRAWINGS_ENTRY },
         preserveEntrySignatures: "allow-extension",
         output: {
           // custom element class names are read by dev-time warnings and the manifest (see `vite.config.ts`)

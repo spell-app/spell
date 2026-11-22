@@ -50,6 +50,14 @@ export const spellViewerVocabulary = {
         "A CSS selector for a `<spell-editor>` in the same document or shadow root:  runs what it compiles, and " +
         "what it compiled already.  Waits for it without `project` or `src`."
     },
+    {
+      name: "base",
+      kind: "string",
+      description:
+        "The page's address a site it runs goes under, `/components/ui`:  the site's address follows the page's, " +
+        "so `/components/ui/button/api` shows its `/button/api`, the browser's back and forward work, and a link's " +
+        "`#section` lands.  Without it, the site keeps its own address."
+    },
     { name: "toolbar", kind: "boolean", description: "Shows the toolbar:  its name, Restart, Debug." },
     {
       name: "debug",

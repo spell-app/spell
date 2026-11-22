@@ -1,0 +1,73 @@
+"epic actions element" is a notebook page
+	<header level="1">
+		&lt;epic-actions&gt;
+		<header>The &lt;epic-actions&gt; element: a block's actions row on an epic page, its buttons over the block's top right corner.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-actions&gt;</> is a block's actions row on an epic page: the one row of a paragraph's, a list's or a table's own controls, a line of no height just before the block, its buttons over the block's top right corner. The comments' bullhorn comes first, then a table's expand button.</>
+	<text class="meta" paragraph>For anyone adding a control to a block, or changing where the bullhorns sit.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P45), its own <link target="src-spell-epic-src-components-epic-actions" link="/epic/src/components/epic-actions/"><text title="epic/src/components/epic-actions/" code>epic-actions</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-actions-epicactions-en-ts" link="/epic/src/components/epic-actions/EpicActions.en.ts"><text title="epic/src/components/epic-actions/EpicActions.en.ts" code>EpicActions.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-actions-epicactions-tsx" link="/epic/src/components/epic-actions/EpicActions.tsx"><text title="epic/src/components/epic-actions/EpicActions.tsx" code>EpicActions.tsx</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>A row with two buttons, before a paragraph, as the docs runtime makes it.</>
+		<example "Example">
+			<html>
+				<ui-stack style="position: relative; padding: 8px; border: 1px dashed var(--ui-border-color)">
+					<epic-actions style="--spell-block-gap: 0px">
+						<ui-button appearance="basic circular" size="mini" icon="bullhorn" aria-label="Comment"></ui-button>
+						<ui-button appearance="basic" size="mini" icon="arrows left right" aria-label="Expand"></ui-button>
+					</epic-actions>
+					<ui-text style="margin: 0" paragraph>A paragraph of an epic page: its controls sit over its top right corner, on the page's ground, and never push its text aside.</ui-text>
+				</ui-stack>
+			</html>
+		</example>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item>Nobody writes it in a page: the docs runtime makes it the first time a block gets a control (<link target="src-spell-epic-src-tools-assets-spell-doc-helpers-js" link="/epic/src/tools/_assets/spell-doc-helpers.js"><text title="epic/src/tools/_assets/spell-doc-helpers.js" code>addBlockAction()</></>), and takes it away with its last.</>
+			<item>On every page: every page that draws one loads the epics pack (the docs runtime, the component sets' layouts).</>
+			<item><text code>data-spell-added</>: a live update steps around it.</>
+			<item>Where the block's top edge lies is the runtime's to measure (the block's own top margin may lie between them): it hands it in as <text code>--spell-block-gap</>, and for a table <text code>--spell-block-head</> and <text code>head-row</>.</>
+		</>
+	</>
+
+	<section label="3. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>What it is</>
+			</>
+			<row>
+				<cell>
+					<text code>head-row</>
+				</>
+				<cell>Its block is a table: the buttons centred on its header row.</>
+			</>
+			<row>
+				<cell>
+					<text code>::part(base)</>
+				</>
+				<cell>The controls' box, out of the flow, over the block's corner.</>
+			</>
+		</>
+	</>
+
+	<section label="4. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>2px inside the block's top and right edges (<text code>--epic-actions-inset</>), 2px between the buttons (<text code>--epic-actions-gap</>).</>
+			<item>Each button round, on the page's ground (<text code>--epic-actions-background</>).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-25 against branch <ui-text code>epic-engine</> (P45).</>
+		</>
+	</>

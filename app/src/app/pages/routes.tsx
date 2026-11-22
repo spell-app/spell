@@ -4,13 +4,8 @@ import { createRouter, defineRoutes, useNavigate, type RouterHistory, type Route
 
 import { editor } from "spell/app/app/editor"
 import { setNavigator } from "./navigation"
-import { GuidesPage } from "./GuidesPage"
-import { PaletteGroupsPage } from "./PaletteGroupsPage"
-import { PlaceReferencePage } from "./PlaceReference"
-import { ProjectChooser } from "./ProjectChooser"
-import { SiteEditorRoute } from "./SiteEditorPage"
+import { PageViews } from "./pageViews"
 import { ProjectPageRoute } from "./SpellEditor"
-import { ThemeEditorPage } from "./ThemeEditorPage"
 import { GUIDES_PAGE, PALETTE_PAGE, PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
 
 /**
@@ -32,6 +27,8 @@ import { GUIDES_PAGE, PALETTE_PAGE, PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./
  * - anything else:  `<ProjectChooser>`
  * - Each page is ONE route:  it stays mounted while only its address changes, e.g.
  *   moving between files, and follows them (`followRoute()`).
+ * - Every page but the editor's loads the first time it shows (`PageViews`, epic `solid-2-final` P11):
+ *   the editor's first load carries none of them.
  */
 export const ROUTES = defineRoutes([
   {
@@ -39,11 +36,11 @@ export const ROUTES = defineRoutes([
     matchFilters: { page: ["edit", "design", "run"] },
     component: ProjectPageRoute
   },
-  { path: THEME_PAGE, component: ThemeEditorPage },
-  { path: PALETTE_PAGE, component: PaletteGroupsPage },
-  { path: `${SITE_PAGE}/*address`, component: SiteEditorRoute },
-  { path: `${PLACE_PAGE}/*address`, component: PlaceReferencePage },
-  { path: [GUIDES_PAGE, `${GUIDES_PAGE}/*path`], component: GuidesPage },
+  { path: THEME_PAGE, component: PageViews.theme.view("ThemeEditorPage") },
+  { path: PALETTE_PAGE, component: PageViews.palette.view("PaletteGroupsPage") },
+  { path: `${SITE_PAGE}/*address`, component: PageViews.site.view("SiteEditorRoute") },
+  { path: `${PLACE_PAGE}/*address`, component: PageViews.place.view("PlaceReferencePage") },
+  { path: [GUIDES_PAGE, `${GUIDES_PAGE}/*path`], component: PageViews.guides.view("GuidesPage") },
   { path: "*", component: HomeRoute }
 ])
 
@@ -57,6 +54,9 @@ function HomeRoute() {
   onSettled(() => void editor.leaveProject())
   return <ProjectChooser />
 }
+
+/** `<ProjectChooser>`, loaded the first time the home page shows (`PageViews`). */
+const ProjectChooser = PageViews.home.view("ProjectChooser")
 
 /**
  * A router over `ROUTES`;  `history` defaults to the browser's (tests pass `memoryHistory()`).

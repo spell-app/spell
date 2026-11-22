@@ -24,6 +24,15 @@ export class ComponentPacks {
     this.packs.set(pack.name, pack)
   }
 
+  /**
+   * Load what every registered pack needs to read `language`, past English:  its words for it, which may load on
+   * first use (epic `solid-2-final` P11:  Spell UI's Spanish dictionary).
+   * - `SP.Language.loadFor()` calls it, before a program in that language is read.
+   */
+  static async loadLanguage(language: string): Promise<void> {
+    await Promise.all([...this.packs.values()].map((pack) => pack.loadLanguage?.(language) ?? Promise.resolve()))
+  }
+
   /** The pack called `name`, if one is registered. */
   static named(name: string): ComponentPack | undefined {
     return this.packs.get(name)
@@ -214,6 +223,13 @@ export type ComponentPack = {
    * - Left out:  the pack can't say.
    */
   help?(language: string): ComponentHelp | undefined
+  /**
+   * Load its names in `language`, past English, before a program in it is read (`ComponentPacks.loadLanguage()`):
+   * until then, `tagFor()` and the rest know none of them.
+   * - Once per language:  every later call the same promise.
+   * - Left out:  it has every language's names at once.
+   */
+  loadLanguage?(language: string): Promise<void>
 }
 
 /**

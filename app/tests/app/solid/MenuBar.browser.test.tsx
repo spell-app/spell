@@ -277,7 +277,7 @@ describe("<ProjectBarMenu>", () => {
     const [address, target, features] = opened.mock.calls[1]!
     const url = new URL(String(address))
     expect([url.origin + url.pathname, url.searchParams.get("pages"), target, features]).toEqual([
-      "http://127.0.0.1:4747/components/ui/theme-bench.html",
+      "http://127.0.0.1:4747/components/ui/theme-bench",
       "app",
       "_blank",
       "noopener"

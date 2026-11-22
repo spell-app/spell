@@ -3,8 +3,10 @@
  * - The path is forwarded unchanged:  the server behind must expect it
  *   (e.g. a Vite dev server's `base: "/ui"` for `/ui/...`).
  * - `Host` is rewritten to the target's, so its own host check (Vite's `allowedHosts`) accepts it.
+ * - A request that came over HTTP/2 goes on as HTTP/1.1:  its `:` headers left behind, and the answer's
+ *   connection headers (`HOP_BY_HOP`), which HTTP/2 refuses
  */
-import { request as httpRequest, type IncomingMessage } from "node:http"
+import { request as httpRequest, type IncomingHttpHeaders, type IncomingMessage } from "node:http"
 import { connect } from "node:net"
 import type { Duplex } from "node:stream"
 
@@ -28,10 +30,14 @@ export function proxyTo(target: ProxyTarget): Handler {
           port,
           method: request.method,
           path: request.originalUrl,
-          headers: { ...request.headers, host: `127.0.0.1:${port}` }
+          headers: { ...http1Headers(request.headers), host: `127.0.0.1:${port}` }
         },
         (incoming) => {
-          reply.raw.writeHead(incoming.statusCode ?? 502, incoming.headers)
+          const isHttp2 = request.raw.httpVersionMajor === 2
+          reply.raw.writeHead(
+            incoming.statusCode ?? 502,
+            isHttp2 ? withoutHopByHop(incoming.headers) : incoming.headers
+          )
           incoming.pipe(reply.raw)
           incoming.on("end", done)
           incoming.on("error", done)
@@ -66,6 +72,19 @@ export function proxyUpgrade(raw: IncomingMessage, socket: Duplex, head: Buffer,
   upstream.on("close", () => socket.destroy())
   socket.on("error", () => upstream.destroy())
   socket.on("close", () => upstream.destroy())
+}
+
+/** An answer's headers HTTP/2 refuses:  they're about one HTTP/1.1 connection. */
+const HOP_BY_HOP = ["connection", "keep-alive", "proxy-connection", "transfer-encoding", "upgrade"]
+
+/** `headers` without HTTP/2's own `:method`, `:path` ...:  as HTTP/1.1 sends them on. */
+function http1Headers(headers: IncomingHttpHeaders): IncomingHttpHeaders {
+  return Object.fromEntries(Object.entries(headers).filter(([name]) => !name.startsWith(":")))
+}
+
+/** `headers` without `HOP_BY_HOP`'s. */
+function withoutHopByHop(headers: IncomingHttpHeaders): IncomingHttpHeaders {
+  return Object.fromEntries(Object.entries(headers).filter(([name]) => !HOP_BY_HOP.includes(name)))
 }
 
 /** Whether `path` is `prefix` or under it, segment-wise:  `/ui`, `/ui/`, `/ui/x`, never `/uix`. */

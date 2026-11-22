@@ -213,6 +213,8 @@ export class PendingChanges {
   private readonly places: Places
   /** The place it had when it was set aside:  `setAside()`. */
   private placeAside: Place | undefined
+  /** How many changes were kept under this tab's own key as it opened:  what a page with no locks finds left. */
+  private readonly keptFromLastVisit: number
   /** Which key this tab keeps them under, and what closed tabs left.  Left out:  nothing's kept. */
   private readonly copies: TabCopies | undefined
 
@@ -231,7 +233,21 @@ export class PendingChanges {
       ...(storage && { storage })
     })
     this.pending = this.queue.kept<PendingChange[]>() ?? []
+    this.keptFromLastVisit = this.pending.length
     this.lastGroup = Math.max(0, ...this.pending.map(({ group }) => group ?? 0))
+  }
+
+  /**
+   * The names of the places with changes kept on this device under `keepAs`, by any tab, this one or one gone:
+   * the places a page has writes waiting for, from the last visit (epic `solid-2-final` P13).
+   * - STATIC:  read from what's kept, before any list is opened;  a group is never kept, so it never counts.
+   */
+  static placesWaiting({ keepAs, storage }: Pick<PendingChangesProps, "keepAs" | "storage">): string[] {
+    if (keepAs === undefined) return []
+    return TabCopies.namesKeptUnder<PendingChange[]>(`${PENDING_STORE}:${keepAs}/`, {
+      storage,
+      holds: (kept) => Array.isArray(kept) && kept.length > 0
+    })
   }
 
   /** Every change not yet confirmed, oldest first. */
@@ -277,13 +293,15 @@ export class PendingChanges {
   /**
    * SIDE EFFECT:  send what was left from the last visit:  first what the place holds now, with it replayed on top.
    * - Takes over what any closed tab left of this place (`TabCopies`).
-   * - Nothing kept:  nothing happens.
+   * - Nothing left from the last visit:  nothing happens, though this page may have made a change already
+   *   (it waits for the gathering's lock):  that one goes at its own pace, and a failed one waits for its retry.
    * - NEVER throws:  a heal that fails is logged, and it's sent anyway.
    */
   async open(): Promise<void> {
     let takenSoFar = 0
     await this.copies?.gather<PendingChange[]>((changes) => (takenSoFar += this.takeOver(changes, takenSoFar)))
-    if (!this.pending.length) return
+    // only what the last visit left:  a change made on this page since goes on its own, at its own pace
+    if (!takenSoFar && !this.keptFromLastVisit) return
     await this.places.heal.healPending(this.placeName)
     this.queue.changed({ now: true })
   }

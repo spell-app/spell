@@ -136,7 +136,7 @@ const BUNDLES = [
   "../ui/src/components/ui-root",
   "../ui/site/_assets",
   "../epic/src/components/__pack",
-  "../epic/src/tools/_assets"
+  "../epic/src/tools/_assets/spell-ui"
 ]
 
 // epic `epic-engine` P54 (Owen, Q61:  "Only in a worktree")
@@ -207,7 +207,9 @@ describe("Bundle sources", () => {
   put(root, "epic/src/tool/Tool.ts", "tool")
   put(root, "epic/src/components/__pack/epics.pack.js", "pack")
   put(root, "epic/src/docs/__data/components.json5", "{}")
-  put(root, "epic/src/tools/_assets/spell-ui.js", "bundle")
+  put(root, "epic/src/tools/_assets/spell-ui.js", "loader")
+  put(root, "epic/src/tools/_assets/spell-ui/main.js", "bundle")
+  put(root, "epic/src/tools/_assets/spell-comments.js", "comments")
   put(root, "epic/src/tools/_assets/emoji/cldr/a.js", "emoji")
   put(root, "epic/src/tools/_assets/spell-doc-runtime.js", "runtime")
   afterAll(() => rmSync(root, { recursive: true, force: true }))
@@ -219,14 +221,16 @@ describe("Bundle sources", () => {
       SRV.BUNDLES.find((spec) => spec.name === name)!
     )
 
-  test("never what any committed one generates, nor its own entry:  so no build makes another stale", () => {
+  test("never what any bundle generates, nor its own entry:  so no build makes another stale", () => {
     const epicFiles = (name: string) =>
       bundleOf(name)
         .sourceFiles()
         .filter((file) => file.startsWith("spell/epic/"))
+    // the docs bundle's own classic loader, `spell-ui.js`, is committed:  a source of both
     expect(epicFiles("epics-pack")).toEqual([
       "spell/epic/src/tool/Tool.ts",
-      "spell/epic/src/tools/_assets/spell-doc-runtime.js"
+      "spell/epic/src/tools/_assets/spell-doc-runtime.js",
+      "spell/epic/src/tools/_assets/spell-ui.js"
     ])
     expect(epicFiles("epic-docs")).toEqual(epicFiles("epics-pack"))
   })

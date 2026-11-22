@@ -49,6 +49,19 @@ and in the app's build folder, `app/` at the app folder's root.
   - `ui/`:  `UI`, shared UI types, CodeMirror's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)
+  - `run/`:  the RUN PAGE, `/run/<project>` opened straight (epic `solid-2-final` P12):  the project running by
+    itself, with no editor, code pane, language service or parser in the page;  its Edit opens `/edit/<project>`
+    - its page is `run.html`, beside `index.html`, a second entry of `vite.config.ts`;  which page an address gets is
+      ONE function, spaces' `editorPageFor()`, which the dev server (`runPageInDev()`) and the built editor's server
+      (`EditorServer.builtServer()`) both ask
+    - it runs what the server built of the project, as `<spell-viewer project>` does (`projectSource()`), on the
+      editor's own `spell-runtime.js`;  a site keeps its address in the page's (`RunSiteHost`)
+    - the editor's own switch from Edit to Run stays on the editor's page:  live edits and the game in progress carry
+      over
+    - a phone opening `/edit/<project>` goes there before the editor downloads (`index.html`'s first script):
+      a phone only runs
+    - the static build keeps its Run in the editor:  a host sends `index.html` for every address
+    - `build.test.ts` pins that it loads no editor, CodeMirror, Inspector, language service or parser
   - `spellEditor/`:  `<spell-editor>`'s pane (below)
   - `editor.ts`:  the editor's state and actions, ONE `editor` for the page
   - `EditorHistory.ts`:  what's undone outside the code, the side bar's changes and a notebook's (`editor.history`);
@@ -78,7 +91,7 @@ and in the app's build folder, `app/` at the app folder's root.
   - the page, `index.html`
   - `demo/`, `static/`, `scripts/` (App UI's data and pictures, `stop.mjs`)
   - the vite configs, `vite*.config.ts`;  the tests' are the root's `vitest.config.ts`
-  - `docs/`, App UI (below);  the builds, `dist*/`
+  - `docs/`, App UI's viewer page and data (below);  the builds, `dist*/`
 - Its scripts are the app folder's (its `package.json`), the builds `cd app && ...` (epic `repo-split` P11):
   - The editor (vite, port 3000 if free, else any) is the PAGE SERVER's child.
     - Spaces' [appRoutes.ts](../spaces/server/node/routes/appRoutes.ts) starts it (`EditorServer`)
@@ -127,6 +140,9 @@ and in the app's build folder, `app/` at the app folder's root.
       - `spell-ui.js`:  the `spell-ui` barrel, lazy
         - its chunks in `ui/`
         - it also puts `registerPack` on `globalThis.SpellUI`
+      - `spell-solid.js` puts one there first, on a page with none (`PagePacks`, in `components/`;  epic `editor` P44):
+        so a Spell page's `<ui-components source>` loads a component pack (a guide's `<epic-*>` examples);  the first
+        pack fills `SpellUI.packModules` from these two files, then waits for all of Spell UI, as the site bundle does
     - The element / editor / runner builds import them through `sharedSolid()` (`vite.shared.ts`),
       never bundling their own.
     - They take Solid and the core through `spell-solid-shared.js`:
@@ -145,9 +161,25 @@ and in the app's build folder, `app/` at the app folder's root.
 - [The app's CodeMirror plumbing](ui/codemirror/) (no UI):  every place the app shows code is CodeMirror 6
   (epic `codemirror`, 2026-11-16):  the code pane and its fallback editor, the Inspector's Code card, the compiled
   pane, Publish's diff, notebook cells and `<spell-editor>`.
-  - Its language features call the SAME `LSP.SpellLanguageService`, in-process
-    ([CodeMirrorLanguage](ui/codemirror/CodeMirrorLanguage.ts)).
-    So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
+  - Its language features ask the SAME `LSP.SpellLanguageService` VS Code's language server does, by the ONE table of
+    requests (`LSP.LANGUAGE_REQUESTS`), through a [LanguageClient](ui/codemirror/LanguageClient.ts)
+    ([CodeMirrorLanguage](ui/codemirror/CodeMirrorLanguage.ts);  epic `solid-2-final` P18):
+    - in the editor app, the editor's LANGUAGE WORKER answers ([languageWorker.ts](ui/codemirror/languageWorker.ts),
+      an `LSP.LanguageHost`):  the parser and the service off the page's thread, its own parse of each project,
+      sent each edit as changes, never the whole text
+      - started by the app alone (`startLanguageWorker()`, from `LazyCodeMirror`):  `<spell-editor>`, the static build
+        and the tests ask the page's own service, in-process (`LanguageClient.inThread()`)
+      - a worker that stops hands every question to the page's own service;  so does a project the worker can't load
+        (one only the page holds, made from a start card and not saved yet:  `LanguageClient.onFallback()`)
+      - the editor's compile too (`editor.compileApp()`, through `editor.compileElsewhere`):  the worker compiles its
+        copy of the project, the pages in play as the page has them, and hands back what the compile wrote
+        (`SP.CompiledEntry`), which the page takes as its own and runs (`SpellProject.takeCompiled()`);
+        `compiledFrom` says `"elsewhere"`
+      - each file's problems too, sent after each of the worker's parses, numbered by the edits they're of
+        (`FileStates.parsedElsewhere()`);  the editor's own Spell keeps the page's, which checks the names it fills
+      - still on the page's parse:  folding, the bubbly look, and every reader outside the code
+        (the list:  the epic page's P18)
+    - So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
     - Its answers reach CodeMirror through one converter, [LspToCodeMirror](ui/codemirror/LspToCodeMirror.ts).
     - Suggestions, hover, folding, signature help (⇧⌘Space, or once a space is typed and the typing pauses, while Settings… says),
       highlights of the word at the caret (off unless the editor asks), go to definition and type definition,
@@ -361,7 +393,7 @@ and in the app's build folder, `app/` at the app folder's root.
         and goes to the extension, which shows each failed check on its line (lsp's `spell/testDiagnostics`).
     - the `<spell-viewer>` web component, in `components/spell-viewer/`
       - built by `yarn build:element`, into `dist-element/`
-      - its page:  [spell-viewer.html](../../app/docs/spell-viewer.html), in App UI's docs
+      - its page:  `/components/app/spell-viewer`, in App UI's guide
   - Solid (P7), on `spell-ui`.
     - The runners import the Solid panes' FILES, never the `spell/app/app/solid` barrel (it pulls in the editor).
       - e.g. `spell/app/app/solid/ThingExplorer`, `.../ConsoleLines`, `.../loadUI`
@@ -377,7 +409,13 @@ and in the app's build folder, `app/` at the app folder's root.
     - The app loads it once (`editor.loadRuntime()`), and so does the VS Code runner.
     - Each `<spell-viewer>` loads its OWN copy (`loadRuntime()`).
       So apps on a page don't share a `core`.
+      - One that leaves the page hands its copy to the next (`RuntimeCopies`, epic `solid-2-final` P10):
+        the browser never lets go of a module, so a page swapping demos holds only as many as ever showed at once.
     - No import map:  `runCompiled()` links each program's imports.
+    - A program runs as a FUNCTION, not a module (`runProgram()`, epic `solid-2-final` P10):
+      a module per run, and per live edit, was never let go.
+      - The projects it imports and the code files it calls stay modules:  they're reused from run to run.
+      - Where the page forbids running text as code (VS Code's webview), it runs as a module still.
     - A recompile of the same program with an app on the page takes the edit as it runs ([LiveEdit](runner/LiveEdit.ts),
       epic `editor`, Edit Without Redraw):  the same elements and things, only what changed drawn again.
       - What it can't take (a type removed or renamed, a line at the top level) waits for Restart, and the editor says so
@@ -506,6 +544,9 @@ and in the app's build folder, `app/` at the app folder's root.
         - what the page server adds to the docs pages it serves (its `"pageScripts"`:
           [the kit's server AGENTS.md](../../../src/server/AGENTS.md)), so epic pages and guides colour spell (Q23)
         - it needs only the page's core, so any docs bundle will do
+        - left off a page whose spell the page server drew ahead (epic `solid-2-final` P15):  `SpellOnServer`,
+          the parser and `BubblyHtml` in the server's process, added by the app's drawing route module
+          (`spellDrawingRoutes.server.ts`), `replaces` it;  the kit's `SRV.Drawings`
     - Compiled spell's `<markdown>` blocks stay `<ui-markdown>` (marked):
       they're plain text in a drawing (`LayoutSpell.ts`, `MarkdownBlock`).
 - `<spell-reference-page>`:  a REFERENCE PAGE, made from its source each time, with a person's words about each thing
@@ -518,44 +559,37 @@ and in the app's build folder, `app/` at the app folder's root.
   - `editable`:  an option-click opens something's words;  the page around saves them (`spell-reference-edit`).
   - Built by `vite.code.config.ts`, as `<spell-code>` is:  `spell-reference-page.js`;  the Spell UI families it draws
     with come from the page (`DRAWN_FAMILIES`, `vite.shared.ts`).
-- `app/docs/` is App UI (epic `epic-workflow` P11):  the docs pages of the app's components, a COMPONENT SET.
-  - Served at `/components/app/`.
-  - Laid out as every set is since P18 of `people-and-orgs` (the root's `AGENTS.md`).
-  - ONE flat folder:
-    - a page per documented component, `<Name>.html` (the web components' `spell-viewer.html` ...)
-    - its home, `index.html`
-    - `__parts/` (the layout and footer, every page's frame) and `__data/`
-    - `_images/` (the pictures) and `_examples/` (snippets a page shows):
-      they aren't frame or data, so they keep one `_`
-  - Spell UI's page shape, on Spell UI's site bundle:  the page server lays its `_assets/` over the folder.
-    - the page server's `componentSets` setting, in the app folder's [package.json](../../package.json)
-  - Links are written as from the page's SERVED address (`/components/app/x.html`):
-    - `../../` is the checkout's root
-    - `../../ui/ui-button.html` is a Spell UI page
-    - the layout and footer, in `__parts/`, are one level deeper
-  - What it documents, and in which group:  [the hand-kept facts](../../app/docs/__data/pages.json5).
-  - Each page's props, attributes and "Used in" tables come from the code:  `yarn site:data`.
+- App UI is the guide to the app's components (epic `epic-workflow` P11):  a Spell guide since epic `editor` P44,
+  `@spell/guides/AppUI` (`app/spaces/@spell/guides/AppUI/`), as the Spell UI site is.
+  - A page per documented component, `MenuBar.spell`, its address the component's name (`/menu-bar`);  the site
+    file, `AppUI.spell`, says where each page is and which group lists it.
+  - Shown at `/components/app/` with no editor:  [app/docs/](../../app/docs/) holds the viewer page (the set's
+    `sitePage`), its data (`__data/`) and its pictures (`_images/`);  in the editor at `/run/@spell/guides/AppUI`.
+  - Its live examples (the web components, the runner's pieces) load `/element/spell.pack.js` from the guide's layout,
+    so they need `yarn build:element`.
+  - Each page's props, attributes and "Used in" tables come from the code:  `yarn site:data`, drawn by
+    `<ui-docs-api family="MenuBar">` from the data the viewer page names.
     - [The data builder](tools/AppUIDataBuilder.ts) reads, for each listed file:
       - its exported components with a banner (`### `<Name>``)
       - their props types ([ComponentSource](tools/ComponentSource.ts))
       - and every JSX use in the app
     - The web components and a view's element:  their vocabularies, by Spell UI's own builder.
-    - It writes the set's data, COMMITTED:  `components.json5` and `search.json5`, in `__data/`.
+    - It writes `components.json5`, in `__data/`, COMMITTED.
     - [Its test](../../tests/app/tools/AppUIDataBuilder.test.ts) fails while:
-      - they're stale
-      - a listed page is missing, or unlinked from the home
-      - its component's banner doesn't point at it
+      - it's stale
+      - a listed page isn't in the guide's site file
+      - its component's banner doesn't name its page's address (`/components/app/menu-bar`)
     - So rerun it after changing a documented component's banner, props or uses.
+    - What it documents, and in which group:  [the hand-kept facts](../../app/docs/__data/pages.json5).
   - Pictures, for what needs the whole editor around it:  `yarn site:pictures [name...]`.
     - headless screenshots of this checkout's running editor, into `app/docs/_images/` ([its script](../../app/scripts/site-pictures.ts))
     - Opening the editor compiles its project:  its `*.spell.js`, declarations and words go in `build/`,
       never committed, so nothing beside its source changes.
-  - Live examples (the web components, the runner's pieces) need `yarn build:element`:
-    the layout loads `/element/spell.pack.js`.
   - A new page:
     1. its entry in `pages.json5`, then `yarn site:data`
-    2. a copy of a page like it:  `Notice.html` for a picture, `spell-viewer.html` for a live one
-    3. linked from `index.html`
+    2. a copy of a page like it in the guide:  `Notice.spell` for a picture, `SpellViewer.spell` for a live one
+    3. its line in `AppUI.spell`, under its group
+  - Check the pages:  `yarn site:check --site app <page...> | --all`, in `ui/`.
 - `spellEditor/` is `<spell-editor>`'s pane:  the app's CodeMirror editor, as a web component.
   - `yarn build:element` => `spell-editor.js`
   - its demo:  `/demo/spell-editor.html`
@@ -607,7 +641,7 @@ and in the app's build folder, `app/` at the app folder's root.
     - typed by `SPACES.MeAnswer`
   - The name page ([NamePage.tsx](solid/NamePage.tsx), epic `repo-split` P27):  `index.tsx` reads who's at this machine
     (`/api/people/local`) before it draws anything, and asks their name first while nobody is, on this machine.
-  - `<spell-viewer>` loads only the light files, without the parser:
+  - `<spell-viewer>` and the run page load only the light files, without the parser:
     - `spell/app/spaces/models/projectGroups`, which registers spell's project groups
     - `spell/parser/spell/SpellSetup`
     - `spell/parser/spell/SpellUrls`

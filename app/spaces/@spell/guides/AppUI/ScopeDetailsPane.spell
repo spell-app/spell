@@ -1,0 +1,81 @@
+"scope details pane" is a notebook page
+	<header level="1">
+		ScopeDetailsPane
+		<header>The details of a scope picked in the Type Explorer: where it is, its members and docs.</>
+	</>
+
+	<text class="lede" paragraph>The right side of the <link target="src-packages-app-docs-typeexplorer-html" link="/type-explorer">Type Explorer</>, headed "Details": all there is to say about the scope picked in its tree. Where it is, its docstring, its members, its spell, and the javascript it compiled to.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the runners' debug pane, or reading its code</>
+		<item icon="play">Live: a real <text code>&lt;spell-viewer&gt;</>, its debug pane on the Type Explorer</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Solitaire's Type Explorer: the "Details" side, on the right of the pane under the game, IS this component. Click a scope in the tree, such as Card under Solitaire's Card.spell, then open its "Members", "Spell" or "Compiled Output".</>
+		<example "1. Example" description="Solitaire, its debug pane on the Type Explorer tab:  the Details side.">
+			<html>
+				<spell-viewer project="@spell/examples/Solitaire" toolbar debug="explorer" height="820px"></spell-viewer>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from the app's element build, which this set's pages load: <text code>/element/spell.pack.js</>. <link target="src-packages-app" link="/src/app/">The app package</> builds it with <text code>yarn build:element</>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Only the <link target="src-packages-app-docs-typeexplorer-html" link="/type-explorer">TypeExplorer</> draws it, made afresh each time a scope is picked:</>
+		<text paragraph>TypeExplorer.tsx · the Details side:</>
+		<markdown>
+			```typescript
+			<Show when={shown()} keyed>
+			  {(current) => (
+			    <ScopeDetailsPane
+			      node={trailTo(tree(), current.path)?.at(-1) ?? selected()}
+			      trail={trail().slice(1)}
+			      order={order()}
+			      openSections={openSections()}
+			      onToggleSection={toggleSection}
+			      onSelect={select}
+			      onOpen={(href) => props.onOpen(href)}
+			      onSaveDescription={props.readonly ? undefined : props.onSaveDescription}
+			      nodeFor={(path) => trailTo(tree(), path)?.at(-1)}
+			      detailsFor={detailsFor}
+			      load={load}
+			    />
+			  )}
+			</Show>
+			```
+		</>
+		<list bulleted>
+			<item>At its top, breadcrumbs of where the scope is in the tree: click one to pick it.</>
+			<item>Then its docstring, drawn as <link target="src-packages-app-docs-markdown-html" link="/markdown">Markdown</>. Click it to edit it, when the explorer can save it (in VS Code); never in a <text code>&lt;spell-viewer&gt;</>.</>
+			<item>Then its members: click one to pick it in the tree, or its arrow to show its own details right there. As declared, under one "Members" heading, or in alphabetical order, under "Properties", "Actions" and so on.</>
+			<item>Then "Spell", with where it's declared at the right (a link to open it), the rules its statement made, and "Compiled Output".</>
+			<item>Every heading starts closed, and stays open or closed alike for every scope: <text code>openSections</> and <text code>onToggleSection</> keep that in the explorer.</>
+			<item>Its details come in through <text code>detailsFor()</>, asked for with <text code>load()</> the first time they're shown: "Loading…" until then.</>
+			<item>A <link link="#SectionMarker">SectionMarker</> marks where each heading starts in a list in document order. The Type and Thing Explorers' trees use it too.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="ScopeDetailsPane"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-scopedetailspane-tsx" link="/src/app/solid/ScopeDetailsPane.tsx"><text title="src/app/solid/ScopeDetailsPane.tsx" code>ScopeDetailsPane.tsx</></>: the component and its props, what it draws inside, and <text code>SectionMarker</></>
+			<item><link target="src-packages-app-src-solid-typeexplorer-css" link="/src/app/solid/TypeExplorer.css"><text title="src/app/solid/TypeExplorer.css" code>TypeExplorer.css</></>: its look, the Type Explorer's</>
+			<item>Its tests, with the Type Explorer's: <link target="src-tests-app-src-solid-typeexplorer-browser-test-tsx" link="/tests/app/solid/TypeExplorer.browser.test.tsx"><text title="tests/app/solid/TypeExplorer.browser.test.tsx" code>TypeExplorer.browser.test.tsx</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

@@ -9,6 +9,7 @@ import { PerfBuilds } from "./PerfBuilds"
 import { PerfResults } from "./PerfResults"
 import { LoadMeasure } from "./LoadMeasure"
 import { LeaksMeasure } from "./LeaksMeasure"
+import { HugeListsMeasure } from "./HugeListsMeasure"
 import { TypingMeasure } from "./TypingMeasure"
 import { A11yMeasure } from "./A11yMeasure"
 import { ListenersMeasure } from "./ListenersMeasure"
@@ -63,7 +64,7 @@ export class PerfRun {
     const busyAtStart = this.machine.isBusy
     if (busyAtStart) this.say(`BUSY MACHINE:  1-minute load ${before.load[0]}:  times will be noisy`)
     const started = new Date()
-    const builds = new PerfBuilds(join(this.kitRoot, "app", "app"))
+    const builds = new PerfBuilds(join(this.kitRoot, "app", "app"), { https: options.https })
     const data: PerfRecord["data"] = {}
     let chromeVersion = ""
     try {
@@ -146,6 +147,11 @@ export class PerfRun {
         await step("leaks", `${page}/${profile}`, () => LeaksMeasure.measure(page, profile, on))
       }
     }
+    // huge lists are put on the docs page, which defines both:  on the phone when it's asked for
+    if (steps.includes("lists") && pages.includes("docs")) {
+      const profile: PerfProfileName = profiles.includes("phone") ? "phone" : firstProfile
+      await step("lists", `docs/${profile}`, () => HugeListsMeasure.measure("docs", profile, on))
+    }
     if (steps.includes("typing") && pages.includes("editor")) {
       for (const profile of [...new Set(profiles.map(forEditor))])
         await step("typing", profile, () => TypingMeasure.measure(profile, on))
@@ -176,7 +182,8 @@ export class PerfRun {
     if (!needsEditor) return { editor: { editor: "", pageServer } }
     this.say("Building the editor into a temporary folder ...")
     const editor = await builds.serve(builds.build("editor"), pagePort)
-    return { editor: { editor, pageServer } }
+    const trustedKey = builds.trustedKey
+    return { editor: { editor, pageServer, ...(trustedKey && { trustedKey }) } }
   }
 
   /** The speed test's editing pipeline, `spell speedtest --pipeline --json`:  its medians. */

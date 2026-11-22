@@ -194,6 +194,7 @@ export class JSWriter extends ProgramWriter {
   }
 
   ASTExpressionWithComment(node: P.ASTExpressionWithComment): string {
+    if (this.leavesOut(node.comment)) return String(this.write(node.expression))
     return `${this.write(node.expression)} ${this.write(node.comment)}`
   }
 
@@ -1155,7 +1156,7 @@ export class JSWriter extends ProgramWriter {
     // where the doc comment right above the next statement starts, in `lines`
     let docStart = 0
     for (const statement of flattened(node)) {
-      if (this.project.moved.has(statement)) continue
+      if (this.project.moved.has(statement) || this.leavesOut(statement)) continue
       // one blank line at most, none at the start:  where a member moved out, two would meet
       if (statement instanceof P.ASTBlankLine) {
         if (lines.length && lines.at(-1) !== "") lines.push("")
@@ -1188,6 +1189,21 @@ export class JSWriter extends ProgramWriter {
     return elseOnItsLine(lines.join(jsText.NEWLINE))
   }
 
+  /**
+   * Does a built site's code leave `statement` out (`isBuilt`)?
+   * - Its comments, docstrings and banners, and a heading's `core.heading()`:  text for the editor alone.
+   * - Never a `/*! ... *\/` comment (a declaration's marker, data) or a parse error's annotation.
+   */
+  leavesOut(statement: P.ASTNode): boolean {
+    if (!this.isBuilt) return false
+    if (statement instanceof P.ASTHeadingInvocation) return true
+    return (
+      statement instanceof P.ASTComment &&
+      !(statement instanceof P.ASTPreservedComment) &&
+      !(statement instanceof P.ASTParserAnnotation)
+    )
+  }
+
   /** What goes above class `node`, above its docstring:  javascript has nothing -- see `TSWriter`. */
   classPrefix(node: P.ASTClassDeclaration): string {
     return ""
@@ -1199,7 +1215,7 @@ export class JSWriter extends ProgramWriter {
    * - Its new variables are its own, see `inBlock()`.
    */
   ASTStatementBlock(node: P.ASTStatementBlock): string {
-    const statements = [...(node.statements ?? [])]
+    const statements = (node.statements ?? []).filter((statement) => !this.leavesOut(statement))
     while (statements[0] instanceof P.ASTBlankLine) statements.shift()
     while (statements.at(-1) instanceof P.ASTBlankLine) statements.pop()
     for (const statement of statements) this.statements.add(statement)
@@ -1392,7 +1408,8 @@ export class JSWriter extends ProgramWriter {
    * - NOTE: indents its members' non-blank lines only -- `jsText.Block()` would leave a tab on blank ones.
    */
   protected classDeclaration(node: P.ASTClassDeclaration): string {
-    const { type, superType, members } = node
+    const { type, superType } = node
+    const members = this.keptMembers(node.members)
     const superDeclarator = superType ? `extends ${this.superTypeOf(node)} ` : ""
     const declaration = `export class ${this.typeNameOf(type.name)} ${superDeclarator}`
     // our own class of an imported one is the one its library makes, from the start (`core.classToMake()`)
@@ -1409,6 +1426,14 @@ export class JSWriter extends ProgramWriter {
       .map((line) => (line ? `${jsText.INDENT}${line}` : line))
       .join(jsText.NEWLINE)
     return `${declaration}${jsText.LEFT_CURLY}${jsText.NEWLINE}${body}${jsText.NEWLINE}${jsText.RIGHT_CURLY}`
+  }
+
+  /** `members`, less what a built site leaves out (`leavesOut()`), and a blank line left after another. */
+  private keptMembers(members: P.ASTNode[] | undefined): P.ASTNode[] | undefined {
+    if (!members || !this.isBuilt) return members
+    return members
+      .filter((member) => !this.leavesOut(member))
+      .filter((member, index, kept) => !(member instanceof P.ASTBlankLine && kept[index - 1] instanceof P.ASTBlankLine))
   }
 
   /**
@@ -1500,6 +1525,7 @@ export class JSWriter extends ProgramWriter {
    * - `undefined` when there's none.
    */
   spellComment(node: P.ASTNode): string | undefined {
+    if (this.isBuilt) return undefined
     const spell = this.spellOf(node)
     return (
       spell &&
@@ -1599,7 +1625,7 @@ export class JSWriter extends ProgramWriter {
   /**
    * `declaredAt: {...}`, where `node`, a saved type's property, is declared:  for the editor's side bar (epic `data` P12, J3).
    * - Worked out each time it's written:  a memoized tree keeps a line's old offsets when an edit above it moves it.
-   * - `undefined` for a type that isn't saved, or a line from no file.
+   * - `undefined` for a type that isn't saved, a line from no file, or a built site's code (`isBuilt`).
    */
   declaredAtOf(node: P.ASTClassMember): string | undefined {
     if (!this.reads?.savedTypeFor(node.typeName)) return undefined
@@ -1608,6 +1634,8 @@ export class JSWriter extends ProgramWriter {
 
   /** `declaredAt: {...}` for `node`'s line:  `undefined` for one from no file. */
   private lineOf(node: P.ASTNode): string | undefined {
+    // for the editor's side bar alone
+    if (this.isBuilt) return undefined
     const { match } = node
     const path = match?.getScopeOfType(P.FileScope)?.path
     const { start, end } = match ?? {}

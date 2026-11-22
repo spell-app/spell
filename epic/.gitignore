@@ -24,3 +24,22 @@ __screenshots__/
 
 # `spell map`'s map of this repo (graphify's, epic coherence P1):  rebuilt on demand, never committed
 graphify-out/
+
+# Built where they're served, never committed (epic `solid-2-final` P7):  the page server builds them when stale
+# (`spell bundle epics-pack epic-docs`), `spell publish` into the published plugin
+# - the docs pages' scripts (`node src/tools/bundle-spell-ui.js`):  the docs bundle's folder, and the scripts that run
+#   beside it;  the folders the build before P7 wrote (`emoji/`, `lazy/`), and a build's own folder while it runs
+/src/tools/_assets/spell-ui/
+/src/tools/_assets/spell-comments.js
+/src/tools/_assets/commands.js
+/src/tools/_assets/core-reference.js
+/src/tools/_assets/spell-syntax.js
+/src/tools/_assets/emoji/
+/src/tools/_assets/lazy/
+/src/tools/_assets/.*-building-*/
+# - the epics pack's script and its families' modules (`yarn pack:build`), and its build record;  its catalog and
+#   entry stay committed
+/src/components/__pack/epics.pack.js
+/src/components/__pack/epics/
+/src/components/__pack/epics.building-*/
+/src/components/__pack/.bundle.json

@@ -1,3 +1,6 @@
+// Import directly:  a leaf with no imports, where Spell UI's barrel would load every component
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
+
 /**
  * The pages and profiles `spell perf run` measures, and the shapes of what it keeps (epic `solid-2-final` P1).
  * - Taken from the research scripts that made the first numbers (the epic's `research/perf-scripts/`), as they were.
@@ -14,8 +17,12 @@ export const PERF_PAGE_NAMES = ["editor", "docs", "epic", "run"] as const
 /** One of `PERF_PAGE_NAMES`. */
 export type PerfPageName = (typeof PERF_PAGE_NAMES)[number]
 
-/** Where a page's addresses start:  the editor build being measured, and the page server. */
-export type PerfServers = { editor: string; pageServer: string }
+/**
+ * Where a page's addresses start:  the editor build being measured, and the page server.
+ * - `trustedKey`:  with `--https`, the editor build's throwaway certificate's key (its SPKI hash), which Chromium
+ *   is told to trust:  so it speaks HTTP/2 and caches as it would with a trusted certificate
+ */
+export type PerfServers = { editor: string; pageServer: string; trustedKey?: string }
 
 /**
  * A page measured.
@@ -63,7 +70,8 @@ export const PERF_PAGES: Record<PerfPageName, PerfPage> = {
   },
   docs: {
     name: "docs",
-    url: ({ pageServer }) => `${pageServer}/components/ui/kitchen-sink.html`,
+    // the Spell UI site's Kitchen Sink page, every component on one page
+    url: ({ pageServer }) => `${pageServer}${SpellUIGuide.addressOf("/kitchen-sink")}`,
     ready: `() => document.readyState === "complete" && ${ALL_DEFINED}`
   },
   epic: {
@@ -140,7 +148,17 @@ export const PERF_PROFILES: Record<PerfProfileName, PerfProfile> = {
 ////////////////
 
 /** The measurements a run can take:  `load` by default, every one with `--full`. */
-export const PERF_STEPS = ["load", "leaks", "typing", "a11y", "listeners", "sheets", "cpu", "pipeline"] as const
+export const PERF_STEPS = [
+  "load",
+  "leaks",
+  "lists",
+  "typing",
+  "a11y",
+  "listeners",
+  "sheets",
+  "cpu",
+  "pipeline"
+] as const
 
 /** One of `PERF_STEPS`. */
 export type PerfStep = (typeof PERF_STEPS)[number]
@@ -152,6 +170,7 @@ export type PerfStep = (typeof PERF_STEPS)[number]
  * - `waitMinutes`:  how long to wait for a quiet machine;  `force`:  don't
  * - `out`:  write there instead of the dated file
  * - `baseline`:  `save`, this run is the new baseline too
+ * - `https`:  the editor build served over HTTPS, so HTTP/2, with a throwaway certificate (epic `solid-2-final` P14)
  */
 export type PerfRunOptions = {
   pages: PerfPageName[]
@@ -162,6 +181,7 @@ export type PerfRunOptions = {
   force: boolean
   out?: string
   baseline?: "save"
+  https?: boolean
 }
 
 /** The machine as a run saw it:  load averages, memory, the CPUs. */

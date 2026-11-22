@@ -7,6 +7,9 @@ import { PY } from "spell/parser/py"
 import { core } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
 
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
+
 /**
  * The spell syntax table of one human language:  every rule class of the base spell language, what it's for,
  * each syntax it's registered with in that language, and what an example of each compiles to in each writer.

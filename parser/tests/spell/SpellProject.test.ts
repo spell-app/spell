@@ -1,5 +1,6 @@
-import { describe, test, expect } from "vite-plus/test"
+import { afterEach, describe, test, expect } from "vite-plus/test"
 
+import { LoadableFile } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
@@ -92,5 +93,57 @@ describe("getFileForPath():  a file's kind is the END of its name", () => {
   test("CSS, and property editor pages", () => {
     expect(fileNamed("theme.dark.css")).toBeInstanceOf(SP.SpellCSSFile)
     expect(fileNamed(`Card${SP.EDITOR_PAGE_SUFFIX}`)).toBeInstanceOf(SP.SpellJSFile)
+  })
+})
+
+/**
+ * What a compile saves (epic `solid-2-final` P9):  `save: "later"` sends nothing till `saveUnsavedOutput()`,
+ * and a built file is sent only when its text changed since we last sent it.
+ */
+describe("saving what a compile wrote", () => {
+  const realFetch = LoadableFile.fetch
+  afterEach(() => {
+    LoadableFile.fetch = realFetch
+  })
+
+  /** A project with output written as a compile would, and every url saving it sends. */
+  function compiledProject(projectName: string) {
+    const project = new SP.SpellProject(`@spell/test/${projectName}`)
+    project.contents = { manifest: {}, imports: [] }
+    project.outputFile.contents = "export const one = 1\n"
+    project.declarationsFile.contents = "{}"
+    const sent: string[] = []
+    LoadableFile.fetch = (async ({ url }: { url: string }) => {
+      sent.push(url.split("/").at(-1)!)
+      return ""
+    }) as unknown as typeof LoadableFile.fetch
+    return { project, sent }
+  }
+
+  test('`save: "later"`:  nothing sent, till `saveUnsavedOutput()`;  then once', async () => {
+    const { project, sent } = compiledProject("LaterSaves")
+    project.saveCompiled = "later"
+    await project.saveOutput()
+    expect(sent).toEqual([])
+    expect(project.hasUnsavedOutput).toBe(true)
+    await project.saveUnsavedOutput()
+    expect(sent.sort()).toEqual(["LaterSaves.declarations.json5", "LaterSaves.en.js", "LaterSaves.spell.js"])
+    expect(project.hasUnsavedOutput).toBe(false)
+    sent.length = 0
+    await project.saveUnsavedOutput()
+    expect(sent).toEqual([])
+  })
+
+  test("a built file whose text hasn't changed isn't sent again", async () => {
+    const { project, sent } = compiledProject("ChangedSaves")
+    project.saveCompiled = true
+    await project.saveOutput()
+    expect(sent.length).toBe(3)
+    sent.length = 0
+    await project.saveOutput()
+    expect(sent).toEqual([])
+    project.outputFile.contents = "export const one = 2\n"
+    await project.saveOutput()
+    expect(sent).toEqual(["ChangedSaves.spell.js"])
   })
 })

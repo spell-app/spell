@@ -36,6 +36,8 @@ import { afterAll, beforeAll, describe, test, expect } from "vite-plus/test"
  * - And `spell-runtime.js` draws with the page's one Solid (epic `output-targets` P10):
  *   - it imports Solid and `h` through `spell-solid-shared.js`, bundles none of its own, and never loads `ui`
  *   - it exports that same `h`:  what compiled javascript draws with (P20)
+ * - ONE grammar (spell's parser and rules) for a layout's spell and `<spell-code>`'s colours, `spell-grammar.js`
+ *   (`sharedGrammar()`, `vite.element.config.ts`);  `<spell-editor>` keeps its own.
  * - CodeMirror only in `<spell-editor>`'s lazy chunk:  the parser compiles, and apps run, before it loads.
  * - Icon packs beside the chunk holding `BuiltInPacks`, where it looks -- complete enough for every Fomantic name.
  * - Every bundle MUST parse:  a build can succeed and still write javascript no browser runs --
@@ -132,6 +134,23 @@ describe("runner builds", () => {
     )
     expect(readFileSync(join(element, "spell-app.css"), "utf8")).not.toMatch(CODE_EDITOR_CSS)
     expect(existsSync(join(element, "core.scopes.js"))).toBe(true)
+  })
+
+  test("a cloud app loads no compiler before its program runs:  no parser writer, grammar or tokenizer up front", () => {
+    // what `<spell-viewer>` and its runtime load before any `import()`:  a cloud app runs what the server compiled
+    // (epic `solid-2-final` P12:  `spell-shared.js` once held the parser a layout's spell lazily compiles with)
+    const upFront = new Set([
+      ...staticImports(element, "spell-viewer.js"),
+      ...staticImports(element, "spell-runtime.js")
+    ])
+    const held = [...upFront].flatMap((file) =>
+      sources(element, file)
+        .filter((source) => PARSER.test(source) || WHOLE_LODASH.test(source))
+        .map((source) => `${file}:  ${source.replace(/^.*\/(parser|node_modules)\//, "$1/")}`)
+    )
+    expect(held).toEqual([])
+    // and the parser IS built, lazily, for a layout's spell (`LayoutSpell.js`)
+    expect(chunks(element).some((file) => sources(element, file).some((source) => PARSER.test(source)))).toBe(true)
   })
 
   test("<spell-editor>:  CodeMirror loaded lazily, in its own chunk, no worker;  its own CSS", () => {
@@ -263,6 +282,24 @@ describe("runner builds", () => {
     expect(readFileSync(join(element, "spell-ui.js"), "utf8")).toMatch(/SpellUI\b[^;]*registerPack/)
   })
 
+  test("one grammar for a layout's spell and `<spell-code>`'s colours:  `spell-grammar.js`'s;  `<spell-editor>` keeps its own", () => {
+    // spell's rules, in every chunk but the editor's own (its language service watches its projects through its own
+    // `spell/util`):  ONE chunk, which `spell-grammar.js` imports (epic `solid-2-final` P11)
+    const holding = (pattern: RegExp) =>
+      chunks(element).filter(
+        (file) => !file.startsWith("spell-editor") && sources(element, file).some((source) => pattern.test(source))
+      )
+    const withRules = holding(SPELL_RULES)
+    expect(withRules).toHaveLength(1)
+    expect(staticImports(element, "spell-grammar.js")).toContain(withRules[0])
+    // Spanish's registrations:  one chunk too, which nothing loads up front (`SP.Language.loadsOnFirstUse()`)
+    const spanish = holding(SPANISH_RULES)
+    expect(spanish).toHaveLength(1)
+    expect(staticImports(element, "spell-grammar.js")).not.toContain(spanish[0])
+    // a layout's spell imports it by its name, from the code build;  it bundles no rule of its own
+    expect(staticImports(element, "LayoutSpell.js")).toContain("spell-grammar.js")
+  })
+
   test("<spell-code> and <spell-markdown>:  Spell UI's families through `spell-ui-shared.js`;  `spell-language.js` imports none of it up front", () => {
     for (const entry of ["spell-code.js", "spell-markdown.js", "spell-reference-page.js"]) {
       const files = staticImports(element, entry)
@@ -349,13 +386,30 @@ const PACKAGES = {
   solid: /\/node_modules\/(solid-js|@solidjs\/(web|signals))\//,
   // its generated data and the built-in sounds' names aside, plain tables bundled where they're read
   // (`vite.shared.ts`'s `UI_DATA`);  and its plain-DOM leaves, bundled the same way (`BUNDLED_UI_LEAVES`:  a desktop
-  // drop's reading, epic `language` P67;  the theme tree a site's own theme is built with, I36)
-  ui: /\/ui\/src\/(?!.*\.generated\.ts$|sounds\/|components\/ui-uploader\/DroppedFiles\.ts$|components\/ui-theme-editor\/ThemeTokens\.ts$|styles\/(ThemeFile|styles\.en)\.ts$)/,
+  // drop's reading, epic `language` P67;  the theme tree a site's own theme is built with, I36;  where the Spell UI site
+  // is, epic `editor` P43)
+  ui: /\/ui\/src\/(?!.*\.generated\.ts$|sounds\/|components\/ui-uploader\/DroppedFiles\.ts$|components\/ui-theme-editor\/ThemeTokens\.ts$|styles\/(ThemeFile|styles\.en)\.ts$|util\/SpellUIGuide\.ts$)/,
   codemirror: /\/node_modules\/@codemirror\//
 }
 
 /** The code editor's CSS:  the bubbly look's in CodeMirror, `bubbly.css` and `codemirror.css`. */
 const CODE_EDITOR_CSS = /\.cmb-editor/
+
+/** The parser:  its rules, its writers (but `SourceMarks`, a program's source map), its tokenizer, and spell's grammar. */
+/** A grammar rule's module, `parser/src/spell/rules/...`, but Spanish's registrations:  in the one grammar chunk only. */
+const SPELL_RULES = /\/parser\/src\/spell\/rules\/.*(?<!\.es)\.ts$/
+
+/** Spanish's registrations of the rules, `<module>.es.ts`:  loaded on first use (epic `solid-2-final` P11). */
+const SPANISH_RULES = /\/parser\/src\/spell\/rules\/.*\.es\.ts$/
+
+const PARSER =
+  /\/parser\/src\/(parser\/(rules|writers\/(?!SourceMarks)|tokenizer\/(?!.*\.types)|Parser\.ts)|spell\/rules\/)/
+
+/**
+ * The whole of lodash, `import * as _ from "lodash-es"` (or CommonJS lodash's `lodash.js`):
+ * the core names what it imports from `lodash-es`, which leaves the rest out (epic `solid-2-final` P11).
+ */
+const WHOLE_LODASH = /\/node_modules\/lodash(-es)?\/lodash(\.default)?\.js$/
 
 /** The core's own module, which makes `core`:  only `spell-runtime.js` may hold it. */
 const CORE_MODULE = /\/parser\/src\/core\/core\.ts$/

@@ -140,6 +140,11 @@ export type ServerInfo = {
    * (`--spaces`), whose record is its own (`PidFile.forPageServer()`)
    */
   spaces?: string
+  /**
+   * its HTTPS address, for people's browsers, once this machine trusts its certificate (`SRV.LocalCertificate`):
+   * `https://localhost:4747`;  the same port still answers plain HTTP, which the tools use (epic `solid-2-final` P14)
+   */
+  https?: string
 }
 
 ////////////////
@@ -161,7 +166,8 @@ export type LinkResult = {
  * - `from` / `to`:  as written, and as written now (`to` is `""` for a dropped `<spell-site-header root>`)
  * - `kind`:
  *   - `rooted`:  the root path of the file it reached
- *   - `mended`:  it reached nothing, and a move's one new home was found (`spell-lang/` is `parser/` ...)
+ *   - `mended`:  it reached nothing, and a move's one new home was found (`spell-lang/` is `parser/` ...);
+ *     or it's a link to a site's old page (`Linker`'s `sites`), a root path too, at the page's address now
  *   - `broken`:  it reaches nothing, then or now:  written as the browser reads it, for a person to fix
  *   - `dropped`:  a `<spell-site-header root>`, which only served pages opened from disk
  *   - `outside`:  it climbs above the root:  left as written
@@ -170,6 +176,24 @@ export type RootLinkChange = {
   from: string
   to: string
   kind: "rooted" | "mended" | "broken" | "dropped" | "outside"
+}
+
+/**
+ * A site the page server shows at an address with NO FILE per page, `Linker`'s `sites`:
+ * the Spell UI site, a Spell site in a viewer at `/components/ui/` (epic `editor` P43).
+ * - Its pages' addresses (`/components/ui/button`) check as found, file or none.
+ * - A link written for its old pages (`/components/ui/ui-button.html`) is mended to its page's address.
+ * - Handed in by whoever makes the linker (the epic tools:  spell-epic's `ServedFolders.sites`):
+ *   the kit knows no site's pages.
+ */
+export type LinkSite = {
+  /** its address on the page server, with no `/` at its end:  `/components/ui` */
+  address: string
+  /**
+   * the address a link to one of its old pages is now, its `?query` and `#hash` kept
+   * (`/components/ui/ui-button.html#api` => `/components/ui/button#api`);  `undefined`:  not one of them
+   */
+  mendedPath(path: string): string | undefined
 }
 
 /** What `Linker.rootLinks()` did to a page's text. */
@@ -202,7 +226,8 @@ export type LinkCheck = {
  *   - Why not committed:  its chunk names carry content hashes,
  *     so every Spell UI change deleted and re-added most of its files in every diff and merge
  *     (Owen, epic `epic-components`, 2026-10-07)
- * - a committed one (epic `epic-engine` P54):  Spell UI's root catalog, the epics pack, spell-epic's docs bundle
+ * - a committed one (epic `epic-engine` P54):  Spell UI's root catalog (the epics pack and the docs bundle until epic
+ *   `solid-2-final` P7)
  */
 export type BundleSpec = {
   /** what the command line calls it, e.g. `ui-site` */
@@ -393,10 +418,9 @@ export const BUNDLES: BundleSpec[] = [
     package: "spell-epic",
     cwd: ".",
     run: ["yarn", "pack:build"],
-    check: ["yarn", "pack:check"],
     output: "src/components/__pack",
     entry: "epics.pack.js",
-    committed: true,
+    // its catalog and entry (committed), its script and its families' chunks (`epics/`), and Epic UI's data
     generated: ["src/components/__pack", "src/docs/__data"],
     sources: [...EPIC_SOURCES, "spell/src/element-tools"]
   },
@@ -406,11 +430,12 @@ export const BUNDLES: BundleSpec[] = [
     package: "spell-epic",
     cwd: ".",
     run: ["node", "src/tools/bundle-spell-ui.js"],
-    output: "src/tools/_assets",
-    entry: "spell-ui.js",
-    committed: true,
+    output: "src/tools/_assets/spell-ui",
+    entry: "main.js",
+    // what its build writes beside its sources, in `_assets/`:  the docs bundle's folder (`spell-ui/`), the scripts
+    // beside the page's Spell UI, and the folders of the build before epic `solid-2-final` P7 (`emoji/`, `lazy/`)
     generated: [
-      "src/tools/_assets/spell-ui.js",
+      "src/tools/_assets/spell-ui",
       "src/tools/_assets/spell-comments.js",
       "src/tools/_assets/commands.js",
       "src/tools/_assets/core-reference.js",
@@ -421,6 +446,84 @@ export const BUNDLES: BundleSpec[] = [
     sources: EPIC_SOURCES
   }
 ]
+
+////////////////
+// ## Drawings
+////////////////
+
+/**
+ * Something a page shows that a DRAWER can draw ahead, on the server (`SRV.Drawings`):
+ * a diagram's text, a block of code, and what it's drawn with.
+ * - `kind`:  what draws it in a page, the drawer's `kind`:  `mermaid`, `code`
+ * - `settings`:  JSON, everything the drawing depends on besides the text (`{ language: "js", drawing: true }`)
+ * - `text`:  as the element reads it
+ * - `hints`:  what a page that asks for it knows that the server can't, NOT part of its key:
+ *   `<ui-mermaid-diagram>`'s Mermaid settings, its colours read from the page's tokens
+ * - Its KEY names it in a page and on the server alike:  `Drawings.keyFor()`, a hash of the first three.
+ */
+export type DrawingItem = {
+  readonly kind: string
+  readonly settings: Readonly<Record<string, unknown>>
+  readonly text: string
+  readonly hints?: Readonly<Record<string, unknown>>
+}
+
+/**
+ * A finished drawing:  `markup` (an SVG, coloured code), and what else the element needs to show it.
+ * - `sheet`:  the CSS it's drawn in, when the element doesn't have it (spell's bubbly look)
+ * - `data`:  anything else the element reads, JSON (`{ diagramType }`, `{ language, detected }`)
+ */
+export type Drawing = {
+  markup: string
+  sheet?: string
+  data?: Record<string, unknown>
+}
+
+/**
+ * A DRAWER:  one way to draw a kind of item ahead, on the server, which a folder hands the page server
+ * (`RouteContext.drawings.add()`, from its route module).
+ * - `kind`:  the items it draws, `mermaid`, `code`;  several may draw one kind (`takes()`), the one added last asked
+ *   first
+ * - `name`:  its own, a folder name:  its cache's folder (`~/.spell/cache/drawings/<name>/`)
+ * - `version`:  what it draws with now, e.g. its code's hash:  a new one starts its cache empty;  asked at each
+ *   read and write, so it may change while the server runs
+ * - `takes(item)`:  does it draw this one?  none:  every item of its kind
+ * - `find(page)`:  the items a page's HTML holds, as the page's elements will read them (none:  it finds none);
+ *   a page server fills in each one it has drawn already (`Drawings.fill()`)
+ * - `draw(item)`:  the drawing;  `undefined` when it can't (a page then draws it itself)
+ * - `replaces`:  URLs of page scripts (`"pageScripts"`) only there to draw what it draws:  a page whose items it
+ *   takes are ALL filled in doesn't get them (spell's `/element/spell-language.js`)
+ * - `stop()`:  when the page server stops, e.g. to close its browser
+ */
+export type Drawer = {
+  readonly kind: string
+  readonly name: string
+  readonly version: string
+  takes?(item: DrawingItem): boolean
+  find?(page: string): DrawingItem[]
+  draw(item: DrawingItem): Promise<Drawing | undefined>
+  readonly replaces?: readonly string[]
+  stop?(): unknown
+}
+
+/**
+ * The table of drawings a page server puts in a page it fills in (`Drawings.fill()`), as JSON in a
+ * `<script type="application/json" data-spell-drawings>`.
+ * - `drawings`:  each by its key;  its `sheet` is a key of `sheets`, so a sheet many share is in the page once
+ * - `sheets`:  each sheet by its key (`textHash()` of it)
+ */
+export type DrawingsTable = {
+  drawings: Record<string, Omit<Drawing, "sheet"> & { sheet?: string }>
+  sheets: Record<string, string>
+}
+
+/**
+ * What a page is told of the drawings, as `SPELL_SERVER.drawings` (`Drawings.pageConfig()`).
+ * - `api`:  `POST <api>/<kind>`, `{ text, settings }`:  a `Drawing`, or 204 when none came in time
+ * - `kinds`:  the kinds it draws
+ * - `table`:  the selector of a page's tables (`DrawingsTable`)
+ */
+export type DrawingsConfig = { api: string; kinds: string[]; table: string }
 
 ////////////////
 // ## Errors

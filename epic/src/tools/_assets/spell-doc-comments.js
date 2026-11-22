@@ -53,6 +53,7 @@ import {
   growField,
   noteToast,
   readJSON,
+  whenAttached,
   writeJSON
 } from "./spell-doc-helpers.js"
 
@@ -706,8 +707,8 @@ class PageComments {
     const showing = new Set()
     if (!this.send || this.send.byPage || !this.main.querySelector("epic-text-box")) return showing
     // its `value` is the element's own, once the epics pack defines it:  set before, it would hide that for good
-    if (!customElements.get("epic-text-box")) {
-      this.boxesDefined ??= customElements.whenDefined("epic-text-box").then(() => this.draw())
+    if (!customElements.get("epic-text-box")?.isAttached?.("epic-text-box")) {
+      this.boxesDefined ??= whenAttached("epic-text-box").then(() => this.draw())
       return showing
     }
     for (const [box, note] of this.noteBoxes)
@@ -2237,7 +2238,7 @@ export function holdFocusIn(pane, field) {
 
 /** Resolves once `element` (one of the pack's) is defined and has drawn.  NEVER rejects. */
 async function drawn(element) {
-  await customElements.whenDefined(element.localName)
+  await whenAttached(element.localName)
   await element.ready?.catch(() => undefined)
 }
 

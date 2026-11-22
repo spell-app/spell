@@ -15,7 +15,7 @@ import { nextFrame } from "spell/util/dom"
 import { clamp } from "spell/util/number"
 import { withoutAccents } from "spell/util/string"
 import { commentsOnPage, firstWords } from "./spell-doc-comments.js"
-import { FIELDS, el } from "./spell-doc-helpers.js"
+import { FIELDS, el, whenAttached } from "./spell-doc-helpers.js"
 import { ThreadFacts } from "spell/epic/comments"
 
 ////////////////
@@ -497,8 +497,7 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
   modal.visible = true
   // the input once the dialog has drawn:  `autofocus` alone loses to the dialog's own focus on some opens;  an element
   // the page's root loads (Epic UI's) draws a frame or two later
-  void customElements
-    .whenDefined("ui-modal")
+  void whenAttached("ui-modal")
     .then(() => {
       modal.visible = true
       return nextFrame(2)

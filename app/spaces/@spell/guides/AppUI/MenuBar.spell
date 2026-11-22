@@ -1,0 +1,52 @@
+"menu bar" is a notebook page
+	<header level="1">
+		MenuBar
+		<header>The top bar's menus: Spell's, listing the group's projects, then the project's, File, Edit, View, Run and Help.</>
+	</>
+
+	<text class="lede" paragraph>The menus along the editor's top bar. The first, the Spell menu, is how you move between projects: it lists every project of the group the open one is in (the Examples, or the Guides), the one shown ticked.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or reading its code</>
+		<item icon="image">A picture, not live: it needs the whole editor around it</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The Spell menu open over the Solitaire example:</>
+		<image src="/components/app/_images/MenuBar.png" alt="The Spell menu open: Home and About Spell, then every example in columns, Solitaire ticked, and New Example last" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The editor page draws them in its top bar, each in a slot of the editor's own Spell:</>
+		<list bulleted>
+			<item><text code>&lt;SpellBarMenu&gt;</>: the Spell menu. Home and About Spell at its top, then the project list (<text code>&lt;ProjectsMenu&gt;</>, inside the same file), in columns of 10 when there are more, New Example last. In Run, the project chosen opens in Run.</>
+			<item><text code>&lt;ProjectBarMenu&gt;</>: the open project's own menu, under its name, with its Theme items.</>
+			<item><text code>&lt;AppBarMenus&gt;</>: File, Edit, View, Run and Help, folded into one menu when the window is narrow.</>
+			<item>The project list reads its group through <text code>trackProjectRoot()</>, and opens one with <text code>openProject()</>: the landing page's cards read the same.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="MenuBar"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-menubar-tsx" link="/src/app/solid/MenuBar.tsx"><text title="src/app/solid/MenuBar.tsx" code>MenuBar.tsx</></>: the menus, and the Spell menu's project list</>
+			<item><link target="src-packages-app-src-solid-menubar-css" link="/src/app/solid/MenuBar.css"><text title="src/app/solid/MenuBar.css" code>MenuBar.css</></>: its look</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-16 against branch <ui-text code>codemirror</>.</>
+		</>
+	</>

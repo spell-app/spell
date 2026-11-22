@@ -456,18 +456,20 @@ sequenceDiagram
   root->>page: 6 · all settled:  ui-ready, the content shows
 ```
 
-_A pack is one classic script:  it brings its own elements, and borrows Solid and the framework from the page._
+_A pack is one classic script and a module per family:  it brings its own elements, and borrows Solid and the framework from the page._
 
 Making a package a pack takes one key in its `package.json`.
 spell-epic's is `"spellPack": { "name": "epics", "prefix": "epic-", "dir": "src" }`:
 - `prefix` is required, and every tag starts with it;  `name` is the folder's name unless it says otherwise.
 - `dir`:  where its `components/` and `docs/` are, and its code, when that isn't the package's root.
 
-`spell-pack build` then reads every vocabulary in the families' folder, and writes three files into its `__pack/`:
+`spell-pack build` then reads every vocabulary in the families' folder, and writes into its `__pack/`:
 the catalog `<ui-root>` reads (`<pack>.catalog.ts`, each tag's family and skeleton),
-the entry that registers it (`<pack>.entry.ts`, one `SpellUI.registerPack({ name, prefix, catalog, define })`),
-and that entry built as one minified classic script, `<pack>.pack.js`, which works from `file://` too.
-The set's docs data comes after;  `spell-pack check` exits 1 while any of it is stale.
+the entry that registers it (`<pack>.entry.ts`, one `SpellUI.registerPack({ name, prefix, catalog, loadFamily, define })`),
+that entry built as one minified classic script, `<pack>.pack.js`,
+and each family as an ES module beside it, `<pack>/<family>.js`, loaded the first time a page needs it.
+The set's docs data comes after;  `spell-pack check` exits 1 while what it commits is stale
+(the catalog, the entry, the data:  the script and the modules are built where they're served).
 
 - ONE Solid per page:  two copies of Solid, of this framework or of Spell UI's core on a page break silently
   (two registries, two owners).
@@ -777,7 +779,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [PartContext.ts](../src/element/PartContext.ts), [OwnerContext.ts](../src/element/OwnerContext.ts) | generic content parts, and the element they belong to |
 | [ShadowEvents.ts](../src/element/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
 | [RichAttributes.ts](../src/element/RichAttributes.ts) | a function or object given to an element's attribute, as Solid hands a plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property;  `<ui-root pure>` turns its page-wide patch off |
-| [drawnWindow.ts](../src/element/drawnWindow.ts) | a long list drawn as you scroll, `drawnInWindow()`:  the first rows, then more near the screen, what's drawn kept;  `through` draws up to a given item at once.  Spell's long lists and `<ui-tree>`'s data columns use it (not in the barrel:  `spell/element/drawnWindow`) |
+| [drawnWindow.ts](../src/element/drawnWindow.ts) | a long list drawn as you scroll, `drawnInWindow()`:  the first rows, then more near the screen;  past 300, only the rows within a few screens stay drawn, the focused one always;  `through` draws a given item at once.  Spell's long lists, `<ui-tree>`'s data columns and `<ui-table>`'s data rows use it (not in the barrel:  `spell/element/drawnWindow`) |
 | [HotDefinitions.ts](../src/element/HotDefinitions.ts) | hot reload, in development only (its own entry) |
 | timing.ts | *(none -- `spell/util/timing`, re-exported by the barrel)*:  when to run something |
 | [SkeletonText.ts](../src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
@@ -806,7 +808,7 @@ and the page server running ([README/server.md](server.md)).
 - Custom Elements in Spell (two objects per tag, `<ui-counter>` built step by step, every decorator):
   `/guides/custom-elements/custom-elements.html`
 - Spell on Solid 2, measured:  `/guides/solid/solid-2.html`
-- Spell UI's theming notes:  `/components/ui/theming.html`
+- Spell UI's theming page, on the Spell UI site:  `/components/ui/theming`
 
 </details>
 

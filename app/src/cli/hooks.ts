@@ -21,5 +21,7 @@ export default {
 export async function loadApp(): Promise<typeof import("spell/app/cli/languageCommands")> {
   await import("spell/app/cli/consoleGuard")
   await import("spell/parser/spell/node/packageVersion.node")
+  // every language pack, past English:  the command line reads them all (epic `solid-2-final` P11)
+  await import("spell/parser/spell/languages/all")
   return import("spell/app/cli/languageCommands")
 }

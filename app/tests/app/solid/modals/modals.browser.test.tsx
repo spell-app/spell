@@ -3,7 +3,7 @@ import { userEvent } from "vite-plus/test/browser"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { editor } from "spell/app/app/editor"
-import { normalizeChooserOptions } from "spell/app/app/solid/modals"
+import { normalizeChooserOptions } from "spell/app/app/solid/modals/Chooser"
 
 /**
  * `editor`'s dialogs on `spell-ui`, in the browser:

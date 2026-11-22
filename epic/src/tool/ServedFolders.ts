@@ -1,7 +1,9 @@
 import { existsSync, realpathSync } from "node:fs"
 import { join, relative } from "node:path"
 
+import type { SRV } from "spell/server"
 import { componentSets, pageServerSettings } from "spell/server/page/settings"
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
@@ -27,9 +29,28 @@ import { EPIC_UI } from "spell/epic/server/server.types"
  * - Who asks:  the docs tools' linker (`doc-links.js`) and the `epic` tool's (`PlanDocFiles.linker`:  `epic lint`'s
  *   link check, and every write), so both read `../../components/epics/` and `../../templates/` alike
  *   (epic `epic-engine` I27:  `epic lint` called them missing)
+ * - And the sites the page server shows with no file per page (`sites`, `SRV.Linker`'s too):  the Spell UI site,
+ *   Epic UI's and App UI's.
  * - STATIC:  reads the disk (the link), keeps nothing.
  ****************/
 export class ServedFolders {
+  /**
+   * The sites a checkout's page server shows at an address with no file per page, for its linker (`SRV.LinkSite`):
+   * the Spell UI site, a Spell site at `/components/ui/` (epic `editor` P43);  Epic UI's and App UI's at
+   * `/components/epics/` and `/components/app/` (P44).
+   * - Their pages' addresses (`/components/ui/button/api`) check as found;  a link to one of the old components
+   *   pages (`/components/ui/ui-button.html`, `/components/epics/epic-card.html`) is mended to its page's address
+   *   (`SpellUIGuide.mendedPath()`, `setMendedPath()`).
+   */
+  static readonly sites: readonly SRV.LinkSite[] = [
+    { address: SpellUIGuide.address, mendedPath: (path) => SpellUIGuide.mendedPath(path) },
+    // Epic UI's and App UI's guides (epic `editor` P44)
+    ...Object.values(SpellUIGuide.sets).map(({ address }) => ({
+      address,
+      mendedPath: (path: string) => SpellUIGuide.setMendedPath(path)
+    }))
+  ]
+
   /** spell-epic's root:  this engine's folder (`EngineFiles.root`). */
   static readonly ENGINE = EngineFiles.root
 

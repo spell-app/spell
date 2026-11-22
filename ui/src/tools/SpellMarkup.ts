@@ -19,6 +19,7 @@ import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
  *   - the web's own tags as Spell UI's (`webTagsAsSpellUI()`):  `<p>` is `<text paragraph>`, `<b>` `<text bold>`,
  *     `<a>` `<link>`, a table's rows `<row>`s of `<cell>`s, `<div>` a `<stack>`, a `<br>` a `<space/>`,
  *     but a paragraph's `<br>` a blank line ...
+ *   - but never inside another pack's element (`<epic-card>`):  it reads its insides as they are
  *   - what's left, a run of markup holding one of the web's own tags (a `<pre>`, a data `<script>`), or a tag no
  *     pack has (`<ui-docs-api>`), is an `<html>` block, written as the web writes it
  *   - a bare element whose text holds the web's inline tags it couldn't write stays bare,
@@ -496,7 +497,7 @@ export class SpellMarkup {
 
   /** The web's tags inside `parent`, as Spell UI's (`webTagsAsSpellUI()`). */
   private swapInside(parent: Element) {
-    if (KEPT_AS_WRITTEN.has(parent.localName)) return
+    if (KEPT_AS_WRITTEN.has(parent.localName) || isPackElement(parent)) return
     for (const child of [...parent.childNodes]) {
       if (child.nodeType !== ELEMENT) continue
       for (const each of this.swapped(child as Element)) this.swapInside(each)
@@ -1011,6 +1012,14 @@ const JSON_READERS = new Set(["ui-diagram", "ui-tree-diagram"])
 
 /** Tags whose insides are never swapped:  their text is code or data, or the web's own markup inside a template. */
 const KEPT_AS_WRITTEN = new Set(["script", "style", "pre", "template", "svg", "math"])
+
+/**
+ * Is `element` another pack's custom element (`<epic-card>`, `<spell-viewer>`):  a dashed tag that isn't Spell UI's?
+ * - Its insides are kept as the web writes them:  the element reads them, as they are (an `<epic-card>`'s `<a>`).
+ */
+function isPackElement(element: Element): boolean {
+  return element.localName.includes("-") && !element.localName.startsWith("ui-")
+}
 
 /** The web's inline tags, which text in a bare element may hold, inside an `<html>` block (`hasBareText()`). */
 const INLINE_TAGS = new Set(["code", "a", "b", "strong", "em", "i", "kbd", "br", "span", "small", "mark", "sup", "sub"])

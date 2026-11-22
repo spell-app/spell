@@ -1,5 +1,5 @@
 import { isNode } from "browser-or-node"
-import omit from "lodash/omit"
+import { omit } from "lodash-es"
 
 import { Assertable } from "spell/util"
 import { P } from "spell/parser/parser"

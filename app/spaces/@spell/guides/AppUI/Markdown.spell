@@ -1,0 +1,65 @@
+"markdown" is a notebook page
+	<header level="1">
+		Markdown
+		<header>Markdown text, such as a docstring, drawn as HTML.</>
+	</>
+
+	<text class="lede" paragraph>How the app shows a docstring: the comment above a declaration, written as markdown, drawn as headings, bold, lists and links. Today it's the docstring at the top of the Type Explorer's details.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the runners' debug pane, or reading its code</>
+		<item icon="play">Live: a real <text code>&lt;spell-viewer&gt;</>, its debug pane on the Type Explorer</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Solitaire's Type Explorer. In its tree, open Card.spell under Solitaire and click Card: the line in bold under the breadcrumbs, "definition of a Card ...", IS this component, drawing Card's docstring (a <text code>##</> comment, so a heading).</>
+		<example "1. Example" description="Solitaire, its debug pane on the Type Explorer tab:  pick Card to see its docstring.">
+			<html>
+				<spell-viewer project="@spell/examples/Solitaire" toolbar debug="explorer" height="820px"></spell-viewer>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from the app's element build, which this set's pages load: <text code>/element/spell.pack.js</>. <link target="src-packages-app" link="/src/app/">The app package</> builds it with <text code>yarn build:element</>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The <link target="src-packages-app-docs-scopedetailspane-html" link="/scope-details-pane">ScopeDetailsPane</> draws a scope's docstring with it, when it's not being edited:</>
+		<text paragraph>ScopeDetailsPane.tsx · a docstring:</>
+		<markdown>
+			```typescript
+			<Show when={text()} fallback="Add a description…">
+			  {(text) => <Markdown text={text()} onOpen={props.onOpen} />}
+			</Show>
+			```
+		</>
+		<list bulleted>
+			<item>It draws GitHub-flavoured markdown as plain HTML tags, with Spell's own markdown package, written on its parser.</>
+			<item>That package, and the parser under it, load the first time a <text code>Markdown</> is drawn: a runner's page carries no parser otherwise. Until then it shows the text as written.</>
+			<item>A link clicked in it goes to <text code>onOpen</>, not the page: a link to a spell file, say, for the editor to open.</>
+			<item>Raw HTML in the text is drawn as it is, but for <text code>&lt;script&gt;</> and the like: only give it text the app made.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="Markdown"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-markdown-tsx" link="/src/app/solid/Markdown.tsx"><text title="src/app/solid/Markdown.tsx" code>Markdown.tsx</></>: the component, and its props</>
+			<item><link target="src-packages-app-src-solid-typeexplorer-css" link="/src/app/solid/TypeExplorer.css"><text title="src/app/solid/TypeExplorer.css" code>TypeExplorer.css</></>: its look in the Type Explorer</>
+			<item>Its test: <link target="src-tests-app-src-solid-markdown-browser-test-tsx" link="/tests/app/solid/Markdown.browser.test.tsx"><text title="tests/app/solid/Markdown.browser.test.tsx" code>Markdown.browser.test.tsx</></></>
+			<item>What draws the markdown, the spell markdown package: <link target="src-spell-lang-src-markdown-agents-md" link="/parser/src/markdown/AGENTS.md"><text title="parser/src/markdown/AGENTS.md" code>markdown</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

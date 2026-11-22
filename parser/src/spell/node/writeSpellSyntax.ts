@@ -12,6 +12,9 @@ import { resolve } from "path"
 import { SP } from "spell/parser/spell"
 import { spellSyntax, spellSyntaxFileFor } from "spell/parser/spell/node/spellSyntax"
 
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
+
 for (const language of SP.Language.all.values()) {
   const path = resolve(import.meta.dirname, "..", spellSyntaxFileFor(language))
   writeFileSync(path, `${JSON.stringify(spellSyntax(language), null, 2)}\n`)

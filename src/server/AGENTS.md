@@ -40,8 +40,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         else text of 1 KB or more gzipped, a file's gzip kept in memory by its path, size and time (128 MB at most)
       - `send()` / `json()`:  text of 1 KB or more gzipped
       - each says `Vary: Accept-Encoding`;  a request that takes neither gets the body as it is
-      - the brotli copies:  the builds' `brotliCopies()` (`spell/toolchain/brotliCopies`), in the app's builds and
-        Spell UI's site bundle;  never the committed bundles, which are gzipped once a run instead
+      - the brotli copies:  the builds' `brotliCopies()` (`spell/toolchain/brotliCopies`), in the app's builds,
+        Spell UI's site bundle and the docs pages' bundle;  never a committed file, which is gzipped once a run instead
     - `reply.noStore()`:  the ONE way an answer says "never keep a copy" (`Cache-Control: no-store`), every route's
   - [listener.ts](listener.ts) -- `toListener()`:  a handler as node's `(req, res)`, with the 404 / error answers
   - [ports.ts](ports.ts) -- choosing a port:
@@ -101,7 +101,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - its own file:  patched in place (the kit's `PagePatch`, run by the docs runtime and Spell UI's site), else
         reloaded
         - its own file is also the file at its ADDRESS:  a component set's page is reported where it's served
-          (`/components/ui/ui-button.html`), not as its file in the checkout (P40)
+          (`/components/app/spell-viewer.html`), not as its file in the checkout (P40)
       - a stylesheet it uses:  swapped in place, no reload
         - in VS Code's side-bar views too (spell-epic's Review and Details):  the live client runs inside their frame,
           with its own socket (the frame is cross-origin to the view)
@@ -236,7 +236,27 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - the page server's setting `cacheLimit` sets it (below), `sizeInBytes()` reading `"200MB"`, `"1GB"` ...
     - `codeVersion(paths)`:  a version for some code, a hash of its files' text, read again only when one changes
     - `DiskCache.home`:  Spell's caches on this machine, `~/.spell/cache`
-    - Today one:  the app's compile cache, `/api/compiles` (spaces' `api.ts`):  it knows nothing of spell projects.
+    - Today two:  the app's compile cache, `/api/compiles` (spaces' `api.ts`):  it knows nothing of spell projects;
+      and the drawings' (`Drawings`, below)
+  - `Drawings` -- what pages show that never changes, DRAWN AHEAD on the server (epic `solid-2-final` P15):
+    Mermaid's diagrams and coloured code, so a page whose drawings are all in loads none of what draws them
+    - ONE mechanism, a DRAWER per kind (`SRV.Drawer`:  its kind, name and version, `find()` in a page, `draw()`),
+      handed in by each folder's route module (`RouteContext.drawings.add()`):  it names none itself
+      - Spell UI's:  `<ui-code>`'s highlight.js, in process;  `<ui-mermaid-diagram>`'s Mermaid, in ONE headless page
+        it keeps open (`spell/ui/drawings`)
+      - the app's:  Spell's bubbly look, in process (`SpellOnServer`);  it `replaces` `spell-language.js`
+    - ONE cache on disk, a `DiskCache` per drawer, `~/.spell/cache/drawings/<drawer>/<version>/<key>`, under
+      `cacheLimit`;  the key a hash of the item's kind, settings and text (`Drawings.keyFor()`, on util's
+      `stableHash()`), the same in a page (Spell UI's `GivenDrawings`)
+    - FILLED IN as a page is served (`fill()`, an html hook before the page scripts):  what's cached goes into a table
+      in its `<head>`, `<script type="application/json" data-spell-drawings>`, a shared sheet once;  the rest is drawn
+      in the background, one at a time, for the next view
+      - a page whose items a drawer takes are ALL in doesn't get the page scripts it `replaces` (`withPageScripts()`)
+    - ASKED for:  `POST /api/server/drawings/<kind>`, `{ text, settings, hints? }`, same origin, no token;
+      the drawing, or 204 when none came in 2s (a headless browser starting):  the page draws it itself meanwhile
+    - told every page as `SPELL_SERVER.drawings` (`DrawingsConfig`):  its address, its kinds, its tables' selector
+    - NEVER fails a page:  a drawer that throws is logged (`SPELL_DEBUG=server:drawings`), and the page draws as before
+    - `SPELL_DRAWINGS=0` in the page server's environment turns it off:  every page draws as it did before
   - `Git` -- running git, for every tool in every repo (epic `coherence` P7, from spell-epic):
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
@@ -256,6 +276,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [Test helpers](test/checkouts.ts) that fake one:  `fakeMainCheckout()`, `fakeWorktree()`.
   - [proxy.ts](proxy.ts) -- `proxyTo()` / `proxyUpgrade()`:  HTTP and websockets to another local server
   - `WebServer` -- all of the above on node's HTTP server
+    - with a `certificate`, HTTPS and HTTP/2 too, on the SAME port (epic `solid-2-final` P14):  each connection
+      handed on by its first byte, a TLS hello to node's HTTP/2 server (`allowHTTP1`, so websockets still upgrade),
+      anything else to the plain one;  `url` stays `http://127.0.0.1:<port>` for the tools, `secureUrl` is
+      `https://localhost:<port>` for browsers
+    - HTTP/2's requests:  `Host` is its `:authority` (`Request.get()`), a body needs no length (`hasBody()`), and a
+      proxied one goes on as HTTP/1.1, its answer's connection headers dropped (`proxyTo()`)
+  - `LocalCertificate` -- a certificate this machine's browsers trust, made by mkcert (epic `solid-2-final` P14):
+    `state`, `make()`, `trust()` (`sudo security add-trusted-cert`, the password asked once), `undo()`;
+    its programs through `CertificateTools`, so tests run none
+    - the page server's:  `forPageServer()`, `localhost` / `127.0.0.1` / `::1` in `~/.spell/localhost/`;  made and
+      trusted only by `spell server certificate`, taken by `PageServer.certificateFor()` once it's `"ready"`
+      (never in tests or CI, nor with `SPELL_HTTPS=0`);  its HTTPS address is `ServerInfo.https`
+    - the house-network site's too (the app's `spell space local setup`):  its own names and folder, the same steps
   - [serveRoutes.ts](serveRoutes.ts) -- `serveRoutes()`, `folderRoute()`:  a small loopback server for a command's
     page (spell-app's `spell run`), each path answered with text, a file, or 404 (epic `coherence` P25)
   - [untilInterrupted.ts](untilInterrupted.ts) -- run until `Ctrl-C`
@@ -326,13 +359,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - lists end to end;  maps (`componentSets`, `engineRoutes`, `localCopies`) entry by entry, a later part winning
         - outside a kit:  `root`'s own `package.json` alone (the tests' scratch checkouts)
       - `componentSets()` and `engineRoutes()` read their two lists out of them;  `repoSettings()` reads one part.
+      - `ui/`'s route module adds its drawers, `src/drawings/drawingRoutes.server.ts`;  the app's, Spell's,
+        `src/app/components/spell-code/spellDrawingRoutes.server.ts` (`SRV.Drawings`, above)
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
         local copies, what's gone, the site header's tabs, the caches' cap
     - THE CACHES' CAP (`"cacheLimit"`, epic `language` Q41):  the most the server's caches on disk may take, every
       version's entries together, e.g. `"200MB"`, `"1GB"`, `"512KB"` (`SRV.sizeInBytes()`);  200 MB by default
       - the kit's part says `"200MB"`;  a later part's wins, so the epic repo's `page-server.json5` may change it
       - past it, a write drops the entries used least recently first (`SRV.DiskCache`)
-      - today one cache:  the app's compile cache, `~/.spell/cache/compiles` (its route module sets the cap as it starts)
+      - two caches:  the app's compile cache, `~/.spell/cache/compiles` (its route module sets the cap as it starts),
+        and each drawer's, `~/.spell/cache/drawings/<drawer>` (`SRV.Drawings`)
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
         node built-ins, `json5`, `spell/server/contentFolder`, `spell/server/kitFolders`, `spell/util/node/findUp`
         and type imports only,
@@ -412,6 +448,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           - it loads the component packs a set's pages name (`SitePacks`):  the epics pack, for the comments, on all
           - the other sets had their own build (its `sets/`), until epic `epic-engine`
         - the rest is the set's own folder:  its pages, `__parts/`, `__data/`
+        - a set whose guide is a Spell site (`sitePage`, `componentSetSitePath()`;  epic `editor` P43-P44):  every
+          address with no file of its own and no `.` in its last part gets its viewer page;  all three since P44, so
+          the site bundle and `__parts/` serve no set's pages now
       - The same at `/worktrees/<w>/components/<set>/`.
         - with that worktree's own site bundle (epic `epic-engine` r35):
           - a page there that loads a set's address by its root path (`/components/ui/_assets/site.js`)
@@ -742,6 +781,10 @@ The steps between a page's content and its file on disk, for every tool that wri
     P46, `rootLinks()`):  the same text from any folder, a part or a template;  a link to the page's own folder stays
     relative, and so does a load below it (`_assets/`, `parts/`);  a link a move broke goes to its one new home
   - `check()` verifies them, and refuses a relative one (`relative:  ../x.ts -- write /spell-ui/x.ts`)
+  - a SITE shown with no file per page (`sites`, `SRV.LinkSite`;  epic `editor` P43):  the Spell UI site at
+    `/components/ui/`, handed in by the epic tools (spell-epic's `ServedFolders.sites`), since the kit names no site
+    - its pages' addresses check as found;  a link to one of its old pages is mended to its page's address
+      (`/components/ui/ui-button.html` => `/components/ui/button`), and `check()` calls it an `old page`
   - a worktree's page lays its root links under its address as they're clicked:  the live client's `worktreeHref()`,
     the rule the site header's tabs follow too
   - It was the docs tools' `doc-links.js`, which is now its command line.
@@ -758,9 +801,11 @@ The steps between a page's content and its file on disk, for every tool that wri
 
   - HOW each is built:  `BUNDLES`, in [server.types.ts](server.types.ts):
     - `ui-site`:  Spell UI's docs site
+    - `epics-pack`:  the epics pack's script and its families' modules
+    - `epic-docs`:  the docs pages' bundle (`_assets/spell-ui/`), and the scripts beside it
   - `check()`:  stale when never built, its entry missing or rewritten, or its sources' hash changed.
-  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog, the
-    epics pack, spell-epic's docs bundle
+  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog
+    (the epics pack and spell-epic's docs bundle were too, until epic `solid-2-final` P7:  bundles now, git-ignored)
     - built by `--stale` only in a worktree (`buildsWhenStale`);  named (`spell bundle ui-root`), anywhere
     - its record in the install's git-ignored cache, `node_modules/.cache/spell-bundles/`, never beside it
     - the main checkout tells by its `check` command (`yarn pack:check`);  a worktree by its record, or that check

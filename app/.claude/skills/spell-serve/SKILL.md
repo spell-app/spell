@@ -1,6 +1,6 @@
 ---
 name: spell-serve
-description: Start the spell web servers of this checkout that aren't running -- the page server (docs, epics, goals, the app's API), the editor (vite, the spell app) and Spell UI's docs (static pages at /components/ui/) -- and say which port each is on.  Use for `/spell-serve`, or when Owen says "start the servers", "is the editor running?", "what port is the page server on?".
+description: Start the spell web servers of this checkout that aren't running -- the page server (docs, epics, goals, the app's API), the editor (vite, the spell app) and Spell UI's docs (the Spell UI site, at /components/ui/) -- and say which port each is on.  Use for `/spell-serve`, or when Owen says "start the servers", "is the editor running?", "what port is the page server on?".
 ---
 
 # /spell-serve
@@ -10,9 +10,11 @@ description: Start the spell web servers of this checkout that aren't running --
    - It starts the page server if it isn't running (`spell server start`).
      The page server starts the editor once it listens ([EditorServer.ts](src/spaces/server/node/routes/EditorServer.ts)).
    - It waits for the editor:  up to 90s, since vite may be building its dependency cache.
-   - Then it checks Spell UI's docs, by asking for their bundle, `/components/ui/_assets/site.js`.
-     - They're static pages the page server serves at `/components/ui/`:
-       their pages (`../ui/docs/`), with this branch's built `_assets/` (from `../ui/site/`) laid over them.
+   - Then it checks the component sets' bundle, by asking for it, `/components/ui/_assets/site.js`.
+     - Every set's guide is a Spell guide, shown with no editor at `/components/ui/`, `/components/epics/` and
+       `/components/app/` (one page each, its set's `docs/index.html`, at every address);  no set's pages load the
+       bundle any more (epic `editor` P44), but the page server still builds it, this branch's `_assets/` (from
+       `../ui/site/`), laid over each set's docs folder.
      - The bundle is NOT committed.
        The page server builds it (and the brand pages' bundle) when it starts, if stale,
        and the request waits for that.

@@ -4,6 +4,8 @@
  *   - `afterSolidUpdate(fn)` -- as soon as the current code finishes
  *   - `beforeNextPaint(fn)` -- just before the browser next draws the page
  *   - `soon(fn)` -- in the next task, once the browser has had a turn
+ *   - `await letBrowserIn()` -- between steps of long work:  keys and clicks waiting go first, then the work carries on
+ *   - `whenIdle(fn)` -- once the browser has nothing else to do (2 seconds at the most)
  *   - `after(seconds, fn)` -- once, `seconds` from now:  a promise to await, or cancel
  *   - `every(seconds, fn)` -- every `seconds`, until you stop it
  * - Why not the platform's calls (`queueMicrotask()`, `setTimeout()` ...):
@@ -61,6 +63,38 @@ export function soon(fn: () => void): () => void {
   const timer = setTimeout(fn, 0)
   return () => clearTimeout(timer)
 }
+
+/**
+ * Let the browser handle what's waiting -- a key typed, a click, a paint -- then carry on:  `await letBrowserIn()`.
+ * - Between the steps of long work, e.g. a compile's files (`TaskList`), so a key typed during it isn't held up.
+ * - Over `scheduler.yield()` where there is one (Chrome, Edge):  the work carries on ahead of other tasks.
+ * - Else a zero-delay task, as `soon()`:  so in node, and in tests, it's the next task, as `after(0)` was.
+ */
+export function letBrowserIn(): Promise<void> {
+  const scheduler = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler
+  if (scheduler?.yield) return scheduler.yield()
+  return new Promise((resolve) => setTimeout(resolve, 0))
+}
+
+/**
+ * Run `fn` once the browser has nothing else to do:  an idle moment, over `requestIdleCallback()`.
+ * - Work that matters, but not now:  what's waiting to be saved, a page fetched ahead of a click.
+ * - `timeout`:  the longest wait, in SECONDS, before it runs anyway (2 by default):
+ *   a busy page, or a slow machine running tests, may never be idle.
+ * - No `requestIdleCallback()` (Safari before 18.2, node):  in the next task instead, as `soon()`.
+ * - Returns a function that cancels it, if it hasn't run yet.
+ * - The ONE idle wait:  `LoadOnce.atIdle()` is this, skipped under Save-Data.
+ */
+export function whenIdle(fn: () => void, { timeout = IDLE_LIMIT }: { timeout?: number } = {}): () => void {
+  if (typeof requestIdleCallback === "function") {
+    const id = requestIdleCallback(() => fn(), { timeout: timeout * 1000 })
+    return () => cancelIdleCallback(id)
+  }
+  return soon(fn)
+}
+
+/** `whenIdle()`'s longest wait for an idle moment, in seconds, before it runs anyway. */
+const IDLE_LIMIT = 2
 
 ////////////////
 // ## Later

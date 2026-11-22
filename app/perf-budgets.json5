@@ -12,7 +12,8 @@
       id: "editor-first-js",
       name: "The editor's first screen, JavaScript",
       budget: 400,
-      ceiling: 1003,
+      // Smaller Built Code (epic solid-2-final P11):  854 => 741 KB, Spanish, the dialogs and the pages on first use
+      ceiling: 756,
       build: "editor",
       entries: ["index.html"],
       only: "\\.js$"
@@ -21,7 +22,8 @@
       id: "editor-first-all",
       name: "The editor's first screen, everything",
       budget: 500,
-      ceiling: 1020,
+      // P11:  872 => 754 KB
+      ceiling: 769,
       build: "editor",
       entries: ["index.html"]
     },
@@ -36,18 +38,31 @@
       id: "cloud-app",
       name: "A cloud app:  <spell-viewer> and its runtime",
       budget: 150,
-      ceiling: 412,
+      // P11:  309 => 307 KB (lodash-es)
+      ceiling: 313,
       build: "element",
       entries: ["spell-viewer.js", "spell-solid.js", "spell-runtime.js"],
       only: "\\.js$"
     },
     {
+      id: "run-page-first",
+      name: "The run page's first load, a project running alone",
+      budget: 150,
+      ceiling: 176,
+      build: "editor",
+      entries: ["run.html"]
+    },
+    {
       id: "docs-page-js",
       name: "A docs or epic page, JavaScript (the docs bundle)",
       budget: 250,
-      ceiling: 989,
+      // Lighter Docs Pages (epic solid-2-final P7):  974 KB => 357 KB, every family a lazy chunk
+      ceiling: 365,
       folder: "epic/src/tools/_assets",
-      entries: ["spell-ui.js", "spell-doc-runtime.js"]
+      // the classic loader a page names, the ES module it imports and what that imports at once (epic `solid-2-final`
+      // P7):  every family, engine and theme is a lazy chunk;  the page runtime is in the module
+      entries: ["spell-ui.js", "spell-ui/main.js"],
+      only: "\\.js$"
     },
     {
       id: "ui-site-page",
@@ -71,9 +86,10 @@
       id: "docs-lazy-piece",
       name: "Any lazy piece of a docs page",
       budget: 150,
-      ceiling: 1210,
+      // P7:  Mermaid's ELK, 344 KB, the biggest lazy piece now (the whole Mermaid script, 1,186 KB, before)
+      ceiling: 351,
       folder: "epic/src/tools/_assets",
-      entries: ["spell-ui.js", "spell-doc-runtime.js"],
+      entries: ["spell-ui.js", "spell-ui/main.js"],
       only: "\\.js$",
       measure: "lazy"
     },

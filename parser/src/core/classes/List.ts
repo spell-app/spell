@@ -1,7 +1,7 @@
 /**
  * Base classes for spell.
  */
-import _ from "lodash"
+import { range } from "lodash-es"
 
 import {
   Cell,
@@ -245,7 +245,7 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
   }
   /** Our indexes, from 0. */
   getKeys(): number[] {
-    return _.range(0, this.length)
+    return range(0, this.length)
   }
   /** Return a CLONE of our `items` as a normal `Array`. */
   getValues(): T[] {

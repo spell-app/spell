@@ -238,7 +238,7 @@ export default function appCommands(spell: Command): void {
       "measure the editor, a docs page, an epic page and run mode on a desktop and an emulated phone (CPU slowed 4x, " +
         "a 5G-like network), in the machine's test turn;  then the report.  About 5 minutes;  --full measures everything"
     )
-    .option("--full", "every measurement:  load, leaks, typing, accessibility, listeners, sheets, CPU, the pipeline")
+    .option("--full", "every measurement:  load, leaks, huge lists, typing, accessibility, listeners, sheets, CPU, the pipeline")
     .option("--page <pages>", "which pages, e.g. editor,docs -- default editor, docs, epic, run")
     .option("--profile <profiles>", "which profiles:  desktop, phone, phonewide -- default desktop, phone")
     .option("--steps <steps>", "which measurements, e.g. load,typing -- default load (all with --full)")
@@ -247,6 +247,7 @@ export default function appCommands(spell: Command): void {
     .option("--force", "don't wait for a quiet machine")
     .option("--out <file>", "write the results there, not in .perf-results/")
     .option("--baseline <save>", "save this run as the baseline the report compares with (perfBaseline.json)")
+    .option("--https", "serve the editor build over HTTPS and HTTP/2, with a throwaway certificate Chromium trusts")
     .action((_options, command: Command) =>
       CLI.runCommand(async () => (await import("./commands/perfCommand")).perfCommand("run", command.optsWithGlobals()))
     )

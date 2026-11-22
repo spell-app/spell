@@ -2,6 +2,8 @@ import type { SP } from "spell/parser/spell"
 import { initialCaps, slug } from "spell/util/string"
 // Import directly:  `<spell-viewer>` loads this file alone, without spell's barrel and its parser
 import { SpellSetup } from "spell/parser/spell/SpellSetup"
+// Import directly:  a leaf with no imports, where Spell UI's barrel would load every component
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 
 /**
  * Spell's own org, `spell`:  where Spell accounts are (`ana@spell`), and Spell admins (`spell-admin` there).
@@ -63,10 +65,11 @@ export function personIdFor(text: string): string {
 }
 
 /**
- * Spell UI's component pages, one site of notebooks in the Guides group (epic `notebook` P10).
+ * Spell UI's component pages, one site of notebooks in the Guides group (epic `notebook` P10):  `@spell/guides/SpellUI`.
  * - Its project file says `"onHome": false`, so the home page shows no card for it.
+ * - Spell UI's own `SpellUIGuide.project`:  the page server shows the same site at `/components/ui/`.
  */
-export const SPELL_UI_SITE_PROJECT = "@spell/guides/SpellUI"
+export const SPELL_UI_SITE_PROJECT = SpellUIGuide.project
 
 /**
  * The groups whose projects people open AS EXAMPLES (epic `mockup` T52):  the examples and the guides,

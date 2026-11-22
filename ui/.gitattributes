@@ -12,7 +12,6 @@
 # Spell UI site data (`yarn site:data`;  `.json5` since epic `epic-workflow` P20);  `pages.json5` is hand-kept.
 # Its bundle, `site/_assets/`, isn't committed:  the page server builds it (`.gitignore`)
 docs/__data/components.json5                                  linguist-generated merge=binary
-docs/__data/icons.json5                                       linguist-generated merge=binary -diff
 docs/__data/search.json5                                      linguist-generated merge=binary
 docs/__data/custom-elements.json                              linguist-generated merge=binary
 docs/__data/html-custom-data.json                             linguist-generated merge=binary

@@ -334,6 +334,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell server stop all` | the page server, then the app's editor too, even one left running, and the local site, which a plain stop leaves up |
 | `spell server status` | the running page server's details (JSON);  exit 1 when it isn't running |
 | `spell server url <file>` | starts the page server if needed, then prints the address that serves `<file>`, of this checkout or the epic folder |
+| `spell server certificate [--check] [--undo]` | makes the page server's HTTPS certificate with mkcert, and has this computer trust it (asks for the password once);  the page server then speaks HTTPS and HTTP/2 too, at its next start, on the same port ([README/server.md](server.md#https-and-http2-on-the-same-port)) |
 | `spell server prune [--dry-run]` | stops the page and Vite servers whose checkout is gone, on any checkout;  `--dry-run` only lists them |
 
 - The page server's own flags pass through, as typed:
@@ -867,13 +868,14 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 
 | Option | What it does |
 | --- | --- |
-| `spell perf run --full` | every measurement, 5 loads each:  load, leaks, typing, accessibility, listeners, style sheets, a CPU profile and the editing pipeline |
+| `spell perf run --full` | every measurement, 5 loads each:  load, leaks, huge lists (a 100,000-row table and tree scrolled on the docs page), typing, accessibility, listeners, style sheets, a CPU profile and the editing pipeline |
 | `spell perf run --page editor,docs` | which pages:  `editor`, `docs`, `epic`, `run` (default all) |
 | `spell perf run --profile phone` | which profiles:  `desktop`, `phone`, `phonewide` (default `desktop` and `phone`) |
 | `spell perf run --steps load,typing` | which measurements (default `load`) |
 | `spell perf run --runs <count>` | cold loads per page and profile, medians reported (default 1, 5 with `--full`) |
 | `spell perf run --wait <minutes>` / `--force` | how long to wait for a quiet machine (default 10) / don't wait |
 | `spell perf run --baseline save` | this run is the baseline too, `perfBaseline.json` beside the command's code |
+| `spell perf run --https` | the editor build served over HTTPS and HTTP/2, with a throwaway certificate only the measuring browser trusts;  each load says how many files came by each protocol, and how long they waited to be sent |
 | `spell perf budget --tighten` | lowers each ceiling to the bundle's size now plus 2%:  after a change that shrank one |
 
 - The phone is Playwright's Pixel 7, its CPU slowed 4x and a 5G-like network (20ms, 50 Mbps down, 20 up);

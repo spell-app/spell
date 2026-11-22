@@ -460,34 +460,16 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
    *   shared code never names a DOM global (`AGENTS.md` "Solid authoring" › SSR).
    */
   static inlineTextOf(domElement: HTMLElement): string {
-    let text = domElement.textContent ?? ""
-    for (const child of domElement.children) {
-      if (child.localName === "script" && (child as HTMLScriptElement).type.startsWith("text/")) {
-        text = (child as HTMLScriptElement).text
-        break
-      }
-      if (child.localName === "template") {
-        text = child.innerHTML
-        break
-      }
-    }
-    return LoadableComponent.dedent(text)
+    return E.InlineText.of(domElement)
   }
 
   /**
    * `text` without its common indent, and without blank first / last lines:
    * inline content is indented with the page's markup.
-   * - Tabs and spaces count one each;  blank lines don't set the indent.
-   * - Static:  pure text, no element needed.
+   * - `E.InlineText.dedent()`, which the page server's drawers read pages with too
    */
   static dedent(text: string): string {
-    const lines = text.replace(/\r\n?/g, "\n").split("\n")
-    while (lines.length && !lines[0].trim()) lines.shift()
-    while (lines.length && !lines[lines.length - 1].trim()) lines.pop()
-    let indent = Infinity
-    for (const line of lines) if (line.trim()) indent = Math.min(indent, line.length - line.trimStart().length)
-    if (!Number.isFinite(indent) || indent === 0) return lines.join("\n")
-    return lines.map((line) => line.slice(Math.min(indent, line.length - line.trimStart().length))).join("\n")
+    return E.InlineText.dedent(text)
   }
 }
 

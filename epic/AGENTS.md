@@ -32,7 +32,7 @@ a folder of the kit `spell`.
 - Laid out as a plain JS project (epic `epic-eject` J14):
   - `src/`:  the code, the elements and the docs tools included;  its rules:  [src/AGENTS.md](src/AGENTS.md)
   - `tests/`:  its tests, at the same paths as the code (`tests/command/X.test.ts` for `src/command/X.ts`)
-  - `scripts/`:  dev-only scripts;  `vscode/`:  the extension, its own yarn project
+  - `vscode/`:  the extension, its own yarn project (no `scripts/` since epic `editor` P44:  its one, Epic UI's data, went)
   - the plugin's parts at the folder's root:  `.claude-plugin/`, `skills/`, `hooks/`, `bin/epic`
 - [src/AGENTS.md](src/AGENTS.md) was written inside spell-app, as `packages/epics/AGENTS.md`.
   - Its links lead from where it is now:  the epic folder's pages through `../../spell.epics/`,
@@ -110,7 +110,7 @@ As WWOD §4, plus these.
   - `spell/epic` (the barrel, `EP`), `spell/epic/markup`, `spell/epic/tool/PlanDoc`,
     `spell/epic/components/epic-page`
   - Same-folder peers stay `./PlanItem`;  NEVER a `../` climb, NEVER a `$/` alias.
-  - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, the extension's `vscode/`) import `src/` the same way.
+  - Files outside `src/` (`tests/`, `hooks/`, the extension's `vscode/`) import `src/` the same way.
     The two files code imports from OUTSIDE `src/` have an explicit key each in the kit's `exports`, for their tests:
     `spell/epic/vscode/src/docUrls.ts`, `spell/epic/vscode/src/ClipboardImage.ts` (epic `epic-friend` P15).
   - Nothing imports by the folder's old name, `spell-epic/...`:  the hooks too say `spell/epic/...`.

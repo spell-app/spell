@@ -1,0 +1,74 @@
+"actions element" is a notebook page
+	<header level="1">
+		Actions
+		<header>The editor's actions, each as a menu item or a button.</>
+	</>
+
+	<text class="lede" paragraph>Everything a person can tell the editor to do from a toolbar or a menu: Save, New File, Restart, Settings. Each one is ready to drop into a bar, a "..." menu, or a page as a button, with its own text, icon and click.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone adding a button or menu item to the spell app</>
+		<item icon="image">A picture, not live: they act on the editor, so they need it running</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The top bar's File menu: New Spell File, Save and Discard Changes are actions, drawn as menu items, each with its key.</>
+		<image src="/components/app/_images/Actions.png" alt="The File menu open under the top bar:  New Spell File, New CSS File, Save, Discard Changes, AutoSave and Duplicate File, with their keys" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The menu in the picture: each entry of <text code>Actions</> is a component, drawn by name:</>
+		<text paragraph>MenuBar.tsx · the File menu:</>
+		<markdown>
+			```typescript
+			<BarMenu id="FileBarMenu" label={appTexts.text("menuFile")} name={appTexts.text("menuFile")}>
+			  <Actions.saveAll menu />
+			  <Actions.revertFile menu />
+			  <Divider />
+			  <Actions.createFile menu />
+			  <Actions.duplicateFile menu />
+			  <Actions.renameFile menu />
+			  <Actions.deleteFile menu />
+			</BarMenu>
+			```
+		</>
+		<text paragraph>The same action as a big button, on the project chooser, with its own text:</>
+		<text paragraph>ProjectChooser.tsx · a "create" button:</>
+		<markdown>
+			```typescript
+			<Actions.createProject button title="Create a New Project" fluid="" />
+			```
+		</>
+		<list bulleted>
+			<item><text code>&lt;Action&gt;</> is one action: a menu item by default, or a button with <text code>button</>. <list bulleted><item><text code>title</>: its text</> <item><text code>icon</>: its icon</> <item><text code>iconOnly</>: just its icon, its <text code>title</> a tooltip below it after two seconds</> <item><text code>active</>: lights it up</> <item><text code>menu</>: an item of the top bar's menus, a <text code>&lt;ui-action&gt;</>: its title and its key (<text code>shortcut</>), from the editor's one list of keys (<text title="app/src/app/pages/editorHotkeys.ts" code>EDITOR_HOTKEYS</>)</></></>
+			<item><text code>Actions</> holds the app's own, each an Action with its text, icon and click filled in, in groups: <list bulleted><item>going places: Edit, Run, Settings, Home, Help, and You, the person's avatar</> <item>the project: create, duplicate, rename, delete it; its settings; compile and run it, restart it, or reset it to what's saved</> <item>files: create, duplicate, rename, delete, save, revert</> <item>the code editor's own: undo, redo, find</> <item>the console: Clear Console</> <item>dialogs, for trying them out: alert, confirm, prompt, a number prompt, and <link target="src-packages-app-docs-chooser-html" link="/chooser">choose</></></></>
+			<item>Props given where it's drawn win over the entry's own: its text, its icon, its click handler (<text code>onClick</>) ...</>
+			<item>Some light up as the editor changes: Save and Revert File when the file has unsaved changes.</>
+			<item>In a "..." menu, keep <text code>title</> plain text: the menu draws its items from their text.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="Actions"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-actions-tsx" link="/src/app/solid/Actions.tsx"><text title="src/app/solid/Actions.tsx" code>Actions.tsx</></>: Action, and every entry of <text code>Actions</></>
+			<item><link target="src-tests-app-src-solid-sharedui-browser-test-tsx" link="/tests/app/solid/sharedUI.browser.test.tsx"><text title="tests/app/solid/sharedUI.browser.test.tsx" code>sharedUI.browser.test.tsx</></>: their tests, with the toolbars'</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

@@ -5,8 +5,8 @@ import { join } from "node:path"
  * ### `FamilyExamples`
  * A component family's element examples, `src/components/<family>/examples/elements/*.html`:  its files, main one
  * first, and each file's sections.
- * - ONE reading for the kitchen sink and the Theming playgrounds (`yarn site:kitchen`) and the claude.ai design
- *   export (`DesignComponents`), so both show a family by the same sections (epic `coherence` P23).
+ * - ONE reading for the Spell UI site's Kitchen Sink (`yarn site:kitchen`) and the claude.ai design export
+ *   (`DesignComponents`), so both show a family by the same sections (epic `coherence` P23).
  * - Each caller filters what it can't show:  the kitchen sink leaves out the tests' `stub-*` stand-ins, the design
  *   export what loads a `source`.
  * - Static:  pure name and text rules, no state.

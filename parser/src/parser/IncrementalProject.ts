@@ -127,10 +127,14 @@ export class IncrementalProject {
 
   /**
    * File `path` now has `text`:  re-parse as little as possible.
+   * - `span`:  where the text changed, if the caller knows (an editor's change set, `P.EditedSpan`):
+   *   then the one-line check and the parse's search for what changed read only around it, not the whole file.
+   *   Without it (VS Code's language server, the tests, a paste from elsewhere), both compare the texts whole:
+   *   either way the parse is the same (epic `solid-2-final` P9).
    * - Returns every file whose `match` changed, in order:  none, just that file, or that file + every later one.
    * - Throws if `path` isn't one of ours.
    */
-  update(path: string, text: string): P.IncrementalParse[] {
+  update(path: string, text: string, span?: P.EditedSpan): P.IncrementalParse[] {
     const index = this.files.findIndex((file) => file.path === path)
     const entry = this.files[index]
     if (!entry)
@@ -151,7 +155,8 @@ export class IncrementalProject {
       if (this.isBroken) return this.parseAll(path, text)
       // a declaration's line being typed in keeps what it declared till the next full parse;  an edit of many lines
       // (a rename, its head and every call) is a change like any other (epic `editor` I170)
-      const keepEdited = this.keepLastGood && changesOneLine(file.text, text)
+      const edited = P.EditedSpan.fits(span, file.text, text) ? span : undefined
+      const keepEdited = this.keepLastGood && P.EditedSpan.changesOneLine(file.text, text, edited)
       // which methods there are:  every call registered ahead of its definition reads again (epic `editor` I170)
       if (parser.changesMethods(this.scope, file.text, text, keepEdited)) return this.parseAll(path, text)
       if (
@@ -163,7 +168,7 @@ export class IncrementalProject {
       }
       const kindsBefore = this.typeKinds()
       const oldMatch = file.match
-      const result = file.update(text)
+      const result = file.update(text, edited)
       if (result === "same") return []
       if (result === "body" || result === "region") return [file]
       // Rewinding took back every later file:  keep those whose lookups find the same, re-parse the rest, in order.
@@ -430,17 +435,4 @@ export type IncrementalProjectProps = {
     /** It's alone, and this is what the project knows of it. */
     head?: P.FileHead
   }>
-}
-
-/**
- * Is `after` `before` with one line changed, and no line added or taken away:  a line being typed in?
- * - What `IncrementalProject.update()` lets keep its declarations till the next full parse (`keepLastGood`).
- */
-function changesOneLine(before: string, after: string): boolean {
-  const was = before.split("\n")
-  const now = after.split("\n")
-  if (was.length !== now.length) return false
-  let changed = 0
-  for (let at = 0; at < was.length && changed < 2; at++) if (was[at] !== now[at]) changed++
-  return changed <= 1
 }

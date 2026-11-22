@@ -239,7 +239,7 @@ describe("SpellDeclarations of a property's list of values", () => {
         contents: ['una "carta" es una cosa donde:', '\t- su "palo" es uno de tréboles, diamantes'].join("\n")
       }
     ])
-    const imports = SP.SpellDeclarations.importScope(SP.spanish.rootScope, [
+    const imports = SP.SpellDeclarations.importScope(SP.Language.for("es").rootScope, [
       { from: "@spell/library/cartas", declarations: cartas }
     ])
     expect(imports.types.get("PaloDeCarta", "LOCAL_ONLY")?.valueKind?.listName).toBe("Palos")
@@ -295,14 +295,14 @@ describe("SpellDeclarations, a type's gender", () => {
   test("goes into its declarations, and its type has it in a project that imports it", () => {
     const { declarations } = compiledSpellProject(
       [{ path: "/Cartas.spell", contents: "una carta es una cosa\nun mazo es una lista de cartas" }],
-      { parentScope: SP.spanish.rootScope }
+      { parentScope: SP.Language.for("es").rootScope }
     )
     const genders = declarations.statements.filter((it) => it.type).map(({ type, gender }) => [type, gender])
     expect(genders).toEqual([
       ["Carta", "feminine"],
       ["Mazo", "masculine"]
     ])
-    const imports = SP.SpellDeclarations.importScope(SP.spanish.rootScope, [
+    const imports = SP.SpellDeclarations.importScope(SP.Language.for("es").rootScope, [
       { from: "@spell/library/cartas", declarations }
     ])
     expect(imports.types.get("Carta")?.gender).toBe("feminine")

@@ -27,11 +27,12 @@ const SSR_TESTS = ["**/*.ssr.test.{ts,tsx}"]
 
 /**
  * Node tooling tests, run with the `ssr` project, in node:  the tools' (`src/tools/`), and Spell UI's `spell` commands'
- * (`src/cli/`:  `spell icon`, `spell ssr`, `spell pack`, `spell design`).
+ * (`src/cli/`:  `spell icon`, `spell ssr`, `spell pack`, `spell design`), and its drawers for the page server
+ * (`src/drawings/`).
  * - The tests mirror `src/`:  `tests/tools/` tests `src/tools/`, `tests/components/ui-button/` tests
  *   `src/components/ui-button/` ...
  */
-const TOOL_TESTS = ["tools/**/*.test.ts", "cli/**/*.test.ts"]
+const TOOL_TESTS = ["tools/**/*.test.ts", "cli/**/*.test.ts", "drawings/**/*.test.ts"]
 
 /**
  * Test files that test MOTION itself:  the `motion` project's, with animations ON.
@@ -88,7 +89,7 @@ const MOTION_TESTS = [
  *   - the plugin picks its posture (client, or the server build of `@solidjs/web`)
  *     from `test.environment` of the config it's created in
  *   - it never sees a project's `environment` through `extends: true`
- * - NOTE: `ssr` runs FIRST:  it writes `.cache/ssr-button.html`, which `tests/test-helpers/dsd.test.ts` imports.
+ * - NOTE: `ssr` runs FIRST:  it writes `.cache/ssr-shadow.html`, which `tests/test-helpers/dsd.test.ts` imports.
  *   - `yarn test` here runs the projects one after the other.
  *   - In the root's single run, `sequence.groupOrder` does it:
  *     vitest runs project groups in ascending order, and a group finishes before the next starts.

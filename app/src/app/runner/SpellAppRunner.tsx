@@ -3,11 +3,13 @@ import { Match, Show, Switch, createEffect, createSignal, getOwner, onSettled, r
 import { textChecksum } from "spell/util/string"
 import type { LSP } from "spell/app/lsp"
 import type { SP } from "spell/parser/spell"
+import type { SiteHost } from "spell/parser/core/core.types"
 import type { ThingExplorerState, TypeExplorerState } from "spell/app/app/ui/ui.types"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the `spell/app/app/solid` barrel, which pulls in the editor
 import { TypeExplorer } from "spell/app/app/solid/TypeExplorer"
 import { ThingExplorer } from "spell/app/app/solid/ThingExplorer"
+import { LazyPages } from "./LazyPages"
 import { loadRuntime, type LoadedRuntime } from "./loadRuntime"
 import { ViewerSiteHost } from "./ViewerSiteHost"
 import { fetchJSON, fetchText } from "./fetchFresh"
@@ -49,7 +51,7 @@ import "./SpellAppRunner.css"
  * - Its `<ui-*>` tags are the caller's to define, with Fomantic's icon names:
  *   `<spell-viewer>` is a root that loads them as they appear;  the VS Code runner imports `spell/app/app/solid/loadUI`.
  * - A site it runs keeps its own address, and wears its theme:  one of Spell UI's, or its project's own
- *   (`ViewerSiteHost`).
+ *   (`ViewerSiteHost`);  the run page's keeps it in the page's URL (`siteHost`).
  * - NEVER imports `spell/parser/core`:  it'd land in the bundle's shared chunk, so every app would share it.
  *   Everything of spell's comes from this app's copy of the runtime.
  ****************/
@@ -57,6 +59,8 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
   // `run()` reads props from an effect's callback, and a conditional prop is a memo made on its first read:
   // since Solid rc.17, a memo made there needs an owner (`PRIMITIVE_IN_EFFECT_CALLBACK`)
   const owner = getOwner()
+  /** A running site's host for a new run:  the page's own (`siteHost`), else one keeping its address to itself. */
+  const newSiteHost = (): SiteHost => untrack(() => props.siteHost)?.() ?? new ViewerSiteHost()
   const [loaded, setLoaded] = createSignal<LoadedRuntime>()
   const [error, setError] = createSignal<string>()
   // Does the program draw an app?  Assume so until a run says.
@@ -81,7 +85,7 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
   // what takes back the last run's `in="header"` slots -- see `slotsFromIn()`.  Up here, as above.
   let unslot: (() => void) | undefined
   // a site's host:  its theme, and where it last went, for a run that keeps its things.  Up here, as above.
-  let siteHost = new ViewerSiteHost()
+  let siteHost = newSiteHost()
 
   // NOTE: ALWAYS here, just hidden without an app -- so its mount point is never redrawn
   const appRoot = (<div class="App" />) as HTMLDivElement
@@ -228,7 +232,7 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
       await RootLoader.useLanguage(own.lang)
     }
-    if (!keepThings) siteHost = new ViewerSiteHost()
+    if (!keepThings) siteHost = newSiteHost()
     const ran = await runProgram(copy, source, appRoot, {
       layout: !!layout,
       keepThings,
@@ -320,6 +324,12 @@ export type SpellAppRunnerProps = {
   runtimeUrl: string
   /** URL of the built-in types' scope pack, `core.scopes.js`. */
   builtInsUrl: string
+  /**
+   * A running site's host, made for each run that doesn't keep its things:  where its address lives.
+   * - None:  `ViewerSiteHost`, the site's address its own, as in a `<spell-viewer>` on any page.
+   * - The run page's keeps it in the page's URL (`RunSiteHost`).
+   */
+  siteHost?: () => SiteHost
   /** A Type Explorer link clicked, e.g. `spell:/@spell/examples/Solitaire/Solitaire.spell#L12`. */
   onOpen: (href: string) => void
   /** Hand over what the element can do to us, e.g. `restart()` -- every render. */
@@ -454,12 +464,15 @@ async function runProgram(
     keepThings,
     messages,
     siteHost
-  }: { layout: boolean; keepThings: boolean; messages?: Record<string, string>; siteHost: ViewerSiteHost }
+  }: { layout: boolean; keepThings: boolean; messages?: Record<string, string>; siteHost: SiteHost }
 ): Promise<Ran> {
   const compiled = new Map<string, string>()
+  stopFetchingAhead.get(appRoot)?.()
   try {
     const text = source.compiled ?? (await fetchText(source.compiledUrl))
     compiled.set(MAIN_PROJECT, text)
+    // a built site's pages, each loaded the first time it's shown (epic `solid-2-final` P13)
+    const lazy = source.compiled === undefined ? LazyPages.forProgram(text, source.compiledUrl, copy) : undefined
     const error = await copy.runtime.runApp(text, {
       sourceMap: source.compiled === undefined ? await sourceMapOf(text, source.compiledUrl) : undefined,
       appRoot,
@@ -467,7 +480,7 @@ async function runProgram(
       keepThings,
       messages,
       projectId: source.projectId,
-      siteHost,
+      siteHost: lazy ? lazy.hostFor(siteHost) : siteHost,
       // only a program this page fetched:  an editor's own compiles would each ask every other window to reload
       ...(source.compiled === undefined && { programVersion: textChecksum(text) }),
       coreUrl: copy.coreUrl,
@@ -478,11 +491,15 @@ async function runProgram(
       },
       ...(source.nativeUrl && { loadNative: (module: string) => fetchText(source.nativeUrl!(module)) })
     })
+    if (lazy && !error) stopFetchingAhead.set(appRoot, lazy.fetchAheadIn(appRoot))
     return { error, hasApp: copy.runtime.appIsMounted(), compiled }
   } catch (problem) {
     return { error: messageOf(problem), hasApp: false, compiled }
   }
 }
+
+/** What stops fetching a built site's pages ahead, for the program drawn in each app root (`LazyPages`). */
+const stopFetchingAhead = new WeakMap<HTMLElement, () => void>()
 
 /**
  * The source map compiled javascript `text`, fetched from `url`, names on its last line (epic `elemental-spell` P14):
@@ -507,6 +524,7 @@ async function bindLayout(copy: LoadedRuntime, source: SpellAppSource, root: Ele
     source.declarations ?? fetchJSON(source.declarationsUrl)
   ])
   const { core } = copy.runtime
+  await LayoutSpell.loadLanguagesOf(declarations)
   return new LayoutSpell({ root, projectId: source.name, declarations, core }).bind()
 }
 

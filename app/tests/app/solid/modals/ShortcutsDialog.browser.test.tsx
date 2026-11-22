@@ -7,7 +7,8 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { APP_TEXTS } from "spell/app/app/ui/AppTexts.en"
 import { appTextsEs } from "spell/app/app/ui/AppTexts.es"
 import { uiReady } from "spell/app/app/solid"
-import { openShortcuts, shortcutRows } from "spell/app/app/solid/modals"
+import { openShortcuts } from "spell/app/app/solid/modals"
+import { shortcutRows } from "spell/app/app/solid/modals/ShortcutsDialog"
 import { EDITOR_HOTKEYS, HOTKEY_GROUPS, editorHotkeys, type ListedHotkey } from "spell/app/app/pages/editorHotkeys"
 
 /**

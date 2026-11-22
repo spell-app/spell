@@ -1,7 +1,7 @@
 import { NONE } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import { longestNameIn, namesWithGrammarWords } from "spell/parser/spell/rules/rules.types"
+import { isWordIn, longestNameIn, namesWithGrammarWords } from "spell/parser/spell/rules/rules.types"
 import { SpellType } from "spell/parser/spell/rules/types"
 import { SpellIdentifier } from "./SpellIdentifier"
 
@@ -64,7 +64,7 @@ export class WordsIdentifier extends SpellIdentifier {
   static declaredWithGrammarWords(scope: P.Scope, tokens: P.Token[], start = 0): number {
     if (!(tokens[start + 1] instanceof P.WordToken)) return 0
     const { blacklist } = SP.Language.of(scope).words
-    const names = namesWithGrammarWords(scope.variables, "variable", wordsOfVariable, (word) => !!blacklist[word])
+    const names = namesWithGrammarWords(scope.variables, "variable", wordsOfVariable, isWordIn(blacklist))
     if (!names.length) return 0
     return longestNameIn(SpellType.lowerWords(tokens.slice(start), MAX_WORDS), names)
   }

@@ -1,4 +1,4 @@
-import isEqual from "lodash/isEqual"
+import { isEqual } from "lodash-es"
 import { createEffect, createMemo, createSignal } from "solid-js"
 
 import { SP } from "spell/parser/spell"

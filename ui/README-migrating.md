@@ -198,7 +198,7 @@ The word is the attribute's name with `-` as a space, unless the vocabulary name
     so remove the attribute instead.
 - A value that isn't allowed is dropped, with a "did you mean" warning in development:
   `color="gren"` draws a plain button and suggests `green`.
-- The live page, with every example:  the docs site's [Grammar page](docs/grammar.html).
+- The live page, with every example:  the Spell UI site's [Grammar page](../app/spaces/@spell/guides/SpellUI/Grammar.spell), at `/components/ui/grammar`.
 
 </details>
 

@@ -12,6 +12,8 @@ import { P } from "spell/parser/parser"
  *     spell's `NewThing.namesGiven()` (`named:<name>`)
  * - Generous:  a lookup by a line that's since been re-parsed stays noted until the whole file parses again.
  *   One noted too many can only make the file parse again when it needn't.
+ *   - But held WEAKLY (epic `solid-2-final` P10):  a list or record nothing else holds any more, an old line's,
+ *     is let go;  no diff can name it, so forgetting it changes no answer.
  * - Knows nothing of files or projects:  `P.ParseDiff` says what changed, and asks `isAffectedBy()`.
  */
 export class Outline {
@@ -21,23 +23,39 @@ export class Outline {
    * - A test:  looked through every item for those it passes, `list.scan(test)`.
    * - A test and what it found:  asked if any item passes, `list.some(test)`.
    */
-  readonly lookups = new Map<object, Set<OutlineKey>>()
+  private lookups = new WeakMap<object, Set<OutlineKey>>()
 
-  /** Every record a lookup found. */
-  readonly found = new Set<object>()
+  /**
+   * The owner of each list asked (a type, for its members):  its change affects us too.
+   * - Weak, as `lookups` is:  a list of a line parsed again since, e.g. an old method's scope, is let go
+   *   (epic `solid-2-final` P10:  kept, every edit typed kept the old lines' scopes, and their parses).
+   */
+  private owners = new WeakSet<object>()
+
+  /**
+   * Every record a lookup found.
+   * - Weak:  a record of a line parsed again since is let go, as nothing asks for it any more
+   *   (epic `solid-2-final` P10:  kept, every edit typed kept its line's old parse).
+   */
+  private found = new WeakSet<object>()
 
   /** Note that `list` (or a type) was asked for `key` -- see `lookups` -- and found `item`. */
   lookedUp(list: object, key: OutlineKey, item?: unknown): void {
     let keys = this.lookups.get(list)
-    if (!keys) this.lookups.set(list, (keys = new Set()))
+    if (!keys) {
+      this.lookups.set(list, (keys = new Set()))
+      const owner = (list as { props?: P.ScopeListProps }).props?.target as object | undefined
+      if (owner) this.owners.add(owner)
+    }
     keys.add(key)
     if (item && typeof item === "object") this.found.add(item)
   }
 
   /** Forget everything:  the file parses from scratch. */
   clear(): void {
-    this.lookups.clear()
-    this.found.clear()
+    this.lookups = new WeakMap()
+    this.owners = new WeakSet()
+    this.found = new WeakSet()
   }
 
   /**
@@ -61,17 +79,15 @@ export class Outline {
    * - Or a record it found, or a list's owner it asked, changed itself:  e.g. a type's `superType`.
    */
   isAffectedBy(diff: P.ParseDiff): boolean {
-    for (const [list, keys] of this.lookups) {
-      const changed = diff.changedKeys.get(list)
-      if (changed) {
-        for (const key of keys) {
-          if (isAffected(key, changed, diff.changedItems.get(list))) return true
-        }
+    // read from the diff's side:  what we noted is weak, so it can't be listed
+    for (const [list, changed] of diff.changedKeys) {
+      for (const key of this.lookups.get(list) ?? []) {
+        if (isAffected(key, changed, diff.changedItems.get(list))) return true
       }
-      const owner = (list as { props?: P.ScopeListProps }).props?.target as object | undefined
-      if (diff.changedRecords.has(list) || (owner && diff.changedRecords.has(owner))) return true
     }
-    for (const record of this.found) if (diff.changedRecords.has(record)) return true
+    for (const record of diff.changedRecords) {
+      if (this.lookups.has(record) || this.owners.has(record) || this.found.has(record)) return true
+    }
     return false
   }
 }

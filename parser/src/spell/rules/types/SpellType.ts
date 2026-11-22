@@ -1,7 +1,7 @@
 import { NONE, proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import { longestNameIn, namesWithGrammarWords } from "spell/parser/spell/rules/rules.types"
+import { isWordIn, longestNameIn, namesWithGrammarWords } from "spell/parser/spell/rules/rules.types"
 
 /**
  * Base pattern rule for matching a type name, singular or plural, known or unknown:
@@ -211,7 +211,7 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     tokens: P.Token[]
   ): P.MatchFor<this> | undefined {
     const { blacklist } = SP.Language.of(scope).words
-    const names = namesWithGrammarWords(types, "type", SpellType.wordsOfTypeName, (word) => !!blacklist[word])
+    const names = namesWithGrammarWords(types, "type", SpellType.wordsOfTypeName, isWordIn(blacklist))
     if (!names.length) return undefined
     const written = SpellType.lowerWords(tokens, SpellType.MAX_NAME_WORDS)
     // plural by its first word, as a person writes it:  `cards in play`, `cartas de juego`

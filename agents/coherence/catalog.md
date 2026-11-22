@@ -522,12 +522,15 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - Epic `data` T76;  the parser's core's until an epic moved it to the kit.
   - It draws the first lot of items (`MOST_AT_ONCE`), then more as a sentinel nears the view,
     reading a place's next page.
-  - What's drawn stays drawn.
+  - Up to `MOST_KEPT` (300) items, what's drawn stays drawn;  past that, the lots more than a few screens from the
+    view are taken down, a stand-in as tall as they were in their place (epic `solid-2-final` P17):
+    never the one with the focus, one typed into, or the one the caller asks for.
   - An item the caller needs (`through`:  a pick, a key's target) is drawn at once.
   - In Spell it's every loop in a drawing, and `<for>` (epic `data` P22) adds the loader, Try again, the empty message,
     pages and a title.
   - In Spell UI it's each `<ui-tree>` column drawn from its items list (`UITree.itemRows()`):
-    5,000 rows open in 33 ms, as 300 do.
+    5,000 rows open in 33 ms, as 300 do;  and a `<ui-table>`'s data rows (`UITable.bodyRows()`), whose own windowing
+    (spacer rows, a scroll listener) moved onto it in P17.
 - **Use it when:**  a list a page draws could be long.  Never a scroll listener or a list's own paging.
 
 ### Remembering a preference
@@ -676,6 +679,20 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Score:**  `listeners = new Set<\(\) => void>\(\)|static adopt\(` · in `epic/src/`
   · home `epic/src/review/PageStore.ts`
 - **Copies:**  `--` since P22 (the six stores)
+
+### Drawing ahead on the server:  diagrams, coloured code
+
+- **It is:**  `SRV.Drawings` (the kit's server, epic `solid-2-final` P15):  a drawer per kind of drawing, ONE disk cache
+  (a `DiskCache` per drawer), ONE route (`/api/server/drawings/<kind>`), and the page server filling each page it
+  serves with what it has;  the elements' half is Spell UI's `GivenDrawings`
+- **Use it when:**  an element draws something that doesn't change from page to page with a heavy engine
+  (Mermaid, highlight.js, Spell's parser):  add a drawer from the folder's route module, and have the element look it
+  up first (`GivenDrawings.find()`, `spell/ui/elements/GivenDrawings`)
+- **Flag:**  a second cache of drawn markup, a page server hook that draws, an element fetching its own pre-drawn copy
+- **Copies:**  none.  Its drawers:  Spell UI's `CodeOnServer`, `MermaidOnServer`;  the app's `SpellOnServer`
+  - NOT the static render (`spell/ui/static`):  it turns elements into plain markup for search engines, no shadow DOM;
+    a drawing ahead keeps the element and hands it its finished picture
+  - NOT `spell readme pictures`:  pictures for GitHub, files beside the README
 
 ## Errors and logging
 
@@ -1075,11 +1092,14 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 - **Use it when:**  a script builds a bundle the page server serves.
 - **Copies:**  `--` since P11 (Spell UI's site bundle, the brand's build)
 
-### A component set's data
+### A component set's guide
 
-- **It is:**  Spell UI's `SiteDataBuilder` (`ui/src/tools/SiteDataBuilder.ts`), its `set` and `forSet()`
-  (epic `coherence` P11):  a set's own groups as the topics, its own side-column links, its pages one flat folder
-- **Copies:**  `--` since P11 (the brand's, Epic UI's and App UI's data)
+- **It is:**  a Spell guide in `@spell/guides` (`SpellUI`, `EpicUI`, `AppUI`;  epic `editor` P43-P44):  its site file
+  says each page's address and group;  `SpellUIGuide` (`ui/src/util/SpellUIGuide.ts`) each page's address on the page
+  server, and the link mender's rule for the old HTML pages;  `yarn site:check [--site epics | app]` checks it
+- **Use it when:**  a set of elements needs its pages:  never HTML components pages again.
+- **Copies:**  `--` since P44 (`SiteDataBuilder`'s set mode, `forSet()`, went with the other sets' HTML pages;  epic
+  `coherence` P11 had made it the one way to build a set's data)
 
 ### A docs element's site data
 
@@ -1114,7 +1134,7 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 
 ### Spell UI's folder, the site's pages, the page server
 
-- **It is:**  `SPELL_UI_ROOT` and `sitePages()` (`ui/src/tools/tools.types.ts`), `ensurePageServer()`
+- **It is:**  `SPELL_UI_ROOT` (`ui/src/tools/tools.types.ts`;  `sitePages()` went in epic `editor` P44), `ensurePageServer()`
   (`ui/src/tools/pageServer.ts`;  epic `coherence` P23)
 - **Use it when:**  a Spell UI script or tool needs the repo's folder, the docs site's pages, or the page server
   running.

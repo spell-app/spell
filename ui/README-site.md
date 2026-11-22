@@ -1,310 +1,142 @@
-# Spell UI's docs site
+# The Spell UI site
 
-```html
-<ui-section id="examples-types-button" label="Button" sticky collapsible dividing>
-  <ui-example description="A standard button.">
-    <ui-button>Follow</ui-button>
-  </ui-example>
-</ui-section>
+```spell
+<section label="Button" sticky="stack" collapsible dividing>
+	<example "Button" description="A standard button.">
+		<button>Follow</button>
+	</example>
+</>
 ```
 
-_The first example on [the Button page](docs/ui-button.html), as it's written on disk._
+_The first example on the Button's Examples page, as it's written on disk:
+[Examples.spell](../app/spaces/@spell/guides/SpellUI/Button/Examples.spell)._
 
 That's a whole example, and all of its source.
-In the browser it's a live `<ui-button>` under its description, with a code button that shows these same lines.
+On the page it's a live `<ui-button>` under its description, with a code button that shows these same lines.
 Nobody typed them twice:  an example shows its own markup.
 
-If you've written Storybook stories, here's what's different.
-A story is a function, and Storybook builds every story into an app of its own.
-Here an example is markup in a plain HTML page, and the page server sends that page exactly as it is on disk:
-nothing is built between saving a page and reading it.
-The one thing built is a bundle every page loads, and the page server builds that itself when its sources change.
+Spell UI's docs are a Spell guide, the Spell UI site:  one project of notebook pages,
+`@spell/guides/SpellUI`, in the app folder's built-in projects.
+- 435 pages, with 2,074 live examples (counted 2026-11-22).
+- A component has a folder of four pages, Usage, Examples, API and Theming;
+  its Usage page is its address (`/button`), the others under it (`/button/examples`).
+- Nine more:  the home page, getting started, the class grammar, theming, icons, utilities,
+  the component index, the kitchen sink and the theme bench.
+- The site file, [SpellUI.spell](../app/spaces/@spell/guides/SpellUI/SpellUI.spell),
+  says where each page is and what the side navigation calls it.
+- Where an element can't do what a page needs, that's a gap in the library:
+  it gets fixed in the element, never patched in the page.
 
-There are 121 pages, with 2,159 live examples (counted 2026-11-21):
-- a page per family, 96 of them, each named for its main tag and laid out as fomantic-ui.com's are
-- a page of its own for 15 sub-tags:  `ui-radio`, `ui-textarea` and the content parts
-- ten more:  the home page, getting started, the class grammar, theming, utilities, icons, the palette,
-  the theme bench, the component index and the kitchen sink
-
-Each family's page has four tabs, Examples, Usage, API and Theming, and an "On this page" rail beside them.
-A left nav lists every component, A-Z or by topic, with a search.
-And where an element can't do what a page needs, that's a gap in the library:
-it gets fixed in the element, never patched in the page.
+Until epic `editor` P43 the docs were 121 hand-written HTML pages in `docs/`, the components pages.
+They're gone:  the Spell UI site has every page they had,
+and a link written for one (`/components/ui/ui-button.html`) is mended to its Spell page's address
+(`/components/ui/button`) by the page server's link mender.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
   vocab["the families' vocabularies and sheets"] -- "yarn site:data" --> data["docs/__data/<br/>generated, committed"]
-  src["site/_src/<br/>the site's own code"] -- "yarn site:bundle" --> bundle["site/_assets/<br/>built when stale, never committed"]
-  pages["docs/<br/>the pages, by hand"] --> server["the page server"]
+  pages["the Spell UI site<br/>@spell/guides/SpellUI"] --> server["the page server"]
   data --> server
-  bundle --> server
+  viewer["docs/index.html<br/>one page, a spell-viewer"] --> server
   server --> browser["the browser,<br/>at /components/ui/"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef folder fill:#E6EAF5,stroke:#8E96B5,stroke-width:1.5px,color:#1A1C27,rx:4px,ry:4px
-  class data,src,bundle,pages folder
+  class data,pages,viewer folder
 ```
 
-_Three things make the site:  pages written by hand, data a script writes from the elements, and one bundle._
+_Three things make the site:  the Spell pages, data a script writes from the elements, and one page that shows them._
 
-## Viewing it:  one command, from anywhere in the kit
+## Viewing it:  at /components/ui/, with no editor
 
 ```sh
-spell server start all
+spell server start
 ```
 
-<details>
-<summary>What it printed</summary>
+Then open `/components/ui/` on the page server, or any page's address under it:
+`/components/ui/button/api` is the Button's API page, `#section` and all.
 
-```text
-Spell servers of ~/www/spell.worktrees/readme:
-  page server           56343  http://127.0.0.1:56343/                docs, epics, /api                 started
-  editor                56344  http://localhost:56344/                the spell app (vite)              running
-  Spell UI's docs site  56343  http://127.0.0.1:56343/components/ui/  static pages, by the page server  running
-```
-
-</details>
-
-_A run in an epic's worktree of the kit:  the main checkout's server already held port 4747, so this one took free
-ports._
-
-The last row is the docs site:  open it, or one page in it, `ui-button.html`.
-When the bundle is stale, the page server rebuilds it as it starts, and a page that asks for it first waits.
-
-- The docs site is served by the kit's page server, because Spell UI's own part of its settings names the set and
-  its bundle (`"pageServer"`, in [package.json](package.json):
-  [the kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md#settings-and-route-modules--each-repo-brings-its-own)).
-  - So it needs only a checkout of the kit, Spell UI's folder with it
-    ([setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero)).
-  - `start all` and `spell server start` both find the kit from any folder of it.
-- `start all` brings up the editor too, from the app's folder.
-  For the page server alone, `spell server start`.
-- An open page reloads when the page, its layout, its data or the bundle changes.
-- `spell server stop all` stops them both.
-- The epic server serves the same pages, at the same path.
+- Every address under `/components/ui/` gets the same page, [docs/index.html](docs/index.html):
+  a `<spell-viewer>` showing the Spell UI site, at the page the address names.
+  - It's Spell UI's component set's `sitePage`, in its part of the page server's settings
+    (`"pageServer"`, in [package.json](package.json)).
+  - Going to another page changes the address, so back, forward and a reload work as with plain pages.
+  - The page server compiles the guides as it starts.
+- In the editor, the same site is the project `/run/@spell/guides/SpellUI`:
+  that's where a page is changed, with Change this.
+  The page at `/components/ui/` is for reading.
+- Links to the site are worked out in one place, [SpellUIGuide](src/util/SpellUIGuide.ts):
+  the editor's Inspector, the theme bench, `spell ui icon`, the components catalogue and the link mender ask it.
+- The pages read Spell UI's docs folder, served at the same address:
+  - its data, `__data/`:  the API tables, the search, the component index
+  - Fomantic's docs pictures, `images/`, and the files examples load, `examples/`
+- Under a worktree's address too:  `/worktrees/<epic>/components/ui/...`.
 - Just the elements, no server:  `yarn dev` in `ui/` opens [the demo](src/tools/demo/index.html),
   every example in class grammar beside the elements, with hot reload.
 
-Three catches, all found the hard way:
-- **A page opened from disk shows bare markup.**
-  At a `file://` address there's no `_assets/` beside the page, so no bundle.
-- **`spell server url <file>` doesn't know the docs site yet.**
-  For a page in `docs/` it prints a plain file's address, with no bundle laid over it.
-  Use the docs site's address instead:  `/components/ui/<page>`.
-- **The main checkout's server never builds a worktree's bundle.**
-  It answers `/worktrees/<epic>/components/ui/` with the worktree's own pages and bundle,
-  but builds only its own bundles as it starts.
-  After a change to the bundle's sources in a worktree, run `spell bundle ui-site` there,
-  or `spell server start all` in the worktree, as above.
-
-## A page is its head and one `main`
-
-Every page is a component set's page, laid out as every set is:
-pages in one flat folder, tracked with the branch, so a page changes in the same commit as its element.
-This is all of a page's file but its content:
-
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light dark" />
-    <title>Button | Spell UI</title>
-    <meta name="description" content="A button indicates a possible user action." />
-    <script>
-      /* the viewer's colour scheme, before first paint */
-    </script>
-    <link rel="stylesheet" href="_assets/site.css" />
-    <script type="module" src="_assets/site.js"></script>
-    <script defer src="/_epic/assets/spell-comments.js"></script>
-  </head>
-  <body class="ui-typography">
-    <main id="main" class="site-main" data-toc-header="Button">
-      <!-- the masthead, then <ui-tabs id="site-tabs"> and its four panes -->
-    </main>
-  </body>
-</html>
-```
-
-_From [ui-button.html](docs/ui-button.html), trimmed:  the scheme script's ten lines, and 1,064 lines of content._
-
-There's no top bar, no nav and no `<ui-root>`.
-They're in [the layout](docs/__parts/layout.html), written once for every page,
-and the bundle puts each page's `main` inside it.
-
-### The first load:  hidden until it's all there
-
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"sequence":{"mirrorActors":false,"messageAlign":"left","noteAlign":"left"}}}%%
-sequenceDiagram
-  participant File as ui-button.html
-  participant Site as site.js
-  participant Server as the page server
-  participant Root as ui-root
-  Note over File: site.css hides the main, 4 s at most
-  File->>Site: loads its one script
-  Site->>Site: keeps every example's markup, before anything upgrades
-  Site->>Server: fetches __parts/layout.html
-  Server-->>Site: the top bar, nav, footer and ui-root
-  Site->>File: wraps the main in the layout
-  Site->>Server: the viewer's theme sheet
-  Site->>Root: defines ui-root, only now
-  Root->>Server: imports each family the page uses, once each
-  Root-->>File: shows the whole page at once
-```
-
-_The page shows once its layout, its theme and every element on it are ready:  no flash of unstyled markup, no jump._
-
-- The order is the trick.
-  `<ui-root display="when-ready">` keeps the page hidden until every element in it is ready,
-  and the bundle defines it only after the layout and the theme's sheet are in, so the chrome counts too.
-  Until then [the site's CSS](site/_src/site.css) hides the bare `main`, for 4 seconds at most.
-- The examples' markup is kept FIRST, by the bundle's first import, [snapshot.ts](site/_src/snapshot.ts).
-  An element may change its light DOM as its family loads (a roving `tabindex`, an include's fetched content),
-  so the code an example shows is read before anything upgrades.
-  An example whose markup changes as it runs holds it in a `<template>` child instead.
-- After the first page, a click on another page of the site doesn't load a page.
-  The site's router fetches it, loads the families it uses, swaps only the `main`
-  (through a `<ui-include selector="main#main">`) and pushes its real URL:
-  inside a View Transition, where the browser has them.
-  - The chrome stays;  back, forward, deep links and reloads work as with plain pages.
-  - A swap that fails falls back to a full load.
-- **The catch:**  inline scripts in `main` run again on every visit, and `<head>` styles DON'T follow a swap.
-  Put a page's styles in its `main`, or in the site's layout glue.
-
-What a page can count on:
-- Links are written as from the page's served address:
-  `_assets/` is beside it, `../../` is the page server's root, `../epics/epic-item.html` another set's page.
-- `<ui-root>` loads every family on first use, the doc-only `<ui-docs-*>` elements included:
-  `api`, `index`, `inspector`, `nav`, `search`, `theme-bench` and `tokens`, in [their folder](src/docs-components/).
-  - Three were among them once, and are real elements now:
-    `<ui-theme-menu>` (epic `debut` P17), `<ui-example>` and `<ui-toc>` (epic `ui-gaps` P14).
-  They read the site's data, [components.json5](docs/__data/components.json5), never the vocabularies.
-- The layout's root is `<ui-root class="site" stack-with="page" ...>`,
-  so an example that stacks on a narrow screen stacks by the SCREEN's width, as on fomantic-ui.com,
-  not by the narrower docs column's.
-- Everything visible is a `ui-*` element.
-  The site's CSS is layout glue only (grid areas, widths, sticky offsets):  a rule there that changes a look is a gap.
-- A page's source is one click away:  the site header's "open in VS Code" button.
-
-### Comments come with every page
-
-People comment on these pages as on every set's,
-with the bullhorns, threads and Send of `spell-epic`'s review tools ([its README-pages.md](https://github.com/spell-app/spell/blob/main/epic/README-pages.md)).
-
-- Every page loads them in its `<head>`, after the site's bundle:
-  `<script defer src="/_epic/assets/spell-comments.js"></script>`.
-  `yarn site:new` writes that line;  a page written by hand needs it.
-- The layout loads the epics pack, `<ui-components source="/_epic/pack/epics.pack.js">`:
-  its `<epic-thread>` and `<epic-comment-pane>` draw the threads and the pane.
-- Both are `spell-epic`'s engine routes, `/_epic/...`, which the page server serves too.
-- The site's bundle shares its Solid and Spell UI with the pack, by their npm names
-  (`solid-js`, `@solidjs/web`, `spell/ui/core`, `spell/element` ...):  [SitePacks.ts](site/_src/SitePacks.ts).
-- A comment waits in `<page>.inbox.json5` beside its page, git-ignored,
-  until Send hands it to the standing `feedback` epic.
-- **The cost:**  a pack may use any export of what it shares, so those modules stay whole in the bundle.
-  A page loads 555 kB of script and CSS before its first family, 155 kB gzipped, on today's build;
-  without them it was 305 kB, 79 kB gzipped, as SitePacks.ts's header records.
-
 <details>
-<summary>The pages folder and the build folder, file by file</summary>
+<summary>The docs folder and the build folder, file by file</summary>
 
 | Path | What |
 | --- | --- |
-| [docs/](docs/) | the pages, served at `/components/ui/`:  `index.html`, `getting-started.html`, `grammar.html`, `theming.html`, `utilities.html`, `icons.html`, `kitchen-sink.html` |
-| [docs/components.html](docs/components.html) | the component index:  its cards between markers, written by `yarn site:index` |
-| `docs/ui-<name>.html` | one page per family, named for its main tag;  a page of its own for each sub-tag its family lists under `pages` in `pages.json5` (`ui-radio`, `ui-textarea`, the content parts but `ui-header`) |
-| [docs/\_\_parts/](docs/__parts/) | `layout.html`:  EVERY page's chrome (top bar, nav, `<ui-root>`), written once;  `footer.html` |
-| [docs/\_\_data/](docs/__data/) | `components.json5`, `icons.json5`, `search.json5`, `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`:  GENERATED by `yarn site:data`, and committed, since the pages fetch them as they are;  `pages.json5`, kept by hand |
+| [docs/index.html](docs/index.html) | the page that shows the Spell UI site at every one of its addresses, with no editor |
+| [docs/\_\_data/](docs/__data/) | `components.json5`, `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`:  GENERATED by `yarn site:data`;  `search.json5`, GENERATED by `yarn site:check --all` from the Spell pages as drawn;  all committed, since the pages fetch them as they are;  `pages.json5`, kept by hand |
 | [docs/examples/](docs/examples/) | files the pages' examples load:  `<ui-include source>`, `<ui-markdown source>`, an icon pack |
 | [docs/images/](docs/images/) | Fomantic's docs images, at fomantic-ui.com's `/images/...` paths;  `components/`, the catalogue's 40 thumbnails (`yarn readme:components`) |
-| [site/\_src/](site/_src/) | the bundle's source:  [site.ts](site/_src/site.ts), the entry (what's in it and why);  [SitePacks.ts](site/_src/SitePacks.ts), the component packs' globals;  `SiteShell.ts`, which mounts the layout;  `SiteRouter.ts`, which swaps pages;  [SitePatch.ts](site/_src/SitePatch.ts), which patches an edited page in place (the kit's `PagePatch`);  [SiteSections.ts](site/_src/SiteSections.ts), sticky offsets, folds and landing on a hash (through `HashLanding`);  `snapshot.ts`, the examples' markup;  [site.types.ts](site/_src/site.types.ts), their shared constants, which the site check reads too;  [site.css](site/_src/site.css), layout glue only.  Its config:  [vite.site.config.ts](vite.site.config.ts) |
+| [site/\_src/](site/_src/) | the component sets' HTML pages' bundle, which no set's pages load since their guides became Spell:  [site.ts](site/_src/site.ts), the entry (what's in it and why);  [SitePacks.ts](site/_src/SitePacks.ts), the component packs' globals;  `SiteShell.ts`, which mounts a set's layout;  `SiteRouter.ts`, which swaps pages;  [SitePatch.ts](site/_src/SitePatch.ts), which patches an edited page in place (the kit's `PagePatch`);  [SiteSections.ts](site/_src/SiteSections.ts), sticky offsets, folds and landing on a hash (through `HashLanding`);  `snapshot.ts`, the examples' markup;  [site.types.ts](site/_src/site.types.ts), their shared constants;  [site.css](site/_src/site.css), layout glue only.  Its config:  [vite.site.config.ts](vite.site.config.ts) |
 | `site/_assets/` | GENERATED, NOT committed:  the bundle (`site.js`, `site.css`, a lazy chunk per family);  `.bundle.json`, its sources' hash, so the page server doesn't build it again;  `icon-packs`, a link to `../../src/icons/icon-packs` (2,167 SVGs, 8.7 MB:  committed once, never copied).  NEVER edit |
 
-- Git-ignored because its hashed chunk names churned every diff;
-  how the page server builds bundles on demand:  [the kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md).
-- EVERY component set's pages load this one bundle:
-  Spell UI's, Epic UI's at `/components/epics/`, App UI's at `/components/app/`.
-  Each takes the folder above its `_assets/` as the site's root, for its layout and its data.
+- The bundle is still built here, though no component set's pages are HTML any more:
+  Epic UI's and App UI's guides are Spell, as this site is, at `/components/epics/` and `/components/app/`.
+  - Each set takes the folder above its `_assets/` as the site's root, for its layout and its data.
+  - Git-ignored because its hashed chunk names churned every diff;
+    how the page server builds bundles on demand:  [the kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md).
 - `site.ts`, `snapshot.ts` and `SitePacks.ts` are imported for what they do, not for exports:
   each is listed in `package.json`'s `sideEffects`, or the bundler drops it.
 
 </details>
 
-## Writing a page:  start from the model, write it flat
+## Writing a page:  in the editor, as Spell
 
-The model page is [ui-button.html](docs/ui-button.html):  open it beside yours, and copy its patterns.
-A new page comes from `yarn site:new`, in `ui/`:
+A page is a notebook page of the Spell UI site, changed in the editor (`/run/@spell/guides/SpellUI`) or in its file.
+A new component's pages come from `yarn site:new`, in `ui/`:
 
 ```sh
-yarn site:new ui-card                                                          # docs/ui-card.html
-yarn site:new getting-started --title "Getting started" --summary "One line."  # docs/getting-started.html
+yarn site:new ui-card
 ```
 
-- A tag (any tag of the family:  `ui-cards` works too) writes its four pages in the Spell UI site
-  (`<Title>/Usage.spell` ... in `@spell/guides/SpellUI`, and their lines in its site file), as Spell, from its
-  family's page, `docs/<main tag>.html`:  a masthead with the theme menu, and the four tabs, from the template
-  when it isn't there yet.
-- A sub-tag its family lists under `pages` writes a page of its own, `docs/<tag>.html`:
-  ONE tag's API (`<ui-docs-api tag>`, where `#<tag>` lands), and a Theming tab only when a family token names it.
-- Anything else is a guide page, one column, no tabs:  `--title` (default:  the name in Title Case) and `--summary`.
+- A tag (any tag of the family:  `ui-cards` works too) writes its four pages in the Spell UI site,
+  `Card/Usage.spell`, `Examples.spell`, `API.spell` and `Theming.spell`, and their lines in the site file and
+  the project file, A to Z.
+- A sub-tag its family lists under `pages` gets pages of its own:
+  ONE tag's API (`<ui-docs-api tag>`), and a Theming page only when a family token names it.
 - Title, summary and status come from [the pages data](docs/__data/pages.json5):
   fix a summary THERE, then `yarn site:data`.
-- It starts from `spell/epic`'s template, [spell-ui-docs.html](https://github.com/spell-app/spell/blob/main/epic/templates/spell-ui-docs.html),
-  found through the kit's install, and refuses to overwrite a page:  `--force` does, and loses what you wrote.
+- It starts from its template,
+  [ComponentPage.template.html](src/tools/ComponentPage.template.html),
+  filled in memory and written as Spell ([SpellUISite](src/tools/SpellUISite.ts), on [SpellMarkup](src/tools/SpellMarkup.ts)).
+- What it couldn't write as Spell (a script that drives an example) it lists, to tidy by hand.
+- A component the site has already is left as it is:  `--force` writes it again, and loses what you wrote.
+- A guide page (not a tag) is written in the site by hand, with its line in the site file:
+  `yarn site:new` says so, and writes nothing.
 
-```text
-$ yarn site:new my-guide --title "My Guide"
-wrote docs/my-guide.html  (page)
-  check:  yarn site:check my-guide.html
-```
-
-### The Examples pane:  write it flat, and let a script nest it
-
-Write a level 2 header per topic, and an example with a `header` for each example.
-Here is the hook's example, as you'd type it:
-
-```html
-<ui-header level="2" dividing>Types</ui-header>
-<ui-example heading="Button" description="A standard button.">
-  <ui-button>Follow</ui-button>
-</ui-example>
-```
-
-Then `yarn site:sections` turns it into the markup at the top of this page.
-The header becomes `<ui-section id="examples-types" label="Types" sticky collapsible dividing>`,
-and the example a section of its own inside it, `#examples-types-button`, holding the example without its `header`.
-
-- Every section's title sticks below the tabs' bar, which sticks too.
-- They fold, and the folds are remembered per page;  everything starts open.
-- The ids follow the nesting, so a link lands anywhere:
-  `#examples-types-emphasis` opens the Examples tab, unfolds what hides it,
-  and puts its title just below the stuck ones ([SiteSections.ts](site/_src/SiteSections.ts)).
-  Old hashes still land (`#types`, `#emphasis`).
-  - The landing itself is the docs elements' own,
-    [HashLanding](src/components/ui-toc/HashLanding.ts), by the site's rules:
-    the page scrolls once, where the table of contents and the site used to scroll one after the other.
-- Rerun `yarn site:sections` after renaming a header:  it fixes the ids, and running it twice changes nothing.
-- An example is a `<ui-example description>` around live markup.
-  It shows that markup, re-indented, so you write it once;  a comment inside it shows too.
-
-The other three panes:
+How a page is laid out:
+- Examples:  Fomantic's page, section by section and in its order, a `<section label>` per topic,
+  and a section of its own around each example.
+  - An example is an `<example "Name" description="...">` around live markup:  the markup IS the code shown.
+  - Every section's title sticks below the ones above it, and folds.
+  - The table of contents names each section by its label as it draws:  no ids to write.
 - Usage:  what to write, the events with their `detail`, keyboard and accessibility, in sections like Examples'.
 - API:  done already.
-  `<ui-docs-api family="ui-button">` draws every table from the vocabularies,
-  and `yarn site:sections` splits it into one section per kind the family has (Attributes, Events ...),
-  each holding `<ui-docs-api family="ui-button" only="attributes">`.
+  A section per kind of table the family has (Attributes, Events ...),
+  each holding `<ui-docs-api family="ui-button" only="attributes">`, which draws the table from the vocabularies.
   - A family of 2+ tags gets a Tags section first:  each tag with its one-line summary,
-    its name a link to its first table below (`<ui-docs-api family="ui-button" only="tags">`).
-  - So the API tab gets the same row of section buttons as Examples.
-  - Its "On this page" list names every attribute, event, slot ... under its section;
-    a click lands on the row (`#api-attributes-size`), which flashes.
-  - Rerun `yarn site:sections` after `yarn site:data`:  a tag's first event adds an Events section.
-- Theming:  keep `<ui-docs-tokens family="ui-button" playground>`, and explain the family's tokens around it.
-  - `yarn site:kitchen` fills the playground with the family's main example, so a token edited there shows at once.
-  - A playground with children of your own (and no markers) is yours:  the script leaves it alone.
+    its name a link to its first table below (`only="tags"`).
+  - A tag's first event, after `yarn site:data`, needs an Events section by hand.
+- Theming:  `<ui-docs-tokens family="ui-button" playground>` around the family's main example,
+  and the family's tokens explained around it.
+  The playgrounds are kept by hand since epic `editor` P43;  before, `yarn site:kitchen` filled the HTML pages' ones.
 
 <details>
 <summary>The pages guide in five lines, and the sub-tag pages</summary>
@@ -314,11 +146,10 @@ In five lines:
 1. Fomantic's page, section by section and in its order, with its headers and descriptions;  our own extras after.
 2. The only attributes that exist are the family's vocabulary, `UI<Name>.en.ts`.
    Its `examples/elements/` files are Fomantic's examples already in element markup:  reuse them.
-3. The markup IS the code shown:  clean `ui-*` markup, no `style=`, and no comments inside an example.
-4. A Fomantic feature left out on purpose gets one line in its place,
-   `<ui-message size="small" class="site-not-ported">Not ported:  ...</ui-message>`:  the pages have 81.
-5. What an element can't render yet is a gap:  a comment before its example's section, naming its issue
-   (147 in the pages today), and a fix in the element, never CSS in the page.
+3. The markup IS the code shown:  clean markup, no `style=`, and no comments inside an example.
+4. A Fomantic feature left out on purpose gets one line in its place:  a small message saying "Not ported".
+5. What an element can't render yet is a gap:  a comment before its example's section, naming its issue,
+   and a fix in the element, never CSS in the page.
 
 The gap that catches everybody once, from the Button page:
 
@@ -326,43 +157,43 @@ The gap that catches everybody once, from the Button page:
 <!-- GAP I23:  Fomantic's `right arrow` / `left chevron` draw nothing;  use the canonical `arrow right`, `chevron left`. -->
 ```
 
-A sub-tag gets a page of its own once its family's entry in `pages.json5` lists it under `pages`
+A sub-tag gets pages of its own once its family's entry in `pages.json5` lists it under `pages`
 (title, summary, status).
-- Then `yarn site:data`, and `yarn site:new <tag>` writes `<tag>.html`.
-- Its family's page keeps the whole family's API, and a one-line link to it.
-- The nav, the search, the component index and the kitchen sink follow.
+- Then `yarn site:data`, and `yarn site:new <tag>` writes them.
+- Its family's pages keep the whole family's API, and a one-line link to it.
 - Today:  `ui-radio` (from `ui-checkbox`), `ui-textarea` (from `ui-input`),
-  and twelve content parts (from `ui-parts`, whose own page is `ui-header.html`).
+  and twelve content parts (from `ui-parts`, whose own page is the content parts').
 
 </details>
 
-## The scripts:  four rebuild what the site reads
+## The scripts:  what rebuilds what the site reads
 
 From `ui/`.
-After changing a vocabulary, a family's sheet, an example or any source the site shows, run `yarn site:build`:
-it runs the first four below, in turn.
-Then commit what it changed in `docs/`;  the bundle is never committed.
+After changing a vocabulary, a family's sheet or an example, run `yarn site:build`.
+Then commit what it changed in `docs/__data/` and the Spell UI site;  the bundle is never committed.
 
 | Script | What it writes |
 | --- | --- |
-| `yarn site:data [--check]` | the site's data, from the vocabularies and the families' sheets:  `components.json5`;  `icons.json5`, the icon browser's search terms;  `search.json5`, every page's sections for the site search (rerun after renaming or moving a section);  the editors' manifests, `custom-elements.json`, `html-custom-data.json` and `css-custom-data.json`, and the JSX types, `src/jsx.ts`;  and a new family's entry in `pages.json5` |
-| `yarn site:index [--check]` | the component index's cards, [components.html](docs/components.html):  every tag under each of its topics, A-Z |
-| `yarn site:kitchen [--check]` | the kitchen sink's examples, [kitchen-sink.html](docs/kitchen-sink.html), from each family's main example file (`examples/elements/types.html`), three sections a family at most;  and each component page's Theming playground, its family's main example (the first of those sections), between `playground:start` / `playground:end` markers |
-| `yarn site:bundle` | `site/_assets/`, from [the site's entry](site/_src/site.ts) and [its Vite config](vite.site.config.ts);  prints the sizes.  The page server runs it as `spell bundle ui-site` |
-| `yarn site:build` | the four above, in turn |
-| `yarn site:dev` | `site:bundle`, then live editing:  the page server (started if needed) serves `/components/ui/` while a Vite watch build rebuilds the bundle on every source edit, and the open pages reload |
-| `yarn site:new <tag\|page>` | a component's four Spell UI site pages and its page from the template, or a guide page (above) |
-| `yarn site:sections [--check] [page...]` | nests every page's flat headers into `<ui-section>`s and writes their ids, and splits each API tab into a section per kind of table;  no page named:  every page |
-| `yarn site:check <page...> \| --all` | loads pages in a headless browser, and fails on what's broken (below) |
+| `yarn site:data [--check]` | the site's data, from the vocabularies and the families' sheets:  `components.json5`;  the editors' manifests, `custom-elements.json`, `html-custom-data.json` and `css-custom-data.json`, and the JSX types, `src/jsx.ts`;  and a new family's entry in `pages.json5` |
+| `yarn site:kitchen [--check]` | the Spell UI site's Kitchen Sink page, [KitchenSink.spell](../app/spaces/@spell/guides/SpellUI/KitchenSink.spell), between its `kitchen:start` / `kitchen:end` comments:  each family's main example file (`examples/elements/types.html`), three sections a family at most |
+| `yarn site:bundle` | `site/_assets/`, the other component sets' bundle, from [the site's entry](site/_src/site.ts) and [its Vite config](vite.site.config.ts);  prints the sizes.  The page server runs it as `spell bundle ui-site` |
+| `yarn site:build` | the three above, in turn |
+| `yarn site:dev` | `site:bundle`, then live editing:  the page server (started if needed) while a Vite watch build rebuilds the bundle on every source edit, and the open pages reload |
+| `yarn site:new <tag>` | a new component's four Spell UI site pages (above) |
+| `yarn site:check <page...> \| --all \| --search` | loads pages in a headless browser, and fails on what's broken (below);  `--all` and `--search` write `search.json5`, every page's sections for the site search (rerun after adding, renaming or moving a section) |
 | `yarn readme:components [--check]` | the catalogue in [README-components.md](README-components.md), from the site's data;  `--shoot <url> [family ...]` retakes its thumbnails from the served site |
 | `yarn design:build [--out <dir>]` | the claude.ai design system's files, from the site's data, the element examples and the Spell theme, into `<dir>/project/` (by default `build/design-system/`, git-ignored);  also `spell design build` |
 
 - `--check` writes nothing, and exits 1 if a file would change.
-- `site:index`, `site:kitchen` and `readme:components` write only between their pages' markers:
+- `site:kitchen` and `readme:components` write only between their pages' markers:
   the rest of each page is kept by hand.
-- `site:index`, `site:kitchen` and `site:new` run `site:sections`' converter on what they write.
 - A comment typed into one of the `.json5` data files stays when `site:data` rewrites it.
-- `site:dev` doesn't watch the data, the index or the kitchen sink:  rerun `yarn site:build` for those.
+- Gone with the HTML pages in epic `editor` P43:
+  - `yarn site:index`, which wrote the component index's cards:  the index element draws them from the site's data
+  - `yarn site:sections`, which nested a page's flat headers into sections and wrote their ids:
+    a Spell page is written in sections, and the table of contents names them
+  - `icons.json5`, the icon browser's search terms:  the icon browser searches with `IconCatalog`, as the icon picker does
+- `site:dev` doesn't watch the data or the kitchen sink:  rerun `yarn site:build` for those.
   - A watch rebuild leaves old hashed chunks behind;  `yarn site:build` clears them.
   - `Ctrl-C` stops the watch, not the page server.
 - A stale bundle, by hand:
@@ -384,7 +215,8 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 ### Checking:  a real browser, at desktop, phone width and dark
 
 `yarn site:check <page...>`, or `yarn site:check --all`, loads pages of the Spell UI site
-(the Spell pages of `@spell/guides/SpellUI`) as this checkout's editor runs them (started if needed),
+(the Spell pages of `@spell/guides/SpellUI`) as the page server shows them at `/components/ui/`, with no editor
+(this checkout's page server, started if needed;  `--server <origin>` for another),
 in Playwright's Chromium, and fails on:
 - console errors, page errors, failed requests and responses of 400 or more
 - `ui-*` or `spell-*` elements still undefined once settled, or defined ones with no shadow root
@@ -396,9 +228,14 @@ in Playwright's Chromium, and fails on:
 A page is its address in the site (`/button/examples`, `button`), or a tag (`ui-button`).
 Until epic `editor` P42 it checked Spell UI's components pages (`docs/*.html`) instead.
 
+`--all` also writes the site's search file, `docs/__data/search.json5`:
+every page and its sections, read from each page as it's drawn, for the search field in every page's app menu.
+- `--search` only writes it:  no checks, every page in one browser page, clicking from one to the next.
+- It's written only when every page was read.
+
 It checks every page, whatever failed before it.
 Problems go to stderr, a JSON summary is the last thing on stdout,
-and it exits 0 when clean, 1 on any problem, 2 when it can't start (no such page, no editor running the site).
+and it exits 0 when clean, 1 on any problem, 2 when it can't start (no such page, no page server to start).
 
 **What it can't see:  overlap, clipping or ugly wrapping.**
 The screenshots go to `results/site-check/` (or `--out <dir>`):  LOOK at them.
@@ -408,9 +245,9 @@ The command is [site-check.ts](scripts/site-check.ts), on [SiteCheck](src/tools/
 
 The site isn't deployed anywhere yet:  it runs locally, from the page server.
 What a static host would take, from what's built today:
-- one folder, `docs/`, with the site's `_assets/` copied in beside it, through the `icon-packs` link (`cp -RL`)
-- every bundle URL is relative (`base: "./"`), so the site works under any path
-- and one piece that won't travel:  the comments' two addresses, `/_epic/...`, answer only on Spell's own servers
+- the viewer page, `docs/index.html`, answering every address under the site's own
+- the editor's built `<spell-viewer>` (`/element/spell-viewer.js`) and the guides it shows, compiled
+- the docs folder's data, pictures and example files beside it
 
 ## The tools:  the library's own checks, beside the site's
 
@@ -472,7 +309,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [cli.ts](src/tools/cli.ts) | the command line behind `yarn vendor`, `measure`, `smoke` (`declarations`, then `smoke`), `serve`, `report` (`loc`, then `report`), `icons:pack` |
 | [index.ts](src/tools/index.ts) | the barrel:  the measure, vendor, LOC, report, smoke and icon-pack classes;  NOT the site and design tools, the static renderer, the pages or the scripts (its header says why) |
 | [package.config.ts](src/tools/package.config.ts) | `PACKAGE`:  entries, shared entries (`core`, `forms`), externals, peer list, module → bucket;  `DIST_IMPORTS` for import maps |
-| [tools.types.ts](src/tools/tools.types.ts) | `PackageConfig`, result shapes (`MeasureResults`, `SmokeResults`, `LocResults`) and `kB()`, `SolidIdentityHook`, Spell UI's folder (`SPELL_UI_ROOT`), the site's two halves (`SITE_PAGES`, `SITE_BUILD`) and its pages (`sitePages()`), the static pages' and the design export's shapes, the error classes `IconPackError` and `SiteCheckError` |
+| [tools.types.ts](src/tools/tools.types.ts) | `PackageConfig`, result shapes (`MeasureResults`, `SmokeResults`, `LocResults`) and `kB()`, `SolidIdentityHook`, Spell UI's folder (`SPELL_UI_ROOT`), the docs folder and the bundle's (`SITE_PAGES`, `SITE_BUILD`), the Spell UI site's folder (`SPELL_UI_SITE_FOLDER`), the static pages' and the design export's shapes, the error classes `IconPackError` and `SiteCheckError` |
 | [BundleMeasure.ts](src/tools/BundleMeasure.ts) | an in-memory `vite build` with the repo's config, modules bucketed into library / shared entries / own per family / lazy;  the library as used and in full;  standalone per-family builds;  structural checks |
 | [PeerVendor.ts](src/tools/PeerVendor.ts) | one ES module per peer specifier, plus `importmap.json`, in `vendor/`:  deduped (ONE Solid), tree-shaken to the bindings `dist/` and the pages import |
 | [DeclarationCheck.ts](src/tools/DeclarationCheck.ts) | run by `yarn smoke` after the build:  every published `exports` `types` path exists, and every import in `dist/`'s declarations is a bare package name or a path inside `dist/`:  no `#` alias, no `spell/ui/...`, no `spell/util` or `spell/element` (theirs ship in `dist/_util/` and `dist/_spell-element/`) |
@@ -482,15 +319,16 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [ReportTables.ts](src/tools/ReportTables.ts) | rewrites the generated tables of the status report, in the epic folder's Spell UI notes |
 | [peers.ts](src/tools/peers.ts) | the peer specifiers `dist/` imports |
 | [IconPackBuilder.ts](src/tools/IconPackBuilder.ts) | `yarn icons:pack`:  checks a folder of SVGs (no script, no external resources) and writes its `pack.js`, keeping hand edits;  `--sanitize`, `--skip-unsafe`, `--allow-unsafe`;  also run by `gen:icons` |
-| [SiteDataBuilder.ts](src/tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, `icons.json5`, and keeps `pages.json5` complete;  its test fails while they're stale.  Another component set's data too (`set`, `forSet()`):  Epic UI's, App UI's and any other set's |
-| [SiteSearchBuilder.ts](src/tools/SiteSearchBuilder.ts) | `search.json5`:  every page's title and sections, read from the page files, for `<ui-docs-search>` |
+| [SiteDataBuilder.ts](src/tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, and keeps `pages.json5` complete;  its test fails while they're stale.  Another folder's elements read the same way (`components`, `data`):  App UI's web components |
+| [SiteSearchBuilder.ts](src/tools/SiteSearchBuilder.ts) | `search.json5`:  every page's title and sections, for `<ui-docs-search>`;  Spell UI's from its Spell pages as `site:check` draws them |
 | [ElementManifests.ts](src/tools/ElementManifests.ts) | what editors read about the elements, written by `yarn site:data`:  in `docs/__data/`, `custom-elements.json` (Custom Elements Manifest 2.1), `html-custom-data.json` (VS Code's HTML data) and `css-custom-data.json` (VS Code's CSS data:  custom properties, `::part()` and `:state()` names), which spell-app's VS Code extension copies when it's built, for every window;  and the JSX types, `src/jsx.ts` (`spell/ui/jsx`) |
 | [FamilyFiles.ts](src/tools/FamilyFiles.ts) | where a family's own files are, by name:  `ui-button` => `UIButton.css`, `UIButton.types.ts` ...;  for the tools that look one up (`FamilyTokens`, `yarn gen:root`) |
-| [FamilyExamples.ts](src/tools/FamilyExamples.ts) | a family's element examples, read one way:  its files, main one first, and each file's sections;  for the kitchen sink, its playgrounds and the design export |
-| [FamilyTokens.ts](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
+| [FamilyExamples.ts](src/tools/FamilyExamples.ts) | a family's element examples, read one way:  its files, main one first, and each file's sections;  for the Kitchen Sink page and the design export |
+| [FamilyTokens.ts](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its Theming page's token table |
 | [FoundationTokens.ts](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
-| [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the Spell UI site's pages in headless Chromium, as this checkout's editor runs them (`spell server start all`, from the kit's root);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
-| [pageServer.ts](src/tools/pageServer.ts) | the kit whose page server `site:dev` and `site:check` start, from its root, and the kit's own `spell`:  both found by package, never the `spell` on the `PATH`;  `ensurePageServer()` starts it, `ensureEditor()` the editor too, which runs the Spell UI site (`SPELL_UI_SITE`) |
+| [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the Spell UI site's pages in headless Chromium, as the page server shows them at `/components/ui/` (`--site epics` / `app`:  Epic UI's or App UI's guide) (`spell server start`, from the kit's root;  `--server <origin>` for another);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
+| [ComponentPage.template.html](src/tools/ComponentPage.template.html) | `yarn site:new`'s template:  a new component's four pages as Spell UI's HTML, which it writes as Spell (spell-epic's components page template until epic `editor` P44) |
+| [pageServer.ts](src/tools/pageServer.ts) | the kit whose page server `site:dev` and `site:check` start, from its root, and the kit's own `spell`:  both found by package, never the `spell` on the `PATH`;  `ensurePageServer()` starts it;  `SPELL_UI_SITE_FILE`, the site's own file, which lists its pages |
 | [StaticRenderer.ts](src/tools/StaticRenderer.ts) | the server-only Vite server the static render runs on from node:  it compiles the components' JSX for the server, which `tsx` can't;  used by the visual tests' static pages, and by `spell ssr` in its child process (`src/cli/runner/renderStatic.ts`) |
 | [StaticDocument.ts](src/tools/StaticDocument.ts) | loaded BY that server, never by node:  `render(html, options)` turns a whole page static, `stylesheet(tags)` builds and minifies (Lightning CSS) the sheet for those families;  `spell ssr`'s engine |
 | [DesignExport.ts](src/tools/DesignExport.ts), `DesignTokens.ts`, `DesignColor.ts`, `DesignComponents.ts` | `yarn design:build`, also `spell design build`:  the claude.ai design system's files in `<dir>/project/`:  `tokens.json`, `components/index.d.ts`, a README and `preview.html` per family, the cover, `design-system.json`;  it leaves the design bundle's `components/bundle.js` and `bundle.css` alone |

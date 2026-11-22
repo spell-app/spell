@@ -28,6 +28,9 @@ const APP_TESTS = "tests/app"
  */
 const INTEGRATION_TESTS = ["pages/!(PageStories|RunSite|SiteBoard|SiteEdits|testProject).test.ts"]
 
+/** Every language loaded, before each node test file:  `tests/allLanguages.ts`. */
+const ALL_LANGUAGES = "tests/allLanguages.ts"
+
 /**
  * spell-app's Vitest config:  one project per folder of `src/`,
  * each over its tests in `tests/<folder>/`, at the same paths as the code.
@@ -64,6 +67,8 @@ export default defineConfig({
     // fails a run that adds a folder to your real space, naming it;
     // builds the browser bundle again first when it's stale, for the tests that run a program in a browser
     globalSetup: ["tests/realSpaceCheck.ts", "tests/browserBundleCheck.ts"],
+    // every language loaded, for the node projects:  a browser loads Spanish on first use (epic `solid-2-final` P11)
+    setupFiles: [ALL_LANGUAGES],
     projects: [
       {
         extends: true,
@@ -90,7 +95,8 @@ function appProjects(): TestProjectConfiguration[] {
         name: "app:node",
         dir: APP_TESTS,
         environment: "node",
-        exclude: [...configDefaults.exclude, ...BROWSER_TESTS, ...INTEGRATION_TESTS]
+        exclude: [...configDefaults.exclude, ...BROWSER_TESTS, ...INTEGRATION_TESTS],
+        setupFiles: [ALL_LANGUAGES]
       }
     },
     {
@@ -101,7 +107,8 @@ function appProjects(): TestProjectConfiguration[] {
         dir: APP_TESTS,
         environment: "node",
         include: INTEGRATION_TESTS,
-        fileParallelism: false
+        fileParallelism: false,
+        setupFiles: [ALL_LANGUAGES]
       }
     },
     {

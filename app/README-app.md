@@ -5,7 +5,7 @@
 <spell-viewer project="@spell/examples/calculator" toolbar></spell-viewer>
 ```
 
-_From [the `<spell-viewer>` page](app/docs/spell-viewer.html), which shows it live;
+_From [the `<spell-viewer>` page](spaces/@spell/guides/AppUI/SpellViewer.spell), which shows it live;
 the calculator's `width` left out._
 
 A page needs nothing more:  no framework, no build step of its own, nothing wrapped around the tag.
@@ -84,7 +84,7 @@ Put them on a page either way:
 </ui-root>
 ```
 
-_From [spell-viewer.html](app/docs/spell-viewer.html) and the demo page [spell-editor.html](app/demo/spell-editor.html),
+_From [the `<spell-viewer>` page](spaces/@spell/guides/AppUI/SpellViewer.spell) and the demo page [spell-editor.html](app/demo/spell-editor.html),
 their styles and headings left out._
 
 - `/element/...` is the page server's:  it serves the app's `dist-element/`, which `yarn build:element` builds.
@@ -1083,30 +1083,31 @@ You pay for that split at build time:  `yarn build:element` is four Vite builds 
 
 ## App UI:  a page for every component
 
-The app's own components have docs pages, in Spell UI's page shape:
-App UI, at `/components/app/` on the page server, from [app/docs/](app/docs/), a component set spell-app's settings
-declare ([README-page-server.md](README-page-server.md)).
-It's 31 pages in seven groups, from the four web components through the panes and dialogs to the runner's pieces.
+The app's own components have a guide:  App UI, a Spell guide like the Spell UI site
+([app/spaces/@spell/guides/AppUI/](spaces/@spell/guides/AppUI/)), shown at `/components/app/` on the page server,
+with no editor, and in the editor at `/run/@spell/guides/AppUI`.
+It's 31 pages in seven groups, from the web components through the panes and dialogs to the runner's pieces.
 
 - Each page's props, attributes and "Used in" tables are made from the code:  `yarn site:data`.
-  - It writes the set's data, committed:  `components.json5` and `search.json5`, in `app/docs/__data/`.
-  - Its test fails while they're stale, while a listed page is missing or unlinked from the home page,
-    or while a component's banner doesn't point at its page.
+  - It writes the guide's data, committed:  `components.json5`, in `app/docs/__data/`, which `<ui-docs-api>` draws.
+  - Its test fails while it's stale, while a listed page isn't in the guide's site file,
+    or while a component's banner doesn't name its page (`/components/app/menu-bar`).
     So rerun it after changing a documented component's banner, props or uses.
 - What needs the whole editor around it is shown by pictures:
   `yarn site:pictures [name...]`, headless screenshots of this checkout's running editor, into `app/docs/_images/`.
   - Check `git status` after:  opening the editor compiles its project,
     which may rewrite its declarations and words files.
-- The web components and the runner's pieces are shown live, inside a `<spell-viewer>`:
-  they need `yarn build:element`, since every page loads `/element/spell.pack.js`.
+- The web components and the runner's pieces are shown live, inside the guide's own `<spell-viewer>`:
+  they need `yarn build:element`, since the guide's layout loads `/element/spell.pack.js`.
+- Check its pages:  `yarn site:check --site app --all`, in Spell UI's folder.
 
 <details>
 <summary>Adding a page</summary>
 
 1. Add its entry to [the hand-kept facts](app/docs/__data/pages.json5), then run `yarn site:data`.
-2. Copy a page like it:  [Notice.html](app/docs/Notice.html) for one shown by a picture,
-   [spell-viewer.html](app/docs/spell-viewer.html) for a live one.
-3. Link it from [the home page](app/docs/index.html).
+2. Copy a page like it in the guide:  [Notice.spell](spaces/@spell/guides/AppUI/Notice.spell) for one shown by a
+   picture, [SpellViewer.spell](spaces/@spell/guides/AppUI/SpellViewer.spell) for a live one.
+3. Add its line to [the guide's site file](spaces/@spell/guides/AppUI/AppUI.spell), under its group.
 
 </details>
 

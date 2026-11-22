@@ -1,5 +1,5 @@
 // HACK: expose a bunch of stuff on `global` for browser debugging
-import _ from "lodash"
+import * as _ from "lodash-es"
 import JSON5 from "json5"
 
 import { P } from "spell/parser/parser"

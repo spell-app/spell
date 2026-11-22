@@ -1,0 +1,94 @@
+"epic pills element" is a notebook page
+	<header level="1">
+		&lt;epic-pills&gt;
+		<header>The &lt;epic-pills&gt; element: the docs home page's Active epics, a live pill per epic worked on this week.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-pills&gt;</> is the Active epics list on the docs home page's Epic Pages card. Each pill shows an epic's name, what waits on it, its phase and its agents. It asks the page server, so it stays up to date all night.</>
+	<text class="meta" paragraph>Written for: anyone changing the docs home page, or this element.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> T99), in the <link target="src-spell-epic-src-components-epic-pills" link="/epic/src/components/epic-pills/"><text title="epic/src/components/epic-pills/" code>epic-pills</></> folder of the epics package.</>
+	<text class="meta" paragraph>Its vocabulary (parts, texts): <link target="src-spell-epic-src-components-epic-pills-epicpills-en-ts" link="/epic/src/components/epic-pills/EpicPills.en.ts"><text title="epic/src/components/epic-pills/EpicPills.en.ts" code>EpicPills.en.ts</></>.</>
+	<text class="meta" paragraph>The component: <link target="src-spell-epic-src-components-epic-pills-epicpills-tsx" link="/epic/src/components/epic-pills/EpicPills.tsx"><text title="epic/src/components/epic-pills/EpicPills.tsx" code>EpicPills.tsx</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<epic-pills></epic-pills>
+			</html>
+		</example>
+		<text paragraph>The active epics, live from this page server. Opened from disk, it says it needs the page server instead. With no epic worked on this week, it says so.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph><text code>epic pages index</> writes it into the home page's Epic Pages card, under the card's description. Nothing goes inside it: the pills come from the page server.</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+		<text paragraph>In the docs home page's Epic Pages card (<text code>pages/index.html</>), once. It works on any served page. It has no children and no attributes.</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws, which a page's CSS can style from outside with <text code>::part(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The box around the heading and the pills.</>
+				</>
+				<row>
+					<cell>
+						<text code>heading</>
+					</>
+					<cell>The heading: Active epics.</>
+				</>
+				<row>
+					<cell>
+						<text code>pills</>
+					</>
+					<cell>The pills, in two columns.</>
+				</>
+				<row>
+					<cell>
+						<text code>note</>
+					</>
+					<cell>Instead of pills: none this week, the page opened from disk, or no answer.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="4. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Which epics: the Epics page's Active group, worked on in the last 7 days, A to Z by name.</>
+			<item>Each pill is a small round blue label. A click opens the epic page in this tab.</>
+			<item>The epic's name is on the left. It is cut short with "…" when there's no room.</>
+			<item>On the right, what waits on the epic, in the colours of its epic page's toolbar badges: red for urgent, orange for your turn to pick or review (light orange counts as orange), blue for phases running. One colour shows its count. Several colours show one circle split between them, with no number.</>
+			<item>Then the phase under way, <text code>P12</>, or <text code>Done</> when every phase is done.</>
+			<item>Then the running agents, a robot and their number, when any run.</>
+			<item>The tooltip says it all in words: the counts, the phase's name and the agents.</>
+			<item>Two columns, at the card's width and in the side bar's. Pills are 24px tall, 4px apart.</>
+		</>
+	</>
+
+	<section label="5. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic pages index</>: the home page's generator writes the tag, and nothing else.</>
+			<item>What it draws comes from the page server, <text code>GET /api/epics/running?every</> (<link target="src-spell-epic-src-list-runningepics-ts" link="/epic/src/list/RunningEpics.ts"><text title="epic/src/list/RunningEpics.ts" code>RunningEpics</></>): every epic, running or not, with what waits on it and how many agents run. It asks again whenever an epic page or its agents change, and every 30 seconds.</>
+			<item>Until epic <text code>epic-engine</> T99, the generator wrote a plain pill per epic into the page (J276), as of when it last ran.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-18 against branch <ui-text code>epic-engine</> (T99): the parts and texts come from its vocabulary file, so they change with it.</>
+		</>
+	</>

@@ -9,6 +9,7 @@ import {
   DEFAULT_PORT,
   PageServer,
   componentSetPath,
+  componentSetSitePath,
   componentSets,
   engineRoutePath,
   engineRoutes,
@@ -29,7 +30,7 @@ import { ask, serveHandler } from "spell/server/test/serve"
  */
 const SERVED = {
   componentSets: {
-    ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets" },
+    ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets", sitePage: "index.html" },
     epics: { name: "Epic UI", dir: "epic/src/docs", assets: "packages/ui/site/_assets" },
     app: { name: "App UI", dir: "packages/app/docs", assets: "packages/ui/site/_assets" },
     brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
@@ -125,6 +126,35 @@ describe("PageServer.start():  its port, or no start", () => {
   })
 })
 
+describe("PageServer with a certificate (epic solid-2-final P14)", () => {
+  /** a certificate in each state, its programs stand-ins:  only `state` and `tls` are read */
+  const certificateIn = (state: SRV.CertificateState) =>
+    ({ state, tls: state === "ready" ? { key: "KEY", cert: "CERT" } : undefined }) as SRV.LocalCertificate
+
+  it("takes the certificate only once it's ready;  else says why, in a line for its log", () => {
+    expect(PageServer.certificateFor(certificateIn("ready"), {})).toEqual({ tls: { key: "KEY", cert: "CERT" } })
+    expect(PageServer.certificateFor(certificateIn("untrusted"), {}).why).toMatch(/spell server certificate/)
+    expect(PageServer.certificateFor(certificateIn("no-mkcert"), {}).why).toMatch(/brew install mkcert/)
+  })
+
+  it("never in tests, CI, or with SPELL_HTTPS=0:  plain HTTP, saying nothing", () => {
+    for (const env of [{ VITEST: "true" }, { CI: "true" }, { SPELL_HTTPS: "0" }])
+      expect(PageServer.certificateFor(certificateIn("ready"), env)).toEqual({})
+  })
+
+  it("without one, says no HTTPS address:  as before", async () => {
+    const root = mkdtempSync(join(tmpdir(), "page-plain-"))
+    const server = await new PageServer({ root }).start({ port: 0, routes: false, pidFile: false })
+    try {
+      expect(server.info.https).toBeUndefined()
+      expect(server.web.secureUrl).toBeUndefined()
+    } finally {
+      await server.stop()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
 describe("PageServer.codeFor()", () => {
   const scratch = mkdtempSync(join(tmpdir(), "page-code-"))
   afterAll(() => rmSync(scratch, { recursive: true, force: true }))
@@ -209,6 +239,7 @@ describe("PageServer", () => {
     mkdirSync(join(root, "packages", "ui", "docs", "__data"), { recursive: true })
     mkdirSync(join(root, "packages", "ui", "site", "_assets"), { recursive: true })
     writeFileSync(join(root, "packages", "ui", "docs", "ui-button.html"), "<!doctype html><head></head><p>UI</p>\n")
+    writeFileSync(join(root, "packages", "ui", "docs", "index.html"), "<!doctype html><head></head><p>Site</p>\n")
     writeFileSync(join(root, "packages", "ui", "docs", "__data", "components.json5"), `{"from":"ui"}\n`)
     writeFileSync(join(root, "packages", "ui", "site", "_assets", "site.js"), "export {}\n")
     // a page with no `</body>`
@@ -313,6 +344,18 @@ describe("PageServer", () => {
     expect((await ask(port, "GET", "/components/ui")).status).toBe(302)
     expect((await ask(port, "GET", "/components/ui/missing.html")).status).toBe(404)
     expect((await ask(port, "GET", "/components/ui/_assets/missing.js")).status).toBe(404)
+  })
+
+  it("answers a Spell site's addresses with its page (`sitePage`):  never a file, a picture or a set without one", async () => {
+    for (const address of ["/components/ui/button/api", "/components/ui/getting-started", "/components/ui/"])
+      expect((await ask(port, "GET", address)).text, address).toContain("<p>Site</p>")
+    expect((await ask(port, "GET", "/components/ui/ui-button.html")).text).toContain("<p>UI</p>")
+    expect((await ask(port, "GET", "/components/ui/images/missing.png")).status).toBe(404)
+    expect((await ask(port, "GET", "/components/ui/__data/missing")).status).toBe(404)
+    expect((await ask(port, "GET", "/components/epics/epic-item")).status).toBe(404)
+    expect(componentSetSitePath("/worktrees/w/components/ui/button", server.componentSets)).toBe(
+      "/worktrees/w/packages/ui/docs/index.html"
+    )
   })
 
   it("serves every other set at /components/<set>/:  its docs/, with Spell UI's site bundle as _assets/", async () => {

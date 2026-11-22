@@ -275,7 +275,7 @@
       "mainTag": "spell-code",
       "main": true,
       "page": true,
-      "href": "spell-code.html"
+      "href": "/components/app/spell-code"
     },
     {
       "tag": "spell-editor",
@@ -561,7 +561,7 @@
       "mainTag": "spell-editor",
       "main": true,
       "page": true,
-      "href": "spell-editor.html"
+      "href": "/components/app/spell-editor"
     },
     {
       "tag": "spell-markdown",
@@ -807,7 +807,7 @@
       "mainTag": "spell-markdown",
       "main": true,
       "page": true,
-      "href": "spell-markdown.html"
+      "href": "/components/app/spell-markdown"
     },
     {
       "tag": "spell-reference-page",
@@ -1367,7 +1367,7 @@
       "mainTag": "spell-reference-page",
       "main": true,
       "page": true,
-      "href": "spell-reference-page.html"
+      "href": "/components/app/spell-reference-page"
     },
     {
       "tag": "spell-viewer",
@@ -1409,6 +1409,11 @@
           "name": "editor",
           "kind": "string",
           "description": "A CSS selector for a `<spell-editor>` in the same document or shadow root:  runs what it compiles, and what it compiled already.  Waits for it without `project` or `src`."
+        },
+        {
+          "name": "base",
+          "kind": "string",
+          "description": "The page's address a site it runs goes under, `/components/ui`:  the site's address follows the page's, so `/components/ui/button/api` shows its `/button/api`, the browser's back and forward work, and a link's `#section` lands.  Without it, the site keeps its own address."
         },
         {
           "name": "toolbar",
@@ -1696,7 +1701,7 @@
       "mainTag": "spell-viewer",
       "main": true,
       "page": true,
-      "href": "spell-viewer.html"
+      "href": "/components/app/spell-viewer"
     },
     {
       "tag": "Action",
@@ -1840,7 +1845,7 @@
           "file": "src/app/solid/Actions.tsx"
         }
       ],
-      "href": "Actions.html"
+      "href": "/components/app/actions"
     },
     {
       "tag": "AnatomyButton",
@@ -1867,7 +1872,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "AppAnatomyView.html#AnatomyButton"
+      "href": "/components/app/app-anatomy-view#AnatomyButton"
     },
     {
       "tag": "AppAnatomy",
@@ -1888,7 +1893,7 @@
       "parts": [],
       "states": [],
       "texts": [],
-      "href": "AppAnatomyView.html#AppAnatomy"
+      "href": "/components/app/app-anatomy-view#AppAnatomy"
     },
     {
       "tag": "AppAnatomyView",
@@ -1935,7 +1940,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "AppAnatomyView.html"
+      "href": "/components/app/app-anatomy-view"
     },
     {
       "tag": "AppBarMenus",
@@ -1970,7 +1975,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "MenuBar.html#AppBarMenus"
+      "href": "/components/app/menu-bar#AppBarMenus"
     },
     {
       "tag": "AppContainer",
@@ -2019,7 +2024,7 @@
           "file": "src/app/solid/AppRoot.tsx"
         }
       ],
-      "href": "AppContainer.html"
+      "href": "/components/app/app-container"
     },
     {
       "tag": "AppMenu",
@@ -2057,7 +2062,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "chrome.html"
+      "href": "/components/app/chrome"
     },
     {
       "tag": "AppRoot",
@@ -2106,7 +2111,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "AppRoot.html"
+      "href": "/components/app/app-root"
     },
     {
       "tag": "AppToolbar",
@@ -2133,7 +2138,7 @@
           "file": "src/app/solid/AppRoot.tsx"
         }
       ],
-      "href": "AppRoot.html#AppToolbar"
+      "href": "/components/app/app-root#AppToolbar"
     },
     {
       "tag": "BackToSite",
@@ -2160,7 +2165,7 @@
           "file": "src/app/index.tsx"
         }
       ],
-      "href": "Notice.html#BackToSite"
+      "href": "/components/app/notice#BackToSite"
     },
     {
       "tag": "BarMenu",
@@ -2239,7 +2244,7 @@
           "file": "src/app/solid/MenuBar.tsx"
         }
       ],
-      "href": "MenuBar.html#BarMenu"
+      "href": "/components/app/menu-bar#BarMenu"
     },
     {
       "tag": "Chooser",
@@ -2279,7 +2284,7 @@
           "file": "src/app/solid/modals/Chooser.tsx"
         }
       ],
-      "href": "Chooser.html"
+      "href": "/components/app/chooser"
     },
     {
       "tag": "CodeMirrorEditor",
@@ -2372,7 +2377,7 @@
           "file": "src/app/solid/codemirror/FileEditor.tsx"
         }
       ],
-      "href": "CodeMirrorEditor.html"
+      "href": "/components/app/code-mirror-editor"
     },
     {
       "tag": "ConsoleGroup",
@@ -2413,7 +2418,7 @@
           "file": "src/app/solid/ConsoleLines.tsx"
         }
       ],
-      "href": "ConsoleLines.html#ConsoleGroup"
+      "href": "/components/app/console-lines#ConsoleGroup"
     },
     {
       "tag": "ConsoleLine",
@@ -2463,7 +2468,7 @@
           "file": "src/app/solid/ConsoleLines.tsx"
         }
       ],
-      "href": "ConsoleLines.html#ConsoleLine"
+      "href": "/components/app/console-lines#ConsoleLine"
     },
     {
       "tag": "ConsoleLines",
@@ -2521,7 +2526,7 @@
           "file": "src/app/runner/RunnerConsole.tsx"
         }
       ],
-      "href": "ConsoleLines.html"
+      "href": "/components/app/console-lines"
     },
     {
       "tag": "ConsoleObject",
@@ -2556,7 +2561,7 @@
           "file": "src/app/solid/ConsoleLines.tsx"
         }
       ],
-      "href": "ConsoleLines.html#ConsoleObject"
+      "href": "/components/app/console-lines#ConsoleObject"
     },
     {
       "tag": "ConsoleRoot",
@@ -2600,7 +2605,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "ConsoleViewer.html#ConsoleRoot"
+      "href": "/components/app/console-viewer#ConsoleRoot"
     },
     {
       "tag": "ConsoleToolbar",
@@ -2627,7 +2632,7 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         }
       ],
-      "href": "ConsoleViewer.html#ConsoleToolbar"
+      "href": "/components/app/console-viewer#ConsoleToolbar"
     },
     {
       "tag": "ConsoleValue",
@@ -2673,7 +2678,7 @@
           "file": "src/app/solid/ConsoleLines.tsx"
         }
       ],
-      "href": "ConsoleLines.html#ConsoleValue"
+      "href": "/components/app/console-lines#ConsoleValue"
     },
     {
       "tag": "ConsoleViewer",
@@ -2712,7 +2717,7 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         }
       ],
-      "href": "ConsoleViewer.html"
+      "href": "/components/app/console-viewer"
     },
     {
       "tag": "ErrorBoundary",
@@ -2776,7 +2781,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "ErrorBoundary.html"
+      "href": "/components/app/error-boundary"
     },
     {
       "tag": "ErrorDisplay",
@@ -2844,7 +2849,7 @@
           "file": "src/app/solid/ErrorNotice.tsx"
         }
       ],
-      "href": "ErrorNotice.html#ErrorDisplay"
+      "href": "/components/app/error-notice#ErrorDisplay"
     },
     {
       "tag": "ErrorNotice",
@@ -2871,7 +2876,7 @@
           "file": "src/app/index.tsx"
         }
       ],
-      "href": "ErrorNotice.html"
+      "href": "/components/app/error-notice"
     },
     {
       "tag": "FileEditor",
@@ -2925,7 +2930,7 @@
           "file": "src/app/solid/InputEditor.tsx"
         }
       ],
-      "href": "FileEditor.html"
+      "href": "/components/app/file-editor"
     },
     {
       "tag": "FileTabs",
@@ -2952,7 +2957,7 @@
           "file": "src/app/solid/InputEditor.tsx"
         }
       ],
-      "href": "FileTabs.html"
+      "href": "/components/app/file-tabs"
     },
     {
       "tag": "InputEditor",
@@ -2986,7 +2991,7 @@
           "file": "src/app/solid/InputEditor.tsx"
         }
       ],
-      "href": "InputEditor.html"
+      "href": "/components/app/input-editor"
     },
     {
       "tag": "InputRoot",
@@ -3020,7 +3025,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "InputEditor.html#InputRoot"
+      "href": "/components/app/input-editor#InputRoot"
     },
     {
       "tag": "LineNumbers",
@@ -3041,7 +3046,7 @@
       "parts": [],
       "states": [],
       "texts": [],
-      "href": "InputEditor.html#LineNumbers"
+      "href": "/components/app/input-editor#LineNumbers"
     },
     {
       "tag": "Markdown",
@@ -3091,7 +3096,7 @@
           "file": "src/app/solid/SpellReference.tsx"
         }
       ],
-      "href": "Markdown.html"
+      "href": "/components/app/markdown"
     },
     {
       "tag": "MenuHeader",
@@ -3137,7 +3142,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "chrome.html#MenuHeader"
+      "href": "/components/app/chrome#MenuHeader"
     },
     {
       "tag": "MoreMenu",
@@ -3186,7 +3191,7 @@
           "file": "src/app/pages/ProjectChooser.tsx"
         }
       ],
-      "href": "chrome.html#MoreMenu"
+      "href": "/components/app/chrome#MoreMenu"
     },
     {
       "tag": "Notice",
@@ -3220,7 +3225,7 @@
           "file": "src/app/index.tsx"
         }
       ],
-      "href": "Notice.html"
+      "href": "/components/app/notice"
     },
     {
       "tag": "PanelMenu",
@@ -3262,7 +3267,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "chrome.html#PanelMenu"
+      "href": "/components/app/chrome#PanelMenu"
     },
     {
       "tag": "ProjectBarMenu",
@@ -3289,7 +3294,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "MenuBar.html#ProjectBarMenu"
+      "href": "/components/app/menu-bar#ProjectBarMenu"
     },
     {
       "tag": "RestartNeeded",
@@ -3316,7 +3321,7 @@
           "file": "src/app/index.tsx"
         }
       ],
-      "href": "Notice.html#RestartNeeded"
+      "href": "/components/app/notice#RestartNeeded"
     },
     {
       "tag": "RunnerConsole",
@@ -3355,7 +3360,7 @@
           "file": "src/app/runner/VSCodeRunner.tsx"
         }
       ],
-      "href": "RunnerConsole.html"
+      "href": "/components/app/runner-console"
     },
     {
       "tag": "RunnerPane",
@@ -3424,7 +3429,7 @@
           "file": "src/app/runner/VSCodeRunner.tsx"
         }
       ],
-      "href": "RunnerPane.html"
+      "href": "/components/app/runner-pane"
     },
     {
       "tag": "ScopeDetailsPane",
@@ -3518,7 +3523,7 @@
           "file": "src/app/solid/TypeExplorer.tsx"
         }
       ],
-      "href": "ScopeDetailsPane.html"
+      "href": "/components/app/scope-details-pane"
     },
     {
       "tag": "SectionMarker",
@@ -3565,7 +3570,7 @@
           "file": "src/app/solid/ThingExplorer.tsx"
         }
       ],
-      "href": "ScopeDetailsPane.html#SectionMarker"
+      "href": "/components/app/scope-details-pane#SectionMarker"
     },
     {
       "tag": "SpellBarMenu",
@@ -3590,7 +3595,7 @@
         {
           "name": "useRunner",
           "type": "boolean",
-          "description": "### `<SpellBarMenu>` The top bar's first menu, Spell's:  the hat and Spell's name, our major branding, as `<AppMark>` draws them (Owen, 2026-11-06:  \"Change the Spell menu in the editor to show the Examples menu\"). - Opens the project's group's projects (`<ProjectsMenu>`): the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more. - At its top, one row, `SpellEditor.spell`'s `home row`:  Home, where the hat linked to before; Spell UI, its site in the editor (`editor.showSpellUI()`, epic `mockup` T55); and About Spell, which shows its `about box` (epic `editor` I94, I114). - New Example (`Actions.createApp`:  New Guide among the guides) is the last of the projects it adds to (Owen, 2026-11-14:  \"Put <pen> New Example at the end of the list of examples\"). - `useRunner`:  the one chosen opens in Run. - The Spell UI site's:  \"Spell Notebooks\". - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`). - SEE:  its App UI components page, with the bar's other menus: `app/docs/MenuBar.html` (`/components/app/MenuBar.html`)."
+          "description": "### `<SpellBarMenu>` The top bar's first menu, Spell's:  the hat and Spell's name, our major branding, as `<AppMark>` draws them (Owen, 2026-11-06:  \"Change the Spell menu in the editor to show the Examples menu\"). - Opens the project's group's projects (`<ProjectsMenu>`): the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more. - At its top, one row, `SpellEditor.spell`'s `home row`:  Home, where the hat linked to before; Spell UI, its site in the editor (`editor.showSpellUI()`, epic `mockup` T55); and About Spell, which shows its `about box` (epic `editor` I94, I114). - New Example (`Actions.createApp`:  New Guide among the guides) is the last of the projects it adds to (Owen, 2026-11-14:  \"Put <pen> New Example at the end of the list of examples\"). - `useRunner`:  the one chosen opens in Run. - The Spell UI site's:  \"Spell Notebooks\". - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`). - SEE:  its page in App UI's guide, with the bar's other menus: `/components/app/menu-bar`."
         }
       ],
       "usedIn": [
@@ -3599,7 +3604,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "MenuBar.html"
+      "href": "/components/app/menu-bar"
     },
     {
       "tag": "spell-element",
@@ -3893,7 +3898,7 @@
       "mainTag": "spell-element",
       "main": true,
       "page": true,
-      "href": "spell-element.html"
+      "href": "/components/app/spell-element"
     },
     {
       "tag": "SpellPage",
@@ -4009,7 +4014,7 @@
           "file": "src/app/pages/ThemeEditorPage.tsx"
         }
       ],
-      "href": "SpellPage.html"
+      "href": "/components/app/spell-page"
     },
     {
       "tag": "Spring",
@@ -4043,7 +4048,7 @@
           "file": "src/app/solid/chrome.tsx"
         }
       ],
-      "href": "chrome.html#Spring"
+      "href": "/components/app/chrome#Spring"
     },
     {
       "tag": "Submenu",
@@ -4114,7 +4119,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "chrome.html#Submenu"
+      "href": "/components/app/chrome#Submenu"
     },
     {
       "tag": "ThingExplorer",
@@ -4173,7 +4178,7 @@
           "file": "src/app/runner/VSCodeRunner.tsx"
         }
       ],
-      "href": "ThingExplorer.html"
+      "href": "/components/app/thing-explorer"
     },
     {
       "tag": "TreeRoot",
@@ -4207,7 +4212,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "TreeViewer.html#TreeRoot"
+      "href": "/components/app/tree-viewer#TreeRoot"
     },
     {
       "tag": "TreeToolbar",
@@ -4234,7 +4239,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "TreeViewer.html#TreeToolbar"
+      "href": "/components/app/tree-viewer#TreeToolbar"
     },
     {
       "tag": "TreeViewer",
@@ -4278,7 +4283,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "TreeViewer.html"
+      "href": "/components/app/tree-viewer"
     },
     {
       "tag": "TypeExplorer",
@@ -4353,7 +4358,7 @@
           "file": "src/app/runner/VSCodeRunner.tsx"
         }
       ],
-      "href": "TypeExplorer.html"
+      "href": "/components/app/type-explorer"
     },
     {
       "tag": "UpgradeNotice",
@@ -4380,7 +4385,7 @@
           "file": "src/app/index.tsx"
         }
       ],
-      "href": "Notice.html#UpgradeNotice"
+      "href": "/components/app/notice#UpgradeNotice"
     }
   ],
   "docs": [],
@@ -7447,20 +7452,5 @@
         }
       ]
     }
-  ],
-  "nav": {
-    "start": [
-      {
-        "id": "index",
-        "file": "index.html",
-        "label": "Overview",
-        "icon": "house"
-      }
-    ],
-    "foundation": [],
-    "titles": {
-      "start": "App UI",
-      "components": "Components"
-    }
-  }
+  ]
 }

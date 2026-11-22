@@ -5,6 +5,7 @@ import { basename, join } from "node:path"
 
 import { kb } from "spell/util/number"
 import { CLI } from "spell/cli"
+import { SRV } from "spell/server"
 import { kitFolders } from "spell/server/kitFolders"
 import {
   PACKS_FOLDER,
@@ -79,7 +80,7 @@ export async function publishCommand(options: CLI.PublishOptions = {}): Promise<
     )
   )
   for (const repo of [kitRepo, ...folders]) buildDeclarations(kit, repo)
-  for (const repo of [kitRepo, ...folders]) buildFiles(repo, say)
+  for (const repo of [kitRepo, ...folders]) buildFiles(kit, repo, say)
 
   for (const pkg of packages) {
     const built = await pkg.stage()
@@ -192,18 +193,32 @@ function buildDeclarations(kit: string, repo: PublishedRepo): void {
  * - the app's `build`:  the editor, `app/dist/`, which an install serves (epic `repo-split` P26)
  * - epic's `vscode:package`:  its VS Code extension, `vscode/spell-epic.vsix`, git-ignored, so never stale
  *   (epic `epic-engine` I353;  `PluginPackage` checks its version)
+ * - then its `bundles`, built where git ignores them (epic's docs bundle and epics pack, epic `solid-2-final` P7):
+ *   `PackageBuild` ships what they wrote
  * - dry runs too:  their checks are of what a real publish would ship
  */
-function buildFiles(repo: PublishedRepo, say: (text: string) => void): void {
+function buildFiles(kit: string, repo: PublishedRepo, say: (text: string) => void): void {
   const script = repo.settings.build
-  if (!script) return
-  say(`${repo.name}:  yarn ${script}`)
-  try {
-    execFileSync("yarn", [script], { cwd: repo.root, stdio: "pipe" })
-  } catch (error) {
-    const { stdout, stderr } = error as { stdout?: Buffer; stderr?: Buffer }
-    const output = `${stdout?.toString() ?? ""}${stderr?.toString() ?? ""}`
-    throw new CLI.CliError(`${repo.name}'s build failed (yarn ${script}):\n${output.slice(-2000)}`, CLI.EXIT.ERRORS)
+  if (script) {
+    say(`${repo.name}:  yarn ${script}`)
+    try {
+      execFileSync("yarn", [script], { cwd: repo.root, stdio: "pipe" })
+    } catch (error) {
+      const { stdout, stderr } = error as { stdout?: Buffer; stderr?: Buffer }
+      const output = `${stdout?.toString() ?? ""}${stderr?.toString() ?? ""}`
+      throw new CLI.CliError(`${repo.name}'s build failed (yarn ${script}):\n${output.slice(-2000)}`, CLI.EXIT.ERRORS)
+    }
+  }
+  const names = repo.settings.bundles ?? []
+  if (!names.length) return
+  say(`${repo.name}:  spell bundle ${names.join(" ")}`)
+  for (const bundle of SRV.Bundle.all(kit, names)) {
+    try {
+      bundle.build({ stdio: "pipe" })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      throw new CLI.CliError(`${repo.name}'s bundle ${bundle.name} failed:\n${message.slice(-2000)}`, CLI.EXIT.ERRORS)
+    }
   }
 }
 

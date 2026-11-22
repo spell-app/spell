@@ -3,7 +3,7 @@
  * (`spell/element-tools/generatedFiles`, every repo's, since epic `coherence` P11):
  * what they write formatted as `yarn format` would, and a page's status words.
  * - Escaping the text they write into markup:  the kit's `escapeHTML()` (`spell/util/string`).
- * - Used by `site:index`, `site:kitchen`, `site:new`, `readme:components`, `gen:root`, `gen:styles`, `tokens:alias`.
+ * - Used by `site:kitchen`, `site:new`, `readme:components`, `gen:root`, `gen:styles`, `tokens:alias`.
  * - Node only:  imported by `scripts/`, never by `src/`.
  */
 import type { GeneratedOutput } from "spell/element-tools/generatedFiles"

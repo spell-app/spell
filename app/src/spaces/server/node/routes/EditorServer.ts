@@ -22,7 +22,8 @@ import {
   PAGE_SERVER_PREFIXES,
   SERVER_TOKEN_HEADER,
   TOKEN_PREFIXES,
-  WEBSOCKET_PREFIXES
+  WEBSOCKET_PREFIXES,
+  editorPageFor
 } from "spell/app/spaces/server/node/routes/editorPaths"
 
 /**
@@ -272,17 +273,30 @@ export class EditorServer {
   }
 
   /**
-   * A server, not listening yet, for a BUILT editor in `dir`:  its files, else its `index.html`;
+   * A server, not listening yet, for a BUILT editor in `dir`:  its files, else its `run.html` for a `/run/...` address
+   * and its `index.html` for every other (`editorPageFor()`);
    * the page server's paths (`PAGE_SERVER_PREFIXES`) passed on to it at `pagePort`, websockets too,
    * `token()` added where vite's proxy adds the write token.
    * - what an npm install serves (`serveBuilt()`), and what `spell perf run` measures (a build in a temporary folder)
    * - `token`:  none, no token is added
+   * - `certificate`:  HTTPS and HTTP/2 too, on the same port (`SRV.WebServer`'s);  `spell perf run --https`'s
    * - cached as a deploy would be (`caching: "normal"`;  epic `solid-2-final` P2):  Vite's hashed chunks in `assets/`
    *   kept a year, everything else (`index.html`, the runner's fixed name) checked each time;  compressed, each built
    *   file's brotli copy beside it (`brotliCopies()`)
    */
-  static builtServer({ dir, pagePort, token }: { dir: string; pagePort: number; token?: () => string }): SRV.WebServer {
+  static builtServer({
+    dir,
+    pagePort,
+    token,
+    certificate
+  }: {
+    dir: string
+    pagePort: number
+    token?: () => string
+    certificate?: SRV.CertificateFiles
+  }): SRV.WebServer {
     const web = new SRV.WebServer({
+      certificate,
       mounts: [{ prefix: "/", dir, hashed: SRV.hashedIn("assets") }],
       caching: "normal",
       checkHost: false
@@ -303,9 +317,14 @@ export class EditorServer {
         SRV.proxyUpgrade(raw, socket, head, pagePort)
       })
     }
-    web.fallback.use((request, reply, next) =>
-      request.method === "GET" ? reply.set("Cache-Control", "no-cache").sendFile(join(dir, "index.html")) : next()
-    )
+    // the page the address opens:  the run page for `/run/...`, else the editor (`editorPageFor()`);
+    // a build from before the run page has none, and runs it in the editor
+    web.fallback.use((request, reply, next) => {
+      if (request.method !== "GET") return next()
+      const page = editorPageFor(request.path)
+      const file = existsSync(join(dir, page)) ? page : "index.html"
+      return reply.set("Cache-Control", "no-cache").sendFile(join(dir, file))
+    })
     return web
   }
 

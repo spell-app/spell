@@ -13,6 +13,8 @@ import { PerfBrowser, median, type DomCensus, type LoadTimes, type PerfMetrics }
  *   its body brotli'd only where Chrome didn't say
  * - the live-reload messages the page got while it loaded (`liveMessages`):  each one used to make the live client
  *   walk every script (epic `solid-2-final` P1)
+ * - the network (epic `solid-2-final` P14):  how many files came by each protocol (`h2`, `http/1.1`), and how long
+ *   they waited to be sent (`waitMs`, summed;  `waitMaxMs`, the longest):  HTTP/1.1 shares 6 connections a host
  */
 export class LoadMeasure {
   /** Load `page` under `profile` `runs` times;  never throws for a page that won't get ready:  its run says why. */
@@ -54,6 +56,10 @@ export class LoadMeasure {
     const scripts = fetched.filter((response) => response.type === "script")
     const sum = (list: typeof fetched, key: "raw" | "brotli" | "wire") =>
       list.reduce((total, response) => total + (response[key] ?? 0), 0)
+    const fromNetwork = fetched.filter((response) => response.protocol)
+    const protocols: Record<string, number> = {}
+    for (const response of fromNetwork) protocols[response.protocol!] = (protocols[response.protocol!] ?? 0) + 1
+    const waits = fromNetwork.map((response) => response.waitMs ?? 0)
     const warmBrotli = run === 1 ? await LoadMeasure.warmVisit(browser) : undefined
     const result: LoadRun = {
       run,
@@ -72,12 +78,19 @@ export class LoadMeasure {
       census,
       errors: browser.errors.slice(0, 10),
       writesBlocked: browser.writesBlocked.length,
-      liveMessages: browser.liveMessages
+      liveMessages: browser.liveMessages,
+      protocols,
+      waitMs: waits.reduce((total, wait) => total + wait, 0),
+      waitMaxMs: Math.max(0, ...waits)
     }
     say(
       `  ${page}/${profile} run ${run}:  ready ${times?.readyAt?.toFixed(0) ?? error}ms  ` +
         `tti ${times?.tti.toFixed(0)}  js ${scripts.length} files ${kbOf(result.jsBrotli)} brotli  ` +
-        `heap ${kbOf(afterGC.JSHeapUsedSize)} after GC  nodes ${afterGC.Nodes}`
+        `heap ${kbOf(afterGC.JSHeapUsedSize)} after GC  nodes ${afterGC.Nodes}  ` +
+        `${Object.entries(protocols)
+          .map(([protocol, count]) => `${protocol} ${count}`)
+          .join(", ")}  ` +
+        `waits ${result.waitMs.toFixed(0)}ms (longest ${result.waitMaxMs.toFixed(0)})`
     )
     return result
   }
@@ -107,7 +120,9 @@ export class LoadMeasure {
         listenersAfterGC: metricOf("afterGC", "JSEventListeners"),
         scriptDuration: metricOf("afterLoad", "ScriptDuration"),
         layoutDuration: metricOf("afterLoad", "LayoutDuration"),
-        styleDuration: metricOf("afterLoad", "RecalcStyleDuration")
+        styleDuration: metricOf("afterLoad", "RecalcStyleDuration"),
+        waitMs: median(results.map((result) => result.waitMs)),
+        waitMaxMs: median(results.map((result) => result.waitMaxMs))
       },
       bytes: {
         requests: first.requests,
@@ -122,6 +137,7 @@ export class LoadMeasure {
       census: first.census,
       errors: first.errors.length,
       liveMessages: first.liveMessages,
+      protocols: first.protocols,
       results
     }
   }
@@ -187,6 +203,12 @@ export type LoadRun = {
   errors: string[]
   writesBlocked: number
   liveMessages: number
+  /** how many files came by each protocol (`h2`, `http/1.1`), the cache's left out (epic `solid-2-final` P14) */
+  protocols: Record<string, number>
+  /** every file's wait to be sent, summed (`PerfResponse.waitMs`):  what sharing 6 connections costs */
+  waitMs: number
+  /** the longest one wait */
+  waitMaxMs: number
 }
 
 /** A page's loads under one profile:  the medians, the first load's bytes and census, and every run. */
@@ -199,5 +221,7 @@ export type LoadResult = {
   census: DomCensus
   errors: number
   liveMessages: number
+  /** the first load's files by protocol */
+  protocols: Record<string, number>
   results: LoadRun[]
 }

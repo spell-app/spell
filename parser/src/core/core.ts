@@ -6,8 +6,7 @@
  *   - math, random numbers and primitive iteration
  * - Collection-shaped methods (`itemCountOf`, `forEach`, etc) live in `collection-core.ts` / `collection-other.ts`.
  */
-import _isArrayLike from "lodash/isArrayLike"
-import isEqual from "lodash/isEqual"
+import { isArrayLike as _isArrayLike, isEqual } from "lodash-es"
 
 import { brokenRule, flushCells, onThingMade, peekProp, ruleWarning, withoutCreate } from "spell/util"
 // Import directly, never through the barrel:

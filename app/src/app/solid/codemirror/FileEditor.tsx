@@ -14,7 +14,7 @@ import { CodeMirrorEditor } from "./CodeMirrorEditor"
  *   so switching back finds it as it was left.  No remount per file.
  * - No `file` yet:  a placeholder saying the editor's loading.
  * - `onMount` hands out the editor, `SpellCodeMirror`, once it shows a file.
- * - SEE:  its App UI components page, `app/docs/FileEditor.html` (`/components/app/FileEditor.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/file-editor`.
  ****************/
 export function FileEditor(props: FileEditorProps) {
   /** The view, once made. */

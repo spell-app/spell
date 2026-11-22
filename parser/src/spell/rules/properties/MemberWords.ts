@@ -60,14 +60,11 @@ export class MemberWords extends P.Pattern {
    *   It then reads only a member Y's type declares (`property_expression`).
    */
   static declaredWithStopWords(scope: P.Scope, tokens: P.Token[]): number {
-    const { memberStopWords } = SP.Language.active.words
-    const isStopWord = (word: string) => memberStopWords.has(word) || ALL_DIGITS.test(word)
+    const { namesOf, test } = stopWordNaming(SP.Language.active.words.memberStopWords)
     const names: string[] = []
-    const namesOf = (type: P.TypeScope) =>
-      namesWithGrammarWords(type.variables, "member", wordsOfMember, isStopWord, "LOCAL_ONLY")
     for (let types = scope.types; types; types = types.parent) {
       // only a type with such a member matters (`P.Outline`)
-      for (const type of types.scan((it) => namesOf(it).length > 0)) names.push(...namesOf(type))
+      for (const type of types.scan(test)) names.push(...namesOf(type))
     }
     if (!names.length) return 0
     return longestNameIn(wordsAndNumbersIn(tokens), names)
@@ -104,3 +101,26 @@ function wordsAndNumbersIn(tokens: P.Token[]): string[] {
 function wordsOfMember(member: P.ScopeVariable): string[] {
   return `${member.name}`.split("_")
 }
+
+/**
+ * A type's member names with a stop word or a number in them, and the outline's test for a type with one:
+ * ONE pair for each language's stop words, as a file's outline keeps every test it's handed (`P.Outline`;
+ * epic `solid-2-final` P10).
+ */
+function stopWordNaming(memberStopWords: ReadonlySet<string>): StopWordNaming {
+  let naming = STOP_WORD_NAMING.get(memberStopWords)
+  if (!naming) {
+    const isStopWord = (word: string) => memberStopWords.has(word) || ALL_DIGITS.test(word)
+    const namesOf = (type: P.TypeScope) =>
+      namesWithGrammarWords(type.variables, "member", wordsOfMember, isStopWord, "LOCAL_ONLY")
+    naming = { namesOf, test: (type: P.TypeScope) => namesOf(type).length > 0 }
+    STOP_WORD_NAMING.set(memberStopWords, naming)
+  }
+  return naming
+}
+
+/** A type's member names with a stop word in them, and its outline test -- see `stopWordNaming()`. */
+type StopWordNaming = { namesOf: (type: P.TypeScope) => string[]; test: (type: P.TypeScope) => boolean }
+
+/** `stopWordNaming()`'s pairs, by a language's stop words. */
+const STOP_WORD_NAMING = new WeakMap<ReadonlySet<string>, StopWordNaming>()

@@ -79,7 +79,8 @@ async function highlighterFor(lang: string): Promise<Omit<E.CodeLanguage, "load"
     import("./BubblyHtml"),
     import("./bubbly.css?inline")
   ])
-  const { parser } = SP.Language.for(lang)
+  // a language past English loads on first use:  Spanish only for a page showing ```spell/es
+  const { parser } = await SP.Language.load(lang)
   return {
     highlight: (code: string) => SP.SpellHighlighter.spans(code, parser),
     draw: (code: string) => ({ html: BubblyHtml.write(SP.BubblyLayout.of(code, parser)), styles })

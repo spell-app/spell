@@ -46,10 +46,9 @@ const results = []
 if (check) {
   const shots = mkdtempSync(join(tmpdir(), "spell-docs-"))
   for (const output of pages) {
-    // a Spell UI site page (the `spell-ui-docs` template) loads the site bundle, not `spell-ui.js`:
-    // `yarn site:check` (packages/ui) checks those.  `ui/_assets/` since the pages moved (claude-design P6);  a
-    // component set's (the `component-set-docs` template) loads its own, from `components/<set>/_assets/` (before
-    // people-and-orgs P18, `epic-ui/_assets/`)
+    // a page loading a component set's site bundle (`components/<set>/_assets/`;  `ui/_assets/` since claude-design
+    // P6, `epic-ui/_assets/` before people-and-orgs P18), not `spell-ui.js`:  none is left since epic `editor` P44
+    // (the component sets' guides are Spell, `yarn site:check`), but an old page that still does is skipped
     if (SITE_BUNDLE.test(readFileSync(pageAt(output), "utf8"))) continue
     const outDir = join(shots, output.replace(/\.html$/, "").replaceAll("/", "--"))
     const run = step(`check ${output}`, "node", [join(TOOLS, "check-spell.js"), output, outDir], {
@@ -61,7 +60,8 @@ if (check) {
 }
 
 console.log("\n== docs:update summary")
-const bundle = join(ASSETS, "spell-ui.js")
+// the docs bundle's entry module (`spell-ui.js` is its few-line loader since epic `solid-2-final` P7)
+const bundle = join(ASSETS, "spell-ui", "main.js")
 if (exists(bundle)) console.log(`  ${relative(ROOT, bundle)}  ${kb(bundle)}`)
 for (const output of pages) {
   const result = results.find((r) => r.output === output)

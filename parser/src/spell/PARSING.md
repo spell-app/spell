@@ -2636,6 +2636,12 @@ sidebars any of them opens.
 - So one file's types, constants and rules are visible to every later file.
 - A FILE's name says its language (epic `spanish` P19):  `Carta.es.spell` is Spanish, a plain `Card.spell` English.
   - `SP.Language.forFile()`;  `SpellFile.language`, `SpellProject.languages`.
+  - Every pack past English loads on FIRST USE (epic `solid-2-final` P11):  `SP.Language.loadsOnFirstUse()`.
+    - A project loads its files' packs as its project file loads (`getLoader()`), and again before it parses;
+      an import's, as its declarations are read (`declarationsOf()`).  `SP.Language.loadFor(files)` does it.
+    - With each, every component pack's words in it (Spell UI's Spanish tags, `SP.ComponentPacks.loadLanguage()`).
+    - `for()` of a pack not loaded yet throws, saying to load it first.
+    - Node programs and tests load them all at once:  `import "spell/parser/spell/languages/all"`.
   - One project may mix them:
     - Its root:  `SP.Language.rootScopeFor(languages)`.
       One language:  that language's own root, so its project parses as it always has.
@@ -2747,17 +2753,24 @@ sidebars any of them opens.
       - `@spell/project/<projectId>` => that project's compiled JS, fetched and linked the same way, afresh each run
     - The app, parser and forms NEVER load `core` themselves.
 - ALL files parse first, then ALL compile, so lazy compile-time lookups see the whole project.
-- The editor's code editor calls `project.takeText(file, text)` on every keystroke, and parses once the typing pauses
-  (`project.parseWaitingText()`, 200 msec after the last key:
-  `FileStates`, in [the app's CodeMirror folder](../../../app/src/app/ui/codemirror/)).
+- The editor's code editor holds what's typed in its own state, and hands it to the file once the typing pauses
+  (`project.textLater()`, then `project.parseWaitingText()`, 200 msec after the last key:
+  `FileStates`, in [the app's CodeMirror folder](../../../app/src/app/ui/codemirror/);  epic `solid-2-final` P9).
   - So no keystroke waits on a parse:  a parse of Solitaire's game took 50 msec a key (2026-11-12).
+  - Nor makes the file's text one string:  `takeText(file, text, span)` comes once, at the pause, or as anything is
+    about to read the file (a parse, a compile, a save:  `project.takeWaitingText()`).
+  - `span` (`P.EditedSpan`):  where the text changed since its last parse, from CodeMirror's change sets, joined over
+    the pause.  `incremental.update(path, text, span)` then reads only around it, to tell whether one line changed,
+    and which top-level items are the same;  without one (the language server, the tests), it compares the texts whole.
   - What needs the new parse sooner asks for it:  the language features, a click or focus elsewhere, `compile()`, `parse()`.
   - Everything else calls `project.updateText(file, text)`, which takes the text and parses it at once
     (`onInputChanged`, in [the app's editor](../../../app/src/app/editor.ts);  the language server).
   - Either way it calls `updatedContentsFor(file)`.
   - `project.incremental.update()` re-parses what changed, and hands changed files their new match.
   - If that couldn't cope, it parses from scratch straight away.
-  - After 2s:  it compiles, saves `<Project>.spell.js` and runs it.
+  - After 2s:  it compiles and runs it, from what's in memory:  nothing saved (`compile(..., { save: "later" })`);
+    Save writes the built files (`project.saveUnsavedOutput()`), and so does leaving the project or the page.
+    - A compile asked for on purpose (Cmd-Enter, Restart) saves them, as ever;  each only if its text changed.
 - A crash while parsing (a rule threw, NOT an error in the spell) is left in `project.parseError`.
 - `SpellProject`'s parse task list keeps its scope + `incremental` while they're good.
   See `needsFullParse`.
@@ -3038,6 +3051,13 @@ sidebars any of them opens.
   - Why:  as the program runs, the Thing Explorer knows which heading's code made each thing.
   - NOT in a plain block, e.g. a rule test's.
   - NOT for a heading with no text, e.g. `##########`.
+- A BUILT site's code leaves all of that out (`P.WriterOptions.compiledFor`, `"built"`;  epic `solid-2-final` P11):
+  - `spell compile`, a built site, the cloud:  no comments, docstrings or banners, no line's spell above its code,
+    no `declaredAt` marks, no `core.heading()` (Public Servers:  30.8 => 18.5 KB gzip)
+  - kept:  `/*! ... */` comments (a declaration's marker is data) and a parse error's
+  - the editor's own compile, the default, keeps everything;  only the running target is built so
+    (a library's `.lib.ts` is source people read)
+  - the examples' `<Project>.built.snapshot.js` pins it
 - A line of the program's START, at a FILE's top level, runs only when the program starts afresh
   (epic `drawable-thing` P17):  `if (!core.isCarryingOver) game.start()`.
   - Its lines:
