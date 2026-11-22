@@ -1134,6 +1134,7 @@ It's 31 pages in seven groups, from the four web components through the panes an
 
 ## See also
 
+- The guide:  [The Editor](../guides/codemirror.html), in the kit's guides/ folder
 - [The Spell app](README.md):  this folder's front page, with the live loop drawn for people who don't program
 - [Spaces](README-spaces.md):  where the projects come from, and the server the editor saves through
 - [The element framework](https://github.com/spell-app/spell/blob/main/README/element.md):  what all four elements are written on, and how a pack loads

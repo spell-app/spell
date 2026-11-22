@@ -242,31 +242,42 @@ Two more things the picture won't tell you:
 - The display and the keypad are plain `<div>`s, laid out by the project's own stylesheet;
   the keys are Spell UI's `<ui-button>`, `primary` for an operator, `negative` for C.
 
-## FizzBuzz:  a loop, and printing
+## FizzBuzz:  a loop, and an event for each number
 
 The classic programming exercise:
 count to 100, saying "fizz" for multiples of 3, "buzz" for multiples of 5, and "fizzbuzz" for both.
 Here's all of [FizzBuzz.spell](spaces/@spell/examples/fizzbuzz/FizzBuzz.spell), not an excerpt:
 
 ```spell
-## File FizzBuzz.spell
+# FizzBuzz
+// Counting to 100:  fizz for every number 3 goes into, buzz for 5, fizzbuzz for both.
+// The counting prints nothing itself:  it says what each number is, as an event, to whoever's listening.
+// - `Console.spell` listens, and prints each one.
+// - `Explainer.spell` listens too, and shows them on a page.
+
 to play fizzbuzz
+	// each number from 1 to 100, as one of four events:  fizzbuzz, fizz, buzz, or a plain number
 	for number from 1 to 100
-		if the number divided by 15 is an integer: print the number, "fizzbuzz"
-		otherwise if the number divided by 3 is an integer: print the number, "fizz"
-		otherwise if the number divided by 5 is an integer: print the number, "buzz"
-		otherwise print the number
+		if the number divided by 15 is an integer: trigger fizzbuzz with number = the number
+		otherwise if the number divided by 3 is an integer: trigger fizz with number = the number
+		otherwise if the number divided by 5 is an integer: trigger buzz with number = the number
+		otherwise trigger plain number with number = the number
 
 play fizzbuzz
 ```
 
-- It's a program in two parts, not four:  `to play fizzbuzz` defines a new phrase, and `play fizzbuzz` says it.
+- `to play fizzbuzz` defines a new phrase, and `play fizzbuzz` says it.
 - `for number from 1 to 100` names its loop variable, `number`, and later lines call it "the number".
-- It draws nothing, so the editor's App pane stays empty (the picture below):
-  what it prints goes to the program's output, under the text, or to your terminal.
+- The counting prints nothing itself:  each number is an event, `trigger fizz with number = the number`,
+  and two other files listen.
+  - [Console.spell](spaces/@spell/examples/fizzbuzz/Console.spell) prints each one:
+    `on fizz with number as a number`, then `print number, "fizz"`.
+  - [Explainer.spell](spaces/@spell/examples/fizzbuzz/Explainer.spell) draws them on a page, a coloured label each,
+    beside how it works.
+  - Turn the explainer off (its import's `active`, in the project file) and it runs as a plain program.
 
 ```sh
-spell run @spell/examples/fizzbuzz
+spell run @spell/examples/fizzbuzz --no-browser
 ```
 
 <details>
@@ -288,32 +299,32 @@ spell run @spell/examples/fizzbuzz
 With `--target py`, the same hundred lines come from Python ([the targets](https://github.com/spell-app/spell/blob/main/parser/README-targets.md)).
 
 <details>
-<summary>What it compiles to, in JavaScript</summary>
+<summary>What the counting compiles to, in JavaScript</summary>
 
 ```js
-core.heading("File FizzBuzz.spell")
-/** File FizzBuzz.spell */
+/** each number from 1 to 100, as one of four events:  fizzbuzz, fizz, buzz, or a plain number */
 export function playFizzbuzz() {
-  core.getRange(1, 100).forEach((number) => {
-    if (core.isOfType(number / 15, "integer")) core.console.log(number, "fizzbuzz")
-    else if (core.isOfType(number / 3, "integer")) core.console.log(number, "fizz")
-    else if (core.isOfType(number / 5, "integer")) core.console.log(number, "buzz")
-    else core.console.log(number)
+  return core.asAction({ undoneAs: "Play Fizzbuzz" }, () => {
+    core.getRange(1, 100).forEach((number) => {
+      if (core.isOfType(number / 15, "integer")) trigger("fizzbuzz", { number: number })
+      else if (core.isOfType(number / 3, "integer")) trigger("fizz", { number: number })
+      else if (core.isOfType(number / 5, "integer")) trigger("buzz", { number: number })
+      else trigger("plain-number", { number: number })
+    })
   })
 }
-
-playFizzbuzz()
 ```
 
-- From `spell compile @spell/examples/fizzbuzz --stdout`, its import line left out.
-- The new phrase is a function, `playFizzbuzz()`;  "the number" is the loop's `number`.
+- From `spell compile @spell/examples/fizzbuzz --stdout`:  FizzBuzz.spell's function, the console's and the
+  explainer's code left out.
+- The new phrase is a function, `playFizzbuzz()`, and an action, one Undo step;  "the number" is the loop's `number`.
 - `core` is [the runtime](https://github.com/spell-app/spell/blob/main/parser/README-core.md) compiled Spell runs on.
 
 </details>
 
 <img src="docs/images/examples/fizzbuzz.png" width="640" alt="FizzBuzz open in the Spell editor:  its program on the left, an empty App pane on the right, its first line of output at the bottom">
 
-_FizzBuzz in the editor:  nothing to draw, so the App pane stays empty, and the output starts at the bottom left._
+_FizzBuzz in an earlier editor, before its explainer page:  the App pane was empty then, and the output started at the bottom left._
 
 ## Four small apps:  a game, a form, a quiz and a checklist
 
@@ -620,11 +631,11 @@ about one in five of its 260 names has a picture that's really of it, and the re
 
 ## Solitaire:  a game in plain Spell, and things that draw themselves
 
-Klondike in five files, written in plain Spell, as Task List is.
-Its cards, its deck and its piles are its own files, before the game, in its project file's order:
+Klondike in four files of Spell, a stylesheet and a layout for the Inspector, written in plain Spell, as Task List is.
+Its cards, its piles and its deck are its own files, before the game, in its project file's order:
 
 ```json5
-[{ "path": "/Card.spell" }, { "path": "/Deck.spell" }, { "path": "/Pile.spell" }, { "path": "/Solitaire.spell" }]
+[{ "path": "/Card.spell" }, { "path": "/Pile.spell" }, { "path": "/Deck.spell" }, { "path": "/Solitaire.spell" }, { "path": "/styles.css" }, { "path": "/Card.editor.spell" }]
 ```
 
 _From [its project file](spaces/@spell/examples/Solitaire/__project.json5), shortened:  each file sees the ones before it._
@@ -634,28 +645,31 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
 
 ```spell
 solitaire is an app
-	"deck" is a new deck
-
+	-- A fully playable game in 300 lines of code!
+	-- See https://en.wikipedia.org/wiki/Klondike_(solitaire) for the rules
 	when creating solitaire
 		add each card in the deck to the stock
-		restart the game
+		deal the cards
 
-	to draw it
-		<segment inverted attach-to="top" color="">
-			<toolbar class="GameBar" aria-label="Game" appearance="pills" inverted size="small" shrinkable>
-				<text slot="title" size="large" heavy>Solitaire</text>
+	to draw solitaire
+		-- Use magical HTML tags to draw the game.
+		-- Parts in purple are "views" which can be used in the program.
+		<deck "deck" hidden />
+		<segment inverted attach-to="top">
+			<toolbar size="small" appearance="pills" inverted shrinkable>
+				<text size="big" slot="title" heavy>Spell Solitaire</>
 				<action "auto play"/>
 				<action "cheat"/>
-				<action "restart the game"/>
-				<divider/>
-				<action "undo"/>
-				<action "redo"/>
-				<text slot="right">Score: <number "score"/></>
-			</toolbar>
-		</segment>
-		<container padding="small" columns="7" spacing="xs">
+				<action "deal the cards" title="Restart" />
+				<spacer/>
+				<action "undo" icon-only />
+				<action "redo" icon-only />
+				<text slot="right"><b>Score</b>: <number "score" /></>
+			</>
+		</>
+		<container columns="7" padding="small" spacing="xs">
 			<stock-pile "stock"/>
-			<discard-pile "discards"/>
+			<discard-pile "discard pile"/>
 			<spacer/>
 			<foundation "clubs" suit=clubs/>
 ```
@@ -664,72 +678,71 @@ _The solitaire's first lines, and the top of its drawing, shortened._
 
 - The same sentences as the Calculator's, under the solitaire's line, without "a solitaire" at the start of every line
   ([the language, sentence by sentence](https://github.com/spell-app/spell/blob/main/parser/README-spell.md)).
-- `"deck" is a new deck` makes its deck as the solitaire is made, its name its `id`.
-- Each pile is declared where it's drawn:  `<stock-pile "stock"/>` is the solitaire's stock,
-  `<column "C1"/>` its first column, and `<number "score"/>` its score.
-  So `the stock`, `the discards`, `the clubs` and `the columns` read them, with no line making them.
+- Each part is declared where it's drawn:  `<deck "deck" hidden />` is the solitaire's deck, `<stock-pile "stock"/>`
+  its stock, `<column "C1"/>` its first column, and `<number "score" />` its score.
+  So `the deck`, `the stock`, `the discard pile`, `the clubs` and `the columns` read them, with no line making them.
 - The game bar is a toolbar of pills:  each `<action "cheat"/>` is a button,
   its title, icon and key the action's own, from its head line, `to "cheat" with shortcut "C", icon "eye"`.
-- `group` lines and `##` lines are headings:  for a person to read, which the editor shows in bold.
-- [Card.spell](spaces/@spell/examples/Solitaire/Card.spell) says what its suits, ranks and colors are:
-  `suit=clubs` reads one, and a foundation draws its suit's ace, by the card's `picture`.
-- The card is a `two sided view` ([Card.spell](spaces/@spell/examples/Solitaire/Card.spell)):
+  `title="Restart"` gives `deal the cards` a shorter one there.
+- The board's right-click menu is written inside the drawing, a `<context-menu>` of the same actions.
+- Winning shows a dialog, `<modal "you won">`, from `when the score changes`:  `show "you won"`.
+- `group` lines are headings:  for a person to read, which the editor shows in bold.
+- The card is a `draggable two sided view` ([Card.spell](spaces/@spell/examples/Solitaire/Card.spell)):
   its direction, face up or down, and `turn it over` come from that built-in template,
   and it says what its `to draw its front` and its `to draw its back` look like.
+  - Both draw a `card image`, a view of its own:  the one place a card's look lives.
 - Its Inspector card is laid out in a file of its own, [Card.editor.spell](spaces/@spell/examples/Solitaire/Card.editor.spell):
   `<property-editor "card">`, of Spell UI's property controls, which the program never compiles.
-- It draws both sides at once, one over the other (its own `to draw it`):
-  [styles.css](spaces/@spell/examples/Solitaire/styles.css) shows the side turned up,
+- [styles.css](spaces/@spell/examples/Solitaire/styles.css) shows the side turned up,
   and turns the card about its middle as its direction changes, the other side taking over halfway.
-  - A card drawn already turned shows that side at once:  only a change turns it.
 - The game pauses as long as that flip after turning the stock's card, `pause for 300 msec`,
-  so the card turns over, then goes to the discards.
-- A click on a card is its own handler, `on click`:  `play the card`, and the game says where it goes.
+  so the card turns over, then goes to the discard pile.
+- A click on a card is its own handler, `when clicked`:  `play the card`, and the game says where it goes.
 
-The deal is a loop with a pause in it, so you watch it happen:
+The deal is a loop with pauses in it, so you watch it happen:
 
 ```spell
-to deal the cards
-	// Gather every card into the stock, shuffle it, and deal the columns
-	for card in the deck
-		set start pile to card's pile
-		turn the card face down
-		if start pile is not the stock
-			add the card to the stock
-			pause for 50 msec
+to "deal the cards" with shortcut "R", icon "sync alternate"
+	clear the score
+	for each card in the deck
+		turn the card face down without waiting
+	for each card in the cards which are not in the stock
+		add the card to the stock without waiting
+		pause for 10 msec
 	shuffle the stock
-	// each row's first card lands face down, then turns up where it lies
+	-- each row's first card lands face down, then turns up where it lies
 	for row from 1 to 7
 		for column from row to 7
-			add the last card of the stock to item column of the columns
+			add the top card of the stock to item column of the columns
+			pause for 20 msec
 			if column is the same as row
 				turn the last card of (item column of the columns) face up
-			pause for 50 msec
-	play from the stock
+	turn over the next card
 ```
 
 _From Solitaire.spell:  plain Spell, in the outline style._
 
-- `pause for 50 msec` lets the page draw before the next line runs:  28 cards dealt, 50 ms apart.
+- `pause for 20 msec` lets the page draw before the next line runs:  28 cards dealt, 20 ms apart.
+- `without waiting` skips a step's own pause:  the cards gather at once.
 - What a person starts runs one at a time:
   a second Restart during the deal does nothing, so it can't deal on top of the first.
 - A card is in one pile at a time, as [Pile.spell](spaces/@spell/examples/Solitaire/Pile.spell) says
-  (`a card belongs to one pile`):  adding it to the stock takes it off the pile it was in.
+  (`belongs to one pile`):  adding it to the stock takes it off the pile it was in.
 
 What you see:
-- Each card is one character, from Unicode's playing cards:  the queen of spades is 🂭, and the card's test checks it.
+- Each card is one character, from Unicode's playing cards:  the queen of spades is 🂭, and the card image's test checks it.
 - Each card is its own element, `<solitaire-card>`;
   each pile is a viewable list, its own element (`<solitaire-column>` and the rest), holding its cards' elements.
 - Each kind of pile lays its cards out by its `layout`, which [styles.css](spaces/@spell/examples/Solitaire/styles.css) draws:
-  a column shows the top of each card below the one before;  a stacked pile, the stock, the discards and the
+  a column shows the top of each card below the one before;  a stacked pile, the stock, the discard pile and the
   foundations, shows its last card, over its placeholder while it's empty.
-- Auto Play, Cheat, Restart The Game, Undo and Redo run across the top, as pills, the score on the right;
+- Auto Play, Cheat and Restart run across the top, as pills, Undo and Redo as icons, the score on the right;
   the board's right click shows the same actions as a menu, each with its key (A, C, R).
-  A card onto a foundation scores 10, one from the discards 5.
-  Cheat turns up a random face-down card:  `set the pile to a random pile in remaining piles`.
+  A card onto a foundation scores 10, one from the discard pile 5.
+  Cheat turns up a random face-down card:  `set the card to a random card in the columns where it is face down`.
 
 Its tests are written in Spell, a `to test ...` inside what each one tests, and run from the command line:
-the tests of its card, deck and piles, then the columns' and foundations' own, of what each pile may take.
+the tests of its card and card image, its piles and deck, then the moves, of what each pile may take.
 
 ```sh
 spell test @spell/examples/Solitaire
@@ -740,12 +753,13 @@ spell test @spell/examples/Solitaire
 
 ```text
 ✓ Compiling @spell/examples/Solitaire
-✓ test card setup  (19 checks)
-✓ test a new deck  (5 checks)
+✓ test card setup  (15 checks)
+✓ test card images  (10 checks)
 ✓ test piles  (8 checks)
+✓ test a new deck  (5 checks)
 ✓ test the moves  (11 checks)
 
-4 passed
+5 passed
 ```
 
 </details>
@@ -929,6 +943,7 @@ even `spell format` leaves the test projects alone.
 
 ## See also
 
+- The guide:  [Example Apps](../guides/examples/examples.html), in the kit's guides/ folder
 - [The editor and the runners](README-app.md):  how the editor runs an example as you type,
   and keeps a game going across an edit
 - [Spaces](README-spaces.md):  addresses, your own space, and importing a library into a project

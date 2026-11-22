@@ -1041,7 +1041,6 @@ Tests (node), at the same paths under [tests/server/](../tests/server/):
 
 The docs site needs a checkout with the epic folder beside it, and this page server running.
 
-- The Page Server:  `/guides/server.html` (its endpoint names predate the `/api/` prefix:  this page's are current)
 - The Epic Repo, where the docs and epic pages live:  `/guides/shared-content.html`
 - The Python target:  `/guides/python-target.html`
 
@@ -1049,6 +1048,7 @@ The docs site needs a checkout with the epic folder beside it, and this page ser
 
 ## See also
 
+- The guide:  [The Page Server](../guides/server.html), in the kit's guides/ folder
 - [spell-app's README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md):  what the app's part adds,
   the editor and its API
 - [README/element.md](element.md):  the element framework, whose packs and component pages this server serves

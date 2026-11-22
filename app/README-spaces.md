@@ -689,6 +689,7 @@ Here the org's roles are kept once, in its Admin space (`@rs/__admin`), and ever
 
 ## See also
 
+- The guide:  [Spaces and the Cloud](../guides/people-and-orgs.html), in the kit's guides/ folder
 - [The Spell app](README.md):  this folder's front page, and where spaces sit among its folders
 - [The editor](README-app.md):  what calls these models and saves through this API
 - [The example apps](README-examples.md):  what's in `@spell/examples`, and ideas for a project of your own
