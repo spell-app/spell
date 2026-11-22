@@ -584,6 +584,47 @@ describe("PageServer", () => {
     }
   })
 
+  // epic `epic-engine` P79:  a guide moved out of the epic folder keeps its address, as the checkout's file wins
+  it("serves a moved guide at its old address, on main and under a worktree's:  the checkout's copy, not the epic folder's", async () => {
+    const main = mkdtempSync(join(tmpdir(), "srv-moved-"))
+    const content = `${main}.epics`
+    const worktrees = `${main}.worktrees`
+    const put = (file: string, text: string) => {
+      mkdirSync(dirname(file), { recursive: true })
+      writeFileSync(file, `<!doctype html><head></head><p>${text}</p>\n`)
+    }
+    // the original, left in the epic folder;  the kit's copy (`guidesFolder`), main's and the branch's
+    put(join(content, "guides", "rulex", "rulex.html"), "original")
+    put(join(main, "guides", "rulex", "rulex.html"), "main's")
+    put(join(worktrees, "w", "guides", "rulex", "rulex.html"), "the branch's")
+    // a guide of the epic plugin (`epic/guides/`), at its engine route:  ONE copy, this checkout's
+    put(join(content, "guides", "airplane.html"), "original")
+    put(join(main, "epic", "guides", "airplane.html"), "the plugin's")
+    // a guide that never moved:  the epic folder's, at both addresses
+    put(join(content, "guides", "stays.html"), "the epic folder's")
+    const engineRoutes = { "/guides/": "epic/guides" }
+    writeFileSync(join(main, "package.json"), JSON.stringify({ pageServer: { engineRoutes } }))
+    const served = await new PageServer({ root: main }).start({ port: 0, routes: false, pidFile: false })
+    try {
+      served.serveContent(content)
+      served.serveWorktrees(worktrees)
+      const text = async (path: string) => {
+        const answer = await ask(served.info.port, "GET", path)
+        expect(answer.status, path).toBe(200)
+        return /<p>(.*?)<\/p>/.exec(answer.text)?.[1]
+      }
+      expect(await text("/guides/rulex/rulex.html")).toBe("main's")
+      expect(await text("/worktrees/w/guides/rulex/rulex.html")).toBe("the branch's")
+      expect(await text("/guides/airplane.html")).toBe("the plugin's")
+      expect(await text("/worktrees/w/guides/airplane.html")).toBe("the plugin's")
+      expect(await text("/guides/stays.html")).toBe("the epic folder's")
+      expect(await text("/worktrees/w/guides/stays.html")).toBe("the epic folder's")
+    } finally {
+      await served.stop()
+      for (const dir of [main, content, worktrees]) rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
   // epic `repo-split` P4:  the sets and engine routes are settings, so the server names nothing of a repo's own
   it("reads its component sets and engine routes from its settings (componentSets(), engineRoutes())", () => {
     expect(server.componentSets.map((set) => [set.name, set.prefix])).toEqual([
