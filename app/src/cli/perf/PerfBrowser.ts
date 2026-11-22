@@ -153,9 +153,12 @@ export class PerfBrowser {
     return this.page.evaluate(domCensus)
   }
 
-  /** Every response's body read and sized so far (`responses`).  NEVER throws. */
+  /**
+   * Every response's body read and sized so far (`responses`), waiting at most `SIZED_WAIT_MS`.  NEVER throws.
+   * - at most:  a body that never ends (a request the page holds open) would hold the run for good;  it's left unsized
+   */
   async sized(): Promise<void> {
-    await Promise.all([...this.reading])
+    await Promise.race([Promise.all([...this.reading]), new Promise((resolve) => setTimeout(resolve, SIZED_WAIT_MS))])
   }
 
   /** Close the browser.  NEVER throws. */
@@ -230,6 +233,9 @@ const METRICS = [
   "ScriptDuration",
   "TaskDuration"
 ] as const
+
+/** How long `sized()` waits for the bodies still being read, ms. */
+const SIZED_WAIT_MS = 10_000
 
 /** A request that writes. */
 const WRITES = /^(PUT|POST|DELETE|PATCH)$/

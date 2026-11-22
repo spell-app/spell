@@ -25,50 +25,62 @@ export class LoadMeasure {
     for (let run = 1; run <= runs; run++) {
       const browser = await PerfBrowser.open(page, profile, servers)
       try {
-        let times: LoadTimes | undefined
-        let error: string | undefined
-        try {
-          times = await browser.load()
-        } catch (failed) {
-          error = String(failed).slice(0, 200)
-        }
-        const afterLoad = await browser.metrics()
-        const afterGC = await browser.metricsAfterGC()
-        const census = await browser.census()
-        await browser.sized()
-        const fetched = [...browser.responses.values()]
-        const scripts = fetched.filter((response) => response.type === "script")
-        const sum = (list: typeof fetched, key: "raw" | "brotli") =>
-          list.reduce((total, response) => total + (response[key] ?? 0), 0)
-        const warmBrotli = run === 1 ? await LoadMeasure.warmVisit(browser) : undefined
-        const result: LoadRun = {
-          run,
-          times,
-          error,
-          requests: fetched.length,
-          raw: sum(fetched, "raw"),
-          brotliLoaded: sum(fetched, "brotli"),
-          jsRequests: scripts.length,
-          jsRaw: sum(scripts, "raw"),
-          jsBrotli: sum(scripts, "brotli"),
-          warmBrotli,
-          afterLoad,
-          afterGC,
-          census,
-          errors: browser.errors.slice(0, 10),
-          writesBlocked: browser.writesBlocked.length,
-          liveMessages: browser.liveMessages
-        }
-        results.push(result)
-        say(
-          `  ${page}/${profile} run ${run}:  ready ${times?.readyAt?.toFixed(0) ?? error}ms  ` +
-            `tti ${times?.tti.toFixed(0)}  js ${scripts.length} files ${kbOf(result.jsBrotli)} brotli  ` +
-            `heap ${kbOf(afterGC.JSHeapUsedSize)} after GC  nodes ${afterGC.Nodes}`
-        )
+        results.push(await within(RUN_LIMIT_MS, LoadMeasure.once(browser, run, say)))
       } finally {
         await browser.close()
       }
     }
+    return LoadMeasure.summary(page, profile, runs, results)
+  }
+
+  /** One cold load of `browser`'s page, measured;  never throws for a page that won't get ready:  it says why. */
+  static async once(browser: PerfBrowser, run: number, say: (line: string) => void): Promise<LoadRun> {
+    const { name: page } = browser.spec
+    const { name: profile } = browser.profile
+    let times: LoadTimes | undefined
+    let error: string | undefined
+    try {
+      times = await browser.load()
+    } catch (failed) {
+      error = String(failed).slice(0, 200)
+    }
+    const afterLoad = await browser.metrics()
+    const afterGC = await browser.metricsAfterGC()
+    const census = await browser.census()
+    await browser.sized()
+    const fetched = [...browser.responses.values()]
+    const scripts = fetched.filter((response) => response.type === "script")
+    const sum = (list: typeof fetched, key: "raw" | "brotli") =>
+      list.reduce((total, response) => total + (response[key] ?? 0), 0)
+    const warmBrotli = run === 1 ? await LoadMeasure.warmVisit(browser) : undefined
+    const result: LoadRun = {
+      run,
+      times,
+      error,
+      requests: fetched.length,
+      raw: sum(fetched, "raw"),
+      brotliLoaded: sum(fetched, "brotli"),
+      jsRequests: scripts.length,
+      jsRaw: sum(scripts, "raw"),
+      jsBrotli: sum(scripts, "brotli"),
+      warmBrotli,
+      afterLoad,
+      afterGC,
+      census,
+      errors: browser.errors.slice(0, 10),
+      writesBlocked: browser.writesBlocked.length,
+      liveMessages: browser.liveMessages
+    }
+    say(
+      `  ${page}/${profile} run ${run}:  ready ${times?.readyAt?.toFixed(0) ?? error}ms  ` +
+        `tti ${times?.tti.toFixed(0)}  js ${scripts.length} files ${kbOf(result.jsBrotli)} brotli  ` +
+        `heap ${kbOf(afterGC.JSHeapUsedSize)} after GC  nodes ${afterGC.Nodes}`
+    )
+    return result
+  }
+
+  /** A page's loads summed up:  the medians, the first load's bytes and census. */
+  static summary(page: PerfPageName, profile: PerfProfileName, runs: number, results: LoadRun[]): LoadResult {
     const first = results[0]!
     const timeOf = (key: keyof LoadTimes) => median(results.map((result) => result.times?.[key]))
     const metricOf = (when: "afterLoad" | "afterGC", key: keyof PerfMetrics) =>
@@ -126,6 +138,19 @@ export class LoadMeasure {
       .filter((response) => !response.fromCache)
       .reduce((total, response) => total + (response.brotli ?? 0), 0)
   }
+}
+
+/** The most one load may take, ms:  a page that hangs (a body never ending, a stuck page) fails its step instead. */
+const RUN_LIMIT_MS = 6 * 60_000
+
+/** `work`, or a rejection once `ms` have passed. */
+function within<T>(ms: number, work: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const late = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => reject(new Error(`didn't finish in ${Math.round(ms / 60_000)} minutes`)), ms)
+  })
+  work.catch(() => {})
+  return Promise.race([work, late]).finally(() => clearTimeout(timer))
 }
 
 /** `bytes` as KB, for a progress line. */
