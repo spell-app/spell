@@ -1075,11 +1075,14 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 - **Use it when:**  a script builds a bundle the page server serves.
 - **Copies:**  `--` since P11 (Spell UI's site bundle, the brand's build)
 
-### A component set's data
+### A component set's guide
 
-- **It is:**  Spell UI's `SiteDataBuilder` (`ui/src/tools/SiteDataBuilder.ts`), its `set` and `forSet()`
-  (epic `coherence` P11):  a set's own groups as the topics, its own side-column links, its pages one flat folder
-- **Copies:**  `--` since P11 (the brand's, Epic UI's and App UI's data)
+- **It is:**  a Spell guide in `@spell/guides` (`SpellUI`, `EpicUI`, `AppUI`;  epic `editor` P43-P44):  its site file
+  says each page's address and group;  `SpellUIGuide` (`ui/src/util/SpellUIGuide.ts`) each page's address on the page
+  server, and the link mender's rule for the old HTML pages;  `yarn site:check [--site epics | app]` checks it
+- **Use it when:**  a set of elements needs its pages:  never HTML components pages again.
+- **Copies:**  `--` since P44 (`SiteDataBuilder`'s set mode, `forSet()`, went with the other sets' HTML pages;  epic
+  `coherence` P11 had made it the one way to build a set's data)
 
 ### A docs element's site data
 
@@ -1114,7 +1117,7 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 
 ### Spell UI's folder, the site's pages, the page server
 
-- **It is:**  `SPELL_UI_ROOT` and `sitePages()` (`ui/src/tools/tools.types.ts`), `ensurePageServer()`
+- **It is:**  `SPELL_UI_ROOT` (`ui/src/tools/tools.types.ts`;  `sitePages()` went in epic `editor` P44), `ensurePageServer()`
   (`ui/src/tools/pageServer.ts`;  epic `coherence` P23)
 - **Use it when:**  a Spell UI script or tool needs the repo's folder, the docs site's pages, or the page server
   running.

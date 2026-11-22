@@ -91,7 +91,7 @@ and in the app's build folder, `app/` at the app folder's root.
   - the page, `index.html`
   - `demo/`, `static/`, `scripts/` (App UI's data and pictures, `stop.mjs`)
   - the vite configs, `vite*.config.ts`;  the tests' are the root's `vitest.config.ts`
-  - `docs/`, App UI (below);  the builds, `dist*/`
+  - `docs/`, App UI's viewer page and data (below);  the builds, `dist*/`
 - Its scripts are the app folder's (its `package.json`), the builds `cd app && ...` (epic `repo-split` P11):
   - The editor (vite, port 3000 if free, else any) is the PAGE SERVER's child.
     - Spaces' [appRoutes.ts](../spaces/server/node/routes/appRoutes.ts) starts it (`EditorServer`)
@@ -140,6 +140,9 @@ and in the app's build folder, `app/` at the app folder's root.
       - `spell-ui.js`:  the `spell-ui` barrel, lazy
         - its chunks in `ui/`
         - it also puts `registerPack` on `globalThis.SpellUI`
+      - `spell-solid.js` puts one there first, on a page with none (`PagePacks`, in `components/`;  epic `editor` P44):
+        so a Spell page's `<ui-components source>` loads a component pack (a guide's `<epic-*>` examples);  the first
+        pack fills `SpellUI.packModules` from these two files, then waits for all of Spell UI, as the site bundle does
     - The element / editor / runner builds import them through `sharedSolid()` (`vite.shared.ts`),
       never bundling their own.
     - They take Solid and the core through `spell-solid-shared.js`:
@@ -374,7 +377,7 @@ and in the app's build folder, `app/` at the app folder's root.
         and goes to the extension, which shows each failed check on its line (lsp's `spell/testDiagnostics`).
     - the `<spell-viewer>` web component, in `components/spell-viewer/`
       - built by `yarn build:element`, into `dist-element/`
-      - its page:  [spell-viewer.html](../../app/docs/spell-viewer.html), in App UI's docs
+      - its page:  `/components/app/spell-viewer`, in App UI's guide
   - Solid (P7), on `spell-ui`.
     - The runners import the Solid panes' FILES, never the `spell/app/app/solid` barrel (it pulls in the editor).
       - e.g. `spell/app/app/solid/ThingExplorer`, `.../ConsoleLines`, `.../loadUI`
@@ -531,44 +534,37 @@ and in the app's build folder, `app/` at the app folder's root.
   - `editable`:  an option-click opens something's words;  the page around saves them (`spell-reference-edit`).
   - Built by `vite.code.config.ts`, as `<spell-code>` is:  `spell-reference-page.js`;  the Spell UI families it draws
     with come from the page (`DRAWN_FAMILIES`, `vite.shared.ts`).
-- `app/docs/` is App UI (epic `epic-workflow` P11):  the docs pages of the app's components, a COMPONENT SET.
-  - Served at `/components/app/`.
-  - Laid out as every set is since P18 of `people-and-orgs` (the root's `AGENTS.md`).
-  - ONE flat folder:
-    - a page per documented component, `<Name>.html` (the web components' `spell-viewer.html` ...)
-    - its home, `index.html`
-    - `__parts/` (the layout and footer, every page's frame) and `__data/`
-    - `_images/` (the pictures) and `_examples/` (snippets a page shows):
-      they aren't frame or data, so they keep one `_`
-  - Spell UI's page shape, on Spell UI's site bundle:  the page server lays its `_assets/` over the folder.
-    - the page server's `componentSets` setting, in the app folder's [package.json](../../package.json)
-  - Links are written as from the page's SERVED address (`/components/app/x.html`):
-    - `../../` is the checkout's root
-    - `../ui/button` is a page of the Spell UI site (its Spell guide;  `SpellUIGuide.addressOf()`)
-    - the layout and footer, in `__parts/`, are one level deeper
-  - What it documents, and in which group:  [the hand-kept facts](../../app/docs/__data/pages.json5).
-  - Each page's props, attributes and "Used in" tables come from the code:  `yarn site:data`.
+- App UI is the guide to the app's components (epic `epic-workflow` P11):  a Spell guide since epic `editor` P44,
+  `@spell/guides/AppUI` (`app/spaces/@spell/guides/AppUI/`), as the Spell UI site is.
+  - A page per documented component, `MenuBar.spell`, its address the component's name (`/menu-bar`);  the site
+    file, `AppUI.spell`, says where each page is and which group lists it.
+  - Shown at `/components/app/` with no editor:  [app/docs/](../../app/docs/) holds the viewer page (the set's
+    `sitePage`), its data (`__data/`) and its pictures (`_images/`);  in the editor at `/run/@spell/guides/AppUI`.
+  - Its live examples (the web components, the runner's pieces) load `/element/spell.pack.js` from the guide's layout,
+    so they need `yarn build:element`.
+  - Each page's props, attributes and "Used in" tables come from the code:  `yarn site:data`, drawn by
+    `<ui-docs-api family="MenuBar">` from the data the viewer page names.
     - [The data builder](tools/AppUIDataBuilder.ts) reads, for each listed file:
       - its exported components with a banner (`### `<Name>``)
       - their props types ([ComponentSource](tools/ComponentSource.ts))
       - and every JSX use in the app
     - The web components and a view's element:  their vocabularies, by Spell UI's own builder.
-    - It writes the set's data, COMMITTED:  `components.json5` and `search.json5`, in `__data/`.
+    - It writes `components.json5`, in `__data/`, COMMITTED.
     - [Its test](../../tests/app/tools/AppUIDataBuilder.test.ts) fails while:
-      - they're stale
-      - a listed page is missing, or unlinked from the home
-      - its component's banner doesn't point at it
+      - it's stale
+      - a listed page isn't in the guide's site file
+      - its component's banner doesn't name its page's address (`/components/app/menu-bar`)
     - So rerun it after changing a documented component's banner, props or uses.
+    - What it documents, and in which group:  [the hand-kept facts](../../app/docs/__data/pages.json5).
   - Pictures, for what needs the whole editor around it:  `yarn site:pictures [name...]`.
     - headless screenshots of this checkout's running editor, into `app/docs/_images/` ([its script](../../app/scripts/site-pictures.ts))
     - Opening the editor compiles its project:  its `*.spell.js`, declarations and words go in `build/`,
       never committed, so nothing beside its source changes.
-  - Live examples (the web components, the runner's pieces) need `yarn build:element`:
-    the layout loads `/element/spell.pack.js`.
   - A new page:
     1. its entry in `pages.json5`, then `yarn site:data`
-    2. a copy of a page like it:  `Notice.html` for a picture, `spell-viewer.html` for a live one
-    3. linked from `index.html`
+    2. a copy of a page like it in the guide:  `Notice.spell` for a picture, `SpellViewer.spell` for a live one
+    3. its line in `AppUI.spell`, under its group
+  - Check the pages:  `yarn site:check --site app <page...> | --all`, in `ui/`.
 - `spellEditor/` is `<spell-editor>`'s pane:  the app's CodeMirror editor, as a web component.
   - `yarn build:element` => `spell-editor.js`
   - its demo:  `/demo/spell-editor.html`

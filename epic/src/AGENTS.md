@@ -293,13 +293,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - `PageTargets`:  what one page's DOM holds to land on (ids, titles, phases in order, its `<epic-page saga>`),
       on the browser's DOM or linkedom's
     - used by `<epic-link>`, the docs runtime (`SAGA:/` links rewritten), and the tool's `EpicTargets`
-  - `site/` -- `EpicUISite`:  the data of Epic UI, the elements' docs set, in Spell UI's site shapes.
-    - the set:  `docs/`, at `/components/epics/` (see "Epic UI, the docs set")
-    - `components.json5`, in `__data/`:  one entry per element from `Definitions.all`, plus the side column's own links
-      - filed by the groups in the set's hand-kept `pages.json5`
-      - a new element:  under Other, `planned` until its page exists
-    - `search.json5`, in `__data/`:  every page's sections, for its search
-    - written by `yarn site:data` ([its script](../scripts/site-data.ts));  `EpicUISite.test.ts` fails while stale
+  - `docs/` -- Epic UI's viewer page, at `/components/epics/`:  the guide to the elements is a Spell guide
+    (see "Epic UI, the guide")
   - `list/` -- [the Epics list](../../spell.epics/epics/index.html), out of the page server since P16 of `people-and-orgs`:
     - `EpicState`:  an epic's state, the ONE rule every list and page draws it by
     - `EpicCards`:  the list's markup, written alike by `epic pages index` and the page server:
@@ -841,8 +836,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
 - Change an element -- its vocabulary above all, or any file under `components/` or `src/` -- then:
   1. `yarn pack:build` (`spell-pack build`)
   2. in the same change, commit what it writes that git tracks:  the pack's catalog and entry
-     (`components/__pack/epics.{catalog,entry}.ts`) and the docs data, `docs/__data/`;  its script and families are
-     git-ignored
+     (`components/__pack/epics.{catalog,entry}.ts`);  its script and families are git-ignored
   - `yarn pack:check` exits 1 while either is stale, and the pack's test (`pack.test.ts`) runs it:
     so `yarn test` and `yarn review` fail until you build.
 - Elements are written on `spell/element`:  `import { E } from "spell/element"` (`E.UIComponent`, `@E.state` ...).
@@ -895,9 +889,9 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - Once it's on `main`, `epic migrate --all --notify`:  idle epics are migrated, running ones are told.
     - What the receiving session does:  the epic skill's "Migrations".
   - How a step is written:  [PLAN-DOC.md](tool/PLAN-DOC.md), "Migrations".
-- Every element has a page in Epic UI, [`docs/`](docs/index.html), served at `/components/epics/`.
-  - Change it in the SAME commit as the element, then `yarn site:data` (see "Epic UI, the docs set").
-  - Its pages are tracked here, per branch:  a worktree's show at `/worktrees/<w>/components/epics/` until it merges.
+- Every element has a page in Epic UI, a Spell guide shown at `/components/epics/` (see "Epic UI, the guide").
+  - Change it in the SAME commit as the element.
+  - Its pages are tracked per branch:  a worktree's show at `/worktrees/<w>/components/epics/` until it merges.
 - A pack drawn by pages EVERY checkout shows (the shared `epics/`, `guides/` ...):
   those pages load `main`'s pack, through the main checkout's page server.  So:
   - small fixes straight on `main`
@@ -907,10 +901,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
 
 - `yarn pack:build` ~== `spell-pack build` ~== `spell pack build epics`
   - the catalog, the entry and the script, into `components/__pack/`
-  - then Epic UI's data, `docs/__data/` (`yarn site:data`)
 - `yarn pack:check` ~== `spell-pack check` ~== `spell pack check epics` -- exits 1 while either is stale
-- `yarn site:data [--check]` -- Epic UI's data ([EpicUISite.ts](site/EpicUISite.ts), [its script](../scripts/site-data.ts))
-  - rerun after changing an element or a page's sections, and commit `docs/__data/`
 - `yarn test` -- `node` (`src/`) and `browser` (`components/`, chromium):  fast, no turn needed
 - `yarn test:unit` -- `node` and the plain-node scripts, no browser or integration:  what an epic's agent runs before
   merging (the epic skill's three test tiers, epic `epic-engine` T90)
@@ -926,94 +917,27 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   yarn plan-doc,  yarn details
   ```
 
-## Epic UI, the docs set
+## Epic UI, the guide
 
-`docs/`:  the pages of the `<epic-*>` elements, a COMPONENT SET (epic `epic-workflow` P10).
-Laid out as every set is since P18 of `people-and-orgs`
-([spell-app's AGENTS.md](../../app/AGENTS.md), "COMPONENT SETS").
-- Served by the kit's page server, as the `epic/` folder's part of its settings names it (its folder manifest's
-  `"pageServer"`
-  `"componentSets"`, `componentSets()` in [settings.ts](../../src/server/page/settings.ts)), and by the epic server:
-  - at `/components/epics/`
-  - and at `/worktrees/<w>/components/epics/` for a worktree's
-  - The top bar's Epic/UI tab opens it.
-  - Its folder's own address (`/packages/epics/docs/...`) is NOT a way in:
-    its pages load their site bundle from `_assets/` beside them, which only the set's address has.
-- Tracked and versioned with the branch, like code:  an element's page changes in the same commit as the element.
-- In Spell UI's page shape:
-  - the top bar, a side column of every element by group, the page's contents list, the theme switch
-  - The pages load Spell UI's site bundle (`_assets/`, laid over the folder by the page server), every set's since
-    epic `epic-engine` (the other sets' own build, its `sets/`, before).
-    It loads the epics pack for the live examples.
-- ONE flat folder:
-
-  | Path | What |
-  | --- | --- |
-  | `index.html` | the set's home, The Epic Elements:  how they nest |
-  | `<tag>.html` | one page per element, `epic-item.html`;  every page but the home is an element's |
-  | `__parts/layout.html` | every page's chrome, written once:  the brand, the side column, the epics pack's `<ui-components>` |
-  | `__parts/footer.html` | every page's footer |
-  | `__data/pages.json5` | HAND-KEPT:  the side column's groups, the elements with no page, the side column's own links |
-  | `__data/components.json5`, `__data/search.json5` | GENERATED, committed:  `yarn site:data` |
-
-- A new page:
-  1. copy a page like it, or the shared template once it's been moved on at the merge
-     ([the component set docs template](../templates/component-set-docs.html))
-  2. `yarn site:data`
-  - An element added to the pack shows in the side column by itself (under Other, `planned`) once the data is rebuilt.
-- Links are ROOT PATHS, as the kit's page server serves them (epic `epic-engine` P46;  "Links", below):
-
-  ```text
-  x.html                             a sibling:  the page's own folder stays relative
-  /components/ui/button              a page of the Spell UI site (a Spell guide)
-  /components/app/spell-viewer.html  an App UI page
-  /epic/src/components/              the `epic/` folder's files, from the kit's root
-  /guides/x.html                     a page of the epic folder
-  /_epic/pack/epics.pack.js          the epics pack, the epic server's engine route (the layout's `<ui-components>`)
-  _assets/site.js                    the site bundle a page loads, below its folder:  stays relative
-  ```
-
-  - The same text in the layout and footer, served from `__parts/`.
-  - Before P46 they were written from the page's served address (`../../epic/...`, `../../../` from `__parts/`);
-    before epic `epic-engine` I37 at spell-app's old `../../packages/epics/...`.
-  - `yarn tsx src/tools/doc-links.js --check src/docs/*.html` checks them, from the kit (its linker is the kit's, the
-    checkout the page server serves).
-- Check a page:  `node src/tools/check-spell.js src/docs/<tag>.html`, from `epic/`.
-  It loads the page from the page server, at its address.
-- Comments (epic `epic-engine` P2, T3):  the person comments on these pages as on a guide.
-  - So they do on App UI's and Brand's, spell-app's sets, which load the same script (see "Comments" below).
-  - The bullhorns, the pane, the threads and Send, all of "Comments" below.
-  - Each page loads the comments by themselves, after the site's bundle, in its `<head>`:
-    `<script defer src="/_epic/assets/spell-comments.js">` (the template has it too).
-    - It's the docs runtime's comments ([spell-doc-comments.js](tools/_assets/spell-doc-comments.js))
-      and its toolbar ([spell-doc-toolbar.js](tools/_assets/spell-doc-toolbar.js), epic `epic-engine` T11),
-      and nothing else of it:  these pages load Spell UI's site, not the docs bundle.
-    - It holds NO Spell UI:  the page's own draws its `<ui-*>` markup, so there's one Spell UI on the page
-      (epic `epic-engine` I18:  two handle every event twice).  The build checks it.
-    - Its look:  `spell-comments.css` and `spell-toolbar.css`, which it links.
-    - The site's router swaps `main` for the next page:
-      the toolbar and the comments are taken down and wired again for it.
-  - The masthead is the page header:  the page's bullhorn over its corner, Send under the title.
-  - A TOOLBAR (epic `epic-engine` T11;  2026-10-20:  "Epic UI pages should have a toolbar"):
-    a guide's, built by the same code (`titledItems()`, `toolbarMenu()`),
-    first in the page's article, under the masthead
-    - a button per top-level section (its icon and title, `1. Example` shows `Example`), the section being read marked
-    - the comments' bullhorn at its right, its orange count, each click the next thread waiting on the person
-    - in the site's page bar, `<ui-sticky class="site-sticky-bar">` (`SiteSections`' `PAGE_BAR`):
-      it sticks at the site's top (under the narrow screens' top bar), the section titles stick below it,
-      links land below both
-    - the docs pages' ivory band, out to the page column's edges;  marks only when the titles don't fit (390px)
-    - the site's "On this page" column stays (1200px and wider):
-      it lists the nested sections too, and holds the site's header and look controls (J:  keep both)
-  - Cmd / Ctrl + K, on a page that takes comments:  the docs pages' jump dialog,
-    taking a comment's id (`C3`) or any id on the page.
-    - Anything else typed goes to the site's SEARCH, words and all (J:  one key for both).
-    - `/` still opens the search straight away;  elsewhere the key stays the search's.
-  - Kept in `<page>.inbox.json5` beside a page, git-ignored.
-  - No epic owns these pages, so their comments go to the standing epic `feedback` (epic `epic-engine` T9):
-    Send says "feedback is listening", or "nobody is listening:  Send wakes feedback".
-    `epic comments list` names each by its served path:  `components/epics/epic-item.html#C1`.
-  - [check-comments-epic-ui.mjs](demo/check-comments-epic-ui.mjs) checks them in a browser.
+Epic UI is the guide to the `<epic-*>` elements the epic pages are built from:  a Spell guide, `@spell/guides/EpicUI`,
+one project of notebook pages in the app folder's built-in projects (`app/spaces/@spell/guides/EpicUI/`;  epic `editor`
+P44, as the Spell UI site in P43).  It was a COMPONENT SET of HTML pages here, `docs/`, from epic `epic-workflow` P10.
+- Each element's page:  `EpicCard.spell` ...  The site file, `EpicUI.spell`, says where each page is and which group
+  of the side navigation lists it (`group "The Epics page"`);  `main.page-layout.spell` is every page's frame.
+- Its examples draw live:  the layout loads the epics pack (`<ui-components source="/_epic/pack/epics.pack.js">`),
+  which a Spell page can since P44 (the app's `PagePacks`).
+- Shown at `/components/epics/` by the kit's page server, with no editor:  this folder's `docs/` holds only
+  [the viewer page](docs/index.html), which the page server answers every one of the guide's addresses with
+  (the set's `sitePage`, in the folder manifest's `"pageServer"`):  `/components/epics/epic-card#4-attributes`.
+  - The top bar's Epic/UI tab opens it;  a worktree's at `/worktrees/<w>/components/epics/`.
+  - In the editor:  `/run/@spell/guides/EpicUI`, where a page is changed (Change this).
+- Each page's address is its element's tag (`SpellUIGuide.setAddressOf("epics", tag)`);  a link written for an old
+  HTML page (`/components/epics/epic-card.html`) is mended to it by the link checker (`ServedFolders.sites`).
+- A new element:  its page in the guide, a copy of one like it, and its line in `EpicUI.spell`, under its group.
+- Check the pages:  `yarn site:check --site epics <page...> | --all` (in `ui/`), headless, at the page server's
+  address;  every page compiles in the app's notebooks test.
+- Comments on these pages:  none since P44 (the comments script was the HTML pages');  a note on a page goes through
+  the editor's Change this, as for the Spell UI site (Q83).
 - The epic's write-up and how-to guides stay in the shared guides:
   [Epic Pages as Components](../../spell.epics/guides/epic-components/epic-components.html),
   [Reviewing an Epic Page](../../spell.epics/guides/epic-components/review.html),
@@ -1251,8 +1175,8 @@ In `tools/`:
     - the threads and the pane draw themselves (their own sheets)
   - `spell-toolbar.css`:  the toolbar's look and the jump dialog's (epic `epic-engine` T11)
     - `@import`ed by `spell-doc.css`, which keeps where a docs page puts the toolbar;  linked by `spell-comments.js`
-  - `spell-comments.entry.js` -> `spell-comments.js`:  the toolbar and the comments ALONE, for Epic UI's pages
-    (see "Epic UI, the docs set").
+  - `spell-comments.entry.js` -> `spell-comments.js`:  the toolbar and the comments ALONE, for a component set's HTML
+    pages;  none is left since epic `editor` P44 (see "Epic UI, the guide"), but the brand's, which may bitrot
     - no Spell UI or Solid in it:  it draws with the page's
     - GENERATED by [bundle-spell-ui.js](tools/bundle-spell-ui.js), with the docs bundle, git-ignored.  NEVER edit `spell-comments.js`.
   - `spell-ui.js`:  the ONE script a page names, a few lines of classic script, committed (epic `solid-2-final` P7):
@@ -1637,7 +1561,7 @@ In `tools/`:
             move through them
           - while reviewed, FOCUS MODE first (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly
             walk through the open issues/questions/etc in a plan"):  `<epic-focus>`, drawn in the page's shadow root,
-            never written in a page;  [its Epic UI page](docs/epic-focus.html)
+            never written in a page;  its Epic UI page, `/components/epics/epic-focus`
             - Spell UI's `<ui-modal fullscreen overlay>`, Escape and its × close it
             - the open items by the page's own colour rule (`DrawnState`, `PhaseState`:  red, orange, blue, yellow;  a
               phase's dotted blue), a tab per kind by the id's letter (P, Q, T, J, I, M), the Tests tab in the
@@ -1909,8 +1833,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
 | guide | explains a topic;  an epic's own write-up is "the epic's guide" | `guides/` | [durable.html](../templates/durable.html) |
 | cheatsheet | an API at a glance, as cards you filter | `guides/` | [cheatsheet.html](../templates/cheatsheet.html) |
 | commands page | which command, skill or script does what | `guides/dev/commands/` | [commands.html](../templates/commands.html) |
-| components page | one element:  its examples, attributes and look | a component set's `docs/`:  spell-epic's `src/docs/`, spell-app's `app/docs/`;  Spell UI's are the Spell UI site's pages since epic `editor` P43, a Spell guide (`@spell/guides/SpellUI`) | [spell-ui-docs.html](../templates/spell-ui-docs.html) |
-| components guide | a component set's pages that aren't one element:  home, getting started, theming, icons | beside its components pages | [component-set-docs.html](../templates/component-set-docs.html) |
+| components page | one element:  its examples, attributes and look | a page of its set's Spell guide:  the Spell UI site (`@spell/guides/SpellUI`, epic `editor` P43), Epic UI's and App UI's (`EpicUI`, `AppUI`, P44), shown at `/components/<set>/` | none:  `yarn site:new` writes a Spell UI component's;  the other sets', a copy of a page like it |
+| components guide | a component set's pages that aren't one element:  home, getting started, theming, icons | the same guide, beside its components pages | none:  Spell pages, written by hand |
 | reference page | made from its source each time, with a person's words about each thing:  a place's (`<spell-reference-page>`, epic `data` P53), the commands pages, the core reference page, the syntax guide | a place's:  the editor's `/place/<description>`;  the others in `guides/` | none:  drawn from its source |
 | brand page | Claude Design's brand pages, and their Spell UI copies | `brand/` | none:  Claude Design's exports |
 | home page | the docs' front page:  a card per area | `pages/index.html` | none:  `epic pages index` writes its cards |
@@ -1981,16 +1905,10 @@ the epic page shown in both tabs).
   - saved from `ui-docs-rework`'s morning review, as the model
 - No `templates/goals/` any more (epic `epic-engine` P2, T1):  the parked goal sets' templates are only in spell-app's
   `goals.zip`, an older copy;  their last versions are in git history, before P2.
-- [spell-ui-docs.html](../templates/spell-ui-docs.html):  a components page (one element's).
-  - Spell UI's `yarn site:new` fills it in memory and writes it as the Spell UI site's pages (epic `editor` P43):
-    Spell UI's HTML components pages are gone;  the template stays for the other sets until epic `editor` P44.
-  - Fomantic's docs layout in `<ui-*>` widgets:
-    nav, masthead, Examples / Usage / API / Theming tabs, an "On this page" rail.
-  - It loads the UI site's bundle, NOT `spell-ui.js`.
-  - NEVER copy by hand:  `yarn site:new <tag|page>`, in spell-ui.
-  - How to write one:  [PAGES.md](../../spell.epics/epics/spell-ui-pages/PAGES.md).
-  - Checked by `yarn site:check` there (`docs update` skips it).
-- Every template but the saga pages and `spell-ui-docs.html` is `<ui-section>` markup (see "Writing a page").
+- No components page template since epic `editor` P44:  the HTML components pages are all Spell guides now.
+  - `spell-ui-docs.html` is Spell UI's own, `yarn site:new`'s input (its `src/tools/ComponentPage.template.html`);
+    `component-set-docs.html` went with the other sets' HTML pages.
+- Every template but the saga pages is `<ui-section>` markup (see "Writing a page").
   - The saga pages keep the old `section.s2` markup
     until they migrate ([the code-debt log](../../agents/CODE-DEBT.md)).
 - A new KIND of doc gets a template here.
@@ -2807,10 +2725,11 @@ the epic page shown in both tabs).
   - A page served under `/worktrees/<w>/` redraws on its inbox's change too:  the server announces a shared
     folder's files without that prefix (`inboxPaths`).
   - pages under `guides/`, `pages/`, `epics/` (epic pages too), `sagas/` (saga pages, in their own review inbox)
-  - a component set's pages, at its address (`/components/epics/...`), never its `__parts/`
+  - a component set's HTML pages, at its address (`/components/epics/...`), never its `__parts/`:  none since epic
+    `editor` P44, when the sets became Spell guides, whose notes go through the editor's Change this
     - their inbox beside each, in the set's tracked `docs/` folder, git-ignored there
     - Epic UI's draw them since epic `epic-engine` P2 (T3):  `spell-comments.js`, the comments alone, beside the
-      site's Spell UI (see "Epic UI, the docs set").  Before, the route took their comments, but no page could make one.
+      site's Spell UI.  Before, the route took their comments, but no page could make one.
     - App UI's and Brand's (spell-app's) too, since epic `epic-engine`'s sets work:  the same line in every page's
       head, and the epics pack in their layout (`<ui-components source="/_epic/pack/epics.pack.js">`), whose
       elements draw the threads and the pane.
@@ -3138,19 +3057,6 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
       on a guide and an epic page (epic `epic-workflow` P23)
     - their comments stubbed in the browser, every POST aborted:  no inbox read or written, nobody woken
     - Run it after touching the comments' runtime, the toolbar or the jump dialog.
-  - `node src/demo/check-comments-epic-ui.mjs [--set epics | ui | app | brand] [--checkout <app>] [--page <name>]
-    [--swap <name>] [--docs <folder>] [--bundle <spell-ui.js>] [--keep] [--dark] [outDir]`, from the root:
-    - `--set ui` / `app` / `brand`:  Spell UI's, App UI's or Brand's pages, from the folder `--checkout`'s settings name (`componentSets()`)
-      (default the epic server's default repo's;  a spell-app worktree's, to check its pages before they merge), with that checkout's site
-      bundle (Epic UI's too, when `--checkout` is named);  a tabbed page's toolbar too
-    - `--set ui`:  three element pages' live examples still draw and answer a click (a dropdown, a modal, a checkbox)
-    - `--dark`:  all of it in the dark colour scheme
-    - comments on Epic UI's pages (epic `epic-engine` P2):  the bullhorns, a page comment and a text one, their
-      threads, Send, the router's swap and back, at 1200 and 390px;  and a guide's still drawn by the docs bundle
-    - their toolbar (epic `epic-engine` T11):  a button per section landing it under the band, the bullhorn's count
-      and its jumps, Cmd / Ctrl + K on a comment's id and on words (the site's search), the router's swap
-    - on a scratch copy of the set's folder unless `--docs`;  nobody woken
-    - Run it after touching the comments' code or look, or Epic UI's layout.
   - `node src/demo/check-test-run.mjs [--doc <name>] [outDir]`, from the root (epic `epic-engine` P4, P51):
     - Start testing on a scratch copy of an epic page, its Manual tests section replaced by scratch tests
       (the new shape and older prose-only ones):  the button, Preparing tests, the first test opening once the

@@ -450,11 +450,15 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
     link mender ask it.
   - It takes the old components pages' names too (`ui-button.html`, `ui-grid.html#ui-column`):
     a link written for them lands on the Spell page.
+  - And the other sets' guides, Epic UI's and App UI's (`sets`, `setAddressOf()`, `setMendedPath()`;  epic `editor`
+    P44):  `/components/epics/epic-card`, `/components/app/menu-bar`.
 - Spell UI's components pages, the HTML ones in `docs/` (`ui-button.html` ...), are gone (epic `editor` P43).
   - With them went `yarn site:index`, `yarn site:sections`, the pages' layout (`__parts/`) and `icons.json5`.
-  - The other component sets' pages are still HTML, on the same tooling, until epic `editor` P44 (Q82):
-    Epic UI's and App UI's, the epic templates `spell-ui-docs.html` and `review.html`, `SiteDataBuilder`'s set mode,
-    the comments on those pages, and the site bundle below.
+  - The other component sets' followed in P44 (Q82):  Epic UI's and App UI's guides are Spell guides too
+    (`@spell/guides/EpicUI`, `AppUI`), and with their HTML pages went the components page template (now `yarn
+    site:new`'s own, `src/tools/ComponentPage.template.html`), the component set page template, `SiteDataBuilder`'s
+    set mode (`forSet()`), the search file read from HTML pages, and the comments on those pages.
+  - The site bundle below stays, though no page of the sets loads it now (Brand's, which may bitrot, aside).
 - In two halves, one constant each in [the tools' types](src/tools/tools.types.ts).
 - `SITE_PAGES`, the DOCS FOLDER:  [`docs/`](docs/index.html), tracked here, a component set laid out as every set is
   (epic `people-and-orgs` P18;  [spell-app's AGENTS.md](../app/AGENTS.md), "COMPONENT SETS").
@@ -465,7 +469,7 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
     - `examples/`:  files the examples load
     - `images/`:  Fomantic's docs images
 - `SITE_BUILD`, the BUILD:  `site/`, tracked per branch ([README-site.md](README-site.md):  its files).
-  - The other component sets' pages load it;  the Spell UI site doesn't.
+  - No set's pages load it since epic `editor` P44 (the brand's aside):  every set's guide is Spell.
   - `site/_assets/`:  GENERATED, NOT committed.
     - Git-ignored since 2026-10-07:  its hashed chunk names churned every diff and merge.
     - The site bundle (`yarn site:bundle`):  `site.js` + `site.css`, which every set's page loads.
@@ -596,7 +600,7 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
   - `<Title>/Usage.spell`, `Examples.spell`, `API.spell` and `Theming.spell` (`app/spaces/@spell/guides/SpellUI/`),
     their lines in its site file (`SpellUI.spell`) and its project file, A to Z.
     - A sub-tag its family's `pages` lists gets pages of its own (`ui-radio`).
-  - Written as Spell from spell-epic's components page [template](../epic/templates/spell-ui-docs.html), filled in
+  - Written as Spell from its [template](src/tools/ComponentPage.template.html), filled in
     memory ([SpellUISite](src/tools/SpellUISite.ts), on [SpellMarkup](src/tools/SpellMarkup.ts);  epic `editor` P42).
     - Its API page gets a section per kind of table its tags have (`<ui-docs-api family only="attributes">` ...),
       from the site's data;  a family of 2+ tags a Tags section first (`only="tags"`).
@@ -631,6 +635,9 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
   loads the Spell UI site's pages (`@spell/guides/SpellUI`) as the page server shows them at `/components/ui/`,
   with no editor (Playwright), a page by its address (`/button/examples`) or its tag.
   - `--server <origin>`:  another page server than this checkout's (started if needed).
+  - `--site epics` / `--site app`:  Epic UI's or App UI's guide instead, at `/components/epics/` and
+    `/components/app/` (epic `editor` P44);  a page by its address or its old page's name (`epic-card`, `MenuBar`);
+    no search file.
   - [Its script](scripts/site-check.ts), on [the site check](src/tools/SiteCheck.ts).
   - It fails on:
     - console errors, 404s

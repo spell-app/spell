@@ -401,11 +401,10 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 | [hooks/](hooks/) | `hooks.json` and the eleven scripts it runs, plus `patch-checkout.mjs`, which one of them starts;  `codex-hooks.json`, three of the same scripts for Codex |
 | [monitors/](monitors/) | `listen.mjs` (`InboxPoller`), which keeps an epic's session listening to its epic page:  a small poller that runs `epic session listen` for a moment as the page's inbox changes.  The `Stop` hook starts it at each turn's end in every session (`--hook`, `asyncRewake`:  its exit wakes the session);  `monitors.json` runs it as a monitor too, which Claude Code starts only in a terminal session, never in VS Code's panel |
 | [bin/epic](bin/epic) | the `epic` command:  its program in [src/cli/](src/cli/), the work its verbs do in [src/command/](src/command/) |
-| [src/](src/) | the code:  the `<epic-*>` elements, the epic tool, the epic server, the docs tools, Epic UI's pages |
+| [src/](src/) | the code:  the `<epic-*>` elements, the epic tool, the epic server, the docs tools, Epic UI's viewer page |
 | [tests/](tests/) | its tests, at the same paths as the code;  and the extension's |
 | [templates/](templates/) | the pages' starting points, and the epic-page writing rules ([plan-doc.md](templates/epics/plan-doc.md)) |
 | [vscode/](vscode/) | the VS Code extension, a yarn project of its own |
-| [scripts/](scripts/) | dev-only scripts:  Epic UI's data |
 | [epic_settings.json5](epic_settings.json5) | how the tooling behaves, every key with its default;  yours and your team's override it ([Your settings](README-config.md#your-settings)) |
 | [docs/images/](docs/images/) | the pictures on these pages |
 

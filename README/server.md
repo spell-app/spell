@@ -803,15 +803,15 @@ export default helloRoutes
 | Id | Name | Served at | Its pages | Whose part |
 | --- | --- | --- | --- | --- |
 | `ui` | Spell UI | `/components/ui/` | the Spell UI site, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/ui/docs/index.html) at every address under it (the set's `sitePage`) | spell-ui's |
-| `epics` | Epic UI | `/components/epics/` | [spell-epic's src/docs/](https://github.com/spell-app/spell/tree/main/epic/src/docs) | spell-epic's |
-| `app` | App UI | `/components/app/` | [spell-app's app/docs/](https://github.com/spell-app/spell/tree/main/app/app/docs) | spell-app's |
+| `epics` | Epic UI | `/components/epics/` | Epic UI's guide, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/epic/src/docs/index.html) the same way | spell-epic's |
+| `app` | App UI | `/components/app/` | App UI's guide, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/app/app/docs/index.html) the same way | spell-app's |
 
-- Every set's site bundle is Spell UI's, `ui/site/_assets`:
-  the HTML sets' pages load `site.js` and `site.css` from their own `_assets/`.
+- Every set's site bundle is Spell UI's, `ui/site/_assets`, laid over its folder at `_assets/`:
+  no set's pages load it since every set's guide became Spell.
   What's in it:  [Spell UI's site](https://github.com/spell-app/spell/blob/main/ui/README-site.md).
 - `/components/ui` without its slash redirects to `/components/ui/`, so the pages' relative links hold.
-- A link written for Spell UI's old HTML pages (`/components/ui/ui-button.html`) is mended to the Spell UI site's
-  address (`/components/ui/button`) by the link mender.
+- A link written for a set's old HTML pages (`/components/ui/ui-button.html`, `/components/app/MenuBar.html`) is
+  mended to its guide's address (`/components/ui/button`, `/components/app/menu-bar`) by the link mender.
 
 </details>
 
