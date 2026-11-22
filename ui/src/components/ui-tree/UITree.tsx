@@ -2561,18 +2561,20 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   private itemRows(shown: () => readonly TreeItemData[], depth: number) {
     // read once per change, not by every row:  `shown()` filters the whole column each time it's read
     const setSize = createMemo(() => shown().length)
+    const keyItem = createMemo(() => this.keyItemIn(depth))
+    const through = createMemo(() => {
+      const list = shown()
+      const key = keyItem()
+      const pick = this.openPath[depth]
+      return Math.max(
+        key ? list.indexOf(key) : -1,
+        list.findIndex((item) => item.id === pick)
+      )
+    })
     return drawnInWindow({
       items: shown,
-      drawItem: (item, position) => this.itemRow(item, depth, position, setSize),
-      through: () => {
-        const list = shown()
-        const key = this.keyItemIn(depth)
-        const pick = this.openPath[depth]
-        return Math.max(
-          key ? list.indexOf(key) : -1,
-          list.findIndex((item) => item.id === pick)
-        )
-      }
+      drawItem: (item, position) => this.itemRow(item, { depth, position, setSize, keyItem }),
+      through
     })
   }
 
@@ -2609,8 +2611,9 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /**
    * `item`'s row in column `depth`:  icon, label and which, count, chevron, each as `show` says.
    * - It says its place in the whole column (`position`, of `setSize`):  a long column draws only the rows near the view.
+   * - `keyItem`:  the column's row with the tab stop, worked out once for every row
    */
-  private itemRow(item: TreeItemData, depth: number, position: () => number, setSize: () => number) {
+  private itemRow(item: TreeItemData, { depth, position, setSize, keyItem }: ItemRowPlace) {
     const isPicked = () => this.openPath[depth] === item.id
     const isSelected = () => isPicked() && depth === this.selectedDepth
     // the pick kept in the filtered column, though it doesn't match:  dimmed, so it doesn't read as a match
@@ -2627,7 +2630,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         part={this.partForName("column-row")}
         role="treeitem"
         data-id={item.id}
-        tabindex={depth === Math.max(0, this.selectedDepth) && this.keyItemIn(depth) === item ? "0" : "-1"}
+        tabindex={depth === Math.max(0, this.selectedDepth) && keyItem() === item ? "0" : "-1"}
         aria-level={depth + 1}
         aria-posinset={position() + 1}
         aria-setsize={setSize()}
@@ -2966,3 +2969,15 @@ const SHIFT_STEPS = 10
 
 /** The keys that move a column's line, and which way:  narrower, wider (right to left, turned round). */
 const RESIZE_KEYS: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1 }
+
+/** Where a column's row drawn from `items` is, for `itemRow()`:  each read once per change, for every row. */
+type ItemRowPlace = {
+  /** its column */
+  depth: number
+  /** its place in the column, counting from 0 */
+  position: () => number
+  /** how many rows the column has */
+  setSize: () => number
+  /** the column's row with the tab stop */
+  keyItem: () => TreeItemData | undefined
+}
