@@ -4,6 +4,7 @@
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
               for.</>
 	</>
+
 	<!--
 		EXAMPLES:  Fomantic's embed page, section by section, in its order (Types, Variations), plus our extra (Placeholder
 		content).  Nothing third-party loads on this page until a reader clicks a play button.
@@ -54,6 +55,14 @@
 						<embed source="vimeo" video-id="125292332" aspect-ratio="21:9" label="21:9 video"/>
 					</column>
 				</grid>
+			</example>
+		</>
+	</>
+
+	<section label="Sizing">
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example "Height" description="`height` gives the embed a height of its own, in place of its ratio;  `resizable=\"height\"` lets people drag it.">
+				<embed source="youtube" video-id="O6Xo21L0ybE" alt="A Youtube Video about a waving bear" placeholder="../images/image-16by9.png" height="12em" resizable="height"/>
 			</example>
 		</>
 	</>

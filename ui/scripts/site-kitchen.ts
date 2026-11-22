@@ -31,6 +31,11 @@
  *   - Each gets its family's MAIN EXAMPLE:  the first section the kitchen sink shows for it (`mainExample()`).
  *   - Between `<!-- playground:start ... -->` / `<!-- playground:end -->` inside the element;
  *     a playground with children of its own and no markers is hand-kept, and left alone.
+ * - The Spell UI site's Kitchen Sink page too (`KitchenSpellWriter`;  epic `editor` P42):  the same block as Spell,
+ *   `SpellMarkup`'s, between that page's `<!-- kitchen:start -->` / `<!-- kitchen:end -->` comments
+ *   (`app/spaces/@spell/guides/SpellUI/KitchenSink.spell`, `SPELL_UI_SITE_FOLDER`).
+ *   - Each link to a family's page is that page's address in the site, by its title (`SpellUISite.addressFor()`).
+ *   - A Semantic `<button class="ui button">` in an example file is drawn with `<ui-button>` there.
  * - Rerun after changing an example (`yarn site:build` runs it).
  * - `--check`:  write nothing;  exit 1 if the kitchen sink or a playground is stale.
  */
@@ -47,6 +52,8 @@ import { ID_REFERENCE_ATTRIBUTES } from "spell/ui/static/static.types.ssr"
 import { Terminal } from "spell/element-tools/Terminal"
 import { spliceGenerated, writeOrCheck, type GeneratedOutput } from "spell/element-tools/generatedFiles"
 import { FamilyExamples, type ExampleSection } from "spell/ui/tools/FamilyExamples"
+import { SpellMarkup } from "spell/ui/tools/SpellMarkup"
+import { SpellUISite } from "spell/ui/tools/SpellUISite"
 import { COMPONENTS, SITE_DATA, SITE_PAGES, SPELL_UI_ROOT, sitePages } from "spell/ui/tools/tools.types"
 
 import { withoutTicks } from "spell/ui/tools/generatedFiles"
@@ -223,6 +230,57 @@ class PlaygroundWriter {
   }
 }
 
+/****************
+ * ### `KitchenSpellWriter`
+ * The Spell UI site's Kitchen Sink page (`KitchenSink.spell`):  the kitchen sink's generated block as Spell
+ * (`SpellMarkup`), spliced between the page's `<!-- kitchen:start -->` / `<!-- kitchen:end -->` comments.
+ * - The rest of the page is hand-kept, as the HTML page's is.
+ ****************/
+class KitchenSpellWriter {
+  /** The site's files. */
+  private readonly site = new SpellUISite()
+
+  /** The page. */
+  readonly file = path.join(this.site.folder, "KitchenSink.spell")
+
+  /** What `SpellMarkup` couldn't write as the block has it. */
+  readonly warnings: string[] = []
+
+  constructor(private readonly kitchen: KitchenSinkWriter) {}
+
+  /** `page`, the Spell page, with its block written from `htmlPage`, the kitchen sink's HTML page as it's written. */
+  render(page: string, htmlPage: string): string {
+    const from = htmlPage.indexOf(START)
+    const to = htmlPage.indexOf(END)
+    const document = SpellMarkup.parse(htmlPage.slice(from + START.length, to))
+    const addresses = this.site.addressesByTitle()
+    const spell = new SpellMarkup({ document, pageAddress: (file) => this.addressFor(file, addresses) })
+    return spliceGenerated(page, {
+      file: this.file,
+      start: START,
+      end: END,
+      block: (indent) => {
+        const text = spell.body(document.body, indent.length).replace(/^\n+/, "")
+        this.warnings.push(...spell.warnings)
+        return text
+      }
+    })
+  }
+
+  /**
+   * The address in the site of the components page `file` (`ui-button`), by its family's or its sub-tag's title
+   * (`SpellUISite.addressFor()`).
+   */
+  private addressFor(file: string, addresses: Map<string, string>): string | undefined {
+    const { families } = this.kitchen.data
+    const family = Object.values(families).find((each) => each.mainTag === file)
+    const page = Object.values(families)
+      .map((each) => each.pages?.[file])
+      .find(Boolean)
+    return this.site.addressFor(file, family?.title ?? page?.title, addresses)
+  }
+}
+
 ////////////////
 // ## Constants
 ////////////////
@@ -282,7 +340,14 @@ const playgrounds = new PlaygroundWriter(writer)
 const pages = sitePages()
   .filter((file) => file !== writer.file)
   .map((file): GeneratedOutput => [file, playgrounds.render(readFileSync(file, "utf8"))])
-const stale = writeOrCheck([[writer.file, kitchenPage], ...pages], { command: "site:kitchen", isCheck: values.check })
+// the Spell UI site's Kitchen Sink:  the same block, as Spell
+const spellWriter = new KitchenSpellWriter(writer)
+const spellPage = spellWriter.render(readFileSync(spellWriter.file, "utf8"), kitchenPage)
+const stale = writeOrCheck([[writer.file, kitchenPage], [spellWriter.file, spellPage], ...pages], {
+  command: "site:kitchen",
+  isCheck: values.check
+})
+for (const warning of new Set(spellWriter.warnings)) Terminal.err(`KitchenSink.spell:  ${warning}`)
 for (const folder of new Set(playgrounds.missing))
   Terminal.err(`playground:  ${folder} has no main example;  left empty`)
 if (!values.check) Terminal.out(stale.length ? `wrote ${stale.join(", ")}` : "kitchen sink and playgrounds:  unchanged")

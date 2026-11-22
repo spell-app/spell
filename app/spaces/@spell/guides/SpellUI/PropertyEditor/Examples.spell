@@ -12,11 +12,7 @@
 		<section label="From a schema" sticky="stack" collapsible dividing>
 			<example "From a schema" description="An empty editor draws one property per attribute of its `schema`, each with the control its type calls for, bound to `value`.  Type, tick, and watch the Bound object box.">
 				<html>
-					<ui-property-editor debug style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[
-                      {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"tip\": \"Shown in the theme list.\"},
-                      {\"name\": \"size\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"sm\", \"md\", \"lg\"], \"description\": \"\"},
-                      {\"name\": \"dark\", \"kind\": \"boolean\", \"type\": \"boolean\", \"description\": \"\"}
-                    ]}" value="{\"title\": \"Sunrise\", \"size\": \"md\", \"dark\": false}"></ui-property-editor>
+					<ui-property-editor debug style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[ {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"tip\": \"Shown in the theme list.\"}, {\"name\": \"size\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"sm\", \"md\", \"lg\"], \"description\": \"\"}, {\"name\": \"dark\", \"kind\": \"boolean\", \"type\": \"boolean\", \"description\": \"\"} ]}" value="{\"title\": \"Sunrise\", \"size\": \"md\", \"dark\": false}"></ui-property-editor>
 				</html>
 			</example>
 		</>
@@ -24,13 +20,7 @@
 		<section label="Laid out" sticky="stack" collapsible dividing>
 			<example "Laid out" description="Lay it out with `<ui-property-group>`s and `<ui-property>`s.  Groups open and close, `as` picks a control, and `hint` goes under it;  a dotted `name` reaches into a nested thing.  The title is `label`, which draws a section around it.">
 				<html>
-					<ui-property-editor label="Theme" style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[
-                      {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"},
-                      {\"name\": \"corners\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"sharp\", \"soft\", \"round\"], \"description\": \"\"},
-                      {\"name\": \"font\", \"kind\": \"json\", \"type\": \"thing\", \"description\": \"\", \"attributesOf\": \[
-                        {\"name\": \"family\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"label\": \"Font family\"}
-                      ]}
-                    ]}" value="{\"title\": \"Sunrise\", \"corners\": \"soft\", \"font\": {\"family\": \"Inter\"}}">
+					<ui-property-editor label="Theme" style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[ {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"}, {\"name\": \"corners\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"sharp\", \"soft\", \"round\"], \"description\": \"\"}, {\"name\": \"font\", \"kind\": \"json\", \"type\": \"thing\", \"description\": \"\", \"attributesOf\": \[ {\"name\": \"family\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"label\": \"Font family\"} ]} ]}" value="{\"title\": \"Sunrise\", \"corners\": \"soft\", \"font\": {\"family\": \"Inter\"}}">
 						<ui-property name="title" hint="Used for the file name."></ui-property>
 						<ui-property-group label="Shape" collapsible>
 							<ui-property name="corners" as="buttons"></ui-property>
@@ -46,13 +36,47 @@
 		<section label="Rules" sticky="stack" collapsible dividing>
 			<example "Rules" description="A schema's `rules` are checked as you leave each field (`validate=\"on leave\"`), each with its own message when it has one.  A spell type's rules arrive in this shape:  `- its version must match \"^\\d+\\.\\d+\\.\\d+$\", with suggestion \"Write it like 1.2.3\"`.  Clear the name, or type a letter into the version.">
 				<html>
-					<ui-property-editor label="Release" validate="on leave" style="max-width: 360px" schema="{\"name\": \"Release\", \"attributes\": \[
-                      {\"name\": \"name\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"rules\": \[{\"type\": \"empty\"}]},
-                      {\"name\": \"version\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"rules\": \[
-                        {\"type\": \"regExp\", \"value\": \"/^\\\\d+\\\\.\\\\d+\\\\.\\\\d+$/\", \"prompt\": \"Write it like 1.2.3\"}
-                      ]},
-                      {\"name\": \"stars\", \"kind\": \"number\", \"type\": \"number\", \"description\": \"\", \"rules\": \[{\"type\": \"range\", \"value\": \"1..5\"}]}
-                    ]}" value="{\"name\": \"Sunrise\", \"version\": \"1.0.0\", \"stars\": 4}"></ui-property-editor>
+					<ui-property-editor label="Release" validate="on leave" style="max-width: 360px" schema="{\"name\": \"Release\", \"attributes\": \[ {\"name\": \"name\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"rules\": \[{\"type\": \"empty\"}]}, {\"name\": \"version\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"rules\": \[ {\"type\": \"regExp\", \"value\": \"/^\\\\d+\\\\.\\\\d+\\\\.\\\\d+$/\", \"prompt\": \"Write it like 1.2.3\"} ]}, {\"name\": \"stars\", \"kind\": \"number\", \"type\": \"number\", \"description\": \"\", \"rules\": \[{\"type\": \"range\", \"value\": \"1..5\"}]} ]}" value="{\"name\": \"Sunrise\", \"version\": \"1.0.0\", \"stars\": 4}"></ui-property-editor>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Compact" sticky="stack" collapsible dividing>
+			<example "Compact" description="`compact`:  an inspector's density.  Short fields (a number, a select, a row of icons, sides) share a row, a yes or no sits on one line with its label, three or more of them in a group become one select of pills, and a hint sits at the label row's end.  `show-defaults` bolds a value other than its default:  change Kind, or set Align back to left.">
+				<html>
+					<ui-property-editor compact show-defaults label="Routine" style="max-width: 340px" schema="{\"name\": \"Routine\", \"attributes\": \[ {\"name\": \"name\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"hint\": \"LaTeX\", \"tip\": \"Shown on the circuit.\"}, {\"name\": \"kind\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"gate\", \"measure\", \"reset\"], \"default\": \"gate\", \"description\": \"\"}, {\"name\": \"steps\", \"kind\": \"number\", \"type\": \"number\", \"default\": 1, \"description\": \"\"}, {\"name\": \"angle\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"hint\": \"LaTeX or a #\"}, {\"name\": \"align\", \"kind\": \"textAlign\", \"default\": \"left\", \"description\": \"\", \"tip\": \"Where its label sits.\"}, {\"name\": \"color\", \"kind\": \"color\", \"description\": \"\"}, {\"name\": \"margin\", \"kind\": \"json\", \"type\": \"sides\", \"description\": \"\"}, {\"name\": \"padding\", \"kind\": \"json\", \"type\": \"sides\", \"description\": \"\"}, {\"name\": \"controlled\", \"kind\": \"boolean\", \"description\": \"\", \"tip\": \"Runs only when its control is on.\"}, {\"name\": \"inverse\", \"kind\": \"boolean\", \"description\": \"\"}, {\"name\": \"barrier\", \"kind\": \"boolean\", \"description\": \"\"}, {\"name\": \"visible\", \"kind\": \"boolean\", \"default\": true, \"description\": \"\"}, {\"name\": \"locked\", \"kind\": \"boolean\", \"description\": \"\"} ]}" value="{\"name\": \"QFT\", \"kind\": \"gate\", \"steps\": 3, \"angle\": \"\", \"align\": \"center\", \"color\": \"violet\", \"margin\": \"0 0 0 0\", \"padding\": \"4 8 4 8\", \"controlled\": true, \"inverse\": false, \"barrier\": true, \"visible\": true, \"locked\": false}">
+						<ui-property-group label="Defaults" collapsible>
+							<ui-property name="name"></ui-property>
+							<ui-property name="kind"></ui-property>
+							<ui-property name="steps"></ui-property>
+							<ui-property name="angle"></ui-property>
+						</ui-property-group>
+						<ui-property-group label="Appearance" collapsible>
+							<ui-property name="align"></ui-property>
+							<ui-property name="color"></ui-property>
+							<ui-property name="margin"></ui-property>
+							<ui-property name="padding"></ui-property>
+						</ui-property-group>
+						<ui-property-group label="Behaviour" collapsible>
+							<ui-property name="controlled"></ui-property>
+							<ui-property name="inverse"></ui-property>
+							<ui-property name="barrier"></ui-property>
+						</ui-property-group>
+						<ui-property-group label="Layout" collapsible>
+							<ui-property name="visible"></ui-property>
+							<ui-property name="locked"></ui-property>
+						</ui-property-group>
+					</ui-property-editor>
+				</html>
+			</example>
+		</>
+
+		<section label="Where a value comes from" sticky="stack" collapsible dividing>
+			<example "Where a value comes from" description="`origins`:  handed in by whoever knows.  Set here shows a reset, hover to see it;  from somewhere else, a quieter label;  worked out is read only, with a way to its code.  The label's tooltip says where, and a button only says it was pressed (`ui-reset`, `ui-show-code`).">
+				<html>
+					<ui-property-editor compact show-defaults style="max-width: 340px" schema="{\"name\": \"Card\", \"attributes\": \[ {\"name\": \"name\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"}, {\"name\": \"kind\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"gate\", \"measure\"], \"description\": \"\"}, {\"name\": \"steps\", \"kind\": \"number\", \"type\": \"number\", \"description\": \"\"} ]}" value="{\"name\": \"Ace\", \"kind\": \"gate\", \"steps\": 3}" origins="{ \"name\": {\"kind\": \"here\", \"from\": \"Set here\", \"action\": \"reset\"}, \"kind\": {\"kind\": \"inherited\", \"from\": \"From Card\"}, \"steps\": {\"kind\": \"worked out\", \"from\": \"Worked out in the code\", \"action\": \"show code\"} }"></ui-property-editor>
 				</html>
 			</example>
 		</>
@@ -62,11 +86,7 @@
 		<section label="From a page" sticky="stack" collapsible dividing>
 			<example "From a page" description="`source` loads the layout from a saved page, `Theme.editor.html`:  plain markup, its groups and properties, which the page holds instead of the editor.  `select` would take only part of it.">
 				<html>
-					<ui-property-editor source="/components/ui/examples/Theme.editor.html" style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[
-                      {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"},
-                      {\"name\": \"size\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"sm\", \"md\", \"lg\"], \"description\": \"\"},
-                      {\"name\": \"dark\", \"kind\": \"boolean\", \"type\": \"boolean\", \"description\": \"\"}
-                    ]}" value="{\"title\": \"Sunrise\", \"size\": \"md\", \"dark\": true}"></ui-property-editor>
+					<ui-property-editor source="/components/ui/examples/Theme.editor.html" style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[ {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"}, {\"name\": \"size\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"sm\", \"md\", \"lg\"], \"description\": \"\"}, {\"name\": \"dark\", \"kind\": \"boolean\", \"type\": \"boolean\", \"description\": \"\"} ]}" value="{\"title\": \"Sunrise\", \"size\": \"md\", \"dark\": true}"></ui-property-editor>
 				</html>
 			</example>
 		</>
@@ -76,10 +96,7 @@
 		<section label="Save and Cancel" sticky="stack" collapsible dividing>
 			<example "Save and Cancel" description="`apply=\"on save\"` holds every edit until Save;  Cancel drops them.  A property holding an edit has `:state(changed)`.">
 				<html>
-					<ui-property-editor label="Project" apply="on save" debug style="max-width: 360px" schema="{\"name\": \"Project\", \"attributes\": \[
-                      {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"},
-                      {\"name\": \"version\", \"kind\": \"number\", \"type\": \"number\", \"min\": 1, \"description\": \"\"}
-                    ]}" value="{\"title\": \"Solitaire\", \"version\": 1}"></ui-property-editor>
+					<ui-property-editor label="Project" apply="on save" debug style="max-width: 360px" schema="{\"name\": \"Project\", \"attributes\": \[ {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"}, {\"name\": \"version\", \"kind\": \"number\", \"type\": \"number\", \"min\": 1, \"description\": \"\"} ]}" value="{\"title\": \"Solitaire\", \"version\": 1}"></ui-property-editor>
 				</html>
 			</example>
 		</>
@@ -87,10 +104,7 @@
 		<section label="Many things" sticky="stack" collapsible dividing>
 			<example "Many things" description="A list as `value` edits every thing in it:  a property shows the value they agree on, else blank and Mixed.  A write sets all of them.">
 				<html>
-					<ui-property-editor debug style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[
-                      {\"name\": \"size\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"},
-                      {\"name\": \"font\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"}
-                    ]}" value="\[{\"size\": \"md\", \"font\": \"Inter\"}, {\"size\": \"md\", \"font\": \"Lora\"}]"></ui-property-editor>
+					<ui-property-editor debug style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[ {\"name\": \"size\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"}, {\"name\": \"font\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"} ]}" value="\[{\"size\": \"md\", \"font\": \"Inter\"}, {\"size\": \"md\", \"font\": \"Lora\"}]"></ui-property-editor>
 				</html>
 			</example>
 		</>

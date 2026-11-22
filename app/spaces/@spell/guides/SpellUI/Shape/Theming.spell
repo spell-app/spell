@@ -30,7 +30,7 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-shape" playground>
-				<ui-button commandfor="shape-demo-plain-playground" command="--next">Flip left</ui-button>
+				<ui-button commandfor="shape-demo-plain-playground" command="--next">Flip left</>
 				<ui-shape id="shape-demo-plain-playground">
 					<ui-side>
 						<ui-text paragraph>This side starts visible.</>
@@ -48,7 +48,7 @@
 
 	<section label="Themes">
 		<markdown>
-			The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) restyles the cards, headers and images
+			The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix, Mockup) restyles the cards, headers and images
 			on a shape's sides.
 		</>
 	</>

@@ -4,6 +4,7 @@
 		<header>A group of items presents a set of site content for display, each an image beside its
               text.</>
 	</>
+
 	<!--
 		EXAMPLES:  Fomantic's item page, section by section, in its order (Types, Content, States, Variations).
 		Fomantic's `.item` is the generic `<ui-item>`;  its `.image` + `<img>` the `image` shorthand (or a `<ui-image size>`);

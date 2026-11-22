@@ -1,0 +1,32 @@
+"site-nav-button theming" is a notebook page
+	<header level="1">
+		Site nav button
+		<header>A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-site-nav-button" playground>
+				<ui-page-layout style="min-height: 12em">
+					<ui-app-menu slot="menu">
+						<ui-site-nav-button slot="start"></>
+						<ui-item slot="start">My site</>
+					</>
+					<ui-site-nav slot="drawer" appearance="nav" current="#home" pages="\[{ \"title\": \"Home\", \"href\": \"#home\", \"icon\": \"home\" }, { \"title\": \"Films\", \"href\": \"#films\", \"icon\": \"film\" }]"></>
+					<ui-text paragraph>Press the button: the drawer shows only its icons, or all of it again.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>

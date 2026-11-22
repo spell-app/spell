@@ -83,4 +83,62 @@
 				</stack>
 			</example>
 		</>
+
+		<section label="Actions" sticky="stack" collapsible dividing>
+			<example "Actions" description="A row of actions, as an app's menu draws one:  each its icon and title, a divider between two groups.  A toolbar leaves the keys out of its row:  each action's tooltip names them (`Cheat (C)`).  Drag the box narrower:  the titles are cut, then only the icons are left, then the row folds into `…`, whose menu shows them again.">
+				<stack style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+					<toolbar shrinkable aria-label="Game">
+						<text slot="title" size="large">Solitaire</text>
+						<action icon="redo" shortcut="N">Restart</action>
+						<item kind="divider"/>
+						<action icon="fast forward" shortcut="A">Auto play</action>
+						<action icon="eye" shortcut="C">Cheat</action>
+					</toolbar>
+				</stack>
+			</example>
+		</>
+
+		<section label="Show keys" sticky="stack" collapsible dividing>
+			<example "Show keys" description="`show-keys`:  each action's keys beside its title, as a menu shows them.  They go with the titles once only the icons are left.">
+				<stack style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+					<toolbar shrinkable show-keys aria-label="Game">
+						<text slot="title" size="large">Solitaire</text>
+						<action icon="redo" shortcut="N">Restart</action>
+						<item kind="divider"/>
+						<action icon="fast forward" shortcut="A">Auto play</action>
+						<action icon="eye" shortcut="C">Cheat</action>
+					</toolbar>
+				</stack>
+			</example>
+		</>
+
+		<section label="Pills" sticky="stack" collapsible dividing>
+			<example "Pills" description="`appearance=\"pills\"`:  each run of items between two dividers is one rounded track, its items tiles on it, as a group of buttons is drawn.  Drag the box narrower:  cut titles and icons stay on their pills, and the `…` button is a pill of its own.">
+				<stack style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 760px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+					<toolbar appearance="pills" shrinkable aria-label="Game">
+						<text slot="title" size="large">Solitaire</text>
+						<action icon="play" shortcut="A">Auto play</action>
+						<action icon="eye" shortcut="C">Cheat</action>
+						<action icon="sync alternate" shortcut="R">Restart</action>
+						<item kind="divider"/>
+						<action icon="undo" shortcut="mod+Z">Undo</action>
+						<action icon="redo" shortcut="mod+shift+Z">Redo</action>
+					</toolbar>
+				</stack>
+			</example>
+		</>
+
+		<section label="Scroll first" sticky="stack" collapsible dividing>
+			<example "Scroll first" description="`scroll-first`, with `shrinkable` and a `segmented` look:  a row of many scrolls with its `‹` / `›` while it has `--ui-toolbar-scroll-min` (200px) to show them in;  only then is it the dropdown.  `tabs` says they are tabs, to a screen reader.">
+				<stack style="max-width: 300px">
+					<toolbar appearance="segmented link header" tabs shrinkable scroll-first aria-label="Files">
+						<item selected>Card.spell</item>
+						<item>Deck.spell</item>
+						<item>Pile.spell</item>
+						<item>Solitaire.spell</item>
+						<item>styles.css</item>
+					</toolbar>
+				</stack>
+			</example>
+		</>
 	</>

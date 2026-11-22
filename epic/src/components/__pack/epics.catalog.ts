@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  f27dcbfa93672dd9
+// sources:  8bb129b73500429f
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -58,7 +58,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","phases","mixed","shown"]},
   "epic-status": {"folder":"epic-status","attributes":["state","at","done-at","from","unmerged","agent"]},
   "epic-summary": {"folder":"epic-summary","attributes":[]},
-  "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height"]},
+  "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height","code"]},
   "epic-thread": {"folder":"epic-thread","attributes":["comment","open","unseen","moved","boxed","saved","failed"]},
   "epic-thread-message": {"folder":"epic-thread","attributes":["by","person","agent","mine","at","stamp","older","latest"]},
   "epic-threads": {"folder":"epic-thread","attributes":[]},

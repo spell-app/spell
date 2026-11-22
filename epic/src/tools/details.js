@@ -45,6 +45,7 @@ import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { parseHTML } from "linkedom"
 
+import { indented } from "spell/util/string.ts"
 import { localDate } from "spell/util/time.ts"
 import { waitUntil } from "spell/util/timing.ts"
 import { duration, parseVerbArgs } from "spell/epic/command/command.types.ts"
@@ -52,6 +53,7 @@ import {
   ASK,
   CHOICES,
   OPTION,
+  TEXT_BOX,
   TOOL_TEMPLATES,
   appendHTML,
   commentBox,
@@ -63,6 +65,7 @@ import {
 import { AskListeners } from "./AskListeners.ts"
 import { DetailsPages } from "./DetailsPages.ts"
 import { DataFile } from "spell/epic/data/DataFile.ts"
+import { SEED_EMPTIED } from "spell/epic/answers/answers.types.ts"
 import { CONTENT, ROOT, fromTemplate, inContent, openInVSCode, serialize } from "./pages.js"
 import {
   archiveAnswer,
@@ -639,8 +642,13 @@ export function formatAnswer(page, answer) {
   }
   // the comment box under each section that isn't a question, and under each option (`q1-B`)
   const comments = Object.entries(answer.comments ?? {})
+  const seeded = seededBoxes(document)
   if (comments.length) lines.push("  Comments:")
-  for (const [id, text] of comments) lines.push(`    ${commentPlace(document, id)}:  ${text}${isNew(`comment:${id}`)}`)
+  for (const [id, text] of comments)
+    lines.push(commentLine(document, id, text, seeded.has(id)) + isNew(`comment:${id}`))
+  // a SEEDED box left as it was (epic `ast-markup`):  it sends nothing, so the page says which
+  const kept = [...seeded].filter((id) => !(id in (answer.comments ?? {})))
+  if (kept.length) lines.push(`  Kept as suggested:  ${kept.map((id) => commentPlace(document, id)).join(";  ")}`)
   if (answer.notes) lines.push(`  Notes:  ${answer.notes}${isNew("notes")}`)
   // text typed for questions, options or sections a rewrite took off the page (epic `epic-workflow` P18)
   if (answer.kept?.length) lines.push(`  Kept from before the page changed:${isNew("kept")}`)
@@ -675,6 +683,35 @@ function commentPlace(document, id) {
   const option = question && optionOf(question, letter)
   if (!option) return id
   return `${askHeader(question)}, ${letter} · ${option.getAttribute("title") ?? "?"}`
+}
+
+/**
+ * One comment, for people:  `    1. Context:  clear enough`.
+ * - a SEEDED box's (`isSeeded`):  the person's own version of the suggestion, its lines indented under the title,
+ *   or that they emptied it (`SEED_EMPTIED`)
+ */
+function commentLine(document, id, text, isSeeded) {
+  const place = commentPlace(document, id)
+  if (!isSeeded || text === SEED_EMPTIED) return `    ${place}:  ${text}`
+  return `    ${place}, their version of the suggestion:\n${indented(text, 6)}`
+}
+
+/**
+ * The ids of the page's SEEDED comment boxes (epic `ast-markup`):  each `<epic-text-box for>` holding its starting
+ * text, a `<script type="text/...">` or a `<template>` child (as the element reads it).
+ */
+function seededBoxes(document) {
+  const ids = new Set()
+  for (const box of document.querySelectorAll(`${TEXT_BOX}[for]`)) {
+    const type = box.getAttribute("type") ?? "comment"
+    const isSeeded = [...box.children].some(
+      (child) =>
+        child.localName === "template" ||
+        (child.localName === "script" && /^text\//.test(child.getAttribute("type") ?? ""))
+    )
+    if (type === "comment" && isSeeded) ids.add(box.getAttribute("for"))
+  }
+  return ids
 }
 
 /** A question's (`<epic-ask>`) key:  its `name`, else its section's id, as the element works it out. */

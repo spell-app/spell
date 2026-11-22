@@ -103,6 +103,16 @@
 		<message size="small" class="site-not-ported">Not ported: Fomantic's offset / data-offset, boundary, scrollContext, lastResort and transition settings. CSS anchor positioning places and flips the popup:  set the gap with <text code>--ui-popup-distance</>, and the motion with <text code>--ui-popup-duration</>.</>
 	</>
 
+	<section label="At a point">
+		<text paragraph>For a right click's menu:  <text code>at</>, a point in the window, in place of a target.  It stays inside the window, takes focus, and gives it back when it closes.</>
+		<markdown>
+			```js
+			popup.at = { x: event.clientX, y: event.clientY }
+			popup.visible = true
+			```
+		</>
+	</>
+
 	<section label="Invoker commands">
 		<markdown>
 			A button can drive a popup with no script, through an invoker command: `commandfor` names the popup, `command`

@@ -4,6 +4,7 @@
 		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
               this site.</>
 	</>
+
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
 	<section label="Attributes">
 		<html>

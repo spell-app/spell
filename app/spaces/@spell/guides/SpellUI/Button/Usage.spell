@@ -48,7 +48,7 @@
 			- `active-text` replaces it while the button is on (`selected`).
 			- With only one of them, the button's own content shows in the other state.
 
-			They're live on the Examples tab, under [State texts](/button/examples#states-state-texts).
+			They're live on the Examples tab, under [State texts](/button/examples#state-texts).
 
 			The label SAYS the state, so a toggle button with a state text leaves `aria-pressed` off.
 			A toggle button whose name changes would announce the state twice (WAI-ARIA APG).

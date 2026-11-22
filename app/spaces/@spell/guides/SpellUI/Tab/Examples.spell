@@ -374,5 +374,20 @@
 			</ui-tabs>
 			```
 		</>
-		<message size="small" class="site-not-ported">Not ported:  a real URL path per tab, instead of the hash (<text code>historyType: 'state'</>, <text code>path</>) -- it needs a server route for every tab, so <text code>history</> uses the hash only.</>
+		<header level="4" id="using-a-query-parameter">Using a Query Parameter</>
+		<markdown>
+			`parameter="section"` keeps the selected pane in the address as a query parameter instead
+			(`?section=photos`), beside any others the page has, and leaves the hash alone:  so several tab sets,
+			and search fields, can each keep their own. Back and Forward, and a page opened on the address, select
+			the pane it names, sending `ui-changing` and `ui-changed` as a click does.
+		</>
+		<markdown>
+			```html
+			<ui-tabs appearance="pointing secondary" parameter="section" aria-label="Profile">
+			  <ui-tab label="Bio" value="bio">...</ui-tab>
+			  <ui-tab label="Photos" value="photos" icon="image">...</ui-tab>
+			</ui-tabs>
+			```
+		</>
+		<message size="small" class="site-not-ported">Not ported:  a real URL path per tab (<text code>historyType: 'state'</>, <text code>path</>) -- it needs a server route for every tab, so <text code>history</> uses the hash, and <text code>parameter</> a query parameter.</>
 	</>

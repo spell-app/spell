@@ -4,6 +4,7 @@
 		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
               site.</>
 	</>
+
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
 	<section label="Attributes">
 		<html>

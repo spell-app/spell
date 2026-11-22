@@ -1,8 +1,16 @@
 /**
  * `yarn site:new <tag|page> [--title "Title"] [--summary "One line."] [--force]`:
- * write a page of Spell UI's docs site from the template, `templates/spell-ui-docs.html` (spell-epic's):
- * a components page or a components guide page.
- * - Pages land in the site's one folder, `docs/` (`SITE_PAGES`).
+ * write a component's pages:  its four pages in the Spell UI site, and its components page from the template,
+ * `templates/spell-ui-docs.html` (spell-epic's);  or a components guide page.
+ * - The Spell UI site (`@spell/guides/SpellUI`, epic `editor` P42;  Owen:  "the thing that adds a spell-ui page when
+ *   we make a new component knows where to put them"):  for a TAG, `<Title>/Usage.spell`, `Examples.spell`,
+ *   `API.spell` and `Theming.spell` (`SpellUISite.writeComponent()`), their lines in its site file A to Z, and in its
+ *   project file.
+ *   - Written from the components page:  the one in `docs/` when it's there, else the template's, as Spell
+ *     (`SpellMarkup`).
+ *   - A component the site has already is left alone, without `--force`.
+ *   - A guide page (not a tag) is the components page alone:  write the site's own by hand.
+ * - Components pages land in their one folder, `docs/` (`SITE_PAGES`), until epic `editor` P43 retires them.
  * - A TAG (`ui-button`, `button`, `ui-or`:  any tag of a family) writes `docs/<main tag>.html`, the component layout:
  *   - a masthead with the family's theme picker
  *   - Examples / Usage / API / Theming tabs
@@ -21,7 +29,7 @@
  *   - rewrites its paths to the site for the page's place
  *     (`../ui/`, `../components/ui/` once the template follows the move)
  * - The page is its `<head>` and `main` alone:  the chrome is `docs/__parts/layout.html`.
- * - Refuses to overwrite an existing page without `--force`.
+ * - Leaves an existing components page as it is without `--force`;  refuses, exit 1, when there's nothing left to write.
  * - Prints the path and the page server URL hint.
  * - The Fomantic link:  by the family name, or `FOMANTIC_PAGES` for the families whose page has another name.
  *   - Fomantic's page, in a git-ignored clone (epic page P1):
@@ -37,6 +45,7 @@ import { escapeHTML } from "spell/util/string"
 
 import { Terminal } from "spell/element-tools/Terminal"
 import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
+import { SpellUISite } from "spell/ui/tools/SpellUISite"
 
 import { STATUS_TEXT } from "spell/ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
@@ -88,6 +97,12 @@ type Family = {
   tokens: { name: string }[]
 }
 
+/** A tag as `components.json5` describes it (the fields used here). */
+type Tag = { tag: string; topics: string[] }
+
+/** A topic as `components.json5` lists it, in the site's order. */
+type Topic = { id: string; title: string }
+
 /** What fills a template. */
 type PageFacts = {
   /** output path in the site's folder, e.g. `ui-button.html` */
@@ -116,10 +131,28 @@ class SitePageWriter {
   /** the site's pages, `docs/` */
   readonly site = path.join(SPELL_UI_ROOT, SITE_PAGES)
 
-  /** Every family of `components.json5`, by folder. */
-  private readonly families: Record<string, Family> = readJSON5File<{ families: Record<string, Family> }>(
+  /** The site's data:  every family by folder, every tag, the topics in order. */
+  private readonly data = readJSON5File<{ families: Record<string, Family>; components: Tag[]; topics: Topic[] }>(
     path.join(SPELL_UI_ROOT, SITE_DATA, "components.json5")
-  ).families
+  )
+
+  /** Every family of `components.json5`, by folder. */
+  private readonly families: Record<string, Family> = this.data.families
+
+  /** The titles of `tag`'s topics, in the site's order (`Navigation, Lists`). */
+  topicsOf(tag: string): string[] {
+    const own = this.data.components.find((each) => each.tag === tag)?.topics ?? []
+    return this.data.topics.filter((topic) => own.includes(topic.id)).map((topic) => topic.title)
+  }
+
+  /** A components page's title, by its file name without `.html`:  its family's, or its sub-tag's own page's. */
+  titleOf(file: string): string | undefined {
+    const families = Object.values(this.families)
+    return (
+      families.find((family) => family.mainTag === file)?.title ??
+      families.map((family) => family.pages?.[file]?.title).find(Boolean)
+    )
+  }
 
   /** The facts for `name` (a tag, a family folder or a page name), with `--title` / `--summary` applied. */
   facts(name: string, options: { title?: string; summary?: string }): PageFacts {
@@ -265,14 +298,35 @@ if (!name) {
 const writer = new SitePageWriter()
 const facts = writer.facts(name, { title: flags.title, summary: flags.summary })
 const file = path.join(writer.site, facts.file)
-if (existsSync(file) && !flags.force) {
-  Terminal.err(`${path.relative(process.cwd(), file)} exists:  pass --force to overwrite it`)
+const site = new SpellUISite()
+const hasPage = existsSync(file)
+const hasSpell = !facts.tag || site.hasComponent(facts.title)
+if (hasPage && hasSpell && !flags.force) {
+  Terminal.err(
+    `${path.relative(process.cwd(), file)} exists, and so do its Spell UI site pages:  pass --force to overwrite them`
+  )
   process.exit(1)
 }
-// the template's section ids are written for its placeholder title:  fixed for the page's own (`#examples-types-card`)
-writeFileSync(file, SiteSections.convert(writer.render(facts)))
 const kind = facts.own ? `own page of ${facts.tag}` : facts.tag ? `component ${facts.tag}` : "page"
-Terminal.out(
-  `wrote ${path.relative(process.cwd(), file)}  (${kind}${facts.own && !facts.theming ? ", no Theming tab" : ""})`
-)
-Terminal.out(`  view:  spell server url ${file}   (from the repo root);  check:  yarn site:check ${facts.file}`)
+// the template's section ids are written for its placeholder title:  fixed for the page's own (`#examples-types-card`)
+const html = hasPage && !flags.force ? readFileSync(file, "utf8") : SiteSections.convert(writer.render(facts))
+if (!hasPage || flags.force) {
+  writeFileSync(file, html)
+  Terminal.out(
+    `wrote ${path.relative(process.cwd(), file)}  (${kind}${facts.own && !facts.theming ? ", no Theming tab" : ""})`
+  )
+}
+if (facts.tag && (!hasSpell || flags.force)) {
+  const written = site.writeComponent(html, {
+    tag: facts.tag,
+    title: facts.title,
+    summary: facts.summary,
+    topics: writer.topicsOf(facts.tag),
+    fomantic: facts.fomantic,
+    page: `/components/ui/${facts.file}`,
+    pageAddress: (other) => site.addressFor(other, writer.titleOf(other))
+  })
+  for (const each of written.files) Terminal.out(`wrote ${path.relative(process.cwd(), each)}`)
+  for (const warning of written.warnings) Terminal.err(`  to tidy by hand:  ${warning}`)
+}
+Terminal.out(`  check:  yarn site:check ${facts.tag || facts.file}`)

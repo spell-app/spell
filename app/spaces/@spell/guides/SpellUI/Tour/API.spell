@@ -1,0 +1,48 @@
+"tour api" is a notebook page
+	<header level="1">
+		Tour
+		<header>A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+	<section label="Tags">
+		<html>
+			<ui-docs-api family="ui-tour" only="tags"></>
+		</>
+	</>
+
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-tour" only="attributes"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-tour" only="events"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-tour" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-tour" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-tour" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-tour" only="texts"></>
+		</>
+	</>

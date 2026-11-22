@@ -60,6 +60,13 @@ export const ANSWER_RETRY_MS = 3000
 export const NOTES_KEY = "notes"
 
 /**
+ * What a SEEDED box sends when the person emptied it (`<epic-text-box>` with a seed, epic `ast-markup`):
+ * a box left as seeded sends nothing (`epic ask answer` says it was kept), so an empty one needs words of its own.
+ * - its box shows it as empty again when the answer comes back
+ */
+export const SEED_EMPTIED = "(emptied:  none of the suggested text kept)"
+
+/**
  * A page the details route answers for:  in a `details/` folder (`detailsRoutes.ts` `DETAILS_PAGE`);  any other page
  * (Epic UI's, showing an element live) asks nothing.
  */

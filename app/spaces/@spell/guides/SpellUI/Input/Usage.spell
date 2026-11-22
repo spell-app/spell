@@ -35,6 +35,26 @@
 		</>
 	</>
 
+	<section label="Files and folders">
+		<markdown>
+			A `type="file"` input picks files, as a native one does.
+
+			- `accept` limits the kinds (`.json,.csv`), `multiple` takes more than one, and `folder` picks whole folders.
+			- Its element's `files` holds what was picked;  `ui-changed` says when that changes.
+			- Setting its `value` to `""` forgets them, so the same file can be picked again.
+			- `showPicker()` opens its file dialog from script, as a native input's does:
+			  only from a person's click or key, so call it in a click handler.
+			- [`<ui-uploader>`](/uploader) is built on one, hidden:  its looks' buttons open it this way.
+		</>
+		<markdown>
+			```js
+			const input = document.querySelector("ui-input[type=file]")
+			document.querySelector("#choose").addEventListener("click", () => input.showPicker())
+			input.addEventListener("ui-changed", () => console.log(input.files.map((file) => file.name)))
+			```
+		</>
+	</>
+
 	<section label="Events">
 		<markdown>
 			- `ui-input` fires on every keystroke, with `event.detail.value`.

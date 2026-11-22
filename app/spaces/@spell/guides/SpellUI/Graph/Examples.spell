@@ -1,0 +1,63 @@
+"graph examples" is a notebook page
+	<header level="1">
+		Graph
+		<header>A graph draws nodes joined by edges, laid out left to right. A node may hold a graph of its own, opened in place, in a modal, or in its stead.</>
+	</>
+
+	<!--
+		EXAMPLES:  ours only, no Fomantic page.  Every graph is made up, as JSON in the `graph` attribute, so the
+		code shown IS the data;  only the big one is made by the script at the end of the page.
+	-->
+	<section label="Types">
+		<section label="Flat graph" sticky="stack" collapsible dividing>
+			<example "Flat graph" description="A few nodes with ports, as JSON in the `graph` attribute.  Drag to pan, and use the wheel to zoom;  click a node, an edge or a port to select it;  hover an edge to light up its ends.">
+				<html>
+					<ui-graph style="--ui-graph-height: 16em" graph="{\"nodes\":\[{\"id\":\"in\",\"label\":\"Input\",\"ports\":\[{\"id\":\"out\",\"kind\":\"out\"}]},{\"id\":\"parse\",\"label\":\"Parse\",\"ports\":\[{\"id\":\"src\",\"label\":\"src\",\"kind\":\"in\"},{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"out\"},{\"id\":\"errors\",\"label\":\"errors\",\"kind\":\"out\"}]},{\"id\":\"check\",\"label\":\"Check\",\"ports\":\[{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"in\"},{\"id\":\"ok\",\"label\":\"ok\",\"kind\":\"out\"}]},{\"id\":\"report\",\"label\":\"Report\"},{\"id\":\"emit\",\"label\":\"Emit\"}],\"edges\":\[{\"from\":{\"node\":\"in\",\"port\":\"out\"},\"to\":{\"node\":\"parse\",\"port\":\"src\"}},{\"from\":{\"node\":\"parse\",\"port\":\"ast\"},\"to\":{\"node\":\"check\",\"port\":\"ast\"},\"label\":\"tree\"},{\"from\":{\"node\":\"parse\",\"port\":\"errors\"},\"to\":{\"node\":\"report\"}},{\"from\":{\"node\":\"check\",\"port\":\"ok\"},\"to\":{\"node\":\"emit\"}}]}"></ui-graph>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Children">
+		<section label="Inline" sticky="stack" collapsible dividing>
+			<example "Inline" description="`child-view=\"inline\"`, the default:  the node grows into a container, its graph inside it.  `CPU` starts open (`open`), and `ALU` opens with its toggle.  An edge end with no `node` is the enclosing node's port.">
+				<html>
+					<ui-graph style="--ui-graph-height: 24em" child-view="inline" graph="{\"nodes\":\[{\"id\":\"mem\",\"label\":\"Memory\",\"ports\":\[{\"id\":\"d\",\"label\":\"data\",\"kind\":\"out\"},{\"id\":\"a\",\"label\":\"addr\",\"kind\":\"in\"}]},{\"id\":\"cpu\",\"label\":\"CPU\",\"open\":true,\"ports\":\[{\"id\":\"clk\",\"label\":\"clk\",\"kind\":\"in\"},{\"id\":\"bus\",\"label\":\"bus\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"fetch\",\"label\":\"Fetch\",\"ports\":\[{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"in\"},{\"id\":\"op\",\"label\":\"op\",\"kind\":\"out\"}]},{\"id\":\"alu\",\"label\":\"ALU\",\"ports\":\[{\"id\":\"op\",\"label\":\"op\",\"kind\":\"in\"},{\"id\":\"r\",\"label\":\"r\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"add\",\"label\":\"Adder\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"shift\",\"label\":\"Shifter\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"mux\",\"label\":\"Mux\",\"ports\":\[{\"id\":\"x\",\"kind\":\"in\"},{\"id\":\"y\",\"kind\":\"in\"},{\"id\":\"o\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"add\",\"port\":\"a\"}},{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"shift\",\"port\":\"a\"}},{\"from\":{\"node\":\"add\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"x\"}},{\"from\":{\"node\":\"shift\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"y\"}},{\"from\":{\"node\":\"mux\",\"port\":\"o\"},\"to\":{\"port\":\"r\"}}]}},{\"id\":\"regs\",\"label\":\"Registers\",\"ports\":\[{\"id\":\"w\",\"label\":\"w\",\"kind\":\"in\"},{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"clk\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"fetch\",\"port\":\"op\"},\"to\":{\"node\":\"alu\",\"port\":\"op\"},\"label\":\"op\"},{\"from\":{\"node\":\"alu\",\"port\":\"r\"},\"to\":{\"node\":\"regs\",\"port\":\"w\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"port\":\"bus\"}}]}},{\"id\":\"clock\",\"label\":\"Clock\",\"ports\":\[{\"id\":\"t\",\"kind\":\"out\"}]},{\"id\":\"io\",\"label\":\"I/O\"}],\"edges\":\[{\"from\":{\"node\":\"clock\",\"port\":\"t\"},\"to\":{\"node\":\"cpu\",\"port\":\"clk\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"mem\",\"port\":\"a\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"io\"}},{\"from\":{\"node\":\"mem\",\"port\":\"d\"},\"to\":{\"node\":\"io\"},\"label\":\"dma\"}]}"></ui-graph>
+				</html>
+			</example>
+		</>
+
+		<section label="Modal" sticky="stack" collapsible dividing>
+			<example "Modal" description="`child-view=\"modal\"`:  the children open in a modal holding another graph, the node's ports as pins on its sides.">
+				<html>
+					<ui-graph style="--ui-graph-height: 24em" child-view="modal" graph="{\"nodes\":\[{\"id\":\"mem\",\"label\":\"Memory\",\"ports\":\[{\"id\":\"d\",\"label\":\"data\",\"kind\":\"out\"},{\"id\":\"a\",\"label\":\"addr\",\"kind\":\"in\"}]},{\"id\":\"cpu\",\"label\":\"CPU\",\"ports\":\[{\"id\":\"clk\",\"label\":\"clk\",\"kind\":\"in\"},{\"id\":\"bus\",\"label\":\"bus\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"fetch\",\"label\":\"Fetch\",\"ports\":\[{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"in\"},{\"id\":\"op\",\"label\":\"op\",\"kind\":\"out\"}]},{\"id\":\"alu\",\"label\":\"ALU\",\"ports\":\[{\"id\":\"op\",\"label\":\"op\",\"kind\":\"in\"},{\"id\":\"r\",\"label\":\"r\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"add\",\"label\":\"Adder\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"shift\",\"label\":\"Shifter\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"mux\",\"label\":\"Mux\",\"ports\":\[{\"id\":\"x\",\"kind\":\"in\"},{\"id\":\"y\",\"kind\":\"in\"},{\"id\":\"o\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"add\",\"port\":\"a\"}},{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"shift\",\"port\":\"a\"}},{\"from\":{\"node\":\"add\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"x\"}},{\"from\":{\"node\":\"shift\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"y\"}},{\"from\":{\"node\":\"mux\",\"port\":\"o\"},\"to\":{\"port\":\"r\"}}]}},{\"id\":\"regs\",\"label\":\"Registers\",\"ports\":\[{\"id\":\"w\",\"label\":\"w\",\"kind\":\"in\"},{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"clk\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"fetch\",\"port\":\"op\"},\"to\":{\"node\":\"alu\",\"port\":\"op\"},\"label\":\"op\"},{\"from\":{\"node\":\"alu\",\"port\":\"r\"},\"to\":{\"node\":\"regs\",\"port\":\"w\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"port\":\"bus\"}}]}},{\"id\":\"clock\",\"label\":\"Clock\",\"ports\":\[{\"id\":\"t\",\"kind\":\"out\"}]},{\"id\":\"io\",\"label\":\"I/O\"}],\"edges\":\[{\"from\":{\"node\":\"clock\",\"port\":\"t\"},\"to\":{\"node\":\"cpu\",\"port\":\"clk\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"mem\",\"port\":\"a\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"io\"}},{\"from\":{\"node\":\"mem\",\"port\":\"d\"},\"to\":{\"node\":\"io\"},\"label\":\"dma\"}]}"></ui-graph>
+				</html>
+			</example>
+		</>
+
+		<section label="Drill" sticky="stack" collapsible dividing>
+			<example "Drill" description="`child-view=\"drill\"`:  the drawing shows the children instead, with breadcrumbs back up.  A double-click on a node with children drills into it whatever the view.">
+				<html>
+					<ui-graph style="--ui-graph-height: 24em" child-view="drill" graph="{\"nodes\":\[{\"id\":\"mem\",\"label\":\"Memory\",\"ports\":\[{\"id\":\"d\",\"label\":\"data\",\"kind\":\"out\"},{\"id\":\"a\",\"label\":\"addr\",\"kind\":\"in\"}]},{\"id\":\"cpu\",\"label\":\"CPU\",\"ports\":\[{\"id\":\"clk\",\"label\":\"clk\",\"kind\":\"in\"},{\"id\":\"bus\",\"label\":\"bus\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"fetch\",\"label\":\"Fetch\",\"ports\":\[{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"in\"},{\"id\":\"op\",\"label\":\"op\",\"kind\":\"out\"}]},{\"id\":\"alu\",\"label\":\"ALU\",\"ports\":\[{\"id\":\"op\",\"label\":\"op\",\"kind\":\"in\"},{\"id\":\"r\",\"label\":\"r\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"add\",\"label\":\"Adder\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"shift\",\"label\":\"Shifter\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"mux\",\"label\":\"Mux\",\"ports\":\[{\"id\":\"x\",\"kind\":\"in\"},{\"id\":\"y\",\"kind\":\"in\"},{\"id\":\"o\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"add\",\"port\":\"a\"}},{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"shift\",\"port\":\"a\"}},{\"from\":{\"node\":\"add\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"x\"}},{\"from\":{\"node\":\"shift\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"y\"}},{\"from\":{\"node\":\"mux\",\"port\":\"o\"},\"to\":{\"port\":\"r\"}}]}},{\"id\":\"regs\",\"label\":\"Registers\",\"ports\":\[{\"id\":\"w\",\"label\":\"w\",\"kind\":\"in\"},{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"clk\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"fetch\",\"port\":\"op\"},\"to\":{\"node\":\"alu\",\"port\":\"op\"},\"label\":\"op\"},{\"from\":{\"node\":\"alu\",\"port\":\"r\"},\"to\":{\"node\":\"regs\",\"port\":\"w\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"port\":\"bus\"}}]}},{\"id\":\"clock\",\"label\":\"Clock\",\"ports\":\[{\"id\":\"t\",\"kind\":\"out\"}]},{\"id\":\"io\",\"label\":\"I/O\"}],\"edges\":\[{\"from\":{\"node\":\"clock\",\"port\":\"t\"},\"to\":{\"node\":\"cpu\",\"port\":\"clk\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"mem\",\"port\":\"a\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"io\"}},{\"from\":{\"node\":\"mem\",\"port\":\"d\"},\"to\":{\"node\":\"io\"},\"label\":\"dma\"}]}"></ui-graph>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Big">
+		<section label="150 nodes" sticky="stack" collapsible dividing>
+			<example "150 nodes" description="150 nodes and about 300 edges in one level, made by the script at the end of this page and laid out as it loads.  Some nodes hold a graph of their own.">
+				<graph id="graph-big" style="--ui-graph-height: 36em"/>
+			</example>
+		</>
+	</>
+
+	<section label="Sizing">
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example "Height" description="`height` sizes the graph's box, in place of `--ui-graph-height`;  `resizable=\"height\"` lets people drag it.">
+				<html>
+					<ui-graph height="14em" resizable="height" graph="{\"nodes\":\[{\"id\":\"in\",\"label\":\"Input\",\"ports\":\[{\"id\":\"out\",\"kind\":\"out\"}]},{\"id\":\"parse\",\"label\":\"Parse\",\"ports\":\[{\"id\":\"src\",\"label\":\"src\",\"kind\":\"in\"},{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"out\"},{\"id\":\"errors\",\"label\":\"errors\",\"kind\":\"out\"}]},{\"id\":\"check\",\"label\":\"Check\",\"ports\":\[{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"in\"},{\"id\":\"ok\",\"label\":\"ok\",\"kind\":\"out\"}]},{\"id\":\"report\",\"label\":\"Report\"},{\"id\":\"emit\",\"label\":\"Emit\"}],\"edges\":\[{\"from\":{\"node\":\"in\",\"port\":\"out\"},\"to\":{\"node\":\"parse\",\"port\":\"src\"}},{\"from\":{\"node\":\"parse\",\"port\":\"ast\"},\"to\":{\"node\":\"check\",\"port\":\"ast\"},\"label\":\"tree\"},{\"from\":{\"node\":\"parse\",\"port\":\"errors\"},\"to\":{\"node\":\"report\"}},{\"from\":{\"node\":\"check\",\"port\":\"ok\"},\"to\":{\"node\":\"emit\"}}]}"></ui-graph>
+				</html>
+			</example>
+		</>
+	</>
