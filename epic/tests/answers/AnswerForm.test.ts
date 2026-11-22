@@ -423,6 +423,25 @@ describe("AnswerForm's draft (P18)", () => {
     expect(server.drafts).toEqual([])
   })
 
+  test("the draft unread, the answer read:  the browser's copy never replaces the server's unseen (epic `epic-engine` I377)", async () => {
+    const server = new FakeServer()
+    const reads = server.fetch.getMockImplementation()!
+    server.fetch.mockImplementation(async (url: string, init?: RequestInit) =>
+      url.startsWith("/api/docs/details/draft?") ? json({ error: "busy" }, 503) : reads(url, init)
+    )
+    const storage = new FakeStorage()
+    const left = formOn(new FakeServer(), { storage })
+    const was = new FakeAsk(at("a"), "q1")
+    left.add(was)
+    was.picks = ["A"]
+    left.edited()
+    const form = formOn(server, { storage })
+    form.add(new FakeAsk(at("a"), "q1"))
+    await form.load()
+    await form.saveDraft()
+    expect(server.drafts).toEqual([])
+  })
+
   test("keeps nothing off a details page (an element's docs page);  from `file://`, the browser's copy only", async () => {
     vi.useFakeTimers()
     const storage = new FakeStorage()
