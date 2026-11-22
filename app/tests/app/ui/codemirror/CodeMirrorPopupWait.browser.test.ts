@@ -7,6 +7,7 @@ import { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
 import { CODE_POPUP_DEFAULTS, codeChoices, hoverDelay, showCodeChoices } from "spell/app/app/ui/codePopups"
 import { CodeMirrorLanguage } from "spell/app/app/ui/codemirror/CodeMirrorLanguage"
+import type { LanguageClient } from "spell/app/app/ui/codemirror/LanguageClient"
 import { CodeMirrorPopups } from "spell/app/app/ui/codemirror/CodeMirrorPopups"
 import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
 
@@ -42,6 +43,15 @@ describe("popups wait for a pause in the typing (I22)", () => {
       documentSymbols: () => [],
       signatureHelp: () => ({ signatures: [{ label: "move (a card) to (a pile)", parameters: [] }] })
     } as unknown as LSP.SpellLanguageService
+    // what answers its requests:  the stand-in service, as the page's own client asks it (`LanguageClient.inThread()`)
+    const answers: Record<string, () => unknown> = {
+      "textDocument/completion": () => service.completion(file, { line: 0, character: 0 }),
+      "textDocument/signatureHelp": () => service.signatureHelp(file, { line: 0, character: 0 })
+    }
+    const client = {
+      parsesOnPage: true,
+      request: async (method: string) => answers[method]?.() ?? null
+    } as unknown as LanguageClient
     // the file always holds the editor's text, as one just parsed
     const file = {
       match: {},
@@ -50,7 +60,7 @@ describe("popups wait for a pause in the typing (I22)", () => {
         return view?.state.doc.toString()
       }
     } as unknown as SP.SpellFile
-    const language = new CodeMirrorLanguage({ service, file, parseNow: () => {} })
+    const language = new CodeMirrorLanguage({ service, client, file, parseNow: () => {} })
     const state = EditorState.create({
       doc,
       selection: { anchor: doc.length },

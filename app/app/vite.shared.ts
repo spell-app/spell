@@ -74,6 +74,13 @@ export function appConfig({ builtInFiles }: { builtInFiles?: boolean } = {}) {
   if (builtInFiles) plugins.push(builtInFilesBesideTheirCode())
   return {
     plugins,
+    // the editor's language worker (`languageWorker.ts`, epic `solid-2-final` P18):  the parser, built as the page's is
+    worker: {
+      format: "es" as const,
+      plugins: () => [ruleTestsOutOfBuilds(), standardDecorators(), packageVersion(import.meta.dirname)],
+      // MUST stay on, as the page's:  rules register under their class name (`Rule.instantiate()`)
+      rollupOptions: { output: { keepNames: true } }
+    },
     // every import a package name, found through `package.json`s' `exports` (epic `repo-split` P14):  no aliases
     resolve: { dedupe: SOLID_DEDUPE },
     // every repo's files, beside spell-app (`TOP_REPO`)

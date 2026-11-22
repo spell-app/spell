@@ -27,6 +27,11 @@ when working with code in this folder, `src/lsp/` of the kit's app folder (`spel
     line lands, which words open quotes, the Enter rules' ONE table, where an attribute's quoted value is ...):
     the app's CodeMirror editor wires them to its keys (`CodeMirrorTyping`)
   - `AppAddresses`:  how the app's editors address files, `spell:/<file.path>`, with no editor's code in it
+  - `LANGUAGE_REQUESTS` (`LanguageRequests.ts`):  the ONE table of requests the service answers about a file, by name,
+    the protocol's own (`textDocument/hover` ...) and Spell's (`spell/bubbly` ...):  VS Code's server and the app's
+    language worker answer from it (epic `solid-2-final` P18)
+  - `LanguageHost`:  the service with projects of its own, kept in step by messages (a file opened with its text, its
+    edits as changes):  what the app's language worker runs
   - `SpellLanguageServer`:  wires it to an LSP connection
   - `ScopeExplorer`
   - `ScopesSource` / `ScopePack`:  the scope packs, `<Project>.scopes.js`

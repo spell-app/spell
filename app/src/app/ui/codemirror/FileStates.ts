@@ -41,6 +41,7 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
 import { CodeMirrorTokens } from "./CodeMirrorTokens"
 import { CodeMirrorTyping } from "./CodeMirrorTyping"
 import { CodeMirrorValues } from "./CodeMirrorValues"
+import { LanguageClient } from "./LanguageClient"
 import { LspToCodeMirror } from "./LspToCodeMirror"
 
 /****************
@@ -82,8 +83,14 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   CodeMirror, the parser, the language service, the CodeMirror folder's other files.
  ****************/
 export class FileStates {
-  constructor({ service, onEdit = () => {}, onTaken = () => {} }: FileStatesProps) {
+  constructor({
+    service,
+    client = LanguageClient.inThread(service),
+    onEdit = () => {},
+    onTaken = () => {}
+  }: FileStatesProps) {
     this.service = service
+    this.client = client
     this.onEdit = onEdit
     this.onTaken = onTaken
     // a click or a focus elsewhere acts on the parse, e.g. the side bar's edits:  it mustn't be one keystroke behind
@@ -92,8 +99,14 @@ export class FileStates {
     globalThis.document?.addEventListener("focusin", parseNow, { capture: true })
   }
 
-  /** Answers a spell file's problems, suggestions, hovers ... */
+  /** Answers a spell file's problems, and what's still asked of the page's own parse (folding) */
   readonly service: LSP.SpellLanguageService
+
+  /**
+   * Answers what a person asks of a spell file's code (suggestions, hovers, Go to Definition ...):
+   * the page's own service, or the editor's language worker, which each state's edits are sent to (epic `solid-2-final` P18).
+   */
+  readonly client: LanguageClient
 
   /**
    * Called after each edit of a state, e.g. to compile or save soon.
@@ -252,6 +265,7 @@ export class FileStates {
       entry.dispose()
       this.entries.delete(path)
     }
+    this.client.closed(project)
   }
 
   /** Project of the file we last made a state for -- see `stateFor()`. */
@@ -434,6 +448,7 @@ export class FileStates {
       file instanceof SP.SpellFile
         ? new CodeMirrorLanguage({
             service: this.service,
+            client: this.client,
             file,
             parseNow: () => this.parseNow(),
             isHolding: () => !!this.entries.get(file.path)?.isHolding
@@ -450,6 +465,7 @@ export class FileStates {
       }
     }
     this.entries.set(file.path, entry)
+    if (file instanceof SP.SpellFile) this.client.opened(file, entry.state.doc.toString())
     const stopContents = observe(() => this.whenContentsChange(entry))
     const stopParse = file instanceof SP.SpellFile ? observe(() => this.whenParsed(entry, file)) : undefined
     return entry
@@ -536,6 +552,7 @@ export class FileStates {
   private took(entry: FileEntry, state: EditorState, changes: ChangeSet | undefined, way?: EditWay): void {
     entry.state = state
     if (!changes) return
+    if (entry.file instanceof SP.SpellFile) this.client.changed(entry.file, changes)
     this.toSlices(entry, changes)
     this.stateEdited(entry, changes, way)
   }
@@ -704,6 +721,8 @@ export class FileStates {
 export type FileStatesProps = {
   /** the language service, which answers each spell file's problems */
   service: LSP.SpellLanguageService
+  /** what answers what a person asks of the code:  default, `service` itself (`LanguageClient.inThread()`) */
+  client?: LanguageClient
   /** called after each edit of a state, e.g. to compile soon.  Default:  nothing. */
   onEdit?: (file: SP.AnySpellFile) => void
   /** called once a spell file's typed text is in its `contents`.  Default:  nothing. */
