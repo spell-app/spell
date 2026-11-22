@@ -151,10 +151,10 @@ describe("<ui-flyout> classes", () => {
     ["", "ui left flyout"],
     ['position="right"', "ui right flyout"],
     ["inverted fullscreen", "ui left fullscreen inverted flyout"],
-    ['width="4"', "ui left four wide flyout"],
-    ['width="1/2"', "ui left eight wide flyout"],
+    ['width="4"', "ui left four wide flyout four-wide"],
+    ['width="1/2"', "ui left eight wide flyout eight-wide"],
     ['width="thin"', "ui left thin flyout"],
-    ['width="very-wide"', "ui left very wide flyout"],
+    ['width="very-wide"', "ui left very wide flyout very-wide"],
     ['position="bottom" blurring', "ui bottom blurring flyout"]
   ])("<ui-flyout %s>", async (attributes, classes) => {
     const { dialog } = await flyout(`<ui-flyout ${attributes}>x</ui-flyout>`)
