@@ -1045,6 +1045,7 @@ Until a `/back:  ...` message (or `epic focus status` says off):
 
 The person reviews ON THE PAGE:  the epic page in the side bar's Review tab, where they mark items.
 - Each item's buttons:  one group, Make Todo, Revisit, Approve (no wand on them since 2026-10-25).
+  - Answered or finished:  Reopen alone, a `revisit` mark:  open it again, their note saying why.
 - An issue's or a judgement call's first button is Do this:  worked in the item itself, no todo
   (`epic guide review`, "Do this").
 - A todo that's WORK (no `limit`) has these instead:

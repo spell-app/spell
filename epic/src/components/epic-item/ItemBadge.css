@@ -67,8 +67,8 @@
     --_epic-badge: var(--epic-state-old, var(--ui-grey-background));
     --_epic-badge-on: var(--epic-state-old-on, var(--ui-grey-text));
   }
-  /* last:  its colour is the chip's beside it, which says it already */
-  .badge[data-echo] {
+  /* last:  its colour is the chip's beside it, which says it already;  one grey already keeps its quiet ink (closed) */
+  .badge[data-echo]:not([data-state="old"], [data-state="handled"], [data-state="quiet"], [data-state="paused"]) {
     --_epic-badge: var(--epic-state-echo, var(--ui-grey-background));
     --_epic-badge-on: var(--epic-state-echo-on, var(--ui-text-color));
     padding: 0 6px;

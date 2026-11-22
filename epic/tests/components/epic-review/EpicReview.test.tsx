@@ -767,7 +767,16 @@ describe("<epic-item> review controls", () => {
     const question = await render(
       `<epic-item id="q5" title="A question" status="decided" reviewed="2026-10-07"><p>Text</p></epic-item>`
     )
-    expect(button(question, "todo").getAttribute("data-tooltip")).toBe("Make Todo:  Follow up later · reviewed 10/7/26")
+    // answered:  Reopen alone (T152)
+    expect(button(question, "revisit").getAttribute("data-tooltip")).toBe(
+      "Reopen:  Say why in a note, and Claude opens it again · reviewed 10/7/26"
+    )
+    expect(actions(question)).toEqual(["revisit"])
+    // its UPDATE label the only thing waiting, no badge (I285):  Saw it stays, to clear it
+    const updated = await render(
+      `<epic-item id="q6" status="decided" reviewed="2026-10-07"><span slot="title">A question <epic-update became="decided"></epic-update></span></epic-item>`
+    )
+    expect(actions(updated)).toEqual(["revisit", "approve"])
   })
 
   test("an open judgement call's id chip:  urgent (red) <-> not urgent (yellow, I275), through the inbox", async () => {

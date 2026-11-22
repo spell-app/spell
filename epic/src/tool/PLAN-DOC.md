@@ -761,8 +761,9 @@ As `plan-doc.md`, "Ids":
   word and plane (a thumbs up until I299);  the same stored `todo` mark.
   - an OPEN issue's last button is the x (I299):  a `drop` mark, closed as canceled;  a FIXED one's (orange) is Accept the
     fix (the check), with Revisit before it and no plane (J231:  a fix goes back with Revisit's note);  NO todo is made.
-  - a FINISHED issue or call (done, canceled, decided;  J231):  Revisit and Saw it, no plane;  a phase that took it
-    (`taken-in`) draws `done in P20` where the plane was
+  - a FINISHED item of any kind (done, canceled, decided;  epic `epic-engine` T152):  Reopen alone, Revisit's mark;
+    one waiting for their look (orange, light orange) keeps its check:  Revisit and Saw it (J231).
+    A phase that took it (`taken-in`) draws `in P20` on the line, before the buttons.
   - `inbox apply`:  the item stays where it is, `urgent` (wanted), RED whether reviewed or not, reopened if closed;
     their note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.
@@ -996,7 +997,8 @@ EVERYTHING boxed in a section folds (2026-10-08):  every card with a heading ban
 - Folded content is `hidden="until-found"`, so find-in-page reveals it.
 - A click anywhere on the band folds, but on a link or a control in it (`Fold.heading`, `fold.button()`).
 
-The review buttons, at every step:  Make Todo, Revisit, Approve in one group.
+The review buttons, until an item is finished:  Make Todo, Revisit, Approve in one group.
+- Answered or finished:  Reopen alone, with the check only while it waits for their look (epic `epic-engine` T152).
 - No Do Now (the wand) since 2026-10-25:  "In practice, I'm never using the wand";  nor the header's wand, the
   same day.
   - The header's Send counts down by itself instead (Auto Send, epic `epic-engine` P53):  a ring round the plane,

@@ -66,6 +66,7 @@ import {
   UNDER_TITLE,
   UNFOLDED,
   type ChipMark,
+  type ItemButtons,
   type EpicItemVocabulary,
   type StateFields,
   type ItemLook,
@@ -797,8 +798,15 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             <Show when={this.hasBeenNear}>{this.lineMarks()}</Show>
           </span>
           {/* its phase, `in P4`, on a small line of its own under the buttons (I348):  the title wraps the same with or
-              without it */}
-          <Show when={this.hasBeenNear && !this.commitPill && (this.phasePill || this.donePill || this.fixIn)}>
+              without it;  a finished one's is on the line instead (T152) */}
+          <Show
+            when={
+              this.hasBeenNear &&
+              !this.commitPill &&
+              !this.pillOnLine &&
+              (this.phasePill || this.donePill || this.fixIn)
+            }
+          >
             <span class={PHASE_ROW}>
               <Show when={this.phasePill} fallback={this.doneMark()}>
                 {this.handledMark()}
@@ -815,6 +823,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * then the (i) Clarify button (epic `epic-engine` T95:  on every item, its line, so it's found without opening it).
    * - its phase pill (`in P4`) is under them, on a line of its own (`PHASE_ROW`, I348);
    *   with commits, the git icon's place instead (`commitPill`, I380)
+   * - a finished one's pill is on the line, before its buttons, so the item fits one line (`pillOnLine`, T152)
    */
   private lineMarks(): JSX.Element {
     return (
@@ -831,6 +840,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           </span>
         </Show>
         <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
+        <Show when={!this.commitPill && this.pillOnLine}>
+          <Show when={this.phasePill} fallback={this.doneMark()}>
+            {this.handledMark()}
+          </Show>
+        </Show>
         <Show when={this.hasCommits()}>
           <Show when={this.commitPill} fallback={this.gitButton()}>
             {this.commitMark()}
@@ -1100,20 +1114,52 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /**
    * Which review buttons it draws:  a todo already in a phase draws no plane (`todo-in-phase`, I271);
-   * a finished one, Revisit and Saw it (`todo-done`, I296).
+   * a finished one, Reopen alone (`finished`, T152), with Saw it only while it waits for their check (I296).
    */
-  get buttonsKind(): ReturnType<typeof buttonsForItem> {
+  get buttonsKind(): ItemButtons {
     // held in view after his instant ✓ or x (T80):  the buttons it had when he marked it, so the same button is there
     // to click again and take it back (T81), though the server has closed it since
-    if (this.reviewState.liveOf().heldInView && this.keptButtons) return this.keptButtons
+    const live = this.reviewState.liveOf()
+    if (live.heldInView && this.keptButtons) return this.keptButtons
+    // his instant ✓ or x sent:  as the server will leave it, closed, so its update changes nothing on screen (I360)
+    const mark = this.reviewState.mark()
+    const closedBySend = !!live.closingAs && !live.pressedAs
     this.keptButtons = buttonsForItem(this.id, {
       limit: this.limit,
       inPhase: !!(this.handled || this.takenIn),
       // his Do this on it canceled (I359):  the open item's buttons, his pressed, as `inbox apply` will leave it
-      status: this.isReopening ? "open" : this.status,
-      fixed: !!this.fixed
+      status: this.isReopening
+        ? "open"
+        : closedBySend
+          ? live.closingAs === "drop"
+            ? "canceled"
+            : "done"
+          : this.status,
+      fixed: !!this.fixed,
+      // as before his check, so pressing it never takes the button away (not `drawnLook`:  a memo made after the first
+      // that asks for the buttons, `chipMark`)
+      state: closedBySend ? undefined : DrawnState.of(this.stateFields(), { ...live, closing: false, approved: false }),
+      checked: !closedBySend && mark?.action === "approve",
+      // his ✓ takes the label off, sent or not (`updateLabel`)
+      updated: !live.approved && this.hasLoneUpdateLabel()
     })
     return this.keptButtons
+  }
+
+  /**
+   * Is its UPDATE label the only thing on it waiting for their look:  a label in its title, on a page with no badges?
+   * - his Saw it is the one way to clear it (epic `epic-engine` I285), so a finished one keeps it (T152)
+   * - read off the title, not `updateLabel`:  a memo made after the first that asks for the buttons
+   */
+  private hasLoneUpdateLabel(): boolean {
+    if (isServer || this.badge) return false
+    return !!this.domElement.querySelector(':scope > [slot="title"] > epic-update')
+  }
+
+  /** Its phase pill is on its line, not under it:  it's finished, so it fits one line (epic `epic-engine` T152). */
+  get pillOnLine(): boolean {
+    // `fixIn` too:  his ✓ sent on a fix draws it finished before the server stamps its `taken-in` (I360)
+    return FINISHED_BUTTON_KINDS.has(this.buttonsKind) && !!(this.phasePill || this.donePill || this.fixIn)
   }
 
   /**
@@ -1121,7 +1167,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * - `declare`d, so no field initializer runs:  the first render happens inside the base constructor, and an
    *   initializer after it would wipe what that render kept (epic `epic-engine` I308)
    */
-  declare private keptButtons: ReturnType<typeof buttonsForItem> | undefined
+  declare private keptButtons: ItemButtons | undefined
 
   /** One of its review controls (`<epic-review>`):  what it `shows`, as its `part`. */
   private reviewControl(shows: ReviewShows, part: "review-buttons" | "note-box" | "said"): JSX.Element {
@@ -1421,6 +1467,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
 /** The statuses of a finished item:  its `taken-in` draws its `in P20` pill (`donePill`, J231), never `phasePill`'s (I307). */
 const FINISHED = /^(done|canceled|decided)$/
+
+/** The buttons of a finished item (`buttonsKind`). */
+const FINISHED_BUTTON_KINDS: ReadonlySet<ItemButtons> = new Set(["finished", "issue-done", "todo-done"])
 
 /**
  * Where an item an active phase takes up when it's closed done sits (`activeWorkPhase`):  the issues, the todos

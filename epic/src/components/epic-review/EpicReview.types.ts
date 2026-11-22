@@ -32,12 +32,14 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `issue`:  an open judgement call's (epic `epic-engine` I232):  Do this, Revisit, Approve (`ISSUE_BUTTONS`)
  * - `issue-open`:  an open issue, nothing fixed (epic `epic-engine` I299):  Do this, Revisit, the x (`ISSUE_OPEN_BUTTONS`)
  * - `issue-fixed`:  an issue or call fixed, waiting for Owen (I299):  Revisit, Accept (`ISSUE_FIXED_BUTTONS`)
- * - `issue-done`:  an issue or call finished -- done, canceled, decided (epic `epic-engine` J231):  Revisit, Saw it
- *   (`ISSUE_DONE_BUTTONS`);  no plane;  its `in P20` pill under them when a phase took it (I348)
+ * - `finished`:  any item answered or finished, nothing waiting on their check (epic `epic-engine` T152):  Reopen
+ *   alone (`FINISHED_BUTTONS`)
+ * - `issue-done`:  a finished issue, call, question or test that waits for their look, orange or light orange (epic
+ *   `epic-engine` J231, T152):  Revisit, Saw it (`ISSUE_DONE_BUTTONS`);  no plane
  * - `todo`:  a todo's three (`TODO_BUTTONS`)
  * - `todo-in-phase`:  a todo already in a phase (its `in P52` pill, epic `epic-engine` I271):  Revisit and the x
  *   (`TODO_IN_PHASE_BUTTONS`);  the pill does what the plane would
- * - `todo-done`:  a todo that's finished, done or canceled (epic `epic-engine` I296):  Revisit and Saw it, no x
+ * - `todo-done`:  a finished todo that waits for their look (epic `epic-engine` I296, T152):  Revisit and Saw it, no x
  *   (`TODO_DONE_BUTTONS`)
  * - `part`:  a part of the plan -- an Overview sub-section, the summary:  no Approve (`PART_BUTTONS`)
  * - `phase`:  a phase, still to do (epic `epic-engine` I181):  Do this, Revisit (`PHASE_BUTTONS`);  its note box a part's
@@ -67,6 +69,7 @@ export const REVIEW_KINDS = [
   "issue-open",
   "issue-fixed",
   "issue-done",
+  "finished",
   "todo",
   "todo-in-phase",
   "todo-done",
@@ -142,6 +145,7 @@ export type ReviewButtonSpec = {
     | "closeIssue"
     | "sendBack"
     | "acceptFix"
+    | "reopenItem"
   /** what it does, for a screen reader */
   tip:
     | "approveTip"
@@ -163,6 +167,7 @@ export type ReviewButtonSpec = {
     | "closeIssueTip"
     | "sendBackTip"
     | "acceptFixTip"
+    | "reopenItemTip"
 }
 
 /**
@@ -275,6 +280,16 @@ export const TODO_DONE_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
+ * An item ANSWERED or FINISHED, nothing waiting on their check (epic `epic-engine` T152):  Reopen alone.
+ * - Owen, 2026-11-22:  "An answered thing should just have `reopen`, not `todo` or `approve`"
+ * - Reopen is Revisit's mark:  its note box says why, and Claude opens it again
+ * - one waiting for their look (orange, light orange) keeps its check (`issue-done`, `todo-done`)
+ */
+export const FINISHED_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "revisit", color: "blue", icon: "history", label: "reopenItem", tip: "reopenItemTip" }
+]
+
+/**
  * A part of the plan's review buttons -- an Overview sub-section's (decision Q14), a phase's, the summary's:
  * Make Todo, Revisit -- notes on the plan's parts, not sign-off, so no Approve.
  */
@@ -371,6 +386,7 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   "issue-open": ISSUE_OPEN_BUTTONS,
   "issue-fixed": ISSUE_FIXED_BUTTONS,
   "issue-done": ISSUE_DONE_BUTTONS,
+  finished: FINISHED_BUTTONS,
   todo: TODO_BUTTONS,
   "todo-in-phase": TODO_IN_PHASE_BUTTONS,
   "todo-done": TODO_DONE_BUTTONS,
@@ -603,6 +619,7 @@ export const REVIEW_NAME_TEXTS = [
     description: "Review button:  its name (Make Caveat, epic `epic-engine` P32 to P44)."
   },
   { key: "revisit", text: "Revisit", description: "Review button:  its name." },
+  { key: "reopenItem", text: "Reopen", description: "An answered or finished item's one button (T152):  its name." },
   { key: "next", text: "Start it now", description: "A todo's review button (the plane):  its name." },
   {
     key: "revisitNote",
@@ -681,6 +698,11 @@ export const REVIEW_TEXTS = [
     description: "An issue's or a judgement call's review button:  what Do this does."
   },
   { key: "revisitTip", text: "Talk it over in a note", description: "Review button:  Revisit." },
+  {
+    key: "reopenItemTip",
+    text: "Say why in a note, and Claude opens it again",
+    description: "An answered or finished item's one button (T152):  what Reopen does."
+  },
   {
     key: "revisitCommentsTip",
     text: "Talk it over:  your comments ({ids}) are the note",

@@ -431,7 +431,10 @@ export function isTodo(id: string | undefined, limit: boolean | undefined): bool
 }
 
 /** A todo's statuses once it's finished:  nothing left to queue or drop (I296). */
-const FINISHED_TODO = /^(done|canceled)$/
+const FINISHED_STATUS = /^(done|canceled|decided)$/
+
+/** The states that wait for their check:  orange and light orange (T152). */
+const AWAITS_CHECK: ReadonlySet<string> = new Set(["replied", "requested"])
 
 /** An issue's id (`I3`):  of the calm ids (`CALM_ID`), the one whose open state draws the x (I299). */
 const ISSUE_ID = /^i\d+$/
@@ -442,13 +445,14 @@ const ISSUE_ID = /^i\d+$/
  * - `limit`:  its `limit` (a todo that's a limit draws an item's)
  * - `inPhase`:  it's already in a phase (`handled` or `taken-in`, its `in P52` pill):  a todo draws no plane
  *   (`todo-in-phase`, epic `epic-engine` I271)
- * - `status`:  its status;  a todo that's `done` or `canceled` draws Revisit and Saw it, never the x, which would
- *   drop it (`todo-done`, epic `epic-engine` I296)
+ * - `status`:  its status;  ANY item answered or finished draws Reopen alone (`finished`, epic `epic-engine` T152)
+ *   - but one waiting for their look (`state` orange or light orange), with their check pressed (`checked`), or
+ *     with an UPDATE label and no badge to say it (`updated`, I285:  Saw it is what clears the label):
+ *     Revisit and Saw it (`issue-done`;  a todo `todo-done`, I296, never the x, which would drop it)
  * - `fixed`:  an open issue or call Claude fixed, waiting for Owen:  Revisit, Accept the fix
  *   (`issue-fixed`, epic `epic-engine` I299, its plane gone with J231);  an open issue not fixed:  Do this, Revisit,
  *   the x (`issue-open`);  an open judgement call:  Do this, Revisit, Approve (`issue`)
- * - a FINISHED issue or call (done, canceled, decided):  Revisit and Saw it, no plane (`issue-done`, epic
- *   `epic-engine` J231);  its `in P20` pill stands under its buttons (I348)
+ * - a finished one's `in P20` pill is on its line (`EpicItem.pillOnLine`, T152)
  */
 export function buttonsForItem(
   id: string | undefined,
@@ -456,20 +460,46 @@ export function buttonsForItem(
     limit,
     inPhase,
     status,
-    fixed
-  }: { limit?: boolean; inPhase?: boolean; status?: string | null; fixed?: boolean } = {}
-): "todo" | "todo-in-phase" | "todo-done" | "issue" | "issue-open" | "issue-fixed" | "issue-done" | "item" {
-  if (isTodo(id, limit)) {
-    if (status && FINISHED_TODO.test(status)) return "todo-done"
-    return inPhase ? "todo-in-phase" : "todo"
+    fixed,
+    state,
+    checked,
+    updated
+  }: {
+    limit?: boolean
+    inPhase?: boolean
+    status?: string | null
+    fixed?: boolean
+    /** its colour, as drawn:  orange or light orange waits for their check */
+    state?: string | null
+    /** their check is pressed on it:  kept, to take back */
+    checked?: boolean
+    /** an UPDATE label is the only thing on it waiting for their look (a page with no badges):  Saw it clears it */
+    updated?: boolean
+  } = {}
+): ItemButtons {
+  const todo = isTodo(id, limit)
+  // answered or finished:  Reopen alone, unless it waits for their check (epic `epic-engine` T152)
+  if (status && FINISHED_STATUS.test(status)) {
+    if (!checked && !updated && !AWAITS_CHECK.has(state ?? "")) return "finished"
+    return todo ? "todo-done" : "issue-done"
   }
+  if (todo) return inPhase ? "todo-in-phase" : "todo"
   if (!CALM_ID.test(id ?? "")) return "item"
-  const open = !status || status === "open"
-  // finished:  no plane, nothing left to send (epic `epic-engine` J231)
-  if (!open) return "issue-done"
   if (fixed) return "issue-fixed"
   return ISSUE_ID.test(id ?? "") ? "issue-open" : "issue"
 }
+
+/** The review buttons an item may draw (`buttonsForItem()`). */
+export type ItemButtons =
+  | "todo"
+  | "todo-in-phase"
+  | "todo-done"
+  | "issue"
+  | "issue-open"
+  | "issue-fixed"
+  | "issue-done"
+  | "finished"
+  | "item"
 
 /** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */
 export const THREAD_ATTRIBUTES = ["chosen", "at", "done-at", "state", "from", "slot", "became", "unmerged"]

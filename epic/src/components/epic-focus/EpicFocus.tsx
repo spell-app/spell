@@ -682,7 +682,8 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
         inPhase: item.element.hasAttribute("handled") || item.element.hasAttribute("taken-in"),
         // a fix waiting for a check, or a closed item, has its own (epic `epic-engine` I415)
         status: item.element.getAttribute("status"),
-        fixed: item.element.hasAttribute("fixed")
+        fixed: item.element.hasAttribute("fixed"),
+        state: item.state
       })
     const phase = item.element as Element & { component?: { reviewKind?: string } }
     return phase.component?.reviewKind ?? "phase"

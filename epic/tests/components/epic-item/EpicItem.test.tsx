@@ -181,7 +181,7 @@ describe("<epic-item>", () => {
     expect(title.textContent).toBe("FIXED - It jumps")
     expect(host.getAttribute("title")).toBe("It jumps")
     expect(chip.dataset.tooltip).toMatch(/^Claude found this and fixed it\./)
-    expect(buttonsForItem("i7", { status: "done" })).toBe("issue-done")
+    expect(buttonsForItem("i7", { status: "done" })).toBe("finished")
   })
 
   test("a fix from his words (T143):  light orange, waiting for his look, `FIXED -` first too", async () => {
@@ -500,9 +500,9 @@ describe("<epic-item>", () => {
       host.setAttribute("status", "canceled")
       await Promise.resolve()
       expect(buttonsOf()).toBe("issue-open")
-      // let go at his Send:  its own buttons again, a finished issue's (J231)
+      // let go at his Send:  its own buttons again, a finished item's, Reopen alone (T152)
       held.mockReturnValue(false)
-      expect(buttonsOf()).toBe("issue-done")
+      expect(buttonsOf()).toBe("finished")
     } finally {
       held.mockRestore()
     }
@@ -587,8 +587,8 @@ describe("<epic-item>", () => {
   })
 
   test("buttonsForItem():  a finished todo draws Revisit and Saw it, never the x that drops it (I296)", () => {
-    expect(buttonsForItem("t1", { status: "done", inPhase: true })).toBe("todo-done")
-    expect(buttonsForItem("t1", { status: "canceled" })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "done", inPhase: true, state: "requested" })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "canceled", state: "replied" })).toBe("todo-done")
     expect(buttonsForItem("t1", { status: "open", inPhase: true })).toBe("todo-in-phase")
     expect(BUTTONS_OF["todo-done"].map((spec) => [spec.action, spec.label])).toEqual([
       ["revisit", "revisitNote"],
@@ -598,13 +598,28 @@ describe("<epic-item>", () => {
 
   test("buttonsForItem():  a finished issue or call draws Revisit and Saw it, no plane (J231)", () => {
     for (const status of ["done", "canceled", "decided"]) {
-      expect(buttonsForItem("i1", { status })).toBe("issue-done")
-      expect(buttonsForItem("j1", { status, fixed: true })).toBe("issue-done")
+      expect(buttonsForItem("i1", { status, state: "replied" })).toBe("issue-done")
+      expect(buttonsForItem("j1", { status, fixed: true, state: "requested" })).toBe("issue-done")
     }
     expect(BUTTONS_OF["issue-done"].map((spec) => [spec.action, spec.icon])).toEqual([
       ["revisit", "history"],
       ["approve", "check"]
     ])
+  })
+
+  test("buttonsForItem():  answered or finished, Reopen alone, unless it waits for their check (T152)", () => {
+    for (const status of ["done", "canceled", "decided"])
+      for (const id of ["q1", "j1", "i1", "t1", "m1"])
+        for (const state of ["recent", "old", "handled", undefined])
+          expect(buttonsForItem(id, { status, state }), `${id} ${status} ${state}`).toBe("finished")
+    expect(buttonsForItem("q1", { status: "decided", state: "replied" })).toBe("issue-done")
+    expect(buttonsForItem("q1", { status: "open", state: "attention" })).toBe("item")
+    // their check pressed stays, to take back
+    expect(buttonsForItem("q1", { status: "decided", checked: true })).toBe("issue-done")
+    // an UPDATE label with no badge to say it (I285):  Saw it is the one way to clear it
+    expect(buttonsForItem("q1", { status: "decided", updated: true })).toBe("issue-done")
+    expect(buttonsForItem("t1", { status: "done", updated: true })).toBe("todo-done")
+    expect(BUTTONS_OF.finished.map((spec) => [spec.action, spec.label])).toEqual([["revisit", "reopenItem"]])
   })
 
   test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  `in P2` while still to finish, its tooltip saying so", async () => {
@@ -625,7 +640,7 @@ describe("<epic-item>", () => {
     }
   })
 
-  test("a FINISHED item's `taken-in` draws its own `in P2` under its buttons (J231, I348), not `phasePill`'s (I307);  `handled` keeps its pill", async () => {
+  test("a FINISHED item's `taken-in` draws its own `in P2` on its line (J231, T152), not `phasePill`'s (I307);  `handled` keeps its pill", async () => {
     const phases = document.createElement("div")
     phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
     document.body.append(phases)
@@ -637,8 +652,9 @@ describe("<epic-item>", () => {
         expect(host.shadowRoot!.querySelector("[part~='handled']")).toBeNull()
         const done = host.shadowRoot!.querySelector<HTMLElement>("[part~='done-in']")!
         expect([done.textContent, done.getAttribute("link")]).toEqual(["in P2", "#p-fix"])
-        // on its own line, under the buttons (I348)
-        expect(done.parentElement!.classList.contains("phase-row")).toBe(true)
+        // on the line, with the buttons, so the item fits one line (T152)
+        expect(done.parentElement!.classList.contains("marks")).toBe(true)
+        expect(host.shadowRoot!.querySelector(".phase-row")).toBeNull()
         expect(done.dataset.tooltip).toBe("Done in P2 · Fix Open Issues\nGo to P2")
         expect(chip.dataset.tooltip).toContain("Done in P2 · Fix Open Issues")
       }
@@ -1003,10 +1019,8 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     await client.send()
     await nextFrame(2)
     const sent = JSON.parse(lookOf(host)) as { buttons: string[]; chip: [string, boolean, string] }
-    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([
-      ["revisit:none", "approve:none"],
-      ["", false]
-    ])
+    // drawn as the server leaves it:  finished, Reopen alone (T152)
+    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([["revisit:none"], ["", false]])
   })
 
   test("Send before the server applies it:  let go at the Send, and the page's update then changes nothing", async () => {
@@ -1015,10 +1029,8 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     await nextFrame(2)
     const watch = watchLooks(host)
     const sent = JSON.parse(lookOf(host)) as { buttons: string[]; chip: [string, boolean, string]; pill: string }
-    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([
-      ["revisit:none", "approve:none"],
-      ["", false]
-    ])
+    // drawn as the server leaves it:  finished, Reopen alone (T152)
+    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([["revisit:none"], ["", false]])
     expect(sent.pill).toMatch(/^in P\d+$/)
     await apply(host, client, routes)
     watch.stop()
