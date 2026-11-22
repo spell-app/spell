@@ -69,6 +69,22 @@ describe("SelfFixedIssues (`self-fixed-issues`, epic `epic-engine` T143)", () =>
     expect(document.body.innerHTML).toBe(after)
   })
 
+  test("run again later:  never one fixed for review under the rule, nor one the Log says he OK'd (I375)", () => {
+    const document = pageWith(fixed("i1"), fixed("i2"), fixed("i3"))
+    document.querySelector('epic-section[kind="log"]')!.innerHTML +=
+      '<epic-event at="2026-11-22T10:56-05:00">I1 fixed, for review:  Title of i1</epic-event>' +
+      '<epic-event at="2026-11-22T09:49-05:00">I2 to do:  fix it when an agent is free</epic-event>' +
+      '<epic-event at="2026-11-20T20:16-05:00">I3 fixed, for review:  Title of i3</epic-event>'
+    const notes: string[] = []
+    expect(new SelfFixedIssues().run(document, { now: NOW, notes })).toBe(true)
+    expect(["i1", "i2", "i3"].map((id) => document.getElementById(id)!.getAttribute("status"))).toEqual([
+      "open",
+      "open",
+      "done"
+    ])
+    expect(notes).toEqual(["self-fixed-issues:  FIXED, grey:  I3"])
+  })
+
   test("only on command:  it reads the inbox and closes items", () => {
     expect(new SelfFixedIssues().everyEdit).toBe(false)
   })

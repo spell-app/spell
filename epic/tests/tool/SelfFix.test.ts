@@ -110,6 +110,29 @@ describe("an issue fixed before the person got to it (epic `epic-engine` T143)",
     }
   })
 
+  test("he OK'd it and the work started (queued, then off the list):  orange, and fixed again it stays so (I375)", () => {
+    const { plan, issue } = planWithIssue()
+    plan.queue("i1", "fix it when an agent is free")
+    plan.unqueue("i1")
+    plan.addStatus("i1", "Fixing it")
+    plan.fixedForReview("i1", "It stays put")
+    // the fix took `reviewed` off:  nothing on the item says he got to it now
+    expect(issue.hasAttribute("reviewed")).toBe(false)
+    expect(plan.itemState(issue)).toBe("replied")
+    plan.fixedForReview("i1", "And on phones")
+    expect([issue.getAttribute("status"), plan.itemState(issue)]).toEqual(["open", "replied"])
+  })
+
+  test.each(["reviewed:  talked through", "deferred:  It jumps", "to do:  fix it when an agent is free"])(
+    "only the Log says he got to it (%s):  orange",
+    (line) => {
+      const { plan, issue } = planWithIssue()
+      plan.log(`I1 ${line}`)
+      plan.fixedForReview("i1")
+      expect(plan.itemState(issue)).toBe("replied")
+    }
+  )
+
   test("acting on another item is no getting to this one", () => {
     const { plan, issue } = planWithIssue({ inbox: { comments: { c1: commentOn("i12#block-2") } } })
     plan.log("I12 urgent (Owen, from its id chip)")

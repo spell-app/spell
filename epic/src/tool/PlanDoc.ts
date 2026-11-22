@@ -2403,10 +2403,11 @@ export class PlanDoc extends PlanReader {
    * `item` is fixed;  logged.  Returns whether it went grey by itself.
    * - Claude found it and Owen hadn't got to it (`SelfFix`, T143):  closed, grey, nothing for him
    * - else it waits for his review:  not "reviewed" any more, so it's on his list again
+   * - one waiting already (`fixed`) is never greyed by fixing it again:  why it waits may be gone by then (`reviewed`)
    */
   private markFixed(item: Element, title: string): boolean {
     const label = item.id.toUpperCase()
-    if (SelfFix.isTheirsToSkip(item, this.readActedOn?.())) {
+    if (!item.hasAttribute("fixed") && SelfFix.isTheirsToSkip(item, this.readActedOn?.())) {
       this.setItem(item.id, "done")
       SelfFix.mark(item)
       this.log(`${label} fixed, grey (found by Claude):  ${title}`)

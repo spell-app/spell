@@ -468,6 +468,8 @@ As `plan-doc.md`, "Ids":
       - a Revisit, a reply or a note
       - a click on its id chip
       - a mark, request or comment of theirs in the inbox, sent or not
+      - the Log saying so once the attribute is gone:  `reviewed:`, `deferred:`, `to do:`
+    - never by fixing again one that waits already (`fixed`)
     - reopened (`reopen`, Do this, their Revisit taken up with a card):  gone, the item wanted (`urgent`),
       so its next fix waits for their check
   - Title prefix (epic `epic-engine` T143;  2026-11-22:  "item title prefixes are great, it will help me sort
@@ -1362,6 +1364,8 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - an issue Claude found that the person hasn't got to (`SelfFix`, with the inbox's marks and comments):
       grey, `self-fixed`, closed;  its `changed` left alone
     - one from their own words:  light orange, still open;  one they got to, and one with work under way:  left
+    - never one the Log says was fixed for review since the rule reached main (2026-11-22 10:39):  the rule sorted
+      it as it was fixed, and its reason may be gone from the page since (`reviewed`;  I375)
     - never on an edit:  it closes items, and an edit can't see every page's inbox
     - idempotent:  a closed or light orange one is left
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the

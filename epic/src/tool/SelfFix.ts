@@ -34,7 +34,10 @@ export class SelfFix {
    * - Do this (`urgent`), or a review, deferral or queued work
    * - a mark of theirs already handled (`review-as`:  a Revisit, say), or their reply in it
    * - a mark, comment or urgency waiting in the inbox (`actedOn`)
-   * - their click on its id chip (urgent, or not), which only the Log keeps once applied
+   * - what only the Log keeps:
+   *   - their click on its id chip (urgent, or not), once applied
+   *   - a review, deferral or queued work:  a fix for their review takes `reviewed` off, and starting the work
+   *     `queued` (I375, 2026-11-22:  OK'd, then greyed by the migration)
    */
   static isGotTo(item: Element, actedOn: ReadonlySet<string> = new Set()): boolean {
     if (actedOn.has(item.id.toLowerCase()) || ACTED_ATTRIBUTES.some((name) => item.hasAttribute(name))) return true
@@ -42,7 +45,10 @@ export class SelfFix {
     if (replies.some((reply) => !PlanItem.inOriginal(reply) && !ThreadFacts.isAgents(reply))) return true
     const label = item.id.toUpperCase()
     const events = item.ownerDocument.querySelectorAll('epic-page > epic-section[kind="log"] epic-event')
-    return Array.from(events).some((event) => CHIP_LINE.exec(event.textContent?.trim() ?? "")?.[1] === label)
+    return Array.from(events).some((event) => {
+      const line = event.textContent?.trim() ?? ""
+      return ACTED_LINES.some((acted) => acted.exec(line)?.[1] === label)
+    })
   }
 
   /**
@@ -76,5 +82,9 @@ export class SelfFix {
 /** An item's own attributes saying the person got to it. */
 const ACTED_ATTRIBUTES = ["urgent", "reviewed", "deferred", "queued", "review-as"] as const
 
-/** The Log's line of their click on an id chip (`AuthorWords.fromChip()`);  the id. */
-const CHIP_LINE = /^([A-Z]+\d+) (?:not )?urgent\b.*from its id chip\)/
+/**
+ * The Log's lines saying the person got to an item;  each one's id.
+ * - their click on its id chip (`AuthorWords.fromChip()`)
+ * - `epic review`, `epic defer`, `epic queue`:  it was talked through with them
+ */
+const ACTED_LINES = [/^([A-Z]+\d+) (?:not )?urgent\b.*from its id chip\)/, /^([A-Z]+\d+) (?:reviewed|deferred|to do):/]

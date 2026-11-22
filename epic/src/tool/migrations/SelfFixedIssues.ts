@@ -10,6 +10,8 @@ import type { Migration, MigrationContext } from "./migrations.types"
  *   go to grey automatically" ("Only ones Claude found");  of the others:  "Issue from my words which you are
  *   leaving orange should be light orange"
  * - which:  open issues, `fixed`, nobody at work on them
+ *   - greyed only when fixed BEFORE the rule (`RULE_FROM`):  one fixed since waits because the rule said so as it
+ *     was fixed, whatever of its reason is still on the page (I375's was gone a minute later)
  *   - Claude found it, and he hasn't got to it:  grey, as a fix writes it now (`SelfFix.mark()`)
  *   - from his own words (`requested`):  light orange, still waiting for his look
  *   - the rest (he got to it):  left orange
@@ -30,9 +32,10 @@ export class SelfFixedIssues implements Migration {
   run(document: Document, context: MigrationContext): boolean {
     const greyed: string[] = []
     const lightened: string[] = []
+    const decided = SelfFixedIssues.fixedUnderRule(document)
     for (const item of Array.from(document.querySelectorAll("epic-page > epic-section > epic-item"))) {
       if (!SelfFixedIssues.isWaitingFix(item)) continue
-      if (SelfFix.isTheirsToSkip(item, context.actedOn)) {
+      if (!decided.has(item.id.toUpperCase()) && SelfFix.isTheirsToSkip(item, context.actedOn)) {
         SelfFix.mark(item)
         item.setAttribute("state", "handled")
         greyed.push(item.id.toUpperCase())
@@ -47,6 +50,17 @@ export class SelfFixedIssues implements Migration {
     return greyed.length > 0 || lightened.length > 0
   }
 
+  /** The ids (`I375`) the Log says were fixed for review once the rule was in (`RULE_FROM`). */
+  private static fixedUnderRule(document: Document): Set<string> {
+    const ids = new Set<string>()
+    for (const event of Array.from(document.querySelectorAll('epic-page > epic-section[kind="log"] epic-event'))) {
+      const id = FIXED_LINE.exec(event.textContent?.trim() ?? "")?.[1]
+      const at = Date.parse(event.getAttribute("at") ?? "")
+      if (id && at >= RULE_FROM) ids.add(id)
+    }
+    return ids
+  }
+
   /** Is `item` open and `fixed`, with nobody at work on it again? */
   private static isWaitingFix(item: Element): boolean {
     if (!item.hasAttribute("fixed") || item.hasAttribute("working")) return false
@@ -55,3 +69,9 @@ export class SelfFixedIssues implements Migration {
     return !item.querySelector(':scope > epic-status[state="underway"]')
   }
 }
+
+/** When T143's rule reached main:  from then on every fix is sorted as it's written. */
+const RULE_FROM = Date.parse("2026-11-22T10:39-05:00")
+
+/** The Log's line of a fix waiting for review (`PlanDoc.markFixed()`);  its id. */
+const FIXED_LINE = /^([A-Z]+\d+) fixed, for review:/
