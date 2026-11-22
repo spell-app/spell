@@ -1,6 +1,5 @@
 import type { PerfProfileName, PerfServers } from "./perf.types"
 import { PerfBrowser, median, percentile, type PerfWindow } from "./PerfBrowser"
-import { focusLineTwo, showCardFile } from "./LeaksMeasure"
 
 /**
  * Typing in the editor's code pane:  100 keys into a comment (Card.spell's line 2), one every 120ms, a quick typist.
@@ -10,17 +9,23 @@ import { focusLineTwo, showCardFile } from "./LeaksMeasure"
  *   - a frame:  from the key's time stamp to a task queued after the next animation frame
  * - Autosave is off and writes are refused:  nothing on disk changes.
  * - At phone width the editor shows no code pane:  the phone is measured at `phonewide`.
+ * - Into any file and line (`TypingFile`):  Solitaire's Card.spell by default;  `BIG_FILE`, the Spell UI guide's
+ *   longest page, shows how a key's cost grows with the file (epic `solid-2-final` T20, P18).
  */
 export class TypingMeasure {
   /** Type into the editor under `profile`. */
-  static async measure(profile: PerfProfileName, servers: PerfServers): Promise<TypingResult> {
+  static async measure(
+    profile: PerfProfileName,
+    servers: PerfServers,
+    typed: TypingFile = CARD_FILE
+  ): Promise<TypingResult> {
     const browser = await PerfBrowser.open("editor", profile, servers)
     try {
       await browser.load()
       const { page } = browser
-      await page.evaluate(showCardFile)
-      await page.waitForTimeout(800)
-      await page.evaluate(focusLineTwo)
+      await page.evaluate(showFileAndWait, typed.path)
+      await page.waitForTimeout(typed.settle)
+      await page.evaluate(focusLine, typed.line)
       await page.evaluate(watchFrames)
       await page.waitForTimeout(500)
       const before = await browser.metricsAfterGC()
@@ -70,6 +75,22 @@ export class TypingMeasure {
   }
 }
 
+/** Where keys are typed:  a file, and the line whose end they go at (from 1). */
+export type TypingFile = {
+  /** the file's path, `@spell/examples/Solitaire/Card.spell` */
+  path: string
+  /** the line, from 1:  a comment's, so the program still compiles */
+  line: number
+  /** how long the editor settles once it's shown, msec:  a big file's project compiles first */
+  settle: number
+}
+
+/** Solitaire's Card.spell, its line 2:  a comment. */
+export const CARD_FILE: TypingFile = { path: "@spell/examples/Solitaire/Card.spell", line: 2, settle: 800 }
+
+/** The Spell UI guide's longest page (2,731 lines), its line 4:  its heading's text, so the page still compiles. */
+export const BIG_FILE: TypingFile = { path: "@spell/guides/SpellUI/Table/Examples.spell", line: 4, settle: 8000 }
+
 /** How many keys are typed. */
 const KEYS = 100
 
@@ -78,6 +99,43 @@ const GAP_MS = 120
 
 /** What's typed, a character a key. */
 const TYPED = " the quick brown fox jumps over the lazy dog and keeps on typing a long comment"
+
+/**
+ * In the page:  show the file at `path`, waiting for it to be shown (at most 30 seconds).
+ * - MUST stay self-contained:  Playwright sends its source
+ */
+async function showFileAndWait(path: string): Promise<void> {
+  const { editor } = window as unknown as {
+    editor: { showFileAt(path: string): Promise<void>; shownCodeEditor?: { file?: { path: string } } }
+  }
+  await editor.showFileAt(path)
+  const started = Date.now()
+  while (editor.shownCodeEditor?.file?.path !== path && Date.now() - started < 30_000)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+}
+
+/**
+ * In the page:  the caret at the end of line `number` of the code pane, focused.
+ * - MUST stay self-contained:  Playwright sends its source
+ */
+function focusLine(number: number): void {
+  const { view } = (
+    window as unknown as {
+      editor: {
+        shownCodeEditor: {
+          view: {
+            state: { doc: { line(number: number): { to: number } } }
+            dispatch(spec: { selection: { anchor: number }; scrollIntoView?: boolean }): void
+            focus(): void
+          }
+        }
+      }
+    }
+  ).editor.shownCodeEditor
+  const line = view.state.doc.line(number)
+  view.dispatch({ selection: { anchor: line.to }, scrollIntoView: true })
+  view.focus()
+}
 
 /**
  * In the page:  from each key's time stamp to a task after the next frame, into `window.__frames`;

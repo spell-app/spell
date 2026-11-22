@@ -12,6 +12,7 @@
  * - `SpellTyping`:  the rules behind the typing helps, Enter's among them, for every editor.
  * - `AppAddresses`:  how the app's editors address files, `spell:/<file.path>`.
  * - `LspTexts`:  the labels it shows people, in the language of the file they're about (its name says it).
+ * - `LANGUAGE_REQUESTS`:  the ONE table of requests the service answers, by name, for every editor.
  * - `SpellLanguageServer` wires both to an LSP connection.
  * - Browser-safe:  NO node imports, so the app's editor uses the service in-process.
  * - NOTE: deliberately left out, as node-only or with side effects the moment they're imported:
@@ -33,4 +34,5 @@ export * from "./CompletionShapes"
 export * from "./MarkupIndent"
 export * from "./CodeOrText"
 export * from "./ScopeExplorer"
+export * from "./LanguageRequests"
 export * from "./SpellLanguageServer"
