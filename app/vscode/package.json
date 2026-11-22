@@ -76,14 +76,12 @@
     ],
     "html": {
       "customData": [
-        "./out/data/spell-ui.html-custom-data.json",
-        "./out/data/spell-brand.html-custom-data.json"
+        "./out/data/spell-ui.html-custom-data.json"
       ]
     },
     "css": {
       "customData": [
-        "./out/data/spell-ui.css-custom-data.json",
-        "./out/data/spell-brand.css-custom-data.json"
+        "./out/data/spell-ui.css-custom-data.json"
       ]
     },
     "configuration": {

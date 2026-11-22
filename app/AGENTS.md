@@ -163,9 +163,8 @@ More on some of them:
     - The extension's output says which it picked;  the code is `findSpellApp()` ([spellAppRoot.ts](vscode/src/spellAppRoot.ts)).
   - In `.tsx` / `.jsx` files it also gives custom elements' slot, part and dashed-attribute help
     ([ElementsHelp.ts](vscode/src/ElementsHelp.ts), the kit's `JsxElementHelp` bundled in, with TypeScript 6 to read JSX);
-    and it carries Spell UI's and the brand's HTML and CSS data, copied in by its build:
+    and it carries Spell UI's HTML and CSS data, copied in by its build:
     a vocabulary change shows there after `spell app vscode`.
-    - The brand's comes from spell-brand, beside the kit (`~/www/spell-brand`);  without it, an empty set.
   - The Review and Details tabs and the window bridge are the `epic/` folder's own extension, not this one.
 - THE PAGE SERVER is the kit's, started from the kit's root only (`spell server start`, from any folder;
   epic `repo-split` P16):  [the kit's server AGENTS.md](../src/server/AGENTS.md).
@@ -194,11 +193,11 @@ More on some of them:
     - Spell UI:  [spell-ui's docs/](../ui/docs/), at `/components/ui/`
     - Epic UI:  [epic's docs/](../epic/src/docs/), at `/components/epics/`
     - App UI:  [app's docs/](app/docs/), at `/components/app/`:  the app folder's only one
-    - Brand UI:  spell-brand's `docs/`, beside the kit (`~/www/spell-brand/docs/`), at `/components/brand/`
-  - A set that's a component PACK (epics, brand) is built by the kit's pack tooling, `spell-pack build`
+    - (Brand UI, spell-brand's, went with that repo:  epic `epic-engine` T124)
+  - A set that's a component PACK (epics) is built by the kit's pack tooling, `spell-pack build`
     ([ComponentPack.ts](../src/element-tools/ComponentPack.ts)):  each pack's `yarn pack:build`.
-    `spell pack build <pack>` calls the same tool, and finds the brand's pack in spell-brand, beside the kit.
-  - The top bar's Spell/UI, Epic/UI and App/UI tabs;  the brand's set lights the Brand tab.
+    `spell pack build <pack>` calls the same tool.
+  - The top bar's Spell/UI, Epic/UI and App/UI tabs.
     - The tabs are settings too:  `siteTabs`, in the Epic repo's part (`spell.epics/page-server.json5`), in the
       bar's order, each naming what lights it (epic `repo-split` I4, P16;
       [the kit's server AGENTS.md](../src/server/AGENTS.md)).
@@ -213,13 +212,12 @@ Everything else is in the kit `spell` (`~/www/spell`):  its own `src/`, and the 
   "Which folder holds what".
 - Each folder's rules:  its own `AGENTS.md`
   ([parser's](../parser/AGENTS.md), [ui's](../ui/AGENTS.md), [epic's](../epic/AGENTS.md)).
-- Beside the kit, NOT in it:  spell-brand, its own repo, at `~/www/spell-brand`.
+- Beside the kit, NOT in it:  nothing today (spell-brand was dropped, epic `epic-engine` T124).
 - `app/` is the highest folder.
   - It NEEDS the kit's `src/`, `parser/` and `ui/`:  it imports them.
   - It names `epic/` nowhere since epic `repo-split` P16:  the `epic/` folder declares its own part of the kit's page
     server's settings.
     - One command imports the epic tool's node files, by path:  `spell content update` (below, "The `epic/` folder").
-  - It imports nothing of spell-brand;  only the VS Code extension's build copies the brand's data, when it's there.
   - Nothing imports the app:  every arrow points down (the lint's `spell/no-upward-import`).
 
 ### Which folder may import which
@@ -372,7 +370,6 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
 - `spell dev` and its old spellings of the epic verbs are gone (epic `repo-split` P13):
   callers say `epic <verb>` (`epic pages <verb>` for the docs tools, `epic ask` for details pages).
   - `spell design <sync verb>` (Spell UI's command) runs the engine's design tool.
-  - `spell design bundle | check` run spell-brand's (epic `repo-split` P10).
 - The engine's generated files (the docs bundle, the epics pack, Epic UI's data) are the `epic/` folder's to build.
 - Its page bundles are built from the MAIN checkout:
   a worktree's change to Spell UI shows on the epic pages only once it's merged,

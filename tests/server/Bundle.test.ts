@@ -123,10 +123,10 @@ describe("Bundle", () => {
   })
 })
 
-/** An install holding Spell UI's, spell-epic's and the brand's packages, each its own repo beside the checkout, `app/`. */
+/** An install holding Spell UI's and spell-epic's packages, each its own repo beside the checkout, `app/`. */
 function top(): string {
   const dir = mkdtempSync(join(tmpdir(), "assembler-bundles-"))
-  install(dir, { "spell-ui": "ui", "spell-epic": "epic", "spell-brand": "spell-brand" })
+  install(dir, { "spell-ui": "ui", "spell-epic": "epic" })
   mkdirSync(join(dir, "spell-app"))
   return dir
 }
@@ -135,7 +135,6 @@ function top(): string {
 const BUNDLES = [
   "../ui/src/components/ui-root",
   "../ui/site/_assets",
-  "../spell-brand/_assets/ui",
   "../epic/src/components/__pack",
   "../epic/src/tools/_assets"
 ]
@@ -286,20 +285,14 @@ describe("Bundle.all()", () => {
   afterAll(() => rmSync(dir, { recursive: true, force: true }))
 
   test("every bundle, or the ones named, in that order;  an unknown name says which there are", () => {
-    expect(SRV.Bundle.all(repo).map((bundle) => bundle.name)).toEqual([
-      "ui-root",
-      "ui-site",
-      "brand",
-      "epics-pack",
-      "epic-docs"
-    ])
-    expect(SRV.Bundle.all(repo, ["brand", "ui-site"]).map((bundle) => bundle.outputDir)).toEqual([
-      join(realpathSync(dir), "spell-brand/_assets/ui"),
+    expect(SRV.Bundle.all(repo).map((bundle) => bundle.name)).toEqual(["ui-root", "ui-site", "epics-pack", "epic-docs"])
+    expect(SRV.Bundle.all(repo, ["epics-pack", "ui-site"]).map((bundle) => bundle.outputDir)).toEqual([
+      join(realpathSync(dir), "epic/src/components/__pack"),
       join(realpathSync(dir), "ui/site/_assets")
     ])
     expect(SRV.Bundle.all(repo).map((bundle) => bundle.output)).toEqual(BUNDLES)
     expect(() => SRV.Bundle.all(repo, ["nope"])).toThrow(
-      "Bundle.all():  no bundle 'nope';  bundles:  ui-root, ui-site, brand, epics-pack, epic-docs"
+      "Bundle.all():  no bundle 'nope';  bundles:  ui-root, ui-site, epics-pack, epic-docs"
     )
   })
 })
@@ -316,8 +309,8 @@ describe("Bundle.specs()", () => {
   }
 
   test("the folders the root's package.json names, in its order, each with the bundle that builds into it", () => {
-    const only = checkout("only", { pageServer: { bundles: ["../spell-brand/_assets/ui"] } })
-    expect(SRV.Bundle.specs(only).map((spec) => spec.name)).toEqual(["brand"])
+    const only = checkout("only", { pageServer: { bundles: ["../ui/site/_assets", "../ui/src/components/ui-root"] } })
+    expect(SRV.Bundle.specs(only).map((spec) => spec.name)).toEqual(["ui-site", "ui-root"])
   })
 
   test("none without a list, as the page server;  a folder no bundle builds into throws", () => {
@@ -335,9 +328,9 @@ describe("Bundle.specs()", () => {
   })
 })
 
-// the ONE list, as the kit's settings merge it:  Spell UI's part names its site's bundle, spell-brand's its pages'
-// (spell-app's own test until epic `repo-split` P16);  only where spell-brand is beside the kit (the kit's CI has none)
-describe.skipIf(!SRV.Bundle.packageDirFor("spell-brand", KIT))("the kit's bundles", () => {
+// the ONE list, as the kit's settings merge it:  Spell UI's part names its site's bundle, epic/'s its pack and docs
+// bundle (spell-app's own test until epic `repo-split` P16)
+describe("the kit's bundles", () => {
   test("the installed repos' settings name every bundle, each once", () => {
     const outputs = SRV.Bundle.specs(KIT).map((spec) => spec.name)
     expect([...outputs].sort()).toEqual(SRV.BUNDLES.map((spec) => spec.name).sort())

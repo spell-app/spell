@@ -18,7 +18,7 @@ import {
 
 /**
  * Builds the bundles the page server serves, as it starts (`PageServer.start()`).
- * - the bundles:  the Spell UI docs site's, the brand pages';  built on demand, never committed
+ * - the bundles:  the Spell UI docs site's;  built on demand, never committed
  *   - and the committed generated files (`SRV.BundleSpec.committed`:  Spell UI's root catalog, the epics pack,
  *     spell-epic's docs bundle):  rebuilt only in a worktree;  the main checkout's run logs what to run (epic
  *     `epic-engine` P54)
@@ -226,7 +226,7 @@ export class BundleBuild {
    * The router handler:  while the build runs, a request for a missing file in a bundle's folder waits for it.
    * - this checkout's own bundles only, not `/worktrees/<w>/...`, at the URL path each folder is served at
    *   (`folderUrl()`;  beside the checkout, `/_beside/...`):
-   *   - `/_beside/spell-brand/_assets/ui/...`
+   *   - `/_beside/spell-x/_assets/ui/...`
    *   - `/_beside/ui/site/_assets/...`, and the same laid over a component set's pages at
    *     `/components/<set>/_assets/...` (`componentSetPath()`)
    */
@@ -255,7 +255,7 @@ export class BundleBuild {
  * How `spell bundle --stale`'s lines are logged, before `SRV.ServerLog.CHILD_LINES` (errors, warnings);  the rest
  * are shown.
  * - debug:  `ui-root:  current`, a file `unchanged`, the sizes a build lists (`-- tools/_assets/...`, indented
- *   tables), the bundler's own summary (`brand bundle (1.5s):  _assets/ui/`, said again by `built brand in 1.5s`)
+ *   tables), the bundler's own summary (`ui-site bundle (1.5s):  site/_assets/`, said again by `built ui-site in 1.5s`)
  * - `building ui-site ...`:  shown, a group of its own
  */
 const BUNDLE_LINES: SRV.LineRule[] = [

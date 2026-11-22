@@ -379,7 +379,8 @@ export class EpicConfig {
 
   /**
    * The repos BESIDE this one that its repos file lists as PEERS (epic-engine's P49, Q48 A):
-   * `{ "name": "spell-brand", "path": "../spell-brand", "peer": true }` in the kit's `repos.json5`.
+   * `{ "name": "spell-x", "path": "../spell-x", "peer": true }` in a kit's `repos.json5`;  none in Spell's since
+   * epic `epic-engine` T124 dropped spell-brand, its only one:  an empty list.
    * - each one's MAIN checkout:  `path` (else `../<name>`), from this repo's main checkout;  one not there is left out
    * - read by the page server's `peerRepos()`, the one reader of them
    * - a project of its own, with its own install and its own worktrees (`<name>.worktrees/` beside it, Q50 D):
@@ -402,7 +403,7 @@ export class EpicConfig {
 
   /**
    * The KIT this repo is a peer of (epic-engine's P49, Q51 A):  the config of the folder its own file names as
-   * `"top"` (`{ "top": "../spell" }`, spell-brand's), from its main checkout;  `undefined` without one.
+   * `"top"` (`{ "top": "../spell" }`, a peer's), from its main checkout;  `undefined` without one.
    * - a peer takes its kit's epic folder, windows, window names, shared folders, session-folder links, engine and
    *   voices, for each key its own file leaves out (`kitFor()`);  its worktrees stay its OWN, `../<repo>.worktrees`
    *   beside it, and so do its install, base branch and app
@@ -484,7 +485,7 @@ export class EpicConfig {
    * - each folder right inside `worktree` whose `.git` is a FILE (a git worktree) of ANOTHER repo:  paired with that
    *   repo's main checkout by git (`checkoutOf()`, which `git worktree repair` keeps true after Q41's move to
    *   `~/www/spell.old/`);  a broken one (its git folder gone) is left out
-   * - `found: true`;  `peer: true` when its main checkout is one of `peers` (spell-brand's, before it moved out)
+   * - `found: true`;  `peer: true` when its main checkout is one of `peers` (from before it moved out)
    * - in folder-name order;  none when `worktree` isn't there
    * - why:  every walker of an epic's checkouts (merge-main, the merge, removal, status, `epic loc`, the checkout
    *   patches) then sees them with no change of its own;  each decides what an old one needs (`isCrossed()`)
@@ -1305,11 +1306,11 @@ export type RepoCheckout = {
   top: boolean
   /** an OLD-LAYOUT child checkout found inside the epic's worktree, not one the repo lists (`foundCheckouts()`) */
   found?: boolean
-  /** a found checkout of one of the repo's `peers` (spell-brand's, in an old-layout worktree) */
+  /** a found checkout of one of the repo's `peers` (in an old-layout worktree) */
   peer?: boolean
 }
 
-/** One of `EpicConfig.peers`:  a repo beside this one (`spell-brand`), and its MAIN checkout, absolute. */
+/** One of `EpicConfig.peers`:  a repo beside this one (`spell-x`), and its MAIN checkout, absolute. */
 export type EpicPeer = { name: string; main: string }
 
 /**
@@ -1436,7 +1437,7 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   per person and/or agent working on the project, set in epic project settings"), `EpicColors`;  `{ people: {},
  *   agents: {} }` (the default):  everyone in the shared person or agent colour
  *   - `epic init` doesn't write it;  `epic config colors` prints it
- * - `top`:  the KIT this repo is a PEER of, a folder from the main checkout (`"../spell"`, spell-brand's;
+ * - `top`:  the KIT this repo is a PEER of, a folder from the main checkout (`"../spell"`, a peer's;
  *   epic-engine's P49, Q51 A);  `""` (the default):  none
  *   - each key this file leaves out that a peer shares (the epic folder, windows ...) is the kit's (`kit`);
  *     its worktrees are its own, `../<repo>.worktrees` unless it says otherwise

@@ -71,7 +71,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (the kit's [AGENTS.md](../../AGENTS.md), "Imports across repos"):
     - the app's node program (`app/tsconfig.node.json`, React's JSX for the Ink screens), which has no
       `spell-source` condition:  the `epic/` folder's among them, for `spell content update` (epic `content` P3)
-    - spell-brand, a project beside the kit
+    - a project beside the kit (none today)
   - Every other program reads every folder's SOURCE (`"customConditions": ["spell-source"]`), not these.
   - Not built yet (a fresh clone):  TS2307 in the readers.  Their `yarn ts` builds them first (`--below`).
 - Why:  a program that can't share the folders' settings must not read their SOURCE:
@@ -108,7 +108,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   - `--below`, in a folder:  the kit's own, then each folder before it in the kit's `workspaces`
     (`ui/`:  the kit's, `parser/`'s);  up-to-date ones take a second or two.
-    - In a project beside the kit (spell-brand):  the local packages it depends on (`workspace:`, `portal:` ...),
+    - In a project beside the kit:  the local packages it depends on (`workspace:`, `portal:` ...),
       through `node_modules`, a kit among them with its folders.
     - The app's `yarn ts` runs it first, for its node program:  what that reads is never stale.
     - One program's own `tsc` (`yarn tsc -p tsconfig.node.json`) doesn't:  it reads what was last built.

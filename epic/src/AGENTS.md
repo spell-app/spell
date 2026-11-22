@@ -338,7 +338,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - NOT how the tooling behaves for a person:  that's `LayeredSettings` (`spell/epic/config/LayeredSettings`, epic
       `epic-engine` I235), below
     - the kit after epic `repo-split` P20 · One Repo (epic `epic-engine` P49):
-      - `peers`:  the repos BESIDE it, its `repos.json5`'s `"peer": true` entries (spell-brand), never part of an
+      - `peers`:  the repos BESIDE it, its `repos.json5`'s `"peer": true` entries (none today), never part of an
         epic's worktree;  `epic config peers` prints them, and `/worktrees` lists their own worktrees
       - `kit`:  a peer's settings name the kit, `{ "top": "../spell" }`:  it takes the kit's epic folder, windows
         and voices, and keeps its own worktrees (`../<repo>.worktrees/`) and install;  a warning when the kit doesn't
@@ -1885,7 +1885,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 | guide | explains a topic;  an epic's own write-up is "the epic's guide" | `guides/` | [durable.html](../templates/durable.html) |
 | cheatsheet | an API at a glance, as cards you filter | `guides/` | [cheatsheet.html](../templates/cheatsheet.html) |
 | commands page | which command, skill or script does what | `guides/dev/commands/` | [commands.html](../templates/commands.html) |
-| components page | one element:  its examples, attributes and look | a component set's `docs/`:  spell-ui's `docs/`, spell-epic's `src/docs/`, spell-app's `app/docs/`, spell-brand's `docs/` | [spell-ui-docs.html](../templates/spell-ui-docs.html) |
+| components page | one element:  its examples, attributes and look | a component set's `docs/`:  spell-ui's `docs/`, spell-epic's `src/docs/`, spell-app's `app/docs/` | [spell-ui-docs.html](../templates/spell-ui-docs.html) |
 | components guide | a component set's pages that aren't one element:  home, getting started, theming, icons | beside its components pages | [component-set-docs.html](../templates/component-set-docs.html) |
 | reference page | made from its source each time, with a person's words about each thing:  a place's (`<spell-reference-page>`, epic `data` P53), the commands pages, the core reference page, the syntax guide | a place's:  the editor's `/place/<description>`;  the others in `guides/` | none:  drawn from its source |
 | brand page | Claude Design's brand pages, and their Spell UI copies | `brand/` | none:  Claude Design's exports |
@@ -2827,7 +2827,7 @@ the epic page shown in both tabs).
     `components/app/Chooser.html#C1`;  their inboxes found in the sets' folders (`PageInboxes.inboxFiles()`, `pages.js`
     `pagePath()` / `pageAt()`, both through `ComponentSetFolders`:  the sets the checkout's settings name
     (`componentSets()`), Epic UI's the engine's `src/docs/` (named or not), the others where the settings put
-    them:  spell-app's `app/docs/`, `../spell-brand/docs`).
+    them:  spell-app's `app/docs/`).
   - `working` and `answer` stamp the heartbeat of the session listening to the page's epic, if any.
   - `gather` takes every waiting comment (and page note still `new`) into ONE epic, the standing `feedback`
     (`guide-changes` before epic `epic-engine` T9).
@@ -2980,8 +2980,8 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
 - [bundle-spell-ui.js](tools/bundle-spell-ui.js):  builds UI (`yarn build`), and bundles `spell-ui.js`, in `_assets/`.
   - then `spell-comments.js` beside it (Epic UI's pages' comments);  `--comments`:  only that one, no UI build
   - NOT the claude.ai design system's bundle (`bundle.js` in its `components/`), nor its check:
-    spell-brand's `yarn design:bundle` / `design:check` since epic `repo-split` P10 (Q32),
-    run by `spell design bundle | check`.
+    spell-brand's `yarn design:bundle` / `design:check` from epic `repo-split` P10 (Q32), gone with spell-brand
+    (epic `epic-engine` T124).
 - `yarn tsx src/tools/bundle-experiment.ts <entry.ts> [<out.js>]`:  a guide's live elements, as one classic script.
   - See "Experiments".
   - default out:  `<name>.bundle.js`, beside `<name>.entry.ts`

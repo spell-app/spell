@@ -880,7 +880,7 @@ Until a `/back:  ...` message (or `epic focus status` says off):
    - A multi-repo top:  one commit in EACH repo the phase changed, all with the same subject, each in the repo's
      folder (`epic worktree repos` lists what's uncommitted where);  the lowest repo first (`repos.json5`'s order).
    - The commits reach the epic page BY THEMSELVES (epic `epic-engine` I135), found by subject, in the kit, every
-     child repo and every peer (spell-brand;  a commit there links to that repo on GitHub):
+     child repo and every peer (a repo beside the kit;  a commit there links to that repo on GitHub):
      - under its phases and items, and as an entry in the page's LOG, the epic's change log (epic `epic-engine` P52):
        its time, its sha, its sentence, a chip per phase and item it names;  `<epic>:  ...` with no phase gets one too
      - `epic phase <name>#P<n> done` lists the branch's so far

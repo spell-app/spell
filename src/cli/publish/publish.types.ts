@@ -11,7 +11,7 @@
 
 /**
  * The `"spellPublish"` entry of a repo's `package.json`:  how its npm package is made from its checkout.
- * - Its presence is what makes a repo publish:  a repo without one (spell-brand) never does.
+ * - Its presence is what makes a repo publish:  a repo without one never does.
  * - Every glob is from the repo's `src/`;  `files` are from its root.
  * - `exclude`:  source files left out of the package (`tools/**`:  the repo's own tooling)
  * - `verbatim`:  files shipped exactly as they are, never compiled (`icons/icon-packs/**`:  data the runtime fetches)

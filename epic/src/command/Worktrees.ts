@@ -427,7 +427,7 @@ export class Worktrees {
   /**
    * Each worktree in the worktrees' folders:  `{ name, path, branch }`.
    * - the folders:  `.claude/worktrees/`, or beside the repo and the old place too (`EpicConfig.worktreesFolders`)
-   * - and each peer's own (`EpicConfig.peers`:  spell-brand's `../spell-brand.worktrees/`), `main` its checkout:
+   * - and each peer's own (`EpicConfig.peers`:  `../spell-x.worktrees/`), `main` its checkout:
    *   so `/worktrees` lists a peer's `/isolate` worktrees too
    * - `path` as git lists it:  an unrepaired worktree's old path, after a move behind a compat link, matches its
    *   folder all the same (`RealPath`, epic `epic-engine` I59)
@@ -436,7 +436,7 @@ export class Worktrees {
     const config = this.config
     // this repo's own:  `main` left out, it's `this.main`
     const own = Worktrees.namedIn(this.main, config.worktreesFolders).map(({ main: _, ...it }) => it)
-    // each PEER's (spell-brand's, beside the kit;  epic-engine's P49, Q50 D):  its own lone worktrees, in its own folder
+    // each PEER's (beside the kit;  epic-engine's P49, Q50 D):  its own lone worktrees, in its own folder
     const peers = config.peers
       .filter(({ main }) => existsSync(join(main, ".git")))
       .flatMap(({ main }) => Worktrees.namedIn(main, new EpicConfig(main).worktreesFolders))

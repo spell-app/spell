@@ -20,13 +20,13 @@ afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
 /** A kit's root files and its folders' manifests, frozen (`fixtures/kit/README.md`). */
 const FIXTURE = join(import.meta.dirname, "fixtures", "kit")
 
-/** The commands page, cut down:  a check row naming spell-brand's scripts, and the pack rows. */
+/** The commands page, cut down:  a check row naming spell-epic's scripts, and the pack rows. */
 const COMMANDS = {
   families: [
     {
       id: "checks",
       rows: [
-        { op: "Type-check a repo", yarn: { mark: "same", names: ["root ts", "spell-brand ts", "spell-ui ts"] } },
+        { op: "Type-check a repo", yarn: { mark: "same", names: ["root ts", "spell-epic ts", "spell-ui ts"] } },
         {
           op: "Build a pack",
           id: "pack-build",
@@ -69,7 +69,7 @@ function read(file: string): string {
 }
 
 describe("createPack()", () => {
-  test("writes a pack repo from the templates, laid out as spell-brand is, every token filled in", async () => {
+  test("writes a pack repo from the templates, laid out as a pack repo is, every token filled in", async () => {
     const report = await createPack(root, "cards", { prefix: "epic-", build: false })
     expect(report.created.sort()).toEqual(
       [
@@ -147,7 +147,7 @@ describe("createPack()", () => {
     expect(read("repos.json5")).toBe(before)
     const rows = JSON.parse(read(COMMANDS_JSON)).families[0].rows
     expect(rows.map((row: { yarn: { names: string[] } }) => row.yarn.names)).toEqual([
-      ["root ts", "spell-brand ts", "spell-my-pack ts", "spell-ui ts"],
+      ["root ts", "spell-epic ts", "spell-my-pack ts", "spell-ui ts"],
       ["spell-my-pack pack:build"],
       ["spell-my-pack pack:check"]
     ])
