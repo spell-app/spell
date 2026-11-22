@@ -37,7 +37,7 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-flyout" playground>
-				<button type="button" class="ui button" commandfor="flyout-types-standard-playground" command="--show">Show</>
+				<ui-button commandfor="flyout-types-standard-playground" command="--show">Show</ui-button>
 				<ui-flyout id="flyout-types-standard-playground" closable>
 					<ui-header>Archive old messages</>
 					<ui-content>

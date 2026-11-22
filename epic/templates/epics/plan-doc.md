@@ -61,11 +61,41 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   effect (A, recommended):`); each option may carry its own, inside its `<epic-option>`. Worded otherwise ("once
   fixed"): a plain `<p><b>Net effect (once fixed):</b></p>` and its list.
 
-- TITLES (the one full wording;  everything else points here):
-  - A title is at most 30 plain words saying what the item is.
-  - Before writing it, read it as the person will, hours later and cold:
-    nothing about a passing condition (a pid, "after the 4-line fix", "the turn was stuck").
-  - The rest goes in --details.
+- TITLES (the one full wording;  everything else points here), every kind of item (Q, J, T, I, M, D) and phase:
+  - A title is understood by a reader with NO context, hours later:  not following the work, not in this session.
+  - It says what changed, or what's wrong, effect first, in the person's words.
+  - It names things by what they see or type:  the page, the tab, the button, the command (`epic add`).
+    - Never an internal name:  no class, file or module names;  no "the pack", "the monitor", "the kit",
+      "the fork", "the poller";  no bare phase id as its lead ("P50:  ...").
+  - A change with no visible effect ends "Nothing you'd see."
+  - Nothing about a passing condition (a pid, "after the 4-line fix", "the turn was stuck").
+  - At most 30 words, one sentence (plus "Nothing you'd see.");  the rest goes in --details.
+  - A tag a skill tells you to end it with, saying which review found it, is a LABEL, not part of the title:
+    `(coherence)` (the coherence skill's), `(designer)` (the designer skill's).
+    - Both checks below judge the title without it, so it counts for no words and the reader never sees it.
+    - The list:  `ShortTitle.TAGS`;  a skill prescribing a new tag adds it there and here (epic `epic-engine` I385).
+  - Before and after (Owen, 2026-11-21, epic `epic-engine` T123):
+
+    ```text
+    The monitor is split in two: a tiny plain-JS poller, and a short look that runs the epic tool
+    =>  Each Claude session's background "listen for my Send" process now uses 48 MB instead of 188 MB.
+        Nothing you'd see.
+
+    P52: chips follow renumbering
+    =>  On an epic page, an item's commit chip keeps pointing at the right phase when phases are renumbered.
+
+    A top and its child repos count as one home for an epic
+    =>  An epic that touches several of Spell's folders counts as one epic, so a second session isn't wrongly
+        blocked from starting.
+    ```
+
+  - Why (Owen, 2026-11-21):  "`the pack`, `the monitor`, `the kit` -- it's impossible for me to read that and
+    understand what you're trying to say, unless I happen to be closely following the work."
+  - `epic add` and `epic update --title` hand each title to a fresh reader (`claude -p`, Sonnet, nothing of the
+    repo;  `TitleReader`):  a fail is refused with its reasons and a rewrite to use;  `--title-ok` keeps one on
+    purpose.  No `claude` on the `PATH` (CI, Codex), or a test run:  not read, one line on stderr says so.
+    - The reader passes unless a reader with no context would truly be lost;  its rewrite always fits the 30-word
+      rule, and a title that is its own rewrite, given back within the hour, passes unread (epic `epic-engine` I390).
   - Why (Owen, 2026-11-17, epic `epic-engine` I322):  "I'm looking at these things often hours after the issue came
     up, so sentences referring to some weird condition or issue that only obtained for a little while will be
     meaningless to me."  (I321 before:  3-10 words, 100 characters.)

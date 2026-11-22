@@ -406,10 +406,16 @@ As `plan-doc.md`, "Ids":
   - A rewrite moves the old one into the Original Discussion, with the rest of the old text.
   - `--append` never makes one.
 - `title`:  WITHOUT its id;  with markup, a `<span slot="title">` child instead.
-  - at most 30 plain words saying what it is, read cold (epic `epic-engine` I322;  plan-doc.md, "Rules")
+  - read cold by someone not following the work, at most 30 words (epic `epic-engine` I322, T123;  plan-doc.md,
+    "Rules", TITLES);  `add` and `rename` hand it to a fresh reader first (`TitleReader`), `--title-ok` skipping it
   - `add` and `rename` (`epic update --title`) refuse one over `ShortTitle.MOST_WORDS` (30) words, a `; ` list,
     or more than one sentence, asking for it rewritten;  NOT the tool's own titles (`M3 failed:  <title>`,
     `Follow up:  <title>`)
+  - a known trailing tag, `(coherence)` or `(designer)` (`ShortTitle.TAGS`), is a label:  both checks judge the title
+    without it (`ShortTitle.withoutTag()`;  I385)
+  - the reader converges (I390):  it passes unless a reader with no context would truly be lost;  its rewrite is
+    offered only when it meets `ShortTitle` (cut to its first sentence, else none:  `TitleReader.offerable()`);  a title
+    that IS a rewrite it offered in the last hour passes unread (`title-suggestions.json5` in the epic home)
   - An UPDATE label rides in the title (a bare `<epic-update>`, "Updates"):
     `<span slot="title">Title <epic-update phase="2"></epic-update></span>`.
   - `phase 2 done` removes it, and a title left plain goes back to `title`.

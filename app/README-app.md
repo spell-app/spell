@@ -5,7 +5,7 @@
 <spell-viewer project="@spell/examples/calculator" toolbar></spell-viewer>
 ```
 
-_From [the `<spell-viewer>` demo page](app/demo/spell-viewer.html), which puts five apps on one page this way;
+_From [the `<spell-viewer>` page](app/docs/spell-viewer.html), which shows it live;
 the calculator's `width` left out._
 
 A page needs nothing more:  no framework, no build step of its own, nothing wrapped around the tag.
@@ -84,13 +84,13 @@ Put them on a page either way:
 </ui-root>
 ```
 
-_From the two demo pages, [spell-viewer.html](app/demo/spell-viewer.html) and [spell-editor.html](app/demo/spell-editor.html),
+_From [spell-viewer.html](app/docs/spell-viewer.html) and the demo page [spell-editor.html](app/demo/spell-editor.html),
 their styles and headings left out._
 
 - `/element/...` is the page server's:  it serves the app's `dist-element/`, which `yarn build:element` builds.
   It serves it under every worktree's address too (the settings' `engineRoutes`), so App UI's pages find `spell.pack.js` there.
 - The demos are on the editor's own server, port 3000 when it's free:
-  `/demo/spell-viewer.html`, `/demo/spell-editor.html`, and two more below.
+  `/demo/spell-editor.html`, and two more below.
   To see them, from spell-app's folder:  `yarn build:element`, then `yarn start`.
 - A `<spell-viewer>` loads each tag inside it the first time it appears, from beside its own script:
   a `<spell-editor>` inside one brings `spell-editor.js`, and a page of apps loaded this way never does.

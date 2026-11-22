@@ -1173,17 +1173,23 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   turns: [
     {
       name: "run",
-      usage: "<kind> -- <command> [args...]",
+      usage: "<kind> [--stall <minutes>] -- <command> [args...]",
       description:
         "run a command in its turn:  one of each kind at a time on this machine (a full test run:  test);  " +
-        "waits, saying who has the turn;  epic merge and merge-main take the merge turn by themselves",
+        "waits, saying who has the turn;  epic merge and merge-main take the merge turn by themselves;  " +
+        "a command silent and idle (no output, next to no CPU in its whole process tree) for the stall window " +
+        "is stopped, saying where it was, and the turn freed (exit 1)",
       example: "epic turns run test -- yarn test",
-      flags: {}
+      flags: {
+        "--stall <minutes>": "the stall window:  10 by default (SPELL_EPIC_TURN_STALL sets it too);  0 never stops it"
+      }
     },
     {
       name: "list",
       usage: "",
-      description: "the turns taken now:  each kind's holder, and since when (the default verb)",
+      description:
+        "the turns taken now:  each kind's holder, since when, and whether it's longer than usual or stalled " +
+        "(the default verb)",
       example: "epic turns list",
       flags: {}
     }
@@ -1528,6 +1534,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--estimate <time>": "a phase's estimate, e.g. 1-2h",
     "--title <title>": "a phase's or an item's new title:  links that say the old one follow",
     "--html": "the title is HTML",
+    "--title-ok": "with --title:  keep the new title as it is, not read cold first (T123)",
     "--calm": "an item not urgent:  a judgement call grey, an issue yellow",
     "--loud": "an item urgent (red) again;  a todo too, red as a reminder until you review it (T94)",
     "--requested":
@@ -1564,6 +1571,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   // an epic page:  items
   add: {
     "--details <html>": "its details",
+    "--title-ok": "keep the title as it is, not read cold first (T123)",
     "--calm": "not urgent (a judgement call grey, an issue yellow):  it wouldn't surprise you",
     "--requested":
       "an issue or todo filed from the person's own words:  light orange once Claude closes it, until they review it",

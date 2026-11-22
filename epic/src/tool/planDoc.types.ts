@@ -41,7 +41,8 @@ PlanDocError.prototype.name = "PlanDocError"
  *   - I321 had 100 characters, and moved a retitled item's old title into its body:  no help either
  * - `epic add` and `epic update --title` refuse one that's too long or runs on (`check()`):
  *   the writer rewrites it, nothing is moved anywhere
- * - the writer's own check, reading it cold, is the rest of the rule:  plan-doc.md, "Rules"
+ *   - a second sentence only as "Nothing you'd see." (`NOTHING_TO_SEE`, T123)
+ * - the rest of the rule, read cold:  `TitleReader`, a fresh reader (T123);  the rule:  plan-doc.md, "Rules"
  * - pure
  ****************/
 export class ShortTitle {
@@ -54,12 +55,33 @@ export class ShortTitle {
   /** A sentence's end with another after it:  `.`, `!` or `?`, a space, a capital;  never after `e.g.`, `vs.` ... */
   static readonly SECOND_SENTENCE = /(?<!\b(?:e\.g|i\.e|vs|etc|cf))[.!?]\s+(?=[A-Z])/
 
-  /** Why `title` isn't a title, or `undefined` when it is. */
-  static problemOf(title: string): string | undefined {
+  /** The one second sentence a title may have:  a change with no visible effect says so (epic `epic-engine` T123). */
+  static readonly NOTHING_TO_SEE = /\s+Nothing you['’]d see\.?$/
+
+  /**
+   * The LABELS a skill tells sessions to end a title with, saying which review found it (epic `epic-engine` I385):
+   * `(coherence)`, the coherence skill's;  `(designer)`, the designer skill's.
+   * - a label, not words of the title:  the word count and the fresh reader judge the title without it (`withoutTag()`)
+   * - a skill prescribing a new one adds it here, and to plan-doc.md's TITLES
+   */
+  static readonly TAGS = ["coherence", "designer"]
+
+  /** A known tag at the title's end, its space before it included. */
+  static readonly TAG = new RegExp(`\\s+\\((?:${ShortTitle.TAGS.join("|")})\\)$`)
+
+  /** `title` without a known trailing tag (`TAGS`):  `"X (coherence)"` => `"X"`;  any other title as it is. */
+  static withoutTag(title: string): string {
+    return title.trim().replace(ShortTitle.TAG, "")
+  }
+
+  /** Why `title` isn't a title, or `undefined` when it is;  a known trailing tag isn't counted (`withoutTag()`). */
+  static problemOf(_title: string): string | undefined {
+    const title = ShortTitle.withoutTag(_title)
     const words = title.trim().split(/\s+/).filter(Boolean).length
     if (words > ShortTitle.MOST_WORDS) return `it's ${words} words (the most is ${ShortTitle.MOST_WORDS})`
     if (ShortTitle.LIST.test(title)) return `it runs on, a list after ";"`
-    if (ShortTitle.SECOND_SENTENCE.test(title.trim())) return "it's more than one sentence"
+    const sentence = title.trim().replace(ShortTitle.NOTHING_TO_SEE, "")
+    if (ShortTitle.SECOND_SENTENCE.test(sentence)) return "it's more than one sentence"
     return undefined
   }
 
@@ -72,10 +94,11 @@ export class ShortTitle {
     if (!problem) return
     throw new PlanDocError(
       `rewrite this title:  ${problem}.\n` +
-        `- a title is at most ${ShortTitle.MOST_WORDS} plain words saying what the item is, in one sentence\n` +
-        `- read it as the person will, hours later and cold:  nothing about a passing condition ` +
-        `(a pid, "after the 4-line fix", "the turn was stuck")\n` +
-        `- the rest goes in --details`
+        `- a title is at most ${ShortTitle.MOST_WORDS} words, one sentence (plus "Nothing you'd see." for a change ` +
+        `with no visible effect)\n` +
+        `- what changed or what's wrong, effect first, named by what the person sees or types;  read cold, hours ` +
+        `later:  nothing about a passing condition (a pid, "after the 4-line fix")\n` +
+        `- the rest goes in --details (the rule:  plan-doc.md, "Rules", TITLES)`
     )
   }
 }

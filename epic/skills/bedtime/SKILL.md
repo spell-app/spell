@@ -181,8 +181,8 @@ Everything else stands:
    epic add <name>#J "<the call>" --details "<p>chose ... over ... because ...</p><epic-choices>...</epic-choices><epic-net-effect>...</epic-net-effect>"
    ```
 
-   - Its title is at most 30 plain words saying what it is, read cold, hours later:
-     nothing about a passing condition;  the rest goes in --details (plan-doc.md's "Rules").
+   - Its title is read by someone NOT following the work:  effect first, named by what the person sees or types,
+     never an internal name;  the rest goes in --details (plan-doc.md's "Rules", TITLES).
    - It prints the id (`J4`).
      The epic page's "Judgement calls" section is where the person finds them, open until they review each.
    - Its details ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Prose"):

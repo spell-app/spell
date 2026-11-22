@@ -73,7 +73,7 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *   - each real Space's member list, in step with its org's roles (`MemberLists`):  a term ending on its date
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
- *     - for the demo pages, `/demo/spell-viewer.html` on the editor:  vite passes `/element` on to us, as it does `/api`
+ *     - for the demo page, `/demo/spell-editor.html` on the editor:  vite passes `/element` on to us, as it does `/api`
  *   - `/editor` -- the site header's "Editor":  redirects to the editor, from its record (`EditorServer.recordFile`,
  *     this page server's spaces' own)
  *     - not up yet (vite takes seconds) or not running:  says so

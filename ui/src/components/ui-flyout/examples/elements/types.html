@@ -5,7 +5,7 @@
 <div class="ui-stack">
   <section>
     <h4>Flyout</h4>
-    <button type="button" class="ui button" commandfor="flyout-types-standard" command="--show">Show</button>
+    <ui-button commandfor="flyout-types-standard" command="--show">Show</ui-button>
     <ui-flyout id="flyout-types-standard" closable>
       <ui-header>Archive old messages</ui-header>
       <ui-content>
@@ -20,7 +20,7 @@
 
   <section>
     <h4>Right, shorthands</h4>
-    <button type="button" class="ui button" commandfor="flyout-types-right" command="--show">Show right</button>
+    <ui-button commandfor="flyout-types-right" command="--show">Show right</ui-button>
     <ui-flyout
       id="flyout-types-right"
       position="right"
@@ -34,7 +34,7 @@
 
   <section>
     <h4>Top, inverted</h4>
-    <button type="button" class="ui button" commandfor="flyout-types-top" command="--show">Show top</button>
+    <ui-button commandfor="flyout-types-top" command="--show">Show top</ui-button>
     <ui-flyout id="flyout-types-top" position="top" inverted heading="Notice" closable>
       <ui-content><p>A top flyout is full width, as tall as its content.</p></ui-content>
     </ui-flyout>
@@ -42,7 +42,7 @@
 
   <section>
     <h4>Bottom, blurring</h4>
-    <button type="button" class="ui button" commandfor="flyout-types-bottom" command="--show">Show bottom</button>
+    <ui-button commandfor="flyout-types-bottom" command="--show">Show bottom</ui-button>
     <ui-flyout id="flyout-types-bottom" position="bottom" blurring aria-label="Cookies">
       <ui-content><p>This page uses no cookies.</p></ui-content>
       <ui-actions><ui-button class="approve" color="primary">Got it</ui-button></ui-actions>

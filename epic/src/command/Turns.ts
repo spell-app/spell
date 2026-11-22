@@ -8,6 +8,7 @@ import { SRV } from "spell/server"
 import { EpicHome } from "spell/epic/config/EpicHome"
 
 import { EXIT, EpicCommandError } from "./command.types"
+import { StallWatch, type WatchProps } from "./StallWatch"
 
 /****************
  * ### `Turns`
@@ -33,6 +34,10 @@ import { EXIT, EpicCommandError } from "./command.types"
  *   `epic turns run test -- yarn test` at the kit's root, whose folders' tests might queue again, never waits on itself.
  * - Kinds are open:  any lowercase word (`merge`, `test`, `build` ...).
  * - A single test file (`yarn vitest run <file>`) takes no turn:  it's light, and an agent runs one often.
+ * - A STALLED command is stopped, freeing the turn (`StallWatch`, epic `epic-engine` I384):  no output and next to no
+ *   CPU over its whole process tree for the stall window (10 minutes;  `--stall <minutes>`, `SPELL_EPIC_TURN_STALL`,
+ *   `0` off), one line saying where it was;  `epic turns list` says "stalled" for a holder past it.
+ *   - Its output is piped through to watch it (colours kept when ours is a terminal:  `FORCE_COLOR`).
  ****************/
 export class Turns {
   /** Run `epic turns <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
@@ -45,8 +50,15 @@ export class Turns {
     }
     if (verb !== "run") throw new EpicCommandError(`unknown verb '${verb}':  epic turns run <kind> -- <command> | list`)
     const command = split === -1 ? [] : args.slice(split + 1)
-    if (!kind || !command.length) throw new EpicCommandError("usage:  epic turns run <kind> -- <command> [args...]")
-    return Turns.runCommand(kind, command)
+    if (!kind || !command.length)
+      throw new EpicCommandError("usage:  epic turns run <kind> [--stall <minutes>] -- <command> [args...]")
+    const head = split === -1 ? args : args.slice(0, split)
+    const stall = head.indexOf("--stall")
+    if (stall === -1) return Turns.runCommand(kind, command)
+    const minutes = Number(head[stall + 1])
+    if (!Number.isFinite(minutes) || minutes < 0)
+      throw new EpicCommandError(`epic turns:  --stall takes minutes (0:  off), not '${head[stall + 1] ?? ""}'`)
+    return Turns.runCommand(kind, command, { stallMs: minutes * 60_000 })
   }
 
   /**
@@ -89,23 +101,68 @@ export class Turns {
   /**
    * Run `command` (its words) holding the `kind` turn, its output straight through;  resolves to its exit code.
    * - the turn's kinds are in its environment (`ENV`):  the same kind inside runs straight away
+   * - stalled (`StallWatch`):  its tree stopped, one line saying so, `EXIT.ERRORS`;  `props.stallMs` the window
+   *   (default `stallWindow()`, `0` off), `props.watch` the watch's own (its tests')
    */
-  static runCommand(kind: string, command: string[], props: TakeProps = {}): Promise<number> {
+  static runCommand(kind: string, command: string[], props: RunProps = {}): Promise<number> {
     Turns.checkKind(kind)
+    const label = command.join(" ")
+    const stallMs = props.stallMs ?? Turns.stallWindow()
     return Turns.takeAsync(
       kind,
-      command.join(" "),
+      label,
       () =>
         new Promise<number>((done) => {
-          const child = spawn(command[0]!, command.slice(1), { stdio: "inherit", env: process.env })
+          const env = { ...process.env }
+          if (process.stdout.isTTY && env.FORCE_COLOR === undefined && env.NO_COLOR === undefined) env.FORCE_COLOR = "1"
+          const child = spawn(command[0]!, command.slice(1), { stdio: ["inherit", "pipe", "pipe"], env })
+          child.stdout?.pipe(process.stdout, { end: false })
+          child.stderr?.pipe(process.stderr, { end: false })
+          let stalled = false
+          const watch = new StallWatch({ stallMs })
+          const unwatch = stallMs
+            ? watch.watch(child, {
+                ...props.watch,
+                busy: () => Turns.writeBusy(kind, Date.now(), stallMs),
+                stalled: () => {
+                  stalled = true
+                  console.error(watch.stoppedLine(label))
+                }
+              })
+            : () => {}
+          if (stallMs) Turns.writeBusy(kind, Date.now(), stallMs)
           child.on("error", (error) => {
+            unwatch()
             console.error(`epic turns:  ${command[0]} won't start:  ${error.message}`)
             done(EXIT.ERRORS)
           })
-          child.on("exit", (code, signal) => done(code ?? (signal ? EXIT.ERRORS : EXIT.OK)))
+          child.on("exit", (code, signal) => {
+            unwatch()
+            rmSync(Turns.busyFile(kind), { force: true })
+            const finish = () => {
+              // a process it left running (a server) may hold the pipes:  they mustn't hold this one
+              child.stdout?.destroy()
+              child.stderr?.destroy()
+              done(stalled ? EXIT.ERRORS : (code ?? (signal ? EXIT.ERRORS : EXIT.OK)))
+            }
+            // its last output first:  the pipes close just after it exits, unless something holds them
+            const late = setTimeout(finish, 1_000)
+            child.on("close", () => {
+              clearTimeout(late)
+              finish()
+            })
+          })
         }),
       props
     )
+  }
+
+  /** The stall window, ms:  `SPELL_EPIC_TURN_STALL` (minutes;  `0` off), else `StallWatch.DEFAULT_MS`. */
+  static stallWindow(): number {
+    const minutes = Number(process.env[StallWatch.ENV])
+    return process.env[StallWatch.ENV] && Number.isFinite(minutes) && minutes >= 0
+      ? minutes * 60_000
+      : StallWatch.DEFAULT_MS
   }
 
   /** The turns taken now, by kind:  `{ kind, holder }` each, oldest first. */
@@ -154,7 +211,9 @@ export class Turns {
     const held = now - since.getTime()
     const usual = Turns.usual(kind)
     const long = held > usual * Turns.LONG ? ` -- longer than usual (${minutes(usual)})` : ""
-    return `${who}, for ${minutes(held)}${long}`
+    const quiet = pid ? Turns.quietFor(kind, pid, now) : undefined
+    const stalled = quiet === undefined ? "" : ` -- stalled (no output or CPU for ${minutes(quiet)})`
+    return `${who}, for ${minutes(held)}${long}${stalled}`
   }
 
   /**
@@ -202,6 +261,22 @@ export class Turns {
     if (state.startsWith("Z")) return "zombie"
     if (state.startsWith("T")) return "stopped"
     return "running"
+  }
+
+  /**
+   * How long `kind`'s holder `pid` has been quiet, ms, once past its stall window;  else `undefined`.
+   * - from `<kind>.busy`, which the holder's watch rewrites while it's busy:  `<pid> <last busy ms> <stall ms>`
+   */
+  static quietFor(kind: string, pid: number, now = Date.now()): number | undefined {
+    let words: string[]
+    try {
+      words = readFileSync(Turns.busyFile(kind), "utf8").trim().split(/\s+/)
+    } catch {
+      return undefined
+    }
+    const [holder, busy, stallMs] = words.map(Number)
+    if (holder !== pid || !busy || !stallMs) return undefined
+    return now - busy >= stallMs ? now - busy : undefined
   }
 
   /** The turns' folder:  the epic home's `turns/`. */
@@ -266,6 +341,20 @@ export class Turns {
     else delete process.env[Turns.ENV]
   }
 
+  /** The file a holder's watch keeps its last busy time in. */
+  private static busyFile(kind: string): string {
+    return join(Turns.folder(), `${kind}.busy`)
+  }
+
+  /** Write down that this process's `kind` command was busy at `at`.  NEVER throws. */
+  private static writeBusy(kind: string, at: number, stallMs: number): void {
+    try {
+      writeFileSync(Turns.busyFile(kind), `${process.pid} ${at} ${stallMs}`)
+    } catch {
+      // best effort:  only `epic turns list` reads it
+    }
+  }
+
   /** Add `run` to `history.jsonl`, keeping its last 200 lines.  NEVER throws. */
   private static writeDown(run: TurnRun): void {
     try {
@@ -296,6 +385,16 @@ export type TurnRun = { kind: string; label: string; ms: number; at: string }
  * - `say`:  where the waiting lines go (default stderr)
  */
 export type TakeProps = { wait?: number; say?: (line: string) => void }
+
+/**
+ * `Turns.runCommand()` props:  `take()`'s, plus
+ * - `stallMs`:  the stall window, ms (`0` off;  default `Turns.stallWindow()`)
+ * - `watch`:  the stall watch's look interval, grace and CPU reader (its tests')
+ */
+export type RunProps = TakeProps & {
+  stallMs?: number
+  watch?: Pick<WatchProps, "every" | "graceMs" | "cpu">
+}
 
 /**
  * ### `TurnQueue`

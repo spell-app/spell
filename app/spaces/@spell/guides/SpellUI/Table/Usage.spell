@@ -30,9 +30,9 @@
 			find-in-page, copy and your own CSS all work as on any table. The element only adds the look, sorting and a
 			scroller.
 
-			- It copies its class words onto the table (`<ui-table celled appearance="striped">` gives
-			  `<table class="ui celled striped table">`), adding and removing only its own words, so your classes
-			  stay. A server can write that class string itself, and the table paints before any script runs.
+			- It styles the table you wrote (`<ui-table celled appearance="striped">`), adding and removing only its own
+			  words, so your classes stay. A server can write those words itself, and the table paints before any
+			  script runs. (How it relates to Semantic UI's class string:  ui's README-migrating.)
 			- Rows and cells keep Fomantic's classes on the native `tr`, `td` and `th`: `positive`, `left red marked`,
 			  `collapsing`, `four wide`, `right aligned`. No script, no extra elements.
 			- `columns="4"` is Fomantic's equal-width column count; the data mode's column list is the separate `columnDefs`

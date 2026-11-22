@@ -9,13 +9,18 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
+import { EpicProgram } from "spell/epic/cli/EpicProgram"
+import { VERB_FLAGS } from "spell/epic/cli/epicGroups"
+import { planDocArgs } from "spell/epic/command/epicArgs"
 import { Markup } from "spell/epic/markup"
 import { PhaseIds } from "spell/epic/phases"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands, movedDown } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 import { PlanItem } from "spell/epic/tool/PlanItem"
+import { ShortTitle } from "spell/epic/tool/planDoc.types"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { TitleReader, type TitleRequest, type TitleVerdict } from "spell/epic/tool/TitleReader"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -562,7 +567,7 @@ describe("PlanDocCommands:  short titles", () => {
     expect(await commands().run(["add", "x", "todo", "Retry it;  then tell them"])).toBe(1)
     expect(await commands().run(["add", "x", "issue", "The turn was stuck. It hung for a minute"])).toBe(1)
     expect(warned[0]).toMatch(/^epic:  rewrite this title:  it's 33 words \(the most is 30\)\./)
-    expect(warned[0]).toContain("read it as the person will, hours later and cold")
+    expect(warned[0]).toContain("read cold, hours later")
     expect(warned[0]).toContain("the rest goes in --details")
     expect(warned[1]).toContain('it runs on, a list after ";"')
     expect(warned[2]).toContain("it's more than one sentence")
@@ -573,6 +578,11 @@ describe("PlanDocCommands:  short titles", () => {
     const thirty = Array.from({ length: 30 }, (_, n) => `word${n}`).join(" ")
     expect(await commands().run(["add", "x", "todo", thirty])).toBe(0)
     expect(await commands().run(["add", "x", "todo", "Titles -- up to 30 words, e.g. Owen's own"])).toBe(0)
+  })
+
+  test(`add takes "Nothing you'd see." as a second sentence (T123)`, async () => {
+    const title = "Each session's background listener now uses 48 MB instead of 188 MB. Nothing you'd see."
+    expect(await commands().run(["add", "x", "todo", title])).toBe(0)
   })
 
   test("rename refuses a long title too, and leaves the body as it was", async () => {
@@ -905,5 +915,179 @@ describe("PlanDocCommands summary / items:  finished phases and grey items left 
     await owner.run(["items", "x", "--json", "--all"])
     const every = JSON.parse(printed[0]!).sections.find((s: { kind: string }) => s.kind === "limit")
     expect([every.items.length, every.quiet]).toEqual([1, undefined])
+  })
+})
+
+// epic `epic-engine` T123:  a fresh reader reads each new or changed title cold
+describe("PlanDocCommands:  titles read cold", () => {
+  const INSIDE = "The monitor is split in two:  a tiny plain-JS poller, and a short look that runs the epic tool"
+  const REWRITE =
+    "Each Claude session's background 'listen for my Send' process now uses less memory. Nothing you'd see."
+
+  /** What the reader was handed. */
+  let asked: TitleRequest[]
+
+  /** The commands, with a reader that fails every title naming "the monitor". */
+  function reading() {
+    asked = []
+    const ask = (request: TitleRequest): TitleVerdict => {
+      asked.push(request)
+      return /the monitor/i.test(request.text)
+        ? { pass: false, reasons: ['"the monitor" is an internal name'], rewrite: REWRITE }
+        : { pass: true, reasons: [], rewrite: "" }
+    }
+    const owner = new PlanDocCommands({
+      files: FILES,
+      titleReader: new TitleReader({ ask, skipReason: () => undefined })
+    })
+    vi.spyOn(owner, "print").mockImplementation((text) => void printed.push(text))
+    vi.spyOn(owner, "warn").mockImplementation((text) => void warned.push(text))
+    return owner
+  }
+
+  test("add refuses a title the reader fails, with its reasons and the rewrite to use;  writing nothing", async () => {
+    const skeleton = readFileSync(file, "utf8")
+    expect(await reading().run(["add", "x", "todo", INSIDE])).toBe(1)
+    expect(asked[0]!.text).toBe(`Kind:  todo\nTitle:  ${INSIDE}`)
+    expect(warned[0]).toContain("rewrite this title:  a reader with no context couldn't follow it.")
+    expect(warned[0]).toContain('- "the monitor" is an internal name')
+    expect(warned[0]).toContain(`Try:  "${REWRITE}"`)
+    expect(warned[0]).toContain("--title-ok keeps it as it is")
+    expect(readFileSync(file, "utf8")).toBe(skeleton)
+  })
+
+  test("add takes a title the reader passes, and --title-ok skips the reader", async () => {
+    expect(await reading().run(["add", "x", "todo", "The Send button keeps its place when the page reloads"])).toBe(0)
+    expect(await reading().run(["add", "x", "todo", INSIDE, "--title-ok"])).toBe(0)
+    expect(asked).toEqual([])
+  })
+
+  test("rename reads the new title too, its markup taken off", async () => {
+    await FILES.edit(file, (plan) => plan.addItem("todo", "Old title", {}))
+    expect(await reading().run(["rename", "x", "T1", `<b>${INSIDE}</b>`, "--html"])).toBe(1)
+    expect(asked[0]!.text).toBe(`Kind:  item\nTitle:  ${INSIDE}`)
+    expect(await reading().run(["rename", "x", "T1", INSIDE, "--title-ok"])).toBe(0)
+  })
+
+  /** `epic <verb> ...args` as the `epic` command takes it:  its flags checked, turned into the tool's order, run. */
+  async function typed(verb: string, args: string[]): Promise<number[]> {
+    const checked = EpicProgram.checkFlags(`epic ${verb}`, VERB_FLAGS[verb], args)
+    const codes: number[] = []
+    for (const run of planDocArgs(verb, [...checked])) codes.push(await reading().run(run))
+    return codes
+  }
+
+  // epic `epic-engine` I385:  the flag was the tool's, but the `epic` command refused it as "no such flag"
+  test("epic add and epic update --title take --title-ok, as typed", async () => {
+    expect(await typed("add", ["x#T", INSIDE, "--title-ok"])).toEqual([0])
+    expect(await typed("update", ["x#T1", "--title", INSIDE, "--title-ok"])).toEqual([0])
+    expect(asked).toEqual([])
+    expect(await typed("update", ["x#T1", "--title", INSIDE])).toEqual([1])
+  })
+
+  // epic `epic-engine` I385:  the coherence and designer skills tell sessions to end a title so
+  test("a known trailing tag, (coherence) or (designer), is a label:  the reader and the word count never see it", async () => {
+    const title = "The Send button keeps its place when the page reloads (coherence)"
+    expect(await typed("add", ["x#Q", title])).toEqual([0])
+    expect(asked[0]!.text).toBe("Kind:  question\nTitle:  The Send button keeps its place when the page reloads")
+    expect(await reading().run(["rename", "x", "Q1", "The Send button keeps its place (designer)"])).toBe(0)
+    expect(asked[0]!.text).toBe("Kind:  item\nTitle:  The Send button keeps its place")
+    // written as given, tag and all
+    expect(readFileSync(file, "utf8")).toContain("The Send button keeps its place (designer)")
+    // any other bracket at the end is the title's own
+    reading().titleReader.check("The Send button moves (sometimes)", "issue")
+    expect(asked[0]!.text).toBe("Kind:  issue\nTitle:  The Send button moves (sometimes)")
+  })
+})
+
+describe("ShortTitle", () => {
+  test("a known trailing tag isn't counted:  30 words plus (coherence) is a title, 31 isn't", () => {
+    const thirty = Array.from({ length: 30 }, (_, i) => `w${i}`).join(" ")
+    expect(ShortTitle.problemOf(`${thirty} (coherence)`)).toBeUndefined()
+    expect(ShortTitle.problemOf(`${thirty} (sometimes)`)).toBe("it's 31 words (the most is 30)")
+    expect(ShortTitle.withoutTag("  A title (designer) ")).toBe("A title")
+    expect(ShortTitle.withoutTag("A title (coherence) more")).toBe("A title (coherence) more")
+  })
+})
+
+describe("TitleReader", () => {
+  test("skipped:  says why once, or nothing for a quiet skip;  never asks", () => {
+    const lines: string[] = []
+    const ask = vi.fn()
+    const reader = new TitleReader({
+      ask,
+      skipReason: () => ({ why: "no claude on the PATH" }),
+      warn: (line) => void lines.push(line)
+    })
+    reader.check("A", "todo")
+    reader.check("B", "todo")
+    expect(lines).toEqual(["epic:  title not read cold (no claude on the PATH)"])
+    new TitleReader({
+      ask,
+      skipReason: () => ({ why: "a test run", quiet: true }),
+      warn: (line) => void lines.push(line)
+    }).check("C", "todo")
+    expect(lines).toHaveLength(1)
+    expect(ask).not.toHaveBeenCalled()
+  })
+
+  test("a reader that fails lets the title through, saying so", () => {
+    const lines: string[] = []
+    const ask = () => {
+      throw new Error("claude -p didn't run")
+    }
+    new TitleReader({ ask, skipReason: () => undefined, warn: (line) => void lines.push(line) }).check("A", "todo")
+    expect(lines).toEqual(["epic:  title not read cold:  claude -p didn't run"])
+  })
+
+  // epic `epic-engine` I390:  its rewrite ran past 30 words, which `epic add` then refused
+  test("offers only a rewrite epic add would take:  tidied, cut to its first sentence, else none", () => {
+    const long = Array.from({ length: 31 }, () => "word").join(" ")
+    expect(TitleReader.offerable(`">The Send button keeps its place."`)).toBe("The Send button keeps its place.")
+    expect(TitleReader.offerable(`The Send button keeps its place. And ${long}`)).toBe(
+      "The Send button keeps its place."
+    )
+    expect(TitleReader.offerable("The cache is smaller.  Nothing you'd see.")).toBe(
+      "The cache is smaller.  Nothing you'd see."
+    )
+    expect(TitleReader.offerable(long)).toBeUndefined()
+    expect(TitleReader.offerable("")).toBeUndefined()
+  })
+
+  /** A reader failing every title but `passing`, rewriting to `rewrite`;  its asks counted. */
+  function failing(rewrite: string, file: string, clock = { now: 0 }) {
+    const asked: string[] = []
+    const reader = new TitleReader({
+      ask: ({ text }) => {
+        asked.push(text)
+        return { pass: false, reasons: ["unclear"], rewrite }
+      },
+      skipReason: () => undefined,
+      suggestionsFile: file,
+      now: () => clock.now,
+      warn: () => {}
+    })
+    return { reader, asked, clock }
+  }
+
+  test("a too-long rewrite isn't offered", () => {
+    const long = Array.from({ length: 31 }, () => "word").join(" ")
+    const { reader } = failing(long, join(mkdtempSync(join(tmpdir(), "titles-")), "kept.json5"))
+    expect(() => reader.check("The thing", "todo")).toThrow(/^(?![\s\S]*Try:)/)
+  })
+
+  // epic `epic-engine` I390:  it refused two of its own rewrites
+  test("its own rewrite, given back within the hour, passes unread;  after it, it's read again", () => {
+    const file = join(mkdtempSync(join(tmpdir(), "titles-")), "home", "kept.json5")
+    const REWRITE = "The Send button keeps its place when the page reloads."
+    const { reader, asked, clock } = failing(REWRITE, file)
+    expect(() => reader.check("The poller keeps it", "todo")).toThrow(`Try:  "${REWRITE}"`)
+    expect(asked).toHaveLength(1)
+    reader.check(REWRITE, "todo")
+    reader.check("the send button keeps its place  when the page reloads (coherence)", "todo")
+    expect(asked).toHaveLength(1)
+    clock.now = 60 * 60 * 1000
+    expect(() => reader.check(REWRITE, "todo")).toThrow()
+    expect(asked).toHaveLength(2)
   })
 })

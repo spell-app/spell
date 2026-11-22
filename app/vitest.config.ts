@@ -12,6 +12,12 @@ import { appConfig } from "./app/vite.shared.ts"
  */
 const BROWSER_TESTS = ["**/*.browser.test.{ts,tsx}"]
 
+/**
+ * How long a test in `spaces`, `lsp` or `spell` may take:  many parse or compile a whole project (Solitaire).
+ * - About 3s each on their own, past Vitest's 5s beside a full run on a busy machine (epic `solid-2-final` I1).
+ */
+const WHOLE_PROJECT_TIMEOUT = 20_000
+
 /** The app's tests, at the same paths as its code (`src/app/`). */
 const APP_TESTS = "tests/app"
 
@@ -59,11 +65,14 @@ export default defineConfig({
     // builds the browser bundle again first when it's stale, for the tests that run a program in a browser
     globalSetup: ["tests/realSpaceCheck.ts", "tests/browserBundleCheck.ts"],
     projects: [
-      { extends: true, test: { name: "spaces", dir: "tests/spaces", environment: "node" } },
-      { extends: true, test: { name: "lsp", dir: "tests/lsp" } },
+      {
+        extends: true,
+        test: { name: "spaces", dir: "tests/spaces", environment: "node", testTimeout: WHOLE_PROJECT_TIMEOUT }
+      },
+      { extends: true, test: { name: "lsp", dir: "tests/lsp", testTimeout: WHOLE_PROJECT_TIMEOUT } },
       ...appProjects(),
       { extends: true, test: { name: "cli", dir: "tests/cli" } },
-      { extends: true, test: { name: "spell", dir: "tests/spell" } },
+      { extends: true, test: { name: "spell", dir: "tests/spell", testTimeout: WHOLE_PROJECT_TIMEOUT } },
       { extends: true, test: { name: "vscode", dir: "tests/vscode", environment: "node" } },
       // the extension's elements help:  its own config, for a stand-in `vscode`
       "vscode/vitest.config.ts"
