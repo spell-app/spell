@@ -1,0 +1,54 @@
+"uploader usage" is a notebook page
+	<header level="1">
+		Uploader
+		<header>An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action.</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			- Write `<ui-uploader extensions="json" multiple>`, and pick a look with `appearance`:
+			  `hero` (the default), `button`, `input` or `compact`.
+			- Where the files go:
+			  - `destination`:  a URL each file is posted to, as form data, one request per file
+			  - `action`:  a function called with the files instead;  in Spell, an action
+			  - neither:  it only holds them, and the page reads them from its events or `files`
+			- What it takes:  `extensions`, `max-size` (`2 MB`), `max-files`, `multiple`, `folder`.
+			  A file it doesn't take still gets a row, with the reason.
+			- Its events, the same for a pick as for a drop (`detail.via` says which), each before, while or after:
+			  - `ui-file-dragged-over` / `-out`:  how many files, and their kinds
+			  - `ui-file-dropping`, cancelable:  leaves that file out;  then `ui-file-dropped`, with the file,
+			    its path, size, kind, and the reason when it's turned away
+			  - `ui-uploading`, cancelable:  takes the upload over
+			  - `ui-upload-progress`, then `ui-uploaded` or `ui-upload-failed`, per file
+			  - a `folder` uploader's drags and folders are `ui-folder-*`
+			- Read a file in a handler with `event.detail.file.text()`.
+		</>
+		<markdown>
+			```js
+			const uploader = document.querySelector("ui-uploader")
+			uploader.addEventListener("ui-file-dropped", async (event) => {
+			  if (event.detail.reason) return console.log(event.detail.name, "turned away:", event.detail.reason)
+			  console.log(event.detail.path, JSON.parse(await event.detail.file.text()))
+			})
+			// take the upload over:  nothing is posted
+			uploader.addEventListener("ui-uploading", (event) => event.preventDefault())
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- Tab reaches its button (or the `input` look's field);  Enter or Space opens the file dialog.
+			- Each row's Remove is a button too.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Its button is a real button, named by its words;  the file rows are a list, named "Files".
+			- Each progress bar is named "Uploading";  compact's line of status is a live `status` region.
+			- Dropping needs a pointer:  every look also opens the file dialog from the keyboard.
+			- The `input` look's field takes the uploader's `aria-label`, else its line of help.
+		</>
+	</>

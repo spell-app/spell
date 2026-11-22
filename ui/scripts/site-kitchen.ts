@@ -34,7 +34,7 @@
  * - The Spell UI site's Kitchen Sink page too (`KitchenSpellWriter`;  epic `editor` P42):  the same block as Spell,
  *   `SpellMarkup`'s, between that page's `<!-- kitchen:start -->` / `<!-- kitchen:end -->` comments
  *   (`app/spaces/@spell/guides/SpellUI/KitchenSink.spell`, `SPELL_UI_SITE_FOLDER`).
- *   - Each link to a family's page is that page's address in the site, by its title (`addressesByTitle()`).
+ *   - Each link to a family's page is that page's address in the site, by its title (`SpellUISite.addressFor()`).
  *   - A Semantic `<button class="ui button">` in an example file is drawn with `<ui-button>` there.
  * - Rerun after changing an example (`yarn site:build` runs it).
  * - `--check`:  write nothing;  exit 1 if the kitchen sink or a playground is stale.
@@ -53,14 +53,8 @@ import { Terminal } from "spell/element-tools/Terminal"
 import { spliceGenerated, writeOrCheck, type GeneratedOutput } from "spell/element-tools/generatedFiles"
 import { FamilyExamples, type ExampleSection } from "spell/ui/tools/FamilyExamples"
 import { SpellMarkup } from "spell/ui/tools/SpellMarkup"
-import {
-  COMPONENTS,
-  SITE_DATA,
-  SITE_PAGES,
-  SPELL_UI_ROOT,
-  SPELL_UI_SITE_FOLDER,
-  sitePages
-} from "spell/ui/tools/tools.types"
+import { SpellUISite } from "spell/ui/tools/SpellUISite"
+import { COMPONENTS, SITE_DATA, SITE_PAGES, SPELL_UI_ROOT, sitePages } from "spell/ui/tools/tools.types"
 
 import { withoutTicks } from "spell/ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
@@ -243,8 +237,11 @@ class PlaygroundWriter {
  * - The rest of the page is hand-kept, as the HTML page's is.
  ****************/
 class KitchenSpellWriter {
+  /** The site's files. */
+  private readonly site = new SpellUISite()
+
   /** The page. */
-  readonly file = path.join(SPELL_UI_SITE_FOLDER, "KitchenSink.spell")
+  readonly file = path.join(this.site.folder, "KitchenSink.spell")
 
   /** What `SpellMarkup` couldn't write as the block has it. */
   readonly warnings: string[] = []
@@ -256,7 +253,7 @@ class KitchenSpellWriter {
     const from = htmlPage.indexOf(START)
     const to = htmlPage.indexOf(END)
     const document = SpellMarkup.parse(htmlPage.slice(from + START.length, to))
-    const addresses = this.addressesByTitle()
+    const addresses = this.site.addressesByTitle()
     const spell = new SpellMarkup({ document, pageAddress: (file) => this.addressFor(file, addresses) })
     return spliceGenerated(page, {
       file: this.file,
@@ -270,17 +267,9 @@ class KitchenSpellWriter {
     })
   }
 
-  /** Every page's address in the site, by the title its side navigation shows (`named "Button"`). */
-  private addressesByTitle(): Map<string, string> {
-    const site = readFileSync(path.join(SPELL_UI_SITE_FOLDER, "SpellUI.spell"), "utf8")
-    const addresses = new Map<string, string>()
-    for (const [, address, title] of site.matchAll(SITE_PAGE_LINE)) addresses.set(title!, address!)
-    return addresses
-  }
-
   /**
-   * The address in the site of the components page `file` (`ui-button`):  the page named as its family, or its
-   * sub-tag's own page, is titled;  else `/<its name>`;  `undefined` when the site has neither.
+   * The address in the site of the components page `file` (`ui-button`), by its family's or its sub-tag's title
+   * (`SpellUISite.addressFor()`).
    */
   private addressFor(file: string, addresses: Map<string, string>): string | undefined {
     const { families } = this.kitchen.data
@@ -288,18 +277,13 @@ class KitchenSpellWriter {
     const page = Object.values(families)
       .map((each) => each.pages?.[file])
       .find(Boolean)
-    const title = family?.title ?? page?.title
-    const bare = `/${file.replace(/^ui-/, "")}`
-    return (title && addresses.get(title)) ?? ([...addresses.values()].includes(bare) ? bare : undefined)
+    return this.site.addressFor(file, family?.title ?? page?.title, addresses)
   }
 }
 
 ////////////////
 // ## Constants
 ////////////////
-
-/** A page's line in the Spell UI site's file:  its address and its title. */
-const SITE_PAGE_LINE = /^\s*it has an? [^\n]*? page at "([^"]+)", named "([^"]+)"/gm
 
 /** Start marker (its own line);  its indent is the block's. */
 const START = "<!-- kitchen:start -->"

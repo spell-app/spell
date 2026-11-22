@@ -242,8 +242,10 @@ yarn site:new ui-card                                                          #
 yarn site:new getting-started --title "Getting started" --summary "One line."  # docs/getting-started.html
 ```
 
-- A tag (any tag of the family:  `ui-cards` works too) writes its family's page, `docs/<main tag>.html`:
-  a masthead with the theme menu, and the four tabs.
+- A tag (any tag of the family:  `ui-cards` works too) writes its four pages in the Spell UI site
+  (`<Title>/Usage.spell` ... in `@spell/guides/SpellUI`, and their lines in its site file), as Spell, from its
+  family's page, `docs/<main tag>.html`:  a masthead with the theme menu, and the four tabs, from the template
+  when it isn't there yet.
 - A sub-tag its family lists under `pages` writes a page of its own, `docs/<tag>.html`:
   ONE tag's API (`<ui-docs-api tag>`, where `#<tag>` lands), and a Theming tab only when a family token names it.
 - Anything else is a guide page, one column, no tabs:  `--title` (default:  the name in Title Case) and `--summary`.
@@ -255,7 +257,7 @@ yarn site:new getting-started --title "Getting started" --summary "One line."  #
 ```text
 $ yarn site:new my-guide --title "My Guide"
 wrote docs/my-guide.html  (page)
-  view:  spell server url .../ui/docs/my-guide.html   (from the repo root);  check:  yarn site:check my-guide.html
+  check:  yarn site:check my-guide.html
 ```
 
 ### The Examples pane:  write it flat, and let a script nest it
@@ -348,7 +350,7 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 | `yarn site:bundle` | `site/_assets/`, from [the site's entry](site/_src/site.ts) and [its Vite config](vite.site.config.ts);  prints the sizes.  The page server runs it as `spell bundle ui-site` |
 | `yarn site:build` | the four above, in turn |
 | `yarn site:dev` | `site:bundle`, then live editing:  the page server (started if needed) serves `/components/ui/` while a Vite watch build rebuilds the bundle on every source edit, and the open pages reload |
-| `yarn site:new <tag\|page>` | a page, from the template (above) |
+| `yarn site:new <tag\|page>` | a component's four Spell UI site pages and its page from the template, or a guide page (above) |
 | `yarn site:sections [--check] [page...]` | nests every page's flat headers into `<ui-section>`s and writes their ids, and splits each API tab into a section per kind of table;  no page named:  every page |
 | `yarn site:check <page...> \| --all` | loads pages in a headless browser, and fails on what's broken (below) |
 | `yarn readme:components [--check]` | the catalogue in [README-components.md](README-components.md), from the site's data;  `--shoot <url> [family ...]` retakes its thumbnails from the served site |

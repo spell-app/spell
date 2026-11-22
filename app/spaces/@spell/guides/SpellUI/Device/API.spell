@@ -1,0 +1,42 @@
+"device api" is a notebook page
+	<header level="1">
+		Device
+		<header>A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge.</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-device" only="attributes"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-device" only="events"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-device" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-device" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-device" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-device" only="texts"></>
+		</>
+	</>

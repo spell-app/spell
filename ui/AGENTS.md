@@ -583,16 +583,23 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
   - Not watched:  `site:data` / `site:index` / `site:kitchen`.
   - A watch rebuild leaves stale hashed chunks:  harmless, they're not committed.
     The page server's next start rebuilds the bundle clean.
-- `yarn site:new`:  a site page, from spell-epic's [template](../epic/templates/spell-ui-docs.html)
-  ([its script](scripts/site-new.ts)).
+- `yarn site:new`:  a new component's pages ([its script](scripts/site-new.ts)):
+  its four pages in the Spell UI site, and its components page from spell-epic's
+  [template](../epic/templates/spell-ui-docs.html).
 
   ```sh
   yarn site:new <tag|page> [--title ...] [--summary ...] [--force]
   ```
 
-  - For a tag:  `docs/<main tag>.html`.
-    A sub-tag its family's `pages` lists gets `<tag>.html` (`ui-radio`).
-  - Else `<page>.html`, in `docs/` too.
+  - For a tag:  the Spell UI site's `<Title>/Usage.spell`, `Examples.spell`, `API.spell` and `Theming.spell`
+    (`app/spaces/@spell/guides/SpellUI/`), their lines in its site file (`SpellUI.spell`) and its project file,
+    A to Z;  written as Spell from its components page ([SpellUISite](src/tools/SpellUISite.ts), on
+    [SpellMarkup](src/tools/SpellMarkup.ts);  epic `editor` P42).
+    - And `docs/<main tag>.html`, from the template, when it isn't there yet;
+      a sub-tag its family's `pages` lists gets `<tag>.html` (`ui-radio`).
+    - What it couldn't write as Spell (a script that drives an example) it lists, to tidy by hand.
+  - Else a guide page, `<page>.html`, in `docs/` too:  the Spell UI site's own is written by hand.
+  - Leaves what's there as it is:  `--force` writes it again.
   - Title, summary and status come from [the pages data](docs/__data/pages.json5).
   - How to write one:  [the pages guide](../spell.epics/epics/spell-ui-pages/PAGES.md).
 - `yarn site:sections [--check] [page...]` ([its script](scripts/site-sections.ts)):

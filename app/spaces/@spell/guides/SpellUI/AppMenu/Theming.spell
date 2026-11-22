@@ -1,0 +1,38 @@
+"app-menu theming" is a notebook page
+	<header level="1">
+		App menu
+		<header>An app menu is an app's top bar, joined to the top of its window or page: a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons.</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-app-menu" playground>
+				<ui-app-menu aria-label="Editor demo">
+					<ui-item slot="start" icon="magic">
+						<ui-text bold>My App</>
+					</>
+					<ui-item slot="start">File</>
+					<ui-item slot="start">Edit</>
+					<ui-item slot="start">View</>
+					<ui-menu appearance="segmented" aria-label="Mode">
+						<ui-item value="run" icon="play">Run</>
+						<ui-item value="edit" icon="pencil alternate" selected>Edit</>
+					</>
+					<ui-item slot="end" link="#settings" icon="cog" aria-label="Settings"></>
+					<ui-item slot="end" link="#you" icon="user circle" aria-label="You"></>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  each dresses the bar as it dresses
+			its other bars, through `--ui-bar-rest-background` and `--ui-bar-rest-filter`.
+		</>
+	</>

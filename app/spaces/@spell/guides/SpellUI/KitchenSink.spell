@@ -1468,7 +1468,7 @@
 		</>
 
 		<section label="Graph" sticky="stack" collapsible dividing>
-			<example "Graph" description="A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead. \[Graph page](/components/ui/ui-graph.html)">
+			<example "Graph" description="A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead. \[Graph page](/graph)">
 				<html>
 					<ui-graph style="--ui-graph-height: 16em" graph="{\"nodes\":\[{\"id\":\"in\",\"label\":\"Input\",\"ports\":\[{\"id\":\"out\",\"kind\":\"out\"}]},{\"id\":\"parse\",\"label\":\"Parse\",\"ports\":\[{\"id\":\"src\",\"label\":\"src\",\"kind\":\"in\"},{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"out\"},{\"id\":\"errors\",\"label\":\"errors\",\"kind\":\"out\"}]},{\"id\":\"check\",\"label\":\"Check\",\"ports\":\[{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"in\"},{\"id\":\"ok\",\"label\":\"ok\",\"kind\":\"out\"}]},{\"id\":\"report\",\"label\":\"Report\"},{\"id\":\"emit\",\"label\":\"Emit\"}],\"edges\":\[{\"from\":{\"node\":\"in\",\"port\":\"out\"},\"to\":{\"node\":\"parse\",\"port\":\"src\"}},{\"from\":{\"node\":\"parse\",\"port\":\"ast\"},\"to\":{\"node\":\"check\",\"port\":\"ast\"},\"label\":\"tree\"},{\"from\":{\"node\":\"parse\",\"port\":\"errors\"},\"to\":{\"node\":\"report\"}},{\"from\":{\"node\":\"check\",\"port\":\"ok\"},\"to\":{\"node\":\"emit\"}}]}"></ui-graph>
 				</html>
@@ -1534,7 +1534,7 @@
 		</>
 
 		<section label="Mermaid diagram" sticky="stack" collapsible dividing>
-			<example "Mermaid diagram" description="A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site. \[Mermaid diagram page](/components/ui/ui-mermaid-diagram.html)">
+			<example "Mermaid diagram" description="A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site. \[Mermaid diagram page](/mermaid-diagram)">
 				<html>
 					<ui-mermaid-diagram>
 						<script type="text/mermaid">
@@ -2136,7 +2136,7 @@
 		</>
 
 		<section label="Tour" sticky="stack" collapsible dividing>
-			<example "Tour" description="A tour leads someone through a feature one numbered step at a time, pointing at what each step is about. \[Tour page](/components/ui/ui-tour.html)">
+			<example "Tour" description="A tour leads someone through a feature one numbered step at a time, pointing at what each step is about. \[Tour page](/tour)">
 				<stack class="ui-stack">
 					<stack class="ui-cluster">
 						<button id="tour-new" icon="plus">New</button>
@@ -2209,7 +2209,7 @@
 
 	<section label="Spell UI's own">
 		<section label="App menu" sticky="stack" collapsible dividing>
-			<example "App menu" description="An app menu is an app's top bar, joined to the top of its window or page:  a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons. \[App menu page](/components/ui/ui-app-menu.html)">
+			<example "App menu" description="An app menu is an app's top bar, joined to the top of its window or page:  a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons. \[App menu page](/app-menu)">
 				<app-menu aria-label="Editor demo">
 					<item slot="start" icon="magic">
 						<text bold>My App</text>
@@ -2269,7 +2269,7 @@
 		</>
 
 		<section label="Device" sticky="stack" collapsible dividing>
-			<example "Device" description="A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge. \[Device page](/components/ui/ui-device.html)">
+			<example "Device" description="A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge. \[Device page](/device)">
 				<device device="phone">
 					<segment appearance="basic">
 						<header size="large">Hello</header>
@@ -2647,7 +2647,7 @@
 		</>
 
 		<section label="Uploader" sticky="stack" collapsible dividing>
-			<example "Uploader" description="An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action. \[Uploader page](/components/ui/ui-uploader.html)">
+			<example "Uploader" description="An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action. \[Uploader page](/uploader)">
 				<uploader extensions="json" multiple max-files="5" max-size="2 MB"/>
 			</example>
 		</>

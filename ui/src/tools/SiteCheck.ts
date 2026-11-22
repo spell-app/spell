@@ -561,8 +561,8 @@ const PHONE: BrowserPageProps = {
 /** How long the editor may take to draw the site's page:  its first page compiles the whole site. */
 const SETTLE_MS = 30000
 
-/** A deep-linked section's title lands within this of the scrolling box's top, px (below the stuck titles). */
-const LANDED_PX = 200
+/** A deep-linked section's title lands within this of the scrolling box's top, px:  under the page's title and stuck titles. */
+const LANDED_PX = 320
 
 /** How long a deep link may take to land after the page settles;  a SLEEP:  nothing says it's done. */
 const LAND_MS = 1500
