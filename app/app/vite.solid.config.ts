@@ -130,7 +130,8 @@ function sharedEntries(): Plugin {
  *   `<spell-viewer>` there must use THOSE:  a second Solid on a page fails silently (`solid-2.md`).
  * - Only when the page has every specifier the other builds take from here (`SHARED_SPECIFIERS`):
  *   a page with some missing (an older docs bundle) gets ours, whole.
- * - Read as the module runs:  the docs bundle must run first (it does:  a classic script runs before any module).
+ * - Read as the module runs, once the docs bundle has (\`SpellUI.loading\`):  an ES module since epic \`solid-2-final\` P7,
+ *   imported by the page's classic \`spell-ui.js\`, it may run after this one starts
  * - A module with only a default export (`@solidjs/h`) is renamed:  `h`, as `spell-solid.js` exports it
  *   (`SHARED_DEFAULTS`).
  * - Ours is imported with `await import()`:  a page that has its own never downloads it.
@@ -167,7 +168,9 @@ function sharedPageSource(names: readonly string[]): string {
 /**
  * Solid and Spell UI's core for our other bundles:  the PAGE's own when it has them (a docs page's
  * \`SpellUI.packModules\`), else \`${SHARED_SOLID.solid}\` beside this file.  One Solid per page either way.
+ * - A docs page's bundle is an ES module its \`spell-ui.js\` imports:  wait for it (\`SpellUI.loading\`) first
  */
+await globalThis.SpellUI?.loading
 const page = globalThis.SpellUI?.packModules
 const specifiers = ${JSON.stringify(SHARED_SPECIFIERS)}
 // modules with only a default export, and the name it goes by here
@@ -198,7 +201,9 @@ function sharedFamiliesSource(): string {
 /**
  * Spell UI's code and markdown families, which \`<spell-code>\` and \`<spell-markdown>\` extend:  the PAGE's own when it
  * has Spell UI of its own (a docs page's \`SpellUI.packModules\`), else \`${SHARED_SOLID.ui}\`'s beside this file.
+ * - A docs page's bundle is an ES module its \`spell-ui.js\` imports:  wait for it (\`SpellUI.loading\`) first
  */
+await globalThis.SpellUI?.loading
 const page = globalThis.SpellUI?.packModules
 const specifiers = ${JSON.stringify(SHARED_SPECIFIERS)}
 const families = ${JSON.stringify(Object.keys(SHARED_FAMILIES))}
