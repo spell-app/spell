@@ -85,8 +85,8 @@ export class ShippedGuides {
 
   /**
    * What's wrong with the shipped guides, a line each (`guides/x.html:  ...`);  none:  `[]`.
-   * - `commandExists(words)`:  whether a command line's first words are a command (`spell server start`);  the
-   *   caller's, from every folder's command list (`Guides`)
+   * - `commandExists(words)`:  whether a command line's first words are a command (`spell server start`);
+   *   the caller's, from every folder's command list (`Guides`)
    * - `fileExists(path)`:  whether a path a guide names in code is there, from the checkout's root
    */
   check({ commandExists, fileExists = (path) => existsSync(join(this.checkout, path)) }: CheckProps): string[] {

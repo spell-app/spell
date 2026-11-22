@@ -12,13 +12,14 @@ import "./GuidesPage.css"
 
 /****************
  * ### `<GuidesPage>`
- * The guides that ship with Spell, read in the app (epic `epic-engine` P79):  `/guides` lists them, `/guides/<path>`
- * shows one (`/guides/data/data.html`).
- * - The list:  "Start here" first, in its order (a chapter by its anchor:  Views, in The Spell Language);  then a
- *   section per topic of the guides for people making things;  then the programmers' guides, folded under their own
- *   heading, a section per topic;  a search box over titles and descriptions above it all.
- * - Read from the INSTALLED `spell` package, through the app's server (`/api/guides/`, `appRoutes.ts`):  its list,
- *   `guides.json5` (`epic guides index` writes it from each guide's head), and each page.
+ * The guides that ship with Spell, read in the app (epic `epic-engine` P79):
+ * `/guides` lists them, `/guides/<path>` shows one (`/guides/data/data.html`).
+ * - The list:  "Start here" first, in its order (a chapter by its anchor:  Views, in The Spell Language);
+ *   then a section per topic of the guides for people making things;
+ *   then the programmers' guides, folded under their own heading, a section per topic;
+ *   a search box over titles and descriptions above it all.
+ * - Read from the INSTALLED `spell` package, through the app's server (`/api/guides/`, `appRoutes.ts`):
+ *   its list, `guides.json5` (`epic guides index` writes it from each guide's head), and each page.
  * - One guide:  its page's body, shown in the app's own page and theme (`<GuideBody>`);  the epic pages' site header,
  *   comment button and editing are left out.
  * - The guides you open in the editor (Spell projects that teach by example, `@spell/guides`) are a topic of their

@@ -21,14 +21,14 @@ import { ShippedGuides } from "./ShippedGuides.ts"
  *   commit;  the epic folder keeps its copy, so `main` never loses the guide in between.
  *   - with it:  its twins beside it (`<name>.md`, `<name>.json5`), the files it links or shows from its own folder
  *     (pictures ...), and its folder's `experiments/` when it's that folder's own page (`<topic>/<topic>.html`)
- *   - NOT its comments (`<page>.inbox.json5`) nor the pictures people pasted into them (`pictures/`):  they stay in
- *     the epic folder, at the same path, which the page server and the inboxes still read
+ *   - NOT its comments (`<page>.inbox.json5`) nor the pictures people pasted into them (`pictures/`):
+ *     they stay in the epic folder, at the same path, which the page server and the inboxes still read
  *   - `SAGA:/<id>`:  every guide naming that saga (`<meta name="spell-saga">`)
  * - `prune`, in the main checkout:  the epic folder's copy of every file `main`'s guides folder tracks, deleted, so the
  *   code's is the one copy;  `epic merge` runs it after every merge that moved something onto `main`.
  * - `index`, `check`:  the shipped guides' list and their check (`ShippedGuides`)
- * - Its position:  node only;  the epic folder's files are changed by path, never through git (the turn's end commits
- *   them, `epic turn end`).
+ * - Its position:  node only;  the epic folder's files are changed by path, never through git
+ *   (the turn's end commits them, `epic turn end`).
  ****************/
 export class Guides {
   /** the checkout the verbs work on:  its guides folder, and its repo's epic folder */

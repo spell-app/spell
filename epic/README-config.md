@@ -143,18 +143,18 @@ One your users need belongs with your code instead:  versioned on branches, revi
 - Name the folder once, in the config file:  `"guidesFolder": "guides"`, at your repo's root.
   - Named `guides`, a guide keeps its address (`/guides/data/data.html`):  the page server serves your checkout's
     copy first, the epic folder's after it.
-- Move a guide in, in a worktree:  `epic guides move guides/data/data.html` (or `SAGA:/<id>`, every guide naming
-  that saga).
+- Move a guide in, in a worktree:  `epic guides move guides/data/data.html`.
+  - Or a saga's address, `SAGA:/<id>`:  every guide naming that saga.
   - It's copied, with its pictures, experiments and twin `.md`;  its comments stay in the epic folder.
   - The epic folder keeps its copy until the branch merges:  `epic merge` then deletes it (`epic guides prune`).
 - Every epic tool finds a guide in both places, yours first:  the Guides list page, saga pages, See Also, the voice
   pass, editing in place.
 - Say who each shipped guide is for in its head, then write their list:
-  `<meta name="spell-audience" content="makers">` (or `programmers`), `spell-topic`, and `spell-start-here` with its
-  order;  `epic guides index` writes `guides.json5` beside them, for your app to read.
+  - three metas:  who it's for (`spell-audience`, makers or programmers), its topic, and its place in Start here
+  - `epic guides index` writes their list beside them, for your app to read
 - `epic guides check` fails a shipped guide that links your epic repo or a guide that doesn't ship, or names a
   command or file that isn't there.
-- `epic guides list` says where each guide is:  `code`, `epic`, or `both` while a move waits for its merge.
+- `epic guides list` says where each guide is:  in your code, in the epic folder, or both while a move waits.
 
 ## <a id="your-house-style"></a>Your house style
 
