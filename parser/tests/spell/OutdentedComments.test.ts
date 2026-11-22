@@ -214,6 +214,17 @@ describe.each(Object.entries(PROGRAMS))(
       30_000
     )
 
+    test("being typed beside a body's one value, a lone `-` is its line's error alone", () => {
+      // up to the last value but `return`'s, which takes one line under it, and that line only
+      const written = [lines[0]!, ...values.slice(0, -3)]
+      for (let at = 1; at < written.length; at++)
+        for (const indent of ["", "\t", "\t\t", "\t\t\t"]) {
+          const { errors } = parsed([...written.slice(0, at + 1), `${indent}-`, ...written.slice(at + 1)])
+          expect(errors, JSON.stringify([at, indent])).toHaveLength(1)
+          expect(String(errors[0]), JSON.stringify([at, indent])).toMatch(new RegExp(`^${at + 2}:`))
+        }
+    }, 30_000)
+
     test("being typed, a lone `-` or `/` is its line's error alone;  only whitespace is none", () => {
       for (const at of [atHead, atMiddle - 1, atMiddle])
         for (const indent of ["", "\t", "\t\t", "\t\t\t\t"]) {

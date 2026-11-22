@@ -242,6 +242,9 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
    */
   static isCodeLine(item: P.Match): boolean {
     if (item.is(Block)) return item.matched.some((line) => line instanceof P.Match && Block.isCodeLine(line))
+    // nor is a comment being typed, a lone `-`:  its own error, never the body's value
+    const [written] = item.tokens
+    if (written instanceof P.LineToken && item.scope.parser?.tokenizer.isAside(written)) return false
     return item.matched.some(
       (it) =>
         it instanceof P.Match &&
