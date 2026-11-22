@@ -537,7 +537,7 @@ or to the code it bundles:  the kit's page server, which the fallback runs, and 
 
 Two checks, both from spell-epic's root.
 The type check is `yarn vscode:check`.
-The tests are seventeen, of the pure parts, in [tests/vscode/](tests/vscode/), run by plain `node --test`:
+The tests are eighteen, of the pure parts, in [tests/vscode/](tests/vscode/), run by plain `node --test`:
 
 ```sh
 yarn test:vscode
@@ -552,9 +552,9 @@ yarn test:vscode
 ...
 ✔ folderIndex():  a window's folder by any spelling -- one reopened from the recent list after a move (I59) ...
 ...
-ℹ tests 17
+ℹ tests 18
 ℹ suites 0
-ℹ pass 17
+ℹ pass 18
 ℹ fail 0
 ...
 ```
