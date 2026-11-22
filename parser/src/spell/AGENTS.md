@@ -161,6 +161,9 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
   - The app's `<spell-code>` colours pages with it, from source, in a lazy chunk
     ([SpellLanguage](../../../app/src/app/components/spell-code/SpellLanguage.ts)):
     nothing to regenerate after a grammar change.
+- [PageChunks.ts](PageChunks.ts):  a built site's compiled program cut into its main chunk and a chunk per page alone in
+  its file (epic `solid-2-final` P13), by its text alone:  the page server cuts a built file as it serves it
+  (`?pages=lazy`, `?page=<Class>`), and the runner's `LazyPages` loads each page as it's first shown.
 - [targets.ts](targets.ts):  the TARGETS spell compiles to, `SP.TARGETS`.
   Each is a language, the runtime its code runs on, and the writer that writes it:
   - `js/solid`:  ALWAYS compiled, as the editor, the runners and `spell run` run it
