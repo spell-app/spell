@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Core Reference</title>
+    <meta
+      name="description"
+      content="Every name the javascript core offers compiled code, file by file:  what every core must have, Python's name for each, and whether spell_core has it yet.  Drawn from the core's method list in the checkout serving the page."
+    />
+    <meta name="spell-voice" content="readme 2026-10-22" />
+    <meta name="spell-saga" content="output-targets" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body
+    class="spell-doc-page"
+    data-spell-needs-server
+    data-core-declarations="/spell-parser/src/core/core.declarations.json"
+    data-not-ported="/spell-parser/src/py/core/not_ported_yet.json"
+  >
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
+          <ui-breadcrumb selected>Core Reference</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Core Reference</h1></header></ui-sticky
+        >
+        <p class="lede">
+          Compiled Spell calls <code>core.getItemAt(deck, 0)</code>; in Python that's
+          <code>core.get_item_at(deck, 0)</code>, and Python's core must have it. Every name like it is below.
+        </p>
+        <p>
+          It's the javascript core's method list: every name compiled Spell can call, so what every core must have. One
+          row per name, with Python's name for it, and whether Python's core has it yet.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="map"
+            ><b>Epic page:</b>
+            <a href="/epics/python-target/python-target.plan.html" target="python-target"
+              >epic python-target</a
+            ></ui-item
+          >
+          <ui-item icon="user"
+            >Written for: anyone porting the core to a new language, or looking up what a core method does</ui-item
+          >
+          <ui-item icon="flag"
+            >Status: built in epic <code>python-target</code> P29, 2026-10-11, on branch
+            <code>python-target</code></ui-item
+          >
+          <ui-item icon="folder"
+            >Data: the core's method list,
+            <a
+              href="/spell-parser/src/core/core.declarations.json5"
+              target="src-spell-parser-src-core-core-declarations-json5"
+              ><code title="spell-parser/src/core/core.declarations.json5">core.declarations.json5</code></a
+            >, and what Python lacks,
+            <a
+              href="/spell-parser/src/py/core/not_ported_yet.json5"
+              target="src-spell-parser-src-py-core-not-ported-yet-json5"
+              ><code title="spell-parser/src/py/core/not_ported_yet.json5">not_ported_yet.json</code></a
+            >; drawn by the page server, from the checkout serving this page</ui-item
+          >
+          <ui-item icon="book"
+            >Related: <a href="targets.html" target="src-guides-targets-targets-html">Targets and Writers</a>,
+            <a href="/guides/python-target.html" target="src-guides-python-target-html">The Python Target</a></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ui-statistics class="spell-stats" size="mini" data-core-stats></ui-statistics>
+          <ul>
+            <li>
+              The core is what compiled Spell runs on: <code>core.getItemAt(deck, 0)</code>, a <code>Thing</code> to
+              extend.
+              <ul>
+                <li>Every method and property of <code>core</code>.</li>
+                <li>
+                  The classes and functions compiled code imports by name, e.g. <code>Thing</code>, <code>h</code>.
+                </li>
+              </ul>
+            </li>
+            <li>
+              A core for a new language must have each of them, under its own spelling. Python's core, spell_core, is
+              the first.
+            </li>
+            <li>
+              The tables (<a href="#3-files">3. The core, file by file</a>) are drawn as the page opens, from the
+              checkout serving it: they can't go out of date.
+              <ul>
+                <li>One table per file of the core, in the list's order.</li>
+                <li>Grouped under the file's own headings; the classes and functions imported by name last.</li>
+                <li>The code icon in each file's title opens its source.</li>
+              </ul>
+            </li>
+            <li>
+              The numbers above count names: a few are both a <code>core</code> method and an import
+              (<code>positionOf</code>), and count twice.
+            </li>
+          </ul>
+          <ui-table celled padding="compact" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>In Python</th>
+                  <th>Means</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="yes positive">✓</td>
+                  <td>spell_core has it</td>
+                </tr>
+                <tr>
+                  <td class="no negative">✗ not yet</td>
+                  <td>
+                    spell_core doesn't have it yet; why is its tooltip, and in
+                    <a href="#4-not-in-python">4. Not in Python yet</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>?</td>
+                  <td>
+                    this checkout has no list of what Python lacks (a branch before epic <code>python-target</code>)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <p>Python's names, as spell_core's test looks for them:</p>
+          <ui-table celled padding="compact" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>What it is</th>
+                  <th>javascript</th>
+                  <th>Python</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>a method of <code>core</code></td>
+                  <td><code>core.getItemAt()</code></td>
+                  <td><code>core.get_item_at()</code></td>
+                </tr>
+                <tr>
+                  <td>capitals together stay one word</td>
+                  <td><code>isANumber()</code>, <code>fromJSON()</code></td>
+                  <td><code>is_a_number()</code>, <code>from_json()</code></td>
+                </tr>
+                <tr>
+                  <td>a property</td>
+                  <td><code>core.TIME_UNITS_MAP</code></td>
+                  <td><code>core.time_units_map</code>, or its capitals kept</td>
+                </tr>
+                <tr>
+                  <td>a class</td>
+                  <td><code>Thing</code></td>
+                  <td><code>spell_core.Thing</code></td>
+                </tr>
+                <tr>
+                  <td>a function compiled code imports</td>
+                  <td><code>positionOf()</code></td>
+                  <td><code>position_of()</code>, on <code>core</code> or the package</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+        </ui-section>
+
+        <ui-section id="2-who-reads-it" label="2. Who reads the list" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="circle question"></ui-icon>
+          <p>
+            Do the javascript and TypeScript targets use the list? No: it's written FROM the javascript core, for the
+            cores that come after it.
+          </p>
+          <ul>
+            <li>
+              The javascript and TypeScript targets compile against the core's TypeScript itself.
+              <ul>
+                <li>
+                  What <code>core</code> has is the type
+                  <a href="/spell-parser/src/core/core.types.ts" target="src-spell-parser-src-core-core-types-ts"
+                    ><code title="spell-parser/src/core/core.types.ts">SC.Core</code></a
+                  >, and compiled code calls it directly.
+                </li>
+                <li>Neither compiler nor runner opens the list.</li>
+              </ul>
+            </li>
+            <li>
+              The javascript core writes it:
+              <a
+                href="/spell-parser/src/core/core.declarations.json5"
+                target="src-spell-parser-src-core-core-declarations-json5"
+                ><code title="spell-parser/src/core/core.declarations.json5">core.declarations.json5</code></a
+              >, at core's root.
+              <ul>
+                <li>
+                  <code>yarn gen:declarations</code>, in core, runs
+                  <a
+                    href="/spell-parser/src/core/writeCoreDeclarations.ts"
+                    target="src-spell-parser-src-core-writecoredeclarations-ts"
+                    ><code title="spell-parser/src/core/writeCoreDeclarations.ts">writeCoreDeclarations.ts</code></a
+                  >.
+                </li>
+                <li>
+                  The names are read from the core as it runs: nothing is listed by hand (<a
+                    href="/spell-parser/src/core/coreDeclarations.ts"
+                    target="src-spell-parser-src-core-coredeclarations-ts"
+                    ><code title="spell-parser/src/core/coreDeclarations.ts">coreDeclarations.ts</code></a
+                  >).
+                </li>
+                <li>Each name's heading and description come from the comments in its source file.</li>
+                <li>
+                  It's in the format a project's own <code>&lt;Project&gt;.declarations.json</code> is written in, with
+                  one key more: <code>module</code>, the core's file that has it.
+                </li>
+              </ul>
+            </li>
+            <li>
+              A core test fails when the list is out of date:
+              <a
+                href="/spell-parser/tests/core/coreDeclarations.test.ts"
+                target="src-spell-parser-tests-core-coredeclarations-test-ts"
+                ><code title="spell-parser/tests/core/coreDeclarations.test.ts">coreDeclarations.test.ts</code></a
+              >.
+            </li>
+            <li>
+              Its readers:
+              <ul>
+                <li>
+                  Python's test,
+                  <a
+                    href="/spell-parser/tests/py/core/tests/test_core_declarations.py"
+                    target="src-spell-parser-tests-py-core-tests-test-core-declarations-py"
+                    ><code title="spell-parser/tests/py/core/tests/test_core_declarations.py"
+                      >test_core_declarations.py</code
+                    ></a
+                  >: spell_core must have each name, snake_cased, or list it in
+                  <a
+                    href="/spell-parser/src/py/core/not_ported_yet.json5"
+                    target="src-spell-parser-src-py-core-not-ported-yet-json5"
+                    ><code title="spell-parser/src/py/core/not_ported_yet.json5">not_ported_yet.json</code></a
+                  >
+                  with why.
+                </li>
+                <li>
+                  So a name the javascript core gains fails Python's test, until it's ported or listed as not yet.
+                </li>
+                <li>And this page.</li>
+              </ul>
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="3-files" label="3. The core, file by file" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="cubes"></ui-icon>
+          <p>
+            Each file of the core under
+            <a href="/spell-parser/src/core/" target="src-spell-parser-src-core"
+              ><code>spell-parser/src/core</code></a
+            >, with its names. Rows without a label are methods of <code>core</code>.
+          </p>
+          <div class="spell-filter">
+            <ui-input icon="search" placeholder="Filter names" aria-label="Filter names" data-core-filter></ui-input>
+          </div>
+          <div data-core-modules></div>
+        </ui-section>
+
+        <ui-section id="4-not-in-python" label="4. Not in Python yet" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="seedling"></ui-icon>
+          <p>
+            What spell_core doesn't have yet, by why, from
+            <a
+              href="/spell-parser/src/py/core/not_ported_yet.json5"
+              target="src-spell-parser-src-py-core-not-ported-yet-json5"
+              ><code title="spell-parser/src/py/core/not_ported_yet.json5">not_ported_yet.json</code></a
+            >.
+          </p>
+          <p>A name comes out of it as it's ported: Python's test fails while a ported name is still listed.</p>
+          <div data-core-not-ported></div>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">
+            Last checked 2026-10-11 against branch <code>python-target</code>: the tables are drawn from that checkout's
+            core, so they're as current as the checkout serving the page.
+          </p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/core-reference.js"></script>
+  </body>
+</html>
