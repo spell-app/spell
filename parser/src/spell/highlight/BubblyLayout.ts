@@ -85,7 +85,7 @@ export class BubblyLayout {
   private isAlone = false
 
   /**
-   * The indent the parse read each comment, or other aside, at, by line index.
+   * The indent the parse read a comment at, or another aside, where that's not as written:  by line index.
    * - So one written out of line doesn't cut a band, as it doesn't cut a block (epic `language` I181).
    */
   private readonly asideIndents = new Map<number, number>()
@@ -159,10 +159,8 @@ export class BubblyLayout {
     }
     if (!match) return
     this.read(match)
-    const { tokenizer } = parser
     P.Tokenizer.forEachToken(match.tokens, (token) => {
-      // a line with nothing at all on it sits where the next does, in `treeOf()`
-      if (token instanceof P.LineToken && (token.tokens.length || token.leading) && tokenizer.isAside(token))
+      if (token instanceof P.LineToken && token.record.isPlaced)
         this.asideIndents.set(this.lineIndexOf(token.start), token.indent)
     })
   }

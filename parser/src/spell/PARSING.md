@@ -883,7 +883,8 @@ A kind that says so is saved in a file of its own.
     (`and the last card of each column`);  `and` then a condition goes on with it (`and it is red`)
     (`SpellStatement.conditionBeforeAlternatives()`;  epic `language` T152)
   - the tokens stay the lines' own:  every rule reads the joined line as one written whole
-  - a comment among those lines doesn't end them:  it goes first in the joined line's body (epic `language` I181)
+  - a comment among those lines, or beside a lone `and` / `or`, doesn't end them:
+    it goes first in the joined line's body (epic `language` I181)
   - the editors indent the line after one as it's typed (`LSP.SpellKeywords.CONTINUES_LINE`)
 - Then it loops over the root `BlockToken`'s items:
   - a `LineToken` => `parser.parse(items, "line", scope)`
@@ -931,7 +932,7 @@ A kind that says so is saved in a file of its own.
   - `parseNestedBlock()` parses a `{nested_statements}` as a block.
     - in `statement.nestedScope`
     - It sets `data.enclose`.
-    - A `{nested_expression}` (e.g. `return`) accepts a single-line block only.
+    - A `{nested_expression}` (e.g. `return`) accepts a single line of code only, comments aside (epic `language` I181).
   - `nestedScope` comes from `rule.getNestedScopeForMatch()`:
     - default:  the same scope
     - `if` / `else` => a new `BlockScope`

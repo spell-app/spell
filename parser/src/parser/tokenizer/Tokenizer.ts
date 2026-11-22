@@ -1347,13 +1347,14 @@ export class Tokenizer {
   /** SIDE EFFECT:  places `run`, the asides between a line indented `codeAbove` and `code`:  see `placeAsides()`. */
   private placeRun(run: P.LineToken[], codeAbove: number, code: P.LineToken) {
     const isBlank = (line: P.LineToken) => !line.tokens.length && line.leading === undefined
+    const place = (aside: P.LineToken, indent: number) => Object.assign(aside.record, { indent, isPlaced: true })
     let inBody = codeAbove >= code.indent
     for (const aside of run) {
       if (isBlank(aside)) continue
       if (aside.indent === code.indent) inBody = true
-      else if (aside.indent < code.indent || !inBody) aside.record.indent = code.indent
+      else if (aside.indent < code.indent || !inBody) place(aside, code.indent)
       else if (aside.tokens[0] instanceof P.SymbolToken && aside.indent > codeAbove)
-        aside.record.indent = Math.max(codeAbove, code.indent)
+        place(aside, Math.max(codeAbove, code.indent))
     }
     for (let index = run.length - 1; index >= 0; index--) {
       if (isBlank(run[index]!)) run[index]!.record.indent = (run[index + 1] ?? code).indent

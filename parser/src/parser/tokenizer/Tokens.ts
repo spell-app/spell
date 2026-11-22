@@ -496,6 +496,8 @@ export type LineTokenProps = Prettify<P.TokenProps<string>> & {
   tokens: Token[]
   /** Indent level of the line. */
   indent: number
+  /** Is `indent` the code's below it, not as written:  an aside that would have cut a block (`Tokenizer.isAside()`)? */
+  isPlaced?: boolean
   /** Leading whitespace at start of line. */
   leading?: string
   /**

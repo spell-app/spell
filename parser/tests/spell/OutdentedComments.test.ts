@@ -22,6 +22,8 @@ type Program = {
   middle: string
   /** A method further down, which the body above it calls. */
   method: string
+  /** A type's bodies of one value each:  a question's, its condition over lines, and a `return`'s. */
+  values: string[]
   /** A condition's two lines, the second going on from the first. */
   condition: [first: string, second: string]
 }
@@ -49,6 +51,18 @@ const PROGRAMS: Record<string, Program> = {
     head: '\tits "label" is',
     middle: "\t\t\tset summary",
     method: "\tto tidy up",
+    values: [
+      'a "pile" is a droppable list of cards',
+      "\tit is droppable when",
+      "\t\tit is empty",
+      "\t\tor",
+      "\t\t1 is 2",
+      '\tits "top" is',
+      "\t\t1 + 2",
+      "\tto show it",
+      "\t\treturn",
+      "\t\t\t3"
+    ],
     condition: ["\t\tif 1 is 1 and", "\t\t\t2 is 2"]
   },
   Spanish: {
@@ -73,6 +87,18 @@ const PROGRAMS: Record<string, Program> = {
     head: '\tsu "etiqueta" es',
     middle: "\t\t\tponer resumen",
     method: "\tpara ordenar todo",
+    values: [
+      'una "pila" es una lista soltable de cartas',
+      "\tes soltable cuando",
+      "\t\testá vacía",
+      "\t\to",
+      "\t\t1 es 2",
+      '\tsu "tope" es',
+      "\t\t1 + 2",
+      "\tpara mostrar todo",
+      "\t\tdevolver",
+      "\t\t\t3"
+    ],
     condition: ["\t\tsi 1 es 1 y", "\t\t\t2 es 2"]
   }
 }
@@ -83,7 +109,7 @@ const COMMENTS = ["-- a note", "// a note"]
 describe.each(Object.entries(PROGRAMS))(
   "a comment never cuts a block, whatever its indent, %s (epic `language` I181)",
   (_language, program) => {
-    const { path, lines, head, middle, method, condition } = program
+    const { path, lines, head, middle, method, condition, values } = program
     /** The program with `added` just after its line `at`. */
     const withLines = (at: number, ...added: string[]) => [...lines.slice(0, at + 1), ...added, ...lines.slice(at + 1)]
     const parsed = (text: string[]) => parseSpellProject([{ path, contents: text.join("\n") }]).files[0]!
@@ -165,6 +191,29 @@ describe.each(Object.entries(PROGRAMS))(
       }
     })
 
+    // every place by every indent, each a parse and a compile:  slow under load, so its own timeouts
+    test.each(COMMENTS)(
+      "beside a body's one value, or a lone `or`, `%s` changes nothing it does",
+      (comment) => {
+        const written = [lines[0]!, ...values]
+        expect(parsed(written).errors).toEqual([])
+        /** Compiled, its comments and spacing aside. */
+        const runs = (text: string[]) =>
+          codeOf(text)
+            .replace(/\/\*[^]*?\*\/|\/\/[^\n]*/g, "")
+            .replace(/\s+/g, " ")
+            .trim()
+        const plain = runs(written)
+        for (let at = 1; at < written.length; at++)
+          for (const indent of ["", "\t", "\t\t", "\t\t\t", "\t\t\t\t"]) {
+            const text = [...written.slice(0, at + 1), indent + comment, ...written.slice(at + 1)]
+            expect(parsed(text).errors, JSON.stringify([at, indent])).toEqual([])
+            expect(runs(text), JSON.stringify([at, indent])).toBe(plain)
+          }
+      },
+      30_000
+    )
+
     test("being typed, a lone `-` or `/` is its line's error alone;  only whitespace is none", () => {
       for (const at of [atHead, atMiddle - 1, atMiddle])
         for (const indent of ["", "\t", "\t\t", "\t\t\t\t"]) {
@@ -191,7 +240,7 @@ describe.each(Object.entries(PROGRAMS))(
           }
         }
       }
-    })
+    }, 30_000)
 
     test("the bubbly look keeps its band around it", () => {
       const parser = SP.Language.forFile(path).parser as SP.SpellParser

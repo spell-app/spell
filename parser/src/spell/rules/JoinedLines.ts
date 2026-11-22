@@ -25,7 +25,8 @@ import { Wording } from "spell/parser/spell/rules/expressions"
  *   ```
  *
  *   - What's indented under the last of them is the statement's body:  `if a`, `and b`, then its steps under that.
- * - A comment among those lines doesn't end them (epic `language` I181):  it goes first in what's under the joined line.
+ * - A comment among those lines, or beside a lone `and` / `or`, doesn't end them (epic `language` I181):
+ *   it goes first in what's under the joined line.
  * - A line of just `and` or `or` joins the lines on either side, each in parentheses:
  *
  *   ```spell
@@ -179,17 +180,20 @@ export class JoinedLines {
     const out: (P.LineToken | P.BlockToken)[] = []
     for (let index = 0; index < items.length; index++) {
       const item = items[index]!
-      if (!(item instanceof P.LineToken) || !JoinedLines.isPart(item)) {
+      if (!(item instanceof P.LineToken) || !JoinedLines.isPart(scope, item)) {
         out.push(item)
         continue
       }
-      // `part (lone part)+`:  each lone word a line of its own between two parts
+      // `part (lone part)+`:  each lone word a line of its own between two parts, comments aside
       const run: P.LineToken[] = [item]
-      while (
-        JoinedLines.isLone(scope, items[index + run.length]) &&
-        JoinedLines.isPart(items[index + run.length + 1])
-      ) {
-        run.push(items[index + run.length] as P.LineToken, items[index + run.length + 1] as P.LineToken)
+      let end = index
+      while (true) {
+        const lone = JoinedLines.afterNotes(scope, items, end + 1)
+        if (!JoinedLines.isLone(scope, items[lone])) break
+        const part = JoinedLines.afterNotes(scope, items, lone + 1)
+        if (!JoinedLines.isPart(scope, items[part])) break
+        run.push(items[lone] as P.LineToken, items[part] as P.LineToken)
+        end = part
       }
       if (run.length === 1) {
         out.push(item)
@@ -199,7 +203,19 @@ export class JoinedLines {
         at % 2 ? JoinedLines.spaced(each.tokens) : JoinedLines.spaced(JoinedLines.inParentheses(each))
       )
       out.push(JoinedLines.lineOf(item, tokens, run.at(-1)!))
-      index += run.length - 1
+      const notes = items
+        .slice(index + 1, end)
+        .flatMap((each) => (each instanceof P.BlockToken ? (JoinedLines.linesOf(each) ?? []) : [each]))
+        .filter((each) => !run.includes(each))
+      if (notes.length) {
+        // first in what's under the joined line
+        const below = items[end + 1]
+        if (below instanceof P.BlockToken) end++
+        const tokens = below instanceof P.BlockToken ? [...notes, ...below.tokens] : notes
+        const { start, line, ch } = notes[0]!
+        out.push(new P.BlockToken({ start, line, ch, indent: item.indent + 1, tokens }))
+      }
+      index = end
     }
     return out
   }
@@ -211,10 +227,18 @@ export class JoinedLines {
   }
 
   /** Is `item` a line of code that may be a part:  a line, not blank, with no comment. */
-  private static isPart(item: P.LineToken | P.BlockToken | undefined): item is P.LineToken {
-    return (
-      item instanceof P.LineToken && item.tokens.length > 0 && !item.tokens.some((it) => it instanceof P.CommentToken)
-    )
+  private static isPart(scope: P.Scope, item: P.LineToken | P.BlockToken | undefined): item is P.LineToken {
+    if (!(item instanceof P.LineToken) || !item.tokens.length || JoinedLines.isNote(scope, item)) return false
+    return !item.tokens.some((it) => it instanceof P.CommentToken)
+  }
+
+  /** Where the first of `items` from `index` is that isn't a comment, or a block of them alone. */
+  private static afterNotes(scope: P.Scope, items: (P.LineToken | P.BlockToken)[], index: number): number {
+    const isNotes = (each: P.LineToken | P.BlockToken): boolean =>
+      each instanceof P.LineToken ? JoinedLines.isNote(scope, each) : each.tokens.every(isNotes)
+    let at = index
+    while (at < items.length && isNotes(items[at]!)) at++
+    return at
   }
 
   /**
