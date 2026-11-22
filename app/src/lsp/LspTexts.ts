@@ -17,7 +17,7 @@ import { LSP_TEXTS_ES } from "./LspTexts.es"
  * - Plain data, browser-safe:  the app's code editor runs the same service in-process.
  * - NOT `UI.i18n` (Spell UI's), which the app's own texts read:  the server runs in node too, with no Spell UI.
  * - Its Spanish is a static import, not a lazy chunk:  hover and completion answer at once,
- *   and the Spanish language pack (`SP.spanish`) it labels is in the same bundle already.
+ *   and the Spanish language pack (`SP.Language.for("es")`) it labels is in the same bundle already.
  ****************/
 export class LspTexts {
   /** Language code, e.g. `es`. */

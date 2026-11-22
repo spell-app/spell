@@ -21,7 +21,7 @@ import { SRV } from "spell/server"
 import { pageServerRoot } from "spell/server/page/settings"
 import { buildFolderFor } from "spell/app/spaces/server/node/projects/project-utils"
 import { SP } from "spell/parser/spell"
-import { fixturePath, fixtureFolder } from "spell/app/spaces/test"
+import { builtFixture, fixturePath, fixtureFolder } from "spell/app/spaces/test"
 
 /**
  * The real `spell` command, end to end:  the kit's `bin/spell.mjs` run as a separate process, as a user would,
@@ -276,11 +276,12 @@ describe("no project named", () => {
 })
 
 describe("spell compile", () => {
-  test("--stdout prints exactly the fixture's snapshot", () => {
+  // a built site's code, with none of the editor's text (epic `solid-2-final` P11):  the editor's is the snapshot
+  test("--stdout prints exactly the fixture as a built site has it", () => {
     const { status, stdout, stderr } = spell(["compile", "@spell/test/fizzbuzz", "--stdout"])
     expect(stderr).toContain("✓ @spell/test/fizzbuzz")
     expect(status).toBe(0)
-    expect(stdout).toBe(readFileSync(fixturePath("fizzbuzz", `fizzbuzz${SP.SNAPSHOT_JS_SUFFIX}`), "utf8"))
+    expect(stdout).toBe(builtFixture("fizzbuzz"))
   })
 
   test("a spell file prints its javascript", () => {

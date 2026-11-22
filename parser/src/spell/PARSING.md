@@ -2636,6 +2636,12 @@ sidebars any of them opens.
 - So one file's types, constants and rules are visible to every later file.
 - A FILE's name says its language (epic `spanish` P19):  `Carta.es.spell` is Spanish, a plain `Card.spell` English.
   - `SP.Language.forFile()`;  `SpellFile.language`, `SpellProject.languages`.
+  - Every pack past English loads on FIRST USE (epic `solid-2-final` P11):  `SP.Language.loadsOnFirstUse()`.
+    - A project loads its files' packs as its project file loads (`getLoader()`), and again before it parses;
+      an import's, as its declarations are read (`declarationsOf()`).  `SP.Language.loadFor(files)` does it.
+    - With each, every component pack's words in it (Spell UI's Spanish tags, `SP.ComponentPacks.loadLanguage()`).
+    - `for()` of a pack not loaded yet throws, saying to load it first.
+    - Node programs and tests load them all at once:  `import "spell/parser/spell/languages/all"`.
   - One project may mix them:
     - Its root:  `SP.Language.rootScopeFor(languages)`.
       One language:  that language's own root, so its project parses as it always has.

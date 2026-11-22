@@ -30,7 +30,7 @@ function fixesOf(language: SP.Language): Map<string, string> {
 describe("SpellKeywords", () => {
   describe("accent fixes", () => {
     test("Spanish:  a keyword with a written accent, typed without it", () => {
-      const fixes = fixesOf(SP.spanish)
+      const fixes = fixesOf(SP.Language.for("es"))
       expect(fixes.get("numero")).toBe("número")
       expect(fixes.get("posicion")).toBe("posición")
       expect(fixes.get("esta")).toBe("está")
@@ -39,12 +39,14 @@ describe("SpellKeywords", () => {
     })
 
     test("a word a rule ALSO writes on its own is fixed only in the rules that pair it:  `si` is `if`, `sí o no` yes", () => {
-      const keywords = LSP.SpellKeywords.of(SP.spanish) as unknown as { fixesByRule: Map<P.Rule, Map<string, string>> }
+      const keywords = LSP.SpellKeywords.of(SP.Language.for("es")) as unknown as {
+        fixesByRule: Map<P.Rule, Map<string, string>>
+      }
       const rules = [...keywords.fixesByRule.keys()]
       // `como sí o no` pairs them;  `si {condition}` writes `si` alone, so it's never one of these rules
       expect(rules.filter((rule) => keywords.fixesByRule.get(rule)!.has("si")).length).toBeLessThan(rules.length)
       // `esta mañana` writes `esta` alone, `(está|esta) vacía` pairs them
-      expect(fixesOf(SP.spanish).get("esta")).toBe("está")
+      expect(fixesOf(SP.Language.for("es")).get("esta")).toBe("está")
     })
 
     test("a word only a repeat's separator says is one of the keywords too", () => {
@@ -66,9 +68,10 @@ describe("SpellKeywords", () => {
     })
 
     test("statements start with each language's words;  the little words are anywhere", () => {
-      const [control, , , operator] = LSP.SpellKeywords.grammarKeywords([SP.english, SP.spanish]).patterns.map(
-        ({ match }) => new RegExp(match, "u")
-      )
+      const [control, , , operator] = LSP.SpellKeywords.grammarKeywords([
+        SP.english,
+        SP.Language.for("es")
+      ]).patterns.map(({ match }) => new RegExp(match, "u"))
       expect(control!.exec("\tsi la carta es roja")?.[1]).toBe("si")
       expect(control!.exec("de lo contrario")?.[1]).toBe("de lo contrario")
       expect(control!.exec("\tif x is 1")?.[1]).toBe("if")
@@ -79,7 +82,7 @@ describe("SpellKeywords", () => {
     })
 
     test("what a line says about itself after its words, P48's (epic `language` T105), English and Spanish", () => {
-      const [, runs, words] = LSP.SpellKeywords.grammarKeywords([SP.english, SP.spanish]).patterns.map(
+      const [, runs, words] = LSP.SpellKeywords.grammarKeywords([SP.english, SP.Language.for("es")]).patterns.map(
         ({ match }) => new RegExp(match, "gu")
       )
       const found = (pattern: RegExp, line: string) => [...line.matchAll(pattern)].map(([, phrase]) => phrase)
@@ -305,7 +308,7 @@ describe("SpellLanguageService, in Spanish", () => {
   })
 
   test("the project reads as Spanish, cleanly", () => {
-    expect(mazo.project.languages).toEqual([SP.spanish])
+    expect(mazo.project.languages).toEqual([SP.Language.for("es")])
     for (const file of mazo.project.spellFiles) expect(errorsIn(file), file.path).toEqual([])
   })
 

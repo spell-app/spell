@@ -46,7 +46,9 @@ describe("a tag's quoted word", () => {
 
   test("a word two languages spell alike goes by the language", () => {
     expect(elementFor('<panel "Settings"/>').attributes?.[0]?.name).toBe("label")
-    expect(elementFor('<panel "Ajustes"/>', SP.spanish.parser.tokenizer).attributes?.[0]?.name).toBe("etiqueta")
+    expect(elementFor('<panel "Ajustes"/>', SP.Language.for("es").parser.tokenizer).attributes?.[0]?.name).toBe(
+      "etiqueta"
+    )
   })
 
   test("the editor's view of a tag keeps the word in its head", () => {

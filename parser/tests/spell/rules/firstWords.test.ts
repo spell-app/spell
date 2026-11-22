@@ -20,7 +20,8 @@ describe("first-word filing", () => {
       if (rule instanceof P.Sequence) classes.add(rule.constructor as typeof P.Sequence)
       for (const child of rule.childRules ?? []) walk(child)
     }
-    for (const { parser } of [SP.english, SP.spanish]) for (const rule of Object.values(parser.rules)) walk(rule)
+    for (const { parser } of [SP.english, SP.Language.for("es")])
+      for (const rule of Object.values(parser.rules)) walk(rule)
     for (const value of Object.values(SP)) {
       if (typeof value === "function" && value.prototype instanceof P.Sequence) classes.add(value as typeof P.Sequence)
     }

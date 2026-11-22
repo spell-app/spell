@@ -788,6 +788,18 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * Our project file, loaded:  then the language pack of each file it names, past English, which loads on first use
+   * (epic `solid-2-final` P11).
+   * - So a project loaded can read its files:  `languages`, `SpellFile.language`.
+   * - Contents set by hand (a project made in the page) load theirs as they parse (`parser`).
+   */
+  override async getLoader(params: Parameters<JSON5File<SP.ProjectManifestJSON5>["getLoader"]>[0]) {
+    const contents = await super.getLoader(params)
+    await SP.Language.loadFor((contents?.imports ?? []).map(({ path }) => path))
+    return contents
+  }
+
+  /**
    * Return base `ProjectScope` for this project, given `parentScope`.
    * - Clones `parentScope`'s parser scoped to `this.path`, so rules added within project
    *   (e.g. custom types/macros) don't leak out to `parentScope` or sibling projects.
@@ -821,6 +833,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
             name: `Loading ${this.type}`,
             run: async (parentScope) => {
               await this.load(undefined)
+              // the packs our files are in, past English:  they load on first use (epic `solid-2-final` P11)
+              await SP.Language.loadFor(this.spellFiles.map((file) => file.file))
               // Keep our scope while `incremental` is good:  files' matches belong to it.
               if (this.needsFullParse) {
                 this.resetCompiled()
@@ -1877,16 +1891,21 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Else from the comments in its `outputFile`, for a project compiled before that file existed.
    * - `undefined` if neither has any.
    * - Fresh each time:  another project's compile may have changed them since we last looked.
+   * - SIDE EFFECT:  loads the language packs they're written in (`SP.Language.loadFor()`).
    */
   static async declarationsOf(project: SpellProject): Promise<SP.SpellDeclarationsData | undefined> {
     const { declarationsFile, outputFile } = project
     declarationsFile.cacheDuration = 0
     const json = await declarationsFile.load(undefined).catch(() => undefined)
-    const declarations = json && SP.SpellDeclarations.read(json)
-    if (declarations) return declarations
-    outputFile.cacheDuration = 0
-    const compiled = await outputFile.load(undefined).catch(() => undefined)
-    return compiled ? SP.SpellDeclarations.fromComments(compiled) : undefined
+    let declarations = json ? SP.SpellDeclarations.read(json) : undefined
+    if (!declarations) {
+      outputFile.cacheDuration = 0
+      const compiled = await outputFile.load(undefined).catch(() => undefined)
+      declarations = compiled ? SP.SpellDeclarations.fromComments(compiled) : undefined
+    }
+    // the packs they're written in, past English, which load on first use:  reading them asks those
+    if (declarations) await SP.Language.loadFor(SP.SpellDeclarations.languagesOf(declarations))
+    return declarations
   }
 
   /**

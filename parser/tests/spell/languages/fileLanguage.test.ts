@@ -40,8 +40,8 @@ describe("a file's language", () => {
   test("a file's name says its language;  a plain .spell is English", () => {
     expect(SP.Language.forFile("Card.spell")).toBe(SP.english)
     expect(SP.Language.forFile("Card.en.spell")).toBe(SP.english)
-    expect(SP.Language.forFile("Carta.es.spell")).toBe(SP.spanish)
-    expect(SP.Language.forFile("@spell/test/cartas/Carta.es.spell")).toBe(SP.spanish)
+    expect(SP.Language.forFile("Carta.es.spell")).toBe(SP.Language.for("es"))
+    expect(SP.Language.forFile("@spell/test/cartas/Carta.es.spell")).toBe(SP.Language.for("es"))
     // as declarations say where a statement is
     expect(SP.Language.langOfFile("/Carta.es.spell:71-92")).toBe("es")
     expect(SP.Language.langOfFile("/Card.spell:0-17")).toBeUndefined()
@@ -111,7 +111,7 @@ describe("a project mixing languages", () => {
     expect(project.files.map((file) => file.errors)).toEqual([[], []])
     const [english, spanish] = project.files
     expect(english!.scope.parser).toBe(project.scope.parser)
-    expect((spanish!.scope.parser as SP.SpellParser).language).toBe(SP.spanish)
+    expect((spanish!.scope.parser as SP.SpellParser).language).toBe(SP.Language.for("es"))
     expect(project.files.map((file) => file.warnings)).toEqual([[], []])
     expect(spanish!.compiled).toMatch(/class Equipo extends List \{\n\s*static instanceType = Player\n/)
     expect(spanish!.compiled).toMatch(/const p = new Player\(\)\n\s*p\.reset\(\)\n\s*this\.append\(p\)/)
@@ -132,9 +132,9 @@ describe("a project mixing languages", () => {
   })
 
   test("its root reads the built-in members in both languages", () => {
-    const root = SP.Language.rootScopeFor([SP.english, SP.spanish])
+    const root = SP.Language.rootScopeFor([SP.english, SP.Language.for("es")])
     expect(root).not.toBe(SP.english.rootScope)
-    expect(SP.Language.rootScopeFor([SP.english, SP.spanish])).toBe(root)
+    expect(SP.Language.rootScopeFor([SP.english, SP.Language.for("es")])).toBe(root)
     const list = root.types.get("list", "LOCAL_ONLY")!
     expect(list.variables.get("length", "LOCAL_ONLY")).toBeDefined()
     expect(list.variables.get("largo", "LOCAL_ONLY")).toBeDefined()

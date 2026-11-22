@@ -9,7 +9,7 @@
  */
 import { existsSync, readFileSync } from "fs"
 import { readFile, stat } from "fs/promises"
-import escapeRegExp from "lodash/escapeRegExp"
+import { escapeRegExp } from "lodash-es"
 import { basename, dirname, extname, relative, resolve, sep } from "path"
 
 import { findUp } from "spell/util/node/findUp"
@@ -32,6 +32,9 @@ import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { DRAFT_FOLDER, ProjectDrafts, VERSIONS_FOLDER } from "./ProjectDrafts"
 import { ProjectRoles, type ProjectFileChange } from "./ProjectRoles"
 import type { ManifestJSON, ProjectFileJSON, ProjectIndexJSON } from "./server.types"
+
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
 
 // This machine's person, and their org's groups in spell.spaces, set before any route answers or any address is read
 thisMachinesPerson()

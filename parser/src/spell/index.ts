@@ -84,6 +84,9 @@ export * from "./highlight"
 export * from "./languages/Language"
 export * from "./SpellLines"
 
-// The language packs:  English first, the default
+import { Language } from "./languages/Language"
+
+// The language packs:  English first, the default;  Spanish on first use (epic `solid-2-final` P11),
+// so a page reading only English never downloads its grammar -- see `SP.Language.loadsOnFirstUse()`
 export { english } from "./languages/en"
-export { spanish } from "./languages/es"
+Language.loadsOnFirstUse("es", () => import("spell/parser/spell/languages/es"))

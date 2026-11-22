@@ -27,7 +27,7 @@ describe("each language's spell syntax table is up to date:  if not, run `yarn s
 
   test("English's is spellSyntax.json;  Spanish's, spellSyntax.es.json", () => {
     expect(spellSyntaxFileFor(SP.english)).toBe(SPELL_SYNTAX_FILE)
-    expect(spellSyntaxFileFor(SP.spanish)).toBe("spellSyntax.es.json")
+    expect(spellSyntaxFileFor(SP.Language.for("es"))).toBe("spellSyntax.es.json")
   })
 })
 
@@ -180,7 +180,7 @@ describe("purposeOf()", () => {
 })
 
 describe("Spanish's spell syntax table, spellSyntax.es.json", () => {
-  const rows = spellSyntax(SP.spanish).modules.flatMap((module) => module.rules)
+  const rows = spellSyntax(SP.Language.for("es")).modules.flatMap((module) => module.rules)
 
   test("a rule's Spanish syntax, its example from its Spanish tests, and what that compiles to", () => {
     expect(rows.find((row) => row.className === "IsGtLt")).toMatchObject({

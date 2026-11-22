@@ -90,7 +90,10 @@ describe("names with grammar words", () => {
             "the c is a new card in play\nthe d is a new box of the year",
             'a card in play is a thing\na "box of the year" is a thing'
           ]),
-          probe(SP.spanish.rootScope, ["la c es una nueva carta de juego", 'una "carta de juego" es una cosa'])
+          probe(SP.Language.for("es").rootScope, [
+            "la c es una nueva carta de juego",
+            'una "carta de juego" es una cosa'
+          ])
         ].join("\n")
       ).toMatchInlineSnapshot(`
         "export const c = new CardInPlay()
@@ -415,7 +418,7 @@ function english(...lines: string[]): string {
 
 /** `lines` as one Spanish file:  see `probe()`. */
 function spanish(...lines: string[]): string {
-  return probe(SP.spanish.rootScope, [lines.join("\n")])
+  return probe(SP.Language.for("es").rootScope, [lines.join("\n")])
 }
 
 /**

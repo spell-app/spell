@@ -285,11 +285,17 @@ describe("runner builds", () => {
   test("one grammar for a layout's spell and `<spell-code>`'s colours:  `spell-grammar.js`'s;  `<spell-editor>` keeps its own", () => {
     // spell's rules, in every chunk but the editor's own (its language service watches its projects through its own
     // `spell/util`):  ONE chunk, which `spell-grammar.js` imports (epic `solid-2-final` P11)
-    const withRules = chunks(element).filter(
-      (file) => !file.startsWith("spell-editor") && sources(element, file).some((source) => SPELL_RULES.test(source))
-    )
+    const holding = (pattern: RegExp) =>
+      chunks(element).filter(
+        (file) => !file.startsWith("spell-editor") && sources(element, file).some((source) => pattern.test(source))
+      )
+    const withRules = holding(SPELL_RULES)
     expect(withRules).toHaveLength(1)
     expect(staticImports(element, "spell-grammar.js")).toContain(withRules[0])
+    // Spanish's registrations:  one chunk too, which nothing loads up front (`SP.Language.loadsOnFirstUse()`)
+    const spanish = holding(SPANISH_RULES)
+    expect(spanish).toHaveLength(1)
+    expect(staticImports(element, "spell-grammar.js")).not.toContain(spanish[0])
     // a layout's spell imports it by its name, from the code build;  it bundles no rule of its own
     expect(staticImports(element, "LayoutSpell.js")).toContain("spell-grammar.js")
   })
@@ -389,14 +395,20 @@ const PACKAGES = {
 const CODE_EDITOR_CSS = /\.cmb-editor/
 
 /** The parser:  its rules, its writers (but `SourceMarks`, a program's source map), its tokenizer, and spell's grammar. */
-/** A grammar rule's module, `parser/src/spell/rules/...`:  in the one grammar chunk only. */
-const SPELL_RULES = /\/parser\/src\/spell\/rules\//
+/** A grammar rule's module, `parser/src/spell/rules/...`, but Spanish's registrations:  in the one grammar chunk only. */
+const SPELL_RULES = /\/parser\/src\/spell\/rules\/.*(?<!\.es)\.ts$/
+
+/** Spanish's registrations of the rules, `<module>.es.ts`:  loaded on first use (epic `solid-2-final` P11). */
+const SPANISH_RULES = /\/parser\/src\/spell\/rules\/.*\.es\.ts$/
 
 const PARSER =
   /\/parser\/src\/(parser\/(rules|writers\/(?!SourceMarks)|tokenizer\/(?!.*\.types)|Parser\.ts)|spell\/rules\/)/
 
-/** The whole of lodash, `import _ from "lodash"`:  a file at a time is what the core imports. */
-const WHOLE_LODASH = /\/node_modules\/lodash\/lodash\.js$/
+/**
+ * The whole of lodash, `import * as _ from "lodash-es"` (or CommonJS lodash's `lodash.js`):
+ * the core names what it imports from `lodash-es`, which leaves the rest out (epic `solid-2-final` P11).
+ */
+const WHOLE_LODASH = /\/node_modules\/lodash(-es)?\/lodash(\.default)?\.js$/
 
 /** The core's own module, which makes `core`:  only `spell-runtime.js` may hold it. */
 const CORE_MODULE = /\/parser\/src\/core\/core\.ts$/

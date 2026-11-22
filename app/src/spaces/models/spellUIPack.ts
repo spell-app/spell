@@ -1,7 +1,6 @@
 import { withoutAccents } from "spell/util/string"
 import { SP } from "spell/parser/spell"
 import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
-import { es } from "spell/ui/components/components.es"
 import { SpellUIDefaults } from "./SpellUIDefaults"
 
 /**
@@ -10,6 +9,7 @@ import { SpellUIDefaults } from "./SpellUIDefaults"
  * - English:  every tag in Spell UI's catalog, without its `ui-`.
  * - Spanish:  each tag's Spanish name from Spell UI's dictionary, `es-` before it, as a Spanish page reads it;
  *   accents count as written or not (`botón` ~== `boton`).
+ *   - The dictionary loads on first use, as Spanish's grammar does (`loadLanguage()`, `SP.Language.loadFor()`).
  * - SIDE EFFECT:  loading this registers it with spell as `"spell-ui"` (`SP.ComponentPacks`), the pack every
  *   project draws with unless its project file says otherwise:  spell-parser never imports Spell UI.
  * - It says what each tag and attribute is, for the editors' completions and hovers (`help()`, epic `editor` P28),
@@ -32,6 +32,8 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
   attributeNameFor: (tag, attribute, language) => SpellUIDefaults.attributeNameFor(tag, attribute, language),
   // a type built on one of its tags, `a ui tree view`:  its noun of several words as its tag's (`property-editor`)
   viewBaseFor: (noun, language) => SpellUIDefaults.viewBaseFor(noun.replace(/\s+/g, "-"), language),
+  // Spanish's names, from Spell UI's dictionary, load on first use (epic `solid-2-final` P11)
+  loadLanguage: (language) => SpellUIDefaults.loadLanguage(language),
   help(language) {
     if (!helpTable) {
       loadHelp()
@@ -83,7 +85,10 @@ function tagsFor(language: string): Map<string, string> {
   if (tags) return tags
   tags = new Map()
   if (language === "es") {
-    for (const name of Object.values(es.tags ?? {})) tags.set(withoutAccents(name), `es-${name}`)
+    // none till Spell UI's dictionary is in (`loadLanguage()`):  kept only once it is
+    const { dictionary } = SpellUIDefaults
+    if (!dictionary) return tags
+    for (const name of Object.values(dictionary.tags ?? {})) tags.set(withoutAccents(name), `es-${name}`)
   } else {
     for (const tag of Object.keys(ROOT_CATALOG)) tags.set(tag.replace(/^ui-/, ""), tag)
   }

@@ -8,6 +8,8 @@ import "./stdioGuard"
 import "spell/parser/spell/node/packageVersion.node"
 
 const { createConnection, ProposedFeatures } = await import("vscode-languageserver/node")
+// every language pack, past English:  the language server reads them all (epic `solid-2-final` P11)
+await import("spell/parser/spell/languages/all")
 const { LSP } = await import("spell/app/lsp")
 const { SpellDiskWorkspace } = await import("spell/app/lsp/SpellDiskWorkspace")
 

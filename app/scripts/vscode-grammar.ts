@@ -17,6 +17,9 @@ import { writeOrCheck } from "spell/element-tools/generatedFiles"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
+
 /** The grammar this keeps current. */
 const GRAMMAR = path.resolve(import.meta.dirname, "../vscode/syntaxes/spell.tmLanguage.json")
 

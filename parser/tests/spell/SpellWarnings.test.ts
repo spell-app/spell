@@ -96,7 +96,7 @@ describe("SpellWarnings", () => {
 describe("SpellWarnings, in Spanish", () => {
   /** `lines` parsed as a block, in a fresh Spanish scope called `scopeName`. */
   const parseEs = (lines: string[], scopeName: string) =>
-    SP.spanish.parser.getScope(scopeName).parse(lines.join("\n"), "block")!
+    SP.Language.for("es").parser.getScope(scopeName).parse(lines.join("\n"), "block")!
 
   test("the cartas project's:  a new variable's list says what it holds, with a Spanish example", () => {
     const lines = [
@@ -159,8 +159,11 @@ describe("SP.Language.parserMessage()", () => {
   })
 
   test("a key a language lacks reads English", () => {
-    const { "dont-understand": _left, ...messages } = SP.spanish.parserMessages
-    const lacking = Object.assign(Object.create(SP.Language.prototype), { ...SP.spanish, parserMessages: messages })
+    const { "dont-understand": _left, ...messages } = SP.Language.for("es").parserMessages
+    const lacking = Object.assign(Object.create(SP.Language.prototype), {
+      ...SP.Language.for("es"),
+      parserMessages: messages
+    })
     expect(lacking.parserMessage("dont-understand", { text: "x" })).toBe('Don\'t understand "x"')
     expect(lacking.parserMessage("example-text")).toBe("texto")
   })

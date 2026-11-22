@@ -40,7 +40,7 @@ para probar la preparación de la carta
 describe("NamesSeeder", () => {
   const english = parseSpellProject([{ path: "/Card.spell", contents: CARD }]).files[0]!
   const spanish = parseSpellProject([{ path: "/Carta.es.spell", contents: CARTA }]).files[0]!
-  const names = new TranslationNames({ names: { king: "rey mago" } }, { from: SP.english, to: SP.spanish })
+  const names = new TranslationNames({ names: { king: "rey mago" } }, { from: SP.english, to: SP.Language.for("es") })
   const added = new NamesSeeder(names).seed(
     [{ path: "/Card.spell", contents: CARD, match: english.match }],
     [{ path: "/Carta.es.spell", contents: CARTA, match: spanish.match }]

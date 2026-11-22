@@ -516,6 +516,7 @@ async function bindLayout(copy: LoadedRuntime, source: SpellAppSource, root: Ele
     source.declarations ?? fetchJSON(source.declarationsUrl)
   ])
   const { core } = copy.runtime
+  await LayoutSpell.loadLanguagesOf(declarations)
   return new LayoutSpell({ root, projectId: source.name, declarations, core }).bind()
 }
 
