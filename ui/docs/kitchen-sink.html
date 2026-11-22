@@ -2092,7 +2092,7 @@
                   A dimmer hides distractions to focus attention on particular content.
                   <a href="ui-dimmer.html">Dimmer page</a>
                 </p>
-                <button type="button" class="ui button" commandfor="dimmer-types-plain" command="--toggle">Toggle</button>
+                <ui-button commandfor="dimmer-types-plain" command="--toggle">Toggle</ui-button>
                 <ui-segment>
                   <p>A segment holding some text that the dimmer covers.</p>
                   <p>Another paragraph, so the segment has some height.</p>
@@ -2109,7 +2109,7 @@
                 </ui-segment>
               </ui-example>
               <ui-example description="Page dimmer">
-                <button type="button" class="ui button" commandfor="dimmer-types-page" command="--show">Dim the page</button>
+                <ui-button commandfor="dimmer-types-page" command="--show">Dim the page</ui-button>
                 <ui-dimmer id="dimmer-types-page" page aria-label="Dark page dimmer">
                   <ui-header level="2">Dark page dimmer</ui-header>
                   <p>A click anywhere, or Escape, brings the page back.</p>
@@ -2185,7 +2185,7 @@
                   A flyout is a modal that slides in from a side of the page.
                   <a href="ui-flyout.html">Flyout page</a>
                 </p>
-                <button type="button" class="ui button" commandfor="flyout-types-standard" command="--show">Show</button>
+                <ui-button commandfor="flyout-types-standard" command="--show">Show</ui-button>
                 <ui-flyout id="flyout-types-standard" closable>
                   <ui-header>Archive old messages</ui-header>
                   <ui-content>
@@ -2198,7 +2198,7 @@
                 </ui-flyout>
               </ui-example>
               <ui-example description="Right, shorthands">
-                <button type="button" class="ui button" commandfor="flyout-types-right" command="--show">Show right</button>
+                <ui-button commandfor="flyout-types-right" command="--show">Show right</ui-button>
                 <ui-flyout
                   id="flyout-types-right"
                   position="right"
@@ -2210,7 +2210,7 @@
                 </ui-flyout>
               </ui-example>
               <ui-example description="Top, inverted">
-                <button type="button" class="ui button" commandfor="flyout-types-top" command="--show">Show top</button>
+                <ui-button commandfor="flyout-types-top" command="--show">Show top</ui-button>
                 <ui-flyout id="flyout-types-top" position="top" inverted heading="Notice" closable>
                   <ui-content><p>A top flyout is full width, as tall as its content.</p></ui-content>
                 </ui-flyout>
@@ -2267,7 +2267,7 @@
                   A modal displays content that temporarily blocks interactions with the main view of a site.
                   <a href="ui-modal.html">Modal page</a>
                 </p>
-                <button type="button" class="ui button" commandfor="modal-types-standard" command="--show">Show</button>
+                <ui-button commandfor="modal-types-standard" command="--show">Show</ui-button>
                 <ui-modal id="modal-types-standard" closable>
                   <ui-header>Profile Picture</ui-header>
                   <ui-content>
@@ -2283,7 +2283,7 @@
                 </ui-modal>
               </ui-example>
               <ui-example description="Basic">
-                <button type="button" class="ui button" commandfor="modal-types-basic" command="--show">Show basic</button>
+                <ui-button commandfor="modal-types-basic" command="--show">Show basic</ui-button>
                 <ui-modal id="modal-types-basic" appearance="basic" size="small" heading="Archive Old Messages">
                   <ui-content>
                     <p>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</p>
@@ -2434,7 +2434,7 @@
                   A shape is a three dimensional object displayed on a two dimensional plane.
                   <a href="ui-shape.html">Shape page</a>
                 </p>
-                <button type="button" class="ui button" commandfor="shape-demo-plain" command="--next">Flip left</button>
+                <ui-button commandfor="shape-demo-plain" command="--next">Flip left</ui-button>
                 <ui-shape id="shape-demo-plain">
                   <ui-side><p>This side starts visible.</p></ui-side>
                   <ui-side><p>This is yet another side.</p></ui-side>
@@ -2442,8 +2442,8 @@
                 </ui-shape>
               </ui-example>
               <ui-example description="Cube">
-                <button type="button" class="ui button" commandfor="shape-demo-cube" command="--next">Flip up</button>
-                <button type="button" class="ui button" commandfor="shape-demo-cube" command="--previous">Back</button>
+                <ui-button commandfor="shape-demo-cube" command="--next">Flip up</ui-button>
+                <ui-button commandfor="shape-demo-cube" command="--previous">Back</ui-button>
                 <ui-shape id="shape-demo-cube" cube direction="up">
                   <ui-side><span>1</span></ui-side>
                   <ui-side><span>2</span></ui-side>
@@ -2451,7 +2451,7 @@
                 </ui-shape>
               </ui-example>
               <ui-example description="Text">
-                <button type="button" class="ui button" commandfor="shape-demo-text" command="--next">Flip down</button>
+                <ui-button commandfor="shape-demo-text" command="--next">Flip down</ui-button>
                 <p>
                   Flip to
                   <ui-shape id="shape-demo-text" text direction="down" active-index="1">
@@ -2478,14 +2478,14 @@
                   </ui-sidebar>
                   <ui-pusher>
                     <ui-segment appearance="basic">
-                      <button type="button" class="ui button" commandfor="sidebar-demo-left" command="--toggle">Menu</button>
+                      <ui-button commandfor="sidebar-demo-left" command="--toggle">Menu</ui-button>
                       <p>The default left sidebar uncovers itself from under this content, which dims.</p>
                     </ui-segment>
                   </ui-pusher>
                 </ui-pushable>
               </ui-example>
               <ui-example description="Overlay, right, thin">
-                <button type="button" class="ui button" commandfor="sidebar-demo-right" command="--toggle">Toggle right</button>
+                <ui-button commandfor="sidebar-demo-right" command="--toggle">Toggle right</ui-button>
                 <ui-pushable style="height: 12em">
                   <ui-sidebar id="sidebar-demo-right" position="right" width="thin" transition="overlay" inverted>
                     <ui-menu direction="vertical" inverted fluid aria-label="Numbers">
@@ -2687,11 +2687,11 @@
                   A transition is an animation used to show or hide content, or to draw attention to it.
                   <a href="ui-transition.html">Transition page</a>
                 </p>
-                <button type="button" class="ui button" commandfor="transition-demo-fade" command="--toggle">Fade up</button>
-                <button type="button" class="ui button" commandfor="transition-demo-scale" command="--toggle">Scale</button>
-                <button type="button" class="ui button" commandfor="transition-demo-flip" command="--toggle">
+                <ui-button commandfor="transition-demo-fade" command="--toggle">Fade up</ui-button>
+                <ui-button commandfor="transition-demo-scale" command="--toggle">Scale</ui-button>
+                <ui-button commandfor="transition-demo-flip" command="--toggle">
                   Horizontal flip
-                </button>
+                </ui-button>
                 <div class="ui-cluster">
                   <ui-transition id="transition-demo-fade" animation="fade up" inline visible>
                     <ui-segment>Fade up</ui-segment>
@@ -2705,8 +2705,8 @@
                 </div>
               </ui-example>
               <ui-example description="Attention">
-                <button type="button" class="ui button" commandfor="transition-demo-shake" command="--transition">Shake</button>
-                <button type="button" class="ui button" commandfor="transition-demo-tada" command="--transition">Tada</button>
+                <ui-button commandfor="transition-demo-shake" command="--transition">Shake</ui-button>
+                <ui-button commandfor="transition-demo-tada" command="--transition">Tada</ui-button>
                 <div class="ui-cluster">
                   <ui-transition id="transition-demo-shake" animation="shake" inline visible>
                     <ui-segment>Shake</ui-segment>
@@ -2717,7 +2717,7 @@
                 </div>
               </ui-example>
               <ui-example description="Hidden">
-                <button type="button" class="ui button" commandfor="transition-demo-hidden" command="--show">Show</button>
+                <ui-button commandfor="transition-demo-hidden" command="--show">Show</ui-button>
                 <ui-transition id="transition-demo-hidden" animation="drop">
                   <ui-segment>Hidden until shown</ui-segment>
                 </ui-transition>

@@ -15,7 +15,7 @@
       </ui-sidebar>
       <ui-pusher>
         <ui-segment appearance="basic">
-          <button type="button" class="ui button" commandfor="sidebar-demo-left" command="--toggle">Menu</button>
+          <ui-button commandfor="sidebar-demo-left" command="--toggle">Menu</ui-button>
           <p>The default left sidebar uncovers itself from under this content, which dims.</p>
         </ui-segment>
       </ui-pusher>
@@ -24,7 +24,7 @@
 
   <section>
     <h4>Overlay, right, thin</h4>
-    <button type="button" class="ui button" commandfor="sidebar-demo-right" command="--toggle">Toggle right</button>
+    <ui-button commandfor="sidebar-demo-right" command="--toggle">Toggle right</ui-button>
     <ui-pushable style="height: 12em">
       <ui-sidebar id="sidebar-demo-right" position="right" width="thin" transition="overlay" inverted>
         <ui-menu direction="vertical" inverted fluid aria-label="Numbers">
@@ -65,7 +65,7 @@
       </ui-sidebar>
       <ui-pusher>
         <ui-segment appearance="basic">
-          <button type="button" class="ui button" commandfor="sidebar-demo-quarter" command="--toggle">Quarter</button>
+          <ui-button commandfor="sidebar-demo-quarter" command="--toggle">Quarter</ui-button>
           <p>A sidebar `width` in columns (here 1/4).</p>
         </ui-segment>
       </ui-pusher>

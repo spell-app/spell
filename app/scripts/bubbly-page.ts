@@ -35,7 +35,6 @@ const DRAWINGS = [
   { id: "pile", label: "Pile", files: ["Solitaire/Pile.spell"] },
   { id: "deck", label: "Deck", files: ["Solitaire/Deck.spell"] },
   { id: "carta", label: "La carta, en español", files: ["Solitario/Carta.es.spell"], lang: "es" },
-  { id: "html-viewer", label: "HTML:  the spell-viewer demo", files: ["app/demo/spell-viewer.html"], html: true },
   { id: "html-editor", label: "HTML:  the spell-editor demo", files: ["app/demo/spell-editor.html"], html: true }
 ]
 

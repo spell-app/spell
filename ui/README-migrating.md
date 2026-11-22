@@ -152,6 +152,11 @@ its shadow root carries the words on the left, except the icon's, which is an SV
 | `class="four wide column"` | `<ui-column width="4">`, or `width="1/4"`, or `width="25%"` |
 | `class="ui toggle checkbox"` | `<ui-checkbox appearance="toggle">` |
 | `class="ui disabled button"` | `<ui-button disabled>` |
+| `<select class="ui dropdown">` | `<ui-dropdown selection>`, with `multiple` for a multi-select |
+| `<img class="ui wireframe image">` | `<ui-image src>` |
+| `<ul class="ui list">` / `<ol class="ui list">` | `<ui-list bulleted>` / `<ui-list ordered>`:  a real `ul` / `ol` in its shadow root |
+| `<table class="ui celled striped table">` | `<ui-table celled appearance="striped">`:  it copies those words onto the table as classes, so a server can write them itself and the table paints before any script runs |
+| `<label class="ui purple button">` on a checkbox's label | not ported:  the label is in the shadow root, so it can't take another component's classes |
 | `class="ui loading form"` | `<ui-form loading>` |
 | `<i class="user icon">` | `<ui-icon name="user">`:  an SVG from Font Awesome 7 Free, not a font glyph |
 
