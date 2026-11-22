@@ -114,6 +114,25 @@ describe("LanguageHost", () => {
     expect(sent.at(-1)!.drawing).toBeUndefined()
   })
 
+  test("a compile sends what its parse found:  a page opened and compiled is drawn before it's typed in", async () => {
+    const sent: LSP.LanguageParsed[] = []
+    const watched = new LSP.LanguageHost({ onParsed: (parsed) => sent.push(parsed) })
+    const wait = LSP.LanguageHost.PARSE_WAIT
+    // the compile comes before the host's own parse, as it does when a big project opens
+    LSP.LanguageHost.PARSE_WAIT = 60_000
+    try {
+      watched.open({ uri, projectId: solitaire, text })
+      await watched.compile({ projectId: solitaire })
+      await vi.waitFor(() => expect(sent.at(-1)).toMatchObject({ uri, version: 0 }))
+      // compiled again with nothing edited:  the editor isn't sent the same drawing again
+      await watched.compile({ projectId: solitaire })
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      expect(sent).toHaveLength(1)
+    } finally {
+      LSP.LanguageHost.PARSE_WAIT = wait
+    }
+  })
+
   test("a project it can't load is said, and holds nothing else up", async () => {
     const unavailable: string[] = []
     const lonely = new LSP.LanguageHost({ onUnavailable: (projectId) => unavailable.push(projectId) })
