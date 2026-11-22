@@ -190,7 +190,8 @@ More on some of them:
     which lays a build of Spell UI's site over the folder at `_assets/`.
     - The list:  `componentSets`, in each folder's part of the settings (its `package.json`'s `"pageServer"`).
   - The sets:
-    - Spell UI:  [spell-ui's docs/](../ui/docs/), at `/components/ui/`
+    - Spell UI:  [spell-ui's docs/](../ui/docs/), at `/components/ui/`:  since epic `editor` P43 no HTML pages, but
+      the one that shows the Spell UI site (a Spell guide) at every address, and the data and pictures it reads
     - Epic UI:  [epic's docs/](../epic/src/docs/), at `/components/epics/`
     - App UI:  [app's docs/](app/docs/), at `/components/app/`:  the app folder's only one
     - (Brand UI, spell-brand's, went with that repo:  epic `epic-engine` T124)

@@ -339,8 +339,8 @@ it loads what's inside on demand, gives it a theme and a size, and decides what 
 - Parts:  `loading` (the loader), `skeleton` (the placeholders' box), `scroller` (the scrolling region of a box root).
 - States:  `:state(loading)`, `:state(ready)`, `:state(light)`, `:state(dark)`, `:state(box)`, `:state(fixed)`.
 - Swappable looks:  `UIRoot.Loading = MyLoading`, `UIRoot.Skeleton = MySkeleton`.
-- The live page, with every example:  [`<ui-root>`'s docs page](docs/ui-root.html), served by the page server
-  ([README-site.md](README-site.md#viewing-it--one-command-from-anywhere-in-the-kit)).
+- The live page, with every example:  [`<ui-root>`'s page](../app/spaces/@spell/guides/SpellUI/Root/Examples.spell) of the Spell UI site, at `/components/ui/root`
+  ([README-site.md](README-site.md#viewing-it--at-componentsui-with-no-editor)).
 
 </details>
 
@@ -376,7 +376,8 @@ It borrows the page's, so the page still has one Solid, and the pack's elements 
 Looking for a datepicker?  It's `<ui-calendar>`, and a snackbar is `<ui-toast>`.
 [The catalogue](README-components.md#the-catalogue) finds a family by the name your last library gave it:
 every family with a picture, its tags, and what other libraries call it.
-Every example runs live in [the docs site's component index](docs/components.html), served by the page server.
+Every example runs live on the Spell UI site, Spell UI's docs, whose component index is at `/components/ui/components`
+on the page server ([README-site.md](README-site.md)).
 
 The names, and the groups they sort into, are Semantic UI's and Fomantic UI's:
 - Elements, the basic pieces of a page:  `<ui-button>`, `<ui-input>`, `<ui-label>`, `<ui-segment>` ...
@@ -493,7 +494,7 @@ each example's plain class markup on the left, the same example as elements on t
 | `yarn tokens:alias <family> [--write]` | the codemod that gives a family's sheet private aliases for its public tokens |
 | `yarn manifest` | the custom-elements manifest, from the source |
 | `yarn test:visual` / `test:visual:update`, `test:hmr`, `vendor`, `measure`, `smoke`, `serve`, `report`, `screenshots`, `icons:pack <folder> --id <id>` | the tools:  the visual tests, hot reload end to end, vendored peers, bundle sizes, the framework pages, the report tables ([README-site.md](README-site.md#the-tools--the-librarys-own-checks-beside-the-sites)) |
-| `yarn site:dev`, `site:data`, `site:index`, `site:kitchen`, `site:bundle`, `site:build`, `site:new`, `site:sections`, `site:check`, `readme:components`, `design:build` | the docs site, the catalogue in [README-components.md](README-components.md), and the claude.ai design system's files ([README-site.md](README-site.md#the-scripts--four-rebuild-what-the-site-reads)) |
+| `yarn site:dev`, `site:data`, `site:kitchen`, `site:bundle`, `site:build`, `site:new`, `site:check`, `readme:components`, `design:build` | the docs site, the catalogue in [README-components.md](README-components.md), and the claude.ai design system's files ([README-site.md](README-site.md#the-scripts--what-rebuilds-what-the-site-reads)) |
 
 </details>
 
@@ -563,10 +564,6 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 <details>
 <summary>Deferred</summary>
 
-- [The `site:sections` script](scripts/site-sections.ts) is two things:
-  the command of that name, and the `SiteSections` converter three other scripts import.
-  - Its class should move to a file of its own,
-    but the name `SiteSections` is taken by the browser side, [the site's own](site/_src/SiteSections.ts).
 - A fresh checkout can't run `gen:icons` and `gen:emoji`.
   - Both need the git-ignored clone of Fomantic UI, `reference/Fomantic-UI/`.
   - `gen:icons` needs the network too.
@@ -579,7 +576,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 
 These guides are served by the page server from the epic folder,
 so they need a checkout with the epic folder and the page server running:
-[README-site.md](README-site.md#viewing-it--one-command-from-anywhere-in-the-kit), "Viewing it".
+[README-site.md](README-site.md#viewing-it--at-componentsui-with-no-editor), "Viewing it".
 
 - UI Component Creation:  `/guides/ui-component-creation.html`
 - Spell UI's design notes (plan, grammar, theming, translation, icons, fallback, runtime, status, report):

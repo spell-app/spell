@@ -427,8 +427,8 @@ Seven steps, run from `spell/ui/`;  four of them have a test that fails until th
 5. `yarn site:data`:  the docs site's data.
    [Its test](tests/tools/SiteDataBuilder.test.ts) fails while it's stale.
    - Add the family's facts to [the pages data](docs/__data/pages.json5).
-6. `yarn site:new <tag>`:  its four pages in the Spell UI site, and its docs page from the template
-   ([README-site.md](README-site.md#writing-a-page--start-from-the-model-write-it-flat) has today's catch).
+6. `yarn site:new <tag>`:  its four pages in the Spell UI site, from the template
+   ([README-site.md](README-site.md#writing-a-page--in-the-editor-as-spell) has today's catch).
    Then `yarn site:build` (its Kitchen Sink entry too), and `yarn site:check <tag>`.
 7. `yarn readme:components`:  its row in the catalogue (below).
 

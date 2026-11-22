@@ -531,7 +531,7 @@ and in the app's build folder, `app/` at the app folder's root.
     - the page server's `componentSets` setting, in the app folder's [package.json](../../package.json)
   - Links are written as from the page's SERVED address (`/components/app/x.html`):
     - `../../` is the checkout's root
-    - `../../ui/ui-button.html` is a Spell UI page
+    - `../ui/button` is a page of the Spell UI site (its Spell guide;  `SpellUIGuide.addressOf()`)
     - the layout and footer, in `__parts/`, are one level deeper
   - What it documents, and in which group:  [the hand-kept facts](../../app/docs/__data/pages.json5).
   - Each page's props, attributes and "Used in" tables come from the code:  `yarn site:data`.

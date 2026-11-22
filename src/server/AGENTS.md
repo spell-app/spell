@@ -84,7 +84,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - its own file:  patched in place (the kit's `PagePatch`, run by the docs runtime and Spell UI's site), else
         reloaded
         - its own file is also the file at its ADDRESS:  a component set's page is reported where it's served
-          (`/components/ui/ui-button.html`), not as its file in the checkout (P40)
+          (`/components/app/spell-viewer.html`), not as its file in the checkout (P40)
       - a stylesheet it uses:  swapped in place, no reload
         - in VS Code's side-bar views too (spell-epic's Review and Details):  the live client runs inside their frame,
           with its own socket (the frame is cross-origin to the view)

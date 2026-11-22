@@ -957,7 +957,7 @@ Laid out as every set is since P18 of `people-and-orgs`
 
   ```text
   x.html                             a sibling:  the page's own folder stays relative
-  /components/ui/ui-button.html      a Spell UI page
+  /components/ui/button              a page of the Spell UI site (a Spell guide)
   /components/app/spell-viewer.html  an App UI page
   /epic/src/components/              the `epic/` folder's files, from the kit's root
   /guides/x.html                     a page of the epic folder
@@ -1894,7 +1894,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 | guide | explains a topic;  an epic's own write-up is "the epic's guide" | `guides/` | [durable.html](../templates/durable.html) |
 | cheatsheet | an API at a glance, as cards you filter | `guides/` | [cheatsheet.html](../templates/cheatsheet.html) |
 | commands page | which command, skill or script does what | `guides/dev/commands/` | [commands.html](../templates/commands.html) |
-| components page | one element:  its examples, attributes and look | a component set's `docs/`:  spell-ui's `docs/`, spell-epic's `src/docs/`, spell-app's `app/docs/` | [spell-ui-docs.html](../templates/spell-ui-docs.html) |
+| components page | one element:  its examples, attributes and look | a component set's `docs/`:  spell-epic's `src/docs/`, spell-app's `app/docs/`;  Spell UI's are the Spell UI site's pages since epic `editor` P43, a Spell guide (`@spell/guides/SpellUI`) | [spell-ui-docs.html](../templates/spell-ui-docs.html) |
 | components guide | a component set's pages that aren't one element:  home, getting started, theming, icons | beside its components pages | [component-set-docs.html](../templates/component-set-docs.html) |
 | reference page | made from its source each time, with a person's words about each thing:  a place's (`<spell-reference-page>`, epic `data` P53), the commands pages, the core reference page, the syntax guide | a place's:  the editor's `/place/<description>`;  the others in `guides/` | none:  drawn from its source |
 | brand page | Claude Design's brand pages, and their Spell UI copies | `brand/` | none:  Claude Design's exports |
@@ -1966,8 +1966,9 @@ the epic page shown in both tabs).
   - saved from `ui-docs-rework`'s morning review, as the model
 - No `templates/goals/` any more (epic `epic-engine` P2, T1):  the parked goal sets' templates are only in spell-app's
   `goals.zip`, an older copy;  their last versions are in git history, before P2.
-- [spell-ui-docs.html](../templates/spell-ui-docs.html):  a components page (one element's),
-  for Spell UI's set ([its docs](../../ui/docs/)).
+- [spell-ui-docs.html](../templates/spell-ui-docs.html):  a components page (one element's).
+  - Spell UI's `yarn site:new` fills it in memory and writes it as the Spell UI site's pages (epic `editor` P43):
+    Spell UI's HTML components pages are gone;  the template stays for the other sets until epic `editor` P44.
   - Fomantic's docs layout in `<ui-*>` widgets:
     nav, masthead, Examples / Usage / API / Theming tabs, an "On this page" rail.
   - It loads the UI site's bundle, NOT `spell-ui.js`.
@@ -2804,7 +2805,7 @@ the epic page shown in both tabs).
         alone;  it's the one bundle now, every set's.
       - Its prose is `<ui-markdown>`'s, in a shadow root:  a text comment there works as anywhere (`selectedRange()`),
         its thread under the paragraph (`boxInMarkdown()`).
-    - a page in TABS (a components page's Examples, Usage, API, Theming:  Spell UI's and Brand's element pages):
+    - a page in TABS (a components page's Examples, Usage, API, Theming:  an element page in Spell UI's page shape):
       the toolbar lists the shown tab's sections, and follows the tabs (`spell-comments.entry.js`).
   - NOT:
     - an epic page's `parts/`
