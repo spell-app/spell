@@ -50,6 +50,10 @@ import { pathInside } from "./RealPath"
  *     `<root>/epics/` is `<content>/epics/`, with no link at the checkout's root.
  *   - So a page there links `../../packages/...` as before, and a link into it is "inside the repo".
  *   - A page's folder is taken from where it's served, whichever way it's given (`link()`, `check()`).
+ * - SITES (`sites`, epic `editor` P43):  a site the page server shows at an address with no file per page
+ *   (`SRV.LinkSite`:  the Spell UI site at `/components/ui/`).
+ *   - Its pages' addresses check as found;  a link to one of its old pages is mended to its page's address,
+ *     a root path too (`/components/ui/ui-button.html` => `/components/ui/button`), under a worktree's address too.
  * - From the docs tools' `doc-links.js` (epic `epic-components`, P7;  spell-epic's `src/tools/` now), which runs its
  *   command line on this.
  */
@@ -91,6 +95,9 @@ export class Linker {
   /** the epic folder, laid under the checkout;  `undefined` when the repo names none */
   readonly content?: string
 
+  /** the sites shown at an address with no file per page (`SRV.LinkSite`):  the Spell UI site's */
+  readonly sites: readonly SRV.LinkSite[]
+
   /** the epic folder's served folders alone (`served`'s last), each `[<root>/<name>, <content>/<name>]` */
   private contentAreas: readonly (readonly [string, string])[]
 
@@ -102,16 +109,19 @@ export class Linker {
    *   e.g. `{ "components/ui": "packages/ui/docs" }`
    *   (the page server's `componentSets` setting, in the root `package.json`)
    * - `content`:  the epic folder, absolute;  default the repo's (`contentFolderOf()`)
+   * - `sites`:  the sites shown at an address with no file per page (`SRV.LinkSite`);  default none
    */
   constructor(
     root: string,
     {
       served = {},
-      content = contentFolderOf(root)
-    }: { served?: Readonly<Record<string, string>>; content?: string } = {}
+      content = contentFolderOf(root),
+      sites = []
+    }: { served?: Readonly<Record<string, string>>; content?: string; sites?: readonly SRV.LinkSite[] } = {}
   ) {
     this.root = root
     this.content = content
+    this.sites = sites
     this.contentAreas = content
       ? contentAreasOf(root, content).map((name) => [join(root, name), join(content, name)] as const)
       : []
@@ -308,6 +318,12 @@ export class Linker {
     const dir = this.servedDir(pageDir)
     const rewrite = (url: string, isLoad: boolean): string => {
       const decoded = decodeEntities(url)
+      // a root path to a site's old page:  its page's address now
+      const siteMended = mend && isRootPath(decoded) ? this.siteMendedPath(decoded) : undefined
+      if (siteMended) {
+        changes.push({ from: url, to: siteMended, kind: "mended" })
+        return url.includes("&") ? escapeHTML(siteMended) : siteMended
+      }
       if (!isRelativeUrl(decoded) || keepsRelative(decoded, isLoad)) return url
       let to = this.rootPathFor(decoded, dir)
       if (to === undefined) {
@@ -315,7 +331,11 @@ export class Linker {
         return url
       }
       let kind: SRV.RootLinkChange["kind"] = "rooted"
-      if (mend && !existsSync(this.fileFor(to, dir))) {
+      const toSite = mend ? this.siteMendedPath(to) : undefined
+      if (toSite) {
+        to = toSite
+        kind = "mended"
+      } else if (mend && !existsSync(this.fileFor(to, dir))) {
         const mended = this.mendedPath(to)
         if (mended) {
           to = mended
@@ -381,8 +401,11 @@ export class Linker {
    * - each tried on the others' results too
    * - none of those there:  the one file the bare-name index has under the same last folder and name (`sameNamed()`)
    * - more than one distinct home, or none:  `undefined`
+   * - first of all, a site's old page (`sites`):  its page's address (`siteMendedPath()`)
    */
   mendedPath(path: string): string | undefined {
+    const site = this.siteMendedPath(path)
+    if (site) return site
     const suffix = path.slice(urlPath(path).length)
     const start = percentDecoded(urlPath(path)).replace(/^\//, "")
     const seen = new Set<string>([start])
@@ -403,6 +426,31 @@ export class Linker {
     if (homes.size !== 1) return undefined
     const [home] = homes
     return `/${encodeURI(home!)}${suffix}`
+  }
+
+  /**
+   * Root path `path` at its page's address now, when it's a link to a site's old page (`sites`, `SRV.LinkSite`):
+   * `/components/ui/ui-button.html#api` => `/components/ui/button#api`;  else `undefined`.
+   * - under a worktree's address too:  `/worktrees/mockup/components/ui/ui-table.html` =>
+   *   `/worktrees/mockup/components/ui/table`
+   */
+  siteMendedPath(path: string): string | undefined {
+    const [, worktree = "", rest = path] = WORKTREE_ADDRESS.exec(path) ?? []
+    for (const site of this.sites) {
+      const mended = site.mendedPath(rest)
+      if (mended) return `${worktree}${mended}`
+    }
+    return undefined
+  }
+
+  /**
+   * Is root path `path` a page of a site shown with no file per page (`sites`):  under its address,
+   * its last step with no `.` (`/components/ui/button/api`;  never `/components/ui/images/x.png`)?
+   */
+  isSitePage(path: string): boolean {
+    const rest = urlPath(path).replace(WORKTREE_ADDRESS, "$2")
+    if (/\.[^/]*$/.test(rest)) return false
+    return this.sites.some((site) => rest === site.address || rest.startsWith(`${site.address}/`))
   }
 
   /**
@@ -627,7 +675,9 @@ export class Linker {
           ? `site header root:  root="${change.from}" -- drop it, pages are served`
           : change.kind === "outside"
             ? `relative:  ${change.from} -- climbs above the root`
-            : `relative:  ${change.from} -- write ${change.to}${change.kind === "broken" ? " (reaches nothing)" : ""}`
+            : isRootPath(decodeEntities(change.from))
+              ? `old page:  ${change.from} -- write ${change.to}`
+              : `relative:  ${change.from} -- write ${change.to}${change.kind === "broken" ? " (reaches nothing)" : ""}`
       )
     for (const m of body.matchAll(A_TAG)) {
       const attrs = m[1]
@@ -637,7 +687,9 @@ export class Linker {
       const href = decodeEntities(hrefMatch[1])
       const local = !URL_START.test(href)
       const dest = local ? this.fileFor(href, pageDir) : href
-      if (local && !existsSync(dest)) {
+      // a site's page is shown at its address, with no file of its own
+      const isSitePage = local && isRootPath(href) && this.isSitePage(href)
+      if (local && !isSitePage && !existsSync(dest)) {
         if (!this.isGitIgnored(dest + (href.split("#")[0].endsWith("/") ? "/" : ""))) problems.push(`missing:  ${href}`)
       } else if (local && !this.isInside(dest)) problems.push(`outside repo:  ${href}`)
       if (!target) {
@@ -842,6 +894,9 @@ function keepsRelative(url: string, isLoad: boolean): boolean {
 function urlPath(url: string): string {
   return /^[^?#]*/.exec(url)![0]
 }
+
+/** A worktree's pages' address on the main page server, at a root path's start:  `/worktrees/mockup`. */
+const WORKTREE_ADDRESS = /^(\/worktrees\/[^/]+)(\/.*)$/
 
 /** Is `path` a root path, `/x`:  one slash, not a protocol-relative `//host`? */
 function isRootPath(path: string): boolean {

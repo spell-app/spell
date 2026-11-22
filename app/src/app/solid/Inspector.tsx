@@ -16,6 +16,8 @@ import type { TextChange } from "spell/app/app/EditorHistory"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { GROUP_ORDER, PropertyLayouts, PropertySchemas, type PropertyLayout } from "spell/ui/property"
 import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPropertyEditor.types"
+// Import directly:  `spell/ui/util` leaves it out, so it stays out of the `core` bundle
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 // By file:  a click's rule is all this needs
 import { ListSelection, type ListClick } from "spell/util/ListSelection"
 import { appTexts, renameRefusal, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -877,15 +879,15 @@ export class Inspector {
   }
 
   /**
-   * Open `tag`'s page of Spell UI's docs, on the page server (`SPELL_UI_DOCS`), in ONE browser tab every time
-   * (`window.open()`'s name, `spell-ui-docs`;  Owen, T95:  "Re-use the same tab for all components").
+   * Open `tag`'s page of the Spell UI site, on the page server (`SpellUIGuide.addressOf()`), in ONE browser tab every
+   * time (`window.open()`'s name, `spell-ui-docs`;  Owen, T95:  "Re-use the same tab for all components").
    * - Its page as the docs' data says (`SiteData.tag()`):  a tag with no page of its own, its family's, at its section
-   *   (`ui-column` => `ui-grid.html#ui-column`);  until the data's in, `<tag>.html`.
+   *   (`ui-column` => `ui-grid.html#ui-column`, so `/components/ui/grid#ui-column`);  until the data's in, the tag's.
    * - SIDE EFFECT:  starts loading the data, for the next one.
    */
   static openSpellUIDocs(tag: string): void {
-    const page = docsPages?.[tag] ?? `${tag}.html`
-    window.open(new URL(`${SPELL_UI_DOCS}${page}`, location.href).href, DOCS_TAB)
+    const page = SpellUIGuide.addressOf(docsPages?.[tag] ?? tag)
+    window.open(new URL(page, location.href).href, DOCS_TAB)
     loadDocsPages()
   }
 
@@ -2358,8 +2360,6 @@ const INSPECTING_MARK = "data-inspecting"
 
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
 export const THING_ICON = "cube"
-/** Where Spell UI's docs pages are:  the page server's, which the editor's dev server passes `/components/` on to. */
-const SPELL_UI_DOCS = "/components/ui/"
 /** The browser tab every Spell UI docs page opens in (`Inspector.openSpellUIDocs()`). */
 const DOCS_TAB = "spell-ui-docs"
 
@@ -2368,7 +2368,7 @@ let docsPages: Record<string, string> | undefined
 
 /**
  * Load each tag's docs page from Spell UI's docs data, once (`NotebookDocs.dataUrl`, through `SiteData`).
- * - NEVER throws:  without it, a tag's page is guessed (`<tag>.html`).
+ * - NEVER throws:  without it, a tag's page is guessed (its own name).
  */
 function loadDocsPages(): void {
   if (docsPages) return

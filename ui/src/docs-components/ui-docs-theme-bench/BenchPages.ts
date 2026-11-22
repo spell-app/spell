@@ -1,3 +1,4 @@
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEditor.types"
 
 /****************
@@ -93,7 +94,8 @@ const PLACES: Readonly<
   },
   ui: {
     at: "page server",
-    path: "/components/ui/ui-button.html",
+    // the Spell UI site's Button page, on the page server
+    path: SpellUIGuide.addressOf("ui-button"),
     width: 1280,
     icon: "cubes"
   },

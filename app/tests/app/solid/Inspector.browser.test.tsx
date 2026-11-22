@@ -371,7 +371,7 @@ describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a ca
     const open = vi.spyOn(window, "open").mockReturnValue(null)
     cleanups.push(() => open.mockRestore())
     ;(buttons[0] as HTMLElement).click()
-    expect(open).toHaveBeenCalledWith(expect.stringMatching(/\/components\/ui\/ui-segment\.html$/), "spell-ui-docs")
+    expect(open).toHaveBeenCalledWith(expect.stringMatching(/\/components\/ui\/segment$/), "spell-ui-docs")
     expect(host.querySelector(".InspectorCard ui-icon.PanelClose.InspectorClose")).not.toBeNull()
     // a program's own view:  no docs
     Inspector.select(view)

@@ -557,7 +557,7 @@ describe("<ui-theme-menu> Theme bench", () => {
     const bench = part<HTMLAnchorElement>(host, "bench")
     expect(bench.target).toBe("_blank")
     expect(bench.getAttribute("title")).toBe("Open the theme bench in a new window, in this theme")
-    expect(bench.href).toBe(`${location.origin}/components/ui/theme-bench.html?theme=glass&pages=app`)
+    expect(bench.href).toBe(`${location.origin}/components/ui/theme-bench?theme=glass&pages=app`)
     row(host, "merlot").click()
     await ElementFixture.settle()
     expect(part<HTMLAnchorElement>(host, "bench").href).toContain("?theme=merlot")
@@ -566,7 +566,7 @@ describe("<ui-theme-menu> Theme bench", () => {
   it("`bench` names the site it's on;  `none`:  no row", async () => {
     const host = await render(`<ui-theme-menu bench="http://127.0.0.1:4747/"></ui-theme-menu>`)
     expect(part<HTMLAnchorElement>(host, "bench").href).toBe(
-      "http://127.0.0.1:4747/components/ui/theme-bench.html?theme=glass&pages=app"
+      "http://127.0.0.1:4747/components/ui/theme-bench?theme=glass&pages=app"
     )
     const none = await render(`<ui-theme-menu bench="none"></ui-theme-menu>`)
     expect(none.shadowRoot!.querySelector("[part~=bench]")).toBeNull()
@@ -597,7 +597,7 @@ describe("<ui-theme-menu> Theme bench", () => {
     const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
     pick(host, "theme bench")
     expect(open).toHaveBeenCalledWith(
-      `${location.origin}/components/ui/theme-bench.html?theme=glass&pages=app`,
+      `${location.origin}/components/ui/theme-bench?theme=glass&pages=app`,
       "_blank",
       "noopener"
     )

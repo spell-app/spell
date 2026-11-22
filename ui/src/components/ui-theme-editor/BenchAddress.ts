@@ -1,4 +1,5 @@
 import { commaList } from "spell/util/string"
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 import type { PageDevice, PageSchemes } from "./UIThemeEditor.types"
 
 /****************
@@ -94,8 +95,8 @@ export type BenchView = {
 /** The address's parameters. */
 const PARAMS = { theme: "theme", scheme: "scheme", swap: "swap", pages: "pages", phone: "phone" } as const
 
-/** The theme bench's page, from a site's root:  Spell UI's docs page (`ui/docs/theme-bench.html`). */
-const BENCH_PATH = "/components/ui/theme-bench.html"
+/** The theme bench's page, from a site's root:  the Spell UI site's Theme bench page, `/components/ui/theme-bench`. */
+const BENCH_PATH = SpellUIGuide.addressOf("/theme-bench")
 
 /** A switch that's on:  `swap=1`. */
 const ON = "1"

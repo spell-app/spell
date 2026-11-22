@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { SpellUIGuide } from "spell/ui/docs-components/SpellUIGuide"
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 
 describe("SpellUIGuide.addressOf()", () => {
   it("takes a site address, a tag or an old components page's name", () => {

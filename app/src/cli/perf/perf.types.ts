@@ -1,3 +1,6 @@
+// Import directly:  a leaf with no imports, where Spell UI's barrel would load every component
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
+
 /**
  * The pages and profiles `spell perf run` measures, and the shapes of what it keeps (epic `solid-2-final` P1).
  * - Taken from the research scripts that made the first numbers (the epic's `research/perf-scripts/`), as they were.
@@ -63,7 +66,8 @@ export const PERF_PAGES: Record<PerfPageName, PerfPage> = {
   },
   docs: {
     name: "docs",
-    url: ({ pageServer }) => `${pageServer}/components/ui/kitchen-sink.html`,
+    // the Spell UI site's Kitchen Sink page, every component on one page
+    url: ({ pageServer }) => `${pageServer}${SpellUIGuide.addressOf("/kitchen-sink")}`,
     ready: `() => document.readyState === "complete" && ${ALL_DEFINED}`
   },
   epic: {

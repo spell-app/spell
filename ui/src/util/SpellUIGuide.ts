@@ -8,7 +8,9 @@
  *   the components README's writer, the page server's link mender.
  * - It also takes the names Spell UI's old components pages went by (`ui-grid.html#ui-column`, `icons.html?q=star`),
  *   so a link written for them still lands on the right page.
- * - A leaf:  no imports, so a browser page, a component and a node tool all import it alone.
+ * - A leaf of `spell/ui/util`, the bottom of `ui`:  no imports, so a component (the theme menu), a docs widget,
+ *   the editor and a node tool (`spell ui icon`) all import it by file.
+ *   - Not in the barrel:  it'd land in `core`, which no page needs it in.
  * - STATIC and instance-free on purpose:  there's one site.
  ****************/
 export class SpellUIGuide {

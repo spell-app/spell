@@ -24,6 +24,8 @@
  *   - e.g. `epic/src/docs/`, served at `/components/epics/` (the checkout's `"pageServer"` `"componentSets"`,
  *     `ServedFolders`)
  *   - their links are written and checked from there (`Linker`'s `served`, `servedDir()`)
+ * - The Spell UI site's pages check as found, though no file is each one, and a link to one of Spell UI's old
+ *   components pages is mended to its Spell page (`ServedFolders.sites`, `Linker`'s `sites`;  epic `editor` P43).
  * - `--check` also checks short addresses (`href="SAGA:/..."`) and `<epic-link>`s, which `Linker` leaves alone:
  *   the epics tool's `EpicTargets` knows the sagas (epic `epic-workflow` P15).
  * - NOTE:  ported from `doc-links.py` on 2026-10-03;  makes the same edits to every page.
@@ -69,7 +71,7 @@ let linker = linkerUnder(new RepoList().linkRootOf(CHECKOUT))
 
 /** A linker under checkout `root`, told its served folders:  a new one each call, so callers keep theirs. */
 export function linkerUnder(root) {
-  return new SRV.Linker(resolvePath(root), { served: servedUnder(root) })
+  return new SRV.Linker(resolvePath(root), { served: servedUnder(root), sites: ServedFolders.sites })
 }
 
 /** The epic folder, real:  a page in it is taken by its real folder, whichever link it's reached through. */
@@ -168,7 +170,7 @@ if (import.meta.main) {
   const at = args.indexOf("--root")
   const root = at >= 0 ? args[at + 1] : undefined
   if (root) {
-    linker = new SRV.Linker(resolvePath(root), { served: servedUnder(CHECKOUT) })
+    linker = new SRV.Linker(resolvePath(root), { served: servedUnder(CHECKOUT), sites: ServedFolders.sites })
     targets = new EpicTargets(resolvePath(root))
   }
   const files = args.filter((arg, i) => !arg.startsWith("--") && !(at >= 0 && i === at + 1))

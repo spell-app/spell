@@ -724,6 +724,10 @@ The steps between a page's content and its file on disk, for every tool that wri
     P46, `rootLinks()`):  the same text from any folder, a part or a template;  a link to the page's own folder stays
     relative, and so does a load below it (`_assets/`, `parts/`);  a link a move broke goes to its one new home
   - `check()` verifies them, and refuses a relative one (`relative:  ../x.ts -- write /spell-ui/x.ts`)
+  - a SITE shown with no file per page (`sites`, `SRV.LinkSite`;  epic `editor` P43):  the Spell UI site at
+    `/components/ui/`, handed in by the epic tools (spell-epic's `ServedFolders.sites`), since the kit names no site
+    - its pages' addresses check as found;  a link to one of its old pages is mended to its page's address
+      (`/components/ui/ui-button.html` => `/components/ui/button`), and `check()` calls it an `old page`
   - a worktree's page lays its root links under its address as they're clicked:  the live client's `worktreeHref()`,
     the rule the site header's tabs follow too
   - It was the docs tools' `doc-links.js`, which is now its command line.
