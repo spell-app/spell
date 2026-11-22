@@ -601,6 +601,13 @@ export type MergeMainReport = {
   ditched?: string[]
   ditchedTo?: string
   /**
+   * files left uncommitted that the merge doesn't change, left exactly as they were:  another agent's work in progress,
+   * in a worktree several share (`MainMerge.clearTheWay()`, epic `epic-engine` I406);  none:  left out
+   */
+  leftAlone?: string[]
+  /** a merge made in a temporary worktree because of `leftAlone`, the branch then moved to it (`mergeAside()`) */
+  aside?: boolean
+  /**
    * Spell UI's old names the branch brought in, rewritten after the merge by `spell ui rename --write`
    * (`MainMerge.renameOldNames()`, epic `epic-engine` I143), committed on their own:
    * each file, from the kit's root, with its renames (`<ui-docs-toc> => <ui-toc> (2)`);  left out when none

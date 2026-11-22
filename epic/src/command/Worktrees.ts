@@ -804,10 +804,15 @@ function repoLines(states: RepoState[]): string[] {
 /** `merge-main`'s report, for a person. */
 function mergeMainLines(report: MergeMainReport): string[] {
   const lines = mergeResultLines(report)
-  const { ditched = [], ditchedTo, baseCatchUp } = report
+  const { ditched = [], ditchedTo, baseCatchUp, leftAlone = [], aside, result } = report
+  // another agent's work in progress (epic `epic-engine` I406):  said only when the merge went on around it
+  const around = result === "up-to-date" || !leftAlone.length
   return [
     ...(baseCatchUp ? [baseCatchUp] : []),
     lines[0]!,
+    ...(around
+      ? []
+      : [`  left ${leftAlone.length} uncommitted file(s) alone${aside ? ", merging in a temporary worktree" : ""}`]),
     ...(ditched.length
       ? [
           `  moved ${ditched.length} generated file(s) aside, into ${ditchedTo}:`,
