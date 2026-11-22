@@ -42,7 +42,7 @@ export type SpellRuntime = typeof SpellRuntimeModule
 
 /**
  * `source` with its relative imports made absolute against `url`, so it runs from a `blob:` URL.
- * - e.g. `from "./spell-solid-shared.js"`, `import("./x.js")`
+ * - e.g. `from "./spell-solid-shared.js"`, `import("./x.js")`, and the dev server's `from "/src/app/runner/x.ts"`
  * - `import.meta.url` is `url` too:  the places' chunk is loaded lazily, by its neighbours (epic `data` P11).
  * - Pure.
  */
@@ -54,8 +54,12 @@ export function absoluteImports(source: string, url: string): string {
   return absolute.replaceAll("import.meta.url", JSON.stringify(url))
 }
 
-/** A relative specifier in an `import`:  what's before it, its quote, then it. */
-const RELATIVE_IMPORT = /(\bfrom\s*|\bimport\s*\(?\s*)(["'`])(\.{1,2}\/[^"'`]+)\2/g
+/**
+ * A relative specifier in an `import`:  what's before it, its quote, then it.
+ * - From the server's root too, `/src/app/...`:  the dev server writes its modules' imports so (`/@vite/client`),
+ *   and a `blob:` URL can't resolve those either (the run page's copy in dev, epic `solid-2-final` P12).
+ */
+const RELATIVE_IMPORT = /(\bfrom\s*|\bimport\s*\(?\s*)(["'`])(\.{0,2}\/(?!\/)[^"'`]+)\2/g
 
 /** Text of each runtime fetched, by URL -- fetched once per page. */
 const sources = new Map<string, Promise<string>>()

@@ -12,6 +12,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Light / dark before first paint, as Spell UI's docs pages do:  a copy of `ThemePreference.HEAD_SCRIPT`
          (spell-ui's `src/components/ui-theme-menu/ThemePreference.ts`), which the editor's theme (`EditorTheme`) then keeps -->
+    <!-- A phone only runs (`SpellEditor`'s `phoneWidth()`):  a project opened there goes to the run page,
+         `/run/<project>`, before the editor downloads (epic `solid-2-final` P12).  A file's address stays the editor's. -->
+    <script>
+      if (matchMedia("(width <= 767px)").matches && /^\/edit\/.*[^/.]$/.test(location.pathname)) {
+        var last = location.pathname.slice(location.pathname.lastIndexOf("/") + 1)
+        if (last.indexOf(".") < 0) location.replace("/run/" + location.pathname.slice(6) + location.search)
+      }
+    </script>
     <script>
       try {
         var l = localStorage,

@@ -6,6 +6,15 @@ import { defineConfig, type Plugin } from "vite"
 import environment from "spell/app/spaces/server/node/environment"
 import { appConfig, sharedSolid } from "./vite.shared.ts"
 
+/** The two entries, `input` below, from this folder. */
+const ENTRIES = {
+  "spell-viewer": "../src/app/components/spell-viewer/index.ts",
+  "spell-runtime": "../src/app/runner/spellRuntime.ts"
+}
+
+/** Each entry's module id:  its file. */
+const ENTRY_IDS = Object.values(ENTRIES).map((entry) => fileURLToPath(new URL(entry, import.meta.url)))
+
 /**
  * Build the `<spell-viewer>` web component:  `yarn build:element` => `dist-element/`, after `vite.solid.config.ts`.
  * - Two entries:
@@ -43,10 +52,7 @@ export default defineConfig({
     sourcemap: true,
     cssCodeSplit: false,
     rolldownOptions: {
-      input: {
-        "spell-viewer": "../src/app/components/spell-viewer/index.ts",
-        "spell-runtime": "../src/app/runner/spellRuntime.ts"
-      },
+      input: ENTRIES,
       // keep `spell-runtime.js`'s exports:  nothing in the bundle imports it, the element loads it by URL
       preserveEntrySignatures: "exports-only",
       output: {
@@ -55,8 +61,8 @@ export default defineConfig({
         assetFileNames: (asset) =>
           asset.names?.some((name) => name.endsWith(".css")) ? "spell-app.css" : "[name][extname]",
         keepNames: true,
-        // everything both entries use, in ONE chunk with a name that says so -- NOT e.g. `Button.js`
-        codeSplitting: { groups: [{ name: "spell-shared", minShareCount: 2 }] }
+        // everything both entries load up front, in ONE chunk with a name that says so -- NOT e.g. `Button.js`
+        codeSplitting: { groups: [{ name: sharedUpFront(), debugName: "spell-shared" }] }
       }
     }
   },
@@ -65,6 +71,40 @@ export default defineConfig({
     "process.env": {}
   }
 })
+
+/**
+ * The name of the chunk both entries load up front, `spell-shared`, for a module BOTH import statically;
+ * `null` for every other, which Rolldown splits as it would.
+ * - NOT every module two chunks share (`minShareCount: 2`):  that counted the lazy chunks too, so the parser a layout's
+ *   spell compiles with (`LayoutSpell.js`) went into `spell-shared.js`, which every cloud app loaded before it ran
+ *   (epic `solid-2-final` P12:  1.1 MB of source no program needs to run).
+ * - Worked out once, the first time it's asked:  each entry's static imports, followed.
+ */
+function sharedUpFront(): (moduleId: string, ctx: ChunkingContext) => string | null {
+  let both: Set<string> | undefined
+  return (moduleId, ctx) => {
+    both ??= bothEntriesImport(ctx)
+    return both.has(moduleId) ? "spell-shared" : null
+  }
+}
+
+/** Every module both entries reach through static imports alone. */
+function bothEntriesImport(ctx: ChunkingContext): Set<string> {
+  const reached = ENTRY_IDS.map((start) => {
+    const seen = new Set<string>()
+    const next = [start]
+    for (let id = next.pop(); id !== undefined; id = next.pop()) {
+      if (seen.has(id)) continue
+      seen.add(id)
+      next.push(...(ctx.getModuleInfo(id)?.importedIds ?? []))
+    }
+    return seen
+  })
+  return new Set([...reached[0]!].filter((id) => reached.every((set) => set.has(id))))
+}
+
+/** What Rolldown hands a chunk group's `name()`:  each module's imports. */
+type ChunkingContext = { getModuleInfo(moduleId: string): { importedIds: readonly string[] } | null }
 
 /**
  * Copy the built-in types' scope pack, `core`'s `src/core.scopes.js`, beside the bundle --

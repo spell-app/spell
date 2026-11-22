@@ -118,6 +118,29 @@ describe("production build", () => {
     expect(built.length).toBeGreaterThanOrEqual(8)
   })
 
+  test("the run page, `run.html`, loads no editor:  no CodeMirror, Inspector, language service or parser", () => {
+    const html = readFileSync(join(outDir, "run.html"), "utf8")
+    const entries = [
+      ...html.matchAll(/<(?:script[^>]*type="module"[^>]*src|link[^>]*rel="modulepreload"[^>]*href)="\/([^"]+\.js)"/g)
+    ].map(([, file]) => file!)
+    expect(entries.length).toBeGreaterThan(0)
+    // what it loads up front, then what it may load later (a layout's spell compiles in the page:  `LayoutSpell`)
+    const eager = new Set(entries.flatMap((entry) => [entry, ...importedChunks(outDir, entry, "static")]))
+    const held = (files: Iterable<string>, pattern: RegExp) =>
+      [...files].flatMap((file) =>
+        sources(join(outDir, file))
+          .filter((source) => pattern.test(source))
+          .map((source) => `${file}:  ${source.replace(/^.*\/(app|parser|node_modules)\//, "$1/")}`)
+      )
+    expect(held(eager, NOT_ON_THE_RUN_PAGE)).toEqual([])
+    expect(held(eager, PARSER)).toEqual([])
+    // nor later:  only a layout's spell brings the parser
+    const later = new Set(entries.flatMap((entry) => importedChunks(outDir, entry)))
+    expect(held(later, NOT_ON_THE_RUN_PAGE)).toEqual([])
+    // it runs its program on the editor's own runtime, by its fixed name
+    expect(existsSync(join(outDir, "spell-runtime.js"))).toBe(true)
+  })
+
   test("what a runtime keeps per copy -- `core` and the runner -- is in `spell-runtime.js`, never in a chunk it loads", () => {
     // every chunk it loads, at once or lazily:  a copy shares them all (`loadRuntime()`)
     const loaded = importedChunks(outDir, "spell-runtime.js")
@@ -281,6 +304,17 @@ const PER_COPY = /\/(parser\/src\/core|app\/src\/app\/runner)\//
 /** What the editor loads on first use, as it appears in a sourcemap's `sources`:  the views a `LazyPiece` loads, the CSS service. */
 const ON_FIRST_USE =
   /\/app\/src\/app\/solid\/(InspectorView|InspectorParts|PaletteView|AppAnatomyStack|DesignView|ChangeThisView|EditorToursView)\.tsx$|\/node_modules\/vscode-css-languageservice\//
+
+/**
+ * What the run page never loads, as it appears in a sourcemap's `sources`:  the editor, CodeMirror, the Inspector,
+ * the language service.
+ */
+const NOT_ON_THE_RUN_PAGE =
+  /\/app\/src\/app\/(editor\.ts|solid\/(Inspector|SpellPage)|ui\/codemirror\/)|\/app\/src\/lsp\/SpellLanguageService|\/node_modules\/@codemirror\//
+
+/** The parser:  its rules, writers and tokenizer, and spell's grammar. */
+const PARSER =
+  /\/parser\/src\/(parser\/(rules|writers\/(?!SourceMarks)|tokenizer\/(?!.*\.types)|Parser\.ts)|spell\/rules\/)/
 
 /** A static relative import in minified output, never a lazy one:  `from"./x.js"`, `import"./x.js"`. */
 const STATIC_IMPORT = /(?:\bfrom|\bimport)\s*["'`](\.{1,2}\/[^"'`]+\.js)["'`]/g

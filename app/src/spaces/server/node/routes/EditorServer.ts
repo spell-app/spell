@@ -22,7 +22,8 @@ import {
   PAGE_SERVER_PREFIXES,
   SERVER_TOKEN_HEADER,
   TOKEN_PREFIXES,
-  WEBSOCKET_PREFIXES
+  WEBSOCKET_PREFIXES,
+  editorPageFor
 } from "spell/app/spaces/server/node/routes/editorPaths"
 
 /**
@@ -272,7 +273,8 @@ export class EditorServer {
   }
 
   /**
-   * A server, not listening yet, for a BUILT editor in `dir`:  its files, else its `index.html`;
+   * A server, not listening yet, for a BUILT editor in `dir`:  its files, else its `run.html` for a `/run/...` address
+   * and its `index.html` for every other (`editorPageFor()`);
    * the page server's paths (`PAGE_SERVER_PREFIXES`) passed on to it at `pagePort`, websockets too,
    * `token()` added where vite's proxy adds the write token.
    * - what an npm install serves (`serveBuilt()`), and what `spell perf run` measures (a build in a temporary folder)
@@ -303,9 +305,14 @@ export class EditorServer {
         SRV.proxyUpgrade(raw, socket, head, pagePort)
       })
     }
-    web.fallback.use((request, reply, next) =>
-      request.method === "GET" ? reply.set("Cache-Control", "no-cache").sendFile(join(dir, "index.html")) : next()
-    )
+    // the page the address opens:  the run page for `/run/...`, else the editor (`editorPageFor()`);
+    // a build from before the run page has none, and runs it in the editor
+    web.fallback.use((request, reply, next) => {
+      if (request.method !== "GET") return next()
+      const page = editorPageFor(request.path)
+      const file = existsSync(join(dir, page)) ? page : "index.html"
+      return reply.set("Cache-Control", "no-cache").sendFile(join(dir, file))
+    })
     return web
   }
 
