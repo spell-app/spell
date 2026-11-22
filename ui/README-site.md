@@ -178,8 +178,9 @@ What a page can count on:
 - Links are written as from the page's served address:
   `_assets/` is beside it, `../../` is the page server's root, `../epics/epic-item.html` another set's page.
 - `<ui-root>` loads every family on first use, the doc-only `<ui-docs-*>` elements included:
-  `api`, `example`, `inspector`, `nav`, `search`, `toc` and `tokens`, in [their folder](src/docs-components/).
-  - The theme menu was one of them until epic `debut` P17:  `<ui-theme-menu>` is a real element now.
+  `api`, `index`, `inspector`, `nav`, `search`, `theme-bench` and `tokens`, in [their folder](src/docs-components/).
+  - Three were among them once, and are real elements now:
+    `<ui-theme-menu>` (epic `debut` P17), `<ui-example>` and `<ui-toc>` (epic `ui-gaps` P14).
   They read the site's data, [components.json5](docs/__data/components.json5), never the vocabularies.
 - The layout's root is `<ui-root class="site" stack-with="page" ...>`,
   so an example that stacks on a narrow screen stacks by the SCREEN's width, as on fomantic-ui.com,
