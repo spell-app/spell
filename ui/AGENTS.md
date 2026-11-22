@@ -1208,7 +1208,9 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
   - From epic `epic-components` P1.
   - Restated in `wwod-spell-ui`'s names when `main` merged in (2026-10-08),
     in place of `wwod-spell-ui` P12's JSON packs.
-- The pack is ONE classic script, so it works from `file://`.
+- The pack is ONE classic script a page names, which registers it at once;  its families are ES modules beside it,
+  each loaded the first time one of its elements is made on the docs pages, all at once elsewhere (`loadFamily`,
+  `define()`;  epic `solid-2-final` P7).
   - Built by the kit's pack tooling, [ComponentPack](../src/element-tools/ComponentPack.ts)
     (Spell UI's from epic `repo-split` P5 to P10):
     - `spell-pack build | check [<folder>]`, the kit's bin ([its script](../bin/spell-pack.mjs)),

@@ -11,10 +11,10 @@ import type { Plugin } from "vite"
  *   about a fifth of the file, and nothing compressed per request
  * - scripts, styles, pages, JSON, SVG and WebAssembly, of at least 1 KB (`MIN_BYTES`);  never a file the build left
  *   in its folder from before (a `.br` is written only for a file this build wrote)
- * - who:  the app's builds (`appConfig()`:  the editor, the element builds, the runner, a Python program's page side)
- *   and Spell UI's site bundle
- * - NOT the bundles the repo commits (the docs bundle, the epics pack):  a copy beside them would double what git
- *   keeps;  the servers gzip them as they're sent, once a run
+ * - who:  the app's builds (`appConfig()`:  the editor, the element builds, the runner, a Python program's page side),
+ *   Spell UI's site bundle and the docs pages' bundle (epic `solid-2-final` P7)
+ * - NOT a file the repo commits:  a copy beside it would double what git keeps;  the servers gzip it as it's sent, once
+ *   a run
  * - node's own zlib:  no dependency
  */
 export function brotliCopies(): Plugin {

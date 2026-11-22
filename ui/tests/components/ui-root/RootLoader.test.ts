@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
+import { ComponentPacks } from "spell/ui/components/ui-components/ComponentPacks"
 import { RootLoader } from "spell/ui/components/ui-root/RootLoader"
 
 // `RootLoader`'s registries are page-wide and have no reset:  each case uses folders of its own
@@ -57,5 +58,38 @@ describe("RootLoader.entryOf()", () => {
     expect(RootLoader.entryOf("ui-buttons")).toMatchObject({ folder: "ui-button", attributes: expect.any(Array) })
     expect(RootLoader.entryOf("x-unlisted")).toBeUndefined()
     expect(RootLoader.entryOf("toString")).toBeUndefined()
+  })
+})
+
+describe("RootLoader.canLoad()", () => {
+  it("knows the library's families and the added ones;  not a doc-only one no bundle added", () => {
+    RootLoader.add({ "../../docs-components/ui-added-can/index.ts": async () => undefined })
+    expect(RootLoader.canLoad("ui-divider")).toBe(true)
+    expect(RootLoader.canLoad("ui-added-can")).toBe(true)
+    expect(RootLoader.canLoad("ui-docs-api")).toBe(false)
+  })
+})
+
+// epic `solid-2-final` P7:  the docs bundle defines no family up front, and a pack's families are modules of their own
+describe("RootLoader.loadOnFirstUse()", () => {
+  it("loads a pack's added family the first time one of its elements is made, in a shadow root too, once", async () => {
+    const catalog = { "p7lazy-card": { folder: "p7lazy-card", attributes: ["label"] } }
+    ComponentPacks.register({ name: "p7lazy", prefix: "p7lazy-", catalog, define: () => undefined })
+    let loads = 0
+    RootLoader.add({ "p7lazy-card/index.ts": async () => void loads++ })
+    expect(RootLoader.folderFor("p7lazy-card")).toBe("p7lazy-card")
+    RootLoader.loadOnFirstUse()
+    RootLoader.defineEarly(catalog)
+    const host = document.body.appendChild(document.createElement("div"))
+    host.attachShadow({ mode: "open" }).innerHTML = "<p7lazy-card></p7lazy-card><p7lazy-card></p7lazy-card>"
+    document.body.append(document.createElement("p7lazy-card"))
+    await Promise.resolve()
+    expect(loads).toBe(1)
+    host.remove()
+  })
+
+  it("leaves a tag whose family the page can't import to the page's own script:  no load, no warning", () => {
+    RootLoader.loadOnFirstUse()
+    expect(() => document.createElement("ui-docs-api")).not.toThrow()
   })
 })

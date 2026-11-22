@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
 import { createHash } from "node:crypto"
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { readTypeScript } from "spell/util/node/typescript.ts"
@@ -25,14 +25,18 @@ import {
  * - `<pack>.catalog.ts`:  tag => family folder + skeleton, read from every vocabulary (`<Name>.en.ts`) in
  *   `components/` by `RootCatalog` (as Spell UI's `yarn gen:root` builds its `UIRoot.catalog.ts`);
  *   its second line records the sources' hash (`hash()`), which `check()` compares
- * - `<pack>.entry.ts`:  `SpellUI.registerPack({ name, prefix, catalog, define })`, `define()` importing every family
- *   barrel (`import()`:  inlined in the script, but run only when called;  it returns that promise)
- * - `<pack>.pack.js`:  the entry built by Vite as ONE classic script (an IIFE), minified,
- *   on `elementBaseConfig()`, the settings Spell UI's own elements build on (decorators BEFORE Solid, Solid's JSX,
- *   Lightning CSS),
- *   with every `PACK_MODULES` specifier left external and read from `globalThis.SpellUI.packModules[<specifier>]`:
- *   the page's one Solid, one spell-element and one Spell UI core
+ * - `<pack>.entry.ts`:  `SpellUI.registerPack({ name, prefix, catalog, families, loadFamily, define })`
+ *   - `loadFamily(folder)` imports one family's module, `<pack>/<family>.js` beside the script;  `define()` all of them
+ *   - a page that loads families on first use (the docs bundle) asks for each as one of its elements is made;  any
+ *     other calls `define()` (epic `solid-2-final` P7)
+ * - `<pack>/<family>.js`:  each family an ES module, what two or more share in ONE chunk beside them (`bundleFamilies()`),
+ *   minified, on `elementBaseConfig()`, the settings Spell UI's own elements build on (decorators BEFORE Solid,
+ *   Solid's JSX, Lightning CSS);  every `PACK_MODULES` import read from `globalThis.SpellUI.packModules[<specifier>]`
+ *   (`withPageModules()`):  the page's one Solid, one element layer and one Spell UI core
+ * - `<pack>.pack.js`:  the entry built by Vite as ONE classic script (an IIFE), minified, the script a page names
  *   - its banner records the same hash
+ * - The catalog and entry are committed;  the script and the families are built where they're served (the page
+ *   server's `spell bundle epics-pack`, `spell publish`), git-ignored:  their hashed chunk names would churn every diff
  * - then its set's docs data, `docs/__data/` (`buildSiteData()`)
  * - A pack is a package whose `package.json` has `"spellPack": { "prefix" }` (`read()`).
  * - Run by `spell-pack build | check` (the kit's `bin/spell-pack.mjs`), from any repo of the kit:
@@ -187,7 +191,8 @@ export class ComponentPack {
    * - `stale` names each one that isn't, and why;  none means current.
    * - The catalog:  its recorded hash is the sources' (`hash()`),
    *   and its text is what a build writes now (so a hand edit shows too)
-   * - The entry:  its text, while the sources are current (it holds each family's hash);  the script:  its banner's hash
+   * - The entry:  its text, while the sources are current (it holds each family's hash);  the script, when built:  its
+   *   banner's hash (not built at all is no stale file:  it's never committed)
    * - And the set's docs data:  its builder's `--check` (`buildSiteData()`)
    * - Doesn't build:  fast enough for every `yarn test` (a pack's own test runs it)
    */
@@ -207,9 +212,11 @@ export class ComponentPack {
     if (entry === undefined) add(files.entry, "missing")
     // the entry carries each family's hash, so changed sources change it too:  the catalog and script say so already
     else if (!sourcesChanged && entry !== this.entrySource()) add(files.entry, "not what a build writes")
+    // the script and families are built where they're served, never committed (epic `solid-2-final` P7):  none yet
+    // is no stale file (a fresh checkout, CI);  one built from older sources is
     const script = ComponentPack.readText(files.script)
-    if (script === undefined) add(files.script, "missing")
-    else if (ComponentPack.recordedHash(script) !== hash) add(files.script, "built from older sources")
+    if (script !== undefined && ComponentPack.recordedHash(script) !== hash)
+      add(files.script, "built from older sources")
     if (this.hasSiteData && !this.buildSiteData({ check: true })) {
       add(join(this.dir, DOCS_DATA_FOLDER), `not what \`yarn ${SITE_DATA_SCRIPT}\` writes now`)
     }
@@ -323,7 +330,8 @@ export class ComponentPack {
     return {
       catalog: join(folder, `${this.name}.catalog.ts`),
       entry: join(folder, `${this.name}.entry.ts`),
-      script: join(folder, `${this.name}.pack.js`)
+      script: join(folder, `${this.name}.pack.js`),
+      families: join(folder, this.name)
     }
   }
 
@@ -367,44 +375,63 @@ ${lines.join(",\n")}${lines.length ? "\n" : ""}}
 
   /** The text of `<pack>.entry.ts`. */
   private entrySource(): string {
-    // the entry sits in `components/__pack/`, beside the families
-    const imports = this.families().map((family) => `import("../${family}")`)
-    const define = imports.length
-      ? `() =>\n    Promise.all([\n      ${imports.join(",\n      ")}\n    ]).then(() => undefined)`
-      : "() => Promise.resolve()"
     const families = Object.entries(this.familyHashes()).map(
-      ([family, hash]) => `    ${JSON.stringify(family)}: "${hash}"`
+      ([family, hash]) => `  ${JSON.stringify(family)}: "${hash}"`
     )
     return `/* GENERATED -- do not edit:  \`spell pack build ${this.name}\` */
 /**
- * The \`${this.name}\` pack's script:  registers with the page's Spell UI, which adds the catalog and calls \`define()\`.
- * - \`define()\` imports every family barrel, which defines its tags:  inlined in the script, run only when called.
- * - \`families\`:  each family's sources' hash, so a page swapping in a rebuilt pack re-renders only what changed.
+ * The \`${this.name}\` pack's script:  registers with the page's Spell UI, which adds the catalog, and loads its
+ * families (\`${this.name}/<family>.js\`, ES modules beside the script) on first use, or all at once (\`define()\`).
+ * - \`families\`:  each family's sources' hash, so a page swapping in a rebuilt pack re-renders only what changed;
+ *   and its module's query, so a rebuilt family is a new module, an unchanged one the same
  */
 import { CATALOG } from "./${this.name}.catalog"
 
-/** The docs bundle's global (\`spell-ui.entry.js\`). */
-const { SpellUI } = globalThis as unknown as { SpellUI: { registerPack(pack: object): void } }
+/** The page's Spell UI (the docs bundle's, the site's):  \`loading\` until the docs bundle has run (\`spell-ui.js\`). */
+const { SpellUI } = globalThis as unknown as {
+  SpellUI?: { registerPack?(pack: object): void; loading?: Promise<unknown> }
+}
 
-SpellUI.registerPack({
-  name: ${JSON.stringify(this.name)},
-  prefix: ${JSON.stringify(this.prefix)},
-  catalog: CATALOG,
-  families: {
+/** This script's own address:  its families are beside it.  Read as it runs, while \`currentScript\` is set. */
+const BASE = document.currentScript instanceof HTMLScriptElement ? document.currentScript.src : location.href
+
+/** Each family folder => its sources' hash. */
+const FAMILIES: Record<string, string> = {
 ${families.join(",\n")}
-  },
-  define: ${define}
-})
+}
+
+/** Import family \`folder\`'s module, which defines its tags. */
+function loadFamily(folder: string): Promise<unknown> {
+  const url = new URL(\`./${this.name}/\${folder}.js?v=\${FAMILIES[folder] ?? ""}\`, BASE)
+  return import(/* @vite-ignore */ url.href)
+}
+
+function register() {
+  SpellUI!.registerPack!({
+    name: ${JSON.stringify(this.name)},
+    prefix: ${JSON.stringify(this.prefix)},
+    catalog: CATALOG,
+    families: FAMILIES,
+    loadFamily,
+    define: () => Promise.all(Object.keys(FAMILIES).map(loadFamily)).then(() => undefined)
+  })
+}
+
+if (SpellUI?.registerPack) register()
+else void SpellUI?.loading?.then(register)
 `
   }
 
   /**
-   * Build the entry into `<pack>.pack.js`;  returns the files written.
+   * Build the pack's script and its families;  returns the files written.
+   * - Its families first (`bundleFamilies()`), then the entry into `<pack>.pack.js`, ONE classic script (an IIFE):
+   *   the script a page names, which registers the pack at once and imports each family when asked (`loadFamily()`).
    * - In this process, through Vite's API, on `elementBaseConfig()`, as Spell UI's own elements are built;
    *   `configFile: false`:  the pack's own `vite.config.ts` holds only lint / format settings.
    */
   private async bundle(hash: string): Promise<string[]> {
     const { build } = await import("vite-plus")
+    const families = await this.bundleFamilies()
     const base = elementBaseConfig()
     const folder = join(this.components, PACK_FOLDER)
     const { files } = this
@@ -427,33 +454,127 @@ ${families.join(",\n")}
           name: "SpellPack",
           fileName: () => `${this.name}.pack.js`
         },
-        rolldownOptions: {
-          external: (id: string) => {
-            if (PACK_MODULES.includes(id)) return true
-            // its own package's files are its own:  bundled
-            if (this.isOwnName(id)) return false
-            if (SHARED_IMPORT.test(id)) {
-              throw new ComponentPackError(
-                `pack '${this.name}':  imports '${id}', which the page can't share;  import from ` +
-                  `${PACK_MODULES.map((it) => `'${it}'`).join(", ")} only, or add it to PACK_MODULES ` +
-                  "(the kit's src/element-tools/packModules.ts) and Spell UI's packModules"
-              )
-            }
-            return false
-          },
-          output: {
-            // custom element class names are read by dev-time warnings and the manifest (see ui's `vite.config.ts`)
-            keepNames: true,
-            globals: (id: string) => `globalThis.SpellUI.packModules[${JSON.stringify(id)}]`
-          }
-        }
+        rolldownOptions: { external: this.external, output: { keepNames: true } }
       }
     })
     // The banner goes on AFTER the build:  the minifier drops `output.banner`'s comment
     const banner = `/* GENERATED -- do not edit:  \`spell pack build ${this.name}\`.  sources:  ${hash} */`
     writeFileSync(files.script, `${banner}\n${readFileSync(files.script, "utf8")}`)
     const outputs = (Array.isArray(result) ? result : [result]).flatMap((it) => ("output" in it ? it.output : []))
-    return outputs.map((chunk) => join(folder, chunk.fileName))
+    return [...outputs.map((chunk) => join(folder, chunk.fileName)), ...families]
+  }
+
+  /**
+   * Build every family into `<pack>/<family>.js` (`files.families`), an ES module each, what they share in chunks
+   * beside them (`<name>-<hash>.js`), minified;  returns the files written.
+   * - Every `PACK_MODULES` import is the page's:  rewritten to read `globalThis.SpellUI.packModules[<specifier>]`
+   *   (`withPageModules()`), so a page has one Solid, one element layer and one Spell UI core.
+   * - Built in a folder of this run's, then swapped in whole:  a page loading a family meanwhile finds every chunk.
+   */
+  private async bundleFamilies(): Promise<string[]> {
+    const { build } = await import("vite-plus")
+    const base = elementBaseConfig()
+    const out = this.files.families
+    const building = `${out}.building-${process.pid}`
+    rmSync(building, { recursive: true, force: true })
+    const input = Object.fromEntries(
+      this.families().map((family) => [family, join(this.components, family, "index.ts")])
+    )
+    try {
+      await build({
+        ...base,
+        configFile: false,
+        root: this.dir,
+        base: "./",
+        logLevel: "warn",
+        publicDir: false,
+        build: {
+          outDir: building,
+          emptyOutDir: true,
+          sourcemap: false,
+          minify: true,
+          target: "esnext",
+          modulePreload: false,
+          reportCompressedSize: false,
+          rolldownOptions: {
+            input,
+            preserveEntrySignatures: "allow-extension",
+            external: this.external,
+            output: {
+              // custom element class names are read by dev-time warnings and the manifest (see ui's `vite.config.ts`)
+              keepNames: true,
+              entryFileNames: "[name].js",
+              chunkFileNames: "[name]-[hash].js",
+              // what two families or more share, in ONE chunk:  dozens of small ones were a round trip each on a slow
+              // network (an epic page loads nearly every family);  a family's own code stays its own
+              codeSplitting: { groups: [{ name: "shared", minShareCount: 2 }] }
+            }
+          }
+        }
+      })
+      const written = ComponentPack.filesUnder(building).filter((file) => file.endsWith(".js"))
+      for (const file of written) writeFileSync(file, ComponentPack.withPageModules(readFileSync(file, "utf8"), file))
+      rmSync(out, { recursive: true, force: true })
+      renameSync(building, out)
+      return written.map((file) => join(out, relative(building, file)))
+    } finally {
+      rmSync(building, { recursive: true, force: true })
+    }
+  }
+
+  /**
+   * Which imports the pack's builds leave out:  `PACK_MODULES`, the page's;  its own package's files are bundled.
+   * - Throws `ComponentPackError` on an import of Spell UI, the element layer or Solid that the page can't share.
+   */
+  private readonly external = (id: string): boolean => {
+    if (PACK_MODULES.includes(id)) return true
+    if (this.isOwnName(id)) return false
+    if (SHARED_IMPORT.test(id)) {
+      throw new ComponentPackError(
+        `pack '${this.name}':  imports '${id}', which the page can't share;  import from ` +
+          `${PACK_MODULES.map((it) => `'${it}'`).join(", ")} only, or add it to PACK_MODULES ` +
+          "(the kit's src/element-tools/packModules.ts) and Spell UI's packModules"
+      )
+    }
+    return false
+  }
+
+  /**
+   * `code`, a built family module, with each import of a `PACK_MODULES` specifier read from the page instead:
+   * `import{a as b,c}from"solid-js"` => `const{a:b,c}=globalThis.SpellUI.packModules["solid-js"]`.
+   * - The forms the build writes:  named (`{ a as b }`), a namespace (`* as x`), a default (`x`), and bare.
+   * - Throws `ComponentPackError` when one is left (a form it can't read), naming the file:  a page would fail to
+   *   load it, as no import map names these.
+   */
+  static withPageModules(code: string, file: string): string {
+    const page = (specifier: string) => `globalThis.SpellUI.packModules[${JSON.stringify(specifier)}]`
+    const rewritten = code.replace(PAGE_MODULE_IMPORT, (whole, clause: string | undefined, specifier: string) => {
+      if (!PACK_MODULES.includes(specifier)) return whole
+      const names = (clause ?? "").trim()
+      if (!names) return ""
+      const namespace = /^\*\s*as\s+([\w$]+)$/.exec(names)
+      if (namespace) return `const ${namespace[1]}=${page(specifier)};`
+      const named = /^(?:([\w$]+)\s*,\s*)?\{([^}]*)\}$/.exec(names)
+      const single = /^([\w$]+)$/.exec(names)
+      const defaultName = named?.[1] ?? single?.[1]
+      const pairs = (named?.[2] ?? "")
+        .split(",")
+        .map((it) => it.trim())
+        .filter(Boolean)
+        .map((it) => it.replace(/^([\w$]+)\s+as\s+([\w$]+)$/, "$1:$2"))
+      if (defaultName) pairs.unshift(`default:${defaultName}`)
+      if (!named && !single) return whole
+      return `const{${pairs.join(",")}}=${page(specifier)};`
+    })
+    const left = [...rewritten.matchAll(PAGE_MODULE_IMPORT)]
+      .map((match) => match[2])
+      .filter((it) => PACK_MODULES.includes(it!))
+    if (left.length) {
+      throw new ComponentPackError(
+        `ComponentPack:  ${file} still imports ${left.join(", ")} in a form it can't rewrite`
+      )
+    }
+    return rewritten
   }
 
   /**
@@ -574,7 +695,7 @@ const SHARED_IMPORT =
   /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell\/(element|ui|parser|epic|app)(\/|$)/
 
 /** Version of what `build()` writes:  bump it when the generated files change shape, so every pack goes stale. */
-const PACK_FORMAT = "spell-pack 3"
+const PACK_FORMAT = "spell-pack 4"
 
 /** The set's docs data, in the pack's `dir`:  what its pages' side column, search and API tables read. */
 const DOCS_DATA_FOLDER = "docs/__data"
@@ -584,6 +705,12 @@ const SITE_DATA_SCRIPT = "site:data"
 
 /** Files under them that never reach the pack:  tests, their snapshots, and the pack's own generated folder. */
 const NOT_SOURCE = /\.test\.[cm]?[jt]sx?$|[\\/]__snapshots__[\\/]|[\\/]components[\\/]__pack[\\/]/
+
+/**
+ * A static import in built output, minified or not:  its clause (`{ a as b }`, `* as x`, `x`;  none for a bare one) and
+ * its specifier.  Never a dynamic `import(...)`.
+ */
+const PAGE_MODULE_IMPORT = /\bimport\s*(?:([\w$*{][^;"'`]*?)\s*from\s*)?["']([^"']+)["'];?/g
 
 /** A file whose imports `sources()` follows. */
 const SCRIPT = /\.[cm]?[jt]sx?$/

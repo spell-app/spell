@@ -358,12 +358,13 @@ There's one today, `spell-epic`'s `epics` pack:  the `<epic-*>` elements every e
 </ui-root>
 ```
 
-A pack is ONE classic script, so it works even from a page opened as a file.
+A pack is ONE classic script a page names, and an ES module per family beside it, each loaded the first time a page
+needs it.
 It carries its elements and nothing they stand on:  no Solid, no Spell UI.
 It borrows the page's, so the page still has one Solid, and the pack's elements share Spell UI's base.
 
 - The price of borrowing:  the page first loads a Spell UI bundle that sets `window.SpellUI`,
-  today the docs site's bundle or the epic pages' single-file bundle.
+  today the docs site's bundle or the epic pages' docs bundle.
   The library's own entries don't set it.
 - A pack that fails or times out logs an error naming its `source`, and the root still gets ready.
 - A pack's elements are written exactly like a Spell UI family.

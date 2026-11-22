@@ -40,8 +40,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         else text of 1 KB or more gzipped, a file's gzip kept in memory by its path, size and time (128 MB at most)
       - `send()` / `json()`:  text of 1 KB or more gzipped
       - each says `Vary: Accept-Encoding`;  a request that takes neither gets the body as it is
-      - the brotli copies:  the builds' `brotliCopies()` (`spell/toolchain/brotliCopies`), in the app's builds and
-        Spell UI's site bundle;  never the committed bundles, which are gzipped once a run instead
+      - the brotli copies:  the builds' `brotliCopies()` (`spell/toolchain/brotliCopies`), in the app's builds,
+        Spell UI's site bundle and the docs pages' bundle;  never a committed file, which is gzipped once a run instead
     - `reply.noStore()`:  the ONE way an answer says "never keep a copy" (`Cache-Control: no-store`), every route's
   - [listener.ts](listener.ts) -- `toListener()`:  a handler as node's `(req, res)`, with the 404 / error answers
   - [ports.ts](ports.ts) -- choosing a port:
@@ -758,9 +758,11 @@ The steps between a page's content and its file on disk, for every tool that wri
 
   - HOW each is built:  `BUNDLES`, in [server.types.ts](server.types.ts):
     - `ui-site`:  Spell UI's docs site
+    - `epics-pack`:  the epics pack's script and its families' modules
+    - `epic-docs`:  the docs pages' bundle (`_assets/spell-ui/`), and the scripts beside it
   - `check()`:  stale when never built, its entry missing or rewritten, or its sources' hash changed.
-  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog, the
-    epics pack, spell-epic's docs bundle
+  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog
+    (the epics pack and spell-epic's docs bundle were too, until epic `solid-2-final` P7:  bundles now, git-ignored)
     - built by `--stale` only in a worktree (`buildsWhenStale`);  named (`spell bundle ui-root`), anywhere
     - its record in the install's git-ignored cache, `node_modules/.cache/spell-bundles/`, never beside it
     - the main checkout tells by its `check` command (`yarn pack:check`);  a worktree by its record, or that check

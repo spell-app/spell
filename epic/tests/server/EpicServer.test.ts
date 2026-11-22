@@ -139,10 +139,11 @@ describe("EpicServer", () => {
   test("the engine's assets and pack at /_epic/;  at their old checkout paths too, for pages not migrated", async () => {
     const css = await ask(port, "GET", "/_epic/assets/spell-doc.css")
     expect([css.status, css.headers["content-type"]]).toEqual([200, "text/css; charset=utf-8"])
-    expect((await ask(port, "GET", "/_epic/pack/epics.pack.js")).status).toBe(200)
+    // the pack's committed catalog:  its script is built where it's served, never committed (epic `solid-2-final` P7)
+    expect((await ask(port, "GET", "/_epic/pack/epics.catalog.ts")).status).toBe(200)
     const old = await ask(port, "GET", "/packages/epics/tools/_assets/spell-doc.css")
     expect([old.status, old.text.length]).toEqual([200, css.text.length])
-    expect((await ask(port, "GET", "/r/two/packages/epics/components/__pack/epics.pack.js")).status).toBe(200)
+    expect((await ask(port, "GET", "/r/two/packages/epics/components/__pack/epics.catalog.ts")).status).toBe(200)
   })
 
   // epic-eject T11:  the templates are the engine's, at /templates/ for every repo (its pages link `../templates/`)
@@ -211,7 +212,8 @@ describe("EpicServer", () => {
     // a repo whose settings name none:  nothing
     expect((await ask(port, "GET", "/r/two/element/spell.pack.js")).status).toBe(404)
     // the engine's own routes stay the engine's
-    expect((await ask(port, "GET", "/_epic/pack/epics.pack.js")).status).toBe(200)
+    // the pack's committed catalog:  its script is built where it's served, never committed (epic `solid-2-final` P7)
+    expect((await ask(port, "GET", "/_epic/pack/epics.catalog.ts")).status).toBe(200)
   })
 
   test("every page's SPELL_SERVER:  its path under the prefix it was asked by, its repo, base and checkout", async () => {

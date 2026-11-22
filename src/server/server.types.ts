@@ -202,7 +202,8 @@ export type LinkCheck = {
  *   - Why not committed:  its chunk names carry content hashes,
  *     so every Spell UI change deleted and re-added most of its files in every diff and merge
  *     (Owen, epic `epic-components`, 2026-10-07)
- * - a committed one (epic `epic-engine` P54):  Spell UI's root catalog, the epics pack, spell-epic's docs bundle
+ * - a committed one (epic `epic-engine` P54):  Spell UI's root catalog (the epics pack and the docs bundle until epic
+ *   `solid-2-final` P7)
  */
 export type BundleSpec = {
   /** what the command line calls it, e.g. `ui-site` */
@@ -393,10 +394,9 @@ export const BUNDLES: BundleSpec[] = [
     package: "spell-epic",
     cwd: ".",
     run: ["yarn", "pack:build"],
-    check: ["yarn", "pack:check"],
     output: "src/components/__pack",
     entry: "epics.pack.js",
-    committed: true,
+    // its catalog and entry (committed), its script and its families' chunks (`epics/`), and Epic UI's data
     generated: ["src/components/__pack", "src/docs/__data"],
     sources: [...EPIC_SOURCES, "spell/src/element-tools"]
   },
@@ -406,11 +406,12 @@ export const BUNDLES: BundleSpec[] = [
     package: "spell-epic",
     cwd: ".",
     run: ["node", "src/tools/bundle-spell-ui.js"],
-    output: "src/tools/_assets",
-    entry: "spell-ui.js",
-    committed: true,
+    output: "src/tools/_assets/spell-ui",
+    entry: "main.js",
+    // what its build writes beside its sources, in `_assets/`:  the docs bundle's folder (`spell-ui/`), the scripts
+    // beside the page's Spell UI, and the folders of the build before epic `solid-2-final` P7 (`emoji/`, `lazy/`)
     generated: [
-      "src/tools/_assets/spell-ui.js",
+      "src/tools/_assets/spell-ui",
       "src/tools/_assets/spell-comments.js",
       "src/tools/_assets/commands.js",
       "src/tools/_assets/core-reference.js",

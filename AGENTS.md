@@ -347,9 +347,10 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   (none today), then each project a checkout's own git-ignored `page-server.local.json5` names
   (`{ projects: ["../x"] }`, someone's project trying the epic framework).
 - How:  [the server's AGENTS.md](src/server/AGENTS.md), "The page server's settings".
-- It keeps a WORKTREE's generated files current by itself (epic `epic-engine` P54):  Spell UI's root catalog, the
-  epics pack, spell-epic's docs bundle, rebuilt as their sources change or a page finds one stale;
-  on `main` it only says what to run.
+- It keeps a WORKTREE's committed generated files current by itself (epic `epic-engine` P54):  Spell UI's root
+  catalog, rebuilt as its sources change or a page finds it stale;  on `main` it only says what to run.
+- The bundles it serves it builds wherever it runs, `main` too, as their sources change (below, "Leaving, merging,
+  shelving"):  Spell UI's site, the epics pack, the docs pages' bundle.
 
 ## Tests
 
@@ -543,7 +544,10 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - NOT committed at all (since 2026-10-07):  the bundles only the page server serves,
     whose hashed chunk names churned every diff.
     - Spell UI's docs site:  its `_assets/`, in [spell-ui's site](ui/site/)
-    - They're git-ignored.
+    - the docs pages' bundle (`epic/src/tools/_assets/spell-ui/`, and the scripts beside it) and the epics pack's
+      script and families (`epic/src/components/__pack/epics.pack.js`, `epics/`), since epic `solid-2-final` P7:
+      code-split, their chunks churned every diff the same way;  the pack's catalog and entry stay committed
+    - They're git-ignored;  `spell publish` builds them into the published package (`"spellPublish": { "bundles" }`).
       The page server builds the stale ones when it starts, and a page waits for them.
     - By hand:  `spell bundle [--stale]`, or `check`.
     - The code:  `Bundle`, in `spell/server`.

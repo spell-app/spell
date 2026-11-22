@@ -61,7 +61,8 @@ if (check) {
 }
 
 console.log("\n== docs:update summary")
-const bundle = join(ASSETS, "spell-ui.js")
+// the docs bundle's entry module (`spell-ui.js` is its few-line loader since epic `solid-2-final` P7)
+const bundle = join(ASSETS, "spell-ui", "main.js")
 if (exists(bundle)) console.log(`  ${relative(ROOT, bundle)}  ${kb(bundle)}`)
 for (const output of pages) {
   const result = results.find((r) => r.output === output)

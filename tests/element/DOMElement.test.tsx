@@ -1069,6 +1069,24 @@ describe("DOMElement defined early", () => {
     })
   })
 
+  test("each element made while its tag is pending is told to pendingMade(), in a shadow root too", async () => {
+    const made: string[] = []
+    E.DOMElement.pendingMade = (tag) => made.push(tag)
+    try {
+      const { tag, define } = earlyTag("early-first-use", [])
+      container().appendChild(document.createElement(tag))
+      const shadow = container().attachShadow({ mode: "open" })
+      shadow.innerHTML = `<${tag}></${tag}>`
+      expect(made).toEqual([tag, tag])
+      define()
+      await (shadow.firstElementChild as Host).ready
+      container().appendChild(document.createElement(tag))
+      expect(made).toEqual([tag, tag])
+    } finally {
+      E.DOMElement.pendingMade = undefined
+    }
+  })
+
   test("a tag defined already is left alone", () => {
     const { tag } = definedTag("early-defined", [])
     expect(E.DOMElement.defineEarly(tag, { attributes: [], isAFormControl: false })).toBeUndefined()

@@ -456,18 +456,20 @@ sequenceDiagram
   root->>page: 6 · all settled:  ui-ready, the content shows
 ```
 
-_A pack is one classic script:  it brings its own elements, and borrows Solid and the framework from the page._
+_A pack is one classic script and a module per family:  it brings its own elements, and borrows Solid and the framework from the page._
 
 Making a package a pack takes one key in its `package.json`.
 spell-epic's is `"spellPack": { "name": "epics", "prefix": "epic-", "dir": "src" }`:
 - `prefix` is required, and every tag starts with it;  `name` is the folder's name unless it says otherwise.
 - `dir`:  where its `components/` and `docs/` are, and its code, when that isn't the package's root.
 
-`spell-pack build` then reads every vocabulary in the families' folder, and writes three files into its `__pack/`:
+`spell-pack build` then reads every vocabulary in the families' folder, and writes into its `__pack/`:
 the catalog `<ui-root>` reads (`<pack>.catalog.ts`, each tag's family and skeleton),
-the entry that registers it (`<pack>.entry.ts`, one `SpellUI.registerPack({ name, prefix, catalog, define })`),
-and that entry built as one minified classic script, `<pack>.pack.js`, which works from `file://` too.
-The set's docs data comes after;  `spell-pack check` exits 1 while any of it is stale.
+the entry that registers it (`<pack>.entry.ts`, one `SpellUI.registerPack({ name, prefix, catalog, loadFamily, define })`),
+that entry built as one minified classic script, `<pack>.pack.js`,
+and each family as an ES module beside it, `<pack>/<family>.js`, loaded the first time a page needs it.
+The set's docs data comes after;  `spell-pack check` exits 1 while what it commits is stale
+(the catalog, the entry, the data:  the script and the modules are built where they're served).
 
 - ONE Solid per page:  two copies of Solid, of this framework or of Spell UI's core on a page break silently
   (two registries, two owners).

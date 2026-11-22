@@ -40,9 +40,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - fails the build on a `tests` it can't read as array and object literals
   - `spell/toolchain/brotliCopies` ([brotliCopies.ts](brotliCopies.ts)):  `brotliCopies()`, a build-only Vite plugin
     writing a brotli copy beside each built text file of 1 KB or more (`x.js.br`;  epic `solid-2-final` P2)
-    - the app's builds (`appConfig()`) and Spell UI's site bundle;  the kit's servers send the copy as it is
-      (`SRV.Reply.sendFile()`)
-    - never the committed bundles:  a copy would double what git keeps
+    - the app's builds (`appConfig()`), Spell UI's site bundle and the docs pages' bundle;  the kit's servers send the
+      copy as it is (`SRV.Reply.sendFile()`)
+    - never a committed file:  a copy would double what git keeps
   - `spell/toolchain/packageVersion` ([packageVersion.ts](packageVersion.ts)):  `__PACKAGE_VERSION__`
   - `spell/toolchain/browserMode` ([browserMode.ts](browserMode.ts)):  `browserMode()`, the `browser` block of every
     repo's browser test projects:  headless Playwright, animations off (reduced motion;  epic `debut` I77)
