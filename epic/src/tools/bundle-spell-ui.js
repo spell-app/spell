@@ -77,6 +77,7 @@ import { gzipSync } from "node:zlib"
 import { kb } from "spell/util/number.ts"
 import { RealPath } from "spell/server/RealPath"
 import { sourceNames } from "spell/toolchain/sourceNames"
+import { ruleTestsOutOfBundles } from "spell/toolchain/stripRuleTests"
 
 import { packageDir } from "./packageDir.ts"
 
@@ -412,8 +413,9 @@ async function bundle() {
     legalComments: "eof",
     metafile: true,
     logLevel: "silent",
-    // the docs runtime's own imports of spell-epic (`spell/epic/links` ...), as their source files
-    plugins: [spellUiResolver(), sourceNames(SPELL_EPIC)]
+    // the docs runtime's own imports of spell-epic (`spell/epic/links` ...), as their source files;
+    // and no grammar rule's tests, should the grammar ever come in (none of it does today)
+    plugins: [spellUiResolver(), sourceNames(SPELL_EPIC), ruleTestsOutOfBundles()]
   })
   checkOneSolid(result.metafile)
   checkEachFileOnce(result.metafile)

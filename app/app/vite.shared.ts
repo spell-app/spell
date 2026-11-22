@@ -6,6 +6,7 @@ import type { Plugin, PluginOption, ProxyOptions, UserConfig } from "vite"
 
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
+import { ruleTestsOutOfBuilds } from "spell/toolchain/stripRuleTests"
 import { CSS_TARGETS, DEV_SERVER_SETTINGS, SOLID_DEDUPE, cssBuildTarget } from "spell/element-tools/elementConfig"
 import { emitIconPacks, emitSoundLibrary } from "spell/ui/vite.config.ts"
 import {
@@ -46,7 +47,8 @@ export const TOP_REPO = (() => {
  * - A FUNCTION, so every config gets its own plugin instances:
  *   the Solid plugin picks client or server posture from the config it's created in
  *   (`vitest`:  node, so `@solidjs/web`'s server build, `renderToString`).
- * - `standardDecorators()` FIRST:  it and the Solid plugin are both `enforce: "pre"`,
+ * - `ruleTestsOutOfBuilds()` first:  a BUILD ships each grammar rule with its first example only, not its tests.
+ * - `standardDecorators()` BEFORE the Solid plugin:  both are `enforce: "pre"`,
  *   and the Solid compiler must see decorator-free code.
  * - `compiledSpell()`:  every config, so a test or a build that reaches `<FileTabs>` reads its `.spell`.
  * - `builtInFiles`:  a BUILD that bundles `spell-ui` emits its built-in icon packs and sounds
@@ -58,6 +60,7 @@ export const TOP_REPO = (() => {
  */
 export function appConfig({ builtInFiles }: { builtInFiles?: boolean } = {}) {
   const plugins: PluginOption[] = [
+    ruleTestsOutOfBuilds(),
     standardDecorators(),
     packageVersion(import.meta.dirname),
     solid({ exclude: [NOT_SOLID_SOURCE] }),
