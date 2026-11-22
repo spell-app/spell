@@ -36,6 +36,8 @@
  *   the toolbar shows, with a red badge, how many NEED OWEN (none:  no badge;  `countItems()`);
  *   an epic card section also gets state chips with counts, filtering its items (`wireItemFilters()`)
  * - scroll-follow:  the toolbar's button of the section being read is highlighted, and the address follows it
+ * - Back and Forward on a Feature Set put the reader where they were, folds and scroll (`spell-doc-back.js`,
+ *   epic `epic-engine` P80);  on any other page they land on the address's `#id`
  * - links to any id in `main` (a section, a heading, a plan item) land below the stuck titles,
  *   unfolding what hides it;  a `#hash` in another case than the page's id (`#T1` for `t1`) lands too
  * - SHORT ADDRESSES (`wireAddresses()`, epic `epic-workflow` P15):
@@ -83,6 +85,7 @@ import { clamp } from "spell/util/number"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { slug } from "spell/util/string"
 import { PagePatch } from "spell/server/site"
+import { backPlacesFor } from "./spell-doc-back.js"
 import { commentsOnPage, wireComments } from "./spell-doc-comments.js"
 import { editHtmlInPlace } from "./spell-doc-edit.js"
 import {
@@ -306,12 +309,17 @@ async function start() {
   const main = document.querySelector("main.spell-doc-main") ?? document.querySelector("main")
   if (!main) return
   // where to land, read before anything scrolls:  scroll-follow rewrites the address as the page moves
-  const landing = { hash: hashId(), scroll: window.SPELL_SERVER?.takeScroll?.() }
+  const reloadedAt = window.SPELL_SERVER?.takeScroll?.()
+  // Back or Forward to a page that keeps places (a Feature Set):  opened as it was left
+  const back = backPlacesFor(main)
+  const arrived = reloadedAt === undefined ? back?.arrival() : undefined
+  back?.watch(isCollapsed)
+  const landing = { hash: hashId(), scroll: reloadedAt ?? arrived?.scroll }
   // a LIVE reload (the page's code changed) comes back as the reader left it:  every fold, and the scroll
-  const kept = takeKeptFolds(landing.scroll !== undefined)
+  const kept = takeKeptFolds(reloadedAt !== undefined) ?? arrived?.folds
   keepFoldsForReload(main)
   // and the field they were typing in (I291):  held from Auto Send until it's back
-  const keptField = takeKeptField(landing.scroll !== undefined)
+  const keptField = takeKeptField(reloadedAt !== undefined)
   keepFieldForReload()
   if (landing.scroll !== undefined) {
     // never the section the address names:  `<epic-*>` blocks follow the address's `#hash` by themselves as they
@@ -355,7 +363,7 @@ async function start() {
   const follow = followScroll(main, outline, rail)
   // before the anchors:  a short address into this page becomes a `#id` link they take
   wireAddresses()
-  const { jump, go, canGo } = wireAnchors(main, outline, sticky, follow, folds)
+  const { jump, go, canGo } = wireAnchors(main, outline, sticky, follow, folds, back)
   wirePaging(main)
   wireJumpKey(go, canGo)
   wireFilter(main)
@@ -664,7 +672,7 @@ function fitTwoColumns(box) {
  *     no pointer, no ids, hidden from readers
  * - the line, below the titles stuck over the table (`tableLine()`)
  * - read only for the tables on screen (an IntersectionObserver), a frame at a time,
- *   on any scroll (the page's, or a table's sideways) or resize
+ *   on any scroll (the page's, or a table's sideways, in its shadow root too:  epic `epic-engine` P80) or resize
  * - tables a part's body or a live update adds later get theirs too (`eachTable()`)
  */
 function wireTableHeads(main) {
@@ -695,7 +703,19 @@ function wireTableHeads(main) {
       onScreen.delete(box)
     }
     for (const [box, pin] of pins) if (!onScreen.has(box)) pin.hidden = true
-    for (const box of onScreen) if (box.isConnected && !unpinnable.has(box)) place(box)
+    for (const box of onScreen) {
+      if (!box.isConnected || unpinnable.has(box)) continue
+      followSideways(box)
+      place(box)
+    }
+  }
+  // a `<ui-table>` scrolls in its shadow root, whose scroll events never reach the document
+  const followed = new WeakSet()
+  const followSideways = (box) => {
+    const root = box.shadowRoot
+    if (!root || followed.has(root)) return
+    followed.add(root)
+    root.addEventListener("scroll", () => redrawSoon(), { capture: true, passive: true })
   }
   const place = (box) => {
     const table = tableOf(box)
@@ -1013,6 +1033,7 @@ function land({ hash, scroll }, jump, follow) {
  *   - one scroll, and one more after `SETTLE_MS` only when nothing else had moved it, landed short
  *     (I23 of `epic-engine`:  1150 -> 671)
  * - the page may be too short for `top` at first:  it gets there as it grows
+ * - returns a function that lets go at once (a newer jump)
  */
 function holdScroll(top) {
   const reader = new AbortController()
@@ -1026,6 +1047,7 @@ function holdScroll(top) {
     else reader.abort()
   }
   hold()
+  return () => reader.abort()
 }
 
 /**
@@ -2817,7 +2839,8 @@ function h2HeightAbove(sticky) {
  *   - `go(id)`:  as a click on a link to `#id` (a history entry, then the jump), resolving once landed;
  *     `canGo(id)`:  is there one to land on
  */
-function wireAnchors(main, outline, sticky, follow, folds) {
+function wireAnchors(main, outline, sticky, follow, folds, back) {
+  let stopHolding
   const landing = HashLanding.forDocument(document).use({
     // the page has drawn already (`start()`)
     whenReady: () => Promise.resolve(),
@@ -2839,16 +2862,33 @@ function wireAnchors(main, outline, sticky, follow, folds) {
     event.preventDefault()
     go(id)
   })
-  addEventListener("popstate", () => jump(hashId()))
-  addEventListener("hashchange", () => jump(hashId()))
+  addEventListener("popstate", onHistory)
+  addEventListener("hashchange", onHistory)
   if (window.parent !== window) addEventListener("message", onMessage)
   return { jump, go, canGo: (id) => !!(targetIn(id) || hostHolding(main, id)) }
+
+  /** The history moved:  a place kept for this entry (`spell-doc-back.js`), else the address's `#id`. */
+  function onHistory() {
+    stopHolding?.()
+    if (back?.restore({ setFolded: putFoldBack, hold: (scroll) => (stopHolding = holdScroll(scroll)) })) return
+    void jump(hashId())
+  }
+
+  /** Fold or unfold `section` as it was, with no height animation:  the scroll put back reads its full height. */
+  function putFoldBack(section, isFolded) {
+    if (isCollapsed(section) === isFolded) return
+    const root = document.documentElement
+    root.setAttribute("data-spell-jumping", "")
+    setTimeout(() => root.removeAttribute("data-spell-jumping"), SETTLE_MS)
+    setCollapsed(section, isFolded)
+  }
 
   /**
    * Follow a same-page link to `id`:  a history entry (unless the address is there already), then the jump.
    * - Resolves once it has landed (`jump()`).
    */
   function go(id) {
+    stopHolding?.()
     if (hashId() !== id) {
       history.pushState(null, "", `#${id}`)
       dispatchEvent(new Event("spell-doc:scrolled-to"))

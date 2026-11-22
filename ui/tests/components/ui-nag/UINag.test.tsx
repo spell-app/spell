@@ -72,7 +72,7 @@ describe("<ui-nag> classes", () => {
     ["", "ui nag"],
     ['size="small"', "ui small nag"],
     ['color="teal" inverted', "ui teal inverted nag"],
-    ["fixed bottom", "ui bottom fixed nag"],
+    ["fixed bottom", "ui bottom fixed nag bottom-fixed"],
     ["overlay", "ui overlay nag"],
     ['fixed="no"', "ui nag"]
   ])("<ui-nag %s>", async (attributes, classes) => {

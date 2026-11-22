@@ -40,6 +40,35 @@ export class AnswerDraft {
   }
 
   /**
+   * `base` with what changed between `before` and `now` laid over it, field by field:  a pick, a question's Other,
+   * a comment, the notes.
+   * - for changes made before the answer sent was read back:  `before` is the page's presets, none of them Owen's
+   */
+  static withEdits(base: PageAnswer, before: PageAnswer, now: PageAnswer): PageAnswer {
+    const edited: PageAnswer = { answers: { ...base.answers }, comments: { ...base.comments }, notes: base.notes }
+    for (const [key, { picked, other }] of Object.entries(now.answers)) {
+      const was = before.answers[key]
+      const isPicked = JSON.stringify(picked) !== JSON.stringify(was?.picked ?? [])
+      if (!isPicked && other === was?.other) continue
+      const answer: AskAnswer = edited.answers[key] ? { ...edited.answers[key] } : { picked: [] }
+      if (isPicked) answer.picked = [...picked]
+      if (other !== was?.other) {
+        if (other) answer.other = other
+        else delete answer.other
+      }
+      edited.answers[key] = answer
+    }
+    for (const id of new Set([...Object.keys(before.comments), ...Object.keys(now.comments)])) {
+      const text = now.comments[id]
+      if (text === before.comments[id]) continue
+      if (text) edited.comments[id] = text
+      else delete edited.comments[id]
+    }
+    if (now.notes !== before.notes) edited.notes = now.notes
+    return edited
+  }
+
+  /**
    * Split `typed` by `present` (the ids the page's parts hold now):  what stays, and what is KEPT, its question,
    * option or section gone.
    * - only text that differs from `sent`:  what was sent, the session has already

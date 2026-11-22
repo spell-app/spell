@@ -336,6 +336,11 @@ export type BundleRecord = {
    * - none for a committed one, or a record from before epic `epic-engine` I364
    */
   files?: string[]
+  /**
+   * the hash of the entry's bytes as built:  written again with the same ones, it's still current
+   * - none for a committed one, or a record from before epic `epic-engine` I363
+   */
+  entry?: string
 }
 
 /** The record's file name in each `output` folder:  a dot file, so the page server neither serves nor reloads it. */

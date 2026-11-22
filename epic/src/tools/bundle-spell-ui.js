@@ -191,6 +191,10 @@ const ICONS = {
   "solid/angles-up": ["angles up"],
   "solid/code": ["code"],
   // a wide-layout table's expand button (`spell-doc-runtime.js` `wireTableWidths()`):  wider, back into the column
+  "solid/arrows-up-down": ["arrows up down"], // a Feature Set's Reorder buttons
+  "solid/arrow-up": ["arrow up"], // its reorder dialog:  move up, move down, the handle to drag by
+  "solid/arrow-down": ["arrow down"],
+  "solid/grip-vertical": ["grip vertical"],
   "solid/arrows-left-right": ["arrows left right"],
   "solid/arrows-left-right-to-line": ["arrows left right to line"],
   // the Epics page's sort buttons (`spell-doc-runtime.js` `wireEpicSort()`):  A to Z, by date

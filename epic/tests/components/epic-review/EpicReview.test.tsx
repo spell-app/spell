@@ -245,16 +245,17 @@ describe("<epic-item> review controls", () => {
       ["history", "blue", "Revisit:  I'm adding a note for you:  Write it in the box at its end"],
       ["xmark", "grey", "Drop it:  Canceled, struck through"]
     ])
-    // the plane marks it, dashed green, and so does its chip;  again, cleared
+    // the plane marks it, dashed green;  its chip ringed till Send (T145);  again, cleared
     button(host, "next").click()
     await settle()
     expect(routes.inbox.marks.t4?.action).toBe("next")
     const chip = deep(host).querySelector<HTMLElement>("[part~='id']")!
-    // the chip keeps its state's colour, the mark's fill (2026-10-11)
-    expect([button(host, "next").dataset.fill, chip.dataset.color, chip.dataset.fill]).toEqual([
+    // the chip keeps its state's colour and fill (2026-10-11;  T145)
+    expect([button(host, "next").dataset.fill, chip.dataset.color, chip.dataset.fill, chip.dataset.marked]).toEqual([
       "dashed",
       undefined,
-      "dashed"
+      undefined,
+      "unsent"
     ])
     // the x:  the latest mark wins
     button(host, "drop").click()
@@ -339,7 +340,7 @@ describe("<epic-item> review controls", () => {
     expect(actions(done).map((action) => button(done, action).dataset.fill)).toEqual(["none", "none", "none"])
   })
 
-  test("a mark in flight:  the id chip ONE 2px dotted blue ring, red letters, whatever the mark;  no mark, solid;  light and dark", async () => {
+  test("a mark not sent:  the id chip as it was, a dotted ring round it (T145);  sent:  all blue, dotted;  no mark, solid;  light and dark", async () => {
     const before = new Date(Date.now() - 60_000).toISOString()
     routes.inbox.marks.m2 = { action: "approve", at: new Date().toISOString() }
     routes.inbox.marks.j8 = { action: "revisit", when: "soon", note: "why?", at: before }
@@ -352,21 +353,38 @@ describe("<epic-item> review controls", () => {
       const chip = deep(host).querySelector<HTMLElement>("[part~='id']")!
       const button = deep(host).querySelector<HTMLElement>("ui-button:is([data-fill='dashed'], [data-fill='outline'])")
       const style = getComputedStyle(chip)
-      return { box, chip, button, fill: chip.dataset.fill, color: chip.dataset.color, border: style.borderTopStyle }
+      return {
+        box,
+        chip,
+        style,
+        button,
+        fill: chip.dataset.fill,
+        color: chip.dataset.color,
+        border: style.borderTopStyle
+      }
     }
     const approved = await look(`<epic-item id="m2" title="Picked" status="open" state="open"></epic-item>`)
     // Owen, 2026-10-11 (J3 of epic-workflow):  the chip keeps the state the section's counts count, not the button's colour
-    // marked in this pass (epic `epic-engine` P43;  Owen, 2026-10-25:  "red text, single blue 2px dotted"):  the mark's
-    // fill stays in the data, but the chip draws one dotted ring in the badge's blue
-    expect([approved.fill, approved.color, approved.border]).toEqual(["dashed", undefined, "dotted"])
-    expect(approved.chip.hasAttribute("data-marked")).toBe(true)
+    // not sent (epic `epic-engine` T145;  Owen, 2026-11-22:  "leave those the color they were before, but do the dotted
+    // outline on them"):  solid as it was, the ring outside it, a gap between
+    expect([approved.fill, approved.color, approved.border]).toEqual([undefined, undefined, "none"])
+    expect([approved.chip.dataset.marked, approved.style.outlineStyle, approved.style.outlineOffset]).toEqual([
+      "unsent",
+      "dotted",
+      "2px"
+    ])
+    const unmarked = await look(`<epic-item id="m77" title="Unmarked" status="open" state="open"></epic-item>`)
+    expect([approved.style.backgroundColor, approved.style.color]).toEqual([
+      unmarked.style.backgroundColor,
+      unmarked.style.color
+    ])
     expect([approved.button?.dataset.fill, approved.button?.dataset.color]).toEqual(["dashed", "green"])
     expect(approved.chip.dataset.tooltip).toMatch(/you chose Approve · not sent yet/)
     const revisited = await look(`<epic-item id="j8" title="Talk" status="open" state="attention"></epic-item>`)
     expect([revisited.fill, revisited.color, revisited.border]).toEqual(["outline", undefined, "dotted"])
     // the ring the same blue whatever the item's state;  an unmarked chip keeps its solid state colour
     const solid = await look(`<epic-item id="j99" title="Unmarked" status="open" state="attention"></epic-item>`)
-    expect(getComputedStyle(revisited.chip).borderTopColor).toBe(getComputedStyle(approved.chip).borderTopColor)
+    expect(getComputedStyle(revisited.chip).borderTopColor).toBe(getComputedStyle(approved.chip).outlineColor)
     expect(solid.chip.hasAttribute("data-marked")).toBe(false)
     const picked = await look(`<epic-item id="q9" title="Which?" status="open" state="attention"></epic-item>`)
     expect([picked.fill, picked.color, picked.chip.dataset.tooltip]).toEqual([
@@ -615,12 +633,13 @@ describe("<epic-item> review controls", () => {
     ).not.toBeNull()
   })
 
-  test("answered, the work still due (Owen, 2026-10-10):  the chip blue:  dotted queued, outlined Claude on it;  done, solid", async () => {
+  test("answered, the work still due:  the chip blue:  dotted queued, outlined handed, SOLID Claude on it (T146);  done, solid", async () => {
     await adoptClient()
     const queued = await render(
       `<epic-item id="t4" title="Tidy" status="open" state="scheduled" queued="2026-10-10" work="P9 · Build" review-as="next"></epic-item>`
     )
     const onIt = await render(`<epic-item id="j6" title="A call" status="open" state="progress"></epic-item>`)
+    const handed = await render(`<epic-item id="i6" title="An issue" status="open" state="handed"></epic-item>`)
     const doneTodo = await render(
       `<epic-item id="t5" title="Tidied" status="done" state="recent" queued="2026-10-10"></epic-item>`
     )
@@ -629,9 +648,10 @@ describe("<epic-item> review controls", () => {
       const chip = host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!
       return [chip.dataset.color, chip.dataset.fill, getComputedStyle(chip).backgroundColor === "rgba(0, 0, 0, 0)"]
     }
-    expect([look(queued), look(onIt), look(doneTodo)]).toEqual([
+    expect([look(queued), look(handed), look(onIt), look(doneTodo)]).toEqual([
       ["blue", "dotted", true],
       ["blue", "outline", true],
+      [undefined, undefined, false],
       [undefined, undefined, false]
     ])
     // its tooltip still says where it stands and what's to do

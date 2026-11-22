@@ -461,7 +461,7 @@ A new element takes its colour from this table, never one that means something e
 | orange | your turn to read:  changed since you looked, or something waiting on your pick or review | UPDATE labels;  a plan waiting for your Accept;  the agent's options;  a fix to review;  a manual test whose phase isn't done;  "nobody is listening" |
 | light orange | what you asked for is finished:  your turn to see it | an issue or todo filed from your own words (a request from another session included), closed by the agent, until you review it |
 | yellow | open, still undecided | an open todo;  a test whose phase is done;  a calm issue;  a reviewed call or issue |
-| blue | do it now, or it's with the agent | Revisit, Send;  the Underway card;  a phase under way;  a Do this not started (outlined);  a todo queued, or a phase still to do (dotted) |
+| blue | do it now, or it's with the agent | Revisit, Send;  an item being worked on, and its UNDERWAY label (solid);  the Underway card;  a phase under way;  a Do this not started (outlined);  a todo queued, or a phase still to do (dotted) |
 | green | decided or done just now:  an item for a day after its last change, a phase for 3 days, then grey | Approve, Make Todo, a pick;  a phase just done;  the Done and Noted cards |
 | violet | a person's voice:  yours, and every person's | your reply cards, your note box, a marked note;  the forms for a new item or option |
 | terracotta | an agent's voice:  Claude's, Codex's | its reply cards' mark and name;  its comment messages;  "recommended" (a thumbs-up) |
@@ -483,12 +483,12 @@ The FILL says how far a button, pill or chip has got:
 | dashed, in its colour | you pressed it;  not sent |
 | outline, in its colour | sent, or in progress:  the agent has it |
 | cleared | handled:  the button is a grey outline again, and the chip has the result |
-| solid | only on chips, the step pill's DONE, and a Choose pill once applied |
+| solid | a chip's state now, solid blue while it's being worked on;  the step pill's DONE;  a Choose pill once applied |
 
 - The buttons are your INPUT, so they never show the agent's verdict:  the id chip does.
-  While your mark is live, the chip matches the button you chose, its colour and its fill:
-  an Approve pressed and not sent is a dashed green chip, a revisit sent an outlined blue one.
-- So a dashed or outlined chip is ANSWERED:  don't answer it again.
+  - Until you Send, the chip and title keep the look they had, with a dotted ring round the chip.
+  - Sent, the chip is dotted blue until the agent takes it, then solid blue while it works.
+- So a ringed, dotted or outlined chip is ANSWERED:  don't answer it again.
   Only a solid red (needs you), orange (your pick or review) or light orange (yours to see) chip waits on you,
   and the toolbar counts only those.
 - Colour-blind readers tell red and green apart least:  the chip's id, the icons and the words keep them readable.
@@ -503,7 +503,7 @@ The FIRST row that applies wins, top to bottom.
 | --- | --- | --- |
 | `progress` | blue | the agent is working on it:  an Underway card, or the spinner |
 | `old` | grey | canceled:  made moot, struck through |
-| `handled` | grey | its answer is a phase's text now;  or an issue the agent found and fixed before you got to it, its line starting `FIXED -`, nothing for you to press |
+| `handled` | grey | its answer is a phase's text now (never a fix waiting for your check);  or an issue the agent found and fixed before you got to it, its line starting `FIXED -`, nothing for you to press |
 | `requested` | light orange | an issue or todo filed from your own words, closed done, not reviewed yet |
 | `recent` | green | decided or done |
 | `requested` | light orange | an issue from your own words the agent has fixed:  your turn to review it, and Approve closes it |

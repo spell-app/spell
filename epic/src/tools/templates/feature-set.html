@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Feature Set Template</title>
+    <meta name="description" content="Template for a Feature Set:  a ranked list to pick from, answered on the page." />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page spell-details-page">
+    <ui-root>
+      <ui-components source="/_epic/pack/epics.pack.js"></ui-components>
+      <spell-site-header></spell-site-header>
+      <div class="spell-doc">
+        <main class="spell-doc-main">
+          <!--
+            TEMPLATE:  a FEATURE SET, a details page that's a ranked list to pick from (epic `epic-engine` P80).
+            NEVER copy it by hand:  `epic ask create <slug> --template feature-set --from <data.json5>`
+            (the data:  `feature-set.json5` beside this;  the skill:  `skills/details/SKILL.md`).
+            - A table per section, three columns:  Item | Your pick | Facts.
+            - S1F1 names one item for good, so the next round is `epic ask round <page> --from <data.json5>`.
+          -->
+          <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+            <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
+            <ui-breadcrumb selected>Short Title</ui-breadcrumb>
+          </ui-breadcrumbs>
+          <ui-sticky class="spell-h1"
+            ><header class="spell-page-head">
+              <h1>Short Title</h1>
+              <epic-send></epic-send></header
+          ></ui-sticky>
+          <p class="lede">Every idea in one list, best first. Pick Yes, No, Modify or Revisit for each.</p>
+          <div class="spell-details-meta">
+            <epic-field label="Asked by" data-details-by>session <code>name</code>, while doing what</epic-field>
+            <epic-field label="Asked" data-details-asked>2026-01-01</epic-field>
+          </div>
+
+          <ui-message class="spell-where" state="info" heading="Where we are">
+            <epic-field label="Epic"><code>name</code> -- what that work is for, in one line.</epic-field>
+          </ui-message>
+
+          <epic-feature-set></epic-feature-set>
+
+          <epic-text-box type="notes"></epic-text-box>
+          <!-- no footer:  the notes are the page's bottom;  the date is up top ("Asked") -->
+        </main>
+      </div>
+    </ui-root>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

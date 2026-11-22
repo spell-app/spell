@@ -14,6 +14,7 @@
  * - A bare label:  an inline orange `UPDATE`, its text centred, sitting on the text's middle;
  *   just the status word after a status change (`FIXED`, `UNDERWAY`;  T75, I295), then a blue `Not in main` pill
  *   while its work isn't merged.
+ *   - `UNDERWAY` is solid blue, as its item's id chip (epic `epic-engine` T146).
  * - Public tokens (`--epic-update-*`) are never declared here:  read through private aliases.
  *   - `--epic-update-fixed-display`:  the `FIXED` word's `display`;  `none` where the line already starts with it
  *     (epic `epic-engine` T143), its `Not in main` pill still showing
@@ -123,6 +124,11 @@
     color: var(--epic-state-replied-on, var(--ui-orange-on));
     font: 700 10px/1 var(--epic-sans, var(--ui-font-family));
     letter-spacing: 0.06em;
+  }
+  /* UNDERWAY, the id chip's solid blue (T146;  Owen, 2026-11-22:  "the underway things' badges should be solid blue") */
+  .label[data-became="underway"] {
+    background: var(--epic-state-progress, var(--ui-blue));
+    color: var(--epic-state-progress-on, var(--ui-blue-on));
   }
   /* FIXED, not said again at the end of a line that starts with it (T143) */
   .label[data-became="fixed"] {

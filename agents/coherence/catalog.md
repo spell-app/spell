@@ -764,7 +764,8 @@ Plain, Command or Control, and Shift, one rule.
 One press, past a few pixels, with Escape to cancel and the closed hand over the page.
 - **It is:**  `Dragging` (`src/util/Dragging.ts`):
   plain DOM, carrying what its owner says, finding a list to drop on or leaving the place to its owner (`placing`).
-- **Used by:**  a program's views and lists (`SpellElement`), the editor's parts and palette (`PartEdits`).
+- **Used by:**  a program's views and lists (`SpellElement`), the editor's parts and palette (`PartEdits`),
+  a Feature Set's reorder dialog (`EpicFeatureSet`, its place worked out by itself:  `placing`).
 - **Copies:**  `PhaseDrag` (`epic/src/components/epic-section/PhaseDrag.ts`), a smaller one for an epic page's phases.
 - **Instead of:**  pointer listeners and a threshold of its own.
 
@@ -1037,6 +1038,15 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
   - Left:  the comments' toolbar (`spell-comments.entry.js` `currentSection()`):  it bundles no Spell UI
   - the runtime's `EPIC_LAND_GAP` is its own since P22, no mirror:  `EpicFold`'s `LAND_GAP` went in P18
   - Left:  the site sections' sticking, in the site (the finding's "later":  into Spell UI's own code)
+
+### Back putting the reader where they were
+
+- **It is:**  `backPlacesFor(main)` (`epic/src/tools/_assets/spell-doc-back.js`;  epic `epic-engine` P80):  a place per
+  history entry, the scroll and the folds, kept as a link is clicked and as the page goes, used only by Back and Forward
+- **Use it when:**  a long docs page's links lead away and Back must return to the row, not the section's top:
+  today a Feature Set alone keeps places
+- **Flag:**  `navigation.currentEntry`
+- **Copies:**  `--`
 
 ### Keeping the reader's place while much of the page folds or hides
 

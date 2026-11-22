@@ -715,6 +715,7 @@
 				<item>a grey outline: available</>
 				<item>dashed in its colour: you pressed it, not sent yet</>
 				<item>outlined in its colour: sent (or a revisit now taken, its icon turning while Claude works)</>
+				<item>its id chip and title keep their look until you Send, a dotted ring round the chip; sent, the chip is dotted blue, and solid blue while Claude works on it</>
 				<item>a revisit now with nobody listening stays dashed, "waiting for a session": the page server wakes the epic (types <text code>/epic review &lt;name&gt;</> into its session) and the tooltip says how</>
 				<item>a grey outline again once Claude has handled it: the chip shows the result</>
 			</>

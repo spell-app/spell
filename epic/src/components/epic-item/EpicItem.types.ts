@@ -158,6 +158,20 @@ export type LiveReview = {
   commentsReplied?: boolean
 }
 
+/** Where the person's mark on an item stands (`EpicItem.markStage`):  its id chip's ring. */
+export type MarkStage = "unsent" | "sent"
+
+/**
+ * How an item's chip and title look (`EpicItem.drawnLook`, epic `epic-engine` T145):
+ * - until Send, as before the person's mark:  while its counts already have the mark
+ */
+export type ItemLook = {
+  /** its colour */
+  state: ItemState
+  /** struck through */
+  canceled: boolean
+}
+
 /** No live review:  outside a review, or a server render. */
 export const NO_LIVE_REVIEW: LiveReview = { workedOn: false, approved: false }
 
@@ -250,6 +264,17 @@ export class DrawnState {
  */
 const RECENT_DAYS = 1
 const DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * The fill a state's chip has of its own;  any other state's is solid (epic `epic-engine` T146:  solid says where the
+ * item stands now, so work under way is solid blue).
+ */
+export const STATE_FILLS: Partial<Record<ItemState, { color: ReviewColor; fill: "outline" | "dotted" }>> = {
+  // handed to Claude, not started
+  handed: { color: "blue", fill: "outline" },
+  // queued
+  scheduled: { color: "blue", fill: "dotted" }
+}
 
 /** `state`'s text key, for the id chip's tooltip. */
 export const STATE_TIP_KEYS = {
@@ -357,22 +382,19 @@ export const COMMITS_PROPERTY = "--epic-commits-display"
 ////////////////
 
 /**
- * Where Owen's answer on an item stands, as its id chip wears it (`EpicItem.chipMark`):
- * a colour and a fill, dashed or outlined;  none, and the chip is solid in its state's colour.
+ * Where Owen's answer on an item stands (`EpicItem.chipMark`), for its chip's tooltip and fill (`chipFill`):
+ * a colour and a fill, dashed or outlined;  none, and the chip has its state's own fill (`STATE_FILLS`).
+ * - DASHED is never drawn on the chip:  until Send it keeps its state's fill, a dotted ring round it (T145)
  * - his live mark:  NO colour, so the chip keeps its state's (Owen, 2026-10-11, J3 of `epic-workflow`:  the counts must
  *   match the chips;  2026-10-08 it wore the chosen button's colour), and the mark's fill
- * - answered, work still due (Owen, 2026-10-10):  outlined in blue, handed to Claude or Claude on it;
- *   a taken pick outlined green;  DOTTED blue, agreed and not started (`scheduled`, epic `epic-engine` P63)
+ * - a taken pick:  outlined green
  */
 export type ChipMark = {
   /** work Claude still owes:  blue, or a taken pick's green;  none for Owen's own mark (its state's colour) */
   color?: ReviewColor
   /** `dotted`:  agreed, not started (`scheduled`), as a scheduled phase's chip */
-  fill: Exclude<ReviewFill, "none"> | "dotted"
-  /**
-   * the chosen button's name (`approve`;  the note box's x, `boxSkip`), or a pick's letter, for the tooltip;
-   * none when work is still due
-   */
+  fill: Exclude<ReviewFill, "none">
+  /** the chosen button's name (`approve`;  the note box's x, `boxSkip`), or a pick's letter, for the tooltip */
   label?: ReviewButtonSpec["label"] | "boxSkip" | { pick: string }
 }
 

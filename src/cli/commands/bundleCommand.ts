@@ -18,6 +18,7 @@ import { CLI } from "spell/cli"
 /**
  * `spell bundle [names...] [--stale]`:  build them (no name:  all);  `--stale`:  only those whose sources changed
  * since their last build.  What the page server runs when it starts.
+ * - two runs at once build a stale one once:  the second waits, and finds it current (`SRV.Bundle.buildIfStale()`)
  * - a committed one in the main checkout (`SRV.Bundle.buildsWhenStale`), unless named:  never built, only said
  *   (`ui-root is stale (its check failed):  run yarn gen:root in ui/`);  `skipped` in the report
  */
@@ -41,7 +42,10 @@ export async function buildBundles(names: string[], options: CLI.BundleOptions =
     }
     if (!options.json) CLI.err(`building ${bundle.name} (${bundle.spec.title}) ...`)
     try {
-      report.built.push(bundle.build())
+      const built = options.stale ? bundle.buildIfStale() : bundle.build()
+      // none:  another page server's check built it while this one waited its turn
+      if (built) report.built.push(built)
+      else report.current.push(bundle.name)
     } catch (error) {
       CLI.err((error as Error).message)
       report.failed.push(bundle.name)
