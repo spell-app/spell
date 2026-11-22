@@ -16,7 +16,7 @@ import docCSS from "spell/epic/tools/_assets/spell-doc.css?inline"
 /** The page:  one item's row, as the tool writes it, a plain box for its pick. */
 const PAGE =
   `<main class="spell-doc-main" style="display: block"><ui-section id="s1" style="display: block">` +
-  `<ui-table class="spell-feature-table spell-full-width" celled compact><table>` +
+  `<ui-table class="spell-feature-table spell-full-width" celled padding="compact"><table>` +
   `<colgroup><col class="spell-feature-col-item"><col class="spell-feature-col-pick"><col class="spell-feature-col-facts"></colgroup>` +
   `<thead><tr><th>Item</th><th>Your pick</th><th>Facts</th></tr></thead>` +
   `<tbody><tr id="s1f1" data-feature-item>` +
