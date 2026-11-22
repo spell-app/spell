@@ -3,11 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sites And Mockups</title>
+    <title>Sites and Mockups</title>
     <meta
       name="description"
-      content="A Spell site:  pages at addresses, a side nav, a site editor, page stories, thumbnails, tags and an automatic index, signed-in reading, NERD / ERD diagrams, editable tables, a hand-drawn Mockup theme, the home page's example rows, and edits that are never lost:  drafts, the editor's File and project menus, Export / Import as a .zip, and Spell UI's sub-menus."
+      content="A Spell site:  pages at addresses, a side nav, a site editor, page stories, thumbnails, tags and an index that draws itself, NERD / ERD diagrams, editable tables, a hand-drawn Mockup theme, and reading a site behind its sign-in."
     />
+    <meta name="spell-audience" content="makers" />
+    <meta name="spell-topic" content="Data and Sites" />
+    <meta name="spell-start-here" content="4" />
     <meta name="spell-saga" content="app" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
   </head>
@@ -16,24 +19,18 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html" target="src-packages-docs-index-html">Spell Epic</ui-breadcrumb>
-          <ui-breadcrumb selected>Sites And Mockups</ui-breadcrumb>
+          <ui-breadcrumb link="/pages/index.html">Docs</ui-breadcrumb>
+          <ui-breadcrumb selected>Sites and Mockups</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
-          ><header class="spell-page-head"><h1>Sites And Mockups</h1></header></ui-sticky
+          ><header class="spell-page-head"><h1>Sites and Mockups</h1></header></ui-sticky
         >
         <p class="lede">
-          A Spell project can now be a whole site: pages at real addresses, a side nav, a site editor, and a sketchy
-          Mockup theme to click through before anything looks finished.
+          A Spell project can be a whole site: pages at real addresses, a side nav, a site editor, and a sketchy Mockup
+          theme to click through before anything looks finished.
         </p>
         <ui-list class="spell-meta">
-          <ui-item icon="map"
-            ><b>Epic page:</b> <a href="/epics/mockup/mockup.plan.html" target="mockup">epic mockup</a></ui-item
-          >
-          <ui-item icon="code branch"
-            ><b>Branch:</b> <code>mockup</code>; everything is on <code>main</code> already</ui-item
-          >
-          <ui-item icon="user">Written for: someone about to build a site in Spell, or change how sites work</ui-item>
+          <ui-item icon="user">Written for: someone about to build a site in Spell</ui-item>
           <ui-item icon="flag"
             >Status: <ui-label size="mini" color="green">built</ui-label>; signing in to a real company site not tried
             yet</ui-item
@@ -59,7 +56,7 @@
             <ui-title>StarWarsSite.spell · the site, shortened · 7 lines</ui-title>
             <ui-content>
               <pre><code class="language-spell">galaxy guide is a site with theme "mockup"
-	it has a films page at "/films", named "Films"
+	it has a films page at "/films", named "Films", icon "film"
 		it has a film page at "/films/:film", named "Film"
 	it has a reviews page at "/reviews", named "Reviews"
 	it has a review dialog
@@ -80,12 +77,11 @@
           </ul>
         </ui-section>
 
-        <ui-section id="2-what-it-is" label="2. What it is, and why" sticky collapsible dividing open="false">
+        <ui-section id="2-what-it-is" label="2. What it is" sticky collapsible dividing open="false">
           <p>
-            Owen is redesigning a site for his day job, from a Figma board of old and new screens. A Spell project was
-            one app in one root, with no pages, no addresses and no way to sketch a page before building it.
+            A Spell project on its own is one app, with no pages and no addresses. A site adds every piece between a
+            sketch of the screens and a site people can click through:
           </p>
-          <p>Now it has all the pieces between a board and a site people can click through:</p>
           <ul>
             <li>a SITE file listing pages, dialogs and sidebars, each page at an address with its parameters</li>
             <li>a side nav drawn from it, and a site editor to add, move, rename and delete pages</li>
@@ -103,32 +99,8 @@
               signing in to a private site once, then reading its data, its pages' rows and pictures of its pages as you
             </li>
           </ul>
-          <p>
-            Owen's Figma board was read once into two private sites, the current one and the new one, which live beside
-            the kit and never in it. The examples anyone can open are Spell's own app as a site, Spell UI's component
-            site and the Star Wars site.
-          </p>
-          <p>
-            Building those sites in the editor turned up a worse problem: a saved edit to a built-in example looked
-            lost, because it went into a draft nothing showed. So the editor changed too:
-          </p>
-          <ul>
-            <li>in a checkout, saving a built-in example writes the file itself, so git sees it</li>
-            <li>
-              everywhere else your save is your DRAFT, and every view of the file shows it: the code, the file list, the
-              running app
-            </li>
-            <li>AutoSave is on, file tabs reorder by dragging, and the File menu and the project's own menu split</li>
-            <li>Delete Draft, Revert Changes, Versions' Save Current Changes, and Export / Import as a .zip</li>
-            <li>
-              Spell UI gained <code>&lt;ui-submenu&gt;</code>, a menu row with a fly-out that stays open as you head for
-              it
-            </li>
-          </ul>
-          <p>
-            <b>Not yet:</b> signing in has only been tried against a made-up site, not a real company sign-in. There is
-            no general Figma reader: a second board would be read by hand again.
-          </p>
+          <p>The examples to open: the Star Wars site, Spell UI's component site, and Spell's own app as a site.</p>
+          <p><b>Not yet:</b> signing in has only been tried against a made-up site, not a real company sign-in.</p>
         </ui-section>
 
         <ui-section id="3-how-to-use-it" label="3. How to use it" sticky collapsible dividing open="false">
@@ -158,7 +130,12 @@
                 isn't made yet.
               </li>
               <li>Every site gets a not found page and an error page; delete one and a plain built-in one shows.</li>
-              <li>It reads in Spanish too: <code>guía galáctica es un sitio en la nube:</code>.</li>
+              <li>It reads in Spanish too: <code>guía galáctica es un sitio en la nube</code>.</li>
+              <li>
+                A page's line can also give its icon in the side nav (<code>, icon "film"</code>), keep it out of the
+                navigation (<code>, not in the navigation</code>), or draw it with no top bar (<code>, no top bar</code
+                >). <code>it has a link to "https://..."</code> puts an outside link in the nav.
+              </li>
               <li>
                 A line can say where its card sits on the site editor's board, and its colour:
                 <code>, in row 2 column 3, colored blue</code>.
@@ -314,6 +291,10 @@
               <li>A card shows the page's thumbnail, when it has one, and its letter tile otherwise.</li>
             </ul>
             <p><b>The catch:</b> rows in the tree drop only before another row, never into one.</p>
+            <p>
+              The site editor's panes, in the editor's terms: the
+              <a href="/app/README-app.md" target="src-app-readme-app-md">app README</a>, "The site editor".
+            </p>
           </ui-section>
 
           <ui-section id="page-stories" label="A page's stories" sticky collapsible dividing open="false">
@@ -415,8 +396,8 @@
                 cards.
               </li>
               <li>
-                Spell UI's Components page is now a heading, a paragraph and <code>&lt;ui-docs-index&gt;</code>: 13
-                lines, down from 627 lines of hand-kept cards. Its pages carry the 37 topics the old page showed.
+                Spell UI's Components page is a heading, a paragraph and <code>&lt;ui-docs-index&gt;</code>: its cards
+                are no longer kept by hand.
               </li>
             </ul>
             <p>
@@ -442,8 +423,9 @@
               </li>
               <li>Corners are slightly uneven, more on cards and modals; a table's cells stay square.</li>
               <li>
-                A site wears it with <code>is a site with theme "mockup"</code> on its line (or <code>its "theme" is "mockup"</code> under it); in Run it takes the colours, font and lines,
-                but not the uneven corners.
+                A site wears it with <code>is a site with theme "mockup"</code> on its line (or
+                <code>its "theme" is "mockup"</code> under it); in Run it takes the colours, font and lines, but not the
+                uneven corners.
               </li>
             </ul>
           </ui-section>
@@ -499,8 +481,8 @@
               </li>
               <li>Drag a box, or focus it and use the arrow keys, and it stays put.</li>
               <li>
-                A right-click menu holds Put back, Save as SVG and Save as JSON; the SVG is the same file Owen's own
-                script writes. <code>spell place nerd</code> writes either from the command line.
+                A right-click menu holds Put back, Save as SVG and Save as JSON. <code>spell place nerd</code> writes
+                either from the command line.
               </li>
               <li>The picked collection's sample rows show under it in an editable table.</li>
             </ul>
@@ -510,7 +492,9 @@
             </p>
             <p>
               Dragging comes from <code>movable</code> and <code>resizable</code>, which every Spell UI tag takes: a
-              drag inside its parent, the browser's corner grip, remembered per element id.
+              drag inside its parent, the browser's corner grip, remembered per element id. Each tag's own options are
+              on its components page: <a href="/components/ui/ui-diagram.html" target="src-ui-docs-ui-diagram-html">&lt;ui-diagram&gt;</a>,
+              <a href="/components/ui/ui-table.html" target="src-ui-docs-ui-table-html">&lt;ui-table&gt;</a>.
             </p>
           </ui-section>
 
@@ -566,84 +550,6 @@ spell site screenshots owen@spell/my-site --signed-in console</code></pre>
             </p>
           </ui-section>
 
-          <ui-section id="a-figma-board" label="A Figma board, as sites" sticky collapsible dividing open="false">
-            <p>
-              Owen's Figma board was read once, by hand, into two private sites beside the kit: the current site, every
-              screen with its snapshot, and the new site in the Mockup theme, its square cards as dialogs.
-            </p>
-            <ul>
-              <li>
-                What that left in Spell for anyone: a page's state and thumbnail on its site line, the site editor's
-                state field, and cards that show the picture.
-              </li>
-              <li>
-                The private sites are links in Owen's space into a private repo, so Spell finds, serves and saves them.
-              </li>
-            </ul>
-            <p>
-              <b>Not yet:</b> no skill or command reads a board, and nothing re-reads one and merges the changes. A
-              second board is read by hand again.
-            </p>
-          </ui-section>
-
-          <ui-section id="the-home-page" label="The home page's examples" sticky collapsible dividing open="false">
-            <p>
-              Spell's home page now shows its examples the way a newcomer browses them: by kind, each with a picture.
-            </p>
-            <ul>
-              <li>
-                The examples sit in rows by category: First steps, Games, Everyday apps, Data from the web, Sites. A
-                project file says its own, <code>"category": "games"</code>.
-              </li>
-              <li>
-                Each card shows a picture of its app running across its top, 16 by 9, the title under it.
-                <ul>
-                  <li>The picture is the top of the app at phone width: 390 pixels wide, taken at twice the pixels.</li>
-                  <li>
-                    FizzBuzz, which used to only print, has its explainer on, results first, so its card shows the fizz
-                    and buzz counts.
-                  </li>
-                  <li>
-                    The examples were fixed to fit a phone: Solitaire's score drops below its buttons, Bill Splitter's
-                    totals stack, Counter's button is big and centred, the recipe apps show one card a row.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Rearrange, a quiet button at the page's foot, turns on a mode where things move.
-                <ul>
-                  <li>Cards drag within their row, the start cards too, and whole rows drag by their headers.</li>
-                  <li>
-                    A card's title and tagline, and a row's header, are typed in where they are: Enter keeps, Escape
-                    puts back.
-                  </li>
-                  <li>
-                    Spell's own people change everyone's (spaces' <code>homeOrder.json</code> and
-                    <code>homeTexts.json</code>; the examples' README table follows the order). Anyone else changes
-                    their own, laid over everyone's, with Reset to put it back.
-                  </li>
-                  <li>Turned off, nothing drags. A new project goes to the end.</li>
-                </ul>
-              </li>
-              <li>
-                A Libraries row follows, the six org apps (Org Admin, Chat, Feed, Inbox, Org Events, and Administración
-                de la org): moved from the examples into the library. Org setup copies its pages from there.
-              </li>
-              <li>Your own apps and the starters keep the small letter tile. The test fixtures' row is gone.</li>
-              <li>
-                The pictures are taken by <code>yarn examples:readme</code>, each app running alone with no editor.
-                <ul>
-                  <li>Each is saved in its project as <code>__thumbnail.png</code>.</li>
-                  <li><code>--thumbnails</code> takes just those.</li>
-                </ul>
-              </li>
-            </ul>
-            <p>
-              <b>The catch:</b> an app that needs you signed in can't be pictured by running it alone. The org apps'
-              pictures are taken instead from the browser tests' shots of a test org full of data.
-            </p>
-          </ui-section>
-
           <ui-section id="saving-and-drafts" label="Saving, and your draft" sticky collapsible dividing open="false">
             <p>Save in the editor, reload, and your edit is there. Where it went depends on whose project it is:</p>
             <ui-table celled padding="compact" appearance="striped" unstackable>
@@ -663,253 +569,21 @@ spell site screenshots owen@spell/my-site --signed-in console</code></pre>
                   </tr>
                   <tr>
                     <td>A built-in example or guide, even on a checkout</td>
-                    <td>into your draft, until you say what to keep (below)</td>
+                    <td>into your draft, until you keep it in your apps or throw it away</td>
                     <td>you</td>
-                  </tr>
-                  <tr>
-                    <td>A library app, through the house-network site</td>
-                    <td>into your draft</td>
-                    <td>you</td>
-                  </tr>
-                  <tr>
-                    <td>Your own project, or your org's</td>
-                    <td>into your draft</td>
-                    <td>you, until you press Publish</td>
                   </tr>
                 </tbody>
               </table>
             </ui-table>
             <ul>
               <li>
-                A draft shows wherever the file is read: the code, the project's list of files, and the running app.
-                <ul>
-                  <li>"Your draft" sits under the file tabs, with Discard beside it.</li>
-                  <li>
-                    The running app is YOUR build while you have drafts, served to you alone; everyone else runs the
-                    shared one.
-                  </li>
-                </ul>
+                A draft shows wherever the file is read: the code, the project's list of files, and the running app,
+                which is YOUR build while you have drafts.
               </li>
+              <li>AutoSave is on: a file is kept once you've stopped typing for 0.8 seconds, and as you leave.</li>
               <li>
-                AutoSave is on by default: a file is kept once you've stopped typing for 0.8 seconds, and as you leave.
-              </li>
-              <li>
-                Drag a file tab along the row to reorder the project's files. The order is saved in the project file.
-              </li>
-              <li>Draft | Publish sits in the Run | Edit group, right of Edit.</li>
-              <li>
-                Leaving an example or a guide you've changed, or pressing Save (⌘S) in one, asks "Keep your changes?"
-                before the page changes.
-                <ul>
-                  <li>Save in My Apps (the default) copies it into your apps, with your changes.</li>
-                  <li>Discard Changes asks once more, then throws them away.</li>
-                  <li>Cancel, Escape or the ✕ stay where you were, your draft as it was.</li>
-                  <li>Update the Example, on the left, only for whoever looks after the built-in examples.</li>
-                </ul>
-              </li>
-            </ul>
-            <p>The menus split by what they're about:</p>
-            <ul>
-              <li>
-                <b>File</b>, the open file: New Spell File (⌥⌘N), New CSS File, Save (every unsaved file), AutoSave,
-                Duplicate File, Revert Changes.
-                <ul>
-                  <li>
-                    Revert goes back to the last save with AutoSave off, to what's published with it on; ⌘Z undoes it.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <b>The project's own menu</b>, under its name left of File: Rename, Delete, Duplicate, Reset to Saved,
-                Publish, Versions, Delete Draft, Project Settings, Export, Import, Theme and Home.
-              </li>
-              <li><b>The Spell menu</b> ends with New Example, above Home.</li>
-            </ul>
-            <p>Four of them are new:</p>
-            <ul>
-              <li>
-                <b>Delete Draft</b> puts every drafted file back as published, after asking; one ⌘Z brings them all
-                back.
-              </li>
-              <li>
-                <b>Versions › Save Current Changes</b>, at the dialog's lower left, keeps your draft as an entry of its
-                own in the list, which only you see. Restore it later as you would any version.
-              </li>
-              <li>
-                <b>Export…</b> downloads the whole project as a .zip, a folder of its name holding every file, pictures
-                and the project file included.
-              </li>
-              <li>
-                <b>Import…</b> reads one back (or an old .spell.json) as a new project of your own. Its pages and source
-                files arrive as your draft; its pictures and project file are real files.
-              </li>
-            </ul>
-            <p>
-              <b>The catch:</b> the language server in VS Code edits the real files on disk, never the editor's drafts.
-            </p>
-          </ui-section>
-
-          <ui-section id="sub-menus" label="Sub-menus, in Spell UI" sticky collapsible dividing open="false">
-            <p>A menu row with a fly-out is one tag. Its fly-out is the items written inside it:</p>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>A View menu with two sub-menus · 13 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-html">&lt;ui-menu direction="vertical" icon-column aria-label="View"&gt;
-  &lt;ui-item appearance="link" icon="expand"&gt;Full Screen&lt;/ui-item&gt;
-  &lt;ui-submenu label="Theme" icon="paint brush"&gt;
-    &lt;ui-item icon="sun"&gt;Light&lt;/ui-item&gt;
-    &lt;ui-item icon="moon"&gt;Dark&lt;/ui-item&gt;
-  &lt;/ui-submenu&gt;
-  &lt;ui-submenu label="Panels" icon="columns"&gt;
-    &lt;ui-item&gt;Tree&lt;/ui-item&gt;
-    &lt;ui-submenu label="More"&gt;
-      &lt;ui-item&gt;Console&lt;/ui-item&gt;
-    &lt;/ui-submenu&gt;
-  &lt;/ui-submenu&gt;
-&lt;/ui-menu&gt;</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ul>
-              <li>
-                Or it shows a menu written elsewhere, by its id: <code>menu="examples-menu"</code>. That menu stays
-                where it's written and shows beside the row while open.
-              </li>
-              <li>
-                It opens on hover at once, as a Mac's menus do, or by a click, Enter or →. In a menu whose items run
-                sideways, ↓ opens it.
-              </li>
-              <li>
-                While the pointer heads for the fly-out it stays open, even across other rows.
-                <ul>
-                  <li>It gives up after two moves away, or 0.4 seconds at rest.</li>
-                  <li>Mouse only: a touch taps the row.</li>
-                </ul>
-              </li>
-              <li>It's as wide as its widest item, and ticks the items inside that say they're on or off.</li>
-              <li>In Spanish it's <code>&lt;es-submenu&gt;</code>. The row's words are <code>label=</code>.</li>
-            </ul>
-            <p>
-              The editor's Theme menu and the folded bar's File, Edit, View, Run and Help are sub-menus now. The rest of
-              its demos are on Spell UI's menu page.
-            </p>
-          </ui-section>
-
-          <ui-section id="sounds" label="Sounds" sticky collapsible dividing open="false">
-            <p>Spell comes with 139 short sounds, each played by its name:</p>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>Counter's click · 3 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-spell">to count up
-	set the count to the count + 1
-	play "click"</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ul>
-              <li>
-                Clicks, cards, dice and chips, board pieces, knocks, footsteps, beeps and short tunes. Each has an
-                English name and a Spanish one: <code>reproducir "deslizar carta"</code>.
-              </li>
-              <li>
-                Type <code>play "</code> in the editor: the names are listed, and the first row, "Pick a sound…", opens
-                the sound picker. Click ▶ to hear one, its name to use it.
-              </li>
-              <li>
-                The examples play them: Solitaire's and Solitario's cards and the win, Checkers' pieces, and the clicks of
-                Counter and both calculators.
-              </li>
-              <li>A program's tests play nothing, so nothing sounds as an app opens.</li>
-              <li>A program compiled to Python plays them too: its page plays each one as the program asks.</li>
-              <li>
-                They play in the editor, in a running app, and on a page of your own with <code>&lt;spell-viewer&gt;</code>.
-                Safari plays them only from version 18.4: they're Ogg files.
-              </li>
-              <li>
-                The sounds are Kenney's (<a href="https://kenney.nl" target="ext-kenney-nl">kenney.nl</a>), from seven of
-                his free packs. They're CC0, so no credit is needed, but we're glad to give it.
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="new-examples" label="New examples" sticky collapsible dividing open="false">
-            <p>Four new examples, three with a Spanish twin, and a new Counter:</p>
-            <ul>
-              <li>
-                <b>Shopping List</b> (Lista de la compra): what to buy, by aisle, kept in a CSV file in its own folder.
-                Add, tick off, clear what you got, undo, print.
-              </li>
-              <li>
-                <b>Recipe Cards</b> (Fichas de recetas): recipes kept in a JSON file, each with its picture,
-                ingredients and steps.
-                <ul>
-                  <li>Cook for any number of people, and every amount scales; metric, or cups and spoons.</li>
-                  <li>Pick ingredients and add them to Shopping List's own list, which it imports.</li>
-                </ul>
-              </li>
-              <li>
-                Each has a guide, How the Shopping List works and How Recipe Cards work, and their Spanish twins.
-                <ul>
-                  <li>
-                    <code>a json file at "recipes.json"</code> is the project's own <code>__data/recipes.json</code>;
-                    the folder is made on the first save.
-                  </li>
-                  <li>A list it can't reach just now says so, never an error box.</li>
-                </ul>
-              </li>
-              <li>
-                <b>Checkers</b>: American checkers against the computer, against yourself on two boards side by side, or
-                against another tab.
-              </li>
-              <li>
-                <b>Weekend Countdown</b> (Cuenta atrás): how long until the weekend, in days, hours, minutes and
-                seconds, ticking every second.
-              </li>
-              <li>
-                <b>Counter</b> comes first in Make something: counters you name, each with its own step, Reset and
-                Delete, and a total.
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="new-in-spell-ui" label="New in Spell UI" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <code>&lt;ui-device&gt;</code> draws a phone, tablet or desktop round what it holds, at that device's
-                screen size, scaled down to fit.
-                <ul>
-                  <li>Its thick bottom edge holds its own device switch and Rotate, then the page's own buttons.</li>
-                  <li>
-                    <code>modal</code> floats it over the dimmed page. The editor's Update App Snapshot… is one: a
-                    phone with Cancel, Change theme, Rotate and Snapshot in its edge.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <code>&lt;ui-dial&gt;</code> picks a number by turning a ring, open at the bottom, its value in the
-                middle and its label under it. Drag it round, or use the slider's keys.
-              </li>
-              <li>
-                <code>on-platform="desktop, tablet"</code>, on any element, shows it only on those devices. Update App
-                Snapshot… uses it: phones can't picture their own screen.
-              </li>
-              <li>
-                <code>&lt;ui-page-layout floating&gt;</code>: the drawer and the side bars are rounded cards over the
-                page, each closable.
-                <ul>
-                  <li><code>drawer-hides</code> lets the drawer's button hide it whole.</li>
-                  <li>
-                    <code>&lt;ui-site-nav-button toggles="right"&gt;</code> shows and hides a side bar. Below 64em,
-                    the side bar slides over the page instead of taking its room.
-                  </li>
-                  <li>A <code>&lt;ui-toc&gt;</code> in one is headed by a band, as the editor's panels are.</li>
-                </ul>
-              </li>
-              <li>
-                <code>&lt;ui-site-links&gt;</code>: the page's own links at the app bar's end, its original (a
-                page's <code>live</code>) and a report link.
-              </li>
-              <li>
-                Spell UI's own site is laid out this way: a floating drawer and contents, Usage | Examples | API |
-                Theming a switch in the app bar, and no row of section tabs on its 389 pages.
+                The rest (Delete Draft, Versions, Export and Import as a .zip, the File and project menus): the
+                <a href="/app/README-app.md" target="src-app-readme-app-md">app README</a>, "Run, Edit and Design".
               </li>
             </ul>
           </ui-section>
@@ -928,7 +602,7 @@ spell site screenshots owen@spell/my-site --signed-in console</code></pre>
               <b>One address grammar</b> for the page server's routes and a site's pages:
               <a href="/src/util/addressPattern.ts" target="src-src-util-addresspattern-ts"
                 ><code title="src/util/addressPattern.ts">addressPattern</code></a
-              >, moved out of the server's router.
+              >.
             </li>
             <li>
               <b>Adding a page doesn't restart a running site.</b> The editor already kept a program running through an
@@ -938,8 +612,7 @@ spell site screenshots owen@spell/my-site --signed-in console</code></pre>
               <b>The NERD reads what the ingester wrote</b>
               (<a href="/parser/src/spell/ingest/PlaceNerd.ts" target="src-parser-src-spell-ingest-placenerd-ts"
                 ><code title="parser/src/spell/ingest/PlaceNerd.ts">PlaceNerd</code></a
-              >), never the API again, and lays it out with Owen's NERD skill's rules, ported to TypeScript. On his own
-              two specs it matches his script's SVG to within 0.19 of a point.
+              >), never the API again, and lays it out in columns by what links to what.
             </li>
             <li>
               <b>Spell UI never writes a place.</b> The editable table sends one cancelable
@@ -960,157 +633,15 @@ spell site screenshots owen@spell/my-site --signed-in console</code></pre>
                 <li>A redirect to another host or to a sign-in page counts as the session having ended.</li>
               </ul>
             </li>
-            <li>
-              <b>The home page's pictures are files in each project</b>, <code>__thumbnail.png</code>, taken by the same
-              script that draws the examples' README pictures. A card with no file draws its letter.
-            </li>
-            <li>
-              <b>One switch says a save may write a built-in's file</b>: on where the built-ins are the checkout's own
-              source, off in the cloud and in any build without them.
-              <ul>
-                <li>The house-network site marks every request it passes on, and a marked save stays a draft.</li>
-                <li>Writing the file drops your old draft of it: you were looking at the draft when you saved.</li>
-              </ul>
-            </li>
-            <li>
-              <b>Your build sits beside your drafts.</b>
-              <ul>
-                <li>The editor compiles in the browser from the files it loaded, your drafts included.</li>
-                <li>While you have drafts, that build is saved in your own folder and served to you first.</li>
-                <li>
-                  Publishing or discarding your last draft drops it; the shared build is redone from the published
-                  files.
-                </li>
-              </ul>
-            </li>
-            <li>
-              <b>Zips are made in the browser</b>, with the platform's own compression, on the same layout the server's
-              zip uses: a folder of the project's name, every file at its path.
-            </li>
-            <li>
-              <b>A sub-menu's aim is an angle check</b>, as React Aria's is: the pointer's path toward the fly-out, with
-              15° of slack.
-            </li>
           </ul>
         </ui-section>
 
-        <ui-section
-          id="5-why-built-this-way"
-          label="5. Why it's built this way"
-          sticky
-          collapsible
-          dividing
-          open="false"
-        >
+        <ui-section id="6-limits" label="5. Limits" sticky collapsible dividing open="false">
           <ul>
-            <li>
-              <b>The site holds the addresses, not the pages</b>, so a page can move, or its name be translated, without
-              changing it; over each page naming its own route.
-            </li>
-            <li>
-              <b>The site editor is its own page</b>, like the theme editor, over a third editor mode: the editor itself
-              is untouched.
-            </li>
-            <li>
-              <b>Stories are tags</b>, <code>&lt;story&gt;</code> inside <code>&lt;stories&gt;</code>, over the first
-              markdown list with a separate details field: one field per story in the side panel, and Spanish words of
-              their own.
-            </li>
-            <li>
-              <b>A site file can be routing alone</b>, over one file holding every page's code: a big site's file stayed
-              readable only that way. A line no file declares waits, over being refused, so a site can be sketched
-              before its pages exist.
-            </li>
-            <li>
-              <b>A thumbnail can be written in two places</b>, on the page and on the site's line, with the line's
-              winning on the card: Spell UI's stay on its lines, Spell's own app as a site keeps them on its pages. One
-              word, <code>thumbnail</code>, replaced <code>picture</code> everywhere.
-            </li>
-            <li>
-              <b>Tags live on the page lines</b>, over the generated component data, so any site can have them, not only
-              Spell UI's. Spell UI's old index script stays: it still writes the docs site's own components page.
-            </li>
-            <li>
-              <b>Signing in is Spell's own window</b>, never your Chrome, and the session lives on this machine, never
-              in a repo; one flag, <code>--signed-in</code>, uses it everywhere.
-            </li>
-            <li>
-              <b>The private sites are joined by links</b> in Owen's space, over the git-ignored local project list,
-              which would have needed a package file in the private repo for nothing.
-            </li>
-            <li>
-              <b>The Figma board was read once by hand</b>, over a skill and a command to re-read and merge it: one
-              board didn't earn the machinery.
-            </li>
-            <li>
-              <b>The org apps moved to the library</b>, over staying examples: they're what an org is set up from, not
-              something to learn from. Their row takes the library's own heading, Libraries, so they need no category.
-            </li>
-            <li>
-              <b>Example cards show a wide picture</b>, 16 by 9 across the top, over the small 64 by 40 tile, which was
-              too small to read an app in.
-            </li>
-            <li>
-              <b>Mockup's wobble is uneven corners</b>, over an SVG filter that would have roughened the text too; built
-              from Crisp, over Pop's shadows and pink.
-            </li>
-            <li>
-              <b>The diagram is new</b>, over stretching the tree diagram: an ERD isn't a tree. It shares the tree's
-              text measuring only.
-            </li>
-            <li><b>Reviews are kept on this device</b>, over the samples, which the editor switches off.</li>
-            <li>
-              <b>A built-in's save writes its file in a checkout</b>, over a draft there too: a draft folder is
-              git-ignored, so an edit to an example never reached a commit, and looked lost.
-            </li>
-            <li>
-              <b>Your build is yours</b>, over the editor's compile saving into the project's one shared build, which
-              ran your unpublished draft for everyone, then lost it when the server rebuilt from disk.
-            </li>
-            <li>
-              <b>Delete Draft takes the edits you haven't saved yet</b> in those files too, over leaving them: a file
-              with no draft is left alone, and ⌘Z brings everything back.
-            </li>
-            <li>
-              <b>Save Current Changes keeps a draft in the Versions list</b>, over making a full version: it isn't
-              counted against the versions kept, and only you see it.
-            </li>
-            <li>
-              <b>An import is a draft</b>, over publishing what it brought: a draft holds text alone, so pictures and
-              the project file are written as they are, and nothing else is public until you Publish.
-            </li>
-            <li>
-              <b>New Spell File is ⌥⌘N</b>, over ⌘N: a page can't take ⌘N from Chrome or Safari, which open a new
-              window.
-            </li>
-            <li>
-              <b>Dragging tabs needs the right to rename files</b>, a project's Manager: the order is in the project
-              file everyone shares, not in your draft.
-            </li>
-            <li>
-              <b>A fly-out opens on hover at once</b>, over the page's 0.8 second hover delay, which is for popups and
-              tooltips; the aim check is what keeps a diagonal move from closing it.
-            </li>
-          </ul>
-        </ui-section>
-
-        <ui-section id="6-limits" label="6. Limits" sticky collapsible dividing open="false">
-          <ul>
-            <li>
-              <code>&lt;ui-device&gt;</code> has no visual baselines yet (they need Docker); the built-in sounds are
-              Ogg files, so Safari before 18.4 plays none.
-            </li>
-            <li>
-              Weekend Countdown compiled to TypeScript still shows 4 type errors: the time left between two dates is
-              typed as anything, so its parts are too.
-            </li>
             <li>
               Signing in is checked against a made-up site only, not a real company sign-in; only cookies are sent, so
               an API wanting a token from the page's storage isn't reached, and an API that really redirects elsewhere
               is misread as an ended session.
-            </li>
-            <li>
-              No reader for Figma boards: a board is read by hand, and nothing re-reads one or merges its changes.
             </li>
             <li>
               A misspelled page name in a site file is no longer an error: it shows as a page still to make. A sidebar's
@@ -1120,24 +651,16 @@ spell site screenshots owen@spell/my-site --signed-in console</code></pre>
             <li>A page written in Spanish needs its thumbnail on the site line for its card to show it.</li>
             <li>The site editor has no field for tags.</li>
             <li>
-              An app that needs you signed in can't be pictured running alone: the org apps' home-page pictures are the
-              browser tests' shots of a test org.
-            </li>
-            <li>
               The language server in VS Code edits the files on disk, never your drafts; and a draft holds text alone,
               so a picture is never drafted.
             </li>
-            <li>
-              Only a project's Manager can reorder its file tabs; reordering the home page's cards works only on your
-              own Mac.
-            </li>
-            <li>A menu fly-out's aim check is mouse only: a touch taps the row.</li>
+            <li>Only a project's Manager can reorder its file tabs.</li>
             <li>The Mockup theme's uneven corners don't show inside Run.</li>
             <li>A Spell UI site's pages are other projects' notebooks, so they carry no stories.</li>
           </ul>
         </ui-section>
 
-        <ui-section id="7-where-things-are" label="7. Where things are" sticky collapsible dividing open="false">
+        <ui-section id="7-where-things-are" label="6. Where things are" sticky collapsible dividing open="false">
           <p>Each name links to its file.</p>
           <ui-table celled padding="compact" appearance="striped" unstackable>
             <table>
@@ -1259,35 +782,6 @@ spell site screenshots owen@spell/my-site --signed-in console</code></pre>
                   </td>
                 </tr>
                 <tr>
-                  <td>The home page's rows and cards</td>
-                  <td>
-                    <a href="/app/src/app/pages/ProjectChooser.tsx" target="src-app-src-app-pages-projectchooser-tsx"
-                      ><code title="app/src/app/pages/ProjectChooser.tsx">ProjectChooser</code></a
-                    >,
-                    <a href="/app/src/app/pages/TileCard.tsx" target="src-app-src-app-pages-tilecard-tsx"
-                      ><code title="app/src/app/pages/TileCard.tsx">TileCard</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>The examples' categories</td>
-                  <td>
-                    <a
-                      href="/app/src/spaces/models/projectGroups.ts"
-                      target="src-app-src-spaces-models-projectgroups-ts"
-                      ><code title="app/src/spaces/models/projectGroups.ts">EXAMPLE_CATEGORIES</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>Taking the pictures</td>
-                  <td>
-                    <a href="/app/scripts/examples-readme.ts" target="src-app-scripts-examples-readme-ts"
-                      ><code title="app/scripts/examples-readme.ts">yarn examples:readme</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
                   <td>The side nav</td>
                   <td>
                     <a href="/ui/src/components/ui-site-nav/" target="src-ui-src-components-ui-site-nav"
@@ -1355,141 +849,14 @@ spell site screenshots owen@spell/my-site --signed-in console</code></pre>
                     >
                   </td>
                 </tr>
-                <tr>
-                  <td>The org apps</td>
-                  <td>
-                    <a href="/app/spaces/@spell/library/" target="src-app-spaces-spell-library"
-                      ><code title="app/spaces/@spell/library/">the library</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>The home page's order</td>
-                  <td>
-                    <a href="/app/src/spaces/models/homeOrder.json" target="src-app-src-spaces-models-homeorder-json"
-                      ><code title="app/src/spaces/models/homeOrder.json">homeOrder.json</code></a
-                    >,
-                    <a
-                      href="/app/src/spaces/server/node/projects/homeOrderRoutes.ts"
-                      target="src-app-src-spaces-server-node-projects-homeorderroutes-ts"
-                      ><code title="app/src/spaces/server/node/projects/homeOrderRoutes.ts">homeOrderRoutes</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>Where a save goes: the file or your draft</td>
-                  <td>
-                    <a
-                      href="/app/src/spaces/server/node/projects/project-utils.ts"
-                      target="src-app-src-spaces-server-node-projects-project-utils-ts"
-                      ><code title="app/src/spaces/server/node/projects/project-utils.ts">request_saveFile()</code></a
-                    >; the switch, in
-                    <a
-                      href="/app/src/spaces/server/node/environment.ts"
-                      target="src-app-src-spaces-server-node-environment-ts"
-                      ><code title="app/src/spaces/server/node/environment.ts">environment</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>Your drafts and your build</td>
-                  <td>
-                    <a
-                      href="/app/src/spaces/server/node/projects/ProjectDrafts.ts"
-                      target="src-app-src-spaces-server-node-projects-projectdrafts-ts"
-                      ><code title="app/src/spaces/server/node/projects/ProjectDrafts.ts">ProjectDrafts</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>The editor's menus</td>
-                  <td>
-                    <a
-                      href="/app/spaces/@spell/editor/spell-editor/SpellEditor.spell"
-                      target="src-app-spaces-spell-editor-spell-editor-spelleditor-spell"
-                      ><code title="app/spaces/@spell/editor/spell-editor/SpellEditor.spell">SpellEditor.spell</code></a
-                    >, drawn by the
-                    <a href="/app/src/app/solid/MenuBar.tsx" target="src-app-src-app-solid-menubar-tsx"
-                      ><code title="app/src/app/solid/MenuBar.tsx">MenuBar</code></a
-                    >
-                    component
-                  </td>
-                </tr>
-                <tr>
-                  <td>Delete Draft, Versions, Export and Import</td>
-                  <td>
-                    the
-                    <a href="/app/src/app/editor.ts" target="src-app-src-app-editor-ts"
-                      ><code title="app/src/app/editor.ts">editor</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>A project as a .zip</td>
-                  <td>
-                    <a
-                      href="/app/src/spaces/models/projectArchive.ts"
-                      target="src-app-src-spaces-models-projectarchive-ts"
-                      ><code title="app/src/spaces/models/projectArchive.ts">projectArchive</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>The file tabs</td>
-                  <td>
-                    <a href="/app/src/app/solid/FileTabs.tsx" target="src-app-src-app-solid-filetabs-tsx"
-                      ><code title="app/src/app/solid/FileTabs.tsx">FileTabs</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>Sub-menus</td>
-                  <td>
-                    <a
-                      href="/ui/src/components/ui-menu/UISubmenu.tsx"
-                      target="src-ui-src-components-ui-menu-uisubmenu-tsx"
-                      ><code title="ui/src/components/ui-menu/UISubmenu.tsx">&lt;ui-submenu&gt;</code></a
-                    >, its aim,
-                    <a
-                      href="/ui/src/components/ui-menu/SubMenuAim.ts"
-                      target="src-ui-src-components-ui-menu-submenuaim-ts"
-                      ><code title="ui/src/components/ui-menu/SubMenuAim.ts">SubMenuAim</code></a
-                    >; the demos on
-                    <a href="/components/ui/ui-menu.html" target="src-ui-docs-ui-menu-html">Spell UI's menu page</a>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </ui-table>
         </ui-section>
 
-        <ui-section id="8-history" label="8. History" sticky collapsible dividing open="false">
-          <ui-accordion class="spell-aside" appearance="styled">
-            <ui-title>Aside: the phases</ui-title>
-            <ui-content>
-              <ul>
-                <li>P1 Site File, P2 Pages By Address, P3 Site Navigation, P4 Site Editor, P5 Docs Nav Tree</li>
-                <li>
-                  P6 Page Jobs (now stories), P7 Mockup Theme, P8 Click-Through Prototype, P9 Editable Table, P10 UI
-                  Diagram, P11 NERD And ERD
-                </li>
-                <li>
-                  P12 Signed-In Ingest, P13 Figma Into Sitemap, P14 Diagram And Table Follow-ups, P15 Automatic Site
-                  Index, P16 Page Thumbnails, P17 Site Files And Story Tags, P18 Home Page, P19 Phone Cards And Order,
-                  P20 Saved Draft Edits; P21 Doc Review
-                </li>
-                <li>
-                  P1 to P20 are on main. Still to come, as later phases: testing with people, a real theme, live data
-                  and publishing
-                </li>
-              </ul>
-            </ui-content>
-          </ui-accordion>
-        </ui-section>
-
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">Last checked 2026-11-18 against branch <code>mockup</code>.</p>
+          <p class="meta">Updated 2026-11-21.</p>
         </footer>
       </main>
     </div>
