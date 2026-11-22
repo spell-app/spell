@@ -294,7 +294,7 @@ export function VSCodeRunner(props: VSCodeRunnerProps) {
   }
 
   /**
-   * Javascript of the code file the program calls as `module` (`call native`, epic `from-project` P10),
+   * Javascript of the code file the program calls as `module` (`call native`, epic `from-console` P10),
    * e.g. `@spell/native/owen@spell/clipboard/clipboard.ts`:  from the extension, which asks the language server
    * (`spell/codeFile`) to take its types out.
    * - Asked for afresh each run, so an edit to it shows on the next;  once, however many wait.

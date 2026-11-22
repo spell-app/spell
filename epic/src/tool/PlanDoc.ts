@@ -3153,7 +3153,7 @@ export class PlanDoc extends PlanReader {
   /**
    * The epic's git branch, apart from its id (`epic update <epic> --branch <name>`, epic `epic-engine` I378):
    * `<epic-page branch>`, which `EpicConfig.branchOf()` reads for every verb that finds the branch.
-   * - e.g. `from-project` kept its id when its branch was renamed `from-console`
+   * - e.g. `from-project` keeps its id when its branch is renamed `from-console`
    */
   setBranch(branch: string): void {
     const was = this.page.getAttribute("branch")
