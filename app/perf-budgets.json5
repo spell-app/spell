@@ -36,10 +36,18 @@
       id: "cloud-app",
       name: "A cloud app:  <spell-viewer> and its runtime",
       budget: 150,
-      ceiling: 412,
+      ceiling: 330,
       build: "element",
       entries: ["spell-viewer.js", "spell-solid.js", "spell-runtime.js"],
       only: "\\.js$"
+    },
+    {
+      id: "run-page-first",
+      name: "The run page's first load, a project running alone",
+      budget: 150,
+      ceiling: 176,
+      build: "editor",
+      entries: ["run.html"]
     },
     {
       id: "docs-page-js",
@@ -47,7 +55,10 @@
       budget: 250,
       ceiling: 989,
       folder: "epic/src/tools/_assets",
-      entries: ["spell-ui.js", "spell-doc-runtime.js"]
+      // the classic loader a page names, the ES module it imports and what that imports at once (epic `solid-2-final`
+      // P7):  every family, engine and theme is a lazy chunk;  the page runtime is in the module
+      entries: ["spell-ui.js", "spell-ui/main.js"],
+      only: "\\.js$"
     },
     {
       id: "ui-site-page",
@@ -73,7 +84,7 @@
       budget: 150,
       ceiling: 1210,
       folder: "epic/src/tools/_assets",
-      entries: ["spell-ui.js", "spell-doc-runtime.js"],
+      entries: ["spell-ui.js", "spell-ui/main.js"],
       only: "\\.js$",
       measure: "lazy"
     },
