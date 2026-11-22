@@ -369,7 +369,7 @@ export type SpellAppSource = {
   /** URL of the compiled javascript of project `projectId`, which it imports. */
   importUrl: (projectId: string) => string
   /**
-   * URL of the javascript of the code file it imports as `module`, for `call native` (epic `from-project` P10):
+   * URL of the javascript of the code file it imports as `module`, for `call native` (epic `from-console` P10):
    * a project's is its server's, `SpellUrls.codeFileUrl()`.
    * - None:  a program that calls one won't run, and says so (`runCompiled()`).
    */

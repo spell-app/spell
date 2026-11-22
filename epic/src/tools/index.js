@@ -27,7 +27,8 @@
  *     - and a "Misc" section last for the rest
  *   - Sagas:  a card per saga, in Owen's order (`sagas/sagas.json5`, through `Sagas`)
  *     - its title linking its saga page (made or not yet), its purpose, how many epics and guides name it
- *   - Templates:  `templates/**`, and the "Writing docs" notes (`WRITING_DOCS`, in its skeleton)
+ *   - Templates:  `templates/**`, those only a command makes a page from (`madeTemplates()`),
+ *     and the "Writing docs" notes (`WRITING_DOCS`, in its skeleton)
  *   - Brand:  `brand/**`, in its section 6, but not the rich Brand index's own pages
  *     - its own (`BRAND_OWN`):  Claude Design's export and its copies, the element pages, Compare
  *     - `section`:  the index's own sections hold an id `brand` already
@@ -59,6 +60,8 @@ import { URGENT_SELECTOR } from "spell/epic/list/EpicState.ts"
 import { PhaseIds } from "spell/epic/phases/PhaseIds.ts"
 import { DataFile } from "spell/epic/data/DataFile.ts"
 import { Sagas } from "spell/epic/tool/Sagas.ts"
+import { TOOL_TEMPLATES } from "./answerPages.js"
+import { FEATURE_SET } from "./FeatureSet.js"
 import { PageNotes } from "./PageNotes.js"
 import {
   BRAND,
@@ -96,6 +99,12 @@ export const HOME_END = "<!-- areas:end -->"
 /** A list page's markers:  its cards go between. */
 export const START = "<!-- index:start -->"
 export const END = "<!-- index:end -->"
+
+/**
+ * The named character references `decodeReferences()` writes out.
+ * Up here, as `GROUP_COUNTS` is:  `main()` needs it as this file loads.
+ */
+const NAMED_REFERENCES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: "\u00a0" }
 
 /**
  * Each Epics group's words in the home's Epics count (`2 favorites · 3 active · 1 planning · 4 urgent · 20 done`).
@@ -206,6 +215,7 @@ export const LISTS = [
     none: "No templates yet.",
     description: "A starting point for every kind of docs page, and how to write one.",
     lede: "A starting point for every kind of docs page, and how to write one.",
+    made: () => madeTemplates(),
     extra: WRITING_DOCS
   },
   // the repo's own templates, when it has any (`repoTemplates`):  their list page in their folder, so the engine's
@@ -326,9 +336,6 @@ function decodeReferences(text) {
     return NAMED_REFERENCES[name.toLowerCase()]
   })
 }
-
-/** The named character references `decodeReferences()` writes out. */
-const NAMED_REFERENCES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: "\u00a0" }
 
 /**
  * Whether this run may rewrite the engine's Templates page:  only from a checkout with an epic config
@@ -709,13 +716,14 @@ export function listSection(list, pages, favorites = readFavorites(), sagas = re
   const from = pagePath(list.dir)
   if (list.id === "guides") return guideSections(list, pages, sagas)
   if (list.id === "sagas") return sagaSection(list, pages, sagas)
+  const cards = [...pages, ...(list.made?.() ?? [])]
   const body = epics
     ? epicListHtml(
         pages.map((page) => epicCard(page, from, favorites, sagas)),
         sagas
       )
-    : pages.length
-      ? `<ui-cards class="spell-grid" stackable>\n${pages.map((page) => card(page, from)).join("\n")}\n</ui-cards>`
+    : cards.length
+      ? `<ui-cards class="spell-grid" stackable>\n${cards.map((page) => card(page, from)).join("\n")}\n</ui-cards>`
       : `<p class="meta">${escapeHTML(list.none)}</p>`
   const section = list.section ?? { id: list.id, title: list.title }
   return `<ui-section id="${section.id}" label="${escapeHTML(section.title)}" sticky collapsible dividing>
@@ -807,11 +815,30 @@ function href(path, from) {
 
 /** A page's card, on the list page in folder `from`:  linked title, description, path. */
 function card(page, from) {
+  const title = escapeHTML(page.title)
+  // no path:  nothing to open, its command says how it's used
+  const header = page.path ? `<a href="${escapeHTML(href(page.path, from))}">${title}</a>` : title
   return `<ui-card><ui-content>
-<ui-header><a href="${escapeHTML(href(page.path, from))}">${escapeHTML(page.title)}</a></ui-header>
+<ui-header>${header}</ui-header>
 ${page.description ? `<ui-description>${escapeHTML(page.description)}</ui-description>` : ""}
-<ui-meta>${escapeHTML(page.path)}</ui-meta>
+<ui-meta>${escapeHTML(page.path ?? page.command)}</ui-meta>
 </ui-content></ui-card>`
+}
+
+/**
+ * The templates only a command makes a page from, as cards:  a Feature Set's.
+ * - no path:  it's the tool's own, not served, and never copied
+ * - its words:  the template's own title and description
+ */
+function madeTemplates() {
+  const { document } = parseHTML(readFileSync(join(TOOL_TEMPLATES, `${FEATURE_SET}.html`), "utf8"))
+  return [
+    {
+      title: document.querySelector("title").textContent,
+      description: document.querySelector('meta[name="description"]').getAttribute("content"),
+      command: `epic ask create <slug> --template ${FEATURE_SET} --from <data.json5>`
+    }
+  ]
 }
 
 /**

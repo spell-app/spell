@@ -66,6 +66,8 @@ export type AnswerFormOptions = ServerLinkOptions & {
  *   - saved by the page's `DraftSaver` (epic `coherence` C10):  one save at a time, a failure said in red and tried
  *     again every 3s until one goes through (a page server back on its address takes it, with its new token)
  *   - the draft wakes nobody:  only Send does;  Send deletes it
+ *   - it's as new as its last change of Owen's (`typedAt`):  putting it back, keeping a gone question's text
+ *     and saving never make it newer, so an old copy can't outdate the answer sent (epic `epic-engine` I377)
  *   - until the answer sent is read back, nothing is saved or sent:  the page still shows its preset picks, which
  *     aren't Owen's.  What he changed meanwhile is laid over the answer once it's read (epic `epic-engine` I377)
  *   - on load, the newest draft newer than the answer (the server's, else the browser's) goes back into the parts,
@@ -135,6 +137,13 @@ export class AnswerForm extends PageStore {
 
   /** Owen changed something before that. */
   private isEditedEarly = false
+
+  /**
+   * When Owen last changed what's in `typed`, ISO:  set by `edited()`, or the draft's own as it's put back.
+   * - the draft's `saved`, here and on the page server:  NEVER the time of a save
+   * - stays after a Send:  a save that was on its way is then older than the answer
+   */
+  private typedAt = ""
 
   /** The page as each part joined it before that:  its preset picks. */
   private readonly untouched: PageAnswer = { answers: {}, comments: {}, notes: "" }
@@ -243,6 +252,7 @@ export class AnswerForm extends PageStore {
       this.drafts.tell("not saved yet")
     } else if (this.keepsDrafts) {
       this.typed = AnswerDraft.over(this.typed ?? EMPTY, this.current())
+      this.typedAt = AnswerDraft.typedAt(Date.now(), this.sent)
       this.writeLocal()
       this.saveSoon()
     }
@@ -460,10 +470,12 @@ export class AnswerForm extends PageStore {
   /**
    * Put `draft` back into the parts, over the answer sent;  then keep what was typed for ids gone from the page.
    * - `isSaved`:  the page server has it;  else (the browser's copy) it's saved there once more
+   * - it isn't typing:  the draft stays as old as it was (`typedAt`)
    */
   private putBack(draft: DetailsDraft, { isSaved }: { isSaved: boolean }) {
     const { answers, comments, notes, labels, kept } = draft
     this.typed = { answers, comments, notes, labels, ...(kept?.length ? { kept } : {}) }
+    this.typedAt = draft.saved
     this.kept = kept ?? []
     const shown = this.shown!
     for (const part of this.parts) part.showAnswer(shown)
@@ -574,12 +586,11 @@ export class AnswerForm extends PageStore {
     await this.drafts.save({ keepalive })
   }
 
-  /** `DraftSaver`'s save:  the draft as it stands to the page server;  when it was saved. */
+  /** `DraftSaver`'s save:  the draft as it stands to the page server;  when it was typed. */
   private async postDraft({ keepalive }: { keepalive: boolean }): Promise<string> {
-    // the server stamps it `saved`
-    const { page, answers, comments, notes, labels, kept } = this.draftNow()
+    const { page, saved, answers, comments, notes, labels, kept } = this.draftNow()
     this.writeLocal()
-    const body = { page, answers, comments, notes, labels, kept: kept ?? [] }
+    const body = { page, saved, answers, comments, notes, labels, kept: kept ?? [] }
     const reply = (await this.link.post(DETAILS_DRAFT_API, body, { keepalive })) as { draft: DetailsDraft }
     return reply.draft.saved
   }
@@ -623,10 +634,10 @@ export class AnswerForm extends PageStore {
     return { ...this.gather(), labels: this.labels() }
   }
 
-  /** The draft as it stands:  `typed`, with the page as it is now laid over it. */
+  /** The draft as it stands:  `typed`, with the page as it is now laid over it, dated when it was typed. */
   private draftNow(): DetailsDraft {
     const typed = AnswerDraft.over(this.typed ?? EMPTY, this.current())
-    return { page: this.options.page, saved: new Date().toISOString(), ...typed }
+    return { page: this.options.page, saved: this.typedAt, ...typed }
   }
 
   /** Save the draft `DETAILS_SAVE_MS` after the last change (a details page only). */

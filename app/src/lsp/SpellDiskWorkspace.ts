@@ -78,7 +78,7 @@ export class SpellDiskWorkspace implements LSP.FileAddresses {
   }
 
   /**
-   * Javascript of the code file compiled spell imports as `module`, for `call native` (epic `from-project` P10):
+   * Javascript of the code file compiled spell imports as `module`, for `call native` (epic `from-console` P10):
    * `@spell/native/owen@spell/clipboard/clipboard.ts` => `clipboard.ts` from disk, its types taken out.
    * - What VS Code's runner links in (`spell/codeFile`), as the editor's runner links what the page server makes of it:
    *   the same `codeFileAsJavascript()`.

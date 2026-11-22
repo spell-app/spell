@@ -309,7 +309,8 @@ export type CompiledImportParams = {
 }
 
 /**
- * Asked as `spell/codeFile`:  the javascript of a code file the project of `uri` calls (`call native`, epic `from-project` P10),
+ * Asked as `spell/codeFile`:  the javascript of a code file the project of `uri` calls
+ * (`call native`, epic `from-console` P10),
  * for VS Code's runner to link it in -- see `runCompiled()`'s `loadNative`.
  * - Answered with the file read fresh from disk, its types taken out (`SpellDiskWorkspace.codeFileJavascript()`).
  * - `null` if it isn't there, or isn't valid TypeScript (logged).

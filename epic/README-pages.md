@@ -602,6 +602,8 @@ _A details page after you've answered:  the recommended option has the thumbs-up
 - `/details` makes one (through `epic ask create`).
   A REVIEW PAGE is the same tool for several calls at once, keep, change or talk over each,
   made from a template of its own;  the tools count it as a details page.
+- A ranked list to pick from is a Feature Set:  `epic ask create <slug> --template feature-set --from <data.json5>`,
+  three columns, names that stay (S1F1), reorderable.
 - Page or modal goes by size:
   a question that fits the modal and needs no picture is asked in the modal;
   one that fits but a picture would help gets a PICTURE PAGE (no questions on it), then the modal;

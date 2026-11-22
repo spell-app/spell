@@ -21,7 +21,7 @@ export function projectSource(projectId: string): SpellAppSource {
     declarationsUrl: builtUrl(projectId, DECLARATIONS_JSON),
     scopesUrl: builtUrl(projectId, SCOPES_JS),
     importUrl: (id) => builtUrl(id, COMPILED_JS),
-    // its code files' javascript, as the editor's runner reads them (`call native`, epic `from-project` P10)
+    // its code files' javascript, as the editor's runner reads them (`call native`, epic `from-console` P10)
     nativeUrl: (module) => SpellUrls.codeFileUrl(module),
     importDeclarationsUrl: (id) => builtUrl(id, DECLARATIONS_JSON),
     wordsUrl: builtUrl(projectId, WORDS_JS),

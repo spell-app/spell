@@ -917,7 +917,7 @@ export class EpicConfig {
    * Epic `epic`'s git branch:  its epic page's `<epic-page branch>`, else its id (epic `epic-engine` I378).
    * - THE one place every verb asks (merge, merge-main, worktree status, park ...):  never the id by itself
    * - set apart from the id by `epic update <epic> --branch <name>`:
-   *   `from-project` kept its id when its branch was renamed `from-console` (no customer names in branch names)
+   *   e.g. `from-project` keeps its id when its branch is renamed `from-console` (no customer names in branch names)
    * - the id for no page, a future epic's (no `branch`), and one written `(detached)` or the base branch
    *   (`epic create` in the main checkout wrote `main`), or one git has no branch for (a stale name)
    * - reads only the page's first few KB, where `<epic-page>` starts:  no parsing library, so plain `node` loads it

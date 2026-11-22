@@ -24,6 +24,7 @@ import {
   htmlIn,
   make
 } from "./answerPages.js"
+import { isSourceFileLink } from "spell/epic/links/links.types.ts"
 import { fromTemplate } from "./pages.js"
 
 /** The template's name, as `--template` takes it. */
@@ -53,6 +54,9 @@ const NO = "N"
 
 /** An item's priorities, first to last. */
 const PRIORITIES = ["1", "2", "3"].map((letter) => ({ letter, title: `Priority ${letter}` }))
+
+/** Another site's link. */
+const OUTSIDE = /^(https?:)?\/\//i
 
 /** The name of the follow-up question, and the tail of its key. */
 const PRIORITY = "Priority"
@@ -87,8 +91,9 @@ const COLUMNS = [
  *   - written in the page as ids (`s1`, `s1f3`), which are the keys of the answer too
  *   - a reorder moves elements, and renames nothing
  *   - a new round keeps each by its `id`, else by its title;  a new one takes the next number never used
- *   - an item moved to another section is new there
- * - Links:  outside ones open a new tab, the page's own and the repo's open in this window (`aimLinks()`).
+ *   - an `id` renames what it named, and never hands the name to another item (`checkKeeper()`)
+ *   - NOT across sections, yet:  an item a round moves to another section gets a new name there
+ * - Links:  outside ones open a new tab, pages open in this window, a source file's keeps its tab (`aimLinks()`).
  ****************/
 export class FeatureSet {
   /** Is parsed page `document` a Feature Set? */
@@ -135,6 +140,7 @@ export class FeatureSet {
       old,
       last: Number(this.previous?.querySelector(TAG)?.getAttribute(LAST)) || 0,
       pattern: SECTION_NAME,
+      letter: "S",
       what: "section"
     })
     host.setAttribute(LAST, String(last))
@@ -171,6 +177,7 @@ export class FeatureSet {
       old: this.oldItems(previous),
       last: Number(previous?.getAttribute(LAST)) || 0,
       pattern: ITEM_NAME,
+      letter: "F",
       what: `item in S${number}`
     })
     const reorder = make(
@@ -323,13 +330,19 @@ export class FeatureSet {
     return make(document, "td", { class: "spell-feature-facts" }, lines)
   }
 
-  /** Aim the links of `document`'s text:  another site's opens a new tab, every other one this window. */
+  /**
+   * Aim the links of `document`'s text:  another site's opens a new tab, every other one this window.
+   * - but a source file's keeps its `src-` tab:  it's how the side bar knows to open it in the editor
+   */
   static aimLinks(document) {
     for (const link of document.querySelectorAll("main a[href], main ui-breadcrumb[link]")) {
-      link.removeAttribute("target")
-      if (!/^(https?:)?\/\//i.test(link.getAttribute("href") ?? "")) continue
-      link.setAttribute("target", "_blank")
-      link.setAttribute("rel", "noopener")
+      const href = link.getAttribute("href") ?? ""
+      if (OUTSIDE.test(href)) {
+        link.setAttribute("target", "_blank")
+        link.setAttribute("rel", "noopener")
+      } else if (!isSourceFileLink(link.getAttribute("target") ?? "", href.split(/[?#]/)[0])) {
+        link.removeAttribute("target")
+      }
     }
   }
 
@@ -362,9 +375,11 @@ export class FeatureSet {
 /**
  * `entries` numbered, in their order:  by the `id` each gives, else by its title in the round before (`old`),
  * else the next number never used (after `last`).
- * - throws for an entry with no title, an `id` that isn't a name, one used twice, or a retired one
+ * - `letter`:  a name's, for the messages
+ * - throws for an entry with no title, an `id` that isn't a name, one used twice, a retired one,
+ *   or one that would hand its name to another (`checkKeeper()`)
  */
-function numbered(entries, { old, last, pattern, what }) {
+function numbered(entries, { old, last, pattern, letter, what }) {
   const used = Math.max(last, ...old.map((each) => each.number))
   const numbers = entries.map((entry) => {
     if (!entry.title) throw new Error(`every ${what} needs a title`)
@@ -377,6 +392,7 @@ function numbered(entries, { old, last, pattern, what }) {
   })
   const given = numbers.filter((number) => number !== undefined)
   if (new Set(given).size < given.length) throw new Error(`two ${what}s have the same id`)
+  entries.forEach((_entry, i) => checkKeeper(entries, i, { numbers, old, letter }))
   const taken = new Set(given)
   entries.forEach((entry, i) => {
     if (numbers[i] !== undefined) return
@@ -390,4 +406,34 @@ function numbered(entries, { old, last, pattern, what }) {
     numbers[i] ??= ++next
   })
   return { named: entries.map((entry, i) => ({ entry, number: numbers[i] })), last: next }
+}
+
+/**
+ * Check that the `id` of `entries[index]` renames what it named, and doesn't give that name to another
+ * (Q83:  a name stays with its item).
+ * - `numbers`:  each entry's, by its `id`
+ * - nothing to check with no `id`, a new one, or the title it had
+ * - throws when the title it had is still on another entry, or its new title is another's
+ *   - except where that other has an `id` saying so itself:  two items may have one title
+ */
+function checkKeeper(entries, index, { numbers, old, letter }) {
+  const number = numbers[index]
+  const before = old.find((each) => each.number === number)
+  const title = String(entries[index].title).trim()
+  if (!before || before.title === title) return
+  const name = `${letter}${number}`
+  /** Is the entry at `i` by its own `id` one that had `titled` as its title? */
+  const hadItself = (i, titled) => old.some((each) => each.number === numbers[i] && each.title === titled)
+  const isStillListed = entries.some(
+    (entry, i) => i !== index && String(entry.title).trim() === before.title && !hadItself(i, before.title)
+  )
+  if (isStillListed)
+    throw new Error(
+      `"${title}" can't have the id ${name}:  "${before.title}" has it, and is still in the list.  Take the id off "${title}".`
+    )
+  const other = old.find((each) => each.title === title && !numbers.includes(each.number))
+  if (other)
+    throw new Error(
+      `"${title}" can't have the id ${name}:  the round before calls it ${letter}${other.number}.  Change the id to ${letter}${other.number}, or take it off.`
+    )
 }

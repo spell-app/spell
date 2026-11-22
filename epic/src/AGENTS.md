@@ -2354,6 +2354,8 @@ the epic page shown in both tabs).
     (`labels`).
     - It puts it back on load over the answer sent, when it's newer:  Send says "Changes not sent",
       the draft's save shows beside it ("draft from 06:12 put back").
+    - Its `saved` is when they last typed, and the route keeps it (epic `epic-engine` I377):
+      only their change moves it, never a put back, a rewrite, a retry or the page going away.
   - Until it has read back the answer sent, the page saves and sends nothing (epic `epic-engine` I377):
     what it shows till then is the page's preset picks, or nothing, and neither is the person's.
     - a failed read is tried again every 3s;  this browser's old copy waits for it, never saved again as new

@@ -14,6 +14,7 @@ import {
   type PartLabels,
   type SentAnswer
 } from "spell/epic/answers"
+import { isSourceFileLink } from "spell/epic/links"
 
 import { epicFeatureSetVocabulary } from "./EpicFeatureSet.en"
 
@@ -485,7 +486,7 @@ export class EpicFeatureSet extends E.UIComponent<typeof epicFeatureSetVocabular
       link.rel = "noopener"
       return
     }
-    if (link.target.startsWith(SOURCE_TARGET) && !/(\.html?|\/)$/.test(link.pathname)) return
+    if (isSourceFileLink(link.target, link.pathname)) return
     if (link.target) link.target = "_self"
   }
 }
@@ -547,9 +548,6 @@ const STATES_BY_URGENCY: readonly AskState[] = ["attention", "working", "done"]
 /** The docs runtime's events:  it patched the page's file in;  a page's blocks changed, so draw the toolbar again. */
 const PAGE_UPDATED = "spell-doc:updated"
 const SECTIONS_CHANGED = "epic-count-changed"
-
-/** How `doc-links.js` names a source file's tab. */
-const SOURCE_TARGET = "src-"
 
 /** Classes of the shadow markup. */
 const REORDER_SECTIONS = "reorder-sections"

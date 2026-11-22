@@ -36,14 +36,16 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "round",
-      usage: '<page> [--title "..."] [--description "..."] [--from <questions.json5>]',
+      usage: '<page> [--title "..."] [--description "..."] [--template feature-set] [--from <questions.json5>]',
       description:
         "ask the same question again:  the ONE page rewritten in place (from --from, else left to edit), the round " +
-        "before folded at its bottom with what you sent;  never a second page (create refuses one)",
+        "before folded at its bottom with what you sent;  never a second page (create refuses one);  " +
+        "--template feature-set:  the page becomes a Feature Set, --from its sections and items",
       example: "epic ask round seo/pick-layout --from round2.json5",
       flags: {
         "--title <title>": "the page's title",
         "--description <text>": "what the page asks, under its title",
+        "--template <name>": "feature-set:  turns an ordinary page into a Feature Set, at the same address",
         "--from <questions.json5>": "the new round's questions;  none:  the page stays as it is, to edit"
       }
     },

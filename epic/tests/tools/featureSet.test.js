@@ -65,10 +65,20 @@ test("links:  another site's a new tab, the page's and the repo's this window", 
   expect(document.querySelector('a[href="../x.plan.html"]').hasAttribute("target")).toBe(false)
 })
 
+test("links:  a source file's keeps its tab, which the side bar opens in the editor;  a page's doesn't", () => {
+  const text =
+    '<a href="/src/util/string.ts" target="src-src-util-string-ts">file</a> ' +
+    '<a href="../y.html#part" target="src-y-html">page</a>'
+  const file = make("sources", spec(["Now", { title: "One", text }]))
+  const { document } = parseHTML(readFileSync(file, "utf8"))
+  expect(document.querySelector('a[href^="/src"]').getAttribute("target")).toBe("src-src-util-string-ts")
+  expect(document.querySelector('a[href^="../y"]').hasAttribute("target")).toBe(false)
+})
+
 test("data it can't draw is refused, saying why", () => {
   expect(() => createPage(docs, "none", { template: "feature-set" })).toThrow("made from data")
   expect(() => createPage(docs, "other", { template: "kanban" })).toThrow("no template 'kanban'")
-  expect(() => createPage(docs, "plain", { spec: spec(["Now", "One"]) })).toThrow("add --template feature-set")
+  expect(() => createPage(docs, "plain", { spec: spec(["Now", "One"]) })).toThrow("with --template feature-set")
   expect(() => make("empty", spec(["Now"]))).toThrow("needs items")
   expect(() => make("pick", spec(["Now", { title: "One", recommended: "X" }]))).toThrow("isn't one of Y, N, M, R")
 })
@@ -84,6 +94,51 @@ test("a round keeps each name with its item, and NEVER uses one again", () => {
   newRound(docs, file, { spec: spec(["Now", "Two, renamed", "Six"], ["Someday", "Seven"]) })
   expect(namesIn(file)).toEqual(["s1f2 Two, renamed", "s1f5 Six", "s3f1 Seven"])
   expect(() => newRound(docs, file, { spec: spec(["Now", { id: "F3", title: "Three" }]) })).toThrow("never used again")
+})
+
+test("an id never hands a name to another item:  its old title still listed, or another's title, is refused", () => {
+  const file = make("passed-on", spec(["Now", "One", "Two", "Three"], ["Later", "Four"]))
+  const before = readFileSync(file, "utf8")
+  const round =
+    (...sections) =>
+    () =>
+      newRound(docs, file, { spec: spec(...sections) })
+  expect(round(["Now", { id: "F1", title: "New" }, "One"])).toThrow('"One" has it, and is still in the list')
+  expect(round(["Now", { id: "F1", title: "Two" }])).toThrow("the round before calls it F2")
+  expect(round(["Now", { id: "F1", title: "Two" }, { id: "F2", title: "One" }])).toThrow('"One" has it')
+  const later = { id: "S1", title: "Soon", items: [{ title: "Five" }] }
+  const now = { title: "Now", items: [{ title: "One" }] }
+  expect(() => newRound(docs, file, { spec: { title: "List", sections: [later, now] } })).toThrow('"Now" has it')
+  expect(readFileSync(file, "utf8")).toBe(before)
+  // two items of one title are two items still, each kept by its own id
+  const twins = make("twins", spec(["Now", "Same", "Same"]))
+  newRound(docs, twins, { spec: spec(["Now", { id: "F2", title: "Same" }, { id: "F1", title: "Changed" }]) })
+  expect(namesIn(twins)).toEqual(["s1f2 Same", "s1f1 Changed"])
+})
+
+test("a list for an ordinary details page is refused, writing nothing;  --template feature-set turns it into one", () => {
+  const question = { id: "q1", title: "Which?", options: [{ title: "This" }, { title: "That" }] }
+  const file = createPage(docs, "ordinary", { epic: "big", spec: { title: "Ordinary", questions: [question] } })
+  const answerFile = DataFile.besidePage(file, "answer")
+  DataFile.write(answerFile, { answered: "2026-11-22T10:00:00.000Z", answers: { q1: { picked: ["B"] } } })
+  const contents = () => [readFileSync(file, "utf8"), readFileSync(answerFile, "utf8")]
+  const before = contents()
+  const list = spec(["Now", "One", "Two"])
+  expect(() => newRound(docs, file, { spec: list })).toThrow("with --template feature-set")
+  expect(() => newRound(docs, file, { template: "feature-set" })).toThrow("made from data")
+  expect(() => newRound(docs, file, { template: "kanban", spec: list })).toThrow("no template 'kanban'")
+  expect(contents()).toEqual(before)
+
+  expect(newRound(docs, file, { template: "feature-set", spec: list })).toBe(file)
+  expect(namesIn(file)).toEqual(["s1f1 One", "s1f2 Two"])
+  const { rounds, answers } = DataFile.read(answerFile)
+  expect(answers).toBeUndefined()
+  expect(rounds[0].answer.answers).toEqual({ q1: { picked: ["B"] } })
+  expect(rounds[0].sent).toContain("That")
+  expect(parseHTML(readFileSync(file, "utf8")).document.querySelector("#round-1").textContent).toContain("That")
+  // and the next round is a Feature Set's, by itself
+  newRound(docs, file, { spec: spec(["Now", "Two", "Three"]) })
+  expect(namesIn(file)).toEqual(["s1f2 Two", "s1f3 Three"])
 })
 
 test("the answer:  a line an item, its Priority and one comment on it;  No needs none;  the new order by name", () => {
