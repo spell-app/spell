@@ -440,13 +440,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     // text typed and not parsed yet (`takeText()`):  parsed first, so nothing compiles from an older parse
     this.updateWaitingText()
     // limited to some pages:  part of the program, so never saved or cached (`pagesInPlay`)
-    if (this.pagesInPlay) {
-      await this.load(undefined)
-      await Promise.all(this.spellFiles.map((file) => file.load(undefined)))
-      if (this.hasAlonePages) {
-        save = false
-        cached = false
-      }
+    if (await this.isLimitedToPages()) {
+      save = false
+      cached = false
     }
     this.saveCompiled = save
     this.targetsThisRun = targets
@@ -481,6 +477,19 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       }
     }
     return result
+  }
+
+  /**
+   * Is what we compile now only some of our pages (`pagesInPlay`)?
+   * - SIDE EFFECT:  loads every file first, when it could be.  A page is known by its text alone (`headFor()`),
+   *   and the page doesn't parse what the language worker compiles:  unloaded, none looked alone, so part of a site
+   *   was saved as all of it, and Run found no page to show (epic `editor` I293).
+   */
+  private async isLimitedToPages(): Promise<boolean> {
+    if (!this.pagesInPlay) return false
+    await this.load(undefined)
+    await Promise.all(this.spellFiles.map((file) => file.load(undefined)))
+    return this.hasAlonePages
   }
 
   /**
@@ -565,13 +574,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * `compile()` would (`save`):  the editor's language worker compiles off the page's thread (epic `solid-2-final` P18).
    * - Our own parse stays as it is:  only what a compile writes is taken (`takeCachedEntry()`), so `compiledFrom` says
    *   `"elsewhere"`.
-   * - A `compile()` still waiting on the cache gives way to it.
+   * - A `compile()` still waiting on the cache gives way to it, and it to a later compile.
    * - Limited to some pages (`pagesInPlay`):  never saved, as `compile()`'s isn't.
-   * - Returns what `saveOutput()` returns.
+   *   SIDE EFFECT:  every file is loaded first, to tell (`isLimitedToPages()`).
+   * - Returns what `saveOutput()` returns;  `undefined` when a later compile took over.
    */
   async takeCompiled(entry: SP.CompiledEntry, { save = true }: { save?: SaveCompiled } = {}): Promise<unknown> {
-    if (this.pagesInPlay && this.hasAlonePages) save = false
-    this.compileRun++
+    const run = ++this.compileRun
+    if (await this.isLimitedToPages()) save = false
+    if (run !== this.compileRun) return undefined
     this.saveCompiled = save
     this.targetsThisRun = undefined
     this.takeCachedEntry(entry)
