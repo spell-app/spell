@@ -164,6 +164,74 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
 - `yarn epic` runs it too, in the epic folder and in the app's.
   - The app's folder adds `yarn ask`, for `epic ask`.
   - And `yarn window`, for `epic window`.
+- `spell epic <verb>` runs it too, from the kit's `spell` command:
+  the nearest checkout's [bin/epic](bin/epic), else the published one, at the version of the `spell` that ran it.
+  So `npx spell@next epic init` is the one command a new repo needs.
+
+</details>
+
+## One writer for every epic page
+
+`epic update seo#P6 --title "New title"` renames a phase, and every link that said `P6 · Old title` follows it.
+That's why code, skills and agents change an epic page through `epic`, never by hand:
+like a migration tool for a database, it's the one writer, and it refuses an edit that would break the page.
+
+- It writes the page's `<epic-*>` elements, their attributes and children, never their layout.
+- Every edit is checked before it's written.
+  One that leaves the page with a problem it didn't have before (a duplicate id, a link to no id, bad markup)
+  writes nothing, and says what it would have broken.
+- Every edit first brings an older page up to today's markup, and logs it:
+  `epic migrate` runs the same steps on every page at once ([below](#epic-page--log-and-upkeep)).
+- Writes take the page's lock and land atomically, so a background agent and the session never race.
+- A command keeps the ids, states, counts, the log and the Update blocks in step:
+  edit through one wherever one exists.
+- Never edit the inbox file beside the page (`seo.inbox.json5`) by hand:
+  the page server and the inbox verbs write it under a lock of its own.
+
+<details>
+<summary>The page on disk:  a skeleton and its parts</summary>
+
+A page is stored SPLIT:  `seo.plan.html` is a skeleton, and each bulky block's body is a file of its own,
+`parts/<id>.html`, loaded the first time it's opened.
+So the side bar opens a long page fast, and an edit to one item rewrites only that item's file.
+
+- The skeleton keeps everything a reader or a script needs without a body:
+  every id, title, status and review mark.
+  So links, counts, filters and the docs' home page work with no body loaded.
+- The hosts with a part:  an Overview sub-section, a phase, an item with details, the log.
+  In the skeleton each one names its body (`source="parts/q7.html"`), and lists the ids inside it (`part-ids`),
+  so a link to one of them loads the body first.
+- Every verb reads either shape whole, and writes it back split, each changed file once.
+  `epic split` and `epic join` switch a page by hand.
+- Claude's status cards always stay in the skeleton, beside the item's title.
+- **The catch:**  a split page needs the page server.
+  Opened from `file://`, a folded body opens empty.
+
+</details>
+
+<details>
+<summary>HTML handed in:  old shapes become elements</summary>
+
+Agents and skills hand `epic` HTML (`--details`, `--file`, a phase's fields), some of it in shapes
+written for the page's older markup.
+On the way in, each becomes its element, so a page never holds them:
+
+| Written | Stored as |
+| --- | --- |
+| an option grid, `ui-grid.spell-pros-cons`, its cards lettered | `<epic-choices>` of `<epic-option>` |
+| `div.plan-reply` | `<epic-reply>` |
+| a `Net effect` paragraph and its list | `<epic-net-effect>` |
+| `ui-accordion.spell-code`, `ui-accordion.spell-aside` | `<epic-code>`, `<epic-aside>` |
+| `ui-message.plan-update` | `<epic-note>` |
+| a labelled block, `<b>Where:</b>` | `<epic-field label>` |
+| a name and its file's path, `<code>buildTsx()</code>, <code>src/.../buildTsx.ts</code>` | the name, with the path as its tooltip |
+
+- Never inside code, or inside an Original Discussion:  history stays as it was written.
+- A tag that's no page markup (`<for x>`, `<script>`) goes in as text, quoted.
+- A rewrite never drops text:  what it replaces moves into the item's Original Discussion, one version each.
+- Write the elements themselves in new HTML:  the old shapes are only accepted, not wanted.
+
+The code:  [IncomingHtml.ts](src/tool/IncomingHtml.ts);  the markup in full, [PLAN-DOC.md](src/tool/PLAN-DOC.md).
 
 </details>
 

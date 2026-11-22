@@ -467,6 +467,17 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 
 Every other folder's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
 
+## The guides
+
+Three longer pages, about the epic tooling and shipped with it, in [the guides folder](guides/):
+VS Code's Epic Docs tab shows them, and so does the page server at their own addresses (`/guides/...`).
+
+| Guide | What's in it |
+| --- | --- |
+| [Epic Pages, a Tour](guides/plan-docs/plan-docs.html) | <ul><li>an epic page's parts, each drawn live:  the header, the Overview, phases, items, the Log</li><li>what each colour and mark means, and what a click does</li></ul> |
+| [Background Agents](guides/background-agents.html) | <ul><li>`/bg`:  a task handed to a helper, so the panel is free again</li><li>names, the running list, redirecting one, what comes back</li></ul> |
+| [Airplane Mode](guides/airplane.html) | <ul><li>`/airplane`:  working on the pages with no Claude</li><li>what's kept for later, and `/airplane land` when you're back</li></ul> |
+
 ## See also
 
 - [README-pages.md](README-pages.md):  the next step, an epic page section by section and a review round on it

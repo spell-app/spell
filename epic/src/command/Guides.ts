@@ -4,7 +4,8 @@ import { basename, dirname, extname, join, relative, resolve, sep } from "node:p
 import { CLI } from "spell/cli"
 import { commandSources } from "spell/cli/commands/commandsCommand"
 import { Git } from "spell/server/Git"
-import { pathInside } from "spell/server/RealPath"
+import { checkoutOf } from "spell/server/checkout"
+import { pathInside, RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { Sagas } from "spell/epic/tool/Sagas.ts"
 
@@ -40,7 +41,7 @@ export class Guides {
 
   /** Run `epic guides <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
   async run(args: string[]): Promise<number> {
-    const { positional, flags } = parseVerbArgs(args, ["json", "dry-run"])
+    const { positional, flags } = parseVerbArgs(args, ["json", "dry-run", "plugin"])
     const [verb = "list", ...pages] = positional
     const dryRun = Boolean(flags.dryRun)
     if (verb === "list") {
@@ -51,7 +52,7 @@ export class Guides {
     }
     if (verb === "move") {
       if (!pages.length) throw new EpicCommandError("guides move:  which guides?  a page (guides/x.html) or SAGA:/<id>")
-      for (const line of this.move(pages, { dryRun }).lines) CLI.out(line)
+      for (const line of this.move(pages, { dryRun, plugin: Boolean(flags.plugin) }).lines) CLI.out(line)
       return EXIT.OK
     }
     if (verb === "prune") {
@@ -87,17 +88,19 @@ export class Guides {
   ////////////////
 
   /**
-   * Every guide, by page path, and where it is:  `code` (the checkout's guides folder), `epic` (the epic folder's),
-   * or `both` (moved, its branch not merged yet).
+   * Every guide, by page path, and where it is:  `code` (the checkout's guides folder), `plugin` (the epic plugin's,
+   * `EpicConfig.pluginGuides()`), `epic` (the epic folder's), or `both` (moved, its branch not merged yet).
    */
   list(): GuideListing[] {
     const where = new Map<string, GuideListing["where"]>()
-    for (const { folder, code, base } of EpicConfig.guideFoldersOf(this.checkout))
+    for (const { folder, code, plugin, base } of EpicConfig.guideFoldersOf(this.checkout)) {
+      const kind = code ? "code" : plugin ? "plugin" : "epic"
       for (const file of pagesUnder(folder)) {
         const path = relative(base, file).split(sep).join("/")
         const before = where.get(path)
-        where.set(path, before && before !== (code ? "code" : "epic") ? "both" : code ? "code" : "epic")
+        where.set(path, before && before !== kind ? "both" : kind)
       }
+    }
     return [...where].map(([path, at]) => ({ path, where: at })).sort((a, b) => a.path.localeCompare(b.path))
   }
 
@@ -105,10 +108,16 @@ export class Guides {
    * Copy guides `pages` (page paths, `guides/x.html`, `x.html`, or `SAGA:/<id>`) from the epic folder into the
    * checkout's guides folder, each with what goes with it (`Guides`' header);  returns what was copied.
    * - `dryRun`:  copies nothing, says what it would
-   * - throws for a repo with no guides folder, a page that isn't an epic folder guide, or a saga with none
+   * - `plugin`:  into the epic plugin's own guides folder instead (`EpicConfig.pluginGuides()`, epic `epic-engine`
+   *   T130), at the same path from the engine's folder:  a guide about the epic tooling, shipped with the plugin
+   * - throws for a repo with no guides folder, a page that isn't an epic folder guide, or a saga with none;  with
+   *   `plugin`, for a checkout that doesn't hold the plugin
    */
-  move(pages: readonly string[], { dryRun = false }: { dryRun?: boolean } = {}): MoveReport {
-    const folder = this.codeFolder()
+  move(
+    pages: readonly string[],
+    { dryRun = false, plugin = false }: { dryRun?: boolean; plugin?: boolean } = {}
+  ): MoveReport {
+    const folder = plugin ? this.pluginFolder() : this.codeFolder()
     const content = EpicConfig.contentOf(this.checkout)
     const shared = join(content, GUIDES)
     const copied: string[] = []
@@ -122,7 +131,7 @@ export class Guides {
         else copyFileSync(file, to)
       }
     }
-    const kept = relative(this.checkout, folder).split(sep).join("/") === GUIDES
+    const kept = plugin || relative(this.checkout, folder).split(sep).join("/") === GUIDES
     const lines = [
       `${dryRun ? "would copy" : "copied"} ${copied.length} file(s) into ${relative(this.checkout, folder) || "."}:`,
       ...copied.map((path) => `  ${path}`),
@@ -144,21 +153,22 @@ export class Guides {
     const pruned: string[] = []
     try {
       const main = EpicConfig.mainOf(root)
-      const written = EpicConfig.of(main).guidesFolder
-      if (!written) return []
+      const written = [EpicConfig.of(main).guidesFolder, pluginFolderIn(main)].filter((each): each is string => !!each)
       const content = EpicConfig.contentOf(main)
-      const tracked = (Git.out(["ls-files", "-z", "--", written], main) ?? "").split("\0").filter(Boolean)
-      const folder = resolve(main, written)
       const emptied = new Set<string>()
-      for (const path of tracked) {
-        const inside = pathInside(folder, resolve(main, path))
-        if (!inside) continue
-        const twin = join(content, GUIDES, inside)
-        if (!existsSync(twin) || !statSync(twin).isFile()) continue
-        pruned.push(relative(content, twin).split(sep).join("/"))
-        if (dryRun) continue
-        rmSync(twin)
-        emptied.add(dirname(twin))
+      for (const each of written) {
+        const tracked = (Git.out(["ls-files", "-z", "--", each], main) ?? "").split("\0").filter(Boolean)
+        const folder = resolve(main, each)
+        for (const path of tracked) {
+          const inside = pathInside(folder, resolve(main, path))
+          if (!inside) continue
+          const twin = join(content, GUIDES, inside)
+          if (!existsSync(twin) || !statSync(twin).isFile()) continue
+          pruned.push(relative(content, twin).split(sep).join("/"))
+          if (dryRun) continue
+          rmSync(twin)
+          emptied.add(dirname(twin))
+        }
       }
       for (const dir of [...emptied].sort((a, b) => b.length - a.length)) removeIfEmpty(dir, join(content, GUIDES))
     } catch (error) {
@@ -179,6 +189,16 @@ export class Guides {
         'guides move:  this repo has no guides folder of its own:  name one in .epic/config.json5, "guidesFolder": "guides"'
       )
     return resolve(this.checkout, written)
+  }
+
+  /** The epic plugin's guides folder, absolute;  throws when this checkout doesn't hold the plugin. */
+  private pluginFolder(): string {
+    const folder = pluginFolderIn(this.checkout)
+    if (!folder)
+      throw new EpicCommandError(
+        "guides move --plugin:  this checkout doesn't hold the epic plugin:  run it in the plugin's own repo (the kit)"
+      )
+    return resolve(this.checkout, folder)
   }
 
   /** The epic folder guides `pages` name, absolute, once each;  throws for one that isn't there. */
@@ -225,7 +245,7 @@ export function commandsIn(root: string): (words: string[]) => boolean {
 }
 
 /** A guide, by page path, and where its copies are (`Guides.list()`). */
-export type GuideListing = { path: string; where: "code" | "epic" | "both" }
+export type GuideListing = { path: string; where: "code" | "plugin" | "epic" | "both" }
 
 /** What `Guides.move()` copied, from the checkout's root, and what to say. */
 export type MoveReport = { copied: string[]; lines: string[] }
@@ -294,6 +314,18 @@ function filesWith(page: string, shared: string): string[] {
 /** Whether `file` is a page's comments, which stay in the epic folder:  `<page>.inbox.json5`, `pictures/`. */
 function isComments(file: string): boolean {
   return file.endsWith(".inbox.json5") || file.split(sep).includes("pictures")
+}
+
+/**
+ * The epic plugin's guides folder (`EpicConfig.pluginGuides()`) as checkout `root` has it, from its root
+ * (`epic/guides`);  `undefined` when the plugin isn't in a checkout of `root`'s repo (an npm install).
+ * - the running engine may be a worktree's while `root` is the main checkout (`epic merge`):  the same path from each
+ */
+function pluginFolderIn(root: string): string | undefined {
+  const plugin = EpicConfig.pluginGuides()
+  const home = plugin && checkoutOf(plugin)
+  if (!plugin || !home || !RealPath.same(home.main, EpicConfig.mainOf(root))) return undefined
+  return pathInside(home.root, plugin)
 }
 
 /** Remove `dir` and each parent left empty, up to (not including) `stop`. */

@@ -105,7 +105,8 @@
     "engineRoutes": {
       "/_epic/assets/": "src/tools/_assets",
       "/_epic/pack/": "src/components/__pack",
-      "/templates/": "templates"
+      "/templates/": "templates",
+      "/guides/": "guides"
     },
     "localCopies": {
       "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js": "/_epic/assets/highlight.min.js"
@@ -154,6 +155,7 @@
       "README-superpowers.md",
       "README-teams.md",
       "README.md",
+      "guides",
       "docs/images",
       "vscode/package.json",
       "vscode/spell-epic.vsix"

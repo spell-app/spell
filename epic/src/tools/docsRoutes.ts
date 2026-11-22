@@ -8,6 +8,8 @@
  * /_epic/docs/README-epics.md          the front page for epics (the kit's root, or the `spell` package's)
  * /_epic/docs/epic/README-setup.md     each README of the engine's folder (`epic/README*.md`)
  * /_epic/docs/epic/docs/images/x.png   the pictures they show
+ * /_epic/docs/epic/guides/x/x.html     the epic plugin's own guides (`epic/guides/`, epic `epic-engine` T130), and
+ *                                      the pictures and files beside them
  * ```
  *
  * - A README's address answers TWO ways:
@@ -55,6 +57,8 @@ function docsHandler(web: SRV.WebServer): Handler {
     const file = DocsFiles.fileFor(path)
     if (!file) throw new SRV.HttpError(404, `no epic doc at ${DOCS_PREFIX}${path}`)
     reply.set({ "Cache-Control": "no-store", Vary: "Sec-Fetch-Dest" })
+    if (PAGE_FILE.test(path))
+      return void reply.type("text/html; charset=utf-8").send(withHooks(web, readFileSync(file, "utf8"), file, request))
     if (!README.test(path)) {
       reply.type(SRV.typeFor(file))
       return reply.sendFile(file)
@@ -62,11 +66,18 @@ function docsHandler(web: SRV.WebServer): Handler {
     const isRead = "raw" in request.query || request.get("sec-fetch-dest") === "empty"
     if (isRead) return void reply.type("text/markdown; charset=utf-8").send(DocsFiles.markdownFor(path, file))
     // a navigation:  the README's page, through the server's own page hooks (`window.SPELL_SERVER`, live reload)
-    let page = readFileSync(EngineFiles.path(PAGE), "utf8")
-    const served = { path: decodeURIComponent(request.path), file, request }
-    for (const hook of web.files.html) page = hook(page, served)
-    reply.type("text/html; charset=utf-8").send(page)
+    reply
+      .type("text/html; charset=utf-8")
+      .send(withHooks(web, readFileSync(EngineFiles.path(PAGE), "utf8"), file, request))
   }
+}
+
+/** Page `html`, for `file` at `request`'s address, through the server's own page hooks (`window.SPELL_SERVER`, live reload). */
+function withHooks(web: SRV.WebServer, html: string, file: string, request: SRV.Request): string {
+  const served = { path: decodeURIComponent(request.path), file, request }
+  let page = html
+  for (const hook of web.files.html) page = hook(page, served)
+  return page
 }
 
 /****************
@@ -101,9 +112,15 @@ export class DocsFiles {
   }
 }
 
-/** The files the tab serves, from `DocsFiles.root`:  the front page, the engine's READMEs and their pictures. */
+/**
+ * The files the tab serves, from `DocsFiles.root`:  the front page, the engine's READMEs and their pictures, and the
+ * epic plugin's guides with what's beside them (never a `..`, nor a dot file).
+ */
 const SERVED =
-  /^(?:README-epics\.md|epic\/README(?:-[\w-]+)?\.md|epic\/docs\/images\/[\w.-]+\.(?:png|svg|jpg|gif|webp))$/
+  /^(?:README-epics\.md|epic\/README(?:-[\w-]+)?\.md|epic\/docs\/images\/[\w.-]+\.(?:png|svg|jpg|gif|webp)|epic\/guides\/(?:[\w-][\w.-]*\/)*[\w-][\w.-]*\.(?:html|png|svg|jpg|gif|webp|pdf|json5|js|css))$/
+
+/** A guide's page, of the paths `SERVED` takes:  sent through the server's page hooks, as the page server's are. */
+const PAGE_FILE = /\.html$/
 
 /** A README, of the paths `SERVED` takes. */
 const README = /\.md$/

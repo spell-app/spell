@@ -1199,8 +1199,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "list",
       usage: "[--json]",
       description:
-        "every guide and where it is:  code (the repo's guidesFolder), epic (the epic folder's guides/), or both " +
-        "(moved on a branch not merged yet);  the default verb",
+        "every guide and where it is:  code (the repo's guidesFolder), plugin (the epic plugin's own, epic/guides/), " +
+        "epic (the epic folder's guides/), or both (moved on a branch not merged yet);  the default verb",
       example: "epic guides list",
       flags: {
         "--json": "print it as JSON"
@@ -1208,13 +1208,16 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "move",
-      usage: "<page | SAGA:/id>... [--dry-run]",
+      usage: "<page | SAGA:/id>... [--plugin] [--dry-run]",
       description:
         "copy guides from the epic folder into the checkout's guides folder, at the same path, with their twins, " +
         "pictures and experiments (not their comments), for the branch to commit;  the epic folder keeps its copy " +
         "until the branch merges into main",
       example: "epic guides move guides/data/data.html",
       flags: {
+        "--plugin":
+          "into the epic plugin's own guides folder (epic/guides/) instead:  a guide about the epic tooling, shipped " +
+          "with the plugin and read in VS Code's Epic Docs tab",
         "--dry-run": "copy nothing:  say what it would"
       }
     },
