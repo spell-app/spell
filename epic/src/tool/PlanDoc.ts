@@ -1006,6 +1006,9 @@ export class PlanDoc extends PlanReader {
     let reopened = 0
     for (const item of this.allItems) {
       if (item.hasAttribute("badge-closed")) {
+        // its plain UPDATE label took the closed status' word on the next edit (`update-labels`):  plain again
+        const label = PlanItem.updateLabelOf(item)
+        if (label && label.getAttribute("became") === item.getAttribute("status")) label.removeAttribute("became")
         Markup.set<"epic-item">(item, { status: "open", badgeClosed: undefined, closedAs: undefined })
         reopened++
       }

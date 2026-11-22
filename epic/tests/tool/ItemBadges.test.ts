@@ -236,6 +236,19 @@ describe("epic badges", () => {
     expect(page().page.hasAttribute("badges")).toBe(false)
   })
 
+  test("off:  a plain UPDATE label is plain again, though it said DONE while its badge had it closed", async () => {
+    const epic = commands()
+    await epic.run(["add", "demo", "judgement", "An old call", "--calm", "--title-ok"])
+    await epic.files.edit(file, (plan) => plan.markUpdate(plan.item("j1")))
+    await epic.run(["badges", "demo", "on"])
+    await epic.run(["badges", "demo", "score"])
+    await epic.run(["badges", "demo", "close", "J1"])
+    await epic.run(["log", "demo", "the next edit"])
+    expect(PlanItem.updateLabelOf(page().item("j1"))!.getAttribute("became")).toBe("done")
+    await epic.run(["badges", "demo", "off"])
+    expect(PlanItem.updateLabelOf(page().item("j1"))!.hasAttribute("became")).toBe(false)
+  })
+
   test("close --as:  what a recheck found;  never their words", async () => {
     const epic = commands()
     await epic.run(["badges", "demo", "on"])
