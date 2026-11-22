@@ -18,14 +18,15 @@
 		</>
 		<list bulleted>
 			<item>The data: copy the starter, <text code>feature-set.json5</>, in the tool's templates.</>
-			<item>The next round: <text code>epic ask round my-list --from my-list.json5</>. Each item keeps its name.</>
+			<item>The next round: <text code>epic ask round my-list --from my-list.json5</>. Each item keeps its name while it stays in its section.</>
 		</>
 	</>
 
 	<section label="2. What it does">
 		<icon slot="icon" name="hand pointer"/>
 		<list bulleted>
-			<item>Names: sections are S1, S2 and each one's items F1, F2, so S1F1 names one item. A name stays with its item, and is never used again.</>
+			<item>Names: sections are S1, S2 and each one's items F1, F2, so S1F1 names one item. A name stays with its item in its section, and is never used again. A round that moves an item to another section gives it a new one.</>
+			<item>In the side bar and on a phone, Your pick comes first, then Item with its Facts under it.</>
 			<item>Reorder sections, and Reorder on each section: one dialog, dragged by the dots or moved by the arrows. Cancel, the ✕ and Escape change nothing.</>
 			<item>The order is part of the answer: Send tells Claude.</>
 			<item>Each section takes the colour of its picks: red until every one is decided.</>

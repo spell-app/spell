@@ -1098,9 +1098,8 @@ export class PlanDoc extends PlanReader {
    *   elements on the way in (`IncomingHtml`);  a question's lead, the question as asked, goes in an
    *   `<epic-question>` (P14) unless the HTML has one
    * - `titleHTML`:  `title` is HTML;  with markup, it's a `slot="title"` child
-   * - a question goes after the open questions at the top of its section;  a decision is a question born answered
-   *   (D13):  the next `q` id, `decided`, `answered`, `title` its answer, among the answered ones;
-   *   everything else at the end
+   * - at its section's end, so every section stays in number order (epic `epic-engine` T151);  no item ever moves
+   * - a decision is a question born answered (D13):  the next `q` id, `decided`, `answered`, `title` its answer
    * - while a phase is active:  `phase` (its "To review" line lists it) and an UPDATE marker
    * - in bedtime mode (a `/bedtime` run):  `overnight`, for good (the bed icon on its line)
    * - `calm`:  not urgent (yellow, not red, until reviewed):  a judgement call or issue that wouldn't surprise Owen
@@ -1139,7 +1138,6 @@ export class PlanDoc extends PlanReader {
     // no details:  "What it says on the tin.  Clarify" as its body, so it opens and takes a comment (epic `epic-engine` I209)
     PlanItem.giveBody(item)
     section.append(item)
-    if (spec.prefix === KINDS.question.prefix) this.placeQuestion(item)
     this.stamp(item)
     // a new item is new, not an update:  labelled only while a phase is active, as it always was
     if (this.activePhase) this.markUpdate(item)
@@ -1195,7 +1193,6 @@ export class PlanDoc extends PlanReader {
       this.dropOtherAnswers(question, this.chooseOption(question, option, choices))
     }
     Markup.set<"epic-item">(question, { status: "decided", answered: true })
-    this.placeQuestion(question)
     this.stamp(question)
     this.markUpdate(question, "decided")
     return question.id
@@ -1243,45 +1240,9 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Put question `item` where it belongs in its section:  an open one after the open questions on top;
-   * an answered (or dropped) one among the answered, in id order.
-   */
-  placeQuestion(item: Element): void {
-    const section = item.parentElement!
-    if (item.getAttribute("status") === "open") {
-      const last = this.openQuestions(section)
-        .filter((other) => other !== item)
-        .at(-1)
-      if (last) last.after(item)
-      else section.prepend(item)
-      return
-    }
-    const n = PlanItem.idNumber(item.id)
-    const later = Array.from(section.children).find(
-      (other) =>
-        other !== item &&
-        QUESTION_ID.test(other.id) &&
-        other.getAttribute("status") !== "open" &&
-        PlanItem.idNumber(other.id) > n
-    )
-    if (later) later.before(item)
-    else section.append(item)
-  }
-
-  /** The open questions at the top of `section`, in order. */
-  openQuestions(section: Element): Element[] {
-    const run: Element[] = []
-    for (const item of section.children) {
-      if (!QUESTION_ID.test(item.id) || item.getAttribute("status") !== "open") break
-      run.push(item)
-    }
-    return run
-  }
-
-  /**
    * Set item `id` open, done or canceled;  closed items stay (`canceled` ones struck through).  Returns its title.
    * - "open" means the kind's live status:  a reopened answered question is `decided` again, an unanswered one `open`
-   * - a question moves to its place (`placeQuestion()`);  stamped (`stamp()`)
+   * - stamped (`stamp()`);  it stays in its place (epic `epic-engine` T151)
    * - TAKEN UP (`taken-in`, epic `epic-engine` I128):  an issue or todo closed done while a phase is active is taken
    *   in that phase (`PhaseTakes`);  reopened or canceled, it's taken in none
    * - closed (done or canceled):  every status card still underway finishes (`finishUnderway()`), so it never stays
@@ -1319,7 +1280,6 @@ export class PlanDoc extends PlanReader {
       const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
       if (active) Markup.set<"epic-item">(item, { takenIn: active.id })
     }
-    if (question) this.placeQuestion(item)
     this.stamp(item)
     this.markUpdate(item, status === "open" ? (reopened ? "reopened" : undefined) : (status as "done" | "canceled"))
     return PlanItem.titleOf(item)
@@ -2775,6 +2735,8 @@ export class PlanDoc extends PlanReader {
    *   - a done phase its commits not on main name (`P28:`), or with one of them listed under it
    *   - an item they name (`editor I55:`), the phase its `work` names, or one listed under it;  a judgement call also
    *     by the phase it was made in (`phase`):  its state reads it (`itemState()`:  a calm call stays blue)
+   *     - not once `main` has a commit of that phase from after the call (`landed`, `madeAt()`):  its work is in it
+   *       (epic `epic-engine` I439)
    *   - a done or fixed item's last finished status card, whose line then says `not on main yet`
    *   - that item's UPDATE label, when it names a status change (`FIXED`, T75):  its `Not in main` pill
    * - gone again once the work lands;  no `landing` (no git, a test):  nothing changes
@@ -2782,13 +2744,17 @@ export class PlanDoc extends PlanReader {
   updateLanded(): number {
     const landing = this.landing
     if (!landing) return 0
-    const { branch, ids, shas } = landing
+    const { branch, ids, shas, landed } = landing
     const isOffMain = (host: Element) =>
       Array.from(host.querySelectorAll(":scope > epic-commit")).some((commit) => {
         const listed = commit.getAttribute("sha") ?? ""
         return Boolean(listed) && shas.some((sha) => sha.startsWith(listed) || listed.startsWith(sha))
       })
     const phaseOf = (label: string | undefined) => /^P(\d+(?:\.\d+)?)\b/i.exec(label ?? "")?.[1]
+    // a call made in a phase is in that phase's next commit:  on main once main has one of the phase's from after it
+    // (epic `epic-engine` I439:  J330-J346 stayed NOT IN MAIN while later P80 work was on the branch alone)
+    const isLanded = (item: Element, { phase }: ItemFacts) =>
+      (landed?.get(`p${phase}`) ?? -Infinity) > PlanDoc.madeAt(item)
     let changed = 0
     const mark = (element: Element, on: boolean) => {
       const value = on ? branch : undefined
@@ -2806,7 +2772,10 @@ export class PlanDoc extends PlanReader {
       const offMain =
         ids.has(facts.id) ||
         (work !== undefined && ids.has(`p${work}`)) ||
-        (JUDGEMENT_ID.test(facts.id) && facts.phase !== undefined && ids.has(`p${facts.phase}`)) ||
+        (JUDGEMENT_ID.test(facts.id) &&
+          facts.phase !== undefined &&
+          ids.has(`p${facts.phase}`) &&
+          !isLanded(item, facts)) ||
         isOffMain(item)
       mark(item, offMain)
       const finished = CLOSED.has(facts.status) || facts.fixed
@@ -2818,6 +2787,20 @@ export class PlanDoc extends PlanReader {
       if (label) mark(label, offMain && finished && label.hasAttribute("became"))
     }
     return changed
+  }
+
+  /**
+   * About when `item` was made, in ms:  the earliest time on it -- its change stamp, when it was judged (P81), its
+   * cards' and replies' times;  `Infinity` with none.
+   * - not its change stamp alone:  a retitle or a review stamps that later (epic `epic-engine` I439)
+   */
+  static madeAt(item: Element): number {
+    const times = [
+      item.getAttribute("changed"),
+      item.getAttribute("judged"),
+      ...Array.from(item.querySelectorAll("[at]"), (dated) => dated.getAttribute("at"))
+    ].map((time) => Date.parse((time ?? "").replace(" ", "T")))
+    return Math.min(Infinity, ...times.filter((time) => Number.isFinite(time)))
   }
 
   /**
@@ -3153,7 +3136,7 @@ export class PlanDoc extends PlanReader {
   /**
    * The epic's git branch, apart from its id (`epic update <epic> --branch <name>`, epic `epic-engine` I378):
    * `<epic-page branch>`, which `EpicConfig.branchOf()` reads for every verb that finds the branch.
-   * - e.g. `from-project` kept its id when its branch was renamed `from-console`
+   * - e.g. `from-project` keeps its id when its branch is renamed `from-console`
    */
   setBranch(branch: string): void {
     const was = this.page.getAttribute("branch")
@@ -3657,7 +3640,6 @@ export class PlanDoc extends PlanReader {
         // open, red, Owen's to answer again:  `setItem()` would keep an answered question decided.
         // Its answer stays, readable, until he answers again
         Markup.set<"epic-item">(question, { status: "open" })
-        if (QUESTION_ID.test(question.id)) this.placeQuestion(question)
         this.stamp(question)
         this.markUpdate(question, "reopened")
       }

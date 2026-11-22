@@ -42,7 +42,8 @@ import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
  *   An orange `UPDATE` inline, on an item changed (`phase 3 done` removes a
  *   phase's labels;  Owen's ✓ any label, I285;  on any epic, a phase under way or not, I290).
  *   - A status change says which (`became`;  Owen, 2026-11-14, epic `epic-engine` T75):  `FIXED`.
- *     - `UNDERWAY` is solid blue, not orange (T146).
+ *     - `UNDERWAY` is solid blue, not orange (T146);  grey beside its item's chip of that blue (T149).
+ *   - In an item's title, the item draws it next to its id chip instead (`EpicItem.updateLabel`, T149).
  *   - Then a blue `Not in main` pill while that work is on its epic's branch alone (`unmerged`).
  *   - Gone once Owen checks its item (his ✓;  I285):  at once on the page, and from the file as it's applied.
  *   - A copy of it ends each line of "0. While you were out" about that item (`PlanDoc.awayBody()`, I302).

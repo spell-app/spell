@@ -49,7 +49,7 @@ export const SpellUrls = {
   },
 
   /**
-   * Address of the code file compiled spell imports as `module`, for `call native` (epic `from-project` P10):
+   * Address of the code file compiled spell imports as `module`, for `call native` (epic `from-console` P10):
    * `@spell/native/owen@spell/clipboard/clipboard.ts` => `owen@spell/clipboard/clipboard.ts`.
    * - throws `TypeError` for a module that isn't a code file's
    */

@@ -156,9 +156,9 @@ A FUTURE epic (`/epic future <name>`, epic `epic-future`, 2026-10-07): an idea w
 The page's BRANCH (`<epic-page branch>`, epic `epic-engine` I378): the epic's git branch, its id unless it names
 another (`EpicConfig.branchOf()`, which every verb asks: merge, merge-main, worktree status, pr ...).
 
-- `epic update <name> --branch <branch>` sets it, for a branch renamed apart from its id (epic `from-project`, branch
-  `from-console`: no customer names in branch names); its worktree is found by that branch when its folder is named
-  otherwise
+- `epic update <name> --branch <branch>` sets it, for a branch renamed apart from its id (say epic `from-project`,
+  branch `from-console`: no customer names in branch names); its worktree is found by that branch when its folder
+  is named otherwise
 - one naming the base branch (`main`, written by `new` in the main checkout), or a branch git doesn't have (a stale
   name), reads as the id
 

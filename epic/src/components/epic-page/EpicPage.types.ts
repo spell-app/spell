@@ -173,7 +173,6 @@ export const CRUMBS = "crumbs"
  * - `target`s name the VS Code side bar's tab, as the old crumbs did
  */
 export const CRUMB_LINKS = {
-  docs: { href: "/pages/index.html", target: "src-packages-docs-index-html" },
   epics: { href: "/epics/index.html", target: "src-epics-index-html" },
   sagas: { href: "/sagas/index.html", target: "src-sagas-index-html" }
 } as const

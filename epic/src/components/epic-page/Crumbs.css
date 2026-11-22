@@ -1,5 +1,5 @@
 /*
- * `<epic-page>`'s crumbs (`crumbs()` in EpicPage.tsx):  `Docs / Epics /` before the epic's name, in the h1, the docs' EYEBROW
+ * `<epic-page>`'s crumbs (`crumbs()` in EpicPage.tsx):  `Epics /` before the epic's name, in the h1, the docs' EYEBROW
  * -- small mono capitals, tracked out, the links in the accent and the page itself muted -- as `spell-doc.css`'s
  * `.spell-crumbs`, which can't reach into the shadow root.
  * - Spell UI's `<ui-breadcrumbs>`, through its public tokens and `::part(breadcrumb)`.

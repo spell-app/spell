@@ -614,6 +614,25 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
     return ask?.localName === ASK_TAG ? ask : null
   }
 
+  /**
+   * Tell `found` the component of the question `ask`:  now, and again once its family has loaded;
+   * returns the stop, for a `@E.whileConnected`.
+   * - Its options can connect while it's still pending:
+   *   each family loads by itself, on first use (epic `solid-2-final` P7;  epic `epic-engine` I432).
+   */
+  static follow(ask: Element | null, found: (component: EpicAsk | undefined) => void): () => void {
+    const host = ask as E.DOMElement<EpicAsk> | null
+    found(host?.component)
+    if (!host || host.component) return () => undefined
+    let live = true
+    void E.DOMElement.whenAttached(host.localName).then(() => {
+      if (live) found(host.component)
+    })
+    return () => {
+      live = false
+    }
+  }
+
   /** The options of the `<epic-ask>` `ask`, in order. */
   static optionsOf(ask: Element): Element[] {
     return Array.from(ask.children)

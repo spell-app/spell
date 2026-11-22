@@ -5,6 +5,7 @@
 
 import type { ReviewButtonSpec, ReviewColor, ReviewFill } from "spell/epic/components/epic-review/EpicReview.types"
 import { reopensCanceled } from "spell/epic/review/review.types"
+import type { EpicJSXAttributes } from "spell/epic/components/epic-page/EpicPage.types"
 
 import type { BadgeWord, epicItemVocabulary } from "./EpicItem.en"
 
@@ -313,6 +314,15 @@ export type ReviewLabel = {
 // ## Shadow markup
 ////////////////
 
+// the UPDATE label an item draws next to its id chip (epic `epic-engine` T149)
+declare module "@solidjs/web/types/jsx.js" {
+  namespace JSX {
+    interface IntrinsicElements {
+      "epic-update": EpicJSXAttributes
+    }
+  }
+}
+
 /** Class names inside the shadow root. */
 export const LINE = "line"
 export const FOLD = "fold"
@@ -323,6 +333,8 @@ export const TITLE = "title"
 export const TITLE_PREFIX = "title-prefix"
 /** The badge before the title (`ItemBadge`, epic `epic-engine` P81). */
 export const BADGE = "badge"
+/** Its UPDATE label, after the badge, before the title (epic `epic-engine` T149). */
+export const UPDATE = "update"
 export const EXTRAS = "extras"
 /** The end of the line's first row:  the page's buttons, the item's marks and review buttons. */
 export const MARKS = "marks"
@@ -460,4 +472,4 @@ export function buttonsForItem(
 }
 
 /** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */
-export const THREAD_ATTRIBUTES = ["chosen", "at", "done-at", "state", "from", "slot"]
+export const THREAD_ATTRIBUTES = ["chosen", "at", "done-at", "state", "from", "slot", "became", "unmerged"]

@@ -2,11 +2,12 @@
 //   epic ask create <slug> --template feature-set --epic <epic> --from <your copy>
 // - Order is rank:  the best first.  Titles are plain words;  the other texts may hold HTML.
 // - The page names the sections S1, S2 ... and each one's items F1, F2 ...;  link one as <a href="#s1f2">S1F2</a>.
-// - A name stays with its item:  for the next round (`epic ask round <page> --from <data>`) an item keeps it by its
-//   title.  Give `id: "F2"` (a section:  `id: "S2"`) when you change the title.
+// - A name stays with its item in its section:  for the next round (`epic ask round <page> --from <data>`) an item
+//   keeps it by its title.  Give `id: "F2"` (a section:  `id: "S2"`) when you change the title.
+//   Moved to another section by a round, it gets a new name there.
 {
   title: "Ideas to pick from",
-  lede: "Every idea in one list, best first.<br>Pick Yes, No, Modify or Revisit for each, and a priority.",
+  lede: "For each idea, choose Yes, No, Modify (say what to change in the comment box) or Revisit (Claude will ask you again later).<br>Then pick a Priority, from 1 (first) to 3 (last).<br>If you chose No, you can skip Priority.",
   askedBy: "session <code>name</code>, while doing what",
   where: {
     epic: "<code>name</code>:  what that work is for, in one line.",

@@ -185,6 +185,22 @@ test("a draft:  saved beside the page, read back, never an answer;  Send deletes
   ).toBe(403)
 })
 
+test("a draft is dated when the page says it was typed, never later than now (epic `epic-engine` I377)", async () => {
+  const savedFor = async (saved?: unknown) => {
+    const body = JSON.stringify({ page: "/pages/details/pick.html", answers: {}, saved })
+    const reply = await ask(port, "POST", "/api/docs/details/draft", { body, headers: page() })
+    return (JSON.parse(reply.text) as { draft: DetailsDraft }).draft.saved
+  }
+  const typedAt = "2026-01-02T03:04:05.000Z"
+  expect(await savedFor(typedAt)).toBe(typedAt)
+  for (const saved of [undefined, "not a date", 7, "2999-01-01T00:00:00.000Z"]) {
+    const before = Date.now()
+    const at = Date.parse(await savedFor(saved))
+    expect(at).toBeGreaterThanOrEqual(before)
+    expect(at).toBeLessThanOrEqual(Date.now())
+  }
+})
+
 test("writes need the token, our origin and our host", async () => {
   const path = "/pages/details/pick.html"
   expect((await answer(path, undefined, { "content-type": "application/json" })).status).toBe(403)

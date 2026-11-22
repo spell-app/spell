@@ -3059,7 +3059,7 @@ function forgetCompiled(projectId: string): void {
 globalThis.window?.addEventListener("focus", () => compiledImports.clear())
 
 /**
- * Javascript of the code file a program imports as `module`, for `call native` (epic `from-project` P10):
+ * Javascript of the code file a program imports as `module`, for `call native` (epic `from-console` P10):
  * `@spell/native/owen@spell/clipboard/clipboard.ts` => `/spaces/owen@spell/clipboard/clipboard.ts?as=javascript`
  * (`SP.SpellUrls.codeFileUrl()`), which the page server answers with its types taken out.
  * - Fetched afresh each run, so an edit to it shows on the next.

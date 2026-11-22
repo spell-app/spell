@@ -197,8 +197,12 @@ describe("<epic-item>", () => {
     const { host, title } = await item(
       `<epic-item id="i7" status="open" state="replied" fixed><span slot="title">It jumps <epic-update became="fixed" unmerged="branch"></epic-update></span></epic-item>`
     )
-    const update = host.querySelector("epic-update")!.shadowRoot!
-    const shows = (part: string) => getComputedStyle(update.querySelector(`[part~='${part}']`)!).display !== "none"
+    // drawn next to the id chip (T149), the title's own not shown
+    const shows = (part: string) => {
+      const update = host.shadowRoot!.querySelector("[part~='update']")!.shadowRoot!
+      const found = update.querySelector(`[part~='${part}']`)
+      return !!found && getComputedStyle(found).display !== "none"
+    }
     expect(title.querySelector("[part~='title-prefix']")!.textContent).toBe("FIXED -")
     expect([shows("label"), shows("unmerged")]).toEqual([false, true])
     // sent back and reopened:  no prefix, and the label says its word again
@@ -209,7 +213,7 @@ describe("<epic-item>", () => {
     expect(shows("label")).toBe(true)
   })
 
-  test("a badge (P81):  first in the title, in the chip's colour;  it replaces the UPDATE word at the end", async () => {
+  test("a badge (P81):  first in the title, grey in its chip's colour (T149);  it replaces the UPDATE word", async () => {
     const { host, chip, title } = await item(
       `<epic-item id="i7" status="open" state="open" badge="willFix" judged-why="It breaks Send"><span slot="title">It jumps <epic-update became="reopened"></epic-update></span></epic-item>`
     )
@@ -219,7 +223,9 @@ describe("<epic-item>", () => {
       "WILL FIX",
       "It breaks Send"
     ])
-    expect(getComputedStyle(badge).backgroundColor).toBe(getComputedStyle(chip).backgroundColor)
+    expect(getComputedStyle(badge).backgroundColor).not.toBe(getComputedStyle(chip).backgroundColor)
+    expect(badge.hasAttribute("data-echo")).toBe(true)
+    expect(host.shadowRoot!.querySelector("[part~='update']")).toBeNull()
     const label = host.querySelector("epic-update")!.shadowRoot!.querySelector("[part~='label']")!
     expect(getComputedStyle(label).display).toBe("none")
     host.setAttribute("badge", "see")
@@ -232,6 +238,26 @@ describe("<epic-item>", () => {
     host.setAttribute("badge", "somethingNew")
     await ElementFixture.settle()
     expect(title.querySelector("[part~='badge']")).toBeNull()
+  })
+
+  test("UPDATE (T149):  next to the id chip, not at the title's end;  grey only in the chip's own colour", async () => {
+    const { host, title } = await item(
+      `<epic-item id="j3" status="open" state="progress" style="--epic-state-echo: rgb(1, 2, 3)"><span slot="title">It jumps <epic-update></epic-update></span></epic-item>`
+    )
+    const drawn = () => title.querySelector<HTMLElement>("[part~='update']")!
+    const ground = () => getComputedStyle(drawn().shadowRoot!.querySelector("[part~='label']")!).backgroundColor
+    expect(title.firstElementChild).toBe(drawn())
+    const atEnd = host.querySelector("epic-update")!.shadowRoot!.querySelector("[part~='label']")!
+    expect(getComputedStyle(atEnd).display).toBe("none")
+    // orange beside blue:  its own colour;  orange beside orange, and UNDERWAY beside blue:  grey
+    expect(ground()).not.toBe("rgb(1, 2, 3)")
+    host.querySelector("epic-update")!.setAttribute("became", "underway")
+    await ElementFixture.settle()
+    expect(ground()).toBe("rgb(1, 2, 3)")
+    host.querySelector("epic-update")!.removeAttribute("became")
+    host.setAttribute("state", "replied")
+    await ElementFixture.settle()
+    expect(ground()).toBe("rgb(1, 2, 3)")
   })
 
   test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked;  no tooltip (I370)", async () => {

@@ -247,7 +247,27 @@
   .title[data-prefix="fixed"] {
     --epic-update-fixed-display: none;
   }
-  /* a badge replaces the UPDATE word at the line's end, whatever it says;  NOT IN MAIN its pill too (P81) */
+  /* the UPDATE label is drawn next to the id chip (T149), so the title's own doesn't show at its end */
+  .title > slot {
+    --epic-update-word-display: none;
+    --epic-update-fixed-display: none;
+    --epic-update-unmerged-display: none;
+  }
+  .title > .update {
+    margin-inline-end: 4px;
+    /* on the badge's line:  both 18px boxes, centred on the same middle */
+    vertical-align: 1px;
+  }
+  /* a word in the id chip's own colour is grey (T149):  the UPDATE orange beside an orange chip, UNDERWAY beside blue */
+  .title[data-echo="replied"] > .update {
+    --epic-update-accent: var(--epic-state-echo, var(--ui-grey-background));
+    --epic-update-accent-on: var(--epic-state-echo-on, var(--ui-text-color));
+  }
+  .title[data-echo="progress"] > .update {
+    --epic-update-underway: var(--epic-state-echo, var(--ui-grey-background));
+    --epic-update-underway-on: var(--epic-state-echo-on, var(--ui-text-color));
+  }
+  /* a badge replaces the UPDATE word, whatever it says;  NOT IN MAIN its pill too (P81) */
   .title[data-badge] {
     --epic-update-word-display: none;
   }

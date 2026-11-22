@@ -42,7 +42,8 @@ test("new:  scratch and epic pages from the tool's template, in the epics pack's
   expect(html).not.toMatch(/details\.(css|js)"/)
   // root paths, the same from any folder;  no site header `root` (epic `epic-engine` P46)
   expect(html).toContain("<spell-site-header></spell-site-header>")
-  expect(html).toContain('link="/pages/index.html"')
+  // no crumb to the home page:  the site header's Spell Epic is that link (epic `epic-engine` T148)
+  expect(html).not.toContain("<ui-breadcrumb link=")
   expect(html).not.toContain("TEMPLATE:")
   expect(html).toMatch(/<epic-field label="Asked" data-details-asked>\d{4}-\d\d-\d\d</)
   expect(html).toContain("<epic-send></epic-send>")
@@ -54,7 +55,7 @@ test("new:  scratch and epic pages from the tool's template, in the epics pack's
   expect(deep).toContain('href="/_epic/assets/spell-doc.css"')
   expect(deep).toContain('source="/_epic/pack/epics.pack.js"')
   expect(deep).toContain("<spell-site-header></spell-site-header>")
-  expect(deep).toContain('link="/pages/index.html"')
+  expect(deep).not.toContain("<ui-breadcrumb link=")
 })
 
 test("new --from:  the whole page from a spec", () => {

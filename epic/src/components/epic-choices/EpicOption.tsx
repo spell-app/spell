@@ -219,11 +219,10 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     return host?.component as EpicAsk | undefined
   }
 
-  /** While connected, find its question again:  it may have moved. */
+  /** While connected, follow its question:  it may have moved, or its family load later (`EpicAsk.follow()`). */
   @E.whileConnected
-  protected findAsk() {
-    this.ask = EpicOption.askFor(this.domElement)
-    return undefined
+  protected followAsk() {
+    return EpicAsk.follow(EpicAsk.askOf(this.domElement), (ask) => (this.ask = ask))
   }
 
   ////////////////

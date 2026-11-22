@@ -172,6 +172,15 @@ export class AnswerDraft {
   }
 
   /**
+   * When a change made `now` (ms) counts as typed:  `now`, and always after the answer `sent` it was typed over
+   * (a browser's clock can be behind the page server's).
+   */
+  static typedAt(now: number, sent?: SentAnswer): string {
+    const answered = sent ? Date.parse(sent.answered) : NaN
+    return new Date(answered >= now ? answered + 1 : now).toISOString()
+  }
+
+  /**
    * The newest of `drafts` (the server's, the browser's) that is newer than the answer `sent`;  `undefined` for
    * none:  a draft older than the answer was sent already (another window's, or Send's draft deleted late).
    */

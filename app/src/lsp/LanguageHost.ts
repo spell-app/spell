@@ -129,14 +129,24 @@ export class LanguageHost {
    * for the editor to take as its own (`SP.SpellProject.takeCompiled()`), the program run on the page as ever.
    * - Nothing saved:  the editor saves what it takes, as it would its own compile's.
    * - `pagesInPlay`:  the alone pages the editor's compile is limited to, by path (`SP.SpellProject.pagesInPlay`)
+   * - SIDE EFFECT:  its parse is the one of every edit before it, so what that found is sent, as after the host's own
+   *   parse, the compile failed or not:  else a big page opened showed plain till it was typed in (epic
+   *   `solid-2-final` I48).
    * - throws what the compile throws
    */
   async compile({ projectId, pagesInPlay }: LanguageCompile): Promise<SP.CompiledEntry> {
     await this.pending
     const project = await this.projectFor(projectId)
     project.pagesInPlay = pagesInPlay ? new Set(pagesInPlay) : undefined
-    await project.compile(undefined, { save: false, cached: false })
-    return project.cachedEntry()
+    clearTimeout(this.parseTimers.get(project))
+    this.parseTimers.delete(project)
+    try {
+      await project.compile(undefined, { save: false, cached: false })
+      return project.cachedEntry()
+    } finally {
+      // not with an edit made as it compiled:  its own parse sends
+      if (!this.parseTimers.has(project)) this.sendProblems(project)
+    }
   }
 
   ////////////////

@@ -4,7 +4,9 @@
  * - Why:  the runtime lands Back on the address's `#hash`, the top of the section, with whatever a link unfolded on
  *   the way still open;  in a long table that's far from the row the link was in.
  * - A place is kept per history entry (`navigation.currentEntry.key`, else the address), in the tab's storage:
- *   as a link is clicked, and as the page goes.
+ *   as a link is clicked, as Back or Forward leaves it, and as the page goes.
+ *   - the second only where the browser has the Navigation API;  without it, Forward after a Back within the page
+ *     lands where that place was last kept, else on the address's `#hash`
  * - It's used only by Back and Forward:  a reload, or a link to the page, lands as any page does.
  * - Plain DOM, no Spell UI:  the runtime (`spell-doc-runtime.js`) hands it how folds read and write, and how to hold
  *   a scroll.
@@ -61,9 +63,10 @@ class BackPlaces {
   }
 
   /**
-   * Keep the place as a link is clicked and as the page goes.
+   * Keep the place as a link is clicked, as Back or Forward leaves it, and as the page goes.
    * - `isFolded(section)`:  how the runtime reads a fold
    * - the click in the window's capture:  before the runtime follows a `#id`, which makes the next entry
+   * - Back and Forward by `navigate`:  it comes before the history moves, so the entry is still the one being left
    */
   watch(isFolded) {
     const keep = () => {
@@ -79,6 +82,7 @@ class BackPlaces {
     }
     addEventListener("click", onClick, { capture: true })
     addEventListener("pagehide", keep)
+    globalThis.navigation?.addEventListener("navigate", (event) => event.navigationType === "traverse" && keep())
   }
 
   /**

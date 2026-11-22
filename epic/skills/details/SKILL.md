@@ -166,9 +166,17 @@ the page is the same for both agents.
   - the person can reorder the sections, and the items in each
 - Names:  S2 is the second section, S2F3 its third item, as first made.
   - Use them when you talk about an item, and link one as `<a href="#s2f3">S2F3</a>`.
-  - A name stays with its item, and is never used again.
+  - A name stays with its item while it's in its section, and is never used again.
+  - Moved to another section by a round, an item gets a new name there (S1F3 becomes S2F5), and no pick goes along:
+    tell the person both names, and set its `picked` from what they sent.
+- A source file's link carries its tab, so the side bar opens it in the editor:
+  `<a href="/src/util/string.ts" target="src-src-util-string-ts">`.
+- An ordinary details page that should be one:  `epic ask round <slug> --template feature-set --from <data.json5>`.
+  - the same address;  what they sent stays, as the round before
+  - the picks don't move over:  set each item's `picked` from what they sent
 - The next round:  `epic ask round <slug> --from <data.json5>`.
   - an item keeps its name by its title:  give `id: "F3"` (a section:  `id: "S2"`) when you change the title
+    - only then:  an id on another item is refused
   - the person's new order (`New order in S2:  S2F3, S2F1 ...` in the answer):  write the data in that order
 
 ### Asking the same question again:  a new ROUND, never a new page
@@ -287,7 +295,7 @@ new <slug> [--title "..."] [--epic <name>] [--description "..."] [--template fea
                                            --template feature-set:  a ranked list to pick from, from its data
 show <page> [--wait] [--timeout 8h]        in this session's side bar (Chrome outside VS Code);  then wait
 wait <page> [--timeout 8h]                 until a NEW answer;  prints it, exit 0;  timeout:  exit 2
-round <page> [--title "..."] [--from <spec.json>]
+round <page> [--title "..."] [--template feature-set] [--from <spec.json>]
                                            the same question again:  the one page rewritten, the round before folded in
 answer <page> [--round <n>]                the answer already sent (exit 1:  none);  --round:  an earlier round's
 draft <page>                               what's typed and not sent (exit 1:  nothing);  read it before a rewrite

@@ -87,11 +87,11 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
   /** The `<epic-ask>` it holds the options of, drawn;  `undefined` elsewhere.  Read again as it connects. */
   @E.state accessor ask: EpicAsk | undefined = EpicChoices.askFor(this.domElement)
 
-  /** While connected, find its question again:  it may have moved. */
+  /** While connected, follow its question:  it may have moved, or its family load later (`EpicAsk.follow()`). */
   @E.whileConnected
-  protected findAsk() {
-    this.ask = EpicChoices.askFor(this.domElement)
-    return undefined
+  protected followAsk() {
+    const question = this.isAnswering ? this.domElement.parentElement : null
+    return EpicAsk.follow(question, (ask) => (this.ask = ask))
   }
 
   /** The drawn `<epic-ask>` whose options `element` holds, if any. */

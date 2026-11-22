@@ -41,7 +41,9 @@ class FakeServer {
     if (url === "/api/docs/details/draft") {
       this.drafts.push(body)
       if (this.failure) return json({ error: this.failure.error }, this.failure.status)
-      this.draft = { ...(body as unknown as DetailsDraft), saved: "2026-10-14T05:00:00.000Z" }
+      // as the route:  when the page says it was typed, else when it came
+      const saved = (body.saved as string | undefined) ?? new Date().toISOString()
+      this.draft = { ...(body as unknown as DetailsDraft), saved }
       return json({ ok: true, draft: this.draft })
     }
     this.posts.push(body)
@@ -343,6 +345,7 @@ describe("AnswerForm's draft (P18)", () => {
     expect(server.drafts).toEqual([
       {
         page: PAGE,
+        saved: local.saved,
         answers: { q1: { picked: ["B"] } },
         comments: { context: "why not" },
         notes: "",
@@ -440,6 +443,123 @@ describe("AnswerForm's draft (P18)", () => {
     await form.load()
     await form.saveDraft()
     expect(server.drafts).toEqual([])
+  })
+
+  test("putting a draft back is not typing:  no reload, rewrite or leaving makes it newer (epic `epic-engine` I377)", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-16T09:00:00.000Z") })
+    const typedAt = "2026-10-14T21:00:00.000Z"
+    const storage = new FakeStorage()
+    const key = `spell-details-draft:${PAGE}`
+    const draft = draftOf(typedAt, { answers: { q1: { picked: ["B"] }, q2: { picked: ["A"] } }, notes: "" })
+    storage.setItem(key, JSON.stringify(draft))
+    const local = () => (JSON.parse(storage.getItem(key)!) as DetailsDraft).saved
+    // a live reload, then the page server restarted with the draft's file gone, then one more reload
+    for (const restart of [false, true, false]) {
+      const server = new FakeServer()
+      if (!restart) server.draft = draftOf(typedAt, { answers: draft.answers })
+      const form = formOn(server, { storage })
+      const leave = form.add(new FakeAsk(at("a"), "q1"))
+      await form.load()
+      // q2's part is slower than the settle:  kept, then taken back
+      await vi.advanceTimersByTimeAsync(60_000)
+      form.add(new FakeAsk(at("b"), "q2"))
+      await vi.advanceTimersByTimeAsync(60_000)
+      // an agent's rewrite takes q1 away
+      leave()
+      await vi.advanceTimersByTimeAsync(60_000)
+      await form.saveDraft({ keepalive: true })
+      expect([local(), server.draft?.saved]).toEqual([typedAt, typedAt])
+    }
+  })
+
+  test("an old window's draft saved after another window sent stays older than that answer (epic `epic-engine` I377)", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-13T21:00:00.000Z") })
+    const server = new FakeServer()
+    const storage = new FakeStorage()
+    const left = formOn(server, { storage })
+    const was = new FakeAsk(at("a"), "q1")
+    const leave = left.add(was)
+    was.picks = ["A"]
+    left.edited()
+    await vi.advanceTimersByTimeAsync(DETAILS_SAVE_MS)
+    server.draft = null
+    server.answer = sentOf("2026-10-13T22:00:00.000Z", { answers: { q1: { picked: ["C"] } } })
+    vi.setSystemTime(new Date("2026-10-15T15:00:00.000Z"))
+    leave()
+    await vi.advanceTimersByTimeAsync(5000)
+    await left.saveDraft({ keepalive: true })
+    const form = formOn(server, { storage })
+    const ask = new FakeAsk(at("a"), "q1")
+    form.add(ask)
+    await form.load()
+    expect([ask.picks, form.fill]).toEqual([["C"], "sent"])
+  })
+
+  test("a save tried again says when it was typed, not when it got through (epic `epic-engine` I377)", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-14T09:00:00.000Z") })
+    const server = new FakeServer()
+    server.failure = { status: 503, error: "busy" }
+    const storage = new FakeStorage()
+    const form = formOn(server, { storage })
+    const ask = new FakeAsk(at("a"), "q1")
+    form.add(ask)
+    ask.picks = ["A"]
+    form.edited()
+    await vi.advanceTimersByTimeAsync(3_600_000)
+    server.failure = undefined
+    await vi.advanceTimersByTimeAsync(ANSWER_RETRY_MS)
+    const local = JSON.parse(storage.getItem(`spell-details-draft:${PAGE}`)!) as DetailsDraft
+    expect([local.saved, server.draft?.saved]).toEqual(["2026-10-14T09:00:00.000Z", "2026-10-14T09:00:00.000Z"])
+  })
+
+  // the clocks differ by a minute:  what's typed over an answer still counts as after it
+  for (const [clock, now] of [
+    ["right", "2026-10-15T09:00:00.000Z"],
+    ["behind", "2026-10-13T19:59:00.000Z"]
+  ] as const) {
+    test(`what's really typed and not sent is kept, this browser's clock ${clock} (P18;  epic \`epic-engine\` I377)`, async () => {
+      vi.useFakeTimers({ now: new Date(now) })
+      const server = new FakeServer()
+      server.answer = sentOf("2026-10-13T20:00:00.000Z", { answers: { q1: { picked: ["C"] } } })
+      const storage = new FakeStorage()
+      const form = formOn(server, { storage })
+      const [ask, box] = [new FakeAsk(at("a"), "q1"), new FakeBox(at("c"), "context")]
+      form.add(ask)
+      form.add(box)
+      await form.load()
+      box.text = "typed, not sent"
+      form.edited()
+      await form.saveDraft({ keepalive: true })
+      // read back from the page server alone, then from this browser alone
+      for (const [draft, kept] of [
+        [server.draft, undefined],
+        [null, storage]
+      ] as const) {
+        const next = new FakeServer()
+        next.answer = server.answer
+        next.draft = draft
+        const again = formOn(next, { storage: kept })
+        const shown = new FakeBox(at("c"), "context")
+        again.add(new FakeAsk(at("a"), "q1"))
+        again.add(shown)
+        await again.load()
+        expect([shown.text, again.fill]).toEqual(["typed, not sent", "pending"])
+      }
+    })
+  }
+
+  test("typing over a draft put back makes it new (P18;  epic `epic-engine` I377)", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-16T09:00:00.000Z") })
+    const server = new FakeServer()
+    server.draft = draftOf("2026-10-14T21:00:00.000Z", { answers: { q1: { picked: ["B"] } } })
+    const form = formOn(server)
+    const ask = new FakeAsk(at("a"), "q1")
+    form.add(ask)
+    await form.load()
+    ask.picks = ["C"]
+    form.edited()
+    await form.saveDraft()
+    expect([server.draft.saved, server.draft.answers.q1]).toEqual(["2026-10-16T09:00:00.000Z", { picked: ["C"] }])
   })
 
   test("keeps nothing off a details page (an element's docs page);  from `file://`, the browser's copy only", async () => {

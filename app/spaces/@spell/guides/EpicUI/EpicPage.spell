@@ -50,7 +50,7 @@
 		</>
 		<text paragraph>What that draws, above its blocks:</>
 		<list bulleted>
-			<item>ONE line of crumbs, <text code>DOCS / EPICS / SEO</>, the epic's name in their type, twice their size and bold: the h1 (a click on the name copies <text code>/epic resume seo</>, and a toast says so), and at the header's right the step label: <text code>P2</>, the phase under way, outlined grey, then the gear (Auto Send, Theme)</>
+			<item>ONE line of crumbs, <text code>EPICS / SEO</>, the epic's name in their type, twice their size and bold: the h1 (a click on the name copies <text code>/epic resume seo</>, and a toast says so), and at the header's right the step label: <text code>P2</>, the phase under way, outlined grey, then the gear (Auto Send, Theme)</>
 			<item>under the header, the review line (<text code>To review this doc, type /epic review seo</>), then the meta lines: the branch, the worktree, <text code>Started 10/1/26, updated 10/7/26</>, and <text code>Saga: Spell UI</>, a link to the saga's page, its purpose the tooltip (the page server says the saga's title and purpose;  until it does, and from disk, the link reads <text code>spell-ui</>)</>
 			<item>served by the page server, a See Also box above the blocks: the epic's guide, every page it made for itself in its <link target="src-pages-details" link="/pages/details/"><text code>details/</></> folder (details pages, choice pages, its review page), then every guide its page and parts link to, each with its kind's icon and word (guide, details, choices, guide)</>
 			<item>no Send: it shows only while an epic page is being reviewed through the page server</>
@@ -405,7 +405,7 @@
 					<cell>
 						<text code>crumbs</>
 					</>
-					<cell>In the h1, before the epic's name: <text code>Docs / Epics /</>, the docs' eyebrow. None narrow, nor while the doc still holds its old <text code>ui-breadcrumbs.spell-crumbs</> before the page.</>
+					<cell>In the h1, before the epic's name: <text code>Epics /</>, the docs' eyebrow. None narrow, nor while the doc still holds its old <text code>ui-breadcrumbs.spell-crumbs</> before the page.</>
 				</>
 				<row>
 					<cell>
@@ -561,7 +561,7 @@
 		<icon slot="icon" name="map"/>
 		<text paragraph>With <text code>kind="saga"</> it's a SAGA page (epic <text code>epic-workflow</> P15): one saga's page, <text code>sagas/&lt;id&gt;/&lt;id&gt;.saga.html</>, built of the same elements, so its items, marks, comments and Send work as an epic page's.</>
 		<list bulleted>
-			<item>Crumbs <text code>DOCS / SAGAS / &lt;ID&gt;</>; a click on the id copies its review command.</>
+			<item>Crumbs <text code>SAGAS / &lt;ID&gt;</>; a click on the id copies its review command.</>
 			<item>One meta line, its short address (<text code>SAGA:/drawable-spell</>, copied on click), then its dates.</>
 			<item>No step label, state, Plan hung?, See Also or Agents running: a saga has no phases or branch.</>
 			<item>Send and the review line as on an epic page. Its marks and comments wait in its own inbox, beside it, for the session running <text code>/epic review SAGA:/&lt;id&gt;</>.</>

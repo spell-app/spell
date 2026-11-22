@@ -11,6 +11,8 @@
  */
 import { copyText } from "spell/util/dom"
 import { PrefStore } from "spell/util/persist/PrefStore"
+// Import directly:  the site's barrel would put the header in the comments' own script
+import { SITE_HOME } from "spell/server/site/site.types"
 import { PageNotices, ServerLink } from "spell/epic/review"
 
 /** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
@@ -28,6 +30,20 @@ export function readJSON(key) {
 /** Keep `value` as JSON under `key`;  a browser that blocks storage keeps it for this page only. */
 export function writeJSON(key, value) {
   PrefStore.setAt(key, value)
+}
+
+/**
+ * A copy of a page's breadcrumb `crumbs`, as its head shows it.
+ * - without a first crumb to the home page:  the top bar's Spell Epic is that link, and never said twice
+ *   (epic `epic-engine` T148);  whatever its words, as older pages write Docs
+ * - `undefined` when only the page itself is left:  the title says it
+ */
+export function headCrumbs(crumbs) {
+  const trail = crumbs.cloneNode(true)
+  const first = trail.children[0]
+  const link = first?.getAttribute("link")?.replace(/[?#].*$/, "")
+  if (link?.endsWith(`/${SITE_HOME}`)) first.remove()
+  return Array.from(trail.children).some((crumb) => !crumb.hasAttribute("selected")) ? trail : undefined
 }
 
 /** Add `pill` to the page header `head`, before its toolbar (`buildPageToolbar()`):  the toolbar stays its last row. */
