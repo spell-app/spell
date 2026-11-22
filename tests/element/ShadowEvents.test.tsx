@@ -1,6 +1,15 @@
 import { onTestFinished, describe, expect, test } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
-import { Dynamic, Portal, render, type JSX } from "@solidjs/web"
+import { createSignal, flush, Show } from "solid-js"
+import {
+  DelegatedEvents,
+  Dynamic,
+  Portal,
+  registerDelegatedContainer,
+  render,
+  unregisterDelegatedContainer,
+  type JSX
+} from "@solidjs/web"
 
 import {
   UIComponent,
@@ -338,5 +347,113 @@ describe("ShadowEvents reconnecting", () => {
     await ElementFixture.settle(parent)
     inside(host, "button").click()
     expect(log).toEqual(["click"])
+  })
+})
+
+////////////////
+// ## Only the kinds a root uses
+////////////////
+
+/** Every delegated listener added from now to the test's end, by the target it went on:  its kinds. */
+function recordListeners(): Map<EventTarget, Set<string>> {
+  const added = new Map<EventTarget, Set<string>>()
+  const add = EventTarget.prototype.addEventListener
+  EventTarget.prototype.addEventListener = function (this: EventTarget, type: string, ...rest: unknown[]) {
+    if (DelegatedEvents.has(type)) {
+      let kinds = added.get(this)
+      if (!kinds) added.set(this, (kinds = new Set()))
+      kinds.add(type)
+    }
+    return (add as (...args: unknown[]) => void).call(this, type, ...rest)
+  } as typeof add
+  onTestFinished(() => {
+    EventTarget.prototype.addEventListener = add
+  })
+  return added
+}
+
+describe("ShadowEvents only the kinds a root uses", () => {
+  test("each shadow root listens only for the kinds a node inside handles;  one with no handler, for none", async () => {
+    // `input` and `click` are in use on the page already:  Solid would add both to every new root
+    await mount(defineField())
+    const added = recordListeners()
+    const log: string[] = []
+    const plain = await mount(defineElement("plain", () => <span>text</span>))
+    const clicker = await mount(defineElement("clicker", () => <button onClick={() => log.push("click")}>go</button>))
+    expect(added.get(plain.shadowRoot!)).toBeUndefined()
+    expect([...(added.get(clicker.shadowRoot!) ?? [])]).toEqual(["click"])
+    inside(clicker, "button").click()
+    expect(log).toEqual(["click"])
+  })
+
+  test("a handler drawn after the first render still fires, for a kind the root didn't use yet", async () => {
+    const log: string[] = []
+    const [isShown, setShown] = createSignal(false)
+    const host = await mount(
+      defineElement("late", () => (
+        <section onClick={() => log.push("section")}>
+          <Show when={isShown()}>
+            <button onDblClick={() => log.push("dblclick")} onClick={() => log.push("button")}>
+              go
+            </button>
+          </Show>
+        </section>
+      ))
+    )
+    setShown(true)
+    flush()
+    const button = inside(host, "button")
+    button.click()
+    button.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, composed: true }))
+    expect(log).toEqual(["button", "section", "dblclick"])
+  })
+
+  test("a root that gains its FIRST handler late hears it, a non-composed event a microtask after the draw included", async () => {
+    const log: string[] = []
+    const [isShown, setShown] = createSignal(false)
+    const host = await mount(
+      defineElement("first-late", () => (
+        <Show when={isShown()} fallback={<span>none</span>}>
+          <input onInput={() => log.push("input")} />
+        </Show>
+      ))
+    )
+    setShown(true)
+    flush()
+    // not composed:  never reaches the document, so only the root's own listener can hear it
+    await Promise.resolve()
+    inside(host, "input").dispatchEvent(new Event("input", { bubbles: true }))
+    expect(log).toEqual(["input"])
+  })
+
+  test("a click right after a draw lands, while another node still waits for a root it never joins", async () => {
+    // drawn into a container that's on no page:  its button waits for a root for good
+    const nowhere = document.createElement("div")
+    const disposeNowhere = render(() => <button onClick={() => {}}>never</button>, nowhere)
+    onTestFinished(disposeNowhere)
+    const log: string[] = []
+    const [isShown, setShown] = createSignal(false)
+    const host = await mount(
+      defineElement("click-at-once", () => (
+        <Show when={isShown()}>
+          <button onClick={() => log.push("click")}>go</button>
+        </Show>
+      ))
+    )
+    setShown(true)
+    flush()
+    // no microtask in between:  the document's capturing listener finds the button's root first
+    inside(host, "button").click()
+    expect(log).toEqual(["click"])
+  })
+
+  test("Solid still gives a node its handler as `_$$<kind>`, and its container a `handlers` map", async () => {
+    const host = await mount(defineElement("internals", () => <button onClick={() => {}}>go</button>))
+    expect(Object.hasOwn(inside(host, "button"), "_$$click")).toBe(true)
+    const state = (registerDelegatedContainer as (root: Node, owner: Node) => unknown)(host.shadowRoot!, host) as {
+      handlers?: unknown
+    }
+    expect(state.handlers).toBeInstanceOf(Map)
+    unregisterDelegatedContainer(host.shadowRoot!, host)
   })
 })

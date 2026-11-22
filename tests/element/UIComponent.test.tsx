@@ -488,3 +488,32 @@ describe("UIComponent hostLayout", () => {
     expect(element.shadowRoot!.adoptedStyleSheets.length).toBe(0)
   })
 })
+
+////////////////
+// ## Moving
+////////////////
+
+describe("UIComponent moved with `moveBefore()`", () => {
+  test("keeps its component and what it drew:  `onMove()`, no `onDisconnect()` / `onConnect()`", async () => {
+    const tag = defineLabel()
+    const element = await ElementFixture.render<DOMElement>(`<${tag} label="x"></${tag}>`)
+    const target = document.createElement("div")
+    element.parentElement!.after(target)
+    onTestFinished(() => target.remove())
+    const component = element.component!
+    const drawn = element.shadowRoot!.firstElementChild
+    const calls: string[] = []
+    for (const hook of ["onConnect", "onDisconnect", "onMove"] as const) {
+      const original = component[hook].bind(component)
+      vi.spyOn(component, hook).mockImplementation(() => {
+        calls.push(hook)
+        original()
+      })
+    }
+    ;(target as Element & { moveBefore(node: Node, child: Node | null): void }).moveBefore(element, null)
+    expect(element.parentElement).toBe(target)
+    expect(calls).toEqual(["onMove"])
+    expect(element.component).toBe(component)
+    expect(element.shadowRoot!.firstElementChild).toBe(drawn)
+  })
+})

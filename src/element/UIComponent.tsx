@@ -183,11 +183,12 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   // 5. form controls only, as the browser reports them:
   //    `onFormAssociated()`, `onFormDisabled()`, `onFormReset()`, `onFormStateRestore()`
   // 6. `onDisconnect()`:  every time it's removed;  the component stays for the next connect
+  // -  `onMove()`:  instead of 6 then 3, when the page moves it with `moveBefore()`
   //
   // - The DOM element calls 3, 5 and 6 as the browser reports each event
   //   (DOM API `connectedCallback()`, the form callbacks ...).
   // - Each is a hook:  override the ones you need.
-  // - The base class's own work is in `onMount()`, `onConnect()`, `onDisconnect()` and `onFormDisabled()`:
+  // - The base class's own work is in `onMount()`, `onConnect()`, `onDisconnect()`, `onMove()` and `onFormDisabled()`:
   //   an override of those calls `super`.
   ////////////////
 
@@ -281,6 +282,16 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    * - `mode`:  `"restore"` or `"autocomplete"`.
    */
   onFormStateRestore(_state: File | string | FormData | null, _mode: string) {}
+
+  /**
+   * Hook:  the page moved the element with `moveBefore()` (DOM API `connectedMoveCallback()`).
+   * - It stayed connected:  no `onDisconnect()`, no `onConnect()`, so nothing set up while connected starts again.
+   * - A part re-checks which element it belongs to (`PartContext`):  a move can change it.
+   * - It may run while Solid is drawing (Solid moves a node holding the focus with `moveBefore()`).
+   */
+  onMove() {
+    E.PartContext.connected(this.domElement)
+  }
 
   /** Hook:  the element was removed from its page.  The component stays, for the next connect. */
   onDisconnect() {
