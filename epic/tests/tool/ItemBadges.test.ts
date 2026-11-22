@@ -436,6 +436,24 @@ describe("waiting on them (I435)", () => {
     expect([against, theirs, acted].filter((id) => hushed.includes(id))).toEqual([])
     expect(hushed).toContain(routine)
   })
+
+  test("While you were out:  URGENT red under Waiting on you, YOUR CALL orange there, each with its badge", () => {
+    const plan = planWith("on")
+    plan.addItem("issue", "It loses work", { calm: true })
+    plan.addItem("issue", "A choice", { calm: true })
+    score(plan, "i1", 90, 5, { severe: true })
+    score(plan, "i2", 90, 5, { needsYou: true })
+    plan.updateStates()
+    plan.refreshAway()
+    const lines = Array.from(plan.document.querySelectorAll("epic-away-line"), (line) =>
+      ["line", "state", "badge"].map((name) => line.getAttribute(name))
+    )
+    expect(lines).toContainEqual(["i1", "attention", "urgent"])
+    expect(lines).toContainEqual(["i2", "replied", "yourCall"])
+    expect(lines.map(([id]) => id)).not.toContain("issues")
+    const words = plan.document.querySelector('epic-away-line[line="i1"]')!.textContent
+    expect(words).not.toMatch(/URGENT -/)
+  })
 })
 
 describe("epic badges", () => {

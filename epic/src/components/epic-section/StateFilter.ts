@@ -135,7 +135,8 @@ export class StateFilter {
  */
 const STATE_GROUPS: readonly (readonly string[])[] = [
   ["progress", "handed", "scheduled"],
-  ["replied", "requested", "waiting", "updated", "recheck"],
+  // a recheck has its own chip, light orange (epic `epic-engine` J335):  not in the orange one
+  ["replied", "requested", "waiting", "updated"],
   ["open", "someday"],
   ["old", "handled", "quiet"]
 ]

@@ -22,6 +22,8 @@ import { parseSetLetter, reopensCanceled, setPicksOf } from "spell/epic/review/r
 import { Pictures } from "spell/epic/review/Pictures"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 import { TitlePrefix } from "spell/epic/components/epic-item/TitlePrefix"
+// Import directly:  the colour rule's pure file, not `epic-section`'s barrel (which defines its element)
+import { StateFilter } from "spell/epic/components/epic-section/StateFilter"
 import type { ClosedAs } from "spell/epic/components/epic-item/ItemBadge"
 
 import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
@@ -3206,10 +3208,11 @@ export class PlanDoc extends PlanReader {
       id: AWAY_ID,
       kind: AWAY,
       title: AWAY_TITLE,
-      waiting: summary.waiting || undefined,
-      news: awayCounts(summary) || undefined
+      waiting: summary.waiting || undefined
     })
     section.append(...this.awayBody(summary))
+    // counted by the lines as drawn:  each in its own colour (I435)
+    Markup.set<"epic-section">(section, { news: awayCounts(section) || undefined })
     // its lines' keys on the section itself:  the review inbox reads the skeleton, and the body is a part (I206)
     const lines = Array.from(section.querySelectorAll("epic-away-line[line]"), (line) => line.getAttribute("line"))
     section.setAttribute("lines", lines.join(" "))
@@ -3274,17 +3277,39 @@ export class PlanDoc extends PlanReader {
     const line = (key: string, state: AwayState, ...children: (Node | string)[]) => {
       const element = this.make("epic-away-line", { line: key, state })
       element.append(...children)
-      const item = this.findItem(key)
-      const label = item && PlanItem.updateLabelOf(item)
-      // a badge starts the line and replaces that word;  only a Not in main pill is still worth saying (P81)
-      const saidByBadge = !!item?.hasAttribute("badge") && !label?.hasAttribute("unmerged")
-      if (label && !saidByBadge) element.append(" ", label.cloneNode(true))
       return element
     }
-    // a fix's line starts `FIXED -`, as its item's does (T143)
-    const titled = ({ id, title }: NeedLine) => {
-      const item = this.findItem(id)
-      return TitlePrefix.titled(title, item)
+    // an item's line, as its row starts:  its number, its badge, its UPDATE label, its title (T149, I435)
+    // - on a page with badges, in the row's own colour (`StateFilter.colorOf()`, the counts' rule):  URGENT red
+    // - the label a copy of the item's, drawn again on every edit;  its ✓ hides both at once (`EpicUpdate.isChecked`)
+    const itemLine = (need: NeedLine, at: number, partState: AwayState) => {
+      const item = this.findItem(need.id)
+      const badge = item?.getAttribute("badge") ?? undefined
+      const state = (this.badges.mode && item && awayStateOf(item)) || partState
+      const lead = html("span", `${at + 1}. `, link(need.id, need.label))
+      const label = item && PlanItem.updateLabelOf(item)
+      // a badge says the word;  only a Not in main pill is still worth saying (P81)
+      // nor a FIXED its line already starts with (T143)
+      const saidByPrefix = label?.getAttribute("became") === "fixed" && TitlePrefix.wordsOfItem(item!) !== ""
+      const saysLabel = !!label && (label.hasAttribute("unmerged") || (!badge && !saidByPrefix))
+      const words = badge ? need.title : TitlePrefix.titled(need.title, item)
+      const element = line(
+        need.id,
+        state,
+        ...(badge ? [] : [lead, " "]),
+        ...(saysLabel ? [label!.cloneNode(true), " "] : []),
+        words
+      )
+      if (badge) {
+        lead.setAttribute("slot", "lead")
+        element.prepend(lead)
+        Markup.set<"epic-away-line">(element, {
+          badge,
+          badgeItem: item?.getAttribute("badge-item") ?? undefined,
+          badgeState: item?.getAttribute("state") ?? undefined
+        })
+      }
+      return element
     }
     const heading = (key: AwayPart, state: AwayState, text: string) => {
       const element = line(key, state, html("b", text))
@@ -3296,9 +3321,13 @@ export class PlanDoc extends PlanReader {
     const needPart = (part: (typeof NEED_PARTS)[number]) => {
       const needs = summary.needs.filter((need) => need.part === part.key)
       if (!needs.length) return
-      body.push(heading(part.key, part.state, part.title))
-      for (const [index, need] of needs.entries())
-        body.push(line(need.id, part.state, `${index + 1}. `, link(need.id, need.label), ` ${titled(need)}`))
+      const lines = needs.map((need, at) => itemLine(need, at, part.state))
+      // the heading in its lines' most pressing colour;  `mixed` when they differ, so no colour filter hides it
+      const states = new Set(lines.map((each) => each.getAttribute("state") as AwayState))
+      const top = AWAY_STATE_ORDER.find((state) => states.has(state)) ?? part.state
+      const head = heading(part.key, top, part.title)
+      if (states.size > 1) head.setAttribute("mixed", "")
+      body.push(head, ...lines)
     }
     needPart(NEED_PARTS[0])
     // done and dropped (I228) alike:  each line says which
@@ -4319,19 +4348,29 @@ const AWAY_TITLE = "0. While you were out"
 /** A line of "0. While you were out":  which of its title's badges it counts in, and so its tick's colour. */
 type AwayState = "recent" | "progress" | "replied" | "open" | "attention"
 
-/** What's new in "0. While you were out", for its title's badges:  `recent:2 progress:1 attention:3`. */
-function awayCounts(summary: NightSummary): string {
-  const running = summary.done.filter((done) => done.status === "under way").length
-  const needs = (...parts: NeedPart[]) => summary.needs.filter((need) => parts.includes(need.part)).length
-  const counts = {
-    recent: summary.done.length - running,
-    progress: running,
-    replied: needs("fixed"),
-    open: needs("issues", "tests"),
-    attention: needs("asks")
+/** The away lines' colours, most pressing first. */
+const AWAY_STATE_ORDER: readonly AwayState[] = ["attention", "replied", "open", "progress", "recent"]
+
+/**
+ * What's new in "0. While you were out", for its title's badges:  `recent:2 progress:1 attention:3`.
+ * - its lines as drawn, each in its own colour (epic `epic-engine` I435):  the counts and the lines agree
+ */
+function awayCounts(section: Element): string {
+  const counts = new Map<string, number>()
+  for (const line of Array.from(section.querySelectorAll("epic-away-line[state]:not([heading])"))) {
+    const state = line.getAttribute("state")!
+    counts.set(state, (counts.get(state) ?? 0) + 1)
   }
-  return Object.entries(counts)
-    .filter(([, count]) => count > 0)
-    .map(([state, count]) => `${state}:${count}`)
+  return AWAY_STATE_ORDER.flatMap((state) => (counts.get(state) ? [`${state}:${counts.get(state)}`] : []))
+    .reverse()
     .join(" ")
+}
+
+/**
+ * The colour item `item`'s away line takes:  its row's (`state`), as the counts' rule groups it
+ * (`StateFilter.colorOf()`:  light orange with orange, light yellow with yellow, the blues together).
+ */
+function awayStateOf(item: Element): AwayState | undefined {
+  const color = StateFilter.colorOf(item.getAttribute("state") ?? "")
+  return (AWAY_STATE_ORDER as readonly string[]).includes(color) ? (color as AwayState) : undefined
 }

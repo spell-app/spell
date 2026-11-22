@@ -6,9 +6,13 @@ import { E } from "spell/element"
 import { AWAY_ID } from "spell/epic/definitions/definitions.types"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
+// the badge's class:  its file, not `epic-item`'s barrel (which defines that family)
+import { BADGE } from "spell/epic/components/epic-item/EpicItem.types"
+import { TitlePrefix } from "spell/epic/components/epic-item/TitlePrefix"
 
 import { epicAwayLineVocabulary } from "./EpicAwayLine.en"
 
+import badgeCSS from "spell/epic/components/epic-item/ItemBadge.css?inline"
 import awayLineCSS from "./EpicAwayLine.css?inline"
 
 /****************
@@ -29,7 +33,7 @@ import awayLineCSS from "./EpicAwayLine.css?inline"
 export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
   @E.proto static vocabulary = epicAwayLineVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-away-line": awayLineCSS },
+    styleSheets: { "epic-away-line": awayLineCSS, "epic-badge": badgeCSS },
     cssStates: ["heading", "working"],
     // a line of text:  a click on its words must not jump to its tick
     delegatesFocus: false
@@ -89,6 +93,17 @@ export class EpicAwayLine extends E.UIComponent<typeof epicAwayLineVocabulary> {
           />
         </Show>
         <div part={this.partForName("body")}>
+          {/* with a badge (I435):  its number, the badge, then the rest, as the item's row */}
+          <Show when={TitlePrefix.knownBadge(this.badge)}>
+            {(badge) => (
+              <>
+                <slot name={this.slotForName("lead")} />{" "}
+                <span class={BADGE} part={this.partForName("badge")} data-state={this.badgeState}>
+                  {this.translationForKey(`badge_${badge()}`, { id: this.badgeItem?.toUpperCase() ?? "" })}
+                </span>{" "}
+              </>
+            )}
+          </Show>
           <slot />
         </div>
       </div>

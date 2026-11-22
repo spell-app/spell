@@ -6,6 +6,9 @@
 
 import type { EpicVocabulary } from "spell/epic/definitions"
 
+// the badges' words, as an item's row says them
+import { BADGE_TEXTS } from "spell/epic/components/epic-item/EpicItem.en"
+
 /****************
  * ### `<epic-away-line>`
  * One line of "0. While you were out", or the heading of one of its parts, with a tick of its own:  read, it leaves
@@ -38,6 +41,20 @@ export const epicAwayLineVocabulary = {
         "Which of the section's badges it counts in (`recent`, `progress`, `replied`, `open`, `attention`):  its tick's colour, and what filters it."
     },
     {
+      name: "badge",
+      kind: "string",
+      description:
+        "Its item's badge, on a page with them (epic `epic-engine` P81, I435):  drawn after its number, as the item's " +
+        "row draws it, in `badge-state`'s colour."
+    },
+    { name: "badge-item", kind: "string", description: "The id its badge names (`SEE T38`)." },
+    { name: "badge-state", kind: "string", description: "Its item's state:  its badge's colour." },
+    {
+      name: "mixed",
+      kind: "boolean",
+      description: "A heading whose lines are of more than one colour:  no colour filter hides it."
+    },
+    {
       name: "working",
       kind: "boolean",
       description:
@@ -53,7 +70,10 @@ export const epicAwayLineVocabulary = {
     }
   ],
   events: [],
-  slots: [{ name: "", description: "The line:  its link and its words." }],
+  slots: [
+    { name: "", description: "The line:  its link and its words." },
+    { name: "lead", description: "With a badge:  its number and link, before the badge." }
+  ],
   parts: [
     { name: "base", description: "The line:  the tick, then its words." },
     {
@@ -61,7 +81,8 @@ export const epicAwayLineVocabulary = {
       description: 'Its ✓ Read, while the page is reviewed:  an `<epic-review buttons="away-line">`.'
     },
     { name: "working", description: "A phase under way:  its spinning half circle." },
-    { name: "body", description: "Its words." }
+    { name: "body", description: "Its words." },
+    { name: "badge", description: "Its item's badge, as the row draws it." }
   ],
   states: [
     {
@@ -71,7 +92,10 @@ export const epicAwayLineVocabulary = {
     { name: "heading", description: "A part's heading." },
     { name: "working", description: "A phase still under way." }
   ],
-  texts: [{ key: "buttonsLabel", text: "this line", description: "Read's group, spoken." }],
-  children: [{ tag: "flow", description: "The line:  its link and its words." }],
+  texts: [...BADGE_TEXTS, { key: "buttonsLabel", text: "this line", description: "Read's group, spoken." }],
+  children: [
+    { tag: "flow", description: "The line:  its link and its words." },
+    { tag: "flow", slot: "lead", description: "With a badge:  its number and link, before the badge." }
+  ],
   flow: true
 } as const satisfies EpicVocabulary

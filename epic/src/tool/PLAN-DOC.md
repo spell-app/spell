@@ -445,7 +445,7 @@ As `plan-doc.md`, "Ids":
     | `quiet`     | grey   | open, nothing to think about:  a `calm` judgement call not reviewed, a limit (epic `epic-engine` P63) |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
     | `replied`   | orange | a manual test whose phase isn't done (epic `epic-engine` P63:  `PlanReader.manualTestState()`) |
-    | `recheck`   | light orange | a page with badges (P81):  WILL RECHECK, WILL CLOSE:  Claude's turn, never counted as needing the person (Q82) |
+    | `recheck`   | light orange | a page with badges (P81):  WILL RECHECK, WILL CLOSE:  Claude's turn, its own light orange chip, never counted as needing the person (Q82, J335) |
     | `someday`   | light yellow | a page with badges (P81):  SOMEDAY, OPTIONAL:  open, no hurry               |
     | `open`      | yellow | anything else open:  still undecided, not urgent;  a calm issue, a test whose phase is done;  a revisit or request for now answered |
 
@@ -914,7 +914,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | red    | needs the person                               | `attention` chips;  the rail's count (only what needs them);  a todo the person flagged red as a reminder (`--loud`, T94), its buttons still a todo's (plane, revisit, x) |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
 | light yellow | open, no hurry (DARK text):  SOMEDAY, OPTIONAL | `someday` chips and badges;  counts in, and filters with, the yellow bubble (epic `epic-engine` P81) |
-| light orange | finished as they asked, their turn to see it (DARK text);  on a page with badges also Claude's turn to check again | `requested` and `recheck` chips and badges;  both filter with orange, but a recheck is never counted as needing the person (P81, Q82) |
+| light orange | finished as they asked, their turn to see it (DARK text);  on a page with badges also Claude's turn to check again | `requested` and `recheck` chips and badges;  `requested` filters with orange, a recheck has a chip of its own, never counted as needing the person (P81, Q82, J335) |
 | blue   | do it now, or it's with Claude           | `progress` chips and the UNDERWAY label (solid);  `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (start now), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since the person looked, or a warning;  an item Claude answered with options, waiting for the person's pick (2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing the person |
