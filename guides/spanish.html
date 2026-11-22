@@ -8,6 +8,8 @@
       name="description"
       content="A Spell project can be written in Spanish:  it parses, compiles, runs and edits in Spanish, with Spell UI's components as es-* tags and the editor speaking Spanish too;  spell translate writes an English project in Spanish."
     />
+    <meta name="spell-audience" content="makers" />
+    <meta name="spell-topic" content="Writing Spell" />
     <meta name="spell-voice" content="readme 2026-10-22" />
     <meta name="spell-saga" content="spell-language" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
@@ -17,85 +19,58 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
+          <ui-breadcrumb link="/pages/index.html">Docs</ui-breadcrumb>
           <ui-breadcrumb selected>Spell in Spanish</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
           ><header class="spell-page-head"><h1>Spell in Spanish</h1></header></ui-sticky
         >
         <p class="lede">
-          <code>- "es una figura" si su rango es jota, dama o rey</code> is a line of Spell, from a Spanish card. It
+          <code>"es una figura" si su rango es jota, dama o rey</code> is a line of Spell, from a Spanish card. It
           compiles to a getter, <code>get esUnaFigura()</code>, and a test that uses it prints
           <code>✅ Como se esperaba</code> when it passes.
         </p>
         <p>
-          Spanish is the second language Spell reads. It isn't a translation layer over English, and it isn't a fork of
-          the parser: the same rule classes are registered twice, once with English words and once with Spanish ones,
-          and each file's name says which set it's written in.
+          Spanish is the second language Spell reads, and in Spanish Spell is called <b>Encanto</b>. It isn't a
+          translation layer over English, and it isn't a second parser: the same rule classes are registered twice, once
+          with English words and once with Spanish ones, and each file's name says which set it's written in.
         </p>
         <ui-list class="spell-meta">
-          <ui-item icon="map"
-            ><b>Epic page:</b> <a href="/epics/spanish/spanish.plan.html" target="spanish">epic spanish</a></ui-item
-          >
           <ui-item icon="user"
-            >Written for: someone writing Spell in Spanish, or a developer adding a rule, a word or a third
-            language</ui-item
+            >Written for: someone writing Spell in Spanish, or turning an English project into a Spanish one</ui-item
           >
           <ui-item icon="flag"
-            >Status: <ui-label size="mini" color="green">merged</ui-label> into <code>main</code> in every repo it
-            touched, 2026-10-21 to 2026-10-23; Solitario, Solitaire in Spanish, is an example of its own; and
-            <code>spell translate</code> writes any English project in Spanish</ui-item
+            >Status: <ui-label size="mini" color="green">built</ui-label>; Solitario, Solitaire in Spanish, is an
+            example of its own, and <code>spell translate</code> writes any English project in Spanish</ui-item
           >
-          <ui-item icon="code branch"
-            >Branch <code>spanish</code>, in the kit, spell-parser, spell-ui and spell-app</ui-item
-          >
-          <ui-item icon="flask"
-            >Checked on: <code>main</code>, 2026-10-23, by running Solitario's tests, the pack check and a translation
-            with no Claude, and against the epic page's decisions</ui-item
+          <ui-item icon="book"
+            >The same, for programmers, with every command's output:
+            <a href="/parser/README-spanish.md" target="src-parser-readme-spanish-md">the Spanish README</a></ui-item
           >
         </ui-list>
 
         <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="lightbulb"></ui-icon>
           <ui-statistics class="spell-stats" size="mini">
-            <ui-statistic value="19" label="rule modules in Spanish"></ui-statistic>
-            <ui-statistic value="104" label="Spell UI dictionaries"></ui-statistic>
-            <ui-statistic value="168" label="editor texts"></ui-statistic>
+            <ui-statistic value="21" label="rule modules in Spanish"></ui-statistic>
+            <ui-statistic value="5" label="Solitario's tests, in Spanish"></ui-statistic>
           </ui-statistics>
           <ul>
             <li>
-              A file's name says its language:
-              <a
-                href="/spell-app/spaces/@spell/examples/Solitario/Carta.es.spell"
-                target="src-spell-app-spaces-spell-examples-solitario-carta-es-spell"
-                ><code>Carta.es.spell</code></a
-              >
-              is Spanish,
-              <a
-                href="/spell-app/spaces/@spell/examples/Solitaire/Card.spell"
-                target="src-spell-app-spaces-spell-examples-solitaire-card-spell"
-                ><code>Card.spell</code></a
-              >
-              (or <code>Card.en.spell</code>) English. One project may mix them.
+              A file's name says its language: <a href="/app/spaces/@spell/examples/Solitario/Carta.es.spell" target="src-app-spaces-spell-examples-solitario-carta-es-spell"><code>Carta.es.spell</code></a> is Spanish, <code>Card.spell</code> (or
+              <code>Card.en.spell</code>) English. One project may mix them.
             </li>
             <li>
-              Spell&#39;s own name in Spanish is <b>Encanto</b>: a Spanish spellx file (<code>Carta.es.spellx</code>)
-              opens with <code>&lt;encanto-vista "carta"&gt;</code> where an English one says
-              <code>&lt;spell-view "card"&gt;</code>, and the words inside keep their accents
-              (<code>&lt;propiedad&gt;</code>, <code>&lt;acción&gt;</code>).
+              A Spanish file says each line in Spanish, <code>una "carta" es una vista</code> beside English
+              <code>a "card" is a view</code>, and the words keep their accents: <code>su "palo"</code>,
+              <code>para voltearla</code>.
             </li>
             <li>
-              A Spanish file parses with Spanish words, plurals and articles, and compiles to Spanish names, accents
-              kept.
+              It parses with Spanish words, plurals and articles, and compiles to the author's names, accents kept.
             </li>
             <li>
               Every language is a LANGUAGE PACK: its rule words, its word tables, its inflector (singular and plural)
               and its messages. English is the first pack, Spanish the second.
-            </li>
-            <li><code>spell translate check</code> says whether a pack has every rule English has.</li>
-            <li>
-              <code>spell translate</code> writes an English project again in Spanish: its names first, then each line
-              by its own rule, then Claude fixes what fails lint, a test, or compiles to a different program.
             </li>
             <li>
               A wrong article is a warning, in both languages:
@@ -106,31 +81,20 @@
             </li>
             <li>Spell UI's components have Spanish names on a Spanish page: <code>&lt;es-boton&gt;</code>.</li>
             <li>
-              The editor, VS Code and the parser's messages speak each file's language, and a test's run-time lines the
+              The editor, VS Code and the parser's messages speak each file's language, and a test's lines the
               program's; the editor's own buttons and panels speak the page's.
+            </li>
+            <li>
+              <code>spell translate</code> writes an English project again in Spanish: its names first, then each line
+              by its own rule, then Claude fixes what fails.
             </li>
           </ul>
           <ui-message state="positive" heading="To write a project in Spanish">
             <ul>
+              <li>Name its files <code>.es.spell</code>.</li>
               <li>
-                Name its files <code>.es.spell</code>:
-                <a
-                  href="/spell-app/spaces/@spell/examples/Solitario/Carta.es.spell"
-                  target="src-spell-app-spaces-spell-examples-solitario-carta-es-spell"
-                  ><code>Carta.es.spell</code></a
-                >.
-              </li>
-              <li>
-                The example <code>@spell/examples/Solitario</code>, Solitaire in Spanish line for line, is a whole
+                The example <code>@spell/examples/Solitario</code>, Solitaire in Spanish file for file, is a whole
                 project to copy from.
-              </li>
-              <li>
-                The language's own page, with pictures and commands to try:
-                <a
-                  href="https://github.com/spell-app/spell-parser/blob/main/README-spanish.md"
-                  target="ext-github-com-spell-app-spell-parser-blob-main-readme-spanish-md"
-                  >README-spanish</a
-                >.
               </li>
             </ul>
           </ui-message>
@@ -139,43 +103,31 @@
         <ui-section id="2-a-spanish-project" label="2. A Spanish project" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="code"></ui-icon>
           <p>
-            Solitario is the Solitaire example translated line for line: its own card, deck and piles (Carta, Mazo,
-            Pila), the game, and their tests. Its project file is an ordinary one: each file's name says it's Spanish.
+            Solitario is the Solitaire example written again in Spanish, file for file: its own card, deck and piles
+            (Carta, Mazo, Pila), the game, and their tests. Its project file is an ordinary one: each file's name says
+            it's Spanish.
           </p>
-          <ui-accordion class="spell-code" appearance="styled">
-            <ui-title>Solitario's project file, shortened · 8 lines</ui-title>
-            <ui-content>
-              <pre><code class="language-json">{
-  "title": "Solitario",
-  "imports": [
-    { "path": "/Carta.es.spell", "active": true },
-    { "path": "/Mazo.es.spell", "active": true },
-    ...
-  ]
-}</code></pre>
-            </ui-content>
-          </ui-accordion>
 
           <ui-section id="what-it-reads" label="What it reads" sticky collapsible dividing open="false">
-            <p>A Spanish outline reads the way an English one does, word order and all.</p>
+            <p>A Spanish file reads the way an English one does, word order and all.</p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>Carta.es.spell, lines 4-18 · 15 lines</ui-title>
+              <ui-title>Carta.es.spell, its first lines · 14 lines</ui-title>
               <ui-content>
-                <pre><code class="language-text">una "carta" es una vista donde:
-	# rango de la carta
-	- su "rango" es uno de as, 2 ... 10, jota, dama, rey
-	- su "valor" es la posición de su rango      				// as = 1 ... rey = 13
-	- "es un (rango)"											// "la carta es un rey"
-	- "es una figura" si su rango es jota, dama o rey			// "la carta es una figura"
-	- "es una carta numérica" si no es una figura				// "la carta es una carta numérica"
+                <pre><code class="language-spell">una "carta" es una vista reversible arrastrable 			-- Una carta de la baraja
+	grupo "Rango y Palo" -- El as es bajo:  as = 1 ... rey = 13
+	su "rango" es uno de as, 2 ... 10, jota, dama, rey
+	su "palo" es uno de tréboles, diamantes, corazones o espadas
+	su "color" es uno de rojo, negro
+		rojo si es un diamante o es un corazón
+		negro de lo contrario
 
-	## palo de la carta
-	- su "palo" es uno de tréboles, diamantes, corazones o espadas
-	- "es un (palo)"											// "la carta es un diamante"
+	grupo "Alias" 								-- Spell para identificar cartas
+	"es una figura" si su rango es jota, dama o rey
+	"es una carta numérica" si no es una figura
+	"es el (rango) de (palo)"  -- p. ej. la carta es el dos de espadas
 
-	- su "color" es:
-		rojo si su palo es diamantes o corazones
-		negro de lo contrario</code></pre>
+	grupo "Nombres" 								-- identificar una carta
+	su "nombre" es su rango &amp;&amp; "de" &amp;&amp; su palo</code></pre>
               </ui-content>
             </ui-accordion>
             <p>What Spanish needed that English didn't:</p>
@@ -193,11 +145,24 @@
                 <b>A dropped subject:</b> <code>tiene un mazo</code> needs no "it"; <code>su / sus</code> stand for
                 "its".
               </li>
+              <li>
+                <b>A property read inside an action:</b> <code>barajar la reserva</code> for
+                <code>barajar su reserva</code>, and <code>poner la puntuación a 1</code> writes it.
+              </li>
               <li><b>The decimal comma:</b> <code>1,5</code> is a number, <code>1, 5</code> a list of two.</li>
               <li>
                 <b>Accents in names:</b> <code>año</code> is one word, not three tokens, everywhere a word is matched.
               </li>
             </ul>
+            <p>
+              One project may mix languages. A Spanish file names an English type by its own words, and calls its
+              English methods: <code>un equipo es una lista de players</code>, then <code>reset el p</code>.
+            </p>
+            <p>
+              <b>The catch:</b> a plural English name in a Spanish file is made singular by Spanish's rules.
+              <code>players</code> finds Player, but <code>una lista de cards</code> looks for a type named Cards: to
+              Spanish, one syllable ending in <code>-s</code> is already singular, as <code>mes</code> is.
+            </p>
           </ui-section>
 
           <ui-section id="what-it-compiles-to" label="What it compiles to" sticky collapsible dividing open="false">
@@ -206,33 +171,33 @@
               own calls (<code>core.includes</code>) stay English, because nobody reads them.
             </p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>spell compile @spell/examples/Solitario --stdout, from Carta.es.spell · 15 lines</ui-title>
+              <ui-title>spell compile @spell/examples/Solitario --stdout, from Carta.es.spell · 12 lines</ui-title>
               <ui-content>
-                <pre><code class="language-js">  /** "la carta es una figura" */
+                <pre><code class="language-js">  get color() {
+    if (this.palo === "diamantes" || this.palo === "corazones") return "rojo"
+    return "negro"
+  }
+
   get esUnaFigura() {
     return core.includes(["jota", "dama", "rey"], this.rango)
   }
 
-  /** "la carta es una carta numérica" */
   get esUnaCartaNumérica() {
     return !this.esUnaFigura
-  }
-  ...
-  get color() {
-    if (core.includes(["diamantes", "corazones"], this.palo)) return "rojo"
-    return "negro"
   }</code></pre>
               </ui-content>
             </ui-accordion>
-            <p>
-              Its words file, which maps each compiled name back to its Spanish words, is named for the language:
-              <a
-                href="/spell-app/spaces/@spell/examples/Solitario/Solitario.es.js"
-                target="src-spell-app-spaces-spell-examples-solitario-solitario-es-js"
-                ><code>Solitario.es.js</code></a
-              >
-              for JavaScript, <code>Solitario.py.es.json5</code> for Python.
-            </p>
+            <ul>
+              <li>
+                <code>esUnaCartaNumérica</code> is a legal name in JavaScript, TypeScript and Python 3, so Spell keeps
+                the accent. Two ways of typing <code>é</code> are one name.
+              </li>
+              <li><code>--target py</code> writes <code>es_una_figura</code>, the same getter as a Python property.</li>
+              <li>
+                Each language in a project gets its own words file, which maps each compiled name back to the words that
+                declared it: <code>Solitario.es.js</code> beside an English project's <code>.en.js</code>.
+              </li>
+            </ul>
           </ui-section>
 
           <ui-section id="running-it" label="Running it" sticky collapsible dividing open="false">
@@ -241,15 +206,29 @@
               English; what the program says is Spanish.
             </p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>spell test @spell/examples/Solitario --verbose, the first lines · 4 lines</ui-title>
+              <ui-title>spell test @spell/examples/Solitario · 8 lines</ui-title>
               <ui-content>
-                <pre><code class="language-text">✅ test la preparación de la carta
-  ▶️ Ejecutando   `obtener una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo`
-  probando la dama de espadas
-  ✅ Como se esperaba, `su rango` es `dama`</code></pre>
+                <pre><code class="language-text">✓ Compiling @spell/examples/Solitario
+✓ test la preparación de la carta  (15 checks)
+✓ test las imágenes de carta  (10 checks)
+✓ test la creación del mazo  (5 checks)
+✓ test las pilas  (8 checks)
+✓ test los movimientos  (11 checks)
+
+5 passed</code></pre>
               </ui-content>
             </ui-accordion>
-            <p>A failing check reads <code>❌ Inesperado: 2 + 2 debería ser 5 pero en realidad es 4</code>.</p>
+            <ul>
+              <li>
+                <code>--verbose</code> prints each check, in the program's language:
+                <code>✅ Como se esperaba, `su rango` es `dama`</code>.
+              </li>
+              <li>A failing check reads <code>❌ Inesperado: 2 + 2 debería ser 5 pero en realidad es 4</code>.</li>
+              <li>
+                <code>spell explain si --in @spell/examples/Solitario</code> lists the five rules
+                <code>si</code> starts, the same five <code>if</code> starts in English.
+              </li>
+            </ul>
           </ui-section>
         </ui-section>
 
@@ -276,46 +255,35 @@
             open="false"
           >
             <ul>
-              <li>Each folder of rules holds the rule classes, and nothing about words.</li>
+              <li>Each rule's class is a file of its own, with nothing about words.</li>
               <li>
-                Beside them, <code>&lt;folder&gt;.en.ts</code> registers every rule of the folder with its English
-                syntax and tests, and <code>&lt;folder&gt;.es.ts</code> the same rules, in the same order, with Spanish.
+                Beside them, <code>&lt;module&gt;.en.ts</code> registers every rule of the module with its English
+                syntax and tests, and <code>&lt;module&gt;.es.ts</code> the same rules, in the same order, with
+                Spanish's.
               </li>
-              <li>A third language is a third file per folder.</li>
+              <li>A third language is a third file per module.</li>
             </ul>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>one rule in both languages · illustrative · 9 lines</ui-title>
+              <ui-title>a rule module's folder · 4 lines</ui-title>
               <ui-content>
-                <pre><code class="language-ts">// expressions.en.ts
-expressions.addRule(IsEqual, {
-  syntax: "{operator:is_or_is_not} {expression:operand}",
-  tests: [["thing is other", "(thing === other)"], ["thing is not other", "(thing !== other)"]]
-})
-// expressions.es.ts:  the same class
-expressions.addRule(IsEqual, {
-  syntax: "{operator:is_or_is_not} {expression:operand}",
-  tests: [["cosa es otra", "(cosa === otra)"], ["cosa no es otra", "(cosa !== otra)"]]
-})</code></pre>
+                <pre><code class="language-text">parser/src/spell/rules/&lt;module&gt;/
+  &lt;Rule&gt;.ts             the rule's class:  what it compiles to, in no language's words
+  &lt;module&gt;.en.ts        every rule of the module, with its English syntax and tests
+  &lt;module&gt;.es.ts        the same rules, in the same order, with Spanish's</code></pre>
               </ui-content>
             </ui-accordion>
           </ui-section>
 
           <ui-section id="word-rules" label="Small words are rules too" sticky collapsible dividing open="false">
-            <p>
-              Rule code used to test the English word it matched, e.g. <code>=== "is not"</code>. Now no rule reads a
-              word.
-            </p>
             <ul>
               <li>
-                The small words are WORD RULES each language registers, about 30 of them: the articles, "is" or "is
-                not", "it" ...
+                The small words are WORD RULES each language registers: the articles, "is" or "is not", "it" ...
                 <ui-accordion class="spell-code" appearance="styled">
-                  <ui-title>some word rules, English and Spanish · illustrative · 4 lines</ui-title>
+                  <ui-title>some word rules, English and Spanish · illustrative · 3 lines</ui-title>
                   <ui-content>
                     <pre><code class="language-text">definite_article      the            el | la | los | las
 indefinite_article    a | an         un | una | unos | unas
-is_or_is_not          is | is not    es | está | no es | no está
-it                    it             eso | ello</code></pre>
+is_or_is_not          is | is not    es | está | no es | no está</code></pre>
                   </ui-content>
                 </ui-accordion>
               </li>
@@ -326,26 +294,20 @@ it                    it             eso | ello</code></pre>
 
           <ui-section id="the-pack" label="What a pack holds" sticky collapsible dividing open="false">
             <p>
-              <a
-                href="/spell-parser/src/spell/languages/Language.ts"
-                target="src-spell-parser-src-spell-languages-language-ts"
-                ><code title="spell-parser/src/spell/languages/Language.ts">SP.Language</code></a
-              >
-              is one language's pack, in
-              <a href="/spell-parser/src/spell/languages/" target="src-spell-parser-src-spell-languages"
-                ><code title="spell-parser/src/spell/languages">languages/&lt;lang&gt;/</code></a
-              >:
+              <code>SP.Language</code> is one language's pack, in <a href="/parser/src/spell/languages/" target="src-parser-src-spell-languages"><code>parser/src/spell/languages</code></a>, a folder per
+              language:
             </p>
             <ul>
               <li>its parser, with every rule registered in its words</li>
               <li>
                 its inflector: English's wraps the npm <code>pluralize</code>; Spanish's is ported from
-                Python-Inflector's rules, and widened
+                Python-Inflector's rules, and works both ways
               </li>
               <li>
                 its word tables: the identifier blacklist, booleans, number words, ordinals, the built-in types' words
               </li>
               <li>its article agreement, and the messages a person reads</li>
+              <li>its glossary of the words chosen, so every module says <code>poner</code>, not <code>fijar</code></li>
             </ul>
             <p>
               Each file's scope picks its pack from the file's language, so its colours, completions and warnings
@@ -358,18 +320,18 @@ it                    it             eso | ello</code></pre>
             <ui-accordion class="spell-code" appearance="styled">
               <ui-title>spell translate check es · 1 line</ui-title>
               <ui-content>
-                <pre><code class="language-text">Spanish (es):  complete, 19 modules</code></pre>
+                <pre><code class="language-text">Spanish (es):  complete, 21 modules</code></pre>
               </ui-content>
             </ui-accordion>
             <ul>
               <li>
                 <code>check</code> compares each pack with English, module by module: a rule missing, out of order, or
-                with no syntax or tests; and the word tables. It exits 1 on anything missing, and runs in spell-parser's
+                with no syntax or tests; and the word tables. It exits 1 on anything missing, and runs in the parser's
                 tests too.
               </li>
               <li>
-                <code>fix</code> writes stubs for what's missing. With <code>--ai</code>, Claude drafts each one through
-                the command line, marked for review.
+                <code>spell translate fix es</code> writes a stub for each missing registration. With <code>--ai</code>,
+                Claude drafts each one, marked for review.
               </li>
               <li>
                 A difference on purpose is marked in the pack's file, so the check passes:
@@ -381,71 +343,68 @@ it                    it             eso | ello</code></pre>
           <ui-section id="agreement" label="Articles that don't agree" sticky collapsible dividing open="false">
             <ul>
               <li>
-                A type's gender is read off its declaration: <code>una carta es una cosa</code> makes it feminine.
+                A type's gender is read off its declaration: <code>una "carta" es una cosa</code> makes it feminine.
               </li>
               <li>
                 Spanish warns on gender and number: <code>el carta</code>, <code>un cartas</code>. English uses the same
                 check for <code>a apple</code> and <code>an card</code>.
               </li>
-              <li>It's a warning in the editor, never an error: the line still compiles.</li>
+              <li>
+                It's a warning, never an error: the line still compiles. A strict parser would need gender while it
+                matches, and it doesn't have it.
+              </li>
+              <li>
+                <code>spell compile</code> and <code>spell run</code> print it:
+                <code>Prueba.es.spell:3:1 warning: ¿Querías decir "la carta"?</code>.
+              </li>
             </ul>
           </ui-section>
         </ui-section>
 
         <ui-section id="4-spell-ui" label="4. Spell UI in Spanish" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="puzzle piece"></ui-icon>
-          <p>On a Spanish page, every Spell UI component has a Spanish tag, Spanish attributes and Spanish texts.</p>
+          <p>
+            On a Spanish page, every Spell UI component has a Spanish tag, Spanish attributes and Spanish texts.
+            Solitario's toolbar is one:
+          </p>
           <ui-accordion class="spell-code" appearance="styled">
-            <ui-title>Spell UI's Spanish demo page, translate.html · 9 lines</ui-title>
+            <ui-title>Solitario.es.spell, its para dibujar eso, shortened · 12 lines</ui-title>
             <ui-content>
-              <pre><code class="language-html">&lt;html lang="es"&gt;
-  &lt;es-boton primario&gt;Guardar&lt;/es-boton&gt;
-  &lt;es-boton color="rojo" tamano="grande"&gt;Borrar&lt;/es-boton&gt;
-  &lt;es-boton alternable color="verde"&gt;Votar&lt;/es-boton&gt;
-
-  &lt;es-desplegable seleccion busqueda marcador="Género" name="genero"&gt;
-    &lt;es-elemento value="f"&gt;Femenino&lt;/es-elemento&gt;
-    ...
-  &lt;/es-desplegable&gt;</code></pre>
+              <pre><code class="language-spell">&lt;segmento invertido unir-a="arriba" color=""&gt;
+	&lt;barra-herramientas class="GameBar" aria-label="Juego" apariencia="pildoras" invertido tamano="pequeño" encogible&gt;
+		&lt;texto slot="titulo" tamano="grande" extranegrita&gt;Solitario&lt;/texto&gt;
+		&lt;acción "jugar solo"/&gt;
+		&lt;acción "hacer trampa"/&gt;
+		&lt;acción "reiniciar el juego"/&gt;
+		&lt;divisor/&gt;
+		&lt;acción "deshacer" solo-icono/&gt;
+		&lt;acción "rehacer" solo-icono/&gt;
+		&lt;texto slot="derecha"&gt;Puntos: &lt;número "puntuación"/&gt;&lt;/&gt;
+	&lt;/barra-herramientas&gt;
+&lt;/segmento&gt;</code></pre>
             </ui-content>
           </ui-accordion>
           <ul>
             <li>
-              The page's language is its <code>&lt;ui-root lang="es"&gt;</code>, else the document's <code>lang</code>.
-              Every component then loads on demand as <code>es-*</code>, its texts in Spanish.
+              In Spell, a bare name is Spell UI's tag: <code>&lt;texto&gt;</code> for <code>&lt;es-texto&gt;</code>. A
+              Spanish view gets its tag from its Spanish names: <code>&lt;solitario-carta&gt;</code>.
+            </li>
+            <li>
+              On a plain page, its language is its <code>&lt;ui-root lang="es"&gt;</code>, else the document's
+              <code>lang</code>. Every component then loads on demand as <code>es-*</code>, its texts in Spanish.
             </li>
             <li>
               Tag and attribute names are ASCII: <code>es-boton</code>, <code>tamano</code>. Values keep their accents,
               and are found without them too: <code>pequeno</code> finds pequeño.
             </li>
             <li>A Spanish tag's properties are Spanish too: <code>desplegable.abierto</code>.</li>
-            <li>The Spanish costs a page 10.3 kB gzipped, and only a Spanish page loads it.</li>
+            <li>Only a Spanish page loads the Spanish.</li>
             <li>
-              From code: <code>UI.vocabulary.defineComponents({ prefix: "es", dictionary: es })</code> for the names,
-              and <code>UI.i18n.registerDictionary(es)</code> for the texts.
-            </li>
-            <li>
-              Each component's Spanish sits beside its English:
-              <a
-                href="/spell-ui/src/components/ui-button/UIButton.es.ts"
-                target="src-spell-ui-src-components-ui-button-uibutton-es-ts"
-                ><code title="spell-ui/src/components/ui-button/UIButton.es.ts">UIButton.es.ts</code></a
-              >
-              beside
-              <a
-                href="/spell-ui/src/components/ui-button/UIButton.en.ts"
-                target="src-spell-ui-src-components-ui-button-uibutton-en-ts"
-                ><code title="spell-ui/src/components/ui-button/UIButton.en.ts">UIButton.en.ts</code></a
-              >. What many share is translated once, in
-              <a href="/spell-ui/src/components/components.es.ts" target="src-spell-ui-src-components-components-es-ts"
-                ><code title="spell-ui/src/components/components.es.ts">components.es.ts</code></a
-              >.
+              Each component's Spanish sits beside its English, <a href="/ui/src/components/ui-button/UIButton.es.ts" target="src-ui-src-components-ui-button-uibutton-es-ts"><code>UIButton.es.ts</code></a> beside
+              <a href="/ui/src/components/ui-button/UIButton.en.ts" target="src-ui-src-components-ui-button-uibutton-en-ts"><code>UIButton.en.ts</code></a>. How the names work:
+              <a href="/ui/README-runtime.md" target="src-ui-readme-runtime-md">Spell UI's runtime README</a>.
             </li>
           </ul>
-          <p>
-            In Spell, a Spanish program's JSX writes <code>&lt;es-*&gt;</code> tags as they are, and its views get tags
-            from their Spanish names: <code>&lt;solitario-carta&gt;</code>.
-          </p>
         </ui-section>
 
         <ui-section id="5-editor" label="5. The editor and VS Code" sticky collapsible dividing open="false">
@@ -454,9 +413,9 @@ it                    it             eso | ello</code></pre>
             <ul>
               <li>
                 A keyword typed without its accent gets it back as you type a space or Enter:
-                <code>numero</code> becomes <code>número</code>.
+                <code>el numero de</code> becomes <code>el número de</code>.
                 <ul>
-                  <li>Both VS Code and the editor do it.</li>
+                  <li>Both VS Code and the editor do it, so a Spanish file types on an English keyboard.</li>
                   <li>It never touches a word that's right both ways (si, sí), or a name a person chose.</li>
                 </ul>
               </li>
@@ -466,7 +425,7 @@ it                    it             eso | ello</code></pre>
               </li>
               <li><code>si no:</code> and <code>de lo contrario</code> go back out a level, as otherwise does.</li>
               <li>
-                In a Spanish project, completion offers Spanish keywords (<code>si, para, devolver</code>), and the Type
+                In a Spanish file, completion offers Spanish keywords (<code>si, para, devolver</code>), and the Type
                 Explorer's built-in types are Spanish's.
               </li>
               <li>An accented word is one word to double-click.</li>
@@ -475,17 +434,12 @@ it                    it             eso | ello</code></pre>
           <ui-section id="the-editors-words" label="The editor's own words" sticky collapsible dividing open="false">
             <ul>
               <li>
-                The editor speaks the PAGE's language: the document's <code>lang</code>, else the browser's. 168 of its
-                texts have Spanish, loaded only on a Spanish page.
+                The editor speaks the PAGE's language: the document's <code>lang</code>, else the browser's. "Guardar"
+                where an English browser gets "Save".
               </li>
               <li>
-                The language server's 32 labels (hover, completion, the Define fix, the Type Explorer) speak the
-                language of the FILE they're about, in any editor: a Spanish program's hover says
-                <code>declarado en</code>.
-              </li>
-              <li>
-                Each text is a key, read with <code>appTexts.text(key, params)</code>. A sentence naming something takes
-                it as a param, never glued from pieces, so each language words it its own way.
+                The language server's labels (hover, completion, the Define fix, the Type Explorer) speak the language
+                of the FILE they're about, in any editor: a Spanish program's hover says <code>declarado en</code>.
               </li>
             </ul>
           </ui-section>
@@ -495,7 +449,7 @@ it                    it             eso | ello</code></pre>
           <ui-icon slot="icon" name="language"></ui-icon>
           <p>
             <code>spell translate &lt;project&gt; --to es</code> writes an English project again in Spanish, as a
-            project of its own beside it. Solitaire comes out linted clean and passing its six tests, with no person in
+            project of its own beside it. Solitaire came out linted clean and passing its six tests, with no person in
             the loop, in under a minute.
           </p>
 
@@ -516,10 +470,10 @@ it                    it             eso | ello</code></pre>
                     First from the Spanish glossary, shared by every project, so one English word is one Spanish word in
                     every program.
                   </li>
-                  <li>The rest by Claude: the types in one call, then the other names in up to 6 calls at once.</li>
+                  <li>The rest by Claude: the types first, then the other names in a few calls at once.</li>
                   <li>
-                    They land in the project's dictionary,
-                    <code>&lt;Project&gt;.es.names.json5</code>, for a person to review.
+                    They land in the project's dictionary, <code>&lt;Project&gt;.es.names.json5</code>, for a person to
+                    review.
                   </li>
                 </ul>
               </li>
@@ -529,14 +483,18 @@ it                    it             eso | ello</code></pre>
               </li>
               <li>
                 <b>Fix-ups:</b> the translation is linted, its tests run, and each statement compiled beside its English
-                one (the shape check). A line that fails, couldn't be written, or compiles to a different program goes
-                back to Claude, in context, up to 3 rounds.
+                one. A line that fails, couldn't be written, or compiles to a different program goes back to Claude, in
+                context, a few rounds at most.
               </li>
             </ol>
             <ul>
               <li>
-                A line it can't write keeps its English, marked <code>// TODO: translate (why)</code>, and the command
-                exits 1.
+                Every translation comes back in plain Spell: <code>Card.spell</code> gives <a href="/app/spaces/@spell/examples/Solitario/Carta.es.spell" target="src-app-spaces-spell-examples-solitario-carta-es-spell"><code>Carta.es.spell</code></a>.
+                A page file is left out: its body is prose and markup.
+              </li>
+              <li>
+                A line it can't write keeps its English, marked <code>// TODO: translate</code>, and the command exits
+                1.
               </li>
               <li>
                 <code>&lt;ui-*&gt;</code> tags, their attributes and values become Spell UI's Spanish ones, and a style
@@ -547,32 +505,32 @@ it                    it             eso | ello</code></pre>
                 Spanish stay.
               </li>
             </ul>
+            <p>
+              With no Claude (<code>--no-ai</code>) and no glossary (<code>--cold</code>), every line is Spanish but its
+              names, <code>para number de 1 a 100</code>:
+            </p>
             <ui-accordion class="spell-code" appearance="styled">
               <ui-title
                 >spell translate @spell/examples/fizzbuzz --to es --no-ai --cold --out /tmp/fizzbuzz-es · shortened · 9
                 lines</ui-title
               >
               <ui-content>
-                <pre><code class="language-text">fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (1 files, 0.27s)
-  10 of 10 lines translated
+                <pre><code class="language-text">fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (3 files, ...)
+  131 of 131 lines translated
+  names:  /tmp/fizzbuzz-es/fizzbuzz.es.names.json5
   pre-calculated:  none (--cold)
-  shape:  7 of 7 statements compile to the same program as the English
-  7 lines still need a person, marked // TODO: translate:
-    FizzBuzz.es.spell:2  phrases "play fizzbuzz"
-    FizzBuzz.es.spell:3  names "number"
-    ...
-    FizzBuzz.es.spell:9  phrases "play fizzbuzz"</code></pre>
+  shape:  35 of 42 statements compile to the same program as the English
+  49 lines still need a person, marked // TODO: translate:
+...
+    FizzBuzz.es.spell:9  names "number"
+  17 problems left:</code></pre>
               </ui-content>
             </ui-accordion>
-            <p>
-              With no Claude (<code>--no-ai</code>) and no glossary (<code>--cold</code>), every line is Spanish but its
-              names: <code>para number de 1 a 100</code>.
-            </p>
           </ui-section>
 
           <ui-section
             id="claude-and-speed"
-            label="Asking Claude, and how fast"
+            label="Asking Claude, reviewing, and how fast"
             sticky
             collapsible
             dividing
@@ -581,133 +539,76 @@ it                    it             eso | ello</code></pre>
             <ul>
               <li>
                 Through the Claude API when <code>ANTHROPIC_API_KEY</code> is set, else through <code>claude -p</code>,
-                which says once that a key would be faster.
+                a little slower.
               </li>
               <li>
-                Either way an answer can only be JSON of the shape asked for, and the glossary rides in the system
-                prompt.
+                <code>--effort fast|balanced|best</code> says how much Claude spends;
+                <code>spell translate speedtest</code>
+                times whole runs.
               </li>
               <li>
-                <code>--effort fast|balanced|best</code> says how much each pass spends, <code>balanced</code> unless
-                asked. More thought made no better names, so today only <code>best</code>'s fix-ups think harder.
+                Solitaire: about 52 seconds from nothing at all (<code>--cold</code>), 31-41 from the shared glossary.
               </li>
               <li>
-                Solitaire through <code>claude -p</code>: about 52 s from nothing at all (<code>--cold</code>), 31-41 s
-                from the glossary; the todos example 10-16 s.
-              </li>
-              <li>
-                <code>spell translate speedtest</code> times it: each run on a scratch copy it deletes after, a table of
-                min, median and max, and how many names agree with Solitario's.
+                <code>--review</code> opens a page in the editor's side bar after the names pass, a row per name Claude
+                drafted: accept it, type over it, or pick one of its alternatives, and tick a name "for every project"
+                to put it in the shared glossary. With no Send in 30 minutes (<code>--review-timeout</code>), Claude's
+                names stand for the rest.
               </li>
               <li><code>--learn</code> adds a project's reviewed names to the glossary, for every project after it.</li>
+              <li>
+                Every option:
+                <a href="/README/cli.md" target="src-readme-cli-md">the command line's README</a>.
+              </li>
             </ul>
           </ui-section>
         </ui-section>
 
-        <ui-section id="7-why" label="7. Why it's built this way" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="gavel"></ui-icon>
-          <ul>
-            <li>
-              <b>A file's language is in its name, not the project file.</b> It began as one language per project; a
-              file's name won because one project can then mix an English library with Spanish files, each file parsed
-              by its own language's parser over the project's shared types.
-            </li>
-            <li>
-              <b>Compiled names are Spanish, accents kept,</b> over stripping accents or translating to English.
-              <ul>
-                <li>
-                  <code>esUnTrébol</code> is legal in JavaScript, TypeScript and Python 3, and the author can read it.
-                </li>
-                <li>
-                  Two ways of typing <code>é</code> are one name: names are normalized to one form of each accent.
-                </li>
-              </ul>
-            </li>
-            <li>
-              <b>Rules were refactored first, not overridden in Spanish.</b> Turning the English words in rule code into
-              word rules cost one big move, but a third language now costs words, not code.
-            </li>
-            <li>
-              <b>Agreement warns, never fails,</b> over strict Spanish where a wrong article is "Don't understand". A
-              strict parser would need gender at match time, which it doesn't have.
-            </li>
-            <li>
-              <b>The inflector is the pack's,</b> not util's, so a Spanish program never pays for English's. Spanish's
-              is a port of Python-Inflector's rules: the npm packages only pluralize, and Spell needs both ways.
-            </li>
-            <li>
-              <b>Unaccented keywords are accepted, and the editor fixes them,</b> over a quick fix on save: typing on an
-              English keyboard just works.
-            </li>
-            <li>
-              <b>Spell UI's tags start <code>es-</code>,</b> over the smoke page's earlier <code>ie-</code>.
-            </li>
-            <li>
-              <b>The pack fixer calls the <code>claude</code> command,</b> not an SDK: no key to configure, no new
-              dependency. The translator does too, or the Claude API by plain <code>fetch</code> when a key is set:
-              still no SDK.
-            </li>
-            <li>
-              <b>The translator writes lines by the rules, not by a model.</b> Each line is read by its English rule and
-              written by the same rule in Spanish, so it reads and compiles; Claude only names things and fixes the
-              lines that fail.
-            </li>
-            <li>
-              <b>The shape check compiles each statement in its scope,</b> and compares the two programs, names and
-              texts aside. Comparing the two parse trees was tried and dropped: on Solitaire it named 4 good lines, and
-              missed the one real mismatch, a loop that lost its variable.
-            </li>
-            <li>
-              <b>One glossary per language,</b> shared by every project: Spell as a corpus of programs, the same English
-              name the same Spanish name everywhere.
-            </li>
-            <li>
-              <b>One <code>--effort</code> flag, in no provider's terms;</b> each runner maps it to a model and how hard
-              it thinks.
-            </li>
-          </ul>
-        </ui-section>
-
-        <ui-section id="8-limits" label="8. Limits" sticky collapsible dividing open="false">
+        <ui-section id="8-limits" label="7. Limits" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="triangle exclamation"></ui-icon>
           <ul>
             <li>
-              <b>The parser's own messages speak Spanish,</b> examples and all: a Spanish project says
-              <code
-                >Di qué contiene "nombres-de-cartas", p. ej. "poner nombres-de-cartas a una nueva lista de texto"</code
-              >. Still English: the compiled code's comment for a JSX tag it can't draw, the project-level errors
-              (imports, exports, targets), and the runner console's "on line N".
+              <b>First drafts.</b> Spell UI's Spanish, the runtime's messages and the editor's words are not yet
+              reviewed by a native speaker.
             </li>
             <li>
-              <b>The docs teach English Spell.</b> The Spanish syntax table is generated, but no page reads it yet.
+              <b>Still English:</b>
+              <ul>
+                <li>the runtime's own names: <code>View</code>, <code>core.includes</code></li>
+                <li>what a developer reads at run time: assertions, thrown errors, type checks</li>
+                <li>
+                  the project-level compile errors (imports, exports, targets), and a few lines of the editor's Program
+                  Output (<code>Compiling</code>, <code>Started afresh</code>)
+                </li>
+                <li>the project prompts, the property editor's field names</li>
+                <li>an English library's names, imported into a Spanish file</li>
+              </ul>
             </li>
             <li>
-              <b>An English library imported into a Spanish project keeps its English names,</b> and a plural English
-              type name in a Spanish file is made singular by Spanish's rules: <code>una lista de cards</code> looks for
-              a type named Cards.
+              <b>Where the parser is lenient:</b> <code>ser</code> and <code>estar</code> are the same to it; a wrong
+              article is a warning, so a line that reads oddly to a Spanish speaker still compiles.
             </li>
-            <li>
-              <b><code>ser</code> and <code>estar</code> are the same to the parser.</b>
-            </li>
-            <li><b>Spell UI's Spanish, and the editor's, are a first draft,</b> for a native speaker to review.</li>
-            <li>
-              <b>Still English in a Spanish editor:</b> the project prompts, the property editor's field names.
-            </li>
-            <li><b>Developer-facing run-time messages stay English:</b> assertions, thrown errors, type checks.</li>
             <li>
               <b>A translation reads differently from a person's.</b> Translated cold, about 7 in 10 of Solitaire's
               names match the hand-made Solitario's (<code>reina</code> where it says <code>dama</code>): a first draft
               that runs, for a Spanish speaker to review. Only English into Spanish has been tried.
             </li>
             <li>
-              <b>Not yet:</b> a phrase like <code>which are not a face card</code> inside a where-clause, reading a
-              Spell file back in another language, and a third language (Norwegian and Portuguese are next, with help
-              from friends).
+              <b>Not yet:</b>
+              <ul>
+                <li>
+                  the core contract test, which runs each test project under every target and compares, runs Solitaire
+                  in Python and not Solitario yet
+                </li>
+                <li>the docs teach English Spell: the Spanish syntax table is generated, but no page reads it yet</li>
+                <li>a file read back in the other language, as you read it</li>
+                <li>a third language: Norwegian and Portuguese are next, with help from friends; neither is started</li>
+              </ul>
             </li>
           </ul>
         </ui-section>
 
-        <ui-section id="9-where-things-are" label="9. Where things are" sticky collapsible dividing open="false">
+        <ui-section id="9-where-things-are" label="8. Where things are" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="folder"></ui-icon>
           <ui-table celled padding="compact" appearance="striped">
             <table>
@@ -719,145 +620,58 @@ it                    it             eso | ello</code></pre>
               </thead>
               <tbody>
                 <tr>
-                  <td>the packs, and the Spanish glossary</td>
+                  <td>the language packs, and the Spanish glossary</td>
                   <td>
-                    <a href="/spell-parser/src/spell/languages/" target="src-spell-parser-src-spell-languages"
-                      ><code title="spell-parser/src/spell/languages/">languages/</code></a
-                    >,
-                    <a
-                      href="/spell-parser/src/spell/languages/es/GLOSSARY.md"
-                      target="src-spell-parser-src-spell-languages-es-glossary-md"
-                      ><code title="spell-parser/src/spell/languages/es/GLOSSARY.md">GLOSSARY.md</code></a
-                    >
+                    <a href="/parser/src/spell/languages/" target="src-parser-src-spell-languages"><code>parser/src/spell/languages</code></a>,
+                    <a href="/parser/src/spell/languages/es/GLOSSARY.md" target="src-parser-src-spell-languages-es-glossary-md"><code>parser/src/spell/languages/es/GLOSSARY.md</code></a>
                   </td>
                 </tr>
                 <tr>
-                  <td>the rules' words, per folder and language</td>
-                  <td>
-                    <a href="/spell-parser/src/spell/rules/" target="src-spell-parser-src-spell-rules"
-                      ><code title="spell-parser/src/spell/rules/">rules/</code></a
-                    >, a <code>&lt;folder&gt;.&lt;lang&gt;.ts</code> each
-                  </td>
+                  <td>the rules' words, a file per module and language</td>
+                  <td><a href="/parser/src/spell/rules/" target="src-parser-src-spell-rules"><code>parser/src/spell/rules</code></a>, a <code>&lt;module&gt;.es.ts</code> each</td>
                 </tr>
                 <tr>
                   <td>the Spanish example</td>
-                  <td>
-                    <a
-                      href="/spell-app/spaces/@spell/examples/Solitario/"
-                      target="src-spell-app-spaces-spell-examples-solitario"
-                      ><code title="spell-app/spaces/@spell/examples/Solitario/">@spell/examples/Solitario</code></a
-                    >
-                  </td>
+                  <td><a href="/app/spaces/@spell/examples/Solitario/" target="src-app-spaces-spell-examples-solitario"><code>app/spaces/@spell/examples/Solitario</code></a></td>
                 </tr>
                 <tr>
                   <td>the pack check and fix</td>
-                  <td>
-                    <a href="/spell-parser/src/cli/packsCommand.ts" target="src-spell-parser-src-cli-packscommand-ts"
-                      ><code title="spell-parser/src/cli/packsCommand.ts">spell translate check | fix [--ai]</code></a
-                    >
-                  </td>
+                  <td><a href="/parser/src/cli/packsCommand.ts" target="src-parser-src-cli-packscommand-ts"><code>parser/src/cli/packsCommand.ts</code></a>: <code>spell translate check | fix [--ai]</code></td>
                 </tr>
                 <tr>
                   <td>the translator</td>
                   <td>
-                    <a href="/spell-parser/src/spell/translate/" target="src-spell-parser-src-spell-translate"
-                      ><code title="spell-parser/src/spell/translate/">translate/</code></a
-                    >, its passes;
-                    <a
-                      href="/spell-parser/src/cli/translateProject.ts"
-                      target="src-spell-parser-src-cli-translateproject-ts"
-                      ><code title="spell-parser/src/cli/translateProject.ts">spell translate</code></a
-                    >;
-                    <a
-                      href="/spell-parser/src/spell/languages/es/glossary.json5"
-                      target="src-spell-parser-src-spell-languages-es-glossary-json5"
-                      ><code title="spell-parser/src/spell/languages/es/glossary.json5">glossary.json5</code></a
-                    >
+                    its passes, <a href="/parser/src/spell/translate/" target="src-parser-src-spell-translate"><code>parser/src/spell/translate</code></a>; the command,
+                    <a href="/parser/src/cli/translateProject.ts" target="src-parser-src-cli-translateproject-ts"><code>parser/src/cli/translateProject.ts</code></a>; the names shared by every project,
+                    <a href="/parser/src/spell/languages/es/glossary.json5" target="src-parser-src-spell-languages-es-glossary-json5"><code>parser/src/spell/languages/es/glossary.json5</code></a>
                   </td>
                 </tr>
                 <tr>
-                  <td>the run-time messages</td>
+                  <td>the runtime's messages</td>
                   <td>
-                    <a href="/spell-parser/src/core/messages.ts" target="src-spell-parser-src-core-messages-ts"
-                      ><code title="spell-parser/src/core/messages.ts">core.message()</code></a
-                    >; Python's
-                    <a
-                      href="/spell-parser/src/py/core/spell_core/messages.py"
-                      target="src-spell-parser-src-py-core-spell-core-messages-py"
-                      ><code title="spell-parser/src/py/core/spell_core/messages.py">spell_core</code></a
-                    >
+                    <a href="/parser/src/core/messages.ts" target="src-parser-src-core-messages-ts"><code>parser/src/core/messages.ts</code></a>; Python's,
+                    <a href="/parser/src/py/core/spell_core/messages.py" target="src-parser-src-py-core-spell-core-messages-py"><code>parser/src/py/core/spell_core/messages.py</code></a>
                   </td>
                 </tr>
                 <tr>
                   <td>Spell UI's Spanish</td>
                   <td>
                     <code>UI&lt;Name&gt;.es.ts</code> beside each component,
-                    <a
-                      href="/spell-ui/src/components/components.es.ts"
-                      target="src-spell-ui-src-components-components-es-ts"
-                      ><code title="spell-ui/src/components/components.es.ts">components.es.ts</code></a
-                    >
+                    <a href="/ui/src/components/components.es.ts" target="src-ui-src-components-components-es-ts"><code>ui/src/components/components.es.ts</code></a> for what many share
                   </td>
                 </tr>
                 <tr>
-                  <td>the editor's texts</td>
-                  <td>
-                    <a href="/spell-app/src/app/ui/AppTexts.es.ts" target="src-spell-app-src-app-ui-apptexts-es-ts"
-                      ><code title="spell-app/src/app/ui/AppTexts.es.ts">AppTexts.es.ts</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>the language server's labels</td>
-                  <td>
-                    <a href="/spell-app/src/lsp/LspTexts.es.ts" target="src-spell-app-src-lsp-lsptexts-es-ts"
-                      ><code title="spell-app/src/lsp/LspTexts.es.ts">LspTexts.es.ts</code></a
-                    >
-                  </td>
-                </tr>
-                <tr>
-                  <td>VS Code's keyword lists, written from the packs</td>
-                  <td>
-                    <a href="/spell-app/scripts/vscode-grammar.ts" target="src-spell-app-scripts-vscode-grammar-ts"
-                      ><code title="spell-app/scripts/vscode-grammar.ts">vscode-grammar.ts</code></a
-                    >
-                  </td>
+                  <td>the editor's and the language server's words</td>
+                  <td><a href="/app/src/app/ui/AppTexts.es.ts" target="src-app-src-app-ui-apptexts-es-ts"><code>app/src/app/ui/AppTexts.es.ts</code></a>, <a href="/app/src/lsp/LspTexts.es.ts" target="src-app-src-lsp-lsptexts-es-ts"><code>app/src/lsp/LspTexts.es.ts</code></a></td>
                 </tr>
               </tbody>
             </table>
           </ui-table>
         </ui-section>
 
-        <ui-section id="10-history" label="10. History" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="clock rotate left"></ui-icon>
-          <ui-accordion class="spell-aside" appearance="styled">
-            <ui-title>The epic's phases</ui-title>
-            <ui-content>
-              <ul>
-                <li>P1 Unicode words; P2 the identifier blacklist, from 105 words to 8</li>
-                <li>P3 the language pack, English first; P4 a project's language</li>
-                <li>P5-P6 Spanish, the whole grammar; P7 the pack check and fix; P8 article agreement</li>
-                <li>P9 Spell UI in Spanish; P10 the editor; P12 run-time messages; P13 the app in Spanish</li>
-                <li>P14 names with grammar words; P15 list names; P17 the parser's messages in Spanish</li>
-                <li>P18 the test projects moved; P19 a file's language from its name; P20 one-sided drawables</li>
-                <li>P11 Solitario; P21 loose ends; P22 card checks and test results</li>
-                <li>P23 the gaps a translation found; P24 <code>spell translate</code>, line by line</li>
-                <li>
-                  P25 names first, then lines, then fix-ups; P26 the shape check and the shared glossary; P27 the Claude
-                  API
-                </li>
-                <li>
-                  P28 the todos example, and <code>is</code> compiles to <code>===</code>; P29 <code>--cold</code> and
-                  translate-time
-                </li>
-              </ul>
-            </ui-content>
-          </ui-accordion>
-        </ui-section>
-
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">Last checked 2026-10-23 against <code>main</code>.</p>
+          <p class="meta">Updated 2026-11-21.</p>
         </footer>
       </main>
     </div>
