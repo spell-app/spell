@@ -720,8 +720,10 @@ card.turnOver()
     played.shadowRoot!.querySelector<HTMLElement>("[part=back]")!.click()
     await waitFor(() => discards() > 1)
     // ... and they follow as the game plays:  the card played from the stock is face up, on the discards
-    await waitFor(() => played.getAttribute("direction") === "up")
-    await waitFor(() => played.getAttribute("pile") === "DiscardPile#discard-pile")
+    // - the discards draw an element of their own for it:  the stock's is let go as it leaves (epic `solid-2-final` I34)
+    const moved = () => host.querySelector(`test-project-discard-pile > [id="${played.id}"]`)
+    await waitFor(() => moved()?.getAttribute("direction") === "up")
+    await waitFor(() => moved()?.getAttribute("pile") === "DiscardPile#discard-pile")
   })
 
   test('a viewable list\'s frame:  its cards in its <children/>, a child written in="header" in its <children name="header"/>', async () => {
@@ -1559,6 +1561,9 @@ describe("<SpellAppRunner>, an app's widget defaults (`<ui-defaults>`)", () => {
   async function compiledApp(files: { path: string; contents: string }[], imports?: P.Scope) {
     await import("spell/app/spaces/models/spellUIPack")
     const { compiledSpellProject } = await import("spell/parser/spell/test/parseSpellProject")
+    const { SP } = await import("spell/parser/spell")
+    // as a project does before it parses:  a language past English loads on first use
+    await SP.Language.loadFor(files.map(({ path }) => path))
     const project = compiledSpellProject(files, { parentScope: imports })
     expect(project.code).not.toContain("PARSE ERROR")
     // a project with no imports compiles with `h` alone here:  the rest of `@spell/core`, as a compile writes it

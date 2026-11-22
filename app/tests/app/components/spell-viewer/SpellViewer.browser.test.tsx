@@ -247,6 +247,9 @@ describe("<spell-viewer>'s layout:  the spell in its markup (P9, Q11, Q12, Q18)"
 
   test("a <spell> block's handlers are read by spell's own `on` rule:  Spanish's `al` and `cuando` too", async () => {
     const { LayoutSpell } = await import("spell/app/app/runner/LayoutSpell")
+    const { SP } = await import("spell/parser/spell")
+    // as the runner does for a Spanish program's layout (`LayoutSpell.loadLanguagesOf()`):  it loads on first use
+    await SP.Language.loadFor(["es"])
     expect(LayoutSpell.handlersIn("al carta elegida: imprimir 1\ncuando clic en carta\n  imprimir 2")).toEqual([
       { event: "carta-elegida", body: "imprimir 1" },
       { event: "clic-en-carta", body: "imprimir 2" }

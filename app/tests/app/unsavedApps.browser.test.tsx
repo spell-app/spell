@@ -119,9 +119,13 @@ describe("leaving a project made from a start card (`editor.leaveProject()`)", (
 
   test("untouched, but an edit is waiting for AutoSave:  it's kept first, so it counts as a change", async () => {
     ownProjects = [{ path: own("counter"), unsaved: "untouched" }]
-    const file = { isDirty: true, save: vi.fn(async () => (ownProjects[0]!.unsaved = "changed")) }
+    // its project takes what's typed into its files first (`takeWaitingText()`, epic `solid-2-final` P9)
+    const takeWaitingText = vi.fn()
+    const save = vi.fn(async () => (ownProjects[0]!.unsaved = "changed"))
+    const file = { isDirty: true, project: { takeWaitingText }, save }
     const asked = answer(true)
     await editor.leaveProject(project("counter", [file]))
+    expect(takeWaitingText).toHaveBeenCalledBefore(save)
     expect(file.save).toHaveBeenCalledOnce()
     expect(asked).toHaveBeenCalledOnce()
   })

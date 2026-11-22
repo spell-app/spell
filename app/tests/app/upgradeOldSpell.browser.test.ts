@@ -52,7 +52,9 @@ function projectOf(path: string, text: string, spellVersion?: string) {
     compiledFrom: "compile",
     spellFiles: [] as unknown[],
     files: [] as unknown[],
-    updatedContentsFor: () => {}
+    updatedContentsFor: () => {},
+    // nothing typed is waiting:  saving asks first (`takeWaitingText()`, epic `solid-2-final` P9)
+    takeWaitingText: () => {}
   }
   const file = {
     path: `${path}/Cards.spell`,

@@ -4,6 +4,7 @@ import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
+import { SP } from "spell/parser/spell"
 import { PropertyLayouts } from "spell/ui/property"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { Inspector, InspectorColumn, InspectorPane, isThing, itemsOf, uiReady } from "spell/app/app/solid"
@@ -643,7 +644,9 @@ describe("things inside things", () => {
     expect(Inspector.thingLabel(new StockPile(), "", null)).toBe("Stock Pile")
   })
 
-  test('a thing named in its language\'s own word:  Spanish\'s `su "nombre" es ...` titles it `Carta "<nombre>"`', () => {
+  test('a thing named in its language\'s own word:  Spanish\'s `su "nombre" es ...` titles it `Carta "<nombre>"`', async () => {
+    // as opening a Spanish project does:  a language past English loads on first use
+    await SP.Language.loadFor(["es"])
     class Carta {}
     const carta = Object.assign(new Carta(), { nombre: "dama de espadas" })
     expect(Inspector.nameOf(carta, ["es"])).toBe("dama de espadas")
