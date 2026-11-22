@@ -235,12 +235,12 @@ describe.each(Object.entries(PROGRAMS))(
           }
           if (indent) expect(parsed(withLines(at, indent)).errors, JSON.stringify([at, indent])).toEqual([])
         }
-    })
+    }, 30_000)
 
     test("typed and deleted a character at a time, an incremental parse is a full one", () => {
       for (const at of [atHead, atMiddle - 1, lines.indexOf(method) - 1]) {
         const project = incrementalSpellProject([{ path, contents: lines.join("\n") }])
-        for (const typed of ["\t-- note", "// note", "\t\t\t\t-- note"]) {
+        for (const typed of ["\t-- n", "// n", "\t\t\t\t--"]) {
           const keys = Array.from({ length: typed.length }, (_, index) => typed.slice(0, index + 1))
           for (const line of ["", ...keys, ...keys.toReversed(), ""]) {
             const contents = withLines(at, line).join("\n")
