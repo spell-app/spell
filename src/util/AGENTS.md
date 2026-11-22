@@ -26,6 +26,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       (`as: "github"`, accented letters kept)
     - `withoutAccents(text, { keep })`, `escapeRegExp()`, `escapeHTML()`, `dedent()`, `indented(text, indent)`
   - `number.ts` -- `clamp()`, and `kb()`:  a size in KB, of 1024 bytes
+  - `hash.ts` -- `textHash()`, `stableHash()`:  a hash of text, or of any JSON value its keys in any order, the same in a
+    page and in node, synchronous (epic `solid-2-final` P15:  what names a drawing on the page server and in a page);
+    by file, in no barrel of Spell UI's
   - `LoadOnce.ts` -- a load per key, every caller the same promise, with a choice of what a failure does;
     `LoadOnce.abortable()` ends one caller's wait (Spell UI's and the places', moved down by epic `data`, J12)
   - `MostRecent.ts` -- the most recent N things used, newest first, the oldest let go with a callback

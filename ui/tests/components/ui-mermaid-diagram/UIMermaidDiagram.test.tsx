@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { E } from "spell/ui/core"
+import { GivenDrawings } from "spell/ui/elements/GivenDrawings"
 import { UI } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -320,13 +320,13 @@ describe("<ui-markdown> mermaid blocks", () => {
 describe("<ui-mermaid-diagram> drawn on the page server", () => {
   afterEach(() => {
     document.querySelectorAll("script[data-spell-drawings]").forEach((table) => table.remove())
-    E.GivenDrawings.reset()
+    GivenDrawings.reset()
   })
 
   /** A page's table holding one drawing of `FLOWCHART`, in the light, its look `look`. */
   function giveDrawing(look: string) {
     const settings = { theme: "spell", scheme: "light", look: "classic", layout: "auto", seed: 1 }
-    const key = E.GivenDrawings.keyFor({ kind: "mermaid", settings, text: FLOWCHART })
+    const key = GivenDrawings.keyFor({ kind: "mermaid", settings, text: FLOWCHART })
     const table = document.createElement("script")
     table.type = "application/json"
     table.setAttribute("data-spell-drawings", "")

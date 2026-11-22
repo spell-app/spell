@@ -2,6 +2,8 @@ import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell/ui/core"
+// Import directly:  in no family's barrel nor `core`, so it's in the drawing families' chunks, not every page's
+import { GivenDrawings } from "spell/ui/elements/GivenDrawings"
 import { codeVocabulary } from "./UICode.en"
 import { CodeHighlighter } from "./CodeHighlighter"
 import { CodeLines } from "./CodeLines"
@@ -46,7 +48,7 @@ export class DOMCodeElement extends E.DOMLoadableElement<UICode> {
  *   - a language `UI.code` knows (a page's own, e.g. spell's):  its own highlighter
  *   - one that draws its code whole (`CodeLanguage.draw`, spell's bubbly look):  that drawing, in place of the
  *     `<pre>`, with the sheet it hands over;  unless `line-numbers` or `wrap` asks for lines
- * - DRAWN AHEAD by the page server when it served the page (`E.GivenDrawings`, kind `code`):  colours (or a
+ * - DRAWN AHEAD by the page server when it served the page (`GivenDrawings`, kind `code`):  colours (or a
  *   language's drawing) it was given for THIS text and these settings show with nothing loaded, no highlight.js, no
  *   spell parser;  its first colouring asks the page server, when it draws code, before loading either
  *   - text edited since, or a server that can't:  coloured in the page, as below
@@ -158,7 +160,7 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
   }
 
   /**
-   * The page server's colours for `code` as `language` (`E.GivenDrawings`):  the page's, else asked for on the
+   * The page server's colours for `code` as `language` (`GivenDrawings`):  the page's, else asked for on the
    * first colouring;  `undefined` for none, and the page colours it.
    * - plain text never:  nothing loads for it anyway
    */
@@ -167,7 +169,7 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
     const ask = !this.hasAsked
     this.hasAsked = true
     const settings = { language: language ?? "", drawing: this.isDrawable }
-    const given = await E.GivenDrawings.find({ kind: CODE_DRAWINGS, settings, text: code }, { ask })
+    const given = await GivenDrawings.find({ kind: CODE_DRAWINGS, settings, text: code }, { ask })
     if (!given) return undefined
     const data = given.data ?? {}
     return {
@@ -260,7 +262,7 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
 export interface UICode extends E.AttributeValues<typeof codeVocabulary> {}
 
-/** The page server's kind of drawing for code (`E.GivenDrawings`):  Spell UI's `CodeOnServer`, the app's Spell. */
+/** The page server's kind of drawing for code (`GivenDrawings`):  Spell UI's `CodeOnServer`, the app's Spell. */
 const CODE_DRAWINGS = "code"
 
 /** Class of each line's span inside `<code>`. */

@@ -684,7 +684,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   serves with what it has;  the elements' half is Spell UI's `GivenDrawings`
 - **Use it when:**  an element draws something that doesn't change from page to page with a heavy engine
   (Mermaid, highlight.js, Spell's parser):  add a drawer from the folder's route module, and have the element look it
-  up first (`E.GivenDrawings.find()`)
+  up first (`GivenDrawings.find()`, `spell/ui/elements/GivenDrawings`)
 - **Flag:**  a second cache of drawn markup, a page server hook that draws, an element fetching its own pre-drawn copy
 - **Copies:**  none.  Its drawers:  Spell UI's `CodeOnServer`, `MermaidOnServer`;  the app's `SpellOnServer`
   - NOT the static render (`spell/ui/static`):  it turns elements into plain markup for search engines, no shadow DOM;

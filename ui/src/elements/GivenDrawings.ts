@@ -1,3 +1,4 @@
+import { stableHash } from "spell/util/hash"
 import { E } from "spell/ui/core"
 
 /****************
@@ -16,11 +17,13 @@ import { E } from "spell/ui/core"
  * - What it knows of the page server comes from `SPELL_SERVER.drawings` (`SRV.DrawingsConfig`):  its address, its
  *   kinds, its tables' selector.  It imports nothing of the server.
  * - STATIC and instance-free:  ONE set of tables per page, shared by every element.
+ * - NOT in `spell/ui/core`:  the families that draw ahead import it by file, so it's in their lazy chunks, never
+ *   every page's first load (`stableHash()` too, by file).
  ****************/
 export class GivenDrawings {
   /** The key that names `item`:  as the page server's `SRV.Drawings.keyFor()`. */
   static keyFor(item: DrawingItem): string {
-    return E.stableHash([item.kind, item.settings, item.text])
+    return stableHash([item.kind, item.settings, item.text])
   }
 
   /**
@@ -47,7 +50,7 @@ export class GivenDrawings {
 
   /** What an answer is kept under:  the item's key, its `hints` too (as the page server's `cacheKeyFor()`). */
   private static answerKeyFor(item: DrawingItem): string {
-    return item.hints ? E.stableHash([item.kind, item.settings, item.text, item.hints]) : GivenDrawings.keyFor(item)
+    return item.hints ? stableHash([item.kind, item.settings, item.text, item.hints]) : GivenDrawings.keyFor(item)
   }
 
   /**
