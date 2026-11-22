@@ -24,6 +24,8 @@ export class TypingMeasure {
       await browser.load()
       const { page } = browser
       await page.evaluate(showFileAndWait, typed.path)
+      // its project started:  a big one draws for a minute on the phone, which would be measured as typing
+      await browser.waitReadyAndQuiet({ quietMs: 3000, capMs: 180_000 })
       await page.waitForTimeout(typed.settle)
       await page.evaluate(focusLine, typed.line)
       await page.evaluate(watchFrames)
@@ -35,6 +37,10 @@ export class TypingMeasure {
       }
       await page.waitForTimeout(2000)
       const after = await browser.metricsAfterGC()
+      // the keys went into the code:  else nothing here measures typing
+      const typedIntoCode = await page.evaluate(lineEndsWith, { number: typed.line, tail: TYPED.slice(0, 20) })
+      if (!typedIntoCode)
+        throw new Error(`TypingMeasure:  the keys didn't reach the code, line ${typed.line} of ${typed.path}`)
       const { frames, events } = await page.evaluate(() => {
         const holder = window as unknown as PerfWindow & { __frames: number[] }
         return { frames: holder.__frames, events: holder.__perf.events }
@@ -81,7 +87,7 @@ export type TypingFile = {
   path: string
   /** the line, from 1:  a comment's, so the program still compiles */
   line: number
-  /** how long the editor settles once it's shown, msec:  a big file's project compiles first */
+  /** how long the editor settles once it's shown and quiet, msec */
   settle: number
 }
 
@@ -89,7 +95,7 @@ export type TypingFile = {
 export const CARD_FILE: TypingFile = { path: "@spell/examples/Solitaire/Card.spell", line: 2, settle: 800 }
 
 /** The Spell UI guide's longest page (2,731 lines), its line 4:  its heading's text, so the page still compiles. */
-export const BIG_FILE: TypingFile = { path: "@spell/guides/SpellUI/Table/Examples.spell", line: 4, settle: 8000 }
+export const BIG_FILE: TypingFile = { path: "@spell/guides/SpellUI/Table/Examples.spell", line: 4, settle: 1000 }
 
 /** How many keys are typed. */
 const KEYS = 100
@@ -115,10 +121,24 @@ async function showFileAndWait(path: string): Promise<void> {
 }
 
 /**
- * In the page:  the caret at the end of line `number` of the code pane, focused.
+ * In the page:  does line `number` of the code pane hold `tail`?
  * - MUST stay self-contained:  Playwright sends its source
  */
-function focusLine(number: number): void {
+function lineEndsWith({ number, tail }: { number: number; tail: string }): boolean {
+  const { view } = (
+    window as unknown as {
+      editor: { shownCodeEditor: { view: { state: { doc: { line(number: number): { text: string } } } } } }
+    }
+  ).editor.shownCodeEditor
+  return view.state.doc.line(number).text.includes(tail)
+}
+
+/**
+ * In the page:  the caret at the end of line `number` of the code pane, focused, waiting till it keeps the focus
+ * (at most 10 seconds):  a notice that shows as a project opens takes it.
+ * - MUST stay self-contained:  Playwright sends its source
+ */
+async function focusLine(number: number): Promise<void> {
   const { view } = (
     window as unknown as {
       editor: {
@@ -127,6 +147,7 @@ function focusLine(number: number): void {
             state: { doc: { line(number: number): { to: number } } }
             dispatch(spec: { selection: { anchor: number }; scrollIntoView?: boolean }): void
             focus(): void
+            hasFocus: boolean
           }
         }
       }
@@ -134,7 +155,11 @@ function focusLine(number: number): void {
   ).editor.shownCodeEditor
   const line = view.state.doc.line(number)
   view.dispatch({ selection: { anchor: line.to }, scrollIntoView: true })
-  view.focus()
+  const started = Date.now()
+  do {
+    view.focus()
+    await new Promise((resolve) => setTimeout(resolve, 500))
+  } while (!view.hasFocus && Date.now() - started < 10_000)
 }
 
 /**
