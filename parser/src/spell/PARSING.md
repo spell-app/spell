@@ -3045,6 +3045,13 @@ sidebars any of them opens.
   - Why:  as the program runs, the Thing Explorer knows which heading's code made each thing.
   - NOT in a plain block, e.g. a rule test's.
   - NOT for a heading with no text, e.g. `##########`.
+- A BUILT site's code leaves all of that out (`P.WriterOptions.compiledFor`, `"built"`;  epic `solid-2-final` P11):
+  - `spell compile`, a built site, the cloud:  no comments, docstrings or banners, no line's spell above its code,
+    no `declaredAt` marks, no `core.heading()` (Public Servers:  30.8 => 18.5 KB gzip)
+  - kept:  `/*! ... */` comments (a declaration's marker is data) and a parse error's
+  - the editor's own compile, the default, keeps everything;  only the running target is built so
+    (a library's `.lib.ts` is source people read)
+  - the examples' `<Project>.built.snapshot.js` pins it
 - A line of the program's START, at a FILE's top level, runs only when the program starts afresh
   (epic `drawable-thing` P17):  `if (!core.isCarryingOver) game.start()`.
   - Its lines:

@@ -124,6 +124,7 @@ export class CliSession {
    *   - `force` (`spell compile --force`):  recompiles them all
    *   - either way, what they import first
    * - Shows each on `status`, if given.
+   * - Compiled as a built site's (`compiledFor: "built"`), as `spell compile` compiles.
    */
   async compileImports(
     project: SP.SpellProject,
@@ -147,7 +148,8 @@ export class CliSession {
       if (!why) continue
 
       const row = status?.start(`${imported.projectId}  (imported by ${project.projectName})`)
-      await imported.compile()
+      // read by what imports it, never shown in an editor:  no editor text (`compiledFor`)
+      await imported.compile(undefined, { compiledFor: "built" })
       const wrote = `wrote ${this.relative(imported.outputFile.location.serverPath)}`
       if (row) this.report(status!, row, imported, { note: `${why} · ${wrote}` })
     }

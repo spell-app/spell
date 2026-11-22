@@ -417,6 +417,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - `save: "later"` doesn't write it either, but remembers to:  `saveUnsavedOutput()` writes it, e.g. on the editor's
    *   Save, so a compile as typing pauses sends nothing to the server (epic `solid-2-final` P9).
    * - `targets`:  compile to these, this run only, instead of our project file's -- see `targets`.
+   * - `compiledFor`:  who the running code is for, this run only -- see `compiledForThisRun`.
    * - With a compile cache installed (`compileCache`, the editor's), asks it first, on a project not parsed yet:
    *   - found:  takes what it holds and saves it as a compile would, without parsing or compiling a line
    *     (`compiledFrom` says `"cache"`)
@@ -427,7 +428,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   async compile(
     parser?: P.Scope,
-    { save = true, targets, cached = true }: { save?: SaveCompiled; targets?: string[]; cached?: boolean } = {}
+    {
+      save = true,
+      targets,
+      cached = true,
+      compiledFor = "editor"
+    }: { save?: SaveCompiled; targets?: string[]; cached?: boolean; compiledFor?: P.CompiledFor } = {}
   ): Promise<unknown> {
     this.parser.cancel()
     this.compiler.cancel()
@@ -444,6 +450,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     }
     this.saveCompiled = save
     this.targetsThisRun = targets
+    this.compiledForThisRun = compiledFor
     const run = ++this.compileRun
     const cache = parser || !cached ? undefined : SpellProject.compileCache
     // the key of what we're about to compile, worked out first:  the text may change while it compiles
@@ -572,6 +579,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /** Targets the running `compile()` was asked for, instead of the project file's.  Plain field, as `saveCompiled`. */
   targetsThisRun: string[] | undefined
+
+  /**
+   * Who the running `compile()`'s running code is for (`P.WriterOptions.compiledFor`):
+   * - `"editor"`, the default:  the editor's own compile, with each line's spell, `declaredAt` marks and headings
+   * - `"built"`:  a built site, the cloud, `spell compile`, without them (epic `solid-2-final` P11)
+   * - Only the running target's code (`SP.RUNNING_TARGET`):  another's, a library's `.lib.ts` say, keeps its comments.
+   * - Plain field, as `saveCompiled`.
+   */
+  compiledForThisRun: P.CompiledFor = "editor"
 
   /**
    * Each place's deployment named `deployment`, from our project file's `places`, by the place's name as compiled code
@@ -929,13 +945,18 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                     target.writer instanceof P.JSWriter && target.can.run !== false
                       ? new P.SourceMarks(SpellProject.sourcePlaceOf, SpellProject.partPlaceOf)
                       : undefined
+                  // the running code alone is ever built without the editor's text:  see `compiledForThisRun`
+                  const options =
+                    target.name === SP.RUNNING_TARGET
+                      ? { ...this.writerOptions(), compiledFor: this.compiledForThisRun }
+                      : this.writerOptions()
                   const combine = () =>
                     SpellProject.combineCompiled(
                       parts,
                       target.writer,
                       header,
                       this.scope,
-                      this.writerOptions(),
+                      options,
                       this.mainFileIn(files)
                     )
                   const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
