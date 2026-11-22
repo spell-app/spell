@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { counterVocabulary } from "./UICounter.en"
 
 import counterCSS from "./UICounter.css?inline"
@@ -16,7 +16,7 @@ import counterCSS from "./UICounter.css?inline"
  *   4. a click:  `requestChange()` sends a cancelable `ui-change`, then writes the count
  *   5. a `:state()`:  `@E.cssState("at-max")`, and a key listener with `@E.on`
  * - A GUIDE-ONLY element (`guides/custom-elements/experiments/`):  built into the guide's own script with
- *   `packages/docs/tools/bundle-experiment.ts`, on the page's Spell UI.
+ *   the epic folder's `src/tools/bundle-experiment.ts`, on the page's Spell UI.
  ****************/
 export class UICounter extends E.UIComponent<typeof counterVocabulary> {
   @E.proto static vocabulary = counterVocabulary

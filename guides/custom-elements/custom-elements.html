@@ -3,11 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Custom Elements in Spell</title>
+    <title>Custom Elements</title>
     <meta
       name="description"
-      content="How a Spell UI element works, for someone new to custom elements:  the platform in brief, the DOM element and its component, the decorators, every hook, events, and a counter built step by step, with live elements to click."
+      content="How a Spell UI element works, for someone new to custom elements:  the platform in brief, the DOM element and its component, a live counter built step by step, a real button, and why it's built this way;  the full reference is the element README."
     />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="Elements and UI" />
     <meta name="spell-voice" content="readme 2026-10-22" />
     <meta name="spell-saga" content="spell-ui" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
@@ -88,11 +90,11 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
-          <ui-breadcrumb selected>Custom Elements in Spell</ui-breadcrumb>
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Custom Elements</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
-          ><header class="spell-page-head"><h1>Custom Elements in Spell</h1></header></ui-sticky
+          ><header class="spell-page-head"><h1>Custom Elements</h1></header></ui-sticky
         >
         <p class="lede">
           Click <b>+1</b> on the <code>&lt;ui-counter max="5"&gt;</code> in <a href="#ui-counter">section 4</a> five
@@ -107,23 +109,16 @@
           write or change a Spell UI component, new to custom elements or not.
         </p>
         <ui-list class="spell-meta">
-          <ui-item icon="map"
-            ><b>Epic page:</b>
-            <a href="/epics/spell-element/spell-element.plan.html" target="spell-element"
-              >epic spell-element</a
-            ></ui-item
-          >
           <ui-item icon="user"
-            >Written for: whoever writes <code>ui</code> components (Owen, agents, contributors); no custom-element
-            knowledge assumed</ui-item
-          >
-          <ui-item icon="flag"
-            >Status: <ui-label size="mini" color="green">built</ui-label> (epic spell-element, P6; brought up to date in
-            P13)</ui-item
+            >Written for: whoever writes Spell UI components, or elements of their own on the same base; no
+            custom-element knowledge assumed</ui-item
           >
           <ui-item icon="flask"
-            >Checked on: branch <code>spell-element</code>, 2026-10-10; every code block is quoted from the file it
-            names</ui-item
+            >Checked: 2026-11-21, every code block against the file it names, the counter rebuilt that day</ui-item
+          >
+          <ui-item icon="book open"
+            >The reference beside it: <a href="/README/element.md" target="src-readme-element-md">README/element</a>,
+            the element base in full</ui-item
           >
         </ui-list>
 
@@ -131,7 +126,8 @@
           <ui-icon slot="icon" name="lightbulb"></ui-icon>
           <p>
             Every Spell UI tag (<code>&lt;ui-button&gt;</code>, <code>&lt;ui-select&gt;</code> ...) is a custom element:
-            a tag of our own, which the browser runs like one of its own.
+            a tag of our own, which the browser runs like one of its own. So are the epic pages' tags, and every view a
+            Spell program draws.
           </p>
           <ul>
             <li>
@@ -156,9 +152,13 @@
             </li>
             <li>
               A <b>lint guard</b> keeps component files on the decorators: it flags an effect, listener or timer written
-              by hand (<a href="#decorator-lint">6</a>).
+              by hand.
             </li>
             <li>The components draw with Solid 2; this guide only says what's ours, and links Solid's own rules.</li>
+            <li>
+              This page is the tutorial. The reference, every decorator and hook, is
+              <a href="/README/element.md" target="src-readme-element-md">README/element</a>.
+            </li>
           </ul>
           <ui-message state="info" heading="How to read it">
             <ul>
@@ -167,18 +167,19 @@
                 in <a href="#ui-counter">4</a>.
               </li>
               <li>
-                Writing a component today: <a href="#ui-button">5. A real one</a>, then
-                <a href="#decorators">6. The decorators</a> and <a href="#lifecycle">7. The life of an element</a>.
+                Writing a component today: <a href="#ui-button">5. A real one</a>, then the reference (<a
+                  href="#reference"
+                  >7</a
+                >).
               </li>
               <li>
                 The live examples are real elements: click them, and their inspector beside them shows what changed.
               </li>
               <li>
                 Solid's rules (no writes while drawing, effects in two halves):
-                <a href="/guides/solid/solid-2.html" target="src-guides-solid-solid-2-html">Solid 2</a>. The short form for
-                agents:
-                <a href="/spell-ui/AGENTS.md" title="spell-ui/AGENTS.md" target="src-spell-ui-agents-md"
-                  >ui's <code>AGENTS.md</code></a
+                <a href="/guides/solid/solid-2.html" target="src-guides-solid-solid-2-html">Solid 2 in Spell</a>. The
+                short form for agents:
+                <a href="/ui/AGENTS.md" title="ui/AGENTS.md" target="src-ui-agents-md">ui's <code>AGENTS.md</code></a
                 >, "Solid authoring".
               </li>
             </ul>
@@ -475,7 +476,7 @@
               </li>
               <li>
                 An element that finds one already there draws into it (see
-                <a href="#static-render">16. The static server render</a>).
+                <a href="#static-render">The static render</a>).
               </li>
               <li>
                 MDN:
@@ -578,7 +579,7 @@
               </li>
               <li>
                 A family that adds script API names its own subclass (see
-                <a href="#pattern-dom-element">12. Patterns</a>).
+                <a href="#patterns">Patterns that repeat</a>).
                 <ul>
                   <li>
                     <code>&lt;ui-include&gt;</code>'s is <code>DOMIncludeElement</code>. It adds
@@ -628,8 +629,8 @@
             <ul>
               <li>
                 <a
-                  href="/spell-ui/src/components/ui-button/UIButton.en.ts"
-                  target="src-spell-ui-src-components-ui-button-uibutton-en-ts"
+                  href="/ui/src/components/ui-button/UIButton.en.ts"
+                  target="src-ui-src-components-ui-button-uibutton-en-ts"
                   ><code>UIButton.en.ts</code></a
                 >
                 names EVERYTHING the tag uses: its tag, attributes (and how each converts), events, slots, parts, states
@@ -715,7 +716,14 @@
             </li>
           </ul>
 
-          <ui-section id="counter-1-vocabulary" label="Step 1:  the vocabulary" sticky collapsible dividing open="false">
+          <ui-section
+            id="counter-1-vocabulary"
+            label="Step 1:  the vocabulary"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
             <ul>
               <li>
                 Every name the tag uses, in one object: the tag, its attributes (each with a <code>kind</code>, which
@@ -789,12 +797,12 @@
               <li>
                 A component extends <code>E.UIComponent</code>, typed by its vocabulary.
                 <ul>
-                  <li>Everything shared comes from <code>spell-ui/core</code>, imported as <code>E</code>.</li>
+                  <li>Everything shared comes from <code>spell/ui/core</code>, imported as <code>E</code>.</li>
                 </ul>
               </li>
               <li>
                 <code>@E.proto static vocabulary</code> and <code>@E.protoMerged static elementSetup</code> are CLASS
-                settings: set once on the prototype, not on each element (see <a href="#decorator-proto">@proto</a>).
+                settings: set once on the prototype, not on each element (see <a href="#decorators">The decorators</a>).
               </li>
               <li>
                 <code>elementSetup.styleSheets</code>: the sheets the shadow root adopts.
@@ -890,7 +898,7 @@ render(): JSX.Element {
                   <li><code>this.count</code> is the page's value, or <code>undefined</code>.</li>
                 </ul>
               </li>
-              <li>The idea, and why: <a href="#decorator-controlled">@E.controlled, in detail</a>.</li>
+              <li>The idea, and why: <a href="#decorators">The decorators</a>.</li>
             </ul>
             <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The count · <code>UICounter.tsx · 2 lines</code></ui-title>
@@ -1010,25 +1018,23 @@ protected onKeyDown(event: KeyboardEvent) {
                   </li>
                   <li>
                     <a
-                      href="/spell-epic/src/tools/bundle-experiment.ts"
-                      title="spell-epic/src/tools/bundle-experiment.ts"
-                      target="src-spell-epic-src-tools-bundle-experiment-ts"
+                      href="/epic/src/tools/bundle-experiment.ts"
+                      title="epic/src/tools/bundle-experiment.ts"
+                      target="src-epic-src-tools-bundle-experiment-ts"
                       ><code>bundle-experiment.ts</code></a
                     >
                     builds that into one classic script
                   </li>
                   <li>
                     this page loads it right after
-                    <a
-                      href="/spell-epic/src/tools/_assets/spell-ui.js"
-                      target="src-spell-epic-src-tools-assets-spell-ui-js"
+                    <a href="/epic/src/tools/_assets/spell-ui.js" target="src-epic-src-tools-assets-spell-ui-js"
                       ><code>spell-ui.js</code></a
                     >
                   </li>
                 </ul>
               </li>
               <li>
-                Its imports of Solid and <code>spell-ui/core</code> come from the page's own copies, as a component
+                Its imports of Solid and <code>spell/ui/core</code> come from the page's own copies, as a component
                 pack's do: one Solid, one <code>UIComponent</code>.
                 <ul>
                   <li>Those copies: <code>SpellUI.packModules</code>.</li>
@@ -1049,12 +1055,19 @@ export { UICounter }</code></pre>
               <ui-title>The guide's script · <code>custom-elements.entry.ts · 2 lines</code></ui-title>
               <ui-content>
                 <pre><code class="language-ts">import "./ui-counter"
-import "spell-ui/docs-components/ui-docs-inspector"</code></pre>
+import "spell/ui/docs-components/ui-docs-inspector"</code></pre>
               </ui-content>
             </ui-accordion>
           </ui-section>
 
-          <ui-section id="counter-try" label="Try it:  the page sets the count" sticky collapsible dividing open="false">
+          <ui-section
+            id="counter-try"
+            label="Try it:  the page sets the count"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
             <p>
               This one starts with <code>count="3" step="2"</code>: the page's value. A click still adds, by writing the
               property, so the page and the counter never disagree.
@@ -1078,7 +1091,7 @@ import "spell-ui/docs-components/ui-docs-inspector"</code></pre>
           <ui-icon slot="icon" name="code"></ui-icon>
           <p>
             The same pieces, in a component used everywhere. A toggle button: click it, and watch
-            <code>active</code> come and go.
+            <code>selected</code> come and go, with <code>:state(active)</code> beside it.
           </p>
           <div class="ce-live">
             <div><ui-button id="button-demo" toggle icon="heart">Like</ui-button></div>
@@ -1092,39 +1105,68 @@ import "spell-ui/docs-components/ui-docs-inspector"</code></pre>
                 <ul>
                   <li><code>size</code> and <code>color</code> are value sets</li>
                   <li>
-                    <code>primary</code> ... <code>toggle</code> are on / off words: each one a bare word, a boolean,
-                    and a class (kind <code>keyOnly</code>).
+                    <code>appearance</code> takes several words at once (<code>kind: "multiple"</code>), each a class
+                  </li>
+                  <li>
+                    <code>replaces</code> keeps the old switches working: <code>&lt;ui-button basic&gt;</code> still
+                    reads as <code>appearance="basic"</code>
                   </li>
                 </ul>
               </li>
               <li><code>topics</code> and <code>aka</code>: how people look for it.</li>
               <li><code>skeleton</code>: what a loading page draws in its place.</li>
+              <li><code>group</code>: where the property editor and the components page show each attribute.</li>
             </ul>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The start of buttonVocabulary · <code>UIButton.en.ts · 17 lines</code></ui-title>
+              <ui-title>The start of buttonVocabulary · <code>UIButton.en.ts · 34 lines</code></ui-title>
               <ui-content>
                 <pre><code class="language-ts">export const buttonVocabulary = {
   tag: "ui-button",
+  icon: "hand point up outline",
+  snippet: "&lt;ui-button&gt;Click me&lt;/ui-button&gt;",
+  formControl: true,
   topics: ["buttons", "basic", "controls", "forms", "elements"],
   aka: ["btn", "action", "submit", "link button"],
   skeleton: "inline 6 x 2.5",
   noun: "button",
+  partOfSpeech: "action",
   plural: "buttons",
   description: "A button indicates a possible action.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "color", kind: "color", description: "Hue;  fills the button (or its ring and text when `basic`)." },
-    { name: "primary", kind: "keyOnly", description: "Primary emphasis:  the `primary` brand colour." },
-    { name: "secondary", kind: "keyOnly", description: "Secondary emphasis:  the `secondary` brand colour." },
-    { name: "positive", kind: "keyOnly", description: "Positive consequence:  the `positive` colour." },
-    { name: "negative", kind: "keyOnly", description: "Negative consequence:  the `negative` colour." },
-    { name: "basic", kind: "keyOnly", description: "Less pronounced:  transparent with a hairline ring." },
-    { name: "tertiary", kind: "keyOnly", description: "Least pronounced:  text only, underlined on hover." },</code></pre>
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      values: UIT.PosterSizes,
+      default: "medium",
+      // ...
+    },
+    {
+      name: "color",
+      group: "appearance",
+      kind: "color",
+      replaces: COLOR_SWITCHES,
+      // ...
+    },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["basic", "tertiary", "circular", "pill", "raised"],
+      classes: { pill: "circular" },
+      // ...</code></pre>
               </ui-content>
             </ui-accordion>
           </ui-section>
 
-          <ui-section id="button-class" label="The class, and its pressed state" sticky collapsible dividing open="false">
+          <ui-section
+            id="button-class"
+            label="The class, and its pressed state"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
             <ul>
               <li>
                 <code>loading: "its own"</code>: every element gets <code>:state(loading)</code> from its base class;
@@ -1138,13 +1180,20 @@ import "spell-ui/docs-components/ui-docs-inspector"</code></pre>
               <li>
                 <code>isActive</code> is both controlled and a CSS state:
                 <ul>
-                  <li><code>@E.controlled("active")</code>: the page may set it, and a click may change it</li>
+                  <li>
+                    <code>@E.controlled("selected")</code>: the page may set <code>selected</code>, and a click may
+                    change it
+                  </li>
                   <li><code>@E.cssState("active")</code>: <code>:state(active)</code> follows it either way</li>
                 </ul>
               </li>
+              <li>
+                <code>isDisabled</code> is the base class's <code>isMarkedDisabled</code>: its attribute, or a disabled
+                fieldset around it.
+              </li>
             </ul>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The class · <code>UIButton.tsx · 20 lines</code></ui-title>
+              <ui-title>The class · <code>UIButton.tsx · 22 lines</code></ui-title>
               <ui-content>
                 <pre><code class="language-ts">export class UIButton extends E.UIComponent&lt;typeof buttonVocabulary&gt; {
   @E.proto static vocabulary = buttonVocabulary
@@ -1155,27 +1204,19 @@ import "spell-ui/docs-components/ui-docs-inspector"</code></pre>
     // `disabled`:  its `&lt;button&gt;` is disabled
     disabled: "its own",
     // `loading`:  its own spinner
-    loading: "its own"
+    loading: "its own",
+    // `ellipsis`:  the host is never wider than its parent, so the text has a width to cut at
+    cssStates: ["ellipsis"]
   } satisfies Partial&lt;E.ElementSetup&gt;
 
   ////////////////
-  // ## Pressed (`active`)
+  // ## Pressed (`selected`)
   ////////////////
 
-  /** `active`:  set by the page, or toggled by a click (`toggle`). */
+  /** `selected`:  set by the page, or toggled by a click (`toggle`). */
   @E.cssState("active")
-  @E.controlled("active")
+  @E.controlled("selected")
   accessor isActive = false</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>Disabled · <code>UIButton.tsx · 5 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">/** Disabled by its attribute, or by a disabled fieldset. */
-@E.cssState("disabled")
-get isDisabled(): boolean {
-  return this.disabled || this.formIsDisabled
-}</code></pre>
               </ui-content>
             </ui-accordion>
           </ui-section>
@@ -1186,7 +1227,7 @@ get isDisabled(): boolean {
                 <code>this.rootClass</code> builds Fomantic's class string from the attributes.
                 <ul>
                   <li>
-                    <code>&lt;ui-button size="small" primary basic&gt;</code> =&gt;
+                    <code>&lt;ui-button size="small" color="primary" appearance="basic"&gt;</code> =&gt;
                     <code>ui small basic primary button</code>
                   </li>
                 </ul>
@@ -1194,7 +1235,7 @@ get isDisabled(): boolean {
               <li>
                 <code>classValue()</code> lets a class follow STATE instead of its attribute.
                 <ul>
-                  <li><code>active</code> follows <code>isActive</code>.</li>
+                  <li><code>selected</code> follows <code>isActive</code>.</li>
                 </ul>
               </li>
               <li><code>extraClass</code> adds a word no attribute names: "icon", on an icon-only button.</li>
@@ -1203,16 +1244,16 @@ get isDisabled(): boolean {
               <ui-title>classValue() and extraClass · <code>UIButton.tsx · 13 lines</code></ui-title>
               <ui-content>
                 <pre><code class="language-ts">protected classValue(name: E.AttributeName&lt;typeof buttonVocabulary&gt;): unknown {
-  if (name === "active") return this.isActive
+  if (name === "selected") return this.isActive
   if (name === "disabled") return this.isDisabled
-  if (name === "labeled" &amp;&amp; this.hasLabel) return false
+  if (name === "labeled" &amp;&amp; this.hasBadge) return false
   return super.classValue(name)
 }
 
 /** `icon` for icon-only buttons and for `labeled icon` buttons. */
 protected get extraClass(): string | undefined {
-  if (!this.hasIcon || this.animated) return undefined
-  const isLabeledIcon = !!this.labeled &amp;&amp; !this.hasLabel
+  if (!this.hasIcon || this.reveal) return undefined
+  const isLabeledIcon = !!this.labeled &amp;&amp; !this.hasBadge
   return !this.hasText || isLabeledIcon ? UIT.ICON_CLASS : undefined
 }</code></pre>
               </ui-content>
@@ -1222,12 +1263,12 @@ protected get extraClass(): string | undefined {
           <ui-section id="button-render" label="render()" sticky collapsible dividing open="false">
             <ul>
               <li>
-                A <code>&lt;Show&gt;</code>: a joined label wraps the control in a <code>&lt;div&gt;</code>, else the
+                A <code>&lt;Show&gt;</code>: a joined badge wraps the control in a <code>&lt;div&gt;</code>, else the
                 control alone.
               </li>
               <li>
-                <code>control()</code> is the inner button: a native <code>&lt;button&gt;</code>, or a link when it has
-                an href.
+                <code>control()</code> is the inner button: a native <code>&lt;button&gt;</code>, or a link with
+                <code>link</code>.
                 <ul>
                   <li>So keyboard, focus and screen readers work as on any button.</li>
                 </ul>
@@ -1242,7 +1283,7 @@ protected get extraClass(): string | undefined {
               <ui-content>
                 <pre><code class="language-ts">render(): JSX.Element {
   return (
-    &lt;Show when={this.hasLabel} fallback={this.control()}&gt;
+    &lt;Show when={this.hasBadge} fallback={this.control()}&gt;
       &lt;div
         class={this.wrapperClass({
           size: this.size,
@@ -1252,7 +1293,7 @@ protected get extraClass(): string | undefined {
       &gt;
         {this.control()}
         &lt;span class={LABEL_CLASS} part={this.partForName("label")}&gt;
-          &lt;slot name={this.slotForName("label")}&gt;{this.label}&lt;/slot&gt;
+          &lt;slot name={this.slotForName("label")}&gt;{this.badge}&lt;/slot&gt;
         &lt;/span&gt;
       &lt;/div&gt;
     &lt;/Show&gt;
@@ -1267,7 +1308,10 @@ protected get extraClass(): string | undefined {
               <li>
                 The inner button's <code>onClick</code>: a toggle asks to flip <code>isActive</code>.
                 <ul>
-                  <li>It asks through <code>requestChange()</code>, sending <code>ui-toggle</code> first.</li>
+                  <li>
+                    It asks through <code>requestChange()</code>, sending <code>ui-selected</code> or
+                    <code>ui-deselected</code> first.
+                  </li>
                   <li>The page may cancel it.</li>
                 </ul>
               </li>
@@ -1277,7 +1321,7 @@ protected get extraClass(): string | undefined {
               </li>
             </ul>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The click handler · <code>UIButton.tsx · 16 lines</code></ui-title>
+              <ui-title>The click handler · <code>UIButton.tsx · 18 lines</code></ui-title>
               <ui-content>
                 <pre><code class="language-ts">private readonly onClick = (event: MouseEvent) =&gt; {
   if (this.isDisabled) {
@@ -1288,7 +1332,9 @@ protected get extraClass(): string | undefined {
   this.runInvoker(event)
   if (this.toggle) {
     const next = !this.isActive
-    this.requestChange("isActive", next, () =&gt; this.send("ui-toggle", { active: next, originalEvent: event }))
+    this.requestChange("isActive", next, () =&gt;
+      this.send(next ? "ui-selected" : "ui-deselected", { active: next, originalEvent: event })
+    )
   }
   const { form } = this.domElement.internals
   if (!form) return
@@ -1323,7 +1369,7 @@ protected onDOMElementClick(event: MouseEvent) {
               </li>
             </ul>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The getters' types · <code>UIButton.tsx · 1 lines</code></ui-title>
+              <ui-title>The getters' types · <code>UIButton.tsx · 1 line</code></ui-title>
               <ui-content>
                 <pre><code class="language-ts">export interface UIButton extends E.AttributeValues&lt;typeof buttonVocabulary&gt; {}</code></pre>
               </ui-content>
@@ -1345,1847 +1391,165 @@ export { UIButton, UIButtons, UIOr }</code></pre>
           </ui-section>
         </ui-section>
 
-        <ui-section id="decorators" label="6. The decorators" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="hat wizard"></ui-icon>
-          <p>A decorator on a member says how it works. They're standard (TC39) decorators:</p>
-          <ul>
-            <li>
-              most in
-              <a
-                href="/src/element/Reactive.ts"
-                title="src/element/Reactive.ts"
-                target="src-src-element-reactive-ts"
-                ><code>Reactive.ts</code></a
-              >
-            </li>
-            <li>
-              the class settings in
-              <a href="/src/util/decorators.ts" title="src/util/decorators.ts" target="src-src-util-decorators-ts"
-                ><code>decorators.ts</code></a
-              >
-            </li>
-            <li>a component file writes them as <code>@E.state</code>, <code>@E.proto</code> ...</li>
-          </ul>
-          <ul>
-            <li>
-              The reactive ones keep every member in ONE record per instance.
-              <ul>
-                <li><code>this.x</code> reads fresh right after <code>this.x = v</code>, with no waiting.</li>
-                <li>And Solid still follows the reads in JSX and effects.</li>
-              </ul>
-            </li>
-            <li>Which to reach for:</li>
-          </ul>
-          <ui-table celled padding="compact" appearance="striped" unstackable>
-            <table>
-              <tbody>
-                <tr>
-                  <th>you want</th>
-                  <th>write</th>
-                </tr>
-                <tr>
-                  <td>state of the element's own</td>
-                  <td><code>@E.state accessor isOpen = false</code></td>
-                </tr>
-                <tr>
-                  <td>state the page may set, or a person may change</td>
-                  <td><code>@E.controlled("open") accessor isOpen = false</code></td>
-                </tr>
-                <tr>
-                  <td>a value worked out from others</td>
-                  <td>a plain <code>get</code>; <code>@E.derived get</code> when it's real work</td>
-                </tr>
-                <tr>
-                  <td>a <code>:state()</code> CSS can select</td>
-                  <td>
-                    <code>@E.cssState("open")</code> on it; one that only mirrors its attribute:
-                    <code>elementSetup.cssStates</code>
-                  </td>
-                </tr>
-                <tr>
-                  <td>ARIA that follows a value</td>
-                  <td><code>@E.aria("busy")</code> on it</td>
-                </tr>
-                <tr>
-                  <td>something to do when members change</td>
-                  <td><code>@E.onChange("a", "b") onXChanged(a, b)</code></td>
-                </tr>
-                <tr>
-                  <td>a listener on the window, only while in the page</td>
-                  <td><code>@E.whileConnected watchX()</code></td>
-                </tr>
-                <tr>
-                  <td>a value read from the element's children</td>
-                  <td><code>@E.watches({ childList: true }) get x()</code></td>
-                </tr>
-                <tr>
-                  <td>a listener on the DOM element</td>
-                  <td><code>@E.on("click") protected onClick(event)</code></td>
-                </tr>
-                <tr>
-                  <td>a handler or getter that reads members to decide</td>
-                  <td><code>@E.untracked</code> on it</td>
-                </tr>
-                <tr>
-                  <td>a class setting</td>
-                  <td><code>@E.proto static</code>, <code>@E.protoMerged static elementSetup</code></td>
-                </tr>
-                <tr>
-                  <td>a value made once</td>
-                  <td><code>@E.lazy get</code>, <code>@E.once</code> method</td>
-                </tr>
-                <tr>
-                  <td>a setting whose change makes it again</td>
-                  <td><code>@E.resets("load") static accessor url</code></td>
-                </tr>
-              </tbody>
-            </table>
-          </ui-table>
-
-          <ui-section id="decorator-state" label="@E.state" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                The element's own state, read and written like a field.
-                <ul>
-                  <li>After <code>this.sections = list</code>, reading it gives the new list at once.</li>
-                </ul>
-              </li>
-              <li>JSX, effects and getters that read it update when it changes.</li>
-              <li>
-                Options:
-                <ul>
-                  <li>
-                    <code>{ equals }</code>: a write equal to the old value changes nothing (<code>E.isSameList</code>
-                    compares lists item by item)
-                  </li>
-                  <li><code>{ ownedWrite }</code>: for state written by design while Solid draws</li>
-                </ul>
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-docs-toc&gt;'s sections · <code>UIDocsToc.tsx · 7 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@E.state accessor sections: readonly TocSection[] = []
-
-/** Nothing listed:  `:state(empty)`. */
-@E.cssState("empty")
-get isEmpty(): boolean {
-  return !this.sections.length
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="decorator-controlled" label="@E.controlled, in detail" sticky collapsible dividing open="false">
-            <p>
-              Some state can be changed from BOTH sides: the page may set it, and a person may change it.
-              <code>@E.controlled</code> is how one member serves both.
-            </p>
-            <ul>
-              <li>a dropdown's <code>open</code></li>
-              <li>a select's <code>value</code></li>
-              <li>a button's <code>active</code></li>
-            </ul>
-            <ul>
-              <li>
-                <b>Reading</b>: the DOM element's property when it has a value (the page set it, as an attribute or a
-                property), else the component's own starting value.
-              </li>
-              <li>
-                <b>Writing</b>: always to the DOM element's PROPERTY, which writes the attribute back.
-                <ul>
-                  <li>
-                    So <code>el.open</code> is always current, as a native <code>&lt;details open&gt;</code>'s is.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <b>A person's change</b>:
-                <code>this.requestChange("isOpen", next, () =&gt; this.send("ui-open", ...))</code>:
-                <ol>
-                  <li><code>announce()</code> sends the event first</li>
-                  <li>a page that cancels it (a cancelable event) keeps the old value</li>
-                  <li>a page that sets the property itself while handling it wins too (its value stands)</li>
-                  <li>otherwise <code>next</code> is written</li>
-                </ol>
-              </li>
-              <li>
-                <b>Handing back</b>: writing <code>undefined</code> to the property gives control back to the
-                component's own value (a form reset does it).
-              </li>
-              <li>
-                <code>isControlledByPage("value")</code>: is it reading the page's value right now?
-                <code>&lt;ui-select&gt;</code> keeps the page's starting value, to restore on a form reset.
-              </li>
-              <li>
-                Why "controlled": React's word for an input whose value the page owns.
-                <ul>
-                  <li>The difference: React makes you pick controlled or not. Here the element works either way.</li>
-                </ul>
-              </li>
-              <li>
-                Live: the <a href="#ui-counter">counter</a> and the <a href="#ui-button">toggle button</a> both use it.
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>How it reads and writes · <code>Reactive.ts · 16 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">export function controlled(attribute: string) {
-  return function &lt;This extends ComponentShape, T&gt;(
-    _target: ClassAccessorDecoratorTarget&lt;This, T&gt;,
-    context: ClassAccessorDecoratorContext&lt;This, T&gt;
-  ): ClassAccessorDecoratorResult&lt;This, T&gt; {
-    const member = context.name as string
-    return {
-      get(this: This): T {
-        const { key } = this.elementDefinition.attribute(attribute)
-        const pageValue = Reactive.attributeValue(this, key)
-        return (pageValue === undefined ? Reactive.recordOf(this).values[member] : pageValue) as T
-      },
-      set(this: This, next: T) {
-        const { property } = this.elementDefinition.attribute(attribute)
-        ;(this.domElement as unknown as Record&lt;string, unknown&gt;)[property] = next
-      },</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title
-                >&lt;ui-select&gt;'s value, and the page's value kept for a reset ·
-                <code>UISelect.tsx · 4 lines</code></ui-title
-              >
-              <ui-content>
-                <pre><code class="language-ts">@E.controlled("value") accessor value: UIT.SelectValue | undefined = this.selectedItemValues()
-
-/** The page's value to restore on a form reset (`undefined`:  back to the `selected` items). */
-private readonly initialValue = this.isControlledByPage("value") ? this.value : undefined</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="decorator-derived" label="@E.derived" sticky collapsible dividing open="false">
-            <ul>
-              <li>A plain getter is already fresh: it reads its members every time, so use one by default.</li>
-              <li>
-                <code>@E.derived</code> on a getter that does real work (loops, parsing, building DOM) keeps its result,
-                and works it out again only when a member it read has changed since.
-              </li>
-              <li>
-                It MUST read only reactive members: it can't see anything else change.
-                <ul>
-                  <li><code>@E.state</code> and <code>@E.controlled</code> members</li>
-                  <li>attribute getters</li>
-                  <li>other <code>@E.derived</code> getters</li>
-                </ul>
-              </li>
-              <li>
-                <code>{ equals: E.isSameList }</code>: an equal new result keeps the old one, so readers see no change.
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-select&gt;'s chosen values · <code>UISelect.tsx · 7 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@E.derived({ equals: E.isSameList })
-get chosenValues(): readonly string[] {
-  const value = this.value as unknown
-  if (Array.isArray(value)) return value.map(String)
-  if (typeof value !== "string" || value === "") return []
-  return this.multiple ? E.Converters.list(value) : [value]
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section
-            id="decorator-css-state"
-            label="@E.cssState and elementSetup.cssStates"
-            sticky
-            collapsible
-            dividing
-            open="false"
-          >
-            <ul>
-              <li>
-                <code>@E.cssState("fluid")</code> on a getter or accessor: <code>:state(fluid)</code> follows its
-                truthiness.
-              </li>
-              <li>
-                A state that only mirrors its attribute needs no getter: its name goes in
-                <code>elementSetup.cssStates</code>.
-                <ul>
-                  <li>The label's: <code>cssStates: ["active"]</code>.</li>
-                  <li>A subclass that adds states spreads its base's list, as for <code>styleSheets</code>.</li>
-                  <li><code>define()</code> throws on a name the tag has no attribute or member for (a typo).</li>
-                </ul>
-              </li>
-              <li>The page styles them from outside: <code>ui-button:state(fluid) { ... }</code>.</li>
-              <li>
-                A set worked out in code: the <code>cssStates()</code> hook (same name as the setup key, another thing).
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-button&gt;'s fluid state · <code>UIButton.tsx · 5 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@E.cssState("fluid")
-get isFluid(): boolean {
-  const { attached } = this
-  return this.fluid || attached === true || attached === "top" || attached === "bottom"
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="decorator-aria" label="@E.aria" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <code>@E.aria("busy")</code> on a getter or accessor: the element's busy state, as a screen reader sees
-                it, follows it.
-                <ul>
-                  <li>It's written to <code>internals.ariaBusy</code>, not to an attribute.</li>
-                  <li>true is written as <code>"true"</code></li>
-                  <li>false or undefined removes it</li>
-                </ul>
-              </li>
-              <li>Stacks with <code>@E.cssState</code>, one decorator a line.</li>
-              <li>
-                ARIA that never changes is <code>elementSetup.aria</code> instead: <code>{ role: "group" }</code>, set
-                once.
-              </li>
-              <li>
-                Short names in both, from <code>E.AriaNames</code>; a name not there fails TypeScript.
-                <ul>
-                  <li><code>busy</code> stands for <code>ariaBusy</code>, the internals' name for aria-busy.</li>
-                  <li>A new name is one line in that map.</li>
-                </ul>
-              </li>
-              <li>
-                NOTE: a getter that reads <code>UI</code> (its texts, its browser checks) must wait for
-                <code>isReady</code>: the runtime throws until it has loaded.
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-card&gt;'s loading · <code>UICard.tsx · 5 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@E.cssState("loading")
-@E.aria("busy")
-get isLoading(): boolean {
-  return this.loading
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title
-                >&lt;ui-docs-inspector&gt;'s name, waiting for the runtime ·
-                <code>UIDocsInspector.tsx · 5 lines</code></ui-title
-              >
-              <ui-content>
-                <pre><code class="language-ts">@E.aria("label")
-get label(): string | undefined {
-  if (!this.isReady) return undefined
-  return this.translationForKey("label", { target: this.title ?? `#${this.for ?? ""}` })
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="decorator-on-change" label="@E.onChange" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <code>@E.onChange("a", "b") onXChanged(a, b)</code>: the method runs with the members' values at the
-                start, then whenever one changes.
-              </li>
-              <li>A function it returns is the cleanup, run before the next call and when the element is released.</li>
-              <li>It runs untracked: only the members it names run it again.</li>
-              <li>
-                <code>{ writesDOMElement: true }</code> (last argument): the method writes the DOM element, so the
-                static server render applies it once.
-                <ul>
-                  <li>E.g. it sets a <code>:state()</code>, or a tabindex.</li>
-                </ul>
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-button&gt; re-points its invoker · <code>UIButton.tsx · 4 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@E.onChange("commandfor", "hasNativeInvokers")
-protected onCommandTargetChanged() {
-  this.resolveInvoker()
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="decorator-while-connected" label="@E.whileConnected" sticky collapsible dividing open="false">
-            <ul>
-              <li>The method runs each time the element connects; a function it returns runs when it disconnects.</li>
-              <li>
-                For a listener or observer on something OUTSIDE the element (the window, the document, a shared
-                preference) that must stop while the element is out of the page.
-              </li>
-              <li>Sugar over <code>@E.onChange("isConnected")</code>.</li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title
-                >&lt;ui-docs-themes&gt; follows the theme preference · <code>UIDocsThemes.tsx · 5 lines</code></ui-title
-              >
-              <ui-content>
-                <pre><code class="language-ts">@E.whileConnected
-protected followPreference() {
-  this.follow(ThemePreference.look)
-  return ThemePreference.subscribe((look) =&gt; this.follow(look))
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="decorator-from-content" label="@E.watches" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                On a getter: a value read from the element's light DOM (its children), worked out again when what the
-                options name changes.
-                <ul>
-                  <li>
-                    The options are a <code>MutationObserver</code>'s: <code>childList</code>, subtree, attributes ...
-                  </li>
-                  <li>Its old name was <code>@E.fromContent</code>, before P11 of epic spell-element.</li>
-                </ul>
-              </li>
-              <li>Readers hear of it only when the VALUE moved, so a reader that writes the light DOM can't loop.</li>
-              <li>On a method: called with the mutations on each change, for a change that writes other members.</li>
-              <li>ONE observer per element, stopped when it's released.</li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-card&gt; follows what's slotted · <code>UICard.tsx · 4 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@E.watches({ childList: true, subtree: true, equals: isSameNouns })
-get slottedNouns(): ReadonlySet&lt;string&gt; {
-  return isServer ? NOTHING_SLOTTED : this.scan()
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="decorator-on" label="@E.on" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <code>@E.on("command") protected onCommand(event)</code>: a listener on the DOM element for its whole
-                life, added as the component is built, removed when it's released (not when it's moved).
-              </li>
-              <li>
-                <code>{ target: "renderRoot" }</code> listens on the shadow root instead; other options are
-                <code>addEventListener()</code>'s.
-              </li>
-              <li>A plain method, <code>protected</code>: it runs untracked.</li>
-              <li>
-                A listener added later, or under a condition: <code>this.on(type, listener)</code> (see
-                <a href="#events">9. Events</a>).
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>UIComponent hears its slots change · <code>UIComponent.tsx · 4 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@on("slotchange", { target: "renderRoot" })
-protected onSlotChangeForParts(event: Event) {
-  E.PartContext.slotChanged(event.target as HTMLSlotElement)
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="decorator-untracked" label="@E.untracked" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                The method's body runs inside Solid's <code>untrack()</code>: what it reads is never followed by the
-                computation that called it.
-              </li>
-              <li>For actions and handlers, which read members to DECIDE what to do.</li>
-              <li>
-                Also on an arrow-function field handed to JSX:
-                <code>@E.untracked private readonly onKeyDown = (event) =&gt; { ... }</code>.
-              </li>
-              <li>
-                And on a getter, for a value read to ACT on, never to follow:
-                <ul>
-                  <li>
-                    a setting an animation reads as it starts: <code>@E.untracked private get cssDuration()</code>
-                  </li>
-                  <li>
-                    a DOM element's script API over its component, so a page's effect reading it doesn't re-run each
-                    time it changes
-                  </li>
-                </ul>
-              </li>
-              <li>NEVER on a method a getter, JSX or an effect calls to FOLLOW its reads.</li>
-              <li>
-                Not needed in a constructor or a field's starting value: every component is built inside
-                <code>untrack()</code> already.
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-select&gt; syncs its native select · <code>UISelect.tsx · 9 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@E.untracked
-private syncSelect() {
-  const { select } = this
-  if (!select) return
-  const chosen = new Set(this.chosenValues)
-  for (const option of select.options) {
-    option.selected = option.classList.contains(PLACEHOLDER) ? !chosen.size : chosen.has(option.value)
-  }
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="decorator-proto" label="@E.proto and @E.protoMerged" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <code>@E.proto static vocabulary = buttonVocabulary</code>: a class setting, put on the PROTOTYPE, so
-                <code>this.vocabulary</code> reads it with no per-instance copy.
-              </li>
-              <li>
-                <code>@E.protoMerged static elementSetup = { ... }</code>: the same for an OBJECT whose keys add up down
-                the class chain. A subclass states only the keys it changes.
-                <ul>
-                  <li>
-                    Each class's object gets its base class's object as its prototype: a key it doesn't state is read
-                    from there. Nothing is copied.
-                  </li>
-                  <li>
-                    So read keys by name (<code>this.elementSetup.styleSheets</code>): a spread of the whole object sees
-                    only its own class's keys.
-                  </li>
-                </ul>
-              </li>
-              <li><code>elementSetup</code>'s keys, by what they say (each one's default is below the table):</li>
-            </ul>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>what it says</th>
-                    <th>keys</th>
-                  </tr>
-                  <tr>
-                    <td>its sheets, and the states that mirror an attribute</td>
-                    <td><code>styleSheets</code>, <code>cssStates</code></td>
-                  </tr>
-                  <tr>
-                    <td>how the browser treats it</td>
-                    <td><code>isAFormControl</code>, <code>delegatesFocus</code>, <code>slotAssignment</code></td>
-                  </tr>
-                  <tr>
-                    <td>a part of another element, or a root, as <code>&lt;ui-root&gt;</code> is</td>
-                    <td><code>isAPart</code>, <code>root</code></td>
-                  </tr>
-                  <tr>
-                    <td>its DOM element class, and the plain stand-in it shows when it breaks</td>
-                    <td><code>DOMElement</code>, <code>Fallback</code></td>
-                  </tr>
-                  <tr>
-                    <td>it looks right before its styles load</td>
-                    <td><code>canRenderUnstyled</code></td>
-                  </tr>
-                  <tr>
-                    <td>fixed ARIA, by short name: <code>{ role: "status", live: "polite" }</code></td>
-                    <td><code>aria</code></td>
-                  </tr>
-                  <tr>
-                    <td>what the shared attributes mean for it (<a href="#disabled-and-friends">13</a>)</td>
-                    <td><code>disabled</code>, <code>loading</code>, <code>visible</code>, <code>animation</code></td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>UIComponent's defaults · <code>UIComponent.tsx · 17 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@protoMerged static elementSetup: Partial&lt;E.ElementSetup&gt; = {
-  styleSheets: {},
-  cssStates: [],
-  isAFormControl: false,
-  delegatesFocus: true,
-  slotAssignment: "named",
-  isAPart: false,
-  DOMElement: DOMElement,
-  Fallback: undefined,
-  canRenderUnstyled: false,
-  root: false,
-  aria: {},
-  disabled: "unusable",
-  loading: "loader",
-  visible: "shown",
-  animation: DEFAULT_ANIMATION
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section
-            id="decorator-lazy-once"
-            label="@E.lazy, @E.once and @E.resets"
-            sticky
-            collapsible
-            dividing
-            open="false"
-          >
-            <ul>
-              <li>
-                <code>@E.lazy get x()</code>: made on first read, then kept.
-                <ul>
-                  <li>NOT reactive: a reactive kept value is <code>@E.derived</code>.</li>
-                </ul>
-              </li>
-              <li>
-                <code>@E.once</code> on a method: runs once, and every later call gets the same result (a loader's
-                promise).
-              </li>
-              <li>
-                <code>@E.resets("load")</code> on an <code>accessor</code>: every write to it forgets what the members
-                it names kept, so the next call makes it anew.
-                <ul>
-                  <li>Every write resets, even of the same value.</li>
-                  <li>It needs <code>accessor</code>: a plain field's decorator never sees a later write.</li>
-                  <li>The names are checked, so a typo is a type error.</li>
-                </ul>
-              </li>
-              <li><code>E.forget(object, "name")</code> drops what either kept, by hand (tests).</li>
-              <li>
-                Which to use:
-                <ul>
-                  <li>made once and kept: <code>@E.lazy</code> or <code>@E.once</code></li>
-                  <li>changes later: <code>@E.state</code>, even when nothing reactive reads it</li>
-                </ul>
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The runtime's browser support, made once · <code>Browser.ts · 3 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@lazy get supports(): BrowserSupports {
-  return this.detect()
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title
-                >The docs site's data, loaded once until its address changes ·
-                <code>SiteData.ts · 6 lines</code></ui-title
-              >
-              <ui-content>
-                <pre><code class="language-ts">@E.resets("load") static accessor url: string | undefined
-
-/** The data file, fetched once per page (until `url` is set). */
-@E.once static load(): Promise&lt;SiteDataFile&gt; {
-  return SiteData.fetch(SiteData.resolve())
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section
-            id="decorator-lint"
-            label="The lint guard:  decorators, not effects by hand"
-            sticky
-            collapsible
-            dividing
-            open="false"
-          >
-            <p>
-              <code>yarn lint</code> flags a component file that does BY HAND what a decorator or a timing helper
-              already does (epic spell-element, P10).
-            </p>
-            <ul>
-              <li>
-                Where: the component folders of Spell UI, of the epic pages' elements (epics) and of the brand pages.
-                <ul>
-                  <li>Not the app, whose components are plain Solid functions.</li>
-                  <li>Not the element core itself, nor tests.</li>
-                </ul>
-              </li>
-              <li>Each message names what to write instead.</li>
-            </ul>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>rule (<code>spell-ui/...</code>)</th>
-                    <th>flags</th>
-                    <th>write instead</th>
-                  </tr>
-                  <tr>
-                    <td><code>no-solid-effect</code></td>
-                    <td>Solid's <code>createEffect</code>, <code>onSettled</code>, <code>onMount</code> ...</td>
-                    <td>
-                      <a href="#decorator-on-change">@E.onChange</a>,
-                      <a href="#decorator-while-connected">@E.whileConnected</a>,
-                      <a href="#decorator-from-content">@E.watches</a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><code>no-mutation-observer</code></td>
-                    <td>a <code>new MutationObserver()</code></td>
-                    <td><a href="#decorator-from-content">@E.watches</a></td>
-                  </tr>
-                  <tr>
-                    <td><code>no-dom-element-listener</code></td>
-                    <td><code>addEventListener</code> on the DOM element</td>
-                    <td><a href="#decorator-on">@E.on</a>, or <code>this.on()</code></td>
-                  </tr>
-                  <tr>
-                    <td><code>no-untrack</code></td>
-                    <td><code>untrack(...)</code></td>
-                    <td><a href="#decorator-untracked">@E.untracked</a> on the method or getter</td>
-                  </tr>
-                  <tr>
-                    <td><code>no-raw-timer</code></td>
-                    <td>
-                      <code>setTimeout</code>, <code>queueMicrotask</code>, <code>requestAnimationFrame</code> ...
-                    </td>
-                    <td>
-                      a <a href="#timing">timing helper</a>: <code>E.after()</code>,
-                      <code>E.afterSolidUpdate()</code> ...
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><code>no-function-component</code></td>
-                    <td>an exported function component in a family folder</td>
-                    <td>a family class, or a private render method</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <p>A use that has to stay says why, and goes on an allow-list.</p>
-            <ul>
-              <li>On the line above it: a disable comment for that one line, with its reason after <code>--</code>.</li>
-              <li>
-                The same reason goes on the allow-list, in a test (<a
-                  href="/spell-ui/tests/tools/LintPatterns.test.ts"
-                  title="spell-ui/tests/tools/LintPatterns.test.ts"
-                  target="src-spell-ui-tests-tools-lintpatterns-test-ts"
-                  ><code>LintPatterns.test.ts</code></a
-                >).
-                <ul>
-                  <li>
-                    The test fails on a disable comment the list doesn't name, so every exception is seen in review.
-                  </li>
-                  <li>16 uses are on it today: helper classes no decorator reaches, watches on ANOTHER element ...</li>
-                </ul>
-              </li>
-              <li>
-                The rules themselves:
-                <a
-                  href="/src/toolchain/lint.patterns.ts"
-                  title="src/toolchain/lint.patterns.ts"
-                  target="src-src-toolchain-lint-patterns-ts"
-                  ><code>vite.lint.patterns.ts</code></a
-                >, at the repo root. Agents' short form: ui's
-                <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a
-                >, "The lint guard".
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>A use that stays, and its reason · <code>UIForm.tsx · 2 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">// oxlint-disable-next-line spell-ui/no-mutation-observer -- only while connected:  `@E.watches` lasts the element's whole life
-const observer = new MutationObserver(() =&gt; this.findForm())</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-        </ui-section>
-
-        <ui-section id="lifecycle" label="7. The life of an element" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="clock rotate left"></ui-icon>
-          <p>What happens, in order, from the tag's definition to its release.</p>
-          <p>The DOM element hears the browser, and calls the component's <b>hooks</b>, which a subclass fills in.</p>
-          <div class="ce-scroll">
-            <svg
-              class="ce-diagram"
-              viewBox="0 0 760 360"
-              role="img"
-              aria-label="The life of an element.  define(), then the DOM element's constructor.  First connect:  mount() builds the component, then onMount() and render(), then onConnect().  The runtime loads:  styles adopted, isReady, the content shows, ready resolves.  Disconnect:  onDisconnect(), the component kept;  a reconnect calls onConnect() again.  dispose():  the component and its listeners released."
-            >
-              <defs>
-                <marker
-                  id="ce-arrow2"
-                  viewBox="0 0 10 10"
-                  refX="9"
-                  refY="5"
-                  markerWidth="7"
-                  markerHeight="7"
-                  orient="auto"
-                >
-                  <path class="arrowhead" d="M0,0 L10,5 L0,10 z" />
-                </marker>
-              </defs>
-              <rect class="box" x="10" y="10" width="14" height="14" rx="3" />
-              <text class="note" x="30" y="22">the DOM element (the browser calls it)</text>
-              <rect class="accent" x="290" y="10" width="14" height="14" rx="3" />
-              <text class="note" x="310" y="22">the component (hooks you fill in)</text>
-              <g>
-                <rect class="box" x="10" y="44" width="170" height="56" rx="8" />
-                <text class="title" x="22" y="66">1 define()</text>
-                <text class="mono" x="22" y="88">customElements.define</text>
-                <rect class="box" x="200" y="44" width="170" height="56" rx="8" />
-                <text class="title" x="212" y="66">2 constructor</text>
-                <text class="mono" x="212" y="88">upgrade; internals</text>
-                <rect class="box" x="390" y="44" width="170" height="56" rx="8" />
-                <text class="title" x="402" y="66">3 connectedCallback</text>
-                <text class="mono" x="402" y="88">first time: mount()</text>
-                <rect class="accent" x="580" y="44" width="170" height="56" rx="8" />
-                <text class="title" x="592" y="66">4 new UIButton()</text>
-                <text class="mono" x="592" y="88">its constructor</text>
-                <path class="line" d="M180,72 L198,72" marker-end="url(#ce-arrow2)" />
-                <path class="line" d="M370,72 L388,72" marker-end="url(#ce-arrow2)" />
-                <path class="line" d="M560,72 L578,72" marker-end="url(#ce-arrow2)" />
-              </g>
-              <path class="line" d="M665,100 L665,130" marker-end="url(#ce-arrow2)" />
-              <g>
-                <rect class="accent" x="580" y="132" width="170" height="56" rx="8" />
-                <text class="title" x="592" y="154">5 onMount()</text>
-                <text class="mono" x="592" y="176">effects; render()</text>
-                <rect class="accent" x="390" y="132" width="170" height="56" rx="8" />
-                <text class="title" x="402" y="154">6 onConnect()</text>
-                <text class="mono" x="402" y="176">every connect</text>
-                <rect class="accent" x="200" y="132" width="170" height="56" rx="8" />
-                <text class="title" x="212" y="154">7 runtime loaded</text>
-                <text class="mono" x="212" y="176">styles in; isReady</text>
-                <rect class="box" x="10" y="132" width="170" height="56" rx="8" />
-                <text class="title" x="22" y="154">8 ready resolves</text>
-                <text class="mono" x="22" y="176">content shows</text>
-                <path class="line" d="M580,160 L562,160" marker-end="url(#ce-arrow2)" />
-                <path class="line" d="M390,160 L372,160" marker-end="url(#ce-arrow2)" />
-                <path class="line" d="M200,160 L182,160" marker-end="url(#ce-arrow2)" />
-              </g>
-              <path class="line" d="M95,188 L95,218" marker-end="url(#ce-arrow2)" />
-              <g>
-                <rect class="box" x="10" y="220" width="170" height="56" rx="8" />
-                <text class="title" x="22" y="242">9 disconnected</text>
-                <text class="mono" x="22" y="264">removed or moved</text>
-                <rect class="accent" x="200" y="220" width="170" height="56" rx="8" />
-                <text class="title" x="212" y="242">10 onDisconnect()</text>
-                <text class="mono" x="212" y="264">component kept</text>
-                <rect class="box" x="390" y="220" width="170" height="56" rx="8" />
-                <text class="title" x="402" y="242">11 connected again</text>
-                <text class="mono" x="402" y="264">onConnect() only</text>
-                <rect class="box" x="580" y="220" width="170" height="56" rx="8" />
-                <text class="title" x="592" y="242">12 dispose()</text>
-                <text class="mono" x="592" y="264">released</text>
-                <path class="line" d="M180,248 L198,248" marker-end="url(#ce-arrow2)" />
-                <path class="line" d="M370,248 L388,248" marker-end="url(#ce-arrow2)" />
-                <path class="line" d="M560,248 L578,248" marker-end="url(#ce-arrow2)" />
-              </g>
-              <text class="note" x="10" y="306">
-                Form controls also hear their form: onFormAssociated(), onFormDisabled(), onFormReset(),
-                onFormStateRestore().
-              </text>
-              <text class="note" x="10" y="326">
-                If any step from 4 on throws, the element's error boundary shows its fallback (14). A connect after
-                dispose() starts again at 3.
-              </text>
-            </svg>
-          </div>
-
-          <ui-section id="hook-constructor" label="The DOM element, and mount()" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                The browser builds the DOM element when it parses (or upgrades) the tag: it attaches
-                <code>internals</code>, reads each attribute's starting value, and keeps any property a page set before
-                the upgrade.
-              </li>
-              <li>
-                Its FIRST <code>connectedCallback()</code> mounts the component: in a Solid root of its own, inside an
-                error boundary, drawn into the shadow root.
-              </li>
-              <li>A connect only calls <code>onConnect()</code> after that: the component lives across moves.</li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>connectedCallback() · <code>DOMElement.ts · 11 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">connectedCallback() {
-  this.restoreUpgradeValues()
-  const { connectedState } = this
-  if (!connectedState.isMounted) {
-    connectedState.isMounted = true
-    // a bare subclass defined without `subclassForTag()` (a test's stand-in) has no component
-    this.tagSetup?.mountComponent(this)
-    this.handOverEarlyFormState()
-  }
-  this.component?.onConnect()
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>UIComponent.mount() · <code>UIComponent.tsx · 29 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">private static mount(
-  Class: E.UIComponentClass,
-  definition: E.ElementDefinition,
-  domElement: DOMElement,
-  Fallback: E.FallbackClass | undefined
-) {
-  createRoot((dispose) =&gt; {
-    const root = domElement.renderRoot
-    domElement.addReleaseCallback(() =&gt; {
-      ShadowEvents.unregister(root)
-      root.textContent = ""
-      dispose()
-    })
-    // `&lt;Errored&gt;` called as a function;  `children` is a GETTER, so the component is built inside the boundary
-    const view = Errored({
-      get children() {
-        return untrack(() =&gt; new Class(domElement, definition).onMount())
-      },
-      fallback: (error: Accessor&lt;unknown&gt;) =&gt; {
-        const cause = error()
-        const showsFallback = runWithOwner(null, () =&gt; UIComponent.onError(domElement, cause))
-        return showsFallback ? UIComponent.renderFallback(domElement, cause, Fallback) : undefined
-      }
-    })
-    domElement.clearServerContent()
-    ShadowEvents.register(root)
-    insert(root, view)
-  })
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section
-            id="hook-component-constructor"
-            label="The component's constructor"
-            sticky
-            collapsible
-            dividing
-            open="false"
-          >
-            <ul>
-              <li>
-                It sets the element up:
-                <ul>
-                  <li>links the pair</li>
-                  <li>applies the fixed ARIA (<code>elementSetup.aria</code>)</li>
-                  <li>starts the <code>@E.on</code> listeners</li>
-                  <li>asks the runtime (<code>UI</code>) to load, if it hasn't</li>
-                </ul>
-              </li>
-              <li>
-                A subclass rarely needs one: field initializers run here, in declaration order, so declare state ABOVE
-                what reads it.
-              </li>
-              <li>It runs while Solid draws: never change state in it.</li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>UIComponent's constructor · <code>UIComponent.tsx · 16 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">constructor(domElement: DOMElement, definition: E.ElementDefinition) {
-  this.domElement = domElement
-  this.elementDefinition = definition
-  domElement.component = this
-  this.appContext = isServer ? null : UIComponent.appContextFor(domElement)
-  this.internalState = { classInput: definition.classInput((name) =&gt; this.classValue(name as E.AttributeName&lt;V&gt;)) }
-  this.isConnected = isServer || domElement.isConnected
-  // the class's constant ARIA, on the server too:  short names (`live`) to `internals` properties (`ariaLive`)
-  for (const [name, text] of Object.entries(this.elementSetup.aria) as [E.AriaName, string][])
-    domElement.internals[E.AriaNames[name]] = text
-  // on the server there are no style sheets to wait for:  draw at once
-  this.isReady = isServer || (E.RUNTIME_KEY in globalThis &amp;&amp; !!(globalThis as E.RuntimeGlobal)[E.RUNTIME_KEY])
-  if (isServer) return
-  this.startListeners()
-  if (!this.isReady) void UI.load().then(() =&gt; this.onRuntimeLoaded())
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="hook-on-mount" label="onMount() and render()" sticky collapsible dividing open="false">
-            <ul>
-              <li><code>onMount()</code> runs once, right after the constructor, when every subclass field exists.</li>
-              <li>
-                Then, in order:
-                <ul>
-                  <li>it keeps the <code>:state()</code>s in step</li>
-                  <li>it starts the <code>@E.onChange</code> and <code>@E.whileConnected</code> effects</li>
-                  <li>it starts the <code>@E.aria</code> one</li>
-                  <li>it calls <code>render()</code></li>
-                </ul>
-              </li>
-              <li>The content shows only once <code>isReady</code>: styles adopted, so nothing flashes unstyled.</li>
-              <li>
-                Override it to start an effect of your own (conditional, per item), then
-                <code>return super.onMount()</code>.
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>onMount() · <code>UIComponent.tsx · 31 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">onMount(): JSX.Element {
-  if (!isServer &amp;&amp; untrack(() =&gt; this.isReady)) this.adoptStyleSheets()
-  // a RENDER effect, so a getter that throws shows the element's fallback (a plain effect would only log it)
-  const decorated = E.Reactive.cssStatesOf(this, this.elementSetup.cssStates)
-  createRenderEffect(
-    () =&gt; {
-      const states: Record&lt;string, boolean | undefined&gt; = { ...this.cssStates() }
-      for (const { member, state: name } of decorated) states[name] = !!(this as Record&lt;PropertyKey, unknown&gt;)[member]
-      return states
-    },
-    (states) =&gt; {
-      for (const [name, isOn] of Object.entries(states)) this.domElement.setState(name, !!isOn)
-    }
-  )
-  E.Reactive.startEffects(this)
-  // the names joined into one string, so the effect can tell "same names" from "new names"
-  const separator = " "
-  createEffect(
-    () =&gt; this.styleSheetNames.join(separator),
-    (names) =&gt; {
-      if (untrack(() =&gt; this.isReady)) {
-        UI.styles.adoptInto(this.domElement.renderRoot, names ? names.split(separator) : [])
-      }
-    },
-    { defer: true }
-  )
-  const { canRenderUnstyled } = this.elementSetup
-  // `untrack`:  `&lt;Show&gt;` evaluates its children in a TRACKED computation, so a reactive read in `render()`'s body
-  // (outside its JSX) would run it again and rebuild the whole view;  it runs ONCE
-  return &lt;Show when={canRenderUnstyled || this.isReady}&gt;{untrack(() =&gt; this.render())}&lt;/Show&gt;
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="hook-on-connect" label="onConnect() and onDisconnect()" sticky collapsible dividing open="false">
-            <ul>
-              <li><code>onConnect()</code>: every time the element is added to a page, the first time included.</li>
-              <li><code>onDisconnect()</code>: every time it's removed.</li>
-              <li>
-                Both keep <code>isConnected</code> in step, a microtask later: they may run while an app's Solid is
-                drawing, when state can't change yet.
-                <ul>
-                  <li>Defer your own writes the same way (<code>E.afterSolidUpdate()</code>).</li>
-                </ul>
-              </li>
-              <li>
-                An override calls <code>super</code>.
-                <ul>
-                  <li>
-                    For a listener on the window, prefer <a href="#decorator-while-connected">@E.whileConnected</a>.
-                  </li>
-                </ul>
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>onConnect() · <code>UIComponent.tsx · 5 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">onConnect() {
-  const { domElement } = this
-  E.afterSolidUpdate(() =&gt; (this.isConnected = domElement.isConnected))
-  E.PartContext.connected(domElement)
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>onDisconnect() · <code>UIComponent.tsx · 4 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">onDisconnect() {
-  const { domElement } = this
-  E.afterSolidUpdate(() =&gt; (this.isConnected = domElement.isConnected))
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section
-            id="hook-on-runtime-loaded"
-            label="onRuntimeLoaded() and isReady"
-            sticky
-            collapsible
-            dividing
-            open="false"
-          >
-            <ul>
-              <li>
-                The runtime (<code>UI</code>: styles, icons, texts, keyboard ...) is ONE lazy chunk per page.
-                <ul>
-                  <li>The first element asks for it; the rest wait for the same load.</li>
-                </ul>
-              </li>
-              <li>
-                When it's in, each element adopts its style sheets and sets <code>isReady</code>: its content shows, and
-                <code>domElement.ready</code> resolves a microtask later.
-              </li>
-              <li>
-                Private: not a hook to override.
-                <ul>
-                  <li>
-                    Read <code>this.isReady</code> instead (an <code>@E.onChange("isReady")</code>, or a getter that
-                    waits for it).
-                  </li>
-                </ul>
-              </li>
-              <li>Tests <code>await el.ready</code> (or <code>ElementFixture.settle()</code>) before looking.</li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>onRuntimeLoaded() · <code>UIComponent.tsx · 4 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">private onRuntimeLoaded() {
-  this.adoptStyleSheets()
-  this.isReady = true
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>ready, once ready · <code>UIComponent.tsx · 4 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@onChange("isReady")
-protected onReadyChanged(isReady: boolean) {
-  if (isReady) E.afterSolidUpdate(() =&gt; this.domElement.markReady())
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="hook-forms" label="The form hooks" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                For form controls only (<code>elementSetup.isAFormControl</code>): the browser's four form callbacks
-                reach the component as hooks.
-                <ul>
-                  <li><code>onFormAssociated(form)</code>: its form owner changed</li>
-                  <li>
-                    <code>onFormDisabled(disabled)</code>: a disabled fieldset around it (the base class keeps
-                    <code>formIsDisabled</code>)
-                  </li>
-                  <li><code>onFormReset()</code>: the form was reset: put the starting value back</li>
-                  <li><code>onFormStateRestore(state, mode)</code>: back / forward cache, autofill</li>
-                </ul>
-              </li>
-              <li>
-                The browser may call the first two BEFORE the component exists (as the element is inserted): the DOM
-                element keeps them, and hands them over once it's built.
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The DOM element passes them on · <code>DOMElement.ts · 26 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">formAssociatedCallback(form: HTMLFormElement | null) {
-  if (this.component) this.component.onFormAssociated(form)
-  else (this.connectedState.earlyForm ??= {}).form = form
-}
-
-/**
- * DOM API:  a `&lt;fieldset disabled&gt;` around the element started or stopped disabling it.
- * Calls the component's `onFormDisabled()`.
- */
-formDisabledCallback(disabled: boolean) {
-  if (this.component) this.component.onFormDisabled(disabled)
-  else (this.connectedState.earlyForm ??= {}).disabled = disabled
-}
-
-/** DOM API:  the form was reset.  Calls the component's `onFormReset()`. */
-formResetCallback() {
-  this.component?.onFormReset()
-}
-
-/**
- * DOM API:  the browser restored a value (back / forward, autofill;  `mode`:  `"restore"` / `"autocomplete"`).
- * Calls the component's `onFormStateRestore()`.
- */
-formStateRestoreCallback(state: File | string | FormData | null, mode: string) {
-  this.component?.onFormStateRestore(state, mode)
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-select&gt;'s reset · <code>UISelect.tsx · 4 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">onFormReset() {
-  this.value = this.initialValue
-  this.selectRevision++
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="hook-dispose" label="dispose():  the end" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                A removed element KEEPS its component, ready for the next connect (<code>keepAlive</code>).
-                <ul>
-                  <li>Only <code>domElement.dispose()</code> releases it, or garbage collection.</li>
-                </ul>
-              </li>
-              <li>
-                <code>dispose()</code> runs the release callbacks, newest first: Solid's root, the listeners
-                <code>on()</code> added, observers.
-                <ul>
-                  <li>A later connect builds a new component.</li>
-                </ul>
-              </li>
-              <li>
-                So anything page-wide (an overlay, a document listener) follows <code>isConnected</code>, never
-                disposal.
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>disconnectedCallback() and dispose() · <code>DOMElement.ts · 16 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">disconnectedCallback() {
-  this.component?.onDisconnect()
-}
-
-/**
- * Release the component and everything it holds (release callbacks, newest first);  idempotent.
- * - A later connect builds a new component.
- */
-dispose() {
-  const { connectedState } = this
-  if (!connectedState.isMounted) return
-  connectedState.isMounted = false
-  connectedState.propertyChangedCallbacks.length = 0
-  let callback
-  while ((callback = connectedState.releaseCallbacks.pop())) callback(this)
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="hook-on-error" label="onError():  when it throws" sticky collapsible dividing open="false">
-            <p>
-              Not a hook to override: what the error boundary does. See
-              <a href="#errors">14. When an element breaks</a>.
-            </p>
-          </ui-section>
-        </ui-section>
-
-        <ui-section id="attributes" label="8. How an attribute reaches the view" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="route"></ui-icon>
+        <ui-section id="why" label="6. Why it's built this way" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="question circle outline"></ui-icon>
           <p>
-            A page writes <code>size="large"</code> (or <code>button.size = "large"</code>), and a moment later the
-            inner button's class says "large". The steps between:
+            Spell UI follows the house style everywhere but a few places, and most of those have one reason: a component
+            library ships every byte to every page.
           </p>
-          <div class="ce-scroll">
-            <svg
-              class="ce-diagram"
-              viewBox="0 0 760 300"
-              role="img"
-              aria-label="An attribute's path.  The attribute size=large reaches attributeChangedCallback;  a property write button.size reaches the property's setter.  Both convert through the ElementDefinition and store the value in attributeValues;  a property write is also written back to the attribute.  The change callbacks tell Solid:  the component's getter this.size reads the new value, rootClass and the JSX update, and the inner button's class says large."
-            >
-              <defs>
-                <marker
-                  id="ce-arrow3"
-                  viewBox="0 0 10 10"
-                  refX="9"
-                  refY="5"
-                  markerWidth="7"
-                  markerHeight="7"
-                  orient="auto"
-                >
-                  <path class="arrowhead" d="M0,0 L10,5 L0,10 z" />
-                </marker>
-              </defs>
-              <path
-                class="line"
-                d="M625,46 C625,-6 105,-6 105,44"
-                marker-end="url(#ce-arrow3)"
-                style="stroke-dasharray: 4 3"
-              />
-              <text class="note" x="365" y="38" text-anchor="middle">
-                a property write is written back to the attribute (ignored on its way in)
-              </text>
-              <rect class="box" x="10" y="46" width="190" height="44" rx="8" />
-              <text class="mono" x="22" y="73">size="large"</text>
-              <rect class="box" x="10" y="126" width="190" height="44" rx="8" />
-              <text class="mono" x="22" y="153">button.size = "large"</text>
-              <rect class="box" x="230" y="46" width="240" height="44" rx="8" />
-              <text class="mono" x="242" y="73">attributeChangedCallback()</text>
-              <rect class="box" x="230" y="126" width="240" height="44" rx="8" />
-              <text class="mono" x="242" y="153">the property's setter</text>
-              <rect class="box" x="500" y="46" width="250" height="124" rx="8" />
-              <text class="title" x="512" y="72">convert, then store</text>
-              <text class="mono" x="512" y="100">attributeValues.size</text>
-              <text class="mono" x="512" y="120">= "large"</text>
-              <text class="note" x="512" y="150">the DOM element's</text>
-              <path class="line" d="M200,68 L228,68" marker-end="url(#ce-arrow3)" />
-              <path class="line" d="M470,68 L498,68" marker-end="url(#ce-arrow3)" />
-              <path class="line" d="M200,148 L228,148" marker-end="url(#ce-arrow3)" />
-              <path class="line" d="M470,148 L498,148" marker-end="url(#ce-arrow3)" />
-              <path class="line" d="M625,170 L625,214" marker-end="url(#ce-arrow3)" />
-              <text class="note" x="615" y="196" text-anchor="end">change callbacks tell Solid</text>
-              <rect class="accent" x="500" y="216" width="250" height="56" rx="8" />
-              <text class="title" x="512" y="238">the component</text>
-              <text class="mono" x="512" y="260">this.size</text>
-              <rect class="accent" x="230" y="216" width="240" height="56" rx="8" />
-              <text class="title" x="242" y="238">re-runs what read it</text>
-              <text class="mono" x="242" y="260">rootClass, the JSX</text>
-              <rect class="box" x="10" y="216" width="190" height="56" rx="8" />
-              <text class="title" x="22" y="238">the shadow DOM</text>
-              <text class="mono" x="22" y="260">"ui large button"</text>
-              <path class="line" d="M500,244 L472,244" marker-end="url(#ce-arrow3)" />
-              <path class="line" d="M230,244 L202,244" marker-end="url(#ce-arrow3)" />
-            </svg>
-          </div>
-          <ol>
+          <ul>
             <li>
-              <b>In</b>: the browser calls <code>attributeChangedCallback()</code> with the text; a property write calls
-              the property's setter, which <code>define()</code> put on the tag's class for every attribute.
+              <b>A module constant, not a private static:</b> one under a class minifies to one letter, and a static
+              keeps its name. Moving them to statics cost <code>forms.js</code> 0.27 kB gzipped, when it was tried.
             </li>
             <li>
-              <b>Convert</b>: the definition turns text or value into the attribute's kind, and stores it in
-              <code>domElement.attributeValues</code>.
-              <ul>
-                <li><code>"yes"</code> =&gt; <code>true</code></li>
-                <li>a translated <code>rojo</code> =&gt; <code>red</code></li>
-              </ul>
+              <b>Fomantic's class grammar stays:</b> <code>ui small basic primary button</code> is what the sheets key
+              on, so <code>rootClass</code> writes it from the attributes.
             </li>
             <li>
-              <b>Reflect</b>: a property write writes the attribute back (<code>reflect</code>); the DOM element ignores
-              that echo on its way in.
-              <ul>
-                <li>
-                  An attribute's own text is never rewritten: <code>primary="yes"</code> stays <code>"yes"</code>.
-                </li>
-              </ul>
+              <b>Vocabularies are data</b>, which node loads without a DOM: the components page, the static render, the
+              property editor and the Spanish tags all read them.
             </li>
             <li>
-              <b>Tell Solid</b>: the DOM element's change callbacks bump the attribute's version, and Solid re-runs
-              whatever read <code>this.size</code>.
+              <b>Two objects per tag</b>, so the browser's side (attributes, internals, the shadow root) and Solid's
+              side (state, drawing) each stay in one place.
             </li>
             <li>
-              <b>Draw</b>: <code>rootClass</code> builds "ui large button", and the JSX's class updates.
-              <ul>
-                <li><code>render()</code> doesn't run again.</li>
-              </ul>
+              <b>Changing values are fields with a decorator</b>, read fresh right after a write, never a signal pair
+              written by hand.
             </li>
-          </ol>
-
-          <ui-section id="attributes-in" label="In:  attribute or property" sticky collapsible dividing open="false">
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>attributeChangedCallback() · <code>DOMElement.ts · 12 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">attributeChangedCallback(name: string, _old: string | null, text: string | null) {
-  const definition = this.tagSetup?.elementDefinition
-  const attribute = definition?.attributeNamed(name)
-  if (
-    !attribute ||
-    this.connectedState.reflecting === name ||
-    this.connectedState.upgradeValues?.has(attribute.property)
-  ) {
-    return
-  }
-  this.setValue(attribute, definition.convert(attribute, text), "attribute")
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>A property per attribute · <code>DOMElement.ts · 12 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">for (const attribute of elementDefinition.attributes) {
-  Object.defineProperty(prototype, attribute.property, {
-    get(this: DOMElement) {
-      return this.attributeValues[attribute.key]
-    },
-    set(this: DOMElement, value: unknown) {
-      this.setValue(attribute, this.tagSetup.elementDefinition.convert(attribute, value), "property")
-    },
-    enumerable: true,
-    configurable: true
-  })
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="attributes-store" label="Store, reflect, tell" sticky collapsible dividing open="false">
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>setValue() · <code>DOMElement.ts · 9 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">private setValue(attribute: E.ResolvedAttribute, value: unknown, source: ValueSource) {
-  const old = this.attributeValues[attribute.key]
-  this.attributeValues[attribute.key] = value
-  if (import.meta.hot) DOMElement.hotReloadHooks?.valueSet(this, attribute.key, source)
-  if (source === "property" &amp;&amp; attribute.reflect) this.reflectAttribute(attribute, value)
-  for (const callback of this.connectedState.propertyChangedCallbacks.slice()) {
-    callback(attribute.key, value, old, source)
-  }
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>convert() · <code>ElementDefinition.ts · 8 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">convert(attribute: E.ResolvedAttribute, raw: unknown): unknown {
-  const { spec } = attribute
-  const value = this.canonicalValue(attribute, raw ?? spec.default)
-  const where = { attribute: attribute.attribute, tag: this.tag }
-  switch (spec.kind) {
-    case "keyOnly":
-    case "boolean":
-      return E.Converters.boolean(value as string | boolean | null | undefined, attribute.attribute)</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="attributes-getter" label="The component's getter" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                Every attribute has a getter on the component under its camelCase name, made by <code>register()</code>.
-                <ul>
-                  <li>E.g. <code>this.size</code>, <code>this.closeIcon</code>.</li>
-                </ul>
-              </li>
-              <li>Read inside JSX or an effect, it's followed; read anywhere, it's fresh.</li>
-              <li>
-                Writing it (<code>this.indeterminate = false</code>) writes the DOM element's property, which reflects.
-              </li>
-              <li>
-                An attribute outside the vocabulary, or a vocabulary attribute's raw text:
-                <code>this.attributes["aria-label"]</code>.
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>Reactive.attributeValue() · <code>Reactive.ts · 12 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">static attributeValue(component: ComponentShape, key: string): unknown {
-  if (collecting || getObserver()) {
-    const record = Reactive.recordOf(component)
-    let source = record.sources.get(ATTRIBUTE_PREFIX + key) as AttributeSource | undefined
-    if (!source) {
-      record.sources.set(ATTRIBUTE_PREFIX + key, (source = new AttributeSource(component, key)))
-      watchAttributeValues(record, component)
-    }
-    reading(source)
-  }
-  return attributeValueNow(component, key)
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="attributes-upgrade" label="The upgrade step" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                A framework may set <code>el.options = [...]</code> BEFORE the tag is defined.
-                <ul>
-                  <li>
-                    The value lands as a plain property of the not-yet-upgraded element, and would hide the class's
-                    setter forever.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                So the constructor takes those values off, stores them, and the first connect sets them again through
-                the real setters.
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The upgrade step · <code>DOMElement.ts · 18 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">private captureUpgradeValues(definition: E.ElementDefinition) {
-  const self = this as unknown as Record&lt;string, unknown&gt;
-  for (const attribute of definition.attributes) {
-    if (!Object.hasOwn(this, attribute.property)) continue
-    const value = self[attribute.property]
-    delete self[attribute.property]
-    ;(this.connectedState.upgradeValues ??= new Map()).set(attribute.property, value)
-    this.attributeValues[attribute.key] = definition.convert(attribute, value)
-  }
-}
-
-/** First-connect step:  set the captured values again, through the real setters (so they reflect). */
-private restoreUpgradeValues() {
-  const values = this.connectedState.upgradeValues
-  if (!values) return
-  this.connectedState.upgradeValues = undefined
-  for (const [property, value] of values) (this as unknown as Record&lt;string, unknown&gt;)[property] = value
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
+            <li>
+              Each exception, and the rule it departs from:
+              <a href="/ui/AGENTS.md" title="ui/AGENTS.md" target="src-ui-agents-md">ui's <code>AGENTS.md</code></a
+              >, where a section named like a house-style rule starts "As WWOD §N, plus:".
+            </li>
+          </ul>
         </ui-section>
 
-        <ui-section id="events" label="9. Events" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="comments"></ui-icon>
-          <p>Two short verbs: <code>send()</code> an event, <code>on()</code> to listen.</p>
-
-          <ui-section id="events-send" label="send()" sticky collapsible dividing open="false">
+        <ui-section id="reference" label="7. The reference, in short" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="book"></ui-icon>
+          <p>
+            What's left of how an element works, a line or two each. The whole of it is
+            <a href="/README/element.md" target="src-readme-element-md">README/element</a>, and each class's own
+            docstring in <a href="/src/element/" target="src-src-element"><code>src/element/</code></a>.
+          </p>
+          <ui-section id="decorators" label="The decorators" sticky collapsible dividing open="false">
             <ul>
               <li>
-                <code>this.send("ui-change", { value, originalEvent })</code> sends the vocabulary's event from the DOM
-                element: it bubbles, and leaves the shadow root (<code>composed</code>).
+                Standard (TC39) decorators, most in
+                <a href="/src/element/Reactive.ts" title="src/element/Reactive.ts" target="src-src-element-reactive-ts"
+                  ><code>Reactive.ts</code></a
+                >: <code>@E.state</code>, <code>@E.controlled</code>, <code>@E.derived</code>, <code>@E.cssState</code>,
+                <code>@E.aria</code>, <code>@E.onChange</code>, <code>@E.whileConnected</code>, <code>@E.watches</code>,
+                <code>@E.on</code>, <code>@E.untracked</code>.
+              </li>
+              <li><code>@E.proto</code> and <code>@E.protoMerged</code> set class settings once, on the prototype.</li>
+              <li>
+                The lint guard fails a hand-written effect, observer, listener, <code>untrack()</code> or timer in a
+                component file: "The lint guard" in ui's <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a>.
+              </li>
+              <li>README/element: "It renders once, and a write reaches only what read it".</li>
+            </ul>
+          </ui-section>
+          <ui-section id="lifecycle" label="The life of an element" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>define()</code>, then the DOM element's constructor; on its first connect,
+                <code>mount()</code> builds the component, then <code>onMount()</code> and <code>render()</code>, then
+                <code>onConnect()</code>.
+              </li>
+              <li>
+                A disconnect calls <code>onDisconnect()</code> and keeps the component; a reconnect calls
+                <code>onConnect()</code> again.
+              </li>
+              <li><code>dispose()</code> releases the component and its listeners.</li>
+              <li>
+                The hooks' docstrings:
+                <a
+                  href="/src/element/UIComponent.tsx"
+                  title="src/element/UIComponent.tsx"
+                  target="src-src-element-uicomponent-tsx"
+                  ><code>UIComponent.tsx</code></a
+                >.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="attributes"
+            label="How an attribute reaches the view"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <code>size="large"</code> or <code>button.size = "large"</code> converts through the tag's
+                <code>ElementDefinition</code> and is stored in <code>attributeValues</code>.
+              </li>
+              <li>A property write is written back to the attribute.</li>
+              <li>
+                The component's getter, <code>this.size</code>, reads the new value, and only what read it redraws.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="events" label="Events" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>this.send("ui-change", { ... })</code> sends the vocabulary's event from the DOM element: it
+                bubbles, and leaves the shadow root.
               </li>
               <li>
                 Cancelable when the vocabulary says so: then it returns <code>false</code> if a listener called
                 <code>preventDefault()</code>.
               </li>
-              <li>The name is checked against the vocabulary, and a translated tag sends its own name for it.</li>
               <li>
-                <code>detail</code> carries the new state, plus <code>originalEvent</code>.
-                <ul>
-                  <li>E.g. <code>{ value }</code>, <code>{ open }</code></li>
-                </ul>
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>send() · <code>UIComponent.tsx · 10 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">send(name: E.EventName&lt;V&gt;, detail: object): boolean {
-  const spec = this.elementDefinition.vocabulary.events.find((event) =&gt; event.name === name)
-  const event = new CustomEvent(this.elementDefinition.event(name), {
-    bubbles: true,
-    composed: true,
-    cancelable: !!spec?.cancelable,
-    detail
-  })
-  return this.domElement.dispatchEvent(event)
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="events-on" label="on() and @E.on" sticky collapsible dividing open="false">
-            <ul>
-              <li>From the start, for the element's whole life: <a href="#decorator-on">@E.on</a> on a method.</li>
-              <li>
-                Later, or under a condition: <code>this.on(type, listener, { target })</code>.
-                <ul>
-                  <li>
-                    It's removed when the element is released, through ONE <code>AbortController</code> per element.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                One that should stop sooner (an effect's): its own <code>AbortController</code>, aborted in the effect's
-                cleanup.
-              </li>
-              <li>
-                Native events INSIDE the shadow DOM: JSX's <code>onClick={...}</code> on the inner node.
-                <ul>
-                  <li><code>&lt;ui-button&gt;</code>'s inner button does that.</li>
-                </ul>
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>on() · <code>UIComponent.tsx · 4 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">protected on(type: string, listener: (event: Event) =&gt; void, { target, ...options }: E.OnOptions = {}) {
-  const listeners = (this.internalState.listeners ??= UIComponent.abortedOnDispose(this.domElement))
-  ;(target ?? this.domElement).addEventListener(type, listener, { ...options, signal: listeners.signal })
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="events-outside" label="Listening from outside" sticky collapsible dividing open="false">
-            <ul>
-              <li>A page listens on the element like any other: <code>el.addEventListener("ui-change", ...)</code>.</li>
-              <li>
-                Outside, <code>event.target</code> is the DOM element itself; <code>event.composedPath()[0]</code> is
-                the inner node.
-              </li>
-              <li>
-                Solid's own event delegation would break that.
-                <ul>
-                  <li>It leaves the inner node on the event, and drops the event for an outer Solid app.</li>
-                  <li>
-                    <a
-                      href="/src/element/ShadowEvents.ts"
-                      title="src/element/ShadowEvents.ts"
-                      target="src-src-element-shadowevents-ts"
-                      ><code>ShadowEvents</code></a
-                    >
-                    undoes it, so a Solid app's <code>&lt;ui-button onClick&gt;</code> runs once, with the right target.
-                  </li>
-                  <li>Never work around a wrong <code>target</code> in a component: fix it there.</li>
-                </ul>
+                <code>@E.on("keydown")</code> listens on the DOM element for its whole life; a translated tag sends and
+                hears its own names.
               </li>
             </ul>
           </ui-section>
-        </ui-section>
-
-        <ui-section id="timing" label="10. Running something later" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="clock outline"></ui-icon>
-          <p>Through <code>E</code>'s timing helpers, never the platform's calls, so the code says WHEN it runs.</p>
-          <ui-table celled padding="compact" appearance="striped" unstackable>
-            <table>
-              <tbody>
-                <tr>
-                  <th>helper</th>
-                  <th>runs</th>
-                  <th>over</th>
-                  <th>cancel</th>
-                </tr>
-                <tr>
-                  <td><code>E.afterSolidUpdate(fn)</code></td>
-                  <td>as soon as the current code finishes: after the Solid update it's in</td>
-                  <td><code>queueMicrotask()</code></td>
-                  <td class="no negative">no</td>
-                </tr>
-                <tr>
-                  <td><code>E.beforeNextPaint(fn)</code></td>
-                  <td>just before the browser next draws</td>
-                  <td><code>requestAnimationFrame()</code></td>
-                  <td class="yes positive">returned function</td>
-                </tr>
-                <tr>
-                  <td><code>E.soon(fn)</code></td>
-                  <td>in the next task, after the event being handled</td>
-                  <td><code>setTimeout(fn, 0)</code></td>
-                  <td class="yes positive">returned function</td>
-                </tr>
-                <tr>
-                  <td><code>E.after(seconds, fn)</code></td>
-                  <td>once, in SECONDS; a promise of <code>fn</code>'s result</td>
-                  <td><code>setTimeout()</code></td>
-                  <td class="yes positive"><code>.cancel()</code></td>
-                </tr>
-                <tr>
-                  <td><code>E.every(seconds, fn)</code></td>
-                  <td>every <code>seconds</code>, until stopped</td>
-                  <td><code>setInterval()</code></td>
-                  <td class="yes positive">returned function</td>
-                </tr>
-              </tbody>
-            </table>
-          </ui-table>
-          <ul>
-            <li>
-              <code>E.afterSolidUpdate()</code> is how a hook that may run while Solid draws (<code>onConnect()</code>)
-              changes state safely.
-            </li>
-            <li>
-              Keep what a helper returns in a field, to cancel a pending one (<code>this.copiedTimer?.cancel()</code>).
-            </li>
-            <li>
-              <code>&lt;ui-docs-inspector&gt;</code> reads its element with <code>E.every()</code>.
-              <ul>
-                <li>Its <code>@E.onChange</code> cleanup stops the timer when it disconnects.</li>
-              </ul>
-            </li>
-          </ul>
-          <ui-accordion class="spell-code" appearance="styled">
-            <ui-title>A timer that stops on disconnect · <code>UIDocsInspector.tsx · 6 lines</code></ui-title>
-            <ui-content>
-              <pre><code class="language-ts">@E.onChange("isConnected", "for", "all")
-protected onTargetChanged(isConnected: boolean) {
-  if (!isConnected) return undefined
-  this.refresh()
-  return E.every(REFRESH_SECONDS, () =&gt; this.refresh())
-}</code></pre>
-            </ui-content>
-          </ui-accordion>
-        </ui-section>
-
-        <ui-section id="parts" label="11. How a part finds its owner" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="puzzle piece"></ui-icon>
-          <p>
-            The generic parts (header, content, meta ...) are ONE element each, wherever they sit.
-            <code>&lt;ui-header&gt;</code> in a card looks like a card's header because it finds its OWNER, and says so
-            with <code>:state(in-card)</code>.
-          </p>
-          <div class="ce-scroll">
-            <svg
-              class="ce-diagram"
-              viewBox="0 0 760 270"
-              role="img"
-              aria-label="Two trees.  Left:  ui-card holds ui-content, which holds ui-header.  The header climbs:  ui-content is a part, so it climbs past it;  ui-card owns headers, so the header gets :state(in-card).  Right:  ui-card holds ui-segment, which holds ui-header.  The climb stops at ui-segment, a component that isn't a part:  the header stays standalone."
-            >
-              <defs>
-                <marker
-                  id="ce-arrow4"
-                  viewBox="0 0 10 10"
-                  refX="9"
-                  refY="5"
-                  markerWidth="7"
-                  markerHeight="7"
-                  orient="auto"
-                >
-                  <path class="arrowhead" d="M0,0 L10,5 L0,10 z" />
-                </marker>
-              </defs>
-              <text class="eyebrow" x="10" y="18">FOUND: :STATE(IN-CARD)</text>
-              <text class="eyebrow" x="400" y="18">STOPPED: STANDALONE</text>
-              <rect class="accent" x="10" y="34" width="200" height="40" rx="8" />
-              <text class="mono" x="24" y="59">&lt;ui-card&gt;</text>
-              <text class="note" x="220" y="52">owns header, content,</text>
-              <text class="note" x="220" y="68">meta ... (ownsParts)</text>
-              <rect class="box" x="50" y="104" width="200" height="40" rx="8" />
-              <text class="mono" x="64" y="129">&lt;ui-content&gt;</text>
-              <text class="note" x="260" y="129">a part: climbed past</text>
-              <rect class="box" x="90" y="174" width="200" height="40" rx="8" />
-              <text class="mono" x="104" y="199">&lt;ui-header&gt;</text>
-              <path class="line" d="M90,194 C30,194 30,135 48,128" marker-end="url(#ce-arrow4)" />
-              <path class="line" d="M50,124 C0,124 0,64 8,56" marker-end="url(#ce-arrow4)" />
-              <text class="note" x="104" y="236">gets :state(in-card)</text>
-              <rect class="accent" x="400" y="34" width="200" height="40" rx="8" />
-              <text class="mono" x="414" y="59">&lt;ui-card&gt;</text>
-              <rect class="box" x="440" y="104" width="200" height="40" rx="8" />
-              <text class="mono" x="454" y="129">&lt;ui-segment&gt;</text>
-              <text class="note" x="650" y="122">not a part:</text>
-              <text class="note" x="650" y="138">the climb stops</text>
-              <rect class="box" x="480" y="174" width="200" height="40" rx="8" />
-              <text class="mono" x="494" y="199">&lt;ui-header&gt;</text>
-              <path class="line" d="M480,194 C420,194 420,135 438,128" marker-end="url(#ce-arrow4)" />
-              <text class="note" x="494" y="236">no owner: a plain header</text>
-            </svg>
-          </div>
-          <ul>
-            <li>
-              A part's component is a <code>PartComponent</code>, which makes a <code>PartContext</code> for its noun
-              ("header").
-            </li>
-            <li>
-              The context climbs the FLAT tree (slots included, across shadow roots) from the part:
-              <ul>
-                <li>past other parts (<code>elementSetup.isAPart</code>)</li>
-                <li>
-                  stopping at any other component, a <b>barrier</b>: a header in a segment in a card stays standalone,
-                  as Fomantic's child selectors have it
-                </li>
-                <li>to the nearest component whose vocabulary <code>ownsParts</code> its noun</li>
-              </ul>
-            </li>
-            <li>
-              It keeps <code>:state(in-&lt;owner&gt;)</code> on the part.
-              <ul>
-                <li>
-                  The shared sheet
-                  <a
-                    href="/spell-ui/src/components/ui-parts/UIParts.css"
-                    target="src-spell-ui-src-components-ui-parts-uiparts-css"
-                    ><code>UIParts.css</code></a
-                  >
-                  styles <code>:state(in-card)</code>.
-                </li>
-                <li>Never a <code>ui-card-header</code> tag.</li>
-              </ul>
-            </li>
-            <li>
-              It looks again on every connect after the first (a part moved into another owner), and on
-              <code>slotchange</code> in any component's shadow root.
-            </li>
-            <li>
-              Why not Solid context: each element draws in a root of its own, and a <code>&lt;slot&gt;</code> carries no
-              context.
-            </li>
-          </ul>
-          <ui-accordion class="spell-code" appearance="styled">
-            <ui-title>Every part makes its context · <code>PartComponent.tsx · 1 lines</code></ui-title>
-            <ui-content>
-              <pre><code class="language-ts">readonly context = new E.PartContext({ domElement: this.domElement, noun: this.vocabulary.noun })</code></pre>
-            </ui-content>
-          </ui-accordion>
-          <ui-accordion class="spell-code" appearance="styled">
-            <ui-title>A card names the parts it owns · <code>UICard.en.ts · 1 lines</code></ui-title>
-            <ui-content>
-              <pre><code class="language-ts">ownsParts: ["content", "header", "meta", "description", "extra", "avatar"]</code></pre>
-            </ui-content>
-          </ui-accordion>
-        </ui-section>
-
-        <ui-section id="patterns" label="12. Patterns that repeat" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="layer group"></ui-icon>
-          <p>Once <code>&lt;ui-button&gt;</code> makes sense, most families are one of a few shapes.</p>
-
-          <ui-section id="pattern-form-control" sticky collapsible dividing open="false">
-            <span slot="label">A form control: <code>&lt;ui-select&gt;</code></span>
+          <ui-section id="timing" label="Running something later" sticky collapsible dividing open="false">
             <ul>
               <li>
-                Extends <code>F.FormComponent</code> (from <code>spell-ui/forms</code>), so it's form-associated.
-                <ul>
-                  <li>
-                    Its DOM element is a <code>DOMFormControl</code>, with a native control's API: form, validity,
-                    <code>checkValidity()</code> ...
-                  </li>
-                </ul>
+                Through the timing helpers, never the platform's calls, so the code says WHEN it runs:
+                <code>afterSolidUpdate()</code>, <code>after()</code>, <code>waitUntil()</code> ...
               </li>
-              <li>
-                A subclass gives its <code>formValue</code>, and the base hands it on:
-                <ul>
-                  <li>the value to the form (<code>internals.setFormValue()</code>)</li>
-                  <li>its rules to <code>setValidity()</code></li>
-                </ul>
-              </li>
-              <li>
-                Its value is <code>@E.controlled("value")</code>; <code>onFormReset()</code> puts the page's starting
-                value back.
-              </li>
-              <li>
-                It has a <code>Fallback</code>: a plain native control shown if its render throws, which still submits,
-                validates and resets.
-              </li>
+              <li>They're <code>spell/util/timing</code>'s, re-exported as <code>E</code>'s.</li>
             </ul>
-            <div class="ce-live">
-              <div>
-                <ui-select id="select-demo" placeholder="Pick a fruit">
-                  <ui-item value="apple">Apple</ui-item>
-                  <ui-item value="pear">Pear</ui-item>
-                  <ui-item value="plum">Plum</ui-item>
-                </ui-select>
-              </div>
-              <ui-docs-inspector for="select-demo"></ui-docs-inspector>
-            </div>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>FormComponent · <code>FormComponent.ts · 17 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">export abstract class FormComponent&lt;V extends E.ComponentVocabulary = E.ComponentVocabulary&gt; extends E.UIComponent&lt;V&gt; {
-  @E.protoMerged static elementSetup: Partial&lt;E.ElementSetup&gt; = {
-    // with the form-control API
-    DOMElement: DOMFormControl,
-    isAFormControl: true
-  }
-
-  /**
-   * The DOM element, as the form control it is (`elementSetup.DOMElement`):  `form`, `validity`, `internals` ...
-   * - `declare`, a type only:  the constructor (`UIComponent`) sets it.
-   */
-  declare readonly domElement: DOMFormControl
-// ...
-@E.onChange("formValue", "formName")
-protected onFormValueChanged(value: E.FieldValue, name: string | undefined) {
-  this.domElement.internals.setFormValue(this.formSubmission(value, name))
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
           </ui-section>
-
-          <ui-section id="pattern-loading" sticky collapsible dividing open="false">
-            <span slot="label">Loading a file: <code>&lt;ui-include&gt;</code></span>
+          <ui-section id="parts" label="How a part finds its owner" sticky collapsible dividing open="false">
             <ul>
               <li>
-                The elements that show a text file extend <code>E.LoadableComponent</code>:
-                <ul>
-                  <li><code>&lt;ui-include&gt;</code></li>
-                  <li><code>&lt;ui-code&gt;</code></li>
-                  <li><code>&lt;ui-markdown&gt;</code></li>
-                </ul>
+                The generic parts (<code>&lt;ui-header&gt;</code>, <code>&lt;ui-content&gt;</code> ...) are ONE element
+                each, wherever they sit.
               </li>
               <li>
-                The base owns:
-                <ul>
-                  <li>where the text comes from: <code>source</code>, a property, the element's own text</li>
-                  <li>when it loads (<code>load="visible"</code> ...)</li>
-                  <li>the loading and error look</li>
-                  <li>saving</li>
-                </ul>
+                A header in a card climbs to its owner and says so with <code>:state(in-card)</code>; the climb stops at
+                a component that isn't a part.
               </li>
-              <li>A subclass only says how to show the text.</li>
             </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-include&gt;'s class · <code>UIInclude.tsx · 7 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">export class UIInclude extends E.LoadableComponent&lt;typeof includeVocabulary&gt; {
-  @E.proto static vocabulary = includeVocabulary
-  @E.protoMerged static elementSetup = {
-    styleSheets: { include: includeCSS },
-    DOMElement: DOMIncludeElement,
-    delegatesFocus: false
-  } satisfies Partial&lt;E.ElementSetup&gt;</code></pre>
-              </ui-content>
-            </ui-accordion>
           </ui-section>
-
+          <ui-section id="patterns" label="Patterns that repeat" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A form control extends <code>F.FormComponent</code>, from <code>spell/ui/forms</code>: its DOM element
+                is a <code>DOMFormControl</code>, with <code>form</code>, <code>validity</code> and
+                <code>checkValidity()</code>.
+              </li>
+              <li>
+                A tag that shows a text file extends <code>LoadableComponent</code>: <code>source</code>, inline text,
+                <code>save()</code>.
+              </li>
+              <li>
+                A family with a script API of its own names its own DOM element class:
+                <code>&lt;ui-include&gt;</code>'s adds <code>contentRoot</code>.
+              </li>
+            </ul>
+          </ui-section>
           <ui-section
-            id="pattern-dom-element"
-            label="A family's own DOM element class"
+            id="disabled-and-friends"
+            label="Disabled, visible, animation and friends"
             sticky
             collapsible
             dividing
@@ -3193,819 +1557,96 @@ protected onFormValueChanged(value: E.FieldValue, name: string | undefined) {
           >
             <ul>
               <li>
-                A family whose tag needs script API of its own (<code>contentRoot</code>, <code>close()</code>) gives it
-                a DOM element class of its own.
-                <ul>
-                  <li>It subclasses <code>DOMElement</code> (or another DOM element base), above its component.</li>
-                  <li>It names that class in <code>elementSetup.DOMElement</code>.</li>
-                </ul>
+                Every element takes <code>disabled</code>, <code>loading</code>, <code>visible</code> (or
+                <code>hidden</code>) and <code>animation</code>, though its vocabulary never names them, and the
+                platform's <code>inert</code>.
               </li>
-              <li>
-                It names its component's class too (<code>E.DOMLoadableElement&lt;UIInclude&gt;</code>), so
-                <code>this.component</code> is typed and its API forwards with no cast.
-              </li>
-              <li>Never a member an attribute's property could be called: <code>define()</code> refuses it.</li>
+              <li>README/element: "What every element gets without asking".</li>
             </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>DOMIncludeElement · <code>UIInclude.tsx · 10 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">export class DOMIncludeElement extends E.DOMLoadableElement&lt;UIInclude&gt; {
-  /**
-   * Where the included markup lives:  the shadow box (`[part~=content]`), or the DOM element itself with
-   * `page-styles`;  `undefined` before it loads.
-   * - For editors:  edit there, then `save()`.
-   */
-  get contentRoot(): HTMLElement | undefined {
-    return this.component?.contentRoot
-  }
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
           </ui-section>
-
-          <ui-section id="pattern-slots" label="Slots, and what's in them" sticky collapsible dividing open="false">
+          <ui-section id="errors" label="When an element breaks" sticky collapsible dividing open="false">
             <ul>
               <li>
-                <code>E.SlotContent</code> follows which slots have light-DOM children, so the view can draw a box only
-                when there's something to put in it.
-              </li>
-              <li>A value read from the children themselves: <a href="#decorator-from-content">@E.watches</a>.</li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;ui-button&gt;'s slots · <code>UIButton.tsx · 5 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">readonly slots = new E.SlotContent(this.domElement)
-// ...
-get hasIcon(): boolean {
-  return !!this.icon || this.slots.hasContent(this.slotForName("icon"))
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="pattern-translated" label="Translated tags" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                An app may define a tag again under another language's names:
-                <code>UIButton.define("ie-boton", es)</code> registers
-                <code>&lt;ie-boton primario color="rojo"&gt;</code>.
+                Each element draws inside an error boundary of its own. When it throws, it gets
+                <code>:state(errored)</code>, one console error names the tag, and it sends a cancelable
+                <code>ui-error</code>.
               </li>
               <li>
-                Its attributes, properties and events take the dictionary's names; values arrive in English (<code
-                  >rojo</code
-                >
-                =&gt; <code>red</code>), so the component's code is the same.
-              </li>
-              <li>
-                That's why a component never writes a name as a string. These resolve it for the actual tag:
-                <ul>
-                  <li><code>this.partForName()</code></li>
-                  <li><code>this.send()</code></li>
-                  <li><code>this.attributes.value</code></li>
-                </ul>
-              </li>
-              <li>
-                The <a href="#disabled-and-friends">shared attributes</a> are translated too:
-                <code>&lt;ie-boton desactivado&gt;</code> is disabled.
-                <ul>
-                  <li>
-                    Each language names them once, in its own shared file (<a
-                      href="/spell-ui/src/vocabulary/SharedVocabulary.es.ts"
-                      title="spell-ui/src/vocabulary/SharedVocabulary.es.ts"
-                      target="src-spell-ui-src-vocabulary-sharedvocabulary-es-ts"
-                      ><code>SharedVocabulary.es.ts</code></a
-                    >).
-                  </li>
-                  <li>Every dictionary of that language reads it, without naming it; its own names still win.</li>
-                </ul>
+                Then it shows its fallback: a form control's plain native one, else a bare slot, so its children still
+                show.
               </li>
             </ul>
           </ui-section>
-
-          <ui-section id="pattern-root" sticky collapsible dividing open="false">
-            <span slot="label">A root of your own: <code>&lt;spell-viewer&gt;</code></span>
-            <p>
-              A ROOT is the top of a page or an app: it loads each Spell UI family the first time its tag appears, and
-              holds the settings everything inside reads (theme, size, icons ...).
-            </p>
+          <ui-section id="hot-reload" label="Hot reload" sticky collapsible dividing open="false">
             <ul>
-              <li><code>&lt;ui-root&gt;</code> is the page's.</li>
               <li>
-                A subclass of its component, <code>UIRoot</code>, is a root too, under its own tag: so
-                <code>&lt;spell-viewer&gt;</code> needs nothing around it on a page.
-                <ul>
-                  <li>
-                    The family setting <code>root: true</code> says so; <code>UIRoot</code> sets it, so every subclass
-                    inherits it.
-                  </li>
-                  <li>The elements inside find their nearest root by it, for its settings and its app context.</li>
-                </ul>
+                In development, an edit to a component swaps it into every live element, which redraws keeping its
+                attributes and properties; an edit to its CSS swaps the sheet with no redraw.
               </li>
               <li>
-                Its vocabulary is the root's, plus its own; every root attribute works on it.
-                <ul>
-                  <li>
-                    Where they share a name, its own wins: <code>&lt;spell-viewer&gt;</code>'s width, height and assets.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Two hooks say what more it loads:
-                <ul>
-                  <li><code>contentRoots</code>: where else to look for tags, its own shadow root say</li>
-                  <li>
-                    <code>ownTagLoader(tag)</code>: how to load a tag of its own, which Spell UI's catalog doesn't know
-                  </li>
-                </ul>
-              </li>
-              <li>
-                So a page with only <code>&lt;spell-viewer&gt;</code>s downloads the widgets each app draws, and never the
-                editor: <code>&lt;spell-editor&gt;</code> loads only when one appears inside.
+                What the browser reads only once (the observed attributes, form association) reloads the page instead:
+                <a
+                  href="/src/element/HotDefinitions.ts"
+                  title="src/element/HotDefinitions.ts"
+                  target="src-src-element-hotdefinitions-ts"
+                  ><code>HotDefinitions.ts</code></a
+                >.
               </li>
             </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>&lt;spell-viewer&gt;, a root · <code>SpellViewer.tsx · 7 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">export class SpellViewer extends UIRoot&lt;typeof vocabulary&gt; {
-  @E.proto static vocabulary = vocabulary
-  @E.protoMerged static elementSetup = {
-    DOMElement: DOMSpellViewerElement,
-    // clicking the program's text must not move focus to its first button
-    delegatesFocus: false
-  } satisfies Partial&lt;E.ElementSetup&gt;</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>What more it loads · <code>SpellViewer.tsx · 14 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">/** What the root loads is in our shadow root too:  the widgets the runner draws. */
-protected get contentRoots(): readonly ParentNode[] {
-  return [this.domElement, this.domElement.renderRoot]
-}
-
-/**
- * A spell tag inside us (`&lt;spell-editor&gt;`) loads from its own script beside ours (`spell-editor.js`),
- * the first time one appears.
- * - Every `spell-*` tag:  `&lt;tag&gt;.js`, as `vite.element.config.ts` names each family's script.
- */
-protected ownTagLoader(tag: string): (() =&gt; Promise&lt;void&gt;) | undefined {
-  if (!tag.startsWith(SPELL_TAG_PREFIX)) return undefined
-  return () =&gt; import(/* @vite-ignore */ new URL(`${tag}.js`, BUNDLE).href).then(() =&gt; undefined)
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
+          </ui-section>
+          <ui-section id="static-render" label="The static render" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A page of <code>ui-*</code> elements as plain HTML, for search engines and readers with no JavaScript:
+                <code>spell ssr</code>.
+              </li>
+              <li>
+                Only <code>@E.aria</code> members and <code>@E.onChange(..., { writesDOMElement: true })</code> methods
+                run there.
+              </li>
+              <li>
+                How a page uses it:
+                <a href="/guides/ui-gaps.html" target="src-guides-ui-gaps-html">Pages with Spell UI</a>.
+              </li>
+            </ul>
           </ui-section>
         </ui-section>
 
-        <ui-section
-          id="disabled-and-friends"
-          label="13. Disabled, visible, animation and friends"
-          sticky
-          collapsible
-          dividing
-          open="false"
-        >
-          <ui-icon slot="icon" name="eye"></ui-icon>
-          <p>
-            Every element takes four shared attributes, though its vocabulary never names them: disabled, loading,
-            visible and animation (epic spell-element, P8 and P12).
-          </p>
+        <ui-section id="sources" label="8. See also" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="book open"></ui-icon>
           <ul>
             <li>
-              It takes the platform's own two as well: <code>hidden</code> (visible turned round) and
-              <code>inert</code>.
+              <a href="/README/element.md" target="src-readme-element-md">README/element</a>: the element base in full,
+              packs and <code>&lt;ui-root&gt;</code>, styling, testing in a real browser, what it costs
             </li>
             <li>
-              <code>SharedVocabulary</code> adds the four to every tag's definition, docs data and manifests.
-              <ul>
-                <li>A vocabulary that declares its own of that name wins: its own spec and meaning.</li>
-                <li>None declares its own visible or animation.</li>
-              </ul>
+              <a href="/guides/solid/solid-2.html" target="src-guides-solid-solid-2-html">Solid 2 in Spell</a>: Solid's
+              own rules, which every component draws by
             </li>
             <li>
-              <code>UIComponent</code> reads them ("Shared states", "Shown or hidden"); what each means for a family is
-              a key of its <code>elementSetup</code>.
+              <a href="/ui/AGENTS.md" title="ui/AGENTS.md" target="src-ui-agents-md">ui's <code>AGENTS.md</code></a
+              >: "Solid authoring", "Classes", "Events", the same ground as rules for agents
             </li>
             <li>
-              Their look is in
-              <a href="/spell-ui/src/styles/reset.css" target="src-spell-ui-src-styles-reset-css"
-                ><code>reset.css</code></a
-              >, which every shadow root adopts; the static render maps them to <code>data-state</code> and ARIA.
+              <a href="/guides/spell-ui-pages.html" target="src-guides-spell-ui-pages-html">Spell UI's Docs Site</a>:
+              where every component's page lives
+            </li>
+            <li>
+              The counter's files:
+              <a
+                href="/guides/custom-elements/experiments/ui-counter/"
+                title="guides/custom-elements/experiments/ui-counter/"
+                target="src-guides-custom-elements-experiments-ui-counter"
+                ><code>ui-counter/</code></a
+              >, rebuilt into this page's script from the <a href="/epic/" target="src-epic"><code>epic/</code></a> folder:
+              <!-- prettier-ignore -->
+              <ui-code language="sh" collapsed>yarn tsx src/tools/bundle-experiment.ts ../guides/custom-elements/experiments/custom-elements.entry.ts</ui-code>
             </li>
           </ul>
-
-          <ui-section id="shared-disabled" label="disabled" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <code>:state(disabled)</code> on every element, from <code>isMarkedDisabled</code>.
-                <ul>
-                  <li>That's the attribute, or a disabled <code>&lt;fieldset&gt;</code> around a form control.</li>
-                </ul>
-              </li>
-              <li>
-                <code>elementSetup.disabled = "unusable"</code>, the default, is the base class's way:
-                <ul>
-                  <li><code>isDisabled</code>, so the DOM element swallows clicks</li>
-                  <li>
-                    everything inside is inert (<code>inert</code> on the shadow root's boxes reaches what's slotted
-                    into them too), and dimmed (<code>:state(dimmed)</code>)
-                  </li>
-                  <li>
-                    <code>aria-disabled="true"</code>; if focus was inside, it moves on to the next focusable element
-                    (<code>UI.focus.moveOutOf()</code>)
-                  </li>
-                  <li>
-                    NOTE: inert content also leaves the accessibility tree: a screen reader doesn't read a disabled
-                    card's text
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <code>"its own"</code>: the base class sets only <code>:state(disabled)</code>, and the family says what
-                it means:
-                <ul>
-                  <li>
-                    unusable its own way, overriding <code>isDisabled</code>:
-                    <ul>
-                      <li>a form control disables its native control, and stays announced as a disabled control</li>
-                      <li>the button disables its inner <code>&lt;button&gt;</code></li>
-                    </ul>
-                  </li>
-                  <li>
-                    only a look, on text or a glyph: the icon, emoji, header, text and progress dim, and clicks go
-                    through
-                    <ul>
-                      <li>inert would hide their text from a screen reader and find-in-page</li>
-                    </ul>
-                  </li>
-                  <li>
-                    something else: <code>&lt;ui-transition&gt;</code> pauses, <code>&lt;ui-dimmer&gt;</code> never
-                    shows
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Most families take the default: cards, segments, labels, forms, fields, comments, images, tabs ... (epic
-                spell-element, P11).
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>A family with a disabled of its own · <code>UIIcon.tsx · 7 lines</code></ui-title>
-              <ui-content>
-                <pre><code class="language-ts">@E.protoMerged static elementSetup = {
-  styleSheets: { icon: iconCSS },
-  // `disabled`:  only a look
-  disabled: "its own",
-  // `loading`:  it spins
-  loading: "its own"
-} satisfies Partial&lt;E.ElementSetup&gt;</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="shared-loading" label="loading" sticky collapsible dividing open="false">
-            <ul>
-              <li><code>:state(loading)</code> on every element, from <code>isMarkedLoading</code> (true only).</li>
-              <li>
-                <code>elementSetup.loading = "loader"</code>, the default:
-                <ul>
-                  <li><code>aria-busy</code></li>
-                  <li>everything inside inert and dimmed</li>
-                  <li>
-                    a spinner over it, <code>:state(busy)</code>: a <code>::after</code> placed on the first box
-                    <ul>
-                      <li>placed by anchor positioning, as most DOM elements have no box of their own</li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <code>"its own"</code>: the family draws its own, or loading means something else to it.
-                <ul>
-                  <li>its own: the button's spinner, the segment's veil</li>
-                  <li>something else: <code>&lt;ui-root&gt;</code>'s message</li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="shared-visible" label="visible and hidden" sticky collapsible dividing open="false">
-            <p>
-              Shown or hidden is ONE fact about an element, and <code>visible</code> and the platform's
-              <code>hidden</code> are its two names, opposites (epic spell-element, P12).
-            </p>
-            <ul>
-              <li><code>el.visible</code> is always <code>!el.hidden</code>; writing either one sets the fact.</li>
-              <li>
-                The <code>hidden</code> attribute is where it's kept: the browser, CSS and a page before its scripts
-                load all read it.
-              </li>
-              <li>
-                The element writes a <code>visible</code> attribute back only where the page wrote one.
-                <ul>
-                  <li>So a page that only uses <code>hidden</code> never sees visible appear.</li>
-                </ul>
-              </li>
-              <li>
-                Neither written: the family decides, by <code>elementSetup.visible</code> (<code>"shown"</code> by
-                default).
-                <ul>
-                  <li>
-                    A modal, popup, flyout, sidebar, dimmer, loader or transition starts hidden, and writes
-                    <code>hidden</code> on itself when it first connects.
-                  </li>
-                  <li>
-                    Removing <code>visible</code> later, with no hidden written, hands the choice back to the family: a
-                    modal hides, a message stays shown.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Both written in markup and disagreeing: <code>hidden</code> wins (the browser already hid it).
-                <ul>
-                  <li>After the first connect, the latest write wins.</li>
-                </ul>
-              </li>
-              <li>
-                Both animate the same way (<code>animation</code>, below): at once before the element first draws, and
-                wherever motion is off.
-              </li>
-              <li><code>hidden="until-found"</code> stays the browser's: it counts as hidden, and never animates.</li>
-              <li>
-                Two attributes whose old meaning clashed were renamed:
-                <code>&lt;ui-divider spacer&gt;</code> (Fomantic's hidden divider) and
-                <code>&lt;ui-reveal unclipped&gt;</code> (its visible reveal).
-              </li>
-            </ul>
-            <ui-table padding="compact" celled unstackable>
-              <table>
-                <thead>
-                  <tr>
-                    <th>written</th>
-                    <th>after it draws</th>
-                    <th>shows</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><code>&lt;ui-message&gt;</code></td>
-                    <td>unchanged</td>
-                    <td>yes</td>
-                  </tr>
-                  <tr>
-                    <td><code>&lt;ui-message visible="false"&gt;</code></td>
-                    <td><code>visible="false" hidden</code></td>
-                    <td>no</td>
-                  </tr>
-                  <tr>
-                    <td><code>&lt;ui-message hidden visible&gt;</code></td>
-                    <td><code>hidden visible="false"</code></td>
-                    <td>no (<code>hidden</code> wins)</td>
-                  </tr>
-                  <tr>
-                    <td><code>&lt;ui-modal&gt;</code></td>
-                    <td><code>hidden</code> (its family's default)</td>
-                    <td>no</td>
-                  </tr>
-                  <tr>
-                    <td><code>&lt;ui-modal visible&gt;</code></td>
-                    <td>unchanged</td>
-                    <td>yes</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <p>Who does what:</p>
-            <ul>
-              <li>
-                <code>DOMElement</code> ("Shown or hidden") keeps the two names in step, and the fact in
-                <code>attributeValues.visible</code>.
-              </li>
-              <li>
-                <code>UIComponent</code> holds it as <code>isVisible</code>, controlled: a person's action asks first.
-                <ul>
-                  <li>
-                    Closing a modal:
-                    <code>requestChange("isVisible", false, () =&gt; this.send("ui-close", { visible: false }))</code>
-                  </li>
-                  <li>
-                    The events:
-                    <ul>
-                      <li>before: <code>ui-open</code> or <code>ui-close</code>, which a page may cancel</li>
-                      <li>once the animation is done: <code>ui-show</code> or <code>ui-hide</code></li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Each change runs the hook <code>onVisibleChange(visible, animation)</code>.
-                <ul>
-                  <li>
-                    By default: the animation on the shadow root's top-level boxes, through the transitions helper.
-                  </li>
-                  <li>
-                    A family overrides it to show and hide its own way: a dialog's <code>showModal()</code> and
-                    <code>close()</code>.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                While a hide runs, <code>:state(hiding)</code> keeps the element on screen; <code>:state(hidden)</code>
-                once it's done.
-                <ul>
-                  <li>
-                    One rule in the shared reset sheet (<a
-                      href="/spell-ui/src/styles/reset.css"
-                      title="spell-ui/src/styles/reset.css"
-                      target="src-spell-ui-src-styles-reset-css"
-                      ><code>reset.css</code></a
-                    >) does the hiding for every family; a family wanting a hidden look of its own styles
-                    <code>:state(hidden)</code>.
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="shared-animation" label="animation" sticky collapsible dividing open="false">
-            <p>
-              Every element takes <code>animation</code>: how it shows and hides, in the transition's names (fade, fade
-              up, scale ...), or <code>none</code>.
-            </p>
-            <ol>
-              <li>
-                Motion off wins first: the element's own <code>animation="none"</code>, <code>none</code> from around
-                it, or the person's reduced-motion setting.
-                <ul>
-                  <li>An element inside can't turn motion back on.</li>
-                </ul>
-              </li>
-              <li>
-                Then the element's own <code>animation</code> (<code>&lt;ui-modal animation="fly down"&gt;</code>).
-              </li>
-              <li>Then its family's default, <code>elementSetup.animation</code>.</li>
-              <li>Then <code>fade</code>.</li>
-            </ol>
-            <ul>
-              <li>
-                <code>none</code> spreads down through a custom property, <code>--ui-motion: none</code>, which shadow
-                roots inherit too.
-                <ul>
-                  <li>
-                    So one attribute turns off a whole page, <code>&lt;ui-root animation="none"&gt;</code>; or one CSS
-                    line, <code>:root { --ui-motion: none }</code>.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                The switch stills a family's own CSS motion too (an overlay's transition), as reduced motion does; a
-                loader keeps spinning.
-                <ul>
-                  <li>
-                    That part is a CSS style query: a browser without style queries still runs the family's CSS motion,
-                    though showing and hiding stay at once.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <code>:state(still)</code> marks an element whose own animation is <code>none</code>; the reset sheet
-                stills everything inside it by that state, so a translated tag works too.
-              </li>
-              <li>
-                <code>UIComponent.animationToRun</code> works it out. <code>&lt;ui-visibility&gt;</code>'s lazy images
-                use it too; <code>&lt;ui-sidebar transition&gt;</code> (over, push, uncover) is something else and keeps
-                its name.
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="shared-readonly-inert" label="readonly and inert" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <code>readonly</code>: every form control's vocabulary declares it.
-                <ul>
-                  <li>Its property is <code>readOnly</code>.</li>
-                  <li><code>FormComponent.isReadOnly</code> reads it, and sets <code>:state(readonly)</code>.</li>
-                  <li>Each control refuses changes its own way: a native readonly, or a change undone.</li>
-                </ul>
-              </li>
-              <li>
-                <code>inert</code>: the platform's, unstyled. Overlays set it on what they cover, which has a look of
-                its own (<code>&lt;ui-pushable&gt;</code>'s pusher, under its dimmer).
-              </li>
-            </ul>
-          </ui-section>
         </ui-section>
-
-        <ui-section id="errors" label="14. When an element breaks" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="bug"></ui-icon>
-          <p>
-            Every element draws inside an error boundary of its own (Solid's <code>&lt;Errored&gt;</code>, in
-            <code>mount()</code>). When its constructor, <code>render()</code> or an effect throws:
-          </p>
-          <ol>
-            <li>it gets <code>:state(errored)</code></li>
-            <li>one <code>console.error</code> names the tag</li>
-            <li>
-              it sends a cancelable <code>ui-error</code> (<code>{ error }</code>): an app that cancels it keeps the
-              fallback away
-            </li>
-            <li><code>domElement.ready</code> resolves, and the broken component is dropped</li>
-            <li>
-              a microtask later it shows its fallback: a form control's plain native one
-              (<code>elementSetup.Fallback</code>), else a bare <code>&lt;slot&gt;</code>, so its children still show
-            </li>
-          </ol>
-          <ul>
-            <li>
-              The rest of the page keeps working: without a net per element, one error would halt Solid for the whole
-              page.
-            </li>
-            <li>A container's net can't catch it instead: each element's Solid root has no parent.</li>
-            <li>
-              The fallbacks and why only form controls have one:
-              <a href="/guides/ui/notes/fallback.md" target="src-guides-ui-notes-fallback-md"><code>fallback.md</code></a
-              >.
-            </li>
-          </ul>
-          <ui-accordion class="spell-code" appearance="styled">
-            <ui-title>onError() · <code>UIComponent.tsx · 8 lines</code></ui-title>
-            <ui-content>
-              <pre><code class="language-ts">private static onError(domElement: DOMElement, error: unknown): boolean {
-  domElement.setState(E.ERRORED_STATE, true)
-  console.error(`&lt;${domElement.localName}&gt; failed:`, error)
-  domElement.component = undefined
-  domElement.markReady()
-  const event = new CustomEvent(E.ERROR_EVENT, { bubbles: true, composed: true, cancelable: true, detail: { error } })
-  return domElement.dispatchEvent(event)
-}</code></pre>
-            </ui-content>
-          </ui-accordion>
-        </ui-section>
-
-        <ui-section id="hot-reload" label="15. Hot reload" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="arrows rotate"></ui-icon>
-          <ul>
-            <li>
-              In <code>yarn dev</code> (in
-              <a href="/spell-ui/" title="spell-ui" target="src-spell-ui"><code>ui</code></a
-              >), an edit to a family's component, vocabulary, fallback or sheet updates every live element in place:
-              the elements, their attributes and properties stay; their inner state (a query, an open menu) resets.
-            </li>
-            <li>
-              The browser can't define a tag twice, so the tag's DOM element class STAYS, and what it reads is swapped
-              in place.
-              <ul>
-                <li>
-                  <a
-                    href="/src/element/HotDefinitions.ts"
-                    title="src/element/HotDefinitions.ts"
-                    target="src-src-element-hotdefinitions-ts"
-                    ><code>HotDefinitions</code></a
-                  >
-                  does the swap.
-                </li>
-                <li>
-                  The Vite plugin
-                  <a
-                    href="/src/element-tools/HotElements.ts"
-                    title="tools/HotElements.ts"
-                    target="src-src-element-tools-hotelements-ts"
-                    ><code>HotElements.ts</code></a
-                  >
-                  loads it into each family barrel.
-                </li>
-              </ul>
-            </li>
-            <li>
-              What the platform reads only once reloads the page instead:
-              <ul>
-                <li>the observed attributes</li>
-                <li><code>formAssociated</code></li>
-                <li>the DOM element's class</li>
-                <li>shadow root options</li>
-                <li>
-                  any edit to shared code: <code>core</code>, <code>forms</code>, the runtime, or
-                  <a href="/spell-ui/src/elements/" title="src/elements/" target="src-spell-ui-src-elements"
-                    >the elements folder</a
-                  >
-                </li>
-              </ul>
-            </li>
-            <li>
-              <code>yarn test:hmr</code> must pass after touching either:
-              <ul>
-                <li><code>HotDefinitions</code></li>
-                <li><code>UIComponent.define()</code></li>
-              </ul>
-            </li>
-          </ul>
-          <ui-accordion class="spell-code" appearance="styled">
-            <ui-title>The wrapped define() · <code>HotDefinitions.ts · 14 lines</code></ui-title>
-            <ui-content>
-              <pre><code class="language-ts">static define(Class: E.UIComponentClass, tag?: string, dictionary?: E.Dictionary): CustomElementConstructor {
-  const original = HotDefinitions.original!
-  const resolved = new E.ElementDefinition(Class.prototype.vocabulary, { tag, dictionary }).tag
-  const known = HotDefinitions.tags.get(resolved)
-  if (!known) {
-    HotDefinitions.tags.set(resolved, { Class, tag, dictionary })
-    return original.call(Class, tag, dictionary)
-  }
-  const defined = customElements.get(resolved)
-  if (!defined || known.Class === Class || known.Class.name !== Class.name)
-    return original.call(Class, tag, dictionary)
-  HotDefinitions.replace(known.Class, Class)
-  return defined
-}</code></pre>
-            </ui-content>
-          </ui-accordion>
-        </ui-section>
-
-        <ui-section id="static-render" label="16. The static server render" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="desktop"></ui-icon>
-          <p>
-            For search engines and readers without JavaScript, a page of <code>ui-*</code> elements can be rendered in
-            node to plain HTML: no shadow DOM, no scripts (<code>spell-ui/static</code>).
-          </p>
-          <ol>
-            <li>
-              <code>StaticRender.define(UIButton, ...)</code> records the families (node has no
-              <code>customElements</code>)
-            </li>
-            <li>
-              <code>await StaticRender.prepare(html)</code> loads icons and data;
-              <code>StaticRender.page(html)</code> then parses the page
-            </li>
-            <li>
-              each <code>ui-*</code> element becomes a stand-in DOM element (<code>ServerDOMElement</code>):
-              <ul>
-                <li>the real element</li>
-                <li>
-                  plus <code>attributeValues</code>, <code>internals</code> and the rest of the API a component reads
-                </li>
-              </ul>
-            </li>
-            <li>
-              every component is built (owners first), then rendered to HTML with Solid's <code>renderToString</code>
-            </li>
-            <li>
-              each element is swapped for its rendered root, slots for their children; <code>:state()</code>s and ARIA
-              become classes and attributes
-            </li>
-          </ol>
-          <ul>
-            <li>Hooks don't run there: nothing connects.</li>
-            <li>
-              Effects don't either, so a member that writes the DOM element is <code>@E.aria</code> or
-              <code>@E.onChange(..., { writesDOMElement: true })</code>: those apply once.
-            </li>
-            <li>Code that touches the DOM in a constructor checks <code>isServer</code>.</li>
-            <li>The plan behind it: <a href="/epics/seo/seo.plan.html" target="seo">epic seo</a>.</li>
-          </ul>
-          <ui-accordion class="spell-code" appearance="styled">
-            <ui-title>StaticRender.page() · <code>StaticRender.ssr.ts · 5 lines</code></ui-title>
-            <ui-content>
-              <pre><code class="language-ts">static page(html: string): string {
-  const { document } = parseHTML(html)
-  StaticRender.render(document)
-  return (document.doctype ? "&lt;!doctype html&gt;\n" : "") + document.documentElement.outerHTML
-}</code></pre>
-            </ui-content>
-          </ui-accordion>
-        </ui-section>
-
-        <ui-section id="sources" label="17. Further reading" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="book"></ui-icon>
-          <ui-items class="spell-sources" divided>
-            <ui-item>
-              <ui-content>
-                <ui-header
-                  ><a href="/guides/solid/solid-2.html" target="src-guides-solid-solid-2-html">Solid 2</a></ui-header
-                >
-                <ui-meta>guide</ui-meta>
-                <ui-description
-                  >Solid's own rules: no writes while drawing, effects in two halves, eager memos.</ui-description
-                >
-              </ui-content>
-            </ui-item>
-            <ui-item>
-              <ui-content>
-                <ui-header
-                  ><a href="/spell-ui/AGENTS.md" title="spell-ui/AGENTS.md" target="src-spell-ui-agents-md"
-                    >ui's <code>AGENTS.md</code></a
-                  ></ui-header
-                >
-                <ui-meta>the rules, short</ui-meta>
-                <ui-description
-                  >"Solid authoring", "Classes", "Events": the same ground as this guide, as rules for
-                  agents.</ui-description
-                >
-              </ui-content>
-            </ui-item>
-            <ui-item>
-              <ui-content>
-                <ui-header
-                  ><a
-                    href="/spell-ui/src/elements/"
-                    title="spell-ui/src/elements/"
-                    target="src-spell-ui-src-elements"
-                    ><code>elements/</code></a
-                  ></ui-header
-                >
-                <ui-meta>the code</ui-meta>
-                <ui-description
-                  >Every class's docstring says what it is first. Start with:
-                  <ul>
-                    <li>
-                      <a href="/src/element/DOMElement.ts" target="src-src-element-domelement-ts"
-                        ><code>DOMElement.ts</code></a
-                      >
-                    </li>
-                    <li>
-                      <a href="/src/element/UIComponent.tsx" target="src-src-element-uicomponent-tsx"
-                        ><code>UIComponent.tsx</code></a
-                      >
-                    </li>
-                    <li>
-                      <a href="/src/element/Reactive.ts" target="src-src-element-reactive-ts"
-                        ><code>Reactive.ts</code></a
-                      >
-                    </li>
-                    <li>
-                      <a href="/src/element/ElementDefinition.ts" target="src-src-element-elementdefinition-ts"
-                        ><code>ElementDefinition.ts</code></a
-                      >
-                    </li>
-                    <li>
-                      <a href="/src/element/ShadowEvents.ts" target="src-src-element-shadowevents-ts"
-                        ><code>ShadowEvents.ts</code></a
-                      >
-                    </li>
-                    <li>
-                      <a href="/src/element/HotDefinitions.ts" target="src-src-element-hotdefinitions-ts"
-                        ><code>HotDefinitions.ts</code></a
-                      >
-                    </li>
-                  </ul></ui-description
-                >
-              </ui-content>
-            </ui-item>
-            <ui-item>
-              <ui-content>
-                <ui-header
-                  ><a
-                    href="/guides/custom-elements/experiments/ui-counter/"
-                    title="experiments/ui-counter/"
-                    target="src-guides-custom-elements-experiments-ui-counter"
-                    ><code>ui-counter/</code></a
-                  ></ui-header
-                >
-                <ui-meta
-                  >experiment ·
-                  <code
-                    >cd packages/docs &amp;&amp; yarn tsx tools/bundle-experiment.ts
-                    ../../guides/custom-elements/experiments/custom-elements.entry.ts</code
-                  ></ui-meta
-                >
-                <ui-description
-                  >The teaching element, and the script this page loads; rebuild it after editing the counter, or when
-                  <code>&lt;ui-docs-inspector&gt;</code> changes.</ui-description
-                >
-              </ui-content>
-            </ui-item>
-            <ui-item>
-              <ui-content>
-                <ui-header
-                  ><a href="/epics/spell-element/spell-element.plan.html" target="spell-element"
-                    >Epic spell-element</a
-                  ></ui-header
-                >
-                <ui-meta>epic page</ui-meta>
-                <ui-description
-                  >How solid-element was folded into <code>DOMElement</code> and <code>UIComponent</code>, and the
-                  decisions behind this guide (Q15, Q16, Q23, Q24).</ui-description
-                >
-              </ui-content>
-            </ui-item>
-            <ui-item>
-              <ui-content>
-                <ui-header
-                  ><a
-                    href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components"
-                    target="ext-developer-mozilla-org-en-us-docs-web-api-web-components"
-                    >MDN: Web Components</a
-                  ></ui-header
-                >
-                <ui-meta>reference</ui-meta>
-                <ui-description>The platform's side, in full.</ui-description>
-              </ui-content>
-            </ui-item>
-          </ui-items>
-        </ui-section>
-
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">Last checked 2026-10-10 against branch <code>spell-element</code>.</p>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
         </footer>
       </main>
     </div>

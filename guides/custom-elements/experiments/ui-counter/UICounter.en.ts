@@ -7,7 +7,7 @@
  * - A GUIDE-ONLY element (`guides/custom-elements/experiments/`):  not part of Spell UI, its site or its bundles.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `counterVocabulary`
