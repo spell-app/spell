@@ -314,6 +314,17 @@ export type ImportMap = {
 export const SPELL_UI_ROOT = resolve(fileURLToPath(import.meta.url), "../../..")
 
 /**
+ * The Spell UI site's folder, absolute:  Spell UI's pages as Spell, one project of notebooks,
+ * `@spell/guides/SpellUI` (epic `notebook` P10), its site file `SpellUI.spell`.
+ * - Found through the kit's package (`spell/package.json`), never by a path from Spell UI's folder.
+ * - `yarn site:kitchen` writes its Kitchen Sink page (epic `editor` P42).
+ */
+export const SPELL_UI_SITE_FOLDER = join(
+  resolve(fileURLToPath(import.meta.resolve("spell/package.json")), ".."),
+  "app/spaces/@spell/guides/SpellUI"
+)
+
+/**
  * Spell UI's docs site's PAGES, from the repo's root:  its `docs/` folder, a component set laid out as every set is
  * (epic `people-and-orgs` P18;  until then the epic repo, the checkout's `ui/`, from claude-design P6).
  * - What's in it:

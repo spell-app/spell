@@ -303,6 +303,10 @@ export class SpellMarkup {
 
   /** `element` in bare names:  its children a line each, or on its own line when it mixes text and elements. */
   private writeBare(out: Writer, element: Element, indent: number, place: Place) {
+    if (element.localName === "ui-json" && element.textContent!.trim()) {
+      this.writeJson(out, element, indent, place)
+      return
+    }
     if (isParagraph(element) && [...element.childNodes].some(isLineBreak)) {
       this.writeParagraph(out, element, indent, place)
       return
@@ -318,6 +322,18 @@ export class SpellMarkup {
       this.writeMarkup(out, kids, indent + 1, place)
       out.line(indent, closerOf(this.bareNameOf(element.localName)!, place))
     }
+  }
+
+  /** A `<ui-json>` as Spell's `<json>`:  its text as written, dedented, one tab in;  JSON's braces aren't Spell's. */
+  private writeJson(out: Writer, element: Element, indent: number, place: Place) {
+    const text = dedented(element.textContent ?? "")
+    if (!text.includes("\n")) {
+      out.line(indent, `${this.openTag(element)}${text}${closerOf("json", place)}`)
+      return
+    }
+    out.line(indent, this.openTag(element))
+    for (const line of text.split("\n")) out.line(line ? indent + 1 : 0, line)
+    out.line(indent, closerOf("json", place))
   }
 
   /**
@@ -507,6 +523,8 @@ export class SpellMarkup {
     if (tag === "label") return this.fieldLabelOf(element) ? [] : [element]
     if (tag === "kbd") return [this.keysOf(element) ?? element]
     if (tag === "br") return [this.spaceFor(element)]
+    if (tag === "button") SpellMarkup.dropSemanticButton(element)
+    if (tag === "script") return [SpellMarkup.jsonFor(element) ?? element]
     const swap = WEB_TAGS[tag]
     if (!swap || hasOwnAttributes(element, Object.keys(swap.renamed ?? {}))) return [element]
     const document = element.ownerDocument
@@ -517,6 +535,35 @@ export class SpellMarkup {
     replacement.append(...element.childNodes)
     element.replaceWith(replacement)
     return [replacement]
+  }
+
+  /**
+   * A `<script type="application/json">` a diagram reads (`<ui-diagram>`, `<ui-tree-diagram>`), as the
+   * `<ui-json>` it reads the same way, swapped in its place:  Spell's `<json>`, its text kept as written.
+   * - `undefined` for any other script, and inside a `<ui-json>` (its own example of a script child).
+   */
+  private static jsonFor(script: Element): Element | undefined {
+    if (!/^application\/json$/.test(script.getAttribute("type") ?? "")) return undefined
+    if (!JSON_READERS.has(script.parentElement?.localName ?? "")) return undefined
+    const json = script.ownerDocument.createElement("ui-json")
+    json.textContent = script.textContent
+    script.replaceWith(json)
+    return json
+  }
+
+  /**
+   * A native `<button class="ui button">`, Semantic's look, made a plain button so it swaps for a `<ui-button>`:
+   * its `ui` and `button` class words dropped, and its `type="button"` (a `<ui-button>` sends no form by itself).
+   * - Why:  Spell UI's pages draw every button with `<ui-button>` (epic `solid-2-final` I2, epic `editor` P42).
+   * - SIDE EFFECT:  changes `button`'s attributes in place.
+   */
+  private static dropSemanticButton(button: Element) {
+    const words = (button.getAttribute("class") ?? "").split(/\s+/).filter(Boolean)
+    if (!words.includes("ui") || !words.includes("button")) return
+    const rest = words.filter((word) => word !== "ui" && word !== "button")
+    if (rest.length) button.setAttribute("class", rest.join(" "))
+    else button.removeAttribute("class")
+    if (button.getAttribute("type") === "button") button.removeAttribute("type")
   }
 
   /**
@@ -752,7 +799,8 @@ function defaultTagFor(bare: string): string | undefined {
 /** `name="value"` in Spell's markup:  a boolean bare, its value escaped (`escapeAttribute()`). */
 function attributeText(name: string, value: string): string {
   if (value === "" && !STRING_ATTRIBUTES.test(name)) return name
-  return `${name}="${escapeAttribute(value)}"`
+  // a value the formatter wrapped across lines (a long `style`) is one line in Spell
+  return `${name}="${escapeAttribute(collapsed(value))}"`
 }
 
 /** A quoted value's `"` and `\` escaped, and its `[` a real bracket (`\[`), not a fill-in. */
@@ -905,7 +953,17 @@ const WEB_TAGS: Record<string, { tag: string; bare?: string[]; renamed?: Record<
   ol: { tag: "ui-list", bare: ["ordered"] },
   li: { tag: "ui-item" },
   section: { tag: "ui-section" },
-  button: { tag: "ui-button", renamed: { type: "type", name: "name", value: "value", disabled: "disabled" } },
+  button: {
+    tag: "ui-button",
+    renamed: {
+      type: "type",
+      name: "name",
+      value: "value",
+      disabled: "disabled",
+      commandfor: "commandfor",
+      command: "command"
+    }
+  },
   div: { tag: "ui-stack" },
   form: { tag: "ui-form" }
 }
@@ -924,6 +982,9 @@ const CELL_ALIGNMENT = /^(left|center|right|justified|top|middle|bottom) aligned
 
 /** The alignments that are vertical:  a cell's `vertical-align`. */
 const VERTICAL_ALIGNMENTS = new Set(["top", "middle", "bottom"])
+
+/** Spell UI's elements that read a JSON child as their data:  a `<script type="application/json">` there is a `<ui-json>`. */
+const JSON_READERS = new Set(["ui-diagram", "ui-tree-diagram"])
 
 /** Tags whose insides are never swapped:  their text is code or data, or the web's own markup inside a template. */
 const KEPT_AS_WRITTEN = new Set(["script", "style", "pre", "template", "svg", "math"])

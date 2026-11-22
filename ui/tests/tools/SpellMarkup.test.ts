@@ -87,4 +87,18 @@ describe("SpellMarkup.body()", () => {
     expect(text).toContain("<!-- GAP:  later -->")
     expect(text).toContain("<text>&#123;x&#125; \\[y]</text>")
   })
+
+  test('a Semantic button (class="ui button") is a Spell UI button, its invoker command kept', () => {
+    const text = bodyOf(
+      `<ui-example heading="Modal"><button type="button" class="ui button" commandfor="m" command="--show">Show</button></ui-example>`
+    )
+    expect(text).toMatch(/<button (commandfor="m" command="--show"|command="--show" commandfor="m")>Show<\/button>/)
+  })
+
+  test("a diagram's JSON script is its <json>, the JSON kept as written", () => {
+    const text = bodyOf(
+      `<ui-example heading="Data"><ui-tree-diagram><script type="application/json">{ "label": "Add" }</script></ui-tree-diagram></ui-example>`
+    )
+    expect(text).toContain('<json>{ "label": "Add" }</json>')
+  })
 })
