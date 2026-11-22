@@ -11,13 +11,16 @@ import {
   BUNDLE_WAIT_MS,
   componentSetPath,
   componentSets,
+  engineRoutePath,
+  engineRoutes,
   folderUrl,
   pageServerSettings,
-  type ComponentSet
+  type ComponentSet,
+  type EngineRoute
 } from "spell/server/page"
 
 /**
- * Builds the bundles the page server serves, as it starts (`PageServer.start()`).
+ * Builds the bundles the page server serves, once it listens (`PageServer.start()`).
  * - the bundles:  the Spell UI docs site's;  built on demand, never committed
  *   - and the committed generated files (`SRV.BundleSpec.committed`:  Spell UI's root catalog, the epics pack,
  *     spell-epic's docs bundle):  rebuilt only in a worktree;  the main checkout's run logs what to run (epic
@@ -25,13 +28,16 @@ import {
  *   - `folders`:  the settings' `"bundles"`, every installed repo's (`pageServerSettings()`)
  * - `start()`:  runs `spell bundle --stale` in the background, with the checkout's OWN `spell` (the kit's, as its
  *   install resolves it)
- *   - it builds only the bundles whose sources changed since their last build (the logic:  `spell/server` `Bundle`)
+ *   - it builds only the bundles whose sources changed since their last build, or that lost a file it made
+ *     (the logic:  `spell/server` `Bundle`)
  *   - so a start with nothing changed builds nothing
  * - its output goes to the server's log, each line prefixed `bundles:  ` (`SRV.ServerLog`, `server:bundles`)
  *   - shown:  each bundle built, and what failed;  each build a group of its own
  *   - debug (`SPELL_DEBUG=server:bundles`):  the checks, "current", the files and sizes each build wrote
- * - `wait`:  while it runs, a request for a MISSING file in a bundle's folder waits for it to end,
+ * - `wait`:  while it runs, a request for a MISSING built file waits for it to end,
  *   at most `timeout` ms, then is served as usual;  a file that's there is served at once
+ *   - and with none running, such a request STARTS one when a bundle lost a file (`repairIfMissing()`):
+ *     nothing else notices a deletion, as no source changed (epic `epic-engine` I364)
  * - when it ends, live reload reloads the open pages that load a bundle:  the page server watches both folders
  * - `watch()`:  and again whenever a bundle's SOURCES change while it runs (a merge into this checkout, an edit), once
  *   they've been quiet `REBUILD_QUIET_MS`:  so a merge never leaves pages on an old bundle (epic `epic-engine`, 2026-10-25:
@@ -52,6 +58,18 @@ export class BundleBuild {
 
   /** the component sets, whose `_assets/` are a bundle's folder:  its settings' `componentSets`, read once */
   readonly sets: readonly ComponentSet[]
+
+  /** the engine routes, some leading to built files (`/_epic/pack/`):  its settings' `engineRoutes`, read once */
+  readonly routes: readonly EngineRoute[]
+
+  /** `start()` was called, and `stop()` not since:  only then does a missing file start a build */
+  private builds = false
+
+  /** `bundles`, once asked */
+  private foundBundles?: SRV.Bundle[]
+
+  /** `places`, once asked */
+  private foundPlaces?: string[]
 
   /** starts the child:  `node:child_process`'s `spawn`, or a test's stub */
   private spawn: SpawnBuild
@@ -81,11 +99,30 @@ export class BundleBuild {
     const settings = pageServerSettings(root)
     this.folders = settings.bundles ?? []
     this.sets = componentSets(settings)
+    this.routes = engineRoutes(settings)
   }
 
   /** Is the build running? */
   get isBuilding(): boolean {
     return this.child !== undefined
+  }
+
+  /** the bundles that are never committed, found when first asked;  none when the settings name one nobody builds */
+  private get bundles(): SRV.Bundle[] {
+    if (this.foundBundles) return this.foundBundles
+    try {
+      this.foundBundles = SRV.Bundle.all(this.root).filter((bundle) => !bundle.spec.committed)
+    } catch (ignored) {
+      this.log.debug("can't tell what the bundles write:", ignored)
+      this.foundBundles = []
+    }
+    return this.foundBundles
+  }
+
+  /** where built files are, from `root`:  the bundles' folders, and the files some builds write beside theirs */
+  private get places(): string[] {
+    this.foundPlaces ??= [...new Set([...this.folders, ...this.bundles.flatMap((bundle) => bundle.outputs)])]
+    return this.foundPlaces
   }
 
   /** the checkout's own `spell`:  the kit's `bin/spell.mjs`, as `root`'s install resolves it (`kitSpell()`) */
@@ -99,6 +136,7 @@ export class BundleBuild {
    * - NEVER throws:  a failed build is logged, and leaves its bundle stale for the next start
    */
   start(): this {
+    this.builds = true
     const cli = this.cli
     if (this.child || !cli || !existsSync(cli)) return this
     const args = [cli, "bundle", "--stale"]
@@ -196,6 +234,7 @@ export class BundleBuild {
 
   /** Stop the build, if it runs:  its whole process group;  and stop watching.  NEVER throws. */
   stop(): void {
+    this.builds = false
     clearTimeout(this.quiet)
     for (const watcher of this.watchers) watcher.close()
     this.watchers = []
@@ -223,31 +262,46 @@ export class BundleBuild {
   }
 
   /**
-   * The router handler:  while the build runs, a request for a missing file in a bundle's folder waits for it.
-   * - this checkout's own bundles only, not `/worktrees/<w>/...`, at the URL path each folder is served at
+   * Is URL path `path` a built file that isn't there?  If so, and a bundle lost a file, build again.
+   * - SIDE EFFECT:  may start the build, once `start()` has been called and while none runs
+   * - a name no build made (an old page's chunk), every bundle whole:  builds nothing
+   */
+  repairIfMissing(path: string): boolean {
+    const file = this.bundleFileFor(path)
+    if (!file || existsSync(file)) return false
+    if (this.builds && !this.child && this.bundles.some((bundle) => bundle.isIncomplete))
+      this.checkAgain(`a built file is missing, asked for at ${path}`)
+    return true
+  }
+
+  /**
+   * The router handler:  a request for a missing built file waits for the build, which it may start
+   * (`repairIfMissing()`).
+   * - this checkout's own bundles only, at the URL path each is served at
    *   (`folderUrl()`;  beside the checkout, `/_beside/...`):
    *   - `/_beside/spell-x/_assets/ui/...`
    *   - `/_beside/ui/site/_assets/...`, and the same laid over a component set's pages at
    *     `/components/<set>/_assets/...` (`componentSetPath()`)
+   *   - `/_epic/assets/spell-ui/...`, `/_epic/pack/...`, the engine routes (`engineRoutePath()`):
+   *     this checkout's copy under a worktree's address too
    */
   wait: Handler = async (request, _reply, next) => {
-    if (!this.child || (request.method !== "GET" && request.method !== "HEAD")) return next()
-    const file = this.bundleFileFor(request.path)
-    if (file && !existsSync(file)) await this.untilBuilt()
+    if (request.method !== "GET" && request.method !== "HEAD") return next()
+    if (this.repairIfMissing(request.path)) await this.untilBuilt()
     next()
   }
 
-  /** The file in a bundle's folder URL path `path` names, through the sets' overlay;  else `undefined`. */
+  /** The built file URL path `path` names (`places`), through the sets' and engine routes' overlays;  else `undefined`. */
   bundleFileFor(path: string): string | undefined {
     let served: string
     try {
-      served = decodeURIComponent(componentSetPath(path, this.sets) ?? path)
+      served = decodeURIComponent(componentSetPath(path, this.sets) ?? engineRoutePath(path, this.routes) ?? path)
     } catch {
       return undefined
     }
-    const folder = this.folders.find((each) => served.startsWith(`${folderUrl(each)}/`))
-    if (!folder || served.split("/").includes("..")) return undefined
-    return join(this.root, folder, served.slice(folderUrl(folder).length))
+    const place = this.places.find((each) => `${served}/`.startsWith(`${folderUrl(each)}/`))
+    if (!place || served.split("/").includes("..")) return undefined
+    return join(this.root, place, served.slice(folderUrl(place).length))
   }
 }
 

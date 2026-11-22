@@ -178,6 +178,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Nothing restarts it by itself:  the next `spell server start` (an opener, `/airplane`),
         or the side bar's "Restart Page Server".  Its open pages reconnect (`hello`), and reload only for code of
         theirs that changed (epic `epic-engine` I293).
+    - `ensure` waits for the server it started AS LONG AS that's still starting (epic `epic-engine` I362):
+      until it answers, or its process ends (said at once, how it ended the log's last line)
+      - 2 minutes with neither (`START_LIMIT_MS`) is hung:  it's stopped, so none given up on listens just after
+      - a caller with a time limit of its own allows more than that (Spell UI's `ensurePageServer()`)
+      - Why:  it was a flat 15s;  on a busy machine the server listened just after, and its starter had failed
+      - the page server listens BEFORE it begins the bundles' build (`PageServer.start()`), for the same reason
     - `stop` waits for the old PROCESS to end (`SIGTERM`, then `SIGKILL` after 10s), not just for it to stop answering.
       - Why:  it stops answering before it lets go of its port.
         `ensure` started the new one while the old one held the port, so the new one took another port,
@@ -461,11 +467,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `<prefix>` redirects to `<prefix>/`:  the one redirect left.
       - Live reload watches each set's folder and its bundle, reporting their changes at the set's address.
       - Settings that name no sets:  no sets served.
-    - The bundles it serves are NOT committed:  it builds the stale ones as it starts
+    - The bundles it serves are NOT committed:  it builds the stale ones once it listens
       (`BundleBuild`, in [page/](page/BundleBuild.ts):  `spell bundle --stale`, as a child;  spell-app's until P16).
       - and again whenever their sources change while it runs (`BundleBuild.watch()`), once quiet 3s:  a merge into
         the checkout never leaves pages on an old bundle (epic `epic-engine`, 2026-10-25)
-      - A request for a MISSING file of one waits while that runs (`BUNDLE_WAIT_MS`).
+      - A request for a MISSING file of one waits while that runs (`BUNDLE_WAIT_MS`),
+        at the engine routes too (`/_epic/pack/`, `/_epic/assets/spell-ui/`).
+      - With none running, that request starts one when a bundle lost a file (`repairIfMissing()`, epic
+        `epic-engine` I364):  no watcher sees a deleted output, as no source changed.
       - A worktree's too, seen through this server (`worktreeBuildFor()`, r35):  built by the worktree's own `spell`
         at the first request at its address, a page of any kind (an epic page too, since epic `epic-engine` P54), then
         watched;  while it builds, requests at its sets' addresses wait, pages too
@@ -803,7 +812,8 @@ The steps between a page's content and its file on disk, for every tool that wri
     - `ui-site`:  Spell UI's docs site
     - `epics-pack`:  the epics pack's script and its families' modules
     - `epic-docs`:  the docs pages' bundle (`_assets/spell-ui/`), and the scripts beside it
-  - `check()`:  stale when never built, its entry missing or rewritten, or its sources' hash changed.
+  - `check()`:  stale when never built, its entry rewritten, its sources' hash changed,
+    or ANY file its build made is missing (epic `epic-engine` I364):  a lazy engine, a chunk, a script beside its folder.
   - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog
     (the epics pack and spell-epic's docs bundle were too, until epic `solid-2-final` P7:  bundles now, git-ignored)
     - built by `--stale` only in a worktree (`buildsWhenStale`);  named (`spell bundle ui-root`), anywhere
@@ -811,12 +821,15 @@ The steps between a page's content and its file on disk, for every tool that wri
     - the main checkout tells by its `check` command (`yarn pack:check`);  a worktree by its record, or that check
       when it has none
     - what its build writes beside other sources (`generated`) is no bundle's source, so no build makes another stale
-  - `build()`:  runs its package's script, then records the hash in its output folder (`.bundle.json`).
+  - `build()`:  runs its package's script, then records the hash and the files it made in its output folder
+    (`.bundle.json`):  everything there, and under its `generated`, as the build ends.
+    - so a file a build writes outside its output folder is listed in `generated`, or it isn't required
+    - `isIncomplete`:  a file gone, asked without reading a source
   - `firstLoad()`:  what a page loads first of a bundle, each file sized raw, gzipped and brotli (`sizesOf()`):
     the ONE way a bundle is sized, by `sizeReport()` and the app's size budgets (`spell perf budget`, epic
     `solid-2-final` P1)
   - Its command line:  `spell bundle [<name>...] [--stale]` / `check`.
-  - The page server runs `build --stale` when it starts:  `BundleBuild`, in `page/`.
+  - The page server runs `build --stale` once it listens:  `BundleBuild`, in `page/`.
   - Why (Owen, 2026-10-07):  their chunk names carry content hashes,
     so every Spell UI change deleted and re-added most of their files, in every diff and merge.
   - A new bundle:

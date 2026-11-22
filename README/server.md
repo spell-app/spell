@@ -318,7 +318,9 @@ _A server older than its own code is restarted, so after a merge the next opener
 
 Cold, with every repo installed, the server answers in about a second and a half,
 because it loads eleven route modules before it listens;  with none to load, in about a quarter of a second.
-`ensure()` gives up after 15 s, and points at the log.
+`ensure()` waits as long as the server is still starting, however busy the machine.
+One that stops first is reported at once;  one still silent after 2 minutes is stopped.
+Both point at the log.
 
 "Older than its code" means older than the server's folder or its route modules' folders.
 Nothing restarts a server on its own:  the next opener does, and the open pages reload when they hear the new run.
@@ -570,27 +572,28 @@ Every Spell UI change deleted and re-added most of them, in every diff and every
 for (const bundle of SRV.Bundle.all(root)) if (bundle.isStale) bundle.build()
 ```
 
-- Stale:  never built, its entry missing or newer than its build, or its sources' hash changed.
-- `build()` runs the package's script, then records the hash in its output folder (`.bundle.json`).
+- Stale:  never built, any file its build made missing, its entry newer than its build, or its sources' hash changed.
+- `build()` runs the package's script, then records the hash and the files it made, in its output folder (`.bundle.json`).
 - Which bundles exist:  the settings' `bundles` list (spell-ui's part names `ui-site`'s);  how each is built:
   `BUNDLES`.
   Each is found by its package, through `node_modules`, wherever its repo is.
 - By hand:  `spell bundle [<name>...] [--stale]`, `spell bundle check [<name>...]`;  `--json` for either.
 - A new bundle:  a `BUNDLES` entry;  its output folder in the settings' `bundles` list, and in its repo's `.gitignore`.
 
-The page server builds the stale ones itself, as it starts
+The page server builds the stale ones itself, once it's listening
 ([BundleBuild.ts](../src/server/page/BundleBuild.ts)):
-- It runs `spell bundle --stale` as a child process, which rebuilds only a bundle whose sources changed.
+- It runs `spell bundle --stale` as a child process, which rebuilds only a bundle that's stale.
   A start with nothing changed builds nothing.
 - It runs the kit's OWN `spell`, as the kit's install finds it, never the one on your PATH:
   so a worktree's server builds with the worktree's code.
 - Its output goes to the server's log, each line starting `bundles:  `:
   each bundle it builds and what failed;  the rest only with `SPELL_DEBUG=server:bundles`.
-- A request for a bundle's file that isn't there yet waits for the build, up to two minutes.
+- A request for a bundle's file that isn't there waits for the build, up to two minutes,
+  and starts one if none runs and a bundle lost a file.
   Then it's answered as things stand:  a 404, if the file is still missing.
   A file that's there is served at once.
 - When the build ends, live reload reloads the pages that load the bundle.
-- Only this server's own bundles wait, for `GET` and `HEAD`;  a request under `/worktrees/<w>/` never does.
+- Only this server's own bundles wait, for `GET` and `HEAD`;  a worktree's own wait at its component sets' addresses.
   A build that fails is logged, and leaves the bundle stale until the next start.
 
 ### Data files

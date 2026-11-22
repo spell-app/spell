@@ -193,6 +193,71 @@ describe("PidFile.ensure(), a server on older code", () => {
   })
 })
 
+// epic `epic-engine` I362:  it gave up after 15s, and the server it started listened just after
+describe("PidFile.ensure():  waits for the server it started, as long as that's still starting", () => {
+  let root: string
+
+  beforeEach(() => {
+    root = realpathSync(mkdtempSync(join(tmpdir(), "pid-file-start-")))
+  })
+
+  afterEach(async () => {
+    vi.restoreAllMocks()
+    await new SRV.PidFile(root).stop()
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  /** a command that runs node `code` */
+  const node = (code: string) => [process.execPath, "-e", code]
+
+  it("one that answers after 20s, still running:  waited for", async () => {
+    const started = Date.now.bind(Date)
+    let later = 0
+    vi.spyOn(Date, "now").mockImplementation(() => started() + later)
+    const jump = setTimeout(() => (later = 20_000), 100)
+    try {
+      const command = node(`setTimeout(() => { ${serverAnswering(root)} }, 600)`)
+      expect(await new SRV.PidFile(root).ensure({ command })).toMatchObject({ launched: true, root })
+    } finally {
+      clearTimeout(jump)
+    }
+  })
+
+  it("one that ends before it answers:  says so in seconds, not once the time is up", async () => {
+    const ended = new SRV.PidFile(root).ensure({ command: node("process.exit(3)") })
+    await expect(ended).rejects.toThrow(/stopped before it was ready\..+\.spell-server\.log/)
+    expect(readFileSync(join(root, ".spell-server.log"), "utf8")).toContain("The start failed:  exit 3")
+  }, 8000)
+
+  it("a program that can't be run:  says why", async () => {
+    const unknown = new SRV.PidFile(root).ensure({ command: [join(root, "no-such-program")] })
+    await expect(unknown).rejects.toThrow(/stopped before it was ready\./)
+    expect(readFileSync(join(root, ".spell-server.log"), "utf8")).toMatch(/The start failed:.+ENOENT/)
+  }, 8000)
+
+  it("one still not answering when the time is up is stopped:  so it can't listen just after", async () => {
+    const marker = join(root, "starting.pid")
+    const command = node(
+      `require('node:fs').writeFileSync(${JSON.stringify(marker)}, String(process.pid)); setInterval(() => {}, 1000)`
+    )
+    await expect(new SRV.PidFile(root).ensure({ command, timeout: 2000 })).rejects.toThrow(/took more than 2 seconds/)
+    const pid = Number(readFileSync(marker, "utf8"))
+    const left = alive(pid)
+    if (left) process.kill(pid, "SIGKILL")
+    expect(left).toBe(false)
+  })
+
+  it("two started at once:  the one that ends for the other's sake finds the other", async () => {
+    const other = spawn(process.execPath, ["-e", `setTimeout(() => { ${serverAnswering(root)} }, 600)`])
+    try {
+      const found = await new SRV.PidFile(root).ensure({ command: node("process.exit(1)") })
+      expect(found.pid).toBe(other.pid)
+    } finally {
+      other.kill("SIGKILL")
+    }
+  })
+})
+
 describe("PidFile.stop():  waits for the PROCESS, not just for it to stop answering", () => {
   let root: string
   let server: ChildProcess | undefined

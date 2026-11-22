@@ -245,7 +245,7 @@ export type BundleSpec = {
   run: string[]
   /** the folder the build writes, relative to `package`'s folder */
   output: string
-  /** a file every build writes in `output`:  missing => stale */
+  /** a file every build writes in `output`:  missing => stale, as is every other the last build made (`BundleRecord`) */
   entry: string
   /**
    * files and folders the build reads:  a change to one makes the bundle stale
@@ -269,6 +269,7 @@ export type BundleSpec = {
    * the files and folders its build writes, relative to `package`'s folder, that are no build's source:
    * left out of EVERY bundle's sources, so a build writing beside another's sources never makes it stale
    * - its own `entry` is always left out of its own sources
+   * - those there after its build are required, as its `output`'s files are (`BundleRecord.files`)
    */
   generated?: string[]
 }
@@ -330,6 +331,11 @@ export type BundleRecord = {
   sources: string
   /** when, as an ISO date */
   built: string
+  /**
+   * every file and link the build made, from its package's folder:  one missing makes it stale
+   * - none for a committed one, or a record from before epic `epic-engine` I364
+   */
+  files?: string[]
 }
 
 /** The record's file name in each `output` folder:  a dot file, so the page server neither serves nor reloads it. */

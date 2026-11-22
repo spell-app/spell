@@ -60,7 +60,8 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  *   (the settings' `"siteTabs"`) ... and what route modules add (`addPageConfig()`), e.g. epics' airplane mode
  * - route modules (`RouteModule`) from the settings (`"routes"`) add the rest, e.g. the running epics, the app's `/api`
  * - the settings:  every installed repo's `"pageServer"` part, merged (`pageServerSettings()`, epic `repo-split` P16)
- * - the bundles there (`"bundles"`) are built as it starts, if stale (`BundleBuild`):  they're never committed
+ * - the bundles there (`"bundles"`) are built once it listens, if stale or a file short (`BundleBuild`):
+ *   they're never committed
  * - the page scripts there (`"pageScripts"`) go on every page, before `</body>` (`withPageScripts()`)
  * - the local copies there (`"localCopies"`) stand in for the CDN files pages load (`withLocalCopies()`)
  * - what's `"gone"` there answers "not found", though the epic folder still holds it
@@ -107,7 +108,7 @@ export class PageServer {
    */
   readonly siteTabs?: readonly SiteTab[]
 
-  /** the bundles' build as it starts (`BundleBuild`):  `start()` begins it, `stop()` ends it */
+  /** the bundles' build (`BundleBuild`):  `start()` begins it once it listens, `stop()` ends it */
   readonly bundles: BundleBuild
 
   /** its own lines in its log (`SPELL_DEBUG` name `server`):  where it listens, a route module that failed */
@@ -270,8 +271,10 @@ export class PageServer {
   }
 
   /**
-   * Start watching, build the stale bundles in the background, load the route modules, listen, write the pid file,
+   * Start watching, load the route modules, listen, build the stale bundles in the background, write the pid file,
    * then run route modules' `onListening`s.
+   * - the builds only once it listens (epic `epic-engine` I362):
+   *   begun first, they took the processor from the start, and its starter gave up
    * - `port`:  its port (default `DEFAULT_PORT`);  0:  any free one
    *   - a worktree asking for `DEFAULT_PORT` gets any free one instead (`portFor()`)
    *   - throws when it's taken, BEFORE loading anything:  never another port (epic `epic-engine` I332), and a
@@ -297,12 +300,10 @@ export class PageServer {
     // the engine routes' files at their routes too, so a page loading `/_epic/...` hot-reloads them
     for (const [route, folder] of Object.entries(settings.engineRoutes ?? {}))
       this.web.live!.watch(join(this.root, folder), { servedAt: route.endsWith("/") ? route : `${route}/` })
-    if (routes) {
-      this.bundles.start().watch()
-      for (const path of settings.routes ?? []) await this.loadRoutes(path)
-    }
+    if (routes) for (const path of settings.routes ?? []) await this.loadRoutes(path)
     const { port: actual } = await this.web.listen({ port: wanted, fallback: false })
     this.info.port = actual
+    if (routes) this.bundles.start().watch()
     if (this.web.secureUrl) this.info.https = this.web.secureUrl
     if (pidFile) {
       this.pidFile.write(this.info)
@@ -607,15 +608,13 @@ export class PageServer {
   private waitForWorktreeBundles: Handler = async (request, _reply, next) => {
     if (request.method !== "GET" && request.method !== "HEAD") return next()
     const build = this.worktreeBuildFor(request.path)
-    if (build && this.isAtComponentSet(request.path)) await build.untilBuilt()
+    const match = build && WORKTREE_ADDRESS.exec(request.path)
+    const inside = match ? request.path.slice(match[0].length - 1) : ""
+    if (build && this.componentSets.some((set) => inside.startsWith(`${set.prefix}/`))) {
+      build.repairIfMissing(inside)
+      await build.untilBuilt()
+    }
     next()
-  }
-
-  /** Is URL path `path` at one of a worktree's component set addresses (`/worktrees/<w>/components/<set>/...`)? */
-  private isAtComponentSet(path: string): boolean {
-    const match = WORKTREE_ADDRESS.exec(path)
-    const inside = match ? path.slice(match[0].length - 1) : ""
-    return this.componentSets.some((set) => inside.startsWith(`${set.prefix}/`))
   }
 
   /**

@@ -1,8 +1,18 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
+import { spawn } from "node:child_process"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { stripVTControlCharacters } from "node:util"
-import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
+import { afterAll, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
 import { SRV } from "spell/server"
 import {
@@ -124,6 +134,55 @@ describe("PageServer.start():  its port, or no start", () => {
       rmSync(root, { recursive: true, force: true })
     }
   })
+})
+
+// epic `epic-engine` I362:  the builds took the processor from the start it was waiting for
+describe("PageServer.start():  answers before it builds", () => {
+  it("begins the bundles' build only once it listens", async () => {
+    const root = mkdtempSync(join(tmpdir(), "page-start-"))
+    writeFileSync(join(root, "package.json"), JSON.stringify({ pageServer: { watch: [] } }))
+    const server = new PageServer({ root })
+    let portThen = 0
+    vi.spyOn(server.bundles, "start").mockImplementation(() => {
+      portThen = server.info.port
+      return server.bundles
+    })
+    vi.spyOn(server.bundles, "watch").mockReturnValue(server.bundles)
+    try {
+      const port = await SRV.freePort()
+      await server.start({ port, pidFile: false })
+      expect(portThen).toBe(port)
+    } finally {
+      await server.stop()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
+// epic `epic-engine` I362:  a start's failure read "page server didn't start (Node.js v24.21.0)"
+describe("spell server start, when it can't", () => {
+  it("says why on its last line, which is all its callers show", async () => {
+    const root = realpathSync(mkdtempSync(join(tmpdir(), "page-start-fails-")))
+    writeFileSync(join(root, "repos.json5"), "{}")
+    const holder = await serveHandler(new SRV.Router().handle)
+    try {
+      const port = new URL(holder.base).port
+      const cli = join(import.meta.dirname, "../../../src/server/page/cli.ts")
+      const tsconfig = join(import.meta.dirname, "../../../tsconfig.node.json")
+      const child = spawn(process.execPath, ["--import", "tsx", cli, "start", "--root", root, "--port", port], {
+        env: { ...process.env, TSX_TSCONFIG_PATH: tsconfig },
+        stdio: ["ignore", "ignore", "pipe"]
+      })
+      let said = ""
+      child.stderr!.on("data", (chunk: Buffer) => (said += chunk.toString()))
+      const code = await new Promise((done) => child.once("close", done))
+      expect(code).toBe(1)
+      expect(said.trim().split("\n").at(-1)).toMatch(/must listen on port \d+/)
+    } finally {
+      await holder.close()
+      rmSync(root, { recursive: true, force: true })
+    }
+  }, 30_000)
 })
 
 describe("PageServer with a certificate (epic solid-2-final P14)", () => {

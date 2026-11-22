@@ -21,6 +21,8 @@
  *   - without it, every server speaks plain HTTP, as before;  with it, plain HTTP stays on the same port, for the tools
  * - `prune [--dry-run]` -- stop the page and vite servers whose checkout is gone (`pruneServers()`), on any checkout;
  *   `--dry-run` only says which
+ * - What can't be done (`SRV.HttpError`:  a start that failed, a port held) is one line and exit 1:
+ *   callers show the last line, which was node's version under a stack (epic `epic-engine` I362)
  * - `--root <dir>`:  the kit (default:  the kit holding the folder `yarn` ran in, `INIT_CWD`, from any folder of it,
  *   `pageServerRoot()`);  the page server starts from the kit's root ONLY:  any other folder is an error, naming the
  *   kit (`kitRootOf()`, epic `repo-split` P16)
@@ -77,7 +79,13 @@ const CERTIFICATE_WORDS = {
     "To apply this, restart the server.  Type  spell server stop,  then  spell server start."
 } as const
 
-await main(process.argv.slice(2))
+try {
+  await main(process.argv.slice(2))
+} catch (error) {
+  if (!(error instanceof SRV.HttpError)) throw error
+  console.error(error.message)
+  process.exitCode = 1
+}
 
 /** Run `args`. */
 async function main(args: string[]): Promise<void> {

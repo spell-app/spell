@@ -1,14 +1,14 @@
 import type { ChildProcess } from "node:child_process"
 import { EventEmitter } from "node:events"
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { PassThrough } from "node:stream"
 import { stripVTControlCharacters } from "node:util"
-import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { SRV } from "spell/server"
-import { BundleBuild, componentSetPath, componentSets } from "spell/server/page"
+import { BundleBuild, componentSetPath, componentSets, engineRoutePath } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
 ////////////////
@@ -225,6 +225,91 @@ describe("BundleBuild", () => {
     const kill = vi.spyOn(process, "kill").mockImplementation(() => true)
     build.start().stop()
     expect(kill).toHaveBeenCalledWith(-4242, "SIGTERM")
+  })
+})
+
+// epic `epic-engine` I364:  a lost engine stayed lost, until a source changed
+describe("BundleBuild:  a page asking for a lost file has it built again", () => {
+  let root: string
+  let web: SRV.WebServer
+  let bundles: BundleBuild
+  let child: FakeChild
+  let spawn: ReturnType<typeof spawnOf>
+  let port: number
+  const ASSETS = "epic/src/tools/_assets"
+
+  beforeEach(async () => {
+    quiet()
+    root = realpathSync(mkdtempSync(join(tmpdir(), "page-server-repair-")))
+    const pageServer = { bundles: [`${ASSETS}/spell-ui`], engineRoutes: { "/_epic/assets/": ASSETS } }
+    put(root, "package.json", JSON.stringify({ pageServer }))
+    put(
+      root,
+      "node_modules/spell/package.json",
+      JSON.stringify({ name: "spell", exports: { "./package.json": "./package.json" } })
+    )
+    put(root, "node_modules/spell/bin/spell.mjs", "")
+    put(root, "epic/package.json", JSON.stringify({ name: "spell-epic" }))
+    symlinkSync(join(root, "epic"), join(root, "node_modules/spell-epic"))
+    for (const file of ["spell-ui/main.js", "spell-ui/engine.js", "commands.js"]) put(root, `${ASSETS}/${file}`, file)
+    const files = ["spell-ui/main.js", "spell-ui/engine.js", "commands.js"].map((file) => `src/tools/_assets/${file}`)
+    put(root, `${ASSETS}/spell-ui/${SRV.BUNDLE_RECORD}`, JSON.stringify({ sources: "x", built: "", files }))
+    child = new FakeChild()
+    spawn = spawnOf(child)
+    bundles = new BundleBuild({ root, spawn })
+    web = new SRV.WebServer({ root, mounts: [{ prefix: "/", dir: root }] })
+    web.files.overlays.push((path) => engineRoutePath(path, [["/_epic/assets/", `/${ASSETS}/`]]))
+    web.router.use(bundles.wait)
+    port = (await web.listen({ port: 0 })).port
+  })
+
+  afterEach(async () => {
+    vi.spyOn(process, "kill").mockImplementation(() => true)
+    bundles.stop()
+    vi.restoreAllMocks()
+    await web.close()
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  /** the check as the server starts, over */
+  function started(): void {
+    bundles.start()
+    child.exit(0)
+    spawn.mockClear()
+  }
+
+  test.each(["spell-ui/engine.js", "commands.js"])(
+    "%s, at its engine route:  built, waited for, served",
+    async (file) => {
+      started()
+      rmSync(join(root, ASSETS, file))
+      const asked = ask(port, "GET", `/_epic/assets/${file}`)
+      await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(1))
+      put(root, `${ASSETS}/${file}`, "built again")
+      child.exit(0)
+      expect(await asked).toMatchObject({ status: 200, text: "built again" })
+    }
+  )
+
+  test("the whole folder, its record with it:  built", async () => {
+    started()
+    rmSync(join(root, ASSETS, "spell-ui"), { recursive: true })
+    const asked = ask(port, "GET", "/_epic/assets/spell-ui/main.js")
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(1))
+    child.exit(1)
+    expect((await asked).status).toBe(404)
+  })
+
+  test("a name no build made, none of the bundle's missing:  a 404, and no build", async () => {
+    started()
+    expect((await ask(port, "GET", "/_epic/assets/spell-ui/old-chunk.js")).status).toBe(404)
+    expect(spawn).not.toHaveBeenCalled()
+  })
+
+  test("never in a server that doesn't build (`start()` not called, or stopped)", async () => {
+    rmSync(join(root, ASSETS, "spell-ui/engine.js"))
+    expect((await ask(port, "GET", "/_epic/assets/spell-ui/engine.js")).status).toBe(404)
+    expect(spawn).not.toHaveBeenCalled()
   })
 })
 

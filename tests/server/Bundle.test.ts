@@ -123,6 +123,55 @@ describe("Bundle", () => {
   })
 })
 
+// epic `epic-engine` I364:  only the entry was looked for, so a missing engine or chunk was never built again
+describe("Bundle.check():  every file the build made is required", () => {
+  const root = mkdtempSync(join(tmpdir(), "assembler-bundle-made-"))
+  install(root, { "@demo/made": "made" })
+  mkdirSync(join(root, "app"))
+  put(root, "made/src/a.ts", "a")
+  put(root, "made/icons/x.svg", "<svg/>")
+  const bundle = new SRV.Bundle(join(root, "app"), {
+    ...SPEC,
+    package: "@demo/made",
+    sources: ["@demo/made/src"],
+    generated: ["out", "beside.js", "never-written"],
+    run: [
+      process.execPath,
+      "-e",
+      `const fs = require("fs");
+      fs.rmSync("out", { recursive: true, force: true });
+      fs.mkdirSync("out/engines", { recursive: true });
+      fs.mkdirSync("out/engines.building-123");
+      for (const file of ["out/entry.js", "out/engines/code.js", "out/chunk-Bq3xZ9aP.js", "out/engines.building-123/left.js", "beside.js"])
+        fs.writeFileSync(file, "built");
+      fs.symlinkSync("../icons", "out/icon-packs")`
+    ]
+  })
+
+  afterAll(() => rmSync(root, { recursive: true, force: true }))
+
+  test.each([
+    ["a lazy engine", "out/engines/code.js"],
+    ["a chunk", "out/chunk-Bq3xZ9aP.js"],
+    ["a whole folder", "out/engines", "out/engines/code.js"],
+    ["a file beside its folder", "beside.js"],
+    ["a link", "out/icon-packs"]
+  ])("stale without %s, %s;  current once built again", (_what, path, named = path) => {
+    bundle.build({ stdio: "ignore" })
+    expect(bundle.isStale).toBe(false)
+    rmSync(join(root, "made", path), { recursive: true, force: true })
+    expect(bundle.check().stale).toBe(`no ${named}`)
+    bundle.build({ stdio: "ignore" })
+    expect(bundle.isStale).toBe(false)
+  })
+
+  test("not what another run was still building, nor a generated path it never wrote", () => {
+    bundle.build({ stdio: "ignore" })
+    rmSync(join(root, "made/out/engines.building-123"), { recursive: true })
+    expect(bundle.isStale).toBe(false)
+  })
+})
+
 /** An install holding Spell UI's and spell-epic's packages, each its own repo beside the checkout, `app/`. */
 function top(): string {
   const dir = mkdtempSync(join(tmpdir(), "assembler-bundles-"))

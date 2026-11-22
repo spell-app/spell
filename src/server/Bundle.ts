@@ -35,9 +35,11 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
  * - `check()`:  stale when
  *   - never built
  *   - its entry is missing, or newer than its build
+ *   - any file that build made is missing:  a lazy engine, a chunk, a script beside its folder (`missingFile()`;
+ *     epic `epic-engine` I364:  with only the entry looked for, a lost engine was never built again)
  *   - its sources' hash isn't the one its last build recorded (`SRV.BUNDLE_RECORD`, in its output folder)
- * - `build()`:  runs its build command, then records the hash
- * - The page server runs `spell bundle --stale` when it starts, so a page always loads a current build.
+ * - `build()`:  runs its build command, then records the hash, and every file it made
+ * - The page server runs `spell bundle --stale` once it listens, so a page always loads a current build.
  * - WHICH bundles:  the ones whose output folders the page server's settings name, `"bundles"`
  *   (every installed repo's `"pageServer"` part, merged:  `pageServerSettings()`), the list the page server reads too
  *   (`Bundle.specs()`)
@@ -78,6 +80,24 @@ export class Bundle {
   /** its output folder, relative to the checkout, `/`-separated:  as the settings' `bundles` name it */
   get output(): string {
     return relative(SRV.RealPath.of(this.root), this.outputDir).split(sep).join("/")
+  }
+
+  /**
+   * everything its build writes, relative to the checkout, `/`-separated:
+   * its output folder, and what it writes beside it (`spec.generated`)
+   */
+  get outputs(): string[] {
+    const root = SRV.RealPath.of(this.root)
+    return this.writtenPaths().map((path) =>
+      relative(root, SRV.RealPath.of(join(this.packageDir, path)))
+        .split(sep)
+        .join("/")
+    )
+  }
+
+  /** `outputs`, as the spec spells them:  from its package's folder. */
+  private writtenPaths(): string[] {
+    return [...new Set([this.spec.output, ...(this.spec.generated ?? [])])]
   }
 
   /**
@@ -175,6 +195,8 @@ export class Bundle {
     if (entry.mtimeMs > statSync(this.recordFile).mtimeMs)
       return { ...found, stale: `${this.spec.entry} changed since` }
     if (record.sources !== sources) return { ...found, stale: "built from older sources" }
+    const missing = this.missingFile(record)
+    if (missing) return { ...found, stale: `no ${missing}` }
     return found
   }
 
@@ -203,11 +225,53 @@ export class Bundle {
     return spawnSync(command!, args, { cwd: join(this.packageDir, this.spec.cwd), stdio: "ignore" }).status === 0
   }
 
-  /** Record `sources` as what its build is current with.  SIDE EFFECT:  writes `recordFile`, making its folder. */
+  /**
+   * Record `sources` as what its build is current with, and the files it made (not a committed one's:  its output
+   * folder holds sources too).
+   * - SIDE EFFECT:  writes `recordFile`, making its folder
+   */
   private writeRecord(sources: string): void {
-    const record: SRV.BundleRecord = { sources, built: new Date().toISOString() }
+    const record: SRV.BundleRecord = {
+      sources,
+      built: new Date().toISOString(),
+      ...(!this.spec.committed && { files: this.builtFiles() })
+    }
     mkdirSync(dirname(this.recordFile), { recursive: true })
     writeFileSync(this.recordFile, `${JSON.stringify(record, null, 2)}\n`)
+  }
+
+  /**
+   * Is a file its build makes missing?  The quick half of `check()`, reading no source:  for a request to ask
+   * (`BundleBuild.repairIfMissing()`).
+   * - never built, or its record gone with its folder:  yes
+   * - never a committed one
+   */
+  get isIncomplete(): boolean {
+    if (this.spec.committed) return false
+    const record = this.record()
+    return !record || this.missingFile(record) !== undefined
+  }
+
+  /** The first file of `record`'s build, or its entry, that isn't there, from its package's folder;  else `undefined`. */
+  private missingFile({ files = [] }: SRV.BundleRecord): string | undefined {
+    const dir = this.packageDir
+    const entry = posix.join(this.spec.output, this.spec.entry)
+    return [entry, ...files].find((file) => !existsSync(join(dir, file)))
+  }
+
+  /**
+   * What a build made, as it stands right after one, from its package's folder:  every file and link under what it
+   * writes (`writtenPaths()`).
+   * - never dot files (the record), nor a folder another run was building in (`UNFINISHED`)
+   */
+  private builtFiles(): string[] {
+    const dir = this.packageDir
+    const files = this.writtenPaths().flatMap((path) => {
+      const stat = statSync(join(dir, path), { throwIfNoEntry: false })
+      if (!stat?.isDirectory()) return stat ? [path] : []
+      return filesUnder(join(dir, path), { links: "listed" }).map((file) => posix.join(path, file))
+    })
+    return [...new Set(files.filter((file) => !UNFINISHED.test(file)))]
   }
 
   /** Does it need a build?  `check()`, when the reason doesn't matter. */
@@ -216,7 +280,7 @@ export class Bundle {
   }
 
   /**
-   * Run its build, then record the sources' hash it started from.
+   * Run its build, then record the sources' hash it started from, and the files it made.
    * - `stdio`:  where the build's output goes (default:  this process's stderr, so a `--json` stdout stays clean)
    * - throws when the build fails;  it records nothing then, so the bundle stays stale
    * - SIDE EFFECT:  the build clears and rewrites `outputDir`
@@ -437,7 +501,10 @@ export class Bundle {
 }
 
 /** Bump to make every bundle stale once, e.g. when what a build records changes. */
-const BUNDLE_FORMAT = "bundle 2"
+const BUNDLE_FORMAT = "bundle 3"
+
+/** A folder a build was still writing, or left when it was stopped (`ComponentPack`'s `epics.building-<pid>`):  no build's file. */
+const UNFINISHED = /\.building-\d+(\/|$)/
 
 /** The install's root above `from`:  the nearest folder up holding `yarn.lock`;  `from` itself without one. */
 function installRoot(from: string): string {
@@ -472,12 +539,17 @@ function isLink(file: string): boolean {
   }
 }
 
-/** Every file under `folder`, `/`-separated, relative:  never through a link (the icon packs, the sounds), nor a dot file. */
-function filesUnder(folder: string, prefix = ""): string[] {
+/**
+ * Every file under `folder`, `/`-separated, relative:  never through a link (the icon packs, the sounds), nor a dot
+ * file.
+ * - `links`:  `"listed"` names each link itself;  default `"skipped"`
+ */
+function filesUnder(folder: string, { links = "skipped" }: { links?: "skipped" | "listed" } = {}): string[] {
   return readdirSync(folder, { withFileTypes: true }).flatMap((entry) => {
-    if (entry.isSymbolicLink() || entry.name.startsWith(".")) return []
-    const name = `${prefix}${entry.name}`
-    return entry.isDirectory() ? filesUnder(join(folder, entry.name), `${name}/`) : [name]
+    if (entry.name.startsWith(".")) return []
+    if (entry.isSymbolicLink()) return links === "listed" ? [entry.name] : []
+    if (!entry.isDirectory()) return [entry.name]
+    return filesUnder(join(folder, entry.name), { links }).map((file) => `${entry.name}/${file}`)
   })
 }
 

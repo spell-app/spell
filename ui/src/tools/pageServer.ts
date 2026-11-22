@@ -41,4 +41,4 @@ export function ensurePageServer(): string {
 export const SPELL_UI_SITE_FILE = "spaces/@spell/guides/SpellUI/SpellUI.spell"
 
 /** Longest `spell server start` may take, ms:  a stale site bundle is built first. */
-const SERVER_START_MS = 60_000
+const SERVER_START_MS = 150_000
