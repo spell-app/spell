@@ -207,7 +207,9 @@ export class PageServer {
       this.web.files.mount({ prefix: folderUrl(folder), dir: join(this.root, folder) })
     this.web.files.overlays.push(
       (path) => componentSetPath(path, this.componentSets),
-      (path) => engineRoutePath(path, this.engineRoutes)
+      (path) => engineRoutePath(path, this.engineRoutes),
+      // last:  a Spell site's address, which has no file of its own
+      (path) => componentSetSitePath(path, this.componentSets)
     )
     const router = this.web.router
     // a request for a bundle's missing file waits while the bundles build (`start()`)
@@ -818,6 +820,24 @@ export function componentSetPath(path: string, sets: readonly ComponentSet[]): s
   const assets = rest.startsWith(`/${SET_ASSETS}/`)
   const folder = assets ? set.assets : set.dir
   return `${isBeside(folder) ? "" : base}${folderUrl(folder)}${assets ? rest.slice(SET_ASSETS.length + 1) : rest}`
+}
+
+/**
+ * The URL path of the page that shows a component set's Spell site, for one of its site's addresses
+ * (`ComponentSet.sitePage`, epic `editor` P43):  `/components/ui/button/api` => `/ui/docs/index.html`;  else
+ * `undefined`.
+ * - only for a path with no `.` in its last part, and not in the set's bundle (`_assets/`), data (`__data/`) or
+ *   page parts:  a missing picture is still a 404
+ * - a `StaticHandler` overlay, after `componentSetPath()`:  a real file or folder at the address wins
+ * - the same under `/worktrees/<w>/`, as `componentSetPath()`
+ */
+export function componentSetSitePath(path: string, sets: readonly ComponentSet[]): string | undefined {
+  const match = /^((?:\/worktrees\/[^/]+)?)(\/[^/]+\/[^/]+)(\/.*)$/.exec(path)
+  const set = match && sets.find((each) => each.prefix === match[2])
+  if (!match || !set?.sitePage) return undefined
+  const [, base = "", , rest = "/"] = match
+  if (/\/_|\.[^/]*$/.test(rest)) return undefined
+  return `${isBeside(set.dir) ? "" : base}${folderUrl(set.dir)}/${set.sitePage}`
 }
 
 /**

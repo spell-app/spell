@@ -196,11 +196,16 @@ export type PageScript = {
  *     (`SitePacks`) for the component packs a set's pages load, the epics pack, for the comments, on all of them
  *   - the other sets had a build of their own (its `sets/`), from epic `epic-workflow` P10 until epic
  *     `epic-engine` gave Spell UI's pages the packs too
+ * - `sitePage`:  for a set whose pages are ONE Spell site, the page in `dir` that shows it, e.g. Spell UI's
+ *   `index.html` (epic `editor` P43):  every address under the set with no file of its own and no `.` in its last
+ *   part (`/components/ui/button/api`) is answered with it, and the site shows its page there
+ *   (`componentSetSitePath()`);  none:  such an address is a 404, as any missing file
  */
 export type ComponentSetSetting = {
   readonly name: string
   readonly dir: string
   readonly assets: string
+  readonly sitePage?: string
 }
 
 /**

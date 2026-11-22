@@ -297,8 +297,10 @@ const BUNDLED_ELEMENT_LEAVES = new Set(["spell/element/drawnWindow"])
  * - `DroppedFiles`, the uploader's reading of a desktop drop, which a view that takes files reads too (epic `language` P67).
  * - The theme tree, which a site's own theme is checked and built with (`SiteThemes`, I36):  `ThemeTokens` reads every
  *   theme and palette file (a lazy chunk each), `ThemeFile` works one out, `styles.en` is the tree itself.
+ * - `SpellUIGuide`, where the Spell UI site is (epic `editor` P43):  spell's project groups name its project.  No imports.
  */
 const BUNDLED_UI_LEAVES = new Set([
+  "spell/ui/util/SpellUIGuide",
   "spell/ui/components/ui-uploader/DroppedFiles",
   "spell/ui/components/ui-theme-editor/ThemeTokens",
   "spell/ui/styles/ThemeFile",

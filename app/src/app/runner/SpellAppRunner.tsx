@@ -48,8 +48,8 @@ import "./SpellAppRunner.css"
  * - `debug` and `fluid` are read once, to start;  `runtimeUrl` once per copy loaded.
  * - Its `<ui-*>` tags are the caller's to define, with Fomantic's icon names:
  *   `<spell-viewer>` is a root that loads them as they appear;  the VS Code runner imports `spell/app/app/solid/loadUI`.
- * - A site it runs keeps its own address, and wears its theme:  one of Spell UI's, or its project's own
- *   (`ViewerSiteHost`).
+ * - A site it runs keeps its own address, or follows the page's under `siteBase`, and wears its theme:
+ *   one of Spell UI's, or its project's own (`ViewerSiteHost`).
  * - NEVER imports `spell/parser/core`:  it'd land in the bundle's shared chunk, so every app would share it.
  *   Everything of spell's comes from this app's copy of the runtime.
  ****************/
@@ -82,6 +82,8 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
   let unslot: (() => void) | undefined
   // a site's host:  its theme, and where it last went, for a run that keeps its things.  Up here, as above.
   let siteHost = new ViewerSiteHost()
+  const newSiteHost = () =>
+    new ViewerSiteHost({ base: untrack(() => props.siteBase), root: appRoot.getRootNode() as ParentNode })
 
   // NOTE: ALWAYS here, just hidden without an app -- so its mount point is never redrawn
   const appRoot = (<div class="App" />) as HTMLDivElement
@@ -108,6 +110,7 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       return () => {
         gone = true
         unbindLayout?.()
+        siteHost.stop()
         ;(appRoot as AppElement).spellRoot?.unmount()
         copy?.release()
       }
@@ -228,7 +231,10 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
       await RootLoader.useLanguage(own.lang)
     }
-    if (!keepThings) siteHost = new ViewerSiteHost()
+    if (!keepThings) {
+      siteHost.stop()
+      siteHost = newSiteHost()
+    }
     const ran = await runProgram(copy, source, appRoot, {
       layout: !!layout,
       keepThings,
@@ -320,6 +326,11 @@ export type SpellAppRunnerProps = {
   runtimeUrl: string
   /** URL of the built-in types' scope pack, `core.scopes.js`. */
   builtInsUrl: string
+  /**
+   * The page's address a site it runs goes under, `/components/ui`:  the site's address follows the page's
+   * (`ViewerSiteHost`);  none, the site keeps its own.  Read as each run starts.
+   */
+  siteBase?: string
   /** A Type Explorer link clicked, e.g. `spell:/@spell/examples/Solitaire/Solitaire.spell#L12`. */
   onOpen: (href: string) => void
   /** Hand over what the element can do to us, e.g. `restart()` -- every render. */
