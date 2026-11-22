@@ -1173,17 +1173,23 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   turns: [
     {
       name: "run",
-      usage: "<kind> -- <command> [args...]",
+      usage: "<kind> [--stall <minutes>] -- <command> [args...]",
       description:
         "run a command in its turn:  one of each kind at a time on this machine (a full test run:  test);  " +
-        "waits, saying who has the turn;  epic merge and merge-main take the merge turn by themselves",
+        "waits, saying who has the turn;  epic merge and merge-main take the merge turn by themselves;  " +
+        "a command silent and idle (no output, next to no CPU in its whole process tree) for the stall window " +
+        "is stopped, saying where it was, and the turn freed (exit 1)",
       example: "epic turns run test -- yarn test",
-      flags: {}
+      flags: {
+        "--stall <minutes>": "the stall window:  10 by default (SPELL_EPIC_TURN_STALL sets it too);  0 never stops it"
+      }
     },
     {
       name: "list",
       usage: "",
-      description: "the turns taken now:  each kind's holder, and since when (the default verb)",
+      description:
+        "the turns taken now:  each kind's holder, since when, and whether it's longer than usual or stalled " +
+        "(the default verb)",
       example: "epic turns list",
       flags: {}
     }
