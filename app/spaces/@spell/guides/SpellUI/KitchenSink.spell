@@ -196,7 +196,7 @@
 				<input placeholder="Search..." aria-label="Search"/>
 			</example>
 			<example "Input" description="Native types">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<input type="password" placeholder="Password" aria-label="Password"/>
 					<input type="email" placeholder="E-mail" aria-label="E-mail"/>
 					<input type="number" placeholder="Quantity" aria-label="Quantity"/>
@@ -1651,7 +1651,7 @@
 				<calendar value="2026-09-30T14:30" locale="en-US" placeholder="Date and time" today/>
 			</example>
 			<example "Calendar" description="Date, time, month, year">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<calendar type="date" locale="en-US" placeholder="Date"/>
 					<calendar type="time" locale="en-US" placeholder="Time"/>
 					<calendar type="month" locale="en-US" placeholder="Month"/>
@@ -1659,7 +1659,7 @@
 				</stack>
 			</example>
 			<example "Calendar" description="Inline">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<calendar inline type="date" value="2026-09-30" locale="en-US" aria-label="Inline date"/>
 					<calendar inline type="month" value="2026-09" locale="en-US" aria-label="Inline month"/>
 					<calendar inline type="time" value="14:30" locale="en-US" aria-label="Inline time"/>
@@ -1684,7 +1684,7 @@
 
 		<section label="Dial" sticky="stack" collapsible dividing>
 			<example "Dial" description="A dial lets people pick a number by turning it, with its value in the middle and its label under it. \[Dial page](/dial)">
-				<stack style="gap: 24px" class="ui-cluster">
+				<stack direction="horizontal" wrap style="gap: 24px">
 					<dial size="small" label="Weight" color="orange" min="100" max="900" value="777" ticks style="--ui-dial-value-font-weight: 777"/>
 					<dial size="small" label="Roundness" color="teal" value="50"/>
 					<dial size="small" label="Size" color="blue" max="250" value="104"/>
@@ -1696,7 +1696,7 @@
 
 		<section label="Dimmer" sticky="stack" collapsible dividing>
 			<example "Dimmer" description="A dimmer hides distractions to focus attention on particular content. \[Dimmer page](/dimmer)">
-				<button command="--toggle" commandfor="dimmer-types-plain">Toggle</button>
+				<button commandfor="dimmer-types-plain" command="--toggle">Toggle</button>
 				<segment>
 					<text paragraph>A segment holding some text that the dimmer covers.</text>
 					<text paragraph>Another paragraph, so the segment has some height.</text>
@@ -1713,7 +1713,7 @@
 				</segment>
 			</example>
 			<example "Dimmer" description="Page dimmer">
-				<button command="--show" commandfor="dimmer-types-page">Dim the page</button>
+				<button commandfor="dimmer-types-page" command="--show">Dim the page</button>
 				<dimmer id="dimmer-types-page" page aria-label="Dark page dimmer">
 					<header level="2">Dark page dimmer</header>
 					<text paragraph>A click anywhere, or Escape, brings the page back.</text>
@@ -1762,7 +1762,7 @@
 
 		<section label="Flyout" sticky="stack" collapsible dividing>
 			<example "Flyout" description="A flyout is a modal that slides in from a side of the page. \[Flyout page](/flyout)">
-				<button command="--show" commandfor="flyout-types-standard">Show</button>
+				<button commandfor="flyout-types-standard" command="--show">Show</button>
 				<flyout id="flyout-types-standard" closable>
 					<header>Archive old messages</header>
 					<content>
@@ -1775,11 +1775,11 @@
 				</flyout>
 			</example>
 			<example "Flyout" description="Right, shorthands">
-				<button command="--show" commandfor="flyout-types-right">Show right</button>
+				<button commandfor="flyout-types-right" command="--show">Show right</button>
 				<flyout id="flyout-types-right" position="right" width="thin" heading="Profile" content="A thin flyout." closable/>
 			</example>
 			<example "Flyout" description="Top, inverted">
-				<button command="--show" commandfor="flyout-types-top">Show top</button>
+				<button commandfor="flyout-types-top" command="--show">Show top</button>
 				<flyout id="flyout-types-top" position="top" inverted heading="Notice" closable>
 					<content>
 						<text paragraph>A top flyout is full width, as tall as its content.</text>
@@ -1820,7 +1820,7 @@
 
 		<section label="Modal" sticky="stack" collapsible dividing>
 			<example "Modal" description="A modal displays content that temporarily blocks interactions with the main view of a site. \[Modal page](/modal)">
-				<button command="--show" commandfor="modal-types-standard">Show</button>
+				<button commandfor="modal-types-standard" command="--show">Show</button>
 				<modal id="modal-types-standard" closable>
 					<header>Profile Picture</header>
 					<content>
@@ -1836,7 +1836,7 @@
 				</modal>
 			</example>
 			<example "Modal" description="Basic">
-				<button command="--show" commandfor="modal-types-basic">Show basic</button>
+				<button commandfor="modal-types-basic" command="--show">Show basic</button>
 				<modal id="modal-types-basic" appearance="basic" size="small" heading="Archive Old Messages">
 					<content>
 						<text paragraph>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</text>
@@ -1964,7 +1964,7 @@
 
 		<section label="Shape" sticky="stack" collapsible dividing>
 			<example "Shape" description="A shape is a three dimensional object displayed on a two dimensional plane. \[Shape page](/shape)">
-				<button command="--next" commandfor="shape-demo-plain">Flip left</button>
+				<button commandfor="shape-demo-plain" command="--next">Flip left</button>
 				<shape id="shape-demo-plain">
 					<side>
 						<text paragraph>This side starts visible.</text>
@@ -1978,8 +1978,8 @@
 				</shape>
 			</example>
 			<example "Shape" description="Cube">
-				<button command="--next" commandfor="shape-demo-cube">Flip up</button>
-				<button command="--previous" commandfor="shape-demo-cube">Back</button>
+				<button commandfor="shape-demo-cube" command="--next">Flip up</button>
+				<button commandfor="shape-demo-cube" command="--previous">Back</button>
 				<shape id="shape-demo-cube" cube direction="up">
 					<side>
 						<text>1</text>
@@ -1993,7 +1993,7 @@
 				</shape>
 			</example>
 			<example "Shape" description="Text">
-				<button command="--next" commandfor="shape-demo-text">Flip down</button>
+				<button commandfor="shape-demo-text" command="--next">Flip down</button>
 				<text paragraph>Flip to <shape id="shape-demo-text" text direction="down" active-index="1"><side>Scale</side> <side>Fade</side></shape></text>
 			</example>
 		</>
@@ -2010,14 +2010,14 @@
 					</sidebar>
 					<pusher>
 						<segment appearance="basic">
-							<button command="--toggle" commandfor="sidebar-demo-left">Menu</button>
+							<button commandfor="sidebar-demo-left" command="--toggle">Menu</button>
 							<text paragraph>The default left sidebar uncovers itself from under this content, which dims.</text>
 						</segment>
 					</pusher>
 				</pushable>
 			</example>
 			<example "Sidebar" description="Overlay, right, thin">
-				<button command="--toggle" commandfor="sidebar-demo-right">Toggle right</button>
+				<button commandfor="sidebar-demo-right" command="--toggle">Toggle right</button>
 				<pushable style="height: 12em">
 					<sidebar id="sidebar-demo-right" position="right" width="thin" transition="overlay" inverted>
 						<menu direction="vertical" inverted fluid aria-label="Numbers">
@@ -2138,7 +2138,7 @@
 		<section label="Tour" sticky="stack" collapsible dividing>
 			<example "Tour" description="A tour leads someone through a feature one numbered step at a time, pointing at what each step is about. \[Tour page](/tour)">
 				<stack class="ui-stack">
-					<stack class="ui-cluster">
+					<stack direction="horizontal" wrap>
 						<button id="tour-new" icon="plus">New</button>
 						<button id="tour-save" icon="save">Save</button>
 						<button commandfor="tour-example" command="--start" appearance="basic" icon="map signs">Take the tour</button>
@@ -2154,10 +2154,10 @@
 
 		<section label="Transition" sticky="stack" collapsible dividing>
 			<example "Transition" description="A transition is an animation used to show or hide content, or to draw attention to it. \[Transition page](/transition)">
-				<button command="--toggle" commandfor="transition-demo-fade">Fade up</button>
-				<button command="--toggle" commandfor="transition-demo-scale">Scale</button>
-				<button command="--toggle" commandfor="transition-demo-flip">Horizontal flip</button>
-				<stack class="ui-cluster">
+				<button commandfor="transition-demo-fade" command="--toggle">Fade up</button>
+				<button commandfor="transition-demo-scale" command="--toggle">Scale</button>
+				<button commandfor="transition-demo-flip" command="--toggle">Horizontal flip</button>
+				<stack direction="horizontal" wrap>
 					<transition id="transition-demo-fade" animation="fade up" inline visible>
 						<segment>Fade up</segment>
 					</transition>
@@ -2170,9 +2170,9 @@
 				</stack>
 			</example>
 			<example "Transition" description="Attention">
-				<button command="--transition" commandfor="transition-demo-shake">Shake</button>
-				<button command="--transition" commandfor="transition-demo-tada">Tada</button>
-				<stack class="ui-cluster">
+				<button commandfor="transition-demo-shake" command="--transition">Shake</button>
+				<button commandfor="transition-demo-tada" command="--transition">Tada</button>
+				<stack direction="horizontal" wrap>
 					<transition id="transition-demo-shake" animation="shake" inline visible>
 						<segment>Shake</segment>
 					</transition>
@@ -2182,7 +2182,7 @@
 				</stack>
 			</example>
 			<example "Transition" description="Hidden">
-				<button command="--show" commandfor="transition-demo-hidden">Show</button>
+				<button commandfor="transition-demo-hidden" command="--show">Show</button>
 				<transition id="transition-demo-hidden" animation="drop">
 					<segment>Hidden until shown</segment>
 				</transition>
@@ -2310,6 +2310,15 @@
 			</example>
 		</>
 
+		<section label="Icon Browser" sticky="stack" collapsible dividing>
+			<example "Icon Browser" description="An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it. \[Icon Browser page](/icon-browser)">
+				<icon-browser/>
+			</example>
+			<example "Icon Browser" description="On a pack and a search">
+				<icon-browser pack="fa7-brands" query="git"/>
+			</example>
+		</>
+
 		<section label="Icon Picker" sticky="stack" collapsible dividing>
 			<example "Icon Picker" description="An icon picker lets people choose an icon by searching for it and clicking its glyph. \[Icon Picker page](/icon-picker)">
 				<icon-picker value="star" aria-label="Icon"/>
@@ -2405,7 +2414,7 @@
 				</panel>
 			</example>
 			<example "Panel" description="Colors">
-				<stack style="align-items: start" class="ui-cluster">
+				<stack direction="horizontal" wrap style="align-items: start">
 					<panel label="Violet" level="5" color="violet" style="width: 200px">
 						<panel label="Tweak">
 							<text paragraph>Any hue.</text>
@@ -2587,7 +2596,7 @@
 		<section label="Table of contents" sticky="stack" collapsible dividing>
 			<example "Table of contents" description="A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all. \[Table of contents page](/table-of-contents)">
 				<html>
-					<ui-stack style="align-items: flex-start" class="ui-cluster ui-gap-l">
+					<ui-stack direction="horizontal" wrap style="align-items: flex-start" class="ui-gap-l">
 						<ui-toc for="toc-example-content" heading="Button" style="width: 12em"></ui-toc>
 						<ui-section style="flex: 1" id="toc-example-content">
 							<ui-header level="2" dividing>Types</ui-header>

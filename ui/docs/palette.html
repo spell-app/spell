@@ -7,13 +7,13 @@
     <title>Palette groups | Spell UI</title>
     <meta
       name="description"
-      content="The Spell editor's palette, a column per group:  drag components between groups, reorder, rename, add or remove groups, then save."
+      content="The Spell editor's palette groups moved into the editor:  its own page, at /palette."
     />
     <!--
-      The palette groups page (`<ui-docs-palette>`, epic `editor` T81):  the editor palette's table, `paletteGroups.json`
-      beside `ComponentDefinitions`, to arrange and save.
-      - A working page, not a page of the docs:  it reads and writes through the page server (`paletteRoutes`), so it needs
-        the page server, and saves into the checkout that server runs.
+      The palette groups page's old home (epic `editor` T81):  the arranger moved into the editor in epic `editor` P42,
+      Q81 (Owen:  "shouldn't be in spell-ui at all"), as its page `/palette` (`<PaletteGroupsPage>`).
+      - Kept until epic `editor` P43, pointing there:  the page server's `/editor/palette` opens it on this checkout's
+        editor, whichever port it took.
     -->
     <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
     <script>
@@ -39,7 +39,7 @@
           <ui-header level="1" class="site-title">
             Palette groups
             <ui-header
-              >The Spell editor's palette, a column per group: arrange it here, then save.</ui-header
+              >The Spell editor's palette groups are arranged in the editor now.</ui-header
             >
           </ui-header>
         </ui-container>
@@ -50,18 +50,14 @@
           <ui-section id="palette-groups" label="The palette's groups" dividing>
             <ui-markdown>
               <script type="text/markdown">
-                The editor's **+** menu shows these groups, in this order, each with its components in this order.
+                The editor's **+** menu shows its components in groups.
+                You arrange those groups on a page of the editor itself now:  [open the palette groups page](/editor/palette).
 
-                - Drag a component to another group, or to another place in its own.
-                - Drag a group by its handle to move it;  type over its name to rename it.
-                - **Add group** adds an empty one at the end;  its ✕ removes one, its components going to **Not in the palette**.
-                - Drag a component from **Not in the palette** into a group to offer it.
-                - **Save** writes the table, `paletteGroups.json`:  the editor's palette shows it on its next load.
-
-                A new component nobody has placed yet still shows:  under its first topic, at that group's end.
+                - Drag a component to another group, or a group by its handle.
+                - Rename a group, pick its icon, add or remove one.
+                - **Save**, then reload the editor's tab to see the new groups in the **+** menu.
               </script>
             </ui-markdown>
-            <ui-docs-palette></ui-docs-palette>
           </ui-section>
         </article>
       </ui-container>

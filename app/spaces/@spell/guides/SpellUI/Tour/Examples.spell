@@ -21,7 +21,7 @@
 	<section label="Types">
 		<section label="Tour" sticky="stack" collapsible dividing>
 			<example "Tour" description="Three steps:  two point at a button, the last at nothing.  Its button starts it;  Escape or its ✕ ends it.">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<button id="tour-new" icon="plus">New</button>
 					<button id="tour-save" icon="save">Save</button>
 					<button commandfor="tour-toolbar" command="--start" appearance="basic" icon="map signs">Take the tour</button>
@@ -38,7 +38,7 @@
 	<section label="Variations">
 		<section label="Dim" sticky="stack" collapsible dividing>
 			<example "Dim" description="`dim` darkens all but what the step points at.  Off by default;  a step can say `dim=\"false\"`.">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<button id="tour-dim-target" color="primary">Publish</button>
 					<button commandfor="tour-dim" command="--start" appearance="basic" icon="map signs">Take the tour</button>
 				</stack>
@@ -50,7 +50,7 @@
 
 		<section label="Wait for" sticky="stack" collapsible dividing>
 			<example "Wait for" description="`wait-for=\"click\"`:  the rest of the page can't be clicked, and the tour goes on once its target is.">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<button id="tour-wait-target" icon="redo">Deal again</button>
 					<button commandfor="tour-wait" command="--start" appearance="basic" icon="map signs">Take the tour</button>
 				</stack>
@@ -63,7 +63,7 @@
 
 		<section label="Offer" sticky="stack" collapsible dividing>
 			<example "Offer" description="A tour that starts by itself offers itself first (`offerToStart()`):  `offer=\"ask\"`, a note (the default);  `start`, straight away;  `dot`, a pulsing dot.  With `remember`, once taken or turned down it isn't offered again.">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<button id="tour-offer-target" icon="images outline">Gallery</button>
 					<button id="tour-offer-button" appearance="basic" icon="bell outline">Offer it</button>
 				</stack>

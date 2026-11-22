@@ -425,7 +425,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     },
     attributes: ["current", "base", "view", "size"]
   },
-  "ui-docs-palette": { folder: "ui-docs-palette", skeleton: { height: "40em" }, attributes: [] },
   "ui-docs-search": {
     folder: "ui-docs-search",
     skeleton: { width: "16em", height: "2.25em" },
@@ -656,6 +655,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "rotated",
       "corner"
     ]
+  },
+  "ui-icon-browser": {
+    folder: "ui-icon-browser",
+    skeleton: { height: "30em" },
+    attributes: ["pack", "query", "address"]
   },
   "ui-icon-picker": {
     folder: "ui-icon-picker",

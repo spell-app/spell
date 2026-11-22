@@ -28,7 +28,8 @@ import "./Palette.css"
  * - Closed, it's the top bar's popup:  a menu in columns by topic.
  * - Kept open, it's the top bar's second row:  its topics' names, each a menu (epic `editor` T80).
  * - It reads the components' own descriptions (`ComponentDefinitions`), loaded the first time it opens:
- *   every vocabulary, which the page never needs otherwise.
+ *   every vocabulary, which the page never needs otherwise;  and files them in its groups by its own rule and table
+ *   (`PaletteGroups`, arranged on the palette groups page, `/palette`).
  * - What's offered is what has a `snippet`:  a new component is offered by saying what it adds.
  * - First, App views:  the app's own views, each added as `{draw a new card}` (`Palette.ownViews`, epic `editor` P19).
  *   - On a page that draws its body, a notebook among them, it's This page, with a row of its own first:
@@ -92,10 +93,14 @@ export class Palette {
 
   /** Load what it offers, the first time. */
   static load(): void {
-    loading ??= import("spell/ui/components/ComponentDefinitions")
-      .then(({ ComponentDefinitions }) => {
+    loading ??= Promise.all([
+      import("spell/ui/components/ComponentDefinitions"),
+      import("spell/app/app/ui/PaletteGroups")
+    ])
+      .then(([{ ComponentDefinitions }, { PaletteGroups }]) => {
         definitions = ComponentDefinitions
-        setOffered(ComponentDefinitions.paletteGroups())
+        groupRule = PaletteGroups
+        setOffered(PaletteGroups.inGroups())
       })
       .catch((error: unknown) => console.error("Palette.load():  couldn't load what it offers", error))
   }
@@ -157,6 +162,9 @@ export class Palette {
 
 /** `ComponentDefinitions`, once it's loaded:  a row only shows after that, so a drop never waits for it. */
 let definitions: typeof import("spell/ui/components/ComponentDefinitions").ComponentDefinitions | undefined
+
+/** The palette's rule for its groups, `PaletteGroups`, once it's loaded with `definitions`. */
+let groupRule: typeof import("spell/app/app/ui/PaletteGroups").PaletteGroups | undefined
 
 /** Its loading, once it's asked for. */
 let loading: Promise<void> | undefined
@@ -224,8 +232,8 @@ const PINNED_PREF = "palettePinned"
 const [isPinned, setPinned] = createSignal<boolean>(editorPrefs.get(PINNED_PREF) === true)
 const [offered, setOffered] = createSignal<readonly PaletteGroup[]>([])
 
-/** One group of what's offered:  its topic or title, and its parts (`ComponentDefinitions.paletteGroups()`). */
-type PaletteGroup = import("spell/ui/components/ComponentDefinitions").PaletteGroup
+/** One group of what's offered:  its topic or title, and its parts (`PaletteGroups.inGroups()`). */
+type PaletteGroup = import("spell/app/app/ui/PaletteGroups").PaletteGroup
 
 /** One of the app's own views, as the palette offers it. */
 export type OwnView = {
@@ -316,7 +324,7 @@ function languageOf(file: SP.AnySpellFile | undefined): string {
  * - Reactive:  redrawn when the page language's texts arrive (`appTexts.lang`).
  */
 function groupName(group: PaletteGroup): string {
-  return definitions?.groupNameIn(group, appTexts.lang) ?? group.title ?? group.topic ?? ""
+  return groupRule?.groupNameIn(group, appTexts.lang) ?? group.title ?? group.topic ?? ""
 }
 
 /** A step's title for adding `definition`. */
@@ -774,7 +782,7 @@ function PinIcon(): JSX.Element {
 /**
  * The palette as a menu, in columns:
  * what to do and its search, then App views, the app's own views, then every part, by topic.
- * - Every group shows everything in it, as the palette's table orders it (`paletteGroups.json`;  epic `editor` I174, T81).
+ * - Every group shows everything in it, as the palette's table orders it (spaces' `paletteGroups.json`;  epic `editor` I174, T81).
  * - A search looks through all of them, by name, other names and description.
  */
 function PaletteMenu(): JSX.Element {

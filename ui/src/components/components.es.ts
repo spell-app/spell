@@ -59,6 +59,7 @@ import { gridEs } from "spell/ui/components/ui-grid/UIGrid.es"
 import { rowEs } from "spell/ui/components/ui-grid/UIRow.es"
 import { iconEs } from "spell/ui/components/ui-icon/UIIcon.es"
 import { iconsEs } from "spell/ui/components/ui-icon/UIIcons.es"
+import { iconBrowserEs } from "spell/ui/components/ui-icon-browser/UIIconBrowser.es"
 import { iconPickerEs } from "spell/ui/components/ui-icon-picker/UIIconPicker.es"
 import { imageEs } from "spell/ui/components/ui-image/UIImage.es"
 import { imagesEs } from "spell/ui/components/ui-image/UIImages.es"
@@ -736,6 +737,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   rowEs,
   iconEs,
   iconsEs,
+  iconBrowserEs,
   iconPickerEs,
   imageEs,
   imagesEs,

@@ -1,0 +1,52 @@
+"icon-browser usage" is a notebook page
+	<header level="1">
+		Icon Browser
+		<header>An icon browser shows every icon of a pack, to search through: clicking one copies the name that draws it.</>
+	</>
+
+	<!-- USAGE:  how to use it, where its icons come from, keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Put one on a page, and it shows every icon of a pack Spell UI ships, ready to search.
+
+			- `pack` is the pack it starts on: `fa7-free` (the default), `fa7-brands` or `fomantic`.
+			  Its buttons switch to another.
+			- `query` is what it starts searching for.
+			- `address` opens it on the search and the pack the page's address names: `?q=bell&pack=fa7-brands`,
+			  as `spell icon bell --open` writes it.
+			- Click an icon to copy its name: the name `<ui-icon name>` and every `icon` attribute take.
+		</>
+		<markdown>
+			```html
+			<ui-icon-browser pack="fa7-brands" query="git"></ui-icon-browser>
+			```
+		</>
+	</>
+
+	<section label="Its icons">
+		<markdown>
+			It shows the pack's own icons, one tile per glyph, whatever packs the page has.
+
+			- Each pack loads on its own, so browsing Fomantic changes nothing the page's other icons mean.
+			- A tile shows the name `name` takes; its other names are in its tooltip.
+			- A search matches names first (exact, then starting with what you typed, then holding it),
+			  then Font Awesome's search terms: `mail` finds `envelope`.
+			- The grid draws its first tiles, then more as you scroll near its end: each glyph is a file of its own.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- Tab moves through the pack buttons, the search box and the tiles.
+			- Enter or Space on a tile copies its name.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The pack switch is a group of buttons, named "Icon pack"; the one shown is selected.
+			- The search box is named "Search icons".
+			- The tiles are a list of buttons, each named for its icon.
+			- The count and the copied note are status messages: a screen reader reads them as they change.
+		</>
+	</>

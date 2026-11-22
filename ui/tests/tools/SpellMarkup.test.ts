@@ -101,4 +101,9 @@ describe("SpellMarkup.body()", () => {
     )
     expect(text).toContain('<json>{ "label": "Add" }</json>')
   })
+
+  test("a ui-cluster row is a horizontal stack, in the stack's own words", () => {
+    const text = bodyOf(`<ui-example heading="Row"><div class="ui-cluster"><ui-button>A</ui-button></div></ui-example>`)
+    expect(text).toContain('<stack direction="horizontal" wrap>')
+  })
 })

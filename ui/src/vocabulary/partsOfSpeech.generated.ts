@@ -56,6 +56,7 @@ export const PARTS_OF_SPEECH: Readonly<Record<string, PartOfSpeech>> = {
   "ui-grid": "structure",
   "ui-header": "property",
   "ui-icon": "property",
+  "ui-icon-browser": "action",
   "ui-icon-picker": "action",
   "ui-icons": "property",
   "ui-image": "property",

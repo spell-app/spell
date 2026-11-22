@@ -13,7 +13,7 @@
 		<html>
 			<ui-docs-tokens family="ui-tour" playground>
 				<ui-stack class="ui-stack">
-					<ui-stack class="ui-cluster">
+					<ui-stack direction="horizontal" wrap>
 						<ui-button id="tour-new-playground" icon="plus">New</>
 						<ui-button id="tour-save-playground" icon="save">Save</>
 						<ui-button commandfor="tour-example-playground" command="--start" appearance="basic" icon="map signs">Take the tour</>

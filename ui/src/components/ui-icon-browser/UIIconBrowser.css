@@ -1,0 +1,98 @@
+/*
+ * The style sheet of `<ui-icon-browser>`:  a pack switch, a search box, a usage line and a count,
+ * over a grid of icon tiles.
+ * - No Fomantic original:  each piece is a Spell UI element with its own look;  this sheet lays them out,
+ *   and shapes the tiles.
+ * - The shadow markup it expects:
+ *
+ *     <div class="ui icon browser">
+ *       <ui-buttons part="packs" equal>  <ui-button color="primary" selected>FA7 Free</ui-button> ...  </ui-buttons>
+ *       <ui-input part="search" type="search" fluid></ui-input>
+ *       <ui-message part="usage" size="small">The default pack ...  <code>...</code></ui-message>
+ *       <ui-labels>  <ui-label part="count">...</ui-label>  <ui-label part="copied" color="green">...</ui-label>  </ui-labels>
+ *       <div class="grid" part="grid" role="list">
+ *         <ui-button class="tile" part="tile" appearance="basic" role="listitem" data-tooltip="Copy “bell”">
+ *           <span class="glyph" part="glyph"><svg></span>
+ *           <span class="name" part="name">bell</span>
+ *         </ui-button> ...
+ *         <spell-more-below>                                    (while more tiles are to come:  drawnInWindow())
+ *       </div>
+ *       <div class="message">No icons match</div>              (a search that finds nothing)
+ *     </div>
+ *
+ * - The DOM element:  block-level.
+ * - Public tokens (`--ui-icon-browser-*`) are NEVER declared here:  each is read through a private alias.
+ *   - `--ui-icon-browser-tile-width`:  the narrowest a tile is (the grid fits as many as it can a row)
+ *   - `--ui-icon-browser-glyph-size`:  a tile's glyph
+ *   - `--ui-icon-browser-gap`:  between the tiles, and between the pieces
+ */
+
+@layer ui.components.icon-browser.types, ui.components.icon-browser.content, ui.components.icon-browser.variations, ui.components.icon-browser.states;
+
+@layer ui.components.icon-browser.types {
+  :host {
+    display: block;
+  }
+
+  .ui.browser {
+    --_ui-icon-browser-tile-width: var(--ui-icon-browser-tile-width, 8em);
+    --_ui-icon-browser-glyph-size: var(--ui-icon-browser-glyph-size, 1.5em);
+    --_ui-icon-browser-gap: var(--ui-icon-browser-gap, 0.5em);
+    display: flex;
+    flex-direction: column;
+    gap: calc(2 * var(--_ui-icon-browser-gap));
+  }
+}
+
+@layer ui.components.icon-browser.content {
+  .ui.browser > ui-buttons {
+    max-inline-size: 30em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--_ui-icon-browser-tile-width), 1fr));
+    gap: var(--_ui-icon-browser-gap);
+  }
+
+  /* a tile:  its glyph over its name, the name cut short with a `…` when it's long */
+  .tile {
+    display: flex;
+    min-inline-size: 0;
+  }
+  .tile::part(button) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--_ui-icon-browser-gap);
+    align-items: center;
+    inline-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    padding-inline: var(--_ui-icon-browser-gap);
+  }
+  .glyph {
+    display: grid;
+    place-items: center;
+    inline-size: var(--_ui-icon-browser-glyph-size);
+    block-size: var(--_ui-icon-browser-glyph-size);
+  }
+  .glyph > svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    fill: currentColor;
+  }
+  .name {
+    overflow: hidden;
+    max-inline-size: 100%;
+    font-size: 0.85em;
+    font-weight: normal;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .message {
+    color: var(--ui-text-muted);
+    text-align: center;
+  }
+}
