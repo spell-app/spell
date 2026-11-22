@@ -3,12 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Page Server</title>
+    <title>The Page Server</title>
     <meta
       name="description"
-      content="One live-reloading server per checkout for docs, epics, sagas, Spell UI and the editor:  the spell/server library, its flows, route modules, safety, and why it's built this way."
+      content="The one live-reloading server every Spell page is read on:  starting it, its addresses, live reload, saving a section in place, every epic's worktree on one port, route modules, safety, and the kinds of page it serves."
     />
-    <meta name="spell-voice" content="readme 2026-10-22" />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="Tools" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
     <meta name="spell-saga" content="docs-site" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
   </head>
@@ -17,1600 +19,674 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
-          <ui-breadcrumb selected>Page Server</ui-breadcrumb>
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>The Page Server</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
-          ><header class="spell-page-head"><h1>Page Server</h1></header></ui-sticky
+          ><header class="spell-page-head"><h1>The Page Server</h1></header></ui-sticky
         >
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>spell server status, in the main checkout · 11 lines</ui-title>
+          <ui-content>
+            <pre><code class="language-json">{
+  "pid": 75355,
+  "port": 4747,
+  "root": "~/www/spell",
+  "started": "2026-11-22T02:46:14.087Z",
+  "branch": "main",
+  "worktrees": "~/www/spell.worktrees",
+  "contentFolder": "~/www/spell/spell.epics",
+  "base": "http://127.0.0.1:4747"
+}</code></pre>
+          </ui-content>
+        </ui-accordion>
         <p class="lede">
-          <code>spell server start</code>, run in a worktree, answers in about a second: a page server on port 55703,
-          because the main checkout already has 4747. Every docs page, epic page, saga page and Spell UI page of that
-          checkout is now live on it.
+          That's the server every Spell page is read on: the guides, the epic pages, the component sets' docs, the
+          editor's API, and every epic's worktree, on one port. There is ONE per kit, whichever folder of it you ask
+          from.
         </p>
         <p>
-          Below: how the repo serves its pages locally. The <code>spell/server</code> library (<code>SRV</code>), the
-          one page server per checkout built on it, and everything that plugs into it.
+          If you've used <code>npx serve</code>, it starts out the same: files go out exactly as they are on disk, with
+          no build step. Then it adds what that doesn't: live reload, a router with Express's names, and a way for a
+          page to save a section of itself back to disk.
         </p>
         <ui-list class="spell-meta">
-          <ui-item icon="map"
-            ><b>Epic page:</b>
-            <a href="/epics/unified-server/unified-server.plan.html" target="unified-server"
-              >epic unified-server</a
-            ></ui-item
-          >
           <ui-item icon="user"
-            >Written for: anyone opening, editing or serving a page, or adding routes to the page server</ui-item
+            >Written for: anyone opening, writing or serving a page, or adding routes to the page server</ui-item
           >
-          <ui-item icon="flag"
-            >Status: <ui-label size="mini" color="green">merged</ui-label> into <code>main</code> (P1-P7)</ui-item
+          <ui-item icon="flask"
+            >Checked: 2026-11-21, every command and address against that day's code and a running server</ui-item
           >
-          <ui-item icon="code branch"
-            >Checked on: <code>main</code>, 2026-10-09, against the code (not just the
-            <a href="/epics/unified-server/unified-server.plan.html" target="unified-server">epic page</a>)</ui-item
+          <ui-item icon="book open"
+            >The reference beside it, with every address, call, setting and file:
+            <a href="/README/server.md" target="src-readme-server-md">the server README</a></ui-item
           >
         </ui-list>
 
-        <ui-section id="1-overview" label="1. Overview" sticky collapsible dividing open="false">
+        <ui-section id="1-overview" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
           <ui-statistics class="spell-stats" size="mini">
-            <ui-statistic value="1" label="server per checkout"></ui-statistic>
-            <ui-statistic value="7" label="properties"></ui-statistic>
+            <ui-statistic value="1" label="server per kit"></ui-statistic>
             <ui-statistic value="4747" label="preferred port"></ui-statistic>
+            <ui-statistic value="250 ms" label="of quiet, then reload"></ui-statistic>
           </ui-statistics>
-
-          <ui-section id="what-it-is" label="What it is" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                The
-                <a href="/src/server/" target="src-src-server"><span title="src/server">server package</span></a>
-                serves pages locally, for every package.
-                <ul>
-                  <li>It's the kit's <code>server</code> folder, imported as <code>spell/server</code>.</li>
-                  <li>Its namespace is <code>SRV</code>.</li>
-                </ul>
-                <ul>
-                  <li>Before it, six servers each had their own mime table, path check, port choice and opener.</li>
-                  <li>Now they share one library.</li>
-                </ul>
-              </li>
-              <li>
-                The PAGE SERVER (<code>spell server</code>): ONE per checkout, serving the whole repo on one port.
-                <ul>
-                  <li>One for the main checkout, and one for each worktree.</li>
-                  <li>live reload on every page; edit a section in place; the server-only properties</li>
-                  <li><code>/</code> redirects to the docs' home page</li>
-                  <li>port: 4747 if free, else any free one (<code>SPELL_SERVER_PORT</code> overrides)</li>
-                  <li>
-                    the real port is written to <code>&lt;root&gt;/.spell-server.json</code>, where the openers find it
-                  </li>
-                  <li>its output goes to <code>&lt;root&gt;/.spell-server.log</code></li>
-                </ul>
-              </li>
-              <li>
-                Every page carries the site header (<code>&lt;spell-site-header&gt;</code>): a fixed bar switching
-                between the site's parts, its tabs.
-                <ul>
-                  <li>
-                    It also holds:
-                    <ul>
-                      <li>the checkout's worktree / branch badge</li>
-                      <li>an "open in VS Code" link</li>
-                      <li>edit mode</li>
-                      <li>a light / dark toggle</li>
-                    </ul>
-                  </li>
-                  <li>
-                    Its Spell logo goes to the
-                    <a href="/pages/index.html" title="pages/index.html" target="src-pages-index-html">home page</a>:
-                    a card per property.
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="the-five-properties" label="The seven properties" sticky collapsible dividing open="false">
-            <p>In the top bar's order (epic <code>claude-design</code>, Q6).</p>
-            <ul>
-              <li>
-                Each lights on its own pages (<code>litTab()</code>
-                in
-                <a href="/src/server/site/site.types.ts" target="src-src-server-site-site-types-ts"
-                  ><code>site.types.ts</code></a
-                >).
-              </li>
-              <li>The docs' home page lights none.</li>
-            </ul>
-            <p>The tabs are DATA, not the header's code (epic <code>repo-split</code> I4).</p>
-            <ul>
-              <li>
-                They're the checkout's page server settings, <code>"siteTabs"</code> in its root
-                <a href="/package.json" target="src-package-json"><code>package.json</code></a
-                >, told to every page it serves.
-              </li>
-              <li>A doc opened from disk shows the docs bundle's own: the docs' areas and Epic/UI.</li>
-            </ul>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>property</th>
-                    <th>home</th>
-                    <th>from <code>file://</code></th>
-                    <th>served by</th>
-                  </tr>
-                  <tr>
-                    <td>Epics</td>
-                    <td>
-                      <a href="/epics/index.html" target="src-epics-index-html"
-                        >epics' <code title="epics/index.html">index.html</code></a
-                      >
-                    </td>
-                    <td class="yes positive">yes</td>
-                    <td>static files; running epics' cards from <code>RunningEpics</code></td>
-                  </tr>
-                  <tr>
-                    <td>Guides</td>
-                    <td>
-                      <a href="index.html" target="src-guides-index-html"
-                        >guides' <code title="guides/index.html">index.html</code></a
-                      >
-                    </td>
-                    <td class="yes positive">yes</td>
-                    <td>static files</td>
-                  </tr>
-                  <tr>
-                    <td>Brand</td>
-                    <td>
-                      <a href="/brand/index.html" target="src-brand-index-html"
-                        >brand's <code title="brand/index.html">index.html</code></a
-                      >
-                    </td>
-                    <td class="yes positive">yes</td>
-                    <td>static files</td>
-                  </tr>
-                  <tr>
-                    <td>Spell UI</td>
-                    <td><code>/components/ui/</code></td>
-                    <td class="no negative">no</td>
-                    <td>
-                      static pages, the shared <a href="/ui/" target="src-ui"><code>ui/</code></a> folder with this
-                      branch's build of
-                      <a href="/spell-ui/site/" target="src-spell-ui-site"
-                        ><code title="spell-ui/site/">site/</code></a
-                      >
-                      laid over it
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Templates</td>
-                    <td>
-                      <a href="/templates/index.html" target="src-templates-index-html"
-                        >templates' <code title="templates/index.html">index.html</code></a
-                      >
-                    </td>
-                    <td class="yes positive">yes</td>
-                    <td>static files</td>
-                  </tr>
-                  <tr>
-                    <td>Sagas (parked)</td>
-                    <td>
-                      <a href="/goals/index.html" target="src-goals-index-html"
-                        >goals' <code title="goals/index.html">index.html</code></a
-                      >
-                    </td>
-                    <td class="meh warning">no buttons</td>
-                    <td>static files + goals' route module</td>
-                  </tr>
-                  <tr>
-                    <td>App</td>
-                    <td><code>/editor/</code></td>
-                    <td class="no negative">no</td>
-                    <td>a redirect to the editor (vite), which the app's route module starts with the page server</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-          </ui-section>
-
-          <ui-section id="running-it" label="Running it" sticky collapsible dividing open="false">
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>command</th>
-                    <th>what it does</th>
-                  </tr>
-                  <tr>
-                    <td><code>spell server local [--port N]</code></td>
-                    <td>run it in the foreground, until <code>Ctrl-C</code></td>
-                  </tr>
-                  <tr>
-                    <td><code>spell server start</code></td>
-                    <td>start it in the background if it isn't running; print its info as JSON</td>
-                  </tr>
-                  <tr>
-                    <td><code>spell server stop</code> / <code>status</code></td>
-                    <td>stop it; JSON, or <code>not running</code> and exit 1</td>
-                  </tr>
-                  <tr>
-                    <td><code>spell server url &lt;file&gt;</code></td>
-                    <td><code>ensure</code>, then print the URL serving <code>file</code></td>
-                  </tr>
-                  <tr>
-                    <td><code>spell server start all</code></td>
-                    <td>
-                      every server of the checkout, started if need be: <code>ensure</code>, wait for the editor, check
-                      Spell UI's bundle answers (<code>/components/ui/_assets/site.js</code>). Prints each one's port
-                      and URL (<code title="scripts/serve.mjs">serve.mjs</code>, <code>/spell-serve</code>)
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><code>spell app serve [target]</code></td>
-                    <td>
-                      everything: the page server, whose app route module runs the API and the editor (vite). Waits for
-                      the editor and opens it. <code>yarn start</code> in
-                      <a href="/spell-app/app/" target="src-spell-app-app"><code>spell-app/app</code></a> is
-                      <code>spell app serve --headless</code>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><code>spell dev goals open [target]</code></td>
-                    <td>
-                      a saga page in a new browser window (<code>open-vs</code>: VS Code); parked with the saga sets, in
-                      spell-app's <code>goals.zip</code>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><code>epic pages open [page]</code></td>
-                    <td>a doc in Chrome, one reused tab per page, in the background</td>
-                  </tr>
-                  <tr>
-                    <td><code>epic open &lt;name&gt;</code></td>
-                    <td>an epic page in VS Code's Simple Browser, beside the editor</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <ul>
-              <li>
-                <code>--root &lt;dir&gt;</code>: the checkout.
-                <ul>
-                  <li>By default, the one holding the folder <code>yarn</code> ran in (<code>INIT_CWD</code>).</li>
-                </ul>
-              </li>
-              <li>
-                Every opener starts the page server first; if it can't, the page opens from <code>file://</code>.
-                <ul>
-                  <li><code>SPELL_NO_SERVER=1</code>: never start it</li>
-                  <li><code>SPELL_NO_BROWSER=1</code>: open nothing</li>
-                </ul>
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>spell server start, in a worktree (4747 taken by the main checkout) · 10 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-json">{
-  "pid": 54219,
-  "port": 55703,
-  "root": "/Users/owen/www/spell-app/spell-app/.claude/worktrees/unified-server",
-  "started": "2026-10-02T05:53:02.703Z",
-  "branch": "unified-server",
-  "worktree": "unified-server",
-  "base": "http://127.0.0.1:55703",
-  "launched": true
-}</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-        </ui-section>
-
-        <ui-section id="2-structure" label="2. Structure" sticky collapsible dividing open="false">
-          <p>
-            One package, three entry points: the barrel (<code>spell/server</code>, node built-ins only), and two opt-in
-            folders reached by path. So a tool that only needs a port or a path check pulls in nothing else.
-          </p>
-
-          <ui-section id="the-library" label="The library" sticky collapsible dividing open="false">
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>
-                      file (<a href="/src/server/" target="src-src-server"
-                        ><code title="src/server/">src/server/</code></a
-                      >)
-                    </th>
-                    <th>what</th>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/server.types.ts" target="src-src-server-server-types-ts"
-                        ><code>server.types.ts</code></a
-                      >
-                    </td>
-                    <td>
-                      <code>Handler</code>, <code>Mount</code>, <code>ServerInfo</code>, the html / file hooks,
-                      <code>HttpError</code>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/mime.ts" target="src-src-server-mime-ts"><code>mime.ts</code></a>
-                    </td>
-                    <td>
-                      ONE content-type table, <code>typeFor()</code>; source-ish files (<code>.ts</code>,
-                      <code>.spell</code> ...) are <code>text/plain</code>, shown not downloaded
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/safePath.ts" target="src-src-server-safepath-ts"
-                        ><code>safePath.ts</code></a
-                      >
-                    </td>
-                    <td><code>resolveInside()</code>: URL path -&gt; file under a root, never outside it</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/StaticHandler.ts" target="src-src-server-statichandler-ts"
-                        ><code>StaticHandler.ts</code></a
-                      >
-                    </td>
-                    <td>
-                      folders under URL prefixes (longest wins); <code>no-store</code> + an <code>ETag</code>; html and
-                      per-extension hooks
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/Request.ts" target="src-src-server-request-ts"><code>Request.ts</code></a
-                      >, <a href="/src/server/Reply.ts" target="src-src-server-reply-ts"><code>Reply.ts</code></a
-                      >,
-                      <a href="/src/server/Router.ts" target="src-src-server-router-ts"><code>Router.ts</code></a>
-                    </td>
-                    <td>
-                      the part of Express the app's
-                      <a href="/spell-ui/src/api.ts" target="src-spell-ui-src-api-ts"><code>api.ts</code></a> uses,
-                      with Express's names and behaviour
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/bodies.ts" target="src-src-server-bodies-ts"><code>bodies.ts</code></a>
-                    </td>
-                    <td>
-                      <code>parseBodies()</code>: JSON (parser pluggable, e.g. JSON5), text, forms; size limit, 413
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/listener.ts" target="src-src-server-listener-ts"
-                        ><code>listener.ts</code></a
-                      >
-                    </td>
-                    <td>
-                      <code>toListener()</code>: a <code>Handler</code> as node's listener, with 404 / error answers
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/ports.ts" target="src-src-server-ports-ts"><code>ports.ts</code></a>
-                    </td>
-                    <td>
-                      <code>isFree</code>, <code>freePort</code>, <code>listenPreferred</code>; loopback by default
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/open.ts" target="src-src-server-open-ts"><code>open.ts</code></a>
-                    </td>
-                    <td>default browser, new window, reused Chrome tab, VS Code's Simple Browser</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/FileLock.ts" target="src-src-server-filelock-ts"
-                        ><code>FileLock.ts</code></a
-                      >
-                    </td>
-                    <td><code>&lt;file&gt;.lock</code>, so tools writing one file take turns</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/untilInterrupted.ts" target="src-src-server-untilinterrupted-ts"
-                        ><code>untilInterrupted.ts</code></a
-                      >
-                    </td>
-                    <td>run until <code>Ctrl-C</code> / <code>SIGTERM</code>, dropping open connections</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/proxy.ts" target="src-src-server-proxy-ts"><code>proxy.ts</code></a>
-                    </td>
-                    <td>
-                      <code>proxyTo()</code> / <code>proxyUpgrade()</code>: pass requests and websockets to another
-                      local server
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/LiveReload.ts" target="src-src-server-livereload-ts"
-                        ><code>LiveReload.ts</code></a
-                      >
-                    </td>
-                    <td>
-                      a websocket per page over <code>fs.watch</code> (<a
-                        href="/src/server/webSocket.ts"
-                        target="src-src-server-websocket-ts"
-                        ><code>webSocket.ts</code></a
-                      >): tells every page which file changed
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/liveClient.ts" target="src-src-server-liveclient-ts"
-                        ><code>liveClient.ts</code></a
-                      >
-                    </td>
-                    <td>
-                      the browser side, served as <code>/_server/live.js</code>: reloads, and
-                      <code>SPELL_SERVER.editPage()</code>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/Guard.ts" target="src-src-server-guard-ts"><code>Guard.ts</code></a>
-                    </td>
-                    <td><code>Host</code> check, per-run write token, same <code>Origin</code></td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/PidFile.ts" target="src-src-server-pidfile-ts"><code>PidFile.ts</code></a>
-                    </td>
-                    <td>
-                      <a href="/.spell-server.json" target="src-spell-server-json"><code>.spell-server.json</code></a
-                      >: <code>status()</code>, <code>ensure()</code> (start detached),
-                      <code>stop()</code>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/mainServer.ts" target="src-src-server-mainserver-ts"
-                        ><code>mainServer.ts</code></a
-                      >
-                    </td>
-                    <td>
-                      <code>mainServerUrl(file)</code>: a worktree's file on the MAIN checkout's server
-                      (<code>/worktrees/&lt;w&gt;/...</code>), when it runs and serves worktrees;
-                      <code>worktreePath(file)</code>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/server/WebServer.ts" target="src-src-server-webserver-ts"
-                        ><code>WebServer.ts</code></a
-                      >
-                    </td>
-                    <td>
-                      all of the above on <code>node:http</code>: host check -&gt; live reload -&gt;
-                      <code>router</code> -&gt; static files -&gt; <code>fallback</code> -&gt; 404
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-          </ui-section>
-
-          <ui-section id="page" label="page/" sticky collapsible dividing open="false">
-            <p>
-              The page server itself, <code>spell/server/page</code>: opt-in, since it brings <code>parse5</code> and
-              loads route modules.
-            </p>
-            <ul>
-              <li>
-                <a href="/src/server/page/PageServer.ts" target="src-src-server-page-pageserver-ts"
-                  ><code>PageServer.ts</code></a
-                >
-                -- THE server: a live <code>WebServer</code> on the checkout.
-                <ul>
-                  <li>
-                    Plus <code>/_server/ping</code>, the editor, <code>/components/ui/</code> and the route modules.
-                  </li>
-                </ul>
-                <ul>
-                  <li>
-                    <code>PageServer.ensure(root)</code>: what <code>spell server start</code>, goals and the openers
-                    call
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a href="/src/server/page/PageEditor.ts" target="src-src-server-page-pageeditor-ts"
-                  ><code>PageEditor.ts</code></a
-                >
-                -- <code>/_server/page</code>: read, replace or patch a page's source
-              </li>
-              <li>
-                <a href="/spell-epic/src/list/RunningEpics.ts" target="src-spell-epic-src-list-runningepics-ts"
-                  ><code>RunningEpics.ts</code></a
-                >
-                -- the epic pages of running epics on the main checkout's server: <code>/worktrees/&lt;w&gt;/</code>,
-                <code>/_server/epics</code>, and their cards in the home page's Epics section (<a
-                  href="#running-epics-flow"
-                  >Running epics</a
-                >)
-              </li>
-              <li>
-                <a href="/src/server/page/cli.ts" target="src-src-server-page-cli-ts"><code>cli.ts</code></a>
-                -- <code>spell server</code>
-              </li>
-              <li>
-                <a href="/src/server/page/page.types.ts" target="src-src-server-page-page-types-ts"
-                  ><code>page.types.ts</code></a
-                >
-                -- <code>RouteModule</code>, <code>RouteContext</code>, <code>PageServerSettings</code>
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="site" label="site/" sticky collapsible dividing open="false">
-            <p>
-              Browser code, <code>spell/server/site</code>: bundled into the docs'
-              <a href="/spell-epic/src/tools/_assets/spell-ui.js" target="src-spell-epic-src-tools-assets-spell-ui-js"
-                ><code>spell-ui.js</code></a
+          <ul>
+            <li>
+              It's the kit's <code>server</code> folder, imported as <code>spell/server</code>, namespace
+              <code>SRV</code>: a library, and the page server built on it.
+            </li>
+            <li>
+              It starts from the kit's root only, on 4747 when that's free, else any free port (<code
+                >SPELL_SERVER_PORT</code
               >
-              and Spell UI's site bundle (<a
-                href="/spell-ui/site/_assets/site.js"
-                target="src-spell-ui-site-assets-site-js"
-                ><code title="spell-ui/site/_assets/site.js">site.js</code></a
-              >).
-            </p>
-            <ul>
-              <li>
-                <a href="/src/server/site/SiteHeader.ts" target="src-src-server-site-siteheader-ts"
-                  ><code>SiteHeader.ts</code></a
-                >
-                -- <code>&lt;spell-site-header&gt;</code>: own shadow DOM and CSS, no UI elements, so it looks the same
-                on every property
-              </li>
-              <li>
-                <a href="/src/server/site/SectionEditor.ts" target="src-src-server-site-sectioneditor-ts"
-                  ><code>SectionEditor.ts</code></a
-                >
-                -- <code>&lt;spell-section-editor&gt;</code>: edit mode's hover, dialog and save
-              </li>
-              <li>
-                <a href="/src/server/site/site.types.ts" target="src-src-server-site-site-types-ts"
-                  ><code>site.types.ts</code></a
-                >
-                -- <code>SiteTab</code> and <code>litTab()</code>: the header's tabs as data, and the one a page lights
-              </li>
-              <li>
-                <a href="/src/server/site/index.ts" target="src-src-server-site-index-ts"><code>index.ts</code></a>
-                -- <code>defineSite()</code>: defines the header, and mounts the editor on served pages
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="leaf-package" label="Leaf package" sticky collapsible dividing open="false">
-            <ui-message
-              state="info"
-              heading="Anything node-side may import spell/server;  of the kit, it imports only util's json5 and the toolchain's format settings"
-            >
-              <ul>
-                <li>
-                  It's a leaf of the kit. Beyond node's own modules, the barrel uses <code>json5</code>, linkedom (for
-                  <code>Linker</code>) and oxfmt (for <code>formatHTML()</code>, loaded when it's first called).
-                </li>
-                <li>esbuild comes in as the caller's hook (<code>transforms</code>).</li>
-                <li>
-                  Its users: Spell UI's tools and site, spaces' node server, the <code>spell</code> command, the app,
-                  the epic tools, goals, the VS Code extension.
-                </li>
-                <li>
-                  <code>page/</code> may use dependencies (<code>parse5</code>), and
-                  <a href="/src/server/site/" target="src-src-server-site"><code>site/</code></a> is DOM code.
-                </li>
-                <li>Neither is in the barrel.</li>
-              </ul>
-            </ui-message>
-          </ui-section>
+              overrides).
+            </li>
+            <li>
+              A page gets five lines added to its head: Spell's favicon, the page's facts as
+              <code>window.SPELL_SERVER</code>, and the live reload client. The rest is the file, byte for byte.
+            </li>
+            <li>
+              The main checkout's server serves every epic's worktree too, at <code>/worktrees/&lt;epic&gt;/...</code>.
+            </li>
+            <li>
+              The server names no folder of its own: each folder of the kit brings its part of the settings, and its
+              route modules.
+            </li>
+            <li>
+              It keeps out other web pages, not other programs on your machine: loopback only, a host check, a token per
+              run, same-origin writes.
+            </li>
+          </ul>
         </ui-section>
 
-        <ui-section id="3-flows" label="3. Flows" sticky collapsible dividing open="false">
-          <p>Each flow, step by step, in the order it happens.</p>
-
-          <ui-section id="opening-a-page" label="Opening a page" sticky collapsible dividing open="false">
-            <ol>
-              <li>
-                The opener (<code>epic pages open</code>, <code>epic open</code>, and the parked
-                <code>spell dev goals open</code>) calls <code>PageServer.ensure()</code> -- the docs' scripts through
-                <code>ensurePageServer()</code>.
-              </li>
-              <li>
-                It reads the pid file,
-                <a href="/.spell-server.json" target="src-spell-server-json"><code>.spell-server.json</code></a
-                >, and asks that server's <code>/_server/ping</code>.
-                <ul>
-                  <li>It counts only if it answers for THIS checkout.</li>
-                </ul>
-              </li>
-              <li>
-                None: it spawns <code>cli.ts serve</code> under <code>tsx</code>, detached, logging to
-                <a href="/.spell-server.log" target="src-spell-server-log"><code>.spell-server.log</code></a
-                >, and waits up to 15s.
-                <ul>
-                  <li>about 1s when it has to start, 0.3s when it already runs</li>
-                </ul>
-              </li>
-              <li>
-                The URL is <code>base</code> + the file's path from the checkout, shown in:
-                <ul>
-                  <li>a Chrome tab keyed by the page's path, so the same page from another checkout reuses it</li>
-                  <li>a new browser window (saga pages), or VS Code's Simple Browser</li>
-                </ul>
-              </li>
-              <li>
-                Every <code>.html</code> page it serves gets three things before <code>&lt;/head&gt;</code>:
-                <ul>
-                  <li><code>window.SPELL_SERVER</code> (port, token, file, <code>ETag</code>, branch)</li>
-                  <li><code>/_server/live.js</code></li>
-                  <li>Spell's favicon links, unless its <code>&lt;head&gt;</code> links its own icon</li>
-                </ul>
-              </li>
-              <li>
-                Spell's favicon, on every <code>WebServer</code>, live or not: <code>/_server/favicon.svg</code>,
-                <code>/_server/favicon-32.png</code>, <code>/_server/apple-touch-icon.png</code>, and
-                <code>/favicon.ico</code> (the 32px PNG, after the static folders).
-              </li>
-              <li>
-                The favicon is made by <code>yarn favicon</code> in
-                <a href="/src/server/" target="src-src-server"><code>src/server</code></a> (<a
-                  href="/scripts/favicon.ts"
-                  target="src-scripts-favicon-ts"
-                  ><code title="scripts/favicon.ts">favicon.ts</code></a
-                >) into <code title="src/site/favicon.ts">favicon.ts</code>; pages opened from disk get it from the site
-                header.
-              </li>
-            </ol>
-          </ui-section>
-
-          <ui-section id="live-reload" label="Live reload" sticky collapsible dividing open="false">
-            <ol>
-              <li>
-                <code>fs.watch</code> on the named folders only:
-                <ul>
-                  <li>
-                    <code>"pageServer".watch</code> (the shared pages' folders, the docs' bundle, the brand pages)
-                  </li>
-                  <li>
-                    plus <a href="/goals/" target="src-goals"><code>goals/</code></a> from goals' route module
-                  </li>
-                  <li>
-                    never
-                    <a href="/spell-epic/src/tools/" target="src-spell-epic-src-tools"><code>scripts/</code></a> or
-                    <code>experiments/</code>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Why not the whole root: it would flood the watcher (<code>node_modules</code>,
-                <a href="/.git" target="src-git"><code>.git</code></a
-                >, worktrees).
-              </li>
-              <li>Each changed path waits 250ms for quiet: a write is often two (write, then a formatter).</li>
-              <li>
-                A <code>change</code> message with the URL path goes to every page holding its
-                <code>/_server/events</code> websocket open.
-                <ul>
-                  <li>A ping every 30s keeps the sockets alive.</li>
-                </ul>
-              </li>
-              <li>
-                A websocket, not server-sent events (2026-10-06).
-                <ul>
-                  <li>
-                    An <code>EventSource</code> holds one of Chrome's 6 connections per host for good, and every VS Code
-                    window shares them.
-                  </li>
-                  <li>So 6 docs pages open anywhere left every other page's parts and scripts waiting forever.</li>
-                  <li>Websockets don't count toward the 6.</li>
-                </ul>
-              </li>
-              <li>
-                The page reloads if the path is its own file, or any <code>.css</code> / <code>.js</code>; its scroll
-                position survives.
-              </li>
-            </ol>
-          </ui-section>
-
-          <ui-section id="editing-a-section" label="Editing a section" sticky collapsible dividing open="false">
-            <ol>
-              <li>The header's pencil turns edit mode on, for this tab.</li>
-              <li>
-                Hovering outlines the editable thing under the pointer: an element with an <code>id</code> (sections,
-                paragraphs, list items, cards ...), or a <code>section</code> through its heading's <code>id</code>.
-              </li>
-              <li>
-                "edit" fetches its source fresh: <code>GET /_server/page?path=&amp;id=[&amp;parent=section]</code> -&gt;
-                <code>{ html, etag }</code>.
-              </li>
-              <li>Save sends <code>PATCH /_server/page?path=</code> with the token and <code>If-Match</code>.</li>
-              <li>
-                The server:
-                <ul>
-                  <li>
-                    checks the token and origin, and that the path is an <code>.html</code> file inside the checkout
-                  </li>
-                  <li>takes the file's <code>FileLock</code>; a changed <code>ETag</code> is a 409</li>
-                  <li>
-                    finds exactly ONE <code>#id</code> with <code>parse5</code> (none: 404, several: 409), and splices
-                    its byte range: every other byte stays as it was
-                  </li>
-                  <li>writes a temp file and renames it over the original</li>
-                </ul>
-              </li>
-              <li>Live reload shows the result.</li>
-              <li>Nothing is committed: the change waits in the working tree.</li>
-            </ol>
-            <ul>
-              <li>Also: <code>PUT</code> replaces the whole page.</li>
-              <li>Scripts in a page call <code>SPELL_SERVER.editPage({ id, html })</code>.</li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The save, from SectionEditor.ts · 5 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-ts">const answer = await fetch(`${config.edit ?? "/_server/page"}?path=${encodeURIComponent(config.file)}`, {
-  method: "PATCH",
-  headers: { "content-type": "application/json", "x-server-token": config.token, "if-match": editing.etag },
-  body: JSON.stringify({ id: editing.id, parent: editing.parent, html })
-})</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="goals-buttons" label="Saga page buttons" sticky collapsible dividing open="false">
-            <ol>
-              <li>
-                Saga pages get <code>window.GOALS_SERVER = { api: "/api/goals" }</code> from goals' html hook, so
-                <a
-                  href="/spell-epic/src/tools/_assets/goals-live.js"
-                  target="src-spell-epic-src-tools-assets-goals-live-js"
-                  ><code>goals-live.js</code></a
-                >
-                knows the buttons work.
-              </li>
-              <li>A button posts to <code>/api/goals/&lt;op&gt;</code> with <code>x-server-token</code>.</li>
-              <li>
-                <code>guard.writeCheck</code>, then the body (64kb at most), then the handler:
-                <ul>
-                  <li><code>thought</code> -- save a thought onto a page</li>
-                  <li>
-                    <code>run</code> -- start Claude Code on <code>/goals</code> or <code>/goals-update</code>, in a
-                    terminal
-                  </li>
-                  <li><code>claude/login</code> -- log in, in a terminal; <code>GET claude</code>: status, no token</li>
-                  <li><code>open-vscode</code> -- the page in VS Code's Simple Browser</li>
-                </ul>
-              </li>
-              <li>
-                Goals' own errors become the answers its pages expect:
-                <ul>
-                  <li>unknown target: 404 + choices</li>
-                  <li>launch failure: 501 + command</li>
-                  <li>bad input: 400</li>
-                </ul>
-              </li>
-            </ol>
-          </ui-section>
-
-          <ui-section id="spell-ui-static" label="Spell UI at /components/ui/" sticky collapsible dividing open="false">
-            <ol>
-              <li>
-                <code>/components/ui/</code> serves the shared
-                <a href="/ui/" target="src-ui"><code>ui/</code></a> folder: plain <code>.html</code> pages, with this
-                branch's build laid over them.
-                <ul>
-                  <li>
-                    The build: <code>_assets/</code> and <code>_data/</code>, from Spell UI's
-                    <a href="/spell-ui/site/" target="src-spell-ui-site"><code title="spell-ui/site/">site/</code></a>
-                    folder (<a href="/src/server/page/page.types.ts" target="src-src-server-page-page-types-ts"
-                      ><code title="src/server/page/page.types.ts">UI_SITE</code></a
-                    >).
-                  </li>
-                  <li>
-                    <code>/ui</code> redirects to <code>/components/ui/</code>, so the pages' relative links resolve.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                The pages load ONE bundle, <code title="_assets/site.js">site.js</code> + <code>site.css</code>.
-                <ul>
-                  <li>It's not committed (since 2026-10-07).</li>
-                  <li>The page server builds it when it starts, if it's stale; a page waits for it.</li>
-                  <li>No dev server.</li>
-                </ul>
-              </li>
-              <li>
-                Live like the docs: a page reloads when it or any CSS / JS changes.
-                <ul>
-                  <li>The folder is watched, but not <code>_src/</code>, the bundle's entry.</li>
-                  <li>So a rebuilt bundle reloads every page.</li>
-                  <li>
-                    <code>yarn site:dev</code> in
-                    <a href="/spell-ui/" target="src-spell-ui"><code>spell-ui</code></a> rebuilds the bundle on every
-                    source edit, so a library change shows up live.
-                  </li>
-                  <li>
-                    The section editor works on them too: their <code>SPELL_SERVER.file</code> is
-                    <code>/components/ui/...</code>.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Until 2026-10-02 this proxied <code>astro dev</code> (<code>AstroProxy</code>).
-                <ul>
-                  <li>The Astro site was deleted on 2026-10-03 (epic <code>spell-ui-pages</code>, P7).</li>
-                </ul>
-              </li>
-            </ol>
-          </ui-section>
-
-          <ui-section id="vs-code-preview" label="VS Code preview" sticky collapsible dividing open="false">
-            <ol>
-              <li>
-                A script asks for a page:
-                <ul>
-                  <li>
-                    <code>vscode://spell-app.spell-language/doc-preview?file=...</code>, or <code>?url=</code> (loopback
-                    URLs only)
-                  </li>
-                  <li>
-                    or the window bridge's <code>show-doc</code>, which reaches THIS session's window, not the focused
-                    one
-                  </li>
-                </ul>
-              </li>
-              <li>
-                A worktree's file: the MAIN checkout's page server first, when it runs and serves worktrees
-                (<code>SRV.mainServerUrl()</code>), so a running epic's page shows on the one port every link uses.
-              </li>
-              <li>
-                Else <code>DocPreview</code> finds the file's checkout: the folder holding
-                <a href="/.git" target="src-git"><code>.git</code></a> above it.
-                <ul>
-                  <li>Pages are served from the root, since docs link all over the repo.</li>
-                </ul>
-              </li>
-              <li>Its pid file names a running page server: use it.</li>
-              <li>
-                Else an in-process <code>SRV.WebServer</code> with live reload, one per root, watching
-                <a href="/packages/docs/content/" target="src-packages-docs-content"><code>packages/docs</code></a>
-                and <code>goals</code>.
-                <ul>
-                  <li>The catch: it has no route modules.</li>
-                </ul>
-              </li>
-              <li>
-                Simple Browser shows it beside the editor, in one tab.
-                <ul>
-                  <li>A <code>?t=</code> stamp makes every open a reload.</li>
-                </ul>
-              </li>
-            </ol>
-            <ul>
-              <li>
-                The extension NEVER starts the page server: a GUI VS Code may have no <code>node</code> on its PATH.
-                <ul>
-                  <li>The scripts that open docs start it first.</li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="running-epics-flow" label="Running epics" sticky collapsible dividing open="false">
-            <p>
-              A running epic's page lives in its worktree until it merges, and each worktree has its own page server.
-              Yet the main checkout's server shows them all:
-            </p>
-            <ol>
-              <li>
-                <code>/worktrees/&lt;w&gt;/...</code> serves worktree <code>&lt;w&gt;</code>'s files (a
-                <code>StaticHandler</code> mount on <code>.claude/worktrees</code>; dot files still 403).
-                <ul>
-                  <li>An epic page's relative assets resolve inside its own worktree.</li>
-                </ul>
-                <ul>
-                  <li>
-                    Since epic <code>epic-eject</code> (P4 and P7, on <code>main</code> once it merges), the server
-                    knows no worktree folder of its own.
-                  </li>
-                  <li>
-                    The repo's
-                    <a href="/.epic/config.json5" target="src-epic-config-json5"
-                      ><code title=".epic/config.json5">epic config</code></a
-                    >
-                    names it (<code>worktreesFolder</code>), and the running-epics route module tells the server.
-                  </li>
-                  <li>
-                    Pages learn the served path from the server (<code title="window.SPELL_SERVER.worktreesPath"
-                      >SPELL_SERVER.worktreesPath</code
-                    >), not from a path written into them.
-                  </li>
-                  <li>
-                    The server also serves the epic engine's assets and pack at <code>/_epic/assets/</code> and
-                    <code>/_epic/pack/</code>, so pages written for spell-epic's server draw here too.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <code>/_server/epics</code> lists them, as JSON: each worktree's own epic (named like the worktree), and
-                any epic the main checkout lacks.
-                <ul>
-                  <li>Copies of epics merged before the worktree was cut are skipped.</li>
-                </ul>
-              </li>
-              <li>
-                The Epics page's cards are filled in again on each request.
-                <ul>
-                  <li>
-                    They sit between its <code>&lt;!-- running-epics --&gt;</code> markers, around its card groups;
-                    <code>epic pages index</code> writes the markers.
-                  </li>
-                  <li>
-                    Running and merged epics go in five groups: Favorites, Active, Planning, Urgent, Done (<a
-                      href="/spell-epic/src/list/EpicCards.ts"
-                      target="src-spell-epic-src-list-epiccards-ts"
-                      ><code title="spell-epic/src/list/EpicCards.ts">EpicCards</code></a
-                    >).
-                  </li>
-                  <li>
-                    Each title is followed by its state: in progress (3/6), errors, paused, future, done
-                    (<code>spell/server/site/EpicState</code>).
-                  </li>
-                  <li>A merged epic's card is dropped when it runs in a worktree too.</li>
-                  <li>
-                    Every card is marked again as the page is served: in progress or paused, by whether a Claude session
-                    runs for it (<code>~/.claude/sessions</code>) and today's date.
-                  </li>
-                  <li>None running: no cards added.</li>
-                  <li>Opened from disk: the marks as <code>docs index</code> wrote them.</li>
-                </ul>
-              </li>
-              <li>
-                A worktree's epic page changing reloads its page and the home page (one recursive watch on
-                <code>.claude/worktrees</code>).
-              </li>
-              <li>
-                <code>spell server url</code> and the VS Code preview hand out these URLs for a worktree's file
-                (<code>SRV.mainServerUrl()</code>), so every link is on port 4747.
-              </li>
-              <li>
-                <code>epic</code> doesn't rewrite the committed index inside a worktree: two worktrees doing so
-                conflicted on merge.
-                <ul>
-                  <li>The epic's card comes with Doc Review's <code>epic pages index</code>.</li>
-                </ul>
-              </li>
-            </ol>
-          </ui-section>
-
-          <ui-section id="spell-serve" label="spell serve" sticky collapsible dividing open="false">
-            <p>The editor is the PAGE SERVER's child, so <code>spell server</code> alone runs it too.</p>
-            <p>
-              The app's route module (<a
-                href="/spell-app/src/spaces/server/node/routes/appRoutes.ts"
-                target="src-spell-app-src-spaces-server-node-routes-approutes-ts"
-                ><code>appRoutes.ts</code></a
-              >) starts it with <code>EditorServer</code> once the page server listens (<code>onListening</code>), and
-              stops it with the page server (<code>onStop</code>).
-            </p>
-            <ol>
-              <li>
-                <code>--port</code>, if given, goes to a page server this STARTS as <code>SPELL_EDITOR_PORT</code>
-                (default 3000, else any free port).
-                <ul>
-                  <li>One already running keeps its editor where it is.</li>
-                </ul>
-              </li>
-              <li><code>PageServer.ensure()</code>: the page server, with every route module.</li>
-              <li>
-                Once it listens, the app's module starts vite (its script, under this <code>node</code>, in
-                <a href="/spell-app/app/" target="src-spell-app-app"><code>spell-app/app</code></a
-                >) with <code>PORT</code> = the page server's port and <code>API_SERVER=127.0.0.1</code>.
-                <ul>
-                  <li>So its proxy sends <code>/api</code> there.</li>
-                </ul>
-                Its output goes to
-                <a href="/.spell-server.editor.log" target="src-spell-server-editor-log"
-                  ><code>.spell-server.editor.log</code></a
-                >.
-              </li>
-              <li>
-                Once vite answers, the module records it in
-                <a href="/.spell-server.editor.json" target="src-spell-server-editor-json"
-                  ><code>.spell-server.editor.json</code></a
-                >: the page server's <code>/editor</code> redirects there.
-              </li>
-              <li>
-                <code>spell app serve</code> waits (up to 90s) for that record to answer, then opens the editor, unless
-                <code>--headless</code>.
-              </li>
-              <li>
-                <code>Ctrl-C</code>: stop the page server -- and with it the editor -- only if
-                <code>spell app serve</code> started it.
-              </li>
-            </ol>
-          </ui-section>
+        <ui-section id="running-it" label="2. Running it" sticky collapsible dividing open="false">
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>command</th>
+                  <th>what it does</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>spell server start</code></td>
+                  <td>
+                    start it in the background if it isn't running, and print where it is (JSON):
+                    <code>"launched": true</code> when this call started it
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>spell server start all</code></td>
+                  <td>every web server of the checkout: the page server, the editor, Spell UI's bundle</td>
+                </tr>
+                <tr>
+                  <td><code>spell server status</code></td>
+                  <td>the running server's facts (JSON), or <code>not running</code> and exit 1</td>
+                </tr>
+                <tr>
+                  <td><code>spell server stop [all]</code></td>
+                  <td>stop it; <code>all</code>: the app's editor with it, even one left running</td>
+                </tr>
+                <tr>
+                  <td><code>spell server url &lt;file&gt;</code></td>
+                  <td>start it if need be, then print the address that serves the file</td>
+                </tr>
+                <tr>
+                  <td><code>spell server local</code></td>
+                  <td>run it in the foreground, until Ctrl-C</td>
+                </tr>
+                <tr>
+                  <td><code>spell server prune</code></td>
+                  <td>stop the page and Vite servers whose checkout is gone</td>
+                </tr>
+                <tr>
+                  <td><code>spell bundle [--stale]</code></td>
+                  <td>build the bundles it serves (Spell UI's site ...); <code>check</code> says which are stale</td>
+                </tr>
+                <tr>
+                  <td><code>spell app serve [project]</code></td>
+                  <td>the page server and the editor together, then opens the editor</td>
+                </tr>
+                <tr>
+                  <td><code>epic pages open [page]</code></td>
+                  <td>show a page in Chrome, or in VS Code's side bar with <code>--vs</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              Flags, after any verb: <code>--root &lt;dir&gt;</code> (another kit's root),
+              <code>--port &lt;n&gt;</code>, <code>--spaces &lt;dir&gt;</code> (the projects folder; it also gets an
+              editor of its own).
+            </li>
+            <li>
+              A tool that shows a page never assumes a server is up: it asks for one, and starts it if need be. A server
+              older than its own code is restarted, so after a merge the next opener gets the new routes.
+            </li>
+            <li>
+              Its facts go in <code>.spell-server.json</code> at the kit's root, where the openers find them; its
+              output, in colour, in
+              <a href="/.spell-server.log" target="src-spell-server-log"><code>.spell-server.log</code></a
+              >.
+            </li>
+            <li>Cold, it answers in about a second and a half: it loads its route modules before it listens.</li>
+            <li>The catch: pointed at any folder but a kit's root, it refuses to start, and says where the root is.</li>
+          </ul>
         </ui-section>
 
-        <ui-section id="4-route-modules" label="4. Route modules" sticky collapsible dividing open="false">
+        <ui-section id="2-structure" label="3. One port, every address" sticky collapsible dividing open="false">
           <p>
-            How a package adds routes to the page server without the server importing it. Like Express middleware, but
-            registered by a path in the settings, not an <code>import</code> in the server's code.
+            A request meets the route modules first, in the order the settings list them. Whatever they don't answer is
+            a file: from the kit, then the epic folder, then a folder the settings name.
           </p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>address</th>
+                  <th>what it serves</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>/</code></td>
+                  <td>a redirect to the docs home, <code>/pages/index.html</code></td>
+                </tr>
+                <tr>
+                  <td><code>/guides/</code>, <code>/epics/</code>, <code>/sagas/</code>, <code>/pages/</code></td>
+                  <td>
+                    the kit's own <code>guides/</code> first (the guides that ship with Spell), then the epic folder
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>/worktrees/&lt;w&gt;/...</code></td>
+                  <td>an epic's worktree, the same addresses inside; on the main checkout's server only</td>
+                </tr>
+                <tr>
+                  <td><code>/components/&lt;set&gt;/</code></td>
+                  <td>
+                    a component set's docs:
+                    <a href="/components/ui/" target="src-ui-docs"><code>/components/ui/</code></a> is Spell UI's
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/_epic/assets/</code>, <code>/_epic/pack/</code>,
+                    <a href="/templates/" target="src-epic-templates"><code>/templates/</code></a>
+                  </td>
+                  <td>the epic engine's page scripts and styles, its elements, its templates</td>
+                </tr>
+                <tr>
+                  <td><code>/editor</code></td>
+                  <td>a redirect to the running editor; while it isn't up, a 503 page saying so</td>
+                </tr>
+                <tr>
+                  <td><code>/api/server</code></td>
+                  <td>the server's facts: what <code>spell server status</code> prints</td>
+                </tr>
+                <tr>
+                  <td><code>/api/...</code></td>
+                  <td>saving pages and files, then each route module's calls; the editor's API last</td>
+                </tr>
+                <tr>
+                  <td>anything else</td>
+                  <td>
+                    the kit's own files, and every folder's inside it:
+                    <a href="/components/app/index.html" target="src-app-app-docs-index-html"
+                      ><code>/app/app/docs/index.html</code></a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>Old addresses get no redirect: they answer "not found".</li>
+            <li>
+              Every call under <code>/api/</code>, and which module answers it:
+              <a href="/README/server.md" target="src-readme-server-md">the server README</a>, "One port, every
+              address".
+            </li>
+          </ul>
+        </ui-section>
 
-          <ui-section id="the-contract" label="The contract" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                A ROUTE MODULE is a file whose default export is a <code>RouteModule</code>:
-                <code>{ name, setup(context) }</code>.
-                <ul>
-                  <li><code>setup()</code> runs once, before the server listens</li>
-                  <li>loaded by dynamic import under <code>tsx</code>; a failure is logged, not fatal</li>
-                </ul>
-              </li>
-              <li>
-                <code>RouteContext</code>, what <code>setup()</code> gets:
-                <ul>
-                  <li><code>router</code> -- add routes; they run BEFORE static files</li>
-                  <li><code>guard</code> -- put <code>guard.writeCheck</code> on every route that changes something</li>
-                  <li><code>live</code> -- <code>live.watch(dir)</code> reloads pages when files under it change</li>
-                  <li>
-                    <code>web</code> -- the whole server, e.g. <code>web.files.html.push()</code> for an html hook
-                  </li>
-                  <li><code>root</code>, <code>info</code> -- the checkout; pid, port, branch</li>
-                  <li>
-                    <code>onListening(start)</code> -- run once the server listens (<code>info.port</code> is set), e.g.
-                    to start a child process that needs the page server's port: the app's editor
-                  </li>
-                  <li><code>onStop(stop)</code> -- run when the server stops, e.g. to end a child process</li>
-                </ul>
-              </li>
-              <li>
-                Listed in the repo root's
-                <a href="/spell-epic/package.json" target="src-spell-epic-package-json"><code>package.json</code></a
-                >, <code>"pageServer"</code>: <code>routes</code> (paths from the root) and <code>watch</code> (folders
-                to live-reload; default
-                <a href="/src/server/page/PageServer.ts" target="src-src-server-page-pageserver-ts"
-                  ><code title="src/server/page/PageServer.ts">DEFAULT_WATCH</code></a
-                >, the shared pages' folders and the docs' bundle).
-              </li>
-            </ul>
+        <ui-section id="3-flows" label="4. What it does to a page" sticky collapsible dividing open="false">
+          <ui-section id="live-reload" label="Live reload" sticky collapsible dividing open="false">
+            <p>
+              Vite swaps a changed module into the running page. This server tells the page which FILE changed, and the
+              page decides: patch itself, swap a stylesheet, or reload.
+            </p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The root package.json's pageServer field · 25 lines</ui-title>
+              <ui-title>a page's socket, while a file it shows is written twice, 100 ms apart · 2 lines</ui-title>
               <ui-content>
-                <pre><code class="language-json">{
-  "pageServer": {
-    "routes": [
-      "packages/epics/tools/goals/goalsRoutes.ts",
-      "spell-epic/src/tools/detailsRoutes.ts",
-      "spell-epic/src/tools/choicesRoutes.ts",
-      "packages/epics/tools/notesRoutes.ts",
-      "spell-epic/src/tool/reviewRoutes.ts",
-      "spell-epic/src/tool/epicRoutes.ts",
-      "spell-epic/src/tools/agentRoutes.ts",
-      "spell-epic/src/tools/showRoutes.ts",
-      "spell-app/src/spaces/server/node/routes/appRoutes.ts"
-    ],
-    "watch": [
-      "epics",
-      "guides",
-      "pages",
-      "templates",
-      "brand",
-      "spell-epic/src/tools/_assets",
-      "spell-brand",
-      "spell-epic/src/components/__pack"
-    ]
-  }
-}</code></pre>
+                <pre><code class="language-text">{"event":"hello","data":{"run":"852fc1fa"}}                as the socket opens
+{"event":"change","data":{"path":"/guides/hello.html"}}    262 ms after the second write</code></pre>
               </ui-content>
             </ui-accordion>
-          </ui-section>
-
-          <ui-section id="goals-and-the-app" label="Goals and the app" sticky collapsible dividing open="false">
             <ul>
+              <li>Each path waits for 250 ms of quiet: a save is often a write, then a formatter.</li>
               <li>
-                <a href="/spell-epic/src/tools" target="src-spell-epic-src-tools"
-                  ><code title="packages/epics/tools/goals/goalsRoutes.ts">goalsRoutes.ts</code></a
-                >
-                -- <code>/api/goals/*</code>, the goals folder watched, and <code>window.GOALS_SERVER</code> on saga
-                pages.
-                <ul>
-                  <li>It was <code>server.js</code>, the goals server.</li>
-                </ul>
+                The page's own file is patched in place or reloaded; a stylesheet is swapped with no reload; a script
+                reloads the page, keeping the scroll.
               </li>
               <li>
-                <a href="/spell-epic/src/tools/detailsRoutes.ts" target="src-spell-epic-src-tools-detailsroutes-ts"
-                  ><code title="spell-epic/src/tools/detailsRoutes.ts">detailsRoutes.ts</code></a
-                >
-                -- <code>/api/details/answer</code>: a details page's answer, written beside it (<a
-                  href="details.html"
-                  target="src-guides-details-html"
-                  >Details Pages</a
-                >).
+                One websocket a page, never an <code>EventSource</code>: each held-open request takes one of Chrome's
+                six connections per host, for good, and every VS Code window shares them.
+              </li>
+              <li>Never while you type: an "Updated: reload" pill waits until the field loses focus.</li>
+              <li>A server restart sends a new run id, and a page from the old run reloads.</li>
+              <li>Only watched folders report: a file anywhere else can change all day, and no page hears of it.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="editing-a-section" label="Saving a section in place" sticky collapsible dividing open="false">
+            <p>
+              The site header's pencil turns edit mode on: hover outlines any element with an <code>id</code>, and
+              "edit" opens its HTML. The save splices that element's bytes into the file.
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>what the section editor sends, by hand · 9 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-text">GET   /api/pages?path=/guides/hello.html&amp;id=hello
+200   {"path":"/guides/hello.html","etag":"\"4c-1a1614c434d\"","html":"&lt;h1 id=\"hello\"&gt;Hello, again!&lt;/h1&gt;"}
+
+PATCH /api/pages?path=/guides/hello.html      x-server-token, If-Match: "4c-1a1614c434d"
+      {"id":"hello","html":"&lt;h1 id=\"hello\"&gt;Hello, edited&lt;/h1&gt;"}
+200   {"path":"/guides/hello.html","etag":"\"4c-1a1614c4837\""}
+
+PATCH the same again, with the same If-Match
+409   {"error":"the file changed since it was loaded:  reload it","etag":"\"4c-1a1614c4837\""}</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>Only the element's own bytes change, so <code>git diff</code> shows only the edit.</li>
+              <li>Nothing is committed: the change waits in the working tree.</li>
+              <li>
+                Two people editing one section: the second save gets the 409, and the editor says to reload. No
+                <code>If-Match</code> at all is a 428.
               </li>
               <li>
-                <a href="/spell-epic/src/tools/showRoutes.ts" target="src-spell-epic-src-tools-showroutes-ts"
-                  ><code title="spell-epic/src/tools/showRoutes.ts">showRoutes.ts</code></a
-                >
-                -- <code>/api/docs/show</code>: a link clicked in the Claude panel shows a page in VS Code's side bar,
-                or in Chrome (<code>epic pages link</code>).
+                A script can do the same: <code>SPELL_SERVER.editPage({ id, html })</code>, on any page the server sent.
               </li>
               <li>
-                <b>ORDER matters:</b> the app's <code>/api</code> router ends in a catch-all 404, so a module adding
-                <code>/api/...</code> routes MUST be listed before
-                <a
-                  href="/spell-app/src/spaces/server/node/routes/appRoutes.ts"
-                  target="src-spell-app-src-spaces-server-node-routes-approutes-ts"
-                  ><code>appRoutes.ts</code></a
-                >.
-              </li>
-              <li>
-                <a
-                  href="/spell-app/src/spaces/server/node/routes/appRoutes.ts"
-                  target="src-spell-app-src-spaces-server-node-routes-approutes-ts"
-                  ><code title="spell-app/src/spaces/server/node/routes/appRoutes.ts">appRoutes.ts</code></a
-                >
-                -- the app on the page server:
-                <ul>
-                  <li>
-                    <code>/api/...</code> -- the app's API router,
-                    <a href="/spell-ui/src/api.ts" target="src-spell-ui-src-api-ts"><code>api.ts</code></a
-                    >, unchanged
-                  </li>
-                  <li><code>/hello</code> -- liveness</li>
-                  <li>
-                    <code>/editor</code> -- redirect to vite; not running: a 503 page saying to run
-                    <code>spell app serve</code>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a href="/spell-app/src/app" target="src-spell-app-src-app"
-                  >server's <code title="packages/app/src/server/index.ts">index.ts</code></a
-                >
-                still runs the API alone (<code>yarn start:server</code>, port 3001), on
-                <code>SRV.WebServer</code> instead of Express.
+                The edge: only inside the folders the settings call writable (the epic folder's
+                <code>epics</code>, <code>guides</code>, <code>pages</code>); anywhere else is a 403 that says where you
+                can write.
               </li>
             </ul>
+          </ui-section>
+          <ui-section id="running-epics-flow" label="Every epic on one port" sticky collapsible dividing open="false">
+            <p>
+              An epic is worked in its own worktree, but its pages are read on the main checkout's server. Vite runs a
+              dev server per project; here one port, one tab and one live reload serve however many epics are open.
+            </p>
+            <ul>
+              <li>
+                <code>spell server url</code> in a worktree hands out the main server's address for it:
+                <code>http://127.0.0.1:4747/worktrees/&lt;epic&gt;/...</code>.
+              </li>
+              <li>A page served from a worktree is told its branch and worktree name, for the header's badge.</li>
+              <li>
+                The epic folder is served after each worktree's own files, so
+                <code>/worktrees/&lt;w&gt;/epics/...</code>
+                works, from one shared copy.
+              </li>
+              <li>
+                The server knows nothing of epics: a route module of the epic engine's tells it where the worktrees and
+                the epic folder are.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="4-route-modules" label="5. Settings and route modules" sticky collapsible dividing open="false">
+          <p>
+            An Express server is an app you write. This one is an app you configure: settings name the folders, and
+            route modules bring the code.
+          </p>
+          <ul>
+            <li>
+              Each folder of the kit declares its own part, in its
+              <a href="/package.json" target="src-package-json"><code>package.json</code></a
+              >'s <code>"pageServer"</code>; the epic folder's is its <code>page-server.json5</code>.
+            </li>
+            <li>
+              They're merged as the server starts: the kit's own, the epic folder's, then each folder's, lowest first.
+            </li>
+          </ul>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>Spell UI's whole part, from its package.json · 4 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-json">"pageServer": {
+  "bundles": ["site/_assets"],
+  "componentSets": { "ui": { "name": "Spell UI", "dir": "docs", "assets": "site/_assets" } }
+}</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ui-section id="the-contract" label="A route module" sticky collapsible dividing open="false">
+            <p>
+              A route module is a file whose default export is a name and a <code>setup()</code>, which runs once,
+              before the server listens. The server imports none: it loads each by its path from the settings.
+            </p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>A route module: goalsRoutes.ts, abridged · 30 lines</ui-title>
+              <ui-title
+                >a route module: listed in a folder's routes, GET /api/hello?name=Spell answered {"hello":"Spell"} · 10
+                lines</ui-title
+              >
               <ui-content>
-                <pre><code class="language-ts">import { SRV } from "spell/server"
-import type { RouteModule } from "spell/server/page"
+                <pre><code class="language-ts">import type { RouteModule } from "spell/server/page"
 
-const goalsRoutes: RouteModule = {
-  name: "goals",
-  setup({ router, guard, live, web }) {
-    live.watch(GOALS, { ignore: /(^|\/)_(tools|skills)\// })
-    web.files.html.push((html, { file }) =&gt;
-      file.startsWith(`${GOALS}/`)
-        ? html.replace("&lt;/head&gt;", `&lt;script&gt;window.GOALS_SERVER = ${JSON.stringify({ api: API })}&lt;/script&gt;\n&lt;/head&gt;`)
-        : html
-    )
-
-    const api = new SRV.Router()
-    api.get("/claude", (_request, reply) =&gt; reply.set("Cache-Control", "no-store").json(claude(true)))
-    api.use(guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }))
-    api.post("/thought", (request, reply) =&gt; {
-      const body = request.body as { target?: string; text?: string }
-      const target = resolveTarget(body.target ?? "", preferences())
-      const id = addThought(target, String(body.text ?? "")) as string
-      reply.json({ ok: true, id: id.toUpperCase(), target: target.name })
-    })
-    // ... /run, /claude/login, /open-vscode
-    router.use(API, (request, reply, next) =&gt;
-      api.handle(request, reply, (error) =&gt; next(error === undefined ? undefined : goalsError(error)))
-    )
+const helloRoutes: RouteModule = {
+  name: "hello",
+  setup({ router }) {
+    router.get("/api/hello", (request, reply) =&gt; reply.json({ hello: request.query.name ?? "world" }))
   }
 }
 
-export default goalsRoutes</code></pre>
+export default helloRoutes</code></pre>
               </ui-content>
             </ui-accordion>
-          </ui-section>
-
-          <ui-section
-            id="body-parsing-is-per-route"
-            label="Body parsing is per route"
-            sticky
-            collapsible
-            dividing
-            open="false"
-          >
             <ul>
+              <li>Its routes run before the static files.</li>
               <li>
-                The page server parses no bodies itself; each route parses its own:
-                <ul>
-                  <li>page edits: 10mb</li>
-                  <li>goals: 64kb</li>
-                  <li>the app's <code>/api</code>: JSON5, 10mb</li>
-                </ul>
+                What <code>setup()</code> gets: the router; the guard, for routes that change something; live reload's
+                watcher; the server itself; and <code>onListening()</code> and <code>onStop()</code>, for a child
+                process such as the editor.
               </li>
-              <li>Why: a proxy (<code>/ui</code>) must stream the raw body, and a body can be read only once.</li>
               <li>
-                A second <code>parseBodies()</code> in a chain leaves an already-read body alone, instead of waiting for
-                a stream that has ended.
-                <ul>
-                  <li>Found when the saga pages' buttons hung.</li>
-                </ul>
+                Order matters: the editor's <code>/api</code> router ends in a catch-all 404, so it's listed last.
               </li>
+              <li>A module that fails to load is logged, not fatal.</li>
             </ul>
           </ui-section>
         </ui-section>
 
-        <ui-section id="5-safety" label="5. Safety" sticky collapsible dividing open="false">
+        <ui-section id="5-safety" label="6. Safety" sticky collapsible dividing open="false">
+          <p>A web page in some other tab can send requests to <code>127.0.0.1</code> too. So the server checks:</p>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>real answers from a running page server, one per request · 7 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-text">{"error":"unknown host"}                                403
+{"error":"hidden file:  /.spell-server.json"}           403
+{"error":"outside the root:  /../etc/passwd"}           403
+{"error":"bad path:  /guides%2Fserver.html"}            400
+{"error":"bad token:  reload the page"}                 403
+{"error":"bad path:  /guides/server.html%00"}           400
+{"error":"wrong origin"}                                403</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>Loopback only (<code>127.0.0.1</code>), and a host check on every request, against DNS rebinding.</li>
+            <li>
+              A write token per run, which only the pages it served know (<code>window.SPELL_SERVER.token</code>), sent
+              as <code>x-server-token</code>.
+            </li>
+            <li>Writes only from the same origin, and only inside the writable folders.</li>
+            <li>
+              One path check for every file: <code>..</code>, NUL bytes and encoded slashes are refused; dot files are
+              never served.
+            </li>
+            <li>The editor's API takes no token: its one check is the origin.</li>
+            <li>
+              The edge: these keep out other web pages, not other programs on your machine. Any local program can fetch
+              a page and read its token.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="page-kinds" label="7. The pages it serves" sticky collapsible dividing open="false">
           <p>
-            A local server is reachable by every web page the browser opens, not just yours. These checks keep it to its
-            own pages.
+            A Spell page is hand-written HTML in <code>&lt;ui-*&gt;</code> elements, with no build step to read it. Each
+            kind of page has ONE name, and most start from a template, the epic engine's
+            <a href="/templates/" target="src-epic-templates"><code>epic/templates/</code></a
+            >.
           </p>
-
-          <ui-section id="who-can-reach-it" label="Who can reach it" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                Loopback only: every server binds <code>127.0.0.1</code>, so nothing on the network reaches it.
-                <ul>
-                  <li>
-                    exception: the app's standalone API (<code>yarn start:server</code>) binds <code>0.0.0.0</code>
-                    with no host check, as Express did, for vite and LAN devices
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <code>Host</code> check, on every request and websocket: <code>127.0.0.1:&lt;port&gt;</code>,
-                <code>localhost:&lt;port&gt;</code> or <code>[::1]:&lt;port&gt;</code>, else 403.
-                <ul>
-                  <li>So a site pointing its own name at 127.0.0.1 (DNS rebinding) is refused.</li>
-                </ul>
-              </li>
-              <li>
-                Write token: random each run, given only to pages the server serves
-                (<code>window.SPELL_SERVER.token</code>), sent as <code>x-server-token</code>.
-                <ul>
-                  <li>a page from an older run must reload: "bad token: reload the page"</li>
-                  <li>an <code>Origin</code> header, when sent, must be the server's own</li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="what-it-serves" label="What it serves" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <code>resolveInside()</code> is the ONE path check:
-                <ul>
-                  <li>each segment decoded on its own: an encoded <code>/</code> (<code>%2F</code>) is a 400</li>
-                  <li><code>..</code>, <code>.</code> and NUL bytes refused</li>
-                  <li>the result checked to be inside the root after resolving, as a last line</li>
-                </ul>
-              </li>
-              <li>
-                Dot files are 403 unless a mount says <code>dotFiles</code>:
-                <a href="/.git" target="src-git"><code>.git</code></a
-                >, <code>.env</code> and
-                <a href="/.spell-server.json" target="src-spell-server-json"><code>.spell-server.json</code></a>
-                stay private.
-              </li>
-              <li>Live reload never reports them.</li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="what-it-writes" label="What it writes" sticky collapsible dividing open="false">
-            <ul>
-              <li>Page edits: <code>.html</code> files inside the checkout only, never committed.</li>
-              <li>
-                <code>If-Match</code> MUST be the <code>ETag</code> the page was served with (size + modified time):
-                missing 428, stale 409.
-                <ul>
-                  <li>This catches writers that don't lock: VS Code, an agent's edit tool.</li>
-                </ul>
-              </li>
-              <li>
-                <code>FileLock</code> (<code>&lt;file&gt;.lock</code>, created atomically) makes cooperating tools take
-                turns: page edits, <code>epic</code>, the parked <code>spell dev goals</code>, the app's saves.
-                <ul>
-                  <li>waits up to 20s; a lock older than 60s is a crashed holder's, and taken over</li>
-                </ul>
-              </li>
-              <li>
-                The app's <code>/api</code> takes no token: the editor calls it from vite's origin, through vite's
-                proxy.
-                <ul>
-                  <li>But a write whose <code>Origin</code> isn't this machine is 403.</li>
-                  <li>Express had no check at all.</li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>kind</th>
+                  <th>what it's for</th>
+                  <th>template</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>guide</td>
+                  <td>explains a topic, like this page</td>
+                  <td>
+                    <a href="/templates/durable.html" target="src-epic-templates-durable-html"
+                      ><code>durable.html</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>cheatsheet</td>
+                  <td>an API at a glance, as cards you filter</td>
+                  <td>
+                    <a href="/templates/cheatsheet.html" target="src-epic-templates-cheatsheet-html"
+                      ><code>cheatsheet.html</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>epic page</td>
+                  <td>an epic's plan: its phases, items and log</td>
+                  <td>the epic tool's own</td>
+                </tr>
+                <tr>
+                  <td>saga page</td>
+                  <td>an epic of epics: what its epics did, its ideas, its epics' cards</td>
+                  <td>the epic tool's own</td>
+                </tr>
+                <tr>
+                  <td>details page</td>
+                  <td>one question explained with a picture, answered on the page</td>
+                  <td><code>details.html</code></td>
+                </tr>
+                <tr>
+                  <td>review page</td>
+                  <td>several calls to go through at once: keep, change, talk over</td>
+                  <td>
+                    <a href="/templates/review.html" target="src-epic-templates-review-html"
+                      ><code>review.html</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>choice page</td>
+                  <td>a table of names Claude recommends, typed over, then "Do it"</td>
+                  <td><code>syntax-choices.html</code></td>
+                </tr>
+                <tr>
+                  <td>run page</td>
+                  <td>a command asks, the person answers each row and sends, and the command carries on</td>
+                  <td>served by the epic engine, never copied</td>
+                </tr>
+                <tr>
+                  <td>commands page</td>
+                  <td>which command, skill or script does what</td>
+                  <td>
+                    <a href="/templates/commands.html" target="src-epic-templates-commands-html"
+                      ><code>commands.html</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>components page</td>
+                  <td>one element: its examples, attributes and look</td>
+                  <td>
+                    <a href="/templates/spell-ui-docs.html" target="src-epic-templates-spell-ui-docs-html"
+                      ><code>spell-ui-docs.html</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>components guide</td>
+                  <td>a component set's pages that aren't one element: home, getting started, theming</td>
+                  <td>
+                    <a href="/templates/component-set-docs.html" target="src-epic-templates-component-set-docs-html"
+                      ><code>component-set-docs.html</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>reference page</td>
+                  <td>made from its source each time: a place's, the commands pages, the core reference</td>
+                  <td>none: drawn from its source</td>
+                </tr>
+                <tr>
+                  <td>home page, list page</td>
+                  <td>the docs' front page, and each top-bar tab's page: a card per page</td>
+                  <td>none: <code>epic pages index</code> writes them</td>
+                </tr>
+                <tr>
+                  <td>changelog</td>
+                  <td>what the repo shipped, newest first</td>
+                  <td>none: its header comment has an entry's markup</td>
+                </tr>
+                <tr>
+                  <td>template</td>
+                  <td>the starting point for one kind of page</td>
+                  <td>--</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              Where they live: the guides that ship with Spell in the kit's <code>guides/</code> folder, versioned with
+              the code; epic pages, sagas, details pages and the rest in the epic folder, beside the kit.
+            </li>
+            <li>
+              A page loads ONE classic script, <code>/_epic/assets/spell-ui.js</code> (Solid, Spell UI and the page
+              runtime, bundled), and one stylesheet, <code>/_epic/assets/spell-doc.css</code>.
+            </li>
+            <li>
+              The toolbar in its sticky header is built from its top-level sections when it loads, so it never drifts
+              from them. Folds are remembered per page.
+            </li>
+            <li>
+              Start one with <code>epic pages create durable &lt;page&gt; --title "..."</code>; link its code spans with
+              the epic engine's <code>doc-links.js</code>, then check it with <code>doc-links.js --check</code>.
+            </li>
+            <li>
+              Every tool that writes a page calls the same steps: links (<code>SRV.Linker</code>), then formatting
+              (<code>SRV.formatHTML()</code>), then the write. So pages come out alike, whoever wrote them.
+            </li>
+          </ul>
         </ui-section>
 
-        <ui-section id="6-why" label="6. Why" sticky collapsible dividing open="false">
-          <p>
-            The decisions behind it, condensed from the epic page's
-            <a href="/epics/unified-server/unified-server.plan.html#decisions" target="unified-server">Decisions</a>
-            and "Review:"
-            <a href="/epics/unified-server/unified-server.plan.html#todos" target="unified-server">todos</a>.
-          </p>
-
-          <ui-section id="why-shape" label="Shape" sticky collapsible dividing open="false">
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>choice</th>
-                    <th>why</th>
-                  </tr>
-                  <tr>
-                    <td>a library AND one page server</td>
-                    <td>docs and epics gain live reload; one URL scheme for every property</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      a leaf package; <code>page/</code>,
-                      <a href="/spell-ui/site/" target="src-spell-ui-site"><code>site/</code></a> opt-in
-                    </td>
-                    <td>anything may import the barrel, which stays dependency-free</td>
-                  </tr>
-                  <tr>
-                    <td>TypeScript; goals runs under <code>tsx</code></td>
-                    <td>the repo's convention; goals becomes less portable (see Limits)</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      migrate goals, DocPreview, <code>cli</code> serve, <code>ui</code>'s StaticServer, the app's
-                      Express
-                    </td>
-                    <td>one mime table, path check and port choice; vite dev servers and Astro stay</td>
-                  </tr>
-                  <tr>
-                    <td>StaticServer kept as a thin wrapper</td>
-                    <td>
-                      SmokeRunner barely changes; side effect: a taken port (5199) now falls back to a free one instead
-                      of failing
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-          </ui-section>
-
-          <ui-section id="why-pages" label="Pages and editing" sticky collapsible dividing open="false">
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>choice</th>
-                    <th>why</th>
-                  </tr>
-                  <tr>
-                    <td>the site header in each page and template, not injected</td>
-                    <td>it shows on <code>file://</code> too; cost: one edit of every existing page</td>
-                  </tr>
-                  <tr>
-                    <td>edits write the original file, by byte range, never commit</td>
-                    <td>diffs show only the edit; review stays with whoever reviews the change</td>
-                  </tr>
-                  <tr>
-                    <td><code>FileLock</code> + <code>If-Match</code></td>
-                    <td>
-                      several writers touch the same pages; the lock serializes the polite ones, the ETag catches the
-                      rest
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>edits REQUIRE <code>If-Match</code> (428), no blind writes</td>
-                    <td>every caller has the ETag of the page it loaded</td>
-                  </tr>
-                  <tr>
-                    <td>the live client is a stringified function, not a <code>.js</code> asset</td>
-                    <td>
-                      VS Code's bundle (cjs) has no <code>import.meta.url</code> to find an asset by; needs a
-                      <code>__name</code> shim for <code>tsx</code>'s <code>keepNames</code>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>"Open in VS Code" is a plain <code>vscode://file</code> link</td>
-                    <td>works from <code>file://</code>; the window bridge would need a server endpoint</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-          </ui-section>
-
-          <ui-section id="why-spell-ui" label="Spell UI" sticky collapsible dividing open="false">
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>choice</th>
-                    <th>why</th>
-                  </tr>
-                  <tr>
-                    <td><code>/components/ui/</code> serves Spell UI's docs as static pages</td>
-                    <td>
-                      over proxying <code>astro dev</code> (until 2026-10-02): no second process; cost: a library change
-                      shows after the bundle is rebuilt (the page server's start, or <code>yarn site:dev</code>
-                      while working)
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>two theme toggles on Spell UI pages</td>
-                    <td>the site's own toggle is part of what it documents</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-          </ui-section>
-
-          <ui-section id="why-app" label="The app" sticky collapsible dividing open="false">
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>choice</th>
-                    <th>why</th>
-                  </tr>
-                  <tr>
-                    <td>contract tests first, against Express, then unchanged against <code>SRV.Router</code></td>
-                    <td>proves the swap kept the API's behaviour</td>
-                  </tr>
-                  <tr>
-                    <td><code>:name*</code> holds the WHOLE rest of the path</td>
-                    <td>Express 4 put only the first segment there: nested project files 404'd or hit EISDIR</td>
-                  </tr>
-                  <tr>
-                    <td>other behaviour changed on purpose</td>
-                    <td>
-                      unknown <code>DELETE /api/...</code>: the API's own 404; <code>.spell</code> files
-                      <code>text/plain</code>; a bad JSON5 body: 400 <code>{ error }</code> JSON, not an HTML page
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><code>/editor</code> redirects to vite</td>
-                    <td>
-                      over a built editor under <code>/editor/</code>, which needs a vite base and router basename
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><code>yarn start</code> is <code>spell app serve --headless</code></td>
-                    <td>one way to run everything; the API is on the page server, not 3001</td>
-                  </tr>
-                  <tr>
-                    <td><code>spell app serve</code> stops only a page server it started</td>
-                    <td>one already running (docs open elsewhere) stays up</td>
-                  </tr>
-                  <tr>
-                    <td>the extension never starts the page server</td>
-                    <td>a GUI VS Code may have no <code>node</code> on its PATH</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-          </ui-section>
+        <ui-section id="7-limits" label="8. Limits" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <b>No TypeScript, no module swapped in place</b>: a <code>.ts</code> file goes out as
+              <code>text/plain</code>, to read. The editor, which needs both, runs on Vite.
+            </li>
+            <li>
+              <b>Bundles show as last built</b>: a Spell UI change shows on
+              <a href="/components/ui/" target="src-ui-docs"><code>/components/ui/</code></a> after
+              <code>spell bundle --stale</code>, or the server's next start.
+            </li>
+            <li>
+              <b>A worktree deleted by hand leaves its server running</b>: <code>spell server prune</code> stops it.
+            </li>
+            <li>
+              <b>The docs home needs the epic folder</b>, which someone new hasn't got: start at
+              <a href="/components/ui/" target="src-ui-docs"><code>/components/ui/</code></a
+              >, which needs only the kit.
+            </li>
+            <li>
+              <b>It isn't the Python server</b>: <code>spell run &lt;project&gt; --target py</code> starts a different,
+              much smaller one, which runs one program.
+            </li>
+          </ul>
         </ui-section>
 
-        <ui-section id="7-limits" label="7. Limits" sticky collapsible dividing open="false">
-          <p>
-            Known costs and open caveats, from the epic page's
-            <a href="/epics/unified-server/unified-server.plan.html#todos" target="unified-server">Caveats</a>.
-          </p>
-
-          <ui-section id="limits-goals" label="Goals" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                Slower under <code>tsx</code>.
-                <ul>
-                  <li><code>goals.sh help</code>: 0.05s with node, 0.18s under tsx.</li>
-                  <li><code>yarn goals help</code>: ~0.6s, mostly yarn.</li>
-                </ul>
-              </li>
-              <li>
-                Less portable: goals now needs three things from this repo.
-                <ul>
-                  <li>
-                    the
-                    <a href="/src/server/" target="src-src-server"><span title="src/server">server package</span></a>
-                  </li>
-                  <li><code>tsx</code></li>
-                  <li>
-                    the root <a href="/package.json" target="src-package-json"><code>package.json</code></a
-                    >'s <code>"pageServer"</code> field
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Already-open saga pages need one reload: the token header moved from <code>x-goals-token</code> to
-                <code>x-server-token</code>.
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="limits-preview" label="VS Code and the header" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                A page opened through <code>?file=</code> with no page server running gets the extension's own server.
-                <ul>
-                  <li>
-                    It has no saga page buttons and no <code>/components/ui/</code>, until
-                    <code>spell server start</code>.
-                  </li>
-                </ul>
-              </li>
-              <li>"Open in VS Code" opens in the LAST FOCUSED VS Code window, not this session's.</li>
-              <li>The header's theme toggle and the Spell UI site's can disagree.</li>
-              <li>The editor has no site header, and the Editor tab leaves the page server's origin.</li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="limits-epics" label="Running epics" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                No edit mode on a worktree's page through the main server: <code>PageEditor</code> refuses dot paths
-                too.
-                <ul>
-                  <li>The worktree's own server edits it.</li>
-                </ul>
-              </li>
-              <li>
-                A main server started before this code (an old checkout, not restarted) has no
-                <code>/worktrees/</code>.
-                <ul>
-                  <li><code>mainServerUrl()</code> checks <code>/_server/epics</code> first.</li>
-                  <li>Without it, links fall back to the worktree's own server.</li>
-                </ul>
-              </li>
-              <li>
-                Phases are read by pattern, since the server is a leaf with no HTML parser.
-                <ul>
-                  <li>
-                    So an epic page whose phase tags lose their phase or status (<code>data-phase</code> /
-                    <code>data-status</code>) shows as "planning".
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="limits-ui" label="Spell UI" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <code>/components/ui/</code> shows the bundle as last built: a library change shows only after a
-                rebuild.
-                <ul>
-                  <li><code>spell bundle --stale</code> rebuilds it,</li>
-                  <li>or the page server's next start,</li>
-                  <li>or <code>yarn site:dev</code> while working.</li>
-                </ul>
-              </li>
-              <li>
-                <code>_assets/icon-packs</code> is a symlink into
-                <a href="/spell-ui/src/icons/" target="src-spell-ui-src-icons"
-                  ><code title="spell-ui/src/icons/">icons/</code></a
-                >: served fine, but a static deploy must copy through it.
-              </li>
-            </ul>
-          </ui-section>
+        <ui-section id="where" label="9. Where things are" sticky collapsible dividing open="false">
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>file</th>
+                  <th>what it is</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <a href="/src/server/WebServer.ts" target="src-src-server-webserver-ts"
+                      ><code title="src/server/WebServer.ts">WebServer.ts</code></a
+                    >
+                  </td>
+                  <td>the server, and the order a request walks</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/src/server/page/PageServer.ts" target="src-src-server-page-pageserver-ts"
+                      ><code title="src/server/page/PageServer.ts">PageServer.ts</code></a
+                    >
+                  </td>
+                  <td>the page server: starting one, the settings, route modules</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/src/server/LiveReload.ts" target="src-src-server-livereload-ts"
+                      ><code title="src/server/LiveReload.ts">LiveReload.ts</code></a
+                    >
+                  </td>
+                  <td>live reload's watcher and socket</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/src/server/Guard.ts" target="src-src-server-guard-ts"
+                      ><code title="src/server/Guard.ts">Guard.ts</code></a
+                    >
+                  </td>
+                  <td>the host, token and origin checks</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/src/server/safePath.ts" target="src-src-server-safepath-ts"
+                      ><code title="src/server/safePath.ts">safePath.ts</code></a
+                    >
+                  </td>
+                  <td>the one path check</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/src/server/site/" target="src-src-server-site"
+                      ><code title="src/server/site/">site/</code></a
+                    >
+                  </td>
+                  <td>the browser side: the site header, the section editor, the favicon</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/README/server.md" target="src-readme-server-md">The server README</a>: every address, call,
+              setting and file, and the five flows drawn
+            </li>
+            <li>
+              <a href="/src/server/AGENTS.md" target="src-src-server-agents-md">The server's AGENTS.md</a>: the rules
+              for working on it
+            </li>
+            <li>
+              <a href="/README/cli.md" target="src-readme-cli-md">The command-line README</a>, "The kit": every
+              <code>spell server</code> verb and flag
+            </li>
+            <li>
+              <a href="/guides/cli.html" target="src-guides-cli-html">The spell Command</a>: the command line the server
+              is started from
+            </li>
+          </ul>
         </ui-section>
-
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">
-            Last checked 2026-10-09 against <code>main</code>: re-read
-            <a href="/src/server/" target="src-src-server"><code title="src/server">src/server/</code></a>
-            to update.
-          </p>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
         </footer>
       </main>
     </div>
