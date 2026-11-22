@@ -53,6 +53,10 @@ test("the starter data makes a page:  three columns, one question chipless with 
   expect(ask.hasAttribute("no-chip")).toBe(true)
   const priority = ask.querySelector('epic-ask[slot="then"]')
   expect([priority.getAttribute("name"), priority.getAttribute("off-for")]).toEqual(["s1f1-priority", "N"])
+  expect(document.querySelector("p.lede").textContent.replace(/\s+/g, " ").trim()).toBe(
+    "For each idea, choose Yes, No, Modify (say what to change in the comment box) or Revisit (Claude will ask you again later)." +
+      "Then pick a Priority, from 1 (first) to 3 (last).If you chose No, you can skip Priority."
+  )
   expect(document.querySelector("#s1").getAttribute("label")).toBe("S1 · Now")
   expect(document.querySelector("a.spell-feature-name").getAttribute("href")).toBe("#s1f1")
 })

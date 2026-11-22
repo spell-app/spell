@@ -7,7 +7,7 @@
 //   Moved to another section by a round, it gets a new name there.
 {
   title: "Ideas to pick from",
-  lede: "Every idea in one list, best first.<br>Pick Yes, No, Modify or Revisit for each, and a priority.",
+  lede: "For each idea, choose Yes, No, Modify (say what to change in the comment box) or Revisit (Claude will ask you again later).<br>Then pick a Priority, from 1 (first) to 3 (last).<br>If you chose No, you can skip Priority.",
   askedBy: "session <code>name</code>, while doing what",
   where: {
     epic: "<code>name</code>:  what that work is for, in one line.",

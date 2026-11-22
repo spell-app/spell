@@ -144,6 +144,18 @@ describe("<epic-feature-set>", () => {
     expect(AnswerForm.forPage().gather().answers["order-s1"]).toBeUndefined()
   })
 
+  test("the dialog says what it's reordering, how, that names stay, and when Claude sees it", async () => {
+    const { main, host } = await page()
+    await openItems(main, host)
+    const dialog = parts(host, "dialog")[0]!
+    expect(dialog.getAttribute("heading")).toBe("Reorder your list: S1 · Now")
+    expect(Array.from(dialog.querySelectorAll(".how-to > p"), (line) => line.textContent)).toEqual([
+      "To move a row, drag the dots on its left, or click its up and down arrows.",
+      "Each row keeps its own number when you move it, so the numbers may end up out of order.",
+      "Press Save order to keep your new order. Claude only sees it after you press Send to Claude at the top of the page."
+    ])
+  })
+
   test("a drag moves a row in the dialog, and the page's only with Save", async () => {
     const { main, host } = await page()
     await openItems(main, host)

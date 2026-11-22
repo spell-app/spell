@@ -197,7 +197,6 @@ export class EpicFeatureSet extends E.UIComponent<typeof epicFeatureSetVocabular
       heading: isSections
         ? this.translationForKey("sectionsHeading")
         : this.translationForKey("itemsHeading", { title: this.sectionTitle(key) }),
-      example: entryOf(list.elements[0]!).name,
       entries: list.elements.map(entryOf)
     }
     this.said = ""
@@ -405,7 +404,7 @@ export class EpicFeatureSet extends E.UIComponent<typeof epicFeatureSetVocabular
         <ui-content class={DIALOG_BODY}>
           <div class={HOW_TO}>
             <p>{this.translationForKey("howTo")}</p>
-            <p>{this.translationForKey("namesStay", { name: this.sorting?.example ?? "" })}</p>
+            <p>{this.translationForKey("namesStay")}</p>
             <p>{this.translationForKey("sendAfter")}</p>
           </div>
           <ol ref={(list: HTMLElement) => (this.listBox = list)} class={LIST} part={this.partForName("list")}>
@@ -523,8 +522,8 @@ function sameOrder(one: readonly string[], other: readonly string[]): boolean {
 /** A list that can be reordered:  its answer key and its elements, in their order now. */
 type ReorderList = { key: string; elements: HTMLElement[] }
 
-/** What the dialog sorts:  the list's key, the dialog's title, a name to explain with, its rows as they'd be saved. */
-type Sorting = { key: string; heading: string; example: string; entries: SortEntry[] }
+/** What the dialog sorts:  the list's key, the dialog's title, its rows as they'd be saved. */
+type Sorting = { key: string; heading: string; entries: SortEntry[] }
 
 /** A row of the dialog:  the element's id, its name (`S2`, `F3`), its title. */
 type SortEntry = { id: string; name: string; title: string }
