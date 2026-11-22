@@ -812,7 +812,7 @@ The steps between a page's content and its file on disk, for every tool that wri
     - `ui-site`:  Spell UI's docs site
     - `epics-pack`:  the epics pack's script and its families' modules
     - `epic-docs`:  the docs pages' bundle (`_assets/spell-ui/`), and the scripts beside it
-  - `check()`:  stale when never built, its entry rewritten, its sources' hash changed,
+  - `check()`:  stale when never built, its entry rewritten with other bytes, its sources' hash changed,
     or ANY file its build made is missing (epic `epic-engine` I364):  a lazy engine, a chunk, a script beside its folder.
   - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog
     (the epics pack and spell-epic's docs bundle were too, until epic `solid-2-final` P7:  bundles now, git-ignored)
@@ -825,6 +825,11 @@ The steps between a page's content and its file on disk, for every tool that wri
     (`.bundle.json`):  everything there, and under its `generated`, as the build ends.
     - so a file a build writes outside its output folder is listed in `generated`, or it isn't required
     - `isIncomplete`:  a file gone, asked without reading a source
+    - builds of one bundle take turns, across processes (epic `epic-engine` I363):
+      a worktree's own page server and main's both watch it, and both see each change
+      - the lock:  `node_modules/.cache/spell-bundles/<name>.build.lock`
+      - `buildIfStale()`, `spell bundle --stale`'s:  looks again on its turn, so the second builds nothing
+      - the entry's hash is recorded too:  `yarn pack:build` by hand over the same sources leaves it current
   - `firstLoad()`:  what a page loads first of a bundle, each file sized raw, gzipped and brotli (`sizesOf()`):
     the ONE way a bundle is sized, by `sizeReport()` and the app's size budgets (`spell perf budget`, epic
     `solid-2-final` P1)

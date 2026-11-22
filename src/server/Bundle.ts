@@ -34,11 +34,15 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
  *   - "never edited by hand":  so a merge rewriting it says nothing, unlike a bundle's "changed since"
  * - `check()`:  stale when
  *   - never built
- *   - its entry is missing, or newer than its build
+ *   - its entry is missing, or newer than its build and not what that build wrote
+ *     (built by hand from the same sources, it's the same bytes:  epic `epic-engine` I363)
  *   - any file that build made is missing:  a lazy engine, a chunk, a script beside its folder (`missingFile()`;
  *     epic `epic-engine` I364:  with only the entry looked for, a lost engine was never built again)
  *   - its sources' hash isn't the one its last build recorded (`SRV.BUNDLE_RECORD`, in its output folder)
  * - `build()`:  runs its build command, then records the hash, and every file it made
+ *   - builds of one bundle take turns, across processes (`inTurn()`):  an epic worktree has two page servers watching
+ *     it, its own and main's, and each builds what it finds stale.  `buildIfStale()` looks again on its turn,
+ *     so the second finds it current (epic `epic-engine` I363)
  * - The page server runs `spell bundle --stale` once it listens, so a page always loads a current build.
  * - WHICH bundles:  the ones whose output folders the page server's settings name, `"bundles"`
  *   (every installed repo's `"pageServer"` part, merged:  `pageServerSettings()`), the list the page server reads too
@@ -106,7 +110,12 @@ export class Bundle {
    */
   get recordFile(): string {
     if (!this.spec.committed) return join(this.outputDir, SRV.BUNDLE_RECORD)
-    return join(installRoot(this.root), "node_modules", ".cache", "spell-bundles", `${this.name}.json`)
+    return join(this.cacheFolder, `${this.name}.json`)
+  }
+
+  /** the install's git-ignored folder for what's kept about its bundles, out of every build's way */
+  private get cacheFolder(): string {
+    return join(installRoot(this.root), "node_modules", ".cache", "spell-bundles")
   }
 
   /** Is the checkout a worktree (`SRV.checkoutOf()`), not the main checkout? */
@@ -191,8 +200,9 @@ export class Bundle {
     if (!record) return { ...found, stale: "never built" }
     const entry = statSync(join(this.outputDir, this.spec.entry), { throwIfNoEntry: false })
     if (!entry) return { ...found, stale: `no ${this.spec.entry}` }
-    // written after its build:  something else wrote it, e.g. a merge of a branch that still commits the bundle
-    if (entry.mtimeMs > statSync(this.recordFile).mtimeMs)
+    // written after its build, and not the same bytes:  something else wrote it, e.g. a merge of a branch that still
+    // commits the bundle
+    if (entry.mtimeMs > statSync(this.recordFile).mtimeMs && record.entry !== this.entryHash())
       return { ...found, stale: `${this.spec.entry} changed since` }
     if (record.sources !== sources) return { ...found, stale: "built from older sources" }
     const missing = this.missingFile(record)
@@ -234,10 +244,16 @@ export class Bundle {
     const record: SRV.BundleRecord = {
       sources,
       built: new Date().toISOString(),
-      ...(!this.spec.committed && { files: this.builtFiles() })
+      ...(!this.spec.committed && { files: this.builtFiles(), entry: this.entryHash() })
     }
     mkdirSync(dirname(this.recordFile), { recursive: true })
     writeFileSync(this.recordFile, `${JSON.stringify(record, null, 2)}\n`)
+  }
+
+  /** The hash of its entry's bytes as they stand;  `undefined` when it isn't there. */
+  private entryHash(): string | undefined {
+    const file = join(this.outputDir, this.spec.entry)
+    return existsSync(file) ? createHash("sha256").update(readFileSync(file)).digest("hex").slice(0, 16) : undefined
   }
 
   /**
@@ -280,12 +296,38 @@ export class Bundle {
   }
 
   /**
-   * Run its build, then record the sources' hash it started from, and the files it made.
+   * Run its build on its turn (`inTurn()`), then record the sources' hash it started from, and the files it made.
    * - `stdio`:  where the build's output goes (default:  this process's stderr, so a `--json` stdout stays clean)
    * - throws when the build fails;  it records nothing then, so the bundle stays stale
    * - SIDE EFFECT:  the build clears and rewrites `outputDir`
    */
-  build({ stdio = ["ignore", 2, 2] }: { stdio?: StdioOptions } = {}): SRV.BundleBuilt {
+  build(options: BuildOptions = {}): SRV.BundleBuilt {
+    return this.inTurn(() => this.runBuild(options))
+  }
+
+  /**
+   * `build()`, unless on its turn it's current:  another process built it from these sources meanwhile.
+   * - `undefined`:  nothing to build
+   * - throws as `build()`
+   */
+  buildIfStale(options: BuildOptions = {}): SRV.BundleBuilt | undefined {
+    return this.inTurn(() => (this.isStale ? this.runBuild(options) : undefined))
+  }
+
+  /**
+   * Run `work` when no other process is building this bundle.
+   * - the lock is in the install's cache:  a build empties its output folder
+   * - throws a `FileLockError` when another build holds it for `TURN_MS`
+   * - SIDE EFFECT:  makes the cache's folder
+   */
+  private inTurn<T>(work: () => T): T {
+    mkdirSync(this.cacheFolder, { recursive: true })
+    const options = { wait: TURN_MS, stale: TURN_MS, label: `spell bundle ${this.name}` }
+    return SRV.FileLock.run(join(this.cacheFolder, `${this.name}.build`), work, options)
+  }
+
+  /** `build()`'s work, on its turn. */
+  private runBuild({ stdio = ["ignore", 2, 2] }: BuildOptions): SRV.BundleBuilt {
     const sources = this.sourcesHash()
     const started = performance.now()
     const [command, ...args] = this.spec.run
@@ -503,8 +545,17 @@ export class Bundle {
 /** Bump to make every bundle stale once, e.g. when what a build records changes. */
 const BUNDLE_FORMAT = "bundle 3"
 
+/**
+ * The longest a build waits for another's, and a live one keeps its turn, in ms:  well past the slowest build.
+ * - a killed build's turn ends at once (`FileLock`:  its process is gone)
+ */
+const TURN_MS = 600_000
+
 /** A folder a build was still writing, or left when it was stopped (`ComponentPack`'s `epics.building-<pid>`):  no build's file. */
 const UNFINISHED = /\.building-\d+(\/|$)/
+
+/** `build()`'s options;  `stdio`:  where the build's output goes. */
+type BuildOptions = { stdio?: StdioOptions }
 
 /** The install's root above `from`:  the nearest folder up holding `yarn.lock`;  `from` itself without one. */
 function installRoot(from: string): string {
