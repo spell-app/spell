@@ -1730,8 +1730,8 @@ main :is(td, th)[data-spell-editing] {
  * - at 720px and under (the side bar, a phone) the pick would be off to the side, so (its design review):
  *   - Your pick first, 170px, then Item, its Facts under it in the same column;  nothing scrolls sideways
  *   - still a table, never stacked cards:  each row a grid of the same cells, in their order in the page
- * - an item's name (F1) is a chip in its pick's state colour:  red nothing picked, green picked, blue only a comment
- *   (its question shows no chip of its own)
+ * - an item's name (F1) is a chip in its row's state colour:  red till its pick and its Priority are both in, then
+ *   green (No needs no Priority:  it's off), blue only a comment (its question shows no chip of its own)
  */
 body.spell-doc-page .spell-doc-main > ui-section > ui-table.spell-feature-table {
   margin: 12px 16px 20px 16px;
@@ -1791,10 +1791,16 @@ body.spell-doc-page .spell-doc-main > ui-section > ui-table.spell-feature-table 
   .spell-feature-table > table > tbody > tr {
     grid-template-rows: auto 1fr;
   }
+  /* the table rounds its first and last cells' corners:  they aren't its corners here */
+  .spell-feature-table > table > * > tr > :is(th, td) {
+    border-radius: 0;
+  }
+  .spell-feature-table > table > * > tr > :is(:nth-child(1), .spell-feature-facts) {
+    border-inline-start: var(--ui-border-width) solid var(--ui-border-color);
+  }
   .spell-feature-table > table > * > tr > :nth-child(1) {
     grid-area: 1 / 2;
     min-width: 0;
-    border-inline-start: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
   }
   .spell-feature-table > table > * > tr > :nth-child(2) {
     grid-area: 1 / 1;
@@ -1841,6 +1847,13 @@ body.spell-doc-page .spell-doc-main > ui-section > ui-table.spell-feature-table 
 .spell-feature-table tr:has(> .spell-feature-pick > epic-ask:state(done)) a.spell-feature-name {
   --_feature-state: var(--spell-state-recent);
   --_feature-state-on: var(--spell-state-recent-on);
+}
+/* picked, its Priority still to pick:  not decided yet */
+.spell-feature-table
+  tr:has(> .spell-feature-pick > epic-ask:state(done) > epic-ask[slot="then"]:not(:state(off)):not(:state(done)))
+  a.spell-feature-name {
+  --_feature-state: var(--spell-state-attention);
+  --_feature-state-on: var(--spell-state-attention-on);
 }
 .spell-feature-table tr:has(> .spell-feature-pick > epic-ask:state(working)) a.spell-feature-name {
   --_feature-state: var(--spell-state-progress);

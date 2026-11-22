@@ -14,17 +14,28 @@ import "spell/ui/components/ui-input"
 import "spell/ui/components/ui-modal"
 import "spell/ui/components/ui-select"
 
+import docCSS from "spell/epic/tools/_assets/spell-doc.css?inline"
+
 ////////////////
 // ## Fixtures
 ////////////////
 
 /** An item's row, as the tool writes one. */
-function row(id: string, title: string) {
+function row(id: string, title: string, priority = "") {
   return (
     `<tr id="${id}" data-feature-item><td><p class="spell-feature-title"><a class="spell-feature-name" href="#${id}">` +
     `${id.slice(2).toUpperCase()}</a> <b>${title}</b></p></td><td class="spell-feature-pick">` +
     `<epic-ask compact no-chip name="${id}" label="${id.toUpperCase()} · ${title}"><epic-choices>` +
-    `<epic-option letter="Y" title="Yes"></epic-option></epic-choices></epic-ask></td></tr>`
+    `<epic-option letter="Y" title="Yes"></epic-option><epic-option letter="N" title="No"></epic-option></epic-choices>` +
+    `${priority}</epic-ask></td></tr>`
+  )
+}
+
+/** An item's Priority, in its pick's `then` slot. */
+function priority(id: string) {
+  return (
+    `<epic-ask slot="then" compact name="${id}-priority" label="Priority" off-for="N"><epic-choices>` +
+    `<epic-option letter="2" title="Priority 2"></epic-option></epic-choices></epic-ask>`
   )
 }
 
@@ -32,7 +43,7 @@ function row(id: string, title: string) {
 function section(id: string, title: string, rows: string) {
   return (
     `<ui-section id="${id}" label="${id.toUpperCase()} · ${title}" data-feature-section>` +
-    `<ui-button data-feature-reorder="${id}">Reorder</ui-button><table><tbody>${rows}</tbody></table></ui-section>`
+    `<ui-button data-feature-reorder="${id}">Reorder</ui-button><table class="spell-feature-table"><tbody>${rows}</tbody></table></ui-section>`
   )
 }
 
@@ -154,6 +165,38 @@ describe("<epic-feature-set>", () => {
       "Each row keeps its own number when you move it, so the numbers may end up out of order.",
       "Press Save order to keep your new order. Claude only sees it after you press Send to Claude at the top of the page."
     ])
+  })
+
+  test("a row and its section go green with both picks in, or with No, which turns the Priority off", async () => {
+    const main = await ElementFixture.render(
+      `<main class="spell-doc-main"><epic-feature-set></epic-feature-set>` +
+        `${section("s1", "Now", row("s1f1", "One", priority("s1f1")))}</main>`
+    )
+    const sheet = document.createElement("style")
+    sheet.textContent = docCSS
+    document.head.append(sheet)
+    await ElementFixture.settle()
+    const chip = () => getComputedStyle(main.querySelector(".spell-feature-name")!).backgroundColor
+    const pick = async (selector: string, value: string) => {
+      main
+        .querySelector(selector)!
+        .shadowRoot!.querySelector('[part~="select"]')!
+        .dispatchEvent(new CustomEvent("ui-changed", { detail: { value } }))
+      await ElementFixture.settle()
+    }
+    const state = () => main.querySelector("#s1")!.getAttribute("data-state")
+    const red = chip()
+    await pick("#s1f1 epic-ask", "Y")
+    expect([chip(), state()]).toEqual([red, "attention"])
+    await pick("#s1f1 epic-ask[slot]", "2")
+    expect(state()).toBe("done")
+    const green = chip()
+    expect(green).not.toBe(red)
+    await pick("#s1f1 epic-ask[slot]", "")
+    expect([chip(), state()]).toEqual([red, "attention"])
+    await pick("#s1f1 epic-ask", "N")
+    expect([chip(), state()]).toEqual([green, "done"])
+    sheet.remove()
   })
 
   test("a drag moves a row in the dialog, and the page's only with Save", async () => {
