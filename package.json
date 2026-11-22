@@ -1424,6 +1424,7 @@
     "concurrently": "^8.2.2",
     "emojibase-data": "^17.0.0",
     "ink-testing-library": "^4",
+    "magic-string": "^1.4.3",
     "playwright": "1.63.0",
     "pyright": "1.1.414",
     "typescript": "^7.0.2",

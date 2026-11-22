@@ -94,6 +94,8 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   - `epic add` and `epic update --title` hand each title to a fresh reader (`claude -p`, Sonnet, nothing of the
     repo;  `TitleReader`):  a fail is refused with its reasons and a rewrite to use;  `--title-ok` keeps one on
     purpose.  No `claude` on the `PATH` (CI, Codex), or a test run:  not read, one line on stderr says so.
+    - The reader passes unless a reader with no context would truly be lost;  its rewrite always fits the 30-word
+      rule, and a title that is its own rewrite, given back within the hour, passes unread (epic `epic-engine` I390).
   - Why (Owen, 2026-11-17, epic `epic-engine` I322):  "I'm looking at these things often hours after the issue came
     up, so sentences referring to some weird condition or issue that only obtained for a little while will be
     meaningless to me."  (I321 before:  3-10 words, 100 characters.)

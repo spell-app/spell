@@ -565,7 +565,7 @@ describe("compiled spell draws with Solid", () => {
     expect(cardsIn(host)[0]!.textContent).toBe("A")
   })
 
-  test('a getter that waits:  a "…" in its spot, its view held whole, the rest drawn;  later changes fill in (epic `language` P12)', async () => {
+  test('a getter that waits:  a "…" in its spot, its view held whole behind a spinner, the rest drawn;  later changes fill in (epic `language` P12)', async () => {
     const host = await mount(source(SLOW_VALUES, "Table"))
     const page = window as unknown as {
       slowTable: { moves: number; rank: number }
@@ -573,14 +573,16 @@ describe("compiled spell draws with Solid", () => {
     }
     const total = () => host.querySelector(".total")?.textContent
     const tileElement = () => host.querySelector("test-project-tile")
+    // a view held whole shows Spell UI's spinner, a value a "…" (epic `old-console-redo` T35)
+    const tileWaits = () => !!tileElement()!.shadowRoot!.querySelector("ui-loader")
     await waitFor(() => total() === "…" && !!tileElement())
-    expect(tileElement()!.shadowRoot!.textContent).toContain("…")
+    expect(tileWaits()).toBe(true)
     expect(host.querySelector(".moves")!.textContent).toBe("0")
 
     // each fills in when its own answer lands
     page.answerSlow("total", 10)
     await waitFor(() => total() === "11")
-    expect(tileElement()!.shadowRoot!.textContent).toContain("…")
+    expect(tileWaits()).toBe(true)
     page.answerSlow("face", "a")
     await waitFor(() => tileElement()!.shadowRoot!.querySelector(".tile")?.textContent === "A")
 

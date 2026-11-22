@@ -6198,6 +6198,7 @@ __metadata:
     linkedom: "npm:^0.18.13"
     lodash: "npm:^4.17.21"
     lodash-es: "npm:^4.18.1"
+    magic-string: "npm:^1.4.3"
     marked: "npm:^18.0.0"
     mermaid: "npm:^12.3.0"
     node-filter-async: "npm:^3.0.0"

@@ -4,6 +4,7 @@ import solid, { type Options as SolidOptions } from "@solidjs/vite-plugin"
 import type { Plugin } from "vite"
 
 import { standardDecorators } from "spell/toolchain/decorators"
+import { ruleTestsOutOfBuilds } from "spell/toolchain/stripRuleTests"
 
 /****************
  * ### Element build settings
@@ -55,7 +56,9 @@ export const DEV_SERVER_SETTINGS = { forwardConsole: false }
 
 /**
  * The plugins, aliases, dedupe, CSS and dev server settings an element build needs.
- * - `standardDecorators()` MUST come first:  both it and the Solid plugin are `enforce: "pre"`, and the Solid
+ * - `ruleTestsOutOfBuilds()` first:  a BUILD that reaches the grammar ships each rule with its first example only,
+ *   not its tests.
+ * - `standardDecorators()` MUST come before the Solid plugin:  both are `enforce: "pre"`, and the Solid
  *   compiler must see decorator-free code.
  * - Aliases come from the nearest `tsconfig.json` of each file (`resolve.tsconfigPaths`):  each repo's own table.
  * - `solid`:  the Solid plugin's options, e.g. `{ dev: false }` for Solid's production runtime.
@@ -63,7 +66,7 @@ export const DEV_SERVER_SETTINGS = { forwardConsole: false }
  */
 export function elementBaseConfig({ solid: solidOptions = {} }: { solid?: SolidOptions } = {}) {
   return {
-    plugins: [standardDecorators(), solid(solidOptions), cssBuildTarget()],
+    plugins: [ruleTestsOutOfBuilds(), standardDecorators(), solid(solidOptions), cssBuildTarget()],
     resolve: {
       tsconfigPaths: true,
       dedupe: SOLID_DEDUPE

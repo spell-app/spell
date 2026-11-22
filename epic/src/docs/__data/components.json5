@@ -7461,9 +7461,11 @@
         "textarea",
         "text field",
         "other",
-        "feedback"
+        "feedback",
+        "suggested text",
+        "code box"
       ],
-      "description": "A box you type in, on a page you answer on (epic `epic-workflow` P12):  one line to start, growing with its text.  What you type is part of the page's answer, by `type` and `for`:  the page's notes, a comment on a section or an option, a question's Other, a choice page's feedback.  The page's notes box also shows what the page KEPT (P18):  text typed for a question, option or section an agent's rewrite took off the page, under its old title, sent with the rest until you drop it.",
+      "description": "A box you type in, on a page you answer on (epic `epic-workflow` P12):  one line to start, growing with its text.  What you type is part of the page's answer, by `type` and `for`:  the page's notes, a comment on a section or an option, a question's Other, a choice page's feedback.  The page's notes box also shows what the page KEPT (P18):  text typed for a question, option or section an agent's rewrite took off the page, under its old title, sent with the rest until you drop it.  A box may start with Claude's SUGGESTED text, its seed (epic `ast-markup`):  you edit it into your own, and a box left as it was is sent as kept.",
       "noun": "text box",
       "attributes": [
         {
@@ -7499,6 +7501,11 @@
           "name": "max-height",
           "kind": "string",
           "description": "How tall it grows before it scrolls, a CSS length:  `40vh`, `50vh`;  none:  a third of the window.  For a box another element draws, with room of its own (`<epic-agents>`' redirect box, `<epic-new-item>`)."
+        },
+        {
+          "name": "code",
+          "kind": "boolean",
+          "description": "For code or markup:  monospace, lines never wrap (it scrolls sideways), Tab indents (Shift-Tab takes it back;  Escape, then Tab, moves on);  it still grows with its lines."
         }
       ],
       "slots": [],
@@ -7519,12 +7526,20 @@
         {
           "name": "kept-item",
           "description": "One kept text:  its old title (the id it was under on hover), what was typed, and a × to drop it."
+        },
+        {
+          "name": "reset",
+          "description": "A seeded box's button back to its suggested text, under its field while what's in it differs."
         }
       ],
       "states": [
         {
           "name": "filled",
           "description": "Something is typed in it."
+        },
+        {
+          "name": "edited",
+          "description": "A seeded box no longer holds its suggested text."
         }
       ],
       "texts": [
@@ -7567,6 +7582,16 @@
           "key": "comment",
           "text": "Comment on this section",
           "description": "A `comment` box's placeholder."
+        },
+        {
+          "key": "reset",
+          "text": "Back to the suggestion",
+          "description": "A seeded box's reset button."
+        },
+        {
+          "key": "resetTip",
+          "text": "Put Claude's suggested text back, and lose your changes",
+          "description": "The reset button's tooltip."
         },
         {
           "key": "other",

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { AnswerForm } from "spell/epic/answers"
+import { AnswerForm, SEED_EMPTIED, type SentAnswer } from "spell/epic/answers"
 
 import "spell/epic/components/epic-text-box"
 // the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
@@ -114,5 +114,112 @@ describe("<epic-text-box>", () => {
     await type(feedback, "mine")
     // a feedback box is its bar's:  never the details page's answer
     expect(AnswerForm.forPage().gather().comments).toEqual({ context: "set" })
+  })
+
+  describe("a SEED (epic `ast-markup`)", () => {
+    /** A seeded comment box for `context`:  its seed markup with `<`, quotes and braces, unescaped. */
+    const SEEDED =
+      `<epic-text-box for="context" code><script type="text/plain">\n` +
+      `      <ui-button label="Save {name}" on-click="save">\n        <b>go</b>\n      </ui-button>\n` +
+      `    </script></epic-text-box>`
+    const SEED = `<ui-button label="Save {name}" on-click="save">\n  <b>go</b>\n</ui-button>`
+
+    test("starts with its seed, dedented;  left as it is, it sends nothing", async () => {
+      const box = await ElementFixture.render(SEEDED)
+      expect(field(box).value).toBe(SEED)
+      expect(box.matches(":state(edited)")).toBe(false)
+      expect(AnswerForm.forPage().gather().comments).toEqual({})
+      expect(AnswerForm.forPage().isEmpty).toBe(true)
+    })
+
+    test("edited:  the person's text is sent, a reset puts the seed back;  emptied:  says so;  axe", async () => {
+      const box = await ElementFixture.render(SEEDED)
+      await type(box, `${SEED}\n<ui-label>new</ui-label>`)
+      expect(AnswerForm.forPage().gather().comments).toEqual({ context: `${SEED}\n<ui-label>new</ui-label>` })
+      expect(box.matches(":state(edited)")).toBe(true)
+      const reset = box.shadowRoot!.querySelector<HTMLElement>('[part~="reset"]')!
+      expect(reset.textContent).toBe("Back to the suggestion")
+      await expectAccessible(box)
+      reset.click()
+      await ElementFixture.settle()
+      expect([field(box).value, AnswerForm.forPage().gather().comments]).toEqual([SEED, {}])
+      expect(box.shadowRoot!.querySelector('[part~="reset"]')).toBeNull()
+      await type(box, "  ")
+      expect(AnswerForm.forPage().gather().comments).toEqual({ context: SEED_EMPTIED })
+    })
+
+    test("an answer sent comes back:  the person's text, the seed for none, empty for emptied", async () => {
+      const box = await ElementFixture.render(SEEDED)
+      const form = AnswerForm.forPage()
+      const sent = (comments: Record<string, string>) =>
+        ({ page: "/x.html", answered: "", changes: 0, answers: {}, notes: "", comments }) as SentAnswer
+      const component = (box as HTMLElement & { component: { showAnswer(answer: SentAnswer): void } }).component
+      const shown = async (answer: SentAnswer) => {
+        component.showAnswer(answer)
+        await ElementFixture.settle()
+        return field(box).value
+      }
+      expect(await shown(sent({ context: "mine" }))).toBe("mine")
+      expect(await shown(sent({}))).toBe(SEED)
+      expect(await shown(sent({ context: SEED_EMPTIED }))).toBe("")
+      expect(form.gather().comments).toEqual({ context: SEED_EMPTIED })
+    })
+
+    test("`code`:  monospace, no wrapping;  Tab indents, Shift-Tab takes it back, after Escape Tab leaves", async () => {
+      const box = await ElementFixture.render(SEEDED)
+      const control = field(box)
+      const style = getComputedStyle(control)
+      expect([style.whiteSpace, style.fontFamily.includes("mono")]).toEqual(["pre", true])
+      control.focus()
+      control.setSelectionRange(0, 0)
+      const key = (init: KeyboardEventInit) => {
+        const event = new KeyboardEvent("keydown", { bubbles: true, composed: true, cancelable: true, ...init })
+        control.dispatchEvent(event)
+        return event.defaultPrevented
+      }
+      expect(key({ key: "Tab" })).toBe(true)
+      await ElementFixture.settle()
+      expect(control.value.startsWith(`  ${SEED.slice(0, 10)}`)).toBe(true)
+      control.setSelectionRange(0, control.value.length)
+      key({ key: "Tab", shiftKey: true })
+      await ElementFixture.settle()
+      expect(control.value).toBe(
+        SEED.split("\n")
+          .map((line) => line.replace(/^ {1,2}/, ""))
+          .join("\n")
+      )
+      key({ key: "Escape" })
+      expect(key({ key: "Tab" })).toBe(false)
+    })
+
+    test("a seed that arrives after the box was built (a router, a rewrite) is taken, unless it was typed in", async () => {
+      const box = await ElementFixture.render(`<epic-text-box for="context"></epic-text-box>`)
+      const seed = (text: string) => {
+        const script = document.createElement("script")
+        script.type = "text/plain"
+        script.textContent = text
+        box.replaceChildren(script)
+      }
+      seed("first")
+      await ElementFixture.settle()
+      expect(field(box).value).toBe("first")
+      seed("second")
+      await ElementFixture.settle()
+      expect(field(box).value).toBe("second")
+      await type(box, "mine")
+      seed("third")
+      await ElementFixture.settle()
+      expect([field(box).value, AnswerForm.forPage().gather().comments]).toEqual(["mine", { context: "mine" }])
+    })
+
+    test("a plain box takes a seed too;  a box without `code` keeps wrapping", async () => {
+      const box = await ElementFixture.render(
+        `<epic-text-box type="notes"><script type="text/plain">Looks right to me.</script></epic-text-box>`
+      )
+      expect([field(box).value, getComputedStyle(field(box)).whiteSpace]).toEqual(["Looks right to me.", "pre-wrap"])
+      expect(AnswerForm.forPage().gather().notes).toBe("")
+      await type(box, "Looks right.")
+      expect(AnswerForm.forPage().gather().notes).toBe("Looks right.")
+    })
   })
 })

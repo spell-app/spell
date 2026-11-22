@@ -46,14 +46,17 @@ describe("<for>'s attributes, as core.drawRead() draws them", () => {
   test("paging=pages:  a page at a time, with Previous and Next", async () => {
     drawn(rowsOf(MOST_AT_ONCE + 5), { paging: () => "pages" })
     expect(texts(".row")).toHaveLength(MOST_AT_ONCE)
-    expect(texts("ui-text")).toEqual(["Page 1"])
+    expect(texts("ui-text")).toEqual([`Showing 1-${MOST_AT_ONCE} of ${MOST_AT_ONCE + 5}`, "Page 1 of 2"])
     const [previous, next] = box.querySelectorAll("ui-button")
     expect(previous!.hasAttribute("disabled")).toBe(true)
     ;(next as HTMLElement).click()
     await new Promise((resolve) => setTimeout(resolve))
     flush()
     expect(texts(".row")).toEqual(rowsOf(5).map((row) => `${MOST_AT_ONCE + row}`))
-    expect(texts("ui-text")).toEqual(["Page 2"])
+    expect(texts("ui-text")).toEqual([
+      `Showing ${MOST_AT_ONCE + 1}-${MOST_AT_ONCE + 5} of ${MOST_AT_ONCE + 5}`,
+      "Page 2 of 2"
+    ])
   })
 
   test("paging=pages, as=cards or a table:  the pager comes after them, never one more card or row", () => {

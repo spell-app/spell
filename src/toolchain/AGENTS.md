@@ -31,6 +31,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       layout and alias table.
   - `spell/toolchain/decorators` ([decorators.ts](decorators.ts)):  the decorator pre-pass, every Vite and Vitest
     config's (standard decorators lowered by esbuild, before the Solid plugin)
+  - `spell/toolchain/stripRuleTests` ([stripRuleTests.ts](stripRuleTests.ts)):  the grammar rules' tests out of BUILT code
+    (epic `ast-markup` T1)
+    - `ruleTestsOutOfBuilds()`, a build-only Vite plugin:  the app's builds (`appConfig()`) and the elements'
+      (`elementBaseConfig()`);  `ruleTestsOutOfBundles()`, the same for esbuild:  the docs bundle
+    - each rule keeps its first example's input, all the language server reads (`firstExample()`);  dev, Vitest and
+      the syntax table read the source, every test with it
+    - fails the build on a `tests` it can't read as array and object literals
   - `spell/toolchain/packageVersion` ([packageVersion.ts](packageVersion.ts)):  `__PACKAGE_VERSION__`
   - `spell/toolchain/browserMode` ([browserMode.ts](browserMode.ts)):  `browserMode()`, the `browser` block of every
     repo's browser test projects:  headless Playwright, animations off (reduced motion;  epic `debut` I77)
@@ -56,8 +63,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The bins import them by package name (`spell/toolchain/declarations`).
   - Why:  node runs them as they are, types stripped,
     and the `./toolchain/*` entry of the kit's `exports` names each `.ts`.
-  - No package but its tools (`vite-plus`, esbuild) and `json5`;  of the kit, only util's `findUp()`
-    (`spell/util/node/findUp`, epic `coherence` P29), which imports nothing.
+  - No package but its tools (`vite-plus`, esbuild) and `json5`;
+    and TypeScript 6's API and `magic-string` (dev dependencies), loaded only as `stripRuleTests.ts` cuts a file.
+  - Of the kit, only util's `findUp()` (`spell/util/node/findUp`, epic `coherence` P29), which imports nothing.
 - Its tests:  [tests/toolchain/](../../tests/toolchain/), at the same paths as the code.
   - The `spell-ui/*` rules' tests stay Spell UI's:  their allow-list is Spell UI's.
 - Every folder manifest names the kit, `spell`, in its dependencies (`workspace:*`), for the bins.
