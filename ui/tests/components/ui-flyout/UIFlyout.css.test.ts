@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -70,7 +70,7 @@ describe("UIFlyout.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit, and the word widths", () => {
-    const css = flyoutRaw + colorsCSS
+    const css = flyoutRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(flyoutVocabulary))
       expect(Sheets.covers(css, phrase), `${flyoutVocabulary.tag}: ${phrase}`).toBe(true)
     for (const phrase of ["left", "right", "top", "bottom", "thin", "very thin", "wide", "very wide"])

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -68,7 +68,7 @@ describe("UISidebar.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = sidebarRaw + colorsCSS
+    const css = sidebarRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(sidebarVocabulary))
       expect(Sheets.covers(css, phrase), `${sidebarVocabulary.tag}: ${phrase}`).toBe(true)
     for (const spec of sidebarVocabulary.attributes) {

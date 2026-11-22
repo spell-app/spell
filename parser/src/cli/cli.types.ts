@@ -211,6 +211,11 @@ export type SpeedtestOptions = GlobalOptions & {
   baseline?: string
   /** a percent:  time against the baseline, and fail over it */
   budget?: string
+  /**
+   * time the editing pipeline instead of the rule tests:  Solitaire's whole parse, its edits, its compile, a run and
+   * startup (epic `solid-2-final` P1)
+   */
+  pipeline?: boolean
 }
 
 /**

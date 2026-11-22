@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS, tokensCSS } from "spell/ui/styles"
+import { colorsCSS, colorsSharedCSS, foundationCSS, tokensCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -56,11 +56,11 @@ describe("UIText.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = textRaw + colorsCSS
+    const css = textRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(textVocabulary))
       expect(Sheets.covers(css, phrase), `${textVocabulary.tag}: ${phrase}`).toBe(true)
     const [, , state] = textVocabulary.attributes
-    for (const value of state.values) expect(colorsCSS).toContain(`.ui.${value},`)
+    for (const value of state.values) expect(colorsSharedCSS).toContain(`.ui.${value},`)
   })
 
   it("never aliases a global --ui-text-* colour token", () => {

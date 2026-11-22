@@ -832,6 +832,7 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 | `spell speedtest --by-module` | each test timed on its own too:  a table by module, then the rules that grew most |
 | `spell speedtest --baseline save` | saves this commit and its numbers as the baseline, in the command's `speedBaseline.json` |
 | `spell speedtest --budget 5` | times against the saved baseline, by module, and fails when the tests both sides have take over 5% longer |
+| `spell speedtest --pipeline` | times the editing pipeline instead:  Solitaire's cold parse, the incremental tests' four edits, a compile, startup, and one run of the compiled program;  with `--json`, `--baseline save` and `--budget 5` too |
 
 - A side's runs combine as the mean of their averages, the lowest min and the highest max.
   With 3 or more runs, one fluke (an average 25% over the median) is dropped.
@@ -847,6 +848,44 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
   before merging.
   - A run always times the baseline's commit again, beside this one, on the same machine:
     the numbers saved with it are only a record.
+- `--pipeline` times what the editor does as you type, each number the median of the runs:
+  - CPU time after a warm-up, as the rule tests are, except the program's run, which is a child process:  the clock's
+  - its baseline is `spell perf`'s (below), so `--budget` compares with the numbers saved there, not a commit
+
+</details>
+
+### Measuring speed and size
+
+| Command | What it does |
+| --- | --- |
+| `spell perf run` | measures the editor, a docs page, an epic page and run mode in a headless browser, on a desktop and an emulated phone, then prints the report;  about 5 minutes |
+| `spell perf report` | the last run's numbers beside the run before it and the baseline, "WORSE" past 10% |
+| `spell perf budget` | every bundle's size, brotli, against its budget and its ceiling;  exits 1 when one grew past its ceiling |
+
+<details>
+<summary>Every option of perf, and how it measures</summary>
+
+| Option | What it does |
+| --- | --- |
+| `spell perf run --full` | every measurement, 5 loads each:  load, leaks, typing, accessibility, listeners, style sheets, a CPU profile and the editing pipeline |
+| `spell perf run --page editor,docs` | which pages:  `editor`, `docs`, `epic`, `run` (default all) |
+| `spell perf run --profile phone` | which profiles:  `desktop`, `phone`, `phonewide` (default `desktop` and `phone`) |
+| `spell perf run --steps load,typing` | which measurements (default `load`) |
+| `spell perf run --runs <count>` | cold loads per page and profile, medians reported (default 1, 5 with `--full`) |
+| `spell perf run --wait <minutes>` / `--force` | how long to wait for a quiet machine (default 10) / don't wait |
+| `spell perf run --baseline save` | this run is the baseline too, `perfBaseline.json` beside the command's code |
+| `spell perf budget --tighten` | lowers each ceiling to the bundle's size now plus 2%:  after a change that shrank one |
+
+- The phone is Playwright's Pixel 7, its CPU slowed 4x and a 5G-like network (20ms, 50 Mbps down, 20 up);
+  `phonewide` is the same at 1280 x 800, where the editor shows its code pane.
+- The editor is a production build made into a temporary folder and served, its server paths passed on to the running
+  page server:  start it first (`spell server start`).  Nothing in the checkout changes:  its writes are refused.
+- A run waits for the machine's test turn (`epic turns run test`), then for a quiet machine (a 1-minute load under half
+  the CPUs).  Still busy, it runs anyway, and says so:  times are noisy then, bytes and counts aren't.
+- Each run is a dated file in `.perf-results/` at the kit's root, git-ignored.
+- The budgets are `app/perf-budgets.json5`, brotli KB:  each with what it should weigh and a CEILING, its size the day
+  it was set plus 2%.  CI runs `spell perf budget`, so a bundle can only get smaller;  two of them are numbers a run
+  measures in a browser, and are checked only after one.
 
 </details>
 

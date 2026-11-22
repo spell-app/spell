@@ -749,6 +749,9 @@ The steps between a page's content and its file on disk, for every tool that wri
       when it has none
     - what its build writes beside other sources (`generated`) is no bundle's source, so no build makes another stale
   - `build()`:  runs its package's script, then records the hash in its output folder (`.bundle.json`).
+  - `firstLoad()`:  what a page loads first of a bundle, each file sized raw, gzipped and brotli (`sizesOf()`):
+    the ONE way a bundle is sized, by `sizeReport()` and the app's size budgets (`spell perf budget`, epic
+    `solid-2-final` P1)
   - Its command line:  `spell bundle [<name>...] [--stale]` / `check`.
   - The page server runs `build --stale` when it starts:  `BundleBuild`, in `page/`.
   - Why (Owen, 2026-10-07):  their chunk names carry content hashes,

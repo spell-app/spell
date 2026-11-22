@@ -1,7 +1,7 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 import { itemVocabulary } from "spell/ui/components/ui-item"
 
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -61,7 +61,7 @@ describe("UIMenu.css source", () => {
   })
 
   it("covers every class word the menu and item vocabularies can emit", () => {
-    const css = menuRaw + colorsCSS
+    const css = menuRaw + colorsSharedCSS
     for (const vocabulary of [menuVocabulary, itemVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary)) {
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)

@@ -3,7 +3,7 @@ import { userEvent } from "vite-plus/test/browser"
 
 import { ClassBuilder } from "spell/ui/elements"
 import { UI } from "spell/ui/runtime"
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -69,7 +69,7 @@ describe("UISelect.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = selectRaw + colorsCSS
+    const css = selectRaw + colorsSharedCSS
     for (const phrase of classPhrases(selectVocabulary)) {
       expect(Sheets.covers(css, phrase), phrase).toBe(true)
     }

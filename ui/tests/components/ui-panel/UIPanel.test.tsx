@@ -440,6 +440,41 @@ describe('<ui-panel appearance="pane"> scroll shades', () => {
     expect(getComputedStyle(top).pointerEvents).toBe("none")
   })
 
+  it("follows a body swapped for another", async () => {
+    const { host, body } = await scrollingPane(2)
+    expect(await ends(host)).toEqual({ above: false, below: false })
+    const longer = body.cloneNode() as HTMLElement
+    longer.innerHTML = Array.from({ length: 20 }, (_, row) => `<div style="height: 40px">row ${row}</div>`).join("")
+    body.replaceWith(longer)
+    expect(await ends(host)).toEqual({ above: false, below: true })
+    longer.scrollTop = 100
+    expect(await ends(host)).toEqual({ above: true, below: true })
+  })
+
+  it("follows rows added to the body", async () => {
+    const { host, body } = await scrollingPane(2)
+    expect(await ends(host)).toEqual({ above: false, below: false })
+    body.insertAdjacentHTML("beforeend", `<div style="height: 400px">tall row</div>`)
+    expect(await ends(host)).toEqual({ above: false, below: true })
+  })
+
+  // solid-2-final P3:  every change inside a busy Inspector card read every child's style
+  it("reads no style for a change deeper in than the body's rows, and still follows its size", async () => {
+    const { host, body } = await scrollingPane(2)
+    // a row that grows with what's in it
+    const row = Object.assign(document.createElement("div"), { textContent: "card" })
+    body.append(row)
+    expect(await ends(host)).toEqual({ above: false, below: false })
+    const reads = vi.spyOn(window, "getComputedStyle")
+    try {
+      row.append(Object.assign(document.createElement("div"), { textContent: "more", style: "height: 400px" }))
+      expect(await ends(host)).toEqual({ above: false, below: true })
+      expect(reads.mock.calls.filter(([element]) => element.parentElement === host)).toEqual([])
+    } finally {
+      reads.mockRestore()
+    }
+  })
+
   it("leaves a panel that isn't a pane alone", async () => {
     const host = await ElementFixture.render(`<ui-panel label="Theme"><p>fields</p></ui-panel>`)
     expect(host.shadowRoot!.querySelector(".scroll.shade")).toBeNull()

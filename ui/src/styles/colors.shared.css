@@ -1,0 +1,574 @@
+/* GENERATED -- do not edit, run `yarn gen:styles` (source: styles.en.ts) */
+
+@layer ui.tokens {
+  /* Remaps:  component CSS reads only the generic `--ui-color*` tokens. */
+  .ui.red,
+  .ui-red {
+    --ui-color: var(--ui-red);
+    --ui-color-text: var(--ui-red-text);
+    --ui-color-header: var(--ui-red-header);
+    --ui-color-border: var(--ui-red-border);
+    --ui-color-background: var(--ui-red-background);
+    --ui-color-inverted: var(--ui-red-inverted);
+    --ui-color-on: var(--ui-red-on);
+    --ui-color-inverted-on: var(--ui-red-inverted-on);
+  }
+  .ui.orange,
+  .ui-orange {
+    --ui-color: var(--ui-orange);
+    --ui-color-text: var(--ui-orange-text);
+    --ui-color-header: var(--ui-orange-header);
+    --ui-color-border: var(--ui-orange-border);
+    --ui-color-background: var(--ui-orange-background);
+    --ui-color-inverted: var(--ui-orange-inverted);
+    --ui-color-on: var(--ui-orange-on);
+    --ui-color-inverted-on: var(--ui-orange-inverted-on);
+  }
+  .ui.yellow,
+  .ui-yellow {
+    --ui-color: var(--ui-yellow);
+    --ui-color-text: var(--ui-yellow-text);
+    --ui-color-header: var(--ui-yellow-header);
+    --ui-color-border: var(--ui-yellow-border);
+    --ui-color-background: var(--ui-yellow-background);
+    --ui-color-inverted: var(--ui-yellow-inverted);
+    --ui-color-on: var(--ui-yellow-on);
+    --ui-color-inverted-on: var(--ui-yellow-inverted-on);
+  }
+  .ui.olive,
+  .ui-olive {
+    --ui-color: var(--ui-olive);
+    --ui-color-text: var(--ui-olive-text);
+    --ui-color-header: var(--ui-olive-header);
+    --ui-color-border: var(--ui-olive-border);
+    --ui-color-background: var(--ui-olive-background);
+    --ui-color-inverted: var(--ui-olive-inverted);
+    --ui-color-on: var(--ui-olive-on);
+    --ui-color-inverted-on: var(--ui-olive-inverted-on);
+  }
+  .ui.green,
+  .ui-green {
+    --ui-color: var(--ui-green);
+    --ui-color-text: var(--ui-green-text);
+    --ui-color-header: var(--ui-green-header);
+    --ui-color-border: var(--ui-green-border);
+    --ui-color-background: var(--ui-green-background);
+    --ui-color-inverted: var(--ui-green-inverted);
+    --ui-color-on: var(--ui-green-on);
+    --ui-color-inverted-on: var(--ui-green-inverted-on);
+  }
+  .ui.teal,
+  .ui-teal {
+    --ui-color: var(--ui-teal);
+    --ui-color-text: var(--ui-teal-text);
+    --ui-color-header: var(--ui-teal-header);
+    --ui-color-border: var(--ui-teal-border);
+    --ui-color-background: var(--ui-teal-background);
+    --ui-color-inverted: var(--ui-teal-inverted);
+    --ui-color-on: var(--ui-teal-on);
+    --ui-color-inverted-on: var(--ui-teal-inverted-on);
+  }
+  .ui.blue,
+  .ui-blue {
+    --ui-color: var(--ui-blue);
+    --ui-color-text: var(--ui-blue-text);
+    --ui-color-header: var(--ui-blue-header);
+    --ui-color-border: var(--ui-blue-border);
+    --ui-color-background: var(--ui-blue-background);
+    --ui-color-inverted: var(--ui-blue-inverted);
+    --ui-color-on: var(--ui-blue-on);
+    --ui-color-inverted-on: var(--ui-blue-inverted-on);
+  }
+  .ui.violet,
+  .ui-violet {
+    --ui-color: var(--ui-violet);
+    --ui-color-text: var(--ui-violet-text);
+    --ui-color-header: var(--ui-violet-header);
+    --ui-color-border: var(--ui-violet-border);
+    --ui-color-background: var(--ui-violet-background);
+    --ui-color-inverted: var(--ui-violet-inverted);
+    --ui-color-on: var(--ui-violet-on);
+    --ui-color-inverted-on: var(--ui-violet-inverted-on);
+  }
+  .ui.purple,
+  .ui-purple {
+    --ui-color: var(--ui-purple);
+    --ui-color-text: var(--ui-purple-text);
+    --ui-color-header: var(--ui-purple-header);
+    --ui-color-border: var(--ui-purple-border);
+    --ui-color-background: var(--ui-purple-background);
+    --ui-color-inverted: var(--ui-purple-inverted);
+    --ui-color-on: var(--ui-purple-on);
+    --ui-color-inverted-on: var(--ui-purple-inverted-on);
+  }
+  .ui.pink,
+  .ui-pink {
+    --ui-color: var(--ui-pink);
+    --ui-color-text: var(--ui-pink-text);
+    --ui-color-header: var(--ui-pink-header);
+    --ui-color-border: var(--ui-pink-border);
+    --ui-color-background: var(--ui-pink-background);
+    --ui-color-inverted: var(--ui-pink-inverted);
+    --ui-color-on: var(--ui-pink-on);
+    --ui-color-inverted-on: var(--ui-pink-inverted-on);
+  }
+  .ui.brown,
+  .ui-brown {
+    --ui-color: var(--ui-brown);
+    --ui-color-text: var(--ui-brown-text);
+    --ui-color-header: var(--ui-brown-header);
+    --ui-color-border: var(--ui-brown-border);
+    --ui-color-background: var(--ui-brown-background);
+    --ui-color-inverted: var(--ui-brown-inverted);
+    --ui-color-on: var(--ui-brown-on);
+    --ui-color-inverted-on: var(--ui-brown-inverted-on);
+  }
+  .ui.grey,
+  .ui-grey {
+    --ui-color: var(--ui-grey);
+    --ui-color-text: var(--ui-grey-text);
+    --ui-color-header: var(--ui-grey-header);
+    --ui-color-border: var(--ui-grey-border);
+    --ui-color-background: var(--ui-grey-background);
+    --ui-color-inverted: var(--ui-grey-inverted);
+    --ui-color-on: var(--ui-grey-on);
+    --ui-color-inverted-on: var(--ui-grey-inverted-on);
+  }
+  .ui.black,
+  .ui-black {
+    --ui-color: var(--ui-black);
+    --ui-color-text: var(--ui-black-text);
+    --ui-color-header: var(--ui-black-header);
+    --ui-color-border: var(--ui-black-border);
+    --ui-color-background: var(--ui-black-background);
+    --ui-color-inverted: var(--ui-black-inverted);
+    --ui-color-on: var(--ui-black-on);
+    --ui-color-inverted-on: var(--ui-black-inverted-on);
+  }
+  .ui.primary,
+  .ui-primary {
+    --ui-color: var(--ui-primary);
+    --ui-color-text: var(--ui-primary-text);
+    --ui-color-header: var(--ui-primary-header);
+    --ui-color-border: var(--ui-primary-border);
+    --ui-color-background: var(--ui-primary-background);
+    --ui-color-inverted: var(--ui-primary-inverted);
+    --ui-color-on: var(--ui-primary-on);
+    --ui-color-inverted-on: var(--ui-primary-inverted-on);
+  }
+  .ui.secondary,
+  .ui-secondary {
+    --ui-color: var(--ui-secondary);
+    --ui-color-text: var(--ui-secondary-text);
+    --ui-color-header: var(--ui-secondary-header);
+    --ui-color-border: var(--ui-secondary-border);
+    --ui-color-background: var(--ui-secondary-background);
+    --ui-color-inverted: var(--ui-secondary-inverted);
+    --ui-color-on: var(--ui-secondary-on);
+    --ui-color-inverted-on: var(--ui-secondary-inverted-on);
+  }
+  .ui.positive,
+  .ui-positive {
+    --ui-color: var(--ui-positive);
+    --ui-color-text: var(--ui-positive-text);
+    --ui-color-header: var(--ui-positive-header);
+    --ui-color-border: var(--ui-positive-border);
+    --ui-color-background: var(--ui-positive-background);
+    --ui-color-inverted: var(--ui-positive-inverted);
+    --ui-color-on: var(--ui-positive-on);
+    --ui-color-inverted-on: var(--ui-positive-inverted-on);
+  }
+  .ui.negative,
+  .ui-negative {
+    --ui-color: var(--ui-negative);
+    --ui-color-text: var(--ui-negative-text);
+    --ui-color-header: var(--ui-negative-header);
+    --ui-color-border: var(--ui-negative-border);
+    --ui-color-background: var(--ui-negative-background);
+    --ui-color-inverted: var(--ui-negative-inverted);
+    --ui-color-on: var(--ui-negative-on);
+    --ui-color-inverted-on: var(--ui-negative-inverted-on);
+  }
+  .ui.info,
+  .ui-info {
+    --ui-color: var(--ui-info);
+    --ui-color-text: var(--ui-info-text);
+    --ui-color-header: var(--ui-info-header);
+    --ui-color-border: var(--ui-info-border);
+    --ui-color-background: var(--ui-info-background);
+    --ui-color-inverted: var(--ui-info-inverted);
+    --ui-color-on: var(--ui-info-on);
+    --ui-color-inverted-on: var(--ui-info-inverted-on);
+  }
+  .ui.warning,
+  .ui-warning {
+    --ui-color: var(--ui-warning);
+    --ui-color-text: var(--ui-warning-text);
+    --ui-color-header: var(--ui-warning-header);
+    --ui-color-border: var(--ui-warning-border);
+    --ui-color-background: var(--ui-warning-background);
+    --ui-color-inverted: var(--ui-warning-inverted);
+    --ui-color-on: var(--ui-warning-on);
+    --ui-color-inverted-on: var(--ui-warning-inverted-on);
+  }
+  .ui.success,
+  .ui-success {
+    --ui-color: var(--ui-success);
+    --ui-color-text: var(--ui-success-text);
+    --ui-color-header: var(--ui-success-header);
+    --ui-color-border: var(--ui-success-border);
+    --ui-color-background: var(--ui-success-background);
+    --ui-color-inverted: var(--ui-success-inverted);
+    --ui-color-on: var(--ui-success-on);
+    --ui-color-inverted-on: var(--ui-success-inverted-on);
+  }
+  .ui.error,
+  .ui-error {
+    --ui-color: var(--ui-error);
+    --ui-color-text: var(--ui-error-text);
+    --ui-color-header: var(--ui-error-header);
+    --ui-color-border: var(--ui-error-border);
+    --ui-color-background: var(--ui-error-background);
+    --ui-color-inverted: var(--ui-error-inverted);
+    --ui-color-on: var(--ui-error-on);
+    --ui-color-inverted-on: var(--ui-error-inverted-on);
+  }
+  .ui.red,
+  .ui-red,
+  .ui.orange,
+  .ui-orange,
+  .ui.yellow,
+  .ui-yellow,
+  .ui.olive,
+  .ui-olive,
+  .ui.green,
+  .ui-green,
+  .ui.teal,
+  .ui-teal,
+  .ui.blue,
+  .ui-blue,
+  .ui.violet,
+  .ui-violet,
+  .ui.purple,
+  .ui-purple,
+  .ui.pink,
+  .ui-pink,
+  .ui.brown,
+  .ui-brown,
+  .ui.grey,
+  .ui-grey,
+  .ui.black,
+  .ui-black,
+  .ui.primary,
+  .ui-primary,
+  .ui.secondary,
+  .ui-secondary,
+  .ui.positive,
+  .ui-positive,
+  .ui.negative,
+  .ui-negative,
+  .ui.info,
+  .ui-info,
+  .ui.warning,
+  .ui-warning,
+  .ui.success,
+  .ui-success,
+  .ui.error,
+  .ui-error {
+    --ui-color-hover: oklch(from var(--ui-color) calc(l - 0.05) calc(c * 1.1) h);
+    --ui-color-focus: oklch(from var(--ui-color) calc(l - 0.08) calc(c * 1.2) h);
+    --ui-color-down: oklch(from var(--ui-color) calc(l - 0.1) c h);
+    --ui-color-active: oklch(from var(--ui-color) calc(l - 0.05) calc(c * 1.15) h);
+  }
+  .ui.black,
+  .ui-black,
+  .ui.secondary,
+  .ui-secondary {
+    --ui-color-hover: oklch(from var(--ui-color) calc(l + 0.05) c h);
+    --ui-color-focus: oklch(from var(--ui-color) calc(l + 0.08) c h);
+    --ui-color-down: oklch(from var(--ui-color) calc(l + 0.1) c h);
+    --ui-color-active: oklch(from var(--ui-color) calc(l - 0.05) c h);
+  }
+  [data-variation~="red"] {
+    --ui-variation-color: var(--ui-red);
+    --ui-variation-color-inverted: var(--ui-red-inverted);
+    --ui-variation-color-on: var(--ui-red-on);
+    --ui-variation-color-inverted-on: var(--ui-red-inverted-on);
+  }
+  [data-variation~="orange"] {
+    --ui-variation-color: var(--ui-orange);
+    --ui-variation-color-inverted: var(--ui-orange-inverted);
+    --ui-variation-color-on: var(--ui-orange-on);
+    --ui-variation-color-inverted-on: var(--ui-orange-inverted-on);
+  }
+  [data-variation~="yellow"] {
+    --ui-variation-color: var(--ui-yellow);
+    --ui-variation-color-inverted: var(--ui-yellow-inverted);
+    --ui-variation-color-on: var(--ui-yellow-on);
+    --ui-variation-color-inverted-on: var(--ui-yellow-inverted-on);
+  }
+  [data-variation~="olive"] {
+    --ui-variation-color: var(--ui-olive);
+    --ui-variation-color-inverted: var(--ui-olive-inverted);
+    --ui-variation-color-on: var(--ui-olive-on);
+    --ui-variation-color-inverted-on: var(--ui-olive-inverted-on);
+  }
+  [data-variation~="green"] {
+    --ui-variation-color: var(--ui-green);
+    --ui-variation-color-inverted: var(--ui-green-inverted);
+    --ui-variation-color-on: var(--ui-green-on);
+    --ui-variation-color-inverted-on: var(--ui-green-inverted-on);
+  }
+  [data-variation~="teal"] {
+    --ui-variation-color: var(--ui-teal);
+    --ui-variation-color-inverted: var(--ui-teal-inverted);
+    --ui-variation-color-on: var(--ui-teal-on);
+    --ui-variation-color-inverted-on: var(--ui-teal-inverted-on);
+  }
+  [data-variation~="blue"] {
+    --ui-variation-color: var(--ui-blue);
+    --ui-variation-color-inverted: var(--ui-blue-inverted);
+    --ui-variation-color-on: var(--ui-blue-on);
+    --ui-variation-color-inverted-on: var(--ui-blue-inverted-on);
+  }
+  [data-variation~="violet"] {
+    --ui-variation-color: var(--ui-violet);
+    --ui-variation-color-inverted: var(--ui-violet-inverted);
+    --ui-variation-color-on: var(--ui-violet-on);
+    --ui-variation-color-inverted-on: var(--ui-violet-inverted-on);
+  }
+  [data-variation~="purple"] {
+    --ui-variation-color: var(--ui-purple);
+    --ui-variation-color-inverted: var(--ui-purple-inverted);
+    --ui-variation-color-on: var(--ui-purple-on);
+    --ui-variation-color-inverted-on: var(--ui-purple-inverted-on);
+  }
+  [data-variation~="pink"] {
+    --ui-variation-color: var(--ui-pink);
+    --ui-variation-color-inverted: var(--ui-pink-inverted);
+    --ui-variation-color-on: var(--ui-pink-on);
+    --ui-variation-color-inverted-on: var(--ui-pink-inverted-on);
+  }
+  [data-variation~="brown"] {
+    --ui-variation-color: var(--ui-brown);
+    --ui-variation-color-inverted: var(--ui-brown-inverted);
+    --ui-variation-color-on: var(--ui-brown-on);
+    --ui-variation-color-inverted-on: var(--ui-brown-inverted-on);
+  }
+  [data-variation~="grey"] {
+    --ui-variation-color: var(--ui-grey);
+    --ui-variation-color-inverted: var(--ui-grey-inverted);
+    --ui-variation-color-on: var(--ui-grey-on);
+    --ui-variation-color-inverted-on: var(--ui-grey-inverted-on);
+  }
+  [data-variation~="black"] {
+    --ui-variation-color: var(--ui-black);
+    --ui-variation-color-inverted: var(--ui-black-inverted);
+    --ui-variation-color-on: var(--ui-black-on);
+    --ui-variation-color-inverted-on: var(--ui-black-inverted-on);
+  }
+  [data-variation~="primary"] {
+    --ui-variation-color: var(--ui-primary);
+    --ui-variation-color-inverted: var(--ui-primary-inverted);
+    --ui-variation-color-on: var(--ui-primary-on);
+    --ui-variation-color-inverted-on: var(--ui-primary-inverted-on);
+  }
+  [data-variation~="secondary"] {
+    --ui-variation-color: var(--ui-secondary);
+    --ui-variation-color-inverted: var(--ui-secondary-inverted);
+    --ui-variation-color-on: var(--ui-secondary-on);
+    --ui-variation-color-inverted-on: var(--ui-secondary-inverted-on);
+  }
+}
+
+@layer ui.utilities {
+  .ui-text-red {
+    color: var(--ui-red-text);
+  }
+  .ui-text-orange {
+    color: var(--ui-orange-text);
+  }
+  .ui-text-yellow {
+    color: var(--ui-yellow-text);
+  }
+  .ui-text-olive {
+    color: var(--ui-olive-text);
+  }
+  .ui-text-green {
+    color: var(--ui-green-text);
+  }
+  .ui-text-teal {
+    color: var(--ui-teal-text);
+  }
+  .ui-text-blue {
+    color: var(--ui-blue-text);
+  }
+  .ui-text-violet {
+    color: var(--ui-violet-text);
+  }
+  .ui-text-purple {
+    color: var(--ui-purple-text);
+  }
+  .ui-text-pink {
+    color: var(--ui-pink-text);
+  }
+  .ui-text-brown {
+    color: var(--ui-brown-text);
+  }
+  .ui-text-grey {
+    color: var(--ui-grey-text);
+  }
+  .ui-text-black {
+    color: var(--ui-black-text);
+  }
+  .ui-text-primary {
+    color: var(--ui-primary-text);
+  }
+  .ui-text-secondary {
+    color: var(--ui-secondary-text);
+  }
+  .ui-text-positive {
+    color: var(--ui-positive-text);
+  }
+  .ui-text-negative {
+    color: var(--ui-negative-text);
+  }
+  .ui-text-info {
+    color: var(--ui-info-text);
+  }
+  .ui-text-warning {
+    color: var(--ui-warning-text);
+  }
+  .ui-text-success {
+    color: var(--ui-success-text);
+  }
+  .ui-text-error {
+    color: var(--ui-error-text);
+  }
+  .ui-bg-red {
+    background-color: var(--ui-red-background);
+  }
+  .ui-bg-orange {
+    background-color: var(--ui-orange-background);
+  }
+  .ui-bg-yellow {
+    background-color: var(--ui-yellow-background);
+  }
+  .ui-bg-olive {
+    background-color: var(--ui-olive-background);
+  }
+  .ui-bg-green {
+    background-color: var(--ui-green-background);
+  }
+  .ui-bg-teal {
+    background-color: var(--ui-teal-background);
+  }
+  .ui-bg-blue {
+    background-color: var(--ui-blue-background);
+  }
+  .ui-bg-violet {
+    background-color: var(--ui-violet-background);
+  }
+  .ui-bg-purple {
+    background-color: var(--ui-purple-background);
+  }
+  .ui-bg-pink {
+    background-color: var(--ui-pink-background);
+  }
+  .ui-bg-brown {
+    background-color: var(--ui-brown-background);
+  }
+  .ui-bg-grey {
+    background-color: var(--ui-grey-background);
+  }
+  .ui-bg-black {
+    background-color: var(--ui-black-background);
+  }
+  .ui-bg-primary {
+    background-color: var(--ui-primary-background);
+  }
+  .ui-bg-secondary {
+    background-color: var(--ui-secondary-background);
+  }
+  .ui-bg-positive {
+    background-color: var(--ui-positive-background);
+  }
+  .ui-bg-negative {
+    background-color: var(--ui-negative-background);
+  }
+  .ui-bg-info {
+    background-color: var(--ui-info-background);
+  }
+  .ui-bg-warning {
+    background-color: var(--ui-warning-background);
+  }
+  .ui-bg-success {
+    background-color: var(--ui-success-background);
+  }
+  .ui-bg-error {
+    background-color: var(--ui-error-background);
+  }
+  .ui-border-red {
+    border-color: var(--ui-red-border);
+  }
+  .ui-border-orange {
+    border-color: var(--ui-orange-border);
+  }
+  .ui-border-yellow {
+    border-color: var(--ui-yellow-border);
+  }
+  .ui-border-olive {
+    border-color: var(--ui-olive-border);
+  }
+  .ui-border-green {
+    border-color: var(--ui-green-border);
+  }
+  .ui-border-teal {
+    border-color: var(--ui-teal-border);
+  }
+  .ui-border-blue {
+    border-color: var(--ui-blue-border);
+  }
+  .ui-border-violet {
+    border-color: var(--ui-violet-border);
+  }
+  .ui-border-purple {
+    border-color: var(--ui-purple-border);
+  }
+  .ui-border-pink {
+    border-color: var(--ui-pink-border);
+  }
+  .ui-border-brown {
+    border-color: var(--ui-brown-border);
+  }
+  .ui-border-grey {
+    border-color: var(--ui-grey-border);
+  }
+  .ui-border-black {
+    border-color: var(--ui-black-border);
+  }
+  .ui-border-primary {
+    border-color: var(--ui-primary-border);
+  }
+  .ui-border-secondary {
+    border-color: var(--ui-secondary-border);
+  }
+  .ui-border-positive {
+    border-color: var(--ui-positive-border);
+  }
+  .ui-border-negative {
+    border-color: var(--ui-negative-border);
+  }
+  .ui-border-info {
+    border-color: var(--ui-info-border);
+  }
+  .ui-border-warning {
+    border-color: var(--ui-warning-border);
+  }
+  .ui-border-success {
+    border-color: var(--ui-success-border);
+  }
+  .ui-border-error {
+    border-color: var(--ui-error-border);
+  }
+}

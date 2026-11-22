@@ -1,0 +1,18 @@
+/* GENERATED -- do not edit, run `yarn gen:styles` (source: styles.en.ts) */
+
+@layer ui.tokens {
+  /* Fallback for shadow roots on pages that never loaded this sheet. */
+  @container not style(--ui-sheet-sizes: loaded) {
+    :host {
+      --ui-sheet-sizes: loaded;
+      --ui-size-mini: 0.625;
+      --ui-size-tiny: 0.75;
+      --ui-size-small: 0.875;
+      --ui-size-medium: 1;
+      --ui-size-large: 1.125;
+      --ui-size-big: 1.25;
+      --ui-size-huge: 1.5;
+      --ui-size-massive: 2;
+    }
+  }
+}

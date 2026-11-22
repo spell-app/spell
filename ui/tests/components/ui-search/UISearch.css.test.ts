@@ -2,7 +2,7 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
 import { ClassBuilder } from "spell/ui/elements"
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -60,7 +60,7 @@ describe("UISearch.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = searchRaw + colorsCSS
+    const css = searchRaw + colorsSharedCSS
     for (const phrase of classPhrases(searchVocabulary)) {
       expect(Sheets.covers(css, phrase), phrase).toBe(true)
     }

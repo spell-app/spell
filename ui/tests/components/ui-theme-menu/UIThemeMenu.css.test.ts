@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell/ui/styles"
+import { fallbackCSS, shadowFoundationCSS } from "spell/ui/styles"
 
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
@@ -48,7 +48,7 @@ describe("UIThemeMenu.css source", () => {
 
 describe("UIThemeMenu.css look", () => {
   it("lays the controls in one row:  28px round buttons, --ui-theme-menu-gap / -button-size set them", () => {
-    const host = Sheets.host(MARKUP, [...foundationCSS, themesCSS])
+    const host = Sheets.host(MARKUP, [...shadowFoundationCSS, ...fallbackCSS, themesCSS])
     const shadow = host.shadowRoot!
     const controls = shadow.querySelector<HTMLElement>("[part~=controls]")!
     const scheme = shadow.querySelector<HTMLElement>("[part~=scheme]")!
@@ -68,7 +68,7 @@ describe("UIThemeMenu.css look", () => {
   })
 
   it("shows the glyph of the button's scheme:  the other one shrunk, faded and blurred", () => {
-    const host = Sheets.host(MARKUP, [...foundationCSS, themesCSS])
+    const host = Sheets.host(MARKUP, [...shadowFoundationCSS, ...fallbackCSS, themesCSS])
     const shadow = host.shadowRoot!
     const sun = getComputedStyle(shadow.querySelector(".light.glyph")!)
     const moon = getComputedStyle(shadow.querySelector(".dark.glyph")!)
@@ -81,7 +81,7 @@ describe("UIThemeMenu.css look", () => {
   })
 
   it("marks the chosen theme;  Light | Dark | Auto (a segmented menu, its own look) fills the row", () => {
-    const host = Sheets.host(MARKUP, [...foundationCSS, themesCSS])
+    const host = Sheets.host(MARKUP, [...shadowFoundationCSS, ...fallbackCSS, themesCSS])
     const [checked, other] = host.shadowRoot!.querySelectorAll(".option")
     expect(getComputedStyle(checked!.querySelector(".check")!).opacity).toBe("1")
     expect(getComputedStyle(other!.querySelector(".check")!).opacity).toBe("0")
@@ -92,7 +92,8 @@ describe("UIThemeMenu.css look", () => {
 
   it("size scales the buttons", () => {
     const host = Sheets.host(MARKUP.replace('class="ui themes"', 'class="ui small themes"'), [
-      ...foundationCSS,
+      ...shadowFoundationCSS,
+      ...fallbackCSS,
       themesCSS
     ])
     expect(getComputedStyle(host.shadowRoot!.querySelector("[part~=scheme]")!).width).toBe("24.5px")

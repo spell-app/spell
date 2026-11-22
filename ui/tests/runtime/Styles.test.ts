@@ -192,6 +192,110 @@ describe("Styles.adoptPageSheetsInto()", () => {
     styles.adoptInto(other, ["view"])
     expect([...other.adoptedStyleSheets]).not.toContain(table)
   })
+
+  it("a `pageOnly` sheet never reaches such a root:  the tokens' `:root` rules do nothing there (solid-2-final P3)", () => {
+    const tokens = styles.register("tokens-test", ":root { --x: 1 }", { page: true, pageOnly: true })
+    const table = styles.register("table", ".ui.table > ui-row { display: grid }", { page: true })
+    try {
+      expect(document.adoptedStyleSheets).toContain(tokens)
+      const { root } = shadowHost()
+      styles.adoptInto(root, [])
+      styles.adoptPageSheetsInto(root)
+      expect([...root.adoptedStyleSheets]).toContain(table)
+      expect([...root.adoptedStyleSheets]).not.toContain(tokens)
+    } finally {
+      styles.register("tokens-test", "")
+      styles.register("table", "")
+    }
+  })
+})
+
+describe("Styles.setOptional()", () => {
+  it("a root takes an optional sheet only when its `takes` names it;  the others, and roots without `takes`, take all (solid-2-final P4)", async () => {
+    const layers = styles.register("layers", "@layer a;")
+    const colors = styles.register("colors-shared", ".ui.red { --c: red }")
+    const animations = styles.register("animations", "[data-ui-animation] { --a: 1 }")
+    const utilities = styles.register("utilities", ".ui-bold { font-weight: bold }")
+    styles.setFoundation(["layers", "colors-shared", "animations"])
+    styles.setOptional(["colors-shared", "animations", "utilities"])
+    const plain = shadowHost().root
+    const red = shadowHost().root
+    const old = shadowHost().root
+    styles.adoptInto(plain, [], [])
+    styles.adoptInto(red, [], ["colors-shared"])
+    styles.adoptInto(old, [])
+    await styles.appSheetReady
+    expect([...plain.adoptedStyleSheets]).toEqual([layers, styles.appSheet])
+    expect([...red.adoptedStyleSheets]).toEqual([layers, colors, styles.appSheet])
+    expect([...old.adoptedStyleSheets]).toEqual([layers, colors, animations, utilities, styles.appSheet])
+  })
+
+  it("`addInto()` adds one to a root for good, in the foundation's order;  a later `adoptInto()` keeps it", async () => {
+    const layers = styles.register("layers", "@layer a;")
+    const colors = styles.register("colors-shared", ".ui.red { --c: red }")
+    const animations = styles.register("animations", "[data-ui-animation] { --a: 1 }")
+    styles.setFoundation(["layers", "colors-shared", "animations"])
+    styles.setOptional(["colors-shared", "animations"])
+    const { root } = shadowHost()
+    styles.adoptInto(root, [], ["colors-shared"])
+    styles.addInto(root, "animations")
+    styles.adoptInto(root, [], ["colors-shared"])
+    await styles.appSheetReady
+    expect([...root.adoptedStyleSheets]).toEqual([layers, colors, animations, styles.appSheet])
+    // a name that isn't optional changes nothing
+    styles.addInto(root, "layers")
+    expect([...root.adoptedStyleSheets]).toEqual([layers, colors, animations, styles.appSheet])
+  })
+})
+
+describe("Styles.setFallback()", () => {
+  /** A sheet setting the colours' marker on `:root`, as `colors.css` does:  the page has the tokens. */
+  const MARKER = ":root { --ui-sheet-colors: loaded }"
+
+  it("a root takes the fallback sheets, after the foundation, on a page with no tokens", () => {
+    expect(getComputedStyle(document.documentElement).getPropertyValue("--ui-sheet-colors")).toBe("")
+    const layers = styles.register("layers", "@layer a;")
+    const fallback = styles.register("colors-fallback", ":host { --x: 1 }")
+    const button = styles.register("button", ".probe { color: red }")
+    styles.setFoundation(["layers"])
+    styles.setFallback(["colors-fallback"])
+    const { root } = shadowHost()
+    styles.adoptInto(root, ["button"])
+    expect([...root.adoptedStyleSheets].slice(0, 3)).toEqual([layers, fallback, button])
+  })
+
+  it("no root takes them on a page that has the tokens, nor once the page gets them", () => {
+    const fallback = styles.register("colors-fallback", ":host { --x: 1 }")
+    styles.setFallback(["colors-fallback"])
+    const { root } = shadowHost()
+    styles.adoptInto(root, [])
+    expect([...root.adoptedStyleSheets]).toContain(fallback)
+    // the page gets the tokens:  its roots drop the fallback
+    styles.register("colors", MARKER, { page: true, pageOnly: true })
+    try {
+      expect([...root.adoptedStyleSheets]).not.toContain(fallback)
+      const other = shadowHost().root
+      styles.adoptInto(other, [])
+      expect([...other.adoptedStyleSheets]).not.toContain(fallback)
+    } finally {
+      styles.register("colors", "")
+    }
+  })
+
+  it("a page that links ui.css has the tokens", () => {
+    const linked = document.createElement("style")
+    linked.textContent = MARKER
+    document.head.append(linked)
+    try {
+      const fallback = styles.register("colors-fallback", ":host { --x: 1 }")
+      styles.setFallback(["colors-fallback"])
+      const { root } = shadowHost()
+      styles.adoptInto(root, [])
+      expect([...root.adoptedStyleSheets]).not.toContain(fallback)
+    } finally {
+      linked.remove()
+    }
+  })
 })
 
 ////////////////
