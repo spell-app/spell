@@ -8,3 +8,6 @@
 
 # Vitest snapshots:  regenerated with `vp test run --update`, then checked against both sides
 **/__snapshots__/*.snap                                        linguist-generated merge=binary
+
+# The shipped guides' list (epic `epic-engine` P79):  `epic guides index`, from each guide's metas
+guides/guides.json5                                            linguist-generated merge=binary

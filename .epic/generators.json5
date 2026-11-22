@@ -100,6 +100,12 @@
       "outputs": ["app/app/docs/__data/{components,search}.json5"],
       "cwd": "app",
       "run": ["yarn", "site:data"]
+    },
+    {
+      "name": "shipped guides' list",
+      "outputs": ["guides/guides.json5"],
+      "cwd": ".",
+      "run": ["node", "epic/bin/epic", "guides", "index"]
     }
   ]
 }
