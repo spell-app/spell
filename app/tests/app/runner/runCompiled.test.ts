@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { linkModule, nativeImportsOf, projectImportsOf, startChanged } from "spell/app/app/runner"
+import { asFunction, linkModule, nativeImportsOf, projectImportsOf, startChanged } from "spell/app/app/runner"
 
 const COMPILED = `/*! SPELL: PROJECT { spellVersion: "0.8.0" } */
 import { core, Thing, List, App } from "@spell/core"
@@ -116,3 +116,75 @@ describe("startChanged():  does a recompile change the program's start, so it ru
     expect(startChanged(project(counter, CARD), project(counter.replace("new", "new  "), CARD))).toBe(false)
   })
 })
+
+describe("asFunction():  a program run as a function the browser can let go, not a module (solid-2-final P10)", () => {
+  const LINKED = [
+    `/*! SPELL: PROJECT { spellVersion: "0.8.0" } */`,
+    `import { core, App } from "blob:core"`,
+    `import { Pile as Stack } from "blob:solitaire"`,
+    `export class Game extends App {}`,
+    `export const game = new Game()`,
+    `export async function testIt() {}`,
+    `if (!core.isCarryingOver) game.start()`,
+    `//# sourceMappingURL=data:application/json;base64,e30=`
+  ].join("\n")
+
+  test("reads each import from what it's handed, keeps every line where it was, and answers its exports", () => {
+    const program = asFunction(LINKED, "@spell/examples/Solitaire")!
+    expect(program.imports).toEqual(["blob:core", "blob:solitaire"])
+    const lines = program.text.split("\n")
+    expect(lines[0]).toBe(
+      `(async (__spellImports__) => { "use strict"; const { core, App } = __spellImports__["blob:core"]; ` +
+        `const { Pile: Stack } = __spellImports__["blob:solitaire"]; /*! SPELL: PROJECT { spellVersion: "0.8.0" } */`
+    )
+    expect(lines.slice(1, 7)).toEqual([
+      "",
+      "",
+      "class Game extends App {}",
+      "const game = new Game()",
+      "async function testIt() {}",
+      "if (!core.isCarryingOver) game.start()"
+    ])
+    expect(program.text).toContain(
+      "return { get Game() { return Game }, get game() { return game }, get testIt() { return testIt } }\n})\n" +
+        "//# sourceMappingURL=data:"
+    )
+    expect(program.text.trimEnd().endsWith("//# sourceURL=@spell/examples/Solitaire.spell.js")).toBe(true)
+  })
+
+  test("runs:  its exports are what it made, from the modules it's handed", async () => {
+    class App {
+      start() {
+        started.push(this)
+      }
+    }
+    const started: App[] = []
+    const core = { isCarryingOver: false }
+    const { text } = asFunction(LINKED)!
+    const exports = await runText(text, { "blob:core": { core, App }, "blob:solitaire": { Pile: class {} } })
+    expect(Object.keys(exports)).toEqual(["Game", "game", "testIt"])
+    expect(exports.game).toBeInstanceOf(exports.Game as typeof App)
+    expect(started).toEqual([exports.game])
+  })
+
+  test("its exports stay live, as a module's do:  `export let`, set later, reads as it is now", async () => {
+    const { text } = asFunction(`export let count = 1\nexport function bump() { count++ }`)!
+    const exports = await runText(text, {})
+    ;(exports.bump as () => void)()
+    expect(exports.count).toBe(2)
+  })
+
+  test("leaves a shape it doesn't know to run as a module", () => {
+    expect(asFunction(`export default 3`)).toBeUndefined()
+    expect(asFunction(`const a = 1\nexport { a }`)).toBeUndefined()
+    expect(asFunction(`import "blob:x"`)).toBeUndefined()
+    expect(asFunction(`export const { a } = b`)).toBeUndefined()
+  })
+})
+
+/** Run a program's function text, as `runProgram()` does, handed `imports`. */
+function runText(text: string, imports: Record<string, unknown>): Promise<Record<string, unknown>> {
+  // oxlint-disable-next-line no-eval -- the program's text is what's under test
+  const run = (0, eval)(text) as (imports: Record<string, unknown>) => Promise<Record<string, unknown>>
+  return run(imports)
+}

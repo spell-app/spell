@@ -29,8 +29,9 @@ import { LiveEdit, type ProgramText } from "./LiveEdit"
  *   - Afresh after all, saying why on the console, when:
  *     - the edit changed the program's start:  the file that starts its app -- see `startChanged()`
  *     - one of the last run's things can't come over, e.g. its type changed -- see `core.carryProblems()`
- * - Imports it as a module from a NEW `blob:` URL each time -- the browser caches modules by URL,
- *   so re-importing one would hand back the old module without running anything.
+ * - Runs it as a FUNCTION, not a module (`runProgram()`, epic `solid-2-final` P10):
+ *   the browser keeps every module a page imports till the page goes, so a module per run, or per live edit,
+ *   grew memory with every edit.  A function is let go once nothing holds what it made.
  * - Each project it imports comes from `options.loadImport()`, linked onto its own `blob:` URL:
  *   once per run, however many import it, deepest first.
  *   Without `loadImport`, a project which imports another won't run.
@@ -92,12 +93,12 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
     if (options.projectId) await core.remember(options.projectId)
     // NOTE: the URL first, THEN `import()` it:  vite wraps `import(...)` in an arrow for its preloading,
     // so an `await` in its argument would end up in a function that isn't `async` -- a syntax error in the bundle
-    const url = await link(compiled, [])
+    const linkedProgram = await link(compiled, [])
     core.isCarryingOver = !!previous
     let program: Record<string, unknown>
     try {
       // its whole opening can't be undone:  Undo isn't lit the moment it starts (epic `language` J180)
-      program = (await core.runOpening(() => import(/* @vite-ignore */ url))) as Record<string, unknown>
+      program = await core.runOpening(() => runProgram(linkedProgram, options.projectId))
     } finally {
       core.isCarryingOver = false
     }
@@ -140,9 +141,10 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
   }
 
   /**
-   * `blob:` URL of `source`, linked:  its `@spell/core` onto `coreUrl`, each project it imports onto its own.
+   * `source`, linked:  its `@spell/core` onto `coreUrl`, each project it imports onto its own `blob:` URL.
    * - Each project it imports is linked first;  each code file it calls, once per run.
    * - `chain`:  the projects we're linking this for, to catch projects importing each other.
+   * - Answers a project's `blob:` URL, and the program's own text, linked, which runs as a function (`runProgram()`).
    */
   async function link(source: string, chain: string[]): Promise<string> {
     const imports: Record<string, string> = {}
@@ -174,6 +176,7 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
       linkModule(stamped, coreUrl, imports, natives),
       chain.length ? undefined : options.sourceMap
     )
+    if (!chain.length) return linkedSource
     const url = URL.createObjectURL(new Blob([linkedSource], { type: "text/javascript" }))
     urls.push(url)
     return url
@@ -321,17 +324,11 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
     }
     let program = last.exports
     if (edit.kind === "live") {
-      const url = blobUrl(
-        SourceMarks.inline(linkModule(edit.text, options.coreUrl, urlsOf(imports), last.natives), options.sourceMap)
+      const text = SourceMarks.inline(
+        linkModule(edit.text, options.coreUrl, urlsOf(imports), last.natives),
+        options.sourceMap
       )
-      try {
-        program = await core.loadOverRunning(
-          last.exports,
-          () => import(/* @vite-ignore */ url) as Promise<Record<string, unknown>>
-        )
-      } finally {
-        URL.revokeObjectURL(url)
-      }
+      program = await core.loadOverRunning(last.exports, () => runProgram(text, options.projectId))
       core.takeNewClasses(last.exports, program)
       core.things.setTopLevel(program)
       followDrawing(edit)
@@ -386,6 +383,111 @@ function sameImports(running: RunningImports, compiled: string): boolean {
 function blobUrl(text: string): string {
   return URL.createObjectURL(new Blob([text], { type: "text/javascript" }))
 }
+
+/**
+ * Run `linked`, a program's text with its imports linked (`linkModule()`), and answer what it exports.
+ * - As a FUNCTION, not a module (epic `solid-2-final` P10, TLDR 26):  the browser keeps every module it ever
+ *   imported, so a module from a new `blob:` URL per run, and per live edit, was never let go.
+ *   - Its imports are read first, `import()`ed:  modules already loaded (the runtime, each project it imports,
+ *     each code file it calls), so nothing new enters the browser's modules.
+ *   - Its source map stays:  dev tools and an error's stack still name its `.spell` lines (`//# sourceURL`).
+ * - As a module still, from a `blob:` URL, when it can't be:
+ *   - the page forbids running text as code (VS Code's webview:  no `unsafe-eval`)
+ *   - a shape `asFunction()` doesn't know (`export default` ...), which the compiler never writes today
+ * - `projectId`:  names it in dev tools, `<projectId>.spell.js`.
+ * - throws what the program throws as it runs, or a `SyntaxError`
+ */
+export async function runProgram(linked: string, projectId?: string): Promise<Record<string, unknown>> {
+  const program = canRunText() ? asFunction(linked, projectId) : undefined
+  if (!program) {
+    const url = blobUrl(linked)
+    try {
+      return (await import(/* @vite-ignore */ url)) as Record<string, unknown>
+    } finally {
+      URL.revokeObjectURL(url)
+    }
+  }
+  const modules: Record<string, Record<string, unknown>> = {}
+  for (const url of program.imports) modules[url] = (await import(/* @vite-ignore */ url)) as Record<string, unknown>
+  // indirect:  in the page's own scope, never this file's
+  // oxlint-disable-next-line no-eval -- running the program's own text is what this is for
+  const run = (0, eval)(program.text) as (imports: typeof modules) => Promise<Record<string, unknown>>
+  return run(modules)
+}
+
+/**
+ * `linked`, a program's module text, as the text of an `async` function that runs it and answers its exports.
+ * - `imports`:  the URL of each module it imports, which the function is handed, by URL.
+ * - Its lines stay where they were, so its source map still holds:
+ *   its imports become one line, put before its first;  their own lines are left blank.
+ * - `undefined` for a shape it doesn't know:  `export default`, `export { ... }`, `export *`, a side-effect import,
+ *   a destructured export.
+ * - Its exports are getters, so they stay live as a module's are:  `export let x`, set later, reads as it is now.
+ * - An import is read once, as the program starts:  what a project exports is set once it has loaded.
+ * - Pure.
+ */
+export function asFunction(linked: string, projectId?: string): { text: string; imports: string[] } | undefined {
+  const mapAt = linked.search(SOURCE_MAP_COMMENT)
+  const [code, map] = mapAt >= 0 ? [linked.slice(0, mapAt), linked.slice(mapAt)] : [linked, ""]
+  const imports: string[] = []
+  const reads: string[] = []
+  const withoutImports = code.replace(IMPORT_LINE, (_whole, names: string, url: string) => {
+    if (!imports.includes(url)) imports.push(url)
+    const bound = names
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean)
+      .map((name) => name.replace(/\s+as\s+/, ": "))
+    reads.push(`const { ${bound.join(", ")} } = ${IMPORTS}[${JSON.stringify(url)}];`)
+    return ""
+  })
+  if (UNKNOWN_SHAPE.test(withoutImports)) return undefined
+  const exported: string[] = []
+  const body = withoutImports.replace(EXPORT_LINE, (_whole, kind: string, name: string) => {
+    exported.push(name)
+    return `${kind} ${name}`
+  })
+  const name = `${projectId ?? "program"}.spell.js`
+  const text =
+    `(async (${IMPORTS}) => { "use strict"; ${reads.join(" ")} ${body}\n` +
+    `return { ${exported.map((it) => `get ${it}() { return ${it} }`).join(", ")} }\n})\n${map}\n//# sourceURL=${name}\n`
+  return { text, imports }
+}
+
+/**
+ * Can this page run text as code (`eval`)?  Asked once.
+ * - Not where its rules forbid it (a `Content-Security-Policy` with no `unsafe-eval`):  VS Code's webview.
+ */
+function canRunText(): boolean {
+  canEval ??= (() => {
+    try {
+      // oxlint-disable-next-line typescript/no-implied-eval -- the question is whether the page allows it
+      new Function("")
+      return true
+    } catch (ignored) {
+      return false
+    }
+  })()
+  return canEval
+}
+
+/** What `canRunText()` found. */
+let canEval: boolean | undefined
+
+/** The name a program run as a function reads its imports by:  each module, by URL. */
+const IMPORTS = "__spellImports__"
+
+/** An `import { a, b as c } from "url"` on its own line, as the compiler writes them:  its names, then its URL. */
+const IMPORT_LINE = /^import\s*\{([^}]*)\}\s*from\s*"([^"]+)";?[ \t]*$/gm
+
+/** A declaration exported on its own line:  `export class Card`, `export const solitaire`, `export async function f`. */
+const EXPORT_LINE = /^export\s+((?:async\s+)?function\*?|class|const|let|var)\s+([\p{L}_$][\p{L}\p{N}_$]*)/gmu
+
+/** What `asFunction()` can't turn into a function:  an import or export it doesn't know. */
+const UNKNOWN_SHAPE = /^(?:import\b|export\s+(?:default\b|\{|\*|(?:const|let|var)\s*[{[]))/m
+
+/** Where a program's inline source map starts. */
+const SOURCE_MAP_COMMENT = /^\/\/# sourceMappingURL=/m
 
 /** Each running project's URL, by id:  what `linkModule()` points a program's imports at. */
 function urlsOf(imports: RunningImports): Record<string, string> {

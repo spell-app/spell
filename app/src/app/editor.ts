@@ -1,6 +1,6 @@
 import type { ViewUpdate } from "@codemirror/view"
 
-import { $fetch, UIError, Observable, prop, setDebugGlobal, LoadableFile } from "spell/util"
+import { $fetch, UIError, Observable, prop, setDebugGlobal, LoadableFile, MostRecent } from "spell/util"
 import { watchServerFiles } from "spell/util/polling"
 import { after, type CancelablePromise } from "spell/util/timing"
 
@@ -325,6 +325,8 @@ export class EditorStore extends Observable {
     // `<FileTabs>` reads both, and would list the old project's file among the new one's
     editor.project = project
     editor.file = file
+    // the projects shown before the last few drop their parse, keeping their text (epic `solid-2-final` P10)
+    keptWhole.use(project)
     await file.load(undefined)
     const pageCameIntoPlay = editor.bringIntoPlay(project, file)
     startingPoints.note(project.path, project.files)
@@ -2674,6 +2676,40 @@ editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: true })
 
 /** How long typing pauses before AutoSave keeps an edit (`keepEdit()`), in milliseconds. */
 const KEEP_DELAY_MS = 2000
+
+/**
+ * The last projects shown, kept whole:  their parse, their compile and the parse's scope (epic `solid-2-final` P10).
+ * - An older one keeps its files' text, edits and all, and drops the rest (`forgetParseOf()`):
+ *   a project's parse is tens of MB, and an hour of visiting projects held every one.
+ * - Going back to one parses it again;  the compile cache runs it at once, as on a reload (`compileApp()`).
+ * - Three:  this one, and the two you'd go back and forth between.
+ */
+const keptWhole = new MostRecent<SP.SpellProject>(3, { onDropped: (project) => forgetParseOf(project) })
+
+/**
+ * `project` drops its parse, its compile and its scope, keeping its files' text:  it's no longer among `keptWhole`.
+ * - Not the project shown, nor one a project kept whole imports as source:  its files parse into that one's.
+ * - What's typed and still waiting goes into its files first (`takeWaitingText()`).
+ * - NEVER throws:  it's only memory.
+ */
+function forgetParseOf(project: SP.SpellProject): void {
+  if (project === editor.project) return
+  const isSourceOfKept = keptWhole.items.some((kept) =>
+    kept.projectImports.some((it) => it.source && it.projectId === project.projectId)
+  )
+  if (isSourceOfKept) return
+  try {
+    project.takeWaitingText()
+    project.incremental = undefined
+    project.compiledFrom = undefined
+    project.resetCompiled()
+    for (const file of project.files) if (file instanceof SP.SpellFile) file.resetCompiled()
+    // the Type Explorer's details of it read its parse too
+    scopeExplorer?.forget(project)
+  } catch (error) {
+    console.error(`couldn't forget the parse of ${project.path}`, error)
+  }
+}
 
 /** The projects `leaveProject()` is deciding about now, by path. */
 const leavingProjects = new Set<string>()

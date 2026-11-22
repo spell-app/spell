@@ -390,7 +390,13 @@ and in the app's build folder, `app/` at the app folder's root.
     - The app loads it once (`editor.loadRuntime()`), and so does the VS Code runner.
     - Each `<spell-viewer>` loads its OWN copy (`loadRuntime()`).
       So apps on a page don't share a `core`.
+      - One that leaves the page hands its copy to the next (`RuntimeCopies`, epic `solid-2-final` P10):
+        the browser never lets go of a module, so a page swapping demos holds only as many as ever showed at once.
     - No import map:  `runCompiled()` links each program's imports.
+    - A program runs as a FUNCTION, not a module (`runProgram()`, epic `solid-2-final` P10):
+      a module per run, and per live edit, was never let go.
+      - The projects it imports and the code files it calls stay modules:  they're reused from run to run.
+      - Where the page forbids running text as code (VS Code's webview), it runs as a module still.
     - A recompile of the same program with an app on the page takes the edit as it runs ([LiveEdit](runner/LiveEdit.ts),
       epic `editor`, Edit Without Redraw):  the same elements and things, only what changed drawn again.
       - What it can't take (a type removed or renamed, a line at the top level) waits for Restart, and the editor says so

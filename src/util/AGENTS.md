@@ -28,6 +28,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `number.ts` -- `clamp()`, and `kb()`:  a size in KB, of 1024 bytes
   - `LoadOnce.ts` -- a load per key, every caller the same promise, with a choice of what a failure does;
     `LoadOnce.abortable()` ends one caller's wait (Spell UI's and the places', moved down by epic `data`, J12)
+  - `MostRecent.ts` -- the most recent N things used, newest first, the oldest let go with a callback
+    (epic `solid-2-final` P10):  the editor's last projects kept whole;  the last pages drawn (P13)
   - `time.ts` -- LOCAL dates and times (epic `coherence` I5):  `localDate()`, `clockTime()`, `compactTime()`,
     `localTime()` / `localMinutes()` with the offset, `localMidnight()`
     - never `toISOString().slice(0, 10)` for a day:  that's the UTC date, tomorrow in California from 5pm
