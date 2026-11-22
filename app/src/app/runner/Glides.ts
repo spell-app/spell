@@ -36,7 +36,7 @@ export class Glides {
    * - SIDE EFFECT:  `element` is the one `noteWhereThingsAre()` measures next time `thing` moves.
    */
   static drawn(thing: object, element: HTMLElement): void {
-    Glides.elements.set(thing, element)
+    Glides.elements.set(thing, new WeakRef(element))
     if (Glides.startedAt.has(thing)) E.beforeNextPaint(() => Glides.glide(thing))
   }
 
@@ -47,10 +47,10 @@ export class Glides {
    */
   static noteWhereThingsAre(things: unknown[]): void {
     const noted = Glides.note(things)
-    const moving = new Set(noted.map((thing) => Glides.elements.get(thing)))
+    const moving = new Set(noted.map((thing) => Glides.elementOf(thing)))
     for (const thing of noted) {
       // where its list's other elements are, to close its gap once it has gone (`closeGap()`)
-      const element = Glides.elements.get(thing)
+      const element = Glides.elementOf(thing)
       if (element) Glides.gapAround.set(thing, Glides.whereSiblingsAre(element, moving))
     }
     for (const thing of noted) {
@@ -84,7 +84,7 @@ export class Glides {
     const noted: object[] = []
     for (const thing of things) {
       if (!thing || typeof thing !== "object") continue
-      const element = Glides.elements.get(thing)
+      const element = Glides.elementOf(thing)
       if (!element?.isConnected) continue
       Glides.startedAt.set(thing, element.getBoundingClientRect())
       Glides.gapAround.delete(thing)
@@ -103,7 +103,7 @@ export class Glides {
    */
   private static glide(thing: object): void {
     const from = Glides.startedAt.get(thing)
-    const element = Glides.elements.get(thing)
+    const element = Glides.elementOf(thing)
     const gap = Glides.gapAround.get(thing) ?? []
     if (!from || !element?.isConnected) return
     const wasSide = Glides.sideAt.get(thing)
@@ -187,8 +187,16 @@ export class Glides {
     return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches
   }
 
-  /** Each thing's latest element. */
-  private static readonly elements = new WeakMap<object, HTMLElement>()
+  /** `thing`'s latest element, while something else keeps it:  see `elements`. */
+  private static elementOf(thing: object): HTMLElement | undefined {
+    return Glides.elements.get(thing)?.deref()
+  }
+
+  /**
+   * Each thing's latest element, held weakly:  a thing outlives its drawings (a site's page, drawn again on each visit),
+   * and holding the element kept every drawing it was ever in (epic `solid-2-final` I34).
+   */
+  private static readonly elements = new WeakMap<object, WeakRef<HTMLElement>>()
 
   /** Where each moving thing's element was, noted just before it moved;  gone once it has glided. */
   private static readonly startedAt = new WeakMap<object, DOMRect>()

@@ -37,7 +37,17 @@
  */
 import h from "@solidjs/h"
 import { createComponent, insert, type JSX } from "@solidjs/web"
-import { Errored, For, Loading, createDeferred, createEffect, createMemo, getOwner, onCleanup } from "solid-js"
+import {
+  Errored,
+  For,
+  Loading,
+  createDeferred,
+  createEffect,
+  createMemo,
+  getOwner,
+  onCleanup,
+  runWithOwner
+} from "solid-js"
 
 import { msUntil, pollWhileVisible } from "spell/util/polling"
 import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
@@ -1995,8 +2005,11 @@ function rowOf(row: Element, cells: Drawing): JSX.Element {
  *   a row's cells are `h()`s, which make their elements when the row is inserted,
  *   and that waits while anything on the page does.
  *   So looking for them as the row was made found none on a read that waited:  no header, or one only once more rows came.
+ * - Its elements are made under the table's drawing (`runWithOwner()`), though an effect's callback has no owner:
+ *   so they're let go with it, as the rows are (epic `solid-2-final` I34;  made with none, a page let go kept them).
  */
 function keepHeaderRow(row: Element, table: Element, items: () => readonly unknown[]): void {
+  const drawing = getOwner()
   createEffect(
     () => items().length,
     () => {
@@ -2004,20 +2017,25 @@ function keepHeaderRow(row: Element, table: Element, items: () => readonly unkno
       const first = [...table.children].find((child) => child.localName === row.localName)
       const named = first ? [...first.children].filter((cell) => cell.hasAttribute(COLUMN_NAME)) : []
       if (!named.length) return
-      const header = row.cloneNode(false) as Element
-      header.setAttribute("header", "")
-      header.setAttribute(HEADER_ROW, "")
-      for (const cell of named) {
-        const title = document.createElement(cell.localName)
-        title.textContent = cell.getAttribute(COLUMN_NAME)
-        title.setAttribute(COLUMN_KEY, cell.getAttribute(COLUMN_NAME)!)
-        const align = cell.getAttribute("align")
-        if (align) title.setAttribute("align", align)
-        header.append(title)
-      }
-      table.prepend(header)
+      runWithOwner(drawing, () => table.prepend(headerRowOf(row, named)))
     }
   )
+}
+
+/** A header row like `row`, a heading cell for each of `named`, the cells of a first row that name their column. */
+function headerRowOf(row: Element, named: Element[]): Element {
+  const header = row.cloneNode(false) as Element
+  header.setAttribute("header", "")
+  header.setAttribute(HEADER_ROW, "")
+  for (const cell of named) {
+    const title = document.createElement(cell.localName)
+    title.textContent = cell.getAttribute(COLUMN_NAME)
+    title.setAttribute(COLUMN_KEY, cell.getAttribute(COLUMN_NAME)!)
+    const align = cell.getAttribute("align")
+    if (align) title.setAttribute("align", align)
+    header.append(title)
+  }
+  return header
 }
 
 /**
