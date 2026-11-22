@@ -104,6 +104,9 @@
     --epic-state-requested-on: var(--ui-yellow-on);
     --epic-state-open: var(--ui-yellow);
     --epic-state-open-on: var(--ui-yellow-on);
+    /* light yellow:  open, no hurry (`someday`, epic `epic-engine` P81) */
+    --epic-state-someday: light-dark(oklch(0.94 0.1 98), oklch(0.94 0.075 98));
+    --epic-state-someday-on: var(--ui-yellow-on);
     --epic-state-progress: var(--ui-blue);
     --epic-state-progress-on: var(--ui-blue-on);
     --epic-state-recent: var(--ui-green);

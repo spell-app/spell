@@ -196,6 +196,16 @@
   .draft {
     white-space: pre;
   }
+  /*
+   * its badge (epic `epic-engine` P81), centred on the title's capitals at either of its sizes:
+   * the cell takes the title's size, so its em is the title's
+   */
+  .badge-cell {
+    vertical-align: 0.19em;
+  }
+  .badge-cell > .badge {
+    vertical-align: baseline;
+  }
 
   /* a phase's lines wrap anywhere:  a long path with no break (`cli/src/commands/{watch,run}Command.ts`) would
      widen the page at phone width */

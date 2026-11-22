@@ -12,7 +12,54 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell/epic/components/epic-item/Fold.types"
 import { REVIEW_NAME_TEXTS, REVIEW_PARTS } from "spell/epic/components/epic-review/EpicReview.types"
 
-/** What an item's line may START with, by what it says (`TitlePrefix`, epic `epic-engine` T143). */
+/**
+ * The BADGES, what happens next said first on an item's or phase's line (`ItemBadge`, epic `epic-engine` P81):
+ * each `badge` value's words, as the tables of T144 have them.
+ * - never a word glued on:  `SEE {id}` takes the todo's id
+ */
+export const BADGE_WORDS = {
+  underway: "UNDERWAY",
+  rechecking: "RECHECKING",
+  notInMain: "NOT IN MAIN",
+  fixed: "FIXED",
+  cantReproduce: "CAN'T REPRODUCE",
+  moot: "MOOT",
+  duplicate: "DUPLICATE",
+  wontFix: "WON'T FIX",
+  queued: "QUEUED",
+  yourCall: "YOUR CALL",
+  willRecheck: "WILL RECHECK",
+  willClose: "WILL CLOSE",
+  urgent: "URGENT",
+  willFix: "WILL FIX",
+  againstYourAsk: "AGAINST YOUR ASK",
+  decided: "DECIDED",
+  done: "DONE",
+  willDo: "WILL DO",
+  someday: "SOMEDAY",
+  wontDo: "WON'T DO",
+  failed: "FAILED",
+  passed: "PASSED",
+  youTest: "YOU TEST",
+  optional: "OPTIONAL",
+  answered: "ANSWERED",
+  see: "SEE {id}",
+  yourTurn: "YOUR TURN",
+  limit: "LIMIT",
+  held: "HELD"
+} as const
+
+/** A badge, by its key:  `badge`'s value. */
+export type BadgeWord = keyof typeof BADGE_WORDS
+
+/** `BADGE_WORDS` as a vocabulary's texts. */
+export const BADGE_TEXTS = Object.entries(BADGE_WORDS).map(([word, text]) => ({
+  key: `badge_${word}` as `badge_${BadgeWord}`,
+  text,
+  description: `The badge \`${word}\`, first on its line (epic \`epic-engine\` P81).`
+}))
+
+/** What an item's line may START with on a page without badges (`TitlePrefix`, epic `epic-engine` T143). */
 export const TITLE_PREFIX_WORDS = { fixed: "FIXED -" } as const
 
 /****************
@@ -75,9 +122,11 @@ export const epicItemVocabulary = {
         "attention",
         "replied",
         "requested",
+        "recheck",
         "progress",
         "handed",
         "open",
+        "someday",
         "scheduled",
         "recent",
         "handled",
@@ -179,6 +228,74 @@ export const epicItemVocabulary = {
         "`attention` (red).  " +
         "For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip " +
         "while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
+    },
+    {
+      name: "care",
+      kind: "number",
+      description:
+        "JUDGED (epic `epic-engine` P81):  care, 0-100, how likely you are to want it (an issue fixed, a todo built, " +
+        "a test worth your time;  a call:  you'd have chosen differently).  With `doubt`, what its badge is worked " +
+        "out from.  None:  not judged, so it's drawn as a page without badges draws it."
+    },
+    {
+      name: "doubt",
+      kind: "number",
+      description:
+        "JUDGED (P81):  doubt, 0-100, how likely it's transient, not real, done already or overtaken by later work."
+    },
+    {
+      name: "severe",
+      kind: "boolean",
+      description:
+        "JUDGED (P81):  an issue that blocks work, loses work or gives wrong answers (URGENT);  a judgement call that " +
+        "changes or narrows what you said (AGAINST YOUR ASK)."
+    },
+    {
+      name: "needs-you",
+      kind: "boolean",
+      description: "JUDGED (P81):  only you can decide the issue, OK the todo, or run the test."
+    },
+    {
+      name: "judged",
+      kind: "string",
+      format: "time",
+      description: "When it was judged, or last scored by hand (`epic badges <epic> set`)."
+    },
+    {
+      name: "judged-why",
+      kind: "string",
+      description: "Why it got that care and doubt, in one line:  its badge's tooltip."
+    },
+    {
+      name: "flagged",
+      kind: "boolean",
+      description: "You called it urgent from its id chip, on a page with badges:  URGENT, whatever was judged."
+    },
+    {
+      name: "closed-as",
+      kind: "enum",
+      values: ["vanished", "moot", "duplicate", "declined"],
+      description:
+        "Why Claude closed it with no fix (`epic badges <epic> close ... --as vanished`):  CAN'T REPRODUCE, MOOT, " +
+        "DUPLICATE, or WON'T FIX / WON'T DO."
+    },
+    {
+      name: "badge-closed",
+      kind: "boolean",
+      description: "Closed by its badge's rule (`epic badges <epic> close`):  `epic badges <epic> off` reopens it."
+    },
+    {
+      name: "badge",
+      kind: "string",
+      description:
+        "Its BADGE, first on its line (P81):  a key of `BADGE_WORDS` (`willFix`, `yourCall` ...), written by the epic " +
+        "tool on every edit, with `state`, its colour.  The page follows what's live (an agent on it:  UNDERWAY)."
+    },
+    {
+      name: "badge-item",
+      kind: "string",
+      format: "item id",
+      description: "The item its badge names:  `SEE T38`'s todo."
     },
     {
       name: "requested",
@@ -332,6 +449,7 @@ export const epicItemVocabulary = {
     },
     { name: "title", description: "The title." },
     { name: "title-prefix", description: "The word before the title:  `FIXED -`, on a fix (epic `epic-engine` T143)." },
+    { name: "badge", description: "The badge before the title, in the item's colour:  `WILL FIX` (P81)." },
     {
       name: "review",
       description:
@@ -415,6 +533,17 @@ export const epicItemVocabulary = {
       description: "Id chip tooltip, `self-fixed` (epic `epic-engine` T143)."
     },
     { key: "fixed", text: TITLE_PREFIX_WORDS.fixed, description: "A fix's line starts with it (T143)." },
+    ...BADGE_TEXTS,
+    {
+      key: "stateRecheck",
+      text: "Claude will check if this is still needed.\nYou don't need to do anything while it checks.",
+      description: "Id chip tooltip, `state=recheck` (light orange, epic `epic-engine` P81)."
+    },
+    {
+      key: "stateSomeday",
+      text: "Not done yet, and it can wait.\nNothing for you to do now.",
+      description: "Id chip tooltip, `state=someday` (light yellow, epic `epic-engine` P81)."
+    },
     {
       key: "stateCommentReplied",
       text: "Your comment answered:  ✓ closes it",

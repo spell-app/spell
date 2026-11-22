@@ -1711,3 +1711,78 @@ main :is(td, th)[data-spell-editing] {
   background: var(--spell-card);
   box-shadow: var(--ui-shadow-floating);
 }
+
+/*******************************
+          A Feature Set
+*******************************/
+
+/*
+ * A ranked list to pick from (`epic ask create --template feature-set`, epic `epic-engine` P80), after Solid TLDR:
+ * - three columns and no more, Item | Your pick | Facts;  narrower than 860px it scrolls in its own box, as every
+ *   table does (never stacked)
+ * - an item's name (F1) is a chip in its pick's state colour:  red nothing picked, green picked, blue only a comment
+ *   (its question shows no chip of its own)
+ */
+body.spell-doc-page .spell-doc-main > ui-section > ui-table.spell-feature-table {
+  margin: 12px 16px 20px 16px;
+}
+.spell-feature-table > table {
+  width: 100%;
+  min-width: 860px;
+  table-layout: fixed;
+}
+.spell-feature-table col.spell-feature-col-pick {
+  width: 20%;
+}
+.spell-feature-table col.spell-feature-col-facts {
+  width: 22%;
+}
+.spell-feature-table td p {
+  max-width: none;
+  margin: 0 0 4px 0;
+}
+.spell-feature-table td > p:last-child {
+  margin-bottom: 0;
+}
+.spell-feature-table td > p.spell-feature-changes-head {
+  margin: 8px 0 4px 0;
+}
+.spell-feature-table ul.spell-feature-changes {
+  margin: 0;
+  padding-inline-start: 20px;
+}
+.spell-feature-table ul.spell-feature-changes > li {
+  max-width: none;
+  margin: 0 0 4px 0;
+}
+.spell-feature-why {
+  color: var(--spell-muted);
+}
+.spell-feature-pick > epic-ask {
+  margin: 0;
+}
+.spell-feature-table a.spell-feature-name {
+  --_feature-state: var(--spell-state-attention);
+  --_feature-state-on: var(--spell-state-attention-on);
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--_feature-state);
+  color: var(--_feature-state-on);
+  font: 600 12px / 1 var(--ui-font-family-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+.spell-feature-table tr:has(> .spell-feature-pick > epic-ask:state(done)) a.spell-feature-name {
+  --_feature-state: var(--spell-state-recent);
+  --_feature-state-on: var(--spell-state-recent-on);
+}
+.spell-feature-table tr:has(> .spell-feature-pick > epic-ask:state(working)) a.spell-feature-name {
+  --_feature-state: var(--spell-state-progress);
+  --_feature-state-on: var(--spell-state-progress-on);
+}

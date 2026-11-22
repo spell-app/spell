@@ -1012,7 +1012,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(markedBadge(host)).toEqual(["3", "3 with Claude\nHide these · ⌥-click:  only these"])
     expect(chipsOf(questions).map((chip) => `${chip.dataset.state}:${chip.textContent}`)).toEqual(["open:1"])
     expect(markedBadge(questions)).toEqual(["2", "2 with Claude\nHide these · ⌥-click:  only these"])
-    // each marked item's id chip ringed in the badge's blue (Owen:  "the T1 should be blue outline");  an unmarked one not
+    // each marked item's id chip ringed in the badge's blue (T145:  its own colour inside till Send);  an unmarked one not
     const idChip = (id: string) => host.querySelector(`#${id}`)!.shadowRoot!.querySelector<HTMLElement>('[part~="id"]')!
     expect(["q1", "q2", "t1"].map((id) => idChip(id).hasAttribute("data-marked"))).toEqual([true, true, true])
     expect(idChip("t2").hasAttribute("data-marked")).toBe(false)

@@ -262,6 +262,19 @@ epic update <epic>#J3 promised "<what was promised, what's there instead>"   # w
   must pick:  the others still close.
 - Then say how many closed, how many noted, and each promised item with what's missing.
 
+## badges -- What each item's badge asks of you
+
+On a page with item badges, each line starts with what happens next.
+
+- URGENT, WILL FIX, WILL DO:  do it without asking, URGENT first.
+- YOUR CALL, AGAINST YOUR ASK:  wait for the person.  Never answer a question for them.
+- WILL RECHECK, WILL CLOSE:  check them when nothing else is waiting, then either:
+  - it's real:  `epic badges <epic>#I7 set --doubt 5 --why "..."`
+  - it isn't:  `epic badges <epic> close I7 --as vanished --why "..."` (or `moot`, `duplicate`, `declined`)
+- SOMEDAY, OPTIONAL:  nothing, unless asked.
+- SEE T38:  work that todo, not the item.
+- Never turn badges on, score or close on an epic you weren't asked to.
+
 ## hush -- Grey settled items the person won't look at again
 
 Only when the person asks (the skill's word:  `$epic hush`):  the epic skill's "17. Hush".

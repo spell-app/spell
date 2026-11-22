@@ -19,16 +19,19 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   ask: [
     {
       name: "create",
-      usage: '<slug> [--title "..."] [--epic <epic>] [--description "..."] [--from <questions.json5>]',
+      usage:
+        '<slug> [--title "..."] [--epic <epic>] [--description "..."] [--template feature-set] [--from <questions.json5>]',
       description:
         "make a details page from the template, and print its path;  --epic:  in that epic's details/ (else a " +
-        "scratch page, swept after 14 days);  --from:  the whole page from a list of questions",
+        "scratch page, swept after 14 days);  --from:  the whole page from a list of questions;  " +
+        "--template feature-set:  a Feature Set, a ranked list to pick from, --from its sections and items",
       example: 'epic ask create pick-layout --epic seo --title "Pick a layout"',
       flags: {
         "--title <title>": "the page's title",
         "--epic <epic>": "in that epic's details/, kept;  else a scratch page, swept after 14 days",
         "--description <text>": "what the page asks, under its title",
-        "--from <questions.json5>": "the whole page, from a list of questions"
+        "--template <name>": "feature-set:  a ranked list to pick from, a table per section, from --from's data",
+        "--from <questions.json5>": "the whole page, from a list of questions (a Feature Set:  its sections and items)"
       }
     },
     {
@@ -1619,6 +1622,16 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--dryrun": "print the table (id, colour, age, hush or keep, why) and change nothing",
     "--json": "print the calls as JSON",
     "--model <model>": "the judge's model (default sonnet)"
+  },
+  badges: {
+    "--json": "list:  print the scores, badges and what would close as JSON",
+    "--model <model>": "score:  the judge's model (default sonnet)",
+    "--care <n>": "set:  care, 0 to 100, how likely you want it",
+    "--doubt <n>": "set:  doubt, 0 to 100, how likely it's transient, done already or overtaken",
+    "--severe <yes|no>": "set:  an issue blocks or loses work;  a judgement call changes what you said",
+    "--your-call <yes|no>": "set:  only you can decide it, OK it or test it",
+    "--as <why>": "close:  what a recheck found:  vanished, moot, duplicate or declined",
+    "--why <text>": "set, close:  why, in one line"
   },
   summaries: { "--all": "every phase and grey item, as summary --all" },
   items: {

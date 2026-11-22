@@ -5,7 +5,7 @@ import { SRV } from "spell/server"
 
 import { PlanCommits } from "./PlanCommits"
 import type { PlanDoc } from "./PlanDoc"
-import { PROMISED_CARD, SETTLED_AS, type ItemKind, type Phase } from "./planDoc.types"
+import { FROM_LINE, MADE_TODO, PROMISED_CARD, SETTLED_AS, type ItemKind, type Phase } from "./planDoc.types"
 
 /****************
  * ### `StaleFacts`
@@ -676,12 +676,6 @@ const TIDY_NOTE = new RegExp(`^(?:Maybe obsolete:|Partly obsolete:|${PROMISED_CA
 
 /** Between two ids of one list:  `data T16, T17`, `T16 and T17`. */
 const LIST_JOIN = /^\s*(?:,|and|,\s*and)\s*$/
-
-/** A status card's start, saying a follow-up was made:  its todo's id. */
-const MADE_TODO = /^Made todo (T\d+)\b/
-
-/** A follow-up todo's line naming what it came from (`PlanDoc.followUp()`). */
-const FROM_LINE = /^\s*From [A-Z]\d+\b/
 
 /** Inside an item, what isn't its own words:  for what it says it's waiting for. */
 const NOT_ITS_WORDS = "epic-status, epic-reply, epic-original, epic-commit, epic-choices"

@@ -1265,6 +1265,19 @@ describe("PlanDoc states", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  // epic `epic-engine` I411:  I88, reopened for his check, still drew grey by its old `handled`
+  test("an open fix waiting for his check is orange, never grey, though a phase once handled it", () => {
+    const plan = freshPlan()
+    plan.addItem("issue", "fixed long ago", { calm: true })
+    const item = el(plan, "i1")
+    item.setAttribute("handled", "p-the-new-flow")
+    expect(stateOf(plan, "i1")).toEqual(["handled"])
+    item.setAttribute("fixed", "")
+    expect(stateOf(plan, "i1")).toEqual(["replied"])
+    item.setAttribute("requested", "")
+    expect(stateOf(plan, "i1")).toEqual(["requested"])
+  })
+
   describe("One Color Each (epic `epic-engine` P63)", () => {
     test("an issue filed from his own words, closed by Claude:  light orange until he reviews it;  Claude's own stays grey", () => {
       const plan = freshPlan()

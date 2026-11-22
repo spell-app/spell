@@ -8,7 +8,9 @@ import { PageStages, PhaseIds, PhaseStatuses } from "spell/epic/phases"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import { CHOSEN, stopIfOwn, type ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
-import { COMMIT_TAG, COMMITS_PROPERTY, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import { BADGE, COMMIT_TAG, COMMITS_PROPERTY, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import type { BadgeWord } from "spell/epic/components/epic-item/EpicItem.en"
+import { ItemBadge } from "spell/epic/components/epic-item/ItemBadge"
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell/epic/components/epic-section/EpicFold"
 import { phaseFields } from "spell/epic/components/epic-section/PhaseFields"
@@ -25,6 +27,7 @@ import { epicPhaseVocabulary } from "./EpicPhase.en"
 import { ICON } from "./EpicPhase.types"
 
 import foldCSS from "spell/epic/components/epic-section/EpicFold.css?inline"
+import badgeCSS from "spell/epic/components/epic-item/ItemBadge.css?inline"
 import phaseCSS from "./EpicPhase.css?inline"
 
 /****************
@@ -91,6 +94,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   @E.protoMerged static elementSetup = {
     styleSheets: {
       "epic-fold": foldCSS,
+      "epic-badge": badgeCSS,
       "epic-phase": phaseCSS
     }
   } satisfies Partial<E.ElementSetup>
@@ -226,6 +230,12 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     return !this.isFinished && PageStages.of(this.page) === "phases"
   }
 
+  /** Its badge, first in its title, on a page with badges (epic `epic-engine` P81);  a draft says DRAFT instead. */
+  get phaseBadge(): BadgeWord | undefined {
+    if (!this.badged || this.isDraft) return undefined
+    return ItemBadge.ofPhase(this.drawnState, this.status)
+  }
+
   /**
    * A DRAFT:  the page's Overview is still being agreed (`stage="overview"`, epic `epic-engine` P70):  its title reads
    * `P1. DRAFT: <title>`.  Owen, 2026-11-09:  "OK to show phases when in overview stage, but put as `P1. DRAFT: blah
@@ -346,6 +356,15 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             }
           >
             <span class="draft">{this.translationForKey("draftMark")}</span>
+          </Show>
+          <Show when={this.phaseBadge}>
+            {(badge) => (
+              <span class="badge-cell">
+                <span class={BADGE} data-state={this.drawnState}>
+                  {this.translationForKey(`badge_${badge()}`)}
+                </span>
+              </span>
+            )}
           </Show>
           <slot name={this.slotForName("title")}>{this.title}</slot>
         </>

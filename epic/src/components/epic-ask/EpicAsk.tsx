@@ -1,6 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
+import { commaList } from "spell/util/string"
 import { E } from "spell/ui/core"
 
 import {
@@ -39,6 +40,11 @@ const OPTION_ATTRIBUTES = [SELECTED, DONE, "letter"]
  *   tools (Select all, Open | All);  then its children;  then the Other box (`<epic-text-box type="other">`).
  *   - its chip numbers what the author means (`chipLabel`, epic `epic-engine` I369):  its key's id, its section's
  *     number, a letter each for two questions in one section (`Q12 · a`)
+ * - A FOLLOW-UP (`slot="then"`, inside a compact question;  epic `epic-engine` P80):  the question's second pick,
+ *   a Feature Set's Priority.
+ *   - it draws between the question's select and its ONE comment box, with no chip and no box of its own
+ *   - it isn't counted as a question of its own (`AnswerForm.decided`)
+ *   - `off-for="N"`:  greyed while its question's pick is one of those, what was picked in it kept
  * - `compact` (epic `epic-engine` T121;  Owen:  "a select for each item and a comment field for each"):  its children,
  *   then ONE row, the chip, its options as a Spell UI `<ui-select>` and a comment box (its Other, the same answer);
  *   its cards stay in the page, hidden
@@ -124,6 +130,41 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
   /** Is "Provide more details" pressed on `letter`? */
   wantsMore(letter: string): boolean {
     return this.moreWanted.includes(letter)
+  }
+
+  ////////////////
+  // ## A follow-up
+  ////////////////
+
+  /** The question it follows, when it's written in one's `then` slot;  else `null`. */
+  @E.lazy get followedAsk(): Element | null {
+    if (isServer || this.domElement.getAttribute("slot") !== THEN) return null
+    const parent = this.domElement.parentElement
+    return parent?.localName === ASK_TAG ? parent : null
+  }
+
+  /** It's a follow-up:  no chip, no comment box, not counted by itself. */
+  get isFollowUp(): boolean {
+    return !!this.followedAsk
+  }
+
+  /** The picks of the question it follows, as last heard from the page's form. */
+  @E.state accessor followedPicks: readonly string[] = []
+
+  /** A follow-up greyed by that question's pick (`off-for`). */
+  @E.cssState("off")
+  get isOff(): boolean {
+    const offFor = commaList(this.offFor ?? "")
+    return this.followedPicks.some((letter) => offFor.includes(letter))
+  }
+
+  /** While connected, keep `followedPicks` as `form` hears the changes;  returns the undo. */
+  private followQuestion(form: AnswerForm): (() => void) | undefined {
+    const parent = this.followedAsk as E.DOMElement<EpicAsk> | null
+    if (!parent) return undefined
+    const heard = () => (this.followedPicks = [...(parent.component?.picks ?? [])])
+    heard()
+    return form.subscribe(heard)
   }
 
   ////////////////
@@ -220,9 +261,20 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
     return shown.find((letter) => this.isPicked(letter)) ?? shown[0]
   }
 
-  /** What its options' group is called:  its section's title (`Q1 · Which layout?`), else its chip. */
+  /**
+   * What its options' group is called:  its own `label`, else its section's title (`Q1 · Which layout?`), else its
+   * chip;  a follow-up's after its question's (`S1F2 · Share a link, Priority`).
+   */
   get groupLabel(): string {
-    return this.domElement.closest("ui-section[id]")?.getAttribute("label") ?? this.chipLabel
+    const { label } = this
+    const question = this.followedAsk?.getAttribute("label")
+    if (question && label) return `${question}, ${label}`
+    return label ?? this.domElement.closest("ui-section[id]")?.getAttribute("label") ?? this.chipLabel
+  }
+
+  /** It draws its chip:  not with `no-chip`, nor in a follow-up. */
+  get hasChip(): boolean {
+    return !this.noChip && !this.isFollowUp
   }
 
   /** Every option shown is ticked:  the button says Select none. */
@@ -244,29 +296,37 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
    */
   @E.whileConnected
   protected joinForm() {
-    const holderOf = (ask: Element) => ask.closest("ui-section[id]") ?? ask
-    const asks = Array.from(document.querySelectorAll(this.domElement.localName))
-    const holders = [...new Set(asks.map(holderOf))]
-    const holder = holderOf(this.domElement)
-    const partners = asks.filter((ask) => holderOf(ask) === holder)
-    this.position = holders.indexOf(holder) + 1
-    this.partIndex = partners.length > 1 ? partners.indexOf(this.domElement) : -1
+    if (this.hasChip) this.numberItself()
     const form = AnswerForm.forPage()
     this.form = form
     const leave = form.add(this)
+    const unfollow = this.followQuestion(form)
     return () => {
+      unfollow?.()
       leave()
       this.form = undefined
     }
   }
 
+  /** Its place among the page's question sections and among its section's questions, for its chip. */
+  private numberItself() {
+    const holderOf = (ask: Element) => ask.closest("ui-section[id]") ?? ask
+    const asks = Array.from(document.querySelectorAll(`${this.domElement.localName}:not([slot="${THEN}"])`))
+    const holders = [...new Set(asks.map(holderOf))]
+    const holder = holderOf(this.domElement)
+    const partners = asks.filter((ask) => holderOf(ask) === holder)
+    this.position = holders.indexOf(holder) + 1
+    this.partIndex = partners.length > 1 ? partners.indexOf(this.domElement) : -1
+  }
+
   /**
    * Its state on its section (`data-state`), and on that section's toolbar button (the docs runtime copies it from
    * the section when it builds the toolbar, so a later change goes to both).
+   * - not a question with its own `label`, nor a follow-up:  the section holds many, and isn't this one's
    */
   @E.onChange("askState", "isConnected")
   protected markState(state: AskState, connected: boolean) {
-    if (!connected) return
+    if (!connected || this.label || this.isFollowUp) return
     const section = this.domElement.closest("ui-section[id]")
     section?.setAttribute(STATE_ATTRIBUTE, state)
     if (section)
@@ -313,30 +373,48 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
         <slot />
         <div class={ROW} part={this.partForName("row")}>
           <span class={PICK_LINE}>
-            {this.renderChip()}
+            <Show when={this.hasChip}>{this.renderChip()}</Show>
             <ui-select
               class={PICK}
               part={this.partForName("select")}
               size="small"
+              fluid={this.hasChip ? undefined : ""}
               aria-label={this.groupLabel}
               placeholder={this.translationForKey(this.isMultiple ? "pickSeveral" : "pickOne")}
               multiple={this.isMultiple ? "" : undefined}
               options={this.selectOptions}
               value={this.isMultiple ? this.picks.join(",") : (this.picks[0] ?? "")}
+              disabled={this.isOff ? "" : undefined}
+              data-tooltip={this.isOff ? this.offTip : undefined}
+              data-variation={this.isOff ? "multiline" : undefined}
               on-ui-changed={this.onSelectPick}
             />
           </span>
-          <epic-text-box
-            class={COMMENT}
-            part={this.partForName("other")}
-            type="other"
-            for={this.key}
-            placeholder={this.translationForKey("comment")}
-            onInput={this.onOtherInput}
-          />
+          <slot name={this.slotForName(THEN)} />
+          <Show when={!this.isFollowUp}>
+            <epic-text-box
+              class={COMMENT}
+              part={this.partForName("other")}
+              type="other"
+              for={this.key}
+              placeholder={this.translationForKey("comment")}
+              label={this.label ? this.translationForKey("commentOn", { question: this.label }) : undefined}
+              onInput={this.onOtherInput}
+            />
+          </Show>
         </div>
       </>
     )
+  }
+
+  /** Why a greyed follow-up can't be picked:  the question's pick, by its title. */
+  get offTip(): string {
+    const parent = this.followedAsk
+    const picked = parent && EpicAsk.optionsOf(parent).find((option) => this.followedPicks.includes(letterOf(option)))
+    return this.translationForKey("offTip", {
+      label: this.label ?? this.groupLabel,
+      pick: picked?.getAttribute("title") ?? ""
+    })
   }
 
   /** The select's entries:  each option's title (`recommended` says so), its letter the value. */
@@ -354,7 +432,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
     return (
       <>
         <div class={LINE} part={this.partForName("line")}>
-          {this.renderChip()}
+          <Show when={this.hasChip}>{this.renderChip()}</Show>
           <button
             type="button"
             class={HOW}
@@ -506,7 +584,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
   labelsInto(labels: PartLabels) {
     const key = this.key
     if (!key) return
-    labels[key] = this.domElement.closest("ui-section[id]")?.getAttribute("label") ?? this.chipLabel
+    labels[key] = this.groupLabel
     for (const option of this.options) {
       const letter = letterOf(option)
       labels[`${key}-${letter}`] = `${letter} · ${option.getAttribute("title") ?? letter}`
@@ -554,6 +632,9 @@ function letterOf(option: Element): string {
 
 /** The tags of a question's options. */
 const ASK_TAG = "epic-ask"
+
+/** The slot a follow-up question is written in. */
+const THEN = "then"
 const CHOICES_TAG = "epic-choices"
 const OPTION_TAG = "epic-option"
 

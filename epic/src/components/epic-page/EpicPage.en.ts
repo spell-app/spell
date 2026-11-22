@@ -74,6 +74,16 @@ export const epicPageVocabulary = {
         "adding phases to;  each phase merges into `main` on its own, and every phase done is NOT done."
     },
     {
+      name: "badges",
+      kind: "enum",
+      values: ["trial", "on"],
+      description:
+        "ITEM BADGES (epic `epic-engine` P81):  each item's line starts with what happens next, in its colour, and " +
+        "new items are judged as they're made.  `trial`:  what's closed keeps its colour, and nothing is closed by " +
+        "its badge;  `on`:  a new item its badge would grey is closed.  None:  drawn as before badges.  Set by " +
+        "`epic badges <epic> on | trial`;  `off` undoes it."
+    },
+    {
       name: "stage",
       kind: "enum",
       values: PageStages.ALL,

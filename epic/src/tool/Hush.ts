@@ -2,8 +2,8 @@ import { DrawnState, NO_LIVE_REVIEW } from "spell/epic/components/epic-item/Epic
 import { ClaudePrint } from "spell/epic/command/ClaudePrint"
 
 import type { PlanDoc } from "./PlanDoc"
+import { JudgeText } from "./JudgeText"
 import { PlanItem } from "./PlanItem"
-import { PlanMarkup } from "./PlanMarkup"
 import { PROMISED_CARD, type ItemState } from "./planDoc.types"
 
 /****************
@@ -40,6 +40,7 @@ export class Hush {
    * The items of `plan` that may be hushed, in page order:  drawn green, yellow or orange, settled `HUSH_DAYS` or more
    * before `plan.now`, and none of these:
    * - an open question (red anyway), a manual test (left for Owen), open work (an open todo, an open issue not fixed)
+   * - YOUR CALL, on a page with badges (P81):  only he can decide it
    * - one waiting on his pick, one he marked loud (`urgent`, unless it's a fix waiting for his review), one a tidy
    *   found promised and not delivered
    * - one with his mark not yet taken (`skip.marked`), Claude at work on it (`skip.working`), or a comment thread on it
@@ -58,6 +59,8 @@ export class Hush {
       if (open && (kind === "todo" || kind === "limit")) return []
       if (open && kind === "issue" && !facts.fixed) return []
       if (facts.awaitsPick || (facts.urgent && !facts.fixed) || Hush.isPromised(item)) return []
+      // a page with badges:  YOUR CALL waits on him alone, so nobody greys it for him (epic `epic-engine` P81)
+      if (open && plan.badges.badgeOf(item).badge === "yourCall") return []
       const state = DrawnState.of({ ...DrawnState.fieldsOf(item), state: plan.itemState(item) }, NO_LIVE_REVIEW, now)
       const colour = COLOURS[state]
       if (!colour) return []
@@ -71,8 +74,8 @@ export class Hush {
           colour,
           state,
           ageDays: Math.floor((now - settled) / DAY_MS),
-          words: Hush.wordsOf(item),
-          cards: Hush.lastCards(item)
+          words: JudgeText.wordsOf(item),
+          cards: JudgeText.lastCards(item)
         }
       ]
     })
@@ -175,27 +178,6 @@ export class Hush {
       (card.textContent ?? "").trim().startsWith(PROMISED_CARD)
     )
   }
-
-  /** `item`'s own words:  its text, without its cards, replies or Original Discussion, cut to `WORDS_CHARS`. */
-  private static wordsOf(item: Element): string {
-    const copy = item.cloneNode(true) as Element
-    for (const each of Array.from(copy.querySelectorAll(NOT_ITS_WORDS))) each.remove()
-    return cut(PlanMarkup.squeeze(copy.textContent ?? ""), WORDS_CHARS)
-  }
-
-  /** `item`'s last `LAST_CARDS` status cards and replies, oldest first:  `Done (11/14 09:12):  <its words>`. */
-  private static lastCards(item: Element): string[] {
-    return Array.from(item.querySelectorAll(":scope > epic-status, :scope > epic-reply"))
-      .slice(-LAST_CARDS)
-      .map((card) => {
-        const who =
-          card.localName === "epic-reply"
-            ? (card.getAttribute("from") ?? "reply")
-            : (card.getAttribute("state") ?? "underway")
-        const at = card.getAttribute("at")
-        return `${who}${at ? ` (${at})` : ""}:  ${cut(PlanMarkup.squeeze(card.textContent ?? ""), CARD_CHARS)}`
-      })
-  }
 }
 
 ////////////////
@@ -292,16 +274,6 @@ const STATE_WORDS: Partial<Record<ItemState, string>> = {
   requested: "something he asked for, finished, not looked at yet"
 }
 
-/** What an item's own words leave out. */
-const NOT_ITS_WORDS = "epic-status, epic-reply, epic-original, epic-commits, epic-commit"
-
-/** How much of an item's words, and of each card, the judge reads. */
-const WORDS_CHARS = 600
-const CARD_CHARS = 300
-
-/** How many of an item's last cards the judge reads. */
-const LAST_CARDS = 3
-
 /** How many items one `claude -p` call decides. */
 const BATCH = 40
 
@@ -310,11 +282,6 @@ const DEFAULT_MODEL = "sonnet"
 
 /** The longest one batch may take, ms. */
 const JUDGE_TIMEOUT_MS = 600_000
-
-/** `text` cut to `chars`, with `…` when it was longer. */
-function cut(text: string, chars: number): string {
-  return text.length > chars ? `${text.slice(0, chars - 1)}…` : text
-}
 
 /**
  * The judge's instructions:  Owen's rule (T122), the 80% line.

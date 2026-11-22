@@ -35,6 +35,7 @@ import { epicVersionVocabulary } from "spell/epic/components/epic-original/EpicV
 import { epicOverviewVocabulary } from "spell/epic/components/epic-overview/EpicOverview.en"
 import { epicPageNoteHeadVocabulary } from "spell/epic/components/epic-page-note-head/EpicPageNoteHead.en"
 import { epicPageVocabulary } from "spell/epic/components/epic-page/EpicPage.en"
+import { epicFeatureSetVocabulary } from "spell/epic/components/epic-feature-set/EpicFeatureSet.en"
 import { epicFieldVocabulary } from "spell/epic/components/epic-phase/EpicField.en"
 import { epicPhaseVocabulary } from "spell/epic/components/epic-phase/EpicPhase.en"
 import { epicUpdatedVocabulary } from "spell/epic/components/epic-phase/EpicUpdated.en"
@@ -118,6 +119,8 @@ export class Definitions {
     // the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12):  details and choice pages
     "epic-ask": epicAskVocabulary,
     "epic-text-box": epicTextBoxVocabulary,
+    // a ranked list to pick from, a details page's template (epic `epic-engine` P80)
+    "epic-feature-set": epicFeatureSetVocabulary,
     "epic-send": epicSendVocabulary,
     "epic-send-buttons": epicSendButtonsVocabulary,
     "epic-choice-rows": epicChoiceRowsVocabulary,

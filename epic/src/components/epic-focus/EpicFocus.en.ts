@@ -1,10 +1,12 @@
 /**
  * Every name `<epic-focus>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
- * - Pure data:  `import type` only.
+ * - Pure data:  `import type`, plus the badges' words (`<epic-item>`'s), data too.
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "spell/epic/definitions"
+
+import { BADGE_TEXTS } from "spell/epic/components/epic-item/EpicItem.en"
 
 /****************
  * ### `<epic-focus>`
@@ -59,6 +61,7 @@ export const epicFocusVocabulary = {
   ],
   states: [{ name: "open", description: "Showing." }],
   texts: [
+    ...BADGE_TEXTS,
     { key: "heading", text: "Focus mode", description: "The overlay's name." },
     { key: "phasesTab", text: "Phases" },
     { key: "questionsTab", text: "Questions" },

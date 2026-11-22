@@ -11,6 +11,7 @@ import { ChunkFiles } from "spell/server/places/ChunkFiles"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
+import type { BadgeLimits } from "spell/epic/components/epic-item/ItemBadge"
 import { LayeredSettings } from "spell/epic/config/LayeredSettings"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { DataFile, type DataFileMove } from "spell/epic/data/DataFile"
@@ -282,6 +283,9 @@ export class PlanDocFiles {
   // ## Reading and writing
   ////////////////
 
+  /** The repo's `issueBadges`, once asked. */
+  private issueBadges: BadgeLimits | undefined
+
   /**
    * The epic page at `file`, parsed:  a `PlanDoc`.  `options` as its constructor's;  its `person` this machine's
    * (`EpicHome.personName()`) unless they say.
@@ -299,6 +303,8 @@ export class PlanDocFiles {
     const plan = PlanDoc.parse(html, undefined, {
       person: () => EpicHome.personName(),
       agent: () => EpicHome.agentName(),
+      // the repo's percentages for its item badges, read as they're first used (epic `epic-engine` P81)
+      badgeLimits: () => (this.issueBadges ??= EpicConfig.of(this.root).issueBadges),
       ...options
     })
     plan.parts = assembleEpic(plan.document, file)

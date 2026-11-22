@@ -119,6 +119,18 @@ export const RUN_POLL_MS = 30_000
 export const FOLD_KEY_PREFIX = "spell-folds:"
 
 ////////////////
+// ## A Feature Set's order
+////////////////
+
+/** The answer key of a Feature Set's order of sections (epic `epic-engine` P80):  their ids, when the person moved one. */
+export const ORDER_KEY = "order"
+
+/** The answer key of the order of the items in section `section` (`order-s2`). */
+export function orderKeyFor(section: string): string {
+  return `${ORDER_KEY}-${section}`
+}
+
+////////////////
 // ## A one-line answer box
 ////////////////
 
@@ -233,6 +245,8 @@ export type AnswerPart = {
 /** A question on a details page:  a part with a state, which the Send bar counts ("5 of 17 decided"). */
 export type AskPart = AnswerPart & {
   readonly askState: AskState
+  /** it follows another question (a Priority, epic `epic-engine` P80):  not counted by itself */
+  readonly isFollowUp?: boolean
 }
 
 /**

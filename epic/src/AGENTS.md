@@ -277,7 +277,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - the answers' shapes are copies of the docs tools' routes':
       [detailsRoutes.ts](tools/detailsRoutes.ts), [choicesRoutes.ts](tools/choicesRoutes.ts)
     - The elements:
-      - `<epic-ask>`, `<epic-text-box>`, `<epic-send>`, `<epic-choice-rows>` / `<epic-choice-row>`, `<epic-choices-bar>`
+      - `<epic-ask>`, `<epic-text-box>`, `<epic-send>`, `<epic-feature-set>` (a Feature Set's, P80 of `epic-engine`), `<epic-choice-rows>` / `<epic-choice-row>`, `<epic-choices-bar>`
       - and `<epic-option>`'s answering mode, an option of an `<epic-ask>` (a tick box, a comment box)
       - Their pages:  Epic UI's "Pages you answer on".
     - `<epic-text-box>` is written in pages (the notes, a section's comment)
@@ -798,6 +798,14 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - asked by every fix (`PlanDoc`) and the migration `self-fixed-issues`;  what they got to comes partly from the
         review inbox (`PlanReader.readActedOn`)
       - one from their words (`requested`) waits, light orange;  one they got to, orange
+    - ITEM BADGES (epic `epic-engine` P81, T144):  each line starts with what happens next, WILL FIX, YOUR CALL ...;
+      only on a page with them (`<epic-page badges>`), the rules in PLAN-DOC.md ("ITEM BADGES")
+      - `ItemBadge` (`components/epic-item/ItemBadge.ts`):  the ONE rule, a table per kind, pure;  the page reads
+        what it wrote (`badge`, `state`), never works it out again
+      - `ItemBadges`:  one page's facts for it, `PlanReader.badges`;  `itemState()` takes its colour
+      - `ItemJudge`:  care and doubt, by a fresh `claude -p` (`ClaudePrint`), read as `Hush` reads an item (`JudgeText`);
+        a constructor option, so its test never calls a model
+      - `BadgeCommands`:  `epic badges`;  it stores judgements and starts no work
     - `Hush` (epic `epic-engine` T122):  `epic hush [<epic> | all] [--dryrun]`, tidy's sibling:  the green, yellow and
       orange items settled 3 days ago or more (`candidates()`, pure), each judged by a fresh `claude -p` (`ClaudePrint`;
       hush only if 80% sure Owen won't look again), the hushed ones approved as his ✓ would (`apply()`), one write
@@ -1906,6 +1914,16 @@ the epic page shown in both tabs).
     - tracked with each branch, as the elements it's written in are
     - The shared one becomes a copy of it when the migration step `answer-elements` runs
       (see "Scripts", `migrate.js`).
+- [feature-set.html](tools/templates/feature-set.html), "Feature Set":  a details page that's a ranked list to pick
+  from (epic `epic-engine` P80), after Solid TLDR.
+  - NEVER copy by hand:  `epic ask create <slug> --template feature-set --from <data.json5>`.
+    - its data:  [feature-set.json5](tools/templates/feature-set.json5), to copy;
+      the shape and the names' rules, [FeatureSet.js](tools/FeatureSet.js)
+  - a table per section, three columns, Item | Your pick | Facts
+  - S1F1 names one item for good (Q83):  a reorder renames nothing, a number is never used again
+  - a pick is an `<epic-ask compact no-chip>`, its Priority one in its `then` slot:  ONE comment box
+  - `<epic-feature-set>`:  the reorder dialog, the links, the sections' states
+  - Back puts the reader where they were:  the runtime's [spell-doc-back.js](tools/_assets/spell-doc-back.js)
 - [syntax-choices.html](../templates/syntax-choices.html):  a choice page.
   - `syntax-choices.rows.json5` beside it is a small working example.
   - NEVER copy by hand:  `epic choices create <slug> --rows <rows.json5>`.
@@ -2336,6 +2354,11 @@ the epic page shown in both tabs).
     (`labels`).
     - It puts it back on load over the answer sent, when it's newer:  Send says "Changes not sent",
       the draft's save shows beside it ("draft from 06:12 put back").
+  - Until it has read back the answer sent, the page saves and sends nothing (epic `epic-engine` I377):
+    what it shows till then is the page's preset picks, or nothing, and neither is the person's.
+    - a failed read is tried again every 3s;  this browser's old copy waits for it, never saved again as new
+    - what they change meanwhile is laid over what's read, field by field (`AnswerDraft.withEdits()`), then saved
+    - closed before that, what they changed in that time is lost (J340)
   - An agent's rewrite reloads the page, or patches it in place:
     either way a question that's still there gets back what was typed in it.
   - Text whose id the rewrite removed is KEPT:  a box of its own above the notes, "Kept from before the page changed".

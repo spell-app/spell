@@ -434,7 +434,7 @@ As `plan-doc.md`, "Ids":
     | ----------- | ------ | ---------------------------------------------------------------------------------- |
     | `progress`  | blue   | Claude is working on it:  an underway status card, or `working`                    |
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
-    | `handled`   | grey   | taken into a phase's text (`handled`);  an issue Claude found, fixed before the person got to it (`self-fixed`, epic `epic-engine` T143) |
+    | `handled`   | grey   | taken into a phase's text (`handled`), never an open fix waiting for a check (`fixed`:  orange, epic `epic-engine` I411);  an issue Claude found, fixed before the person got to it (`self-fixed`, epic `epic-engine` T143) |
     | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), in the last day (a phase:  3 days);  older, grey                 |
     | `requested` | light orange | an issue or todo filed from the person's own words (`requested`;  a todo since epic `epic-engine` T88), closed done, not reviewed:  their turn to see it (P63) |
     | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
@@ -445,6 +445,8 @@ As `plan-doc.md`, "Ids":
     | `quiet`     | grey   | open, nothing to think about:  a `calm` judgement call not reviewed, a limit (epic `epic-engine` P63) |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
     | `replied`   | orange | a manual test whose phase isn't done (epic `epic-engine` P63:  `PlanReader.manualTestState()`) |
+    | `recheck`   | light orange | a page with badges (P81):  WILL RECHECK, WILL CLOSE:  Claude's turn, never counted as needing the person (Q82) |
+    | `someday`   | light yellow | a page with badges (P81):  SOMEDAY, OPTIONAL:  open, no hurry               |
     | `open`      | yellow | anything else open:  still undecided, not urgent;  a calm issue, a test whose phase is done;  a revisit or request for now answered |
 
     - Green across the board for what's decided, grey only for what no longer matters (2026-10-08).
@@ -478,6 +480,35 @@ As `plan-doc.md`, "Ids":
     - `FIXED - `:  `fixed` while open (orange, light orange), or `self-fixed` (grey);  none while it's `progress`
     - drawn, and said by `summary`, `items`, `inbox` and "0. While you were out";  the stored title never changes
     - no `FIXED` at the line's end then:  the label stays in the markup, for its `Not in main` pill alone
+  - ITEM BADGES (epic `epic-engine` P81;  the tables Owen agreed:  T144):  on a page with them
+    (`<epic-page badges="trial | on">`, `epic badges <epic> trial | on`), a line STARTS with what happens next, in
+    the item's colour:  `WILL FIX`, `YOUR CALL`, `SOMEDAY` ...
+    - one rule, as tables:  `ItemBadge` (`components/epic-item/ItemBadge.ts`), the first row that matches wins.
+      Change a row there, never in an element or a list.
+    - what's stored is the judgement:  `care` and `doubt` (0-100), `severe`, `needs-you`, `judged`, `judged-why`
+      - care:  how likely the person wants it (an issue fixed, a todo built, a test worth their time;  a call:  they'd
+        have chosen differently)
+      - doubt:  how likely it's transient, done already, or overtaken by later work
+      - `severe`:  an issue blocks work, loses work or gives wrong answers;  a call changes or narrows what they said
+      - `needs-you`:  only they can decide the issue, OK the todo, run the test
+      - judged by `ItemJudge` as each item is created, and by `epic badges <epic> score`;  by hand:  `epic badges
+        <epic>#J3 set --care 80 --doubt 10`
+      - never judged on a page without badges
+    - what's written from it, on every edit:  `badge` (with `badge-item`, for `SEE T38`) and `state`
+      - the page follows what's live:  an agent on it (UNDERWAY, RECHECKING), a comment answered (YOUR TURN), their ✓
+    - the percentages:  `issueBadges` in the repo's `.epic/config.json5` (`recheckAt` 50, `closeBelow` 25,
+      `fixAbove` 60);  a change draws on the page's next edit
+    - no judgement (the judge failed, nobody asked):  drawn as a page without badges draws it
+    - GREY MEANS CLOSED, a limit apart:  a rule that would grey an open item leaves it as it is, with no badge, until
+      `epic badges <epic> close <ids>` closes it (`badge-closed`)
+      - never their words, what they got to, or a question:  theirs wait light orange, orange once they acted
+      - with badges `on`, a new item like that is closed as it's made;  `trial` closes nothing, and leaves what's
+        closed its colour
+    - turned into a todo, still open:  `SEE T38`, outlined blue, ahead of every rule but a comment waiting on them
+    - the badge replaces the UPDATE word at the line's end;  listings say it as a prefix (`WILL FIX - It jumps`)
+    - phases:  from their state alone (`badged`, written by the tool;  `ItemBadge.ofPhase()`)
+    - `epic badges <epic> off`:  the one undo.  Scores off, what a badge closed open again, drawn as before.
+    - no migration step:  every attribute is new and optional, and a page without `badges` draws as before
   - `changed`:  ISO local time with offset.
     - Stamped by every command that changes its status or review marks.
     - `bedtime` while a `/bedtime` run is on, until reviewed.
@@ -881,7 +912,9 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | ------ | ---------------------------------------- | ---------------------------------------------------------------------- |
 | red    | needs the person                               | `attention` chips;  the rail's count (only what needs them);  a todo the person flagged red as a reminder (`--loud`, T94), its buttons still a todo's (plane, revisit, x) |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
-| blue   | do it now, or it's with Claude           | `progress` and `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
+| light yellow | open, no hurry (DARK text):  SOMEDAY, OPTIONAL | `someday` chips and badges;  counts in, and filters with, the yellow bubble (epic `epic-engine` P81) |
+| light orange | finished as they asked, their turn to see it (DARK text);  on a page with badges also Claude's turn to check again | `requested` and `recheck` chips and badges;  both filter with orange, but a recheck is never counted as needing the person (P81, Q82) |
+| blue   | do it now, or it's with Claude           | `progress` chips and the UNDERWAY label (solid);  `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (start now), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since the person looked, or a warning;  an item Claude answered with options, waiting for the person's pick (2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing the person |
 | violet | a person's voice                         | their reply cards, the note box, the forms and kept text of their own words |
@@ -906,22 +939,25 @@ The fills, in the order they come:
   - the step label's DONE
   - a Choose pill on its set's `chosen` option (applied, wherever the cards are)
 
-An item's id chip says WHERE THE PERSON'S ANSWER STANDS, by its fill.
+An item's id chip says WHERE THE ITEM STANDS NOW, the person's answer included, by its fill.
 In the person's words (2026-10-10):
 "it's not clear when an answer is queued and being addressed, so I keep filling in answers over and over".
-- DASHED:  their answer given, not sent.
-- OUTLINED:  sent.  Claude has it, is on it, or the work it asked for is still due.
-- SOLID:  done.  Claude did it, or noted it, and nothing more is due from anyone.
-- While their OWN mark is live (dashed, or outlined once sent), the chip keeps its STATE's colour:  only the fill shows
-  the mark, and the colour below is the button's (2026-10-11, epic `epic-workflow` I6:  a red item marked
-  Revisit turned blue, and its section's red count matched no chip).
-  - Once Claude has it in hand, the outline is the colour below:  a pick taken (green), work with Claude (blue:  outlined;
-    queued, dotted).
+- SOLID:  the item's state now (2026-11-22, epic `epic-engine` T146;  before, "done, nothing more due").
+  - solid BLUE:  being worked on (`progress`), its UNDERWAY label solid blue with it
+- OUTLINED blue:  handed to Claude, not started (`handed`).  DOTTED blue:  queued (`scheduled`).
+- RINGED:  their answer given, not sent (T145;  "leave those the color they were before, but do the dotted outline
+  on them").
+  - the chip keeps its state's colour, fill and letters, and the line its title's look:  a ✓ doesn't grey it, an x
+    doesn't strike it, until Send
+  - a 2px dotted blue ring round the chip, a gap inside it, so it shows on solid blue too
+  - the counts have the answer already:  the blue bubble, or a ✓ or x's closed (I306)
+- ALL BLUE, dotted:  their answer sent, until Claude takes it (P43);  solid blue as soon as Claude is on it.
+- Once Claude has it in hand, the fill is the colour below:  a pick taken (green, outlined), work with Claude (blue).
 - So at a glance:
-  - a dashed or outlined chip is ANSWERED (don't answer again)
-  - solid red or orange WAITS ON THE PERSON
+  - a ringed, dotted or outlined chip is ANSWERED (don't answer again);  so is solid blue
+  - solid red or orange with no ring WAITS ON THE PERSON
 
-| The person's answer                          | colour | dashed:  not sent | outlined:  sent, Claude has it, or still due | solid:  done (the item's state) |
+| The person's answer                          | button's colour | not sent:  button dashed, chip ringed | sent, Claude has it, or still due | then:  the item's state |
 | -------------------------------------- | ------ | ----------------- | -------------------------------------------- | ------------------------------- |
 | Approve                                | green  | pressed           | sent, until `inbox apply`                    | green:  a call accepted, a test passed;  an issue / todo settled |
 | a pick (the Choose pill)               | green  | picked            | sent;  still outlined once `apply` takes it, until the doc's `chosen` reaches the page | green:  a question answered, a call accepted (a Noted card) |
@@ -933,7 +969,7 @@ In the person's words (2026-10-10):
 | a todo's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |
 | the note box's x:  "skip this" (no line button wears it:  the chip alone does) | grey | pressed | sent              | its status as it was (`skip` settles nothing) |
 | Revisit, with a note                   | blue   | pressed           | sent:  Claude talking it over                | yellow (talked over, still open);  orange if Claude answered with options (the person's turn);  green if it got decided |
-| any work Claude took (an underway status card) | blue | --          | `progress`:  outlined until the card is Done or Noted | the state's colour      |
+| any work Claude took (an underway status card) | blue | --          | `progress`:  SOLID blue until the card is Done or Noted | the state's colour      |
 | a new todo or question from the page | its section's new row | not sent | sent                              | the new item's own chip (a question red, a todo yellow) |
 | urgent / not urgent (the id chip itself) | red / grey (an issue's yellow) | a dashed ring | --                     | solid red / grey                |
 
@@ -943,7 +979,7 @@ In the person's words (2026-10-10):
 - Outlined is drawn from the item's own marks, never written:
   - The person's live mark (the inbox)
   - a pick Claude took (`ReviewClient.takenPickOf()`)
-  - `scheduled` (dotted), `handed`, `progress`
+  - `scheduled` (dotted), `handed`
 
 ## Folding
 

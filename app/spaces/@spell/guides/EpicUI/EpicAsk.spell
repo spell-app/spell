@@ -207,6 +207,30 @@
 				<cell>Its chip, as written (<text code>12</>). None: its key's id (<text code>q3-priority</> gives <text code>Q3</>), else its section's number (<text code>12 · Rename it</> gives <text code>Q12</>), else its section's place. Two questions in one section share it, a letter each: <text code>Q12 · a</>, <text code>Q12 · b</> (I369).</>
 				<cell/>
 			</>
+			<row>
+				<cell>
+					<text code>no-chip</>
+				</>
+				<cell>present or absent</>
+				<cell>No chip: its id stays internal (a Feature Set's Your pick, epic <text code>epic-engine</> P80). Its state still shows as its <text code>:state()</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>label</>
+				</>
+				<cell>text</>
+				<cell>Its name for people, when it shares its section with others (a row of a table: <text code>S1F2 · Share a link</>): the answer, a screen reader and kept text say it. It then leaves its section's state alone.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>off-for</>
+				</>
+				<cell>letters</>
+				<cell>A follow-up's (<text code>slot="then"</>): the picks of its question that grey it out, comma-separated (<text code>N</>). What was picked in it stays.</>
+				<cell/>
+			</>
 		</>
 
 		<section label="Slots" sticky="stack" collapsible dividing open="false">
@@ -221,6 +245,12 @@
 						<text italic>default</>
 					</>
 					<cell>The question: an <text code>&lt;epic-question&gt;</>, then an <text code>&lt;epic-choices&gt;</>; prose too.</>
+				</>
+				<row>
+					<cell>
+						<text code>then</>
+					</>
+					<cell><text code>compact</>: a follow-up question, an <text code>&lt;epic-ask compact&gt;</> drawn between the select and the one comment box (a Priority). No chip, no box of its own; not counted by itself.</>
 				</>
 			</>
 		</>
@@ -307,6 +337,12 @@
 						<text code>working</>
 					</>
 					<cell>"Provide more details" asked, or only Other written: blue, Claude's to do.</>
+				</>
+				<row>
+					<cell>
+						<text code>off</>
+					</>
+					<cell>A follow-up greyed by its question's pick (<text code>off-for</>).</>
 				</>
 			</>
 		</>

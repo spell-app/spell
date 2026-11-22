@@ -135,7 +135,8 @@ export class StateFilter {
  */
 const STATE_GROUPS: readonly (readonly string[])[] = [
   ["progress", "handed", "scheduled"],
-  ["replied", "requested", "waiting", "updated"],
+  ["replied", "requested", "waiting", "updated", "recheck"],
+  ["open", "someday"],
   ["old", "handled", "quiet"]
 ]
 

@@ -131,9 +131,15 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     return [state, ...others]
   }
 
-  /** How many are in `state`'s chip:  it and the states of its colour (`sameColor()`). */
+  /**
+   * The number on `state`'s chip:  it and the states of its colour (`sameColor()`).
+   * - NOT a recheck (`UNCOUNTED`, epic `epic-engine` Q82):  it filters with orange, but waits on Claude, so the orange
+   *   number stays what needs the person;  0 with only rechecks
+   */
   private chipCount(state: string): number {
-    return this.sameColor(state).reduce((count, each) => count + (this.stateCounts.get(each) ?? 0), 0)
+    return this.sameColor(state)
+      .filter((each) => !UNCOUNTED.has(each))
+      .reduce((count, each) => count + (this.stateCounts.get(each) ?? 0), 0)
   }
 
   /** The states a chip stands for, by its lead state:  the blue badge's for `MARKED_SHOWS_AS`, else its chip's. */
@@ -264,6 +270,9 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     this.send(STATE_PICK, { state, shown, how } satisfies StatePickDetail)
   }
 }
+
+/** The states a chip shows and hides without counting them:  a recheck, Claude's turn (epic `epic-engine` Q82). */
+const UNCOUNTED: ReadonlySet<string> = new Set(["recheck"])
 
 /** The grey chip's state, and the ones that count in it (`handled`, P31;  `quiet`, P63):  one chip for all (epic `epic-engine`). */
 const SETTLED = "old"

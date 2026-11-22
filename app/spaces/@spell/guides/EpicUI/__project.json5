@@ -76,6 +76,10 @@
       "active": true
     },
     {
+      "path": "/EpicFeatureSet.spell",
+      "active": true
+    },
+    {
       "path": "/EpicField.spell",
       "active": true
     },
