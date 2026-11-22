@@ -25,7 +25,24 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - html / per-extension hooks
     - overlays:  one folder laid over another
     - an `ETag`
+    - CACHING, its `caching` setting (`Caching`;  epic `solid-2-final` P2):
+      - `"never"`, the default:  `Cache-Control: no-store`;  every worktree's page server, so development never sees a
+        stale file
+      - `"normal"`:  the main checkout's page server, the built editor (`EditorServer.builtServer()`), the cloud's
+        `/element/`
+        - a name carrying a build's hash (`Mount.hashed`, made by `hashedIn()`) kept a year, `immutable`
+        - everything else `no-cache`:  checked each time, "not modified" (304) while the browser's copy matches its
+          `ETag`;  a page through the `html` hooks only while they'd make the same page again
   - `Request`, `Reply`, `Router` and [bodies.ts](bodies.ts) -- the part of Express the app's API uses
+    - `Reply` COMPRESSES what it sends, when the browser takes it ([compress.ts](compress.ts), node's zlib;
+      epic `solid-2-final` P2):
+      - `sendFile()`:  the file's brotli copy beside it (`x.js.br`, no older than the file), as it is;
+        else text of 1 KB or more gzipped, a file's gzip kept in memory by its path, size and time (128 MB at most)
+      - `send()` / `json()`:  text of 1 KB or more gzipped
+      - each says `Vary: Accept-Encoding`;  a request that takes neither gets the body as it is
+      - the brotli copies:  the builds' `brotliCopies()` (`spell/toolchain/brotliCopies`), in the app's builds and
+        Spell UI's site bundle;  never the committed bundles, which are gzipped once a run instead
+    - `reply.noStore()`:  the ONE way an answer says "never keep a copy" (`Cache-Control: no-store`), every route's
   - [listener.ts](listener.ts) -- `toListener()`:  a handler as node's `(req, res)`, with the 404 / error answers
   - [ports.ts](ports.ts) -- choosing a port:
 
@@ -88,8 +105,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a stylesheet it uses:  swapped in place, no reload
         - in VS Code's side-bar views too (spell-epic's Review and Details):  the live client runs inside their frame,
           with its own socket (the frame is cross-origin to the view)
-        - nothing caches a stale one:  every answer is `Cache-Control: no-store`, `_assets/` included,
-          so a reload always fetches the stylesheet as it is now
+        - nothing caches a stale one:  a worktree's server answers `Cache-Control: no-store`, `_assets/` included;
+          the main checkout's checks each file every time (`no-cache`, "not modified" while it's current),
+          so a reload always gets the stylesheet as it is now
       - a script it loaded, or one beside it:  reloaded, keeping the scroll
         - which:  its `<script src>` tags, and `performance`'s resource entries
           (lazy chunks, `epics.pack.js`, an experiment's `*.bundle.js`)

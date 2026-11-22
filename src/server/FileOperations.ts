@@ -100,7 +100,7 @@ export class FileOperations {
     if (typeof contents !== "string")
       throw new SRV.HttpError(400, "nothing to save:  send the contents as text, or as JSON { contents }")
     const etag = await FileOperations.save(file, contents, { ifMatch: request.get("if-match") })
-    reply.set("Cache-Control", "no-store").json({ path, etag })
+    reply.noStore().json({ path, etag })
   }
 
   /**
@@ -114,7 +114,7 @@ export class FileOperations {
     const { path, file } = this.writableFile(body.path)
     const contents = typeof body.contents === "string" ? body.contents : undefined
     const etag = await FileOperations.create(file, { contents, folder: body.folder === true })
-    reply.set("Cache-Control", "no-store").json({ path, etag })
+    reply.noStore().json({ path, etag })
   }
 
   /**
@@ -126,7 +126,7 @@ export class FileOperations {
   private async request_rename(request: SRV.Request, reply: SRV.Reply): Promise<void> {
     const { from, to } = this.writablePair(request.body)
     await FileOperations.rename(from.file, to.file)
-    reply.set("Cache-Control", "no-store").json({ path: from.path, to: to.path })
+    reply.noStore().json({ path: from.path, to: to.path })
   }
 
   /**
@@ -138,7 +138,7 @@ export class FileOperations {
   private async request_duplicate(request: SRV.Request, reply: SRV.Reply): Promise<void> {
     const { from, to } = this.writablePair(request.body)
     await FileOperations.duplicate(from.file, to.file)
-    reply.set("Cache-Control", "no-store").json({ path: from.path, to: to.path })
+    reply.noStore().json({ path: from.path, to: to.path })
   }
 
   /**
@@ -149,7 +149,7 @@ export class FileOperations {
   private async request_delete(request: SRV.Request, reply: SRV.Reply): Promise<void> {
     const { path, file } = this.writableFile(request.query.path)
     await FileOperations.delete(file)
-    reply.set("Cache-Control", "no-store").json({ path })
+    reply.noStore().json({ path })
   }
 
   /**

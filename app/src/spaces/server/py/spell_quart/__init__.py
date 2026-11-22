@@ -6,7 +6,7 @@
 - Compiling to `py` writes the app itself beside the program, `<Project>.app.py`:  its routes, spelled out.
 """
 
-from spell_quart.page import ASSETS_URL, assets_folder, built_folder, fresh, page_html
+from spell_quart.page import ASSETS_URL, assets_folder, built_folder, fresh, page_html, send_built
 from spell_quart.sessions import VISITOR_COOKIE, SpellSessions, Visit, remember_visitor, visitor_of
 
 __all__ = [
@@ -19,5 +19,6 @@ __all__ = [
     "fresh",
     "page_html",
     "remember_visitor",
+    "send_built",
     "visitor_of",
 ]

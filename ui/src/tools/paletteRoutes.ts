@@ -34,7 +34,7 @@ export function paletteRoutesFor(file: string): RouteModule {
     setup({ router, guard }) {
       const api = new SRV.Router()
       api.get("/", (_request, reply) => {
-        reply.set("Cache-Control", "no-store").json(JSON.parse(readFileSync(file, "utf8")) as PaletteTable)
+        reply.noStore().json(JSON.parse(readFileSync(file, "utf8")) as PaletteTable)
       })
       api.use(guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }))
       api.put("/", async (request, reply) => {

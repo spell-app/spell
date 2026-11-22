@@ -70,6 +70,9 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  * - NO redirects for old URLs (epic `people-and-orgs`, Q30):  an old address answers "not found"
  * - The server knows nothing of what the sets, routes, scripts and tabs are:  they come from the settings
  *   (epic `repo-split` P4).
+ * - CACHING (epic `solid-2-final` P2):  a worktree's server says "never store" (`caching: "never"`), so development
+ *   never sees a stale file;  the main checkout's `"normal"`:  pages and files checked each time by their `ETag`
+ *   ("not modified"), the bundles' hashed names (`builtNames()`) kept a year
  * - port:  `DEFAULT_PORT` (4747) for the main checkout, and ONLY that:  taken, it fails to start
  *   (epic `epic-engine` I332:  a restart that found an orphan on 4747 started on 59931, and the side bar lost it);
  *   a WORKTREE's server never asks for it (`portFor()`), and takes any free one:
@@ -125,6 +128,9 @@ export class PageServer {
   /** the folders `/worktrees/<w>/` serves, in order, once `serveWorktrees()` has said;  none before */
   private worktrees: string[] = []
 
+  /** which names are a build's hashed ones (`builtNames()`):  in this checkout, and in each worktree it serves */
+  private readonly hashed: { own: RegExp; worktrees: RegExp }
+
   /** the epic folder served after the checkout, once `serveContent()` has said;  none before */
   private content?: string
 
@@ -170,11 +176,13 @@ export class PageServer {
       tab.path.startsWith(`${COMPONENTS_PREFIX}/`) && !tab.sets?.some((set) => served.has(set))
     this.siteTabs = siteTabs?.filter((tab) => !unserved(tab))
     this.bundles = new BundleBuild({ root: this.root })
+    this.hashed = builtNames(this.root)
     this.web = new SRV.WebServer({
       root: this.root,
       token,
       live: true,
-      mounts: [{ prefix: "/", dir: this.root }],
+      caching: this.info.worktree ? "never" : "normal",
+      mounts: [{ prefix: "/", dir: this.root, hashed: this.hashed.own }],
       html: [
         (page) => this.withLocalCopies(page),
         (page, served) => this.withPageScripts(page, served),
@@ -226,7 +234,7 @@ export class PageServer {
       router.get(set.prefix, (request, reply, next) =>
         request.path.endsWith("/") ? next() : reply.redirect(`${set.prefix}/`)
       )
-    router.get(SERVER_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(this.info))
+    router.get(SERVER_API, (_request, reply) => reply.noStore().json(this.info))
     router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
     router.get(SERVER_REPORTS_API, this.onReportsAsked)
     // NOTE: no body parsing here:  each route parses its own (the app's `/api` is JSON5), and the proxy streams.
@@ -405,7 +413,7 @@ export class PageServer {
     for (const dir of dirs.map((each) => resolve(each))) {
       if (this.worktrees.includes(dir)) continue
       this.worktrees.push(dir)
-      this.web.files.mount({ prefix: WORKTREES_PREFIX, dir })
+      this.web.files.mount({ prefix: WORKTREES_PREFIX, dir, hashed: this.hashed.worktrees })
     }
     this.info.worktrees = this.worktrees[0]
     this.info.worktreesFolders = [...this.worktrees]
@@ -666,7 +674,7 @@ export class PageServer {
         .then(report)
         .catch(() => undefined)
     )
-    reply.set("Cache-Control", "no-store").json((await Promise.all(asked)).filter(Boolean))
+    reply.noStore().json((await Promise.all(asked)).filter(Boolean))
   }
 }
 
@@ -890,4 +898,28 @@ function checkoutInfo(root: string): { branch?: string; worktree?: string } {
   const found = SRV.checkoutOf(root)
   const worktree = found?.root === resolve(root) ? found.worktree : undefined
   return { ...(branch && { branch }), ...(worktree && { worktree }) }
+}
+
+/** A `Mount.hashed` that takes no name. */
+const NO_NAMES = /(?!)/
+
+/**
+ * The hashed names of the bundles the checkout at `root` builds and never commits (`SRV.Bundle.specs()`:  Spell UI's
+ * site bundle, `ui/site/_assets/`), as `Mount.hashed`:  for the checkout's own mount (`own`), and for every worktree's
+ * at `/worktrees/<w>/` (`worktrees`).
+ * - NEVER a committed bundle's (the docs bundle, the epics pack):  their names carry no hash, so a year would be stale
+ * - NEVER throws:  settings that won't read have none
+ */
+function builtNames(root: string): { own: RegExp; worktrees: RegExp } {
+  let folders: string[] = []
+  try {
+    folders = SRV.Bundle.all(root)
+      .filter((bundle) => !bundle.spec.committed)
+      .map((bundle) => relative(root, bundle.outputDir).split(sep).join("/"))
+      .filter((folder) => folder && !folder.startsWith(".."))
+  } catch {
+    // no bundles to mark:  everything is checked each time
+  }
+  if (!folders.length) return { own: NO_NAMES, worktrees: NO_NAMES }
+  return { own: SRV.hashedIn(...folders), worktrees: SRV.hashedIn(...folders.map((folder) => `*/${folder}`)) }
 }

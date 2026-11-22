@@ -52,6 +52,9 @@ export class PerfBrowser {
   /** every response the page got, by URL:  its type and sizes */
   readonly responses = new Map<string, PerfResponse>()
 
+  /** what the network said of each URL (Chrome's own events):  laid onto `responses` by `sized()` */
+  private readonly network = new Map<string, Pick<PerfResponse, "fromCache" | "notModified" | "wire">>()
+
   /** the response bodies being read and sized (`sized()`) */
   private readonly reading = new Set<Promise<void>>()
 
@@ -159,6 +162,16 @@ export class PerfBrowser {
    */
   async sized(): Promise<void> {
     await Promise.race([Promise.all([...this.reading]), new Promise((resolve) => setTimeout(resolve, SIZED_WAIT_MS))])
+    for (const [url, facts] of this.network) {
+      const entry = this.responses.get(url)
+      if (entry) Object.assign(entry, facts)
+    }
+  }
+
+  /** Forget every response so far:  before the same page loads again (a warm visit). */
+  forgetResponses(): void {
+    this.responses.clear()
+    this.network.clear()
   }
 
   /** Close the browser.  NEVER throws. */
@@ -211,9 +224,19 @@ export class PerfBrowser {
       this.reading.add(read)
       void read.finally(() => this.reading.delete(read))
     })
-    cdp.on("Network.responseReceived", ({ response }) => {
+    // what really crossed the network (epic `solid-2-final` P2):  a compressed body, a "not modified" answer's headers;
+    // kept by URL, and laid onto `responses` once they're sized (`sized()`), as Playwright's answer may come later
+    const urls = new Map<string, string>()
+    cdp.on("Network.responseReceived", ({ requestId, response }) => {
+      urls.set(requestId, response.url)
+      const fromCache = response.fromDiskCache || response.fromServiceWorker
+      this.network.set(response.url, { fromCache, notModified: response.status === 304 })
       const entry = this.responses.get(response.url)
-      if (entry) entry.fromCache = response.fromDiskCache || response.fromServiceWorker
+      if (entry) entry.fromCache = fromCache
+    })
+    cdp.on("Network.loadingFinished", ({ requestId, encodedDataLength }) => {
+      const facts = this.network.get(urls.get(requestId) ?? "")
+      if (facts && !facts.fromCache) facts.wire = encodedDataLength
     })
     cdp.on("Network.webSocketFrameReceived", () => this.liveMessages++)
   }
@@ -438,6 +461,10 @@ export type PerfResponse = {
   raw?: number
   brotli?: number
   fromCache?: boolean
+  /** the bytes that crossed the network, headers included, as the server sent them (compressed or not) */
+  wire?: number
+  /** the server answered "not modified" (304):  the browser's copy was current */
+  notModified?: boolean
 }
 
 /** What `domCensus()` counts. */

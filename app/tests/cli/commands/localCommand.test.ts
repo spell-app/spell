@@ -858,7 +858,7 @@ describe("spell space local", () => {
     world = setUp()
     const file = caddyFileFor({ names: NAMES, certificate: "/c.pem", key: "/k.pem" })
     expect(file).toContain(
-      `test.spell.app, test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\treverse_proxy 127.0.0.1:4949 {\n` +
+      `test.spell.app, test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\tencode zstd gzip\n\treverse_proxy 127.0.0.1:4949 {\n` +
         `\t\tlb_try_duration 30s\n\t\tlb_try_interval 250ms\n\t}\n}`
     )
   })
@@ -869,8 +869,10 @@ describe("spell space local", () => {
 
     test("the editor's name goes to its dev server, the other to the cloud", () => {
       world = setUp()
-      expect(file()).toContain(`test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\treverse_proxy 127.0.0.1:4949 {`)
-      expect(file()).toMatch(/\ntest\.spell\.app \{\n\ttls "\/c\.pem" "\/k\.pem"\n/)
+      expect(file()).toContain(
+        `test.spell.space {\n\ttls "/c.pem" "/k.pem"\n\tencode zstd gzip\n\treverse_proxy 127.0.0.1:4949 {`
+      )
+      expect(file()).toMatch(/\ntest\.spell\.app \{\n\ttls "\/c\.pem" "\/k\.pem"\n\tencode zstd gzip\n/)
       expect(file()).toContain("reverse_proxy 127.0.0.1:3456 {")
       expect(file()).not.toMatch(/test\.spell\.app, /)
     })

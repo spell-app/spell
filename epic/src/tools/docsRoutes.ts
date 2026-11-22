@@ -54,7 +54,7 @@ function docsHandler(web: SRV.WebServer): Handler {
     const path = decodeURIComponent(request.path.replace(WORKTREE_ADDRESS, "/").slice(DOCS_PREFIX.length))
     const file = DocsFiles.fileFor(path)
     if (!file) throw new SRV.HttpError(404, `no epic doc at ${DOCS_PREFIX}${path}`)
-    reply.set({ "Cache-Control": "no-store", Vary: "Sec-Fetch-Dest" })
+    reply.noStore().vary("Sec-Fetch-Dest")
     if (!README.test(path)) {
       reply.type(SRV.typeFor(file))
       return reply.sendFile(file)
