@@ -571,10 +571,12 @@ The cost is the stylesheet, and most of it is the foundation:
 a page with one button gets 143 kB minified (20 kB gzipped), and the six tags above 259 kB (33 kB).
 
 Where it stops:
-- 55 of the 62 [families](README-components.md) render.
-  The other seven stay as they are, and are listed on stderr:
-  `ui-code`, `ui-markdown`, `ui-include`, `ui-panel`, `ui-property-editor`, `ui-tree-diagram`, and `ui-components`,
-  the pack loader.
+- 55 of the 97 [families](README-components.md) render, and `ui-item` lends its class to the ones that hold items.
+  The other 41 stay as they are, and are listed on stderr:
+  among them `ui-code`, `ui-markdown`, `ui-include`, `ui-panel`, `ui-property-editor`, `ui-tree-diagram`,
+  the newer layout and site families (`ui-stack`, `ui-toolbar`, `ui-page-layout`, `ui-site-nav` ...),
+  and `ui-components`, the pack loader.
+  - The list:  `StaticFamilies.CLASSES`, in [StaticFamilies.ssr.ts](src/static/StaticFamilies.ssr.ts).
 - What has no path without JavaScript stays as rendered:  tabs, and popups that open on hover.
 - The page mustn't load the elements as well:  they'd take the flattened markup for slotted content, and show it twice.
   That's why the render removes the scripts.
