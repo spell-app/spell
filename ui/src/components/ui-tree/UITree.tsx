@@ -91,7 +91,7 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *   - Its rows can be DATA instead:  `items`, a `TreeItemData` list, drawn in its shadow root ("Columns from data").
  *     For big trees:  a `children` function runs the first time its item opens, and only the open path is drawn.
  *     Each column draws its first rows, then more as its end scrolls near (`drawnInWindow()`, `itemRows()`):
- *     5,000 rows open as fast as 300.
+ *     5,000 rows open as fast as 300;  past a few hundred, the rows far from the view are taken down again.
  *     Rows from markup draw themselves, as in every tree:  none builds a shadow root it doesn't show.
  * - `ui-settled`:  `ui-changed`'s detail again, once what's selected has stayed put for a moment (the arrow keys stopped).
  * - For subclasses (a `<netlist-columns>` built on it):
@@ -2553,14 +2553,15 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /**
    * Column `depth`'s rows:  the first ones, then more as its end scrolls near (`drawnInWindow()`), so a column of
    * 5,000 rows opens as fast as one of 300.
-   * - Its pick, and the row with the tab stop, are always drawn, with every row before them:
+   * - Its pick, and the row with the tab stop, are always drawn, with the rows around them:
    *   a path set, `openTo()`, a match elsewhere picked, or End pressed, draws down to it first.
-   * - What's drawn stays drawn, as in every long list:  a column scrolled to its end holds all its rows.
+   * - Past a few hundred rows, the rows far from the view are taken down, as in every long list, and drawn again as they
+   *   come back:  never the row with the tab stop, or the focus (epic `solid-2-final` P17).
    */
   private itemRows(shown: () => readonly TreeItemData[], depth: number) {
     return drawnInWindow({
       items: shown,
-      drawItem: (item) => this.itemRow(item, depth),
+      drawItem: (item, position) => this.itemRow(item, depth, position, () => shown().length),
       through: () => {
         const list = shown()
         const key = this.keyItemIn(depth)
@@ -2603,8 +2604,11 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     )
   }
 
-  /** `item`'s row in column `depth`:  icon, label and which, count, chevron, each as `show` says. */
-  private itemRow(item: TreeItemData, depth: number) {
+  /**
+   * `item`'s row in column `depth`:  icon, label and which, count, chevron, each as `show` says.
+   * - It says its place in the whole column (`position`, of `setSize`):  a long column draws only the rows near the view.
+   */
+  private itemRow(item: TreeItemData, depth: number, position: () => number, setSize: () => number) {
     const isPicked = () => this.openPath[depth] === item.id
     const isSelected = () => isPicked() && depth === this.selectedDepth
     // the pick kept in the filtered column, though it doesn't match:  dimmed, so it doesn't read as a match
@@ -2623,6 +2627,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         data-id={item.id}
         tabindex={depth === Math.max(0, this.selectedDepth) && this.keyItemIn(depth) === item ? "0" : "-1"}
         aria-level={depth + 1}
+        aria-posinset={position() + 1}
+        aria-setsize={setSize()}
         aria-selected={isSelected() ? "true" : "false"}
         aria-expanded={this.hasChildren(item) ? (isPicked() ? "true" : "false") : undefined}
         onClick={(event: MouseEvent) => this.pickItem(item, depth, event)}

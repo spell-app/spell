@@ -212,18 +212,33 @@ describe("<ui-table editable>, long", () => {
     return { host, table: host.querySelector("table")!, sent }
   }
 
-  it("draws only the rows in view, a spacer standing in for the rest", async () => {
+  it("draws only the rows near the view, a spacer standing in for the rest", async () => {
     const { table } = await longTable()
     const rows = table.tBodies[0]!.rows
-    expect(rows.length).toBeLessThan(200)
-    expect(table.querySelectorAll("tr.spacer")).toHaveLength(2)
+    expect(rows.length).toBeLessThan(700)
+    // the rows below, and the end that draws more
+    expect(table.querySelectorAll("tr.spacer").length).toBeGreaterThanOrEqual(1)
     expect(table.getAttribute("aria-rowcount")).toBe("10001")
-    expect(rows[1]!.cells[0]!.textContent).toBe("Film 0")
+    expect(rows[0]!.cells[0]!.textContent).toBe("Film 0")
+    expect(rows[0]!.getAttribute("aria-rowindex")).toBe("2")
+  })
+
+  it("scrolled to the end and back:  the far rows are taken down, and the cursor's row stays", async () => {
+    const { host, table } = await longTable()
+    const scroller = host.shadowRoot!.querySelector<HTMLElement>("[part~='scroller']")!
+    table.tBodies[0]!.rows[0]!.cells[0]!.focus()
+    await settle()
+    scroller.scrollTop = scroller.scrollHeight
+    await expect.poll(() => [...table.tBodies[0]!.rows].some((row) => row.cells[0]?.textContent === "Film 9999")).toBe(true)
+    expect(table.tBodies[0]!.rows.length).toBeLessThan(900)
+    // the cursor's row, with the focus:  still there
+    expect(document.activeElement?.closest("tr")?.cells[0]?.textContent).toBe("Film 0")
+    expect([...table.tBodies[0]!.rows].some((row) => row.cells[0]?.textContent === "Film 500")).toBe(false)
   })
 
   it("Ctrl End takes the cursor to the last row, drawing it", async () => {
     const { table } = await longTable()
-    table.tBodies[0]!.rows[1]!.cells[0]!.focus()
+    table.tBodies[0]!.rows[0]!.cells[0]!.focus()
     await userEvent.keyboard("{Control>}{End}{/Control}")
     await settle()
     await new Promise((done) => requestAnimationFrame(done))
@@ -237,7 +252,7 @@ describe("<ui-table editable>, long", () => {
 
   it("a paste past the drawn rows fills every row it covers", async () => {
     const { table, sent } = await longTable()
-    const first = table.tBodies[0]!.rows[1]!.cells[0]!
+    const first = table.tBodies[0]!.rows[0]!.cells[0]!
     first.focus()
     const data = new DataTransfer()
     data.setData("text/plain", Array.from({ length: 150 }, (_, index) => `Pasted ${index}`).join("\n"))

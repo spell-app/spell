@@ -5,6 +5,7 @@ import { Baseline, type Comparison } from "spell/app/cli/Baseline"
 import type { PerfBaselineNumbers, PerfRecord } from "./perf.types"
 import type { LoadResult } from "./LoadMeasure"
 import type { LeaksResult } from "./LeaksMeasure"
+import type { HugeListsResult } from "./HugeListsMeasure"
 import type { TypingResult } from "./TypingMeasure"
 import type { A11yResult } from "./A11yMeasure"
 import type { ListenersResult } from "./ListenersMeasure"
@@ -107,6 +108,16 @@ export class PerfResults {
         keep(`leaks ${target} ${loop.name} heapPerCycle`, loop.heapPerCycle)
         keep(`leaks ${target} ${loop.name} nodesPerCycle`, loop.nodesPerCycle)
         keep(`leaks ${target} ${loop.name} listenersPerCycle`, loop.listenersPerCycle)
+      }
+    }
+    for (const [target, huge] of Object.entries(data.lists ?? {}) as Array<[string, HugeListsResult]>) {
+      for (const list of huge.lists) {
+        const name = `lists ${target} ${list.kind}`
+        keep(`${name} drawnMs`, list.drawnMs)
+        keep(`${name} drawnRows`, list.drawnRows)
+        keep(`${name} nodesAfter`, list.nodesAfter)
+        keep(`${name} heapAfter`, list.heapAfter)
+        for (const [metric, value] of Object.entries(list.frame ?? {})) keep(`${name} frame.${metric}`, value)
       }
     }
     for (const [profile, typing] of Object.entries(data.typing ?? {}) as Array<[string, TypingResult]>) {

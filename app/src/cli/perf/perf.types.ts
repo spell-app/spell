@@ -148,7 +148,17 @@ export const PERF_PROFILES: Record<PerfProfileName, PerfProfile> = {
 ////////////////
 
 /** The measurements a run can take:  `load` by default, every one with `--full`. */
-export const PERF_STEPS = ["load", "leaks", "typing", "a11y", "listeners", "sheets", "cpu", "pipeline"] as const
+export const PERF_STEPS = [
+  "load",
+  "leaks",
+  "lists",
+  "typing",
+  "a11y",
+  "listeners",
+  "sheets",
+  "cpu",
+  "pipeline"
+] as const
 
 /** One of `PERF_STEPS`. */
 export type PerfStep = (typeof PERF_STEPS)[number]

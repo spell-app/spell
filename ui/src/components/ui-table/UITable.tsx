@@ -2,6 +2,7 @@
 import { For, Show, createRenderEffect } from "solid-js"
 import { Portal, isServer, type JSX } from "@solidjs/web"
 
+import { MOST_KEPT, drawnInWindow } from "spell/element/drawnWindow"
 import { E, UI, UIT } from "spell/ui/core"
 import { tableVocabulary } from "./UITable.en"
 import { TableClassMirror } from "./TableClassMirror"
@@ -60,7 +61,8 @@ import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
  *   - Why the light DOM:  the same page sheet and class grammar as a slotted table,
  *     native semantics in the document,
  *     and a server draws the same `<table>` itself (first paint never needs the property).
- *   - NOTE: no virtualization (the plan's ~200-row threshold):  every row is drawn.
+ *   - A long one is drawn as every long list is (`drawnInWindow()`):  the first rows, more as they scroll near,
+ *     and past a few hundred, only the rows near the view (see "Long tables").
  *
  * - NOTE: `sort-column` counts `colspan`s but not `rowspan`s (see `TableSort`).
  *
@@ -76,7 +78,7 @@ import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
  *     a page that writes its own things (a Spell program, through its core) cancels it, and its rows follow.
  *   - It NEVER changes a row object in place.
  *   - Its look is the sheet's `editable` class word:  square cells on a hairline grid, the cursor outlined.
- *   - NOTE: every row is drawn, as in data mode:  a long table isn't drawn in windows yet.
+ *   - A long one is drawn as in data mode, the cursor's row always drawn.
  *
  * - Rows mode (epic `ui-gaps` P7):  `<ui-row>`s of `<ui-cell>`s, with no native table, for a drawing,
  *   which holds no native HTML.
@@ -378,7 +380,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
       <table
         ref={(table: HTMLTableElement) => this.adoptDataTable(table)}
         role={this.isEditable ? "grid" : undefined}
-        aria-rowcount={this.isWindowed ? this.sortedRows.length + 1 : undefined}
+        aria-rowcount={this.isLong ? this.sortedRows.length + 1 : undefined}
       >
         {this.headAndBody()}
       </table>
@@ -410,35 +412,23 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
           </tr>
         </thead>
         <tbody>
-          {this.spacer("above")}
           <Show
             when={this.isEditable}
-            fallback={
-              <For each={this.drawnRows}>
-                {(row) => (
-                  <tr>
-                    <For each={this.dataColumns}>
-                      {(column) => (
-                        <td class={TableGrammar.cell(column) || undefined}>{TableSort.text(row[column.key])}</td>
-                      )}
-                    </For>
-                  </tr>
-                )}
-              </For>
-            }
+            fallback={this.bodyRows((row, position) => (
+              <tr aria-rowindex={this.isLong ? position() + 2 : undefined}>
+                <For each={this.dataColumns}>
+                  {(column) => <td class={TableGrammar.cell(column) || undefined}>{TableSort.text(row[column.key])}</td>}
+                </For>
+              </tr>
+            ))}
           >
-            <For each={this.drawnRows}>
-              {(row, drawnIndex) => (
-                <tr aria-rowindex={this.isWindowed ? this.drawnFrom + drawnIndex() + 2 : undefined}>
-                  <For each={this.dataColumns}>
-                    {(column, columnIndex) =>
-                      this.editableCell({ row, rowIndex: () => this.drawnFrom + drawnIndex(), column, columnIndex })
-                    }
-                  </For>
-                </tr>
-              )}
-            </For>
-            {this.spacer("below")}
+            {this.bodyRows((row, position) => (
+              <tr aria-rowindex={this.isLong ? position() + 2 : undefined}>
+                <For each={this.dataColumns}>
+                  {(column, columnIndex) => this.editableCell({ row, rowIndex: position, column, columnIndex })}
+                </For>
+              </tr>
+            ))}
             <tr class={NEW_ROW} aria-label={this.translationForKey("new-row")}>
               <For each={this.dataColumns}>
                 {(column, columnIndex) =>
@@ -447,112 +437,60 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
               </For>
             </tr>
           </Show>
-          <Show when={!this.isEditable}>{this.spacer("below")}</Show>
         </tbody>
       </>
     )
   }
 
   ////////////////
-  // ## Long tables:  only the rows in view (epic `mockup` P14, J34 B)
+  // ## Long tables:  drawn as every long list is (epic `mockup` P14, J34 B;  epic `solid-2-final` P17)
   //
-  // Past `WINDOW_FROM` rows, a data-mode body draws only the rows in view and a few around them, with a spacer row
-  // above and below standing in for the rest, so a table of 10,000 rows scrolls as one of 50.
-  // - What's in view:  the body against the window and the scroller (`measureWindow()`), on every scroll and resize.
+  // A data-mode body is drawn by `drawnInWindow()`, `spell/element`'s, as every long list Spell draws:
+  // - the first `ROWS_AT_ONCE` rows at once, then more as they scroll near
+  // - past `MOST_KEPT` rows, only the rows within a few screens of the view, a spacer row standing in for each run of
+  //   the rest, as tall as they were (or the average, for rows never drawn), so the scroll bar stays steady
+  // - the cursor's row is never taken down, nor the row with the focus or one being edited
   // - The cursor is in the data's places (`sortedRows`), drawn or not:  moving it to an undrawn row draws that row
-  //   first (`setCursor()`), and keys, edits and paste act on the data, so a paste fills rows past the window too.
+  //   first (it's the window's `through`), and keys, edits and paste act on the data, so a paste fills rows past the
+  //   drawn ones too.
+  // - Each row is found by its place through `drawnRows` (and back, `placeOf()`), never by its place among the body's.
+  // - Screen readers:  past `MOST_KEPT`, the table says how many rows it has (`aria-rowcount`), each row which it is
+  //   (`aria-rowindex`).
   // - A server render draws every row:  nothing scrolls there.
   ////////////////
 
-  /** Is the body drawn in a window?  Past `WINDOW_FROM` rows, in a browser. */
-  get isWindowed(): boolean {
-    return !isServer && this.isInDataMode && this.sortedRows.length > WINDOW_FROM
+  /** Is the table long enough that only the rows near the view are drawn, so it says each row's place? */
+  get isLong(): boolean {
+    return !isServer && this.isInDataMode && this.sortedRows.length > MOST_KEPT
   }
-
-  /** The first row drawn, in `sortedRows`. */
-  @E.state accessor windowStart = 0
-
-  /** How many rows the window draws. */
-  @E.state accessor windowSize = WINDOW_FIRST_SIZE
-
-  /** The first row drawn:  0 when it isn't windowed. */
-  get drawnFrom(): number {
-    return this.isWindowed ? Math.min(this.windowStart, this.sortedRows.length) : 0
-  }
-
-  /** The rows drawn:  all of them, or the window's. */
-  get drawnRows(): readonly UIT.TableRow[] {
-    const rows = this.sortedRows
-    return this.isWindowed ? rows.slice(this.drawnFrom, this.drawnFrom + this.windowSize) : rows
-  }
-
-  /** A row standing in for the undrawn rows `above` or `below` the window, as tall as they'd be. */
-  private spacer(where: "above" | "below"): JSX.Element {
-    const rows = () => {
-      const count = this.sortedRows.length
-      return where === "above" ? this.drawnFrom : Math.max(0, count - this.drawnFrom - this.drawnRows.length)
-    }
-    return (
-      <Show when={this.isWindowed}>
-        <tr class={SPACER} aria-hidden="true">
-          <td colspan={Math.max(1, this.dataColumns.length)} style={{ height: `${rows() * this.rowHeight}px` }} />
-        </tr>
-      </Show>
-    )
-  }
-
-  /** A drawn row's height in pixels, measured once rows are drawn;  `DEFAULT_ROW_PX` before. */
-  @E.state accessor rowHeight = DEFAULT_ROW_PX
 
   /**
-   * SIDE EFFECT:  while windowed, follows every scroll and resize, and draws the rows then in view.
-   * - Scrolls are heard on the document, capturing:  the scroller, the page, or any box around it.
+   * The body's rows, in `sortedRows`' order, each drawn by `drawRow`, as a long list is drawn.
+   * - Each row is remembered by its element, and its element by its place, while it's drawn.
    */
-  @E.onChange("isReady", "isWindowed")
-  protected onWindowed(isReady: boolean, isWindowed: boolean) {
-    if (!isReady || !isWindowed) return
-    const remeasure = () => E.beforeNextPaint(() => this.measureWindow())
-    document.addEventListener("scroll", remeasure, { capture: true, passive: true })
-    window.addEventListener("resize", remeasure)
-    remeasure()
-    return () => {
-      document.removeEventListener("scroll", remeasure, { capture: true })
-      window.removeEventListener("resize", remeasure)
-    }
+  private bodyRows(drawRow: (row: UIT.TableRow, position: () => number) => JSX.Element): JSX.Element {
+    return drawnInWindow({
+      items: () => this.sortedRows,
+      atOnce: ROWS_AT_ONCE,
+      through: () => this.cursor?.row,
+      standIn: () => {
+        const spacer = document.createElement("tr")
+        spacer.className = SPACER
+        spacer.setAttribute("aria-hidden", "true")
+        const cell = spacer.insertCell()
+        cell.colSpan = Math.max(1, this.dataColumns.length)
+        return spacer
+      },
+      drawItem: (row, position) => {
+        const drawn = drawRow(row, position) as HTMLTableRowElement
+        this.drawnRows.set(drawn, position)
+        return drawn
+      }
+    })
   }
 
-  /** Draw the rows in view now, and a few around them. */
-  @E.untracked
-  private measureWindow() {
-    const body = this.dataTable?.tBodies[0]
-    if (!body || !this.isWindowed) return
-    const drawn = body.rows[1]
-    if (drawn && !drawn.classList.contains(SPACER) && drawn.offsetHeight) this.rowHeight = drawn.offsetHeight
-    const box = this.scrollerScrolls ? this.scroller?.getBoundingClientRect() : undefined
-    const top = Math.max(0, box?.top ?? 0)
-    const bottom = Math.min(window.innerHeight, box?.bottom ?? window.innerHeight)
-    // where the first row would be:  the body's top, the spacer above included
-    const first = Math.floor((top - body.getBoundingClientRect().top) / this.rowHeight)
-    const count = Math.ceil(Math.max(0, bottom - top) / this.rowHeight)
-    const start = Math.max(0, Math.min(first - WINDOW_EXTRA, this.sortedRows.length - 1))
-    const size = Math.max(count + 2 * WINDOW_EXTRA, WINDOW_FIRST_SIZE)
-    if (start !== this.windowStart) this.windowStart = start
-    if (size !== this.windowSize) this.windowSize = size
-  }
-
-  /** Draw row `row` if it's outside the window:  the window starts a few rows above it. */
-  @E.untracked
-  private drawRow(row: number) {
-    if (!this.isWindowed || row >= this.sortedRows.length) return
-    const from = this.drawnFrom
-    if (row >= from && row < from + this.windowSize) return
-    this.windowStart = Math.max(0, row - WINDOW_EXTRA)
-  }
-
-  /** How many spacer rows the body starts with:  1 while windowed. */
-  private get rowsBeforeData(): number {
-    return this.isWindowed ? 1 : 0
-  }
+  /** Each drawn body row's place in `sortedRows`, by its element. */
+  private readonly drawnRows = new WeakMap<Element, () => number>()
 
   /**
    * Remember the generated `table`:  marked at once (the author-table scan must skip it),
@@ -737,9 +675,8 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     if (!body) return undefined
     // the empty last row is the body's last, after a spacer below
     if (at.row === this.sortedRows.length && this.isEditable) return body.rows[body.rows.length - 1]?.cells[at.column]
-    const drawn = at.row - this.drawnFrom
-    if (drawn < 0 || drawn >= this.drawnRows.length) return undefined
-    return body.rows[this.rowsBeforeData + drawn]?.cells[at.column]
+    for (const row of body.rows) if (this.drawnRows.get(row)?.() === at.row) return row.cells[at.column]
+    return undefined
   }
 
   /** The body cell `target` is in, as a place, if it's the generated table's. */
@@ -750,9 +687,9 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     if (!cell || !table || cell.closest("table") !== table || cell.parentElement?.parentElement !== table.tBodies[0])
       return undefined
     const row = cell.parentElement as HTMLTableRowElement
-    if (row.classList.contains(SPACER)) return undefined
     if (row.classList.contains(NEW_ROW)) return { row: this.sortedRows.length, column: cell.cellIndex }
-    return { row: this.drawnFrom + row.sectionRowIndex - this.rowsBeforeData, column: cell.cellIndex }
+    const position = this.drawnRows.get(row)
+    return position ? { row: position(), column: cell.cellIndex } : undefined
   }
 
   /**
@@ -1058,7 +995,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   /** Put the cursor at `at`, and focus its cell. */
   @E.untracked
   private setCursor(at: CellAt) {
-    this.drawRow(at.row)
+    // the window draws the cursor's row, wherever it is
     this.cursor = at
     this.focusCursor()
   }
@@ -1257,14 +1194,8 @@ const NEW_ROW = "new-row"
 /** A long table's spacer rows' class:  standing in for the rows not drawn. */
 const SPACER = "spacer"
 
-/** How many rows a body has before it's drawn in a window. */
-const WINDOW_FROM = 200
-/** How many rows a window draws before it's measured. */
-const WINDOW_FIRST_SIZE = 60
-/** How many rows a window draws above and below what's in view. */
-const WINDOW_EXTRA = 15
-/** A row's height before one is measured, in pixels. */
-const DEFAULT_ROW_PX = 32
+/** How many rows a long body draws at a time:  a table up to that is drawn whole, at once. */
+const ROWS_AT_ONCE = 200
 
 /** The cursor cell's class. */
 const CURSOR = "cursor"
