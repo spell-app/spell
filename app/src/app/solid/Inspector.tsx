@@ -2,7 +2,7 @@ import { Show, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 import type { TextEdit } from "vscode-languageserver"
 
-import { UIError, kebabCase, upperFirst } from "spell/util"
+import { UIError, kebabCase, setDebugGlobal, upperFirst } from "spell/util"
 import { E } from "spell/element"
 import { P } from "spell/parser/parser"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
@@ -2808,6 +2808,15 @@ class PartSelector {
   /** The app's area it's listening on, marked `INSPECTING_MARK`. */
   private static area: HTMLElement | undefined
 }
+
+// DEBUG:  `Inspector` at the devtools console, and the browser tests
+setDebugGlobal({ Inspector })
+
+// A change to the Inspector's code reloads the page, rather than swapping this file in (epic `editor` I236):
+// it and its views (`InspectorView`, `InspectorParts`) import each other, so a hot swap made a second Inspector,
+// its own selection, area and runtime, beside the first:  the Views tree chose parts in the new one,
+// the cards still showed the old one's, so a click on a row inspected nothing until the page was reloaded.
+import.meta.hot?.accept(() => location.reload())
 
 /** `<InspectorColumn>`, loaded on first use:  see `InspectorView.tsx`. */
 export const InspectorColumn = Inspector.views.view("InspectorColumn")

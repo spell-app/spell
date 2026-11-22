@@ -1,7 +1,6 @@
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onSettled, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { setDebugGlobal } from "spell/util"
 import { DRAG_START_PX } from "spell/util/Dragging"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { AnatomyFloors, type Floor } from "./AppAnatomyFloors"
@@ -840,6 +839,3 @@ function isInShadowOf(element: Element, host: Element): boolean {
   }
   return false
 }
-
-// for a look in the console, and the browser tests:  `AppAnatomy.view`
-setDebugGlobal({ AppAnatomy })

@@ -1,7 +1,6 @@
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { setDebugGlobal } from "spell/util"
 import { E } from "spell/element"
 import { P } from "spell/parser/parser"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
@@ -661,13 +660,7 @@ function PropertiesCard(): JSX.Element {
   )
 }
 
-// DEBUG:  `Inspector` at the devtools console
-setDebugGlobal({ Inspector })
-
-// A change to the Inspector's code reloads the page, rather than swapping this file in (epic `editor` I236):
-// it and `InspectorParts` import each other, so a hot swap of either made a second Inspector,
-// its own selection, area and runtime, beside the first:  the Views tree chose parts in the new one,
-// the cards still showed the old one's, so a click on a row inspected nothing until the page was reloaded.
+// A change to the Inspector's views reloads the page, as its state's does (`Inspector.tsx`, epic `editor` I236)
 import.meta.hot?.accept(() => location.reload())
 
 /****************

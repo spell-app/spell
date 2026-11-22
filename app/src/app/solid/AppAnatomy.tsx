@@ -1,6 +1,7 @@
 import { Show, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { setDebugGlobal } from "spell/util"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { barTooltip } from "./chrome"
@@ -286,6 +287,9 @@ export function AppAnatomyView(props: {
     </Show>
   )
 }
+
+// for a look in the console, and the browser tests:  `AppAnatomy.view`
+setDebugGlobal({ AppAnatomy })
 
 /** Anatomy while it shows, loaded on first use:  see `AppAnatomyStack.tsx`. */
 const AnatomyStack = AppAnatomy.views.view("AnatomyStack")

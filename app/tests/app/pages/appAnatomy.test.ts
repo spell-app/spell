@@ -145,8 +145,12 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
   test("each view is a floor over the view holding it, tagged with its type;  a click selects;  off puts it back", async () => {
     const before = await stylesNow()
     // the palette kept open, so its strip shows
-    if (!(await page.locator(".PaletteStrip").count()))
+    if (!(await page.locator(".PaletteStrip").count())) {
+      // the pin is in Add a View's menu, drawn once the pointer reaches its button (`AddPartButton`)
+      await page.locator(".AddPartButton").first().dispatchEvent("pointerenter")
+      await page.waitForSelector(".PalettePin", { state: "attached" })
       await page.evaluate(() => (document.querySelector(".PalettePin") as HTMLElement).click())
+    }
     await page.waitForSelector(".PaletteStrip")
     await page.locator(".AnatomyButton [part~=item]").first().click()
     // the palette's strip hidden while Anatomy shows (I263)
