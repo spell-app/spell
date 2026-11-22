@@ -13,7 +13,7 @@ import { UISegment } from "spell/ui/components/ui-segment/UISegment"
 
 /**
  * The static render's SHADOW output (epic `solid-2-final` P16):  every element keeps its tag and its children, and
- * gets its view as a declarative shadow root, with the sheets it adopts in a browser linked, and Solid's hydration keys.
+ * gets its view as a declarative shadow root, with the sheets it adopts in a browser linked.
  */
 describe('StaticRender.fragment(html, { output: "shadow" })', () => {
   beforeAll(() => {
@@ -42,15 +42,6 @@ describe('StaticRender.fragment(html, { output: "shadow" })', () => {
     expect(inner.querySelector("slot")).not.toBeNull()
     // the light output's mark for the flattener:  not needed here
     expect(inner.hasAttribute("data-ui-control")).toBe(false)
-  })
-
-  it("marks what the view drew with Solid's hydration keys, keyed by the view alone:  the same for every element", () => {
-    const { out } = render(`<ui-button>One</ui-button><ui-button>Two</ui-button>`)
-    const keys = [...out.matchAll(/_hk=["']?([\w-]+)/g)].map((match) => match[1])
-    expect(keys.length).toBeGreaterThan(0)
-    expect(keys.every((key) => key!.startsWith("v"))).toBe(true)
-    // each element's root is hydrated on its own, so both start the same
-    expect(keys.slice(0, keys.length / 2)).toEqual(keys.slice(keys.length / 2))
   })
 
   it("links the sheets a browser adopts, in its order:  foundation first, the family's own, the same address each time", () => {
@@ -93,7 +84,7 @@ describe('StaticRender.fragment(html, { output: "shadow" })', () => {
     expect(twice.match(/<template/g)?.length).toBe(1)
   })
 
-  it("the light output is as before:  no keys", () => {
-    expect(StaticRender.fragment(`<ui-button>Go</ui-button>`)).not.toContain("_hk")
+  it("writes no hydration keys:  each element draws again in its place", () => {
+    expect(StaticRender.fragment(`<ui-button>Go</ui-button>`, { output: "shadow" })).not.toContain("_hk")
   })
 })

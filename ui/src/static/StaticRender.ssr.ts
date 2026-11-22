@@ -21,8 +21,8 @@ import { SHADOW_SHEETS_FOLDER } from "./static.types.ssr"
  *   5. wire what works without scripts (`StaticInteractions`:  dialogs, popovers, unique ids)
  *   6. rewrite the page's own `<style>`s for that (`StaticPageStyles`:  `::part()`, `:state()`, `ui-*` tags)
  * - Its SHADOW output (`{ output: "shadow" }`) keeps every element and writes its view into a declarative shadow root
- *   instead (`StaticShadowRoots`), with Solid's hydration keys:  steps 4-6 don't run, and the page keeps its scripts,
- *   so the elements start over what's there and hydrate it.
+ *   instead (`StaticShadowRoots`):  steps 4-6 don't run, and the page keeps its scripts, so the elements start over
+ *   what's there and draw again in its place.
  * - Families are opt-in (`define()`):  a `ui-*` tag without one stays as it is.
  * - NOTE: a page of the light output MUST NOT load the elements too:
  *   an upgrade would take the flattened markup for slotted content.
@@ -135,7 +135,7 @@ export class StaticRender {
         element: domElement as unknown as Element,
         family,
         sheetNames: untrack(() => domElement.component?.styleSheetNames),
-        html: isShadow ? StaticRender.hydratableView(domElement) : StaticRender.staticView(domElement)
+        html: StaticRender.view(domElement)
       }))
       if (isShadow) {
         SSR.StaticShadowRoots.attach(document, views, sheets)
@@ -149,28 +149,15 @@ export class StaticRender {
     }
   }
 
-  /**
-   * `domElement`'s view as HTML with no hydration keys:  nothing hydrates the light output.
-   * - Nor Solid's markers (`<!--$-->` ... `<!--/-->`), which a hydratable build writes around each dynamic part.
-   */
-  private static staticView(domElement: E.DOMElement): string {
-    const html = renderToString(() =>
+  /** `domElement`'s view as HTML.  `NoHydration`:  no element hydrates, so no `_hk` keys. */
+  private static view(domElement: E.DOMElement): string {
+    return renderToString(() =>
       createComponent(NoHydration, {
         get children() {
           return untrack(() => domElement.component!.onMount())
         }
       })
     )
-    return html.replace(SOLID_MARKERS, "")
-  }
-
-  /**
-   * `domElement`'s view as HTML with Solid's hydration keys, for the element to claim in the page.
-   * - Keyed by what `render()` draws alone (`UIComponent.onMount()` runs it under a root of a fixed id),
-   *   so every element's keys are its own, and the same as the page's.
-   */
-  private static hydratableView(domElement: E.DOMElement): string {
-    return renderToString(() => untrack(() => domElement.component!.onMount()))
   }
 
   /** Does `element` already hold a declarative shadow root (a page drawn before)? */
@@ -215,9 +202,6 @@ export class StaticRender {
     }
   }
 }
-
-/** The comments a hydratable server build marks its dynamic parts with:  `<!--$-->`, `<!--/-->`, `<!--!$-->`. */
-const SOLID_MARKERS = /<!--!?[$/][^>]*?-->/g
 
 /** Where the shadow output links its sheets, unless told:  a folder beside the page. */
 const DEFAULT_SHEETS: SSR.ShadowSheets = { href: SHADOW_SHEETS_FOLDER }

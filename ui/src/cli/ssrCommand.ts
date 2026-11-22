@@ -34,7 +34,7 @@ const RUNNER = resolve(CLI_DIR, "runner", "renderStatic.ts")
  * - Removes each `<script>` that loads the elements (`StaticDocument.ELEMENT_SCRIPT`):  an upgrade would show the
  *   content twice.  Other scripts stay.
  * - `--shadow-roots`:  the shadow output instead (epic `solid-2-final` P16), `page.shadow.html`:
- *   - each element keeps its tag, and gets its shadow root drawn ahead, for the page's scripts to hydrate
+ *   - each element keeps its tag, and gets its shadow root drawn ahead:  it paints before the scripts start it
  *   - its scripts stay;  each family's sheets are linked from `ui-sheets/`, beside the page, written there too
  * - Renders in a child process, through Vite -- see `runner/renderStatic.ts`.
  * - Lists each page it wrote on stdout;  sizes, removed scripts and tags it left as they were on stderr.

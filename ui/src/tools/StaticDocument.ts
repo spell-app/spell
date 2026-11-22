@@ -84,7 +84,7 @@ export class StaticDocument {
 
   /**
    * Render `html` to the SHADOW output (`StaticRender.page(html, { output: "shadow" })`):  each element's shadow root
-   * drawn ahead, for it to hydrate when the page's scripts start them.
+   * drawn ahead:  it paints before any script, and each element draws again in its place when the scripts start it.
    * - The page keeps its scripts:  they start the elements.
    * - Its `<head>` links the page's own sheet first (the tokens, which reach every shadow root), unless the page
    *   already links Spell UI's;  then a `preload` of each sheet the roots link, so they load beside it, not after

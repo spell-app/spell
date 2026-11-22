@@ -6,7 +6,7 @@ import { SSR } from "spell/ui/static"
  * Puts each rendered `ui-*` element's view into its own shadow root, written as a declarative
  * `<template shadowrootmode="open">`:  the static render's SHADOW output (`StaticRender.page(html, { output: "shadow" })`).
  * - The page paints styled before any script;
- *   when the elements start, each one hydrates what's there (`UIComponent`, "Server-drawn shadow roots").
+ *   when the elements start, each one draws again in its place (`UIComponent`, "Server-drawn shadow roots").
  * - Unlike the light output (`StaticFlattener`), nothing moves:  the element keeps its tag, its attributes and its
  *   children, which its slots take as they would in a browser.
  * - Per root, first:  a `<link>` per sheet it adopts in a browser, in the same order (`StaticStylesheet.shadowLinks()`),

@@ -7,51 +7,46 @@ import type { DOMElement } from "spell/element"
 
 /**
  * The browser half of the server-drawn shadow roots' probe (epic `solid-2-final` P16):  the page `ssr.ssr.test.tsx`
- * drew paints styled BEFORE any script, and when the elements start, each one keeps what's there.
- * - Hydrated:  the same nodes, wired up;  no root ever painted empty;  nothing moved.
- * - A drawing that can't be claimed is drawn again in its place, in the same task:  no frame without it either.
+ * drew paints styled BEFORE any script, and when the elements start, each one draws again in its place.
+ * - In the same task:  no root ever painted empty, nothing moved.
+ * - The focus moves to the element in the same place.
  */
-it("paints the server's shadow roots styled before any script;  each element then hydrates them, keeping its nodes", async () => {
+it("paints the server's shadow roots styled before any script;  each element then draws again in place, nothing moving", async () => {
   const container = await painted(ssrShadow)
   const roots = shadowRoots(container)
   expect(roots.length).toBe(7)
   const host = container.querySelector<DOMElement>("ui-button")!
-  const button = host.shadowRoot!.querySelector("button")!
-  expect(button.className).toBe("ui primary button")
-  expect(getComputedStyle(button).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
-  const nodes = roots.map((root) => drawn(root))
-  const box = button.getBoundingClientRect().toJSON()
+  const serverButton = host.shadowRoot!.querySelector("button")!
+  expect(serverButton.className).toBe("ui primary button")
+  const color = getComputedStyle(serverButton).backgroundColor
+  expect(color).not.toBe("rgba(0, 0, 0, 0)")
+  const boxes = roots.map((root) => root.host.getBoundingClientRect().toJSON())
   const frames = watchFrames(roots)
 
-  // no hydration key missed, nothing drawn again
-  const warnings: string[] = []
-  const warn = console.warn
-  console.warn = (...args: unknown[]) => void warnings.push(args.map(String).join(" "))
   await startElements()
   await ElementFixture.settle(container)
-  console.warn = warn
   frames.stop()
-  expect(warnings).toEqual([])
 
-  expect(roots.map((root) => drawn(root))).toEqual(nodes)
+  const button = host.shadowRoot!.querySelector("button")!
+  expect(button).not.toBe(serverButton)
+  expect(button.className).toBe("ui primary button")
   expect(frames.emptyRoots).toBe(0)
-  expect(button.getBoundingClientRect().toJSON()).toEqual(box)
+  expect(roots.map((root) => root.host.getBoundingClientRect().toJSON())).toEqual(boxes)
   // its own sheets are in:  the server's links went
   expect(roots.every((root) => !root.querySelector("link"))).toBe(true)
-  expect(getComputedStyle(button).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
-  // and it's live:  a change reaches the very node the server drew
+  expect(getComputedStyle(button).backgroundColor).toBe(color)
+  // and it's live
   host.setAttribute("color", "red")
   flush()
   expect(button.className).toBe("ui red button")
   container.remove()
 })
 
-it("a drawing it can't claim is drawn again in its place, with no frame empty, the focus kept", async () => {
-  // the first button alone, under a tag nothing has defined yet, with no hydration keys:  nothing to claim
+it("the focus in the server's drawing moves to the element in the same place, with no frame empty", async () => {
+  // the first button alone, under a tag nothing has defined yet
   const sheet = /<link[^>]*>/.exec(ssrShadow)![0]
   const button = /<ui-button[\s\S]*?<\/ui-button>/.exec(ssrShadow)![0]
-  const html = sheet + button.replaceAll("ui-button", "ssr-button").replace(/ _hk=["']?[\w-]+["']?/g, "")
-  const container = await painted(html)
+  const container = await painted(sheet + button.replaceAll("ui-button", "ssr-button"))
   const roots = shadowRoots(container)
   const host = container.querySelector<DOMElement>("ssr-button")!
   const serverButton = host.shadowRoot!.querySelector("button")!

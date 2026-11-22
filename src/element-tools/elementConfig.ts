@@ -44,17 +44,6 @@ export function cssBuildTarget(): Plugin {
 export const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
 
 /**
- * The Solid compiler's setting that lets an element HYDRATE the shadow root the server drew:
- * claim its nodes and wire them up, rather than draw them again (epic `solid-2-final` P16).
- * - On both sides:  the server writes hydration keys (`_hk`), the page's code claims the nodes that carry them.
- * - Set explicitly:  the Solid plugin turns it off in Vitest and in a plain build;  its `ssr` option would turn it on
- *   only with a server entry of Solid Start's.
- * - Costs about 4% of a component's compiled code (139 component files, minified:  768 KB => 799 KB, measured
- *   2026-11-22);  a page with nothing server-drawn never hydrates, and its templates clone as before.
- */
-export const HYDRATABLE = { hydratable: true }
-
-/**
  * What every dev server of ours sets.
  * - `forwardConsole` off:  Vite turns it on by itself when an agent starts the server,
  *   sending each `console.*` call's arguments to the terminal.
@@ -73,14 +62,11 @@ export const DEV_SERVER_SETTINGS = { forwardConsole: false }
  *   compiler must see decorator-free code.
  * - Aliases come from the nearest `tsconfig.json` of each file (`resolve.tsconfigPaths`):  each repo's own table.
  * - `solid`:  the Solid plugin's options, e.g. `{ dev: false }` for Solid's production runtime.
- * - Compiled HYDRATABLE, in the page and on the server (`HYDRATABLE`):
- *   an element keeps a shadow root the server drew, and only wires it up (epic `solid-2-final` P16).
  * - A FUNCTION, so every caller gets its own plugin instances.
  */
 export function elementBaseConfig({ solid: solidOptions = {} }: { solid?: SolidOptions } = {}) {
-  const options = { ...solidOptions, solid: { ...HYDRATABLE, ...solidOptions.solid } }
   return {
-    plugins: [ruleTestsOutOfBuilds(), standardDecorators(), solid(options), cssBuildTarget()],
+    plugins: [ruleTestsOutOfBuilds(), standardDecorators(), solid(solidOptions), cssBuildTarget()],
     resolve: {
       tsconfigPaths: true,
       dedupe: SOLID_DEDUPE

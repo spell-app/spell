@@ -135,8 +135,8 @@ export type StaticSheetUsage = {
  * What `StaticRender.page()` / `fragment()` write:
  * - `"light"`, the default:  plain light-DOM HTML, no shadow roots, no scripts needed (`StaticFlattener`),
  *   for crawlers and no-JS readers
- * - `"shadow"`:  each element keeps its tag and gets its shadow root as a declarative template, with Solid's
- *   hydration keys (`StaticShadowRoots`):  it paints before any script, and the elements hydrate it when they start
+ * - `"shadow"`:  each element keeps its tag and gets its shadow root as a declarative template (`StaticShadowRoots`):
+ *   it paints before any script, and each element draws again in its place when it starts
  */
 export type StaticOutput = "light" | "shadow"
 

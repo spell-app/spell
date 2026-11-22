@@ -198,22 +198,6 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     this.connectedState.releaseCallbacks.push(callback)
   }
 
-  /** How many release and property callbacks it has now, for `releaseSince()`. */
-  releaseMark(): ReleaseMark {
-    const { releaseCallbacks, propertyChangedCallbacks } = this.connectedState
-    return { releases: releaseCallbacks.length, properties: propertyChangedCallbacks.length }
-  }
-
-  /**
-   * Release what was added since `mark` (`releaseMark()`), newest first, and stop the property callbacks added since:
-   * a component given up on (a server drawing that didn't hydrate), before another is built.
-   */
-  releaseSince(mark: ReleaseMark) {
-    const { releaseCallbacks, propertyChangedCallbacks } = this.connectedState
-    propertyChangedCallbacks.length = Math.min(propertyChangedCallbacks.length, mark.properties)
-    while (releaseCallbacks.length > mark.releases) releaseCallbacks.pop()!(this)
-  }
-
   ////////////////
   // ## Attributes and properties
   ////////////////
@@ -577,8 +561,8 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
 
   /**
    * What the server drew in the shadow root, before the first render took it;  `undefined` when it drew nothing.
-   * - The first render either hydrates it (`isHydratable`:  Solid claims its nodes and wires them up)
-   *   or draws again in its place (`takeServerDrawing()`), in the same task:  nothing flashes, nothing moves.
+   * - The first render draws again in its place (`takeServerDrawing()`), in the same task:
+   *   nothing flashes, nothing moves.
    * - Its sheets (`<link rel="stylesheet">`, `<style>`) stay until the element's own are in (`markReady()`),
    *   so it stays styled meanwhile.
    */
@@ -635,7 +619,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
       if (DOMElement.isSheet(node)) sheets.push(node as Element)
       else nodes.push(node)
     }
-    return { nodes, sheets, isHydratable: !!root.querySelector(`[${HYDRATION_KEY}]`), isTaken: false }
+    return { nodes, sheets, isTaken: false }
   }
 
   /** A `<link rel="stylesheet">` or `<style>`. */
@@ -1088,12 +1072,6 @@ const VISIBLE = "visible"
 /** The state of an element defined early whose family hasn't loaded ("Defined early"). */
 const PENDING = "pending"
 
-/**
- * The attribute Solid's server render marks each node with, so the page's code can claim it (hydration):
- * a shadow root holding one was drawn to be hydrated.
- */
-export const HYDRATION_KEY = "_hk"
-
 /** The state of an element ready to go:  rendered with its styles (`markReady()`). */
 const READY = "ready"
 
@@ -1181,14 +1159,6 @@ export type DOMElementHotHooks = {
  * What `DOMElement`'s custom-element callbacks share, kept in ONE private field, `connectedState`:
  * one name an attribute property could clash with, not one per member below.
  */
-/** `DOMElement.releaseMark()`:  how many callbacks of each kind it had. */
-export type ReleaseMark = {
-  /** release callbacks */
-  releases: number
-  /** property-changed callbacks */
-  properties: number
-}
-
 /**
  * What the server drew in an element's shadow root (`DOMElement.serverDrawing`), until the first render takes it.
  */
@@ -1197,8 +1167,6 @@ export type ServerDrawing = {
   nodes: ChildNode[]
   /** its `<link rel="stylesheet">`s and `<style>`s:  they style the root until the element's own sheets are in */
   sheets: Element[]
-  /** it carries Solid's hydration keys (`HYDRATION_KEY`):  the first render may claim its nodes */
-  isHydratable: boolean
   /** a render has drawn in its place (`takeServerDrawing()`) */
   isTaken: boolean
   /** where the focus was in it then, by element index (`restoreServerFocus()`);  `undefined`:  not in it */

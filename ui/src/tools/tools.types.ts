@@ -480,7 +480,7 @@ export type IconPackErrorCause = {
 export type StaticDocumentOptions = {
   /**
    * What it writes (`StaticRender.page()`'s `output`):  `"light"`, the default, or `"shadow"`, each element's shadow
-   * root drawn ahead for it to hydrate (epic `solid-2-final` P16).
+   * root drawn ahead, to paint before any script (epic `solid-2-final` P16).
    * - `"shadow"`:  the page keeps its scripts, and links the sheets its roots adopt at `sheetsHref`, returned as
    *   `sheets`;  `href`, `shared`, `minify`, `input` and `output` do nothing.
    */

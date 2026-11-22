@@ -1,7 +1,7 @@
 /**
  * Barrel for `spell/ui/static` -- the static server render:  `ui-*` pages => plain light-DOM HTML, no shadow DOM,
  * no JS, for crawlers and no-JS readers (`StaticRender`);  or, its shadow output, each element's shadow root drawn
- * ahead for the elements to hydrate (`StaticShadowRoots`).
+ * ahead, to paint before any script (`StaticShadowRoots`).
  * - Node only:  runs under `@solidjs/web`'s server build and imports linkedom.  NEVER import it from a component
  *   or `spell-ui`'s barrel:  browser bundles must not carry it.
  * - Every file it re-exports runs on the server, so it ends `.ssr.ts`, `.server.ts`'s short form (WWOD §10 ›

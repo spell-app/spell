@@ -36,10 +36,9 @@ describe("the shadow output, for the browser probe", () => {
     StaticRender.define(UIButton, UISegment, UICard, UIContent, UIHeader, UIDescription)
   })
 
-  it("writes each element's shadow root, keyed for hydration, its sheets linked, none copied in", async () => {
+  it("writes each element's shadow root, its sheets linked, none copied in", async () => {
     const html = StaticRender.fragment(SSR_PAGE, { output: "shadow", sheets: { href: SHEETS_URL } })
     expect(html.match(/shadowrootmode="open"/g)?.length).toBe(7)
-    expect(html).toContain("_hk=")
     expect(html).not.toContain("<style")
     const cache = resolve(import.meta.dirname, "../../.cache")
     const sheets = resolve(cache, "ui-sheets")
