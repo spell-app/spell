@@ -1,8 +1,10 @@
 /**
  * The editor palette's groups, on the page server:  `GET` and `PUT` at `SPACES.PALETTE_GROUPS_API`
  * (epic `editor` T81;  Spell UI's route module until epic `editor` P42, Q81).
- * - The table is `paletteGroups.json`, in spaces' models (`paletteTable.ts`):  the editor ships with it, so it's
- *   code, in the checkout this server runs (a worktree's server writes the worktree's).
+ * - The table is `paletteGroups.json`, in the editor's folder (`src/app/ui/`;  epic `editor` J275):
+ *   the editor ships with it, so it's code, in the checkout this server runs
+ *   (a worktree's server writes the worktree's).
+ *   - Found through the package, by its name:  a data file read and written, NEVER an import of the app's code.
  * - The editor's palette groups page (`<PaletteGroupsPage>`, `/palette`) reads and saves it here, through the
  *   editor's dev server, as the rest of the app's API;  the palette shows the new grouping on its next load.
  * - `GET`:  the table, `SPACES.PaletteTable`
@@ -14,13 +16,16 @@
  * - Node only:  it reads and writes the file, and imports nothing of the components.
  */
 import { readFileSync, writeFileSync } from "node:fs"
-import { fileURLToPath } from "node:url"
+import { createRequire } from "node:module"
 
 import { SRV } from "spell/server"
 import { PALETTE_GROUPS_API, type PaletteTable } from "spell/app/spaces/models/paletteTable"
 
-/** The table the editor ships with. */
-export const PALETTE_TABLE_FILE = fileURLToPath(new URL("../../../models/paletteGroups.json", import.meta.url))
+/**
+ * The table the editor ships with, in its own folder.
+ * - Resolved, not a relative path, so it's right in a checkout and in the published package's `dist/` alike.
+ */
+export const PALETTE_TABLE_FILE = createRequire(import.meta.url).resolve("spell/app/app/ui/paletteGroups.json")
 
 /** Biggest body accepted:  a few hundred tags. */
 const MAX_BODY = 64 * 1024

@@ -1,13 +1,17 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { join, resolve } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell/server"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 import { PALETTE_GROUPS_API } from "spell/app/spaces/models/paletteTable"
-import { paletteRoutesFor, paletteTableOrDie } from "spell/app/spaces/server/node/routes/paletteRoutes"
+import {
+  PALETTE_TABLE_FILE,
+  paletteRoutesFor,
+  paletteTableOrDie
+} from "spell/app/spaces/server/node/routes/paletteRoutes"
 
 /** A table as the palette groups page (`<PaletteGroupsPage>`) saves it. */
 const TABLE = {
@@ -56,6 +60,13 @@ describe("the palette groups route (epic `editor` T81)", () => {
     expect(await save(TABLE)).toEqual({ status: 200, body: { ok: true } })
     expect(readFileSync(file, "utf8")).toBe(await SRV.formatHTML(file, JSON.stringify(TABLE, null, 2)))
     expect(JSON.parse((await ask(port, "GET", PALETTE_GROUPS_API)).text)).toEqual(TABLE)
+  })
+
+  test("writes the editor's own file unless handed another (epic `editor` J275)", () => {
+    expect(PALETTE_TABLE_FILE).toBe(resolve(import.meta.dirname, "../../../../../src/app/ui/paletteGroups.json"))
+    expect(Array.isArray((JSON.parse(readFileSync(PALETTE_TABLE_FILE, "utf8")) as { groups: unknown }).groups)).toBe(
+      true
+    )
   })
 
   test("refuses a body that isn't a table", async () => {

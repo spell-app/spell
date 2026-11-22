@@ -1,8 +1,9 @@
 /**
- * The editor palette's TABLE:  its groups, as Owen arranged them, and where the page server keeps it (epic `editor`
- * T81;  out of Spell UI since epic `editor` P42, Q81).
- * - The table itself is `paletteGroups.json`, beside this file:  the editor ships with it, so it's code, in the
- *   checkout the page server runs (a worktree's server writes the worktree's).
+ * The shape of the editor palette's TABLE (its groups, as Owen arranged them), and the address it's saved at
+ * (epic `editor` T81;  out of Spell UI since epic `editor` P42, Q81).
+ * - The table itself is the editor's, `src/app/ui/paletteGroups.json` (epic `editor` J275, Owen, 2026-11-22):
+ *   the editor ships with it, so it's code, in the checkout the page server runs
+ *   (a worktree's server writes the worktree's).
  * - Saved by the editor's palette groups page (`<PaletteGroupsPage>`, at `/palette`) through spaces' route,
  *   `paletteRoutes`;  the palette (`<Palette>`) reads it through `PaletteGroups`, the rule that files every
  *   component into it.

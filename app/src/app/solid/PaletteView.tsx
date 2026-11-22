@@ -393,7 +393,7 @@ function PinIcon(): JSX.Element {
 /**
  * The palette as a menu, in columns:
  * what to do and its search, then App views, the app's own views, then every part, by topic.
- * - Every group shows everything in it, as the palette's table orders it (spaces' `paletteGroups.json`;  epic `editor` I174, T81).
+ * - Every group shows everything in it, as the palette's table orders it (`ui/paletteGroups.json`;  epic `editor` I174, T81).
  * - A search looks through all of them, by name, other names and description.
  */
 export function PaletteMenu(): JSX.Element {
