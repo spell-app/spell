@@ -110,8 +110,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   [perfCommand.ts](commands/perfCommand.ts), loading no spell:
   - `PerfRun`:  a run, in the machine's test turn;  the editor built into a temporary folder and served (`PerfBuilds`);
     the pages and profiles are data ([perf.types.ts](perf/perf.types.ts))
-  - one class per measurement:  `LoadMeasure`, `LeaksMeasure`, `TypingMeasure`, `A11yMeasure`, `ListenersMeasure`,
-    `SheetsMeasure`, `CpuMeasure`, each on `PerfBrowser` (a cold page in headless Chromium, its CPU and network slowed)
+  - one class per measurement:  `LoadMeasure`, `LeaksMeasure`, `HugeListsMeasure`, `TypingMeasure`, `A11yMeasure`,
+    `ListenersMeasure`, `SheetsMeasure`, `CpuMeasure`, each on `PerfBrowser` (a cold page in headless Chromium, its CPU and network slowed)
   - `PerfResults`:  each run a dated file in the kit's `.perf-results/`;  the baseline, `perfBaseline.json` beside it
   - `PerfBudget`:  the bundles' size budgets, [perf-budgets.json5](../../perf-budgets.json5) at the app folder's root
 - Each command's work is a file in [commands/](commands/), `<name>Command.ts`:
