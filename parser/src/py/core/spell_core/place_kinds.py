@@ -34,7 +34,7 @@ import urllib.request
 from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime
 from email.utils import parsedate_to_datetime
-from http.client import HTTPResponse
+from http.client import HTTPException, HTTPResponse
 from pathlib import Path
 from typing import Any
 
@@ -76,7 +76,7 @@ DEVICE_SUFFIX = ".device.json"
 DEVICE_WRITES = threading.Lock()
 
 
-# The failures that say a place kept none of what it was sent:  no answer might have kept it.
+# The failures that say a place making all or none kept none of what it was sent:  no answer might have kept it.
 NOTHING_KEPT = {"refused", "not found", "out of date"}
 
 
@@ -85,7 +85,8 @@ class PlaceError(Exception):
 
     - `kind`:  why, as the JavaScript names it:  `"refused"`, `"not found"`, `"out of date"`, `"no answer"` ...
     - `why_not`:  for a refusal, what the place said:  `"owner"`, `"role"` ...
-    - `has_kept_nothing`:  is it sure none of what was sent was kept, so each change can be tried alone?
+    - `has_kept_nothing`:  from a place that makes all or none, is it sure none of what was sent was kept?
+      Then each change can be tried alone.
     """
 
     def __init__(self, message: str, kind: str = "no answer", why_not: str | None = None) -> None:
@@ -100,6 +101,8 @@ class PlaceError(Exception):
 EVERY_FIELD = "every field"
 # The kinds on the page server that hold any field, as a sheet with no such column doesn't.
 HOLDS_ANY_FIELD = {"data folder", "the cloud"}
+# The kinds on the page server that make a send all or none:  a data folder keeps what came before a refusal.
+MAKES_ALL_OR_NONE = {"sheet", "excel file"}
 
 
 class PlaceBehind:
@@ -110,6 +113,8 @@ class PlaceBehind:
 
     # the kind's word, as the program's line says it:  `data folder`
     kind = ""
+    # is a send made all or none:  else each change is a send of its own, as a failure may follow some it kept
+    makes_all_or_none = False
     # what it can hold of Spell's two times (`created`, `modified`):  `EVERY_FIELD`, or those fields;  none by default
     times_held: str | Sequence[str] = ()
 
@@ -136,7 +141,10 @@ class PlaceBehind:
         raise NotImplementedError
 
     def apply(self, changes: list[Change]) -> None:
-        """Make `changes`, in order, all or none where the place can.  - throws `PlaceError`"""
+        """Make `changes`, in order, all or none where the place can (`makes_all_or_none`).
+
+        - throws `PlaceError`:  `"no answer"` once it may have been sent and what came back can't say
+        """
         raise NotImplementedError
 
     def call(self, name: str, input: object) -> object:
@@ -160,6 +168,7 @@ class DeviceFile(PlaceBehind):
 
     kind = "database on this device"
     times_held = EVERY_FIELD
+    makes_all_or_none = True
 
     def __init__(self, file: Path) -> None:
         """The database kept in `file`, which needn't exist yet."""
@@ -191,7 +200,7 @@ class DeviceFile(PlaceBehind):
             else:
                 rows[the_id] = {**rows.get(the_id, {ID_FIELD: the_id}), **change.get("fields", {})}
         written = self.file.with_name(f"{self.file.name}.writing")
-        written.write_text(f"{json.dumps(data, ensure_ascii=False, indent=2)}\n", encoding="utf-8")
+        written.write_text(f"{json_text(data, indent=2, ensure_ascii=False)}\n", encoding="utf-8")
         written.replace(self.file)
 
     def _read(self) -> dict[str, dict[str, Row]]:
@@ -225,6 +234,7 @@ class ServerPlace(PlaceBehind):
     ) -> None:
         """The place at `address`, its whole URL, written with `token`."""
         self.kind = kind
+        self.makes_all_or_none = kind in MAKES_ALL_OR_NONE
         self.address = address
         self.token = token
         self.lines = dict(lines or {})
@@ -265,19 +275,53 @@ class ServerPlace(PlaceBehind):
 
 
 def post_json(url: str, body: dict[str, object], headers: dict[str, str]) -> object:
-    """`body` posted to `url` as JSON:  the answer's JSON.  - throws `PlaceError`, saying what the server said"""
-    data = json.dumps(body).encode("utf-8")
+    """`body` posted to `url` as JSON:  the answer's JSON.
+
+    - throws `PlaceError`:
+      - what the server said
+      - `"refused"`, with nothing sent, for a body JSON can't hold
+      - `"no answer"` for none, or one that can't be read:  what was sent may have been kept
+    """
+    data = json_text(body).encode("utf-8")
     request = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
         with open_minding_limits(request) as response:
-            return json.loads(response.read().decode("utf-8") or "null")
+            text = response.read()
     except urllib.error.HTTPError as error:
-        said = json_object_in(error.read())
+        said = json_object_in(body_of(error, url))
         message = said.get("error") or f"the server answered {error.code}"
         kind = said.get("kind") or ("refused" if error.code in (401, 403) else "no answer")
         raise PlaceError(f"{url}:  {message}", kind, said.get("whyNot")) from error
     except (urllib.error.URLError, OSError) as error:
         raise PlaceError(f"{url}:  no answer ({error}):  is the page server running?  `spell server start`") from error
+    except HTTPException as error:
+        raise cant_read_answer(url, error) from error
+    try:
+        return json.loads(text.decode("utf-8") or "null")
+    except ValueError as error:
+        raise cant_read_answer(url, error) from error
+
+
+def body_of(error: urllib.error.HTTPError, url: str) -> bytes:
+    """What `url` said with `error`.  - throws `PlaceError` `"no answer"` for one cut short"""
+    try:
+        return error.read()
+    except (OSError, HTTPException) as cut:
+        raise cant_read_answer(url, cut) from cut
+
+
+def cant_read_answer(url: str, error: Exception) -> PlaceError:
+    """`url`'s answer can't be read, as `error` says:  no answer, as what was sent may have been kept."""
+    return PlaceError(f"{url}:  no answer that can be read ({error}), so it may or may not have been kept")
+
+
+def json_text(value: object, indent: int | None = None, ensure_ascii: bool = True) -> str:
+    """`value` as JSON, to write or send.  - throws `PlaceError` `"refused"`, `"field"`:  JSON can't hold it"""
+    try:
+        return json.dumps(value, ensure_ascii=ensure_ascii, indent=indent)
+    except (TypeError, ValueError) as error:
+        message = f"it holds what JSON can't ({error}), so none of it was sent"
+        raise PlaceError(message, "refused", "field") from error
 
 
 def open_minding_limits(request: urllib.request.Request) -> HTTPResponse:

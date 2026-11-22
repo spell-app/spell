@@ -8,9 +8,12 @@ await queue.wait_until_sent()   # before a read of the place, or as the program 
 ```
 
 - Under Quart one loop serves every visitor, so a send waits in a thread, as a read does.
-- In the order made.  What's waiting goes as one send;  an `in one go:`'s changes are always a send of their own.
-- A send that failed keeping none of it is sent again one change at a time, so only what can't be kept is lost:
-  the JavaScript core's way (epic data, J26).
+- In the order made.  An `in one go:`'s changes are always a send of their own.
+- A place that makes a send all or none (`makes_all_or_none`) is sent what's waiting as one.
+  - Refused, so none of it was kept:  sent again one change at a time, so only what it refuses is lost (J304).
+  - NEVER for another failure:  it may have been kept, and would reach the place twice.
+- Any other place, a data folder, gets a send per change:
+  it keeps what came before a refusal, so nothing sent there can be sent again.
 - Where nothing can wait (no loop running, a drawing), `send_now()` sends right there.
 - What's heard of each send is heard on the program's own thread (`hear()`), never the one that sent it.
 - Imports only `place_kinds`:  knows nothing of things, or of the core.
@@ -90,6 +93,12 @@ class PlaceQueue:
             await asyncio.to_thread(self.send_now)
         self.hear()
 
+    def stop_waiting_for(self, sending: Sending) -> None:
+        """SIDE EFFECT:  who waited for `sending` has gone:  its failure is reported, even one that's been heard."""
+        sending.is_waited_for = False
+        if sending.error and sending.is_done and sending not in self.answered:
+            self.report(sending)
+
     async def _send_all(self) -> None:
         """The task:  sends until nothing's waiting.
 
@@ -126,9 +135,12 @@ class PlaceQueue:
                 count -= len(batch)
 
     def _next_batch(self, count: int) -> list[Sending]:
-        """The next send:  an `in one go:` alone, else the changes in a row up to the next one."""
+        """The next send:  an `in one go:` alone, else the changes in a row up to the next one.
+
+        - A place that doesn't make all or none:  one change.
+        """
         batch = [self.waiting[0]]
-        if batch[0].is_waited_for:
+        if batch[0].is_waited_for or not self.behind.makes_all_or_none:
             return batch
         # by index:  the program's thread may add as this runs, which iterating doesn't allow
         for index in range(1, min(count, MOST_AT_ONCE)):
@@ -139,14 +151,15 @@ class PlaceQueue:
         return batch
 
     def _send(self, batch: list[Sending]) -> None:
-        """SIDE EFFECT:  `batch` sent as one `apply()`;  none of it kept, each alone.
+        """SIDE EFFECT:  `batch` sent as one `apply()`.
 
-        - A failure that's no `PlaceError` is one change's own, e.g. a value JSON can't hold:  each alone too.
+        - Sent again, each alone, only when the place says it kept none of it (`PlaceError.has_kept_nothing`).
+        - Any other error is each one's failure:  there's no telling whether it was sent.
         """
         try:
             self.behind.apply([change for sending in batch for change in sending.changes])
         except Exception as error:
-            if len(batch) > 1 and (not isinstance(error, PlaceError) or error.has_kept_nothing):
+            if len(batch) > 1 and isinstance(error, PlaceError) and error.has_kept_nothing:
                 for sending in batch:
                     self._send([sending])
                 return

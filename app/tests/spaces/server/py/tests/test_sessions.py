@@ -1,5 +1,6 @@
 """A spell app on Quart:  its page, and its WebSocket, a game per visitor -- on Quart's own test client."""
 
+import asyncio
 import json
 import time
 from pathlib import Path
@@ -209,3 +210,33 @@ async def test_the_app_stopping_waits_for_the_last_save(saving: tuple[Quart, Spe
         assert happened == []
         await app.shutdown()
         assert happened == ["saved"]
+
+
+class ClosingSocket:
+    """A page that saves, hears the answer, and closes."""
+
+    def __init__(self) -> None:
+        """A page yet to say anything."""
+        self.frames: asyncio.Queue[str] = asyncio.Queue()
+        self.has_saved = False
+
+    async def send(self, data: str) -> None:
+        """The page's next frame."""
+        await self.frames.put(data)
+
+    async def receive(self) -> str:
+        """The save, then, once it's answered, the page closing."""
+        await self.frames.get()
+        if self.has_saved:
+            raise ConnectionError("the page closed")
+        self.has_saved = True
+        return json.dumps({"trigger": "save"})
+
+
+async def test_a_visitors_game_ending_waits_for_their_last_save(
+    saving: tuple[Quart, SpellSessions, list[str]],
+) -> None:
+    _app, sessions, happened = saving
+    with pytest.raises(ConnectionError):
+        await sessions.serve(ClosingSocket(), "ann")
+    assert happened == ["saved"]

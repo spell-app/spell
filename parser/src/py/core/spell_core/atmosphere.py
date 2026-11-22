@@ -37,6 +37,7 @@ import urllib.parse
 import urllib.request
 from collections.abc import Mapping
 from dataclasses import dataclass
+from http.client import HTTPException
 from typing import Any
 
 from spell_core.place_kinds import (
@@ -46,7 +47,10 @@ from spell_core.place_kinds import (
     PlaceBehind,
     PlaceError,
     Row,
+    body_of,
+    cant_read_answer,
     json_object_in,
+    json_text,
     key_from,
     open_minding_limits,
 )
@@ -132,6 +136,8 @@ class AtmosphereAccount(PlaceBehind):
     """
 
     times_held = EVERY_FIELD
+    # one write alone, or `applyWrites`
+    makes_all_or_none = True
 
     def __init__(self, details: Mapping[str, Any]) -> None:
         """The place `details` describes.  Its network from `SPELL_ATMOSPHERE`, else the real one."""
@@ -439,21 +445,32 @@ class AtmosphereAccount(PlaceBehind):
           - `InvalidSwap`:  `"out of date"`
           - what isn't there:  `"not found"`
           - any other 4xx:  `"refused"`
-          - no answer (5xx, 408, 425, 429), or a session that's ended:  `"no answer"`
+          - no answer (5xx, 408, 425, 429), one that can't be read, or a session that's ended:  `"no answer"`
+          - a body JSON can't hold, with nothing sent:  `"refused"`
         """
         headers = {"content-type": "application/json"} if body is not None else {}
         if token is not None:
             headers["authorization"] = f"Bearer {token}"
-        data = json.dumps(body).encode("utf-8") if body is not None else None
+        data = json_text(body).encode("utf-8") if body is not None else None
         request = urllib.request.Request(url, data=data, headers=headers, method="POST" if body is not None else "GET")
         try:
             with open_minding_limits(request) as response:
-                text = response.read().decode("utf-8")
+                text = response.read()
         except urllib.error.HTTPError as error:
-            raise self._refusal(error.code, json_object_in(error.read()), url, token is not None) from error
+            raise self._refusal(error.code, json_object_in(body_of(error, url)), url, token is not None) from error
         except (urllib.error.URLError, OSError) as error:
             raise PlaceError(f"{url}:  no answer ({error})") from error
-        return json.loads(text) if text.strip() else {}
+        except HTTPException as error:
+            raise cant_read_answer(url, error) from error
+        if not text.strip():
+            return {}
+        try:
+            answer = json.loads(text.decode("utf-8"))
+        except ValueError as error:
+            raise cant_read_answer(url, error) from error
+        if not isinstance(answer, dict):
+            raise cant_read_answer(url, ValueError("it isn't a JSON object"))
+        return answer
 
     def _refusal(self, status: int, said: Mapping[str, Any], url: str, is_signed_in: bool) -> PlaceError:
         """What a host's no means."""
