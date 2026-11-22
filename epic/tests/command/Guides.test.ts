@@ -1,9 +1,10 @@
 /**
  * Tests of `epic guides` (`Guides`, epic `epic-engine` P79), on a SCRATCH git repo and its epic folder beside it:
- * - `list`:  where each guide is, code, epic or both
+ * - `list`:  where each guide is, code, plugin, epic or both
  * - `move`:  a guide copied into the repo's guides folder, with its twin, its picture and its experiments, never its
  *   comments;  a saga's guides at once;  the epic folder keeps its copy
  * - `prune`:  once the base branch tracks the moved files, the epic folder's copies go, its comments stay
+ * - `move --plugin`:  into the epic plugin's own guides folder (epic `epic-engine` T130)
  */
 import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
@@ -123,6 +124,29 @@ describe("epic guides", () => {
     expect(new Guides({ checkout: repo }).list().find((each) => each.path === "guides/data/data.html")?.where).toBe(
       "code"
     )
+  })
+
+  test("move --plugin copies a guide into the epic plugin's guides folder;  list says plugin, prune takes it out", () => {
+    const { repo, content } = scratch("plugin")
+    const before = process.env.SPELL_EPIC_PLUGIN_GUIDES
+    // the plugin inside the repo, as the kit holds it (`epic/guides/`)
+    process.env.SPELL_EPIC_PLUGIN_GUIDES = join(repo, "epic/guides")
+    try {
+      const guides = new Guides({ checkout: repo })
+      expect(guides.move(["guides/mockup.html"], { plugin: true }).copied).toEqual(["epic/guides/mockup.html"])
+      expect(existsSync(join(repo, "guides/mockup.html"))).toBe(false)
+      expect(guides.list().find((each) => each.path === "guides/mockup.html")?.where).toBe("both")
+      execFileSync("git", ["-C", repo, "add", "-A"])
+      execFileSync("git", ["-C", repo, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "moved"])
+      expect(Guides.prune(repo)).toEqual(["guides/mockup.html"])
+      expect(existsSync(join(content, "guides/mockup.html"))).toBe(false)
+      expect(guides.list().find((each) => each.path === "guides/mockup.html")?.where).toBe("plugin")
+      // a plugin that isn't in this repo (an npm install):  nothing to move into
+      process.env.SPELL_EPIC_PLUGIN_GUIDES = join(TEMP, "elsewhere/guides")
+      expect(() => guides.move(["guides/private.html"], { plugin: true })).toThrow(/doesn't hold the epic plugin/)
+    } finally {
+      process.env.SPELL_EPIC_PLUGIN_GUIDES = before
+    }
   })
 
   test("a repo with no guides folder:  move says how to name one;  prune does nothing", () => {

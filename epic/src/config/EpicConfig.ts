@@ -766,10 +766,12 @@ export class EpicConfig {
   /**
    * Every folder checkout `root`'s guides are in, the CODE's first (epic `epic-engine` P79):
    * - `<root>/<guidesFolder>`, when the repo names one and the checkout has it (`code: true`)
+   * - then the epic plugin's own guides, `guides/` in the engine's folder (`plugin: true`, `pluginGuides()`):  about
+   *   the epic tooling, not the repo, shipped with the plugin and read in VS Code's Epic Docs tab (T130)
    * - then the epic folder's `guides/` (`<contentFolder>/guides`), when it's there
-   * - a guide in both (moved on a branch not merged yet, `epic guides move`):  the code's is the one
+   * - a guide in two (moved on a branch not merged yet, `epic guides move`):  the first is the one
    *   (`guideFileOf()`);  every lister keeps the first of each page path
-   * - NEVER throws:  a config that won't read gives the epic folder's alone
+   * - NEVER throws:  a config that won't read gives the plugin's and the epic folder's alone
    */
   static guideFoldersOf(root: string): GuideFolder[] {
     const folders: GuideFolder[] = []
@@ -781,10 +783,26 @@ export class EpicConfig {
     }
     const code = written ? resolve(root, written) : undefined
     if (code && existsSync(code)) folders.push({ folder: code, code: true, base: resolve(root) })
+    const plugin = EpicConfig.pluginGuides()
+    if (plugin && existsSync(plugin) && plugin !== code)
+      folders.push({ folder: plugin, code: false, plugin: true, base: dirname(plugin) })
     const content = EpicConfig.contentOf(root)
     const shared = join(content, "guides")
     if (existsSync(shared) && shared !== code) folders.push({ folder: shared, code: false, base: content })
     return folders
+  }
+
+  /**
+   * The epic plugin's own guides folder, absolute:  `guides/` in the engine's folder (`EngineFiles.root`;  the kit's
+   * `epic/guides/`, an install's `epic/guides/` beside its `dist/`);  epic `epic-engine` T130
+   * - its guides' page paths are from the engine's folder (`guides/plan-docs/plan-docs.html`), the addresses they had in
+   *   the epic folder, served there by the plugin's engine route (`"/guides/"`, its folder manifest)
+   * - `$SPELL_EPIC_PLUGIN_GUIDES` names another (`""`:  none), for tests:  their scratch repos see none of the real ones
+   */
+  static pluginGuides(): string | undefined {
+    const named = process.env.SPELL_EPIC_PLUGIN_GUIDES
+    if (named !== undefined) return named ? resolve(named) : undefined
+    return EngineFiles.path(PLUGIN_GUIDES)
   }
 
   /**
@@ -1364,10 +1382,15 @@ export type RepoCheckout = {
 /**
  * One of `EpicConfig.guideFoldersOf()`:  a folder holding guides.
  * - `folder`:  absolute
- * - `code`:  the checkout's own (`guidesFolder`), versioned with the code;  else the epic folder's `guides/`
+ * - `code`:  the checkout's own (`guidesFolder`), versioned with the code
+ * - `plugin`:  the epic plugin's own (`EpicConfig.pluginGuides()`)
+ * - neither:  the epic folder's `guides/`
  * - `base`:  what its guides' page paths are from:  the checkout's root, or the epic folder
  */
-export type GuideFolder = { folder: string; code: boolean; base: string }
+export type GuideFolder = { folder: string; code: boolean; plugin?: boolean; base: string }
+
+/** The epic plugin's guides folder, in the engine's folder (`EpicConfig.pluginGuides()`). */
+const PLUGIN_GUIDES = "guides"
 
 /** One of `EpicConfig.peers`:  a repo beside this one (`spell-x`), and its MAIN checkout, absolute. */
 export type EpicPeer = { name: string; main: string }
