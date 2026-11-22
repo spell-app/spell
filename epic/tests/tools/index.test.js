@@ -189,10 +189,12 @@ describe("the list pages", () => {
     expect(listSection(guides, [], undefined, SAGAS)).toContain(`<p class="meta">No guides yet.</p>`)
   })
 
-  it("start from a skeleton:  site header, breadcrumb home, sticky title, the markers", () => {
+  it("start from a skeleton:  site header, its own breadcrumb, sticky title, the markers", () => {
     const html = skeleton(guides)
     expect(html).toContain(`<spell-site-header></spell-site-header>`)
-    expect(html).toContain(`<ui-breadcrumb link="/pages/index.html" target="_self">Spell Epic</ui-breadcrumb>`)
+    // no crumb to the home page:  the site header's Spell Epic is that link (epic `epic-engine` T148)
+    expect(html).not.toContain(`<ui-breadcrumb link=`)
+    expect(html).toContain(`<ui-breadcrumb selected>Guides</ui-breadcrumb>`)
     expect(html).toContain(`<h1>Guides</h1>`)
     expect(html.indexOf(START)).toBeLessThan(html.indexOf(END))
     expect(skeleton(LISTS.find((list) => list.id === "templates"))).toContain(`id="writing-docs"`)
