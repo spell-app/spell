@@ -2,7 +2,7 @@
  * Tests of the Docs tab's route module on a real page server, over HTTP:
  * - the landing page and a README of the engine's folder, as pages and as Markdown
  * - their relative links:  to another README kept (they lead to its page), to a source file turned to GitHub
- * - pictures, the redirect, a worktree's address, and what it doesn't serve
+ * - pictures, the epic plugin's guides, the redirect, a worktree's address, and what it doesn't serve
  * - the READMEs are the kit's own, found through `EngineFiles` as the server finds them
  */
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs"
@@ -96,14 +96,27 @@ describe("the Docs tab's pages", () => {
     expect(answer.headers["content-type"]).toBe("image/png")
   })
 
+  test("the epic plugin's own guides, a page through the server's page hooks (epic-engine T130)", async () => {
+    const answer = await get(`${DOCS_PREFIX}epic/guides/plan-docs/plan-docs.html`)
+    expect(answer.status).toBe(200)
+    expect(answer.headers["content-type"]).toMatch(/^text\/html/)
+    expect(answer.text).toContain("window.SPELL_SERVER")
+    expect(DocsFiles.markdownFor("epic/README.md", join(DocsFiles.root, "epic/README.md"))).toContain(
+      "](guides/plan-docs/plan-docs.html)"
+    )
+  })
+
   test("under a worktree's address too", async () => {
     expect((await get(`/worktrees/w${DOCS_PREFIX}epic/README-faq.md`)).status).toBe(200)
   })
 
-  test.each([`${DOCS_PREFIX}README.md`, `${DOCS_PREFIX}epic/src/AGENTS.md`, `${DOCS_PREFIX}../package.json`])(
-    "nothing else:  %s",
-    async (path) => {
-      expect((await get(path)).status).toBe(404)
-    }
-  )
+  test.each([
+    `${DOCS_PREFIX}README.md`,
+    `${DOCS_PREFIX}epic/src/AGENTS.md`,
+    `${DOCS_PREFIX}../package.json`,
+    `${DOCS_PREFIX}epic/guides/../package.json`,
+    `${DOCS_PREFIX}epic/guides/.hidden.html`
+  ])("nothing else:  %s", async (path) => {
+    expect((await get(path)).status).toBe(404)
+  })
 })

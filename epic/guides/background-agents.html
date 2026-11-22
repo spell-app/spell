@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Background agents: /bg</title>
+    <meta
+      name="description"
+      content="/bg runs a task in a named, budgeted background helper so the Claude panel stays free;  the running-agents list, claims and turns for agents sharing a worktree, steering one from the epic page's agents button, /epic phase and start, and the page server's self-restart."
+    />
+    <meta name="spell-voice" content="readme 2026-11-17" />
+    <meta name="spell-saga" content="epics" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
+          <ui-breadcrumb selected>Background agents: /bg</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Background agents: /bg</h1></header></ui-sticky
+        >
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>/bg, in epic skillz · the whole reply</ui-title>
+          <ui-content>
+            <pre><code class="language-text">&gt; /bg "docstrings" 2 add a docstring to every export in util/string.ts
+started:  skillz-docstrings (2 agents)</code></pre>
+          </ui-content>
+        </ui-accordion>
+        <p class="lede">
+          That one line, and the panel is yours again: a helper named <code>skillz-docstrings</code> does the task, and
+          its report comes back as a notice when it's done.
+        </p>
+        <p>
+          It's <code>&amp;</code> in a shell, with three differences. Each job has a name and a budget; it shows on the
+          epic page while it runs; and you can steer it mid-task with a note.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="robot"
+            ><b>The rules:</b>
+            <a href="/epic/skills/bg/SKILL.md" target="src-epic-skills-bg-skill-md">the <code>/bg</code> skill</a>; the
+            standing rule, "Delegated work", in the kit's
+            <a href="/CLAUDE.md" target="src-claude-md">CLAUDE.md</a></ui-item
+          >
+          <ui-item icon="book"
+            ><b>In an epic:</b> <a href="/epic/README-skills.md" target="src-epic-readme-skills-md">README-skills</a>,
+            "The session answers; agents build"</ui-item
+          >
+          <ui-item icon="user"
+            >Written for: you, the Claude sessions starting agents, and whoever changes <code>/bg</code> or
+            <code>epic agents</code></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-bg" label="1. /bg:  name, budget, task" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="layer group"></ui-icon>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>the three forms · 3 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-text">/bg ["name"] [n] &lt;task&gt;     start one:  /bg "docstrings" 2 add a docstring to every export in util/string.ts
+/bg ?                       what's running:  name, status, age, task
+/bg stop &lt;name&gt;             stop one</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>
+              <code>"name"</code>, a quoted first word. None: Claude makes one up from the task, 1-3 words, kebab-case
+              (<code>string-docstrings</code>).
+            </li>
+            <li>
+              <code>n</code>, a whole number 1-5 next: the most agents the task may use IN ALL, the helper included.
+              <ul>
+                <li>Default 1: the helper alone. <code>/bg 3</code> is the helper plus up to 2 of its own.</li>
+                <li>A hard cap, unlike the standing rule's "up to 5, unasked".</li>
+              </ul>
+            </li>
+            <li>The rest is the task, word for word. No task: Claude asks for one, and starts nothing.</li>
+          </ul>
+
+          <ui-section
+            id="names"
+            label="Every agent has a name, and it's listed"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>
+              Every agent a session starts, by <code>/bg</code> or on its own, is NAMED and LISTED while it runs. So
+              you, and Claude, can always tell what's in flight.
+            </p>
+            <ul>
+              <li>
+                The real name is a prefix and the name: the epic's name, else the worktree's, else <code>main</code>. In
+                epic skillz, <code>/bg "aaa"</code> is <code>skillz-aaa</code>.
+              </li>
+              <li>An agent's own helpers add to its name: <code>skillz-aaa-tests</code>.</li>
+              <li>
+                Claude Code's <code>Agent</code> call has no name field, so the name goes first in its description
+                (<code>skillz-aaa: docstrings in string.ts</code>), which is what Claude Code shows.
+              </li>
+              <li>A name already running is refused, and Claude takes <code>aaa-2</code>.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="start" label="Starting one, step by step" sticky collapsible dividing open="false">
+            <p>
+              The session does only this, quickly, and never reads the files the task names: the point is a free panel.
+            </p>
+            <ui-steps class="spell-steps" ordered direction="vertical">
+              <ui-step
+                heading="Same files?"
+                description="epic agents list --json.  A running agent's task touches the files this one will:  the new one is listed 'blocked on <other>' and not started.  Reply:  waiting:  ..."
+              ></ui-step>
+              <ui-step
+                heading="List it"
+                description='epic agents add <name> "<task>" prints the full name.  Listed BEFORE it starts, so a name clash is caught before any agent exists.'
+              ></ui-step>
+              <ui-step
+                heading="Start it"
+                description="ONE Agent call, in the background:  a fork of the session, else general-purpose (below).  Its prompt:  the skill's brief."
+              ></ui-step>
+              <ui-step
+                heading="Record its id"
+                description="epic agents set <name> --task-id <id>:  what /bg stop, redirects and a resume after a restart need."
+              ></ui-step>
+              <ui-step
+                heading="Wait for redirects"
+                description="If none runs yet, an epic agents wait in the background (section 3)."
+              ></ui-step>
+              <ui-step
+                heading="One line, end the turn"
+                description="started:  skillz-aaa (1 agent).  The panel is free."
+              ></ui-step>
+            </ui-steps>
+          </ui-section>
+
+          <ui-section
+            id="fork"
+            label="A fork sees the conversation;  general-purpose doesn't"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                A fork is a copy of the session that sees the whole conversation, so "fix the thing we just talked
+                about" works as is.
+              </li>
+              <li>
+                The catch: the VS Code panel's sessions had no fork agent type (2026-10-07). The call fails with
+                <code>Agent type 'fork' not found</code>, and the skill makes the same call with
+                <code>general-purpose</code>.
+              </li>
+              <li>
+                That helper sees NOTHING of the conversation, so the session fills in the brief's Context line: which
+                thing, which files.
+              </li>
+              <li>
+                A helper's own helpers are ordinary agents (<code>general-purpose</code>, <code>Explore</code> ...),
+                never forks.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="2-brief" label="2. What the helper is told" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="map"></ui-icon>
+          <p>
+            The helper's prompt is a template in the skill, filled in once. It carries the task word for word, a Context
+            line, the checkout (and worktree, branch), the epic and its page, the budget, and these rules:
+          </p>
+          <ul>
+            <li>
+              <b>The house rules:</b> the repo's and the folder's
+              <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a> and the house style they name.
+              Stage, and never commit unless told; in an epic, its own merge (below) is the exception.
+            </li>
+            <li>
+              <b>The epic folder at its real path:</b> epic pages, guides and logs are edited where they live, never
+              git-added. A turn-end hook commits them.
+            </li>
+            <li>
+              <b>No questions to you:</b> a choice you might make differently is taken, then recorded as a calm
+              judgement call on the epic page, its title at most 30 plain words, read cold.
+              <ul>
+                <li>
+                  It stops only on a risky one: deleting or overwriting work, publishing, changing what the task means.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <b>Status cards in short paragraphs:</b> an item's card opens with one sentence saying what happened, then
+              short paragraphs or bullets; the tool refuses any over 50 words, so the long story goes in the item.
+            </li>
+            <li>
+              <b>Claims:</b> before changing a file, it claims it (<code>epic agents claim</code>), a file, a folder or
+              a glob. A file another agent claimed is refused, naming the holder, and it leaves that file alone.
+            </li>
+            <li>
+              <b>Merging <code>main</code> in</b> with <code>epic worktree merge-main --as &lt;name&gt;</code>, which
+              never moves aside a file another running agent claims.
+            </li>
+            <li>
+              <b>Tests in three tiers:</b>
+              <ol>
+                <li>per change, only the tests beside what changed</li>
+                <li>before merging, each touched folder's unit tests, in its turn</li>
+                <li>
+                  after merging, the full suite, only if <code>epic agents last</code> says it's the last agent
+                  standing; what that finds becomes an issue
+                </li>
+              </ol>
+            </li>
+            <li>
+              <b>In an epic, merge at once:</b> once its work is done and checked, it merges into <code>main</code>
+              itself, whenever that merges cleanly.
+              <ul>
+                <li>The steps: commit by path, merge <code>main</code> in, unit tests, merge, mark the item fixed.</li>
+                <li>It can't: it says why in its report and on the item.</li>
+              </ul>
+            </li>
+            <li>
+              <b>Never mark itself done:</b> <code>epic agents done</code> is the session's, when the report arrives.
+              Done early, the redirect waiter stopped while the agent still worked.
+            </li>
+            <li>
+              <b>Its last message is its report:</b> what changed, where to look, checks with numbers, judgement calls,
+              and a question for you last.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section
+          id="3-steer"
+          label="3. Steering a running agent from the epic page"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="paper plane"></ui-icon>
+          <p>
+            While any agent of the epic runs, the epic page's step pill, at the header's right, counts them:
+            <code>2 🤖</code>, the robot button. Click it for a popover, a row per agent with its task, age and the
+            notes sent to it, and a box under each.
+          </p>
+          <p>Type there to change an agent's course, without typing into a busy session.</p>
+          <ui-steps class="spell-steps" ordered direction="vertical">
+            <ui-step
+              heading="You send a note"
+              description="It waits in that agent's entry in the list, untold."
+            ></ui-step>
+            <ui-step
+              heading="The waiter wakes"
+              description="The session keeps ONE epic agents wait running in the background while its agents run.  It exits 0, printing skillz-aaa:  <note>."
+            ></ui-step>
+            <ui-step
+              heading="The session passes it on"
+              description="SendMessage to the agent's task id:  'the person redirects you, from the epic page:  <note>'.  Then epic agents told <name>, and the waiter starts again."
+            ></ui-step>
+            <ui-step heading="The row shows 'told'" description="The agent changes course mid-task."></ui-step>
+          </ui-steps>
+          <ul>
+            <li>
+              The waiter's other exits: 3, nothing runs any more (don't restart it); 2, an hour passed (restart it while
+              agents run).
+            </li>
+            <li>An agent another session started keeps its notes untold, for that session's waiter.</li>
+            <li>A row updates in place as the page polls, so a note you're typing keeps its text and its focus.</li>
+          </ul>
+          <p>
+            The edge: a note reaches the agent only through a session that's waiting. A session that has ended can't
+            pass it on, and the note stays untold.
+          </p>
+          <p>
+            Going heads-down on something else? Type <code>/focus</code> in any session, with a reason if you like
+            (<code>/focus the demo</code>).
+          </p>
+          <ul>
+            <li>
+              Every running epic session keeps building what's in flight, merges what's clean, and asks you nothing.
+            </li>
+            <li>
+              <code>/back</code> turns it off: each session posts its own status in its own window, what's waiting on
+              you first.
+            </li>
+            <li>The idle epics with news are listed in the session where you typed it.</li>
+            <li>
+              It's one switch per machine (<code>epic focus on | off | status</code>); a session started meanwhile hears
+              it from a session-start hook.
+            </li>
+            <li>The edge: Codex can't message another session, so there each session reads it at its next turn.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section
+          id="4-back"
+          label="4. When it comes back, and stopping one"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="flag checkered"></ui-icon>
+          <ul>
+            <li>
+              Its notice wakes the session, which runs <code>epic agents done &lt;name&gt;</code>. That prints how long
+              the agent worked, from its transcript (<code>skillz-aaa done: took 21m</code>), and logs it on the epic
+              page.
+            </li>
+            <li>
+              The reply opens with a bold line of its own, <b>Agent skillz-aaa came back with:</b>, then the report in
+              short, with links. What you can't do or see yet gets a bold line of its own.
+            </li>
+            <li>A question only you can answer goes in the question modal.</li>
+            <li>An agent <code>blocked on</code> this one is set active and started, in the same turn.</li>
+            <li>
+              <code>/bg ?</code> shows the list as a short table. The list is the record, not the session's memory: it
+              survives a compacted session, and shows agents other sessions in the epic started.
+            </li>
+            <li>
+              <code>/bg stop &lt;name&gt;</code> stops the agent's task, then marks it done. Its staged changes stay; it
+              won't stop another session's agent.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="5-sharing" label="5. Many agents, one worktree" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="users"></ui-icon>
+          <p>
+            In an epic, the session you type to answers you and hands anything longer than a minute to a named agent. So
+            several agents often share the epic's ONE worktree, and three things keep them out of each other's way.
+          </p>
+          <ul>
+            <li>
+              <b>Claims:</b> two running agents never claim the same file, and a merge never moves aside a file a
+              running agent claims. Claims go with the agent when it's done.
+            </li>
+            <li>
+              <b>Turns:</b> merges and full test runs take turns on the machine, first come, first served;
+              <code>epic turns list</code> shows the holder, how long, and the line.
+              <ul>
+                <li>Why: three full runs at once drove the load to about 50, and tests failed on their timeouts.</li>
+              </ul>
+            </li>
+            <li>
+              <b>The last agent standing:</b> only it runs the full suite after merging:
+              <code>epic agents last &lt;name&gt;</code> exits 0 when no other agent of the epic is listed.
+            </li>
+          </ul>
+          <p>
+            A VS Code restart ends every background agent with its session. The plugin wakes the session at once, naming
+            each agent the restart cut off; it resumes each from its saved transcript, starts one with no task id again
+            from its task, and says so in one line.
+          </p>
+        </ui-section>
+
+        <ui-section id="6-list" label="6. The running list:  epic agents" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="list check"></ui-icon>
+          <ul>
+            <li>
+              Where it's kept, git-ignored, and gone when empty: in an epic, <code>agents.json5</code> beside its epic
+              page; with no epic, <code>.spell-agents.json5</code> at the checkout's root.
+            </li>
+            <li>
+              Only the command and the page server's redirect route write it, never Claude by hand. Several agents write
+              at once, so every write is locked, and atomic.
+            </li>
+            <li>It says what's running now; the epic page says what agents DID.</li>
+          </ul>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>epic agents · its verbs</ui-title>
+            <ui-content>
+              <pre><code class="language-text">epic agents add aaa "docstrings in string.ts" [--status "blocked on skillz-bbb"] [--task-id &lt;id&gt;] [--files &lt;path,...&gt;]
+skillz-aaa                                  the full name;  exits 1 if it's running already
+epic agents claim aaa &lt;path...&gt;              files it's changing:  exits 1, naming the agent, if another has one
+epic agents claims                          every running agent's claims, one line each
+epic agents set aaa [--status active | "blocked on ..."] [--task-id &lt;id&gt;]   only the fields given
+epic agents done aaa                        its entry goes
+epic agents last aaa                        exit 0:  no other agent of the epic is listed
+epic agents [list] [--json]                 one line each, oldest first:  skillz-aaa  active  3m  docstrings in string.ts
+epic agents wait [--every 2] [--max 3600]   in the background:  exits with your notes (section 3)
+epic agents told aaa                        its notes were passed on
+  --epic &lt;name&gt;                             any verb:  that epic's list (default:  this checkout's)</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>epic skillz's running list, as an example</ui-title>
+            <ui-content>
+              <pre><code class="language-json">[
+  {
+    name: "skillz-aaa",
+    task: "Add a docstring to every export in util/string.ts",
+    status: "active",
+    started: "2026-10-07T14:05:00-04:00",
+    taskId: "&lt;background task id&gt;",
+    redirects: [{ note: "only the exported ones", at: "2026-10-07T14:07:12Z", told: "2026-10-07T14:07:19Z" }]
+  },
+  {
+    name: "skillz-bbb",
+    task: "Rename the string helpers' tests",
+    status: "blocked on skillz-aaa",
+    started: "2026-10-07T14:06:10-04:00",
+    taskId: ""
+  }
+]</code></pre>
+            </ui-content>
+          </ui-accordion>
+        </ui-section>
+
+        <ui-section id="7-epic" label="7. /epic phase and /epic start" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="route"></ui-icon>
+          <p>
+            Two <a href="/epic/" target="src-epic"><code>/epic</code></a> forms that act on the session's OWN epic. With
+            no epic, they say so and stop.
+          </p>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>the forms · 7 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-text">/epic phase                      a new phase with no antecedents:  the text on the lines after says what
+/epic phase J1 J5, t3            from those items (spaces or commas, any case)
+/epic phase add-phases           named "Add Phases"
+/epic phase t3 Retry Logic       both:  from T3, named "Retry Logic"
+/epic start P3                   phase 3, now
+/epic start J3 J4 T6             those three items, worked as one block
+  &lt;text on the lines after&gt;      your input, word for word</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>
+              <code>/epic phase</code>: a background agent drafts the phase, its page showing a spinner while it plans.
+              <ul>
+                <li>
+                  It writes symptom, changes, goal (each antecedent linked), files, verify, estimate, then its build
+                  plan.
+                </li>
+                <li>Last, before a last Doc Review, unless you name a place ("after P11").</li>
+                <li>It queues each antecedent into the phase.</li>
+              </ul>
+            </li>
+            <li>
+              Phase numbers stay whole: a new phase renumbers the to-do phases after it, and items, links and
+              <code>P5 · Name</code> text follow. A started phase after the place refuses the move.
+            </li>
+            <li>
+              <code>/epic start</code> with items: each is closed when done, and the block goes in ONE commit, titled
+              <code>&lt;epic&gt; J3 + J4 + T6: ...</code>, so the page files it under each item. A phase out of order:
+              said in one line, then started anyway.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section
+          id="8-server"
+          label="8. The page server restarts itself when its code changes"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="globe"></ui-icon>
+          <ul>
+            <li>
+              A page server loads its route modules only when it starts. So after a merge, a server that ran from before
+              it served the old routes, and a new page control (like the agents button) never showed.
+            </li>
+            <li>
+              Now <code>spell server start</code>, which every opener calls, restarts a server older than its code. It
+              checks the files the server loaded, when the server kept a record of them; else, any code file newer than
+              the server's start.
+            </li>
+            <li>So after a merge or a pull, the next page opened comes from a fresh server.</li>
+            <li>
+              The main checkout's server runs on port 4747 only, and never falls back to another.
+              <ul>
+                <li>A restart first stops an old server of this checkout still holding 4747.</li>
+                <li>Anything else holding it is an error that names it.</li>
+                <li>A worktree's server takes a new port at each start.</li>
+              </ul>
+            </li>
+            <li>
+              A restart of main's server leaves the editor's Vite dev server running, and the new page server takes it
+              over, so open editor tabs don't reload. A change to the installed packages still replaces it.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="9-why" label="9. Why it's built this way" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="gavel"></ui-icon>
+          <ul>
+            <li>
+              <b>The session starts the helper, not the skill itself:</b> forking the whole skill would free the panel
+              instantly, but then <code>?</code> and <code>stop</code> would fork too, and nothing would check two tasks
+              against the same files. The few seconds the session takes buy that check.
+            </li>
+            <li>
+              <b>The same checkout, not a worktree per helper:</b> most tasks are small and belong to the work under
+              way; a worktree would mean a merge per task, and a helper couldn't see uncommitted changes. Claims and
+              turns are what make sharing safe.
+            </li>
+            <li>
+              <b>Decide, record, stop only if stuck:</b> the same rule as <code>/bedtime</code>, so you review both the
+              same way. Always stopping would bring most tasks back half done.
+            </li>
+            <li>
+              <b>A command writes the list, never Claude by hand:</b> several helpers write at once, and one place knows
+              the path, the prefix and the format.
+            </li>
+            <li>
+              <b>Listed before it starts:</b> a clashing name is caught before any agent exists, and an interrupted
+              session still shows it. The cost is one more command, <code>set --task-id</code>.
+            </li>
+            <li>
+              <b>A list outside an epic, at the checkout's root:</b> it makes <code>/bg ?</code> and the same-files
+              check work on <code>main</code> too.
+            </li>
+            <li>
+              <b>The agents in a header button, not a panel above the page:</b> you asked for a button that opens them,
+              rather than a section at the top: the count is one glance up, and the rows open on demand.
+            </li>
+            <li>
+              <b>The rule in the kit's CLAUDE.md, its steps in the skill:</b> it's Claude-only (Codex has neither
+              <code>Agent</code> nor <code>TaskStop</code>), and a rule lives in one place.
+            </li>
+            <li>
+              <b>The server restarts when older than its code:</b> a restart on merge would miss a pull or a hand merge,
+              and a server can't reload its own routes: Node caches modules, and routes can't be removed.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="10-limits" label="10. Limits" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="triangle exclamation"></ui-icon>
+          <ul>
+            <li>
+              <b>The budget is a rule, not a fence:</b> nothing in Claude Code counts a helper's agents: the cap holds
+              because the brief says so. A helper that ignored it could start more, and <code>/bg ?</code> would show
+              them only if it listed them.
+            </li>
+            <li>
+              <b>The name is ours, not Claude Code's:</b> an agent started without <code>epic agents add</code> has no
+              name anywhere but its description; <code>/bg stop</code> finds the task id in the list, never in Claude
+              Code's task list.
+            </li>
+            <li>
+              <b>A restart cuts agents off:</b> they are resumed from their saved transcripts, not kept running, and
+              only while the session is woken.
+            </li>
+            <li>
+              <b>Claude Code only:</b> Codex has no background agents: there the session does the work itself, a step at
+              a time.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="11-files" label="11. Where things are" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="book"></ui-icon>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>the skill: forms, steps, the helper's brief, redirects</td>
+                  <td><a href="/epic/skills/bg/SKILL.md" target="src-epic-skills-bg-skill-md">the /bg skill</a></td>
+                </tr>
+                <tr>
+                  <td>agents in an epic: claims, tiers, merging at once, after a restart</td>
+                  <td>
+                    <a href="/epic/skills/epic/SKILL.md" target="src-epic-skills-epic-skill-md">the epic skill</a>, "The
+                    session answers; agents build"
+                  </td>
+                </tr>
+                <tr>
+                  <td>the running list, and its command line</td>
+                  <td>
+                    <a href="/epic/src/tools/AgentList.ts" target="src-epic-src-tools-agentlist-ts">AgentList.ts</a>,
+                    <a href="/epic/src/tools/agents.ts" target="src-epic-src-tools-agents-ts">agents.ts</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>the page server's routes: the list, and a redirect</td>
+                  <td>
+                    <a href="/epic/src/tools/agentRoutes.ts" target="src-epic-src-tools-agentroutes-ts"
+                      >agentRoutes.ts</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the header's agents button and its rows</td>
+                  <td>
+                    <a
+                      href="/epic/src/components/epic-agents/EpicAgents.tsx"
+                      target="src-epic-src-components-epic-agents-epicagents-tsx"
+                      >EpicAgents.tsx</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the server's restart when older than its code</td>
+                  <td>
+                    <a href="/src/server/PidFile.ts" target="src-src-server-pidfile-ts">PidFile.ts</a>,
+                    <a href="/src/server/page/PageServer.ts" target="src-src-server-page-pageserver-ts"
+                      >PageServer.ts</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the commands' map: "Run a task in the background", "Track the agents running"</td>
+                  <td>
+                    <a href="/guides/dev/commands/commands.html" target="src-guides-dev-commands-commands-html"
+                      >Commands</a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+        </ui-section>
+
+        <ui-section id="12-history" label="12. History" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="history"></ui-icon>
+          <ul>
+            <li>
+              Epic <a href="/epics/skillz/skillz.plan.html" target="skillz">skillz</a>, 2026-10-07 and 08, its decisions
+              Q1-Q13 and calls J1-J7:
+              <ul>
+                <li>/bg and the list (P2); the agents panel and redirects (P3)</li>
+                <li>/epic phase and /epic start (P4); tried live from the VS Code panel (P5)</li>
+                <li>
+                  Measured then: the first helper took 52s from start to report; a redirect reached a running agent in
+                  about 7s.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Epic <code>epic-engine</code>:
+              <ul>
+                <li>the "Agents running" panel became the header's agents button (P35)</li>
+                <li>the session answers, agents build: claims, turns, merging at once (T77, T82)</li>
+                <li>
+                  three test tiers and <code>epic agents last</code> (T90); an agent never marks itself done (I288)
+                </li>
+                <li>the restart wake, and resuming cut-off agents (I310)</li>
+                <li>epic <code>epic-workflow</code>: the list as JSON5, keeping comments added by hand (P21)</li>
+                <li>the server's restart by the files it loaded (I309)</li>
+                <li>main's server on 4747 only (I332); the editor kept across a restart (I329)</li>
+                <li>/focus and /back (T93); the robot button described as built, no line beside Send (I330, I340)</li>
+              </ul>
+            </li>
+          </ul>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-18 against the kit's <code>main</code>.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>
