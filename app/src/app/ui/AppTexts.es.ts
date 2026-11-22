@@ -1103,6 +1103,7 @@ const APP_TEXTS_ES: AppTextPack = {
   guidesChapterOf: "Un capítulo de {guide}.",
   guidesMissing:
     "No se pudieron abrir las guías.\nVienen con Encanto:  cierra la app y ábrela otra vez.\nSi no funciona, vuelve a instalar Encanto.",
+  guidesInTheEditor: "Guías que se abren en el editor",
   guidesHomeLink: "Todas las guías"
 }
 

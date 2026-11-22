@@ -1,10 +1,12 @@
 import { createEffect, createMemo, createSignal, Errored, For, Loading, Show } from "solid-js"
 import { useNavigate, type RouteSectionProps } from "@solidjs/router"
 
-import { $fetch, parseJSON5 } from "spell/util"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { on, SpellPage } from "spell/app/app/solid"
+import { SPACES } from "spell/app/spaces"
+import { Actions, on, SpellPage } from "spell/app/app/solid"
 import { GUIDES_PAGE, guideUrlFor } from "./pages.types"
+import { readGuideBody, readGuideList, startHereLine, type Audience, type ShippedGuide } from "./GuideList"
+import { ProjectCards } from "./ProjectChooser"
 
 import "./GuidesPage.css"
 
@@ -19,6 +21,8 @@ import "./GuidesPage.css"
  *   `guides.json5` (`epic guides index` writes it from each guide's head), and each page.
  * - One guide:  its page's body, shown in the app's own page and theme (`<GuideBody>`);  the epic pages' site header,
  *   comment button and editing are left out.
+ * - The guides you open in the editor (Spell projects that teach by example, `@spell/guides`) are a topic of their
+ *   own, after the makers' (`<ProjectCards>`, the home page's cards):  the home page shows only Start here.
  * - The epic plugin's guides are never here:  they ship with the plugin, in VS Code's Epic Docs tab.
  ****************/
 export function GuidesPage(props: RouteSectionProps) {
@@ -33,7 +37,7 @@ export function GuidesPage(props: RouteSectionProps) {
             </ui-message>
           }
         >
-          <Show when={path()} keyed fallback={<GuideList />}>
+          <Show when={path()} keyed fallback={<GuideIndex />}>
             {(shown) => <GuideBody path={shown} hash={props.location.hash} />}
           </Show>
         </Errored>
@@ -43,10 +47,10 @@ export function GuidesPage(props: RouteSectionProps) {
 }
 
 /****************
- * ### `<GuideList>`
+ * ### `<GuideIndex>`
  * Every shipped guide:  Start here, the makers' topics, then the programmers' folded;  filtered by its search box.
  ****************/
-function GuideList() {
+function GuideIndex() {
   const list = createMemo(async () => readGuideList())
   const [search, setSearch] = createSignal("")
   const navigate = useNavigate()
@@ -73,7 +77,7 @@ function GuideList() {
               {(entry) => (
                 <GuideCard
                   title={entry.title}
-                  description={describe(list(), entry)}
+                  description={startHereLine(list(), entry)}
                   onOpen={() => navigate(guideUrlFor(entry.path, entry.anchor))}
                 />
               )}
@@ -84,6 +88,18 @@ function GuideList() {
       <For each={topicsOf("makers")}>
         {(topic) => <TopicSection topic={topic} shown={shown} onOpen={(guide) => navigate(guideUrlFor(guide.path))} />}
       </For>
+      <Show when={!search()}>
+        <ProjectCards
+          id="project-guides"
+          projectRoot={SPACES.SpellProjectRoot.guides}
+          language="en"
+          heading={appTexts.text("guidesInTheEditor")}
+          line={appTexts.text("homeGuidesLine")}
+          empty={appTexts.text("homeNoGuides")}
+          create={<Actions.createGuide button appearance="basic" size="small" />}
+          hideWhenNone
+        />
+      </Show>
       <ui-section
         id="for-programmers"
         label={appTexts.text("guidesForProgrammers")}
@@ -183,50 +199,8 @@ function GuideBody(props: { path: string; hash: string }) {
   )
 }
 
-////////////////
-// ## Reading the guides
-////////////////
-
-/** Who a guide is for. */
-type Audience = "makers" | "programmers"
-
-/** One shipped guide, as `guides.json5` lists it (`ShippedGuides`, spell-epic's `epic guides index`). */
-export type ShippedGuide = { path: string; title: string; description: string; audience: Audience; topic: string }
-
-/** A Start here entry:  a guide, or a chapter of one (`anchor`). */
-export type StartHere = { order: number; path: string; title: string; anchor?: string }
-
-/** `guides.json5`. */
-export type GuideList = { guides: ShippedGuide[]; startHere: StartHere[] }
-
 /** One topic's guides, in the list's order. */
 type Topic = { name: string; guides: ShippedGuide[] }
-
-/** The shipped guides' list;  throws `$fetch()`'s error when the package has none. */
-export async function readGuideList(): Promise<GuideList> {
-  const text = await $fetch<string>({ url: `${GUIDES_API}/guides.json5`, cache: "no-cache" })
-  return parseJSON5(text, "guides.json5") as GuideList
-}
-
-/**
- * Guide `path`'s title and body (`guides/data/data.html`):  its `<main>`, less what only the epic pages' site draws
- * (the breadcrumb, the page head's sticky wrapper, scripts);  throws `$fetch()`'s error when it isn't there.
- */
-export async function readGuideBody(path: string): Promise<{ title: string; html: string }> {
-  const text = await $fetch<string>({ url: `${GUIDES_API}/${path.replace(/^guides\//, "")}`, cache: "no-cache" })
-  const page = new DOMParser().parseFromString(text, "text/html")
-  const main = page.querySelector("main") ?? page.body
-  for (const away of main.querySelectorAll(LEFT_OUT)) away.remove()
-  // the title stays, out of the site's sticky head
-  for (const sticky of main.querySelectorAll("ui-sticky.spell-h1")) sticky.replaceWith(...sticky.querySelectorAll("h1"))
-  return { title: page.title || path, html: main.innerHTML }
-}
-
-/** Where the app's server answers for the shipped guides (`appRoutes.ts`' `GUIDES_API`). */
-const GUIDES_API = "/api/guides"
-
-/** What only the epic pages' site draws:  left out of a guide shown in the app. */
-const LEFT_OUT = "ui-breadcrumbs.spell-crumbs, script, spell-site-header"
 
 /** Each topic's guides, topics in the order their first guide comes. */
 function topics(guides: ShippedGuide[]): Topic[] {
@@ -243,13 +217,6 @@ function matches(guide: ShippedGuide, search: string): boolean {
     .split(/\s+/)
     .filter(Boolean)
     .every((word) => text.includes(word))
-}
-
-/** A Start here entry's line:  its guide's description, or, for a chapter, which guide it's in. */
-function describe(list: GuideList, entry: StartHere): string {
-  const guide = list.guides.find((each) => each.path === entry.path)
-  if (!guide) return ""
-  return entry.anchor ? appTexts.text("guidesChapterOf", { guide: guide.title }) : guide.description
 }
 
 /** Set the window's title while the list shows. */

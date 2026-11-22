@@ -118,6 +118,16 @@ describe("the Guides page", () => {
     expect(history.get()).toBe("/guides/spell-language/spell-language.html#views")
     await vi.waitFor(() => expect(host.querySelector(".GuideBody #views")?.getAttribute("open")).toBe("true"))
   })
+
+  test("the home page's guides row:  only the Start here guides, each opening on the Guides page, and its button", async () => {
+    const { host, history } = await mountAt("/")
+    await vi.waitFor(() => expect(host.querySelectorAll("#guides .TileCard:not(.empty)").length).toBe(3))
+    const titles = [...host.querySelectorAll("#guides .TileCard .title")].map((each) => each.textContent)
+    expect(titles).toEqual(["The Spell Language", "Data", "Views"])
+    ;(host.querySelectorAll("#guides .TileCard")[2] as HTMLElement).click()
+    await settle(host)
+    expect(history.get()).toBe("/guides/spell-language/spell-language.html#views")
+  })
 })
 
 /** Draw the app's routes at `url`, on a memory history, and wait for the page. */

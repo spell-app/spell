@@ -1148,6 +1148,7 @@ export const APP_TEXTS = {
   guidesChapterOf: "A chapter of {guide}.",
   guidesMissing:
     "The guides couldn't be opened.\nThey come with Spell, so try closing and opening the app again.\nIf that doesn't help, install Spell again.",
+  guidesInTheEditor: "Guides you open in the editor",
   guidesHomeLink: "All guides"
 } as const
 

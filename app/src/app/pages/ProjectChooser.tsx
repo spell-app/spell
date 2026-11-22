@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onSettled } from "solid-js"
+import { For, Loading, Show, createMemo, createSignal, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { canCaptureScreen } from "spell/util/platform"
@@ -21,7 +21,9 @@ import {
   trackProjectRoot,
   type ProjectRootState
 } from "spell/app/app/solid"
-import { siteEditorUrlFor } from "./pages.types"
+import { GUIDES_PAGE, guideUrlFor, siteEditorUrlFor } from "./pages.types"
+import { readGuideList, startHereLine } from "./GuideList"
+import { navigate } from "./navigation"
 import { EditableText } from "./EditableText"
 import { HomeArrangement } from "./HomeArrangement"
 import { EmptyCard, TileCard, type TileCardDrag, type TileCardEdit } from "./TileCard"
@@ -116,17 +118,8 @@ export function ProjectChooser() {
           />
         )
       case "guides":
-        return (
-          <ProjectCards
-            id="guides"
-            projectRoot={guides}
-            language={ENGLISH}
-            line={appTexts.text("homeGuidesLine")}
-            empty={appTexts.text("homeNoGuides")}
-            create={<Actions.createGuide button appearance="basic" size="small" />}
-            sectionDrag={drag()}
-          />
-        )
+        // only the Start here guides, and a link to the Guides page, where the rest are (epic `epic-engine` P79)
+        return <HomeGuides drag={drag()} />
       case "spanish":
         return (
           <LanguageCards
@@ -332,6 +325,52 @@ function StartCard(props: { id: SPACES.HomeStartCard; drag?: TileCardDrag }) {
         edit={cardEditFor(key, SPACES.CARD_LINE_LENGTH)}
       />
     </Show>
+  )
+}
+
+/****************
+ * ### `<HomeGuides>`
+ * The home page's guides:  the Start here guides that ship with Spell, a card each, and a button to the Guides page,
+ * where every guide is, the project guides you open in the editor among them (epic `epic-engine` P79;  `<GuidesPage>`).
+ * - Read from the installed package (`readGuideList()`);  none there (a static build):  a quiet card, and the button.
+ * - A card opens its guide on the Guides page;  Views, a chapter, opens the language guide at that chapter.
+ ****************/
+function HomeGuides(props: { drag?: TileCardDrag }) {
+  const list = createMemo(async () => {
+    try {
+      return await readGuideList()
+    } catch {
+      // no guides to read:  the button still leads to the Guides page, which says so
+      return undefined
+    }
+  })
+  return (
+    <HomeSection
+      id="guides"
+      heading={appTexts.text("guidesTitle")}
+      line={appTexts.text("homeGuidesLine")}
+      actions={
+        <ui-button appearance="basic" size="small" icon="book open" onClick={() => navigate(GUIDES_PAGE)}>
+          {appTexts.text("guidesHomeLink")}
+        </ui-button>
+      }
+      drag={props.drag}
+    >
+      <Loading fallback={<EmptyCard>{appTexts.text("homeNoGuides")}</EmptyCard>}>
+        <Show when={list()?.startHere.length} fallback={<EmptyCard>{appTexts.text("homeNoGuides")}</EmptyCard>}>
+          <For each={list()!.startHere}>
+            {(entry) => (
+              <TileCard
+                title={entry.title}
+                line={startHereLine(list()!, entry)}
+                hueFrom={entry.title}
+                onClick={() => navigate(guideUrlFor(entry.path, entry.anchor))}
+              />
+            )}
+          </For>
+        </Show>
+      </Loading>
+    </HomeSection>
   )
 }
 
