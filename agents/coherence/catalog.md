@@ -522,12 +522,15 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - Epic `data` T76;  the parser's core's until an epic moved it to the kit.
   - It draws the first lot of items (`MOST_AT_ONCE`), then more as a sentinel nears the view,
     reading a place's next page.
-  - What's drawn stays drawn.
+  - Up to `MOST_KEPT` (300) items, what's drawn stays drawn;  past that, the lots more than a few screens from the
+    view are taken down, a stand-in as tall as they were in their place (epic `solid-2-final` P17):
+    never the one with the focus, one typed into, or the one the caller asks for.
   - An item the caller needs (`through`:  a pick, a key's target) is drawn at once.
   - In Spell it's every loop in a drawing, and `<for>` (epic `data` P22) adds the loader, Try again, the empty message,
     pages and a title.
   - In Spell UI it's each `<ui-tree>` column drawn from its items list (`UITree.itemRows()`):
-    5,000 rows open in 33 ms, as 300 do.
+    5,000 rows open in 33 ms, as 300 do;  and a `<ui-table>`'s data rows (`UITable.bodyRows()`), whose own windowing
+    (spacer rows, a scroll listener) moved onto it in P17.
 - **Use it when:**  a list a page draws could be long.  Never a scroll listener or a list's own paging.
 
 ### Remembering a preference
