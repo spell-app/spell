@@ -276,6 +276,14 @@ describe("planDocArgs():  update", () => {
     expect(planDocArgs("update", ["seo#I3", "--requested"])).toEqual([["requested", "seo", "I3"]])
   })
 
+  // epic `epic-engine` T123:  a title kept as it is, unread
+  test("--title-ok goes through to rename, and only with --title", () => {
+    expect(planDocArgs("update", ["seo#J3", "--title-ok", "--title", "T"])).toEqual([
+      ["rename", "seo", "J3", "T", "--title-ok"]
+    ])
+    expect(() => planDocArgs("update", ["seo#J3", "--title-ok"])).toThrow("--title-ok goes with --title")
+  })
+
   // epic `epic-engine` I174:  a manual test the session filed as failed
   test("a manual test:  --failed I12 marks it failed, --failed off takes it off;  a value it needs", () => {
     expect(planDocArgs("update", ["seo#M3", "--failed", "I12"])).toEqual([["failed", "seo", "M3", "I12"]])

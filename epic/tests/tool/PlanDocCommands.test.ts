@@ -16,6 +16,7 @@ import { PlanDocCommands, movedDown } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 import { PlanItem } from "spell/epic/tool/PlanItem"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { TitleReader, type TitleRequest, type TitleVerdict } from "spell/epic/tool/TitleReader"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -562,7 +563,7 @@ describe("PlanDocCommands:  short titles", () => {
     expect(await commands().run(["add", "x", "todo", "Retry it;  then tell them"])).toBe(1)
     expect(await commands().run(["add", "x", "issue", "The turn was stuck. It hung for a minute"])).toBe(1)
     expect(warned[0]).toMatch(/^epic:  rewrite this title:  it's 33 words \(the most is 30\)\./)
-    expect(warned[0]).toContain("read it as the person will, hours later and cold")
+    expect(warned[0]).toContain("read cold, hours later")
     expect(warned[0]).toContain("the rest goes in --details")
     expect(warned[1]).toContain('it runs on, a list after ";"')
     expect(warned[2]).toContain("it's more than one sentence")
@@ -573,6 +574,11 @@ describe("PlanDocCommands:  short titles", () => {
     const thirty = Array.from({ length: 30 }, (_, n) => `word${n}`).join(" ")
     expect(await commands().run(["add", "x", "todo", thirty])).toBe(0)
     expect(await commands().run(["add", "x", "todo", "Titles -- up to 30 words, e.g. Owen's own"])).toBe(0)
+  })
+
+  test(`add takes "Nothing you'd see." as a second sentence (T123)`, async () => {
+    const title = "Each session's background listener now uses 48 MB instead of 188 MB. Nothing you'd see."
+    expect(await commands().run(["add", "x", "todo", title])).toBe(0)
   })
 
   test("rename refuses a long title too, and leaves the body as it was", async () => {
@@ -905,5 +911,88 @@ describe("PlanDocCommands summary / items:  finished phases and grey items left 
     await owner.run(["items", "x", "--json", "--all"])
     const every = JSON.parse(printed[0]!).sections.find((s: { kind: string }) => s.kind === "limit")
     expect([every.items.length, every.quiet]).toEqual([1, undefined])
+  })
+})
+
+// epic `epic-engine` T123:  a fresh reader reads each new or changed title cold
+describe("PlanDocCommands:  titles read cold", () => {
+  const INSIDE = "The monitor is split in two:  a tiny plain-JS poller, and a short look that runs the epic tool"
+  const REWRITE =
+    "Each Claude session's background 'listen for my Send' process now uses less memory. Nothing you'd see."
+
+  /** What the reader was handed. */
+  let asked: TitleRequest[]
+
+  /** The commands, with a reader that fails every title naming "the monitor". */
+  function reading() {
+    asked = []
+    const ask = (request: TitleRequest): TitleVerdict => {
+      asked.push(request)
+      return /the monitor/i.test(request.text)
+        ? { pass: false, reasons: ['"the monitor" is an internal name'], rewrite: REWRITE }
+        : { pass: true, reasons: [], rewrite: "" }
+    }
+    const owner = new PlanDocCommands({
+      files: FILES,
+      titleReader: new TitleReader({ ask, skipReason: () => undefined })
+    })
+    vi.spyOn(owner, "print").mockImplementation((text) => void printed.push(text))
+    vi.spyOn(owner, "warn").mockImplementation((text) => void warned.push(text))
+    return owner
+  }
+
+  test("add refuses a title the reader fails, with its reasons and the rewrite to use;  writing nothing", async () => {
+    const skeleton = readFileSync(file, "utf8")
+    expect(await reading().run(["add", "x", "todo", INSIDE])).toBe(1)
+    expect(asked[0]!.text).toBe(`Kind:  todo\nTitle:  ${INSIDE}`)
+    expect(warned[0]).toContain("rewrite this title:  a reader with no context couldn't follow it.")
+    expect(warned[0]).toContain('- "the monitor" is an internal name')
+    expect(warned[0]).toContain(`Try:  "${REWRITE}"`)
+    expect(warned[0]).toContain("--title-ok keeps it as it is")
+    expect(readFileSync(file, "utf8")).toBe(skeleton)
+  })
+
+  test("add takes a title the reader passes, and --title-ok skips the reader", async () => {
+    expect(await reading().run(["add", "x", "todo", "The Send button keeps its place when the page reloads"])).toBe(0)
+    expect(await reading().run(["add", "x", "todo", INSIDE, "--title-ok"])).toBe(0)
+    expect(asked).toEqual([])
+  })
+
+  test("rename reads the new title too, its markup taken off", async () => {
+    await FILES.edit(file, (plan) => plan.addItem("todo", "Old title", {}))
+    expect(await reading().run(["rename", "x", "T1", `<b>${INSIDE}</b>`, "--html"])).toBe(1)
+    expect(asked[0]!.text).toBe(`Kind:  item\nTitle:  ${INSIDE}`)
+    expect(await reading().run(["rename", "x", "T1", INSIDE, "--title-ok"])).toBe(0)
+  })
+})
+
+describe("TitleReader", () => {
+  test("skipped:  says why once, or nothing for a quiet skip;  never asks", () => {
+    const lines: string[] = []
+    const ask = vi.fn()
+    const reader = new TitleReader({
+      ask,
+      skipReason: () => ({ why: "no claude on the PATH" }),
+      warn: (line) => void lines.push(line)
+    })
+    reader.check("A", "todo")
+    reader.check("B", "todo")
+    expect(lines).toEqual(["epic:  title not read cold (no claude on the PATH)"])
+    new TitleReader({
+      ask,
+      skipReason: () => ({ why: "a test run", quiet: true }),
+      warn: (line) => void lines.push(line)
+    }).check("C", "todo")
+    expect(lines).toHaveLength(1)
+    expect(ask).not.toHaveBeenCalled()
+  })
+
+  test("a reader that fails lets the title through, saying so", () => {
+    const lines: string[] = []
+    const ask = () => {
+      throw new Error("claude -p didn't run")
+    }
+    new TitleReader({ ask, skipReason: () => undefined, warn: (line) => void lines.push(line) }).check("A", "todo")
+    expect(lines).toEqual(["epic:  title not read cold:  claude -p didn't run"])
   })
 })
