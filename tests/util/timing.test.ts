@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { afterSolidUpdate, Queued, soon, waitUntil, within } from "spell/util/timing"
+import { afterSolidUpdate, letBrowserIn, Queued, soon, waitUntil, within } from "spell/util/timing"
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -89,5 +89,15 @@ describe("Queued", () => {
     // a timer made inside another one waits a millisecond under fake timers
     await vi.advanceTimersByTimeAsync(10)
     expect(runs).toBe(2)
+  })
+})
+
+describe("letBrowserIn()", () => {
+  test("waits for the browser:  what's already queued as microtasks runs first", async () => {
+    const ran: string[] = []
+    void Promise.resolve().then(() => ran.push("queued"))
+    await letBrowserIn()
+    ran.push("after")
+    expect(ran).toEqual(["queued", "after"])
   })
 })

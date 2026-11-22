@@ -270,6 +270,8 @@ export class EditorStore extends Observable {
       // the old app goes at once, never shown while this one loads (I254);  nor run again meanwhile, or drawn back
       comingProject = project
       appRuntime?.unmountApp()
+      // what its compiles as typing paused built, saved as it's left:  another project may import it
+      editor.project?.saveUnsavedOutput().catch((error: unknown) => console.error("couldn't save built files", error))
       // the one shown goes, if it was a start card's and not kept (epic `mockup` I42):  asked while this one loads
       void editor.leaveProject()
       editor.history.clear()
@@ -565,11 +567,16 @@ export class EditorStore extends Observable {
 
   /**
    * Compile current `project` and, if compilation produced output, execute it.
+   * - `way`:  `"on purpose"` (the default:  Cmd-Enter, Restart, a menu) or `"as typing pauses"` (`compileAppSoon()`)
+   *   - on purpose:  the built files are saved, and the compiled program printed in the program's console
+   *   - as typing pauses:  neither (epic `solid-2-final` P9);  the program runs from what's in memory,
+   *     and Save writes the built files (`saveAll()`, `SpellProject.saveUnsavedOutput()`)
    * - SIDE EFFECT: clears `runtimeConsole()` and cancels any pending `compileAppSoon()` timer first.
    */
-  async compileApp(): Promise<void> {
+  async compileApp(way: CompileWay = "on purpose"): Promise<void> {
     const { project, file } = editor
     if (!project || !file) return
+    const onPurpose = way !== "as typing pauses"
 
     const output = (await editor.loadRuntime()).core.console
     output.clear()
@@ -577,7 +584,9 @@ export class EditorStore extends Observable {
       output.group(appTexts.text("consoleCompiling"), project)
 
       editor.clearCompileAppSoon()
-      await project.compile()
+      await project.compile(undefined, { save: onPurpose ? true : "later" })
+      // its built text changed:  a program that imports it reads it again (`fetchCompiled()`)
+      forgetCompiled(project.projectId)
       // every file's loaded now, whichever was shown first
       startingPoints.note(project.path, project.files)
       editor.edits++
@@ -591,14 +600,17 @@ export class EditorStore extends Observable {
       const { compiled } = project
 
       if (compiled) {
-        output.groupCollapsed(appTexts.text("consoleCompiledTo"))
-        const lines = compiled
-          .replace(/\t/g, "   ")
-          .split("\n")
-          .map((line, lineNum) => `${lineNum}`.padStart(4, " ") + `  ${line}`)
-          .join("\n")
-        output.log(lines)
-        output.groupEnd()
+        // the compiled-code pane shows it already:  printed whole only when asked for on purpose
+        if (onPurpose) {
+          output.groupCollapsed(appTexts.text("consoleCompiledTo"))
+          const lines = compiled
+            .replace(/\t/g, "   ")
+            .split("\n")
+            .map((line, lineNum) => `${lineNum}`.padStart(4, " ") + `  ${line}`)
+            .join("\n")
+          output.log(lines)
+          output.groupEnd()
+        }
 
         await editor.executeCompiledApp()
       }
@@ -662,11 +674,17 @@ export class EditorStore extends Observable {
     )
   }
 
-  /** Keep every edit still waiting for typing to pause (`keepEdit()`), e.g. as the page goes.  NEVER throws. */
+  /**
+   * Keep every edit still waiting for typing to pause (`keepEdit()`), e.g. as the page goes.  NEVER throws.
+   * - And what the compiles as typing paused built (`compileApp()`), best effort.
+   */
   keepWaitingEdits(): void {
     for (const [file, waiting] of waitingKeeps) {
       clearTimeout(waiting)
       editor.keepNow(file)
+    }
+    if (!isStaticBuild) {
+      editor.project?.saveUnsavedOutput().catch((error: unknown) => console.error("couldn't save built files", error))
     }
   }
 
@@ -680,6 +698,8 @@ export class EditorStore extends Observable {
   private keepNow(file: SP.AnySpellFile): void {
     waitingKeeps.delete(file)
     if (!file.isDirty) return
+    // the text typed, from the code editor holding it (`SpellProject.textLater()`)
+    file.project.takeWaitingText()
     void file
       .save(undefined)
       ?.then(() => editor.refreshDrafts())
@@ -962,10 +982,16 @@ export class EditorStore extends Observable {
 
   /** Timer id for a pending `compileAppSoon()`, if any. */
   compileAppSoonTimer: ReturnType<typeof setTimeout> | undefined = undefined
-  /** Compile after `delay` seconds. */
+  /**
+   * Compile after `delay` seconds, as typing pauses:  nothing saved, the program not printed (`compileApp()`'s `way`).
+   * - NEVER throws:  a failure is shown.
+   */
   compileAppSoon(delay: number = 1): void {
     editor.clearCompileAppSoon()
-    editor.compileAppSoonTimer = setTimeout(editor.compileApp, delay * 1000)
+    editor.compileAppSoonTimer = setTimeout(
+      () => void editor.compileApp("as typing pauses").catch(editor.showError),
+      delay * 1000
+    )
   }
   /** Cancel pending `compileAppSoon()` timer, if any. */
   clearCompileAppSoon(): void {
@@ -1397,6 +1423,7 @@ export class EditorStore extends Observable {
 
   /** Save each of `files` now, an edit AutoSave was waiting to keep among them. */
   private async saveFiles(files: SP.AnySpellFile[]): Promise<void> {
+    for (const project of new Set(files.map((file) => file.project))) project.takeWaitingText()
     for (const file of files) {
       editor.forgetWaitingKeep(file)
       await file.save(undefined)
@@ -1524,12 +1551,19 @@ export class EditorStore extends Observable {
    */
   async saveAll(): Promise<void> {
     const { file, project } = editor
+    // the text typed, from the code editor holding it (`SpellProject.textLater()`)
+    project?.takeWaitingText()
     const files = new Set(project?.files.filter((each) => each.isDirty))
     if (file) files.add(file)
     for (const each of files) {
       if (!each.isLoaded || editor.isLocked(each)) continue
       editor.forgetWaitingKeep(each)
       await each.save(undefined)
+    }
+    // what the compiles as typing paused built, kept in memory till now (`compileApp()`)
+    if (project && !isStaticBuild) {
+      await project.saveUnsavedOutput()
+      forgetCompiled(project.projectId)
     }
     await editor.saveSideBarEdits()
     await editor.refreshDrafts()
@@ -2349,10 +2383,19 @@ export class EditorStore extends Observable {
    * - The static build keeps the edit at once (`keepEdit()`).
    */
   onFileEdited(file: SP.AnySpellFile): void {
-    editor.edits++
+    // a spell file's typed text isn't in it yet:  the count moves when it is (`onFileTextTaken()`)
+    if (!(file instanceof SP.SpellFile)) editor.edits++
     editor.keepEdit(file)
     // by path:  cheap, and the same however the project was reached
     if (file.project.path === editor.project?.path) editor.compileAppSoon(EDIT_COMPILE_DELAY)
+  }
+
+  /**
+   * `file`'s typed text reached its `contents`, once the typing paused or something read it (`FileStates`):
+   * what follows `edits` reads it now (epic `solid-2-final` P9).
+   */
+  onFileTextTaken(_file: SP.SpellFile): void {
+    editor.edits++
   }
 
   /**
@@ -2941,10 +2984,32 @@ export function runtimeUrl(): string {
  * its `<Project>.spell.js`, at `/spaces/<project>/<Project>.spell.js` (`SP.SpellUrls`).
  */
 async function fetchCompiled(projectId: string): Promise<string> {
+  const kept = compiledImports.get(projectId)
+  if (kept) return kept
   const { projectName } = new SP.SpellLocation(projectId)
   const url = SP.SpellUrls.fileUrl(SP.SpellLocation.join(projectId, `${projectName}${SP.COMPILED_JS_SUFFIX}`))
-  return $fetch<string>({ url, cache: "no-cache" })
+  const text = $fetch<string>({ url, cache: "no-cache" })
+  compiledImports.set(projectId, text)
+  // a failure isn't kept:  the next run asks again
+  text.catch(() => compiledImports.delete(projectId))
+  return text
 }
+
+/**
+ * Each imported project's compiled javascript, as `fetchCompiled()` last fetched it, by project id:
+ * a pause in typing re-runs the program without asking the server for imports that can't have changed
+ * (epic `solid-2-final` P9).
+ * - Forgotten when this editor compiles or saves that project (`forgetCompiled()`),
+ *   and all of it when the page comes back into focus:  another window or tab may have changed one.
+ */
+const compiledImports = new Map<string, Promise<string>>()
+
+/** Forget `fetchCompiled()`'s copy of project `projectId`:  it's been compiled again. */
+function forgetCompiled(projectId: string): void {
+  compiledImports.delete(projectId)
+}
+
+globalThis.window?.addEventListener("focus", () => compiledImports.clear())
 
 /**
  * Javascript of the code file a program imports as `module`, for `call native` (epic `from-project` P10):
@@ -2955,3 +3020,10 @@ async function fetchCompiled(projectId: string): Promise<string> {
 async function fetchCodeFile(module: string): Promise<string> {
   return $fetch<string>({ url: SP.SpellUrls.codeFileUrl(module), cache: "no-cache" })
 }
+
+/**
+ * How a compile was asked for -- see `editor.compileApp()`:
+ * - `"on purpose"`:  Cmd-Enter, Restart, a menu;  saves the built files and prints the program
+ * - `"as typing pauses"`:  `compileAppSoon()`;  neither
+ */
+export type CompileWay = "on purpose" | "as typing pauses"

@@ -9,6 +9,7 @@
  *   - `parse`:  a cold parse of Solitaire whole, on a new incremental project
  *   - `edit.<kind>`:  the four edits the incremental tests make (insert a character, delete one, delete the line,
  *     duplicate it), one a line in turn on every seventh line of every file, each then undone;  the time per edit, ms
+ *     - each with the span of text it changed, as the editor hands it over (`P.EditedSpan`, epic `solid-2-final` P9)
  *   - `compile`:  every file's JavaScript, then the whole program's, as `SpellProject` writes `<Project>.spell.js`
  * - Never `spell/app/cli`:  it needs only spell, and the fixtures' helpers.
  */
@@ -90,10 +91,13 @@ function editTimes(project: ReturnType<typeof parsed>): Record<string, number> {
       const [name, edit] = kinds[turn++ % kinds.length]!
       const edited = [...lines]
       edit(edited, index)
+      const text = edited.join("\n")
+      // with the span the editor hands it (CodeMirror's change set), worked out before the clock starts
+      const span = P.EditedSpan.between(file.contents, text)
       const total = (totals[name] ??= { ms: 0, count: 0 })
-      total.ms += cpuOf(() => project.update(file.path, edited.join("\n")))
+      total.ms += cpuOf(() => project.update(file.path, text, span))
       total.count++
-      project.update(file.path, file.contents)
+      project.update(file.path, file.contents, P.EditedSpan.between(text, file.contents))
     }
   }
   return Object.fromEntries(Object.entries(totals).map(([name, { ms, count }]) => [name, ms / count]))

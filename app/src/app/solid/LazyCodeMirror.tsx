@@ -72,6 +72,7 @@ function loadCodeMirror(): Promise<CodeMirrorModule> {
   loading ??= import("spell/app/app/solid/codemirror").then(async (module) => {
     const { SpellCodeMirror } = module
     SpellCodeMirror.onEdit((file) => editor.onFileEdited(file))
+    SpellCodeMirror.onTaken((file) => editor.onFileTextTaken(file))
     editor.codeEditorEdits = (file, edits, way) => SpellCodeMirror.states.applyEdits(file, edits, way)
     // the Types tab's tree, from the same language service:  `spell/app/lsp` is already in CodeMirror's chunk
     const { LSP } = await import("spell/app/lsp")

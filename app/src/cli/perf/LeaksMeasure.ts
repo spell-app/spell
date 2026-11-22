@@ -96,7 +96,7 @@ const LOOPS: Partial<Record<PerfPageName, LeakLoop[]>> = {
       name: "type 200 characters into a comment",
       cycles: 200,
       async setup(page) {
-        await page.getByText("Card.spell", { exact: true }).filter({ visible: true }).first().click({ force: true })
+        await page.evaluate(showCardFile)
         await page.waitForTimeout(800)
         await page.evaluate(focusLineTwo)
       },
@@ -159,6 +159,15 @@ const LOOPS: Partial<Record<PerfPageName, LeakLoop[]>> = {
  * In the editor's page:  the caret at the end of the shown file's line 2 (a comment), the code pane focused.
  * - MUST stay self-contained:  Playwright sends its source
  */
+/**
+ * In the page:  show Solitaire's `Card.spell` in the code pane, as a click on its tab would.
+ * - By the editor, not by its tab's text:  the tab's label is drawn where a text search can't see it.
+ */
+export async function showCardFile(): Promise<void> {
+  const { editor } = window as unknown as EditorWindow
+  await editor.showFileAt(`${editor.project.path}/Card.spell`)
+}
+
 export function focusLineTwo(): void {
   const { view } = (window as unknown as EditorWindow).editor.shownCodeEditor
   const line = view.state.doc.line(2)
@@ -169,6 +178,8 @@ export function focusLineTwo(): void {
 /** What a page function reads of the editor's page:  its code pane's view (CodeMirror's). */
 export type EditorWindow = Window & {
   editor: {
+    project: { path: string }
+    showFileAt(path: string): Promise<void>
     shownCodeEditor: {
       view: {
         state: { doc: { line(number: number): { to: number; text: string } } }
