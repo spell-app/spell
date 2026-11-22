@@ -466,13 +466,16 @@ class ProgramPlaces:
                 for queue, sending in sendings:
                     await queue.wait_for(sending)
             except asyncio.CancelledError:
-                # nobody's left to hear a failure:  it's said on the console
-                for _queue, sending in sendings:
-                    sending.is_waited_for = False
+                # it's still sent, and nobody's left to hear a failure:  it's said on the console
+                for queue, sending in sendings:
+                    queue.stop_waiting_for(sending)
                 raise
-        failed = next((sending.error for _queue, sending in sendings if sending.error), None)
+        failed = [sending for _queue, sending in sendings if sending.error]
+        # only one can be thrown:  the rest are said
+        for sending in failed[1:]:
+            self.report(sending)
         if failed:
-            raise failed
+            raise failed[0].error
 
     def together(self, place_name: str, held: list[Sending]) -> tuple[PlaceQueue, Sending]:
         """An `in one go:`'s changes to the place `place_name`, as one send, and the queue it waits in."""

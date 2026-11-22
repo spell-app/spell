@@ -4,6 +4,7 @@ environment.
 - The whole path, signing in and writing to a fake host, is the app folder's `pythonPlaces.test.ts`.
 """
 
+import http.client
 import io
 import urllib.error
 import urllib.request
@@ -11,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from spell_core import place_kinds
+from spell_core import atmosphere, place_kinds
 from spell_core.atmosphere import (
     AccountWrite,
     AtmosphereAccount,
@@ -244,3 +245,32 @@ def test_where_an_account_is() -> None:
     assert host_in("did:plc:abc", document) == "https://h"
     with pytest.raises(PlaceError, match="no host"):
         host_in("did:plc:abc", {"service": []})
+
+
+@pytest.mark.parametrize(
+    "answer", [b"<html>", b"[1, 2]", http.client.IncompleteRead(b"{")], ids=["garbled", "no object", "cut off"]
+)
+def test_an_accounts_answer_that_cant_be_read_is_no_answer(
+    monkeypatch: pytest.MonkeyPatch, answer: bytes | Exception
+) -> None:
+    class CutShort:
+        """An answer that can't be read."""
+
+        def __enter__(self) -> "CutShort":
+            """The answer itself."""
+            return self
+
+        def __exit__(self, *raised: object) -> None:
+            """Nothing to close."""
+
+        def read(self) -> bytes:
+            """Its bytes, such as they are."""
+            if isinstance(answer, Exception):
+                raise answer
+            return answer
+
+    monkeypatch.setattr(atmosphere, "open_minding_limits", lambda request: CutShort())
+    account = AtmosphereAccount({"name": "sky", "kind": "personal atmosphere account"})
+    with pytest.raises(PlaceError) as failed:
+        account._answer("https://host.test/xrpc/com.atproto.repo.applyWrites", {"writes": []})
+    assert (failed.value.kind, failed.value.has_kept_nothing) == ("no answer", False)

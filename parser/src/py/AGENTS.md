@@ -154,6 +154,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     only the fields that changed;  rows by javascript's field names, so a page and Python share them
   - writes and reads wait off the event loop (epic `data` P62):  under Quart one loop serves every visitor
     - a place's writes wait in its queue ([place_queue.py](core/spell_core/place_queue.py)), sent in the order made
+      - one send for what's waiting, only where the place makes all or none;  a data folder gets one per change
+      - NEVER sent again but when such a place says it kept none:  no answer, or one that can't be read, may be kept
     - so a place's no is a line on the console, not a throw;  an `in one go:` waits, and throws
     - a read of a place waits for its queue first;  in a drawing, both wait right there
     - no loop running (a plain script's top level):  sent at once, and a no throws
