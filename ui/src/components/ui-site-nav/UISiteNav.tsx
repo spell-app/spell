@@ -49,7 +49,7 @@ export class DOMSiteNavElement extends E.DOMElement<UISiteNav> {
  *   - `appearance="nav"`:  the docs site's look (the tree's `appearance="nav"`), and a page's `band`, `count` and
  *     `badge` with it (epic `mockup` P5:  `<ui-docs-nav>` draws its list with it).
  * - A page with an `href` is a real link (its title an `<a>`):  a middle click or Command-click opens it in a new tab,
- *   as a link does;  a plain click is the tree's pick.
+ *   as a link does;  a plain click goes there as a pick of its row does, `ui-navigating` first.
  * - A page with `starred` gets a star at its row's end:  a click sends `ui-starred`, and selects nothing.
  * - A page's `open`, when it says one, wins:  the page that hands the nav its pages decides (a search opens what
  *   matches);  the nav's `ui-opening` / `ui-closing` tell it what the person did.
@@ -234,6 +234,17 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
     this.goTo(page as SiteNavPage & { href: string }, originalEvent)
   }
 
+  /**
+   * A page's link was clicked:  the link's own click, which the tree leaves alone (`OwnControls`), so it's picked here
+   * (epic `editor` I311).
+   * - Its default is stopped first, cancelled or not:  `goTo()` does the going, so no router of the page follows it too.
+   */
+  private onLinkClicked(page: SiteNavPage, event: MouseEvent) {
+    if (!page.href || SitePages.isOpenElsewhere(event)) return
+    event.preventDefault()
+    this.goTo(page as SiteNavPage & { href: string }, event)
+  }
+
   /** Go to `page`:  `ui-navigating`, then the browser's address, unless it's cancelled. */
   private goTo(page: SiteNavPage & { href: string }, originalEvent: Event | undefined) {
     const { href } = page
@@ -386,7 +397,13 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
         </Show>
         <Show when={page().href}>
           {(href) => (
-            <a slot="label" class="link" href={href()} tabindex="-1">
+            <a
+              slot="label"
+              class="link"
+              href={href()}
+              tabindex="-1"
+              onClick={(event: MouseEvent) => this.onLinkClicked(page(), event)}
+            >
               {page().title}
             </a>
           )}
