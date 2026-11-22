@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Epic Pages</title>
+    <title>Epic Pages, a Tour</title>
     <meta
       name="description"
       content="How an epic page works and how to review one:  its parts, its items and their colours, every review button by kind, Send and Auto Send, what the session and its agents do with your marks, finding your way, and working offline.  With live examples."
     />
-    <meta name="spell-voice" content="readme 2026-11-17" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
     <meta name="spell-saga" content="epics" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
   </head>
@@ -18,11 +18,11 @@
       <div class="spell-doc">
         <main class="spell-doc-main">
           <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-            <ui-breadcrumb link="/pages/index.html" target="src-packages-docs-index-html">Spell Epic</ui-breadcrumb>
-            <ui-breadcrumb selected>Epic Pages</ui-breadcrumb>
+            <ui-breadcrumb>Guides</ui-breadcrumb>
+            <ui-breadcrumb selected>Epic Pages, a Tour</ui-breadcrumb>
           </ui-breadcrumbs>
           <ui-sticky class="spell-h1"
-            ><header class="spell-page-head"><h1>Epic Pages</h1></header></ui-sticky
+            ><header class="spell-page-head"><h1>Epic Pages, a Tour</h1></header></ui-sticky
           >
           <epic-item
             id="i4"
@@ -63,6 +63,7 @@
               agents</ui-item
             >
             <ui-item icon="user">Written for: you, reviewing epic pages, with Claude listening or not</ui-item>
+            <ui-item icon="flask">Checked: 2026-11-21, every command and example against that day's code</ui-item>
             <ui-item icon="eye"
               >Examples: LIVE, drawn by the same <code>&lt;epic-*&gt;</code> elements an epic page uses; click a line to
               unfold it. Review buttons show only on a real epic page being reviewed, never in a guide.</ui-item
@@ -163,9 +164,9 @@
                   </ul>
                 </li>
                 <li>
-                  In the same pill, while agents the epic started are running, their count and a robot,
-                  <code>2 🤖</code>. A click opens a popover, a row per agent with its task and a box whose words reach
-                  that agent mid-task (section 7).
+                  After it, while agents the epic started are running, their count and a robot, <code>2 🤖</code>. A
+                  click opens a popover, a row per agent with its task and a box whose words reach that agent mid-task
+                  (section 7).
                 </li>
                 <li>The gear: Focus mode (while the page is reviewed), Auto Send's wait, and the page's theme.</li>
               </ul>
@@ -403,16 +404,16 @@
                       <td>what's wrong today, one line</td>
                     </tr>
                     <tr>
-                      <td>Changes</td>
-                      <td>what changes, two or three lines</td>
-                    </tr>
-                    <tr>
                       <td>Requests</td>
                       <td>what you sent it from other sessions (<code>/send</code>), your words and screenshots</td>
                     </tr>
                     <tr>
                       <td>Goal</td>
                       <td>one bullet per outcome, in your terms: what you'll see or be able to do</td>
+                    </tr>
+                    <tr>
+                      <td>Changes</td>
+                      <td>what changes, two or three lines</td>
                     </tr>
                     <tr>
                       <td>Update blocks</td>
@@ -455,14 +456,14 @@
               <p>Live, a phase being built and one done:</p>
               <epic-phase id="p2" title="Plan-Doc Notes" status="active" estimate="2-3h">
                 <epic-field name="symptom">On a plane, you can't leave a note on a phase or the summary.</epic-field>
-                <epic-field name="changes"
-                  >The summary and every phase take Revisit; each item section gets a New button.</epic-field
-                >
                 <epic-field name="goal"
                   ><ul>
                     <li>a note on any phase, or the summary, from its own buttons</li>
                     <li>a new todo or question from the page, made at the next review</li>
                   </ul></epic-field
+                >
+                <epic-field name="changes"
+                  >The summary and every phase take Revisit; each item section gets a New button.</epic-field
                 >
                 <epic-update id="up1" at="2026-10-09 18:20" summary="New items wait in the inbox"
                   ><p>New items wait in the inbox like any mark, so they work offline.</p></epic-update
@@ -473,12 +474,12 @@
                 <epic-field name="symptom"
                   >Pages fetched highlight.js from the internet, and hung with no wifi.</epic-field
                 >
-                <epic-field name="changes">The page server serves the repo's own copy.</epic-field>
                 <epic-field name="goal"
                   ><ul>
                     <li>every page opens offline, code coloured</li>
                   </ul></epic-field
                 >
+                <epic-field name="changes">The page server serves the repo's own copy.</epic-field>
                 <epic-field name="done"
                   ><ul>
                     <li>Open any guide with Wi-Fi off: the code is coloured at once.</li>
@@ -1143,7 +1144,7 @@
                 the session passes your words on mid-task (<a
                   href="/guides/background-agents.html"
                   target="src-guides-background-agents-html"
-                  >Background agents</a
+                  >Background Agents</a
                 >).
               </li>
               <li>
@@ -1195,7 +1196,7 @@
                 build on and ask you nothing until <code>/back</code> (<a
                   href="/guides/background-agents.html"
                   target="src-guides-background-agents-html"
-                  >Background agents</a
+                  >Background Agents</a
                 >).
               </p>
               <ul>
@@ -1265,7 +1266,7 @@
               </li>
               <li>
                 On the plane: open an epic page from the Review tab's list button ("Review: Open Epic..."), any other
-                page from "Review: Home Page".
+                page from "Review: Epics Home".
               </li>
               <li>Mark and comment as usual. Send isn't needed: every mark is taken at landing, sent or not.</li>
               <li>
@@ -1280,13 +1281,10 @@
                 </ul>
               </li>
             </ul>
-            <ui-message state="warning" heading="If something stops">
-              <ul>
-                <li>Pages blank or unstyled: the Review tab's "Restart Page Server".</li>
-                <li>Wi-Fi that asks you to pay first makes requests hang: turn Wi-Fi fully off.</li>
-              </ul>
-            </ui-message>
-            <p>More: <a href="/guides/airplane.html" target="src-guides-airplane-html">Airplane Mode</a>.</p>
+            <p>
+              More: <a href="/guides/airplane.html" target="src-guides-airplane-html">Airplane Mode</a>; when something
+              stops, the <a href="/epic/README-faq.md" target="src-epic-readme-faq-md">FAQ</a>.
+            </p>
           </ui-section>
 
           <ui-section id="11-commands" label="11. The commands behind it" sticky collapsible dividing open="false">
@@ -1307,7 +1305,10 @@
                   <tr>
                     <td><code>create &lt;name&gt;</code>, <code>stage</code></td>
                     <td>
-                      makes the page (<a href="/epic/" target="src-epic"><code>/epic</code></a> runs it); sets its stage
+                      makes the page (<a href="/epic/skills/epic/SKILL.md" target="src-epic-skills-epic-skill-md"
+                        ><code>/epic</code></a
+                      >
+                      runs it); sets its stage
                     </td>
                   </tr>
                   <tr>
@@ -1319,7 +1320,7 @@
                     <td>adds an item (J, Q, I, T, M or D), printing its id; refuses a title over 30 words</td>
                   </tr>
                   <tr>
-                    <td><code>update &lt;name&gt;#J3 underway | done | fixed | noted</code></td>
+                    <td><code>update &lt;name&gt;#J3 underway | done | fixed | noted | promised</code></td>
                     <td>a status card; <code>--title</code> gives a phase or item a new title</td>
                   </tr>
                   <tr>
@@ -1334,7 +1335,7 @@
                   </tr>
                   <tr>
                     <td>
-                      <code>inbox &lt;name&gt; wait | apply | done</code>
+                      <code>inbox wait | apply | done &lt;name&gt;</code>
                     </td>
                     <td>reads and works through your marks</td>
                   </tr>
@@ -1370,40 +1371,9 @@
             </ul>
           </ui-section>
 
-          <ui-section id="13-history" label="13. History" sticky collapsible dividing open="false">
-            <ui-icon slot="icon" name="history"></ui-icon>
-            <ul>
-              <li>
-                Epic <code>airplane</code> (P2, P8): notes on phases and the summary, new items from the page, the
-                toolbar.
-              </li>
-              <li>
-                Epic <code>epic-engine</code>:
-                <ul>
-                  <li>typing marks Revisit (P20); the stages and their Accepts (P29)</li>
-                  <li>the agents button in the header, replacing the "Agents running" panel (P35)</li>
-                  <li>Send in the header's middle with Auto Send, replacing Send, Review Now and Do Now (P53)</li>
-                  <li>Do this on phases and issues (I181), as a paper plane (I299)</li>
-                  <li>the stage Accept's countdown, and Send carrying it (I181, I222); held phases grey (I221)</li>
-                  <li>a todo's plane starts it now (I314); the phase pill on a todo in a phase (I271)</li>
-                  <li>one spinner (I316); a fix handed on turns fixed with its new item (I317)</li>
-                  <li>requested todos light orange (T88); pictures on items (T87); titles of 30 words (I322)</li>
-                  <li>the session answers, agents build (T77, T90); stale Underway items tidied (T78)</li>
-                  <li>the inbox poller standing down in a scripted run (I319)</li>
-                </ul>
-              </li>
-              <li>
-                Gone from this page on purpose, since none of it exists any more: the Review Now and Do Now wands, the
-                header's <code>+</code> and git toggle, the note box's own buttons and Skip This, the Caveats and To
-                test sections (caveats are limits now, tests <code>M</code>), the round state filter, the Plan changes
-                box.
-              </li>
-            </ul>
-          </ui-section>
-
           <footer class="spell-doc-footer">
             <ui-divider></ui-divider>
-            <p class="meta">Last checked 2026-11-18 against the kit's <code>main</code>.</p>
+            <p class="meta">Last checked 2026-11-21, against the epic plugin's code that day.</p>
           </footer>
         </main>
       </div>
