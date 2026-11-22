@@ -602,6 +602,13 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     - WWOD's old copy (`agents/wwod/`):  WWOD is tracked in the kit since epic `repo-split` P9 (below);
       the copy here stays for the checkouts from before the split, until a later todo deletes it
 
+- The guides that SHIP with Spell are not in it:  they're the kit's own [guides/](guides/), versioned with the code
+  (epic `epic-engine` P79;  `guidesFolder` in [the kit's epic settings](.epic/config.json5)).
+  - Each keeps its address, `/guides/<path>`:  the page server serves the checkout's copy first.
+  - Moved in on a branch with `epic guides move <page>`;  the epic repo's copy goes once `main` has it (`epic merge`).
+  - Edited like any file, on a branch;  their list, `guides/guides.json5`, is `epic guides index`'s.
+  - The Spell app's Guides page reads them from the installed package (`/guides`).
+
 ### How they're found
 
 - They're ONE epic repo, the same for main and every worktree.

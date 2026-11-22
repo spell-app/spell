@@ -325,6 +325,15 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         (epic `epic-friend` P6):  `defaultsFor()`, from its name, lock file and branches
         - `DEFAULTS` keeps only the keys no repo changes;  `app`'s default:  none
       - `colors` (epic `epic-friend` P10):  a colour per person and per agent on the pages (see "Colours")
+      - `guidesFolder` (epic `epic-engine` P79):  the repo's OWN guides, a folder from each checkout's root (the kit's
+        `guides/`), versioned and shipped with the code;  `guideFoldersOf()` is the ONE "where are the guides?"
+        (the checkout's first, then the epic folder's `guides/`), which the list pages (`pages.js` `GUIDE_FOLDERS`,
+        `findPages()` keeping the first of each page path), `Sagas.guides()`, `SeeAlso` and `voice` ask;
+        `guideFileOf()` one guide's file
+        - `epic guides list | move | prune | index | check` (`command/Guides.ts`, `ShippedGuides.ts`):  move a guide in
+          on a branch (copied, its comments left behind), the epic folder's copy deleted once `main` tracks it
+          (`epic merge` runs `prune`), the shipped guides' list `guides.json5` from their metas, and the check that
+          each stands alone
     - `ofSetUp()`, `isSetUp`:  the ONE "is this repo set up for epics?" check (epic `epic-friend` P6)
       - every hook and `WorktreeGuard` ask it, and do nothing in a repo `epic init` never set up
       - there, the worktree hook makes the plain worktree Claude Code would make by itself:
