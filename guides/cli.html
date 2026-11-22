@@ -1,0 +1,1904 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>spell Command Line</title>
+    <meta
+      name="description"
+      content="The spell command:  every language command and every repo's own tools, what each does, how it runs spell's source, and the epic command the epic tools moved to."
+    />
+    <meta name="spell-voice" content="readme 2026-10-22" />
+    <meta name="spell-saga" content="output-targets" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>spell Command Line</h1></header></ui-sticky
+        >
+        <p class="lede">
+          <code>spell lint Hello</code> answers <code>Hello/Hello.spell:3:1 Don't understand "print greeting"</code>,
+          and exits 1: the same error the editor underlines, because it runs the language server's own code.
+          <code>spell</code> compiles, lints, explores, runs, tests and times Spell projects from a terminal. Its base
+          is the kit's <a href="/src/cli/" target="src-src-cli" title="src/cli">command line folder</a>, and each repo
+          adds its own commands to it: the language's, Spell UI's, the app's, and each repo's own tools, by noun (<code
+            >spell server start</code
+          >, <code>spell pack build</code>). Beside <code>spell</code>, <code>epic</code> holds the epic tools (epic
+          pages, the pages Owen answers on, windows, worktrees, agents, airplane mode).
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="map"
+            ><b>Epic pages:</b>
+            <a href="/epics/cli-additions/cli-additions.plan.html" target="cli-additions">epic cli-additions</a>
+            (the language commands);
+            <a href="/epics/epic-workflow/epic-workflow.plan.html#p1" target="epic-workflow"
+              >epic epic-workflow, P1</a
+            >
+            (this refresh, and the Renames);
+            <a href="/epics/epic-workflow/epic-workflow.plan.html#p9" target="epic-workflow">P9</a>
+            (the <code>epic</code> command); epic <code>repo-split</code> P13 (each repo's commands, under one
+            <code>spell</code>)</ui-item
+          >
+          <ui-item icon="user">Written for: people and agents working on Spell or its tools</ui-item>
+          <ui-item icon="flag"
+            >Status: built (2026-10-01); every command brought up to date, and the Renames proposed, 2026-10-11; the
+            epic tools moved to the <code>epic</code> command, 2026-10-12; every command brought up to date again, after
+            epic <code>repo-split</code>, 2026-10-22. <b>Not yet reviewed by a person.</b></ui-item
+          >
+          <ui-item icon="flask"
+            >Checked: the language commands are covered by spell-app's command-line tests (see
+            <a href="#6-sources">Sources</a>); the tables come from <code>spell --help</code> and each command's help,
+            and from <code>epic --help</code> and each group's, 2026-10-22 (before that: the
+            <code>spell dev</code> tables from each group's own help, 2026-10-11, the <code>epic</code> ones from its
+            verbs' help, 2026-10-12)</ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="book open"></ui-icon>
+          <ul>
+            <li>
+              One command, <code>spell</code>, runs every repo's SOURCE through <code>tsx</code>. There's no build step,
+              so it's always the working copy.
+            </li>
+            <li>
+              What <code>spell</code> says, the editor says, because it loads projects and answers questions with the
+              language server's own code.
+              <ul>
+                <li>Projects load through <code>SpellDiskWorkspace</code>.</li>
+                <li>Questions go to its <code>SpellLanguageService</code> and <code>ScopeExplorer</code>.</li>
+              </ul>
+            </li>
+            <li>
+              Each repo brings its own commands, and <code>spell --help</code> lists them under the repo that added
+              them:
+              <ul>
+                <li>
+                  the kit's: <code>server</code>, <code>bundle</code>, <code>commands</code>, <code>wwod</code>,
+                  <code>pony</code>, and <code>help</code>
+                </li>
+                <li>
+                  spell-parser's: the eleven language commands, from <code>compile</code> to <code>explain</code>, and
+                  <code>lang</code>: see <a href="#2-commands">Commands</a>
+                </li>
+                <li>Spell UI's: <code>icon</code>, <code>ssr</code>, <code>pack</code>, <code>design</code></li>
+                <li>spell-app's: <code>app create | serve | vscode</code>, and <code>projects</code></li>
+              </ul>
+            </li>
+            <li>
+              The repo tools among them go by noun, then verb (<code>spell server start</code>; 14 groups under
+              <code>spell dev</code> before epic <code>repo-split</code> P13): see <a href="#spell-dev">Repo tools</a>.
+            </li>
+            <li>
+              <code>epic</code>, a command of its own: epic pages, the pages Owen answers on, windows, worktrees,
+              sessions, agents, airplane mode, requests between sessions. 63 verbs, called as
+              <code>epic &lt;verb&gt; &lt;epic&gt;#&lt;id&gt;</code>.
+            </li>
+            <li>
+              The epic tools moved out of <code>spell dev</code> into <code>epic</code> (epic
+              <code>epic-workflow</code>, P9): see <a href="#renames">Done</a>. Their old spellings went with
+              <code>spell dev</code> itself (epic <code>repo-split</code> P13).
+            </li>
+            <li>No target: the project here -- or, outside one, an autocompleting prompt.</li>
+            <li>A UI project's <code>run</code> opens in your browser.</li>
+            <li>Output goes to stdout; progress and screens go to stderr.</li>
+            <li>
+              Exit codes:
+              <ul>
+                <li><code>0</code>: fine</li>
+                <li><code>1</code>: the spell has errors, or a test failed</li>
+                <li><code>2</code>: the command line is wrong</li>
+              </ul>
+            </li>
+          </ul>
+          <ui-message state="positive" heading="Start here">
+            <ul>
+              <li>
+                <code>yarn cli:install</code> at the kit's root, which links
+                <a href="/bin/spell.mjs" target="src-bin-spell-mjs"><code title="bin/spell.mjs">spell.mjs</code></a>
+                onto your PATH, then <code>spell --help</code>.
+              </li>
+              <li>A command's options, or a noun's verbs: <code>spell &lt;command&gt; --help</code>.</li>
+              <li>The epic tools: <code>epic --help</code>, then <code>epic help &lt;verb&gt;</code>.</li>
+            </ul>
+          </ui-message>
+        </ui-section>
+
+        <ui-section id="2-commands" label="2. Commands" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="terminal"></ui-icon>
+          <p>
+            spell-parser's language commands. Their work is spell-app's for now, through its <code>language</code> hook,
+            so they need spell-app cloned. Every project command takes the same kinds of target:
+          </p>
+          <ul>
+            <li>a <code>.spell</code> file, or a project folder</li>
+            <li><code>@here</code>: the project in the current folder</li>
+            <li>a project by its address, <code>@spell/library/cards</code>, <code>owen@spell/x</code></li>
+            <li>a file in one, <code>@spell/test/solitaire/Card.spell</code>: its name has a dot</li>
+            <li>
+              a group, <code>@spell/library</code>, or all of a space's, <code>@spell</code>: pick from their projects,
+              or <code>--all</code> takes them all
+            </li>
+            <li>none: see <a href="#target-prompt">Target prompt</a></li>
+          </ul>
+          <p><code>--verbose</code>, on any command, shows Spell's own logging on stderr.</p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>command</th>
+                  <th>does</th>
+                </tr>
+                <tr>
+                  <td><code>compile</code></td>
+                  <td>
+                    writes <code>&lt;Project&gt;.spell.js</code> (and each <code>*.editor.html</code>'s module), and
+                    with no errors its scope pack. <code>--stdout --target ts/solid --force --stale</code>
+                    (<code>--force</code>: its imports too)
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>lint</code></td>
+                  <td>
+                    errors as <code>path:line:col message</code>, a project's editor pages too, against its types;
+                    <code>--json</code>, <code>--fix</code> (puts the editor pages right)
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>describe</code></td>
+                  <td>the Type Explorer as text, or one thing in it. <code>--inherited --compiled --json</code></td>
+                </tr>
+                <tr>
+                  <td><code>watch</code></td>
+                  <td>
+                    recompiles on save; rebuilds watched importers; until <code>q</code> or <code>Ctrl-C</code>.
+                    <code>--test [--name] --check-only</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>run</code> / <code>test</code></td>
+                  <td>
+                    run under node -- a UI project then in your browser.
+                    <code>--browser --no-browser --seed --target</code>; test's own: <code>--name --watch --seed</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>format</code></td>
+                  <td>whitespace, as Format Document; <code>--check</code>; never in the frozen test projects</td>
+                </tr>
+                <tr>
+                  <td><code>speedtest</code></td>
+                  <td>
+                    parser speed test as a table (<code>--runs --json</code>); <code>--against HEAD</code> adds Previous
+                    and Change
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>parse</code> / <code>repl</code></td>
+                  <td>
+                    a line's match tree and javascript; <code>--in</code>: inside a project's scope. And for parse:
+                    <code>--rule --tree --html --json</code>, the tree being what the line means
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>explain</code></td>
+                  <td>rules a word names or starts; <code>--in</code>: what a project declares by that name</td>
+                </tr>
+                <tr>
+                  <td><code>lang packs</code></td>
+                  <td>
+                    is each language pack complete, against English? <code>check</code>, or <code>fix</code> with stubs
+                    to translate
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <p>The other repos' commands that work on projects and pages:</p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>command</th>
+                  <th>does</th>
+                </tr>
+                <tr>
+                  <td><code>app create</code></td>
+                  <td>
+                    a project folder, <code>__project.json5</code> and a starter spell file, in your space
+                    (<code>owen@spell</code>) or <code>--in</code> a folder
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>app serve</code></td>
+                  <td>
+                    the spell app -- the editor and its API, which saves to disk -- opened on the target.
+                    <code>--port --headless</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>projects</code></td>
+                  <td>the project groups, or one group's projects, with the names to type; <code>--json</code></td>
+                </tr>
+                <tr>
+                  <td><code>icon</code></td>
+                  <td>
+                    find Spell UI's icons by name, alias or keyword (<code>--pack --json</code>); <code>--open</code>:
+                    them as pictures in your browser
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>ssr</code></td>
+                  <td>
+                    <code>ui-*</code> pages as plain HTML for crawlers and no-JS readers: a static twin of each page,
+                    and one stylesheet per folder. <code>-o --css --inline-css --no-minify</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>pony</code></td>
+                  <td>a pony in Spell's wizard hat, saying your words, or one of its own; <code>--gallop</code></td>
+                </tr>
+                <tr>
+                  <td><code>help</code></td>
+                  <td>every command, by repo, or one command's options: <code>spell help server start</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <p>Gone, with what replaced them:</p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>command</th>
+                  <th>now</th>
+                </tr>
+                <tr>
+                  <td><code>check</code>, <code>speed</code>, <code>new</code>, <code>serve</code></td>
+                  <td>
+                    <code>lint</code>, <code>speedtest</code>, <code>app create</code>, <code>app serve</code> (epic
+                    <code>repo-split</code> P13)
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>icons</code>, <code>static</code></td>
+                  <td><code>icon</code>, <code>ssr</code>: Spell UI's</td>
+                </tr>
+                <tr>
+                  <td><code>explore</code></td>
+                  <td>gone: <code>describe</code> prints the Type Explorer as text</td>
+                </tr>
+                <tr>
+                  <td><code>dev</code></td>
+                  <td>each repo's own nouns: see <a href="#spell-dev">Repo tools</a></td>
+                </tr>
+                <tr>
+                  <td><code>epic</code></td>
+                  <td>
+                    the <code>epic</code> command of its own: <code>epic summary seo</code>. See
+                    <a href="#renames">Done</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>plan-doc</code>, <code>goals</code></td>
+                  <td>
+                    gone: <code>spell plan-doc</code> at P9 of epic <code>epic-workflow</code> (its verbs are
+                    <code>epic</code>'s), <code>spell goals</code> with goals parked
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+        </ui-section>
+
+        <ui-section id="spell-dev" label="3. Repo tools" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="laptop code"></ui-icon>
+          <p>
+            The repos' own tools, as opposed to the Spell language: <code>spell &lt;noun&gt; &lt;verb&gt;</code> for the
+            kit's and Spell UI's (<code>spell server start</code>), <code>epic &lt;noun&gt; &lt;verb&gt;</code> for the
+            epic tools (<code>epic window open</code>). <code>spell dev</code> held most of them until epic
+            <code>repo-split</code> P13.
+          </p>
+          <ul>
+            <li>Each finds the nearest checkout from the current folder, so it works in a worktree too.</li>
+            <li>
+              <code>spell --help</code> lists the nouns, by repo; <code>epic --help</code>, its verbs, by what they work
+              on.
+              <ul>
+                <li>A noun's verbs: <code>spell &lt;noun&gt; --help</code>, <code>epic &lt;noun&gt; --help</code>.</li>
+              </ul>
+            </li>
+            <li>
+              They start fast, because they don't load Spell.
+              <ul>
+                <li>
+                  <code>spell help</code> loads every repo's command list, and each loads its command's work only when
+                  it runs: <code>spell pony</code> answers in about 0.1s.
+                </li>
+                <li>Every <code>epic</code> verb runs without Spell (epic <code>epic-eject</code> P5).</li>
+              </ul>
+            </li>
+            <li>
+              The epic tools are a command of their own, <code>epic</code> (epic <code>epic-workflow</code>, P9): the
+              first two sections below, and most of the rest.
+              <ul>
+                <li>
+                  Their old spellings, <code>spell dev plan-doc</code>, <code>details</code>, <code>choices</code>,
+                  <code>comments</code>, <code>notes</code>, <code>agents</code> and <code>airplane</code>, went with
+                  <code>spell dev</code> itself (epic <code>repo-split</code> P13).
+                </li>
+              </ul>
+            </li>
+            <li>
+              Every command, skill and yarn script, by what it does, is on
+              <a href="/guides/dev/commands/commands.html" target="guides-dev-commands-commands-html">the commands page</a>.
+            </li>
+          </ul>
+
+          <ui-section id="dev-epics" label="Epics, plans and review" sticky collapsible dividing open="false">
+            <p>
+              The tools of the review loop: epic pages, sagas, the agents Claude starts and airplane mode, under
+              <code>epic</code> since P9 (see <a href="#renames">Done</a>).
+            </p>
+
+            <h4>epic: a page and its phases</h4>
+            <p>
+              Each takes the epic's name first, a phase as <code>&lt;epic&gt;#P3</code>: <code>epic summary seo</code>,
+              <code>epic update seo#P3 --estimate 2h</code>.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>create</code></td>
+                    <td>
+                      an epic page from the template; <code>--future</code>: an epic not planned yet;
+                      <code>--saga</code>: the saga it serves
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>add-phase</code></td>
+                    <td>a phase: Symptom, Changes, then the details; <code>--before N</code> inserts it</td>
+                  </tr>
+                  <tr>
+                    <td><code>update seo#P3</code></td>
+                    <td>
+                      set or remove a phase's fields (<code>--goal</code>, <code>--symptom</code> ...), its estimate
+                      (<code>--estimate</code>: the Overview's total follows) or its title (<code>--title</code>); with
+                      no id, the page's flags (<code>--standing</code>)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>updated</code></td>
+                    <td>a change to a phase's plan, in an Update block at the end of its description</td>
+                  </tr>
+                  <tr>
+                    <td><code>phase seo#P3</code></td>
+                    <td>a phase's status: todo, active, done (<code>--done</code>: what was built)</td>
+                  </tr>
+                  <tr>
+                    <td><code>commit</code> / <code>commits</code></td>
+                    <td>list a commit under a phase or item / every one, from the page's git history</td>
+                  </tr>
+                  <tr>
+                    <td><code>log</code></td>
+                    <td>a timestamped line in the log</td>
+                  </tr>
+                  <tr>
+                    <td><code>bedtime</code></td>
+                    <td>
+                      a <code>/bedtime</code> run starts or ends: bedtime mode on or off, both logged;
+                      <code>start "P3-P6,P9"</code> takes ranges
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>prompt</code></td>
+                    <td>the prompt that started the epic (<code>""</code> removes it)</td>
+                  </tr>
+                  <tr>
+                    <td><code>summary</code></td>
+                    <td>its phases, the next one; open questions, issues, caveats, todos</td>
+                  </tr>
+                  <tr>
+                    <td><code>summaries</code></td>
+                    <td>several pages' summaries, by path (worktrees' too), as JSON (for <code>/epics</code>)</td>
+                  </tr>
+                  <tr>
+                    <td><code>docs</code> / <code>decisions</code></td>
+                    <td>the docs an epic wrote / what its epic page settled (for <code>/docs-check</code>)</td>
+                  </tr>
+                  <tr>
+                    <td><code>list</code></td>
+                    <td>every epic: in progress, future or done, where it runs, items not reviewed</td>
+                  </tr>
+                  <tr>
+                    <td><code>lint</code></td>
+                    <td>ids, <code>#id</code> links, phases and parts; its links; then the page in a browser</td>
+                  </tr>
+                  <tr>
+                    <td><code>open</code></td>
+                    <td>show it in VS Code's side bar: the Spell Docs tab; <code>--review</code>: the Review tab</td>
+                  </tr>
+                  <tr>
+                    <td><code>migrate</code></td>
+                    <td>pages brought up to today's markup, every step of their kind; safe to run again</td>
+                  </tr>
+                  <tr>
+                    <td><code>split</code> / <code>join</code></td>
+                    <td>
+                      store a page as a skeleton plus part files (<code>--done</code>: every finished epic) / back as
+                      one file
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>saga</code></td>
+                    <td>
+                      the sagas, epics of epics: <code>list</code>, <code>set</code> an epic's, <code>create</code>,
+                      <code>move</code>, <code>title</code>, <code>rename</code>, <code>page</code>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+
+            <h4>epic: items</h4>
+            <p>
+              Each names its item, <code>epic close seo#J3</code>; a new one by its kind's letter,
+              <code>epic add seo#J "Title"</code>.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>add</code></td>
+                    <td>
+                      a judgement call (<code>#J</code>), question (<code>#Q</code>), issue (<code>#I</code>), caveat
+                      (<code>#C</code>), todo (<code>#T</code>), test (<code>#V</code>) or decision (<code>#D</code>);
+                      prints its id; <code>--calm</code>: yellow, not red
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>calm</code></td>
+                    <td>calls or issues not urgent; <code>--loud</code>: urgent again</td>
+                  </tr>
+                  <tr>
+                    <td><code>update seo#J3</code></td>
+                    <td>
+                      an item's title (<code>--title</code>), <code>--calm</code> / <code>--loud</code>, or Claude's
+                      card on it: <code>underway</code> (spinner on), <code>done</code>, or <code>noted</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>decide</code></td>
+                    <td>answer a question; <code>--option</code> marks the chosen option</td>
+                  </tr>
+                  <tr>
+                    <td><code>choose</code></td>
+                    <td>an option Owen settled in conversation, on any item, recorded as the page's pick does</td>
+                  </tr>
+                  <tr>
+                    <td><code>close</code> / <code>reopen</code></td>
+                    <td>an item done / open again</td>
+                  </tr>
+                  <tr>
+                    <td><code>cancel</code></td>
+                    <td>an item another decision made moot: struck through</td>
+                  </tr>
+                  <tr>
+                    <td><code>details</code></td>
+                    <td>
+                      write an agent's details or reply into an item (<code>--append</code> adds it,
+                      <code>--more</code> under it)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>summarize</code></td>
+                    <td>
+                      condense an item after a lot of back and forth: its text and every reply move into its Original
+                      Discussion, folded
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>restore</code></td>
+                    <td>earlier text, from git, into an item's Original Discussion</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+
+            <h4>epic: review and the inbox</h4>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>review</code></td>
+                    <td>mark an item reviewed today; the outcome goes in the log</td>
+                  </tr>
+                  <tr>
+                    <td><code>defer</code></td>
+                    <td>put an item off: still not reviewed, dated</td>
+                  </tr>
+                  <tr>
+                    <td><code>queue</code> / <code>unqueue</code></td>
+                    <td>work a review decided on, waiting / started or dropped</td>
+                  </tr>
+                  <tr>
+                    <td><code>items</code></td>
+                    <td>what a review walks: sections, counts, items, the queue</td>
+                  </tr>
+                  <tr>
+                    <td><code>backfill</code></td>
+                    <td>items Owen already went through, from past sessions; a dry run unless <code>--apply</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>test</code></td>
+                    <td>
+                      Owen's test run: the page in the Review tab, one test at a time; <code>--all</code>: every epic's;
+                      <code>--list</code>: the open tests
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>inbox</code></td>
+                    <td>what Owen sent from the page: requests, marks, comments</td>
+                  </tr>
+                  <tr>
+                    <td><code>inbox watch</code> / <code>ignore</code></td>
+                    <td>a session waits on the inbox (the page says someone's reviewing) / stopped</td>
+                  </tr>
+                  <tr>
+                    <td><code>inbox wait</code></td>
+                    <td>block until there's work, print it; run in the background</td>
+                  </tr>
+                  <tr>
+                    <td><code>inbox apply</code></td>
+                    <td>
+                      apply the sent approve, pick and todo marks and test answers to the page; <code>--all</code>: sent
+                      or not
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>inbox working seo#J3 on</code></td>
+                    <td>the page's spinner on an item, or on a comment (<code>seo#M3</code>)</td>
+                  </tr>
+                  <tr>
+                    <td><code>inbox done seo#J3</code> / <code>clear</code></td>
+                    <td>an agent finished an item / drop marks</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+
+            <h4>agents, airplane</h4>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>agents list</code></td>
+                    <td>the background agents running in this epic (else checkout), oldest first</td>
+                  </tr>
+                  <tr>
+                    <td><code>agents add</code></td>
+                    <td>list one by name as it starts; prints its full name, <code>&lt;epic&gt;-&lt;name&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>agents set</code> / <code>done</code></td>
+                    <td>its status, or its task id / it's back, off the list</td>
+                  </tr>
+                  <tr>
+                    <td><code>agents wait</code></td>
+                    <td>wait, in the background, for Owen's notes to an agent from the epic page</td>
+                  </tr>
+                  <tr>
+                    <td><code>agents told</code></td>
+                    <td>its notes were passed on</td>
+                  </tr>
+                  <tr>
+                    <td><code>airplane status</code></td>
+                    <td>airplane mode on or off, since when</td>
+                  </tr>
+                  <tr>
+                    <td><code>airplane on</code> / <code>off</code></td>
+                    <td>the switch: what Owen leaves on the pages waits for <code>/airplane land</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>airplane check</code></td>
+                    <td>is this laptop ready to fly; <code>--fix</code> fixes what it can</td>
+                  </tr>
+                  <tr>
+                    <td><code>airplane inbox</code></td>
+                    <td>everything Owen left while flying, by place, for <code>/airplane land</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+
+            <h4>goals: saga sets (parked)</h4>
+            <p>
+              The first saga pages' tool, once <code>spell dev goals</code>, is parked: it's in <code>goals.zip</code>,
+              at spell-app's root, until epic <code>epic-goals</code> rebuilds it. Its verbs were <code>sets</code>,
+              <code>use</code>, <code>resolve</code>, <code>summary</code>, <code>thoughts</code>, <code>new-set</code>,
+              <code>new</code>, <code>add</code>, <code>close</code>, <code>reopen</code>, <code>log</code>,
+              <code>status</code>, <code>thought</code>, <code>digest</code>, <code>index</code>, <code>check</code>,
+              <code>serve</code>, <code>server</code>, <code>open</code>, <code>open-vs</code>, <code>talk</code>,
+              <code>update</code> and <code>claude</code>, on a target <code>[set/]topic[/anchor]</code>
+              (<code>spell/motivation/G1</code>).
+            </p>
+          </ui-section>
+
+          <ui-section id="dev-questions" label="Questions and comments" sticky collapsible dividing open="false">
+            <p>
+              Pages Owen answers Claude on, and the comments he leaves on docs pages: <code>epic ask</code>,
+              <code>choices</code>, <code>comments</code> and <code>notes</code> since P9. (<code>epic details</code>
+              is the item verb.)
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>ask create</code></td>
+                    <td>
+                      a details page: a question Claude explains, Owen answers on it; scratch, or
+                      <code>--epic</code>'s; <code>--from</code>: the whole page from a list of questions
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>ask show</code></td>
+                    <td>show it in this session's VS Code side bar, Review tab; <code>--wait</code>: then wait</td>
+                  </tr>
+                  <tr>
+                    <td><code>ask wait</code></td>
+                    <td>block until Owen answers, print it; run in the background</td>
+                  </tr>
+                  <tr>
+                    <td><code>ask answer</code> / <code>draft</code></td>
+                    <td>the answer already sent / what Owen typed on the page and hasn't sent</td>
+                  </tr>
+                  <tr>
+                    <td><code>ask list</code> / <code>sweep</code></td>
+                    <td>every details page, answered or waiting / delete scratch pages over 14 days old</td>
+                  </tr>
+                  <tr>
+                    <td><code>choices create</code></td>
+                    <td>a choice page: names Claude recommends, one row each, Owen's call per name</td>
+                  </tr>
+                  <tr>
+                    <td><code>choices show | wait | answer | list [&lt;epic&gt;]</code></td>
+                    <td>as details pages': the answer is "Do it"; <code>list seo</code>: that epic's only</td>
+                  </tr>
+                  <tr>
+                    <td><code>comments list [&lt;epic&gt;]</code></td>
+                    <td>
+                      every comment still waiting for Claude, on every docs page (with an epic, only its own);
+                      <code>--all</code>: taken and answered ones too
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>comments wait</code></td>
+                    <td>block until a comment starts waiting, print it; run in the background</td>
+                  </tr>
+                  <tr>
+                    <td><code>comments gather</code></td>
+                    <td>
+                      the waiting comments (and new page notes) into the standing epic <code>feedback</code>, a phase
+                      per page
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>comments working</code></td>
+                    <td>its thread shows "Claude: thinking…" (on), or stops (off)</td>
+                  </tr>
+                  <tr>
+                    <td><code>comments answer</code></td>
+                    <td>Claude's answer on the comment's thread; <code>--commit</code>: where it was built</td>
+                  </tr>
+                  <tr>
+                    <td><code>notes list | answer | done</code></td>
+                    <td>the page notes from before comments: the new ones / answer one / mark it done</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="dev-docs" label="Docs pages and servers" sticky collapsible dividing open="false">
+            <p>
+              The docs pages' tools (<code>epic pages</code>), the page server that serves them (<code
+                >spell server</code
+              >), and Spell's claude.ai design system (<code>spell design</code>).
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>epic pages index</code></td>
+                    <td>write the home page's area cards and each area's list page; a missing one is made</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic pages update</code></td>
+                    <td>check the docs pages against their template: sections, links, the engine's assets</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic pages create</code> / <code>template</code></td>
+                    <td>a page from a template, at the right depth, listed on its area's page / where a template is</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic pages open</code></td>
+                    <td>show a page in Chrome; <code>--vs</code> / <code>--review</code>: in VS Code's side bar</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic pages link</code></td>
+                    <td>the side-bar and browser links Claude gives for a page; <code>--show</code>: show it too</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic pages fuss</code></td>
+                    <td>the writing checker: pages and comments against the house rules</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic pages voice</code></td>
+                    <td>
+                      the guides a voice still has to go over, and the voice's file; <code>--done</code>: stamp them
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>epic pages offline</code></td>
+                    <td>what the docs pages load from the internet, for airplane mode</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell server local</code></td>
+                    <td>this checkout's page server, in the foreground</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell server start</code></td>
+                    <td>start it in the background, if it isn't running, and print where it is</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell server start all</code></td>
+                    <td>every web server of the checkout: page server, editor, Spell UI's site</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell server stop</code> / <code>status</code></td>
+                    <td>stop it (<code>stop all</code>: the app's editor too) / is it running</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell server url</code></td>
+                    <td>the URL that serves a file, starting the server if need be</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell server prune</code></td>
+                    <td>stop the page and Vite servers whose checkout is gone</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic server</code></td>
+                    <td>
+                      the same page server, for the epic tools: <code>serve</code>, <code>start</code>,
+                      <code>ensure</code>, <code>stop</code>, <code>status</code>, <code>url</code>, <code>prune</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>epic hub</code> / <code>repo</code></td>
+                    <td>the machine's one epic server, for every registered repo / the repos it serves</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell design build | bundle | check</code></td>
+                    <td>the design system's files / its bundle / prove the bundle works</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell design pull</code></td>
+                    <td>a Claude Design board, as a page</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell design changed | pushed | state</code></td>
+                    <td>what changed since the last push / record a push / where it stands</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="dev-windows" label="Windows and sessions" sticky collapsible dividing open="false">
+            <p>
+              VS Code windows and Claude Code sessions (<code>epic</code>), and the extension (<code>spell app</code>).
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>epic window init</code></td>
+                    <td>write each package's missing window file, bring the rest up to date</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window move</code></td>
+                    <td>
+                      carry the window files once from the main checkout's <code>workspaces/</code> to the windows
+                      folder
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window which</code></td>
+                    <td>this session's window: pid, workspace file, folders</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window open</code> / <code>close</code></td>
+                    <td>open a worktree in a new window / close it, deleting its file</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window launch</code></td>
+                    <td>
+                      wake an epic: its running session, else a NEW one in its open window, else make its worktree, open
+                      its window and start a session there
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window handoff</code> / <code>resume</code></td>
+                    <td>
+                      move this session to a worktree's window when the turn ends / the move itself (a hook runs it)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window stay</code> / <code>should-stay</code></td>
+                    <td>title and tint this window for a worktree, or put it back / stay or move, and why</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window color</code></td>
+                    <td>give this window a look; none: list them</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window show</code></td>
+                    <td>show a page in the window's side bar: Spell Docs, or the Review tab</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window reload</code></td>
+                    <td>rebuild a side-bar view gone wrong, at the page it shows</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic window add</code> / <code>remove</code></td>
+                    <td>
+                      a folder in the window; never a worktree's any more (see the root
+                      <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a
+                      >)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>epic session list</code> / <code>find</code></td>
+                    <td>this repo's saved sessions, newest first / those of one name or worktree</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic session open</code></td>
+                    <td>open one in the VS Code Claude panel</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic session title</code></td>
+                    <td>this session's title, or queue a new one</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic session done</code> / <code>icons</code></td>
+                    <td>mark finished work's sessions ✅ / give every session the icon its work's state calls for</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic session window</code></td>
+                    <td>the VS Code window a process runs in</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic session transcript</code></td>
+                    <td>another session's prompts, last reply and waiting question</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic session listen</code></td>
+                    <td>one look at this session's epic page for it (the plugin's monitor runs it)</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell app vscode build</code> / <code>install</code></td>
+                    <td>the extension's <code>.vsix</code> / install it into VS Code; no verb: both</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="dev-worktrees" label="Worktrees and the epic repo" sticky collapsible dividing open="false">
+            <p>Git worktrees, parked work, and the epic repo, all under <code>epic</code>.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>worktree list</code></td>
+                    <td>the live sessions and where each works; then idle worktrees</td>
+                  </tr>
+                  <tr>
+                    <td><code>worktree status</code> / <code>path</code></td>
+                    <td>where a worktree, branch, epic page or session stands / a worktree's folder</td>
+                  </tr>
+                  <tr>
+                    <td><code>worktree repos</code></td>
+                    <td>
+                      each repo's checkout in an epic's worktree: its branch, what's uncommitted, ahead and behind
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>worktree merge-main</code></td>
+                    <td>
+                      merge <code>main</code> in, regenerating generated files; <code>--continue</code> after conflicts
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>worktree move</code> / <code>remove</code></td>
+                    <td>
+                      move one from the old <code>.claude/worktrees</code> beside the repo / remove one, its servers
+                      stopped first
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>worktree patch</code></td>
+                    <td>give this checkout the fixes its repo lists in <code>checkoutPatches</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>park list</code> / <code>candidates</code></td>
+                    <td>the PARKED notes / what <code>/wait-for</code> could wait on</td>
+                  </tr>
+                  <tr>
+                    <td><code>park wait</code></td>
+                    <td>wait for a name to finish: merged, removed, exited or every phase done</td>
+                  </tr>
+                  <tr>
+                    <td><code>status</code></td>
+                    <td>
+                      take stock: worktrees, branches, sessions, parked work, plans; in process, hung or parked, dead
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>shared status</code></td>
+                    <td>each checkout's links, and the epic repo's uncommitted files and last commit</td>
+                  </tr>
+                  <tr>
+                    <td><code>shared init</code> / <code>link</code></td>
+                    <td>make the epic repo / link a checkout's shared folders</td>
+                  </tr>
+                  <tr>
+                    <td><code>shared commit</code></td>
+                    <td>commit its changes, one commit per epic, guide or folder (a hook runs it every turn)</td>
+                  </tr>
+                  <tr>
+                    <td><code>shared migrate</code></td>
+                    <td>move a worktree cut before the cutover onto the epic repo</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="dev-packs" label="Packs and bundles" sticky collapsible dividing open="false">
+            <p>Built scripts: component packs, and the bundles only the page server serves.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>spell pack create</code></td>
+                    <td>
+                      a component pack, a repo of its own: custom elements that <code>&lt;ui-root&gt;</code> loads on
+                      demand
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>spell pack add</code></td>
+                    <td>add one element to a pack: its folder, its test, its line in the pack's index</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell pack build</code> / <code>check</code></td>
+                    <td>build a pack's catalog, entry and script / are its files current</td>
+                  </tr>
+                  <tr>
+                    <td><code>spell bundle [names...]</code></td>
+                    <td>
+                      the bundles the page server serves, e.g. Spell UI's docs site; <code>--stale</code>: only those
+                      that changed
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>spell bundle check</code></td>
+                    <td>are they current; says why not</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="dev-other" label="Other" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>verb</th>
+                    <th>does</th>
+                  </tr>
+                  <tr>
+                    <td><code>spell commands list</code> / <code>check</code></td>
+                    <td>
+                      every yarn script, spell command, epic verb and skill, against the commands page / only the gaps
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>spell wwod check</code></td>
+                    <td>
+                      every citation and repo path in WWOD, the
+                      <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a> and
+                      <a href="/CLAUDE.md" target="src-claude-md"><code>CLAUDE.md</code></a> files and the skills
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>epic config</code> / <code>voice</code> / <code>init</code></td>
+                    <td>
+                      this repo's epic settings / the voice a kind of page is written in / set a repo up for epics
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="renames" label="4. Done: the epic command" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="route"></ui-icon>
+          <p>
+            <code>epic close seo#J3</code> used to be <code>spell dev plan-doc close seo J3</code>. The epic tools moved
+            out of <code>spell dev</code> into a command of their own, <code>epic</code>: P9 of
+            <a href="/epics/epic-workflow/epic-workflow.plan.html#p9" target="epic-workflow">epic epic-workflow</a>,
+            2026-10-12. They were proposed as the Renames (P1,
+            <a href="/epics/epic-workflow/epic-workflow.plan.html#q6" target="epic-workflow">Q6</a>, J3 to J8), and
+            built in a different shape.
+          </p>
+          <ul>
+            <li>
+              <code>epic</code> is a command of its own, beside <code>spell</code>. <code>yarn cli:install</code> links
+              both onto the PATH, and root <code>yarn epic</code> runs it.
+              <ul>
+                <li>
+                  It starts fast, because it doesn't load Spell, except for <code>send</code>, <code>requests</code>,
+                  <code>file</code>, <code>home</code> and <code>merge</code>.
+                </li>
+                <li>
+                  <code>epic --help</code> lists its 50 verbs, by what they work on, and
+                  <code>epic help &lt;verb&gt;</code> says more about one.
+                </li>
+              </ul>
+            </li>
+            <li>
+              One way to name what a verb acts on, <code>&lt;epic&gt;#&lt;id&gt;</code>:
+              <ul>
+                <li><code>seo</code>: the epic's page</li>
+                <li><code>seo#J3</code>: an item (a comment, <code>seo#cm3</code>, too)</li>
+                <li><code>seo#P3</code>: a phase, or by its id, <code>seo#p-epic-migrate</code></li>
+                <li>
+                  <code>seo#J</code>: a new item of that kind, for <code>add</code>: <code>epic add seo#J "Title"</code>
+                </li>
+                <li>
+                  <code>guides/x.html#cm3</code>: a comment on a docs page, for <code>epic comments</code> (a page note,
+                  <code>guides/x.html#n3</code>, for <code>epic notes</code>)
+                </li>
+                <li>
+                  The id always goes after the <code>#</code>. The old order, <code>epic close seo J3</code>, is
+                  refused, and the message says <code>epic close seo#J3</code> (P19)
+                </li>
+              </ul>
+            </li>
+            <li>
+              Every verb's help says how it's called and what it does, and gives an example, a group's verbs too (<code
+                >epic ask create --help</code
+              >).
+              <ul>
+                <li>An unknown verb exits 1, listing the verbs; a usage error exits 2.</li>
+              </ul>
+            </li>
+            <li>
+              <code>epic update</code> sets fields: a phase's body, estimate and title, an item's title and calm, the
+              page's flags. It replaces <code>phase-body</code>, <code>estimate</code>, <code>rename</code> and
+              <code>standing</code>.
+            </li>
+            <li>
+              <code>epic restore</code> is the old <code>original</code>: earlier text into an item's Original
+              Discussion.
+            </li>
+            <li>
+              <code>epic open seo</code> shows the page in the side bar's Spell Docs tab; with <code>--review</code>,
+              the Review tab (what <code>plan-doc open</code> did).
+            </li>
+            <li>
+              <code>epic ask</code> (root <code>yarn ask</code>) is the details pages, once <code>epic ask</code>;
+              <code>epic details</code> writes an item's details.
+            </li>
+            <li>
+              <code>epic choices list [&lt;epic&gt;]</code> and <code>epic comments list [&lt;epic&gt;]</code> list one
+              epic's only.
+            </li>
+            <li><code>epic bedtime seo start "P3-P6,P9"</code> takes ranges and lists of phases.</li>
+            <li>
+              The old spellings ran on for a while, hidden from <code>spell dev --help</code>:
+              <code>spell dev plan-doc</code>, <code>details</code>, <code>choices</code>, <code>comments</code>,
+              <code>notes</code>, <code>agents</code>, <code>airplane</code>, and <code>spell epic &lt;verb&gt;</code>;
+              root <code>yarn plan-doc</code> and <code>yarn details</code> too.
+              <ul>
+                <li>
+                  The <code>spell dev</code> ones went with <code>spell dev</code> itself (epic
+                  <code>repo-split</code> P13); <code>yarn plan-doc</code> and <code>yarn details</code> are
+                  spell-epic's scripts now.
+                </li>
+              </ul>
+            </li>
+            <li>The deprecated top-level <code>spell plan-doc</code> is gone.</li>
+          </ul>
+
+          <ui-section id="renames-table" label="Old to new" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>old spelling (gone)</th>
+                    <th>now</th>
+                  </tr>
+                  <tr>
+                    <td><code>spell dev plan-doc &lt;verb&gt; &lt;epic&gt; &lt;id&gt; ...</code></td>
+                    <td><code>epic &lt;verb&gt; &lt;epic&gt;#&lt;id&gt; ...</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>spell dev plan-doc add-phase seo "Name" ...</code></td>
+                    <td><code>epic add-phase seo "Name" ...</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>spell dev plan-doc add seo judgement "Title"</code></td>
+                    <td><code>epic add seo#J "Title"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>spell dev plan-doc close seo J3</code></td>
+                    <td><code>epic close seo#J3</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>... phase-body seo 3 --goal ...</code>, <code>estimate seo 3 "1-2h"</code></td>
+                    <td><code>epic update seo#P3 --goal ...</code>, <code>--estimate "1-2h"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>... rename seo P6 "New"</code></td>
+                    <td><code>epic update seo#P6 --title "New"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>... standing seo on</code></td>
+                    <td><code>epic update seo --standing</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>... phase seo 3 done</code></td>
+                    <td><code>epic phase seo#P3 done</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>... commit seo abc123 --phase 3 "..."</code></td>
+                    <td><code>epic commit seo#P3 abc123 "..."</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>... request seo 7 r3 ...</code></td>
+                    <td><code>epic file seo#P7 r3</code> (<code>add-request</code>, its first name, hidden)</td>
+                  </tr>
+                  <tr>
+                    <td><code>... original seo J3 --file old.html</code></td>
+                    <td><code>epic restore seo#J3 --file old.html</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>... open seo</code></td>
+                    <td><code>epic open seo --review</code> (bare: the Spell Docs tab)</td>
+                  </tr>
+                  <tr>
+                    <td><code>... inbox seo wait</code></td>
+                    <td><code>epic inbox wait seo</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>... inbox seo working J3 on</code>, <code>done J3</code>, <code>clear J3</code></td>
+                    <td><code>epic inbox working seo#J3 on</code>, <code>done</code>, <code>clear</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>spell plan-doc</code> (deprecated)</td>
+                    <td>gone</td>
+                  </tr>
+                  <tr>
+                    <td>root <code>yarn plan-doc</code></td>
+                    <td>kept; root <code>yarn epic</code> is the new one</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic ask</code>, root <code>yarn details</code></td>
+                    <td><code>epic ask</code>, root <code>yarn ask</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>epic choices</code>, <code>comments</code></td>
+                    <td><code>epic choices</code>, <code>epic comments</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>epic notes</code>, <code>agents</code>, <code>airplane</code></td>
+                    <td><code>epic notes</code>, <code>epic agents</code>, <code>epic airplane</code></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>epic send</code>, <code>requests</code>, <code>file</code>, <code>home</code>,
+                      <code>merge</code>
+                    </td>
+                    <td>
+                      <code>epic send</code>, <code>requests</code>, <code>file</code>, <code>home</code>,
+                      <code>merge</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>spell dev</code> goals, design, docs, server, window, session, worktree, park, stock,
+                      shared, pack, bundles, vscode, commands, wwod
+                    </td>
+                    <td>stay</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="renames-new" label="Requests from other sessions" sticky collapsible dividing open="false">
+            <p>The verbs on a whole epic, from any session: verb, then the epic's name.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>command</th>
+                    <th>does</th>
+                    <th>phase</th>
+                  </tr>
+                  <tr>
+                    <td><code>epic send &lt;epic&gt;</code></td>
+                    <td>save Owen's words and screenshots as a request in that epic; say who to tell</td>
+                    <td><a href="/epics/epic-workflow/epic-workflow.plan.html#p2" target="epic-workflow">P2</a></td>
+                  </tr>
+                  <tr>
+                    <td><code>epic requests &lt;epic&gt;</code></td>
+                    <td>every request sent to it, and where each went</td>
+                    <td>P2</td>
+                  </tr>
+                  <tr>
+                    <td><code>epic file &lt;epic&gt;#P3 &lt;id&gt;</code></td>
+                    <td>
+                      file a request into a phase, or, with no phase (<code
+                        >epic file &lt;epic&gt; &lt;id&gt; "&lt;where&gt;"</code
+                      >), mark where it went
+                    </td>
+                    <td><a href="/epics/epic-workflow/epic-workflow.plan.html#p4" target="epic-workflow">P4</a></td>
+                  </tr>
+                  <tr>
+                    <td><code>epic home [&lt;epic&gt;]</code></td>
+                    <td>where tooling requests go; with a name, change it</td>
+                    <td><a href="/epics/epic-workflow/epic-workflow.plan.html#p3" target="epic-workflow">P3</a></td>
+                  </tr>
+                  <tr>
+                    <td><code>epic merge &lt;epic&gt;</code></td>
+                    <td>a standing epic's phase onto <code>main</code>, fast-forward only, in the main checkout</td>
+                    <td><a href="/epics/epic-workflow/epic-workflow.plan.html#p5" target="epic-workflow">P5</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>epic --help, its last lines · 17 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-plaintext">Naming what a verb acts on:
+  seo                 the epic's page, epics/seo/seo.plan.html
+  seo#J3              an item:  J3 (a comment on the page, seo#cm3, too)
+  seo#P3              a phase:  P3, or by its id, seo#p-epic-migrate;  phase, updated and file take its name
+                      too:  seo#epic-migrate, "seo#Epic Migrate"
+  seo#J               a new item of that kind, for add:  epic add seo#J "Title"
+  SAGA:/epics         a saga's page, sagas/epics/epics.saga.html:  epic add SAGA:/epics#T "Title"
+  guides/x.html#cm3   a comment on a docs page, for epic comments (and a page note, guides/x.html#n3)
+
+Examples:
+  epic summary seo
+  epic phase seo#P3 done --done "&lt;ul&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt;"
+  epic update seo#P3 --goal "&lt;p&gt;...&lt;/p&gt;" --estimate 2h
+  epic update seo#J3 underway "Writing the answer"
+  epic inbox wait seo
+
+epic &lt;verb&gt; --help says more about each;  an id always goes after a #, never as a word of its own.</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="renames-p6" label="What else P9 did" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>epic</code> starts as fast as <code>spell dev</code>, from its lean entry (<a
+                  href="/epics/epic-workflow/epic-workflow.plan.html#i3"
+                  target="epic-workflow"
+                  >I3</a
+                >).
+              </li>
+              <li>
+                The help that drifted from the tools (<a
+                  href="/epics/epic-workflow/epic-workflow.plan.html#i4"
+                  target="epic-workflow"
+                  >I4</a
+                >): the comments group's hint has <code>working</code>, the airplane group's <code>inbox</code>, and
+                each verb's usage says <code>epic</code>.
+              </li>
+              <li>
+                The callers say the new names: the skills, the hooks, the root
+                <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a> and
+                <a href="/CLAUDE.md" target="src-claude-md"><code>CLAUDE.md</code></a
+                >, the shared docs, the commands page and this page. A missed one still runs, through the old spellings.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="3-how-it-works" label="5. How it works" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="cubes"></ui-icon>
+          <p>A command is one function; long-running work happens in child processes or on Ink screens.</p>
+
+          <ui-section id="structure" label="Structure" sticky collapsible dividing open="false">
+            <ui-cards class="spell-flow" stackable>
+              <ui-card>
+                <ui-content>
+                  <ui-header title="bin/spell.mjs">spell.mjs</ui-header>
+                  <ui-description
+                    >registers <code>tsx</code> with the kit's node settings, then imports
+                    <a href="/src/cli/main.ts" target="src-src-cli-main-ts"
+                      ><code title="src/cli/main.ts">main.ts</code></a
+                    ></ui-description
+                  >
+                </ui-content>
+              </ui-card>
+              <ui-card>
+                <ui-content>
+                  <ui-header>main.ts</ui-header>
+                  <ui-description>
+                    reads every installed repo's command list, adds them to one program, then commander picks the
+                    command
+                  </ui-description>
+                </ui-content>
+              </ui-card>
+              <ui-card>
+                <ui-content>
+                  <ui-header>&lt;name&gt;Command</ui-header>
+                  <ui-description>
+                    <code>(session, args, options) =&gt; exitCode</code>; spell-app's <code>CliSession</code> owns the
+                    workspace, language service and explorer
+                  </ui-description>
+                </ui-content>
+              </ui-card>
+            </ui-cards>
+            <ul>
+              <li>
+                The base is the kit's <code>spell/cli</code>, in its
+                <a href="/src/cli/" target="src-src-cli"><code title="src/cli/">src/cli/</code></a
+                >: it reads the command line, prints the help, and finds every installed repo's commands.
+                <ul>
+                  <li>
+                    <code>spellRepos()</code> finds the repos: the kit, then each child repo in
+                    <a href="/repos.json5" target="src-repos-json5"><code>repos.json5</code></a
+                    >, lowest first, whose
+                    <a href="/package.json" target="src-package-json"><code>package.json</code></a> names its list,
+                    <code>"spell": { "commands", "hooks" }</code>.
+                  </li>
+                  <li>
+                    <code>addRepoCommands()</code> adds them; a word two repos both add goes under each one's short name
+                    (<code>spell parser check</code>, <code>spell app check</code>).
+                  </li>
+                  <li>
+                    Its barrel stays lean, node built-ins, commander and chalk, because <code>spell help</code> loads
+                    every repo's list. Each list imports its command's work only when it runs.
+                  </li>
+                  <li>
+                    <code>findCheckout()</code>: a command works on the checkout the current folder is in, else the kit
+                    <code>spell</code> runs from.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Each repo's own folder adds its commands: spell-parser's, Spell UI's and spell-app's
+                <a href="/src/cli/" target="src-src-cli"><code>src/cli/</code></a
+                >.
+                <ul>
+                  <li>
+                    spell-app's <code>language</code> hook, in
+                    <a href="/spell-app/src/cli/hooks.ts" target="src-spell-app-src-cli-hooks-ts"
+                      ><code title="spell-app/src/cli/hooks.ts">hooks.ts</code></a
+                    >, does the work of spell-parser's commands, because they find projects the app's way for now.
+                  </li>
+                  <li>
+                    Its <code>loadApp()</code> loads
+                    <a href="/spell-app/src/cli/consoleGuard.ts" target="src-spell-app-src-cli-consoleguard-ts"
+                      ><code>consoleGuard.ts</code></a
+                    >
+                    FIRST, which silences <code>console.*</code>, then Spell, then the commands' work.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <code>epic</code>'s verbs are built in
+                <a href="/spell-epic/src/cli/EpicProgram.ts" target="src-spell-epic-src-cli-epicprogram-ts"
+                  ><code title="spell-epic/src/cli/EpicProgram.ts">EpicProgram</code></a
+                >, run by spell-epic's <code>bin/epic</code> through the lean
+                <a href="/spell-epic/src/cli/epicMain.ts" target="src-spell-epic-src-cli-epicmain-ts"
+                  ><code title="spell-epic/src/cli/epicMain.ts">epicMain.ts</code></a
+                >.
+                <ul>
+                  <li>
+                    <a href="/spell-epic/src/command/epicArgs.ts" target="src-spell-epic-src-command-epicargs-ts"
+                      ><code title="spell-epic/src/command/epicArgs.ts">epicArgs.ts</code></a
+                    >
+                    reads <code>&lt;epic&gt;#&lt;id&gt;</code>, and hands the epic tool its arguments.
+                  </li>
+                  <li>Every verb runs without Spell (epic <code>epic-eject</code> P5).</li>
+                </ul>
+              </li>
+              <li>
+                Child processes, in
+                <a href="/spell-app/src/cli/runner/" target="src-spell-app-src-cli-runner"
+                  ><code title="spell-app/src/cli/runner/">runner/</code></a
+                >:
+                <ul>
+                  <li>
+                    <a
+                      href="/spell-app/src/cli/runner/runProject.ts"
+                      target="src-spell-app-src-cli-runner-runproject-ts"
+                      ><code>runProject.ts</code></a
+                    >: runs and tests a project
+                  </li>
+                  <li>
+                    <a
+                      href="/spell-app/src/cli/runner/speedTest.mts"
+                      target="src-spell-app-src-cli-runner-speedtest-mts"
+                      ><code>speedTest.mts</code></a
+                    >
+                    for <code>speedtest</code>
+                  </li>
+                  <li>
+                    <a
+                      href="/spell-ui/src/cli/runner/renderStatic.ts"
+                      target="src-spell-ui-src-cli-runner-renderstatic-ts"
+                      ><code>renderStatic.ts</code></a
+                    >
+                    for <code>ssr</code>, Spell UI's
+                  </li>
+                  <li>
+                    They never import
+                    <a href="/spell-app/src/cli/" target="src-spell-app-src-cli"><code>spell-app/cli</code></a
+                    >'s values.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Ink screens, in
+                <a href="/spell-app/src/cli/ui/" target="src-spell-app-src-cli-ui"
+                  ><code title="spell-app/src/cli/ui/">ui/</code></a
+                >, which never take over the console (<code>patchConsole: false</code>).
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="scope-packs" label="Scope packs" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>&lt;Project&gt;.scopes.js</code>: the Type Explorer's data for a page with no parser, e.g.
+                <code>&lt;spell-viewer&gt;</code>.
+              </li>
+              <li>
+                It's written after a CLEAN compile (compiled, no errors), always by
+                <code>SpellDiskWorkspace.writeScopes()</code>. Four things call it:
+                <ul>
+                  <li>the language server</li>
+                  <li>spell-app's <code>yarn lsp:scopes</code></li>
+                  <li><code>spell compile</code></li>
+                  <li><code>spell watch</code></li>
+                </ul>
+              </li>
+              <li>
+                Checked: <code>spell compile</code> on the three example projects rewrote their checked-in packs
+                unchanged.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="speed" label="spell speedtest" sticky collapsible dividing open="false">
+            <ol>
+              <li>
+                Each run is a fresh node process running <code>SP.spellParser.speedTest()</code>: a warm-up, then 20
+                timed passes.
+              </li>
+              <li>
+                <code>--against &lt;ref&gt;</code> runs the same test on an older version of the code:
+                <ul>
+                  <li>it checks spell-parser out at the ref into a temporary git worktree</li>
+                  <li>
+                    it links the kit's <code>node_modules</code> in, and points the runner at that worktree's
+                    <code>src/spell/</code>
+                  </li>
+                  <li>it runs there, then removes the worktree, links first, even on failure</li>
+                </ul>
+              </li>
+              <li>The two sides take turns, run by run, so a busy moment hits both alike.</li>
+              <li>
+                A side's runs combine as the mean of their averages, the lowest min, and the highest max.
+                <ul>
+                  <li>With 3+ runs, one fluke (an average over 1.25x the median) is dropped.</li>
+                </ul>
+              </li>
+            </ol>
+          </ui-section>
+
+          <ui-section id="language-tools" label="Language tools" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>parse</code> and <code>repl</code> parse in a scope of their own.
+                <ul>
+                  <li>
+                    With <code>--in</code>, that scope sits inside the project's. Its types and aliases are known, but
+                    nothing typed lands in it.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Which rule parses a line, when none is given:
+                <ul>
+                  <li>one line: <code>statement</code>, then <code>expression</code></li>
+                  <li>several lines: <code>block</code></li>
+                </ul>
+              </li>
+              <li><code>repl</code> commits each line, so later lines know what it declared.</li>
+              <li>
+                <code>explain</code> finds rules by name, or by the first word of their syntax. It shows a declaration
+                as the editor's hover does, less its first section (the declaring rule).
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title title="spell-app/src/cli/parseText.ts">lineScope() · 8 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-ts">/**
+ * A fresh scope to parse lines in:  inside `project`'s, so its types and phrases are known -- or, with none, a bare
+ * one with only spell's own rules.
+ */
+export function lineScope(project?: SP.SpellProject): P.Scope {
+  if (!project?.scope) return SP.spellParser.getScope("cli")
+  return new P.ProjectScope({ name: "cli", parentScope: project.scope })
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="watching" label="Watching" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                It watches each project's folder (<code>fs.watch()</code>) for its spell files, CSS and
+                <code>project.json</code>.
+              </li>
+              <li>
+                The kind of change comes from what's on disk, not the event, because macOS reports a save as a rename.
+              </li>
+              <li>
+                A watched importer rebuilds from scratch after a project it imports, as if its
+                <code>project.json</code> changed.
+                <ul>
+                  <li>Why: a compiled import's declarations are only read on a full parse.</li>
+                </ul>
+              </li>
+              <li>
+                <code>--test</code> runs the tests in a child process, capturing its output, so failures show under the
+                project's row.
+              </li>
+              <li>Piped, it prints a timestamped line per rebuild on stderr, instead of its live screen.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="target-prompt" label="Target prompt" sticky collapsible dividing open="false">
+            <ul>
+              <li>No target, in a project's folder or below: that project, for every command.</li>
+              <li>
+                Outside one, in a terminal: a prompt that completes like a shell.
+                <ul>
+                  <li>
+                    <code>Tab</code> completes a group (<code>@spell/examples/</code>), then a project, then "entire
+                    project" or one of its files.
+                  </li>
+                  <li>Piped: an error, exit 2.</li>
+                </ul>
+              </li>
+              <li>
+                The last 3 picks come first, from spell-app's
+                <code title="spell-app/.recent-projects.json">.recent-projects.json</code>, git-ignored, one per
+                checkout.
+                <ul>
+                  <li>
+                    Before epic <code>output-targets</code> it was <code>.recent-targets.json</code>, moved on first
+                    read.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Keys arriving together -- typed while it's busy, or pasted -- are split and taken one at a time, because
+                Ink only names a key that arrives alone.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="in-the-browser" label="In the browser" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <a href="/spell-app/src/cli/serve.ts" target="src-spell-app-src-cli-serve-ts"><code>serve.ts</code></a
+                >: a small server on <code>localhost</code>, answering only its routes. Spell UI has its own copy, for
+                <code>spell icon --open</code>.
+              </li>
+              <li><code>SPELL_NO_BROWSER=1</code> prints the URL instead of opening a browser.</li>
+              <li>
+                <code>icon --open</code>: a gallery page of the packs' SVGs, with a filter box; click to copy a name.
+              </li>
+              <li>
+                <code>run</code>: when the project tries to show a UI, the child process tells <code>spell</code>.
+                <ul>
+                  <li>
+                    Then a page with app's <code>&lt;spell-viewer src=...&gt;</code> serves the project as compiled for
+                    this run, its scope pack, and its imports.
+                  </li>
+                  <li>
+                    The web component is built first if missing (spell-app's <code>yarn build:element</code>), a few
+                    seconds.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <code>app serve</code> runs this checkout's page server, starting it if it isn't running.
+                <ul>
+                  <li>The editor (vite) is the page server's child, and the app's API is one of its routes.</li>
+                  <li>It waits for the editor to answer, then opens it on the project.</li>
+                  <li>
+                    <code>Ctrl-C</code> stops the page server, and so the editor, only if <code>app serve</code> started
+                    it.
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="4-why" label="6. Why" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>
+              <b>The language server's workspace, not a parallel loader,</b> so the command line and the editor can't
+              disagree.
+            </li>
+            <li>
+              <b>Each command list loads no Spell up front,</b> because <code>spell help</code> loads every repo's list,
+              and a repo tool is called many times a turn: loading Spell costs about half a second each time.
+            </li>
+            <li>
+              <b>Each repo brings its own commands,</b> so a repo that isn't cloned simply isn't there, and
+              <code>spell</code> names no repo in its code (epic <code>repo-split</code> P13).
+            </li>
+            <li>
+              <b><code>speedtest</code> points its runner at the other commit's source,</b> rather than running there:
+              the runner imports nothing of ours, only that commit's Spell, through its package names.
+            </li>
+            <li>
+              <b><code>app create</code> writes its own files:</b> the shared way to make a project (<code
+                title="projectUtils.createProject(), through getIndex()"
+                >createProject()</code
+              >) adds an <code>Untitled.spell</code>. Its default folder is your space, <code>owen@spell</code>.
+            </li>
+            <li>
+              <b>The test name filter is <code>--name</code>,</b> because <code>test</code> takes several targets, so a
+              positional name couldn't be told from one.
+            </li>
+            <li>
+              <b>Never writes into the frozen test projects</b> (spell-parser's <code>tests/spaces/@spell/test/</code>):
+              <code>format</code> refuses, and tests use temporary copies.
+            </li>
+            <li>
+              <b>Browser runs use <code>&lt;spell-viewer src=&gt;</code>, not the app server:</b> the compiled JS and its
+              scope pack, served beside each other, with no <code>/api</code> to run.
+            </li>
+            <li>
+              <b><code>spell app serve</code> isn't spell-app's <code>yarn start</code>,</b> because that also installs
+              packages and stops the page server, which other sessions may be using.
+            </li>
+            <li>
+              <b>Icon keywords match a word's start;</b> names and aliases match anywhere. So <code>bell</code> finds
+              dumbbell, but not brain by its keyword "cerebellum".
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="5-limits" label="7. Limits" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="triangle exclamation"></ui-icon>
+          <ul>
+            <li>
+              It runs Spell's WORKING COPY. A half-done change in the
+              <a href="/spell-app/src/lsp/" target="src-spell-app-src-lsp" title="spell-app/src/lsp/"
+                >language server</a
+              >
+              or <code>SpellProject</code> can break <code>spell</code>, with nothing in Spell noticing.
+            </li>
+            <li>
+              <b>spell-parser's commands need spell-app cloned.</b> Without it, each stops with a message to clone it,
+              and exits 2, until their work moves down into spell-parser.
+            </li>
+            <li>
+              The <code>spell</code> and <code>epic</code> links run the MAIN checkout's CLI.
+              <ul>
+                <li>
+                  A command a branch adds or changes shows only from that branch's own copy, its
+                  <a href="/bin/spell.mjs" target="src-bin-spell-mjs"><code title="bin/spell.mjs">spell.mjs</code></a
+                  >.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <code>speedtest --against</code> links today's packages into the old checkout, so it needs a ref from
+              after epic <code>repo-split</code> P14, when every import became a package name. A ref with different
+              dependencies may not run.
+            </li>
+            <li><code>format</code> trusts <code>formatting()</code> to change whitespace only.</li>
+            <li>
+              <code>repl</code>'s live screen is tested through <code>ink-testing-library</code>, and its piped mode end
+              to end.
+            </li>
+            <li>
+              <code>watch</code> sees only what it watches: an imported project that isn't watched doesn't rebuild its
+              importer.
+            </li>
+            <li>
+              Under node, <code>run</code> skips what needs a browser, e.g. starting a UI; other browser-only code
+              throws.
+            </li>
+            <li>In the browser, <code>run</code> serves what was compiled at the start: no live reload.</li>
+            <li><code>app serve</code> opens only projects in the app's roots; others open the chooser.</li>
+            <li>
+              The commands page's check reads every repo's <code>spell</code> commands and their verbs, and each
+              <code>epic</code> verb, but not an <code>epic</code> verb's own verbs. So a verb an
+              <code>epic</code> group gains or loses (<code>epic inbox wait</code>) isn't checked against it.
+            </li>
+          </ul>
+          <ui-message state="info" heading="Not built yet">
+            <ul>
+              <li><code>spell lsp</code>, with the VS Code extension spawning it</li>
+              <li>a single-file bundle, so it installs without a checkout</li>
+              <li>publishing to npm</li>
+            </ul>
+          </ui-message>
+        </ui-section>
+
+        <ui-section id="6-sources" label="8. Sources" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="flask"></ui-icon>
+          <ul>
+            <li>
+              <a
+                href="/spell-app/tests/cli/cli.test.ts"
+                title="spell-app/tests/cli/cli.test.ts"
+                target="src-spell-app-tests-cli-cli-test-ts"
+                ><code>cli.test.ts</code></a
+              >: every language command end to end, running the real
+              <a href="/bin/spell.mjs" target="src-bin-spell-mjs"><code title="bin/spell.mjs">spell.mjs</code></a
+              >; it also checks the old spellings are gone (<code>spell dev</code>, <code>check</code>,
+              <code>new</code>, <code>serve</code>, <code>explore</code> ...).
+            </li>
+            <li>
+              The kit's own in its <a href="/tests/cli/" target="src-tests-cli"><code>tests/cli/</code></a
+              >:
+              <a href="/tests/cli/spell.test.ts" target="src-tests-cli-spell-test-ts"><code>spell.test.ts</code></a>
+              runs the real <code>spell</code>, so a broken command list in any repo fails it;
+              <a href="/tests/cli/program.test.ts" target="src-tests-cli-program-test-ts"
+                ><code>program.test.ts</code></a
+              >
+              tests the clash rule.
+            </li>
+            <li>
+              spell-app's unit tests in its <a href="/tests/cli/" target="src-tests-cli"><code>tests/cli/</code></a
+              >, at the same paths as the code, e.g. <code>speedtestCommand.test.ts</code>. Screens are tested through
+              <code>ink-testing-library</code>, e.g.
+              <a
+                href="/spell-app/tests/cli/ui/ReplScreen.test.tsx"
+                title="spell-app/tests/cli/ui/ReplScreen.test.tsx"
+                target="src-spell-app-tests-cli-ui-replscreen-test-tsx"
+                ><code>ReplScreen.test.tsx</code></a
+              >.
+            </li>
+            <li>
+              The tables: <code>spell --help</code> and each command's, and <code>epic --help</code> and each group's,
+              2026-10-22. Before that, the <code>spell dev</code> tables came from its help and each group's,
+              2026-10-11, checked against
+              <code title="packages/cli/src/devProgram.ts">devProgram()</code>
+              and the tools' headers; the <code>epic</code> tables from its help and each verb's, 2026-10-12.
+            </li>
+            <li>
+              <a href="/README/cli.md" target="src-readme-cli-md" title="README/cli.md"
+                >the kit's <code>README/cli.md</code></a
+              >: instructions and caveats in full.
+            </li>
+            <li>
+              The epic pages behind it:
+              <a
+                href="/epics/cli-additions/cli-additions.plan.html"
+                target="cli-additions"
+                title="epics/cli-additions/cli-additions.plan.html"
+                ><code>cli-additions.plan.html</code></a
+              >;
+              <a
+                href="/epics/epic-workflow/epic-workflow.plan.html"
+                target="epic-workflow"
+                title="epics/epic-workflow/epic-workflow.plan.html"
+                ><code>epic-workflow.plan.html</code></a
+              >.
+            </li>
+          </ul>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">
+            Last updated 2026-10-22: every command brought up to date after epic repo-split (each repo's commands under
+            one <code>spell</code>, <code>spell dev</code> gone). Before that, 2026-10-14: the page kinds' new names,
+            "epic page" first (epic epic-workflow, P14); 2026-10-12: the epic tools moved to the
+            <code>epic</code> command (epic epic-workflow, P9); 2026-10-11: every <code>spell</code> and
+            <code>spell dev</code> command, and the Renames proposal (epic epic-workflow, P1); 2026-10-01: built (epic
+            cli-additions).
+          </p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>
