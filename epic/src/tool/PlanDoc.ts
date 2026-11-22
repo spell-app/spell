@@ -36,12 +36,14 @@ import {
 
 import {
   CALM_ID,
+  CANCELED,
   JUDGEMENT_ID,
   CLOSED,
   ITEM_STATUSES,
   KINDS,
   REQUESTED_ID,
   ISSUE_ID,
+  MANUAL_TEST_ID,
   TODO_ID,
   OBSOLETE_ID,
   PROMISED_CARD,
@@ -104,6 +106,7 @@ import { PlanMarkup } from "./PlanMarkup"
 import { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { SelfFix } from "./SelfFix"
+import { MADE_FROM_PAGE } from "./TheirWords"
 import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { HandedOnFixes, Migrations } from "./migrations"
@@ -968,6 +971,9 @@ export class PlanDoc extends PlanReader {
       item.hasAttribute("severe") ||
       (item.hasAttribute("urgent") && TODO_ID.test(item.id) && !item.hasAttribute("calm"))
     if (flagged ? item.hasAttribute("flagged") : !wasRed && item.hasAttribute("calm")) return undefined
+    // what `epic badges <epic> off` puts back
+    if (!item.hasAttribute("calm-before"))
+      Markup.set<"epic-item">(item, { calmBefore: item.hasAttribute("calm") ? "yes" : "no" })
     Markup.set<"epic-item">(item, {
       flagged: flagged || undefined,
       calm: !flagged || undefined,
@@ -981,16 +987,19 @@ export class PlanDoc extends PlanReader {
    * Close item `id` by its badge (`epic badges <epic> close`), logged;  returns the line.
    * - as its badge says, or as a recheck found (`as`:  canceled, its badge saying which)
    * - `badge-closed`:  so turning the badges off reopens it (`clearBadges()`)
-   * - NOT stamped `changed` nor labelled:  nothing changed but that nobody needs to look
-   * - the caller has asked `ItemBadges.closeRefusal()`
+   * - through `setItem()`, quietly:  NOT stamped `changed` nor labelled, nor taken up by a phase:  nothing changed
+   *   but that nobody needs to look
+   * - throws when `closeRefusal()` says no, as `closeObsolete()` does (the caller has checked;  this is the guard)
    */
   closeByBadge(id: string, { as, why }: { as?: ClosedAs; why?: string } = {}): string {
     const item = this.item(id)
+    const refusal = this.closeRefusal(id, { tests: true })
+    if (refusal) throw new PlanDocError(`${item.id.toUpperCase()} can't close by its badge:  ${refusal}`)
     const status = as ? "canceled" : this.badges.badgeOf(item).closes?.status
     if (!status) throw new PlanDocError(`${item.id.toUpperCase()}:  its badge wouldn't close it`)
     const closedAs = as ?? (status === "canceled" ? "declined" : undefined)
-    this.finishUnderway(item, "noted")
-    Markup.set<"epic-item">(item, { status, closedAs, badgeClosed: true, working: undefined })
+    this.setItem(id, status, { quiet: true })
+    Markup.set<"epic-item">(item, { closedAs, badgeClosed: true, takenIn: undefined })
     const reason = why ?? item.getAttribute("judged-why") ?? ""
     const line = `${item.id.toUpperCase()} closed by its badge${as ? ` (${as})` : ""}${reason ? `:  ${reason}` : ""}`
     this.log(line)
@@ -999,6 +1008,7 @@ export class PlanDoc extends PlanReader {
 
   /**
    * Undo the badges (`epic badges <epic> off`):  each score and flag off, what a badge closed open again, logged.
+   * - NOT what they approved since (`review()` took its `badge-closed`);  `calm` as it was before their chip (I435)
    * - the states and badges follow as every edit writes them (`updateStates()`):  the page is drawn as before
    */
   clearBadges(): { cleared: number; reopened: number } {
@@ -1009,12 +1019,15 @@ export class PlanDoc extends PlanReader {
         // its plain UPDATE label took the closed status' word on the next edit (`update-labels`):  plain again
         const label = PlanItem.updateLabelOf(item)
         if (label && label.getAttribute("became") === item.getAttribute("status")) label.removeAttribute("became")
-        Markup.set<"epic-item">(item, { status: "open", badgeClosed: undefined, closedAs: undefined })
+        this.setItem(item.id, "open", { quiet: true })
         reopened++
       }
+      const calmBefore = item.getAttribute("calm-before")
+      if (calmBefore) Markup.set<"epic-item">(item, { calm: calmBefore === "yes" || undefined, calmBefore: undefined })
       if (item.hasAttribute("care")) cleared++
-      else if (!item.hasAttribute("flagged")) continue
+      else if (!item.hasAttribute("flagged") && !item.hasAttribute("asks-you")) continue
       Markup.set<"epic-item">(item, {
+        asksYou: undefined,
         care: undefined,
         doubt: undefined,
         severe: undefined,
@@ -1024,7 +1037,7 @@ export class PlanDoc extends PlanReader {
         flagged: undefined
       })
     }
-    Markup.set(this.page, { badges: undefined })
+    Markup.set(this.page, { badges: undefined, badgesCloseNew: undefined })
     this.log(`item badges off:  ${cleared} scores cleared, ${reopened} reopened`)
     return { cleared, reopened }
   }
@@ -1058,7 +1071,7 @@ export class PlanDoc extends PlanReader {
       queued: data.queued,
       work: data.work,
       working: Boolean(data.working),
-      underway: !!item.querySelector(UNDERWAY_CARD),
+      underway: isUnderway(item),
       bedtime: Boolean(data.bedtime),
       calm: Boolean(data.calm),
       urgent: Boolean(data.urgent),
@@ -1248,9 +1261,10 @@ export class PlanDoc extends PlanReader {
    * - closed (done or canceled):  every status card still underway finishes (`finishUnderway()`), so it never stays
    *   blue, "Claude is working on it" (epic `epic-engine` I355).  Every way an item closes comes through here:
    *   `epic update ... done`, `epic close`, `epic cancel`, a phase closing its items, an approve, `epic complete`
+   * - `quiet`:  a badge's close, or its undo:  no stamp, no label
    * - throws on any other status, or an id the doc doesn't have
    */
-  setItem(id: string, status: string): string {
+  setItem(id: string, status: string, { quiet = false }: { quiet?: boolean } = {}): string {
     if (!(ITEM_STATUSES as readonly string[]).includes(status))
       throw new PlanDocError(`item status must be ${ITEM_STATUSES.join(" / ")}`)
     const item = this.item(id)
@@ -1280,6 +1294,7 @@ export class PlanDoc extends PlanReader {
       const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
       if (active) Markup.set<"epic-item">(item, { takenIn: active.id })
     }
+    if (quiet) return PlanItem.titleOf(item)
     this.stamp(item)
     this.markUpdate(item, status === "open" ? (reopened ? "reopened" : undefined) : (status as "done" | "canceled"))
     return PlanItem.titleOf(item)
@@ -1330,7 +1345,8 @@ export class PlanDoc extends PlanReader {
    */
   review(id: string, { date = this.today }: { date?: string } = {}): string {
     const item = this.item(id)
-    Markup.set(item, { reviewed: date, deferred: undefined })
+    // they've looked:  closed on their word now, so turning badges off doesn't reopen it (epic `epic-engine` I435)
+    Markup.set<"epic-item">(item, { reviewed: date, deferred: undefined, badgeClosed: undefined })
     this.stamp(item, { at: date === this.today ? this.now : PlanTime.localDay(date), bedtime: false })
     Markup.set(item, { bedtime: undefined })
     return PlanItem.titleOf(item)
@@ -2497,21 +2513,31 @@ export class PlanDoc extends PlanReader {
    * - never one he asked to have done lately (`recentAsk()`), one a tidy found promised and not delivered
    * - `marked`:  the ids (lower case) holding a mark of his not taken yet:  never those
    * - `epic stale` reports this same answer, so an agent needn't try
+   * - the ONE rule for "may Claude close this" (epic `epic-engine` I435):  the tidy's and the badges' alike
+   *   (`closeObsolete()`, `closeByBadge()`)
+   *   - one being worked on, or with a note of theirs not sent (`readHeld`)
+   *   - on a page with badges, what waits on them, their words, what they got to (`ItemBadges.holdOf()`)
+   * - `tests`:  a manual test may close too:  a recheck found it out of date
    */
-  closeRefusal(id: string, { marked = new Set<string>() }: { marked?: ReadonlySet<string> } = {}): string | undefined {
+  closeRefusal(
+    id: string,
+    { marked = new Set<string>(), tests = false }: { marked?: ReadonlySet<string>; tests?: boolean } = {}
+  ): string | undefined {
     if (!this.hasItem(id)) return "no such item"
-    const facts = this.facts(this.item(id))
+    const item = this.item(id)
+    const facts = this.facts(item)
     if (QUESTION_ID.test(facts.id)) return "a question:  decide it (`epic decide`)"
-    if (!OBSOLETE_ID.test(facts.id)) return "only judgement calls, issues and todos close this way"
+    if (!OBSOLETE_ID.test(facts.id) && !(tests && MANUAL_TEST_ID.test(facts.id)))
+      return "only judgement calls, issues and todos close this way"
     if (facts.status !== "open") return `already ${facts.status}`
+    if (this.hasPromisedCard(item)) return "promised, not delivered:  Owen decides"
     if (facts.urgent) return "Owen asked for it (urgent)"
     if (facts.fixed) return "fixed, waiting for Owen's review"
     if (facts.awaitsPick) return "waiting for Owen's pick"
     if (marked.has(facts.id)) return "Owen's mark on it hasn't been taken"
     if (facts.underway || facts.working) return "being worked on"
     if (facts.queued !== undefined) return "queued work:  `epic unqueue` it first"
-    if (this.hasPromisedCard(this.item(id))) return "promised, not delivered:  Owen decides"
-    return this.recentAsk(this.item(id), facts)
+    return this.readHeld?.().get(facts.id) ?? this.badges.holdOf(item) ?? this.recentAsk(item, facts)
   }
 
   /**
@@ -2735,7 +2761,7 @@ export class PlanDoc extends PlanReader {
    *   - a done phase its commits not on main name (`P28:`), or with one of them listed under it
    *   - an item they name (`editor I55:`), the phase its `work` names, or one listed under it;  a judgement call also
    *     by the phase it was made in (`phase`):  its state reads it (`itemState()`:  a calm call stays blue)
-   *     - not once `main` has a commit of that phase from after the call (`landed`, `madeAt()`):  its work is in it
+   *     - not once `main` has a commit of that phase from after the call (`landed`, `PlanItem.madeAt()`):  its work is in it
    *       (epic `epic-engine` I439)
    *   - a done or fixed item's last finished status card, whose line then says `not on main yet`
    *   - that item's UPDATE label, when it names a status change (`FIXED`, T75):  its `Not in main` pill
@@ -2754,7 +2780,7 @@ export class PlanDoc extends PlanReader {
     // a call made in a phase is in that phase's next commit:  on main once main has one of the phase's from after it
     // (epic `epic-engine` I439:  J330-J346 stayed NOT IN MAIN while later P80 work was on the branch alone)
     const isLanded = (item: Element, { phase }: ItemFacts) =>
-      (landed?.get(`p${phase}`) ?? -Infinity) > PlanDoc.madeAt(item)
+      (landed?.get(`p${phase}`) ?? -Infinity) > PlanItem.madeAt(item)
     let changed = 0
     const mark = (element: Element, on: boolean) => {
       const value = on ? branch : undefined
@@ -2787,20 +2813,6 @@ export class PlanDoc extends PlanReader {
       if (label) mark(label, offMain && finished && label.hasAttribute("became"))
     }
     return changed
-  }
-
-  /**
-   * About when `item` was made, in ms:  the earliest time on it -- its change stamp, when it was judged (P81), its
-   * cards' and replies' times;  `Infinity` with none.
-   * - not its change stamp alone:  a retitle or a review stamps that later (epic `epic-engine` I439)
-   */
-  static madeAt(item: Element): number {
-    const times = [
-      item.getAttribute("changed"),
-      item.getAttribute("judged"),
-      ...Array.from(item.querySelectorAll("[at]"), (dated) => dated.getAttribute("at"))
-    ].map((time) => Date.parse((time ?? "").replace(" ", "T")))
-    return Math.min(Infinity, ...times.filter((time) => Number.isFinite(time)))
   }
 
   /**
@@ -3980,9 +3992,11 @@ export class PlanDoc extends PlanReader {
       }
     const about = near ? `<p>About ${this.aboutLink(near)}.</p>` : ""
     const details = `${promptHTML(note)}${about}`
-    const id = this.addItem(kind, title, { details: details || undefined })
+    // their words, as one filed from them (epic `epic-engine` T88, I435)
+    const requested = kind === "todo" || kind === "issue"
+    const id = this.addItem(kind, title, { details: details || undefined, requested })
     const written = at ? `, written ${PlanTime.clockTime(new Date(at))}` : ""
-    this.noteStatus(id, `Made from the page:  ${AuthorWords.newItem(PlanMarkup.text(this.person), kind)}${written}.`)
+    this.noteStatus(id, `${MADE_FROM_PAGE}  ${AuthorWords.newItem(PlanMarkup.text(this.person), kind)}${written}.`)
     this.log(
       `${id.toUpperCase()} made from the page:  ${AuthorWords.newItem(this.person, kind)} (${String(key).toUpperCase()})`
     )
@@ -4125,6 +4139,20 @@ const DONE_CARD = ':scope > epic-status[state="done"]'
 
 /** A status card that's finished:  done or noted. */
 const FINISHED_CARD = ':scope > epic-status:not([state="underway"])'
+
+/**
+ * Is Claude on `item` by a status card?  Not by one left underway from before the item was canceled (epic
+ * `epic-engine` I435:  I312 read UNDERWAY and was struck through at once).
+ */
+function isUnderway(item: Element): boolean {
+  const card = Array.from(item.querySelectorAll(UNDERWAY_CARD)).at(-1)
+  if (!card) return false
+  if (item.getAttribute("status") !== CANCELED) return true
+  const began = Date.parse((card.getAttribute("at") ?? "").replace(" ", "T"))
+  const canceled = Date.parse(item.getAttribute("changed") ?? "")
+  // a card's time is to the minute
+  return !(canceled >= began + 60_000)
+}
 
 /** How long Owen's ask keeps an item from closing as obsolete (`recentAsk()`). */
 const RECENT_ASK_DAYS = 14

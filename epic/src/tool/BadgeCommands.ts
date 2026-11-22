@@ -5,9 +5,8 @@ import { Markup } from "spell/epic/markup"
 import { ItemJudge, type Judgement } from "./ItemJudge"
 import { PlanItem } from "./PlanItem"
 import { PlanTime } from "./PlanTime"
-import { ReviewInbox } from "./ReviewInbox"
 import { StaleFacts } from "./StaleFacts"
-import { PlanDocError, type BadgeMode } from "./planDoc.types"
+import { JUDGEMENT_ID, PlanDocError, type BadgeMode } from "./planDoc.types"
 
 import type { PlanDoc } from "./PlanDoc"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
@@ -18,6 +17,7 @@ import type { Flags, PlanDocCommands } from "./PlanDocCommands"
  * - `trial | on | off`:  turn them on, or undo them all in one command (`off`)
  * - `score`, `set`:  store judgements (`ItemJudge`), only on a page with badges:  no other epic is ever scored
  * - `close`:  what a badge would grey, or what a recheck found;  NEVER in a trial
+ * - `close-new yes | no`:  may a new item close as it's made?  Only once they said yes to that by itself (I435)
  * - `list`:  each open item's scores, badge, and what would close
  * - it stores and prints;  it starts no work
  * - node only;  imported by `PlanDocCommands`, by path
@@ -42,14 +42,17 @@ export class BadgeCommands {
         return this.set(file, ids, flags)
       case "close":
         return this.close(file, ids, flags)
+      case "close-new":
+        return this.turnCloseNew(file, refs[0])
       default:
-        throw new PlanDocError(`badges ${verb}?  list, trial, on, off, score, set or close`)
+        throw new PlanDocError(`badges ${verb}?  list, trial, on, off, score, set, close or close-new`)
     }
   }
 
   /**
    * The items `ids` judged and stored, as they were just made (`PlanDocCommands.edit()`).
-   * - on a page with badges `on`, one its badge would grey is closed at once
+   * - never closed for it, unless they said yes to that (`close-new`), with badges `on`
+   *   - and never a call:  its work can't be on main as it's made (I435)
    * - NEVER throws for a judge that can't run:  one line on stderr, the items drawn as before badges
    */
   async judgeNew(name: string, file: string, ids: readonly string[]): Promise<void> {
@@ -66,9 +69,12 @@ export class BadgeCommands {
       const judgements = judge.decide(name, plan.today, items)
       await this.owner.files.edit(file, (doc) => {
         const stored = ItemJudge.store(doc, judgements)
-        if (doc.badges.mode !== "on") return
+        if (doc.badges.mode !== "on" || !doc.page.hasAttribute("badges-close-new")) return
         doc.badges.refresh()
-        for (const id of stored) if (doc.badges.badgeOf(doc.item(id)).closes) doc.closeByBadge(id)
+        for (const id of stored) {
+          if (JUDGEMENT_ID.test(id) || !doc.badges.badgeOf(doc.item(id)).closes) continue
+          if (!doc.closeRefusal(id, { tests: true })) doc.closeByBadge(id)
+        }
       })
     } catch (error) {
       this.owner.warn(`epic:  not scored for a badge:  ${(error as Error).message}`)
@@ -107,6 +113,18 @@ export class BadgeCommands {
       plan.log(`item badges ${mode}`)
     })
     this.owner.print(`badges ${mode}`)
+  }
+
+  /** `close-new yes | no`:  whether a new item its badge would grey closes as it's made, logged. */
+  private async turnCloseNew(file: string, answer: string | undefined) {
+    if (answer !== "yes" && answer !== "no")
+      throw new PlanDocError("badges close-new takes yes or no:  yes only once they said so to that by itself")
+    await this.owner.files.edit(file, (plan) => {
+      if (!plan.badges.mode) throw new PlanDocError(NO_BADGES)
+      Markup.set<"epic-page">(plan.page, { badgesCloseNew: answer === "yes" || undefined })
+      plan.log(`item badges:  new items close as they're made:  ${answer}`)
+    })
+    this.owner.print(`close-new ${answer}`)
   }
 
   /** `off`:  every badge, score and close by a badge undone (`PlanDoc.clearBadges()`). */
@@ -172,6 +190,8 @@ export class BadgeCommands {
           doubt,
           severe: (given.severe ?? was.severe) || undefined,
           needsYou: (given.needsYou ?? was.needsYou) || undefined,
+          // said outright, it holds for every kind, whatever the scores (I435)
+          asksYou: (given.needsYou ?? was.asksYou) || undefined,
           judged: PlanTime.isoTime(plan.now),
           judgedWhy: why ?? was.judgedWhy
         })
@@ -186,7 +206,7 @@ export class BadgeCommands {
    * `close <ids> [--as vanished | moot | duplicate | declined] [--why ...]`:
    * - none given as `--as`:  only what its badge would grey
    * - `--as`:  what a recheck found, with no fix
-   * - refused:  in a trial, and for anything of theirs (`ItemBadges.closeRefusal()`);  all or none
+   * - refused:  in a trial, and by the one rule, the tidy's (`PlanDoc.closeRefusal()`);  all or none
    */
   private async close(file: string, ids: string[], flags: Flags) {
     if (!ids.length) throw new PlanDocError("badges close:  which items?  epic badges <epic> list names them")
@@ -194,15 +214,13 @@ export class BadgeCommands {
     if (as !== undefined && !(CLOSED_AS as readonly string[]).includes(as))
       throw new PlanDocError(`--as must be ${CLOSED_AS.join(" / ")}`)
     const why = stringFlag(flags.why)
-    const busy = new Set(Object.keys(ReviewInbox.read(ReviewInbox.pathFor(file)).working))
     const lines = await this.owner.files.edit(file, (plan) => {
       if (plan.badges.mode !== "on")
         throw new PlanDocError("badges close:  only with badges on;  a trial closes nothing (epic badges <epic> on)")
       const refused = ids.flatMap((id) => {
         const item = plan.item(id)
         const reason =
-          plan.badges.closeRefusal(item) ??
-          (as ? undefined : busy.has(item.id) ? "being worked on" : undefined) ??
+          plan.closeRefusal(item.id, { tests: true }) ??
           (as || plan.badges.badgeOf(item).closes ? undefined : "its badge wouldn't close it:  --as says why")
         return reason ? [`${item.id.toUpperCase()}:  ${reason}`] : []
       })
@@ -240,6 +258,7 @@ export class BadgeCommands {
       const facts = plan.badges.badgeFacts(item)
       if (facts.status !== "open") return []
       const { badge, closes } = plan.badges.badgeOf(item)
+      const held = closes && plan.closeRefusal(item.id, { tests: true })
       return [
         {
           id: item.id,
@@ -252,7 +271,8 @@ export class BadgeCommands {
           why: item.getAttribute("judged-why") ?? undefined,
           state: plan.itemState(item),
           badge: badge ?? closes?.badge,
-          closes: closes?.status
+          closes: held ? undefined : closes?.status,
+          held
         }
       ]
     })
@@ -273,6 +293,8 @@ type BadgeRow = {
   badge?: string
   /** the status its badge would close it with */
   closes?: string
+  /** why it's left open though its badge would close it */
+  held?: string
 }
 
 /** The refusal on a page without badges. */

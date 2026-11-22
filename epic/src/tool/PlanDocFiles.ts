@@ -312,6 +312,14 @@ export class PlanDocFiles {
     plan.readComments = () => ReviewInbox.read(ReviewInbox.pathFor(file)).comments
     // what the person got to, read only as an issue is fixed (epic `epic-engine` T143)
     plan.readActedOn = () => SelfFix.actedOn(ReviewInbox.read(ReviewInbox.pathFor(file)))
+    // what it says holds an item open, read only as one is closed (epic `epic-engine` I435)
+    plan.readHeld = () => {
+      const { drafts, working } = ReviewInbox.read(ReviewInbox.pathFor(file))
+      return new Map([
+        ...Object.keys(drafts).map((id) => [id.toLowerCase(), "their note on it isn't sent yet"] as const),
+        ...Object.keys(working).map((id) => [id.toLowerCase(), "being worked on"] as const)
+      ])
+    }
     for (const id of plan.parts.missing)
       process.stderr.write(
         `epic:  ${relative(this.content, PlanParts.partFile(file, id))} is missing:  #${id} has no body\n`

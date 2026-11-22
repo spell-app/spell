@@ -256,6 +256,21 @@ export const epicItemVocabulary = {
       description: "JUDGED (P81):  only you can decide the issue, OK the todo, or run the test."
     },
     {
+      name: "asks-you",
+      kind: "boolean",
+      description:
+        "A recheck handed it to you (`epic badges <epic> set --your-call yes`, P81):  YOUR CALL, a test YOU TEST, " +
+        "whatever its care and doubt."
+    },
+    {
+      name: "calm-before",
+      kind: "enum",
+      values: ["yes", "no"],
+      description:
+        "Whether it was `calm` before your click on its id chip, on a page with badges (P81):  what " +
+        "`epic badges <epic> off` puts back."
+    },
+    {
       name: "judged",
       kind: "string",
       format: "time",

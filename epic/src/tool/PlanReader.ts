@@ -105,6 +105,13 @@ export abstract class PlanReader {
    */
   readActedOn?: () => ReadonlySet<string>
 
+  /**
+   * What the review inbox says holds an item open, by id (lower case):  Claude at work on it, a note of theirs not
+   * sent yet (epic `epic-engine` I435;  `PlanDoc.closeRefusal()`).
+   * - set by the command line's `read()`;  none (a test, a page off disk):  the page alone says
+   */
+  readHeld?: () => ReadonlyMap<string, string>
+
   constructor(
     document: Document,
     now = new Date(),
@@ -135,7 +142,9 @@ export abstract class PlanReader {
       document: this.document,
       factsOf: (item) => this.facts(item),
       limitsOf: this.badgeLimits,
-      readActedOn: () => this.readActedOn?.() ?? new Set()
+      readActedOn: () => this.readActedOn?.() ?? new Set(),
+      personOf: () => this.person,
+      nowOf: () => this.now
     })
     return this.itemBadges
   }

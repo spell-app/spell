@@ -80,8 +80,15 @@ export const epicPageVocabulary = {
       description:
         "ITEM BADGES (epic `epic-engine` P81):  each item's line starts with what happens next, in its colour, and " +
         "new items are judged as they're made.  `trial`:  what's closed keeps its colour, and nothing is closed by " +
-        "its badge;  `on`:  a new item its badge would grey is closed.  None:  drawn as before badges.  Set by " +
+        "its badge;  `on`:  Claude may close what a badge would grey.  None:  drawn as before badges.  Set by " +
         "`epic badges <epic> on | trial`;  `off` undoes it."
+    },
+    {
+      name: "badges-close-new",
+      kind: "boolean",
+      description:
+        "You said yes to closing new items by themselves (epic `epic-engine` I435):  with badges `on`, a new one " +
+        "its badge would grey closes as it's made, never a judgement call.  Set by `epic badges <epic> close-new yes`."
     },
     {
       name: "stage",
