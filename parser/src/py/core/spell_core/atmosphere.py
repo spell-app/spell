@@ -463,7 +463,9 @@ class AtmosphereAccount(PlaceBehind):
             return PlaceError(f"{url}:  {error} {message}".strip())
         if is_signed_in and (status == 401 or error in SESSION_OVER):
             self._session = None
-            return PlaceError(f"the sign-in has ended, so this wasn't kept:  {message};  the next write signs in again")
+            over = PlaceError(f"the sign-in has ended, so this wasn't kept:  {message};  the next write signs in again")
+            over.has_kept_nothing = True
+            return over
         if error == "InvalidSwap":
             return PlaceError(message, "out of date")
         if error in NOT_THERE or status == 404 or NO_SUCH_ACCOUNT.search(message):

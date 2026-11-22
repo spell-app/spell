@@ -76,11 +76,16 @@ DEVICE_SUFFIX = ".device.json"
 DEVICE_WRITES = threading.Lock()
 
 
+# The failures that say a place kept none of what it was sent:  no answer might have kept it.
+NOTHING_KEPT = {"refused", "not found", "out of date"}
+
+
 class PlaceError(Exception):
     """A place said no, or couldn't be reached:  the JavaScript `PlaceError`.
 
     - `kind`:  why, as the JavaScript names it:  `"refused"`, `"not found"`, `"out of date"`, `"no answer"` ...
     - `why_not`:  for a refusal, what the place said:  `"owner"`, `"role"` ...
+    - `has_kept_nothing`:  is it sure none of what was sent was kept, so each change can be tried alone?
     """
 
     def __init__(self, message: str, kind: str = "no answer", why_not: str | None = None) -> None:
@@ -88,6 +93,7 @@ class PlaceError(Exception):
         super().__init__(message)
         self.kind = kind
         self.why_not = why_not
+        self.has_kept_nothing = kind in NOTHING_KEPT
 
 
 # A place that can hold whatever field it's handed:  `PlaceBehind.times_held`.

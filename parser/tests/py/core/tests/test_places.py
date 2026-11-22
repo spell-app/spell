@@ -347,6 +347,45 @@ def test_a_refused_save_is_one_line_and_the_next_still_goes(
     assert capsys.readouterr().err.splitlines() == ["Couldn't keep the change to DeviceNote:  that text isn't allowed"]
 
 
+def test_a_value_json_cant_hold_loses_only_its_own_save(
+    program: Core, watched: WatchedFile, capsys: pytest.CaptureFixture[str]
+) -> None:
+    async def saves() -> None:
+        program.save_thing(DeviceNote(text="one"))
+        odd = DeviceNote(text="odd")
+        odd._props["text"] = {1, 2}
+        program.save_thing(odd)
+
+    asyncio.run(saves())
+    assert watched.texts_sent == [["one"]]
+    assert "Couldn't keep the change to DeviceNote" in capsys.readouterr().err
+
+
+def test_a_sign_in_that_ended_loses_only_the_save_that_found_it(program: Core, tmp_path: Path) -> None:
+    class SignedOut(DeviceFile):
+        """A place whose sign-in has ended, as an atmosphere account's says it:  the next send signs in again."""
+
+        has_signed_in = False
+
+        def apply(self, changes: list[Change]) -> None:
+            """Refuse the first send, knowing none of it was kept."""
+            if not self.has_signed_in:
+                self.has_signed_in = True
+                over = PlaceError("the sign-in has ended")
+                over.has_kept_nothing = True
+                raise over
+            super().apply(changes)
+
+    program._places.behinds["this_device"] = SignedOut(tmp_path / "Notes.device.json")
+
+    async def saves() -> None:
+        for text in ("one", "two", "three"):
+            program.save_thing(DeviceNote(text=text))
+
+    asyncio.run(saves())
+    assert len(DeviceFile(tmp_path / "Notes.device.json").rows_now("device_notes")) == 3
+
+
 def test_with_no_loop_a_refused_save_still_raises(program: Core, watched: WatchedFile) -> None:
     with pytest.raises(PlaceError, match="isn't allowed"):
         program.save_thing(DeviceNote(text="no"))

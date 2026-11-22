@@ -9,7 +9,7 @@ await queue.wait_until_sent()   # before a read of the place, or as the program 
 
 - Under Quart one loop serves every visitor, so a send waits in a thread, as a read does.
 - In the order made.  What's waiting goes as one send;  an `in one go:`'s changes are always a send of their own.
-- A send a place refused is sent again one change at a time, so only what it refuses is lost:
+- A send that failed keeping none of it is sent again one change at a time, so only what can't be kept is lost:
   the JavaScript core's way (epic data, J26).
 - Where nothing can wait (no loop running, a drawing), `send_now()` sends right there.
 - What's heard of each send is heard on the program's own thread (`hear()`), never the one that sent it.
@@ -27,8 +27,6 @@ from spell_core.place_kinds import Change, PlaceBehind, PlaceError
 
 # The most changes sent as one:  what an atmosphere account's `applyWrites` takes.
 MOST_AT_ONCE = 200
-# The failures that say a place kept none of a send, so each change can be tried alone:  no answer might have kept it.
-NOTHING_KEPT = {"refused", "not found", "out of date"}
 
 
 @dataclass(eq=False)
@@ -141,11 +139,14 @@ class PlaceQueue:
         return batch
 
     def _send(self, batch: list[Sending]) -> None:
-        """SIDE EFFECT:  `batch` sent as one `apply()`;  refused, each alone."""
+        """SIDE EFFECT:  `batch` sent as one `apply()`;  none of it kept, each alone.
+
+        - A failure that's no `PlaceError` is one change's own, e.g. a value JSON can't hold:  each alone too.
+        """
         try:
             self.behind.apply([change for sending in batch for change in sending.changes])
         except Exception as error:
-            if len(batch) > 1 and isinstance(error, PlaceError) and error.kind in NOTHING_KEPT:
+            if len(batch) > 1 and (not isinstance(error, PlaceError) or error.has_kept_nothing):
                 for sending in batch:
                     self._send([sending])
                 return
