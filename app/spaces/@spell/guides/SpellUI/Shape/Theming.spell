@@ -30,7 +30,7 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-shape" playground>
-				<button type="button" class="ui button" commandfor="shape-demo-plain-playground" command="--next">Flip left</>
+				<ui-button commandfor="shape-demo-plain-playground" command="--next">Flip left</ui-button>
 				<ui-shape id="shape-demo-plain-playground">
 					<ui-side>
 						<ui-text paragraph>This side starts visible.</>

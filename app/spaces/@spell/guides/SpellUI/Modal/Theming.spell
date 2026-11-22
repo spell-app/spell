@@ -42,7 +42,7 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-modal" playground>
-				<button type="button" class="ui button" commandfor="modal-types-standard-playground" command="--show">Show</>
+				<ui-button commandfor="modal-types-standard-playground" command="--show">Show</ui-button>
 				<ui-modal id="modal-types-standard-playground" closable>
 					<ui-header>Profile Picture</>
 					<ui-content>
