@@ -27,7 +27,8 @@ import { ShippedGuides } from "./ShippedGuides.ts"
  *   - `SAGA:/<id>`:  every guide naming that saga (`<meta name="spell-saga">`)
  * - `prune`, in the main checkout:  the epic folder's copy of every file `main`'s guides folder tracks, deleted, so the
  *   code's is the one copy;  `epic merge` runs it after every merge that moved something onto `main`.
- * - `index`, `check`:  the shipped guides' list and their check (`ShippedGuides`)
+ * - `index`, `check`:  the shipped guides' list and their check (`ShippedGuides`);  the check reads the epic
+ *   plugin's guides too, in the checkout that holds them
  * - Its position:  node only;  the epic folder's files are changed by path, never through git
  *   (the turn's end commits them, `epic turn end`).
  ****************/
@@ -73,7 +74,11 @@ export class Guides {
       return EXIT.OK
     }
     if (verb === "check") {
-      const problems = new ShippedGuides(this.checkout).check({ commandExists: commandsIn(this.checkout) })
+      const plugin = pluginFolderIn(this.checkout)
+      const problems = new ShippedGuides(this.checkout).check({
+        commandExists: commandsIn(this.checkout),
+        plugin: plugin && resolve(this.checkout, plugin)
+      })
       for (const problem of problems) CLI.out(problem)
       CLI.err(
         problems.length ? `${problems.length} problem(s) in the shipped guides` : "the shipped guides stand alone"

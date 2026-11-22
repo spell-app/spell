@@ -122,6 +122,18 @@ describe("ShippedGuides", () => {
     expect(asked).toEqual(["spell bundle"])
   })
 
+  test("a guide in a folder named examples ships:  listed, checked, and linked to (I396)", () => {
+    const metas = '    <meta name="spell-audience" content="makers" />\n'
+    const root = repo("examples", {
+      "guides/examples/examples.html": page("Example Apps", metas),
+      "guides/server.html": page("Server", metas, '<a href="/guides/examples/examples.html">examples</a>')
+    })
+    const shipped = new ShippedGuides(root)
+    shipped.write()
+    expect(shipped.build().guides.map((guide) => guide.path)).toContain("guides/examples/examples.html")
+    expect(shipped.check({ commandExists: () => true })).toEqual([])
+  })
+
   test("commandsIn():  a group and its listed verb are commands;  a verb the group lacks isn't", () => {
     const has = commandsIn(join(import.meta.dirname, "../../.."))
     expect(has(["spell", "server", "start"])).toBe(true)

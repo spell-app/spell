@@ -1,5 +1,5 @@
-import { existsSync, realpathSync } from "node:fs"
-import { join, relative } from "node:path"
+import { existsSync, readdirSync, realpathSync } from "node:fs"
+import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
 import type { SRV } from "spell/server"
 import { componentSets, pageServerSettings } from "spell/server/page/settings"
@@ -26,6 +26,8 @@ import { EPIC_UI } from "spell/epic/server/server.types"
  *   repo, found as the templates are
  * - the engine's templates, at `templates/` (epic `epic-eject` T11), through the checkout's `spell-epic` link when it
  *   has one to this engine's repo;  nothing when they ARE the checkout's (spell-epic's own)
+ * - the epic plugin's guides, at `guides/` (epic `epic-engine` I402), FILE by file:  the checkout and the epic folder
+ *   have guides at that address too, and a guide the checkout has is its own
  * - Who asks:  the docs tools' linker (`doc-links.js`) and the `epic` tool's (`PlanDocFiles.linker`:  `epic lint`'s
  *   link check, and every write), so both read `../../components/epics/` and `../../templates/` alike
  *   (epic `epic-engine` I27:  `epic lint` called them missing)
@@ -63,8 +65,31 @@ export class ServedFolders {
     return {
       [EPIC_UI.path]: ServedFolders.engineDir(root, engine, EPIC_UI.dir),
       ...Object.fromEntries(componentSets(pageServerSettings(root)).map((set) => [set.prefix.slice(1), set.dir])),
-      ...(templates !== "templates" && { templates })
+      ...(templates !== "templates" && { templates }),
+      ...ServedFolders.pluginGuidesUnder(root)
     }
+  }
+
+  /**
+   * The epic plugin's guide files by the address they're served at under checkout `root`, both relative to it:
+   * `{ "guides/airplane.html": "epic/guides/airplane.html" }`.
+   * - through the checkout's link to the engine, as the templates are (`engineDir()`)
+   * - never one whose address the checkout has a file at:  the page server serves that first
+   */
+  private static pluginGuidesUnder(root: string): Record<string, string> {
+    const guides = EpicConfig.pluginGuides()
+    if (!guides) return {}
+    const dir = ServedFolders.engineDir(root, dirname(guides), basename(guides))
+    const folder = resolve(root, dir)
+    if (!existsSync(folder)) return {}
+    const served: Record<string, string> = {}
+    for (const entry of readdirSync(folder, { recursive: true, withFileTypes: true })) {
+      if (!entry.isFile()) continue
+      const path = relative(folder, join(entry.parentPath, entry.name)).split(sep).join("/")
+      const address = `guides/${path}`
+      if (!existsSync(join(root, address))) served[address] = `${dir}/${path}`
+    }
+    return served
   }
 
   /**

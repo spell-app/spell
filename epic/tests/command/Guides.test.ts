@@ -4,14 +4,17 @@
  * - `move`:  a guide copied into the repo's guides folder, with its twin, its picture and its experiments, never its
  *   comments;  a saga's guides at once;  the epic folder keeps its copy
  * - `prune`:  once the base branch tracks the moved files, the epic folder's copies go, its comments stay
+ * - `check`:  the epic plugin's guides are checked too (epic `epic-engine` I402)
  * - `move --plugin`:  into the epic plugin's own guides folder (epic `epic-engine` T130)
  */
 import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
-import { afterAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
+import { CLI } from "spell/cli"
+import { EXIT } from "spell/epic/command/command.types"
 import { Guides } from "spell/epic/command/Guides"
 
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "epic-guides-")))
@@ -145,6 +148,27 @@ describe("epic guides", () => {
       process.env.SPELL_EPIC_PLUGIN_GUIDES = join(TEMP, "elsewhere/guides")
       expect(() => guides.move(["guides/private.html"], { plugin: true })).toThrow(/doesn't hold the epic plugin/)
     } finally {
+      process.env.SPELL_EPIC_PLUGIN_GUIDES = before
+    }
+  })
+
+  test("check reads the epic plugin's guides too, which may link each other (I402)", async () => {
+    const { repo } = scratch("plugin-check")
+    const before = process.env.SPELL_EPIC_PLUGIN_GUIDES
+    process.env.SPELL_EPIC_PLUGIN_GUIDES = join(repo, "epic/guides")
+    const said = vi.spyOn(CLI, "out").mockImplementation(() => {})
+    const toldErr = vi.spyOn(CLI, "err").mockImplementation(() => {})
+    try {
+      mkdirSync(join(repo, "epic/guides/how"), { recursive: true })
+      writeFileSync(join(repo, "epic/guides/away.html"), '<a href="/guides/how/how.html">how</a>')
+      writeFileSync(join(repo, "epic/guides/how/how.html"), '<a href="/epics/x/x.plan.html">plan</a>')
+      expect(await new Guides({ checkout: repo }).run(["check"])).toBe(EXIT.ERRORS)
+      const lines = said.mock.calls.flat().join("\n")
+      expect(lines).toContain("epic/guides/how/how.html:  links /epics/x/x.plan.html, in the epic repo")
+      expect(lines).not.toContain("away.html")
+    } finally {
+      said.mockRestore()
+      toldErr.mockRestore()
       process.env.SPELL_EPIC_PLUGIN_GUIDES = before
     }
   })

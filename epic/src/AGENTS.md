@@ -2896,6 +2896,8 @@ the epic page shown in both tabs).
       - for `PlanDocFiles`' linker and `doc-links.js`'s, one linker for content and repo pages alike
     - both told that checkout's SERVED folders (`ServedFolders`, epic `epic-engine` I27):
       a link to `components/epics/` or `templates/` checks as the folder it serves (`epic lint` called them missing)
+      - and to one of the plugin's own guides, `/guides/airplane.html`, as its file (epic `epic-engine` I402);
+        the checkout's own guide wins
     - links to the engine's old places in spell-app (`packages/epics/...`):  fixed once by the migration step
       `engine-links`, gone since epic `repo-split` P14
     - `doc-links.js` is its command line.

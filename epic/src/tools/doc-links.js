@@ -41,7 +41,7 @@ import { ServedFolders } from "spell/epic/tool/ServedFolders"
 import { RootLinks } from "spell/epic/tool/migrations/RootLinks"
 
 import { markdownTagsOnOneLine } from "./MarkdownTags.js"
-import { CONTENT, PACKAGE, ROOT } from "./pages.js"
+import { CONTENT, PACKAGE, PLUGIN_GUIDES, ROOT } from "./pages.js"
 
 /**
  * The checkout the links are from:  the kit, when `ROOT` is one of its folders (epic `repo-split` P20, I46);
@@ -53,8 +53,9 @@ const CHECKOUT = kitOf(ROOT) ?? ROOT
 
 /**
  * The folders served at another address under checkout `root` (`ServedFolders`):  the component sets'
- * (`{ "components/epics": "epic/src/docs" }`), and the engine's templates, at `templates/`, so a guide's
- * `../templates/durable.html` checks against spell-epic's copy.  The `epic` tool's linker is told the same.
+ * (`{ "components/epics": "epic/src/docs" }`), the engine's templates, at `templates/`, so a guide's
+ * `../templates/durable.html` checks against spell-epic's copy, and the epic plugin's guides, at `guides/`.
+ * The `epic` tool's linker is told the same.
  */
 function servedUnder(root) {
   return ServedFolders.under(root, PACKAGE)
@@ -77,13 +78,21 @@ export function linkerUnder(root) {
 /** The epic folder, real:  a page in it is taken by its real folder, whichever link it's reached through. */
 const REAL_CONTENT = SRV.RealPath.of(CONTENT)
 
+/** The epic plugin's guides folder, real;  `undefined` when there's none. */
+const REAL_PLUGIN_GUIDES = PLUGIN_GUIDES && SRV.RealPath.of(PLUGIN_GUIDES)
+
 /**
- * The linker for a page in `docDir`, and that folder as it takes it:  a content page's folder real, so it's laid
- * under the checkout as served;  any other as given.
+ * The linker for a page in `docDir`, and that folder as it takes it:
+ * - a content page's folder real, so it's laid under the checkout as served
+ * - an epic plugin guide's as served, `<root>/guides/...`:
+ *   here, as only its files are the linker's, never its folder (`ServedFolders`;  epic `epic-engine` I402)
+ * - any other as given
  */
 export function linkerFor(docDir) {
   const real = SRV.RealPath.of(resolvePath(docDir))
   if (SRV.pathInside(REAL_CONTENT, real) !== undefined) return { linker, dir: real }
+  const inPlugin = REAL_PLUGIN_GUIDES && SRV.pathInside(REAL_PLUGIN_GUIDES, real)
+  if (inPlugin !== undefined) return { linker, dir: join(linker.root, "guides", inPlugin) }
   return { linker, dir: docDir }
 }
 

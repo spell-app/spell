@@ -154,6 +154,7 @@ One your users need belongs with your code instead:  versioned on branches, revi
   - `epic guides index` writes their list beside them, for your app to read
 - `epic guides check` fails a shipped guide that links your epic repo or a guide that doesn't ship, or names a
   command or file that isn't there.
+  - In the repo that holds the epic plugin, it checks the plugin's own guides too:  they may link each other.
 - `epic guides list` says where each guide is:  in your code, in the epic folder, or both while a move waits.
 
 ## <a id="your-house-style"></a>Your house style
