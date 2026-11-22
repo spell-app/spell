@@ -3,11 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Data in Spell</title>
+    <title>Data</title>
     <meta
       name="description"
-      content="How a Spell program reads and saves data that lives somewhere else, a server, a folder, a sheet, a room, Airtable or this device, in the same words for every one:  the guide to epic data."
+      content="How a Spell program reads and saves data that lives somewhere else, a server, a folder, a sheet, a room, Airtable, the cloud or this device, in the same words for every one."
     />
+    <meta name="spell-audience" content="makers" />
+    <meta name="spell-topic" content="Data and Sites" />
+    <meta name="spell-start-here" content="3" />
     <meta name="spell-saga" content="spell-language" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
   </head>
@@ -16,30 +19,23 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html" target="src-packages-docs-index-html">Spell Epic</ui-breadcrumb>
-          <ui-breadcrumb selected>Data in Spell</ui-breadcrumb>
+          <ui-breadcrumb link="/pages/index.html">Docs</ui-breadcrumb>
+          <ui-breadcrumb selected>Data</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
-          ><header class="spell-page-head"><h1>Data in Spell</h1></header></ui-sticky
+          ><header class="spell-page-head"><h1>Data</h1></header></ui-sticky
         >
         <p class="lede">
           One line says where a program's things live. The rest of the program reads and changes them as if they were in
           memory: it waits, cancels, saves, heals and shares by itself.
         </p>
         <ui-list class="spell-meta">
-          <ui-item icon="map"
-            ><b>Epic page:</b> <a href="/epics/data/data.plan.html" target="data">epic data</a></ui-item
-          >
-          <ui-item icon="book"
-            ><b>Why it's built this way:</b>
-            <a href="/guides/data/survey.html" target="guides-data-survey-html">The Data Problem: A Survey</a></ui-item
-          >
           <ui-item icon="user"
             >Written for: someone writing a Spell program that keeps data, or working on the code under it</ui-item
           >
           <ui-item icon="flag"
-            >Status: <ui-label size="mini" color="green">built</ui-label>, merged into main; real Google Sheets,
-            Airtable and AT Protocol accounts are still manual tests</ui-item
+            >Status: <ui-label size="mini" color="green">built</ui-label>; real Google Sheets, Airtable and AT Protocol
+            accounts are still to be tried by hand</ui-item
           >
         </ui-list>
 
@@ -81,7 +77,7 @@
               hand edits: PokéAPI for PokéSpell, and six more in the Public Servers example.
             </li>
             <li>
-              <b>A copy on this device, when asked.</b> <code>- keep a copy on this device</code> makes a reload before
+              <b>A copy on this device, when asked.</b> <code>keep a copy on this device</code> makes a reload before
               the next check send no request at all: Star Wars' second load sends 0, its first 6.
             </li>
           </ul>
@@ -89,13 +85,13 @@
 
         <ui-section id="2-where" label="2. Saying where" sticky collapsible dividing open="false">
           <!-- prettier-ignore -->
-          <ui-code language="spell" collapsed>family cookbook is a web server at "https://api.example.com/v1":
-	- check it every 5 minutes
+          <ui-code language="spell" collapsed>family cookbook is a web server at "https://api.example.com/v1"
+	check it every 5 minutes
 
-a "recipe" is a thing:
-	- it lives in family cookbook
-	- its "title" is text
-	- its "servings" is a number or "unknown"</ui-code>
+a "recipe" is a thing
+	it lives in family cookbook
+	its "title" is text
+	its "servings" is a number or "unknown"</ui-code>
           <table>
             <thead>
               <tr>
@@ -122,18 +118,17 @@ a "recipe" is a thing:
                 <td>a folder of JSON files, behind the place server</td>
                 <td>yes</td>
                 <td>
-                  <ui-label size="mini" color="green">Works</ui-label> in tests and the recipe demo; the ingest can't
-                  look at one
+                  <ui-label size="mini" color="green">Works</ui-label> in tests and the recipe demo; a name alone
+                  (<code>"recipes"</code>) is the program's own folder, in its space (<a href="#cloud"
+                    >Saved in the cloud</a
+                  >)
                 </td>
               </tr>
               <tr>
                 <td><code>a file at</code></td>
                 <td>one JSON file</td>
                 <td>yes</td>
-                <td>
-                  <ui-label size="mini" color="green">Works</ui-label> in tests and the recipe demo; the ingest can't
-                  look at one
-                </td>
+                <td><ui-label size="mini" color="green">Works</ui-label> in tests and the recipe demo</td>
               </tr>
               <tr>
                 <td><code>a room at</code></td>
@@ -161,9 +156,8 @@ a "recipe" is a thing:
                 </td>
                 <td>behind the place server</td>
                 <td>
-                  <ui-label size="mini" color="green">Works</ui-label> as a sheet does; Excel will be once
-                  <a href="/epics/data/data.plan.html#p-excel-sheets" target="data">Excel Sheets</a> merges (built, in
-                  tests only)
+                  <ui-label size="mini" color="green">Works</ui-label> as a sheet does, and as an excel file does for a
+                  <code>.xlsx</code>
                 </td>
               </tr>
               <tr>
@@ -174,10 +168,18 @@ a "recipe" is a thing:
                 </td>
                 <td>behind the place server</td>
                 <td>
-                  <ui-label size="mini" color="yellow">Built</ui-label> in
-                  <a href="/epics/data/data.plan.html#p-excel-sheets" target="data">Excel Sheets</a>, not merged yet:
-                  read in a browser with no key; written behind the place server, keeping its other sheets, formulas and
-                  column widths, but not its cell colours and fonts (the free SheetJS drops styles on a save)
+                  <ui-label size="mini" color="green">Works</ui-label> read in a browser with no key; written behind the
+                  place server, keeping its other sheets, formulas and column widths, but not its cell colours and fonts
+                  (the free SheetJS drops styles on a save)
+                </td>
+              </tr>
+              <tr>
+                <td><code>is saved in the cloud</code></td>
+                <td>each person's own folder on Spell's server</td>
+                <td>yes, once signed in</td>
+                <td>
+                  <ui-label size="mini" color="green">Works</ui-label> on a cloud server on this machine; no public
+                  address yet (<a href="#cloud">Saved in the cloud</a>)
                 </td>
               </tr>
               <tr>
@@ -265,13 +267,13 @@ a "recipe" is a thing:
               </ul>
             </li>
             <li>
-              A key is named, never written: <code>it is authenticated with the secret "COOKBOOK_KEY"</code>, kept on a server side. A
-              key written into a program won't compile.
+              A key is named, never written: <code>it is authenticated with the secret "COOKBOOK_KEY"</code>, kept on a
+              server side. A key written into a program won't compile.
               <ul>
                 <li>
                   A server that doesn't want it as <code>Authorization: Bearer</code> says where:
-                  <code>- its secret goes in its "X-Api-Key" header</code>, or
-                  <code>- its secret goes in the address as "api_key"</code>.
+                  <code>its secret goes in its "X-Api-Key" header</code>, or
+                  <code>its secret goes in the address as "api_key"</code>.
                 </li>
               </ul>
             </li>
@@ -288,10 +290,10 @@ a "recipe" is a thing:
             </li>
             <li>
               A server with an OpenAPI description is read from it whole:
-              <code>spell place ingest &lt;address&gt; --spec &lt;its description&gt;</code> (epic <code>data</code> P49).
+              <code>spell place ingest &lt;address&gt; --spec &lt;its description&gt;</code>.
               <ul>
                 <li>
-                  Every list, field, write and action route comes from its schemas, with no cap:  NetBox's demo gives 143
+                  Every list, field, write and action route comes from its schemas, with no cap: NetBox's demo gives 143
                   lists.
                 </li>
                 <li>
@@ -299,37 +301,42 @@ a "recipe" is a thing:
                   <code>spell place verify App.api.spell</code> reads each list and one thing of it by its id, and turns
                   that into <code>this type is verified</code> or <code>this type is failed</code>.
                 </li>
-                <li>When, where, its status and why stay in <code>App.api.json5</code>, each collection's <code>state</code>.</li>
+                <li>
+                  When, where, its status and why stay in <code>App.api.json5</code>, each collection's
+                  <code>state</code>.
+                </li>
               </ul>
             </li>
             <li>
               What a server lets be done to a type's things is a line on the thing:
               <code>enabled operations are read, add, change</code>.
               <ul>
-                <li>No line means every operation;  a line only narrows.  <code>read</code> alone is read only.</li>
-                <li>An action route joins the list by its name:  <code>enabled operations are add, complete</code>.</li>
+                <li>No line means every operation; a line only narrows. <code>read</code> alone is read only.</li>
+                <li>An action route joins the list by its name: <code>enabled operations are add, complete</code>.</li>
                 <li><code>all operations are disabled</code> turns the whole route off, reading too.</li>
                 <li>
                   The same line one step in under a collection's <code>live at</code> line is the switch for all of
-                  them;  a thing's own line can only narrow it.
+                  them; a thing's own line can only narrow it.
                 </li>
-                <li>What's left out still compiles, and says so when it runs:  "Jobs can't be deleted here."</li>
+                <li>What's left out still compiles, and says so when it runs: "Jobs can't be deleted here."</li>
               </ul>
             </li>
             <li>
               A key that's a short-lived token made from a secret:
-              <code>it is authenticated with a token from "https://auth.example.com/api-keys/{key id}/token", made with the secret "ACME_API_KEY"</code>.
-              Spell makes it, keeps it, and makes another before it runs out.
+              <code
+                >it is authenticated with a token from "https://auth.example.com/api-keys/{key id}/token", made with the
+                secret "ACME_API_KEY"</code
+              >. Spell makes it, keeps it, and makes another before it runs out.
             </li>
             <li>
-              <code>its data is private, located in "~/.spell/places/acme"</code>:  no real value goes in the
-              description, and the rows read go in that folder.  <code>spell place ingest --no-examples</code> writes it.
+              <code>its data is private, located in "~/.spell/places/acme"</code>: no real value goes in the
+              description, and the rows read go in that folder. <code>spell place ingest --no-examples</code> writes it.
             </li>
             <li>
-              One place, several deployments (dev, staging, production):  the project's file lists them under
-              <code>places</code>, each its own address, key, and read only or not.  <code>--deployment</code> or
-              <code>SPELL_DEPLOYMENT</code> picks one for <code>spell place verify</code>, which never writes to a
-              read only one.
+              One place, several deployments (dev, staging, production): the project's file lists them under
+              <code>places</code>, each its own address, key, and read only or not. <code>--deployment</code> or
+              <code>SPELL_DEPLOYMENT</code> picks one for <code>spell place verify</code>, which never writes to a read
+              only one.
             </li>
           </ul>
           <p>
@@ -459,7 +466,100 @@ a "recipe" is a thing:
           </ul>
         </ui-section>
 
-        <ui-section id="3-reading" label="3. Reading" sticky collapsible dividing open="false">
+        <ui-section id="cloud" label="3. Saved in the cloud, and shared" sticky collapsible dividing open="false">
+          <!-- prettier-ignore -->
+          <ui-code language="spell" collapsed>## Family Cookbook:  your recipes, saved in the cloud
+family cookbook is saved in the cloud
+
+a "recipe" is a thing
+	it lives in family cookbook
+	its "title" is text
+	its "servings" is a number
+	its "notes" is text</ui-code>
+          <ul>
+            <li>
+              That line is a folder of each person's own on Spell's server: their space's
+              <code>__data/family-cookbook</code>.
+              <ul>
+                <li>Signed out, every change stays in this browser, and the sign-in bar says so.</li>
+                <li>Signed in, the changes go up within seconds, and every device they sign in on sees them.</li>
+                <li>In Spanish: <code>recetario familiar se guarda en la nube</code>.</li>
+              </ul>
+            </li>
+            <li>
+              A Firebase or Supabase app gets the same from an SDK, a console and a config file. Here it's the sentence:
+              the rest of the program reads and saves the way it did on this device.
+            </li>
+          </ul>
+          <h4>A data folder by its address</h4>
+          <ul>
+            <li>
+              <code>family cookbook is a data folder at "owen@spell/recipes"</code> keeps its rows in that space's
+              folder.
+            </li>
+            <li><code>"recipes"</code> alone is the program's own folder, shared by everyone who runs it.</li>
+            <li>
+              <code>personal "recipes"</code> is one per person, in their own space (Spanish:
+              <code>carpeta de datos personal en "recetas"</code>).
+            </li>
+            <li>
+              A data folder is asked what changed at most every 5 seconds: a faster <code>check it every</code> is
+              raised to that, with a warning at the line.
+            </li>
+            <li>
+              <code>task sheet is a sheet at "tasks.csv"</code> and <code>a json file at "recipes.json"</code> work the
+              same way: a file's name alone is a file in the program's own folder, which takes writes.
+            </li>
+          </ul>
+          <h4>Signing in</h4>
+          <ul>
+            <li>
+              People sign in by email: a link and a 6-digit code. The link works on any device, and the device that
+              asked signs in too.
+            </li>
+            <li>
+              It's invite only: an invite makes the person's Spell account, <code>ana@spell</code>. Once signed in, they
+              can link a Bluesky account, and sign in with it after that.
+            </li>
+          </ul>
+          <h4>Sharing a space with its members</h4>
+          <ul>
+            <li>
+              A space's own folder (<code>@family/cookbook</code>) is written by its members. A program's own data is
+              each row's owner's only.
+            </li>
+            <li>
+              Every record in a members' folder is the space's, with <code>by</code> naming who saved it: Ana and Bo
+              editing one recipe keep one record.
+            </li>
+            <li>
+              Each member has one of three roles:
+              <ul>
+                <li><b>viewer:</b> reads, and posts and comments where the space allows it</li>
+                <li><b>editor:</b> also adds rows and files, and changes any of them; removes only their own</li>
+                <li><b>manager:</b> also makes new pages and apps, publishes, removes anything, and adds people</li>
+              </ul>
+            </li>
+            <li>
+              Changing a program's own pages is a right of its own, <b>design</b>: managers have it, and an org gives it
+              to anyone else.
+            </li>
+            <li>A member may always leave; the last manager can't.</li>
+            <li>
+              Anyone else is refused, in English and Spanish: "Your role can't write here: you aren't a member of
+              @family". A refusal names the role it takes: "it takes an editor".
+            </li>
+            <li>Limits: 1 MB a thing, 100 MB a space. A save over either is refused, and stays on the page.</li>
+          </ul>
+          <p>
+            <b>Not yet:</b> a public address. Spell's cloud server runs on this machine, and its mail lands in a catcher
+            here (<code>spell space cloud mail</code> reads it); going live waits on a public host and a real mail
+            service. Orgs, their roles and spaces, and running the server: the
+            <a href="/app/README-spaces.md" target="src-app-readme-spaces-md">spaces README</a>.
+          </p>
+        </ui-section>
+
+        <ui-section id="3-reading" label="4. Reading" sticky collapsible dividing open="false">
           <ul>
             <li>
               The reads, each a phrase:
@@ -478,17 +578,17 @@ a "recipe" is a thing:
               Every saved type has <code>its created</code> and <code>its modified</code> by itself: two dates Spell
               stamps as things are saved.
               <ul>
-                <li><code>- it keeps no times</code> turns them off, for a type with no use for them.</li>
+                <li><code>it keeps no times</code> turns them off, for a type with no use for them.</li>
                 <li>A place that can't hold them is neither asked for them nor sorted by them.</li>
                 <li>Saved again by undo, a thing keeps the <code>created</code> it had.</li>
               </ul>
             </li>
             <li>
-              In a <code>.spellml</code> drawing:
+              In a drawing (<code>to draw it</code>):
               <code>&lt;for recipe in the matches empty="No recipes yet." /&gt;</code>.
               <ul>
                 <li>
-                  <code>the matches</code> is a property of the drawing:
+                  <code>the matches</code> is a property of the app:
                   <code>every recipe where its title includes the search</code>.
                 </li>
                 <li>No body: each item draws itself. <code>for films</code> names the item <code>film</code>.</li>
@@ -528,8 +628,11 @@ a "recipe" is a thing:
             <li>
               In plain Spell, riders under a read say the same:
               <ul>
-                <li><code>while waiting:</code>, <code>if there are none:</code></li>
-                <li><code>if that fails:</code>, <code>if that fails say "..."</code></li>
+                <li>
+                  <code>while waiting</code>, <code>if there are none</code>, each with its steps under it, or after a
+                  colon on the same line, as PokéSpell's search does
+                </li>
+                <li><code>if that fails</code>, <code>if that fails say "..."</code></li>
                 <li>
                   <code>show them 12 at a time</code>: how many a page holds, or each lot of more as you scroll (on
                   <code>&lt;for&gt;</code>, <code>page-size="12"</code>).
@@ -557,6 +660,14 @@ a "recipe" is a thing:
               looking for text in a field the server searches. The program still checks what comes back.
             </li>
             <li>
+              A field a server names its things by (GitHub names a person by their <code>login</code>) is their id, and
+              still a field the program can read and show.
+            </li>
+            <li>
+              A search handed to a server is checked again in the browser: a server's own search may look in more fields
+              than the <code>where</code> names, so only what the <code>where</code> says is kept.
+            </li>
+            <li>
               <code>the saved todos</code> always means the place's, even beside a property of that name; an
               <code>add</code> to a list worked out from a place warns that it saves nothing.
             </li>
@@ -567,10 +678,10 @@ a "recipe" is a thing:
           </ul>
         </ui-section>
 
-        <ui-section id="4-writing" label="4. Changing, undoing, healing" sticky collapsible dividing open="false">
+        <ui-section id="4-writing" label="5. Changing, undoing, healing" sticky collapsible dividing open="false">
           <ul>
             <li>A change is one field of one thing, kept on the device, sent when the action that made it ends.</li>
-            <li><code>in one go:</code> sends several together, or none.</li>
+            <li><code>in one go</code>, its steps under it, sends several together, or none.</li>
             <li>Undo before it's sent drops it; after, it sends the change back.</li>
             <li>A refused save merges per field, yours winning, with a notice and Use theirs.</li>
             <li>A failed save shows a notice with Retry.</li>
@@ -593,35 +704,33 @@ a "recipe" is a thing:
                   are.
                 </li>
                 <li>
-                  Recipe Box's Edit screen is the whole thing, in today's words (<a
-                    href="/epics/data/data.plan.html#q36"
-                    target="data"
-                    >Q36</a
-                  >):
+                  Recipe Box's Edit screen is the whole thing, shortened:
                   <!-- prettier-ignore -->
-                  <ui-code language="spellml" collapsed>&lt;spell-view "recipe editor"&gt;
-	&lt;property "recipe" type="recipe"/&gt;
-	&lt;property "draft"&gt;a draft of its recipe&lt;/property&gt;
+                  <ui-code language="spell" collapsed>a "recipe editor" is a view
+	its "recipe" is a recipe
+	its "draft" is a draft of its recipe
 
-	&lt;action "save it"&gt;
+	to save it, can't be undone
 		save its draft
 		set the editing of the recipe box to nothing
-	&lt;/action&gt;
 
-	&lt;action "cancel it"&gt;
+	to cancel it, can't be undone
 		discard its draft
 		set the editing of the recipe box to nothing
-	&lt;/action&gt;
 
-	&lt;draw&gt;
-		&lt;form value={its draft}&gt;
-			&lt;field label="Recipe name"&gt;&lt;input name="title"/&gt;&lt;/field&gt;
-			&lt;field label="Serves"&gt;&lt;input name="servings" type="number"/&gt;&lt;/field&gt;
-		&lt;/form&gt;
-		&lt;button color="primary" onClick={save it}&gt;Save&lt;/button&gt;
-		&lt;button onClick={cancel it}&gt;Cancel&lt;/button&gt;
-	&lt;/draw&gt;
-&lt;/spell-view&gt;</ui-code>
+	to draw it
+		&lt;card class="editor"&gt;
+			&lt;content&gt;
+				&lt;form value={its draft}&gt;
+					&lt;field label="Recipe name"&gt;&lt;input name="title" /&gt;&lt;/field&gt;
+					&lt;field label="Serves" inline&gt;&lt;input name="servings" type="number" /&gt;&lt;/field&gt;
+				&lt;/form&gt;
+			&lt;/content&gt;
+			&lt;extra&gt;
+				&lt;button color="primary" onClick={save it}&gt;Save&lt;/button&gt;
+				&lt;button onClick={cancel it}&gt;Cancel&lt;/button&gt;
+			&lt;/extra&gt;
+		&lt;/card&gt;</ui-code>
                 </li>
               </ul>
             </li>
@@ -642,7 +751,7 @@ a "recipe" is a thing:
           <h4>A server's actions</h4>
           <p>
             A server's own action, <code>to complete a job is at "/api/jobs/{id}/complete"</code>, is an action of the
-            job like any other, and steps can run around it, from any file (epic <code>data</code> P50).
+            job like any other, and steps can run around it, from any file.
           </p>
           <ul>
             <li>
@@ -671,16 +780,17 @@ a "recipe" is a thing:
             </li>
             <li>
               The app's own, <code>when any server call fails</code>, runs last, for what the others passed on; then
-              Spell's notice, only for what nobody caught. <code>otherwise do nothing</code> there keeps the notice away.
+              Spell's notice, only for what nobody caught. <code>otherwise do nothing</code> there keeps the notice
+              away.
             </li>
             <li>
-              The order, from the file each is in: before and while steps from a page's file first, then the app's,
-              then the <code>.api.spell</code> file's; after and failure steps the other way round. A page's before and
-              while steps only run while it's shown; its after steps even once it's left.
+              The order, from the file each is in: before and while steps from a page's file first, then the app's, then
+              the <code>.api.spell</code> file's; after and failure steps the other way round. A page's before and while
+              steps only run while it's shown; its after steps even once it's left.
             </li>
             <li>
-              A second <code>to complete a job</code> wraps the server's: <code>call netbox</code> (or, in the API
-              file, <code>call the server</code>) runs it where it says. One that never calls it is warned of.
+              A second <code>to complete a job</code> wraps the server's: <code>call netbox</code> (or, in the API file,
+              <code>call the server</code>) runs it where it says. One that never calls it is warned of.
             </li>
             <li>
               Spanish: <code>antes de completar un trabajo</code>, <code>mientras se completa un trabajo</code>,
@@ -691,7 +801,7 @@ a "recipe" is a thing:
           </ul>
         </ui-section>
 
-        <ui-section id="5-people" label="5. Several people" sticky collapsible dividing open="false">
+        <ui-section id="5-people" label="6. Several people" sticky collapsible dividing open="false">
           <ul>
             <li>
               The person using the program: <code>they</code>, <code>them</code>.
@@ -700,12 +810,12 @@ a "recipe" is a thing:
                 <li><code>everyone here</code> is who's in the room now.</li>
               </ul>
             </li>
-            <li><code>when someone else changes it:</code> runs for another person's change only.</li>
+            <li><code>when someone else changes it</code> runs for another person's change only.</li>
             <li>A room's referee gives every change one order: two people settle in about half a second.</li>
           </ul>
         </ui-section>
 
-        <ui-section id="6-fields" label="6. The server's names and numbers" sticky collapsible dividing open="false">
+        <ui-section id="6-fields" label="7. The server's names and numbers" sticky collapsible dividing open="false">
           <ul>
             <li>
               A field finds the server's spelling by its words: <code>its "hair color" is text</code>.
@@ -735,11 +845,11 @@ a "recipe" is a thing:
           </ul>
         </ui-section>
 
-        <ui-section id="7-device" label="7. A copy on this device" sticky collapsible dividing open="false">
+        <ui-section id="7-device" label="8. A copy on this device" sticky collapsible dividing open="false">
           <!-- prettier-ignore -->
-          <ui-code language="spell" collapsed>poke api is a web server at "https://pokeapi.co/api/v2":
-	- check it once a day
-	- keep a copy on this device</ui-code>
+          <ui-code language="spell" collapsed>poke api is a web server at "https://pokeapi.co/api/v2"
+	check it once a day
+	keep a copy on this device</ui-code>
           <ul>
             <li>
               A place that says so keeps what it reads in the browser's database: its rows, its pages, the things its
@@ -751,21 +861,21 @@ a "recipe" is a thing:
             </li>
             <li>A server's longer <code>max-age</code> wins; <code>no-store</code> keeps nothing.</li>
             <li>
-              50 MB a place, unless the line says (<code>- keep a copy on this device, up to 20 MB</code>): what was
-              read least recently goes first, and a full database discards the same way, then tries again.
+              50 MB a place, unless the line says (<code>keep a copy on this device, up to 20 MB</code>): what was read
+              least recently goes first, and a full database discards the same way, then tries again.
             </li>
             <li>
               A write discards that place's copies; <code>reload the films</code> asks the server whatever's kept. A
               place with a key keeps each person's copies apart, forgotten when they sign out.
             </li>
             <li>
-              Spanish: <code>- guarda una copia en este dispositivo</code>, <code>hasta 20 MB</code>. Star Wars and
+              Spanish: <code>guarda una copia en este dispositivo</code>, <code>hasta 20 MB</code>. Star Wars and
               PokéSpell keep one; the ingest never writes the line.
             </li>
           </ul>
         </ui-section>
 
-        <ui-section id="8-servers" label="8. Seven public servers" sticky collapsible dividing open="false">
+        <ui-section id="8-servers" label="9. Seven public servers" sticky collapsible dividing open="false">
           <p>
             Each example's API file comes from <code>spell place ingest</code>, untouched by hand, and each server was
             picked for one shape it adds:
@@ -834,134 +944,28 @@ a "recipe" is a thing:
           </ul>
         </ui-section>
 
-        <ui-section id="10-why" label="9. Why it's built this way" sticky collapsible dividing open="false">
-          <p>
-            The long version is
-            <a href="/guides/data/survey.html" target="guides-data-survey-html">The Data Problem: A Survey</a>. The
-            calls a reader would trip on:
-          </p>
-          <ul>
-            <li>
-              <b>A server a page can no longer ask is read from where it publishes its data, pinned.</b>
-              <ul>
-                <li>
-                  It happens when a free version is taken down, and the next one needs a key or refuses requests from a
-                  browser page.
-                </li>
-                <li>
-                  REST Countries, for one: its free version (v3.1) is gone, and its v5 is both. So its tab reads the
-                  same data from the code repository it's published in, at a fixed version, with no key.
-                </li>
-                <li>Choosing fields (<code>?fields=</code>) is lost.</li>
-                <li>Owen picked keeping it over dropping the tab; moving to v5 stays a todo.</li>
-              </ul>
-            </li>
-            <li>
-              <b>A copy on the device is opt-in:</b> Owen, "make sure the caching is opt-in!"
-              <ul>
-                <li>Without the line a page reads as it always did, memory only.</li>
-                <li>A place that needs a key or a sign-in is kept only because its line says so, like any other.</li>
-              </ul>
-            </li>
-            <li>
-              <b>A stale copy is re-read through the browser's own cache,</b> not with an <code>If-None-Match</code> of
-              ours: swapi refuses that header from a page.
-            </li>
-            <li>
-              <b>A search handed to a server is still checked in the browser.</b>
-              <ul>
-                <li>
-                  A server's own search may match more loosely than the program asked: it may look in more fields than
-                  the one the <code>where</code> names.
-                </li>
-                <li>
-                  So the program goes over the few rows that came back, and keeps exactly what its
-                  <code>where</code> says.
-                </li>
-                <li>The Star Wars server (swapi), for one, looks in more than one field on some of its lists.</li>
-              </ul>
-            </li>
-            <li>
-              <b>A field a server names its things by is still a field you can read.</b>
-              <ul>
-                <li>
-                  Some servers have no number for a thing: they name it by one of its fields, and Spell uses that field
-                  as its id.
-                </li>
-                <li>
-                  It's still there under its own name too, so the program can show it. It used to be moved into the id,
-                  and read empty.
-                </li>
-                <li>
-                  GitHub, for one, names a person by their login: <code>its login</code> showed nothing, and so did a
-                  Wikipedia page's <code>title</code>.
-                </li>
-              </ul>
-            </li>
-            <li>
-              <b>A list kept under each thing shows only what the server answered.</b>
-              <ul>
-                <li>
-                  Some servers keep a list under each thing, at that thing's own address: a post's comments, under the
-                  post.
-                </li>
-                <li>
-                  A thing the program adds doesn't join that list until the server answers with it. Nothing in a new one
-                  says which thing it's under, so it would have joined every thing's list at once.
-                </li>
-                <li>
-                  JSONPlaceholder, for one, keeps each post's comments under it: a new comment would have shown under
-                  every post.
-                </li>
-                <li>
-                  To see a new one at once, read the whole list with a <code>where</code>:
-                  <code>every todo where its user id is 1</code> takes a todo added here.
-                </li>
-              </ul>
-            </li>
-            <li>
-              <b>A server that searches everything about a thing gets words of its own:</b>
-              <code>every artwork matching the search</code>.
-              <ul>
-                <li>
-                  Some servers search by their own rules: they look at all of each thing (its tags, its maker ...) and
-                  answer only the ids that matched, not where the text was found.
-                </li>
-                <li><code>matching</code> hands the text to that search and takes what it answers, as it is.</li>
-                <li>
-                  A <code>where</code> couldn't: <code>where its title includes the search</code> would read every
-                  result in full, then drop the ones that matched on a tag.
-                </li>
-                <li>The Metropolitan Museum's collection, for one, searches this way.</li>
-              </ul>
-            </li>
-            <li>
-              <b>In the code Spell writes, a property holding one saved thing is read carefully.</b>
-              <ul>
-                <li>
-                  Such a property can be empty: its thing may not have arrived yet, or been removed. So
-                  <code>the title of its page</code> becomes <code>this.page?.title</code>, which is nothing then, not a
-                  crash.
-                </li>
-                <li>
-                  When the line just before has checked (<code>if its page</code>, <code>its page and ...</code>), the
-                  care is dropped: <code>this.page.title</code>.
-                </li>
-                <li>Not inside a drawing's function, though: it runs again later, when the page may be gone.</li>
-              </ul>
-            </li>
-          </ul>
-        </ui-section>
-
         <ui-section id="11-limits" label="10. Limits" sticky collapsible dividing open="false">
           <ul>
             <li>
               <b>Not yet:</b> manual tests on real accounts: a Google Sheet, Airtable, an AT Protocol account, two
               people on one recipe, Use a sample, two windows on a live room, PokéSpell's cry playing.
             </li>
-            <li>Python can't run a place yet: a Python project with a place doesn't compile, and says why.</li>
             <li>
-              REST Countries is a pinned file checked every 30 seconds: 1.4 MB of countries, cached by the CDN a week.
+              A program compiled to Python keeps things in five kinds of place: a database on this device (a file beside
+              the program), a data folder, a sheet, an excel file, and an atmosphere account. Any other kind (a web
+              server, GraphQL, Airtable, a Google Sheet, a room, the cloud) is refused as it compiles, saying it isn't
+              in Python yet.
+            </li>
+            <li>
+              REST Countries' free version is gone, and its next one needs a key and refuses a browser page. So its tab
+              reads the same data from the code repository it's published in, at a fixed version: a file checked every
+              30 seconds, 1.4 MB of countries, cached by the CDN a week. Choosing fields (<code>?fields=</code>) is
+              lost.
+            </li>
+            <li>
+              A list a server keeps under each thing (a post's comments) shows only what the server answered: a comment
+              added here joins it once the server answers with it. To see a new one at once, read the whole list with a
+              <code>where</code>: <code>every todo where its user id is 1</code>.
             </li>
             <li>
               The Met: its search gives its first 100 only, and <code>every artwork</code> reads all 500,000 ids in one
@@ -976,8 +980,8 @@ a "recipe" is a thing:
               yet.
             </li>
             <li>
-              <code>spell place ingest</code> can't look at a room, a data folder, a file, an Airtable or an atmosphere
-              account, and writes English Spell only.
+              <code>spell place ingest</code> can't look at an atmosphere space, the cloud, or a place on this device.
+              It writes Spanish Spell into a file named <code>.es.spell</code>, English into any other.
               <ul>
                 <li>What works now, kind by kind: the table in <a href="#2-where">Saying where</a>.</li>
               </ul>
@@ -987,7 +991,6 @@ a "recipe" is a thing:
               Spell UI's Spanish attribute names are ASCII: <code>tamano</code>, not <code>tamaño</code>, though a tag
               can be typed with its accent (<code>&lt;botón&gt;</code>).
             </li>
-            <li>The Cloud and publishing are the future epic <code>atmosphere</code>.</li>
           </ul>
         </ui-section>
 
@@ -1011,37 +1014,32 @@ a "recipe" is a thing:
               <tr>
                 <td>What compiled Spell calls</td>
                 <td>
-                  <code>spell/parser/core</code>:
-                  <ul>
-                    <li>
-                      <a href="/parser/src/core/saved.ts" target="src-parser-src-core-saved-ts"><code>saved.ts</code></a
-                      >,
-                      <a href="/parser/src/core/places.ts" target="src-parser-src-core-places-ts"
-                        ><code>places.ts</code></a
-                      >
-                    </li>
-                    <li>
-                      <a href="/src/element/drawnWindow.ts" target="src-element-drawnwindow-ts"
-                        ><code>drawnWindow.ts</code></a
-                      >
-                    </li>
-                  </ul>
+                  <code>spell/parser/core</code>: <a href="/parser/src/core/saved.ts" target="src-parser-src-core-saved-ts"><code>saved.ts</code></a
+                  >,
+                  <a href="/parser/src/core/places.ts" target="src-parser-src-core-places-ts"><code>places.ts</code></a>
+                </td>
+              </tr>
+              <tr>
+                <td>A long list drawing what fits, and more as you scroll</td>
+                <td>
+                  <code>spell/element</code>:
+                  <a href="/src/element/drawnWindow.ts" target="src-src-element-drawnwindow-ts"><code>drawnWindow.ts</code></a>
                 </td>
               </tr>
               <tr>
                 <td>The words</td>
-                <td><code>spell/parser/spell</code>'s <code>rules/places/</code></td>
+                <td><a href="/parser/src/spell/rules/places/" target="src-parser-src-spell-rules-places"><code>parser/src/spell/rules/places</code></a></td>
               </tr>
               <tr>
                 <td>The ingest</td>
-                <td><code>spell/parser/spell/ingest</code>, <code>spell place ingest</code></td>
+                <td><a href="/parser/src/spell/ingest/" target="src-parser-src-spell-ingest"><code>parser/src/spell/ingest</code></a>, <code>spell place ingest</code></td>
               </tr>
               <tr>
                 <td>The examples</td>
                 <td>
                   <code>@spell/examples</code>:
                   <ul>
-                    <li><code>RecipeBox</code>, <code>CajaDeRecetas</code></li>
+                    <li><code>RecipeBox</code>, <code>CajaDeRecetas</code>, <code>FamilyCookbook</code></li>
                     <li><code>StarWars</code>, <code>PokeSpell</code></li>
                     <li><code>PublicServers</code></li>
                   </ul>
@@ -1051,26 +1049,9 @@ a "recipe" is a thing:
           </table>
         </ui-section>
 
-        <ui-section id="history" label="History" sticky collapsible dividing open="false">
-          <ul>
-            <li>
-              P1-P23: the places, the words, the back-ends, the ingest, Star Wars, <code>&lt;for&gt;</code>; P25 the
-              first Doc Review.
-            </li>
-            <li>
-              P24 PokéSpell; P26 server search; P27-P30 and P33-P35 the public servers; P31 spellml's own tags; P32
-              filters; P36 the copy on this device; I44-I68 and T121 the fixes those found; P37 this pass.
-            </li>
-            <li>
-              P42-P44: <code>its created</code> and <code>its modified</code>, the key lines, sorting and dates; P47
-              this pass: Recipe Box's Edit screen, Caja de recetas in Spanish tags, and every new word here.
-            </li>
-          </ul>
-        </ui-section>
-
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">Updated 2026-11-17: P50 · Server Actions.</p>
+          <p class="meta">Updated 2026-11-21.</p>
         </footer>
       </main>
     </div>
