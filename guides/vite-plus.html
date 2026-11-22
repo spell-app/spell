@@ -3,13 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vite+</title>
+    <title>Working on Spell</title>
     <meta
       name="description"
-      content="The repo's toolchain on Vite+ 1.0:  one vite-plus dependency pins vite, vitest, oxlint and oxfmt;  how it's set up, what it bought, and its limits."
+      content="Changing Spell and checking the change:  the loop from branch to merge, the four checks and review, the toolchain on one Vite+ 1.5.1 dependency, and how the READMEs are written and kept true."
     />
-    <meta name="spell-voice" content="readme 2026-10-22" />
-    <meta name="spell-saga" content="tooling" />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="Tools" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
   </head>
   <body class="spell-doc-page">
@@ -17,407 +18,446 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html" target="src-packages-docs-index-html"
-            >Docs</ui-breadcrumb
-          >
-          <ui-breadcrumb selected>Vite+</ui-breadcrumb>
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Working on Spell</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
-          ><header class="spell-page-head"><h1>Vite+</h1></header></ui-sticky
+          ><header class="spell-page-head"><h1>Working on Spell</h1></header></ui-sticky
         >
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>a change from branch to merged, in an epic's worktree · 8 steps</ui-title>
+          <ui-content>
+            <pre><code class="language-sh"># 1.  A branch of the whole repo:  in Claude Code, /isolate readme (or /epic readme)
+cd ~/www/spell.worktrees/readme
+
+# 2.  Edit, then run the tests you're near:  here, the server's router
+yarn vp test run Router
+#  Test Files  1 passed (1)
+#       Tests  21 passed (21)
+
+# 3.  The finishing pass:  ts, lint:fix, format and tests, in src/ and then in every folder above it
+yarn review
+
+# 4.  What changed:  the branch, how far it is from main
+epic worktree repos
+
+# 5.  One commit, whichever folders it touches
+git commit -am "README-development:  the loop first"
+
+# 6.  main moved meanwhile?  Merge it in, regenerating the generated files
+epic worktree merge-main
+
+# 7.  In Claude Code, /isolate done:  it asks, then merges into main</code></pre>
+          </ui-content>
+        </ui-accordion>
         <p class="lede">
-          <code>yarn ts</code> takes 3.1s, down from 6.0s, and five tool dependencies are now one. The repo's build,
-          test, lint and format run on Vite+ 1.0, and its cache is the one thing here you mustn't trust.
+          That's every part of Spell, changed and checked as one, and nothing in the loop publishes anything: no
+          <code>npm link</code>, no version bump. Every folder runs the others' SOURCE through one install, so the
+          folders above your change are running it already, and <code>yarn review</code> checks them.
         </p>
         <ui-list class="spell-meta">
-          <ui-item icon="user">Written for: anyone touching configs, scripts or tool versions</ui-item>
-          <ui-item icon="flag"
-            >Status: <ui-label size="mini" color="green">merged</ui-label> into <code>main</code> 2026-10-04</ui-item
+          <ui-item icon="user"
+            >Written for: anyone changing Spell's code, its configs, its tool versions or its READMEs</ui-item
           >
-          <ui-item icon="flask"
-            >Checked 2026-10-02: every package's checks run before and after, on the same machine (see
-            <a href="#3-measured">Measured</a>)</ui-item
+          <ui-item icon="flask">Checked: 2026-11-21, every script, version and file against that day's code</ui-item>
+          <ui-item icon="book open"
+            >The references beside it:
+            <a href="/README/development.md" target="src-readme-development-md">the development README</a> and
+            <a href="/README/toolchain.md" target="src-readme-toolchain-md">the toolchain README</a></ui-item
           >
         </ui-list>
 
         <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
           <ui-statistics class="spell-stats" size="mini">
             <ui-statistic value="1" label="tool dependency"></ui-statistic>
-            <ui-statistic value="2×" label="faster yarn ts"></ui-statistic>
-            <ui-statistic value="0" label="new failures"></ui-statistic>
+            <ui-statistic value="1.5.1" label="Vite+"></ui-statistic>
+            <ui-statistic value="44" label="README pages"></ui-statistic>
           </ui-statistics>
           <ul>
             <li>
-              <code>vite-plus</code> 1.0.0 (command <code>vp</code>, MIT) replaces five tools in every
-              <a href="/spell-epic/package.json" target="src-spell-epic-package-json"><code>package.json</code></a
-              >: vite, vitest, oxlint, oxfmt and tsgolint. Their versions now move together.
-            </li>
-            <li>The engines underneath are the same, so dev, build and one package's tests are no faster.</li>
-            <li>
-              The gain is <code>vp run</code>. Root scripts run the packages in parallel, and carry on past a failing
-              one.
-              <ul>
-                <li><code>yarn ts</code>: 6.0s to 3.1s.</li>
-                <li>Every package's tests: about 15% faster.</li>
-              </ul>
+              One repo, one install, one <a href="/yarn.lock" target="src-yarn-lock"><code>yarn.lock</code></a>: the kit's <a href="/src/" target="src-src"><code>src/</code></a>, and four big folders
+              beside it (<a href="/parser/" target="src-parser"><code>parser/</code></a>, <a href="/ui/" target="src-ui"><code>ui/</code></a>, <a href="/epic/" target="src-epic"><code>epic/</code></a>, <a href="/app/" target="src-app"><code>app/</code></a>).
             </li>
             <li>
-              The cost: its pins trail the standalone tools by a week or two (vitest 5.0.1, oxlint 1.85, oxfmt 0.70).
-              That rewrapped 4 files, and added no lint warnings.
+              Every folder answers to the same four checks, <code>ts</code>, <code>lint</code>, <code>format</code>,
+              <code>test</code>, and <code>review</code> runs them all.
             </li>
-            <li>It needs Node 24.11+.</li>
+            <li>
+              One dev dependency, <code>vite-plus</code> (command <code>vp</code>), pins vite, vitest, oxlint, oxfmt and
+              oxlint's type-aware half together.
+            </li>
+            <li>
+              The lint and format settings are code, imported from <code>spell/toolchain/lint</code>, not a published
+              config.
+            </li>
+            <li>
+              The READMEs are linted and their examples run: <code>yarn readme:check</code>, <code>readme:test</code>,
+              <code>readme:pictures</code>.
+            </li>
+            <li>
+              Which command, skill or script does what is the commands page's job: a generated table of every one, among
+              the guides.
+            </li>
           </ul>
-          <ui-message state="negative" heading="Never cache a plain script">
-            <ul>
-              <li>
-                <code>vp run --cache</code> replayed "TSC PASSED" for a package with a type error. Its file tracking
-                can't see TS 7's native <code>tsc</code>, so a cached task needs explicit inputs (<a href="#5-limits"
-                  >Limits</a
-                >).
-              </li>
-            </ul>
-          </ui-message>
         </ui-section>
 
-        <ui-section id="2-setup" label="2. How it's set up" sticky collapsible dividing open="false">
-          <ui-section id="versions" label="Versions" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                Every version is in one yarn <code>catalog:</code>, in
-                <a href="/.yarnrc.yml" target="src-yarnrc-yml"><code>.yarnrc.yml</code></a
-                >, and packages say <code>"catalog:"</code>:
-                <ul>
-                  <li>
-                    <code>vite</code> is <code>npm:@voidzero-dev/vite-plus-core@1.0.0</code> (Vite 8.3.1 repackaged)
-                  </li>
-                  <li><code>vitest</code> and <code>@vitest/*</code> are 5.0.1</li>
-                  <li><code>vite-plus</code> is 1.0.0</li>
-                </ul>
-              </li>
-              <li>Bump them all together, to what <code>vp toolchain</code> lists; never one tool on its own.</li>
-              <li>
-                One exception:
-                <a href="/spell-app/vscode/" target="src-spell-app-vscode"><code>spell-app/vscode</code></a> is its
-                own yarn project, and stays on plain vite.
-              </li>
-            </ul>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <thead>
-                  <tr>
-                    <th>tool</th>
-                    <th>before</th>
-                    <th>vite-plus 1.0.0</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>vite</td>
-                    <td>8.3.1</td>
-                    <td>vite-plus-core (on 8.3.1)</td>
-                  </tr>
-                  <tr>
-                    <td>vitest, browser-playwright</td>
-                    <td>5.0.2</td>
-                    <td>5.0.1</td>
-                  </tr>
-                  <tr>
-                    <td>oxlint</td>
-                    <td>1.86.0</td>
-                    <td>1.85.0</td>
-                  </tr>
-                  <tr>
-                    <td>oxfmt</td>
-                    <td>0.71.0</td>
-                    <td>0.70.0</td>
-                  </tr>
-                  <tr>
-                    <td>oxlint-tsgolint</td>
-                    <td>7.0.2003</td>
-                    <td>7.0.2003</td>
-                  </tr>
-                  <tr>
-                    <td>node</td>
-                    <td>22.17+</td>
-                    <td>24.11+</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-          </ui-section>
-
-          <ui-section id="lint-fmt" label="Lint and format settings" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                They live in ONE module,
-                <code>vite.lint.ts</code> at the repo root: <code>lintBase</code>, <code>reactLint</code>,
-                <code>packageLint()</code>, <code>rootLint()</code>, <code>fmtConfig</code>.
-                <ul>
-                  <li>
-                    It replaced three files: <code>.oxlintrc.json</code>, <code>.oxlintrc.react.json</code> and
-                    <code>.oxfmtrc.json</code>.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Every
-                <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> spreads them
-                into its <code>lint</code> / <code>fmt</code> blocks, and <code>vp lint</code> / <code>vp fmt</code>
-                read the nearest one.
-              </li>
-              <li>
-                The catch: the editor (<code>oxc.disableNestedConfig</code>) and <code>vp check</code> read only the
-                ROOT block.
-                <ul>
-                  <li>
-                    So <code>rootLint()</code> carries React's rules as <code>overrides</code> for app, cli, core, lsp,
-                    parser, spell and util.
-                  </li>
-                </ul>
-              </li>
-            </ul>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>packages/parser/vite.config.ts · 12 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-ts">import { defineConfig } from "vite-plus"
-
-import { fmtConfig, packageLint } from "../../vite.lint.ts"
-
-/**
- * `parser`'s Vite+ config:  only the `lint` / `fmt` blocks (`vp lint`, `vp fmt`), from the repo root's `vite.lint.ts`.
- * - Tests:  `vitest.config.ts` beside this.
- */
-export default defineConfig({
-  fmt: fmtConfig,
-  lint: packageLint({ react: true })
-})</code></pre>
-              </ui-content>
-            </ui-accordion>
-          </ui-section>
-
-          <ui-section id="commands" label="Commands and scripts" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                In a package or at the root: <code>yarn vp lint</code>, <code>yarn vp fmt [--check]</code>,
-                <code>yarn vp test</code>, <code>yarn vp check</code>.
-                <ul>
-                  <li>
-                    <code>yarn oxfmt</code> and <code>yarn oxlint</code> no longer work in a package;
-                    <code>yarn vitest</code> does.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Tests import from <code>vite-plus/test</code> (<code>/browser</code>, <code>/browser-playwright</code>),
-                and configs from <code>vite-plus</code>.
-                <ul>
-                  <li>The lint rule <code>vite-plus/prefer-vite-plus-imports</code> holds them to it.</li>
-                </ul>
-              </li>
-              <li>
-                The root's <code>ts</code>, <code>test</code>, <code>lint</code> and <code>review</code> run the kit's own
-                (<code>kit:*</code>) first, then each folder's script, lowest first (<code>tools/repos.ts run &lt;task&gt;</code>).
-                <ul>
-                  <li>Before the repo split they ran <code>vp run -F '@spell-app/*'</code> over the monorepo's packages.</li>
-                </ul>
-              </li>
-            </ul>
-            <ui-message state="warning" heading="Heads up">
-              <ul>
-                <li><code>vp run -r</code> includes the root package, so its all-in-one <code>test</code> runs too.</li>
-                <li>A filter that matches nothing exits 0: hence <code>--fail-if-no-match</code>.</li>
-                <li>Flags go BEFORE the task name; after it, they're handed to the task.</li>
-              </ul>
-            </ui-message>
-          </ui-section>
-        </ui-section>
-
-        <ui-section id="3-measured" label="3. Measured" sticky collapsible dividing open="false">
+        <ui-section id="checks" label="2. The checks" sticky collapsible dividing open="false">
           <p>
-            In a worktree on an M-series Mac, with Node 24. "Before" is the same checks, run first on
-            <code>main</code>'s tools.
+            Every folder answers to the same script names, so <code>yarn test</code> means the same thing in each.
+            <code>review</code> is the one to run before you commit: it CHANGES files.
           </p>
           <ui-table celled padding="compact" appearance="striped" unstackable>
             <table>
               <thead>
                 <tr>
-                  <th>what</th>
-                  <th>before</th>
-                  <th>Vite+</th>
-                  <th>note</th>
+                  <th>check</th>
+                  <th>what it does</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>each package's ts / lint / format:check / test</td>
-                  <td colspan="2">same results</td>
-                  <td class="yes positive">only failures already on <code>main</code></td>
+                  <td><code>ts</code></td>
+                  <td>the type check: the folder's programs and its tests', reading every folder below as source</td>
                 </tr>
                 <tr>
-                  <td>oxfmt 0.71 to 0.70</td>
-                  <td>-</td>
-                  <td class="num right aligned">4 files</td>
-                  <td>rewraps at the 120-column edge</td>
+                  <td><code>lint</code></td>
+                  <td>oxlint, strict: a warning fails, and so does an unused disable comment; plus ruff, for Python</td>
                 </tr>
                 <tr>
-                  <td>oxlint 1.86 to 1.85</td>
-                  <td>-</td>
-                  <td class="num right aligned">0</td>
-                  <td class="yes positive">no new warnings</td>
+                  <td><code>format</code></td>
+                  <td>oxfmt, and ruff's formatter for Python, over the folder's own files; it rewrites them</td>
                 </tr>
                 <tr>
-                  <td>type check, all packages</td>
-                  <td class="num right aligned">6.0s</td>
-                  <td class="num right aligned">3.1s</td>
-                  <td class="yes positive">parallel; 0.6s cached, but unsafe</td>
+                  <td><code>test</code></td>
+                  <td>Vitest, every project in the folder; then pytest for its Python</td>
                 </tr>
                 <tr>
-                  <td>tests, all packages (2 runs)</td>
-                  <td class="num right aligned">318-345s</td>
-                  <td class="num right aligned">262-276s</td>
-                  <td class="meh warning">cli's 240s suite caps it</td>
-                </tr>
-                <tr>
-                  <td>app build, build:element, <code>yarn vscode</code></td>
-                  <td colspan="2">ok</td>
-                  <td class="yes positive">vite-plus-core builds</td>
+                  <td><code>review</code></td>
+                  <td>
+                    <code>ts</code>, <code>lint:fix</code>, <code>format</code>, <code>test</code>, stopping at the
+                    first that fails; then "REVIEW PASSED"
+                  </td>
                 </tr>
               </tbody>
             </table>
           </ui-table>
-        </ui-section>
-
-        <ui-section id="4-why" label="4. Why" sticky collapsible dividing open="false">
           <ul>
             <li>
-              Vite+'s pinned versions across the board, not the newer standalone ones: one set to bump, and nothing to
-              drift.
+              At the root, each runs the kit's own (<code>kit:ts</code> ...) first, then each folder's, lowest first,
+              and carries on past a failing one.
             </li>
-            <li>Node 24 LTS, not the minimum 22.18: one bump covers the next pins too.</li>
+            <li>One folder: its own scripts, in its folder, <code>cd ui &amp;&amp; yarn test</code>.</li>
             <li>
-              The settings are folded into
-              <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a
-              >, through ONE module, by hand.
-              <ul>
-                <li>
-                  <code>vp migrate</code> left each package's <code>lint.extends</code> pointing at deleted files, and
-                  dropped every comment saying why a rule is set.
-                </li>
-              </ul>
+              One test project: <code>yarn vp test run --project server</code>; one file:
+              <code>yarn vp test run Router</code>.
+            </li>
+            <li><code>yarn tsc</code>, never <code>npx tsc</code>: yarn picks the install's TypeScript 7.</li>
+            <li>
+              Done means three things: <code>yarn review</code> passed at the root, you read your own diff, and you
+              reported the test count and how it moved.
             </li>
             <li>
-              No <code>options.typeCheck</code>: <code>yarn ts</code> already runs <code>tsc</code>, and a second type
-              check reports every error twice.
+              The catch: <code>vp fmt</code> at the KIT's root reaches every folder with only the root's ignore list.
+              Format the kit with <code>yarn kit:format</code>, a folder with its own <code>yarn format</code>.
             </li>
-            <li>
-              The imports were rewritten to <code>vite-plus/test</code> in their own commit: 380 lines, nothing else.
-            </li>
-            <li>
-              Root scripts are on <code>vp run</code>, because it runs packages in parallel, and runs every package
-              instead of stopping at the first failure.
-            </li>
-            <li>No git hooks, no cached tasks and no root <code>check</code> script yet (see Limits).</li>
           </ul>
+        </ui-section>
+
+        <ui-section id="2-setup" label="3. The toolchain: Vite+" sticky collapsible dividing open="false">
+          <p>
+            Vite, Vitest, ESLint, Prettier and a type-aware lint plugin are usually five dependencies on five release
+            schedules. Spell has one, <code>vite-plus</code>, and it pins a set known to work together.
+          </p>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>yarn vp --version, at the kit's root · 11 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-text">vp v1.5.1
+
+Local vite-plus:
+  vite-plus  v1.5.1
+
+Tools:
+  vite             v8.3.7
+  rolldown         v1.2.18
+  vitest           v5.1.0
+  oxfmt            v0.76.0
+  oxlint           v1.91.0
+  oxlint-tsgolint  v7.0.2005</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ui-section id="versions" label="Versions" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Every version lives in one yarn <code>catalog:</code>, in the kit's <a href="/.yarnrc.yml" target="src-yarnrc-yml"><code>.yarnrc.yml</code></a>, and each
+                <a href="/package.json" target="src-package-json"><code>package.json</code></a> says <code>"catalog:"</code>:
+                <ul>
+                  <li><code>vite-plus</code>: 1.5.1</li>
+                  <li><code>vite</code>: <code>npm:@voidzero-dev/vite-plus-core@1.5.1</code>, Vite+'s own build</li>
+                  <li><code>vitest</code> and <code>@vitest/*</code>: 5.1.0</li>
+                </ul>
+              </li>
+              <li>Bump them all together, to what <code>vp toolchain</code> lists; never one tool on its own.</li>
+              <li>The type checker isn't in the set: every folder names TypeScript 7, the native compiler.</li>
+              <li>Node 24, at least 24.11 (<code>engines</code>); yarn 4.18, through corepack.</li>
+              <li>
+                The cost: Vite+ is the same engines, repackaged, so a dev server or one folder's tests run no faster.
+                Its pins trail the standalone releases by a release or so.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="lint-fmt" label="Lint and format settings" sticky collapsible dividing open="false">
+            <p>
+              ESLint shares rules through <code>extends</code>, a name that resolves to a published package. Here each
+              folder's ONE <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> imports the settings like any other code, and spreads them in.
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>the parser folder's vite.config.ts, but for its docstring · 10 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-ts">import { defineConfig } from "vite-plus"
+
+import { fmtConfig, packageLint } from "spell/toolchain/lint"
+
+/** Not linted or formatted by oxlint / oxfmt:  Python (ruff's). */
+const NOT_OURS = ["src/py/core/**", "tests/py/core/**"]
+
+export default defineConfig({
+  fmt: { ...fmtConfig, ignorePatterns: [...fmtConfig.ignorePatterns, ...NOT_OURS] },
+  lint: packageLint({ react: true, ignorePatterns: ["build", "dist", ".cache", "docs", ...NOT_OURS] })
+})</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>spell/toolchain/lint</code> is the toolchain's
+                <a href="/src/toolchain/lint.ts" target="src-src-toolchain-lint-ts"
+                  ><code title="src/toolchain/lint.ts">lint.ts</code></a
+                >: 120 columns, 2 spaces, no semicolons, double quotes, no trailing commas.
+              </li>
+              <li>Markdown is left as written: the settings skip <code>*.md</code>.</li>
+              <li>
+                Linting is type-aware, but never a second type check: <code>yarn ts</code> already runs
+                <code>tsc</code>.
+              </li>
+              <li>
+                The house's own rules, beside it: the component rules (<code>spell-ui/*</code>), and the import rules
+                (<code>spell/no-parent-import</code>, <code>spell/no-upward-import</code>).
+              </li>
+              <li>
+                Tests import from <code>vite-plus/test</code>, and configs from <code>vite-plus</code>; the lint rule
+                <code>vite-plus/prefer-vite-plus-imports</code> holds them to it.
+              </li>
+              <li>
+                <code>yarn oxfmt</code> and <code>yarn oxlint</code> don't work: they're <code>vp</code>'s, not
+                dependencies of their own. <code>yarn vitest</code> does.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="readmes" label="4. The READMEs" sticky collapsible dividing open="false">
+          <p>
+            Every big folder has a front page, its <a href="/README.md" target="src-readme-md"><code>README.md</code></a>, and a
+            <code>README-&lt;topic&gt;.md</code> beside it for each major folder or topic; the kit keeps its topic pages
+            in <a href="/README/" target="src-readme"><code>README/</code></a>. The kit's front page indexes all 44.
+          </p>
+          <ui-section id="3-the-brief" label="How a page is written" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                First for developers who know another framework, by contrast with what they know; second for coding
+                agents. The rules for working on the code stay in the folder's <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a>, which the page
+                links.
+              </li>
+              <li>
+                In the readme voice: proof first (real code, real output), the model, the edges, then the next command.
+              </li>
+              <li>
+                A plain lead, then short sections of bullets; a table for three or more rows of one shape. Details fold
+                into expands, and the page reads whole with every expand closed.
+              </li>
+              <li>
+                Setup is written for a Node novice: every command complete, from a named folder, with what it printed.
+              </li>
+              <li>
+                Pictures are Mermaid blocks, each with a one-line italic caption; <code>yarn mermaid:pretty</code> gives
+                them the Spell look.
+              </li>
+              <li>A planned feature gets a "🌱 Coming" stub: what it will do and where it stands, never a date.</li>
+              <li>
+                "Spell" is capitalised in prose; "people", never "users"; no internal repo is named. A link into another
+                folder is its GitHub address.
+              </li>
+              <li>Every page ends with See also: at most five links, each with the reason you'd follow it.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="5-tools" label="The tools" sticky collapsible dividing open="false">
+            <p>Four scripts at the kit's root keep the pages true. Each takes page paths, from the kit's root.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>run</th>
+                    <th>what it does</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <a href="/tools/readme-check.ts" target="src-tools-readme-check-ts"
+                        ><code title="tools/readme-check.ts">yarn readme:check</code></a
+                      >
+                    </td>
+                    <td>
+                      follows every link to its file and heading, wants a caption under every picture, fails stale
+                      names; exits 1 on any finding
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/tools/readme-test.ts" target="src-tools-readme-test-ts"
+                        ><code title="tools/readme-test.ts">yarn readme:test</code></a
+                      >
+                    </td>
+                    <td>
+                      runs every command a page shows with an Output fold, and fails one that prints something else
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/tools/readme-pictures.ts" target="src-tools-readme-pictures-ts"
+                        ><code title="tools/readme-pictures.ts">yarn readme:pictures</code></a
+                      >
+                    </td>
+                    <td>
+                      draws every <code>html example</code> block headlessly, light and dark, into a picture under it;
+                      the check fails a stale one
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/tools/mermaid-pretty.ts" target="src-tools-mermaid-pretty-ts"
+                        ><code title="tools/mermaid-pretty.ts">yarn mermaid:pretty</code></a
+                      >
+                    </td>
+                    <td>gives every Mermaid picture the Spell look, in place; safe to run again</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Three of them are <code>spell readme check</code>, <code>spell readme test</code> and
+                <code>spell readme pictures</code> too.
+              </li>
+              <li>
+                A tested example is an <code>sh</code> block, then a fold titled Output holding a
+                <code>text</code> block. It runs in <code>bash</code>, from its page's repo root.
+              </li>
+              <li>
+                What it prints must match line by line, but for <code>...</code>: alone on a line, any lines or none;
+                inside a line, any text there.
+              </li>
+              <li>
+                A fold titled anything else, such as What it printed, is shown but never run: for installs, servers and
+                anything slow.
+              </li>
+              <li>
+                Two folders write a table of their own: Spell UI's <code>yarn readme:components</code>, and the app's
+                <code>yarn examples:readme</code>.
+              </li>
+            </ul>
+          </ui-section>
         </ui-section>
 
         <ui-section id="5-limits" label="5. Limits" sticky collapsible dividing open="false">
           <ul>
             <li>
-              <b>No caching.</b> Input auto-tracking misses TS 7's native <code>tsc</code>, so
-              <code>vp run --cache</code> replays a stale pass.
-              <ul>
-                <li>To cache a task: a <code>run.tasks</code> entry with explicit <code>cache.input</code> globs.</li>
-                <li>They must include the packages its type check reads through <code>$/</code> aliases.</li>
-              </ul>
+              <b>The editor's lint reads only the nearest config</b>: a nested <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> inherits
+              nothing from the root's, so it spreads <code>packageLint()</code> itself.
+            </li>
+            <li><b>The format check skips Markdown</b>: the README check is the only check a README gets.</li>
+            <li>
+              <b>The repo checks aren't <code>spell</code> commands yet</b>: <code>spell lint</code> and
+              <code>spell format</code> check and tidy <code>.spell</code> programs, not TypeScript.
             </li>
             <li>
-              <code>vp check</code> fails today, on 63 files already unformatted on <code>main</code> (56 of them in
-              docs).
+              <b>The extensions are yarn projects of their own</b>: the app's <code>vscode/</code> and the epic folder's
+              each need their own <code>yarn install</code>.
             </li>
-            <li>
-              The Oxc editor extension must read <code>fmt</code> from the root
-              <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a
-              >. If saving a file adds semicolons, it isn't.
-            </li>
-            <li>
-              Fixed: a fresh install's first app browser test run used to fail on a cold vite deps cache, on
-              <code>main</code> too.
-              <ul>
-                <li>
-                  The tests import
-                  <a
-                    href="/spell-app/src/app/runner/spellRuntime.ts"
-                    target="src-spell-app-src-app-runner-spellruntime-ts"
-                    ><code>spellRuntime.ts</code></a
-                  >
-                  by URL, so it's now listed in Vite's dependency entries (<code>optimizeDeps.entries</code>,
-                  <a href="/spell-app/vitest.config.ts" target="src-spell-app-vitest-config-ts"
-                    ><code title="spell-app/vitest.config.ts">vitest.config.ts</code></a
-                  >).
-                </li>
-              </ul>
-            </li>
-            <li>cli's process-spawning tests can time out at 5s when everything runs at once; they pass alone.</li>
-            <li>Vite+ also manages Node and the package manager. We don't use that: we keep corepack yarn 4.18.</li>
           </ul>
         </ui-section>
 
-        <ui-section id="6-history" label="6. History" sticky collapsible dividing open="false">
-          <ui-feed class="spell-history" size="small">
-            <ui-event icon="check">
-              <ui-content>
-                <ui-summary>Built and measured, unattended overnight <ui-date>2026-10-02</ui-date></ui-summary>
-              </ui-content>
-            </ui-event>
-            <ui-event icon="gavel">
-              <ui-content>
-                <ui-summary>Decided: Vite+ versions across the board, Node 24 <ui-date>2026-10-02</ui-date></ui-summary>
-              </ui-content>
-            </ui-event>
-          </ui-feed>
+        <ui-section id="7-sources" label="6. Where things are" sticky collapsible dividing open="false">
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>file</th>
+                  <th>what it is</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><a href="/.yarnrc.yml" target="src-yarnrc-yml"><code>.yarnrc.yml</code></a></td>
+                  <td>the catalog: every tool version</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/src/toolchain/lint.ts" target="src-src-toolchain-lint-ts"
+                      ><code title="src/toolchain/lint.ts">lint.ts</code></a
+                    >
+                  </td>
+                  <td>the lint and format settings every <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> spreads in</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/vite.config.ts" target="src-vite-config-ts"
+                      ><code title="vite.config.ts">vite.config.ts</code></a
+                    >
+                  </td>
+                  <td>the kit's own lint and format block</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/vitest.config.ts" target="src-vitest-config-ts"
+                      ><code title="vitest.config.ts">vitest.config.ts</code></a
+                    >
+                  </td>
+                  <td>the kit's Vitest projects, one per folder of <a href="/src/" target="src-src"><code>src/</code></a></td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/tools/repos.ts" target="src-tools-repos-ts"
+                      ><code title="tools/repos.ts">repos.ts</code></a
+                    >
+                  </td>
+                  <td>runs a check over the kit, then each folder, lowest first</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/README/development.md" target="src-readme-development-md">The development README</a>: the loop,
+              workspaces, tests, worktrees, CI, every script folder by folder
+            </li>
+            <li>
+              <a href="/README/toolchain.md" target="src-readme-toolchain-md">The toolchain README</a>: the settings,
+              the house's lint rules, decorators, declarations
+            </li>
+            <li>
+              <a href="/guides/wwod.html" target="src-guides-wwod-html">Working with Agents</a>: the house style the
+              checks hold code to
+            </li>
+            <li>
+              <a href="/guides/cli.html" target="src-guides-cli-html">The spell Command</a>: every command, the
+              <code>spell readme</code> ones among them
+            </li>
+          </ul>
         </ui-section>
-
-        <ui-section id="7-sources" label="7. Sources" sticky collapsible dividing open="false">
-          <ui-items class="spell-sources" divided>
-            <ui-item>
-              <ui-content>
-                <ui-header
-                  ><a href="/epics/vite-plus/vite-plus.plan.html" target="vite-plus"
-                    ><code title="epics/vite-plus/vite-plus.plan.html">vite-plus.plan.html</code></a
-                  ></ui-header
-                >
-                <ui-meta>epic page</ui-meta>
-                <ui-description>The record: decisions, judgement calls, issue I1, the log.</ui-description>
-              </ui-content>
-            </ui-item>
-            <ui-item>
-              <ui-content>
-                <ui-header
-                  ><a href="https://voidzero.dev/posts/announcing-vite-plus-1-0" target="ext-voidzero-dev"
-                    >Announcing Vite+ 1.0</a
-                  ></ui-header
-                >
-                <ui-meta>reference · read 2026-10-02</ui-meta>
-                <ui-description>What 1.0 bundles; MIT, free.</ui-description>
-              </ui-content>
-            </ui-item>
-            <ui-item>
-              <ui-content>
-                <ui-header
-                  ><a href="https://viteplus.dev/guide/migrate" target="ext-viteplus-dev"
-                    >Vite+ migration guide</a
-                  ></ui-header
-                >
-                <ui-meta>reference · read 2026-10-02</ui-meta>
-                <ui-description>Import rewrites, monorepo migration from the root, editor settings.</ui-description>
-              </ui-content>
-            </ui-item>
-          </ui-items>
-        </ui-section>
-
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">Last checked 2026-10-09 against <code>main</code>.</p>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
         </footer>
       </main>
     </div>
