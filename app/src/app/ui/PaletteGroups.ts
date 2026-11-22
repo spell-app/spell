@@ -1,7 +1,7 @@
 /**
  * The editor palette's rule:  which Spell UI components it offers, and in which group (epic `editor` T81, I174, I180;
  * Spell UI's `ComponentDefinitions` held it until epic `editor` P42, Q81).
- * - Its groups are the palette's TABLE (`paletteGroups.json`, spaces' models), as Owen arranged them on the palette
+ * - Its groups are the palette's TABLE (`paletteGroups.json`, beside this file), as Owen arranged them on the palette
  *   groups page;  what the table doesn't name is filed by today's rule.
  * - Reads Spell UI's own descriptions and snippets (`ComponentDefinitions`):  every vocabulary, so a LAZY chunk,
  *   imported by path where it's needed (`<Palette>`, `<PaletteGroupsPage>`), never through `spell/app/app/ui`.
@@ -11,7 +11,7 @@
 import { ComponentDefinitions, type ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
 import { ValueSets, type ComponentTopic } from "spell/ui/vocabulary"
 import type { SPACES } from "spell/app/spaces"
-import shippedTable from "spell/app/spaces/models/paletteGroups.json"
+import shippedTable from "./paletteGroups.json"
 
 /** One group of the editor's palette:  its topic or title, and its components, in order. */
 export type PaletteGroup = Omit<SPACES.PaletteTableGroup, "tags"> & { parts: ComponentDefinition[] }

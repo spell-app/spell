@@ -44,49 +44,25 @@ export class RunSiteHost implements SiteHost {
   }
 
   /**
-   * Show the page's address again on Back and Forward, and land on its `#section`, if it names one.
+   * Show the page's address again on Back and Forward, and land on its `#section`, if it names one, once that page
+   * is shown.
    * - Each run listens again:  only the last one's `showAddress` is called, through ONE listener on the window.
    * - Called as the site starts:  so a `#section` the page was opened at is landed on too.
    */
-  listen(showAddress: (address: string) => void): void {
+  listen(showAddress: (address: string) => Promise<void> | void): void {
     if (!this.showAddress)
       addEventListener("popstate", () => {
-        this.showAddress?.(this.address())
-        this.landOnHash()
+        void Promise.resolve(this.showAddress?.(this.address())).then(() => this.landOnHash())
       })
     this.showAddress = showAddress
     this.landOnHash()
   }
 
   /** What the last run's `listen()` asked us to call. */
-  private showAddress?: (address: string) => void
+  private showAddress?: (address: string) => Promise<void> | void
 
-  /**
-   * Scroll to section `id` of the page shown, once it's drawn, as the browser's own jump to a `#section` does
-   * (`scrollIntoView()`:  the section's `scroll-margin-top` keeps it below a bar stuck at the top);
-   * the page's address then names it too, so it can be shared or reloaded.
-   * - Waits for the section:  a page draws a moment after it's shown;  lands once more when late layout has moved it,
-   *   unless the reader has scrolled since.
-   * - NOT Spell UI's `HashLanding`, as the editor's Run lands:  `<spell-viewer>`'s bundle takes Spell UI only from
-   *   the page's shared files (`sharedSolid()`), and they don't hold it.
-   * - NEVER throws:  a section that never comes, or one the page doesn't have, is left alone.
-   */
-  landOn = (id: string): void => {
-    let tries = 0
-    const look = () => {
-      const section = elementWithId(this.root, id)
-      if (!section) {
-        if (++tries < SECTION_TRIES) setTimeout(look, SECTION_PAUSE)
-        return
-      }
-      section.scrollIntoView({ block: "start" })
-      const landedAt = scrollY
-      setTimeout(() => scrollY === landedAt && section.scrollIntoView({ block: "start" }), SETTLE_PAUSE)
-      const { pathname, search, hash } = location
-      if (hash !== `#${id}`) history.replaceState(null, "", `${pathname}${search}#${id}`)
-    }
-    look()
-  }
+  /** Scroll to section `id` of the page shown, once it's drawn (`RunSiteHost.landOnSection()`, in `root`). */
+  landOn = (id: string): void => RunSiteHost.landOnSection(this.root, id)
 
   /** Land on the section the page's address names, if any. */
   private landOnHash(): void {
@@ -98,9 +74,42 @@ export class RunSiteHost implements SiteHost {
   themeTokens(name: string, projectFolder?: string): Promise<string> {
     return SiteThemes.tokens(name, projectFolder)
   }
+
+  /**
+   * Scroll to section `id` of the site drawn in `root`, once it's drawn, as the browser's own jump to a `#section`
+   * does:  the ONE landing of a site's link to a section, for this host and the editor's Run (`RunSite`).
+   * - `scrollIntoView()` scrolls whatever box holds the section, the window or a pane of the editor;
+   *   the section's `scroll-margin-top` keeps it below a bar stuck at the top.
+   * - The page's address then names the section too, so it can be shared or reloaded.
+   * - Looks first on the next frame, once the page just shown has replaced the one left;
+   *   then waits for the section:  a page draws a moment after it's shown.
+   * - Lands once more when late layout has moved it, unless the reader has scrolled since.
+   * - NOT Spell UI's `HashLanding`:  `<spell-viewer>`'s bundle takes Spell UI only from the page's shared files
+   *   (`sharedSolid()`), and they don't hold it;  and it scrolls only the window, which the editor's Run doesn't.
+   * - NEVER throws:  a section that never comes, or one the page doesn't have, is left alone.
+   */
+  static landOnSection(root: ParentNode, id: string): void {
+    let tries = 0
+    const look = () => {
+      const section = elementWithId(root, id)
+      if (!section) {
+        if (++tries < SECTION_TRIES) setTimeout(look, SECTION_PAUSE)
+        return
+      }
+      section.scrollIntoView({ block: "start" })
+      const landedAt = scrollTopAround(section)
+      setTimeout(
+        () => scrollTopAround(section) === landedAt && section.scrollIntoView({ block: "start" }),
+        SETTLE_PAUSE
+      )
+      const { pathname, search, hash } = location
+      if (hash !== `#${id}`) history.replaceState(history.state, "", `${pathname}${search}#${id}`)
+    }
+    requestAnimationFrame(look)
+  }
 }
 
-/** How many times a link's section is looked for, `SECTION_PAUSE` apart:  five seconds, as the editor's Run. */
+/** How many times a link's section is looked for, `SECTION_PAUSE` apart:  five seconds. */
 const SECTION_TRIES = 50
 
 /** How long between looks for a link's section, in milliseconds. */
@@ -108,6 +117,23 @@ const SECTION_PAUSE = 100
 
 /** How long after landing on a section it lands once more, in milliseconds:  as Spell UI's `HashLanding` settles. */
 const SETTLE_PAUSE = 1500
+
+/**
+ * How far the boxes holding `element` are scrolled, the window's included:  one number that changes when the reader
+ * scrolls whichever one holds it.
+ */
+function scrollTopAround(element: Element): number {
+  let total = scrollY
+  for (let box = element.parentElement ?? hostOf(element); box; box = box.parentElement ?? hostOf(box))
+    total += box.scrollTop
+  return total
+}
+
+/** The shadow host of `element`'s root, if it's in a shadow root. */
+function hostOf(element: Element): Element | null {
+  const root = element.getRootNode()
+  return root instanceof ShadowRoot ? root.host : null
+}
 
 /**
  * The element with `id` in `root`, looking inside every shadow root too:  a page's sections are drawn in its views'

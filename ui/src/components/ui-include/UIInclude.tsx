@@ -1,4 +1,3 @@
-import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E, type UIT } from "spell/ui/core"
@@ -57,11 +56,16 @@ export class UIInclude extends E.LoadableComponent<typeof includeVocabulary> {
   } satisfies Partial<E.ElementSetup>
   @E.proto static wantsInlineContent = false
 
-  /** Markup is in place:  the placeholder slot goes (shadow mode). */
-  @E.state accessor markupIsInserted = false
-
   /** The shadow box the markup goes in, once rendered. */
   private box?: HTMLElement
+
+  /**
+   * The placeholder slot:  hidden as the markup goes in, except with `page-styles`, where the markup is what it shows.
+   * - Hidden by `insert()` itself, never by a member it writes:  a member written there would be a second step,
+   *   and the page would draw one frame with the markup in and the placeholder still showing
+   *   (Solid dev's `EFFECT_RELAY_TEAR`, epic `editor` I291).
+   */
+  private placeholder?: HTMLSlotElement
 
   /** Where the markup is now:  `box`, or the DOM element (`page-styles`). */
   private root?: HTMLElement
@@ -106,9 +110,11 @@ export class UIInclude extends E.LoadableComponent<typeof includeVocabulary> {
   protected renderContent(): JSX.Element {
     return (
       <>
-        <Show when={this.pageStyles || !this.markupIsInserted}>
-          <slot />
-        </Show>
+        <slot
+          ref={(slot: HTMLSlotElement) => {
+            this.placeholder = slot
+          }}
+        />
         <div
           class={this.rootClass}
           part={this.partForName("content")}
@@ -149,7 +155,7 @@ export class UIInclude extends E.LoadableComponent<typeof includeVocabulary> {
     this.selected = select ? (target.firstElementChild ?? undefined) : undefined
     this.insertedFrom = text
     this.insertedMarkup = this.liveMarkup()
-    this.markupIsInserted = true
+    if (this.placeholder) this.placeholder.hidden = !pageStyles
     UIInclude.loadFamilies(target)
   }
 

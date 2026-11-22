@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { es } from "spell/ui/components/components.es"
-import shippedTable from "spell/app/spaces/models/paletteGroups.json"
+import shippedTable from "spell/app/app/ui/paletteGroups.json"
 import { PaletteGroups } from "spell/app/app/ui/PaletteGroups"
 
 describe("PaletteGroups.inGroups()", () => {
