@@ -20,6 +20,9 @@ import type { ItemState, LiveReview } from "./EpicItem.types"
  * - the page only follows what happens live (`drawn()`):  an agent starting, his urgency, his ✓, a comment answered
  * - GREY MEANS CLOSED, a limit apart (Owen:  "grey open is not really a thing to me"):
  *   a rule that would grey an open item says `closes`, and the item keeps its look until something closes it
+ *   - one a phase handled would read grey, so it's yellow until then, a question red (epic `epic-engine` I435)
+ * - NEVER GREY UNSEEN:  what's finished and theirs waits for their look, light orange from their words,
+ *   orange if they got to it (T144's footnote;  `awaitsLook()`)
  ****************/
 export class ItemBadge {
   /**
@@ -34,17 +37,40 @@ export class ItemBadge {
       isMinor: (facts.care ?? 100) < limits.closeBelow,
       isWorthIt: (facts.care ?? 0) > limits.fixAbove
     }
+    // an open item a phase handled is never grey (I435):  yellow, a question red, where no rule colours it
+    const ifUncoloured = ItemBadge.handledOpen(facts)
     const rule = RULES[facts.kind].find(({ when }) => when(test))
-    if (!rule) return {}
+    if (!rule) return ifUncoloured ? { state: ifUncoloured } : {}
     const { badge, state, closes, finished } = rule
     if (closes && badge) {
       // never closed unseen:  their words wait light orange, what they got to first orange
       if (facts.actedOn) return { badge, state: "replied" }
       if (facts.fromYou) return { badge, state: "requested" }
-      return { closes: { badge, status: closes } }
+      return { closes: { badge, status: closes }, state: ifUncoloured }
     }
     const item = badge === "see" ? facts.followUp?.id : undefined
-    return { badge, item, state: trial && finished ? undefined : state }
+    if (!finished) return { badge, item, state: state ?? ifUncoloured }
+    return { badge, item, state: trial ? undefined : (ItemBadge.awaitsLook(facts) ?? state) }
+  }
+
+  /**
+   * The colour of finished `facts` while it waits for their look (T144's footnote, I435);  none, and it may be grey.
+   * - orange if they got to it before, light orange from their words
+   * - none:  they've seen it since (`seen`), dropped it themselves, or a todo carries it
+   * - none for an answered question, their own answer, nor a limit
+   */
+  private static awaitsLook(facts: BadgeFacts): ItemState | undefined {
+    const { kind, status, seen, dropped, followUp } = facts
+    if (kind === "limit" || seen || dropped || followUp) return undefined
+    if (kind === "question" && status !== "canceled") return undefined
+    if (facts.actedOn) return "replied"
+    return facts.fromYou ? "requested" : undefined
+  }
+
+  /** An OPEN item a phase handled, with no colour of its own:  yellow, a question red, never grey (I435). */
+  private static handledOpen({ kind, status, handled }: BadgeFacts): ItemState | undefined {
+    if (!handled || status !== "open" || kind === "limit") return undefined
+    return kind === "question" ? "attention" : "open"
   }
 
   /** The kind with rules that item `id` is:  by its letter, a `limit` apart;  an old id's, a question. */
@@ -64,7 +90,8 @@ export class ItemBadge {
     if (live.workedOn && !KEPT_AT_WORK.has(badge)) return RECHECKS.has(badge) ? "rechecking" : "underway"
     if (live.commentsReplied && state === "replied") return "yourTurn"
     if (live.urgency) {
-      if (!live.urgency.calm) return "urgent"
+      // the word follows the colour:  one whose colour the click can't change never reads URGENT in yellow
+      if (!live.urgency.calm) return state === "attention" ? "urgent" : badge
       if (badge === "urgent") return kind === "issue" ? "willFix" : undefined
     }
     return badge
@@ -115,6 +142,8 @@ export type BadgeFacts = {
   severe?: boolean
   /** only they can:  decide the issue, OK the todo, run the test */
   needsYou?: boolean
+  /** a recheck handed it to them (`epic badges <epic> set --your-call yes`):  any kind, ahead of care and doubt */
+  asksYou?: boolean
   /** they called it urgent from its id chip */
   flagged?: boolean
   /** from their words or their request */
@@ -123,6 +152,8 @@ export type BadgeFacts = {
   actedOn?: boolean
   /** they've looked since it was written */
   reviewed?: boolean
+  /** they've seen it as it stands now, its result if it's finished */
+  seen?: boolean
   /** Claude is at work on it */
   working?: boolean
   /** its work is on the branch, not on main */
@@ -139,6 +170,8 @@ export type BadgeFacts = {
   settled?: boolean
   /** its answer is in a phase's text now */
   handled?: boolean
+  /** that phase is done:  open still, its work is finished */
+  handledDone?: boolean
   /** a manual test that failed */
   failed?: boolean
   /** a todo made by turning an item into one */
@@ -243,6 +276,15 @@ const DECLINED: Readonly<Record<BadgeKind, BadgeWord>> = {
 /** A badge that becomes RECHECKING, not UNDERWAY, as an agent takes it. */
 const RECHECKS: ReadonlySet<BadgeWord> = new Set(["willRecheck", "willClose", "rechecking"])
 
+/** What a recheck's hand-over reads as, by kind (`asksYou`);  a limit has none. */
+const ASKS_YOU: Readonly<Record<Exclude<BadgeKind, "limit">, { badge: BadgeWord; state: ItemState }>> = {
+  issue: { badge: "yourCall", state: "replied" },
+  judgement: { badge: "yourCall", state: "replied" },
+  todo: { badge: "yourCall", state: "replied" },
+  test: { badge: "youTest", state: "open" },
+  question: { badge: "yourCall", state: "attention" }
+}
+
 /** A badge an agent at work doesn't change:  SEE is ahead of every rule but a comment waiting. */
 const KEPT_AT_WORK: ReadonlySet<BadgeWord> = new Set(["see"])
 
@@ -256,6 +298,9 @@ function stagesOf(kind: BadgeKind, rechecks: (test: RuleTest) => boolean = (test
   const isCanceled = ({ facts }: RuleTest) => facts.status === "canceled"
   // a decision stays green a day, then greys with age (`ItemAge`)
   const isDecision = kind === "judgement" || kind === "question"
+  // the kinds a phase's work can finish:  never a question or a test, which only they answer
+  const isWork = kind === "judgement" || kind === "issue" || kind === "todo"
+  const askingThem = kind === "limit" ? undefined : ASKS_YOU[kind]
   return [
     // "Agreed, add":  ahead of every rule but a comment waiting on them
     {
@@ -267,8 +312,8 @@ function stagesOf(kind: BadgeKind, rechecks: (test: RuleTest) => boolean = (test
       badge: "rechecking",
       state: "progress",
       when: (test) => {
-        const { working, handed, flagged, queued, needsYou } = test.facts
-        const asked = handed || flagged || queued || (needsYou && (kind === "issue" || kind === "todo"))
+        const { working, handed, flagged, queued, needsYou, asksYou } = test.facts
+        const asked = handed || flagged || queued || asksYou || (needsYou && (kind === "issue" || kind === "todo"))
         return isOpen(test) && working && test.isJudged && !asked && rechecks(test)
       }
     },
@@ -300,17 +345,6 @@ function stagesOf(kind: BadgeKind, rechecks: (test: RuleTest) => boolean = (test
     },
     {
       badge: FINISHED[kind],
-      state: "requested",
-      finished: true,
-      when: (test) =>
-        isDone(test) &&
-        (kind === "issue" || kind === "todo") &&
-        test.facts.fromYou &&
-        !test.facts.reviewed &&
-        !test.facts.handled
-    },
-    {
-      badge: FINISHED[kind],
       state: "recent",
       finished: true,
       when: (test) =>
@@ -318,9 +352,12 @@ function stagesOf(kind: BadgeKind, rechecks: (test: RuleTest) => boolean = (test
     },
     { badge: FINISHED[kind], state: "handled", finished: true, when: isDone },
     // a fix waiting for their check is never grey (I411)
+    { badge: "fixed", state: "replied", when: ({ facts }) => facts.fixed && facts.actedOn },
     { badge: "fixed", state: "requested", when: ({ facts }) => facts.fixed && facts.fromYou },
     { badge: "fixed", state: "replied", when: ({ facts }) => facts.fixed },
-    { badge: FINISHED[kind], state: "handled", when: ({ facts }) => facts.handled },
+    { ...askingThem, when: ({ facts }) => askingThem && facts.asksYou },
+    // open still, the phase that took it done:  it may close, never grey by itself (I435)
+    { badge: FINISHED[kind], closes: "done", when: (test) => isOpen(test) && isWork && test.facts.handledDone },
     { badge: FINISHED[kind], state: "recent", when: ({ facts }) => facts.followUp?.done },
     { badge: "queued", state: "scheduled", when: ({ facts }) => facts.queued },
     { badge: "yourCall", state: "replied", when: ({ facts }) => facts.picking },

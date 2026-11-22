@@ -38,25 +38,31 @@ export const epicFeatureSetVocabulary = {
   states: [],
   texts: [
     { key: "reorderSections", text: "Reorder sections", description: "Its button." },
-    { key: "sectionsHeading", text: "Reorder sections", description: "The dialog's title, for the sections." },
+    {
+      key: "sectionsHeading",
+      text: "Reorder your sections",
+      description: "The dialog's title, for the sections."
+    },
     {
       key: "itemsHeading",
-      text: "Reorder {title}",
+      text: "Reorder your list: {title}",
       description: "The dialog's title, for a section's items:  its title."
     },
     {
       key: "howTo",
-      text: "Drag a row by its dots, or use its arrows.",
+      text: "To move a row, drag the dots on its left, or click its up and down arrows.",
       description: "The dialog's first line."
     },
     {
       key: "namesStay",
-      text: "Moving a row doesn't rename it:  {name} stays {name}, so the numbers can look out of order.",
+      text: "Each row keeps its own number when you move it, so the numbers may end up out of order.",
       description: "The dialog's second line:  names don't follow a reorder."
     },
     {
       key: "sendAfter",
-      text: "Claude sees the new order when you press Send to Claude, at the top of the page.",
+      text:
+        "Press Save order to keep your new order. " +
+        "Claude only sees it after you press Send to Claude at the top of the page.",
       description: "The dialog's last line."
     },
     { key: "grip", text: "Move {title}", description: "A row's handle:  drag it, or press the arrow keys on it." },

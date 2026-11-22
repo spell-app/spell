@@ -16,6 +16,12 @@ ONE repo, its own `src/` and its folders `parser/`, `ui/`, `epic/` and `app/` (e
   say "a project's", "an outside API", "the console", "an example project" instead (Owen, 2026-11-20).
 - So the rule itself names neither:  `git grep -il` for either name prints nothing,
   and neither does `git log --all`.
+- Checked by `spell names check` (epic `epic-engine` T153), against a list kept OUTSIDE every repo, so no rule names
+  them:  `~/.spell/private-names`, one name a line.
+  - Every push runs it (`tools/pre-push.ts`), over the commits pushed:  their files, messages, branch names, pictures.
+  - `spell publish` runs it over each packed file, pictures included, before publishing anything.
+  - The epic repo, which may name them, is never pushed while GitHub says it's public (`SharedSync`).
+  - A clone without the list:  the check says so, and passes.
 
 **If working with Solid (2.0):  READ [the Solid 2 rules](agents/solid/solid-2.md) IN FULL FIRST.**
 - Solid work is any of:
@@ -176,7 +182,8 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   - Every other session merges into `main` as usual, then asks it:  `/send epic-engine "release <what>"`.
     Never `git push` or `spell publish` itself.
 - Before any push to GitHub or publish to npm, the dependencies are checked and fixed (Owen, 2026-11-09;  epic `epic-engine` P67):
-  - `spell deps check`:  the lockfile;  a git hook runs it before a push to `main` (`tools/pre-push.ts`, written by `yarn install`)
+  - `spell deps check`:  the lockfile;  a git hook runs it before a push to `main` (`tools/pre-push.ts`, written by `yarn install`),
+    after `spell names check`, which it runs before every push
   - `spell publish`, on its scratch installs:  what someone outside gets, which the lockfile can't show
   - both fail on a deprecated package, a critical or high advisory not on [the known-open list](deps-known-open.json5),
     or an entry on it that no longer matches anything

@@ -665,7 +665,7 @@ function goalSets() {
 ////////////////
 
 /**
- * A new list page:  site header, breadcrumb back to the home, sticky title, lede, the markers, then `list.extra`.
+ * A new list page:  site header, its breadcrumb, sticky title, lede, the markers, then `list.extra`.
  * - every list page is `<area>/index.html`, one folder deep:  `..` up to the root
  * - the engine's assets from the epic server's route, `/_epic/assets/` (epic `epic-eject` P7)
  * - written once, when missing;  after that only between the markers
@@ -685,7 +685,6 @@ export function skeleton(list) {
 <div class="spell-doc">
 <main class="spell-doc-main">
 <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-<ui-breadcrumb link="/pages/index.html" target="_self">Spell Epic</ui-breadcrumb>
 <ui-breadcrumb selected>${escapeHTML(list.title)}</ui-breadcrumb>
 </ui-breadcrumbs>
 <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(list.title)}</h1></header></ui-sticky>

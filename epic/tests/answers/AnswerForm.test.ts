@@ -406,6 +406,64 @@ describe("AnswerForm's draft (P18)", () => {
     expect([server.drafts, server.posts]).toEqual([[], []])
   })
 
+  test("typed before the answer sent is read, then closed:  kept in the browser, laid over on the next visit (J340)", async () => {
+    const storage = new FakeStorage()
+    const busy = new FakeServer()
+    const reads = busy.fetch.getMockImplementation()!
+    busy.fetch.mockImplementation(async (url: string, init?: RequestInit) =>
+      !init?.body && url.startsWith("/api/docs/details/answer?") ? json({ error: "busy" }, 503) : reads(url, init)
+    )
+    const left = formOn(busy, { storage })
+    const [was, other] = [new FakeAsk(at("a"), "q1"), new FakeAsk(at("b"), "q2")]
+    other.picks = ["A"]
+    left.add(was)
+    left.add(other)
+    void left.load()
+    was.picks = ["B"]
+    left.edited()
+    await left.saveDraft({ keepalive: true })
+    // nothing saved yet:  the page is closed before the read
+    expect(busy.drafts).toEqual([])
+    const server = new FakeServer()
+    server.answer = sentOf("2026-10-13T20:00:00.000Z", { answers: { q1: { picked: ["C"] }, q2: { picked: ["C"] } } })
+    const form = formOn(server, { storage })
+    const [first, second] = [new FakeAsk(at("a"), "q1"), new FakeAsk(at("b"), "q2")]
+    second.picks = ["A"]
+    form.add(first)
+    form.add(second)
+    await form.load()
+    await form.saveDraft()
+    // his pick over the answer sent;  the other question as sent, not the page's preset
+    expect([first.picks, second.picks]).toEqual([["B"], ["C"]])
+    expect(server.drafts.at(-1)).toMatchObject({ answers: { q1: { picked: ["B"] }, q2: { picked: ["C"] } } })
+    // laid over once:  the next visit reads the draft, not the early copy
+    expect([...storage.items.values()].join(" ")).not.toContain('"typed"')
+  })
+
+  test("typed early, but sent since:  the answer sent wins over the early copy (J340)", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-13T19:00:00.000Z"), toFake: ["Date"] })
+    const storage = new FakeStorage()
+    const busy = new FakeServer()
+    const reads = busy.fetch.getMockImplementation()!
+    busy.fetch.mockImplementation(async (url: string, init?: RequestInit) =>
+      !init?.body && url.startsWith("/api/docs/details/answer?") ? json({ error: "busy" }, 503) : reads(url, init)
+    )
+    const left = formOn(busy, { storage })
+    const was = new FakeAsk(at("a"), "q1")
+    left.add(was)
+    void left.load()
+    was.picks = ["B"]
+    left.edited()
+    vi.useRealTimers()
+    const server = new FakeServer()
+    server.answer = sentOf("2026-10-13T20:00:00.000Z", { answers: { q1: { picked: ["C"] } } })
+    const form = formOn(server, { storage })
+    const first = new FakeAsk(at("a"), "q1")
+    form.add(first)
+    await form.load()
+    expect(first.picks).toEqual(["C"])
+  })
+
   test("loading alone, the answer unread:  an old copy in the browser is never saved again as new (epic `epic-engine` I377)", async () => {
     const server = new FakeServer()
     const reads = server.fetch.getMockImplementation()!

@@ -10,6 +10,7 @@
  * - `spell local [status | on [checkout] | off]`:  run your own checkout in a project that installs `spell` from npm,
  *   for you alone (epic `repo-split` T70;  `.spell/kit.json5`)
  * - `spell deps [check]`:  the lockfile's advisories and deprecated packages, before a push
+ * - `spell names [check]`:  the names on this machine's private list, in what a push or a publish would send
  * - `spell readme check | test | pictures [pages...]`:  every repo's README pages, checked, their examples run
  *   (epic `readme` P16), or their `html example` blocks pictured (epic `ui-gaps` P14)
  * - `spell map install | status | build | query | explain | uses`:  a map of every repo's code, and one of the
@@ -183,6 +184,22 @@ export default function kitCommands(spell: Command): void {
     .option("--json", "print the report as JSON")
     .action((verb: string | undefined, options: CLI.DepsOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/depsCommand")).depsCommand(verb, options))
+    )
+
+  spell
+    .command("names")
+    .description(
+      "the names on your private list (~/.spell/private-names):  fail when what's about to leave this machine " +
+        "holds one -- its files, commit messages, branch names and pictures;  every push runs it"
+    )
+    .argument("[verb]", "check (default)")
+    .argument("[revisions...]", "what to check (default HEAD):  each one's files, and its commits not on a remote yet")
+    .option("--push <remote>", "check what a push to <remote> sends, as git's pre-push hook hands it on stdin")
+    .option("--json", "print the report as JSON")
+    .action((verb: string | undefined, revisions: string[], options: CLI.NamesOptions) =>
+      CLI.runCommand(async () =>
+        (await import("spell/cli/commands/namesCommand")).namesCommand(verb, revisions, options)
+      )
     )
 
   ////////////////

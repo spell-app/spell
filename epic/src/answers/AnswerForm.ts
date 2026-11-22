@@ -1,5 +1,15 @@
+import { BrowserCopy } from "spell/places/SaveQueue"
+
 import { PlanDates } from "spell/epic/dates"
-import { PageStore, ServerLink, clockOf, sentence, type ServerLinkOptions, type StorageFinder } from "spell/epic/review"
+import {
+  PageStore,
+  ServerLink,
+  clockOf,
+  sentence,
+  storageNow,
+  type ServerLinkOptions,
+  type StorageFinder
+} from "spell/epic/review"
 
 import { AnswerDraft } from "./AnswerDraft"
 import { DraftSaver } from "./DraftSaver"
@@ -13,6 +23,7 @@ import {
   DETAILS_SAVE_MS,
   DETAILS_SETTLE_MS,
   DRAFT_KEY_PREFIX,
+  EARLY_KEY_PREFIX,
   PAGE_COMMENTS_ATTRIBUTE,
   PAGE_COMMENTS_EVENT,
   type AnswerListener,
@@ -70,6 +81,8 @@ export type AnswerFormOptions = ServerLinkOptions & {
  *     and saving never make it newer, so an old copy can't outdate the answer sent (epic `epic-engine` I377)
  *   - until the answer sent is read back, nothing is saved or sent:  the page still shows its preset picks, which
  *     aren't Owen's.  What he changed meanwhile is laid over the answer once it's read (epic `epic-engine` I377)
+ *     - kept in the browser meanwhile, apart from the draft (`EARLY_KEY_PREFIX`, J340):  closed or reloaded before the
+ *       read, the next visit lays it over once it has read the answer (Owen's "kept as typed", epic-workflow P18)
  *   - on load, the newest draft newer than the answer (the server's, else the browser's) goes back into the parts,
  *     by id, over the answer sent (`AnswerDraft.over()`):  "Changes not sent"
  *   - an agent's rewrite patched IN PLACE replaces the questions that changed:
@@ -139,6 +152,12 @@ export class AnswerForm extends PageStore {
   private isEditedEarly = false
 
   /**
+   * What he typed before the read, in the browser, apart from the draft (`EarlyTyping`, epic `epic-engine` J340):
+   * so closing or reloading the page then loses nothing.  Dropped once it's laid over the answer read.
+   */
+  private readonly early: BrowserCopy
+
+  /**
    * When Owen last changed what's in `typed`, ISO:  set by `edited()`, or the draft's own as it's put back.
    * - the draft's `saved`, here and on the page server:  NEVER the time of a save
    * - stays after a Send:  a save that was on its way is then older than the answer
@@ -176,6 +195,10 @@ export class AnswerForm extends PageStore {
       storage: options.storage,
       link: this.link,
       onChange: () => this.changed()
+    })
+    this.early = new BrowserCopy({
+      key: `${EARLY_KEY_PREFIX}${options.page}`,
+      storage: () => ("storage" in options ? storageNow(options.storage) : globalThis.localStorage)
     })
   }
 
@@ -248,7 +271,8 @@ export class AnswerForm extends PageStore {
   edited() {
     if (this.isReading) {
       this.isEditedEarly = true
-      // saved once the answer sent is read back (`putEarly()`)
+      // saved once the answer sent is read back (`putEarly()`);  kept in the browser till then (J340)
+      this.early.keep({ typed: new Date().toISOString(), ...this.current() } satisfies EarlyTyping)
       this.drafts.tell("not saved yet")
     } else if (this.keepsDrafts) {
       this.typed = AnswerDraft.over(this.typed ?? EMPTY, this.current())
@@ -448,7 +472,8 @@ export class AnswerForm extends PageStore {
       this.readAgainSoon()
       return
     }
-    const early = this.isEditedEarly ? this.current() : undefined
+    // typed before the read:  in this visit, or kept from one closed before its read (J340)
+    const early: Partial<EarlyTyping> | undefined = this.isEditedEarly ? this.current() : this.keptEarly()
     this.hasRead = true
     if (this.error === STILL_READING) this.error = ""
     const answer = reply?.answer ?? undefined
@@ -463,8 +488,19 @@ export class AnswerForm extends PageStore {
     const local = this.readLocal()
     const newest = AnswerDraft.newest([draft, local], answer)
     if (newest) this.putBack(newest, { isSaved: newest === draft })
-    if (early) this.putEarly(early)
+    // older than the answer sent:  a later Send had it, or overruled it
+    if (early && !(answer && early.typed && early.typed <= answer.answered)) {
+      const { answers = {}, comments = {}, notes = "", labels = {}, kept } = early
+      this.putEarly({ answers, comments, notes, labels, ...(kept && { kept }) })
+    }
+    this.early.drop()
     this.changed()
+  }
+
+  /** What a visit closed before its read had typed (`early`), or `undefined`. */
+  private keptEarly(): EarlyTyping | undefined {
+    const kept = this.early.kept<EarlyTyping>()
+    return kept && typeof kept.typed === "string" && kept.answers && kept.labels ? kept : undefined
   }
 
   /**
@@ -691,6 +727,9 @@ function epicOf(page: string): string | undefined {
 
 /** What Send says before the answer sent is read back. */
 const STILL_READING = "This page is still loading the answers you sent before.  Wait a moment, then press Send again."
+
+/** What was typed before the read (`AnswerForm.early`, J340):  the page as it was, and when, ISO. */
+type EarlyTyping = TypedAnswer & { typed: string }
 
 /** A page with nothing on it:  what a first change is laid over. */
 const EMPTY: TypedAnswer = { answers: {}, comments: {}, notes: "", labels: {} }

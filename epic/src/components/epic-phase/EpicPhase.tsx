@@ -230,10 +230,16 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     return !this.isFinished && PageStages.of(this.page) === "phases"
   }
 
-  /** Its badge, first in its title, on a page with badges (epic `epic-engine` P81);  a draft says DRAFT instead. */
+  /**
+   * Its badge, after its title, on a page with badges (epic `epic-engine` P81):  UNDERWAY on the phase being built, and
+   * no other (T154;  Owen, 2026-11-22:  "Don't need DONE here ... don't need badges here other than UNDERWAY").
+   * - its status circle says the rest already
+   * - after the title, so the title sits where it did before badges, with or without one
+   */
   get phaseBadge(): BadgeWord | undefined {
     if (!this.badged || this.isDraft) return undefined
-    return ItemBadge.ofPhase(this.drawnState, this.status)
+    const badge = ItemBadge.ofPhase(this.drawnState, this.status)
+    return badge === "underway" ? badge : undefined
   }
 
   /**
@@ -357,16 +363,17 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
           >
             <span class="draft">{this.translationForKey("draftMark")}</span>
           </Show>
+          <slot name={this.slotForName("title")}>{this.title}</slot>
           <Show when={this.phaseBadge}>
             {(badge) => (
               <span class="badge-cell">
+                {" "}
                 <span class={BADGE} data-state={this.drawnState}>
                   {this.translationForKey(`badge_${badge()}`)}
                 </span>
               </span>
             )}
           </Show>
-          <slot name={this.slotForName("title")}>{this.title}</slot>
         </>
       ),
       // after the title, on its first line:  a folded phase is where the pen matters

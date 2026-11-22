@@ -1403,7 +1403,9 @@ In `tools/`:
   - A sticky page header above them, on EVERY page (the templates have it), so the title stays on screen:
     `<ui-sticky class="spell-h1"><header class="spell-page-head">` around the h1.
     - The runtime draws it on ONE line, as an epic page's (`oneLineHead()`;  2026-10-13):
-      - a copy of the breadcrumb goes into the h1:  `SPELL EPIC / SPELL SYNTAX`
+      - a copy of the breadcrumb goes into the h1:  `EPIC-ENGINE / SHIPPED GUIDES`
+        - never a first crumb to the home page, which the top bar already is
+          (`headCrumbs()`, epic `epic-engine` T148)
       - the title in the crumbs' type (mono capitals), twice their size and bold
       - the breadcrumb above it hides
       - a lighter ivory than the toolbar under it
@@ -1745,7 +1747,8 @@ In `tools/`:
     - verdict cells:  `yes positive` / `no negative` / `meh warning`
   - small badges:  `<ui-label size="mini">`
     - a legend of them:  `<ui-labels class="spell-legend" size="mini">`
-  - page top:  `<ui-breadcrumbs class="spell-crumbs">`, back to the index
+  - page top:  `<ui-breadcrumbs class="spell-crumbs">`, what the page is under, then the page itself
+    - no crumb to the home page:  the top bar's Spell Epic is that link (epic `epic-engine` T148)
     - meta lines (who it's for, status, how checked):  `<ui-list class="spell-meta">` of `<ui-item icon="...">`
   - headline numbers:  `<ui-statistics class="spell-stats" size="mini">` of `<ui-statistic value label>`
     - 2-4 of them, each also stated with its caveat in the body
@@ -1845,6 +1848,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 | epic page | an epic's plan:  its phases, items and log | `epics/<epic-id>/<epic-id>.plan.html` | [the tool's](tool/templates/plan.html) |
 | saga page | a saga (an epic of epics):  what its epics did, ideas not done yet, its epics' cards;  commented on and sent from as an epic page is (epic `epic-workflow` P15) | `sagas/<saga-id>/<saga-id>.saga.html` | [the tool's](tool/templates/saga.html) (`epic saga page <id>`);  the parked goal sets in `goals/`:  none (spell-app's `goals.zip`) |
 | details page | one question explained with a picture, answered on the page | `pages/details/`, `epics/<epic-id>/details/` | [details.html](../templates/details.html) |
+| Feature Set | a details page that's a ranked list to pick from, its sections and items named (S1F1) and put in your own order (epic `epic-engine` P80) | same as details pages | [the tool's](tools/templates/feature-set.html), never copied:  `epic ask create <slug> --template feature-set --from <data.json5>` |
 | review page | several calls to go through at once:  keep, change, talk over | same as details pages | [review.html](../templates/review.html) |
 | choice page | a table of names Claude recommends, typed over, then "Do it" | same, with `<slug>.rows.json5` | [syntax-choices.html](../templates/syntax-choices.html) |
 | run page | a command's review page:  a COMMAND (not Claude) asks, the person answers each row, Send, and the command carries on (epic `epic-engine` P23) | `pages/runs/<run-id>/`, served at `/runs/<run-id>/` | [the tool's](tools/templates/run.html), served by [runRoutes.ts](tools/runRoutes.ts), never copied |
@@ -1920,10 +1924,16 @@ the epic page shown in both tabs).
     - its data:  [feature-set.json5](tools/templates/feature-set.json5), to copy;
       the shape and the names' rules, [FeatureSet.js](tools/FeatureSet.js)
   - a table per section, three columns, Item | Your pick | Facts
-  - S1F1 names one item for good (Q83):  a reorder renames nothing, a number is never used again
+  - S1F1 names one item (Q83):  a reorder renames nothing, an `id` never hands a name to another,
+    and a number is never used again
+    - a round that moves an item to another section gives it a new name there, for now (I433)
+  - `epic ask round <page> --template feature-set --from <data.json5>`:  an ordinary details page becomes one,
+    at the same address
+  - at 720px and under, Your pick first, then Item with the Facts under it
+  - a row and its section are green once the pick and its Priority are both in, or the pick is No
   - a pick is an `<epic-ask compact no-chip>`, its Priority one in its `then` slot:  ONE comment box
   - `<epic-feature-set>`:  the reorder dialog, the links, the sections' states
-  - Back puts the reader where they were:  the runtime's [spell-doc-back.js](tools/_assets/spell-doc-back.js)
+  - Back and Forward put the reader where they were:  the runtime's [spell-doc-back.js](tools/_assets/spell-doc-back.js)
 - [syntax-choices.html](../templates/syntax-choices.html):  a choice page.
   - `syntax-choices.rows.json5` beside it is a small working example.
   - NEVER copy by hand:  `epic choices create <slug> --rows <rows.json5>`.
@@ -2360,7 +2370,8 @@ the epic page shown in both tabs).
     what it shows till then is the page's preset picks, or nothing, and neither is the person's.
     - a failed read is tried again every 3s;  this browser's old copy waits for it, never saved again as new
     - what they change meanwhile is laid over what's read, field by field (`AnswerDraft.withEdits()`), then saved
-    - closed before that, what they changed in that time is lost (J340)
+    - kept in this browser meanwhile, apart from the draft (`EARLY_KEY_PREFIX`, J340):  closed or reloaded before the
+      read, the next visit lays it over what it reads, unless an answer sent since is newer
   - An agent's rewrite reloads the page, or patches it in place:
     either way a question that's still there gets back what was typed in it.
   - Text whose id the rewrite removed is KEPT:  a box of its own above the notes, "Kept from before the page changed".

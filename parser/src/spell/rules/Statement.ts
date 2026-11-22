@@ -167,6 +167,30 @@ export class SpellStatement<
   }
 
   /**
+   * Is `item`, a line or a block of them, comments, blank lines and comments being typed alone, however deep?
+   * - A comment being typed, a lone `-` (`P.Tokenizer.isAside()`), is still an error:  `typedMarkErrorsOf()`.
+   */
+  private static holdsOnlyComments(item: P.LineToken | P.BlockToken, scope: P.Scope): boolean {
+    if (item instanceof P.BlockToken) return item.tokens.every((each) => SpellStatement.holdsOnlyComments(each, scope))
+    const isComment = item.tokens.length === 1 && item.tokens[0] instanceof P.CommentToken
+    return !item.tokens.length || isComment || SpellStatement.isTypedMark(item, scope)
+  }
+
+  /** Is `line` a comment being typed, a lone `-` or `/` (`P.Tokenizer.isAside()`)? */
+  private static isTypedMark(line: P.LineToken, scope: P.Scope): boolean {
+    return line.tokens[0] instanceof P.SymbolToken && !!scope.parser?.tokenizer.isAside(line)
+  }
+
+  /**
+   * The errors of the comments being typed beside a body read as ONE line (`nestedAs` other than `"block"`), e.g. a
+   * lone `-` between a bare `return` and its value (epic `language` J307):  each its own line's error, the value kept.
+   * - `BlockLine` reports them with the line's.
+   */
+  static typedMarkErrorsOf(body: P.Match): P.Match[] {
+    return (body.data as { typedMarkErrors?: P.Match[] }).typedMarkErrors ?? []
+  }
+
+  /**
    * A `parse_error` match in place of statement `match`, saying why spell won't take it,
    * e.g. a property declared on a built-in type.
    * - For a `parse()` which understood what it read, but mustn't accept it:
@@ -546,7 +570,7 @@ export class SpellStatement<
    * - Returns the nested body match if successful.
    * - `bodySpec.nestedAs` ~== `"block"` => parses the whole nested block via `statement.nestedScope` and marks
    *   the result `enclose`d (wrapped in `{}` when compiled), unless we're `flatBody`.  Otherwise, only a single-line nested block
-   *   can be parsed, as `nestedAs` directly (e.g. an `expression`).
+   *   can be parsed, as `nestedAs` directly (e.g. an `expression`), comments above or below it aside.
    * - SIDE EFFECT: on success, adds it to `statement.groups` as `body`,
    *   and records it as `statement.data.body` -- see `getBody()`.
    * - NOTE: this will throw if rule does not implement `getNestedScopeForMatch`.
@@ -570,19 +594,27 @@ export class SpellStatement<
       }
     } else {
       // if parsing as anything else, we can only handle a single line
-      if (nestedBlock.tokens.length > 1) return undefined
+      const { nestedScope } = statement
+      const code = nestedBlock.tokens.filter((item) => !SpellStatement.holdsOnlyComments(item, nestedScope))
+      if (code.length > 1) return undefined
       // get line to process, minus leading whitespace
-      // TODO: remove comment????
-      const first = nestedBlock.tokens[0]
+      // TODO: remove comment at the line's end????
+      const [first] = code
       // Only a `LineToken` (not a nested `BlockToken`) can be parsed as a single rule here.
       if (!(first instanceof P.LineToken)) return undefined
       const { tokens } = first
       // the body's scope, as an inline body's (`parseInlineStatement()`):  e.g. `draw_it`'s markup, where `[rank]`
       // is the card's.  The same as `statement.scope` for a rule with no scope of its own, e.g. `return`
-      const { nestedScope } = statement
       result = nestedScope.parser?.parse(tokens, parseAs, nestedScope)
       // forget it if we didn't parse the entire line
       if (result?.length !== tokens.length) return undefined
+      // a comment being typed beside it:  its own error -- see `typedMarkErrorsOf()`
+      const marks: P.LineToken[] = []
+      P.Tokenizer.forEachToken(nestedBlock.tokens, (token) => {
+        if (token instanceof P.LineToken && SpellStatement.isTypedMark(token, nestedScope)) marks.push(token)
+      })
+      const errors = marks.flatMap((line) => nestedScope.parser?.parse(line.tokens, "parse_error", nestedScope) ?? [])
+      if (errors.length) (result.data as { typedMarkErrors?: P.Match[] }).typedMarkErrors = errors
     }
     if (result) {
       statement.addMatch(result, "body")

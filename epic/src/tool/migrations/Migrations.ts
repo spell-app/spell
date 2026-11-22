@@ -4,6 +4,7 @@ import { ClarifiedBodies } from "./ClarifiedBodies"
 import { DoneCardsClose } from "./DoneCardsClose"
 import { HandedOnFixes } from "./HandedOnFixes"
 import { ItemBodies } from "./ItemBodies"
+import { ItemsInOrder } from "./ItemsInOrder"
 import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
 import { LogCommits } from "./LogCommits"
@@ -66,7 +67,8 @@ export class Migrations {
     new ReopenedFixes(),
     new HandedOnFixes(),
     new PictureLabels(),
-    new SelfFixedIssues()
+    new SelfFixedIssues(),
+    new ItemsInOrder()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

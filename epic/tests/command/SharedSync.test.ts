@@ -10,7 +10,9 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
+import { GitHubVisibility } from "spell/epic/command/GitHubVisibility"
 import { Shared, syncLines } from "spell/epic/command/Shared"
+import { PUBLIC_REFUSED } from "spell/epic/command/SharedSync"
 import { SyncState } from "spell/epic/command/SyncState"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
@@ -162,6 +164,25 @@ describe("Shared.sync()", () => {
     expect(SyncState.notice(ben.dir)?.claude).toMatch(/git rebase --continue/)
   })
 
+  test("GitHub says the epic repo is public:  committed, never pushed, said in one line;  private again:  pushed", async () => {
+    const isPublic = GitHubVisibility.isPublic
+    try {
+      GitHubVisibility.isPublic = async () => true
+      writeFileSync(join(ana.dir, "public.md"), "kept here\n")
+      const before = git(REMOTE, "rev-parse", "HEAD")
+      const { sync } = await ana.shared.sync()
+      expect(sync).toMatchObject({ result: "not pushed", public: true, error: PUBLIC_REFUSED })
+      expect(git(REMOTE, "rev-parse", "HEAD")).toBe(before)
+      expect(SyncState.notice(ana.dir)?.person).toMatch(/GitHub shows their repo as public/)
+      GitHubVisibility.isPublic = async () => false
+      expect((await ana.shared.sync()).sync).toMatchObject({ result: "synced", pushed: true })
+      expect(SyncState.notice(ana.dir)).toBeUndefined()
+      await ben.shared.sync()
+    } finally {
+      GitHubVisibility.isPublic = isPublic
+    }
+  })
+
   test("no contentRemote in the config:  commits, never syncs, even with an origin;  `sync` refuses", async () => {
     const quiet = person("quiet", { remote: "" })
     expect(quiet.shared.clone(REMOTE)).toBeUndefined()
@@ -242,5 +263,37 @@ describe("Shared.keepRepoFiles()", () => {
     expect(shared.keepRepoFiles()).toEqual([])
     expect(readFileSync(join(dir, ".gitignore"), "utf8")).toContain("/scratch/")
     expect(readFileSync(join(dir, ".gitattributes"), "utf8")).toMatch(/^\*\.png binary$/m)
+  })
+})
+
+describe("GitHubVisibility", () => {
+  test("a GitHub address's repo;  another host's none", () => {
+    expect(GitHubVisibility.repoOf("https://github.com/acme/plans.epics.git")).toBe("acme/plans.epics")
+    expect(GitHubVisibility.repoOf("git@github.com:acme/plans")).toBe("acme/plans")
+    expect(GitHubVisibility.repoOf("https://gitlab.example.com/acme/plans.git")).toBeUndefined()
+    expect(GitHubVisibility.repoOf(REMOTE)).toBeUndefined()
+  })
+
+  test("asked once in 10 minutes;  GitHub silent:  the last answer kept", async () => {
+    const ask = GitHubVisibility.ask
+    const gitDir = mkdtempSync(join(TEMP, "visibility-"))
+    const asked: string[] = []
+    try {
+      let answer: boolean | undefined = true
+      GitHubVisibility.ask = async (repo) => (asked.push(repo), answer)
+      const url = "https://github.com/acme/plans.git"
+      expect(await GitHubVisibility.isPublic(url, gitDir, 0)).toBe(true)
+      answer = false
+      expect(await GitHubVisibility.isPublic(url, gitDir, 60_000)).toBe(true)
+      expect(asked).toEqual(["acme/plans"])
+      answer = undefined
+      expect(await GitHubVisibility.isPublic(url, gitDir, 11 * 60_000)).toBe(true)
+      answer = false
+      expect(await GitHubVisibility.isPublic(url, gitDir, 12 * 60_000)).toBe(false)
+      expect(await GitHubVisibility.isPublic(REMOTE, gitDir)).toBeUndefined()
+      expect(asked).toHaveLength(3)
+    } finally {
+      GitHubVisibility.ask = ask
+    }
   })
 })

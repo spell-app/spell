@@ -104,11 +104,12 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     expect(await page.locator(".InspectorCard[data-panel=code]").getAttribute("label")).toBe("Code")
     await expect
       .poll(async () =>
-        (await row("on click").locator(".CodeSlice .cm-line").allInnerTexts()).map((line) =>
+        (await row("when clicked").locator(".CodeSlice .cm-line").allInnerTexts()).map((line) =>
           line.replace(/\s+/g, " ").trim()
         )
       )
-      // its words are its row's header:  the field holds only its code (Solitaire as it is now, I62)
+      // its words are its row's header, `when clicked` since Solitaire's language T155 (was `on click`):
+      // the field holds only its code (Solitaire as it is now, I62)
       .toEqual(["if it is face up or its pile is solitaire's stock", "play the card"])
     // an action:  its signature in its band, its name a pill, each type a blank in it (T98), then its code
     const action = page
@@ -170,19 +171,19 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
     }
     expect(await mainFile()).toBe(before)
     // each row keeps its own head, at once:  not read again while the program's compile is behind the text (I220:
-    // `on click`'s row read `if it is face up ...`, its code `play the card`, till the next compile ran)
-    const onClick = page.locator(".InspectorEvent").nth(1)
-    expect((await onClick.locator(".InspectorEventWords").innerText()).replace(/\s+/g, " ").trim()).toBe("on click")
-    expect((await onClick.locator(".CodeSlice .cm-line").first().innerText()).trim()).toBe(
+    // the click's row read `if it is face up ...`, its code `play the card`, till the next compile ran)
+    const clicked = page.locator(".InspectorEvent").nth(1)
+    expect((await clicked.locator(".InspectorEventWords").innerText()).replace(/\s+/g, " ").trim()).toBe("when clicked")
+    expect((await clicked.locator(".CodeSlice .cm-line").first().innerText()).trim()).toBe(
       "if it is face up or its pile is solitaire's stock"
     )
   })
 
-  // Solitaire's card has no one-line row any more (`- clickable when ...` is its `on click`'s `if` now, I62):
+  // Solitaire's card has no one-line row any more (`- clickable when ...` is its `when clicked`'s `if` now, I62):
   // what this keeps is a row's first line, where Home lands at its code, past the file's indent
   test("a row's field starts at its code, and typing at its start lands there", async () => {
     const before = await mainFile()
-    const field = row("on click").locator(".CodeSlice")
+    const field = row("when clicked").locator(".CodeSlice")
     await expect
       .poll(async () => (await field.locator(".cm-content").innerText()).replace(/\s+/g, " ").trim())
       .toMatch(/^if it is face up or its pile is solitaire's stock/)

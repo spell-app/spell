@@ -39,7 +39,7 @@ export const epicPageVocabulary = {
       kind: "string",
       description:
         "What kind of page:  absent, an epic page;  `saga`, a SAGA page (epic `epic-workflow` P15), " +
-        "`sagas/<id>/<id>.saga.html`:  `saga` names it, its crumbs say `Docs / Sagas`, its review command is " +
+        "`sagas/<id>/<id>.saga.html`:  `saga` names it, its crumb says `Sagas`, its review command is " +
         "`/epic review SAGA:/<id>`, and it has no phases, branch, worktree or step label."
     },
     {
@@ -80,8 +80,15 @@ export const epicPageVocabulary = {
       description:
         "ITEM BADGES (epic `epic-engine` P81):  each item's line starts with what happens next, in its colour, and " +
         "new items are judged as they're made.  `trial`:  what's closed keeps its colour, and nothing is closed by " +
-        "its badge;  `on`:  a new item its badge would grey is closed.  None:  drawn as before badges.  Set by " +
+        "its badge;  `on`:  Claude may close what a badge would grey.  None:  drawn as before badges.  Set by " +
         "`epic badges <epic> on | trial`;  `off` undoes it."
+    },
+    {
+      name: "badges-close-new",
+      kind: "boolean",
+      description:
+        "You said yes to closing new items by themselves (epic `epic-engine` I435):  with badges `on`, a new one " +
+        "its badge would grey closes as it's made, never a judgement call.  Set by `epic badges <epic> close-new yes`."
     },
     {
       name: "stage",
@@ -167,7 +174,7 @@ export const epicPageVocabulary = {
     {
       name: "crumbs",
       description:
-        "In the h1, before the epic's name:  `Docs / Epics /`, the docs' eyebrow.  None narrow, nor while the doc " +
+        "In the h1, before the epic's name:  `Epics /`, the docs' eyebrow.  None narrow, nor while the doc " +
         "still holds its old `ui-breadcrumbs.spell-crumbs` before the page."
     },
     {
@@ -317,9 +324,8 @@ export const epicPageVocabulary = {
     { key: "seeAlsoGuide", text: "guide", description: "A See Also page's kind:  a guide the epic page links to." },
     { key: "seeAlsoDetails", text: "details", description: "A See Also page's kind:  a details page." },
     { key: "seeAlsoChoices", text: "choice", description: "A See Also page's kind:  a choice page." },
-    { key: "crumbDocs", text: "Spell Epic", description: "The crumbs' first:  the epics' home page." },
-    { key: "crumbEpics", text: "Epics", description: "The crumbs' second:  the Epics list page." },
-    { key: "crumbSagas", text: "Sagas", description: "A saga page's crumbs' second:  the Sagas list page." },
+    { key: "crumbEpics", text: "Epics", description: "The crumb before the name:  the Epics list page." },
+    { key: "crumbSagas", text: "Sagas", description: "A saga page's crumb:  the Sagas list page." },
     {
       key: "sagaPage",
       text: "Saga page:",

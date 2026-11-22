@@ -445,7 +445,7 @@ As `plan-doc.md`, "Ids":
     | `quiet`     | grey   | open, nothing to think about:  a `calm` judgement call not reviewed, a limit (epic `epic-engine` P63) |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
     | `replied`   | orange | a manual test whose phase isn't done (epic `epic-engine` P63:  `PlanReader.manualTestState()`) |
-    | `recheck`   | light orange | a page with badges (P81):  WILL RECHECK, WILL CLOSE:  Claude's turn, never counted as needing the person (Q82) |
+    | `recheck`   | light orange | a page with badges (P81):  WILL RECHECK, WILL CLOSE:  Claude's turn, its own light orange chip, never counted as needing the person (Q82, J335) |
     | `someday`   | light yellow | a page with badges (P81):  SOMEDAY, OPTIONAL:  open, no hurry               |
     | `open`      | yellow | anything else open:  still undecided, not urgent;  a calm issue, a test whose phase is done;  a revisit or request for now answered |
 
@@ -761,8 +761,9 @@ As `plan-doc.md`, "Ids":
   word and plane (a thumbs up until I299);  the same stored `todo` mark.
   - an OPEN issue's last button is the x (I299):  a `drop` mark, closed as canceled;  a FIXED one's (orange) is Accept the
     fix (the check), with Revisit before it and no plane (J231:  a fix goes back with Revisit's note);  NO todo is made.
-  - a FINISHED issue or call (done, canceled, decided;  J231):  Revisit and Saw it, no plane;  a phase that took it
-    (`taken-in`) draws `done in P20` where the plane was
+  - a FINISHED item of any kind (done, canceled, decided;  epic `epic-engine` T152):  Reopen alone, Revisit's mark;
+    one waiting for their look (orange, light orange) keeps its check:  Revisit and Saw it (J231).
+    A phase that took it (`taken-in`) draws `in P20` on the line, before the buttons.
   - `inbox apply`:  the item stays where it is, `urgent` (wanted), RED whether reviewed or not, reopened if closed;
     their note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.
@@ -913,7 +914,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | red    | needs the person                               | `attention` chips;  the rail's count (only what needs them);  a todo the person flagged red as a reminder (`--loud`, T94), its buttons still a todo's (plane, revisit, x) |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
 | light yellow | open, no hurry (DARK text):  SOMEDAY, OPTIONAL | `someday` chips and badges;  counts in, and filters with, the yellow bubble (epic `epic-engine` P81) |
-| light orange | finished as they asked, their turn to see it (DARK text);  on a page with badges also Claude's turn to check again | `requested` and `recheck` chips and badges;  both filter with orange, but a recheck is never counted as needing the person (P81, Q82) |
+| light orange | finished as they asked, their turn to see it (DARK text);  on a page with badges also Claude's turn to check again | `requested` and `recheck` chips and badges;  `requested` filters with orange, a recheck has a chip of its own, never counted as needing the person (P81, Q82, J335) |
 | blue   | do it now, or it's with Claude           | `progress` chips and the UNDERWAY label (solid);  `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (start now), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since the person looked, or a warning;  an item Claude answered with options, waiting for the person's pick (2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing the person |
@@ -996,7 +997,8 @@ EVERYTHING boxed in a section folds (2026-10-08):  every card with a heading ban
 - Folded content is `hidden="until-found"`, so find-in-page reveals it.
 - A click anywhere on the band folds, but on a link or a control in it (`Fold.heading`, `fold.button()`).
 
-The review buttons, at every step:  Make Todo, Revisit, Approve in one group.
+The review buttons, until an item is finished:  Make Todo, Revisit, Approve in one group.
+- Answered or finished:  Reopen alone, with the check only while it waits for their look (epic `epic-engine` T152).
 - No Do Now (the wand) since 2026-10-25:  "In practice, I'm never using the wand";  nor the header's wand, the
   same day.
   - The header's Send counts down by itself instead (Auto Send, epic `epic-engine` P53):  a ring round the plane,
@@ -1404,6 +1406,8 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       it as it was fixed, and its reason may be gone from the page since (`reviewed`;  I375)
     - never on an edit:  it closes items, and an edit can't see every page's inbox
     - idempotent:  a closed or light orange one is left
+  - `items-in-order` (2026-11-22, on command;  epic `epic-engine` T151):  each section's items back in number
+    order (`ItemsInOrder`).  An item keeps its place:  a new one goes last, an open question no longer on top.
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the
   SAME commit as the markup change it follows (epics' `AGENTS.md`, "Rules").  Another kind's:  an entry in the docs
   tool's `STEPS`, last.  Either way:  idempotent, every word kept, and a test (a before page becomes the after page,

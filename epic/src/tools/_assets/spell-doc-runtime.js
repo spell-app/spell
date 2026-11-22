@@ -98,6 +98,7 @@ import {
   dropBlockAction,
   el,
   growField,
+  headCrumbs,
   noteToast,
   readJSON,
   restoreEpicFolds,
@@ -410,16 +411,17 @@ function loadEpicsPack() {
 }
 
 /**
- * The page's head on ONE line, as an epic page's:  `DOCS / SPELL SYNTAX`, the crumbs then the title,
+ * The page's head on ONE line, as an epic page's:  `EPIC-ENGINE / SHIPPED GUIDES`, the crumbs then the title,
  * in the crumbs' own type, the title twice their size and bold (`spell-doc.css`, "The page's head on one line").
  * - Owen, 2026-10-13:  "Make the header changes in the other doc files"
  * - a copy of the page's breadcrumb (`.spell-crumbs`, before the sticky head) goes INTO the h1, before its text;
  *   `data-spell-added`, so a live update steps around it
+ *   - without its crumb to the home page, which the top bar already is (`headCrumbs()`, epic `epic-engine` T148)
  *   - its last section (the page itself) stays, emptied:  the title says its words;
  *     so the `/` before the title is the breadcrumb's own divider (epic `epic-engine` P3:  a `<span>` of ours before)
  * - the breadcrumb itself stays where it was, hidden (`<body class="spell-one-line-head">`):
  *   live updates still patch it, and the copy follows when the page reloads
- * - a page with no breadcrumb:  the title alone, in the same type
+ * - a page with no breadcrumb, or none but the home page's and its own:  the title alone, in the same type
  */
 function oneLineHead(main) {
   const h1 = main.querySelector(PAGE_TITLE)
@@ -427,7 +429,8 @@ function oneLineHead(main) {
   document.body.classList.add("spell-one-line-head")
   const crumbs = main.querySelector(":scope > ui-breadcrumbs.spell-crumbs")
   if (!crumbs || h1.querySelector(":scope > .spell-head-crumbs")) return
-  const trail = crumbs.cloneNode(true)
+  const trail = headCrumbs(crumbs)
+  if (!trail) return
   trail.classList.add("spell-head-crumbs")
   trail.dataset.spellAdded = ""
   trail.removeAttribute("id")

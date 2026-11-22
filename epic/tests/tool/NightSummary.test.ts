@@ -199,7 +199,7 @@ describe("a line's Read (I206)", () => {
   })
 
   // epic `epic-engine` I302:  "While you were out should have the same `FIXED` etc badges as the items themselves do"
-  test("a line ends with a copy of its item's label;  the item's ✓ takes both off", () => {
+  test("a line has a copy of its item's label after its number (T149);  never a FIXED its start says;  the item's ✓ takes both off", () => {
     const plan = readPage()
     night(plan)
     plan.addItem("issue", "It jumps", { requested: true })
@@ -208,7 +208,8 @@ describe("a line's Read (I206)", () => {
     const labelOf = (selector: string) => plan.page.querySelector(`${selector} > epic-update`)
     const item = plan.page.querySelector('#i2 > [slot="title"] > epic-update')
     expect(item?.getAttribute("became")).toBe("fixed")
-    expect(labelOf('epic-away-line[line="i2"]')?.outerHTML).toBe(item!.outerHTML)
+    // its line starts `FIXED -` already (T143):  no copy
+    expect(labelOf('epic-away-line[line="i2"]')).toBeNull()
     // a new item, made while a phase is under way, has a plain UPDATE label:  its line copies that one
     expect(labelOf('epic-away-line[line="i1"]')?.outerHTML).toBe(
       plan.page.querySelector('#i1 > [slot="title"] > epic-update')?.outerHTML

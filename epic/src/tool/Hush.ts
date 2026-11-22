@@ -40,7 +40,8 @@ export class Hush {
    * The items of `plan` that may be hushed, in page order:  drawn green, yellow or orange, settled `HUSH_DAYS` or more
    * before `plan.now`, and none of these:
    * - an open question (red anyway), a manual test (left for Owen), open work (an open todo, an open issue not fixed)
-   * - YOUR CALL, on a page with badges (P81):  only he can decide it
+   * - on a page with badges (P81), one waiting on him by its badge (YOUR CALL, AGAINST YOUR ASK, YOU TEST ...),
+   *   his finished work he hasn't seen with it (I435)
    * - one waiting on his pick, one he marked loud (`urgent`, unless it's a fix waiting for his review), one a tidy
    *   found promised and not delivered
    * - one with his mark not yet taken (`skip.marked`), Claude at work on it (`skip.working`), or a comment thread on it
@@ -59,8 +60,8 @@ export class Hush {
       if (open && (kind === "todo" || kind === "limit")) return []
       if (open && kind === "issue" && !facts.fixed) return []
       if (facts.awaitsPick || (facts.urgent && !facts.fixed) || Hush.isPromised(item)) return []
-      // a page with badges:  YOUR CALL waits on him alone, so nobody greys it for him (epic `epic-engine` P81)
-      if (open && plan.badges.badgeOf(item).badge === "yourCall") return []
+      // a page with badges:  what waits on him is his alone to grey (epic `epic-engine` P81, I435)
+      if (plan.badges.waitsOnThem(item)) return []
       const state = DrawnState.of({ ...DrawnState.fieldsOf(item), state: plan.itemState(item) }, NO_LIVE_REVIEW, now)
       const colour = COLOURS[state]
       if (!colour) return []

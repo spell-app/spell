@@ -1010,24 +1010,24 @@ describe("PlanDoc questions and decisions", () => {
     '<ui-column><ui-segment><ui-label attach-to="top">B · Unfold <code>it</code> (recommended)</ui-label><p>b</p></ui-segment></ui-column>' +
     "</ui-grid>"
 
-  test("one section (D13):  open questions on top, then the answered ones in id order;  a decision is born answered", () => {
+  test("one section (D13), in number order, open or answered (T151);  a decision is born answered", () => {
     const plan = freshPlan()
     expect(plan.addItem("decision", "first")).toBe("q1")
     plan.addItem("question", "which?")
     plan.addItem("decision", "second")
     plan.addItem("question", "and?")
-    expect(order(plan)).toEqual(["q2:open", "q4:open", "q1:decided", "q3:decided"])
+    expect(order(plan)).toEqual(["q1:decided", "q2:open", "q3:decided", "q4:open"])
     expect(el(plan, "q1").hasAttribute("answered")).toBe(true)
     expect(plan.summary().open.question.map((item) => item.id)).toEqual(["q2", "q4"])
   })
 
-  test("decide:  an <epic-answer> INTO the question, after its text;  it keeps its title and moves", () => {
+  test("decide:  an <epic-answer> INTO the question, after its text;  it keeps its title and its place (T151)", () => {
     const plan = freshPlan()
     plan.addItem("question", "which browser?", { details: "<p>the options</p>" })
     plan.addItem("question", "later?")
     plan.addItem("decision", "earlier")
     expect(plan.decide("Q1", "Chrome first", { details: "<p>most readers</p>" })).toBe("q1")
-    expect(order(plan)).toEqual(["q2:open", "q1:decided", "q3:decided"])
+    expect(order(plan)).toEqual(["q1:decided", "q2:open", "q3:decided"])
     const question = el(plan, "q1")
     expect([PlanItem.titleOf(question), question.hasAttribute("answered")]).toEqual(["which browser?", true])
     // no phase under way, and still `DECIDED` (epic `epic-engine` I290):  the title moves into its slot
@@ -1144,7 +1144,7 @@ describe("PlanDoc questions and decisions", () => {
     expect(order(plan)).toEqual(["q1:done", "q2:done"])
     plan.setItem("q1", "open")
     plan.setItem("q2", "open")
-    expect(order(plan)).toEqual(["q2:open", "q1:decided"])
+    expect(order(plan)).toEqual(["q1:decided", "q2:open"])
   })
 
   test("an old decision's id on an answer (d7) finds its question, and stays on a new answer", () => {
@@ -1375,6 +1375,20 @@ describe("PlanDoc states", () => {
     expect(stateOf(plan, "j1", "j2")).toEqual(["open", "progress"])
     expect(phases()).toEqual([null, null])
 
+    // its phase's later work not on main, but a commit of it from after the call is (I439):  landed, yellow
+    const made = Date.parse(el(plan, "j1").getAttribute("changed")!)
+    plan.landing = { branch: "editor", ids: new Set(["p1"]), shas: [], landed: new Map([["p1", made + 60_000]]) }
+    plan.updateStates()
+    expect(stateOf(plan, "j1")).toEqual(["open"])
+    // main's last commit of P1 is from before the call:  still blue
+    plan.landing = { branch: "editor", ids: new Set(["p1"]), shas: [], landed: new Map([["p1", made - 60_000]]) }
+    plan.updateStates()
+    expect(stateOf(plan, "j1")).toEqual(["progress"])
+    // retitled since:  made when it was first judged, not at the retitle
+    Markup.set(el(plan, "j1"), { judged: PlanTime.isoTime(new Date(made - 120_000)) })
+    plan.updateStates()
+    expect(stateOf(plan, "j1")).toEqual(["open"])
+
     // landed:  every mark gone, the calls yellow
     plan.landing = { branch: "editor", ids: new Set(), shas: [] }
     plan.updateStates()
@@ -1581,8 +1595,8 @@ describe("PlanDoc review", () => {
       "Manual tests"
     ])
     expect(sections[0]!.items.map((item) => [item.id, item.state])).toEqual([
-      ["Q2", "outstanding"],
-      ["Q1", "reviewed"]
+      ["Q1", "reviewed"],
+      ["Q2", "outstanding"]
     ])
   })
 

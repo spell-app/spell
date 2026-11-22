@@ -135,7 +135,7 @@ describe("<epic-page>", () => {
   })
 
   // epic `epic-workflow` P15:  a saga's page, from the same elements
-  test("a saga page:  crumbs DOCS / SAGAS / <id>, its short address in the meta lines, its review command;  no step label, Plan hung?, See Also or agents", async () => {
+  test("a saga page:  crumbs SAGAS / <id>, its short address in the meta lines, its review command;  no step label, Plan hung?, See Also or agents", async () => {
     const fetched = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ pages: [] })))
     const host = await render(
       `<epic-page kind="saga" saga="epics" title="Epic Tooling" started="2026-10-14" updated="2026-10-14">` +
@@ -150,10 +150,7 @@ describe("<epic-page>", () => {
       crumb.textContent,
       crumb.getAttribute("link")
     ])
-    expect(crumbs).toEqual([
-      ["Spell Epic", "/pages/index.html"],
-      ["Sagas", "/sagas/index.html"]
-    ])
+    expect(crumbs).toEqual([["Sagas", "/sagas/index.html"]])
     const lines = Array.from(shadow.querySelectorAll('[part~="meta"] > li'), (li) =>
       li.textContent!.replace(/\s+/g, " ").trim()
     )
@@ -262,7 +259,7 @@ describe("<epic-page>", () => {
   })
 
   // Owen, 2026-10-13:  "Just go with a single set of breadcrumbs"
-  test("draws its crumbs in the h1, `Docs / Epics /` then the name;  NONE while the doc still holds its old crumbs before it", async () => {
+  test("draws its crumb in the h1, `Epics /` then the name, never the top bar's Spell Epic again (T148);  NONE while the doc still holds its old crumbs before it", async () => {
     const host = await render(page("", ["todo"]))
     const crumbs = host.shadowRoot!.querySelector('[part~="crumbs"]')!
     expect(
@@ -271,10 +268,7 @@ describe("<epic-page>", () => {
         crumb.getAttribute("link"),
         crumb.hasAttribute("selected")
       ])
-    ).toEqual([
-      ["Spell Epic", "/pages/index.html", false],
-      ["Epics", "/epics/index.html", false]
-    ])
+    ).toEqual([["Epics", "/epics/index.html", false]])
     expect(crumbs.parentElement!.localName).toBe("h1")
     expect(crumbs.nextElementSibling!.textContent).toBe("demo")
 

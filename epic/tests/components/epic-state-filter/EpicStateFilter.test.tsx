@@ -51,18 +51,20 @@ describe("<epic-state-filter>", () => {
     await expectAccessible(host)
   })
 
-  test("light yellow counts with yellow;  a recheck filters with orange, not in its number (epic-engine P81, Q82)", async () => {
+  test("light yellow counts with yellow;  a recheck has its own light orange chip, never in orange's number (P81, Q82, J335)", async () => {
     const host = await ElementFixture.render(
       `<epic-state-filter counts="replied:4 recheck:9 open:8 someday:3"></epic-state-filter>`
     )
-    expect(chips(host)).toEqual(["replied:4+", "open:11+"])
+    expect(chips(host)).toEqual(["replied:4+", "recheck:9+", "open:11+"])
+    expect(chip(host, "recheck").dataset.color).toBe("lightOrange")
+    expect(chip(host, "recheck").dataset.tooltip).toContain("9 waiting for Claude to check again, not for you")
     const picked = new Promise<string[]>((done) =>
       host.addEventListener("epic-state-changed", (event) => done((event as CustomEvent).detail.shown), { once: true })
     )
     chip(host, "replied").click()
-    expect(await picked).toEqual(["open", "someday"])
+    expect(await picked).toEqual(["recheck", "open", "someday"])
     const alone = await ElementFixture.render(`<epic-state-filter counts="recheck:9"></epic-state-filter>`)
-    expect(chips(alone)).toEqual(["recheck:0+"])
+    expect(chips(alone)).toEqual(["recheck:9+"])
   })
 
   // epic `epic-engine` I157, recoloured in I170 (Owen, 2026-10-29:  "this doesn't match our other colors");  ONE blue

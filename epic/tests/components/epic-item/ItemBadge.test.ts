@@ -26,6 +26,12 @@ const ISSUES: Row[] = [
   ["issue", { status: "canceled", closedAs: "duplicate" }, "duplicate", "old"],
   ["issue", { status: "canceled", closedAs: "declined" }, "wontFix", "old"],
   ["issue", { status: "canceled", dropped: true }, "wontFix", "old"],
+  // T144's footnote, for every way of finishing (I435)
+  ["issue", { status: "canceled", closedAs: "vanished", fromYou: true }, "cantReproduce", "requested"],
+  ["issue", { status: "canceled", closedAs: "duplicate", actedOn: true }, "duplicate", "replied"],
+  ["issue", { status: "done", fromYou: true, actedOn: true }, "fixed", "replied"],
+  ["issue", { status: "done", fromYou: true, actedOn: true, seen: true }, "fixed", "handled"],
+  ["issue", { fixed: true, fromYou: true, actedOn: true }, "fixed", "replied"],
   ["issue", { fixed: true, actedOn: true }, "fixed", "replied"],
   ["issue", { fixed: true, fromYou: true }, "fixed", "requested"],
   ["issue", { queued: true }, "queued", "scheduled"],
@@ -49,7 +55,8 @@ const JUDGEMENTS: Row[] = [
   ["judgement", { care: 40, fromYou: true }, "decided", "requested"],
   ["judgement", { care: 10, actedOn: true }, "decided", "replied"],
   ["judgement", { status: "done", care: 40 }, "decided", "recent"],
-  ["judgement", { status: "done", care: 10 }, "decided", "handled"]
+  ["judgement", { status: "done", care: 10 }, "decided", "handled"],
+  ["judgement", { asksYou: true, care: 5, doubt: 90 }, "yourCall", "replied"]
 ]
 
 const TODOS: Row[] = [
@@ -122,6 +129,13 @@ describe("ItemBadge.of():  T144's tables", () => {
             expect(["handled", "quiet", "old"]).not.toContain(badge(kind, { care, doubt, needsYou }).state)
   })
 
+  test("a phase handled it, still open:  yellow, a question red, never grey (I435)", () => {
+    const unjudged = { care: undefined, doubt: undefined, handled: true }
+    expect(badge("judgement", unjudged).state).toBe("open")
+    expect(badge("question", unjudged).state).toBe("attention")
+    expect(badge("judgement", { care: 10, handled: true, handledDone: true }).state).toBe("open")
+  })
+
   test("a fix waiting for a check is never grey, whatever was scored (I411)", () => {
     expect(badge("issue", { fixed: true, care: 0, doubt: 100, handled: true }).state).toBe("replied")
   })
@@ -150,6 +164,12 @@ describe("ItemBadge.drawn():  what the page follows live", () => {
     const at = { ...live, workedOn: true }
     expect(ItemBadge.drawn({ kind: "issue", badge: "willFix" }, "progress", at)).toBe("underway")
     expect(ItemBadge.drawn({ kind: "issue", badge: "willRecheck" }, "progress", at)).toBe("rechecking")
+  })
+
+  test("the word follows the colour:  never URGENT in yellow", () => {
+    const at = { ...live, urgency: { calm: false } }
+    expect(ItemBadge.drawn({ kind: "issue", badge: "willFix" }, "attention", at)).toBe("urgent")
+    expect(ItemBadge.drawn({ kind: "issue", badge: "willFix" }, "open", at)).toBe("willFix")
   })
 
   test("a comment waiting on them beats SEE", () => {

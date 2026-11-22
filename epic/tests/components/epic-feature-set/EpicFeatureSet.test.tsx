@@ -14,17 +14,28 @@ import "spell/ui/components/ui-input"
 import "spell/ui/components/ui-modal"
 import "spell/ui/components/ui-select"
 
+import docCSS from "spell/epic/tools/_assets/spell-doc.css?inline"
+
 ////////////////
 // ## Fixtures
 ////////////////
 
 /** An item's row, as the tool writes one. */
-function row(id: string, title: string) {
+function row(id: string, title: string, priority = "") {
   return (
     `<tr id="${id}" data-feature-item><td><p class="spell-feature-title"><a class="spell-feature-name" href="#${id}">` +
     `${id.slice(2).toUpperCase()}</a> <b>${title}</b></p></td><td class="spell-feature-pick">` +
     `<epic-ask compact no-chip name="${id}" label="${id.toUpperCase()} · ${title}"><epic-choices>` +
-    `<epic-option letter="Y" title="Yes"></epic-option></epic-choices></epic-ask></td></tr>`
+    `<epic-option letter="Y" title="Yes"></epic-option><epic-option letter="N" title="No"></epic-option></epic-choices>` +
+    `${priority}</epic-ask></td></tr>`
+  )
+}
+
+/** An item's Priority, in its pick's `then` slot. */
+function priority(id: string) {
+  return (
+    `<epic-ask slot="then" compact name="${id}-priority" label="Priority" off-for="N"><epic-choices>` +
+    `<epic-option letter="2" title="Priority 2"></epic-option></epic-choices></epic-ask>`
   )
 }
 
@@ -32,7 +43,7 @@ function row(id: string, title: string) {
 function section(id: string, title: string, rows: string) {
   return (
     `<ui-section id="${id}" label="${id.toUpperCase()} · ${title}" data-feature-section>` +
-    `<ui-button data-feature-reorder="${id}">Reorder</ui-button><table><tbody>${rows}</tbody></table></ui-section>`
+    `<ui-button data-feature-reorder="${id}">Reorder</ui-button><table class="spell-feature-table"><tbody>${rows}</tbody></table></ui-section>`
   )
 }
 
@@ -107,6 +118,24 @@ async function drag(host: Element, from: number, to: number) {
   }
 }
 
+/** Contrast of `text` on `ground`, WCAG's, both as the browser paints them over the page's `canvas` colour. */
+function contrast(text: string, ground: string, canvas: string) {
+  const context = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!
+  const lightnessOf = (...layers: string[]) => {
+    for (const layer of [canvas, ...layers]) {
+      context.fillStyle = layer
+      context.fillRect(0, 0, 1, 1)
+    }
+    const [red, green, blue] = Array.from(context.getImageData(0, 0, 1, 1).data, (value) => {
+      const channel = value / 255
+      return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * red! + 0.7152 * green! + 0.0722 * blue!
+  }
+  const [dim, bright] = [lightnessOf(ground, text), lightnessOf(ground)].sort((one, other) => one - other)
+  return (bright! + 0.05) / (dim! + 0.05)
+}
+
 afterEach(() => AnswerForm.adopt(undefined))
 
 ////////////////
@@ -143,6 +172,68 @@ describe("<epic-feature-set>", () => {
     expect(items(main)).toEqual(["s1f1", "s1f2", "s1f3"])
     expect(AnswerForm.forPage().gather().answers["order-s1"]).toBeUndefined()
   })
+
+  test("the dialog says what it's reordering, how, that names stay, and when Claude sees it", async () => {
+    const { main, host } = await page()
+    await openItems(main, host)
+    const dialog = parts(host, "dialog")[0]!
+    expect(dialog.getAttribute("heading")).toBe("Reorder your list: S1 · Now")
+    expect(Array.from(dialog.querySelectorAll(".how-to > p"), (line) => line.textContent)).toEqual([
+      "To move a row, drag the dots on its left, or click its up and down arrows.",
+      "Each row keeps its own number when you move it, so the numbers may end up out of order.",
+      "Press Save order to keep your new order. Claude only sees it after you press Send to Claude at the top of the page."
+    ])
+  })
+
+  test("a row and its section go green with both picks in, or with No, which turns the Priority off", async () => {
+    const main = await ElementFixture.render(
+      `<main class="spell-doc-main"><epic-feature-set></epic-feature-set>` +
+        `${section("s1", "Now", row("s1f1", "One", priority("s1f1")))}</main>`
+    )
+    const sheet = document.createElement("style")
+    sheet.textContent = docCSS
+    document.head.append(sheet)
+    await ElementFixture.settle()
+    const chip = () => getComputedStyle(main.querySelector(".spell-feature-name")!).backgroundColor
+    const pick = async (selector: string, value: string) => {
+      main
+        .querySelector(selector)!
+        .shadowRoot!.querySelector('[part~="select"]')!
+        .dispatchEvent(new CustomEvent("ui-changed", { detail: { value } }))
+      await ElementFixture.settle()
+    }
+    const state = () => main.querySelector("#s1")!.getAttribute("data-state")
+    const red = chip()
+    await pick("#s1f1 epic-ask", "Y")
+    expect([chip(), state()]).toEqual([red, "attention"])
+    await pick("#s1f1 epic-ask[slot]", "2")
+    expect(state()).toBe("done")
+    const green = chip()
+    expect(green).not.toBe(red)
+    await pick("#s1f1 epic-ask[slot]", "")
+    expect([chip(), state()]).toEqual([red, "attention"])
+    await pick("#s1f1 epic-ask", "N")
+    expect([chip(), state()]).toEqual([green, "done"])
+    sheet.remove()
+  })
+
+  for (const scheme of ["light", "dark"] as const)
+    test(`"Pick one" reads as text in ${scheme}, 4.5:1 or more;  only a select that's off is pale`, async () => {
+      const main = await ElementFixture.render(
+        `<main style="color-scheme: ${scheme}"><epic-feature-set></epic-feature-set>` +
+          `${section("s1", "Now", row("s1f1", "One", priority("s1f1")))}</main>`
+      )
+      await ElementFixture.settle()
+      const select = (selector: string) => {
+        const host = main.querySelector(selector)!.shadowRoot!.querySelector('[part~="select"]')!
+        return getComputedStyle(host.shadowRoot!.querySelector("select")!)
+      }
+      const canvas = scheme === "dark" ? "#1b1a22" : "#fff"
+      for (const selector of ["#s1f1 epic-ask", "#s1f1 epic-ask[slot]"]) {
+        const { color, backgroundColor } = select(selector)
+        expect(contrast(color, backgroundColor, canvas)).toBeGreaterThanOrEqual(4.5)
+      }
+    })
 
   test("a drag moves a row in the dialog, and the page's only with Save", async () => {
     const { main, host } = await page()

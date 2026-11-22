@@ -9,12 +9,14 @@ import {
   ORDER_KEY,
   orderKeyFor,
   type AnswerPart,
+  type AskPart,
   type AskState,
   type PageAnswer,
   type PartLabels,
   type SentAnswer
 } from "spell/epic/answers"
 import { isSourceFileLink } from "spell/epic/links"
+import type { EpicAsk } from "spell/epic/components/epic-ask"
 
 import { epicFeatureSetVocabulary } from "./EpicFeatureSet.en"
 
@@ -33,7 +35,8 @@ import featureSetCSS from "./EpicFeatureSet.css?inline"
  *   - the order is part of the answer (`AnswerPart`):  under `order` and `order-<section>`, when it isn't as written
  * - Links in the page's text:  another site's opens a new tab, the rest this window.
  *   (Back putting the reader where they were is the docs runtime's, `spell-doc-back.js`.)
- * - Each section's state (`data-state`), from its questions:  red till every one's decided.
+ * - Each section's state (`data-state`), from its rows:  red till every one's pick and Priority are in
+ *   (No needs no Priority).
  * - SIDE EFFECT:  moves the page's sections and rows, writes their `data-state` and their links' `target`.
  * - NEVER wraps the sections:  they're the page's top-level ones, which its toolbar and landing read.
  ****************/
@@ -197,7 +200,6 @@ export class EpicFeatureSet extends E.UIComponent<typeof epicFeatureSetVocabular
       heading: isSections
         ? this.translationForKey("sectionsHeading")
         : this.translationForKey("itemsHeading", { title: this.sectionTitle(key) }),
-      example: entryOf(list.elements[0]!).name,
       entries: list.elements.map(entryOf)
     }
     this.said = ""
@@ -310,7 +312,8 @@ export class EpicFeatureSet extends E.UIComponent<typeof epicFeatureSetVocabular
   }
 
   /**
-   * Each section's state, from its questions:  one undecided is red, one Claude has more to do on blue, else green.
+   * Each section's state, from its rows (`rowStateOf()`):
+   * one undecided is red, one Claude has more to do on blue, else green.
    * - SIDE EFFECT:  writes `data-state`, and tells the page's toolbar of a change
    */
   @E.untracked
@@ -319,7 +322,7 @@ export class EpicFeatureSet extends E.UIComponent<typeof epicFeatureSetVocabular
     const states = new Map<Element, AskState[]>()
     for (const ask of this.form.asks) {
       const section = ask.domElement.closest(SECTION)
-      if (section) states.set(section, [...(states.get(section) ?? []), ask.askState])
+      if (section) states.set(section, [...(states.get(section) ?? []), rowStateOf(ask)])
     }
     let isChanged = false
     for (const [section, found] of states) {
@@ -405,7 +408,7 @@ export class EpicFeatureSet extends E.UIComponent<typeof epicFeatureSetVocabular
         <ui-content class={DIALOG_BODY}>
           <div class={HOW_TO}>
             <p>{this.translationForKey("howTo")}</p>
-            <p>{this.translationForKey("namesStay", { name: this.sorting?.example ?? "" })}</p>
+            <p>{this.translationForKey("namesStay")}</p>
             <p>{this.translationForKey("sendAfter")}</p>
           </div>
           <ol ref={(list: HTMLElement) => (this.listBox = list)} class={LIST} part={this.partForName("list")}>
@@ -505,6 +508,18 @@ function entryOf(element: HTMLElement): SortEntry {
   }
 }
 
+/**
+ * Where `ask`'s row stands:  as its pick does, but not decided till the follow-up in it (its Priority) is picked too.
+ * - one that's off (after No) needs no pick
+ */
+function rowStateOf(ask: AskPart): AskState {
+  if (ask.askState !== "done") return ask.askState
+  const waits = Array.from(ask.domElement.querySelectorAll<E.DOMElement<EpicAsk>>(FOLLOW_UP)).some(
+    ({ component }) => component && !component.isOff && component.askState !== "done"
+  )
+  return waits ? "attention" : "done"
+}
+
 /** An entry, as a sentence names it:  `F3 · Share a link`. */
 function titleOf({ name, title }: SortEntry): string {
   return `${name} · ${title}`
@@ -523,8 +538,8 @@ function sameOrder(one: readonly string[], other: readonly string[]): boolean {
 /** A list that can be reordered:  its answer key and its elements, in their order now. */
 type ReorderList = { key: string; elements: HTMLElement[] }
 
-/** What the dialog sorts:  the list's key, the dialog's title, a name to explain with, its rows as they'd be saved. */
-type Sorting = { key: string; heading: string; example: string; entries: SortEntry[] }
+/** What the dialog sorts:  the list's key, the dialog's title, its rows as they'd be saved. */
+type Sorting = { key: string; heading: string; entries: SortEntry[] }
 
 /** A row of the dialog:  the element's id, its name (`S2`, `F3`), its title. */
 type SortEntry = { id: string; name: string; title: string }
@@ -535,6 +550,9 @@ type MovableParent = Element & { moveBefore?: (node: Element, child: Node | null
 /** The list's sections, and an item's row in one (the tool's `FeatureSet` writes both). */
 const SECTION = "ui-section[data-feature-section]"
 const ITEM = "tr[data-feature-item]"
+
+/** A pick's follow-up, in its slot:  its Priority. */
+const FOLLOW_UP = ':scope > epic-ask[slot="then"]'
 
 /** A section's Reorder button's attribute:  the section's id its value. */
 const REORDER = "data-feature-reorder"

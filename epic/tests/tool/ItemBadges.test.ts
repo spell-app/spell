@@ -18,6 +18,8 @@ import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 import { PlanItem } from "spell/epic/tool/PlanItem"
+import type { ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { SelfFix } from "spell/epic/tool/SelfFix"
 
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
 const FIXTURE = readFileSync(join(FIXTURES, "epic-plan.html"), "utf8")
@@ -33,6 +35,16 @@ function planWith(mode?: "trial" | "on") {
 /** Score `id`. */
 function score(plan: PlanDoc, id: string, care: number, doubt = 5, more: Partial<Judgement> = {}) {
   ItemJudge.store(plan, [{ id, care, doubt, severe: false, needsYou: false, why: "why", ...more }])
+}
+
+/** A judgement call made 5 days before `NOW`, so its work can be on main;  scored `care`.  Its id. */
+function oldCall(plan: PlanDoc, details?: string, care = 10, more: Partial<Judgement> = {}) {
+  plan.now = new Date(NOW.getTime() - 5 * 86_400_000)
+  const id = plan.addItem("judgement", "A routine call", { calm: true, details })
+  plan.now = NOW
+  score(plan, id, care, 5, more)
+  plan.badges.refresh()
+  return id
 }
 
 /** `id`'s state and badge, as every edit writes them. */
@@ -121,7 +133,7 @@ describe("a page's badges", () => {
     plan.log(line)
     plan.badges.refresh()
     expect(plan.badges.badgeOf(plan.item("j1")).closes).toBeUndefined()
-    expect(plan.badges.closeRefusal(plan.item("j1"))).toMatch(/got to it/)
+    expect(plan.closeRefusal("j1")).toMatch(/got to it/)
   })
 
   test("got to, by the inbox:  a mark or comment waiting", () => {
@@ -140,6 +152,307 @@ describe("a page's badges", () => {
     expect(drawn(plan, "i1")).toEqual(["attention", "urgent"])
     expect(plan.setCalm("i1", true)).toBe("not urgent")
     expect(drawn(plan, "i1")).toEqual(["recheck", "willRecheck"])
+  })
+})
+
+describe("one rule for closing (I435):  tidy and badges the same", () => {
+  test("a routine old call may close, by either", () => {
+    const plan = planWith("on")
+    const id = oldCall(plan)
+    expect(plan.closeRefusal(id)).toBeUndefined()
+    plan.closeByBadge(id)
+    expect(drawn(plan, id)[1]).toBe("decided")
+  })
+
+  test.each<[string, (plan: PlanDoc) => string, RegExp]>([
+    [
+      "promised, not delivered",
+      (plan) => {
+        const id = oldCall(plan)
+        plan.promiseUnkept(id, "the second half")
+        return id
+      },
+      /promised, not delivered/
+    ],
+    [
+      "being worked on",
+      (plan) => {
+        const id = oldCall(plan)
+        plan.readHeld = () => new Map([[id, "being worked on"]])
+        return id
+      },
+      /being worked on/
+    ],
+    [
+      "a note not sent",
+      (plan) => {
+        const id = oldCall(plan)
+        plan.readHeld = () => new Map([[id, "their note on it isn't sent yet"]])
+        return id
+      },
+      /isn't sent/
+    ],
+    ["YOUR CALL", (plan) => oldCall(plan, undefined, 90), /YOUR CALL/],
+    ["AGAINST YOUR ASK", (plan) => oldCall(plan, undefined, 10, { severe: true }), /AGAINST YOUR ASK/],
+    [
+      "an issue only they can decide",
+      (plan) => {
+        const id = plan.addItem("issue", "A choice", { calm: true })
+        score(plan, id, 90, 80, { needsYou: true })
+        return id
+      },
+      /YOUR CALL/
+    ],
+    [
+      "YOU TEST",
+      (plan) => {
+        const id = plan.addItem("test", "Press it")
+        score(plan, id, 90, 5, { needsYou: true })
+        return id
+      },
+      /YOU TEST/
+    ],
+    [
+      "an answered Revisit",
+      (plan) => {
+        const id = oldCall(plan)
+        plan.item(id).setAttribute("review-as", "revisit")
+        return id
+      },
+      /Revisit answered/
+    ],
+    [
+      "its words rewritten for a Revisit (J28, J192)",
+      (plan) => {
+        const id = oldCall(plan, "<p>As first written</p>")
+        plan.keepOriginal(plan.item(id), [plan.document.createTextNode("Before the Revisit")])
+        return id
+      },
+      /Revisit answered/
+    ],
+    [
+      "an open question asks about it (Q80)",
+      (plan) => {
+        const id = oldCall(plan)
+        plan.addItem("question", "Grey the old calls?", { details: `<p>It asks about <a href="#${id}">it</a>.</p>` })
+        plan.badges.refresh()
+        return id
+      },
+      /Q\d+ is open/
+    ],
+    [
+      "an open question lists it among many, in a More Details card (Q80's 70)",
+      (plan) => {
+        const id = oldCall(plan)
+        const question = plan.addItem("question", "Grey the old calls?", { details: "<p>Grey all but J66?</p>" })
+        plan
+          .item(question)
+          .insertAdjacentHTML("beforeend", `<epic-more><p>The calls:  J1, ${id.toUpperCase()}, J99.</p></epic-more>`)
+        plan.badges.refresh()
+        return id
+      },
+      /Q\d+ is open/
+    ],
+    [
+      "a new call, its work maybe not on main",
+      (plan) => {
+        const id = plan.addItem("judgement", "Just made", { calm: true })
+        score(plan, id, 10)
+        return id
+      },
+      /may not be on main/
+    ],
+    [
+      "work not on main",
+      (plan) => {
+        const id = oldCall(plan)
+        plan.item(id).setAttribute("unmerged", "epic-engine")
+        return id
+      },
+      /isn't on main/
+    ]
+  ])("never:  %s", (_, make, reason) => {
+    const plan = planWith("on")
+    const id = make(plan)
+    expect(plan.closeRefusal(id, { tests: true })).toMatch(reason)
+    expect(() => plan.closeByBadge(id, { as: "declined" })).toThrow(reason)
+    expect(() => plan.closeObsolete(id, "overtaken")).toThrow()
+    expect(plan.item(id).getAttribute("status")).toBe("open")
+  })
+
+  test("a call is new from when it was made, not from a retitle today (I439's rule)", () => {
+    const plan = planWith("on")
+    // made 5 days ago, a card then;  retitled now, which stamps it
+    plan.now = new Date(NOW.getTime() - 5 * 86_400_000)
+    const id = plan.addItem("judgement", "A routine call", { calm: true })
+    plan.addStatus(id, "Looked again", { state: "noted", quiet: true })
+    plan.now = NOW
+    score(plan, id, 10)
+    plan.renameEntry(id, "A routine call, read cold")
+    expect(Date.parse(plan.item(id).getAttribute("changed")!)).toBe(NOW.getTime())
+    plan.badges.refresh()
+    expect(plan.closeRefusal(id)).toBeUndefined()
+    // one with no card of its own:  as old as a later call's card says
+    const bare = oldCall(plan)
+    plan.renameEntry(bare, "Another call, read cold")
+    const later = oldCall(plan)
+    plan.now = new Date(NOW.getTime() - 4 * 86_400_000)
+    plan.addStatus(later, "Looked again", { state: "noted", quiet: true })
+    plan.now = NOW
+    plan.badges.refresh()
+    expect(plan.closeRefusal(bare)).toBeUndefined()
+  })
+
+  test("a note not sent is something they did", () => {
+    const plan = planWith("on")
+    const id = oldCall(plan)
+    const inbox = { marks: {}, taken: {}, urgency: {}, now: [], comments: {}, drafts: { [id]: { note: "no!" } } }
+    plan.readActedOn = () => SelfFix.actedOn(inbox as unknown as ReviewInbox)
+    plan.badges.refresh()
+    expect(plan.closeRefusal(id)).toMatch(/got to it/)
+  })
+
+  test("closed through setItem():  an underway card never stays blue", () => {
+    const plan = planWith("on")
+    const id = oldCall(plan)
+    plan.addStatus(id, "Looked again", { state: "noted", quiet: true })
+    plan.closeByBadge(id, { as: "moot" })
+    expect(plan.item(id).getAttribute("status")).toBe("canceled")
+    expect(plan.item(id).hasAttribute("taken-in")).toBe(false)
+  })
+})
+
+describe("their words (I435)", () => {
+  test.each([
+    ["a <q>", "<p>Owen's comment C7: <q>Center this button</q></p>"],
+    ["after Was titled:", '<p class="spell-meta">Was titled: An old title</p><p>Owen: "Center this"</p>'],
+    ["after a first line", "<p>Picked one box.</p><p>Owen, 2026-11-14: “Change this to a single textarea”</p>"],
+    ["asked for", '<p>Owen asked for "updated" to mean a phase with news for him.</p>'],
+    ["named, not quoted", "<p>Owen's comments C6 and C9 take the git button away.</p>"],
+    ["picked", '<p>Owen picked "Fade them" for a heading.</p>'],
+    ["in brackets", '<ul><li>No pencil (Owen, 2026-10-08: "they did nothing there").</li></ul>'],
+    ["said to them", "<ul><li>You said <q>Start I66 in the background</q>.</li></ul>"],
+    ["quoted, then named", '<p>Kept "stay in place" (Owen, 2026-10-10) on guides.</p>']
+  ])("%s:  theirs, so never closed", (_, details) => {
+    const plan = planWith("on")
+    const id = oldCall(plan, details)
+    expect(plan.closeRefusal(id)).toMatch(/their words/)
+    expect(drawn(plan, id)).toEqual(["requested", "decided"])
+  })
+
+  test("the rest isn't:  a UI word in <q>, the person named in passing, a commit's quote", () => {
+    for (const details of [
+      "<p>The row reads <q>Theme · Paper</q>.</p>",
+      "<p>The list keeps the order Owen gave the sagas.</p>",
+      '<p>One box.</p><epic-commit sha="abc1234">Owen: "Change this"</epic-commit>'
+    ]) {
+      const plan = planWith("on")
+      const id = oldCall(plan, details)
+      expect(plan.closeRefusal(id), details).toBeUndefined()
+    }
+  })
+
+  test("one they add on the page:  their words, its finish light orange", () => {
+    const plan = planWith("on")
+    plan.applyMark({ id: "new1", action: "new", kind: "todo", title: "Their todo" })
+    score(plan, "t1", 10)
+    expect(drawn(plan, "t1")).toEqual(["open", "willDo"])
+    plan.setItem("t1", "done")
+    expect(drawn(plan, "t1")).toEqual(["requested", "done"])
+  })
+})
+
+describe("finished, never grey unseen (I435, T144's footnote)", () => {
+  test("queued by them, then done:  orange, as they got to it", () => {
+    const plan = planWith("on")
+    plan.addItem("todo", "Theirs", { requested: true })
+    score(plan, "t1", 90)
+    plan.queue("t1", "now")
+    plan.setItem("t1", "done")
+    expect(drawn(plan, "t1")).toEqual(["replied", "done"])
+  })
+
+  test("their words, canceled by Claude:  light orange", () => {
+    const plan = planWith("on")
+    plan.addItem("issue", "Their report", { requested: true })
+    plan.setItem("i1", "canceled")
+    expect(drawn(plan, "i1")).toEqual(["requested", "moot"])
+  })
+
+  test("their Do this, done:  orange;  their check on the result:  grey", () => {
+    const plan = planWith("on")
+    plan.addItem("issue", "It jumps")
+    plan.applyMark({ id: "i1", action: "todo" })
+    plan.setItem("i1", "done")
+    expect(drawn(plan, "i1")).toEqual(["replied", "fixed"])
+    plan.now = new Date(NOW.getTime() + 600_000)
+    plan.applyMark({ id: "i1", action: "approve" })
+    expect(drawn(plan, "i1")).toEqual(["handled", "fixed"])
+  })
+
+  test("approved before it was built is no look at the result", () => {
+    const plan = planWith("on")
+    plan.addItem("todo", "Build it")
+    plan.applyMark({ id: "t1", action: "approve" })
+    plan.now = new Date(NOW.getTime() + 600_000)
+    plan.setItem("t1", "done")
+    expect(drawn(plan, "t1")).toEqual(["replied", "done"])
+  })
+
+  test("open, though a phase handled it:  never grey", () => {
+    const plan = planWith("on")
+    const theirs = oldCall(plan, '<p>Owen: "Add choice by default"</p>')
+    const routine = oldCall(plan)
+    const question = plan.addItem("question", "Which?")
+    if (!plan.phaseElements.length) plan.addPhase("The phase that took them")
+    for (const id of [theirs, routine, question]) plan.item(id).setAttribute("handled", plan.phaseElements[0]!.id)
+    plan.phaseElements[0]!.setAttribute("status", "done")
+    expect(drawn(plan, theirs)).toEqual(["requested", "decided"])
+    expect(drawn(plan, routine)[0]).toBe("open")
+    expect(drawn(plan, question)[0]).toBe("attention")
+  })
+
+  test("canceled with a card left underway:  struck, not UNDERWAY (I312)", () => {
+    const plan = planWith("on")
+    plan.addItem("issue", "Old")
+    plan.addStatus("i1", "On it")
+    plan.now = new Date(NOW.getTime() + 3_600_000)
+    plan.item("i1").setAttribute("status", "canceled")
+    plan.stamp(plan.item("i1"))
+    expect(drawn(plan, "i1")[1]).not.toBe("underway")
+  })
+})
+
+describe("waiting on them (I435)", () => {
+  test("hush:  never what waits on them by a badge, nor their finished work", () => {
+    const plan = planWith("on")
+    const against = oldCall(plan, undefined, 10, { severe: true })
+    const theirs = oldCall(plan, '<p>Owen: "Do it so"</p>')
+    const acted = oldCall(plan)
+    plan.log(`${acted.toUpperCase()} urgent (Owen, from its id chip)`)
+    const routine = oldCall(plan)
+    plan.badges.refresh()
+    const hushed = Hush.candidates(plan).map(({ id }) => id)
+    expect([against, theirs, acted].filter((id) => hushed.includes(id))).toEqual([])
+    expect(hushed).toContain(routine)
+  })
+
+  test("While you were out:  URGENT red under Waiting on you, YOUR CALL orange there, each with its badge", () => {
+    const plan = planWith("on")
+    plan.addItem("issue", "It loses work", { calm: true })
+    plan.addItem("issue", "A choice", { calm: true })
+    score(plan, "i1", 90, 5, { severe: true })
+    score(plan, "i2", 90, 5, { needsYou: true })
+    plan.updateStates()
+    plan.refreshAway()
+    const lines = Array.from(plan.document.querySelectorAll("epic-away-line"), (line) =>
+      ["line", "state", "badge"].map((name) => line.getAttribute(name))
+    )
+    expect(lines).toContainEqual(["i1", "attention", "urgent"])
+    expect(lines).toContainEqual(["i2", "replied", "yourCall"])
+    expect(lines.map(([id]) => id)).not.toContain("issues")
+    const words = plan.document.querySelector('epic-away-line[line="i1"]')!.textContent
+    expect(words).not.toMatch(/URGENT -/)
   })
 })
 
@@ -217,36 +530,78 @@ describe("epic badges", () => {
     expect(said.join("\n")).toMatch(/not scored for a badge:\s+offline/)
   })
 
-  test("on:  one its badge would grey closes as it's made;  off:  one command puts it all back", async () => {
+  test("on:  no new item closes as it's made, until they say yes to that;  off:  one command puts it all back", async () => {
     const epic = commands()
-    await epic.run(["add", "demo", "judgement", "An old call", "--calm", "--title-ok"])
     await epic.run(["badges", "demo", "on"])
-    await epic.run(["badges", "demo", "score"])
-    expect(page().item("j1").getAttribute("status")).toBe("open")
-    expect(await epic.run(["badges", "demo", "close", "J1"])).toBe(0)
+    await epic.run(["add", "demo", "todo", "Nice to have", "--title-ok"])
+    expect(page().item("t1").getAttribute("status")).toBe("open")
+    expect(await epic.run(["badges", "demo", "close", "T1"])).toBe(0)
+    expect(await epic.run(["badges", "demo", "close-new", "yes"])).toBe(0)
+    await epic.run(["add", "demo", "todo", "Another", "--title-ok"])
     await epic.run(["add", "demo", "judgement", "A new call", "--title-ok"])
-    expect(["j1", "j2"].map((id) => page().item(id).getAttribute("status"))).toEqual(["done", "done"])
+    const statuses = ["t1", "t2", "j1"].map((id) => page().item(id).getAttribute("status"))
+    expect(statuses).toEqual(["canceled", "canceled", "open"])
     expect(await epic.run(["badges", "demo", "off"])).toBe(0)
-    for (const id of ["j1", "j2"]) {
+    for (const id of ["t1", "t2", "j1"]) {
       const item = page().item(id)
       expect(item.getAttribute("status")).toBe("open")
       for (const name of ["care", "doubt", "badge", "badge-closed", "closed-as", "judged"])
         expect(item.hasAttribute(name)).toBe(false)
     }
     expect(page().page.hasAttribute("badges")).toBe(false)
+    expect(page().page.hasAttribute("badges-close-new")).toBe(false)
+  })
+
+  test("one they add on the page is never closed as it's made", async () => {
+    const epic = commands()
+    await epic.run(["badges", "demo", "on"])
+    await epic.run(["badges", "demo", "close-new", "yes"])
+    await epic.edit(file, (plan) => plan.applyMark({ id: "new1", action: "new", kind: "todo", title: "Their todo" }))
+    expect(page().item("t1").getAttribute("status")).toBe("open")
+  })
+
+  test("off:  what they approved since stays closed;  calm comes back", async () => {
+    const epic = commands()
+    await epic.run(["badges", "demo", "on"])
+    await epic.run(["add", "demo", "todo", "Nice to have", "--title-ok"])
+    await epic.run(["add", "demo", "issue", "It jumps", "--calm", "--title-ok"])
+    await epic.run(["badges", "demo", "close", "T1"])
+    await epic.files.edit(file, (plan) => {
+      plan.applyMark({ id: "t1", action: "approve" })
+      plan.setCalm("i1", false)
+    })
+    await epic.run(["badges", "demo", "off"])
+    expect(page().item("t1").getAttribute("status")).toBe("canceled")
+    expect(page().item("i1").hasAttribute("calm")).toBe(true)
+  })
+
+  test("set --your-call yes:  a call, a test and a question too, whatever their scores", async () => {
+    const epic = commands()
+    await epic.run(["badges", "demo", "trial"])
+    for (const kind of ["judgement", "test", "question"]) await epic.run(["add", "demo", kind, "It asks", "--title-ok"])
+    for (const id of ["J1", "M1", "Q1"]) {
+      const flags = ["--care", "10", "--doubt", "90", "--your-call", "yes"]
+      expect(await epic.run(["badges", "demo", "set", id, ...flags])).toBe(0)
+    }
+    const look = (id: string) => [page().item(id).getAttribute("badge"), page().item(id).getAttribute("state")]
+    expect([look("j1"), look("m1"), look("q1")]).toEqual([
+      ["yourCall", "replied"],
+      ["youTest", "open"],
+      ["yourCall", "attention"]
+    ])
   })
 
   test("off:  a plain UPDATE label is plain again, though it said DONE while its badge had it closed", async () => {
     const epic = commands()
-    await epic.run(["add", "demo", "judgement", "An old call", "--calm", "--title-ok"])
-    await epic.files.edit(file, (plan) => plan.markUpdate(plan.item("j1")))
+    await epic.run(["add", "demo", "todo", "An old wish", "--title-ok"])
+    await epic.files.edit(file, (plan) => plan.markUpdate(plan.item("t1")))
     await epic.run(["badges", "demo", "on"])
     await epic.run(["badges", "demo", "score"])
-    await epic.run(["badges", "demo", "close", "J1"])
+    await epic.run(["badges", "demo", "close", "T1"])
     await epic.run(["log", "demo", "the next edit"])
-    expect(PlanItem.updateLabelOf(page().item("j1"))!.getAttribute("became")).toBe("done")
+    expect(PlanItem.updateLabelOf(page().item("t1"))!.getAttribute("became")).toBe("canceled")
     await epic.run(["badges", "demo", "off"])
-    expect(PlanItem.updateLabelOf(page().item("j1"))!.hasAttribute("became")).toBe(false)
+    expect(PlanItem.updateLabelOf(page().item("t1"))!.hasAttribute("became")).toBe(false)
   })
 
   test("close --as:  what a recheck found;  never their words", async () => {

@@ -181,7 +181,7 @@ describe("<epic-item>", () => {
     expect(title.textContent).toBe("FIXED - It jumps")
     expect(host.getAttribute("title")).toBe("It jumps")
     expect(chip.dataset.tooltip).toMatch(/^Claude found this and fixed it\./)
-    expect(buttonsForItem("i7", { status: "done" })).toBe("issue-done")
+    expect(buttonsForItem("i7", { status: "done" })).toBe("finished")
   })
 
   test("a fix from his words (T143):  light orange, waiting for his look, `FIXED -` first too", async () => {
@@ -197,8 +197,12 @@ describe("<epic-item>", () => {
     const { host, title } = await item(
       `<epic-item id="i7" status="open" state="replied" fixed><span slot="title">It jumps <epic-update became="fixed" unmerged="branch"></epic-update></span></epic-item>`
     )
-    const update = host.querySelector("epic-update")!.shadowRoot!
-    const shows = (part: string) => getComputedStyle(update.querySelector(`[part~='${part}']`)!).display !== "none"
+    // drawn next to the id chip (T149), the title's own not shown
+    const shows = (part: string) => {
+      const update = host.shadowRoot!.querySelector("[part~='update']")!.shadowRoot!
+      const found = update.querySelector(`[part~='${part}']`)
+      return !!found && getComputedStyle(found).display !== "none"
+    }
     expect(title.querySelector("[part~='title-prefix']")!.textContent).toBe("FIXED -")
     expect([shows("label"), shows("unmerged")]).toEqual([false, true])
     // sent back and reopened:  no prefix, and the label says its word again
@@ -209,7 +213,7 @@ describe("<epic-item>", () => {
     expect(shows("label")).toBe(true)
   })
 
-  test("a badge (P81):  first in the title, in the chip's colour;  it replaces the UPDATE word at the end", async () => {
+  test("a badge (P81):  first in the title, grey in its chip's colour (T149);  it replaces the UPDATE word", async () => {
     const { host, chip, title } = await item(
       `<epic-item id="i7" status="open" state="open" badge="willFix" judged-why="It breaks Send"><span slot="title">It jumps <epic-update became="reopened"></epic-update></span></epic-item>`
     )
@@ -219,7 +223,9 @@ describe("<epic-item>", () => {
       "WILL FIX",
       "It breaks Send"
     ])
-    expect(getComputedStyle(badge).backgroundColor).toBe(getComputedStyle(chip).backgroundColor)
+    expect(getComputedStyle(badge).backgroundColor).not.toBe(getComputedStyle(chip).backgroundColor)
+    expect(badge.hasAttribute("data-echo")).toBe(true)
+    expect(host.shadowRoot!.querySelector("[part~='update']")).toBeNull()
     const label = host.querySelector("epic-update")!.shadowRoot!.querySelector("[part~='label']")!
     expect(getComputedStyle(label).display).toBe("none")
     host.setAttribute("badge", "see")
@@ -232,6 +238,26 @@ describe("<epic-item>", () => {
     host.setAttribute("badge", "somethingNew")
     await ElementFixture.settle()
     expect(title.querySelector("[part~='badge']")).toBeNull()
+  })
+
+  test("UPDATE (T149):  next to the id chip, not at the title's end;  grey only in the chip's own colour", async () => {
+    const { host, title } = await item(
+      `<epic-item id="j3" status="open" state="progress" style="--epic-state-echo: rgb(1, 2, 3)"><span slot="title">It jumps <epic-update></epic-update></span></epic-item>`
+    )
+    const drawn = () => title.querySelector<HTMLElement>("[part~='update']")!
+    const ground = () => getComputedStyle(drawn().shadowRoot!.querySelector("[part~='label']")!).backgroundColor
+    expect(title.firstElementChild).toBe(drawn())
+    const atEnd = host.querySelector("epic-update")!.shadowRoot!.querySelector("[part~='label']")!
+    expect(getComputedStyle(atEnd).display).toBe("none")
+    // orange beside blue:  its own colour;  orange beside orange, and UNDERWAY beside blue:  grey
+    expect(ground()).not.toBe("rgb(1, 2, 3)")
+    host.querySelector("epic-update")!.setAttribute("became", "underway")
+    await ElementFixture.settle()
+    expect(ground()).toBe("rgb(1, 2, 3)")
+    host.querySelector("epic-update")!.removeAttribute("became")
+    host.setAttribute("state", "replied")
+    await ElementFixture.settle()
+    expect(ground()).toBe("rgb(1, 2, 3)")
   })
 
   test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked;  no tooltip (I370)", async () => {
@@ -474,9 +500,9 @@ describe("<epic-item>", () => {
       host.setAttribute("status", "canceled")
       await Promise.resolve()
       expect(buttonsOf()).toBe("issue-open")
-      // let go at his Send:  its own buttons again, a finished issue's (J231)
+      // let go at his Send:  its own buttons again, a finished item's, Reopen alone (T152)
       held.mockReturnValue(false)
-      expect(buttonsOf()).toBe("issue-done")
+      expect(buttonsOf()).toBe("finished")
     } finally {
       held.mockRestore()
     }
@@ -561,8 +587,8 @@ describe("<epic-item>", () => {
   })
 
   test("buttonsForItem():  a finished todo draws Revisit and Saw it, never the x that drops it (I296)", () => {
-    expect(buttonsForItem("t1", { status: "done", inPhase: true })).toBe("todo-done")
-    expect(buttonsForItem("t1", { status: "canceled" })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "done", inPhase: true, state: "requested" })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "canceled", state: "replied" })).toBe("todo-done")
     expect(buttonsForItem("t1", { status: "open", inPhase: true })).toBe("todo-in-phase")
     expect(BUTTONS_OF["todo-done"].map((spec) => [spec.action, spec.label])).toEqual([
       ["revisit", "revisitNote"],
@@ -572,13 +598,28 @@ describe("<epic-item>", () => {
 
   test("buttonsForItem():  a finished issue or call draws Revisit and Saw it, no plane (J231)", () => {
     for (const status of ["done", "canceled", "decided"]) {
-      expect(buttonsForItem("i1", { status })).toBe("issue-done")
-      expect(buttonsForItem("j1", { status, fixed: true })).toBe("issue-done")
+      expect(buttonsForItem("i1", { status, state: "replied" })).toBe("issue-done")
+      expect(buttonsForItem("j1", { status, fixed: true, state: "requested" })).toBe("issue-done")
     }
     expect(BUTTONS_OF["issue-done"].map((spec) => [spec.action, spec.icon])).toEqual([
       ["revisit", "history"],
       ["approve", "check"]
     ])
+  })
+
+  test("buttonsForItem():  answered or finished, Reopen alone, unless it waits for their check (T152)", () => {
+    for (const status of ["done", "canceled", "decided"])
+      for (const id of ["q1", "j1", "i1", "t1", "m1"])
+        for (const state of ["recent", "old", "handled", undefined])
+          expect(buttonsForItem(id, { status, state }), `${id} ${status} ${state}`).toBe("finished")
+    expect(buttonsForItem("q1", { status: "decided", state: "replied" })).toBe("issue-done")
+    expect(buttonsForItem("q1", { status: "open", state: "attention" })).toBe("item")
+    // their check pressed stays, to take back
+    expect(buttonsForItem("q1", { status: "decided", checked: true })).toBe("issue-done")
+    // an UPDATE label with no badge to say it (I285):  Saw it is the one way to clear it
+    expect(buttonsForItem("q1", { status: "decided", updated: true })).toBe("issue-done")
+    expect(buttonsForItem("t1", { status: "done", updated: true })).toBe("todo-done")
+    expect(BUTTONS_OF.finished.map((spec) => [spec.action, spec.label])).toEqual([["revisit", "reopenItem"]])
   })
 
   test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  `in P2` while still to finish, its tooltip saying so", async () => {
@@ -599,7 +640,7 @@ describe("<epic-item>", () => {
     }
   })
 
-  test("a FINISHED item's `taken-in` draws its own `in P2` under its buttons (J231, I348), not `phasePill`'s (I307);  `handled` keeps its pill", async () => {
+  test("a FINISHED item's `taken-in` draws its own `in P2` on its line (J231, T152), not `phasePill`'s (I307);  `handled` keeps its pill", async () => {
     const phases = document.createElement("div")
     phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
     document.body.append(phases)
@@ -611,8 +652,9 @@ describe("<epic-item>", () => {
         expect(host.shadowRoot!.querySelector("[part~='handled']")).toBeNull()
         const done = host.shadowRoot!.querySelector<HTMLElement>("[part~='done-in']")!
         expect([done.textContent, done.getAttribute("link")]).toEqual(["in P2", "#p-fix"])
-        // on its own line, under the buttons (I348)
-        expect(done.parentElement!.classList.contains("phase-row")).toBe(true)
+        // on the line, with the buttons, so the item fits one line (T152)
+        expect(done.parentElement!.classList.contains("marks")).toBe(true)
+        expect(host.shadowRoot!.querySelector(".phase-row")).toBeNull()
         expect(done.dataset.tooltip).toBe("Done in P2 · Fix Open Issues\nGo to P2")
         expect(chip.dataset.tooltip).toContain("Done in P2 · Fix Open Issues")
       }
@@ -977,10 +1019,8 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     await client.send()
     await nextFrame(2)
     const sent = JSON.parse(lookOf(host)) as { buttons: string[]; chip: [string, boolean, string] }
-    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([
-      ["revisit:none", "approve:none"],
-      ["", false]
-    ])
+    // drawn as the server leaves it:  finished, Reopen alone (T152)
+    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([["revisit:none"], ["", false]])
   })
 
   test("Send before the server applies it:  let go at the Send, and the page's update then changes nothing", async () => {
@@ -989,10 +1029,8 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     await nextFrame(2)
     const watch = watchLooks(host)
     const sent = JSON.parse(lookOf(host)) as { buttons: string[]; chip: [string, boolean, string]; pill: string }
-    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([
-      ["revisit:none", "approve:none"],
-      ["", false]
-    ])
+    // drawn as the server leaves it:  finished, Reopen alone (T152)
+    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([["revisit:none"], ["", false]])
     expect(sent.pill).toMatch(/^in P\d+$/)
     await apply(host, client, routes)
     watch.stop()

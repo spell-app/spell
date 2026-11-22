@@ -179,6 +179,8 @@ a "card" is a draggable two sided view, aka "playing card"
   hovered in an editor, and written above it in the code, `/** Its shorthand ... */`.
   - A line with no body takes one holding just the comment:  `its "hint" is text`, then `-- Said beside the score`.
   - A comment right above a declaration still describes it, when nothing under it does.
+  - A comment on a line of its own never ends a block, however it's indented:
+    one out of line reads at the indent of the line of code under it.
 - A note goes on a line of its own, never after a line's code:
   a `//` note at a line's end still reads, with a warning, and `spell lint --fix` moves it to the line under it,
   as `--`.

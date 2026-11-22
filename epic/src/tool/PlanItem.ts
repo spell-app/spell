@@ -99,6 +99,21 @@ export class PlanItem {
   }
 
   /**
+   * About when `item` was made, in ms:  the earliest time on it -- its change stamp, when it was judged (P81), its
+   * cards' and replies' times;  `Infinity` with none.
+   * - not its change stamp alone:  a retitle or a review stamps that later (epic `epic-engine` I439);
+   *   the badges' "new call" asks it too (`ItemBadges`, I435)
+   */
+  static madeAt(item: Element): number {
+    const times = [
+      item.getAttribute("changed"),
+      item.getAttribute("judged"),
+      ...Array.from(item.querySelectorAll("[at]"), (dated) => dated.getAttribute("at"))
+    ].map((time) => Date.parse((time ?? "").replace(" ", "T")))
+    return Math.min(Infinity, ...times.filter((time) => Number.isFinite(time)))
+  }
+
+  /**
    * `item`'s bare UPDATE label (`PlanDoc.markUpdate()`), if it has one.
    */
   static updateLabelOf(item: Element): Element | null {

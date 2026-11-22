@@ -256,6 +256,21 @@ export const epicItemVocabulary = {
       description: "JUDGED (P81):  only you can decide the issue, OK the todo, or run the test."
     },
     {
+      name: "asks-you",
+      kind: "boolean",
+      description:
+        "A recheck handed it to you (`epic badges <epic> set --your-call yes`, P81):  YOUR CALL, a test YOU TEST, " +
+        "whatever its care and doubt."
+    },
+    {
+      name: "calm-before",
+      kind: "enum",
+      values: ["yes", "no"],
+      description:
+        "Whether it was `calm` before your click on its id chip, on a page with badges (P81):  what " +
+        "`epic badges <epic> off` puts back."
+    },
+    {
       name: "judged",
       kind: "string",
       format: "time",
@@ -449,7 +464,18 @@ export const epicItemVocabulary = {
     },
     { name: "title", description: "The title." },
     { name: "title-prefix", description: "The word before the title:  `FIXED -`, on a fix (epic `epic-engine` T143)." },
-    { name: "badge", description: "The badge before the title, in the item's colour:  `WILL FIX` (P81)." },
+    {
+      name: "badge",
+      description:
+        "The badge before the title (P81):  `WILL FIX`;  grey where its colour is the id chip's, which says it " +
+        "already (epic `epic-engine` T149)."
+    },
+    {
+      name: "update",
+      description:
+        "Its UPDATE label, next to the id chip, after any badge (T149):  drawn from the one in its title, which " +
+        "doesn't show at the title's end."
+    },
     {
       name: "review",
       description:

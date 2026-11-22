@@ -48,11 +48,17 @@ test("the starter data makes a page:  three columns, one question chipless with 
   const html = readFileSync(file, "utf8")
   const { document } = parseHTML(html)
   expect(html).not.toContain("TEMPLATE:")
+  // no crumb to the home page (epic `epic-engine` T148)
+  expect(html).not.toContain("<ui-breadcrumb link=")
   expect([...document.querySelectorAll("th")].map((head) => head.textContent)).toEqual(["Item", "Your pick", "Facts"])
   const ask = document.querySelector("#s1f1 epic-ask")
   expect(ask.hasAttribute("no-chip")).toBe(true)
   const priority = ask.querySelector('epic-ask[slot="then"]')
   expect([priority.getAttribute("name"), priority.getAttribute("off-for")]).toEqual(["s1f1-priority", "N"])
+  expect(document.querySelector("p.lede").textContent.replace(/\s+/g, " ").trim()).toBe(
+    "For each idea, choose Yes, No, Modify (say what to change in the comment box) or Revisit (Claude will ask you again later)." +
+      "Then pick a Priority, from 1 (first) to 3 (last).If you chose No, you can skip Priority."
+  )
   expect(document.querySelector("#s1").getAttribute("label")).toBe("S1 · Now")
   expect(document.querySelector("a.spell-feature-name").getAttribute("href")).toBe("#s1f1")
 })

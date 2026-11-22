@@ -94,7 +94,9 @@ export const epicUpdateVocabulary = {
     { name: "body", description: "What changed, under the title row;  hidden (`until-found`) while folded." },
     {
       name: "label",
-      description: "The bare orange `UPDATE` label (just `FIXED` ... with `became`;  `UNDERWAY` solid blue)."
+      description:
+        "The bare orange `UPDATE` label (just `FIXED` ... with `became`;  `UNDERWAY` solid blue);  grey beside " +
+        "an id chip of its own colour."
     },
     {
       name: "unmerged",

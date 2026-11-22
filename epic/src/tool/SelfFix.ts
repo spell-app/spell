@@ -61,8 +61,23 @@ export class SelfFix {
   }
 
   /**
+   * When `document`'s Log last says the person LOOKED at each item (`LOOKED_LINES`), in ms, by id (lower case).
+   * - a look, never an ask:  Do this, Start now and queued work say go, not that they saw the result (I435)
+   */
+  static loggedLooks(document: Document): Map<string, number> {
+    const looks = new Map<string, number>()
+    for (const event of Array.from(document.querySelectorAll('epic-page > epic-section[kind="log"] epic-event'))) {
+      const id = LOOKED_LINE.exec(event.textContent?.trim() ?? "")?.[1]?.toLowerCase()
+      const at = Date.parse((event.getAttribute("at") ?? "").replace(" ", "T"))
+      if (id && Number.isFinite(at)) looks.set(id, Math.max(at, looks.get(id) ?? 0))
+    }
+    return looks
+  }
+
+  /**
    * The ids (lower case) of what the person acted on in `inbox`, sent or not:
    * - their marks, waiting or taken, and their requests for now
+   * - a note they haven't sent (`drafts`;  epic `epic-engine` I435)
    * - their urgency, from an id chip
    * - their comments, answered and closed ones too
    */
@@ -70,6 +85,7 @@ export class SelfFix {
     const ids = [
       ...Object.keys(inbox.marks),
       ...Object.keys(inbox.taken),
+      ...Object.keys(inbox.drafts ?? {}),
       ...Object.keys(inbox.urgency),
       ...inbox.now.map((request) => request.id),
       ...Object.values(inbox.comments).map((comment) => partOf(comment.anchor))
@@ -90,6 +106,10 @@ export class SelfFix {
 
 /** An item's own attributes saying the person got to it. */
 const ACTED_ATTRIBUTES = ["urgent", "reviewed", "deferred", "queued", "review-as"] as const
+
+/** A Log line saying the person looked at an item as it stood:  their check, pick, skip, x or run, or a review. */
+const LOOKED_LINE =
+  /^([A-Z]+\d+) (?:approved:|reviewed:|skipped:|hushed:|(?:\S+ )?picked [A-Z]|canceled:\s+dropped by |(?:passed|canceled)\b.*\brun\))/
 
 /**
  * The Log's lines saying the person got to an item;  each one's id.
