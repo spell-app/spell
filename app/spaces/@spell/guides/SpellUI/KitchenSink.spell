@@ -196,7 +196,7 @@
 				<input placeholder="Search..." aria-label="Search"/>
 			</example>
 			<example "Input" description="Native types">
-				<stack class="ui-cluster">
+				<stack wrap direction="horizontal">
 					<input type="password" placeholder="Password" aria-label="Password"/>
 					<input type="email" placeholder="E-mail" aria-label="E-mail"/>
 					<input type="number" placeholder="Quantity" aria-label="Quantity"/>
@@ -1651,7 +1651,7 @@
 				<calendar value="2026-09-30T14:30" locale="en-US" placeholder="Date and time" today/>
 			</example>
 			<example "Calendar" description="Date, time, month, year">
-				<stack class="ui-cluster">
+				<stack wrap direction="horizontal">
 					<calendar type="date" locale="en-US" placeholder="Date"/>
 					<calendar type="time" locale="en-US" placeholder="Time"/>
 					<calendar type="month" locale="en-US" placeholder="Month"/>
@@ -1659,7 +1659,7 @@
 				</stack>
 			</example>
 			<example "Calendar" description="Inline">
-				<stack class="ui-cluster">
+				<stack wrap direction="horizontal">
 					<calendar inline type="date" value="2026-09-30" locale="en-US" aria-label="Inline date"/>
 					<calendar inline type="month" value="2026-09" locale="en-US" aria-label="Inline month"/>
 					<calendar inline type="time" value="14:30" locale="en-US" aria-label="Inline time"/>
@@ -1684,7 +1684,7 @@
 
 		<section label="Dial" sticky="stack" collapsible dividing>
 			<example "Dial" description="A dial lets people pick a number by turning it, with its value in the middle and its label under it. \[Dial page](/dial)">
-				<stack style="gap: 24px" class="ui-cluster">
+				<stack wrap direction="horizontal" style="gap: 24px">
 					<dial size="small" label="Weight" color="orange" min="100" max="900" value="777" ticks style="--ui-dial-value-font-weight: 777"/>
 					<dial size="small" label="Roundness" color="teal" value="50"/>
 					<dial size="small" label="Size" color="blue" max="250" value="104"/>
@@ -2138,7 +2138,7 @@
 		<section label="Tour" sticky="stack" collapsible dividing>
 			<example "Tour" description="A tour leads someone through a feature one numbered step at a time, pointing at what each step is about. \[Tour page](/tour)">
 				<stack class="ui-stack">
-					<stack class="ui-cluster">
+					<stack wrap direction="horizontal">
 						<button id="tour-new" icon="plus">New</button>
 						<button id="tour-save" icon="save">Save</button>
 						<button commandfor="tour-example" command="--start" appearance="basic" icon="map signs">Take the tour</button>
@@ -2157,7 +2157,7 @@
 				<button commandfor="transition-demo-fade" command="--toggle">Fade up</button>
 				<button commandfor="transition-demo-scale" command="--toggle">Scale</button>
 				<button commandfor="transition-demo-flip" command="--toggle">Horizontal flip</button>
-				<stack class="ui-cluster">
+				<stack wrap direction="horizontal">
 					<transition id="transition-demo-fade" animation="fade up" inline visible>
 						<segment>Fade up</segment>
 					</transition>
@@ -2172,7 +2172,7 @@
 			<example "Transition" description="Attention">
 				<button commandfor="transition-demo-shake" command="--transition">Shake</button>
 				<button commandfor="transition-demo-tada" command="--transition">Tada</button>
-				<stack class="ui-cluster">
+				<stack wrap direction="horizontal">
 					<transition id="transition-demo-shake" animation="shake" inline visible>
 						<segment>Shake</segment>
 					</transition>
@@ -2414,7 +2414,7 @@
 				</panel>
 			</example>
 			<example "Panel" description="Colors">
-				<stack style="align-items: start" class="ui-cluster">
+				<stack wrap direction="horizontal" style="align-items: start">
 					<panel label="Violet" level="5" color="violet" style="width: 200px">
 						<panel label="Tweak">
 							<text paragraph>Any hue.</text>
@@ -2596,7 +2596,7 @@
 		<section label="Table of contents" sticky="stack" collapsible dividing>
 			<example "Table of contents" description="A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all. \[Table of contents page](/table-of-contents)">
 				<html>
-					<ui-stack style="align-items: flex-start" class="ui-cluster ui-gap-l">
+					<ui-stack wrap direction="horizontal" style="align-items: flex-start" class="ui-gap-l">
 						<ui-toc for="toc-example-content" heading="Button" style="width: 12em"></ui-toc>
 						<ui-section style="flex: 1" id="toc-example-content">
 							<ui-header level="2" dividing>Types</ui-header>

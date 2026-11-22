@@ -411,7 +411,7 @@ export class SiteCheck {
   private async shootWhole(page: Page, check: CheckContext, file: string): Promise<void> {
     const viewport = page.viewportSize()!
     const height = await page.evaluate(scrollingHeight)
-    const tall = Math.min(Math.max(height, viewport.height), WHOLE_MAX_PX)
+    const tall = Math.ceil(Math.min(Math.max(height, viewport.height), WHOLE_MAX_PX))
     await page.setViewportSize({ width: viewport.width, height: tall })
     await page.waitForTimeout(SCROLL_SETTLE_MS)
     try {

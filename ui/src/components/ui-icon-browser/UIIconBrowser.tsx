@@ -199,7 +199,7 @@ export class UIIconBrowser extends E.UIComponent<typeof iconBrowserVocabulary> {
       <div class={this.rootClass}>
         {this.packSwitch()}
         <ui-input
-          ref={(input: HTMLElement) => input.addEventListener("ui-input", this.onSearchInput)}
+          ref={(input: HTMLElement) => input.addEventListener("ui-typed", this.onSearchInput)}
           part={this.partForName("search")}
           type="search"
           icon="magnifying glass"

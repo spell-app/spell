@@ -1,4 +1,4 @@
-"icons" is a notebook page
+"icon set" is a notebook page
 	<header level="1">
 		Icons
 		<header>Every icon in the packs Spell UI ships: Font Awesome 7 Free by default, brands and Fomantic's names when a page adds them.</>
@@ -7,7 +7,7 @@
 	<section label="Icon packs">
 		<markdown>
 			An icon is a name: `<ui-icon name="bell">`, or the `icon` attribute most components take. Names come from icon
-			PACKS, each a folder of SVGs plus an index (`pack.js`); a pack's SVG is fetched the first time a page draws it.
+			packs, each a folder of SVGs plus an index (`pack.js`); a pack's SVG is fetched the first time a page draws it.
 
 			- **FA7 Free**, Font Awesome 7 Free's solid and regular icons (`bell`, `bell outline`), is the default: every page
 			  has it.

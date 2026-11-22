@@ -39,11 +39,14 @@ function parts(host: Element) {
   }
 }
 
-/** Type `text` into the browser's search box, as the box would announce it. */
+/**
+ * Type `text` into the browser's search box:  into its native field, as a person does, so the box announces it its own
+ * way (`ui-typed`;  a test that sent the event itself once passed while the page's typing did nothing).
+ */
 function typeSearch(host: Element, text: string) {
-  const search = parts(host).search()
-  search.value = text
-  search.dispatchEvent(new CustomEvent("ui-input", { detail: { value: text }, bubbles: true, composed: true }))
+  const field = parts(host).search().shadowRoot!.querySelector("input")!
+  field.value = text
+  field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
 }
 
 afterEach(() => {

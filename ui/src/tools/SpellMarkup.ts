@@ -532,6 +532,7 @@ export class SpellMarkup {
     for (const word of swap.bare ?? []) replacement.setAttribute(word, "")
     for (const name of element.getAttributeNames())
       replacement.setAttribute(swap.renamed?.[name] ?? name, element.getAttribute(name)!)
+    if (tag === "div") SpellMarkup.clusterAsRow(replacement)
     replacement.append(...element.childNodes)
     element.replaceWith(replacement)
     return [replacement]
@@ -549,6 +550,22 @@ export class SpellMarkup {
     json.textContent = script.textContent
     script.replaceWith(json)
     return json
+  }
+
+  /**
+   * A `<div class="ui-cluster">` (the utility:  a wrapping row) swapped for a `<ui-stack>`, as the stack's own words:
+   * `direction="horizontal" wrap`, the class word dropped.  As a class on the stack it laid nothing out:
+   * the stack lays out its children in its own shadow root, a column (epic `editor` P42's design review).
+   * - SIDE EFFECT:  changes `stack`'s attributes in place.
+   */
+  private static clusterAsRow(stack: Element) {
+    const words = (stack.getAttribute("class") ?? "").split(/\s+/).filter(Boolean)
+    if (!words.includes(CLUSTER)) return
+    const rest = words.filter((word) => word !== CLUSTER)
+    if (rest.length) stack.setAttribute("class", rest.join(" "))
+    else stack.removeAttribute("class")
+    stack.setAttribute("direction", "horizontal")
+    stack.setAttribute("wrap", "")
   }
 
   /**
@@ -984,6 +1001,9 @@ const CELL_ALIGNMENT = /^(left|center|right|justified|top|middle|bottom) aligned
 
 /** The alignments that are vertical:  a cell's `vertical-align`. */
 const VERTICAL_ALIGNMENTS = new Set(["top", "middle", "bottom"])
+
+/** The utility class of a wrapping row, which a `<div>` swapped for a `<ui-stack>` says in the stack's words. */
+const CLUSTER = "ui-cluster"
 
 /** Spell UI's elements that read a JSON child as their data:  a `<script type="application/json">` there is a `<ui-json>`. */
 const JSON_READERS = new Set(["ui-diagram", "ui-tree-diagram"])
