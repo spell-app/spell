@@ -12,7 +12,7 @@
       id: "editor-first-js",
       name: "The editor's first screen, JavaScript",
       budget: 400,
-      ceiling: 1003,
+      ceiling: 854,
       build: "editor",
       entries: ["index.html"],
       only: "\\.js$"
@@ -21,7 +21,7 @@
       id: "editor-first-all",
       name: "The editor's first screen, everything",
       budget: 500,
-      ceiling: 1020,
+      ceiling: 871,
       build: "editor",
       entries: ["index.html"]
     },
