@@ -110,3 +110,98 @@ describe("LoadOnce.abortable()", () => {
     await expect(LoadOnce.abortable(new Promise(() => {}), signal)).rejects.toMatchObject({ name: "AbortError" })
   })
 })
+
+describe("LoadOnce.valueOf()", () => {
+  test("the value once its load is in;  nothing before, or after a failure", async () => {
+    const loads = new LoadOnce<string, string>()
+    const loading = loads.get("a", async () => "loaded")
+    expect(loads.valueOf("a")).toBeUndefined()
+    await loading
+    expect(loads.valueOf("a")).toBe("loaded")
+    await loads.get("b", async () => Promise.reject(new Error("no"))).catch(() => undefined)
+    expect(loads.valueOf("b")).toBeUndefined()
+    loads.set("c", "saved")
+    expect(loads.valueOf("c")).toBe("saved")
+    loads.forget()
+    expect(loads.valueOf("a")).toBeUndefined()
+  })
+})
+
+describe("LoadOnce.ahead()", () => {
+  /** A button on the page, its hover delay 20ms. */
+  function button() {
+    const element = document.createElement("button")
+    element.style.setProperty("--ui-hover-delay", "20ms")
+    document.body.append(element)
+    return element
+  }
+
+  test("starts once the pointer has rested for the hover delay, and only once", async () => {
+    const element = button()
+    const start = vi.fn()
+    LoadOnce.ahead(element, start)
+    element.dispatchEvent(new PointerEvent("pointerenter"))
+    expect(start).not.toHaveBeenCalled()
+    await new Promise((resolve) => setTimeout(resolve, 60))
+    expect(start).toHaveBeenCalledOnce()
+    element.dispatchEvent(new PointerEvent("pointerdown"))
+    expect(start).toHaveBeenCalledOnce()
+    element.remove()
+  })
+
+  test("the pointer leaving first cancels it;  focus or a press starts it at once", async () => {
+    const element = button()
+    const start = vi.fn()
+    LoadOnce.ahead(element, start)
+    element.dispatchEvent(new PointerEvent("pointerenter"))
+    element.dispatchEvent(new PointerEvent("pointerleave"))
+    await new Promise((resolve) => setTimeout(resolve, 60))
+    expect(start).not.toHaveBeenCalled()
+    element.focus()
+    expect(start).toHaveBeenCalledOnce()
+
+    const pressed = vi.fn()
+    LoadOnce.ahead(element, pressed)
+    element.dispatchEvent(new PointerEvent("pointerdown"))
+    expect(pressed).toHaveBeenCalledOnce()
+    element.remove()
+  })
+
+  test("under Save-Data, only a press starts it", async () => {
+    vi.spyOn(LoadOnce, "isSavingData").mockReturnValue(true)
+    const element = button()
+    const start = vi.fn()
+    const stop = LoadOnce.ahead(element, start)
+    element.dispatchEvent(new PointerEvent("pointerenter"))
+    element.focus()
+    await new Promise((resolve) => setTimeout(resolve, 60))
+    expect(start).not.toHaveBeenCalled()
+    element.dispatchEvent(new PointerEvent("pointerdown"))
+    expect(start).toHaveBeenCalledOnce()
+    stop()
+    element.remove()
+  })
+})
+
+describe("LoadOnce.atIdle()", () => {
+  test("starts once the browser is idle;  undone first, never", async () => {
+    const start = vi.fn()
+    LoadOnce.atIdle(start, { timeout: 50 })
+    const cancelled = vi.fn()
+    LoadOnce.atIdle(cancelled, { timeout: 50 })()
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(start).toHaveBeenCalledOnce()
+    expect(cancelled).not.toHaveBeenCalled()
+  })
+
+  test("under Save-Data, a load ahead is skipped;  one that must happen (`ahead: false`) still runs", async () => {
+    vi.spyOn(LoadOnce, "isSavingData").mockReturnValue(true)
+    const skipped = vi.fn()
+    const needed = vi.fn()
+    LoadOnce.atIdle(skipped, { timeout: 20 })
+    LoadOnce.atIdle(needed, { timeout: 20, ahead: false })
+    await new Promise((resolve) => setTimeout(resolve, 80))
+    expect(skipped).not.toHaveBeenCalled()
+    expect(needed).toHaveBeenCalledOnce()
+  })
+})

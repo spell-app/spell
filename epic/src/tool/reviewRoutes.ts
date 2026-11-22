@@ -115,7 +115,7 @@ const reviewRoutes: RouteModule = {
       const inbox = ReviewInbox.read(ReviewInbox.pathFor(file))
       // an instant mark whose timer was lost (the server restarted) is applied on the page's next look (I304)
       if (inbox.markList.some((mark) => isInstantDue(mark.id, mark))) instantLater(file, root, 0)
-      reply.set("Cache-Control", "no-store").json(inbox.forPage())
+      reply.noStore().json(inbox.forPage())
     })
     // before the other writes' body limit:  a screenshot is megabytes
     api.post("/shot", guard.writeCheck, SRV.parseBodies({ limit: MAX_SHOT_BODY }), async (request, reply) => {

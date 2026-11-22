@@ -72,7 +72,7 @@ describe("<ui-checkbox> classes", () => {
     // the new words (epic `ui-gaps` P4):  the old names above draw the same
     ['appearance="toggle"', "ui toggle checkbox"],
     ['padding="none" invisible', "ui fitted invisible checkbox"],
-    ['align="right"', "ui right aligned checkbox"],
+    ['align="right"', "ui right aligned checkbox right-aligned"],
     ["readonly", "ui read-only checkbox"],
     ["disabled", "ui disabled checkbox"],
     ["inverted indeterminate", "ui indeterminate inverted checkbox"],

@@ -85,19 +85,19 @@ beforeEach(async () => {
 
 describe("<ui-popup> classes", () => {
   it.each([
-    ["", "ui top left popup"],
-    ['size="small"', "ui small top left popup"],
-    ['size="medium"', "ui top left popup"],
-    ['color="red"', "ui red top left popup"],
-    ['appearance="basic"', "ui basic top left popup"],
-    ["wide", "ui wide top left popup"],
-    ['wide="very"', "ui very wide top left popup"],
-    ["inverted flowing fixed", "ui fixed flowing inverted top left popup"],
-    ["fluid loading", "ui fluid loading top left popup"],
+    ["", "ui top left popup top-left"],
+    ['size="small"', "ui small top left popup top-left"],
+    ['size="medium"', "ui top left popup top-left"],
+    ['color="red"', "ui red top left popup top-left"],
+    ['appearance="basic"', "ui basic top left popup top-left"],
+    ["wide", "ui wide top left popup top-left"],
+    ['wide="very"', "ui very wide top left popup top-left very-wide"],
+    ["inverted flowing fixed", "ui fixed flowing inverted top left popup top-left"],
+    ["fluid loading", "ui fluid loading top left popup top-left"],
     ['position="right center"', "ui right center popup"],
-    ['position="left top"', "ui left top popup"],
-    ['position="bottom centre"', "ui top left popup"],
-    ['open-on="manual" visible', "ui top left visible popup"]
+    ['position="left top"', "ui left top popup left-top"],
+    ['position="bottom centre"', "ui top left popup top-left"],
+    ['open-on="manual" visible', "ui top left visible popup top-left"]
   ])("<ui-popup %s>", async (attributes, classes) => {
     const { root } = await popup(`<button>t</button><ui-popup ${attributes}>Text</ui-popup>`)
     expect(root.localName).toBe("div")

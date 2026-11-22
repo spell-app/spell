@@ -65,15 +65,15 @@ const detailsRoutes: RouteModule = {
     api.get("/answer", (request, reply) => {
       const file = detailsPage(web.files, request.query.page)
       const answer = sentAnswer(DataFile.read<DetailsAnswer>(answerFile(file)))
-      reply.set("Cache-Control", "no-store").json({ answer, listening: listeningOn(file) })
+      reply.noStore().json({ answer, listening: listeningOn(file) })
     })
     api.get("/listening", (request, reply) => {
       const file = detailsPage(web.files, request.query.page)
-      reply.set("Cache-Control", "no-store").json({ listening: listeningOn(file) })
+      reply.noStore().json({ listening: listeningOn(file) })
     })
     api.get("/draft", (request, reply) => {
       const draft = DataFile.read<DetailsDraft>(draftFile(detailsPage(web.files, request.query.page))) ?? null
-      reply.set("Cache-Control", "no-store").json({ draft })
+      reply.noStore().json({ draft })
     })
     api.use(guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }))
     api.post("/answer", async (request, reply) => {

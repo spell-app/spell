@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsCSS, colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { progressVocabulary } from "spell/ui/components/ui-progress/UIProgress.en"
@@ -33,7 +32,7 @@ const ALLOWED_IMPORTANT = 0
 /** Render `html` with the progress sheet;  returns the first `.ui.progress`. */
 function render(html: string, css: readonly string[] = []): HTMLElement {
   Sheets.adopt([...foundationCSS, colorsCSS, progressCSS, STILL, ...css])
-  const root = Fixture.render(html)
+  const root = Sheets.render(html)
   return root.matches(".ui.progress") ? root : root.querySelector<HTMLElement>(".ui.progress")!
 }
 
@@ -75,7 +74,7 @@ describe("UIProgress.css source", () => {
 describe("UIProgress.css examples", () => {
   it.each(Object.keys(EXAMPLES))("draws a track and bars in %s", (path) => {
     Sheets.adopt([...foundationCSS, colorsCSS, progressCSS, STILL])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const progresses = root.querySelectorAll<HTMLElement>(".ui.progress")
     expect(progresses.length).toBeGreaterThan(0)
     for (const progress of progresses) {
@@ -115,7 +114,7 @@ describe("UIProgress.css examples", () => {
     function probe(token: string, parent?: HTMLElement) {
       const span = document.createElement("span")
       span.style.backgroundColor = `var(${token})`
-      ;(parent ?? Fixture.render("<div></div>")).append(span)
+      ;(parent ?? Sheets.render("<div></div>")).append(span)
       return getComputedStyle(span).backgroundColor
     }
   })
@@ -135,7 +134,7 @@ describe("UIProgress.css examples", () => {
 
   it("fills the track while indeterminate, and animates its piece", () => {
     Sheets.adopt([...foundationCSS, colorsCSS, progressCSS])
-    const root = Fixture.render(`<div style="width: 400px"><div class="ui sliding indeterminate progress">
+    const root = Sheets.render(`<div style="width: 400px"><div class="ui sliding indeterminate progress">
       <div class="bar"></div></div></div>`)
     const bar = root.querySelector<HTMLElement>(".bar")!
     expect(getComputedStyle(bar).width).toBe("400px")
@@ -152,7 +151,7 @@ describe("UIProgress.css examples", () => {
 describe("UIProgress.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, progressCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-progress-bar-height: 20px"><div class="ui progress" data-percent="40"><div class="bar" style="width: 40%"></div></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.progress .bar")!).height).toBe("20px")

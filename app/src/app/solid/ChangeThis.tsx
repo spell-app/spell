@@ -1,4 +1,4 @@
-import { For, Match, Show, Switch, createSignal } from "solid-js"
+import { Show, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { KnownFormat, LoadableFile } from "spell/util"
@@ -11,8 +11,8 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
+import { LazyPiece } from "./LazyPiece"
 import { PartEdits } from "./PartEdits"
-import { on } from "./on"
 
 import "./ChangeThis.css"
 
@@ -26,8 +26,13 @@ import "./ChangeThis.css"
  * - The result arrives as any other edit does:  one step of `editor.history`, compiled with the running app left up.
  * - One request at a time.
  * - Never in the public preview, which has no server (`isStaticBuild`).
+ * - Its box, `<ChangeThisBox>`, is in `ChangeThisView.tsx`, loaded the first time it opens
+ *   (`ChangeThis.views`, a `LazyPiece`).
  ****************/
 export class ChangeThis {
+  /** The box, loaded the first time it opens:  see `LazyPiece`. */
+  static views = new LazyPiece(() => import("./ChangeThisView"))
+
   /** Can anything be asked here?  Not in the public preview. */
   static get isAvailable(): boolean {
     return !isStaticBuild
@@ -44,7 +49,9 @@ export class ChangeThis {
     if (!ChangeThis.isAvailable) return
     const element = selectedElement()
     placeAsked = element && ChangeThis.placeFor(element)
-    if (request() || placeAsked) setBoxAt(boxPlaceFor(element, at))
+    if (!request() && !placeAsked) return
+    ChangeThis.views.loadSoon()
+    setBoxAt(boxPlaceFor(element, at))
   }
 
   /** Close the box:  a request under way goes on without it. */
@@ -220,141 +227,6 @@ export class ChangeThis {
   }
 }
 
-/****************
- * ### `<ChangeThisBox>`
- * The small box next to what's selected:  a `<ui-popup>` there, with what to change, then how the request is getting on.
- * - A popup, not a panel:  it covers nothing but the place it's about.
- * - Its ✕, top right, closes it;  so does Esc.  A request under way goes on without it.
- * - Send, a small paper plane right of the words, at their foot, sends them;  so does Enter.  Shift+Enter starts a new line.
- * - A picture pasted or dropped into it goes with the words, a thumbnail under them, its ✕ taking it out (epic `editor` T62).
- * - Under way, a spinner, a short line of what Claude is doing, and the seconds since it was sent (epic `editor` I138):
- *   "Starting your agent…", "Reading your request…", "Editing Solitaire.spell…" (`statusOf()`);
- *   no Claude Code on this machine:  a link to install it, and the command to run by hand.
- * - `ChangeThis.open()` opens it.
- ****************/
-export function ChangeThisBox(): JSX.Element {
-  const send = () => void ChangeThis.send(words())
-  return (
-    <Show when={boxAt()}>
-      {(where) => (
-        <ui-popup
-          at={leftEdgeOf(where())}
-          open-on="manual"
-          visible=""
-          class="BarMenuPopup ChangeThisPopup"
-          aria-label={appTexts.text("menuChangeThis")}
-          ref={on("ui-closing", () => ChangeThis.close())}
-        >
-          <div
-            class="ChangeThisBox"
-            ref={(box: HTMLElement) => requestAnimationFrame(() => measureBox(box))}
-            onPaste={(event: ClipboardEvent) => takePictures(event, event.clipboardData)}
-            onDragOver={(event: DragEvent) => {
-              // a file dragged over:  it may be dropped here
-              if (event.dataTransfer?.types.includes("Files")) event.preventDefault()
-            }}
-            onDrop={(event: DragEvent) => takePictures(event, event.dataTransfer)}
-          >
-            <div class="ChangeThisTop">
-              <label class="ChangeThisHeader">{appTexts.text("changeThisHeader")}</label>
-              <ui-button
-                class="ChangeThisClose"
-                appearance="circular basic"
-                size="mini"
-                icon="close"
-                aria-label={appTexts.text("changeThisClose")}
-                title={appTexts.text("changeThisClose")}
-                onClick={() => ChangeThis.close()}
-              />
-            </div>
-            <div class="ChangeThisField">
-              <ui-textarea
-                grow=""
-                fluid=""
-                rows="3"
-                max-rows="6"
-                autofocus=""
-                readonly={!!request()}
-                aria-label={appTexts.text("changeThisPrompt")}
-                placeholder={appTexts.text("changeThisPrompt")}
-                value={words()}
-                ref={on<{ value: string }>("ui-typed", (event) => setWords(event.detail.value))}
-                onKeyDown={(event: KeyboardEvent) => {
-                  if (event.key !== "Enter" || event.shiftKey || event.isComposing || request()) return
-                  event.preventDefault()
-                  send()
-                }}
-              />
-              <ui-button
-                class="ChangeThisSend"
-                appearance="circular"
-                size="mini"
-                color="primary"
-                icon={SEND_ICON}
-                aria-label={appTexts.text("changeThisSend")}
-                title={appTexts.text("changeThisSend")}
-                disabled={request() || !words().trim() ? "" : undefined}
-                onClick={send}
-              />
-            </div>
-            <Show when={pictures().length}>
-              <div class="ChangeThisPictures">
-                <For each={pictures()}>
-                  {(picture, index) => (
-                    <span class="ChangeThisPicture">
-                      <img src={picture.url} alt={appTexts.text("changeThisPicture")} />
-                      <Show when={!request()}>
-                        <ui-icon
-                          name="close"
-                          link=""
-                          label={appTexts.text("changeThisRemovePicture")}
-                          title={appTexts.text("changeThisRemovePicture")}
-                          onClick={() => ChangeThis.removePictures(index())}
-                        />
-                      </Show>
-                    </span>
-                  )}
-                </For>
-              </div>
-            </Show>
-            <Switch>
-              <Match when={isUnderWay(request())}>
-                <p class="ChangeThisWorking">
-                  <ui-loader visible="" inline="" size="small" />
-                  <span class="ChangeThisStatus">{statusOf(request())}</span>
-                  <span class="ChangeThisElapsed">
-                    {appTexts.text("changeThisSeconds", { seconds: secondsSince(request()?.at) })}
-                  </span>
-                </p>
-              </Match>
-              <Match when={stageOf(request()) === "no claude"}>
-                <p class="ChangeThisNoClaude">{appTexts.text("changeThisNoClaude")}</p>
-                <a class="ChangeThisInstall" href={INSTALL_URL} target="_blank" rel="noopener">
-                  {appTexts.text("changeThisInstall")}
-                </a>
-                <p>{appTexts.text("changeThisByHand")}</p>
-                <ui-code language="sh">{LISTEN_COMMAND}</ui-code>
-              </Match>
-              <Match when={stageOf(request()) === "nobody"}>
-                <p>{appTexts.text("changeThisNobody")}</p>
-                <ui-button
-                  class="ChangeThisStart"
-                  size="small"
-                  icon="play"
-                  onClick={() => void ChangeThis.startClaude()}
-                >
-                  {appTexts.text("changeThisStart")}
-                </ui-button>
-                <ui-code language="sh">{LISTEN_COMMAND}</ui-code>
-              </Match>
-            </Switch>
-          </div>
-        </ui-popup>
-      )}
-    </Show>
-  )
-}
-
 /**
  * Where `request` has got to, as the box says it:
  * - `starting`:  the page server started a Claude session, which hasn't taken it yet
@@ -363,40 +235,13 @@ export function ChangeThisBox(): JSX.Element {
  * - `nobody`:  nobody listens, and no session started:  the Start Claude Code button
  * - `undefined`:  no request
  */
-function stageOf(
+export function stageOf(
   request: SPACES.ChangeAnswer | undefined
 ): "starting" | "working" | "no claude" | "nobody" | undefined {
   if (!request) return undefined
   if (request.status === "waiting" && request.session) return "starting"
   if (request.status !== "waiting" || request.listening) return "working"
   return request.hasClaude ? "nobody" : "no claude"
-}
-
-/** Is `request` under way:  a session started for it, or one on it? */
-function isUnderWay(request: SPACES.ChangeAnswer | undefined): boolean {
-  const stage = stageOf(request)
-  return stage === "starting" || stage === "working"
-}
-
-/**
- * What Claude is doing with `request`, as the box says it, in one short line:
- * - a session the page server started:  what its log says (`progress`), "Editing Solitaire.spell…"
- * - else "Starting your agent…" while none has taken it, then "Your agent is working on it…"
- */
-function statusOf(request: SPACES.ChangeAnswer | undefined): string {
-  const progress = request?.progress
-  const file = progress?.file ?? ""
-  if (progress?.step === "reading request") return appTexts.text("changeThisReadingRequest")
-  if (progress?.step === "reading" && file) return appTexts.text("changeThisReadingFile", { file })
-  if (progress?.step === "editing" && file) return appTexts.text("changeThisEditing", { file })
-  if (progress?.step === "finishing") return appTexts.text("changeThisFinishing")
-  return appTexts.text(stageOf(request) === "starting" ? "changeThisStarting" : "changeThisWorking")
-}
-
-/** Whole seconds from `at` (ISO) to `now()`:  the box's count, so it's visibly alive. */
-function secondsSince(at: string | undefined): number {
-  const since = at ? Date.parse(at) : NaN
-  return Number.isNaN(since) ? 0 : Math.max(0, Math.round((now() - since) / 1000))
 }
 
 /**
@@ -424,20 +269,6 @@ function boxPlaceFor(element: Element | undefined, at?: BoxPlace): BoxPlace {
 /** Centred under `box`. */
 function under(box: DOMRect | undefined): BoxPlace | undefined {
   return box && { x: box.left + box.width / 2, y: box.bottom + BOX_GAP_PX, isCentred: true }
-}
-
-/** Keep the drawn width of the popup round `box`, so a centred box stays centred. */
-function measureBox(box: HTMLElement) {
-  const width = box.parentElement?.getBoundingClientRect().width
-  if (width) setBoxWidth(width)
-}
-
-/**
- * The point `<ui-popup at>` takes, its box's top left:  a centred place moved left by half the box's width.
- * - The width is the box's as last drawn (`boxWidth`), else what its sheet sets.
- */
-function leftEdgeOf(place: BoxPlace): BoxPlace {
-  return place.isCentred ? { x: place.x - boxWidth() / 2, y: place.y } : place
 }
 
 /**
@@ -516,7 +347,7 @@ function selectedElement(): Element | undefined {
 }
 
 /** Where the box is, in the window. */
-type BoxPlace = {
+export type BoxPlace = {
   /** across the window, px */
   x: number
   /** down the window, px */
@@ -526,22 +357,22 @@ type BoxPlace = {
 }
 
 /** The box's width as last drawn, padding and all;  at first, what `ChangeThis.css` sets (420px, 12px padding). */
-const [boxWidth, setBoxWidth] = createSignal(446)
+export const [boxWidth, setBoxWidth] = createSignal(446)
 
 /** Where the box is open:  `undefined` while it's shut. */
-const [boxAt, setBoxAt] = createSignal<BoxPlace>()
+export const [boxAt, setBoxAt] = createSignal<BoxPlace>()
 
 /** What's typed in the box:  it stays, read only, while the request is under way. */
-const [words, setWords] = createSignal("")
+export const [words, setWords] = createSignal("")
 
 /** What the box is about. */
 let placeAsked: SPACES.ChangePlace | undefined
 
 /** The request under way, as last heard. */
-const [request, setRequest] = createSignal<SPACES.ChangeAnswer>()
+export const [request, setRequest] = createSignal<SPACES.ChangeAnswer>()
 
 /** When the request was last heard, in msec:  the box's seconds count from it. */
-const [now, setNow] = createSignal(Date.now())
+export const [now, setNow] = createSignal(Date.now())
 
 /** A picture in the box:  what's sent, and a URL of it for its thumbnail. */
 type BoxPicture = SPACES.ChangePicture & {
@@ -550,33 +381,7 @@ type BoxPicture = SPACES.ChangePicture & {
 }
 
 /** The pictures pasted or dropped into the box, in order (epic `editor` T62). */
-const [pictures, setPictures] = createSignal<BoxPicture[]>([])
-
-/** The pictures the server takes, by type:  `ChangeRequests`' too. */
-const PICTURE_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"]
-
-/**
- * The box's paste or drop:  its pictures are taken, and nothing else of it happens;  words go in as ever.
- * - `data`:  the clipboard's, or the drop's
- */
-function takePictures(event: Event, data: DataTransfer | null): void {
-  const files = [...(data?.files ?? [])].filter((file) => PICTURE_TYPES.includes(file.type))
-  if (!files.length) return
-  event.preventDefault()
-  void ChangeThis.addPictures(files).catch((error: unknown) => editor.showError(error as Error))
-}
-
-/** `file` as a picture in the box:  its bytes as base64, and a URL for its thumbnail. */
-async function pictureOf(file: File): Promise<BoxPicture> {
-  const dataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    // read as a data URL:  its result is text
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(reader.error ?? new Error(`ChangeThis:  can't read the picture ${file.name}`))
-    reader.readAsDataURL(file)
-  })
-  return { type: file.type, data: dataUrl.slice(dataUrl.indexOf(",") + 1), url: URL.createObjectURL(file) }
-}
+export const [pictures, setPictures] = createSignal<BoxPicture[]>([])
 
 /** The attribute the compiler's mark is on a drawn element:  `SourceMarks`'. */
 const DRAWN_AT = "data-spell-at"
@@ -586,15 +391,6 @@ const REFUSED_STATUS = 403
 
 /** The route. */
 const CHANGES_URL = "/api/changes"
-
-/** What a session runs to listen. */
-const LISTEN_COMMAND = "spell app changes wait"
-
-/** Where Claude Code's install is explained. */
-const INSTALL_URL = "https://code.claude.com/docs/en/setup"
-
-/** Send's icon:  Publish's paper plane (`EditorMode.tsx`). */
-const SEND_ICON = "paper plane outline"
 
 /** The Inspector, and a row of its Views tree:  where ⌘K may be pressed, and the box opens by. */
 const INSPECTOR_COLUMN = ".InspectorColumn"
@@ -614,3 +410,30 @@ const REDRAW_MS = 1000
 
 /** How often the editor looks at the request, in msec. */
 const LOOK_EVERY_MS = 1000
+
+/** `file` as a picture in the box:  its bytes as base64, and a URL for its thumbnail. */
+async function pictureOf(file: File): Promise<BoxPicture> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    // read as a data URL:  its result is text
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error ?? new Error(`ChangeThis:  can't read the picture ${file.name}`))
+    reader.readAsDataURL(file)
+  })
+  return { type: file.type, data: dataUrl.slice(dataUrl.indexOf(",") + 1), url: URL.createObjectURL(file) }
+}
+
+/** The pictures the server takes, by type:  `ChangeRequests`' too. */
+export const PICTURE_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"]
+
+/** The box, loaded on first use:  see `ChangeThisView.tsx`. */
+const ChangeThisBoxDrawn = ChangeThis.views.view("ChangeThisBox")
+
+/** The small box next to what's selected, while it's open:  `<ChangeThisBox>`, from `ChangeThisView.tsx`. */
+export function ChangeThisBox(): JSX.Element {
+  return (
+    <Show when={boxAt()}>
+      <ChangeThisBoxDrawn />
+    </Show>
+  )
+}

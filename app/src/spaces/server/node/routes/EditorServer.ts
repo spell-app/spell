@@ -277,9 +277,16 @@ export class EditorServer {
    * `token()` added where vite's proxy adds the write token.
    * - what an npm install serves (`serveBuilt()`), and what `spell perf run` measures (a build in a temporary folder)
    * - `token`:  none, no token is added
+   * - cached as a deploy would be (`caching: "normal"`;  epic `solid-2-final` P2):  Vite's hashed chunks in `assets/`
+   *   kept a year, everything else (`index.html`, the runner's fixed name) checked each time;  compressed, each built
+   *   file's brotli copy beside it (`brotliCopies()`)
    */
   static builtServer({ dir, pagePort, token }: { dir: string; pagePort: number; token?: () => string }): SRV.WebServer {
-    const web = new SRV.WebServer({ mounts: [{ prefix: "/", dir }], checkHost: false })
+    const web = new SRV.WebServer({
+      mounts: [{ prefix: "/", dir, hashed: SRV.hashedIn("assets") }],
+      caching: "normal",
+      checkHost: false
+    })
     const pass = SRV.proxyTo(() => pagePort)
     for (const prefix of PAGE_SERVER_PREFIXES) {
       const withToken = token && TOKEN_PREFIXES.includes(prefix)
@@ -297,7 +304,7 @@ export class EditorServer {
       })
     }
     web.fallback.use((request, reply, next) =>
-      request.method === "GET" ? reply.sendFile(join(dir, "index.html")) : next()
+      request.method === "GET" ? reply.set("Cache-Control", "no-cache").sendFile(join(dir, "index.html")) : next()
     )
     return web
   }

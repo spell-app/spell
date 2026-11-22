@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { shapeVocabulary } from "spell/ui/components/ui-shape/UIShape.en"
@@ -31,7 +30,7 @@ const ALLOWED_IMPORTANT = 0
 /** Adopt the sheets and render the example. */
 function example(): HTMLElement {
   Sheets.adopt([...foundationCSS, shapeCSS])
-  return Fixture.render(EXAMPLES["./examples/shape.html"]!)
+  return Sheets.render(EXAMPLES["./examples/shape.html"]!)
 }
 
 ////////////////
@@ -94,7 +93,7 @@ describe("UIShape.css examples", () => {
 
   it("animating:  the sides box goes absolute, the staged side over it, the leaving side fades", () => {
     Sheets.adopt([...foundationCSS, shapeCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div class="ui animating shape"><div class="sides"><div class="active hidden side">A</div>` +
         `<div class="animating side">B</div></div></div>`
     )
@@ -113,7 +112,7 @@ describe("UIShape.css examples", () => {
 describe("UIShape.css tokens", () => {
   it("takes a public token from a wrapper or the shape itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, shapeCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-shape-cube-size: 100px"><div class="ui cube shape"><div class="sides">` +
         `<div class="active side">A</div></div></div></div>`
     )

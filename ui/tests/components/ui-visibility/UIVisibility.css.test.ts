@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { visibilityVocabulary } from "spell/ui/components/ui-visibility/UIVisibility.en"
@@ -50,7 +49,7 @@ describe("UIVisibility.css source", () => {
 describe("UIVisibility.css examples", () => {
   it.each(Object.keys(EXAMPLES))("renders the content of %s", (path) => {
     Sheets.adopt([...foundationCSS, visibilityCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     for (const image of root.querySelectorAll("img")) expect(image.getBoundingClientRect().width).toBe(96)
   })
 })

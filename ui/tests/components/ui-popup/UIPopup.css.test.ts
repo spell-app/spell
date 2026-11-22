@@ -5,7 +5,6 @@ import { Keys } from "spell/ui/test-helpers/Keys"
 import { colorsSharedCSS, foundationCSS, nativeCSS } from "spell/ui/styles"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { Fixture } from "spell/test-helpers/Fixture"
 import type { DOMElement } from "spell/element"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
@@ -40,7 +39,7 @@ const ALLOWED_IMPORTANT = 0
 /** Adopt the popup sheets (and buttons, for the tooltip examples) and render example `name`. */
 function example(name: string): HTMLElement {
   Sheets.adopt([...foundationCSS, nativeCSS, buttonCSS, popupCSS, anchoredRaw])
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 /** Computed style of the static popup in `root` whose text starts with `text`. */
@@ -102,7 +101,7 @@ describe("UIPopup.css source", () => {
     expect(Sheets.covers(popupRaw, "left center")).toBe(true)
     expect(Sheets.covers(popupRaw, "right center")).toBe(true)
     for (const position of ["left top", "left bottom", "right top", "right bottom"])
-      expect(popupRaw, position).toContain(`[class*="${position}"]`)
+      expect(popupRaw, position).toContain(`.${position.replaceAll(" ", "-")}`)
   })
 
   it("resolves the duration alias on STATIC popups too (no host to declare it)", () => {
@@ -113,7 +112,7 @@ describe("UIPopup.css source", () => {
   it("tells beside-and-aligned positions from above / below ones with the same words", () => {
     const root = example("variations")
     const above = root.querySelector<HTMLElement>(".ui.popup.top.left")!
-    const beside = root.querySelector<HTMLElement>('.ui.popup[class*="left top"]')!
+    const beside = root.querySelector<HTMLElement>(".ui.popup.left-top")!
     expect(getComputedStyle(above).transformOrigin).not.toBe(getComputedStyle(beside).transformOrigin)
     expect(parseFloat(getComputedStyle(beside).marginRight)).toBeGreaterThan(0)
     expect(parseFloat(getComputedStyle(beside).marginBottom)).toBe(0)
@@ -137,7 +136,7 @@ describe("UIPopup.css source", () => {
 describe("UIPopup.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every popup in %s", (path) => {
     Sheets.adopt([...foundationCSS, popupCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     for (const popup of root.querySelectorAll<HTMLElement>(".ui.popup")) {
       const style = getComputedStyle(popup)
       expect(style.display, popup.outerHTML.slice(0, 80)).toBe("block")
@@ -152,7 +151,7 @@ describe("UIPopup.css examples", () => {
     const popup = popupNamed(root, "User Rating")
     const style = getComputedStyle(popup)
     const probe = getComputedStyle(
-      Fixture.render(`<span style="background: var(--ui-surface); color: var(--ui-border-color-strong)"></span>`)
+      Sheets.render(`<span style="background: var(--ui-surface); color: var(--ui-border-color-strong)"></span>`)
     )
     expect(style.backgroundColor).toBe(probe.backgroundColor)
     expect(style.borderTopColor).toBe(probe.color)
@@ -216,7 +215,7 @@ describe("UIPopup.css examples", () => {
   it("colours:  a coloured popup fills box and arrow with the hue;  inverted takes the ink, or the light hue", () => {
     const root = example("variations")
     const probe = getComputedStyle(
-      Fixture.render(
+      Sheets.render(
         `<span style="background: var(--ui-red); color: var(--ui-ink); outline-color: var(--ui-red-inverted)"></span>`
       )
     )
@@ -274,7 +273,7 @@ describe("native.css tooltip", () => {
     const root = example("types")
     const tip = root.querySelector<HTMLElement>("[data-inverted]")!
     expect(getComputedStyle(tip, "::after").opacity).toBe("1")
-    const ink = getComputedStyle(Fixture.render(`<span style="background: var(--ui-ink)"></span>`)).backgroundColor
+    const ink = getComputedStyle(Sheets.render(`<span style="background: var(--ui-ink)"></span>`)).backgroundColor
     expect(getComputedStyle(tip, "::after").backgroundColor).toBe(ink)
   })
 })
@@ -296,7 +295,7 @@ describe("native.css tooltip shown states", () => {
     (position) => {
       Sheets.adopt([...foundationCSS, nativeCSS, buttonCSS])
       const attributes = position ? `data-position="${position}"` : ""
-      const button = Fixture.render(`<button data-tooltip="Hi" data-variation="visible" ${attributes}>x</button>`)
+      const button = Sheets.render(`<button data-tooltip="Hi" data-variation="visible" ${attributes}>x</button>`)
       expect(getComputedStyle(button, "::after").opacity).toBe("1")
       expect(scaleOf(getComputedStyle(button, "::after").transform)).toBe(1)
       // `::before` is the arrow, rotated 45deg:  cos(45deg) * scale
@@ -325,7 +324,7 @@ describe("native.css tooltip shown states", () => {
 
   it("a mouse-focused native <button> doesn't pin its tooltip open", async () => {
     Sheets.adopt([...foundationCSS, nativeCSS, buttonCSS])
-    const button = Fixture.render(`<button data-tooltip="Hi">x</button>`)
+    const button = Sheets.render(`<button data-tooltip="Hi">x</button>`)
     await userEvent.click(button)
     // Safari doesn't focus a button on click:  focus it (after the mouse, so it still isn't :focus-visible)
     button.focus()
@@ -355,7 +354,7 @@ async function resize(width: number) {
 describe("UIPopup.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, popupCSS])
-    const root = Fixture.render(`<div style="--ui-popup-radius: 20px"><div class="ui visible popup">x</div></div>`)
+    const root = Sheets.render(`<div style="--ui-popup-radius: 20px"><div class="ui visible popup">x</div></div>`)
     expect(getComputedStyle(root.querySelector(".ui.popup")!).borderTopLeftRadius).toBe("20px")
   })
 })

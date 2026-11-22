@@ -136,14 +136,14 @@
    * a segmented track hugs its items, as a segmented menu does (`alignment="fluid"` spreads it):
    * it shrinks and scrolls once they don't fit (Owen:  "second tab group doesn't need to be full width")
    */
-  .ui.toolbar > .ui.segmented.menu:not([class*="fluid aligned"]) {
+  .ui.toolbar > .ui.segmented.menu:not(.fluid-aligned) {
     flex: 0 1 auto;
   }
   /*
    * a header's row (`appearance="segmented header"`):  its items hug their words, its actions at the far end
    * - the actions as quiet as its caret, each with room to press:  `--ui-toolbar-header-action-gap`
    */
-  .ui.toolbar > .ui.segmented.header.menu:not([class*="fluid aligned"]) {
+  .ui.toolbar > .ui.segmented.header.menu:not(.fluid-aligned) {
     --_ui-menu-item-flex: 0 0 auto;
     flex: 0 1 auto;
   }

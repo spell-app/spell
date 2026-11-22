@@ -1,4 +1,4 @@
-import { UIT } from "spell/ui/core"
+import { E, UIT } from "spell/ui/core"
 
 /****************
  * ### `TableClassMirror`
@@ -8,6 +8,9 @@ import { UIT } from "spell/ui/core"
  * - Owns only its words:  the author's other classes stay, in their order.
  *   The element's phrase follows them as one run in grammar order,
  *   since phrase selectors (`[class*="very basic"]`) need the words adjacent.
+ * - Without the phrases' joined words (`very-basic`, `ClassBuilder.withoutPhrases()`):
+ *   `UITable.css` keeps Fomantic's substring selectors for the page's own `<td class="right aligned">`,
+ *   and a joined word after a phrase could make one match where it shouldn't.
  * - Words the table ALREADY has when first mirrored, and the element emits, count as the element's:
  *   an SSR table carries the element's own words (`class="ui celled table"`), which must go when `celled` does.
  * - Re-applies through a `MutationObserver` on the table's `class`, when a framework rewrites `className`.
@@ -33,6 +36,7 @@ export class TableClassMirror {
    * - SIDE EFFECT:  writes `table`'s `class` attribute (only when the text changes).
    */
   apply(table: Element | undefined, classes: string) {
+    classes = E.ClassBuilder.withoutPhrases(classes)
     this.classes = classes
     if (table !== this.table) {
       this.detach()
@@ -78,7 +82,7 @@ export class TableClassMirror {
    * - Static:  one call, nothing to mirror into later.
    */
   static mirrored(text: string | null, classes: string): string {
-    const ours = TableClassMirror.words(classes)
+    const ours = TableClassMirror.words(E.ClassBuilder.withoutPhrases(classes))
     const mine = new Set(ours)
     return [...TableClassMirror.words(text).filter((word) => !mine.has(word)), ...ours].join(" ")
   }

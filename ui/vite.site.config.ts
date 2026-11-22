@@ -1,6 +1,8 @@
 import { defineConfig, type UserConfig } from "vite"
 import { fileURLToPath } from "node:url"
 
+import { brotliCopies } from "spell/toolchain/brotliCopies"
+
 import { baseConfig } from "./vite.config.ts"
 
 /** Spell UI's root. */
@@ -22,6 +24,7 @@ export const SITE_ENTRY = `${ROOT}site/_src/site.ts`
  * - Stable names where the tree is stable, so a rebuild's diff is small:  `site.js`, `site.css`,
  *   one `<family>.js` per family barrel (`ui-button.js`, `ui-example.js`), emoji data under `emoji/<set>/`;
  *   every other chunk (shared code, the runtime, engines) `<name>-<hash>.js`.
+ * - A brotli copy beside each file (`brotliCopies()`):  the kit's servers send it to a browser that takes brotli.
  * - Minified, no sourcemaps:  as a deploy would ship it.  `emptyOutDir: false`:
  *   `scripts/site-bundle.ts` clears the folder itself, keeping the `icon-packs` link.
  * - No aliases:  `site/_src` imports Spell UI and the kit by their package names, through their `exports`
@@ -34,6 +37,7 @@ export default defineConfig(() => {
   const base = baseConfig()
   return {
     ...base,
+    plugins: [...(base.plugins ?? []), brotliCopies()],
     root: ROOT,
     base: "./",
     publicDir: false,

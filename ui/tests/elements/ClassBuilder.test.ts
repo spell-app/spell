@@ -73,31 +73,39 @@ describe("ClassBuilder.build() per kind", () => {
     ["keyOnly false", { basic: false }, "ui widget"],
     ["keyOnly hyphenated name => words", { "very-basic": true }, "ui very basic widget"],
     ["keyOnly explicit key", { labeled: true }, "ui labeled icon widget"],
-    ["valueAndKey", { floated: "left" }, "ui left floated widget"],
+    ["valueAndKey", { floated: "left" }, "ui left floated widget left-floated"],
     ["valueAndKey bare emits nothing", { floated: true }, "ui widget"],
     ["keyOrValueAndKey bare", { pointing: true }, "ui pointing widget"],
-    ["keyOrValueAndKey value", { pointing: "left" }, "ui left pointing widget"],
+    ["keyOrValueAndKey value", { pointing: "left" }, "ui left pointing widget left-pointing"],
     ["keyOrValueAndKey false", { pointing: false }, "ui widget"],
-    ["multiple", { only: "mobile" }, "ui mobile only widget"],
-    ["multiple, several", { only: "mobile tablet" }, "ui mobile only tablet only widget"],
-    ["multiple, large screen", { only: "large screen widescreen" }, "ui large screen only widescreen only widget"],
-    ["multiple, array", { only: ["computer", "tablet"] }, "ui computer only tablet only widget"],
+    ["multiple", { only: "mobile" }, "ui mobile only widget mobile-only"],
+    ["multiple, several", { only: "mobile tablet" }, "ui mobile only tablet only widget mobile-only tablet-only"],
+    [
+      "multiple, large screen",
+      { only: "large screen widescreen" },
+      "ui large screen only widescreen only widget large-screen-only widescreen-only"
+    ],
+    [
+      "multiple, array",
+      { only: ["computer", "tablet"] },
+      "ui computer only tablet only widget computer-only tablet-only"
+    ],
     [
       "multiple, vertically",
       { reversed: "computer vertically mobile" },
-      "ui computer vertically reversed mobile reversed widget"
+      "ui computer vertically reversed mobile reversed widget computer-vertically-reversed mobile-reversed"
     ],
     ["multiple true emits nothing", { only: true }, "ui widget"],
-    ["width number", { width: 4 }, "ui four wide widget"],
-    ["width string", { width: "4" }, "ui four wide widget"],
-    ["width word", { width: "four" }, "ui four wide widget"],
-    ["width fraction", { width: "1/4" }, "ui four wide widget"],
-    ["width fraction 3/4", { width: "3/4" }, "ui twelve wide widget"],
-    ["width percent", { width: "25%" }, "ui four wide widget"],
-    ["width 100%", { width: "100%" }, "ui sixteen wide widget"],
-    ["textAlign", { "text-align": "left" }, "ui left aligned widget"],
+    ["width number", { width: 4 }, "ui four wide widget four-wide"],
+    ["width string", { width: "4" }, "ui four wide widget four-wide"],
+    ["width word", { width: "four" }, "ui four wide widget four-wide"],
+    ["width fraction", { width: "1/4" }, "ui four wide widget four-wide"],
+    ["width fraction 3/4", { width: "3/4" }, "ui twelve wide widget twelve-wide"],
+    ["width percent", { width: "25%" }, "ui four wide widget four-wide"],
+    ["width 100%", { width: "100%" }, "ui sixteen wide widget sixteen-wide"],
+    ["textAlign", { "text-align": "left" }, "ui left aligned widget left-aligned"],
     ["textAlign justified", { "text-align": "justified" }, "ui justified widget"],
-    ["verticalAlign", { "vertical-align": "middle" }, "ui middle aligned widget"],
+    ["verticalAlign", { "vertical-align": "middle" }, "ui middle aligned widget middle-aligned"],
     ["property-only kinds emit nothing", { disabled: true, value: "x" }, "ui widget"],
     ["unknown keys are ignored", { nope: true }, "ui widget"]
   ])("%s", (_, values, expected) => {
@@ -123,8 +131,10 @@ describe("ClassBuilder.build() order", () => {
       size: "large"
     }
     expect(widgets.build(everything, { extra: "active" })).toBe(
-      "ui large blue basic fluid labeled icon very basic left pointing right floated attached " +
-        "mobile only eight wide center aligned top aligned active widget"
+      ClassBuilder.withPhrases(
+        "ui large blue basic fluid labeled icon very basic left pointing right floated attached " +
+          "mobile only eight wide center aligned top aligned active widget"
+      )
     )
   })
 
@@ -156,11 +166,11 @@ describe("ClassBuilder.build() order", () => {
 describe("ClassBuilder.build() widths", () => {
   it.each<[string, ClassInput, string]>([
     ["no ui class", {}, "column"],
-    ["default widthClass is wide", { width: 4 }, "four wide column"],
-    ["widthClass with a device", { computer: 4 }, "four wide computer column"],
-    ["widthClass column", { columns: 3 }, "three column column"],
-    ["equal when allowed", { columns: "equal" }, "equal width column"],
-    ["empty widthClass emits the bare word", { count: 2 }, "two column"]
+    ["default widthClass is wide", { width: 4 }, "four wide column four-wide"],
+    ["widthClass with a device", { computer: 4 }, "four wide computer column four-wide four-wide-computer"],
+    ["widthClass column", { columns: 3 }, "three column column three-column"],
+    ["equal when allowed", { columns: "equal" }, "equal width column equal-width"],
+    ["empty widthClass emits the bare word", { count: 2 }, "two column two-column"]
   ])("%s", (_, values, expected) => {
     expect(columns.build(values)).toBe(expected)
   })
@@ -175,8 +185,8 @@ describe("ClassBuilder.build() widths", () => {
 
   it("snaps inexact widths to the nearest column, with a warning", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-    expect(columns.build({ width: "1/3" })).toBe("five wide column")
-    expect(columns.build({ width: "33%" })).toBe("five wide column")
+    expect(columns.build({ width: "1/3" })).toBe("five wide column five-wide")
+    expect(columns.build({ width: "33%" })).toBe("five wide column five-wide")
     expect(warn).toHaveBeenCalledTimes(2)
     expect(warn.mock.calls[0][0]).toMatch(/5\.33 of 16 columns;  using 5/)
   })
@@ -220,7 +230,7 @@ describe("ClassBuilder.build() with `classes`", () => {
 
   it.each([
     [{ padding: "md" }, "ui padded segment"],
-    [{ padding: "lg" }, "ui very padded segment"],
+    [{ padding: "lg" }, "ui very padded segment very-padded"],
     [{ padding: "none" }, "ui segment"],
     [{ padding: "compact" }, "ui compact segment"],
     [{ appearance: "very-basic raised" }, "ui very basic raised segment"]

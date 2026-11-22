@@ -225,20 +225,20 @@
       drop-shadow(0 calc(var(--_ui-icon-corner-stroke) * -1) 0 var(--_icon-outline, var(--_ui-icon-corner-outline)))
       drop-shadow(0 var(--_ui-icon-corner-stroke) 0 var(--_icon-outline, var(--_ui-icon-corner-outline)));
   }
-  .ui.icons > [class*="bottom right corner"].icon,
-  :host(:state(in-icons)) > .ui[class*="bottom right corner"].icon {
+  .ui.icons > .bottom-right-corner.icon,
+  :host(:state(in-icons)) > .ui.bottom-right-corner.icon {
     inset: auto var(--_icon-offset) var(--_icon-offset) auto;
   }
-  .ui.icons > [class*="top right corner"].icon,
-  :host(:state(in-icons)) > .ui[class*="top right corner"].icon {
+  .ui.icons > .top-right-corner.icon,
+  :host(:state(in-icons)) > .ui.top-right-corner.icon {
     inset: var(--_icon-offset) var(--_icon-offset) auto auto;
   }
-  .ui.icons > [class*="top left corner"].icon,
-  :host(:state(in-icons)) > .ui[class*="top left corner"].icon {
+  .ui.icons > .top-left-corner.icon,
+  :host(:state(in-icons)) > .ui.top-left-corner.icon {
     inset: var(--_icon-offset) auto auto var(--_icon-offset);
   }
-  .ui.icons > [class*="bottom left corner"].icon,
-  :host(:state(in-icons)) > .ui[class*="bottom left corner"].icon {
+  .ui.icons > .bottom-left-corner.icon,
+  :host(:state(in-icons)) > .ui.bottom-left-corner.icon {
     inset: auto auto var(--_icon-offset) var(--_icon-offset);
   }
 }
@@ -303,25 +303,25 @@
 
   /* Flipped / rotated:  one transform built from tokens, so the two combine in Fomantic's order. */
   .ui.flipped.icon,
-  .ui[class*="horizontally flipped"].icon {
+  .ui.horizontally-flipped.icon {
     --_icon-flip-x: -1;
   }
-  .ui[class*="vertically flipped"].icon {
+  .ui.vertically-flipped.icon {
     --_icon-flip-x: 1;
     --_icon-flip-y: -1;
   }
   .ui.rotated.icon,
-  .ui[class*="clockwise rotated"].icon {
+  .ui.clockwise-rotated.icon {
     --_icon-rotate: 90deg;
   }
-  .ui[class*="counterclockwise rotated"].icon {
+  .ui.counterclockwise-rotated.icon {
     --_icon-rotate: -90deg;
   }
-  .ui[class*="halfway rotated"].icon {
+  .ui.halfway-rotated.icon {
     --_icon-rotate: 180deg;
   }
   /* `rotated="when stacked"`:  a quarter while the `stackable` stack it's in is a column (`UIStack`), else none */
-  .ui[class*="when stacked rotated"].icon {
+  .ui.when-stacked-rotated.icon {
     --_icon-rotate: var(--_ui-stack-turn, 0deg);
   }
   .ui:is(.flipped, .rotated).icon {

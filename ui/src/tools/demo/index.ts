@@ -48,5 +48,6 @@ for (const [path, html] of Object.entries(ELEMENTS)) {
   const pair = document.createElement("section")
   pair.className = "pair"
   pair.innerHTML = `<div><h3>${name} -- class grammar</h3>${original}</div><div><h3>${name} -- elements</h3>${html}</div>`
+  FamilySheets.joinPhrases(pair.firstElementChild!)
   main.append(pair)
 }

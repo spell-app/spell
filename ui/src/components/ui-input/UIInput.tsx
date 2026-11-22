@@ -277,7 +277,7 @@ export class UIInput extends TextControl<Vocabulary> {
         <Show when={this.labelPlace === "end"}>{this.labelBox()}</Show>
         <Show when={this.labelPlace === "corner"}>
           <span
-            class={this.labeled === "left corner" ? LEFT_CORNER_LABEL : CORNER_LABEL}
+            class={this.labeled === "left corner" ? E.ClassBuilder.withPhrases(LEFT_CORNER_LABEL) : CORNER_LABEL}
             part={this.partForName("label")}
             aria-hidden="true"
           >

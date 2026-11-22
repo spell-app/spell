@@ -374,7 +374,7 @@
     --_button-glyph-height: 1em;
     --_button-glyph-margin: auto;
   }
-  .ui[class*="right labeled"].icon:is(.button, .buttons) {
+  .ui.right-labeled.icon:is(.button, .buttons) {
     --_button-pad-start: 0em;
     --_button-pad-end: var(--_ui-button-labeled-icon-width);
     --_button-icon-start: auto;
@@ -391,11 +391,11 @@
   .ui.labeled.button > .button {
     margin: 0;
   }
-  .ui.labeled.button:not([class*="left labeled"]) > .button {
+  .ui.labeled.button:not(.left-labeled) > .button {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
   }
-  .ui[class*="left labeled"].button > .button {
+  .ui.left-labeled.button > .button {
     border-start-start-radius: 0;
     border-end-start-radius: 0;
   }
@@ -651,7 +651,7 @@
     background-color: var(--ui-color, var(--_ui-button-background));
     color: var(--ui-color-on, var(--_ui-button-color));
   }
-  .ui[class*="left labeled"].button > .label {
+  .ui.left-labeled.button > .label {
     order: -1;
     margin-inline: 0 calc(var(--ui-border-width) * -1);
     border-radius: var(--_ui-button-radius) 0 0 var(--_ui-button-radius);
@@ -735,12 +735,12 @@
   }
 
   /* Floated */
-  .ui[class*="left floated"]:is(.button, .buttons) {
+  .ui.left-floated:is(.button, .buttons) {
     float: left;
     margin-left: 0;
     margin-right: var(--_ui-button-floated-margin);
   }
-  .ui[class*="right floated"]:is(.button, .buttons) {
+  .ui.right-floated:is(.button, .buttons) {
     float: right;
     margin-left: var(--_ui-button-floated-margin);
     margin-right: 0;
@@ -987,19 +987,19 @@
     margin-inline: calc(var(--ui-border-width) * -1);
     border-radius: 0;
   }
-  .ui[class*="top attached"].buttons {
+  .ui.top-attached.buttons {
     border-start-start-radius: var(--_buttons-radius);
     border-start-end-radius: var(--_buttons-radius);
   }
-  .ui[class*="bottom attached"].buttons {
+  .ui.bottom-attached.buttons {
     border-end-start-radius: var(--_buttons-radius);
     border-end-end-radius: var(--_buttons-radius);
   }
-  .ui[class*="left attached"].buttons {
+  .ui.left-attached.buttons {
     border-start-start-radius: var(--_buttons-radius);
     border-end-start-radius: var(--_buttons-radius);
   }
-  .ui[class*="right attached"].buttons {
+  .ui.right-attached.buttons {
     border-start-end-radius: var(--_buttons-radius);
     border-end-end-radius: var(--_buttons-radius);
   }
@@ -1010,44 +1010,44 @@
     --_ui-buttons-es: 0;
     --_ui-buttons-ee: 0;
   }
-  .ui[class*="top attached"].buttons > :first-child,
-  .ui[class*="top attached"].buttons > ::slotted(:first-child) {
+  .ui.top-attached.buttons > :first-child,
+  .ui.top-attached.buttons > ::slotted(:first-child) {
     --_ui-buttons-ss: 1;
   }
-  .ui[class*="top attached"].buttons > :last-child,
-  .ui[class*="top attached"].buttons > ::slotted(:last-child) {
+  .ui.top-attached.buttons > :last-child,
+  .ui.top-attached.buttons > ::slotted(:last-child) {
     --_ui-buttons-se: 1;
   }
-  .ui[class*="bottom attached"].buttons {
+  .ui.bottom-attached.buttons {
     margin-top: calc(var(--ui-border-width) * -1);
   }
-  .ui[class*="bottom attached"].buttons > :first-child,
-  .ui[class*="bottom attached"].buttons > ::slotted(:first-child) {
+  .ui.bottom-attached.buttons > :first-child,
+  .ui.bottom-attached.buttons > ::slotted(:first-child) {
     --_ui-buttons-es: 1;
   }
-  .ui[class*="bottom attached"].buttons > :last-child,
-  .ui[class*="bottom attached"].buttons > ::slotted(:last-child) {
+  .ui.bottom-attached.buttons > :last-child,
+  .ui.bottom-attached.buttons > ::slotted(:last-child) {
     --_ui-buttons-ee: 1;
   }
-  .ui[class*="left attached"].buttons,
-  .ui[class*="right attached"].buttons {
+  .ui.left-attached.buttons,
+  .ui.right-attached.buttons {
     display: inline-flex;
     margin-inline: 0;
   }
-  .ui[class*="left attached"].buttons > :first-child,
-  .ui[class*="left attached"].buttons > ::slotted(:first-child) {
+  .ui.left-attached.buttons > :first-child,
+  .ui.left-attached.buttons > ::slotted(:first-child) {
     --_ui-buttons-se: 1;
   }
-  .ui[class*="left attached"].buttons > :last-child,
-  .ui[class*="left attached"].buttons > ::slotted(:last-child) {
+  .ui.left-attached.buttons > :last-child,
+  .ui.left-attached.buttons > ::slotted(:last-child) {
     --_ui-buttons-ee: 1;
   }
-  .ui[class*="right attached"].buttons > :first-child,
-  .ui[class*="right attached"].buttons > ::slotted(:first-child) {
+  .ui.right-attached.buttons > :first-child,
+  .ui.right-attached.buttons > ::slotted(:first-child) {
     --_ui-buttons-ss: 1;
   }
-  .ui[class*="right attached"].buttons > :last-child,
-  .ui[class*="right attached"].buttons > ::slotted(:last-child) {
+  .ui.right-attached.buttons > :last-child,
+  .ui.right-attached.buttons > ::slotted(:last-child) {
     --_ui-buttons-es: 1;
   }
 

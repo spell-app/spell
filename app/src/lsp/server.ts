@@ -15,4 +15,6 @@ const connection = createConnection(ProposedFeatures.all)
 // `createConnection()` sends `console.*` to the editor's log.  Drop `info` / `debug`, which are parser chatter,
 // e.g. `TaskList` dumping every parse's results.
 console.info = console.debug = () => {}
+// the CSS service at start:  the browser loads it on a file's first `<css>` block, but nothing waits here
+await LSP.SpellCSS.load()
 new LSP.SpellLanguageServer(connection, new SpellDiskWorkspace()).listen()

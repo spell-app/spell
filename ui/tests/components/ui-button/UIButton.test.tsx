@@ -34,7 +34,7 @@ describe("<ui-button> classes", () => {
     ['color="primary"', "ui primary button"],
     ["", "ui button"],
     ["", "ui button"],
-    ['size="small"', "ui small button"],
+    ['size="small"', "ui small button small-button"],
     ['size="medium"', "ui button"],
     ['color="red"', "ui red button"],
     ['color="rde"', "ui button"],
@@ -56,10 +56,10 @@ describe("<ui-button> classes", () => {
     ["loading", "ui loading button"],
     ["toggle", "ui toggle button"],
     ["labeled", "ui labeled button"],
-    ['labeled="right"', "ui right labeled button"],
+    ['labeled="right"', "ui right labeled button right-labeled"],
     ['reveal="slide"', "ui animated button"],
     ['reveal="fade"', "ui fade animated button"],
-    ['attach-to="top"', "ui top attached button"],
+    ['attach-to="top"', "ui top attached button top-attached"],
     // `floated` is gone (epic ui-gaps P8):  a `<ui-stack>` places buttons
     ["floated", "ui button"]
   ])("<ui-button %s>", async (attributes, classes) => {
@@ -93,7 +93,7 @@ describe("<ui-button> classes", () => {
   it("wraps a joined label in a `labeled` root", async () => {
     const { host } = await button(`<ui-button labeled="left" color="red" icon="heart" badge="2,048">Like</ui-button>`)
     const root = host.shadowRoot!.firstElementChild!
-    expect(root.className).toBe("ui red left labeled button")
+    expect(root.className).toBe("ui red left labeled button left-labeled")
     expect(root.querySelector("[part~=button]")!.className).toBe("ui red button")
     expect(root.querySelector("[part~=label]")!.textContent).toBe("2,048")
   })
@@ -453,7 +453,7 @@ describe("<ui-buttons> / <ui-or>", () => {
     const group = await ElementFixture.render<DOMElement>(
       `<ui-buttons width="equal"><ui-button>A</ui-button></ui-buttons>`
     )
-    expect(group.shadowRoot!.firstElementChild!.className).toBe("ui equal width buttons")
+    expect(group.shadowRoot!.firstElementChild!.className).toBe("ui equal width buttons equal-width")
   })
 
   it("`equal`:  every button as wide as the widest, the group hugging them", async () => {

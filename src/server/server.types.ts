@@ -61,6 +61,9 @@ export type ServedFile = {
  *   - e.g. `{ prefix: "/worktrees/", dir: content, skip: 1 }`:  `/worktrees/<w>/epics/x.html` is `<content>/epics/x.html`,
  *     for EVERY `<w>` (the page server's epic folder, `PageServer.serveContent()`)
  *   - a catch-all:  at one prefix, it comes after the folders that look the path up as it is (`StaticHandler`)
+ * - `hashed`:  the files whose names carry a build's hash, by their path inside `dir` (`assets/x-Bq3xZ9aP.js`):
+ *   with `caching: "normal"`, kept a year, never asked about again (`StaticHandler`;  `hashedIn()` makes one)
+ *   - only a BUILT folder's:  a name that looks hashed but isn't would be kept stale for a year
  */
 export type Mount = {
   prefix: string
@@ -68,6 +71,34 @@ export type Mount = {
   dotFiles?: boolean
   index?: string | false
   skip?: number
+  hashed?: RegExp
+}
+
+/**
+ * How a `StaticHandler` (and so a `WebServer`) lets browsers keep copies of its files (epic `solid-2-final` P2).
+ * - `"never"`:  `Cache-Control: no-store`:  every load fetches every file;  every worktree's page server, so
+ *   development never sees a stale file;  the default
+ * - `"normal"`:  a file whose name carries a build's hash (`Mount.hashed`) is kept a year, `immutable`;
+ *   everything else, pages above all, is `no-cache`:  checked each time by its `ETag`, a "not modified" answer
+ *   (304, a few hundred bytes) when the browser's copy is current
+ */
+export type Caching = "never" | "normal"
+
+/**
+ * A file name as Vite writes a hashed build's (`[name]-[hash].[ext]`):  `-`, 8 letters, digits, `_` or `-`, then its
+ * extension, e.g. `CodeEngine-DrT7xrSW.js`.
+ * - at least one of the 8 an upper-case letter, a digit or `_`:  a plain word (`ui-settings.js`) never matches;
+ *   a real hash of only lower-case letters (about 1 in 1,500) is merely checked each time instead
+ */
+export const HASHED_NAME = "[^/]+-(?=[\\w-]{0,7}[A-Z0-9_])[\\w-]{8}\\.[a-z0-9]+"
+
+/**
+ * `Mount.hashed` for hashed names (`HASHED_NAME`) anywhere under any of `folders`, each a path inside the mount's
+ * folder (`assets`, `ui/site/_assets`;  `*` for any one folder, e.g. a worktree's name:  `* /ui/site/_assets`).
+ */
+export function hashedIn(...folders: string[]): RegExp {
+  const each = folders.map((folder) => folder.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]+"))
+  return new RegExp(`^(?:${each.join("|")})/(?:[^/]+/)*${HASHED_NAME}$`)
 }
 
 ////////////////

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { flyoutVocabulary } from "spell/ui/components/ui-flyout/UIFlyout.en"
@@ -30,7 +29,7 @@ const ALLOWED_IMPORTANT = 0
 /** Adopt the sheets and render example `name`. */
 function example(name: string): HTMLElement {
   Sheets.adopt([...foundationCSS, buttonCSS, flyoutCSS])
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 /** The static flyout in `root` whose first paragraph (or header) reads `text`. */
@@ -119,7 +118,7 @@ describe("UIFlyout.css examples", () => {
   it("hidden flyouts sit off their edge", () => {
     Sheets.adopt([...foundationCSS, flyoutCSS])
     // laid out (a hidden static flyout has `display: none`, which resolves no transform)
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div><div class="ui left flyout" style="display: flex"></div>` +
         `<div class="ui right flyout" style="display: flex"></div></div>`
     )
@@ -137,7 +136,7 @@ describe("UIFlyout.css examples", () => {
 describe("UIFlyout.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, flyoutCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-flyout-width: 321px"><div class="ui visible flyout"><div class="content">x</div></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.flyout")!).width).toBe("321px")

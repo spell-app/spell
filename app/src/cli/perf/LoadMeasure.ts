@@ -4,11 +4,13 @@ import { PerfBrowser, median, type DomCensus, type LoadTimes, type PerfMetrics }
 /**
  * A page loaded cold, `runs` times, and measured:  the medians, and what the first load fetched.
  * - load:  first paint, largest paint, ready, TTI-like (the last long task before 3s with none), long tasks, TBT-like
- * - bytes:  every script and every file fetched, raw and brotli'd (what a host that compresses would send)
+ * - bytes:  every script and every file fetched, raw and brotli'd (what a host that compresses would send),
+ *   and what really crossed the network (`wireLoaded`:  the servers compress, epic `solid-2-final` P2)
  * - memory:  the heap, DOM nodes and listeners, after load and after a forced garbage collection
  * - the DOM:  elements through shadow roots, custom elements, shadow roots, their adopted sheets
  * - a WARM visit too, once:  the same page again in the same browser, and what it fetched past the browser's cache
- *   (`warmBrotli`), the warm-visit budget's number
+ *   (`warmBrotli`), the warm-visit budget's number:  what crossed the network (a "not modified" answer, its headers),
+ *   its body brotli'd only where Chrome didn't say
  * - the live-reload messages the page got while it loaded (`liveMessages`):  each one used to make the live client
  *   walk every script (epic `solid-2-final` P1)
  */
@@ -50,7 +52,7 @@ export class LoadMeasure {
     await browser.sized()
     const fetched = [...browser.responses.values()]
     const scripts = fetched.filter((response) => response.type === "script")
-    const sum = (list: typeof fetched, key: "raw" | "brotli") =>
+    const sum = (list: typeof fetched, key: "raw" | "brotli" | "wire") =>
       list.reduce((total, response) => total + (response[key] ?? 0), 0)
     const warmBrotli = run === 1 ? await LoadMeasure.warmVisit(browser) : undefined
     const result: LoadRun = {
@@ -60,6 +62,7 @@ export class LoadMeasure {
       requests: fetched.length,
       raw: sum(fetched, "raw"),
       brotliLoaded: sum(fetched, "brotli"),
+      wireLoaded: sum(fetched, "wire"),
       jsRequests: scripts.length,
       jsRaw: sum(scripts, "raw"),
       jsBrotli: sum(scripts, "brotli"),
@@ -110,6 +113,7 @@ export class LoadMeasure {
         requests: first.requests,
         raw: first.raw,
         brotliLoaded: first.brotliLoaded,
+        wireLoaded: first.wireLoaded,
         jsRequests: first.jsRequests,
         jsRaw: first.jsRaw,
         jsBrotli: first.jsBrotli,
@@ -127,7 +131,7 @@ export class LoadMeasure {
    * cache.  NEVER throws:  `undefined` when it won't load again.
    */
   static async warmVisit(browser: PerfBrowser): Promise<number | undefined> {
-    browser.responses.clear()
+    browser.forgetResponses()
     try {
       await browser.load({ quietMs: 1000 })
     } catch {
@@ -136,7 +140,7 @@ export class LoadMeasure {
     await browser.sized()
     return [...browser.responses.values()]
       .filter((response) => !response.fromCache)
-      .reduce((total, response) => total + (response.brotli ?? 0), 0)
+      .reduce((total, response) => total + (response.wire ?? response.brotli ?? 0), 0)
   }
 }
 
@@ -167,10 +171,15 @@ export type LoadRun = {
   requests: number
   raw: number
   brotliLoaded: number
+  /** what crossed the network, headers included:  as the server sent it */
+  wireLoaded: number
   jsRequests: number
   jsRaw: number
   jsBrotli: number
-  /** a warm visit's brotli bytes past the cache:  the first run only */
+  /**
+   * a warm visit's bytes past the cache, as they crossed the network (a "not modified" answer, its headers), brotli'd
+   * only where Chrome didn't say;  the first run only
+   */
   warmBrotli?: number
   afterLoad: PerfMetrics
   afterGC: PerfMetrics

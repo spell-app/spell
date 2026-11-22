@@ -3,7 +3,6 @@ import { page } from "vite-plus/test/browser"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { containerVocabulary } from "spell/ui/components/ui-container/UIContainer.en"
@@ -74,7 +73,7 @@ describe("UIContainer.css examples", () => {
   ])("sizes containers at %ipx (%s)", async (width) => {
     await resize(width)
     Sheets.adopt([...foundationCSS, containerCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const box = root.querySelector<HTMLElement>('.ui.container[class="ui container"]')!
     const outer = box.parentElement!.getBoundingClientRect()
     const inner = box.getBoundingClientRect()
@@ -89,7 +88,7 @@ describe("UIContainer.css examples", () => {
   it("widens wide and grid containers, fills fluid ones", async () => {
     await resize(1180)
     Sheets.adopt([...foundationCSS, containerCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const width = (selector: string) => root.querySelector<HTMLElement>(selector)!.getBoundingClientRect().width
     const page = root.getBoundingClientRect().width
     expect(width(".ui.wide.container")).toBeCloseTo(Math.min(933 * 1.2, page), 0)
@@ -101,7 +100,7 @@ describe("UIContainer.css examples", () => {
 
   it("aligns, justifies and scrolls", () => {
     Sheets.adopt([...foundationCSS, containerCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     expect(style(".ui.center.aligned.container").textAlign).toBe("center")
     expect(style(".ui.right.aligned.container").textAlign).toBe("right")
@@ -125,14 +124,14 @@ describe("UIContainer.css padding, size and inverted", () => {
     ["very padded", "48px"]
   ])("`%s` pads it %s", (classes, padding) => {
     Sheets.adopt([...foundationCSS, containerCSS])
-    const root = Fixture.render(`<div class="ui ${classes} container">A</div>`)
+    const root = Sheets.render(`<div class="ui ${classes} container">A</div>`)
     expect(getComputedStyle(root).paddingTop).toBe(padding)
     expect(getComputedStyle(root).paddingLeft).toBe(padding)
   })
 
   it("sizes its text, and hands its content the dark scheme", () => {
     Sheets.adopt([...foundationCSS, containerCSS])
-    const root = Fixture.render(`<div class="ui large inverted container"><p>A</p></div>`)
+    const root = Sheets.render(`<div class="ui large inverted container"><p>A</p></div>`)
     const style = getComputedStyle(root)
     expect(parseFloat(style.fontSize)).toBeGreaterThan(16)
     expect(style.colorScheme).toBe("dark")
@@ -141,7 +140,7 @@ describe("UIContainer.css padding, size and inverted", () => {
 
   it("leaves a plain container's text and scheme alone", () => {
     Sheets.adopt([...foundationCSS, containerCSS])
-    const root = Fixture.render(`<div style="font-size: 10px"><div class="ui container">A</div></div>`)
+    const root = Sheets.render(`<div style="font-size: 10px"><div class="ui container">A</div></div>`)
     expect(getComputedStyle(root.firstElementChild!).fontSize).toBe("10px")
   })
 })
@@ -159,7 +158,7 @@ describe("UIContainer.css tokens", () => {
   ])("at %ipx the scrolling height is %s, from %s", async (width, em, token) => {
     await resize(width)
     Sheets.adopt([...foundationCSS, containerCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div class="ui scrolling container" style="font-size: 10px">A</div>` +
         `<div class="ui scrolling container" style="font-size: 10px; ${token}: 77px">B</div>`
     )
@@ -172,7 +171,7 @@ describe("UIContainer.css tokens", () => {
 
   it("takes a public token from a wrapper or the container itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, containerCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-container-text-width: 500px"><div class="ui text container">A</div></div>` +
         `<div class="ui text container" style="--ui-container-text-font-ratio: 2">B</div>`
     )

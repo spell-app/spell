@@ -857,7 +857,7 @@ Spell UI's tools, spaces' API server and spell-epic's own server are built from 
 
 | Piece | What it does |
 | --- | --- |
-| `StaticHandler` | folders under URL prefixes (longest prefix wins), one laid over another;  dot files refused;  every answer `Cache-Control: no-store` with an ETag;  hooks to rewrite HTML or transform by extension |
+| `StaticHandler` | folders under URL prefixes (longest prefix wins), one laid over another;  dot files refused;  an ETag on every answer, and its `caching` setting:  `no-store` (a worktree's), or checked each time with "not modified" answers and hashed names kept a year (the main checkout's);  hooks to rewrite HTML or transform by extension |
 | `Router`, `Request`, `Reply` | the part of Express the app's API uses, with Express's names;  one difference:  `:name*` holds the whole rest of the path |
 | `LiveReload` | the websocket that tells pages a file changed;  its page-side client is served at `/api/server/live.js` |
 | `FolderWatch` | a folder watched for changes:  dot files, `node_modules`, lock files and editors' temp files skipped;  a burst reported once it's quiet, if asked |

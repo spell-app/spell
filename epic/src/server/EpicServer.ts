@@ -199,7 +199,7 @@ export class EpicServer {
     // a page not migrated to the engine routes:  its old asset and pack paths from THIS engine
     this.web.files.overlays.push(legacyEnginePath)
     const router = this.web.router
-    router.get(SRV.SERVER_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(this.info))
+    router.get(SRV.SERVER_API, (_request, reply) => reply.noStore().json(this.info))
     // a repo's own address:  its home page, as spell-app's page server's `/`
     for (const repo of this.repos) {
       router.get(repo.prefix, (request, reply, next) =>

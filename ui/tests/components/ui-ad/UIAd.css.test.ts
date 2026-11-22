@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { adVocabulary } from "spell/ui/components/ui-ad/UIAd.en"
@@ -55,7 +54,7 @@ describe("UIAd.css source", () => {
 describe("UIAd.css examples", () => {
   it("sizes each unit and labels test ads", () => {
     Sheets.adopt([...foundationCSS, adCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const medium = root.querySelector<HTMLElement>('.ui[class*="medium rectangle"].ad')!
     expect(getComputedStyle(medium).width).toBe("300px")
     expect(getComputedStyle(medium).height).toBe("250px")
@@ -66,7 +65,7 @@ describe("UIAd.css examples", () => {
 
   it("centres, and falls back to 'Ad' without data-text", () => {
     Sheets.adopt([...foundationCSS, adCSS])
-    const root = Fixture.render(`<div style="width: 800px">${EXAMPLES["./examples/variations.html"]!}</div>`)
+    const root = Sheets.render(`<div style="width: 800px">${EXAMPLES["./examples/variations.html"]!}</div>`)
     const centered = root.querySelector<HTMLElement>(".ui.centered.ad")!
     expect(getComputedStyle(centered).marginLeft).toBe(getComputedStyle(centered).marginRight)
     expect(parseFloat(getComputedStyle(centered).marginLeft)).toBeGreaterThan(0)
@@ -82,7 +81,7 @@ describe("UIAd.css examples", () => {
 describe("UIAd.css tokens", () => {
   it("takes a public token from a wrapper or the ad itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, adCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-ad-test-background: rgb(255, 0, 0)"><div class="ui test button ad"></div></div>` +
         `<div><p>A</p><div class="ui button ad" style="--ui-ad-margin: 7px 0">B</div><p>C</p></div>`
     )

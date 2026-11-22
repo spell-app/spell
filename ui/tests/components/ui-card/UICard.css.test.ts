@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { cardVocabulary } from "spell/ui/components/ui-card/UICard.en"
@@ -39,7 +38,7 @@ function adopt() {
 /** Render example `name` inside a `width`-px wrapper;  returns its root. */
 function example(name: string, width = 1000): HTMLElement {
   adopt()
-  const wrapper = Fixture.render(`<div style="width: ${width}px"></div>`)
+  const wrapper = Sheets.render(`<div style="width: ${width}px"></div>`)
   wrapper.innerHTML = EXAMPLES[`./examples/${name}.html`]!
   return wrapper
 }
@@ -111,7 +110,7 @@ describe("UICard.css source", () => {
 describe("UICard.css examples", () => {
   it.each(Object.keys(EXAMPLES))("lays out every card in %s", (path) => {
     adopt()
-    const root = Fixture.render(`<div style="width: 1000px">${EXAMPLES[path]!}</div>`)
+    const root = Sheets.render(`<div style="width: 1000px">${EXAMPLES[path]!}</div>`)
     const cards = cardsIn(root)
     expect(cards.length).toBeGreaterThan(0)
     for (const card of cards) {

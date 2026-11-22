@@ -1,15 +1,15 @@
-import { createEffect, For } from "solid-js"
+import { For, Show, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { waitUntil } from "spell/util/timing"
 import type { DOMTourElement, TourControl } from "spell/ui/components/ui-tour"
 import { editor } from "spell/app/app/editor"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
-import { isStaticBuild } from "spell/app/app/static/staticBuild"
 
 import { Action } from "./Actions"
 import { Design } from "./Design"
 import { EditorMode } from "./EditorMode"
+import { LazyPiece } from "./LazyPiece"
 
 /****************
  * ### `EditorTours`
@@ -25,8 +25,14 @@ import { EditorMode } from "./EditorMode"
  * - A tour's own `when`s, as Owen asked for them ("when going into edit mode, stop the tour"):
  *   a tour stops when the editor goes to another mode (`<EditorToursLayer>`'s mode watch).
  * - STATIC and instance-free on purpose, as `Inspector` is:  one set of tours per page.
+ * - Their elements, `<EditorToursLayer>`, are drawn the first time a tour starts or is offered:
+ *   from `EditorToursView.tsx` (`EditorTours.views`, a `LazyPiece`), so neither it nor Spell UI's tour family
+ *   loads with the editor.
  ****************/
 export class EditorTours {
+  /** The tours' elements, loaded the first time one starts or is offered:  see `LazyPiece`. */
+  static views = new LazyPiece(() => import("./EditorToursView"))
+
   /** The editor's tours, in the Help menu's order. */
   static get all(): readonly EditorTour[] {
     return EDITOR_TOURS
@@ -57,9 +63,25 @@ export class EditorTours {
    * - NEVER throws.
    */
   static offer(id: EditorTourId): void {
-    void EditorTours.elementFor(id)
-      ?.offerToStart()
+    void EditorTours.drawn(id)
+      .then((tour) => tour?.offerToStart())
       .catch((error: unknown) => console.error(error))
+  }
+
+  /**
+   * Draw every tour's element, the first time, and wait for them (at most 5s):  Tours… reads which were taken.
+   * - Rejects when the tours' view can't load.
+   */
+  static async draw(): Promise<void> {
+    setWanted(true)
+    await EditorTours.views.load()
+    await waitUntil(() => EDITOR_TOURS.every((tour) => EditorTours.elementFor(tour.id)), { timeout: WAIT_FOR_PLACE })
+  }
+
+  /** Draw the tours (`draw()`), then tour `id`'s element. */
+  private static async drawn(id: EditorTourId): Promise<DOMTourElement | undefined> {
+    await EditorTours.draw()
+    return EditorTours.elementFor(id)
   }
 
   /** Go where tour `id`'s steps are, and wait until its first target is drawn (at most 5s);  its element. */
@@ -68,7 +90,7 @@ export class EditorTours {
     tour.prepare()
     const first = tour.steps[0]?.target
     if (first) await waitUntil(() => document.querySelector(`[data-tour="${first}"]`), { timeout: WAIT_FOR_PLACE })
-    return EditorTours.elementFor(id)
+    return EditorTours.drawn(id)
   }
 
   /** The mode a tour started in:  it stops when the editor leaves it. */
@@ -77,55 +99,21 @@ export class EditorTours {
   }
 }
 
-/****************
- * ### `<EditorToursLayer>`
- * The editor's tours, drawn once in the page:  nothing shows until one starts.
- * - Their steps' text in the editor's language (`appTexts`).
- * - Each step with no target shows under the top bar (`--ui-tour-top`, measured as a tour starts).
- * - A running tour stops when the editor goes to another mode.
- ****************/
+/** Has a tour started or been offered, so their elements are drawn (`<EditorToursLayer>`)? */
+const [isWanted, setWanted] = createSignal(false)
+
+/** The tours' elements, loaded on first use:  see `EditorToursView.tsx`. */
+const EditorToursDrawn = EditorTours.views.view("EditorToursLayer")
+
+/**
+ * The editor's tours, drawn once in the page, the first time one starts or is offered:
+ * `<EditorToursLayer>`, from `EditorToursView.tsx`.
+ */
 export function EditorToursLayer(): JSX.Element {
-  let startedIn: string | undefined
-  const started = (event: Event) => {
-    startedIn = EditorTours.modeNow()
-    const bar = document.querySelector(".EditorBarPlace")?.getBoundingClientRect().bottom
-    if (bar) (event.currentTarget as HTMLElement).style.setProperty("--ui-tour-top", `${Math.round(bar) + 12}px`)
-  }
-  createEffect(
-    () => EditorTours.modeNow(),
-    (mode) => {
-      if (!startedIn || mode === startedIn) return
-      startedIn = undefined
-      pageTours()?.stop()
-    }
-  )
   return (
-    <div class="EditorTours">
-      <For each={EDITOR_TOURS}>
-        {(tour) => (
-          <ui-tour
-            id={EditorTours.elementId(tour.id)}
-            name={appTexts.text(tour.name)}
-            summary={appTexts.text(tour.summary)}
-            remember={isStaticBuild ? "" : ON_SERVER}
-            ref={(element: HTMLElement) => element.addEventListener("ui-starting", started)}
-          >
-            <For each={tour.steps}>
-              {(step) => (
-                <ui-tour-step
-                  target={step.target}
-                  wait-for={step.waitFor}
-                  placement={step.placement}
-                  dim={step.dim ? "" : undefined}
-                >
-                  {appTexts.text(step.text)}
-                </ui-tour-step>
-              )}
-            </For>
-          </ui-tour>
-        )}
-      </For>
-    </div>
+    <Show when={isWanted()}>
+      <EditorToursDrawn />
+    </Show>
   )
 }
 
@@ -146,7 +134,8 @@ export function TourMenuItems(): JSX.Element {
         icon="th large"
         title={appTexts.text("toursMenu")}
         onClick={() =>
-          void import("./modals/ToursDialog")
+          void EditorTours.draw()
+            .then(() => import("./modals/ToursDialog"))
             .then(({ openTours }) => openTours())
             .catch((error: unknown) => editor.showError(error))
         }
@@ -192,7 +181,7 @@ export type EditorTourId = "design" | "anatomy" | "inspect"
 const TOUR_ICON = "map signs"
 
 /** `remember`'s value that keeps a tour taken with the person's account. */
-const ON_SERVER = "on server"
+export const ON_SERVER = "on server"
 
 /** How long a tour waits for the editor to draw its first target, in seconds. */
 const WAIT_FOR_PLACE = 5
@@ -201,7 +190,7 @@ const WAIT_FOR_PLACE = 5
  * The page's tour control, which Spell UI's tour family puts on the page as it loads (`UITour.control`).
  * - Read by its symbol, never imported:  this file is in the editor's first bundle, Spell UI loads later.
  */
-function pageTours(): TourControl | undefined {
+export function pageTours(): TourControl | undefined {
   return (globalThis as Record<symbol, TourControl | undefined>)[Symbol.for("spell-ui:tours")]
 }
 
@@ -211,7 +200,7 @@ function intoEdit() {
 }
 
 /** The editor's tours (epic `editor` P40, Q12):  Design mode, Anatomy and Inspect app. */
-const EDITOR_TOURS: readonly EditorTour[] = [
+export const EDITOR_TOURS: readonly EditorTour[] = [
   {
     id: "design",
     name: "tourDesign",

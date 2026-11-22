@@ -1,6 +1,7 @@
 import { onTestFinished } from "vite-plus/test"
 
 import { ClassBuilder } from "spell/ui/elements"
+import { CLASS_PHRASES } from "spell/ui/elements/ClassPhrases"
 import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -39,6 +40,16 @@ export class Sheets {
   }
 
   /**
+   * `Fixture.render(html)`, with each class's phrases joined as the elements write them
+   * (`ClassBuilder.withPhrases()`):  class-grammar markup, as Fomantic writes it, styled by the family sheets.
+   */
+  static render<T extends Element = HTMLElement>(html: string): T {
+    const element = Fixture.render<T>(html)
+    Sheets.joinPhrases(element.parentElement!)
+    return element
+  }
+
+  /**
    * A fixture `<span>` host whose open shadow root adopts `css` and holds `html`.
    * - Stands in for a component element before its class exists.
    */
@@ -48,12 +59,24 @@ export class Sheets {
     return host
   }
 
-  /** Attach an open shadow root to `host` adopting `css`, holding `html`;  returns the shadow root. */
+  /**
+   * Attach an open shadow root to `host` adopting `css`, holding `html`;  returns the shadow root.
+   * - Each class in `html` gets its phrases' joined words, as the elements write them (`ClassBuilder.withPhrases()`):
+   *   `class="ui top attached segment"` is drawn as `ui top attached segment top-attached`.
+   */
   static attach(host: Element, html: string, css: readonly string[]): ShadowRoot {
     const root = host.attachShadow({ mode: "open" })
     root.adoptedStyleSheets = Sheets.from(css)
     root.innerHTML = html
+    Sheets.joinPhrases(root)
     return root
+  }
+
+  /** Every class under `root` with its phrases' joined words (`ClassBuilder.withPhrases()`). */
+  static joinPhrases(root: ParentNode) {
+    for (const element of root.querySelectorAll("[class]")) {
+      element.setAttribute("class", ClassBuilder.withPhrases(element.getAttribute("class")!))
+    }
   }
 
   /** First element of `host`'s shadow root. */
@@ -118,7 +141,7 @@ export class Sheets {
         const text = builder.build({ [spec.name]: value })
         const phrase = text
           .split(" ")
-          .filter((word) => !skip.has(word))
+          .filter((word) => !skip.has(word) && !JOINED.has(word))
           .join(" ")
         if (phrase) phrases.add(phrase)
       }
@@ -126,9 +149,13 @@ export class Sheets {
     return [...phrases]
   }
 
-  /** `css` styles `phrase`:  as a `[class*="..."]` phrase, or every word as a class selector. */
+  /**
+   * `css` styles `phrase`:  as its joined word (`.bottom-attached`), as a substring (`[class*="single line"]`,
+   * a sheet that also styles a page's own markup:  `MARKUP_SHEETS`), or every word as a class selector.
+   */
   static covers(css: string, phrase: string): boolean {
     if (css.includes(`[class*="${phrase}"]`)) return true
+    if (new RegExp(`\\.${phrase.replaceAll(" ", "-")}(?![\\w-])`).test(css)) return true
     return phrase.split(" ").every((word) => new RegExp(`\\.${word}(?![\\w-])`).test(css))
   }
 
@@ -149,3 +176,6 @@ const SAMPLES: Readonly<Record<string, string[]>> = {
   verticalAlignments: ["top", "middle", "bottom"],
   attachments: ["top", "bottom", "left", "right", "top left", "top right", "bottom left", "bottom right"]
 }
+
+/** Every class phrase's joined word, which `classPhrases()` leaves out:  `covers()` looks for it itself. */
+const JOINED = new Set(CLASS_PHRASES.map((phrase) => phrase.replaceAll(" ", "-")))

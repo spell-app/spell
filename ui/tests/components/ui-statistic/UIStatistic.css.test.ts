@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { statisticsVocabulary } from "spell/ui/components/ui-statistic/UIStatistics.en"
@@ -32,7 +31,7 @@ const BASE = 16
 /** Adopt the sheets and render example `name`. */
 function example(name: string): HTMLElement {
   Sheets.adopt([...foundationCSS, partsCSS, statisticCSS])
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 /** Font size in px of the value in `statistic`. */
@@ -130,7 +129,7 @@ describe("UIStatistic.css examples", () => {
 
   it("colours values, and inverts to the dark scheme", () => {
     const root = example("variations")
-    const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
+    const red = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
     const value = root.querySelector(".ui.red.statistic:not(.inverted) > .value")!
     expect(getComputedStyle(value).color).toBe(getComputedStyle(red).color)
     const inverted = root.querySelector<HTMLElement>(".ui.inverted.statistic:not(.red)")!
@@ -153,11 +152,11 @@ describe("UIStatistic.css examples", () => {
       `<div style="width: ${width}px"><div class="ui stackable three statistics">` +
       `<div class="statistic"><div class="value in-statistic">1</div></div>` +
       `<div class="statistic"><div class="value in-statistic">2</div></div></div></div>`
-    const narrow = Fixture.render(markup(400))
+    const narrow = Sheets.render(markup(400))
     const [a, b] = narrow.querySelectorAll<HTMLElement>(".statistic")
     expect(a!.getBoundingClientRect().width).toBeCloseTo(400, 0)
     expect(b!.getBoundingClientRect().top).toBeGreaterThanOrEqual(a!.getBoundingClientRect().bottom - 1)
-    const wide = Fixture.render(markup(900))
+    const wide = Sheets.render(markup(900))
     const [c, d] = wide.querySelectorAll<HTMLElement>(".statistic")
     expect(d!.getBoundingClientRect().top).toBe(c!.getBoundingClientRect().top)
   })
@@ -170,7 +169,7 @@ describe("UIStatistic.css examples", () => {
 describe("UIStatistic.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, statisticCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-statistic-horizontal-spacing: 20px"><div class="ui statistics"><div class="statistic">x</div></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.statistics")!).marginLeft).toBe("-20px")

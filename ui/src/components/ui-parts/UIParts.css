@@ -1272,10 +1272,10 @@
   .ui.attached:not(.top).header {
     border-top: none;
   }
-  .ui[class*="top attached"].header {
+  .ui.top-attached.header {
     border-radius: var(--ui-radius) var(--ui-radius) 0 0;
   }
-  .ui[class*="bottom attached"].header {
+  .ui.bottom-attached.header {
     border-radius: 0 0 var(--ui-radius) var(--ui-radius);
   }
   .ui.seamless.attached:not(.bottom).header {
@@ -1293,13 +1293,13 @@
   }
 
   /* Aligned */
-  .ui[class*="left aligned"].header {
+  .ui.left-aligned.header {
     text-align: left;
   }
-  .ui[class*="right aligned"].header {
+  .ui.right-aligned.header {
     text-align: right;
   }
-  .ui:is(.centered, [class*="center aligned"]).header {
+  .ui:is(.centered, .center-aligned).header {
     text-align: center;
   }
   .ui.justified.header {
@@ -1310,18 +1310,18 @@
     display: inline-block;
     width: 100%;
   }
-  .ui.icon.header:is(.centered, [class*="aligned"], .justified) {
+  .ui.icon.header:is(.centered, .aligned, .justified) {
     display: block;
     margin-inline: auto;
   }
 
   /* Floated */
-  .ui:is(.floated, [class*="left floated"]).header {
+  .ui:is(.floated, .left-floated).header {
     float: left;
     margin-top: 0;
     margin-inline-end: var(--_ui-header-floated-margin);
   }
-  .ui[class*="right floated"].header {
+  .ui.right-floated.header {
     float: right;
     margin-top: 0;
     margin-inline-start: var(--_ui-header-floated-margin);
@@ -1459,49 +1459,49 @@
   }
 
   /* Floated and aligned content (`right floated content`, `center aligned content`).  Fomantic's:
-     - `.ui.card [class*="right floated"]`
-     - `.ui.list .item > [class*="middle aligned"].content`
-     - the Items view's `.image + [class*="middle aligned"].content` */
-  .content[class*="left floated"] {
+     - `.ui.card .right-floated`
+     - `.ui.list .item > .middle-aligned.content`
+     - the Items view's `.image + .middle-aligned.content` */
+  .content.left-floated {
     float: left;
   }
-  .content[class*="right floated"] {
+  .content.right-floated {
     float: right;
   }
-  .content[class*="left aligned"] {
+  .content.left-aligned {
     text-align: left;
   }
-  .content[class*="center aligned"] {
+  .content.center-aligned {
     text-align: center;
   }
-  .content[class*="right aligned"] {
+  .content.right-aligned {
     text-align: right;
   }
   .content.justified {
     text-align: justify;
   }
-  :host(:state(in-item)) > .content[class*="top aligned"],
-  .in-item.content[class*="top aligned"] {
+  :host(:state(in-item)) > .content.top-aligned,
+  .in-item.content.top-aligned {
     align-self: flex-start;
   }
-  :host(:state(in-item)) > .content[class*="middle aligned"],
-  .in-item.content[class*="middle aligned"] {
+  :host(:state(in-item)) > .content.middle-aligned,
+  .in-item.content.middle-aligned {
     align-self: center;
   }
-  :host(:state(in-item)) > .content[class*="bottom aligned"],
-  .in-item.content[class*="bottom aligned"] {
+  :host(:state(in-item)) > .content.bottom-aligned,
+  .in-item.content.bottom-aligned {
     align-self: flex-end;
   }
-  :host(:state(in-list)) > .content[class*="top aligned"],
-  .in-list.content[class*="top aligned"] {
+  :host(:state(in-list)) > .content.top-aligned,
+  .in-list.content.top-aligned {
     vertical-align: top;
   }
-  :host(:state(in-list)) > .content[class*="middle aligned"],
-  .in-list.content[class*="middle aligned"] {
+  :host(:state(in-list)) > .content.middle-aligned,
+  .in-list.content.middle-aligned {
     vertical-align: middle;
   }
-  :host(:state(in-list)) > .content[class*="bottom aligned"],
-  .in-list.content[class*="bottom aligned"] {
+  :host(:state(in-list)) > .content.bottom-aligned,
+  .in-list.content.bottom-aligned {
     vertical-align: bottom;
   }
 

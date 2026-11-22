@@ -383,19 +383,19 @@
   }
 
   /* Static markup:  floated and aligned content (elements carry their own `floated` / `text-align`). */
-  :is(.ui.card, .ui.cards > .card) [class*="left floated"] {
+  :is(.ui.card, .ui.cards > .card) .left-floated {
     float: left;
   }
-  :is(.ui.card, .ui.cards > .card) [class*="right floated"] {
+  :is(.ui.card, .ui.cards > .card) .right-floated {
     float: right;
   }
-  :is(.ui.card, .ui.cards > .card) [class*="left aligned"] {
+  :is(.ui.card, .ui.cards > .card) .left-aligned {
     text-align: left;
   }
-  :is(.ui.card, .ui.cards > .card) [class*="center aligned"] {
+  :is(.ui.card, .ui.cards > .card) .center-aligned {
     text-align: center;
   }
-  :is(.ui.card, .ui.cards > .card) [class*="right aligned"] {
+  :is(.ui.card, .ui.cards > .card) .right-aligned {
     text-align: right;
   }
 

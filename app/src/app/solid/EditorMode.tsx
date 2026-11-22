@@ -198,7 +198,10 @@ export function ModeButtons(props: {
   )
 }
 
-/** One mode's tab in `<ModeButtons>`:  chosen while the page is in `mode`. */
+/**
+ * One mode's tab in `<ModeButtons>`:  chosen while the page is in `mode`.
+ * - Design's loads what draws Design ahead, while the pointer rests on it (`Design.views.ahead`).
+ */
 function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
   const look = () => MODE_LOOKS[props.mode]
   return (
@@ -208,6 +211,9 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
       data-tour={props.mode}
       {...barTooltip(appTexts.text(modeTipFor(props.mode, props.current)))}
       onClick={() => EditorMode.show(props.mode)}
+      ref={(tab: Element) => {
+        if (props.mode === "design") Design.views.ahead(tab)
+      }}
     >
       <span class="ModeText">{appTexts.text(look().text)}</span>
     </ui-item>

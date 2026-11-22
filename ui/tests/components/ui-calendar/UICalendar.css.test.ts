@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { calendarVocabulary } from "spell/ui/components/ui-calendar/UICalendar.en"
@@ -29,7 +28,7 @@ const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
 /** Adopt the calendar sheets and render example `name`. */
 function example(name: string): HTMLElement {
   Sheets.adopt([...foundationCSS, inputCSS, segmentCSS, calendarCSS])
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 /** The static calendar root in `root` whose grid is labelled by title `id`;  `"minutes"`:  the unlabelled one. */
@@ -45,7 +44,7 @@ function styleIn(root: Element, id: string, selector: string, pseudo?: string): 
 
 /** Colour a token resolves to on the page. */
 function color(token: string): string {
-  return getComputedStyle(Fixture.render(`<span style="background: ${token}"></span>`)).backgroundColor
+  return getComputedStyle(Sheets.render(`<span style="background: ${token}"></span>`)).backgroundColor
 }
 
 ////////////////
@@ -155,7 +154,7 @@ describe("UICalendar.css examples", () => {
 
   it("takes a public token from a wrapper (static markup)", () => {
     Sheets.adopt([...foundationCSS, inputCSS, segmentCSS, calendarCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-calendar-cell-padding: 20px">${EXAMPLES["./examples/types.html"]!}</div>`
     )
     expect(styleIn(root, "t-day", "tbody td").paddingTop).toBe("20px")

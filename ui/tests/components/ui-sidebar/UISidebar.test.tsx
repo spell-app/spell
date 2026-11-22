@@ -97,11 +97,11 @@ describe("<ui-sidebar> classes and markup", () => {
     ["", "ui left uncover sidebar"],
     ['position="right"', "ui right uncover sidebar"],
     ['position="top"', "ui top overlay sidebar"],
-    ['width="very thin" transition="scale down"', "ui left scale down very thin sidebar"],
-    ['width="very-wide"', "ui left uncover very wide sidebar"],
-    ['width="4"', "ui left uncover four wide sidebar"],
-    ['width="1/4"', "ui left uncover four wide sidebar"],
-    ['width="50%"', "ui left uncover eight wide sidebar"],
+    ['width="very thin" transition="scale down"', "ui left scale down very thin sidebar very-thin"],
+    ['width="very-wide"', "ui left uncover very wide sidebar very-wide"],
+    ['width="4"', "ui left uncover four wide sidebar four-wide"],
+    ['width="1/4"', "ui left uncover four wide sidebar four-wide"],
+    ['width="50%"', "ui left uncover eight wide sidebar eight-wide"],
     ['transition="slide along" inverted blurring', "ui left slide along blurring inverted sidebar"]
   ])("<ui-sidebar %s>", async (attributes, classes) => {
     const { panel } = await pushable(`<ui-sidebar ${attributes}>${LINKS}</ui-sidebar>`)

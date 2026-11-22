@@ -295,8 +295,8 @@
   :host > .long.line {
     --_placeholder-outdent: var(--_ui-placeholder-long-outdent);
   }
-  .ui.placeholder [class*="very long"].line,
-  :host > [class*="very long"].line {
+  .ui.placeholder .very-long.line,
+  :host > .very-long.line {
     --_placeholder-outdent: var(--_ui-placeholder-very-long-outdent);
   }
   .ui.placeholder .medium.line,
@@ -307,8 +307,8 @@
   :host > .short.line {
     --_placeholder-outdent: var(--_ui-placeholder-short-outdent);
   }
-  .ui.placeholder [class*="very short"].line,
-  :host > [class*="very short"].line {
+  .ui.placeholder .very-short.line,
+  :host > .very-short.line {
     --_placeholder-outdent: var(--_ui-placeholder-very-short-outdent);
   }
 

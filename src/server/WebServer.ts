@@ -4,7 +4,7 @@ import { createServer, type IncomingMessage, type Server } from "node:http"
 import { relative, sep } from "node:path"
 import type { Duplex } from "node:stream"
 
-import type { FileTransform, HtmlTransform, Mount, ServedFile } from "spell/server"
+import type { Caching, FileTransform, HtmlTransform, Mount, ServedFile } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { Guard } from "./Guard"
 import { toListener } from "./listener"
@@ -78,7 +78,7 @@ export class WebServer {
   port = 0
 
   constructor(props: WebServerProps = {}) {
-    const { mounts = [], html = [], transforms, live = false, checkHost = true, onError } = props
+    const { mounts = [], html = [], transforms, caching, live = false, checkHost = true, onError } = props
     this.root = props.root ?? mounts.find((mount) => mount.prefix === "/")?.dir
     this.configure = props.configure
     this.guard = new Guard({ token: props.token })
@@ -86,6 +86,7 @@ export class WebServer {
     this.files = new StaticHandler({
       mounts,
       transforms,
+      caching,
       html: live ? [...html, (page, served) => this.inject(page, served)] : html
     })
     // a page's change carries the page, as served (epic `epic-engine` P40)
@@ -96,12 +97,12 @@ export class WebServer {
     if (this.live) {
       this.upgrade(LIVE_EVENTS, this.live.events)
       top.get(LIVE_SCRIPT, (_request, reply) =>
-        reply.type("text/javascript; charset=utf-8").set("Cache-Control", "no-store").send(liveClientScript())
+        reply.type("text/javascript; charset=utf-8").noStore().send(liveClientScript())
       )
       top.get(LIVE_VERSIONS, (request, reply) => {
         const paths = new URL(request.originalUrl, "http://host").searchParams.getAll("path")
         const answer: LiveVersions = { versions: this.versionsOf(paths), run: this.live?.run, token: this.guard.token }
-        reply.set("Cache-Control", "no-store").json(answer)
+        reply.noStore().json(answer)
       })
     }
     const favicons = new Router()
@@ -222,7 +223,7 @@ export class WebServer {
 
 /**
  * `new WebServer()` props.
- * - `mounts` / `html` / `transforms`:  as `StaticHandler`
+ * - `mounts` / `html` / `transforms` / `caching`:  as `StaticHandler` (`caching` default `"never"`)
  * - `root`:  folder pages are reported relative to;  default the `/` mount's
  * - `live`:  live reload + `window.SPELL_SERVER` on every page
  * - `configure`:  more fields for `window.SPELL_SERVER`
@@ -234,6 +235,7 @@ export type WebServerProps = {
   mounts?: Mount[]
   html?: HtmlTransform[]
   transforms?: Record<string, FileTransform>
+  caching?: Caching
   root?: string
   live?: boolean
   configure?: (served: ServedFile) => Record<string, unknown>

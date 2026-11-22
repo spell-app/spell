@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { UIT } from "spell/ui/core"
@@ -72,7 +71,7 @@ describe("UIFlag.css source", () => {
 describe("UIFlag.css examples", () => {
   it.each(Object.keys(EXAMPLES))("draws every flag in %s as a one-line emoji box", (path) => {
     Sheets.adopt([...foundationCSS, flagCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const flags = root.querySelectorAll<HTMLElement>(".ui.flag")
     expect(flags.length).toBeGreaterThan(0)
     for (const flag of flags) {
@@ -89,7 +88,7 @@ describe("UIFlag.css examples", () => {
 
   it("sizes on Fomantic's flag ladder, relative to the surrounding text", () => {
     Sheets.adopt([...foundationCSS, flagCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const base = parseFloat(getComputedStyle(root.querySelector(".ui.small.flag")!.parentElement!).fontSize)
     const ratio = (size: string) =>
       parseFloat(getComputedStyle(root.querySelector(`.ui.${size}.flag`)!).fontSize) / base
@@ -99,7 +98,7 @@ describe("UIFlag.css examples", () => {
 
   it("autosizes an unsized flag to the text around it, on its baseline", () => {
     Sheets.adopt([...foundationCSS, flagCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     for (const flag of root.querySelectorAll<HTMLElement>('.ui.flag[class="ui flag"]')) {
       const style = getComputedStyle(flag)
       expect(style.fontSize).toBe(getComputedStyle(flag.parentElement!).fontSize)
@@ -115,7 +114,7 @@ describe("UIFlag.css examples", () => {
 describe("UIFlag.css in shadow roots", () => {
   it("renders the host as contents and ignores a parent's scale", () => {
     Sheets.adopt(foundationCSS)
-    const wrapper = Fixture.render(`<div class="ui-huge" style="font-size: 20px"><span></span><span></span></div>`)
+    const wrapper = Sheets.render(`<div class="ui-huge" style="font-size: 20px"><span></span><span></span></div>`)
     const [plain, large] = [...wrapper.children].map((host, index) => {
       const size = index ? "large " : ""
       Sheets.attach(host, `<span class="ui ${size}flag" part="flag" role="img" aria-label="France">🇫🇷</span>`, [
@@ -181,7 +180,7 @@ describe("FLAG_ALIASES / UIT.SpecialFlags", () => {
 describe("UIFlag.css tokens", () => {
   it("takes a public token from a wrapper or the flag itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, flagCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-flag-distance: 10px"><span class="ui flag">🇫🇷</span></div>` +
         `<span style="--ui-flag-line-height: 3px" class="ui flag">🇫🇷</span>`
     )

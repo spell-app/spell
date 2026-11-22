@@ -51,17 +51,17 @@ describe("<ui-input> classes", () => {
     ['fluid="yes"', "ui fluid input"],
     ["disabled", "ui disabled input"],
     ['icon="search"', "ui icon input"],
-    ['icon="search" icon-position="left"', "ui left icon input"],
+    ['icon="search" icon-position="left"', "ui left icon input left-icon"],
     ["loading", "ui loading icon input"],
     ['label="http://"', "ui labeled input"],
-    ['labeled="right" label="kg"', "ui right labeled input"],
-    ['labeled="corner" label="asterisk"', "ui corner labeled input"],
+    ['labeled="right" label="kg"', "ui right labeled input right-labeled"],
+    ['labeled="corner" label="asterisk"', "ui corner labeled input corner-labeled"],
     [
       'labeled="left corner" label="asterisk" icon="user" icon-position="left"',
-      "ui left icon left corner labeled input"
+      "ui left icon left corner labeled input corner-labeled left-corner left-corner-labeled left-icon"
     ],
     ["action", "ui action input"],
-    ['action="left"', "ui left action input"]
+    ['action="left"', "ui left action input left-action"]
   ])("<ui-input %s>", async (attributes, classes) => {
     const { root, control } = await input(`<ui-input ${attributes} aria-label="Field"></ui-input>`)
     expect(root.localName).toBe("div")

@@ -26,8 +26,13 @@ export async function serveHandler(handler: Handler): Promise<Served> {
   }
 }
 
-/** An answer:  status, headers, body as text. */
-export type Answer = { status: number; headers: Record<string, string | string[] | undefined>; text: string }
+/** An answer:  status, headers, body as text, and as it came (`bytes`:  a compressed body stays compressed). */
+export type Answer = {
+  status: number
+  headers: Record<string, string | string[] | undefined>
+  text: string
+  bytes: Buffer
+}
 
 /**
  * Send `method` `path` (sent exactly as written) to `port`, with `body` and `headers`.
@@ -51,9 +56,10 @@ export function ask(
       (response) => {
         const chunks: Buffer[] = []
         response.on("data", (chunk: Buffer) => chunks.push(chunk))
-        response.on("end", () =>
-          done({ status: response.statusCode ?? 0, headers: response.headers, text: Buffer.concat(chunks).toString() })
-        )
+        response.on("end", () => {
+          const bytes = Buffer.concat(chunks)
+          done({ status: response.statusCode ?? 0, headers: response.headers, text: bytes.toString(), bytes })
+        })
       }
     )
     sent.on("error", fail)

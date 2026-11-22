@@ -141,7 +141,7 @@ describe("<ui-form> classes", () => {
     ['size="large"', "ui large form"],
     ['size="medium"', "ui form"],
     ['state="warning"', "ui warning form"],
-    ["equal-width inverted", "ui equal width inverted form"],
+    ["equal-width inverted", "ui equal width inverted form equal-width"],
     ['loading disabled="no" unstackable="yes"', "ui loading unstackable form"]
   ])("<ui-form %s>", async (attributes, classes) => {
     const { root } = await form(`<ui-form ${attributes}><form></form></ui-form>`)
@@ -151,9 +151,9 @@ describe("<ui-form> classes", () => {
   it.each([
     ["", "field"],
     ['state="error" inline required', "error inline required field"],
-    ['width="4"', "four wide field"],
-    ['width="1/2"', "eight wide field"],
-    ['width="25%" disabled', "disabled four wide field"]
+    ['width="4"', "four wide field four-wide"],
+    ['width="1/2"', "eight wide field eight-wide"],
+    ['width="25%" disabled', "disabled four wide field four-wide"]
   ])("<ui-field %s>", async (attributes, classes) => {
     const host = await ElementFixture.render(`<ui-field ${attributes}></ui-field>`)
     expect(host.shadowRoot!.querySelector("[part~=field]")!.className).toBe(classes)
@@ -163,7 +163,7 @@ describe("<ui-form> classes", () => {
   it.each([
     ["", "fields"],
     ['widths="2"', "two fields"],
-    ['widths="equal"', "equal width fields"],
+    ['widths="equal"', "equal width fields equal-width"],
     ["inline required", "inline required fields"],
     ['grouped state="info" unstackable', "info grouped unstackable fields"]
   ])("<ui-fields %s>", async (attributes, classes) => {
@@ -292,7 +292,7 @@ describe("<ui-fields> equal", () => {
         `</ui-fields></form></ui-form></div>`
     )
     const fields = host.querySelector<HTMLElement>("ui-fields")!
-    expect(fields.shadowRoot!.querySelector("[part~=fields]")!.className).toBe("equal width fields")
+    expect(fields.shadowRoot!.querySelector("[part~=fields]")!.className).toBe("equal width fields equal-width")
     const widths = [...fields.querySelectorAll("ui-field")].map((field) =>
       Math.round(field.shadowRoot!.firstElementChild!.getBoundingClientRect().width)
     )

@@ -135,10 +135,10 @@
 
 @layer ui.components.dimmer.variations {
   /* ## Aligned:  the content at the top or bottom. */
-  .ui[class*="top aligned"].dimmer {
+  .ui.top-aligned.dimmer {
     justify-content: flex-start;
   }
-  .ui[class*="bottom aligned"].dimmer {
+  .ui.bottom-aligned.dimmer {
     justify-content: flex-end;
   }
 
@@ -173,7 +173,7 @@
   .ui.light.dimmer {
     background: oklch(0 0 0 / 0.45);
   }
-  .ui[class*="very light"].dimmer {
+  .ui.very-light.dimmer {
     background: oklch(0 0 0 / 0.25);
   }
 
@@ -193,7 +193,7 @@
   .ui.light.inverted.dimmer {
     background: oklch(1 0 0 / 0.45);
   }
-  .ui[class*="very light"].inverted.dimmer {
+  .ui.very-light.inverted.dimmer {
     background: oklch(1 0 0 / 0.25);
   }
 

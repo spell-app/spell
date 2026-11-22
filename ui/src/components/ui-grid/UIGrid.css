@@ -292,82 +292,82 @@
 
 @layer ui.components.grid.variations {
   /* Column count (grid or row):  columns share the width;  `doubling` uses the halved counts. */
-  .ui[class*="one column"]:is(.grid, .row) {
+  .ui.one-column:is(.grid, .row) {
     --_grid-columns: 1;
     --_grid-columns-tablet: 1;
     --_grid-columns-mobile: 1;
   }
-  .ui[class*="two column"]:is(.grid, .row) {
+  .ui.two-column:is(.grid, .row) {
     --_grid-columns: 2;
     --_grid-columns-tablet: 1;
     --_grid-columns-mobile: 1;
   }
-  .ui[class*="three column"]:is(.grid, .row) {
+  .ui.three-column:is(.grid, .row) {
     --_grid-columns: 3;
     --_grid-columns-tablet: 2;
     --_grid-columns-mobile: 2;
   }
-  .ui[class*="four column"]:is(.grid, .row) {
+  .ui.four-column:is(.grid, .row) {
     --_grid-columns: 4;
     --_grid-columns-tablet: 2;
     --_grid-columns-mobile: 2;
   }
-  .ui[class*="five column"]:is(.grid, .row) {
+  .ui.five-column:is(.grid, .row) {
     --_grid-columns: 5;
     --_grid-columns-tablet: 3;
     --_grid-columns-mobile: 2;
   }
-  .ui[class*="six column"]:is(.grid, .row) {
+  .ui.six-column:is(.grid, .row) {
     --_grid-columns: 6;
     --_grid-columns-tablet: 3;
     --_grid-columns-mobile: 2;
   }
-  .ui[class*="seven column"]:is(.grid, .row) {
+  .ui.seven-column:is(.grid, .row) {
     --_grid-columns: 7;
     --_grid-columns-tablet: 3;
     --_grid-columns-mobile: 2;
   }
-  .ui[class*="eight column"]:is(.grid, .row) {
+  .ui.eight-column:is(.grid, .row) {
     --_grid-columns: 8;
     --_grid-columns-tablet: 4;
     --_grid-columns-mobile: 2;
   }
-  .ui[class*="nine column"]:is(.grid, .row) {
+  .ui.nine-column:is(.grid, .row) {
     --_grid-columns: 9;
     --_grid-columns-tablet: 4;
     --_grid-columns-mobile: 3;
   }
-  .ui[class*="ten column"]:is(.grid, .row) {
+  .ui.ten-column:is(.grid, .row) {
     --_grid-columns: 10;
     --_grid-columns-tablet: 5;
     --_grid-columns-mobile: 3;
   }
-  .ui[class*="eleven column"]:is(.grid, .row) {
+  .ui.eleven-column:is(.grid, .row) {
     --_grid-columns: 11;
     --_grid-columns-tablet: 5;
     --_grid-columns-mobile: 3;
   }
-  .ui[class*="twelve column"]:is(.grid, .row) {
+  .ui.twelve-column:is(.grid, .row) {
     --_grid-columns: 12;
     --_grid-columns-tablet: 6;
     --_grid-columns-mobile: 3;
   }
-  .ui[class*="thirteen column"]:is(.grid, .row) {
+  .ui.thirteen-column:is(.grid, .row) {
     --_grid-columns: 13;
     --_grid-columns-tablet: 6;
     --_grid-columns-mobile: 3;
   }
-  .ui[class*="fourteen column"]:is(.grid, .row) {
+  .ui.fourteen-column:is(.grid, .row) {
     --_grid-columns: 14;
     --_grid-columns-tablet: 7;
     --_grid-columns-mobile: 4;
   }
-  .ui[class*="fifteen column"]:is(.grid, .row) {
+  .ui.fifteen-column:is(.grid, .row) {
     --_grid-columns: 15;
     --_grid-columns-tablet: 7;
     --_grid-columns-mobile: 4;
   }
-  .ui[class*="sixteen column"]:is(.grid, .row) {
+  .ui.sixteen-column:is(.grid, .row) {
     --_grid-columns: 16;
     --_grid-columns-tablet: 8;
     --_grid-columns-mobile: 4;
@@ -378,184 +378,142 @@
    * - The bare rules exclude (in `:where()`, so the device rules still out-rank them) `N wide <device>` classes
    *   (the substring matches those too), so `width="4" width-mobile="16"` is 4 wide outside the mobile range.
    */
-  .ui[class*="one wide"]:where(
-      :not(
-        [class*="one wide mobile"],
-        [class*="one wide tablet"],
-        [class*="one wide computer"],
-        [class*="one wide large screen"],
-        [class*="one wide widescreen"]
-      )
+  .ui.one-wide:where(
+      :not(.one-wide-mobile, .one-wide-tablet, .one-wide-computer, .one-wide-large-screen, .one-wide-widescreen)
     ).column {
     --_grid-wide: 1;
   }
-  .ui[class*="two wide"]:where(
-      :not(
-        [class*="two wide mobile"],
-        [class*="two wide tablet"],
-        [class*="two wide computer"],
-        [class*="two wide large screen"],
-        [class*="two wide widescreen"]
-      )
+  .ui.two-wide:where(
+      :not(.two-wide-mobile, .two-wide-tablet, .two-wide-computer, .two-wide-large-screen, .two-wide-widescreen)
     ).column {
     --_grid-wide: 2;
   }
-  .ui[class*="three wide"]:where(
+  .ui.three-wide:where(
       :not(
-        [class*="three wide mobile"],
-        [class*="three wide tablet"],
-        [class*="three wide computer"],
-        [class*="three wide large screen"],
-        [class*="three wide widescreen"]
+        .three-wide-mobile,
+        .three-wide-tablet,
+        .three-wide-computer,
+        .three-wide-large-screen,
+        .three-wide-widescreen
       )
     ).column {
     --_grid-wide: 3;
   }
-  .ui[class*="four wide"]:where(
-      :not(
-        [class*="four wide mobile"],
-        [class*="four wide tablet"],
-        [class*="four wide computer"],
-        [class*="four wide large screen"],
-        [class*="four wide widescreen"]
-      )
+  .ui.four-wide:where(
+      :not(.four-wide-mobile, .four-wide-tablet, .four-wide-computer, .four-wide-large-screen, .four-wide-widescreen)
     ).column {
     --_grid-wide: 4;
   }
-  .ui[class*="five wide"]:where(
-      :not(
-        [class*="five wide mobile"],
-        [class*="five wide tablet"],
-        [class*="five wide computer"],
-        [class*="five wide large screen"],
-        [class*="five wide widescreen"]
-      )
+  .ui.five-wide:where(
+      :not(.five-wide-mobile, .five-wide-tablet, .five-wide-computer, .five-wide-large-screen, .five-wide-widescreen)
     ).column {
     --_grid-wide: 5;
   }
-  .ui[class*="six wide"]:where(
-      :not(
-        [class*="six wide mobile"],
-        [class*="six wide tablet"],
-        [class*="six wide computer"],
-        [class*="six wide large screen"],
-        [class*="six wide widescreen"]
-      )
+  .ui.six-wide:where(
+      :not(.six-wide-mobile, .six-wide-tablet, .six-wide-computer, .six-wide-large-screen, .six-wide-widescreen)
     ).column {
     --_grid-wide: 6;
   }
-  .ui[class*="seven wide"]:where(
+  .ui.seven-wide:where(
       :not(
-        [class*="seven wide mobile"],
-        [class*="seven wide tablet"],
-        [class*="seven wide computer"],
-        [class*="seven wide large screen"],
-        [class*="seven wide widescreen"]
+        .seven-wide-mobile,
+        .seven-wide-tablet,
+        .seven-wide-computer,
+        .seven-wide-large-screen,
+        .seven-wide-widescreen
       )
     ).column {
     --_grid-wide: 7;
   }
-  .ui[class*="eight wide"]:where(
+  .ui.eight-wide:where(
       :not(
-        [class*="eight wide mobile"],
-        [class*="eight wide tablet"],
-        [class*="eight wide computer"],
-        [class*="eight wide large screen"],
-        [class*="eight wide widescreen"]
+        .eight-wide-mobile,
+        .eight-wide-tablet,
+        .eight-wide-computer,
+        .eight-wide-large-screen,
+        .eight-wide-widescreen
       )
     ).column {
     --_grid-wide: 8;
   }
-  .ui[class*="nine wide"]:where(
-      :not(
-        [class*="nine wide mobile"],
-        [class*="nine wide tablet"],
-        [class*="nine wide computer"],
-        [class*="nine wide large screen"],
-        [class*="nine wide widescreen"]
-      )
+  .ui.nine-wide:where(
+      :not(.nine-wide-mobile, .nine-wide-tablet, .nine-wide-computer, .nine-wide-large-screen, .nine-wide-widescreen)
     ).column {
     --_grid-wide: 9;
   }
-  .ui[class*="ten wide"]:where(
-      :not(
-        [class*="ten wide mobile"],
-        [class*="ten wide tablet"],
-        [class*="ten wide computer"],
-        [class*="ten wide large screen"],
-        [class*="ten wide widescreen"]
-      )
+  .ui.ten-wide:where(
+      :not(.ten-wide-mobile, .ten-wide-tablet, .ten-wide-computer, .ten-wide-large-screen, .ten-wide-widescreen)
     ).column {
     --_grid-wide: 10;
   }
-  .ui[class*="eleven wide"]:where(
+  .ui.eleven-wide:where(
       :not(
-        [class*="eleven wide mobile"],
-        [class*="eleven wide tablet"],
-        [class*="eleven wide computer"],
-        [class*="eleven wide large screen"],
-        [class*="eleven wide widescreen"]
+        .eleven-wide-mobile,
+        .eleven-wide-tablet,
+        .eleven-wide-computer,
+        .eleven-wide-large-screen,
+        .eleven-wide-widescreen
       )
     ).column {
     --_grid-wide: 11;
   }
-  .ui[class*="twelve wide"]:where(
+  .ui.twelve-wide:where(
       :not(
-        [class*="twelve wide mobile"],
-        [class*="twelve wide tablet"],
-        [class*="twelve wide computer"],
-        [class*="twelve wide large screen"],
-        [class*="twelve wide widescreen"]
+        .twelve-wide-mobile,
+        .twelve-wide-tablet,
+        .twelve-wide-computer,
+        .twelve-wide-large-screen,
+        .twelve-wide-widescreen
       )
     ).column {
     --_grid-wide: 12;
   }
-  .ui[class*="thirteen wide"]:where(
+  .ui.thirteen-wide:where(
       :not(
-        [class*="thirteen wide mobile"],
-        [class*="thirteen wide tablet"],
-        [class*="thirteen wide computer"],
-        [class*="thirteen wide large screen"],
-        [class*="thirteen wide widescreen"]
+        .thirteen-wide-mobile,
+        .thirteen-wide-tablet,
+        .thirteen-wide-computer,
+        .thirteen-wide-large-screen,
+        .thirteen-wide-widescreen
       )
     ).column {
     --_grid-wide: 13;
   }
-  .ui[class*="fourteen wide"]:where(
+  .ui.fourteen-wide:where(
       :not(
-        [class*="fourteen wide mobile"],
-        [class*="fourteen wide tablet"],
-        [class*="fourteen wide computer"],
-        [class*="fourteen wide large screen"],
-        [class*="fourteen wide widescreen"]
+        .fourteen-wide-mobile,
+        .fourteen-wide-tablet,
+        .fourteen-wide-computer,
+        .fourteen-wide-large-screen,
+        .fourteen-wide-widescreen
       )
     ).column {
     --_grid-wide: 14;
   }
-  .ui[class*="fifteen wide"]:where(
+  .ui.fifteen-wide:where(
       :not(
-        [class*="fifteen wide mobile"],
-        [class*="fifteen wide tablet"],
-        [class*="fifteen wide computer"],
-        [class*="fifteen wide large screen"],
-        [class*="fifteen wide widescreen"]
+        .fifteen-wide-mobile,
+        .fifteen-wide-tablet,
+        .fifteen-wide-computer,
+        .fifteen-wide-large-screen,
+        .fifteen-wide-widescreen
       )
     ).column {
     --_grid-wide: 15;
   }
-  .ui[class*="sixteen wide"]:where(
+  .ui.sixteen-wide:where(
       :not(
-        [class*="sixteen wide mobile"],
-        [class*="sixteen wide tablet"],
-        [class*="sixteen wide computer"],
-        [class*="sixteen wide large screen"],
-        [class*="sixteen wide widescreen"]
+        .sixteen-wide-mobile,
+        .sixteen-wide-tablet,
+        .sixteen-wide-computer,
+        .sixteen-wide-large-screen,
+        .sixteen-wide-widescreen
       )
     ).column {
     --_grid-wide: 16;
   }
   /* Equal width:  columns share the line;  sized ones keep their width. */
-  .ui[class*="equal width"]:is(.grid, .row) {
+  .ui.equal-width:is(.grid, .row) {
     --_grid-grow: 1;
   }
   .ui.wide.column {
@@ -577,7 +535,7 @@
   .ui.relaxed:is(.grid, .row) {
     --_grid-gutter: var(--_ui-grid-relaxed-gutter);
   }
-  .ui[class*="very relaxed"]:is(.grid, .row) {
+  .ui.very-relaxed:is(.grid, .row) {
     --_grid-gutter: var(--_ui-grid-very-relaxed-gutter);
   }
 
@@ -586,7 +544,7 @@
     --_grid-gutter: var(--_ui-grid-compact-gutter);
     --_grid-row-spacing: var(--_ui-grid-compact-row-spacing);
   }
-  .ui[class*="very compact"].grid {
+  .ui.very-compact.grid {
     --_grid-gutter: var(--_ui-grid-very-compact-gutter);
     --_grid-row-spacing: var(--_ui-grid-very-compact-row-spacing);
   }
@@ -595,41 +553,41 @@
   .ui.padded.grid:not(.vertically, .horizontally) {
     margin: 0;
   }
-  .ui[class*="horizontally padded"].grid {
+  .ui.horizontally-padded.grid {
     margin-inline: 0;
   }
-  .ui[class*="vertically padded"].grid {
+  .ui.vertically-padded.grid {
     margin-block: 0;
   }
 
   /* Floated:  pushed to the start / end of the line. */
-  .ui[class*="left floated"].column {
+  .ui.left-floated.column {
     margin-right: auto;
   }
-  .ui[class*="right floated"].column {
+  .ui.right-floated.column {
     margin-left: auto;
   }
 
   /* Attached:  no gutter on the attached side. */
-  .ui[class*="left attached"].column {
+  .ui.left-attached.column {
     padding-right: 0;
   }
-  .ui[class*="right attached"].column {
+  .ui.right-attached.column {
     padding-left: 0;
   }
 
   /* Divided:  a hairline between the columns of each line. */
-  .ui.divided:is(.grid, .row):not([class*="vertically divided"]) {
+  .ui.divided:is(.grid, .row):not(.vertically-divided) {
     --_grid-column-divider: calc(var(--_ui-grid-divider-width) * -1) 0 0 0 var(--_grid-divider-color);
     --_grid-first-divider: none;
     --_grid-cells: 1;
   }
-  .ui[class*="horizontally padded"].divided.grid,
+  .ui.horizontally-padded.divided.grid,
   .ui.padded.divided.grid:not(.vertically, .horizontally) {
     width: 100%;
   }
   /* Vertically divided:  a hairline between rows, inset by the gutter;  columns trade padding for margin. */
-  .ui[class*="vertically divided"].grid {
+  .ui.vertically-divided.grid {
     --_grid-vdivided: 1;
     --_grid-column-margin: calc(var(--_grid-row-spacing) / 2);
     --_grid-column-pad-block: 0;
@@ -670,23 +628,23 @@
   .ui.relaxed.celled.grid {
     --_grid-cell-padding: var(--_ui-grid-celled-relaxed-padding);
   }
-  .ui[class*="very relaxed"].celled.grid {
+  .ui.very-relaxed.celled.grid {
     --_grid-cell-padding: var(--_ui-grid-celled-very-relaxed-padding);
   }
   .ui.compact.relaxed.celled.grid {
     --_grid-cell-padding: calc(var(--_ui-grid-celled-relaxed-padding) / 2);
   }
-  .ui.compact[class*="very relaxed"].celled.grid {
+  .ui.compact.very-relaxed.celled.grid {
     --_grid-cell-padding: calc(var(--_ui-grid-celled-very-relaxed-padding) / 2);
   }
-  .ui[class*="very compact"].relaxed.celled.grid {
+  .ui.very-compact.relaxed.celled.grid {
     --_grid-cell-padding: calc(var(--_ui-grid-celled-relaxed-padding) / 4);
   }
-  .ui[class*="very compact"][class*="very relaxed"].celled.grid {
+  .ui.very-compact.very-relaxed.celled.grid {
     --_grid-cell-padding: calc(var(--_ui-grid-celled-very-relaxed-padding) / 4);
   }
   /* Internally celled:  no outer box, no rule above the first row. */
-  .ui[class*="internally celled"].grid {
+  .ui.internally-celled.grid {
     --_grid-first-row-divider: none;
     margin: 0;
     box-shadow: none;
@@ -709,48 +667,48 @@
   }
 
   /* Vertically aligned:  columns sit at the top / middle / bottom of the line. */
-  .ui[class*="top aligned"]:is(.grid, .row) {
+  .ui.top-aligned:is(.grid, .row) {
     --_grid-align-self: flex-start;
   }
-  .ui[class*="middle aligned"]:is(.grid, .row) {
+  .ui.middle-aligned:is(.grid, .row) {
     --_grid-align-self: center;
   }
-  .ui[class*="bottom aligned"]:is(.grid, .row) {
+  .ui.bottom-aligned:is(.grid, .row) {
     --_grid-align-self: flex-end;
   }
-  .ui[class*="top aligned"].column:not(.grid, .row) {
+  .ui.top-aligned.column:not(.grid, .row) {
     align-self: flex-start;
   }
-  .ui[class*="middle aligned"].column:not(.grid, .row) {
+  .ui.middle-aligned.column:not(.grid, .row) {
     align-self: center;
   }
-  .ui[class*="bottom aligned"].column:not(.grid, .row) {
+  .ui.bottom-aligned.column:not(.grid, .row) {
     align-self: flex-end;
   }
 
   /* Text aligned:  a grid / row aligns its columns' text;  a column its own. */
-  .ui[class*="left aligned"]:is(.grid, .row) {
+  .ui.left-aligned:is(.grid, .row) {
     --_grid-text-align: left;
   }
-  .ui[class*="center aligned"]:is(.grid, .row) {
+  .ui.center-aligned:is(.grid, .row) {
     --_grid-text-align: center;
   }
-  .ui[class*="center aligned"].grid {
+  .ui.center-aligned.grid {
     --_grid-justify: center;
   }
-  .ui[class*="right aligned"]:is(.grid, .row) {
+  .ui.right-aligned:is(.grid, .row) {
     --_grid-text-align: right;
   }
   .ui.justified:is(.grid, .row) {
     --_grid-text-align: justify;
   }
-  .ui[class*="left aligned"].column:not(.grid, .row) {
+  .ui.left-aligned.column:not(.grid, .row) {
     text-align: left;
   }
-  .ui[class*="center aligned"].column:not(.grid, .row) {
+  .ui.center-aligned.column:not(.grid, .row) {
     text-align: center;
   }
-  .ui[class*="right aligned"].column:not(.grid, .row) {
+  .ui.right-aligned.column:not(.grid, .row) {
     text-align: right;
   }
   .ui.justified.column:not(.grid, .row) {
@@ -859,12 +817,12 @@
       .ui.grid:not(.stack-with-page) {
         --_grid-range: mobile;
       }
-      .ui[class*="mobile reversed"].grid:not(.stack-with-page) {
+      .ui.mobile-reversed.grid:not(.stack-with-page) {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="mobile vertically reversed"].grid:not(.stack-with-page),
-      .ui.stackable[class*="mobile reversed"].grid:not(.stack-with-page) {
+      .ui.mobile-vertically-reversed.grid:not(.stack-with-page),
+      .ui.stackable.mobile-reversed.grid:not(.stack-with-page) {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -873,12 +831,12 @@
       .ui.grid.stack-with-container {
         --_grid-range: mobile;
       }
-      .ui[class*="mobile reversed"].grid.stack-with-container {
+      .ui.mobile-reversed.grid.stack-with-container {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="mobile vertically reversed"].grid.stack-with-container,
-      .ui.stackable[class*="mobile reversed"].grid.stack-with-container {
+      .ui.mobile-vertically-reversed.grid.stack-with-container,
+      .ui.stackable.mobile-reversed.grid.stack-with-container {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -890,12 +848,12 @@
       .ui.grid:not(.stack-with-container) {
         --_grid-range: mobile;
       }
-      .ui[class*="mobile reversed"].grid:not(.stack-with-container) {
+      .ui.mobile-reversed.grid:not(.stack-with-container) {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="mobile vertically reversed"].grid:not(.stack-with-container),
-      .ui.stackable[class*="mobile reversed"].grid:not(.stack-with-container) {
+      .ui.mobile-vertically-reversed.grid:not(.stack-with-container),
+      .ui.stackable.mobile-reversed.grid:not(.stack-with-container) {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -904,12 +862,12 @@
       .ui.grid.stack-with-page {
         --_grid-range: mobile;
       }
-      .ui[class*="mobile reversed"].grid.stack-with-page {
+      .ui.mobile-reversed.grid.stack-with-page {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="mobile vertically reversed"].grid.stack-with-page,
-      .ui.stackable[class*="mobile reversed"].grid.stack-with-page {
+      .ui.mobile-vertically-reversed.grid.stack-with-page,
+      .ui.stackable.mobile-reversed.grid.stack-with-page {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -922,11 +880,11 @@
       .ui.grid:not(.stack-with-page) {
         --_grid-range: tablet;
       }
-      .ui[class*="tablet reversed"].grid:not(.stack-with-page) {
+      .ui.tablet-reversed.grid:not(.stack-with-page) {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="tablet vertically reversed"].grid:not(.stack-with-page) {
+      .ui.tablet-vertically-reversed.grid:not(.stack-with-page) {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -935,11 +893,11 @@
       .ui.grid.stack-with-container {
         --_grid-range: tablet;
       }
-      .ui[class*="tablet reversed"].grid.stack-with-container {
+      .ui.tablet-reversed.grid.stack-with-container {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="tablet vertically reversed"].grid.stack-with-container {
+      .ui.tablet-vertically-reversed.grid.stack-with-container {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -951,11 +909,11 @@
       .ui.grid:not(.stack-with-container) {
         --_grid-range: tablet;
       }
-      .ui[class*="tablet reversed"].grid:not(.stack-with-container) {
+      .ui.tablet-reversed.grid:not(.stack-with-container) {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="tablet vertically reversed"].grid:not(.stack-with-container) {
+      .ui.tablet-vertically-reversed.grid:not(.stack-with-container) {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -964,11 +922,11 @@
       .ui.grid.stack-with-page {
         --_grid-range: tablet;
       }
-      .ui[class*="tablet reversed"].grid.stack-with-page {
+      .ui.tablet-reversed.grid.stack-with-page {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="tablet vertically reversed"].grid.stack-with-page {
+      .ui.tablet-vertically-reversed.grid.stack-with-page {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -981,11 +939,11 @@
       .ui.grid:not(.stack-with-page) {
         --_grid-range: computer;
       }
-      .ui[class*="computer reversed"].grid:not(.stack-with-page) {
+      .ui.computer-reversed.grid:not(.stack-with-page) {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="computer vertically reversed"].grid:not(.stack-with-page) {
+      .ui.computer-vertically-reversed.grid:not(.stack-with-page) {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -994,11 +952,11 @@
       .ui.grid.stack-with-container {
         --_grid-range: computer;
       }
-      .ui[class*="computer reversed"].grid.stack-with-container {
+      .ui.computer-reversed.grid.stack-with-container {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="computer vertically reversed"].grid.stack-with-container {
+      .ui.computer-vertically-reversed.grid.stack-with-container {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -1010,11 +968,11 @@
       .ui.grid:not(.stack-with-container) {
         --_grid-range: computer;
       }
-      .ui[class*="computer reversed"].grid:not(.stack-with-container) {
+      .ui.computer-reversed.grid:not(.stack-with-container) {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="computer vertically reversed"].grid:not(.stack-with-container) {
+      .ui.computer-vertically-reversed.grid:not(.stack-with-container) {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -1023,11 +981,11 @@
       .ui.grid.stack-with-page {
         --_grid-range: computer;
       }
-      .ui[class*="computer reversed"].grid.stack-with-page {
+      .ui.computer-reversed.grid.stack-with-page {
         --_grid-reverse: 1;
         flex-direction: row-reverse;
       }
-      .ui[class*="computer vertically reversed"].grid.stack-with-page {
+      .ui.computer-vertically-reversed.grid.stack-with-page {
         --_grid-vreverse: 1;
         flex-direction: column-reverse;
       }
@@ -1092,55 +1050,55 @@
 
   /* Mobile */
   @container style(--_grid-range: mobile) {
-    .ui[class*="one wide mobile"].column {
+    .ui.one-wide-mobile.column {
       --_grid-wide: 1;
     }
-    .ui[class*="two wide mobile"].column {
+    .ui.two-wide-mobile.column {
       --_grid-wide: 2;
     }
-    .ui[class*="three wide mobile"].column {
+    .ui.three-wide-mobile.column {
       --_grid-wide: 3;
     }
-    .ui[class*="four wide mobile"].column {
+    .ui.four-wide-mobile.column {
       --_grid-wide: 4;
     }
-    .ui[class*="five wide mobile"].column {
+    .ui.five-wide-mobile.column {
       --_grid-wide: 5;
     }
-    .ui[class*="six wide mobile"].column {
+    .ui.six-wide-mobile.column {
       --_grid-wide: 6;
     }
-    .ui[class*="seven wide mobile"].column {
+    .ui.seven-wide-mobile.column {
       --_grid-wide: 7;
     }
-    .ui[class*="eight wide mobile"].column {
+    .ui.eight-wide-mobile.column {
       --_grid-wide: 8;
     }
-    .ui[class*="nine wide mobile"].column {
+    .ui.nine-wide-mobile.column {
       --_grid-wide: 9;
     }
-    .ui[class*="ten wide mobile"].column {
+    .ui.ten-wide-mobile.column {
       --_grid-wide: 10;
     }
-    .ui[class*="eleven wide mobile"].column {
+    .ui.eleven-wide-mobile.column {
       --_grid-wide: 11;
     }
-    .ui[class*="twelve wide mobile"].column {
+    .ui.twelve-wide-mobile.column {
       --_grid-wide: 12;
     }
-    .ui[class*="thirteen wide mobile"].column {
+    .ui.thirteen-wide-mobile.column {
       --_grid-wide: 13;
     }
-    .ui[class*="fourteen wide mobile"].column {
+    .ui.fourteen-wide-mobile.column {
       --_grid-wide: 14;
     }
-    .ui[class*="fifteen wide mobile"].column {
+    .ui.fifteen-wide-mobile.column {
       --_grid-wide: 15;
     }
-    .ui[class*="sixteen wide mobile"].column {
+    .ui.sixteen-wide-mobile.column {
       --_grid-wide: 16;
     }
-    .ui[class*="mobile reversed"].row {
+    .ui.mobile-reversed.row {
       --_grid-reverse: 1;
       flex-direction: row-reverse;
     }
@@ -1196,55 +1154,55 @@
 
   /* Tablet */
   @container style(--_grid-range: tablet) {
-    .ui[class*="one wide tablet"].column {
+    .ui.one-wide-tablet.column {
       --_grid-wide: 1;
     }
-    .ui[class*="two wide tablet"].column {
+    .ui.two-wide-tablet.column {
       --_grid-wide: 2;
     }
-    .ui[class*="three wide tablet"].column {
+    .ui.three-wide-tablet.column {
       --_grid-wide: 3;
     }
-    .ui[class*="four wide tablet"].column {
+    .ui.four-wide-tablet.column {
       --_grid-wide: 4;
     }
-    .ui[class*="five wide tablet"].column {
+    .ui.five-wide-tablet.column {
       --_grid-wide: 5;
     }
-    .ui[class*="six wide tablet"].column {
+    .ui.six-wide-tablet.column {
       --_grid-wide: 6;
     }
-    .ui[class*="seven wide tablet"].column {
+    .ui.seven-wide-tablet.column {
       --_grid-wide: 7;
     }
-    .ui[class*="eight wide tablet"].column {
+    .ui.eight-wide-tablet.column {
       --_grid-wide: 8;
     }
-    .ui[class*="nine wide tablet"].column {
+    .ui.nine-wide-tablet.column {
       --_grid-wide: 9;
     }
-    .ui[class*="ten wide tablet"].column {
+    .ui.ten-wide-tablet.column {
       --_grid-wide: 10;
     }
-    .ui[class*="eleven wide tablet"].column {
+    .ui.eleven-wide-tablet.column {
       --_grid-wide: 11;
     }
-    .ui[class*="twelve wide tablet"].column {
+    .ui.twelve-wide-tablet.column {
       --_grid-wide: 12;
     }
-    .ui[class*="thirteen wide tablet"].column {
+    .ui.thirteen-wide-tablet.column {
       --_grid-wide: 13;
     }
-    .ui[class*="fourteen wide tablet"].column {
+    .ui.fourteen-wide-tablet.column {
       --_grid-wide: 14;
     }
-    .ui[class*="fifteen wide tablet"].column {
+    .ui.fifteen-wide-tablet.column {
       --_grid-wide: 15;
     }
-    .ui[class*="sixteen wide tablet"].column {
+    .ui.sixteen-wide-tablet.column {
       --_grid-wide: 16;
     }
-    .ui[class*="tablet reversed"].row {
+    .ui.tablet-reversed.row {
       --_grid-reverse: 1;
       flex-direction: row-reverse;
     }
@@ -1272,55 +1230,55 @@
 
   /* Computer and up */
   @container style(--_grid-range: computer) {
-    .ui[class*="one wide computer"].column {
+    .ui.one-wide-computer.column {
       --_grid-wide: 1;
     }
-    .ui[class*="two wide computer"].column {
+    .ui.two-wide-computer.column {
       --_grid-wide: 2;
     }
-    .ui[class*="three wide computer"].column {
+    .ui.three-wide-computer.column {
       --_grid-wide: 3;
     }
-    .ui[class*="four wide computer"].column {
+    .ui.four-wide-computer.column {
       --_grid-wide: 4;
     }
-    .ui[class*="five wide computer"].column {
+    .ui.five-wide-computer.column {
       --_grid-wide: 5;
     }
-    .ui[class*="six wide computer"].column {
+    .ui.six-wide-computer.column {
       --_grid-wide: 6;
     }
-    .ui[class*="seven wide computer"].column {
+    .ui.seven-wide-computer.column {
       --_grid-wide: 7;
     }
-    .ui[class*="eight wide computer"].column {
+    .ui.eight-wide-computer.column {
       --_grid-wide: 8;
     }
-    .ui[class*="nine wide computer"].column {
+    .ui.nine-wide-computer.column {
       --_grid-wide: 9;
     }
-    .ui[class*="ten wide computer"].column {
+    .ui.ten-wide-computer.column {
       --_grid-wide: 10;
     }
-    .ui[class*="eleven wide computer"].column {
+    .ui.eleven-wide-computer.column {
       --_grid-wide: 11;
     }
-    .ui[class*="twelve wide computer"].column {
+    .ui.twelve-wide-computer.column {
       --_grid-wide: 12;
     }
-    .ui[class*="thirteen wide computer"].column {
+    .ui.thirteen-wide-computer.column {
       --_grid-wide: 13;
     }
-    .ui[class*="fourteen wide computer"].column {
+    .ui.fourteen-wide-computer.column {
       --_grid-wide: 14;
     }
-    .ui[class*="fifteen wide computer"].column {
+    .ui.fifteen-wide-computer.column {
       --_grid-wide: 15;
     }
-    .ui[class*="sixteen wide computer"].column {
+    .ui.sixteen-wide-computer.column {
       --_grid-wide: 16;
     }
-    .ui[class*="computer reversed"].row {
+    .ui.computer-reversed.row {
       --_grid-reverse: 1;
       flex-direction: row-reverse;
     }
@@ -1328,104 +1286,104 @@
 
   /* Large screen */
   @container style(--_grid-large-screen: 1) {
-    .ui[class*="one wide large screen"].column {
+    .ui.one-wide-large-screen.column {
       --_grid-wide: 1;
     }
-    .ui[class*="two wide large screen"].column {
+    .ui.two-wide-large-screen.column {
       --_grid-wide: 2;
     }
-    .ui[class*="three wide large screen"].column {
+    .ui.three-wide-large-screen.column {
       --_grid-wide: 3;
     }
-    .ui[class*="four wide large screen"].column {
+    .ui.four-wide-large-screen.column {
       --_grid-wide: 4;
     }
-    .ui[class*="five wide large screen"].column {
+    .ui.five-wide-large-screen.column {
       --_grid-wide: 5;
     }
-    .ui[class*="six wide large screen"].column {
+    .ui.six-wide-large-screen.column {
       --_grid-wide: 6;
     }
-    .ui[class*="seven wide large screen"].column {
+    .ui.seven-wide-large-screen.column {
       --_grid-wide: 7;
     }
-    .ui[class*="eight wide large screen"].column {
+    .ui.eight-wide-large-screen.column {
       --_grid-wide: 8;
     }
-    .ui[class*="nine wide large screen"].column {
+    .ui.nine-wide-large-screen.column {
       --_grid-wide: 9;
     }
-    .ui[class*="ten wide large screen"].column {
+    .ui.ten-wide-large-screen.column {
       --_grid-wide: 10;
     }
-    .ui[class*="eleven wide large screen"].column {
+    .ui.eleven-wide-large-screen.column {
       --_grid-wide: 11;
     }
-    .ui[class*="twelve wide large screen"].column {
+    .ui.twelve-wide-large-screen.column {
       --_grid-wide: 12;
     }
-    .ui[class*="thirteen wide large screen"].column {
+    .ui.thirteen-wide-large-screen.column {
       --_grid-wide: 13;
     }
-    .ui[class*="fourteen wide large screen"].column {
+    .ui.fourteen-wide-large-screen.column {
       --_grid-wide: 14;
     }
-    .ui[class*="fifteen wide large screen"].column {
+    .ui.fifteen-wide-large-screen.column {
       --_grid-wide: 15;
     }
-    .ui[class*="sixteen wide large screen"].column {
+    .ui.sixteen-wide-large-screen.column {
       --_grid-wide: 16;
     }
   }
 
   /* Widescreen */
   @container style(--_grid-widescreen: 1) {
-    .ui[class*="one wide widescreen"].column {
+    .ui.one-wide-widescreen.column {
       --_grid-wide: 1;
     }
-    .ui[class*="two wide widescreen"].column {
+    .ui.two-wide-widescreen.column {
       --_grid-wide: 2;
     }
-    .ui[class*="three wide widescreen"].column {
+    .ui.three-wide-widescreen.column {
       --_grid-wide: 3;
     }
-    .ui[class*="four wide widescreen"].column {
+    .ui.four-wide-widescreen.column {
       --_grid-wide: 4;
     }
-    .ui[class*="five wide widescreen"].column {
+    .ui.five-wide-widescreen.column {
       --_grid-wide: 5;
     }
-    .ui[class*="six wide widescreen"].column {
+    .ui.six-wide-widescreen.column {
       --_grid-wide: 6;
     }
-    .ui[class*="seven wide widescreen"].column {
+    .ui.seven-wide-widescreen.column {
       --_grid-wide: 7;
     }
-    .ui[class*="eight wide widescreen"].column {
+    .ui.eight-wide-widescreen.column {
       --_grid-wide: 8;
     }
-    .ui[class*="nine wide widescreen"].column {
+    .ui.nine-wide-widescreen.column {
       --_grid-wide: 9;
     }
-    .ui[class*="ten wide widescreen"].column {
+    .ui.ten-wide-widescreen.column {
       --_grid-wide: 10;
     }
-    .ui[class*="eleven wide widescreen"].column {
+    .ui.eleven-wide-widescreen.column {
       --_grid-wide: 11;
     }
-    .ui[class*="twelve wide widescreen"].column {
+    .ui.twelve-wide-widescreen.column {
       --_grid-wide: 12;
     }
-    .ui[class*="thirteen wide widescreen"].column {
+    .ui.thirteen-wide-widescreen.column {
       --_grid-wide: 13;
     }
-    .ui[class*="fourteen wide widescreen"].column {
+    .ui.fourteen-wide-widescreen.column {
       --_grid-wide: 14;
     }
-    .ui[class*="fifteen wide widescreen"].column {
+    .ui.fifteen-wide-widescreen.column {
       --_grid-wide: 15;
     }
-    .ui[class*="sixteen wide widescreen"].column {
+    .ui.sixteen-wide-widescreen.column {
       --_grid-wide: 16;
     }
   }
@@ -1441,27 +1399,27 @@
    * outside X's range;  `revert-layer` hands `display` back to the layers above for the ranges it names.
    */
   @media (--ui-mobile) {
-    .ui[class*=" only"]:is(.grid, .row, .column):not([class*="mobile only"]) {
+    .ui.only:is(.grid, .row, .column):not(.mobile-only) {
       display: none;
     }
   }
   @media (--ui-tablet) {
-    .ui[class*=" only"]:is(.grid, .row, .column):not([class*="tablet only"]) {
+    .ui.only:is(.grid, .row, .column):not(.tablet-only) {
       display: none;
     }
   }
   @media (--ui-computer) {
-    .ui[class*=" only"]:is(.grid, .row, .column):not([class*="computer only"]) {
+    .ui.only:is(.grid, .row, .column):not(.computer-only) {
       display: none;
     }
   }
   @media (--ui-large-monitor) {
-    .ui[class*="large screen only"][class*=" only"]:is(.grid, .row, .column) {
+    .ui.large-screen-only.only:is(.grid, .row, .column) {
       display: revert-layer;
     }
   }
   @media (--ui-widescreen) {
-    .ui[class*="widescreen only"][class*=" only"]:is(.grid, .row, .column) {
+    .ui.widescreen-only.only:is(.grid, .row, .column) {
       display: revert-layer;
     }
   }

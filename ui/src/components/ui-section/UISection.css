@@ -632,7 +632,7 @@
   .ui.padded.section {
     --_section-content-padding: var(--_ui-section-padded);
   }
-  .ui[class*="very padded"].section {
+  .ui.very-padded.section {
     --_section-content-padding: var(--_ui-section-very-padded);
   }
 
@@ -645,24 +645,24 @@
   .ui.attached.section:not(.top) {
     border-top-width: 0;
   }
-  .ui[class*="top attached"].section {
+  .ui.top-attached.section {
     --_section-margin-top: var(--_ui-section-margin);
     --_section-radius: var(--_ui-section-radius) var(--_ui-section-radius) 0 0;
   }
-  .ui[class*="top attached"].section:first-child {
+  .ui.top-attached.section:first-child {
     --_section-margin-top: 0;
   }
-  :host(:first-child) > .ui[class*="top attached"].section {
+  :host(:first-child) > .ui.top-attached.section {
     --_section-margin-top: 0;
   }
-  .ui[class*="bottom attached"].section {
+  .ui.bottom-attached.section {
     --_section-margin-bottom: var(--_ui-section-margin);
     --_section-radius: 0 0 var(--_ui-section-radius) var(--_ui-section-radius);
   }
-  .ui[class*="bottom attached"].section:last-child {
+  .ui.bottom-attached.section:last-child {
     --_section-margin-bottom: 0;
   }
-  :host(:last-child) > .ui[class*="bottom attached"].section {
+  :host(:last-child) > .ui.bottom-attached.section {
     --_section-margin-bottom: 0;
   }
 
@@ -704,13 +704,13 @@
   .ui.short.scrolling.section {
     --_section-scroll-ratio: 0.75;
   }
-  .ui[class*="very short scrolling"].section {
+  .ui.very-short-scrolling.section {
     --_section-scroll-ratio: 0.5;
   }
   .ui.long.scrolling.section {
     --_section-scroll-ratio: 2;
   }
-  .ui[class*="very long scrolling"].section {
+  .ui.very-long-scrolling.section {
     --_section-scroll-ratio: 3;
   }
   @media (--ui-tablet), (--ui-computer) {

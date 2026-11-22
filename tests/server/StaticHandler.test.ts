@@ -1,6 +1,7 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+import { brotliCompressSync, brotliDecompressSync, gunzipSync } from "node:zlib"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
 import { SRV } from "spell/server"
@@ -180,5 +181,119 @@ describe("StaticHandler.render()", () => {
     expect(await files.render("/missing.html")).toBeUndefined()
     expect(await files.render("/page.html", 4)).toBeUndefined()
     rmSync(dir, { recursive: true, force: true })
+  })
+})
+
+// epic `solid-2-final` P2:  compressed on the way out, and cached
+describe("StaticHandler, compressed and cached", () => {
+  const dir = mkdtempSync(join(tmpdir(), "srv-cache-"))
+  const script = `export const words = ${JSON.stringify("words ".repeat(400))}\n`
+  const page = `<html><head></head><body>${"<p>page</p>".repeat(200)}</body></html>`
+  let served: Served
+  let setting = "first"
+
+  beforeAll(async () => {
+    mkdirSync(join(dir, "assets"))
+    writeFileSync(join(dir, "big.js"), script)
+    writeFileSync(join(dir, "small.css"), "a{}")
+    writeFileSync(join(dir, "picture.png"), Buffer.alloc(4000, 7))
+    writeFileSync(join(dir, "page.html"), page)
+    writeFileSync(join(dir, "assets", "Chunk-Bq3xZ9aP.js"), script)
+    writeFileSync(join(dir, "assets", "plain-settings.js"), script)
+    writeFileSync(join(dir, "built.js"), script)
+    writeFileSync(join(dir, "built.js.br"), brotliCompressSync(script))
+    writeFileSync(join(dir, "stale.js"), script)
+    writeFileSync(join(dir, "stale.js.br"), "old")
+    utimesSync(join(dir, "stale.js.br"), new Date(2020, 0, 1), new Date(2020, 0, 1))
+    const files = new SRV.StaticHandler({
+      caching: "normal",
+      mounts: [{ prefix: "/", dir, hashed: SRV.hashedIn("assets") }],
+      html: [(html) => html.replace("<head>", `<head><meta name="setting" content="${setting}">`)]
+    })
+    const router = new SRV.Router()
+      .use(files.handle)
+      .get("/api/list", (_request, reply) => reply.noStore().json({ words: "words ".repeat(400) }))
+    served = await serveHandler(router.handle)
+  })
+
+  afterAll(async () => {
+    await served.close()
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  const GZIP = { "accept-encoding": "gzip, deflate" }
+  const BROTLI = { "accept-encoding": "gzip, deflate, br" }
+
+  it("sends a built file's brotli copy, as it is, to a browser that takes brotli", async () => {
+    const answer = await ask(served.port, "GET", "/built.js", { headers: BROTLI })
+    expect(answer.headers["content-encoding"]).toBe("br")
+    expect(answer.headers["content-type"]).toBe("text/javascript; charset=utf-8")
+    expect(answer.headers.vary).toBe("Accept-Encoding")
+    expect(brotliDecompressSync(answer.bytes).toString()).toBe(script)
+  })
+
+  it("gzips a file with no brotli copy, or an older one, as it's sent", async () => {
+    for (const path of ["/big.js", "/stale.js"]) {
+      const answer = await ask(served.port, "GET", path, { headers: BROTLI })
+      expect(answer.headers["content-encoding"]).toBe("gzip")
+      expect(gunzipSync(answer.bytes).toString()).toBe(script)
+      expect(Number(answer.headers["content-length"])).toBeLessThan(script.length / 5)
+    }
+  })
+
+  it("sends it as it is to a request that takes neither, and leaves small or packed files alone", async () => {
+    const plain = await ask(served.port, "GET", "/big.js")
+    expect([plain.headers["content-encoding"], plain.text, plain.headers.vary]).toEqual([
+      undefined,
+      script,
+      "Accept-Encoding"
+    ])
+    const small = await ask(served.port, "GET", "/small.css", { headers: GZIP })
+    expect([small.headers["content-encoding"], small.text]).toEqual([undefined, "a{}"])
+    const picture = await ask(served.port, "GET", "/picture.png", { headers: GZIP })
+    expect(picture.headers["content-encoding"]).toBeUndefined()
+  })
+
+  it("gzips a page made on the way and an API's answer too", async () => {
+    const answer = await ask(served.port, "GET", "/page.html", { headers: GZIP })
+    expect(answer.headers["content-encoding"]).toBe("gzip")
+    expect(gunzipSync(answer.bytes).toString()).toContain(`<meta name="setting"`)
+    const listed = await ask(served.port, "GET", "/api/list", { headers: GZIP })
+    expect([listed.headers["content-encoding"], listed.headers["cache-control"]]).toEqual(["gzip", "no-store"])
+    expect(JSON.parse(gunzipSync(listed.bytes).toString())).toHaveProperty("words")
+  })
+
+  it("keeps a hashed name a year;  checks everything else each time", async () => {
+    const hashed = await ask(served.port, "GET", "/assets/Chunk-Bq3xZ9aP.js")
+    expect(hashed.headers["cache-control"]).toBe("public, max-age=31536000, immutable")
+    for (const path of ["/assets/plain-settings.js", "/big.js", "/page.html"])
+      expect((await ask(served.port, "GET", path)).headers["cache-control"]).toBe("no-cache")
+  })
+
+  it("answers 'not modified' while the browser's copy matches", async () => {
+    const first = await ask(served.port, "GET", "/big.js")
+    const again = await ask(served.port, "GET", "/big.js", { headers: { "if-none-match": String(first.headers.etag) } })
+    expect([again.status, again.text, again.headers.etag]).toEqual([304, "", first.headers.etag])
+    const other = await ask(served.port, "GET", "/big.js", { headers: { "if-none-match": '"0-0"' } })
+    expect(other.status).toBe(200)
+  })
+
+  it("answers a page 'not modified' only while its hooks make the same page", async () => {
+    const first = await ask(served.port, "GET", "/page.html")
+    expect(first.headers.vary).toContain("Sec-Fetch-Dest")
+    const etag = String(first.headers.etag)
+    expect((await ask(served.port, "GET", "/page.html", { headers: { "if-none-match": etag } })).status).toBe(304)
+    setting = "second"
+    const changed = await ask(served.port, "GET", "/page.html", { headers: { "if-none-match": etag } })
+    expect([changed.status, changed.text]).toEqual([200, expect.stringContaining(`content="second"`)])
+  })
+
+  it("never keeps a copy with caching \"never\":  no-store, no 'not modified'", async () => {
+    const never = await serveHandler(new SRV.StaticHandler({ mounts: [{ prefix: "/", dir }] }).handle)
+    const first = await ask(never.port, "GET", "/assets/Chunk-Bq3xZ9aP.js")
+    expect(first.headers["cache-control"]).toBe("no-store")
+    const again = await ask(never.port, "GET", "/big.js", { headers: { "if-none-match": String(first.headers.etag) } })
+    expect(again.status).toBe(200)
+    await never.close()
   })
 })

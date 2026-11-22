@@ -73,7 +73,7 @@ export class PageEditor {
     const id = one(request.query.id)
     const range = id ? findById(source, id, one(request.query.parent)) : undefined
     const html = range ? sliceOf(source, range, Boolean(one(request.query.inner))) : source
-    reply.set("Cache-Control", "no-store").json({ path, etag, html })
+    reply.noStore().json({ path, etag, html })
   }
 
   /** answer `PUT` / `PATCH`:  `{ path, etag }`, the file's new `ETag` */
@@ -100,7 +100,7 @@ export class PageEditor {
       },
       { ifMatch: expected }
     )
-    reply.set("Cache-Control", "no-store").json({ path, etag })
+    reply.noStore().json({ path, etag })
   }
 
   /**
