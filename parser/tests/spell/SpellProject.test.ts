@@ -1,4 +1,4 @@
-import { afterEach, describe, test, expect } from "vite-plus/test"
+import { afterEach, describe, test, expect, vi } from "vite-plus/test"
 
 import { LoadableFile } from "spell/util"
 import { P } from "spell/parser/parser"
@@ -145,5 +145,20 @@ describe("saving what a compile wrote", () => {
     project.outputFile.contents = "export const one = 2\n"
     await project.saveOutput()
     expect(sent).toEqual(["ChangedSaves.spell.js"])
+  })
+
+  test("a compile of some pages taken from elsewhere isn't saved:  its files load, to tell (editor I293)", async () => {
+    const { project, sent } = compiledProject("SomePages")
+    project.pagesInPlay = new Set()
+    // a page is known by its text:  none is, till its file has loaded
+    let isLoaded = false
+    const page = { load: async () => (isLoaded = true) } as unknown as SP.SpellFile
+    vi.spyOn(project, "load").mockResolvedValue(undefined as never)
+    vi.spyOn(project, "spellFiles", "get").mockReturnValue([page])
+    vi.spyOn(project, "hasAlonePages", "get").mockImplementation(() => isLoaded)
+    const entry = { compiled: "", declarations: "{}", languages: [], words: {}, targets: {} }
+    await project.takeCompiled(entry)
+    expect(isLoaded).toBe(true)
+    expect(sent).toEqual([])
   })
 })

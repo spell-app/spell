@@ -1128,7 +1128,10 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     `this.on()` for one added later, or under a condition.
   - Inside a component, `onClick={...}` for native events.
     - No `on:` namespace, no `prop:` (epic `solid-17`).
-    - A `ui-*` event:  `on-ui-changed={f}`, the event's own name after `on-`.
+    - A `ui-*` event:  a ref that adds the listener, `ref={(menu) => menu.addEventListener("ui-choosing", f)}`
+      (its element knows its tag's events, `event.detail` typed).
+      - Not `on-ui-changed={f}` inside a component, though it works:  Solid's dev build warns
+        `LOWERCASE_EVENT_ATTRIBUTE` once per name, and the editor's console must stay clean (epic `editor` I98, I291).
     - Rich data as a plain prop, `options={[...]}`:  a function or object reaches the element as itself.
     - Both through the kit's element framework, its `RichAttributes`:
       Solid sets a prop it doesn't know with `setAttribute()`, which our elements take over.

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
-import { flush } from "solid-js"
+import { OBSERVE, flush } from "solid-js"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { SpellCompiled } from "spell/app/app/runner/runner.types"
@@ -134,6 +134,20 @@ board.start()
     const drawn = () => [...app.children].map((tag) => tag.shadowRoot?.textContent)
     await waitFor(() => drawn()[0] === "T1")
     expect(drawn()).toEqual(["T1", "T1", "T1", "T2", '⚠ no Tableau named "9"'])
+  })
+
+  test("a run reads its layout untracked:  no `STRICT_READ_UNTRACKED` (epic `editor` I291)", async () => {
+    const events = OBSERVE!.diagnostics.capture()
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    try {
+      const app = await mountApp(`<spell-viewer><floor-tableau id="T1"></floor-tableau></spell-viewer>`)
+      app.run({ projectId: "@spell/test/Floor", compiled: PILES } satisfies SpellCompiled)
+      await waitFor(() => app.firstElementChild?.shadowRoot?.textContent === "T1")
+      const untracked = events.stop().filter((event) => event.code === "STRICT_READ_UNTRACKED")
+      expect(untracked.map((event) => event.message)).toEqual([])
+    } finally {
+      warn.mockRestore()
+    }
   })
 })
 

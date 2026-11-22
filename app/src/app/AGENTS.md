@@ -628,6 +628,9 @@ and in the app's build folder, `app/` at the app folder's root.
       `repoSourceInDev()`, in [vite.config.ts](../../app/vite.config.ts), finds it in the app folder's `src/`.
 - Nothing imports THIS folder except `cli`.
   And the `<script>` entries in its own pages:  `index.html` and the demos.
+- One file here is written by the server:  [paletteGroups.json](ui/paletteGroups.json), the + menu's groups,
+  which `/palette`'s Save writes through spaces' route (epic `editor` J275).
+  - Moving it:  change `PALETTE_TABLE_FILE` there too.
 - It may import spaces' models, `spell/app/spaces` (the same folder, `app/`);
   NEVER `spell/app/spaces/server/node/...`, which is node only.
   - Another folder's files by name (`spell/parser/spell`, `spell/ui/core` ...):

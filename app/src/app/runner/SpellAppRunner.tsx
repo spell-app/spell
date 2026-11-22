@@ -219,7 +219,8 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
     unslot?.()
     unslot = undefined
     // read props before waiting:  by then, whoever handed them to us may be gone (`<spell-viewer>` dropping its source)
-    const layout = props.layout
+    // - untracked:  it runs from an effect's second function, where a read follows nothing (`STRICT_READ_UNTRACKED`)
+    const layout = untrack(() => props.layout)
     if (layout) unslot = slotsFromIn(layout)
     const keepThings = how === "keep things" && isSameProgram(lastSource, source)
     lastSource = source

@@ -1,8 +1,8 @@
-import { waitUntil } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { SiteHost } from "spell/parser/core/core.types"
 import { editor, type RunningSitePage } from "spell/app/app/editor"
 import { SiteThemes } from "spell/app/app/runner/SiteThemes"
+import { RunSiteHost } from "spell/app/app/run/RunSiteHost"
 import { navigate } from "./navigation"
 import { SiteWrites } from "./SiteWrites"
 
@@ -125,20 +125,11 @@ export class RunSite implements SiteHost {
   }
 
   /**
-   * Scroll to section `id` of the page being shown, once it's drawn:  the docs site's way of landing on a link's target
-   * (`HashLanding`).
-   * - Waits for the section:  a page compiled in as it's shown takes a moment.
+   * Scroll to section `id` of the page being shown, once it's drawn:  as the run page and `<spell-viewer>` land
+   * (`RunSiteHost.landOnSection()`), looked for in the site's frame, and the editor's pane around it scrolled.
    * - NEVER throws:  a section that never comes is left alone.
    */
-  landOn = (id: string): void => {
-    const shown = () => document.querySelector(`.spell-site-frame [id="${CSS.escape(id)}"]`)
-    void waitUntil(shown, { timeout: SECTION_WAIT })
-      .then(async () => {
-        const { HashLanding } = await import("spell/ui/components/ui-toc/HashLanding")
-        await HashLanding.forDocument(document).landOnHash(`#${id}`)
-      })
-      .catch(() => undefined)
-  }
+  landOn = (id: string): void => RunSiteHost.landOnSection(document.querySelector(SITE_FRAME) ?? document, id)
 
   /** Call `showAddress` whenever the URL changes by itself:  each run hands over its site's. */
   listen(showAddress: (address: string) => void): void {
@@ -227,8 +218,8 @@ export class RunSite implements SiteHost {
   }
 }
 
-/** How long a link's `#section` waits for its section, in seconds. */
-const SECTION_WAIT = 5
+/** Where the running site draws, in the editor's page:  a link's section is looked for there. */
+const SITE_FRAME = ".spell-site-frame"
 
 /** `path` decoded:  as it is when it won't decode. */
 function safelyDecoded(path: string): string {
