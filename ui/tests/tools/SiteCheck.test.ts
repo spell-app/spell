@@ -40,3 +40,20 @@ describe("SiteCheck.shotNameFor()", () => {
     expect(SiteCheck.shotNameFor("/button/examples")).toBe("button-examples")
   })
 })
+
+describe("SiteCheck.pageUrl()", () => {
+  test("the page server's address of a site page, under the site's address", () => {
+    expect(SiteCheck.pageUrl("http://127.0.0.1:47431", "/button/api")).toBe(
+      "http://127.0.0.1:47431/components/ui/button/api"
+    )
+    expect(SiteCheck.pageUrl("http://127.0.0.1:47431/", "/")).toBe("http://127.0.0.1:47431/components/ui/")
+  })
+})
+
+describe("SiteCheck.jobsFor()", () => {
+  test("a whole number, 1 or more", () => {
+    expect(SiteCheck.jobsFor("4")).toBe(4)
+    expect(() => SiteCheck.jobsFor("0")).toThrow(/--jobs/)
+    expect(() => SiteCheck.jobsFor("two")).toThrow(/--jobs/)
+  })
+})

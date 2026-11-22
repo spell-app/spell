@@ -51,6 +51,11 @@
       const [, worktree = ""] = /^((?:\/worktrees\/[^/]+)?)\/components\/ui(?:\/|$)/.exec(location.pathname) ?? []
       const viewer = document.querySelector("spell-viewer")
       viewer.setAttribute("base", `${worktree}/components/ui`)
+      // the docs elements' data (`<ui-docs-api>`'s tables, `<ui-docs-search>`'s pages):  the site's `__data/`, whatever
+      // the address (`SiteData`, the page's `<meta name="ui-docs-data">`)
+      const data = Object.assign(document.createElement("meta"), { name: "ui-docs-data" })
+      data.content = `${worktree}/components/ui/__data/components.json5`
+      document.head.append(data)
       // the scheme the person picked (the head script, the theme menu), else the device's:  everything inside wears it
       const root = document.documentElement.classList
       const device = matchMedia("(prefers-color-scheme: dark)")

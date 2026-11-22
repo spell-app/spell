@@ -633,8 +633,9 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
       `src/vocabulary/partsOfSpeech.generated.ts`, a small table the bubbly look reads (the app's `BubblyMarkup`)
       to colour a tag's band, without loading Spell UI.
 - `yarn site:check <page...> | --all`:
-  loads the Spell UI site's pages (`@spell/guides/SpellUI`) as this checkout's editor runs them (Playwright),
-  a page by its address (`/button/examples`) or its tag.
+  loads the Spell UI site's pages (`@spell/guides/SpellUI`) as the page server shows them at `/components/ui/`,
+  with no editor (Playwright), a page by its address (`/button/examples`) or its tag.
+  - `--server <origin>`:  another page server than this checkout's (started if needed).
   - [Its script](scripts/site-check.ts), on [the site check](src/tools/SiteCheck.ts).
   - It fails on:
     - console errors, 404s

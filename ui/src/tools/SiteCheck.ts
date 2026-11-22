@@ -10,7 +10,8 @@ import type { SiteDataFile } from "spell/ui/docs-components/docs-components.type
 import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
 import { writeOrCheck } from "spell/element-tools/generatedFiles"
 import { Terminal } from "spell/element-tools/Terminal"
-import { SPELL_UI_SITE, SPELL_UI_SITE_FILE, ensureEditor, ensurePageServer } from "./pageServer.ts"
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
+import { SPELL_UI_SITE_FILE, ensurePageServer } from "./pageServer.ts"
 import { SiteSearchBuilder, type DrawnSpellPage } from "./SiteSearchBuilder.ts"
 import { SITE_DATA, SPELL_UI_ROOT, SiteCheckError } from "./tools.types.ts"
 import { environment } from "./environment.ts"
@@ -18,10 +19,13 @@ import { environment } from "./environment.ts"
 /****************
  * ### `SiteCheck`
  * Checks the pages of the Spell UI site in headless chromium:
- * the Spell pages of `@spell/guides/SpellUI`, as this checkout's editor runs them
- * (`<editor>/run/@spell/guides/SpellUI/<address>`, the editor's `RunSite`).
+ * the Spell pages of `@spell/guides/SpellUI`, as the page server shows them, with no editor
+ * (`<page server>/components/ui/<address>`:  one page, its `<spell-viewer>` showing the site;  epic `editor` P43).
  * - Run:  `yarn site:check <page...>` (in `ui/`), or `yarn site:check --all`.
  *   - `--out <dir>` for the screenshots (default `results/site-check/`, git-ignored).
+ *   - `--server <origin>` for another page server than this checkout's (`http://127.0.0.1:47431`);
+ *     by default this checkout's, started if it isn't running (`ensurePageServer()`).
+ *   - `--jobs <n>`:  check `n` pages at once (default 1):  each page loads four times, so `--all` alone is slow.
  *   - `scripts/site-check.ts` is the command, which hands its arguments to `SiteCheck.main()`:
  *     a class file runs nothing when imported.
  * - A page is its ADDRESS in the site (`resolveAddress()`), as the site's file lists it (`SpellUI.spell`):
@@ -43,10 +47,13 @@ import { environment } from "./environment.ts"
  *   - Written only when every page was read:  a page that couldn't be is a problem, and the file stays as it was.
  * - Problems go to stderr, with each page's URL, counts and screenshots;  a JSON summary is the last thing on stdout.
  * - Look at the screenshots too:  the checks can't see overlap, clipping or ugly wrapping.
- * - Throws `SiteCheckError` when it can't start:  no such page, or no editor running the site (exit 2).
+ * - Throws `SiteCheckError` when it can't start:  no such page, or no page server showing the site (exit 2).
  * - Until epic `editor` P42 it checked Spell UI's components pages (`docs/*.html`) instead,
  *   with two checks only they needed (four site tabs a page;  `site:sections`' ids):  gone with them.
- * - The page's elements are all in shadow roots (the editor's, the site's):  every probe walks them.
+ * - The page's elements are all in shadow roots (the viewer's, the site's):  every probe walks them.
+ *   - The page scrolls the WINDOW, as any page does:  the probes that measure scrolling
+ *     (`landedState()`, `scrollingHeight()`) take the nearest box that scrolls, else the window.
+ * - Until P43 it checked the pages as the editor ran them (`<editor>/run/@spell/guides/SpellUI/<address>`).
  * - Node only.
  ****************/
 export class SiteCheck {
@@ -56,8 +63,14 @@ export class SiteCheck {
   /** Screenshot folder, absolute. */
   readonly out: string
 
-  /** The running editor's origin, with its `/`, e.g. `http://localhost:64794/`;  set by `run()`. */
+  /** The page server's origin, no `/` after it, e.g. `http://127.0.0.1:54769`;  set by `run()`. */
   base = ""
+
+  /** The page server to check against, as `--server` gave it;  none:  this checkout's (`ensurePageServer()`). */
+  readonly server: string | undefined
+
+  /** How many pages are checked at once (`--jobs`);  `--search` reads them one by one whatever it says. */
+  readonly jobs: number
 
   /** What it does with the site's search file:  see `SiteCheckProps.search`. */
   readonly search: SiteCheckProps["search"]
@@ -71,15 +84,17 @@ export class SiteCheck {
   /** The site's navigation's `pages`, as the first page read drew it:  the pages' titles (`spellTitles()`). */
   private navPages: unknown
 
-  constructor({ addresses, out = DEFAULT_OUT, search }: SiteCheckProps) {
+  constructor({ addresses, out = DEFAULT_OUT, search, server, jobs = 1 }: SiteCheckProps) {
+    this.jobs = Math.max(1, Math.floor(jobs))
     this.addresses = addresses
+    this.server = server?.replace(/\/+$/, "")
     this.out = out
     this.search = search
   }
 
   /**
    * `yarn site:check`:  parse the command line, check every page, print, and exit.
-   * - SIDE EFFECT:  `process.exit()`:  0 all clean, 1 any problem, 2 bad arguments, no such page or no editor
+   * - SIDE EFFECT:  `process.exit()`:  0 all clean, 1 any problem, 2 bad arguments, no such page or no page server
    */
   static async main(argv: string[] = process.argv.slice(2)): Promise<never> {
     let parsed: ReturnType<typeof parseCommandLine>
@@ -91,14 +106,17 @@ export class SiteCheck {
     const { values, positionals } = parsed
     if (values.help) return exit(USAGE, 0)
     try {
-      const known = await SiteCheck.siteAddresses()
+      const server = values.server ?? SiteCheck.pageServer()
+      const known = await SiteCheck.siteAddresses(server)
       const isWhole = values.all || values.search
       const addresses = isWhole ? known : positionals.map((name) => SiteCheck.resolveAddress(name, known))
       if (!addresses.length) return exit(USAGE, 2)
       const check = new SiteCheck({
         addresses: [...new Set(addresses)],
         out: values.out === undefined ? undefined : resolve(environment.invocationDir, values.out),
-        search: values.search ? "only" : values.all ? "also" : undefined
+        search: values.search ? "only" : values.all ? "also" : undefined,
+        server,
+        jobs: values.jobs === undefined ? undefined : SiteCheck.jobsFor(values.jobs)
       })
       const reports = await check.run()
       const ok = reports.every((report) => report.ok)
@@ -136,19 +154,25 @@ export class SiteCheck {
   }
 
   /**
-   * Every page's address, in the order the site's file lists them (`it has ... page at "/button" ...`):
-   * read from the page server (`SPELL_UI_SITE_FILE`).
-   * - SIDE EFFECT:  `spell server start` starts the page server if it isn't running
-   * - throws `SiteCheckError` when the page server can't start, or doesn't serve the file
+   * This checkout's page server's origin (`ensurePageServer()`).
+   * - SIDE EFFECT:  `spell server start` starts it if it isn't running
+   * - throws `SiteCheckError` when it can't start
    */
-  static async siteAddresses(): Promise<string[]> {
-    let base: string
+  static pageServer(): string {
     try {
-      base = ensurePageServer()
+      return ensurePageServer()
     } catch (error) {
-      throw new SiteCheckError(`SiteCheck.siteAddresses():  can't start or find the page server:  ${error}`)
+      throw new SiteCheckError(`SiteCheck.pageServer():  can't start or find the page server:  ${error}`)
     }
-    const url = `${base}/${SPELL_UI_SITE_FILE}`
+  }
+
+  /**
+   * Every page's address, in the order the site's file lists them (`it has ... page at "/button" ...`):
+   * read from the page server at `server`, an origin (`SPELL_UI_SITE_FILE`).
+   * - throws `SiteCheckError` when the page server doesn't serve the file
+   */
+  static async siteAddresses(server: string): Promise<string[]> {
+    const url = `${server.replace(/\/+$/, "")}/${SPELL_UI_SITE_FILE}`
     const response = await fetch(url, { signal: AbortSignal.timeout(PROBE_MS) }).catch((error: unknown) => {
       throw new SiteCheckError(`SiteCheck.siteAddresses():  ${url} didn't answer:  ${error}`)
     })
@@ -161,19 +185,35 @@ export class SiteCheck {
     return [...siteText.matchAll(PAGE_LINE)].map((match) => match[1]!)
   }
 
+  /**
+   * Where the page server at `server` (an origin) shows the site's page at `address`:
+   * `/button/api` => `<server>/components/ui/button/api`, `/` => `<server>/components/ui/` (`SpellUIGuide.addressOf()`).
+   */
+  static pageUrl(server: string, address: string): string {
+    return `${server.replace(/\/+$/, "")}${SpellUIGuide.addressOf(address)}`
+  }
+
+  /** `--jobs`'s text as a count, 1 or more;  throws `SiteCheckError` on anything else. */
+  static jobsFor(text: string): number {
+    const jobs = Number(text)
+    if (!Number.isInteger(jobs) || jobs < 1)
+      throw new SiteCheckError(`SiteCheck.jobsFor():  --jobs takes a whole number, 1 or more, not "${text}"`)
+    return jobs
+  }
+
   /** A page's screenshot prefix:  its address, `/` => `home`, `/button/examples` => `button-examples`. */
   static shotNameFor(address: string): string {
     return address === "/" ? "home" : address.replace(/^\//, "").replaceAll("/", "-")
   }
 
   /**
-   * Find the editor, then check every page in one browser.
-   * - SIDE EFFECT:  `spell server start all` starts the page server and the editor if they aren't running;
+   * Find the page server showing the site, then check every page in one browser.
+   * - SIDE EFFECT:  with no `server`, `spell server start` starts this checkout's page server if it isn't running;
    *   writes screenshots to `out`;  prints each page's result to stderr
-   * - throws `SiteCheckError` when there's no editor running the site
+   * - throws `SiteCheckError` when no page server shows the site
    */
   async run(): Promise<PageReport[]> {
-    this.base = await this.ensureEditor()
+    this.base = await this.ensureSite()
     mkdirSync(this.out, { recursive: true })
     this.browser = await BrowserPage.launch()
     const reports: PageReport[] = []
@@ -184,11 +224,18 @@ export class SiteCheck {
           reports.push(report)
         }
       } else {
-        for (const address of this.addresses) {
-          const report = await this.checkPage(address)
-          this.print(report)
-          reports.push(report)
+        // `jobs` pages at once, each printed as it's done;  the reports in the addresses' order
+        const byAddress = new Map<string, PageReport>()
+        const queue = [...this.addresses]
+        const worker = async () => {
+          for (let address = queue.shift(); address !== undefined; address = queue.shift()) {
+            const report = await this.checkPage(address)
+            this.print(report)
+            byAddress.set(address, report)
+          }
         }
+        await Promise.all(Array.from({ length: Math.min(this.jobs, queue.length) }, worker))
+        reports.push(...this.addresses.map((address) => byAddress.get(address)!))
       }
     } finally {
       await this.browser.close()
@@ -221,26 +268,18 @@ export class SiteCheck {
   }
 
   /**
-   * The running editor's origin, once it runs the site (`ensureEditor()`).
-   * - throws `SiteCheckError` when there's no editor, or it doesn't answer the site's home page
+   * The page server's origin (`server`, else this checkout's), once it answers the site's home page.
+   * - throws `SiteCheckError` when it can't start, or doesn't answer the site's home page
    */
-  async ensureEditor(): Promise<string> {
-    let base: string
-    try {
-      base = ensureEditor()
-    } catch (error) {
-      throw new SiteCheckError(
-        `SiteCheck.ensureEditor():  can't start or find this checkout's editor (\`spell server start all\`):  ` +
-          `${error};  start it by hand and read its output`
-      )
-    }
-    const probe = `${base}${SPELL_UI_SITE}/`
+  async ensureSite(): Promise<string> {
+    const base = this.server ?? SiteCheck.pageServer()
+    const probe = SiteCheck.pageUrl(base, "/")
     const status = await fetch(probe, { signal: AbortSignal.timeout(PROBE_MS) }).then(
       (response) => response.status,
       (error: unknown) => String(error)
     )
     if (status !== 200)
-      throw new SiteCheckError(`SiteCheck.ensureEditor():  the editor doesn't answer ${probe} (${status})`)
+      throw new SiteCheckError(`SiteCheck.ensureSite():  the page server doesn't show the site at ${probe} (${status})`)
     return base
   }
 
@@ -350,7 +389,7 @@ export class SiteCheck {
   private started(address: string): { context: CheckContext; finish: () => PageReport } {
     const report: PageReport = {
       page: address,
-      url: `${this.base}${SPELL_UI_SITE}${address === "/" ? "/" : address}`,
+      url: SiteCheck.pageUrl(this.base, address),
       ok: false,
       problems: [],
       notes: [],
@@ -571,8 +610,9 @@ export class SiteCheck {
   }
 
   /**
-   * Screenshot the WHOLE page:  the page scrolls inside the editor's box, not the window,
-   * so the window is made as tall as what's in that box (at most `WHOLE_MAX_PX`), then put back.
+   * Screenshot the WHOLE page:  the window is made as tall as the page's content (`scrollingHeight()`,
+   * at most `WHOLE_MAX_PX`), then put back.
+   * - Not Playwright's `fullPage`:  that takes the document's height, and misses a box that scrolls inside it.
    */
   private async shootWhole(page: Page, check: CheckContext, file: string): Promise<void> {
     const viewport = page.viewportSize()!
@@ -605,6 +645,10 @@ export type SiteCheckProps = {
   addresses: string[]
   /** screenshot folder, absolute;  default `results/site-check/` */
   out?: string
+  /** the page server's origin (`http://127.0.0.1:47431`);  default this checkout's, started if needed */
+  server?: string
+  /** how many pages to check at once, each in its own browser pages;  default 1 */
+  jobs?: number
   /**
    * the site's search file (`docs/__data/search.json5`), from every page as drawn:
    * - `"also"`:  read as the pages are checked, then written (`--all`)
@@ -624,7 +668,7 @@ export type SiteCheckProps = {
 export type PageReport = {
   /** its address in the site, e.g. `/button/examples` */
   page: string
-  /** where the editor runs it */
+  /** where the page server shows it */
   url: string
   /** no problems */
   ok: boolean
@@ -701,6 +745,8 @@ function parseCommandLine(argv: string[]) {
       all: { type: "boolean" },
       search: { type: "boolean" },
       out: { type: "string" },
+      server: { type: "string" },
+      jobs: { type: "string" },
       help: { type: "boolean", short: "h" }
     }
   })
@@ -729,11 +775,13 @@ const SEARCH_FILE = join(SPELL_UI_ROOT, SITE_DATA, "search.json5")
 const PAGES_PER_LOAD = 40
 
 /** Printed on bad arguments and `--help`. */
-const USAGE = `usage:  yarn site:check <page...> | --all | --search  [--out <dir>]
+const USAGE = `usage:  yarn site:check <page...> | --all | --search  [--out <dir>] [--server <origin>] [--jobs <n>]
   page:  an address of the Spell UI site (/button/examples, button), a tag (ui-button), or home
   --all:  every page its file (SpellUI.spell) lists;  and writes the site's search file (docs/__data/search.json5)
   --search:  only writes the search file:  reads every page, with no checks
-  --out:  screenshot folder (default ${DEFAULT_OUT})`
+  --out:  screenshot folder (default ${DEFAULT_OUT})
+  --server:  the page server showing the site at /components/ui/ (default this checkout's, started if needed)
+  --jobs:  how many pages to check at once (default 1);  each page loads four times, so --all alone is slow`
 
 /** Desktop viewport. */
 const DESKTOP: BrowserPageProps = { viewport: { width: 1440, height: 900 } }
@@ -744,7 +792,7 @@ const PHONE: BrowserPageProps = {
   context: { isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
 }
 
-/** How long the editor may take to draw the site's page:  its first page compiles the whole site. */
+/** How long the viewer may take to draw the site's page:  its first page compiles the whole site. */
 const SETTLE_MS = 30000
 
 /** A deep-linked section's title lands within this of the scrolling box's top, px:  under the page's title and stuck titles. */
@@ -793,7 +841,7 @@ const PROBE_MS = 10000
 ////////////////
 // ## In-page probes
 // Serialized into the page by `page.evaluate()` / `waitForFunction()`:  self-contained, no closures over this module.
-// Each walks the light DOM and every open shadow root:  the editor draws the site in its own.
+// Each walks the light DOM and every open shadow root:  the viewer draws the site in its own.
 ////////////////
 
 /** Whether the site has drawn its page:  its `ui-page-layout`, anywhere. */
@@ -954,7 +1002,10 @@ function followSiteLink(address: string): boolean {
   }
 }
 
-/** Where the section `id` landed, from the top of the box the page scrolls in;  `undefined`:  no such section. */
+/**
+ * Where the section `id` landed, from the top of the box the page scrolls in (the window when no box around it
+ * scrolls);  `undefined`:  no such section.
+ */
 function landedState(id: string): LandedState | undefined {
   const target = find(document)
   if (!target) return undefined
@@ -991,7 +1042,7 @@ function landedState(id: string): LandedState | undefined {
   }
 }
 
-/** How tall the page's content is:  the tallest box that scrolls (the editor's), else the document. */
+/** How tall the page's content is:  the document, or a taller box that scrolls inside it. */
 function scrollingHeight(): number {
   let tallest = document.documentElement.scrollHeight
   walk(document)

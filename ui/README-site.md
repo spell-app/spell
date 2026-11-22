@@ -383,7 +383,8 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 ### Checking:  a real browser, at desktop, phone width and dark
 
 `yarn site:check <page...>`, or `yarn site:check --all`, loads pages of the Spell UI site
-(the Spell pages of `@spell/guides/SpellUI`) as this checkout's editor runs them (started if needed),
+(the Spell pages of `@spell/guides/SpellUI`) as the page server shows them at `/components/ui/`, with no editor
+(this checkout's page server, started if needed;  `--server <origin>` for another),
 in Playwright's Chromium, and fails on:
 - console errors, page errors, failed requests and responses of 400 or more
 - `ui-*` or `spell-*` elements still undefined once settled, or defined ones with no shadow root
@@ -493,8 +494,8 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [FamilyExamples.ts](src/tools/FamilyExamples.ts) | a family's element examples, read one way:  its files, main one first, and each file's sections;  for the kitchen sink, its playgrounds and the design export |
 | [FamilyTokens.ts](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
 | [FoundationTokens.ts](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
-| [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the Spell UI site's pages in headless Chromium, as this checkout's editor runs them (`spell server start all`, from the kit's root);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
-| [pageServer.ts](src/tools/pageServer.ts) | the kit whose page server `site:dev` and `site:check` start, from its root, and the kit's own `spell`:  both found by package, never the `spell` on the `PATH`;  `ensurePageServer()` starts it, `ensureEditor()` the editor too, which runs the Spell UI site (`SPELL_UI_SITE`) |
+| [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the Spell UI site's pages in headless Chromium, as the page server shows them at `/components/ui/` (`spell server start`, from the kit's root;  `--server <origin>` for another);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
+| [pageServer.ts](src/tools/pageServer.ts) | the kit whose page server `site:dev` and `site:check` start, from its root, and the kit's own `spell`:  both found by package, never the `spell` on the `PATH`;  `ensurePageServer()` starts it;  `SPELL_UI_SITE_FILE`, the site's own file, which lists its pages |
 | [StaticRenderer.ts](src/tools/StaticRenderer.ts) | the server-only Vite server the static render runs on from node:  it compiles the components' JSX for the server, which `tsx` can't;  used by the visual tests' static pages, and by `spell ssr` in its child process (`src/cli/runner/renderStatic.ts`) |
 | [StaticDocument.ts](src/tools/StaticDocument.ts) | loaded BY that server, never by node:  `render(html, options)` turns a whole page static, `stylesheet(tags)` builds and minifies (Lightning CSS) the sheet for those families;  `spell ssr`'s engine |
 | [DesignExport.ts](src/tools/DesignExport.ts), `DesignTokens.ts`, `DesignColor.ts`, `DesignComponents.ts` | `yarn design:build`, also `spell design build`:  the claude.ai design system's files in `<dir>/project/`:  `tokens.json`, `components/index.d.ts`, a README and `preview.html` per family, the cover, `design-system.json`;  it leaves the design bundle's `components/bundle.js` and `bundle.css` alone |
