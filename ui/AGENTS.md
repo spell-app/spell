@@ -204,6 +204,12 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
 - [`src/static/`](src/static/) (`spell/ui/static`, `SSR`):  the STATIC server render, for SEO.
   - `StaticRender.page()` / `fragment()` turn `ui-*` markup into plain light-DOM HTML in node:
     no shadow DOM, no JS.
+  - Or, its SHADOW output (`{ output: "shadow" }`, `spell ssr --shadow-roots`;  epic `solid-2-final` P16):
+    each element keeps its tag and gets its shadow root drawn ahead, a declarative template (`StaticShadowRoots`).
+    - It paints before any script;  each root links the sheets it adopts in a browser (`StaticStylesheet.shadowLinks()`),
+      the same files for every root, and its custom states come as `data-ui-states`.
+    - The page keeps its scripts:  each element waits for the runtime, then draws again in place, in the same task
+      (`UIComponent`, "Server-drawn shadow roots";  not hydrated:  that was slower, J62).
   - How:
     - stand-in DOM elements are linkedom elements (`ServerDOMElement`)
     - components render with `renderToString`
@@ -548,7 +554,7 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
   - entries:  `core`, `forms`, one per family, `styles`, `index`;  and `dist/icon-packs/`
   - `.d.ts` files beside the bundle's `exports` paths, from `declarations()` in `vite.config.ts`
 - `yarn test`:  the `ssr` project, then `browser`.
-  - `ssr` first:  it writes `ssr-button.html` in `.cache/`,
+  - `ssr` first:  it writes `ssr-shadow.html` and its sheets in `.cache/`,
     which [the DSD test](./tests/test-helpers/dsd.test.ts) reads.
 - `yarn test:all`:  chromium + firefox + webkit (`yarn test:browsers` once first).
 - `yarn test:visual`:  screenshot tests of every element example, light + dark,
