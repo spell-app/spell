@@ -417,7 +417,9 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
             fallback={this.bodyRows((row, position) => (
               <tr aria-rowindex={this.isLong ? position() + 2 : undefined}>
                 <For each={this.dataColumns}>
-                  {(column) => <td class={TableGrammar.cell(column) || undefined}>{TableSort.text(row[column.key])}</td>}
+                  {(column) => (
+                    <td class={TableGrammar.cell(column) || undefined}>{TableSort.text(row[column.key])}</td>
+                  )}
                 </For>
               </tr>
             ))}

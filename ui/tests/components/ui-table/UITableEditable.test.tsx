@@ -229,7 +229,9 @@ describe("<ui-table editable>, long", () => {
     table.tBodies[0]!.rows[0]!.cells[0]!.focus()
     await settle()
     scroller.scrollTop = scroller.scrollHeight
-    await expect.poll(() => [...table.tBodies[0]!.rows].some((row) => row.cells[0]?.textContent === "Film 9999")).toBe(true)
+    await expect
+      .poll(() => [...table.tBodies[0]!.rows].some((row) => row.cells[0]?.textContent === "Film 9999"))
+      .toBe(true)
     expect(table.tBodies[0]!.rows.length).toBeLessThan(900)
     // the cursor's row, with the focus:  still there
     expect(document.activeElement?.closest("tr")?.cells[0]?.textContent).toBe("Film 0")
@@ -248,6 +250,20 @@ describe("<ui-table editable>, long", () => {
     await settle()
     // the last column, as End left it:  its row is the last film
     expect((document.activeElement as HTMLElement | null)?.closest("tr")?.cells[0]?.textContent).toBe("Film 9999")
+  })
+
+  it("Ctrl Home from the end goes back to the first row, taken down meanwhile, drawing it first", async () => {
+    const { table } = await longTable()
+    const filmShown = (film: string) => [...table.tBodies[0]!.rows].some((row) => row.cells[0]?.textContent === film)
+    table.tBodies[0]!.rows[0]!.cells[0]!.focus()
+    await userEvent.keyboard("{Control>}{End}{/Control}")
+    await settle()
+    await expect.poll(() => filmShown("Film 0")).toBe(false)
+    await userEvent.keyboard("{Control>}{Home}{/Control}")
+    await settle()
+    await expect
+      .poll(() => (document.activeElement as HTMLElement | null)?.closest("tr")?.cells[0]?.textContent)
+      .toBe("Film 0")
   })
 
   it("a paste past the drawn rows fills every row it covers", async () => {
