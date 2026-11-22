@@ -416,7 +416,7 @@ To make a look of your own, start from one of Spell UI's and change what you lik
 - A theme kept in this browser from before:  the Spell editor wears it over its base, and any page can,
   `SavedTheme.restore()`;  Stop using forgets it.
 - It starts from the page's theme, `fruity` when there's none;  `base` and `value` start it elsewhere.
-- Its docs page, with the editor live:  `/components/ui/ui-theme-editor.html`.
+- Its page on the Spell UI site, with the editor live:  `/components/ui/theme-editor`.
 
 ### 6. A project's own theme
 
@@ -478,7 +478,7 @@ These pages are served by the page server, so they need a checkout and the page 
 ([README-site.md](README-site.md)).
 The second lives in the epic folder, which a new checkout doesn't have.
 
-- Theming, with a live theme gallery and every foundation token:  `/components/ui/theming.html`
+- Theming, with a live theme gallery and every foundation token:  `/components/ui/theming`
 - Spell UI's theming notes (the sheet table, component tokens, utilities, stacking):  `/guides/ui/notes/theming.md`
 
 </details>

@@ -386,8 +386,9 @@ const PACKAGES = {
   solid: /\/node_modules\/(solid-js|@solidjs\/(web|signals))\//,
   // its generated data and the built-in sounds' names aside, plain tables bundled where they're read
   // (`vite.shared.ts`'s `UI_DATA`);  and its plain-DOM leaves, bundled the same way (`BUNDLED_UI_LEAVES`:  a desktop
-  // drop's reading, epic `language` P67;  the theme tree a site's own theme is built with, I36)
-  ui: /\/ui\/src\/(?!.*\.generated\.ts$|sounds\/|components\/ui-uploader\/DroppedFiles\.ts$|components\/ui-theme-editor\/ThemeTokens\.ts$|styles\/(ThemeFile|styles\.en)\.ts$)/,
+  // drop's reading, epic `language` P67;  the theme tree a site's own theme is built with, I36;  where the Spell UI site
+  // is, epic `editor` P43)
+  ui: /\/ui\/src\/(?!.*\.generated\.ts$|sounds\/|components\/ui-uploader\/DroppedFiles\.ts$|components\/ui-theme-editor\/ThemeTokens\.ts$|styles\/(ThemeFile|styles\.en)\.ts$|util\/SpellUIGuide\.ts$)/,
   codemirror: /\/node_modules\/@codemirror\//
 }
 

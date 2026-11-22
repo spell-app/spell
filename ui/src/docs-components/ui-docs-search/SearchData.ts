@@ -4,7 +4,8 @@ import { SITE_SEARCH_PATH, type SiteSearchFile } from "spell/ui/docs-components/
 
 /****************
  * ### `SearchData`
- * The site's search file, `__data/search.json5` (`docs/__data/search.json5`, `yarn site:data`):
+ * The site's search file, `__data/search.json5` (Spell UI's `docs/__data/search.json5`, `yarn site:check --all`;
+ * another set's, its `yarn site:data`):
  * every page's sections, fetched once per page, on the first search (~170 KB, ~25 KB compressed:  never on load).
  * - `SiteData`'s twin, the same surface:  `url` (setting it fetches again), `load()`;
  *   fetched through `SiteData.request()`.
@@ -31,7 +32,7 @@ export class SearchData {
     const url = new URL(SearchData.url ?? SITE_SEARCH_PATH, SearchData.url ? document.baseURI : SiteData.root()).href
     const response = await SiteData.request(url, {
       method: "SearchData.load()",
-      fix: "run `yarn site:data` in packages/ui, or check `SearchData.url`"
+      fix: "run `yarn site:check --all` in ui (another set:  its `yarn site:data`), or check `SearchData.url`"
     })
     return SiteData.json<SiteSearchFile>(response)
   }

@@ -543,7 +543,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     (each branch's own, read by `MainMerge`;  the kit's:  [generators.json5](.epic/generators.json5)).
   - NOT committed at all (since 2026-10-07):  the bundles only the page server serves,
     whose hashed chunk names churned every diff.
-    - Spell UI's docs site:  its `_assets/`, in [spell-ui's site](ui/site/)
+    - Spell UI's site bundle, which the other component sets' pages load:  its `_assets/`, in [spell-ui's site](ui/site/)
     - the docs pages' bundle (`epic/src/tools/_assets/spell-ui/`, and the scripts beside it) and the epics pack's
       script and families (`epic/src/components/__pack/epics.pack.js`, `epics/`), since epic `solid-2-final` P7:
       code-split, their chunks churned every diff the same way;  the pack's catalog and entry stay committed
@@ -586,7 +586,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     with its Markdown, JSON and `experiments/`
   - `pages/` -- [the docs' home page](spell.epics/pages/index.html), and the scratch details pages, `pages/details/`
   - `ui/` -- Spell UI's hand-written docs pages (claude-design P6), LEFT for the other checkouts.
-    - Since epic `people-and-orgs` P18 they're in [spell-ui's docs/](ui/docs/), served at `/components/ui/`.
+    - Since epic `people-and-orgs` P18 they were in [spell-ui's docs/](ui/docs/), served at `/components/ui/`;
+      since epic `editor` P43 Spell UI's docs are the Spell UI site (a Spell guide), shown there with no editor.
     - The page server answers "not found" for `/ui/`;  that epic's merge removes the folder (its T3).
   - `brand/` -- the old Brand tab's pages:  Claude Design's exports and their Spell UI copies
     - kept, but no longer offered:  the Brand tab, its `/_brand/assets/` and brand bundle routes went with spell-brand

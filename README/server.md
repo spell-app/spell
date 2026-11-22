@@ -91,7 +91,7 @@ A `.js` file is served as the file on disk, and so is a `.css`.
 
 - So what you debug in the browser is the file you wrote:  no source maps, no generated code in between.
 - Scripts arrive already built.
-  The bundles a page loads, such as Spell UI's docs site, are built by their own package's script, when they're
+  The bundles a page loads, such as Spell UI's site bundle, are built by their own package's script, when they're
   stale ([below](#bundles-built-on-demand-never-committed)).
 - The cost:  no TypeScript, since a `.ts` file goes out as `text/plain`, to read and not to run;
   and no module swapped in place.
@@ -223,7 +223,7 @@ the rest of `/api/` is the editor's:  spell-app's module is listed last, and see
   A page server with its own `--spaces` names both by them (`.spell-server.editor.<folder>-<hash>.json`):  one editor each.
 - Old addresses get no redirect:  they answer "not found".
 - The docs home comes from the epic folder, which someone new hasn't got:
-  start at `/components/ui/`, Spell UI's pages, which need nothing but the repo.
+  start at `/components/ui/`, the Spell UI site, which needs nothing but the repo.
 
 Each folder brings its own part:
 - the app folder's:  the editor, `/api/projects/`, Spell colouring, and the App/UI tab
@@ -543,7 +543,7 @@ In memory, a 75 KB guide takes about 110 ms the first time (most of it loading o
 
 ### Bundles built on demand, never committed
 
-Some bundles only the page server serves, like Spell UI's docs site.
+Some bundles only the page server serves, like Spell UI's site bundle, which the component sets' HTML pages load.
 Each is git-ignored, and built when it's stale:
 
 ```sh
@@ -702,13 +702,14 @@ Spell UI's whole part:
 
 ```json
 "pageServer": {
-  "bundles": ["site/_assets"],
-  "componentSets": { "ui": { "name": "Spell UI", "dir": "docs", "assets": "site/_assets" } }
+  "bundles": ["src/components/ui-root", "site/_assets"],
+  "componentSets": { "ui": { "name": "Spell UI", "dir": "docs", "assets": "site/_assets", "sitePage": "index.html" } }
 }
 ```
 
 _From [spell-ui's package.json](https://github.com/spell-app/spell/blob/main/ui/package.json):
-its site bundle, built on demand, and its component set, at `/components/ui/`._
+its bundles, built on demand, and its component set, at `/components/ui/`, where one page (`sitePage`) answers every
+address with the Spell UI site._
 
 `pageServerSettings()` merges the parts as the server starts, in a fixed order:
 1. the kit's own:  none today
@@ -801,14 +802,16 @@ export default helloRoutes
 
 | Id | Name | Served at | Its pages | Whose part |
 | --- | --- | --- | --- | --- |
-| `ui` | Spell UI | `/components/ui/` | [spell-ui's docs/](https://github.com/spell-app/spell/tree/main/ui/docs) | spell-ui's |
+| `ui` | Spell UI | `/components/ui/` | the Spell UI site, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/ui/docs/index.html) at every address under it (the set's `sitePage`) | spell-ui's |
 | `epics` | Epic UI | `/components/epics/` | [spell-epic's src/docs/](https://github.com/spell-app/spell/tree/main/epic/src/docs) | spell-epic's |
 | `app` | App UI | `/components/app/` | [spell-app's app/docs/](https://github.com/spell-app/spell/tree/main/app/app/docs) | spell-app's |
 
 - Every set's site bundle is Spell UI's, `ui/site/_assets`:
-  its pages load `site.js` and `site.css` from their own `_assets/`.
+  the HTML sets' pages load `site.js` and `site.css` from their own `_assets/`.
   What's in it:  [Spell UI's site](https://github.com/spell-app/spell/blob/main/ui/README-site.md).
 - `/components/ui` without its slash redirects to `/components/ui/`, so the pages' relative links hold.
+- A link written for Spell UI's old HTML pages (`/components/ui/ui-button.html`) is mended to the Spell UI site's
+  address (`/components/ui/button`) by the link mender.
 
 </details>
 

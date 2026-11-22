@@ -53,12 +53,10 @@
     "/////// DOCS SITE": "",
     "site:dev": "tsx scripts/site-dev.ts",
     "site:data": "tsc -p tsconfig.node.json && tsx scripts/site-data.ts",
-    "site:index": "tsx scripts/site-index.ts",
     "site:kitchen": "tsx scripts/site-kitchen.ts",
     "site:bundle": "tsx scripts/site-bundle.ts",
-    "site:build": "yarn site:data && yarn site:index && yarn site:kitchen && yarn site:bundle",
+    "site:build": "yarn site:data && yarn site:kitchen && yarn site:bundle",
     "site:new": "tsc -p tsconfig.node.json && tsx scripts/site-new.ts",
-    "site:sections": "tsx scripts/site-sections.ts",
     "site:check": "tsx scripts/site-check.ts",
     "readme:components": "tsx scripts/readme-components.ts",
     "/////// GENERATED": "",
@@ -125,7 +123,8 @@
       "ui": {
         "name": "Spell UI",
         "dir": "docs",
-        "assets": "site/_assets"
+        "assets": "site/_assets",
+        "sitePage": "index.html"
       }
     }
   },

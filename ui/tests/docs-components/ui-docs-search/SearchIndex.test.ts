@@ -4,6 +4,7 @@ import { Fixture } from "spell/test-helpers/Fixture"
 import { DATA, PAGE, SEARCH, siteTag } from "spell/ui/test-helpers/docsSearch.fixtures"
 
 import { PageOutline } from "spell/ui/components/ui-toc/PageOutline"
+import type { SiteSearchFile } from "spell/ui/docs-components/docs-components.types"
 import { SearchIndex } from "spell/ui/docs-components/ui-docs-search/SearchIndex"
 
 /** The index of the test data and search file. */
@@ -53,16 +54,16 @@ describe("SearchIndex.search()", () => {
   })
 
   test("skips the search file's copy of the page shown, and boosts its own attributes", () => {
-    expect(found("vertical divider", "components/ui-divider.html").flatMap(([, titles]) => titles)).not.toContain(
+    expect(found("vertical divider", "ui-divider.html").flatMap(([, titles]) => titles)).not.toContain(
       "Vertical Divider"
     )
-    const [attributes] = INDEX.search("circular", [], "components/ui-label.html").filter((g) => g.kind === "attribute")
+    const [attributes] = INDEX.search("circular", [], "ui-label.html").filter((g) => g.kind === "attribute")
     expect(attributes!.hits[0]!.entry.code).toBe("<ui-label>")
   })
 
   test("orders groups by their best hit;  the page shown's sections win a tie", () => {
     const here = SearchIndex.here(Fixture.render(PAGE))
-    const groups = INDEX.search("vertical divider", here, "components/ui-divider.html")
+    const groups = INDEX.search("vertical divider", here, "ui-divider.html")
     expect(groups[0]!.kind).toBe("here")
   })
 
@@ -150,5 +151,47 @@ describe("SearchIndex.here()", () => {
       ["More", "", "#more"]
     ])
     expect(SearchIndex.here(undefined)).toEqual([])
+  })
+})
+
+describe("new SearchIndex() on the Spell UI site's search file", () => {
+  /** Pages listed by their addresses on the site, as `yarn site:check --all` writes them. */
+  const SITE: SiteSearchFile = {
+    $comment: "test",
+    pages: [
+      { path: "/", title: "Spell UI", sections: [{ id: "design", title: "Design" }] },
+      { path: "/button", title: "Button", tag: "ui-button", sections: [{ id: "events", title: "Events" }] },
+      {
+        path: "/button/api",
+        title: "Button › API",
+        sections: [
+          { id: "tags", title: "Tags" },
+          { id: "attributes", title: "Attributes" }
+        ]
+      },
+      { path: "/divider", title: "Divider", tag: "ui-divider", sections: [] }
+    ]
+  }
+  const index = new SearchIndex({ data: DATA, search: SITE })
+  const hrefOf = (kind: string, title: string, code?: string) =>
+    index.entries.find((entry) => entry.kind === kind && entry.title === title && (!code || entry.code === code))!.href
+
+  test("links components to their family's page, by its address", () => {
+    expect(hrefOf("component", "Button")).toBe("/button")
+    expect(hrefOf("component", "Or")).toBe("/button")
+  })
+
+  test("links attributes to the Attributes section of their family's API page, else to the family's page", () => {
+    expect(hrefOf("attribute", "circular", "<ui-button>")).toBe("/button/api#attributes")
+    expect(hrefOf("attribute", "vertical")).toBe("/divider")
+  })
+
+  test("lists the pages and sections at their addresses;  the page shown's (its address) skipped", () => {
+    expect(hrefOf("section", "Attributes")).toBe("/button/api#attributes")
+    expect(hrefOf("page", "Button › API")).toBe("/button/api")
+    const sections = (current?: string) =>
+      index.search("tags", [], current).find((group) => group.kind === "section")?.hits.length ?? 0
+    expect(sections()).toBe(1)
+    expect(sections("/button/api")).toBe(0)
   })
 })

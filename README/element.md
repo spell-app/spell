@@ -808,7 +808,7 @@ and the page server running ([README/server.md](server.md)).
 - Custom Elements in Spell (two objects per tag, `<ui-counter>` built step by step, every decorator):
   `/guides/custom-elements/custom-elements.html`
 - Spell on Solid 2, measured:  `/guides/solid/solid-2.html`
-- Spell UI's theming notes:  `/components/ui/theming.html`
+- Spell UI's theming page, on the Spell UI site:  `/components/ui/theming`
 
 </details>
 

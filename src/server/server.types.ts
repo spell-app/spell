@@ -166,7 +166,8 @@ export type LinkResult = {
  * - `from` / `to`:  as written, and as written now (`to` is `""` for a dropped `<spell-site-header root>`)
  * - `kind`:
  *   - `rooted`:  the root path of the file it reached
- *   - `mended`:  it reached nothing, and a move's one new home was found (`spell-lang/` is `parser/` ...)
+ *   - `mended`:  it reached nothing, and a move's one new home was found (`spell-lang/` is `parser/` ...);
+ *     or it's a link to a site's old page (`Linker`'s `sites`), a root path too, at the page's address now
  *   - `broken`:  it reaches nothing, then or now:  written as the browser reads it, for a person to fix
  *   - `dropped`:  a `<spell-site-header root>`, which only served pages opened from disk
  *   - `outside`:  it climbs above the root:  left as written
@@ -175,6 +176,24 @@ export type RootLinkChange = {
   from: string
   to: string
   kind: "rooted" | "mended" | "broken" | "dropped" | "outside"
+}
+
+/**
+ * A site the page server shows at an address with NO FILE per page, `Linker`'s `sites`:
+ * the Spell UI site, a Spell site in a viewer at `/components/ui/` (epic `editor` P43).
+ * - Its pages' addresses (`/components/ui/button`) check as found, file or none.
+ * - A link written for its old pages (`/components/ui/ui-button.html`) is mended to its page's address.
+ * - Handed in by whoever makes the linker (the epic tools:  spell-epic's `ServedFolders.sites`):
+ *   the kit knows no site's pages.
+ */
+export type LinkSite = {
+  /** its address on the page server, with no `/` at its end:  `/components/ui` */
+  address: string
+  /**
+   * the address a link to one of its old pages is now, its `?query` and `#hash` kept
+   * (`/components/ui/ui-button.html#api` => `/components/ui/button#api`);  `undefined`:  not one of them
+   */
+  mendedPath(path: string): string | undefined
 }
 
 /** What `Linker.rootLinks()` did to a page's text. */

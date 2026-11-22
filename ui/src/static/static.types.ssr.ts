@@ -67,8 +67,7 @@ export type ServerDOMElementState = {
 
 /**
  * The attributes that name other elements by id, a space-separated list in some:  what follows an id when it changes.
- * - `StaticInteractions` renames a repeated id and its references;  `yarn site:kitchen` gives a playground's copy of
- *   an example ids of its own (the ONE list, epic `coherence` P23).
+ * - `StaticInteractions` renames a repeated id and its references with it (the ONE list, epic `coherence` P23).
  */
 export const ID_REFERENCE_ATTRIBUTES = [
   "aria-controls",

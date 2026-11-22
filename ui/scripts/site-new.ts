@@ -1,41 +1,32 @@
 /**
- * `yarn site:new <tag|page> [--title "Title"] [--summary "One line."] [--force]`:
- * write a component's pages:  its four pages in the Spell UI site, and its components page from the template,
- * `templates/spell-ui-docs.html` (spell-epic's);  or a components guide page.
- * - The Spell UI site (`@spell/guides/SpellUI`, epic `editor` P42;  Owen:  "the thing that adds a spell-ui page when
- *   we make a new component knows where to put them"):  for a TAG, `<Title>/Usage.spell`, `Examples.spell`,
- *   `API.spell` and `Theming.spell` (`SpellUISite.writeComponent()`), their lines in its site file A to Z, and in its
- *   project file.
- *   - Written from the components page:  the one in `docs/` when it's there, else the template's, as Spell
- *     (`SpellMarkup`).
- *   - A component the site has already is left alone, without `--force`.
- *   - A guide page (not a tag) is the components page alone:  write the site's own by hand.
- * - Components pages land in their one folder, `docs/` (`SITE_PAGES`), until epic `editor` P43 retires them.
- * - A TAG (`ui-button`, `button`, `ui-or`:  any tag of a family) writes `docs/<main tag>.html`, the component layout:
- *   - a masthead with the family's theme picker
- *   - Examples / Usage / API / Theming tabs
+ * `yarn site:new <tag> [--title "Title"] [--summary "One line."] [--force]`:
+ * write a new component's four pages in the Spell UI site (`@spell/guides/SpellUI`, epic `editor` P42).
+ * - Owen:  "the thing that adds a spell-ui page when we make a new component knows where to put them".
+ * - What it writes, for a TAG (`ui-button`, `button`, `ui-or`:  any tag of a family):
+ *   - `<Title>/Usage.spell`, `Examples.spell`, `API.spell` and `Theming.spell` (`SpellUISite.writeComponent()`)
+ *   - their lines in the site file, A to Z, and in its project file
  *   - title, summary and status from `docs/__data/pages.json5` (`--title` / `--summary` override them)
- * - A sub-tag with a page of its OWN (pages.json5 `pages`, e.g. `ui-radio`) writes `docs/<tag>.html`:
+ * - A sub-tag with a page of its OWN (pages.json5 `pages`, e.g. `ui-radio`) gets its own pages:
  *   - its own title, summary and status
  *   - ONE tag's API tables (`<ui-docs-api tag>`)
- *   - the Theming tab only when one of the family's tokens names it
+ *   - the Theming page only when one of the family's tokens names it
  *     (`--ui-checkbox-radio-size`;  `ui-meta` has none:  its owners style it)
- * - Anything else is a PAGE:  `docs/<page>.html`, one content column, no tabs.
- *   - `--title` (default:  the name in Title Case) and `--summary`
- * - What it does to the template:
+ * - How:  it fills spell-epic's components page template, `templates/spell-ui-docs.html`, in memory,
+ *   and writes that as Spell (`SpellMarkup`).  What it does to the template:
  *   - fills its `{{...}}` placeholders
- *   - keeps the `site:component` OR `site:page` blocks
+ *   - keeps the `site:component` blocks
  *   - drops the status label for a `done` family, and the Fomantic link when Fomantic has no such page
- *   - rewrites its paths to the site for the page's place
- *     (`../ui/`, `../components/ui/` once the template follows the move)
- * - The page is its `<head>` and `main` alone:  the chrome is `docs/__parts/layout.html`.
- * - Leaves an existing components page as it is without `--force`;  refuses, exit 1, when there's nothing left to write.
- * - Prints the path and the page server URL hint.
+ *   - rewrites its paths to the site (`../ui/`, `../components/ui/`)
+ *   - Until epic `editor` P43 it also wrote the HTML components page, `docs/<tag>.html`, and guide pages;
+ *     the template stays for the other component sets' pages.
+ * - A guide page (not a tag) is written in the Spell UI site by hand:  it says so, exit 1.
+ * - Leaves a component the site has already as it is, without `--force` (exit 1).
+ * - Prints what it wrote, what to tidy by hand (a script that drives an example), and the check to run.
  * - The Fomantic link:  by the family name, or `FOMANTIC_PAGES` for the families whose page has another name.
  *   - Fomantic's page, in a git-ignored clone (epic page P1):
  *     `reference/Fomantic-UI-Docs/server/documents/<group>/<name>.html.eco`
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
+import { existsSync, readFileSync, readdirSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
@@ -43,12 +34,15 @@ import { parseArgs } from "node:util"
 import { readJSON5File } from "spell/util/node/json5"
 import { escapeHTML } from "spell/util/string"
 
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
+import type { SiteTag } from "spell/ui/docs-components/docs-components.types"
+import { ApiModel } from "spell/ui/docs-components/ui-docs-api/ApiModel"
+import { docsApiVocabulary } from "spell/ui/docs-components/ui-docs-api/UIDocsApi.en"
 import { Terminal } from "spell/element-tools/Terminal"
-import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
+import { SITE_DATA, SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
 import { SpellUISite } from "spell/ui/tools/SpellUISite"
 
 import { STATUS_TEXT } from "spell/ui/tools/generatedFiles"
-import { SiteSections } from "./site-sections.ts"
 
 /**
  * The template, in the `epic/` folder's `templates/` (epic `epic-eject` T11:  every template is the engine's), found
@@ -97,27 +91,24 @@ type Family = {
   tokens: { name: string }[]
 }
 
-/** A tag as `components.json5` describes it (the fields used here). */
-type Tag = { tag: string; topics: string[] }
-
 /** A topic as `components.json5` lists it, in the site's order. */
 type Topic = { id: string; title: string }
 
 /** What fills a template. */
 type PageFacts = {
-  /** output path in the site's folder, e.g. `ui-button.html` */
+  /** its components page's name, e.g. `ui-button.html`:  how the template's links name it */
   file: string
   title: string
   summary: string
   /** `done` drops the status label */
   status: string
-  /** the tag the page documents, e.g. `ui-button` (a main tag) or `ui-radio`;  empty for a page */
+  /** the tag the page documents, e.g. `ui-button` (a main tag) or `ui-radio` */
   tag: string
   /** a sub-tag's own page:  ONE tag's API tables (`site:tag`), not the family's (`site:family`) */
   own: boolean
   /** keep the Theming tab */
   theming: boolean
-  /** family folder, e.g. `ui-button`;  empty for a page */
+  /** family folder, e.g. `ui-button` */
   family: string
   /** fomantic-ui.com URL, or empty */
   fomantic: string
@@ -125,14 +116,11 @@ type PageFacts = {
 
 /****************
  * ### `SitePageWriter`
- * Turns the template into one page:  facts from the site data, blocks kept or dropped, paths fixed for depth.
+ * Turns the template into one component's page:  facts from the site data, blocks kept or dropped, paths fixed.
  ****************/
 class SitePageWriter {
-  /** the site's pages, `docs/` */
-  readonly site = path.join(SPELL_UI_ROOT, SITE_PAGES)
-
   /** The site's data:  every family by folder, every tag, the topics in order. */
-  private readonly data = readJSON5File<{ families: Record<string, Family>; components: Tag[]; topics: Topic[] }>(
+  private readonly data = readJSON5File<{ families: Record<string, Family>; components: SiteTag[]; topics: Topic[] }>(
     path.join(SPELL_UI_ROOT, SITE_DATA, "components.json5")
   )
 
@@ -154,23 +142,13 @@ class SitePageWriter {
     )
   }
 
-  /** The facts for `name` (a tag, a family folder or a page name), with `--title` / `--summary` applied. */
-  facts(name: string, options: { title?: string; summary?: string }): PageFacts {
+  /**
+   * The facts for `name` (a tag or a family folder), with `--title` / `--summary` applied;
+   * `undefined` when it names no family's tag.
+   */
+  facts(name: string, options: { title?: string; summary?: string }): PageFacts | undefined {
     const family = this.family(name)
-    if (!family) {
-      const page = name.replace(/\.html$/, "")
-      return {
-        file: `${page}.html`,
-        title: options.title ?? SitePageWriter.titleCase(page),
-        summary: options.summary ?? "",
-        status: "done",
-        tag: "",
-        own: false,
-        theming: false,
-        family: "",
-        fomantic: ""
-      }
-    }
+    if (!family) return undefined
     const tag = SitePageWriter.tagOf(name)
     const own = family.pages && Object.hasOwn(family.pages, tag) ? family.pages[tag]! : undefined
     if (own) {
@@ -200,15 +178,12 @@ class SitePageWriter {
     }
   }
 
-  /** The page's HTML for `facts`. */
+  /** The components page's HTML for `facts`:  what the Spell pages are written from. */
   render(facts: PageFacts): string {
-    const depth = facts.file.split("/").length - 1
-    const rel = "../".repeat(depth)
-    const component = !!facts.tag
     let html = readFileSync(TEMPLATE, "utf8")
     html = SitePageWriter.dropComment(html)
-    html = SitePageWriter.block(html, "component", component)
-    html = SitePageWriter.block(html, "page", !component)
+    html = SitePageWriter.block(html, "component", true)
+    html = SitePageWriter.block(html, "page", false)
     html = SitePageWriter.block(html, "status", facts.status !== "done")
     html = SitePageWriter.block(html, "fomantic", !!facts.fomantic)
     html = SitePageWriter.block(html, "family", !facts.own)
@@ -217,7 +192,7 @@ class SitePageWriter {
     html = html
       .replace(/<title>[^<]*<\/title>/, `<title>${escapeHTML(`${facts.title} | Spell UI`)}</title>`)
       .replace(/(<meta\s+name="description"\s+content=")[^"]*(")/, `$1${escapeHTML(facts.summary)}$2`)
-      .replaceAll(TEMPLATE_SITE, rel)
+      .replaceAll(TEMPLATE_SITE, "")
     const values: Record<string, string> = {
       title: facts.title,
       summary: facts.summary,
@@ -225,9 +200,35 @@ class SitePageWriter {
       tag: facts.tag,
       family: facts.family,
       fomantic: facts.fomantic,
-      bugTitle: encodeURIComponent(`${facts.tag || facts.title}:  `)
+      bugTitle: encodeURIComponent(`${facts.tag}:  `)
     }
-    return html.replace(/\{\{(\w+)\}\}/g, (match, key: string) => (key in values ? escapeHTML(values[key]!) : match))
+    html = html.replace(/\{\{(\w+)\}\}/g, (match, key: string) => (key in values ? escapeHTML(values[key]!) : match))
+    return html.replace(API_TABLE, (_match, indent: string, kind: string, name: string) =>
+      this.apiSections(indent, kind, name)
+    )
+  }
+
+  /**
+   * The API tab's sections:  one per kind of table `name`'s tags have (a family:  any of its tags), in order,
+   * each holding that kind's `<ui-docs-api only>`, at `indent`.
+   * - A family of 2+ tags gets a Tags section first (`ApiModel.sectionIdsFor()`).
+   * - A tag the data doesn't know yet (before `yarn site:data`):  the lone table, left as it is.
+   */
+  private apiSections(indent: string, kind: string, name: string): string {
+    const tagOf = (tag: string): SiteTag | undefined => this.data.components.find((entry) => entry.tag === tag)
+    const names = kind === "family" ? (this.families[name]?.tags ?? []) : [name]
+    const ids = ApiModel.sectionIdsFor(names.map(tagOf).filter((tag): tag is SiteTag => !!tag))
+    if (!ids.length) return `${indent}<ui-docs-api ${kind}="${name}"></ui-docs-api>`
+    return ids
+      .map((id) => {
+        const label = docsApiVocabulary.texts.find((text) => text.key === id)?.text ?? id
+        return [
+          `${indent}<ui-section label="${label}" sticky="stack" collapsible dividing>`,
+          `${indent}  <ui-docs-api ${kind}="${name}" only="${ApiModel.onlyFor(id)}"></ui-docs-api>`,
+          `${indent}</ui-section>`
+        ].join("\n")
+      })
+      .join("\n\n")
   }
 
   /** `name` as a tag:  `button` => `ui-button`. */
@@ -273,18 +274,13 @@ class SitePageWriter {
   private static dropComment(html: string): string {
     return html.replace(/<!--\s*\n\s*TEMPLATE:[\s\S]*?-->\n/, "")
   }
-
-  /** `getting-started` => `Getting Started`. */
-  private static titleCase(name: string): string {
-    return name
-      .split(/[-_\s]+/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-  }
 }
 
+/** The template's API table, after its placeholders are filled:  its indent, `family` or `tag`, and its name. */
+const API_TABLE = /^( *)<ui-docs-api (family|tag)="([^"]+)"><\/ui-docs-api>$/m
+
 /** Printed when the name is missing. */
-const USAGE = 'usage:  yarn site:new <tag|page> [--title "Title"] [--summary "One line."] [--force]'
+const USAGE = 'usage:  yarn site:new <tag> [--title "Title"] [--summary "One line."] [--force]'
 
 const { values: flags, positionals } = parseArgs({
   options: { title: { type: "string" }, summary: { type: "string" }, force: { type: "boolean", default: false } },
@@ -297,36 +293,25 @@ if (!name) {
 }
 const writer = new SitePageWriter()
 const facts = writer.facts(name, { title: flags.title, summary: flags.summary })
-const file = path.join(writer.site, facts.file)
-const site = new SpellUISite()
-const hasPage = existsSync(file)
-const hasSpell = !facts.tag || site.hasComponent(facts.title)
-if (hasPage && hasSpell && !flags.force) {
-  Terminal.err(
-    `${path.relative(process.cwd(), file)} exists, and so do its Spell UI site pages:  pass --force to overwrite them`
-  )
+if (!facts) {
+  Terminal.err(`${name} is no Spell UI tag:  write a guide page in the Spell UI site by hand (${SpellUIGuide.project})`)
   process.exit(1)
 }
-const kind = facts.own ? `own page of ${facts.tag}` : facts.tag ? `component ${facts.tag}` : "page"
-// the template's section ids are written for its placeholder title:  fixed for the page's own (`#examples-types-card`)
-const html = hasPage && !flags.force ? readFileSync(file, "utf8") : SiteSections.convert(writer.render(facts))
-if (!hasPage || flags.force) {
-  writeFileSync(file, html)
-  Terminal.out(
-    `wrote ${path.relative(process.cwd(), file)}  (${kind}${facts.own && !facts.theming ? ", no Theming tab" : ""})`
-  )
+const site = new SpellUISite()
+if (site.hasComponent(facts.title) && !flags.force) {
+  Terminal.err(`${facts.title}'s Spell UI site pages exist:  pass --force to overwrite them`)
+  process.exit(1)
 }
-if (facts.tag && (!hasSpell || flags.force)) {
-  const written = site.writeComponent(html, {
-    tag: facts.tag,
-    title: facts.title,
-    summary: facts.summary,
-    topics: writer.topicsOf(facts.tag),
-    fomantic: facts.fomantic,
-    page: `/components/ui/${facts.file}`,
-    pageAddress: (other) => site.addressFor(other, writer.titleOf(other))
-  })
-  for (const each of written.files) Terminal.out(`wrote ${path.relative(process.cwd(), each)}`)
-  for (const warning of written.warnings) Terminal.err(`  to tidy by hand:  ${warning}`)
-}
-Terminal.out(`  check:  yarn site:check ${facts.tag || facts.file}`)
+const written = site.writeComponent(writer.render(facts), {
+  tag: facts.tag,
+  title: facts.title,
+  summary: facts.summary,
+  topics: writer.topicsOf(facts.tag),
+  fomantic: facts.fomantic,
+  page: `${SpellUIGuide.address}/${facts.file}`,
+  pageAddress: (other) => site.addressFor(other, writer.titleOf(other))
+})
+const kind = facts.own ? `own page of ${facts.tag}` : `component ${facts.tag}`
+for (const each of written.files) Terminal.out(`wrote ${path.relative(process.cwd(), each)}  (${kind})`)
+for (const warning of written.warnings) Terminal.err(`  to tidy by hand:  ${warning}`)
+Terminal.out(`  check:  yarn site:check ${facts.tag}`)

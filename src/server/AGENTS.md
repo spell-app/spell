@@ -101,7 +101,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - its own file:  patched in place (the kit's `PagePatch`, run by the docs runtime and Spell UI's site), else
         reloaded
         - its own file is also the file at its ADDRESS:  a component set's page is reported where it's served
-          (`/components/ui/ui-button.html`), not as its file in the checkout (P40)
+          (`/components/app/spell-viewer.html`), not as its file in the checkout (P40)
       - a stylesheet it uses:  swapped in place, no reload
         - in VS Code's side-bar views too (spell-epic's Review and Details):  the live client runs inside their frame,
           with its own socket (the frame is cross-origin to the view)
@@ -777,6 +777,10 @@ The steps between a page's content and its file on disk, for every tool that wri
     P46, `rootLinks()`):  the same text from any folder, a part or a template;  a link to the page's own folder stays
     relative, and so does a load below it (`_assets/`, `parts/`);  a link a move broke goes to its one new home
   - `check()` verifies them, and refuses a relative one (`relative:  ../x.ts -- write /spell-ui/x.ts`)
+  - a SITE shown with no file per page (`sites`, `SRV.LinkSite`;  epic `editor` P43):  the Spell UI site at
+    `/components/ui/`, handed in by the epic tools (spell-epic's `ServedFolders.sites`), since the kit names no site
+    - its pages' addresses check as found;  a link to one of its old pages is mended to its page's address
+      (`/components/ui/ui-button.html` => `/components/ui/button`), and `check()` calls it an `old page`
   - a worktree's page lays its root links under its address as they're clicked:  the live client's `worktreeHref()`,
     the rule the site header's tabs follow too
   - It was the docs tools' `doc-links.js`, which is now its command line.

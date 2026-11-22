@@ -7,12 +7,14 @@ import { keepingCommentsIn as asWritten, readJSON5File } from "spell/util/node/j
 import { writeOrCheck } from "spell/element-tools/generatedFiles"
 import type { SitePagesFile } from "spell/ui/docs-components/docs-components.types"
 import { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
-import { SITE_PAGES } from "spell/ui/tools/tools.types"
+import { SPELL_UI_SITE_FOLDER } from "spell/ui/tools/tools.types"
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 
 /**
  * The site's committed data is what `yarn site:data` would write now.
- * - The data:  `docs/__data/`'s `components.json5`, `pages.json5`, `icons.json5`, `search.json5`
- * - Run it after changing a vocabulary, a family sheet's tokens, `pages.json5` or a page's sections.
+ * - The data:  `docs/__data/`'s `components.json5`, `pages.json5`
+ *   - not `search.json5`:  `yarn site:check --all` writes it from the Spell pages as drawn, which a unit test can't
+ * - Run it after changing a vocabulary, a family sheet's tokens or `pages.json5`.
  * - A comment written into one of them is kept by the writer (`keepingCommentsIn()`):  compared as it would write it.
  */
 describe("SiteDataBuilder.build()", () => {
@@ -25,14 +27,6 @@ describe("SiteDataBuilder.build()", () => {
     expect(
       readFileSync(builder.dataFile, "utf8") === asWritten(builder.dataFile, SiteDataBuilder.stringify(data)),
       "components.json5"
-    ).toBe(true)
-    expect(
-      readFileSync(builder.iconsFile, "utf8") === asWritten(builder.iconsFile, builder.iconsText()),
-      "icons.json5"
-    ).toBe(true)
-    expect(
-      readFileSync(builder.searchFile, "utf8") === asWritten(builder.searchFile, builder.searchText()),
-      "search.json5"
     ).toBe(true)
   }, 60_000)
 
@@ -60,9 +54,13 @@ describe("SiteDataBuilder.build()", () => {
     expect(data.families["ui-checkbox"]!.pages!["ui-radio"]!.title).toBe("Radio")
     expect(data.components.find((entry) => entry.tag === "ui-or")!.page).toBe(false)
     expect(data.components.find((entry) => entry.tag === "ui-button")!.page).toBe(true)
-    // every page the data names exists
+    // every page the data names is a page of the Spell UI site (its site file's `it has a ... page at "/x"`)
+    const site = readFileSync(join(SPELL_UI_SITE_FOLDER, "SpellUI.spell"), "utf8")
+    const addresses = new Set(
+      [...site.matchAll(/^\t+(?:- )?it has an? .+? page at "([^"]+)"/gm)].map((match) => match[1])
+    )
     for (const entry of data.components.filter((tag) => tag.page))
-      expect(() => readFileSync(join(import.meta.dirname, "../..", SITE_PAGES, entry.href!)), entry.href).not.toThrow()
+      expect(addresses.has(SpellUIGuide.siteAddressOf(entry.href!)), entry.href).toBe(true)
   }, 60_000)
 
   it("resolves shared value sets, and reads a family's tokens with types", async () => {

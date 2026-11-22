@@ -325,26 +325,27 @@ export const SPELL_UI_SITE_FOLDER = join(
 )
 
 /**
- * Spell UI's docs site's PAGES, from the repo's root:  its `docs/` folder, a component set laid out as every set is
- * (epic `people-and-orgs` P18;  until then the epic repo, the checkout's `ui/`, from claude-design P6).
+ * Spell UI's docs folder, from its folder's root:  `docs/`, a component set laid out as every set is
+ * (epic `people-and-orgs` P18), served by the page server at `/components/ui/`.
  * - What's in it:
- *   - the pages, `*.html`, flat:  an element's page is its tag, `ui-button.html`
- *   - the component index, `components.html`
- *   - the layout (`__parts/`), the data (`__data/`, `SITE_DATA`)
+ *   - `index.html`:  the page that shows the Spell UI site (a Spell guide, `SPELL_UI_SITE_FOLDER`) at every one of
+ *     its addresses, with no editor (the component set's `sitePage`;  epic `editor` P43)
+ *   - the data (`__data/`, `SITE_DATA`), which the Spell pages read
  *   - the files examples load (`examples/`), Fomantic's images (`images/`)
- * - Tracked with the branch, so a page changes in the same commit as its element.
- * - The page server serves it at `/components/ui/`, with the site bundle (`SITE_BUILD`'s `_assets/`) laid over it,
- *   so a page's `_assets/site.js` resolves (the page server's `componentSets` setting).
+ * - Its HTML components pages, one per tag (`ui-button.html`), went in epic `editor` P43:
+ *   the Spell UI site has every page they had.
+ * - The site bundle (`SITE_BUILD`'s `_assets/`) is still laid over it (the page server's `componentSets` setting).
  */
 export const SITE_PAGES = "docs"
 
 /**
- * Every page of a component set's site:  the `.html` files right in `folder`, A-Z, absolute;  none when it's missing.
- * - `folder`:  Spell UI's pages (`SITE_PAGES`) by default;  another set's for its data (`SiteDataBuilder`'s `set`).
+ * Every page of a component set's HTML site:  the `.html` files right in `folder`, A-Z, absolute;
+ * none when it's missing.
+ * - `folder`:  another set's pages (Epic UI's, App UI's), for its search file (`SiteDataBuilder`'s `set`).
+ *   - Spell UI's site is Spell pages since epic `editor` P43:  `yarn site:check` draws them instead.
  * - Not a `_`-prefixed file:  a partial or a smoke page, never one of the site's pages.
- * - What `site:sections`, `site:kitchen`, `site:check --all` and the site search's index read (epic `coherence` P23).
  */
-export function sitePages(folder = join(SPELL_UI_ROOT, SITE_PAGES)): string[] {
+export function sitePages(folder: string): string[] {
   if (!existsSync(folder)) return []
   return readdirSync(folder)
     .filter((name) => name.endsWith(".html") && !name.startsWith("_"))
@@ -355,7 +356,7 @@ export function sitePages(folder = join(SPELL_UI_ROOT, SITE_PAGES)): string[] {
 /**
  * Spell UI's docs site's DATA, from the repo's root:  `docs/__data/`.
  * - GENERATED, committed (`yarn site:data`):
- *   - `components.json5`, `icons.json5`, `search.json5`
+ *   - `components.json5`;  `search.json5`, from the Spell pages as drawn (`yarn site:check --all`)
  *   - `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`
  * - hand-kept:  `pages.json5`, the per-family facts they're built from
  */

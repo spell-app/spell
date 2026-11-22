@@ -39,14 +39,16 @@ export const docsSearchVocabulary = {
       kind: "string",
       description:
         "The site root, relative to the page, e.g. `../` from `components/`;  every result's link starts with it.  " +
-        "Default:  the folder above the site's data file (`SiteData`), so links are absolute."
+        "In a Spell site, `/`:  links are the site's own addresses (`/button/api`), which it shows without loading " +
+        "a page.  Default:  the folder above the site's data file (`SiteData`), so links are absolute."
     },
     {
       name: "page",
       kind: "string",
       description:
         'Selector of the element whose sections "On this page" lists:  its `<ui-section id>`s and headers with ' +
-        "ids, across every tab.  Default:  `main#main`, else the page's `main`."
+        "ids, across every tab.  Default:  the page of the page layout the field is in (a Spell site's page), " +
+        "else `main#main`, else the page's `main`."
     },
     {
       name: "shortcuts",
@@ -80,7 +82,8 @@ export const docsSearchVocabulary = {
       description:
         "A result was picked (Enter or a plain click):  `href` is absolute, `kind` its group (`here`, `component`, " +
         "`page`, `section`, `attribute`).  `preventDefault()` keeps the browser on the page (a router takes over);  " +
-        "else a result on the page shown sets the hash, any other loads its page."
+        "else a result on the page shown sets the hash, and any other is followed as a plain link click, which a " +
+        "site showing its own pages takes."
     }
   ],
   slots: [],

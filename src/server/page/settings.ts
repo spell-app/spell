@@ -300,7 +300,8 @@ export function componentSets(settings: PageServerSettings): ComponentSet[] {
     name: set.name,
     prefix: `${COMPONENTS_PREFIX}/${id}`,
     dir: set.dir,
-    assets: set.assets
+    assets: set.assets,
+    ...(set.sitePage && { sitePage: set.sitePage })
   }))
 }
 

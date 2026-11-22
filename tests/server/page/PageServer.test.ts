@@ -9,6 +9,7 @@ import {
   DEFAULT_PORT,
   PageServer,
   componentSetPath,
+  componentSetSitePath,
   componentSets,
   engineRoutePath,
   engineRoutes,
@@ -29,7 +30,7 @@ import { ask, serveHandler } from "spell/server/test/serve"
  */
 const SERVED = {
   componentSets: {
-    ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets" },
+    ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets", sitePage: "index.html" },
     epics: { name: "Epic UI", dir: "epic/src/docs", assets: "packages/ui/site/_assets" },
     app: { name: "App UI", dir: "packages/app/docs", assets: "packages/ui/site/_assets" },
     brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
@@ -238,6 +239,7 @@ describe("PageServer", () => {
     mkdirSync(join(root, "packages", "ui", "docs", "__data"), { recursive: true })
     mkdirSync(join(root, "packages", "ui", "site", "_assets"), { recursive: true })
     writeFileSync(join(root, "packages", "ui", "docs", "ui-button.html"), "<!doctype html><head></head><p>UI</p>\n")
+    writeFileSync(join(root, "packages", "ui", "docs", "index.html"), "<!doctype html><head></head><p>Site</p>\n")
     writeFileSync(join(root, "packages", "ui", "docs", "__data", "components.json5"), `{"from":"ui"}\n`)
     writeFileSync(join(root, "packages", "ui", "site", "_assets", "site.js"), "export {}\n")
     // a page with no `</body>`
@@ -342,6 +344,18 @@ describe("PageServer", () => {
     expect((await ask(port, "GET", "/components/ui")).status).toBe(302)
     expect((await ask(port, "GET", "/components/ui/missing.html")).status).toBe(404)
     expect((await ask(port, "GET", "/components/ui/_assets/missing.js")).status).toBe(404)
+  })
+
+  it("answers a Spell site's addresses with its page (`sitePage`):  never a file, a picture or a set without one", async () => {
+    for (const address of ["/components/ui/button/api", "/components/ui/getting-started", "/components/ui/"])
+      expect((await ask(port, "GET", address)).text, address).toContain("<p>Site</p>")
+    expect((await ask(port, "GET", "/components/ui/ui-button.html")).text).toContain("<p>UI</p>")
+    expect((await ask(port, "GET", "/components/ui/images/missing.png")).status).toBe(404)
+    expect((await ask(port, "GET", "/components/ui/__data/missing")).status).toBe(404)
+    expect((await ask(port, "GET", "/components/epics/epic-item")).status).toBe(404)
+    expect(componentSetSitePath("/worktrees/w/components/ui/button", server.componentSets)).toBe(
+      "/worktrees/w/packages/ui/docs/index.html"
+    )
   })
 
   it("serves every other set at /components/<set>/:  its docs/, with Spell UI's site bundle as _assets/", async () => {

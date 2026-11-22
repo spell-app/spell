@@ -433,8 +433,8 @@ The root (`~/www/spell`)
   `format`, `format:check`, `review`
 - `dev` (the demo page), `build`, `preview`, `clean`
 - visual and browser tests:  `test:visual`, `test:visual:update`, `test:hmr`, `test:browsers`, `smoke`, `screenshots`
-- the docs site:  `site:dev`, `site:data`, `site:index`, `site:kitchen`, `site:bundle`, `site:build`, `site:new`,
-  `site:sections`, `site:check`, `readme:components`
+- the docs site:  `site:dev`, `site:data`, `site:kitchen`, `site:bundle`, `site:build`, `site:new`, `site:check`,
+  `readme:components`
 - generators:  `gen:styles`, `gen:icons`, `gen:emoji`, `gen:root`, `tokens:alias`, `icons:pack`, `manifest`
 - tools:  `vendor`, `measure`, `serve`, `report`, `design:build`
 

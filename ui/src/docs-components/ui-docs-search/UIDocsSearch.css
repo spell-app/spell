@@ -27,8 +27,17 @@
 @layer ui.components.docs-search.types, ui.components.docs-search.content, ui.components.docs-search.variations, ui.components.docs-search.states;
 
 @layer ui.components.docs-search.types {
+  /* Never narrower than a short query:  in a row that shares its room (an app menu's end), it would shrink to its icon. */
   :host {
     display: block;
+    min-inline-size: 12em;
+  }
+
+  /* A phone's app menu has no room for a field:  the pill shrinks to its icon, and a tap still opens the search. */
+  @media (width < 40em) {
+    :host {
+      min-inline-size: var(--_ui-docs-search-height, 2.25em);
+    }
   }
 
   /* Tokens:  the brand pill's measures and the card's. */
@@ -181,9 +190,13 @@
     --ui-keys-font-size: 0.6875em;
   }
 
-  /* ## The card:  a popover anchored under the pill, its left edges lined up. */
+  /*
+   * ## The card:  a popover anchored under the pill, its left edges lined up;
+   * its right edges instead where it would run off the screen (a pill at a menu bar's end).
+   */
   .results {
     position-anchor: --ui-docs-search-field;
+    position-try-fallbacks: flip-inline;
     box-sizing: border-box;
     inset: auto;
     top: calc(anchor(bottom) + 0.375em);

@@ -10,6 +10,7 @@ import "spell/app/spaces/models/projectGroups"
 import { SPELL_COMPILED_EVENT, type SpellCompiled } from "spell/app/app/runner/runner.types"
 import { adoptShadowStyles } from "spell/app/app/runner/shadowStyles"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { RunSiteHost } from "spell/app/app/run/RunSiteHost"
 import {
   SpellAppRunner,
   PUSHED_FOR,
@@ -116,6 +117,8 @@ const vocabulary = {
  *   - inside another root (a docs page, the editor demo), it's a nested root:  the outer one waits for it
  * - The PROGRAM draws with Solid too (Solid's own `h()`, from `@spell/core`), the page's one Solid;
  *   `spell-app.css` is adopted into the shadow root (`adoptShadowStyles()`).
+ * - A site it runs follows the page's address under `base` (`RunSiteHost`, as the run page's does):  how the page server shows the Spell UI
+ *   site at `/components/ui/` (epic `editor` P43).
  * - `width` / `height` set our inline style, so page CSS works too.
  * - Leaving the page stops the app and lets go of its runtime, a microtask later:  a move in one go keeps it.
  * - SEE:  its App UI components page, `app/docs/spell-viewer.html` (`/components/app/spell-viewer.html`).
@@ -279,6 +282,23 @@ export class SpellViewer extends UIRoot<typeof vocabulary> {
   // ## Drawing
   ////////////////
 
+  /**
+   * Each new run's site host, given a `base`:  the page's address is the site's (`RunSiteHost`), its sections looked for
+   * in our shadow root;  none, the runner's own, which keeps the site's address to itself (`ViewerSiteHost`).
+   * - ONE host while `base` stays the same, as the run page keeps one:  it hears the browser's Back and Forward once.
+   */
+  private get siteHost(): (() => RunSiteHost) | undefined {
+    const { base } = this
+    if (!base) return undefined
+    if (this.urlSiteHost?.base !== base.replace(/\/+$/, ""))
+      this.urlSiteHost = new RunSiteHost(base, this.domElement.renderRoot)
+    const host = this.urlSiteHost
+    return () => host
+  }
+
+  /** The site host `siteHost` hands out, for `base` as it was. */
+  private urlSiteHost?: RunSiteHost
+
   /** Our size, as our inline style. */
   @E.onChange("width", "height")
   protected onSizeChanged(width: string | undefined, height: string | undefined) {
@@ -329,6 +349,7 @@ export class SpellViewer extends UIRoot<typeof vocabulary> {
               fluid={!cssSize(this.height)}
               runtimeUrl={new URL("spell-runtime.js", BUNDLE).href}
               builtInsUrl={new URL("core.scopes.js", BUNDLE).href}
+              siteHost={this.siteHost}
               onOpen={(href) => this.send("spell-exploring", { href })}
               onControls={(controls) => (this.controls = controls)}
             />

@@ -18,6 +18,14 @@ const UI_CORE = sourceOf("spell/ui/core.ts")
  */
 const UI_ROOT = sourceOf("spell/ui/components/ui-root")
 
+/**
+ * Spell UI's docs elements (`<ui-docs-api>`, `<ui-docs-search>` ...), which a root loads on sight once told of them
+ * (`DocsFamilies.add()`):  each a lazy chunk of `ui/`, like every other family.
+ * - For the Spell UI site in `<spell-viewer>` (`/components/ui/`, epic `editor` P43):  its API tables, its search, its
+ *   component index.
+ */
+const DOCS_FAMILIES = sourceOf("spell/ui/docs-components/DocsFamilies.ts")
+
 /** Spell UI's barrel, `spell/ui`:  in `SHARED_SOLID.ui`. */
 const UI_BARREL = sourceOf("spell/ui")
 
@@ -36,6 +44,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  *   - Each is re-exported WHOLE:  the other builds can't tell this one which names they use.
  *   - None of their names clash.
  *   - Importing it defines `<ui-root>` (and what a root draws:  `<ui-loader>`, `<ui-placeholder>`, `<ui-components>`).
+ *   - And lets a root load Spell UI's docs elements, `<ui-docs-*>`, on sight (`DOCS_FAMILIES`).
  * - `spell-solid-shared.js`, what the other builds import instead (`sharedPage()`):
  *   the same names, from the PAGE when it has them all (a docs page's `SpellUI.packModules`),
  *   else from `spell-solid.js`.
@@ -103,6 +112,9 @@ function sharedEntries(): Plugin {
       `export * from "@solidjs/web"`,
       `export * from ${JSON.stringify(UI_CORE)}`,
       `export * from ${JSON.stringify(UI_ROOT)}`,
+      // a root may load the docs elements too:  Spell UI's guide draws them (`DOCS_FAMILIES`)
+      `import { DocsFamilies } from ${JSON.stringify(DOCS_FAMILIES)}`,
+      `DocsFamilies.add()`,
       // what `core` draws compiled spell with:  `sharedSolid()` hands it to `spell-runtime.js`
       `export { default as h } from "@solidjs/h"`,
       `export const loadSpellUI = () => import(${JSON.stringify(UI_ENTRY)})`

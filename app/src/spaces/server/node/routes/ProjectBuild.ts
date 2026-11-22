@@ -16,7 +16,9 @@ import { hasProjectFile } from "spell/parser/spell/node/projectFile"
  * Builds spell projects when the API needs what they build:  their compiled output and scope packs are in `build/`
  * (epic `people-and-orgs` P11), never committed, so a fresh checkout or worktree has none.
  * - `start()`:  when the page server starts, compiles the built-in projects that are out of date, in the background:
- *   `spell compile --stale --all @spell/examples @spell/library` (`STARTUP_PROJECTS`), as the kit's page server's `BundleBuild` builds the bundles
+ *   `spell compile --stale --all @spell/examples @spell/library @spell/guides` (`STARTUP_PROJECTS`), as the kit's page
+ *   server's `BundleBuild` builds the bundles;  the guides since the page server shows the Spell UI site with no
+ *   editor, at `/components/ui/` (epic `editor` P43)
  * - `builtFirst()`:  a route's handler.
  *   A request for a built file that isn't there (`/spaces/<project>/<file>`) compiles its project first,
  *   `spell compile <projectId>`, then goes on to be served:
@@ -197,7 +199,7 @@ const COMPILE_LINES: SRV.LineRule[] = [
 ]
 
 /** The built-in projects `start()` compiles:  what the demo pages and App UI's component pages run. */
-export const STARTUP_PROJECTS = ["@spell/examples", "@spell/library"]
+export const STARTUP_PROJECTS = ["@spell/examples", "@spell/library", "@spell/guides"]
 
 /** ms a request waits for its project to compile, startup build included. */
 export const COMPILE_WAIT_MS = 60_000

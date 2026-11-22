@@ -132,7 +132,7 @@ export class PlanDocFiles {
     // under the checkout the content is served in, which isn't this one for spell-epic's own epics (I22);  told its
     // served addresses, so `components/epics/` and `templates/` check as the folders they serve (I27)
     const linkRoot = new RepoList().linkRootOf(root, content)
-    this.linker = new SRV.Linker(linkRoot, { served: ServedFolders.under(linkRoot) })
+    this.linker = new SRV.Linker(linkRoot, { served: ServedFolders.under(linkRoot), sites: ServedFolders.sites })
   }
 
   /** The environment the docs tools run in:  this process's, with `root` as the checkout they work on. */

@@ -2,7 +2,8 @@ import { styleText } from "node:util"
 
 import { CLI } from "spell/cli"
 import { SRV } from "spell/server"
-import { SITE_ADDRESS, ensurePageServer } from "spell/ui/tools/pageServer"
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
+import { ensurePageServer } from "spell/ui/tools/pageServer"
 
 import type { IconsOptions } from "./cli.types"
 import { type IconInfo, loadIcons, searchIcons } from "./iconSearch"
@@ -16,7 +17,7 @@ const MAX_LISTED = 60
  * - A line each:  its name, its pack, and what else it's called.
  * - `--pack <id>`:  only that pack, e.g. `fa7-brands`.
  * - `--json`:  the icons found, as JSON.
- * - `--open`:  show them as pictures, in a browser:  the docs' icon browser (`docs/icons.html`) on the page server,
+ * - `--open`:  show them as pictures, in a browser:  the Spell UI site's Icons page on the page server,
  *   at the query, on `--pack` (else the best match's pack) -- `openIconsPage()`.
  * - Returns the exit code:  `EXIT.ERRORS` if nothing matched.
  */
@@ -49,8 +50,8 @@ export async function iconCommand(words: string[], options: IconsOptions = {}): 
 }
 
 /**
- * Open the docs' icon browser at `query`, on `pack`, in a browser:  `/components/ui/icons.html?q=<query>&pack=<pack>`
- * on the kit's page server, which this starts if it isn't running (`ensurePageServer()`).
+ * Open the Spell UI site's Icons page (its icon browser) at `query`, on `pack`, in a browser:
+ * `/components/ui/icons?q=<query>&pack=<pack>` (`SpellUIGuide.addressOf()`) on the kit's page server, which this starts if it isn't running (`ensurePageServer()`).
  * - The ONE icon browser, searching as this command does (`IconName.search()`):  the command keeps no page of its own.
  * - Prints the address;  returns the exit code.
  * - throws `CLI.CliError` when the page server won't start
@@ -62,7 +63,7 @@ async function openIconsPage(query: string, pack: string | undefined): Promise<n
   } catch (error) {
     throw new CLI.CliError(`spell icon --open:  the page server won't start (\`spell server start\`):  ${error}`)
   }
-  const url = new URL(`${base}${SITE_ADDRESS}/icons.html`)
+  const url = new URL(`${base}${SpellUIGuide.addressOf("/icons")}`)
   if (query) url.searchParams.set("q", query)
   if (pack) url.searchParams.set("pack", pack)
   CLI.out(url.href)
