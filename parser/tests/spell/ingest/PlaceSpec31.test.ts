@@ -183,7 +183,7 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
     // asked for by it, with nothing to try it with
     expect(other.collections[1]!.askedBy).toEqual({ team: "" })
     expect(other.notes).toContain(
-      '/api/reports can\'t be read without "team", and its description gives no example to try:  verify skips it.'
+      '/api/reports can\'t be read without "team", and its description gives no example to try:  verify asks it with a thing of the list it names, if one does, else skips it.'
     )
     expect(other.serverTakes).toBeUndefined()
   })

@@ -160,6 +160,8 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     ...(look.searchedOnly && { searchedOnly: true }),
     ...(look.searchedFor !== undefined && { searchedFor: look.searchedFor }),
     ...(look.askedBy && { askedBy: look.askedBy }),
+    ...(look.oneAt !== undefined && { oneAt: look.oneAt }),
+    ...(look.asksFrom && { asksFrom: look.asksFrom }),
     ...(look.schemaAt !== undefined && { schemaAt: look.schemaAt }),
     ...(look.tag !== undefined && { tag: look.tag }),
     ...(look.operations && { operations: look.operations }),
@@ -308,9 +310,9 @@ function fieldsOfRows(rows: ReadonlyArray<Record<string, unknown>>, depth: numbe
       }
       const kind = kindOf(values)
       // a yes or no named `is_hidden` is `its "hidden"`:  what's read as `if it is hidden`
-      const yesOrNo = kind.type === "yes or no" ? /^(?:is|has) (.+)$/.exec(words)?.[1] : undefined
+      const said = kind.type === "yes or no" ? yesOrNoWords(words) : words
       const named = isLinkKind(kind.type) && holdsNamedLinks(rows.map((row) => row[name]))
-      return [name, { words: yesOrNo ?? words, ...kind, ...exampleOf(values), ...(named && { isNamedLink: true }) }]
+      return [name, { words: said, ...kind, ...exampleOf(values), ...(named && { isNamedLink: true }) }]
     })
   )
 }
@@ -677,6 +679,14 @@ export function plainNameFor(address: string, kind: string): string {
   } catch {
     return `${wordsFor(address.replace(/\W+/g, " ").trim())} place`
   }
+}
+
+/**
+ * A yes or no field's words, as Spell reads them:  `is hidden` => `hidden`, `has more` => `more`.
+ * - Spell asks one `if it is hidden`, so `its "is hidden" is yes or no` is a line it can't read.
+ */
+export function yesOrNoWords(words: string): string {
+  return /^(?:is|has) (.+)$/.exec(words)?.[1] ?? words
 }
 
 /** A source's name for a field, as words a person writes:  `hair_color`, `hairColor` => `hair color`. */

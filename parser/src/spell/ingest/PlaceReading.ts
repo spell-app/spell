@@ -229,7 +229,7 @@ export function renameCollections(description: PlaceDescription): void {
 }
 
 /** Does every one of `rows` hold its own value in `field`? */
-function isUniqueIn(rows: ReadonlyArray<Record<string, unknown>>, field: string): boolean {
+export function isUniqueIn(rows: ReadonlyArray<Record<string, unknown>>, field: string): boolean {
   const values = rows.map((row) => row[field])
   return (
     values.every((value) => value !== undefined && value !== null && value !== "") &&
