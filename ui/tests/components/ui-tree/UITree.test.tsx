@@ -820,6 +820,46 @@ describe('<ui-tree appearance="columns">', () => {
     expect(pathWords(await deepColumns())).toEqual([])
     expect(pathWords(await columns("sticky-path"))).toEqual([])
   })
+
+  it("`column-min-width`:  while even the strips don't make room, the full columns keep it, and scroll sideways", async () => {
+    const host = await deepColumns('column-min-width="200"', 300)
+    expect(narrowColumns(host)).toEqual([0, 1])
+    expect([widthOf(host, 2), widthOf(host, 3)]).toEqual([200, 200])
+    const box = host.shadowRoot!.querySelector<HTMLElement>(".columns")!
+    expect(box.scrollWidth).toBeGreaterThan(box.clientWidth)
+    expect(edge(host, 2).getAttribute("aria-valuemin")).toBe("200")
+  })
+
+  it("`column-min-width` and `column-max-width` hold every column between them:  `size`, a drag, the keys", async () => {
+    const host = await columns('size="300, 60" column-min-width="120" column-max-width="250"')
+    click(host, "Acme")
+    await ElementFixture.settle()
+    expect([widthOf(host, 0), widthOf(host, 1)]).toEqual([250, 120])
+    expect(edge(host, 0).getAttribute("aria-valuemax")).toBe("250")
+    await dragLine(edge(host, 0), -200)
+    expect(widthOf(host, 0)).toBe(120)
+    await dragLine(edge(host, 0), 400)
+    expect(widthOf(host, 0)).toBe(250)
+    // narrower than the least:  the least;  in em
+    host.setAttribute("column-min-width", "10em")
+    await ElementFixture.settle()
+    const em = parseFloat(getComputedStyle(host.shadowRoot!.querySelector(".columns")!).fontSize)
+    expect(widthOf(host, 1)).toBe(Math.round(10 * em))
+  })
+
+  it('`size="auto"` fits a column up to `column-max-width`, never under `column-min-width`', async () => {
+    const host = await columns(
+      'size="auto" column-min-width="150" column-max-width="180"',
+      '<ui-tree-item label="A row with a much longer label than the rest, longer than any column here"></ui-tree-item>'
+    )
+    click(host, "Acme")
+    await ElementFixture.settle()
+    await nextPaint()
+    await nextPaint()
+    expect(widthOf(host, 0)).toBe(180)
+    // Acme's column, "Menu" and "Site", needs far less
+    expect(widthOf(host, 1)).toBe(150)
+  })
 })
 
 describe('<ui-tree appearance="columns"> from `items`', () => {
