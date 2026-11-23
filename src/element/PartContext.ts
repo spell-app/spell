@@ -19,6 +19,8 @@ function isSameOwner(a: E.OwnerMatch | undefined, b: E.OwnerMatch | undefined) {
  * - Resolution is `OwnerContext.find()` over the flat tree,
  *   with a `barrier` at every registered NON-part component:
  *   a header inside a segment inside a card stays standalone, as Fomantic's child combinators have it.
+ * - SEE-THROUGH elements (`SeeThroughElement`, a component with `letsPartsThrough()`):  no barrier while they say
+ *   so -- a view's element laying out as its drawing, so the `<ui-card>` it draws is a card of the group around it.
  * - `isDirect` mode (icons):  only the flat-tree parent component counts,
  *   skipping its own shadow internals (`.ui.icons > .icon`).
  * - CONDITIONAL owners (`ConditionalOwner`, a part whose component has `isOwnerOf()`):
@@ -149,10 +151,11 @@ export class PartContext {
    * - Called by `UIComponent.register()` for every tag, translated aliases included.
    * - Static:  the registry is page-wide, filled before any instance exists.
    */
-  static define({ vocabulary, tag, isAPart, isConditionalOwner = false }: E.PartDefinition) {
+  static define({ vocabulary, tag, isAPart, isConditionalOwner = false, isSeeThrough = false }: E.PartDefinition) {
     PartContext.definedTags.add(tag)
     if (isAPart) PartContext.partTags.add(tag)
     if (isConditionalOwner) PartContext.conditionalTags.add(tag)
+    if (isSeeThrough) PartContext.seeThroughTags.add(tag)
     for (const noun of vocabulary.ownsParts ?? []) {
       let owners = PartContext.owners.get(noun)
       if (!owners) PartContext.owners.set(noun, (owners = new Map()))
@@ -186,11 +189,16 @@ export class PartContext {
   }
 
   /**
-   * Does the climb stop at `element`?  Yes for a registered component that isn't a part.
+   * Does the climb stop at `element`?  Yes for a registered component that isn't a part,
+   * unless it's a see-through one saying so now (`SeeThroughElement`).
    * - Static:  a default `barrier`, passed around as a value (`this: void`).
    */
   static isBarrier(this: void, element: Element): boolean {
-    return PartContext.definedTags.has(element.localName) && !PartContext.partTags.has(element.localName)
+    const tag = element.localName
+    if (!PartContext.definedTags.has(tag) || PartContext.partTags.has(tag)) return false
+    if (!PartContext.seeThroughTags.has(tag)) return true
+    const component = (element as E.DOMElement).component as Partial<E.SeeThroughElement> | undefined
+    return !component?.letsPartsThrough?.()
   }
 
   /**
@@ -230,12 +238,25 @@ export class PartContext {
     else E.afterSolidUpdate(() => context.refresh())
   }
 
+  /**
+   * Re-resolve every part inside `domElement`, its light DOM and its shadow root's:  it stopped or started being
+   * a barrier (a see-through element, `SeeThroughElement`).
+   * - Not its shadow's own shadow roots:  a component in there is a barrier of its own, or re-resolves its own.
+   * - Static:  the element calls it, as `slotChanged()`.
+   */
+  static refreshInside(domElement: Element) {
+    const root = domElement.shadowRoot
+    const inside = [...domElement.querySelectorAll("*"), ...(root ? root.querySelectorAll("*") : [])]
+    for (const element of inside) PartContext.contexts.get(element)?.update()
+  }
+
   /** Forget every defined tag and live context, for tests. */
   static reset() {
     PartContext.owners.clear()
     PartContext.definedTags.clear()
     PartContext.partTags.clear()
     PartContext.conditionalTags.clear()
+    PartContext.seeThroughTags.clear()
     PartContext.contexts = new WeakMap()
     PartContext.lastAssigned = new WeakMap()
   }
@@ -274,6 +295,9 @@ export class PartContext {
 
   /** Tags of conditional owners (`ConditionalOwner`):  owners only while their component says so. */
   private static readonly conditionalTags = new Set<string>()
+
+  /** Tags of see-through elements (`SeeThroughElement`):  no barrier while their component says so. */
+  private static readonly seeThroughTags = new Set<string>()
 
   /**
    * Live context per DOM element, for `slotChanged()` / cascades.

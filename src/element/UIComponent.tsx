@@ -1579,7 +1579,8 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
       vocabulary,
       tag: definition.tag,
       isAPart: this.prototype.elementSetup.isAPart,
-      isConditionalOwner: "isOwnerOf" in this.prototype
+      isConditionalOwner: "isOwnerOf" in this.prototype,
+      isSeeThrough: "letsPartsThrough" in this.prototype
     })
     // Hand the vocabulary to the runtime (Spell UI's `UI.vocabulary`), and its English texts to its `UI.i18n`:
     // - when the class is DEFINED, not when its first element connects,
