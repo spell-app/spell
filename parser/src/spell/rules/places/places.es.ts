@@ -55,7 +55,8 @@ import {
   ShowThemAtATime,
   ShowThemIn,
   ShowThemPaged,
-  WhileWaiting
+  WhileWaiting,
+  WhileWaitingSay
 } from "./ReadRider"
 import { ReloadThings } from "./ReloadThings"
 import { PickFileFor } from "./PickFileFor"
@@ -1328,6 +1329,17 @@ placesEs.addRule(TypeVerified, {
   ]
 })
 
+placesEs.addRule(WhileWaitingSay, {
+  syntax: "mientras (espera|carga) decir {text:expression}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        ['mientras espera decir "Cargando Trabajos..."', 'core.readRider("waitingSay", () => "Cargando Trabajos...")']
+      ]
+    }
+  ]
+})
 placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) (:|,)? {statement_body}?" })
 placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) (:|,)? {statement_body}?" })
 placesEs.addRule(IfThatFailsSay, { syntax: "si falla decir {text:expression}" })

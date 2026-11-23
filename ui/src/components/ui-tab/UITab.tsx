@@ -2,6 +2,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
 import { tabVocabulary } from "./UITab.en"
+import statePanesCSS from "spell/ui/elements/StatePanes.css?inline"
 import { BASIC, type TabOwner, type TabPaneState } from "./UITab.types"
 
 import segmentCSS from "spell/ui/components/ui-segment/UISegment.css?inline"
@@ -30,12 +31,23 @@ import tabCSS from "./UITab.css?inline"
 export class UITab extends E.UIComponent<typeof tabVocabulary> {
   @E.proto static vocabulary = tabVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { segment: segmentCSS, tab: tabCSS },
+    styleSheets: { statePanes: statePanesCSS, segment: segmentCSS, tab: tabCSS },
     // the DOM element is the tabpanel and its focus stop;  nothing inside to delegate to
     delegatesFocus: false,
     // `loading`:  Fomantic's veil
-    loading: "its own"
+    loading: "its own",
+    // `error`:  its error pane in place of its content (`StatePanes`)
+    error: "its own"
   } satisfies Partial<E.ElementSetup>
+
+  /** Its loading and error panes, in place of its content while it loads or once it failed (`E.StatePanes`). */
+  readonly panes = new E.StatePanes({ owner: this, part: (name) => this.partForName(name as never) })
+
+  /** A pane stands in for its content:  `:state(state-pane)`, so its own veil goes (`reset.css`). */
+  @E.cssState("state-pane")
+  get showsStatePane(): boolean {
+    return !!this.panes.showing
+  }
 
   /** Always:  `UITab.css` tells a pane's DOM element from a tab set's by `:state(pane)`. */
   @E.cssState("pane")
@@ -191,7 +203,8 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("tab")} aria-busy={this.loading ? "true" : undefined}>
-        <slot />
+        {this.panes.content()}
+        {this.panes.draw()}
       </div>
     )
   }

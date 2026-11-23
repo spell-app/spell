@@ -3,6 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell/ui/core"
 import { popupVocabulary } from "./UIPopup.en"
+import statePanesCSS from "spell/ui/elements/StatePanes.css?inline"
 
 import popupCSS from "./UIPopup.css?inline"
 import anchoredCSS from "./UIPopup.anchored.css?raw"
@@ -63,16 +64,27 @@ import anchoredCSS from "./UIPopup.anchored.css?raw"
 export class UIPopup extends E.UIComponent<Vocabulary> {
   @E.proto static vocabulary = popupVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { popup: popupCSS, "popup-anchored": anchoredCSS },
+    styleSheets: { statePanes: statePanesCSS, popup: popupCSS, "popup-anchored": anchoredCSS },
     cssStates: ["fluid"],
     // nothing inside needs focus delegated:  a click on a tooltip's text must not jump to a link in it
     delegatesFocus: false,
     // `loading`:  Fomantic's loader inside the popup
     loading: "its own",
+    // `error`:  its error pane in place of its content (`StatePanes`)
+    error: "its own",
     visible: "hidden",
     // the sheet's own transition is Fomantic's `scale`:  faded in from 80%
     animation: "scale"
   } satisfies Partial<E.ElementSetup>
+
+  /** Its loading and error panes, in place of its content while it loads or once it failed (`E.StatePanes`). */
+  readonly panes = new E.StatePanes({ owner: this, part: (name) => this.partForName(name as never) })
+
+  /** A pane stands in for its content:  `:state(state-pane)`, so its own veil goes (`reset.css`). */
+  @E.cssState("state-pane")
+  get showsStatePane(): boolean {
+    return !!this.panes.showing
+  }
 
   ////////////////
   // ## Shown or hidden
@@ -528,7 +540,8 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
             {this.label}
           </div>
         </Show>
-        <slot />
+        {this.panes.content()}
+        {this.panes.draw()}
       </div>
     )
   }

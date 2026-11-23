@@ -368,7 +368,9 @@ export const EN_STRINGS = {
   more: "More",
   less: "Less",
   required: "Required",
-  invalid: "Invalid value"
+  invalid: "Invalid value",
+  failed: "Couldn't load this.",
+  retry: "Try again"
 } as const
 
 /** A shared string key, or any string a component pack adds. */

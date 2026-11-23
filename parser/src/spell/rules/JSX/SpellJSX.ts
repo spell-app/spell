@@ -1,4 +1,6 @@
 import { elementTagFor, proto } from "spell/util"
+import { SkeletonText } from "spell/element/SkeletonText"
+import { lookOfWords } from "spell/parser/core/looks"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Through the folder:  read only when called, once the folder has loaded
@@ -180,7 +182,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const shownIn =
       takesShortcuts && element instanceof P.JSXElementToken ? SpellJSX.shownInScope(scope, element) : undefined
     if (shownIn) match.data.shownIn = textOf((element as P.JSXElementToken).quotedWord!.value).trim()
-    const childScope = shownIn ?? scope
+    // a rider inside an element, `<loading>`, `<failed>`:  inside `<failed>`, `the error` is what went wrong
+    const rider = takesShortcuts && element instanceof P.JSXElementToken ? SpellJSX.riderOf(scope, element) : undefined
+    if (rider) match.data.rider = rider
+    const childScope = shownIn ?? (rider === "failed" ? SpellJSX.failedScope(scope) : scope)
     // `Scope.parse()` only accepts a `string` for `text`, but we have actual `Token`s here:
     // call `scope.parser.parse()` directly instead, as `SpellCSSFile.parse()` does.
     match.data.children = element.children?.map(
@@ -231,7 +236,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       // a type declared further down, still a stub:  a view once its line says so, when it compiles (`viewOf()`)
       else match.data.laterView = later ?? SpellJSX.laterViewFor(scope, element.tagName)
       // a bare name nobody has:  an error in a page;  in plain Spell, the web's own element, `<div>`
-      if (!tag && !match.data.laterView && isPage && isBareComponentName(element.tagName)) {
+      if (!tag && !match.data.laterView && !match.data.rider && isPage && isBareComponentName(element.tagName)) {
         const language = SP.Language.of(scope)
         const packs = SP.ComponentPacks.searched(SpellJSX.packsFor(scope))
         // a control inside an element (`<segment><otherwise>`):  a page reads those on a drawing's own lines
@@ -256,6 +261,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       }
     }
     SpellJSX.reuseNamedMenu(scope, match, element)
+    match.data.looking = SpellJSX.lookingOf(scope, match, element, match.data.tagName)
     match.data.attributes = SpellJSX.attributesOf(match, element)?.map((attr) =>
       scope.parser?.parse(attr, "jsxAttribute", scope)
     )
@@ -558,14 +564,132 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (laterView && !view && (match.matched[0] as P.JSXElementToken).quotedWord) attrs = attrs?.slice(0, -1)
     // a view this tag declares (Q52):  its attributes are the new thing's starting values, so the element has its id alone
     if (match.data.declares?.view) attrs = attrs?.filter((attr) => attr?.name === VIEW_ID_ATTRIBUTE)
-    const laidOut = match.data.dialogParts ? SpellJSX.dialogChildren(match) : this.childASTs(match)
+    // its `loading="..."` is Spell's:  how what waits inside it looks, never handed to the element
+    const { looking } = match.data
+    if (looking) attrs = attrs?.filter((attr) => attr?.name !== looking.attribute && attr?.name !== LOADING_ATTRIBUTE)
+    if (match.data.rider) {
+      return new P.ASTJSXElement(match, {
+        tagName,
+        attrs: [],
+        children: this.childASTs(match),
+        rider: match.data.rider
+      })
+    }
+    const ridden = SpellJSX.ridersAmong(this.childASTs(match))
+    const laidOut = match.data.dialogParts ? SpellJSX.dialogChildren(match) : ridden.children
     const children =
       match.data.shownIn !== undefined && readsIt(laidOut) ? SpellJSX.drawnShown(match, laidOut) : laidOut
     return new P.ASTJSXElement(match, {
       tagName,
       attrs: SpellJSX.clickableAttrs(match, SpellJSX.withMeasure(match, tagName, attrs)),
-      children: view ? SpellJSX.withSlotNames(view, children) : children
+      children: view ? SpellJSX.withSlotNames(view, children) : children,
+      ...((looking || ridden.waiting || ridden.failed) && {
+        looking: {
+          said: looking?.said ?? "",
+          ownsState: looking?.ownsState ?? SpellJSX.ownsLoadingState(match.scope, tagName),
+          ...(ridden.waiting && { waiting: ridden.waiting }),
+          ...(ridden.failed && { failed: ridden.failed }),
+          ...(SpellJSX.hasStateSlots(match.scope, tagName) && { slots: true })
+        }
+      })
     })
+  }
+
+  /**
+   * Which rider `element` is, written inside an element:  `<loading>` (`waiting`) or `<failed>`, by the language's
+   * words for a `<for>`'s slots (`cargando`, `fallo`);  `undefined` for any other tag.
+   * - Inside an element whose content waits:  what shows while it waits, or once it failed -- in its `loading` /
+   *   `error` slots where it has them (Spell UI's panes), else in place of what waits (`core.drawLooking()`).
+   */
+  private static riderOf(scope: P.Scope, element: P.JSXElementToken): "waiting" | "failed" | undefined {
+    if (element.attributes?.length || element.quotedWord || element.chain) return undefined
+    const language = SP.Language.of(scope)
+    const controls = (language.words.page ?? SP.Language.default.words.page!).controls
+    const kind = controls[element.tagName]
+    return kind === WAITING_CONTROL ? "waiting" : kind === FAILED_CONTROL ? "failed" : undefined
+  }
+
+  /** The scope `<failed>`'s children read in:  `the error` is the failure's words (`core.drawLooking()`'s `riders`). */
+  private static failedScope(scope: P.Scope): P.BlockScope {
+    const failed = new P.BlockScope({ name: FAILED_SCOPE, parentScope: scope })
+    failed.variables.add({ name: CAUGHT_ERROR, output: CAUGHT_ERROR })
+    return failed
+  }
+
+  /** `children` without their riders, and each rider's children as a fragment. */
+  private static ridersAmong(children: P.ASTJSXElementProps["children"]): {
+    children: P.ASTJSXElementProps["children"]
+    waiting?: P.ASTJSXFragment
+    failed?: P.ASTJSXFragment
+  } {
+    const riders = children.filter(
+      (child): child is P.ASTJSXElement => child instanceof P.ASTJSXElement && !!child.rider
+    )
+    if (!riders.length) return { children }
+    const fragmentOf = (kind: "waiting" | "failed") => {
+      const rider = riders.find((each) => each.rider === kind)
+      return rider ? new P.ASTJSXFragment(rider.match, { children: rider.children }) : undefined
+    }
+    return {
+      children: children.filter((child) => !riders.includes(child as P.ASTJSXElement)),
+      waiting: fragmentOf("waiting"),
+      failed: fragmentOf("failed")
+    }
+  }
+
+  /** Does `tag` have a `loading` state of its own (its pack says it takes `loading`)? */
+  private static ownsLoadingState(scope: P.Scope, tag: string): boolean {
+    const { lang } = SP.Language.of(scope)
+    return SP.ComponentPacks.attributeNameFor(tag, LOADING_ATTRIBUTE, lang, SpellJSX.packsFor(scope)) !== undefined
+  }
+
+  /** Does `tag` have `loading` and `error` slots (Spell UI's panes:  `StatePanes`)? */
+  private static hasStateSlots(scope: P.Scope, tag: string): boolean {
+    const { lang } = SP.Language.of(scope)
+    return SP.ComponentPacks.slotNameFor(tag, ERROR_SLOT, lang, SpellJSX.packsFor(scope)) !== undefined
+  }
+
+  /**
+   * Its `loading="..."`, when Spell takes it:  how what waits inside the element looks meanwhile, as a
+   * `<for loading>` says it -- `"skeleton"`, `"spinner"`, `"none"`, or a spinner's words (`core.drawLooking()`).
+   * - `skeleton: <skeleton text>` gives the skeleton's shape in `SkeletonText`'s words, the ones a component's
+   *   vocabulary writes its own in (`header, 3 line paragraph`):  parsed here, as it compiles, so a page never does.
+   *   A bare `skeleton` is the element's own (its vocabulary's), else the shape of what's coming.
+   * - Only a QUOTED value, other than the web's own `lazy` and `eager` (an image's, `<image loading="lazy">`):
+   *   a bare `loading` or `loading={...}` stays the element's, Spell UI's loading state.
+   * - `ownsState`:  the tag has a `loading` state of its own (Spell UI's segment, card, section, tab, form, popup):
+   *   with a spinner, that state turns on while what's inside waits, instead of a spinner inside it.
+   * - Its name is the language's `<for>` one (`loading`, Spanish `cargando`).
+   */
+  private static lookingOf(
+    scope: P.Scope,
+    match: P.MatchFor<SpellJSX>,
+    element: P.JSXElementToken,
+    tag: string | undefined
+  ): JSXMatchData["looking"] {
+    const language = SP.Language.of(scope)
+    const words = language.words.page ?? SP.Language.default.words.page!
+    const name = Object.keys(words.forAttributes).find((word) => words.forAttributes[word] === LOADING_ATTRIBUTE)
+    const attribute = element.attributes?.find((each) => each.name === name && each.value instanceof P.TextToken)
+    if (!attribute || !name) return undefined
+    const written = textOf(attribute.value!)
+    if (WEB_LOADING_VALUES.includes(written)) return undefined
+    const packs = SpellJSX.packsFor(scope)
+    const ownsState = !!tag && SpellJSX.ownsLoadingState(scope, tag)
+    const tagSkeleton = tag ? SP.ComponentPacks.skeletonFor(tag, language.lang, packs) : undefined
+    let said = written
+    try {
+      // a skeleton's shape, `skeleton: header, 3 line paragraph`, parsed here:  a page never parses skeleton text
+      said = lookOfWords(written, (text) => SkeletonText.parse(text), tagSkeleton)
+    } catch (error) {
+      const why = error instanceof Error ? error.message : String(error)
+      match.data.error ??= SP.spellParser.createParseError(
+        scope,
+        [attribute],
+        language.parserMessage("skeleton-unreadable", { why })
+      )
+    }
+    return { attribute: name, said, ownsState }
   }
 
   ////////////////
@@ -1196,6 +1320,25 @@ function readsIt(node: unknown): boolean {
   }
   return false
 }
+
+/** The `<for>` slots a rider inside an element is (`riderOf()`), as the page words' controls name them. */
+const WAITING_CONTROL = "for waiting"
+const FAILED_CONTROL = "for failed"
+
+/** The scope of `<failed>`'s children (`failedScope()`). */
+const FAILED_SCOPE = "failed"
+
+/** What `the error` is called inside `<failed>`:  as in an action's `if that fails:`. */
+const CAUGHT_ERROR = "error"
+
+/** A pane's error slot (Spell UI's `StatePanes`). */
+const ERROR_SLOT = "error"
+
+/** `loading`, by its English name:  a `<for>`'s, and Spell UI's loading state. */
+const LOADING_ATTRIBUTE = "loading"
+
+/** The web's own values of `loading`, an image's or a frame's:  never Spell's. */
+const WEB_LOADING_VALUES = ["lazy", "eager"]
 
 function textOf(word: P.JSXAttributeValue): string {
   return word instanceof P.TextToken ? word.innerText : `${word.raw ?? ""}`.trim()

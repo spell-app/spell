@@ -620,6 +620,7 @@ export type SharedDictionary = {
       Record<
         | "disabled"
         | "loading"
+        | "error"
         | "visible"
         | "animation"
         | "link"
