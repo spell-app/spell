@@ -1,3 +1,4 @@
+import { OBSERVE } from "solid-js"
 import { describe, expect, it, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
@@ -916,6 +917,19 @@ describe('<ui-tree appearance="columns"> from `items`', () => {
     expect(columnLabels(host).length).toBe(1)
     expect(dataRow(host, "empty").querySelector(".chevron")).toBeNull()
     expect(dataRow(host, "empty").classList).toContain("selected")
+  })
+
+  it("runs a `children` function inside the path line's work with no reactive write there", async () => {
+    // Solid's dev build reports a write inside a computation as `REACTIVE_WRITE_IN_OWNED_SCOPE`
+    const capture = OBSERVE!.diagnostics.capture()
+    const host = await dataTree("sticky-path")
+    await pick(host, "acme")
+    await pick(host, "empty")
+    const codes = capture.stop().map((event) => event.code)
+    expect(codes).not.toContain("REACTIVE_WRITE_IN_OWNED_SCOPE")
+    expect(dataRow(host, "empty").querySelector(".chevron")).toBeNull()
+    await pick(host, "acme")
+    expect(columnLabels(host)[1]).toEqual(["Menu", "Site"])
   })
 
   it("shows a spinner, and no empty line, while a promised list comes", async () => {

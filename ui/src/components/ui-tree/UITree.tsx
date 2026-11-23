@@ -2182,7 +2182,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.isLooking = false
     this.didStopLooking = looked > REACH_ROWS
     // a `children` function that made nothing:  its chevron goes
-    if (didRun) this.childrenVersion++
+    if (didRun) this.childrenCame.ask()
   }
 
   /**
@@ -2376,26 +2376,33 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** Each item's children once its `children` has run:  the list, or the promise of it. */
   private readonly childrenOfItem = new WeakMap<TreeItemData, readonly TreeItemData[] | Promise<unknown>>()
 
-  /** Bumped as a promised list comes:  what's read from `childrenOfItem` is read again. */
+  /** Bumped as `children` make their lists:  what's read from `childrenOfItem` is read again. */
   @E.state private accessor childrenVersion = 0
 
   /**
+   * Bumps `childrenVersion` once the current work is done:  a burst of runs bumps it once.
+   * - NEVER at once:  `childrenOf()` runs inside computations (the path line's, the columns'),
+   *   where a write is Solid's `REACTIVE_WRITE_IN_OWNED_SCOPE`.
+   */
+  private readonly childrenCame = new E.Queued({ when: E.afterSolidUpdate, run: () => this.childrenVersion++ })
+
+  /**
    * `item`'s children, made once:  `undefined` while a promise of them is on its way.
-   * - SIDE EFFECT:  the first call runs a `children` function.
+   * - SIDE EFFECT:  the first call runs a `children` function, and asks for `childrenCame`.
    */
   private childrenOf(item: TreeItemData): readonly TreeItemData[] | undefined {
     void this.childrenVersion
     const hasRun = this.childrenOfItem.has(item)
     const made = this.childrenNow(item)
     if (!Array.isArray(made)) return undefined
-    // a function that made none:  its chevron goes
-    if (!hasRun && typeof item.children === "function") this.childrenVersion++
+    // a function's list is known:  its count shows, or, if it made none, its chevron goes
+    if (!hasRun && typeof item.children === "function") this.childrenCame.ask()
     return made
   }
 
   /**
    * `item`'s children, made once:  the list, or the promise of it, with no reactive read or write.
-   * - SIDE EFFECT:  the first call runs a `children` function;  a promised list bumps `childrenVersion` as it comes.
+   * - SIDE EFFECT:  the first call runs a `children` function;  a promised list asks for `childrenCame` as it comes.
    */
   private childrenNow(item: TreeItemData): readonly TreeItemData[] | Promise<unknown> {
     const known = this.childrenOfItem.get(item)
@@ -2412,7 +2419,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         E.Warnings.warn("<ui-tree items>", `\`${item.id}\`'s children didn't come:`, error)
         this.childrenOfItem.set(item, [])
       })
-      .finally(() => this.childrenVersion++)
+      .finally(() => this.childrenCame.ask())
     this.childrenOfItem.set(item, promised)
     return promised
   }
