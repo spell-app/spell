@@ -83,7 +83,13 @@ export class CodeMirrorRelayout {
   ): Extension {
     /** each view on this extension, so a transaction can find its own and keep its caret's line still */
     const views = new Set<EditorView>()
-    const laidOut = StateEffect.define<Layout>()
+    /**
+     * Lay the text out again, in the update this goes in (the pause's relayout):  from the transaction's own new state.
+     * - NEVER a layout made beforehand from the view's state:  that state holds the layout before it, which the new
+     *   one's marks (`LaidOut.marksIn()`) would keep, and that one the one before:  every layout ever made stayed,
+     *   at each pause in the typing and each file shown (epic `solid-2-final` I26).
+     */
+    const laidOut = StateEffect.define<null>()
     const layoutOf = (state: EditorState): Layout | undefined => {
       const made = decorationsOf(state)
       return !made || "decorations" in made ? made : { decorations: made }
@@ -94,10 +100,13 @@ export class CodeMirrorRelayout {
     const field = StateField.define<Layout>({
       create: (state) => layoutOf(state) ?? { decorations: Decoration.none },
       update(layout, transaction) {
-        for (const effect of transaction.effects) if (effect.is(laidOut)) return kept(effect.value, layout)
         if (
           transaction.effects.some(
-            (effect) => effect.is(foldEffect) || effect.is(unfoldEffect) || effect.is(CodeMirrorSetup.PARSED)
+            (effect) =>
+              effect.is(laidOut) ||
+              effect.is(foldEffect) ||
+              effect.is(unfoldEffect) ||
+              effect.is(CodeMirrorSetup.PARSED)
           )
         ) {
           const made = layoutOf(transaction.state)
@@ -202,8 +211,7 @@ export class CodeMirrorRelayout {
           this.timer = after(wait / 1000, () => {
             const { state } = this.view
             if (wait === msec && isParseOnItsWay(state)) return this.relayoutSoon(CodeMirrorRelayout.AWAIT_PARSE_MSEC)
-            const layout = layoutOf(state)
-            if (layout) this.view.dispatch({ effects: laidOut.of(layout) })
+            this.view.dispatch({ effects: laidOut.of(null) })
           })
         }
 
