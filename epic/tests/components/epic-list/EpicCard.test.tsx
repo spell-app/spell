@@ -142,4 +142,13 @@ describe("<epic-card>", () => {
     const offline = await render(`phases="done active"`)
     expect(offline.shadowRoot!.querySelector(".menu")!.hasAttribute("disabled")).toBe(true)
   })
+
+  test("its `...` menu's pick is heard by its own listener (not an `on-ui-*` prop):  Resume asks the page server", async () => {
+    served()
+    const host = await render(`phases="done active"`)
+    const posted = vi.spyOn(globalThis, "fetch").mockImplementation(async () => new Response(JSON.stringify({})))
+    host.shadowRoot!.querySelector(".menu")!.dispatchEvent(new CustomEvent("ui-changed", { detail: { value: "resume" } }))
+    await vi.waitFor(() => expect(posted).toHaveBeenCalled())
+    expect(posted.mock.calls[0]![0]).toMatch(/\/resume$/)
+  })
 })

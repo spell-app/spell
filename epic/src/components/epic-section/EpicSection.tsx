@@ -1068,10 +1068,13 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
       <>
         {this.newItemList(kind)}
         <epic-new-item
-          ref={(element: HTMLElement) => (this.newItem = element as typeof this.newItem)}
+          ref={[
+            (element: HTMLElement) => (this.newItem = element as typeof this.newItem),
+            (element: HTMLElement) =>
+              element.addEventListener("epic-new-closed", (() => (this.editingNew = undefined)) as EventListener)
+          ]}
           adds={kind}
           part={this.partForName("new-item")}
-          on-epic-new-closed={() => (this.editingNew = undefined)}
         />
       </>
     )

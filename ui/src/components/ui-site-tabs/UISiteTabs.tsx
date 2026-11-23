@@ -206,13 +206,17 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
     return (
       <Show when={this.tabs.length}>
         <ui-toolbar
-          ref={(element: HTMLElement) => (this.menu = element)}
+          ref={[
+            (element: HTMLElement) => (this.menu = element),
+            (element: HTMLElement) =>
+              element.addEventListener("ui-choosing", ((event: CustomEvent<{ item: Element }>) =>
+                this.onChoosing(event)) as EventListener)
+          ]}
           exportparts={`menu: ${this.partForName("tabs")}`}
           appearance={this.isHeader ? HEADER_LOOK : SEGMENTED}
           align={this.isHeader ? undefined : FLUID}
           equal={this.isHeader ? undefined : ""}
           aria-label={this.label ?? this.family[0]?.title}
-          on-ui-choosing={(event: CustomEvent<{ item: Element }>) => this.onChoosing(event)}
         >
           <For each={this.tabs} keyed={SitePages.keyOf}>
             {(page) => this.tab(page)}

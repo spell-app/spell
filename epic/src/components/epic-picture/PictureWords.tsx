@@ -60,7 +60,10 @@ export class PictureWords {
               <epic-picture
                 label={picture().label}
                 removable=""
-                on-epic-picture-removed={(event: CustomEvent<{ label: string }>) => remove(event.detail.label)}
+                ref={(element: HTMLElement) =>
+                  element.addEventListener("epic-picture-removed", ((event: CustomEvent<{ label: string }>) =>
+                    remove(event.detail.label)) as EventListener)
+                }
               >
                 <img src={picture().path} alt={picture().label} onClick={PictureWords.zoom} />
               </epic-picture>
