@@ -137,7 +137,7 @@ export class Statusphere extends App {
           </ui-content>
         </ui-card>
         <ui-header size="small">Recent</ui-header>
-        {core.drawRead(() => this.recent, (status: Status) => core.drawThing(status), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding statuses"}</ui-loader>, none: () => <ui-text color="grey">No statuses yet. Be the first!</ui-text> })}
+        {core.drawRead(() => this.recent, (status: Status) => core.drawThing(status), { waitingSay: () => "Finding statuses", none: () => <ui-text color="grey">No statuses yet. Be the first!</ui-text> })}
       </ui-container>
     )
   }

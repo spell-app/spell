@@ -118,7 +118,7 @@ export class PersonFact extends View {
           <ui-cell>
             {core.drawWaiting(() => <ui-link link={core.siteAddressOf("planet page", this.person?.homeworld!)}>
               {core.whileWaiting(() => this.person?.homeworld?.name)}
-            </ui-link>)}
+            </ui-link>, "ui-link")}
           </ui-cell>
         </ui-row>
       </ui-table>

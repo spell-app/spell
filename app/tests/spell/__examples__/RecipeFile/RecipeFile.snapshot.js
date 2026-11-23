@@ -155,7 +155,7 @@ export class Cookbook extends App {
             }, "Add recipe")
           )
         ),
-        () => core.drawRead(async () => await core.savedThings(Recipe, {}, "as drawn"), (recipe) => core.drawThing(recipe), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your recipes"), none: () => h("ui-card", { class: "none" },
+        () => core.drawRead(async () => await core.savedThings(Recipe, {}, "as drawn"), (recipe) => core.drawThing(recipe), { waitingSay: () => "Reading your recipes", none: () => h("ui-card", { class: "none" },
           h("ui-content",
             h("ui-text", { color: "grey" }, "No recipes yet. Open a recipes file, or add your first one.")
           )

@@ -76,6 +76,7 @@ import { EveryThingMatching } from "./EveryThingMatching"
 import { SearchedAt } from "./SearchedAt"
 import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
+import { ReadOnStartup } from "./ReadOnStartup"
 import { ThereAreThings } from "./ThereAreThings"
 import { AnyServerCallFails } from "./AnyServerCallFails"
 import { ErrorIs } from "./ErrorIs"
@@ -1015,6 +1016,30 @@ placesEs.addRule(AskedBy, {
             '  collections: { pronósticos: { askedBy: ["latitud", "longitud"] } },',
             '  unclearNumbers: ","',
             "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(ReadOnStartup, {
+  syntax: `${THE} {collection:plural_type} se leen al arrancar`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'tienda es un servidor web en "https://tienda.test"\n\t- los artículos se leen al arrancar\nun artículo es una cosa',
+          [
+            "export class Tienda extends Place {}",
+            "export const tienda = core.place(new Tienda(), {",
+            '  name: "tienda",',
+            '  kind: "web server",',
+            '  at: "https://tienda.test",',
+            '  readOnStartup: ["Artículo"],',
+            '  unclearNumbers: ","',
+            "})",
+            "export class Artículo extends Thing {}"
           ]
         ]
       ]

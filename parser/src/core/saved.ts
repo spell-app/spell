@@ -13,8 +13,11 @@
  *   place never loads it.  `places.ts`, which does know `core`, is in the runtime itself.
  * - What drives the things is the read's own `changes` cell:  a memo reading `core.savedThings()` follows it, so a new
  *   answer, a write or a heal runs the memo again.  `PlaceThings.thingsFrom()` runs inside that, never by itself (J).
+ * - It NEVER reads ahead:  a page reads only what it draws, as it draws it.  Lists asked for in the same moment still go
+ *   in one request where the place can take several (`PlaceBatch`).
+ *   - Only a collection whose place says so is read as the program starts:  `tags are read on startup`,
+ *     `readOnStartup` on the place's line (`readOnStartup()`).  None is by default.
  * - What the compiler gathered (epic `data` P12), and what it couldn't see:
- *   - `firstReads`, on the place's line:  everything a first draw reads from it, asked for together when it's first read.
  *   - `select`, on a type's `savedIn`:  the fields anything reads, for a place that can leave the rest out.
  *   - A field it left out and something read anyway (`PropInfo.whenUnset`):  the place is asked once more, for all of them.
  *     Whoever read it follows the field, so it appears.
@@ -39,7 +42,6 @@ import { Errored, For, Loading, createDeferred, createEffect, createMemo, getOwn
 import { msUntil, pollWhileVisible } from "spell/util/polling"
 import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
 import { snakeCase } from "spell/util"
-import { after } from "spell/util/timing"
 
 import { Cell, getProp, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
 import { MOST_AT_ONCE, drawnInWindow, rowAt, type MorePages } from "spell/element/drawnWindow"
@@ -176,9 +178,6 @@ const KINDS_WITH_PEOPLE = new Set(["room", "atmosphere account", "personal atmos
 /** The kinds of place where each person is someone, so they sign in:  made as the program starts, to know who's at the page. */
 const KINDS_WITH_SIGN_IN = new Set(["atmosphere account", "personal atmosphere account", "the cloud"])
 
-/** How long a read asked for ahead waits for the draw that wants it, once it has its answer, in msec. */
-const FIRST_READ_WAITS = 5_000
-
 /** What a function written `async` says it is. */
 const ASYNC_FUNCTION = "AsyncFunction"
 
@@ -265,6 +264,26 @@ class ProgramPlaces {
       const behind = this.places.placeFor(name) ?? this.placeNeedingNoClass(details)
       if (!this.places.placeFor(name)) this.places.add(name, behind)
       this.followSignIn(behind)
+    }
+    this.readOnStartup()
+  }
+
+  /**
+   * SIDE EFFECT:  each collection a place's line says is read on startup (`tags are read on startup`) is read
+   * now, as the program starts, and kept for as long as it runs.  Nothing else is:  a page reads what it draws.
+   * - Its first page:  the rest as it's drawn, as a draw's own read would.
+   * - Its class by name:  every class is declared by now, as the program's module has run.
+   */
+  private readOnStartup(): void {
+    for (const { details } of this.declared.values()) {
+      for (const name of details.readOnStartup ?? []) {
+        const Class = this.classNamed(name) as SavedClass | undefined
+        if (!Class) {
+          console.error(`core.place():  "${details.name}" reads ${name} on startup, and no class goes by that name`)
+          continue
+        }
+        this.readOf(Class, {}).keepFromStartup()
+      }
     }
   }
 
@@ -535,24 +554,6 @@ class ProgramPlaces {
     return read
   }
 
-  /** What a first draw reads from the place `Class` is saved in, asked for now:  once per place. */
-  askFirstReads(Class: SavedClass): void {
-    const { place } = savedInOf(Class)
-    if (this.askedFirst.has(place)) return
-    this.askedFirst.add(place)
-    try {
-      for (const [ReadClass, query = {}] of this.declared.get(place)?.details.firstReads?.() ?? []) {
-        this.readOf(ReadClass as SavedClass, query).askAhead()
-      }
-    } catch (ignored) {
-      // only a head start:  each read still asks for itself
-      console.error("core.savedThings():  couldn't ask for what a first draw reads", ignored)
-    }
-  }
-
-  /** Each place whose first reads have gone. */
-  private readonly askedFirst = new Set<string>()
-
   /** What each link was found to be, by type and address:  `null` when the place holds nothing there. */
   private readonly linksFound = new Map<string, Thing | null>()
   /** Each thing's list of what its links name, so it stays one list while they're the same. */
@@ -702,15 +703,22 @@ class ProgramPlaces {
     }
   }
 
-  /** The fields to ask `behind` for, of `Class`:  only when it can leave the rest out, and nothing's been missed. */
+  /**
+   * The fields to ask `behind` for, of `Class`:  only when it can leave the rest out ITSELF, and nothing's been missed.
+   * - Its id too, so what it's asked whether it can do is the selection it gets:  a place that can't leave fields out
+   *   (a web server's `"none"`) can't select only an id either, so it's read whole, once.  Asked of the compiled list
+   *   alone, an empty `select` passed, the place sent every field anyway, the engine hid them, and the first field read
+   *   asked the whole list again.
+   */
   private selectionFor(Class: SavedClass, behind: PlaceBehind): readonly string[] | undefined {
     const { select } = savedInOf(Class)
     if (!select || this.askedWhole.has(Class)) return undefined
     const { select: canSelect, idOf = ID_FIELD } = behind.describe()
-    if (!this.folder!.canDoAll(canSelect, select)) return undefined
-    this.heedFieldsLeftOut(Class, select, behind)
     // its id too:  it's what makes it one thing
-    return select.includes(idOf) ? select : [...select, idOf]
+    const selection = select.includes(idOf) ? select : [...select, idOf]
+    if (!this.folder!.canDoAll(canSelect, selection)) return undefined
+    this.heedFieldsLeftOut(Class, select, behind)
+    return selection
   }
 
   /** The classes something read a left-out field of:  read whole from now on. */
@@ -1107,13 +1115,14 @@ class SavedRead {
   }
 
   /**
-   * Ask for it now, before anything draws it:  what a first draw reads, together (`PlaceDetails.firstReads`).
-   * - Held a while after its answer, so the draw that wants it finds it there, with no second request.
+   * Read it now, as the program starts, and hold it for as long as it runs:  a collection read on startup
+   * (`PlaceDetails.readOnStartup`).  NEVER throws:  a draw that reads it says what went wrong.
    */
-  askAhead(): void {
+  keepFromStartup(): void {
     this.holders++
-    const letGo = () => void after(FIRST_READ_WAITS / 1000, () => this.letGo()).catch(console.error)
-    void this.firstPage().then(letGo, letGo)
+    this.firstPage().catch((ignored) =>
+      console.error(`core.place():  couldn't read ${this.Class.name} on startup`, ignored)
+    )
   }
 
   /** It was asked with some fields left out, and something read another:  ask again for the whole thing.  NEVER throws. */
@@ -1402,7 +1411,6 @@ export const savedMethods = defineCoreModule({
     how?: "looks through" | "as drawn"
   ): Promise<List<InstanceType<Class>>> {
     const program = programPlaces()
-    program.askFirstReads(Class as unknown as SavedClass)
     const read = program.readOf(Class as unknown as SavedClass, query)
     read.changes.read()
     const answering = how === "as drawn" ? read.firstPage() : read.answer()

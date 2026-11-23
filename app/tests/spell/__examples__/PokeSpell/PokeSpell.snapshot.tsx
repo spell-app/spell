@@ -1291,7 +1291,8 @@ export const pokeApi = core.place(new PokeApi(), {
     moves: { at: "/move" },
     evolutionChains: { at: "/evolution-chain" },
     generations: { at: "/generation" }
-  }, firstReads: () => [[Pokemon], [Type]] })
+  }
+})
 
 // -----------
 core.heading("Your favourites:  kept on this device")
@@ -1417,7 +1418,7 @@ export class Guess extends Thing {
     if (this.hiding) {
       return [
         <ui-segment class={this.look} align="center">
-          {core.drawWaiting(() => <ui-image class="art" align="center" src={this.hiding?.picture} alt="A Pokémon, hiding" />)}
+          {core.drawWaiting(() => <ui-image class="art" align="center" src={this.hiding?.picture} alt="A Pokémon, hiding" />, "ui-image")}
         </ui-segment>,
         <slot name="answer">{this.drawAnswer()}</slot>
       ]

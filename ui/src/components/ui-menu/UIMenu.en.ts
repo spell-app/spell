@@ -280,8 +280,8 @@ export const menuVocabulary = {
       name: "ui-changed",
       detail: "{ value?: string, values?: string[] }",
       description:
-        "A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose=\"many\"` menu's `values`, the " +
-        "items now on, in order (each one's `value`, else its text)."
+        "A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  " +
+        "a `choose=\"many\"` menu's `values`, the items now on, in order (each one's `value`, else its text)."
     },
     {
       name: "ui-form-value",

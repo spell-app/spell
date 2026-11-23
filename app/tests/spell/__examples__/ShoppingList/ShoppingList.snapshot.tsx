@@ -121,7 +121,8 @@ export class ShoppingSheet extends Place {}
 export const shoppingSheet = core.place(new ShoppingSheet(), {
   name: "shopping_sheet",
   kind: "sheet",
-  at: "/api/places/spaces/@spell/examples/ShoppingList/__data/shopping.csv", firstReads: () => [[Item, { filter: { got: true } }], [Item, { filter: { got: false } }]] })
+  at: "/api/places/spaces/@spell/examples/ShoppingList/__data/shopping.csv"
+})
 
 // -----------
 core.heading("An item on the list")

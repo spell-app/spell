@@ -260,7 +260,7 @@ export class Weather extends App {
               {core.drawEach(this.cities, (city: City) => <ui-item value={city.name}>{city.name}</ui-item>)}
             </ui-select>
           </ui-form>
-          {core.drawRead(() => this.forecasts, (forecast: Forecast) => core.drawThing(forecast), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking Open-Meteo"}</ui-loader>, failedSay: () => "Open-Meteo can't be reached just now." })}
+          {core.drawRead(() => this.forecasts, (forecast: Forecast) => core.drawThing(forecast), { waitingSay: () => "Asking Open-Meteo", failedSay: () => "Open-Meteo can't be reached just now." })}
           <ui-text size="small" color="grey">
             {"From "}
             <ui-link link="https://open-meteo.com">Open-Meteo</ui-link>

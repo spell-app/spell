@@ -124,7 +124,8 @@ export const orgEvents = core.place(new OrgEvent(), {
   name: "org_events",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__admin/events",
-  checkedEvery: 30, firstReads: () => [[Event], [EventStage]] })
+  checkedEvery: 30
+})
 
 // -----------
 core.heading("Org Events")
@@ -191,7 +192,7 @@ export class EventsPage extends App {
             h("ui-header", { size: "medium" }, "Events"),
             h("ui-stack", { class: "events", spacing: "sm" },
               () => core.drawRead(async () => await core.savedThings(Event, {}, "as drawn"), (event) => core.drawThing(event), {
-                waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding the events"),
+                waitingSay: () => "Finding the events",
                 none: () => h("ui-text", { class: "none", color: "grey" }, "No events yet."),
                 failed: () => h("ui-text", { color: "red" }, "We can't read the events right now.")
               })
@@ -200,7 +201,7 @@ export class EventsPage extends App {
           h("ui-segment", { class: "stages" },
             h("ui-header", { size: "medium" }, "Stages"),
             h("ui-stack", { class: "stages", spacing: "sm" },
-              () => core.drawRead(async () => await core.savedThings(EventStage, {}, "as drawn"), (step) => core.drawThing(step), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding the stages") })
+              () => core.drawRead(async () => await core.savedThings(EventStage, {}, "as drawn"), (step) => core.drawThing(step), { waitingSay: () => "Finding the stages" })
             )
           )
         )
