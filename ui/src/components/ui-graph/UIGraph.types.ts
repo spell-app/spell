@@ -14,7 +14,25 @@
 export type GraphData = {
   nodes: GraphNode[]
   edges?: GraphEdge[]
+  /**
+   * The columns its nodes' `group`s make, in order, with each one's header;  a group not listed comes after these,
+   * its id its header.  Nodes with no `group` go in a last column, no header.
+   */
+  groups?: GraphGroup[]
+  /**
+   * The rows its nodes' `row`s make, top to bottom (`groups` arrangement):  each row starts at the same height in
+   * every column, as tall as its tallest cell;  a row not listed comes after these, sorted.  Nodes with no `row` go
+   * under the rows (at the top of a column that has none).
+   */
+  rows?: string[]
 }
+
+/** A column of the `groups` arrangement:  its id (what nodes' `group` names) and header. */
+export type GraphGroup = { id: string; label?: string }
+
+/** How a graph's nodes are arranged.  Above its type:  the vocabulary lists them. */
+export const GraphArrangements = ["auto", "layers", "groups"] as const
+export type GraphArrangement = (typeof GraphArrangements)[number]
 
 /** What a node's `children` may be:  a graph, or a function giving one (or a promise of one), called on first open. */
 export type GraphChildren = GraphData | (() => GraphData | Promise<GraphData>)
@@ -35,6 +53,17 @@ export type GraphNode = {
   childView?: GraphChildView
   /** Starts open (`inline` only). */
   open?: boolean
+  /**
+   * The column it goes in (`arrange` `groups`, or `auto` when any node has one):  nodes of a group are stacked top
+   * to bottom by `order`, then label.
+   */
+  group?: string
+  /** Its place in its group's column, smallest at the top. */
+  order?: number
+  /** Room above and below it in its column (between two nodes, the larger);  none:  the metrics' `nodeGap`. */
+  spacing?: number
+  /** The row it goes in, in its column (`groups` arrangement):  rows line up across the columns (a grid). */
+  row?: string
   /** Hover text (an SVG `<title>`). */
   title?: string
   /** Anything the page wants to keep with the node:  never read by the graph. */
@@ -150,6 +179,22 @@ export type GraphPlacedEdge = {
   readonly fromSide: GraphPortSide
   readonly toSide: GraphPortSide
   readonly depth: number
+  /** Routed square through the gaps between layers and rows (never under a box):  drawn with rounded corners. */
+  readonly routed?: boolean
+  /** Where its label goes:  the middle of its longest run. */
+  readonly labelAt?: GraphPoint
+}
+
+/** A column of the `groups` arrangement, placed:  a band behind its nodes, its header at the top. */
+export type GraphPlacedColumn = {
+  readonly id: string
+  readonly label: string
+  readonly x: number
+  readonly y: number
+  readonly width: number
+  readonly height: number
+  /** How deep its graph is:  `0` for the shown graph. */
+  readonly depth: number
 }
 
 /** A boundary pin:  an enclosing node's port, drawn on the graph's own edge (modal and drill views). */
@@ -168,6 +213,8 @@ export type GraphLayoutResult = {
   readonly edges: readonly GraphPlacedEdge[]
   /** The enclosing node's ports, at the top level's sides. */
   readonly pins: readonly GraphPlacedPin[]
+  /** The columns, when nodes were arranged in `groups`. */
+  readonly columns: readonly GraphPlacedColumn[]
 }
 
 /** What `GraphLayout` is told besides the graph. */
@@ -185,6 +232,8 @@ export type GraphLayoutOptions = {
   boundary?: readonly GraphPort[]
   /** The shown graph's own path, `""` at the top:  what its nodes' paths start with. */
   prefix?: string
+  /** How nodes are arranged:  `layers` (by their edges), `groups` (a column per `group`), `auto` (groups when any node has one). */
+  arrange?: GraphArrangement
 }
 
 /** Sizes the layout works in, in user units. */
@@ -203,6 +252,8 @@ export const GRAPH_METRICS = {
   layerGap: 56,
   /** Space between nodes in a layer. */
   nodeGap: 18,
+  /** Space between rows, when nodes have a `row` (a grid of columns and rows). */
+  rowGap: 40,
   /** A container's header (its label and toggle), and the padding round its child graph. */
   headerHeight: 26,
   containerPadding: 14,

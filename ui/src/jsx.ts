@@ -18727,6 +18727,17 @@ export interface UIGraphAttributes {
    */
   "prop:path"?: string
   /**
+   * How nodes are placed:  `layers`, left to right by their edges;  `groups`, a column per node `group` (its header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column;  `auto`, groups when any node has one.  NOT `layout`:  that's the laid out drawing, a property already.
+   * - takes:  `auto` · `layers` · `groups`
+   * - default:  `auto`
+   */
+  arrange?: "auto" | "layers" | "groups"
+  /**
+   * `arrange`, as the DOM element's property.
+   * @deprecated write `arrange` -- `prop:` stays only for compiled spell
+   */
+  "prop:arrange"?: "auto" | "layers" | "groups"
+  /**
    * PROPERTY:  what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`;  `undefined`:  nothing.  Clicks set it.
    * - a JS property (rich data):  an object, array or function, given as it is
    */

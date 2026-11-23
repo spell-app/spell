@@ -747,6 +747,8 @@ export const HELP_TABLE: Readonly<
       "child-view":
         "How a node's children show when it's opened: `inline`, inside the node, which grows round them; `modal`, a graph in a modal; `drill`, the graph replaced by them, with breadcrumbs back.",
       path: 'The node whose child graph is shown, drilled to, by its ids from the top joined by `/` (`cpu/alu`); `""`: the top.',
+      arrange:
+        "How nodes are placed: `layers`, left to right by their edges; `groups`, a column per node `group` (its header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column; `auto`, groups when any node has one.",
       selected: "PROPERTY: what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`; `undefined`: nothing.",
       boundary: "PROPERTY: the enclosing node's ports, drawn as pins on the graph's sides, for edges with no `node`."
     }

@@ -11473,7 +11473,7 @@
       "name": "::part(column)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-column>`:  The column box (a flex item).\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  one column."
+        "value": "Part of:\n\n- `<ui-column>`:  The column box (a flex item).\n- `<ui-graph>`:  Each column of the `groups` arrangement:  its band and header.\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  one column."
       }
     },
     {
@@ -12852,7 +12852,7 @@
       "name": "::part(toolbar)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-graph>`:  The buttons over the drawing (fit).\n- `<ui-toolbar>`:  The box around the menu and its scroll buttons."
+        "value": "Part of:\n\n- `<ui-graph>`:  The buttons at the right of the bar over the drawing (a subclass's, then fit).\n- `<ui-toolbar>`:  The box around the menu and its scroll buttons."
       }
     },
     {

@@ -14,17 +14,20 @@ import "spell/ui/components/ui-breadcrumbs"
 UIGraph.define()
 
 export { DOMGraphElement, GraphLayout, UIGraph }
-export { GRAPH_METRICS, GraphChildViews, GraphPortSides } from "./UIGraph.types"
+export { GRAPH_METRICS, GraphArrangements, GraphChildViews, GraphPortSides } from "./UIGraph.types"
 export type {
+  GraphArrangement,
   GraphChildren,
   GraphChildView,
   GraphData,
   GraphEdge,
   GraphEnd,
+  GraphGroup,
   GraphLayoutOptions,
   GraphLayoutResult,
   GraphMetrics,
   GraphNode,
+  GraphPlacedColumn,
   GraphPlacedEdge,
   GraphPlacedNode,
   GraphPlacedPin,

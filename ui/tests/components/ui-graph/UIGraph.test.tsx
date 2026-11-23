@@ -157,3 +157,68 @@ describe("<ui-graph> selection", () => {
     expect(host.selected).toBeUndefined()
   })
 })
+
+describe("<ui-graph> columns and fit", () => {
+  /** A made-up build in two named columns. */
+  const STAGES: GraphData = {
+    groups: [
+      { id: "source", label: "Sources" },
+      { id: "build", label: "Build" }
+    ],
+    nodes: [
+      { id: "repo", label: "Repo", group: "source" },
+      { id: "compile", label: "Compile", group: "build", order: 1 },
+      { id: "bundle", label: "Bundle", group: "build", order: 2 }
+    ],
+    edges: [
+      { from: { node: "repo" }, to: { node: "compile" } },
+      { from: { node: "compile" }, to: { node: "bundle" } }
+    ]
+  }
+
+  /** Whether every node's box shows whole in the drawing's box. */
+  function allShowing(root: ShadowRoot): boolean {
+    const view = root.querySelector("svg")!.getBoundingClientRect()
+    return [...root.querySelectorAll("g.node > rect")].every((rect) => {
+      const box = rect.getBoundingClientRect()
+      return box.left >= view.left && box.right <= view.right && box.top >= view.top && box.bottom <= view.bottom
+    })
+  }
+
+  test("draws a band and a header per column", async () => {
+    const host = await ElementFixture.render<GraphElement>(
+      `<ui-graph graph='${JSON.stringify(STAGES)}' style="width: 640px"></ui-graph>`
+    )
+    await ElementFixture.tick()
+    const root = host.shadowRoot!
+    expect(root.querySelectorAll("g.column > rect.column-band")).toHaveLength(2)
+    expect([...root.querySelectorAll("text.column-label")].map((text) => text.textContent)).toEqual([
+      "Sources",
+      "Build"
+    ])
+    // `arrange="layers"`:  no columns.
+    host.setAttribute("arrange", "layers")
+    await ElementFixture.tick()
+    expect(root.querySelectorAll("g.column")).toHaveLength(0)
+  })
+
+  test("the toolbar sits at the right of the bar over the drawing, Fit last", async () => {
+    const { root } = await graph()
+    const toolbar = root.querySelector(".top-bar > .toolbar")!
+    expect(toolbar).toBeTruthy()
+    expect(toolbar.lastElementChild!.classList.contains("group-start")).toBe(true)
+    const bar = root.querySelector(".top-bar")!.getBoundingClientRect()
+    expect(bar.bottom).toBeLessThanOrEqual(root.querySelector("svg")!.getBoundingClientRect().top + 1)
+  })
+
+  test("fits the drawing to the view, and again, eased, when a node opens in place", async () => {
+    const { host, root } = await graph()
+    expect(allShowing(root)).toBe(true)
+    await host.open("cpu")
+    await ElementFixture.tick()
+    // The fit eases over 350ms.
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    expect(labels(root)).toEqual(expect.arrayContaining(["ALU", "Registers"]))
+    expect(allShowing(root)).toBe(true)
+  })
+})

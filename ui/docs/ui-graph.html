@@ -80,6 +80,19 @@
               </ui-section>
             </ui-section>
 
+            <ui-section id="examples-columns" label="Columns" sticky="stack" collapsible dividing>
+              <ui-section id="examples-columns-groups" label="Groups" sticky="stack" collapsible dividing>
+                <ui-example description="A node&#39;s `group` puts it in a column, headed by the graph&#39;s `groups`;  `order` stacks a column top to bottom.  A node with no `group` goes in a last column, with no header.  Edges go round the boxes, square.">
+                  <ui-graph style="--ui-graph-height: 22em" graph='{"groups":[{"id":"source","label":"Sources"},{"id":"build","label":"Build"},{"id":"ship","label":"Ship"}],"nodes":[{"id":"repo","label":"Repo","group":"source","order":1,"ports":[{"id":"out","kind":"out"}]},{"id":"assets","label":"Assets","group":"source","order":2,"ports":[{"id":"out","kind":"out"}]},{"id":"compile","label":"Compile","group":"build","order":1,"ports":[{"id":"in","kind":"in"},{"id":"out","kind":"out"}]},{"id":"bundle","label":"Bundle","group":"build","order":2,"ports":[{"id":"code","label":"code","kind":"in"},{"id":"files","label":"files","kind":"in"},{"id":"out","kind":"out"}]},{"id":"test","label":"Test","group":"build","order":3,"ports":[{"id":"in","kind":"in"}]},{"id":"deploy","label":"Deploy","group":"ship","ports":[{"id":"in","kind":"in"}]},{"id":"notes","label":"Notes"}],"edges":[{"from":{"node":"repo","port":"out"},"to":{"node":"compile","port":"in"}},{"from":{"node":"compile","port":"out"},"to":{"node":"bundle","port":"code"}},{"from":{"node":"assets","port":"out"},"to":{"node":"bundle","port":"files"}},{"from":{"node":"compile","port":"out"},"to":{"node":"test","port":"in"}},{"from":{"node":"bundle","port":"out"},"to":{"node":"deploy","port":"in"},"label":"release"},{"from":{"node":"repo","port":"out"},"to":{"node":"notes"}}]}'></ui-graph>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-columns-rows" label="Rows" sticky="stack" collapsible dividing>
+                <ui-example description="A node&#39;s `row` lines it up across the columns:  each of the graph&#39;s `rows` starts at the same height in every column.">
+                  <ui-graph style="--ui-graph-height: 22em" graph='{"groups":[{"id":"east","label":"East wing"},{"id":"west","label":"West wing"}],"rows":["upper","lower"],"nodes":[{"id":"pump","label":"Pump","group":"east","row":"upper","ports":[{"id":"out","kind":"out"}]},{"id":"tank","label":"Tank","group":"east","row":"lower","order":1,"ports":[{"id":"out","kind":"out"}]},{"id":"heater","label":"Heater","group":"east","row":"lower","order":2,"ports":[{"id":"out","kind":"out"}]},{"id":"valve","label":"Valve","group":"west","row":"upper","ports":[{"id":"in","kind":"in"}]},{"id":"meter","label":"Meter","group":"west","row":"lower","ports":[{"id":"a","kind":"in"},{"id":"b","kind":"in"}]}],"edges":[{"from":{"node":"pump","port":"out"},"to":{"node":"valve","port":"in"}},{"from":{"node":"tank","port":"out"},"to":{"node":"meter","port":"a"}},{"from":{"node":"heater","port":"out"},"to":{"node":"valve","port":"in"}},{"from":{"node":"pump","port":"out"},"to":{"node":"meter","port":"b"}}]}'></ui-graph>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+
             <ui-section id="examples-big" label="Big" sticky="stack" collapsible dividing>
               <ui-section id="examples-big-150-nodes" label="150 nodes" sticky="stack" collapsible dividing>
                 <ui-example description="150 nodes and about 300 edges in one level, made by the script at the end of this page and laid out as it loads.  Some nodes hold a graph of their own.">
@@ -104,15 +117,20 @@
                   A graph draws any nodes and edges:  it knows nothing about where they came from.
                   Give it the `graph` property, or JSON in the attribute on a static page:
 
-                  - `nodes`, each `{ id, label?, kind?, ports?, children?, childView?, open?, title?, data? }`
+                  - `nodes`, each `{ id, label?, kind?, ports?, children?, childView?, open?, group?, order?, spacing?, row?, title?, data? }`
                     - `ports`, each `{ id, label?, side?, kind? }`.  With no `side`:  `kind` `in` or `input` is on the
                       left, `out` or `output` on the right, else the side most of its edges come from.
                     - `children`:  a graph, or a function giving one (or a promise of one), called the first time it opens.
                     - `kind`:  a word added to its classes and parts (`kind-hub`), for a page's own style.
                   - `edges`, each `{ id?, from: { node, port? }, to: { node, port? }, kind?, label?, data? }`
                     - Inside a child graph, an end with NO `node` is the enclosing node:  `port` names its port.
+                  - `groups`, each `{ id, label? }`:  the columns nodes' `group`s make, in order, with their headers.
+                  - `rows`:  the rows nodes' `row`s make, top to bottom, lined up across the columns.
 
                   It lays the graph out in layers, left to right, and fits it to the view.
+                  When any node has a `group`, it lays it out in COLUMNS instead, a column per group (`arrange` says which:
+                  `auto`, `layers` or `groups`).
+                  Edges go square, round the boxes, with rounded corners.
                   Set a NEW graph to redraw:  one changed in place isn't seen.
                 </script>
               </ui-markdown>
@@ -183,7 +201,10 @@
                   | `portLabel(port, node)`, `portClass(port, node)` | A port's text and classes. |
                   | `metrics` | The sizes the layout works in. |
                   | `trail()` | The breadcrumbs. |
-                  | `toolButtons()`, `overlay()` | More buttons beside Fit;  something drawn over the drawing. |
+                  | `toolButtons()`, `overlay()` | More buttons before Fit, at the right of the bar over the drawing;  something at its left (a legend). |
+                  | `underlay()` | Something drawn under the nodes and edges, in the drawing's own units. |
+                  | `drawingBounds()`, `minOpenFitZoom` | The box Fit shows, for an underlay that reaches past the nodes;  the least zoom the Fit button and an opened node fit to. |
+                  | `arrangement` | How nodes are arranged, when the subclass decides it another way than `arrange`. |
 
                   The modal opens a graph of the same tag, so a subclass keeps its look there.
                   Every node, container, edge, port and pin is a part, with `kind-<kind>` beside it:
