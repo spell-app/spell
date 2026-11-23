@@ -49,6 +49,8 @@ import {
   type Running,
   type StartAnswer,
   type TestsEntry,
+  type CloseAllAnswer,
+  idsOf,
   sentence,
   storageNow,
   wakeOf,
@@ -842,6 +844,28 @@ export class ReviewClient extends PageStore {
       this.notify(sentence((failure as Error).message))
       return false
     }
+  }
+
+  /**
+   * A section's Close all (`POST close-all`, epic `epic-engine` T158):  each of `ids`, of section kind `kind`, closed
+   * as his ✓ would, in one edit;  the ids closed and left, and the Undo's key;  `undefined` when it failed (a notice
+   * says why).
+   * - NEVER throws
+   */
+  async closeAll(kind: string, ids: readonly string[]): Promise<CloseAllAnswer | undefined> {
+    const reply = (await this.post("close-all", { kind, ids })) as Partial<CloseAllAnswer> | undefined
+    if (!reply) return undefined
+    return { closed: idsOf(reply.closed), left: idsOf(reply.left), ...(reply.batch && { batch: reply.batch }) }
+  }
+
+  /**
+   * Undo Close all `batch` (`POST undo-close-all`):  each item put back, unless it changed since;  the ids put back and
+   * left;  `undefined` when it failed (a notice says why).
+   * - NEVER throws
+   */
+  async undoCloseAll(batch: string): Promise<{ restored: string[]; left: string[] } | undefined> {
+    const reply = (await this.post("undo-close-all", { batch })) as { restored?: unknown; left?: unknown } | undefined
+    return reply && { restored: idsOf(reply.restored), left: idsOf(reply.left) }
   }
 
   /**

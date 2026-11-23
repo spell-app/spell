@@ -33,6 +33,12 @@
  *       answers the inbox, with `did`;  404 nothing to undo, 409 the item changed since (or an answered question)
  *   - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item only:
  *     `{ action: "test", result: "passed" | "failed" | "skip" | "notnow", note?, shot? }`
+ * - `POST /api/epics/review/close-all` `{ page, kind, ids }` -- a section's Close all (epic `epic-engine` T158):
+ *   each of `ids` (what the page counted) still a DECIDED call, FIXED issue or DONE todo closed as the person's ✓
+ *   would, in one edit (`CloseAll`, loaded only now);  `kind`:  `judgements`, `issues` or `todos` (400 otherwise)
+ *   - answers the inbox, plus `closed` (the ids), `left` (ids no longer closable) and `batch`, its Undo's key
+ *   - `POST /api/epics/review/undo-close-all` `{ page, batch }` puts each back as it was, unless it changed since
+ *     (`InstantUndo.undoBatch()`);  answers the inbox, plus `restored` and `left`;  404 nothing to undo
  * - `POST /api/epics/review/shot` `{ page, id, png }` -- Owen's screenshot of test `id` failing, pasted or dropped in
  *   the test run (epic `epic-engine` P4):  `png` a PNG data URL, at most 8 MB (`MAX_SHOT`, else 413)
  *   - written beside the page, `tests/m3-20261019-1432.png` (`TestShots.saveShot()`), never over a file
@@ -153,6 +159,27 @@ const reviewRoutes: RouteModule = {
       const { InstantUndo } = await import("./InstantUndo")
       const did = await InstantUndo.undo(file, root, id)
       reply.json({ ...ReviewInbox.read(ReviewInbox.pathFor(file)).forPage(), did })
+    })
+    // a section's Close all (epic `epic-engine` T158):  `CloseAll`, loaded only now, as it brings `PlanDoc`
+    api.post("/close-all", async (request, reply) => {
+      const body = request.body as { page?: unknown; kind?: unknown; ids?: unknown }
+      const file = planDoc(web.files, body.page)
+      const { CloseAllRule } = await import("spell/epic/components/epic-section/CloseAllRule")
+      const kind = CloseAllRule.kindOf(typeof body.kind === "string" ? body.kind : undefined)
+      if (!kind) throw new SRV.HttpError(400, "kind:  judgements, issues or todos")
+      if (!Array.isArray(body.ids) || !body.ids.every((id) => typeof id === "string"))
+        throw new SRV.HttpError(400, "ids:  the item ids to close")
+      const { CloseAll } = await import("./CloseAll")
+      const result = await CloseAll.run(file, root, kind, body.ids as string[])
+      reply.json({ ...ReviewInbox.read(ReviewInbox.pathFor(file)).forPage(), ...result })
+    })
+    api.post("/undo-close-all", async (request, reply) => {
+      const body = request.body as { page?: unknown; batch?: unknown }
+      const file = planDoc(web.files, body.page)
+      if (typeof body.batch !== "string" || !body.batch) throw new SRV.HttpError(400, "no batch")
+      const { InstantUndo } = await import("./InstantUndo")
+      const result = await InstantUndo.undoBatch(file, root, body.batch)
+      reply.json({ ...ReviewInbox.read(ReviewInbox.pathFor(file)).forPage(), ...result })
     })
     // an item's picture deleted from the page, its file too (epic `epic-engine` T87):  `ItemPictures`, loaded only now,
     // as it brings `PlanDoc`

@@ -810,6 +810,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       orange items settled 3 days ago or more (`candidates()`, pure), each judged by a fresh `claude -p` (`ClaudePrint`;
       hush only if 80% sure Owen won't look again), the hushed ones approved as his ✓ would (`apply()`), one write
       per page;  the judge a constructor option, so its test never calls a model
+    - `CloseAll` (epic `epic-engine` T158):  a section's Close all, the person's own bulk ✓, no judge:  the Judgement
+      calls, Issues and Todos sections' title button closes every DECIDED call, FIXED issue or DONE todo still waiting
+      for their tick (`CloseAllRule`, `components/epic-section/`, the ONE rule the button counts by and the server
+      closes by), in one edit, kept for Undo as one record (`InstantUndo.keepBatch()`);  `POST close-all`,
+      `undo-close-all`;  `epic close-all <epic> <judgements | issues | todos> [--dryrun]`
     - `EpicTargets` (P15):  what a link to a saga, an epic, a phase or an item finds in a checkout
       - the page, the id, its title, what's broken (no saga, no page, no id, an epic under a saga it doesn't name)
       - read by:

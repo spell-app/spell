@@ -308,6 +308,14 @@ export type NewItem = { id: string } & InboxMark & { kind: NewKind; title: strin
  */
 export type TestAnswer = { result: TestResult; note?: string; shot?: string }
 
+/** What a section's Close all did (`POST close-all`, epic `epic-engine` T158):  the ids closed and left, its Undo's key. */
+export type CloseAllAnswer = { closed: string[]; left: string[]; batch?: string }
+
+/** `value`'s strings, when it's a list:  a route's ids;  else `[]`. */
+export function idsOf(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((id): id is string => typeof id === "string") : []
+}
+
 /** An epic with open tests (`GET /api/epics/tests`):  its name, how many, and its epic page's address. */
 export type TestsEntry = { epic: string; open: number; page: string }
 

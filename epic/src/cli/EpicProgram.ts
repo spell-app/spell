@@ -269,6 +269,12 @@ export class EpicProgram {
       "epic hush epic-engine --dryrun"
     ).usage("[<epic> | all] [--dryrun] [--json] [--model sonnet]")
     this.page(
+      epic.command("close-all"),
+      "a section's Close all:  every DECIDED judgement call, FIXED issue or DONE todo still waiting for your tick, " +
+        "closed as your check would, in one write;  the page's Undo can put them back;  --dryrun:  the ids only",
+      "epic close-all epic-engine judgements --dryrun"
+    ).usage("<epic> <judgements | issues | todos> [--dryrun]")
+    this.page(
       epic.command("badges"),
       "item badges:  each line starts with what happens next (WILL FIX, YOUR CALL ...), from each item's care and " +
         "doubt;  trial:  nothing closed;  off:  undo them all;  score:  judge the open items never scored, this epic's alone;  " +

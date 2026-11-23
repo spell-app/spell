@@ -4,15 +4,14 @@ import { createRequire } from "node:module"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { SRV } from "spell/server"
-import { ThreadFacts } from "spell/epic/comments"
 import { duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
 import { Markup } from "spell/epic/markup"
 import { PageStages, PhaseStatuses } from "spell/epic/phases"
-import { partOf } from "spell/epic/review/review.types"
 import { fromTemplate } from "spell/epic/tools/pages.js"
+import { CloseAllRule } from "spell/epic/components/epic-section/CloseAllRule"
 import {
   CardText,
   OPEN_KINDS,
@@ -41,6 +40,7 @@ import { EpicTargets } from "./EpicTargets"
 import { FocusCommands } from "./FocusCommands"
 import { FreshCommands } from "./FreshCommands"
 import { BadgeCommands } from "./BadgeCommands"
+import { CloseAll } from "./CloseAll"
 import { Hush, type HushCall, type HushJudge } from "./Hush"
 import { ItemJudge } from "./ItemJudge"
 import { InboxCommands } from "./InboxCommands"
@@ -259,6 +259,8 @@ export class PlanDocCommands {
     switch (command) {
       case "create":
         return this.create(name, file, flags)
+      case "close-all":
+        return this.closeAll(file, rest[0], flags)
       case "add-phase": {
         const { label, moved } = await this.edit(file, (plan) => {
           const before = phaseFlag(plan, flags.before, "--before")
@@ -1211,7 +1213,7 @@ export class PlanDocCommands {
     const report: { epic: string; calls: HushCall[]; greyed: number }[] = []
     for (const epic of names) {
       const file = this.files.findDoc(epic)
-      const skip = PlanDocCommands.hushSkips(file)
+      const skip = Hush.skipsOf(file)
       const candidates = Hush.candidates(this.read(file), skip)
       const calls = candidates.length ? hush.decide(epic, candidates) : []
       const hushed = calls.filter((call) => call.hush)
@@ -1228,6 +1230,23 @@ export class PlanDocCommands {
     if (flags.json) this.print(JSON.stringify(dry ? report.map(({ greyed: _, ...rest }) => rest) : report, null, 2))
   }
 
+  /**
+   * `close-all <epic> <judgements | issues | todos> [--dryrun]` (`CloseAll`, epic `epic-engine` T158):  a section's Close
+   * all from the command line:  every DECIDED call, FIXED issue or DONE todo still waiting for his tick, closed as his
+   * ✓ would, in one write, kept for the page's Undo;  `--dryrun`:  the ids only
+   */
+  private async closeAll(file: string, section: string | undefined, flags: Flags): Promise<void> {
+    const kind = CloseAllRule.kindOf(section)
+    if (!kind) throw new PlanDocError("close-all:  which section?  judgements, issues or todos")
+    const ids = CloseAll.candidates(this.read(file), kind, Hush.skipsOf(file))
+    const listed = ids.map((id) => id.toUpperCase()).join(" ")
+    if (flags.dryrun ?? flags.dryRun) return this.print(`${ids.length} to close${ids.length ? `:  ${listed}` : ""}`)
+    const { closed, left } = ids.length
+      ? await CloseAll.run(file, this.files.root, kind, ids)
+      : { closed: [], left: [] }
+    this.print(`Close all:  ${closed.length} closed${left.length ? `, ${left.length} left` : ""}`)
+  }
+
   /** The epics `hush all` goes through:  every one in progress. */
   private openEpics(): string[] {
     return this.files
@@ -1241,18 +1260,6 @@ export class PlanDocCommands {
     const name = EpicConfig.of(this.files.root).worktreeNameOf(this.files.root)
     if (name && this.files.epicNames().includes(name)) return name
     throw new PlanDocError("hush:  which epic?  this checkout is no epic's worktree:  epic hush <epic>, or all")
-  }
-
-  /** What `Hush` leaves out of epic page `file`, from its inbox:  his marks, Claude's work, threads not finished. */
-  private static hushSkips(file: string): { marked: Set<string>; working: Set<string>; commented: Set<string> } {
-    const inbox = ReviewInbox.read(ReviewInbox.pathFor(file))
-    const comments = inbox.commentList
-    const open = [...comments.waiting, ...comments.all.filter((comment) => ThreadFacts.turnOf(comment) === "person")]
-    return {
-      marked: PlanDocCommands.pendingMarks(file),
-      working: new Set(Object.keys(inbox.working).map((id) => id.toLowerCase())),
-      commented: new Set(open.map((comment) => partOf(comment.anchor)))
-    }
   }
 
   /**

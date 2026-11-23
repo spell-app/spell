@@ -104,6 +104,7 @@ const ICONS = {
   "solid/circle-exclamation": ["circle exclamation", "warning circle"],
   "solid/circle-xmark": ["circle xmark", "times circle"],
   "solid/check": ["check", "checkmark"],
+  "solid/check-double": ["check double"], // a section's Close all (epic `epic-engine` T158)
   "solid/chevron-down": ["chevron down"],
   "solid/chevron-right": ["chevron right"],
   "solid/chevron-up": ["chevron up"], // a plan item's fold button (`spell-doc-runtime.js` `wireItemFolds()`)

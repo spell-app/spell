@@ -1625,6 +1625,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--json": "print the calls as JSON",
     "--model <model>": "the judge's model (default sonnet)"
   },
+  "close-all": {
+    "--dryrun": "print the ids it would close, and change nothing"
+  },
   badges: {
     "--json": "list:  print the scores, badges and what would close as JSON",
     "--model <model>": "score:  the judge's model (default sonnet)",

@@ -1,9 +1,12 @@
 import { DrawnState, NO_LIVE_REVIEW } from "spell/epic/components/epic-item/EpicItem.types"
 import { ClaudePrint } from "spell/epic/command/ClaudePrint"
+import { ThreadFacts } from "spell/epic/comments"
+import { partOf } from "spell/epic/review/review.types"
 
 import type { PlanDoc } from "./PlanDoc"
 import { JudgeText } from "./JudgeText"
 import { PlanItem } from "./PlanItem"
+import { ReviewInbox } from "./ReviewInbox"
 import { PROMISED_CARD, type ItemState } from "./planDoc.types"
 
 /****************
@@ -155,6 +158,22 @@ export class Hush {
     return [`The epic:  ${epic}.  ${candidates.length} items.`, ...blocks].join("\n\n")
   }
 
+  /**
+   * What `candidates()` leaves out of epic page `file`, from its inbox:  his marks (sent or not, and taken), Claude's
+   * work, threads not finished with (waiting on Claude, or his turn).
+   * - read by `epic hush` and a section's Close all (`CloseAll`, epic `epic-engine` T158)
+   */
+  static skipsOf(file: string): Required<HushSkips> {
+    const inbox = ReviewInbox.read(ReviewInbox.pathFor(file))
+    const comments = inbox.commentList
+    const open = [...comments.waiting, ...comments.all.filter((comment) => ThreadFacts.turnOf(comment) === "person")]
+    return {
+      marked: new Set([...Object.keys(inbox.marks), ...Object.keys(inbox.taken)].map((id) => id.toLowerCase())),
+      working: new Set(Object.keys(inbox.working).map((id) => id.toLowerCase())),
+      commented: new Set(open.map((comment) => partOf(comment.anchor)))
+    }
+  }
+
   ////////////////
   // ## Reading an item
   ////////////////
@@ -174,7 +193,7 @@ export class Hush {
   }
 
   /** Did a tidy leave `item` a `Promised, not delivered:` card? */
-  private static isPromised(item: Element): boolean {
+  static isPromised(item: Element): boolean {
     return Array.from(item.querySelectorAll(":scope > epic-status")).some((card) =>
       (card.textContent ?? "").trim().startsWith(PROMISED_CARD)
     )

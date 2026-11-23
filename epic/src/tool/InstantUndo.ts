@@ -64,13 +64,54 @@ export class InstantUndo {
     return did
   }
 
+  /**
+   * SIDE EFFECT:  a section's Close all on page `file` kept, so its Undo puts every item back (`CloseAll`, epic
+   * `epic-engine` T158):  ONE record, `batch`, holding each item's.
+   */
+  static keepBatch(file: string, batch: string, items: readonly UndoRecord[]): void {
+    const at = items[0]?.at ?? new Date().toISOString()
+    InstantUndo.keep(file, { ...EMPTY_BATCH, id: batch, did: `${items.length} closed at once`, at, items: [...items] })
+  }
+
+  /**
+   * SIDE EFFECT:  Close all `batch` on page `file` undone:  each item it closed put back as it was, in ONE edit of the
+   * page;  how many were put back, and the ids left as they are now (changed since).
+   * - throws `SRV.HttpError`:  404 when there's nothing to undo for `batch`
+   */
+  static async undoBatch(file: string, root: string, batch: string): Promise<{ restored: string[]; left: string[] }> {
+    const path = InstantUndo.pathFor(file)
+    const record = InstantUndo.read(path).find((each) => each.id === batch && each.items)
+    if (!record?.items) throw new SRV.HttpError(404, "nothing to undo:  that Close all was undone, or is too old")
+    const records = record.items
+    const done = await new PlanDocFiles({ root }).edit(file, (plan) => {
+      const restored: string[] = []
+      const left: string[] = []
+      for (const each of records) {
+        try {
+          InstantUndo.restore(plan, each)
+          restored.push(each.id)
+        } catch {
+          left.push(each.id)
+        }
+      }
+      return { restored, left }
+    })
+    SRV.FileLock.run(path, () => {
+      DataFile.write(
+        path,
+        InstantUndo.read(path).filter((each) => each.id !== batch)
+      )
+    })
+    return done
+  }
+
   /** Where page `file`'s undo records are kept:  beside its inbox. */
   static pathFor(file: string): string {
     return file.replace(/(\.plan|\.saga)?\.html$/, `.instant-undo${DataFile.SUFFIX}`)
   }
 
   /** `record`'s item on `plan` put back;  what was done.  Throws a 409 when it changed since. */
-  private static restore(plan: PlanDoc, record: UndoRecord): string {
+  static restore(plan: PlanDoc, record: UndoRecord): string {
     const item = plan.findItem(record.id)
     const label = record.id.toUpperCase()
     if (!item) throw new SRV.HttpError(404, `${label}:  no longer on the page`)
@@ -100,6 +141,14 @@ export class InstantUndo {
     }
   }
 }
+
+/** A Close all's own record, before its items:  it changed nothing itself. */
+const EMPTY_BATCH = {
+  action: "close-all",
+  undoable: true,
+  before: { attributes: {}, label: null },
+  after: { attributes: {}, label: null }
+} as const
 
 /** How many applied instant marks a page keeps for undo. */
 const KEPT = 20
@@ -136,4 +185,6 @@ export type UndoRecord = {
   before: ItemSnapshot
   /** the item after it */
   after: ItemSnapshot
+  /** a Close all's:  each item it closed (`keepBatch()`);  its own `before` and `after` are empty */
+  items?: UndoRecord[]
 }

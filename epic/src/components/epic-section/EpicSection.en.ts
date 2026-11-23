@@ -219,6 +219,13 @@ export const epicSectionVocabulary = {
       description: "A Todo or Questions section's new items waiting to be made:  dashed until sent, then outlined."
     },
     {
+      name: "close-all",
+      description:
+        "The Judgement calls, Issues and Todos sections' button on their title (epic `epic-engine` T158), only while " +
+        'the page is reviewed and one is waiting for your tick:  "Close 12 decided" ticks every DECIDED call (FIXED ' +
+        "issue, DONE todo) at once, after a confirm, with Undo in the notice after it."
+    },
+    {
       name: "start-testing",
       description:
         "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and " +
@@ -280,6 +287,55 @@ export const epicSectionVocabulary = {
       key: "addNew",
       text: "New {kind}",
       description: "An item section's comment-dots button on its title:  its name and tooltip."
+    },
+    {
+      key: "closeAll",
+      text: "Close {count} {state}",
+      description:
+        "The Judgement calls, Issues and Todos sections' Close all button on their title (epic `epic-engine` T158):  " +
+        "how many it closes, and their state (`closeDecided` ...)."
+    },
+    { key: "closeDecided", text: "decided", description: "A judgement call's finished word, in Close all." },
+    { key: "closeFixed", text: "fixed", description: "An issue's finished word, in Close all." },
+    { key: "closeDone", text: "done", description: "A todo's finished word, in Close all." },
+    { key: "closeJudgementOne", text: "decided judgement call", description: "Close all's thing, one call." },
+    { key: "closeJudgements", text: "decided judgement calls", description: "Close all's things, several calls." },
+    { key: "closeIssueOne", text: "fixed issue", description: "Close all's thing, one issue." },
+    { key: "closeIssues", text: "fixed issues", description: "Close all's things, several issues." },
+    { key: "closeTodoOne", text: "finished todo", description: "Close all's thing, one todo." },
+    { key: "closeTodos", text: "finished todos", description: "Close all's things, several todos." },
+    {
+      key: "closeAllTip",
+      text: "Close all {count} {things} at once:  each turns grey, as if you ticked it",
+      description: "Close all's tooltip."
+    },
+    {
+      key: "closeAllTitle",
+      text: "Close {count} {things}?",
+      description: "Close all's confirm dialog:  its heading."
+    },
+    {
+      key: "closeAllAsk",
+      text: "Each one turns grey, as if you had ticked it yourself.\nNothing is deleted, and the message that comes next has an Undo button.",
+      description: "Close all's confirm dialog:  its message, a line each."
+    },
+    { key: "closeAllOk", text: "Close them", description: "Close all's confirm dialog:  its OK button." },
+    { key: "closeAllCancel", text: "Cancel", description: "Close all's confirm dialog:  its Cancel button." },
+    {
+      key: "closedAll",
+      text: "Closed {count} {things}.",
+      description: "The notice after Close all, with its Undo."
+    },
+    {
+      key: "closedAllLeft",
+      text: "{count} were not closed:  they changed just now, and are still open.",
+      description: "Added to Close all's notice when some items changed before it ran, and were left."
+    },
+    { key: "closeAllUndo", text: "Undo", description: "Close all's notice:  its Undo button." },
+    {
+      key: "closeAllUndone",
+      text: "Put back {count} as they were.",
+      description: "The notice after Close all's Undo:  how many it put back."
     },
     {
       key: "startTesting",
