@@ -158,6 +158,8 @@ export const carryMethods = defineCoreModule({
       }
       retired.set(name, [...older, Old])
     }
+    // each running thing of an old class is of the new one now:  file it under its classes again
+    core.things.reindex()
     tellHeldDefinitions()
   }
 })

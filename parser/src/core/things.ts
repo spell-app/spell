@@ -32,6 +32,8 @@ import { ViewableList } from "./classes/ViewableList"
  * - NOTE: `version` changes in a microtask, NOT as a thing registers.
  *   - Else a thing made while a reader reads, e.g. in a `to draw`, would change what the explorer reads mid-read.
  *   - It also makes one change of a loop making 52 cards.
+ * - And by class, each with a change cell of its own (`ofClass()`):  so `every card` re-runs as cards come and go,
+ *   NOT as every other thing does, and looks through the cards alone.
  */
 export class ThingRegistry {
   /** Changes as the registry does -- see `version`. */
@@ -67,6 +69,15 @@ export class ThingRegistry {
   /** Is a `version` bump waiting for its microtask? */
   private changePending = false
 
+  /** Each class's things, by the class -- see `ofClass()` and `classKeyOf()`. */
+  private byClass = new Map<Function, ClassIndex>()
+
+  /** The classes each thing is under, by creation number:  so one forgotten or collected leaves each. */
+  private indexesOf = new Map<number, ClassIndex[]>()
+
+  /** Classes whose cell changes with the next `version` bump. */
+  private classesChanged = new Set<ClassIndex>()
+
   /** How deep in `quietly()` we are:  nothing made meanwhile registers. */
   private quiet = 0
 
@@ -76,7 +87,7 @@ export class ThingRegistry {
       ? undefined
       : new FinalizationRegistry<number>((number) => {
           this.headings.delete(number)
-          if (this.entries.delete(number)) this.changed()
+          if (this.entries.delete(number)) this.changed(this.unindex(number))
         })
 
   /**
@@ -98,7 +109,7 @@ export class ThingRegistry {
     if (this.currentHeading) this.headings.set(number, this.currentHeading)
     // the thing is its own token, so `forget()` and `clear()` can unregister it
     this.finalizer?.register(thing, number, thing)
-    this.changed()
+    this.changed(this.index(thing, number))
   }
 
   /**
@@ -114,7 +125,8 @@ export class ThingRegistry {
     this.addClasses(exports)
     // its top level's done:  what's made from now on, e.g. by a click, is under no heading
     this.currentHeading = undefined
-    this.changed()
+    // a lookup by name falls back on the top-level things (`core.thingNamed()`):  every class's readers re-run
+    this.changed(this.byClass.values())
   }
 
   /**
@@ -138,7 +150,7 @@ export class ThingRegistry {
     this.numbers.delete(thing)
     this.headings.delete(number)
     this.entries.delete(number)
-    this.changed()
+    this.changed(this.unindex(number))
   }
 
   /** Forget everything, e.g. as a new run starts -- see `resetRuntime()`. */
@@ -154,7 +166,25 @@ export class ThingRegistry {
     this.lastNumber = 0
     this.exports = {}
     this.classes.clear()
-    this.changed()
+    // each class's readers re-run, and find the new indexes
+    this.changed(this.byClass.values())
+    this.byClass = new Map()
+    this.indexesOf.clear()
+  }
+
+  /**
+   * File every thing under its classes again, from scratch -- after a live edit rewires the program's classes:
+   * a running thing of the old `Card` is a thing of the new `Card` now (`core.takeNewClasses()`).
+   * - Every class's readers re-run.
+   */
+  reindex(): void {
+    this.changed(this.byClass.values())
+    for (const index of this.byClass.values()) index.entries.clear()
+    this.indexesOf.clear()
+    for (const [number, ref] of this.entries) {
+      const thing = ref.deref()
+      if (thing) this.index(thing, number)
+    }
   }
 
   ////////////////
@@ -258,6 +288,24 @@ export class ThingRegistry {
   all(): ThingLike[] {
     void this.version
     return [...this.entries.values()].map((ref) => ref.deref()).filter((thing) => thing !== undefined)
+  }
+
+  /**
+   * Things still alive of class `Class`, or of a sub-class -- each that's `instanceof Class` -- in the order made.
+   * - `every card` reads it (`core.everyThing()`).
+   * - Reads `Class`'s own change cell, NOT `version`:  a reader re-runs as things of `Class` come and go, never as a
+   *   thing of another class is made (I63:  a page reading `every apollo record where ...` for each of its 7000 parts).
+   * - Looks through `Class`'s things alone, from an index kept as each registers.
+   */
+  ofClass<T>(Class: abstract new (...args: never[]) => T): Array<ThingLike & T> {
+    const index = this.indexFor(classKeyOf(Class))
+    index.cell.read()
+    const things: Array<ThingLike & T> = []
+    for (const ref of index.entries.values()) {
+      const thing = ref.deref()
+      if (thing) things.push(thing as ThingLike & T)
+    }
+    return things
   }
 
   /**
@@ -445,15 +493,69 @@ export class ThingRegistry {
     }
   }
 
-  /** Change `version` in a microtask, once however many changes before it -- see `ThingRegistry`. */
-  private changed(): void {
+  /**
+   * Change `version` in a microtask, once however many changes before it -- see `ThingRegistry`.
+   * - And the cell of each class in `classes`, the classes of the things that came or went:  see `ofClass()`.
+   */
+  private changed(classes: Iterable<ClassIndex> = []): void {
+    for (const index of classes) this.classesChanged.add(index)
     if (this.changePending) return
     this.changePending = true
     queueMicrotask(() => {
       this.changePending = false
+      const changed = [...this.classesChanged]
+      this.classesChanged.clear()
       this.versionCell.changed()
+      for (const index of changed) index.cell.changed()
     })
   }
+
+  /** File `thing`, creation number `number`, under its class and each it extends -- see `ofClass()`. */
+  private index(thing: ThingLike, number: number): ClassIndex[] {
+    const ref = new WeakRef(thing)
+    const indexes: ClassIndex[] = []
+    for (let proto = Object.getPrototypeOf(thing) as object | null; proto; proto = Object.getPrototypeOf(proto)) {
+      if (proto === Object.prototype) break
+      const index = this.indexFor(proto.constructor)
+      if (indexes.includes(index)) continue
+      index.entries.set(number, ref)
+      indexes.push(index)
+    }
+    this.indexesOf.set(number, indexes)
+    return indexes
+  }
+
+  /** Take thing number `number` out of each class it's under;  answers those classes. */
+  private unindex(number: number): ClassIndex[] {
+    const indexes = this.indexesOf.get(number) ?? []
+    this.indexesOf.delete(number)
+    for (const index of indexes) index.entries.delete(number)
+    return indexes
+  }
+
+  /** The index of class `key`, made empty if it has none yet:  so a reader of a class with no things has a cell. */
+  private indexFor(key: Function): ClassIndex {
+    let index = this.byClass.get(key)
+    if (!index) this.byClass.set(key, (index = { cell: new Cell(), entries: new Map() }))
+    return index
+  }
+}
+
+/** One class's things -- see `ThingRegistry.ofClass()`. */
+type ClassIndex = {
+  /** Changes as its things come and go, in the registry's microtask. */
+  cell: Cell
+  /** Each thing of it, or of a sub-class, by creation number:  in order, as a `Map` iterates. */
+  entries: Map<number, WeakRef<ThingLike>>
+}
+
+/**
+ * The class `Class`'s things are filed under:  the class its prototype names.
+ * - Itself, but for a class a live edit retired (`core.takeNewClasses()`):  its prototype's own `constructor` is gone,
+ *   so it names the new class, which `instanceof` asks for it.
+ */
+function classKeyOf(Class: Function): Function {
+  return ((Class.prototype as { constructor?: Function } | undefined)?.constructor ?? Class) as Function
 }
 
 /** The built-in classes a program's classes extend -- see `classNamed()`. */
