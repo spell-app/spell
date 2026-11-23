@@ -292,3 +292,47 @@ describe("beside another place", () => {
     expect(parseSpellProject(project).files.flatMap(({ errors }) => errors)).toEqual([])
   })
 })
+
+describe("verify's question", () => {
+  /** The lab, with a search and a list asked for by a team, each with an example of two words. */
+  const WITH_QUESTIONS = structuredClone(DOCUMENT)
+  WITH_QUESTIONS.paths!["/api/finds"] = {
+    get: {
+      parameters: [{ name: "q", in: "query", required: true, schema: { type: "string" }, example: "dune sand" }],
+      responses: listOf("Device")
+    }
+  } as never
+  WITH_QUESTIONS.paths!["/api/rosters"] = {
+    get: {
+      parameters: [{ name: "team", in: "query", required: true, schema: { type: "string" }, example: "red team" }],
+      responses: listOf("Device")
+    }
+  } as never
+
+  /** Every address verify asked, after an ingest and `edit` to its description. */
+  async function askedByVerify(edit: (description: PlaceDescription) => void = () => {}) {
+    const { ingest, descriptions, fetch } = await ingestOf(WITH_QUESTIONS)
+    edit(descriptions.get("Lab.api.json5")!)
+    const asked: string[] = []
+    fetch.answer = (url) => {
+      asked.push(`${url.pathname}${url.search}`)
+      return Response.json([{ id: "d1", name: "probe" }])
+    }
+    await ingest.verify("Lab.api.spell")
+    return asked
+  }
+
+  test("a space goes as %20, a search's and a list's question alike", async () => {
+    const asked = await askedByVerify()
+    expect(asked).toContain("/api/finds?q=dune%20sand")
+    expect(asked).toContain("/api/rosters?team=red%20team")
+  })
+
+  test("each question goes beside the others, and a list of values goes as its question repeated", async () => {
+    const asked = await askedByVerify((description) => {
+      const rosters = Object.values(description.collections).find(({ at }) => at === "/api/rosters")!
+      rosters.askedBy = { ...rosters.askedBy, device: ["d1", "d2"] as never }
+    })
+    expect(asked).toContain("/api/rosters?team=red%20team&device=d1&device=d2")
+  })
+})

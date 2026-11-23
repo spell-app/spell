@@ -419,10 +419,16 @@ export class PlaceIngest {
     // a search is asked something:  what its description says to search for, else a letter (epic `data` I140, J295);
     // a list asked for by a query, what its description's example says (epic `data` P56)
     const { searchedOnly, searchedBy, searchedFor, askedBy = {} } = collection
-    const question = new URLSearchParams(Object.entries(askedBy))
+    // each question beside the others, a search's first, a list of values as the question repeated;
+    // a space as `%20`, as a server reads it in an address
     const searched = !!(searchedOnly && searchedBy)
-    if (searchedOnly && searchedBy) question.set(searchedBy.param, searchedFor ?? SEARCH_TRIED)
-    const query = `${question}`
+    const asked: Array<[string, unknown]> = [
+      ...(searchedOnly && searchedBy ? [[searchedBy.param, searchedFor ?? SEARCH_TRIED] as [string, unknown]] : []),
+      ...Object.entries(askedBy)
+    ]
+    const query = asked
+      .flatMap(([param, value]) => [value].flat().map((each) => `${param}=${encodeURIComponent(`${each}`)}`))
+      .join("&")
     const url = `${address}${collection.at}${query ? `${collection.at.includes("?") ? "&" : "?"}${query}` : ""}`
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
