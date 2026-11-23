@@ -252,6 +252,108 @@ describe("<ui-json> a key or closed line opens it", () => {
   })
 })
 
+const PORTS = JSON.stringify({
+  name: "source",
+  ports: { g: { type: "electrical", attrs: { width: 2, unit: "um" }, direction: "in" }, h: { type: "optical" } }
+})
+
+/** Wide enough for each closed line to show all it holds. */
+const WIDE = "display: block; width: 1200px;"
+
+/** The member shown in a closed line's preview whose text starts `text`. */
+function member(element: Element, text: string): HTMLElement {
+  const found = [...element.shadowRoot!.querySelectorAll<HTMLElement>("[part~=preview] .member")].find((each) =>
+    each.textContent!.startsWith(text)
+  )
+  if (!found) throw new Error(`no member "${text}" in ${JSON.stringify(lines(element))}`)
+  return found
+}
+
+/** Is the line whose text starts `text` open? */
+function isOpen(element: Element, text: string): boolean {
+  const row = [...element.shadowRoot!.querySelectorAll<HTMLElement>("[part~=row]")].find((each) =>
+    each.textContent!.startsWith(text)
+  )
+  return row?.querySelector("[part~=toggle]")?.getAttribute("aria-expanded") === "true"
+}
+
+/** Settled, and a frame drawn:  `openTo()` shows what it opened just before the next paint. */
+async function shown() {
+  await ElementFixture.settle()
+  await new Promise((resolve) => requestAnimationFrame(resolve))
+}
+
+describe("<ui-json> a click in a closed line opens the way down to it", () => {
+  test("a nested `{ ... }` opens every level down to it, and it ends up open", async () => {
+    const element = await json(`<ui-json style="${WIDE}">${PORTS}</ui-json>`)
+    expect(isOpen(element, '"ports"')).toBe(false)
+    const attrs = member(element, '"attrs"')
+    expect(attrs.textContent).toBe('"attrs": { ... }')
+    const braces = [...attrs.querySelectorAll<HTMLElement>(".punct")].find((each) => each.textContent === "{ ... }")!
+    braces.click()
+    await shown()
+    expect(isOpen(element, '"ports"')).toBe(true)
+    expect(isOpen(element, '"g"')).toBe(true)
+    expect(isOpen(element, '"attrs"')).toBe(true)
+    expect(isOpen(element, '"h"')).toBe(false)
+    expect(lines(element)).toEqual(expect.arrayContaining(['"width": 2,', '"unit": "um"']))
+  })
+
+  test("a nested key opens down to it", async () => {
+    const element = await json(`<ui-json style="${WIDE}">${PORTS}</ui-json>`)
+    const key = [...member(element, '"g"').querySelectorAll<HTMLElement>(".key")].find(
+      (each) => each.textContent === '"g"'
+    )!
+    key.click()
+    await shown()
+    expect(isOpen(element, '"ports"')).toBe(true)
+    expect(isOpen(element, '"g"')).toBe(true)
+    expect(isOpen(element, '"attrs"')).toBe(false)
+  })
+
+  test("it lands on the target:  its key focused, its line scrolled into view", async () => {
+    const tall = JSON.stringify({ filler: Array.from({ length: 80 }, (_, index) => index), ...JSON.parse(PORTS) })
+    const element = await json(`<ui-json depth="2" style="${WIDE} height: 200px; overflow: auto">${tall}</ui-json>`)
+    const navigated = vi.fn()
+    element.addEventListener("ui-navigating", navigated)
+    // `depth="2"`:  the filler is open, so `g`'s closed line sits far below the fold
+    member(element, '"attrs"').click()
+    await shown()
+    const focused = element.shadowRoot!.activeElement as HTMLElement
+    expect(focused.textContent).toBe('"attrs"')
+    const row = focused.closest<HTMLElement>("[part~=row]")!
+    // its light, `.found`, is motion:  over at once here, with animations off
+    expect(row.textContent).toBe('"attrs": {')
+    const box = element.getBoundingClientRect()
+    const line = row.getBoundingClientRect()
+    expect(line.top).toBeGreaterThanOrEqual(box.top - 1)
+    expect(line.bottom).toBeLessThanOrEqual(box.bottom + 1)
+    expect(navigated).not.toHaveBeenCalled()
+  })
+
+  test("a leaf opens down to its parent and sends no `ui-navigating`;  its own line then navigates", async () => {
+    const element = await json(`<ui-json style="${WIDE}">${PORTS}</ui-json>`)
+    const navigated = vi.fn()
+    element.addEventListener("ui-navigating", navigated)
+    member(element, '"h"').querySelector<HTMLElement>(".string")!.click()
+    await shown()
+    expect(isOpen(element, '"h"')).toBe(true)
+    expect(navigated).not.toHaveBeenCalled()
+    expect((element.shadowRoot!.activeElement as HTMLElement).textContent).toBe('"h"')
+    span(element, '"optical"').click()
+    expect(navigated).toHaveBeenCalledTimes(1)
+  })
+
+  test("a click on the line outside any member still opens just the line", async () => {
+    const element = await json(`<ui-json style="${WIDE}">${PORTS}</ui-json>`)
+    const preview = element.shadowRoot!.querySelector<HTMLElement>("[part~=preview]")!
+    ;(preview.firstElementChild as HTMLElement).click()
+    await shown()
+    expect(isOpen(element, '"ports"')).toBe(true)
+    expect(isOpen(element, '"g"')).toBe(false)
+  })
+})
+
 describe("<ui-json editable>", () => {
   test("not editable:  a double-click does nothing", async () => {
     const element = await json(`<ui-json>{ "id": "x1" }</ui-json>`)

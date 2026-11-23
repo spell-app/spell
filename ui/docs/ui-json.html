@@ -53,7 +53,7 @@
             <!-- EXAMPLES:  the outline first, then data a diagram reads. -->
             <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
               <ui-section id="examples-types-an-outline" label="An outline" sticky="stack" collapsible dividing>
-                <ui-example description="Its text is the data, drawn as an outline.  The top level starts open;  a closed object or array sits on one line.  Click its toggle, its key or its line to open it;  Alt-click to open or close everything inside it.">
+                <ui-example description="Its text is the data, drawn as an outline.  The top level starts open;  a closed object or array sits on one line.  Click its toggle, its key or its line to open it, or something inside its line to open the way down to that;  Alt-click to open or close everything inside it.">
                   <ui-json>
                     { "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null,
                       "tags": ["in", "test", "v2"], "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 },
@@ -202,6 +202,10 @@
 
                   A click on an object's or array's key, or on its closed line, opens it, as its toggle does;
                   a click on its key closes it again.
+
+                  A click on something inside a closed line, such as a key or a nested `{ ... }`,
+                  opens every level down to it, then scrolls to it and lights it for a moment.
+                  A value inside a closed line is opened the same way:  a click on its own line then navigates.
 
                   A click on any other key or value sends `ui-navigating`, with where it is:
                   `path`, the keys from the top down, then `key`, `value` and `part` (`"key"` or `"value"`).

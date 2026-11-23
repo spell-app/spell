@@ -137,7 +137,12 @@ export const jsonVocabulary = {
       description:
         "Each object's or array's open / close button, a chevron in the left gutter;  Alt-click:  its whole branch."
     },
-    { name: "preview", description: "A closed object or array, on one line;  a click opens it, as the toggle does." },
+    {
+      name: "preview",
+      description:
+        "A closed object or array, on one line;  a click opens it, as the toggle does.  A click on a member shown " +
+        "in it (a key, a nested `{ ... }`, a value) opens every level down to that member, and shows it."
+    },
     { name: "editor", description: "The control a key or value is edited in (`editable`)." }
   ],
   states: [...UIT.SourceStates],

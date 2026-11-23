@@ -113,6 +113,8 @@ export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
  *   - `depth` levels start open (`1`:  the top alone).
  *   - Its key, or its closed line, opens it too, as its toggle does (`opener()`);  its key closes it again.
  *     Its key is a Tab stop, which Enter or Space opens and closes.
+ *   - A click on a member shown in a closed line (a key, a `{ ... }`, a value) opens every level down to it,
+ *     then scrolls to it and lights it (`openTo()`):  "show me that".  A leaf shown so navigates from its own line.
  *   - A closed object's members aren't drawn:  387 of them cost one line until it's opened.
  * - A click on any other key or value sends `ui-navigating` (`{ path, key, value, part }`;  cancelable):
  *   the page decides what it means.
@@ -396,7 +398,7 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     const comma = isLast ? undefined : <span class="punct">,</span>
     if (!isContainer(value)) {
       return (
-        <div class="row" part={this.partForName("row")} style={`--level: ${level}`}>
+        <div class="row" part={this.partForName("row")} style={`--level: ${level}`} ref={this.rowRef(path)}>
           {this.keyOf(key, value, path, at)}
           {this.scalar(value, key, path, at)}
           {comma}
@@ -407,7 +409,7 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     const entries = entriesOf(value)
     if (!entries.length) {
       return (
-        <div class="row" part={this.partForName("row")} style={`--level: ${level}`}>
+        <div class="row" part={this.partForName("row")} style={`--level: ${level}`} ref={this.rowRef(path)}>
           {this.keyOf(key, value, path, at)}
           {this.link(<span class="punct">{isArray ? "[]" : "{}"}</span>, "value", key, value, at)}
           {comma}
@@ -421,7 +423,7 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     const lastKey = entries[entries.length - 1]![0]
     return (
       <>
-        <div class="row container" part={this.partForName("row")} style={`--level: ${level}`}>
+        <div class="row container" part={this.partForName("row")} style={`--level: ${level}`} ref={this.rowRef(path)}>
           <button
             type="button"
             class={{ toggle: true, open: open() }}
@@ -434,7 +436,7 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
             <ui-icon name={open() ? "chevron-down" : "chevron-right"} />
           </button>
           {this.keyOf(key, value, path, at, opens)}
-          <Show when={open()} fallback={this.closed(value, comma, level, key, opens)}>
+          <Show when={open()} fallback={this.closed(value, comma, level, key, at, opens)}>
             <span class="punct">{isArray ? "[" : "{"}</span>
           </Show>
         </div>
@@ -452,7 +454,7 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
               )
             }}
           </For>
-          <div class="row" part={this.partForName("row")} style={`--level: ${level}`}>
+          <div class="row" part={this.partForName("row")} style={`--level: ${level}`} ref={this.rowRef(path + END)}>
             <span class="punct">{isArray ? "]" : "}"}</span>
             {comma}
           </div>
@@ -461,26 +463,86 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     )
   }
 
-  /** A closed object or array, on one line:  `{ "a": 1, ... }`;  a click opens it (Alt:  everything inside). */
-  private closed(value: object, comma: JSX.Element, level: number, key: Key, opens: Opens): JSX.Element {
+  /**
+   * A closed object or array, on one line:  `{ "a": 1, "b": { "c": 2 }, ... }`.
+   * - A click on the line opens it (Alt:  everything inside).
+   * - A click on a member shown in it (`"b"`, its `{ "c": 2 }`, the `2` inside) opens every level down to that member,
+   *   then shows it (`openTo()`):  each member is a `.member` span, which knows its path.
+   * - Still one Tab stop, the line's key:  the members are for the mouse.
+   */
+  private closed(value: object, comma: JSX.Element, level: number, key: Key, at: Path, opens: Opens): JSX.Element {
     // what's left of the line:  the gutter (3), the indent, `"key": `, the comma
     const used = 3 + level * 2 + (typeof key === "string" ? JSON.stringify(key).length + 2 : 0) + 1
     const budget = this.columns === undefined ? PREVIEW_CHARS : Math.max(PREVIEW_MIN, this.columns - used)
-    const tokens = previewTokens(value, budget, !!this.quotes)
+    const members: Path[] = []
+    const draw = (piece: PreviewPiece): JSX.Element => {
+      if (isToken(piece)) return <span class={piece[0]}>{piece[1]}</span>
+      members.push(piece.at)
+      return (
+        <span class="member" data-member={members.length - 1}>
+          {piece.pieces.map(draw)}
+        </span>
+      )
+    }
+    const onClick = (event: MouseEvent) => {
+      // read now:  an `editable` outline acts a moment later, when the event's path is gone
+      const member = (event.composedPath()[0] as Element | undefined)?.closest?.<HTMLElement>(".member")
+      const memberAt = member ? members[Number(member.dataset.member)] : undefined
+      this.clicked(event, () => (memberAt ? this.openTo([...at, ...memberAt]) : opens.toggle(event.altKey)))
+    }
     return (
       <>
-        <span
-          class="preview opens"
-          part={this.partForName("preview")}
-          onClick={(event: MouseEvent) => this.clicked(event, () => opens.toggle(event.altKey))}
-        >
-          {tokens.map(([kind, text]) => (
-            <span class={kind}>{text}</span>
-          ))}
+        <span class="preview opens" part={this.partForName("preview")} onClick={onClick}>
+          {previewPieces(value, budget, !!this.quotes).map(draw)}
         </span>
         {comma}
       </>
     )
+  }
+
+  /** Each row by its path (a closing row's:  its path, `END`), to show it after `openTo()`. */
+  private readonly rows = new Map<string, HTMLElement>()
+
+  /** A row's `ref`:  keeps it in `rows`. */
+  private rowRef(path: string) {
+    return (row: HTMLElement) => void this.rows.set(path, row)
+  }
+
+  /**
+   * Open every closed object and array from the top down to the member at `at`, then show it:
+   * - scrolled into view;  an object or array it opened, as much of it as fits
+   * - lit for a moment (`.found`)
+   * - focused:  an object's or array's key (an array member's:  its toggle);  a leaf, its parent's
+   * - A leaf opens nothing of its own:  a click on its line then sends `ui-navigating`, as ever.
+   */
+  @E.untracked
+  private openTo(at: Path) {
+    const target = valueAt(this.value, at)
+    const opened = entriesOf(target).length ? at : at.slice(0, -1)
+    const toggled = new Map(this.toggled)
+    for (let depth = 0; depth <= opened.length; depth++) toggled.set(pathOf(opened.slice(0, depth)), true)
+    this.toggled = toggled
+    E.afterSolidUpdate(() => E.beforeNextPaint(() => this.reveal(at, opened)))
+  }
+
+  /** `openTo()`'s last step:  scroll to the member at `at` and light it;  focus `opened`'s key. */
+  private reveal(at: Path, opened: Path) {
+    const rowFor = (path: string) => {
+      const row = this.rows.get(path)
+      return row?.isConnected ? row : undefined
+    }
+    const row = rowFor(pathOf(at))
+    if (!row) return
+    const openedRow = rowFor(pathOf(opened))
+    const opener = openedRow?.querySelector<HTMLElement>(":scope > .key.opens")
+    ;(opener ?? openedRow?.querySelector<HTMLElement>(":scope > .toggle"))?.focus({ preventScroll: true })
+    // its end first, then its start:  the start wins when the whole of it doesn't fit
+    if (opened === at) rowFor(pathOf(at) + END)?.scrollIntoView({ block: "nearest" })
+    row.scrollIntoView({ block: "nearest" })
+    row.classList.remove("found")
+    void row.offsetWidth // a second `openTo()` restarts the light
+    row.classList.add("found")
+    row.addEventListener("animationend", () => row.classList.remove("found"), { once: true })
   }
 
   /**
@@ -790,8 +852,19 @@ type Key = string | number | undefined
 type Path = (string | number)[]
 type JsonPart = "key" | "value"
 
-/** A piece of a closed preview:  its class (`key`, `string` ...) and text. */
+/** A piece of text in a closed preview:  its class (`key`, `string` ...) and text. */
 type Token = readonly [string, string]
+
+/** A member shown in a closed preview:  its path, and its pieces. */
+type PreviewMember = {
+  /** the keys from the closed line's value down to it */
+  at: Path
+  /** its key (an object's member), `: `, then its value:  an object or array, with its own members */
+  pieces: PreviewPiece[]
+}
+
+/** A piece of a closed preview:  text, or a member. */
+type PreviewPiece = Token | PreviewMember
 
 /** An object or array with members:  whether it's open, and opening or closing it (`branch`:  everything inside). */
 type Opens = {
@@ -825,6 +898,8 @@ const PREVIEW_CHARS = 90
 const PREVIEW_STRING = 32
 /** Joins a path's keys:  no JSON key holds it in practice, and a collision only shares an open state. */
 const SEP = "\u0001"
+/** Ends a closing row's path, in `rows`. */
+const END = "\u0003"
 /** Joins a path and its part in an edit's id. */
 const EDIT_SEP = "\u0002"
 /** How long a click on an `editable` outline waits for a second one, in seconds. */
@@ -974,50 +1049,57 @@ function renameAt(value: unknown, at: Path, newKey: string): unknown {
   return setAt(value, parentPath, renamed)
 }
 
+function isToken(piece: PreviewPiece): piece is Token {
+  return Array.isArray(piece)
+}
+
 /**
- * A closed object or array as tokens:  `[ 1, 2, 3, ... ]`, `{ "a": 1, "b": { "c": 2 }, ... }`.
+ * A closed object or array as pieces:  `[ 1, 2, 3, ... ]`, `{ "a": 1, "b": { "c": 2 }, ... }`.
+ * - Each member shown is a `PreviewMember`, with its path below `value`;  the rest is text (`Token`).
  * - Nested values closed too, two levels down;  past that `{ ... }` / `[ ... ]`.
  * - Cut once it's about `budget` long;  the first member stays however long, and the CSS ellipsis cuts it.
  */
-function previewTokens(value: object, budget: number, quotes: boolean): Token[] {
-  const tokens: Token[] = []
+function previewPieces(value: object, budget: number, quotes: boolean): PreviewPiece[] {
+  const top: PreviewPiece[] = []
   // `...` and the closing bracket must fit too
   let left = budget - 4
-  const push = (kind: string, text: string) => {
-    tokens.push([kind, text])
+  const push = (pieces: PreviewPiece[], kind: string, text: string) => {
+    pieces.push([kind, text])
     left -= text.length
   }
-  const walk = (item: object, nest: number) => {
+  const walk = (item: object, nest: number, at: Path, pieces: PreviewPiece[]) => {
     const isArray = Array.isArray(item)
     const entries = entriesOf(item)
     const [open, close] = isArray ? ["[", "]"] : ["{", "}"]
-    if (!entries.length) return push("punct", open + close)
-    if (nest >= 2) return push("punct", `${open} ... ${close}`)
-    push("punct", open + " ")
+    if (!entries.length) return push(pieces, "punct", open + close)
+    if (nest >= 2) return push(pieces, "punct", `${open} ... ${close}`)
+    push(pieces, "punct", open + " ")
     for (let index = 0; index < entries.length; index++) {
       // a member that runs past the line is taken back, `...` in its place
-      const mark = tokens.length
+      const mark = pieces.length
       const leftAtMark = left
-      if (index) push("punct", ", ")
+      if (index) push(pieces, "punct", ", ")
       const [key, child] = entries[index]!
+      const member: PreviewMember = { at: [...at, isArray ? index : key], pieces: [] }
+      pieces.push(member)
       if (!isArray) {
-        push("key", keyText(key, quotes))
-        push("punct", ": ")
+        push(member.pieces, "key", keyText(key, quotes))
+        push(member.pieces, "punct", ": ")
       }
-      if (isContainer(child)) walk(child, nest + 1)
+      if (isContainer(child)) walk(child, nest + 1, member.at, member.pieces)
       else {
         let text = scalarText(child)
         if (typeof child === "string" && text.length > PREVIEW_STRING) text = text.slice(0, PREVIEW_STRING - 2) + '…"'
-        push(scalarKind(child), text)
+        push(member.pieces, scalarKind(child), text)
       }
       if (left < 0 && index) {
-        tokens.length = mark
+        pieces.length = mark
         left = leftAtMark
-        return push("punct", `, ... ${close}`)
+        return push(pieces, "punct", `, ... ${close}`)
       }
     }
-    push("punct", " " + close)
+    push(pieces, "punct", " " + close)
   }
-  walk(value, 0)
-  return tokens
+  walk(value, 0, [], top)
+  return top
 }

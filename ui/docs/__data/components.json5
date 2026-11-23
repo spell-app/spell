@@ -22645,7 +22645,7 @@
         },
         {
           "name": "preview",
-          "description": "A closed object or array, on one line;  a click opens it, as the toggle does."
+          "description": "A closed object or array, on one line;  a click opens it, as the toggle does.  A click on a member shown in it (a key, a nested `{ ... }`, a value) opens every level down to that member, and shows it."
         },
         {
           "name": "editor",
