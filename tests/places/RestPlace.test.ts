@@ -1057,7 +1057,10 @@ describe("enabled operations, and action routes (epic `data` P49)", () => {
       {},
       {
         can: { write: "none" },
-        operations: { star: { at: "/recipes/{id}/star", method: "PATCH" }, load: { at: "/recipes/load", method: "GET" } }
+        operations: {
+          star: { at: "/recipes/{id}/star", method: "PATCH" },
+          load: { at: "/recipes/load", method: "GET" }
+        }
       }
     )
     const refused = await place.call("load", {}, {}, "recipes").catch((error: unknown) => error)
@@ -1134,6 +1137,33 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
     ])
   })
 
+  test("ONE thing at its own address:  read as a list of that one row, asked for with no page", async () => {
+    const asked = fakeServer(() => ({ ok: true, nodes: [{ id: 1 }], edges: [] }))
+    const place = shapedPlace({
+      can: { page: "offset" },
+      pageSize: 20,
+      collections: { statuses: { path: "/api/status{/id}", isOne: true } }
+    })
+    const answer = await place.list("statuses", {}, {})
+    expect(answer.rows).toEqual([{ ok: true, nodes: [{ id: 1 }], edges: [] }])
+    expect(answer.nextPage).toBeUndefined()
+    expect(asked).toEqual(["https://shapes.test/api/status"])
+  })
+
+  test("a list's own most is the most it's asked for, whatever a read asks:  more would be refused", async () => {
+    const asked = fakeServer((query) => {
+      const offset = Number(query.get("offset"))
+      return FIVE_ROWS.slice(offset, offset + Number(query.get("limit")))
+    })
+    const place = shapedPlace({
+      can: { page: "offset" },
+      pageSize: 20,
+      collections: { recipes: { path: "/recipes{/id}", paging: { pageSize: 3 } } }
+    })
+    await place.list("recipes", { page: { size: 20 } }, {})
+    expect(asked).toEqual(["https://shapes.test/recipes?limit=3&offset=0"])
+  })
+
   test("a list the server answers only for a team:  a filter on it goes as the question, and is taken as done", async () => {
     const asked = fakeServer((query) =>
       query.get("team") ? [{ id: "run-1", team: query.get("team") }] : { detail: [{ msg: "Field required" }] }
@@ -1146,7 +1176,9 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
 
   test("a list asked for by a list of values:  each one sent, the question repeated", async () => {
     const asked = fakeServer((query) => query.getAll("device").map((device) => ({ id: `m-${device}`, device })))
-    const place = shapedPlace({ collections: { measurements: { path: "/api/measurements{/id}", askedBy: ["device"] } } })
+    const place = shapedPlace({
+      collections: { measurements: { path: "/api/measurements{/id}", askedBy: ["device"] } }
+    })
     const answer = await place.list("measurements", { filter: { device: ["d1", "d2"] } }, {})
     expect(answer).toMatchObject({ rows: [{ id: "m-d1" }, { id: "m-d2" }], handled: { filter: true } })
     expect(asked).toEqual(["https://shapes.test/api/measurements?device=d1&device=d2"])

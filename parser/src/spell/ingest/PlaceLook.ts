@@ -1,7 +1,7 @@
 import { parseCsv } from "spell/places/csv"
 import { googleSheetCsvAddress, isPlaceServerAddress } from "spell/places/places.types"
 import { Workbook } from "spell/places/Workbook"
-import { wrappedRows } from "spell/places/wrappedRows"
+import { rowsIn, wrappedRows } from "spell/places/wrappedRows"
 
 import {
   IngestStopped,
@@ -70,6 +70,8 @@ export type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections" | "samp
   kind?: string
   /** The names of what's in a folder on this disk:  see `IngestFiles.namesInFolder`. */
   namesInFolder?: IngestFiles["namesInFolder"]
+  /** The most bytes it reads of a list's answer, by its address, when that's more than every answer's most. */
+  mostBytes?: Readonly<Record<string, number>>
 }
 
 /** The kinds it knows how to look at, and how:  a new kind adds a look here. */
@@ -235,7 +237,8 @@ async function lookAtWebServer({
   samples,
   addListed,
   spec,
-  reader
+  reader,
+  mostBytes = {}
 }: LookAsk): Promise<PlaceLook> {
   // its description is the source:  every list, from the schemas, with no cap and no rows (epic `data` P49)
   if (spec) return lookAtSpec(address, spec, reader)
@@ -253,7 +256,7 @@ async function lookAtWebServer({
     const known = new Set(wanted.map(({ at }) => at.replace(TRAILING_SLASHES, "")))
     wanted.push(...(listedIn(body, address) ?? []).filter(({ at }) => !known.has(at)))
   }
-  if (!wanted && (Array.isArray(body) || wrappedRows(body))) {
+  if (!wanted && rowsIn(body)) {
     const cut = address.lastIndexOf("/")
     place = address.slice(0, cut)
     wanted = [{ name: address.slice(cut + 1), at: address.slice(cut) }]
@@ -278,7 +281,7 @@ async function lookAtWebServer({
         ? await readFoundByName(place, name, at, samplesFor(name, samples, at), reader)
         : searchIn(at)
           ? await readSearched(place, name, at, reader)
-          : await readCollection(place, name, at, reader)
+          : await readCollection(place, name, at, reader, { mostBytes: mostBytes[at] })
       if (look.searchedOnly) {
         notes.push(
           `"${name}" answers only a search:  asked with none, it gave nothing, so its line says it's searched, and a program can't read every one.`
@@ -381,7 +384,7 @@ async function readSearched(place: string, name: string, at: string, reader: Pol
   try {
     const answer = await reader.read(`${place}${path}`)
     const body = answer.status >= 400 ? undefined : answer.isCut ? idsReadOf(answer.text) : jsonOf(answer.text)
-    const rows = Array.isArray(body) ? body : wrappedRows(body)?.rows
+    const rows = rowsIn(body)?.rows
     if (!rows?.length) look.searchedOnly = true
   } catch (error) {
     if (error instanceof IngestStopped) throw error
@@ -484,19 +487,18 @@ function listedIn(body: unknown, address: string): Array<{ name: string; at: str
   return listed.length ? listed : undefined
 }
 
-
 /** A few pages of one collection. */
 async function readCollection(
   place: string,
   name: string,
   at: string,
   reader: PoliteReader,
-  { isSearch = false }: { isSearch?: boolean } = {}
+  { isSearch = false, mostBytes }: { isSearch?: boolean; mostBytes?: number } = {}
 ): Promise<CollectionLook> {
   const look: CollectionLook = { name, at, rows: [], paging: "none", pagesRead: 0, hasMore: false }
   let url: string | undefined = `${place}${at}`
   while (url && look.pagesRead < MOST_PAGES) {
-    const answer = await reader.read(url)
+    const answer = await reader.read(url, { mostBytes })
     refuseAnswer(url, answer)
     // a list of ids too long to read whole, the Met Museum's 500,000:  the ids it read are enough to look at
     const body = answer.isCut ? idsReadOf(answer.text) : jsonOf(answer.text)
@@ -613,7 +615,7 @@ async function serverTakesOf(
       const answer = await reader.read(`${url}?${query}`)
       if (answer.status >= 400 || answer.isCut) return undefined
       const body = jsonOf(answer.text)
-      return (Array.isArray(body) ? body : wrappedRows(body)?.rows)?.filter(isRow)
+      return rowsIn(body)?.rows?.filter(isRow)
     } catch {
       // none of these is what the look's for:  past its limits, they just say nothing
       return undefined
@@ -865,7 +867,7 @@ async function searchOf(url: string, look: CollectionLook, reader: PoliteReader)
         const answer = await reader.read(`${url}${url.includes("?") ? "&" : "?"}${param}=${encodeURIComponent(word)}`)
         if (answer.status >= 400 || answer.isCut) continue
         const body = jsonOf(answer.text)
-        const rows = (Array.isArray(body) ? body : wrappedRows(body)?.rows)?.filter(isRow)
+        const rows = rowsIn(body)?.rows?.filter(isRow)
         const found = rows?.length ?? 0
         const isNarrower = found < Math.max(look.rowsItSays ?? 0, look.rows.length)
         const holdsIt = (row: Record<string, unknown>) => textIn(row[field]).toLowerCase().includes(word)

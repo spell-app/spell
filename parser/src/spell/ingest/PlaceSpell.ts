@@ -212,6 +212,8 @@ function allSpellPartsFor(
     placeLines.push(...linesOfWhatItTakes(serverTakes, every, write, hasPaging))
   }
   const placePages = kind === "web server" && !hasPaging ? serverTakes?.pagesWith : undefined
+  // how many the place's own line says every list gives:  a list giving fewer says so under its own line
+  const placeSize = Number(/up to (\d+)/.exec(placeLines.find(({ key }) => key === "size")?.text ?? "")?.[1] ?? NaN)
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = kind === "web server" || kind === "graphql server" ? nameExampleOf(every) : undefined
   if (namesLike) placeLines.push({ key: "names", text: `it writes names like "${namesLike}"` })
@@ -243,14 +245,17 @@ function allSpellPartsFor(
         ? "are searched at"
         : "live at"
     const searchedThere = searchedApart && description.searchedOnly && searchAddressOf(description) === description.at
-    // given only to its own search, its search's line says where:  `repositories are searched with "q" at "/search/repositories"`
-    if (!searchedThere) {
+    if (description.isOne) {
+      // ONE thing, not a list:  `the server status lives at "/api/status"`
+      placeLines.push({ key: `at:${collection}`, text: `the ${description.type} lives at "${description.at}"` })
+    } else if (!searchedThere) {
+      // given only to its own search, its search's line says where:  `repositories are searched with "q" at "/search/repositories"`
       placeLines.push({
         key: `at:${collection}`,
         text: `${collectionWords(description)} ${where} "${description.at}"`
       })
       // paging its own way, one step in under its line, wins for it (epic `data` P56)
-      if (kind === "web server") placeLines.push(...ownPagingLines(collection, description, placePages))
+      if (kind === "web server") placeLines.push(...ownPagingLines(collection, description, placePages, placeSize))
     }
     if (searchedApart && description.searchedBy) {
       const at = searchAddressOf(description)
@@ -396,17 +401,26 @@ function linesOfWhatItTakes(
  * The lines one step in under a collection's `live at` line that say how it pages, when that isn't the place's way
  * (epic `data` P56):  `its next page is asked for with "take" and "skip"`, `it gives up to 100 at a time`.
  * - `place`:  how the place's own line says every list pages;  `undefined` when it says none by position.
+ * - `placeSize`:  how many the place's own line says every list gives at a time;  `NaN` when it says none.
  * - Nothing for a list that pages as the place does, or by no position its description says,
  *   or whose answer says where its next page is.
+ * - Paging as the place does but giving fewer than it says, only how many:  `it gives up to 10 at a time`,
+ *   so a read never asks it for more.
  */
 function ownPagingLines(
   collection: string,
   { pagesWith, nextAt }: CollectionDescription,
-  place: PagesWith | undefined
+  place: PagesWith | undefined,
+  placeSize: number
 ): SpellLine[] {
   // its answer says where its next page is:  NetBox's `next`, which it follows instead
   if (!pagesWith || nextAt !== undefined) return []
-  if (place && place.limit === pagesWith.limit && place.offset === pagesWith.offset) return []
+  if (place && place.limit === pagesWith.limit && place.offset === pagesWith.offset) {
+    const most = pagesWith.most
+    return most !== undefined && !(most >= placeSize)
+      ? [{ key: `size:${collection}`, text: `\tit gives up to ${most} at a time` }]
+      : []
+  }
   return [
     {
       key: `pages:${collection}`,

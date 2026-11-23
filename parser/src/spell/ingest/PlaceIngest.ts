@@ -1,7 +1,7 @@
 import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { tokenServiceMint } from "spell/places/PlaceToken"
-import { wrappedRows } from "spell/places/wrappedRows"
+import { rowsIn } from "spell/places/wrappedRows"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -33,6 +33,7 @@ import {
   messageOf
 } from "./PlaceLook"
 import { checkSecondsWithin, describeLook, fieldsOf, fingerprintOf, idFieldOf, plainNameFor } from "./PlaceShape"
+import { MAKES_A_TOKEN } from "./PlaceSpec"
 import { partsInLanguageOf } from "./PlaceInLanguage"
 import { PlaceWords } from "./PlaceWords"
 import {
@@ -172,8 +173,9 @@ export class PlaceIngest {
     await this.notePictures(description, ask.pictures, reader)
     if (ask.triesWrites) await this.noteWrites(description, look, reader)
     leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
-    awayFromTypesBeside(description, await files.otherSpellBeside(file))
     await this.readWithAgent(description, look, { keepName: !!ask.name })
+    // after the agent's names, which may be the bare ones another file beside it declares
+    awayFromTypesBeside(description, await files.otherSpellBeside(file))
     await this.keepPrivate(description, look, file)
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
@@ -226,11 +228,16 @@ export class PlaceIngest {
     const samples = Object.values(old.collections).flatMap(({ at, samples: names }) =>
       (names ?? []).map((sample) => `${at}=${sample}`)
     )
+    // a list a person gave more room to read is read with it again
+    const mostBytes = Object.fromEntries(
+      Object.values(old.collections).flatMap(({ at, mostBytes: most }) => (most === undefined ? [] : [[at, most]]))
+    )
     const look = await lookAtPlace(kind, {
       address,
       reader,
       collections,
       addListed: !collectionsAsked,
+      mostBytes,
       ...withDefined({
         spec: specAt,
         docs: docsAt,
@@ -239,6 +246,10 @@ export class PlaceIngest {
       })
     })
     const description = describeLook(look, { kind, name })
+    for (const [each, collection] of Object.entries(description.collections)) {
+      const most = old.collections[each]?.mostBytes
+      if (most !== undefined) collection.mostBytes = most
+    }
     leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
     if (keySecret) description.about.keySecret = keySecret
     if (keyGoes) description.about.keyGoes = keyGoes
@@ -341,10 +352,18 @@ export class PlaceIngest {
     for (const [name, collection] of Object.entries(description.collections)) {
       if (collection.leftOut || collection.state?.is === "disabled") continue
       if (!isListed(collection) && !isSearchToTry(collection)) continue
+      // a `GET` that makes a token, or signs in or out, is never read
+      if (MAKES_A_TOKEN.test(collection.at)) continue
       // each list its own allowance:  a whole description has hundreds, each read once, a gap between each request
       reader.startAgain()
       const was = collection.state?.is
-      const { state, rows } = await this.verifyCollection(address, collection, reader, deployment?.name)
+      const { state, rows } = await this.verifyCollection(
+        address,
+        collection,
+        reader,
+        deployment?.name,
+        description.about.rows
+      )
       collection.state = state
       if (rows.length) read.push({ name, at: collection.at, rows, paging: "none", pagesRead: 1, hasMore: false })
       if (state.is !== was) {
@@ -403,13 +422,16 @@ export class PlaceIngest {
 
   /**
    * One collection tried:  its first page, then its first thing by its id.
+   * - `pageSize`:  how many the place reads at a time, asked for of a list that takes a `limit`, as a read asks;
+   *   else a list with no paging of its own answers whole, perhaps more than a reader takes
    * - NEVER throws for an answer, or none:  that's `failed`;  but `IngestStopped` past the reader's limits
    */
   private async verifyCollection(
     address: string,
     collection: CollectionDescription,
     reader: PoliteReader,
-    deployment: string | undefined
+    deployment: string | undefined,
+    pageSize?: number
   ): Promise<{ state: PlaceState; rows: Array<Record<string, unknown>> }> {
     const tried = { at: this.nowISO(), ...(deployment !== undefined && { deployment }) }
     const failed = (reason: string, status?: number) => ({
@@ -424,7 +446,8 @@ export class PlaceIngest {
     const searched = !!(searchedOnly && searchedBy)
     const asked: Array<[string, unknown]> = [
       ...(searchedOnly && searchedBy ? [[searchedBy.param, searchedFor ?? SEARCH_TRIED] as [string, unknown]] : []),
-      ...Object.entries(askedBy)
+      ...Object.entries(askedBy),
+      ...(collection.isOne ? [] : pageAsked(collection, pageSize, askedBy))
     ]
     const query = asked
       .flatMap(([param, value]) => [value].flat().map((each) => `${param}=${encodeURIComponent(`${each}`)}`))
@@ -432,26 +455,46 @@ export class PlaceIngest {
     const url = `${address}${collection.at}${query ? `${collection.at.includes("?") ? "&" : "?"}${query}` : ""}`
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
-      answer = await reader.read(url)
+      answer = await reader.read(url, { mostBytes: collection.mostBytes })
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
-      return failed(`it didn't answer:  ${messageOf(error)}`)
+      return failed(`it didn't answer:  ${messageOf(error).replaceAll(url, collection.at)}`)
     }
-    if (answer.status >= 400) return failed(`it answered ${answer.status}${detailOf(answer.text)}`, answer.status)
+    if (answer.status >= 400) {
+      // the server's own message is a hint, said as it runs and never kept:  it may name a real value
+      const hint = detailOf(answer.text)
+      if (hint) this.say(`${collection.at} answered ${answer.status}${hint}`)
+      return failed(`it answered ${answer.status} at ${collection.at}`, answer.status)
+    }
+    if (answer.isCut) return failed("its answer is more than it reads at once:  too big to read whole", answer.status)
     const body = jsonOf(answer.text)
-    // no schema said where its rows are (NetBox's background queues):  a wrapped list says, as a look finds it
-    const wrapped = collection.rowsAt === undefined && !Array.isArray(body) ? wrappedRows(body) : undefined
-    if (wrapped) collection.rowsAt = wrapped.rowsAt
-    const list =
-      collection.rowsAt === undefined ? body : (body as Record<string, unknown> | undefined)?.[collection.rowsAt]
-    if (!Array.isArray(list)) {
+    // ONE thing, not a list:  its description says so;  or, saying nothing of its answer, it answers one object
+    // (P10's untyped lists, till a read shows them):  `{ ok: true }`, or `{ nodes: [...], edges: [...] }`
+    // and one its description says is one thing, answering a list, is a list after all
+    if (collection.isOne && Array.isArray(body)) delete collection.isOne
+    if (collection.isOne || isOneThingAnswered(collection, body)) {
+      if (!isOneObject(body)) return failed("its answer isn't one thing", answer.status)
+      if (!collection.isOne) {
+        collection.isOne = true
+        delete collection.takesLimit
+        delete collection.pagesWith
+      }
+      // its keys its fields, when they're names:  not a map keyed by its values, an address or an id each
+      if (!Object.keys(collection.fields).length && isKeyedByNames(body)) collection.fields = fieldsOf([body])
+      return { state: { is: "verified", ...tried, status: answer.status, rows: 1 }, rows: [body] }
+    }
+    // no schema said where its rows are (NetBox's background queues):  a wrapped list says, as a look finds it;
+    // a bare list is its rows, though its description wraps them:  a read takes either
+    const found = rowsIn(body, collection.rowsAt)
+    if (!found) {
       return failed(`its answer holds no list${collection.rowsAt ? ` in "${collection.rowsAt}"` : ""}`, answer.status)
     }
-    const rows = list.filter((row): row is Record<string, unknown> => !!row && typeof row === "object")
+    if (collection.rowsAt === undefined && found.rowsAt !== undefined) collection.rowsAt = found.rowsAt
+    const rows = found.rows.filter((row): row is Record<string, unknown> => !!row && typeof row === "object")
     const deprecated = deprecationOf(answer.headers)
     if (deprecated) collection.about = [collection.about, deprecated].filter(Boolean).join("  ")
     // no schema said its fields:  what it read does
-    if (!Object.keys(collection.fields).length && rows.length) {
+    if (!Object.keys(collection.fields).length && rows.length && isKeyedByNames(rows)) {
       collection.fields = fieldsOf(rows)
       const id = idFieldOf(rows, collection.fields)
       if (id !== undefined) collection.idField = id
@@ -488,29 +531,30 @@ export class PlaceIngest {
     const id = read.find((each) => each.name === ownerName)?.rows[0]?.[owner.idField ?? "id"]
     if (typeof id !== "string" && typeof id !== "number") return undefined
     const tried = { at: this.nowISO(), ...(deployment !== undefined && { deployment }) }
-    const under = `under ${owner.type} ${id}`
+    // its route, never the owner's id nor its address:  a description holds no real value
+    const route = owner.listsUnder![name]!
+    const under = `at ${route}`
     const failed = (reason: string, status?: number): PlaceState => ({
       is: "failed",
       ...tried,
       ...(status !== undefined && { status }),
       reason
     })
-    const url = `${address}${owner.listsUnder![name]!.replace("{id}", encodeURIComponent(`${id}`))}`
+    const url = `${address}${route.replace("{id}", encodeURIComponent(`${id}`))}`
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
       answer = await reader.read(url)
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
-      return failed(`it didn't answer ${under}:  ${messageOf(error)}`)
+      return failed(`it didn't answer ${under}:  ${messageOf(error).replaceAll(url, route)}`)
     }
-    if (answer.status >= 400)
-      return failed(`it answered ${answer.status} ${under}${detailOf(answer.text)}`, answer.status)
+    if (answer.status >= 400) return failed(`it answered ${answer.status} ${under}`, answer.status)
     const body = jsonOf(answer.text)
     const { isOneUnder, rowsAt } = collections[name]!
     if (!isOneUnder) {
-      const list = Array.isArray(body) ? body : (body as Record<string, unknown> | undefined)?.[rowsAt ?? ""]
-      if (!Array.isArray(list)) return failed(`its answer ${under} holds no list`, answer.status)
-      return { is: "verified", ...tried, status: answer.status, rows: list.length }
+      const found = rowsIn(body, rowsAt ?? "")
+      if (!found) return failed(`its answer ${under} holds no list`, answer.status)
+      return { is: "verified", ...tried, status: answer.status, rows: found.rows.length }
     }
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return failed(`its answer ${under} isn't one thing`, answer.status)
@@ -518,7 +562,11 @@ export class PlaceIngest {
     return { is: "verified", ...tried, status: answer.status, rows: 1 }
   }
 
-  /** Read `row` again by its id, at its own address:  why it couldn't be, or `undefined` when it could, or has none. */
+  /**
+   * Read `row` again by its id, at its own address:  why it couldn't be, or `undefined` when it could, or has none.
+   * - Why names its route, `/jobs/{id}`, and its status, never the id nor its address:  a description holds no real
+   *   value
+   */
   private async thingById(
     address: string,
     { at, idField = "id", operations }: CollectionDescription,
@@ -533,12 +581,13 @@ export class PlaceIngest {
     const url = IS_ITS_OWN_ADDRESS.test(`${id}`)
       ? `${id}`
       : `${address}${template.replace(/\{[^{}/]*\}/, encodeURIComponent(`${id}`))}`
+    const route = IS_ITS_OWN_ADDRESS.test(`${id}`) ? "the address its id is" : template
     try {
       const { status } = await reader.read(url)
-      return status >= 400 ? `its thing ${id}, read by its id at ${url}, answered ${status}` : undefined
+      return status >= 400 ? `its first thing, read by its id at ${route}, answered ${status}` : undefined
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
-      return `its thing ${id}, read by its id at ${url}, didn't answer`
+      return `its first thing, read by its id at ${route}, didn't answer`
     }
   }
 
@@ -1056,6 +1105,41 @@ function isListed({ at, searchedOnly, askedBy, samples }: CollectionDescription)
   return !/\{[^{}/]*\}/.test(at) && !searchedOnly && canAsk && !samples
 }
 
+/** The most fields one thing read is given from its keys:  more, it's a map keyed by its values. */
+const MOST_KEYS_AS_FIELDS = 60
+
+/** A key that's a field's name:  `rack_id`, `feedStatus`;  not `10.0.0.5`, `7`, `r-12`. */
+const KEY_AS_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/
+
+/**
+ * Are `body`'s keys its fields' names, not values it's keyed by (a map from each address to its rack)?
+ * And so every object's inside it, each of which is a thing of its own:  `{ racks: [...], mapping: { "10.0.0.5": ... } }`.
+ * - So no real value becomes a field's name, in the description or the Spell.
+ */
+function isKeyedByNames(body: unknown, depth = 0): boolean {
+  if (Array.isArray(body)) return body.slice(0, 5).every((each) => isKeyedByNames(each, depth))
+  if (!isOneObject(body)) return true
+  if (depth > 6) return false
+  const keys = Object.keys(body)
+  if (keys.length > MOST_KEYS_AS_FIELDS || !keys.every((key) => KEY_AS_NAME.test(key))) return false
+  return Object.values(body).every((value) => isKeyedByNames(value, depth + 1))
+}
+
+/** Is `body` one object:  not a list, nor nothing? */
+function isOneObject(body: unknown): body is Record<string, unknown> {
+  return !!body && typeof body === "object" && !Array.isArray(body)
+}
+
+/**
+ * Is `body`, a list's answer, ONE thing:  its description said nothing of its rows (no field, nor where they are),
+ * and it's one object holding no list, or several:  `{ ok: true }`, `{ nodes: [...], edges: [...] }`?
+ * - One holding a single list is that list, wrapped:  `{ sources: [...], next_offset: 20 }`.
+ */
+function isOneThingAnswered({ fields, rowsAt }: CollectionDescription, body: unknown): boolean {
+  if (Object.keys(fields).length || rowsAt !== undefined || !isOneObject(body)) return false
+  return Object.values(body).filter(Array.isArray).length !== 1
+}
+
 /** Is collection `name` kept under each thing of another, one thing or a list:  read only from there? */
 function isUnderAnother(name: string, { collections }: PlaceDescription): boolean {
   return Object.values(collections).some(({ listsUnder }) => listsUnder?.[name] !== undefined)
@@ -1085,6 +1169,20 @@ function deprecationOf(headers: Headers): string | undefined {
 /** Where a private place's rows go when nothing says:  `~/.spell/places/netbox`. */
 function privateFolderFor({ about }: PlaceDescription): string {
   return `~/.spell/places/${about.name.toLowerCase().replace(/[^\p{L}\d]+/gu, "-")}`
+}
+
+/**
+ * The page a verify asks a list for, as a read would:  `pageSize` under its limit's name, up to the most it gives;
+ * nothing for a list that takes no limit, or is asked for one already.
+ */
+function pageAsked(
+  { takesLimit, pagesWith }: CollectionDescription,
+  pageSize: number | undefined,
+  askedBy: Record<string, unknown>
+): Array<[string, unknown]> {
+  const limit = pagesWith?.limit ?? (takesLimit ? "limit" : undefined)
+  if (limit === undefined || pageSize === undefined || limit in askedBy) return []
+  return [[limit, Math.min(pageSize, pagesWith?.most ?? pageSize)]]
 }
 
 /** SIDE EFFECT:  no field, nor any inside one, keeps a real value. */
@@ -1270,7 +1368,13 @@ function awayFromTypesBeside(description: PlaceDescription, others: readonly str
  * - A list with fields of its own, of the same name, is its own:  named apart (`awayFromTypesBeside()`).
  */
 function leaveOutCopies(description: PlaceDescription, others: readonly PlaceDescription[]): void {
-  const lastWord = (at: string) => at.replace(/[?#].*$/, "").replace(/\/+$/, "").split("/").pop()!.toLowerCase()
+  const lastWord = (at: string) =>
+    at
+      .replace(/[?#].*$/, "")
+      .replace(/\/+$/, "")
+      .split("/")
+      .pop()!
+      .toLowerCase()
   const theirs = new Map(
     others.flatMap(({ about, collections }) =>
       Object.entries(collections)
@@ -1323,7 +1427,10 @@ function namesFromFile(description: PlaceDescription, file: string, text: string
     const after = linesAfter[at]!.text
     if (after !== before) written.set(before.trim(), after.trim())
   })
-  if (written.size) description.spell = description.spell?.map((line) => line.replace(line.trim(), written.get(line.trim()) ?? line.trim()))
+  if (written.size)
+    description.spell = description.spell?.map((line) =>
+      line.replace(line.trim(), written.get(line.trim()) ?? line.trim())
+    )
 }
 
 /** Are these words used in a line the tool didn't write, here or in another file beside it? */

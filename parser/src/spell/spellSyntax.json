@@ -8933,7 +8933,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 125,
+          "line": 127,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9473,6 +9473,32 @@
                 },
                 "py": {
                   "code": "class SignUpSheet(Place):\n    pass\n\nsign_up_sheet = core.place(\n    SignUpSheet(),\n    {\n        \"name\": \"sign_up_sheet\",\n        \"kind\": \"data folder\",\n        \"at\": \"/api/places/spaces/picnic@rs/__private/signups\",\n        \"sheet\": {\n            \"only_from\": \"attendees\",\n            \"most_each\": [{\"field\": \"shift\", \"most\": 2}, {\"field\": \"event\", \"most\": 40}],\n            \"allowance\": {\"collection\": \"tickets\", \"field\": \"invitations\"},\n            \"joins\": {\"collection\": \"tickets\", \"address\": \"picnic@rs/__attendees\"},\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "OneThingAt",
+          "ruleNames": ["one_thing_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/OneThingAt.ts",
+          "line": 11,
+          "purpose": "A web server answers ONE thing at an address of its own, not a list: its status, its version.",
+          "syntaxes": [
+            {
+              "syntax": "the {type:singular_type} lives at {path:text}",
+              "example": "acme is a web server at \"https://acme.test\"\n\t- the server status lives at \"/api/status\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  collections: { serverStatuses: { at: \"/api/status\", isOne: true } }\n})"
+                },
+                "ts": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  collections: { serverStatuses: { at: \"/api/status\", isOne: true } }\n})"
+                },
+                "py": {
+                  "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"collections\": {\"server_statuses\": {\"at\": \"/api/status\", \"is_one\": True}},\n    },\n)"
                 }
               }
             }

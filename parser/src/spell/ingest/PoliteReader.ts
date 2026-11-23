@@ -185,16 +185,17 @@ export class PoliteReader {
 
   /**
    * `GET` this address, or `POST` this GraphQL query.
+   * - `mostBytes`:  the most it reads of this answer, when that isn't every answer's most
    * - NEVER throws for an answer, whatever its status;  throws what `fetch` threw, for none;  `IngestStopped` past the limits
    */
   async read(
     url: string,
-    { query, accept, bytes }: { query?: string; accept?: string; bytes?: boolean } = {}
+    { query, accept, bytes, mostBytes }: { query?: string; accept?: string; bytes?: boolean; mostBytes?: number } = {}
   ): Promise<ReadAnswer> {
     const init: RequestInit = query
       ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ query }) }
       : { headers: accept ? { accept } : {} }
-    return this.answerTo(url, init, "only reads", bytes ? "bytes too" : "text")
+    return this.answerTo(url, init, "only reads", bytes ? "bytes too" : "text", mostBytes)
   }
 
   /**
