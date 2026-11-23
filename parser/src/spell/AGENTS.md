@@ -199,7 +199,9 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
       - a project not parsed yet asks it first:  found, it takes what's kept and saves it, compiling nothing
         (`compiledFrom` is `"cache"`;  nothing is parsed till something asks)
       - the same entry is what the editor's language worker hands back from its compile:  the page takes it as its own,
-        its parse as it was (`takeCompiled()`;  `compiledFrom` is `"elsewhere"`;  epic `solid-2-final` P18)
+        its parse as it was (`takeCompiled()`;  `compiledFrom` is `"elsewhere"`;  epic `solid-2-final` P18);
+        a clean one is kept in the cache too, under the key of the text it compiled (`compileCacheKey()`, asked
+        before;  I57)
       - its key:  what its project file says, its files' text, its targets, and each import's declarations
         (or a `source` import's files);  the compiler's version is the store's
       - whole projects:  a project compiles as one module, so any edit compiles it all again

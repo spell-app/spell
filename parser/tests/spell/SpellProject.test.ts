@@ -161,4 +161,25 @@ describe("saving what a compile wrote", () => {
     expect(isLoaded).toBe(true)
     expect(sent).toEqual([])
   })
+
+  test("a clean compile taken from elsewhere is kept in the compile cache, under the key it was asked by (I57)", async () => {
+    const { project } = compiledProject("KeptElsewhere")
+    const entries = new Map<string, string>()
+    const cache = SP.CompileCache.inMemory(entries)
+    vi.spyOn(cache, "keep")
+    SP.SpellProject.compileCache = cache
+    try {
+      const entry = { compiled: "x", declarations: "{}", languages: [], words: {}, targets: {} }
+      // with errors:  never kept;  no key:  never kept
+      await project.takeCompiled({ ...entry, clean: false }, { save: false, cacheKey: "k1" })
+      await project.takeCompiled({ ...entry, clean: true }, { save: false })
+      expect(cache.keep).not.toHaveBeenCalled()
+      await project.takeCompiled({ ...entry, clean: true }, { save: false, cacheKey: "k2" })
+      // kept as compile() keeps its own:  the cache's own shape, without `clean`
+      expect(cache.keep).toHaveBeenCalledWith("k2", entry)
+      expect(project.compiledFrom).toBe("elsewhere")
+    } finally {
+      SP.SpellProject.compileCache = undefined
+    }
+  })
 })
