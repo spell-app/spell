@@ -17,6 +17,8 @@
  *   | `--ui-tree-nav-current-background` / `-color` | the selected row, the page shown |
  *   | `--ui-tree-nav-open-duration` / `-close-duration` | how long a row's rows take to ease open, and shut |
  *   | `--ui-tree-nav-ease` | how they ease |
+ *   | `--ui-tree-nav-font-size` | a row's words, against the tree's:  `0.875em` |
+ *   | `--ui-tree-nav-row-height` | a row's least height:  `2.25em` of its words, on the 4px grid |
  *   - A row's rows stay drawn while it's closed, a one-row grid 0fr tall, so they ease;  never under reduced motion.
  */
 @layer ui.components {
@@ -32,6 +34,8 @@
     --_ui-tree-selected-color: var(--ui-tree-selected-color, var(--ui-primary-text, var(--ui-text-color)));
     --_ui-tree-muted-color: var(--ui-tree-muted-color, var(--ui-text-muted));
     --_ui-tree-path-background: var(--ui-tree-path-background, var(--ui-background));
+    --_ui-tree-nav-font-size: var(--ui-tree-nav-font-size, 0.875em);
+    --_ui-tree-nav-row-height: var(--ui-tree-nav-row-height, round(2.25em, var(--ui-grid, 4px)));
     display: block;
     min-width: 0;
     color: var(--ui-text-color);
@@ -290,13 +294,13 @@
   /* a row's height on the 4px grid (`--ui-grid`, epic `mockup` I36):  2.25em of its text, rounded to it */
   :host(:state(nav)) > .row {
     gap: 0.75em;
-    min-height: round(2.25em, var(--ui-grid, 4px));
+    min-height: var(--_ui-tree-nav-row-height);
     /* 0.5em of the tree's text, from inside this smaller text */
     margin-inline: calc(0.5em / 0.875);
     padding-block: 0.25em;
     padding-inline: calc(0.75em + var(--_ui-tree-depth, 0) * var(--_ui-tree-indent)) 0.75em;
     border-radius: var(--ui-radius-m);
-    font-size: 0.875em;
+    font-size: var(--_ui-tree-nav-font-size);
     font-weight: 500;
     white-space: nowrap;
   }

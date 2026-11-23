@@ -53,6 +53,7 @@
  * - More tokens:
  *   | `--ui-page-layout-float-room` | `floating`:  the room round each card |
  *   | `--ui-page-layout-sidebar-width` | `floating`:  a side bar's width |
+ *   | `--ui-page-layout-drawer-width` | all of the drawer's width:  `16em` |
  */
 @layer ui.components {
   :host {
@@ -70,7 +71,7 @@
     /* the muted strip down the page's end side, beside its top-right corner (I219) */
     --_ui-page-layout-end-room: var(--ui-page-layout-end-room, round(0.5em, var(--ui-grid, 4px)));
     /* all of the drawer:  its column, its open box, and what it holds while it moves */
-    --_page-layout-drawer-width: 16em;
+    --_page-layout-drawer-width: var(--ui-page-layout-drawer-width, 16em);
     /* `floating`:  the room round each card, and a side bar's width */
     --_ui-page-layout-float-room: var(--ui-page-layout-float-room, 12px);
     --_ui-page-layout-sidebar-width: var(--ui-page-layout-sidebar-width, 16em);
