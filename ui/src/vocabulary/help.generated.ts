@@ -2438,7 +2438,7 @@ export const HELP_TABLE: Readonly<
       "column-titles":
         '`appearance="columns"`: a title over each column, by level, separated by commas (`Clients, Projects, Files`); the last one names every column deeper than the list goes.',
       items:
-        '`appearance="columns"`: the tree as data, given as a property, in place of `<ui-tree-item>`s: `{ id, label, icon?, which?, count?, children?, data?',
+        '`appearance="columns"`: the tree as data, given as a property, in place of `<ui-tree-item>`s: `{ id, kind?, label, icon?, which?, count?, children?, data?',
       path: "`appearance=\"columns\"`: the ids of each column's pick, from the top (`string[]`; a `<ui-tree-item>`'s id is its `value`, else its `label`).",
       size: '`appearance="columns"`: each column\'s width, by level, separated by commas; the last one sizes every column deeper than the list goes.',
       "column-min-width":
@@ -2447,6 +2447,8 @@ export const HELP_TABLE: Readonly<
         '`appearance="columns"`: the widest a full column is drawn, however it got its width, written as `column-min-width` is; `size="auto"` fits a column to its rows up to it.',
       "narrow-before": '`appearance="columns"`: how many columns at the end never narrow.',
       show: '`appearance="columns"`: which parts each row shows, as words: `icon which count chevron`; the label always shows.',
+      groups:
+        '`appearance="columns"` with headers in `items` (`kind: "header"`): how a column shows the groups under them.',
       "sticky-path":
         "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.",
       "sticky-detail":

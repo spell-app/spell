@@ -11477,6 +11477,13 @@
       }
     },
     {
+      "name": "::part(column-header)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  a header, the label line over its group of rows (`kind: \"header\"`);  `groups=\"accordion\"`:  the button that opens its group."
+      }
+    },
+    {
       "name": "::part(column-row)",
       "description": {
         "kind": "markdown",

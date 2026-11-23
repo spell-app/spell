@@ -211,6 +211,39 @@
                   </script>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-types-grouped-columns" label="Grouped columns" sticky="stack" collapsible dividing>
+                <ui-example description="A column's rows can sit in groups, each under a header that stays in view.">
+                  <ul slot="description">
+                    <li>An item with <code>kind: "header"</code> is a header:  the rows after it, up to the next header, are its group.  It shows how many rows its group holds.  It's never picked, and the arrow keys go past it.</li>
+                    <li>With <code>groups="accordion"</code>, one group is open at a time, the first to begin with.  Click a header, or press Enter or Space on it, to open its group.</li>
+                    <li>Scroll a long group:  the headers stick, at the top of the column under the ones above, and at its bottom over the ones below.</li>
+                  </ul>
+                  <ui-tree id="docs-tree-columns-groups" appearance="columns" groups="accordion" column-titles="Rooms, Things" show="icon count chevron" label="House, in groups" style="height: 16em">
+                  </ui-tree>
+                  <script type="module">
+                    const things = (names, icon) => names.map((name) => ({ id: name, label: name, icon }))
+                    const room = (name, groups) => ({
+                      id: name,
+                      label: name,
+                      icon: "home",
+                      children: Object.entries(groups).flatMap(([group, list]) => [{ id: `${group} header`, kind: "header", label: group }, ...list])
+                    })
+                    await customElements.whenDefined("ui-tree")
+                    const tree = document.getElementById("docs-tree-columns-groups")
+                    tree.items = [
+                      room("Kitchen", {
+                        Furniture: things(["Table", "Bench", "Stool", "Shelf", "Dresser", "Cupboard", "Island", "Bin", "Rack", "Trolley", "Chair", "Hooks"], "couch"),
+                        Lights: things(["Pendant", "Spotlights", "Under-cabinet strip"], "lightbulb outline")
+                      }),
+                      room("Study", {
+                        Furniture: things(["Desk", "Chair", "Bookcase"], "couch"),
+                        Lights: things(["Desk lamp", "Floor lamp"], "lightbulb outline")
+                      })
+                    ]
+                    tree.path = ["Kitchen"]
+                  </script>
+                </ui-example>
+              </ui-section>
               <ui-section id="examples-types-detail-pane" label="Detail pane" sticky="stack" collapsible dividing>
                 <ui-example description="Pick a chapter, and the pane on the right shows more about it.">
                   <ul slot="description">
@@ -384,6 +417,8 @@
                   - `filter` filters one column:  the last one on screen as the filter starts, until it's cleared.  After its rows, it lists the matches elsewhere in the tree, at any depth, each with the rows it's inside;  a click on one opens the path to it.  From `items`, it runs the `children` functions to look inside (waiting for promised ones), but opens no column.  It lists the first 200, and stops after 100,000 rows.
                   - `openTo(levels)` shows that many columns, keeping each column's pick, else picking its first row that holds rows;  `closeAll()` goes back to the first column.
                   - `show` picks each row's parts:  `icon which count chevron`;  without it, `icon which chevron`.
+                  - An item `{ id, kind: "header", label, icon?, count? }` in `items` is a header over the rows after it, up to the next header:  its group.  It shows its `count`, else how many rows its group holds.  It's never picked, selected or counted, never a step of `path`, and the arrow keys go past it;  `filter` keeps it only while a row in its group matches.  It sticks as its column scrolls:  at the top under the headers above it, at the bottom over the ones below.
+                  - `groups="accordion"` shows one group a column:  the first, or the one its pick is in.  A header is then a button, in the tab order:  a click, Enter or Space opens its group and closes the other.  The column keeps which one is open while its pick stays put.  While `filter` filters it, every group with a match shows.
                   - `sticky-path` puts a line above the columns naming each column's pick;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.  Like the outline's, a screen reader skips it:  the columns' own keys are the way back.
                   - While the columns don't fit the tree's width, the first ones narrow to a strip with their pick's name, as few as it takes.  The last `narrow-before` (2) and the selected row's never do;  the pointer or the focus on one widens it again, over the columns after it.
                   - Pointing at a narrow strip, or moving the focus into it, draws it whole over the columns after it, which stay where they are.  While even the strips don't make room, the full columns share what's left, so the selected one shows whole.
@@ -440,6 +475,7 @@
                   - Up and down move within a column;  Home and End go to its ends.
                   - Right goes into the next column, onto the row picked there before, else its first;  left goes back to the previous column's pick.  Right to left, they swap.
                   - On the line after a column, left and right make it narrower and wider, ten times as far with Shift;  with Option (Alt), every column.
+                  - With `groups="accordion"`, Tab reaches each group's header too;  Enter or Space on one opens its group.  Up and down never land on a header.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -447,6 +483,8 @@
               <ui-markdown>
                 <script type="text/markdown">
                   It's a `tree` of `treeitem`s, each saying its level, and whether it's open and selected.  Give it a `label`.
+
+                  A column's header isn't a `treeitem`:  each row in its group names it in `aria-describedby`, so a screen reader hears it with the row.  With `groups="accordion"`, it's a `button` saying whether its group is open (`aria-expanded`).
                 </script>
               </ui-markdown>
             </ui-section>

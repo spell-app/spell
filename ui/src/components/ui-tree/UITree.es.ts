@@ -21,9 +21,13 @@ export const treeEs = {
     "column-min-width": "ancho-minimo-de-columna",
     "column-max-width": "ancho-maximo-de-columna",
     "sticky-detail": "detalle-fijo",
-    tools: "herramientas"
+    tools: "herramientas",
+    groups: "grupos"
   },
-  values: { appearance: { nav: "navegacion", columns: "columnas" } },
+  values: {
+    appearance: { nav: "navegacion", columns: "columnas" },
+    groups: { open: "abiertos", accordion: "acordeon" }
+  },
   events: { "ui-selecting": "ui-seleccionando", "ui-settled": "ui-asentado" },
   slots: { empty: "vacio", detail: "detalle", tools: "herramientas" },
   parts: {
@@ -32,6 +36,7 @@ export const treeEs = {
     "path-row": "fila-de-ruta",
     column: "columna",
     "column-row": "fila-de-columna",
+    "column-header": "encabezado-de-columna",
     "narrow-column": "columna-estrecha",
     "column-title": "titulo-de-columna",
     tools: "herramientas",

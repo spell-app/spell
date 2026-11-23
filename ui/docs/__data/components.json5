@@ -55632,7 +55632,7 @@
           "name": "items",
           "kind": "json",
           "reflect": false,
-          "description": "`appearance=\"columns\"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn."
+          "description": "`appearance=\"columns\"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, kind?, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.  `kind: \"header\"` makes an item the label line over the rows after it, up to the next header (its group), as `<ui-item kind=\"header\">` is in a menu:  never picked, selected, counted or in `path`, skipped by the arrow keys, and kept by `filter` only while a row under it shows.  It draws its `label`, `icon` and `count` (none:  how many rows its group holds), and sticks at the column's top or bottom as it scrolls (`groups`)."
         },
         {
           "name": "path",
@@ -55665,6 +55665,15 @@
           "name": "show",
           "kind": "string",
           "description": "`appearance=\"columns\"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows."
+        },
+        {
+          "name": "groups",
+          "kind": "valueOnly",
+          "values": [
+            "open",
+            "accordion"
+          ],
+          "description": "`appearance=\"columns\"` with headers in `items` (`kind: \"header\"`):  how a column shows the groups under them.  `open`, the default:  every group.  `accordion`:  one group a column, the first, or the one its pick is in;  a click on a header (Enter, Space) opens its group and closes the other.  Either way, the headers stick as the column scrolls:  at its top under the ones above, at its bottom over the ones below."
         },
         {
           "name": "sticky-path",
@@ -55936,6 +55945,10 @@
         {
           "name": "column-row",
           "description": "`appearance=\"columns\"` with `items`:  one row of a column."
+        },
+        {
+          "name": "column-header",
+          "description": "`appearance=\"columns\"` with `items`:  a header, the label line over its group of rows (`kind: \"header\"`);  `groups=\"accordion\"`:  the button that opens its group."
         },
         {
           "name": "tools",

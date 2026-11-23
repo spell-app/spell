@@ -1784,6 +1784,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "column-max-width",
       "narrow-before",
       "show",
+      "groups",
       "sticky-path",
       "sticky-detail"
     ]

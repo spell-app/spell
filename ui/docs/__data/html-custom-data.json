@@ -65937,6 +65937,21 @@
           }
         },
         {
+          "name": "groups",
+          "description": {
+            "kind": "markdown",
+            "value": "`appearance=\"columns\"` with headers in `items` (`kind: \"header\"`):  how a column shows the groups under them.  `open`, the default:  every group.  `accordion`:  one group a column, the first, or the one its pick is in;  a click on a header (Enter, Space) opens its group and closes the other.  Either way, the headers stick as the column scrolls:  at its top under the ones above, at its bottom over the ones below.\n\nTakes:  `open` · `accordion`"
+          },
+          "values": [
+            {
+              "name": "open"
+            },
+            {
+              "name": "accordion"
+            }
+          ]
+        },
+        {
           "name": "sticky-path",
           "description": {
             "kind": "markdown",
