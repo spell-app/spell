@@ -4,6 +4,7 @@ import { basename, dirname, join, relative } from "node:path"
 
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
+import { PortBook } from "spell/server/PortBook"
 import { RealPath } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
@@ -288,6 +289,7 @@ export class Worktrees {
    *   1. its servers stopped (`CheckoutServers.stop()`)
    *   2. `git worktree remove [--force]`:  git refuses a worktree with changes, unless `force`
    *   3. its saved-session link taken away, if it's one to main's (`SessionFolders.unlink()`), as the worktree hook does
+   *   4. the ports written down for its servers forgotten (`PortBook.forget()`)
    * - NOT its branch, unless `branches`:  the caller deletes it (`git branch -d`), as it would after
    *   `git worktree remove`
    * - refuses (`EpicCommandError`) the main checkout, a folder that isn't one of the repo's worktrees, and git's refusal
@@ -318,6 +320,8 @@ export class Worktrees {
     for (const { repo, main: clone, worktree } of found)
       lines.push(...Worktrees.removeOne(worktree, clone, { force }).map((line) => `${repo}:  ${line}`))
     lines.push(...Worktrees.removeOne(path, main, { force, sessions: this.main }))
+    // the ports written down for its servers are free again (`PortBook`, epic `epic-engine` P82)
+    new PortBook().forget(path)
     if (branches && branch && branch !== "(detached)") lines.push(Worktrees.deleteBranch(main, branch))
     return lines
   }

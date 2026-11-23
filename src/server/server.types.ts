@@ -145,6 +145,10 @@ export type ServerInfo = {
    * `https://localhost:4747`;  the same port still answers plain HTTP, which the tools use (epic `solid-2-final` P14)
    */
   https?: string
+  /** when it last answered a request but `/api/server`, ISO:  the server keeper's idle stop (epic `epic-engine` P82) */
+  lastRequest?: string
+  /** how many pages hold its live socket open now:  a page open is use, so no idle stop */
+  pages?: number
 }
 
 ////////////////

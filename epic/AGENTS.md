@@ -93,6 +93,19 @@ a folder of the kit `spell`.
 - Removing a worktree stops its page and vite servers FIRST (`CheckoutServers`, epic `epic-engine` I53):
   - `epic worktree remove <name>`, never a bare `git worktree remove`, in the skills and anything new
   - the worktree hook and `epic worktree move` do it themselves;  the session-start hook stops the rest, hourly
+- The epic server, the hub, is also the SERVER KEEPER (epic `epic-engine` P82;  [ServerKeeper.ts](src/server/ServerKeeper.ts)):
+  - every repo's main page server kept up on main's code, its editor watched, each worktree's page server stopped after
+    30 minutes unused, and the repo's own servers (its `.epic/config.json5`'s `servers`:  a name, a URL or port to
+    check, and a `start` command if it wants Start and Restart) watched and started
+  - it looks every 10 seconds, and when a session starts (the `SessionStart` hook
+    [server-keeper.mjs](hooks/server-keeper.mjs) runs `epic hub kick`)
+  - the ONLY one that starts, stops or restarts a main checkout's page server:  the kit's `PageServer.ensure()`,
+    `stop()` and `restart()` ask it (`SRV.KeeperLink`, its record `~/.spell/server-keeper.json`)
+  - a stop by hand is held until Start (`~/.spell-epic/server-keeper.json`);  its own code changing, it hands over to a
+    fresh hub on its port
+  - the top bar's Servers tab ([serverRoutes.ts](src/server/serverRoutes.ts), its page
+    [servers-page.html](src/tools/servers-page.html)):  `GET /api/servers`, `/api/servers/dot`, `POST
+    /api/servers/<start|stop|restart>`;  what just reached main and what waits:  `ServerFacts`, no Claude call
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.

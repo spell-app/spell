@@ -28,14 +28,17 @@ function litName(path: string): string | undefined {
 describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
   "the site header's tabs (the settings' `siteTabs`)",
   () => {
-    it("are in Owen's order (Epic Pages, Sagas, Guides, Docs;  epic-engine), each list page its tab's home", () => {
-      expect(TABS.map((tab) => tab.name)).toEqual(["Epic Pages", "Sagas", "Guides", "Docs"])
+    it("are in Owen's order (Epic Pages, Sagas, Guides, Docs, Servers;  epic-engine), each list page its tab's home", () => {
+      expect(TABS.map((tab) => tab.name)).toEqual(["Epic Pages", "Sagas", "Guides", "Docs", "Servers"])
       expect(TABS.map((tab) => tab.path)).toEqual([
         "epics/index.html",
         "sagas/index.html",
         "guides/index.html",
-        "/_epic/docs/README-epics.md"
+        "/_epic/docs/README-epics.md",
+        "/_epic/servers/"
       ])
+      // the Servers tab's red dot, from the server keeper (epic `epic-engine` P82)
+      expect(TABS.find((tab) => tab.name === "Servers")?.dot).toBe("/api/servers/dot")
     })
 
     // epic `epic-engine` P46:  every page is served, so no tab is "only when served" (`serverOnly`, gone)
@@ -54,6 +57,9 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       ["/_epic/docs/README-epics.md", "Docs"],
       ["/_epic/docs/epic/README-setup.md", "Docs"],
       ["/worktrees/w/_epic/docs/epic/README.md", "Docs"],
+      // the server keeper's tab (epic `epic-engine` P82)
+      ["/_epic/servers/", "Servers"],
+      ["/worktrees/w/_epic/servers/", "Servers"],
       ["/docs/README.md", undefined],
       ["/brand/index.html", undefined],
       ["/brand/pony.html", undefined],

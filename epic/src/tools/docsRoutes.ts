@@ -73,7 +73,7 @@ function docsHandler(web: SRV.WebServer): Handler {
 }
 
 /** Page `html`, for `file` at `request`'s address, through the server's own page hooks (`window.SPELL_SERVER`, live reload). */
-function withHooks(web: SRV.WebServer, html: string, file: string, request: SRV.Request): string {
+export function withHooks(web: SRV.WebServer, html: string, file: string, request: SRV.Request): string {
   const served = { path: decodeURIComponent(request.path), file, request }
   let page = html
   for (const hook of web.files.html) page = hook(page, served)

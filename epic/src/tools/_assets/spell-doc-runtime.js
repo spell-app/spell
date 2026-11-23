@@ -452,8 +452,10 @@ function oneLineHead(main) {
  * - NOT an epic or saga page:  `<epic-page>` draws its own head, and its own chip, counting only what's SHOWN
  *   (`shownReadingTime()`;  J91, Owen:  "Count what's shown"):  its items' bodies wait in part files until opened
  * - recounted on every `spell-doc:updated`:  an edit saved, a section's body loaded
+ * - NOT a page that's a tool, not a read:  `<body data-spell-no-reading-time>` (the Servers tab's, epic `epic-engine` P82)
  */
 function wireReadingTime(main) {
+  if (document.body.hasAttribute("data-spell-no-reading-time")) return
   drawReadingTime(main)
   addEventListener("spell-doc:updated", () => drawReadingTime(main))
 }

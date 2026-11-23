@@ -26,8 +26,10 @@ import { packageDir } from "spell/epic/tools/packageDir"
 
 import { RepoApp } from "./RepoApp"
 import { RepoList } from "./RepoList"
+import { ServerKeeper } from "./ServerKeeper"
 import {
   DEFAULT_EPIC_PORT,
+  SERVERS_TAB,
   ENGINE_ROUTES,
   EPIC_UI,
   HOME_ENV,
@@ -118,6 +120,12 @@ export class EpicServer {
 
   /** each repo's app, in `repos`' order (`RepoApp`) */
   readonly apps: RepoApp[]
+
+  /**
+   * the SERVER KEEPER (epic `epic-engine` P82):  every repo's web servers kept up, the Servers tab's data;
+   * keeping once `start()` says so (`keep`)
+   */
+  readonly keeper: ServerKeeper
 
   /** more fields for every page's `window.SPELL_SERVER`, from route modules (`addPageConfig()`) */
   private pageConfigs: PageConfig[] = []
@@ -216,6 +224,8 @@ export class EpicServer {
       if (app.repo === this.defaultRepo) app.route(router, "/")
     }
     RepoApp.routeStatus(router, this.apps)
+    this.keeper = new ServerKeeper({ home: this.home, repos: this.repos })
+    this.keeper.route(router, this.web.guard)
     if (repo) {
       const writable = pageServerSettings(repo.checkout).writable ?? WRITABLE
       new PageEditor({ root: repo.content, writable }).route(router, this.web.guard)
@@ -236,19 +246,22 @@ export class EpicServer {
    * - `watchCode`:  live-reload pages when the engine's code changes (its assets, pack and templates) and the
    *   component sets' bundles (default `true`);  a demo check's server turns it off (`DemoServer`):  a bundle rebuilt
    *   by another server in the checkout must never reload a page under a check (epic `epic-engine` I186)
+   * - `keep`:  keep every repo's servers (`ServerKeeper`;  default:  as `pidFile`, so the machine's hub only)
    */
   async start({
     port = DEFAULT_EPIC_PORT,
     routes = true,
     pidFile = true,
     bundles = true,
-    watchCode = true
+    watchCode = true,
+    keep = pidFile
   }: {
     port?: number
     routes?: boolean
     pidFile?: boolean
     bundles?: boolean
     watchCode?: boolean
+    keep?: boolean
   } = {}): Promise<this> {
     this.watch({ watchCode })
     if (bundles) await this.buildBundles()
@@ -267,6 +280,15 @@ export class EpicServer {
     if (pidFile) {
       mkdirSync(this.home, { recursive: true })
       this.pidFile.write(this.info)
+    }
+    if (keep) {
+      const started = Date.parse(this.info.started)
+      this.keeper.start({
+        base: this.web.url,
+        token: this.web.guard.token,
+        isStale: () => SRV.newestChange(SOURCES) > started
+      })
+      this.stops.push(() => this.keeper.stop())
     }
     for (const start of this.listenings)
       await Promise.resolve(start()).catch((error: unknown) => {
@@ -680,7 +702,9 @@ const DEFAULT_SITE_TABS: readonly SiteTab[] = [
   { name: "Sagas", path: "sagas/index.html", areas: ["sagas"] },
   { name: "Guides", path: "guides/index.html", areas: ["guides"] },
   // the engine's own READMEs, rendered (`docsRoutes`):  the same in every repo
-  { name: "Docs", path: "/_epic/docs/README-epics.md", paths: ["^(?:/worktrees/[^/]+)?/_epic/docs/"] }
+  { name: "Docs", path: "/_epic/docs/README-epics.md", paths: ["^(?:/worktrees/[^/]+)?/_epic/docs/"] },
+  // every project's servers, kept by the hub (`ServerKeeper`, `serverRoutes`;  epic `epic-engine` P82)
+  SERVERS_TAB
 ]
 
 /** Folders page edits may write when a repo's `package.json` names none:  the epic repo areas. */

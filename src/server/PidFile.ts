@@ -6,6 +6,7 @@ import { basename, dirname, join, resolve } from "node:path"
 import { waitUntil } from "spell/util/timing"
 import type { ServerInfo } from "spell/server"
 import { checkoutOf } from "./checkout"
+import { FileLock } from "./FileLock"
 import { endProcess, isProcessAlive } from "./Heartbeat"
 import { SERVER_API } from "./liveClient"
 import { LoadedCode } from "./LoadedCode"
@@ -194,9 +195,28 @@ export class PidFile {
    *   - a running one on another port is restarted, and this root's server holding `port` is stopped with it
    *   - one holding `port` the file doesn't name, on current code:  taken as the running one, its pid file rewritten
    *   - the new one starts only once `port` is free;  throws `HttpError` 409 while something else holds it
+   * - ONE start at a time per pid file, across processes (epic `epic-engine` I421):  a second `ensure()` while the
+   *   first is still starting waits for it under the file's `FileLock` (`startLock`), then finds its server running
+   *   - before, a start looked only for a server that already answered, so two at once each started one;  a
+   *     worktree's server took any free port, so both kept running
    * - SIDE EFFECT:  may spawn `command` detached, in `root`
    */
-  async ensure({
+  ensure(options: EnsureOptions): Promise<RunningServer & { launched: boolean }> {
+    const limit = (options.timeout ?? START_LIMIT_MS) + START_LOCK_MARGIN_MS
+    return FileLock.runAsync(this.startLock, () => this.ensureNow(options), {
+      wait: limit,
+      stale: limit,
+      label: "a server start"
+    })
+  }
+
+  /** `<file>` with `.start.lock` for `.json`:  the lock `ensure()` holds while it starts one */
+  get startLock(): string {
+    return this.file.replace(/\.json$/, ".start.lock")
+  }
+
+  /** `ensure()`, holding its lock */
+  private async ensureNow({
     command,
     env,
     log,
@@ -403,6 +423,9 @@ const START_LIMIT_MS = 120_000
 /** How long `ensure()` looks for another start's server once the one it started has ended, in ms. */
 const OTHER_START_MS = 2_000
 
+/** How much longer than a start's own limit its lock may be held, or waited for:  the stop before it, the port's wait. */
+const START_LOCK_MARGIN_MS = 30_000
+
 /** A server that answered:  its info and base URL, `http://127.0.0.1:<port>`. */
 export type RunningServer = ServerInfo & { base: string }
 
@@ -436,7 +459,9 @@ export type StopOptions = { wait?: number; restart?: boolean; port?: number }
 /**
  * The newest modification time (ms) of the code files under `folders`, all the way down;  0 for none.
  * - code:  `.ts`, `.js`, `.mjs`
- * - skips `node_modules`, `_assets` (built pages' assets, not the server's code) and dot folders
+ * - skips `node_modules`, `_assets` (built pages' assets, not the server's code), `__pack` (a component pack's build,
+ *   which a server writes as it starts:  the epic hub's keeper took it for new code, epic `epic-engine` P82) and dot
+ *   folders
  * - a missing folder counts as nothing
  */
 export function newestChange(folders: string[]): number {
@@ -455,4 +480,4 @@ export function newestChange(folders: string[]): number {
 const CODE = /\.(ts|js|mjs)$/
 
 /** Folders `newestChange()` skips, anywhere in a path. */
-const SKIPPED = /(^|[/\\])(node_modules|_assets|\.[^/\\]+)[/\\]/
+const SKIPPED = /(^|[/\\])(node_modules|_assets|__pack|\.[^/\\]+)[/\\]/

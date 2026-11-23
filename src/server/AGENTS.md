@@ -181,6 +181,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Nothing restarts it by itself:  the next `spell server start` (an opener, `/airplane`),
         or the side bar's "Restart Page Server".  Its open pages reconnect (`hello`), and reload only for code of
         theirs that changed (epic `epic-engine` I293).
+    - ONE start at a time per pid file (epic `epic-engine` I421):  `ensure` holds `<file>.start.lock` (`FileLock`)
+      while it starts one, so a second start at the same moment waits and finds it, rather than starting another
     - `ensure` waits for the server it started AS LONG AS that's still starting (epic `epic-engine` I362):
       until it answers, or its process ends (said at once, how it ended the log's last line)
       - 2 minutes with neither (`START_LIMIT_MS`) is hung:  it's stopped, so none given up on listens just after
@@ -198,6 +200,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - one on 4747 the pid file lost, on current code:  `ensure` takes it as the running one
       - Why:  two servers started at once both ran;  the second wrote the pid file, the first kept 4747 unseen,
         and every restart after started on a new port (52841, 59537 ... 59931)
+  - `PortBook` -- the port each WORKTREE's servers keep, written down once in `~/.spell/server-ports.json`
+    (`SPELL_PORTS_FILE`;  epic `epic-engine` P82):  a worktree's page server and its editor are on the same ports at
+    every start, so a link to them stays good;  forgotten when the worktree is removed (`forget()`)
+  - `KeeperLink` -- asking the SERVER KEEPER, the one program that starts, stops and restarts a main checkout's
+    servers (spell-epic's `ServerKeeper`, in its hub;  epic `epic-engine` P82):  its record, `~/.spell/server-keeper.json`
+    (`SPELL_KEEPER_FILE`), `{ pid, base, token }`;  `ask("start" | "stop" | "restart", { checkout })`, `undefined` when
+    none runs, so the caller does it itself
+    - `PageServer.ensure()`, `stop()` and `restart()` ask it for a MAIN checkout;  `ensureHere()` and `stopHere()` are
+      what the keeper runs
+    - this side names nothing of the keeper:  the server package imports no other
+    - `/api/server` answers `lastRequest` and `pages` (open live sockets), for its idle stop of a worktree's server
   - `Heartbeat` -- how a process WAITING on someone says it's there, one rule for whoever asks (epic `coherence` P28):
     - 90s without a beat, or its process gone, and it's gone (`isLive()`)
     - `hold(file, record)`:  `{ ...record, pid, seen }` written every 30s, the file removed however the process ends;

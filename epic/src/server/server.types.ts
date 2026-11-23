@@ -1,3 +1,5 @@
+import type { SiteTab } from "spell/server/site/site.types"
+
 /**
  * Types and constants of spell-epic's ONE page server per machine (`EpicServer`, epic `epic-eject` P7):
  * where it keeps its files, the URLs it serves, the repos it serves them for.
@@ -240,3 +242,95 @@ export type AppStatus = {
  * - here, not in the extension's `docUrls`:  plain `tsx` reads the `vscode/` folder as CommonJS, and can't name its exports
  */
 export const SHOWN_TAB_TITLE = "Shown in VS Code"
+
+////////////////
+// ## The server keeper (epic `epic-engine` P82)
+////////////////
+
+/**
+ * How a server stands, as the keeper's last look found it (`ServerKeeper`):
+ * - `running`:  it answers
+ * - `starting`:  the keeper started it, and it doesn't answer yet
+ * - `stopped`:  not running, and that's fine:  stopped by hand, a worktree's unused, an editor with no page server
+ * - `down`:  it should be running and isn't:  the tab's red dot
+ */
+export type KeptServerState = "running" | "starting" | "stopped" | "down"
+
+/**
+ * One server the keeper keeps, a row of the Servers tab.
+ * - `id`:  `<repo>/<name>`, a worktree's `<repo>/<worktree>/<name>`
+ * - `repo`:  the repo it's for (`""`:  the hub's own);  `worktree`:  the worktree's name, a main checkout's none
+ * - `name`, `what`:  what it's called and what it's for
+ * - `checkout`:  the checkout it serves:  what the buttons send back (`POST /api/servers/<action>`)
+ * - `address`:  where it answers, while it does (a worktree's stopped one:  `port`, the one written down for it)
+ * - `why`:  a few words on its state:  why it's down, what the keeper just did
+ * - `since`:  when the keeper last started it;  `lastRequest`:  a worktree's last use
+ * - `canStart`:  whether Start and Restart apply;  `own`:  one of the repo's own servers (its `.epic/config.json5`)
+ */
+export type KeptServer = {
+  id: string
+  repo: string
+  worktree?: string
+  name: string
+  what: string
+  checkout: string
+  address?: string
+  port?: number
+  state: KeptServerState
+  why?: string
+  since?: string
+  lastRequest?: string
+  canStart: boolean
+  own?: boolean
+}
+
+/** A move of the base branch, from its reflog (`ServerFacts.justOnMain()`). */
+export type MainMove = {
+  sha: string
+  /** when, ISO */
+  at: string
+  /** the reflog's words:  `merge epic-engine:  Fast-forward` */
+  how: string
+  /** the commit it moved to:  its subject */
+  subject: string
+  /** within the last `RECENT_MINUTES` */
+  isNew: boolean
+}
+
+/** A running epic's work not on the base branch yet (`ServerFacts.waitingForMain()`). */
+export type WaitingEpic = {
+  epic: string
+  worktree: string
+  url: string
+  /** its branch's commits the base branch hasn't got */
+  ahead: number
+  phase?: string
+  agents?: number
+  /** the turn it holds now (`Turns`):  `test`, `merge` */
+  turn?: string
+  why: string
+}
+
+/** What the Servers tab says beside the servers (`ServerFacts`). */
+export type ServerFactsAnswer = {
+  justOnMain: MainMove[]
+  waitingForMain: WaitingEpic[]
+  waitingForGitHub?: string
+}
+
+/** `GET /api/servers`:  every server, how often the keeper looks, and the facts beside them. */
+export type ServersAnswer = ServerFactsAnswer & { servers: KeptServer[]; lookSeconds: number }
+
+/** Where the Servers tab's page is served, under every address (`serverRoutes`). */
+export const SERVERS_PAGE = "/_epic/servers/"
+
+/**
+ * The site header's Servers tab (epic `epic-engine` P82):  every project's servers, what just reached main, what
+ * waits;  its red dot from the keeper (`dot`, asked every 10 seconds)
+ */
+export const SERVERS_TAB: SiteTab = {
+  name: "Servers",
+  path: SERVERS_PAGE,
+  paths: ["^(?:/worktrees/[^/]+)?/_epic/servers/"],
+  dot: "/api/servers/dot"
+}

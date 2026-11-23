@@ -100,6 +100,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `app.url` | not written | where the app answers (`"http://localhost:3000/"`);  `""` with no `urlFile`:  no app |
 | `app.urlFile` | not written | or a JSON file its server writes once it's up, `{ "url": ... }`, from the main checkout |
 | `app.start` | not written | the shell command that starts the app, run in the background when it doesn't answer (`"npm run dev"`) |
+| `servers` | not written | the repo's OWN servers, which the epic server keeps beside Spell's and shows on its Servers tab (a proxy server, say):  each a `name`, a `check` (a URL, or just a port, up while something listens there), and, for Start and Restart, a `start` command and the `folder` it runs in;  one without `start` is only watched |
 | `repos` | not written | a MULTI-REPO checkout's child repos (a list, or a file such as `"repos.json5"`):  an epic's worktree is then a worktree of the top with one of every child repo inside it, all on the epic's branch;  a child finds its top as the folder above it (`epic config top`) |
 | `checkoutPatches` | not written:  a comment shows how | fixes every checkout gets at once, the worktrees behind `main` too (`epic worktree patch`):  each an `id`, a `date`, a `why`, and a `copy` (a file of `main`'s, put where it isn't tracked yet, git-excluded) or a `run` (a command, once per checkout) |
 | `voices` | not written | the repo's own voices, a name to a file from the main checkout (`"code": "agents/wwod/writing.md"`), over the engine's `voices/<name>.md` (`epic voice`) |
@@ -253,6 +254,13 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
   - `server.json`:  its process
   - `server.log`
   - `person.json5`:  who you are
+- It KEEPS every repo's servers too (the server keeper):  it looks at each every 10 seconds, and when a Claude
+  session starts.
+  - The repo's own servers (`servers`, above):  watched, and started when they're down and say how.
+  - Spell's own repo:  its main page server always on, restarted when `main` moves;  each worktree's on one port,
+    stopped after 30 minutes unused.
+  - The top bar's Servers tab shows them, with Start, Restart and Stop;  a red dot on the tab while one is down.
+  - A stop by hand stays stopped until Start:  `~/.spell-epic/server-keeper.json`.
 - The app is the repo's own server, never the epic server's:  `/editor/` only finds it, or starts it
   (its output in `~/.spell-epic/app-<repo>.log`).
   With no app declared, it shows a page saying so.
@@ -271,6 +279,8 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 | `/...` | the default repo's epic folder too |
 | `/editor/` | the default repo's APP (each repo's at `/r/<repo>/editor/`):  a redirect when it answers;  else started in the background behind a "Starting ..." page;  with none declared, a page saying so |
 | `/api/app/<repo>` | how a repo's app stands:  up, starting, or failed and why |
+| `/_epic/servers/` | the Servers tab:  every server it keeps, what just reached `main`, what waits |
+| `/api/servers` | the same, as data;  `/api/servers/dot`, the tab's red dot;  `POST /api/servers/<start\|stop\|restart>` |
 | `/api/server` | what it serves:  its port, its repos, the default one |
 | `/api/...` | the review, details, choices, comments, agents, airplane and links routes, for the default repo |
 

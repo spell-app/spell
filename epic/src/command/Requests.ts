@@ -687,6 +687,9 @@ export class Requests {
    *   - unless the packages changed (an install):  then it restarts too, and drops the imports it couldn't resolve
    *     before the install (`EditorServer`'s `packagesStamp()`)
    * - one that isn't running stays stopped;  says so in one line when it restarted
+   * - the SERVER KEEPER does it, when one runs (epic `epic-engine` P82):  the default `server`'s stop and start are
+   *   `PageServer.stop()` and `ensure()`, which ask the keeper for a main checkout (`SRV.KeeperLink`), so a worktree's
+   *   session never restarts main's page server by itself;  no keeper:  done here, as before
    * - `server`:  how it's asked, stopped and started (default the main checkout's own);  tests pass their own
    * - best effort, NEVER throws:  a failure says so in one line, and the merge stands
    */

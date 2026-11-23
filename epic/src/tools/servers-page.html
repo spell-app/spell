@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      The top bar's Servers tab (epic `epic-engine` P82):  every project's servers, what just reached main, what waits.
+      - Served by `serverRoutes` at `/_epic/servers/`, on the epic hub and every page server;  the same page each time.
+      - Drawn by `servers-page.js` from `/api/servers`, the server keeper's, asked again every 10 seconds.
+    -->
+    <title>Servers</title>
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+    <style>
+      .servers-why {
+        display: block;
+        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
+      }
+      .servers-state {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 8px;
+      }
+      .servers-what {
+        display: block;
+        font-size: 0.875em;
+        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
+      }
+      .servers-list {
+        margin: 0;
+        padding-inline-start: 20px;
+      }
+      .servers-list li {
+        margin: 4px 0;
+      }
+      .servers-new {
+        font-weight: 600;
+      }
+      .servers-when {
+        font-variant-numeric: tabular-nums;
+        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
+        margin-inline-end: 8px;
+      }
+    </style>
+  </head>
+  <body class="spell-doc-page" data-spell-needs-server data-spell-no-reading-time>
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-sticky class="spell-h1">
+          <header class="spell-page-head">
+            <h1>Servers</h1>
+          </header>
+        </ui-sticky>
+        <div id="servers-problem"></div>
+        <ui-section id="servers" label="1. Servers" sticky collapsible dividing>
+          <ui-icon slot="icon" name="terminal"></ui-icon>
+          <div id="servers-rows"></div>
+        </ui-section>
+        <ui-section id="on-main" label="2. Just on main" sticky collapsible dividing>
+          <ui-icon slot="icon" name="code branch"></ui-icon>
+          <div id="servers-main"></div>
+        </ui-section>
+        <ui-section id="waiting" label="3. Waiting for main" sticky collapsible dividing>
+          <ui-icon slot="icon" name="clock rotate left"></ui-icon>
+          <div id="servers-waiting"></div>
+        </ui-section>
+        <ui-section id="github" label="4. Waiting for GitHub" sticky collapsible dividing>
+          <ui-icon slot="icon" name="flag"></ui-icon>
+          <div id="servers-github"></div>
+        </ui-section>
+      </main>
+    </div>
+    <script type="module" src="/_epic/assets/servers-page.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

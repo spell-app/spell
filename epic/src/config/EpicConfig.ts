@@ -97,6 +97,7 @@ export class EpicConfig {
     repoTemplates: "",
     guidesFolder: "",
     app: { path: "/editor/", url: "", urlFile: "", start: "" },
+    servers: [],
     repos: "",
     voices: {},
     pageVoices: { readme: "readme", guide: "readme", code: "code", "epic-page": "code" },
@@ -868,6 +869,19 @@ export class EpicConfig {
    * - the epic server's `RepoApp` reads it, at each click
    */
   get app(): EpicApp | undefined {
+    return this.appSetting()
+  }
+
+  /**
+   * the repo's OWN servers, beside Spell's (`EpicServerSetting`, epic `epic-engine` P82):  what the server keeper
+   * watches, and starts when one has a `start`;  each `folder` absolute, from the main checkout
+   */
+  get servers(): EpicServerSetting[] {
+    return this.settings.servers.map((server) => ({ ...server, folder: resolve(this.main, server.folder ?? ".") }))
+  }
+
+  /** `app`'s value */
+  private appSetting(): EpicApp | undefined {
     const app = this.settings.app
     if (!app.url && !app.urlFile) return undefined
     return { ...app, urlFile: app.urlFile && resolve(this.main, app.urlFile) }
@@ -1341,6 +1355,7 @@ export class EpicConfig {
       colors: colorsOf(given, defaults.colors, file),
       top: valueOf(given, "top", defaults.top, file, "", { empty: true }),
       oldLayout: oldLayoutOf(given, defaults.oldLayout, file),
+      servers: serversOf(given, defaults.servers, file),
       app: {
         path: valueOf(app, "path", defaults.app.path, file, "app."),
         url: valueOf(app, "url", defaults.app.url, file, "app.", { empty: true }),
@@ -1566,6 +1581,7 @@ export type EpicSettings = {
   guidesFolder: string
   windowsFolder: string
   app: EpicApp
+  servers: EpicServerSetting[]
   repos: string | string[]
   voices: Record<string, string>
   pageVoices: Record<string, string>
@@ -1626,6 +1642,18 @@ export type CheckoutPatch = { id: string; date: string; why: string; copy?: stri
  * - neither `url` nor `urlFile`:  no app (the default)
  */
 export type EpicApp = { path: string; url: string; urlFile: string; start: string }
+
+/**
+ * One of the repo's OWN servers (`EpicSettings.servers`, epic `epic-engine` P82):  a proxy server, say, which the
+ * server keeper watches beside Spell's own, on the main checkout only.
+ * - `name`:  what the Servers tab calls it, `proxy server`
+ * - `check`:  where it answers:  a URL (`http://127.0.0.1:8080/health`), or just a port (`8080`), up while something
+ *   listens there
+ * - `start`:  the command that starts it, run in the background;  none:  watched and shown, with no Start or Restart
+ * - `folder`:  where `start` runs, from the main checkout (default the checkout itself)
+ * - `what`:  a few words on what it's for, shown under its name
+ */
+export type EpicServerSetting = { name: string; check: string; start?: string; folder?: string; what?: string }
 
 /**
  * `EpicSettings.colors`:  a colour for each person, by the short name `epic whoami` prints, and each agent, by its id
@@ -1857,6 +1885,39 @@ function patchesOf(given: Record<string, unknown>, fallback: CheckoutPatch[], fi
       fail(`:  "${patch.id}"'s "copy" must be a file from the repo's root, not ${JSON.stringify(patch.copy)}`)
     const { id, date, why, copy, run } = patch as CheckoutPatch
     return { id, date, why, ...(copy ? { copy } : {}), ...(run ? { run } : {}) }
+  })
+}
+
+/**
+ * `given.servers`, the repo's own servers (`EpicServerSetting`);  `fallback` when it's left out.
+ * - throws `TypeError` naming the file for anything else:  a server with no `name` or `check`, two of one name, a
+ *   `check` that's neither a URL nor a port
+ */
+function serversOf(given: Record<string, unknown>, fallback: EpicServerSetting[], file: string): EpicServerSetting[] {
+  const value = given.servers
+  if (value === undefined) return fallback
+  const fail = (why: string): never => {
+    throw new TypeError(`EpicConfig:  ${file}'s "servers" ${why}`)
+  }
+  if (!Array.isArray(value))
+    fail(`must be a list, [{ "name": ..., "check": ..., "start": ... }], not ${JSON.stringify(value)}`)
+  const names = new Set<string>()
+  return (value as unknown[]).map((each) => {
+    const server = (typeof each === "object" && each !== null ? each : {}) as Record<string, unknown>
+    const text = (key: string) => (typeof server[key] === "string" ? (server[key] as string).trim() : "")
+    const check = typeof server.check === "number" ? String(server.check) : text("check")
+    if (!text("name")) fail(`:  each needs a "name", not ${JSON.stringify(each)}`)
+    if (names.has(text("name"))) fail(`:  two servers are named "${text("name")}"`)
+    names.add(text("name"))
+    if (!/^\d+$/.test(check) && !/^https?:\/\//.test(check))
+      fail(`:  "${text("name")}"'s "check" must be a URL or a port, not ${JSON.stringify(server.check)}`)
+    return {
+      name: text("name"),
+      check,
+      ...(text("start") && { start: text("start") }),
+      ...(text("folder") && { folder: text("folder") }),
+      ...(text("what") && { what: text("what") })
+    }
   })
 }
 

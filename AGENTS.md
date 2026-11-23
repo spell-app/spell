@@ -348,6 +348,15 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 ## The page server
 
 - ONE page server, the KIT's, started from the kit's root only:  `spell server start | status | stop`.
+- The SERVER KEEPER (epic `epic-engine` P82):  the epic hub keeps every project's servers up, and is the only one that
+  starts, stops or restarts a MAIN checkout's (`ServerKeeper`;  [epic's AGENTS.md](epic/AGENTS.md)).
+  - Every session's start makes sure it runs, and has it look at once;  it looks again every 10 seconds.
+  - `spell server start | stop`, `epic merge`'s restart, the side bar's Restart Page Server and `/airplane` ask it
+    (`SRV.KeeperLink`);  `spell server stop` in the main checkout leaves it stopped until Start.
+  - A worktree's page server and editor keep ONE port each, written down (`SRV.PortBook`), and stop after 30 minutes
+    unused.
+  - The top bar's Servers tab shows them all, what just reached `main`, and what waits;  a red dot when one is down.
+  - A project's own servers (a proxy server, say):  its `.epic/config.json5`'s `servers`.
 - Each big folder declares ITS OWN part of its settings in its folder manifest, `"pageServer"`, paths from its folder.
 - The Epic repo's part is its `page-server.json5`:  the site's tabs, the writable folders, what's `gone`.
 - Merged:  the kit's, the epic repo's, each folder's (`workspaces` order), each peer `repos.json5` names

@@ -77,8 +77,12 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  *   ("not modified"), the bundles' hashed names (`builtNames()`) kept a year
  * - port:  `DEFAULT_PORT` (4747) for the main checkout, and ONLY that:  taken, it fails to start
  *   (epic `epic-engine` I332:  a restart that found an orphan on 4747 started on 59931, and the side bar lost it);
- *   a WORKTREE's server never asks for it (`portFor()`), and takes any free one:
+ *   a WORKTREE's server never asks for it (`portFor()`):
  *   it's the main checkout's, which the side bar and every opener expect (epic `epic-engine` I276)
+ *   - a worktree's takes the port written down for it instead, the same at every start (`SRV.PortBook`, epic
+ *     `epic-engine` P82):  a link to it stays good across restarts
+ * - the MAIN checkout's is the SERVER KEEPER's to start, stop and restart, when one runs (`SRV.KeeperLink`, epic
+ *   `epic-engine` P82):  `ensure()`, `stop()` and `restart()` ask it;  `ensureHere()` and `stopHere()` are what it runs
  *   - the real one goes in `<root>/.spell-server.json`, where `spell server start` and the openers find it
  * - its root:  the kit, from any folder of it (`pageServerRoot()`, epic `repo-split` P16)
  * - Run it with `spell server` (`page/cli.ts`), never by hand.
@@ -242,6 +246,8 @@ export class PageServer {
       (path) => componentSetSitePath(path, this.componentSets)
     )
     const router = this.web.router
+    // every request but the keeper's look at `/api/server` counts as use:  a worktree's idle stop (epic `epic-engine` P82)
+    router.use(this.noteRequest)
     // a request for a bundle's missing file waits while the bundles build (`start()`)
     router.use(this.bundles.wait)
     // and a worktree's, at its component sets' addresses:  built by that worktree, as the request first comes (r35)
@@ -258,7 +264,7 @@ export class PageServer {
       router.get(set.prefix, (request, reply, next) =>
         request.path.endsWith("/") ? next() : reply.redirect(`${set.prefix}/`)
       )
-    router.get(SERVER_API, (_request, reply) => reply.noStore().json(this.info))
+    router.get(SERVER_API, (_request, reply) => reply.noStore().json(this.liveInfo()))
     router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
     router.get(SERVER_REPORTS_API, this.onReportsAsked)
     // drawings asked for by a page:  its own origin only, no token (a page from an earlier run asks too)
@@ -319,6 +325,27 @@ export class PageServer {
   }
 
   /**
+   * What `/api/server` answers:  `info`, plus how it's used now, for the server keeper's idle stop (epic `epic-engine`
+   * P82):  `lastRequest`, when it last answered a request, and `pages`, how many pages hold its live socket open
+   */
+  liveInfo(): ServerInfo {
+    return {
+      ...this.info,
+      lastRequest: new Date(this.lastRequest).toISOString(),
+      pages: this.web.live?.clientCount ?? 0
+    }
+  }
+
+  /** when the server last answered a request but `/api/server`, ms;  its start, before any */
+  private lastRequest = Date.now()
+
+  /** middleware:  note the time of every request but `/api/server` (`liveInfo()`) */
+  private noteRequest: Handler = (request, _reply, next) => {
+    if (request.path !== SERVER_API) this.lastRequest = Date.now()
+    next()
+  }
+
+  /**
    * The certificate a page server listens with for HTTPS and HTTP/2, when this machine has one it trusts
    * (`SRV.LocalCertificate.forPageServer()`, made and trusted by `spell server certificate`);
    * else why not, in a line for its log.
@@ -365,7 +392,20 @@ export class PageServer {
    * - the main checkout's:  on `DEFAULT_PORT`, only (`PidFile.ensure()`'s `port`, epic `epic-engine` I332):  this
    *   checkout's server elsewhere, or one the pid file lost, is restarted onto it;  throws while something else holds it
    */
-  static ensure(_root: string, port = DEFAULT_PORT) {
+  static async ensure(_root: string, port = DEFAULT_PORT): Promise<SRV.RunningServer & { launched: boolean }> {
+    const root = kitRootOf(_root)
+    // the MAIN checkout's:  the server keeper's to start, when one runs (epic `epic-engine` P82, `SRV.KeeperLink`)
+    const kept = await PageServer.askKeeper("start", root, port)
+    if (kept) return kept
+    return PageServer.ensureHere(root, port)
+  }
+
+  /**
+   * `ensure()` in this process, never asking the server keeper:  what the keeper itself runs.
+   * - a WORKTREE's:  on the port written down for it (`SRV.PortBook`, epic `epic-engine` P82), the same at every
+   *   start, and its editor on its own (`SPELL_EDITOR_PORT`)
+   */
+  static async ensureHere(_root: string, port = DEFAULT_PORT): Promise<SRV.RunningServer & { launched: boolean }> {
     const root = kitRootOf(_root)
     // its code:  the server's folder, and the whole `src/` each route module is in;  a server older than them restarts
     // (I5 of `skillz`).  The whole `src/`, not the route's folder (epic `epic-engine` I219):  a route imports far
@@ -377,6 +417,7 @@ export class PageServer {
     const code = PageServer.codeFor(root)
     // the spaces it serves name its record:  the new server is told them too
     const pidFile = SRV.PidFile.forPageServer(root)
+    const booked = await PageServer.bookedPorts(root, port, pidFile.spaces)
     return pidFile.ensure({
       command: [
         process.execPath,
@@ -389,7 +430,7 @@ export class PageServer {
         "--root",
         resolve(root),
         "--port",
-        String(port),
+        String(booked?.port ?? port),
         ...(pidFile.spaces ? ["--spaces", pidFile.spaces] : [])
       ],
       // its log in colour (`SRV.ServerLog`), read in a terminal (`tail -f`, `less -R`);  never with `NO_COLOR`
@@ -397,11 +438,56 @@ export class PageServer {
       env: {
         TSX_TSCONFIG_PATH: code.tsconfig,
         [LOADED_CODE_VARIABLE]: pidFile.codeFile,
+        ...(booked && { [EDITOR_PORT_VARIABLE]: String(booked.editor) }),
         ...(process.env.NO_COLOR ? {} : { FORCE_COLOR: "1" })
       },
       sources: [code.source, ...new Set(routes)],
-      port: portFor(root, port, pidFile.spaces) || undefined
+      port: booked?.port ?? (portFor(root, port, pidFile.spaces) || undefined)
     })
+  }
+
+  /**
+   * The ports written down for worktree `root`'s page server and editor (`SRV.PortBook`), when it's asked for the
+   * usual port (`portFor()` gives it none);  else `undefined`:  the main checkout's, a project's, a port given by hand
+   */
+  static async bookedPorts(
+    root: string,
+    port: number,
+    spaces?: string
+  ): Promise<{ port: number; editor: number } | undefined> {
+    if (port !== DEFAULT_PORT || spaces !== undefined || portFor(root, port, spaces) !== 0) return undefined
+    const book = new SRV.PortBook()
+    return { port: await book.portFor(root), editor: await book.portFor(root, "editor") }
+  }
+
+  /**
+   * Restart the page server of the checkout at `root`, on its code now:  stopped, its editor's vite kept up for the
+   * next one (`PidFile.stop()`'s `restart`), then started;  the server keeper's to do for a MAIN checkout, when one runs
+   * (epic `epic-engine` P82).
+   */
+  static async restart(_root: string): Promise<SRV.RunningServer & { launched: boolean }> {
+    const root = kitRootOf(_root)
+    const kept = await PageServer.askKeeper("restart", root)
+    if (kept) return kept
+    await PageServer.stopHere(root, { restart: true })
+    return PageServer.ensureHere(root)
+  }
+
+  /**
+   * Ask the server keeper to `action` the page server of `root`, when `root` is a MAIN checkout on the usual port
+   * and a keeper runs (`SRV.KeeperLink`);  its answer, else `undefined`:  the caller does it itself
+   * - the keeper's own process never asks itself (`KeeperLink.running()`)
+   */
+  static async askKeeper(
+    action: SRV.KeeperAction,
+    root: string,
+    port = DEFAULT_PORT
+  ): Promise<(SRV.RunningServer & { launched: boolean }) | undefined> {
+    if (port !== DEFAULT_PORT || portFor(root, port, SRV.PidFile.forPageServer(root).spaces) !== DEFAULT_PORT) return
+    const answer = await new SRV.KeeperLink().ask<SRV.RunningServer & { launched: boolean }>(action, {
+      checkout: root
+    })
+    return answer
   }
 
   /**
@@ -410,10 +496,26 @@ export class PageServer {
    *   I332):  so `spell server stop` frees 4747 for the next start
    * - `restart`:  another starts right after;  the editor's vite stays up for it (`PidFile.stop()`, I329)
    */
-  static stop(_root: string, { port = DEFAULT_PORT, restart = false }: { port?: number; restart?: boolean } = {}) {
+  static async stop(
+    _root: string,
+    { port = DEFAULT_PORT, restart = false }: { port?: number; restart?: boolean } = {}
+  ): Promise<boolean> {
+    const root = kitRootOf(_root)
+    // the MAIN checkout's:  the server keeper's (epic `epic-engine` P82);  a plain stop it leaves stopped until a start
+    const kept = await PageServer.askKeeper(restart ? "restart" : "stop", root, port)
+    if (kept) return true
+    return PageServer.stopHere(root, { port, restart })
+  }
+
+  /** `stop()` in this process, never asking the server keeper:  what the keeper itself runs. */
+  static async stopHere(
+    _root: string,
+    { port = DEFAULT_PORT, restart = false }: { port?: number; restart?: boolean } = {}
+  ): Promise<boolean> {
     const root = kitRootOf(_root)
     const pidFile = SRV.PidFile.forPageServer(root)
-    return pidFile.stop({ restart, port: portFor(root, port, pidFile.spaces) || undefined })
+    const booked = await PageServer.bookedPorts(root, port, pidFile.spaces)
+    return pidFile.stop({ restart, port: booked?.port ?? (portFor(root, port, pidFile.spaces) || undefined) })
   }
 
   /**
@@ -788,6 +890,9 @@ const PLAIN_HTTP_WHY: Record<Exclude<SRV.CertificateState, "ready">, string> = {
 
 /** Port the page server asks for first:  `SPELL_SERVER_PORT`, else 4747 (the goals server's old port). */
 export const DEFAULT_PORT = Number(process.env.SPELL_SERVER_PORT) || 4747
+
+/** The variable that tells the editor (spell-app's `EditorServer`) its port:  a worktree's, from `SRV.PortBook`. */
+const EDITOR_PORT_VARIABLE = "SPELL_EDITOR_PORT"
 
 /**
  * The port the page server of checkout `root` asks for, when `wanted` is asked:  `wanted`, but never

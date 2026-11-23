@@ -258,6 +258,30 @@ describe("PidFile.ensure():  waits for the server it started, as long as that's 
   })
 })
 
+describe("PidFile.ensure():  two starts at once make ONE server (epic `epic-engine` I421)", () => {
+  let root: string
+
+  beforeEach(() => {
+    root = realpathSync(mkdtempSync(join(tmpdir(), "pid-file-twice-")))
+  })
+
+  afterEach(async () => {
+    await new SRV.PidFile(root).stop()
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  it("the second waits for the first's start, then finds its server:  one launched, the same pid", async () => {
+    const command = [process.execPath, "-e", `setTimeout(() => { ${serverAnswering(root)} }, 300)`]
+    const [first, second] = await Promise.all([
+      new SRV.PidFile(root).ensure({ command }),
+      new SRV.PidFile(root).ensure({ command })
+    ])
+    expect(first.pid).toBe(second.pid)
+    expect([first.launched, second.launched].filter(Boolean)).toHaveLength(1)
+    expect(existsSync(new SRV.PidFile(root).startLock)).toBe(false)
+  })
+})
+
 describe("PidFile.stop():  waits for the PROCESS, not just for it to stop answering", () => {
   let root: string
   let server: ChildProcess | undefined
