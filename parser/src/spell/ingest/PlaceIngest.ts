@@ -2,6 +2,7 @@ import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { tokenServiceMint } from "spell/places/PlaceToken"
 import { wrappedRows } from "spell/places/wrappedRows"
+import { deploymentAsRun } from "spell/parser/core/runtime"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -164,6 +165,7 @@ export class PlaceIngest {
     if (ask.keySecret && !look.specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, ask.signedIn)
     if (ask.tokenFrom !== undefined) description.about.tokenFrom = ask.tokenFrom
+    keepAsked(description, ask)
     if (ask.dataIsPrivateIn !== undefined)
       description.about.privateDataIn = ask.dataIsPrivateIn || privateFolderFor(description)
     if (look.specAt) noteFromSpec(description)
@@ -242,6 +244,7 @@ export class PlaceIngest {
     if (keySecret && !specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, signedIn)
     if (old.about.tokenFrom !== undefined) description.about.tokenFrom = old.about.tokenFrom
+    keepAsked(description, old.about)
     if (old.about.privateDataIn !== undefined) description.about.privateDataIn = old.about.privateDataIn
     if (specAt) noteFromSpec(description)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
@@ -554,7 +557,7 @@ export class PlaceIngest {
     const picked = named ?? names[0]!
     const deployment = listed![picked]
     if (!deployment) throw new IngestStopped(`${place} has no deployment "${picked}":  ${names.join(", ")}`)
-    return { name: picked, ...deployment }
+    return { name: picked, ...deploymentAsRun(picked, deployment) }
   }
 
   ////////////////
@@ -1490,6 +1493,17 @@ function noteFromSpec(description: PlaceDescription): void {
   description.notes.push(
     "Read from its OpenAPI description only:  every list, write and action route is unverified until `spell place verify` tries it against a running server."
   )
+}
+
+/**
+ * SIDE EFFECT:  what it was asked to say of the place stays, on `description`'s `about`:  read only, rows at a time,
+ * how often it's checked (`--read-only`, `--rows`, `--check-every`).  Each later update carries them over.
+ */
+function keepAsked(
+  description: PlaceDescription,
+  { readOnly, rows, checkEvery }: Pick<PlaceDescription["about"], "readOnly" | "rows" | "checkEvery">
+): void {
+  Object.assign(description.about, withDefined({ readOnly, rows, checkEvery }))
 }
 
 /** SIDE EFFECT:  `description` says which session it was read as, by name, never its values. */

@@ -59,6 +59,12 @@ export type PlaceIngestOptions = {
   spec?: string
   /** `--token-from <address>`:  where a token is made from its key, which is then what's sent (epic `data` P49). */
   tokenFrom?: string
+  /** `--read-only`:  it's read only, whatever its description offers. */
+  readOnly?: boolean
+  /** `--rows <count>`:  how many rows a program asks for at a time. */
+  rows?: string
+  /** `--check-every <time>`:  how often a program asks it what changed, `30s`, `5m`. */
+  checkEvery?: string
   /** `--no-examples`:  its data is private, its rows kept in `~/.spell/places/<name>` (epic `data` P49). */
   examples?: boolean
   /** `--examples-into <folder>`:  its data is private, its rows kept there. */
@@ -91,7 +97,10 @@ export async function placeIngest(address: string, options: PlaceIngestOptions):
     tryWrites,
     ai = true,
     examples = true,
-    examplesInto
+    examplesInto,
+    readOnly,
+    rows,
+    checkEvery
   } = options
   const dataIsPrivateIn = examplesInto ?? (examples ? undefined : "")
   const keyGoes = keyGoesFrom(options)
@@ -105,11 +114,32 @@ export async function placeIngest(address: string, options: PlaceIngestOptions):
       ...(collections && { collections: collectionsIn(collections) }),
       ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
       ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) }),
-      ...(tryWrites && { triesWrites: true })
+      ...(tryWrites && { triesWrites: true }),
+      ...(readOnly && { readOnly: true }),
+      ...(rows !== undefined && { rows: rowsFrom(rows) }),
+      ...(checkEvery !== undefined && { checkEvery: secondsIn(checkEvery) })
     })
     printAdded(result)
     return CLI.EXIT.OK
   })
+}
+
+/** `--rows`, a whole number above 0.  - throws `CliError` for anything else */
+export function rowsFrom(rows: string): number {
+  const count = Number(rows)
+  if (!Number.isInteger(count) || count < 1) {
+    throw new CLI.CliError(`spell place ingest:  --rows is a count, e.g. 20:  not "${rows}"`)
+  }
+  return count
+}
+
+/** The seconds `--check-every` says:  `30`, `30s`, `5m`, `1h`.  - throws `CliError` for anything else */
+export function secondsIn(time: string): number {
+  const [, amount, unit = "s"] = /^(\d+(?:\.\d+)?)\s*(s|m|h)?$/i.exec(time.trim()) ?? []
+  if (amount === undefined) {
+    throw new CLI.CliError(`spell place ingest:  --check-every is a time, e.g. 30s or 5m:  not "${time}"`)
+  }
+  return Number(amount) * { s: 1, m: 60, h: 3600 }[unit.toLowerCase() as "s" | "m" | "h"]
 }
 
 /**

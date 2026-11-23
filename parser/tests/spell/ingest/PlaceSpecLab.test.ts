@@ -5,7 +5,7 @@ import { parseSpellProject } from "spell/parser/spell/test"
 import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import { descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceOnDisk"
 import type { OpenApiDocument } from "spell/parser/spell/ingest/PlaceSpec"
-import type { IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/ingest.types"
+import type { IngestAsk, IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/ingest.types"
 
 /**
  * A made-up lab's API, read whole from its OpenAPI description:  what a bigger description tripped on.
@@ -91,7 +91,11 @@ const DOCUMENT: OpenApiDocument = {
 } as OpenApiDocument
 
 /** The place's Spell and description, from an ingest of `document` into `into`. */
-async function ingestOf(document: OpenApiDocument = DOCUMENT, into = "Lab.api.spell") {
+async function ingestOf(
+  document: OpenApiDocument = DOCUMENT,
+  into = "Lab.api.spell",
+  ask: Partial<IngestAsk> = {}
+) {
   const texts = new Map<string, string>()
   const descriptions = new Map<string, PlaceDescription>()
   const files: IngestFiles = {
@@ -118,7 +122,7 @@ async function ingestOf(document: OpenApiDocument = DOCUMENT, into = "Lab.api.sp
     sleep: async () => {},
     now: () => new Date("2026-11-23T12:00:00Z")
   })
-  const result = await ingest.add({ address: LAB, spec: SPEC_AT, into, name: "lab" })
+  const result = await ingest.add({ address: LAB, spec: SPEC_AT, into, name: "lab", ...ask })
   const description = descriptions.get(into.replace(/\.spell$/, ".json5"))!
   return { ingest, result, texts, descriptions, fetch, spell: texts.get(into)!, description }
 }
@@ -214,5 +218,24 @@ describe("a list wrapped in its answer, as no other is", () => {
     expect(Object.keys(description.collections.sources!.fields)).toContain("supplier")
     expect(spell).not.toMatch(/its rows are/)
     expect(errorsOf(spell)).toEqual([])
+  })
+})
+
+describe("read only, rows at a time, how often it's checked:  as it was told", () => {
+  test("written into the place, writes it describes kept off, and kept by an update", async () => {
+    const { ingest, spell, description } = await ingestOf(DOCUMENT, "Lab.api.spell", {
+      readOnly: true,
+      rows: 20,
+      checkEvery: 30
+    })
+    expect(spell).toMatch(/^\tit is read only$/m)
+    expect(spell).toMatch(/^\tit gives up to 20 at a time$/m)
+    expect(spell).toMatch(/^\tcheck it every 30 seconds$/m)
+    expect(description.about).toMatchObject({ readOnly: true, rows: 20, checkEvery: 30 })
+    expect(errorsOf(spell)).toEqual([])
+    const { spell: again } = await ingest.update("Lab.api.spell")
+    expect(again).toMatch(/^\tit is read only$/m)
+    expect(again).toMatch(/^\tit gives up to 20 at a time$/m)
+    expect(again).toMatch(/^\tcheck it every 30 seconds$/m)
   })
 })

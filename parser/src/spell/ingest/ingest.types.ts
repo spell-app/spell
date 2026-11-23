@@ -153,6 +153,12 @@ export type IngestAsk = {
    * `https://auth.acme.test/api-keys/{key id}/token`, the key holding `<key id>:<secret>`.
    */
   tokenFrom?: string
+  /** It's read only, whatever its description offers:  `it is read only`, kept by every later update. */
+  readOnly?: boolean
+  /** How many rows a program asks for at a time:  `it gives up to 20 at a time`, kept by every later update. */
+  rows?: number
+  /** How often a program asks what changed, in seconds:  `check it every 30 seconds`, kept by every later update. */
+  checkEvery?: number
   /**
    * Its real rows stay on this machine (epic `data` P49, J249):  no real value goes in its description, and the rows
    * it reads go in this folder, `spell place read-page`'s samples files.  `""`:  `~/.spell/places/<name>`.
@@ -684,6 +690,12 @@ export type PlaceDescription = {
     keySecret?: string
     /** Where a token is made from that key:  `it is authenticated with a token from "..."` (epic `data` P49). */
     tokenFrom?: string
+    /** It was asked to be read only (`--read-only`):  `it is read only`, whatever its description offers. */
+    readOnly?: boolean
+    /** The rows a program asks for at a time it was given (`--rows`):  `it gives up to 20 at a time`. */
+    rows?: number
+    /** How often it was asked to be checked, in seconds (`--check-every`):  `check it every 30 seconds`. */
+    checkEvery?: number
     /** Its real rows stay on this machine, in this folder:  `its data is private, located in "..."` (epic `data` P49). */
     privateDataIn?: string
     /** Where that key goes on a request:  left out, `Authorization: Bearer`. */

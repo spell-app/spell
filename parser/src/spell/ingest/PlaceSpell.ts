@@ -173,7 +173,15 @@ function allSpellPartsFor(
   // every name in one request
   const paged = every.filter(({ takesLimit }) => takesLimit !== undefined)
   const most = Math.max(...paged.map(({ rowsItSays }) => rowsItSays ?? Infinity))
-  if (kind === "web server" && paged.length && paged.every(({ takesLimit }) => takesLimit) && most <= MOST_AT_A_TIME) {
+  // how many a program asks for at a time, as it was told to (`--rows`)
+  if (about.rows !== undefined) {
+    placeLines.push({ key: "size", text: `it gives up to ${about.rows} at a time` })
+  } else if (
+    kind === "web server" &&
+    paged.length &&
+    paged.every(({ takesLimit }) => takesLimit) &&
+    most <= MOST_AT_A_TIME
+  ) {
     placeLines.push({ key: "size", text: `it gives up to ${Math.ceil(most / 1000) * 1000} at a time` })
   } else if (kind === "web server" && serverTakes?.pagesWith?.most !== undefined && !nextAt && !paging.size) {
     // its OpenAPI description says the most its lists give:  a read asking for more would be refused (epic `data` I140)
@@ -188,8 +196,9 @@ function allSpellPartsFor(
   if (every.length && every.every(({ fields }) => fields[VERSION_FIELD]?.type === "number")) {
     placeLines.push({ key: "version", text: `its version is its "${VERSION_FIELD}"` })
   }
-  if (checkEverySeconds !== undefined) {
-    placeLines.push({ key: "check", text: `check it ${checkEveryInWords(checkEverySeconds)}` })
+  const checkEvery = about.checkEvery ?? checkEverySeconds
+  if (checkEvery !== undefined) {
+    placeLines.push({ key: "check", text: `check it ${checkEveryInWords(checkEvery)}` })
   }
   // the pace its docs ask for:  the Met Museum's 80 a second
   if (mostPerSecond !== undefined) {
@@ -197,7 +206,11 @@ function allSpellPartsFor(
   }
   // what it was seen to do when it was asked, and what it says of itself:  asked of it, not done here
   const hasPaging = !!nextAt || paging.size > 0
-  if (kind === "web server") placeLines.push(...linesOfWhatItTakes(serverTakes, every, canDo.write, hasPaging))
+  if (kind === "web server") {
+    // told it's read only (`--read-only`):  its writes stay in its description, off
+    const write = about.readOnly ? "read only" : canDo.write
+    placeLines.push(...linesOfWhatItTakes(serverTakes, every, write, hasPaging))
+  }
   const placePages = kind === "web server" && !hasPaging ? serverTakes?.pagesWith : undefined
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = kind === "web server" || kind === "graphql server" ? nameExampleOf(every) : undefined
