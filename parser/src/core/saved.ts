@@ -20,7 +20,8 @@
  * - What the compiler gathered (epic `data` P12), and what it couldn't see:
  *   - `select`, on a type's `savedIn`:  the fields anything reads, for a place that can leave the rest out.
  *   - A field it left out and something read anyway (`PropInfo.whenUnset`):  the place is asked once more, for all of them.
- *     Whoever read it follows the field, so it appears.
+ *     Whoever read it follows the field, so it appears.  A list field, made empty as its thing is kept, is never unset:
+ *     its getter asks.
  * - `leave()`:  each computation reading one holds it until it's disposed (`onCleanup()`):  a draw leaving lets it go,
  *   and the last one letting go aborts its request.  A read from an action holds it only until its answer.
  * - A field holding another thing's address (epic `data` I33, `core.linked()`):  `the name of its homeworld`.
@@ -740,6 +741,8 @@ class ProgramPlaces {
           if (this.things?.placeOf(target as Thing)) this.askWhole(Class)
         }
         schema.declared.set(name, { ...info, whenUnset })
+        // a list is made empty as its thing is kept (`PlaceThings`), so it's never unset:  its getter asks
+        if (info.itemType !== undefined) this.onGet(Class, name, whenUnset)
       }
     }
   }
@@ -780,19 +783,23 @@ class ProgramPlaces {
 
   /** SIDE EFFECT:  `Class`'s getter for `name` reads its thing whole first, once:  see `heedListsGiveOnly()`. */
   private readWholeOnGet(Class: SavedClass, name: string): void {
+    this.onGet(Class, name, (thing) => {
+      if (this.wholeThingsAsked.has(thing) || isOnlyShowing() || isWhileReading()) return
+      if (this.things?.placeOf(thing)) this.readWhole(Class, thing)
+    })
+  }
+
+  /** SIDE EFFECT:  `Class`'s getter for `name` calls `first` with its thing, before it reads it. */
+  private onGet(Class: SavedClass, name: string, first: (thing: Thing) => void): void {
     let owner: object | null = Class.prototype as object
     while (owner && !Object.getOwnPropertyDescriptor(owner, name)?.get) owner = Object.getPrototypeOf(owner) as object
     const descriptor = owner && Object.getOwnPropertyDescriptor(owner, name)
     if (!descriptor?.get) return
     const get = descriptor.get
-    const askWhole = (thing: Thing) => {
-      if (this.wholeThingsAsked.has(thing) || isOnlyShowing() || isWhileReading()) return
-      if (this.things?.placeOf(thing)) this.readWhole(Class, thing)
-    }
     Object.defineProperty(Class.prototype, name, {
       ...descriptor,
       get(this: Thing) {
-        askWhole(this)
+        first(this)
         return get.call(this) as unknown
       }
     })

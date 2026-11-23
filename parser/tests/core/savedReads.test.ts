@@ -8,7 +8,7 @@ import { render } from "@solidjs/web"
 import { beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { bridgeSolid, observe } from "spell/util"
-import { core, Place, Thing } from "spell/parser/core"
+import { core, List, Place, Thing } from "spell/parser/core"
 import { waitAfter } from "spell/parser/core/saved"
 import { MemoryPlace, type ListAnswer, type ListAsk, type ListQuery, type PlaceContext } from "spell/places"
 
@@ -72,6 +72,15 @@ function program(
     set notes(value) {
       this.setProp("notes", value)
     }
+    static {
+      this.declareProp("steps", { itemType: "text", init: () => new List({ instanceType: "text" }) })
+    }
+    get steps() {
+      return this.getProp("steps") as List<string>
+    }
+    set steps(value) {
+      this.setProp("steps", value)
+    }
     static savedIn = { place: "cookbook", collection: "recipes", ...(select && { select }) }
   }
   class Tag extends Thing {
@@ -102,7 +111,12 @@ function program(
 /** A place holding one recipe and one tag. */
 function filled<T extends CountingPlace>(place: T): T {
   void place.apply([
-    { kind: "insert", collection: "recipes", id: "r1", fields: { id: "r1", title: "Soup", notes: "Salt it" } },
+    {
+      kind: "insert",
+      collection: "recipes",
+      id: "r1",
+      fields: { id: "r1", title: "Soup", notes: "Salt it", steps: ["Boil", "Stir"] }
+    },
     { kind: "insert", collection: "tags", id: "t1", fields: { id: "t1", word: "quick" } }
   ])
   return place
@@ -213,6 +227,19 @@ describe("a field the compiler left out", () => {
     void recipe!.notes
     await settled()
     expect(place.requests).toHaveLength(2)
+    stop()
+  })
+
+  test("a list field it left out, read in a loop:  asked for too, though a list is never unset", async () => {
+    const place = filled(new CountingPlace({ capabilities: WITH_IDS }))
+    const { Recipe } = program(place, { select: ["title"] })
+    const [recipe] = (await core.savedThings(Recipe)).items as Array<InstanceType<typeof Recipe>>
+    const seen: string[][] = []
+    const stop = observe(() => void seen.push([...recipe!.steps.items]))
+    await settled()
+    core.flush()
+    expect(place.requests).toHaveLength(2)
+    expect(seen.at(-1)).toEqual(["Boil", "Stir"])
     stop()
   })
 

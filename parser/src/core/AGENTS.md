@@ -414,6 +414,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         it came, and the first one read asked the whole list again:  every list read twice.
     - A left-out field read anyway (`PropInfo.whenUnset`, which costs only a read that finds nothing set):  every read of
       that type asks once more, for all of it, and whoever read the field sees it appear, by its cell.
+      - A LIST field is never unset:  `PlaceThings` makes it, empty, as it keeps the thing, so its read would find it
+        set and never ask.  Its getter asks instead (`onGet()`).
     - A drawn view's element reads every property, to mirror them as attributes:  `whileOnlyShowing()`, so that isn't needing them.
     - A type a program removes is read whole:  undo writes the whole row back.
   - What `belongs to` a saved owner is kept INSIDE the owner's row, in its list of them:  `HELD_BY`, `core.ownerOfSaved()`.
