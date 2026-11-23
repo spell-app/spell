@@ -502,11 +502,13 @@ As `plan-doc.md`, "Ids":
     - GREY MEANS CLOSED, a limit apart:  a rule that would grey an open item leaves it as it is, with no badge, until
       `epic badges <epic> close <ids>` closes it (`badge-closed`)
       - never their words, what they got to, or a question:  theirs wait light orange, orange once they acted
-      - with badges `on`, a new item like that is closed as it's made;  `trial` closes nothing, and leaves what's
-        closed its colour
+      - with badges `on`, a new item like that closes as it's made only once the person said yes,
+        `epic badges <epic> close-new yes` (`badges-close-new`;  I435), and never a judgement call
+      - `trial` closes nothing, and leaves what's closed its colour
     - turned into a todo, still open:  `SEE T38`, outlined blue, ahead of every rule but a comment waiting on them
     - the badge replaces the UPDATE word at the line's end;  listings say it as a prefix (`WILL FIX - It jumps`)
-    - phases:  from their state alone (`badged`, written by the tool;  `ItemBadge.ofPhase()`)
+    - phases:  from their state alone (`badged`, written by the tool;  `ItemBadge.ofPhase()`);
+      a phase's title row draws only UNDERWAY, after its title, on the phase being built (T154)
     - `epic badges <epic> off`:  the one undo.  Scores off, what a badge closed open again, drawn as before.
     - no migration step:  every attribute is new and optional, and a page without `badges` draws as before
   - `changed`:  ISO local time with offset.
