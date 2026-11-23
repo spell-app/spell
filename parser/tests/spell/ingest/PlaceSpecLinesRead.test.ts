@@ -174,6 +174,20 @@ describe("each kind of line the ingest writes", () => {
     expect(spell()).toMatch(/^a "loaf extra" is a thing\n\tits "available" is yes or no\n\tits "reason" is text$/m)
   })
 
+  test("a type the agent names in a plural is ONE of it, as Spell reads a type", async () => {
+    // `a bake data` reads as many
+    const claude: ClaudeRunner = async () =>
+      JSON.stringify({
+        placeName: "",
+        notes: [],
+        collections: [{ name: "loaves", typeWords: "bake data", about: "", idField: "loaf_id", fields: [] }]
+      })
+    const { spell } = await ingestOf({ claude })
+    expect(spell()).toMatch(/^a "bake datum" is a thing$/m)
+    expect(spell()).toMatch(/^\tbake data live at "\/api\/loaves"$/m)
+    expect(errorsOf(spell())).toEqual([])
+  })
+
   test("its front page, `/`, names no list:  left out, said in its notes", async () => {
     const { spell, descriptions } = await ingestOf()
     const description = descriptions.get("Bakery.api.json5")!

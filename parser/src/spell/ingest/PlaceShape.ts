@@ -698,14 +698,18 @@ export function wordsFor(name: string): string {
     .toLowerCase()
 }
 
+/** ONE of what `words` name, its last word made singular, as Spell reads a type:  `run data` => `run datum`. */
+export function oneNamedBy(words: string): string {
+  const each = words.split(" ")
+  return [...each.slice(0, -1), P.singularize(each.at(-1)!)].join(" ")
+}
+
 /**
  * A collection's name, as a type's words:  `life_forms` => `life form`, `people` => `person`.
  * - Where that's one of Spell's own types, it says whose:  `dates` of `swapi` => `swapi date`, as `date` is Spell's.
  */
 export function typeWordsFor(name: string, placeName: string): string {
-  const words = wordsFor(name).split(" ")
-  words[words.length - 1] = P.singularize(words[words.length - 1]!)
-  const type = words.join(" ")
+  const type = oneNamedBy(wordsFor(name))
   return isSpellsOwnType(type) ? `${placeName} ${type}` : type
 }
 

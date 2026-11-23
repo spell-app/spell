@@ -11,7 +11,7 @@ import type {
   PagesWith,
   PlaceLook
 } from "./ingest.types"
-import { wordsFor, yesOrNoWords } from "./PlaceShape"
+import { oneNamedBy, wordsFor, yesOrNoWords } from "./PlaceShape"
 
 /** How deep it reads objects inside objects:  as deep as a look at rows reads (`PlaceShape`'s). */
 const DEEPEST_INSIDE = 3
@@ -838,12 +838,6 @@ function isNothing(schema: Schema | undefined): boolean {
 /** Does `schema` hold one of several kinds:  an `anyOf` / `oneOf` left, or a type list of two or more? */
 function isSeveralKinds(schema: Schema | undefined): boolean {
   return Boolean(schema?.anyOf ?? schema?.oneOf) || Array.isArray(schema?.type)
-}
-
-/** One of what `words` names:  `job sessions` => `job session`. */
-function oneNamedBy(words: string): string {
-  const each = words.split(" ")
-  return [...each.slice(0, -1), P.singularize(each.at(-1)!)].join(" ")
 }
 
 /**

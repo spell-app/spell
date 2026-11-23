@@ -10,7 +10,7 @@ import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 import { PROPORTION } from "spell/util/measures/Dimension"
 
 import type { CollectionDescription, FieldDescription, PagesWith, PlaceDescription, ServerTakes } from "./ingest.types"
-import { isSpellsOwnType, wordsFor, yesOrNoWords } from "./PlaceShape"
+import { isSpellsOwnType, oneNamedBy, wordsFor, yesOrNoWords } from "./PlaceShape"
 import { PlaceWords } from "./PlaceWords"
 
 /** What each thing a field can hold is, in a type's line. */
@@ -570,8 +570,7 @@ function insideTypeFor(
  */
 function singularTypeOf(name: string | undefined, schemaTypes: ReadonlySet<string>): string | undefined {
   if (name === undefined) return undefined
-  const words = name.split(" ")
-  const one = [...words.slice(0, -1), P.singularize(words.at(-1)!)].join(" ")
+  const one = oneNamedBy(name)
   if (one === name) return name
   return schemaTypes.has(one) ? `${name} set` : one
 }
