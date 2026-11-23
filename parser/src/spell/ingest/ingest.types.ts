@@ -733,6 +733,11 @@ export type PlaceDescription = {
   agentNotes?: string[]
   /** What Spell has no words for yet. */
   spellCantSay: string[]
+  /**
+   * The lines Spell couldn't read, by their key (`SpellLine.key`), with why:  any other line the ingest writes, left
+   * out by itself, so one line never stops a whole place.  Said again each time it compiles.
+   */
+  linesLeftOut?: Record<string, string>
   /** How often to ask it what changed, in seconds. */
   checkEverySeconds?: number
   /** The most requests a second its docs ask for:  `it takes up to 80 requests a second`, the Met Museum's (epic `data` P34). */

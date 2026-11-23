@@ -789,6 +789,8 @@ export class PlaceIngest {
     const most = description.about.specAt ? MOST_COMPILES_OF_A_SPEC : MOST_COMPILES
     // the English it wrote:  whatever language the file is in, that's checked after
     const englishFile = file.replace(/\.[a-z]{2}\.spell$/, ".spell")
+    // what Spell couldn't read last time may read now
+    delete description.linesLeftOut
     for (let round = 0; round < most; round++) {
       const parts = spellPartsFor(description)
       const text = spellTextOf(parts)
@@ -1152,9 +1154,24 @@ function leaveOutLine(description: PlaceDescription, line: WrittenLine, why: str
       return true
     }
   }
-  if (!type || line.text !== type.header) return false
-  if (type.isInside) return leaveOutHolders(description, type, reason)
-  return leaveOutCollection(description, type.collection, reason)
+  if (type && line.text === type.header) {
+    if (type.isInside) return leaveOutHolders(description, type, reason)
+    return leaveOutCollection(description, type.collection, reason)
+  }
+  return key ? leaveOutKeyed(description, key, reason) : false
+}
+
+/**
+ * SIDE EFFECT:  the Spell leaves out one line, by its key, whatever it says:  so one line Spell can't read never stops
+ * a whole place (`measurements are asked for by their ...`, before Spell read a list of values).
+ * - `false` if it's left out already.
+ */
+function leaveOutKeyed(description: PlaceDescription, key: string, reason: string): boolean {
+  const leftOut = (description.linesLeftOut ??= {})
+  if (key in leftOut) return false
+  leftOut[key] = reason
+  description.notes.push(`Left out a line:  ${reason}`)
+  return true
 }
 
 /**

@@ -1115,6 +1115,14 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
     expect(asked).toEqual(["https://shapes.test/api/runs?team=infra"])
   })
 
+  test("a list asked for by a list of values:  each one sent, the question repeated", async () => {
+    const asked = fakeServer((query) => query.getAll("device").map((device) => ({ id: `m-${device}`, device })))
+    const place = shapedPlace({ collections: { measurements: { path: "/api/measurements{/id}", askedBy: ["device"] } } })
+    const answer = await place.list("measurements", { filter: { device: ["d1", "d2"] } }, {})
+    expect(answer).toMatchObject({ rows: [{ id: "m-d1" }, { id: "m-d2" }], handled: { filter: true } })
+    expect(asked).toEqual(["https://shapes.test/api/measurements?device=d1&device=d2"])
+  })
+
   test("a list asked for by a field its rows leave out:  each row holds the value it was asked for", async () => {
     const asked: string[] = []
     // answers 400 without its `system`, and its rows never say which system they're for

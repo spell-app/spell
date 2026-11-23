@@ -9930,7 +9930,7 @@
           "ruleNames": ["asked_by"],
           "internal": false,
           "file": "src/spell/rules/places/AskedBy.ts",
-          "line": 16,
+          "line": 18,
           "purpose": "The fields a web server's things are asked for by, each a query parameter (epic `data` P33).",
           "syntaxes": [
             {
@@ -10882,11 +10882,11 @@
           "ruleNames": ["searched_fields"],
           "internal": false,
           "file": "src/spell/rules/places/SearchedFields.ts",
-          "line": 7,
+          "line": 8,
           "purpose": "The fields a server searches, by their words, e.g. `names and titles`: see `SearchesWith`.",
           "syntaxes": [
             {
-              "syntax": "[{identifier} (,|and)]"
+              "syntax": "[{member_words} (,|and)]"
             }
           ],
           "aliases": []

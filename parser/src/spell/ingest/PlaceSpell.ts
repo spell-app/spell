@@ -112,8 +112,24 @@ export type SpellParts = {
  * - Only what's said differently from the usual needs a line, except each collection's address, which shows what's there.
  */
 export function spellPartsFor(
-  { about, canDo, collections, checkEverySeconds, mostPerSecond, serverTakes }: PlaceDescription,
+  description: PlaceDescription,
   { withKey = true }: { withKey?: boolean } = {}
+): SpellParts {
+  const { header, placeLines, types } = allSpellPartsFor(description, { withKey })
+  // a line Spell couldn't read stays out:  the rest of the place is written
+  const { linesLeftOut = {} } = description
+  const isKept = ({ key }: SpellLine) => !(key in linesLeftOut)
+  return {
+    header,
+    placeLines: placeLines.filter(isKept),
+    types: types.map((type) => ({ ...type, lines: type.lines.filter(isKept) }))
+  }
+}
+
+/** `spellPartsFor()`, every line, those Spell couldn't read too. */
+function allSpellPartsFor(
+  { about, canDo, collections, checkEverySeconds, mostPerSecond, serverTakes }: PlaceDescription,
+  { withKey }: { withKey: boolean }
 ): SpellParts {
   const { name, kind, address, keySecret, keyIfSet, keyGoes, tokenFrom, privateDataIn } = about
   const shown = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
