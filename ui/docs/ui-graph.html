@@ -130,6 +130,8 @@
                   It lays the graph out in layers, left to right, and fits it to the view.
                   When any node has a `group`, it lays it out in COLUMNS instead, a column per group (`arrange` says which:
                   `auto`, `layers` or `groups`).
+                  With no node in a group, `groups` draws layers, as `auto` does:
+                  for one column with no header, give every node the same `group`.
                   Edges go square, round the boxes, with rounded corners.
                   Set a NEW graph to redraw:  one changed in place isn't seen.
                 </script>

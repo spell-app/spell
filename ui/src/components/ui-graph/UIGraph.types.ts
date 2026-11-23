@@ -234,7 +234,12 @@ export type GraphLayoutOptions = {
   boundary?: readonly GraphPort[]
   /** The shown graph's own path, `""` at the top:  what its nodes' paths start with. */
   prefix?: string
-  /** How nodes are arranged:  `layers` (by their edges), `groups` (a column per `group`), `auto` (groups when any node has one). */
+  /**
+   * How nodes are arranged:  `layers` (by their edges), `groups` (a column per `group`), `auto` (groups when any node
+   * has one).
+   * - `groups` with no node in a group draws layers, as `auto` does:  for one headerless column, give every node the
+   *   same `group`.
+   */
   arrange?: GraphArrangement
 }
 
