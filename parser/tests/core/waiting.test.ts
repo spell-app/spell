@@ -6,6 +6,8 @@ import { afterEach, beforeAll, describe, expect, test } from "vite-plus/test"
 import { bridgeSolid } from "spell/util"
 import { core, Thing, prop, h } from "spell/parser/core"
 import type { Drawing } from "spell/parser/core/drawing"
+import { SkeletonText } from "spell/element/SkeletonText"
+import { lookOfWords, lookSaid } from "spell/parser/core/looks"
 
 /**
  * A value that takes a while (epic `language` P12):  `core.waitedValue()`, `core.whileWaiting()`, `core.answerOf()`,
@@ -176,6 +178,112 @@ describe("an element whose attributes wait, in a spot of its own", () => {
     expect(shown()).toContain("Heading")
     expect(shown()).toContain("no answer")
     expect(container.querySelector("ui-message ui-button")).not.toBeNull()
+  })
+})
+
+/** Its pane's `loading="..."`:  how what waits in it looks, as compiled javascript writes it (`core.drawLooking()`). */
+class LookingGame extends Game {
+  constructor(
+    private said: string,
+    private tag = "section",
+    private ownsState = false
+  ) {
+    super()
+  }
+
+  override draw(): Drawing {
+    return h("div", h("h1", "Heading"), () =>
+      core.drawLooking(
+        this.said,
+        () =>
+          h(this.tag, () =>
+            core.drawWaiting(() => h("p", { title: () => String(this.total) }, "body") as unknown as Drawing, "p")
+          ) as unknown as Drawing,
+        this.ownsState
+      )
+    ) as unknown as Drawing
+  }
+}
+
+describe("how what waits looks:  an element's `loading`", () => {
+  test('"skeleton":  Spell UI\'s placeholder lines where it waits, announced busy;  then the element', async () => {
+    const game = new LookingGame("skeleton")
+    draw(game)
+    expect(container.querySelector("ui-loader")).toBeNull()
+    const skeleton = container.querySelector(".spell-waiting-skeleton")
+    expect(skeleton?.getAttribute("aria-busy")).toBe("true")
+    expect(skeleton?.querySelectorAll("ui-placeholder-paragraph ui-placeholder-line").length).toBe(3)
+    await game.work.answer(10)
+    expect(container.querySelector("p")?.getAttribute("title")).toBe("11")
+    expect(container.querySelector("ui-placeholder")).toBeNull()
+  })
+
+  test('"skeleton: header, 2 line paragraph, image", as it compiles:  those shapes, in order', () => {
+    draw(new LookingGame(lookOfWords("skeleton: header, 2 line paragraph, image", (text) => SkeletonText.parse(text))))
+    const shapes = [...container.querySelectorAll("ui-placeholder > *")].map((shape) => shape.localName)
+    expect(shapes).toEqual(["ui-placeholder-header", "ui-placeholder-paragraph", "ui-placeholder-image"])
+    expect(container.querySelectorAll("ui-placeholder-paragraph ui-placeholder-line").length).toBe(2)
+  })
+
+  test('"none":  nothing where it waits', () => {
+    draw(new LookingGame("none"))
+    expect(container.querySelector("ui-loader, ui-placeholder")).toBeNull()
+    expect(shown()).toBe("Heading")
+  })
+
+  test("words:  the spinner says them", () => {
+    draw(new LookingGame("Loading Jobs..."))
+    expect(container.querySelector("ui-loader")?.textContent).toBe("Loading Jobs...")
+  })
+
+  test("a pane with a loading state of its own:  that state on while it waits, no second spinner;  off after", async () => {
+    const game = new LookingGame("spinner", "ui-segment", true)
+    draw(game)
+    const segment = container.querySelector("ui-segment")!
+    expect(segment.hasAttribute("loading")).toBe(true)
+    expect(container.querySelector("ui-loader")).toBeNull()
+    await game.work.answer(10)
+    expect(segment.hasAttribute("loading")).toBe(false)
+    expect(container.querySelector("p")?.getAttribute("title")).toBe("11")
+  })
+
+  test("the same pane told skeleton:  placeholder lines inside it, its own state left off", () => {
+    draw(new LookingGame("skeleton", "ui-segment", true))
+    expect(container.querySelector("ui-segment")?.hasAttribute("loading")).toBe(false)
+    expect(container.querySelector("ui-segment ui-placeholder")).not.toBeNull()
+  })
+})
+
+describe("the look's words", () => {
+  test("look words, in both languages;  anything else a spinner's words", () => {
+    expect(lookSaid("skeleton")).toEqual({ look: "skeleton" })
+    expect(lookSaid("esqueleto")).toEqual({ look: "skeleton" })
+    expect(lookSaid("none")).toEqual({ look: "none" })
+    expect(lookSaid("cargador")).toEqual({ look: "spinner" })
+    expect(lookSaid("Loading Jobs...")).toEqual({ look: "spinner", text: "Loading Jobs..." })
+    expect(lookSaid("")).toEqual({ look: "spinner" })
+  })
+
+  test("a skeleton's shape after its `:`, in `SkeletonText`'s words, compiled:  a page never parses it", () => {
+    const parse = (text: string) => SkeletonText.parse(text)
+    const compiled = lookOfWords("skeleton: header, 3 line paragraph", parse)
+    expect(lookSaid(compiled)).toEqual({
+      look: "skeleton",
+      skeleton: { parts: [{ shape: "header" }, { shape: "paragraph", lines: 3 }] }
+    })
+    expect(lookSaid(lookOfWords("esqueleto: 5 line paragraph", parse))).toEqual({
+      look: "skeleton",
+      skeleton: { parts: [{ shape: "paragraph", lines: 5 }] }
+    })
+    // a bare skeleton:  the element's own, its vocabulary's
+    expect(lookSaid(lookOfWords("skeleton", parse, { height: "16em" }))).toEqual({
+      look: "skeleton",
+      skeleton: { height: "16em" }
+    })
+    expect(lookOfWords("Loading Jobs...", parse)).toBe("Loading Jobs...")
+    expect(() => lookOfWords("skeleton: wibble", parse)).toThrow(/wibble/)
+    // said at run time, uncompiled:  a skeleton of what's coming
+    expect(lookSaid("skeleton: wibble")).toEqual({ look: "skeleton" })
   })
 })
 

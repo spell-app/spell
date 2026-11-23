@@ -190,6 +190,16 @@ describe("a <for> on a drawing's own line (epic `language` I73)", () => {
     expect(code).toContain("Scanning...")
   })
 
+  test("`loading` says the loader's words, or names a look:  `while waiting say`, drawn as the look here", () => {
+    expect(drawn('<for its films loading="Loading Films..." />').code).toContain('waitingSay: () => "Loading Films..."')
+    // a skeleton's shape, in `SkeletonText`'s words:  parsed as it compiles
+    expect(drawn('<for its films loading="skeleton: 5 line paragraph" />').code).toContain(
+      'waitingSay: () => "{\\"look\\":\\"skeleton\\",\\"skeleton\\":{\\"parts\\":[{\\"shape\\":\\"paragraph\\",\\"lines\\":5}]}}"'
+    )
+    expect(drawn('<for its films loading="skeleton: 5 rows" />').errors.join("\n")).toMatch(/rows/)
+    expect(drawn("<for its films loading={no} />").code).toContain("waiting: () => {}")
+  })
+
   test("returned:  the loop", () => {
     const { code, errors } = drawn("return <for its films />")
     expect(errors).toEqual([])

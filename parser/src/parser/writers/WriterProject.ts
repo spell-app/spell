@@ -822,7 +822,8 @@ export class WriterProject {
       if (member instanceof P.ASTStaticDefinition && member.name === "uiElement") {
         // `CreateType` writes its tag quoted, as code:  `"ui-tree"`
         const { value } = member
-        if (value instanceof P.ASTStringLiteral) this.uiElements.set(declaration.type.name, value.value.replace(/^"|"$/g, ""))
+        if (value instanceof P.ASTStringLiteral)
+          this.uiElements.set(declaration.type.name, value.value.replace(/^"|"$/g, ""))
       }
       if (member instanceof P.ASTStaticDefinition && member.name === "instanceType") {
         if (member.value instanceof P.ASTTypeExpression) this.itemTypes.set(declaration.type.name, member.value.name)

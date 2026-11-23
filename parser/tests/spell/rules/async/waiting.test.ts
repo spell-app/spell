@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vite-plus/test"
+import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -533,11 +533,75 @@ ${drawing}
 
   test("an element inside another whose attribute waits has a spot of its own:  the rest draws at once", () => {
     const js = compiled(GAME(`		<div>\n			<span class={the total}>x</span>\n		</div>`))
-    expect(js).toContain('() => core.drawWaiting(() => h("span", { class: () => this.total }, "x"))')
+    expect(js).toContain('() => core.drawWaiting(() => h("span", { class: () => this.total }, "x"), "span")')
     expect(js).not.toContain("drawsWaiting")
     const ts = compiled(GAME(`		<div>\n			<span class={the total}>x</span>\n		</div>`), "ts/solid")
     expect(ts).toContain("{core.drawWaiting(() => <span")
     expect(ts).not.toContain("drawsWaiting")
+  })
+
+  describe("an element's `loading=\"...\"`:  Spell's, how what waits in it looks (`core.drawLooking()`)", () => {
+    /** A pack with a segment, which has a loading state of its own, and an image, which has none. */
+    const PACK: SP.ComponentPack = {
+      name: "spell-ui",
+      tagFor: (word) => ({ segment: "ui-segment", image: "ui-image" })[word],
+      attributeNameFor: (tag, attribute) => (tag === "ui-segment" && attribute === "loading" ? "loading" : undefined),
+      skeletonFor: (tag) => (tag === "ui-image" ? { parts: [{ shape: "image", ratio: "square" }] } : undefined)
+    }
+    beforeAll(() => SP.ComponentPacks.register(PACK))
+    afterAll(() => SP.ComponentPacks.register({ name: "spell-ui", tagFor: () => undefined }))
+
+    test("quoted:  taken off the element, around it all;  its attributes waiting in their spot inside", () => {
+      const js = compiled(
+        GAME(`		<div>\n			<span class={the total} loading="skeleton: 5 line paragraph">x</span>\n		</div>`)
+      )
+      expect(js).toContain(
+        `() => core.drawLooking(${JSON.stringify(JSON.stringify({ look: "skeleton", skeleton: { parts: [{ shape: "paragraph", lines: 5 }] } }))}, () => core.drawWaiting(() => h("span", { class: () => this.total }, "x"), "span"))`
+      )
+      const ts = compiled(
+        GAME(`		<div>\n			<span class={the total} loading="skeleton">x</span>\n		</div>`),
+        "ts/solid"
+      )
+      expect(ts).toContain('{core.drawLooking("skeleton", () => core.drawWaiting(() => <span')
+    })
+
+    test("on an element whose children wait:  the look for all inside it", () => {
+      const js = compiled(GAME(`		<div>\n			<div loading="Loading Totals...">{the total}</div>\n		</div>`))
+      expect(js).toContain('() => core.drawLooking("Loading Totals...", () => h("div"')
+      expect(js).not.toContain('loading: "Loading Totals..."')
+    })
+
+    test("a pane with a loading state of its own:  that state stands in for what waits inside it", () => {
+      const js = compiled(GAME(`		<div>\n			<segment loading="spinner">{the total}</segment>\n		</div>`))
+      expect(js).toContain('core.drawLooking("spinner", () => h("ui-segment"')
+      expect(js).toMatch(/core\.drawLooking\("spinner", [\s\S]*, true\)/)
+    })
+
+    test("and when its own attributes wait, it stands in for itself, in that state", () => {
+      const js = compiled(GAME(`		<div>\n			<segment class={the total} loading="spinner">x</segment>\n		</div>`))
+      expect(js).toContain(
+        'core.drawWaiting(() => h("ui-segment", { class: () => this.total }, "x"), "ui-segment", true)'
+      )
+    })
+
+    test("a bare `skeleton`:  the element's own, its vocabulary's, compiled in", () => {
+      const js = compiled(GAME(`		<div>\n			<image src={the total} loading="skeleton" />\n		</div>`))
+      expect(js).toContain('\\"ratio\\":\\"square\\"')
+    })
+
+    test("a skeleton's shape that isn't skeleton text:  an error at the attribute, saying how to write one", () => {
+      expect(() =>
+        compiled(GAME(`		<div>\n			<div loading="skeleton: wibble">{the total}</div>\n		</div>`))
+      ).toThrow(/wibble/)
+    })
+
+    test("a bare `loading`, `loading={...}`, and the web's `lazy` stay the element's", () => {
+      const bare = compiled(GAME(`		<div>\n			<segment loading>x</segment>\n		</div>`))
+      expect(bare).not.toContain("drawLooking")
+      const lazy = compiled(GAME(`		<div>\n			<image src="a.png" loading="lazy" />\n		</div>`))
+      expect(lazy).not.toContain("drawLooking")
+      expect(lazy).toContain('loading: "lazy"')
+    })
   })
 
   test("a part's drawing with an `if` that waits waits in its own spot, never holding its whole thing", () => {

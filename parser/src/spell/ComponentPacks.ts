@@ -1,3 +1,5 @@
+import type { SkeletonSpec } from "spell/element/vocabulary.types"
+
 /**
  * The component packs a drawing names its components from, by their BARE names (epic `elemental-spell` P7, Q46):
  * `<button>` is a pack's button, `ui-button`;  `<botón>` in a Spanish file, its Spanish tag, `es-boton`.
@@ -154,6 +156,23 @@ export class ComponentPacks {
     return undefined
   }
 
+  /**
+   * The skeleton of `tag` (a page's tag, or bare), from the first of `packNames` that has one:  what `<ui-root
+   * display="skeleton">` draws for it, its vocabulary's `skeleton`;  `undefined` for none.
+   * - What a bare `loading="skeleton"` draws while what's in the element waits.
+   */
+  static skeletonFor(
+    tag: string,
+    language: string,
+    packNames: readonly string[] = this.DEFAULT
+  ): SkeletonSpec | undefined {
+    for (const name of packNames) {
+      const skeleton = this.packs.get(name)?.skeletonFor?.(tag, language)
+      if (skeleton) return skeleton
+    }
+    return undefined
+  }
+
   /** `packNames` as an error says what it searched, e.g. `spell-ui`, or `spell-ui (not loaded)`. */
   static searched(packNames: readonly string[] = this.DEFAULT): string {
     return packNames.map((name) => (this.packs.has(name) ? name : `${name} (not loaded)`)).join(", ")
@@ -208,6 +227,12 @@ export type ComponentPack = {
    * - Left out:  no type can be built on the pack's components.
    */
   viewBaseFor?(noun: string, language: string): ComponentViewBase | undefined
+  /**
+   * The skeleton of its tag `tag` in `language` (`ComponentPacks.skeletonFor()`):  its vocabulary's, as `<ui-root
+   * display="skeleton">` draws it;  `undefined` for none.
+   * - Left out:  a bare `loading="skeleton"` draws the shape of what's coming.
+   */
+  skeletonFor?(tag: string, language: string): SkeletonSpec | undefined
   /**
    * What its components are, as `language` writes them in a drawing (`ComponentPacks.help()`).
    * - `undefined` until it has them:  the first call may start loading them, for a later one.

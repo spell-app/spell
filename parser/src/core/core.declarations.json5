@@ -4191,6 +4191,24 @@
     },
     {
       "kind": "method",
+      "name": "drawLooking",
+      "of": "core",
+      "module": "waiting",
+      "params": [
+        {
+          "name": "said"
+        },
+        {
+          "name": "draw"
+        },
+        {
+          "name": "ownsState"
+        }
+      ],
+      "description": "`draw`, with what waits inside it looking as `said` says meanwhile:  an element's `loading=\"...\"`, taken by Spell when its value is quoted (`SpellJSX`), never handed to the element."
+    },
+    {
+      "kind": "method",
       "name": "answerOf",
       "of": "core",
       "module": "waiting",
@@ -4572,6 +4590,15 @@
       "params": [
         {
           "name": "element"
+        },
+        {
+          "name": "tag"
+        },
+        {
+          "name": "ownsState"
+        },
+        {
+          "name": "skeleton"
         }
       ],
       "description": "An element whose attributes read what waits, `<activity-grid runs={its recent jobs} />`, in its own place: the rest of the drawing shows at once."

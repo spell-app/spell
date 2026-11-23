@@ -1628,7 +1628,30 @@ would.
   - Its attributes come after the phrase:  `title`, `loading`, `empty`, `hide-empty`, `failed`, `paging`,
     `page-size`, `as`.
     - Each is a line of code spell at the top of its body, a RIDER (`forLines()`):  `loading="Wait"` is
-      `while waiting :`, written under the loop after its body.
+      `while waiting say "Wait"` (`WhileWaitingSay`), written under the loop after its body;  `loading={no}` an
+      empty `while waiting :`.
+    - `loading` says how the list looks while it waits (`core.drawLooking()`, [looks.ts](../core/looks.ts)):
+      - words, `loading="Loading Jobs..."`:  what the loader says, drawn as the look around it is (a spinner saying
+        them, or a skeleton announcing them)
+      - a look's own word, for this list alone:  `skeleton`, `spinner`, `none` (Spanish `esqueleto`, `cargador`, `nada`)
+      - a skeleton's shape after `skeleton:`, in `SkeletonText`'s words, the ones a component's vocabulary writes its
+        own `skeleton` in:  `loading="skeleton: header, 3 line paragraph"`, `"skeleton: 5 line paragraph"`
+        - parsed as it COMPILES (`lookOfWords()`), so a page never parses skeleton text;  a shape that isn't one is
+          an error at the attribute (`skeleton-unreadable`)
+        - its words are English's alone, in a Spanish file too (`esqueleto: 5 line paragraph`):  `SkeletonText`
+          has no others
+        - drawn as `<ui-root display="skeleton">` draws a tag's (`SkeletonShapes`, the kit's `src/element/`)
+  - The same `loading="..."` on ANY element is Spell's, never the element's (Q10 A;  `SpellJSX.lookingOf()`):
+    how what waits inside it looks, `<card loading="skeleton">`, `<segment loading="Loading Jobs...">`.
+    - Only a quoted value:  a bare `loading`, or `loading={...}`, stays the element's own (Spell UI's loading state),
+      and so do the web's `lazy` and `eager` (`<image loading="lazy">`).
+    - Compiled to `core.drawLooking(said, () => h(...))` around the element, and the loaders inside read it
+      (Solid context, nearest first;  a site's `loading` is the outermost, `SiteBase.draw()`).
+    - A bare `skeleton` is the element's own (its vocabulary's, `ComponentPacks.skeletonFor()`), else lines.
+    - A tag with a loading state of its own (Spell UI's segment, card, section, tab, form, popup:  its pack says it
+      has a `loading` attribute):  with a spinner, THAT state turns on while what's inside waits, instead of a
+      second spinner inside it;  and an element whose own attributes wait stands in for itself, empty, in that
+      state (`core.drawWaiting(..., tag, true)`).  A skeleton draws placeholder lines inside it.
     - Any other goes on what's around its items:  `<for films as="cards" columns="4" />`.
   - Its slots, `<loading>`, `<empty>`, `<failed>`:  `while waiting :`, `if there are none :`, `if that fails :`.
 - An `<html>` block (epic `elemental-spell` P16):  markup as written, the drawing's own lines.
@@ -2423,6 +2446,9 @@ sidebars any of them opens.
 - Its theme (epic `mockup` P8, I30):  the template's `theme` property, on its line, `galaxy guide is a site with theme "mockup"`,
   or in its body, `its "theme" is "mockup"`;  no words of its own;  the running site asks its host for that theme's tokens and wears them on its frame
   alone (`SiteHost.themeTokens()`, the editor's `RunSite`).
+- Its look while its pages wait:  the template's `loading` property, `galaxy guide is a site with loading "skeleton"`
+  (Spanish `con carga "esqueleto"`), the same words as `<for loading>`;  every loader on its pages, dialogs and
+  sidebars reads it unless an element's `loading` nearer says otherwise (`drawnWithLook()`);  unset, a spinner.
 - A page's stories (epic `mockup` P6) are the page's own, `<stories>` in its outline:  "Markdown" below.
 
 ## Projects

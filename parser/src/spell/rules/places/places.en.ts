@@ -54,7 +54,8 @@ import {
   ShowThemAtATime,
   ShowThemIn,
   ShowThemPaged,
-  WhileWaiting
+  WhileWaiting,
+  WhileWaitingSay
 } from "./ReadRider"
 import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
@@ -1404,6 +1405,15 @@ places.addRule(TypeVerified, {
   ]
 })
 
+places.addRule(WhileWaitingSay, {
+  syntax: "while (waiting|loading) say {text:expression}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [['while waiting say "Loading Jobs..."', 'core.readRider("waitingSay", () => "Loading Jobs...")']]
+    }
+  ]
+})
 places.addRule(WhileWaiting, { syntax: "while (waiting|loading) (:|,)? {statement_body}?" })
 places.addRule(IfThereAreNone, { syntax: "if there are none (:|,)? {statement_body}?" })
 places.addRule(IfThatFailsSay, { syntax: "if that fails say {text:expression}" })

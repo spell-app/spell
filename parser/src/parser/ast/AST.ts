@@ -2165,6 +2165,13 @@ export type ASTJSXElementProps = Prettify<{
    *   `{ action: "undo", props: { "icon-only": true } }`, javascript's `["undo", { "icon-only": true }]`.
    */
   contextMenu?: ASTContextMenuItem[]
+  /**
+   * How what waits inside it looks, its `loading="skeleton"`:  javascript's
+   * `core.drawLooking("skeleton", () => h(...), ownsState)`.
+   * - `said`:  the look's word, or a spinner's words, as written.
+   * - `ownsState`:  its tag has a loading state of its own, which a spinner turns on.
+   */
+  looking?: { said: string; ownsState: boolean }
 }>
 
 /**
@@ -2182,6 +2189,7 @@ export class ASTJSXElement extends ASTExpression {
   declare drawnApart: boolean | undefined
   declare action: string | undefined
   declare contextMenu: ASTContextMenuItem[] | undefined
+  declare looking: { said: string; ownsState: boolean } | undefined
   constructor(match: P.AnyMatch, props: ASTJSXElementProps) {
     super(match, props)
     this.assertType("tagName", "string")

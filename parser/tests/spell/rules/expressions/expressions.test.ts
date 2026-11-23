@@ -273,6 +273,7 @@ describe("priority and precedence", () => {
         "when_uploading:  Priority.specific",
         "while_hook:  Priority.specific",
         "while_waiting:  Priority.declaration",
+        "while_waiting_say:  Priority.declaration",
         "with_commas:  Precedence.comparison",
         "without_closing:  Priority.specific",
         "without_waiting:  Priority.specific",

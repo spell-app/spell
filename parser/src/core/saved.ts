@@ -55,6 +55,7 @@ import { CLASSES_DECLARED, core, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 import { SPELL_WINDOW, nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
+import type { SkeletonSpec } from "spell/element/vocabulary.types"
 import { listenForDroppedFiles } from "./pickedFiles"
 import { knowCollection, limitOperations, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./places"
@@ -62,7 +63,8 @@ import type { PlaceDeployment } from "./runtime"
 import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
 import { failsAsMissing, holdNotice } from "./undoing"
-import { forgetWaitedValue, standInFor, waitingLoader } from "./waiting"
+import { lookSaid } from "./looks"
+import { elementWaitingLoader, forgetWaitedValue, standInFor, waitingLoader, waitingMethods } from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
 import { Place } from "./classes/Place"
@@ -94,6 +96,11 @@ export type SavedIn = {
 export type ReadRiders = {
   /** `while waiting:`:  what shows until the first answer. */
   waiting?: () => Drawing
+  /**
+   * `while waiting say "Loading Jobs..."`, a `<for loading="...">`'s:  the look's words, or the look itself
+   * (`"skeleton"`, `"spinner"`, `"none"`), as the loader here draws it (`waitingLoader()`).
+   */
+  waitingSay?: () => unknown
   /** `if there are none:`:  what shows when there's an answer, and nothing in it. */
   none?: () => Drawing
   /** `if that fails:`:  what shows when it can't be read. */
@@ -1758,12 +1765,16 @@ export const savedMethods = defineCoreModule({
   /**
    * An element whose attributes read what waits, `<activity-grid runs={its recent jobs} />`, in its own place:
    * the rest of the drawing shows at once.
-   * - Waiting:  a spinner where it goes (`waitingLoader()`), as a list shows.
+   * - Waiting:  a spinner where it goes (`waitingLoader()`), as a list shows;  or the look around it says
+   *   (`core.drawLooking()`):  a skeleton shaped as `tag` draws (a picture's an image, else lines), or nothing.
    * - Failed:  a message there, and Try again, as a list's;  the page around it stays.
-   * - What the writers write for one:  `core.drawWaiting(() => h("my-site-activity-grid", ...))`.
+   * - `ownsState`:  its tag has a loading state of its own and its `loading="..."` is Spell's:  with a spinner, it
+   *   stands in for itself, empty, in that state (`elementWaitingLoader()`).
+   * - `skeleton`:  its tag's own (its vocabulary's), as the compiler found it, for a skeleton look.
+   * - What the writers write for one:  `core.drawWaiting(() => h("my-site-activity-grid", ...), "my-site-activity-grid")`.
    */
-  drawWaiting(element: () => Drawing): Drawing {
-    return savedMethods.drawRead(element, null, { waiting: waitingLoader })
+  drawWaiting(element: () => Drawing, tag?: string, ownsState?: boolean, skeleton?: SkeletonSpec): Drawing {
+    return savedMethods.drawRead(element, null, { waiting: () => elementWaitingLoader(tag, ownsState, skeleton) })
   },
 
   /**
@@ -1856,7 +1867,10 @@ export const savedMethods = defineCoreModule({
       const isEmpty = createMemo(() => !items().length)
       return (() => (isEmpty() ? (riders.none?.() ?? null) : shown)) as unknown as Drawing
     }
-    const whileLoading = riders.waiting ?? (drawEach ? waitingLoader : undefined)
+    const whileLoading =
+      riders.waiting ??
+      (riders.waitingSay ? () => saidLoader(riders.waitingSay!()) : undefined) ??
+      (drawEach ? () => waitingLoader() : undefined)
     const body = () =>
       whileLoading
         ? createComponent(Loading, {
@@ -1883,6 +1897,18 @@ export const savedMethods = defineCoreModule({
   }
 })
 Object.assign(core, savedMethods)
+
+/**
+ * What `while waiting say "..."` shows:  the look it names (`lookSaid()`) around just this list, or the loader here
+ * saying its words (a skeleton announcing them).
+ */
+function saidLoader(said: unknown): Drawing {
+  // nothing said:  the loader here, as it looks
+  if (said === undefined || said === null || said === "") return waitingLoader("lines")
+  const look = lookSaid(said)
+  if (look.text) return waitingLoader("lines", look.text)
+  return waitingMethods.drawLooking(look.look, () => waitingLoader("lines"))
+}
 
 /** The draft `copy` is a copy for.  - throws `TypeError` for anything else */
 function draftOfCopy(copy: unknown, method: string) {

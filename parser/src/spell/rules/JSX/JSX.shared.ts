@@ -178,6 +178,11 @@ export type JSXMatchData = {
    * be parsed;  (`jsxElement`) for a dotted tag, `<UI.Form>`.
    */
   error?: P.Match
+  /**
+   * (`jsxElement`) Its `loading="..."`, quoted:  Spell's, never the element's -- how what waits inside it looks
+   * (`SpellJSX.lookingOf()`, `core.drawLooking()`).
+   */
+  looking?: { attribute: string; said: string; ownsState: boolean }
   /** (`jsxElement`) Parsed `jsxAttribute` matches for the element. */
   attributes?: Array<P.Match | undefined>
   /** (`jsxAttribute`) Normalized attribute name. */

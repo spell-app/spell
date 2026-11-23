@@ -32,6 +32,11 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
   attributeNameFor: (tag, attribute, language) => SpellUIDefaults.attributeNameFor(tag, attribute, language),
   // a type built on one of its tags, `a ui tree view`:  its noun of several words as its tag's (`property-editor`)
   viewBaseFor: (noun, language) => SpellUIDefaults.viewBaseFor(noun.replace(/\s+/g, "-"), language),
+  // what `<ui-root display="skeleton">` draws for it:  a bare `loading="skeleton"` draws it too
+  skeletonFor(tag, language) {
+    const canonical = SpellUIDefaults.canonicalTagFor(tag, language)
+    return canonical ? ROOT_CATALOG[canonical]?.skeleton : undefined
+  },
   help(language) {
     if (!helpTable) {
       loadHelp()
