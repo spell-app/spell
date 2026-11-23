@@ -140,11 +140,17 @@ export class CodeMirrorBubbly {
   /**
    * `state`'s text laid out bubbly from the language worker's last drawing, as `laidOutOf()`:
    * `undefined` while that drawing isn't of this text, the last layout staying.
+   * - A drawing of an earlier text, taken as this one's (`ParsedElsewhere.behindOf()`;  epic `solid-2-final` J70):
+   *   only its marks, the lines on screen's colours, tags and pills, are taken, made in its own text and moved along
+   *   the edits since (`LaidOut.editsSince`);  the whole file's part (bands, rails, feet, a line's height) stays as
+   *   it was, moved with the typing, till a drawing of this very text comes.  Not in a slice:  its lines are the
+   *   file's now.
+   *   - Why:  laying the whole file out again for each one held a phone's keys up, 49 of 100 over 50 msec.
    * - NEVER throws:  no decorations when the layout fails.
    */
   static laidOutElsewhere(state: EditorState, elsewhere: ParsedElsewhere, slice?: Slice): LaidOut | undefined {
     const drawing = elsewhere.drawingOf(state.doc)
-    if (!drawing) return undefined
+    if (!drawing) return slice ? undefined : CodeMirrorBubbly.laidOutBehind(state, elsewhere)
     try {
       return CodeMirrorBubbly.laidOutFrom(state, drawing, (tag) => elsewhere.isView(tag), slice)
     } catch (error) {
@@ -153,15 +159,41 @@ export class CodeMirrorBubbly {
     }
   }
 
+  /** `state`'s text laid out from the worker's drawing of an earlier text:  see `laidOutElsewhere()`. */
+  private static laidOutBehind(state: EditorState, elsewhere: ParsedElsewhere): LaidOut | undefined {
+    const behind = elsewhere.behindOf(state.doc)
+    if (!behind?.drawing) return undefined
+    try {
+      // the state as it was, its settings kept:  the edits since undone, no filter run
+      const then = state.update({ changes: behind.changes.invert(behind.doc), filter: false }).state
+      const { marksIn } = CodeMirrorBubbly.laidOutFrom(
+        then,
+        behind.drawing,
+        (tag) => elsewhere.isView(tag),
+        undefined,
+        {
+          isMarksOnly: true
+        }
+      )
+      return { decorations: Decoration.none, marksIn, editsSince: behind.changes, keepsDecorations: true }
+    } catch (error) {
+      console.error("CodeMirrorBubbly:  couldn't lay the code out", error)
+      return undefined
+    }
+  }
+
   /** `state`'s text laid out from `drawing`, its views as `isView` says:  see `laidOutOf()`.  Throws as it fails. */
   private static laidOutFrom(
     state: EditorState,
     drawing: SP.BubblyDrawing,
     isView: (tag: string) => boolean,
-    slice?: Slice
+    slice?: Slice,
+    { isMarksOnly = false } = {}
   ): LaidOut {
     const readings: MarkupReadings = new Map()
-    const decorations = new BubblyDecorations(state, drawing, { isView, slice, readings, part: "whole" }).build()
+    const decorations = isMarksOnly
+      ? Decoration.none
+      : new BubblyDecorations(state, drawing, { isView, slice, readings, part: "whole" }).build()
     const marksIn = (region: Region) => {
       try {
         return new BubblyDecorations(state, drawing, { isView, slice, readings, part: "marks", region }).build()

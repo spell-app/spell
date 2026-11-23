@@ -47,7 +47,8 @@ export class CodeMirrorTokens {
     return CodeMirrorRelayout.extension(
       (state) =>
         elsewhere?.isElsewhere()
-          ? elsewhere.coloursOf(state.doc) && CodeMirrorTokens.decorationsOf(state, undefined, elsewhere)
+          ? (elsewhere.coloursOf(state.doc) ?? elsewhere.behindOf(state.doc)?.colours) &&
+            CodeMirrorTokens.decorationsOf(state, undefined, elsewhere)
           : CodeMirrorTokens.decorationsOf(state, fileOf()),
       CodeMirrorTokens.RELAYOUT_MSEC,
       {
@@ -65,17 +66,22 @@ export class CodeMirrorTokens {
    * A mark for each coloured token of `state`'s text.
    * - `within`:  its project file, whose parse is read when it's of this very text.
    * - `elsewhere`:  the language worker's colours, read instead:  none if they aren't of this text.
+   *   - Of an earlier text, taken as this one's (`ParsedElsewhere.behindOf()`;  epic `solid-2-final` J70):
+   *     marked in it, then moved along the edits since.
    * - NEVER throws:  `Decoration.none` when the pass fails.
    */
   static decorationsOf(state: EditorState, within?: SP.SpellFile, elsewhere?: ParsedElsewhere): DecorationSet {
     try {
-      const spans = elsewhere ? elsewhere.coloursOf(state.doc) : CodeMirrorTokens.spansOf(state.doc.toString(), within)
+      const exact = elsewhere?.coloursOf(state.doc)
+      const behind = elsewhere && !exact ? elsewhere.behindOf(state.doc) : undefined
+      const spans = elsewhere ? (exact ?? behind?.colours) : CodeMirrorTokens.spansOf(state.doc.toString(), within)
       if (!spans) return Decoration.none
       const marks = spans.flatMap(({ start, end, kind }) => {
         const role = CodeRules.roleForScope(kind)
         return role && end > start ? [CodeMirrorTokens.markFor(role).range(start, end)] : []
       })
-      return Decoration.set(marks, true)
+      const set = Decoration.set(marks, true)
+      return behind ? set.map(behind.changes) : set
     } catch (error) {
       console.error("CodeMirrorTokens:  couldn't colour the code", error)
       return Decoration.none
@@ -116,4 +122,3 @@ export class CodeMirrorTokens {
 
 /** Each role's one mark, made on first use. */
 const ROLE_MARKS = new Map<CodeRole, Decoration>()
-

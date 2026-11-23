@@ -91,7 +91,7 @@ describe("LanguageHost", () => {
     await vi.waitFor(() => expect(sent.at(-1)).toMatchObject({ version: 0, diagnostics: [] }))
   })
 
-  test("sends no parse the edits have outrun:  the editor would drop it", async () => {
+  test("sends a parse the edits have outrun, numbered by the edit it's of:  the editor moves it along the rest", async () => {
     const sent: LSP.LanguageParsed[] = []
     const watched = new LSP.LanguageHost({ onParsed: (parsed) => sent.push(parsed) })
     watched.open({ uri, projectId: solitaire, text })
@@ -100,15 +100,15 @@ describe("LanguageHost", () => {
     sent.length = 0
     watched.change({ uri, changes: [[0, 0, "-- one\n"]] })
     await watched.request("textDocument/documentSymbol", { textDocument })
-    // an edit before its problems went
+    // an edit before the editor took them:  they're of the first edit, and say so
     watched.change({ uri, changes: [[0, 0, "-- two\n"]] })
     await vi.waitFor(() => expect(sent.at(-1)?.version).toBe(2))
-    expect(sent.map((parsed) => parsed.version)).toEqual([2])
+    expect(sent.map((parsed) => parsed.version)).toEqual([1, 2])
     watched.open({ uri, projectId: solitaire, text })
     await watched.request("textDocument/documentSymbol", { textDocument })
   })
 
-  test("drops a parse an edit outran while its problems were worked out", async () => {
+  test("an edit made while a parse's problems are worked out:  that parse is sent, then the edit's own", async () => {
     const sent: LSP.LanguageParsed[] = []
     let isEdited = false
     const watched: LSP.LanguageHost = new LSP.LanguageHost({
@@ -123,7 +123,7 @@ describe("LanguageHost", () => {
     })
     watched.open({ uri, projectId: solitaire, text })
     await watched.request("textDocument/documentSymbol", { textDocument })
-    await vi.waitFor(() => expect(sent.map((parsed) => parsed.version)).toEqual([1]))
+    await vi.waitFor(() => expect(sent.map((parsed) => parsed.version)).toEqual([0, 1]))
     watched.open({ uri, projectId: solitaire, text })
     await watched.request("textDocument/documentSymbol", { textDocument })
   })
