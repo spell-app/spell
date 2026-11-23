@@ -112,8 +112,10 @@ export class PlaceSpec {
     const paged: PagesWith[] = []
     for (const [path, item] of Object.entries(paths)) {
       if (HAS_BRACE.test(path) || !item?.get) continue
-      // no list in its answer's schema, but things by id under it:  a collection all the same, untyped till a read fills it
-      const rows = this.rowsOf(item.get) ?? (hasThingsUnder(path, paths) ? { item: {} } : undefined)
+      // no list in its answer's schema, but things by id under it, or an answer it says nothing of (`{}`):
+      // a collection all the same, untyped till a read fills it
+      const untyped = hasThingsUnder(path, paths) || this.isUndescribed(item.get)
+      const rows = this.rowsOf(item.get) ?? (untyped ? { item: {} } : undefined)
       if (!rows) continue
       const at = underPlace(path, prefix)
       const search = this.searchOf(item.get)
@@ -201,6 +203,15 @@ export class PlaceSpec {
       ...("next" in properties && { nextAt: "next" }),
       ...this.itemAt(items)
     }
+  }
+
+  /**
+   * Does its description say nothing of what a `GET` answers:  a schema of `{}`, or only its title?
+   * - So it's kept, a list with no fields yet, for `spell place verify` to fill from what it reads.
+   */
+  private isUndescribed(operation: OpenApiOperation): boolean {
+    const answer = this.answerOf(operation)
+    return !!answer && Object.keys(answer).every((key) => key === "title" || key === "description")
   }
 
   /** Where an item's schema is, when it's a reference:  `{ schemaAt: "#/components/schemas/Tenant" }`. */

@@ -11,6 +11,7 @@ import type { IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/in
  * A made-up lab's API, read whole from its OpenAPI description:  what a bigger description tripped on.
  * - Its searches are asked for by a LIST of device ids, `?device_ids=a&device_ids=b`, and by an instance id:
  *   fields of several words, joined (`device-ids`), one a list of values.
+ * - A list whose answer it describes as `{}`:  kept with no fields, for a read to fill, its id a slug.
  * - A question Spell can't say, `1st_page`:  its line is left out, the rest written.
  */
 
@@ -46,6 +47,10 @@ const DOCUMENT: OpenApiDocument = {
     "/api/stacks": {
       get: { parameters: [needs("instance_id", { type: "string" })], responses: listOf("Stack") }
     },
+    // its answer described as nothing at all:  `{}`
+    "/api/designs": {
+      get: { responses: { "200": { description: "OK", content: { "application/json": { schema: {} } } } } }
+    },
     "/api/rankings": {
       get: { parameters: [needs("1st_page", { type: "string" })], responses: listOf("Ranking") }
     }
@@ -76,11 +81,11 @@ async function ingestOf(document: OpenApiDocument = DOCUMENT, into = "Lab.api.sp
     otherSpellBeside: async () => []
   }
   // what it serves as its description:  a test changes it, for a later look
-  const fetch = { document }
+  const fetch = { document, answer: (_url: URL): Response => new Response("nope", { status: 404 }) }
   const ingest = new PlaceIngest({
     fetch: (async (input: RequestInfo | URL) => {
       const url = `${input instanceof Request ? input.url : input}`
-      return url === SPEC_AT ? Response.json(fetch.document) : new Response("nope", { status: 404 })
+      return url === SPEC_AT ? Response.json(fetch.document) : fetch.answer(new URL(url))
     }) as typeof globalThis.fetch,
     ask: async () => undefined,
     files,
@@ -152,5 +157,26 @@ describe("a person's names, kept by spell place update", () => {
     expect(spell).not.toMatch(/"device"/)
     expect(couldntChange).toEqual([])
     expect(errorsOf(spell)).toEqual([])
+  })
+})
+
+describe("a list whose answer isn't described", () => {
+  test("is kept, with no fields yet;  a verify fills its fields from what it reads, and its id field", async () => {
+    const { ingest, spell, description, descriptions, fetch } = await ingestOf()
+    expect(spell).toMatch(/^\tdesigns live at "\/api\/designs"$/m)
+    expect(description.collections.designs).toMatchObject({ state: { is: "untyped" }, fields: {} })
+    expect(errorsOf(spell)).toEqual([])
+    const design = { slug: "top-level", name: "Top level", modules: 3 }
+    fetch.answer = (url) =>
+      url.pathname === "/api/designs"
+        ? Response.json([design])
+        : url.pathname === "/api/designs/top-level"
+          ? Response.json(design)
+          : new Response("nope", { status: 404 })
+    await ingest.verify("Lab.api.spell")
+    const designs = descriptions.get("Lab.api.json5")!.collections.designs!
+    expect(designs.state).toMatchObject({ is: "verified", rows: 1 })
+    expect(designs.idField).toBe("slug")
+    expect(Object.keys(designs.fields)).toEqual(expect.arrayContaining(["name", "modules"]))
   })
 })
