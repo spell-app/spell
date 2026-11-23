@@ -3,10 +3,7 @@ import { createRenderEffect, type Accessor } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
-import { placeholderHeaderVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderHeader.en"
-import { placeholderImageVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderImage.en"
-import { placeholderLineVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderLine.en"
-import { placeholderParagraphVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderParagraph.en"
+import { SkeletonShapes, type SkeletonShape } from "spell/element/SkeletonShapes"
 import { placeholderVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholder.en"
 import type { RootSkeleton } from "./UIRoot.types"
 
@@ -18,7 +15,8 @@ import type { RootSkeleton } from "./UIRoot.types"
  * `UIRoot.Skeleton`, so an app swaps the look with one assignment or a subclass (`UIRoot.Skeleton = MySkeleton`).
  * - The `ui-placeholder` family is imported STATICALLY, by the root's barrel (`index.ts`):
  *   with `ui-loader`, the only families a root never loads on demand.
- *   Here, its vocabularies only:  pure data.
+ *   Here, its box's vocabulary only;  the shapes inside come from `SkeletonShapes`, page-safe data shared with
+ *   Spell's `loading="skeleton"`.
  * - Built with the DOM, not JSX:  Solid's JSX has no types for our tags.
  * - Sizes go through the placeholder's public tokens, so its own sheet draws them:
  *   `--ui-placeholder-max-width`, `--ui-placeholder-image-height`.
@@ -55,46 +53,18 @@ export class PlaceholderSkeleton {
     return placeholder
   }
 
-  /** The shapes inside:  `parts`, or one block `width` x `height`. */
+  /** The shapes inside:  `parts`, or one block `width` x `height` (`SkeletonShapes`, the one way a page draws them too). */
   private static shapes(spec: E.SkeletonSpec): HTMLElement[] {
-    if (!spec.parts?.length) {
-      const block = PlaceholderSkeleton.create(placeholderImageVocabulary.tag)
-      if (spec.height) block.style.setProperty("--ui-placeholder-image-height", spec.height)
-      return [block]
-    }
-    return spec.parts.map((part) => PlaceholderSkeleton.shape(part))
+    return SkeletonShapes.of(spec).map((shape) => PlaceholderSkeleton.made(shape))
   }
 
-  /** One part as placeholder markup. */
-  private static shape(part: E.SkeletonPart): HTMLElement {
-    switch (part.shape) {
-      case "image": {
-        const image = PlaceholderSkeleton.create(placeholderImageVocabulary.tag)
-        if (part.ratio) image.setAttribute(part.ratio, "")
-        return image
-      }
-      case "header": {
-        const header = PlaceholderSkeleton.create(placeholderHeaderVocabulary.tag)
-        if (part.image) header.setAttribute(HEADER_IMAGE, "")
-        header.append(...PlaceholderSkeleton.lines(HEADER_LINES))
-        return header
-      }
-      case "paragraph": {
-        const paragraph = PlaceholderSkeleton.create(placeholderParagraphVocabulary.tag)
-        paragraph.append(...PlaceholderSkeleton.lines(part.lines ?? DEFAULT_LINES))
-        return paragraph
-      }
-      case "line": {
-        const [line] = PlaceholderSkeleton.lines(1)
-        if (part.length) line!.setAttribute(LINE_LENGTH, part.length)
-        return line!
-      }
-    }
-  }
-
-  /** `count` `<ui-placeholder-line>`s. */
-  private static lines(count: number): HTMLElement[] {
-    return Array.from({ length: count }, () => PlaceholderSkeleton.create(placeholderLineVocabulary.tag))
+  /** `shape` as an element. */
+  private static made(shape: SkeletonShape): HTMLElement {
+    const element = PlaceholderSkeleton.create(shape.tag)
+    for (const [name, value] of Object.entries(shape.attributes ?? {})) element.setAttribute(name, value)
+    for (const [name, value] of Object.entries(shape.style ?? {})) element.style.setProperty(name, value)
+    element.append(...(shape.children ?? []).map((child) => PlaceholderSkeleton.made(child)))
+    return element
   }
 
   /** A new element named `tag`. */
@@ -106,12 +76,6 @@ export class PlaceholderSkeleton {
 /** A class `UIRoot.Skeleton` accepts:  `PlaceholderSkeleton` or one shaped like it. */
 export type RootSkeletonRenderer = Pick<typeof PlaceholderSkeleton, "render">
 
-/** Bars in a skeleton paragraph unless it says. */
-const DEFAULT_LINES = 3
-
-/** Bars in a skeleton header. */
-const HEADER_LINES = 2
-
 /** `fluid`:  read from the described element, set on its placeholder. */
 const FLUID: E.AttributeName<typeof placeholderVocabulary> = "fluid"
 
@@ -120,9 +84,3 @@ const SIZE = "size"
 
 /** The size that changes nothing. */
 const MEDIUM = "medium"
-
-/** A header placeholder's square image. */
-const HEADER_IMAGE: E.AttributeName<typeof placeholderHeaderVocabulary> = "image"
-
-/** A line placeholder's length. */
-const LINE_LENGTH: E.AttributeName<typeof placeholderLineVocabulary> = "length"

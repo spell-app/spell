@@ -2563,6 +2563,7 @@ export const HELP_TABLE: Readonly<
 export const SHARED_HELP: Readonly<Record<string, string>> = {
   disabled: "Can't be used: dimmed, out of the tab order, and everything inside it inert; `aria-disabled`.",
   loading: "Busy: dimmed under a loader, and inert; `aria-busy`.",
+  error: 'Failed, with what went wrong if it says: `error="The server didn\'t answer"`.',
   visible: "Shown: the platform's `hidden`, turned round (`el.visible === !el.hidden`).",
   animation:
     "How it shows and hides (Fomantic's names: `fade up`, `scale`, `fly down` ...); default its family's, else `fade`.",

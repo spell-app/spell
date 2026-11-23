@@ -167,4 +167,20 @@ describe("an authenticated place, read by a page through the page server", () =>
     })
     expect(() => SP.SpellProject.deploymentsIn(places, "prod", PROJECT)).toThrow(/no place in .* named "prod"/)
   })
+
+  test("a production deployment is read only, unless its line says it may be written", () => {
+    const places = {
+      jobs: { prod: { at: "https://acme.test" }, production: { at: "https://acme.test", readOnly: false } },
+      board: { prod: { at: "https://board.acme.test" }, staging: { at: "https://staging.acme.test" } }
+    }
+    expect(SP.SpellProject.deploymentsIn(places, "prod", PROJECT)).toEqual({
+      jobs: { at: "https://acme.test", readOnly: true },
+      board: { at: "https://board.acme.test", readOnly: true }
+    })
+    expect(SP.SpellProject.deploymentsIn(places, "production", PROJECT).jobs).toEqual({
+      at: "https://acme.test",
+      readOnly: false
+    })
+    expect(SP.SpellProject.deploymentsIn(places, "staging", PROJECT).board!.readOnly).toBeUndefined()
+  })
 })

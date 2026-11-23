@@ -62,6 +62,8 @@ and in the app's build folder, `app/` at the app folder's root.
     and the menus (P22, P29;  [README-app.md](../../README-app.md), "The editor in Spell");  opened as a project, its app
     pane draws each of its views in a zone of its own (`solid/EditorZones.tsx`, T63)
   - `index.tsx`:  the entry, drawing the app into `#app-root`
+  - `reloadOutOfSight.ts`:  the dev server gone while the tab's out of sight, the editor reloads once it's back, out of
+    sight, not when the person returns to a blank page (vite's own client waits for the tab to show)
   - `ServerCompileStore.ts`:  the editor's compile cache, on the page server (`/api/compiles`;  epic `language` P27),
     installed by `index.tsx`, never in the static build
     - a reload doesn't compile a project that hasn't changed:  `compileApp()` runs what's kept at once, then

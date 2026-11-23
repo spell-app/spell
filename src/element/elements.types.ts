@@ -396,6 +396,15 @@ export type ElementSetup = {
   loading: LoadingMeaning
 
   /**
+   * What `error` does for this family (every element takes it:  `SharedVocabulary`).
+   * - `"look"` (the default):  the base class gives it the error look (`:state(failed-look)`, which `reset.css`
+   *   draws:  an outline in the error colour), its words as its tooltip, and `aria-invalid` on a form control.
+   * - `"its own"`:  the base class only sets `:state(failed)`;  the family shows its own error, a pane's error
+   *   message and Try again in place of its content (Spell UI's `StatePanes`).
+   */
+  error: ErrorMeaning
+
+  /**
    * What the shared `link` does for this family (every element takes it:  `SharedVocabulary`, epic `ui-gaps`).
    * - `"click"` (the default):  a click on the element goes there, in its `target` if it has one;
    *   a click on a control of its own inside (a button, a link, a field) stays that control's.
@@ -460,6 +469,9 @@ export type DisabledMeaning = "unusable" | "its own"
 
 /** `elementSetup.loading`:  what `loading` does for a family. */
 export type LoadingMeaning = "loader" | "its own"
+
+/** `elementSetup.error`:  what `error` does for a family. */
+export type ErrorMeaning = "look" | "its own"
 
 /** `elementSetup.link`:  a click goes there (`"click"`), or the family draws its own link (`"its own"`). */
 export type LinkMeaning = "click" | "its own"

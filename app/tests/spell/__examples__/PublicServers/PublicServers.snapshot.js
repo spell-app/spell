@@ -581,13 +581,15 @@ export class User extends Thing {
         h("ui-image", { src: () => this.avatarUrl, alt: "", size: "small", appearance: "rounded" }),
         h("ui-stack", { spacing: "sm" },
           h("ui-text", { color: "grey" }, () => this.login, " · ", () => this.kind),
-          h("ui-text", { hidden: () => this.bio ? undefined : true }, () => this.bio),
-          h("ui-text", { size: "small", color: "grey", hidden: () => core.dateShown(this.createdAt) ? undefined : true },
-            () => this.publicRepos,
-            " public repositories · ",
-            () => this.followers,
-            " followers"
-          )
+          () => core.drawIf(() => this.bio, () => [h("ui-text", () => this.bio)]),
+          () => core.drawIf(() => core.dateShown(this.createdAt), () => [
+            h("ui-text", { size: "small", color: "grey" },
+              () => this.publicRepos,
+              " public repositories · ",
+              () => this.followers,
+              " followers"
+            )
+          ])
         )
       ),
       h("ui-stack", { spacing: "sm" },
@@ -1655,7 +1657,7 @@ export class Repository extends Thing {
         h("ui-meta",
           "★ ",
           () => this.stargazersCount,
-          h("span", { hidden: () => this.language ? undefined : "until-found" }, " · ", () => this.language)
+          () => core.drawIf(() => this.language, () => [" · ", () => this.language])
         ),
         h("ui-description", () => this.description)
       )
@@ -3171,9 +3173,7 @@ export class Forecast extends Thing {
   drawHourTable() {
     return core.drawRead(() => this.hours, (hour) => [
       h("ui-cell", { "data-column": "Day" },
-        h("span", { hidden: () => core.hourOf(hour.time) === 0 ? undefined : "until-found" },
-          () => core.dateShown(hour.time)
-        )
+        () => core.drawIf(() => core.hourOf(hour.time) === 0, () => [() => core.dateShown(hour.time)])
       ),
       h("ui-cell", { "data-column": "Hour", align: "right" }, () => core.hourOf(hour.time), ":00"),
       h("ui-cell", { "data-column": "Temperature", align: "right" },

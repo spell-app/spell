@@ -1824,7 +1824,39 @@ export class JSWriter extends ProgramWriter {
   ASTJSXElement(node: P.ASTJSXElement): string {
     const element = isDrawnApart(node) ? `core.drawPart(this, () => ${this.jsxElement(node)})` : this.jsxElement(node)
     // its attributes wait:  a spot of its own, a spinner there meanwhile (`WriterProject.elementsThatWait`)
-    return this.project.elementsThatWait.has(node) ? `() => core.drawWaiting(() => ${element})` : element
+    const waits = this.project.elementsThatWait.has(node)
+    const drawn = waits ? this.drawnWaiting(node, element) : element
+    // its `loading="..."`:  how what waits in it looks, around it all
+    if (node.looking) return `() => ${this.drawnLooking(node, drawn)}`
+    return waits ? `() => ${drawn}` : element
+  }
+
+  /**
+   * `element`, `node` written, in a spot of its own while its attributes wait:  `core.drawWaiting(() => ..., "ui-table")`;
+   * a tag with a loading state of its own, whose `loading` is Spell's, stands in for itself in that state (`, true`).
+   */
+  drawnWaiting(node: P.ASTJSXElement, element: string): string {
+    const owns = node.looking?.ownsState ? ", true" : ""
+    return `core.drawWaiting(() => ${element}, ${this.quoted(node.tagName)}${owns})`
+  }
+
+  /**
+   * `drawn`, with what waits in `node` looking as its `loading="..."` says:  `core.drawLooking("skeleton", () => ...)`.
+   * - Its own loading state stands in for what waits inside it (`, true`), unless its attributes wait:  then it
+   *   stands in for itself (`drawnWaiting()`).
+   * - Its `<loading>` and `<failed>`, after:  `{ waiting: () => [...], failed: (error) => [...], slots: true }`.
+   */
+  drawnLooking(node: P.ASTJSXElement, drawn: string): string {
+    const { said, ownsState, waiting, failed, slots } = node.looking!
+    const owns = ownsState && !this.project.elementsThatWait.has(node)
+    // its `<loading>` and `<failed>`:  `the error`, inside `<failed>`, is the failure's words
+    const riders = [
+      waiting && `waiting: () => ${this.write(waiting)}`,
+      failed && `failed: (error) => ${this.write(failed)}`,
+      slots && "slots: true"
+    ].filter(Boolean)
+    const rest = riders.length ? `, ${owns}, { ${riders.join(", ")} }` : owns ? ", true" : ""
+    return `core.drawLooking(${this.quoted(said)}, () => ${drawn}${rest})`
   }
 
   /**
@@ -1945,6 +1977,8 @@ export class JSWriter extends ProgramWriter {
     const looped = this.loopDrawn(node.expression, this.bare(node.expression))
     const value = node.isChild ? this.listChildDrawn(node.expression, looped) : looped
     if (this.project.spotsThatWait.has(node)) return `() => core.whileWaiting(() => ${value})`
+    // an if-chain whose conditions wait:  a spot of its own, ONE spinner there meanwhile (`WriterProject.ifsThatWait`)
+    if (this.project.ifsThatWait.has(node)) return `() => core.drawWaiting(() => ${value})`
     return unwrapped(node.expression) instanceof P.ASTObjectLiteral ? `() => (${value})` : `() => ${value}`
   }
 

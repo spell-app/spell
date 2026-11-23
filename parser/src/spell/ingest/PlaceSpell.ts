@@ -112,8 +112,24 @@ export type SpellParts = {
  * - Only what's said differently from the usual needs a line, except each collection's address, which shows what's there.
  */
 export function spellPartsFor(
-  { about, canDo, collections, checkEverySeconds, mostPerSecond, serverTakes }: PlaceDescription,
+  description: PlaceDescription,
   { withKey = true }: { withKey?: boolean } = {}
+): SpellParts {
+  const { header, placeLines, types } = allSpellPartsFor(description, { withKey })
+  // a line Spell couldn't read stays out:  the rest of the place is written
+  const { linesLeftOut = {} } = description
+  const isKept = ({ key }: SpellLine) => !(key in linesLeftOut)
+  return {
+    header,
+    placeLines: placeLines.filter(isKept),
+    types: types.map((type) => ({ ...type, lines: type.lines.filter(isKept) }))
+  }
+}
+
+/** `spellPartsFor()`, every line, those Spell couldn't read too. */
+function allSpellPartsFor(
+  { about, canDo, collections, checkEverySeconds, mostPerSecond, serverTakes }: PlaceDescription,
+  { withKey }: { withKey: boolean }
 ): SpellParts {
   const { name, kind, address, keySecret, keyIfSet, keyGoes, tokenFrom, privateDataIn } = about
   const shown = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
@@ -157,7 +173,15 @@ export function spellPartsFor(
   // every name in one request
   const paged = every.filter(({ takesLimit }) => takesLimit !== undefined)
   const most = Math.max(...paged.map(({ rowsItSays }) => rowsItSays ?? Infinity))
-  if (kind === "web server" && paged.length && paged.every(({ takesLimit }) => takesLimit) && most <= MOST_AT_A_TIME) {
+  // how many a program asks for at a time, as it was told to (`--rows`)
+  if (about.rows !== undefined) {
+    placeLines.push({ key: "size", text: `it gives up to ${about.rows} at a time` })
+  } else if (
+    kind === "web server" &&
+    paged.length &&
+    paged.every(({ takesLimit }) => takesLimit) &&
+    most <= MOST_AT_A_TIME
+  ) {
     placeLines.push({ key: "size", text: `it gives up to ${Math.ceil(most / 1000) * 1000} at a time` })
   } else if (kind === "web server" && serverTakes?.pagesWith?.most !== undefined && !nextAt && !paging.size) {
     // its OpenAPI description says the most its lists give:  a read asking for more would be refused (epic `data` I140)
@@ -172,8 +196,9 @@ export function spellPartsFor(
   if (every.length && every.every(({ fields }) => fields[VERSION_FIELD]?.type === "number")) {
     placeLines.push({ key: "version", text: `its version is its "${VERSION_FIELD}"` })
   }
-  if (checkEverySeconds !== undefined) {
-    placeLines.push({ key: "check", text: `check it ${checkEveryInWords(checkEverySeconds)}` })
+  const checkEvery = about.checkEvery ?? checkEverySeconds
+  if (checkEvery !== undefined) {
+    placeLines.push({ key: "check", text: `check it ${checkEveryInWords(checkEvery)}` })
   }
   // the pace its docs ask for:  the Met Museum's 80 a second
   if (mostPerSecond !== undefined) {
@@ -181,7 +206,11 @@ export function spellPartsFor(
   }
   // what it was seen to do when it was asked, and what it says of itself:  asked of it, not done here
   const hasPaging = !!nextAt || paging.size > 0
-  if (kind === "web server") placeLines.push(...linesOfWhatItTakes(serverTakes, every, canDo.write, hasPaging))
+  if (kind === "web server") {
+    // told it's read only (`--read-only`):  its writes stay in its description, off
+    const write = about.readOnly ? "read only" : canDo.write
+    placeLines.push(...linesOfWhatItTakes(serverTakes, every, write, hasPaging))
+  }
   const placePages = kind === "web server" && !hasPaging ? serverTakes?.pagesWith : undefined
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = kind === "web server" || kind === "graphql server" ? nameExampleOf(every) : undefined
@@ -235,7 +264,7 @@ export function spellPartsFor(
     // asked for by a query:  `forecasts are asked for by their latitude and longitude`
     const asked = Object.keys(description.askedBy ?? {}).map((field) => description.fields[field]?.words ?? field)
     if (asked.length) {
-      const line = `${collectionWords(description)} are asked for by their ${wordsJoined(asked)}`
+      const line = `${collectionWords(description)} are asked for by their ${fieldsInLine(asked)}`
       placeLines.push({ key: `asked:${collection}`, text: line })
     }
   }
@@ -346,11 +375,8 @@ function linesOfWhatItTakes(
 ): SpellLine[] {
   const lines: SpellLine[] = []
   const { filters, sorts, sortedWith, fieldsNamedIn, pagesWith } = takes ?? {}
-  // each is one word in a line:  two words are joined, `cook-time`
-  const wordsOf = (names: readonly string[]) => {
-    const named = every.flatMap(({ fields }) => names.flatMap((name) => fields[name]?.words ?? []))
-    return wordsJoined([...new Set(named)].map((words) => words.replace(/ /g, "-")))
-  }
+  const wordsOf = (names: readonly string[]) =>
+    fieldsInLine(every.flatMap(({ fields }) => names.flatMap((name) => fields[name]?.words ?? [])))
   if (pagesWith && !hasPaging) {
     lines.push({
       key: "pages",
@@ -390,6 +416,14 @@ function ownPagingLines(
       ? [{ key: `size:${collection}`, text: `\tit gives up to ${pagesWith.most} at a time` }]
       : [])
   ]
+}
+
+/**
+ * Fields by their words, as a line that names several says them (`searched_fields`):  each one word, two words joined,
+ * `cook-time`;  `it filters by cuisine and cook-time`, `runs are asked for by their instance-id`.
+ */
+function fieldsInLine(words: readonly string[]): string {
+  return wordsJoined([...new Set(words)].map((each) => each.replace(/ /g, "-")))
 }
 
 /** `words` as a list in a line:  `latitude and longitude`, `a, b and c`. */

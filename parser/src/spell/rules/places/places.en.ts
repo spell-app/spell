@@ -54,7 +54,8 @@ import {
   ShowThemAtATime,
   ShowThemIn,
   ShowThemPaged,
-  WhileWaiting
+  WhileWaiting,
+  WhileWaitingSay
 } from "./ReadRider"
 import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
@@ -1082,7 +1083,21 @@ places.addRule(AskedBy, {
             '  collections: { forecasts: { askedBy: ["latitude", "longitude"] } }',
             "})"
           ]
-        ]
+        ],
+        {
+          title: "fields of several words, joined, one a list of values",
+          input:
+            'lab is a web server at "https://lab.test"\n\t- measurements are asked for by their device-ids and instance-id',
+          js: [
+            "export class Lab extends Place {}",
+            "export const lab = core.place(new Lab(), {",
+            '  name: "lab",',
+            '  kind: "web server",',
+            '  at: "https://lab.test",',
+            '  collections: { measurements: { askedBy: ["deviceIds", "instanceId"] } }',
+            "})"
+          ]
+        }
       ]
     },
     {
@@ -1404,6 +1419,15 @@ places.addRule(TypeVerified, {
   ]
 })
 
+places.addRule(WhileWaitingSay, {
+  syntax: "while (waiting|loading) say {text:expression}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [['while waiting say "Loading Jobs..."', 'core.readRider("waitingSay", () => "Loading Jobs...")']]
+    }
+  ]
+})
 places.addRule(WhileWaiting, { syntax: "while (waiting|loading) (:|,)? {statement_body}?" })
 places.addRule(IfThereAreNone, { syntax: "if there are none (:|,)? {statement_body}?" })
 places.addRule(IfThatFailsSay, { syntax: "if that fails say {text:expression}" })

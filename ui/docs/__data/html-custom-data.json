@@ -109,6 +109,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -649,6 +656,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -959,6 +973,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -1390,6 +1411,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -2161,6 +2189,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -2530,6 +2565,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -2878,6 +2920,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -3209,6 +3258,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -3557,6 +3613,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -3931,6 +3994,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -4619,6 +4689,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -5221,6 +5298,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -5862,6 +5946,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -6178,7 +6269,7 @@
       "name": "ui-card",
       "description": {
         "kind": "markdown",
-        "value": "A card displays site content in a manner similar to a playing card.\n\nAlso known as:  tile, panel, profile card.\n\n**Slots:**  default"
+        "value": "A card displays site content in a manner similar to a playing card.\n\nAlso known as:  tile, panel, profile card.\n\n**Slots:**  default, `loading`, `error`\n\n**Events:**  `ui-retry`"
       },
       "attributes": [
         {
@@ -6461,6 +6552,13 @@
           "description": {
             "kind": "markdown",
             "value": "Alternative text of the `image` shorthand;  default `\"\"` (decorative:  the card's text names it).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -7087,6 +7185,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -7471,6 +7576,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -8017,6 +8129,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -8404,6 +8523,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -8788,6 +8914,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -9612,6 +9745,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -9943,6 +10083,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -10346,6 +10493,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -10684,6 +10838,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -11244,6 +11405,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -11617,6 +11785,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -11958,6 +12133,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -12289,6 +12471,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -12630,6 +12819,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -13039,6 +13235,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -13394,6 +13597,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -13739,6 +13949,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -14239,6 +14456,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -14591,6 +14815,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -15024,6 +15255,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -15543,6 +15781,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -16308,6 +16553,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -16720,6 +16972,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -17112,6 +17371,13 @@
           "description": {
             "kind": "markdown",
             "value": "Spins (a still glyph under reduced motion).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -17535,6 +17801,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -17911,6 +18184,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -18249,6 +18529,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -18716,6 +19003,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -19620,6 +19914,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -19985,6 +20286,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -20467,6 +20775,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -20797,7 +21112,7 @@
       "name": "ui-form",
       "description": {
         "kind": "markdown",
-        "value": "A form displays a set of related input fields in a structured way.\n\nAlso known as:  form layout, fieldset, validation.\n\n**Slots:**  default\n\n**Events:**  `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`"
+        "value": "A form displays a set of related input fields in a structured way.\n\nAlso known as:  form layout, fieldset, validation.\n\n**Slots:**  default, `loading`, `error`\n\n**Events:**  `ui-retry`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`"
       },
       "attributes": [
         {
@@ -20963,6 +21278,13 @@
           "description": {
             "kind": "markdown",
             "value": "Show the bound `value` (else `values`) as JSON below the form, live.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -21340,6 +21662,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -21965,6 +22294,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -22543,6 +22879,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -23074,6 +23417,13 @@
           ]
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -23483,6 +23833,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -23888,6 +24245,13 @@
           "description": {
             "kind": "markdown",
             "value": "A filled `circular` / `bordered` ring, for dark backgrounds.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -24510,6 +24874,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -24925,6 +25296,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -25295,6 +25673,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -26027,6 +26412,13 @@
           ]
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -26546,6 +26938,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -26955,6 +27354,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -27342,6 +27748,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -27719,6 +28132,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -28368,6 +28788,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -28851,6 +29278,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -29282,6 +29716,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -29785,6 +30226,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -30281,6 +30729,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -30710,6 +31165,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -31502,6 +31964,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -31988,6 +32457,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -32525,6 +33001,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -32856,6 +33339,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -33324,6 +33814,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -33902,6 +34399,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -34240,6 +34744,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -34722,6 +35233,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -35114,6 +35632,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -35430,7 +35955,7 @@
       "name": "ui-panel",
       "description": {
         "kind": "markdown",
-        "value": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
+        "value": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`, `loading`, `error`\n\n**Events:**  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
       },
       "attributes": [
         {
@@ -35809,6 +36334,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -36150,6 +36682,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -36488,6 +37027,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -36836,6 +37382,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -37200,6 +37753,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -37534,6 +38094,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -37850,7 +38417,7 @@
       "name": "ui-popup",
       "description": {
         "kind": "markdown",
-        "value": "A popup displays additional information on top of a page.\n\nAlso known as:  tooltip, popover, hint, hover card, info bubble.\n\n**Slots:**  default\n\n**Events:**  `ui-opening`, `ui-closing`"
+        "value": "A popup displays additional information on top of a page.\n\nAlso known as:  tooltip, popover, hint, hover card, info bubble.\n\n**Slots:**  default, `loading`, `error`\n\n**Events:**  `ui-retry`, `ui-opening`, `ui-closing`"
       },
       "attributes": [
         {
@@ -38118,6 +38685,13 @@
           "description": {
             "kind": "markdown",
             "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -38702,6 +39276,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -39517,7 +40098,7 @@
       "name": "ui-property-editor",
       "description": {
         "kind": "markdown",
-        "value": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.\n\nAlso known as:  inspector, property sheet, properties panel, settings form, object editor.\n\n**Slots:**  default, `output`, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-changed`, `ui-reset`, `ui-show-code`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`"
+        "value": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.\n\nAlso known as:  inspector, property sheet, properties panel, settings form, object editor.\n\n**Slots:**  default, `output`, `label`, `hint`, `icon`, `badge`, `actions`, `description`, `loading`, `error`\n\n**Events:**  `ui-changed`, `ui-reset`, `ui-show-code`, `ui-loading`, `ui-loaded`, `ui-retry`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`"
       },
       "attributes": [
         {
@@ -40362,7 +40943,7 @@
       "name": "ui-property-group",
       "description": {
         "kind": "markdown",
-        "value": "A property group is a band of properties that opens and closes, in a property editor.  It takes `<ui-section>`'s attributes.\n\nAlso known as:  property group, fieldset, settings group, inspector section.\n\n**Slots:**  `output`, default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-invalid`, `ui-saved`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`"
+        "value": "A property group is a band of properties that opens and closes, in a property editor.  It takes `<ui-section>`'s attributes.\n\nAlso known as:  property group, fieldset, settings group, inspector section.\n\n**Slots:**  `output`, default, `label`, `hint`, `icon`, `badge`, `actions`, `description`, `loading`, `error`\n\n**Events:**  `ui-invalid`, `ui-saved`, `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`"
       },
       "attributes": [
         {
@@ -41122,6 +41703,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -41453,6 +42041,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -41801,6 +42396,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -42333,6 +42935,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -42743,6 +43352,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -43229,6 +43845,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -43567,6 +44190,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -44018,6 +44648,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -44504,6 +45141,13 @@
           "description": {
             "kind": "markdown",
             "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -45100,6 +45744,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -45710,6 +46361,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -46019,7 +46677,7 @@
       "name": "ui-section",
       "description": {
         "kind": "markdown",
-        "value": "A section is a titled block of content that can close and keep its title in view.\n\nAlso known as:  section, panel, collapsible, disclosure, fieldset, expander.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
+        "value": "A section is a titled block of content that can close and keep its title in view.\n\nAlso known as:  section, panel, collapsible, disclosure, fieldset, expander.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`, `loading`, `error`\n\n**Events:**  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
       },
       "attributes": [
         {
@@ -46395,6 +47053,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -46729,6 +47394,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -47045,7 +47717,7 @@
       "name": "ui-segment",
       "description": {
         "kind": "markdown",
-        "value": "A segment is used to create a grouping of related content.\n\nAlso known as:  panel, box, section, well, paper, card.\n\n**Slots:**  default"
+        "value": "A segment is used to create a grouping of related content.\n\nAlso known as:  panel, box, section, well, paper, card.\n\n**Slots:**  default, `loading`, `error`\n\n**Events:**  `ui-retry`"
       },
       "attributes": [
         {
@@ -47304,6 +47976,13 @@
               "name": "very long"
             }
           ]
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
         },
         {
           "name": "visible",
@@ -47643,7 +48322,7 @@
       "name": "ui-segments",
       "description": {
         "kind": "markdown",
-        "value": "A group of segments can be formatted to appear together.\n\nAlso known as:  panel group, stacked panels.\n\n**Slots:**  default"
+        "value": "A group of segments can be formatted to appear together.\n\nAlso known as:  panel group, stacked panels.\n\n**Slots:**  default, `loading`, `error`\n\n**Events:**  `ui-retry`"
       },
       "attributes": [
         {
@@ -47767,6 +48446,13 @@
           "description": {
             "kind": "markdown",
             "value": "Dimmed and inert.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -48233,6 +48919,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -48637,6 +49330,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -48968,6 +49668,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -49449,6 +50156,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -49844,6 +50558,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -50192,6 +50913,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -50530,6 +51258,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -50919,6 +51654,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -51459,6 +52201,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -51795,6 +52544,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -52372,6 +53128,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -52748,6 +53511,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -53107,6 +53877,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -53545,6 +54322,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -54040,6 +54824,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -54550,6 +55341,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -55009,6 +55807,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -55568,6 +56373,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -55920,6 +56732,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -56299,6 +57118,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -56626,6 +57452,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -56942,7 +57775,7 @@
       "name": "ui-tab",
       "description": {
         "kind": "markdown",
-        "value": "A tab pane:  the content shown while its tab is selected.\n\nAlso known as:  tab panel, pane.\n\n**Slots:**  default\n\n**Events:**  `ui-opened`"
+        "value": "A tab pane:  the content shown while its tab is selected.\n\nAlso known as:  tab panel, pane.\n\n**Slots:**  default, `loading`, `error`\n\n**Events:**  `ui-retry`, `ui-opened`"
       },
       "attributes": [
         {
@@ -57043,6 +57876,13 @@
           "description": {
             "kind": "markdown",
             "value": "A dark pane;  inside `<ui-tabs>`, the tabs decide.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -57821,6 +58661,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -58423,6 +59270,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -58768,6 +59622,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -59128,6 +59989,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -59705,6 +60573,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -60210,6 +61085,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -60548,6 +61430,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -60967,6 +61856,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -61298,6 +62194,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -61639,6 +62542,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -62165,6 +63075,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -62557,6 +63474,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -63373,6 +64297,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -63750,6 +64681,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -64133,6 +65071,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -64569,6 +65514,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -65013,6 +65965,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -65387,6 +66346,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -65809,6 +66775,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -66241,6 +67214,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -66659,6 +67639,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -66997,6 +67984,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -67390,6 +68384,13 @@
           }
         },
         {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
           "name": "visible",
           "description": {
             "kind": "markdown",
@@ -67761,6 +68762,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {
@@ -68137,6 +69145,13 @@
           "description": {
             "kind": "markdown",
             "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
           }
         },
         {

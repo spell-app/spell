@@ -143,7 +143,9 @@ describe("SP.UIViews", () => {
       "\tto give the row class of (an item)",
       '\t\treturn "port"'
     ].join("\n")
-    const page = compiledSpellProject([{ path: "/Harbor.spell", contents }], { writer: PY.ElementsWriter.instance }).code
+    const page = compiledSpellProject([{ path: "/Harbor.spell", contents }], {
+      writer: PY.ElementsWriter.instance
+    }).code
     expect(page).toContain('export class NetlistColumn extends View {\n  static uiElement = "ui-tree"')
     // the tree asks it as it draws:  answered on the page, never sent to Python
     expect(page).toContain('  rowClass(item) {\n    return "port"\n  }')
@@ -160,7 +162,11 @@ describe("SP.UIViews", () => {
     const path = "/Program.spell"
     const root = SP.Language.rootScopeFor([SP.Language.forFile(path)])
     const imports = SP.SpellDeclarations.importScope(root, [{ from: "@owen/harbor", declarations }])
-    const contents = ['a "port column" is a netlist column', "\tto give the row class of (an item)", '\t\treturn "port"']
+    const contents = [
+      'a "port column" is a netlist column',
+      "\tto give the row class of (an item)",
+      '\t\treturn "port"'
+    ]
     const [file] = parseSpellProject([{ path, contents: contents.join("\n") }], { parentScope: imports }).files
     expect(file!.errors).toEqual([])
     const portColumn = file!.scope.getType("PortColumn")!

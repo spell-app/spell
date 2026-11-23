@@ -484,6 +484,8 @@ export class PageTwin {
   /**
    * A `<for>`'s attributes, as lines of code spell at the top of its body:  a rider each, as `while waiting:` is.
    * - `loading={no}`:  a rider with nothing in it.
+   * - `loading="Loading Jobs..."`:  `while waiting say "Loading Jobs..."`, drawn as the look around it says;
+   *   `loading="skeleton"` (`"spinner"`, `"none"`) names a look for this list alone (`core.drawLooking()`).
    * - `hide-empty` goes on the section, so nothing but a title needs it;  with it, no "nothing found" either.
    * - Whatever isn't its own goes on what's around its items:  `<for films as="cards" columns="4" />`.
    */
@@ -498,8 +500,7 @@ export class PageTwin {
     const lines: string[] = []
     const loading = own("loading")
     if (loading && isNo(loading)) lines.push(words.waiting)
-    else if (loading?.value)
-      lines.push(`${words.waiting} <ui-loader visible inline text>{${said(loading)}}</ui-loader>`)
+    else if (loading?.value) lines.push(`${words.waitingSay} ${said(loading)}`)
     const empty = own("empty")
     const hideEmpty = own("hide-empty")
     if (empty && !hideEmpty && !isNo(empty)) {

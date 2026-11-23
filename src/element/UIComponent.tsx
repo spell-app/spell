@@ -325,6 +325,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     aria: {},
     disabled: "unusable",
     loading: "loader",
+    error: "look",
     link: "click",
     resizable: "both",
     visible: "shown",
@@ -498,6 +499,11 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     return this.sharedText(TOOLTIP)
   }
 
+  /** Its error's words, as its tooltip, while the base class shows its error look (`showsErrorLook`). */
+  get errorTooltip(): string | undefined {
+    return this.showsErrorLook ? this.sharedErrorText : undefined
+  }
+
   /** The shared `label`:  the element's accessible name (`aria-label`). */
   get sharedLabel(): string | undefined {
     return this.sharedText(LABEL)
@@ -509,9 +515,15 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    * - The accessible name only where `label` is the shared one:  a family's own `label` means something else
    *   (a field's label, a statistic's), and names it its own way.
    */
-  @onChange("sharedTooltip", "sharedLabel", { writesDOMElement: true })
-  protected onSharedWordsChanged(tooltip: string | undefined, label: string | undefined) {
+  @onChange("sharedTooltip", "sharedLabel", "errorTooltip", { writesDOMElement: true })
+  protected onSharedWordsChanged(
+    ownTooltip: string | undefined,
+    label: string | undefined,
+    errorTooltip: string | undefined
+  ) {
     const { domElement, internalState } = this
+    // its error's words, where the base class shows its error (`showsErrorLook`) and it has no tooltip of its own
+    const tooltip = ownTooltip ?? errorTooltip
     if (tooltip !== undefined) domElement.setAttribute("title", tooltip)
     else if (internalState.wroteTitle) domElement.removeAttribute("title")
     internalState.wroteTitle = tooltip !== undefined
@@ -854,6 +866,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   // - `disabled`:  `:state(disabled)` always;  the rest per family (`elementSetup.disabled`):
   //   by default unusable, with everything inside inert
   // - `loading`:  `:state(loading)` always;  by default a loader over it (`elementSetup.loading`)
+  // - `error`:  `:state(failed)` always;  by default the error look, its words its tooltip (`elementSetup.error`)
   // - `inert` is the platform's, unstyled
   // - `visible`, `hidden` and `animation`:  "Shown or hidden", below
   ////////////////
@@ -901,6 +914,34 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   }
 
   /**
+   * Is `error` set, bare or with its words (`error="The server didn't answer"`)?
+   * - `:state(failed)` follows it, whatever failing means for the family (`elementSetup.error`).
+   * - Only the SHARED one:  a family with an `error` of its own (a field's line under its control) means that.
+   */
+  @cssState("failed")
+  get isMarkedFailed(): boolean {
+    if (!this.elementDefinition.takesShared(ERROR)) return false
+    const value = E.Reactive.attributeValue(this, ERROR)
+    return value !== undefined && value !== null && value !== false
+  }
+
+  /** The shared `error`'s words;  `undefined` bare, or with none. */
+  get sharedErrorText(): string | undefined {
+    if (!this.elementDefinition.takesShared(ERROR)) return undefined
+    const value = E.Reactive.attributeValue(this, ERROR)
+    return typeof value === "string" && value !== "" ? value : undefined
+  }
+
+  /**
+   * Is the base class giving the element its error look (`elementSetup.error` is `"look"`)?
+   * - `:state(failed-look)`, which `reset.css` draws.
+   */
+  @cssState("failed-look")
+  get showsErrorLook(): boolean {
+    return this.elementSetup.error === "look" && this.isMarkedFailed
+  }
+
+  /**
    * Is the base class drawing its loader over the element (`elementSetup.loading` is `"loader"`)?
    * - `:state(busy)`, which `reset.css` draws a spinner for.
    */
@@ -932,7 +973,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    *   so a family's own (`<ui-form loading>`'s veil) stays (epic `spell-element`, I10).
    * - On a server:  the ARIA only, once.
    */
-  @onChange("hasInertContent", "isDisabled", "showsLoader", "isReady", { writesDOMElement: true })
+  @onChange("hasInertContent", "isDisabled", "showsLoader", "isReady", "showsErrorLook", { writesDOMElement: true })
   protected onSharedStatesChanged(
     hasInertContent: boolean,
     isDisabled: boolean,
@@ -942,6 +983,8 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     const { domElement, elementSetup, internalState } = this
     if (elementSetup.disabled === "unusable") domElement.internals.ariaDisabled = isDisabled ? "true" : null
     if (elementSetup.loading === "loader") domElement.internals.ariaBusy = showsLoader ? "true" : null
+    if (elementSetup.error === "look" && elementSetup.isAFormControl)
+      domElement.internals.ariaInvalid = this.showsErrorLook ? "true" : null
     if (isServer || !isReady) return
     if (!hasInertContent) {
       // never touch the content of an element that was never inert:  most never are
@@ -1627,6 +1670,9 @@ const NOT_A_BOX = "slot, style, link"
 /** The shared sizes, by name:  any CSS length each, or `undefined` (`UIComponent.sharedSizes`). */
 type SharedSizes = Record<(typeof SIZES)[number], string | undefined>
 const TOOLTIP = "tooltip"
+
+/** The shared `error`'s name:  failed, with its words if it has any. */
+const ERROR = "error"
 /** The shared `movable`:  people drag it to a new place. */
 const MOVABLE = "movable"
 /** The shared `resizable`:  people drag its corner to resize it. */

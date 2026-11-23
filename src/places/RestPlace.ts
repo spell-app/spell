@@ -25,6 +25,7 @@ import {
 import { FieldNames, type NameStyle } from "./FieldNames"
 import { DEFAULT_CEILING } from "./PlaceQuery"
 import { jsonIn, valueAt, WebPlace, type WebPlaceProps } from "./WebPlace"
+import { wrappedRows } from "./wrappedRows"
 
 /** The word for every operation, in a list of enabled ones:  `enabled operations are all`. */
 const ALL_OPERATIONS = "all"
@@ -248,6 +249,8 @@ export class RestPlace extends WebPlace implements Place {
     if (operation === undefined) {
       throw new TypeError(`RestPlace.call():  nobody says where "${name}" is;  name it in \`operations\``)
     }
+    // every route it lists is a write, or an action:  a GET too, as one may change things (a load)
+    this.refuseIfReadOnly()
     if (collection) this.refuseUnlessEnabled(collection, name)
     const { at, method = "POST" } = typeof operation === "string" ? { at: operation } : operation
     const data = collection && input ? this.onTheWire(collection, input as PlaceRow) : input
@@ -273,6 +276,17 @@ export class RestPlace extends WebPlace implements Place {
   /** Does `collection` take `operation`? */
   private isEnabled(collection: string, operation: string): boolean {
     return this.enabled.get(collection)?.has(operation) ?? true
+  }
+
+  /**
+   * - throws `PlaceError` `"refused"` on a place that takes no writes (`write: "none"`):  read only by its line, or
+   *   its deployment's, production's unless it says otherwise (`SP.SpellProject.deploymentAsRun()`)
+   */
+  private refuseIfReadOnly(): void {
+    if (this.capabilities.write !== "none") return
+    throw new PlaceError(`${this.url} is read only:  nothing can be changed there`, {
+      cause: { kind: "refused", whyNot: "place" }
+    })
   }
 
   /**
@@ -343,8 +357,12 @@ export class RestPlace extends WebPlace implements Place {
         : (askedBy || (query.under && (query.oneThing || this.isFoundAtItsOwner(collection)))) && isOneRow(held)
           ? [held]
           : !Array.isArray(held) &&
-              (query.under || this.isSearchAddress(collection, url) || (held === undefined && rowsAt !== undefined))
-            ? ((Array.isArray(body) ? body : soleListIn(body)) ?? (query.under && isOneRow(held) ? [held] : held))
+              (query.under ||
+                this.isSearchAddress(collection, url) ||
+                (held === undefined && rowsAt !== undefined) ||
+                // a list whose rows are wrapped, as no other's are:  `{ sources: [...], next_offset: 20 }`
+                (rowsAt === undefined && held === body))
+            ? ((Array.isArray(body) ? body : wrappedRows(body)?.rows) ?? (query.under && isOneRow(held) ? [held] : held))
             : held
     if (!Array.isArray(rows)) {
       throw new TypeError(
@@ -431,6 +449,7 @@ export class RestPlace extends WebPlace implements Place {
   /** Make one change:  its row, as the server now keeps it, if it said. */
   private async makeChange(change: PlaceChange, context: PlaceContext): Promise<PlaceRow | undefined> {
     const { kind, collection, id, changeId } = change
+    this.refuseIfReadOnly()
     this.refuseUnlessEnabled(collection, OPERATION_OF_WRITE[kind])
     if (kind === "delete") {
       await this.answerTo({ ...this.thingAddress(collection, id!), method: "DELETE" }, context, changeId)
@@ -935,12 +954,6 @@ function listed(items: readonly string[]): string {
   return items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : (items[0] ?? "")
 }
 
-/** The one list in an answer that's an object:  a search's rows, `{ total_count, items: [...] }`.  `undefined` for none, or several. */
-function soleListIn(body: unknown): unknown[] | undefined {
-  if (!isOneRow(body)) return undefined
-  const lists = Object.values(body).filter((value) => Array.isArray(value))
-  return lists.length === 1 ? (lists[0] as unknown[]) : undefined
-}
 
 /** The values of `filter` for the fields a list is asked for by (`RestCollection.askedBy`):  none, `undefined`. */
 function askedValuesIn(

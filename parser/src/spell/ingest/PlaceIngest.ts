@@ -1,6 +1,7 @@
 import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { tokenServiceMint } from "spell/places/PlaceToken"
+import { wrappedRows } from "spell/places/wrappedRows"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -29,11 +30,11 @@ import {
   kindFoundAt,
   kindReadFrom,
   lookAtPlace,
-  messageOf,
-  wrappedRows
+  messageOf
 } from "./PlaceLook"
 import { checkSecondsWithin, describeLook, fieldsOf, fingerprintOf, idFieldOf, plainNameFor } from "./PlaceShape"
 import { partsInLanguageOf } from "./PlaceInLanguage"
+import { PlaceWords } from "./PlaceWords"
 import {
   isSearchedApart,
   KINDS_WITH_KEY_LINES,
@@ -163,12 +164,14 @@ export class PlaceIngest {
     if (ask.keySecret && !look.specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, ask.signedIn)
     if (ask.tokenFrom !== undefined) description.about.tokenFrom = ask.tokenFrom
+    keepAsked(description, ask)
     if (ask.dataIsPrivateIn !== undefined)
       description.about.privateDataIn = ask.dataIsPrivateIn || privateFolderFor(description)
     if (look.specAt) noteFromSpec(description)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.notePictures(description, ask.pictures, reader)
     if (ask.triesWrites) await this.noteWrites(description, look, reader)
+    leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
     awayFromTypesBeside(description, await files.otherSpellBeside(file))
     await this.readWithAgent(description, look, { keepName: !!ask.name })
     await this.keepPrivate(description, look, file)
@@ -211,6 +214,7 @@ export class PlaceIngest {
     movedTo?: string
   ): Promise<IngestResult> {
     const { files } = this.settings
+    namesFromFile(old, file, (await files.read(file)) ?? "")
     const { name, kind, keySecret, keyGoes, signedIn, docsAt, specAt, collectionsAsked, picturesAsked } = old.about
     const address = movedTo === undefined ? old.about.address : addressFrom(movedTo)
     const reader = await this.readerFor(keySecret, signedIn, keyGoes, old.about.tokenFrom)
@@ -235,11 +239,13 @@ export class PlaceIngest {
       })
     })
     const description = describeLook(look, { kind, name })
+    leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
     if (keySecret) description.about.keySecret = keySecret
     if (keyGoes) description.about.keyGoes = keyGoes
     if (keySecret && !specAt) await this.noteKeyIfSet(description, look)
     noteSignedIn(description, signedIn)
     if (old.about.tokenFrom !== undefined) description.about.tokenFrom = old.about.tokenFrom
+    keepAsked(description, old.about)
     if (old.about.privateDataIn !== undefined) description.about.privateDataIn = old.about.privateDataIn
     if (specAt) noteFromSpec(description)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
@@ -316,6 +322,9 @@ export class PlaceIngest {
     }
     const old = descriptionFromDisk(onDisk)
     const description = descriptionFromDisk(structuredClone(onDisk))
+    const written = (await files.read(file)) ?? ""
+    namesFromFile(old, file, written)
+    namesFromFile(description, file, written)
     const { keySecret, signedIn, keyGoes, tokenFrom } = description.about
     const deployment = await this.deploymentFor(file, description, named)
     if (triesWrites) refuseWritesOn(deployment)
@@ -410,10 +419,16 @@ export class PlaceIngest {
     // a search is asked something:  what its description says to search for, else a letter (epic `data` I140, J295);
     // a list asked for by a query, what its description's example says (epic `data` P56)
     const { searchedOnly, searchedBy, searchedFor, askedBy = {} } = collection
-    const searched =
-      searchedOnly && searchedBy ? `${searchedBy.param}=${encodeURIComponent(searchedFor ?? SEARCH_TRIED)}` : ""
-    const asked = Object.entries(askedBy).map(([param, value]) => `${param}=${encodeURIComponent(value)}`)
-    const query = [...(searched ? [searched] : []), ...asked].join("&")
+    // each question beside the others, a search's first, a list of values as the question repeated;
+    // a space as `%20`, as a server reads it in an address
+    const searched = !!(searchedOnly && searchedBy)
+    const asked: Array<[string, unknown]> = [
+      ...(searchedOnly && searchedBy ? [[searchedBy.param, searchedFor ?? SEARCH_TRIED] as [string, unknown]] : []),
+      ...Object.entries(askedBy)
+    ]
+    const query = asked
+      .flatMap(([param, value]) => [value].flat().map((each) => `${param}=${encodeURIComponent(`${each}`)}`))
+      .join("&")
     const url = `${address}${collection.at}${query ? `${collection.at.includes("?") ? "&" : "?"}${query}` : ""}`
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
@@ -549,7 +564,7 @@ export class PlaceIngest {
     const picked = named ?? names[0]!
     const deployment = listed![picked]
     if (!deployment) throw new IngestStopped(`${place} has no deployment "${picked}":  ${names.join(", ")}`)
-    return { name: picked, ...deployment }
+    return { name: picked, ...SP.SpellProject.deploymentAsRun(picked, deployment) }
   }
 
   ////////////////
@@ -789,6 +804,8 @@ export class PlaceIngest {
     const most = description.about.specAt ? MOST_COMPILES_OF_A_SPEC : MOST_COMPILES
     // the English it wrote:  whatever language the file is in, that's checked after
     const englishFile = file.replace(/\.[a-z]{2}\.spell$/, ".spell")
+    // what Spell couldn't read last time may read now
+    delete description.linesLeftOut
     for (let round = 0; round < most; round++) {
       const parts = spellPartsFor(description)
       const text = spellTextOf(parts)
@@ -1152,9 +1169,24 @@ function leaveOutLine(description: PlaceDescription, line: WrittenLine, why: str
       return true
     }
   }
-  if (!type || line.text !== type.header) return false
-  if (type.isInside) return leaveOutHolders(description, type, reason)
-  return leaveOutCollection(description, type.collection, reason)
+  if (type && line.text === type.header) {
+    if (type.isInside) return leaveOutHolders(description, type, reason)
+    return leaveOutCollection(description, type.collection, reason)
+  }
+  return key ? leaveOutKeyed(description, key, reason) : false
+}
+
+/**
+ * SIDE EFFECT:  the Spell leaves out one line, by its key, whatever it says:  so one line Spell can't read never stops
+ * a whole place (`measurements are asked for by their ...`, before Spell read a list of values).
+ * - `false` if it's left out already.
+ */
+function leaveOutKeyed(description: PlaceDescription, key: string, reason: string): boolean {
+  const leftOut = (description.linesLeftOut ??= {})
+  if (key in leftOut) return false
+  leftOut[key] = reason
+  description.notes.push(`Left out a line:  ${reason}`)
+  return true
 }
 
 /**
@@ -1205,19 +1237,93 @@ const DECLARED_TYPE = /^(?:a|an|un|una) (?:"([^"\n]+)"|([\p{L}\d ]+?)) (?:is a t
  * JSONPlaceholder's `user`, beside GitHub's, is a `jsonplaceholder user`.
  */
 function awayFromTypesBeside(description: PlaceDescription, others: readonly string[]): void {
-  const declared = new Set(
-    others.flatMap((text) =>
-      [...text.matchAll(DECLARED_TYPE)].map(([, quoted, plain]) => (quoted ?? plain)!.toLowerCase())
-    )
+  // each type declared beside it, by the place whose file declares it:  a file of a person's own, by none
+  const declared = new Map(
+    others.flatMap((text) => {
+      const place = placesIn(text)[0]?.name
+      return [...text.matchAll(DECLARED_TYPE)].map(([, quoted, plain]) => [(quoted ?? plain)!.toLowerCase(), place])
+    })
   )
   const { name } = description.about
   let isRenamed = false
   for (const collection of Object.values(description.collections)) {
-    if (!declared.has(collection.type.toLowerCase())) continue
+    const words = collection.type.toLowerCase()
+    if (collection.leftOut || !declared.has(words)) continue
+    const other = declared.get(words)
     collection.type = `${name} ${collection.type}`
     isRenamed = true
+    // the other half:  the one already there keeps the bare name till a person renames it, which every update keeps
+    if (other !== undefined && !words.startsWith(`${other.toLowerCase()} `)) {
+      description.notes.push(
+        `"${words}" is ${other}'s too, so this one is a "${collection.type}":  to tell them apart both ways, rename ${other}'s in its own file, a "${other} ${words}" (spell place update keeps a name you give).`
+      )
+    }
   }
   if (isRenamed) renameCollections(description)
+}
+
+/**
+ * SIDE EFFECT:  a list whose rows are another place's is left out, saying which place has them (`others`):
+ * a server's copy of another's, `/api/v1/proxy/jobs` beside the other place's `/api/jobs`.
+ * - The same list:  one with no fields of its own (its description says nothing of its rows), whose address ends in
+ *   the same word as one of another place's, which has fields.
+ * - A list with fields of its own, of the same name, is its own:  named apart (`awayFromTypesBeside()`).
+ */
+function leaveOutCopies(description: PlaceDescription, others: readonly PlaceDescription[]): void {
+  const lastWord = (at: string) => at.replace(/[?#].*$/, "").replace(/\/+$/, "").split("/").pop()!.toLowerCase()
+  const theirs = new Map(
+    others.flatMap(({ about, collections }) =>
+      Object.entries(collections)
+        .filter(([, each]) => !each.leftOut && !/\{/.test(each.at) && Object.keys(each.fields).length > 0)
+        .map(([list, { at }]) => [lastWord(at), { place: about.name, list }] as const)
+    )
+  )
+  for (const [name, collection] of Object.entries(description.collections)) {
+    if (collection.leftOut || Object.keys(collection.fields).length || /\{/.test(collection.at)) continue
+    const copied = theirs.get(lastWord(collection.at))
+    if (!copied) continue
+    leaveOutCollection(
+      description,
+      name,
+      `its rows are ${copied.place}'s ${copied.list.replace(/_/g, " ")}, read there:  this is a copy of them`
+    )
+  }
+}
+
+/**
+ * SIDE EFFECT:  a type a person renamed in the place's file goes by their name in `description` too, so a later look
+ * changes its lines as it does any other's, and never puts the old name back:
+ * `devices live at "/api/devices"`, made `instruments live at "/api/devices"`, and `a "device" is a thing`, made
+ * `an "instrument" is a thing`, is an `instrument` from then on.
+ * - Found by the collection's address line, in the file's language:  the only line that says which collection it is.
+ * - The lines it last wrote (`spell`) say the new name too, so the merge sees them as its own, unchanged.
+ */
+function namesFromFile(description: PlaceDescription, file: string, text: string): void {
+  const typesInFile = Object.keys(PlaceWords.of(text).types)
+  const fileLines = new Set(text.split("\n").map((line) => line.trim()))
+  const atLineOf = (collection: string) =>
+    partsInLanguageOf(file, spellPartsFor(description)).placeLines.find(({ key }) => key === `at:${collection}`)?.text
+  const written = new Map<string, string>()
+  const linesBefore = spellLinesOf(partsInLanguageOf(file, spellPartsFor(description)))
+  for (const [name, collection] of Object.entries(description.collections)) {
+    const atLine = atLineOf(name)
+    if (collection.leftOut || !atLine || fileLines.has(atLine)) continue
+    const taken = new Set(Object.values(description.collections).map(({ type }) => type))
+    const was = collection.type
+    const named = typesInFile.find((type) => {
+      if (taken.has(type)) return false
+      collection.type = type
+      return fileLines.has(atLineOf(name) ?? "")
+    })
+    collection.type = named ?? was
+  }
+  const linesAfter = spellLinesOf(partsInLanguageOf(file, spellPartsFor(description)))
+  if (linesBefore.length !== linesAfter.length) return
+  linesBefore.forEach(({ text: before }, at) => {
+    const after = linesAfter[at]!.text
+    if (after !== before) written.set(before.trim(), after.trim())
+  })
+  if (written.size) description.spell = description.spell?.map((line) => line.replace(line.trim(), written.get(line.trim()) ?? line.trim()))
 }
 
 /** Are these words used in a line the tool didn't write, here or in another file beside it? */
@@ -1432,6 +1538,17 @@ function noteFromSpec(description: PlaceDescription): void {
   description.notes.push(
     "Read from its OpenAPI description only:  every list, write and action route is unverified until `spell place verify` tries it against a running server."
   )
+}
+
+/**
+ * SIDE EFFECT:  what it was asked to say of the place stays, on `description`'s `about`:  read only, rows at a time,
+ * how often it's checked (`--read-only`, `--rows`, `--check-every`).  Each later update carries them over.
+ */
+function keepAsked(
+  description: PlaceDescription,
+  { readOnly, rows, checkEvery }: Pick<PlaceDescription["about"], "readOnly" | "rows" | "checkEvery">
+): void {
+  Object.assign(description.about, withDefined({ readOnly, rows, checkEvery }))
 }
 
 /** SIDE EFFECT:  `description` says which session it was read as, by name, never its values. */

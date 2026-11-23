@@ -6,7 +6,8 @@ import type { AttributeSpec, ComponentVocabulary, SharedDictionary, StateSpec } 
 /****************
  * ### `SharedVocabulary`
  * The attributes and states EVERY component has, without its vocabulary declaring them:
- * - `disabled`, `loading`, `visible` and `animation` (epic `spell-element`, P8 and P12)
+ * - `disabled`, `loading`, `visible` and `animation` (epic `spell-element`, P8 and P12);  `error`, failed, with
+ *   what went wrong
  * - `link` and `target`, `font`, `tooltip` and `label` (epic `ui-gaps` P3, Owen's request r1):
  *   where a click goes, how its letters look, the browser's tooltip, its accessible name
  * - `shadow`, and `width`, `min-width` and `max-width` (epic `language` P35, I63):
@@ -148,6 +149,18 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
     description:
       "Busy:  dimmed under a loader, and inert;  `aria-busy`.  " +
       "Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+  },
+  {
+    name: "error",
+    // its property's own name:  many families have an `error` member of their own (a diagram's, a loader's)
+    property: "sharedError",
+    kind: "string",
+    description:
+      'Failed, with what went wrong if it says:  `error="The server didn\'t answer"`.  By default the error look (an ' +
+      "outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, " +
+      "segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its " +
+      'content, or its `slot="error"`.  Shared by every element;  a family may show it its own way ' +
+      "(`elementSetup.error`)."
   },
   {
     name: "visible",
@@ -315,6 +328,12 @@ const SHARED_DICTIONARIES: ReadonlyMap<string, SharedDictionary> = new Map([[sha
 const SHARED_STATES: readonly StateSpec[] = [
   { name: "disabled", description: "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)." },
   { name: "loading", description: "`loading` is set." },
+  { name: "failed", description: "`error` is set." },
+  {
+    name: "failed-look",
+    description:
+      "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+  },
   {
     name: "busy",
     description: "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
