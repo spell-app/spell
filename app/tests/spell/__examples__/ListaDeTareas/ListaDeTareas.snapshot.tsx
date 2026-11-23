@@ -62,9 +62,9 @@ export class Tarea extends View {
           <es-icono name="grip vertical" color="grey" aria-label="Arrastrar" />
           <es-casilla name="hecha" aria-label="Hecha" />
           <es-entrada part="title" name="título" aria-label="Tarea" apariencia="transparent" fluido={true} />
-          <es-etiqueta tamano="diminuto" color={this.prioridad === "alta" ? "red" : "grey"} hidden={this.prioridad !== "normal" ? undefined : true}>
-            {this.prioridad}
-          </es-etiqueta>
+          {core.drawIf(() => this.prioridad !== "normal", () => <>
+            <es-etiqueta tamano="diminuto" color={this.prioridad === "alta" ? "red" : "grey"}>{this.prioridad}</es-etiqueta>
+          </>)}
         </es-pila>
       </es-formulario>
     )
@@ -198,7 +198,9 @@ export class Agenda extends ViewableList<Tarea> {
     // Sus tareas una debajo de otra;  vacía, una línea que lo dice
     return (
       <es-pila separacion="xs">
-        <es-texto color="grey" hidden={this.isEmpty ? undefined : true}>Nada por hacer</es-texto>
+        {core.drawIf(() => this.isEmpty, () => <>
+          <es-texto color="grey">Nada por hacer</es-texto>
+        </>)}
         <slot />
       </es-pila>
     )
@@ -374,11 +376,7 @@ export class ListaDeTareas extends App {
           <es-barra-herramientas menu="menú de tareas" aria-label="Tareas">
             <es-texto slot="titulo" tamano="large">Lista de tareas</es-texto>
             <es-texto slot="derecha">
-              <span hidden={this.cuentaPendiente === 0 ? undefined : "until-found"}>Todo hecho</span>
-              <span hidden={!(this.cuentaPendiente === 0) ? undefined : "until-found"}>
-                {this.cuentaPendiente}
-                {" pendientes"}
-              </span>
+              {core.drawIf(() => this.cuentaPendiente === 0, () => <>Todo hecho</>, () => <>{this.cuentaPendiente} pendientes</>)}
             </es-texto>
           </es-barra-herramientas>
           <es-formulario prop:value={this}>

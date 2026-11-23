@@ -63,11 +63,11 @@ export class Tarea extends View {
         h("es-icono", { name: "grip vertical", color: "grey", "aria-label": "Arrastrar" }),
         h("es-casilla", { name: "hecha", "aria-label": "Hecha" }),
         h("es-entrada", { part: "title", name: "título", "aria-label": "Tarea", apariencia: "transparent", fluido: true }),
-        h("es-etiqueta", {
-          tamano: "diminuto",
-          color: () => this.prioridad === "alta" ? "red" : "grey",
-          hidden: () => this.prioridad !== "normal" ? undefined : true
-        }, () => this.prioridad)
+        () => core.drawIf(() => this.prioridad !== "normal", () => [
+          h("es-etiqueta", { tamano: "diminuto", color: () => this.prioridad === "alta" ? "red" : "grey" },
+            () => this.prioridad
+          )
+        ])
       )
     )
   }
@@ -177,7 +177,7 @@ export class Agenda extends ViewableList {
   draw() {
     // Sus tareas una debajo de otra;  vacía, una línea que lo dice
     return h("es-pila", { separacion: "xs" },
-      h("es-texto", { color: "grey", hidden: () => this.isEmpty ? undefined : true }, "Nada por hacer"),
+      () => core.drawIf(() => this.isEmpty, () => [h("es-texto", { color: "grey" }, "Nada por hacer")]),
       h("slot")
     )
   }
@@ -323,11 +323,7 @@ export class ListaDeTareas extends App {
         h("es-barra-herramientas", { menu: "menú de tareas", "aria-label": "Tareas" },
           h("es-texto", { slot: "titulo", tamano: "large" }, "Lista de tareas"),
           h("es-texto", { slot: "derecha" },
-            h("span", { hidden: () => this.cuentaPendiente === 0 ? undefined : "until-found" }, "Todo hecho"),
-            h("span", { hidden: () => !(this.cuentaPendiente === 0) ? undefined : "until-found" },
-              () => this.cuentaPendiente,
-              " pendientes"
-            )
+            () => core.drawIf(() => this.cuentaPendiente === 0, () => ["Todo hecho"], () => [() => this.cuentaPendiente, " pendientes"])
           )
         ),
         h("es-formulario", { "prop:value": this },

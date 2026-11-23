@@ -1920,9 +1920,15 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - The JSX tokenizer reads it (`Tokenizer.chainTags`, every language's words, `SP.CHAIN_TAGS`):  each branch a
     `JSXElementToken` with its `chain` kind and its `phrase` (a `JSXExpressionToken`, as if written `{...}`);
     a branch ends where the next starts, and ONE closer, `</>` or `</if>`, ends the chain.
-  - `SpellJSX` keeps every branch on the page, each branch hidden while it isn't the one (`childASTs()`):
-    - the web's own elements, and each run of text and holes (in a `<span>` of its own):  `hidden="until-found"`
-    - a custom element (`<ui-label>`):  plain `hidden`, which Spell UI hides by (its host has no box of its own)
+  - `SpellJSX` draws ONLY the branch that holds (`childASTs()`, `ifChain()`):  ONE core call per chain,
+    `core.drawIf(() => c1, () => [...], () => c2, () => [...], () => [...])`, each branch's children a fragment.
+    - A branch that isn't the one draws nothing, so reads nothing:  a place's read under it waits until it shows.
+    - A flip draws the new branch and lets the old one go;  a change that keeps the branch keeps its elements.
+    - Its functions are part of the drawing (`drawnFunctions`):  a read in a branch gets its own spot there.
+    - A condition that waits:  the chain in a spot of its own, `core.drawWaiting(() => core.drawIf(...))`, ONE spinner
+      (`ifsThatWait`).
+    - It once drew every branch, hiding the others (`hidden="until-found"`), so a flip kept their elements and
+      find-in-page reached them;  but a hidden branch still read what it showed, and each showed its own spinner.
   - At a drawing's top level an `<if>` still picks what the drawing returns, rebuilt as it changes:  a page's tag
     line, plain Spell's `if` lines.  A branch in no element is `chain-outside-markup`.
   - A page's `<spell>` block's drawings are plain Spell's (J83):  the tokenizer marks its JSX as it unwraps the
@@ -2298,7 +2304,8 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
       Python's and a library's wait too (`readsThroughSolid`).
     - In a drawing:  a child value alone, `core.whileWaiting()` (`spotsThatWait`);  anywhere else, the class says
       `drawsWaiting`, and its boundary holds the whole thing (`heldDrawings`, `drawInBoundary()`).
-      A loop's function, `core.drawEach()`'s and `core.drawRead()`'s, is part of the drawing (`drawnLoopFunctions`):  it never waits.
+      A loop's function, `core.drawEach()`'s and `core.drawRead()`'s, and an if-chain's, `core.drawIf()`'s, are part of the
+      drawing (`drawnFunctions`):  they never wait.
     - `createDeferred()`, never an async `createMemo()`, which freezes what else draws;  `lazy`, so nobody's slow work
       runs unread.
     - `pause`, and old source's `wait for`, in a drawing are parse errors (`refuseWaitInDraw()`);

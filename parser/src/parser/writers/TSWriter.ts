@@ -1446,6 +1446,7 @@ export class TSWriter extends JSWriter {
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
     if (this.writingCallProps) return super.ASTJSXLiveValue(node)
     if (this.project.spotsThatWait.has(node)) return `core.whileWaiting(() => ${this.bare(node.expression)})`
+    if (this.project.ifsThatWait.has(node)) return `core.drawWaiting(() => ${this.bare(node.expression)})`
     return this.loopDrawn(node.expression, this.bare(node.expression))
   }
 
@@ -1471,6 +1472,8 @@ export class TSWriter extends JSWriter {
     // JSX already, e.g. an element written as a child's value:  no braces
     const text = this.listChildDrawn(expression, this.bare(expression))
     if (this.project.spotsThatWait.has(expression)) return `{core.whileWaiting(() => ${text})}`
+    // an if-chain whose conditions wait:  a spot of its own, ONE spinner there meanwhile (`WriterProject.ifsThatWait`)
+    if (this.project.ifsThatWait.has(expression)) return `{core.drawWaiting(() => ${text})}`
     return text.startsWith("<") ? text : `{${text}}`
   }
 

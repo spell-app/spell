@@ -143,7 +143,9 @@ export class Week extends ViewableList<Habit> {
   @drawn draw() {
     return (
       <ui-stack spacing="sm">
-        <ui-text color="grey" hidden={this.isEmpty ? undefined : true}>{"No habits yet:  add one above"}</ui-text>
+        {core.drawIf(() => this.isEmpty, () => <>
+          <ui-text color="grey">{"No habits yet:  add one above"}</ui-text>
+        </>)}
         <slot />
       </ui-stack>
     )

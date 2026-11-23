@@ -110,8 +110,10 @@ describe("an action's button, <action>", () => {
     expect(file.compiled).toContain('core.drawAction(this, "autoPlay", { "in-menu": true })')
     expect(file.compiled).toContain('h("ui-action", { kind: "divider" })')
     expect(file.compiled).toContain('core.drawAction(this, "restartTheGame", { icon: "refresh", "in-menu": true })')
-    // an `<if>`'s rows keep their actions, hidden while it isn't so
-    expect(file.compiled).toMatch(/core\.drawAction\(this, "undo", \{ "in-menu": true, hidden: .* \}\)/)
+    // an `<if>`'s rows keep their actions, drawn only while it's so
+    expect(file.compiled).toContain(
+      'core.drawIf(() => 1 === 1, () => [core.drawAction(this, "undo", { "in-menu": true })])'
+    )
     // a `<buttons>` inside the menu keeps its buttons
     expect(file.compiled).toContain('core.drawAction(this, "cheat")')
     const ts = String(P.TSWriter.instance.writeMatch(file.match!))

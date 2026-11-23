@@ -107,16 +107,16 @@ const NAMED_TAGS: Readonly<Record<string, { title?: string }>> = {
  *   - No native HTML in a page (Q46, C1):  `<div>` is an error unless a pack has it;
  *     in plain Spell it's the web's own, as written.
  *   - Except in a page.s `<spell>` or `<html>` block, code spell as written (J83):  there `<div>` is the web's (`SP.isCodeSpell()`).
- * - AN IF-CHAIN INSIDE MARKUP (epic `elemental-spell`, Owen 2026-10-25:  "Inside an element:  hidden"):
+ * - AN IF-CHAIN INSIDE MARKUP (epic `elemental-spell`, Owen 2026-10-25):
  *   `<text><if it is done>✓<otherwise>{its title}</></text>`, the same in a page and in plain Spell.
- *   - Every branch stays on the page, each one's elements hidden while it isn't the one:  a flip keeps the element
- *     (its DOM node, its state and focus), and changes only its `hidden`.
- *     - The web's own elements and text:  `hidden="until-found"`, so find-in-page still reaches them.
- *     - A custom element (`<ui-label>`):  plain `hidden`, which Spell UI hides by.  Its host takes no box of its own
- *       (`display: contents`), where the browser's until-found would draw it all the same.
- *   - Each run of its text and `{holes}` is wrapped in a `<span>`, to be hidden too.
- *   - Branch k shows while no branch before it holds, and its own phrase does:  `hidden` is
- *     `() => !c1 && c2 ? undefined : "until-found"`.
+ *   - ONLY the branch whose condition holds is drawn:  `core.drawIf(() => c1, () => [...], () => [...])`, each
+ *     branch's children a fragment.  A flip draws the new branch, and lets the old one go.
+ *     - So a branch that isn't the one reads nothing:  a place's read under it waits until it shows.
+ *     - Every branch was once drawn and kept, the others `hidden` (find-in-page reached them, and a flip kept their
+ *       elements);  but a hidden branch still read what it showed, asking a place for every item for a value that
+ *       wasn't there yet, and showed a spinner of its own beside the one shown.
+ *   - Branch k shows while no branch before it holds, and its own phrase does.
+ *   - A condition that waits:  ONE spinner where the chain goes (`WriterProject.ifsThatWait`).
  *   - The tokenizer reads the chain (`P.Tokenizer.chainTags`):  each branch a `JSXElementToken` with its `chain`
  *     and `phrase`, its siblings the next branches, ONE closer, `</>` or `</if>`, ending the last.
  *   - At a drawing's top level an `<if>` picks what to return, rebuilt as it changes:  a page.s own tag line, or
@@ -814,29 +814,62 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 
   /**
    * The ASTs of `match`'s children, leaving out what writes nothing (e.g. blank `jsxText`).
-   * - An if-chain's branches (see the class's docs):  each one's children, each hidden while it isn't the one.
+   * - An if-chain's branches (see the class's docs):  ONE `core.drawIf(...)`, drawing only the branch that holds.
    */
   protected childASTs(match: P.MatchFor<this>): P.ASTJSXElementProps["children"] {
     const asts: P.ASTJSXElementProps["children"] = []
-    let before: P.ASTExpression[] = []
-    for (const child of match.data.children ?? []) {
-      if (child?.is(SpellJSX) && child.data.chain && child.data.inMarkup) {
-        if (child.data.chain === "if") before = []
-        const condition = SpellJSX.conditionOf(child)
-        const shown = P.ASTMultiInfixExpression(child, {
-          expressions: [...before.map((it) => SpellJSX.not(child, it)), ...(condition ? [condition] : [])],
-          operator: "and"
-        })
-        if (condition) before.push(condition)
-        asts.push(...SpellJSX.hiddenUnless(child, shown, this.childASTs(child as P.MatchFor<this>)))
-        continue
-      }
+    let chain: Array<P.MatchFor<SpellJSX>> = []
+    // what's quiet after a branch (its indent, a comment):  between two branches it's dropped, after the last it's drawn
+    let quiet: P.Match[] = []
+    const endChain = () => {
+      if (chain.length) asts.push(this.ifChain(chain))
+      chain = []
+    }
+    const add = (child: P.Match | undefined) => {
       // a view it declares, hidden:  nothing drawn (T123)
-      if (SpellJSX.drawsNothing(child)) continue
+      if (SpellJSX.drawsNothing(child)) return
       const ast = SpellJSX.childAST(child)
       if (ast) asts.push(ast)
     }
+    for (const child of match.data.children ?? []) {
+      if (child?.is(SpellJSX) && child.data.chain && child.data.inMarkup) {
+        if (child.data.chain === "if") {
+          endChain()
+          quiet.forEach(add)
+        }
+        quiet = []
+        chain.push(child as P.MatchFor<SpellJSX>)
+      } else if (chain.length && child && SpellJSX.isQuiet(child)) quiet.push(child)
+      else {
+        endChain()
+        quiet.forEach(add)
+        quiet = []
+        add(child)
+      }
+    }
+    endChain()
+    quiet.forEach(add)
     return asts
+  }
+
+  /**
+   * An if-chain's `branches`, drawn:  `{core.drawIf(() => c1, () => [...], () => c2, () => [...], () => [...])}`.
+   * - Each branch's condition, then its children, as a fragment;  `<otherwise>`'s children alone, last.
+   * - A branch with no condition (`<otherwise>`, or a phrase that didn't parse) before another:  `true`.
+   */
+  private ifChain(branches: Array<P.MatchFor<SpellJSX>>): P.ASTJSXExpression {
+    const [first] = branches
+    const drawn = (match: P.AnyMatch, value: P.ASTExpression) =>
+      new P.ASTMethodDefinition(match, { inline: true, body: new P.ASTReturnStatement(match, { value }) })
+    const args = branches.flatMap((branch, at) => {
+      const isLast = at === branches.length - 1
+      const condition = SpellJSX.conditionOf(branch) ?? (isLast ? undefined : new P.ASTBooleanLiteral(branch, true))
+      const children = this.childASTs(branch).filter((child) => !(child instanceof P.ASTJSXEndTag))
+      const fragment = new P.ASTJSXFragment(branch, { children })
+      return condition ? [drawn(branch, condition), drawn(branch, fragment)] : [drawn(branch, fragment)]
+    })
+    const expression = new P.ASTCoreMethodInvocation(first!, { methodName: "drawIf", args })
+    return new P.ASTJSXExpression(first!, { expression })
   }
 
   /**
@@ -1035,10 +1068,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     for (const child of match.data.children ?? []) {
       if (!child?.is(SpellJSX) || !child.data.chain) {
         // text between branches (their indent), or a comment, leaves the chain open;  anything else ends it
-        const [token] = child?.matched ?? []
-        const isQuiet =
-          token instanceof P.JSXCommentToken || (token instanceof P.JSXTextToken && !`${token.value ?? ""}`.trim())
-        if (child && !isQuiet) open = false
+        if (child && !SpellJSX.isQuiet(child)) open = false
         continue
       }
       child.data.inMarkup = true
@@ -1062,71 +1092,16 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     return Object.keys(controls).find((word) => controls[word] === kind) ?? kind
   }
 
+  /** Is `child` text between an if-chain's branches (their indent), or a comment:  what leaves the chain open? */
+  private static isQuiet(child: P.Match): boolean {
+    const [token] = child.matched
+    return token instanceof P.JSXCommentToken || (token instanceof P.JSXTextToken && !`${token.value ?? ""}`.trim())
+  }
+
   /** Branch `branch`'s condition, its phrase's expression -- none for `<otherwise>`, or a phrase that didn't parse. */
   private static conditionOf(branch: P.MatchFor<SpellJSX>): P.ASTExpression | undefined {
     const ast = branch.data.condition?.AST
     return ast instanceof P.ASTJSXExpression ? ast.expression : undefined
-  }
-
-  /** `not (expression)`. */
-  private static not(match: P.AnyMatch, expression: P.ASTExpression): P.ASTExpression {
-    return new P.ASTNotExpression(match, { expression: new P.ASTParenthesizedExpression(match, { expression }) })
-  }
-
-  /**
-   * `children`, each hidden while `shown` isn't true (`hidden="until-found"`):  an element by an attribute of its
-   * own, each run of text and `{holes}` in a `<span>` of its own.
-   * - `shown` none:  always shown, as an `<otherwise>` alone would be.
-   */
-  private static hiddenUnless(
-    match: P.AnyMatch,
-    shown: P.ASTExpression | undefined,
-    children: P.ASTJSXElementProps["children"]
-  ): P.ASTJSXElementProps["children"] {
-    if (!shown) return children
-    // a custom element (`<ui-label>`) by its own `hidden`, Spell UI's:  its host takes no box of its own, where the
-    // browser's until-found would draw it all the same;  the web's own elements and text, until found
-    const hidden = (tagName = "span") =>
-      new P.ASTJSXAttribute(match, {
-        name: "hidden",
-        value: new P.ASTTernaryExpression(match, {
-          condition: shown,
-          trueValue: new P.ASTNothingLiteral(match),
-          falseValue: tagName.includes("-")
-            ? new P.ASTBooleanLiteral(match, true)
-            : new P.ASTStringLiteral(match, { value: UNTIL_FOUND, quote: '"' })
-        })
-      })
-    const out: P.ASTJSXElementProps["children"] = []
-    // a run of text and holes, `{its count} to do`:  ONE span
-    let run: P.ASTJSXElementProps["children"] = []
-    const endRun = () => {
-      if (run.length)
-        out.push(new P.ASTJSXElement(run[0]!.match, { tagName: "span", attrs: [hidden()], children: run }))
-      run = []
-    }
-    for (const child of children) {
-      if (child instanceof P.ASTJSXEndTag) continue
-      if (child instanceof P.ASTJSXFragment) {
-        endRun()
-        out.push(...SpellJSX.hiddenUnless(match, shown, child.children))
-      } else if (child instanceof P.ASTJSXElement) {
-        endRun()
-        const { tagName, attrs = [], children: inside, action, contextMenu } = child
-        // an action's button or row keeps its action (`action_button`), a right-click menu its items
-        out.push(
-          new P.ASTJSXElement(child.match, {
-            tagName,
-            attrs: [...attrs, hidden(tagName)],
-            children: inside,
-            ...(action && { action }),
-            ...(contextMenu && { contextMenu })
-          })
-        )
-      } else run.push(child)
-    }
-    endRun()
-    return out
   }
 
   /**
@@ -1188,9 +1163,6 @@ function projectScopeOf(scope: P.Scope): P.ProjectScope | undefined {
 
 /** An `<html>` block's tag:  the web's word, the same in every language (`SpellJSX.isHtmlBlock()`). */
 const HTML_BLOCK_TAG = "html"
-
-/** What a branch that isn't the one is:  hidden, and still found by find-in-page, as a folded section is. */
-const UNTIL_FOUND = "until-found"
 
 /** What an element with an `onClick` looks like by itself -- see `SpellJSX.clickableAttrs()`. */
 // written as Solid's compiler writes it into a TypeScript drawing, so every target draws the same

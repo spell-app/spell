@@ -1,2 +1,2 @@
-267:7 TS2322 Type 'List<Artículo>' is not assignable to type 'undefined'.
-337:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
+266:7 TS2322 Type 'List<Artículo>' is not assignable to type 'undefined'.
+336:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.

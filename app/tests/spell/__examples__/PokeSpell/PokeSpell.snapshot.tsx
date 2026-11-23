@@ -1242,10 +1242,12 @@ export class Chain extends Thing {
     return (
       <ui-stack direction="horizontal" align="center" spacing="sm" stackable="34em">
         {core.whileWaiting(() => core.drawThing(this.species!))}
-        <ui-icon name="chevron right" size="large" rotated="when stacked" hidden={!core.isEmpty(this.evolvesTo) ? undefined : true} />
-        <ui-stack direction="horizontal" wrap={true} align="center" justify="center" spacing="sm" hidden={!core.isEmpty(this.evolvesTo) ? undefined : true}>
-          <slot name="branches">{this.drawBranches()}</slot>
-        </ui-stack>
+        {core.drawIf(() => !core.isEmpty(this.evolvesTo), () => <>
+          <ui-icon name="chevron right" size="large" rotated="when stacked" />
+          <ui-stack direction="horizontal" wrap={true} align="center" justify="center" spacing="sm">
+            <slot name="branches">{this.drawBranches()}</slot>
+          </ui-stack>
+        </>)}
       </ui-stack>
     )
   }

@@ -494,13 +494,17 @@ export class User extends Thing {
           <ui-image src={this.avatarUrl} alt="" size="small" appearance="rounded" />
           <ui-stack spacing="sm">
             <ui-text color="grey">{this.login} · {this.kind}</ui-text>
-            <ui-text hidden={this.bio ? undefined : true}>{this.bio}</ui-text>
-            <ui-text size="small" color="grey" hidden={core.dateShown(this.createdAt) ? undefined : true}>
-              {this.publicRepos}
-              {" public repositories · "}
-              {this.followers}
-              {" followers"}
-            </ui-text>
+            {core.drawIf(() => this.bio, () => <>
+              <ui-text>{this.bio}</ui-text>
+            </>)}
+            {core.drawIf(() => core.dateShown(this.createdAt), () => <>
+              <ui-text size="small" color="grey">
+                {this.publicRepos}
+                {" public repositories · "}
+                {this.followers}
+                {" followers"}
+              </ui-text>
+            </>)}
           </ui-stack>
         </ui-stack>
         <ui-stack spacing="sm">
@@ -1394,11 +1398,7 @@ export class Repository extends Thing {
               <ui-icon name="github" />
             </ui-link>
           </ui-header>
-          <ui-meta>
-            {"★ "}
-            {this.stargazersCount}
-            <span hidden={this.language ? undefined : "until-found"}> · {this.language}</span>
-          </ui-meta>
+          <ui-meta>★ {this.stargazersCount}{core.drawIf(() => this.language, () => <> · {this.language}</>)}</ui-meta>
           <ui-description>{this.description}</ui-description>
         </ui-content>
       </ui-card>
@@ -2725,7 +2725,7 @@ export class Forecast extends Thing {
   drawHourTable() {
     return core.drawRead(() => this.hours, (hour: Hour) => <>
       <ui-cell data-column="Day">
-        <span hidden={core.hourOf(hour.time) === 0 ? undefined : "until-found"}>{core.dateShown(hour.time)}</span>
+        {core.drawIf(() => core.hourOf(hour.time) === 0, () => <>{core.dateShown(hour.time)}</>)}
       </ui-cell>
       <ui-cell data-column="Hour" align="right">{core.hourOf(hour.time)}:00</ui-cell>
       <ui-cell data-column="Temperature" align="right">

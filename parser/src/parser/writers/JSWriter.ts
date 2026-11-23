@@ -1945,6 +1945,8 @@ export class JSWriter extends ProgramWriter {
     const looped = this.loopDrawn(node.expression, this.bare(node.expression))
     const value = node.isChild ? this.listChildDrawn(node.expression, looped) : looped
     if (this.project.spotsThatWait.has(node)) return `() => core.whileWaiting(() => ${value})`
+    // an if-chain whose conditions wait:  a spot of its own, ONE spinner there meanwhile (`WriterProject.ifsThatWait`)
+    if (this.project.ifsThatWait.has(node)) return `() => core.drawWaiting(() => ${value})`
     return unwrapped(node.expression) instanceof P.ASTObjectLiteral ? `() => (${value})` : `() => ${value}`
   }
 

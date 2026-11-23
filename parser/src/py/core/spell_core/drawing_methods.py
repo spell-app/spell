@@ -224,6 +224,20 @@ class DrawingMethods:
         shown = self.shown_in(name)
         return draw(thing if shown is None else shown)
 
+    def draw_if(self, *parts: Callable[[], object]) -> object:
+        """An if-chain inside markup, `<text><if it is done>✓<otherwise>{its title}</></text>`:  ONLY the branch whose
+        condition holds is drawn.
+
+        - `parts`:  each branch's condition, then its drawing;  a last drawing alone is the `<otherwise>`.
+        - None holds, and no `<otherwise>`:  nothing.
+        - The twin of the JavaScript core's `drawIf()`, which a page draws it with, live:
+          here it's drawn as the page is written, once.
+        """
+        for at in range(0, len(parts) - 1, 2):
+            if parts[at]():
+                return parts[at + 1]()
+        return parts[-1]() if len(parts) % 2 else None
+
     def draw_action(
         self, thing: object, name: str, props: dict[str, object] | None = None, *children: object
     ) -> Element:

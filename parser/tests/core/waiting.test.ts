@@ -92,6 +92,21 @@ class PaneGame extends Game {
   }
 }
 
+/** An if-chain whose condition reads it:  the chain in a spot of its own, as compiled javascript writes one. */
+class ChainGame extends Game {
+  override draw(): Drawing {
+    return h("div", h("h1", "Heading"), () =>
+      core.drawWaiting(() =>
+        core.drawIf(
+          () => this.total > 5,
+          () => [h("b", "big")],
+          () => [h("i", "small")]
+        )
+      )
+    ) as unknown as Drawing
+  }
+}
+
 /** Waits for promises, and the page's staged writes. */
 async function settled(): Promise<void> {
   for (let turns = 0; turns < 5; turns++) {
@@ -176,6 +191,19 @@ describe("an element whose attributes wait, in a spot of its own", () => {
     expect(shown()).toContain("Heading")
     expect(shown()).toContain("no answer")
     expect(container.querySelector("ui-message ui-button")).not.toBeNull()
+  })
+})
+
+describe("an if-chain whose condition waits, in a spot of its own", () => {
+  test("ONE spinner where the chain goes, no branch drawn, the rest drawn at once;  then the branch that holds", async () => {
+    const game = new ChainGame()
+    draw(game)
+    expect(shown()).toBe("Heading")
+    expect(container.querySelectorAll("ui-loader")).toHaveLength(1)
+    expect(container.querySelector("b, i")).toBeNull()
+    await game.work.answer(10)
+    expect(shown()).toBe("Headingbig")
+    expect(container.querySelector("ui-loader")).toBeNull()
   })
 })
 
