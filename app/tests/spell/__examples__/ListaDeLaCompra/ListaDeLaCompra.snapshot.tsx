@@ -123,7 +123,8 @@ export const planilla = core.place(new Planilla(), {
   name: "planilla",
   kind: "sheet",
   at: "/api/places/spaces/@spell/examples/ListaDeLaCompra/__data/shopping.csv",
-  unclearNumbers: ",", firstReads: () => [[Artículo, { filter: { comprado: true } }], [Artículo, { filter: { comprado: false } }]] })
+  unclearNumbers: ","
+})
 
 // -----------
 core.heading("Un artículo de la lista")

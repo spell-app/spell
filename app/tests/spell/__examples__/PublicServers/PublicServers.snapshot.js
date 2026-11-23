@@ -1861,7 +1861,8 @@ export const github = core.place(new Github(), {
       at: "/search/repositories",
       searchedOnly: true
     }
-  }, firstReads: () => [[Issue, { filter: { pullRequest: undefined }, page: { size: 6 } }], [Issue]] })
+  }
+})
 
 // -----------
 core.heading("GitHub")

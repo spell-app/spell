@@ -232,7 +232,8 @@ export const signUpSheet = core.place(new SignUpSheet(), {
     allowance: { collection: "tickets", field: "invitations" },
     joins: { collection: "tickets", address: "picnic@rs/__attendees" }
   },
-  checkedEvery: 30, firstReads: () => [[Volunteer], [Ticket], [Attendee]] })
+  checkedEvery: 30
+})
 
 /** What everyone in the picnic sees:  who's on which shift, never an organizer's note. */
 export class PublishedSheet extends Place {}

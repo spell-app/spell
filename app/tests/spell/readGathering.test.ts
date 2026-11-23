@@ -5,7 +5,7 @@
  * - Every type counts as saved, to see how far the pass sees:  only the recipe box's really is.
  * - What only SHOWS a value isn't a read:  a drawn view's element mirrors every property as an attribute
  *   (`SpellElement.shownValueOf()`), read through `whileOnlyShowing()`.
- * - Only a first draw:  nothing's clicked.  So it can only say the pass missed less than it would with people using it.
+ * - Only a first load:  nothing's clicked.  So it can only say the pass missed less than it would with people using it.
  * - Skips itself when `yarn build:element` hasn't run.
  */
 import { existsSync, writeFileSync } from "fs"
@@ -54,12 +54,8 @@ type Row = {
   name: string
   /** Fields its types declare. */
   fields: number
-  /** How many of them the pass finds reachable from a draw. */
-  found: number
   /** How many a page really read. */
   read: number
-  /** Read, and not found from a draw:  they'd be caught at run time, or by the project-wide list. */
-  missedByDraw: string[]
   /** Read, and not found anywhere in the project:  only the run-time half would catch these. */
   missed: string[]
 }
@@ -129,12 +125,7 @@ describe.skipIf(!existsSync(resolve(ELEMENT_DIR, "spell-runtime.js")))("reads fo
     return {
       name,
       fields: all.length,
-      found: all.filter(({ field }) => gathering.namesDrawn.has(field) || isThingsName(field)).length,
       read: stored.length,
-      missedByDraw: stored.filter((read) => {
-        const field = read.split(".")[1]!
-        return !gathering.namesDrawn.has(field) && !isThingsName(field)
-      }),
       missed: stored.filter((read) => {
         const field = read.split(".")[1]!
         return !gathering.namesRead.has(field) && !isThingsName(field)
@@ -142,7 +133,7 @@ describe.skipIf(!existsSync(resolve(ELEMENT_DIR, "spell-runtime.js")))("reads fo
     }
   }
 
-  test("every read a first draw makes is one the project's code names", { timeout: 300_000 }, async () => {
+  test("every read a first load makes is one the project's code names", { timeout: 300_000 }, async () => {
     const names = fixtureProjectNames().filter(
       (name) => EXAMPLE_PROJECTS.has(name) || GUIDE_PROJECTS.has(name) || !name.includes("/")
     )
@@ -163,18 +154,13 @@ describe.skipIf(!existsSync(resolve(ELEMENT_DIR, "spell-runtime.js")))("reads fo
       writeFileSync(
         table,
         [
-          "project | fields | found from a draw | read on a first draw | missed from a draw | missed anywhere",
+          "project | fields | read on a first load | missed",
           ...[...rows]
             .sort((one, other) => one.name.localeCompare(other.name))
-            .map(
-              (row) =>
-                `${row.name} | ${row.fields} | ${row.found} | ${row.read} | ${row.missedByDraw.join(" ") || 0} | ${row.missed.join(" ") || 0}`
-            ),
-          `TOTAL ${rows.length} | ${sum((row) => row.fields)} | ${sum((row) => row.found)} | ${sum((row) => row.read)} | ${sum((row) => row.missedByDraw.length)} | ${sum((row) => row.missed.length)}`
+            .map((row) => `${row.name} | ${row.fields} | ${row.read} | ${row.missed.join(" ") || 0}`),
+          `TOTAL ${rows.length} | ${sum((row) => row.fields)} | ${sum((row) => row.read)} | ${sum((row) => row.missed.length)}`
         ].join("\n")
       )
     expect(rows.flatMap((row) => row.missed)).toEqual([])
-    // the walk from a draw is only a head start:  what it misses is asked for when it's reached
-    expect(sum((row) => row.missedByDraw.length)).toBeLessThanOrEqual(2)
   })
 })

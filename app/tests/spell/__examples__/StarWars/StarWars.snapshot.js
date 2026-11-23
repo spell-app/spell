@@ -849,7 +849,8 @@ export const starWars = core.place(new StarWar(), {
     species: { at: "/species/" },
     vehicles: { at: "/vehicles/" },
     starships: { at: "/starships/" }
-  }, firstReads: () => [[Film], [Character], [Planet], [Vehicle], [Species], [Starship]] })
+  }
+})
 
 // -----------
 core.heading("Wikipedia:  a page each, by its name.  Not every name has one")

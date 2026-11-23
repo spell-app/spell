@@ -314,7 +314,8 @@ export const adminRoles = core.place(new AdminRole(), {
   kind: "data folder",
   at: "/api/places/spaces/@rs/__admin/roles",
   checkedEvery: 30,
-  collections: { stages: { at: "event_stages" } }, firstReads: () => [[OrgProfile], [RoleChange, { sort: [{ field: "at", descending: true }] }], [Stage], [ApprovedApp], [Member, { sort: [{ field: "name" }] }], [Team, { sort: [{ field: "name" }] }], [Project, { sort: [{ field: "name" }] }], [Designer], [OrgRole], [Term]] })
+  collections: { stages: { at: "event_stages" } }
+})
 
 // -----------
 core.heading("Org Admin")

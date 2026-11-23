@@ -323,7 +323,8 @@ export const rolesDeLaOrg = core.place(new RolDeLaOrg(), {
     etapas: { at: "event_stages" },
     cambios: { at: "role_changes" }
   },
-  unclearNumbers: ",", firstReads: () => [[Perfil], [Cambio, { sort: [{ field: "cuándo", descending: true }] }], [Etapa], [Aprobación], [Miembro, { sort: [{ field: "nombre" }] }], [Equipo, { sort: [{ field: "nombre" }] }], [Proyecto, { sort: [{ field: "nombre" }] }], [Diseñador], [Función], [Mandato]] })
+  unclearNumbers: ","
+})
 
 // -----------
 core.heading("Administración de la org")

@@ -2339,8 +2339,11 @@ What a program's lines about where data lives compile to, and what reads the res
     - One that names a loop's item is a value per item, `core.waitedValueKeyFor(this, film)`:  the same words are another read for each film.
 - `core.savedThings` is in `P.CORE_CALLS_THAT_WAIT`:  so a getter over one is a value that waits, and the waiting pass does the rest.
 - What a project reads from its places is worked out as it's compiled too (`P.ReadGathering`, beside the waiting pass):  by name,
-  into `select` on a type's `savedIn`, `firstReads` on a place's line, and `declaredAt` and `readsFrom` on what declares them.
+  into `select` on a type's `savedIn`, and `declaredAt` and `readsFrom` on what declares them.
   A project with no saved type compiles as it did.
+  - Never what to read ahead:  Spell reads only what a page draws, as it draws it.  A collection read as the program
+    starts says so on its place, `tags are read on startup` ([`read_on_startup`](rules/places/ReadOnStartup.ts)),
+    `readOnStartup: ["Tag"]` on the place's line.
 - A loop in a drawing over a saved type, or with a rider under it, is `core.drawRead(() => list, (item) => ..., { riders })` (`DrawnLines.asRead()`).
   - A rider (`while waiting:`, `if there are none:`, `if that fails:`) compiles alone to `core.readRider()`, and the gathering of
     a drawing's lines takes each into the read above it, as an `otherwise` follows its `if`.

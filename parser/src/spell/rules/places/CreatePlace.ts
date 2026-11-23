@@ -567,7 +567,10 @@ export function unclearNumbersOf(scope: P.Scope): { unclearNumbers?: string } {
 }
 
 /** `from` merged into `into`:  a collection's mapping field by field. */
-function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }: PlaceDetailValue): void {
+function mergeDetail(
+  into: PlaceDetailValue,
+  { collections, accounts, readOnStartup, ...rest }: PlaceDetailValue
+): void {
   if (rest.listsUnder) rest.listsUnder = listsUnderMerged(into.listsUnder, rest.listsUnder)
   if (rest.projection) {
     const where = { ...into.projection?.where, ...rest.projection.where }
@@ -580,6 +583,8 @@ function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }:
   }
   Object.assign(into, rest)
   if (accounts) (into.accounts ??= []).push(...accounts)
+  // a line each:  every one named
+  if (readOnStartup) (into.readOnStartup ??= []).push(...readOnStartup)
   for (const [name, { at, fields, searchedOnly, pictures, askedBy, searches, operations, paging }] of Object.entries(
     collections ?? {}
   )) {

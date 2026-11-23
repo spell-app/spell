@@ -61,6 +61,8 @@ export type PlaceDetailValue = {
   sortedWith?: string
   /** What it calls the fields it's asked for:  see `GivesFieldsNamedIn`. */
   fieldsNamedIn?: string
+  /** The classes whose collections are read as the program starts, by name:  see `ReadOnStartup`. */
+  readOnStartup?: string[]
   /** It takes no writes:  see `IsReadOnly`. */
   readOnly?: boolean
   searches?: { param: string; fields: string[]; at?: string }
