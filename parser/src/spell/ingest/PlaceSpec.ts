@@ -1,5 +1,6 @@
 import { P } from "spell/parser/parser"
 import { oneOfWords } from "spell/parser/core/schemaWords"
+import { ROWS_FIELDS, rowsFieldIn, type ListKind } from "spell/places/wrappedRows"
 
 import type {
   CollectionLook,
@@ -12,8 +13,6 @@ import type {
 } from "./ingest.types"
 import { wordsFor } from "./PlaceShape"
 
-/** The names a list's rows usually go under, in a wrapped answer:  NetBox's `results`. */
-const ROWS_NAMES = ["results", "data", "items", "records", "rows"]
 
 /** How deep it reads objects inside objects:  as deep as a look at rows reads (`PlaceShape`'s). */
 const DEEPEST_INSIDE = 3
@@ -192,10 +191,9 @@ export class PlaceSpec {
     if (!answer) return undefined
     if (answer.type === "array" && answer.items) return { item: answer.items, answer, ...this.itemAt(answer.items) }
     const properties = answer.properties ?? {}
-    const lists = Object.entries(properties).filter(([, each]) => this.resolved(each)?.type === "array")
-    const [rowsAt, list] = lists.find(([name]) => ROWS_NAMES.includes(name)) ?? (lists.length === 1 ? lists[0]! : [])
-    const items = list && this.resolved(list)?.items
-    if (!rowsAt || !items) return undefined
+    const rowsAt = rowsFieldIn(properties, (each) => this.listKindOf(each))
+    const items = rowsAt === undefined ? undefined : this.resolved(properties[rowsAt])?.items
+    if (rowsAt === undefined || !items) return undefined
     return {
       item: items,
       answer,
@@ -434,12 +432,20 @@ export class PlaceSpec {
     }
   }
 
+  /** What a schema holds, as `rowsFieldIn()` asks:  a list of things (objects, or references to them), of plain values, or no list. */
+  private listKindOf(schema: Schema | undefined): ListKind {
+    const resolved = this.resolved(schema)
+    if (resolved?.type !== "array") return undefined
+    const item = this.resolved(resolved.items)
+    return item && (item.type === "object" || item.properties || item.allOf || item.anyOf) ? "things" : "values"
+  }
+
   /** Is `answer` one object with fields, not a list, nor one wrapped under a name a list's rows go under? */
   private isOneThing(answer: Schema | undefined): boolean {
     const resolved = this.resolved(answer)
     if (!resolved || resolved.type === "array") return false
     const properties = this.propertiesOf(resolved)
-    const isWrappedList = ROWS_NAMES.some(
+    const isWrappedList = ROWS_FIELDS.some(
       (name) => properties[name] && this.resolved(properties[name])?.type === "array"
     )
     return !isWrappedList && Object.keys(properties).length > 0

@@ -25,6 +25,7 @@ import {
 import { FieldNames, type NameStyle } from "./FieldNames"
 import { DEFAULT_CEILING } from "./PlaceQuery"
 import { jsonIn, valueAt, WebPlace, type WebPlaceProps } from "./WebPlace"
+import { wrappedRows } from "./wrappedRows"
 
 /** The word for every operation, in a list of enabled ones:  `enabled operations are all`. */
 const ALL_OPERATIONS = "all"
@@ -343,8 +344,12 @@ export class RestPlace extends WebPlace implements Place {
         : (askedBy || (query.under && (query.oneThing || this.isFoundAtItsOwner(collection)))) && isOneRow(held)
           ? [held]
           : !Array.isArray(held) &&
-              (query.under || this.isSearchAddress(collection, url) || (held === undefined && rowsAt !== undefined))
-            ? ((Array.isArray(body) ? body : soleListIn(body)) ?? (query.under && isOneRow(held) ? [held] : held))
+              (query.under ||
+                this.isSearchAddress(collection, url) ||
+                (held === undefined && rowsAt !== undefined) ||
+                // a list whose rows are wrapped, as no other's are:  `{ sources: [...], next_offset: 20 }`
+                (rowsAt === undefined && held === body))
+            ? ((Array.isArray(body) ? body : wrappedRows(body)?.rows) ?? (query.under && isOneRow(held) ? [held] : held))
             : held
     if (!Array.isArray(rows)) {
       throw new TypeError(
@@ -935,12 +940,6 @@ function listed(items: readonly string[]): string {
   return items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : (items[0] ?? "")
 }
 
-/** The one list in an answer that's an object:  a search's rows, `{ total_count, items: [...] }`.  `undefined` for none, or several. */
-function soleListIn(body: unknown): unknown[] | undefined {
-  if (!isOneRow(body)) return undefined
-  const lists = Object.values(body).filter((value) => Array.isArray(value))
-  return lists.length === 1 ? (lists[0] as unknown[]) : undefined
-}
 
 /** The values of `filter` for the fields a list is asked for by (`RestCollection.askedBy`):  none, `undefined`. */
 function askedValuesIn(

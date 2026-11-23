@@ -1,6 +1,7 @@
 import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { tokenServiceMint } from "spell/places/PlaceToken"
+import { wrappedRows } from "spell/places/wrappedRows"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -29,8 +30,7 @@ import {
   kindFoundAt,
   kindReadFrom,
   lookAtPlace,
-  messageOf,
-  wrappedRows
+  messageOf
 } from "./PlaceLook"
 import { checkSecondsWithin, describeLook, fieldsOf, fingerprintOf, idFieldOf, plainNameFor } from "./PlaceShape"
 import { partsInLanguageOf } from "./PlaceInLanguage"

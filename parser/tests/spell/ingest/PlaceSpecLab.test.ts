@@ -11,6 +11,7 @@ import type { IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/in
  * A made-up lab's API, read whole from its OpenAPI description:  what a bigger description tripped on.
  * - Its searches are asked for by a LIST of device ids, `?device_ids=a&device_ids=b`, and by an instance id:
  *   fields of several words, joined (`device-ids`), one a list of values.
+ * - A list wrapped in its answer, `{ sources: [...], warnings: [...], next_offset }`:  unwrapped, as no other is.
  * - A list whose answer it describes as `{}`:  kept with no fields, for a read to fill, its id a slug.
  * - A question Spell can't say, `1st_page`:  its line is left out, the rest written.
  */
@@ -47,6 +48,21 @@ const DOCUMENT: OpenApiDocument = {
     "/api/stacks": {
       get: { parameters: [needs("instance_id", { type: "string" })], responses: listOf("Stack") }
     },
+    // its rows wrapped, beside a list of plain values and the next offset
+    "/api/sources": {
+      get: {
+        parameters: [
+          { name: "limit", in: "query", schema: { type: "integer" } },
+          { name: "offset", in: "query", schema: { type: "integer" } }
+        ],
+        responses: {
+          "200": {
+            description: "OK",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/SourcesAnswer" } } }
+          }
+        }
+      }
+    },
     // its answer described as nothing at all:  `{}`
     "/api/designs": {
       get: { responses: { "200": { description: "OK", content: { "application/json": { schema: {} } } } } }
@@ -60,7 +76,16 @@ const DOCUMENT: OpenApiDocument = {
       Device: { type: "object", properties: { id: { type: "string" }, name: { type: "string" } } },
       Measurement: { type: "object", properties: { id: { type: "string" }, value: { type: "number" } } },
       Stack: { type: "object", properties: { id: { type: "string" }, name: { type: "string" } } },
-      Ranking: { type: "object", properties: { id: { type: "string" }, score: { type: "number" } } }
+      Ranking: { type: "object", properties: { id: { type: "string" }, score: { type: "number" } } },
+      Source: { type: "object", properties: { id: { type: "string" }, supplier: { type: "string" } } },
+      SourcesAnswer: {
+        type: "object",
+        properties: {
+          sources: { type: "array", items: { $ref: "#/components/schemas/Source" } },
+          warnings: { type: "array", items: { type: "string" } },
+          next_offset: { anyOf: [{ type: "integer" }, { type: "null" }] }
+        }
+      }
     }
   }
 } as OpenApiDocument
@@ -178,5 +203,16 @@ describe("a list whose answer isn't described", () => {
     expect(designs.state).toMatchObject({ is: "verified", rows: 1 })
     expect(designs.idField).toBe("slug")
     expect(Object.keys(designs.fields)).toEqual(expect.arrayContaining(["name", "modules"]))
+  })
+})
+
+describe("a list wrapped in its answer, as no other is", () => {
+  test("is a list of its one list of things, and a read through the Spell unwraps it", async () => {
+    const { spell, description } = await ingestOf()
+    expect(spell).toMatch(/^\tsources live at "\/api\/sources"$/m)
+    expect(description.collections.sources).toMatchObject({ rowsAt: "sources" })
+    expect(Object.keys(description.collections.sources!.fields)).toContain("supplier")
+    expect(spell).not.toMatch(/its rows are/)
+    expect(errorsOf(spell)).toEqual([])
   })
 })

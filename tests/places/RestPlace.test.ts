@@ -168,12 +168,23 @@ describe("RestPlace.list()", () => {
     expect(result.contents?.map(({ id }) => id)).toEqual(["r-3"])
   })
 
-  test("an answer that isn't a list says where to look", async () => {
+  test("an answer holding its rows wrapped is unwrapped;  one holding no list it can tell says where to look", async () => {
     const { place } = await served(
       { paging: "cursor" },
       { can: { page: "cursor" }, collections: { recipes: { nextAt: "meta.next" } } }
     )
-    await expect(place.list("recipes", {}, {})).rejects.toThrow("say where it is with `rowsAt`")
+    await expect(place.list("recipes", {}, {})).resolves.toMatchObject({ rows: [{}, {}] })
+    fakeServer(() => ({ count: 2, first: [{ id: "a" }], second: [{ id: "b" }] }))
+    const wrapped = shapedPlace({ collections: { recipes: { path: "/recipes{/id}" } } })
+    await expect(wrapped.list("recipes", {}, {})).rejects.toThrow("say where it is with `rowsAt`")
+    vi.unstubAllGlobals()
+  })
+
+  test("a list wrapped in its answer, as no other is, beside a list of plain values:  its one list of things", async () => {
+    fakeServer(() => ({ sources: [{ id: "s1" }, { id: "s2" }], warnings: ["slow"], next_offset: null }))
+    const place = shapedPlace({ collections: { sources: { path: "/api/sources{/id}" } } })
+    await expect(place.list("sources", {}, {})).resolves.toMatchObject({ rows: [{ id: "s1" }, { id: "s2" }] })
+    vi.unstubAllGlobals()
   })
 
   test("a list that's not there is `not found`", async () => {
