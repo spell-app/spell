@@ -173,7 +173,7 @@ export class EventsPage extends App {
               <ui-header size="medium">Events</ui-header>
               <ui-stack class="events" spacing="sm">
                 {core.drawRead(async () => await core.savedThings(Event, {}, "as drawn"), (event: Event) => core.drawThing(event), {
-                  waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding the events"}</ui-loader>,
+                  waitingSay: () => "Finding the events",
                   none: () => <ui-text class="none" color="grey">No events yet.</ui-text>,
                   failed: () => <ui-text color="red">We can't read the events right now.</ui-text>
                 })}
@@ -182,7 +182,7 @@ export class EventsPage extends App {
             <ui-segment class="stages">
               <ui-header size="medium">Stages</ui-header>
               <ui-stack class="stages" spacing="sm">
-                {core.drawRead(async () => await core.savedThings(EventStage, {}, "as drawn"), (step: EventStage) => core.drawThing(step), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding the stages"}</ui-loader> })}
+                {core.drawRead(async () => await core.savedThings(EventStage, {}, "as drawn"), (step: EventStage) => core.drawThing(step), { waitingSay: () => "Finding the stages" })}
               </ui-stack>
             </ui-segment>
           </ui-stack>

@@ -1656,7 +1656,7 @@ export class Guess extends Thing {
     if (this.hiding) {
       return [
         h("ui-segment", { class: () => this.look, align: "center" },
-          () => core.drawWaiting(() => h("ui-image", { class: "art", align: "center", src: () => this.hiding?.picture, alt: "A Pokémon, hiding" }))
+          () => core.drawWaiting(() => h("ui-image", { class: "art", align: "center", src: () => this.hiding?.picture, alt: "A Pokémon, hiding" }), "ui-image")
         ),
         h("slot", { name: "answer" }, () => this.drawAnswer())
       ]

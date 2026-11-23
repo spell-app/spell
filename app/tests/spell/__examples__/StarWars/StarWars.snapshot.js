@@ -1237,7 +1237,7 @@ export class WikiNote extends Thing {
         () => core.whileWaiting(() => this.page?.summary),
         () => core.drawWaiting(() => h("ui-link", { link: () => this.page?.contentUrls?.desktop?.page, target: "_blank" },
           "Read the rest on Wikipedia"
-        ))
+        ), "ui-link")
       )
     }
   }) }

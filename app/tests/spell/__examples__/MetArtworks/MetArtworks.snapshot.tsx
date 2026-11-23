@@ -474,7 +474,7 @@ export class MetArtwork extends App {
             </ui-stack>
           </ui-form>
           {core.drawRead(() => this.found, (artwork: Artwork) => core.drawThing(artwork), {
-            waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the Met"}</ui-loader>,
+            waitingSay: () => "Asking the Met",
             none: () => <ui-text>{"The Met has nothing for that."}</ui-text>,
             failedSay: () => "The Met can't be reached just now.",
             items: () => <ui-cards layout="mosaic" columns="4" doubling={true} />
