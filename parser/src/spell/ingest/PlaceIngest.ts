@@ -172,8 +172,9 @@ export class PlaceIngest {
     await this.notePictures(description, ask.pictures, reader)
     if (ask.triesWrites) await this.noteWrites(description, look, reader)
     leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
-    awayFromTypesBeside(description, await files.otherSpellBeside(file))
     await this.readWithAgent(description, look, { keepName: !!ask.name })
+    // after the agent's names, which may be the bare ones another file beside it declares
+    awayFromTypesBeside(description, await files.otherSpellBeside(file))
     await this.keepPrivate(description, look, file)
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
