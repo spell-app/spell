@@ -1191,6 +1191,16 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       flags: {}
     },
     {
+      name: "kick",
+      usage: "",
+      description:
+        "ensure it runs, then have its server keeper look at every server now:  what each session's start runs (epic-engine P82)",
+      example: "epic hub kick",
+      flags: {
+        "--port <n>": "the port to try first"
+      }
+    },
+    {
       name: "url",
       usage: "<file>",
       description: "ensure it runs, then print the URL that serves <file>, a page in a registered repo's content",
