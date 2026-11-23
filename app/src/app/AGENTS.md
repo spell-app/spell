@@ -175,9 +175,11 @@ and in the app's build folder, `app/` at the app folder's root.
         copy of the project, the pages in play as the page has them, and hands back what the compile wrote
         (`SP.CompiledEntry`), which the page takes as its own and runs (`SpellProject.takeCompiled()`);
         `compiledFrom` says `"elsewhere"`
-      - each file's problems too, sent after each of the worker's parses that no edit has outrun, a compile's parse
-        too (I48), numbered by the edits they're of, and taken once the edit is painted
-        (`FileStates.parsedElsewhere()`;  I45);  the editor's own Spell keeps the page's, which checks the names it fills
+      - each file's problems too, sent after each of the worker's parses, a compile's parse too (I48), numbered by
+        the edit they're of, and taken once the edit is painted (`FileStates.parsedElsewhere()`;  I45);  the editor's
+        own Spell keeps the page's, which checks the names it fills
+        - a parse edits outran is taken all the same, moved along the edits since (`FileStates.sentSince()`,
+          `ParsedElsewhere.behindOf()`;  J70):  dropped, steady typing left the colours seconds behind the text
       - what the code is drawn with comes with each of the worker's parses too (`LSP.LanguageParsed`, in the look the
         editors show):  the blocks that fold, the bubbly drawing or the colours with the look off (`CodeColours`,
         CodeMirror-free, so the worker reads it), the types a tag may name (a space after a tag's name);

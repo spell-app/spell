@@ -88,17 +88,20 @@ export class CodeMirrorRelayout {
       const made = decorationsOf(state)
       return !made || "decorations" in made ? made : { decorations: made }
     }
+    /** `made`, keeping `layout`'s decorations where it says so (`LaidOut.keepsDecorations`). */
+    const kept = (made: Layout, layout: Layout): Layout =>
+      made.keepsDecorations ? { ...made, decorations: layout.decorations } : made
     const field = StateField.define<Layout>({
       create: (state) => layoutOf(state) ?? { decorations: Decoration.none },
       update(layout, transaction) {
-        for (const effect of transaction.effects) if (effect.is(laidOut)) return effect.value
+        for (const effect of transaction.effects) if (effect.is(laidOut)) return kept(effect.value, layout)
         if (
           transaction.effects.some(
             (effect) => effect.is(foldEffect) || effect.is(unfoldEffect) || effect.is(CodeMirrorSetup.PARSED)
           )
         ) {
           const made = layoutOf(transaction.state)
-          if (made) return made
+          if (made) return kept(made, layout)
         }
         if (!transaction.docChanged) return layout
         const moved = layout.decorations.map(transaction.changes)
@@ -279,10 +282,23 @@ function keepCaretLine(view: EditorView): { effects: StateEffect<unknown> } | nu
  * - `marksIn(region)`:  the rest, for the lines in `region` of the text laid out, as a view draws them
  *   - MUST NOT throw
  */
-export type LaidOut = { decorations: DecorationSet; marksIn?: ((region: Region) => DecorationSet) | undefined }
+export type LaidOut = {
+  decorations: DecorationSet
+  marksIn?: ((region: Region) => DecorationSet) | undefined
+  /**
+   * the edits made since the text it was laid out in, which its marks are moved through:  none, it's of the text
+   * given;  a layout of an earlier text, moved along to it, starts with them (epic `solid-2-final` J70)
+   */
+  editsSince?: ChangeSet | undefined
+  /**
+   * `decorations` aren't new:  the layout's are kept, moved with the typing, and only its marks are new
+   * (`marksIn()`;  a drawing of an earlier text, epic `solid-2-final` J70)
+   */
+  keepsDecorations?: boolean
+}
 
-/** A layout as the editor's state keeps it:  `editsSince`, the edits made since it, which its marks are moved through. */
-type Layout = LaidOut & { editsSince?: ChangeSet | undefined }
+/** A layout as the editor's state keeps it:  its `editsSince` grows with each edit. */
+type Layout = LaidOut
 
 /** What else `CodeMirrorRelayout.extension()` takes. */
 export type RelayoutOptions = {

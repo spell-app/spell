@@ -12,6 +12,7 @@ import {
   RangeSet,
   type StateEffect,
   StateField,
+  type Text,
   Transaction,
   type TransactionSpec
 } from "@codemirror/state"
@@ -625,6 +626,7 @@ export class FileStates {
     if (entry.isOpenInClient || !(file instanceof SP.SpellFile) || file.contents === undefined) return
     entry.isOpenInClient = true
     entry.version = 0
+    entry.sent = [{ version: 0, doc: entry.state.doc }]
     this.client.opened(file, entry.state.doc.toString())
   }
 
@@ -649,6 +651,7 @@ export class FileStates {
     if (entry.isOpenInClient) {
       entry.version = (entry.version ?? 0) + 1
       this.client.changed(entry.file as SP.SpellFile, changes)
+      this.keepSent(entry, changes, state.doc)
       this.untilPainted(entry)
     } else this.openInClient(entry)
     this.toSlices(entry, changes)
@@ -844,9 +847,12 @@ export class FileStates {
   }
 
   /**
-   * The language worker's parse of a file:  if it's of the text the state holds (`version`, its edits since it was
-   * opened), its problems become the state's, with their "Fix it" buttons, and what the code's drawn with is kept
+   * The language worker's parse of a file (of its text after edit `version`, counted since it was opened):
+   * its problems become the state's, with their "Fix it" buttons, and what the code's drawn with is kept
    * (`CodeMirrorLanguage.tookParse()`), its slices' too;  a later parse's come after.
+   * - Of an earlier edit than the state's, it's moved along the edits since (`sentSince()`):  typing steadily outruns
+   *   the worker's parse, and dropping each one left the colours, folds and problems seconds behind the text, up to
+   *   18 in a big file (epic `solid-2-final` J70).  An older parse than the one taken is dropped.
    * - An edit's is taken once that edit is painted (epic `solid-2-final` I45):  taken before, laying the file out
    *   again made the browser work the whole page's layout out first, and the key showed up to a second later.
    *   - At once when it's painted already, as it is once the typing pauses:  waiting for another frame there held
@@ -855,8 +861,71 @@ export class FileStates {
   private parsedElsewhere(parsed: LSP.LanguageParsed): void {
     const path = LSP.AppAddresses.pathOf(parsed.uri)
     const entry = path === undefined ? undefined : this.entries.get(path)
-    if (!entry?.isUnpainted || globalThis.document?.hidden !== false) return this.takeParsed(parsed)
+    const isShown = !!entry?.view && globalThis.document?.hidden === false
+    if (entry && isShown && parsed.version !== entry.version) return this.hold(entry, parsed)
+    if (entry) entry.held = undefined
+    if (!entry?.isUnpainted || !isShown) return this.takeParsed(parsed)
     beforeNextPaint(() => soon(() => this.takeParsed(parsed)))
+  }
+
+  /**
+   * Hold `parsed`, a parse edits outran, till the next edit is painted, or `HELD_MSEC` with none:  then it's taken
+   * (epic `solid-2-final` J70).
+   * - Why:  taking one marks the lines on screen again from it, 50 msec of work on a phone in a big file's tags;
+   *   taken as it came, it held up nearly half the keys typed 120 msec apart.  Taken just after a key's painted,
+   *   it's done before the next one.
+   * - A later parse coming meanwhile takes its place.
+   */
+  private hold(entry: FileEntry, parsed: LSP.LanguageParsed): void {
+    const wasHeld = !!entry.held
+    entry.held = parsed
+    if (!wasHeld) void after(FileStates.HELD_MSEC / 1000, () => this.takeHeld(entry))
+  }
+
+  /** Take `entry`'s held parse, if it has one:  see `hold()`. */
+  private takeHeld(entry: FileEntry): void {
+    const { held } = entry
+    entry.held = undefined
+    if (held) this.takeParsed(held)
+  }
+
+  /** The most a parse edits outran is held, with no edit painted meanwhile, in msec:  see `hold()`. */
+  static HELD_MSEC = 150
+
+  /**
+   * Keep `entry`'s text after an edit sent to the language worker, as `changes` made `doc` of it:
+   * a parse of it may come after more edits, and is moved along them (`sentSince()`;  epic `solid-2-final` J70).
+   * - The last `SENT_KEPT` edits:  a parse further behind than that is dropped, the next one being on its way.
+   */
+  private keepSent(entry: FileEntry, changes: ChangeSet, doc: Text): void {
+    const sent = (entry.sent ??= [])
+    sent.push({ version: entry.version!, doc, changes })
+    if (sent.length > FileStates.SENT_KEPT) sent.splice(0, sent.length - FileStates.SENT_KEPT)
+  }
+
+  /** How many of a file's edits sent to the language worker are kept:  see `keepSent()`. */
+  static SENT_KEPT = 200
+
+  /**
+   * `entry`'s text after its edit `version`, and the edits made since, if any:  `undefined` when it isn't kept.
+   * - SIDE EFFECT:  forgets the edits before it, as no later parse can be of them.
+   */
+  private static sentSince(entry: FileEntry, version: number): { doc: Text; changes?: ChangeSet } | undefined {
+    if (entry.version === version) return { doc: entry.state.doc }
+    const sent = entry.sent ?? []
+    const at = sent.findIndex((each) => each.version === version)
+    if (at < 0) return undefined
+    sent.splice(0, at)
+    let changes: ChangeSet | undefined
+    for (const each of sent.slice(1)) changes = changes ? changes.compose(each.changes!) : each.changes
+    return { doc: sent[0]!.doc, changes }
+  }
+
+  /** `problem`, found in an earlier text, where it is after `changes`, if any. */
+  private static movedAlong(problem: LintDiagnostic, changes: ChangeSet | undefined): LintDiagnostic {
+    if (!changes) return problem
+    const from = changes.mapPos(problem.from, 1)
+    return { ...problem, from, to: Math.max(from, changes.mapPos(problem.to, -1)) }
   }
 
   /** `entry`'s edit is unpainted till the browser has drawn a frame:  see `parsedElsewhere()`. */
@@ -867,6 +936,8 @@ export class FileStates {
     beforeNextPaint(() =>
       soon(() => {
         if (entry.version === version) entry.isUnpainted = false
+        // the parse edits outran, taken now the key's on screen:  see `hold()`
+        this.takeHeld(entry)
       })
     )
   }
@@ -880,16 +951,21 @@ export class FileStates {
     const path = LSP.AppAddresses.pathOf(uri)
     const entry = path === undefined ? undefined : this.entries.get(path)
     const file = entry?.file
-    if (!entry || entry.version !== version || !(file instanceof SP.SpellFile)) return
+    if (!entry || !(file instanceof SP.SpellFile)) return
+    // a parse older than the one drawn from:  nothing new in it
+    if ((entry.language?.lastParseVersion ?? -1) > version) return
+    const since = FileStates.sentSince(entry, version)
+    if (!since) return
     const { state } = entry
+    const { doc, changes } = since
     // what the code's drawn with:  its fold arrows, its look, the types its tags name
-    entry.language?.tookParse(parsed, state.doc, state.doc.toString())
+    entry.language?.tookParse(parsed, doc, changes && { doc: state.doc, changes })
     const effects: StateEffect<unknown>[] = [CodeMirrorSetup.PARSED.of(null)]
     if (!this.diagnosesOnPage(file)) {
       const problems = this.withFixIt(
         file,
-        diagnostics.map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic)),
-        new Set(fixItStarts)
+        diagnostics.map((diagnostic) => FileStates.movedAlong(LspToCodeMirror.diagnostic(doc, diagnostic), changes)),
+        new Set(fixItStarts.map((start) => changes?.mapPos(start, 1) ?? start))
       )
       effects.unshift(...asList(setDiagnostics(state, problems).effects))
     }
@@ -984,6 +1060,13 @@ type FileEntry = {
   isUnpainted?: boolean
   /** how many changes went to the client since it was opened:  the worker's problems name it (`parsedElsewhere()`) */
   version?: number
+  /**
+   * its last texts sent, each with the edit that made it:  a late parse is moved along the edits since
+   * (`sentSince()`;  epic `solid-2-final` J70)
+   */
+  sent?: Array<{ version: number; doc: Text; changes?: ChangeSet }>
+  /** a parse edits outran, waiting to be taken till an edit's painted:  see `hold()` */
+  held?: LSP.LanguageParsed
   /** where it was scrolled to when last shown */
   scroll?: StateEffect<unknown>
   /** stops following its file */

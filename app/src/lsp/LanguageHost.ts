@@ -1,6 +1,5 @@
 import type { Diagnostic } from "vscode-languageserver"
 
-import { soon } from "spell/util/timing"
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
@@ -17,9 +16,10 @@ import { LSP } from "spell/app/lsp"
  *   so an answer is always about the text the editor had when it asked.
  * - Requests are the ONE table's (`LSP.LANGUAGE_REQUESTS`), the same VS Code's language server answers.
  * - After each parse, each open file it changed gets its problems sent (`onParsed`), as a language server publishes
- *   diagnostics, numbered by the edits they're of (`version`) so the editor drops a late one.
- *   - Not a parse already behind the edits:  the editor would drop it, once it had read the whole file's drawing
- *     (`sendSoon()`;  epic `solid-2-final` I45).
+ *   diagnostics, numbered by the edits they're of (`version`).
+ *   - Worked out as the parse ends, of the text it parsed, and sent though edits came since:  the editor moves it
+ *     along those edits (`FileStates.parsedElsewhere()`), so steady typing is drawn as it goes, not at its pause
+ *     (epic `solid-2-final` J70;  dropped, its colours trailed the text by up to 18 seconds).
  *   - With them, what the editor draws the file with, so the page never parses for it (epic `solid-2-final` T36):
  *     the blocks that fold, the types its tags may name, and its look (`lookOf`:  the bubbly drawing, or the colours),
  *     in the look the editor shows (`look()`).
@@ -151,7 +151,7 @@ export class LanguageHost {
       await project.compile(undefined, { save: false, cached: false })
       return project.cachedEntry()
     } finally {
-      this.sendSoon(project)
+      this.sendProblems(project)
     }
   }
 
@@ -211,7 +211,7 @@ export class LanguageHost {
     this.parseTimers.delete(project)
     const parsing = project.needsFullParse ? project.parse() : project.parseWaitingText()
     await parsing.catch((error: unknown) => console.error("LanguageHost:  couldn't parse", error))
-    this.sendSoon(project)
+    this.sendProblems(project)
   }
 
   ////////////////
@@ -219,27 +219,18 @@ export class LanguageHost {
   ////////////////
 
   /**
-   * `sendProblems()` in the next task, so the edits that came during the parse are in first:
-   * with one waiting to be parsed, nothing's worked out or sent till its own parse (epic `solid-2-final` I45).
-   */
-  private sendSoon(project: SP.SpellProject): void {
-    soon(() => {
-      if (!this.parseTimers.has(project)) this.sendProblems(project)
-    })
-  }
-
-  /**
    * Send the problems of each open file of `project` whose parse changed since they were last sent (`onParsed`).
    * - A `<css>` block before the CSS service is in:  sent again once it lands, with its mistakes
    *   (`LSP.SpellCSS.load()`).
-   * - Sent a task after they're worked out, and only if no edit came meanwhile:  working out a big file's drawing
-   *   outlasts a key, and the editor spends 20 msec reading one on a phone, to drop it (epic `solid-2-final` I45).
+   * - Of the text the file's parse is of, numbered by its edits:  sent though edits came since, which the editor moves
+   *   it along (epic `solid-2-final` J70);  a parse of an older text (a compile an edit came during) waits for the
+   *   parse that edit asked for.
    * - NEVER throws:  a file whose problems can't be worked out is said on the console, and skipped.
    */
   private sendProblems(project: SP.SpellProject): void {
     for (const [uri, text] of this.texts) {
       const file = this.fileFor(uri)
-      if (!file?.match || file.project !== project) continue
+      if (!file?.match || file.project !== project || !SP.BubblyLayout.isParseOf(file, text)) continue
       const version = this.versions.get(uri) ?? 0
       const sent = this.sentParse.get(uri)
       if (sent?.match === file.match && sent.version === version) continue
@@ -256,9 +247,7 @@ export class LanguageHost {
           ...this.typesOf(file),
           ...this.lookOf(file, text, this.codeLook)
         }
-        soon(() => {
-          if (this.texts.get(uri) === text && (this.versions.get(uri) ?? 0) === version) this.onParsed(parsed)
-        })
+        this.onParsed(parsed)
         if (!LSP.SpellCSS.isLoaded && this.service.css.regionsIn(file.contents ?? "").length) {
           LSP.SpellCSS.load().then(
             () => {

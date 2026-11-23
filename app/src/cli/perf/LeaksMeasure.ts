@@ -176,14 +176,7 @@ const LOOPS: Partial<Record<PerfPageName, LeakLoop[]>> = {
       name: "open / close a dropdown (open attribute)",
       cycles: 50,
       async cycle(page) {
-        await page.evaluate(async () => {
-          const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-          const dropdown = document.querySelectorAll("ui-dropdown")[1]!
-          dropdown.setAttribute("open", "")
-          await wait(80)
-          dropdown.removeAttribute("open")
-          await wait(80)
-        })
+        await page.evaluate(openAndClose, { tag: "ui-dropdown", nth: 1, msec: 80 })
       }
     },
     {
@@ -201,14 +194,7 @@ const LOOPS: Partial<Record<PerfPageName, LeakLoop[]>> = {
       name: "open / close a modal (open attribute)",
       cycles: 50,
       async cycle(page) {
-        await page.evaluate(async () => {
-          const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-          const modal = document.querySelector("ui-modal")!
-          modal.setAttribute("open", "")
-          await wait(120)
-          modal.removeAttribute("open")
-          await wait(120)
-        })
+        await page.evaluate(openAndClose, { tag: "ui-modal", nth: 0, msec: 120 })
       }
     }
   ],
@@ -229,6 +215,29 @@ const LOOPS: Partial<Record<PerfPageName, LeakLoop[]>> = {
       }
     }
   ]
+}
+
+/**
+ * In the page:  open the `nth` element `tag` by its `open` attribute, wait `msec`, close it, and wait again.
+ * - Inside shadow roots too:  the Spell UI site's pages draw their components there, out of `querySelector()`'s reach.
+ * - MUST stay self-contained:  Playwright sends its source
+ * - throws if the page has no such element
+ */
+export async function openAndClose({ tag, nth, msec }: { tag: string; nth: number; msec: number }): Promise<void> {
+  const found: Element[] = []
+  const look = (root: Document | ShadowRoot) => {
+    for (const element of root.querySelectorAll("*")) {
+      if (element.localName === tag) found.push(element)
+      if (element.shadowRoot) look(element.shadowRoot)
+    }
+  }
+  look(document)
+  const element = found[nth]
+  if (!element) throw new Error(`openAndClose():  the page has ${found.length} <${tag}>, so no number ${nth + 1}`)
+  element.setAttribute("open", "")
+  await new Promise((resolve) => setTimeout(resolve, msec))
+  element.removeAttribute("open")
+  await new Promise((resolve) => setTimeout(resolve, msec))
 }
 
 /**

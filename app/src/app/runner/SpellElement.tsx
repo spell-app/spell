@@ -209,7 +209,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
 
   /** What our tag draws with:  its class, and the runtime of the program that defined it last. */
   private get entry(): SpellElementEntry | undefined {
-    return SPELL_ELEMENTS.get(this.domElement.localName)
+    return entryOf(this.domElement.localName)
   }
 
   /** Are we in a `<spell-viewer>`'s layout, its markup around the program?  See `SpellViewer.hasLayout`. */
@@ -1298,7 +1298,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
 
   /** Is a view's element on `path`, any runtime copy's:  a long press there opens its right-click menu (`LongPress`). */
   private static isOnAView(path: readonly EventTarget[]): boolean {
-    return path.some((target) => target instanceof Element && SPELL_ELEMENTS.has(target.localName))
+    return path.some((target) => target instanceof Element && isViewTag(target.localName))
   }
 
   /** May people reorder `list`'s items, dragging them?  Its type says so:  `its items can be reordered`. */
@@ -1703,7 +1703,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
           return thing ? component!.shownValueOf(property, thing) : elementValue.call(this)
         },
         set(this: HTMLElement & { component?: SpellElement }, value: unknown) {
-          const core = property.reference && SPELL_ELEMENTS.get(this.localName)?.core
+          const core = property.reference && entryOf(this.localName)?.core
           const isThing = core && value && typeof value === "object"
           setElementValue.call(this, isThing ? core.referenceFor(value) : value)
         }
@@ -1734,7 +1734,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     // built on a Spell UI element, `a "netlist column" is a ui tree view`:  that element's, not ours
     const uiElement = core.uiElementOf(Class)
     if (uiElement) return UIViewElements.defineFor(tag, Class, core, uiElement)
-    SPELL_ELEMENTS.set(tag, { Class, core })
+    SPELL_ELEMENTS.set(tag, heldByRunOf(core, `tag:${tag}`, { Class, core }))
     // on a phone, a finger held on a view opens its right-click menu (epic `language` P62)
     LongPress.listen(SpellElement.isOnAView)
     const Base = (core.elementClassOf(Class) ?? SpellElement) as typeof SpellElement
@@ -1966,7 +1966,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
 
   /** The view class `element`'s tag is for, e.g. `Card` for `<solitaire-card>` -- `undefined` for any other tag. */
   static classOf(element: Element): Function | undefined {
-    return SPELL_ELEMENTS.get(element.localName)?.Class
+    return entryOf(element.localName)?.Class
   }
 
   /**
@@ -2018,7 +2018,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /** `element`, or its nearest ancestor, that's a view template's tag -- `undefined` if none is. */
   static closestView(element: Element): Element | undefined {
     for (let at: Element | null = element; at; at = at.parentElement) {
-      if (SPELL_ELEMENTS.has(at.localName)) return at
+      if (isViewTag(at.localName)) return at
     }
     return undefined
   }
@@ -2133,9 +2133,44 @@ type SpellElementTag = {
  * Each view template's tag, and what it draws with -- ONE map per page, on `globalThis`:
  * every runtime copy (each `<spell-viewer>` has its own) shares the page's custom elements.
  */
-const SPELL_ELEMENTS: Map<string, SpellElementEntry> = ((globalThis as PageWide<Map<string, SpellElementEntry>>)[
+const SPELL_ELEMENTS: Map<string, KeptEntry> = ((globalThis as PageWide<Map<string, KeptEntry>>)[
   Symbol.for("spell-app:spell-elements")
 ] ??= new Map())
+
+/**
+ * A view tag's entry as `SPELL_ELEMENTS` keeps it:  held only as long as a run of its program keeps it
+ * (`heldByRunOf()`, epic `solid-2-final` I24).
+ * - Read it with `entryOf()` / `isViewTag()`, never the map itself.
+ */
+type KeptEntry = SpellElementEntry | WeakRef<SpellElementEntry>
+
+/**
+ * What view tag `tag` draws with, while its program's run still holds it -- else `undefined`.
+ * - The same object each time, while it's held:  a component compares the entry it drew with by identity.
+ */
+function entryOf(tag: string): SpellElementEntry | undefined {
+  const kept = SPELL_ELEMENTS.get(tag)
+  return kept instanceof WeakRef ? kept.deref() : kept
+}
+
+/** Is `tag` a view template's, of a program a run still holds?  See `entryOf()`. */
+function isViewTag(tag: string): boolean {
+  return !!entryOf(tag)
+}
+
+/**
+ * Keep `value` for as long as the program running on `core` does, under `key`:  how a page-wide map should hold it.
+ * - A program running:  a `WeakRef`, its run holding `value` (`SpellRuntime.held`), so a program the editor left,
+ *   and nothing else uses, is freed though the page's custom elements stay defined (epic `solid-2-final` I24).
+ * - None:  `value` itself.
+ * - The core's own `heldByRun()`, for `core`, a runtime copy's:  this file imports no core, only its types.
+ */
+function heldByRunOf<T extends object>(core: Core, key: string, value: T): T | WeakRef<T> {
+  const held = (core as { RUNTIME?: { held?: Map<string, object> } }).RUNTIME?.held
+  if (!held) return value
+  held.set(key, value)
+  return new WeakRef(value)
+}
 
 /**
  * What each view template's tag was defined with -- ONE map per page, on `globalThis`, as `SPELL_ELEMENTS`:

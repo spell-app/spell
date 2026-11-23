@@ -1,6 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vite-plus/test"
 
 import { core, Thing, on, off, once, trigger } from "spell/parser/core"
+import { declaredClassNamed, heldByRun, stillHeld } from "spell/parser/core/core"
 
 /** `a card is a thing`:  what an event brings, e.g. `trigger card-click with the card`. */
 class Card extends Thing {}
@@ -72,5 +73,44 @@ describe("on() / trigger()", () => {
     expect(() => off("tick", () => {})).not.toThrow()
     expect(() => on("tick", () => {})).toThrow("call core.resetRuntime() first")
     expect(() => once("tick", () => {})).toThrow(TypeError)
+  })
+})
+
+// epic `solid-2-final` I24:  a program the editor left is freed, though page-wide registries list its classes
+describe("heldByRun()", () => {
+  test("while a program runs:  the run holds the value, the registry a weak reference to it", () => {
+    const value = {}
+    const kept = heldByRun("class:Card", value)
+    expect(kept).toBeInstanceOf(WeakRef)
+    expect(stillHeld(kept)).toBe(value)
+    expect(core.RUNTIME.held.get("class:Card")).toBe(value)
+  })
+
+  test("held again under the same key, the last one goes:  a live edit keeps no old class", () => {
+    heldByRun("class:Card", {})
+    const latest = {}
+    heldByRun("class:Card", latest)
+    expect(core.RUNTIME.held.size).toBe(1)
+    expect(core.RUNTIME.held.get("class:Card")).toBe(latest)
+  })
+
+  test("a new run holds none of the last run's", () => {
+    heldByRun("class:Card", {})
+    core.resetRuntime()
+    expect(core.RUNTIME.held.size).toBe(0)
+  })
+
+  test("no program running (the runtime's own classes, as its module loads):  held for good, as it is", () => {
+    core.clearRuntime()
+    const value = {}
+    expect(heldByRun("class:Card", value)).toBe(value)
+    expect(stillHeld(value)).toBe(value)
+  })
+
+  test("a class declaring a property is found by its name, while held", () => {
+    class Shelf extends Thing {}
+    Shelf.declareProp("books", { type: "list" } as never)
+    expect(declaredClassNamed("Shelf")).toBe(Shelf)
+    expect(core.RUNTIME.held.get("class:Shelf")).toBe(Shelf)
   })
 })

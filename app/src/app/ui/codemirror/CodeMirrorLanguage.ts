@@ -121,11 +121,19 @@ export class CodeMirrorLanguage {
   }
 
   /**
-   * The language worker's last parse of the file came, of `text`, the state's text then (`doc`):
+   * The language worker's last parse of the file came, of `doc`'s text:
    * kept for the fold arrows, the look and the typing helps (`FileStates.parsedElsewhere()`).
+   * - `ahead`:  the state's text when it came, if edits were made since `doc`, and those edits:
+   *   its drawing is moved along them (`behindOf()`;  epic `solid-2-final` J70).
    */
-  tookParse(parsed: LSP.LanguageParsed, doc: Text, text: string): void {
-    this.lastParse = { ...parsed, doc, text, types: new Set(parsed.types), views: new Set(parsed.views) }
+  tookParse(parsed: LSP.LanguageParsed, doc: Text, ahead?: { doc: Text; changes: ChangeSet }): void {
+    const text = doc.toString()
+    this.lastParse = { ...parsed, doc, text, ahead, types: new Set(parsed.types), views: new Set(parsed.views) }
+  }
+
+  /** Which edit the last parse taken is of (`LSP.LanguageParsed.version`);  `undefined` before one came. */
+  get lastParseVersion(): number | undefined {
+    return this.lastParse?.version
   }
 
   /** The language worker's last parse, as `tookParse()` kept it. */
@@ -133,6 +141,8 @@ export class CodeMirrorLanguage {
     | (Omit<LSP.LanguageParsed, "types" | "views"> & {
         doc: Text
         text: string
+        /** the text it was moved along to as it came, and the edits since its own:  see `tookParse()` */
+        ahead?: { doc: Text; changes: ChangeSet; text?: string } | undefined
         types: Set<string>
         views: Set<string>
         foldsByHead?: Map<number, number>
@@ -151,6 +161,17 @@ export class CodeMirrorLanguage {
       return parse?.drawing && { ...parse.drawing, text: parse.text }
     },
     coloursOf: (doc) => this.parseOf(doc)?.colours,
+    behindOf: (doc) => {
+      const behind = this.behindOf(doc)
+      return (
+        behind && {
+          doc: behind.parse.doc,
+          changes: behind.changes,
+          drawing: behind.parse.drawing && { ...behind.parse.drawing, text: behind.parse.text },
+          colours: behind.parse.colours
+        }
+      )
+    },
     isView: (tag) => !!tag && !!this.lastParse?.views.has(SP.typeName(tag)),
     isType: (tag) => !!tag && !!this.lastParse?.types.has(SP.typeName(tag))
   }
@@ -164,6 +185,23 @@ export class CodeMirrorLanguage {
     // the same text in another state:  a slice's, or the text typed back
     parse.doc = doc
     return parse
+  }
+
+  /**
+   * The language worker's last parse, if it's of an earlier text than `doc`'s and was moved along to it as it came
+   * (`tookParse()`'s `ahead`), with the edits since its own.
+   */
+  private behindOf(doc: Text) {
+    const parse = this.lastParse
+    const ahead = parse?.ahead
+    if (!parse || !ahead) return undefined
+    if (ahead.doc !== doc) {
+      ahead.text ??= ahead.doc.toString()
+      if (ahead.text.length !== doc.length || ahead.text !== doc.toString()) return undefined
+      // the same text in another state:  a slice's
+      ahead.doc = doc
+    }
+    return { parse, changes: ahead.changes }
   }
 
   /**
@@ -855,6 +893,14 @@ export type ParsedElsewhere = {
   drawingOf(doc: Text): SP.BubblyDrawing | undefined
   /** its colours with the look off, if the last parse is of `doc`'s text */
   coloursOf(doc: Text): SP.SpellHighlightSpan[] | undefined
+  /**
+   * the last parse, when it's of an earlier text than `doc`'s and was taken as `doc`'s (epic `solid-2-final` J70):
+   * its text (`doc`), the edits made since (`changes`), and its drawing or colours, for the look to lay out in its
+   * text and move along those edits
+   */
+  behindOf(
+    doc: Text
+  ): { doc: Text; changes: ChangeSet; drawing?: SP.BubblyDrawing; colours?: SP.SpellHighlightSpan[] } | undefined
   /** does tag `tag` name one of the program's views, drawn as an element of its own (`<tableau>`)? */
   isView(tag: string): boolean
   /** does tag `tag` name one of the program's types? */
