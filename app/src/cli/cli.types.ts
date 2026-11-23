@@ -128,7 +128,12 @@ export type PreviewOptions = GlobalOptions & {
  * - `headless`:  don't open a browser
  */
 export type ServeOptions = GlobalOptions & {
+  /** the editor's port */
   port?: number
+  /** the page server's port, for one this starts */
+  pagePort?: number
+  /** the spaces its page server serves:  a project's own (`serveSpaces()`) */
+  spaces?: string
   headless?: boolean
 }
 
