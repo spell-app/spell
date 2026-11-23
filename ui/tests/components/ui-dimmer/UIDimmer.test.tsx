@@ -118,6 +118,18 @@ describe("<ui-dimmer> element dimmer", () => {
     expect(getComputedStyle(box).display).toBe("none")
   })
 
+  it("a transition the box still lists once it has finished doesn't hold `ui-opened` (I422)", async () => {
+    const { host, box } = await dimmer(`<ui-segment><ui-dimmer>x</ui-dimmer></ui-segment>`)
+    // Chromium lists a finished transition until the page next draws:  waiting on it again and again spun the tab
+    const finished = { playState: "finished", finished: Promise.resolve() } as unknown as Animation
+    box.getAnimations = () => [finished]
+    const shown = next(host, "ui-opened")
+    host.visible = true
+    await settle()
+    await shown
+    expect(host.visible).toBe(true)
+  })
+
   it("positions a plain parent for itself (the page sheet)", async () => {
     const { wrapper } = await dimmer(`<div id="parent"><ui-dimmer visible></ui-dimmer></div>`)
     expect(getComputedStyle(wrapper.querySelector("#parent")!).position).toBe("relative")
