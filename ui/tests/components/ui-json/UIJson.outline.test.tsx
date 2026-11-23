@@ -119,6 +119,18 @@ describe("<ui-json> outline", () => {
     expect(pressed()).toBe("true")
   })
 
+  test("the header's buttons:  each inner button is part `header-button`;  the quotes button shows an icon", async () => {
+    const element = await json(`<ui-json>{ "name": "a" }</ui-json>`)
+    const buttons = [...element.shadowRoot!.querySelectorAll<HTMLElement>("ui-button.tool")]
+    expect(buttons.map((button) => button.getAttribute("exportparts"))).toEqual([
+      "button: header-button",
+      "button: header-button"
+    ])
+    const quotes = element.shadowRoot!.querySelector<HTMLElement>("ui-button.quotes")!
+    expect(quotes.getAttribute("icon")).toBe("quote-left")
+    expect(quotes.querySelector(".glyph")).toBeNull()
+  })
+
   test("nothing to show:  says so", async () => {
     const element = await json(`<ui-json></ui-json>`)
     expect(element.shadowRoot!.querySelector(".empty")?.textContent).toBe("No data")
@@ -188,6 +200,24 @@ describe("<ui-json editable>", () => {
     expect(element.value).toEqual({ id: "12", n: 1 })
     expect(changed).toHaveBeenCalledWith({ id: "12", n: 1 })
     expect(element.dirty).toBe(true)
+  })
+
+  test("an edit of a `value` set is an edit:  `ui-changed`, `dirty`, its text written;  the object given untouched", async () => {
+    const element = await json(`<ui-json editable></ui-json>`)
+    const data = { id: "x1", n: 1 }
+    element.value = data
+    await ElementFixture.settle()
+    expect(element.dirty).toBe(false)
+    const changed = vi.fn()
+    element.addEventListener("ui-changed", (event) => changed((event as CustomEvent).detail.value))
+    const editor = await startEditing(element, span(element, '"x1"'))
+    editor.value = "y2"
+    await press(editor, "Enter")
+    expect(element.value).toEqual({ id: "y2", n: 1 })
+    expect(JSON.parse(element.content)).toEqual({ id: "y2", n: 1 })
+    expect(changed).toHaveBeenCalledWith({ id: "y2", n: 1 })
+    expect(element.dirty).toBe(true)
+    expect(data).toEqual({ id: "x1", n: 1 })
   })
 
   test("Escape drops the edit", async () => {

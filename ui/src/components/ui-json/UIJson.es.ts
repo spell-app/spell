@@ -17,7 +17,7 @@ export const jsonEs = {
     "no-header": "sin-encabezado",
     editors: "editores"
   },
-  parts: { viewer: "visor", toggle: "plegador", preview: "vista-previa" },
+  parts: { viewer: "visor", "header-button": "boton-de-encabezado", toggle: "plegador", preview: "vista-previa" },
   texts: {
     sourceLoading: "Cargando {source}",
     sourceLoadError: "No se pudo cargar {source}.",

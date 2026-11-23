@@ -14200,6 +14200,15 @@
               "fieldName": "path"
             },
             {
+              "name": "arrange",
+              "description": "How nodes are placed:  `layers`, left to right by their edges;  `groups`, a column per node `group` (its header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column;  `auto`, groups when any node has one.  NOT `layout`:  that's the laid out drawing, a property already.",
+              "type": {
+                "text": "\"auto\" | \"layers\" | \"groups\""
+              },
+              "default": "\"auto\"",
+              "fieldName": "arrange"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {
@@ -14440,8 +14449,12 @@
               "description": "Each node's open / close button."
             },
             {
+              "name": "column",
+              "description": "Each column of the `groups` arrangement:  its band and header."
+            },
+            {
               "name": "toolbar",
-              "description": "The buttons over the drawing (fit)."
+              "description": "The buttons at the right of the bar over the drawing (a subclass's, then fit)."
             },
             {
               "name": "breadcrumbs",
@@ -19648,8 +19661,8 @@
           "name": "UIJson",
           "tagName": "ui-json",
           "customElement": true,
-          "summary": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.",
-          "description": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.\n\nAlso known as:  data, data island, json script, application/json, data block, json viewer, json tree, object inspector, pretty print, datos.",
+          "summary": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is its data, parsed, or any object a script sets, shown as it is;  an element it sits inside may read it.",
+          "description": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is its data, parsed, or any object a script sets, shown as it is;  an element it sits inside may read it.\n\nAlso known as:  data, data island, json script, application/json, data block, json viewer, json tree, object inspector, pretty print, datos.",
           "attributes": [
             {
               "name": "source",
@@ -19877,7 +19890,7 @@
             },
             {
               "name": "ui-changed",
-              "description": "The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.",
+              "description": "The data changed through its text:  loaded from `source`, set through `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.  Setting `value` by script sends none:  it shows that object as it is, and isn't an edit.",
               "type": {
                 "text": "CustomEvent<{ value: unknown, content: string }>"
               }
@@ -19935,6 +19948,10 @@
             {
               "name": "header",
               "description": "The bar above the data:  Copy, then the quotes button."
+            },
+            {
+              "name": "header-button",
+              "description": "Copy and the quotes button:  each one's inner button (`<ui-button>`'s `button` part), so a page can size them."
             },
             {
               "name": "row",

@@ -8,12 +8,15 @@ import { graphVocabulary } from "./UIGraph.en"
 import { GraphLayout } from "./GraphLayout"
 import {
   GRAPH_METRICS,
+  GraphArrangements,
   GraphChildViews,
+  type GraphArrangement,
   type GraphChildView,
   type GraphData,
   type GraphEdge,
   type GraphLayoutResult,
   type GraphNode,
+  type GraphPlacedColumn,
   type GraphPlacedEdge,
   type GraphPlacedNode,
   type GraphPlacedPin,
@@ -158,12 +161,49 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
     return 0
   }
 
+  /** The least zoom the eased fit after a node opens in place goes to:  lower, so what opened shows.  `0`:  no least. */
+  get minOpenFitZoom(): number {
+    return 0
+  }
+
+  /**
+   * The box Fit shows:  every node, wire point, pin and column, with a little room;  a subclass adds what its
+   * underlay draws past them.
+   */
+  drawingBounds(): { x: number; y: number; width: number; height: number } {
+    const layout = this.layout
+    if (!layout) return { x: 0, y: 0, width: 1, height: 1 }
+    const xs: number[] = [0, layout.width]
+    const ys: number[] = [0, layout.height]
+    for (const node of layout.nodes) {
+      xs.push(node.x, node.x + node.width)
+      ys.push(node.y, node.y + node.height)
+    }
+    for (const point of [...layout.edges.flatMap((edge) => edge.points), ...layout.pins]) {
+      xs.push(point.x)
+      ys.push(point.y)
+    }
+    return UIGraph.boxAround(xs, ys, FIT_ROOM)
+  }
+
+  /** The box round these xs and ys, `room` more on every side. */
+  static boxAround(xs: number[], ys: number[], room = 0): { x: number; y: number; width: number; height: number } {
+    const x = Math.min(...xs) - room
+    const y = Math.min(...ys) - room
+    return { x, y, width: Math.max(...xs) + room - x, height: Math.max(...ys) + room - y }
+  }
+
   /** More buttons in the toolbar, before Fit. */
   toolButtons(): JSX.Element {
     return undefined
   }
 
-  /** Something drawn over the canvas (a legend ...), positioned by the subclass's own sheet. */
+  /** Something drawn under the nodes and edges, in the drawing's own units (bands behind groups ...). */
+  underlay(): JSX.Element {
+    return undefined
+  }
+
+  /** Something shown in the bar over the canvas, left of the toolbar (a legend ...). */
   overlay(): JSX.Element {
     return undefined
   }
@@ -286,9 +326,16 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
       openChildren,
       loading: this.loadingPaths,
       boundary: this.shownBoundary,
+      arrange: this.arrangement,
       label: (node) => this.nodeLabel(node),
       textWidth: isServer ? undefined : (text, size) => UIGraph.measure(text, size, this.fontFamily)
     })
+  }
+
+  /** How nodes are placed (`arrange`);  a subclass may decide it another way. */
+  get arrangement(): GraphArrangement {
+    const value = String(this.arrange ?? "auto")
+    return (GraphArrangements as readonly string[]).includes(value) ? (value as GraphArrangement) : "auto"
   }
 
   /** The font the labels are drawn in, read once:  what they're measured in. */
@@ -316,8 +363,12 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
     if (!node?.children) return
     const how = view ?? UIGraph.viewFrom(node.childView) ?? UIGraph.viewFrom(this.childView) ?? "inline"
     if (!(await this.load(node, path))) return
-    if (how === "inline") this.openPaths = new Set(this.openPaths).add(path)
-    else if (how === "modal") this.modalPath = path
+    if (how === "inline") {
+      this.openPaths = new Set(this.openPaths).add(path)
+      // Opened in place:  the drawing grows, so ease the view back out until all of it shows.
+      this.needsFit = true
+      this.animateNextFit = true
+    } else if (how === "modal") this.modalPath = path
     else {
       this.drillPaths = [...this.drillPaths, path]
       this.needsFit = true
@@ -336,6 +387,9 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
       this.drilled(originalEvent)
     } else {
       this.openPaths = new Set([...this.openPaths].filter((each) => each !== path && !each.startsWith(`${path}/`)))
+      // Closed in place:  the drawing shrinks, so ease the view to fit it again.
+      this.needsFit = true
+      this.animateNextFit = true
     }
     if (node)
       this.send("ui-node-toggled", { node, path, open: false, view: drilled >= 0 ? "drill" : "inline", originalEvent })
@@ -485,6 +539,10 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   @E.state accessor isPanning = false
   /** The next layout is fitted to the view:  a new graph, or a drill. */
   protected needsFit = true
+  /** The next fit eases there (a node opened in place), rather than jumping. */
+  protected animateNextFit = false
+  /** Stops the easing under way, if any. */
+  private cancelFitEase = () => {}
   /** The view was last set by a fit, not by a person:  a change of size fits again. */
   private isFitted = false
   /** The last pointer press moved far enough to be a drag:  its click selects nothing. */
@@ -497,20 +555,51 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
     return this.isPanning
   }
 
-  /** Fit the drawing to the view:  all of it, at most one and a half times its size. */
+  /**
+   * Fit the drawing to the view:  all of it, at most one and a half times its size, at least `minFitZoom`
+   * (`minOpenFitZoom` when `all`, the Fit button's);  `animate`:  eased, over 350ms.
+   */
   @E.untracked
-  fit() {
+  fit(animate = false, all = false) {
     const layout = this.layout
     // Its own size, not its drawn one:  a modal opening scales it with a transform.
     const box = this.svg && { width: this.svg.clientWidth, height: this.svg.clientHeight }
     if (!layout || !box?.width || !box.height) return
-    const k = Math.max(this.minFitZoom, Math.min(box.width / layout.width, box.height / layout.height, 1.5))
+    // What's drawn, wires and all (an edge going round the outside reaches past the layout's own box).
+    const bounds = this.drawingBounds()
+    // The Fit button (`all`) and a node opened in place zoom out further, so all of it shows.
+    const least = animate || all ? this.minOpenFitZoom : this.minFitZoom
+    const k = Math.max(least, Math.min(box.width / bounds.width, box.height / bounds.height, 1.5))
     // Centred, too big or not.
     // Too big at the least zoom:  its middle shows, the rest a pan away
     // (the middle is where the nodes are;  its edges are often empty pins and margins).
-    const along = (room: number, size: number) => (room - size * k) / 2
-    this.view = { x: along(box.width, layout.width), y: along(box.height, layout.height), k }
+    const along = (room: number, size: number, start: number) => (room - size * k) / 2 - start * k
+    // Columns (`groups`) too tall:  their tops show, headers and all, as a rack is read top down.
+    const tall = layout.columns.length > 0 && bounds.height * k > box.height
+    const target = {
+      x: along(box.width, bounds.width, bounds.x),
+      y: tall ? -bounds.y * k : along(box.height, bounds.height, bounds.y),
+      k
+    }
+    this.cancelFitEase()
     this.isFitted = true
+    if (!animate || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      this.view = target
+      return
+    }
+    const from = { ...this.view }
+    const start = performance.now()
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / FIT_EASE_MS)
+      const e = 1 - Math.pow(1 - t, 3)
+      this.view = {
+        x: from.x + (target.x - from.x) * e,
+        y: from.y + (target.y - from.y) * e,
+        k: from.k + (target.k - from.k) * e
+      }
+      if (t < 1) this.cancelFitEase = E.beforeNextPaint(step)
+    }
+    this.cancelFitEase = E.beforeNextPaint(step)
   }
 
   /** A new graph:  fit it. */
@@ -527,7 +616,9 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   protected onLayoutChanged(layout: GraphLayoutResult | undefined, isReady: boolean) {
     if (!isReady || !layout || !this.needsFit || !this.svg?.getBoundingClientRect().width) return
     this.needsFit = false
-    this.fit()
+    const animate = this.animateNextFit
+    this.animateNextFit = false
+    this.fit(animate)
   }
 
   /** While it's in the page:  fit again when it first gets a size. */
@@ -544,6 +635,7 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   private readonly onWheel = (event: WheelEvent) => {
     if (!this.svg) return
     event.preventDefault()
+    this.cancelFitEase()
     const box = this.svg.getBoundingClientRect()
     const px = event.clientX - box.left
     const py = event.clientY - box.top
@@ -555,6 +647,7 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
 
   private readonly onPointerDown = (event: PointerEvent) => {
     if (event.button !== 0 || !this.svg) return
+    this.cancelFitEase()
     const svg = this.svg
     const start = { x: event.clientX, y: event.clientY, view: this.view }
     this.wasDragged = false
@@ -640,13 +733,15 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
     return (
       <div class={this.rootClass} part={this.partForName("graph")}>
         <Show when={this.trail().length > 1}>{this.breadcrumbs()}</Show>
-        <div class={TOOLBAR_CLASS} part={this.partForName("toolbar")}>
-          {this.toolButtons()}
-          <button type="button" onClick={() => this.fit()}>
-            {this.translationForKey("graphFit")}
-          </button>
+        <div class={TOP_BAR_CLASS}>
+          {this.overlay()}
+          <div class={TOOLBAR_CLASS} part={this.partForName("toolbar")}>
+            {this.toolButtons()}
+            <button type="button" class="group-start" onClick={() => this.fit(true, true)}>
+              {this.translationForKey("graphFit")}
+            </button>
+          </div>
         </div>
-        {this.overlay()}
         <svg
           ref={(svg: SVGSVGElement) => (this.svg = svg)}
           class={CANVAS_CLASS}
@@ -658,6 +753,8 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
           onClick={this.onBackgroundClick}
         >
           <g transform={`translate(${this.view.x} ${this.view.y}) scale(${this.view.k})`}>
+            <For each={this.layout?.columns ?? []}>{(column) => this.column(column)}</For>
+            {this.underlay()}
             <For each={this.containers}>{(placed) => this.node(placed)}</For>
             <For each={this.layout?.edges ?? []}>{(edge) => this.edge(edge)}</For>
             <For each={this.leaves}>{(placed) => this.node(placed)}</For>
@@ -817,6 +914,34 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
     )
   }
 
+  /** A column of the `groups` arrangement:  a faint band, its header above (part `column`);  neither without a label. */
+  private column(column: GraphPlacedColumn): JSX.Element {
+    return (
+      <g class={COLUMN_CLASS} part={this.partForName("column")}>
+        <Show when={column.label}>
+          <rect
+            class={COLUMN_BAND_CLASS}
+            x={column.x}
+            y={column.y}
+            width={column.width}
+            height={column.height}
+            rx={8}
+          />
+        </Show>
+        <Show when={column.label}>
+          <text
+            class={COLUMN_LABEL_CLASS}
+            x={column.x + 10}
+            y={column.y + GRAPH_METRICS.headerHeight / 2 + 2}
+            font-size={String(GRAPH_METRICS.portFontSize + 1)}
+          >
+            {column.label}
+          </text>
+        </Show>
+      </g>
+    )
+  }
+
   /** A pin:  the enclosing node's port, on the graph's side (part `pin`). */
   private pin(pin: GraphPlacedPin): JSX.Element {
     const label = pin.port.label ?? pin.port.id
@@ -897,7 +1022,13 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   static graphFrom(value: unknown): GraphData | undefined {
     if (!value || typeof value !== "object" || !Array.isArray((value as GraphData).nodes)) return undefined
     const graph = value as GraphData
-    return { nodes: graph.nodes, edges: Array.isArray(graph.edges) ? graph.edges : [] }
+    // Its groups and rows kept:  an open node's insides lay out in its columns and rows too.
+    return {
+      nodes: graph.nodes,
+      edges: Array.isArray(graph.edges) ? graph.edges : [],
+      groups: Array.isArray(graph.groups) ? graph.groups : undefined,
+      rows: Array.isArray(graph.rows) ? graph.rows : undefined
+    }
   }
 
   /** `value` when it's a child view's name. */
@@ -938,6 +1069,14 @@ const DRAG_DISTANCE = 4
 const EMPTY = "empty"
 
 const TOOLBAR_CLASS = "toolbar"
+/** Room Fit leaves round the outermost wire or box. */
+const FIT_ROOM = 12
+/** How long a fit eases for, when it does. */
+const FIT_EASE_MS = 350
+const TOP_BAR_CLASS = "top-bar"
+const COLUMN_CLASS = "column"
+const COLUMN_BAND_CLASS = "column-band"
+const COLUMN_LABEL_CLASS = "column-label"
 const BREADCRUMBS_CLASS = "breadcrumbs"
 const CANVAS_CLASS = "canvas"
 const NODE_CLASS = "node"

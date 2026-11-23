@@ -1,4 +1,4 @@
-<!-- `<ui-graph>`'s examples, as element markup:  a flat graph, one nested graph shown three ways, 150 nodes.  Every graph is made up, as JSON in the `graph` attribute. -->
+<!-- `<ui-graph>`'s examples, as element markup:  a flat graph, one nested graph shown three ways, columns (and rows), 150 nodes.  Every graph is made up, as JSON in the `graph` attribute. -->
 <div class="ui-stack">
   <section>
     <h4>Flat graph</h4>
@@ -32,6 +32,22 @@
       style="--ui-graph-height: 24em"
       child-view="drill"
       graph='{"nodes":[{"id":"mem","label":"Memory","ports":[{"id":"d","label":"data","kind":"out"},{"id":"a","label":"addr","kind":"in"}]},{"id":"cpu","label":"CPU","ports":[{"id":"clk","label":"clk","kind":"in"},{"id":"bus","label":"bus","kind":"out"}],"children":{"nodes":[{"id":"fetch","label":"Fetch","ports":[{"id":"pc","label":"pc","kind":"in"},{"id":"op","label":"op","kind":"out"}]},{"id":"alu","label":"ALU","ports":[{"id":"op","label":"op","kind":"in"},{"id":"r","label":"r","kind":"out"}],"children":{"nodes":[{"id":"add","label":"Adder","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"shift","label":"Shifter","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"mux","label":"Mux","ports":[{"id":"x","kind":"in"},{"id":"y","kind":"in"},{"id":"o","kind":"out"}]}],"edges":[{"from":{"port":"op"},"to":{"node":"add","port":"a"}},{"from":{"port":"op"},"to":{"node":"shift","port":"a"}},{"from":{"node":"add","port":"s"},"to":{"node":"mux","port":"x"}},{"from":{"node":"shift","port":"s"},"to":{"node":"mux","port":"y"}},{"from":{"node":"mux","port":"o"},"to":{"port":"r"}}]}},{"id":"regs","label":"Registers","ports":[{"id":"w","label":"w","kind":"in"},{"id":"pc","label":"pc","kind":"out"}]}],"edges":[{"from":{"port":"clk"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"fetch","port":"op"},"to":{"node":"alu","port":"op"},"label":"op"},{"from":{"node":"alu","port":"r"},"to":{"node":"regs","port":"w"}},{"from":{"node":"regs","port":"pc"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"regs","port":"pc"},"to":{"port":"bus"}}]}},{"id":"clock","label":"Clock","ports":[{"id":"t","kind":"out"}]},{"id":"io","label":"I/O"}],"edges":[{"from":{"node":"clock","port":"t"},"to":{"node":"cpu","port":"clk"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"mem","port":"a"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"io"}},{"from":{"node":"mem","port":"d"},"to":{"node":"io"},"label":"dma"}]}'
+    ></ui-graph>
+  </section>
+
+  <section>
+    <h4>Columns</h4>
+    <ui-graph
+      style="--ui-graph-height: 22em"
+      graph='{"groups":[{"id":"source","label":"Sources"},{"id":"build","label":"Build"},{"id":"ship","label":"Ship"}],"nodes":[{"id":"repo","label":"Repo","group":"source","order":1,"ports":[{"id":"out","kind":"out"}]},{"id":"assets","label":"Assets","group":"source","order":2,"ports":[{"id":"out","kind":"out"}]},{"id":"compile","label":"Compile","group":"build","order":1,"ports":[{"id":"in","kind":"in"},{"id":"out","kind":"out"}]},{"id":"bundle","label":"Bundle","group":"build","order":2,"ports":[{"id":"code","label":"code","kind":"in"},{"id":"files","label":"files","kind":"in"},{"id":"out","kind":"out"}]},{"id":"test","label":"Test","group":"build","order":3,"ports":[{"id":"in","kind":"in"}]},{"id":"deploy","label":"Deploy","group":"ship","ports":[{"id":"in","kind":"in"}]},{"id":"notes","label":"Notes"}],"edges":[{"from":{"node":"repo","port":"out"},"to":{"node":"compile","port":"in"}},{"from":{"node":"compile","port":"out"},"to":{"node":"bundle","port":"code"}},{"from":{"node":"assets","port":"out"},"to":{"node":"bundle","port":"files"}},{"from":{"node":"compile","port":"out"},"to":{"node":"test","port":"in"}},{"from":{"node":"bundle","port":"out"},"to":{"node":"deploy","port":"in"},"label":"release"},{"from":{"node":"repo","port":"out"},"to":{"node":"notes"}}]}'
+    ></ui-graph>
+  </section>
+
+  <section>
+    <h4>Columns and rows</h4>
+    <ui-graph
+      style="--ui-graph-height: 22em"
+      graph='{"groups":[{"id":"east","label":"East wing"},{"id":"west","label":"West wing"}],"rows":["upper","lower"],"nodes":[{"id":"pump","label":"Pump","group":"east","row":"upper","ports":[{"id":"out","kind":"out"}]},{"id":"tank","label":"Tank","group":"east","row":"lower","order":1,"ports":[{"id":"out","kind":"out"}]},{"id":"heater","label":"Heater","group":"east","row":"lower","order":2,"ports":[{"id":"out","kind":"out"}]},{"id":"valve","label":"Valve","group":"west","row":"upper","ports":[{"id":"in","kind":"in"}]},{"id":"meter","label":"Meter","group":"west","row":"lower","ports":[{"id":"a","kind":"in"},{"id":"b","kind":"in"}]}],"edges":[{"from":{"node":"pump","port":"out"},"to":{"node":"valve","port":"in"}},{"from":{"node":"tank","port":"out"},"to":{"node":"meter","port":"a"}},{"from":{"node":"heater","port":"out"},"to":{"node":"valve","port":"in"}},{"from":{"node":"pump","port":"out"},"to":{"node":"meter","port":"b"}}]}'
     ></ui-graph>
   </section>
 

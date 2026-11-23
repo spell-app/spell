@@ -18727,6 +18727,17 @@ export interface UIGraphAttributes {
    */
   "prop:path"?: string
   /**
+   * How nodes are placed:  `layers`, left to right by their edges;  `groups`, a column per node `group` (its header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column;  `auto`, groups when any node has one.  NOT `layout`:  that's the laid out drawing, a property already.
+   * - takes:  `auto` · `layers` · `groups`
+   * - default:  `auto`
+   */
+  arrange?: "auto" | "layers" | "groups"
+  /**
+   * `arrange`, as the DOM element's property.
+   * @deprecated write `arrange` -- `prop:` stays only for compiled spell
+   */
+  "prop:arrange"?: "auto" | "layers" | "groups"
+  /**
    * PROPERTY:  what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`;  `undefined`:  nothing.  Clicks set it.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
@@ -23755,7 +23766,7 @@ export interface UIJsonEventMap {
    */
   "ui-loaded": CustomEvent<{ source?: string; content: string }>
   /**
-   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
+   * `ui-changed`:  The data changed through its text:  loaded from `source`, set through `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.  Setting `value` by script sends none:  it shows that object as it is, and isn't an edit.
    * - `event.detail`:  `{ value: unknown, content: string }`
    */
   "ui-changed": CustomEvent<{ value: unknown; content: string }>
@@ -24187,7 +24198,7 @@ export interface UIJsonAttributes {
    */
   "on-ui-loaded"?: (event: UIJsonEventMap["ui-loaded"]) => void
   /**
-   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
+   * `ui-changed`:  The data changed through its text:  loaded from `source`, set through `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.  Setting `value` by script sends none:  it shows that object as it is, and isn't an edit.
    * - `event.detail`:  `{ value: unknown, content: string }`
    */
   "on-ui-changed"?: (event: UIJsonEventMap["ui-changed"]) => void
@@ -61215,7 +61226,7 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-items": UIItemsJSXAttributes
       /**
-       * `<ui-json>`:  JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.
+       * `<ui-json>`:  JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is its data, parsed, or any object a script sets, shown as it is;  an element it sits inside may read it.
        * - also known as:  data, data island, json script, application/json, data block, json viewer, json tree, object inspector, pretty print, datos
        * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-navigating`, `ui-copied`
        */

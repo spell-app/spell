@@ -11473,7 +11473,7 @@
       "name": "::part(column)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-column>`:  The column box (a flex item).\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  one column."
+        "value": "Part of:\n\n- `<ui-column>`:  The column box (a flex item).\n- `<ui-graph>`:  Each column of the `groups` arrangement:  its band and header.\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  one column."
       }
     },
     {
@@ -11915,6 +11915,13 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-calendar>`:  The row with previous / title / next.\n- `<ui-card>`:  The `header` shorthand.\n- `<ui-example>`:  The `<ui-header>` title.\n- `<ui-flyout>`:  The `header` shorthand.\n- `<ui-header>`:  The header box (`<div>`, `<h1>` ... `<h6>`, or `<a>`).\n- `<ui-json>`:  The bar above the data:  Copy, then the quotes button.\n- `<ui-message>`:  The `header` shorthand.\n- `<ui-modal>`:  The `header` shorthand.\n- `<ui-page>`:  The header region.\n- `<ui-panel>`:  The title text box.\n- `<ui-placeholder-header>`:  The header block;  with `image`, its `::before` is the square.\n- `<ui-popup>`:  The `header` shorthand.\n- `<ui-property-editor>`:  The title text box.\n- `<ui-property-group>`:  The title text box.\n- `<ui-section>`:  The title text box.\n- `<ui-toast>`:  The `header` shorthand.\n- `<ui-toc>`:  The `<ui-header>` with `heading`'s text."
+      }
+    },
+    {
+      "name": "::part(header-button)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-json>`:  Copy and the quotes button:  each one's inner button (`<ui-button>`'s `button` part), so a page can size them."
       }
     },
     {
@@ -12845,7 +12852,7 @@
       "name": "::part(toolbar)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-graph>`:  The buttons over the drawing (fit).\n- `<ui-toolbar>`:  The box around the menu and its scroll buttons."
+        "value": "Part of:\n\n- `<ui-graph>`:  The buttons at the right of the bar over the drawing (a subclass's, then fit).\n- `<ui-toolbar>`:  The box around the menu and its scroll buttons."
       }
     },
     {
