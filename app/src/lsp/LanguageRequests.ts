@@ -23,6 +23,7 @@ import type {
 
 import type { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
+import type { MadeAt } from "./SourceHomes"
 
 /****************
  * ### `LanguageRequests`
@@ -207,6 +208,15 @@ export const LANGUAGE_REQUESTS = {
    * there are:  the editor's offer to upgrade a project, and its Upgrade (epic `solid-2-final` T36)
    */
   "spell/oldForms": request((service, file, _params: FileParams) => service.oldForms(file), { count: 0, edits: [] }),
+  /**
+   * where a thing's fields live in its project's source, by field name:  the line that made it, its type's default;
+   * the Inspector's value homes (epic `solid-2-final` T36)
+   */
+  "spell/fieldHomes": request(
+    (service, file, { made, typeNames, names }: FileParams & FieldHomesParams) =>
+      service.fieldHomes(file, made, typeNames, names),
+    null
+  ),
   /** the file's problems, as `textDocument/publishDiagnostics` sends them */
   "spell/diagnostics": request((service, file, _params: FileParams) => service.diagnostics(file), []),
   /** a `<css>` block in the file:  is there one (the CSS service loads only for a file with one) */
@@ -238,6 +248,16 @@ export type LanguageRequest<Params, Answer> = {
  * - Spell's own requests took a bare `uri` before the table (`spell/bubbly` ...):  VS Code's extension still sends it.
  */
 export type FileParams = { textDocument: { uri: string } } | { uri: string; textDocument?: undefined }
+
+/** What `spell/fieldHomes` asks:  where one thing's fields live (`SourceHomes.fieldHomes()`). */
+export type FieldHomesParams = {
+  /** where the thing was made, as the compiler marked it;  none for a thing no line or tag made */
+  made?: MadeAt
+  /** its class's name and those it inherits, its own first */
+  typeNames: string[]
+  /** the fields asked about */
+  names: string[]
+}
 
 /** The file a request is about:  `textDocument.uri`, or Spell's older spelling, `uri`. */
 export function uriOf(params: FileParams): string {

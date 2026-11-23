@@ -52,6 +52,7 @@ import {
 } from "./InspectorSource"
 import { InspectorData } from "./InspectorData"
 import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
+import { FieldHomes } from "./FieldHomes"
 import { PartEdits } from "./PartEdits"
 import { NotebookDocs } from "./notebook/NotebookDocs"
 import { LazyPiece } from "./LazyPiece"
@@ -1230,13 +1231,22 @@ export class Inspector {
 
   /**
    * Field `name` of `part` was changed in the properties card:  the same change goes into the program's source.
+   * - Written once where each field lives is known (`FieldHomes`):  at once, as it is once the part's been drawn.
    * - What can't go there says so under its field (`Inspector.noteNotSaved()`);
    *   code, with a way to it, in the card (`<NotSavedNote>`).
    */
-  static fieldWritten(part: Inspected, name: string, value: unknown): void {
+  static fieldWritten(part: Inspected, name: string, value: unknown, late?: "late"): void {
     // a value kept in a place is the program's data, never the source's:  its change is held until it's committed
     if (!part.layout && InspectorData.isKeptInPlace(part.value, name)) return
     const each = part.together ?? [part]
+    // where each lives isn't known yet (the language worker's answer):  all of them written once it is, as one step
+    const unknown = late ? [] : each.filter((one) => !InspectorWrites.knowsHomes(one, name))
+    if (unknown.length) {
+      void Promise.all(unknown.map((one) => FieldHomes.asked(one.value, [name])))
+        .then(() => Inspector.fieldWritten(part, name, value, "late"))
+        .catch((error: unknown) => console.error("Inspector.fieldWritten():  couldn't write it", error))
+      return
+    }
     const whys = editor.history.transaction(
       InspectorWrites.titleOf(name),
       () => each.map((one) => InspectorWrites.written(one, name, value, Inspector.scopeOf(one))),
@@ -1254,6 +1264,7 @@ export class Inspector {
   static scopeOf(part: { value: object }): InspectorScope {
     if (!isThing(part.value)) return "this"
     // the only one of its type:  its type IS it, so changes go there, never asked (epic `editor` I183)
+    void homesAnswered()
     if (InspectorWrites.isOneOfAKind(part.value)) return "all"
     void scopeChoices()
     const chosen = Inspector.scopesChosen[part.value.constructor.name]
@@ -1297,8 +1308,11 @@ export class Inspector {
    * - A thing's value kept in a data place, or worked out from one, says so over what the code says (epic `editor` P26).
    */
   static originsOf(part: Inspected): ReturnType<typeof InspectorWrites.originsOf> {
+    void homesAnswered()
     const names = part.layout ? part.layout.fields.map((field) => field.name) : Inspector.storedNamesOf(part.value)
     const origins = InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
+    // the others changed with it:  where their fields live asked now, so a change writes them all at once
+    for (const one of part.together ?? []) if (one !== part) FieldHomes.of(one.value, names)
     Inspector.noteNotSaved(part, origins)
     if (part.layout) return origins
     for (const name of [...names, ...Inspector.computedNamesOf(part.value)]) {
@@ -2966,6 +2980,16 @@ export const [notSaved, setNotSaved] = createSignal<{ part: object; name: string
 
 /** Bumped as a thing's scope is chosen:  `Inspector.scopeOf()` reads it. */
 const [scopeChoices, setScopeChoices] = createSignal(0)
+
+/**
+ * Bumped as the language worker answers where a thing's fields live (`FieldHomes`):
+ * `Inspector.originsOf()` and `Inspector.scopeOf()` read it, so they're worked out again with the answer.
+ */
+const [homesAnswered, setHomesAnswered] = createSignal(0)
+FieldHomes.followers.add(() => setHomesAnswered((count) => count + 1))
+
+// a change written once its homes were known, that couldn't be:  said under its field, as at once
+InspectorWrites.whenNotWrittenLate = (part, name, why) => setNotSaved({ part, name, why })
 
 /** The pref remembering `Inspector.setScope()`, by project. */
 const SCOPE_PREF = "scope"

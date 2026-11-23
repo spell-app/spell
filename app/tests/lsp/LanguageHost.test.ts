@@ -225,6 +225,14 @@ describe("LanguageHost", () => {
     expect(await host.request("spell/oldForms", { textDocument })).toEqual({ count: 0, edits: [] })
   })
 
+  test("answers the Inspector:  where a thing's fields live, and the types the project has only one of", async () => {
+    const homes = await host.request("spell/fieldHomes", { textDocument, typeNames: ["Card"], names: ["suit"] })
+    expect(homes).toEqual(host.service.fieldHomes(host.service.addresses.fileFor(uri)!, undefined, ["Card"], ["suit"]))
+    expect(homes?.behind).toBe(false)
+    expect(homes?.making).toEqual({})
+    expect(homes?.onlyTypes).toContain("Solitaire")
+  })
+
   test("answers the Types tab:  the project's scope tree, then what it shows of one of its nodes", async () => {
     const tree = await host.request("spell/scopes", { textDocument })
     const paths: string[] = []

@@ -38,6 +38,7 @@ import { MD, type InlineNode } from "spell/parser/markdown"
 import { SP } from "spell/parser/spell"
 import { BuiltInSounds } from "spell/ui/sounds"
 import { LSP } from "spell/app/lsp"
+import { SourceHomes, type FieldHomes, type MadeAt } from "./SourceHomes"
 
 /**
  * Answers editor questions about parsed spell files, in Language Server Protocol shapes -- one method per request.
@@ -2511,6 +2512,37 @@ export class SpellLanguageService {
     } catch (error) {
       return { error: error instanceof Error ? error.message : String(error) }
     }
+  }
+
+  /**
+   * Where each of `names` lives for a thing made at `made` (none:  a widget or the runtime made it),
+   * of `typeNames`, read from this parse of `file`'s project:  the `spell/fieldHomes` request,
+   * the Inspector's value homes (epic `solid-2-final` T36).
+   * - With the types the project has only one thing of, `onlyTypes` (`InspectorWrites.isOneOfAKind()`).
+   * - NEVER throws:  see `SourceHomes.fieldHomes()`.
+   */
+  fieldHomes(
+    file: SP.SpellFile,
+    made: MadeAt | undefined,
+    typeNames: readonly string[],
+    names: readonly string[]
+  ): FieldHomes {
+    const files = file.project.spellFiles.flatMap((each) =>
+      each.contents === undefined
+        ? []
+        : [
+            {
+              path: SP.SpellLocation.filePathOf(each.path)?.replace(/^\//, "") ?? each.path,
+              contents: each.contents,
+              match: each.match
+            }
+          ]
+    )
+    const variables = file.project.scope?.variables?.get() ?? []
+    const onlyTypes = variables.flatMap((variable) =>
+      variable.kind === "only" && typeof variable.datatype === "string" ? [variable.datatype] : []
+    )
+    return { ...SourceHomes.fieldHomes(files, made, typeNames, names), onlyTypes }
   }
 
   /**

@@ -1,12 +1,10 @@
 import { describe, expect, test } from "vite-plus/test"
 import { codeFolding, foldEffect } from "@codemirror/language"
 import { EditorState } from "@codemirror/state"
-import { EditorView } from "@codemirror/view"
 
 import { SP } from "spell/parser/spell"
 import { CodeMirrorBubbly } from "spell/app/app/ui/codemirror/CodeMirrorBubbly"
 import { CodeMirrorLanguage } from "spell/app/app/ui/codemirror/CodeMirrorLanguage"
-import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
 import type { LanguageClient } from "spell/app/app/ui/codemirror/LanguageClient"
 import type { LSP } from "spell/app/lsp"
 
