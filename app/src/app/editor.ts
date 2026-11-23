@@ -587,9 +587,13 @@ export class EditorStore extends Observable {
 
       editor.clearCompileAppSoon()
       const save = onPurpose ? true : "later"
-      // off the page's thread, where the language worker has every edit (epic `solid-2-final` P18)
+      // off the page's thread, where the language worker has every edit (epic `solid-2-final` P18);  what it wrote is
+      // kept in the compile cache for a reload, under the key of the text it compiled:  only when nothing was typed
+      // while it compiled, so the key before and after agree (I57)
+      const keyBefore = editor.compileElsewhere ? await project.compileCacheKey() : undefined
       const elsewhere = await editor.compileElsewhere?.(project)
-      if (elsewhere) await project.takeCompiled(elsewhere, { save })
+      const cacheKey = elsewhere && keyBefore && (await project.compileCacheKey()) === keyBefore ? keyBefore : undefined
+      if (elsewhere) await project.takeCompiled(elsewhere, { save, cacheKey })
       else await project.compile(undefined, { save })
       // its built text changed:  a program that imports it reads it again (`fetchCompiled()`)
       forgetCompiled(project.projectId)

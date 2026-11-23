@@ -578,19 +578,48 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Our own parse stays as it is:  only what a compile writes is taken (`takeCachedEntry()`), so `compiledFrom` says
    *   `"elsewhere"`.
    * - A `compile()` still waiting on the cache gives way to it, and it to a later compile.
-   * - Limited to some pages (`pagesInPlay`):  never saved, as `compile()`'s isn't.
+   * - Limited to some pages (`pagesInPlay`):  never saved or cached, as `compile()`'s isn't.
    *   SIDE EFFECT:  every file is loaded first, to tell (`isLimitedToPages()`).
+   * - `cacheKey`:  the key of the text it was compiled from (`compileCacheKey()`, asked before the compile):  a clean
+   *   entry (`entry.clean`) is kept in the compile cache under it, as `compile()` keeps its own (epic `solid-2-final`
+   *   I57).  None:  nothing kept.
    * - Returns what `saveOutput()` returns;  `undefined` when a later compile took over.
    */
-  async takeCompiled(entry: SP.CompiledEntry, { save = true }: { save?: SaveCompiled } = {}): Promise<unknown> {
+  async takeCompiled(
+    entry: SP.CompiledEntry,
+    { save = true, cacheKey }: { save?: SaveCompiled; cacheKey?: string } = {}
+  ): Promise<unknown> {
     const run = ++this.compileRun
-    if (await this.isLimitedToPages()) save = false
+    const limited = await this.isLimitedToPages()
+    if (limited) save = false
     if (run !== this.compileRun) return undefined
     this.saveCompiled = save
     this.targetsThisRun = undefined
     this.takeCachedEntry(entry)
     this.compiledFrom = "elsewhere"
+    // kept as compile() keeps its own, so a reload after an edit runs what's kept (epic `solid-2-final` I57)
+    const cache = SpellProject.compileCache
+    if (cache) {
+      cache.noteCompile(this, "compiled", this.spellFiles.length)
+      if (cacheKey && entry.clean && !limited) {
+        const { clean: _clean, ...kept } = entry
+        void cache.keep(cacheKey, kept).catch((error) => console.error("SpellProject.takeCompiled():", error))
+      }
+    }
     return await this.saveOutput()
+  }
+
+  /**
+   * The compile cache's key for our text as it is NOW, for a compile done elsewhere (`takeCompiled()`'s `cacheKey`):
+   * worked out before asking, since our text may change while it compiles.
+   * - SIDE EFFECT:  this run is the editor's (`compiledForThisRun`), as `compile()`'s default is.
+   * - `undefined` with no cache installed, or when its key can't be worked out.  NEVER throws.
+   */
+  async compileCacheKey(): Promise<string | undefined> {
+    const cache = SpellProject.compileCache
+    if (!cache) return undefined
+    this.compiledForThisRun = "editor"
+    return await cache.keyFor(this).catch(() => undefined)
   }
 
   /**

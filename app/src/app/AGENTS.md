@@ -176,7 +176,8 @@ and in the app's build folder, `app/` at the app folder's root.
       - the editor's compile too (`editor.compileApp()`, through `editor.compileElsewhere`):  the worker compiles its
         copy of the project, the pages in play as the page has them, and hands back what the compile wrote
         (`SP.CompiledEntry`), which the page takes as its own and runs (`SpellProject.takeCompiled()`);
-        `compiledFrom` says `"elsewhere"`
+        `compiledFrom` says `"elsewhere"`;  a clean one is kept in the compile cache, under the key of the text it
+        compiled, when nothing was typed meanwhile (I57)
       - each file's problems too, sent after each of the worker's parses, a compile's parse too (I48), numbered by
         the edit they're of, and taken once the edit is painted (`FileStates.parsedElsewhere()`;  I45);  the editor's
         own Spell keeps the page's, which checks the names it fills

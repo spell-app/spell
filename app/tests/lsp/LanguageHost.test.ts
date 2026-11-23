@@ -68,6 +68,8 @@ describe("LanguageHost", () => {
     const entry = await host.compile({ projectId: solitaire })
     expect(entry.compiled).toContain("class Card")
     expect(entry.targets["js/solid"]!.map).toContain("Card.spell")
+    // clean:  the page keeps it in its compile cache (I57)
+    expect(entry.clean).toBe(true)
     const project = host.service.addresses.fileFor(uri)!.project
     await project.takeCompiled(entry, { save: false })
     expect(project.compiledFrom).toBe("elsewhere")

@@ -149,7 +149,8 @@ export class LanguageHost {
     this.parseTimers.delete(project)
     try {
       await project.compile(undefined, { save: false, cached: false })
-      return project.cachedEntry()
+      // clean or not:  the page keeps only a clean one in its compile cache (epic `solid-2-final` I57)
+      return { ...project.cachedEntry(), clean: project.compiledCleanly }
     } finally {
       this.sendProblems(project)
     }

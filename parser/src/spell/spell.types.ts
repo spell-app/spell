@@ -449,6 +449,12 @@ export type CompiledEntry = {
   words: Record<string, string>
   /** What it wrote for each target, by target name, `js/solid` first */
   targets: Record<string, CompiledTargetEntry>
+  /**
+   * Did it parse with no errors (`SpellProject.compiledCleanly`):  sent by the editor's language worker with its
+   * compile, so the page keeps a clean one in the cache (epic `solid-2-final` I57).
+   * - Never kept in the cache itself:  every entry there is clean.
+   */
+  clean?: boolean
 }
 
 /** What a project's compile wrote for one target:  see `CompiledEntry`. */
