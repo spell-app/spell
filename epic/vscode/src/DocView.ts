@@ -3,8 +3,9 @@
  * (VS Code's secondary side bar), beside the editor AND the Claude tab, instead of taking an editor column.
  * spell-epic's own copy (epic `epic-eject` P7), from the spell language extension's:
  * its own view and command ids (`spellEpic.*`), so both extensions run side by side.
- * Three of them, each in its own view container, so the side bar shows them as three tabs, each keeping its own page:
- * one for reading, one for answering, one for the epic tooling's own docs (Owen, 2026-11-19).
+ * Four of them, each in its own view container, so the side bar shows them as four tabs, each keeping its own page:
+ * one for reading, one for the servers, one for answering, one for the epic tooling's own docs (Owen, 2026-11-19;
+ * the servers' since epic `epic-engine` T162).
  * Which tab a page goes to is ONE rule, from its path (`docViewFor()`, epic `epic-engine` P59), never the command's:
  * - "Review" (`spellEpic.reviewView`, the Spell hat):  epic pages and saga pages (`epic open`, `/epic review`),
  *   and every other page:  guides, the home page, the list pages (`epic pages open`, `/spell-docs`)
@@ -18,6 +19,8 @@
  *     epic's details and choice pages, newest first, the waiting ones red, the pages waiting their turn on top
  *     (`showList()`);  "Other epic..." picks another
  *   - why (request r50):  a choice page Owen was answering vanished, the epic page shown in both other tabs
+ * - "Servers" (`spellEpic.serversView`, a server rack, before Epic Docs):  the Servers page (`/_epic/servers/`),
+ *   the hub's:  every project's servers, what just merged into main, what each worktree holds;  its Home button
  * - "Epic Docs" (`spellEpic.docsView`, a book):  the epic tooling's READMEs, rendered by the page server
  *   (`/_epic/docs/README-epics.md` and the pages it links to;  spell-epic's `docsRoutes.ts`)
  * - Each is a webview holding ONE iframe of the page's loopback URL, as Simple Browser does.
@@ -130,6 +133,11 @@ const VIEWS: Record<DocViewName, { id: string; empty: string }> = {
     id: "spellEpic.reviewView",
     empty:
       "Nothing to review yet:  the checklist button above (<b>This Epic's Page</b>), <code>/epic review &lt;name&gt;</code>, or <code>epic pages open &lt;page&gt;</code>."
+  },
+  servers: {
+    id: "spellEpic.serversView",
+    empty:
+      "Can't show your servers yet.  The helper that keeps them running is off.  To turn it on, start a new Claude session, then press Reload above."
   },
   details: {
     id: "spellEpic.detailsView",
@@ -265,7 +273,7 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Register the three views and their title-bar commands -- call once, from `DocPreview.register()`.
+   * Register the four views and their title-bar commands -- call once, from `DocPreview.register()`.
    * - every id is `spellEpic.*`, never the spell language extension's `spell.*`:  both register at once
    * - `retainContextWhenHidden`:  switching tabs keeps each view's page as it was, scroll and all
    */
@@ -287,6 +295,7 @@ export class DocView implements vscode.WebviewViewProvider {
       vscode.commands.registerCommand("spellEpic.reviewView.showWindowEpic", () => DocView.showWindowEpic()),
       vscode.commands.registerCommand("spellEpic.reviewView.home", () => DocView.goHome("review")),
       vscode.commands.registerCommand("spellEpic.docsView.home", () => DocView.goHome("docs")),
+      vscode.commands.registerCommand("spellEpic.serversView.home", () => DocView.goHome("servers")),
       vscode.commands.registerCommand("spellEpic.reviewView.openEpic", () => DocView.pickEpic()),
       vscode.commands.registerCommand("spellEpic.detailsView.list", () => DocView.of("details").showList()),
       ...MENU.map((item) =>

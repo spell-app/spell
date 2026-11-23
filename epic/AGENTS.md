@@ -99,8 +99,9 @@ a folder of the kit `spell`.
     command if it wants Start and Restart) watched and started
   - main's editor kept through its page server, when the repo's `app` names a `start`:  down, the page server is
     restarted (at most every 10 minutes), and its Start and Restart do the same;  else only watched
-  - what waits for main, for each repo the hub serves:  its landings (merges, pulls, commits), each running epic's
-    commits, phase, open issues, todos and questions
+  - what waits for main, for each repo the hub serves:  what merged into main lately (each branch that brought commits
+    of its own, never one that only merged main into itself), each epic worktree's commits not merged, phase, open
+    issues, todos and questions, busy or idle
   - it looks every 10 seconds, and when a session starts (the `SessionStart` hook
     [server-keeper.mjs](hooks/server-keeper.mjs) runs `epic hub kick`)
   - the ONLY one that starts, stops or restarts a main checkout's page server:  the kit's `PageServer.ensure()`,
@@ -109,7 +110,11 @@ a folder of the kit `spell`.
     fresh hub on its port
   - the top bar's Servers tab ([serverRoutes.ts](src/server/serverRoutes.ts), its page
     [servers-page.html](src/tools/servers-page.html)):  `GET /api/servers`, `/api/servers/dot`, `POST
-    /api/servers/<start|stop|restart>`;  what just reached main and what waits:  `ServerFacts`, no Claude call
+    /api/servers/<start|stop|restart>`;  what just merged into main and what waits:  `ServerFacts`, no Claude call
+    - the page (epic `epic-engine` T162):  nothing folds;  "main" and its servers as cards, what merged into main
+      lately, main's commits not on GitHub, then each epic's worktree (`⎇ <name>`, busy ones first):  its servers'
+      cards, what it hasn't merged
+    - VS Code's side bar shows it in a tab of its own, Servers, before Epic Docs ([README-vscode.md](README-vscode.md))
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.

@@ -4,42 +4,86 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!--
-      The top bar's Servers tab (epic `epic-engine` P82):  every project's servers, what just reached main, what waits.
+      The top bar's Servers tab (epic `epic-engine` P82, T162), and the Servers tab in VS Code's side bar:  every
+      project's servers as cards, under "main" and under each epic's worktree;  what just merged into main;  what waits.
       - Served by `serverRoutes` at `/_epic/servers/`, on the epic hub and every page server;  the same page each time.
       - Drawn by `servers-page.js` from `/api/servers`, the server keeper's, asked again every 10 seconds.
+      - Nothing folds, nothing numbered:  it's one short page to glance at (T162).
     -->
     <title>Servers</title>
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
     <style>
-      .servers-why {
-        display: block;
-        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
+      .spell-doc-main .servers-head {
+        margin: 24px 0 8px 0;
       }
-      .servers-state {
+      .servers-head a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .servers-head a:hover {
+        text-decoration: underline;
+      }
+      .spell-doc-main .servers-sub {
+        margin: 24px 0 4px 0;
+      }
+      .servers-list ui-item {
+        padding: 2px 0;
+      }
+      .servers-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+        gap: 12px;
+        --ui-card-margin-block: 0;
+      }
+      .servers-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 28px;
+      }
+      .servers-line + .servers-line {
+        margin-top: 4px;
+      }
+      .servers-address {
+        font-variant-numeric: tabular-nums;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .servers-buttons {
+        display: flex;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .servers-stopped {
         display: flex;
         flex-wrap: wrap;
-        align-items: center;
-        gap: 4px 8px;
-      }
-      .servers-what {
-        display: block;
-        font-size: 0.875em;
+        gap: 4px 16px;
+        margin-top: 8px;
         color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
       }
+      .servers-stopped-one {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
       .servers-list {
-        margin: 0;
-        padding-inline-start: 20px;
+        margin-top: 8px;
       }
-      .servers-list li {
-        margin: 4px 0;
-      }
-      .servers-new {
-        font-weight: 600;
+      .servers-when,
+      .servers-quiet,
+      .servers-github {
+        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
       }
       .servers-when {
         font-variant-numeric: tabular-nums;
-        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
-        margin-inline-end: 8px;
+      }
+      .servers-github {
+        margin: 16px 0 0 0;
+      }
+      .servers-ahead strong {
+        color: var(--ui-orange, light-dark(#c2410c, #fb923c));
       }
     </style>
   </head>
@@ -53,22 +97,7 @@
           </header>
         </ui-sticky>
         <div id="servers-problem"></div>
-        <ui-section id="servers" label="1. Servers" sticky collapsible dividing>
-          <ui-icon slot="icon" name="terminal"></ui-icon>
-          <div id="servers-rows"></div>
-        </ui-section>
-        <ui-section id="on-main" label="2. Just on main" sticky collapsible dividing>
-          <ui-icon slot="icon" name="code branch"></ui-icon>
-          <div id="servers-main"></div>
-        </ui-section>
-        <ui-section id="waiting" label="3. Waiting for main" sticky collapsible dividing>
-          <ui-icon slot="icon" name="clock rotate left"></ui-icon>
-          <div id="servers-waiting"></div>
-        </ui-section>
-        <ui-section id="github" label="4. Waiting for GitHub" sticky collapsible dividing>
-          <ui-icon slot="icon" name="flag"></ui-icon>
-          <div id="servers-github"></div>
-        </ui-section>
+        <div id="servers-page"></div>
       </main>
     </div>
     <script type="module" src="/_epic/assets/servers-page.js"></script>

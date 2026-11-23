@@ -286,14 +286,19 @@ export type KeptServer = {
   own?: boolean
 }
 
-/** A move of the base branch, from its reflog (`ServerFacts.justOnMain()`). */
+/**
+ * Work that landed on the base branch, from its reflog (`ServerFacts.mergedIntoMain()`):  a merge, a pull or a commit
+ * that brought commits of its own;  never a move that brought none (a branch that only merged `main` into itself)
+ */
 export type MainMove = {
   sha: string
   /** when, ISO */
   at: string
-  /** the reflog's words:  `merge epic-engine:  Fast-forward` */
-  how: string
-  /** the commit it moved to:  its subject */
+  /** the branch merged in (`editor`);  `pull` for a pull;  none:  a commit made on the base branch itself */
+  branch?: string
+  /** how many commits of its own it brought, merges left out */
+  commits: number
+  /** the newest of those commits:  its subject */
   subject: string
   /** within the last `RECENT_MINUTES` */
   isNew: boolean
@@ -301,13 +306,17 @@ export type MainMove = {
   repo?: string
 }
 
-/** A running epic's work not on the base branch yet (`ServerFacts.waitingForMain()`). */
-export type WaitingEpic = {
+/**
+ * An epic's worktree, and what it holds that the base branch hasn't got (`ServerFacts.epicWorktrees()`):
+ * every running epic's, busy or idle
+ */
+export type EpicWorktree = {
   epic: string
   worktree: string
   url: string
   /** its branch's commits the base branch hasn't got */
   ahead: number
+  /** the phase under way */
   phase?: string
   agents?: number
   /** the turn it holds now (`Turns`):  `test`, `merge` */
@@ -316,14 +325,22 @@ export type WaitingEpic = {
   open?: string
   /** its repo, once the tab lists two or more */
   repo?: string
-  why: string
+}
+
+/** A base branch's commits GitHub (`origin`) hasn't got (`ServerFacts.notOnGitHub()`). */
+export type NotOnGitHub = {
+  /** the base branch:  `main` */
+  base: string
+  count: number
+  /** its repo, once the tab lists two or more */
+  repo?: string
 }
 
 /** What the Servers tab says beside the servers (`ServerFacts`). */
 export type ServerFactsAnswer = {
-  justOnMain: MainMove[]
-  waitingForMain: WaitingEpic[]
-  waitingForGitHub?: string
+  mergedIntoMain: MainMove[]
+  epicWorktrees: EpicWorktree[]
+  notOnGitHub: NotOnGitHub[]
 }
 
 /** `GET /api/servers`:  every server, how often the keeper looks, and the facts beside them. */
