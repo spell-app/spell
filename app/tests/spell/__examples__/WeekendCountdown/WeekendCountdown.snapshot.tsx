@@ -34,14 +34,17 @@ export class WeekendCountdown extends App {
     return (
       <ui-container width="32em">
         <ui-segment padding="lg">
-          <ui-header hidden={this.isTheWeekend ? undefined : true}>It's the weekend!</ui-header>
-          <ui-text color="grey" hidden={!this.isTheWeekend ? undefined : true}>Weekend starts in</ui-text>
-          <ui-statistics equal={true} size="small" hidden={!this.isTheWeekend ? undefined : true}>
-            <ui-statistic value={core.durationPartOf(this.timeLeft, "days")} label="Days" />
-            <ui-statistic value={core.twoDigits(core.durationPartOf(this.timeLeft, "hours"))} label="Hr" />
-            <ui-statistic value={core.twoDigits(core.durationPartOf(this.timeLeft, "minutes"))} label="Min" />
-            <ui-statistic value={core.twoDigits(core.durationPartOf(this.timeLeft, "seconds"))} label="Sec" />
-          </ui-statistics>
+          {core.drawIf(() => this.isTheWeekend, () => <>
+            <ui-header>It's the weekend!</ui-header>
+          </>, () => <>
+            <ui-text color="grey">Weekend starts in</ui-text>
+            <ui-statistics equal={true} size="small">
+              <ui-statistic value={core.durationPartOf(this.timeLeft, "days")} label="Days" />
+              <ui-statistic value={core.twoDigits(core.durationPartOf(this.timeLeft, "hours"))} label="Hr" />
+              <ui-statistic value={core.twoDigits(core.durationPartOf(this.timeLeft, "minutes"))} label="Min" />
+              <ui-statistic value={core.twoDigits(core.durationPartOf(this.timeLeft, "seconds"))} label="Sec" />
+            </ui-statistics>
+          </>)}
         </ui-segment>
       </ui-container>
     )

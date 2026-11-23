@@ -149,6 +149,22 @@ def test_draw_items_draws_each_item_of_a_spell_list(core: Core) -> None:
     assert core.draw_items(None) is None
 
 
+def test_draw_if_draws_only_the_branch_that_holds(core: Core) -> None:
+    drawn: list[str] = []
+
+    def branch(name: str) -> object:
+        drawn.append(name)
+        return [name]
+
+    assert core.draw_if(lambda: False, lambda: branch("a"), lambda: True, lambda: branch("b"), lambda: branch("c")) == [
+        "b"
+    ]
+    assert core.draw_if(lambda: False, lambda: branch("a"), lambda: branch("otherwise")) == ["otherwise"]
+    assert core.draw_if(lambda: False, lambda: branch("a")) is None
+    # a branch that isn't the one is never drawn
+    assert drawn == ["b", "otherwise"]
+
+
 def test_a_draw_that_fails_shows_a_stand_in(core: Core, capsys: pytest.CaptureFixture[str]) -> None:
     drawn = h("td", None, core.draw_thing(Broken()), core.draw_thing(Card(rank="ace")))
     assert str(drawn) == (

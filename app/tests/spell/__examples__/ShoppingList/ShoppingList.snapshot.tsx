@@ -62,10 +62,9 @@ export class Item extends View {
           <ui-checkbox name="got" aria-label="Got it" />
           <ui-text class="how-much" bold={true}>{this.howMuch}</ui-text>
           <ui-text class="name">{this.name}</ui-text>
-          <ui-text class="for" color="grey" size="small" hidden={this.recipe !== "" ? undefined : true}>
-            {"for "}
-            {this.recipe}
-          </ui-text>
+          {core.drawIf(() => this.recipe !== "", () => <>
+            <ui-text class="for" color="grey" size="small">for {this.recipe}</ui-text>
+          </>)}
           {core.drawAction(this, "remove", { "icon-only": true, appearance: "tertiary" })}
         </ui-stack>
       </ui-form>

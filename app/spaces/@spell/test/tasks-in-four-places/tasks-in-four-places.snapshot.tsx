@@ -60,9 +60,9 @@ export class Task extends View {
           <ui-icon name="grip vertical" color="grey" aria-label="Drag" />
           <ui-checkbox name="done" aria-label="Done" />
           <ui-input part="title" name="title" aria-label="Task" appearance="transparent" fluid={true} />
-          <ui-label size="tiny" color={this.priority === "high" ? "red" : "grey"} hidden={this.priority !== "normal" ? undefined : true}>
-            {this.priority}
-          </ui-label>
+          {core.drawIf(() => this.priority !== "normal", () => <>
+            <ui-label size="tiny" color={this.priority === "high" ? "red" : "grey"}>{this.priority}</ui-label>
+          </>)}
         </ui-stack>
       </ui-form>
     )
@@ -494,7 +494,9 @@ export class Checklist extends ViewableList<Task> {
   @drawn draw() {
     return (
       <ui-stack spacing="xs">
-        <ui-text color="grey" hidden={this.isEmpty ? undefined : true}>Nothing to do</ui-text>
+        {core.drawIf(() => this.isEmpty, () => <>
+          <ui-text color="grey">Nothing to do</ui-text>
+        </>)}
         <slot />
       </ui-stack>
     )
@@ -693,8 +695,7 @@ export class TaskList extends App {
           <ui-toolbar menu="tasks menu" aria-label="Tasks">
             <ui-text slot="title" size="large">Task List</ui-text>
             <ui-text slot="right">
-              <span hidden={this.activeCount === 0 ? undefined : "until-found"}>All done</span>
-              <span hidden={!(this.activeCount === 0) ? undefined : "until-found"}>{this.activeCount} to do</span>
+              {core.drawIf(() => this.activeCount === 0, () => <>All done</>, () => <>{this.activeCount} to do</>)}
             </ui-text>
           </ui-toolbar>
           <ui-form prop:value={this}>

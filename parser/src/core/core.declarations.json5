@@ -2610,6 +2610,19 @@
     },
     {
       "kind": "method",
+      "name": "drawIf",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "...parts"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "An if-chain inside markup, `<text><if it is done>✓<otherwise>{its title}</></text>`:  ONLY the branch whose condition holds is drawn, and drawn again when another one comes to hold."
+    },
+    {
+      "kind": "method",
       "name": "drawAction",
       "of": "core",
       "module": "drawing",

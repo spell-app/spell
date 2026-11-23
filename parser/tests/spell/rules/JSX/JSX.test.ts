@@ -178,6 +178,52 @@ describe("a JSX text keeps its spaces, as JSX reads them", () => {
   })
 })
 
+describe("an if-chain inside markup:  only the branch that holds is drawn", () => {
+  const TASK = [
+    'a "task" is a thing:',
+    '\tits "done" is yes or no',
+    '\tits "title" is text',
+    "\tto draw it:",
+    "\t\t<p>",
+    "\t\t\t<if its done is yes>",
+    "\t\t\t\t<b>{its title}</b>",
+    "\t\t\t<otherwise>",
+    "\t\t\t\t{its title} to do",
+    "\t\t\t</>",
+    "\t\t</p>"
+  ]
+
+  test("ONE `core.drawIf()`:  each branch's condition, then its children;  no branch drawn hidden", () => {
+    const draw = drawOf(TASK)
+    expect(draw).toContain(
+      'core.drawIf(() => this.done, () => [h("b", () => this.title)], () => [() => this.title, " to do"])'
+    )
+    expect(draw).not.toContain("hidden")
+  })
+
+  test("TypeScript and Python the same:  each branch a fragment, Python's a list", () => {
+    expect(oneLine(compiled(TASK, SP.TARGETS["ts/solid"]!.writer))).toContain(
+      "{core.drawIf(() => this.done, () => <> <b>{this.title}</b> </>, () => <>{this.title} to do</>)}"
+    )
+    expect(oneLine(compiled(TASK, SP.TARGETS.py!.writer))).toContain(
+      'core.draw_if( lambda: self.done, lambda: [h("b", self.title)], lambda: [self.title, " to do"], )'
+    )
+  })
+
+  test("an `<otherwise if>` is a condition and a branch;  a chain with no `<otherwise>` ends on its last branch", () => {
+    const lines = [...TASK.slice(0, 5), "\t\t\t<if its done is yes>A<otherwise if its title is empty>B</>", "\t\t</p>"]
+    expect(oneLine(drawOf(lines))).toContain('core.drawIf( () => this.done, () => ["A"], () => !this.title, () => ["B"] )')
+  })
+
+  test("what's after the chain, and a second chain, are the element's own", () => {
+    const lines = [...TASK.slice(0, 10), "\t\t\t<i>after</i>", "\t\t\t<if its done is yes>again</>", "\t\t</p>"]
+    const draw = drawOf(lines)
+    expect(draw).toContain('h("i", "after"),\n')
+    expect(draw).toContain('() => core.drawIf(() => this.done, () => ["again"])')
+    expect(draw.match(/core\.drawIf/g)).toHaveLength(2)
+  })
+})
+
 /** `lines` as one file, compiled by `writer` (javascript by default). */
 function compiled(lines: string[], writer: P.ProgramWriter = P.JSWriter.instance): string {
   const [file] = parseSpellProject([{ path: "/test.spell", contents: lines.join("\n") }]).files
@@ -190,6 +236,11 @@ function drawOf(lines: string[]): string {
   const js = compiled(lines)
   const start = js.indexOf("draw() {")
   return js.slice(start, js.indexOf("\n  }", start) + 4)
+}
+
+/** `text` on one line:  each run of spaces and line breaks one space. */
+function oneLine(text: string): string {
+  return text.replace(/\s+/g, " ")
 }
 
 /** The parse errors of `lines`, as one file. */

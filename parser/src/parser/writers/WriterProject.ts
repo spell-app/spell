@@ -162,8 +162,16 @@ export class WriterProject {
   readonly elementsThatWait = new WeakSet<P.ASTJSXElement>()
   /** Drawings that read what waits somewhere with no spot of its own, an `if` or the outermost element's attribute:  held whole. */
   readonly heldDrawings = new WeakSet<P.ASTPropertyDefinition>()
-  /** The functions a drawing's loops draw each item with:  part of the drawing, so they never wait, and what they read is the drawing's. */
-  readonly drawnLoopFunctions = new WeakSet<P.ASTMethodDefinition>()
+  /**
+   * A drawing's if-chains inside markup (`core.drawIf()`) whose conditions read what waits:  each in a spot of its own,
+   * ONE spinner there while it waits (`core.drawWaiting()`), so the rest of the drawing shows at once.
+   */
+  readonly ifsThatWait = new WeakSet<P.ASTNode>()
+  /**
+   * The functions a drawing calls as it draws:  each item's of a loop, an if-chain's conditions and branches
+   * (`core.drawIf()`).  Part of the drawing, so they never wait, and what they read is the drawing's.
+   */
+  readonly drawnFunctions = new WeakSet<P.ASTMethodDefinition>()
   /** Has `findWaiting()` run?  With none, e.g. `JSWriter.instance` writing one node, only `core`'s own calls wait. */
   hasFoundWaiting = false
 
@@ -210,8 +218,7 @@ export class WriterProject {
     const named = new Map<P.ASTMethodDefinition, string | undefined>()
     const getters = new Set<P.ASTMethodDefinition>()
     forEachNode(files, (node) => {
-      const drawnLoop = this.drawnLoopFunctionOf(node)
-      if (drawnLoop) named.set(drawnLoop, DRAWN_LOOP_FUNCTION_NAME)
+      for (const drawn of this.drawnFunctionsOf(node)) named.set(drawn, DRAWN_FUNCTION_NAME)
       if (node instanceof P.ASTPropertyDefinition && node.method) named.set(node.method, node.property.value)
       else if (node instanceof P.ASTPropertyDefinition && node.get) {
         named.set(node.get, node.property.value)
@@ -363,11 +370,13 @@ export class WriterProject {
    * - an attribute of an element inside another:  that element in a spot of its own, `elementsThatWait`
    * - anywhere else, an `if` or the outermost element's attribute:  the whole thing is held, `heldDrawings`
    * - not in a function inside it, a click's handler:  that's its own, and it waits when it's called
-   *   - but a loop's is the drawing's:  `drawnLoopFunctions`
+   *   - but a loop's is the drawing's, and an if-chain's:  `drawnFunctions`
+   * - an if-chain inside markup whose conditions wait:  the chain in a spot of its own, `ifsThatWait`;
+   *   its branches, as an element's children
    */
   protected noteDrawing(definition: P.ASTPropertyDefinition): void {
     const isOwnFunction = (node: P.ASTNode) =>
-      node instanceof P.ASTMethodDefinition && !this.drawnLoopFunctions.has(node)
+      node instanceof P.ASTMethodDefinition && !this.drawnFunctions.has(node)
     const reads = (node: unknown): boolean => {
       if (Array.isArray(node)) return node.some(reads)
       if (!(node instanceof P.ASTNode) || isOwnFunction(node)) return false
@@ -390,7 +399,14 @@ export class WriterProject {
     }
     const visitChildren = (node: P.ASTJSXElement): void => {
       for (const child of node.childValues) {
-        if (child instanceof P.ASTJSXLiveValue && reads(child.expression)) {
+        const chain = child instanceof P.ASTJSXLiveValue ? ifChainOf(child.expression) : undefined
+        if (chain && child instanceof P.ASTJSXLiveValue) {
+          if (chain.conditions.some(reads)) this.ifsThatWait.add(child).add(child.expression)
+          for (const branch of chain.branches) {
+            if (branch instanceof P.ASTJSXElement) visitChildren(branch)
+            else visit(branch)
+          }
+        } else if (child instanceof P.ASTJSXLiveValue && reads(child.expression)) {
           this.spotsThatWait.add(child).add(child.expression)
         } else if (child instanceof P.ASTJSXElement && reads(child.attrs)) {
           this.elementsThatWait.add(child)
@@ -401,16 +417,19 @@ export class WriterProject {
     visit(definition.method!.body)
   }
 
-  /** SIDE EFFECT:  notes the function `node` draws each item with, if it's a drawing's loop, and returns it. */
-  protected drawnLoopFunctionOf(node: P.ASTNode): P.ASTMethodDefinition | undefined {
-    if (!isCoreCall(node)) return undefined
+  /**
+   * SIDE EFFECT:  notes the functions `node` draws with, if it's a drawing's loop (the one it draws each item with)
+   * or an if-chain (each condition and branch), and returns them.
+   */
+  protected drawnFunctionsOf(node: P.ASTNode): P.ASTMethodDefinition[] {
+    if (!isCoreCall(node)) return []
     const { methodName, args } = node as P.ASTScopedMethodInvocation
-    if (!DRAWN_LOOPS.has(methodName)) return undefined
-    const arg = args.args?.[1]
-    const callback = arg && unwrapped(arg)
-    if (!(callback instanceof P.ASTMethodDefinition)) return undefined
-    this.drawnLoopFunctions.add(callback)
-    return callback
+    const given = methodName === DRAW_IF ? (args.args ?? []) : DRAWN_LOOPS.has(methodName) ? [args.args?.[1]] : []
+    const functions = given
+      .map((arg) => arg && unwrapped(arg))
+      .filter((arg): arg is P.ASTMethodDefinition => arg instanceof P.ASTMethodDefinition)
+    for (const each of functions) this.drawnFunctions.add(each)
+    return functions
   }
 
   /**
@@ -1100,8 +1119,30 @@ export type ProgramPlace = {
 /** `core`'s calls that draw a list, handed the function that draws each item. */
 const DRAWN_LOOPS = new Set(["drawEach", "drawRead"])
 
-/** What `findWaiting()` calls such a function:  a name `DRAWING_NAME` knows, so it never waits. */
-const DRAWN_LOOP_FUNCTION_NAME = "drawEach"
+/** `core`'s call that draws an if-chain inside markup, handed each condition and branch as a function. */
+const DRAW_IF = "drawIf"
+
+/** What `findWaiting()` calls a function a drawing draws with:  a name `DRAWING_NAME` knows, so it never waits. */
+const DRAWN_FUNCTION_NAME = "drawEach"
+
+/**
+ * `expression`'s if-chain, if it's one (`core.drawIf(() => c1, () => [...], ...)`):  its conditions' and its
+ * branches' values, each its function's `return`.
+ */
+function ifChainOf(expression: P.ASTExpression): { conditions: P.ASTNode[]; branches: P.ASTNode[] } | undefined {
+  const call = unwrapped(expression)
+  if (!isCoreCall(call) || (call as P.ASTScopedMethodInvocation).methodName !== DRAW_IF) return undefined
+  const values = ((call as P.ASTScopedMethodInvocation).args.args ?? []).map((arg) => {
+    const method = unwrapped(arg)
+    const [statement] = method instanceof P.ASTMethodDefinition ? (method.body.statements ?? []) : []
+    return statement instanceof P.ASTReturnStatement && statement.value ? statement.value : arg
+  })
+  // condition, branch ... and a last branch alone, the `<otherwise>`
+  return {
+    conditions: values.filter((_, at) => at % 2 === 0 && at + 1 < values.length),
+    branches: values.filter((_, at) => at % 2 === 1 || at + 1 === values.length)
+  }
+}
 
 /**
  * A handler's name, by spell's name:  `on_click`, `whenCardDroppedOn`, `after_move_to_$pile`.
