@@ -85,9 +85,12 @@ function draw(answer) {
   drawServers(answer.servers)
   drawMain(answer.justOnMain)
   drawWaiting(answer.waitingForMain)
-  document
-    .getElementById("servers-github")
-    .replaceChildren(el("p", {}, answer.waitingForGitHub ?? "Nothing is waiting.  GitHub has everything on main."))
+  document.getElementById("servers-github").replaceChildren(
+    // a line per repo, once there are two or more
+    ...(answer.waitingForGitHub ?? "Nothing is waiting.  GitHub has everything on main.")
+      .split("\n")
+      .map((line) => el("p", {}, line))
+  )
 }
 
 /**
@@ -108,7 +111,9 @@ function drawServers(servers) {
       : server.port
         ? `port ${server.port}`
         : undefined
-    const buttons = server.canStart ? (BUTTONS[server.state] ?? []).map((action) => actionButton(server, action)) : []
+    // its own list, when it takes only some (main's editor:  never Stop)
+    const actions = (BUTTONS[server.state] ?? []).filter((action) => !server.actions || server.actions.includes(action))
+    const buttons = server.canStart ? actions.map((action) => actionButton(server, action)) : []
     return el(
       "tr",
       {},
@@ -190,6 +195,7 @@ function drawMain(moves) {
             el("span", { className: "servers-when" }, when(move.at)),
             move.isNew ? el("ui-label", { size: "mini", color: "blue" }, "new") : undefined,
             " ",
+            move.repo ? `${move.repo}:  ` : "",
             // its first part only:  a commit's subject says what, then ` -- ` and the details
             move.subject.split(" -- ")[0]
           )
@@ -205,7 +211,9 @@ function drawWaiting(epics) {
     ? el(
         "ul",
         { className: "servers-list" },
-        epics.map((epic) => el("li", {}, el("a", { href: epic.url }, epic.epic), `:  ${epic.why}`))
+        epics.map((epic) =>
+          el("li", {}, epic.repo ? `${epic.repo}:  ` : "", el("a", { href: epic.url }, epic.epic), `:  ${epic.why}`)
+        )
       )
     : el("p", {}, "No epic is running.")
   document.getElementById("servers-waiting").replaceChildren(list)

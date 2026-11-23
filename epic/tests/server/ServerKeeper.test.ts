@@ -142,6 +142,54 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     }
   })
 
+  it("main's editor, when the app says how it starts:  down under a running page server restarts it, then waits", async () => {
+    writeFileSync(
+      join(main, ".epic/config.json5"),
+      JSON.stringify({
+        worktreesFolder: "../worktrees",
+        app: { urlFile: ".spell-server.editor.json", start: "node bin/spell.mjs server start" }
+      })
+    )
+    servers.running.add(main)
+    const kept = keeper()
+    await kept.look()
+    expect(servers.stops).toEqual([{ checkout: main, restart: false }])
+    expect(rowOf(kept, "kit/editor")).toMatchObject({
+      state: "starting",
+      canStart: true,
+      actions: ["start", "restart"]
+    })
+    // Vite building:  still starting;  then down, and not restarted again for a while
+    now += 60_000
+    await kept.look()
+    expect(rowOf(kept, "kit/editor")).toMatchObject({ state: "starting" })
+    now += 60_000
+    await kept.look()
+    expect(rowOf(kept, "kit/editor")).toMatchObject({ state: "down" })
+    expect(kept.dot()).toMatchObject({ dot: true, why: "Down:  kit's editor" })
+    expect(servers.stops).toHaveLength(1)
+    // its Restart restarts the page server;  its Stop isn't offered, and refused
+    await kept.act("restart", main, "editor")
+    expect(servers.stops).toHaveLength(2)
+    await expect(kept.act("stop", main, "editor")).rejects.toMatchObject({ status: 400 })
+    // up:  running, left alone
+    writeFileSync(
+      join(main, ".spell-server.editor.json"),
+      JSON.stringify({ url: "http://127.0.0.1:5173/", pid: process.pid })
+    )
+    await kept.look()
+    expect(rowOf(kept, "kit/editor")).toMatchObject({ state: "running", address: "http://127.0.0.1:5173/" })
+    expect(servers.stops).toHaveLength(2)
+  })
+
+  it("main's editor with no start command:  only watched", async () => {
+    servers.running.add(main)
+    const kept = keeper()
+    await kept.look()
+    expect(rowOf(kept, "kit/editor")).toMatchObject({ state: "stopped", canStart: false })
+    expect(servers.stops).toEqual([])
+  })
+
   it("a checkout the hub doesn't serve:  404", async () => {
     await expect(keeper().act("start", join(folder, "elsewhere"))).rejects.toMatchObject({ status: 404 })
   })

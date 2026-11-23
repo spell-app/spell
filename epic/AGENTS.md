@@ -94,9 +94,13 @@ a folder of the kit `spell`.
   - `epic worktree remove <name>`, never a bare `git worktree remove`, in the skills and anything new
   - the worktree hook and `epic worktree move` do it themselves;  the session-start hook stops the rest, hourly
 - The epic server, the hub, is also the SERVER KEEPER (epic `epic-engine` P82;  [ServerKeeper.ts](src/server/ServerKeeper.ts)):
-  - every repo's main page server kept up on main's code, its editor watched, each worktree's page server stopped after
-    30 minutes unused, and the repo's own servers (its `.epic/config.json5`'s `servers`:  a name, a URL or port to
-    check, and a `start` command if it wants Start and Restart) watched and started
+  - every repo's main page server kept up on main's code, each worktree's page server stopped after 30 minutes unused,
+    and the repo's own servers (its `.epic/config.json5`'s `servers`:  a name, a URL or port to check, and a `start`
+    command if it wants Start and Restart) watched and started
+  - main's editor kept through its page server, when the repo's `app` names a `start`:  down, the page server is
+    restarted (at most every 10 minutes), and its Start and Restart do the same;  else only watched
+  - what waits for main, for each repo the hub serves:  its landings (merges, pulls, commits), each running epic's
+    commits, phase, open issues, todos and questions
   - it looks every 10 seconds, and when a session starts (the `SessionStart` hook
     [server-keeper.mjs](hooks/server-keeper.mjs) runs `epic hub kick`)
   - the ONLY one that starts, stops or restarts a main checkout's page server:  the kit's `PageServer.ensure()`,

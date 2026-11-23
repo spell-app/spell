@@ -23,7 +23,10 @@ import type { KeptServer, KeptServerState, Repo, ServersAnswer } from "./server.
  *   - the MAIN checkout's page server, in a Spell kit:  always on;  started when it's down, restarted when it runs older
  *     than its code (main moved:  `PageServer.ensureHere()`);  a stop asked for by hand (`spell server stop`) LEAVES it
  *     stopped, until Start
- *   - its editor:  watched, from its record;  it comes and goes with the page server, so it has no buttons
+ *   - its editor:  it comes and goes with the page server (its child), so it's kept through it:  when the repo's
+ *     settings say how the app starts (`EpicConfig.app.start`, the App tab's), an editor down under a running page
+ *     server restarts the page server, at most once every `EDITOR_RETRY_MINUTES`;  its Start and Restart do the same;
+ *     without a start command, it's only watched, with no buttons
  *   - the repo's OWN servers, from its `.epic/config.json5` (`servers`:  a proxy server, say):  watched, by a URL or a
  *     port;  started when down if it names a `start` command, else only shown
  *   - each WORKTREE's page server:  on demand (its first opener starts it), on the port written down for it
@@ -179,8 +182,8 @@ export class ServerKeeper {
   private async lookAtRepo(repo: Repo): Promise<KeptServer[]> {
     const rows: KeptServer[] = []
     if (isKit(repo.checkout)) {
-      rows.push(await this.keepMainPageServer(repo))
-      rows.push(this.editorRow(repo, repo.checkout))
+      const pageServer = await this.keepMainPageServer(repo)
+      rows.push(pageServer, await this.keepMainEditor(repo, pageServer))
     }
     for (const server of EpicConfig.of(repo.checkout).servers) rows.push(await this.keepOwnServer(repo, server))
     if (isKit(repo.checkout)) rows.push(...(await this.lookAtWorktrees(repo)))
@@ -229,6 +232,35 @@ export class ServerKeeper {
     const record = readJson<{ url?: string; pid?: number }>(join(checkout, EDITOR_FILE))
     const isUp = record?.url !== undefined && record.pid !== undefined && SRV.isProcessAlive(record.pid)
     return { ...row, canStart: false, state: isUp ? "running" : "stopped", ...(isUp && { address: record.url }) }
+  }
+
+  /**
+   * The main checkout's editor, kept through its page server, when the repo's settings say how the app starts:
+   * - down under a running page server:  the page server restarted, which brings it back;  tried again only after
+   *   `EDITOR_RETRY_MINUTES`, so an editor that won't build never keeps main's pages restarting
+   * - the page server stopped or down:  stopped too, it comes back with it
+   * - started less than `EDITOR_WAIT_SECONDS` ago (the page server's restart):  starting, Vite may be building
+   */
+  private async keepMainEditor(repo: Repo, pageServer: KeptServer): Promise<KeptServer> {
+    const row = this.editorRow(repo, repo.checkout)
+    if (!EpicConfig.of(repo.checkout).app?.start) return row
+    const kept: KeptServer = { ...row, canStart: true, actions: ["start", "restart"] }
+    if (row.state === "running") return kept
+    if (pageServer.state !== "running") return { ...kept, state: "stopped", why: "It comes back with the page server." }
+    const started = Math.max(this.lastStart.get(row.id) ?? 0, pageServer.since ? Date.parse(pageServer.since) : 0)
+    if (this.now() - started < EDITOR_WAIT_SECONDS * 1000) return { ...kept, state: "starting" }
+    const tried = this.lastStart.get(row.id)
+    if (tried !== undefined && this.now() - tried < EDITOR_RETRY_MINUTES * 60_000)
+      return { ...kept, state: "down", why: `It didn't come back:  see ${EDITOR_LOG}.  Restart tries again.` }
+    await this.restartForEditor(repo)
+    return { ...kept, state: "starting", why: "started:  it was down" }
+  }
+
+  /** the main page server restarted, so its editor starts with it.  SIDE EFFECT:  the editor's last start, now */
+  private async restartForEditor(repo: Repo): Promise<SRV.KeeperAnswer> {
+    this.lastStart.set(idOf(repo, "editor"), this.now())
+    await this.control.stop(repo.checkout)
+    return { ...(await this.control.ensure(repo.checkout)), state: "starting" }
   }
 
   /** One of the repo's own servers (`EpicConfig.servers`), watched;  started when down, if it says how. */
@@ -294,18 +326,23 @@ export class ServerKeeper {
    * - `start`:  a server held stopped is let go and started
    * - `stop`:  stopped and HELD stopped:  the keeper starts it no more until Start (a worktree's:  just stopped)
    * - `restart`:  stopped, then started, on its code now
+   * - main's editor (`start`, `restart`):  its page server restarted, which brings it back (`keepMainEditor()`)
    * - throws `SRV.HttpError` 404 for a server it doesn't keep, 400 for one it can't start
    */
   async act(action: SRV.KeeperAction, checkout: string, server = "page server"): Promise<SRV.KeeperAnswer> {
     const { repo, worktree } = this.whereIs(checkout)
     const id = idOf(repo, server, worktree)
     const own = worktree ? undefined : EpicConfig.of(repo.checkout).servers.find((each) => each.name === server)
-    if (action === "stop" && !worktree) this.hold(id, true)
-    if (action !== "stop") this.hold(id, false)
+    // only what the keeper starts by itself is held:  main's page server, the repo's own
+    const holds = Boolean(own) || server === "page server"
+    if (holds && action === "stop" && !worktree) this.hold(id, true)
+    if (holds && action !== "stop") this.hold(id, false)
     let answer: SRV.KeeperAnswer
     if (own) answer = await this.actOnOwn(action, repo, own)
+    else if (server === "editor" && !worktree && action !== "stop" && EpicConfig.of(repo.checkout).app?.start)
+      answer = await this.restartForEditor(repo)
     else if (server === "page server") answer = await this.actOnPageServer(action, worktree ? checkout : repo.checkout)
-    else throw new SRV.HttpError(400, `the ${server} comes with the page server:  start or restart that instead`)
+    else throw new SRV.HttpError(400, `the ${server} comes with the page server:  ${action} that instead`)
     void this.look()
     return answer
   }
@@ -506,6 +543,15 @@ const PAGE_SERVER_FILE = ".spell-server.json"
 
 /** A checkout's editor record (spell-app's `EditorServer`). */
 const EDITOR_FILE = ".spell-server.editor.json"
+
+/** How long an editor may take to answer after its page server starts, seconds:  Vite may be building its cache. */
+const EDITOR_WAIT_SECONDS = 90
+
+/** How long after the keeper restarted the page server for a down editor before it tries again, minutes. */
+const EDITOR_RETRY_MINUTES = 10
+
+/** Where the editor's output goes, in the main checkout. */
+const EDITOR_LOG = ".spell-server.editor.log"
 
 /** How long a stop waits for a process to end before it kills it, ms. */
 const STOP_WAIT_MS = 10_000

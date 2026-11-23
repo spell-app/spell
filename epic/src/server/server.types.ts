@@ -281,6 +281,8 @@ export type KeptServer = {
   since?: string
   lastRequest?: string
   canStart: boolean
+  /** the buttons it takes, when not every one (main's editor:  Start and Restart, never Stop) */
+  actions?: ("start" | "stop" | "restart")[]
   own?: boolean
 }
 
@@ -295,6 +297,8 @@ export type MainMove = {
   subject: string
   /** within the last `RECENT_MINUTES` */
   isNew: boolean
+  /** its repo, once the tab lists two or more */
+  repo?: string
 }
 
 /** A running epic's work not on the base branch yet (`ServerFacts.waitingForMain()`). */
@@ -308,6 +312,10 @@ export type WaitingEpic = {
   agents?: number
   /** the turn it holds now (`Turns`):  `test`, `merge` */
   turn?: string
+  /** its open issues, todos and questions, in words:  `3 issues, 1 todo open` */
+  open?: string
+  /** its repo, once the tab lists two or more */
+  repo?: string
   why: string
 }
 
