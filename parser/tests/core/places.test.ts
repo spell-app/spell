@@ -1,7 +1,7 @@
 import { createMemo, createRoot, createSignal, enableExternalSource, flush, onCleanup } from "solid-js"
 import { beforeAll, beforeEach, describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 
-import { bridgeSolid, keysOf, observe } from "spell/util"
+import { bridgeSolid, getProp, keysOf, observe } from "spell/util"
 import { CalendarSettings } from "spell/util/measures/CalendarSettings"
 import { MemoryStorage } from "spell/util/persist/MemoryStorage"
 import {
@@ -189,6 +189,46 @@ describe("PlaceThings, one thing per id", () => {
     const [recipe] = things.thingsFrom(result) as Recipe[]
     expect(recipe!.author).toBeInstanceOf(Person)
     expect(recipe!.author.name).toBe("Owen")
+  })
+
+  test("a field the type doesn't name is plain data:  a JSON Schema's $ref inside it is never followed", async () => {
+    const settings = {
+      type: "object",
+      properties: { overrides: { $ref: "#/definitions/Overrides" }, owner: { $ref: "Person#owen" } },
+      definitions: { Overrides: { type: "object" } }
+    }
+    const { places, things, read } = cookbook([{ id: "r-1", title: "Soup", settings }])
+    places.cache.keep("Person", "owen", { id: "owen", name: "Owen" })
+    const result = read()
+    await result.load()
+    const [recipe] = things.thingsFrom(result) as Recipe[]
+    expect(recipe!.title).toBe("Soup")
+    expect(getProp(recipe!, "settings")).toEqual(settings)
+  })
+
+  test("a row changed to hold a JSON Schema's $ref in a field the type doesn't name:  still plain data", async () => {
+    const { place, things, read } = cookbook([{ id: "r-1", title: "Soup", settings: {} }])
+    const result = read()
+    await result.load()
+    const [recipe] = things.thingsFrom(result) as Recipe[]
+    const settings = { items: [{ $ref: "#/definitions/Step" }] }
+    await changeIt(place, { settings })
+    await result.reload()
+    expect(things.thingsFrom(result)[0]).toBe(recipe)
+    expect(getProp(recipe!, "settings")).toEqual(settings)
+  })
+
+  test("a $ref that isn't a reference, in a field the type names:  kept as data, one warning, the read not failed", async () => {
+    const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})
+    onTestFinished(() => warn.mockRestore())
+    const rows = [1, 2].map((n) => ({ id: `r-${n}`, title: "Soup", author: { $ref: "#/definitions/Person" } }))
+    const { things, read } = cookbook(rows)
+    const result = read()
+    await result.load()
+    const recipes = things.thingsFrom(result) as Recipe[]
+    expect(recipes.map((recipe) => recipe.title)).toEqual(["Soup", "Soup"])
+    expect(recipes[0]!.author).toEqual({ $ref: "#/definitions/Person" })
+    expect(warn.mock.calls.filter(([text]) => `${text}`.includes("#/definitions/Person"))).toHaveLength(1)
   })
 
   test("a read with no type, or a type nobody knows:  a clear error", async () => {
