@@ -57322,7 +57322,7 @@ export interface UITreeAttributes {
    */
   "prop:path"?: unknown
   /**
-   * `appearance="columns"`:  each column's width, by level, separated by commas;  the last one sizes every column deeper than the list goes.  Each one a number of px (`240`, `240px`), `em`, a percent of the tree's width (`30%`), `auto` to fit the column to the rows it shows (from 80px to three times `--ui-tree-column-width`), or `*` for `--ui-tree-column-width`.  So `auto` fits every column to its rows, and `12em, auto` keeps the first at 12em.  None:  every column is `--ui-tree-column-width` wide.  A column a person resizes keeps that width instead:  with an `id`, the tree remembers it in this browser.
+   * `appearance="columns"`:  each column's width, by level, separated by commas;  the last one sizes every column deeper than the list goes.  Each one a number of px (`240`, `240px`), `em`, a percent of the tree's width (`30%`), `auto` to fit the column to the rows it shows (from `column-min-width` to `column-max-width`, or three times `--ui-tree-column-width`), or `*` for `--ui-tree-column-width`.  So `auto` fits every column to its rows, and `12em, auto` keeps the first at 12em.  None:  every column is `--ui-tree-column-width` wide.  A column a person resizes keeps that width instead:  with an `id`, the tree remembers it in this browser.
    * - takes:  text
    */
   size?: string
@@ -57331,6 +57331,26 @@ export interface UITreeAttributes {
    * @deprecated write `size` -- `prop:` stays only for compiled spell
    */
   "prop:size"?: string
+  /**
+   * `appearance="columns"`:  the narrowest a full column is drawn, however it got its width (`size`, a fit to its rows, a drag):  a number of px (`200`, `200px`), `em`, `rem` or a percent of the tree's width.  While the columns don't fit even at this width, they scroll sideways rather than shrink.  None:  80px.  A narrow column's strip is narrower still.
+   * - takes:  text
+   */
+  "column-min-width"?: string
+  /**
+   * `column-min-width`, as the DOM element's property.
+   * @deprecated write `column-min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:columnMinWidth"?: string
+  /**
+   * `appearance="columns"`:  the widest a full column is drawn, however it got its width, written as `column-min-width` is;  `size="auto"` fits a column to its rows up to it.  Never under `column-min-width`.  None:  no most, and `auto` stops at three times `--ui-tree-column-width`.
+   * - takes:  text
+   */
+  "column-max-width"?: string
+  /**
+   * `column-max-width`, as the DOM element's property.
+   * @deprecated write `column-max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:columnMaxWidth"?: string
   /**
    * `appearance="columns"`:  how many columns at the end never narrow.  While the columns don't fit the tree's width, the ones before those narrow, from the first, as few as it takes, each to a strip with its pick's name;  the pointer or the focus on one widens it again, and so does picking it from the path line.  The selected row's column never narrows.
    * - takes:  number
