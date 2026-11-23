@@ -227,11 +227,16 @@ export class PlaceIngest {
     const samples = Object.values(old.collections).flatMap(({ at, samples: names }) =>
       (names ?? []).map((sample) => `${at}=${sample}`)
     )
+    // a list a person gave more room to read is read with it again
+    const mostBytes = Object.fromEntries(
+      Object.values(old.collections).flatMap(({ at, mostBytes: most }) => (most === undefined ? [] : [[at, most]]))
+    )
     const look = await lookAtPlace(kind, {
       address,
       reader,
       collections,
       addListed: !collectionsAsked,
+      mostBytes,
       ...withDefined({
         spec: specAt,
         docs: docsAt,
@@ -240,6 +245,10 @@ export class PlaceIngest {
       })
     })
     const description = describeLook(look, { kind, name })
+    for (const [each, collection] of Object.entries(description.collections)) {
+      const most = old.collections[each]?.mostBytes
+      if (most !== undefined) collection.mostBytes = most
+    }
     leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
     if (keySecret) description.about.keySecret = keySecret
     if (keyGoes) description.about.keyGoes = keyGoes
@@ -443,7 +452,7 @@ export class PlaceIngest {
     const url = `${address}${collection.at}${query ? `${collection.at.includes("?") ? "&" : "?"}${query}` : ""}`
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
-      answer = await reader.read(url)
+      answer = await reader.read(url, { mostBytes: collection.mostBytes })
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
       return failed(`it didn't answer:  ${messageOf(error).replaceAll(url, collection.at)}`)

@@ -413,6 +413,20 @@ describe("spell place verify, of a FastAPI service", () => {
     expect(asked).toContain("/api/events?take=100")
   })
 
+  test("a list answered whole, too big for verify, is read whole when its description gives it more room", async () => {
+    // about 3 MB at once, more than the 2 MB verify reads of any other answer
+    const many = Array.from({ length: 12_000 }, () => ({ ...JOB, notes: "x".repeat(200) }))
+    const big = (url: URL) => (url.pathname === "/api/jobs" ? Response.json({ items: many }) : fastApi(url))
+    const { ingest, descriptions } = await ingestOf("AcmeJobs.api.spell", big)
+    await ingest.verify("AcmeJobs.api.spell")
+    const jobs = () => descriptions.get("AcmeJobs.api.json5")!.collections.jobs!
+    expect(jobs().state).toMatchObject({ is: "failed", reason: expect.stringMatching(/too big to read whole/) })
+    jobs().mostBytes = 8_000_000
+    await ingest.verify("AcmeJobs.api.spell")
+    expect(jobs().state).toMatchObject({ is: "verified", rows: 12_000 })
+    expect(jobs().mostBytes).toBe(8_000_000)
+  })
+
   test("a list giving fewer than the place asks for says so under its own line, though it pages as the place does", async () => {
     const { spell } = await ingestOf("AcmeJobs.api.spell", fastApi, 1000)
     expect(spell).toMatch(/^\tit gives up to 1000 at a time$/m)
