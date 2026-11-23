@@ -1,7 +1,7 @@
 import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { tokenServiceMint } from "spell/places/PlaceToken"
-import { wrappedRows } from "spell/places/wrappedRows"
+import { rowsIn } from "spell/places/wrappedRows"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -344,7 +344,13 @@ export class PlaceIngest {
       // each list its own allowance:  a whole description has hundreds, each read once, a gap between each request
       reader.startAgain()
       const was = collection.state?.is
-      const { state, rows } = await this.verifyCollection(address, collection, reader, deployment?.name)
+      const { state, rows } = await this.verifyCollection(
+        address,
+        collection,
+        reader,
+        deployment?.name,
+        description.about.rows
+      )
       collection.state = state
       if (rows.length) read.push({ name, at: collection.at, rows, paging: "none", pagesRead: 1, hasMore: false })
       if (state.is !== was) {
@@ -403,13 +409,16 @@ export class PlaceIngest {
 
   /**
    * One collection tried:  its first page, then its first thing by its id.
+   * - `pageSize`:  how many the place reads at a time, asked for of a list that takes a `limit`, as a read asks;
+   *   else a list with no paging of its own answers whole, perhaps more than a reader takes
    * - NEVER throws for an answer, or none:  that's `failed`;  but `IngestStopped` past the reader's limits
    */
   private async verifyCollection(
     address: string,
     collection: CollectionDescription,
     reader: PoliteReader,
-    deployment: string | undefined
+    deployment: string | undefined,
+    pageSize?: number
   ): Promise<{ state: PlaceState; rows: Array<Record<string, unknown>> }> {
     const tried = { at: this.nowISO(), ...(deployment !== undefined && { deployment }) }
     const failed = (reason: string, status?: number) => ({
@@ -424,7 +433,8 @@ export class PlaceIngest {
     const searched = !!(searchedOnly && searchedBy)
     const asked: Array<[string, unknown]> = [
       ...(searchedOnly && searchedBy ? [[searchedBy.param, searchedFor ?? SEARCH_TRIED] as [string, unknown]] : []),
-      ...Object.entries(askedBy)
+      ...Object.entries(askedBy),
+      ...pageAsked(collection, pageSize, askedBy)
     ]
     const query = asked
       .flatMap(([param, value]) => [value].flat().map((each) => `${param}=${encodeURIComponent(`${each}`)}`))
@@ -435,19 +445,19 @@ export class PlaceIngest {
       answer = await reader.read(url)
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
-      return failed(`it didn't answer:  ${messageOf(error)}`)
+      return failed(`it didn't answer:  ${messageOf(error).replaceAll(url, collection.at)}`)
     }
     if (answer.status >= 400) return failed(`it answered ${answer.status}${detailOf(answer.text)}`, answer.status)
+    if (answer.isCut) return failed("its answer is more than it reads at once:  too big to read whole", answer.status)
     const body = jsonOf(answer.text)
-    // no schema said where its rows are (NetBox's background queues):  a wrapped list says, as a look finds it
-    const wrapped = collection.rowsAt === undefined && !Array.isArray(body) ? wrappedRows(body) : undefined
-    if (wrapped) collection.rowsAt = wrapped.rowsAt
-    const list =
-      collection.rowsAt === undefined ? body : (body as Record<string, unknown> | undefined)?.[collection.rowsAt]
-    if (!Array.isArray(list)) {
+    // no schema said where its rows are (NetBox's background queues):  a wrapped list says, as a look finds it;
+    // a bare list is its rows, though its description wraps them:  a read takes either
+    const found = rowsIn(body, collection.rowsAt)
+    if (!found) {
       return failed(`its answer holds no list${collection.rowsAt ? ` in "${collection.rowsAt}"` : ""}`, answer.status)
     }
-    const rows = list.filter((row): row is Record<string, unknown> => !!row && typeof row === "object")
+    if (collection.rowsAt === undefined && found.rowsAt !== undefined) collection.rowsAt = found.rowsAt
+    const rows = found.rows.filter((row): row is Record<string, unknown> => !!row && typeof row === "object")
     const deprecated = deprecationOf(answer.headers)
     if (deprecated) collection.about = [collection.about, deprecated].filter(Boolean).join("  ")
     // no schema said its fields:  what it read does
@@ -488,29 +498,30 @@ export class PlaceIngest {
     const id = read.find((each) => each.name === ownerName)?.rows[0]?.[owner.idField ?? "id"]
     if (typeof id !== "string" && typeof id !== "number") return undefined
     const tried = { at: this.nowISO(), ...(deployment !== undefined && { deployment }) }
-    const under = `under ${owner.type} ${id}`
+    // its route, never the owner's id nor its address:  a description holds no real value
+    const route = owner.listsUnder![name]!
+    const under = `at ${route}`
     const failed = (reason: string, status?: number): PlaceState => ({
       is: "failed",
       ...tried,
       ...(status !== undefined && { status }),
       reason
     })
-    const url = `${address}${owner.listsUnder![name]!.replace("{id}", encodeURIComponent(`${id}`))}`
+    const url = `${address}${route.replace("{id}", encodeURIComponent(`${id}`))}`
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
       answer = await reader.read(url)
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
-      return failed(`it didn't answer ${under}:  ${messageOf(error)}`)
+      return failed(`it didn't answer ${under}:  ${messageOf(error).replaceAll(url, route)}`)
     }
-    if (answer.status >= 400)
-      return failed(`it answered ${answer.status} ${under}${detailOf(answer.text)}`, answer.status)
+    if (answer.status >= 400) return failed(`it answered ${answer.status} ${under}`, answer.status)
     const body = jsonOf(answer.text)
     const { isOneUnder, rowsAt } = collections[name]!
     if (!isOneUnder) {
-      const list = Array.isArray(body) ? body : (body as Record<string, unknown> | undefined)?.[rowsAt ?? ""]
-      if (!Array.isArray(list)) return failed(`its answer ${under} holds no list`, answer.status)
-      return { is: "verified", ...tried, status: answer.status, rows: list.length }
+      const found = rowsIn(body, rowsAt ?? "")
+      if (!found) return failed(`its answer ${under} holds no list`, answer.status)
+      return { is: "verified", ...tried, status: answer.status, rows: found.rows.length }
     }
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return failed(`its answer ${under} isn't one thing`, answer.status)
@@ -518,7 +529,11 @@ export class PlaceIngest {
     return { is: "verified", ...tried, status: answer.status, rows: 1 }
   }
 
-  /** Read `row` again by its id, at its own address:  why it couldn't be, or `undefined` when it could, or has none. */
+  /**
+   * Read `row` again by its id, at its own address:  why it couldn't be, or `undefined` when it could, or has none.
+   * - Why names its route, `/jobs/{id}`, and its status, never the id nor its address:  a description holds no real
+   *   value
+   */
   private async thingById(
     address: string,
     { at, idField = "id", operations }: CollectionDescription,
@@ -533,12 +548,13 @@ export class PlaceIngest {
     const url = IS_ITS_OWN_ADDRESS.test(`${id}`)
       ? `${id}`
       : `${address}${template.replace(/\{[^{}/]*\}/, encodeURIComponent(`${id}`))}`
+    const route = IS_ITS_OWN_ADDRESS.test(`${id}`) ? "the address its id is" : template
     try {
       const { status } = await reader.read(url)
-      return status >= 400 ? `its thing ${id}, read by its id at ${url}, answered ${status}` : undefined
+      return status >= 400 ? `its first thing, read by its id at ${route}, answered ${status}` : undefined
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
-      return `its thing ${id}, read by its id at ${url}, didn't answer`
+      return `its first thing, read by its id at ${route}, didn't answer`
     }
   }
 
@@ -1085,6 +1101,20 @@ function deprecationOf(headers: Headers): string | undefined {
 /** Where a private place's rows go when nothing says:  `~/.spell/places/netbox`. */
 function privateFolderFor({ about }: PlaceDescription): string {
   return `~/.spell/places/${about.name.toLowerCase().replace(/[^\p{L}\d]+/gu, "-")}`
+}
+
+/**
+ * The page a verify asks a list for, as a read would:  `pageSize` under its limit's name, up to the most it gives;
+ * nothing for a list that takes no limit, or is asked for one already.
+ */
+function pageAsked(
+  { takesLimit, pagesWith }: CollectionDescription,
+  pageSize: number | undefined,
+  askedBy: Record<string, unknown>
+): Array<[string, unknown]> {
+  const limit = pagesWith?.limit ?? (takesLimit ? "limit" : undefined)
+  if (limit === undefined || pageSize === undefined || limit in askedBy) return []
+  return [[limit, Math.min(pageSize, pagesWith?.most ?? pageSize)]]
 }
 
 /** SIDE EFFECT:  no field, nor any inside one, keeps a real value. */

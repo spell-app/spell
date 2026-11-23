@@ -1,7 +1,7 @@
 import { parseCsv } from "spell/places/csv"
 import { googleSheetCsvAddress, isPlaceServerAddress } from "spell/places/places.types"
 import { Workbook } from "spell/places/Workbook"
-import { wrappedRows } from "spell/places/wrappedRows"
+import { rowsIn, wrappedRows } from "spell/places/wrappedRows"
 
 import {
   IngestStopped,
@@ -253,7 +253,7 @@ async function lookAtWebServer({
     const known = new Set(wanted.map(({ at }) => at.replace(TRAILING_SLASHES, "")))
     wanted.push(...(listedIn(body, address) ?? []).filter(({ at }) => !known.has(at)))
   }
-  if (!wanted && (Array.isArray(body) || wrappedRows(body))) {
+  if (!wanted && rowsIn(body)) {
     const cut = address.lastIndexOf("/")
     place = address.slice(0, cut)
     wanted = [{ name: address.slice(cut + 1), at: address.slice(cut) }]
@@ -381,7 +381,7 @@ async function readSearched(place: string, name: string, at: string, reader: Pol
   try {
     const answer = await reader.read(`${place}${path}`)
     const body = answer.status >= 400 ? undefined : answer.isCut ? idsReadOf(answer.text) : jsonOf(answer.text)
-    const rows = Array.isArray(body) ? body : wrappedRows(body)?.rows
+    const rows = rowsIn(body)?.rows
     if (!rows?.length) look.searchedOnly = true
   } catch (error) {
     if (error instanceof IngestStopped) throw error
@@ -613,7 +613,7 @@ async function serverTakesOf(
       const answer = await reader.read(`${url}?${query}`)
       if (answer.status >= 400 || answer.isCut) return undefined
       const body = jsonOf(answer.text)
-      return (Array.isArray(body) ? body : wrappedRows(body)?.rows)?.filter(isRow)
+      return rowsIn(body)?.rows?.filter(isRow)
     } catch {
       // none of these is what the look's for:  past its limits, they just say nothing
       return undefined
@@ -865,7 +865,7 @@ async function searchOf(url: string, look: CollectionLook, reader: PoliteReader)
         const answer = await reader.read(`${url}${url.includes("?") ? "&" : "?"}${param}=${encodeURIComponent(word)}`)
         if (answer.status >= 400 || answer.isCut) continue
         const body = jsonOf(answer.text)
-        const rows = (Array.isArray(body) ? body : wrappedRows(body)?.rows)?.filter(isRow)
+        const rows = rowsIn(body)?.rows?.filter(isRow)
         const found = rows?.length ?? 0
         const isNarrower = found < Math.max(look.rowsItSays ?? 0, look.rows.length)
         const holdsIt = (row: Record<string, unknown>) => textIn(row[field]).toLowerCase().includes(word)

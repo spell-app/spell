@@ -1,5 +1,5 @@
 /**
- * Where an answer that's an object holds its rows:  the ONE way a list wrapped in an answer is unwrapped, for a read
+ * Where an answer holds its rows:  the ONE way a list wrapped in an answer is unwrapped, for a read
  * (`RestPlace`), for a look at real rows (`PlaceLook`) and for an OpenAPI description's schemas (`PlaceSpec`).
  * - `{ count, results: [...] }`, `{ items: [...], total }`:  a field a list's rows usually go under.
  * - Else its one list:  `{ sources: [...], next_offset: 20 }`.
@@ -52,4 +52,16 @@ function kindOfValue(value: unknown): ListKind {
 /** Is every list in `fields` empty? */
 function isEveryListEmpty(fields: Record<string, unknown>): boolean {
   return Object.values(fields).every((value) => !Array.isArray(value) || value.length === 0)
+}
+
+/**
+ * The rows in `body`, an answer to a read of a list:  `undefined` for an answer that holds none.
+ * - A bare list IS its rows, whatever `rowsAt` says:  a server whose description wraps its rows may answer without.
+ * - Else those under `rowsAt`, when it's said;  else those under the field that wraps them, and where (`wrappedRows()`).
+ */
+export function rowsIn(body: unknown, rowsAt?: string): { rows: unknown[]; rowsAt?: string } | undefined {
+  if (Array.isArray(body)) return { rows: body }
+  if (rowsAt === undefined) return wrappedRows(body)
+  const held = (body as Record<string, unknown> | null | undefined)?.[rowsAt]
+  return Array.isArray(held) ? { rows: held, rowsAt } : undefined
 }

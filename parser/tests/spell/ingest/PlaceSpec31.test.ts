@@ -39,8 +39,13 @@ const DOCUMENT = JSON.parse(
 /**
  * The place's Spell and description, from an ingest of the description:  in Spanish for an `.es.spell` file.
  * - `answer`:  what the running server answers, for a verify after;  the ingest itself reads only the description.
+ * - `rows`:  how many it reads at a time, as `it gives up to 20 at a time` says.
  */
-async function ingestOf(into: string, answer: (url: URL) => Response = () => new Response("nope", { status: 404 })) {
+async function ingestOf(
+  into: string,
+  answer: (url: URL) => Response = () => new Response("nope", { status: 404 }),
+  rows?: number
+) {
   const texts = new Map<string, string>()
   const descriptions = new Map<string, PlaceDescription>()
   const files: IngestFiles = {
@@ -65,7 +70,7 @@ async function ingestOf(into: string, answer: (url: URL) => Response = () => new
     sleep: async () => {},
     now: () => new Date("2026-11-19T12:00:00Z")
   })
-  const result = await ingest.add({ address: ACME, spec: SPEC_AT, into, name: "acme jobs" })
+  const result = await ingest.add({ address: ACME, spec: SPEC_AT, into, name: "acme jobs", ...(rows && { rows }) })
   const descriptionAt = into.replace(/(\.es)?\.spell$/, ".json5")
   return { ingest, result, texts, descriptions, spell: texts.get(into)!, description: descriptions.get(descriptionAt)! }
 }
@@ -389,6 +394,21 @@ describe("spell place verify, of a FastAPI service", () => {
     expect(collections.steps!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
     // and its stacks for their example system, which the server won't answer without
     expect(collections.stacks!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
+  })
+
+  test("each list is asked for a page of the place's size, by its own limit's name, up to the most it gives", async () => {
+    const asked: string[] = []
+    const { ingest } = await ingestOf(
+      "AcmeJobs.api.spell",
+      (url) => {
+        asked.push(`${url.pathname}${url.search}`)
+        return fastApi(url)
+      },
+      1000
+    )
+    await ingest.verify("AcmeJobs.api.spell")
+    expect(asked).toContain("/api/jobs?limit=500")
+    expect(asked).toContain("/api/events?take=100")
   })
 
   test("a refusal says FastAPI's own message:  `detail`, a list of what was wrong", async () => {

@@ -25,7 +25,7 @@ import {
 import { FieldNames, type NameStyle } from "./FieldNames"
 import { DEFAULT_CEILING } from "./PlaceQuery"
 import { jsonIn, valueAt, WebPlace, type WebPlaceProps } from "./WebPlace"
-import { wrappedRows } from "./wrappedRows"
+import { rowsIn } from "./wrappedRows"
 
 /** The word for every operation, in a list of enabled ones:  `enabled operations are all`. */
 const ALL_OPERATIONS = "all"
@@ -362,7 +362,7 @@ export class RestPlace extends WebPlace implements Place {
                 (held === undefined && rowsAt !== undefined) ||
                 // a list whose rows are wrapped, as no other's are:  `{ sources: [...], next_offset: 20 }`
                 (rowsAt === undefined && held === body))
-            ? ((Array.isArray(body) ? body : wrappedRows(body)?.rows) ?? (query.under && isOneRow(held) ? [held] : held))
+            ? (rowsIn(body)?.rows ?? (query.under && isOneRow(held) ? [held] : held))
             : held
     if (!Array.isArray(rows)) {
       throw new TypeError(

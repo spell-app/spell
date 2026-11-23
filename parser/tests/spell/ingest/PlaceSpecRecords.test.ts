@@ -184,7 +184,7 @@ describe("spell place verify:  one thing under each", () => {
     expect(collections.reservation_surfaces!.state).toMatchObject({
       is: "failed",
       status: 404,
-      reason: "it answered 404 under instance 7"
+      reason: "it answered 404 at /api/instance-netlists/{id}/reservation-surface"
     })
     expect(asked).toContain(`${ACME}/api/systems/instance/7/snapshot`)
     expect(result.changes).toContain("snapshots:  unverified => verified.")
