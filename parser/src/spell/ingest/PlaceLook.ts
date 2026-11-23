@@ -487,7 +487,6 @@ function listedIn(body: unknown, address: string): Array<{ name: string; at: str
   return listed.length ? listed : undefined
 }
 
-
 /** A few pages of one collection. */
 async function readCollection(
   place: string,

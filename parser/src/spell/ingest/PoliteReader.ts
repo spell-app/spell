@@ -190,12 +190,7 @@ export class PoliteReader {
    */
   async read(
     url: string,
-    {
-      query,
-      accept,
-      bytes,
-      mostBytes
-    }: { query?: string; accept?: string; bytes?: boolean; mostBytes?: number } = {}
+    { query, accept, bytes, mostBytes }: { query?: string; accept?: string; bytes?: boolean; mostBytes?: number } = {}
   ): Promise<ReadAnswer> {
     const init: RequestInit = query
       ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ query }) }

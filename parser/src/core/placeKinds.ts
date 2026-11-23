@@ -57,6 +57,8 @@ export type PlaceDetails = {
        * `its next page is asked for with "take" and "skip"`.
        */
       paging?: PagingDetails
+      /** It's ONE thing at its address, not a list:  `the server status lives at "/api/status"`. */
+      isOne?: boolean
     }
   >
   /** The NAME of the key it needs:  never the key. */
@@ -598,7 +600,7 @@ function pathTemplateOf(at: string): string {
 function restCollections({ collections = {} }: PlaceDetails, collection: string, storedAs: Record<string, string>) {
   const named = { ...collections, [collection]: { ...collections[collection] } }
   return Object.fromEntries(
-    Object.entries(named).map(([name, { at, fields, pictures, askedBy, searches, paging }]) => {
+    Object.entries(named).map(([name, { at, fields, pictures, askedBy, searches, paging, isOne }]) => {
       const all = name === collection ? { ...fields, ...storedAs } : fields
       return [
         name,
@@ -609,7 +611,8 @@ function restCollections({ collections = {} }: PlaceDetails, collection: string,
           ...(askedBy && { askedBy }),
           ...(searches && { searches }),
           ...(paging?.nextPageIn !== undefined && { nextAt: paging.nextPageIn }),
-          ...(paging && { paging: restPagingOf(paging) })
+          ...(paging && { paging: restPagingOf(paging) }),
+          ...(isOne && { isOne })
         }
       ]
     })

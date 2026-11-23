@@ -33,6 +33,7 @@ import {
   messageOf
 } from "./PlaceLook"
 import { checkSecondsWithin, describeLook, fieldsOf, fingerprintOf, idFieldOf, plainNameFor } from "./PlaceShape"
+import { MAKES_A_TOKEN } from "./PlaceSpec"
 import { partsInLanguageOf } from "./PlaceInLanguage"
 import { PlaceWords } from "./PlaceWords"
 import {
@@ -351,6 +352,8 @@ export class PlaceIngest {
     for (const [name, collection] of Object.entries(description.collections)) {
       if (collection.leftOut || collection.state?.is === "disabled") continue
       if (!isListed(collection) && !isSearchToTry(collection)) continue
+      // a `GET` that makes a token, or signs in or out, is never read
+      if (MAKES_A_TOKEN.test(collection.at)) continue
       // each list its own allowance:  a whole description has hundreds, each read once, a gap between each request
       reader.startAgain()
       const was = collection.state?.is
@@ -444,7 +447,7 @@ export class PlaceIngest {
     const asked: Array<[string, unknown]> = [
       ...(searchedOnly && searchedBy ? [[searchedBy.param, searchedFor ?? SEARCH_TRIED] as [string, unknown]] : []),
       ...Object.entries(askedBy),
-      ...pageAsked(collection, pageSize, askedBy)
+      ...(collection.isOne ? [] : pageAsked(collection, pageSize, askedBy))
     ]
     const query = asked
       .flatMap(([param, value]) => [value].flat().map((each) => `${param}=${encodeURIComponent(`${each}`)}`))
@@ -465,6 +468,21 @@ export class PlaceIngest {
     }
     if (answer.isCut) return failed("its answer is more than it reads at once:  too big to read whole", answer.status)
     const body = jsonOf(answer.text)
+    // ONE thing, not a list:  its description says so;  or, saying nothing of its answer, it answers one object
+    // (P10's untyped lists, till a read shows them):  `{ ok: true }`, or `{ nodes: [...], edges: [...] }`
+    // and one its description says is one thing, answering a list, is a list after all
+    if (collection.isOne && Array.isArray(body)) delete collection.isOne
+    if (collection.isOne || isOneThingAnswered(collection, body)) {
+      if (!isOneObject(body)) return failed("its answer isn't one thing", answer.status)
+      if (!collection.isOne) {
+        collection.isOne = true
+        delete collection.takesLimit
+        delete collection.pagesWith
+      }
+      // its keys its fields, when they're names:  not a map keyed by its values, an address or an id each
+      if (!Object.keys(collection.fields).length && isKeyedByNames(body)) collection.fields = fieldsOf([body])
+      return { state: { is: "verified", ...tried, status: answer.status, rows: 1 }, rows: [body] }
+    }
     // no schema said where its rows are (NetBox's background queues):  a wrapped list says, as a look finds it;
     // a bare list is its rows, though its description wraps them:  a read takes either
     const found = rowsIn(body, collection.rowsAt)
@@ -476,7 +494,7 @@ export class PlaceIngest {
     const deprecated = deprecationOf(answer.headers)
     if (deprecated) collection.about = [collection.about, deprecated].filter(Boolean).join("  ")
     // no schema said its fields:  what it read does
-    if (!Object.keys(collection.fields).length && rows.length) {
+    if (!Object.keys(collection.fields).length && rows.length && isKeyedByNames(rows)) {
       collection.fields = fieldsOf(rows)
       const id = idFieldOf(rows, collection.fields)
       if (id !== undefined) collection.idField = id
@@ -1087,6 +1105,41 @@ function isListed({ at, searchedOnly, askedBy, samples }: CollectionDescription)
   return !/\{[^{}/]*\}/.test(at) && !searchedOnly && canAsk && !samples
 }
 
+/** The most fields one thing read is given from its keys:  more, it's a map keyed by its values. */
+const MOST_KEYS_AS_FIELDS = 60
+
+/** A key that's a field's name:  `rack_id`, `feedStatus`;  not `10.0.0.5`, `7`, `r-12`. */
+const KEY_AS_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/
+
+/**
+ * Are `body`'s keys its fields' names, not values it's keyed by (a map from each address to its rack)?
+ * And so every object's inside it, each of which is a thing of its own:  `{ racks: [...], mapping: { "10.0.0.5": ... } }`.
+ * - So no real value becomes a field's name, in the description or the Spell.
+ */
+function isKeyedByNames(body: unknown, depth = 0): boolean {
+  if (Array.isArray(body)) return body.slice(0, 5).every((each) => isKeyedByNames(each, depth))
+  if (!isOneObject(body)) return true
+  if (depth > 6) return false
+  const keys = Object.keys(body)
+  if (keys.length > MOST_KEYS_AS_FIELDS || !keys.every((key) => KEY_AS_NAME.test(key))) return false
+  return Object.values(body).every((value) => isKeyedByNames(value, depth + 1))
+}
+
+/** Is `body` one object:  not a list, nor nothing? */
+function isOneObject(body: unknown): body is Record<string, unknown> {
+  return !!body && typeof body === "object" && !Array.isArray(body)
+}
+
+/**
+ * Is `body`, a list's answer, ONE thing:  its description said nothing of its rows (no field, nor where they are),
+ * and it's one object holding no list, or several:  `{ ok: true }`, `{ nodes: [...], edges: [...] }`?
+ * - One holding a single list is that list, wrapped:  `{ sources: [...], next_offset: 20 }`.
+ */
+function isOneThingAnswered({ fields, rowsAt }: CollectionDescription, body: unknown): boolean {
+  if (Object.keys(fields).length || rowsAt !== undefined || !isOneObject(body)) return false
+  return Object.values(body).filter(Array.isArray).length !== 1
+}
+
 /** Is collection `name` kept under each thing of another, one thing or a list:  read only from there? */
 function isUnderAnother(name: string, { collections }: PlaceDescription): boolean {
   return Object.values(collections).some(({ listsUnder }) => listsUnder?.[name] !== undefined)
@@ -1315,7 +1368,13 @@ function awayFromTypesBeside(description: PlaceDescription, others: readonly str
  * - A list with fields of its own, of the same name, is its own:  named apart (`awayFromTypesBeside()`).
  */
 function leaveOutCopies(description: PlaceDescription, others: readonly PlaceDescription[]): void {
-  const lastWord = (at: string) => at.replace(/[?#].*$/, "").replace(/\/+$/, "").split("/").pop()!.toLowerCase()
+  const lastWord = (at: string) =>
+    at
+      .replace(/[?#].*$/, "")
+      .replace(/\/+$/, "")
+      .split("/")
+      .pop()!
+      .toLowerCase()
   const theirs = new Map(
     others.flatMap(({ about, collections }) =>
       Object.entries(collections)
@@ -1368,7 +1427,10 @@ function namesFromFile(description: PlaceDescription, file: string, text: string
     const after = linesAfter[at]!.text
     if (after !== before) written.set(before.trim(), after.trim())
   })
-  if (written.size) description.spell = description.spell?.map((line) => line.replace(line.trim(), written.get(line.trim()) ?? line.trim()))
+  if (written.size)
+    description.spell = description.spell?.map((line) =>
+      line.replace(line.trim(), written.get(line.trim()) ?? line.trim())
+    )
 }
 
 /** Are these words used in a line the tool didn't write, here or in another file beside it? */

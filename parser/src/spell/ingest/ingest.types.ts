@@ -323,6 +323,8 @@ export type CollectionLook = {
   askedBy?: Record<string, string>
   /** It answered with one thing, not a list:  that's its one row. */
   answersOne?: boolean
+  /** It's ONE thing at its own address, not a list:  a server's status, `the server status lives at "/api/status"`. */
+  isOne?: boolean
   /** Its list holds only ids, as it's read:  each read whole by id, a few of them (epic `data` P34). */
   ids?: Array<string | number>
   /** Its answer was too big to read whole:  a list of ids, read as far as it was. */
@@ -653,6 +655,11 @@ export type CollectionDescription = {
    * - Where:  the owner's `listsUnder`;  its own `at` is that address too, `snapshots are found at "..."`.
    */
   isOneUnder?: boolean
+  /**
+   * It's ONE thing at its own address, not a list:  a server's status, `the server status lives at "/api/status"`.
+   * - Its description says its answer is one object;  or, saying nothing of it, a read found one (`spell place verify`).
+   */
+  isOne?: boolean
   /** Why the Spell leaves it out. */
   leftOut?: string
   /**

@@ -282,14 +282,18 @@ describe("beside another place", () => {
     const { spell, description } = await besideShop()
     expect(spell).not.toMatch(/proxy/)
     expect(description.collections.jobs!.leftOut).toMatch(/its rows are shop's jobs, read there/)
-    expect(description.notes).toContainEqual(expect.stringMatching(/^Left out the collection "jobs":  its rows are shop's jobs/))
+    expect(description.notes).toContainEqual(
+      expect.stringMatching(/^Left out the collection "jobs":  its rows are shop's jobs/)
+    )
   })
 
   test("a type both have is named apart here, and the note says to rename the other's in its own file", async () => {
     const { spell, description, texts } = await besideShop()
     expect(spell).toMatch(/^a "lab device" is a thing$/m)
     expect(description.notes).toContainEqual(
-      expect.stringMatching(/^"device" is shop's too, so this one is a "lab device":  .*rename shop's in its own file, a "shop device"/)
+      expect.stringMatching(
+        /^"device" is shop's too, so this one is a "lab device":  .*rename shop's in its own file, a "shop device"/
+      )
     )
     const project = [...texts].map(([path, contents]) => ({ path: `/${path}`, contents }))
     expect(parseSpellProject(project).files.flatMap(({ errors }) => errors)).toEqual([])

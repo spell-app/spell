@@ -74,7 +74,15 @@ async function ingestOf(
   })
   const result = await ingest.add({ address: ACME, spec: SPEC_AT, into, name: "acme jobs", ...(rows && { rows }) })
   const descriptionAt = into.replace(/(\.es)?\.spell$/, ".json5")
-  return { ingest, result, texts, descriptions, said, spell: texts.get(into)!, description: descriptions.get(descriptionAt)! }
+  return {
+    ingest,
+    result,
+    texts,
+    descriptions,
+    said,
+    spell: texts.get(into)!,
+    description: descriptions.get(descriptionAt)!
+  }
 }
 
 describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
@@ -157,7 +165,7 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
     const document: OpenApiDocument = {
       openapi: "3.1.0",
       paths: {
-        // an object, no list:  a collection only if things by id are under it, and `/api/stats-history/{id}` isn't
+        // an object, no list:  ONE thing, not a list, as `/api/stats-history/{id}` isn't a thing under it
         "/api/stats": { get: answers({ type: "object", properties: { count: { type: "integer" } } }) },
         "/api/stats-history/{id}": { get: answers({ type: "object", properties: { id: { type: "integer" } } }) },
         "/api/reports": {
@@ -169,9 +177,11 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
       }
     }
     const other = new PlaceSpec(document, SPEC_AT).lookAt(ACME)
-    expect(other.collections.map(({ name }) => name)).toEqual(["reports"])
+    expect(other.collections.map(({ name }) => name)).toEqual(["stats", "reports"])
+    expect(other.collections[0]!).toMatchObject({ isOne: true, fields: { count: expect.anything() } })
+    expect(other.collections[0]!.takesLimit).toBeUndefined()
     // asked for by it, with nothing to try it with
-    expect(other.collections[0]!.askedBy).toEqual({ team: "" })
+    expect(other.collections[1]!.askedBy).toEqual({ team: "" })
     expect(other.notes).toContain(
       '/api/reports can\'t be read without "team", and its description gives no example to try:  verify skips it.'
     )

@@ -245,8 +245,11 @@ function allSpellPartsFor(
         ? "are searched at"
         : "live at"
     const searchedThere = searchedApart && description.searchedOnly && searchAddressOf(description) === description.at
-    // given only to its own search, its search's line says where:  `repositories are searched with "q" at "/search/repositories"`
-    if (!searchedThere) {
+    if (description.isOne) {
+      // ONE thing, not a list:  `the server status lives at "/api/status"`
+      placeLines.push({ key: `at:${collection}`, text: `the ${description.type} lives at "${description.at}"` })
+    } else if (!searchedThere) {
+      // given only to its own search, its search's line says where:  `repositories are searched with "q" at "/search/repositories"`
       placeLines.push({
         key: `at:${collection}`,
         text: `${collectionWords(description)} ${where} "${description.at}"`

@@ -319,7 +319,8 @@ export class RestPlace extends WebPlace implements Place {
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
     this.refuseUnlessEnabled(collection, READ_OPERATION)
     const paging = this.pagingOf(collection)
-    const { page, at, size } = this.pageOf(query, paging)
+    const { isOne } = this.mappingOf(collection)
+    const { page, at, size } = isOne ? { page: "none" as const, at: undefined, size: 1 } : this.pageOf(query, paging)
     const handled: ListHandled = {}
     // a next page's whole address carries the query its first page was asked with:  what that one did, this one did
     const asked = this.paramsFor(collection, query, handled)
@@ -354,7 +355,8 @@ export class RestPlace extends WebPlace implements Place {
     const rows =
       held === null
         ? []
-        : (askedBy || (query.under && (query.oneThing || this.isFoundAtItsOwner(collection)))) && isOneRow(held)
+        : (askedBy || isOne || (query.under && (query.oneThing || this.isFoundAtItsOwner(collection)))) &&
+            isOneRow(held)
           ? [held]
           : !Array.isArray(held) &&
               (query.under ||
@@ -375,19 +377,21 @@ export class RestPlace extends WebPlace implements Place {
     const wanted = paging.sendsNoCount && query.page?.size !== undefined ? rows.slice(0, query.page.size) : rows
     const kept = wanted.length > mostRows ? wanted.slice(0, mostRows) : wanted
     const sizeIsKnown = paging.asksForSize || query.page?.size !== undefined
-    const nextPage = this.nextPageOf({
-      paging,
-      page,
-      at,
-      size,
-      sizeIsKnown,
-      count: kept.length,
-      body,
-      nextAt,
-      response,
-      collection,
-      lastRow: kept.at(-1)
-    })
+    const nextPage = isOne
+      ? undefined
+      : this.nextPageOf({
+          paging,
+          page,
+          at,
+          size,
+          sizeIsKnown,
+          count: kept.length,
+          body,
+          nextAt,
+          response,
+          collection,
+          lastRow: kept.at(-1)
+        })
     // what it was asked for, sent as the query, each row holds
     const askedValues = handled.filter ? askedValuesIn(askedBy, query.filter) : undefined
     const read = (kept as unknown[]).map((row) =>
@@ -893,6 +897,11 @@ export type RestCollection = {
    */
   askedBy?: readonly string[]
   /**
+   * It's ONE thing at its address, not a list:  a server's status, `{ ok: true, version: "2.1" }`.
+   * - Read, it's a list of that one row, asked for with no page.
+   */
+  isOne?: boolean
+  /**
    * How this collection searches, when it isn't the place's way (`RestPlace.searches`):
    * GitHub's users at `/search/users`, its repositories at `/search/repositories`, each with `q`.
    * - `users are searched with "q" at "/search/users"`
@@ -957,7 +966,6 @@ function capitalized(text: string): string {
 function listed(items: readonly string[]): string {
   return items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : (items[0] ?? "")
 }
-
 
 /** The values of `filter` for the fields a list is asked for by (`RestCollection.askedBy`):  none, `undefined`. */
 function askedValuesIn(

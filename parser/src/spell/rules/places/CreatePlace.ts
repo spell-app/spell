@@ -587,9 +587,10 @@ function mergeDetail(
   if (accounts) (into.accounts ??= []).push(...accounts)
   // a line each:  every one named
   if (readOnStartup) (into.readOnStartup ??= []).push(...readOnStartup)
-  for (const [name, { at, fields, searchedOnly, pictures, askedBy, searches, operations, paging }] of Object.entries(
-    collections ?? {}
-  )) {
+  for (const [
+    name,
+    { at, fields, searchedOnly, pictures, askedBy, searches, operations, paging, isOne }
+  ] of Object.entries(collections ?? {})) {
     const held = ((into.collections ??= {})[name] ??= {})
     if (searches) held.searches = searches
     if (at !== undefined) held.at = at
@@ -599,6 +600,7 @@ function mergeDetail(
     if (askedBy) held.askedBy = askedBy
     if (operations) held.operations = operations
     if (paging) held.paging = { ...held.paging, ...paging }
+    if (isOne) held.isOne = true
   }
 }
 

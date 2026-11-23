@@ -46,6 +46,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "next_page_in": "type|inner?|outer?|field|param?",
   "next_page_in_link": "type|header",
   "number_of_things_where": "type|where|body?",
+  "one_thing_at": "type|path",
   "operation_at": "signature|path",
   "page_size_is": "type|size|param?",
   "pick_file_for": "place",
