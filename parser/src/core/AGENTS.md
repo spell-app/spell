@@ -409,6 +409,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       first page asked for every other screen's lists too.
   - What the compiler gathered (`P.ReadGathering`, epic `data` P12), and the running page's half:
     - `select`, on a type's `savedIn`:  the fields anything reads, only for a place that can leave the rest out.
+      - Asked of the place WITH its id (`selectionFor()`):  a place that can't leave fields out (a web server) is read
+        whole, once.  Asked of the compiled list alone, a library's `select: []` passed, every field was hidden after
+        it came, and the first one read asked the whole list again:  every list read twice.
     - A left-out field read anyway (`PropInfo.whenUnset`, which costs only a read that finds nothing set):  every read of
       that type asks once more, for all of it, and whoever read the field sees it appear, by its cell.
     - A drawn view's element reads every property, to mirror them as attributes:  `whileOnlyShowing()`, so that isn't needing them.

@@ -233,6 +233,18 @@ describe("a field the compiler left out", () => {
     expect(place.requests[0]![0]!.query.select).toBeUndefined()
     expect(recipe!.notes).toBe("Salt it")
   })
+
+  test("nor when the compiler found nothing read:  read whole, ONCE, not asked again as a field's read", async () => {
+    // a library's type, compiled where nothing reads its fields:  `select: []`, on a web server that can't select
+    const place = filled(new CountingPlace({ capabilities: { ...WITH_IDS, select: "none" } }))
+    const { Recipe } = program(place, { select: [] })
+    const [recipe] = (await core.savedThings(Recipe)).items as Array<InstanceType<typeof Recipe>>
+    expect(place.requests[0]![0]!.query.select).toBeUndefined()
+    expect(recipe!.title).toBe("Soup")
+    expect(recipe!.notes).toBe("Salt it")
+    await settled()
+    expect(place.requests).toHaveLength(1)
+  })
 })
 
 describe("a place checked every so often:  `check it every 1 second`", () => {

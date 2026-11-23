@@ -689,15 +689,22 @@ class ProgramPlaces {
     }
   }
 
-  /** The fields to ask `behind` for, of `Class`:  only when it can leave the rest out, and nothing's been missed. */
+  /**
+   * The fields to ask `behind` for, of `Class`:  only when it can leave the rest out ITSELF, and nothing's been missed.
+   * - Its id too, so what it's asked whether it can do is the selection it gets:  a place that can't leave fields out
+   *   (a web server's `"none"`) can't select only an id either, so it's read whole, once.  Asked of the compiled list
+   *   alone, an empty `select` passed, the place sent every field anyway, the engine hid them, and the first field read
+   *   asked the whole list again.
+   */
   private selectionFor(Class: SavedClass, behind: PlaceBehind): readonly string[] | undefined {
     const { select } = savedInOf(Class)
     if (!select || this.askedWhole.has(Class)) return undefined
     const { select: canSelect, idOf = ID_FIELD } = behind.describe()
-    if (!this.folder!.canDoAll(canSelect, select)) return undefined
-    this.heedFieldsLeftOut(Class, select, behind)
     // its id too:  it's what makes it one thing
-    return select.includes(idOf) ? select : [...select, idOf]
+    const selection = select.includes(idOf) ? select : [...select, idOf]
+    if (!this.folder!.canDoAll(canSelect, selection)) return undefined
+    this.heedFieldsLeftOut(Class, select, behind)
+    return selection
   }
 
   /** The classes something read a left-out field of:  read whole from now on. */
