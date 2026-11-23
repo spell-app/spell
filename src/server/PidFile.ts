@@ -337,10 +337,20 @@ export const PAGE_SERVER_FILE = ".spell-server.json"
  */
 export function spacesFileName(name: string, spaces: string | undefined): string {
   if (spaces === undefined) return name
+  return name.replace(/(\.\w+)$/, `.${spacesTag(spaces)}$1`)
+}
+
+/**
+ * The ONE tag naming what belongs to spaces folder `spaces` when they aren't the kit's own:  its folder's name and a
+ * hash of its path, `my-app-1a2b3c4d` from `.../my-app/spaces` (the folder holding `spaces/` when that's its name, so
+ * it reads as the checkout).
+ * - the page server's and the editor's files (`spacesFileName()`), and spell-app's build folder for those spaces
+ *   (`build/spell-spaces.my-app-1a2b3c4d/`), so two checkouts of one project never share any of them
+ */
+export function spacesTag(spaces: string): string {
   const folder = resolve(spaces)
   const named = basename(folder) === "spaces" ? basename(dirname(folder)) : basename(folder)
-  const tag = `${named.replace(/[^\w.-]+/g, "-")}-${createHash("sha256").update(folder).digest("hex").slice(0, 8)}`
-  return name.replace(/(\.\w+)$/, `.${tag}$1`)
+  return `${named.replace(/[^\w.-]+/g, "-")}-${createHash("sha256").update(folder).digest("hex").slice(0, 8)}`
 }
 
 /**

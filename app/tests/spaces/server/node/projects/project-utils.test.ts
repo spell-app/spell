@@ -5,6 +5,7 @@ import { dirname, resolve } from "path"
 
 import environment from "spell/app/spaces/server/node/environment"
 import { SP } from "spell/parser/spell"
+import { SRV } from "spell/server"
 import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 import { ProjectDrafts } from "spell/app/spaces/server/node/projects/ProjectDrafts"
@@ -116,6 +117,28 @@ describe("buildFolderFor()", () => {
     expect(projectUtils.buildFolderFor("/spell-spaces/@spell/owen@/errors", folders)).toBe(
       "/repo/build/spell-spaces/@spell/owen@/errors"
     )
+  })
+
+  // every page server, compile and lint on a project's spaces wrote into one `build/spell-spaces/`:  two checkouts of a
+  // project built over each other, and the one another imports was whichever compiled it last
+  test("a project in ANOTHER spaces folder (a project's, `--spaces`):  their own build folder, named by them", () => {
+    const own = { ...folders, defaultSpellSpacesDir: "/spell-spaces" }
+    const checkout = (spaces: string) => ({ ...own, spellSpacesDir: spaces })
+    const main = checkout("/work/my-app/spaces")
+    const worktree = checkout("/work/my-app.worktrees/fix/spaces")
+
+    // Spell's own spell.spaces:  `build/spell-spaces/`, as always
+    expect(projectUtils.spacesBuildDir(own)).toBe("/repo/build/spell-spaces")
+    expect(projectUtils.spacesBuildDir(main)).toBe(`/repo/build/spell-spaces.${SRV.spacesTag("/work/my-app/spaces")}`)
+    expect(projectUtils.spacesBuildDir(main)).toMatch(/\/spell-spaces\.my-app-[0-9a-f]{8}$/)
+
+    const inMain = projectUtils.buildFolderFor("/work/my-app/spaces/@acme/app/api", main)
+    const inWorktree = projectUtils.buildFolderFor("/work/my-app.worktrees/fix/spaces/@acme/app/api", worktree)
+    expect(inMain).toBe(`${projectUtils.spacesBuildDir(main)}/@acme/app/api`)
+    expect(inWorktree).toBe(`${projectUtils.spacesBuildDir(worktree)}/@acme/app/api`)
+    expect(inWorktree).not.toBe(inMain)
+    // inside the checkout's `build/`:  the index's `buildFolder` needs no `../` (J33)
+    expect(inWorktree.startsWith("/repo/build/spell-spaces.fix-")).toBe(true)
   })
 
   test("a project of ANOTHER spell-app checkout:  under that checkout's `build/`, never beside its source (P21)", () => {
