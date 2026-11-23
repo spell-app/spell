@@ -188,6 +188,31 @@ export const drawingMethods = defineCoreModule({
   },
 
   /**
+   * An if-chain inside markup, `<text><if it is done>✓<otherwise>{its title}</></text>`:  ONLY the branch whose
+   * condition holds is drawn, and drawn again when another one comes to hold.
+   * - `parts`:  each branch's condition, then its drawing;  a last drawing alone is the `<otherwise>`.
+   *   - `core.drawIf(() => this.isDone, () => ["✓"], () => [() => this.title])`
+   * - The first branch whose condition holds shows;  none, and no `<otherwise>`:  nothing.
+   * - A branch that isn't the one draws nothing, so nothing it reads is asked for:  a place's read under it waits
+   *   until it shows.
+   * - A change that keeps the same branch keeps its drawing:  only a flip draws it again, and lets the old one go.
+   * - A condition that waits makes the chain wait, ONE spinner in its place:  the writers put it in `drawWaiting()`.
+   */
+  drawIf(...parts: Array<() => unknown>): Drawing {
+    const shown = createMemo(() => {
+      let at = 0
+      for (; at + 1 < parts.length; at += 2) if (parts[at]!()) return at + 1
+      return at < parts.length ? at : -1
+    })
+    return createMemo(() => {
+      const at = shown()
+      if (at < 0) return null
+      // what it draws is its own, as a drawing's is:  only a flip draws it again
+      return untrack(() => untrackCells(() => madeOnce(parts[at]!() as Drawing)))
+    }) as unknown as Drawing
+  },
+
+  /**
    * A button for ONE of the program's actions, `name` (`autoPlay`), on `thing` or up its chain (`core.actionOf()`):
    * what `<action "auto play"/>` draws (epic `language`, Owen 2026-11-13).
    * - A `<ui-button>`, which the action gives, LIVE, as a menu's item reads it:
@@ -937,13 +962,23 @@ const DRAWN = Symbol("drawn")
  *   - elements INSIDE it need nothing:  `h()` makes them as it makes their parent
  * - A fragment, `<>...</>`, is a list of them (`[h("a"), h("b")]`):  each made once, the same way.
  * - So is a loop among other drawn lines:  `core.map()` answers a spell `List`, which Solid can't put on a page.
- * - ONLY `h()`'s thunks:  any other function is a live value, which Solid calls itself, again when it changes.
- *   `h()` marks its thunks with a symbol it keeps to itself, so it's read off a thunk of our own, `H_THUNK`.
+ * - Any other function is a live value, which Solid calls itself, again when it changes:  in a memo of its own, as
+ *   Solid's compiler puts a fragment's live values.  Left bare, the boundary called it again each time it re-read
+ *   its children:  one that MAKES a drawing (`core.drawRead()`, a `<for>` over a saved type beside other lines) made a
+ *   new read, which waited, then answered, which the boundary re-read, which made a new read ...  the page hung.
+ *   - The memo runs it again only for what IT read.
+ *   - `h()` marks its thunks with a symbol it keeps to itself, so it's read off a thunk of our own, `H_THUNK`.
  */
 function madeOnce(drawing: Drawing): Drawing {
   if (Array.isArray(drawing)) return drawing.map(madeOnce)
   if ((drawing as unknown) instanceof List) return (drawing as unknown as List<Drawing>).items.map(madeOnce)
-  return isElementThunk(drawing) ? madeOnce(drawing()) : drawing
+  if (isElementThunk(drawing)) return madeOnce(drawing())
+  return isLiveValue(drawing) ? (createMemo(drawing) as unknown as Drawing) : drawing
+}
+
+/** Is `value` a live value, a function Solid calls with nothing for what to draw now -- see `madeOnce()`? */
+function isLiveValue(value: unknown): value is () => Drawing {
+  return typeof value === "function" && value.length === 0
 }
 
 /** Is `value` a thunk core's `h()` made -- see `madeOnce()`? */

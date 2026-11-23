@@ -227,7 +227,7 @@ export class RecipeBox extends App {
           )
         ),
         () => core.drawRead(() => this.matches, (recipe) => core.drawThing(recipe), {
-          waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "screen" }, "Finding your recipes"),
+          waitingSay: () => "Finding your recipes",
           none: () => h("ui-text", { class: "none", color: "grey", part: "screen" },
             () => this.search === "" ? "No recipes yet. Add your first one." : "No recipes match your search."
           ),

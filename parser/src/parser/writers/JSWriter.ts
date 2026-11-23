@@ -11,7 +11,6 @@ import {
   TEMPLATE_TAGS,
   attributeName,
   isCoreCall,
-  objectText,
   isTight,
   PRESS_ATTRIBUTES,
   topLevelOf,
@@ -58,9 +57,6 @@ const ELEMENT_TAG = "elementTag"
 
 /** A `where`'s `core` helper, and its twin that asks each item in turn when its condition waits. */
 const WAITING_TWINS: Record<string, string> = { filter: "filterInTurn", itemWhere: "itemWhereInTurn" }
-
-/** `core`'s call a place's line compiles to. */
-const PLACE_CALL = "place"
 
 /** A line's description comment, `-- ...`:  written as a plain `//` (`ASTLineComment()`). */
 const DESCRIPTION_SYMBOL = "--"
@@ -590,8 +586,7 @@ export class JSWriter extends ProgramWriter {
     }
     const waits = this.writesAwait(node)
     if (waits && this.project.waitsInTurn(node)) return this.inTurn(node)
-    const made = this.call(node)
-    const written = isCoreCall(node) && node.methodName === PLACE_CALL ? this.placeCall(node, made) : made
+    const written = this.call(node)
     return waits ? `await ${written}` : written
   }
 
@@ -1713,24 +1708,6 @@ export class JSWriter extends ProgramWriter {
     return `${written.slice(0, closing.index)}, select: [${select.map((field) => this.quoted(this.nameOf(field))).join(", ")}] }`
   }
 
-  /**
-   * `core.place(thing, {...})`, with what a first draw reads from it:  see `P.ReadGathering.firstReadsOf()`.
-   * - Only two or more:  one read alone is a read that asks for itself.
-   * - In a function:  read when the place is first read, when every class is declared.
-   */
-  private placeCall(node: P.ASTScopedMethodInvocation, written: string): string {
-    const name = node.args?.args?.[1]
-    const placeName = name instanceof P.ASTObjectLiteral ? objectText(name, "name") : undefined
-    const reads = placeName ? this.reads?.firstReadsOf(placeName) : undefined
-    const closing = /\s*\}\)$/.exec(written)
-    if (!reads || reads.length < 2 || !closing) return written
-    const asks = reads.map(({ typeName, query }) => {
-      const type = this.nameOf(typeName)
-      return query ? `[${type}, ${this.bare(query)}]` : `[${type}]`
-    })
-    return `${written.slice(0, closing.index)}, firstReads: () => [${asks.join(", ")}] })`
-  }
-
   /** `code`, below the spell that made `node`, if any (`spellComment()`). */
   withSpell(node: P.ASTNode, code: string): string {
     return [this.spellComment(node), code].filter(Boolean).join(jsText.NEWLINE)
@@ -1852,7 +1829,39 @@ export class JSWriter extends ProgramWriter {
   ASTJSXElement(node: P.ASTJSXElement): string {
     const element = isDrawnApart(node) ? `core.drawPart(this, () => ${this.jsxElement(node)})` : this.jsxElement(node)
     // its attributes wait:  a spot of its own, a spinner there meanwhile (`WriterProject.elementsThatWait`)
-    return this.project.elementsThatWait.has(node) ? `() => core.drawWaiting(() => ${element})` : element
+    const waits = this.project.elementsThatWait.has(node)
+    const drawn = waits ? this.drawnWaiting(node, element) : element
+    // its `loading="..."`:  how what waits in it looks, around it all
+    if (node.looking) return `() => ${this.drawnLooking(node, drawn)}`
+    return waits ? `() => ${drawn}` : element
+  }
+
+  /**
+   * `element`, `node` written, in a spot of its own while its attributes wait:  `core.drawWaiting(() => ..., "ui-table")`;
+   * a tag with a loading state of its own, whose `loading` is Spell's, stands in for itself in that state (`, true`).
+   */
+  drawnWaiting(node: P.ASTJSXElement, element: string): string {
+    const owns = node.looking?.ownsState ? ", true" : ""
+    return `core.drawWaiting(() => ${element}, ${this.quoted(node.tagName)}${owns})`
+  }
+
+  /**
+   * `drawn`, with what waits in `node` looking as its `loading="..."` says:  `core.drawLooking("skeleton", () => ...)`.
+   * - Its own loading state stands in for what waits inside it (`, true`), unless its attributes wait:  then it
+   *   stands in for itself (`drawnWaiting()`).
+   * - Its `<loading>` and `<failed>`, after:  `{ waiting: () => [...], failed: (error) => [...], slots: true }`.
+   */
+  drawnLooking(node: P.ASTJSXElement, drawn: string): string {
+    const { said, ownsState, waiting, failed, slots } = node.looking!
+    const owns = ownsState && !this.project.elementsThatWait.has(node)
+    // its `<loading>` and `<failed>`:  `the error`, inside `<failed>`, is the failure's words
+    const riders = [
+      waiting && `waiting: () => ${this.write(waiting)}`,
+      failed && `failed: (error) => ${this.write(failed)}`,
+      slots && "slots: true"
+    ].filter(Boolean)
+    const rest = riders.length ? `, ${owns}, { ${riders.join(", ")} }` : owns ? ", true" : ""
+    return `core.drawLooking(${this.quoted(said)}, () => ${drawn}${rest})`
   }
 
   /**
@@ -1973,6 +1982,8 @@ export class JSWriter extends ProgramWriter {
     const looped = this.loopDrawn(node.expression, this.bare(node.expression))
     const value = node.isChild ? this.listChildDrawn(node.expression, looped) : looped
     if (this.project.spotsThatWait.has(node)) return `() => core.whileWaiting(() => ${value})`
+    // an if-chain whose conditions wait:  a spot of its own, ONE spinner there meanwhile (`WriterProject.ifsThatWait`)
+    if (this.project.ifsThatWait.has(node)) return `() => core.drawWaiting(() => ${value})`
     return unwrapped(node.expression) instanceof P.ASTObjectLiteral ? `() => (${value})` : `() => ${value}`
   }
 

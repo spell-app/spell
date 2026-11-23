@@ -876,6 +876,14 @@ class PlaceMethods:
                 drawn = around
         return drawn
 
+    def draw_waiting(self, element: Callable[[], Any]) -> Any:
+        """Something whose drawing reads what waits, in its own place:  `element()`, drawn here.
+
+        - The twin of the JavaScript core's `drawWaiting()`, which shows a spinner there meanwhile:
+          here the page is sent with its values (`core.run_at_once()`), so nothing's left to wait for.
+        """
+        return element()
+
     def draw_each(self, collection: object, each: Callable[..., Any]) -> list[Any]:
         """A loop's drawing, one for each item of `collection`:  `for each ... draw` in a drawing."""
         return list(self.map(collection, each) or [])  # type: ignore[attr-defined]

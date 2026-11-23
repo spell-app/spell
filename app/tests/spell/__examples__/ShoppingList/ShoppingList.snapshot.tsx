@@ -62,10 +62,9 @@ export class Item extends View {
           <ui-checkbox name="got" aria-label="Got it" />
           <ui-text class="how-much" bold={true}>{this.howMuch}</ui-text>
           <ui-text class="name">{this.name}</ui-text>
-          <ui-text class="for" color="grey" size="small" hidden={this.recipe !== "" ? undefined : true}>
-            {"for "}
-            {this.recipe}
-          </ui-text>
+          {core.drawIf(() => this.recipe !== "", () => <>
+            <ui-text class="for" color="grey" size="small">for {this.recipe}</ui-text>
+          </>)}
           {core.drawAction(this, "remove", { "icon-only": true, appearance: "tertiary" })}
         </ui-stack>
       </ui-form>
@@ -122,7 +121,8 @@ export class ShoppingSheet extends Place {}
 export const shoppingSheet = core.place(new ShoppingSheet(), {
   name: "shopping_sheet",
   kind: "sheet",
-  at: "/api/places/spaces/@spell/examples/ShoppingList/__data/shopping.csv", firstReads: () => [[Item, { filter: { got: true } }], [Item, { filter: { got: false } }]] })
+  at: "/api/places/spaces/@spell/examples/ShoppingList/__data/shopping.csv"
+})
 
 // -----------
 core.heading("An item on the list")

@@ -1,6 +1,7 @@
 import { parseCsv } from "spell/places/csv"
 import { googleSheetCsvAddress, isPlaceServerAddress } from "spell/places/places.types"
 import { Workbook } from "spell/places/Workbook"
+import { wrappedRows } from "spell/places/wrappedRows"
 
 import {
   IngestStopped,
@@ -28,9 +29,6 @@ const TRAILING_SLASHES = /\/+$/
 
 /** How much of a source's docs it keeps. */
 const MOST_DOCS_CHARS = 8000
-
-/** The fields a wrapped list usually keeps its rows in. */
-const ROWS_FIELDS = ["results", "data", "items", "records", "rows"]
 
 /** The fields an answer usually says its next page in. */
 const NEXT_FIELDS = ["next", "next_url", "nextUrl", "nextPage", "next_page", "links.next", "paging.next"]
@@ -486,15 +484,6 @@ function listedIn(body: unknown, address: string): Array<{ name: string; at: str
   return listed.length ? listed : undefined
 }
 
-/** The rows of a wrapped list, and where they are:  `undefined` for anything else. */
-export function wrappedRows(body: unknown): { rows: unknown[]; rowsAt: string } | undefined {
-  if (!body || typeof body !== "object" || Array.isArray(body)) return undefined
-  const fields = body as Record<string, unknown>
-  const named = ROWS_FIELDS.find((field) => Array.isArray(fields[field]))
-  const only = Object.keys(fields).filter((field) => Array.isArray(fields[field]))
-  const rowsAt = named ?? (only.length === 1 ? only[0] : undefined)
-  return rowsAt === undefined ? undefined : { rows: fields[rowsAt] as unknown[], rowsAt }
-}
 
 /** A few pages of one collection. */
 async function readCollection(

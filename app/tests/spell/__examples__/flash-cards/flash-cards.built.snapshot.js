@@ -115,27 +115,27 @@ export class Quiz extends App {
         ),
         () => core.drawThing(this.card),
         h("ui-stack", { direction: "horizontal", justify: "center" },
-          h("ui-button", {
-            color: "primary",
-            onClick: core.pressed(this, () => this.showTheAnswer()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
-            hidden: () => this.card?.isFaceDirection("up") ? undefined : true
-          }, "Show the answer"),
-          h("ui-button", {
-            color: "positive",
-            icon: "check",
-            onClick: core.pressed(this, () => this.sayIKnew()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
-            hidden: () => !this.card?.isFaceDirection("up") ? undefined : true
-          }, "I knew it"),
-          h("ui-button", {
-            color: "negative",
-            appearance: "basic",
-            icon: "close",
-            onClick: core.pressed(this, () => this.sayIMissed()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
-            hidden: () => !this.card?.isFaceDirection("up") ? undefined : true
-          }, "I missed it")
+          () => core.drawIf(() => this.card?.isFaceDirection("up"), () => [
+            h("ui-button", {
+              color: "primary",
+              onClick: core.pressed(this, () => this.showTheAnswer()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Show the answer")
+          ], () => [
+            h("ui-button", {
+              color: "positive",
+              icon: "check",
+              onClick: core.pressed(this, () => this.sayIKnew()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "I knew it"),
+            h("ui-button", {
+              color: "negative",
+              appearance: "basic",
+              icon: "close",
+              onClick: core.pressed(this, () => this.sayIMissed()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "I missed it")
+          ])
         )
       )
     )

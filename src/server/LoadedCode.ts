@@ -13,30 +13,36 @@ import { fileURLToPath } from "node:url"
  *   several times an hour".
  * - The server's half:  `record()`, run before anything else loads (`page/loadedCodeHook.ts`, an `--import` of the
  *   command `PageServer.ensure()` starts), notes each file node loads, through node's module hooks, and writes
- *   them to `<root>/.spell-server.code.json` (`fileFor()`), a moment after the last one:
+ *   them to its record, beside its pid file (`PidFile.codeFile`), a moment after the last one:
  *   `{ pid, files: { "<path>": <its time when loaded, ms> } }`
  * - The asking half:  `isChanged()`, from `PidFile.ensure()`:  any of them changed or gone since it was loaded.
  *   - `undefined` when there's no record for that server (an older one, or one started by hand):
  *     the caller falls back to the old rule
  * - A file the server hasn't loaded yet doesn't count:  when it's first asked for, it's loaded as it is then.
  * - Node built-ins only:  it's loaded first, before `tsx` has a say on anything of ours.
+ *   So it names no file itself:  the page server's pid file does (`PidFile.codeFile`), and `PageServer.ensure()` hands
+ *   it to the hook in `LOADED_CODE_VARIABLE`.
+ * - ONE record per page server, named by the spaces it serves as its pid file is:  Spell's own,
+ *   `.spell-server.code.json`;  a project's, `.spell-server.<folder>-<hash>.code.json`.
+ *   - Why:  a project's page server on the kit wrote over Spell's record, and Spell's server then fell back to the old
+ *     rule, restarting after more merges than it needed to.
  */
 export class LoadedCode {
   /**
-   * The record's file, beside the pid file:  `<root>/.spell-server.code.json`.
+   * The record's file of Spell's own page server at kit `root`, beside its pid file:  `<root>/.spell-server.code.json`.
+   * - a project's server's is named by its spaces:  `PidFile.codeFile`
    */
   static fileFor(root: string): string {
-    return join(resolve(root), ".spell-server.code.json")
+    return join(resolve(root), LOADED_CODE_FILE)
   }
 
   /**
-   * In the server's process:  note every file node loads from now on, and keep `fileFor(root)` up to date.
+   * In the server's process:  note every file node loads from now on, and keep record `file` up to date.
    * - SIDE EFFECT:  registers a module hook for the process's life;  writes the record 1s after the last new file
    * - NEVER throws:  a server whose record can't be written is restarted by the old rule, nothing worse
    */
-  static record(root: string): void {
+  static record(file: string): void {
     const files: Record<string, number> = {}
-    const file = LoadedCode.fileFor(root)
     let timer: ReturnType<typeof setTimeout> | undefined
     const write = () => {
       try {
@@ -67,9 +73,8 @@ export class LoadedCode {
     })
   }
 
-  /** The record for the server with process `pid`;  `undefined` with none, or one another server wrote. */
-  static read(root: string, pid: number): LoadedCodeRecord | undefined {
-    const file = LoadedCode.fileFor(root)
+  /** The record in `file` for the server with process `pid`;  `undefined` with none, or one another server wrote. */
+  static read(file: string, pid: number): LoadedCodeRecord | undefined {
     if (!existsSync(file)) return undefined
     try {
       const record = JSON.parse(readFileSync(file, "utf8")) as Partial<LoadedCodeRecord>
@@ -80,12 +85,12 @@ export class LoadedCode {
   }
 
   /**
-   * Has any file the server with process `pid` loaded changed, or gone, since it loaded it?
+   * Has any file the server with process `pid` loaded changed, or gone, since it loaded it?  By its record, `file`.
    * - `undefined`:  no record for that server -- the caller decides by its own rule
    * - NEVER throws
    */
-  static isChanged(root: string, pid: number): boolean | undefined {
-    const record = LoadedCode.read(root, pid)
+  static isChanged(file: string, pid: number): boolean | undefined {
+    const record = LoadedCode.read(file, pid)
     if (!record) return undefined
     for (const [path, loaded] of Object.entries(record.files)) {
       try {
@@ -97,6 +102,12 @@ export class LoadedCode {
     return false
   }
 }
+
+/** Spell's own page server's record, at the kit's root:  a project's is named by its spaces (`PidFile.codeFile`). */
+export const LOADED_CODE_FILE = ".spell-server.code.json"
+
+/** The variable `PageServer.ensure()` names the server's record in, for its hook (`loadedCodeHook.ts`). */
+export const LOADED_CODE_VARIABLE = "SPELL_LOADED_CODE_FILE"
 
 /** How long after the last newly loaded file the record is written, in ms. */
 const WRITE_AFTER_MS = 1000

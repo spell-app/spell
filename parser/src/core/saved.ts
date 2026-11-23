@@ -13,11 +13,15 @@
  *   place never loads it.  `places.ts`, which does know `core`, is in the runtime itself.
  * - What drives the things is the read's own `changes` cell:  a memo reading `core.savedThings()` follows it, so a new
  *   answer, a write or a heal runs the memo again.  `PlaceThings.thingsFrom()` runs inside that, never by itself (J).
+ * - It NEVER reads ahead:  a page reads only what it draws, as it draws it.  Lists asked for in the same moment still go
+ *   in one request where the place can take several (`PlaceBatch`).
+ *   - Only a collection whose place says so is read as the program starts:  `tags are read on startup`,
+ *     `readOnStartup` on the place's line (`readOnStartup()`).  None is by default.
  * - What the compiler gathered (epic `data` P12), and what it couldn't see:
- *   - `firstReads`, on the place's line:  everything a first draw reads from it, asked for together when it's first read.
  *   - `select`, on a type's `savedIn`:  the fields anything reads, for a place that can leave the rest out.
  *   - A field it left out and something read anyway (`PropInfo.whenUnset`):  the place is asked once more, for all of them.
- *     Whoever read it follows the field, so it appears.
+ *     Whoever read it follows the field, so it appears.  A list field, made empty as its thing is kept, is never unset:
+ *     its getter asks.
  * - `leave()`:  each computation reading one holds it until it's disposed (`onCleanup()`):  a draw leaving lets it go,
  *   and the last one letting go aborts its request.  A read from an action holds it only until its answer.
  * - A field holding another thing's address (epic `data` I33, `core.linked()`):  `the name of its homeworld`.
@@ -52,7 +56,7 @@ import {
 import { msUntil, pollWhileVisible } from "spell/util/polling"
 import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
 import { snakeCase } from "spell/util"
-import { after, whenIdle } from "spell/util/timing"
+import { whenIdle } from "spell/util/timing"
 
 import { Cell, getProp, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
 import { MOST_AT_ONCE, drawnInWindow, rowAt, type MorePages } from "spell/element/drawnWindow"
@@ -68,6 +72,7 @@ import { core, declaredClasses, declaredClassNamed, isWhileReading, whileReading
 import { defineCoreModule } from "./core.types"
 import { SPELL_WINDOW, nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
+import type { SkeletonSpec } from "spell/element/vocabulary.types"
 import { listenForDroppedFiles } from "./pickedFiles"
 import { knowCollection, limitOperations, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./places"
@@ -75,7 +80,15 @@ import type { PlaceDeployment } from "./runtime"
 import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
 import { failsAsMissing, holdNotice } from "./undoing"
-import { forgetWaitedValue, standInFor, waitingLoader } from "./waiting"
+import { lookSaid } from "./looks"
+import {
+  elementWaitingLoader,
+  failedHere,
+  forgetWaitedValue,
+  standInFor,
+  waitingLoader,
+  waitingMethods
+} from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
 import { Place } from "./classes/Place"
@@ -107,6 +120,11 @@ export type SavedIn = {
 export type ReadRiders = {
   /** `while waiting:`:  what shows until the first answer. */
   waiting?: () => Drawing
+  /**
+   * `while waiting say "Loading Jobs..."`, a `<for loading="...">`'s:  the look's words, or the look itself
+   * (`"skeleton"`, `"spinner"`, `"none"`), as the loader here draws it (`waitingLoader()`).
+   */
+  waitingSay?: () => unknown
   /** `if there are none:`:  what shows when there's an answer, and nothing in it. */
   none?: () => Drawing
   /** `if that fails:`:  what shows when it can't be read. */
@@ -177,9 +195,6 @@ const KINDS_WITH_SIGN_IN = new Set(["atmosphere account", "personal atmosphere a
 
 /** The longest wait, in seconds, for an idle moment to send what the last visit left waiting:  `sendWaiting()`. */
 const WAITING_WRITES_WAIT = 5
-
-/** How long a read asked for ahead waits for the draw that wants it, once it has its answer, in msec. */
-const FIRST_READ_WAITS = 5_000
 
 /** What a function written `async` says it is. */
 const ASYNC_FUNCTION = "AsyncFunction"
@@ -273,6 +288,7 @@ class ProgramPlaces {
     }
     // what the last visit left waiting for a place this one never uses goes too, once the page has settled
     whenIdle(() => this.sendWaiting(), { timeout: WAITING_WRITES_WAIT })
+    this.readOnStartup()
   }
 
   /**
@@ -300,6 +316,25 @@ class ProgramPlaces {
         this.followSignIn(behind)
       } catch (ignored) {
         console.error(`core.place():  couldn't make "${name}" to send what's waiting for it`, ignored)
+      }
+    }
+  }
+
+  /**
+   * SIDE EFFECT:  each collection a place's line says is read on startup (`tags are read on startup`) is read
+   * now, as the program starts, and kept for as long as it runs.  Nothing else is:  a page reads what it draws.
+   * - Its first page:  the rest as it's drawn, as a draw's own read would.
+   * - Its class by name:  every class is declared by now, as the program's module has run.
+   */
+  private readOnStartup(): void {
+    for (const { details } of this.declared.values()) {
+      for (const name of details.readOnStartup ?? []) {
+        const Class = this.classNamed(name) as SavedClass | undefined
+        if (!Class) {
+          console.error(`core.place():  "${details.name}" reads ${name} on startup, and no class goes by that name`)
+          continue
+        }
+        this.readOf(Class, {}).keepFromStartup()
       }
     }
   }
@@ -580,24 +615,6 @@ class ProgramPlaces {
     return read
   }
 
-  /** What a first draw reads from the place `Class` is saved in, asked for now:  once per place. */
-  askFirstReads(Class: SavedClass): void {
-    const { place } = savedInOf(Class)
-    if (this.askedFirst.has(place)) return
-    this.askedFirst.add(place)
-    try {
-      for (const [ReadClass, query = {}] of this.declared.get(place)?.details.firstReads?.() ?? []) {
-        this.readOf(ReadClass as SavedClass, query).askAhead()
-      }
-    } catch (ignored) {
-      // only a head start:  each read still asks for itself
-      console.error("core.savedThings():  couldn't ask for what a first draw reads", ignored)
-    }
-  }
-
-  /** Each place whose first reads have gone. */
-  private readonly askedFirst = new Set<string>()
-
   /** What each link was found to be, by type and address:  `null` when the place holds nothing there. */
   private readonly linksFound = new Map<string, Thing | null>()
   /** Each thing's list of what its links name, so it stays one list while they're the same. */
@@ -747,15 +764,22 @@ class ProgramPlaces {
     }
   }
 
-  /** The fields to ask `behind` for, of `Class`:  only when it can leave the rest out, and nothing's been missed. */
+  /**
+   * The fields to ask `behind` for, of `Class`:  only when it can leave the rest out ITSELF, and nothing's been missed.
+   * - Its id too, so what it's asked whether it can do is the selection it gets:  a place that can't leave fields out
+   *   (a web server's `"none"`) can't select only an id either, so it's read whole, once.  Asked of the compiled list
+   *   alone, an empty `select` passed, the place sent every field anyway, the engine hid them, and the first field read
+   *   asked the whole list again.
+   */
   private selectionFor(Class: SavedClass, behind: PlaceBehind): readonly string[] | undefined {
     const { select } = savedInOf(Class)
     if (!select || this.askedWhole.has(Class)) return undefined
     const { select: canSelect, idOf = ID_FIELD } = behind.describe()
-    if (!this.folder!.canDoAll(canSelect, select)) return undefined
-    this.heedFieldsLeftOut(Class, select, behind)
     // its id too:  it's what makes it one thing
-    return select.includes(idOf) ? select : [...select, idOf]
+    const selection = select.includes(idOf) ? select : [...select, idOf]
+    if (!this.folder!.canDoAll(canSelect, selection)) return undefined
+    this.heedFieldsLeftOut(Class, select, behind)
+    return selection
   }
 
   /** The classes something read a left-out field of:  read whole from now on. */
@@ -791,6 +815,8 @@ class ProgramPlaces {
           if (this.things?.placeOf(target as Thing)) this.askWhole(Class)
         }
         schema.declared.set(name, { ...info, whenUnset })
+        // a list is made empty as its thing is kept (`PlaceThings`), so it's never unset:  its getter asks
+        if (info.itemType !== undefined) this.onGet(Class, name, whenUnset)
       }
     }
   }
@@ -831,19 +857,23 @@ class ProgramPlaces {
 
   /** SIDE EFFECT:  `Class`'s getter for `name` reads its thing whole first, once:  see `heedListsGiveOnly()`. */
   private readWholeOnGet(Class: SavedClass, name: string): void {
+    this.onGet(Class, name, (thing) => {
+      if (this.wholeThingsAsked.has(thing) || isOnlyShowing() || isWhileReading()) return
+      if (this.things?.placeOf(thing)) this.readWhole(Class, thing)
+    })
+  }
+
+  /** SIDE EFFECT:  `Class`'s getter for `name` calls `first` with its thing, before it reads it. */
+  private onGet(Class: SavedClass, name: string, first: (thing: Thing) => void): void {
     let owner: object | null = Class.prototype as object
     while (owner && !Object.getOwnPropertyDescriptor(owner, name)?.get) owner = Object.getPrototypeOf(owner) as object
     const descriptor = owner && Object.getOwnPropertyDescriptor(owner, name)
     if (!descriptor?.get) return
     const get = descriptor.get
-    const askWhole = (thing: Thing) => {
-      if (this.wholeThingsAsked.has(thing) || isOnlyShowing() || isWhileReading()) return
-      if (this.things?.placeOf(thing)) this.readWhole(Class, thing)
-    }
     Object.defineProperty(Class.prototype, name, {
       ...descriptor,
       get(this: Thing) {
-        askWhole(this)
+        first(this)
         return get.call(this) as unknown
       }
     })
@@ -1152,13 +1182,14 @@ class SavedRead {
   }
 
   /**
-   * Ask for it now, before anything draws it:  what a first draw reads, together (`PlaceDetails.firstReads`).
-   * - Held a while after its answer, so the draw that wants it finds it there, with no second request.
+   * Read it now, as the program starts, and hold it for as long as it runs:  a collection read on startup
+   * (`PlaceDetails.readOnStartup`).  NEVER throws:  a draw that reads it says what went wrong.
    */
-  askAhead(): void {
+  keepFromStartup(): void {
     this.holders++
-    const letGo = () => void after(FIRST_READ_WAITS / 1000, () => this.letGo()).catch(console.error)
-    void this.firstPage().then(letGo, letGo)
+    this.firstPage().catch((ignored) =>
+      console.error(`core.place():  couldn't read ${this.Class.name} on startup`, ignored)
+    )
   }
 
   /** It was asked with some fields left out, and something read another:  ask again for the whole thing.  NEVER throws. */
@@ -1447,7 +1478,6 @@ export const savedMethods = defineCoreModule({
     how?: "looks through" | "as drawn"
   ): Promise<List<InstanceType<Class>>> {
     const program = programPlaces()
-    program.askFirstReads(Class as unknown as SavedClass)
     const read = program.readOf(Class as unknown as SavedClass, query)
     read.changes.read()
     const answering = how === "as drawn" ? read.firstPage() : read.answer()
@@ -1817,12 +1847,16 @@ export const savedMethods = defineCoreModule({
   /**
    * An element whose attributes read what waits, `<activity-grid runs={its recent jobs} />`, in its own place:
    * the rest of the drawing shows at once.
-   * - Waiting:  a spinner where it goes (`waitingLoader()`), as a list shows.
+   * - Waiting:  a spinner where it goes (`waitingLoader()`), as a list shows;  or the look around it says
+   *   (`core.drawLooking()`):  a skeleton shaped as `tag` draws (a picture's an image, else lines), or nothing.
    * - Failed:  a message there, and Try again, as a list's;  the page around it stays.
-   * - What the writers write for one:  `core.drawWaiting(() => h("my-site-activity-grid", ...))`.
+   * - `ownsState`:  its tag has a loading state of its own and its `loading="..."` is Spell's:  with a spinner, it
+   *   stands in for itself, empty, in that state (`elementWaitingLoader()`).
+   * - `skeleton`:  its tag's own (its vocabulary's), as the compiler found it, for a skeleton look.
+   * - What the writers write for one:  `core.drawWaiting(() => h("my-site-activity-grid", ...), "my-site-activity-grid")`.
    */
-  drawWaiting(element: () => Drawing): Drawing {
-    return savedMethods.drawRead(element, null, { waiting: waitingLoader })
+  drawWaiting(element: () => Drawing, tag?: string, ownsState?: boolean, skeleton?: SkeletonSpec): Drawing {
+    return savedMethods.drawRead(element, null, { waiting: () => elementWaitingLoader(tag, ownsState, skeleton) })
   },
 
   /**
@@ -1915,7 +1949,10 @@ export const savedMethods = defineCoreModule({
       const isEmpty = createMemo(() => !items().length)
       return (() => (isEmpty() ? (riders.none?.() ?? null) : shown)) as unknown as Drawing
     }
-    const whileLoading = riders.waiting ?? (drawEach ? waitingLoader : undefined)
+    const whileLoading =
+      riders.waiting ??
+      (riders.waitingSay ? () => saidLoader(riders.waitingSay!()) : undefined) ??
+      (drawEach ? () => waitingLoader() : undefined)
     const body = () =>
       whileLoading
         ? createComponent(Loading, {
@@ -1930,9 +1967,7 @@ export const savedMethods = defineCoreModule({
     const whole = createComponent(Errored, {
       // Solid hands the error as an accessor:  read as it was, it said "function () { [native code] }"
       fallback: (error: () => unknown) =>
-        riders.failed
-          ? riders.failed()
-          : failedDrawing(error(), riders.failedSay ? `${riders.failedSay()}` : undefined),
+        riders.failed ? riders.failed() : listFailed(error(), riders.failedSay ? `${riders.failedSay()}` : undefined),
       get children() {
         return body()
       }
@@ -1942,6 +1977,18 @@ export const savedMethods = defineCoreModule({
   }
 })
 Object.assign(core, savedMethods)
+
+/**
+ * What `while waiting say "..."` shows:  the look it names (`lookSaid()`) around just this list, or the loader here
+ * saying its words (a skeleton announcing them).
+ */
+function saidLoader(said: unknown): Drawing {
+  // nothing said:  the loader here, as it looks
+  if (said === undefined || said === null || said === "") return waitingLoader("lines")
+  const look = lookSaid(said)
+  if (look.text) return waitingLoader("lines", look.text)
+  return waitingMethods.drawLooking(look.look, () => waitingLoader("lines"))
+}
 
 /** The draft `copy` is a copy for.  - throws `TypeError` for anything else */
 function draftOfCopy(copy: unknown, method: string) {
@@ -2168,6 +2215,15 @@ function failedDrawing(error: unknown, said?: string): Drawing {
   )
   const look = wait === undefined ? { color: "red" } : { state: "warning", size: "small" }
   return h("ui-message", look, message, button) as unknown as Drawing
+}
+
+/**
+ * What a read that failed shows, with no `if that fails:`:  its element's `<failed>` or own error state, where the
+ * look around it says (`failedHere()`);  else a message, and Try again.
+ */
+function listFailed(error: unknown, said: string | undefined): Drawing {
+  const here = failedHere(error, said ?? whyOf(error))
+  return here === undefined ? failedDrawing(error, said) : here
 }
 
 /** What a failure says of itself. */

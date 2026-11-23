@@ -295,6 +295,7 @@ export const spanishWords: SP.LanguageWords = {
       },
       forTag: {
         waiting: "mientras espera :",
+        waitingSay: "mientras espera decir",
         none: "si no hay nada :",
         failed: "si falla :",
         failedSay: "si falla decir",

@@ -12,6 +12,7 @@
  */
 
 import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /**
  * The class word of every hue a card's `background` can be:  one word, `tinted`, as ONE rule draws them all.
@@ -166,14 +167,15 @@ export const cardVocabulary = {
       description: 'Alternative text of the `image` shorthand;  default `""` (decorative:  the card\'s text names it).'
     }
   ],
-  events: [],
+  events: [...UIT.StatePaneEvents],
   slots: [
     {
       name: "",
       description:
         "Content:  `<ui-content>` blocks (header, meta, description), `<img>`s (full-width images), `<ui-extra>`, " +
         "buttons.  A slotted part of a shorthand's noun replaces that shorthand."
-    }
+    },
+    ...UIT.StatePaneSlots
   ],
   parts: [
     { name: "card", description: "The card box (`<article>`, or `<a>` with `link`)." },
@@ -182,7 +184,8 @@ export const cardVocabulary = {
     { name: "header", description: "The `header` shorthand." },
     { name: "meta", description: "The `meta` shorthand." },
     { name: "description", description: "The `description` shorthand." },
-    { name: "extra", description: "The `extra` shorthand." }
+    { name: "extra", description: "The `extra` shorthand." },
+    ...UIT.StatePaneParts
   ],
   states: [
     { name: "in-cards", description: "In a `<ui-cards>` group:  sized and spaced by it, `role=listitem`." },

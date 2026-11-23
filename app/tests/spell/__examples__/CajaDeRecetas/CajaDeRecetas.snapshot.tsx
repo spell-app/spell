@@ -277,7 +277,7 @@ export class CajaDeRecetas extends App {
             </es-extra>
           </es-tarjeta>
           {core.drawRead(() => this.coincidencias, (receta: Receta) => core.drawThing(receta), {
-            waiting: () => <ui-loader visible={true} inline={true} text={true} part="pantalla">{"Buscando tus recetas"}</ui-loader>,
+            waitingSay: () => "Buscando tus recetas",
             none: () => <es-texto class="none" color="gris" part="pantalla">
               {this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."}
             </es-texto>,

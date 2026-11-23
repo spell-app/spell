@@ -316,6 +316,19 @@ export default function languageCommands(spell: Command): void {
         "writes the line that says so"
     )
     .option(
+      "--read-only",
+      "it's read only, whatever its description offers:  writes it describes stay in its description, off;  " +
+        "writes the line that says so, which every later update keeps"
+    )
+    .option(
+      "--rows <count>",
+      "how many rows a program asks for at a time, e.g. 20:  writes the line that says so, which every later update keeps"
+    )
+    .option(
+      "--check-every <time>",
+      "how often a program asks it what changed, e.g. 30s, 5m:  writes the line that says so, which every later update keeps"
+    )
+    .option(
       "--no-examples",
       "keep its real rows off the project:  no real value in its description, the rows read kept in " +
         '~/.spell/places/<name>;  writes "its data is private", which every later update keeps to'

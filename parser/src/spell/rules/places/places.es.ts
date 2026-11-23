@@ -55,7 +55,8 @@ import {
   ShowThemAtATime,
   ShowThemIn,
   ShowThemPaged,
-  WhileWaiting
+  WhileWaiting,
+  WhileWaitingSay
 } from "./ReadRider"
 import { ReloadThings } from "./ReloadThings"
 import { PickFileFor } from "./PickFileFor"
@@ -75,6 +76,7 @@ import { EveryThingMatching } from "./EveryThingMatching"
 import { SearchedAt } from "./SearchedAt"
 import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
+import { ReadOnStartup } from "./ReadOnStartup"
 import { ThereAreThings } from "./ThereAreThings"
 import { AnyServerCallFails } from "./AnyServerCallFails"
 import { ErrorIs } from "./ErrorIs"
@@ -1020,6 +1022,30 @@ placesEs.addRule(AskedBy, {
     }
   ]
 })
+placesEs.addRule(ReadOnStartup, {
+  syntax: `${THE} {collection:plural_type} se leen al arrancar`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'tienda es un servidor web en "https://tienda.test"\n\t- los artículos se leen al arrancar\nun artículo es una cosa',
+          [
+            "export class Tienda extends Place {}",
+            "export const tienda = core.place(new Tienda(), {",
+            '  name: "tienda",',
+            '  kind: "web server",',
+            '  at: "https://tienda.test",',
+            '  readOnStartup: ["Artículo"],',
+            '  unclearNumbers: ","',
+            "})",
+            "export class Artículo extends Thing {}"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(AccountIncluded, { syntax: "{type:subject_implied} incluye la cuenta {account:text}" })
 placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está en {path:text}" })
 
@@ -1328,6 +1354,17 @@ placesEs.addRule(TypeVerified, {
   ]
 })
 
+placesEs.addRule(WhileWaitingSay, {
+  syntax: "mientras (espera|carga) decir {text:expression}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        ['mientras espera decir "Cargando Trabajos..."', 'core.readRider("waitingSay", () => "Cargando Trabajos...")']
+      ]
+    }
+  ]
+})
 placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) (:|,)? {statement_body}?" })
 placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) (:|,)? {statement_body}?" })
 placesEs.addRule(IfThatFailsSay, { syntax: "si falla decir {text:expression}" })

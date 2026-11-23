@@ -817,6 +817,9 @@ class AttributeSource extends Notifier {
 
 /**
  * A raw attribute's source:  its version follows `getAttribute()`;  its signal is set by the DOM element's observer.
+ * - A read only brings `version` up to date:  it's often inside a computation (a component's drawing), where
+ *   telling Solid is a write, `REACTIVE_WRITE_IN_OWNED_SCOPE`.
+ * - The observer, a moment after each change, tells Solid's listeners (`observed()`):  as `AttributeSource` does.
  */
 class RawAttributeSource extends Notifier {
   /** The element. */
@@ -828,22 +831,34 @@ class RawAttributeSource extends Notifier {
   /** Starts the DOM element's observer (once). */
   private readonly startWatching: () => void
 
-  /** Text at the last refresh. */
+  /** Text at the last look:  `version` follows it. */
   private last: string | null
+
+  /** Text Solid's listeners last heard of. */
+  private told: string | null
 
   constructor(domElement: AttributeElement, name: string, startWatching: () => void) {
     super(false)
     this.domElement = domElement
     this.name = name
     this.startWatching = startWatching
-    this.last = domElement.getAttribute(name)
+    this.last = this.told = domElement.getAttribute(name)
   }
 
+  /** A read:  bring `version` up to date, and NEVER tell Solid. */
   refresh() {
     const text = this.domElement.getAttribute(this.name)
     if (text === this.last) return
     this.last = text
-    this.changed()
+    this.version++
+  }
+
+  /** The DOM element's observer saw the attribute written:  tell Solid's listeners if it moved since they heard. */
+  observed() {
+    this.refresh()
+    if (this.last === this.told) return
+    this.told = this.last
+    this.tell()
   }
 
   track() {
@@ -1038,7 +1053,7 @@ function watchAttributes(record: ReactiveRecord, domElement: AttributeElement) {
   if (isServer || record.attributeObserver) return
   const observer = (record.attributeObserver = new MutationObserver((mutations) => {
     for (const { attributeName } of mutations) {
-      ;(record.sources.get(RAW_PREFIX + attributeName) as RawAttributeSource | undefined)?.refresh()
+      ;(record.sources.get(RAW_PREFIX + attributeName) as RawAttributeSource | undefined)?.observed()
     }
   }))
   observer.observe(domElement as unknown as Node, { attributes: true })

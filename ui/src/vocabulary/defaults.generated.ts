@@ -591,6 +591,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "graph", kind: "json", group: "content" },
     { name: "child-view", kind: "enum", group: "behaviour", values: ["inline", "modal", "drill"] },
     { name: "path", kind: "string", group: "behaviour" },
+    { name: "arrange", kind: "enum", group: "appearance", values: ["auto", "layers", "groups"] },
     { name: "selected", kind: "json", group: "states" },
     { name: "boundary", kind: "json", group: "content" }
   ],
@@ -1994,6 +1995,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "items", kind: "json", group: "content" },
     { name: "path", kind: "json", group: "behaviour" },
     { name: "size", kind: "string", group: "appearance" },
+    { name: "column-min-width", kind: "string", group: "appearance" },
+    { name: "column-max-width", kind: "string", group: "appearance" },
     { name: "narrow-before", kind: "number", group: "appearance" },
     { name: "show", kind: "string", group: "appearance" },
     { name: "sticky-path", kind: "keyOnly", group: "behaviour" },

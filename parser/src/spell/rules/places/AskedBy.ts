@@ -10,7 +10,9 @@ import type { P } from "spell/parser/parser"
  *   `every forecast where its latitude is 52.52 and its longitude is 13.41` asks for that place's,
  *   and `every forecast` won't compile, saying what to give (`EveryThing.refusalWithoutQuery()`).
  * - Its answer is for those values, whatever it says it's for:  the server's nearest, `52.5126`.
- * - Each field by its words, as `it searches names with "search"` names them.
+ * - Each field by its words, as `it searches names with "search"` names them:  several words joined, `their instance-id`.
+ * - A field holding a list of values asks with each, the question repeated:
+ *   `measurements are asked for by their device-ids`, `?device_ids=a&device_ids=b`.
  * - Compiles to `collections: { forecasts: { askedBy: ["latitude", "longitude"] } }`, which `RestPlace` reads.
  */
 export class AskedBy extends PlaceDetail<"collection|fields"> {

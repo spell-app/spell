@@ -275,6 +275,7 @@ export const englishWords: SP.LanguageWords = {
       },
       forTag: {
         waiting: "while waiting :",
+        waitingSay: "while waiting say",
         none: "if there are none :",
         failed: "if that fails :",
         failedSay: "if that fails say",

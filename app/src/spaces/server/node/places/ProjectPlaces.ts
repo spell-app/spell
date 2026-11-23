@@ -1,11 +1,16 @@
 import { readdir, readFile } from "fs/promises"
-import { join, relative, resolve } from "path"
+import { join, relative, resolve, sep } from "path"
 
 import { AUTHENTICATED_PLACES_PREFIX } from "spell/places/places.types"
 import type { AuthenticatedPlace, AuthenticatedPlaceSource, FoundPlace } from "spell/server/places"
 import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
-import { buildFolderFor, loadProjectFile } from "spell/app/spaces/server/node/projects/project-utils"
+import {
+  buildFolderFor,
+  loadProjectFile,
+  SPACES_BUILD,
+  spacesBuildDir
+} from "spell/app/spaces/server/node/projects/project-utils"
 
 /** Folders under `build/` that hold no project's own declarations:  a person's drafts' builds. */
 const NOT_A_PROJECTS_BUILD = /(^|\/)__draft(\/|$)/
@@ -22,7 +27,7 @@ const NOT_A_PROJECTS_BUILD = /(^|\/)__draft(\/|$)/
  *     `SP.UnlistedDeploymentError`'s words, at startup and on every read (from-console J104).
  *     Never read as its line says:  that would read the wrong server quietly.
  * - Every place for the secrets that aren't set:  every project's declarations under `build/`, built when the page
- *   server last compiled it (`ProjectBuild`), drafts' builds left out.
+ *   server last compiled it (`ProjectBuild`), drafts' builds and other spaces folders' builds left out.
  * - Node only;  imported by path, by the app's route module.
  ****************/
 export class ProjectPlaces implements AuthenticatedPlaceSource {
@@ -60,9 +65,16 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
     return { place, served: `${projectId}/${name}`, rest: more.length ? `/${more.join("/")}` : "" }
   }
 
-  /** Every place of every project built here. */
+  /**
+   * Every place of every project built here, for the spaces this server serves:  never another spaces folder's
+   * build (`spacesBuildDir()`), which a project's other checkouts, on this kit, write.
+   */
   async every(): Promise<AuthenticatedPlace[]> {
-    const files = await declarationsUnder(this.buildDir)
+    const own = relative(this.buildDir, spacesBuildDir({ ...environment, buildDir: this.buildDir }))
+    const files = (await declarationsUnder(this.buildDir)).filter((file) => {
+      const [top = ""] = relative(this.buildDir, file).split(sep)
+      return top === own || (top !== SPACES_BUILD && !top.startsWith(`${SPACES_BUILD}.`))
+    })
     const lists = await Promise.all(files.map((file) => this.placesIn(file)))
     return lists.flat()
   }
@@ -79,7 +91,7 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
     if (!served.length) return []
     const project = projectId ?? projectIn(served[0]!.served.servedAt, served[0]!.name)
     const { deployments, refusal } = await this.deploymentsOf(project)
-    return served.map(({ name, served: { at, kind, keyNamed, keyGoes, tokenFrom, readOnly } }) => {
+    return served.map(({ name, served: { at, kind, keyNamed, keyGoes, tokenFrom, readOnly, writes } }) => {
       const deployed = deployments[name]
       const token = deployed?.tokenFrom ?? tokenFrom
       return {
@@ -91,7 +103,8 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
         ...(keyGoes && { keyGoes }),
         ...(token !== undefined && { tokenFrom: token }),
         ...((readOnly || deployed?.readOnly) && { readOnly: true }),
-        ...(refusal !== undefined && { refusal })
+        ...(refusal !== undefined && { refusal }),
+        ...(writes && { writes })
       }
     })
   }

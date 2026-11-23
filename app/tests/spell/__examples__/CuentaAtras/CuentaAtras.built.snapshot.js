@@ -22,16 +22,15 @@ export class CuentaAtrás extends App {
   draw() {
     return h("es-contenedor", { ancho: "32em" },
       h("es-segmento", { relleno: "lg" },
-        h("es-encabezado", { hidden: () => this.esFinDeSemana ? undefined : true }, "¡Es fin de semana!"),
-        h("es-texto", { color: "gris", hidden: () => !this.esFinDeSemana ? undefined : true },
-          "El fin de semana empieza en"
-        ),
-        h("es-estadisticas", { igual: true, tamano: "pequeño", hidden: () => !this.esFinDeSemana ? undefined : true },
-          h("es-estadistica", { value: () => core.durationPartOf(this.tiempoRestante, "days"), etiqueta: "Días" }),
-          h("es-estadistica", { value: () => core.twoDigits(core.durationPartOf(this.tiempoRestante, "hours")), etiqueta: "Hr" }),
-          h("es-estadistica", { value: () => core.twoDigits(core.durationPartOf(this.tiempoRestante, "minutes")), etiqueta: "Min" }),
-          h("es-estadistica", { value: () => core.twoDigits(core.durationPartOf(this.tiempoRestante, "seconds")), etiqueta: "Seg" })
-        )
+        () => core.drawIf(() => this.esFinDeSemana, () => [h("es-encabezado", "¡Es fin de semana!")], () => [
+          h("es-texto", { color: "gris" }, "El fin de semana empieza en"),
+          h("es-estadisticas", { igual: true, tamano: "pequeño" },
+            h("es-estadistica", { value: () => core.durationPartOf(this.tiempoRestante, "days"), etiqueta: "Días" }),
+            h("es-estadistica", { value: () => core.twoDigits(core.durationPartOf(this.tiempoRestante, "hours")), etiqueta: "Hr" }),
+            h("es-estadistica", { value: () => core.twoDigits(core.durationPartOf(this.tiempoRestante, "minutes")), etiqueta: "Min" }),
+            h("es-estadistica", { value: () => core.twoDigits(core.durationPartOf(this.tiempoRestante, "seconds")), etiqueta: "Seg" })
+          )
+        ])
       )
     )
   }

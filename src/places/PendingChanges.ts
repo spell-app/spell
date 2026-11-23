@@ -2,6 +2,7 @@ import type { StorageLike } from "spell/util/persist/persist.types"
 
 import { listEditsTo, POSITIONS_KEY, withListEdits } from "./positions"
 import { rowsInOrder, rowsMatching } from "./PlaceQuery"
+import { newId } from "./refs"
 import { SaveQueue } from "./SaveQueue"
 import { TabCopies, type TabLocks } from "./TabCopies"
 import type { Places } from "./Places"
@@ -368,7 +369,7 @@ export class PendingChanges {
     const first = replaces ? earlier.was : was
     const version = replaces ? earlier.version : this.versionOf(collection, id)
     this.pending.push({
-      changeId: newChangeId(),
+      changeId: newId("c"),
       kind: "update",
       collection,
       ...(type !== undefined && { type }),
@@ -473,7 +474,7 @@ export class PendingChanges {
   ): void {
     const version = this.versionOf(collection, id)
     this.pending.push({
-      changeId: newChangeId(),
+      changeId: newId("c"),
       kind: "update",
       collection,
       ...(type !== undefined && { type }),
@@ -500,7 +501,7 @@ export class PendingChanges {
     const row = { [this.idField]: id, ...fields }
     this.showAtOnce({ collection, ...(type !== undefined && { type }) }, [row])
     this.pending.push({
-      changeId: newChangeId(),
+      changeId: newId("c"),
       kind: "insert",
       collection,
       ...(type !== undefined && { type }),
@@ -523,7 +524,7 @@ export class PendingChanges {
     this.remove(unsent)
     if (unsent.some(({ kind }) => kind === "insert")) return this.changedList(group)
     this.pending.push({
-      changeId: newChangeId(),
+      changeId: newId("c"),
       kind: "delete",
       collection,
       ...(type !== undefined && { type }),
@@ -1093,8 +1094,3 @@ function isSameValue(one: unknown, other: unknown): boolean {
   return one === other || JSON.stringify(one) === JSON.stringify(other)
 }
 
-/** A new change's id, unique across browsers:  `crypto`'s, as `randomUUID()` needs a secure page. */
-function newChangeId(): string {
-  const [high, low] = crypto.getRandomValues(new Uint32Array(2))
-  return `c-${high!.toString(36)}${low!.toString(36)}`
-}

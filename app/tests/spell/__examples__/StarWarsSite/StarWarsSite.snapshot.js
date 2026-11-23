@@ -115,7 +115,7 @@ export class PersonFact extends View {
         h("ui-cell",
           () => core.drawWaiting(() => h("ui-link", { link: () => core.siteAddressOf("planet page", this.person?.homeworld) },
             () => core.whileWaiting(() => this.person?.homeworld?.name)
-          ))
+          ), "ui-link")
         )
       )
     )

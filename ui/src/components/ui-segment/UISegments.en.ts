@@ -6,6 +6,7 @@
  */
 
 import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `segmentsVocabulary`
@@ -82,9 +83,9 @@ export const segmentsVocabulary = {
     { name: "loading", group: "states", kind: "keyOnly", description: "Dims the group under a spinner." },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert." }
   ],
-  events: [],
-  slots: [{ name: "", description: "`<ui-segment>`s and nested `<ui-segments>`." }],
-  parts: [{ name: "group", description: "The group box." }],
+  events: [...UIT.StatePaneEvents],
+  slots: [{ name: "", description: "`<ui-segment>`s and nested `<ui-segments>`." }, ...UIT.StatePaneSlots],
+  parts: [{ name: "group", description: "The group box." }, ...UIT.StatePaneParts],
   states: [{ name: "piled", description: "`piled`:  the host is the stacking context the rotated sheets sit behind." }],
   texts: []
 } as const satisfies E.ComponentVocabulary

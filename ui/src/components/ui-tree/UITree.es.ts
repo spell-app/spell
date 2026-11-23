@@ -18,6 +18,8 @@ export const treeEs = {
     path: "ruta",
     show: "mostrar",
     "narrow-before": "estrechar-antes",
+    "column-min-width": "ancho-minimo-de-columna",
+    "column-max-width": "ancho-maximo-de-columna",
     "sticky-detail": "detalle-fijo",
     tools: "herramientas"
   },

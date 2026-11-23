@@ -747,6 +747,8 @@ export const HELP_TABLE: Readonly<
       "child-view":
         "How a node's children show when it's opened: `inline`, inside the node, which grows round them; `modal`, a graph in a modal; `drill`, the graph replaced by them, with breadcrumbs back.",
       path: 'The node whose child graph is shown, drilled to, by its ids from the top joined by `/` (`cpu/alu`); `""`: the top.',
+      arrange:
+        "How nodes are placed: `layers`, left to right by their edges; `groups`, a column per node `group` (its header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column; `auto`, groups when any node has one.",
       selected: "PROPERTY: what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`; `undefined`: nothing.",
       boundary: "PROPERTY: the enclosing node's ports, drawn as pins on the graph's sides, for edges with no `node`."
     }
@@ -2451,6 +2453,10 @@ export const HELP_TABLE: Readonly<
         '`appearance="columns"`: the tree as data, given as a property, in place of `<ui-tree-item>`s: `{ id, label, icon?, which?, count?, children?, data?',
       path: "`appearance=\"columns\"`: the ids of each column's pick, from the top (`string[]`; a `<ui-tree-item>`'s id is its `value`, else its `label`).",
       size: '`appearance="columns"`: each column\'s width, by level, separated by commas; the last one sizes every column deeper than the list goes.',
+      "column-min-width":
+        '`appearance="columns"`: the narrowest a full column is drawn, however it got its width (`size`, a fit to its rows, a drag): a number of px (`200`, `200px`), `em`, `rem` or a percent of the tree\'s width.',
+      "column-max-width":
+        '`appearance="columns"`: the widest a full column is drawn, however it got its width, written as `column-min-width` is; `size="auto"` fits a column to its rows up to it.',
       "narrow-before": '`appearance="columns"`: how many columns at the end never narrow.',
       show: '`appearance="columns"`: which parts each row shows, as words: `icon which count chevron`; the label always shows.',
       "sticky-path":
@@ -2569,6 +2575,7 @@ export const HELP_TABLE: Readonly<
 export const SHARED_HELP: Readonly<Record<string, string>> = {
   disabled: "Can't be used: dimmed, out of the tab order, and everything inside it inert; `aria-disabled`.",
   loading: "Busy: dimmed under a loader, and inert; `aria-busy`.",
+  error: 'Failed, with what went wrong if it says: `error="The server didn\'t answer"`.',
   visible: "Shown: the platform's `hidden`, turned round (`el.visible === !el.hidden`).",
   animation:
     "How it shows and hides (Fomantic's names: `fade up`, `scale`, `fly down` ...); default its family's, else `fade`.",

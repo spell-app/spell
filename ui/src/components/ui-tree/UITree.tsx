@@ -62,6 +62,8 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *   - `column-titles`:  a title over each column, by level.
  *   - `size`:  each column's width, by level (`E.PaneSizes`, as `<ui-split-panel>` reads its sizes):  px, `em`, a
  *     percent of the box of columns, `auto` to fit the rows it shows (measured, `fitWidths`), `*` for the token's.
+ *   - `column-min-width` / `column-max-width`:  every full column stays between the two, however it got its width
+ *     (`columnLeastPx`, `columnMostPx`);  the least is 80px without one.
  *   - The line after each column resizes it, as a Mac's Finder's does:  dragged, or its arrow keys;  with Option (Alt),
  *     every column together;  a double-click fits the column to its longest row, with Option every column.
  *     A width set so wins over `size`.  A tree with an `id` remembers them in this browser (the `ui-tree` store,
@@ -935,6 +937,53 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /**
+   * `column-min-width`, in px:  the narrowest a full column is drawn, however it got its width;  none:  80.
+   * - Read as one `size` entry is:  px, `em`, `rem`, or a percent of the box of columns.
+   * - While the columns don't fit even at this width, they scroll sideways:  they never shrink past it.
+   */
+  @E.derived
+  get columnLeastPx(): number {
+    return this.lengthPxOf(this.columnMinWidth, "<ui-tree column-min-width>") ?? MIN_COLUMN_PX
+  }
+
+  /**
+   * `column-max-width`, in px, never under `columnLeastPx`:  the widest a full column is drawn;  none:  `Infinity`.
+   * - `size="auto"` fits a column to its rows up to it (none:  three times the token's width).
+   */
+  @E.derived
+  get columnMostPx(): number {
+    const most = this.lengthPxOf(this.columnMaxWidth, "<ui-tree column-max-width>")
+    return most === undefined ? Infinity : Math.max(this.columnLeastPx, most)
+  }
+
+  /** `width` px, held between `columnLeastPx` and `columnMostPx`. */
+  private clampColumnPx(width: number): number {
+    return Math.max(this.columnLeastPx, Math.min(this.columnMostPx, width))
+  }
+
+  /** A column width given as CSS, held between `columnLeastPx` and `columnMostPx`, as CSS. */
+  private clampColumnCSS(width: string): string {
+    const least = this.columnLeastPx
+    const most = this.columnMostPx
+    return most === Infinity ? `max(${least}px, ${width})` : `clamp(${least}px, ${width}, ${most}px)`
+  }
+
+  /** One `size` entry given as text, in px;  `undefined` for none, `auto` or one that isn't a size (warned about). */
+  private lengthPxOf(text: string | undefined, source: string): number | undefined {
+    if (!text) return undefined
+    const size = E.PaneSizes.sizeFor(String(text), { source })
+    return size && !E.PaneSizes.isAuto(size) ? this.fixedSizePxOf(size) : undefined
+  }
+
+  /** A `size` that isn't `auto`, in px:  px, `em`, `rem`, or a percent of the box of columns. */
+  private fixedSizePxOf(size: E.PaneSize): number {
+    if (size.units === "%") return (this.boxWidthPx * size.value) / 100
+    if (size.units === "em") return size.value * this.emPx
+    if (size.units === "rem") return size.value * this.remPx
+    return size.value
+  }
+
+  /**
    * Each column's width by level, in px, as a person dragged it:  `undefined` for one left as `size` says.
    * - Kept under the tree's `id`, when it has one (`keepWidths()`).
    */
@@ -982,21 +1031,21 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * Column `index`'s full width, as CSS:  a person's drag, else `size`'s, else the token's;  never over
    * `fullColumnMostPx` while the columns don't fit, unless `isShared` is false (a narrow one drawn whole over the rest).
    * - `auto`:  its rows' width once measured;  the token's until then.
-   * - A percent is of the tree's box of columns, never under `MIN_COLUMN_PX`.
+   * - A percent is of the tree's box of columns.
+   * - Always between `column-min-width` and `column-max-width` (`clampColumnCSS()`).
    */
   private fullWidthCSS(index: number, { isShared = true } = {}): string {
     const most = this.fullColumnMostPx
     if (isShared && most < this.widthPxOf(index)) return `${most}px`
     const dragged = this.draggedWidthOf(index)
-    if (dragged !== undefined) return `${dragged}px`
+    if (dragged !== undefined) return `${this.clampColumnPx(dragged)}px`
     const size = this.sizeOfColumn(index)
-    if (!size) return DEFAULT_WIDTH
+    if (!size) return this.clampColumnCSS(DEFAULT_WIDTH)
     if (E.PaneSizes.isAuto(size)) {
       const fit = this.fitWidths[index]
-      return fit === undefined ? DEFAULT_WIDTH : `${fit}px`
+      return fit === undefined ? this.clampColumnCSS(DEFAULT_WIDTH) : `${this.clampColumnPx(fit)}px`
     }
-    if (size.units === "%") return `max(${MIN_COLUMN_PX}px, ${size.value}%)`
-    return `${size.value}${size.units}`
+    return this.clampColumnCSS(`${size.value}${size.units}`)
   }
 
   /** Column `index`'s width on screen, in px:  a strip's, or its full width, never over `fullColumnMostPx`. */
@@ -1005,17 +1054,22 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return Math.min(this.fullColumnMostPx, this.widthPxOf(index))
   }
 
-  /** Column `index`'s width when it isn't narrow, in px:  as `columnWidthCSS()` says, worked out. */
+  /**
+   * Column `index`'s width when it isn't narrow, in px:  as `columnWidthCSS()` says, worked out.
+   * - Between `column-min-width` and `column-max-width`.
+   */
   widthPxOf(index: number): number {
+    return this.clampColumnPx(this.givenWidthPxOf(index))
+  }
+
+  /** Column `index`'s width as it was given, in px:  a person's drag, else `size`'s, else the token's. */
+  private givenWidthPxOf(index: number): number {
     const dragged = this.draggedWidthOf(index)
     if (dragged !== undefined) return dragged
     const size = this.sizeOfColumn(index)
     if (!size) return this.defaultWidthPx
     if (E.PaneSizes.isAuto(size)) return this.fitWidths[index] ?? this.defaultWidthPx
-    if (size.units === "%") return Math.max(MIN_COLUMN_PX, (this.boxWidthPx * size.value) / 100)
-    if (size.units === "em") return size.value * this.emPx
-    if (size.units === "rem") return size.value * this.remPx
-    return size.value
+    return this.fixedSizePxOf(size)
   }
 
   /** Where column `index` starts, as CSS:  the room of the columns before it, added up. */
@@ -1044,7 +1098,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         aria-orientation="vertical"
         aria-label={this.translationForKey("resizeColumn")}
         aria-valuenow={Math.round(this.widthPxOf(index))}
-        aria-valuemin={MIN_COLUMN_PX}
+        aria-valuemin={this.columnLeastPx}
+        aria-valuemax={this.columnMostPx === Infinity ? undefined : this.columnMostPx}
         style={{ "inset-inline-start": this.columnStartCSS(index + 1) }}
         onPointerDown={(event) => this.startResizing(event, index)}
         onKeyDown={(event) => this.resizeByKey(event, index)}
@@ -1159,9 +1214,10 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * - A narrow column keeps what it had:  its rows aren't drawn whole.
    */
   private fitColumn(index: number, event: MouseEvent) {
-    if (!event.altKey) return this.setColumnWidth(index, this.measureFitWidth(index, this.boxWidthPx || Infinity))
+    const most = this.boxWidthPx || Infinity
+    if (!event.altKey) return this.setColumnWidth(index, this.measureFitWidth(index, most))
     const widths = this.columnIndexes.map((each) =>
-      this.isNarrowColumn(each) ? this.draggedWidthOf(each) : this.measureFitWidth(each, this.boxWidthPx || Infinity)
+      this.isNarrowColumn(each) ? this.draggedWidthOf(each) : this.measureFitWidth(each, most)
     )
     this.everyColumnWidth = undefined
     this.columnWidths = trimmedWidths(widths)
@@ -1169,23 +1225,25 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /**
-   * Column `index` is `width` px wide now, at least `MIN_COLUMN_PX`;  `undefined`:  back to what `size` says.
+   * Column `index` is `width` px wide now, between `column-min-width` and `column-max-width`;
+   * `undefined`:  back to what `size` says.
    * - SIDE EFFECT:  kept under the tree's `id`, unless `keeps` is false (mid-drag).
    */
   private setColumnWidth(index: number, width: number | undefined, { keeps = true } = {}) {
     const widths = [...this.columnWidths]
-    widths[index] = width === undefined ? undefined : Math.round(Math.max(MIN_COLUMN_PX, width))
+    widths[index] = width === undefined ? undefined : Math.round(this.clampColumnPx(width))
     this.columnWidths = trimmedWidths(widths)
     if (keeps) this.keepWidths()
   }
 
   /**
-   * Every column is `width` px wide now, at least `MIN_COLUMN_PX`, deeper ones as they come:  an Option-drag.
+   * Every column is `width` px wide now, between `column-min-width` and `column-max-width`, deeper ones as they
+   * come:  an Option-drag.
    * - Each column's own width goes, so they're all the same.
    * - SIDE EFFECT:  kept under the tree's `id`, unless `keeps` is false (mid-drag).
    */
   private setEveryColumnWidth(width: number, { keeps = true } = {}) {
-    this.everyColumnWidth = Math.round(Math.max(MIN_COLUMN_PX, width))
+    this.everyColumnWidth = Math.round(this.clampColumnPx(width))
     this.columnWidths = []
     if (keeps) this.keepWidths()
   }
@@ -1261,7 +1319,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** Measure each `auto` column on screen that a person hasn't sized, and isn't narrow (`fitWidths`). */
   private measureFitWidths() {
     if (!this.defaultWidthPx) this.measureDefaultWidth()
-    const most = Math.max(MIN_COLUMN_PX, this.defaultWidthPx * FIT_MOST_TIMES)
+    const most = this.columnMostPx === Infinity ? this.defaultWidthPx * FIT_MOST_TIMES : this.columnMostPx
     this.fitWidths = this.columnIndexes.map((index) => {
       const isMeasured =
         E.PaneSizes.isAuto(this.sizeOfColumn(index)) &&
@@ -1272,14 +1330,14 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /**
-   * The width column `index` needs to show its longest row whole, in px, from `MIN_COLUMN_PX` to `most`;
-   * `undefined` when it isn't drawn, or has no rows.
+   * The width column `index` needs to show its longest row whole, in px, from `column-min-width` to `most`,
+   * never over `column-max-width`;  `undefined` when it isn't drawn, or has no rows.
    * - SIDE EFFECT:  lays the page out, once a column.
    */
   private measureFitWidth(index: number, most: number): number | undefined {
     if (isServer) return undefined
     const width = this.hasItemData ? this.fitOfItemColumn(index) : this.fitOfRowColumn(index)
-    return width === undefined ? undefined : Math.round(Math.min(most, Math.max(MIN_COLUMN_PX, width)))
+    return width === undefined ? undefined : Math.round(this.clampColumnPx(Math.min(most, width)))
   }
 
   /**
@@ -1590,12 +1648,12 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /**
-   * The pane is `width` px wide now, from `MIN_COLUMN_PX` to the box's width less a column's;
+   * The pane is `width` px wide now, from `MIN_COLUMN_PX` to the box's width less a column at `column-min-width`;
    * `undefined`:  back to its content's width (a double-click on its line).
    * - SIDE EFFECT:  kept under the tree's `id`, unless `keeps` is false (mid-drag).
    */
   private setDetailWidth(width: number | undefined, { keeps = true } = {}) {
-    const most = Math.max(MIN_COLUMN_PX, (this.boxWidthPx || Infinity) - MIN_COLUMN_PX)
+    const most = Math.max(MIN_COLUMN_PX, (this.boxWidthPx || Infinity) - this.columnLeastPx)
     this.detailWidth = width === undefined ? undefined : Math.round(Math.min(most, Math.max(MIN_COLUMN_PX, width)))
     if (keeps) this.keepWidths()
   }
@@ -1713,11 +1771,11 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
   /**
    * The room the columns have, in px:  the box of columns', less the `detail` pane's while it shows,
-   * never under `MIN_COLUMN_PX`.
+   * never under `column-min-width`.
    */
   get columnsRoomPx(): number {
     const pane = this.hasDetail ? this.detailWidthPx : 0
-    return Math.max(MIN_COLUMN_PX, this.boxWidthPx - pane)
+    return Math.max(this.columnLeastPx, this.boxWidthPx - pane)
   }
 
   /** The narrow column under the pointer, else the one with the focus:  drawn whole, over the columns after it. */
@@ -1772,7 +1830,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * The widest a full column is drawn, in px, while the columns don't fit even with the strips:  the full ones share
    * what the strips leave, so the selected column shows whole (at a phone's width, say);  `Infinity` while they fit.
    * - Shared fairly:  a column narrower than its share keeps its width, and the rest share what it leaves.
-   * - Never under `MIN_COLUMN_PX`.
+   * - Never under `column-min-width`:  past that, the columns scroll sideways instead.
    */
   get fullColumnMostPx(): number {
     if (!this.isColumns || !this.boxWidthPx || !this.defaultWidthPx) return Infinity
@@ -1785,7 +1843,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     if (full.reduce((sum, width) => sum + width, 0) <= room) return Infinity
     for (let at = 0; at < full.length; at++) {
       const share = room / (full.length - at)
-      if (full[at] > share) return Math.max(MIN_COLUMN_PX, Math.floor(share))
+      if (full[at] > share) return Math.max(this.columnLeastPx, Math.floor(share))
       room -= full[at]
     }
     return Infinity
@@ -2182,7 +2240,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.isLooking = false
     this.didStopLooking = looked > REACH_ROWS
     // a `children` function that made nothing:  its chevron goes
-    if (didRun) this.childrenVersion++
+    if (didRun) this.childrenCame.ask()
   }
 
   /**
@@ -2376,26 +2434,33 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** Each item's children once its `children` has run:  the list, or the promise of it. */
   private readonly childrenOfItem = new WeakMap<TreeItemData, readonly TreeItemData[] | Promise<unknown>>()
 
-  /** Bumped as a promised list comes:  what's read from `childrenOfItem` is read again. */
+  /** Bumped as `children` make their lists:  what's read from `childrenOfItem` is read again. */
   @E.state private accessor childrenVersion = 0
 
   /**
+   * Bumps `childrenVersion` once the current work is done:  a burst of runs bumps it once.
+   * - NEVER at once:  `childrenOf()` runs inside computations (the path line's, the columns'),
+   *   where a write is Solid's `REACTIVE_WRITE_IN_OWNED_SCOPE`.
+   */
+  private readonly childrenCame = new E.Queued({ when: E.afterSolidUpdate, run: () => this.childrenVersion++ })
+
+  /**
    * `item`'s children, made once:  `undefined` while a promise of them is on its way.
-   * - SIDE EFFECT:  the first call runs a `children` function.
+   * - SIDE EFFECT:  the first call runs a `children` function, and asks for `childrenCame`.
    */
   private childrenOf(item: TreeItemData): readonly TreeItemData[] | undefined {
     void this.childrenVersion
     const hasRun = this.childrenOfItem.has(item)
     const made = this.childrenNow(item)
     if (!Array.isArray(made)) return undefined
-    // a function that made none:  its chevron goes
-    if (!hasRun && typeof item.children === "function") this.childrenVersion++
+    // a function's list is known:  its count shows, or, if it made none, its chevron goes
+    if (!hasRun && typeof item.children === "function") this.childrenCame.ask()
     return made
   }
 
   /**
    * `item`'s children, made once:  the list, or the promise of it, with no reactive read or write.
-   * - SIDE EFFECT:  the first call runs a `children` function;  a promised list bumps `childrenVersion` as it comes.
+   * - SIDE EFFECT:  the first call runs a `children` function;  a promised list asks for `childrenCame` as it comes.
    */
   private childrenNow(item: TreeItemData): readonly TreeItemData[] | Promise<unknown> {
     const known = this.childrenOfItem.get(item)
@@ -2412,7 +2477,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         E.Warnings.warn("<ui-tree items>", `\`${item.id}\`'s children didn't come:`, error)
         this.childrenOfItem.set(item, [])
       })
-      .finally(() => this.childrenVersion++)
+      .finally(() => this.childrenCame.ask())
     this.childrenOfItem.set(item, promised)
     return promised
   }
@@ -2958,7 +3023,7 @@ const DEFAULT_EM_PX = 16
 /** The widest a `size="auto"` column grows, in default widths (`--ui-tree-column-width`). */
 const FIT_MOST_TIMES = 3
 
-/** The narrowest a column can be made, in px. */
+/** The narrowest a column can be made, in px, when `column-min-width` says nothing;  a `detail` pane's too. */
 const MIN_COLUMN_PX = 80
 
 /** How far an arrow key moves a column's line, in px. */

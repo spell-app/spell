@@ -1648,7 +1648,41 @@ would.
   - Its attributes come after the phrase:  `title`, `loading`, `empty`, `hide-empty`, `failed`, `paging`,
     `page-size`, `as`.
     - Each is a line of code spell at the top of its body, a RIDER (`forLines()`):  `loading="Wait"` is
-      `while waiting :`, written under the loop after its body.
+      `while waiting say "Wait"` (`WhileWaitingSay`), written under the loop after its body;  `loading={no}` an
+      empty `while waiting :`.
+    - `loading` says how the list looks while it waits (`core.drawLooking()`, [looks.ts](../core/looks.ts)):
+      - words, `loading="Loading Jobs..."`:  what the loader says, drawn as the look around it is (a spinner saying
+        them, or a skeleton announcing them)
+      - a look's own word, for this list alone:  `skeleton`, `spinner`, `none` (Spanish `esqueleto`, `cargador`, `nada`)
+      - a skeleton's shape after `skeleton:`, in `SkeletonText`'s words, the ones a component's vocabulary writes its
+        own `skeleton` in:  `loading="skeleton: header, 3 line paragraph"`, `"skeleton: 5 line paragraph"`
+        - parsed as it COMPILES (`lookOfWords()`), so a page never parses skeleton text;  a shape that isn't one is
+          an error at the attribute (`skeleton-unreadable`)
+        - its words are English's alone, in a Spanish file too (`esqueleto: 5 line paragraph`):  `SkeletonText`
+          has no others
+        - drawn as `<ui-root display="skeleton">` draws a tag's (`SkeletonShapes`, the kit's `src/element/`)
+  - The same `loading="..."` on ANY element is Spell's, never the element's (Q10 A;  `SpellJSX.lookingOf()`):
+    how what waits inside it looks, `<card loading="skeleton">`, `<segment loading="Loading Jobs...">`.
+    - Only a quoted value:  a bare `loading`, or `loading={...}`, stays the element's own (Spell UI's loading state),
+      and so do the web's `lazy` and `eager` (`<image loading="lazy">`).
+    - Compiled to `core.drawLooking(said, () => h(...))` around the element, and the loaders inside read it
+      (Solid context, nearest first;  a site's `loading` is the outermost, `SiteBase.draw()`).
+    - A bare `skeleton` is the element's own (its vocabulary's, `ComponentPacks.skeletonFor()`), else lines.
+    - A tag with a loading state of its own (Spell UI's segment, card, section, tab, form, popup:  its pack says it
+      has a `loading` attribute):  with a spinner, THAT state turns on while what's inside waits, instead of a
+      second spinner inside it;  and an element whose own attributes wait stands in for itself, empty, in that
+      state (`core.drawWaiting(..., tag, true)`).  A skeleton draws placeholder lines inside it.
+  - Its `<loading>` and `<failed>`, written INSIDE any element (Q10 A;  `SpellJSX.riderOf()`):  the element's riders,
+    what shows while what's inside it waits, or once it failed -- `core.drawLooking(said, () => h(...), owns,
+    { waiting, failed, slots })`.
+    - Inside `<failed>`, `the error` is the failure's words (`failedScope()`, as `if that fails:` has in an action);
+      `try again` reads again.
+    - A pane with `loading` and `error` slots (Spell UI's segment, segments, card, section, tab, form, popup:  its pack
+      names the slots, `ComponentPacks.slotNameFor()`):  they fill them, and its own states turn on -- `loading`
+      while what's inside waits (a skeleton look fills its loading slot), `error="<why>"` once it failed, its Try
+      again (`ui-retry`) reading again.  Empty, the pane's defaults:  its veil;  its error message and Try again.
+    - Any other element:  they show in place of what waits, as a list's riders do;  a failure inside an element with
+      a loading state of its own (a button) still turns its `error` on (the shared error look).
     - Any other goes on what's around its items:  `<for films as="cards" columns="4" />`.
   - Its slots, `<loading>`, `<empty>`, `<failed>`:  `while waiting :`, `if there are none :`, `if that fails :`.
 - An `<html>` block (epic `elemental-spell` P16):  markup as written, the drawing's own lines.
@@ -1940,9 +1974,15 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - The JSX tokenizer reads it (`Tokenizer.chainTags`, every language's words, `SP.CHAIN_TAGS`):  each branch a
     `JSXElementToken` with its `chain` kind and its `phrase` (a `JSXExpressionToken`, as if written `{...}`);
     a branch ends where the next starts, and ONE closer, `</>` or `</if>`, ends the chain.
-  - `SpellJSX` keeps every branch on the page, each branch hidden while it isn't the one (`childASTs()`):
-    - the web's own elements, and each run of text and holes (in a `<span>` of its own):  `hidden="until-found"`
-    - a custom element (`<ui-label>`):  plain `hidden`, which Spell UI hides by (its host has no box of its own)
+  - `SpellJSX` draws ONLY the branch that holds (`childASTs()`, `ifChain()`):  ONE core call per chain,
+    `core.drawIf(() => c1, () => [...], () => c2, () => [...], () => [...])`, each branch's children a fragment.
+    - A branch that isn't the one draws nothing, so reads nothing:  a place's read under it waits until it shows.
+    - A flip draws the new branch and lets the old one go;  a change that keeps the branch keeps its elements.
+    - Its functions are part of the drawing (`drawnFunctions`):  a read in a branch gets its own spot there.
+    - A condition that waits:  the chain in a spot of its own, `core.drawWaiting(() => core.drawIf(...))`, ONE spinner
+      (`ifsThatWait`).
+    - It once drew every branch, hiding the others (`hidden="until-found"`), so a flip kept their elements and
+      find-in-page reached them;  but a hidden branch still read what it showed, and each showed its own spinner.
   - At a drawing's top level an `<if>` still picks what the drawing returns, rebuilt as it changes:  a page's tag
     line, plain Spell's `if` lines.  A branch in no element is `chain-outside-markup`.
   - A page's `<spell>` block's drawings are plain Spell's (J83):  the tokenizer marks its JSX as it unwraps the
@@ -2360,7 +2400,8 @@ one step.
       Python's and a library's wait too (`readsThroughSolid`).
     - In a drawing:  a child value alone, `core.whileWaiting()` (`spotsThatWait`);  anywhere else, the class says
       `drawsWaiting`, and its boundary holds the whole thing (`heldDrawings`, `drawInBoundary()`).
-      A loop's function, `core.drawEach()`'s and `core.drawRead()`'s, is part of the drawing (`drawnLoopFunctions`):  it never waits.
+      A loop's function, `core.drawEach()`'s and `core.drawRead()`'s, and an if-chain's, `core.drawIf()`'s, are part of the
+      drawing (`drawnFunctions`):  they never wait.
     - `createDeferred()`, never an async `createMemo()`, which freezes what else draws;  `lazy`, so nobody's slow work
       runs unread.
     - `pause`, and old source's `wait for`, in a drawing are parse errors (`refuseWaitInDraw()`);
@@ -2401,8 +2442,11 @@ What a program's lines about where data lives compile to, and what reads the res
     - One that names a loop's item is a value per item, `core.waitedValueKeyFor(this, film)`:  the same words are another read for each film.
 - `core.savedThings` is in `P.CORE_CALLS_THAT_WAIT`:  so a getter over one is a value that waits, and the waiting pass does the rest.
 - What a project reads from its places is worked out as it's compiled too (`P.ReadGathering`, beside the waiting pass):  by name,
-  into `select` on a type's `savedIn`, `firstReads` on a place's line, and `declaredAt` and `readsFrom` on what declares them.
+  into `select` on a type's `savedIn`, and `declaredAt` and `readsFrom` on what declares them.
   A project with no saved type compiles as it did.
+  - Never what to read ahead:  Spell reads only what a page draws, as it draws it.  A collection read as the program
+    starts says so on its place, `tags are read on startup` ([`read_on_startup`](rules/places/ReadOnStartup.ts)),
+    `readOnStartup: ["Tag"]` on the place's line.
 - A loop in a drawing over a saved type, or with a rider under it, is `core.drawRead(() => list, (item) => ..., { riders })` (`DrawnLines.asRead()`).
   - A rider (`while waiting:`, `if there are none:`, `if that fails:`) compiles alone to `core.readRider()`, and the gathering of
     a drawing's lines takes each into the read above it, as an `otherwise` follows its `if`.
@@ -2485,6 +2529,9 @@ sidebars any of them opens.
 - Its theme (epic `mockup` P8, I30):  the template's `theme` property, on its line, `galaxy guide is a site with theme "mockup"`,
   or in its body, `its "theme" is "mockup"`;  no words of its own;  the running site asks its host for that theme's tokens and wears them on its frame
   alone (`SiteHost.themeTokens()`, the editor's `RunSite`).
+- Its look while its pages wait:  the template's `loading` property, `galaxy guide is a site with loading "skeleton"`
+  (Spanish `con carga "esqueleto"`), the same words as `<for loading>`;  every loader on its pages, dialogs and
+  sidebars reads it unless an element's `loading` nearer says otherwise (`drawnWithLook()`);  unset, a spinner.
 - A page's stories (epic `mockup` P6) are the page's own, `<stories>` in its outline:  "Markdown" below.
 
 ## Projects
@@ -2572,6 +2619,7 @@ sidebars any of them opens.
     - under spell-app:  `spaces/@spell/examples/drawable-solitaire` => `build/spaces/@spell/examples/drawable-solitaire`
       - the frozen test projects too:  `spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
     - in spell.spaces:  `@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
+    - in another spaces folder (a project's):  their own, named by them, `build/spell-spaces.my-app-1a2b3c4d/...`
     - The table, and `SPELL_BUILD_DIR`:  [spaces' AGENTS.md](../../../app/src/spaces/AGENTS.md), "Projects".
   - The files:  its compiled code, its scope pack, its declarations and its words, in every language.
 

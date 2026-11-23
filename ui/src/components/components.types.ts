@@ -2153,3 +2153,38 @@ export const TocMarks = { entry: "data-toc", group: "data-toc-group" } as const
 
 /** `<ui-tree>`'s data items (`appearance="columns"`, `items`):  its own file, named here for the JSX types (`UIT.TreeItemData`). */
 export type { TreeItemData } from "spell/ui/components/ui-tree/UITree.types"
+
+////////////////
+// ## A pane's state panes (`StatePanes`)
+////////////////
+
+/** The slots a pane shows in place of its content while it loads, or once it failed (`E.StatePanes`). */
+export const StatePaneSlots = [
+  {
+    name: "loading",
+    description:
+      "While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, " +
+      "the veil as ever."
+  },
+  {
+    name: "error",
+    description:
+      "While `error`:  shown in place of the content;  empty, the error's words (or \"Couldn't load this.\") and a " +
+      "Try again button."
+  }
+] as const
+
+/** The parts of a pane's state panes (`E.StatePanes`). */
+export const StatePaneParts = [
+  { name: "loading-pane", description: "The box round the `loading` slot, while it stands in for the content." },
+  { name: "error-pane", description: "The box round the `error` slot, or the error message and Try again." }
+] as const
+
+/** The event a pane's Try again dispatches (`E.StatePanes`). */
+export const StatePaneEvents = [
+  {
+    name: "ui-retry",
+    detail: "{}",
+    description: "Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do)."
+  }
+] as const

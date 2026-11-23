@@ -23,3 +23,8 @@ class Site(App):
     # the theme its pages wear, e.g. "mockup":  `galaxy guide is a site with theme "mockup"`
     # - its "theme" is a text
     theme = prop(type="text")
+
+    # how what waits on its pages looks meanwhile:  "skeleton", "spinner" (the default), "none", or a spinner's words:
+    # - its "loading" is a text
+    loading = prop(type="text")
+    # `galaxy guide is a site with loading "skeleton"`

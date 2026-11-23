@@ -1552,6 +1552,11 @@ recipe box is an app
 - A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`;
   `if that fails:` with lines under it draws them instead.
   - In an action, `if that fails:` runs under the line above it:  `set found to every recipe`, then `if that fails:`.
+- When a place is read:  a page reads only what it draws, as it draws it.  Spell never reads ahead.
+  - Lists one drawing asks for at once go in one request, where the place can take several.
+  - A collection every page needs at once can say so, a line under its place:  `tags are read on startup`
+    (Spanish's `las etiquetas se leen al arrancar`).  It's read as the program starts, its first page, and kept.
+    Nothing else is, and nothing is by default.
 - How many a list draws at a time:  `show them 12 at a time`, or `page-size="12"` on a `<for>`;
   a page holds that many, and scrolling draws that many more.
 - A name in quotes can hold a number:  `its "isbn 10" is text`, and `its isbn 10` reads it.

@@ -90,19 +90,20 @@ export type RunnerTab<Id extends string> = {
  *   - `"px"`, for one as tall as it needs to be, e.g. a fluid `<spell-viewer>`:  the top pane is as tall as its
  *     content, and `split` is the BOTTOM pane's height, in px
  * - `onSplit` is called only as the bar's let go:  so e.g. the VS Code extension writes `settings.json5` once.
+ * - Its listener is Solid's own `onUi-changed` (`on` + a capital, the rest lowercased:  `ui-changed`), not
+ *   `on-ui-changed`, which works but makes Solid's dev build warn;  and not a ref, which a spread re-applies as
+ *   `split` changes, adding a listener each time, where Solid swaps the old listener for the new one.
  */
 export function runnerSplit(split: number, unit: "%" | "px", onSplit: (split: number) => void) {
   const isPixels = unit === "px"
   return {
     rows: isPixels ? `auto,${split}px` : `${split}%,${100 - split}%`,
     "min-size": isPixels ? MIN_PIXELS : MIN_SHARE,
-    // a ref, not `on-ui-changed`:  Solid's dev build warns of a dashed event name, and the console must stay clean
-    ref: (panel: Element) =>
-      panel.addEventListener("ui-changed", (event) => {
-        if (event.target !== event.currentTarget) return
-        const [top, bottom] = (event as CustomEvent<{ sizes: string }>).detail.sizes.split(",")
-        onSplit(Math.round(parseFloat(isPixels ? bottom : top)))
-      })
+    "onUi-changed": (event: Event) => {
+      if (event.target !== event.currentTarget) return
+      const [top, bottom] = (event as CustomEvent<{ sizes: string }>).detail.sizes.split(",")
+      onSplit(Math.round(parseFloat(isPixels ? bottom : top)))
+    }
   }
 }
 

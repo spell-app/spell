@@ -102,6 +102,18 @@ export class SpellUIDefaults {
   }
 
   /**
+   * The name `language` writes Spell UI's slot `slot` by on `tag` (the pack's `slotNameFor()`):
+   * `("es-segmento", "error", "es")` => `"error"`;  `undefined` for a tag Spell UI doesn't have, or a slot it hasn't.
+   */
+  static slotNameFor(tag: string, slot: string, language: string): string | undefined {
+    const canonical = SpellUIDefaults.canonicalTagFor(tag, language)
+    if (!canonical) return undefined
+    const english = SpellUIDefaults.registry.localizedFor(canonical)!
+    if (!english.slots.has(slot)) return undefined
+    return SpellUIDefaults.localizedFor(canonical, language).names.slots.get(slot) ?? slot
+  }
+
+  /**
    * The attributes of Spell UI's tag `tag`, as `language` writes them on it (the pack's `help()`, epic `editor` P28):
    * each attribute's name, the words it takes and whether it takes none (`bare`), the shared ones too (`disabled`),
    * with what `describe()` says of it.

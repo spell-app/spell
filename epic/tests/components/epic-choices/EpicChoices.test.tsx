@@ -759,4 +759,41 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
     ])
     expect([part(first!, "cards"), part(first!, "add")]).toEqual([null, null])
   })
+
+  test("its forms are heard by their own listeners (not `on-epic-*` props):  Cancel shuts each;  a saved edit renames an added card", async () => {
+    await reviewing()
+    const { host, options } = await choices(
+      `<epic-item id="q1" title="Which?" status="open"><epic-choices>${OPTIONS}</epic-choices></epic-item>`
+    )
+    await settle()
+    const send = (form: Element, type: string, detail?: unknown) => form.dispatchEvent(new CustomEvent(type, { detail }))
+    const click = (button: Element) => button.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    // Add choice's form:  Cancel shuts it;  saved, it adds a card
+    inShadow<HTMLButtonElement>(host, "[part~='add']")!.click()
+    await settle()
+    send(inShadow(host, "epic-option-form")!, "epic-option-canceled")
+    await settle()
+    expect(inShadow(host, "epic-option-form")).toBe(null)
+    inShadow<HTMLButtonElement>(host, "[part~='add']")!.click()
+    await settle()
+    send(inShadow(host, "epic-option-form")!, "epic-option-saved", { title: "Both", note: "" })
+    await settle()
+    // the added card's pencil:  its form;  saved, the card's new title;  Cancel shuts it
+    click(inShadow(host, "[part~='added']")!.querySelectorAll("ui-button")[0]!)
+    await settle()
+    send(inShadow(host, "epic-option-form")!, "epic-option-saved", { title: "Neither", note: "" })
+    await settle()
+    expect(inShadow(host, "[part~='added']")!.textContent).toContain("Neither")
+    click(inShadow(host, "[part~='added']")!.querySelectorAll("ui-button")[0]!)
+    await settle()
+    send(inShadow(host, "epic-option-form")!, "epic-option-canceled")
+    await settle()
+    expect(inShadow(host, "epic-option-form")).toBe(null)
+    // an option's own pencil:  its form;  Cancel shuts it
+    click(inShadow(options[0], ".tools")!.querySelectorAll("ui-button")[0]!)
+    await settle()
+    send(inShadow(options[0], "epic-option-form")!, "epic-option-canceled")
+    await settle()
+    expect(inShadow(options[0], "epic-option-form")).toBe(null)
+  })
 })

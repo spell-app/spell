@@ -254,7 +254,7 @@ export class CajaDeRecetas extends App {
           )
         ),
         () => core.drawRead(() => this.coincidencias, (receta) => core.drawThing(receta), {
-          waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "pantalla" }, "Buscando tus recetas"),
+          waitingSay: () => "Buscando tus recetas",
           none: () => h("es-texto", { class: "none", color: "gris", part: "pantalla" },
             () => this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."
           ),

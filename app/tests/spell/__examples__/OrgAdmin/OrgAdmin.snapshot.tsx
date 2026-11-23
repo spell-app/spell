@@ -314,7 +314,8 @@ export const adminRoles = core.place(new AdminRole(), {
   kind: "data folder",
   at: "/api/places/spaces/@rs/__admin/roles",
   checkedEvery: 30,
-  collections: { stages: { at: "event_stages" } }, firstReads: () => [[OrgProfile], [RoleChange, { sort: [{ field: "at", descending: true }] }], [Stage], [ApprovedApp], [Member, { sort: [{ field: "name" }] }], [Team, { sort: [{ field: "name" }] }], [Project, { sort: [{ field: "name" }] }], [Designer], [OrgRole], [Term]] })
+  collections: { stages: { at: "event_stages" } }
+})
 
 // -----------
 core.heading("Org Admin")
@@ -448,9 +449,7 @@ export class OrgAdmin extends App {
             <ui-button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Take them out of the org" title="Take them out of the org" onClick={core.pressed(this, () => core.removeSaved(member))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </ui-cell>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="people_section">
-            {"Finding the org's people"}
-          </ui-loader>,
+          waitingSay: () => "Finding the org's people",
           items: () => <ui-table appearance="very-basic" selectable={true} unstackable={true} part="people_section">
             <ui-row />
           </ui-table>,
@@ -478,7 +477,7 @@ export class OrgAdmin extends App {
             <ui-text color="grey">{team.space}</ui-text>
           </ui-cell>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="teams_section">{"Finding the teams"}</ui-loader>,
+          waitingSay: () => "Finding the teams",
           items: () => <ui-table appearance="very-basic" selectable={true} unstackable={true} part="teams_section">
             <ui-row />
           </ui-table>,
@@ -503,7 +502,7 @@ export class OrgAdmin extends App {
             <ui-text color="grey">{project.space}</ui-text>
           </ui-cell>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="teams_section">{"Finding the projects"}</ui-loader>,
+          waitingSay: () => "Finding the projects",
           items: () => <ui-table appearance="very-basic" selectable={true} unstackable={true} part="teams_section">
             <ui-row />
           </ui-table>,
@@ -548,9 +547,7 @@ export class OrgAdmin extends App {
             <ui-button class="end" icon="close" size="mini" appearance="transparent" aria-label="End this term" title="End this term:  its record stays in the log" onClick={core.pressed(this, () => core.removeSaved(term))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </ui-cell>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="roles_section">
-            {"Finding who manages what"}
-          </ui-loader>,
+          waitingSay: () => "Finding who manages what",
           items: () => <ui-table appearance="very-basic" selectable={true} unstackable={true} part="roles_section">
             <ui-row />
           </ui-table>,
@@ -591,9 +588,7 @@ export class OrgAdmin extends App {
             <ui-button class="undesign" icon="close" size="mini" appearance="transparent" aria-label="No longer designs it" title="No longer designs it:  their drafts stay, for a Manager" onClick={core.pressed(this, () => core.removeSaved(designer))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </ui-cell>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="designers_section">
-            {"Finding who designs what"}
-          </ui-loader>,
+          waitingSay: () => "Finding who designs what",
           items: () => <ui-table appearance="very-basic" selectable={true} unstackable={true} part="designers_section">
             <ui-row />
           </ui-table>,
@@ -623,9 +618,7 @@ export class OrgAdmin extends App {
             <ui-button class="unapprove" icon="close" size="mini" appearance="transparent" aria-label="Take it off the list" title="Take it off the list" onClick={core.pressed(this, () => core.removeSaved(app))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </ui-cell>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="apps_section">
-            {"Finding the approved apps"}
-          </ui-loader>,
+          waitingSay: () => "Finding the approved apps",
           items: () => <ui-table appearance="very-basic" selectable={true} unstackable={true} part="apps_section">
             <ui-row />
           </ui-table>,
@@ -663,9 +656,7 @@ export class OrgAdmin extends App {
           <ui-cell data-column="">
             <ui-button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Remove this stage" title="Remove this stage:  not while an event is in it, or another moves to it" onClick={core.pressed(this, () => core.removeSaved(stage))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </ui-cell>
-        </>, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="stages_section">
-          {"Finding the event stages"}
-        </ui-loader>, items: () => <ui-table appearance="very-basic" selectable={true} unstackable={true} part="stages_section">
+        </>, { waitingSay: () => "Finding the event stages", items: () => <ui-table appearance="very-basic" selectable={true} unstackable={true} part="stages_section">
           <ui-row />
         </ui-table> })}
       </ui-stack>
@@ -687,7 +678,7 @@ export class OrgAdmin extends App {
           <ui-cell data-column="What">{change.what}</ui-cell>
           <ui-cell data-column="Why">{change.why}</ui-cell>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="log_section">{"Reading the log"}</ui-loader>,
+          waitingSay: () => "Reading the log",
           items: () => <ui-table appearance="very-basic" unstackable={true} part="log_section">
             <ui-row />
           </ui-table>,

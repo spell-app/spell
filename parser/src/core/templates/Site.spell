@@ -8,3 +8,6 @@ a "site" is an app
 		// the address of the page it's showing:  "/" when it starts
 	its "theme" is a text
 		// the theme its pages wear, e.g. "mockup":  `galaxy guide is a site with theme "mockup"`
+	its "loading" is a text
+		// how what waits on its pages looks meanwhile:  "skeleton", "spinner" (the default), "none", or a spinner's words:
+		// `galaxy guide is a site with loading "skeleton"`

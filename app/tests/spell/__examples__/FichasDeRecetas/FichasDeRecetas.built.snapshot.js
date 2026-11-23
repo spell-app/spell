@@ -61,13 +61,9 @@ export class Receta extends View {
 
   draw() {
     return h("es-tarjeta", { class: "recipe", fluido: true },
-      h("es-imagen", {
-        src: () => this.imagen,
-        alt: () => this.título,
-        proporcion: "21:9",
-        recortar: true,
-        hidden: () => this.imagen !== "" ? undefined : true
-      }),
+      () => core.drawIf(() => this.imagen !== "", () => [
+        h("es-imagen", { src: () => this.imagen, alt: () => this.título, proporcion: "21:9", recortar: true })
+      ]),
       h("es-contenido",
         h("es-pila",
           h("es-pila", { direccion: "horizontal", repartir: "entre" },

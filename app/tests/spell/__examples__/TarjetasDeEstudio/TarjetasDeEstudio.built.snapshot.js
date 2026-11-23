@@ -115,27 +115,27 @@ export class Juego extends App {
         ),
         () => core.drawThing(this.tarjeta),
         h("es-pila", { direccion: "horizontal", repartir: "centro" },
-          h("es-boton", {
-            color: "primario",
-            onClick: core.pressed(this, () => this.mostrarLaRespuesta()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
-            hidden: () => this.tarjeta?.isFaceDirection("up") ? undefined : true
-          }, "Mostrar la respuesta"),
-          h("es-boton", {
-            color: "positivo",
-            icono: "check",
-            onClick: core.pressed(this, () => this.decirQueLaSabía()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
-            hidden: () => !this.tarjeta?.isFaceDirection("up") ? undefined : true
-          }, "La sabía"),
-          h("es-boton", {
-            color: "negativo",
-            apariencia: "básico",
-            icono: "close",
-            onClick: core.pressed(this, () => this.decirQueNoLaSabía()),
-            style: "cursor:var(--ui-control-cursor,pointer);user-select:none",
-            hidden: () => !this.tarjeta?.isFaceDirection("up") ? undefined : true
-          }, "No la sabía")
+          () => core.drawIf(() => this.tarjeta?.isFaceDirection("up"), () => [
+            h("es-boton", {
+              color: "primario",
+              onClick: core.pressed(this, () => this.mostrarLaRespuesta()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "Mostrar la respuesta")
+          ], () => [
+            h("es-boton", {
+              color: "positivo",
+              icono: "check",
+              onClick: core.pressed(this, () => this.decirQueLaSabía()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "La sabía"),
+            h("es-boton", {
+              color: "negativo",
+              apariencia: "básico",
+              icono: "close",
+              onClick: core.pressed(this, () => this.decirQueNoLaSabía()),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "No la sabía")
+          ])
         )
       )
     )

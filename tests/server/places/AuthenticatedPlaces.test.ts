@@ -155,6 +155,18 @@ describe("a page's read, passed on", () => {
     expect(asked).toHaveLength(1)
   })
 
+  test("read only, a GET to a route its lines list as a write is refused too:  a load changes things", async () => {
+    const { url, asked } = await standIn()
+    const readOnly = jobs(url, { readOnly: true, writes: ["/designs/{design_id}/load", "/jobs/{id}/complete"] })
+    const { read } = await pageServer([readOnly], { JOBS_TOKEN: SECRET })
+    const refused = await read("@acme/jobs/jobs/designs/top-level/load?force=1")
+    expect(refused.status).toBe(422)
+    expect(JSON.parse(refused.text)).toMatchObject({ kind: "refused", error: expect.stringMatching(/read only/) })
+    expect(asked).toHaveLength(0)
+    expect((await read("@acme/jobs/jobs/jobs")).status).toBe(200)
+    expect(asked).toHaveLength(1)
+  })
+
   test("a read only graphql server still takes its reads, which are POSTs, and refuses a mutation", async () => {
     const { url, asked } = await standIn()
     const graph = jobs(url, { kind: "graphql server", readOnly: true })

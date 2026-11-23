@@ -1,7 +1,7 @@
 /*
  * The style sheet of `<ui-json>`:  ours, not Fomantic's.
  * - It styles the component's shadow DOM:  `<div class="ui json" part="viewer">`, holding
- *   - its `<div class="header">`:  two `<ui-button class="tool">`s
+ *   - its `<div class="header">`:  two `<ui-button class="tool">`s, their inner buttons part `header-button`
  *   - its `<div class="body">`:  a `<div class="row" style="--level: n">` per line
  *   - An object's or array's line is also `.container`,
  *     with a `<button class="toggle">` (a chevron `<ui-icon>`) in the gutter and, closed, `<span class="preview">`.
@@ -136,13 +136,6 @@
   }
   .tool:state(active)::part(button):hover {
     background: oklch(from var(--ui-ink) l c h / 0.18);
-  }
-  /* the quotes glyph, as text:  two straight quotes in the code font, at the icon's size */
-  .tool .glyph {
-    font-family: var(--_ui-json-font-family);
-    font-size: 1.125em;
-    line-height: 1;
-    letter-spacing: 0.05em;
   }
 
   /* the gutter:  each toggle just before its own row's indent */

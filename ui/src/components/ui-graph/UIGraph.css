@@ -61,13 +61,19 @@
     cursor: var(--ui-control-cursor, pointer);
   }
 
+  /* The bar over the canvas:  the overlay (a legend) on the left, the toolbar on the right. */
+  .top-bar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.4em 0.5em;
+    border-bottom: 1px solid var(--_ui-graph-border-color);
+  }
   .toolbar {
-    position: absolute;
-    right: 0.5em;
-    bottom: 0.5em;
-    z-index: 1;
     display: flex;
     gap: 0.25em;
+    margin-left: auto;
   }
 
   .toolbar button {
@@ -80,8 +86,21 @@
     font-size: 0.8125em;
     cursor: var(--ui-control-cursor, pointer);
   }
+  /* A new group of buttons (a subclass's, then Fit):  a gap before it. */
+  .toolbar button.group-start {
+    margin-left: 0.75em;
+  }
   .toolbar button:hover {
     border-color: var(--_ui-graph-highlight-color);
+  }
+  /* A switch that's on:  filled with the highlight colour, so on and off read at a glance. */
+  .toolbar button[aria-pressed="true"] {
+    border-color: var(--_ui-graph-highlight-color);
+    background: color-mix(in oklab, var(--_ui-graph-highlight-color) 40%, var(--_ui-graph-background));
+    color: var(--ui-text-dark, var(--ui-text-color));
+  }
+  .toolbar button[aria-pressed="false"] {
+    color: var(--ui-text-muted, var(--ui-text-light));
   }
 
   .canvas {
@@ -135,6 +154,17 @@
     }
     .port-label {
       fill: var(--_ui-graph-port-color);
+      dominant-baseline: central;
+    }
+    .column-band {
+      fill: color-mix(in oklab, var(--_ui-graph-label-color) 4%, transparent);
+      stroke: color-mix(in oklab, var(--_ui-graph-label-color) 10%, transparent);
+      stroke-width: 1;
+    }
+    .column-label {
+      fill: var(--_ui-graph-port-color);
+      font-family: var(--ui-font-family-mono, monospace);
+      letter-spacing: 0.04em;
       dominant-baseline: central;
     }
     .pin-mark {

@@ -1,6 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { afterSolidUpdate, letBrowserIn, Queued, soon, waitUntil, whenIdle, within } from "spell/util/timing"
+import {
+  afterSolidUpdate,
+  letBrowserIn,
+  Queued,
+  soon,
+  soonEvenHidden,
+  waitUntil,
+  whenIdle,
+  within
+} from "spell/util/timing"
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -111,5 +120,25 @@ describe("whenIdle()", () => {
     await vi.waitFor(() => expect(ran).toEqual(["idle"]), { timeout: 1000 })
     await new Promise((resolve) => setTimeout(resolve, 100))
     expect(ran).toEqual(["idle"])
+  })
+})
+
+describe("soonEvenHidden()", () => {
+  // the timers here are fake, and never move:  as a hidden tab's, which a browser holds back
+  test("runs in the next task, on no timer:  held-back timers don't hold it", async () => {
+    const ran: string[] = []
+    soonEvenHidden(() => ran.push("message"))
+    soon(() => ran.push("timer"))
+    queueMicrotask(() => ran.push("microtask"))
+    expect(ran).toEqual([])
+    await new Promise((done) => soonEvenHidden(() => done(undefined)))
+    expect(ran).toEqual(["microtask", "message"])
+  })
+
+  test("cancelled before it runs, it never does", async () => {
+    let runs = 0
+    soonEvenHidden(() => runs++)()
+    await new Promise((done) => soonEvenHidden(() => done(undefined)))
+    expect(runs).toBe(0)
   })
 })

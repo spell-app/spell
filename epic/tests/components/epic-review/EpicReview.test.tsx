@@ -909,6 +909,16 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
     const host = await render(`<epic-section id="todos" kind="todos" open></epic-section>`)
     expect(actions(host)).toEqual([])
   })
+
+  test("a Todos section lets go of the waiting item it was editing once its form closes (its own listener, not an `on-epic-*` prop)", async () => {
+    await adoptClient()
+    const host = await render(`<epic-section id="todos" kind="todos" open></epic-section>`)
+    const section = (host as unknown as { component: { editingNew?: string } }).component
+    section.editingNew = "new1"
+    const form = host.shadowRoot!.querySelector("epic-new-item")!
+    form.dispatchEvent(new CustomEvent("epic-new-closed", { detail: { saved: false } }))
+    expect(section.editingNew).toBeUndefined()
+  })
 })
 
 // epic `airplane` P2:  notes on the phases and the summary

@@ -298,10 +298,11 @@ const UI_DATA = /^spell\/ui\/(.+\.generated|sounds)$/
 /**
  * `spell/element`'s leaves that hold no state a page must share,
  * so each build bundles its own copy, as any plain module is.
- * - Today one:  `drawnWindow`, every long list's drawing, which the parser's core draws with.
- * - It imports only Solid and util's generic files, which come from the shared files as usual.
+ * - `drawnWindow`, every long list's drawing, which the parser's core draws with.
+ *   It imports only Solid and util's generic files, which come from the shared files as usual.
+ * - `SkeletonShapes`, the shapes a skeleton is drawn with, which the core's `loading="skeleton"` reads:  pure data.
  */
-const BUNDLED_ELEMENT_LEAVES = new Set(["spell/element/drawnWindow"])
+const BUNDLED_ELEMENT_LEAVES = new Set(["spell/element/drawnWindow", "spell/element/SkeletonShapes"])
 
 /**
  * Spell UI's leaves that are plain DOM, with no element and no state a page must share:  bundled, as `UI_DATA` is.
