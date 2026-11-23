@@ -48,6 +48,7 @@ async function ingestOf(
 ) {
   const texts = new Map<string, string>()
   const descriptions = new Map<string, PlaceDescription>()
+  const said: string[] = []
   const files: IngestFiles = {
     read: async (path) => texts.get(path),
     write: async (path, text) => void texts.set(path, text),
@@ -68,11 +69,12 @@ async function ingestOf(
     files,
     readThrough: readThroughSpell,
     sleep: async () => {},
-    now: () => new Date("2026-11-19T12:00:00Z")
+    now: () => new Date("2026-11-19T12:00:00Z"),
+    say: (line) => void said.push(line)
   })
   const result = await ingest.add({ address: ACME, spec: SPEC_AT, into, name: "acme jobs", ...(rows && { rows }) })
   const descriptionAt = into.replace(/(\.es)?\.spell$/, ".json5")
-  return { ingest, result, texts, descriptions, spell: texts.get(into)!, description: descriptions.get(descriptionAt)! }
+  return { ingest, result, texts, descriptions, said, spell: texts.get(into)!, description: descriptions.get(descriptionAt)! }
 }
 
 describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
@@ -411,20 +413,20 @@ describe("spell place verify, of a FastAPI service", () => {
     expect(asked).toContain("/api/events?take=100")
   })
 
-  test("a refusal says FastAPI's own message:  `detail`, a list of what was wrong", async () => {
-    const { ingest, descriptions } = await ingestOf("AcmeJobs.api.spell", (url) =>
+  test("a refusal keeps only its status and route:  FastAPI's own message is said as it runs, never kept", async () => {
+    const { ingest, descriptions, said } = await ingestOf("AcmeJobs.api.spell", (url) =>
       url.pathname === "/api/jobs"
-        ? Response.json(
-            { detail: [{ loc: ["query", "limit"], msg: "Input should be less than 500" }] },
-            { status: 422 }
-          )
+        ? Response.json({ detail: [{ loc: ["query", "rack"], msg: "No rack named demo_rack_7" }] }, { status: 422 })
         : fastApi(url)
     )
     await ingest.verify("AcmeJobs.api.spell")
-    expect(descriptions.get("AcmeJobs.api.json5")!.collections.jobs!.state).toMatchObject({
+    const description = descriptions.get("AcmeJobs.api.json5")!
+    expect(description.collections.jobs!.state).toMatchObject({
       is: "failed",
       status: 422,
-      reason: "it answered 422:  Input should be less than 500"
+      reason: "it answered 422 at /api/jobs"
     })
+    expect(JSON.stringify(description)).not.toContain("demo_rack_7")
+    expect(said.join("\n")).toContain("/api/jobs answered 422:  No rack named demo_rack_7")
   })
 })

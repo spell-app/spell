@@ -250,7 +250,7 @@ describe("spell place verify (epic `data` P49)", () => {
     expect(collections.jobs!.state).toMatchObject({
       is: "failed",
       status: 403,
-      reason: "it answered 403:  Authentication credentials were not provided"
+      reason: "it answered 403 at /api/core/jobs/"
     })
     // no schema said its fields:  what it read does
     expect(collections.background_tasks!.state).toMatchObject({ is: "verified", rows: 1 })

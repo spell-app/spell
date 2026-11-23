@@ -447,7 +447,12 @@ export class PlaceIngest {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
       return failed(`it didn't answer:  ${messageOf(error).replaceAll(url, collection.at)}`)
     }
-    if (answer.status >= 400) return failed(`it answered ${answer.status}${detailOf(answer.text)}`, answer.status)
+    if (answer.status >= 400) {
+      // the server's own message is a hint, said as it runs and never kept:  it may name a real value
+      const hint = detailOf(answer.text)
+      if (hint) this.say(`${collection.at} answered ${answer.status}${hint}`)
+      return failed(`it answered ${answer.status} at ${collection.at}`, answer.status)
+    }
     if (answer.isCut) return failed("its answer is more than it reads at once:  too big to read whole", answer.status)
     const body = jsonOf(answer.text)
     // no schema said where its rows are (NetBox's background queues):  a wrapped list says, as a look finds it;
