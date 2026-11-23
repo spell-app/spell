@@ -18727,7 +18727,7 @@ export interface UIGraphAttributes {
    */
   "prop:path"?: string
   /**
-   * How nodes are placed:  `layers`, left to right by their edges;  `groups`, a column per node `group` (its header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column;  `auto`, groups when any node has one.  NOT `layout`:  that's the laid out drawing, a property already.
+   * How nodes are placed:  `layers`, left to right by their edges;  `groups`, a column per node `group` (its header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column;  `auto`, groups when any node has one.  `groups` needs a node with a `group` too:  with none, it draws layers, as `auto` does.  For one column with no header, give every node the same `group`.  NOT `layout`:  that's the laid out drawing, a property already.
    * - takes:  `auto` · `layers` · `groups`
    * - default:  `auto`
    */

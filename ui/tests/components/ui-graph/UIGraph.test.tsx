@@ -2,9 +2,37 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import type { DOMGraphElement, GraphData } from "spell/ui/components/ui-graph"
+import { E } from "spell/ui/core"
+import {
+  GRAPH_METRICS,
+  UIGraph,
+  type DOMGraphElement,
+  type GraphData,
+  type GraphMetrics,
+  type GraphPort
+} from "spell/ui/components/ui-graph"
 
 import "spell/ui/components/ui-graph"
+
+/** What a test page keeps with a port. */
+type Wire = { gauge: number }
+
+/**
+ * A graph with bigger boxes and dots, and data on its ports:  what a subclass needs, with no cast.
+ * - `metrics` returns other numbers than the defaults;  `elementSetup` sets only what it changes.
+ */
+class BigGraph extends UIGraph {
+  @E.protoMerged static elementSetup: Partial<E.ElementSetup> = { delegatesFocus: false }
+
+  override get metrics(): GraphMetrics {
+    return { ...GRAPH_METRICS, nodeHeight: 60, portRadius: 7 }
+  }
+
+  override portLabel(port: GraphPort): string | undefined {
+    return `${(port.data as Wire | undefined)?.gauge ?? "?"} mm`
+  }
+}
+BigGraph.define("x-big-graph")
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-graph/examples/elements/*.html", {
@@ -101,6 +129,21 @@ describe("<ui-graph> drawing", () => {
     const host = await ElementFixture.render(`<div>${html}</div>`)
     await ElementFixture.tick()
     await expectAccessible(host)
+  })
+})
+
+describe("<ui-graph> subclass", () => {
+  test("draws at the subclass's metrics, and keeps a port's data", async () => {
+    const ports: GraphPort[] = [{ id: "p", kind: "out", data: { gauge: 2 } satisfies Wire }]
+    const data: GraphData = { nodes: [{ id: "a", ports }, { id: "b" }], edges: [] }
+    const host = await ElementFixture.render<GraphElement>(
+      `<x-big-graph graph='${JSON.stringify(data)}' style="width: 640px"></x-big-graph>`
+    )
+    await ElementFixture.tick()
+    const root = host.shadowRoot!
+    expect(root.querySelector("g.node > rect")!.getAttribute("height")).toBe("60")
+    expect(root.querySelector("circle.port-dot")!.getAttribute("r")).toBe("7")
+    expect(root.querySelector("g.port text")!.textContent).toBe("2 mm")
   })
 })
 
