@@ -40,6 +40,13 @@ export class SpellRuntime extends Eventful() {
   deployments?: Readonly<Record<string, PlaceDeployment>>
   /** What stops each of this run's timers, `every second` (`timers.ts`, epic `language` T159):  each takes itself out. */
   readonly timers = new Set<() => void>()
+  /**
+   * What this run keeps alive that the page's registries hold only weakly, by a key of their own (`heldByRun()`):
+   * its classes by name, its view tags' classes by tag.
+   * - So a program no longer run anywhere, and nothing else uses, can be freed (epic `solid-2-final` I24).
+   * - A key held again (a live edit's new class of the same name) replaces the last:  an edit keeps no old class.
+   */
+  readonly held = new Map<string, object>()
 
   /** SIDE EFFECT:  every timer of this run stops:  the program has ended, or is starting again. */
   stopTimers(): void {

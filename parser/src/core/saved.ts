@@ -64,7 +64,7 @@ import type { ListQuery, PersonHere, Place as PlaceBehind, PlaceRow } from "spel
 import type { PlaceRowsChange } from "spell/places/PendingChanges"
 
 import { compareSortKeys } from "./collection-other"
-import { CLASSES_DECLARED, core, isWhileReading, whileReading } from "./core"
+import { core, declaredClasses, declaredClassNamed, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 import { SPELL_WINDOW, nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
@@ -288,7 +288,7 @@ class ProgramPlaces {
       const declared = this.declared.get(name)
       if (!declared) continue
       try {
-        const Class = [...this.classes.values(), ...(CLASSES_DECLARED.values() as Iterable<SavedClass>)].find(
+        const Class = [...this.classes.values(), ...(declaredClasses() as SavedClass[])].find(
           (each) => each.savedIn?.place === name
         )
         const behind = Class
@@ -385,7 +385,7 @@ class ProgramPlaces {
 
   /** The class called `name`:  the program's own, by what's been read or saved, else what the program knows. */
   private classNamed(name: string): ReturnType<typeof core.things.classNamed> {
-    return (this.classes.get(name) as never) ?? core.things.classNamed(name) ?? (CLASSES_DECLARED.get(name) as never)
+    return (this.classes.get(name) as never) ?? core.things.classNamed(name) ?? (declaredClassNamed(name) as never)
   }
 
   /** Every class read or saved, by its name. */
