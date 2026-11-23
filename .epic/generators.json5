@@ -21,6 +21,14 @@
       "run": ["yarn", "spell:gen:syntax"]
     },
     {
+      // the built-in types' pack the language server and the editor read, off the core's source
+      // (the app's scopes tool);  `parser/.gitattributes` marks it
+      "name": "core scopes",
+      "outputs": ["parser/src/core/core.scopes.js"],
+      "cwd": "app",
+      "run": ["yarn", "lsp:scopes", "--builtins"]
+    },
+    {
       "name": "Spell UI theme sheets",
       "outputs": [
         "ui/src/styles/themes/{spell,glass,fruity,merlot,paper,midnight,crisp,pop,matrix}.css",
