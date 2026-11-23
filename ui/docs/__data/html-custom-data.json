@@ -27253,7 +27253,7 @@
       "name": "ui-json",
       "description": {
         "kind": "markdown",
-        "value": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.\n\nAlso known as:  data, data island, json script, application/json, data block, json viewer, json tree, object inspector, pretty print, datos.\n\n**Events:**  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-navigating`, `ui-copied`"
+        "value": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is its data, parsed, or any object a script sets, shown as it is;  an element it sits inside may read it.\n\nAlso known as:  data, data island, json script, application/json, data block, json viewer, json tree, object inspector, pretty print, datos.\n\n**Events:**  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-navigating`, `ui-copied`"
       },
       "attributes": [
         {

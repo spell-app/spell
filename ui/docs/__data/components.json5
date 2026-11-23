@@ -21390,7 +21390,7 @@
         "pretty print",
         "datos"
       ],
-      "description": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.",
+      "description": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is its data, parsed, or any object a script sets, shown as it is;  an element it sits inside may read it.",
       "noun": "JSON data",
       "attributes": [
         {
@@ -21640,7 +21640,7 @@
         {
           "name": "ui-changed",
           "detail": "{ value: unknown, content: string }",
-          "description": "The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON."
+          "description": "The data changed through its text:  loaded from `source`, set through `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.  Setting `value` by script sends none:  it shows that object as it is, and isn't an edit."
         },
         {
           "name": "ui-saving",
@@ -21703,6 +21703,10 @@
         {
           "name": "editor",
           "description": "The control a key or value is edited in (`editable`)."
+        {
+          "name": "header-button",
+          "description": "Copy and the quotes button:  each one's inner button (`<ui-button>`'s `button` part), so a page can size them."
+        },
         }
       ],
       "states": [

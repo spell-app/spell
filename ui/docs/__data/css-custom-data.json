@@ -11918,6 +11918,13 @@
       }
     },
     {
+      "name": "::part(header-button)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-json>`:  Copy and the quotes button:  each one's inner button (`<ui-button>`'s `button` part), so a page can size them."
+      }
+    },
+    {
       "name": "::part(heading)",
       "description": {
         "kind": "markdown",

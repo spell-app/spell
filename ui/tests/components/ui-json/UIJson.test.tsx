@@ -72,17 +72,55 @@ describe("<ui-json> value", () => {
     expect(element.matches(":state(error)")).toBe(false)
   })
 
-  test("`value` set writes the text, and sends `ui-changed` once, with the data", async () => {
+  test("`value` set holds the very object:  no JSON round trip, no `ui-changed`, not `dirty`", async () => {
     const element = await json(`<ui-json>{ "a": 1 }</ui-json>`)
     const changed = vi.fn()
-    element.addEventListener("ui-changed", (event) => changed((event as CustomEvent).detail))
+    element.addEventListener("ui-changed", changed)
+    const data = { a: 2, big: [{ id: "x" }] }
+    element.value = data
+    await ElementFixture.settle()
+    expect(element.value).toBe(data)
+    expect(element.content).toBe(`{ "a": 1 }`)
+    expect(changed).not.toHaveBeenCalled()
+    expect(element.dirty).toBe(false)
+    expect(element.shadowRoot!.querySelector("[part~=viewer]")!.textContent).toContain('"big"')
+  })
+
+  test("`value` set before the family draws it is kept, as it is", async () => {
+    const element = document.createElement("ui-json") as DOMJsonElement
+    const data = { early: true }
+    element.value = data
+    expect(element.value).toBe(data)
+    document.body.append(element)
+    onTestFinished(() => element.remove())
+    await ElementFixture.settle()
+    expect(element.value).toBe(data)
+    expect(element.dirty).toBe(false)
+  })
+
+  test("a new `content` replaces a `value` set:  that one is an edit, `ui-changed` and `dirty`", async () => {
+    const element = await json(`<ui-json>{ "a": 1 }</ui-json>`)
     element.value = { a: 2 }
     await ElementFixture.settle()
-    expect(element.value).toEqual({ a: 2 })
-    expect(JSON.parse(element.content)).toEqual({ a: 2 })
+    const changed = vi.fn()
+    element.addEventListener("ui-changed", (event) => changed((event as CustomEvent).detail.value))
+    element.content = `{ "a": 3 }`
+    await ElementFixture.settle()
+    expect(element.value).toEqual({ a: 3 })
     expect(changed).toHaveBeenCalledTimes(1)
-    expect(changed.mock.calls[0]![0].value).toEqual({ a: 2 })
+    expect(changed).toHaveBeenCalledWith({ a: 3 })
     expect(element.dirty).toBe(true)
+  })
+
+  test("`save()` writes a `value` set into `content`, as JSON, and keeps the object", async () => {
+    const element = await json(`<ui-json></ui-json>`)
+    const data = { a: [1, 2] }
+    element.value = data
+    await ElementFixture.settle()
+    expect(await element.save()).toBe(true)
+    expect(JSON.parse(element.content)).toEqual(data)
+    expect(element.value).toBe(data)
+    expect(element.dirty).toBe(false)
   })
 
   test("`item` shows a thing:  its `data`, else the thing itself;  an element without `data`, nothing", async () => {
