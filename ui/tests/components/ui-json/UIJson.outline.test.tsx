@@ -1,3 +1,4 @@
+import { OBSERVE } from "solid-js"
 import { describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -100,6 +101,24 @@ describe("<ui-json> outline", () => {
     element.addEventListener("ui-copied", (event) => copied((event as CustomEvent).detail.content))
     expect(await element.copy()).toBe(true)
     expect(JSON.parse(copied.mock.calls[0]![0])).toEqual({ name: "a", "two words": 2 })
+  })
+
+  test("Copy, pressed, makes no reactive write inside a computation", async () => {
+    const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
+    onTestFinished(() => writeText.mockRestore())
+    const element = await json(`<ui-json>{ "name": "a" }</ui-json>`)
+    const copied = vi.fn()
+    element.addEventListener("ui-copied", copied)
+    // Solid's dev build reports a write inside a computation as `REACTIVE_WRITE_IN_OWNED_SCOPE`
+    const capture = OBSERVE!.diagnostics.capture()
+    element.shadowRoot!.querySelector<HTMLElement>("ui-button.copy")!.click()
+    await vi.waitFor(() => expect(copied).toHaveBeenCalled())
+    await ElementFixture.settle()
+    const codes = capture.stop().map((event) => event.code)
+    expect(codes).not.toContain("REACTIVE_WRITE_IN_OWNED_SCOPE")
+    // the inner button's name follows the change, the write told a moment later
+    const copy = element.shadowRoot!.querySelector("ui-button.copy")!
+    expect(copy.shadowRoot!.querySelector("button")!.getAttribute("aria-label")).toBe("Copied")
   })
 
   test("the quotes button turns quotes off and on", async () => {
