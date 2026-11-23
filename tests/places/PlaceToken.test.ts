@@ -72,7 +72,7 @@ describe("PlaceToken", () => {
     await mint("k-1:sesame")
     await mint("k-1:sesame")
     expect(ids).toHaveLength(2)
-    expect(ids[0]).toMatch(/^[0-9a-f-]{36}$/)
+    expect(ids[0]).toMatch(/^spell-[0-9a-z]+$/)
     expect(ids[1]).not.toBe(ids[0])
   })
 

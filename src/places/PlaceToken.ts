@@ -1,4 +1,5 @@
 import { PlaceError } from "./places.types"
+import { newId } from "./refs"
 
 /** A token this close to its end is replaced:  it may run out on the way. */
 const EARLY_MS = 60_000
@@ -136,11 +137,10 @@ export function tokenServiceMint(address: string, fetch: typeof globalThis.fetch
     const url = address.replace(BRACE, encodeURIComponent(keyId))
     const answer = await fetch(url, {
       method: "POST",
-      // only a server side holds a key:  `randomUUID()` is there
       headers: {
         authorization: `Basic ${base64(key)}`,
         accept: "application/json",
-        "x-request-id": crypto.randomUUID()
+        "x-request-id": newId("spell")
       }
     })
     if (answer.status >= 400 && answer.status < 500) {
