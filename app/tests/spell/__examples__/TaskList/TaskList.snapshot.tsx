@@ -118,7 +118,9 @@ export class Checklist extends ViewableList<Task> {
   @drawn draw() {
     return (
       <ui-stack spacing="xs">
-        <ui-text color="grey" hidden={this.isEmpty ? undefined : true}>Nothing to do</ui-text>
+        {core.drawIf(() => this.isEmpty, () => <>
+          <ui-text color="grey">Nothing to do</ui-text>
+        </>)}
         <slot />
       </ui-stack>
     )
@@ -286,8 +288,7 @@ export class TaskList extends App {
             <ui-header level="2">Task List</ui-header>
             <ui-stack direction="horizontal" spacing="sm">
               <ui-text color="grey">
-                <span hidden={this.activeCount === 0 ? undefined : "until-found"}>All done</span>
-                <span hidden={!(this.activeCount === 0) ? undefined : "until-found"}>{this.activeCount} to do</span>
+                {core.drawIf(() => this.activeCount === 0, () => <>All done</>, () => <>{this.activeCount} to do</>)}
               </ui-text>
               {core.drawAction(this, "takeTheTour", { appearance: "tertiary" })}
             </ui-stack>

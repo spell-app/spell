@@ -23,7 +23,7 @@
     },
     {
       "why": "A value that waits, on a page:  Python sends its page with its values (answer_of(), answer_now()), so it has no \"…\" to show (epic language P12)",
-      "names": ["waitedValue", "waitedValueKeyFor", "whileWaiting"]
+      "names": ["waitedValue", "waitedValueKeyFor", "whileWaiting", "drawWaiting", "drawLooking"]
     },
     {
       "why": "choose's dialog on a page (epic language P66):  Python's choose() names its rows itself, and asks its page for this",

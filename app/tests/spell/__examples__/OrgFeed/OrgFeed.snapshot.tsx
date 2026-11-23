@@ -128,14 +128,14 @@ export class FeedPage extends App {
             <ui-segment class="favourites">
               <ui-header size="medium">More of what you like</ui-header>
               <ui-stack class="favourite-list" spacing="sm">
-                {core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post: Post) => post.isAFavourite), (item: Post) => core.descending(item.posted)), (post: Post) => core.drawThing(post), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your feed"}</ui-loader>, none: () => <ui-text color="grey">Nothing yet.</ui-text> })}
+                {core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post: Post) => post.isAFavourite), (item: Post) => core.descending(item.posted)), (post: Post) => core.drawThing(post), { waitingSay: () => "Reading your feed", none: () => <ui-text color="grey">Nothing yet.</ui-text> })}
               </ui-stack>
             </ui-segment>
             <ui-segment class="everything">
               <ui-header size="medium">Everything else</ui-header>
               <ui-stack class="post-list" spacing="sm">
                 {core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post: Post) => post.isOrdinary), (item: Post) => core.descending(item.posted)), (post: Post) => core.drawThing(post), {
-                  waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your feed"}</ui-loader>,
+                  waitingSay: () => "Reading your feed",
                   none: () => <ui-text class="none" color="grey">Nothing new.</ui-text>,
                   failed: () => <ui-text color="red">We can't read your feed right now.</ui-text>
                 })}

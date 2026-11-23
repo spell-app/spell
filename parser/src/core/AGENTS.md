@@ -399,10 +399,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       (the same page drawn again a moment later):  `follow()` asks again for whoever holds it now.
       Only with nobody holding it does the wait end in an `AbortError`.
       [links.test.ts](../../tests/core/links.test.ts) pins it.
+  - It NEVER reads ahead:  a page reads only what it draws, as it draws it.
+    - Lists asked for in the same moment still go in one request, where the place can take several (`PlaceBatch`).
+    - The one way in, opt in, a line a collection:  `tags are read on startup` (`ReadOnStartup`) compiles to
+      `readOnStartup: ["Tag"]` on the place's line;  `ProgramPlaces.readOnStartup()` reads its first page as
+      the program starts, its class by name, and holds it for as long as the program runs.
+    - Epic `data` P12's first reads went (Owen, 2026-11-23:  "We shouldn't be proactively reading data like this, that is
+      going to kill startup time"):  every list any draw could reach, asked as the place was first read, so a site's
+      first page asked for every other screen's lists too.
   - What the compiler gathered (`P.ReadGathering`, epic `data` P12), and the running page's half:
-    - `firstReads`, on the place's line:  what a first draw reads, asked for together when the place is first read, each
-      held a while for the draw that wants it.  Two or more only:  a read alone asks for itself.
     - `select`, on a type's `savedIn`:  the fields anything reads, only for a place that can leave the rest out.
+      - Asked of the place WITH its id (`selectionFor()`):  a place that can't leave fields out (a web server) is read
+        whole, once.  Asked of the compiled list alone, a library's `select: []` passed, every field was hidden after
+        it came, and the first one read asked the whole list again:  every list read twice.
     - A left-out field read anyway (`PropInfo.whenUnset`, which costs only a read that finds nothing set):  every read of
       that type asks once more, for all of it, and whoever read the field sees it appear, by its cell.
     - A drawn view's element reads every property, to mirror them as attributes:  `whileOnlyShowing()`, so that isn't needing them.

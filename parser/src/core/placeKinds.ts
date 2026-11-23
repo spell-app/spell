@@ -13,7 +13,6 @@ import {
   CLOUD_KIND,
   SPACE_PROJECTION_OPERATIONS,
   SPACE_SHEET_OPERATIONS,
-  type ListQuery,
   type Place as PlaceBehind,
   type PlacePerson,
   type Projection,
@@ -183,11 +182,11 @@ export type PlaceDetails = {
   /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */
   accounts?: readonly string[]
   /**
-   * What a first draw reads from it, as the compiler found them (epic `data` P12):  each a class and what's asked.
-   * - Read when the place is first read:  each class is declared by then.
-   * - Asked for together:  one trip, not one per part of the page.
+   * The classes whose collections are read as the program starts, by name:  `tags are read on startup`.
+   * - Opt in, one line a collection:  nothing else is read before a page draws it.
+   * - SEE:  `ProgramPlaces.readOnStartup()`
    */
-  firstReads?: () => Array<[Function, ListQuery?]>
+  readOnStartup?: readonly string[]
 }
 
 /** What the place's paging lines say:  for every collection, or for one alone, under its `live at` line. */

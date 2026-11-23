@@ -11,6 +11,7 @@ export const sharedEs = {
   attributes: {
     disabled: "desactivado",
     loading: "cargando",
+    error: "error",
     visible: "visible",
     animation: "animacion",
     link: "enlace",

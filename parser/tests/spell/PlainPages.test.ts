@@ -225,7 +225,9 @@ describe("a drawing in plain spell takes a page's shortcuts", () => {
     expect(errors).toEqual([])
     expect(code).toContain('h("ui-segment",')
     expect(code).toContain('h("ui-header", "Films")')
-    expect(code).toContain('core.drawRead(() => this.films, (film) => h("ui-text", () => film.title), { waiting:')
+    expect(code).toContain(
+      'core.drawRead(() => this.films, (film) => h("ui-text", () => film.title), { waitingSay: () => "Wait"'
+    )
     expect(code).toContain('none: () => h("ui-text", "None")')
   })
 

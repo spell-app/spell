@@ -179,7 +179,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
         {
           type: "Site",
           superType: "App",
-          defined: "/Site.spell:498-743"
+          defined: "/Site.spell:498-940"
         },
         {
           property: "current_address",
@@ -193,9 +193,15 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           of: "Site",
           datatype: "text",
           defined: "/Site.spell:630-743"
+        },
+        {
+          property: "loading",
+          of: "Site",
+          datatype: "text",
+          defined: "/Site.spell:745-940"
         }
       ],
-      codeLines: [10, 14, 20]
+      codeLines: [10, 14, 20, 26]
     },
     es: {
       spellVersion: "0.8.0",
@@ -206,7 +212,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           type: "Site",
           superType: "App",
           gender: "masculine",
-          defined: "/Site.es.spell:537-802"
+          defined: "/Site.es.spell:537-1023"
         },
         {
           property: "dirección_actual",
@@ -222,9 +228,16 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           datatype: "text",
           defined: "/Site.es.spell:679-802",
           output: "theme"
+        },
+        {
+          property: "carga",
+          of: "Site",
+          datatype: "text",
+          defined: "/Site.es.spell:804-1023",
+          output: "loading"
         }
       ],
-      codeLines: [10, 14, 20]
+      codeLines: [10, 14, 20, 26]
     }
   },
   "page layout": {

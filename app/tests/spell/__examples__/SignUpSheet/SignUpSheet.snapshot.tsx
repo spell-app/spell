@@ -232,7 +232,8 @@ export const signUpSheet = core.place(new SignUpSheet(), {
     allowance: { collection: "tickets", field: "invitations" },
     joins: { collection: "tickets", address: "picnic@rs/__attendees" }
   },
-  checkedEvery: 30, firstReads: () => [[Volunteer], [Ticket], [Attendee]] })
+  checkedEvery: 30
+})
 
 /** What everyone in the picnic sees:  who's on which shift, never an organizer's note. */
 export class PublishedSheet extends Place {}
@@ -377,7 +378,7 @@ export class SignUpPage extends App {
             <ui-header size="medium">Who's on which shift</ui-header>
             <ui-stack class="published-rows" spacing="sm">
               {core.drawRead(async () => await core.savedThings(PublishedVolunteer, {}, "as drawn"), (volunteer: PublishedVolunteer) => core.drawThing(volunteer), {
-                waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading the sheet"}</ui-loader>,
+                waitingSay: () => "Reading the sheet",
                 none: () => <ui-text class="none" color="grey">{"Nobody yet:  be the first."}</ui-text>,
                 failed: () => <ui-text color="red">We can't read the sheet right now.</ui-text>
               })}
@@ -401,7 +402,7 @@ export class SignUpPage extends App {
             <ui-header size="small">The master sheet</ui-header>
             <ui-stack class="master" spacing="sm">
               {core.drawRead(async () => await core.savedThings(Volunteer, {}, "as drawn"), (volunteer: Volunteer) => core.drawThing(volunteer), {
-                waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading the master sheet"}</ui-loader>,
+                waitingSay: () => "Reading the master sheet",
                 none: () => <ui-text color="grey">Nobody's signed up yet.</ui-text>,
                 failed: () => <ui-text class="organizers-only" color="grey">Only the picnic's organizers see this.</ui-text>
               })}
@@ -409,7 +410,7 @@ export class SignUpPage extends App {
             <ui-header size="small">Tickets</ui-header>
             <ui-stack class="tickets" spacing="sm">
               {core.drawRead(async () => await core.savedThings(Ticket, {}, "as drawn"), (ticket: Ticket) => core.drawThing(ticket), {
-                waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading the tickets"}</ui-loader>,
+                waitingSay: () => "Reading the tickets",
                 none: () => <ui-text color="grey">Nobody's asked for one yet.</ui-text>,
                 failed: () => <ui-text color="grey">Only the picnic's organizers see this.</ui-text>
               })}
@@ -431,7 +432,7 @@ export class SignUpPage extends App {
               </ui-input>
             </ui-form>
             <ui-stack class="attendees" spacing="sm">
-              {core.drawRead(async () => await core.savedThings(Attendee, {}, "as drawn"), (attendee: Attendee) => core.drawThing(attendee), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading the list"}</ui-loader>, failed: () => <ui-text color="grey">Only the picnic's organizers see this.</ui-text> })}
+              {core.drawRead(async () => await core.savedThings(Attendee, {}, "as drawn"), (attendee: Attendee) => core.drawThing(attendee), { waitingSay: () => "Reading the list", failed: () => <ui-text color="grey">Only the picnic's organizers see this.</ui-text> })}
             </ui-stack>
           </ui-segment>
         </ui-stack>

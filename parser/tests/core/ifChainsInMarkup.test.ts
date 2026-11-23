@@ -9,10 +9,10 @@ import type { Drawing } from "spell/parser/core/drawing"
 import { parseSpellProject, registerTestComponentPack, runSpellFiles } from "spell/parser/spell/test"
 
 /**
- * An IF-CHAIN INSIDE MARKUP, drawn (epic `elemental-spell`, Owen 2026-10-25:  "Inside an element:  hidden"):
- * every branch stays on the page, each hidden while it isn't the one:  text `hidden="until-found"`, a Spell UI element
- * by its own `hidden`.
- * - So a flip keeps each element, the same DOM node with whatever it holds, and only `hidden` changes.
+ * An IF-CHAIN INSIDE MARKUP, drawn (epic `elemental-spell`, Owen 2026-10-25):  ONLY the branch whose phrase holds is
+ * on the page, `core.drawIf()`.
+ * - A branch that isn't the one draws nothing, so reads nothing:  a place's read under it waits until it shows.
+ * - A flip draws the new branch;  a change that keeps the branch keeps its elements.
  * - The same with a drawing's bare names (`<segment>`) and Spell UI's own (`<ui-segment>`):  the same program.
  * - Compiled, then run on `core`'s source, into a fake page (linkedom), as `drawing.test.ts` draws.
  */
@@ -22,10 +22,11 @@ describe("an <if> inside markup", () => {
     'a "card" is a view:',
     '\tits "up" is yes or no',
     '\tits "rank" is a number',
+    '\tits "face" is text',
     "\tto draw it:",
     "\t\t<segment>",
     "\t\t\t<if its up is yes>",
-    "\t\t\t\t<text>{its rank}</text>",
+    "\t\t\t\t<text>{its face}</text>",
     "\t\t\t<otherwise if its rank is 1>",
     "\t\t\t\tAce down",
     "\t\t\t<otherwise>",
@@ -39,10 +40,11 @@ describe("an <if> inside markup", () => {
     'a "card" is a view where:',
     '\t- its "up" is yes or no',
     '\t- its "rank" is a number',
+    '\t- its "face" is text',
     "\t- to draw it:",
     "\t\t<ui-segment>",
     "\t\t\t<if its up is yes>",
-    "\t\t\t\t<ui-text>{its rank}</ui-text>",
+    "\t\t\t\t<ui-text>{its face}</ui-text>",
     "\t\t\t<otherwise if its rank is 1>",
     "\t\t\t\tAce down",
     "\t\t\t<otherwise>",
@@ -76,61 +78,78 @@ describe("an <if> inside markup", () => {
     element.remove()
   })
 
-  /** The card `lines` make, drawn into `element`. */
+  /** The card `lines` make, drawn into `element`;  `reads` counts each read of its face. */
   function drawnCard(path: string, lines: string[]) {
     const { card } = runSpellFiles([{ path, contents: lines.join("\n") }])("card") as {
-      card: { up: boolean; rank: number; draw(): Drawing }
+      card: { up: boolean; rank: number; face: string; draw(): Drawing }
     }
+    const face = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(card), "face")!
+    const reads = { face: 0 }
+    Object.defineProperty(card, "face", {
+      get() {
+        reads.face++
+        return face.get!.call(card)
+      },
+      set(value: string) {
+        face.set!.call(card, value)
+      }
+    })
+    card.face = "Five"
     dispose = render(() => card.draw(), element)
     core.flush()
-    return card
+    return { card, reads }
   }
 
-  /** What each of the segment's children is, and whether it's hidden:  `ui-text hidden` ... */
-  function shown(): string[] {
+  /** What the segment holds:  each element by its tag, each text as it reads. */
+  function drawn(): string[] {
     const segment = element.firstElementChild!
-    return [...segment.children].map((child) => `${child.localName}${child.hasAttribute("hidden") ? " hidden" : ""}`)
+    return [...segment.childNodes]
+      .map((node) => (node.nodeType === 1 ? (node as Element).localName : node.textContent!.trim()))
+      .filter(Boolean)
   }
 
-  test("every branch is on the page;  the one whose phrase holds shows, the rest are hidden until found", () => {
+  test("only the branch whose phrase holds is on the page:  no branch drawn hidden", () => {
     drawnCard("/Card.spell", BARE)
-    expect(shown()).toEqual(["ui-text hidden", "span hidden", "ui-button"])
-    const [text, span] = [...element.firstElementChild!.children]
-    // a Spell UI element by its own `hidden`;  text, in a span of its own, until found
-    expect(text!.getAttribute("hidden")).toBe("")
-    expect(span!.textContent).toBe("Ace down")
-    expect(span!.getAttribute("hidden")).toBe("until-found")
+    expect(drawn()).toEqual(["ui-button"])
+    expect(element.querySelector("[hidden]")).toBe(null)
   })
 
-  test("a flip keeps every element, the same node with what it holds:  only `hidden` changes", () => {
-    const card = drawnCard("/Card.spell", BARE)
-    const segment = element.firstElementChild!
-    const before = [...segment.children]
-    ;(before[2] as HTMLElement & { held?: string }).held = "kept"
+  test("a branch that isn't the one reads nothing:  its face is read once it shows", () => {
+    const { card, reads } = drawnCard("/Card.spell", BARE)
+    expect(reads.face).toBe(0)
+    card.up = true
+    core.flush()
+    expect(drawn()).toEqual(["ui-text"])
+    expect(element.textContent).toBe("Five")
+    expect(reads.face).toBeGreaterThan(0)
+  })
 
+  test("a flip draws the new branch and lets the old one go;  a change that keeps the branch keeps its elements", () => {
+    const { card } = drawnCard("/Card.spell", BARE)
     // `<otherwise if its rank is 1>`
     card.rank = 1
     core.flush()
-    expect(shown()).toEqual(["ui-text hidden", "span", "ui-button hidden"])
+    expect(drawn()).toEqual(["Ace down"])
     // `<if its up is yes>` wins over every branch after it
     card.up = true
     core.flush()
-    expect(shown()).toEqual(["ui-text", "span hidden", "ui-button hidden"])
-    expect(element.firstElementChild!.children[0]!.textContent).toBe("1")
+    expect(drawn()).toEqual(["ui-text"])
+    const text = element.firstElementChild!.firstElementChild
+    // the same branch:  the same element, only its text changes
+    card.rank = 7
+    card.face = "Seven"
+    core.flush()
+    expect(element.firstElementChild!.firstElementChild).toBe(text)
+    expect(element.textContent).toBe("Seven")
     // `<otherwise>`, again
     card.up = false
-    card.rank = 7
     core.flush()
-    expect(shown()).toEqual(["ui-text hidden", "span hidden", "ui-button"])
-
-    expect(element.firstElementChild).toBe(segment)
-    expect([...segment.children]).toEqual(before)
-    expect((segment.children[2] as HTMLElement & { held?: string }).held).toBe("kept")
+    expect(drawn()).toEqual(["ui-button"])
   })
 
   test("Spell UI's own tags draw the same", () => {
     drawnCard("/Card.spell", CODE_SPELL)
-    expect(shown()).toEqual(["ui-text hidden", "span hidden", "ui-button"])
+    expect(drawn()).toEqual(["ui-button"])
   })
 
   test("both compile to the same program", () => {

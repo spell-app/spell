@@ -130,7 +130,7 @@ export class PicnicLetter extends App {
             <ui-header size="medium">You have signed up for these shifts</ui-header>
             <ui-stack class="shifts" direction="horizontal" spacing="sm" wrap={true}>
               {core.drawRead(() => this.shifts, (listing: Listing) => core.drawThing(listing), {
-                waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading the sheet"}</ui-loader>,
+                waitingSay: () => "Reading the sheet",
                 none: () => <ui-text color="grey">{"No shifts yet:  sign up on the sheet."}</ui-text>,
                 failed: () => <ui-text color="grey">Sign in to see your shifts.</ui-text>
               })}

@@ -72,6 +72,27 @@ describe("a read of a place, right in a drawing", () => {
     expect(typescript).not.toMatch(/\{await /)
   })
 
+  describe("in an if-chain inside markup", () => {
+    test("its condition reads one:  the chain waits in a spot of its own, ONE spinner, never the whole drawing", () => {
+      const { code, typescript } = compiled(
+        "<segment><if there are no reviews><text>None yet</text><otherwise><text>Some</text></></segment>"
+      )
+      expect(code).toContain("() => core.drawWaiting(() => core.drawIf(() => ")
+      expect(code).not.toContain("static drawsWaiting")
+      expect(typescript).toContain("{core.drawWaiting(() => core.drawIf(() => ")
+    })
+
+    test("only a branch reads one:  that read's own spot, inside the branch;  the chain doesn't wait", () => {
+      const { code } = compiled(
+        "<segment><if its films is empty><text>No films</text><otherwise><text>{every review}</text></></segment>"
+      )
+      expect(code).toContain("() => core.drawIf(() => ")
+      expect(code).not.toContain("core.drawWaiting")
+      expect(code).toContain('() => core.whileWaiting(() => core.listShown(core.waitedValue(this, "every review"')
+      expect(code).not.toContain("static drawsWaiting")
+    })
+  })
+
   describe("in a loop", () => {
     // in plain Spell a `<for>` is read inside an element
     const reviewsOfFilm = "every review where its film title is the title of film"

@@ -54,6 +54,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "projected_into": "address",
   "projected_only_where": "field|value",
   "projection_of": "type|source|with_nested_statements?|body?",
+  "read_on_startup": "collection",
   "reload_things": "type",
   "requests_a_second": "type|most",
   "rows_allowed_each": "field|collection",
@@ -83,6 +84,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "versions_in": "type|field",
   "where_field": "property",
   "while_waiting": "body?",
+  "while_waiting_say": "text",
   "wrapper_action": "signature|body?",
   "writes_like": "type|what|example",
 }

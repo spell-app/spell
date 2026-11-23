@@ -1476,20 +1476,12 @@ export class Chain extends Thing {
   draw() {
     return h("ui-stack", { direction: "horizontal", align: "center", spacing: "sm", stackable: "34em" },
       () => core.whileWaiting(() => core.drawThing(this.species)),
-      h("ui-icon", {
-        name: "chevron right",
-        size: "large",
-        rotated: "when stacked",
-        hidden: () => !core.isEmpty(this.evolvesTo) ? undefined : true
-      }),
-      h("ui-stack", {
-        direction: "horizontal",
-        wrap: true,
-        align: "center",
-        justify: "center",
-        spacing: "sm",
-        hidden: () => !core.isEmpty(this.evolvesTo) ? undefined : true
-      }, h("slot", { name: "branches" }, () => this.drawBranches()))
+      () => core.drawIf(() => !core.isEmpty(this.evolvesTo), () => [
+        h("ui-icon", { name: "chevron right", size: "large", rotated: "when stacked" }),
+        h("ui-stack", { direction: "horizontal", wrap: true, align: "center", justify: "center", spacing: "sm" },
+          h("slot", { name: "branches" }, () => this.drawBranches())
+        )
+      ])
     )
   }
 
@@ -1534,7 +1526,8 @@ export const pokeApi = core.place(new PokeApi(), {
     moves: { at: "/move" },
     evolutionChains: { at: "/evolution-chain" },
     generations: { at: "/generation" }
-  }, firstReads: () => [[Pokemon], [Type]] })
+  }
+})
 
 // -----------
 core.heading("Your favourites:  kept on this device")
@@ -1664,7 +1657,7 @@ export class Guess extends Thing {
     if (this.hiding) {
       return [
         h("ui-segment", { class: () => this.look, align: "center" },
-          () => core.drawWaiting(() => h("ui-image", { class: "art", align: "center", src: () => this.hiding?.picture, alt: "A Pokémon, hiding" }))
+          () => core.drawWaiting(() => h("ui-image", { class: "art", align: "center", src: () => this.hiding?.picture, alt: "A Pokémon, hiding" }), "ui-image")
         ),
         h("slot", { name: "answer" }, () => this.drawAnswer())
       ]

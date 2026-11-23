@@ -75,7 +75,9 @@ export class Recipe extends View {
   @drawn draw() {
     return (
       <ui-card class="recipe" fluid={true}>
-        <ui-image src={this.picture} alt={this.title} aspect-ratio="21:9" crop={true} hidden={this.picture !== "" ? undefined : true} />
+        {core.drawIf(() => this.picture !== "", () => <>
+          <ui-image src={this.picture} alt={this.title} aspect-ratio="21:9" crop={true} />
+        </>)}
         <ui-content>
           <ui-stack>
             <ui-stack direction="horizontal" justify="between">

@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
 import { segmentVocabulary } from "./UISegment.en"
+import statePanesCSS from "spell/ui/elements/StatePanes.css?inline"
 
 import segmentCSS from "./UISegment.css?inline"
 import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
@@ -31,13 +32,24 @@ import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 export class UISegment extends E.UIComponent<typeof segmentVocabulary> {
   @E.proto static vocabulary = segmentVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { heights: heightsCSS, segment: segmentCSS },
+    styleSheets: { statePanes: statePanesCSS, heights: heightsCSS, segment: segmentCSS },
     cssStates: ["inverted"],
     // `loading`:  Fomantic's veil
     loading: "its own",
+    // `error`:  its error pane in place of its content (`StatePanes`)
+    error: "its own",
     // a bare `resizable` drags its height
     resizable: "vertically"
   } satisfies Partial<E.ElementSetup>
+
+  /** Its loading and error panes, in place of its content while it loads or once it failed (`E.StatePanes`). */
+  readonly panes = new E.StatePanes({ owner: this, part: (name) => this.partForName(name as never) })
+
+  /** A pane stands in for its content:  `:state(state-pane)`, so its own veil goes (`reset.css`). */
+  @E.cssState("state-pane")
+  get showsStatePane(): boolean {
+    return !!this.panes.showing
+  }
 
   ////////////////
   // ## States
@@ -70,7 +82,8 @@ export class UISegment extends E.UIComponent<typeof segmentVocabulary> {
         tabindex={this.scrolling ? 0 : undefined}
         style={this.inverted ? { [UIT.PartOwnerTokens.inverted]: INVERTED } : undefined}
       >
-        <slot />
+        {this.panes.content()}
+        {this.panes.draw()}
         <Show when={this.loading}>
           <span class={UIT.VISUALLY_HIDDEN} role="status">
             {this.translationForKey("loading")}

@@ -75,7 +75,9 @@ export class Receta extends View {
   @drawn draw() {
     return (
       <es-tarjeta class="recipe" fluido={true}>
-        <es-imagen src={this.imagen} alt={this.título} proporcion="21:9" recortar={true} hidden={this.imagen !== "" ? undefined : true} />
+        {core.drawIf(() => this.imagen !== "", () => <>
+          <es-imagen src={this.imagen} alt={this.título} proporcion="21:9" recortar={true} />
+        </>)}
         <es-contenido>
           <es-pila>
             <es-pila direccion="horizontal" repartir="entre">

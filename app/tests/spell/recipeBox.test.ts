@@ -1614,31 +1614,23 @@ start the recipe box
     return { page, problems }
   }
 
-  test("a first load:  ONE request where there were two", { timeout: 60_000 }, async () => {
-    const program = twoParts(servers.url)
-    expect(compiledProgram(program.path, program.source)).toContain("firstReads: () => [")
-
-    // what it did before:  what the compiler gathered taken out
-    let from = servers.box.asks.length
-    const before = await openedEdited("two-before", program, (code) =>
-      code.replace(/,\s*firstReads: \(\) => \[.*\] \}\)/, " })")
-    )
-    await expect.poll(() => before.page.locator("ui-text.shelf").first().textContent(), WAITING).toBe("2")
-    const asksBefore = graphAsks(from)
-    expect(before.problems).toEqual([])
-    await before.page.close()
-
-    from = servers.box.asks.length
-    const after = await openedEdited("two-after", program, (code) => code)
-    await expect.poll(() => after.page.locator("ui-text.shelf").first().textContent(), WAITING).toBe("2")
-    const asksAfter = graphAsks(from)
-    expect(await after.page.locator("ui-text.title").allTextContents()).toContain("Dal")
-    expect(after.problems).toEqual([])
-    await after.page.close()
-
-    expect(asksBefore).toHaveLength(2)
-    expect(asksAfter).toHaveLength(1)
-  })
+  // Spell never reads ahead:  this was the first reads' test (two reads a first draw reaches, asked in ONE request
+  // before the second was drawn), rewritten as the behaviour changed on purpose.
+  test(
+    "a first load reads only what it draws:  the part drawn from the first answer asks after it",
+    { timeout: 60_000 },
+    async () => {
+      const program = twoParts(servers.url)
+      expect(compiledProgram(program.path, program.source)).not.toContain("readOnStartup")
+      const from = servers.box.asks.length
+      const { page, problems } = await openedEdited("two-parts", program, (code) => code)
+      await expect.poll(() => page.locator("ui-text.shelf").first().textContent(), WAITING).toBe("2")
+      expect(await page.locator("ui-text.title").allTextContents()).toContain("Dal")
+      expect(problems).toEqual([])
+      await page.close()
+      expect(graphAsks(from)).toHaveLength(2)
+    }
+  )
 
   test(
     "it asks only for what's read:  a view's element mirroring the rest doesn't count",

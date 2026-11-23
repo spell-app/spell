@@ -170,6 +170,8 @@ function noNetwork() {
  *     (`withShadowsInPlace()`).
  *   - Each tag's attributes are sorted (`withSortedAttributes()`).
  *   - Without the empty comments Solid marks its places with, which javascript's `h()` never writes.
+ *   - A listener the page shows as its text (`on-ui-closed="() => this.closeTheDrawer()"`) says `this`, where Solid's
+ *     compiler wrote `_self$2`:  it names `this` so in a drawing whose arrow functions read it (`core.drawIf()`'s).
  * - Only for the core contract test, `contract.test.ts`:  a real browser is `spell run`'s.
  *   The contract seeds the random numbers too (`spec.seed`), so a shuffle deals the same cards on every target.
  */
@@ -196,7 +198,10 @@ async function fakeDom() {
     core.flush()
     withShadowsInPlace(page.document.body)
     // without Solid's empty markers, `<!---->`:  javascript's `h()` writes none, so both targets print the same
-    const drawn = withSortedAttributes(page.document.body.innerHTML.replaceAll("<!---->", ""))
+    const drawn = withSortedAttributes(page.document.body.innerHTML.replaceAll("<!---->", "")).replace(
+      SOLID_SELF,
+      "this."
+    )
     if (drawn) process.stdout.write(`\n${drawn}\n`)
   })
 }
@@ -335,6 +340,9 @@ function withSortedAttributes(html: string): string {
     return `<${name}${sorted.map((attribute) => ` ${attribute}`).join("")}${end}>`
   })
 }
+
+/** What Solid's compiler calls `this` in a drawing whose arrow functions read it:  `_self$2.` -- see `fakeDom()`. */
+const SOLID_SELF = /\b_self\$\d+\./g
 
 /** A start tag, as linkedom writes one:  its name, its attributes, and `/` if it closes itself. */
 const START_TAG = /<([a-zA-Z][\w-]*)((?:\s+[^\s"'>/=]+(?:="[^"]*")?)*)\s*(\/?)>/g

@@ -140,7 +140,7 @@ export class Cookbook extends App {
               </ui-button>
             </ui-extra>
           </ui-card>
-          {core.drawRead(async () => await core.savedThings(Recipe, {}, "as drawn"), (recipe: Recipe) => core.drawThing(recipe), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your recipes"}</ui-loader>, none: () => <ui-card class="none">
+          {core.drawRead(async () => await core.savedThings(Recipe, {}, "as drawn"), (recipe: Recipe) => core.drawThing(recipe), { waitingSay: () => "Reading your recipes", none: () => <ui-card class="none">
             <ui-content>
               <ui-text color="grey">No recipes yet. Open a recipes file, or add your first one.</ui-text>
             </ui-content>

@@ -800,7 +800,7 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 
 ### What a program reads from its places
 
-- **It is:**  `P.ReadGathering` (`parser/src/parser/writers/ReadGathering.ts`, epic `data` P12), and on it `core`'s `firstReads` and `select`
+- **It is:**  `P.ReadGathering` (`parser/src/parser/writers/ReadGathering.ts`, epic `data` P12), and on it `core`'s `select`
 - **Use it when:**  anything needs to know, before a program runs, which fields or places its code reaches.
 - **Flag:**  a second walk of a project's tree by property name
 

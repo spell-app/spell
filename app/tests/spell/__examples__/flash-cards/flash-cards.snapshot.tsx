@@ -175,15 +175,18 @@ export class Quiz extends App {
           </ui-toolbar>
           {core.drawThing(this.card!)}
           <ui-stack direction="horizontal" justify="center">
-            <ui-button color="primary" onClick={core.pressed(this, () => this.showTheAnswer())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" hidden={this.card?.isFaceDirection("up") ? undefined : true}>
-              Show the answer
-            </ui-button>
-            <ui-button color="positive" icon="check" onClick={core.pressed(this, () => this.sayIKnew())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" hidden={!this.card?.isFaceDirection("up") ? undefined : true}>
-              I knew it
-            </ui-button>
-            <ui-button color="negative" appearance="basic" icon="close" onClick={core.pressed(this, () => this.sayIMissed())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" hidden={!this.card?.isFaceDirection("up") ? undefined : true}>
-              I missed it
-            </ui-button>
+            {core.drawIf(() => this.card?.isFaceDirection("up"), () => <>
+              <ui-button color="primary" onClick={core.pressed(this, () => this.showTheAnswer())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Show the answer
+              </ui-button>
+            </>, () => <>
+              <ui-button color="positive" icon="check" onClick={core.pressed(this, () => this.sayIKnew())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                I knew it
+              </ui-button>
+              <ui-button color="negative" appearance="basic" icon="close" onClick={core.pressed(this, () => this.sayIMissed())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                I missed it
+              </ui-button>
+            </>)}
           </ui-stack>
         </ui-stack>
       </ui-container>
