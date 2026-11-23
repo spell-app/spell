@@ -1149,7 +1149,10 @@ export class EditorStore extends Observable {
 
   /**
    * Work out current `project`'s scope tree again, into `scopeTree`:  after each compile.
-   * - Parses the projects it imports compiled first, once each, to show their sources (see `LSP.ScopeExplorer`).
+   * - Asked of the code's language service (`spell/scopes`, `askLanguage`):  the language worker's where it parses
+   *   the project, so the page parses neither it nor what it imports for the Types tab (epic `solid-2-final` T36).
+   * - Else from the page's own parse:  the projects it imports compiled parsed first, once each, to show their sources
+   *   (see `LSP.ScopeExplorer`).
    * - NEVER throws:  a tree that can't be worked out keeps the last one, and says why in devtools.
    */
   async refreshScopes(): Promise<void> {
@@ -1157,6 +1160,13 @@ export class EditorStore extends Observable {
     const explorer = scopeExplorer
     if (!project || !explorer) return
     try {
+      const file = editor.languageFileOf(project)
+      if (editor.askLanguage && file) {
+        const tree = await editor.askLanguage(file, "spell/scopes", {})
+        // another project shown meanwhile, or its text changed as it asked:  the next refresh brings it
+        if (tree && project === editor.project) editor.scopeTree = tree
+        return
+      }
       // its class's static, through the instance:  `editor.ts` imports LSP's TYPES only, see `setScopeExplorer()`
       const { importedProjects } = explorer.constructor as typeof LSP.ScopeExplorer
       for (const imported of importedProjects(project)) {
@@ -1178,7 +1188,16 @@ export class EditorStore extends Observable {
    */
   scopeDetails = async (path: string): Promise<LSP.ScopeDetails | null> => {
     const { project } = editor
-    return project && scopeExplorer ? scopeExplorer.details(project, path) : null
+    if (!project || !scopeExplorer) return null
+    const file = editor.languageFileOf(project)
+    if (editor.askLanguage && file) return (await editor.askLanguage(file, "spell/scopeDetails", { path })) ?? null
+    return scopeExplorer.details(project, path)
+  }
+
+  /** The file of `project` its language service is asked about:  the one shown, else its first spell file. */
+  languageFileOf(project: SP.SpellProject): SP.SpellFile | undefined {
+    const { file } = editor
+    return file instanceof SP.SpellFile && file.project === project ? file : project.spellFiles[0]
   }
 
   /**
@@ -2494,6 +2513,20 @@ export class EditorStore extends Observable {
    * (`FileStates.oldForms()`, epic `solid-2-final` T36);  `undefined` where it can't say.  See `oldFormsIn()`.
    */
   oldFormsElsewhere: ((file: SP.SpellFile) => Promise<OldFormsFound | undefined>) | undefined = undefined
+
+  /**
+   * Asks the code's language service `method` about a file, once the code editor's loaded:  the language worker where it
+   * parses the file, else the page's own (`FileStates.ask()`, epic `solid-2-final` T36).
+   * - `undefined` when the file's text changed as it asked.
+   * - See `LazyCodeMirror`.
+   */
+  askLanguage:
+    | (<M extends LSP.LanguageMethod>(
+        file: SP.SpellFile,
+        method: M,
+        params: Omit<LSP.LanguageParams<M>, "textDocument">
+      ) => Promise<LSP.LanguageAnswer<M> | undefined>)
+    | undefined = undefined
 
   /**
    * What's undone outside the code:  the side bar's changes and a notebook's -- see `EditorHistory`.

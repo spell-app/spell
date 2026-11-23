@@ -225,6 +225,22 @@ describe("LanguageHost", () => {
     expect(await host.request("spell/oldForms", { textDocument })).toEqual({ count: 0, edits: [] })
   })
 
+  test("answers the Types tab:  the project's scope tree, then what it shows of one of its nodes", async () => {
+    const tree = await host.request("spell/scopes", { textDocument })
+    const paths: string[] = []
+    const walk = (node: LSP.ScopeNode) => {
+      paths.push(node.path)
+      for (const child of node.children ?? []) walk(child)
+    }
+    walk(tree!)
+    const suit = "project:Solitaire/file:Card.spell/type:Card/property:suit"
+    expect(paths).toContain(suit)
+    const details = await host.request("spell/scopeDetails", { textDocument, path: suit })
+    expect(details).toEqual(host.service.scopes.details(host.service.addresses.fileFor(uri)!.project, suit))
+    expect(details?.line).toBeDefined()
+    expect(await host.request("spell/scopeDetails", { textDocument, path: "project:Solitaire/no:such" })).toBe(null)
+  })
+
   test("a project it can't load is said, and holds nothing else up", async () => {
     const unavailable: string[] = []
     const lonely = new LSP.LanguageHost({ onUnavailable: (projectId) => unavailable.push(projectId) })

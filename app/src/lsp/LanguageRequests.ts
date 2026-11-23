@@ -187,6 +187,16 @@ export const LANGUAGE_REQUESTS = {
     (service, file, { position }: TextDocumentPositionParams) => service.oldFormFixAt(file, position),
     null
   ),
+  /** the scope tree the file's project parses in:  the Types tab's, as VS Code's `spell/scopes` (epic `solid-2-final` T36) */
+  "spell/scopes": request(
+    (service, file, _params: FileParams): Promise<LSP.ScopeNode | null> => service.scopeTree(file),
+    null
+  ),
+  /** what the Types tab shows of the node at `path` in the last tree:  `null` if it isn't there */
+  "spell/scopeDetails": request(
+    (service, file, { path }: FileParams & { path: string }) => service.scopes.details(file.project, path),
+    null
+  ),
   /**
    * The old forms of Spell written in the file, as one list of edits rewriting them all the new way, with how many
    * there are:  the editor's offer to upgrade a project, and its Upgrade (epic `solid-2-final` T36)

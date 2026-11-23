@@ -2470,6 +2470,34 @@ export class SpellLanguageService {
   }
 
   /**
+   * The scope explorer on this service, made the first time it's asked for:  the Types tab's tree and each node's
+   * details, the `spell/scopes` and `spell/scopeDetails` requests (epic `solid-2-final` T36).
+   * - One per service:  `details()` answers from the last `tree()` it worked out.
+   */
+  get scopes(): LSP.ScopeExplorer {
+    return (this.#scopes ??= new LSP.ScopeExplorer(this))
+  }
+
+  #scopes: LSP.ScopeExplorer | undefined
+
+  /**
+   * The scope tree `file`'s project parses in, for the Types tab:  the projects it imports compiled parsed first,
+   * once each, to show their sources (`LSP.ScopeExplorer.importedProjects()`).
+   * - throws what a parse throws
+   */
+  async scopeTree(file: SP.SpellFile): Promise<LSP.ScopeNode> {
+    for (const imported of LSP.ScopeExplorer.importedProjects(file.project)) {
+      if (this.#importsParsed.has(imported)) continue
+      await imported.parse()
+      this.#importsParsed.add(imported)
+    }
+    return this.scopes.tree(file.project)
+  }
+
+  /** The projects imported compiled that `scopeTree()` has parsed:  once each. */
+  #importsParsed = new WeakSet<SP.SpellProject>()
+
+  /**
    * The old forms of Spell written in `file` (`SP.OldForms.uses()`), as one list of edits rewriting them all the new
    * way, with how many there are:  the `spell/oldForms` request (epic `solid-2-final` T36).
    */
