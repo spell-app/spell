@@ -48,10 +48,7 @@ export class Item extends View {
         h("ui-checkbox", { name: "got", "aria-label": "Got it" }),
         h("ui-text", { class: "how-much", bold: true }, () => this.howMuch),
         h("ui-text", { class: "name" }, () => this.name),
-        h("ui-text", { class: "for", color: "grey", size: "small", hidden: () => this.recipe !== "" ? undefined : true },
-          "for ",
-          () => this.recipe
-        ),
+        () => core.drawIf(() => this.recipe !== "", () => [h("ui-text", { class: "for", color: "grey", size: "small" }, "for ", () => this.recipe)]),
         core.drawAction(this, "remove", { "icon-only": true, appearance: "tertiary" })
       )
     )
@@ -77,7 +74,8 @@ export class ShoppingSheet extends Place {}
 export const shoppingSheet = core.place(new ShoppingSheet(), {
   name: "shopping_sheet",
   kind: "sheet",
-  at: "/api/places/spaces/@spell/examples/ShoppingList/__data/shopping.csv", firstReads: () => [[Item, { filter: { got: true } }], [Item, { filter: { got: false } }]] })
+  at: "/api/places/spaces/@spell/examples/ShoppingList/__data/shopping.csv"
+})
 
 // -----------
 export function testHowMuchReads() {

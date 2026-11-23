@@ -22,16 +22,15 @@ export class WeekendCountdown extends App {
   draw() {
     return h("ui-container", { width: "32em" },
       h("ui-segment", { padding: "lg" },
-        h("ui-header", { hidden: () => this.isTheWeekend ? undefined : true }, "It's the weekend!"),
-        h("ui-text", { color: "grey", hidden: () => !this.isTheWeekend ? undefined : true },
-          "Weekend starts in"
-        ),
-        h("ui-statistics", { equal: true, size: "small", hidden: () => !this.isTheWeekend ? undefined : true },
-          h("ui-statistic", { value: () => core.durationPartOf(this.timeLeft, "days"), label: "Days" }),
-          h("ui-statistic", { value: () => core.twoDigits(core.durationPartOf(this.timeLeft, "hours")), label: "Hr" }),
-          h("ui-statistic", { value: () => core.twoDigits(core.durationPartOf(this.timeLeft, "minutes")), label: "Min" }),
-          h("ui-statistic", { value: () => core.twoDigits(core.durationPartOf(this.timeLeft, "seconds")), label: "Sec" })
-        )
+        () => core.drawIf(() => this.isTheWeekend, () => [h("ui-header", "It's the weekend!")], () => [
+          h("ui-text", { color: "grey" }, "Weekend starts in"),
+          h("ui-statistics", { equal: true, size: "small" },
+            h("ui-statistic", { value: () => core.durationPartOf(this.timeLeft, "days"), label: "Days" }),
+            h("ui-statistic", { value: () => core.twoDigits(core.durationPartOf(this.timeLeft, "hours")), label: "Hr" }),
+            h("ui-statistic", { value: () => core.twoDigits(core.durationPartOf(this.timeLeft, "minutes")), label: "Min" }),
+            h("ui-statistic", { value: () => core.twoDigits(core.durationPartOf(this.timeLeft, "seconds")), label: "Sec" })
+          )
+        ])
       )
     )
   }

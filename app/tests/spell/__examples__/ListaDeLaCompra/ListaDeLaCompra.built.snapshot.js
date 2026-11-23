@@ -48,10 +48,7 @@ export class Artículo extends View {
         h("es-casilla", { name: "comprado", "aria-label": "Lo tengo" }),
         h("es-texto", { class: "how-much", negrita: true }, () => this.porción),
         h("es-texto", { class: "name" }, () => this.nombre),
-        h("es-texto", { class: "for", color: "gris", tamano: "pequeño", hidden: () => this.receta !== "" ? undefined : true },
-          "para ",
-          () => this.receta
-        ),
+        () => core.drawIf(() => this.receta !== "", () => [h("es-texto", { class: "for", color: "gris", tamano: "pequeño" }, "para ", () => this.receta)]),
         core.drawAction(this, "sacar", { "icon-only": true, appearance: "tertiary" })
       )
     )
@@ -78,7 +75,8 @@ export const planilla = core.place(new Planilla(), {
   name: "planilla",
   kind: "sheet",
   at: "/api/places/spaces/@spell/examples/ListaDeLaCompra/__data/shopping.csv",
-  unclearNumbers: ",", firstReads: () => [[Artículo, { filter: { comprado: true } }], [Artículo, { filter: { comprado: false } }]] })
+  unclearNumbers: ","
+})
 
 // -----------
 export function testCuántoSeLee() {

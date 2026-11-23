@@ -34,14 +34,17 @@ export class CuentaAtrás extends App {
     return (
       <es-contenedor ancho="32em">
         <es-segmento relleno="lg">
-          <es-encabezado hidden={this.esFinDeSemana ? undefined : true}>¡Es fin de semana!</es-encabezado>
-          <es-texto color="gris" hidden={!this.esFinDeSemana ? undefined : true}>El fin de semana empieza en</es-texto>
-          <es-estadisticas igual={true} tamano="pequeño" hidden={!this.esFinDeSemana ? undefined : true}>
-            <es-estadistica value={core.durationPartOf(this.tiempoRestante, "days")} etiqueta="Días" />
-            <es-estadistica value={core.twoDigits(core.durationPartOf(this.tiempoRestante, "hours"))} etiqueta="Hr" />
-            <es-estadistica value={core.twoDigits(core.durationPartOf(this.tiempoRestante, "minutes"))} etiqueta="Min" />
-            <es-estadistica value={core.twoDigits(core.durationPartOf(this.tiempoRestante, "seconds"))} etiqueta="Seg" />
-          </es-estadisticas>
+          {core.drawIf(() => this.esFinDeSemana, () => <>
+            <es-encabezado>¡Es fin de semana!</es-encabezado>
+          </>, () => <>
+            <es-texto color="gris">El fin de semana empieza en</es-texto>
+            <es-estadisticas igual={true} tamano="pequeño">
+              <es-estadistica value={core.durationPartOf(this.tiempoRestante, "days")} etiqueta="Días" />
+              <es-estadistica value={core.twoDigits(core.durationPartOf(this.tiempoRestante, "hours"))} etiqueta="Hr" />
+              <es-estadistica value={core.twoDigits(core.durationPartOf(this.tiempoRestante, "minutes"))} etiqueta="Min" />
+              <es-estadistica value={core.twoDigits(core.durationPartOf(this.tiempoRestante, "seconds"))} etiqueta="Seg" />
+            </es-estadisticas>
+          </>)}
         </es-segmento>
       </es-contenedor>
     )

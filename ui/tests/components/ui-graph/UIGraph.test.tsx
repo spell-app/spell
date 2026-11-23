@@ -2,9 +2,37 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import type { DOMGraphElement, GraphData } from "spell/ui/components/ui-graph"
+import { E } from "spell/ui/core"
+import {
+  GRAPH_METRICS,
+  UIGraph,
+  type DOMGraphElement,
+  type GraphData,
+  type GraphMetrics,
+  type GraphPort
+} from "spell/ui/components/ui-graph"
 
 import "spell/ui/components/ui-graph"
+
+/** What a test page keeps with a port. */
+type Wire = { gauge: number }
+
+/**
+ * A graph with bigger boxes and dots, and data on its ports:  what a subclass needs, with no cast.
+ * - `metrics` returns other numbers than the defaults;  `elementSetup` sets only what it changes.
+ */
+class BigGraph extends UIGraph {
+  @E.protoMerged static elementSetup: Partial<E.ElementSetup> = { delegatesFocus: false }
+
+  override get metrics(): GraphMetrics {
+    return { ...GRAPH_METRICS, nodeHeight: 60, portRadius: 7 }
+  }
+
+  override portLabel(port: GraphPort): string | undefined {
+    return `${(port.data as Wire | undefined)?.gauge ?? "?"} mm`
+  }
+}
+BigGraph.define("x-big-graph")
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-graph/examples/elements/*.html", {
@@ -104,6 +132,21 @@ describe("<ui-graph> drawing", () => {
   })
 })
 
+describe("<ui-graph> subclass", () => {
+  test("draws at the subclass's metrics, and keeps a port's data", async () => {
+    const ports: GraphPort[] = [{ id: "p", kind: "out", data: { gauge: 2 } satisfies Wire }]
+    const data: GraphData = { nodes: [{ id: "a", ports }, { id: "b" }], edges: [] }
+    const host = await ElementFixture.render<GraphElement>(
+      `<x-big-graph graph='${JSON.stringify(data)}' style="width: 640px"></x-big-graph>`
+    )
+    await ElementFixture.tick()
+    const root = host.shadowRoot!
+    expect(root.querySelector("g.node > rect")!.getAttribute("height")).toBe("60")
+    expect(root.querySelector("circle.port-dot")!.getAttribute("r")).toBe("7")
+    expect(root.querySelector("g.port text")!.textContent).toBe("2 mm")
+  })
+})
+
 describe("<ui-graph> drilling", () => {
   test("a drill shows the node's children, sets `path` and sends `ui-changed`", async () => {
     const { host, root } = await graph(' child-view="drill"')
@@ -155,5 +198,70 @@ describe("<ui-graph> selection", () => {
     root.querySelector('g.node[data-path="mem"]')!.dispatchEvent(new MouseEvent("click", { bubbles: true }))
     await ElementFixture.tick()
     expect(host.selected).toBeUndefined()
+  })
+})
+
+describe("<ui-graph> columns and fit", () => {
+  /** A made-up build in two named columns. */
+  const STAGES: GraphData = {
+    groups: [
+      { id: "source", label: "Sources" },
+      { id: "build", label: "Build" }
+    ],
+    nodes: [
+      { id: "repo", label: "Repo", group: "source" },
+      { id: "compile", label: "Compile", group: "build", order: 1 },
+      { id: "bundle", label: "Bundle", group: "build", order: 2 }
+    ],
+    edges: [
+      { from: { node: "repo" }, to: { node: "compile" } },
+      { from: { node: "compile" }, to: { node: "bundle" } }
+    ]
+  }
+
+  /** Whether every node's box shows whole in the drawing's box. */
+  function allShowing(root: ShadowRoot): boolean {
+    const view = root.querySelector("svg")!.getBoundingClientRect()
+    return [...root.querySelectorAll("g.node > rect")].every((rect) => {
+      const box = rect.getBoundingClientRect()
+      return box.left >= view.left && box.right <= view.right && box.top >= view.top && box.bottom <= view.bottom
+    })
+  }
+
+  test("draws a band and a header per column", async () => {
+    const host = await ElementFixture.render<GraphElement>(
+      `<ui-graph graph='${JSON.stringify(STAGES)}' style="width: 640px"></ui-graph>`
+    )
+    await ElementFixture.tick()
+    const root = host.shadowRoot!
+    expect(root.querySelectorAll("g.column > rect.column-band")).toHaveLength(2)
+    expect([...root.querySelectorAll("text.column-label")].map((text) => text.textContent)).toEqual([
+      "Sources",
+      "Build"
+    ])
+    // `arrange="layers"`:  no columns.
+    host.setAttribute("arrange", "layers")
+    await ElementFixture.tick()
+    expect(root.querySelectorAll("g.column")).toHaveLength(0)
+  })
+
+  test("the toolbar sits at the right of the bar over the drawing, Fit last", async () => {
+    const { root } = await graph()
+    const toolbar = root.querySelector(".top-bar > .toolbar")!
+    expect(toolbar).toBeTruthy()
+    expect(toolbar.lastElementChild!.classList.contains("group-start")).toBe(true)
+    const bar = root.querySelector(".top-bar")!.getBoundingClientRect()
+    expect(bar.bottom).toBeLessThanOrEqual(root.querySelector("svg")!.getBoundingClientRect().top + 1)
+  })
+
+  test("fits the drawing to the view, and again, eased, when a node opens in place", async () => {
+    const { host, root } = await graph()
+    expect(allShowing(root)).toBe(true)
+    await host.open("cpu")
+    await ElementFixture.tick()
+    // The fit eases over 350ms.
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    expect(labels(root)).toEqual(expect.arrayContaining(["ALU", "Registers"]))
+    expect(allShowing(root)).toBe(true)
   })
 })

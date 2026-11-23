@@ -3,6 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
 import { formVocabulary } from "./UIForm.en"
+import statePanesCSS from "spell/ui/elements/StatePanes.css?inline"
 import { FormBinding } from "./FormBinding"
 import { FormFields } from "./FormFields"
 import type { DOMFieldElement } from "./UIField"
@@ -134,13 +135,24 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
   @E.proto static vocabulary = formVocabulary
   // `Partial`:  the property (`UIProperty`) and the editor (`UIPropertyEditor`) extend it
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
-    styleSheets: { form: formCSS },
+    styleSheets: { statePanes: statePanesCSS, form: formCSS },
     DOMElement: DOMFormElement,
     delegatesFocus: false,
     // `disabled`:  unusable, the default;  the root also says `inert` itself, for the static render
     // `loading`:  Fomantic's veil, its content inert
-    loading: "its own"
+    loading: "its own",
+    // `error`:  its error pane in place of its content (`StatePanes`)
+    error: "its own"
   } satisfies Partial<E.ElementSetup>
+
+  /** Its loading and error panes, in place of its content while it loads or once it failed (`E.StatePanes`). */
+  readonly panes = new E.StatePanes({ owner: this, part: (name) => this.partForName(name as never) })
+
+  /** A pane stands in for its content:  `:state(state-pane)`, so its own veil goes (`reset.css`). */
+  @E.cssState("state-pane")
+  get showsStatePane(): boolean {
+    return !!this.panes.showing
+  }
 
   /** Controls, values, labels, errors. */
   readonly fields = new FormFields({ domElement: this.domElement, form: () => this.nativeForm })
@@ -233,7 +245,8 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
         inert={this.disabled || this.loading}
         aria-busy={this.loading ? "true" : undefined}
       >
-        <slot />
+        {this.panes.content()}
+        {this.panes.draw()}
         {this.debugBox()}
       </div>
     )

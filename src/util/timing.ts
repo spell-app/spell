@@ -4,6 +4,7 @@
  *   - `afterSolidUpdate(fn)` -- as soon as the current code finishes
  *   - `beforeNextPaint(fn)` -- just before the browser next draws the page
  *   - `soon(fn)` -- in the next task, once the browser has had a turn
+ *     - `soonEvenHidden(fn)` -- the same, and never held back in a tab out of sight
  *   - `await letBrowserIn()` -- between steps of long work:  keys and clicks waiting go first, then the work carries on
  *   - `whenIdle(fn)` -- once the browser has nothing else to do (2 seconds at the most)
  *   - `after(seconds, fn)` -- once, `seconds` from now:  a promise to await, or cancel
@@ -68,12 +69,12 @@ export function soon(fn: () => void): () => void {
  * Let the browser handle what's waiting -- a key typed, a click, a paint -- then carry on:  `await letBrowserIn()`.
  * - Between the steps of long work, e.g. a compile's files (`TaskList`), so a key typed during it isn't held up.
  * - Over `scheduler.yield()` where there is one (Chrome, Edge):  the work carries on ahead of other tasks.
- * - Else a zero-delay task, as `soon()`:  so in node, and in tests, it's the next task, as `after(0)` was.
+ * - Else the next task, as `soonEvenHidden()`:  a message, not a timer, so a tab out of sight isn't held back.
  */
 export function letBrowserIn(): Promise<void> {
   const scheduler = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler
   if (scheduler?.yield) return scheduler.yield()
-  return new Promise((resolve) => setTimeout(resolve, 0))
+  return new Promise((resolve) => void soonEvenHidden(resolve))
 }
 
 /**
@@ -95,6 +96,33 @@ export function whenIdle(fn: () => void, { timeout = IDLE_LIMIT }: { timeout?: n
 
 /** `whenIdle()`'s longest wait for an idle moment, in seconds, before it runs anyway. */
 const IDLE_LIMIT = 2
+
+/**
+ * Run `fn` in the next task, as `soon()` does, but never held back in a tab out of sight:  a message, over
+ * `MessageChannel`, not a timer.
+ * - Why:  a browser holds a hidden tab's timers back -- Chrome runs them at most once a second, and after five
+ *   minutes out of sight a chain of them once a MINUTE.  Work that takes a turn between its steps on a timer
+ *   (`TaskList`:  a turn for each file it parses and compiles) crawls there:  the editor, reloaded out of sight, was
+ *   still blank when the person came back to it.  Messages aren't held back.
+ * - For work that must go on out of sight;  a pause for the reader (`after()`) stays a timer.
+ * - No `MessageChannel` (an old runtime):  `soon()`.
+ * - Returns a function that cancels it, if it hasn't run yet.
+ * - The channel is closed once `fn` has run, or on cancel:  in node it never keeps the program running after.
+ */
+export function soonEvenHidden(fn: () => void): () => void {
+  if (typeof MessageChannel === "undefined") return soon(fn)
+  const { port1, port2 } = new MessageChannel()
+  const close = () => {
+    port1.close()
+    port2.close()
+  }
+  port1.onmessage = () => {
+    close()
+    fn()
+  }
+  port2.postMessage(undefined)
+  return close
+}
 
 ////////////////
 // ## Later

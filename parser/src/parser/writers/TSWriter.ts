@@ -1065,6 +1065,7 @@ export class TSWriter extends JSWriter {
     "endDragOver",
     "endFilesOver",
     "entry",
+    "errorTooltip",
     "extraClass",
     "fileDragDetail",
     "fileHandlerFor",
@@ -1110,6 +1111,7 @@ export class TSWriter extends JSWriter {
     "isInLayout",
     "isLifted",
     "isMarkedDisabled",
+    "isMarkedFailed",
     "isMarkedLoading",
     "isMotionOff",
     "isPlacing",
@@ -1203,6 +1205,7 @@ export class TSWriter extends JSWriter {
     "sendOverAgain",
     "sendPageEvent",
     "sendToThing",
+    "sharedErrorText",
     "sharedFontSize",
     "sharedLabel",
     "sharedLink",
@@ -1215,6 +1218,7 @@ export class TSWriter extends JSWriter {
     "sharedText",
     "sharedTooltip",
     "shownValueOf",
+    "showsErrorLook",
     "showsLoader",
     "slotForName",
     "startListeners",
@@ -1375,6 +1379,16 @@ export class TSWriter extends JSWriter {
    * Real JSX, which Solid's compiler builds:  `<div class="board">...</div>`, one child a line;
    * short text inline, `<span class="suit">{this.shortSuit}</span>`.
    */
+  /**
+   * `node`, an element whose attributes wait, or whose `loading="..."` says how what waits in it looks:
+   * `core.drawLooking("skeleton", () => core.drawWaiting(() => <ui-table ... />, "ui-table"))`.
+   */
+  drawnWaitingOrLooking(node: P.ASTJSXElement): string {
+    const element = this.write(node)
+    const drawn = this.project.elementsThatWait.has(node) ? this.drawnWaiting(node, element) : element
+    return node.looking ? this.drawnLooking(node, drawn) : drawn
+  }
+
   ASTJSXElement(node: P.ASTJSXElement): string {
     if (node.action) return this.actionButton(node)
     if (node.contextMenu) return `core.drawContextMenu(this, ${this.menuItemNames(node.contextMenu)})`
@@ -1447,6 +1461,7 @@ export class TSWriter extends JSWriter {
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
     if (this.writingCallProps) return super.ASTJSXLiveValue(node)
     if (this.project.spotsThatWait.has(node)) return `core.whileWaiting(() => ${this.bare(node.expression)})`
+    if (this.project.ifsThatWait.has(node)) return `core.drawWaiting(() => ${this.bare(node.expression)})`
     return this.loopDrawn(node.expression, this.bare(node.expression))
   }
 
@@ -1464,14 +1479,16 @@ export class TSWriter extends JSWriter {
     }
     // an action's button, a context menu:  calls, in braces
     // its attributes wait:  a spot of its own, a spinner there meanwhile (`WriterProject.elementsThatWait`)
-    if (child instanceof P.ASTJSXElement && this.project.elementsThatWait.has(child))
-      return `{core.drawWaiting(() => ${this.write(child)})}`
+    if (child instanceof P.ASTJSXElement && (this.project.elementsThatWait.has(child) || child.looking))
+      return `{${this.drawnWaitingOrLooking(child)}}`
     if (child instanceof P.ASTJSXElement) return isCoreDrawn(child) ? `{${this.write(child)}}` : this.write(child)
     const expression = child instanceof P.ASTJSXExpression ? child.output : child
     if (!expression) return ""
     // JSX already, e.g. an element written as a child's value:  no braces
     const text = this.listChildDrawn(expression, this.bare(expression))
     if (this.project.spotsThatWait.has(expression)) return `{core.whileWaiting(() => ${text})}`
+    // an if-chain whose conditions wait:  a spot of its own, ONE spinner there meanwhile (`WriterProject.ifsThatWait`)
+    if (this.project.ifsThatWait.has(expression)) return `{core.drawWaiting(() => ${text})}`
     return text.startsWith("<") ? text : `{${text}}`
   }
 

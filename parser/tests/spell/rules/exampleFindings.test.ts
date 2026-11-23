@@ -183,7 +183,7 @@ ${drawing}
       "/Shelf.spell"
     )
     expect(errors).toEqual([])
-    expect(compiled).toContain("core.drawRead(() => this.films, (film) => core.drawThing(film), { waiting:")
+    expect(compiled).toContain("core.drawRead(() => this.films, (film) => core.drawThing(film), { waitingSay:")
     expect(compiled).toContain('none: () => h("ui-text", "None")')
   })
 

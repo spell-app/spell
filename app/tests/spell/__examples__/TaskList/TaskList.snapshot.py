@@ -93,7 +93,10 @@ class Checklist(ViewableList):
         return h(
             "ui-stack",
             {"spacing": "xs"},
-            h("ui-text", {"color": "grey", "hidden": None if not self else True}, "Nothing to do"),
+            core.draw_if(
+                lambda: not self,
+                lambda: [h("ui-text", {"color": "grey"}, "Nothing to do")],
+            ),
             h("slot"),
         )
 
@@ -253,12 +256,10 @@ class TaskList(App):
                         h(
                             "ui-text",
                             {"color": "grey"},
-                            h("span", {"hidden": None if self.active_count == 0 else "until-found"}, "All done"),
-                            h(
-                                "span",
-                                {"hidden": None if not self.active_count == 0 else "until-found"},
-                                self.active_count,
-                                " to do",
+                            core.draw_if(
+                                lambda: self.active_count == 0,
+                                lambda: ["All done"],
+                                lambda: [self.active_count, " to do"],
                             ),
                         ),
                         core.draw_action(self, "take_the_tour", {"appearance": "tertiary"}),

@@ -248,6 +248,7 @@ export const sectionVocabulary = {
     ...UIT.SourceBodyAttributes
   ],
   events: [
+    ...UIT.StatePaneEvents,
     {
       name: "ui-opening",
       detail: "{ open: boolean, section: Element, originalEvent?: Event }",
@@ -281,7 +282,8 @@ export const sectionVocabulary = {
     { name: "icon", description: "Icon before the title, instead of the `icon` attribute (a `<ui-icon>`, an image)." },
     { name: "badge", description: "Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`)." },
     { name: "actions", description: "Controls at the right of the title bar (buttons, a menu);  never close it." },
-    { name: "description", description: "Rich tip, instead of the `description` attribute (bold words, line breaks)." }
+    { name: "description", description: "Rich tip, instead of the `description` attribute (bold words, line breaks)." },
+    ...UIT.StatePaneSlots
   ],
   parts: [
     { name: "section", description: "The section box." },
@@ -306,7 +308,8 @@ export const sectionVocabulary = {
     },
     { name: "subhead", description: "The hint under the title." },
     { name: "content", description: "The content box:  `size`, `scrolling` and `height` apply here." },
-    ...UIT.SourceBodyParts
+    ...UIT.SourceBodyParts,
+    ...UIT.StatePaneParts
   ],
   states: [
     { name: "collapsed", description: "Closed." },

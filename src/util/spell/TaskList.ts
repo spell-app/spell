@@ -1,4 +1,4 @@
-import { after, letBrowserIn, soon } from "spell/util/timing"
+import { after, letBrowserIn, soonEvenHidden } from "spell/util/timing"
 import { TaskStatus, TaskResolveWith } from "./constants"
 import { Task, type TaskProps } from "./Task"
 
@@ -189,7 +189,10 @@ export class TaskList extends Task {
           }
 
           // Let the browser in before the next task, e.g. a key typed during a compile (epic `solid-2-final` P9);
-          // or wait the delay asked for
+          // or wait the delay asked for.
+          // - Not a timer when there's no delay:  a hidden tab holds timers back (once a second, after five minutes
+          //   once a minute), and a project's parse and compile take a turn per file:  the editor, reloaded out of
+          //   sight, stayed blank (`letBrowserIn()` falls back to `soonEvenHidden()`)
           const { delayBetweenTasks } = this
           if (!delayBetweenTasks)
             void letBrowserIn()
@@ -197,8 +200,8 @@ export class TaskList extends Task {
               .catch(reject)
           else void after(delayBetweenTasks / 1000, () => processNextTask(result)).catch(reject)
         }
-        // Get the party started in the next tick
-        soon(() => void processNextTask(initialValue).catch(reject))
+        // Get the party started in the next turn
+        soonEvenHidden(() => void processNextTask(initialValue).catch(reject))
       })
     }
   }

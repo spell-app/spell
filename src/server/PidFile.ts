@@ -102,6 +102,15 @@ export class PidFile {
     return this.file.replace(/\.json$/, ".token.json")
   }
 
+  /**
+   * The running server's loaded-code record (`LoadedCode`), beside its pid file:  `<file>` with `.code.json` for
+   * `.json`, so each page server on a kit keeps its own -- Spell's `.spell-server.code.json`, a project's
+   * `.spell-server.<folder>-<hash>.code.json`
+   */
+  get codeFile(): string {
+    return this.file.replace(/\.json$/, ".code.json")
+  }
+
   /** SIDE EFFECT:  write this process's server's write `token` -- see `tokenFile` */
   writeToken(token: string): void {
     writeFileSync(this.tokenFile, `${JSON.stringify({ pid: process.pid, token })}\n`, { mode: 0o600 })
@@ -247,12 +256,12 @@ export class PidFile {
   /**
    * Is `running` older than the code it runs, so `ensure()` restarts it?
    * - by the files it LOADED, when it keeps a record of them (`LoadedCode`, epic `epic-engine` I309):
-   *   one of them changed or gone since it loaded it
+   *   one of them changed or gone since it loaded it;  its OWN record, `codeFile`, never another spaces' server's
    * - else (an older server, one started by hand, another kind of server):  any code file under `sources` newer
    *   than its start (`newestChange()`)
    */
   isOlderThanCode(running: RunningServer, sources: string[]): boolean {
-    return LoadedCode.isChanged(this.root, running.pid) ?? newestChange(sources) > Date.parse(running.started)
+    return LoadedCode.isChanged(this.codeFile, running.pid) ?? newestChange(sources) > Date.parse(running.started)
   }
 
   /**
@@ -353,10 +362,20 @@ export const PAGE_SERVER_FILE = ".spell-server.json"
  */
 export function spacesFileName(name: string, spaces: string | undefined): string {
   if (spaces === undefined) return name
+  return name.replace(/(\.\w+)$/, `.${spacesTag(spaces)}$1`)
+}
+
+/**
+ * The ONE tag naming what belongs to spaces folder `spaces` when they aren't the kit's own:  its folder's name and a
+ * hash of its path, `my-app-1a2b3c4d` from `.../my-app/spaces` (the folder holding `spaces/` when that's its name, so
+ * it reads as the checkout).
+ * - the page server's and the editor's files (`spacesFileName()`), and spell-app's build folder for those spaces
+ *   (`build/spell-spaces.my-app-1a2b3c4d/`), so two checkouts of one project never share any of them
+ */
+export function spacesTag(spaces: string): string {
   const folder = resolve(spaces)
   const named = basename(folder) === "spaces" ? basename(dirname(folder)) : basename(folder)
-  const tag = `${named.replace(/[^\w.-]+/g, "-")}-${createHash("sha256").update(folder).digest("hex").slice(0, 8)}`
-  return name.replace(/(\.\w+)$/, `.${tag}$1`)
+  return `${named.replace(/[^\w.-]+/g, "-")}-${createHash("sha256").update(folder).digest("hex").slice(0, 8)}`
 }
 
 /**

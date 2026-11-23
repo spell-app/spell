@@ -66,6 +66,13 @@
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
         },
         {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
+        },
+        {
           "name": "visible",
           "kind": "boolean",
           "shared": true,
@@ -239,6 +246,14 @@
           "description": "`loading` is set."
         },
         {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+        },
+        {
           "name": "busy",
           "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
         },
@@ -339,6 +354,13 @@
           "kind": "boolean",
           "shared": true,
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
         },
         {
           "name": "visible",
@@ -514,6 +536,14 @@
           "description": "`loading` is set."
         },
         {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+        },
+        {
           "name": "busy",
           "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
         },
@@ -596,6 +626,13 @@
           "kind": "boolean",
           "shared": true,
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
         },
         {
           "name": "visible",
@@ -771,6 +808,14 @@
           "description": "`loading` is set."
         },
         {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+        },
+        {
           "name": "busy",
           "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
         },
@@ -846,6 +891,13 @@
           "kind": "boolean",
           "shared": true,
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
         },
         {
           "name": "visible",
@@ -1058,6 +1110,14 @@
         {
           "name": "loading",
           "description": "`loading` is set."
+        },
+        {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
         },
         {
           "name": "busy",
@@ -1481,6 +1541,13 @@
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
         },
         {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
+        },
+        {
           "name": "visible",
           "kind": "boolean",
           "shared": true,
@@ -1652,6 +1719,14 @@
         {
           "name": "loading",
           "description": "`loading` is set."
+        },
+        {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
         },
         {
           "name": "busy",
@@ -3644,6 +3719,13 @@
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
         },
         {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
+        },
+        {
           "name": "visible",
           "kind": "boolean",
           "shared": true,
@@ -3860,6 +3942,14 @@
         {
           "name": "loading",
           "description": "`loading` is set."
+        },
+        {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
         },
         {
           "name": "busy",

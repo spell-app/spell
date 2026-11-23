@@ -1,0 +1,52 @@
+/*
+ * ### StatePanes.css
+ * A pane's state panes (`StatePanes`):  what stands in for its content while it loads, or once it failed.
+ * - Adopted by each pane family (segment, segments, card, section, tab, form, popup):
+ *   `styleSheets: { statePanes: statePanesCSS, ... }`.
+ * - Its error, in the error colours a field and a message in error use (`--ui-error-*`, `colors.css`).
+ */
+@layer ui.components {
+  /* the content, hidden while a pane stands in for it (`StatePanes.content()`) */
+  :host slot[hidden] {
+    display: none !important;
+  }
+
+  .state-pane {
+    display: block;
+  }
+
+  .error-pane {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em 1em;
+    padding: 0.75em 1em;
+    border: 1px solid var(--ui-error-border, var(--ui-negative-border));
+    border-radius: var(--ui-radius-m, 0.5em);
+    color: var(--ui-error-text, var(--ui-negative-text));
+    background: var(--ui-error-background, var(--ui-negative-background));
+    font: inherit;
+  }
+
+  .error-pane > .error-words {
+    flex: 1 1 12em;
+  }
+
+  .error-pane > .retry {
+    padding: 0.4em 0.9em;
+    border: 1px solid currentColor;
+    border-radius: var(--ui-radius-s, 0.25em);
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    font-weight: 600;
+    cursor: var(--ui-control-cursor, pointer);
+  }
+  .error-pane > .retry:hover {
+    background: oklch(from currentColor l c h / 0.08);
+  }
+  .error-pane > .retry:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}

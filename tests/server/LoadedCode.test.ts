@@ -6,7 +6,8 @@ import { createRequire } from "node:module"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import { afterEach, beforeEach, describe, expect, it } from "vite-plus/test"
 
-import { LoadedCode } from "spell/server/LoadedCode"
+import { LOADED_CODE_VARIABLE, LoadedCode } from "spell/server/LoadedCode"
+import { SRV } from "spell/server"
 
 /** The hook a background page server loads first, by its path, as `PageServer.ensure()` passes it. */
 const HOOK = fileURLToPath(new URL("../../src/server/loadedCodeHook.ts", import.meta.url))
@@ -43,20 +44,41 @@ describe("LoadedCode:  the code files a running page server loaded (epic `epic-e
     const loaded = 1_700_000_000_000
     utimesSync(used, loaded / 1000, loaded / 1000)
     const record = { pid: 4242, files: { [used]: loaded } }
-    writeFileSync(LoadedCode.fileFor(root), JSON.stringify(record))
+    const file = LoadedCode.fileFor(root)
+    writeFileSync(file, JSON.stringify(record))
 
-    expect(LoadedCode.isChanged(root, 4242)).toBe(false)
+    expect(LoadedCode.isChanged(file, 4242)).toBe(false)
     // another server's record:  not this one's to judge
-    expect(LoadedCode.isChanged(root, 99)).toBeUndefined()
+    expect(LoadedCode.isChanged(file, 99)).toBeUndefined()
 
     utimesSync(used, (loaded + 5000) / 1000, (loaded + 5000) / 1000)
-    expect(LoadedCode.isChanged(root, 4242)).toBe(true)
+    expect(LoadedCode.isChanged(file, 4242)).toBe(true)
 
     rmSync(used)
-    expect(LoadedCode.isChanged(root, 4242)).toBe(true)
+    expect(LoadedCode.isChanged(file, 4242)).toBe(true)
   })
 
   it("no record at all:  undefined", () => {
-    expect(LoadedCode.isChanged(root, 1)).toBeUndefined()
+    expect(LoadedCode.isChanged(LoadedCode.fileFor(root), 1)).toBeUndefined()
+  })
+
+  // a project's page server on the kit wrote over Spell's record, and Spell's then restarted by the folders rule
+  it("a project's server keeps its own record, named by its spaces:  Spell's is left alone", () => {
+    writeFileSync(join(root, "package.json"), `{ "type": "module" }`)
+    writeFileSync(join(root, "main.js"), `setTimeout(() => {}, 1500)\n`)
+    const spells = SRV.PidFile.forPageServer(root, SRV.defaultSpacesOf(root))
+    const projects = SRV.PidFile.forPageServer(root, join(root, "my-app", "spaces"))
+    expect(spells.codeFile).toBe(LoadedCode.fileFor(root))
+    expect(projects.codeFile).toMatch(/\.spell-server\.my-app-[0-9a-f]{8}\.code\.json$/)
+
+    writeFileSync(spells.codeFile, JSON.stringify({ pid: 4242, files: {} }))
+    const env = { ...process.env, [LOADED_CODE_VARIABLE]: projects.codeFile }
+    execFileSync(process.execPath, ["--import", TSX, "--import", HOOK, join(root, "main.js")], { cwd: root, env })
+
+    expect(JSON.parse(readFileSync(spells.codeFile, "utf8"))).toEqual({ pid: 4242, files: {} })
+    const record = JSON.parse(readFileSync(projects.codeFile, "utf8")) as { files: object }
+    expect(Object.keys(record.files).some((path) => path.endsWith("main.js"))).toBe(true)
+    // each server reads its own:  Spell's record still answers for Spell's server
+    expect(LoadedCode.isChanged(spells.codeFile, 4242)).toBe(false)
   })
 })

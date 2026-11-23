@@ -1,3 +1,4 @@
+import { OBSERVE } from "solid-js"
 import { describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -102,6 +103,24 @@ describe("<ui-json> outline", () => {
     expect(JSON.parse(copied.mock.calls[0]![0])).toEqual({ name: "a", "two words": 2 })
   })
 
+  test("Copy, pressed, makes no reactive write inside a computation", async () => {
+    const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
+    onTestFinished(() => writeText.mockRestore())
+    const element = await json(`<ui-json>{ "name": "a" }</ui-json>`)
+    const copied = vi.fn()
+    element.addEventListener("ui-copied", copied)
+    // Solid's dev build reports a write inside a computation as `REACTIVE_WRITE_IN_OWNED_SCOPE`
+    const capture = OBSERVE!.diagnostics.capture()
+    element.shadowRoot!.querySelector<HTMLElement>("ui-button.copy")!.click()
+    await vi.waitFor(() => expect(copied).toHaveBeenCalled())
+    await ElementFixture.settle()
+    const codes = capture.stop().map((event) => event.code)
+    expect(codes).not.toContain("REACTIVE_WRITE_IN_OWNED_SCOPE")
+    // the inner button's name follows the change, the write told a moment later
+    const copy = element.shadowRoot!.querySelector("ui-button.copy")!
+    expect(copy.shadowRoot!.querySelector("button")!.getAttribute("aria-label")).toBe("Copied")
+  })
+
   test("the quotes button turns quotes off and on", async () => {
     const element = await json(`<ui-json>{ "name": "a" }</ui-json>`)
     const quotes = element.shadowRoot!.querySelector<HTMLElement>("ui-button.quotes")!
@@ -117,6 +136,18 @@ describe("<ui-json> outline", () => {
     await ElementFixture.settle()
     expect(element.hasAttribute("quotes")).toBe(false)
     expect(pressed()).toBe("true")
+  })
+
+  test("the header's buttons:  each inner button is part `header-button`;  the quotes button shows an icon", async () => {
+    const element = await json(`<ui-json>{ "name": "a" }</ui-json>`)
+    const buttons = [...element.shadowRoot!.querySelectorAll<HTMLElement>("ui-button.tool")]
+    expect(buttons.map((button) => button.getAttribute("exportparts"))).toEqual([
+      "button: header-button",
+      "button: header-button"
+    ])
+    const quotes = element.shadowRoot!.querySelector<HTMLElement>("ui-button.quotes")!
+    expect(quotes.getAttribute("icon")).toBe("quote-left")
+    expect(quotes.querySelector(".glyph")).toBeNull()
   })
 
   test("nothing to show:  says so", async () => {
@@ -188,6 +219,24 @@ describe("<ui-json editable>", () => {
     expect(element.value).toEqual({ id: "12", n: 1 })
     expect(changed).toHaveBeenCalledWith({ id: "12", n: 1 })
     expect(element.dirty).toBe(true)
+  })
+
+  test("an edit of a `value` set is an edit:  `ui-changed`, `dirty`, its text written;  the object given untouched", async () => {
+    const element = await json(`<ui-json editable></ui-json>`)
+    const data = { id: "x1", n: 1 }
+    element.value = data
+    await ElementFixture.settle()
+    expect(element.dirty).toBe(false)
+    const changed = vi.fn()
+    element.addEventListener("ui-changed", (event) => changed((event as CustomEvent).detail.value))
+    const editor = await startEditing(element, span(element, '"x1"'))
+    editor.value = "y2"
+    await press(editor, "Enter")
+    expect(element.value).toEqual({ id: "y2", n: 1 })
+    expect(JSON.parse(element.content)).toEqual({ id: "y2", n: 1 })
+    expect(changed).toHaveBeenCalledWith({ id: "y2", n: 1 })
+    expect(element.dirty).toBe(true)
+    expect(data).toEqual({ id: "x1", n: 1 })
   })
 
   test("Escape drops the edit", async () => {

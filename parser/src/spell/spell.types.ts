@@ -818,6 +818,11 @@ export type ServedPlace = {
   tokenFrom?: string
   /** It takes no writes. */
   readOnly?: boolean
+  /**
+   * The addresses of the write and action routes its lines list, under its own:  `/jobs/{job_id}/complete`.
+   * - So a read only one refuses each, a `GET` too, as a `GET` may change things (a load).
+   */
+  writes?: string[]
 }
 
 /** Where a type is saved, as a project's declarations say it -- see `SpellDeclaration.savedIn`. */

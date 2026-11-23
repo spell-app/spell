@@ -73,7 +73,8 @@
    * (the console's "SJC · SW-B17-CTRL03":  9px capitals, 8px a letter;  its size is `header.sub-heading-ratio`)
    */
   .ui.sub.header {
-    color: var(--ui-primary-text);
+    /* a coloured one keeps its colour (`colors.css`'s `--ui-color-header`), as Spell's eyebrow does */
+    color: var(--ui-color-header, var(--ui-primary-text));
     font-family: var(--ui-font-family-mono);
     font-weight: 700;
     letter-spacing: 0.12em;

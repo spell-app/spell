@@ -45,7 +45,6 @@ describe("a program with no place", () => {
     expect(code).not.toContain("declaredAt")
     expect(code).not.toContain("readsFrom")
     expect(code).not.toContain("select:")
-    expect(code).not.toContain("firstReads")
     const { files, scope } = parseSpellProject([
       { path: "/T.spell", contents: 'a card is a thing:\n\t- its "rank" is a number\n' }
     ])
@@ -122,67 +121,70 @@ start the box`
   })
 })
 
-describe("what a first draw reads", () => {
-  test("two reads a draw can reach go on the place's line, the part drawn from it too;  in a function", () => {
-    const { code } = compile(
-      PLACE,
-      TYPES,
-      `box is an app:
+// Spell never reads ahead (epic `data` P12's first reads, gone):  a page reads only what it draws, as it draws it.
+// These were the first reads' own tests, rewritten as the behaviour changed on purpose:  they asserted every list a
+// first draw could reach went on the place's line, to be asked before anything drew it.
+describe("what's read before a page draws it", () => {
+  /** An app whose first draw reads both types, one through a view of the other. */
+  const DRAWS_BOTH = [
+    `box is an app:
 	- to draw it:
 		for each recipe in every recipe
 			draw the recipe
 start the box`,
-      `to draw (a recipe):
+    `to draw (a recipe):
 	for each tag in every tag
 		<ui-text>{the word of the tag}</ui-text>`
-    )
-    expect(code).toContain("firstReads: () => [[Recipe], [Tag]] })")
-  })
+  ]
 
-  test("one read alone asks for itself", () => {
-    const { code } = compile(
-      PLACE,
-      TYPES,
-      "box is an app:\n\t- to draw it:\n\t\tfor each recipe in every recipe\n\t\t\tdraw the recipe\nstart the box"
-    )
+  test("nothing, by itself:  the place's line names no read, however many a first draw reaches", () => {
+    const { code } = compile(PLACE, TYPES, ...DRAWS_BOTH)
+    expect(code).not.toContain("readOnStartup")
     expect(code).not.toContain("firstReads")
   })
 
-  test("what only a handler reads isn't part of a first draw", () => {
+  test("a collection whose place says it's read on startup, and only it", () => {
     const { code } = compile(
-      PLACE,
-      TYPES,
-      `box is an app:
-	- to reset:
-		for each tag in every tag
-			print the word of the tag
-	- to draw it:
-		<ui-button onClick={reset}>Reset</ui-button>
-		for each recipe in every recipe
-			draw the recipe
-start the box`
+      `${PLACE}
+	- tags are read on startup`,
+      TYPES.replace(/\t- it is saved in the family cookbook/g, "\t- it lives in family cookbook"),
+      ...DRAWS_BOTH
     )
-    expect(code).not.toContain("firstReads")
+    expect(code).toContain('readOnStartup: ["Tag"] })')
+    expect(code).not.toContain('Recipe"] })')
   })
 
-  test("a read whose value is known only when it's drawn asks for itself", () => {
+  test("two lines name both", () => {
     const { code } = compile(
-      PLACE,
-      TYPES,
-      `box is an app:
-	- its "wanted" is a number
-	- its "quick" is every recipe where its minutes is the wanted
-	- its "words" is every tag where its word is "soup"
-	- to draw it:
-		for each recipe in the quick
-			draw the recipe
-		for each tag in the words
-			<ui-text>{the word of the tag}</ui-text>
-		for each tag in every tag
-			<ui-text>{the word of the tag}</ui-text>
-start the box`
+      `${PLACE}
+	- tags are read on startup
+	- recipes are read on startup`,
+      TYPES.replace(/\t- it is saved in the family cookbook/g, "\t- it lives in family cookbook"),
+      ...DRAWS_BOTH
     )
-    expect(code).toContain('firstReads: () => [[Tag], [Tag, { filter: { word: "soup" } }]] })')
+    expect(code).toContain('readOnStartup: ["Tag", "Recipe"] })')
+  })
+
+  test("in Spanish:  `se leen al arrancar`", () => {
+    const { files } = parseSpellProject([
+      {
+        path: "/Prueba.es.spell",
+        contents: [
+          'tienda es un servidor web en "https://tienda.test"',
+          "\t- los artículos se leen al arrancar",
+          "un artículo es una cosa",
+          "\t- vive en tienda",
+          ""
+        ].join("\n")
+      }
+    ])
+    expect(files.flatMap((file) => file.errors)).toEqual([])
+    const code = SP.SpellProject.combineCompiled(
+      files.map(({ match }) => match?.AST as P.ASTStatementGroup),
+      P.JSWriter.instance,
+      ""
+    )
+    expect(code).toContain('readOnStartup: ["Artículo"]')
   })
 })
 

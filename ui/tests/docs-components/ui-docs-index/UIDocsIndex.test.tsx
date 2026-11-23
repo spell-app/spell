@@ -53,4 +53,22 @@ describe("<ui-docs-index>", () => {
     flush()
     expect(drawn(element).map(([label]) => label)).toEqual(["Basic", "Forms"])
   })
+
+  it("leaves its search's `ui-navigating` alone:  the search follows its own pick, as a plain link", async () => {
+    const element = Fixture.render(`<ui-docs-index pages='${JSON.stringify(PAGES)}'></ui-docs-index>`)
+    await (element as unknown as { ready: Promise<void> }).ready
+    flush()
+    const followed: string[] = []
+    element.shadowRoot!.addEventListener("click", (event) => {
+      followed.push((event.target as HTMLAnchorElement).getAttribute("href")!)
+      event.preventDefault()
+    })
+    const navigating = new CustomEvent("ui-navigating", {
+      detail: { href: `${location.origin}/a/b?c#d` },
+      cancelable: true
+    })
+    element.shadowRoot!.querySelector("ui-docs-search")!.dispatchEvent(navigating)
+    expect(navigating.defaultPrevented).toBe(false)
+    expect(followed).toEqual([])
+  })
 })

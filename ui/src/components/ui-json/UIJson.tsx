@@ -13,17 +13,47 @@ import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
  * The DOM element of `<ui-json>`:  the source element's script API, plus `value`, `item`, `copy()` and `setQuotes()`.
  ****************/
 export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
+  /** A `value` set before the component existed, wrapped:  the component takes it as it's made. */
+  declare private pendingValue?: GivenJson
+
   /**
-   * The data, parsed;  `undefined` while `source` loads, or when the text is empty or isn't JSON.
-   * - Before the component exists:  its own text, parsed.
+   * The data:  the `value` set, as it was given;  else the text, parsed.
+   * - `undefined` while `source` loads, or when the text is empty or isn't JSON.
+   * - Before the component exists:  the `value` set early, else its own text, parsed.
    */
   get value(): unknown {
-    return this.component ? this.component.value : UIJson.parsedFrom(E.LoadableComponent.inlineTextOf(this)).value
+    if (this.component) return this.component.value
+    if (this.pendingValue) return this.pendingValue.value
+    return UIJson.parsedFrom(E.LoadableComponent.inlineTextOf(this)).value
   }
 
-  /** Hold `value` instead, written as JSON into `content`:  `dirty` until saved;  sends `ui-changed`. */
+  /**
+   * Show `value`, any JSON value, AS IT IS:  the very object, no JSON round trip, so a big one costs nothing.
+   * - Not an edit:  NOT `dirty`, and no `ui-changed`;  `content` stays as it was.
+   * - An edit in the outline, or `save()`, writes it into `content` as JSON;  a new `content` or `source` replaces it.
+   * - Before the component exists:  kept, and shown once it does.
+   */
   set value(value: unknown) {
-    this.content = JSON.stringify(value, null, 2) ?? ""
+    if (this.component) this.component.given = { value }
+    else this.pendingValue = { value }
+  }
+
+  /** As `DOMLoadableElement`'s. */
+  override get content(): string {
+    return super.content
+  }
+
+  /** As `DOMLoadableElement`'s:  and it replaces a `value` set before. */
+  override set content(text: string) {
+    this.pendingValue = undefined
+    super.content = text
+  }
+
+  /** The `value` set before the component existed, once;  `undefined` when none was. */
+  takePendingValue(): GivenJson | undefined {
+    const pending = this.pendingValue
+    this.pendingValue = undefined
+    return pending
   }
 
   /**
@@ -67,7 +97,8 @@ export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
  *
  * - Where it comes from is `LoadableComponent`'s:  `source` through `UI.sources`, else its own text.
  *   So `load`, `reload()`, `loaded`, `save()` and `ui-error` are the same as `<ui-code>`'s.
- * - What it adds:  `value`, the parsed data, and `ui-changed` when that changes.
+ * - Or `value`, set by script:  the object itself is shown, with no JSON round trip (`given`).
+ * - What it adds:  `value`, the data, and `ui-changed` when its text changes it.
  * - Text that isn't JSON:  `value` is `undefined`, one console warning, `ui-error` (`render`), `:state(error)`.
  * - An element that takes JSON reads a `<ui-json>` child through `JsonChild`;  that element's sheet hides it.
  *   `hidden` hides any other.
@@ -107,36 +138,78 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     return UIJson.parsedFrom(this.textToShow)
   }
 
+  /**
+   * The `value` set by script, as it was given (wrapped, so `undefined` is a value too);  `undefined`:  none, the
+   * text's data is shown.
+   * - Set through the DOM element's `value`;  a new `content` or `source` clears it.
+   */
+  @E.state accessor given: GivenJson | undefined = (this.domElement as DOMJsonElement).takePendingValue()
+
+  /** What's shown:  the `value` given, else the text, parsed. */
+  get shown(): ParsedJson {
+    return this.given ?? this.parsed
+  }
+
   /** The data;  `undefined` while `source` loads, or when the text is empty or isn't JSON. */
   get value(): unknown {
-    return this.parsed.value
+    return this.shown.value
   }
 
   /** Did loading fail, or isn't its text JSON?  `:state(error)`. */
   @E.cssState("error")
   override get hasError(): boolean {
-    return super.hasError || !!this.parsed.error
+    return super.hasError || !!this.shown.error
   }
 
   /**
    * As the base's, but text that isn't JSON says why, in the parser's words.
-   * - Read from `parsed`, not the base's `loadError`:  the first load step clears that after the first parse.
+   * - Read from `shown`, not the base's `loadError`:  the first load step clears that after the first parse.
    */
   override get errorText(): string | undefined {
-    const { error } = this.parsed
+    const { error } = this.shown
     if (!error) return super.errorText
     return this.translationForKey("jsonInvalid", { message: error instanceof Error ? error.message : plainText(error) })
   }
 
-  /** Has `onParsedChanged()` run once?  What's there when it first draws is no change. */
+  /** As `LoadableComponent`'s:  and it replaces a `value` given, which an edit or a save writes through here. */
+  override get content(): string {
+    return super.content
+  }
+
+  override set content(text: string) {
+    this.given = undefined
+    super.content = text
+  }
+
+  /** A new `source` replaces a `value` given. */
+  @E.onChange("source", { defer: true })
+  protected onSourceReplacesGiven() {
+    this.given = undefined
+  }
+
+  /** As `LoadableComponent`'s;  a `value` given is written into `content` first, as JSON, and stays as it is. */
+  @E.untracked
+  override save(text?: string): Promise<boolean> {
+    const { given } = this
+    if (text !== undefined || !given) return super.save(text)
+    this.content = JSON.stringify(given.value, null, 2) ?? ""
+    this.given = given
+    return super.save()
+  }
+
+  /** Has `onShownChanged()` run once?  What's there when it first draws is no change. */
   private hasStarted = false
 
   /** The next new data is an edit made here:  what's open stays open. */
   private keepsToggles = false
 
-  /** The data changed:  `ui-changed`, or the error when its text isn't JSON;  new data opens by `depth` again. */
-  @E.onChange("parsed")
-  protected onParsedChanged({ value, error }: ParsedJson) {
+  /**
+   * The data changed:  new data opens by `depth` again;  the error when its text isn't JSON.
+   * - `ui-changed` when its TEXT changed it:  a load, an edit, `content`;  never a `value` given.
+   * - `JSON_CHANGED` either way:  a parent that reads it (a diagram) follows it.
+   */
+  @E.onChange("shown")
+  protected onShownChanged({ value, error }: ParsedJson) {
     const isFirst = !this.hasStarted
     this.hasStarted = true
     if (error) this.onLoadError(error, "render")
@@ -145,7 +218,7 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     if (this.keepsToggles) this.keepsToggles = false
     else this.toggled = new Map()
     this.domElement.dispatchEvent(new Event(JSON_CHANGED, { bubbles: true }))
-    this.send("ui-changed", { value, content: this.content })
+    if (!this.given) this.send("ui-changed", { value, content: this.content })
   }
 
   /** As `LoadableComponent`'s, and warns:  a `<ui-json>` is often unseen, a diagram's data or `hidden`. */
@@ -271,14 +344,16 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
    * Copy and the quotes toggle:  mini basic `<ui-button>`s, as big as an example's code button.
    * - The sheet takes their ring off:  a background only on hover, a fill while the quotes toggle is pressed.
    * - The quotes toggle is a `toggle`, so its inner button says `aria-pressed`;  `selected` follows `quotes`.
-   * - It draws its glyph as text, `""`:  the icon set has no outline quote mark.
+   * - Each one's inner button is the `header-button` part, so a page can size them.
    */
   private header(): JSX.Element {
     const copyLabel = () => this.translationForKey(this.clipboard.isCopied ? "jsonCopied" : "jsonCopy")
+    const exportParts = `button: ${this.partForName("header-button")}`
     return (
       <div class="header" part={this.partForName("header")}>
         <ui-button
           class="tool copy"
+          exportparts={exportParts}
           size="mini"
           appearance="basic"
           icon={this.clipboard.isCopied ? COPIED_ICON : COPY_ICON}
@@ -288,25 +363,23 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
         />
         <ui-button
           class="tool quotes"
+          exportparts={exportParts}
           size="mini"
           appearance="basic"
           toggle=""
+          icon={QUOTES_ICON}
           selected={this.quotes ? "" : undefined}
           aria-label={this.translationForKey("jsonQuotes")}
           title={this.translationForKey(this.quotes ? "jsonQuotesOff" : "jsonQuotesOn")}
           onClick={() => this.setQuotes(!this.quotes)}
-        >
-          <span class="glyph" aria-hidden="true">
-            ""
-          </span>
-        </ui-button>
+        />
       </div>
     )
   }
 
   /** The whole outline, rebuilt only when the data changes. */
   private tree(): JSX.Element {
-    const { value } = this.parsed
+    const { value } = this.shown
     if (value === undefined) {
       return this.isLoading || this.hasError ? undefined : (
         <div class="empty">{this.translationForKey("jsonEmpty")}</div>
@@ -643,6 +716,12 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UIJson extends E.AttributeValues<typeof jsonVocabulary> {}
 
+/** A `value` set by script, as it was given:  wrapped, so `undefined` is a value too. */
+export type GivenJson = {
+  /** The data, the very object set. */
+  value: unknown
+}
+
 /** A `<ui-json>`'s text, parsed. */
 export type ParsedJson = {
   /** The data. */
@@ -694,6 +773,8 @@ type EditorHost = HTMLElement & { value?: unknown; selected?: boolean; ready?: P
 /** Copy's icons:  outline, as an example's code button is a line drawing;  the check at the same weight. */
 const COPY_ICON = "clipboard outline"
 const COPIED_ICON = "check circle outline"
+/** The quotes toggle's icon:  an opening quote mark. */
+const QUOTES_ICON = "quote-left"
 /** How many characters a closed object or array shows at least;  and before it's measured. */
 const PREVIEW_MIN = 24
 const PREVIEW_CHARS = 90

@@ -11,4 +11,33 @@
       <p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</p>
     </ui-segment>
   </section>
+
+  <section>
+    <h4>Loading, with its own skeleton</h4>
+    <ui-segment loading>
+      <p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</p>
+      <ui-placeholder slot="loading" fluid>
+        <ui-placeholder-paragraph>
+          <ui-placeholder-line></ui-placeholder-line>
+          <ui-placeholder-line></ui-placeholder-line>
+          <ui-placeholder-line></ui-placeholder-line>
+        </ui-placeholder-paragraph>
+      </ui-placeholder>
+    </ui-segment>
+  </section>
+
+  <section>
+    <h4>Error</h4>
+    <ui-segment error="The server didn't answer.">
+      <p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</p>
+    </ui-segment>
+  </section>
+
+  <section>
+    <h4>Error, with its own message</h4>
+    <ui-segment error>
+      <p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</p>
+      <ui-message slot="error" state="warning">The jobs are a little late today:  try again in a minute.</ui-message>
+    </ui-segment>
+  </section>
 </div>

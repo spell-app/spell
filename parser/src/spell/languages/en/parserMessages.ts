@@ -370,6 +370,8 @@ export const PARSER_MESSAGES = {
   /** A bare tag in a page's drawing that no pack has (epic `elemental-spell` P7). */
   "page-unknown-component":
     "<{tag}> isn't a component any pack here has (searched:  {packs}):  check its name, or add its pack to the project's packs",
+  /** `loading="skeleton: ..."` whose shape isn't skeleton text (`SkeletonText`). */
+  "skeleton-unreadable": "{why}",
   /** A control tag inside an element in a page's drawing (epic `elemental-spell` P7, C29). */
   "page-tag-in-markup":
     "<{tag} ...> can't sit inside an element yet:  write it on a line of its own in the drawing, outside the element",

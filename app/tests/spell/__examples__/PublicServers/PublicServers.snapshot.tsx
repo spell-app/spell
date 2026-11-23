@@ -494,19 +494,23 @@ export class User extends Thing {
           <ui-image src={this.avatarUrl} alt="" size="small" appearance="rounded" />
           <ui-stack spacing="sm">
             <ui-text color="grey">{this.login} · {this.kind}</ui-text>
-            <ui-text hidden={this.bio ? undefined : true}>{this.bio}</ui-text>
-            <ui-text size="small" color="grey" hidden={core.dateShown(this.createdAt) ? undefined : true}>
-              {this.publicRepos}
-              {" public repositories · "}
-              {this.followers}
-              {" followers"}
-            </ui-text>
+            {core.drawIf(() => this.bio, () => <>
+              <ui-text>{this.bio}</ui-text>
+            </>)}
+            {core.drawIf(() => core.dateShown(this.createdAt), () => <>
+              <ui-text size="small" color="grey">
+                {this.publicRepos}
+                {" public repositories · "}
+                {this.followers}
+                {" followers"}
+              </ui-text>
+            </>)}
           </ui-stack>
         </ui-stack>
         <ui-stack spacing="sm">
           <ui-header size="medium">Most popular</ui-header>
           {core.drawRead(async () => await core.savedThings(Repository, { search: { "*": `user:${this.login} sort:stars` } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
-            waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">{"Asking GitHub"}</ui-loader>,
+            waitingSay: () => "Asking GitHub",
             none: () => <ui-text part="page">{"Nothing public yet."}</ui-text>,
             paging: () => "pages",
             items: () => <ui-cards columns="3" doubling={true} stackable={true} part="page" />
@@ -1394,11 +1398,7 @@ export class Repository extends Thing {
               <ui-icon name="github" />
             </ui-link>
           </ui-header>
-          <ui-meta>
-            {"★ "}
-            {this.stargazersCount}
-            <span hidden={this.language ? undefined : "until-found"}> · {this.language}</span>
-          </ui-meta>
+          <ui-meta>★ {this.stargazersCount}{core.drawIf(() => this.language, () => <> · {this.language}</>)}</ui-meta>
           <ui-description>{this.description}</ui-description>
         </ui-content>
       </ui-card>
@@ -1578,7 +1578,8 @@ export const github = core.place(new Github(), {
       at: "/search/repositories",
       searchedOnly: true
     }
-  }, firstReads: () => [[Issue, { filter: { pullRequest: undefined }, page: { size: 6 } }], [Issue]] })
+  }
+})
 
 // -----------
 core.heading("GitHub")
@@ -1656,13 +1657,13 @@ export class GithubPage extends Thing {
       <ui-stack spacing="sm" part="issues">
         <ui-header size="medium">Solid's issues</ui-header>
         {core.drawRead(async () => await core.savedThings(Issue, { filter: { pullRequest: undefined }, page: { size: 6 } }, "as drawn"), (issue: Issue) => core.drawThing(issue), {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="issues">{"Asking GitHub"}</ui-loader>,
+          waitingSay: () => "Asking GitHub",
           none: () => <ui-text part="issues">{"No open issues."}</ui-text>,
           items: () => <ui-cards columns="3" doubling={true} stackable={true} part="issues" />
         })}
         <ui-header size="medium">Solid's pull requests</ui-header>
         {core.drawRead(async () => core.firstFew(core.filter(await core.savedThings(Issue, {}, "looks through"), (issue: Issue) => issue.pullRequest !== undefined), 6), (issue: Issue) => core.drawThing(issue), {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="issues">{"Asking GitHub"}</ui-loader>,
+          waitingSay: () => "Asking GitHub",
           none: () => <ui-text part="issues">{"No open pull requests."}</ui-text>,
           items: () => <ui-cards columns="3" doubling={true} stackable={true} part="issues" />
         })}
@@ -1679,7 +1680,7 @@ export class GithubPage extends Thing {
           <ui-stack spacing="sm">
             <ui-header size="medium">People and organizations</ui-header>
             {core.drawRead(async () => await core.savedThings(User, { search: { "*": this.search } }, "as drawn"), (user: User) => core.drawThing(user), {
-              waiting: () => <ui-loader visible={true} inline={true} text={true} part="found">{"Asking GitHub"}</ui-loader>,
+              waitingSay: () => "Asking GitHub",
               none: () => <ui-text part="found">{"Nobody on GitHub goes by that."}</ui-text>,
               paging: () => "pages",
               items: () => <ui-cards columns="4" doubling={true} stackable={true} part="found" />
@@ -1688,7 +1689,7 @@ export class GithubPage extends Thing {
           <ui-stack spacing="sm">
             <ui-header size="medium">Repositories</ui-header>
             {core.drawRead(async () => await core.savedThings(Repository, { search: { "*": this.search } }, "as drawn"), (repository: Repository) => core.drawThing(repository), {
-              waiting: () => <ui-loader visible={true} inline={true} text={true} part="found">{"Asking GitHub"}</ui-loader>,
+              waitingSay: () => "Asking GitHub",
               none: () => <ui-text part="found">{"No repository matches that."}</ui-text>,
               paging: () => "pages",
               items: () => <ui-cards columns="3" doubling={true} stackable={true} part="found" />
@@ -1875,9 +1876,7 @@ export class Book extends Thing {
         <ui-stack spacing="sm">
           <ui-header size="medium">Editions</ui-header>
           {core.drawRead(() => this.editions, (edition: Edition) => core.drawThing(edition), {
-            waiting: () => <ui-loader visible={true} inline={true} text={true} part="page">
-              {"Asking Open Library for its editions"}
-            </ui-loader>,
+            waitingSay: () => "Asking Open Library for its editions",
             none: () => <ui-text part="page">{"No editions listed."}</ui-text>,
             paging: () => "pages",
             items: () => <ui-cards columns="4" doubling={true} stackable={true} part="page" />
@@ -2643,9 +2642,9 @@ export class JsonplaceholderPage extends Thing {
           <ui-input name="title" placeholder="Water the plants" aria-label="Something to do" fluid={true} action={true}>
             {core.drawWaiting(() => <ui-button slot="action" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               Add
-            </ui-button>)}
+            </ui-button>, "ui-button")}
           </ui-input>
-        </ui-form>)}
+        </ui-form>, "ui-form")}
         {this.drawTodoList()}
       </ui-stack>
     )
@@ -2725,7 +2724,7 @@ export class Forecast extends Thing {
   drawHourTable() {
     return core.drawRead(() => this.hours, (hour: Hour) => <>
       <ui-cell data-column="Day">
-        <span hidden={core.hourOf(hour.time) === 0 ? undefined : "until-found"}>{core.dateShown(hour.time)}</span>
+        {core.drawIf(() => core.hourOf(hour.time) === 0, () => <>{core.dateShown(hour.time)}</>)}
       </ui-cell>
       <ui-cell data-column="Hour" align="right">{core.hourOf(hour.time)}:00</ui-cell>
       <ui-cell data-column="Temperature" align="right">
@@ -3383,7 +3382,7 @@ export class MetMuseumPage extends Thing {
           </ui-stack>
         </ui-form>
         {core.drawRead(() => this.found, (artwork: Artwork) => core.drawThing(artwork), {
-          waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking the Met"}</ui-loader>,
+          waitingSay: () => "Asking the Met",
           none: () => <ui-text>{"The Met has nothing for that."}</ui-text>,
           failedSay: () => "The Met can't be reached just now.",
           paging: () => "pages",

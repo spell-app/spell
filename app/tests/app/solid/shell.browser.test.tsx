@@ -8,6 +8,7 @@ import type { SPACES } from "spell/app/spaces"
 import { editor, type EditorStore } from "spell/app/app/editor"
 import { SpellPage, openProject, rememberedSizes, trackProjectRoot, uiReady } from "spell/app/app/solid"
 import { editorPrefs } from "spell/app/app/editorPrefs"
+import { on } from "spell/app/app/solid/on"
 
 /**
  * The pages' shell in the browser (P8):  `<SpellPage>`,
@@ -30,7 +31,7 @@ describe("rememberedSizes()", () => {
     const host = await mount(() => {
       sizes = rememberedSizes(() => ({ id, sizes: "20%,*" }))
       return (
-        <ui-split-panel columns={sizes.sizes()} on-ui-changed={sizes.keep}>
+        <ui-split-panel columns={sizes.sizes()} ref={on("ui-changed", sizes.keep)}>
           <div>
             <button class="control" />
           </div>

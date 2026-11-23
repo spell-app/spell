@@ -175,15 +175,18 @@ export class Juego extends App {
           </es-barra-herramientas>
           {core.drawThing(this.tarjeta!)}
           <es-pila direccion="horizontal" repartir="centro">
-            <es-boton color="primario" onClick={core.pressed(this, () => this.mostrarLaRespuesta())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" hidden={this.tarjeta?.isFaceDirection("up") ? undefined : true}>
-              Mostrar la respuesta
-            </es-boton>
-            <es-boton color="positivo" icono="check" onClick={core.pressed(this, () => this.decirQueLaSabía())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" hidden={!this.tarjeta?.isFaceDirection("up") ? undefined : true}>
-              La sabía
-            </es-boton>
-            <es-boton color="negativo" apariencia="básico" icono="close" onClick={core.pressed(this, () => this.decirQueNoLaSabía())} style="cursor:var(--ui-control-cursor,pointer);user-select:none" hidden={!this.tarjeta?.isFaceDirection("up") ? undefined : true}>
-              No la sabía
-            </es-boton>
+            {core.drawIf(() => this.tarjeta?.isFaceDirection("up"), () => <>
+              <es-boton color="primario" onClick={core.pressed(this, () => this.mostrarLaRespuesta())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                Mostrar la respuesta
+              </es-boton>
+            </>, () => <>
+              <es-boton color="positivo" icono="check" onClick={core.pressed(this, () => this.decirQueLaSabía())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                La sabía
+              </es-boton>
+              <es-boton color="negativo" apariencia="básico" icono="close" onClick={core.pressed(this, () => this.decirQueNoLaSabía())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                No la sabía
+              </es-boton>
+            </>)}
           </es-pila>
         </es-pila>
       </es-contenedor>

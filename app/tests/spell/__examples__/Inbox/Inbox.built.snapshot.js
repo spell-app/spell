@@ -146,7 +146,8 @@ export const myInbox = core.place(new MyInbox(), {
   name: "my_inbox",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__inbox",
-  checkedEvery: 30, firstReads: () => [[MailChoice], [Subscription], [Message, { sort: [{ field: "sent", descending: true }] }]] })
+  checkedEvery: 30
+})
 
 // -----------
 export class InboxPage extends App {
@@ -223,7 +224,7 @@ export class InboxPage extends App {
           h("ui-segment", { class: "mail" },
             h("ui-header", { size: "medium" }, "Mail"),
             h("ui-stack", { class: "mail-choices", spacing: "sm" },
-              () => core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice) => core.drawThing(choice), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading how you hear of it"), none: () => h("ui-stack", { direction: "horizontal", spacing: "md", align: "center", wrap: true },
+              () => core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice) => core.drawThing(choice), { waitingSay: () => "Reading how you hear of it", none: () => h("ui-stack", { direction: "horizontal", spacing: "md", align: "center", wrap: true },
                 h("ui-text", { color: "grey" }, "A daily digest of what's new, each morning."),
                 h("ui-button", {
                   class: "choose",
@@ -272,7 +273,7 @@ export class InboxPage extends App {
                   style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
                 }, "Reply")
               ), {
-                waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your inbox"),
+                waitingSay: () => "Reading your inbox",
                 none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing yet."),
                 failed: () => h("ui-text", { color: "red" }, "We can't read your inbox right now.")
               })

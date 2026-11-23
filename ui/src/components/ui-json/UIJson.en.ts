@@ -7,6 +7,7 @@
  *   are shared with `<ui-code>` and `<ui-markdown>`:  `UIT.Source*`, which `LoadableComponent` reads.
  *   - Its `ui-changed` is its own, with the parsed `value`.
  * - `value` is the DOM element's property (any JSON value):  not an attribute.
+ *   Set, it holds the very object given, with no JSON round trip:  not `dirty`, no `ui-changed`.
  *   `item`, also a property, sets it from a thing's `data` (a tree's `detail` pane hands it the pick).
  */
 
@@ -43,7 +44,8 @@ export const jsonVocabulary = {
   partOfSpeech: "property",
   description:
     "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose " +
-    "objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.",
+    "objects and arrays open and close.  `value` is its data, parsed, or any object a script sets, shown as it is;  " +
+    "an element it sits inside may read it.",
   attributes: [
     ...UIT.SourceAttributes,
     {
@@ -99,8 +101,9 @@ export const jsonVocabulary = {
       name: "ui-changed",
       detail: "{ value: unknown, content: string }",
       description:
-        "The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its " +
-        "text edited.  `value` is `undefined` when the text is empty or isn't JSON."
+        "The data changed through its text:  loaded from `source`, set through `content`, edited in the outline, or " +
+        "its text edited.  `value` is `undefined` when the text is empty or isn't JSON.  Setting `value` by script " +
+        "sends none:  it shows that object as it is, and isn't an edit."
     },
     SAVING,
     SAVED,
@@ -122,6 +125,11 @@ export const jsonVocabulary = {
     ...UIT.SourceParts,
     { name: "viewer", description: "The box round it all." },
     { name: "header", description: "The bar above the data:  Copy, then the quotes button." },
+    {
+      name: "header-button",
+      description:
+        "Copy and the quotes button:  each one's inner button (`<ui-button>`'s `button` part), so a page can size them."
+    },
     { name: "row", description: "Each line." },
     {
       name: "toggle",

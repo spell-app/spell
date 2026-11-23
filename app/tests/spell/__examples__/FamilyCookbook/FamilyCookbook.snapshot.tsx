@@ -147,7 +147,7 @@ export class Cookbook extends App {
             </ui-extra>
           </ui-card>
           {core.drawRead(() => this.matches, (recipe: Recipe) => core.drawThing(recipe), {
-            waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Finding your recipes"}</ui-loader>,
+            waitingSay: () => "Finding your recipes",
             none: () => <ui-text class="none" color="grey">
               {this.search === "" ? "No recipes yet. Add your first one." : "No recipes match your search."}
             </ui-text>,

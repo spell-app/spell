@@ -78,13 +78,9 @@ export class Recipe extends View {
 
   draw() {
     return h("ui-card", { class: "recipe", fluid: true },
-      h("ui-image", {
-        src: () => this.picture,
-        alt: () => this.title,
-        "aspect-ratio": "21:9",
-        crop: true,
-        hidden: () => this.picture !== "" ? undefined : true
-      }),
+      () => core.drawIf(() => this.picture !== "", () => [
+        h("ui-image", { src: () => this.picture, alt: () => this.title, "aspect-ratio": "21:9", crop: true })
+      ]),
       h("ui-content",
         h("ui-stack",
           h("ui-stack", { direction: "horizontal", justify: "between" },

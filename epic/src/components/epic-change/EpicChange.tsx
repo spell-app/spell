@@ -133,7 +133,9 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
           wide=""
           class={POPUP}
           part={this.partForName("popup")}
-          on-ui-opening={(event: Event) => this.onOpening(event)}
+          ref={(element: HTMLElement) =>
+            element.addEventListener("ui-opening", ((event: Event) => this.onOpening(event)) as EventListener)
+          }
         >
           <span class={TIP_WORDS}>
             <span class={TIP_LINE}>{this.changedBy}</span>

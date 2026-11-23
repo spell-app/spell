@@ -95,9 +95,7 @@ export class Week extends ViewableList {
 
   draw() {
     return h("ui-stack", { spacing: "sm" },
-      h("ui-text", { color: "grey", hidden: () => this.isEmpty ? undefined : true },
-        "No habits yet:  add one above"
-      ),
+      () => core.drawIf(() => this.isEmpty, () => [h("ui-text", { color: "grey" }, "No habits yet:  add one above")]),
       h("slot")
     )
   }

@@ -9,6 +9,9 @@ import { SP } from "spell/parser/spell"
 // Import directly:  these two helpers, not the rules' barrel
 import { overlayViewNamed, pageNamed } from "spell/parser/spell/rules/sites/sites.shared"
 
+/** What a production deployment is named:  read only unless its line says it may be written. */
+const PRODUCTION = /^prod(?:uction)?$/i
+
 /**
  * One spell project, e.g. `owen@spell/myProject`:  its files, and reading, compiling and saving them.
  * - Its `contents` are the project's index from the server:  its files (`manifest`), and what its project file says.
@@ -664,6 +667,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * `deployment`, named `name` in the project's file, read only when its line says, or when it's production's and its
+   * line doesn't say otherwise (`"readOnly": false`).
+   * - The ONE place that's decided:  a program's run, the page server and `spell place verify` all ask here.
+   */
+  static deploymentAsRun<Deployed extends PlaceDeployment>(name: string, deployment: Deployed): Deployed {
+    return deployment.readOnly === undefined && PRODUCTION.test(name) ? { ...deployment, readOnly: true } : deployment
+  }
+
+  /**
    * Each place's deployment named `deployment`, from `places`, a project file's:  see `deploymentsPicked()`.
    * - For a reader that has the project file but no project:  the page server.
    * - throws `SP.UnlistedDeploymentError` for a deployment no place in it has
@@ -674,7 +686,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     projectId: string
   ): Record<string, PlaceDeployment> {
     const picked = Object.entries(places ?? {}).flatMap(([place, deployments]) =>
-      deployments[deployment] ? [[snakeCase(place), deployments[deployment]] as const] : []
+      deployments[deployment] ? [[snakeCase(place), SpellProject.deploymentAsRun(deployment, deployments[deployment])] as const] : []
     )
     if (!picked.length) {
       const listed = [...new Set(Object.values(places ?? {}).flatMap((deployments) => Object.keys(deployments)))]

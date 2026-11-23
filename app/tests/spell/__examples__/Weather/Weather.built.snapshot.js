@@ -215,7 +215,7 @@ export class Weather extends App {
             () => core.drawEach(this.cities, (city) => h("ui-item", { value: () => city.name }, () => city.name))
           )
         ),
-        () => core.drawRead(() => this.forecasts, (forecast) => core.drawThing(forecast), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking Open-Meteo"), failedSay: () => "Open-Meteo can't be reached just now." }),
+        () => core.drawRead(() => this.forecasts, (forecast) => core.drawThing(forecast), { waitingSay: () => "Asking Open-Meteo", failedSay: () => "Open-Meteo can't be reached just now." }),
         h("ui-text", { size: "small", color: "grey" },
           "From ",
           h("ui-link", { link: "https://open-meteo.com" }, "Open-Meteo"),

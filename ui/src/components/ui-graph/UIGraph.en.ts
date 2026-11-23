@@ -10,7 +10,7 @@
  */
 
 import type { ComponentVocabulary } from "spell/ui/vocabulary"
-import { GraphChildViews } from "./UIGraph.types"
+import { GraphArrangements, GraphChildViews } from "./UIGraph.types"
 
 /****************
  * ### `graphVocabulary`
@@ -70,6 +70,19 @@ export const graphVocabulary = {
         "with `ui-changed` `{ kind: 'path', path }`."
     },
     {
+      name: "arrange",
+      group: "appearance",
+      kind: "enum",
+      values: GraphArrangements,
+      default: "auto",
+      description:
+        "How nodes are placed:  `layers`, left to right by their edges;  `groups`, a column per node `group` (its " +
+        "header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column;  " +
+        "`auto`, groups when any node has one.  `groups` needs a node with a `group` too:  with none, it draws " +
+        "layers, as `auto` does.  For one column with no header, give every node the same `group`.  " +
+        "NOT `layout`:  that's the laid out drawing, a property already."
+    },
+    {
       name: "selected",
       group: "states",
       kind: "json",
@@ -121,7 +134,8 @@ export const graphVocabulary = {
     { name: "port", description: "Each port's `<g>`:  its dot and label." },
     { name: "pin", description: "Each pin, the enclosing node's port, on a modal or drilled graph's side." },
     { name: "toggle", description: "Each node's open / close button." },
-    { name: "toolbar", description: "The buttons over the drawing (fit)." },
+    { name: "column", description: "Each column of the `groups` arrangement:  its band and header." },
+    { name: "toolbar", description: "The buttons at the right of the bar over the drawing (a subclass's, then fit)." },
     { name: "breadcrumbs", description: "The trail back up, when drilled in." }
   ],
   states: [

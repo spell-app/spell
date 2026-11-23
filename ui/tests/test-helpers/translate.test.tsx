@@ -69,6 +69,7 @@ describe("UIComponent.define(tag, dictionary)", () => {
       "etiqueta",
       "desactivado",
       "cargando",
+      "error",
       "visible",
       "animacion",
       "enlace",

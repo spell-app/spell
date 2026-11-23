@@ -432,7 +432,7 @@ export class MetArtwork extends App {
           )
         ),
         () => core.drawRead(() => this.found, (artwork) => core.drawThing(artwork), {
-          waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking the Met"),
+          waitingSay: () => "Asking the Met",
           none: () => h("ui-text", "The Met has nothing for that."),
           failedSay: () => "The Met can't be reached just now.",
           items: () => h("ui-cards", { layout: "mosaic", columns: "4", doubling: true })

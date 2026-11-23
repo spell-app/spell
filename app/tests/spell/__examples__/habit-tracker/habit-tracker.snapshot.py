@@ -136,10 +136,9 @@ class Week(ViewableList):
         return h(
             "ui-stack",
             {"spacing": "sm"},
-            h(
-                "ui-text",
-                {"color": "grey", "hidden": None if not self else True},
-                "No habits yet:  add one above",
+            core.draw_if(
+                lambda: not self,
+                lambda: [h("ui-text", {"color": "grey"}, "No habits yet:  add one above")],
             ),
             h("slot"),
         )

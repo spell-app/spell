@@ -249,6 +249,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   /** A bare tag in a page's drawing that no pack has (epic `elemental-spell` P7). */
   "page-unknown-component":
     "<{tag}> no es un componente de ningún paquete de aquí (buscado:  {packs}):  revisa su nombre, o añade su paquete a los paquetes del proyecto",
+  /** `cargando="esqueleto: ..."` whose shape isn't skeleton text (`SkeletonText`):  its words are English's. */
+  "skeleton-unreadable": "{why}",
   /** A control tag inside an element in a page's drawing (epic `elemental-spell` P7, C29). */
   "page-tag-in-markup":
     "<{tag} ...> aún no puede ir dentro de un elemento:  escríbelo en una línea propia del dibujo, fuera del elemento",

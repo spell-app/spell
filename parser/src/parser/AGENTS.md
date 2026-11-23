@@ -41,7 +41,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - each language says its own file separator and import lines (`fileSeparator`, `importsHeader()`)
   - `P.ReadGathering` (epic `data` P12):  what a project reads from what it saves in places, worked out before it's written,
     beside `P.WriterProject`'s waiting pass
-    - by NAME, as the waiting pass is:  which fields anything reads, what a first draw can reach, which places a getter reads
+    - by NAME, as the waiting pass is:  which fields anything reads, which places a getter reads
+    - never what to read ahead:  a page reads what it draws (`ReadOnStartup`, a place's line, is the one opt-in)
     - nothing for a project with no saved type:  its code doesn't change
     - what it can't prove reads the whole thing, with a note reaching `SP.SpellWarnings`:
       `P.WriterOptions.noteForAuthor`, a writer's one route onto them

@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vite-plus/test"
 import { Task, TaskList } from "spell/util"
-import { after, soon } from "spell/util/timing"
+import { after, soonEvenHidden } from "spell/util/timing"
 
 describe("TaskList.forEach", () => {
   test("reads a `list` function when it RUNS, so an earlier task can fill it", async () => {
@@ -57,7 +57,9 @@ describe("TaskList, letting the browser in between tasks (epic `solid-2-final` P
     const taskList = new TaskList({
       tasks: [
         // a key typed during the first task:  a task of its own, queued while it runs
-        new Task({ name: "a", run: async () => void (ran.push("a"), setTimeout(() => ran.push("key"), 0)) }),
+        // - a message, not a timer:  with no `scheduler.yield()` (node) the list lets the browser in by a message too,
+        //   and a timer's turn comes after it in node
+        new Task({ name: "a", run: async () => void (ran.push("a"), soonEvenHidden(() => ran.push("key"))) }),
         new Task({ name: "b", run: async () => void ran.push("b") })
       ]
     })
@@ -70,12 +72,28 @@ describe("TaskList, letting the browser in between tasks (epic `solid-2-final` P
     const taskList: TaskList = new TaskList({
       tasks: [
         // cancelled as it ends, e.g. by a key typed:  the list is then letting the browser in before "b"
-        new Task({ name: "a", run: async () => void (ran.push("a"), soon(() => taskList.cancel())) }),
+        new Task({ name: "a", run: async () => void (ran.push("a"), soonEvenHidden(() => taskList.cancel())) }),
         new Task({ name: "b", run: async () => void ran.push("b") })
       ]
     })
     await taskList.start(undefined)
     await after(0.02)
     expect(ran).toEqual(["a"])
+  })
+})
+
+describe("TaskList, in a tab out of sight", () => {
+  test("goes from task to task on no timer:  a hidden tab's held-back timers don't hold it", async () => {
+    // fake timers that never move, as a hidden tab's:  only the tasks' turns between them could wait on one
+    vi.useFakeTimers()
+    try {
+      const ran: string[] = []
+      const step = (name: string) => new Task({ name, run: async () => void ran.push(name) })
+      const taskList = new TaskList({ tasks: [step("a"), step("b"), step("c")] })
+      await taskList.start(undefined)
+      expect(ran).toEqual(["a", "b", "c"])
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

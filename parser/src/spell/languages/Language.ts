@@ -773,6 +773,8 @@ export type PageTwinWords = {
 export type PageForWords = {
   /** The rider for what shows while waiting. */
   waiting: string
+  /** The rider for what the loader says while waiting, or the look it names:  `loading="..."`. */
+  waitingSay: string
   /** The rider for what shows when there are none. */
   none: string
   /** The rider for what shows when it fails. */

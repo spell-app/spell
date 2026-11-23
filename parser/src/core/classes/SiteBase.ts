@@ -9,7 +9,7 @@ import { compilePattern, filledPattern, type AddressParams } from "spell/util/ad
 import { core } from "spell/parser/core/core"
 import type { SiteHost, SiteLinkEntry, SiteOverlayEntry, SitePageEntry } from "spell/parser/core/core.types"
 import { followsEditsOf, isElementThunk, type Drawing } from "spell/parser/core/drawing"
-import { pageWaitingLoader } from "spell/parser/core/waiting"
+import { drawnWithLook, pageWaitingLoader } from "spell/parser/core/waiting"
 // Import directly to avoid circular import
 import { App } from "./App"
 import { Page } from "./Page"
@@ -354,8 +354,19 @@ export class SiteBase extends App {
    *   A page whose line says `, filling the window` makes its layout the window's height (`shownFillsWindow`).
    * - Not `<ui-page>`:  that's a whole window's frame and root, and Run draws the site inside the editor's page.
    * - A link on the page to one of its addresses goes there without leaving the page (`followLink()`).
+   * - What waits on its pages looks as its `loading` says:  `"skeleton"`, `"spinner"` (the default), `"none"`, or
+   *   a spinner's words (`core.drawLooking()`).
    */
   draw(): Drawing {
+    // how what waits looks on every page:  its own `loading` property, `with loading "skeleton"` (`WaitingLook`)
+    return drawnWithLook(
+      () => (this as unknown as { loading?: unknown }).loading,
+      () => this.drawFrame()
+    )
+  }
+
+  /** Its frame:  the page layouts drawn, and an open dialog or sidebar over them -- see `draw()`. */
+  private drawFrame(): Drawing {
     return h(
       "div",
       {

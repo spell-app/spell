@@ -3,10 +3,12 @@ import {
   type GraphData,
   type GraphEdge,
   type GraphEnd,
+  type GraphGroup,
   type GraphLayoutOptions,
   type GraphLayoutResult,
   type GraphMetrics,
   type GraphNode,
+  type GraphPlacedColumn,
   type GraphPlacedEdge,
   type GraphPlacedNode,
   type GraphPlacedPin,
@@ -25,7 +27,12 @@ import {
  *   3. a dummy point per layer a long edge crosses, so it routes round the boxes
  *   4. order within each layer by barycentre sweeps (each box moved towards its neighbours' mean), ports counted
  *   5. x by layer;  y pulled towards each box's neighbours, then pushed apart so nothing overlaps
- * - Edges come out as points;  `pathFor()` turns them into a smooth SVG path, leaving and entering ports sideways.
+ *   6. edges ROUTED square:  out of a port into the gap beside its layer (a gutter), down or up the gutter, across
+ *      each layer at a gap (a dummy's place, or a row gap beside a box), into the far port from its own side.  So
+ *      no edge runs under a box, a back edge goes round its node, and edges sharing a gutter get lanes of their own.
+ * - `groups` arrangement (`arrange`, or `auto` when nodes have a `group`):  a column per group instead of layers by
+ *   edges, its nodes stacked top to bottom by `order`, a header above;  edges routed the same way.
+ * - Edges come out as points;  `pathFor()` turns them into an SVG path with rounded corners.
  * - The enclosing node's ports (`boundary`) are pins in the first and last layers:
  *   a container's own ports sit where its child graph's pins are.
  * - Measured:  200 nodes and 400 edges in one level lay out in tens of milliseconds (`UIGraph`'s docs page).
@@ -39,8 +46,9 @@ export class GraphLayout {
     const level = layout.level(graph, prefix, options.boundary ?? [])
     const nodes: GraphPlacedNode[] = []
     const edges: GraphPlacedEdge[] = []
+    const columns: GraphPlacedColumn[] = []
     const { margin } = layout.metrics
-    layout.flatten(level, margin, margin, 0, nodes, edges)
+    layout.flatten(level, margin, margin, 0, nodes, edges, undefined, columns)
     const pins: GraphPlacedPin[] = level.pins.map((pin) => ({
       port: pin.port,
       side: pin.side,
@@ -48,13 +56,14 @@ export class GraphLayout {
       x: pin.x + margin,
       y: pin.y + margin
     }))
-    return { width: level.width + 2 * margin, height: level.height + 2 * margin, nodes, edges, pins }
+    return { width: level.width + 2 * margin, height: level.height + 2 * margin, nodes, edges, pins, columns }
   }
 
   /** `d` of an edge's `<path>`:  cubic curves through its points, leaving and entering along its sides. */
-  static pathFor(edge: Pick<GraphPlacedEdge, "points" | "fromSide" | "toSide">): string {
+  static pathFor(edge: Pick<GraphPlacedEdge, "points" | "fromSide" | "toSide" | "routed">): string {
     const { points, fromSide, toSide } = edge
     if (points.length < 2) return ""
+    if (edge.routed) return GraphLayout.squarePath(points)
     let d = `M${round(points[0].x)} ${round(points[0].y)}`
     for (let i = 1; i < points.length; i++) {
       const p = points[i - 1]
@@ -64,6 +73,30 @@ export class GraphLayout {
       const [c1x, c1y] = i === 1 ? GraphLayout.toward(p, fromSide, reach) : [p.x + forward * reach, p.y]
       const [c2x, c2y] = i === points.length - 1 ? GraphLayout.toward(q, toSide, reach) : [q.x - forward * reach, q.y]
       d += `C${round(c1x)} ${round(c1y)} ${round(c2x)} ${round(c2y)} ${round(q.x)} ${round(q.y)}`
+    }
+    return d
+  }
+
+  /** A square path through `points`, its corners rounded. */
+  private static squarePath(points: readonly GraphPoint[]): string {
+    const at = simplify(points)
+    let d = `M${round(at[0].x)} ${round(at[0].y)}`
+    for (let i = 1; i < at.length; i++) {
+      const p = at[i - 1]
+      const q = at[i]
+      const next = at[i + 1]
+      if (!next) {
+        d += `L${round(q.x)} ${round(q.y)}`
+        break
+      }
+      const r = Math.min(8, Math.hypot(q.x - p.x, q.y - p.y) / 2, Math.hypot(next.x - q.x, next.y - q.y) / 2)
+      const toward = (from: GraphPoint, to: GraphPoint, by: number) => {
+        const length = Math.hypot(to.x - from.x, to.y - from.y) || 1
+        return { x: from.x + ((to.x - from.x) * by) / length, y: from.y + ((to.y - from.y) * by) / length }
+      }
+      const a = toward(q, p, r)
+      const b = toward(q, next, r)
+      d += `L${round(a.x)} ${round(a.y)}Q${round(q.x)} ${round(q.y)} ${round(b.x)} ${round(b.y)}`
     }
     return d
   }
@@ -83,7 +116,8 @@ export class GraphLayout {
   }
 
   /** The middle of an edge's path, for its label. */
-  static middleOf(edge: Pick<GraphPlacedEdge, "points">): GraphPoint {
+  static middleOf(edge: Pick<GraphPlacedEdge, "points" | "labelAt">): GraphPoint {
+    if (edge.labelAt) return edge.labelAt
     const { points } = edge
     if (points.length % 2 === 1) return points[(points.length - 1) / 2]
     const p = points[points.length / 2 - 1]
@@ -188,8 +222,10 @@ export class GraphLayout {
       links.push({ edge, id, from, to, reversed: false, chain: [] })
     })
 
-    // 2. Layers.
-    this.assignLayers(units, links)
+    // 2. Layers:  by the edges, or a column per group.
+    const grouped = this.options.arrange !== "layers" && nodes.some((node) => node && node.group !== undefined)
+    const columnOf = grouped ? this.assignColumns(units, links, graph) : undefined
+    if (!grouped) this.assignLayers(units, links)
 
     // 3. Dummies along long edges.
     const layerCount = Math.max(0, ...units.map((unit) => unit.layer)) + 1
@@ -222,27 +258,61 @@ export class GraphLayout {
       }
     }
 
-    // 4. Order.
+    // 4. Order:  in columns, the nodes by `order` then label, the dummies under them.
     this.order(layers)
+    if (grouped) {
+      const rank = (unit: Unit) => (unit.kind === "node" ? 0 : 1)
+      const label = (unit: Unit) => (unit.node ? this.labelOf(unit.node) : "")
+      for (const layer of layers) {
+        layer.sort(
+          (a, b) =>
+            rank(a) - rank(b) ||
+            (rank(a) === 0
+              ? (a.node!.order ?? Infinity) - (b.node!.order ?? Infinity) ||
+                label(a).localeCompare(label(b), undefined, { numeric: true })
+              : a.order - b.order)
+        )
+        layer.forEach((unit, order) => (unit.order = order))
+      }
+    }
 
     // 5. Coordinates.
-    const { width, height } = this.place(layers, links)
+    const headers = columnOf?.map((column) => (column?.label ? this.textWidth(column.label, m.portFontSize) + 16 : 0))
+    const { width, height, layerX, layerWidth } = this.place(
+      layers,
+      links,
+      grouped,
+      headers,
+      grouped ? graph.rows : undefined
+    )
+
+    // 6. Routes.
+    const routes = this.route(links, layers, layerX, layerWidth)
+
+    const columns: LevelColumn[] = []
+    if (columnOf)
+      columnOf.forEach((column, index) => {
+        if (!column || !layers[index]?.some((unit) => unit.kind === "node")) return
+        columns.push({
+          id: column.id,
+          label: column.label ?? "",
+          x: layerX[index] - 10,
+          y: 0,
+          width: layerWidth[index] + 20,
+          height
+        })
+      })
 
     // Points per edge.
     const placedEdges: LevelEdge[] = []
-    for (const link of links) {
-      const [a, b] = link.reversed ? [link.to, link.from] : [link.from, link.to]
-      const points: GraphPoint[] = [{ x: a.unit.x + a.dx, y: a.unit.y + a.dy }]
-      for (let i = 1; i < link.chain.length - 1; i++) {
-        const dummy = link.chain[i]
-        points.push({ x: dummy.x, y: dummy.y + dummy.height / 2 })
-      }
-      points.push({ x: b.unit.x + b.dx, y: b.unit.y + b.dy })
-      if (link.reversed) points.reverse()
+    links.forEach((link, index) => {
+      const { points, labelAt } = routes[index]
       placedEdges.push({
         edge: link.edge,
         id: link.id,
         points,
+        routed: true,
+        labelAt,
         fromSide: link.from.side,
         toSide: link.to.side,
         fromPath: link.from.path,
@@ -250,7 +320,7 @@ export class GraphLayout {
         fromPin: link.from.unit.kind === "pin" ? link.from.unit.pin!.port.id : undefined,
         toPin: link.to.unit.kind === "pin" ? link.to.unit.pin!.port.id : undefined
       })
-    }
+    })
 
     const levelPins = [...pins.values()].map((pin) => ({
       port: pin.pin!.port,
@@ -265,6 +335,7 @@ export class GraphLayout {
       units: units.filter((unit) => unit.kind === "node"),
       edges: placedEdges,
       pins: levelPins,
+      columns,
       prefix
     }
   }
@@ -464,37 +535,35 @@ export class GraphLayout {
     }
   }
 
-  /** x by layer, y pulled towards neighbours without overlapping;  the level's size. */
-  private place(layers: Unit[][], links: Link[]): { width: number; height: number } {
+  /**
+   * x by layer, y pulled towards neighbours without overlapping;  the level's size, and each layer's x and width.
+   * - `grouped`:  each column's nodes stacked from the top under its header (`headers`, each one's width), as a rack
+   *   is drawn;  only pins are pulled towards what they reach.
+   */
+  private place(
+    layers: Unit[][],
+    links: Link[],
+    grouped = false,
+    headers?: number[],
+    rowOrder?: string[]
+  ): { width: number; height: number; layerX: number[]; layerWidth: number[] } {
     const m = this.metrics
-    const gapAfter = (unit: Unit) => (unit.kind === "dummy" ? 6 : m.nodeGap)
+    const gapAfter = (unit: Unit, next?: Unit) => GraphLayout.gapBetween(unit, next, m.nodeGap)
 
-    // x:  each layer as wide as its widest box, boxes centred in it;  busier gaps are wider.
+    // x:  each layer as wide as its widest box (or header), boxes centred in it;  busier gaps are wider.
     const crossings = new Array(layers.length).fill(0)
     for (const link of links) for (let i = 0; i + 1 < link.chain.length; i++) crossings[link.chain[i].layer]++
+    const layerX: number[] = []
+    const layerWidth: number[] = []
     let x = 0
     layers.forEach((layer, index) => {
-      const width = Math.max(0, ...layer.map((unit) => unit.width))
+      const width = Math.max(0, headers?.[index] ?? 0, ...layer.map((unit) => unit.width))
       for (const unit of layer) unit.x = x + (width - unit.width) / 2
-      x += width + m.layerGap + Math.min(60, Math.sqrt(crossings[index]) * 4)
+      layerX.push(x)
+      layerWidth.push(width)
+      x += width + m.layerGap + Math.min(60, Math.sqrt(crossings[index]) * 6)
     })
 
-    // y:  stacked, then pulled towards the neighbours' attachment points, in a few sweeps.
-    for (const layer of layers) {
-      let y = 0
-      for (const unit of layer) {
-        unit.y = y
-        y += unit.height + gapAfter(unit)
-      }
-    }
-    const tallest = Math.max(
-      0,
-      ...layers.map((layer) => layer.reduce((sum, unit) => sum + unit.height + gapAfter(unit), 0))
-    )
-    for (const layer of layers) {
-      const used = layer.reduce((sum, unit) => sum + unit.height + gapAfter(unit), 0)
-      for (const unit of layer) unit.y += (tallest - used) / 2
-    }
     const pull = (layer: Unit[], side: "up" | "down") => {
       const wanted = layer.map((unit) => {
         const near = [...(unit[side] ?? []), ...(unit[side === "up" ? "down" : "up"] ?? [])]
@@ -503,27 +572,306 @@ export class GraphLayout {
       })
       GraphLayout.separate(layer, wanted, gapAfter)
     }
-    for (let round = 0; round < 8; round++) {
-      if (round % 2 === 0) for (let i = 1; i < layers.length; i++) pull(layers[i], "up")
-      else for (let i = layers.length - 2; i >= 0; i--) pull(layers[i], "down")
+
+    // y:  stacked, then (layers) pulled towards the neighbours' attachment points, in a few sweeps.
+    // Room above for headers (none without labels:  a row's gap, for edges going round the top).
+    const top = grouped ? (headers?.some((width) => width > 0) ? m.headerHeight + 8 : m.nodeGap) : 0
+    for (const layer of layers) {
+      let y = top
+      layer.forEach((unit, index) => {
+        unit.y = y
+        y += unit.height + gapAfter(unit, layer[index + 1])
+      })
+    }
+    // Rows (a grid):  each row starts at one height across the columns, as tall as its tallest cell.
+    const rowOf = (unit: Unit) => (unit.kind === "node" ? unit.node!.row : undefined)
+    const rowIds = [
+      ...new Set(
+        layers
+          .flat()
+          .map(rowOf)
+          .filter((row): row is string => row !== undefined)
+      )
+    ]
+    if (grouped && rowIds.length) {
+      const listed = (rowOrder ?? []).filter((row) => rowIds.includes(row))
+      const rest = rowIds
+        .filter((row) => !listed.includes(row))
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+      const rows = [...listed, ...rest]
+      const cellHeight = (layer: Unit[], row: string) => {
+        const cell = layer.filter((unit) => rowOf(unit) === row)
+        return cell.reduce((sum, unit, index) => sum + unit.height + gapAfter(unit, cell[index + 1]), 0)
+      }
+      const rowY = new Map<string, number>()
+      let y = top
+      for (const row of rows) {
+        rowY.set(row, y)
+        y += Math.max(0, ...layers.map((layer) => cellHeight(layer, row))) + m.rowGap
+      }
+      const below = y
+      for (const layer of layers) {
+        const at = new Map(rowY)
+        const hasRows = layer.some((unit) => rowOf(unit) !== undefined)
+        let rest = hasRows ? below : top
+        const placed = layer.filter((unit) => unit.kind === "node")
+        placed.forEach((unit, index) => {
+          const row = rowOf(unit)
+          const next = placed.slice(index + 1).find((each) => rowOf(each) === row)
+          if (row === undefined) {
+            unit.y = rest
+            rest += unit.height + gapAfter(unit, next)
+          } else {
+            unit.y = at.get(row)!
+            at.set(row, unit.y + unit.height + gapAfter(unit, next))
+          }
+        })
+      }
+      // A long edge's dummies:  at the height its neighbours pull it to, moved to the nearest free gap in its column
+      // (not stacked under the rows, which sent edges on long jogs down and back).
+      const dummies = layers.map((layer) => layer.filter((unit) => unit.kind === "dummy"))
+      for (let round = 0; round < 4; round++)
+        layers.forEach((layer, index) => {
+          const taken = layer
+            .filter((unit) => unit.kind === "node")
+            .map((unit) => [unit.y - 8, unit.y + unit.height + 8])
+          for (const dummy of dummies[index]) {
+            const near = [...(dummy.up ?? []), ...(dummy.down ?? [])]
+            let y = near.length
+              ? near.reduce((sum, each) => sum + each.unit.y + each.theirs - each.mine, 0) / near.length
+              : dummy.y
+            for (let tries = 0; tries < taken.length + 1; tries++) {
+              const hit = taken.find(([low, high]) => y + dummy.height > low && y < high)
+              if (!hit) break
+              y = y + dummy.height / 2 - hit[0] < hit[1] - y ? hit[0] - dummy.height : hit[1]
+            }
+            dummy.y = Math.max(0, y)
+            taken.push([dummy.y - 3, dummy.y + dummy.height + 3])
+          }
+        })
+    }
+    if (grouped) {
+      const pinsOnly = (layer: Unit[]) => layer.length > 0 && layer.every((unit) => unit.kind === "pin")
+      for (let round = 0; round < 2; round++)
+        for (const layer of layers) if (pinsOnly(layer)) pull(layer, round % 2 ? "up" : "down")
+      for (const layer of layers)
+        if (pinsOnly(layer)) {
+          const shift = Math.max(0, top - Math.min(...layer.map((unit) => unit.y)))
+          for (const unit of layer) unit.y += shift
+        }
+    } else {
+      const tallest = Math.max(
+        0,
+        ...layers.map((layer) =>
+          layer.reduce((sum, unit, index) => sum + unit.height + gapAfter(unit, layer[index + 1]), 0)
+        )
+      )
+      for (const layer of layers) {
+        const used = layer.reduce((sum, unit, index) => sum + unit.height + gapAfter(unit, layer[index + 1]), 0)
+        for (const unit of layer) unit.y += (tallest - used) / 2
+      }
+      for (let round = 0; round < 8; round++) {
+        if (round % 2 === 0) for (let i = 1; i < layers.length; i++) pull(layers[i], "up")
+        else for (let i = layers.length - 2; i >= 0; i--) pull(layers[i], "down")
+      }
     }
 
-    // Normalised to start at 0.
+    // Normalised to start at 0, with a row's gap above and below for edges going round.
     const all = layers.flat()
-    const top = Math.min(0, ...all.map((unit) => unit.y))
-    for (const unit of all) unit.y -= top
+    const least = Math.min(0, ...all.map((unit) => unit.y)) - (grouped ? 0 : m.nodeGap)
+    for (const unit of all) unit.y -= least
     const width = Math.max(0, ...all.map((unit) => unit.x + unit.width))
-    const height = Math.max(0, ...all.map((unit) => unit.y + unit.height))
-    return { width, height }
+    const height = Math.max(0, ...all.map((unit) => unit.y + unit.height)) + m.nodeGap
+    return { width, height, layerX, layerWidth }
+  }
+
+  /** Columns:  a layer per group, in the graph's `groups` order, then the rest, then nodes with none;  pins at the sides. */
+  private assignColumns(units: Unit[], links: Link[], graph: GraphData): (GraphGroup | undefined)[] {
+    const nodes = units.filter((unit) => unit.kind === "node")
+    const used = new Set(nodes.map((unit) => unit.node!.group).filter((group): group is string => group !== undefined))
+    const order: GraphGroup[] = []
+    for (const group of graph.groups ?? [])
+      if (used.has(group.id) && !order.some((each) => each.id === group.id)) order.push(group)
+    for (const id of used) if (!order.some((each) => each.id === id)) order.push({ id, label: id })
+    const ungrouped = nodes.some((unit) => unit.node!.group === undefined)
+    const pins = units.filter((unit) => unit.kind === "pin")
+    const offset = pins.some((pin) => pin.pin!.side === "left") ? 1 : 0
+    for (const unit of nodes) {
+      const index = order.findIndex((each) => each.id === unit.node!.group)
+      unit.layer = offset + (index < 0 ? order.length : index)
+    }
+    const last = offset + order.length + (ungrouped ? 1 : 0) - 1
+    for (const pin of pins) pin.layer = pin.pin!.side === "left" ? 0 : last + 1
+    for (const link of links) link.reversed = link.from.unit.layer > link.to.unit.layer
+    const columns: (GraphGroup | undefined)[] = []
+    order.forEach((group, index) => (columns[offset + index] = group))
+    if (ungrouped) columns[offset + order.length] = { id: "", label: "" }
+    return columns
+  }
+
+  /**
+   * Each link's route, square, in draw order (from its start to its end):  never under a box.
+   * - Out of its start port into the gutter on that side;  each dummy is a gap its layer leaves free, crossed
+   *   level;  the end port is entered from its side's gutter, crossing the end's layer at a row gap first if need be
+   *   (a back edge, an edge within one column).
+   * - Within one layer (a column):  round whichever side, left or right, is less busy along its length.
+   * - Lanes:  the vertical runs that overlap in a gutter are spread across it, so parallel edges don't lie on one
+   *   another;  runs that don't overlap share a lane.
+   */
+  private route(
+    links: Link[],
+    layers: Unit[][],
+    layerX: number[],
+    layerWidth: number[]
+  ): { points: GraphPoint[]; labelAt?: GraphPoint }[] {
+    const m = this.metrics
+    const count = layers.length
+    const gutterX = (g: number) => {
+      if (count === 0) return 0
+      if (g <= 0) return layerX[0] - m.layerGap / 2
+      if (g >= count) return layerX[count - 1] + layerWidth[count - 1] + m.layerGap / 2
+      return (layerX[g - 1] + layerWidth[g - 1] + layerX[g]) / 2
+    }
+    const gutterRoom = (g: number) =>
+      g <= 0 || g >= count ? m.layerGap * 0.6 : (layerX[g] - layerX[g - 1] - layerWidth[g - 1]) * 0.7
+    const gapAfter = (unit: Unit, next?: Unit) => GraphLayout.gapBetween(unit, next, m.nodeGap)
+
+    /** A free y to cross `layer` at, near `y` (and near `unit`, when it's in that layer). */
+    const crossingY = (layer: number, y: number, unit?: Unit) => {
+      const list = layers[layer] ?? []
+      const gaps: number[] = []
+      if (list.length) gaps.push(list[0].y - m.nodeGap / 2)
+      list.forEach((each, index) => gaps.push(each.y + each.height + gapAfter(each, list[index + 1]) / 2))
+      const near = unit && unit.layer === layer ? unit.y + unit.height / 2 : y
+      return gaps.reduce((best, gap) => (Math.abs(gap - near) < Math.abs(best - near) ? gap : best), gaps[0] ?? y)
+    }
+
+    type Run = { route: number; index: number; g: number; low: number; high: number }
+    const runs: Run[] = []
+    /**
+     * `link`'s route.  An edge whose ends are in one layer (a column's) must cross it once:  near its END (its long
+     * run in the start's gutter) or near its START (its long run in the end's gutter);  `nearStart` picks.
+     */
+    const routeOf = (link: Link, route: number, nearStart: boolean, into: Run[]): GraphPoint[] => {
+      const chain = link.reversed ? [...link.chain].reverse() : link.chain
+      const { from, to } = link
+      const start = { x: from.unit.x + from.dx, y: from.unit.y + from.dy }
+      const end = { x: to.unit.x + to.dx, y: to.unit.y + to.dy }
+      const points: GraphPoint[] = [start]
+      let g = from.side === "left" ? from.unit.layer : from.unit.layer + 1
+      let y = start.y
+      /** Down or up the gutter `g` to `ny`. */
+      const along = (ny: number) => {
+        points.push({ x: gutterX(g), y })
+        into.push({ route, index: points.length - 1, g, low: Math.min(y, ny), high: Math.max(y, ny) })
+        points.push({ x: gutterX(g), y: ny })
+        y = ny
+      }
+      /** Across layer `layer` at `ny`, to its other gutter. */
+      const across = (layer: number, ny: number) => {
+        along(ny)
+        g = g === layer ? layer + 1 : layer
+      }
+      for (const dummy of chain.slice(1, -1)) {
+        const layer = dummy.layer
+        while (g !== layer && g !== layer + 1) {
+          const crossing = g < layer ? g : g - 1
+          across(crossing, crossingY(crossing, y))
+        }
+        across(layer, dummy.y + dummy.height / 2)
+      }
+      const need = to.side === "left" ? to.unit.layer : to.unit.layer + 1
+      while (g !== need) {
+        const crossing = g < need ? g : g - 1
+        const near = crossing === from.unit.layer && (nearStart || crossing !== to.unit.layer) ? from.unit : to.unit
+        across(
+          crossing,
+          crossingY(crossing, y, crossing === to.unit.layer || crossing === from.unit.layer ? near : undefined)
+        )
+      }
+      along(end.y)
+      points.push(end)
+      return points
+    }
+
+    /** How busy `candidate`'s runs would make their gutters:  the length they share with the runs already there. */
+    const busy = (candidate: Run[]) => {
+      let load = 0
+      for (const run of candidate)
+        for (const other of runs)
+          if (other.g === run.g) load += Math.max(0, Math.min(run.high, other.high) - Math.max(run.low, other.low) + 4)
+      return load
+    }
+
+    // Edges between layers first;  then the ones within a layer (a column), longest first, each round the
+    // less busy side.
+    const routes: GraphPoint[][] = new Array(links.length)
+    const within = (link: Link) => link.from.unit.layer === link.to.unit.layer && link.chain.length <= 2
+    links.forEach((link, route) => {
+      if (!within(link)) routes[route] = routeOf(link, route, false, runs)
+    })
+    const span = (link: Link) => Math.abs(link.from.unit.y + link.from.dy - (link.to.unit.y + link.to.dy))
+    const inLayer = links.map((link, route) => ({ link, route })).filter(({ link }) => within(link))
+    inLayer.sort((a, b) => span(b.link) - span(a.link))
+    for (const { link, route } of inLayer) {
+      const nearEnd: Run[] = []
+      const nearStart: Run[] = []
+      const a = routeOf(link, route, false, nearEnd)
+      const b = routeOf(link, route, true, nearStart)
+      const pickStart = busy(nearStart) < busy(nearEnd)
+      routes[route] = pickStart ? b : a
+      runs.push(...(pickStart ? nearStart : nearEnd))
+    }
+
+    // Lanes:  per gutter, runs that overlap side by side;  runs that don't share a lane.
+    const byGutter = new Map<number, Run[]>()
+    for (const run of runs) {
+      if (run.high - run.low < 0.5) continue
+      const list = byGutter.get(run.g)
+      if (list) list.push(run)
+      else byGutter.set(run.g, [run])
+    }
+    for (const [g, list] of byGutter) {
+      list.sort((a, b) => a.low - b.low || a.high - b.high)
+      const lastHigh: number[] = []
+      const laneOf = list.map((run) => {
+        let lane = lastHigh.findIndex((high) => high + 6 < run.low)
+        if (lane < 0) lane = lastHigh.push(run.high) - 1
+        else lastHigh[lane] = run.high
+        return lane
+      })
+      const step = Math.min(7, gutterRoom(g) / Math.max(1, lastHigh.length))
+      list.forEach((run, index) => {
+        const dx = (laneOf[index] - (lastHigh.length - 1) / 2) * step
+        const points = routes[run.route]
+        for (const at of [run.index, run.index + 1]) points[at] = { x: points[at].x + dx, y: points[at].y }
+      })
+    }
+
+    return routes.map((points) => {
+      const clean = simplify(points)
+      let best = 0
+      let labelAt: GraphPoint | undefined
+      for (let i = 1; i < clean.length; i++) {
+        const p = clean[i - 1]
+        const q = clean[i]
+        const length = Math.abs(q.x - p.x) + Math.abs(q.y - p.y)
+        if (length > best) {
+          best = length
+          labelAt = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 }
+        }
+      }
+      return { points: clean, labelAt }
+    })
   }
 
   /** Put each unit of `layer` as near its `wanted` y as it can, in order, without overlaps. */
-  private static separate(layer: Unit[], wanted: number[], gapAfter: (unit: Unit) => number) {
+  private static separate(layer: Unit[], wanted: number[], gapAfter: (unit: Unit, next?: Unit) => number) {
     // Blocks of units pushed together sit at the mean of what they want (pool adjacent violators).
     type Block = { start: number; end: number; top: number; height: number; weight: number; sum: number }
     const blocks: Block[] = []
     layer.forEach((unit, index) => {
-      const height = unit.height + gapAfter(unit)
+      const height = unit.height + gapAfter(unit, layer[index + 1])
       let block: Block = { start: index, end: index, top: wanted[index], height, weight: 1, sum: wanted[index] }
       while (blocks.length) {
         const previous = blocks[blocks.length - 1]
@@ -546,9 +894,17 @@ export class GraphLayout {
       let y = block.top
       for (let i = block.start; i <= block.end; i++) {
         layer[i].y = y
-        y += layer[i].height + gapAfter(layer[i])
+        y += layer[i].height + gapAfter(layer[i], layer[i + 1])
       }
     }
+  }
+
+  /** The room between `unit` and the next one down its layer:  the larger of their `spacing`s;  a dummy's, small. */
+  private static gapBetween(unit: Unit, next: Unit | undefined, nodeGap: number): number {
+    if (unit.kind === "dummy") return 6
+    const spacing = (each: Unit | undefined) =>
+      each?.kind === "node" ? (each.node!.spacing ?? nodeGap) : each?.kind === "dummy" ? 0 : nodeGap
+    return next ? Math.max(spacing(unit), spacing(next)) : spacing(unit)
   }
 
   ////////////////
@@ -563,8 +919,10 @@ export class GraphLayout {
     depth: number,
     nodes: GraphPlacedNode[],
     edges: GraphPlacedEdge[],
-    container?: { unit: Unit; x: number; y: number }
+    container?: { unit: Unit; x: number; y: number },
+    columns?: GraphPlacedColumn[]
   ) {
+    for (const column of level.columns) columns?.push({ ...column, x: column.x + x, y: column.y + y, depth })
     for (const unit of level.units) {
       const ux = x + unit.x
       const uy = y + unit.y
@@ -589,11 +947,16 @@ export class GraphLayout {
         isLoading: unit.isLoading
       })
       if (unit.child && unit.childOffset)
-        this.flatten(unit.child, ux + unit.childOffset.x, uy + unit.childOffset.y, depth + 1, nodes, edges, {
-          unit,
-          x: ux,
-          y: uy
-        })
+        this.flatten(
+          unit.child,
+          ux + unit.childOffset.x,
+          uy + unit.childOffset.y,
+          depth + 1,
+          nodes,
+          edges,
+          { unit, x: ux, y: uy },
+          columns
+        )
     }
     const graphPath = level.prefix
     for (const edge of level.edges) {
@@ -615,7 +978,9 @@ export class GraphLayout {
         points,
         fromSide: container && edge.fromPin !== undefined ? "right" : edge.fromSide,
         toSide: container && edge.toPin !== undefined ? "left" : edge.toSide,
-        depth
+        depth,
+        routed: edge.routed,
+        labelAt: edge.labelAt && { x: edge.labelAt.x + x, y: edge.labelAt.y + y }
       })
     }
   }
@@ -662,7 +1027,12 @@ type LevelEdge = {
   toPath: string
   fromPin?: string
   toPin?: string
+  routed?: boolean
+  labelAt?: GraphPoint
 }
+
+/** A column of a level, relative to it. */
+type LevelColumn = { id: string; label: string; x: number; y: number; width: number; height: number }
 
 /** One graph laid out, relative to its own top left. */
 type Level = {
@@ -671,12 +1041,32 @@ type Level = {
   units: Unit[]
   edges: LevelEdge[]
   pins: { port: GraphPort; side: "left" | "right"; x: number; y: number }[]
+  columns: LevelColumn[]
   prefix: string
 }
 
 /** A port's votes seen from inside:  a boundary port that edges START from inside is an input, on the left. */
 function flip(votes: { asSource: number; asTarget: number }) {
   return { asSource: votes.asTarget, asTarget: votes.asSource }
+}
+
+/** `points` without repeats or points in the middle of a straight run. */
+function simplify(points: readonly GraphPoint[]): GraphPoint[] {
+  const out: GraphPoint[] = []
+  for (const point of points) {
+    const last = out[out.length - 1]
+    if (last && Math.abs(last.x - point.x) < 0.01 && Math.abs(last.y - point.y) < 0.01) continue
+    const before = out[out.length - 2]
+    if (
+      before &&
+      last &&
+      ((Math.abs(before.x - last.x) < 0.01 && Math.abs(last.x - point.x) < 0.01) ||
+        (Math.abs(before.y - last.y) < 0.01 && Math.abs(last.y - point.y) < 0.01))
+    )
+      out[out.length - 1] = point
+    else out.push(point)
+  }
+  return out
 }
 
 /** A coordinate, to a tenth. */

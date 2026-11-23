@@ -62,10 +62,9 @@ export class Artículo extends View {
           <es-casilla name="comprado" aria-label="Lo tengo" />
           <es-texto class="how-much" negrita={true}>{this.porción}</es-texto>
           <es-texto class="name">{this.nombre}</es-texto>
-          <es-texto class="for" color="gris" tamano="pequeño" hidden={this.receta !== "" ? undefined : true}>
-            {"para "}
-            {this.receta}
-          </es-texto>
+          {core.drawIf(() => this.receta !== "", () => <>
+            <es-texto class="for" color="gris" tamano="pequeño">para {this.receta}</es-texto>
+          </>)}
           {core.drawAction(this, "sacar", { "icon-only": true, appearance: "tertiary" })}
         </es-pila>
       </es-formulario>
@@ -123,7 +122,8 @@ export const planilla = core.place(new Planilla(), {
   name: "planilla",
   kind: "sheet",
   at: "/api/places/spaces/@spell/examples/ListaDeLaCompra/__data/shopping.csv",
-  unclearNumbers: ",", firstReads: () => [[Artículo, { filter: { comprado: true } }], [Artículo, { filter: { comprado: false } }]] })
+  unclearNumbers: ","
+})
 
 // -----------
 core.heading("Un artículo de la lista")

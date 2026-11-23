@@ -54,7 +54,8 @@ import {
   ShowThemAtATime,
   ShowThemIn,
   ShowThemPaged,
-  WhileWaiting
+  WhileWaiting,
+  WhileWaitingSay
 } from "./ReadRider"
 import { NextPageIn } from "./NextPageIn"
 import { NextPageInLink } from "./NextPageInLink"
@@ -87,6 +88,7 @@ import { EveryThingMatching } from "./EveryThingMatching"
 import { SearchedAt } from "./SearchedAt"
 import { CollectionSearchedWith } from "./CollectionSearchedWith"
 import { AskedBy } from "./AskedBy"
+import { ReadOnStartup } from "./ReadOnStartup"
 import { ThereAreThings } from "./ThereAreThings"
 import { AnyServerCallFails } from "./AnyServerCallFails"
 import { ErrorIs } from "./ErrorIs"
@@ -1082,7 +1084,21 @@ places.addRule(AskedBy, {
             '  collections: { forecasts: { askedBy: ["latitude", "longitude"] } }',
             "})"
           ]
-        ]
+        ],
+        {
+          title: "fields of several words, joined, one a list of values",
+          input:
+            'lab is a web server at "https://lab.test"\n\t- measurements are asked for by their device-ids and instance-id',
+          js: [
+            "export class Lab extends Place {}",
+            "export const lab = core.place(new Lab(), {",
+            '  name: "lab",',
+            '  kind: "web server",',
+            '  at: "https://lab.test",',
+            '  collections: { measurements: { askedBy: ["deviceIds", "instanceId"] } }',
+            "})"
+          ]
+        }
       ]
     },
     {
@@ -1090,6 +1106,33 @@ places.addRule(AskedBy, {
       tests: [
         { title: "only under a place", input: "forecasts are asked for by their latitude and longitude", js: undefined }
       ]
+    }
+  ]
+})
+places.addRule(ReadOnStartup, {
+  syntax: "{collection:plural_type} are read on startup",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'shop is a web server at "https://shop.test"\n\t- items are read on startup\nan item is a thing',
+          [
+            "export class Shop extends Place {}",
+            "export const shop = core.place(new Shop(), {",
+            '  name: "shop",',
+            '  kind: "web server",',
+            '  at: "https://shop.test",',
+            '  readOnStartup: ["Item"]',
+            "})",
+            "export class Item extends Thing {}"
+          ]
+        ]
+      ]
+    },
+    {
+      compileAs: "statement",
+      tests: [{ title: "only under a place", input: "items are read on startup", js: undefined }]
     }
   ]
 })
@@ -1404,6 +1447,15 @@ places.addRule(TypeVerified, {
   ]
 })
 
+places.addRule(WhileWaitingSay, {
+  syntax: "while (waiting|loading) say {text:expression}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [['while waiting say "Loading Jobs..."', 'core.readRider("waitingSay", () => "Loading Jobs...")']]
+    }
+  ]
+})
 places.addRule(WhileWaiting, { syntax: "while (waiting|loading) (:|,)? {statement_body}?" })
 places.addRule(IfThereAreNone, { syntax: "if there are none (:|,)? {statement_body}?" })
 places.addRule(IfThatFailsSay, { syntax: "if that fails say {text:expression}" })

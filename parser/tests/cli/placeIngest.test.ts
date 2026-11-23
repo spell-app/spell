@@ -4,7 +4,15 @@ import { join } from "node:path"
 
 import { afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { collectionsIn, diskFiles, fetchWithFiles, placeUpdate, readThroughSpell } from "spell/parser/cli/placeIngest"
+import {
+  collectionsIn,
+  diskFiles,
+  fetchWithFiles,
+  placeUpdate,
+  readThroughSpell,
+  rowsFrom,
+  secondsIn
+} from "spell/parser/cli/placeIngest"
 import type { PlaceDescriptionOnDisk } from "spell/parser/spell/ingest/ingest.types"
 
 /**
@@ -28,6 +36,15 @@ describe("collectionsIn", () => {
     expect(
       collectionsIn("forecasts=/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&forecast_days=2,/users")
     ).toEqual(["forecasts=/v1/forecast?hourly=temperature_2m,precipitation,wind_speed_10m&forecast_days=2", "/users"])
+  })
+})
+
+describe("--rows and --check-every", () => {
+  test("a count;  a time in seconds, minutes or hours;  anything else refused, saying what to give", () => {
+    expect(rowsFrom("20")).toBe(20)
+    expect(() => rowsFrom("0")).toThrow(/--rows is a count/)
+    expect([secondsIn("30"), secondsIn("30s"), secondsIn("5m"), secondsIn("1h")]).toEqual([30, 30, 300, 3600])
+    expect(() => secondsIn("soon")).toThrow(/--check-every is a time/)
   })
 })
 
