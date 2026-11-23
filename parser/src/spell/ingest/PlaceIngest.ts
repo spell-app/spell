@@ -172,6 +172,7 @@ export class PlaceIngest {
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.notePictures(description, ask.pictures, reader)
     if (ask.triesWrites) await this.noteWrites(description, look, reader)
+    leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
     awayFromTypesBeside(description, await files.otherSpellBeside(file))
     await this.readWithAgent(description, look, { keepName: !!ask.name })
     await this.keepPrivate(description, look, file)
@@ -239,6 +240,7 @@ export class PlaceIngest {
       })
     })
     const description = describeLook(look, { kind, name })
+    leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
     if (keySecret) description.about.keySecret = keySecret
     if (keyGoes) description.about.keyGoes = keyGoes
     if (keySecret && !specAt) await this.noteKeyIfSet(description, look)
@@ -1230,19 +1232,57 @@ const DECLARED_TYPE = /^(?:a|an|un|una) (?:"([^"\n]+)"|([\p{L}\d ]+?)) (?:is a t
  * JSONPlaceholder's `user`, beside GitHub's, is a `jsonplaceholder user`.
  */
 function awayFromTypesBeside(description: PlaceDescription, others: readonly string[]): void {
-  const declared = new Set(
-    others.flatMap((text) =>
-      [...text.matchAll(DECLARED_TYPE)].map(([, quoted, plain]) => (quoted ?? plain)!.toLowerCase())
-    )
+  // each type declared beside it, by the place whose file declares it:  a file of a person's own, by none
+  const declared = new Map(
+    others.flatMap((text) => {
+      const place = placesIn(text)[0]?.name
+      return [...text.matchAll(DECLARED_TYPE)].map(([, quoted, plain]) => [(quoted ?? plain)!.toLowerCase(), place])
+    })
   )
   const { name } = description.about
   let isRenamed = false
   for (const collection of Object.values(description.collections)) {
-    if (!declared.has(collection.type.toLowerCase())) continue
+    const words = collection.type.toLowerCase()
+    if (collection.leftOut || !declared.has(words)) continue
+    const other = declared.get(words)
     collection.type = `${name} ${collection.type}`
     isRenamed = true
+    // the other half:  the one already there keeps the bare name till a person renames it, which every update keeps
+    if (other !== undefined && !words.startsWith(`${other.toLowerCase()} `)) {
+      description.notes.push(
+        `"${words}" is ${other}'s too, so this one is a "${collection.type}":  to tell them apart both ways, rename ${other}'s in its own file, a "${other} ${words}" (spell place update keeps a name you give).`
+      )
+    }
   }
   if (isRenamed) renameCollections(description)
+}
+
+/**
+ * SIDE EFFECT:  a list whose rows are another place's is left out, saying which place has them (`others`):
+ * a server's copy of another's, `/api/v1/proxy/jobs` beside the other place's `/api/jobs`.
+ * - The same list:  one with no fields of its own (its description says nothing of its rows), whose address ends in
+ *   the same word as one of another place's, which has fields.
+ * - A list with fields of its own, of the same name, is its own:  named apart (`awayFromTypesBeside()`).
+ */
+function leaveOutCopies(description: PlaceDescription, others: readonly PlaceDescription[]): void {
+  const lastWord = (at: string) => at.replace(/[?#].*$/, "").replace(/\/+$/, "").split("/").pop()!.toLowerCase()
+  const theirs = new Map(
+    others.flatMap(({ about, collections }) =>
+      Object.entries(collections)
+        .filter(([, each]) => !each.leftOut && !/\{/.test(each.at) && Object.keys(each.fields).length > 0)
+        .map(([list, { at }]) => [lastWord(at), { place: about.name, list }] as const)
+    )
+  )
+  for (const [name, collection] of Object.entries(description.collections)) {
+    if (collection.leftOut || Object.keys(collection.fields).length || /\{/.test(collection.at)) continue
+    const copied = theirs.get(lastWord(collection.at))
+    if (!copied) continue
+    leaveOutCollection(
+      description,
+      name,
+      `its rows are ${copied.place}'s ${copied.list.replace(/_/g, " ")}, read there:  this is a copy of them`
+    )
+  }
 }
 
 /**

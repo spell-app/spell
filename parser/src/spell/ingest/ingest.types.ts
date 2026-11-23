@@ -48,6 +48,11 @@ export type IngestFiles = {
   /** The text of every other Spell file beside this one:  what else may use what it declares. */
   otherSpellBeside(path: string): Promise<string[]>
   /**
+   * The description of every other place beside this one (`<Name>.api.json5`), as `descriptionFromDisk()` reads it:
+   * which lists are another place's.  Left out:  none.
+   */
+  otherDescriptionsBeside?(path: string): Promise<PlaceDescription[]>
+  /**
    * Each deployment of the place named `place`, listed in the project's file of the Spell file `file` (epic `data` P49, Q49):
    * `"places": { "netbox": { "dev": { "at": "...", "key": "NETBOX_DEV_KEY" }, "production": { ..., "readOnly": true } } }`.
    * - Left out, or none listed:  `undefined`.

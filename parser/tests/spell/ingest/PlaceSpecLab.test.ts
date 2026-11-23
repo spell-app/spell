@@ -13,6 +13,7 @@ import type { IngestAsk, IngestFiles, PlaceDescription } from "spell/parser/spel
  *   fields of several words, joined (`device-ids`), one a list of values.
  * - A list wrapped in its answer, `{ sources: [...], warnings: [...], next_offset }`:  unwrapped, as no other is.
  * - A list whose answer it describes as `{}`:  kept with no fields, for a read to fill, its id a slug.
+ * - Beside a shop's place:  a device of each (named apart), and the shop's jobs, copied by the lab untyped (left out).
  * - A question Spell can't say, `1st_page`:  its line is left out, the rest written.
  */
 
@@ -94,10 +95,10 @@ const DOCUMENT: OpenApiDocument = {
 async function ingestOf(
   document: OpenApiDocument = DOCUMENT,
   into = "Lab.api.spell",
-  ask: Partial<IngestAsk> = {}
+  ask: Partial<IngestAsk> = {},
+  beside = { texts: new Map<string, string>(), descriptions: new Map<string, PlaceDescription>() }
 ) {
-  const texts = new Map<string, string>()
-  const descriptions = new Map<string, PlaceDescription>()
+  const { texts, descriptions } = beside
   const files: IngestFiles = {
     read: async (path) => texts.get(path),
     write: async (path, text) => void texts.set(path, text),
@@ -107,7 +108,9 @@ async function ingestOf(
     },
     writeDescription: async (path, description) =>
       void descriptions.set(path, descriptionFromDisk(structuredClone(description))),
-    otherSpellBeside: async () => []
+    otherSpellBeside: async (path) => [...texts].filter(([at]) => at !== path).map(([, text]) => text),
+    otherDescriptionsBeside: async (path) =>
+      [...descriptions].filter(([at]) => at !== path.replace(/\.spell$/, ".json5")).map(([, each]) => each)
   }
   // what it serves as its description:  a test changes it, for a later look
   const fetch = { document, answer: (_url: URL): Response => new Response("nope", { status: 404 }) }
@@ -123,6 +126,7 @@ async function ingestOf(
     now: () => new Date("2026-11-23T12:00:00Z")
   })
   const result = await ingest.add({ address: LAB, spec: SPEC_AT, into, name: "lab", ...ask })
+  // the files beside it:  another place's, ingested before
   const description = descriptions.get(into.replace(/\.spell$/, ".json5"))!
   return { ingest, result, texts, descriptions, fetch, spell: texts.get(into)!, description }
 }
@@ -237,5 +241,54 @@ describe("read only, rows at a time, how often it's checked:  as it was told", (
     expect(again).toMatch(/^\tit is read only$/m)
     expect(again).toMatch(/^\tit gives up to 20 at a time$/m)
     expect(again).toMatch(/^\tcheck it every 30 seconds$/m)
+  })
+})
+
+describe("beside another place", () => {
+  /** A shop's place, ingested first:  its own devices and jobs, each typed. */
+  const SHOP: OpenApiDocument = {
+    openapi: "3.1.0",
+    info: { title: "Shop", version: "1.0.0" },
+    paths: {
+      "/api/devices": { get: { responses: listOf("Device") } },
+      "/api/jobs": { get: { responses: listOf("Job") } }
+    },
+    components: {
+      schemas: {
+        Device: { type: "object", properties: { id: { type: "string" }, aisle: { type: "string" } } },
+        Job: { type: "object", properties: { id: { type: "string" }, state: { type: "string" } } }
+      }
+    }
+  } as OpenApiDocument
+
+  /** The lab, with its copy of the shop's jobs:  a route its description says nothing of. */
+  const WITH_COPY = structuredClone(DOCUMENT)
+  WITH_COPY.paths!["/api/v1/proxy/jobs"] = {
+    get: { responses: { "200": { description: "OK", content: { "application/json": { schema: {} } } } } }
+  }
+
+  /** The shop ingested into Shop.api.spell, then the lab beside it. */
+  async function besideShop() {
+    const beside = { texts: new Map<string, string>(), descriptions: new Map<string, PlaceDescription>() }
+    const shop = await ingestOf(SHOP, "Shop.api.spell", { name: "shop" }, beside)
+    expect(errorsOf(shop.spell, "/Shop.api.spell")).toEqual([])
+    return ingestOf(WITH_COPY, "Lab.api.spell", {}, beside)
+  }
+
+  test("a list whose rows are the other place's is left out, saying which place has them", async () => {
+    const { spell, description } = await besideShop()
+    expect(spell).not.toMatch(/proxy/)
+    expect(description.collections.jobs!.leftOut).toMatch(/its rows are shop's jobs, read there/)
+    expect(description.notes).toContainEqual(expect.stringMatching(/^Left out the collection "jobs":  its rows are shop's jobs/))
+  })
+
+  test("a type both have is named apart here, and the note says to rename the other's in its own file", async () => {
+    const { spell, description, texts } = await besideShop()
+    expect(spell).toMatch(/^a "lab device" is a thing$/m)
+    expect(description.notes).toContainEqual(
+      expect.stringMatching(/^"device" is shop's too, so this one is a "lab device":  .*rename shop's in its own file, a "shop device"/)
+    )
+    const project = [...texts].map(([path, contents]) => ({ path: `/${path}`, contents }))
+    expect(parseSpellProject(project).files.flatMap(({ errors }) => errors)).toEqual([])
   })
 })

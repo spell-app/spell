@@ -16,7 +16,8 @@ import { json5Edited } from "spell/util/node/json5"
 import { peekProp, schemaOf, whileOnlyShowing } from "spell/util/reactive"
 import { CLI } from "spell/cli"
 import type { KeyGoes } from "spell/places/keyGoes"
-import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
+import { descriptionPathFor, PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
+import { descriptionFromDisk } from "spell/parser/spell/ingest/PlaceOnDisk"
 import {
   IngestStopped,
   type AskSomeone,
@@ -336,6 +337,16 @@ export const diskFiles: IngestFiles = {
     }
     return project.places?.[place]
   },
+  otherDescriptionsBeside: async (path) =>
+    filesBeside(path)
+      .filter((name) => /\.api(?:\.[a-z]{2})?\.json5$/.test(name) && name !== basename(descriptionPathFor(path)))
+      .flatMap((name) => {
+        try {
+          return [descriptionFromDisk(JSON5.parse(readFileSync(join(dirname(path), name), "utf8")))]
+        } catch {
+          return []
+        }
+      }),
   otherSpellBeside: async (path) =>
     filesBeside(path)
       .filter((name) => name.endsWith(".spell") && name !== basename(path))
