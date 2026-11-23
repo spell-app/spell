@@ -326,7 +326,7 @@ export const CORE_MESSAGES = {
   "page-number-of": "Page {page} of {pages}",
   "page-showing": "Showing {first}-{last} of {count}",
   "page-showing-more": "Showing {first}-{last} of {count}+",
-  "page-size": "Rows a page",
+  "page-size": "Rows per page",
   "read-failed": "Can't read this right now:  {why}",
   "read-too-soon": "The server asks to wait:  try again in a little while",
   "read-too-soon-seconds": "The server asks to wait:  it'll be tried again in {seconds} seconds",

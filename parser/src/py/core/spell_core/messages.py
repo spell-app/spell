@@ -198,7 +198,7 @@ MESSAGES: dict[str, str] = {
     "page-number-of": "Page {page} of {pages}",
     "page-showing": "Showing {first}-{last} of {count}",
     "page-showing-more": "Showing {first}-{last} of {count}+",
-    "page-size": "Rows a page",
+    "page-size": "Rows per page",
     "site-no-such-page": "No such page",
     "site-page-waiting": "This page hasn't been made yet.",
     "site-create-page": "Would you like to create one?",
