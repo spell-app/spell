@@ -83,6 +83,8 @@ export type GraphPort = {
   side?: GraphPortSide
   /** A word for what sort of port it is:  class and part `kind-<word>`. */
   kind?: string
+  /** Anything the page wants to keep with the port:  never read by the graph. */
+  data?: unknown
 }
 
 /**

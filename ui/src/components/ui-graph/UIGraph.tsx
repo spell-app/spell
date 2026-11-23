@@ -15,6 +15,7 @@ import {
   type GraphData,
   type GraphEdge,
   type GraphLayoutResult,
+  type GraphMetrics,
   type GraphNode,
   type GraphPlacedColumn,
   type GraphPlacedEdge,
@@ -94,11 +95,11 @@ export class DOMGraphElement extends E.DOMElement<UIGraph> {
  ****************/
 export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   @E.proto static vocabulary = graphVocabulary
-  @E.protoMerged static elementSetup = {
+  @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { heights: heightsCSS, graph: graphCSS },
     delegatesFocus: false,
     DOMElement: DOMGraphElement
-  } satisfies Partial<E.ElementSetup>
+  }
 
   ////////////////
   // ## Hooks:  a subclass overrides these to restyle and relabel
@@ -134,8 +135,11 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
     return undefined
   }
 
-  /** The sizes the layout works in;  a subclass may make its boxes taller, its layers wider apart ... */
-  get metrics(): typeof GRAPH_METRICS {
+  /**
+   * The sizes the layout works in, and the drawing draws at.
+   * - A subclass may return its own:  taller boxes, layers wider apart ...
+   */
+  get metrics(): GraphMetrics {
     return GRAPH_METRICS
   }
 
@@ -223,7 +227,7 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
    * - Override to draw a node another way;  stay inside `placed`'s box, as the layout sized it.
    */
   renderNode(placed: GraphPlacedNode): JSX.Element {
-    const { fontSize } = GRAPH_METRICS
+    const { fontSize, paddingX, toggleWidth, headerHeight } = this.metrics
     const { x, y, width, height, isOpen } = placed
     const label = this.nodeLabel(placed.node)
     return (
@@ -231,12 +235,8 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
         <rect class={BOX_CLASS} x={x} y={y} width={width} height={height} />
         <text
           class={LABEL_CLASS}
-          x={
-            isOpen
-              ? x + GRAPH_METRICS.paddingX
-              : x + width / 2 - (placed.hasChildren ? GRAPH_METRICS.toggleWidth / 2 : 0)
-          }
-          y={isOpen ? y + GRAPH_METRICS.headerHeight / 2 : y + height / 2}
+          x={isOpen ? x + paddingX : x + width / 2 - (placed.hasChildren ? toggleWidth / 2 : 0)}
+          y={isOpen ? y + headerHeight / 2 : y + height / 2}
           text-anchor={isOpen ? "start" : "middle"}
           font-size={String(fontSize)}
         >
@@ -328,7 +328,7 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
       boundary: this.shownBoundary,
       arrange: this.arrangement,
       label: (node) => this.nodeLabel(node),
-      textWidth: isServer ? undefined : (text, size) => UIGraph.measure(text, size, this.fontFamily)
+      textWidth: isServer ? undefined : (text, size) => UIGraph.measure(text, size, this.fontFamily, this.metrics)
     })
   }
 
@@ -842,8 +842,9 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   private toggleButton(placed: GraphPlacedNode): JSX.Element {
     const label = () =>
       this.translationForKey(placed.isOpen ? "graphCloseNode" : "graphOpenNode", { label: this.nodeLabel(placed.node) })
-    const cx = placed.x + placed.width - GRAPH_METRICS.toggleWidth / 2 - 4
-    const cy = placed.isOpen ? placed.y + GRAPH_METRICS.headerHeight / 2 : placed.y + placed.height / 2
+    const { toggleWidth, headerHeight } = this.metrics
+    const cx = placed.x + placed.width - toggleWidth / 2 - 4
+    const cy = placed.isOpen ? placed.y + headerHeight / 2 : placed.y + placed.height / 2
     return (
       <g
         class={TOGGLE_CLASS}
@@ -873,7 +874,7 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   private port(placed: GraphPlacedPort, owner: GraphPlacedNode): JSX.Element {
     const kind = UIGraph.wordFor(placed.port.kind)
     const label = this.portLabel(placed.port, owner.node)
-    const r = GRAPH_METRICS.portRadius
+    const { portRadius: r, portFontSize } = this.metrics
     const labelAt =
       placed.side === "left"
         ? { x: placed.x + r + 3, y: placed.y, anchor: "start" as const }
@@ -905,7 +906,7 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
             x={labelAt.x}
             y={labelAt.y}
             text-anchor={labelAt.anchor}
-            font-size={String(GRAPH_METRICS.portFontSize)}
+            font-size={String(portFontSize)}
           >
             {label}
           </text>
@@ -932,8 +933,8 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
           <text
             class={COLUMN_LABEL_CLASS}
             x={column.x + 10}
-            y={column.y + GRAPH_METRICS.headerHeight / 2 + 2}
-            font-size={String(GRAPH_METRICS.portFontSize + 1)}
+            y={column.y + this.metrics.headerHeight / 2 + 2}
+            font-size={String(this.metrics.portFontSize + 1)}
           >
             {column.label}
           </text>
@@ -959,7 +960,7 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
           x={pin.x}
           y={pin.y - 10}
           text-anchor="middle"
-          font-size={String(GRAPH_METRICS.portFontSize)}
+          font-size={String(this.metrics.portFontSize)}
         >
           {label}
         </text>
@@ -1000,7 +1001,7 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
             x={middle.x}
             y={middle.y - 4}
             text-anchor="middle"
-            font-size={String(GRAPH_METRICS.portFontSize)}
+            font-size={String(this.metrics.portFontSize)}
           >
             {label}
           </text>
@@ -1053,9 +1054,12 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
     return word && /^[\w-]+$/.test(word) ? word : undefined
   }
 
-  /** `text`'s width at `size`, in `family`:  measured on the page's one canvas (`TreeMeasure`), else estimated. */
-  private static measure(text: string, size: number, family: string): number {
-    return TreeMeasure.widthOf(text, `${size}px ${family}`) ?? text.length * size * GRAPH_METRICS.charWidth
+  /**
+   * `text`'s width at `size`, in `family`:  measured on the page's one canvas (`TreeMeasure`), else estimated from
+   * `metrics`' `charWidth`.
+   */
+  private static measure(text: string, size: number, family: string, metrics: GraphMetrics): number {
+    return TreeMeasure.widthOf(text, `${size}px ${family}`) ?? text.length * size * metrics.charWidth
   }
 }
 
