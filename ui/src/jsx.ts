@@ -1643,7 +1643,7 @@ export interface UIAppMenuEventMap {
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "ui-changed": CustomEvent<{ value?: string; values?: string[] }>
@@ -2287,7 +2287,7 @@ export interface UIAppMenuAttributes {
    */
   "on-ui-choosing"?: (event: UIAppMenuEventMap["ui-choosing"]) => void
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "on-ui-changed"?: (event: UIAppMenuEventMap["ui-changed"]) => void
@@ -27789,7 +27789,7 @@ export interface UIMenuEventMap {
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "ui-changed": CustomEvent<{ value?: string; values?: string[] }>
@@ -28433,7 +28433,7 @@ export interface UIMenuAttributes {
    */
   "on-ui-choosing"?: (event: UIMenuEventMap["ui-choosing"]) => void
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "on-ui-changed"?: (event: UIMenuEventMap["ui-changed"]) => void
@@ -56815,7 +56815,7 @@ export interface UIToolbarEventMap {
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "ui-changed": CustomEvent<{ value?: string; values?: string[] }>
@@ -57519,7 +57519,7 @@ export interface UIToolbarAttributes {
    */
   "on-ui-choosing"?: (event: UIToolbarEventMap["ui-choosing"]) => void
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "on-ui-changed"?: (event: UIToolbarEventMap["ui-changed"]) => void
