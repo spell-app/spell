@@ -437,7 +437,8 @@ export class CreatePlace extends TypeDeclaration<
     const details = CreatePlace.detailsOf(match)
     const servedAt = CreatePlace.servedAtFor(match, details)
     if (!servedAt) return undefined
-    const { keyNamed, keyGoes, tokenFrom } = details
+    const { keyNamed, keyGoes, tokenFrom, operations } = details
+    const writes = [...new Set(Object.values(operations ?? {}))]
     return definedProps({
       servedAt,
       at: textIn(match.groups.address),
@@ -445,7 +446,8 @@ export class CreatePlace extends TypeDeclaration<
       keyNamed: keyNamed!,
       keyGoes,
       tokenFrom,
-      readOnly: isPlaceTypeReadOnly(type) || undefined
+      readOnly: isPlaceTypeReadOnly(type) || undefined,
+      writes: writes.length ? writes : undefined
     })
   }
 

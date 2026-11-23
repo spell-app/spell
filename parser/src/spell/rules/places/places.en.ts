@@ -1082,7 +1082,21 @@ places.addRule(AskedBy, {
             '  collections: { forecasts: { askedBy: ["latitude", "longitude"] } }',
             "})"
           ]
-        ]
+        ],
+        {
+          title: "fields of several words, joined, one a list of values",
+          input:
+            'lab is a web server at "https://lab.test"\n\t- measurements are asked for by their device-ids and instance-id',
+          js: [
+            "export class Lab extends Place {}",
+            "export const lab = core.place(new Lab(), {",
+            '  name: "lab",',
+            '  kind: "web server",',
+            '  at: "https://lab.test",',
+            '  collections: { measurements: { askedBy: ["deviceIds", "instanceId"] } }',
+            "})"
+          ]
+        }
       ]
     },
     {

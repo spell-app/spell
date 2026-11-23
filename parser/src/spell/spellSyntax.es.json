@@ -9896,7 +9896,7 @@
           "ruleNames": ["asked_by"],
           "internal": false,
           "file": "src/spell/rules/places/AskedBy.ts",
-          "line": 16,
+          "line": 18,
           "purpose": "The fields a web server's things are asked for by, each a query parameter (epic `data` P33).",
           "syntaxes": [
             {

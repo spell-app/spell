@@ -70,7 +70,7 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
     if (!served.length) return []
     const project = projectId ?? projectIn(served[0]!.served.servedAt, served[0]!.name)
     const deployments = await this.deploymentsOf(project)
-    return served.map(({ name, served: { at, kind, keyNamed, keyGoes, tokenFrom, readOnly } }) => {
+    return served.map(({ name, served: { at, kind, keyNamed, keyGoes, tokenFrom, readOnly, writes } }) => {
       const deployed = deployments[name]
       const token = deployed?.tokenFrom ?? tokenFrom
       return {
@@ -81,7 +81,8 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
         keyNamed: deployed?.key ?? keyNamed,
         ...(keyGoes && { keyGoes }),
         ...(token !== undefined && { tokenFrom: token }),
-        ...((readOnly || deployed?.readOnly) && { readOnly: true })
+        ...((readOnly || deployed?.readOnly) && { readOnly: true }),
+        ...(writes && { writes })
       }
     })
   }
