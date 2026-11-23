@@ -937,13 +937,23 @@ const DRAWN = Symbol("drawn")
  *   - elements INSIDE it need nothing:  `h()` makes them as it makes their parent
  * - A fragment, `<>...</>`, is a list of them (`[h("a"), h("b")]`):  each made once, the same way.
  * - So is a loop among other drawn lines:  `core.map()` answers a spell `List`, which Solid can't put on a page.
- * - ONLY `h()`'s thunks:  any other function is a live value, which Solid calls itself, again when it changes.
- *   `h()` marks its thunks with a symbol it keeps to itself, so it's read off a thunk of our own, `H_THUNK`.
+ * - Any other function is a live value, which Solid calls itself, again when it changes:  in a memo of its own, as
+ *   Solid's compiler puts a fragment's live values.  Left bare, the boundary called it again each time it re-read
+ *   its children:  one that MAKES a drawing (`core.drawRead()`, a `<for>` over a saved type beside other lines) made a
+ *   new read, which waited, then answered, which the boundary re-read, which made a new read ...  the page hung.
+ *   - The memo runs it again only for what IT read.
+ *   - `h()` marks its thunks with a symbol it keeps to itself, so it's read off a thunk of our own, `H_THUNK`.
  */
 function madeOnce(drawing: Drawing): Drawing {
   if (Array.isArray(drawing)) return drawing.map(madeOnce)
   if ((drawing as unknown) instanceof List) return (drawing as unknown as List<Drawing>).items.map(madeOnce)
-  return isElementThunk(drawing) ? madeOnce(drawing()) : drawing
+  if (isElementThunk(drawing)) return madeOnce(drawing())
+  return isLiveValue(drawing) ? (createMemo(drawing) as unknown as Drawing) : drawing
+}
+
+/** Is `value` a live value, a function Solid calls with nothing for what to draw now -- see `madeOnce()`? */
+function isLiveValue(value: unknown): value is () => Drawing {
+  return typeof value === "function" && value.length === 0
 }
 
 /** Is `value` a thunk core's `h()` made -- see `madeOnce()`? */
