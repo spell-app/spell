@@ -39,6 +39,16 @@ export type FileMatch = {
   unsure?: boolean
 }
 
+/** Where a line names a site's part (`SpellLanguageService.sitePartSpans()`):  what renaming the part replaces. */
+export type SitePartSpan = {
+  /** the file's path in its project, `file.path` */
+  path: string
+  /** where the part's name starts in the file's text */
+  start: number
+  /** where it ends */
+  end: number
+}
+
 // ## Symbols
 
 /**

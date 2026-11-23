@@ -147,27 +147,27 @@ export class SiteWrites {
    * Call part `name` `newName`:  in the site's list, in its own declaration, and in every line naming it,
    * `go to the films page`, `show ...`, `the address of ...`, in every file of the project (T13).
    * - ONE step of the editor's history, however many files it changes.
+   * - Resolves `true` once renamed;  `false` when nothing changed.
    * - NEVER throws:  a name refused shows in the error banner.
    */
-  static renamePart(name: string, newName: string): boolean {
+  static async renamePart(name: string, newName: string): Promise<boolean> {
     const file = SiteWrites.siteFile()
     const project = editor.project
     if (!file || !project) return false
     const wanted = newName.trim().replace(/\s+/g, " ")
-    let siteText: string
     try {
-      siteText = SiteEdits.withPartRenamed(file.contents ?? "", name, wanted)
+      if (SiteEdits.withPartRenamed(file.contents ?? "", name, wanted) === file.contents) return false
     } catch (error) {
       editor.showError(error)
       return false
     }
-    if (siteText === file.contents) return false
-    // every use, by the parse:  its words' place in each file, as it was before the rename
+    // every use:  where its name is written in each file, read before anything changes
     const uses = new Map<SiteFile, Array<{ start: number; end: number }>>()
-    for (const { file: at, match } of LSP.SpellLanguageService.sitePartUses(project, name)) {
-      const written = project.files.find((each) => each.path === at.path)
-      const span = written && SiteWrites.nameSpanIn(written.contents ?? "", match, name)
-      if (span) uses.set(written, [...(uses.get(written) ?? []), span])
+    for (const { path, start, end } of await SiteWrites.partUses(file, name)) {
+      const written = project.files.find((each) => each.path === path)
+      // a place read from older text than the file's now is left alone, not renamed wrong
+      if (written?.contents?.slice(start, end) === name)
+        uses.set(written, [...(uses.get(written) ?? []), { start, end }])
     }
     const title = appTexts.text("siteRenamePart", { name, newName: wanted })
     editor.history.transaction(title, () => {
@@ -331,13 +331,20 @@ export class SiteWrites {
   }
 
   /**
-   * Where the words naming `name` are in `text`, from `words`, a use's match:  inside its quotes, if quoted.
-   * - none when they aren't there:  the file changed since its parse
+   * Where every line in `site`'s project names part `name`, by path and place:  what `renamePart()` replaces.
+   * - Asked of the language worker where it parses the project (`spell/sitePartUses`;  epic `solid-2-final` I56):
+   *   the page holds no parse of it.
+   * - Where nothing answers (no worker, a file not parsed yet), the project is parsed on the page for it, as a Spell
+   *   Console line's is (`editor.parsedForConsole()`):  a rename is rare, and must miss no use.
    */
-  private static nameSpanIn(text: string, words: { start?: number; end?: number }, name: string) {
-    if (words.start === undefined || words.end === undefined) return undefined
-    const at = text.slice(words.start, words.end).indexOf(name)
-    return at < 0 ? undefined : { start: words.start + at, end: words.start + at + name.length }
+  private static async partUses(site: SiteFile, name: string): Promise<LSP.SitePartSpan[]> {
+    if (site instanceof SP.SpellFile) {
+      const { states } = (await LazyCodeMirror.load()).SpellCodeMirror
+      const answer = await states.ask(site, "spell/sitePartUses", { words: name })
+      if (answer) return answer
+    }
+    await editor.parsedForConsole()
+    return editor.project ? LSP.SpellLanguageService.sitePartSpans(editor.project, name) : []
   }
 
   /** `text` with each of `spans` replaced by `newName`, the last first, so the others stay where they are. */

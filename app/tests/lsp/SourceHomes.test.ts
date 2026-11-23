@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { parseSpellProject } from "spell/parser/spell/test"
-import { SourceEdits } from "spell/app/lsp/SourceEdits"
+import { SourceEdits, type TextSpan } from "spell/app/lsp/SourceEdits"
 import { SourceHomes } from "spell/app/lsp/SourceHomes"
 
 /** A type with defaults, and a thing made on a line that says some of its fields. */
@@ -65,7 +65,7 @@ describe("SourceHomes.moved()", () => {
     if (home.kind !== "default") throw new TypeError("not a default")
     // a dragged slider:  2, then 10, then 3, each written to the home the last write left
     for (const value of [10, 3]) {
-      const span = home.span!
+      const span: TextSpan = home.span!
       const after = SourceEdits.applied(text, [SourceEdits.replacing(text, span, String(value))])
       home = SourceHomes.moved(
         home,

@@ -225,6 +225,16 @@ describe("LanguageHost", () => {
     expect(await host.request("spell/oldForms", { textDocument })).toEqual({ count: 0, edits: [] })
   })
 
+  test("answers the site editor's rename:  where each line in the project names a site's part, by path and place", async () => {
+    // a page and a line naming it, in the file the host has:  the page holds no parse of it
+    const site = `${text}\nfaces page is a page:\n\tto see the faces:\n\t\tgo to the faces page\n`
+    host.open({ uri, projectId: solitaire, text: site })
+    const uses = await host.request("spell/sitePartUses", { textDocument, words: "faces page" })
+    expect(uses).toEqual([{ path, start: site.lastIndexOf("faces page"), end: site.lastIndexOf("faces page") + 10 }])
+    expect(await host.request("spell/sitePartUses", { textDocument, words: "no such page" })).toEqual([])
+    host.open({ uri, projectId: solitaire, text })
+  })
+
   test("answers the Inspector:  where a thing's fields live, and the types the project has only one of", async () => {
     const homes = await host.request("spell/fieldHomes", { textDocument, typeNames: ["Card"], names: ["suit"] })
     expect(homes).toEqual(host.service.fieldHomes(host.service.addresses.fileFor(uri)!, undefined, ["Card"], ["suit"]))

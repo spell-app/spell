@@ -170,6 +170,14 @@ export const LANGUAGE_REQUESTS = {
     (_service, file, { words }: FileParams & { words: string }) => file.project.hasPageOrView(words),
     true
   ),
+  /**
+   * Where every line in the file's project names site part `words` (`go to the films page` ...):  what the site
+   * editor's rename of the part replaces (epic `solid-2-final` I56)
+   */
+  "spell/sitePartUses": request(
+    (service, file, { words }: FileParams & { words: string }) => service.sitePartSpansFor(file, words),
+    null
+  ),
   /** Where the innermost tag around a position is written, as its drawn elements are stamped (epic `solid-2-final` T36) */
   "spell/partPlace": request(
     (service, file, { position }: TextDocumentPositionParams) => service.partPlaceAt(file, position) ?? null,

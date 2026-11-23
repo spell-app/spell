@@ -185,7 +185,8 @@ and in the app's build folder, `app/` at the app folder's root.
         CodeMirror-free, so the worker reads it), the types a tag may name (a space after a tag's name);
         the page lays out and colours nothing from a parse of its own (`CodeMirrorLanguage.elsewhere`)
       - what the thing a word names is, as the cursor rests there (Follow Along):  `spell/declaredThing`
-      - the Sentence tab's tree:  `spell/lineTree`;  has a site's part a page yet:  `spell/hasPageOrView`
+      - the Sentence tab's tree:  `spell/lineTree`;  has a site's part a page yet:  `spell/hasPageOrView`;
+        where a site's part is named, for its rename:  `spell/sitePartUses`
       - the tag drawn around a line, which the Inspector selects:  `spell/partPlace`;
       - an action renamed in the Inspector:  `spell/renameAction`;  a project's old forms of Spell, for the offer to upgrade
         it and its Upgrade:  `spell/oldForms` (`editor.oldFormsIn()`);  the Types tab's tree and a node's details:

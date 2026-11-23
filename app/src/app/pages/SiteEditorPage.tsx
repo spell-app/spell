@@ -368,8 +368,13 @@ function SitePartForm(props: { part: SitePart; onRenamed: (name: string) => void
     ) {
       SiteWrites.changePart(part.name, { title, address, state, live })
     }
-    if (name && name !== shownName() && SiteWrites.renamePart(part.name, name)) {
-      props.onRenamed(wasGroup ? SiteEdits.groupKey(name) : name)
+    if (name && name !== shownName()) {
+      // un-awaited:  the form isn't held up while the language worker finds the part's uses
+      void SiteWrites.renamePart(part.name, name)
+        .then((renamed) => {
+          if (renamed) props.onRenamed(wasGroup ? SiteEdits.groupKey(name) : name)
+        })
+        .catch((error: unknown) => editor.showError(error))
     }
   }
   return (

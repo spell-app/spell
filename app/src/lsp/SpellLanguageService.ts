@@ -3238,6 +3238,28 @@ export class SpellLanguageService {
   }
 
   /**
+   * Where each line in `project` names site part `name` (`sitePartUses()`):  the file's path, and where `name` itself
+   * is written in its text, `start` to `end`, what a rename of the part replaces.
+   * - The site editor asks it of the language worker, which parses the project (`spell/sitePartUses`;  epic
+   *   `solid-2-final` I56):  the page holds no parse of it.
+   * - A use whose words don't hold `name` as written (a parse of older text) is left out.
+   */
+  static sitePartSpans(project: SP.SpellProject, name: string): LSP.SitePartSpan[] {
+    const spans: LSP.SitePartSpan[] = []
+    for (const { file, match } of SpellLanguageService.sitePartUses(project, name)) {
+      if (match.start === undefined || match.end === undefined) continue
+      const at = (file.contents ?? "").slice(match.start, match.end).indexOf(name)
+      if (at >= 0) spans.push({ path: file.path, start: match.start + at, end: match.start + at + name.length })
+    }
+    return spans
+  }
+
+  /** `sitePartSpans()` for `file`'s project:  the `spell/sitePartUses` request's answer. */
+  sitePartSpansFor(file: SP.SpellFile, name: string): LSP.SitePartSpan[] {
+    return SpellLanguageService.sitePartSpans(file.project, name)
+  }
+
+  /**
    * Call `visit` for `match` and every match below it, parents first -- see `childMatches()`.
    * - `parent` is the match `visit`'s match was found under.
    */
