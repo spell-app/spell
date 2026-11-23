@@ -48,18 +48,6 @@ export class SpellRuntime extends Eventful() {
   }
 }
 
-/** What a production deployment is named:  read only unless its line says it may be written. */
-const PRODUCTION = /^prod(?:uction)?$/i
-
-/**
- * `deployment`, named `name` in the project's file, read only when its line says, or when it's production's and its
- * line doesn't say otherwise (`"readOnly": false`).
- * - The ONE place that's decided:  a program's run, the page server and `spell place verify` all ask here.
- */
-export function deploymentAsRun<Deployed extends PlaceDeployment>(name: string, deployment: Deployed): Deployed {
-  return deployment.readOnly === undefined && PRODUCTION.test(name) ? { ...deployment, readOnly: true } : deployment
-}
-
 /** One deployment of a place, as the project's file lists it:  its address, its key's name, read only or not. */
 export type PlaceDeployment = {
   /** Its address, a path prefix and all. */

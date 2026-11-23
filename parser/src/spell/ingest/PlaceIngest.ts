@@ -2,7 +2,6 @@ import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { tokenServiceMint } from "spell/places/PlaceToken"
 import { wrappedRows } from "spell/places/wrappedRows"
-import { deploymentAsRun } from "spell/parser/core/runtime"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
@@ -559,7 +558,7 @@ export class PlaceIngest {
     const picked = named ?? names[0]!
     const deployment = listed![picked]
     if (!deployment) throw new IngestStopped(`${place} has no deployment "${picked}":  ${names.join(", ")}`)
-    return { name: picked, ...deploymentAsRun(picked, deployment) }
+    return { name: picked, ...SP.SpellProject.deploymentAsRun(picked, deployment) }
   }
 
   ////////////////

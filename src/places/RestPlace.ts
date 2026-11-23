@@ -280,7 +280,7 @@ export class RestPlace extends WebPlace implements Place {
 
   /**
    * - throws `PlaceError` `"refused"` on a place that takes no writes (`write: "none"`):  read only by its line, or
-   *   its deployment's, production's unless it says otherwise (`deploymentAsRun()`)
+   *   its deployment's, production's unless it says otherwise (`SP.SpellProject.deploymentAsRun()`)
    */
   private refuseIfReadOnly(): void {
     if (this.capabilities.write !== "none") return
