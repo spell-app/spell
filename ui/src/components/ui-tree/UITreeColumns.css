@@ -351,15 +351,19 @@
    */
   .column.items {
     --_ui-tree-header-height: calc(var(--_ui-tree-row-height) + 4px);
-    /* a sticky box keeps clear of its scroller's padding:  so the column's own is taken back, and no row peeks past */
-    --_ui-tree-headers-top: calc(var(--_ui-tree-column-padding) * -1);
+    --_ui-tree-headers-top: 0px;
   }
   .column.items:has(> .column-title) {
     --_ui-tree-headers-top: var(--_ui-tree-title-height);
   }
+  /* no title:  a header starts flush at the column's top, where it sticks, so it never jumps as the column scrolls */
+  .column.items:not(:has(> .column-title)):has(> .column-header) {
+    padding-block-start: 0;
+  }
   .column-header {
     position: sticky;
     top: calc(var(--_ui-tree-headers-top) + var(--_above, 0) * var(--_ui-tree-header-height));
+    /* a sticky box keeps clear of its scroller's padding:  the column's own is taken back, so no row peeks under it */
     bottom: calc(var(--_below, 0) * var(--_ui-tree-header-height) - var(--_ui-tree-column-padding));
     z-index: 1;
     grid-column: 1 / -1;

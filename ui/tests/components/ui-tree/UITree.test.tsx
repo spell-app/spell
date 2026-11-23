@@ -2319,9 +2319,13 @@ describe('<ui-tree appearance="columns"> from `items`, headers', () => {
   it("a header sticks:  at the column's top under the ones above, at its bottom over the ones below", async () => {
     const rows = (prefix: string, count: number) =>
       Array.from({ length: count }, (_, at) => ({ id: `${prefix}${at}`, label: `${prefix} ${at}` }))
-    for (const groups of ["open", "accordion"]) {
+    for (const [groups, titles] of [
+      ["open", 'column-titles="Things"'],
+      ["accordion", 'column-titles="Things"'],
+      ["accordion", ""]
+    ]) {
       const host = (await ElementFixture.render(
-        `<ui-tree appearance="columns" groups="${groups}" column-titles="Things" style="height: 300px; width: 600px"></ui-tree>`
+        `<ui-tree appearance="columns" groups="${groups}" ${titles} style="height: 300px; width: 600px"></ui-tree>`
       )) as TreeHost
       host.items = [
         { id: "first", kind: "header", label: "First" },
@@ -2336,7 +2340,9 @@ describe('<ui-tree appearance="columns"> from `items`, headers', () => {
       column.scrollTop = 200
       await new Promise((done) => requestAnimationFrame(done))
       const box = column.getBoundingClientRect()
-      const title = column.querySelector(".column-title")!.getBoundingClientRect()
+      const title = column.querySelector(".column-title")?.getBoundingClientRect() ?? {
+        bottom: column.getBoundingClientRect().top
+      }
       const [first, second, third] = [...column.querySelectorAll(".column-header")].map((each) =>
         each.getBoundingClientRect()
       )
