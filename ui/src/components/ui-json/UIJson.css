@@ -6,6 +6,7 @@
  *   - An object's or array's line is also `.container`,
  *     with a `<button class="toggle">` (a chevron `<ui-icon>`) in the gutter and, closed, `<span class="preview">`.
  *   - Text spans:  `.key`, `.string`, `.number`, `.boolean`, `.null`, `.punct`;  the clickable ones also `.link`.
+ *   - What opens an object or array, as its toggle does:  its key and its closed line, `.opens`.
  *   - Editing (`editable`):  a `<ui-input>`, `<ui-select>` or `<ui-checkbox>`, `.edit`, in a key's or value's place.
  *   - Before them, the source parts:  `<ui-loader part="loader">` while loading, `<ui-message part="error">`.
  * - The gutter:  a toggle's column, `--_json-gutter` wide, just before its own row's indent.
@@ -189,6 +190,24 @@
     text-decoration: underline;
     text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
     text-underline-offset: 0.2em;
+  }
+
+  /* an object's or array's key and closed line:  a click opens it, so its chevron lights up too */
+  .opens {
+    cursor: pointer;
+  }
+  .key.opens:hover {
+    text-decoration: underline dotted;
+    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+    text-underline-offset: 0.2em;
+  }
+  .key.opens:focus-visible {
+    outline: 2px solid var(--_ui-json-focus-color);
+    outline-offset: 1px;
+    border-radius: 0.25em;
+  }
+  .row.container:has(> .opens:hover) > .toggle {
+    color: var(--_ui-json-color);
   }
 
   /*

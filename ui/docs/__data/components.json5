@@ -22606,7 +22606,7 @@
           "name": "ui-navigating",
           "detail": "{ path: (string | number)[], key: string | number | undefined, value: unknown, part: \"key\" | \"value\" }",
           "cancelable": true,
-          "description": "A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`."
+          "description": "A key or a value was clicked (not a double-click, nor the end of a text selection).  An object's or array's key opens and closes it instead, and sends none.  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an empty object or array too);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`."
         },
         {
           "name": "ui-copied",
@@ -22645,7 +22645,7 @@
         },
         {
           "name": "preview",
-          "description": "A closed object or array, on one line."
+          "description": "A closed object or array, on one line;  a click opens it, as the toggle does."
         },
         {
           "name": "editor",

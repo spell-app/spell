@@ -12383,7 +12383,7 @@
       "name": "::part(preview)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-json>`:  A closed object or array, on one line.\n- `<ui-theme-editor>`:  The sample app, light and dark, when no pages are given."
+        "value": "Part of:\n\n- `<ui-json>`:  A closed object or array, on one line;  a click opens it, as the toggle does.\n- `<ui-theme-editor>`:  The sample app, light and dark, when no pages are given."
       }
     },
     {

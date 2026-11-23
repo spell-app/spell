@@ -26,9 +26,9 @@ function toggles(element: Element): HTMLButtonElement[] {
   return [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("button[part~=toggle]")]
 }
 
-/** The span showing `text`, a key or a value. */
+/** The span showing `text`, a key or a value:  one that navigates (`.link`), or opens what it names (`.opens`). */
 function span(element: Element, text: string): HTMLElement {
-  const found = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".link")].find(
+  const found = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".link, .opens")].find(
     (each) => each.textContent === text
   )
   if (!found) throw new Error(`no span "${text}" in ${JSON.stringify(lines(element))}`)
@@ -170,11 +170,11 @@ describe("<ui-json> ui-navigating", () => {
     const navigated: JsonNavigateDetail[] = []
     element.addEventListener("ui-navigating", (event) => navigated.push((event as CustomEvent).detail))
     span(element, '"x1"').click()
-    span(element, '"inner"').click()
+    span(element, '"id"').click()
     span(element, "20").click()
     expect(navigated).toEqual([
       { path: ["inner", "id"], key: "id", value: "x1", part: "value" },
-      { path: ["inner"], key: "inner", value: { id: "x1" }, part: "key" },
+      { path: ["inner", "id"], key: "id", value: "x1", part: "key" },
       { path: ["list", 1], key: 1, value: 20, part: "value" }
     ])
   })
@@ -196,6 +196,59 @@ describe("<ui-json> ui-navigating", () => {
     value.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, composed: true }))
     vi.advanceTimersByTime(1000)
     expect(navigated).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe("<ui-json> a key or closed line opens it", () => {
+  test("a click on a closed object's key opens it, and a second closes it;  it sends no `ui-navigating`", async () => {
+    const element = await json(`<ui-json>${NESTED}</ui-json>`)
+    const navigated = vi.fn()
+    element.addEventListener("ui-navigating", navigated)
+    const key = span(element, '"inner"')
+    expect(key.getAttribute("aria-expanded")).toBe("false")
+    key.click()
+    await ElementFixture.settle()
+    expect(lines(element)).toContain('"deep": { "deeper": 1 }')
+    expect(toggles(element)[1]!.getAttribute("aria-expanded")).toBe("true")
+    expect(key.getAttribute("aria-expanded")).toBe("true")
+    span(element, '"inner"').click()
+    await ElementFixture.settle()
+    expect(lines(element)).toContain('"inner": { "deep": { "deeper": 1 } },')
+    expect(navigated).not.toHaveBeenCalled()
+  })
+
+  test("a click on a closed line, `{ ... }`, opens it", async () => {
+    const element = await json(`<ui-json>${NESTED}</ui-json>`)
+    const previews = [...element.shadowRoot!.querySelectorAll<HTMLElement>("[part~=preview]")]
+    expect(previews.map((preview) => preview.textContent)).toEqual(['{ "deep": { "deeper": 1 } }', "[ 1, 2, 3 ]"])
+    previews[1]!.click()
+    await ElementFixture.settle()
+    expect(lines(element)).toEqual(expect.arrayContaining(['"list": [', "1,", "3", "]"]))
+  })
+
+  test("Enter or Space on a key opens and closes it", async () => {
+    const element = await json(`<ui-json>${NESTED}</ui-json>`)
+    const key = span(element, '"inner"')
+    expect(key.tabIndex).toBe(0)
+    expect(key.getAttribute("role")).toBe("button")
+    key.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, composed: true }))
+    await ElementFixture.settle()
+    expect(lines(element)).toContain('"deep": { "deeper": 1 }')
+    span(element, '"inner"').dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true, composed: true }))
+    await ElementFixture.settle()
+    expect(lines(element)).not.toContain('"deep": { "deeper": 1 }')
+  })
+
+  test("a click on a leaf opens nothing, and still sends `ui-navigating`", async () => {
+    const element = await json(`<ui-json>${NESTED}</ui-json>`)
+    const navigated = vi.fn()
+    element.addEventListener("ui-navigating", navigated)
+    const before = lines(element)
+    span(element, '"a"').click()
+    span(element, '"name"').click()
+    await ElementFixture.settle()
+    expect(lines(element)).toEqual(before)
+    expect(navigated).toHaveBeenCalledTimes(2)
   })
 })
 

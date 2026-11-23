@@ -111,9 +111,12 @@ export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
  *   a real `<button aria-expanded>` (part `toggle`) holding a chevron;  Alt-click opens or closes its branch.
  *   - Closed, it's one line:  `[ 1, 2, 3, ... ]`, `{ "a": 1, ... }`, cut to the characters that fit (`columns`).
  *   - `depth` levels start open (`1`:  the top alone).
+ *   - Its key, or its closed line, opens it too, as its toggle does (`opener()`);  its key closes it again.
+ *     Its key is a Tab stop, which Enter or Space opens and closes.
  *   - A closed object's members aren't drawn:  387 of them cost one line until it's opened.
- * - A click on a key or value sends `ui-navigating` (`{ path, key, value, part }`;  cancelable):
+ * - A click on any other key or value sends `ui-navigating` (`{ path, key, value, part }`;  cancelable):
  *   the page decides what it means.
+ *   - So what has members opens and closes, and the rest navigates:  ONE meaning per click.
  * - `editable`:  double-click a key or a value to edit it in a control that fits it (`editorKindFor()`).
  *   The data goes through `content`, so it's `dirty` until saved, and `ui-changed` is sent.
  ****************/
@@ -412,6 +415,7 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
       )
     }
     const open = () => this.isOpen(path, level)
+    const opens: Opens = { isOpen: open, toggle: (branch) => this.toggle(path, value, level, branch) }
     const name = key === undefined ? this.translationForKey("jsonTop") : String(key)
     const toggleLabel = () => this.translationForKey(open() ? "jsonClose" : "jsonOpen", { key: name })
     const lastKey = entries[entries.length - 1]![0]
@@ -429,8 +433,8 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
           >
             <ui-icon name={open() ? "chevron-down" : "chevron-right"} />
           </button>
-          {this.keyOf(key, value, path, at)}
-          <Show when={open()} fallback={this.closed(value, comma, level, key)}>
+          {this.keyOf(key, value, path, at, opens)}
+          <Show when={open()} fallback={this.closed(value, comma, level, key, opens)}>
             <span class="punct">{isArray ? "[" : "{"}</span>
           </Show>
         </div>
@@ -457,15 +461,19 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     )
   }
 
-  /** A closed object or array, on one line:  `{ "a": 1, ... }`. */
-  private closed(value: object, comma: JSX.Element, level: number, key: Key): JSX.Element {
+  /** A closed object or array, on one line:  `{ "a": 1, ... }`;  a click opens it (Alt:  everything inside). */
+  private closed(value: object, comma: JSX.Element, level: number, key: Key, opens: Opens): JSX.Element {
     // what's left of the line:  the gutter (3), the indent, `"key": `, the comma
     const used = 3 + level * 2 + (typeof key === "string" ? JSON.stringify(key).length + 2 : 0) + 1
     const budget = this.columns === undefined ? PREVIEW_CHARS : Math.max(PREVIEW_MIN, this.columns - used)
     const tokens = previewTokens(value, budget, !!this.quotes)
     return (
       <>
-        <span class="preview" part={this.partForName("preview")}>
+        <span
+          class="preview opens"
+          part={this.partForName("preview")}
+          onClick={(event: MouseEvent) => this.clicked(event, () => opens.toggle(event.altKey))}
+        >
           {tokens.map(([kind, text]) => (
             <span class={kind}>{text}</span>
           ))}
@@ -475,10 +483,22 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     )
   }
 
-  /** `"key": `, for an object's member;  nothing for an array's or the top's. */
-  private keyOf(key: Key, value: unknown, path: string, at: Path): JSX.Element {
+  /**
+   * `"key": `, for an object's member;  nothing for an array's or the top's.
+   * - `opens`:  an object or array with members, which its key opens and closes (`opener()`);
+   *   any other key is a `link()`.
+   */
+  private keyOf(key: Key, value: unknown, path: string, at: Path, opens?: Opens): JSX.Element {
     if (typeof key !== "string") return undefined
-    const shown = this.link(<span class="key">{keyText(key, !!this.quotes)}</span>, "key", key, value, at)
+    const text = keyText(key, !!this.quotes)
+    const shown = opens
+      ? this.opener(
+          <span class="key" aria-expanded={opens.isOpen() ? "true" : "false"}>
+            {text}
+          </span>,
+          opens
+        )
+      : this.link(<span class="key">{text}</span>, "key", key, value, at)
     return (
       <>
         {this.editableAs(shown, { id: path + EDIT_SEP + "key", part: "key", at, kind: "text", value: key })}
@@ -504,7 +524,28 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
   private link(shown: JSX.Element, part: JsonPart, key: Key, value: unknown, at: Path): HTMLElement {
     const span = shown as HTMLElement
     span.classList.add("link")
-    span.addEventListener("click", (event) => this.navigate(event, { path: at, key, value, part }))
+    span.addEventListener("click", (event) =>
+      this.clicked(event, () => this.send("ui-navigating", { path: at, key, value, part }))
+    )
+    return span
+  }
+
+  /**
+   * `shown`, an object's or array's key, opening and closing it as its toggle does (Alt:  everything inside).
+   * - It sends no `ui-navigating`.
+   * - A Tab stop too (`role="button"`, `aria-expanded`):  Enter or Space does the same.
+   */
+  private opener(shown: JSX.Element, opens: Opens): HTMLElement {
+    const span = shown as HTMLElement
+    span.classList.add("opens")
+    span.tabIndex = 0
+    span.setAttribute("role", "button")
+    span.addEventListener("click", (event) => this.clicked(event, () => opens.toggle(event.altKey)))
+    span.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return
+      event.preventDefault()
+      opens.toggle(event.altKey)
+    })
     return span
   }
 
@@ -546,7 +587,7 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     span.addEventListener("dblclick", (event) => {
       if (!this.editable) return
       event.preventDefault()
-      this.pendingNavigate?.cancel()
+      this.pendingClick?.cancel()
       window.getSelection()?.removeAllRanges()
       void loadEditors().catch((error: unknown) =>
         E.Warnings.warn(`<${this.domElement.localName}>`, "can't load its editors", error)
@@ -671,28 +712,24 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
   }
 
   ////////////////
-  // ## Navigating
+  // ## Clicks
   ////////////////
 
   /** A click waiting to see if it's the start of a double-click (`editable`). */
-  private pendingNavigate: E.CancelablePromise<unknown> | undefined
+  private pendingClick: E.CancelablePromise<unknown> | undefined
 
   /**
-   * A key or value was clicked:  `ui-navigating`, unless it's part of a double-click, an edit or a selection.
-   * - `editable`:  it waits a moment, so a double-click's first click sends nothing.
+   * A key, value or closed line was clicked:  `act()` (send `ui-navigating`, or open it),
+   * unless it's part of a double-click, an edit or a selection.
+   * - `editable`:  it waits a moment, so a double-click's first click does nothing.
    */
   @E.untracked
-  private navigate(event: MouseEvent, detail: JsonNavigateDetail) {
-    if (event.detail > 1 || this.editing) return
-    const selection = window.getSelection()
-    if (selection && !selection.isCollapsed && selection.toString()) return
-    this.pendingNavigate?.cancel()
-    if (!this.editable) {
-      this.send("ui-navigating", detail)
-      return
-    }
-    this.pendingNavigate = E.after(DOUBLE_CLICK_SECONDS, () => this.send("ui-navigating", detail))
-    this.pendingNavigate.catch(() => {})
+  private clicked(event: MouseEvent, act: () => void) {
+    if (event.detail > 1 || this.editing || hasTextSelected()) return
+    this.pendingClick?.cancel()
+    if (!this.editable) return act()
+    this.pendingClick = E.after(DOUBLE_CLICK_SECONDS, act)
+    this.pendingClick.catch(() => {})
   }
 
   ////////////////
@@ -736,7 +773,7 @@ export type JsonNavigateDetail = {
   path: Path
   /** its key (an array member's:  its index);  the top value's:  `undefined` */
   key: Key
-  /** its value, as it is (an object or array too, when its key was clicked) */
+  /** its value, as it is (an empty object or array too:  one with members opens instead) */
   value: unknown
   /** what was clicked */
   part: JsonPart
@@ -755,6 +792,12 @@ type JsonPart = "key" | "value"
 
 /** A piece of a closed preview:  its class (`key`, `string` ...) and text. */
 type Token = readonly [string, string]
+
+/** An object or array with members:  whether it's open, and opening or closing it (`branch`:  everything inside). */
+type Opens = {
+  isOpen: () => boolean
+  toggle: (branch: boolean) => void
+}
 
 /** A key or value being edited. */
 type JsonEdit = {
@@ -857,6 +900,12 @@ function plainText(value: unknown): string {
   if (typeof value === "string") return value
   if (value === null || value === undefined) return ""
   return JSON.stringify(value) ?? ""
+}
+
+/** Is text selected on the page?  A click that ends a selection isn't a click on what it's over. */
+function hasTextSelected(): boolean {
+  const selection = window.getSelection()
+  return !!selection && !selection.isCollapsed && !!selection.toString()
 }
 
 function isContainer(value: unknown): value is object {

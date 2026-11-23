@@ -24396,7 +24396,7 @@ export interface UIJsonEventMap {
     error: unknown
   }>
   /**
-   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
+   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  An object's or array's key opens and closes it instead, and sends none.  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an empty object or array too);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
    * - `event.detail`:  `{ path: (string | number)[], key: string | number | undefined, value: unknown, part: "key" | "value" }`
    * - cancelable:  `preventDefault()` vetoes it
    */
@@ -24834,7 +24834,7 @@ export interface UIJsonAttributes {
    */
   "on-ui-error"?: (event: UIJsonEventMap["ui-error"]) => void
   /**
-   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
+   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  An object's or array's key opens and closes it instead, and sends none.  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an empty object or array too);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
    * - `event.detail`:  `{ path: (string | number)[], key: string | number | undefined, value: unknown, part: "key" | "value" }`
    * - cancelable:  `preventDefault()` vetoes it
    */

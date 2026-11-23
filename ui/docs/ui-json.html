@@ -53,7 +53,7 @@
             <!-- EXAMPLES:  the outline first, then data a diagram reads. -->
             <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
               <ui-section id="examples-types-an-outline" label="An outline" sticky="stack" collapsible dividing>
-                <ui-example description="Its text is the data, drawn as an outline.  The top level starts open;  a closed object or array sits on one line.  Alt-click a toggle to open or close everything inside it.">
+                <ui-example description="Its text is the data, drawn as an outline.  The top level starts open;  a closed object or array sits on one line.  Click its toggle, its key or its line to open it;  Alt-click to open or close everything inside it.">
                   <ui-json>
                     { "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null,
                       "tags": ["in", "test", "v2"], "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 },
@@ -200,7 +200,10 @@
                   Set `item` to show a thing:  its `data`, else the thing itself, becomes `value`.
                   So slotted as a tree's `detail`, it shows each pick's data with no code:  the tree sets its `item`.
 
-                  A click on a key or a value sends `ui-navigating`, with where it is:
+                  A click on an object's or array's key, or on its closed line, opens it, as its toggle does;
+                  a click on its key closes it again.
+
+                  A click on any other key or value sends `ui-navigating`, with where it is:
                   `path`, the keys from the top down, then `key`, `value` and `part` (`"key"` or `"value"`).
                   The page decides what it means, such as showing what a value names.
 
@@ -222,6 +225,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   Each object's and array's toggle is a real button:  it says what it opens, and whether it's open.
+                  Its key is a button too:  Enter or Space opens and closes it.
                   Each one is a Tab stop;  the arrow keys don't move between lines yet.
                   A hidden `<ui-json>`, or one a diagram reads, shows nothing, and screen readers pass over it.
                 </script>
