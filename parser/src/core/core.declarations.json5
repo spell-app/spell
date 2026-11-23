@@ -4203,6 +4203,9 @@
         },
         {
           "name": "ownsState"
+        },
+        {
+          "name": "riders"
         }
       ],
       "description": "`draw`, with what waits inside it looking as `said` says meanwhile:  an element's `loading=\"...\"`, taken by Spell when its value is quoted (`SpellJSX`), never handed to the element."

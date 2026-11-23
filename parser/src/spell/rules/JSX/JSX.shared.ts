@@ -183,6 +183,8 @@ export type JSXMatchData = {
    * (`SpellJSX.lookingOf()`, `core.drawLooking()`).
    */
   looking?: { attribute: string; said: string; ownsState: boolean }
+  /** (`jsxElement`) A rider written inside an element, `<loading>` or `<failed>` (`SpellJSX.riderOf()`). */
+  rider?: "waiting" | "failed"
   /** (`jsxElement`) Parsed `jsxAttribute` matches for the element. */
   attributes?: Array<P.Match | undefined>
   /** (`jsxAttribute`) Normalized attribute name. */

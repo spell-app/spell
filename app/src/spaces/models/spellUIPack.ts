@@ -30,6 +30,8 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
   readDefault: (sample, language) => SpellUIDefaults.read(sample, language),
   readAttribute: (sample, language) => SpellUIDefaults.readAttribute(sample, language),
   attributeNameFor: (tag, attribute, language) => SpellUIDefaults.attributeNameFor(tag, attribute, language),
+  // a pane's `loading` and `error` slots, which an element's `<loading>` and `<failed>` fill
+  slotNameFor: (tag, slot, language) => SpellUIDefaults.slotNameFor(tag, slot, language),
   // a type built on one of its tags, `a ui tree view`:  its noun of several words as its tag's (`property-editor`)
   viewBaseFor: (noun, language) => SpellUIDefaults.viewBaseFor(noun.replace(/\s+/g, "-"), language),
   // what `<ui-root display="skeleton">` draws for it:  a bare `loading="skeleton"` draws it too

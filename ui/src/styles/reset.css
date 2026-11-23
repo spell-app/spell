@@ -260,6 +260,29 @@
   }
 }
 
+@layer ui.reset {
+  /*
+   * `error`, the base class's error look (`:state(failed-look)`):  an outline in the error colour round the element's
+   * first box, as a field in error is edged (its words are the tooltip;  `aria-invalid` on a form control).
+   * - A pane shows its own (`StatePanes`):  its message and Try again in place of its content.
+   * - `!important` in this, the FIRST layer:  beats a family's own `outline: none` (a dropdown's) in `ui.components`.
+   */
+  :host(:state(failed-look)) > :first-child {
+    outline: 0.125em solid var(--ui-error-text, var(--ui-negative-text, red)) !important;
+    outline-offset: 0.125em !important;
+    border-radius: var(--ui-radius-s, 0.25em);
+  }
+
+  /*
+   * A pane showing a state pane (`StatePanes`):  its own loading veil goes, as the pane stands in for its content.
+   * - `!important` in this, the FIRST layer, beats the family's own veil in `ui.components`.
+   */
+  :host(:state(state-pane)) .loading::before,
+  :host(:state(state-pane)) .loading::after {
+    content: none !important;
+  }
+}
+
 @keyframes ui-busy-spin {
   to {
     rotate: 1turn;

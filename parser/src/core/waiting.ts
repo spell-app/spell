@@ -142,17 +142,24 @@ export const waitingMethods = defineCoreModule({
    * - `ownsState`:  the element has a loading state of its own (Spell UI's segment, card, section, tab, form,
    *   popup):  with a spinner, that state turns on while anything inside waits, instead of a second spinner inside it.
    * - Every loader inside reads it (`waitingLoader()`), nearest first;  none:  the site's, else a spinner.
+   * - `riders`:  its `<loading>` and `<failed>`, what shows while what's inside waits, or once it failed
+   *   (`the error` its words);  in its `loading` / `error` slots where it has them (`riders.slots`, Spell UI's panes),
+   *   else in place of what waits, as a list's riders show.
+   * - With a state of its own, a failure inside turns its `error` on, its words the error's (`OwnLoadingState`),
+   *   and its Try again (`ui-retry`) reads again.
    */
-  drawLooking(said: string, draw: () => Drawing, ownsState?: boolean): Drawing {
-    const named = lookSaid(said)
-    // words alone keep the look around, saying them:  a skeleton announces them
+  drawLooking(said: string, draw: () => Drawing, ownsState?: boolean, riders?: LookRiders): Drawing {
     const here = lookHere()
-    const look: WaitingLook = named.text ? { look: here.look, skeleton: here.skeleton, text: named.text } : named
-    const own = ownsState && look.look === "spinner" ? new OwnLoadingState() : undefined
+    const named = said ? lookSaid(said) : undefined
+    // no look of its own, or words alone:  the look around, saying them;  a skeleton announces them
+    const look: WaitingLook =
+      !named || named.text ? { look: here.look, skeleton: here.skeleton, text: named?.text ?? here.text } : named
+    const own = ownsState ? new OwnLoadingState(!!riders?.slots) : undefined
+    const value: WaitingLook = { ...look, ...(own && { own }), ...(riders && { riders }) }
     return createComponent(
       WAITING_LOOK as never,
       {
-        value: own ? { ...look, own } : look,
+        value,
         get children() {
           const drawing = draw()
           if (!own) return drawing
@@ -259,28 +266,107 @@ class OwnLoadingState {
   private made?: Element
   /** How many loaders inside it show. */
   private showing = 0
+  /** The failures inside it, newest last:  its `error` says the newest's words. */
+  private readonly failures: string[] = []
+  /** What's in its `loading` and `error` slots, by slot, while they show. */
+  private readonly slotted = new Map<string, Element>()
+
+  /** `hasSlots`:  it has `loading` and `error` slots (Spell UI's panes), which stand in for its content. */
+  constructor(readonly hasSlots: boolean) {}
 
   set element(element: Element) {
     this.made = element
+    // Try again, in its error pane:  read again
+    element.addEventListener(RETRY_EVENT, () => void core.reloadSaved())
+    // filled while it was being made
+    for (const box of this.slotted.values()) if (box.parentNode !== element) element.append(box)
     this.apply()
   }
 
-  /** One more loader shows, until its owner goes:  the element's state on meanwhile. */
-  hold(): void {
+  /**
+   * One more loader shows, until its owner goes:  the element's state on meanwhile;  `drawing`, if any, in its
+   * `loading` slot (a skeleton, its `<loading>`).
+   */
+  hold(drawing?: () => Drawing): void {
     this.showing++
+    const slotted = drawing && this.hasSlots ? this.slot(LOADING, drawing) : undefined
     this.apply()
     onCleanup(() => {
       this.showing--
+      slotted?.remove()
       this.apply()
     })
   }
 
-  /** Its state on while anything inside waits, else off. */
+  /**
+   * A failure inside it, until its owner goes:  its `error` on, saying `words`;  `drawing`, if any, in its `error`
+   * slot (its `<failed>`).
+   */
+  fail(words: string, drawing?: () => Drawing): void {
+    this.failures.push(words)
+    const slotted = drawing && this.hasSlots ? this.slot(ERROR, drawing) : undefined
+    this.apply()
+    onCleanup(() => {
+      this.failures.splice(this.failures.lastIndexOf(words), 1)
+      slotted?.remove()
+      this.apply()
+    })
+  }
+
+  /** `drawing`, made and put in its slot `name`;  taken out again with `remove()`. */
+  private slot(name: string, drawing: () => Drawing): { remove(): void } {
+    const box = madeElement(h("div", { slot: name, style: "display: contents" }, drawing))!
+    this.slotted.set(name, box)
+    this.made?.append(box)
+    return {
+      remove: () => {
+        box.remove()
+        if (this.slotted.get(name) === box) this.slotted.delete(name)
+      }
+    }
+  }
+
+  /** Its states:  loading while anything inside waits, its error while anything failed. */
   private apply(): void {
-    if (this.showing) this.made?.setAttribute(LOADING, "")
-    else this.made?.removeAttribute(LOADING)
+    const element = this.made
+    if (!element) return
+    if (this.showing) element.setAttribute(LOADING, "")
+    else element.removeAttribute(LOADING)
+    const failure = this.failures.at(-1)
+    if (failure !== undefined) element.setAttribute(ERROR, failure)
+    else element.removeAttribute(ERROR)
   }
 }
+
+/**
+ * An element's `<loading>` and `<failed>`, as Spell compiles them (`core.drawLooking()`).
+ * - `slots`:  it has `loading` and `error` slots (Spell UI's panes), which they fill.
+ */
+export type LookRiders = {
+  waiting?: () => Drawing
+  failed?: (error: string) => Drawing
+  slots?: boolean
+}
+
+/** What a failure inside an element whose look said shows (`drawRead()`'s default):  `undefined`, a list's own. */
+export function failedHere(error: unknown, why: string): Drawing | undefined {
+  // a read given up on as its drawing went away:  no failure of its element's
+  if ((error as Error | undefined)?.name === "AbortError") return undefined
+  const here = lookHere()
+  const failed = here.riders?.failed as ((error: string) => Drawing) | undefined
+  if (here.own) {
+    here.own.fail(why, failed && (() => failed(why)))
+    // in its error slot, or its own error look:  nothing here
+    if (here.own.hasSlots || !failed) return null as unknown as Drawing
+  }
+  return failed ? failed(why) : undefined
+}
+
+/** Spell UI's error state, on an element that has one (the shared `error`). */
+const ERROR = "error"
+
+/** What an element's Try again dispatches (Spell UI's `StatePanes`). */
+const RETRY_EVENT = "ui-retry"
 
 /** Spell UI's loading state, on an element that has one. */
 const LOADING = "loading"
@@ -326,12 +412,15 @@ export function waitingLoader(shape: WaitingShape = "lines", text?: string, skel
   const here = lookHere()
   const said = text ?? here.text
   if (here.look === "none") return null as unknown as Drawing
-  if (here.look === "skeleton") return skeletonOf(here.skeleton ?? skeleton ?? SHAPES[shape], said)
-  if (here.own) {
-    here.own.hold()
+  const rider = here.riders?.waiting as (() => Drawing) | undefined
+  const skeletonLook = () => skeletonOf(here.skeleton ?? skeleton ?? SHAPES[shape], said)
+  const drawn = rider ?? (here.look === "skeleton" ? skeletonLook : undefined)
+  if (here.own && (here.own.hasSlots || !drawn)) {
+    // its own loading state, and what it said in its loading slot
+    here.own.hold(drawn)
     return null as unknown as Drawing
   }
-  return spinner(said)
+  return drawn ? drawn() : spinner(said)
 }
 
 /** Spell UI's spinner, in the text's flow, saying `text` if there is one. */

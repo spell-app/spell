@@ -2171,8 +2171,28 @@ export type ASTJSXElementProps = Prettify<{
    * - `said`:  the look's word, or a spinner's words, as written.
    * - `ownsState`:  its tag has a loading state of its own, which a spinner turns on.
    */
-  looking?: { said: string; ownsState: boolean }
+  looking?: ASTLooking
+  /**
+   * An element's rider, `<loading>` or `<failed>` written inside it:  what shows while what's in it waits, or once it
+   * failed.  Its parent takes it into its `looking` (`riders`).
+   */
+  rider?: "waiting" | "failed"
 }>
+
+/**
+ * How what waits inside an element looks, and what shows meanwhile (`ASTJSXElement.looking`).
+ * - `said`:  its `loading="..."`, the look's word or a spinner's words;  `""`, none of its own.
+ * - `ownsState`:  its tag has a loading state of its own, which a spinner turns on.
+ * - `waiting`, `failed`:  its `<loading>` and `<failed>`, as fragments;  `<failed>`'s reads `the error`, `error`.
+ * - `slots`:  its tag has `loading` and `error` slots (Spell UI's panes), which they fill.
+ */
+export type ASTLooking = {
+  said: string
+  ownsState: boolean
+  waiting?: ASTJSXFragment
+  failed?: ASTJSXFragment
+  slots?: boolean
+}
 
 /**
  * One item of a right-click menu (`ASTJSXElement.contextMenu`):  an action's name as spell names it, `-` a divider;
@@ -2189,7 +2209,8 @@ export class ASTJSXElement extends ASTExpression {
   declare drawnApart: boolean | undefined
   declare action: string | undefined
   declare contextMenu: ASTContextMenuItem[] | undefined
-  declare looking: { said: string; ownsState: boolean } | undefined
+  declare looking: ASTLooking | undefined
+  declare rider: "waiting" | "failed" | undefined
   constructor(match: P.AnyMatch, props: ASTJSXElementProps) {
     super(match, props)
     this.assertType("tagName", "string")

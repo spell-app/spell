@@ -18,6 +18,7 @@
  *     - `SpellUISettings`:  what Spell UI hands `spell/element` (a side effect, below)
  *     - `IconGlyph`, `PartComponent` (the generic content parts)
  *     - `CloseButton`:  the close button of a box that closes (message, toast, nag, dialog)
+ *     - `StatePanes`:  what a pane shows in place of its content while it loads, or once it failed
  *     - `ClipboardCopy`:  a copy button's copy, then "Copied" for a moment
  *     - `AddressParameter`:  a value kept in the page's address (`parameter`, `<ui-tabs history>`), so Back steps through it
  *     - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker, a
@@ -69,6 +70,7 @@ export * from "spell/ui/elements/PartComponent"
 export * from "spell/ui/elements/RootSettings"
 export * from "spell/ui/elements/IconGlyph"
 export * from "spell/ui/elements/CloseButton"
+export * from "spell/ui/elements/StatePanes"
 export * from "spell/ui/elements/ClipboardCopy"
 export * from "spell/ui/elements/AddressParameter"
 export * from "spell/ui/elements/PopoverPanel"

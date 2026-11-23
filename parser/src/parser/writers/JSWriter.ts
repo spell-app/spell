@@ -1844,11 +1844,19 @@ export class JSWriter extends ProgramWriter {
    * `drawn`, with what waits in `node` looking as its `loading="..."` says:  `core.drawLooking("skeleton", () => ...)`.
    * - Its own loading state stands in for what waits inside it (`, true`), unless its attributes wait:  then it
    *   stands in for itself (`drawnWaiting()`).
+   * - Its `<loading>` and `<failed>`, after:  `{ waiting: () => [...], failed: (error) => [...], slots: true }`.
    */
   drawnLooking(node: P.ASTJSXElement, drawn: string): string {
-    const { said, ownsState } = node.looking!
-    const owns = ownsState && !this.project.elementsThatWait.has(node) ? ", true" : ""
-    return `core.drawLooking(${this.quoted(said)}, () => ${drawn}${owns})`
+    const { said, ownsState, waiting, failed, slots } = node.looking!
+    const owns = ownsState && !this.project.elementsThatWait.has(node)
+    // its `<loading>` and `<failed>`:  `the error`, inside `<failed>`, is the failure's words
+    const riders = [
+      waiting && `waiting: () => ${this.write(waiting)}`,
+      failed && `failed: (error) => ${this.write(failed)}`,
+      slots && "slots: true"
+    ].filter(Boolean)
+    const rest = riders.length ? `, ${owns}, { ${riders.join(", ")} }` : owns ? ", true" : ""
+    return `core.drawLooking(${this.quoted(said)}, () => ${drawn}${rest})`
   }
 
   /**

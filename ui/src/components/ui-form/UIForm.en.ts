@@ -145,6 +145,7 @@ export const formVocabulary = {
     }
   ],
   events: [
+    ...UIT.StatePaneEvents,
     {
       name: "ui-valid",
       detail: "{ field: string, value: FieldValue, values: Record<string, FieldValue> }",
@@ -191,10 +192,14 @@ export const formVocabulary = {
       description: "The held edits were dropped:  every control shows the bound `value` again."
     }
   ],
-  slots: [{ name: "", description: "The native `<form>` (or its content, when the `<ui-form>` sits inside one)." }],
+  slots: [
+    { name: "", description: "The native `<form>` (or its content, when the `<ui-form>` sits inside one)." },
+    ...UIT.StatePaneSlots
+  ],
   parts: [
     { name: "form", description: "The form box." },
-    { name: "debug", description: "The JSON `debug` shows, a `<pre>` in a captioned box below the content." }
+    { name: "debug", description: "The JSON `debug` shows, a `<pre>` in a captioned box below the content." },
+    ...UIT.StatePaneParts
   ],
   states: [
     ...STATE_STATES,

@@ -254,6 +254,64 @@ describe("how what waits looks:  an element's `loading`", () => {
   })
 })
 
+/** A pane whose read fails or waits, with its `<loading>` and `<failed>`, as compiled javascript writes them. */
+class RiddenGame extends Game {
+  constructor(private slots: boolean) {
+    super()
+  }
+
+  override draw(): Drawing {
+    return h("div", h("h1", "Heading"), () =>
+      core.drawLooking(
+        "",
+        () =>
+          h("ui-segment", () =>
+            core.drawWaiting(() => h("p", { title: () => String(this.total) }, "body") as unknown as Drawing, "p")
+          ) as unknown as Drawing,
+        true,
+        {
+          waiting: () => h("i", "Loading Totals...") as unknown as Drawing,
+          failed: (error) => h("b", "No totals:  ", error) as unknown as Drawing,
+          slots: this.slots
+        }
+      )
+    ) as unknown as Drawing
+  }
+}
+
+describe("an element's `<loading>` and `<failed>`", () => {
+  test("a pane with slots:  its loading state on and `<loading>` in its loading slot;  both gone once it's read", async () => {
+    const game = new RiddenGame(true)
+    draw(game)
+    const segment = container.querySelector("ui-segment")!
+    expect(segment.hasAttribute("loading")).toBe(true)
+    expect(segment.querySelector(':scope > [slot="loading"]')?.textContent).toBe("Loading Totals...")
+    await game.work.answer(10)
+    expect(segment.hasAttribute("loading")).toBe(false)
+    expect(segment.querySelector('[slot="loading"]')).toBeNull()
+    expect(container.querySelector("p")?.getAttribute("title")).toBe("11")
+  })
+
+  test("a failure:  its `error` on, saying why, and `<failed>` in its error slot with `the error`", async () => {
+    const game = new RiddenGame(true)
+    draw(game)
+    await game.work.fail(new Error("The server didn't answer"))
+    const segment = container.querySelector("ui-segment")!
+    expect(segment.getAttribute("error")).toBe("The server didn't answer")
+    expect(segment.querySelector(':scope > [slot="error"]')?.textContent).toBe("No totals:  The server didn't answer")
+    expect(container.querySelector("ui-message")).toBeNull()
+  })
+
+  test("no slots:  `<loading>` and `<failed>` in place of what waits, as a list's riders show", async () => {
+    const game = new RiddenGame(false)
+    draw(game)
+    expect(container.querySelector("ui-segment > i")?.textContent).toBe("Loading Totals...")
+    await game.work.fail(new Error("gone"))
+    expect(container.querySelector("ui-segment > b")?.textContent).toBe("No totals:  gone")
+    expect(container.querySelector("ui-segment")?.getAttribute("error")).toBe("gone")
+  })
+})
+
 describe("the look's words", () => {
   test("look words, in both languages;  anything else a spinner's words", () => {
     expect(lookSaid("skeleton")).toEqual({ look: "skeleton" })

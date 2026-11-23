@@ -3,6 +3,7 @@ import { Dynamic, isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
 import { cardVocabulary } from "./UICard.en"
+import statePanesCSS from "spell/ui/elements/StatePanes.css?inline"
 import { CardClicks } from "./CardClicks"
 import { UICards } from "./UICards"
 
@@ -54,10 +55,26 @@ function isSameNouns(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
 export class UICard extends E.UIComponent<typeof cardVocabulary> {
   @E.proto static vocabulary = cardVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { heights: heightsCSS, card: cardCSS, ...E.PartComponent.prototype.elementSetup.styleSheets },
+    styleSheets: {
+      statePanes: statePanesCSS,
+      heights: heightsCSS,
+      card: cardCSS,
+      ...E.PartComponent.prototype.elementSetup.styleSheets
+    },
     // `loading`:  Fomantic's veil
-    loading: "its own"
+    loading: "its own",
+    // `error`:  its error pane in place of its content (`StatePanes`)
+    error: "its own"
   } satisfies Partial<E.ElementSetup>
+
+  /** Its loading and error panes, in place of its content while it loads or once it failed (`E.StatePanes`). */
+  readonly panes = new E.StatePanes({ owner: this, part: (name) => this.partForName(name as never) })
+
+  /** A pane stands in for its content:  `:state(state-pane)`, so its own veil goes (`reset.css`). */
+  @E.cssState("state-pane")
+  get showsStatePane(): boolean {
+    return !!this.panes.showing
+  }
 
   ////////////////
   // ## Clicks
@@ -213,7 +230,8 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
             </Show>
           </div>
         </Show>
-        <slot />
+        {this.panes.content()}
+        {this.panes.draw()}
         <Show when={this.rendersShorthand(EXTRA)}>
           <div class={this.staticPart(EXTRA)} part={this.partForName("extra")}>
             {this.extra}

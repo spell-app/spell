@@ -546,7 +546,8 @@ ${drawing}
       name: "spell-ui",
       tagFor: (word) => ({ segment: "ui-segment", image: "ui-image" })[word],
       attributeNameFor: (tag, attribute) => (tag === "ui-segment" && attribute === "loading" ? "loading" : undefined),
-      skeletonFor: (tag) => (tag === "ui-image" ? { parts: [{ shape: "image", ratio: "square" }] } : undefined)
+      skeletonFor: (tag) => (tag === "ui-image" ? { parts: [{ shape: "image", ratio: "square" }] } : undefined),
+      slotNameFor: (tag, slot) => (tag === "ui-segment" && ["loading", "error"].includes(slot) ? slot : undefined)
     }
     beforeAll(() => SP.ComponentPacks.register(PACK))
     afterAll(() => SP.ComponentPacks.register({ name: "spell-ui", tagFor: () => undefined }))
@@ -574,7 +575,7 @@ ${drawing}
     test("a pane with a loading state of its own:  that state stands in for what waits inside it", () => {
       const js = compiled(GAME(`		<div>\n			<segment loading="spinner">{the total}</segment>\n		</div>`))
       expect(js).toContain('core.drawLooking("spinner", () => h("ui-segment"')
-      expect(js).toMatch(/core\.drawLooking\("spinner", [\s\S]*, true\)/)
+      expect(js).toMatch(/core\.drawLooking\("spinner", [\s\S]*, true, \{ slots: true \}\)/)
     })
 
     test("and when its own attributes wait, it stands in for itself, in that state", () => {
@@ -593,6 +594,27 @@ ${drawing}
       expect(() =>
         compiled(GAME(`		<div>\n			<div loading="skeleton: wibble">{the total}</div>\n		</div>`))
       ).toThrow(/wibble/)
+    })
+
+    test("its `<loading>` and `<failed>`:  riders of its look, filling its slots;  `the error` the failure's words", () => {
+      const js = compiled(
+        GAME(
+          `		<div>\n			<segment>\n				<span class={the total}>x</span>\n				<loading>\n					<b>Loading Totals...</b>\n				</loading>\n				<failed>\n					<i>No totals:  {the error}</i>\n				</failed>\n			</segment>\n		</div>`
+        )
+      )
+      expect(js).toContain('core.drawLooking("", () => h("ui-segment"')
+      expect(js).toContain('waiting: () => [h("b", "Loading Totals...")]')
+      expect(js).toContain('failed: (error) => [h("i", "No totals:  ", () => error)]')
+      expect(js).toContain("slots: true")
+      expect(js).not.toContain('h("failed"')
+    })
+
+    test("on an element without those slots:  the same riders, shown in place of what waits", () => {
+      const js = compiled(
+        GAME(`		<div>\n			<div>\n				{the total}\n				<failed>Gone</failed>\n			</div>\n		</div>`)
+      )
+      expect(js).toContain('failed: (error) => ["Gone"]')
+      expect(js).not.toContain("slots: true")
     })
 
     test("a bare `loading`, `loading={...}`, and the web's `lazy` stay the element's", () => {

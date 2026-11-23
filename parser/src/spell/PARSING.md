@@ -1652,6 +1652,17 @@ would.
       has a `loading` attribute):  with a spinner, THAT state turns on while what's inside waits, instead of a
       second spinner inside it;  and an element whose own attributes wait stands in for itself, empty, in that
       state (`core.drawWaiting(..., tag, true)`).  A skeleton draws placeholder lines inside it.
+  - Its `<loading>` and `<failed>`, written INSIDE any element (Q10 A;  `SpellJSX.riderOf()`):  the element's riders,
+    what shows while what's inside it waits, or once it failed -- `core.drawLooking(said, () => h(...), owns,
+    { waiting, failed, slots })`.
+    - Inside `<failed>`, `the error` is the failure's words (`failedScope()`, as `if that fails:` has in an action);
+      `try again` reads again.
+    - A pane with `loading` and `error` slots (Spell UI's segment, segments, card, section, tab, form, popup:  its pack
+      names the slots, `ComponentPacks.slotNameFor()`):  they fill them, and its own states turn on -- `loading`
+      while what's inside waits (a skeleton look fills its loading slot), `error="<why>"` once it failed, its Try
+      again (`ui-retry`) reading again.  Empty, the pane's defaults:  its veil;  its error message and Try again.
+    - Any other element:  they show in place of what waits, as a list's riders do;  a failure inside an element with
+      a loading state of its own (a button) still turns its `error` on (the shared error look).
     - Any other goes on what's around its items:  `<for films as="cards" columns="4" />`.
   - Its slots, `<loading>`, `<empty>`, `<failed>`:  `while waiting :`, `if there are none :`, `if that fails :`.
 - An `<html>` block (epic `elemental-spell` P16):  markup as written, the drawing's own lines.

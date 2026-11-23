@@ -18,7 +18,17 @@ export type WaitingLook = {
   look: "spinner" | "skeleton" | "none"
   text?: string
   skeleton?: SkeletonSpec
-  own?: { hold(): void }
+  own?: {
+    readonly hasSlots: boolean
+    hold(drawing?: () => unknown): void
+    fail(words: string, drawing?: () => unknown): void
+  }
+  /** Its element's `<loading>` and `<failed>` (`core.drawLooking()`'s `riders`). */
+  riders?: {
+    waiting?: () => unknown
+    failed?: (error: string) => unknown
+    slots?: boolean
+  }
 }
 
 /** The look words, in each language a program is written in:  any other text is a spinner's words. */

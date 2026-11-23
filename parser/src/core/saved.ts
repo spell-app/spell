@@ -64,7 +64,14 @@ import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
 import { failsAsMissing, holdNotice } from "./undoing"
 import { lookSaid } from "./looks"
-import { elementWaitingLoader, forgetWaitedValue, standInFor, waitingLoader, waitingMethods } from "./waiting"
+import {
+  elementWaitingLoader,
+  failedHere,
+  forgetWaitedValue,
+  standInFor,
+  waitingLoader,
+  waitingMethods
+} from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
 import { Place } from "./classes/Place"
@@ -1885,9 +1892,7 @@ export const savedMethods = defineCoreModule({
     const whole = createComponent(Errored, {
       // Solid hands the error as an accessor:  read as it was, it said "function () { [native code] }"
       fallback: (error: () => unknown) =>
-        riders.failed
-          ? riders.failed()
-          : failedDrawing(error(), riders.failedSay ? `${riders.failedSay()}` : undefined),
+        riders.failed ? riders.failed() : listFailed(error(), riders.failedSay ? `${riders.failedSay()}` : undefined),
       get children() {
         return body()
       }
@@ -2127,6 +2132,15 @@ function failedDrawing(error: unknown, said?: string): Drawing {
   )
   const look = wait === undefined ? { color: "red" } : { state: "warning", size: "small" }
   return h("ui-message", look, message, button) as unknown as Drawing
+}
+
+/**
+ * What a read that failed shows, with no `if that fails:`:  its element's `<failed>` or own error state, where the
+ * look around it says (`failedHere()`);  else a message, and Try again.
+ */
+function listFailed(error: unknown, said: string | undefined): Drawing {
+  const here = failedHere(error, said ?? whyOf(error))
+  return here === undefined ? failedDrawing(error, said) : here
 }
 
 /** What a failure says of itself. */
