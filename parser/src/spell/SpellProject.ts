@@ -4,7 +4,7 @@ import { PY } from "spell/parser/py"
 // Import directly, NOT through the `spell/parser/core` barrel:  a project MUST NOT load `core` itself --
 // each runner runs its own copy.  See `spellRuntime.ts`.
 import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell/parser/core/core.types"
-import type { PlaceDeployment } from "spell/parser/core/runtime"
+import { deploymentAsRun, type PlaceDeployment } from "spell/parser/core/runtime"
 import { SP } from "spell/parser/spell"
 // Import directly:  these two helpers, not the rules' barrel
 import { overlayViewNamed, pageNamed } from "spell/parser/spell/rules/sites/sites.shared"
@@ -580,7 +580,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     projectId: string
   ): Record<string, PlaceDeployment> {
     const picked = Object.entries(places ?? {}).flatMap(([place, deployments]) =>
-      deployments[deployment] ? [[snakeCase(place), deployments[deployment]] as const] : []
+      deployments[deployment] ? [[snakeCase(place), deploymentAsRun(deployment, deployments[deployment])] as const] : []
     )
     if (!picked.length) {
       throw new TypeError(

@@ -249,6 +249,8 @@ export class RestPlace extends WebPlace implements Place {
     if (operation === undefined) {
       throw new TypeError(`RestPlace.call():  nobody says where "${name}" is;  name it in \`operations\``)
     }
+    // every route it lists is a write, or an action:  a GET too, as one may change things (a load)
+    this.refuseIfReadOnly()
     if (collection) this.refuseUnlessEnabled(collection, name)
     const { at, method = "POST" } = typeof operation === "string" ? { at: operation } : operation
     const data = collection && input ? this.onTheWire(collection, input as PlaceRow) : input
@@ -274,6 +276,17 @@ export class RestPlace extends WebPlace implements Place {
   /** Does `collection` take `operation`? */
   private isEnabled(collection: string, operation: string): boolean {
     return this.enabled.get(collection)?.has(operation) ?? true
+  }
+
+  /**
+   * - throws `PlaceError` `"refused"` on a place that takes no writes (`write: "none"`):  read only by its line, or
+   *   its deployment's, production's unless it says otherwise (`deploymentAsRun()`)
+   */
+  private refuseIfReadOnly(): void {
+    if (this.capabilities.write !== "none") return
+    throw new PlaceError(`${this.url} is read only:  nothing can be changed there`, {
+      cause: { kind: "refused", whyNot: "place" }
+    })
   }
 
   /**
@@ -436,6 +449,7 @@ export class RestPlace extends WebPlace implements Place {
   /** Make one change:  its row, as the server now keeps it, if it said. */
   private async makeChange(change: PlaceChange, context: PlaceContext): Promise<PlaceRow | undefined> {
     const { kind, collection, id, changeId } = change
+    this.refuseIfReadOnly()
     this.refuseUnlessEnabled(collection, OPERATION_OF_WRITE[kind])
     if (kind === "delete") {
       await this.answerTo({ ...this.thingAddress(collection, id!), method: "DELETE" }, context, changeId)

@@ -1051,6 +1051,24 @@ describe("enabled operations, and action routes (epic `data` P49)", () => {
     )
     await expect(place.call("publish", { id: "r-1" }, {}, "recipes")).resolves.toEqual({ published: 1 })
   })
+
+  test("read only, it takes no write and no listed route, a GET one too:  nothing is sent", async () => {
+    const { box, place } = await served(
+      {},
+      {
+        can: { write: "none" },
+        operations: { star: { at: "/recipes/{id}/star", method: "PATCH" }, load: { at: "/recipes/load", method: "GET" } }
+      }
+    )
+    const refused = await place.call("load", {}, {}, "recipes").catch((error: unknown) => error)
+    expect((refused as PlaceError).cause).toMatchObject({ kind: "refused", whyNot: "place" })
+    await expect(place.call("star", { id: "r-1" }, {}, "recipes")).rejects.toThrow(/is read only/)
+    await expect(
+      place.apply([{ kind: "insert", collection: "recipes", row: { title: "Soup" } }] as never, {})
+    ).rejects.toThrow(/is read only/)
+    expect(box.starred).toEqual([])
+    await expect(place.list("recipes", {}, {})).resolves.toMatchObject({ rows: expect.any(Array) })
+  })
 })
 
 ////////////////

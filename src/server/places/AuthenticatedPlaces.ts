@@ -7,6 +7,7 @@ import {
 } from "spell/places/places.types"
 import { putKeyOn, type KeyGoes } from "spell/places/keyGoes"
 import { PlaceToken, tokenServiceMint } from "spell/places/PlaceToken"
+import { compilePattern } from "spell/util/addressPattern"
 import { CHANGE_ID_HEADER, TOKEN_HEADER } from "spell/places/WebPlace"
 import { SRV } from "spell/server"
 
@@ -174,7 +175,7 @@ export class AuthenticatedPlaces {
     try {
       const body =
         request.method === "GET" || request.method === "HEAD" ? undefined : await SRV.readBody(request.raw, BODY_LIMIT)
-      if (place.readOnly && !isRead(request.method, place, body)) {
+      if (place.readOnly && !isRead(request.method, place, body, rest)) {
         throw new PlaceError(`${place.name} is read only:  its lines say so, so it takes no changes`, {
           cause: { kind: "refused", whyNot: "place" }
         })
@@ -284,6 +285,8 @@ export type AuthenticatedPlace = {
   tokenFrom?: string
   /** It takes no writes. */
   readOnly?: boolean
+  /** Its write and action routes, under `at`:  a read only one refuses each, a `GET` too.  See `SP.ServedPlace.writes`. */
+  writes?: readonly string[]
 }
 
 /** A place a request's path names, as a source finds it. */
@@ -320,14 +323,28 @@ function notSetLine(name: string, { name: place, project }: AuthenticatedPlace):
   return `${name} is not set:  the ${place} place in ${project} needs it.  Set it where Spell's page server starts, then start it again`
 }
 
+/** Does `path` (its question aside) answer to `route`, a route's address with braces:  `/jobs/{id}/load`? */
+function matchesRoute(route: string, path: string): boolean {
+  const pattern = route.replace(/\{([^{}/]+)\}/g, (_brace, name: string) => `:${name.replace(/\W/g, "_")}`)
+  return compilePattern(pattern)(path.replace(/[?#].*$/, "")) !== undefined
+}
+
 /** Where a page reads a place:  `/api/places/projects/@acme/jobs/jobs`. */
 function servedAddress(served: string): string {
   return `${AUTHENTICATED_PLACES_PREFIX}/${served}`
 }
 
-/** Is this request a read?  A graphql server's reads are `POST`s:  only a mutation writes. */
-function isRead(method: string, { kind }: AuthenticatedPlace, body: Uint8Array | undefined): boolean {
-  if (method === "GET" || method === "HEAD") return true
+/**
+ * Is this request a read?  A graphql server's reads are `POST`s:  only a mutation writes.
+ * - A `GET` to a route its lines list as a write or an action isn't (a load):  `rest`, the path under the place.
+ */
+function isRead(
+  method: string,
+  { kind, writes = [] }: AuthenticatedPlace,
+  body: Uint8Array | undefined,
+  rest: string
+): boolean {
+  if (method === "GET" || method === "HEAD") return !writes.some((write) => matchesRoute(write, rest))
   if (kind !== "graphql server" || method !== "POST" || !body) return false
   try {
     const { query } = JSON.parse(new TextDecoder().decode(body)) as { query?: unknown }
