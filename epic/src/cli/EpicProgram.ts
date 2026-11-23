@@ -271,10 +271,11 @@ export class EpicProgram {
     this.page(
       epic.command("badges"),
       "item badges:  each line starts with what happens next (WILL FIX, YOUR CALL ...), from each item's care and " +
-        "doubt;  trial:  nothing closed;  off:  undo them all;  score:  judge the open items never scored, this epic's alone",
+        "doubt;  trial:  nothing closed;  off:  undo them all;  score:  judge the open items never scored, this epic's alone;  " +
+        "close-new yes:  with badges on, a new item its badge would grey closes as it's made",
       "epic badges seo trial"
     ).usage(
-      "<epic>[#<id>] [list [--json] | trial | on | off | score [ids] | set <ids> --care <n> --doubt <n> | close <ids> [--as <why>]]"
+      "<epic>[#<id>] [list [--json] | trial | on | off | score [ids] | set <ids> --care <n> --doubt <n> | close <ids> [--as <why>] | close-new yes|no]"
     )
     this.page(
       epic.command("summaries"),

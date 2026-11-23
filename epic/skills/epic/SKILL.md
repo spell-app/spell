@@ -2149,6 +2149,8 @@ The engine only stores judgements and draws them:  it starts no work.  These are
 - `epic badges <epic> list`:  the scores, the badges, and what would close.
 - NEVER turn badges on, score, or close on an epic the person hasn't asked it for.
   `trial` closes nothing;  `epic badges <epic> off` undoes them all.
+- With badges `on`, a new item its badge would grey still stays open until the person says yes to that too:
+  `epic badges <epic> close-new yes` (I435);  never a judgement call, never on your own.
 - In Codex:  the same commands;  the judge runs `claude -p`, so without Claude Code items stay unscored, drawn as
   before badges.
 

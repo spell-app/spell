@@ -3,7 +3,8 @@ import { spawnSync, type ChildProcess } from "node:child_process"
 /****************
  * ### `StallWatch`
  * Notices when a command run in its turn (`Turns.runCommand()`) has STALLED:  it printed nothing, and its whole
- * process tree used next to no CPU, for the stall window (epic `epic-engine` I384).
+ * process tree used next to no CPU, for the stall window (epic `epic-engine` I384);
+ * or it printed nothing at all, busy or not, for `SILENT_TIMES` the window (I422).
  * - Why:  twice on 2026-11-20 a full `yarn test` hung inside a browser test run, headless Chromium still alive, at 0%
  *   CPU and silent, for ~40 minutes;  it held the machine's test turn, and every other session's runs queued behind it
  *   until someone killed it by hand.
@@ -11,6 +12,8 @@ import { spawnSync, type ChildProcess } from "node:child_process"
  *   it exits.
  * - Busy is EITHER:  any output, or the tree using more than `BUSY_SHARE` of one core between two looks.
  *   - So a long quiet step that works (a build, a type check) is never taken for stalled.
+ *   - Unless it stays silent past the hard limit, `SILENT_TIMES` the window (30 minutes):  a page stuck in a loop
+ *     keeps its browser busy for ever, and prints nothing (I422:  Spell UI's `motion` tests, a browser at ~112% CPU).
  * - The rule is pure (`output()`, `sample()`), handed the clock:  its tests need no processes.
  *   `watch()` drives it from a child's output and `ps`.
  * - NEVER throws:  a tree it can't measure (no `ps`, Windows) counts as busy.
@@ -18,6 +21,9 @@ import { spawnSync, type ChildProcess } from "node:child_process"
 export class StallWatch {
   /** how long without output or CPU counts as stalled, ms */
   readonly stallMs: number
+
+  /** how long without output counts as stalled however busy, ms:  `SILENT_TIMES` the window */
+  readonly silentMs: number
 
   /** the last line printed, ANSI colours taken out */
   lastLine = ""
@@ -27,19 +33,21 @@ export class StallWatch {
 
   private readonly now: () => number
   private lastBusy: number
+  private lastOutput: number
   private lastCpu: number | undefined
   private lastLook: number
   private partial = ""
 
   constructor({ stallMs, now = Date.now }: { stallMs: number; now?: () => number }) {
     this.stallMs = stallMs
+    this.silentMs = stallMs * SILENT_TIMES
     this.now = now
-    this.lastBusy = this.lastLook = now()
+    this.lastBusy = this.lastLook = this.lastOutput = now()
   }
 
   /** Output from the command:  it's busy;  keeps its last line, and the last project it named. */
   output(text: string): void {
-    this.lastBusy = this.now()
+    this.lastBusy = this.lastOutput = this.now()
     const lines = (this.partial + text).split(/\r?\n|\r/)
     this.partial = lines.pop() ?? ""
     for (const line of [...lines, this.partial]) {
@@ -64,12 +72,17 @@ export class StallWatch {
       this.lastBusy = now
     this.lastCpu = cpuSeconds
     this.lastLook = now
-    return this.idleMs >= this.stallMs
+    return this.idleMs >= this.stallMs || this.silentFor >= this.silentMs
   }
 
   /** How long since it was last busy, ms. */
   get idleMs(): number {
     return this.now() - this.lastBusy
+  }
+
+  /** How long since it last printed anything, ms. */
+  get silentFor(): number {
+    return this.now() - this.lastOutput
   }
 
   /** The line said once it's stopped:  how long, where it was. */
@@ -80,10 +93,11 @@ export class StallWatch {
     ]
       .filter(Boolean)
       .join(";  ")
-    return (
-      `epic turns:  "${command}" stalled -- no output and no CPU for ${quietWords(this.idleMs)};  ` +
-      `stopped it and freed the turn (${where})`
-    )
+    const why =
+      this.idleMs >= this.stallMs
+        ? `no output and no CPU for ${quietWords(this.idleMs)}`
+        : `no output for ${quietWords(this.silentFor)}, though busy`
+    return `epic turns:  "${command}" stalled -- ${why};  ` + `stopped it and freed the turn (${where})`
   }
 
   /**
@@ -143,6 +157,9 @@ export type WatchProps = {
   graceMs?: number
   cpu?: (pid: number) => number | undefined
 }
+
+/** How many stall windows of silence stop a command however busy it is:  3 (30 minutes by default). */
+const SILENT_TIMES = 3
 
 /** A look's CPU over this share of one core is busy:  2%, over a hung tree's idle timers. */
 const BUSY_SHARE = 0.02

@@ -274,6 +274,7 @@ On a page with item badges, each line starts with what happens next.
 - SOMEDAY, OPTIONAL:  nothing, unless asked.
 - SEE T38:  work that todo, not the item.
 - Never turn badges on, score or close on an epic you weren't asked to.
+- A new item closes by itself only once the person said yes to that too:  `epic badges <epic> close-new yes`.
 
 ## hush -- Grey settled items the person won't look at again
 

@@ -55,12 +55,28 @@ describe("StallWatch", () => {
 
   test("a quiet tree using CPU is busy;  one it can't measure too", () => {
     const { clock, watch } = watchAt()
-    for (let minute = 1; minute <= 30; minute++) {
+    watch.output("building\n")
+    for (let minute = 1; minute < 30; minute++) {
       clock.now = minute * 60_000
       expect(watch.sample(minute * 20)).toBe(false)
     }
-    clock.now = 60 * 60_000
+    clock.now = 29.5 * 60_000
     expect(watch.sample(undefined)).toBe(false)
+  })
+
+  test("silent for 3 windows, however busy:  stalled (a page stuck in a loop, I422)", () => {
+    const { clock, watch } = watchAt()
+    watch.output("RUN  v5.1.0\n")
+    for (let minute = 1; minute < 30; minute++) {
+      clock.now = minute * 60_000
+      expect(watch.sample(minute * 60)).toBe(false)
+    }
+    clock.now = 30 * 60_000
+    expect(watch.sample(30 * 60)).toBe(true)
+    expect(watch.stoppedLine("yarn test")).toBe(
+      'epic turns:  "yarn test" stalled -- no output for 30m, though busy;  stopped it and freed the turn ' +
+        '(last output:  "RUN  v5.1.0")'
+    )
   })
 
   test("stoppedLine():  how long, the project, the last line", () => {

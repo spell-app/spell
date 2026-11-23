@@ -248,14 +248,26 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
    * Once the box's own transitions end:  `true` unless another show / hide started meanwhile.
    * - Asks the box again after each round:  a transition restarted while it ran (a redraw on a slow machine)
    *   settles the old one at once, canceled, and the new one is still running (main's CI, repo-split P23).
+   * - Waits only on the ones not finished yet (`running()`):  a finished one can still be listed by the box
+   *   (epic `epic-engine` I422).
    */
   private async transitionsEnd(): Promise<boolean> {
     const generation = ++this.generation
-    for (let running = this.box?.getAnimations() ?? []; running.length; running = this.box?.getAnimations() ?? []) {
+    for (let running = this.running(); running.length; running = this.running()) {
       await Promise.allSettled(running.map((animation) => animation.finished))
       if (generation !== this.generation) return false
     }
     return generation === this.generation
+  }
+
+  /**
+   * The box's transitions still to finish.
+   * - NEVER a finished one:  Chromium still lists a finished transition until the page next draws, and its
+   *   `finished` has already settled, so waiting on it again and again never let the page draw:
+   *   the tab spun for ever (I422:  1 run in ~40 of the `motion` tests, the dimmer's 1ms fade).
+   */
+  private running(): Animation[] {
+    return (this.box?.getAnimations() ?? []).filter((animation) => animation.playState !== "finished")
   }
 
   ////////////////

@@ -43,6 +43,7 @@ import { StallWatch, type WatchProps } from "./StallWatch"
  * - A STALLED command is stopped, freeing the turn (`StallWatch`, epic `epic-engine` I384):  no output and next to no
  *   CPU over its whole process tree for the stall window (10 minutes;  `--stall <minutes>`, `SPELL_EPIC_TURN_STALL`,
  *   `0` off), one line saying where it was;  `epic turns list` says "stalled" for a holder past it.
+ *   - Or no output at all for 3 times the window, however busy (I422:  a page stuck in a loop keeps its browser busy).
  *   - Its output is piped through to watch it (colours kept when ours is a terminal:  `FORCE_COLOR`).
  *   - A holder still quiet a minute past its window (`STALL_MARGIN`:  its own watch failed to stop it)
  *     is taken over by its waiters, its tree stopped:  stalled is the only "stuck" for a live holder (I400).
