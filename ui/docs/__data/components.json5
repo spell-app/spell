@@ -68500,6 +68500,11 @@
           "name": "--ui-page-layout-sidebar-width",
           "default": "16em",
           "type": "length"
+        },
+        {
+          "name": "--ui-page-layout-drawer-width",
+          "default": "16em",
+          "type": "length"
         }
       ]
     },
@@ -72012,6 +72017,16 @@
           "name": "--ui-tree-path-background",
           "default": "var(--ui-background)",
           "type": "color"
+        },
+        {
+          "name": "--ui-tree-nav-font-size",
+          "default": "0.875em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-tree-nav-row-height",
+          "default": "round(2.25em, var(--ui-grid, 4px))",
+          "type": "length"
         },
         {
           "name": "--ui-tree-nav-border-color",
