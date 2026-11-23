@@ -20,6 +20,7 @@ import { Routes } from "spell/app/app/pages/routes"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
 import { ServerCompileStore } from "spell/app/app/ServerCompileStore"
+import { reloadOutOfSight } from "spell/app/app/reloadOutOfSight"
 
 // Solid follows spell cells:  BEFORE anything renders
 import "spell/app/app/solid/cellsBridge"
@@ -36,6 +37,9 @@ if (!isStaticBuild) ServerCompileStore.install()
 // The editor speaks the page's language:  the browser's, when `index.html` names none.
 // BEFORE anything draws, so `<ui-root>` loads Spell UI's words in it too.
 AppTexts.namePageLanguage()
+
+// The dev server gone while the tab's out of sight:  reload once it's back, out of sight, not when the person returns.
+reloadOutOfSight(import.meta.hot)
 
 // Programs run on the runtime `editor` loads -- start loading it now.
 // - It registers the `UI` / `SUI` tags spell JSX draws with, NOT the editor's `spell/app/app/solid`.

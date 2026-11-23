@@ -50,3 +50,19 @@ describe("TaskList, cancelled and started again", () => {
     }
   })
 })
+
+describe("TaskList, in a tab out of sight", () => {
+  test("goes from task to task on no timer:  a hidden tab's held-back timers don't hold it", async () => {
+    // fake timers that never move, as a hidden tab's:  only the tasks' turns between them could wait on one
+    vi.useFakeTimers()
+    try {
+      const ran: string[] = []
+      const step = (name: string) => new Task({ name, run: async () => void ran.push(name) })
+      const taskList = new TaskList({ tasks: [step("a"), step("b"), step("c")] })
+      await taskList.start(undefined)
+      expect(ran).toEqual(["a", "b", "c"])
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+})
