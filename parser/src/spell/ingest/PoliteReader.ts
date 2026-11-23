@@ -15,6 +15,22 @@ export const READER_NAME = "spell-place-ingest (+https://github.com/spell-app/sp
  */
 export const READER_ORIGIN = "https://example.com"
 
+/** A host on this machine:  `127.0.0.1` (any `127.x`), `localhost`, `*.localhost`, `[::1]`. */
+const THIS_MACHINE = /^(?:127(?:\.\d{1,3}){3}|(?:.+\.)?localhost|\[::1\])$/
+
+/**
+ * The `Origin` it asks `url` as, or none.
+ * - none on this machine:  a server there, as a local proxy is, answers only its own pages, and refuses a foreign one
+ * - NEVER throws:  an address it can't read is asked as a page, as before
+ */
+export function readerOriginFor(url: string): string | undefined {
+  try {
+    return THIS_MACHINE.test(new URL(url).hostname) ? undefined : READER_ORIGIN
+  } catch {
+    return READER_ORIGIN
+  }
+}
+
 /** The most requests one look makes, in all. */
 const MOST_REQUESTS = 60
 
@@ -78,7 +94,8 @@ export type ReadAnswer = {
  * Reads a source the polite way:  everything `spell place ingest` sends goes through here.
  * - Asks the way a well-behaved page would:
  *   - names itself
- *   - asks as a page would (`READER_ORIGIN`), so a server says whether pages may read it
+ *   - asks as a page would (`READER_ORIGIN`), so a server says whether pages may read it;  not on this machine
+ *     (`readerOriginFor()`)
  *   - leaves a gap between requests
  *   - waits when told to (a 429 or a 503), as long as `Retry-After` says
  * - Minds a rate limit its answers name (GitHub's `x-ratelimit-remaining`, `x-ratelimit-reset`):
@@ -287,7 +304,8 @@ export class PoliteReader {
     const headers = new Headers(init.headers)
     headers.set("user-agent", READER_NAME)
     // a browser sets its own, and won't let a page:  so only where it can
-    if (!headers.has("origin") && !this.session && !this.readsPlaceServer) headers.set("origin", READER_ORIGIN)
+    const origin = readerOriginFor(url)
+    if (origin && !headers.has("origin") && !this.session && !this.readsPlaceServer) headers.set("origin", origin)
     const asked = this.key === undefined ? url : putKeyOn(url, headers, this.key, this.keyGoes)
     for (let attempt = 1; ; attempt++) {
       if (!this.hasRoom)
