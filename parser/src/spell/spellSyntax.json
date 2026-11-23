@@ -8933,7 +8933,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 123,
+          "line": 125,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9945,6 +9945,32 @@
                 },
                 "py": {
                   "code": "class OpenMeteo(Place):\n    pass\n\nopen_meteo = core.place(\n    OpenMeteo(),\n    {\n        \"name\": \"open_meteo\",\n        \"kind\": \"web server\",\n        \"at\": \"https://api.open-meteo.com\",\n        \"collections\": {\"forecasts\": {\"asked_by\": [\"latitude\", \"longitude\"]}},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ReadOnStartup",
+          "ruleNames": ["read_on_startup"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadOnStartup.ts",
+          "line": 13,
+          "purpose": "A collection read as the program starts, before any page draws it.",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} are read on startup",
+              "example": "shop is a web server at \"https://shop.test\"\n\t- items are read on startup\nan item is a thing",
+              "outputs": {
+                "js": {
+                  "code": "export class Shop extends Place {}\nexport const shop = core.place(new Shop(), {\n  name: \"shop\",\n  kind: \"web server\",\n  at: \"https://shop.test\",\n  readOnStartup: [\"Item\"]\n})\nexport class Item extends Thing {}"
+                },
+                "ts": {
+                  "code": "export class Shop extends Place {}\nexport const shop = core.place(new Shop(), {\n  name: \"shop\",\n  kind: \"web server\",\n  at: \"https://shop.test\",\n  readOnStartup: [\"Item\"]\n})\nexport class Item extends Thing {}"
+                },
+                "py": {
+                  "code": "class Shop(Place):\n    pass\n\nshop = core.place(\n    Shop(),\n    {\n        \"name\": \"shop\",\n        \"kind\": \"web server\",\n        \"at\": \"https://shop.test\",\n        \"read_on_startup\": [\"Item\"],\n    },\n)\n\nclass Item(Thing):\n    pass"
                 }
               }
             }

@@ -124,7 +124,8 @@ export const myThreads = core.place(new MyThread(), {
   name: "my_threads",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__threads",
-  checkedEvery: 30, firstReads: () => [[Thread], [Thread, { sort: [{ field: "name" }] }]] })
+  checkedEvery: 30
+})
 
 // -----------
 core.heading("Chat")

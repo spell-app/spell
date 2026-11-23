@@ -152,7 +152,8 @@ export const myInbox = core.place(new MyInbox(), {
   name: "my_inbox",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__inbox",
-  checkedEvery: 30, firstReads: () => [[MailChoice], [Subscription], [Message, { sort: [{ field: "sent", descending: true }] }]] })
+  checkedEvery: 30
+})
 
 // -----------
 core.heading("Inbox")

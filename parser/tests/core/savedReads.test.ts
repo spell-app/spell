@@ -50,7 +50,7 @@ class FlakyPlace extends CountingPlace {
 /** The classes of one program, as compiled spell writes them, and the place behind them. */
 function program(
   behind: CountingPlace,
-  { select, firstReads = false, checkedEvery }: { select?: string[]; firstReads?: boolean; checkedEvery?: number } = {}
+  { select, readOnStartup, checkedEvery }: { select?: string[]; readOnStartup?: string[]; checkedEvery?: number } = {}
 ) {
   core.resetRuntime()
   class Recipe extends Thing {
@@ -93,7 +93,7 @@ function program(
   }
   core.place(new Cookbook(), {
     name: "cookbook",
-    ...(firstReads && { firstReads: () => [[Recipe], [Tag]] as Array<[Function]> }),
+    ...(readOnStartup && { readOnStartup }),
     ...(checkedEvery && { checkedEvery })
   })
   return { Recipe, Tag }
@@ -118,39 +118,42 @@ const WITH_IDS = {
 beforeAll(() => bridgeSolid({ enableExternalSource, flush }))
 beforeEach(() => core.resetRuntime())
 
-describe("what a first draw reads", () => {
-  test("asked for together, in ONE request, when the place can;  the draw that reaches it later asks nothing", async () => {
+// Spell never reads ahead:  a page reads only what it draws.  These were the first reads' tests (every list a first
+// draw could reach, asked together as the place was first read), rewritten as the behaviour changed on purpose.
+describe("what's read before a page draws it", () => {
+  test("nothing:  a first read asks only for its own list, and the next list drawn asks for itself", async () => {
     const place = filled(new BatchingPlace({ capabilities: WITH_IDS }))
-    const { Recipe, Tag } = program(place, { firstReads: true })
+    const { Recipe, Tag } = program(place)
     const recipes = await core.savedThings(Recipe)
+    expect(place.requests).toEqual([[{ collection: "recipes", query: {} }]])
+    const tags = await core.savedThings(Tag)
+    expect(place.requests).toEqual([[{ collection: "recipes", query: {} }], [{ collection: "tags", query: {} }]])
+    expect(recipes.items.map((recipe) => (recipe as InstanceType<typeof Recipe>).title)).toEqual(["Soup"])
+    expect(tags.items.map((tag) => (tag as InstanceType<typeof Tag>).word)).toEqual(["quick"])
+  })
+
+  test("lists one draw asks for in the same moment still go in ONE request, when the place can", async () => {
+    const place = filled(new BatchingPlace({ capabilities: WITH_IDS }))
+    const { Recipe, Tag } = program(place)
+    await Promise.all([core.savedThings(Recipe), core.savedThings(Tag)])
     expect(place.requests).toEqual([
       [
         { collection: "recipes", query: {} },
         { collection: "tags", query: {} }
       ]
     ])
+  })
+
+  test("a collection its place says is read on startup:  read as the program starts, alone, and kept", async () => {
+    const place = filled(new BatchingPlace({ capabilities: WITH_IDS }))
+    const { Recipe, Tag } = program(place, { readOnStartup: ["Tag"] })
+    await settled()
+    expect(place.requests).toEqual([[{ collection: "tags", query: {} }]])
     const tags = await core.savedThings(Tag)
     expect(place.requests).toHaveLength(1)
-    expect(recipes.items.map((recipe) => (recipe as InstanceType<typeof Recipe>).title)).toEqual(["Soup"])
     expect(tags.items.map((tag) => (tag as InstanceType<typeof Tag>).word)).toEqual(["quick"])
-  })
-
-  test("a place that can't answer several:  one trip, a request per list, with no waiting for the first", async () => {
-    const place = filled(new CountingPlace({ capabilities: WITH_IDS }))
-    const { Recipe, Tag } = program(place, { firstReads: true })
     await core.savedThings(Recipe)
-    expect(place.requests).toHaveLength(2)
-    await core.savedThings(Tag)
-    expect(place.requests).toHaveLength(2)
-  })
-
-  test("without them:  the part drawn after the first answer asks after it, as it always did", async () => {
-    const place = filled(new BatchingPlace({ capabilities: WITH_IDS }))
-    const { Recipe, Tag } = program(place)
-    await core.savedThings(Recipe)
-    expect(place.requests).toHaveLength(1)
-    await core.savedThings(Tag)
-    expect(place.requests).toHaveLength(2)
+    expect(place.requests).toEqual([[{ collection: "tags", query: {} }], [{ collection: "recipes", query: {} }]])
   })
 })
 
@@ -268,6 +271,18 @@ describe("a field the compiler left out", () => {
     const [recipe] = (await core.savedThings(Recipe)).items as Array<InstanceType<typeof Recipe>>
     expect(place.requests[0]![0]!.query.select).toBeUndefined()
     expect(recipe!.notes).toBe("Salt it")
+  })
+
+  test("nor when the compiler found nothing read:  read whole, ONCE, not asked again as a field's read", async () => {
+    // a library's type, compiled where nothing reads its fields:  `select: []`, on a web server that can't select
+    const place = filled(new CountingPlace({ capabilities: { ...WITH_IDS, select: "none" } }))
+    const { Recipe } = program(place, { select: [] })
+    const [recipe] = (await core.savedThings(Recipe)).items as Array<InstanceType<typeof Recipe>>
+    expect(place.requests[0]![0]!.query.select).toBeUndefined()
+    expect(recipe!.title).toBe("Soup")
+    expect(recipe!.notes).toBe("Salt it")
+    await settled()
+    expect(place.requests).toHaveLength(1)
   })
 })
 

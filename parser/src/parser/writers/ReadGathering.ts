@@ -11,9 +11,6 @@ const FIELD_ATTRIBUTE = "name"
 /** The form element, whose `value` its controls' names are fields of. */
 const FORM_TAG = "ui-form"
 
-/** An event handler's attribute:  `onClick`, `on-ui-change`.  It runs when it's called, not when it's drawn. */
-const HANDLER_ATTRIBUTE = /^on[-A-Z]/
-
 /** `core`'s calls that read a saved type from its place. */
 const SAVED_READS = new Set(["savedThings", "savedThingAt", "savedThingWithId"])
 
@@ -50,10 +47,12 @@ const MAX_LOOK = 8
  * - A pass beside `WriterProject.findWaiting()`:  from the tree alone, no scope lookups, nothing written.
  * - By NAME, as the waiting pass is:  `the title of x` reads `title` of every type declaring one.
  *   - So `draw it` on a list of mixed types joins them, which fetches too much:  and too much is safe.
- * - It answers three things:
+ * - It answers two things:
  *   - `selectFor()`:  which fields of a saved type anything reads, for a place that can leave the rest out.
- *   - `firstReads`:  which reads a first draw can reach, asked for together.
  *   - `placesReadBy()`:  which places a getter reads, whatever one run of it happens to read.
+ * - It never says what to read AHEAD:  a page reads only what it draws, as it draws it (epic `data` P12's first reads
+ *   asked every list any page could draw, on a place's first read;  gone, as that's what slows a site's start).
+ *   A collection read as the program starts says so itself:  `tags are read on startup` (`ReadOnStartup`).
  * - What it can't prove widens to the whole thing, with a note for the author:  `notes`, reaching `SP.SpellWarnings`.
  *   What it can't see at all, a page running catches:  `core`'s `ProgramPlaces` asks the place again.
  * - An import is where it stops:  what a library's code reads isn't in its declarations, so calling one reads everything saved whole.
@@ -63,20 +62,14 @@ const MAX_LOOK = 8
 export class ReadGathering {
   /** Each function in the project, by its spell name:  a getter, a method, a draw. */
   private readonly bodies = new Map<string, GatheredBody[]>()
-  /** What each function reads anywhere, once worked out. */
-  private readonly factsAnywhere = new Map<GatheredBody, BodyFacts>()
-  /** What each function reads in a first draw, once worked out. */
-  private readonly factsInDraw = new Map<GatheredBody, BodyFacts>()
+  /** What each function reads, once worked out. */
+  private readonly facts = new Map<GatheredBody, BodyFacts>()
   /** Every field name any code in the project reads. */
   readonly namesRead = new Set<string>()
-  /** Every field name a first draw can reach. */
-  readonly namesDrawn = new Set<string>()
   /** Types it can't prove the reads of, with why:  read whole. */
   readonly wholeTypes = new Map<string, WholeReason>()
   /** Something read in a way it can't follow, by type unknown:  every saved type is read whole. */
   wholeProject: WholeReason | undefined
-  /** The saved reads a first draw can reach. */
-  readonly firstReads: GatheredRead[] = []
   /** What to tell the author:  a match, and a message key the language words. */
   readonly notes: ReadNote[] = []
   /** The types declared saved, by name, and where. */
@@ -110,7 +103,6 @@ export class ReadGathering {
     if (!allTypes && !gathering.savedTypes.size) return undefined
     gathering.noteBodies(files)
     gathering.walkAnywhere(files)
-    gathering.walkFirstDraw()
     return gathering
   }
 
@@ -167,11 +159,6 @@ export class ReadGathering {
     return [...fields]
   }
 
-  /** The reads a first draw reaches on place `placeName`, once each:  what can be asked before the draw asks. */
-  firstReadsOf(placeName: string): GatheredRead[] {
-    return this.firstReads.filter((read) => this.savedTypes.get(read.typeName)?.place === placeName)
-  }
-
   /**
    * The places getter `name` of `typeName` reads:  the ones it asks, and those its fields are saved in.
    * - Whatever one run of it would read:  a branch not taken counts, and so does a list with nothing in it.
@@ -181,7 +168,7 @@ export class ReadGathering {
     const body = this.bodies.get(name)?.find((each) => each.typeName === typeName)
     if (!body) return []
     const places = new Set<string>()
-    this.reachFrom([body], "anywhere", (facts, each) => {
+    this.reachFrom([body], (facts, each) => {
       for (const read of facts.savedReads) places.add(this.savedTypes.get(read.typeName)?.place ?? "")
       if (!each.typeName) return
       const saved = this.savedTypeFor(each.typeName)
@@ -242,7 +229,7 @@ export class ReadGathering {
   /** SIDE EFFECT:  notes what ALL the project's code reads, top-level steps and handlers too. */
   private walkAnywhere(files: P.ASTNode[][]): void {
     const facts = emptyFacts()
-    this.visit(files, facts, { mode: "anywhere", env: new Map(), form: undefined })
+    this.visit(files, facts, { env: new Map(), form: undefined })
     for (const name of facts.names) this.namesRead.add(name)
     for (const [name, match] of facts.calls) {
       if (!this.bodies.has(name) && this.importedFunctions.has(name)) {
@@ -261,42 +248,18 @@ export class ReadGathering {
     return files.flat()[0]!.match
   }
 
-  /** SIDE EFFECT:  notes what a first draw can reach:  from each app's draw, or every draw when there's no app. */
-  private walkFirstDraw(): void {
-    const draws = this.bodies.get("draw") ?? []
-    const apps = draws.filter((body) => body.typeName && this.isApp(body.typeName))
-    const seen = new Map<string, GatheredRead>()
-    this.reachFrom(apps.length ? apps : draws, "first draw", (facts) => {
-      for (const name of facts.names) this.namesDrawn.add(name)
-      for (const read of facts.savedReads) {
-        const key = `${read.typeName}\n${read.queryText}`
-        if (read.canAskFirst && !seen.has(key)) seen.set(key, read)
-      }
-    })
-    this.firstReads.push(...seen.values())
-  }
-
-  /** Is `typeName` below `App`? */
-  private isApp(typeName: string): boolean {
-    return this.project.isSubclassOf(typeName, "App")
-  }
-
   /**
    * Call `visit` with each function `roots` reach, and what it reads:
    * - a getter or a method named, by name
    * - a draw:  of the type it's known to be, and the types below;  else every draw
    */
-  private reachFrom(
-    roots: GatheredBody[],
-    mode: WalkMode,
-    visit: (facts: BodyFacts, body: GatheredBody) => void
-  ): void {
+  private reachFrom(roots: GatheredBody[], visit: (facts: BodyFacts, body: GatheredBody) => void): void {
     const seen = new Set<GatheredBody>()
     const toVisit = [...roots]
     for (let body = toVisit.pop(); body; body = toVisit.pop()) {
       if (seen.has(body)) continue
       seen.add(body)
-      const facts = this.factsOf(body, mode)
+      const facts = this.factsOf(body)
       visit(facts, body)
       for (const name of [...facts.calls.keys(), ...facts.names]) toVisit.push(...(this.bodies.get(name) ?? []))
       if (facts.drawn.size || facts.drawsAnything) toVisit.push(...(this.bodies.get(DRAW_EACH_ITEM) ?? []))
@@ -329,14 +292,13 @@ export class ReadGathering {
   }
 
   /** What `body` reads, once. */
-  private factsOf(body: GatheredBody, mode: WalkMode): BodyFacts {
-    const memo = mode === "anywhere" ? this.factsAnywhere : this.factsInDraw
-    const known = memo.get(body)
+  private factsOf(body: GatheredBody): BodyFacts {
+    const known = this.facts.get(body)
     if (known) return known
     const facts = emptyFacts()
-    memo.set(body, facts)
+    this.facts.set(body, facts)
     const env: Env = new Map()
-    this.visit(body.method.body, facts, { mode, env, form: undefined, ...(body.typeName && { self: body.typeName }) })
+    this.visit(body.method.body, facts, { env, form: undefined, ...(body.typeName && { self: body.typeName }) })
     return facts
   }
 
@@ -414,7 +376,7 @@ export class ReadGathering {
     }
     const args = (node as P.ASTScopedMethodInvocation).args?.args ?? []
     if (methodName === "on") this.noteListener(args[0], node)
-    if (SAVED_READS.has(methodName)) this.noteSavedRead(node, args, facts, methodName === "savedThings")
+    if (SAVED_READS.has(methodName)) this.noteSavedRead(args, facts)
     else if (NEEDS_WHOLE_ROW.has(methodName)) this.noteWholeRow(node, args, at)
     else if (methodName === SENDS_WHOLE_ROW.call && args[SENDS_WHOLE_ROW.argument]) {
       this.noteWholeRow(node, args.slice(SENDS_WHOLE_ROW.argument), at)
@@ -435,24 +397,14 @@ export class ReadGathering {
     }
   }
 
-  /**
-   * SIDE EFFECT:  notes a read of a saved type:  `core.savedThings(Recipe, { filter })`.
-   * - Only a list (`isList`) can be asked first:  one thing by its id or place isn't a list of them all,
-   *   and a collection found by name has no list (GitHub's `the user whose id is its login`).
-   */
-  private noteSavedRead(node: P.ASTNode, args: readonly P.ASTNode[], facts: BodyFacts, isList: boolean): void {
+  /** SIDE EFFECT:  notes a read of a saved type:  `core.savedThings(Recipe, { filter })`. */
+  private noteSavedRead(args: readonly P.ASTNode[], facts: BodyFacts): void {
     const type = args[0] && unwrapped(args[0] as P.ASTExpression)
     if (!(type instanceof P.ASTTypeExpression)) return
     const query = args[1] instanceof P.ASTObjectLiteral && args[1].properties?.length ? args[1] : undefined
     // what it filters and sorts by:  a read's list keeps to them here too, as rows change under it
     if (query) for (const name of fieldsNamedBy(query)) facts.names.add(name)
-    facts.savedReads.push({
-      typeName: type.name,
-      node,
-      ...(query && { query }),
-      queryText: query ? queryText(query) : "",
-      canAskFirst: isList && (!query || isWrittenOut(query))
-    })
+    facts.savedReads.push({ typeName: type.name })
   }
 
   /** SIDE EFFECT:  `node` needs a whole row:  a thing removed comes back whole on undo. */
@@ -505,7 +457,6 @@ export class ReadGathering {
 
     for (const attr of node.attrs ?? []) {
       if (!(attr instanceof P.ASTJSXAttribute) || !attr.value) continue
-      if (HANDLER_ATTRIBUTE.test(attr.name) && at.mode === "first draw") continue
       if (attr.name === FIELD_ATTRIBUTE) this.noteFieldName(attr, facts, at)
       else if (!(isForm && attr.name === "value")) this.noteHandedOver(node, attr, isOurs, at)
       this.visit(attr.value, facts, inner)
@@ -624,8 +575,7 @@ export class ReadGathering {
     if (property) return heldByProperty(property)
     const getter = this.project.getterOf(owner, name)
     const returned = getter && onlyReturned(getter)
-    if (returned)
-      return this.typeOf(returned, { mode: "anywhere", env: new Map(), form: undefined, self: owner }, depth + 1)
+    if (returned) return this.typeOf(returned, { env: new Map(), form: undefined, self: owner }, depth + 1)
     return EMPTY
   }
 }
@@ -648,18 +598,10 @@ export type SavedType = {
   collection: string
 }
 
-/** A read of a saved type a first draw can reach. */
+/** A read of a saved type. */
 export type GatheredRead = {
   /** The type read. */
   typeName: string
-  /** The call. */
-  node: P.ASTNode
-  /** What it asks, if anything. */
-  query?: P.ASTObjectLiteral
-  /** What it asks, as text, for telling reads apart. */
-  queryText: string
-  /** Is what it asks written out, so it can be asked before anything's drawn? */
-  canAskFirst: boolean
 }
 
 /** Why a type is read whole. */
@@ -698,16 +640,11 @@ type BodyFacts = {
   savedReads: GatheredRead[]
 }
 
-/** How much of a function a walk counts:  `first draw` leaves out what only runs later, an event's handler. */
-type WalkMode = "anywhere" | "first draw"
-
 /** What a variable is known to hold, by name. */
 type Env = Map<string, Held>
 
 /** Where a walk is. */
 type WalkAt = {
-  /** How much it counts. */
-  mode: WalkMode
   /** What's known of the variables. */
   env: Env
   /** The type of the form it's in, if it's in one. */
@@ -757,24 +694,6 @@ function onlyReturned(method: P.ASTMethodDefinition): P.ASTExpression | undefine
   return last instanceof P.ASTReturnStatement ? last.value : undefined
 }
 
-/** `query` as text:  literal values only, what tells two reads apart. */
-function queryText(query: P.ASTObjectLiteral): string {
-  const text = (written: unknown): string => {
-    const node = written instanceof P.ASTExpression ? unwrapped(written) : written
-    if (node instanceof P.ASTQuotedExpression) return text(node.expression)
-    if (node instanceof P.ASTObjectLiteral) {
-      const parts = (node.properties ?? []).map((property) =>
-        property instanceof P.ASTObjectLiteralProperty ? `${property.property.value}:${text(property.value)}` : "?"
-      )
-      return `{${parts.join(",")}}`
-    }
-    if (node instanceof P.ASTArrayLiteral) return `[${(node.items ?? []).map(text).join(",")}]`
-    if (node instanceof P.ASTLiteral) return `${(node as unknown as { value: unknown }).value}`
-    return "?"
-  }
-  return text(query)
-}
-
 /** The fields `query` filters and sorts by. */
 function fieldsNamedBy(query: P.ASTObjectLiteral): string[] {
   const names: string[] = []
@@ -793,19 +712,6 @@ function fieldsNamedBy(query: P.ASTObjectLiteral): string[] {
     }
   }
   return names
-}
-
-/** Is every value in `query` written out, so it means the same before anything's drawn? */
-function isWrittenOut(written: P.ASTNode): boolean {
-  const query = unwrapped(written as P.ASTExpression)
-  if (query instanceof P.ASTQuotedExpression) return isWrittenOut(query.expression)
-  if (query instanceof P.ASTObjectLiteral) {
-    return (query.properties ?? []).every(
-      (property) => property instanceof P.ASTObjectLiteralProperty && !!property.value && isWrittenOut(property.value)
-    )
-  }
-  if (query instanceof P.ASTArrayLiteral) return (query.items ?? []).every(isWrittenOut)
-  return query instanceof P.ASTLiteral
 }
 
 /** What spell's own datatype for a value says it holds. */

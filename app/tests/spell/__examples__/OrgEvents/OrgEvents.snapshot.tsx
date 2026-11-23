@@ -110,7 +110,8 @@ export const orgEvents = core.place(new OrgEvent(), {
   name: "org_events",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__admin/events",
-  checkedEvery: 30, firstReads: () => [[Event], [EventStage]] })
+  checkedEvery: 30
+})
 
 // -----------
 core.heading("Org Events")

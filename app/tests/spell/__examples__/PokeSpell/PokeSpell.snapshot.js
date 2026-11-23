@@ -1526,7 +1526,8 @@ export const pokeApi = core.place(new PokeApi(), {
     moves: { at: "/move" },
     evolutionChains: { at: "/evolution-chain" },
     generations: { at: "/generation" }
-  }, firstReads: () => [[Pokemon], [Type]] })
+  }
+})
 
 // -----------
 core.heading("Your favourites:  kept on this device")
