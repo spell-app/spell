@@ -2498,6 +2498,22 @@ export class SpellLanguageService {
   #importsParsed = new WeakSet<SP.SpellProject>()
 
   /**
+   * The code `file`'s project compiles to for `target` (`js/solid`, `ts/solid`, `py`), with its source map:
+   * the compiled-code pane's, from the last compile here (`SP.SpellProject.codeWithMapFor()`;  epic `solid-2-final` T36).
+   * - `error` when it can't be written:  NEVER throws.
+   *   - A project not compiled here, as one the editor opened from the compile cache:  its files' own compiles aren't
+   *     there, so what it wrote would be the program's head alone (11 lines of Solitaire's 749).
+   */
+  codeWithMap(file: SP.SpellFile, target: string): { code: string; map: P.SourceMapV3 } | { error: string } {
+    if (file.project.compiledFrom !== "compile") return { error: `${file.project.projectId} isn't compiled here` }
+    try {
+      return file.project.codeWithMapFor(target)
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : String(error) }
+    }
+  }
+
+  /**
    * The old forms of Spell written in `file` (`SP.OldForms.uses()`), as one list of edits rewriting them all the new
    * way, with how many there are:  the `spell/oldForms` request (epic `solid-2-final` T36).
    */

@@ -8,7 +8,7 @@ import { editor, type FollowedPlace } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import type { CodeMirrorFollowed, SpellCodeMirror } from "spell/app/app/solid/codemirror"
-import { ErrorBoundary, tracked } from "spell/app/app/solid"
+import { ErrorBoundary } from "spell/app/app/solid"
 import { barTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
@@ -120,22 +120,27 @@ export function CompiledCodeButton(): JSX.Element {
 /****************
  * ### `<CodeOutputPane>`
  * The compiled code beside the code, read only:  a bar choosing its language, as every header, then the code.
- * - The project as `target` writes it, afresh after each compile, with its source map (`project.codeWithMapFor()`).
+ * - The project as `target` writes it, afresh after each compile, with its source map:  asked of the code's language
+ *   service (`spell/codeWithMap`), the language worker's where it compiles the project (epic `solid-2-final` T36),
+ *   else written from the page's own parse (`project.codeWithMapFor()`).
  * - A click on a line says where in the program it came from (`editor.followed`), and its line follows a click elsewhere.
  * - A target whose writer can't write the project shows why, as a comment, and follows nothing.
  ****************/
 export function CodeOutputPane(props: { target: OutputTarget }) {
-  const written = tracked(() => {
-    const { project } = editor
-    // read so a compile writes it afresh
-    if (!project?.compiled) return { code: "" }
-    try {
-      return project.codeWithMapFor(props.target)
-    } catch (error) {
-      const comment = props.target === "py" ? "#" : "//"
-      return { code: `${comment} ${error instanceof Error ? error.message : String(error)}\n` }
+  const [written, setWritten] = createSignal<Written>({ code: "" })
+  // afresh after each compile:  its compiled code is read so one writes it again
+  createEffect(
+    () => [editor.project, editor.project?.compiled, props.target] as const,
+    ([project, compiled, target]) => {
+      let isCurrent = true
+      void writtenFor(project, compiled, target).then((made) => {
+        if (isCurrent) setWritten(made)
+      })
+      return () => {
+        isCurrent = false
+      }
     }
-  })
+  )
   const lines = createMemo(() => {
     const { map } = written() as { map?: P.SourceMapV3 }
     return map && new P.SourceMapLines(map)
@@ -195,6 +200,33 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
       </div>
     </ui-panel>
   )
+}
+
+/** What the compiled-code pane shows:  the code, and the source map it was written with. */
+type Written = { code: string; map?: P.SourceMapV3 }
+
+/**
+ * `project` as `target` writes it, for `<CodeOutputPane>`:  asked of the language service, else from the page's parse.
+ * - A target whose writer can't write the project:  why, as a comment.
+ * - NEVER throws.
+ */
+async function writtenFor(
+  project: SP.SpellProject | undefined,
+  compiled: string | undefined,
+  target: OutputTarget
+): Promise<Written> {
+  if (!project || !compiled) return { code: "" }
+  const comment = target === "py" ? "#" : "//"
+  const file = editor.languageFileOf(project)
+  const answer =
+    editor.askLanguage && file ? await editor.askLanguage(file, "spell/codeWithMap", { target }) : undefined
+  // the worker's, where it compiled the project;  a project it hasn't compiled is written from the page's parse
+  if (answer && !("error" in answer)) return answer
+  try {
+    return project.codeWithMapFor(target)
+  } catch (error) {
+    return { code: `${comment} ${error instanceof Error ? error.message : String(error)}\n` }
+  }
 }
 
 /****************

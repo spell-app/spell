@@ -241,6 +241,26 @@ describe("LanguageHost", () => {
     expect(await host.request("spell/scopeDetails", { textDocument, path: "project:Solitaire/no:such" })).toBe(null)
   })
 
+  test("answers the compiled-code pane:  the project's code for a target, with its source map, once it compiled", async () => {
+    // not compiled here yet:  it says so, rather than write the program's head alone
+    const lonely = new LSP.LanguageHost()
+    lonely.open({ uri, projectId: solitaire, text })
+    await lonely.request("textDocument/documentSymbol", { textDocument })
+    const project = lonely.service.addresses.fileFor(uri)!.project
+    const wasFrom = project.compiledFrom
+    project.compiledFrom = undefined
+    expect(await lonely.request("spell/codeWithMap", { textDocument, target: "js/solid" })).toMatchObject({
+      error: expect.stringContaining("isn't compiled here")
+    })
+    project.compiledFrom = wasFrom
+    await host.compile({ projectId: solitaire })
+    const written = await host.request("spell/codeWithMap", { textDocument, target: "js/solid" })
+    expect(written && "code" in written && written.code).toContain("class Card")
+    expect(written && "map" in written && written.map.sources.join(" ")).toContain("Card.spell")
+    const unknown = await host.request("spell/codeWithMap", { textDocument, target: "cobol" })
+    expect(unknown && "error" in unknown).toBe(true)
+  })
+
   test("a project it can't load is said, and holds nothing else up", async () => {
     const unavailable: string[] = []
     const lonely = new LSP.LanguageHost({ onUnavailable: (projectId) => unavailable.push(projectId) })

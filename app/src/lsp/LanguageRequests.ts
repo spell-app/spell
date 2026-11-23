@@ -187,6 +187,11 @@ export const LANGUAGE_REQUESTS = {
     (service, file, { position }: TextDocumentPositionParams) => service.oldFormFixAt(file, position),
     null
   ),
+  /** the code the file's project compiles to for `target`, with its source map:  the compiled-code pane's (epic `solid-2-final` T36) */
+  "spell/codeWithMap": request(
+    (service, file, { target }: FileParams & { target: string }) => service.codeWithMap(file, target),
+    null
+  ),
   /** the scope tree the file's project parses in:  the Types tab's, as VS Code's `spell/scopes` (epic `solid-2-final` T36) */
   "spell/scopes": request(
     (service, file, _params: FileParams): Promise<LSP.ScopeNode | null> => service.scopeTree(file),

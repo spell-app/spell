@@ -187,7 +187,8 @@ and in the app's build folder, `app/` at the app folder's root.
       - the tag drawn around a line, which the Inspector selects:  `spell/partPlace`;
       - an action renamed in the Inspector:  `spell/renameAction`;  a project's old forms of Spell, for the offer to upgrade
         it and its Upgrade:  `spell/oldForms` (`editor.oldFormsIn()`);  the Types tab's tree and a node's details:
-        `spell/scopes`, `spell/scopeDetails` (`editor.askLanguage`).
+        `spell/scopes`, `spell/scopeDetails` (`editor.askLanguage`);  the compiled-code pane's code and source map:
+        `spell/codeWithMap`, once the worker has compiled the project (`<CodeOutputPane>`).
         From outside the code, ask through `FileStates.ask()`:  it opens the file in the worker first
       - still on the page's parse:  every other reader outside the code (the list:  the epic page's P18, T36)
     - So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
