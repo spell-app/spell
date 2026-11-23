@@ -75,10 +75,12 @@ async function ingestOf(document: OpenApiDocument = DOCUMENT, into = "Lab.api.sp
       void descriptions.set(path, descriptionFromDisk(structuredClone(description))),
     otherSpellBeside: async () => []
   }
+  // what it serves as its description:  a test changes it, for a later look
+  const fetch = { document }
   const ingest = new PlaceIngest({
     fetch: (async (input: RequestInfo | URL) => {
       const url = `${input instanceof Request ? input.url : input}`
-      return url === SPEC_AT ? Response.json(document) : new Response("nope", { status: 404 })
+      return url === SPEC_AT ? Response.json(fetch.document) : new Response("nope", { status: 404 })
     }) as typeof globalThis.fetch,
     ask: async () => undefined,
     files,
@@ -88,7 +90,7 @@ async function ingestOf(document: OpenApiDocument = DOCUMENT, into = "Lab.api.sp
   })
   const result = await ingest.add({ address: LAB, spec: SPEC_AT, into, name: "lab" })
   const description = descriptions.get(into.replace(/\.spell$/, ".json5"))!
-  return { ingest, result, texts, descriptions, spell: texts.get(into)!, description }
+  return { ingest, result, texts, descriptions, fetch, spell: texts.get(into)!, description }
 }
 
 /** `spell`'s errors, compiled alone. */
@@ -111,5 +113,44 @@ describe("asked for by a list of values, and by fields of several words", () => 
     expect(spell).toMatch(/^\trankings live at "\/api\/rankings"$/m)
     expect(description.linesLeftOut).toEqual({ "asked:rankings": expect.stringMatching(/asked for by their 1st-page/) })
     expect(description.notes).toContainEqual(expect.stringMatching(/^Left out a line:  .*1st-page/))
+  })
+})
+
+describe("a person's names, kept by spell place update", () => {
+  test("a type and its list renamed in the file, and a field added by hand, stay after an update", async () => {
+    const { ingest, texts } = await ingestOf()
+    const renamed = texts
+      .get("Lab.api.spell")!
+      .replace(`devices live at "/api/devices"`, `instruments live at "/api/devices"`)
+      .replace(`a "device" is a thing`, `an "instrument" is a thing`)
+      .replace(`\tits "name" is text\n`, `\tits "name" is text\n\tits "serial" is text\n`)
+    texts.set("Lab.api.spell", renamed)
+    expect(errorsOf(renamed)).toEqual([])
+    const { spell, couldntChange } = await ingest.update("Lab.api.spell")
+    expect(spell).toMatch(/^\tinstruments live at "\/api\/devices"$/m)
+    expect(spell).toMatch(/^an "instrument" is a thing\n[^]*?\tits "name" is text\n\tits "serial" is text$/m)
+    expect(spell).not.toMatch(/a "device" is a thing/)
+    expect(couldntChange).toEqual([])
+    expect(errorsOf(spell)).toEqual([])
+  })
+
+  test("a renamed type still takes what a later look finds:  a new field goes under the person's name", async () => {
+    const withModel = structuredClone(DOCUMENT)
+    const device = withModel.components!.schemas!.Device as { properties: Record<string, unknown> }
+    const { ingest, texts, fetch } = await ingestOf()
+    texts.set(
+      "Lab.api.spell",
+      texts
+        .get("Lab.api.spell")!
+        .replace(`devices live at "/api/devices"`, `instruments live at "/api/devices"`)
+        .replace(`a "device" is a thing`, `an "instrument" is a thing`)
+    )
+    device.properties.model = { type: "string" }
+    fetch.document = withModel
+    const { spell, couldntChange } = await ingest.update("Lab.api.spell")
+    expect(spell).toMatch(/^an "instrument" is a thing\n[^]*?\tits "model" is text$/m)
+    expect(spell).not.toMatch(/"device"/)
+    expect(couldntChange).toEqual([])
+    expect(errorsOf(spell)).toEqual([])
   })
 })

@@ -34,6 +34,7 @@ import {
 } from "./PlaceLook"
 import { checkSecondsWithin, describeLook, fieldsOf, fingerprintOf, idFieldOf, plainNameFor } from "./PlaceShape"
 import { partsInLanguageOf } from "./PlaceInLanguage"
+import { PlaceWords } from "./PlaceWords"
 import {
   isSearchedApart,
   KINDS_WITH_KEY_LINES,
@@ -211,6 +212,7 @@ export class PlaceIngest {
     movedTo?: string
   ): Promise<IngestResult> {
     const { files } = this.settings
+    namesFromFile(old, file, (await files.read(file)) ?? "")
     const { name, kind, keySecret, keyGoes, signedIn, docsAt, specAt, collectionsAsked, picturesAsked } = old.about
     const address = movedTo === undefined ? old.about.address : addressFrom(movedTo)
     const reader = await this.readerFor(keySecret, signedIn, keyGoes, old.about.tokenFrom)
@@ -316,6 +318,9 @@ export class PlaceIngest {
     }
     const old = descriptionFromDisk(onDisk)
     const description = descriptionFromDisk(structuredClone(onDisk))
+    const written = (await files.read(file)) ?? ""
+    namesFromFile(old, file, written)
+    namesFromFile(description, file, written)
     const { keySecret, signedIn, keyGoes, tokenFrom } = description.about
     const deployment = await this.deploymentFor(file, description, named)
     if (triesWrites) refuseWritesOn(deployment)
@@ -1235,6 +1240,42 @@ function awayFromTypesBeside(description: PlaceDescription, others: readonly str
     isRenamed = true
   }
   if (isRenamed) renameCollections(description)
+}
+
+/**
+ * SIDE EFFECT:  a type a person renamed in the place's file goes by their name in `description` too, so a later look
+ * changes its lines as it does any other's, and never puts the old name back:
+ * `devices live at "/api/devices"`, made `instruments live at "/api/devices"`, and `a "device" is a thing`, made
+ * `an "instrument" is a thing`, is an `instrument` from then on.
+ * - Found by the collection's address line, in the file's language:  the only line that says which collection it is.
+ * - The lines it last wrote (`spell`) say the new name too, so the merge sees them as its own, unchanged.
+ */
+function namesFromFile(description: PlaceDescription, file: string, text: string): void {
+  const typesInFile = Object.keys(PlaceWords.of(text).types)
+  const fileLines = new Set(text.split("\n").map((line) => line.trim()))
+  const atLineOf = (collection: string) =>
+    partsInLanguageOf(file, spellPartsFor(description)).placeLines.find(({ key }) => key === `at:${collection}`)?.text
+  const written = new Map<string, string>()
+  const linesBefore = spellLinesOf(partsInLanguageOf(file, spellPartsFor(description)))
+  for (const [name, collection] of Object.entries(description.collections)) {
+    const atLine = atLineOf(name)
+    if (collection.leftOut || !atLine || fileLines.has(atLine)) continue
+    const taken = new Set(Object.values(description.collections).map(({ type }) => type))
+    const was = collection.type
+    const named = typesInFile.find((type) => {
+      if (taken.has(type)) return false
+      collection.type = type
+      return fileLines.has(atLineOf(name) ?? "")
+    })
+    collection.type = named ?? was
+  }
+  const linesAfter = spellLinesOf(partsInLanguageOf(file, spellPartsFor(description)))
+  if (linesBefore.length !== linesAfter.length) return
+  linesBefore.forEach(({ text: before }, at) => {
+    const after = linesAfter[at]!.text
+    if (after !== before) written.set(before.trim(), after.trim())
+  })
+  if (written.size) description.spell = description.spell?.map((line) => line.replace(line.trim(), written.get(line.trim()) ?? line.trim()))
 }
 
 /** Are these words used in a line the tool didn't write, here or in another file beside it? */
