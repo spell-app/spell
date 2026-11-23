@@ -54,6 +54,7 @@ exports[`testing spell module places, in Spanish > rule group specs > match snap
   "projected_into": "address",
   "projected_only_where": "field|value",
   "projection_of": "type|source|with_nested_statements?|body?",
+  "read_on_startup": "collection",
   "reload_things": "type",
   "requests_a_second": "type|most",
   "rows_allowed_each": "field|collection",

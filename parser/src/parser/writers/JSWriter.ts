@@ -11,7 +11,6 @@ import {
   TEMPLATE_TAGS,
   attributeName,
   isCoreCall,
-  objectText,
   isTight,
   PRESS_ATTRIBUTES,
   topLevelOf,
@@ -58,9 +57,6 @@ const ELEMENT_TAG = "elementTag"
 
 /** A `where`'s `core` helper, and its twin that asks each item in turn when its condition waits. */
 const WAITING_TWINS: Record<string, string> = { filter: "filterInTurn", itemWhere: "itemWhereInTurn" }
-
-/** `core`'s call a place's line compiles to. */
-const PLACE_CALL = "place"
 
 /** A line's description comment, `-- ...`:  written as a plain `//` (`ASTLineComment()`). */
 const DESCRIPTION_SYMBOL = "--"
@@ -589,8 +585,7 @@ export class JSWriter extends ProgramWriter {
     }
     const waits = this.writesAwait(node)
     if (waits && this.project.waitsInTurn(node)) return this.inTurn(node)
-    const made = this.call(node)
-    const written = isCoreCall(node) && node.methodName === PLACE_CALL ? this.placeCall(node, made) : made
+    const written = this.call(node)
     return waits ? `await ${written}` : written
   }
 
@@ -1683,24 +1678,6 @@ export class JSWriter extends ProgramWriter {
     const closing = /\s*\}$/.exec(written)
     if (!select || !closing) return written
     return `${written.slice(0, closing.index)}, select: [${select.map((field) => this.quoted(this.nameOf(field))).join(", ")}] }`
-  }
-
-  /**
-   * `core.place(thing, {...})`, with what a first draw reads from it:  see `P.ReadGathering.firstReadsOf()`.
-   * - Only two or more:  one read alone is a read that asks for itself.
-   * - In a function:  read when the place is first read, when every class is declared.
-   */
-  private placeCall(node: P.ASTScopedMethodInvocation, written: string): string {
-    const name = node.args?.args?.[1]
-    const placeName = name instanceof P.ASTObjectLiteral ? objectText(name, "name") : undefined
-    const reads = placeName ? this.reads?.firstReadsOf(placeName) : undefined
-    const closing = /\s*\}\)$/.exec(written)
-    if (!reads || reads.length < 2 || !closing) return written
-    const asks = reads.map(({ typeName, query }) => {
-      const type = this.nameOf(typeName)
-      return query ? `[${type}, ${this.bare(query)}]` : `[${type}]`
-    })
-    return `${written.slice(0, closing.index)}, firstReads: () => [${asks.join(", ")}] })`
   }
 
   /** `code`, below the spell that made `node`, if any (`spellComment()`). */

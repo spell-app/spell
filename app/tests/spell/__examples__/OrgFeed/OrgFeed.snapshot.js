@@ -131,14 +131,14 @@ export class FeedPage extends App {
           h("ui-segment", { class: "favourites" },
             h("ui-header", { size: "medium" }, "More of what you like"),
             h("ui-stack", { class: "favourite-list", spacing: "sm" },
-              () => core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post) => post.isAFavourite), (item) => core.descending(item.posted)), (post) => core.drawThing(post), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your feed"), none: () => h("ui-text", { color: "grey" }, "Nothing yet.") })
+              () => core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post) => post.isAFavourite), (item) => core.descending(item.posted)), (post) => core.drawThing(post), { waitingSay: () => "Reading your feed", none: () => h("ui-text", { color: "grey" }, "Nothing yet.") })
             )
           ),
           h("ui-segment", { class: "everything" },
             h("ui-header", { size: "medium" }, "Everything else"),
             h("ui-stack", { class: "post-list", spacing: "sm" },
               () => core.drawRead(async () => core.sortedBy(core.filter(await core.savedThings(Post, {}, "looks through"), (post) => post.isOrdinary), (item) => core.descending(item.posted)), (post) => core.drawThing(post), {
-                waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading your feed"),
+                waitingSay: () => "Reading your feed",
                 none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing new."),
                 failed: () => h("ui-text", { color: "red" }, "We can't read your feed right now.")
               })

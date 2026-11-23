@@ -595,7 +595,7 @@ export class User extends Thing {
       h("ui-stack", { spacing: "sm" },
         h("ui-header", { size: "medium" }, "Most popular"),
         () => core.drawRead(async () => await core.savedThings(Repository, { search: { "*": `user:${this.login} sort:stars` } }, "as drawn"), (repository) => core.drawThing(repository), {
-          waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "page" }, "Asking GitHub"),
+          waitingSay: () => "Asking GitHub",
           none: () => h("ui-text", { part: "page" }, "Nothing public yet."),
           paging: () => "pages",
           items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "page" })
@@ -1863,7 +1863,8 @@ export const github = core.place(new Github(), {
       at: "/search/repositories",
       searchedOnly: true
     }
-  }, firstReads: () => [[Issue, { filter: { pullRequest: undefined }, page: { size: 6 } }], [Issue]] })
+  }
+})
 
 // -----------
 core.heading("GitHub")
@@ -1949,13 +1950,13 @@ export class GithubPage extends Thing {
     return h("ui-stack", { spacing: "sm", part: "issues" },
       h("ui-header", { size: "medium" }, "Solid's issues"),
       () => core.drawRead(async () => await core.savedThings(Issue, { filter: { pullRequest: undefined }, page: { size: 6 } }, "as drawn"), (issue) => core.drawThing(issue), {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "issues" }, "Asking GitHub"),
+        waitingSay: () => "Asking GitHub",
         none: () => h("ui-text", { part: "issues" }, "No open issues."),
         items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "issues" })
       }),
       h("ui-header", { size: "medium" }, "Solid's pull requests"),
       () => core.drawRead(async () => core.firstFew(core.filter(await core.savedThings(Issue, {}, "looks through"), (issue) => issue.pullRequest !== undefined), 6), (issue) => core.drawThing(issue), {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "issues" }, "Asking GitHub"),
+        waitingSay: () => "Asking GitHub",
         none: () => h("ui-text", { part: "issues" }, "No open pull requests."),
         items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "issues" })
       })
@@ -1970,7 +1971,7 @@ export class GithubPage extends Thing {
         h("ui-stack", { spacing: "sm" },
           h("ui-header", { size: "medium" }, "People and organizations"),
           () => core.drawRead(async () => await core.savedThings(User, { search: { "*": this.search } }, "as drawn"), (user) => core.drawThing(user), {
-            waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "found" }, "Asking GitHub"),
+            waitingSay: () => "Asking GitHub",
             none: () => h("ui-text", { part: "found" }, "Nobody on GitHub goes by that."),
             paging: () => "pages",
             items: () => h("ui-cards", { columns: "4", doubling: true, stackable: true, part: "found" })
@@ -1979,7 +1980,7 @@ export class GithubPage extends Thing {
         h("ui-stack", { spacing: "sm" },
           h("ui-header", { size: "medium" }, "Repositories"),
           () => core.drawRead(async () => await core.savedThings(Repository, { search: { "*": this.search } }, "as drawn"), (repository) => core.drawThing(repository), {
-            waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "found" }, "Asking GitHub"),
+            waitingSay: () => "Asking GitHub",
             none: () => h("ui-text", { part: "found" }, "No repository matches that."),
             paging: () => "pages",
             items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "found" })
@@ -2198,9 +2199,7 @@ export class Book extends Thing {
       h("ui-stack", { spacing: "sm" },
         h("ui-header", { size: "medium" }, "Editions"),
         () => core.drawRead(() => this.editions, (edition) => core.drawThing(edition), {
-          waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "page" },
-            "Asking Open Library for its editions"
-          ),
+          waitingSay: () => "Asking Open Library for its editions",
           none: () => h("ui-text", { part: "page" }, "No editions listed."),
           paging: () => "pages",
           items: () => h("ui-cards", { columns: "4", doubling: true, stackable: true, part: "page" })
@@ -3080,9 +3079,9 @@ export class JsonplaceholderPage extends Thing {
             disabled: () => this.newTodo.title === "",
             onClick: core.pressed(this, async () => await this.addTheNewTodo()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Add"))
+          }, "Add"), "ui-button")
         )
-      )),
+      ), "ui-form"),
       () => this.drawTodoList()
     )
   }
@@ -3926,7 +3925,7 @@ export class MetMuseumPage extends Thing {
         )
       ),
       () => core.drawRead(() => this.found, (artwork) => core.drawThing(artwork), {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking the Met"),
+        waitingSay: () => "Asking the Met",
         none: () => h("ui-text", "The Met has nothing for that."),
         failedSay: () => "The Met can't be reached just now.",
         paging: () => "pages",

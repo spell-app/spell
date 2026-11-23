@@ -8,5 +8,17 @@
     advisories: ["GHSA-mrhx-c7xc-m3w5"],
     in: ["repo", "npm"],
     reason: "@atproto's packages need zod 3, and the fix is in zod 4.6.6:  memory exhaustion validating oversized collections.  Only the Bluesky sign-in loads it, and an npm install gets it only with the add-ons."
+  },
+  {
+    package: "yuku-core",
+    deprecated: true,
+    in: ["repo"],
+    reason: "Deprecated for the one `yuku` package.  It comes in through vite-plus's yuku-parser, and every vite-plus to 1.7.0 still uses it:  ours to drop only when vite-plus moves to `yuku`."
+  },
+  {
+    package: "yuku-parser",
+    deprecated: true,
+    in: ["repo"],
+    reason: "Deprecated for the one `yuku` package.  vite-plus-core depends on it (every vite-plus to 1.7.0):  ours to drop only when vite-plus moves to `yuku`."
   }
 ]

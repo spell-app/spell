@@ -145,7 +145,8 @@ export const myThreads = core.place(new MyThread(), {
   name: "my_threads",
   kind: "data folder",
   at: "/api/places/spaces/@rs/__threads",
-  checkedEvery: 30, firstReads: () => [[Thread], [Thread, { sort: [{ field: "name" }] }]] })
+  checkedEvery: 30
+})
 
 // -----------
 core.heading("Chat")
@@ -242,7 +243,7 @@ export class ChatPage extends App {
             h("ui-stack", { class: "messages", spacing: "none" },
               h("ui-stack", { class: "message-list", spacing: "none" },
                 () => core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message) => core.drawThing(message), {
-                  waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Joining the thread"),
+                  waitingSay: () => "Joining the thread",
                   none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing yet:  say hello."),
                   failed: () => h("ui-text", { color: "red" }, "We can't join this thread right now.")
                 })
@@ -259,7 +260,7 @@ export class ChatPage extends App {
                   placeholder: () => this.boxWords,
                   "aria-label": "Your message",
                   "on-ui-send": () => async () => await this.send()
-                })),
+                }), "ui-textarea"),
                 h("ui-button", {
                   class: "send",
                   color: "primary",
@@ -297,9 +298,7 @@ export class ChatPage extends App {
         icon: () => thread.mark,
         part: "thread_list"
       }, () => thread.name), {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "thread_list" },
-          "Finding your threads"
-        ),
+        waitingSay: () => "Finding your threads",
         none: () => h("ui-text", { class: "none", color: "grey", part: "thread_list" }, "No threads you can read."),
         failed: () => h("ui-text", { color: "red", part: "thread_list" }, "We can't find your threads right now.")
       })
