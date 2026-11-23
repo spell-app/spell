@@ -10,6 +10,7 @@
  */
 
 import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `segmentVocabulary`
@@ -155,9 +156,9 @@ export const segmentVocabulary = {
         "`resizable`, bare or `height`, people drag its height from the cap, taller or shorter."
     }
   ],
-  events: [],
-  slots: [{ name: "", description: "Content." }],
-  parts: [{ name: "segment", description: "The segment box." }],
+  events: [...UIT.StatePaneEvents],
+  slots: [{ name: "", description: "Content." }, ...UIT.StatePaneSlots],
+  parts: [{ name: "segment", description: "The segment box." }, ...UIT.StatePaneParts],
   states: [
     { name: "piled", description: "`piled`:  the host is the stacking context the rotated sheets sit behind." },
     { name: "inverted", description: "In the dark scheme." },

@@ -20,4 +20,10 @@ export class Site extends SiteBase {
   // - its "theme" is a text
   @prop({ type: "text" })
   accessor theme!: string
+
+  /** how what waits on its pages looks meanwhile:  "skeleton", "spinner" (the default), "none", or a spinner's words: */
+  // - its "loading" is a text
+  @prop({ type: "text" })
+  accessor loading!: string
+  // `galaxy guide is a site with loading "skeleton"`
 }

@@ -8,3 +8,6 @@ un "sitio" es una aplicación
 		// la dirección de la página que muestra:  "/" al empezar
 	su "tema" es un texto
 		// el tema que llevan sus páginas, p. ej. "mockup":  `guía galáctica es un sitio con tema "mockup"`
+	su "carga" es un texto
+		// cómo se ve lo que espera en sus páginas mientras tanto:  "esqueleto", "cargador" (por defecto), "nada", o las
+		// palabras de un cargador:  `guía galáctica es un sitio con carga "esqueleto"`

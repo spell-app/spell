@@ -237,7 +237,7 @@ export class InboxPage extends App {
             <ui-segment class="mail">
               <ui-header size="medium">Mail</ui-header>
               <ui-stack class="mail-choices" spacing="sm">
-                {core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice: MailChoice) => core.drawThing(choice), { waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading how you hear of it"}</ui-loader>, none: () => <ui-stack direction="horizontal" spacing="md" align="center" wrap={true}>
+                {core.drawRead(async () => await core.savedThings(MailChoice, {}, "as drawn"), (choice: MailChoice) => core.drawThing(choice), { waitingSay: () => "Reading how you hear of it", none: () => <ui-stack direction="horizontal" spacing="md" align="center" wrap={true}>
                   <ui-text color="grey">A daily digest of what's new, each morning.</ui-text>
                   <ui-button class="choose" size="small" onClick={core.pressed(this, () => this.chooseHow())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                     Choose
@@ -267,7 +267,7 @@ export class InboxPage extends App {
                     Reply
                   </ui-button>
                 </ui-stack>, {
-                  waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Reading your inbox"}</ui-loader>,
+                  waitingSay: () => "Reading your inbox",
                   none: () => <ui-text class="none" color="grey">Nothing yet.</ui-text>,
                   failed: () => <ui-text color="red">We can't read your inbox right now.</ui-text>
                 })}

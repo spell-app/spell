@@ -84,6 +84,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "versions_in": "type|field",
   "where_field": "property",
   "while_waiting": "body?",
+  "while_waiting_say": "text",
   "wrapper_action": "signature|body?",
   "writes_like": "type|what|example",
 }

@@ -239,6 +239,16 @@ export interface UIAccordionAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -749,6 +759,16 @@ export interface UIActionAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -992,6 +1012,16 @@ export interface UIActionsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -1343,6 +1373,16 @@ export interface UIAdAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -1603,7 +1643,7 @@ export interface UIAppMenuEventMap {
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "ui-changed": CustomEvent<{ value?: string; values?: string[] }>
@@ -1985,6 +2025,16 @@ export interface UIAppMenuAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -2237,7 +2287,7 @@ export interface UIAppMenuAttributes {
    */
   "on-ui-choosing"?: (event: UIAppMenuEventMap["ui-choosing"]) => void
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "on-ui-changed"?: (event: UIAppMenuEventMap["ui-changed"]) => void
@@ -2345,6 +2395,16 @@ export interface UIAudioAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -2655,6 +2715,16 @@ export interface UIAuthorAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -2928,6 +2998,16 @@ export interface UIAvatarAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -3223,6 +3303,16 @@ export interface UIBreadcrumbAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -3516,6 +3606,16 @@ export interface UIBreadcrumbsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -4111,6 +4211,16 @@ export interface UIButtonAttributes {
    */
   "prop:value"?: string
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -4592,6 +4702,16 @@ export interface UIButtonsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -5222,6 +5342,16 @@ export interface UICalendarAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -5498,6 +5628,15 @@ export interface UICalendarJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UICalendarEventMap>>, keyof UICalendarAttributes>,
     UICalendarAttributes {}
 
+/** `<ui-card>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UICardEventMap {
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
+}
+
 /** `<ui-card>`'s own attributes, from its vocabulary. */
 export interface UICardAttributes {
   /**
@@ -5748,6 +5887,16 @@ export interface UICardAttributes {
    * @deprecated write `alt` -- `prop:` stays only for compiled spell
    */
   "prop:alt"?: string
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -6004,11 +6153,16 @@ export interface UICardAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UICardEventMap["ui-retry"]) => void
 }
 
 /** `<ui-card>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UICardJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UICardAttributes>, UICardAttributes {}
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UICardEventMap>>, keyof UICardAttributes>, UICardAttributes {}
 
 /** `<ui-cards>`'s own attributes, from its vocabulary. */
 export interface UICardsAttributes {
@@ -6220,6 +6374,16 @@ export interface UICardsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -6534,6 +6698,16 @@ export interface UICellAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -7012,6 +7186,16 @@ export interface UICheckboxAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -7400,6 +7584,16 @@ export interface UICodeAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -7780,6 +7974,16 @@ export interface UIColorChipAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -8413,6 +8617,16 @@ export interface UIColumnAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -8686,6 +8900,16 @@ export interface UICommentAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -9011,6 +9235,16 @@ export interface UICommentsAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -9294,6 +9528,16 @@ export interface UIComponentsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -9733,6 +9977,16 @@ export interface UIContainerAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -10027,6 +10281,16 @@ export interface UIContentAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -10311,6 +10575,16 @@ export interface UIDateAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -10584,6 +10858,16 @@ export interface UIDescriptionAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -10868,6 +11152,16 @@ export interface UIDetailAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -11209,6 +11503,16 @@ export interface UIDeviceAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -11555,6 +11859,16 @@ export interface UIDiagramAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -11860,6 +12174,16 @@ export interface UIDiagramNodeAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -12306,6 +12630,16 @@ export interface UIDialAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -12619,6 +12953,16 @@ export interface UIDimensionAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -13000,6 +13344,16 @@ export interface UIDimmerAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -13440,6 +13794,16 @@ export interface UIDividerAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -14177,6 +14541,16 @@ export interface UIDropdownAttributes {
    */
   "prop:options"?: unknown
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -14593,6 +14967,16 @@ export interface UIEmbedAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -14937,6 +15321,16 @@ export interface UIEmojiAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -15285,6 +15679,16 @@ export interface UIFeedEventAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -15636,6 +16040,16 @@ export interface UIExampleAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -15931,6 +16345,16 @@ export interface UIExtraAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -16309,6 +16733,16 @@ export interface UIFeedAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -17084,6 +17518,16 @@ export interface UIFieldsAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -17377,6 +17821,16 @@ export interface UIFlagAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -17826,6 +18280,16 @@ export interface UIFlyoutAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -18134,6 +18598,11 @@ export interface UIFlyoutJSXAttributes
 /** `<ui-form>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIFormEventMap {
   /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
+  /**
    * `ui-valid`:  A field passed validation.
    * - `event.detail`:  `{ field: string, value: FieldValue, values: Record<string, FieldValue> }`
    */
@@ -18354,6 +18823,16 @@ export interface UIFormAttributes {
    * @deprecated write `debug` -- `prop:` stays only for compiled spell
    */
   "prop:debug"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -18601,6 +19080,11 @@ export interface UIFormAttributes {
    */
   "prop:onPlatform"?: string
   /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UIFormEventMap["ui-retry"]) => void
+  /**
    * `ui-valid`:  A field passed validation.
    * - `event.detail`:  `{ field: string, value: FieldValue, values: Record<string, FieldValue> }`
    */
@@ -18727,7 +19211,7 @@ export interface UIGraphAttributes {
    */
   "prop:path"?: string
   /**
-   * How nodes are placed:  `layers`, left to right by their edges;  `groups`, a column per node `group` (its header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column;  `auto`, groups when any node has one.  NOT `layout`:  that's the laid out drawing, a property already.
+   * How nodes are placed:  `layers`, left to right by their edges;  `groups`, a column per node `group` (its header from the graph's `groups`), stacked top to bottom by `order`, nodes with none in a last column;  `auto`, groups when any node has one.  `groups` needs a node with a `group` too:  with none, it draws layers, as `auto` does.  For one column with no header, give every node the same `group`.  NOT `layout`:  that's the laid out drawing, a property already.
    * - takes:  `auto` · `layers` · `groups`
    * - default:  `auto`
    */
@@ -18779,6 +19263,16 @@ export interface UIGraphAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -19294,6 +19788,16 @@ export interface UIGridAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -19762,6 +20266,16 @@ export interface UIHeaderAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -20160,6 +20674,16 @@ export interface UIIconAttributes {
    */
   "prop:corner"?: boolean | "" | "top left" | "top right" | "bottom left" | "bottom right"
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -20531,6 +21055,16 @@ export interface UIIconPickerAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -20879,6 +21413,16 @@ export interface UIIconsAttributes {
    * @deprecated write `inverted` -- `prop:` stays only for compiled spell
    */
   "prop:inverted"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -21378,6 +21922,16 @@ export interface UIImageAttributes {
    */
   "prop:link"?: string
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -21691,6 +22245,16 @@ export interface UIImagesAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -22046,6 +22610,16 @@ export interface UIIncludeAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -22744,6 +23318,16 @@ export interface UIInputAttributes {
    */
   "prop:rules"?: unknown
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -23193,6 +23777,16 @@ export interface UIItemAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -23506,6 +24100,16 @@ export interface UIItemsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -23908,6 +24512,16 @@ export interface UIJsonAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -24279,6 +24893,16 @@ export interface UIKeysAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -24818,6 +25442,16 @@ export interface UILabelAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -25202,6 +25836,16 @@ export interface UILabelsAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -25539,6 +26183,16 @@ export interface UILinkAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -25963,6 +26617,16 @@ export interface UIListAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -26376,6 +27040,16 @@ export interface UILoaderAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -26772,6 +27446,16 @@ export interface UIMarkdownAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -27105,7 +27789,7 @@ export interface UIMenuEventMap {
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "ui-changed": CustomEvent<{ value?: string; values?: string[] }>
@@ -27487,6 +28171,16 @@ export interface UIMenuAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -27739,7 +28433,7 @@ export interface UIMenuAttributes {
    */
   "on-ui-choosing"?: (event: UIMenuEventMap["ui-choosing"]) => void
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "on-ui-changed"?: (event: UIMenuEventMap["ui-changed"]) => void
@@ -27944,6 +28638,16 @@ export interface UIMermaidDiagramAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -28421,6 +29125,16 @@ export interface UIMessageAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -28707,6 +29421,16 @@ export interface UIMetaAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -29140,6 +29864,16 @@ export interface UIModalAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -29708,6 +30442,16 @@ export interface UINagAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -30007,6 +30751,16 @@ export interface UIOrAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -30432,6 +31186,16 @@ export interface UIPageAttributes {
    */
   "prop:disabled"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -30780,6 +31544,16 @@ export interface UIPageLayoutAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -31040,6 +31814,11 @@ export interface UIPageLayoutJSXAttributes
 
 /** `<ui-panel>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIPanelEventMap {
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
   /**
    * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
@@ -31403,6 +32182,16 @@ export interface UIPanelAttributes {
    */
   "prop:selector"?: string
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -31639,6 +32428,11 @@ export interface UIPanelAttributes {
    */
   "prop:onPlatform"?: string
   /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UIPanelEventMap["ui-retry"]) => void
+  /**
    * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
@@ -31724,6 +32518,16 @@ export interface UIPlaceholderAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -32008,6 +32812,16 @@ export interface UIPlaceholderHeaderAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -32305,6 +33119,16 @@ export interface UIPlaceholderImageAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -32589,6 +33413,16 @@ export interface UIPlaceholderLineAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -32863,6 +33697,16 @@ export interface UIPlaceholderParagraphAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -33118,6 +33962,11 @@ export interface UIPlaceholderParagraphJSXAttributes
 
 /** `<ui-popup>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIPopupEventMap {
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
   /**
    * `ui-opening`:  About to show for a person's action (the trigger, an invoker command);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
@@ -33400,6 +34249,16 @@ export interface UIPopupAttributes {
    */
   "prop:disabled"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -33625,6 +34484,11 @@ export interface UIPopupAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UIPopupEventMap["ui-retry"]) => void
   /**
    * `ui-opening`:  About to show for a person's action (the trigger, an invoker command);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
@@ -33894,6 +34758,16 @@ export interface UIProgressAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -34681,6 +35555,11 @@ export interface UIPropertyEditorEventMap {
    * - `event.detail`:  `{ source: string, content: string }`
    */
   "ui-loaded": CustomEvent<{ source: string; content: string }>
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
   /**
    * `ui-valid`:  A field passed validation.
    * - `event.detail`:  `{ field: string, value: FieldValue, values: Record<string, FieldValue> }`
@@ -35575,6 +36454,11 @@ export interface UIPropertyEditorAttributes {
    */
   "on-ui-loaded"?: (event: UIPropertyEditorEventMap["ui-loaded"]) => void
   /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UIPropertyEditorEventMap["ui-retry"]) => void
+  /**
    * `ui-valid`:  A field passed validation.
    * - `event.detail`:  `{ field: string, value: FieldValue, values: Record<string, FieldValue> }`
    */
@@ -35670,6 +36554,11 @@ export interface UIPropertyGroupEventMap {
    * - `event.detail`:  `{ values: Record<string, FieldValue>, originalEvent?: Event }`
    */
   "ui-saved": CustomEvent<{ values: Record<string, E.FieldValue>; originalEvent?: Event }>
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
   /**
    * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
@@ -36324,6 +37213,11 @@ export interface UIPropertyGroupAttributes {
    */
   "on-ui-saved"?: (event: UIPropertyGroupEventMap["ui-saved"]) => void
   /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UIPropertyGroupEventMap["ui-retry"]) => void
+  /**
    * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
@@ -36386,6 +37280,16 @@ export interface UIPushableAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -36660,6 +37564,16 @@ export interface UIPusherAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -36954,6 +37868,16 @@ export interface UIQuoteAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -37412,6 +38336,16 @@ export interface UIRadioAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -37740,6 +38674,16 @@ export interface UIRailAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -38160,6 +39104,16 @@ export interface UIRatingAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -38459,6 +39413,16 @@ export interface UIRepeatAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -38813,6 +39777,16 @@ export interface UIRevealAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -39247,6 +40221,16 @@ export interface UIRootAttributes {
    * @deprecated write `disabled` -- `prop:` stays only for compiled spell
    */
   "prop:disabled"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -39749,6 +40733,16 @@ export interface UIRowAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -40369,6 +41363,16 @@ export interface UISearchAttributes {
    */
   "prop:source"?: unknown
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -40645,6 +41649,11 @@ export interface UISearchJSXAttributes
 
 /** `<ui-section>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISectionEventMap {
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
   /**
    * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
@@ -41008,6 +42017,16 @@ export interface UISectionAttributes {
    */
   "prop:selector"?: string
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -41244,6 +42263,11 @@ export interface UISectionAttributes {
    */
   "prop:onPlatform"?: string
   /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UISectionEventMap["ui-retry"]) => void
+  /**
    * `ui-opening`:  About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
@@ -41321,6 +42345,16 @@ export interface UISectionsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -41573,6 +42607,15 @@ export interface UISectionsAttributes {
 export interface UISectionsJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UISectionsAttributes>, UISectionsAttributes {}
 
+/** `<ui-segment>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UISegmentEventMap {
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
+}
+
 /** `<ui-segment>`'s own attributes, from its vocabulary. */
 export interface UISegmentAttributes {
   /**
@@ -41729,6 +42772,16 @@ export interface UISegmentAttributes {
    * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
    */
   "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -42005,11 +43058,27 @@ export interface UISegmentAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UISegmentEventMap["ui-retry"]) => void
 }
 
 /** `<ui-segment>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UISegmentJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UISegmentAttributes>, UISegmentAttributes {}
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UISegmentEventMap>>, keyof UISegmentAttributes>,
+    UISegmentAttributes {}
+
+/** `<ui-segments>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UISegmentsEventMap {
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
+}
 
 /** `<ui-segments>`'s own attributes, from its vocabulary. */
 export interface UISegmentsAttributes {
@@ -42113,6 +43182,16 @@ export interface UISegmentsAttributes {
    * @deprecated write `disabled` -- `prop:` stays only for compiled spell
    */
   "prop:disabled"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -42359,11 +43438,18 @@ export interface UISegmentsAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UISegmentsEventMap["ui-retry"]) => void
 }
 
 /** `<ui-segments>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UISegmentsJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UISegmentsAttributes>, UISegmentsAttributes {}
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UISegmentsEventMap>>, keyof UISegmentsAttributes>,
+    UISegmentsAttributes {}
 
 /** `<ui-select>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISelectEventMap {
@@ -42527,6 +43613,16 @@ export interface UISelectAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -42879,6 +43975,16 @@ export interface UIShapeAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -43157,6 +44263,16 @@ export interface UISideAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -43564,6 +44680,16 @@ export interface UISidebarAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -43935,6 +45061,16 @@ export interface UISidesAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -44245,6 +45381,16 @@ export interface UISiteBreadcrumbsAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -44539,6 +45685,16 @@ export interface UISiteLinksAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -44928,6 +46084,16 @@ export interface UISiteNavAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -45404,6 +46570,16 @@ export interface UISiteNavButtonAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -45702,6 +46878,16 @@ export interface UISiteTabsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -46247,6 +47433,16 @@ export interface UISliderAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -46591,6 +47787,16 @@ export interface UISpaceAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -46913,6 +48119,16 @@ export interface UISplitPanelAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -47256,6 +48472,16 @@ export interface UIStackAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -47675,6 +48901,16 @@ export interface UIStatisticAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -48052,6 +49288,16 @@ export interface UIStatisticsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -48460,6 +49706,16 @@ export interface UIStepAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -48879,6 +50135,16 @@ export interface UIStepsAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -49198,6 +50464,16 @@ export interface UIStickyAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -49543,6 +50819,16 @@ export interface UISubmenuAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -49807,6 +51093,16 @@ export interface UISummaryAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -50061,6 +51357,11 @@ export interface UISummaryJSXAttributes
 /** `<ui-tab>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITabEventMap {
   /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "ui-retry": CustomEvent<{}>
+  /**
    * `ui-opened`:  Became the shown pane;  `first` the first time (fill a lazy pane now).
    * - `event.detail`:  `{ value: string, first: boolean }`
    */
@@ -50184,6 +51485,16 @@ export interface UITabAttributes {
    * @deprecated write `inverted` -- `prop:` stays only for compiled spell
    */
   "prop:inverted"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -50420,6 +51731,11 @@ export interface UITabAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-retry`:  Try again, in its error pane, was pressed:  read what failed again (Spell's failed reads do).
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-retry"?: (event: UITabEventMap["ui-retry"]) => void
   /**
    * `ui-opened`:  Became the shown pane;  `first` the first time (fill a lazy pane now).
    * - `event.detail`:  `{ value: string, first: boolean }`
@@ -50834,6 +52150,16 @@ export interface UITableAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -51356,6 +52682,16 @@ export interface UITabsAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -51666,6 +53002,16 @@ export interface UITermAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -51951,6 +53297,16 @@ export interface UITermsAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -52470,6 +53826,16 @@ export interface UITextAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -52954,6 +54320,16 @@ export interface UITextareaAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -53295,6 +54671,16 @@ export interface UIThemeEditorAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -53663,6 +55049,16 @@ export interface UIThemeMenuAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -53973,6 +55369,16 @@ export interface UIThemeTokenAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -54268,6 +55674,16 @@ export interface UITitleAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -54742,6 +56158,16 @@ export interface UIToastAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -55109,6 +56535,16 @@ export interface UITocAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -55379,7 +56815,7 @@ export interface UIToolbarEventMap {
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "ui-changed": CustomEvent<{ value?: string; values?: string[] }>
@@ -55821,6 +57257,16 @@ export interface UIToolbarAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -56073,7 +57519,7 @@ export interface UIToolbarAttributes {
    */
   "on-ui-choosing"?: (event: UIToolbarEventMap["ui-choosing"]) => void
   /**
-   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen, only when it has a `name`;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
    * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "on-ui-changed"?: (event: UIToolbarEventMap["ui-changed"]) => void
@@ -56188,6 +57634,16 @@ export interface UITourAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -56534,6 +57990,16 @@ export interface UITourStepAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -56932,6 +58398,16 @@ export interface UITransitionAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -57322,7 +58798,7 @@ export interface UITreeAttributes {
    */
   "prop:path"?: unknown
   /**
-   * `appearance="columns"`:  each column's width, by level, separated by commas;  the last one sizes every column deeper than the list goes.  Each one a number of px (`240`, `240px`), `em`, a percent of the tree's width (`30%`), `auto` to fit the column to the rows it shows (from 80px to three times `--ui-tree-column-width`), or `*` for `--ui-tree-column-width`.  So `auto` fits every column to its rows, and `12em, auto` keeps the first at 12em.  None:  every column is `--ui-tree-column-width` wide.  A column a person resizes keeps that width instead:  with an `id`, the tree remembers it in this browser.
+   * `appearance="columns"`:  each column's width, by level, separated by commas;  the last one sizes every column deeper than the list goes.  Each one a number of px (`240`, `240px`), `em`, a percent of the tree's width (`30%`), `auto` to fit the column to the rows it shows (from `column-min-width` to `column-max-width`, or three times `--ui-tree-column-width`), or `*` for `--ui-tree-column-width`.  So `auto` fits every column to its rows, and `12em, auto` keeps the first at 12em.  None:  every column is `--ui-tree-column-width` wide.  A column a person resizes keeps that width instead:  with an `id`, the tree remembers it in this browser.
    * - takes:  text
    */
   size?: string
@@ -57331,6 +58807,26 @@ export interface UITreeAttributes {
    * @deprecated write `size` -- `prop:` stays only for compiled spell
    */
   "prop:size"?: string
+  /**
+   * `appearance="columns"`:  the narrowest a full column is drawn, however it got its width (`size`, a fit to its rows, a drag):  a number of px (`200`, `200px`), `em`, `rem` or a percent of the tree's width.  While the columns don't fit even at this width, they scroll sideways rather than shrink.  None:  80px.  A narrow column's strip is narrower still.
+   * - takes:  text
+   */
+  "column-min-width"?: string
+  /**
+   * `column-min-width`, as the DOM element's property.
+   * @deprecated write `column-min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:columnMinWidth"?: string
+  /**
+   * `appearance="columns"`:  the widest a full column is drawn, however it got its width, written as `column-min-width` is;  `size="auto"` fits a column to its rows up to it.  Never under `column-min-width`.  None:  no most, and `auto` stops at three times `--ui-tree-column-width`.
+   * - takes:  text
+   */
+  "column-max-width"?: string
+  /**
+   * `column-max-width`, as the DOM element's property.
+   * @deprecated write `column-max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:columnMaxWidth"?: string
   /**
    * `appearance="columns"`:  how many columns at the end never narrow.  While the columns don't fit the tree's width, the ones before those narrow, from the first, as few as it takes, each to a strip with its pick's name;  the pointer or the focus on one widens it again, and so does picking it from the path line.  The selected row's column never narrows.
    * - takes:  number
@@ -57392,6 +58888,16 @@ export interface UITreeAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -57763,6 +59269,16 @@ export interface UITreeDiagramAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -58176,6 +59692,16 @@ export interface UITreeItemAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -58557,6 +60083,16 @@ export interface UITreeNodeAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -59060,6 +60596,16 @@ export interface UIUploaderAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -59408,6 +60954,16 @@ export interface UIValueAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -59782,6 +61338,16 @@ export interface UIVideoAttributes {
    * @deprecated write `loading` -- `prop:` stays only for compiled spell
    */
   "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -60169,6 +61735,16 @@ export interface UIVisibilityAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -60546,6 +62122,16 @@ export interface UIZoomAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
@@ -60894,6 +62480,9 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  tile, panel, profile card
        * - slots:
        *   - default:  Content:  `<ui-content>` blocks (header, meta, description), `<img>`s (full-width images), `<ui-extra>`, buttons.  A slotted part of a shorthand's noun replaces that shorthand.
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-retry`
        */
       "ui-card": UICardJSXAttributes
       /**
@@ -61136,7 +62725,9 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  form layout, fieldset, validation
        * - slots:
        *   - default:  The native `<form>` (or its content, when the `<ui-form>` sits inside one).
-       * - events:  `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-retry`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`
        */
       "ui-form": UIFormJSXAttributes
       /**
@@ -61369,7 +62960,9 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
        *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
-       * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
        */
       "ui-panel": UIPanelJSXAttributes
       /**
@@ -61408,7 +63001,9 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  tooltip, popover, hint, hover card, info bubble
        * - slots:
        *   - default:  Content:  text, `<ui-header>` / `<ui-content>` parts, a grid, controls.
-       * - events:  `ui-opening`, `ui-closing`
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-retry`, `ui-opening`, `ui-closing`
        */
       "ui-popup": UIPopupJSXAttributes
       /**
@@ -61444,7 +63039,9 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
        *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
-       * - events:  `ui-changed`, `ui-reset`, `ui-show-code`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-changed`, `ui-reset`, `ui-show-code`, `ui-loading`, `ui-loaded`, `ui-retry`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`
        */
       "ui-property-editor": UIPropertyEditorJSXAttributes
       /**
@@ -61459,7 +63056,9 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
        *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
-       * - events:  `ui-invalid`, `ui-saved`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-invalid`, `ui-saved`, `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`
        */
       "ui-property-group": UIPropertyGroupJSXAttributes
       /**
@@ -61554,7 +63153,9 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
        *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
-       * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
        */
       "ui-section": UISectionJSXAttributes
       /**
@@ -61569,6 +63170,9 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  panel, box, section, well, paper, card
        * - slots:
        *   - default:  Content.
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-retry`
        */
       "ui-segment": UISegmentJSXAttributes
       /**
@@ -61576,6 +63180,9 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  panel group, stacked panels
        * - slots:
        *   - default:  `<ui-segment>`s and nested `<ui-segments>`.
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-retry`
        */
       "ui-segments": UISegmentsJSXAttributes
       /**
@@ -61734,7 +63341,9 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  tab panel, pane
        * - slots:
        *   - default:  The pane's content.
-       * - events:  `ui-opened`
+       *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
+       *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
+       * - events:  `ui-retry`, `ui-opened`
        */
       "ui-tab": UITabJSXAttributes
       /**
@@ -61961,6 +63570,7 @@ export interface UIEventMap {
   "ui-selected": CustomEvent<unknown>
   "ui-deselected": CustomEvent<unknown>
   "ui-changing": CustomEvent<unknown>
+  "ui-retry": CustomEvent<unknown>
   "ui-saving": CustomEvent<unknown>
   "ui-saved": CustomEvent<unknown>
   "ui-coloured": CustomEvent<unknown>
@@ -62045,7 +63655,7 @@ declare global {
     "ui-button": UIHTMLElement<UIButtonEventMap>
     "ui-buttons": HTMLElement
     "ui-calendar": UIHTMLElement<UICalendarEventMap>
-    "ui-card": HTMLElement
+    "ui-card": UIHTMLElement<UICardEventMap>
     "ui-cards": HTMLElement
     "ui-cell": HTMLElement
     "ui-checkbox": UIHTMLElement<UICheckboxEventMap>
@@ -62132,8 +63742,8 @@ declare global {
     "ui-search": UIHTMLElement<UISearchEventMap>
     "ui-section": UIHTMLElement<UISectionEventMap>
     "ui-sections": HTMLElement
-    "ui-segment": HTMLElement
-    "ui-segments": HTMLElement
+    "ui-segment": UIHTMLElement<UISegmentEventMap>
+    "ui-segments": UIHTMLElement<UISegmentsEventMap>
     "ui-select": UIHTMLElement<UISelectEventMap>
     "ui-shape": UIHTMLElement<UIShapeEventMap>
     "ui-side": HTMLElement

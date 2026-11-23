@@ -428,7 +428,7 @@ export class SignUpPage extends App {
           h("ui-header", { size: "medium" }, "Who's on which shift"),
           h("ui-stack", { class: "published-rows", spacing: "sm" },
             () => core.drawRead(async () => await core.savedThings(PublishedVolunteer, {}, "as drawn"), (volunteer) => core.drawThing(volunteer), {
-              waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading the sheet"),
+              waitingSay: () => "Reading the sheet",
               none: () => h("ui-text", { class: "none", color: "grey" }, "Nobody yet:  be the first."),
               failed: () => h("ui-text", { color: "red" }, "We can't read the sheet right now.")
             })
@@ -463,7 +463,7 @@ export class SignUpPage extends App {
           h("ui-header", { size: "small" }, "The master sheet"),
           h("ui-stack", { class: "master", spacing: "sm" },
             () => core.drawRead(async () => await core.savedThings(Volunteer, {}, "as drawn"), (volunteer) => core.drawThing(volunteer), {
-              waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading the master sheet"),
+              waitingSay: () => "Reading the master sheet",
               none: () => h("ui-text", { color: "grey" }, "Nobody's signed up yet."),
               failed: () => h("ui-text", { class: "organizers-only", color: "grey" }, "Only the picnic's organizers see this.")
             })
@@ -471,7 +471,7 @@ export class SignUpPage extends App {
           h("ui-header", { size: "small" }, "Tickets"),
           h("ui-stack", { class: "tickets", spacing: "sm" },
             () => core.drawRead(async () => await core.savedThings(Ticket, {}, "as drawn"), (ticket) => core.drawThing(ticket), {
-              waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading the tickets"),
+              waitingSay: () => "Reading the tickets",
               none: () => h("ui-text", { color: "grey" }, "Nobody's asked for one yet."),
               failed: () => h("ui-text", { color: "grey" }, "Only the picnic's organizers see this.")
             })
@@ -510,7 +510,7 @@ export class SignUpPage extends App {
             )
           ),
           h("ui-stack", { class: "attendees", spacing: "sm" },
-            () => core.drawRead(async () => await core.savedThings(Attendee, {}, "as drawn"), (attendee) => core.drawThing(attendee), { waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Reading the list"), failed: () => h("ui-text", { color: "grey" }, "Only the picnic's organizers see this.") })
+            () => core.drawRead(async () => await core.savedThings(Attendee, {}, "as drawn"), (attendee) => core.drawThing(attendee), { waitingSay: () => "Reading the list", failed: () => h("ui-text", { color: "grey" }, "Only the picnic's organizers see this.") })
           )
         )
       )

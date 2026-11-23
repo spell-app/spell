@@ -539,9 +539,7 @@ export class OrgAdmin extends App {
           })
         )
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "people_section" },
-          "Finding the org's people"
-        ),
+        waitingSay: () => "Finding the org's people",
         items: () => h("ui-table", { appearance: "very-basic", selectable: true, unstackable: true, part: "people_section" },
           h("ui-row")
         ),
@@ -577,9 +575,7 @@ export class OrgAdmin extends App {
         h("ui-cell", { "data-column": "Name" }, () => team.name),
         h("ui-cell", { "data-column": "Space" }, h("ui-text", { color: "grey" }, () => team.space))
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "teams_section" },
-          "Finding the teams"
-        ),
+        waitingSay: () => "Finding the teams",
         items: () => h("ui-table", { appearance: "very-basic", selectable: true, unstackable: true, part: "teams_section" },
           h("ui-row")
         ),
@@ -607,9 +603,7 @@ export class OrgAdmin extends App {
         h("ui-cell", { "data-column": "Under" }, () => project.team),
         h("ui-cell", { "data-column": "Space" }, h("ui-text", { color: "grey" }, () => project.space))
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "teams_section" },
-          "Finding the projects"
-        ),
+        waitingSay: () => "Finding the projects",
         items: () => h("ui-table", { appearance: "very-basic", selectable: true, unstackable: true, part: "teams_section" },
           h("ui-row")
         ),
@@ -666,9 +660,7 @@ export class OrgAdmin extends App {
           })
         )
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "roles_section" },
-          "Finding who manages what"
-        ),
+        waitingSay: () => "Finding who manages what",
         items: () => h("ui-table", { appearance: "very-basic", selectable: true, unstackable: true, part: "roles_section" },
           h("ui-row")
         ),
@@ -719,9 +711,7 @@ export class OrgAdmin extends App {
           })
         )
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "designers_section" },
-          "Finding who designs what"
-        ),
+        waitingSay: () => "Finding who designs what",
         items: () => h("ui-table", { appearance: "very-basic", selectable: true, unstackable: true, part: "designers_section" },
           h("ui-row")
         ),
@@ -765,9 +755,7 @@ export class OrgAdmin extends App {
           })
         )
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "apps_section" },
-          "Finding the approved apps"
-        ),
+        waitingSay: () => "Finding the approved apps",
         items: () => h("ui-table", { appearance: "very-basic", selectable: true, unstackable: true, part: "apps_section" },
           h("ui-row")
         ),
@@ -815,9 +803,7 @@ export class OrgAdmin extends App {
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           })
         )
-      ], { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "stages_section" },
-        "Finding the event stages"
-      ), items: () => h("ui-table", { appearance: "very-basic", selectable: true, unstackable: true, part: "stages_section" },
+      ], { waitingSay: () => "Finding the event stages", items: () => h("ui-table", { appearance: "very-basic", selectable: true, unstackable: true, part: "stages_section" },
         h("ui-row")
       ) })
     )
@@ -833,7 +819,7 @@ export class OrgAdmin extends App {
         h("ui-cell", { "data-column": "What" }, () => change.what),
         h("ui-cell", { "data-column": "Why" }, () => change.why)
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "log_section" }, "Reading the log"),
+        waitingSay: () => "Reading the log",
         items: () => h("ui-table", { appearance: "very-basic", unstackable: true, part: "log_section" }, h("ui-row")),
         none: () => h("ui-text", { class: "none", color: "grey", part: "log_section" }, "Nothing's changed yet.")
       })

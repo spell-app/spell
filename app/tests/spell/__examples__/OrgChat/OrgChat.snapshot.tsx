@@ -204,28 +204,30 @@ export class ChatPage extends App {
         </ui-toolbar>
         <ui-stack class="workspace" direction="horizontal" spacing="none">
           <ui-stack class="sidebar" spacing="none">{this.drawThreadList()}</ui-stack>
-          {core.drawWaiting(() => <ui-stack class="main" spacing="none" hidden={this.picked ? undefined : true}>
-            <ui-stack class="thread-name">
-              <ui-header size="small">{core.whileWaiting(() => this.threadName)}</ui-header>
-            </ui-stack>
-            <ui-stack class="messages" spacing="none">
-              <ui-stack class="message-list" spacing="none">
-                {core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message: Message) => core.drawThing(message), {
-                  waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Joining the thread"}</ui-loader>,
-                  none: () => <ui-text class="none" color="grey">{"Nothing yet:  say hello."}</ui-text>,
-                  failed: () => <ui-text color="red">We can't join this thread right now.</ui-text>
-                })}
+          {core.drawWaiting(() => core.drawIf(() => this.picked, () => <>
+            <ui-stack class="main" spacing="none">
+              <ui-stack class="thread-name">
+                <ui-header size="small">{core.whileWaiting(() => this.threadName)}</ui-header>
               </ui-stack>
-            </ui-stack>
-            <ui-form class="composer" prop:value={this.newMessage}>
-              <ui-stack direction="horizontal" spacing="sm" align="end">
-                {core.drawWaiting(() => <ui-textarea name="text" fluid={true} grow={true} max-rows={8} send-on-enter={true} placeholder={this.boxWords} aria-label="Your message" on-ui-send={async () => await this.send()} />)}
-                <ui-button class="send" color="primary" disabled={this.newMessage.text === ""} onClick={core.pressed(this, async () => await this.send())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-                  Send
-                </ui-button>
+              <ui-stack class="messages" spacing="none">
+                <ui-stack class="message-list" spacing="none">
+                  {core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message: Message) => core.drawThing(message), {
+                    waitingSay: () => "Joining the thread",
+                    none: () => <ui-text class="none" color="grey">{"Nothing yet:  say hello."}</ui-text>,
+                    failed: () => <ui-text color="red">We can't join this thread right now.</ui-text>
+                  })}
+                </ui-stack>
               </ui-stack>
-            </ui-form>
-          </ui-stack>)}
+              <ui-form class="composer" prop:value={this.newMessage}>
+                <ui-stack direction="horizontal" spacing="sm" align="end">
+                  {core.drawWaiting(() => <ui-textarea name="text" fluid={true} grow={true} max-rows={8} send-on-enter={true} placeholder={this.boxWords} aria-label="Your message" on-ui-send={async () => await this.send()} />, "ui-textarea")}
+                  <ui-button class="send" color="primary" disabled={this.newMessage.text === ""} onClick={core.pressed(this, async () => await this.send())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+                    Send
+                  </ui-button>
+                </ui-stack>
+              </ui-form>
+            </ui-stack>
+          </>))}
         </ui-stack>
         <ui-flyout class="threads-drawer" visible={this.drawerOpen} position="left" width="thin" on-ui-closed={() => this.closeTheDrawer()}>
           {this.drawThreadList()}
@@ -240,7 +242,7 @@ export class ChatPage extends App {
         {core.drawRead(async () => await core.savedThings(Thread, { sort: [{ field: "name" }] }, "as drawn"), (thread: Thread) => <ui-item link={thread.link} selected={thread.current} icon={thread.mark} part="thread_list">
           {thread.name}
         </ui-item>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="thread_list">{"Finding your threads"}</ui-loader>,
+          waitingSay: () => "Finding your threads",
           none: () => <ui-text class="none" color="grey" part="thread_list">No threads you can read.</ui-text>,
           failed: () => <ui-text color="red" part="thread_list">We can't find your threads right now.</ui-text>
         })}

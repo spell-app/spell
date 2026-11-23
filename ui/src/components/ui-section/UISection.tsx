@@ -3,6 +3,7 @@ import { Dynamic, isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell/ui/core"
 import { sectionVocabulary } from "./UISection.en"
+import statePanesCSS from "spell/ui/elements/StatePanes.css?inline"
 import { UISections } from "./UISections"
 import { FoldIconPlace, type SectionVocabulary } from "./UISection.types"
 
@@ -94,14 +95,26 @@ import sectionCSS from "./UISection.css?inline"
 export class UISection extends E.UIComponent<SectionVocabulary> {
   @E.proto static vocabulary = sectionVocabulary
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
-    styleSheets: { section: sectionCSS },
+    styleSheets: { statePanes: statePanesCSS, section: sectionCSS },
     cssStates: ["inverted"],
     DOMElement: E.DOMLoadableBodyElement,
     // a container:  a click on its text must not jump to the fold button or a link inside
     delegatesFocus: false,
     // `loading`:  Fomantic's veil
-    loading: "its own"
+    loading: "its own",
+    // `error`:  its error pane in place of its content (`StatePanes`)
+    error: "its own"
   }
+
+  /** Its loading and error panes, in place of its content while it loads or once it failed (`E.StatePanes`). */
+  readonly panes = new E.StatePanes({ owner: this, part: (name) => this.partForName(name as never) })
+
+  /** A pane stands in for its content:  `:state(state-pane)`, so its own veil goes (`reset.css`). */
+  @E.cssState("state-pane")
+  get showsStatePane(): boolean {
+    return !!this.panes.showing
+  }
+
   @E.proto static defaultFoldIcon: FoldIconPlace = FoldIconPlace.start
 
   /** Where the fold chevron sits without a `fold-icon` attribute:  `start`;  a subclass may move it. */
@@ -637,7 +650,8 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
             </p>
           </Show>
           {this.contentStart()}
-          <slot />
+          {this.panes.content()}
+          {this.panes.draw()}
         </div>
         <Show when={this.isLoading}>
           <span class={UIT.VISUALLY_HIDDEN} role="status">

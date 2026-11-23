@@ -162,6 +162,7 @@ describe("Vocabulary.define() with the English identity dictionary", () => {
       // the shared attributes (`SharedVocabulary`), then the aliases
       "disabled",
       "loading",
+      "error",
       "visible",
       "animation",
       "link",

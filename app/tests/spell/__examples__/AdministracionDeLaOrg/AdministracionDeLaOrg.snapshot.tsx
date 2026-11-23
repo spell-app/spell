@@ -472,9 +472,7 @@ export class AdministraciónDeLaOrg extends App {
             <ui-button class="remove" icon="close" size="mini" appearance="transparent" aria-label="Sacarle de la org" title="Sacarle de la org" onClick={core.pressed(this, () => core.removeSaved(miembro))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </es-celda>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="sección_personas">
-            {"Buscando a la gente de la org"}
-          </ui-loader>,
+          waitingSay: () => "Buscando a la gente de la org",
           items: () => <es-tabla appearance="very-basic" selectable={true} unstackable={true} part="sección_personas">
             <es-fila />
           </es-tabla>,
@@ -502,7 +500,7 @@ export class AdministraciónDeLaOrg extends App {
             <ui-text color="grey">{equipo.espacio}</ui-text>
           </es-celda>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="sección_equipos">{"Buscando los equipos"}</ui-loader>,
+          waitingSay: () => "Buscando los equipos",
           items: () => <es-tabla appearance="very-basic" selectable={true} unstackable={true} part="sección_equipos">
             <es-fila />
           </es-tabla>,
@@ -527,9 +525,7 @@ export class AdministraciónDeLaOrg extends App {
             <ui-text color="grey">{proyecto.espacio}</ui-text>
           </es-celda>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="sección_equipos">
-            {"Buscando los proyectos"}
-          </ui-loader>,
+          waitingSay: () => "Buscando los proyectos",
           items: () => <es-tabla appearance="very-basic" selectable={true} unstackable={true} part="sección_equipos">
             <es-fila />
           </es-tabla>,
@@ -574,9 +570,7 @@ export class AdministraciónDeLaOrg extends App {
             <ui-button class="end" icon="close" size="mini" appearance="transparent" aria-label="Terminar este mandato" title="Terminar este mandato:  su registro se queda" onClick={core.pressed(this, () => core.removeSaved(mandato))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </es-celda>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="sección_roles">
-            {"Buscando quién dirige qué"}
-          </ui-loader>,
+          waitingSay: () => "Buscando quién dirige qué",
           items: () => <es-tabla appearance="very-basic" selectable={true} unstackable={true} part="sección_roles">
             <es-fila />
           </es-tabla>,
@@ -617,9 +611,7 @@ export class AdministraciónDeLaOrg extends App {
             <ui-button class="undesign" icon="close" size="mini" appearance="transparent" aria-label="Ya no lo diseña" title="Ya no lo diseña:  sus borradores se quedan, para un Manager" onClick={core.pressed(this, () => core.removeSaved(diseñador))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </es-celda>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="sección_diseñadores">
-            {"Buscando quién diseña qué"}
-          </ui-loader>,
+          waitingSay: () => "Buscando quién diseña qué",
           items: () => <es-tabla appearance="very-basic" selectable={true} unstackable={true} part="sección_diseñadores">
             <es-fila />
           </es-tabla>,
@@ -651,9 +643,7 @@ export class AdministraciónDeLaOrg extends App {
             <ui-button class="unapprove" icon="close" size="mini" appearance="transparent" aria-label="Quitarla de la lista" title="Quitarla de la lista" onClick={core.pressed(this, () => core.removeSaved(aprobación))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </es-celda>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="sección_aplicaciones">
-            {"Buscando las aplicaciones aprobadas"}
-          </ui-loader>,
+          waitingSay: () => "Buscando las aplicaciones aprobadas",
           items: () => <es-tabla appearance="very-basic" selectable={true} unstackable={true} part="sección_aplicaciones">
             <es-fila />
           </es-tabla>,
@@ -691,9 +681,7 @@ export class AdministraciónDeLaOrg extends App {
           <es-celda data-column="">
             <ui-button class="unstage" icon="close" size="mini" appearance="transparent" aria-label="Quitar esta etapa" title="Quitar esta etapa:  no mientras haya un evento en ella, o otra lleve a ella" onClick={core.pressed(this, () => core.removeSaved(etapa))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
           </es-celda>
-        </>, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="sección_etapas">
-          {"Buscando las etapas de los eventos"}
-        </ui-loader>, items: () => <es-tabla appearance="very-basic" selectable={true} unstackable={true} part="sección_etapas">
+        </>, { waitingSay: () => "Buscando las etapas de los eventos", items: () => <es-tabla appearance="very-basic" selectable={true} unstackable={true} part="sección_etapas">
           <es-fila />
         </es-tabla> })}
       </ui-stack>
@@ -715,7 +703,7 @@ export class AdministraciónDeLaOrg extends App {
           <es-celda data-column="Qué">{cambio.qué}</es-celda>
           <es-celda data-column="Por qué">{cambio.porQué}</es-celda>
         </>, {
-          waiting: () => <ui-loader visible={true} inline={true} text={true} part="sección_registro">{"Leyendo el registro"}</ui-loader>,
+          waitingSay: () => "Leyendo el registro",
           items: () => <es-tabla appearance="very-basic" unstackable={true} part="sección_registro">
             <es-fila />
           </es-tabla>,

@@ -168,12 +168,23 @@ describe("RestPlace.list()", () => {
     expect(result.contents?.map(({ id }) => id)).toEqual(["r-3"])
   })
 
-  test("an answer that isn't a list says where to look", async () => {
+  test("an answer holding its rows wrapped is unwrapped;  one holding no list it can tell says where to look", async () => {
     const { place } = await served(
       { paging: "cursor" },
       { can: { page: "cursor" }, collections: { recipes: { nextAt: "meta.next" } } }
     )
-    await expect(place.list("recipes", {}, {})).rejects.toThrow("say where it is with `rowsAt`")
+    await expect(place.list("recipes", {}, {})).resolves.toMatchObject({ rows: [{}, {}] })
+    fakeServer(() => ({ count: 2, first: [{ id: "a" }], second: [{ id: "b" }] }))
+    const wrapped = shapedPlace({ collections: { recipes: { path: "/recipes{/id}" } } })
+    await expect(wrapped.list("recipes", {}, {})).rejects.toThrow("say where it is with `rowsAt`")
+    vi.unstubAllGlobals()
+  })
+
+  test("a list wrapped in its answer, as no other is, beside a list of plain values:  its one list of things", async () => {
+    fakeServer(() => ({ sources: [{ id: "s1" }, { id: "s2" }], warnings: ["slow"], next_offset: null }))
+    const place = shapedPlace({ collections: { sources: { path: "/api/sources{/id}" } } })
+    await expect(place.list("sources", {}, {})).resolves.toMatchObject({ rows: [{ id: "s1" }, { id: "s2" }] })
+    vi.unstubAllGlobals()
   })
 
   test("a list that's not there is `not found`", async () => {
@@ -1040,6 +1051,24 @@ describe("enabled operations, and action routes (epic `data` P49)", () => {
     )
     await expect(place.call("publish", { id: "r-1" }, {}, "recipes")).resolves.toEqual({ published: 1 })
   })
+
+  test("read only, it takes no write and no listed route, a GET one too:  nothing is sent", async () => {
+    const { box, place } = await served(
+      {},
+      {
+        can: { write: "none" },
+        operations: { star: { at: "/recipes/{id}/star", method: "PATCH" }, load: { at: "/recipes/load", method: "GET" } }
+      }
+    )
+    const refused = await place.call("load", {}, {}, "recipes").catch((error: unknown) => error)
+    expect((refused as PlaceError).cause).toMatchObject({ kind: "refused", whyNot: "place" })
+    await expect(place.call("star", { id: "r-1" }, {}, "recipes")).rejects.toThrow(/is read only/)
+    await expect(
+      place.apply([{ kind: "insert", collection: "recipes", row: { title: "Soup" } }] as never, {})
+    ).rejects.toThrow(/is read only/)
+    expect(box.starred).toEqual([])
+    await expect(place.list("recipes", {}, {})).resolves.toMatchObject({ rows: expect.any(Array) })
+  })
 })
 
 ////////////////
@@ -1113,6 +1142,14 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
     const answer = await place.list("runs", { filter: { team: "infra" } }, {})
     expect(answer).toMatchObject({ rows: [{ id: "run-1", team: "infra" }], handled: { filter: true } })
     expect(asked).toEqual(["https://shapes.test/api/runs?team=infra"])
+  })
+
+  test("a list asked for by a list of values:  each one sent, the question repeated", async () => {
+    const asked = fakeServer((query) => query.getAll("device").map((device) => ({ id: `m-${device}`, device })))
+    const place = shapedPlace({ collections: { measurements: { path: "/api/measurements{/id}", askedBy: ["device"] } } })
+    const answer = await place.list("measurements", { filter: { device: ["d1", "d2"] } }, {})
+    expect(answer).toMatchObject({ rows: [{ id: "m-d1" }, { id: "m-d2" }], handled: { filter: true } })
+    expect(asked).toEqual(["https://shapes.test/api/measurements?device=d1&device=d2"])
   })
 
   test("a list asked for by a field its rows leave out:  each row holds the value it was asked for", async () => {

@@ -3,7 +3,7 @@
  * - The compiling half:  `tests/spell/parserTests/readGathering.test.ts`.
  */
 import { parseHTML } from "linkedom"
-import { enableExternalSource, flush } from "solid-js"
+import { createSignal, enableExternalSource, flush } from "solid-js"
 import { render } from "@solidjs/web"
 import { beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
@@ -204,6 +204,45 @@ describe("a table sorted by its header", () => {
       expect(table.textContent).toBe("ApplesBeans")
     })
     expect(place.requests.at(-1)![0]!.query.sort).toEqual([{ field: "title", descending: false }])
+    leave()
+  })
+})
+
+describe("a read under an if-chain's branch that isn't the one (`core.drawIf()`)", () => {
+  test("asks its place nothing until the branch shows;  then once, and shows the answer", async () => {
+    const { document, window } = parseHTML("<!doctype html><html><body></body></html>")
+    Object.assign(globalThis, { document, window, Node: window.Node, Element: window.Element })
+    const place = filled(new CountingPlace({ capabilities: WITH_IDS }))
+    const { Recipe } = program(place)
+    const [picked, setPicked] = createSignal(false)
+    const container = document.createElement("div")
+    document.body.append(container)
+    const leave = render(
+      () =>
+        core.drawIf(
+          () => picked(),
+          () => [
+            core.drawRead(
+              async () => await core.savedThings(Recipe),
+              (item) => (item as InstanceType<typeof Recipe>).title as never,
+              { paging: () => "all" } as never
+            )
+          ],
+          () => ["Pick one"]
+        ) as never,
+      container
+    )
+    flush()
+    await settled()
+    expect(container.textContent).toBe("Pick one")
+    expect(place.requests).toEqual([])
+
+    setPicked(true)
+    await vi.waitFor(() => {
+      flush()
+      expect(container.textContent).toBe("Soup")
+    })
+    expect(place.requests).toHaveLength(1)
     leave()
   })
 })

@@ -1,4 +1,4 @@
-import { after, soon } from "spell/util/timing"
+import { after, soonEvenHidden } from "spell/util/timing"
 import { TaskStatus, TaskResolveWith } from "./constants"
 import { Task, type TaskProps } from "./Task"
 
@@ -188,11 +188,16 @@ export class TaskList extends Task {
             result = error
           }
 
-          // Execute the next task on a slight delay to allow the UI to catch up
-          void after((this.delayBetweenTasks || 0) / 1000, () => processNextTask(result)).catch(reject)
+          // The next task in the next turn, so the UI can catch up;  after `delayBetweenTasks`, if asked.
+          // - Not a timer when there's no delay:  a hidden tab holds timers back (once a second, after five minutes
+          //   once a minute), and a project's parse and compile take a turn per file:  the editor, reloaded out of
+          //   sight, stayed blank (`soonEvenHidden()`)
+          if (this.delayBetweenTasks)
+            void after(this.delayBetweenTasks / 1000, () => processNextTask(result)).catch(reject)
+          else soonEvenHidden(() => void processNextTask(result).catch(reject))
         }
-        // Get the party started in the next tick
-        soon(() => void processNextTask(initialValue).catch(reject))
+        // Get the party started in the next turn
+        soonEvenHidden(() => void processNextTask(initialValue).catch(reject))
       })
     }
   }

@@ -34,7 +34,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `color.ts` -- colour maths (epic `coherence` I13):  OKLCH <-> sRGB, fitting into sRGB (`clipped()`,
     `toGamut()`), luminance, contrast;  one shape each (`Rgb`, `Oklch`), hex in and out
   - `timing.ts` -- when to run something (epic `coherence` P19, from `spell/element`, which re-exports it):
-    `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
+    `afterSolidUpdate()`, `beforeNextPaint()`, `soon()` (`soonEvenHidden()`:  never held back in a hidden tab),
+    `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
   - `polling.ts` -- `pollWhileVisible()`, on `every()`:  the ONE way to poll.  Taken by file, in no barrel
     - and `watchServerFiles()`, the ONE watch of every page, which refreshes:
       - when the page server says a file changed (`spell-server:changed`)

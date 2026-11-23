@@ -16,6 +16,7 @@ import {
   type RoomSnapshot
 } from "./RoomCopy"
 import { personOnThisPage } from "./people"
+import { newId } from "./refs"
 import {
   PlaceError,
   type ApplyAnswer,
@@ -815,8 +816,3 @@ function pageToken(): string | undefined {
   return (globalThis as { SPELL_SERVER?: { token?: string } }).SPELL_SERVER?.token
 }
 
-/** A new id, unique across browsers:  `crypto`'s, as `randomUUID()` needs a secure page. */
-function newId(prefix: string): string {
-  const [high, low] = crypto.getRandomValues(new Uint32Array(2))
-  return `${prefix}-${high!.toString(36)}${low!.toString(36)}`
-}

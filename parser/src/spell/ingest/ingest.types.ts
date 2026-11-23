@@ -48,6 +48,11 @@ export type IngestFiles = {
   /** The text of every other Spell file beside this one:  what else may use what it declares. */
   otherSpellBeside(path: string): Promise<string[]>
   /**
+   * The description of every other place beside this one (`<Name>.api.json5`), as `descriptionFromDisk()` reads it:
+   * which lists are another place's.  Left out:  none.
+   */
+  otherDescriptionsBeside?(path: string): Promise<PlaceDescription[]>
+  /**
    * Each deployment of the place named `place`, listed in the project's file of the Spell file `file` (epic `data` P49, Q49):
    * `"places": { "netbox": { "dev": { "at": "...", "key": "NETBOX_DEV_KEY" }, "production": { ..., "readOnly": true } } }`.
    * - Left out, or none listed:  `undefined`.
@@ -153,6 +158,12 @@ export type IngestAsk = {
    * `https://auth.acme.test/api-keys/{key id}/token`, the key holding `<key id>:<secret>`.
    */
   tokenFrom?: string
+  /** It's read only, whatever its description offers:  `it is read only`, kept by every later update. */
+  readOnly?: boolean
+  /** How many rows a program asks for at a time:  `it gives up to 20 at a time`, kept by every later update. */
+  rows?: number
+  /** How often a program asks what changed, in seconds:  `check it every 30 seconds`, kept by every later update. */
+  checkEvery?: number
   /**
    * Its real rows stay on this machine (epic `data` P49, J249):  no real value goes in its description, and the rows
    * it reads go in this folder, `spell place read-page`'s samples files.  `""`:  `~/.spell/places/<name>`.
@@ -684,6 +695,12 @@ export type PlaceDescription = {
     keySecret?: string
     /** Where a token is made from that key:  `it is authenticated with a token from "..."` (epic `data` P49). */
     tokenFrom?: string
+    /** It was asked to be read only (`--read-only`):  `it is read only`, whatever its description offers. */
+    readOnly?: boolean
+    /** The rows a program asks for at a time it was given (`--rows`):  `it gives up to 20 at a time`. */
+    rows?: number
+    /** How often it was asked to be checked, in seconds (`--check-every`):  `check it every 30 seconds`. */
+    checkEvery?: number
     /** Its real rows stay on this machine, in this folder:  `its data is private, located in "..."` (epic `data` P49). */
     privateDataIn?: string
     /** Where that key goes on a request:  left out, `Authorization: Bearer`. */
@@ -733,6 +750,11 @@ export type PlaceDescription = {
   agentNotes?: string[]
   /** What Spell has no words for yet. */
   spellCantSay: string[]
+  /**
+   * The lines Spell couldn't read, by their key (`SpellLine.key`), with why:  any other line the ingest writes, left
+   * out by itself, so one line never stops a whole place.  Said again each time it compiles.
+   */
+  linesLeftOut?: Record<string, string>
   /** How often to ask it what changed, in seconds. */
   checkEverySeconds?: number
   /** The most requests a second its docs ask for:  `it takes up to 80 requests a second`, the Met Museum's (epic `data` P34). */

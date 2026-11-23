@@ -66,10 +66,7 @@ export class Item extends View {
         h("ui-checkbox", { name: "got", "aria-label": "Got it" }),
         h("ui-text", { class: "how-much", bold: true }, () => this.howMuch),
         h("ui-text", { class: "name" }, () => this.name),
-        h("ui-text", { class: "for", color: "grey", size: "small", hidden: () => this.recipe !== "" ? undefined : true },
-          "for ",
-          () => this.recipe
-        ),
+        () => core.drawIf(() => this.recipe !== "", () => [h("ui-text", { class: "for", color: "grey", size: "small" }, "for ", () => this.recipe)]),
         core.drawAction(this, "remove", { "icon-only": true, appearance: "tertiary" })
       )
     )

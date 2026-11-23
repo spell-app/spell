@@ -166,6 +166,7 @@ export const popupVocabulary = {
     }
   ],
   events: [
+    ...UIT.StatePaneEvents,
     {
       name: "ui-opening",
       detail: "{ visible: true, originalEvent?: Event }",
@@ -182,11 +183,15 @@ export const popupVocabulary = {
         "dismissed a `hint` popover (Escape, a click elsewhere)."
     }
   ],
-  slots: [{ name: "", description: "Content:  text, `<ui-header>` / `<ui-content>` parts, a grid, controls." }],
+  slots: [
+    { name: "", description: "Content:  text, `<ui-header>` / `<ui-content>` parts, a grid, controls." },
+    ...UIT.StatePaneSlots
+  ],
   parts: [
     { name: "popup", description: "The popup box (its arrow is `::before`)." },
     { name: "header", description: "The `header` shorthand." },
-    { name: "content", description: "The `content` shorthand." }
+    { name: "content", description: "The `content` shorthand." },
+    ...UIT.StatePaneParts
   ],
   states: [{ name: "fluid", description: "As wide as its target (`fluid`)." }],
   texts: [],

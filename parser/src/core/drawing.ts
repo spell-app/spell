@@ -188,6 +188,31 @@ export const drawingMethods = defineCoreModule({
   },
 
   /**
+   * An if-chain inside markup, `<text><if it is done>✓<otherwise>{its title}</></text>`:  ONLY the branch whose
+   * condition holds is drawn, and drawn again when another one comes to hold.
+   * - `parts`:  each branch's condition, then its drawing;  a last drawing alone is the `<otherwise>`.
+   *   - `core.drawIf(() => this.isDone, () => ["✓"], () => [() => this.title])`
+   * - The first branch whose condition holds shows;  none, and no `<otherwise>`:  nothing.
+   * - A branch that isn't the one draws nothing, so nothing it reads is asked for:  a place's read under it waits
+   *   until it shows.
+   * - A change that keeps the same branch keeps its drawing:  only a flip draws it again, and lets the old one go.
+   * - A condition that waits makes the chain wait, ONE spinner in its place:  the writers put it in `drawWaiting()`.
+   */
+  drawIf(...parts: Array<() => unknown>): Drawing {
+    const shown = createMemo(() => {
+      let at = 0
+      for (; at + 1 < parts.length; at += 2) if (parts[at]!()) return at + 1
+      return at < parts.length ? at : -1
+    })
+    return createMemo(() => {
+      const at = shown()
+      if (at < 0) return null
+      // what it draws is its own, as a drawing's is:  only a flip draws it again
+      return untrack(() => untrackCells(() => madeOnce(parts[at]!() as Drawing)))
+    }) as unknown as Drawing
+  },
+
+  /**
    * A button for ONE of the program's actions, `name` (`autoPlay`), on `thing` or up its chain (`core.actionOf()`):
    * what `<action "auto play"/>` draws (epic `language`, Owen 2026-11-13).
    * - A `<ui-button>`, which the action gives, LIVE, as a menu's item reads it:

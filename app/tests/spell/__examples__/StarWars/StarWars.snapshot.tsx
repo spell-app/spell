@@ -1101,7 +1101,7 @@ export class WikiNote extends Thing {
       return (
         <ui-text paragraph={true} part="words">
           {core.whileWaiting(() => this.page?.summary)}
-          {core.drawWaiting(() => <ui-link link={this.page?.contentUrls?.desktop?.page} target="_blank">Read the rest on Wikipedia</ui-link>)}
+          {core.drawWaiting(() => <ui-link link={this.page?.contentUrls?.desktop?.page} target="_blank">Read the rest on Wikipedia</ui-link>, "ui-link")}
         </ui-text>
       )
     }

@@ -14,6 +14,7 @@
  */
 
 import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `<ui-tab>`
@@ -103,14 +104,15 @@ export const tabVocabulary = {
     }
   ],
   events: [
+    ...UIT.StatePaneEvents,
     {
       name: "ui-opened",
       detail: "{ value: string, first: boolean }",
       description: "Became the shown pane;  `first` the first time (fill a lazy pane now)."
     }
   ],
-  slots: [{ name: "", description: "The pane's content." }],
-  parts: [{ name: "tab", description: "The pane box." }],
+  slots: [{ name: "", description: "The pane's content." }, ...UIT.StatePaneSlots],
+  parts: [{ name: "tab", description: "The pane box." }, ...UIT.StatePaneParts],
   states: [
     { name: "pane", description: "Always:  `UITab.css` tells a pane's host from a tab set's by it." },
     { name: "selected", description: "The shown pane." },

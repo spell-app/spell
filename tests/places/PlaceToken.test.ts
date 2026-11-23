@@ -62,6 +62,20 @@ describe("PlaceToken", () => {
     expect((refused as PlaceError).cause).toMatchObject({ kind: "refused" })
   })
 
+  test("each request for a token carries a fresh request id:  a service may refuse one without", async () => {
+    const ids: Array<string | null> = []
+    const fetch = (async (_url: RequestInfo | URL, init?: RequestInit) => {
+      ids.push(new Headers(init?.headers).get("x-request-id"))
+      return Response.json({ token: `tok-${ids.length}`, expires_in: 1 })
+    }) as typeof globalThis.fetch
+    const mint = tokenServiceMint("https://auth.lab.test/api-keys/{key id}/token", fetch)
+    await mint("k-1:sesame")
+    await mint("k-1:sesame")
+    expect(ids).toHaveLength(2)
+    expect(ids[0]).toMatch(/^spell-[0-9a-z]+$/)
+    expect(ids[1]).not.toBe(ids[0])
+  })
+
   test("a web server reads with it, as its key", async () => {
     const { url, token } = await served()
     const place = new RestPlace({ url, keyNamed: "ACME_API_KEY", keyFrom: token.current })

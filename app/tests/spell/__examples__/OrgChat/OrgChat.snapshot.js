@@ -235,41 +235,43 @@ export class ChatPage extends App {
       ),
       h("ui-stack", { class: "workspace", direction: "horizontal", spacing: "none" },
         h("ui-stack", { class: "sidebar", spacing: "none" }, () => this.drawThreadList()),
-        () => core.drawWaiting(() => h("ui-stack", { class: "main", spacing: "none", hidden: () => this.picked ? undefined : true },
-          h("ui-stack", { class: "thread-name" },
-            h("ui-header", { size: "small" }, () => core.whileWaiting(() => this.threadName))
-          ),
-          h("ui-stack", { class: "messages", spacing: "none" },
-            h("ui-stack", { class: "message-list", spacing: "none" },
-              () => core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message) => core.drawThing(message), {
-                waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Joining the thread"),
-                none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing yet:  say hello."),
-                failed: () => h("ui-text", { color: "red" }, "We can't join this thread right now.")
-              })
-            )
-          ),
-          h("ui-form", { class: "composer", "prop:value": () => this.newMessage },
-            h("ui-stack", { direction: "horizontal", spacing: "sm", align: "end" },
-              () => core.drawWaiting(() => h("ui-textarea", {
-                name: "text",
-                fluid: true,
-                grow: true,
-                "max-rows": 8,
-                "send-on-enter": true,
-                placeholder: () => this.boxWords,
-                "aria-label": "Your message",
-                "on-ui-send": () => async () => await this.send()
-              })),
-              h("ui-button", {
-                class: "send",
-                color: "primary",
-                disabled: () => this.newMessage.text === "",
-                onClick: core.pressed(this, async () => await this.send()),
-                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-              }, "Send")
+        () => core.drawWaiting(() => core.drawIf(() => this.picked, () => [
+          h("ui-stack", { class: "main", spacing: "none" },
+            h("ui-stack", { class: "thread-name" },
+              h("ui-header", { size: "small" }, () => core.whileWaiting(() => this.threadName))
+            ),
+            h("ui-stack", { class: "messages", spacing: "none" },
+              h("ui-stack", { class: "message-list", spacing: "none" },
+                () => core.drawRead(async () => await core.savedThings(Message, { filter: { thread: (await core.answerOf(this, "picked")).topic }, sort: [{ field: "sent" }] }, "as drawn"), (message) => core.drawThing(message), {
+                  waitingSay: () => "Joining the thread",
+                  none: () => h("ui-text", { class: "none", color: "grey" }, "Nothing yet:  say hello."),
+                  failed: () => h("ui-text", { color: "red" }, "We can't join this thread right now.")
+                })
+              )
+            ),
+            h("ui-form", { class: "composer", "prop:value": () => this.newMessage },
+              h("ui-stack", { direction: "horizontal", spacing: "sm", align: "end" },
+                () => core.drawWaiting(() => h("ui-textarea", {
+                  name: "text",
+                  fluid: true,
+                  grow: true,
+                  "max-rows": 8,
+                  "send-on-enter": true,
+                  placeholder: () => this.boxWords,
+                  "aria-label": "Your message",
+                  "on-ui-send": () => async () => await this.send()
+                }), "ui-textarea"),
+                h("ui-button", {
+                  class: "send",
+                  color: "primary",
+                  disabled: () => this.newMessage.text === "",
+                  onClick: core.pressed(this, async () => await this.send()),
+                  style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+                }, "Send")
+              )
             )
           )
-        ))
+        ]))
       ),
       h("ui-flyout", {
         class: "threads-drawer",
@@ -296,9 +298,7 @@ export class ChatPage extends App {
         icon: () => thread.mark,
         part: "thread_list"
       }, () => thread.name), {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "thread_list" },
-          "Finding your threads"
-        ),
+        waitingSay: () => "Finding your threads",
         none: () => h("ui-text", { class: "none", color: "grey", part: "thread_list" }, "No threads you can read."),
         failed: () => h("ui-text", { color: "red", part: "thread_list" }, "We can't find your threads right now.")
       })

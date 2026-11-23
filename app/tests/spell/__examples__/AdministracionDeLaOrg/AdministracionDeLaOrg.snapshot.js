@@ -551,9 +551,7 @@ export class AdministraciónDeLaOrg extends App {
           })
         )
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_personas" },
-          "Buscando a la gente de la org"
-        ),
+        waitingSay: () => "Buscando a la gente de la org",
         items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_personas" },
           h("es-fila")
         ),
@@ -591,9 +589,7 @@ export class AdministraciónDeLaOrg extends App {
         h("es-celda", { "data-column": "Nombre" }, () => equipo.nombre),
         h("es-celda", { "data-column": "Espacio" }, h("ui-text", { color: "grey" }, () => equipo.espacio))
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_equipos" },
-          "Buscando los equipos"
-        ),
+        waitingSay: () => "Buscando los equipos",
         items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_equipos" },
           h("es-fila")
         ),
@@ -626,9 +622,7 @@ export class AdministraciónDeLaOrg extends App {
         h("es-celda", { "data-column": "Bajo" }, () => proyecto.equipo),
         h("es-celda", { "data-column": "Espacio" }, h("ui-text", { color: "grey" }, () => proyecto.espacio))
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_equipos" },
-          "Buscando los proyectos"
-        ),
+        waitingSay: () => "Buscando los proyectos",
         items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_equipos" },
           h("es-fila")
         ),
@@ -683,9 +677,7 @@ export class AdministraciónDeLaOrg extends App {
           })
         )
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_roles" },
-          "Buscando quién dirige qué"
-        ),
+        waitingSay: () => "Buscando quién dirige qué",
         items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_roles" },
           h("es-fila")
         ),
@@ -738,9 +730,7 @@ export class AdministraciónDeLaOrg extends App {
           })
         )
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_diseñadores" },
-          "Buscando quién diseña qué"
-        ),
+        waitingSay: () => "Buscando quién diseña qué",
         items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_diseñadores" },
           h("es-fila")
         ),
@@ -784,9 +774,7 @@ export class AdministraciónDeLaOrg extends App {
           })
         )
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_aplicaciones" },
-          "Buscando las aplicaciones aprobadas"
-        ),
+        waitingSay: () => "Buscando las aplicaciones aprobadas",
         items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_aplicaciones" },
           h("es-fila")
         ),
@@ -836,9 +824,7 @@ export class AdministraciónDeLaOrg extends App {
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           })
         )
-      ], { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_etapas" },
-        "Buscando las etapas de los eventos"
-      ), items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_etapas" },
+      ], { waitingSay: () => "Buscando las etapas de los eventos", items: () => h("es-tabla", { appearance: "very-basic", selectable: true, unstackable: true, part: "sección_etapas" },
         h("es-fila")
       ) })
     )
@@ -854,9 +840,7 @@ export class AdministraciónDeLaOrg extends App {
         h("es-celda", { "data-column": "Qué" }, () => cambio.qué),
         h("es-celda", { "data-column": "Por qué" }, () => cambio.porQué)
       ], {
-        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "sección_registro" },
-          "Leyendo el registro"
-        ),
+        waitingSay: () => "Leyendo el registro",
         items: () => h("es-tabla", { appearance: "very-basic", unstackable: true, part: "sección_registro" }, h("es-fila")),
         none: () => h("ui-text", { class: "none", color: "grey", part: "sección_registro" }, "Nada ha cambiado todavía.")
       })

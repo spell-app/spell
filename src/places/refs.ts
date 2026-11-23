@@ -52,3 +52,13 @@ export function refText({ type, id, place }: SavedRef): string {
   }
   return place ? `${type}#${id}@${place}` : `${type}#${id}`
 }
+
+/**
+ * A new id, unique across browsers, with `prefix` in front:  `c-1x2y3z`.
+ * - `crypto`'s, as `randomUUID()` needs a secure page;  never an `@`.
+ * - A live room's people and calls, a change's id, a token request's `X-Request-Id`.
+ */
+export function newId(prefix: string): string {
+  const [high, low] = crypto.getRandomValues(new Uint32Array(2))
+  return `${prefix}-${high!.toString(36)}${low!.toString(36)}`
+}

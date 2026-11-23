@@ -4,6 +4,12 @@ import { E } from "spell/ui/core"
 import { ComponentDefinitions } from "spell/ui/components/ComponentDefinitions"
 import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
 import { SkeletonText } from "spell/element/SkeletonText"
+import { SKELETON_TAGS } from "spell/element/SkeletonShapes"
+import { placeholderVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholder.en"
+import { placeholderHeaderVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderHeader.en"
+import { placeholderImageVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderImage.en"
+import { placeholderLineVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderLine.en"
+import { placeholderParagraphVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderParagraph.en"
 
 /**
  * `<ui-root>`'s generated catalog (`UIRoot.catalog.ts`) agrees with the vocabularies:  run `yarn gen:root` after
@@ -80,3 +86,14 @@ describe("ROOT_CATALOG's early definitions", () => {
 
 /** The fields every `DOMElement` has of its own, as it's made. */
 const DOM_ELEMENT_FIELDS = ["internals", "attributeValues", "ready", "connectedState", "component"]
+
+/** The kit's `SkeletonShapes` names the placeholder family by tag:  the same tags its vocabularies have. */
+test("SkeletonShapes' tags are the placeholder family's", () => {
+  expect(SKELETON_TAGS).toEqual({
+    placeholder: placeholderVocabulary.tag,
+    header: placeholderHeaderVocabulary.tag,
+    paragraph: placeholderParagraphVocabulary.tag,
+    line: placeholderLineVocabulary.tag,
+    image: placeholderImageVocabulary.tag
+  })
+})

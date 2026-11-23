@@ -98,7 +98,7 @@ export class Checklist extends ViewableList {
   /** Its tasks one under the other;  while it's empty, a line saying so */
   draw() {
     return h("ui-stack", { spacing: "xs" },
-      h("ui-text", { color: "grey", hidden: () => this.isEmpty ? undefined : true }, "Nothing to do"),
+      () => core.drawIf(() => this.isEmpty, () => [h("ui-text", { color: "grey" }, "Nothing to do")]),
       h("slot")
     )
   }
@@ -216,11 +216,7 @@ export class TaskList extends App {
           h("ui-header", { level: "2" }, "Task List"),
           h("ui-stack", { direction: "horizontal", spacing: "sm" },
             h("ui-text", { color: "grey" },
-              h("span", { hidden: () => this.activeCount === 0 ? undefined : "until-found" }, "All done"),
-              h("span", { hidden: () => !(this.activeCount === 0) ? undefined : "until-found" },
-                () => this.activeCount,
-                " to do"
-              )
+              () => core.drawIf(() => this.activeCount === 0, () => ["All done"], () => [() => this.activeCount, " to do"])
             ),
             core.drawAction(this, "takeTheTour", { appearance: "tertiary" })
           )

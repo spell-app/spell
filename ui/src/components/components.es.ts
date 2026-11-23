@@ -339,6 +339,7 @@ export const sharedEs = {
     "ui-loading": "cargando",
     "ui-loaded": "cargado",
     "ui-error": "error",
+    "ui-retry": "reintentar",
     "ui-changing": "cambiando",
     "ui-changed": "cambiado",
     "ui-saving": "guardando",
@@ -370,6 +371,9 @@ export const sharedEs = {
     "ui-navigating": "navegando"
   },
   slots: {
+    // a pane's state panes (`StatePanes`):  what stands in for its content while it loads, or once it failed
+    loading: "cargando",
+    error: "error",
     caption: "leyenda",
     icon: "icono",
     label: "etiqueta",
@@ -694,7 +698,9 @@ export const sharedEs = {
     more: "Más",
     less: "Menos",
     required: "Obligatorio",
-    invalid: "Valor no válido"
+    invalid: "Valor no válido",
+    failed: "No se pudo cargar.",
+    retry: "Reintentar"
   }
 } as const satisfies Dictionary
 

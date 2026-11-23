@@ -1,4 +1,6 @@
 import { proto } from "spell/util"
+import { SkeletonText } from "spell/element/SkeletonText"
+import { lookOfWords } from "spell/parser/core/looks"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
@@ -11,7 +13,16 @@ import { DrawIt } from "spell/parser/spell/rules/classes/DrawIt"
 const CAUGHT_ERROR = "error"
 
 /** Which of a read's riders a line is:  what `core.drawRead()` calls each. */
-export type RiderKind = "waiting" | "none" | "failed" | "failedSay" | "items" | "whole" | "paging" | "pageSize"
+export type RiderKind =
+  | "waiting"
+  | "waitingSay"
+  | "none"
+  | "failed"
+  | "failedSay"
+  | "items"
+  | "whole"
+  | "paging"
+  | "pageSize"
 
 /**
  * `read_rider` rule:  what a read in a drawing shows while it has no list to show (epic `data` P11).
@@ -89,6 +100,58 @@ export class IfThatFailsSay extends SpellStatement<"text"> {
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     return riderSaying(match, this.kind, P.matchAST(match.groups.text))
+  }
+}
+
+/**
+ * `while waiting say "Loading Jobs..."`:  what the loader says while a read waits, a `<for loading="...">`'s
+ * -- see `core.drawRead()`.
+ * - Drawn as the look around it says (`core.drawLooking()`, a site's `loading`):  a spinner saying it, or a
+ *   skeleton announcing it.
+ * - The look's own words name a look for this list alone:  `"skeleton"`, `"spinner"`, `"none"`
+ *   (Spanish `"esqueleto"`, `"cargador"`, `"nada"`);  a skeleton's shape after a `:`, in `SkeletonText`'s words
+ *   (English's alone), `"skeleton: 5 line paragraph"`, parsed as it compiles.
+ */
+export class WhileWaitingSay extends SpellStatement<"text"> {
+  @proto static alias = "statement"
+  @proto static priority = Priority.declaration
+  @proto static loops = true
+  @proto static kind: RiderKind = "waitingSay"
+  declare kind: RiderKind
+
+  /**
+   * Its words read as the drawing around the loop does -- see `ReadRider.getNestedScopeForMatch()`.
+   * - A skeleton's shape in them, `"skeleton: 5 line paragraph"`, must be skeleton text (`SkeletonText`).
+   */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(outsideTheLoop(scope), tokens) as P.MatchFor<this> | undefined
+    if (!match) return undefined
+    const said = WhileWaitingSay.saidOf(match)
+    if (said === undefined) return match
+    try {
+      lookOfWords(said, (text) => SkeletonText.parse(text))
+    } catch (error) {
+      const why = error instanceof Error ? error.message : String(error)
+      return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("skeleton-unreadable", { why }))
+    }
+    return match
+  }
+
+  /** Its words, compiled:  a skeleton's shape parsed (`lookOfWords()`), so a page never parses skeleton text. */
+  getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
+    const said = WhileWaitingSay.saidOf(match)
+    const compiled = said === undefined ? undefined : lookOfWords(said, (text) => SkeletonText.parse(text))
+    const value =
+      compiled !== undefined && compiled !== said
+        ? new P.ASTStringLiteral(match, { value: compiled, quote: '"' })
+        : P.matchAST(match.groups.text)
+    return riderSaying(match, this.kind, value)
+  }
+
+  /** Its words when they're a text as written, `"skeleton: header"`;  `undefined` for anything worked out. */
+  private static saidOf(match: P.MatchFor<WhileWaitingSay>): string | undefined {
+    const value = P.matchAST(match.groups.text)
+    return value instanceof P.ASTStringLiteral && value.quote ? value.value : undefined
   }
 }
 

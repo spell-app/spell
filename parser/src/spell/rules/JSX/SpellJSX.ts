@@ -1,4 +1,6 @@
 import { elementTagFor, proto } from "spell/util"
+import { SkeletonText } from "spell/element/SkeletonText"
+import { lookOfWords } from "spell/parser/core/looks"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Through the folder:  read only when called, once the folder has loaded
@@ -107,16 +109,16 @@ const NAMED_TAGS: Readonly<Record<string, { title?: string }>> = {
  *   - No native HTML in a page (Q46, C1):  `<div>` is an error unless a pack has it;
  *     in plain Spell it's the web's own, as written.
  *   - Except in a page.s `<spell>` or `<html>` block, code spell as written (J83):  there `<div>` is the web's (`SP.isCodeSpell()`).
- * - AN IF-CHAIN INSIDE MARKUP (epic `elemental-spell`, Owen 2026-10-25:  "Inside an element:  hidden"):
+ * - AN IF-CHAIN INSIDE MARKUP (epic `elemental-spell`, Owen 2026-10-25):
  *   `<text><if it is done>✓<otherwise>{its title}</></text>`, the same in a page and in plain Spell.
- *   - Every branch stays on the page, each one's elements hidden while it isn't the one:  a flip keeps the element
- *     (its DOM node, its state and focus), and changes only its `hidden`.
- *     - The web's own elements and text:  `hidden="until-found"`, so find-in-page still reaches them.
- *     - A custom element (`<ui-label>`):  plain `hidden`, which Spell UI hides by.  Its host takes no box of its own
- *       (`display: contents`), where the browser's until-found would draw it all the same.
- *   - Each run of its text and `{holes}` is wrapped in a `<span>`, to be hidden too.
- *   - Branch k shows while no branch before it holds, and its own phrase does:  `hidden` is
- *     `() => !c1 && c2 ? undefined : "until-found"`.
+ *   - ONLY the branch whose condition holds is drawn:  `core.drawIf(() => c1, () => [...], () => [...])`, each
+ *     branch's children a fragment.  A flip draws the new branch, and lets the old one go.
+ *     - So a branch that isn't the one reads nothing:  a place's read under it waits until it shows.
+ *     - Every branch was once drawn and kept, the others `hidden` (find-in-page reached them, and a flip kept their
+ *       elements);  but a hidden branch still read what it showed, asking a place for every item for a value that
+ *       wasn't there yet, and showed a spinner of its own beside the one shown.
+ *   - Branch k shows while no branch before it holds, and its own phrase does.
+ *   - A condition that waits:  ONE spinner where the chain goes (`WriterProject.ifsThatWait`).
  *   - The tokenizer reads the chain (`P.Tokenizer.chainTags`):  each branch a `JSXElementToken` with its `chain`
  *     and `phrase`, its siblings the next branches, ONE closer, `</>` or `</if>`, ending the last.
  *   - At a drawing's top level an `<if>` picks what to return, rebuilt as it changes:  a page.s own tag line, or
@@ -180,7 +182,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const shownIn =
       takesShortcuts && element instanceof P.JSXElementToken ? SpellJSX.shownInScope(scope, element) : undefined
     if (shownIn) match.data.shownIn = textOf((element as P.JSXElementToken).quotedWord!.value).trim()
-    const childScope = shownIn ?? scope
+    // a rider inside an element, `<loading>`, `<failed>`:  inside `<failed>`, `the error` is what went wrong
+    const rider = takesShortcuts && element instanceof P.JSXElementToken ? SpellJSX.riderOf(scope, element) : undefined
+    if (rider) match.data.rider = rider
+    const childScope = shownIn ?? (rider === "failed" ? SpellJSX.failedScope(scope) : scope)
     // `Scope.parse()` only accepts a `string` for `text`, but we have actual `Token`s here:
     // call `scope.parser.parse()` directly instead, as `SpellCSSFile.parse()` does.
     match.data.children = element.children?.map(
@@ -231,7 +236,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       // a type declared further down, still a stub:  a view once its line says so, when it compiles (`viewOf()`)
       else match.data.laterView = later ?? SpellJSX.laterViewFor(scope, element.tagName)
       // a bare name nobody has:  an error in a page;  in plain Spell, the web's own element, `<div>`
-      if (!tag && !match.data.laterView && isPage && isBareComponentName(element.tagName)) {
+      if (!tag && !match.data.laterView && !match.data.rider && isPage && isBareComponentName(element.tagName)) {
         const language = SP.Language.of(scope)
         const packs = SP.ComponentPacks.searched(SpellJSX.packsFor(scope))
         // a control inside an element (`<segment><otherwise>`):  a page reads those on a drawing's own lines
@@ -256,6 +261,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       }
     }
     SpellJSX.reuseNamedMenu(scope, match, element)
+    match.data.looking = SpellJSX.lookingOf(scope, match, element, match.data.tagName)
     match.data.attributes = SpellJSX.attributesOf(match, element)?.map((attr) =>
       scope.parser?.parse(attr, "jsxAttribute", scope)
     )
@@ -558,14 +564,132 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (laterView && !view && (match.matched[0] as P.JSXElementToken).quotedWord) attrs = attrs?.slice(0, -1)
     // a view this tag declares (Q52):  its attributes are the new thing's starting values, so the element has its id alone
     if (match.data.declares?.view) attrs = attrs?.filter((attr) => attr?.name === VIEW_ID_ATTRIBUTE)
-    const laidOut = match.data.dialogParts ? SpellJSX.dialogChildren(match) : this.childASTs(match)
+    // its `loading="..."` is Spell's:  how what waits inside it looks, never handed to the element
+    const { looking } = match.data
+    if (looking) attrs = attrs?.filter((attr) => attr?.name !== looking.attribute && attr?.name !== LOADING_ATTRIBUTE)
+    if (match.data.rider) {
+      return new P.ASTJSXElement(match, {
+        tagName,
+        attrs: [],
+        children: this.childASTs(match),
+        rider: match.data.rider
+      })
+    }
+    const ridden = SpellJSX.ridersAmong(this.childASTs(match))
+    const laidOut = match.data.dialogParts ? SpellJSX.dialogChildren(match) : ridden.children
     const children =
       match.data.shownIn !== undefined && readsIt(laidOut) ? SpellJSX.drawnShown(match, laidOut) : laidOut
     return new P.ASTJSXElement(match, {
       tagName,
       attrs: SpellJSX.clickableAttrs(match, SpellJSX.withMeasure(match, tagName, attrs)),
-      children: view ? SpellJSX.withSlotNames(view, children) : children
+      children: view ? SpellJSX.withSlotNames(view, children) : children,
+      ...((looking || ridden.waiting || ridden.failed) && {
+        looking: {
+          said: looking?.said ?? "",
+          ownsState: looking?.ownsState ?? SpellJSX.ownsLoadingState(match.scope, tagName),
+          ...(ridden.waiting && { waiting: ridden.waiting }),
+          ...(ridden.failed && { failed: ridden.failed }),
+          ...(SpellJSX.hasStateSlots(match.scope, tagName) && { slots: true })
+        }
+      })
     })
+  }
+
+  /**
+   * Which rider `element` is, written inside an element:  `<loading>` (`waiting`) or `<failed>`, by the language's
+   * words for a `<for>`'s slots (`cargando`, `fallo`);  `undefined` for any other tag.
+   * - Inside an element whose content waits:  what shows while it waits, or once it failed -- in its `loading` /
+   *   `error` slots where it has them (Spell UI's panes), else in place of what waits (`core.drawLooking()`).
+   */
+  private static riderOf(scope: P.Scope, element: P.JSXElementToken): "waiting" | "failed" | undefined {
+    if (element.attributes?.length || element.quotedWord || element.chain) return undefined
+    const language = SP.Language.of(scope)
+    const controls = (language.words.page ?? SP.Language.default.words.page!).controls
+    const kind = controls[element.tagName]
+    return kind === WAITING_CONTROL ? "waiting" : kind === FAILED_CONTROL ? "failed" : undefined
+  }
+
+  /** The scope `<failed>`'s children read in:  `the error` is the failure's words (`core.drawLooking()`'s `riders`). */
+  private static failedScope(scope: P.Scope): P.BlockScope {
+    const failed = new P.BlockScope({ name: FAILED_SCOPE, parentScope: scope })
+    failed.variables.add({ name: CAUGHT_ERROR, output: CAUGHT_ERROR })
+    return failed
+  }
+
+  /** `children` without their riders, and each rider's children as a fragment. */
+  private static ridersAmong(children: P.ASTJSXElementProps["children"]): {
+    children: P.ASTJSXElementProps["children"]
+    waiting?: P.ASTJSXFragment
+    failed?: P.ASTJSXFragment
+  } {
+    const riders = children.filter(
+      (child): child is P.ASTJSXElement => child instanceof P.ASTJSXElement && !!child.rider
+    )
+    if (!riders.length) return { children }
+    const fragmentOf = (kind: "waiting" | "failed") => {
+      const rider = riders.find((each) => each.rider === kind)
+      return rider ? new P.ASTJSXFragment(rider.match, { children: rider.children }) : undefined
+    }
+    return {
+      children: children.filter((child) => !riders.includes(child as P.ASTJSXElement)),
+      waiting: fragmentOf("waiting"),
+      failed: fragmentOf("failed")
+    }
+  }
+
+  /** Does `tag` have a `loading` state of its own (its pack says it takes `loading`)? */
+  private static ownsLoadingState(scope: P.Scope, tag: string): boolean {
+    const { lang } = SP.Language.of(scope)
+    return SP.ComponentPacks.attributeNameFor(tag, LOADING_ATTRIBUTE, lang, SpellJSX.packsFor(scope)) !== undefined
+  }
+
+  /** Does `tag` have `loading` and `error` slots (Spell UI's panes:  `StatePanes`)? */
+  private static hasStateSlots(scope: P.Scope, tag: string): boolean {
+    const { lang } = SP.Language.of(scope)
+    return SP.ComponentPacks.slotNameFor(tag, ERROR_SLOT, lang, SpellJSX.packsFor(scope)) !== undefined
+  }
+
+  /**
+   * Its `loading="..."`, when Spell takes it:  how what waits inside the element looks meanwhile, as a
+   * `<for loading>` says it -- `"skeleton"`, `"spinner"`, `"none"`, or a spinner's words (`core.drawLooking()`).
+   * - `skeleton: <skeleton text>` gives the skeleton's shape in `SkeletonText`'s words, the ones a component's
+   *   vocabulary writes its own in (`header, 3 line paragraph`):  parsed here, as it compiles, so a page never does.
+   *   A bare `skeleton` is the element's own (its vocabulary's), else the shape of what's coming.
+   * - Only a QUOTED value, other than the web's own `lazy` and `eager` (an image's, `<image loading="lazy">`):
+   *   a bare `loading` or `loading={...}` stays the element's, Spell UI's loading state.
+   * - `ownsState`:  the tag has a `loading` state of its own (Spell UI's segment, card, section, tab, form, popup):
+   *   with a spinner, that state turns on while what's inside waits, instead of a spinner inside it.
+   * - Its name is the language's `<for>` one (`loading`, Spanish `cargando`).
+   */
+  private static lookingOf(
+    scope: P.Scope,
+    match: P.MatchFor<SpellJSX>,
+    element: P.JSXElementToken,
+    tag: string | undefined
+  ): JSXMatchData["looking"] {
+    const language = SP.Language.of(scope)
+    const words = language.words.page ?? SP.Language.default.words.page!
+    const name = Object.keys(words.forAttributes).find((word) => words.forAttributes[word] === LOADING_ATTRIBUTE)
+    const attribute = element.attributes?.find((each) => each.name === name && each.value instanceof P.TextToken)
+    if (!attribute || !name) return undefined
+    const written = textOf(attribute.value!)
+    if (WEB_LOADING_VALUES.includes(written)) return undefined
+    const packs = SpellJSX.packsFor(scope)
+    const ownsState = !!tag && SpellJSX.ownsLoadingState(scope, tag)
+    const tagSkeleton = tag ? SP.ComponentPacks.skeletonFor(tag, language.lang, packs) : undefined
+    let said = written
+    try {
+      // a skeleton's shape, `skeleton: header, 3 line paragraph`, parsed here:  a page never parses skeleton text
+      said = lookOfWords(written, (text) => SkeletonText.parse(text), tagSkeleton)
+    } catch (error) {
+      const why = error instanceof Error ? error.message : String(error)
+      match.data.error ??= SP.spellParser.createParseError(
+        scope,
+        [attribute],
+        language.parserMessage("skeleton-unreadable", { why })
+      )
+    }
+    return { attribute: name, said, ownsState }
   }
 
   ////////////////
@@ -814,29 +938,62 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 
   /**
    * The ASTs of `match`'s children, leaving out what writes nothing (e.g. blank `jsxText`).
-   * - An if-chain's branches (see the class's docs):  each one's children, each hidden while it isn't the one.
+   * - An if-chain's branches (see the class's docs):  ONE `core.drawIf(...)`, drawing only the branch that holds.
    */
   protected childASTs(match: P.MatchFor<this>): P.ASTJSXElementProps["children"] {
     const asts: P.ASTJSXElementProps["children"] = []
-    let before: P.ASTExpression[] = []
-    for (const child of match.data.children ?? []) {
-      if (child?.is(SpellJSX) && child.data.chain && child.data.inMarkup) {
-        if (child.data.chain === "if") before = []
-        const condition = SpellJSX.conditionOf(child)
-        const shown = P.ASTMultiInfixExpression(child, {
-          expressions: [...before.map((it) => SpellJSX.not(child, it)), ...(condition ? [condition] : [])],
-          operator: "and"
-        })
-        if (condition) before.push(condition)
-        asts.push(...SpellJSX.hiddenUnless(child, shown, this.childASTs(child as P.MatchFor<this>)))
-        continue
-      }
+    let chain: Array<P.MatchFor<SpellJSX>> = []
+    // what's quiet after a branch (its indent, a comment):  between two branches it's dropped, after the last it's drawn
+    let quiet: P.Match[] = []
+    const endChain = () => {
+      if (chain.length) asts.push(this.ifChain(chain))
+      chain = []
+    }
+    const add = (child: P.Match | undefined) => {
       // a view it declares, hidden:  nothing drawn (T123)
-      if (SpellJSX.drawsNothing(child)) continue
+      if (SpellJSX.drawsNothing(child)) return
       const ast = SpellJSX.childAST(child)
       if (ast) asts.push(ast)
     }
+    for (const child of match.data.children ?? []) {
+      if (child?.is(SpellJSX) && child.data.chain && child.data.inMarkup) {
+        if (child.data.chain === "if") {
+          endChain()
+          quiet.forEach(add)
+        }
+        quiet = []
+        chain.push(child as P.MatchFor<SpellJSX>)
+      } else if (chain.length && child && SpellJSX.isQuiet(child)) quiet.push(child)
+      else {
+        endChain()
+        quiet.forEach(add)
+        quiet = []
+        add(child)
+      }
+    }
+    endChain()
+    quiet.forEach(add)
     return asts
+  }
+
+  /**
+   * An if-chain's `branches`, drawn:  `{core.drawIf(() => c1, () => [...], () => c2, () => [...], () => [...])}`.
+   * - Each branch's condition, then its children, as a fragment;  `<otherwise>`'s children alone, last.
+   * - A branch with no condition (`<otherwise>`, or a phrase that didn't parse) before another:  `true`.
+   */
+  private ifChain(branches: Array<P.MatchFor<SpellJSX>>): P.ASTJSXExpression {
+    const [first] = branches
+    const drawn = (match: P.AnyMatch, value: P.ASTExpression) =>
+      new P.ASTMethodDefinition(match, { inline: true, body: new P.ASTReturnStatement(match, { value }) })
+    const args = branches.flatMap((branch, at) => {
+      const isLast = at === branches.length - 1
+      const condition = SpellJSX.conditionOf(branch) ?? (isLast ? undefined : new P.ASTBooleanLiteral(branch, true))
+      const children = this.childASTs(branch).filter((child) => !(child instanceof P.ASTJSXEndTag))
+      const fragment = new P.ASTJSXFragment(branch, { children })
+      return condition ? [drawn(branch, condition), drawn(branch, fragment)] : [drawn(branch, fragment)]
+    })
+    const expression = new P.ASTCoreMethodInvocation(first!, { methodName: "drawIf", args })
+    return new P.ASTJSXExpression(first!, { expression })
   }
 
   /**
@@ -1035,10 +1192,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     for (const child of match.data.children ?? []) {
       if (!child?.is(SpellJSX) || !child.data.chain) {
         // text between branches (their indent), or a comment, leaves the chain open;  anything else ends it
-        const [token] = child?.matched ?? []
-        const isQuiet =
-          token instanceof P.JSXCommentToken || (token instanceof P.JSXTextToken && !`${token.value ?? ""}`.trim())
-        if (child && !isQuiet) open = false
+        if (child && !SpellJSX.isQuiet(child)) open = false
         continue
       }
       child.data.inMarkup = true
@@ -1062,71 +1216,16 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     return Object.keys(controls).find((word) => controls[word] === kind) ?? kind
   }
 
+  /** Is `child` text between an if-chain's branches (their indent), or a comment:  what leaves the chain open? */
+  private static isQuiet(child: P.Match): boolean {
+    const [token] = child.matched
+    return token instanceof P.JSXCommentToken || (token instanceof P.JSXTextToken && !`${token.value ?? ""}`.trim())
+  }
+
   /** Branch `branch`'s condition, its phrase's expression -- none for `<otherwise>`, or a phrase that didn't parse. */
   private static conditionOf(branch: P.MatchFor<SpellJSX>): P.ASTExpression | undefined {
     const ast = branch.data.condition?.AST
     return ast instanceof P.ASTJSXExpression ? ast.expression : undefined
-  }
-
-  /** `not (expression)`. */
-  private static not(match: P.AnyMatch, expression: P.ASTExpression): P.ASTExpression {
-    return new P.ASTNotExpression(match, { expression: new P.ASTParenthesizedExpression(match, { expression }) })
-  }
-
-  /**
-   * `children`, each hidden while `shown` isn't true (`hidden="until-found"`):  an element by an attribute of its
-   * own, each run of text and `{holes}` in a `<span>` of its own.
-   * - `shown` none:  always shown, as an `<otherwise>` alone would be.
-   */
-  private static hiddenUnless(
-    match: P.AnyMatch,
-    shown: P.ASTExpression | undefined,
-    children: P.ASTJSXElementProps["children"]
-  ): P.ASTJSXElementProps["children"] {
-    if (!shown) return children
-    // a custom element (`<ui-label>`) by its own `hidden`, Spell UI's:  its host takes no box of its own, where the
-    // browser's until-found would draw it all the same;  the web's own elements and text, until found
-    const hidden = (tagName = "span") =>
-      new P.ASTJSXAttribute(match, {
-        name: "hidden",
-        value: new P.ASTTernaryExpression(match, {
-          condition: shown,
-          trueValue: new P.ASTNothingLiteral(match),
-          falseValue: tagName.includes("-")
-            ? new P.ASTBooleanLiteral(match, true)
-            : new P.ASTStringLiteral(match, { value: UNTIL_FOUND, quote: '"' })
-        })
-      })
-    const out: P.ASTJSXElementProps["children"] = []
-    // a run of text and holes, `{its count} to do`:  ONE span
-    let run: P.ASTJSXElementProps["children"] = []
-    const endRun = () => {
-      if (run.length)
-        out.push(new P.ASTJSXElement(run[0]!.match, { tagName: "span", attrs: [hidden()], children: run }))
-      run = []
-    }
-    for (const child of children) {
-      if (child instanceof P.ASTJSXEndTag) continue
-      if (child instanceof P.ASTJSXFragment) {
-        endRun()
-        out.push(...SpellJSX.hiddenUnless(match, shown, child.children))
-      } else if (child instanceof P.ASTJSXElement) {
-        endRun()
-        const { tagName, attrs = [], children: inside, action, contextMenu } = child
-        // an action's button or row keeps its action (`action_button`), a right-click menu its items
-        out.push(
-          new P.ASTJSXElement(child.match, {
-            tagName,
-            attrs: [...attrs, hidden(tagName)],
-            children: inside,
-            ...(action && { action }),
-            ...(contextMenu && { contextMenu })
-          })
-        )
-      } else run.push(child)
-    }
-    endRun()
-    return out
   }
 
   /**
@@ -1189,9 +1288,6 @@ function projectScopeOf(scope: P.Scope): P.ProjectScope | undefined {
 /** An `<html>` block's tag:  the web's word, the same in every language (`SpellJSX.isHtmlBlock()`). */
 const HTML_BLOCK_TAG = "html"
 
-/** What a branch that isn't the one is:  hidden, and still found by find-in-page, as a folded section is. */
-const UNTIL_FOUND = "until-found"
-
 /** What an element with an `onClick` looks like by itself -- see `SpellJSX.clickableAttrs()`. */
 // written as Solid's compiler writes it into a TypeScript drawing, so every target draws the same
 const CLICKABLE_STYLE = "cursor:var(--ui-control-cursor,pointer);user-select:none"
@@ -1224,6 +1320,25 @@ function readsIt(node: unknown): boolean {
   }
   return false
 }
+
+/** The `<for>` slots a rider inside an element is (`riderOf()`), as the page words' controls name them. */
+const WAITING_CONTROL = "for waiting"
+const FAILED_CONTROL = "for failed"
+
+/** The scope of `<failed>`'s children (`failedScope()`). */
+const FAILED_SCOPE = "failed"
+
+/** What `the error` is called inside `<failed>`:  as in an action's `if that fails:`. */
+const CAUGHT_ERROR = "error"
+
+/** A pane's error slot (Spell UI's `StatePanes`). */
+const ERROR_SLOT = "error"
+
+/** `loading`, by its English name:  a `<for>`'s, and Spell UI's loading state. */
+const LOADING_ATTRIBUTE = "loading"
+
+/** The web's own values of `loading`, an image's or a frame's:  never Spell's. */
+const WEB_LOADING_VALUES = ["lazy", "eager"]
 
 function textOf(word: P.JSXAttributeValue): string {
   return word instanceof P.TextToken ? word.innerText : `${word.raw ?? ""}`.trim()

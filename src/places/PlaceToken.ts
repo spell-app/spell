@@ -1,4 +1,5 @@
 import { PlaceError } from "./places.types"
+import { newId } from "./refs"
 
 /** A token this close to its end is replaced:  it may run out on the way. */
 const EARLY_MS = 60_000
@@ -117,6 +118,7 @@ export type PlaceTokenProps = {
  * - Its answer, as JSON:  the token in `token`, `access_token`, `accessToken` or `jwt`;  how long it lasts in
  *   `expires_in` / `expiresIn` (seconds) or `expires_at` / `expiresAt` (a date, or seconds since 1970).
  * - An answer that's text is the token itself.
+ * - Each request has a fresh `X-Request-Id`:  some services refuse one without (a 400), and it's harmless to the rest.
  * - `fetch`:  what sends it, the platform's unless a caller's (a look's, which minds its manners).
  * - throws `PlaceError` `"refused"` for a key with no id, or a 4xx;  anything else for no answer
  */
@@ -135,7 +137,11 @@ export function tokenServiceMint(address: string, fetch: typeof globalThis.fetch
     const url = address.replace(BRACE, encodeURIComponent(keyId))
     const answer = await fetch(url, {
       method: "POST",
-      headers: { authorization: `Basic ${base64(key)}`, accept: "application/json" }
+      headers: {
+        authorization: `Basic ${base64(key)}`,
+        accept: "application/json",
+        "x-request-id": newId("spell")
+      }
     })
     if (answer.status >= 400 && answer.status < 500) {
       throw new PlaceError(`tokenServiceMint():  ${new URL(url).host} turned down the key (${answer.status})`, {

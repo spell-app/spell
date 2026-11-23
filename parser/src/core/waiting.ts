@@ -8,6 +8,8 @@
  *     (epic `language` P8:  the counter froze at 28, then jumped to 56).
  *     `lazy`, so a value nobody reads runs no slow work again.
  * - `core.whileWaiting()`:  the "…" around one read in a drawing.  A whole thing held has one too (`drawInBoundary()`).
+ * - `core.drawLooking()`:  how what waits inside an element looks meanwhile, `<card loading="skeleton">`;
+ *   a site's for every page, `galaxy guide is a site with loading "skeleton"` (`WaitingLook`).
  * - `core.answerOf()`:  what an action reads it with, waiting for the answer.
  *   - Solid's own `resolve()` gives the OLD answer just after a write, so it's not used:
  *     it brings the writes in, reads, then waits for the latest promise (P8).
@@ -17,11 +19,25 @@
 
 import h from "@solidjs/h"
 import { createComponent } from "@solidjs/web"
-import { Errored, Loading, createDeferred, createRoot, getObserver, getOwner, runWithOwner } from "solid-js"
+import {
+  Errored,
+  Loading,
+  createContext,
+  createDeferred,
+  createRoot,
+  getObserver,
+  getOwner,
+  onCleanup,
+  runWithOwner,
+  useContext
+} from "solid-js"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 import type { Drawing } from "./drawing"
+import { SKELETON_TAGS, SkeletonShapes, type SkeletonShape } from "spell/element/SkeletonShapes"
+import type { SkeletonSpec } from "spell/element/vocabulary.types"
+import { lookSaid, type WaitingLook } from "./looks"
 
 /** One getter's value on one thing. */
 type WaitedValue = {
@@ -118,6 +134,44 @@ export const waitingMethods = defineCoreModule({
   },
 
   /**
+   * `draw`, with what waits inside it looking as `said` says meanwhile:  an element's `loading="..."`, taken by
+   * Spell when its value is quoted (`SpellJSX`), never handed to the element.
+   * - `said`:  `"skeleton"`, `"spinner"`, `"none"`, or the words a spinner says, as `<for loading>` takes them
+   *   (`lookSaid()`);  a skeleton with its own shape comes compiled (`lookOfWords()`).  Words alone keep the look
+   *   around:  a skeleton announces them.
+   * - `ownsState`:  the element has a loading state of its own (Spell UI's segment, card, section, tab, form,
+   *   popup):  with a spinner, that state turns on while anything inside waits, instead of a second spinner inside it.
+   * - Every loader inside reads it (`waitingLoader()`), nearest first;  none:  the site's, else a spinner.
+   * - `riders`:  its `<loading>` and `<failed>`, what shows while what's inside waits, or once it failed
+   *   (`the error` its words);  in its `loading` / `error` slots where it has them (`riders.slots`, Spell UI's panes),
+   *   else in place of what waits, as a list's riders show.
+   * - With a state of its own, a failure inside turns its `error` on, its words the error's (`OwnLoadingState`),
+   *   and its Try again (`ui-retry`) reads again.
+   */
+  drawLooking(said: string, draw: () => Drawing, ownsState?: boolean, riders?: LookRiders): Drawing {
+    const here = lookHere()
+    const named = said ? lookSaid(said) : undefined
+    // no look of its own, or words alone:  the look around, saying them;  a skeleton announces them
+    const look: WaitingLook =
+      !named || named.text ? { look: here.look, skeleton: here.skeleton, text: named?.text ?? here.text } : named
+    const own = ownsState ? new OwnLoadingState(!!riders?.slots) : undefined
+    const value: WaitingLook = { ...look, ...(own && { own }), ...(riders && { riders }) }
+    return createComponent(
+      WAITING_LOOK as never,
+      {
+        value,
+        get children() {
+          const drawing = draw()
+          if (!own) return drawing
+          const element = madeElement(drawing)
+          if (element) own.element = element
+          return (element ?? drawing) as Drawing
+        }
+      } as never
+    ) as unknown as Drawing
+  },
+
+  /**
    * The answer of `thing`'s member `name`, once it has one:  what an action writes for reading what waits.
    * - The newest answer:  writes before the read count, and a change while it waits starts the wait again.
    * - A getter over one that waits works too:  it's read again with the answers.
@@ -156,24 +210,274 @@ export function standInFor(read: () => Drawing, shows?: () => Drawing): Drawing 
   })
 }
 
-/**
- * What a part of a drawing shows while it waits, when nothing said what to:  Spell UI's spinner, in the text's flow.
- * - A list's (`<for>` with no `loading`), an element whose attributes wait, a view whose whole drawing waits.
- */
-export function waitingLoader(): Drawing {
-  return h("ui-loader", { visible: true, inline: true }) as unknown as Drawing
+/** The look nearest:  `core.drawLooking()`'s, or a site's.  `null`:  none set. */
+const WAITING_LOOK = createContext<WaitingLook | null>(null)
+
+/** The look here:  read only with an owner (`useContext` needs one);  none set, a plain spinner. */
+function lookHere(): WaitingLook {
+  // oxlint-disable-next-line react-hooks/rules-of-hooks -- Solid's `useContext()` is no React hook:  any owner reads it
+  const nearest = getOwner() ? useContext(WAITING_LOOK) : null
+  return nearest ?? siteLook ?? { look: "spinner" }
 }
 
 /**
- * What a page shows while its whole drawing waits:  a bigger spinner, in the middle of the page's room under its
- * layout's menus, which drew at once.
+ * The running site's look (`drawnWithLook()`), for a loader no context reaches:  inside a view's own element, which
+ * draws in a root of its own, so the site's context stops at its edge.
+ */
+let siteLook: WaitingLook | undefined
+
+/**
+ * A site's look for all it draws, `galaxy guide is a site with loading "skeleton"` (`SiteBase.draw()`).
+ * - `said` is read each time a loader shows, so changing the site's line changes the next one.
+ */
+export function drawnWithLook(said: () => unknown, draw: () => Drawing): Drawing {
+  const value = {
+    get look() {
+      return lookSaid(said()).look
+    },
+    get text() {
+      return lookSaid(said()).text
+    },
+    get skeleton() {
+      return lookSaid(said()).skeleton
+    }
+  } as WaitingLook
+  siteLook = value
+  onCleanup(() => {
+    if (siteLook === value) siteLook = undefined
+  })
+  return createComponent(
+    WAITING_LOOK as never,
+    {
+      value,
+      get children() {
+        return draw()
+      }
+    } as never
+  ) as unknown as Drawing
+}
+
+/**
+ * An element's own loading state (`core.drawLooking()`'s `ownsState`):  on while any loader inside it shows.
+ * - Its `loading` attribute, Spell UI's:  set and taken off here, so it dims under its own spinner (`aria-busy` too).
+ */
+class OwnLoadingState {
+  /** The element, once it's made:  a loader inside may show while it's being made. */
+  private made?: Element
+  /** How many loaders inside it show. */
+  private showing = 0
+  /** The failures inside it, newest last:  its `error` says the newest's words. */
+  private readonly failures: string[] = []
+  /** What's in its `loading` and `error` slots, by slot, while they show. */
+  private readonly slotted = new Map<string, Element>()
+
+  /** `hasSlots`:  it has `loading` and `error` slots (Spell UI's panes), which stand in for its content. */
+  constructor(readonly hasSlots: boolean) {}
+
+  set element(element: Element) {
+    this.made = element
+    // Try again, in its error pane:  read again
+    element.addEventListener(RETRY_EVENT, () => void core.reloadSaved())
+    // filled while it was being made
+    for (const box of this.slotted.values()) if (box.parentNode !== element) element.append(box)
+    this.apply()
+  }
+
+  /**
+   * One more loader shows, until its owner goes:  the element's state on meanwhile;  `drawing`, if any, in its
+   * `loading` slot (a skeleton, its `<loading>`).
+   */
+  hold(drawing?: () => Drawing): void {
+    this.showing++
+    const slotted = drawing && this.hasSlots ? this.slot(LOADING, drawing) : undefined
+    this.apply()
+    onCleanup(() => {
+      this.showing--
+      slotted?.remove()
+      this.apply()
+    })
+  }
+
+  /**
+   * A failure inside it, until its owner goes:  its `error` on, saying `words`;  `drawing`, if any, in its `error`
+   * slot (its `<failed>`).
+   */
+  fail(words: string, drawing?: () => Drawing): void {
+    this.failures.push(words)
+    const slotted = drawing && this.hasSlots ? this.slot(ERROR, drawing) : undefined
+    this.apply()
+    onCleanup(() => {
+      this.failures.splice(this.failures.lastIndexOf(words), 1)
+      slotted?.remove()
+      this.apply()
+    })
+  }
+
+  /** `drawing`, made and put in its slot `name`;  taken out again with `remove()`. */
+  private slot(name: string, drawing: () => Drawing): { remove(): void } {
+    const box = madeElement(h("div", { slot: name, style: "display: contents" }, drawing))!
+    this.slotted.set(name, box)
+    this.made?.append(box)
+    return {
+      remove: () => {
+        box.remove()
+        if (this.slotted.get(name) === box) this.slotted.delete(name)
+      }
+    }
+  }
+
+  /** Its states:  loading while anything inside waits, its error while anything failed. */
+  private apply(): void {
+    const element = this.made
+    if (!element) return
+    if (this.showing) element.setAttribute(LOADING, "")
+    else element.removeAttribute(LOADING)
+    const failure = this.failures.at(-1)
+    if (failure !== undefined) element.setAttribute(ERROR, failure)
+    else element.removeAttribute(ERROR)
+  }
+}
+
+/**
+ * An element's `<loading>` and `<failed>`, as Spell compiles them (`core.drawLooking()`).
+ * - `slots`:  it has `loading` and `error` slots (Spell UI's panes), which they fill.
+ */
+export type LookRiders = {
+  waiting?: () => Drawing
+  failed?: (error: string) => Drawing
+  slots?: boolean
+}
+
+/** What a failure inside an element whose look said shows (`drawRead()`'s default):  `undefined`, a list's own. */
+export function failedHere(error: unknown, why: string): Drawing | undefined {
+  // a read given up on as its drawing went away:  no failure of its element's
+  if ((error as Error | undefined)?.name === "AbortError") return undefined
+  const here = lookHere()
+  const failed = here.riders?.failed as ((error: string) => Drawing) | undefined
+  if (here.own) {
+    here.own.fail(why, failed && (() => failed(why)))
+    // in its error slot, or its own error look:  nothing here
+    if (here.own.hasSlots || !failed) return null as unknown as Drawing
+  }
+  return failed ? failed(why) : undefined
+}
+
+/** Spell UI's error state, on an element that has one (the shared `error`). */
+const ERROR = "error"
+
+/** What an element's Try again dispatches (Spell UI's `StatePanes`). */
+const RETRY_EVENT = "ui-retry"
+
+/** Spell UI's loading state, on an element that has one. */
+const LOADING = "loading"
+
+/**
+ * The shape of what's coming, which a skeleton takes when nothing gave it one:  `lines` (a list, a card's facts, a
+ * tree), `image` (a picture, a chart, a graph), `page` (a heading over paragraphs).
+ */
+export type WaitingShape = "lines" | "image" | "page"
+
+/** Each `WaitingShape`'s skeleton, in `SkeletonText`'s terms. */
+const SHAPES: Readonly<Record<WaitingShape, SkeletonSpec>> = {
+  lines: { parts: [{ shape: "paragraph" }] },
+  image: { parts: [{ shape: "image" }] },
+  page: { parts: [{ shape: "header" }, { shape: "paragraph", lines: 4 }, { shape: "paragraph" }] }
+}
+
+/** Tags that draw a picture, whose vocabulary may say no skeleton of its own:  an image's. */
+const PICTURE_TAGS = new Set(["img", "picture", "svg", "canvas", "video"])
+
+/**
+ * What an element whose attributes wait stands in with (`core.drawWaiting()`):
+ * - itself, empty, in its own loading state, when it has one and the look here is a spinner (`ownsState`)
+ * - else the loader here:  a skeleton is `skeleton`, its vocabulary's (`<ui-root display="skeleton">`'s), given as
+ *   it compiled, else an image's for a picture, else lines
+ */
+export function elementWaitingLoader(tag: string | undefined, ownsState?: boolean, skeleton?: SkeletonSpec): Drawing {
+  const here = lookHere()
+  if (ownsState && tag && here.look === "spinner" && !here.own)
+    return h(tag, { [LOADING]: true, "aria-label": here.text }) as unknown as Drawing
+  return waitingLoader(tag && PICTURE_TAGS.has(tag) ? "image" : "lines", undefined, skeleton)
+}
+
+/**
+ * What a part of a drawing shows while it waits, as the look here says (`WaitingLook`):  Spell UI's spinner, in
+ * the text's flow, by default.
+ * - A list's (`<for>` with no `loading`), an element whose attributes wait, a view whose whole drawing waits.
+ * - `shape`:  what's coming, for a skeleton;  `text`:  this loader's own words (`<for loading="...">`);
+ *   `skeleton`:  the element's own skeleton, when the look here names none.
+ * - In an element whose own loading state stands in (`WaitingLook.own`):  nothing here, that state on meanwhile.
+ */
+export function waitingLoader(shape: WaitingShape = "lines", text?: string, skeleton?: SkeletonSpec): Drawing {
+  const here = lookHere()
+  const said = text ?? here.text
+  if (here.look === "none") return null as unknown as Drawing
+  const rider = here.riders?.waiting as (() => Drawing) | undefined
+  const skeletonLook = () => skeletonOf(here.skeleton ?? skeleton ?? SHAPES[shape], said)
+  const drawn = rider ?? (here.look === "skeleton" ? skeletonLook : undefined)
+  if (here.own && (here.own.hasSlots || !drawn)) {
+    // its own loading state, and what it said in its loading slot
+    here.own.hold(drawn)
+    return null as unknown as Drawing
+  }
+  return drawn ? drawn() : spinner(said)
+}
+
+/** Spell UI's spinner, in the text's flow, saying `text` if there is one. */
+function spinner(text: string | undefined): Drawing {
+  return (text
+    ? h("ui-loader", { visible: true, inline: true, text: true }, text)
+    : h("ui-loader", { visible: true, inline: true })) as unknown as Drawing
+}
+
+/**
+ * `spec` drawn:  Spell UI's `<ui-placeholder>`, as wide as its room, its shapes `SkeletonShapes`' (as
+ * `<ui-root display="skeleton">` draws them).
+ * - The placeholder is hidden from a screen reader:  the box around it says it's busy, and `text` if there is one.
+ */
+function skeletonOf(spec: SkeletonSpec, text: string | undefined): Drawing {
+  const made = (shape: SkeletonShape): unknown =>
+    h(
+      shape.tag,
+      {
+        ...shape.attributes,
+        ...(shape.style && {
+          style: Object.entries(shape.style)
+            .map(([name, value]) => `${name}: ${value}`)
+            .join("; ")
+        })
+      },
+      ...(shape.children ?? []).map(made)
+    )
+  const box = spec.width ? { fluid: false, style: `--ui-placeholder-max-width: ${spec.width}` } : { fluid: true }
+  return h(
+    "div",
+    { class: "spell-waiting-skeleton", role: "status", "aria-busy": "true", "aria-label": text },
+    h(SKELETON_TAGS.placeholder, box, ...SkeletonShapes.of(spec).map(made))
+  ) as unknown as Drawing
+}
+
+/**
+ * What a page shows while its whole drawing waits, under its layout's menus, which drew at once:  a bigger spinner
+ * in the middle of the page's room, or the page's skeleton when the look here is one.
  */
 export function pageWaitingLoader(): Drawing {
+  const here = lookHere()
+  if (here.look !== "spinner") return waitingLoader("page")
   return h(
     "div",
     { class: "spell-page-waiting", role: "presentation" },
-    h("ui-loader", { visible: true, inline: true, align: "center", size: "large" })
+    here.text
+      ? h("ui-loader", { visible: true, inline: true, align: "center", size: "large", text: true }, here.text)
+      : h("ui-loader", { visible: true, inline: true, align: "center", size: "large" })
   ) as unknown as Drawing
+}
+
+/** The element a drawing made, if it's one:  `h()` hands back a function that makes it. */
+function madeElement(drawing: unknown): Element | undefined {
+  let value = drawing
+  while (typeof value === "function") value = (value as () => unknown)()
+  return value instanceof Element ? value : undefined
 }
 
 /**
