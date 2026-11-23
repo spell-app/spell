@@ -208,10 +208,16 @@ const WAITING_LOOK = createContext<WaitingLook | null>(null)
 
 /** The look here:  read only with an owner (`useContext` needs one);  none set, a plain spinner. */
 function lookHere(): WaitingLook {
-  if (!getOwner()) return { look: "spinner" }
   // oxlint-disable-next-line react-hooks/rules-of-hooks -- Solid's `useContext()` is no React hook:  any owner reads it
-  return useContext(WAITING_LOOK) ?? { look: "spinner" }
+  const nearest = getOwner() ? useContext(WAITING_LOOK) : null
+  return nearest ?? siteLook ?? { look: "spinner" }
 }
+
+/**
+ * The running site's look (`drawnWithLook()`), for a loader no context reaches:  inside a view's own element, which
+ * draws in a root of its own, so the site's context stops at its edge.
+ */
+let siteLook: WaitingLook | undefined
 
 /**
  * A site's look for all it draws, `galaxy guide is a site with loading "skeleton"` (`SiteBase.draw()`).
@@ -228,7 +234,11 @@ export function drawnWithLook(said: () => unknown, draw: () => Drawing): Drawing
     get skeleton() {
       return lookSaid(said()).skeleton
     }
-  }
+  } as WaitingLook
+  siteLook = value
+  onCleanup(() => {
+    if (siteLook === value) siteLook = undefined
+  })
   return createComponent(
     WAITING_LOOK as never,
     {
