@@ -1037,9 +1037,26 @@ export class EditorStore extends Observable {
   }
 
   /**
+   * The open project parsed on the page, for a console line to read in its scope (`runInConsole()`):
+   * where the language worker parses it, the page parses it only for that (epic `solid-2-final` T36), the first time
+   * in full, after that only what was typed since.
+   * - NEVER throws:  a parse that fails leaves Spell's own rules, and says why in devtools.
+   */
+  async parsedForConsole(): Promise<void> {
+    const { project } = editor
+    if (!project) return
+    try {
+      if (project.scope) await project.parseWaitingText()
+      else await project.parse()
+    } catch (error) {
+      console.error("editor.parsedForConsole():  couldn't parse", project.projectId, error)
+    }
+  }
+
+  /**
    * Run a line of Spell typed into the console on the running app, as the browser's console runs a line on its page
    * (the Spell Console, epic `editor` P32;  Q38):  the app's things are the running ones, kept, and what it changes stays.
-   * - Read as `spell repl` reads a line (`SP.parseLine()`), in the open project's scope:
+   * - Read as `spell repl` reads a line (`SP.parseLine()`), in the open project's scope (`parsedForConsole()`):
    *   its types, things and actions are known, and what earlier lines declared (`x is 3`, then `x + 4`).
    * - Logged on the program's console:  the line as typed, then its value, or why not, in red.
    * - Nothing running yet:  Spell's own rules alone, and only the runtime's names.
@@ -1051,6 +1068,7 @@ export class EditorStore extends Observable {
     const runtime = await editor.loadRuntime()
     const output = runtime.core.console
     output.typed(line)
+    await editor.parsedForConsole()
     const parsed = SP.parseLine(line, consoleScopeFor(editor.project), { commit: true })
     if (parsed.error !== undefined || parsed.compiled === undefined) {
       // nothing read at all:  the parser's "Doesn't parse as statement or expression" is its own words, not a reader's

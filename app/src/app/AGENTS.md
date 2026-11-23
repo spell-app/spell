@@ -194,7 +194,9 @@ and in the app's build folder, `app/` at the app folder's root.
         (the line that made a thing, its type's default) and the types a project has only one of:  `spell/fieldHomes`
         (`FieldHomes`, its answers moved along the Inspector's own edits, so a dragged slider's writes need no new one).
         From outside the code, ask through `FileStates.ask()`:  it opens the file in the worker first
-      - still on the page's parse:  every other reader outside the code (the list:  the epic page's P18, T36)
+      - the page parses no project the worker parses, typing, clicking or opening one from the compile cache
+        (`editor.compileBehind()` compiles it in the worker);  only a Spell Console line parses it on the page, as it runs
+        (`editor.parsedForConsole()`):  the line is read and run on the page
     - So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
     - Its answers reach CodeMirror through one converter, [LspToCodeMirror](ui/codemirror/LspToCodeMirror.ts).
     - Suggestions, hover, folding, signature help (⇧⌘Space, or once a space is typed and the typing pauses, while Settings… says),

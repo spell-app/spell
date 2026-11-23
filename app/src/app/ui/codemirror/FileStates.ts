@@ -60,10 +60,10 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   - Its parse waits till the typing pauses (`PARSE_WAIT`), so no keystroke waits on it:
  *     `project.takeText()`, with where it changed (`P.EditedSpan`), then `project.parseWaitingText()`,
  *     re-parsing as little as possible.
- *   - Where the language worker parses it, longer (`SIDE_BAR_PARSE_WAIT`):  only what reads the page's parse
- *     outside the code waits for it (epic `solid-2-final` T36).
+ *   - Where the language worker parses it, never on the page:  the text typed goes into its file at the pause, and
+ *     everything that reads a parse asks the worker (epic `solid-2-final` T36).
  *   - Whatever must see the new parse sooner asks for it, `parseNow()`:  the language features (a hover, a suggestion),
- *     a click or a focus anywhere on the page (the side bar edits from the parse).
+ *     a click or a focus anywhere on the page, where the page parses.
  * - File => state:  a change from outside the editors (a load, another editor of the file) comes in as the one change
  *   that makes them the same, kept out of undo, so the caret and the file's own undo stay right.
  * - Parse => problems:  whenever a spell file's `match` changes, even from an edit to ANOTHER file, its diagnostics
@@ -111,7 +111,7 @@ export class FileStates {
     const sendLook = () => client.look(codeLook.isBubbly ? "bubbly" : "tokens")
     codeLook.followers.add(sendLook)
     sendLook()
-    // a click or a focus elsewhere acts on the parse, e.g. the side bar's edits:  it mustn't be one keystroke behind
+    // a click or a focus elsewhere acts on the parse where the page parses:  it mustn't be one keystroke behind
     const parseNow = () => this.parseNow()
     globalThis.document?.addEventListener("pointerdown", parseNow, { capture: true })
     globalThis.document?.addEventListener("focusin", parseNow, { capture: true })
@@ -141,6 +141,8 @@ export class FileStates {
 
   /**
    * Parse the text typed and not parsed yet, now, in every project with some waiting -- see `project.takeText()`.
+   * - Only where the page parses it:  where the language worker does, the text goes into its files, unparsed here
+   *   (epic `solid-2-final` T36).
    * - The incremental parse is done when it returns;  a parse from scratch, if that couldn't cope, comes later.
    * - NEVER throws:  a parse error shows on its line, as ever.
    */
@@ -150,6 +152,10 @@ export class FileStates {
     const projects = this.waiting
     this.waiting = new Set()
     for (const project of projects) {
+      if (!this.parsesOnPageFor(project)) {
+        project.takeWaitingText()
+        continue
+      }
       project
         .parseWaitingText()
         .catch((error: unknown) => console.error("FileStates.parseNow():  couldn't parse", error))
@@ -203,36 +209,19 @@ export class FileStates {
   }
 
   /**
-   * Parse `project`'s waiting text once the typing pauses for `PARSE_WAIT` msec:
-   * `SIDE_BAR_PARSE_WAIT` where the language worker parses it (epic `solid-2-final` T36).
+   * Parse `project`'s waiting text once the typing pauses for `PARSE_WAIT` msec (`parseNow()`):
+   * where the language worker parses it, only its text goes into its files then (epic `solid-2-final` T36).
    */
   private parseSoon(project: SP.SpellProject): void {
     this.waiting.add(project)
     this.parseTimer?.cancel()
-    this.parseTimer = after(FileStates.PARSE_WAIT / 1000, () => {
-      if ([...this.waiting].some((each) => this.parsesOnPageFor(each))) return this.parseNow()
-      // the text typed goes into its files at the pause, as ever:  only the parse waits
-      for (const each of this.waiting) each.takeWaitingText()
-      this.parseTimer = after((FileStates.SIDE_BAR_PARSE_WAIT - FileStates.PARSE_WAIT) / 1000, () => this.parseNow())
-    })
+    this.parseTimer = after(FileStates.PARSE_WAIT / 1000, () => this.parseNow())
   }
 
   /**
    * How long the typing must pause before what's typed is parsed, in msec.
    */
   static PARSE_WAIT = 200
-
-  /**
-   * How long the typing must pause before what's typed is parsed on the page, in msec, where the language worker
-   * parses it too (epic `solid-2-final` T36).
-   * - The text typed still goes into its files at `PARSE_WAIT`:  only the parse waits.
-   * - Then only what reads the page's parse outside the code waits for it:  the Inspector, the Types and Sentence
-   *   tabs, the compiled pane, a site's writes;  the code itself is drawn from the worker's parses.
-   * - Before the running app takes the edit (`editor.compileAppSoon()`, 2 seconds), so the Types tab it refreshes
-   *   reads the new parse.
-   * - A click or a focus on the page parses at once all the same (`parseNow()`).
-   */
-  static SIDE_BAR_PARSE_WAIT = 1000
 
   /** Is `project` parsed here for the code itself:  its problems, its look?  Else the language worker parses it. */
   private parsesOnPageFor(project: SP.SpellProject): boolean {
