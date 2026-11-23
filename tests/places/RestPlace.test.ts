@@ -1134,6 +1134,20 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
     ])
   })
 
+  test("a list's own most is the most it's asked for, whatever a read asks:  more would be refused", async () => {
+    const asked = fakeServer((query) => {
+      const offset = Number(query.get("offset"))
+      return FIVE_ROWS.slice(offset, offset + Number(query.get("limit")))
+    })
+    const place = shapedPlace({
+      can: { page: "offset" },
+      pageSize: 20,
+      collections: { recipes: { path: "/recipes{/id}", paging: { pageSize: 3 } } }
+    })
+    await place.list("recipes", { page: { size: 20 } }, {})
+    expect(asked).toEqual(["https://shapes.test/recipes?limit=3&offset=0"])
+  })
+
   test("a list the server answers only for a team:  a filter on it goes as the question, and is taken as done", async () => {
     const asked = fakeServer((query) =>
       query.get("team") ? [{ id: "run-1", team: query.get("team") }] : { detail: [{ msg: "Field required" }] }

@@ -413,6 +413,14 @@ describe("spell place verify, of a FastAPI service", () => {
     expect(asked).toContain("/api/events?take=100")
   })
 
+  test("a list giving fewer than the place asks for says so under its own line, though it pages as the place does", async () => {
+    const { spell } = await ingestOf("AcmeJobs.api.spell", fastApi, 1000)
+    expect(spell).toMatch(/^\tit gives up to 1000 at a time$/m)
+    expect(spell).toMatch(/^\tjobs live at "\/api\/jobs"\n\t\tit gives up to 500 at a time$/m)
+    const { files } = parseSpellProject([{ path: "/AcmeJobs.api.spell", contents: spell }])
+    expect(files[0]!.errors).toEqual([])
+  })
+
   test("a refusal keeps only its status and route:  FastAPI's own message is said as it runs, never kept", async () => {
     const { ingest, descriptions, said } = await ingestOf("AcmeJobs.api.spell", (url) =>
       url.pathname === "/api/jobs"

@@ -334,7 +334,7 @@ export class RestPlace extends WebPlace implements Place {
       // its next link says the rest, the size asked for included:  PokéAPI's `?offset=2000&limit=2000`
       if (paging.pagesByLastId) {
         if (!paging.sendsNoCount) data[paging.limit] = size
-      } else if (query.page?.size !== undefined) data[paging.limit] = query.page.size
+      } else if (query.page?.size !== undefined) data[paging.limit] = size
       else if (paging.asksForSize && !at) data[paging.limit] = paging.size
       if (at && !nextAddress) data[paging.cursor] = at
     }
@@ -606,18 +606,20 @@ export class RestPlace extends WebPlace implements Place {
 
   /** How to page this query, `paging`'s way. */
   private pageOf({ page }: ListQuery, paging: Paging): { page: PageKind; at: string | undefined; size: number } {
-    return { page: paging.page, at: page?.at, size: page?.size ?? paging.size }
+    // never more than a list's own most, whatever a read asks:  a server refuses more (`422`)
+    return { page: paging.page, at: page?.at, size: Math.min(page?.size ?? paging.size, paging.most ?? Infinity) }
   }
 
   /**
    * How `collection` pages:  its own way, when it says one (`RestCollection.paging`, epic `data` P56), else the place's.
    * - Its own kind of paging is whole:  the names it asks with are its own, or the usual `limit`, `offset` and `cursor`.
    * - Only how many it gives:  the place's way, that many at a time.
+   * - How many it gives is the most it's ever asked for (`Paging.most`):  `it gives up to 10 at a time`.
    */
   private pagingOf(collection: string): Paging {
     const own = this.mappingOf(collection).paging
     if (!own) return this.paging
-    const size = own.pageSize === undefined ? {} : { size: own.pageSize, asksForSize: true }
+    const size = own.pageSize === undefined ? {} : { size: own.pageSize, asksForSize: true, most: own.pageSize }
     if (own.page === undefined)
       return { ...this.paging, ...size, ...(own.params?.limit && { limit: own.params.limit }) }
     return {
@@ -932,6 +934,8 @@ type Paging = {
   firstPageNumber: number | undefined
   /** It's never told how many to give:  `RestPlaceProps.sendsNoCount`. */
   sendsNoCount: boolean
+  /** The most a list gives at a time, said under its own line:  a read asking for more asks for this many. */
+  most?: number
   /** Its next page is asked for by the last row's id:  `RestPlaceProps.pagesByLastId`. */
   pagesByLastId: { moreAt?: string } | undefined
 }
