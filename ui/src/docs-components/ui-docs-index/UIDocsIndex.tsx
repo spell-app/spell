@@ -130,7 +130,10 @@ export class UIDocsIndex extends E.UIComponent<typeof docsIndexVocabulary> {
           pages={this.pagesText}
           placeholder={this.translationForKey("search")}
           shortcuts="false"
-          on-ui-navigating={(event: CustomEvent<{ href: string }>) => this.onNavigating(event)}
+          ref={(element: HTMLElement) =>
+            element.addEventListener("ui-navigating", ((event: CustomEvent<{ href: string }>) =>
+              this.onNavigating(event)) as EventListener)
+          }
         />
         <For each={this.groups} keyed={(group) => group.tag}>
           {(group) => (

@@ -548,7 +548,10 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
         direction="left"
         data-tooltip={gear.title()}
         aria-label={gear.title()}
-        on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) => this.onGearPick(event, gear)}
+        ref={(element: HTMLElement) =>
+          element.addEventListener("ui-changed", ((event: CustomEvent<{ value: string | string[] }>) =>
+            this.onGearPick(event, gear)) as EventListener)
+        }
       >
         {/* named too:  the dropdown's own button takes the focus, but this one is a button all the same */}
         <ui-button

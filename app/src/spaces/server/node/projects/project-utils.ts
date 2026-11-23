@@ -160,8 +160,10 @@ const TARGET_WORDS = Object.values(SP.TARGETS).flatMap(({ wordsSuffix }) => {
  * - Under the repo (its packages, its `tests/`):  the same path under `build/`
  *   - `spaces/@spell/examples/Solitaire` => `build/spaces/@spell/examples/Solitaire`
  *   - the frozen test projects too:  `spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
- * - Under spell-spaces:  under `build/spell-spaces/`, so each checkout builds its own
+ * - Under spell-spaces:  under the spaces' own build folder (`spacesBuildDir()`), so each checkout builds its own
  *   - `<spell-spaces>/@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
+ *   - a project's spaces (`SPELL_SPACES_DIR`):  `<checkout>/spaces/@acme/app/jobs` =>
+ *     `build/spell-spaces.checkout-1a2b3c4d/@acme/app/jobs`, so two checkouts of a project never build over each other
  * - In ANOTHER spell-app checkout (`checkoutHolding()`), e.g. a worktree's example opened by the main checkout's
  *   language server:  the same path under THAT checkout's `build/` (epic `spanish` P21)
  *   - `<worktree>/app/spaces/@spell/examples/Solitaire` => `<worktree>/spell-app/build/spaces/@spell/...`
@@ -176,7 +178,7 @@ export function buildFolderFor(projectFolder: string, folders: BuildFolders = en
   const mirrors: Array<[string | undefined, string]> = [
     [folders.repoDir && resolve(folders.repoDir, "tests"), folders.buildDir],
     [folders.packagesDir, folders.buildDir],
-    [folders.spellSpacesDir, resolve(folders.buildDir, "spell-spaces")]
+    [folders.spellSpacesDir, spacesBuildDir(folders)]
   ]
   for (const [from, to] of mirrors) {
     const inside = insidePath(from, projectFolder)
@@ -185,6 +187,24 @@ export function buildFolderFor(projectFolder: string, folders: BuildFolders = en
   const other = checkoutHolding(projectFolder)
   return other ? resolve(other, "build", insidePath(other, projectFolder)!) : projectFolder
 }
+
+/**
+ * The build folder of the spaces `folders` names (`spellSpacesDir`), under its `buildDir`:  `buildFolderFor()`'s mirror.
+ * - the kit's own spell.spaces (`defaultSpellSpacesDir`, or none given):  `build/spell-spaces/`, as always
+ * - any other, a project's served by `--spaces` or named by `SPELL_SPACES_DIR` (`yarn clone`, `spell lint`):  its own,
+ *   named as the page server's files are, `build/spell-spaces.<folder>-<hash>/` (`SRV.spacesTag()`)
+ *   - Why:  every page server, compile and lint on a project's spaces wrote into the one `build/spell-spaces/`, so a
+ *     project two checkouts share (one another imports, read through its built declarations) was whichever compiled
+ *     it last, and an agent's half-built project landed where the person's editor reads.
+ */
+export function spacesBuildDir(folders: BuildFolders = environment): string {
+  const { spellSpacesDir, defaultSpellSpacesDir } = folders
+  const own = !spellSpacesDir || !defaultSpellSpacesDir || resolve(spellSpacesDir) === resolve(defaultSpellSpacesDir)
+  return resolve(folders.buildDir, own ? SPACES_BUILD : `${SPACES_BUILD}.${SRV.spacesTag(spellSpacesDir)}`)
+}
+
+/** The kit's own spaces' build folder, in `build/`;  another spaces folder's adds its tag (`spacesBuildDir()`). */
+export const SPACES_BUILD = "spell-spaces"
 
 /** Path of `folder` inside `from`, if it's inside it:  `undefined` for `from` itself, or a folder outside it. */
 function insidePath(from: string | undefined, folder: string): string | undefined {
@@ -216,13 +236,16 @@ const SPELL_APP = "spell-app"
  * Where `buildFolderFor()` mirrors from, and to.
  * - `packagesDir`, `buildDir`:  where the repo's packages are (its root, epic `repo-split` P8) and its `build/`
  * - `repoDir`:  the checkout, whose `tests/` mirror too
- * - `spellSpacesDir`:  spell-spaces, mirrored under `build/spell-spaces/`
+ * - `spellSpacesDir`:  spell-spaces, mirrored under its build folder (`spacesBuildDir()`)
+ * - `defaultSpellSpacesDir`:  the kit's own spell.spaces, mirrored under `build/spell-spaces/`;  left out:
+ *   `spellSpacesDir` is taken as the kit's own
  */
 export type BuildFolders = {
   packagesDir: string
   buildDir: string
   repoDir?: string
   spellSpacesDir?: string
+  defaultSpellSpacesDir?: string
 }
 
 /**

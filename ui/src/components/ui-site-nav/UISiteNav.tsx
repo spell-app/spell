@@ -325,9 +325,7 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
           part={this.partForName("tree")}
           appearance={this.appearance}
           label={this.label ?? this.translationForKey("label")}
-          on-ui-selecting={(event: CustomEvent<{ item: HTMLElement | UIT.TreeItemData }>) => this.onSelecting(event)}
-          on-ui-opening={(event: CustomEvent<{ open: boolean }>) => this.onOpening(event, true)}
-          on-ui-closing={(event: CustomEvent<{ open: boolean }>) => this.onOpening(event, false)}
+          ref={(tree: HTMLElement) => this.listenTo(tree)}
         >
           <For each={this.sitePages} keyed={UISiteNav.keyOf}>
             {(page) => this.row(page, () => this.sitePages)}
@@ -335,6 +333,18 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
         </ui-tree>
       </nav>
     )
+  }
+
+  /**
+   * Hear the tree's selecting, opening and closing:  a ref's own listeners, not `on-ui-*` props, which work but
+   * make Solid's dev build warn (`agents/solid/solid-2.md`, "Events").
+   */
+  private listenTo(tree: HTMLElement) {
+    type Picked = CustomEvent<{ item: HTMLElement | UIT.TreeItemData }>
+    type Folded = CustomEvent<{ open: boolean }>
+    tree.addEventListener("ui-selecting", (event) => this.onSelecting(event as Picked))
+    tree.addEventListener("ui-opening", (event) => this.onOpening(event as Folded, true))
+    tree.addEventListener("ui-closing", (event) => this.onOpening(event as Folded, false))
   }
 
   /** One page's row, and its pages' rows inside it;  `siblings`, the pages beside it, itself among them. */

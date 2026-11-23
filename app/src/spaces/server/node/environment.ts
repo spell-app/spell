@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "path"
 // in plain node, so that import names its `.ts`.
 // The one finder of a package's folder (epic `coherence` P29)
 import { packageFolderFor } from "spell/toolchain/sourceNames"
-import { isSourceCheckout, repoDir, spellSpacesDir } from "./spellSpacesDir.ts"
+import { defaultSpellSpacesDir, isSourceCheckout, repoDir, spellSpacesDir } from "./spellSpacesDir.ts"
 
 /**
  * Where the app's build folder (`app/`) and the `@spell` space's projects (`spaces/`) are:
@@ -21,6 +21,7 @@ const packagesDir = repoDir
  *     - `spaces/@spell/examples/Solitaire` => `build/spaces/@spell/examples/Solitaire`
  *     - the frozen test projects too:  `spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
  *   - under spell.spaces:  under `build/spell-spaces/`, `build/spell-spaces/@spell/owen@/errors`
+ *   - under another spaces folder (`SPELL_SPACES_DIR`, a project's):  its own, `build/spell-spaces.<folder>-<hash>/`
  * - `SPELL_BUILD_DIR` sets it, e.g. the server's contract test's temporary folder.
  */
 const buildDir = process.env.SPELL_BUILD_DIR ? resolve(process.env.SPELL_BUILD_DIR) : resolve(repoDir, "build")
@@ -199,6 +200,8 @@ const environment = {
   coreDir,
   staticDir,
   spellSpacesDir,
+  /** spell.spaces when `SPELL_SPACES_DIR` doesn't set it:  the kit's own, whose build folder is `build/spell-spaces/` */
+  defaultSpellSpacesDir,
   signInDir,
   signInMinutes,
   cloudDir,

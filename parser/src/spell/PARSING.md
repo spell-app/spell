@@ -2557,6 +2557,7 @@ sidebars any of them opens.
     - under spell-app:  `spaces/@spell/examples/drawable-solitaire` => `build/spaces/@spell/examples/drawable-solitaire`
       - the frozen test projects too:  `spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
     - in spell.spaces:  `@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
+    - in another spaces folder (a project's):  their own, named by them, `build/spell-spaces.my-app-1a2b3c4d/...`
     - The table, and `SPELL_BUILD_DIR`:  [spaces' AGENTS.md](../../../app/src/spaces/AGENTS.md), "Projects".
   - The files:  its compiled code, its scope pack, its declarations and its words, in every language.
 

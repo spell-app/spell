@@ -184,6 +184,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | the app folder's `tests/X` | `build/X` | |
   | the app folder's `X` | `build/X` | `build/spaces/@spell/examples/Solitaire/`, `build/spaces/@spell/test/fizzbuzz/` |
   | spell.spaces' `X` | `build/spell-spaces/X` | `build/spell-spaces/@spell/owen@/errors/` |
+  | another spaces folder's `X` (a project's, `--spaces` / `SPELL_SPACES_DIR`) | `build/spell-spaces.<folder>-<hash>/X`, its own (`spacesBuildDir()`) | `build/spell-spaces.my-app-1a2b3c4d/@acme/app/jobs/`:  two checkouts of a project never build over each other |
   | another checkout's `app/spaces/X` or `app/tests/X` | THAT checkout's `build/...` | a worktree's example, opened by the main checkout's language server (epic `spanish` P21) |
   | anywhere else | beside the source | |
 

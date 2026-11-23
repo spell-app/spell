@@ -53,4 +53,22 @@ describe("<ui-docs-index>", () => {
     flush()
     expect(drawn(element).map(([label]) => label)).toEqual(["Basic", "Forms"])
   })
+
+  it("its search's `ui-navigating` goes by a same-page link (its own listener, not an `on-ui-*` prop)", async () => {
+    const element = Fixture.render(`<ui-docs-index pages='${JSON.stringify(PAGES)}'></ui-docs-index>`)
+    await (element as unknown as { ready: Promise<void> }).ready
+    flush()
+    const followed: string[] = []
+    element.shadowRoot!.addEventListener("click", (event) => {
+      followed.push((event.target as HTMLAnchorElement).getAttribute("href")!)
+      event.preventDefault()
+    })
+    const navigating = new CustomEvent("ui-navigating", {
+      detail: { href: `${location.origin}/a/b?c#d` },
+      cancelable: true
+    })
+    element.shadowRoot!.querySelector("ui-docs-search")!.dispatchEvent(navigating)
+    expect(navigating.defaultPrevented).toBe(true)
+    expect(followed).toEqual(["/a/b?c#d"])
+  })
 })

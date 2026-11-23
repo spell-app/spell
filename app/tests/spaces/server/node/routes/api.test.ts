@@ -27,6 +27,9 @@ import os from "node:os"
 import path from "node:path"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
+// the one naming rule for what belongs to a spaces folder that isn't the kit's own:  here, the temp folder's
+import { spacesTag } from "spell/server/PidFile"
+
 /** Project used by every test, in the `owen@spell` group. */
 const PROJECT = "owen@spell/Proj"
 /** Its place:  your space (`SPACES.localPerson`), then its name. */
@@ -100,11 +103,21 @@ function request(
 /**
  * Where `file` is in the temp folder:
  * - `user/...`:  your space's projects (`spaces/@spell/owen@/...`)
- * - `built/...`:  their build folders (`build/spell-spaces/@spell/owen@/...`)
+ * - `built/...`:  their build folders (`build/<spaces' build>/@spell/owen@/...`, `spacesBuild()`)
  */
 function fixturePath(file: string): string {
-  const inside = file.replace(/^user\//, "spaces/@spell/owen@/").replace(/^built\//, "build/spell-spaces/@spell/owen@/")
+  const inside = file
+    .replace(/^user\//, "spaces/@spell/owen@/")
+    .replace(/^built\//, `build/${spacesBuild()}/@spell/owen@/`)
   return path.join(tempDir, inside)
+}
+
+/**
+ * The temp spaces' build folder, in `build/`:  not the kit's own spell.spaces, so their own,
+ * `spell-spaces.<folder>-<hash>` (`spacesBuildDir()`), never the `spell-spaces/` every other spaces folder shared.
+ */
+function spacesBuild(): string {
+  return `spell-spaces.${spacesTag(path.join(tempDir, "spaces"))}`
 }
 
 /** Write `contents` at `file` (see `fixturePath()`), making folders. */
@@ -593,8 +606,8 @@ describe("request body parsing on POST /api/projects/create/file", () => {
     expect(reply.contentType).toMatch(/^application\/json/)
     const index = reply.json()
     expect(Object.keys(index).sort()).toEqual(["buildFolder", "imports", "manifest"])
-    // your space's projects build in THIS checkout's `build/spell-spaces/`:  named inside `build/`, no `../` (J33)
-    expect(index.buildFolder).toBe("spell-spaces/@spell/owen@/Proj")
+    // your space's projects build in THIS checkout's `build/`, in their spaces' own folder:  no `../` (J33)
+    expect(index.buildFolder).toBe(`${spacesBuild()}/@spell/owen@/Proj`)
     expect(index.imports.map((item: any) => item.path)).toContain("/c.spell")
     expect(readDraft("c.spell")).toBe("x")
   })

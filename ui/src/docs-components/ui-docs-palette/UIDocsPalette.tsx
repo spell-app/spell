@@ -377,7 +377,10 @@ export class UIDocsPalette extends E.UIComponent<DocsPaletteVocabulary> {
             value={group().icon ?? ""}
             aria-label={this.text("groupIcon", { group: name() })}
             title={this.text("groupIcon", { group: name() })}
-            on-ui-changed={(event: CustomEvent<{ value: string }>) => this.setIcon(at, event.detail.value)}
+            ref={(element: HTMLElement) =>
+              element.addEventListener("ui-changed", ((event: CustomEvent<{ value: string }>) =>
+                this.setIcon(at, event.detail.value)) as EventListener)
+            }
           ></ui-icon-picker>
           <ui-input
             class="name"
@@ -385,7 +388,10 @@ export class UIDocsPalette extends E.UIComponent<DocsPaletteVocabulary> {
             appearance="transparent"
             value={name()}
             aria-label={this.text("groupName")}
-            on-ui-changed={(event: CustomEvent<{ value: string }>) => this.rename(at, event.detail.value)}
+            ref={(element: HTMLElement) =>
+              element.addEventListener("ui-changed", ((event: CustomEvent<{ value: string }>) =>
+                this.rename(at, event.detail.value)) as EventListener)
+            }
           ></ui-input>
           <ui-icon
             class="remove"

@@ -272,4 +272,18 @@ describe("<epic-change>", () => {
     expect([asked, click.defaultPrevented]).toEqual([["c2"], true])
     await expectAccessible(host)
   })
+
+  test("its popup stays shut while words in it are selected (its own `ui-opening` listener, not an `on-ui-*` prop)", async () => {
+    const host = await render(NEW)
+    const opening = () => {
+      const event = new CustomEvent("ui-opening", { cancelable: true, bubbles: true, composed: true })
+      popup(host).dispatchEvent(event)
+      return event.defaultPrevented
+    }
+    const selection = document.getSelection()!
+    selection.selectAllChildren(host)
+    expect(opening()).toBe(true)
+    selection.removeAllRanges()
+    expect(opening()).toBe(false)
+  })
 })

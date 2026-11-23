@@ -351,8 +351,11 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             option-title={this.pendingEdit?.title ?? this.title ?? this.textOf("title")}
             note={this.pendingEdit?.note ?? this.textOf("")}
             for={this.cardSet()?.holder ?? ""}
-            on-epic-option-saved={(event: CustomEvent<OptionFormSaved>) => this.onEdited(event.detail)}
-            on-epic-option-canceled={() => (this.isEditing = false)}
+            ref={(element: HTMLElement) => {
+              element.addEventListener("epic-option-saved", ((event: CustomEvent<OptionFormSaved>) =>
+                this.onEdited(event.detail)) as EventListener)
+              element.addEventListener("epic-option-canceled", (() => (this.isEditing = false)) as EventListener)
+            }}
           />
         </Show>
       </div>

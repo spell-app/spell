@@ -365,8 +365,11 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
             heading={this.translationForKey("newChoice")}
             submit={this.translationForKey("add")}
             for={this.cardSet?.holder ?? ""}
-            on-epic-option-saved={(event: CustomEvent<OptionFormSaved>) => this.onAdded(event.detail)}
-            on-epic-option-canceled={() => (this.isAdding = false)}
+            ref={(element: HTMLElement) => {
+              element.addEventListener("epic-option-saved", ((event: CustomEvent<OptionFormSaved>) =>
+                this.onAdded(event.detail)) as EventListener)
+              element.addEventListener("epic-option-canceled", (() => (this.isAdding = false)) as EventListener)
+            }}
           />
         </Show>
         <Show when={this.canAdd && !this.isAdding}>
@@ -441,8 +444,11 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
             note={option.note ?? ""}
             shot={option.shot ?? ""}
             for={this.cardSet?.holder ?? ""}
-            on-epic-option-saved={(event: CustomEvent<OptionFormSaved>) => this.onAddedEdited(option.key, event.detail)}
-            on-epic-option-canceled={() => (this.editingKey = undefined)}
+            ref={(element: HTMLElement) => {
+              element.addEventListener("epic-option-saved", ((event: CustomEvent<OptionFormSaved>) =>
+                this.onAddedEdited(option.key, event.detail)) as EventListener)
+              element.addEventListener("epic-option-canceled", (() => (this.editingKey = undefined)) as EventListener)
+            }}
           />
         }
       >

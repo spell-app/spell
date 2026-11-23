@@ -8,10 +8,10 @@
  *   its own server's addresses sent to the page server here.
  * - The place:  a stand-in server that answers only with the secret, and says it back.
  */
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "fs"
+import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "fs"
 import { createServer } from "http"
 import { tmpdir } from "os"
-import { dirname, join } from "path"
+import { dirname, join, relative } from "path"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { AUTHENTICATED_PLACES_PREFIX, PlaceError } from "spell/places"
@@ -23,7 +23,7 @@ import { SP } from "spell/parser/spell"
 import { parseSpellProject, runSpellFiles } from "spell/parser/spell/test"
 import "spell/app/spaces"
 import { ProjectPlaces } from "spell/app/spaces/server/node/places/ProjectPlaces"
-import { buildFolderFor } from "spell/app/spaces/server/node/projects/project-utils"
+import { buildFolderFor, spacesBuildDir } from "spell/app/spaces/server/node/projects/project-utils"
 import environment from "spell/app/spaces/server/node/environment"
 
 /** The project the program's in:  a test project's address, which no folder holds. */
@@ -115,7 +115,7 @@ async function pageServer(lines: string[], from: Record<string, string | undefin
     seen.push(await answer.clone().text())
     return answer
   })
-  return { places, compiled: files[0]!.compiled, seen }
+  return { places, compiled: files[0]!.compiled, seen, buildDir, file }
 }
 
 /** The program's jobs, read as its page reads them. */
@@ -158,6 +158,27 @@ describe("an authenticated place, read by a page through the page server", () =>
     await expect(read).rejects.toBeInstanceOf(PlaceError)
     await expect(read).rejects.toMatchObject({ kind: "refused", message: said[0] })
     expect(sent).toEqual([])
+  })
+
+  // every page server, compile and lint on a project's spaces wrote into one `build/spell-spaces/`, so a server read
+  // the places another checkout of the project built
+  test("every place:  this server's spaces' build and the built-ins', never another spaces folder's", async () => {
+    const { buildDir, file } = await pageServer(program("http://127.0.0.1:1"), {})
+    const source = new ProjectPlaces({ from: {}, buildDir })
+    expect(await source.every()).toHaveLength(1)
+
+    // another checkout's spaces, on this kit:  their own build folder, which this server never reads
+    const elsewhere = join(buildDir, "spell-spaces.elsewhere-0123abcd", "@acme", "jobs-board")
+    mkdirSync(elsewhere, { recursive: true })
+    cpSync(file, join(elsewhere, `jobs-board${SP.DECLARATIONS_JSON_SUFFIX}`))
+    expect(await source.every()).toHaveLength(1)
+
+    // this server's own spaces' build folder:  read
+    const own = spacesBuildDir({ ...environment, buildDir })
+    expect(relative(buildDir, own)).toMatch(/^spell-spaces(\.|$)/)
+    mkdirSync(join(own, "@acme", "jobs-board"), { recursive: true })
+    cpSync(file, join(own, "@acme", "jobs-board", `jobs-board${SP.DECLARATIONS_JSON_SUFFIX}`))
+    expect(await source.every()).toHaveLength(2)
   })
 
   test("its deployment, picked by SPELL_DEPLOYMENT from the project file, as spell run picks", () => {

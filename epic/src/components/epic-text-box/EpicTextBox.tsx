@@ -134,7 +134,10 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
       <div class={this.rootClass} part={this.partForName("base")}>
         <Show when={this.kept.length}>{this.keptBox()}</Show>
         <ui-textarea
-          ref={(element: HTMLElement) => this.holdField(element as DOMFieldElement)}
+          ref={[
+            (element: HTMLElement) => this.holdField(element as DOMFieldElement),
+            (element: HTMLElement) => element.addEventListener("ui-typed", this.onTyped as EventListener)
+          ]}
           class={FIELD}
           part={this.partForName("field")}
           grow=""
@@ -142,7 +145,6 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
           placeholder={this.hint}
           aria-label={this.label ?? this.hint}
           style={this.maxHeight ? { "--ui-input-textarea-grow-max-height": this.maxHeight } : undefined}
-          on-ui-typed={this.onTyped}
         />
       </div>
     )

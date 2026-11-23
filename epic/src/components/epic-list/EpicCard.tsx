@@ -222,7 +222,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
         data-tooltip={title()}
         aria-label={title()}
         disabled={this.canStar && !this.isActing ? undefined : ""}
-        on-ui-changed={this.onMenuPick}
+        ref={(element: HTMLElement) => element.addEventListener("ui-changed", this.onMenuPick as EventListener)}
       >
         <ui-button
           slot="trigger"
