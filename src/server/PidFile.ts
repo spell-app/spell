@@ -102,6 +102,15 @@ export class PidFile {
     return this.file.replace(/\.json$/, ".token.json")
   }
 
+  /**
+   * The running server's loaded-code record (`LoadedCode`), beside its pid file:  `<file>` with `.code.json` for
+   * `.json`, so each page server on a kit keeps its own -- Spell's `.spell-server.code.json`, a project's
+   * `.spell-server.<folder>-<hash>.code.json`
+   */
+  get codeFile(): string {
+    return this.file.replace(/\.json$/, ".code.json")
+  }
+
   /** SIDE EFFECT:  write this process's server's write `token` -- see `tokenFile` */
   writeToken(token: string): void {
     writeFileSync(this.tokenFile, `${JSON.stringify({ pid: process.pid, token })}\n`, { mode: 0o600 })
@@ -222,12 +231,12 @@ export class PidFile {
   /**
    * Is `running` older than the code it runs, so `ensure()` restarts it?
    * - by the files it LOADED, when it keeps a record of them (`LoadedCode`, epic `epic-engine` I309):
-   *   one of them changed or gone since it loaded it
+   *   one of them changed or gone since it loaded it;  its OWN record, `codeFile`, never another spaces' server's
    * - else (an older server, one started by hand, another kind of server):  any code file under `sources` newer
    *   than its start (`newestChange()`)
    */
   isOlderThanCode(running: RunningServer, sources: string[]): boolean {
-    return LoadedCode.isChanged(this.root, running.pid) ?? newestChange(sources) > Date.parse(running.started)
+    return LoadedCode.isChanged(this.codeFile, running.pid) ?? newestChange(sources) > Date.parse(running.started)
   }
 
   /**

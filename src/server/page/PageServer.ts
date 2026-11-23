@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { escapeRegExp } from "spell/util/string"
 import { SRV, type Handler, type ServedFile, type ServerInfo } from "spell/server"
+import { LOADED_CODE_VARIABLE } from "spell/server/LoadedCode"
 import type { SiteTab } from "spell/server/site/site.types"
 import {
   BundleBuild,
@@ -335,7 +336,12 @@ export class PageServer {
         ...(pidFile.spaces ? ["--spaces", pidFile.spaces] : [])
       ],
       // its log in colour (`SRV.ServerLog`), read in a terminal (`tail -f`, `less -R`);  never with `NO_COLOR`
-      env: { TSX_TSCONFIG_PATH: code.tsconfig, ...(process.env.NO_COLOR ? {} : { FORCE_COLOR: "1" }) },
+      // its hook's record:  its own, beside its pid file, named by its spaces as that is
+      env: {
+        TSX_TSCONFIG_PATH: code.tsconfig,
+        [LOADED_CODE_VARIABLE]: pidFile.codeFile,
+        ...(process.env.NO_COLOR ? {} : { FORCE_COLOR: "1" })
+      },
       sources: [code.source, ...new Set(routes)],
       port: portFor(root, port, pidFile.spaces) || undefined
     })

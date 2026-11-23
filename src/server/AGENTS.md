@@ -154,6 +154,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         loaded;  a component's browser code, a docs script or the epics pack changing restarts nothing
         - the page server's own record, `.spell-server.code.json`, written by `loadedCodeHook.ts`, which
           `PageServer.ensure()` loads first (`--import`)
+        - one per page server, beside its pid file and named as it is (`PidFile.codeFile`):  a project's server on the
+          kit keeps `.spell-server.<folder>-<hash>.code.json`, handed to the hook in `SPELL_LOADED_CODE_FILE`,
+          so it never writes over Spell's
         - why:  the folders rule restarted main's server after 24 of 26 merges into main in a day, and each left
           the side bar's views a few seconds with no server
       - no record (an older server, one started by hand, the epic server):  the `sources` folders, by `newestChange()`
