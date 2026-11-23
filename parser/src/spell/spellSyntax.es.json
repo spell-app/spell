@@ -10848,7 +10848,7 @@
           "ruleNames": ["searched_fields"],
           "internal": false,
           "file": "src/spell/rules/places/SearchedFields.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "The fields a server searches, by their words, e.g. `names and titles`: see `SearchesWith`.",
           "syntaxes": [
             {

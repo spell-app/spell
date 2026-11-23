@@ -251,7 +251,7 @@ function allSpellPartsFor(
     // asked for by a query:  `forecasts are asked for by their latitude and longitude`
     const asked = Object.keys(description.askedBy ?? {}).map((field) => description.fields[field]?.words ?? field)
     if (asked.length) {
-      const line = `${collectionWords(description)} are asked for by their ${wordsJoined(asked)}`
+      const line = `${collectionWords(description)} are asked for by their ${fieldsInLine(asked)}`
       placeLines.push({ key: `asked:${collection}`, text: line })
     }
   }
@@ -362,11 +362,8 @@ function linesOfWhatItTakes(
 ): SpellLine[] {
   const lines: SpellLine[] = []
   const { filters, sorts, sortedWith, fieldsNamedIn, pagesWith } = takes ?? {}
-  // each is one word in a line:  two words are joined, `cook-time`
-  const wordsOf = (names: readonly string[]) => {
-    const named = every.flatMap(({ fields }) => names.flatMap((name) => fields[name]?.words ?? []))
-    return wordsJoined([...new Set(named)].map((words) => words.replace(/ /g, "-")))
-  }
+  const wordsOf = (names: readonly string[]) =>
+    fieldsInLine(every.flatMap(({ fields }) => names.flatMap((name) => fields[name]?.words ?? [])))
   if (pagesWith && !hasPaging) {
     lines.push({
       key: "pages",
@@ -406,6 +403,14 @@ function ownPagingLines(
       ? [{ key: `size:${collection}`, text: `\tit gives up to ${pagesWith.most} at a time` }]
       : [])
   ]
+}
+
+/**
+ * Fields by their words, as a line that names several says them (`searched_fields`):  each one word, two words joined,
+ * `cook-time`;  `it filters by cuisine and cook-time`, `runs are asked for by their instance-id`.
+ */
+function fieldsInLine(words: readonly string[]): string {
+  return wordsJoined([...new Set(words)].map((each) => each.replace(/ /g, "-")))
 }
 
 /** `words` as a list in a line:  `latitude and longitude`, `a, b and c`. */

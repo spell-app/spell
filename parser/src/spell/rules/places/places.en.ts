@@ -1002,7 +1002,7 @@ places.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["nu
   syntax: "((numbers:numbers)|(names:names))"
 })
 places.addRule(WritesLike, { syntax: "{type:subject_it} writes {what:numbers_or_names} like {example:text}" })
-places.addRule(SearchedFields, { syntax: "[{member_words} (,|and)]" })
+places.addRule(SearchedFields, { syntax: "[{identifier} (,|and)]" })
 // before `searches_with`, which reads `everything` as a field's name too
 places.addRule(SearchesEverything, {
   syntax: "{type:subject_it} searches everything with {param:text} (at {path:text})?",
@@ -1084,9 +1084,9 @@ places.addRule(AskedBy, {
           ]
         ],
         {
-          title: "fields of several words, one a list of values",
+          title: "fields of several words, joined, one a list of values",
           input:
-            'lab is a web server at "https://lab.test"\n\t- measurements are asked for by their device ids and instance id',
+            'lab is a web server at "https://lab.test"\n\t- measurements are asked for by their device-ids and instance-id',
           js: [
             "export class Lab extends Place {}",
             "export const lab = core.place(new Lab(), {",

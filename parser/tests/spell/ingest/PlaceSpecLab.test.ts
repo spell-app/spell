@@ -10,8 +10,8 @@ import type { IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/in
 /**
  * A made-up lab's API, read whole from its OpenAPI description:  what a bigger description tripped on.
  * - Its searches are asked for by a LIST of device ids, `?device_ids=a&device_ids=b`, and by an instance id:
- *   fields of several words, one a list of values.
- * - A question Spell can't say, `sort_by`:  its line is left out, the rest written.
+ *   fields of several words, joined (`device-ids`), one a list of values.
+ * - A question Spell can't say, `1st_page`:  its line is left out, the rest written.
  */
 
 const LAB = "https://lab.test"
@@ -47,7 +47,7 @@ const DOCUMENT: OpenApiDocument = {
       get: { parameters: [needs("instance_id", { type: "string" })], responses: listOf("Stack") }
     },
     "/api/rankings": {
-      get: { parameters: [needs("sort_by", { type: "string" })], responses: listOf("Ranking") }
+      get: { parameters: [needs("1st_page", { type: "string" })], responses: listOf("Ranking") }
     }
   },
   components: {
@@ -97,19 +97,19 @@ function errorsOf(spell: string, path = "/Lab.api.spell"): unknown[] {
 }
 
 describe("asked for by a list of values, and by fields of several words", () => {
-  test("its searches are asked for by their device ids, a list;  its stacks by their instance id", async () => {
+  test("its searches are asked for by their device-ids, a list;  its stacks by their instance-id", async () => {
     const { spell } = await ingestOf()
-    expect(spell).toMatch(/^\tsearches are asked for by their device ids$/m)
-    expect(spell).toMatch(/^\tstacks are asked for by their instance id$/m)
+    expect(spell).toMatch(/^\tsearches are asked for by their device-ids$/m)
+    expect(spell).toMatch(/^\tstacks are asked for by their instance-id$/m)
     expect(spell).toMatch(/^\tits "device ids" is a list of text$/m)
     expect(errorsOf(spell)).toEqual([])
   })
 
   test("a line Spell can't read is left out, saying why, and the rest of the place is written", async () => {
     const { spell, description } = await ingestOf()
-    expect(spell).not.toMatch(/asked for by their sort/)
+    expect(spell).not.toMatch(/asked for by their 1st/)
     expect(spell).toMatch(/^\trankings live at "\/api\/rankings"$/m)
-    expect(description.linesLeftOut).toEqual({ "asked:rankings": expect.stringMatching(/asked for by their sort by/) })
-    expect(description.notes).toContainEqual(expect.stringMatching(/^Left out a line:  .*sort by/))
+    expect(description.linesLeftOut).toEqual({ "asked:rankings": expect.stringMatching(/asked for by their 1st-page/) })
+    expect(description.notes).toContainEqual(expect.stringMatching(/^Left out a line:  .*1st-page/))
   })
 })
