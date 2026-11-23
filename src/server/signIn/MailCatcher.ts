@@ -12,7 +12,9 @@ import type { CaughtMail, Mail, Mailer } from "./signIn.types"
  * new SignInCheck({ signIns, mailer: new MailCatcher({ folder: "~/.spell/sign-in/mail" }), accounts })
  * ```
  *
- * - One JSON file per mail, `<time>-<random>.json`:  `{ to, subject, text, sentAt }`.
+ * - One JSON file per mail, `<time>-<order>-<random>.json`:  `{ to, subject, text, sentAt }`.
+ *   - `<order>` counts the mails sent in the same millisecond, so the newest still sorts first:
+ *     with the random part alone, two mails in one millisecond came back in either order.
  * - `caught()`:  every one, newest first.
  *   The sign-in's mail page lists them (`MAIL_PAGE`), and tests read the link and code from them.
  * - For tests and this machine.
@@ -23,6 +25,8 @@ export class MailCatcher implements Mailer {
   readonly folder: string
   /** The time now, ms. */
   private readonly now: () => number
+  /** The last mail's time, ms, and how many went at that time before the next. */
+  private last = { sentAt: 0, count: 0 }
 
   constructor({ folder, now = Date.now }: MailCatcherProps) {
     this.folder = folder
@@ -33,7 +37,9 @@ export class MailCatcher implements Mailer {
   async send(mail: Mail): Promise<void> {
     mkdirSync(this.folder, { recursive: true })
     const sentAt = this.now()
-    const file = `${sentAt}-${randomBytes(4).toString("hex")}.json`
+    this.last = sentAt === this.last.sentAt ? { sentAt, count: this.last.count + 1 } : { sentAt, count: 0 }
+    const order = String(this.last.count).padStart(4, "0")
+    const file = `${sentAt}-${order}-${randomBytes(4).toString("hex")}.json`
     writeFileSync(join(this.folder, file), `${JSON.stringify({ ...mail, sentAt }, null, 2)}\n`, { mode: 0o600 })
   }
 

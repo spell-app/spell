@@ -195,11 +195,12 @@ describe("<FileTabs>", () => {
     // its words are its `label`:  a drafted file's pen's tip holds words too (I92)
     expect(tabs.map((tab) => tab.getAttribute("label"))).toEqual(["one.js", "two.js"])
     expect(tabs.map((tab) => tab.hasAttribute("selected"))).toEqual([true, false])
-    expect(tabs[0]!.querySelector(".NotSaved")!.hasAttribute("hidden")).toBe(true)
+    // an `<if>` draws only the branch that holds:  no dot at all while saved
+    expect(tabs[0]!.querySelector(".NotSaved")).toBeNull()
 
     file.isDirty = true
     flush()
-    await vi.waitFor(() => expect(tabs[0]!.querySelector(".NotSaved")!.hasAttribute("hidden")).toBe(false))
+    await vi.waitFor(() => expect(tabs[0]!.querySelector(".NotSaved")).not.toBeNull())
 
     tabs[1]!.click()
     expect(showEditor).toHaveBeenCalledWith("test-project/two.js")
