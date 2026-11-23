@@ -871,16 +871,31 @@ class ProgramPlaces {
 
   /**
    * Where the list the place keeps under `owner`, in its field `field`, is:  `/posts/1/comments`, its id in the braces.
-   * - An address that starts with the id takes the id as it is:  a path of its own, Open Library's `/works/OL45804W`.
+   * - Each brace names one of `owner`'s own fields, `{current_receipt_id}`;  `{id}` is its id.
+   *   - A first brace naming no field it has is its id too, as every line said before:  `"/posts/{postId}/comments"`.
+   * - An address that starts with a brace takes its value as it is:  a path of its own, Open Library's `/works/OL45804W`.
+   *   Elsewhere each value is made safe for an address.
    * - `undefined` for a field no line says lives under it (`- a post's comments live at "..."`),
-   *   or a thing read from no place.
+   *   a thing read from no place, or a brace whose field holds no value:  nothing is read, never a broken address.
    */
   addressUnder(owner: Thing, field: string): string | undefined {
     const Owner = owner.constructor as SavedClass
     const id = Owner.savedIn && this.things?.placeOf(owner)?.id
     if (id === undefined) return undefined
     const path = this.detailsOf(Owner).listsUnder?.[Owner.savedIn!.collection]?.[field]
-    return path?.replace("{id}", path.startsWith("{id}") ? id : encodeURIComponent(id))
+    if (path === undefined) return undefined
+    const schema = schemaOf(Owner)
+    let missing = false
+    let first = true
+    const filled = path.replace(/\{([^{}/]*)\}/g, (_brace, name: string, at: number) => {
+      const isFirst = first
+      first = false
+      const isId = name === "id" || (isFirst && schema.info(name) === undefined)
+      const value = isId ? id : valueInAddress(getProp(owner, name))
+      if (value === undefined) missing = true
+      return value === undefined ? "" : at === 0 ? value : encodeURIComponent(value)
+    })
+    return missing ? undefined : filled
   }
 
   /** What the lines of the place `Class` is saved in say. */
@@ -2202,5 +2217,15 @@ function responseOf(error: unknown): Response | undefined {
     if (response && typeof (response as Response).status === "number" && (response as Response).headers)
       return response as Response
   }
+  return undefined
+}
+
+/**
+ * A field's value as it goes in an address's braces:  a text, number or yes / no as it reads.
+ * - `undefined` for no value, or an empty text:  that address is never asked for.
+ */
+function valueInAddress(value: unknown): string | undefined {
+  if (typeof value === "string") return value === "" ? undefined : value
+  if (typeof value === "number" || typeof value === "bigint" || typeof value === "boolean") return `${value}`
   return undefined
 }

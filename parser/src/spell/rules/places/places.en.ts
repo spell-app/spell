@@ -971,7 +971,19 @@ places.addRule(ListsUnder, {
             '  name: "typicode",',
             '  kind: "web server",',
             '  at: "https://jsonplaceholder.typicode.com",',
-            '  listsUnder: { posts: { comments: "/posts/{id}/comments" } }',
+            '  listsUnder: { posts: { comments: "/posts/{postId}/comments" } }',
+            "})"
+          ]
+        ],
+        [
+          'typicode is a web server at "https://jsonplaceholder.typicode.com"\n\t- a post\'s receipt lives at "/shops/{shop_name}/posts/{id}/receipts/{current receipt id}"',
+          [
+            "export class Typicode extends Place {}",
+            "export const typicode = core.place(new Typicode(), {",
+            '  name: "typicode",',
+            '  kind: "web server",',
+            '  at: "https://jsonplaceholder.typicode.com",',
+            '  listsUnder: { posts: { receipt: "/shops/{shopName}/posts/{id}/receipts/{currentReceiptId}" } }',
             "})"
           ]
         ],

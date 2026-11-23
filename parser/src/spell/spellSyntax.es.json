@@ -9815,7 +9815,7 @@
           "ruleNames": ["lists_under"],
           "internal": false,
           "file": "src/spell/rules/places/ListsUnder.ts",
-          "line": 14,
+          "line": 17,
           "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
           "syntaxes": [
             {

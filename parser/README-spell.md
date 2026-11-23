@@ -1540,6 +1540,9 @@ recipe box is an app
     `it searches everything with "q" at "/v1.1/search"`, read as `every artwork matching the search`
   - pictures on another server:  `a book's "cover i" is a picture at "https://covers.openlibrary.org/b/id/{id}-M.jpg"`
   - a list under each thing:  `a post's comments live at "/posts/{id}/comments"`
+    - its braces name the thing's own fields, `{id}` its id:
+      `an order's receipt lives at "/shops/{shop}/orders/{id}/receipts/{current_receipt_id}"`;
+      a thing with no value in one of them reads nothing there, and a first brace naming no field is its id
   - answers only to a question:  `forecasts are asked for by their latitude and longitude`;
     a read without both won't compile
   - its pace:  `it takes up to 80 requests a second`
