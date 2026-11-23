@@ -264,7 +264,7 @@ describe("beside another place", () => {
   /** The lab, with its copy of the shop's jobs:  a route its description says nothing of. */
   const WITH_COPY = structuredClone(DOCUMENT)
   WITH_COPY.paths!["/api/v1/proxy/jobs"] = {
-    get: { responses: { "200": { description: "OK", content: { "application/json": { schema: {} } } } } }
+    get: { responses: { "200": { content: { "application/json": { schema: {} } } } } }
   }
 
   /** The shop ingested into Shop.api.spell, then the lab beside it. */
