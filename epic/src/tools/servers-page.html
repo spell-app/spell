@@ -12,12 +12,23 @@
       - Cards three a row at most, the name the link;  worktrees newest worked first (I449).
       - Each card:  its address under its name, its state on the right, its buttons as icons under the state;  the lists
         as rows in columns, the GitHub line their quiet last row (I451).
+      - main's heading has Restart all at its right;  its last card is the secure link's, HTTPS on and off (T164).
     -->
     <title>Servers</title>
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
     <style>
       .spell-doc-main .servers-head {
         margin: 24px 0 8px 0;
+      }
+      /* main's:  Restart all at the right of its heading */
+      .servers-head-tools {
+        display: flex;
+        align-items: center;
+      }
+      .servers-tools {
+        margin-left: auto;
+        font-size: 1rem;
+        font-weight: normal;
       }
       .servers-head a {
         color: inherit;

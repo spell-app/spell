@@ -232,6 +232,9 @@ const ICONS = {
   "solid/play": ["play"],
   "solid/rotate-right": ["rotate right"],
   "solid/stop": ["stop"],
+  // its secure link card's Turn on and Turn off (epic `epic-engine` T164)
+  "solid/lock": ["lock"],
+  "solid/unlock": ["unlock"],
   // an Epics card's star (`spell/epic/list/EpicCards`):  a favourite, or not;  the Favorites group's heading
   "solid/star": ["star"],
   "regular/star": ["star outline"],

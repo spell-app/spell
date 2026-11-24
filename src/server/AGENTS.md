@@ -307,8 +307,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `LocalCertificate` -- a certificate this machine's browsers trust, made by mkcert (epic `solid-2-final` P14):
     `state`, `make()`, `trust()` (`sudo security add-trusted-cert`, the password asked once), `undo()`;
     its programs through `CertificateTools`, so tests run none
+    - `trustInWindow()` (epic `epic-engine` T164):  the same with no terminal, a Mac only, for this person's login
+      keychain (no `sudo`):  the Mac asks for the password in its own window (`CertificateTools.ask()`, which waits
+      without blocking);  the Servers tab's Turn on
     - the page server's:  `forPageServer()`, `localhost` / `127.0.0.1` / `::1` in `~/.spell/localhost/`;  made and
-      trusted only by `spell server certificate`, taken by `PageServer.certificateFor()` once it's `"ready"`
+      trusted only by `spell server certificate` or the Servers tab's card (spell-epic's `HttpsSwitch`), taken by `PageServer.certificateFor()` once it's `"ready"`
       (never in tests or CI, nor with `SPELL_HTTPS=0`);  its HTTPS address is `ServerInfo.https`
     - the house-network site's too (the app's `spell space local setup`):  its own names and folder, the same steps
   - [serveRoutes.ts](serveRoutes.ts) -- `serveRoutes()`, `folderRoute()`:  a small loopback server for a command's

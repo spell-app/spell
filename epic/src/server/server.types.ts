@@ -1,3 +1,4 @@
+import type { SRV } from "spell/server"
 import type { SiteTab } from "spell/server/site/site.types"
 
 /**
@@ -356,8 +357,54 @@ export type ServerFactsAnswer = {
   notOnGitHub: NotOnGitHub[]
 }
 
-/** `GET /api/servers`:  every server, how often the keeper looks, and the facts beside them. */
-export type ServersAnswer = ServerFactsAnswer & { servers: KeptServer[]; lookSeconds: number }
+/**
+ * `GET /api/servers`:  every server, how often the keeper looks, the facts beside them, whether the page servers
+ * speak HTTPS (`https`, epic `epic-engine` T164) and whether the person said hands off (`handsOff`)
+ */
+export type ServersAnswer = ServerFactsAnswer & {
+  servers: KeptServer[]
+  lookSeconds: number
+  https?: HttpsStatus
+  /** the person is working on the servers themselves:  the keeper leaves main's alone (`ServerKeeper.isHandsOff`) */
+  handsOff?: boolean
+}
+
+/**
+ * Whether the page servers speak HTTPS (and HTTP/2), as the Servers tab draws it (`HttpsSwitch`, epic `epic-engine`
+ * T164):  from the page server's certificate's state (`SRV.LocalCertificate`), ONE for every page server of this Mac
+ * - `state`:  `on`;  `off` (no certificate, or no mkcert to make one);  `needs-trust` (made, not trusted);
+ *   `out-of-date` (expired, or missing a name)
+ * - `certificate`:  the certificate's own state, as `spell server certificate --check` says it
+ * - `words`:  what it means, for the card's tooltip;  `address`:  where browsers open the pages, while it's on
+ * - `canTurnOn`, `canTurnOff`:  which buttons apply;  `whyNot`:  why Turn on doesn't (no mkcert, or not a Mac)
+ */
+export type HttpsStatus = {
+  state: HttpsState
+  certificate: SRV.CertificateState
+  words: string
+  address?: string
+  canTurnOn: boolean
+  canTurnOff: boolean
+  whyNot?: string
+}
+
+/** `HttpsStatus.state`. */
+export type HttpsState = "on" | "off" | "needs-trust" | "out-of-date"
+
+/** `POST /api/servers/https`'s body:  which way to turn it. */
+export type HttpsTurn = { turn: "on" | "off" }
+
+/** Where the Servers tab turns HTTPS on and off:  under `SRV.KEEPER_API`, before its `/:action`. */
+export const HTTPS_API = "/api/servers/https"
+
+/** Where the tab's hands-off switch asks:  the keeper leaves main's servers alone while it's on (T164). */
+export const HANDS_OFF_API = "/api/servers/hands-off"
+
+/** `POST /api/servers/hands-off`'s body. */
+export type HandsOff = { on: boolean }
+
+/** Where main's Restart all asks:  every main page server and its editor restarted (epic `epic-engine` T164). */
+export const RESTART_ALL_API = "/api/servers/restart-all"
 
 /** Where the Servers tab's page is served, under every address (`serverRoutes`). */
 export const SERVERS_PAGE = "/_epic/servers/"

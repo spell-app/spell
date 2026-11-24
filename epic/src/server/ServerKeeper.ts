@@ -11,8 +11,19 @@ import { REPOS_FILE } from "spell/server/kitFolders"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 
+import { HttpsSwitch, afterAnswer } from "./HttpsSwitch"
 import { ServerFacts } from "./ServerFacts"
-import type { KeptServer, KeptServerState, Repo, ServersAnswer } from "./server.types"
+import {
+  HTTPS_API,
+  RESTART_ALL_API,
+  HANDS_OFF_API,
+  type HandsOff,
+  type HttpsTurn,
+  type KeptServer,
+  type KeptServerState,
+  type Repo,
+  type ServersAnswer
+} from "./server.types"
 
 /****************
  * ### `ServerKeeper`
@@ -36,10 +47,21 @@ import type { KeptServer, KeptServerState, Repo, ServersAnswer } from "./server.
  *   `POST /api/servers/<start|stop|restart>` does it;  every main-checkout start, stop and restart of the page server
  *   comes here (`PageServer.ensure()`, `stop()`, `restart()`)
  * - The Servers tab's data:  `GET /api/servers` (`ServersAnswer`), `GET /api/servers/dot` (the tab's red dot)
+ * - HTTPS for the page servers, on and off from the tab (`https`, an `HttpsSwitch`;  epic `epic-engine` T164):
+ *   `POST /api/servers/https`
+ * - the page server's certificate WATCHED (T164):  each look compares its two files (`HttpsSwitch.filesStamp`) with the
+ *   last;  made, made again or deleted (the tab's switch, or `spell server certificate` / `--undo` in a terminal),
+ *   every main page server is restarted, so it takes HTTPS or drops it with no restart by hand
+ * - HANDS OFF (T164):  a switch on the tab, kept in the hold file until turned off (`handsOff`):  while it's on, the
+ *   keeper starts, stops and restarts nothing of main's by itself (no keep-alive, no editor restart, no repo's own
+ *   server, no certificate restart), but still looks and reports;  the person's own buttons still work.  Turned off,
+ *   it looks at once:  what's down comes back, and a certificate changed meanwhile is taken up
+ * - Restart all (T164):  `POST /api/servers/restart-all`, every main page server restarted, its editor with it, held
+ *   ones too
  * - Its own code newer than its start (main moved under it):  it hands over to a fresh hub (`epic hub ensure`, run
  *   detached), so it keeps on the main code too
  * - What a stop by hand holds:  `<home>/server-keeper.json`, `{ held: [<server id>] }`
- * - The page servers it's handed (`control`) and the clock (`now`) are its tests' to change.
+ * - The page servers it's handed (`control`), the clock (`now`) and the HTTPS switch (`https`) are its tests' to change.
  ****************/
 export class ServerKeeper {
   /** the epic home:  the hold file, the own servers' logs */
@@ -54,8 +76,14 @@ export class ServerKeeper {
   /** the clock, ms */
   readonly now: () => number
 
+  /** HTTPS on the page servers, turned on and off from the tab */
+  readonly https: HttpsSwitch
+
   /** every server, as the last look found it, by id */
   private rows = new Map<string, KeptServer>()
+
+  /** the page server's certificate files as the last look found them (`HttpsSwitch.filesStamp`) */
+  private certificateStamp?: string
 
   /** a look under way:  the next waits for it */
   private looking?: Promise<void>
@@ -83,18 +111,22 @@ export class ServerKeeper {
     repos,
     control = PAGE_SERVERS,
     now = Date.now,
-    onStale
+    onStale,
+    https
   }: {
     home: string
     repos: Repo[]
     control?: PageServerControl
     now?: () => number
     onStale?: () => void
+    /** default:  the page servers' certificate, a turn asking for a look, which sees its files change */
+    https?: HttpsSwitch
   }) {
     this.home = home
     this.repos = repos
     this.control = control
     this.now = now
+    this.https = https ?? new HttpsSwitch({ changed: () => this.look() })
     this.onStale = onStale ?? (() => this.handOver())
   }
 
@@ -152,6 +184,7 @@ export class ServerKeeper {
 
   /** the look itself */
   private async lookNow(): Promise<void> {
+    await this.watchCertificate()
     const rows: KeptServer[] = [this.hubRow()]
     for (const repo of this.repos) {
       try {
@@ -194,11 +227,12 @@ export class ServerKeeper {
   private async keepMainPageServer(repo: Repo): Promise<KeptServer> {
     const id = idOf(repo, "page server")
     const row = this.row(id, repo, repo.checkout, "page server", "epic pages, guides, the app's calls")
-    if (this.held().includes(id)) {
+    const handsOff = this.isHandsOff
+    if (handsOff || this.held().includes(id)) {
       const running = await this.control.status(repo.checkout)
       return running
         ? { ...row, state: "running", address: `${running.base}/` }
-        : { ...row, state: "stopped", why: STOPPED_BY_HAND }
+        : { ...row, state: "stopped", why: handsOff ? HANDS_OFF_WHY : STOPPED_BY_HAND }
     }
     if (this.isWaitingAfterFailure(id)) return this.rows.get(id) ?? { ...row, state: "down" }
     try {
@@ -247,6 +281,7 @@ export class ServerKeeper {
     const kept: KeptServer = { ...row, canStart: true, actions: ["start", "restart"] }
     if (row.state === "running") return kept
     if (pageServer.state !== "running") return { ...kept, state: "stopped", why: "It comes back with the page server." }
+    if (this.isHandsOff) return { ...kept, state: "stopped", why: HANDS_OFF_WHY }
     const started = Math.max(this.lastStart.get(row.id) ?? 0, pageServer.since ? Date.parse(pageServer.since) : 0)
     if (this.now() - started < EDITOR_WAIT_SECONDS * 1000) return { ...kept, state: "starting" }
     const tried = this.lastStart.get(row.id)
@@ -275,6 +310,7 @@ export class ServerKeeper {
     if (await isAnswering(server.check)) return { ...row, state: "running" }
     if (!server.start) return { ...row, state: "down", why: "Spell doesn't know how to start it, so start it yourself" }
     if (this.held().includes(id)) return { ...row, state: "stopped", why: STOPPED_BY_HAND }
+    if (this.isHandsOff) return { ...row, state: "stopped", why: HANDS_OFF_WHY }
     if (this.isWaitingAfterFailure(id)) return { ...row, state: "starting" }
     this.startOwn(repo, server)
     return { ...row, state: "starting", why: "started:  it was down" }
@@ -347,6 +383,37 @@ export class ServerKeeper {
     return answer
   }
 
+  /**
+   * SIDE EFFECT:  the page server's certificate files compared with the last look's;  changed (made, made again,
+   * deleted), every main page server restarted, so it takes HTTPS or drops it.  The first look only notes them.
+   */
+  private async watchCertificate(): Promise<void> {
+    // hands off:  the change waits, and is taken up once it's turned off
+    if (this.isHandsOff) return
+    const stamp = this.https.filesStamp
+    const hasChanged = this.certificateStamp !== undefined && stamp !== this.certificateStamp
+    this.certificateStamp = stamp
+    if (!hasChanged) return
+    this.https.forget()
+    try {
+      await this.restartMainPageServers()
+    } catch (error) {
+      console.error("server keeper:  the certificate changed, and a page server wouldn't restart:", error)
+    }
+  }
+
+  /**
+   * SIDE EFFECT:  every main page server restarted, its editor with it (its child)
+   * - `withHeld`:  one stopped by hand too, which then runs (Restart all);  else it's left stopped, taking the
+   *   certificate at its start
+   */
+  async restartMainPageServers({ withHeld = false }: { withHeld?: boolean } = {}): Promise<void> {
+    for (const repo of this.repos) {
+      if (!isKit(repo.checkout) || (!withHeld && this.held().includes(idOf(repo, "page server")))) continue
+      await this.act("restart", repo.checkout)
+    }
+  }
+
   /** a page server, started, stopped or restarted here, never through the keeper again */
   private async actOnPageServer(action: SRV.KeeperAction, checkout: string): Promise<SRV.KeeperAnswer> {
     if (action === "stop") return { state: (await this.control.stop(checkout)) ? "stopped" : "not running" }
@@ -382,6 +449,10 @@ export class ServerKeeper {
    * - `GET /api/servers`:  the Servers tab's data (`ServersAnswer`)
    * - `GET /api/servers/dot`:  `{ dot, why }`, the tab's red dot:  a server that should be up is down
    * - `POST /api/servers/look`:  look now (a session's start)
+   * - `POST /api/servers/https`, `{ turn: "on" | "off" }`:  HTTPS turned (`HttpsSwitch.turn()`), its status after
+   * - `POST /api/servers/hands-off`, `{ on }`:  hands off turned on or off (`setHandsOff()`)
+   * - `POST /api/servers/restart-all`:  `{ state: "restarting" }`, then every main page server restarted, its editor
+   *   with it (`restartMainPageServers()`), just after the answer:  the call came through one of them
    * - `POST /api/servers/<start|stop|restart>`, `{ checkout, server }`:  `act()`
    * - every POST needs the hub's write token (`guard`)
    */
@@ -392,7 +463,26 @@ export class ServerKeeper {
       await this.look()
       reply.noStore().json({ servers: this.servers() })
     })
+    // before `/:action`, which would take them for an action
+    router.post(HTTPS_API, guard.writeCheck, SRV.parseBodies(), this.onHttps)
+    router.post(HANDS_OFF_API, guard.writeCheck, SRV.parseBodies(), async (request, reply) => {
+      const { on } = (request.body ?? {}) as Partial<HandsOff>
+      if (typeof on !== "boolean") throw new SRV.HttpError(400, "on or off?  { on: true | false }")
+      await this.setHandsOff(on)
+      reply.noStore().json({ handsOff: this.isHandsOff })
+    })
+    router.post(RESTART_ALL_API, guard.writeCheck, (_request, reply) => {
+      afterAnswer(() => this.restartMainPageServers({ withHeld: true }))
+      reply.noStore().json({ state: "restarting" })
+    })
     router.post(`${SRV.KEEPER_API}/:action`, guard.writeCheck, SRV.parseBodies(), this.onAct)
+  }
+
+  /** `POST /api/servers/https` */
+  private onHttps: Handler = async (request, reply) => {
+    const { turn } = (request.body ?? {}) as Partial<HttpsTurn>
+    if (turn !== "on" && turn !== "off") throw new SRV.HttpError(400, `which way?  { turn: "on" | "off" }`)
+    reply.noStore().json(await this.https.turn(turn))
   }
 
   /** `GET /api/servers` */
@@ -401,7 +491,9 @@ export class ServerKeeper {
     const answer: ServersAnswer = {
       servers: this.servers(),
       lookSeconds: LOOK_SECONDS,
-      ...ServerFacts.of(this.repos)
+      ...ServerFacts.of(this.repos),
+      https: this.https.status,
+      ...(this.isHandsOff && { handsOff: true })
     }
     reply.noStore().json(answer)
   }
@@ -417,6 +509,7 @@ export class ServerKeeper {
 
   /** the tab's red dot:  every server that should be up and isn't, named */
   dot(): { dot: boolean; why?: string } {
+    if (this.isHandsOff) return { dot: true, why: HANDS_OFF_DOT }
     const down = this.servers().filter((row) => row.state === "down")
     if (!down.length) return { dot: false }
     return {
@@ -471,19 +564,46 @@ export class ServerKeeper {
     child.unref()
   }
 
+  /** the hold file:  the ids held stopped by hand, and whether the person has said hands off */
+  private holds(): HoldFile {
+    return readJson<HoldFile>(join(this.home, HOLD_FILE)) ?? {}
+  }
+
   /** the ids held stopped by hand */
   private held(): string[] {
-    return readJson<{ held?: string[] }>(join(this.home, HOLD_FILE))?.held ?? []
+    return this.holds().held ?? []
+  }
+
+  /** whether the person is working on the servers themselves:  the keeper starts, stops and restarts nothing of main's */
+  get isHandsOff(): boolean {
+    return this.holds().handsOff === true
+  }
+
+  /**
+   * SIDE EFFECT:  hands off turned on or off, kept in the hold file;  off, a look at once, so what's down comes back
+   * and a certificate changed meanwhile is taken up
+   */
+  async setHandsOff(isOn: boolean): Promise<void> {
+    if (isOn === this.isHandsOff) return
+    this.writeHolds({ ...this.holds(), handsOff: isOn })
+    if (!isOn) await this.look()
   }
 
   /** hold server `id` stopped, or let it go.  SIDE EFFECT:  writes the hold file */
   private hold(id: string, isHeld: boolean): void {
-    const held = new Set(this.held())
+    const holds = this.holds()
+    const held = new Set(holds.held ?? [])
     if (isHeld === held.has(id)) return
     if (isHeld) held.add(id)
     else held.delete(id)
+    this.writeHolds({ ...holds, held: [...held] })
+  }
+
+  /** SIDE EFFECT:  the hold file written;  `handsOff` only while it's on */
+  private writeHolds({ held = [], handsOff }: HoldFile): void {
     mkdirSync(this.home, { recursive: true })
-    writeFileSync(join(this.home, HOLD_FILE), `${JSON.stringify({ held: [...held] }, null, 2)}\n`)
+    const holds: HoldFile = { held, ...(handsOff && { handsOff }) }
+    writeFileSync(join(this.home, HOLD_FILE), `${JSON.stringify(holds, null, 2)}\n`)
   }
 
   /**
@@ -526,11 +646,21 @@ const STALE_LOOK_SECONDS = 60
 /** How long after a start the keeper waits before starting the same server again, seconds. */
 const RETRY_SECONDS = 60
 
+/** What a main server says while hands off is on. */
+const HANDS_OFF_WHY = "You're working on the servers yourself, so Spell won't start or restart this one for you."
+
+/** The tab's dot while hands off is on. */
+const HANDS_OFF_DOT =
+  "Hands off:  Spell won't start, stop or restart your servers until you turn off the switch at the top of this tab."
+
 /** What a server held stopped says. */
 const STOPPED_BY_HAND = "You stopped it.  Press Start to turn it back on."
 
 /** The calls `act()` takes. */
 const ACTIONS: readonly SRV.KeeperAction[] = ["start", "stop", "restart"]
+
+/** The hold file:  `held`, the servers stopped by hand;  `handsOff`, while the person works on them themselves. */
+type HoldFile = { held?: string[]; handsOff?: boolean }
 
 /** What a stop by hand holds, in the epic home. */
 const HOLD_FILE = "server-keeper.json"
