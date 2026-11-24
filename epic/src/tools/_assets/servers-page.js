@@ -6,20 +6,22 @@
  *     under it says so plainly
  *   - "main", with Restart all at its right (the page server and editor together, `restartAllButton()`, T164):  a card
  *     per server of the main checkout (the hub, the page server, the editor, a repo's own);  the page server's card
- *     has the secure link's switch, HTTPS on the page servers, as a lock among its buttons (`httpsButton()`, epic
- *     `epic-engine` T164, I454:  a card of its own before, which read as if every server had HTTPS)
+ *     has the secure link's switch, HTTPS on the page servers, as the lock before its address (`httpsButton()`, epic
+ *     `epic-engine` T164, I454, I456:  a card of its own before, which read as if every server had HTTPS;  then a
+ *     second lock among its buttons)
  *   - "Merged into main recently":  the branches that landed on main, newest first (`ServerFacts.mergedIntoMain()`),
  *     a row each in columns, and last, quieter, a row per repo for main's commits not on GitHub yet
  *   - each epic's worktree, `⎇ <worktree>`, the one worked on last first, how long ago beside its name:  a card per
  *     server it has, then what it holds that main hasn't got
- * - Each card:  the server's name, a link, and its address under it ("Not running" while it isn't, T164);  its state on the right, and under the state its
- *   buttons, icons only;  three a row at most, fewer as the page narrows (epic `epic-engine` I449, I451).
+ * - Each card:  the server's name, a link, and its address under it ("Not running" while it isn't, T164);  its state
+ *   on the right as one icon, and under it its buttons, icons only, a tight group;  three a row at most, fewer as the
+ *   page narrows (epic `epic-engine` I449, I451, I456).
  * - Built with `document.createElement()`, never markup in strings;  every control a `<ui-button>`.
  * - Start, Restart and Stop POST `/api/servers/<action>` with this page's write token (`SPELL_SERVER.token`);  the
  *   page server hands them on to the hub (`serverRoutes`).
  * - Plain DOM, no imports:  the page loads it as it is, beside the docs bundle;  so `ago()` is its own.
  *   - Its pure parts are exported for its tests (`worktreeOrder()`, `inCardOrder()`, `firstClause()`, `httpsToggle()`, `withSecureAddress()`,
- *     `addressLine()`);  it starts only on its page.
+ *     `addressLine()`, `stateLook()`);  it starts only on its page.
  * - Its own timer, not the kit's `pollWhileVisible()`:  that's for bundled code, and this page has no bundle of its own;
  *   the same rule, by hand:  no look while the page is hidden, one as soon as it shows again.
  */
@@ -27,12 +29,16 @@
 /** How often the page asks, seconds, when the answer doesn't say (`lookSeconds`). */
 const LOOK_SECONDS = 10
 
-/** What each state is drawn as:  its words and its colour. */
+/**
+ * What each state is drawn as:  one icon, its colour, its words in its tooltip (epic `epic-engine` I456:  a pill
+ * saying "Running" ate into the card's name)
+ * - each icon is one the docs bundle registers (`ICONS` in `bundle-spell-ui.js`):  no other draws
+ */
 const STATES = {
-  running: { words: "Running", color: "green" },
-  starting: { words: "Starting", color: "blue" },
-  stopped: { words: "Stopped", color: "grey" },
-  down: { words: "Down", color: "red" }
+  running: { words: "Running", icon: "circle check", color: "green" },
+  starting: { words: "Starting", icon: "circle notch", color: "blue", loading: true },
+  stopped: { words: "Stopped", icon: "circle outline", color: "grey" },
+  down: { words: "Down", icon: "triangle exclamation", color: "red" }
 }
 
 /** The buttons a server that can start gets, by its state:  icons under its state, in this order. */
@@ -74,7 +80,7 @@ const NO_RESTART = {
  */
 const HTTPS_STATES = {
   on: { tip: "Secure link (HTTPS) is on.\nYour browser opens these pages faster, over HTTP/2." },
-  off: { tip: "Secure link (HTTPS) is off.\nThese pages open the ordinary, unprotected way." },
+  off: { tip: "Secure link (HTTPS) is off.\nThese pages open unencrypted." },
   "needs-trust": { tip: "Secure link (HTTPS) is set up, but your Mac hasn't approved it yet." },
   "out-of-date": { tip: "Secure link (HTTPS) has expired." }
 }
@@ -83,11 +89,11 @@ const HTTPS_STATES = {
 const HTTPS_ACTIONS = {
   on: {
     label: "Turn on the secure link",
-    tip: "Click to turn it on.\nYour Mac will ask for your password once, because this changes a setting on your computer."
+    tip: "Click to turn it on.\nYour Mac will ask for your password once, so it trusts this secure link."
   },
   off: {
     label: "Turn off the secure link",
-    tip: "Click to turn it off.\nThe pages then open the ordinary, unprotected way, a little slower."
+    tip: "Click to turn it off.\nThe pages still open, but unencrypted and a little slower."
   }
 }
 
@@ -321,7 +327,8 @@ function cards(servers, named, https) {
 }
 
 /**
- * The page server's HTTPS switch, one icon among its buttons (epic `epic-engine` I454):  pure, for the page's tests
+ * The page server's HTTPS switch, the lock before its address (epic `epic-engine` I454, I456):  pure, for the page's
+ * tests
  * - on:  a closed lock;  a click turns it off
  * - off, or wanting the password, or expired:  an open lock;  a click turns it on, disabled saying why when it can't
  *   (no mkcert, not a Mac)
@@ -336,13 +343,16 @@ export function httpsToggle(https) {
     : { turn: "on", icon: "unlock", tip, whyNot: `${state.tip}\n${https.whyNot ?? https.words}` }
 }
 
-/** the HTTPS switch's icon button (`httpsToggle()`);  `whyNot`:  disabled, saying why in its tooltip */
+/**
+ * the HTTPS switch, the lock before main's page server's address (`httpsToggle()`, `addressLock()`);  `whyNot`:
+ * disabled, saying why in its tooltip
+ */
 function httpsButton(https) {
   const { turn, icon, tip, whyNot } = httpsToggle(https)
   const button = el("ui-button", {
-    className: "servers-action servers-https",
+    className: "servers-https",
     size: "tiny",
-    appearance: "circular basic",
+    appearance: "basic compact",
     icon,
     "aria-label": HTTPS_ACTIONS[turn].label,
     disabled: Boolean(whyNot)
@@ -376,16 +386,16 @@ function httpsButton(https) {
 }
 
 /**
- * one server's card, two rows of two (epic `epic-engine` I451):
- * - its name, a link to its address;  under it, the address itself, small (what it's for, its tooltip)
- * - on the right its state, and under the state, lined up with it, its buttons as icons
+ * one server's card, two rows of two (epic `epic-engine` I451, I456):
+ * - its name, a link to its address;  on the right, its state as one icon (`stateLook()`), its words the tooltip
+ * - under the name, the address itself, small (what it's for, its tooltip);  before it, on a page server, the lock
+ *   (`addressLock()`);  on the right, its buttons as icons, a tight group
  * - a button it hasn't got is drawn disabled, its tooltip saying why (`NO_STOP`, `NO_RESTART`), so every running
  *   card has the same icons in the same place
  */
 function serverCard(_server, named, https) {
   const server = withSecureAddress(_server, https)
-  const state = STATES[server.state] ?? STATES.down
-  const isSecure = isRunning(server) && /^https:/.test(server.address ?? "")
+  const look = stateLook(server)
   const name = named && server.repo && !server.worktree ? `${server.repo} ${server.name}` : server.name
   const address = server.address?.replace(/^https?:\/\//, "").replace(/\/$/, "")
   return el(
@@ -403,22 +413,54 @@ function serverCard(_server, named, https) {
           server.address ? el("a", { href: server.address, target: "_blank" }, name) : name
         ),
         el(
-          "ui-label",
-          { className: "servers-state", size: "mini", color: state.color, "data-tooltip": server.why || undefined },
-          state.words
+          "span",
+          { className: "servers-state", "data-tooltip": look.tip },
+          el("ui-icon", { name: look.icon, color: look.color, loading: look.loading, label: look.tip })
         ),
         el(
           "span",
-          { className: "servers-address", "data-tooltip": (isRunning(server) ? server.what : server.why) || undefined },
-          ...(isSecure
-            ? [el("ui-icon", { name: "lock", "aria-label": SECURE_ADDRESS, "data-tooltip": SECURE_ADDRESS })]
-            : []),
-          addressLine(server, address)
+          { className: "servers-address" },
+          addressLock(server, https),
+          el(
+            "span",
+            {
+              className: "servers-address-words",
+              "data-tooltip": (isRunning(server) ? server.what : server.why) || undefined
+            },
+            addressLine(server, address)
+          )
         ),
-        el("span", { className: "servers-actions" }, cardButtons(server), https ? [httpsButton(https)] : [])
+        el("span", { className: "servers-actions" }, cardButtons(server))
       )
     )
   )
+}
+
+/**
+ * a server's state as one icon (`STATES`), its words the tooltip:  `Running`, `Down:  <why>`;  pure, for the page's
+ * tests
+ */
+export function stateLook(server) {
+  const state = STATES[server.state] ?? STATES.down
+  return { ...state, tip: server.why ? `${state.words}:  ${server.why}` : state.words }
+}
+
+/**
+ * the lock before a page server's address (epic `epic-engine` I456:  "Why are there two lock icons?")
+ * - main's page server (`https` given):  the secure link's switch itself (`httpsButton()`), closed while on
+ * - a worktree's on its https address:  a plain lock, saying so
+ * - any other server:  none
+ */
+function addressLock(server, https) {
+  if (https) return httpsButton(https)
+  if (isRunning(server) && /^https:/.test(server.address ?? ""))
+    return el("ui-icon", {
+      className: "servers-lock",
+      name: "lock",
+      label: SECURE_ADDRESS,
+      "data-tooltip": SECURE_ADDRESS
+    })
+  return undefined
 }
 
 /**
@@ -457,7 +499,7 @@ function actionButton(server, action, whyNot) {
   const button = el("ui-button", {
     className: "servers-action",
     size: "tiny",
-    appearance: "circular basic",
+    appearance: "basic compact",
     icon,
     "aria-label": label,
     disabled: Boolean(whyNot)

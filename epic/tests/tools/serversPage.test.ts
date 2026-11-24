@@ -4,6 +4,7 @@ import {
   addressLine,
   firstClause,
   httpsToggle,
+  stateLook,
   withSecureAddress,
   inCardOrder,
   worktreeOrder
@@ -79,7 +80,27 @@ describe("the Servers page's merged list (epic `epic-engine` I451)", () => {
   })
 })
 
-describe("the page server's HTTPS switch, a lock among its buttons (epic `epic-engine` I454)", () => {
+describe("a card's state, one icon (epic `epic-engine` I456)", () => {
+  test("stateLook():  running a green check, down a red triangle, stopped a grey circle;  its words the tooltip", () => {
+    expect(stateLook(server("page server"))).toMatchObject({ icon: "circle check", color: "green", tip: "Running" })
+    expect(stateLook(server("editor", undefined, { state: "down", why: "it stopped answering" }))).toMatchObject({
+      icon: "triangle exclamation",
+      color: "red",
+      tip: "Down:  it stopped answering"
+    })
+    expect(stateLook(server("editor", undefined, { state: "stopped" }))).toMatchObject({
+      icon: "circle outline",
+      color: "grey",
+      tip: "Stopped"
+    })
+    expect(stateLook(server("editor", undefined, { state: "starting" }))).toMatchObject({
+      loading: true,
+      tip: "Starting"
+    })
+  })
+})
+
+describe("the page server's HTTPS switch, the lock before its address (epic `epic-engine` I454, I456)", () => {
   test("httpsToggle():  on, a closed lock that turns it off;  off, an open lock that turns it on", () => {
     expect(httpsToggle({ state: "on", canTurnOn: false, canTurnOff: true })).toMatchObject({
       turn: "off",

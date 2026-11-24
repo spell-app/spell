@@ -12,7 +12,9 @@
       - Cards three a row at most, the name the link;  worktrees newest worked first (I449).
       - Each card:  its address under its name, its state on the right, its buttons as icons under the state;  the lists
         as rows in columns, the GitHub line their quiet last row (I451).
-      - main's heading has Restart all at its right;  the page server's card has the secure link's switch, a lock among its buttons (T164, I454).
+      - Each card's state is one icon, its words its tooltip;  its buttons a tight group under it (I456).
+      - main's heading has Restart all at its right;  main's page server's lock, before its address, is the secure
+        link's switch (T164, I454, I456).
     -->
     <title>Servers</title>
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
@@ -45,6 +47,13 @@
         margin: 24px 0 4px 0;
       }
       /* at most three a row:  never narrower than 200px, so the side bar and a phone take fewer */
+      .servers-cards,
+      .servers-rows {
+        /* a tiny compact icon button:  its box, and the right margin every button has */
+        --servers-button-width: 18px;
+        --servers-button-margin: -4px;
+        --servers-lock-inset: -4.75px;
+      }
       .servers-cards {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(max(min(100%, 200px), calc((100% - 16px) / 3)), 1fr));
@@ -52,16 +61,19 @@
         --ui-card-margin-block: 0;
         --ui-card-content-padding: 8px 12px;
       }
-      /* name and address on the left;  the state and, under it, its icons on the right, their left edges lined up */
+      /*
+       * name and address on the left;  the state icon and, under it, its buttons on the right, right edges lined up
+       * (I456:  one icon, not a pill, so the name keeps its room)
+       */
       .servers-card-grid {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
         justify-items: start;
-        gap: 4px 12px;
+        gap: 4px 8px;
       }
       .servers-name,
-      .servers-address {
+      .servers-address-words {
         max-width: 100%;
         min-width: 0;
         overflow: hidden;
@@ -71,24 +83,53 @@
       .servers-name {
         line-height: 24px;
       }
+      /*
+       * as wide as a button and its margin, so its glyph, which has the same 4px right margin, is centred over the
+       * last button's
+       */
+      .servers-state {
+        justify-self: end;
+        display: flex;
+        justify-content: center;
+        width: calc(var(--servers-button-width) - var(--servers-button-margin));
+        margin: 0 var(--servers-button-margin) 0 0;
+        line-height: 24px;
+      }
+      /*
+       * the lock (or the secure link's switch), then the address:  the button's own right margin, and the icon's,
+       * are the gap
+       */
       .servers-address {
+        display: flex;
+        align-items: center;
+        max-width: 100%;
+        min-width: 0;
         font-family: var(--spell-mono);
         font-size: 12px;
         line-height: 24px;
         color: var(--spell-muted);
         font-variant-numeric: tabular-nums;
+        --ui-button-basic-border-width: 0px;
       }
-      /* the glyphs' left edge on the state's:  a button's glyph sits in from its box */
+      .servers-lock {
+        flex: none;
+      }
+      /* the switch's glyph on the name's left edge:  a button's glyph sits in from its box */
+      .servers-https {
+        flex: none;
+        margin: 0 0 0 var(--servers-lock-inset);
+      }
+      /* a tight group, each button its own 4px right margin apart;  the last button's box on the card's right edge */
       .servers-actions {
         display: flex;
-        gap: 4px;
-        margin: 0 0 0 var(--servers-glyph-inset, -9px);
+        justify-self: end;
+        margin: 0 var(--servers-button-margin) 0 0;
         min-height: 24px;
         --ui-button-basic-border-width: 0px;
       }
-      /* in a row's last column:  the glyph's right edge on the column's */
+      /* in a row's last column too */
       .servers-row .servers-actions {
-        margin: 0 var(--servers-glyph-inset, -9px) 0 0;
+        margin: 0 var(--servers-button-margin) 0 0;
       }
       .servers-why-not {
         display: inline-flex;

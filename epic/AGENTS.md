@@ -138,14 +138,18 @@ a folder of the kit `spell`.
         (restart, stop;  start when stopped);  one a server can't take drawn disabled, its tooltip saying why (the hub
         keeps the rest, so it never stops;  an editor goes with its page server);  what merged into main, and each
         worktree's open work, as rows in columns, nothing wrapping, the GitHub line their quiet last row
-      - T164, I454:  the SECURE LINK, HTTPS on the page servers (`HttpsSwitch`, on `SRV.LocalCertificate`, none of
-        its logic copied), is a lock among main's page server's buttons:  closed while on (a click turns it off), open
-        while off, waiting for the password or expired (a click turns it on;  disabled, saying why, with no mkcert);
-        its tooltip says which first, "browsers use HTTP/2";  a lock before each page server's https address;  only
-        the page servers have it, the editor and the hub stay plain HTTP (a card of its own before I454 read as if
-        every server had it);  Turn on makes the certificate and has the Mac ask for the password in its own window
-        (`trustInWindow()`, the person's login keychain:  the hub has no terminal for `sudo`);  the restart is the
-        keeper's watch, asked to look just after the answer
+      - I456:  the state is ONE icon on the right of the name, its words the tooltip ("Running", "Down:  <why>"):  a
+        green circle check, a red triangle, a grey circle while stopped, a turning blue notch while starting;  under
+        it the buttons, a tight group (compact icon buttons, 4px apart), the state centred over the last;  the name
+        never cut at three a row
+      - T164, I454, I456:  the SECURE LINK, HTTPS on the page servers (`HttpsSwitch`, on `SRV.LocalCertificate`, none
+        of its logic copied), is ONE lock, before main's page server's address, and it IS the switch:  closed while on
+        (a click turns it off), open while off, waiting for the password or expired (a click turns it on;  disabled,
+        saying why, with no mkcert);  its tooltip says which first, "browsers use HTTP/2";  a worktree's page server on
+        its https address shows a plain lock there;  only the page servers have it, the editor and the hub stay plain
+        HTTP (a card of its own before I454 read as if every server had it);  Turn on makes the certificate and has
+        the Mac ask for the password in its own window (`trustInWindow()`, the person's login keychain:  the hub has
+        no terminal for `sudo`);  the restart is the keeper's watch, asked to look just after the answer
       - I455:  a look that fails (the hub handing over, a page server restarting) asks again every 2 seconds, the page
         as it was and a calm "Reconnecting…";  only after 30 seconds the problem;  a down editor's card says what to
         do in plain words, never a log file's name
