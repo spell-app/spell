@@ -2,6 +2,8 @@ import type { ChangeSet } from "@codemirror/state"
 
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
+// Import directly:  spaces' project groups alone, not its barrel, which the element build keeps out of this file's chunk
+import { localPerson, orgGroups } from "spell/app/spaces/models/projectGroups"
 
 /****************
  * ### `LanguageClient`
@@ -137,6 +139,8 @@ class WorkerClient extends LanguageClient {
     super()
     this.worker.addEventListener("message", (event: MessageEvent<LanguageWorkerReply>) => this.replied(event.data))
     this.worker.addEventListener("error", (event) => this.stopped(event.message))
+    // first, before any project:  the worker's own copy of spaces' models knows only spell's groups
+    this.post({ kind: "groups", ...groupsOnPage() })
   }
 
   answersOnPage(project: SP.SpellProject): boolean {
@@ -272,12 +276,26 @@ class WorkerClient extends LanguageClient {
 
 /** A message to the language worker. */
 export type LanguageWorkerMessage =
+  | ({ kind: "groups" } & GroupsOnPage)
   | ({ kind: "open" } & LSP.LanguageOpen)
   | ({ kind: "change" } & LSP.LanguageChange)
   | { kind: "close"; projectId: string }
   | { kind: "look"; look: LSP.CodeLook }
   | { kind: "request"; id: number; method: LSP.LanguageMethod; params: unknown }
   | ({ kind: "compile"; id: number } & LSP.LanguageCompile)
+
+/**
+ * What the page learned of this machine's person as it loaded (`NamePage`, `GET /api/people/local`), for the worker:
+ * their address, and their org's own groups (`@acme/tools`).
+ * - Without it, the worker takes `@acme/tools/dashboard` for the org's program `tools`, and can't load it.
+ */
+export type GroupsOnPage = { person: { id: string; org: string }; orgGroups: string[] }
+
+/** This page's person and org groups, as spaces' models hold them now. */
+function groupsOnPage(): GroupsOnPage {
+  const { id, org } = localPerson
+  return { person: { id, org }, orgGroups: [...orgGroups] }
+}
 
 /** The language worker's reply to a request:  its answer, or the error it threw. */
 export type LanguageWorkerReply =
