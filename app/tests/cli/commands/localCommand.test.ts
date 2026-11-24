@@ -80,6 +80,7 @@ function setUp({ installed = ["mkcert", "caddy"], trusted = false, relay = "", p
   let nextPid = 2000
 
   const tools: LocalTools = {
+    ask: async () => {},
     has: (command) => installed.includes(command),
     output: (command, args) => {
       if (command === "mkcert") return `${caRoot}\n`
