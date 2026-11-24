@@ -11,6 +11,7 @@
  * - The class words are the section's, then `panel` (and `sub` inside another panel):
  *   `<ui-panel color="violet">` => `ui violet panel section`.
  * - `appearance` gains `pane`, which only the panel draws;  and the states gain a pane's scroll shades.
+ * - Its own:  `closable` and `close-label`, the ✕ at its bar's far end, its `close` part and `ui-dismissed`.
  */
 
 import type { E } from "spell/ui/core"
@@ -38,6 +39,35 @@ const APPEARANCE_DESCRIPTION =
   "Put a toolbar in its `slot=\"actions\"`, and the bar's chevron, the toolbar's items and its actions read as one row.  " +
   "Closed, only the bar is left.  The section's words too:  `bordered`, `styled`, `raised`, `basic`, `drawer`."
 
+/** A panel's ✕, at the far end of its bar:  `closable`, and its name. */
+const CLOSE_ATTRIBUTES = [
+  {
+    name: "closable",
+    group: "behaviour",
+    kind: "boolean",
+    description:
+      "A ✕ at the far end of its bar, after its actions and chevron, light until hovered:  a click sends " +
+      "`ui-dismissed`, and the page closes it (hides it, or the column it's in).  It never folds the panel."
+  },
+  {
+    name: "close-label",
+    group: "content",
+    kind: "string",
+    description: "With `closable`:  the ✕'s name and tooltip, what closing it does (`Hide the code`).  None:  `Close`."
+  }
+] as const
+
+/** What a click on its ✕ sends. */
+const CLOSE_EVENTS = [
+  {
+    name: "ui-dismissed",
+    detail: "{ originalEvent?: Event }",
+    description:
+      "Its ✕ was clicked (`closable`):  the page closes it.  The panel doesn't hide itself, so the page can hide " +
+      "what it belongs to."
+  }
+] as const
+
 /** A pane's scroll shades' states:  which ends of its body have more to scroll to. */
 const PANE_STATES = [
   { name: "more-above", description: "A pane whose body is scrolled down from its top:  a shade shows under its bar." },
@@ -59,14 +89,23 @@ export const panelVocabulary = {
   description:
     "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  " +
     "It takes every `<ui-section>` attribute.",
-  attributes: sectionVocabulary.attributes.map((spec) =>
-    spec.name === "color"
-      ? { ...spec, description: COLOR_DESCRIPTION }
-      : spec.name === "fold-icon"
-        ? { ...spec, description: FOLD_ICON_DESCRIPTION }
-        : spec.name === "appearance"
-          ? { ...spec, values: [...spec.values, PANE_APPEARANCE], description: APPEARANCE_DESCRIPTION }
-          : spec
-  ),
-  states: [...sectionVocabulary.states, ...PANE_STATES]
+  attributes: [
+    ...sectionVocabulary.attributes.map((spec) =>
+      spec.name === "color"
+        ? { ...spec, description: COLOR_DESCRIPTION }
+        : spec.name === "fold-icon"
+          ? { ...spec, description: FOLD_ICON_DESCRIPTION }
+          : spec.name === "appearance"
+            ? { ...spec, values: [...spec.values, PANE_APPEARANCE], description: APPEARANCE_DESCRIPTION }
+            : spec
+    ),
+    ...CLOSE_ATTRIBUTES
+  ],
+  events: [...sectionVocabulary.events, ...CLOSE_EVENTS],
+  parts: [...sectionVocabulary.parts, { name: "close", description: "With `closable`:  the ✕ at the bar's far end." }],
+  states: [...sectionVocabulary.states, ...PANE_STATES],
+  texts: [
+    ...sectionVocabulary.texts,
+    { key: "close", text: "Close", description: "The ✕'s name and tooltip, with `closable` and no `close-label`." }
+  ]
 } as const satisfies E.ComponentVocabulary

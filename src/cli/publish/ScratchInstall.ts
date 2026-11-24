@@ -1,7 +1,9 @@
 import { execFileSync } from "node:child_process"
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+
+import JSON5 from "json5"
 
 import { SRV } from "spell/server"
 import { BrowserPage } from "spell/element-tools/BrowserPage"
@@ -20,13 +22,14 @@ import type { PackedPackage, PublishCheck } from "spell/cli/publish"
  *      an epic page and the epics pack answer (epic `epic-engine` I246);  every route module loaded;
  *      an edit saves and formats the page
  *   4. a command that needs a package left out prints the line to paste
+ *   5. the shipped guides are there, every one their list names (epic `epic-engine` P79)
  * - WHOLE:  every `.tgz`, plus the add-ons that line names (epic `repo-split` P19's Verify):
  *   1. node imports `spell/util` and `spell/parser/parser`
  *   2. a page Vite builds, importing `spell/ui/ui-button` and `spell/element`, draws a `<ui-button>` in headless Chromium,
  *      with ONE element base:  the button's class extends the page's own `E.DOMElement`, and the built page holds one
  *      `class DOMElement`
- *   3. `npx spell help` runs, and the command the lean install couldn't;  and `npx epic --help`, and the epic checks
- *      above, when `spell-epic` is among them
+ *   3. `npx spell help` runs, and the command the lean install couldn't;  and `npx epic --help`, the plugin's own
+ *      guides (`guidesMissing()`) and the epic checks above, when `spell-epic` is among them
  * - Both are held to `DependencyCheck`'s rules (epic `epic-engine` P67):  what someone outside gets, deprecated or
  *   audited, which the lockfile can't show.  The publish fails on what isn't on the known-open list.
  * - Third-party packages come from the npm registry:  it needs the network.
@@ -77,6 +80,7 @@ export class ScratchInstall {
       this.step("lean:  audited", () => this.audit()),
       this.step("lean:  small enough", () => this.leanSize()),
       this.step("lean:  npx spell help runs", () => this.spellHelp()),
+      this.step("lean:  the shipped guides and their list", () => this.shippedGuides()),
       await this.asyncStep("lean:  the epic server starts, and an epic page saves", () => this.epicServer(spellEpic)),
       this.step("lean:  a command needing a left-out package prints the line to paste", () => this.addOnMessage())
     ]
@@ -99,6 +103,7 @@ export class ScratchInstall {
     ]
     if (this.packed.some((pkg) => pkg.name === "spell-epic")) {
       checks.push(this.step("whole:  npx epic --help runs (spell-epic's bin, on spell's code)", () => this.epicHelp()))
+      checks.push(this.step("whole:  the plugin holds its own guides", () => this.pluginGuides()))
       const epic = (...args: string[]) => ["--no-install", "epic", ...args]
       checks.push(
         await this.asyncStep("whole:  the epic server starts and serves an epic page", () => this.epicServer(epic))
@@ -156,6 +161,37 @@ export class ScratchInstall {
     const size = `${count} packages, ${megabytes} MB (limits:  ${LEAN_LIMITS.packages}, ${LEAN_LIMITS.megabytes} MB)`
     if (count > LEAN_LIMITS.packages || megabytes > LEAN_LIMITS.megabytes) throw new Error(size)
     return size
+  }
+
+  /**
+   * The guides that ship with Spell (epic `epic-engine` P79):  the installed `spell`'s `guides/guides.json5`, and every
+   * page it lists there;  nothing from the epic repo (no epic page, saga or docs home among them).
+   * - none listed in the kit (no `guides/guides.json5` yet):  says so, and passes
+   */
+  private shippedGuides(): string {
+    const installed = join(this.project, "node_modules", SPELL, "guides")
+    const listFile = join(installed, "guides.json5")
+    if (!existsSync(join(CLI.KIT_ROOT, "guides", "guides.json5"))) return "no shipped guides yet"
+    if (!existsSync(listFile)) throw new Error("guides/guides.json5 is missing from the package")
+    const list = JSON5.parse(readFileSync(listFile, "utf8")) as { guides: { path: string }[] }
+    const missing = list.guides.filter((guide) => !existsSync(join(installed, guide.path.replace(/^guides\//, ""))))
+    if (missing.length) throw new Error(`listed but not shipped:  ${missing.map((guide) => guide.path).join(", ")}`)
+    const strays = ["epics", "sagas", "pages"].filter((folder) =>
+      existsSync(join(this.project, "node_modules", SPELL, folder))
+    )
+    if (strays.length) throw new Error(`the epic repo's folders shipped:  ${strays.join(", ")}`)
+    return `${list.guides.length} guides`
+  }
+
+  /**
+   * The epic plugin's own guides (epic `epic-engine` P79):  every page of the checkout's `epic/guides/` in the
+   * installed `spell-epic`'s `guides/`, which VS Code's Epic Docs tab and the `/guides/` engine route serve.
+   */
+  private pluginGuides(): string {
+    const source = join(CLI.KIT_ROOT, "epic", "guides")
+    const missing = guidesMissing(source, join(this.project, "node_modules", "spell-epic", "guides"))
+    if (missing.length) throw new Error(`not shipped:  ${missing.join(", ")}`)
+    return `${guidePages(source).length} guides`
   }
 
   /** The add-ons as the published `spell` lists them:  its optional `peerDependencies`. */
@@ -369,6 +405,22 @@ export class ScratchInstall {
 }
 
 /** The one package everything else is built on, and the only one `npx spell@next epic init` installs. */
+/**
+ * The pages (`.html`) of the guides folder `source` that `installed` doesn't hold, by their path in it.
+ * - for a packed plugin:  its own guides, checked by `ScratchInstall`
+ */
+export function guidesMissing(source: string, installed: string): string[] {
+  return guidePages(source).filter((page) => !existsSync(join(installed, page)))
+}
+
+/** Every page (`.html`) under the guides folder `folder`, by its path in it;  `[]` for none. */
+function guidePages(folder: string): string[] {
+  if (!existsSync(folder)) return []
+  return readdirSync(folder, { recursive: true, encoding: "utf8" })
+    .filter((page) => page.endsWith(".html"))
+    .sort()
+}
+
 const SPELL = "spell"
 
 /**

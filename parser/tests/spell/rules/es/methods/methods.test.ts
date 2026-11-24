@@ -4,12 +4,12 @@ import { SP } from "spell/parser/spell"
 import { core } from "spell/parser/core"
 
 describe("testing spell module methods, in Spanish", () => {
-  unitTestModuleRules(SP.spanish.parser, "methods", core.resetRuntime)
+  unitTestModuleRules(SP.Language.for("es").parser, "methods", core.resetRuntime)
 
   /** `lines` as one file of a Spanish project:  its compiled code. */
   function compiled(lines: string[]) {
     const { files } = parseSpellProject([{ path: "/test.spell", contents: lines.join("\n") }], {
-      parentScope: SP.spanish.rootScope
+      parentScope: SP.Language.for("es").rootScope
     })
     return files[0]!.compiled
   }

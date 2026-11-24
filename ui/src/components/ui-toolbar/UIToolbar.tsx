@@ -3,12 +3,14 @@ import type { JSX } from "@solidjs/web"
 
 // Import directly:  in `core`'s util barrel it would cost every page its bytes, as for `TocPreferences`
 import { PrefStore } from "spell/util/persist/PrefStore"
+import { Dragging } from "spell/util/Dragging"
 import { E, UIT } from "spell/ui/core"
 // the family barrel, not the leaf:
 // the lib build then imports `ui-menu.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines `<ui-menu>` and `<ui-item>`, which a toolbar extends and holds)
 import { UIMenu } from "spell/ui/components/ui-menu"
 import type { menuVocabulary } from "spell/ui/components/ui-menu/UIMenu.en"
+import type { DragMark, UIItem } from "spell/ui/components/ui-item/UIItem"
 // The menu family's, beside its sheet (below):  `<ui-tabs>`' tab list scrolls the same way
 import { ScrollingRow, START, END } from "spell/ui/components/ui-menu/ScrollingRow"
 import { toolbarVocabulary } from "./UIToolbar.en"
@@ -48,6 +50,8 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - `scroll-first`, without a `segmented` look:  once only its icons are left, it scrolls with them, no overflow button.
  *   - `scroll-first`, with a `segmented` look:  it does scroll with them while the row has `--ui-toolbar-scroll-min`
  *     (200px) to show, then it's the dropdown:  a row of many files stays a row for as long as it can.
+ *   - `scroll-only`:  as `scroll-first`, with no end:  however narrow, it scrolls, and it's never the dropdown
+ *     (the editor's file tabs, whose list button already lists every file;  epic `editor` I188, T145).
  * - Its own items draw no key caps:  an action's keys are in its tooltip (`Undo (⌘Z)`).  `show-keys` draws them.
  * - `appearance="pills"`:  each run of its items between two dividers (`<ui-item kind="divider">`), spacers or other elements is one rounded
  *   track, as a group of buttons is drawn, its items tiles on it (`pills()`, `UIToolbar.css`).
@@ -69,6 +73,11 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *     (the editor's file tabs:  `file outline`;  epic `editor` T76).
  *   - `all-items-at-end` puts the button at the bar's far end, however few items show:
  *     without it, it sits right after the last one (the editor's file tabs;  epic `editor` I173).
+ * - `reorderable`:  its items dragged along the row (`Dragging`, the kit's;  the editor's file tabs, epic `editor` T145).
+ *   - The dragged one dimmed (`:state(dragged)`), a 2px line where it would land, before or after the item under the
+ *     pointer (`:state(drop-before)`, `:state(drop-after)`), all on the items, `UIToolbar.css`.
+ *   - The drop sends `ui-item-dropped`:  the row is the page's, so the page moves it.  Escape puts it back.
+ *   - A press that doesn't move is a click, as ever;  a press on an item's ✕ (`closable`) is never a drag.
  * - A BAR's slots around the items, for a site's top bar:
  *   `icon`, `title`, `center` (the room left), `right` (at the end).
  *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
@@ -89,7 +98,7 @@ export class UIToolbar extends UIMenu {
   readonly scrolling = new ScrollingRow({
     owner: this,
     // a shrinkable one fits its titles instead:  no keys, no fades;  unless it scrolls first, and is still whole
-    canScroll: () => !this.shrinkable || (!!this.scrollFirst && !this.isDropdown),
+    canScroll: () => !this.shrinkable || (this.scrollsFirst && !this.isDropdown),
     // the list's button, while drawn:  the row would get its room back
     roomBeside: () => this.allItemsRoom()
   })
@@ -109,13 +118,18 @@ export class UIToolbar extends UIMenu {
     this.scrolling.measure()
   }
 
-  /** `scroll-first`:  the row scrolls before it's a dropdown. */
+  /** `scroll-first` (or `scroll-only`):  the row scrolls before it's a dropdown. */
   protected get scrollsFirst(): boolean {
-    return !!this.scrollFirst
+    return !!this.scrollFirst || !!this.scrollOnly
+  }
+
+  /** `scroll-only`:  the row scrolls however narrow, and is never a dropdown. */
+  protected get scrollsOnly(): boolean {
+    return !!this.scrollOnly
   }
 
   /** SIDE EFFECT:  follows the box's scroll and the sizes of it and its items, once drawn;  the cleanup stops. */
-  @E.onChange("isReady", "shrinkable", "scrollFirst", "fitAnswer")
+  @E.onChange("isReady", "shrinkable", "scrollFirst", "scrollOnly", "fitAnswer")
   protected onReadyToScroll(isReady: boolean) {
     const box = this.box
     if (!isReady || !box) return
@@ -137,7 +151,8 @@ export class UIToolbar extends UIMenu {
 
   /**
    * `ItemOwner`:  the menu's context for `item`, plus the toolbar's own for the items in its row:
-   * no key caps (unless `show-keys`), and its place in its pill (`appearance="pills"`).
+   * no key caps (unless `show-keys`), its place in its pill (`appearance="pills"`), and whether some items are put
+   * away (`limited`:  a `closable="when-limited"` tab's ✕ shows only then).
    * - The same object for the same answer (`contextWith()`), so an item doesn't draw again for nothing.
    * - SIDE EFFECT:  as the menu's, and with `pills`, works out the pills again once the items have drawn.
    */
@@ -146,7 +161,7 @@ export class UIToolbar extends UIMenu {
     if (item.parentElement !== this.domElement) return context
     const pill = this.hasPills ? this.pillPlaces.get(item) : undefined
     if (this.hasPills) this.pillRefresh.ask()
-    return this.contextWith(context, !this.showKeys, pill)
+    return this.contextWith(context, !this.showKeys, pill, this.isLimited)
   }
 
   /** `appearance` holds `pills`. */
@@ -193,13 +208,14 @@ export class UIToolbar extends UIMenu {
   private contextWith(
     context: UIT.ItemContext,
     hidesShortcuts: boolean,
-    pill: UIT.PillPlace | undefined
+    pill: UIT.PillPlace | undefined,
+    limited: boolean
   ): UIT.ItemContext {
     let answers = this.contexts.get(context)
     if (!answers) this.contexts.set(context, (answers = new Map()))
-    const key = `${hidesShortcuts}${SEPARATOR}${pill ?? ""}`
+    const key = `${hidesShortcuts}${SEPARATOR}${pill ?? ""}${SEPARATOR}${limited}`
     let answer = answers.get(key)
-    if (!answer) answers.set(key, (answer = { ...context, hidesShortcuts, ...(pill ? { pill } : {}) }))
+    if (!answer) answers.set(key, (answer = { ...context, hidesShortcuts, limited, ...(pill ? { pill } : {}) }))
     return answer
   }
 
@@ -449,6 +465,55 @@ export class UIToolbar extends UIMenu {
         </button>
       </Show>
     )
+  }
+
+  ////////////////
+  // ## Dragging items along the row (`reorderable`)
+  ////////////////
+
+  /** A press on one of its items:  `reorderable`, a drag along the row once it moves. */
+  @E.on("pointerdown")
+  protected onItemPressed(event: PointerEvent) {
+    if (!this.reorderable || event.button !== 0) return
+    const items = this.rowElements().filter((each) => this.itemOf(each) && !(each as HTMLElement).hidden)
+    const item = event.composedPath().find((at) => items.includes(at as Element)) as HTMLElement | undefined
+    if (!item) return
+    const from = items.indexOf(item)
+    let target: Element | undefined
+    const mark = (element: Element | undefined, dragMark: DragMark | undefined) => {
+      const component = (element as E.DOMElement | undefined)?.component as UIItem | undefined
+      if (component) component.dragMark = dragMark
+    }
+    const markTarget = (next: Element | undefined) => {
+      if (next === target) return
+      mark(target, undefined)
+      target = next
+      if (target) mark(target, items.indexOf(target) > from ? "after" : "before")
+    }
+    const end = () => {
+      markTarget(undefined)
+      mark(item, undefined)
+    }
+    new Dragging(item, event, {
+      carried: [item],
+      follows: false,
+      placing: (x) => {
+        mark(item, "dragged")
+        // the item under the pointer, by its box:  an item draws in its shadow, its own box empty
+        const over = items.find((each) => {
+          const box = this.itemOf(each)?.focusTarget?.getBoundingClientRect()
+          return !!box && box.width > 0 && x >= box.left && x < box.right
+        })
+        markTarget(over === item ? undefined : over)
+      },
+      onDrop: () => {
+        const landed = target
+        const place = landed && items.indexOf(landed) > from ? "after" : "before"
+        end()
+        if (landed) this.send("ui-item-dropped" as never, { item, target: landed, place } as never)
+      },
+      onCancel: end
+    })
   }
 
   ////////////////

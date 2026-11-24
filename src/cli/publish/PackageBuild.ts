@@ -14,6 +14,7 @@ import type { Plugin } from "esbuild"
 import JSON5 from "json5"
 
 import { packageRootFor } from "spell/toolchain/sourceNames"
+import { SRV } from "spell/server"
 import { Git } from "spell/server/Git"
 import { pathInside } from "spell/server/RealPath"
 import { ALWAYS_EXCLUDED, DIST, type BuildReport, type PublishedRepo } from "spell/cli/publish"
@@ -103,12 +104,39 @@ export class PackageBuild {
   // ## Which files
   ////////////////
 
-  /** The files of `src/` that ship, from `src/`:  git's, less the excluded. */
+  /**
+   * The files of `src/` that ship, from `src/`:  git's, and what the repo's `bundles` built there (git ignores
+   * those), less the excluded.
+   */
   sourceFiles(): string[] {
     const excluded = [...ALWAYS_EXCLUDED, ...(this.repo.settings.exclude ?? [])]
-    return trackedFiles(this.root, "src")
+    const files = new Set([...trackedFiles(this.root, "src"), ...this.bundledFiles()])
+    return [...files]
+      .sort()
       .map((file) => file.slice("src/".length))
       .filter((file) => !matchesAny(file, excluded))
+  }
+
+  /**
+   * What the repo's `bundles` (`"spellPublish": { "bundles" }`) wrote under `src/`, from the repo's root:  each
+   * one's output folder and the files it writes beside it (`SRV.BUNDLES`' `output`, `generated`), as they are on disk.
+   * - `spell publish` builds them first (`buildFiles()`);  dot files (a build's record) never ship.
+   */
+  private bundledFiles(): string[] {
+    const names = this.repo.settings.bundles ?? []
+    const paths = SRV.BUNDLES.filter((spec) => names.includes(spec.name)).flatMap((spec) => [
+      spec.output,
+      ...(spec.generated ?? [])
+    ])
+    return paths
+      .filter((path) => path.startsWith("src/"))
+      .flatMap((path) => {
+        const full = join(this.root, path)
+        if (!existsSync(full)) return []
+        if (!statSync(full).isDirectory()) return [path]
+        return walk(full).map((file) => `${path}/${file}`)
+      })
+      .filter((file) => !file.split("/").some((part) => part.startsWith(".")))
   }
 
   ////////////////
@@ -331,6 +359,9 @@ export class PackageBuild {
    * Copy the repo's built declarations (`dist-types/src/`, `spell-types`'s) into `dist/`, but those of excluded files,
    * without their source-map line:  the source doesn't ship.
    * - None built (spell-epic and spell-app have none:  no repo above reads them):  nothing to copy.
+   * - Only those whose source is still there (epic `epic-engine` T153):  an incremental build never deletes the
+   *   declarations of a file moved or deleted, so a checkout's `dist-types/` keeps them, as main's held 50 naming what
+   *   the repo mustn't, from before the source changed.
    */
   private copyDeclarations(): void {
     const types = join(this.root, "dist-types", "src")
@@ -340,6 +371,8 @@ export class PackageBuild {
       if (!file.endsWith(".d.ts")) continue
       const source = file.replace(/\.d\.ts$/, ".ts")
       if (matchesAny(source, excluded) || matchesAny(`${source}x`, excluded)) continue
+      // left from a source file since moved or deleted:  the build never deletes one, and it'd ship stale
+      if (!existsSync(join(this.root, "src", source)) && !existsSync(join(this.root, "src", `${source}x`))) continue
       const out = join(this.dist, file)
       if (existsSync(out)) continue // a hand-written `.d.ts`, copied from `src/`
       mkdirSync(dirname(out), { recursive: true })

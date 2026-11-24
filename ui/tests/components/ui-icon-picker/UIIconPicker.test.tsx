@@ -154,6 +154,23 @@ describe("<ui-icon-picker> panel", () => {
     expect(panel.getBoundingClientRect().top).toBeGreaterThanOrEqual(field.getBoundingClientRect().bottom)
   })
 
+  test("Browse, beside the search box:  every icon in a dialog, searching for what's typed;  a click there picks it", async () => {
+    const { host, field, panel, search, cells } = await picker(`<ui-icon-picker aria-label="Icon"></ui-icon-picker>`)
+    const values = changes(host)
+    await openGrid(field, cells)
+    await userEvent.type(search, "bell")
+    await userEvent.click(host.shadowRoot!.querySelector<HTMLElement>("[part~=browse]")!)
+    expect(panel.matches(":popover-open")).toBe(false)
+    const browser = () => document.querySelector<HTMLElement>("ui-modal ui-icon-browser")
+    const firstName = () =>
+      browser()?.shadowRoot?.querySelector<HTMLElement>("[part~=tile] [part~=name]")?.textContent ?? undefined
+    await expect.poll(firstName, { timeout: 10_000 }).toBe("bell")
+    await userEvent.click(browser()!.shadowRoot!.querySelector<HTMLElement>("[part~=tile]")!)
+    await expect.poll(() => host.value).toBe("bell")
+    expect(values).toEqual(["bell"])
+    await expect.poll(() => document.querySelector("ui-modal")).toBeNull()
+  })
+
   test("sends the cancelable ui-opening / ui-closing, as the other popovers do;  a cancelled one changes nothing", async () => {
     const { host, field, panel } = await picker(`<ui-icon-picker aria-label="Icon"></ui-icon-picker>`)
     const heard: string[] = []

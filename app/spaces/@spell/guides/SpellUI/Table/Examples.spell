@@ -420,6 +420,14 @@
 			</example>
 		</>
 
+		<section label="Editable" sticky="stack" collapsible dividing>
+			<example "Editable" description="`editable` turns a data-mode table into a spreadsheet:  arrows, Tab and Enter move the cursor, typing or F2 edits a cell by its column's `type`, Escape puts it back.  Type in the empty last row to add one;  Delete clears a cell, ⌘ / Ctrl + Delete removes its row;  paste a block of cells from Excel or Sheets.  Each change goes out as one `ui-editing`, which a page cancels when it writes its own data.">
+				<html>
+					<ui-table editable celled caption="Reviews" column-defs="\[{\"key\":\"film\",\"header\":\"Film\"},{\"key\":\"stars\",\"header\":\"Stars\",\"type\":\"number\",\"textAlign\":\"right\"},{\"key\":\"seen\",\"header\":\"Seen in a cinema\",\"type\":\"yes-no\"},{\"key\":\"mood\",\"header\":\"Mood\",\"choices\":\[{\"value\":\"glad\",\"text\":\"Glad\"},{\"value\":\"sad\",\"text\":\"Sad\"},{\"value\":\"thrilled\",\"text\":\"Thrilled\"}]},{\"key\":\"words\",\"header\":\"What they thought\"}]" rows="\[{\"film\":\"A New Hope\",\"stars\":5,\"seen\":true,\"mood\":\"thrilled\",\"words\":\"Where it all began.\"},{\"film\":\"The Empire Strikes Back\",\"stars\":5,\"seen\":false,\"mood\":\"sad\",\"words\":\"Better every time.\"},{\"film\":\"Return of the Jedi\",\"stars\":4,\"seen\":true,\"mood\":\"glad\",\"words\":\"Ewoks!\"}]"></ui-table>
+				</html>
+			</example>
+		</>
+
 		<section label="Row spanned" sticky="stack" collapsible dividing>
 			<example "Row spanned" description="A `rowspanned` cell is a hidden stand-in for a cell spanning down from the row above, so every row keeps a full set of cells (and stacks right on phones).">
 				<html>
@@ -733,7 +741,7 @@
 			</example>
 		</>
 
-		<section label="Colored and Marked" sticky collapsible dividing id="states-colored-and-marked">
+		<section label="Colored and Marked" sticky collapsible dividing>
 			<example "Colored and Marked">
 				<html>
 					<ui-table celled>
@@ -765,7 +773,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Single Line" sticky="stack" collapsible dividing id="variations-single-line">
+		<section label="Single Line" sticky="stack" collapsible dividing>
 			<example "Single Line" description="A table can specify that its cell contents should remain on a single line, and not wrap.">
 				<table single-line>
 					<row header>
@@ -1100,7 +1108,7 @@
 			</example>
 		</>
 
-		<section label="Striped" sticky="stack" collapsible dividing id="variations-striped">
+		<section label="Striped" sticky="stack" collapsible dividing>
 			<example "Striped" description="A table can stripe alternate rows of content with a darker color to increase contrast.">
 				<table appearance="striped">
 					<row header>
@@ -1316,7 +1324,7 @@
 			</example>
 		</>
 
-		<section label="Column Width" sticky="stack" collapsible dividing id="variations-column-width">
+		<section label="Column Width" sticky="stack" collapsible dividing>
 			<example "Column Width" description="A table can specify the width of individual columns independently.">
 				<html>
 					<ui-table>
@@ -1833,7 +1841,7 @@
 			</example>
 		</>
 
-		<section label="Sortable" sticky="stack" collapsible dividing id="variations-sortable">
+		<section label="Sortable" sticky="stack" collapsible dividing>
 			<example "Sortable" description="A table may allow a user to sort contents by clicking on a table header.">
 				<html>
 					<ui-table sortable celled client-sort>
@@ -2527,7 +2535,7 @@
 			</example>
 		</>
 
-		<section label="Stuck" sticky="stack" collapsible dividing id="variations-stuck">
+		<section label="Stuck" sticky="stack" collapsible dividing>
 			<example "Stuck" description="A table can scroll horizontally, with its head, foot, first or last column staying stuck (`stuck`).  You can freely stick any combination like `stuck=\"head first\"`, `\"foot first last\"`, `\"head foot first\"`, `\"first last\"`, etc.">
 				<container scrolling="short">
 					<table stuck="head foot first last" unstackable celled aria-label="Jobs">
@@ -2654,6 +2662,70 @@
 					</table>
 				</container>
 				<message slot="description" state="info" size="small">A stuck table possibly needs to be wrapped into an overflowing container like a <link link="/container">scrolling container</link> or <link link="/segment">scrolling segment</link>. If you don't want an extra wrapper, use <text code>overflowing</text> on the table; this only works if the table's columns exceed the available width.</message>
+			</example>
+		</>
+	</>
+
+	<section label="Sizing">
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example "Height" description="`height` gives the table a height, and its rows scroll under the header;  a bare `resizable` lets people drag its height.">
+				<table celled height="12em" resizable>
+					<row header>
+						<cell>Rack</cell>
+						<cell>State</cell>
+						<cell>Ports</cell>
+					</row>
+					<row>
+						<cell>Rack 1</cell>
+						<cell>Busy</cell>
+						<cell>4</cell>
+					</row>
+					<row>
+						<cell>Rack 2</cell>
+						<cell>Off</cell>
+						<cell>8</cell>
+					</row>
+					<row>
+						<cell>Rack 3</cell>
+						<cell>Ready</cell>
+						<cell>12</cell>
+					</row>
+					<row>
+						<cell>Rack 4</cell>
+						<cell>Busy</cell>
+						<cell>16</cell>
+					</row>
+					<row>
+						<cell>Rack 5</cell>
+						<cell>Off</cell>
+						<cell>20</cell>
+					</row>
+					<row>
+						<cell>Rack 6</cell>
+						<cell>Ready</cell>
+						<cell>24</cell>
+					</row>
+					<row>
+						<cell>Rack 7</cell>
+						<cell>Busy</cell>
+						<cell>28</cell>
+					</row>
+					<row>
+						<cell>Rack 8</cell>
+						<cell>Off</cell>
+						<cell>32</cell>
+					</row>
+					<row>
+						<cell>Rack 9</cell>
+						<cell>Ready</cell>
+						<cell>36</cell>
+					</row>
+					<row>
+						<cell>Rack 10</cell>
+						<cell>Busy</cell>
+						<cell>40</cell>
+					</row>
+				</table>
 			</example>
 		</>
 	</>

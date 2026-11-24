@@ -15,3 +15,7 @@ src/spell/spellSyntax.json                                    linguist-generated
 
 # core:  the core's method list (`yarn core:gen:declarations`)
 src/core/core.declarations.json5                              linguist-generated
+
+# core:  the built-in types' pack the language server and the editor read (`yarn lsp:scopes --builtins`, in the app
+# folder)
+src/core/core.scopes.js                                       linguist-generated merge=binary

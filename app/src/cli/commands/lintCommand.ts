@@ -3,8 +3,12 @@ import type { TextEdit } from "vscode-languageserver"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { writeSpellVersion } from "spell/parser/spell/node/projectFile"
 import { SourceEdits, type TextSpan } from "spell/app/lsp/SourceEdits"
 import { CLI } from "spell/app/cli"
+
+/** The warning for one of Spell's old forms, written the old way:  see `oldFormsIn()`. */
+const OLD_FORM = "old-form"
 
 /** The warning for a description written as a `<text>` just before its example:  see `descriptionsBeforeExamples()`. */
 const DESCRIPTION_BEFORE_EXAMPLE = "description-before-example"
@@ -20,16 +24,16 @@ const DESCRIPTION_BEFORE_EXAMPLE = "description-before-example"
  *   (decision Q17;  `CLI.EditorPages`).
  * - `--fix`:  puts right what it can, writes it back,
  *   then lists what it did, one line each (`... fixed:  ...`), on stdout (with `--json`, on stderr):
- *   - each retired word in the spell, e.g. `parts` => `slots` -- see `fixRetiredWords()`
+ *   - each of Spell's old forms, e.g. `parts` => `slots`, a note after a line's code, `// ...`, moved to the line
+ *     under it, `-- ...` -- see `fixOldForms()`;  then the project's file names the Spell it now matches
  *   - a `.spell` file's HTML habits, e.g. `<ui-button>` => `<button>` -- see `fixHtmlHabits()`
  *   - a `.spell` page's old spellings, e.g. `<spell-notebook "x">` => `<spell-page "x" notebook>` --
  *     see `fixPageHabits()`
- *   - a note after a line's code, `// ...`, moved to the line under it, `-- ...` -- see `fixLineEndNotes()`
  *   - each editor page
  *   - What it can't put right is still an error.
  * - A `.spell` file's HTML habit it can't put right, `on-click=`, is an error -- see `htmlHabitsIn()`.
  * - A page's example described by a `<text>` just before it is a WARNING, which `--fix` puts right --
- *   see `pageHabitsIn()`.
+ *   see `pageHabitsIn()`;  so is each of Spell's old forms -- see `oldFormsIn()`.
  * - SIDE EFFECT:  compiles any project they import which has never been compiled --
  *   see `CliSession.compileImports()`.
  * - Returns the exit code:  `EXIT.ERRORS` if there were any errors;  warnings alone exit 0.
@@ -43,20 +47,21 @@ export async function lintCommand(session: CLI.CliSession, args: string[], optio
     for (const resolved of resolvedProjects) {
       if (resolved.kind === "file") {
         const { project } = resolved.file
-        if (options.fix) fixes.push(...(await fixRetiredWords(session, project, resolved.file)))
+        if (options.fix) fixes.push(...(await fixOldForms(session, project, resolved.file)))
         if (options.fix) fixes.push(...(await fixHtmlHabits(session, project, resolved.file)))
         if (options.fix) fixes.push(...(await fixPageHabits(session, project, resolved.file)))
-        if (options.fix) fixes.push(...(await fixLineEndNotes(session, project, resolved.file)))
         problems.push(...(await checkProject(session, project, resolved.file, status)))
+        problems.push(...oldFormsIn(project, resolved.file))
         problems.push(...htmlHabitsIn(project, resolved.file))
         problems.push(...pageHabitsIn(project, resolved.file))
         continue
       }
-      if (options.fix) fixes.push(...(await fixRetiredWords(session, resolved.project)))
+      if (options.fix) fixes.push(...(await fixOldForms(session, resolved.project)))
       if (options.fix) fixes.push(...(await fixHtmlHabits(session, resolved.project)))
       if (options.fix) fixes.push(...(await fixPageHabits(session, resolved.project)))
-      if (options.fix) fixes.push(...(await fixLineEndNotes(session, resolved.project)))
+      if (options.fix) upgradeSpellVersion(resolved.project)
       problems.push(...(await checkProject(session, resolved.project, undefined, status)))
+      problems.push(...oldFormsIn(resolved.project))
       problems.push(...htmlHabitsIn(resolved.project))
       problems.push(...pageHabitsIn(resolved.project))
       const pages = await checkPages(session, resolved.project, status, options)
@@ -95,44 +100,60 @@ async function checkProject(
 }
 
 /**
- * With `--fix`:  put each RETIRED word in `project` right -- only `file`'s, if given --
- * e.g. `- it has parts "front"` => `- it has slots "front"`, `- animation deal it:` => `- to deal it:`,
- * and write each changed file back (epic `elemental-spell`, Q61).
- * - The parser marks each one as an error whose `data.replacement` is its new word:
- *   see `SpellType.retiredWordErrorsIn()`.
- * - A word written with a capital keeps it:  `Parts` => `Slots`.
- * - A word that's simply gone takes its colon and spaces with it:  `wait for: deal` => `deal` (epic `language` P13).
+ * With `--fix` (and `spell upgrade`):  rewrite each of Spell's old forms in `project` the new way -- only `file`'s,
+ * if given -- and write each changed file back (`SP.OldForms`, epic `language` P68):
+ * - a retired word, `- it has parts "front"` => `- it has slots "front"`, `- animation deal it:` => `- to deal it:`
+ *   (epic `elemental-spell`, Q61);  one that's simply gone takes its colon with it, `wait for: deal` => `deal`
+ * - a note after a line's code, `load its sound  // so it plays`, moved to the line under it, `-- so it plays`
+ *   (epic `language` T166)
+ * - The parser reports each one, a warning (an error once Spell drops it):  `SP.OldForms.report()`.
+ * - `write: false` (`spell upgrade --dry-run`):  says what it would fix, and writes nothing.
  * - Not a test project's files:  they stay frozen, as their editor pages do.
  * - SIDE EFFECT:  parses `project`, then hands it each file's new text, so what's listed after is what's left.
- * - Returns what it fixed, each a problem saying so, where the word was.
+ * - Returns what it fixed, each a problem saying so, where it was.
  */
-async function fixRetiredWords(
+export async function fixOldForms(
   session: CLI.CliSession,
   project: SP.SpellProject,
-  file?: SP.SpellFile
+  file?: SP.SpellFile,
+  { write = true }: { write?: boolean } = {}
 ): Promise<CLI.Problem[]> {
   await session.parse(project)
   const fixes: CLI.Problem[] = []
   // its files load as it parses:  read them after
   for (const spellFile of file ? [file] : project.spellFiles) {
-    const path = spellFile.location.serverPath
     const text = spellFile.contents
-    if (!spellFile.match || text === undefined || CLI.isTestProject(path)) continue
-    const retired = (SP.Block.getParseErrors(spellFile.match) ?? []).flatMap(({ start, end, data: { replacement } }) =>
-      typeof replacement === "string" && start !== undefined && end !== undefined ? [{ start, end, replacement }] : []
+    if (!spellFile.match || text === undefined || CLI.isTestProject(spellFile.location.serverPath)) continue
+    const edits = SP.OldForms.uses(spellFile).flatMap((use) =>
+      use.edits.map(({ start, end, newText }, index): Fix =>
+        fix(text, { start, end }, newText, index ? undefined : fixedMessage(use))
+      )
     )
-    const edits = retired.map(({ start, end, replacement }): Fix => {
-      const written = text.slice(start, end)
-      if (!replacement) {
-        const gone = end + /^[ \t]*:?[ \t]*/.exec(text.slice(end))![0].length
-        return fix(text, { start, end: gone }, "", `fixed:  "${written}" isn't needed any more`)
-      }
-      const word = /^[A-ZÁÉÍÓÚÑ]/.test(written) ? replacement[0]!.toUpperCase() + replacement.slice(1) : replacement
-      return fix(text, { start, end }, word, `fixed:  "${written}" is now "${word}"`)
-    })
-    fixes.push(...(await writeFixes(project, spellFile, edits)))
+    fixes.push(...(await writeFixes(project, spellFile, edits, { write })))
   }
   return fixes
+}
+
+/** What `fixOldForms()` says it did for `use`. */
+function fixedMessage(use: SP.OldFormUse): string {
+  if (use.form.id === "line-end-comment") return 'fixed:  a "//" note moved to the line under it, as "--"'
+  const newText = use.edits[0]?.newText
+  return newText ? `fixed:  "${use.written}" is now "${newText}"` : `fixed:  "${use.written}" isn't needed any more`
+}
+
+/**
+ * Write the Spell `project` now matches into its project file, `spellVersion`, after `fixOldForms()` (epic `language`
+ * P68):  `writeSpellVersion()`, only when it names an older Spell or none.
+ * - Not a test project's:  it stays frozen.
+ * - `write: false`:  only whether it would.
+ * - SIDE EFFECT:  `project.contents.spellVersion` follows.
+ * - Returns whether it changed (or would change) the file.
+ */
+export function upgradeSpellVersion(project: SP.SpellProject, { write = true }: { write?: boolean } = {}): boolean {
+  const folder = new SP.SpellLocation(project.projectId).serverPath
+  if (CLI.isTestProject(folder) || !writeSpellVersion(folder, { write })) return false
+  if (write && project.contents) project.contents.spellVersion = SP.SPELL_VERSION
+  return true
 }
 
 /**
@@ -216,37 +237,26 @@ async function fixPageHabits(
 }
 
 /**
- * With `--fix`:  move each note after a line's code in `project`, `load its sound  // so it plays at once`, to the
- * first line inside its line, `-- so it plays at once` -- only `file`'s, if given -- and write each changed file back
- * (`SP.LineEndComments`, epic `language` T166).
- * - The parser warns about each one:  `BlockLine`.
- * - Not a test project's files:  they stay frozen.
- * - SIDE EFFECT:  parses `project`, then hands it each file's new text.
- * - Returns what it fixed, each a problem saying so, where the note was.
+ * Each of Spell's old forms still written in `project` -- only `file`'s, if given -- as a WARNING `--fix` puts right,
+ * `old-form` (`SP.OldForms`, epic `language` P68):  listed with the errors, so a run says what's old.
+ * - Not one past its drop version:  that's an error already, among the parse errors.
+ * - Read from the files as last parsed.
  */
-async function fixLineEndNotes(
-  session: CLI.CliSession,
-  project: SP.SpellProject,
-  file?: SP.SpellFile
-): Promise<CLI.Problem[]> {
-  await session.parse(project)
-  const fixes: CLI.Problem[] = []
-  for (const spellFile of file ? [file] : project.spellFiles) {
+function oldFormsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Problem[] {
+  return (file ? [file] : project.spellFiles).flatMap((spellFile) => {
     const text = spellFile.contents
-    if (!spellFile.match || text === undefined || CLI.isTestProject(spellFile.location.serverPath)) continue
-    const edits = SP.LineEndComments.in(spellFile.match.tokens).flatMap((comment) =>
-      SP.LineEndComments.moved(text, comment).map(({ start, end, newText }, index): Fix =>
-        fix(
-          text,
-          { start, end },
-          newText,
-          index ? undefined : 'fixed:  a "//" note moved to the line under it, as "--"'
-        )
-      )
-    )
-    fixes.push(...(await writeFixes(project, spellFile, edits)))
-  }
-  return fixes
+    if (!spellFile.match || text === undefined) return []
+    return SP.OldForms.uses(spellFile)
+      .filter((use) => !use.isDropped)
+      .map((use): CLI.Problem => ({
+        project: project.projectId,
+        path: spellFile.location.serverPath,
+        ...lineAndColumnOf(text, use.start),
+        message: use.message,
+        severity: "warning",
+        rule: OLD_FORM
+      }))
+  })
 }
 
 /**
@@ -354,18 +364,26 @@ function fix(text: string, span: TextSpan, newText: string, message?: string): F
 
 /**
  * Make `fixes` to `spellFile`'s text, write it back and hand `project` the new text;  what each did, as problems.
+ * - `write: false`:  only what each would do.
  * - In any order, none overlapping:  `SourceEdits.applied()` makes the later ones first.
  */
-async function writeFixes(project: SP.SpellProject, spellFile: SP.SpellFile, fixes: Fix[]): Promise<CLI.Problem[]> {
+async function writeFixes(
+  project: SP.SpellProject,
+  spellFile: SP.SpellFile,
+  fixes: Fix[],
+  { write = true }: { write?: boolean } = {}
+): Promise<CLI.Problem[]> {
   const text = spellFile.contents
   if (!fixes.length || text === undefined) return []
   const path = spellFile.location.serverPath
-  const fixed = SourceEdits.applied(
-    text,
-    fixes.map(({ edit }) => edit)
-  )
-  writeFileSync(path, fixed)
-  await project.updateText(spellFile, fixed)
+  if (write) {
+    const fixed = SourceEdits.applied(
+      text,
+      fixes.map(({ edit }) => edit)
+    )
+    writeFileSync(path, fixed)
+    await project.updateText(spellFile, fixed)
+  }
   return fixes
     .flatMap(({ edit: { range }, message }) =>
       message

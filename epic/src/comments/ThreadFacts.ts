@@ -303,21 +303,6 @@ export class ThreadFacts {
     return `“${words.length > HEADLINE_CHARS ? `${words.slice(0, HEADLINE_CHARS).trimEnd()}…` : words}”`
   }
 
-  /**
-   * Which block a comment is on, in full, for a tooltip:  "On a field in “Guide Comments”";  with its id (a saved
-   * comment's):  "Comment C3, on ..."
-   */
-  static aboutTip({ id, place }: { id?: string; place: ThreadPlace }): string {
-    const what = THE_ONE.includes(place.kind)
-      ? `the ${ThreadFacts.kindName(place.kind)}`
-      : `a ${ThreadFacts.kindName(place.kind)}`
-    const named = place.kind === "section" || place.kind === "item"
-    const on = named && place.label ? `“${place.label}”` : what
-    const where = place.kind === "page" || named || !place.label ? "" : ` in “${place.label}”`
-    const said = place.quote ? `:  “${place.quote}”` : ""
-    return `${id ? `Comment ${ThreadFacts.label(id)}, on` : "On"} ${on}${where}${said}`
-  }
-
   /** What a block kind is called in a bullhorn's tooltip and the comment pane (`table`, `code block` ...). */
   static kindName(kind: string): string {
     return KIND_NAMES[kind] ?? kind
@@ -438,9 +423,6 @@ const HEADLINE_CHARS = 40
 
 /** A local stamp's month, day and time (`localStamp()`, or a note's `at`). */
 const SHORT_STAMP = /^\d{4}-(\d\d)-(\d\d)[ T](\d\d:\d\d)/
-
-/** The blocks a page has one of:  "the page", "the Overview" (`aboutTip()`). */
-const THE_ONE: readonly string[] = ["page", "overview"]
 
 /** What a block kind is called, where it isn't its own name (`kindName()`). */
 const KIND_NAMES: Readonly<Record<string, string>> = {

@@ -23,12 +23,22 @@ class SilentPlace extends MemoryPlace {
   }
 }
 
+/** A place with no network:  every write fails, as a fetch would. */
+class OfflinePlace extends MemoryPlace {
+  override apply(): Promise<never> {
+    return Promise.reject(new TypeError("Failed to fetch"))
+  }
+}
+
 /** The event a change of `Recipe` told, as a handler sees it. */
 type Told = { kind: string; fields: string[]; recipe?: unknown; thing?: unknown }
 
-/** A program:  its `Recipe`, in `behind`, saying what it heard. */
-function program(behind: MemoryPlace, { select, noHandler }: { select?: string[]; noHandler?: boolean } = {}) {
-  core.resetRuntime()
+/** A program:  its `Recipe`, in `behind`, saying what it heard;  a new run, unless it's `inThisRun`. */
+function program(
+  behind: MemoryPlace,
+  { select, noHandler, inThisRun }: { select?: string[]; noHandler?: boolean; inThisRun?: boolean } = {}
+) {
+  if (!inThisRun) core.resetRuntime()
   const someoneElse: Told[] = []
   const anyone: Told[] = []
   class Recipe extends Thing {
@@ -214,5 +224,41 @@ describe("who's here", () => {
     expect(people.items[0]).toBe(me)
     place.say([{ id: "me", name: "Me", page: "p-me" }])
     expect(people.items).toEqual([me])
+  })
+})
+
+describe("what the last visit left waiting (epic `solid-2-final` P13)", () => {
+  test("a write left for a place this visit never uses is sent at idle;  a place with nothing waiting isn't made", async () => {
+    const { Places } = await import("spell/places")
+    const { MemoryStorage } = await import("spell/util/persist/MemoryStorage")
+    const storage = new MemoryStorage()
+    const was = (globalThis as { localStorage?: unknown }).localStorage
+    ;(globalThis as { localStorage?: unknown }).localStorage = storage
+    try {
+      // the last visit:  offline, its change kept on this device
+      const offline = new OfflinePlace()
+      const last = new Places({ keepPendingAs: "@owen/cookbook", wait: 0, retry: 60_000 }).add("cookbook", offline)
+      const pending = last.pendingFor("cookbook")
+      pending.setField({ collection: "recipes", type: "Recipe", id: "r1", field: "title", value: "Stew", was: "Soup" })
+      await vi.waitFor(() => expect(pending.queue.state.kind).toBe("failed"))
+      pending.queue.stop()
+
+      // this visit:  the program names the place, and a second one, and reads neither
+      const behind = filled(new MemoryPlace({ capabilities: WITH_IDS }))
+      const pantry = vi.fn(() => new MemoryPlace())
+      core.resetRuntime()
+      await core.remember("@owen/cookbook")
+      program(behind, { inThisRun: true })
+      class Pantry extends Place {
+        makePlace = pantry
+      }
+      core.place(new Pantry(), { name: "pantry" })
+      await vi.waitFor(async () =>
+        expect(await behind.getMany("recipes", ["r1"], {})).toMatchObject([{ title: "Stew" }])
+      )
+      expect(pantry).not.toHaveBeenCalled()
+    } finally {
+      ;(globalThis as { localStorage?: unknown }).localStorage = was
+    }
   })
 })

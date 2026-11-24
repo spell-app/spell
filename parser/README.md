@@ -328,17 +328,17 @@ spell explain if
 <summary>Output</summary>
 
 ```text
-if  if {condition:expression} (then|:)? {statement_body}?
+if  if {condition:expression} (then|:|,)? {statement_body}?
 e.g. if a
 
 backwards_if  if {operator:expression} (else|otherwise) (it is)? {expression}
 e.g. print 1 if bar else 2
 
-if_there_are_none  if there are none :? {statement_body}?
+if_there_are_none  if there are none (:|,)? {statement_body}?
 
 if_that_fails_say  if that fails say {text:expression}
 
-if_that_fails  if that fails :? {statement_body}?
+if_that_fails  if that fails (:|,)? {statement_body}?
 ```
 
 </details>

@@ -1,0 +1,32 @@
+"mermaid-diagram theming" is a notebook page
+	<header level="1">
+		Mermaid diagram
+		<header>A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			The `spell` theme's colours ARE Spell UI's tokens, read from the page as it draws:  the primary colour and its
+			background for boxes, the text colour for words, the surfaces for groups, yellow for notes.  So a theme picked
+			in the menu above, or edited in the theme editor, reaches the diagram too;  switching the page to dark draws
+			it again, dark.
+
+			Its own tokens are the box's:  `--ui-mermaid-diagram-padding`, and how faint the last good drawing is under
+			an error, `--ui-mermaid-diagram-stale-opacity`.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-mermaid-diagram" playground></>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Mermaid's own themes are offered beside Spell's (`theme`), by their own names.  A light one with a dark twin
+			follows the page:  `default` draws as `dark` on a dark page, `neo` as `neo-dark`, `redux` as
+			`redux-dark`, `redux-color` as `redux-dark-color`.  `neutral` and `forest` draw the same either way.
+
+			The pictures in Spell's READMEs are drawn in the same Spell look, from the same table of colours
+			(`yarn mermaid:pretty`), so a README and a page match.
+		</>
+	</>

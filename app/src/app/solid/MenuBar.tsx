@@ -157,8 +157,8 @@ function Divider(): JSX.Element {
  * - `useRunner`:  the one chosen opens in Run.
  * - The Spell UI site's:  "Spell Notebooks".
  * - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`).
- * - SEE:  its App UI components page, with the bar's other menus:
- *   `app/docs/MenuBar.html` (`/components/app/MenuBar.html`).
+ * - SEE:  its page in App UI's guide, with the bar's other menus:
+ *   `/components/app/menu-bar`.
  ****************/
 export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {
   const root = trackProjectRoot(() => undefined)
@@ -279,9 +279,9 @@ export function ProjectBarMenu(): JSX.Element {
     deleteWords: appTexts.text("deleteProject", project()),
     duplicateWords: appTexts.text("duplicateProject", project()),
     onAServer: !isStaticBuild,
-    mayChangeProject: !isStaticBuild || editor.canChangeProject,
-    mayReset: !isStaticBuild || !editor.canChangeProject,
-    canPublish: editor.canPublish,
+    projectChangesAllowed: !isStaticBuild || editor.canChangeProject,
+    resetAllowed: !isStaticBuild || !editor.canChangeProject,
+    readyToPublish: editor.canPublish,
     drafted: editor.canDeleteDraft
   }))
   return (
@@ -350,7 +350,8 @@ function ThemeItems(): JSX.Element {
  *   P34), Program Panel, ─,
  *   Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
- * - Help:  Keyboard Shortcuts (epic `editor` P36), ─, the editor's tours and Tours… (`<TourMenuItems>`, epic `editor` P40),
+ * - Help:  Keyboard Shortcuts (epic `editor` P36), All Icons (T158), ─,
+ *   the editor's tours and Tours… (`<TourMenuItems>`, epic `editor` P40),
  *   ─, then Help, which does nothing yet;  the editor's own, not the Spell's.
  *   - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there.
  * - `mode`:  the page's, ticked in View.
@@ -368,13 +369,13 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     )
   })
   followEditor(spell, (): EditorValues => ({
-    canRevert: editor.canRevertChanges,
+    fileChanged: editor.canRevertChanges,
     revertWords: appTexts.text("revertChanges"),
     autoSaving: editor.isAutoSaving,
     unsaved: editor.hasUnsavedEdits,
-    mayCreate: editor.mayCreate && (!isStaticBuild || editor.canChangeProject),
-    mayDesign: editor.mayDesign,
-    mayChangeProject: !isStaticBuild || editor.canChangeProject,
+    newFilesAllowed: editor.mayCreate && (!isStaticBuild || editor.canChangeProject),
+    draftsAllowed: editor.mayDesign,
+    projectChangesAllowed: !isStaticBuild || editor.canChangeProject,
     running: props.mode === "run",
     codeIsShowing: EditorMode.isEditing(props.mode) && !CodeShown.isClosed(editor.project?.path),
     compiledCodeIsShowing: EditorMode.isEditing(props.mode) && !!CodeOutputShown.target,
@@ -390,6 +391,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
   const help = () => (
     <>
       <Actions.showShortcuts menu />
+      <Actions.showIcons menu />
       <ui-divider />
       <TourMenuItems />
       <ui-divider />

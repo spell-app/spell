@@ -59,7 +59,7 @@ const noParentImport = defineRule({
  * - It stands in for the clone that enforced it while they were repos of their own:  a repo only had the ones below.
  * - `import { UI } from "spell/ui/core"` in `parser/src/` is up;  in `epic/src/`, down.
  * - Every file of a folder counts as it:  its `src/`, tests, scripts and configs.
- * - A file outside the kit (a project beside it, spell-brand) may use any of them, as any project of `spell` may.
+ * - A file outside the kit (a project beside it) may use any of them, as any project of `spell` may.
  */
 const noUpwardImport = defineRule({
   meta: {

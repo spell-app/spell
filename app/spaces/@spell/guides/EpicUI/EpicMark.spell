@@ -1,0 +1,104 @@
+"epic mark" is a notebook page
+	<header level="1">
+		&lt;epic-mark&gt;
+		<header>The &lt;epic-mark&gt; element: an item's id as a chip in its state colour, a link that lands on it.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-mark&gt;</> draws an item's id as a chip in the item's state colour: <text code>&lt;epic-mark item="i126" link&gt;</> shows <text code>I126</>, red while it waits on you, blue while it's under way, green when it's newly decided, grey once it's old. Its tooltip is the item's title; with <text code>link</>, a click lands on the item and opens it.</>
+	<text class="meta" paragraph>For anyone writing a phase's To review list, or naming an item in a page.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P45), its own <link target="src-spell-epic-src-components-epic-mark" link="/epic/src/components/epic-mark/"><text title="epic/src/components/epic-mark/" code>epic-mark</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-mark-epicmark-en-ts" link="/epic/src/components/epic-mark/EpicMark.en.ts"><text title="epic/src/components/epic-mark/EpicMark.en.ts" code>EpicMark.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-mark-epicmark-tsx" link="/epic/src/components/epic-mark/EpicMark.tsx"><text title="epic/src/components/epic-mark/EpicMark.tsx" code>EpicMark.tsx</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Three items, and a line marking them: each mark takes its item's colour, its title on hover.</>
+		<html>
+			<ui-stack>
+				<epic-section id="decisions" kind="questions" open>
+					<epic-item id="q1" title="Which colour names should windows take?" status="open" state="attention"></>
+					<epic-item id="j3" title="Thumbnails 200px wide" status="decided" state="recent"></>
+					<epic-item id="i126" title="Phase numbers whole" status="open" state="progress"></>
+				</>
+				<ui-text paragraph>To review: <epic-mark item="q1" link></>, <epic-mark item="j3" link></>, <epic-mark item="i126" link></></>
+			</>
+		</>
+		<text paragraph>The marks above:</>
+		<markdown>
+			```html
+			<p>To review: <epic-mark item="q1" link></epic-mark>, <epic-mark item="j3" link></epic-mark>, <epic-mark item="i126" link></epic-mark></p>
+			```
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item>The epic tool writes them in a phase's To review field, one per item added while the phase was active and not reviewed yet, with commas between: <text code>&lt;epic-field name="to-review"&gt;&lt;epic-mark item="j1" link&gt;&lt;/epic-mark&gt;, ...</>.</>
+			<item>Before P45 that field held <text code>&lt;a href="#j1"&gt;J1&lt;/a&gt;</> links, coloured by a script; the migration <text code>to-review-marks</> turns them into marks.</>
+			<item>It holds no text: the id is drawn from <text code>item</>, in capitals.</>
+		</>
+	</>
+
+	<section label="3. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Attribute</>
+				<cell>What it is</>
+			</>
+			<row>
+				<cell>
+					<text code>item</>
+				</>
+				<cell>The item's id on this page, any case (<text code>i126</>, <text code>Q3</>).</>
+			</>
+			<row>
+				<cell>
+					<text code>link</>
+				</>
+				<cell>A link that lands on the item; without it, the chip alone.</>
+			</>
+		</>
+
+		<section label="Parts and states" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Name</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The chip: an <text code>&lt;a&gt;</> with <text code>link</>, else a <text code>&lt;span&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>id</>
+					</>
+					<cell>The item's id, in capitals.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(missing)</>
+					</>
+					<cell>No item with that id on the page: the accent colour, its tooltip saying so.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="4. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Its colour is the item's state as the item's own id chip draws it (<text code>ItemAge</>: a decided item turns grey a day after its last change), through the page's state tokens, <text code>--epic-state-*</>.</>
+			<item>A pill, 1.6em tall, set in the line on its middle: <text code>--epic-mark-height</>, <text code>--epic-mark-min-width</>, <text code>--epic-mark-padding</>, <text code>--epic-mark-radius</>, <text code>--epic-mark-font-size</>, <text code>--epic-mark-font-weight</>.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-25 against branch <ui-text code>epic-engine</> (P45).</>
+		</>
+	</>

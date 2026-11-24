@@ -53,8 +53,8 @@ export const epicReviewVocabulary = {
       values: REVIEW_KINDS,
       default: "item",
       description:
-        "Whose:  `item` (Make Todo, Revisit, Approve), `issue` (an open judgement call:  Do this (the plane), Revisit, Approve), `issue-open` (an open issue, nothing fixed:  Do this, Revisit, the x that closes it unfixed;  I299), `issue-fixed` (an issue or call fixed, waiting for you:  Revisit, which with a note sends it back, and Accept the fix (the check);  no plane, J231), `issue-done` (an issue or call finished:  Revisit, Saw it), `todo` (the plane, Revisit, the x;  each takes the note " +
-        "box's note along), `todo-in-phase` (a todo already in a phase:  Revisit, the x;  its `in P52` pill goes to the phase, and starts it on an ⌥-click), `todo-done` (a finished todo, done or canceled:  Revisit, Saw it;  no x, which would drop it), `part` (an Overview sub-section, the summary:  no Approve), `phase` (a phase still to do:  Do this, " +
+        "Whose:  `item` (Make Todo, Revisit, Approve), `issue` (an open judgement call:  Do this (the plane), Revisit, Approve), `issue-open` (an open issue, nothing fixed:  Do this, Revisit, the x that closes it unfixed;  I299), `issue-fixed` (an issue or call fixed, waiting for you:  Revisit, which with a note sends it back, and Accept the fix (the check);  no plane, J231), `finished` (any item answered or finished:  Reopen alone;  T152), `issue-done` (a finished item waiting for your look, orange:  Revisit, Saw it), `todo` (the plane, Revisit, the x;  each takes the note " +
+        "box's note along), `todo-in-phase` (a todo already in a phase:  Revisit, the x;  its `in P52` pill goes to the phase, and starts it on an ⌥-click), `todo-done` (a finished todo waiting for your look:  Revisit, Saw it;  no x, which would drop it), `part` (an Overview sub-section, the summary:  no Approve), `phase` (a phase still to do:  Do this, " +
         "Revisit);  a " +
         "comment thread's answer, drawn by `<epic-thread>` with no inbox behind it:  `thread` (That's good, Reply, " +
         "Skip it), `closed` (Reopen);  `proposal` (an open phase while the page's phases are agreed:  Looks good, " +

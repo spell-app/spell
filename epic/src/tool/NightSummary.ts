@@ -254,8 +254,29 @@ const CLOSED = /^(done|decided|canceled)$/
  * - a manual test to run
  */
 const NEED_ORDER: readonly [NeedPart, string, (item: Element) => boolean][] = [
-  ["asks", "needs your call", (item) => item.getAttribute("state") === "attention" && !/^[im]\d/.test(item.id)],
+  [
+    "asks",
+    "needs your call",
+    (item) =>
+      (item.getAttribute("state") === "attention" && !/^[im]\d/.test(item.id)) ||
+      // a page with badges:  what its badge says waits on them, whatever its kind (epic `epic-engine` P81, I435)
+      ASKS.has(item.getAttribute("badge") ?? "")
+  ],
   ["fixed", "fixed, to review", (item) => item.hasAttribute("fixed")],
-  ["issues", "open issue", (item) => /^i\d/.test(item.id) && !item.hasAttribute("fixed")],
-  ["tests", "to test", (item) => /^m\d/.test(item.id)]
+  [
+    "issues",
+    "open issue",
+    (item) =>
+      /^i\d/.test(item.id) &&
+      !item.hasAttribute("fixed") &&
+      !ASKS.has(item.getAttribute("badge") ?? "") &&
+      !WAITS_ON_CLAUDE.has(item.getAttribute("state") ?? "")
+  ],
+  ["tests", "to test", (item) => /^m\d/.test(item.id) && !WAITS_ON_CLAUDE.has(item.getAttribute("state") ?? "")]
 ]
+
+/** The badges that put an item under Waiting on you (epic `epic-engine` P81, I435):  URGENT too, red there. */
+const ASKS: ReadonlySet<string> = new Set(["yourCall", "againstYourAsk", "urgent", "failed"])
+
+/** The states of a page with badges that wait on Claude, not the person (epic `epic-engine` Q82). */
+const WAITS_ON_CLAUDE: ReadonlySet<string> = new Set(["recheck"])

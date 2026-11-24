@@ -302,10 +302,11 @@ const GROUPS: GroupDefinition[] = [
   {
     id: "motion",
     title: "Motion",
-    description: "Durations, easing curves, and how long a hover waits.",
+    description: "Durations, easing curves, and how long a hover or a tooltip waits.",
     rules: [
       [/^--ui-duration-(\w+)$/, (match) => `Duration \`${match[1]}\`.`],
       [/^--ui-hover-delay$/, () => "How long a hover popup waits before it shows."],
+      [/^--ui-tooltip-delay$/, () => "How long a tooltip waits before it shows:  as long as the browser's own."],
       [
         /^--ui-control-height$/,
         () => "A control's height at the medium size;  `0px`:  its padding says how tall it is."

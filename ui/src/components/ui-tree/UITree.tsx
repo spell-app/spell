@@ -1,5 +1,5 @@
 import { isServer } from "@solidjs/web"
-import { For, Show, type Accessor } from "solid-js"
+import { For, Show, createMemo, type Accessor } from "solid-js"
 
 import { Dragging } from "spell/util/Dragging"
 import { PrefStore } from "spell/util/persist/PrefStore"
@@ -93,7 +93,7 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *   - Its rows can be DATA instead:  `items`, a `TreeItemData` list, drawn in its shadow root ("Columns from data").
  *     For big trees:  a `children` function runs the first time its item opens, and only the open path is drawn.
  *     Each column draws its first rows, then more as its end scrolls near (`drawnInWindow()`, `itemRows()`):
- *     5,000 rows open as fast as 300.
+ *     5,000 rows open as fast as 300;  past a few hundred, the rows far from the view are taken down again.
  *     Rows from markup draw themselves, as in every tree:  none builds a shadow root it doesn't show.
  *     - An item `kind: "header"` is the label line over the rows after it, its group (`headerRow()`):  never picked,
  *       selected, counted or a step of `path`;  the arrow keys skip it, and `filter` keeps it only while a row under
@@ -2645,9 +2645,10 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /**
    * Column `depth`'s rows:  the first ones, then more as its end scrolls near (`drawnInWindow()`), so a column of
    * 5,000 rows opens as fast as one of 300.
-   * - Its pick, and the row with the tab stop, are always drawn, with every row before them:
+   * - Its pick, and the row with the tab stop, are always drawn, with the rows around them:
    *   a path set, `openTo()`, a match elsewhere picked, or End pressed, draws down to it first.
-   * - What's drawn stays drawn, as in every long list:  a column scrolled to its end holds all its rows.
+   * - Past a few hundred rows, the rows far from the view are taken down, as in every long list, and drawn again as they
+   *   come back:  never the row with the tab stop, or the focus (epic `solid-2-final` P17).
    * - With headers:  every header shown is drawn, each with a window of its own rows after it,
    *   so the headers below a long group are there to stick at the column's bottom.
    */
@@ -2656,7 +2657,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     list: Accessor<readonly TreeItemData[] | undefined>,
     depth: number
   ) {
-    const headers = () => shown().filter(isHeader)
+    const headers = createMemo(() => shown().filter(isHeader))
     const rowsUnder = (header: TreeItemData | undefined) => () => {
       const { headerOf } = this.groupsOf(list() ?? [])
       return shown().filter((item) => !isHeader(item) && headerOf.get(item) === header)
@@ -2671,21 +2672,26 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     )
   }
 
-  /** `rows` of column `depth`, drawn a window at a time (`itemRows()`). */
+  /** `rows` of column `depth`, drawn a window at a time (`itemRows()`):  each row says its place among them. */
   private rowWindow(
     rows: () => readonly TreeItemData[],
     list: Accessor<readonly TreeItemData[] | undefined>,
     depth: number
   ) {
+    // read once per change, not by every row:  `rows()` filters the whole column each time it's read
+    const drawn = createMemo(rows)
+    const setSize = createMemo(() => drawn().length)
+    const keyItem = createMemo(() => this.keyItemIn(depth))
+    const through = createMemo(() => {
+      const items = drawn()
+      const key = keyItem()
+      const pick = pickIn(items, this.openPath[depth])
+      return Math.max(key ? items.indexOf(key) : -1, pick ? items.indexOf(pick) : -1)
+    })
     return drawnInWindow({
-      items: rows,
-      drawItem: (item) => this.itemRow(item, depth, list),
-      through: () => {
-        const drawn = rows()
-        const key = this.keyItemIn(depth)
-        const pick = pickIn(drawn, this.openPath[depth])
-        return Math.max(key ? drawn.indexOf(key) : -1, pick ? drawn.indexOf(pick) : -1)
-      }
+      items: drawn,
+      drawItem: (item, position) => this.itemRow(item, { depth, position, setSize, keyItem, list }),
+      through
     })
   }
 
@@ -2872,8 +2878,12 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     })
   }
 
-  /** `item`'s row in column `depth`:  icon, label and which, count, chevron, each as `show` says. */
-  private itemRow(item: TreeItemData, depth: number, list: Accessor<readonly TreeItemData[] | undefined>) {
+  /**
+   * `item`'s row in column `depth`:  icon, label and which, count, chevron, each as `show` says.
+   * - It says its place in the whole column (`position`, of `setSize`):  a long column draws only the rows near the view.
+   * - `keyItem`:  the column's row with the tab stop, worked out once for every row
+   */
+  private itemRow(item: TreeItemData, { depth, position, setSize, keyItem, list }: ItemRowPlace) {
     const header = () => this.groupsOf(list() ?? []).headerOf.get(item)
     const isPicked = () => this.openPath[depth] === item.id
     const isSelected = () => isPicked() && depth === this.selectedDepth
@@ -2891,8 +2901,10 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         part={this.partForName("column-row")}
         role="treeitem"
         data-id={item.id}
-        tabindex={depth === Math.max(0, this.selectedDepth) && this.keyItemIn(depth) === item ? "0" : "-1"}
+        tabindex={depth === Math.max(0, this.selectedDepth) && keyItem() === item ? "0" : "-1"}
         aria-level={depth + 1}
+        aria-posinset={position() + 1}
+        aria-setsize={setSize()}
         aria-selected={isSelected() ? "true" : "false"}
         aria-expanded={this.hasChildren(item) ? (isPicked() ? "true" : "false") : undefined}
         aria-describedby={this.headerIdOf(header())}
@@ -3276,3 +3288,17 @@ const SHIFT_STEPS = 10
 
 /** The keys that move a column's line, and which way:  narrower, wider (right to left, turned round). */
 const RESIZE_KEYS: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1 }
+
+/** Where a column's row drawn from `items` is, for `itemRow()`:  each read once per change, for every row. */
+type ItemRowPlace = {
+  /** its column */
+  depth: number
+  /** its place in the column, counting from 0 */
+  position: () => number
+  /** how many rows the column has */
+  setSize: () => number
+  /** the column's row with the tab stop */
+  keyItem: () => TreeItemData | undefined
+  /** the column's whole list, headers and all */
+  list: Accessor<readonly TreeItemData[] | undefined>
+}

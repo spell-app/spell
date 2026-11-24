@@ -160,6 +160,8 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     ...(look.searchedOnly && { searchedOnly: true }),
     ...(look.searchedFor !== undefined && { searchedFor: look.searchedFor }),
     ...(look.askedBy && { askedBy: look.askedBy }),
+    ...(look.oneAt !== undefined && { oneAt: look.oneAt }),
+    ...(look.asksFrom && { asksFrom: look.asksFrom }),
     ...(look.schemaAt !== undefined && { schemaAt: look.schemaAt }),
     ...(look.tag !== undefined && { tag: look.tag }),
     ...(look.operations && { operations: look.operations }),
@@ -308,9 +310,9 @@ function fieldsOfRows(rows: ReadonlyArray<Record<string, unknown>>, depth: numbe
       }
       const kind = kindOf(values)
       // a yes or no named `is_hidden` is `its "hidden"`:  what's read as `if it is hidden`
-      const yesOrNo = kind.type === "yes or no" ? /^(?:is|has) (.+)$/.exec(words)?.[1] : undefined
+      const said = kind.type === "yes or no" ? yesOrNoWords(words) : words
       const named = isLinkKind(kind.type) && holdsNamedLinks(rows.map((row) => row[name]))
-      return [name, { words: yesOrNo ?? words, ...kind, ...exampleOf(values), ...(named && { isNamedLink: true }) }]
+      return [name, { words: said, ...kind, ...exampleOf(values), ...(named && { isNamedLink: true }) }]
     })
   )
 }
@@ -679,6 +681,14 @@ export function plainNameFor(address: string, kind: string): string {
   }
 }
 
+/**
+ * A yes or no field's words, as Spell reads them:  `is hidden` => `hidden`, `has more` => `more`.
+ * - Spell asks one `if it is hidden`, so `its "is hidden" is yes or no` is a line it can't read.
+ */
+export function yesOrNoWords(words: string): string {
+  return /^(?:is|has) (.+)$/.exec(words)?.[1] ?? words
+}
+
 /** A source's name for a field, as words a person writes:  `hair_color`, `hairColor` => `hair color`. */
 export function wordsFor(name: string): string {
   return name
@@ -688,14 +698,18 @@ export function wordsFor(name: string): string {
     .toLowerCase()
 }
 
+/** ONE of what `words` name, its last word made singular, as Spell reads a type:  `run data` => `run datum`. */
+export function oneNamedBy(words: string): string {
+  const each = words.split(" ")
+  return [...each.slice(0, -1), P.singularize(each.at(-1)!)].join(" ")
+}
+
 /**
  * A collection's name, as a type's words:  `life_forms` => `life form`, `people` => `person`.
  * - Where that's one of Spell's own types, it says whose:  `dates` of `swapi` => `swapi date`, as `date` is Spell's.
  */
 export function typeWordsFor(name: string, placeName: string): string {
-  const words = wordsFor(name).split(" ")
-  words[words.length - 1] = P.singularize(words[words.length - 1]!)
-  const type = words.join(" ")
+  const type = oneNamedBy(wordsFor(name))
   return isSpellsOwnType(type) ? `${placeName} ${type}` : type
 }
 

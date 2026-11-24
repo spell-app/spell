@@ -73,6 +73,27 @@ async function render<T extends Element = E.DOMElement>(html: string, selector?:
 }
 
 describe("<epic-phase>", () => {
+  test("on a page with badges, UNDERWAY after the title of the phase being built, and no other badge (T154)", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p-one" title="One" status="done" badged></epic-phase>` +
+        `<epic-phase id="p-two" title="Two" status="active" badged></epic-phase>` +
+        `<epic-phase id="p-three" title="Three" status="todo" badged></epic-phase>` +
+        `</epic-section>`
+    )
+    const titleOf = (id: string) => {
+      const phase = host.querySelector(`#${id}`)!
+      const header = inner(phase).shadowRoot!.querySelector('[part~="header"]')!
+      return flatText(header).replace(/\s+/g, " ").trim()
+    }
+    // the title where it was before badges:  `P2 · Two`, the badge after it
+    expect([titleOf("p-one"), titleOf("p-two"), titleOf("p-three")]).toEqual([
+      "P1 · One",
+      "P2 · Two UNDERWAY",
+      "P3 · Three"
+    ])
+  })
+
   test("its title line:  status icon in its colour, `P5 · <title>`, the estimate as a badge;  folded", async () => {
     // `P5`:  its PLACE among the phases, never its id (stable, from its name:  epic `epic-workflow` P15)
     const before = ["One", "Two", "Three", "Four"]
@@ -150,7 +171,7 @@ describe("<epic-phase>", () => {
   })
 
   // epic `epic-engine` I273 (Owen:  "This says it's done, but it's not on main yet.  That should be indicated.")
-  test("done, its work not on main yet:  a `not on main` pill before its time pill, the branch in its tooltip", async () => {
+  test("done, its work not on main yet:  a `not on main` pill before its time pill, no tooltip (I370)", async () => {
     const host = await render(
       `<epic-section id="phases" kind="phases">` +
         `<epic-phase id="p-off" title="Off main" status="done" took="21m" unmerged="editor"></epic-phase>` +
@@ -163,7 +184,7 @@ describe("<epic-phase>", () => {
       const pill = phase.shadowRoot!.querySelector('[part~="unmerged"]')
       return pill && [pill.textContent, pill.getAttribute("data-tooltip")]
     })
-    expect(shown).toEqual([["not on main", "Done on editor, not merged yet"], null, null])
+    expect(shown).toEqual([["not on main", null], null, null])
   })
 
   // epic `epic-engine` I228 (atmosphere's r60, Owen:  "P18 should show as 'done', or better, crossed out somehow")

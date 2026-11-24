@@ -1506,6 +1506,9 @@
         },
         "hover-delay": {
           "$ref": "#/definitions/value"
+        },
+        "tooltip-delay": {
+          "$ref": "#/definitions/value"
         }
       }
     },

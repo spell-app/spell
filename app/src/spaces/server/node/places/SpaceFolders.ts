@@ -359,7 +359,7 @@ export class SpaceFolders {
       })
       reply
         .set("Content-Disposition", `attachment; filename="${out.fileName}"`)
-        .set("Cache-Control", "no-store")
+        .noStore()
         .type("application/zip")
         .send(out.zip())
     })
@@ -459,10 +459,10 @@ export class SpaceFolders {
     }
     router.get(path, guard.hostCheck, async (request, reply) => {
       const { files, context, name } = await filesOf(request)
-      if (name === undefined) return reply.set("Cache-Control", "no-store").json(await refusedAs(files.list(context)))
+      if (name === undefined) return reply.noStore().json(await refusedAs(files.list(context)))
       const file = await refusedAs(files.read(name, context))
       if (!file) throw new SRV.HttpError(404, `there's no file "${name}" in ${request.params.place}`)
-      reply.set("Cache-Control", "no-store").type(file.mimeType).send(Buffer.from(file.bytes))
+      reply.noStore().type(file.mimeType).send(Buffer.from(file.bytes))
     })
     router.put(path, ...writes, async (request, reply) => {
       const { files, context, name } = await filesOf(request)

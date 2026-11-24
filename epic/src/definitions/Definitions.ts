@@ -23,6 +23,7 @@ import { epicMarkVocabulary } from "spell/epic/components/epic-mark/EpicMark.en"
 import { epicClarifyVocabulary } from "spell/epic/components/epic-clarify/EpicClarify.en"
 import { epicPictureVocabulary } from "spell/epic/components/epic-picture/EpicPicture.en"
 import { epicKickoffVocabulary } from "spell/epic/components/epic-kickoff/EpicKickoff.en"
+import { epicStepOutputVocabulary } from "spell/epic/components/epic-step-output/EpicStepOutput.en"
 import { epicCardVocabulary } from "spell/epic/components/epic-list/EpicCard.en"
 import { epicListVocabulary } from "spell/epic/components/epic-list/EpicList.en"
 import { epicSortVocabulary } from "spell/epic/components/epic-list/EpicSort.en"
@@ -35,6 +36,7 @@ import { epicVersionVocabulary } from "spell/epic/components/epic-original/EpicV
 import { epicOverviewVocabulary } from "spell/epic/components/epic-overview/EpicOverview.en"
 import { epicPageNoteHeadVocabulary } from "spell/epic/components/epic-page-note-head/EpicPageNoteHead.en"
 import { epicPageVocabulary } from "spell/epic/components/epic-page/EpicPage.en"
+import { epicFeatureSetVocabulary } from "spell/epic/components/epic-feature-set/EpicFeatureSet.en"
 import { epicFieldVocabulary } from "spell/epic/components/epic-phase/EpicField.en"
 import { epicPhaseVocabulary } from "spell/epic/components/epic-phase/EpicPhase.en"
 import { epicUpdatedVocabulary } from "spell/epic/components/epic-phase/EpicUpdated.en"
@@ -118,6 +120,8 @@ export class Definitions {
     // the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12):  details and choice pages
     "epic-ask": epicAskVocabulary,
     "epic-text-box": epicTextBoxVocabulary,
+    // a ranked list to pick from, a details page's template (epic `epic-engine` P80)
+    "epic-feature-set": epicFeatureSetVocabulary,
     "epic-send": epicSendVocabulary,
     "epic-send-buttons": epicSendButtonsVocabulary,
     "epic-choice-rows": epicChoiceRowsVocabulary,
@@ -147,6 +151,8 @@ export class Definitions {
     "epic-option-form": epicOptionFormVocabulary,
     // the kickoff box (epic `epic-engine` P75):  drawn by `<epic-overview>` on a new epic's page, never written
     "epic-kickoff": epicKickoffVocabulary,
+    // a manual test's paste box (epic `epic-engine` T165):  under each step's command, put there by its Step field
+    "epic-step-output": epicStepOutputVocabulary,
     "epic-agents": epicAgentsVocabulary,
     "epic-thread-message": epicThreadMessageVocabulary,
     // what the docs runtime's comments draw on every page that takes comments (epic `epic-engine` P3)

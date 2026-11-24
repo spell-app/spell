@@ -26,14 +26,14 @@ describe("<ui-container> classes and layout", () => {
     ['fluid="yes"', "ui fluid container"],
     ["wide", "ui wide container"],
     // the old names (epic ui-gaps P4), and the new
-    ['grid spacing="xl"', "ui very relaxed gridded container"],
+    ['grid spacing="xl"', "ui very relaxed gridded container very-relaxed"],
     ['grid spacing="lg"', "ui relaxed gridded container"],
     // epic `language` T119:  a segment's padding, size and inverted;  `columns` makes no class on the box
     ['padding="small"', "ui lightly padded container"],
-    ['padding="lg"', "ui very padded container"],
+    ['padding="lg"', "ui very padded container very-padded"],
     ['size="small" inverted', "ui small inverted container"],
-    ['columns="7" spacing="xs"', "ui very compact container"],
-    ['scrolling="very short" resizable', "ui resizable very short scrolling container"],
+    ['columns="7" spacing="xs"', "ui very compact container very-compact"],
+    ['scrolling="very short" resizable', "ui resizable very short scrolling container very-short very-short-scrolling"],
     ['width="20em"', "ui set-width container"]
   ])("<ui-container %s>", async (attributes, classes) => {
     const host = await ElementFixture.render<DOMElement>(`<ui-container ${attributes}><p>x</p></ui-container>`)
@@ -50,7 +50,7 @@ describe("<ui-container> classes and layout", () => {
     )
     const box = host.shadowRoot!.querySelector<HTMLElement>("[part~=container]")!
     const grid = host.shadowRoot!.querySelector<HTMLElement>("[part~=grid]")!
-    expect(grid.className).toBe("ui very compact seven column grid")
+    expect(grid.className).toBe("ui very compact seven column grid seven-column very-compact")
     expect(grid.querySelector("slot")).not.toBeNull()
     expect(getComputedStyle(host).display).toBe("contents")
     expect(getComputedStyle(box).paddingLeft).toBe("16px")

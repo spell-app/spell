@@ -257,6 +257,17 @@ export class Places {
     return pending
   }
 
+  /**
+   * The names of the places not added yet with changes waiting on this device, left by the last visit:
+   * a program makes just those (`add()`), so what's waiting is sent though this visit never reads or writes them
+   * (epic `solid-2-final` P13).
+   * - Nothing kept on this device (`keepPendingAs`):  none.
+   */
+  waitingPlaceNames(): string[] {
+    const { keepPendingAs, storage } = this.props
+    return PendingChanges.placesWaiting({ keepAs: keepPendingAs, storage }).filter((name) => !this.places.has(name))
+  }
+
   /** The changes pending for `placeName`, if anything's asked for them:  a read looks here, and makes nothing. */
   pendingIfAny(placeName: string): PendingChanges | undefined {
     return this.pending.get(placeName)

@@ -68,9 +68,9 @@ describe("<ui-steps> classes", () => {
     ["ordered", "ui ordered steps"],
     ['direction="vertical"', "ui vertical steps"],
     ['direction="vertical-right"', "ui right vertical steps"],
-    ['attach-to="bottom"', "ui bottom attached steps"],
+    ['attach-to="bottom"', "ui bottom attached steps bottom-attached"],
     ['attach-to="both"', "ui attached steps"],
-    ['stackable="tablet"', "ui tablet stackable steps"],
+    ['stackable="tablet"', "ui tablet stackable steps tablet-stackable"],
     ["unstackable fluid inverted", "ui fluid inverted unstackable steps"],
     ['widths="3"', "ui three steps"],
     ['appearance="circular" color="red"', "ui red circular steps"]

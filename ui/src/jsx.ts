@@ -530,6 +530,16 @@ export interface UIAccordionJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UIAccordionEventMap>>, keyof UIAccordionAttributes>,
     UIAccordionAttributes {}
 
+/** `<ui-action>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIActionEventMap {
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{ originalEvent?: Event }>
+}
+
 /** `<ui-action>`'s own attributes, from its vocabulary. */
 export interface UIActionAttributes {
   /**
@@ -717,6 +727,16 @@ export interface UIActionAttributes {
    * @deprecated write `kind` -- `prop:` stays only for compiled spell
    */
   "prop:kind"?: "item" | "header" | "divider"
+  /**
+   * A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.
+   * - takes:  text
+   */
+  closable?: string
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
+  "prop:closable"?: string
   /**
    * PROPERTY:  the action it draws and runs:  `{ title, icon?, shortcut?, isEnabled, isSelected, run() }`, read live.  Spell's `core.menuOf()` gives a menu's.
    * - a JS property (rich data):  an object, array or function, given as it is
@@ -984,11 +1004,17 @@ export interface UIActionAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UIActionEventMap["ui-closing"]) => void
 }
 
 /** `<ui-action>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UIActionJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIActionAttributes>, UIActionAttributes {}
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIActionEventMap>>, keyof UIActionAttributes>, UIActionAttributes {}
 
 /** `<ui-actions>`'s own attributes, from its vocabulary. */
 export interface UIActionsAttributes {
@@ -5808,6 +5834,16 @@ export interface UICardAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * The one chosen among its neighbours:  its border the primary colour and its fill a touch of it, its text as the others';  `--ui-card-selected-border-color` and `--ui-card-selected-background` change them.
+   * - takes:  flag (present / absent)
+   */
+  selected?: boolean | ""
+  /**
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
+  "prop:selected"?: boolean | ""
+  /**
    * Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance="link"`.  Its old name was `href`.
    * - takes:  text
    */
@@ -10250,6 +10286,16 @@ export interface UIContentAttributes {
    * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
   "prop:align"?: "left" | "center" | "right" | "justified"
+  /**
+   * Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.  Without it, its content shows as written.
+   * - takes:  flag (present / absent)
+   */
+  markdown?: boolean | ""
+  /**
+   * `markdown`, as the DOM element's property.
+   * @deprecated write `markdown` -- `prop:` stays only for compiled spell
+   */
+  "prop:markdown"?: boolean | ""
   /**
    * In an item or a list:  `top`, `middle` or `bottom` against the image or icon beside it.
    * - takes:  `top` · `middle` · `bottom`
@@ -20925,6 +20971,357 @@ export interface UIIconAttributes {
 export interface UIIconJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIIconAttributes>, UIIconAttributes {}
 
+/** `<ui-icon-browser>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIIconBrowserEventMap {
+  /**
+   * `ui-chosen`:  A tile was clicked:  `name` draws its icon;  `isCopied`, whether it reached the clipboard (never with `pick`).
+   * - `event.detail`:  `{ name: string, isCopied: boolean }`
+   */
+  "ui-chosen": CustomEvent<{ name: string; isCopied: boolean }>
+}
+
+/** `<ui-icon-browser>`'s own attributes, from its vocabulary. */
+export interface UIIconBrowserAttributes {
+  /**
+   * The pack it starts on:  `fa7-free` (the default), `fa7-brands` or `fomantic`.  Its buttons switch to another;  each is loaded on its own, so the page's own icons never change.
+   * - takes:  `fa7-free` · `fa7-brands` · `fomantic`
+   * - default:  `fa7-free`
+   */
+  pack?: "fa7-free" | "fa7-brands" | "fomantic"
+  /**
+   * `pack`, as the DOM element's property.
+   * @deprecated write `pack` -- `prop:` stays only for compiled spell
+   */
+  "prop:pack"?: "fa7-free" | "fa7-brands" | "fomantic"
+  /**
+   * What it starts searching for:  a name or what an icon shows (`mail` finds `envelope`, by Font Awesome's terms).
+   * - takes:  text
+   */
+  query?: string
+  /**
+   * `query`, as the DOM element's property.
+   * @deprecated write `query` -- `prop:` stays only for compiled spell
+   */
+  "prop:query"?: string
+  /**
+   * Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it;  ahead of `query` and `pack`.
+   * - takes:  flag (present / absent)
+   */
+  address?: boolean | ""
+  /**
+   * `address`, as the DOM element's property.
+   * @deprecated write `address` -- `prop:` stays only for compiled spell
+   */
+  "prop:address"?: boolean | ""
+  /**
+   * A click picks the icon instead of copying its name:  `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse).
+   * - takes:  flag (present / absent)
+   */
+  pick?: boolean | ""
+  /**
+   * `pick`, as the DOM element's property.
+   * @deprecated write `pick` -- `prop:` stays only for compiled spell
+   */
+  "prop:pick"?: boolean | ""
+  /**
+   * Tighter, for a dialog:  the search first, smaller tiles closer together, and no line about adding the pack to a page.
+   * - takes:  flag (present / absent)
+   */
+  compact?: boolean | ""
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
+  "prop:compact"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
+   * - takes:  text
+   */
+  error?: string
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
+  "prop:sharedError"?: string
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
+   * - takes:  text
+   */
+  "on-platform"?: string
+  /**
+   * `on-platform`, as the DOM element's property.
+   * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
+   */
+  "prop:onPlatform"?: string
+  /**
+   * `ui-chosen`:  A tile was clicked:  `name` draws its icon;  `isCopied`, whether it reached the clipboard (never with `pick`).
+   * - `event.detail`:  `{ name: string, isCopied: boolean }`
+   */
+  "on-ui-chosen"?: (event: UIIconBrowserEventMap["ui-chosen"]) => void
+}
+
+/** `<ui-icon-browser>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIIconBrowserJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIIconBrowserEventMap>>, keyof UIIconBrowserAttributes>,
+    UIIconBrowserAttributes {}
+
 /** `<ui-icon-picker>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIIconPickerEventMap {
   /**
@@ -23086,7 +23483,7 @@ export interface UIInputAttributes {
    */
   "prop:action"?: boolean | "" | "left"
   /**
-   * Icon name, drawn inside the field;  the root gets `icon`.
+   * Icon name, drawn inside the field;  the root gets `icon`.  A `type="search"` field shows a magnifying glass at its start when it names none.
    * - takes:  icon name
    */
   icon?: string
@@ -23286,6 +23683,26 @@ export interface UIInputAttributes {
    * @deprecated write `folder` -- `prop:` stays only for compiled spell
    */
   "prop:folder"?: boolean | ""
+  /**
+   * Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type="search"`;  `clearable="false"` turns it off there.
+   * - takes:  flag (present / absent)
+   */
+  clearable?: boolean | ""
+  /**
+   * `clearable`, as the DOM element's property.
+   * @deprecated write `clearable` -- `prop:` stays only for compiled spell
+   */
+  "prop:clearable"?: boolean | ""
+  /**
+   * Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows.
+   * - takes:  text
+   */
+  shortcut?: string
+  /**
+   * `shortcut`, as the DOM element's property.
+   * @deprecated write `shortcut` -- `prop:` stays only for compiled spell
+   */
+  "prop:shortcut"?: string
   /**
    * Autofill hint, forwarded to the native input.
    * - takes:  text
@@ -23579,6 +23996,16 @@ export interface UIInputAttributes {
 export interface UIInputJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIInputEventMap>>, keyof UIInputAttributes>, UIInputAttributes {}
 
+/** `<ui-item>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIItemEventMap {
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{ originalEvent?: Event }>
+}
+
 /** `<ui-item>`'s own attributes, from its vocabulary. */
 export interface UIItemAttributes {
   /**
@@ -23766,6 +24193,16 @@ export interface UIItemAttributes {
    * @deprecated write `kind` -- `prop:` stays only for compiled spell
    */
   "prop:kind"?: "item" | "header" | "divider"
+  /**
+   * A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.
+   * - takes:  text
+   */
+  closable?: string
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
+  "prop:closable"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
@@ -24002,11 +24439,17 @@ export interface UIItemAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UIItemEventMap["ui-closing"]) => void
 }
 
 /** `<ui-item>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UIItemJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIItemAttributes>, UIItemAttributes {}
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIItemEventMap>>, keyof UIItemAttributes>, UIItemAttributes {}
 
 /** `<ui-items>`'s own attributes, from its vocabulary. */
 export interface UIItemsAttributes {
@@ -31861,6 +32304,11 @@ export interface UIPanelEventMap {
     source: string
     error: unknown
   }>
+  /**
+   * `ui-dismissed`:  Its ✕ was clicked (`closable`):  the page closes it.  The panel doesn't hide itself, so the page can hide what it belongs to.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   */
+  "ui-dismissed": CustomEvent<{ originalEvent?: Event }>
 }
 
 /** `<ui-panel>`'s own attributes, from its vocabulary. */
@@ -32182,6 +32630,26 @@ export interface UIPanelAttributes {
    */
   "prop:selector"?: string
   /**
+   * A ✕ at the far end of its bar, after its actions and chevron, light until hovered:  a click sends `ui-dismissed`, and the page closes it (hides it, or the column it's in).  It never folds the panel.
+   * - takes:  flag (present / absent)
+   */
+  closable?: boolean | ""
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
+  "prop:closable"?: boolean | ""
+  /**
+   * With `closable`:  the ✕'s name and tooltip, what closing it does (`Hide the code`).  None:  `Close`.
+   * - takes:  text
+   */
+  "close-label"?: string
+  /**
+   * `close-label`, as the DOM element's property.
+   * @deprecated write `close-label` -- `prop:` stays only for compiled spell
+   */
+  "prop:closeLabel"?: string
+  /**
    * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
    * - takes:  text
    */
@@ -32470,6 +32938,11 @@ export interface UIPanelAttributes {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-error"?: (event: UIPanelEventMap["ui-error"]) => void
+  /**
+   * `ui-dismissed`:  Its ✕ was clicked (`closable`):  the page closes it.  The panel doesn't hide itself, so the page can hide what it belongs to.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   */
+  "on-ui-dismissed"?: (event: UIPanelEventMap["ui-dismissed"]) => void
 }
 
 /** `<ui-panel>` in JSX:  its own attributes, and HTML's global ones. */
@@ -41044,6 +41517,11 @@ export interface UISearchEventMap {
    */
   "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
   /**
+   * `ui-toggled`:  A `collapsed` search slid open (`expanded: true`) or folded back.
+   * - `event.detail`:  `{ expanded: boolean }`
+   */
+  "ui-toggled": CustomEvent<{ expanded: boolean }>
+  /**
    * `ui-replied`:  A remote query answered.
    * - `event.detail`:  `{ query: string, results: SearchResult[] }`
    */
@@ -41104,6 +41582,16 @@ export interface UISearchAttributes {
    * @deprecated write `fluid` -- `prop:` stays only for compiled spell
    */
   "prop:fluid"?: boolean | ""
+  /**
+   * Starts as a search button;  a click slides the field open, focused.  Escape, or leaving it empty, folds it back.  `:state(expanded)` and `ui-toggled` tell the page, to hide a title the field covers.
+   * - takes:  flag (present / absent)
+   */
+  collapsed?: boolean | ""
+  /**
+   * `collapsed`, as the DOM element's property.
+   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   */
+  "prop:collapsed"?: boolean | ""
   /**
    * The results scroll after a fixed height.
    * - takes:  flag (present / absent)
@@ -41195,6 +41683,17 @@ export interface UISearchAttributes {
    */
   "prop:placeholder"?: string
   /**
+   * Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable="false"` turns it off.
+   * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  clearable?: boolean | "" | "false"
+  /**
+   * `clearable`, as the DOM element's property.
+   * @deprecated write `clearable` -- `prop:` stays only for compiled spell
+   */
+  "prop:clearable"?: boolean | "" | "false"
+  /**
    * The input's text:  the query, or a chosen result's title.
    * - takes:  text
    */
@@ -41234,6 +41733,16 @@ export interface UISearchAttributes {
    * @deprecated write `required` -- `prop:` stays only for compiled spell
    */
   "prop:required"?: boolean | ""
+  /**
+   * Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows.
+   * - takes:  text
+   */
+  shortcut?: string
+  /**
+   * `shortcut`, as the DOM element's property.
+   * @deprecated write `shortcut` -- `prop:` stays only for compiled spell
+   */
+  "prop:shortcut"?: string
   /**
    * Remote results:  a `UI.api` URL template with `{query}`, e.g. `/api/search?q={query}`.
    * - takes:  text
@@ -41624,6 +42133,11 @@ export interface UISearchAttributes {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UISearchEventMap["ui-changed"]) => void
+  /**
+   * `ui-toggled`:  A `collapsed` search slid open (`expanded: true`) or folded back.
+   * - `event.detail`:  `{ expanded: boolean }`
+   */
+  "on-ui-toggled"?: (event: UISearchEventMap["ui-toggled"]) => void
   /**
    * `ui-replied`:  A remote query answered.
    * - `event.detail`:  `{ query: string, results: SearchResult[] }`
@@ -46361,6 +46875,16 @@ export interface UISiteNavJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UISiteNavEventMap>>, keyof UISiteNavAttributes>,
     UISiteNavAttributes {}
 
+/** `<ui-site-nav-button>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UISiteNavButtonEventMap {
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{ originalEvent?: Event }>
+}
+
 /** `<ui-site-nav-button>`'s own attributes, from its vocabulary. */
 export interface UISiteNavButtonAttributes {
   /**
@@ -46548,6 +47072,16 @@ export interface UISiteNavButtonAttributes {
    * @deprecated write `kind` -- `prop:` stays only for compiled spell
    */
   "prop:kind"?: "item" | "header" | "divider"
+  /**
+   * A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.
+   * - takes:  text
+   */
+  closable?: string
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
+  "prop:closable"?: string
   /**
    * What it shows and hides:  the layout's `drawer` (its side navigation), or its `left` or `right` side bar.  With one for a side bar, a narrow layout hides that side bar behind it.
    * - takes:  `drawer` · `left` · `right`
@@ -46795,11 +47329,19 @@ export interface UISiteNavButtonAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UISiteNavButtonEventMap["ui-closing"]) => void
 }
 
 /** `<ui-site-nav-button>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UISiteNavButtonJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UISiteNavButtonAttributes>, UISiteNavButtonAttributes {}
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UISiteNavButtonEventMap>>, keyof UISiteNavButtonAttributes>,
+    UISiteNavButtonAttributes {}
 
 /** `<ui-site-tabs>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISiteTabsEventMap {
@@ -56824,6 +57366,11 @@ export interface UIToolbarEventMap {
    * - `event.detail`:  `{}`
    */
   "ui-form-value": CustomEvent<{}>
+  /**
+   * `ui-item-dropped`:  `reorderable`:  `item` was dragged and dropped `place` (`before` or `after`) `target`, another item of the row.  The toolbar moves nothing:  the page does, as the row is its own.
+   * - `event.detail`:  `{ item: Element, target: Element, place: "before" | "after" }`
+   */
+  "ui-item-dropped": CustomEvent<{ item: Element; target: Element; place: "before" | "after" }>
 }
 
 /** `<ui-toolbar>`'s own attributes, from its vocabulary. */
@@ -57197,6 +57744,16 @@ export interface UIToolbarAttributes {
    */
   "prop:scrollFirst"?: boolean | ""
   /**
+   * `scroll-first` that never stops:  however narrow, its items scroll with `‹` / `›`, and it's never the dropdown.  For a row whose own button already lists every item (`max-visible`), such as a project's files.
+   * - takes:  flag (present / absent)
+   */
+  "scroll-only"?: boolean | ""
+  /**
+   * `scroll-only`, as the DOM element's property.
+   * @deprecated write `scroll-only` -- `prop:` stays only for compiled spell
+   */
+  "prop:scrollOnly"?: boolean | ""
+  /**
    * More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button lists every item while some aren't in view.  An item picked there joins the row, and the one chosen longest ago leaves it.
    * - takes:  text
    */
@@ -57226,6 +57783,16 @@ export interface UIToolbarAttributes {
    * @deprecated write `all-items-icon` -- `prop:` stays only for compiled spell
    */
   "prop:allItemsIcon"?: string
+  /**
+   * Its items can be dragged along the row:  the dragged one dimmed, a line where it would land, before or after the item under the pointer.  The drop sends `ui-item-dropped`;  the page puts it there (a project's files:  their order).  Escape puts it back.
+   * - takes:  flag (present / absent)
+   */
+  reorderable?: boolean | ""
+  /**
+   * `reorderable`, as the DOM element's property.
+   * @deprecated write `reorderable` -- `prop:` stays only for compiled spell
+   */
+  "prop:reorderable"?: boolean | ""
   /**
    * With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one.
    * - takes:  flag (present / absent)
@@ -57528,6 +58095,11 @@ export interface UIToolbarAttributes {
    * - `event.detail`:  `{}`
    */
   "on-ui-form-value"?: (event: UIToolbarEventMap["ui-form-value"]) => void
+  /**
+   * `ui-item-dropped`:  `reorderable`:  `item` was dragged and dropped `place` (`before` or `after`) `target`, another item of the row.  The toolbar moves nothing:  the page does, as the row is its own.
+   * - `event.detail`:  `{ item: Element, target: Element, place: "before" | "after" }`
+   */
+  "on-ui-item-dropped"?: (event: UIToolbarEventMap["ui-item-dropped"]) => void
 }
 
 /** `<ui-toolbar>` in JSX:  its own attributes, and HTML's global ones. */
@@ -62401,6 +62973,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
        *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
+       * - events:  `ui-closing`
        */
       "ui-action": UIActionJSXAttributes
       /**
@@ -62766,6 +63339,12 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-icon": UIIconJSXAttributes
       /**
+       * `<ui-icon-browser>`:  An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.
+       * - also known as:  icon gallery, icon list, icon finder, glyph browser, icon catalog, icon search
+       * - events:  `ui-chosen`
+       */
+      "ui-icon-browser": UIIconBrowserJSXAttributes
+      /**
        * `<ui-icon-picker>`:  An icon picker lets people choose an icon by searching for it and clicking its glyph.
        * - also known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search
        * - events:  `ui-changing`, `ui-changed`, `ui-opening`, `ui-closing`
@@ -62817,6 +63396,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
        *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
+       * - events:  `ui-closing`
        */
       "ui-item": UIItemJSXAttributes
       /**
@@ -62972,7 +63552,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
        *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
-       * - events:  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
+       * - events:  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`, `ui-dismissed`
        */
       "ui-panel": UIPanelJSXAttributes
       /**
@@ -63149,7 +63729,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  autocomplete, typeahead, search box, combobox, lookup
        * - slots:
        *   - `icon`:  Replaces the magnifying glass.
-       * - events:  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-replied`, `ui-opening`, `ui-closing`
+       * - events:  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-toggled`, `ui-replied`, `ui-opening`, `ui-closing`
        */
       "ui-search": UISearchJSXAttributes
       /**
@@ -63260,6 +63840,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
        *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
+       * - events:  `ui-closing`
        */
       "ui-site-nav-button": UISiteNavButtonJSXAttributes
       /**
@@ -63455,7 +64036,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `title`:  After the icon:  the title, never squeezed.
        *   - `center`:  After the title, taking the room left, what's in it centred there:  e.g. a row of links.
        *   - `right`:  Last, pushed to the end:  e.g. search and settings.
-       * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`
+       * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`, `ui-item-dropped`
        */
       "ui-toolbar": UIToolbarJSXAttributes
       /**
@@ -63605,16 +64186,18 @@ export interface UIEventMap {
   "ui-cancelled": CustomEvent<unknown>
   "ui-selecting": CustomEvent<unknown>
   "ui-node-toggled": CustomEvent<unknown>
+  "ui-chosen": CustomEvent<unknown>
   "ui-drawing": CustomEvent<unknown>
   "ui-typed": CustomEvent<unknown>
   "ui-navigating": CustomEvent<unknown>
   "ui-removing": CustomEvent<unknown>
-  "ui-chosen": CustomEvent<unknown>
   "ui-drawn": CustomEvent<unknown>
   "ui-ready": CustomEvent<unknown>
   "ui-toggle": CustomEvent<unknown>
+  "ui-dismissed": CustomEvent<unknown>
   "ui-completed": CustomEvent<unknown>
   "ui-show-code": CustomEvent<unknown>
+  "ui-toggled": CustomEvent<unknown>
   "ui-replied": CustomEvent<unknown>
   "ui-animated": CustomEvent<unknown>
   "ui-starred": CustomEvent<unknown>
@@ -63625,6 +64208,7 @@ export interface UIEventMap {
   "ui-send": CustomEvent<unknown>
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
+  "ui-item-dropped": CustomEvent<unknown>
   "ui-starting": CustomEvent<unknown>
   "ui-started": CustomEvent<unknown>
   "ui-stepped": CustomEvent<unknown>
@@ -63653,7 +64237,7 @@ export interface UIEventMap {
 declare global {
   interface HTMLElementTagNameMap {
     "ui-accordion": UIHTMLElement<UIAccordionEventMap>
-    "ui-action": HTMLElement
+    "ui-action": UIHTMLElement<UIActionEventMap>
     "ui-actions": HTMLElement
     "ui-ad": HTMLElement
     "ui-app-menu": UIHTMLElement<UIAppMenuEventMap>
@@ -63703,13 +64287,14 @@ declare global {
     "ui-grid": HTMLElement
     "ui-header": HTMLElement
     "ui-icon": HTMLElement
+    "ui-icon-browser": UIHTMLElement<UIIconBrowserEventMap>
     "ui-icon-picker": UIHTMLElement<UIIconPickerEventMap>
     "ui-icons": HTMLElement
     "ui-image": HTMLElement
     "ui-images": HTMLElement
     "ui-include": UIHTMLElement<UIIncludeEventMap>
     "ui-input": UIHTMLElement<UIInputEventMap>
-    "ui-item": HTMLElement
+    "ui-item": UIHTMLElement<UIItemEventMap>
     "ui-items": HTMLElement
     "ui-json": UIHTMLElement<UIJsonEventMap>
     "ui-keys": HTMLElement
@@ -63762,7 +64347,7 @@ declare global {
     "ui-site-breadcrumbs": HTMLElement
     "ui-site-links": HTMLElement
     "ui-site-nav": UIHTMLElement<UISiteNavEventMap>
-    "ui-site-nav-button": HTMLElement
+    "ui-site-nav-button": UIHTMLElement<UISiteNavButtonEventMap>
     "ui-site-tabs": UIHTMLElement<UISiteTabsEventMap>
     "ui-slider": UIHTMLElement<UISliderEventMap>
     "ui-space": HTMLElement

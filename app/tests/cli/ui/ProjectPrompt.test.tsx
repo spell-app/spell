@@ -5,8 +5,8 @@ import { CLI } from "spell/app/cli"
 
 const KEY = { down: "\u001B[B", tab: "\t", enter: "\r", escape: "\u001B" }
 
-/** Let Ink -- and the choices, worked out async -- catch up with the input just written. */
-const settle = () => new Promise((done) => setTimeout(done, 60))
+/** Let Ink catch up with the input just written. */
+const tick = () => new Promise((done) => setTimeout(done, 60))
 
 /**
  * Draw a `<ProjectPrompt>` with `recents`, type each of `keys`, and return the last frame and what it picked.
@@ -15,9 +15,18 @@ const settle = () => new Promise((done) => setTimeout(done, 60))
  */
 async function prompt(keys: string[], recents: string[] = [], { untilPicked = false } = {}) {
   const onDone = vi.fn()
-  const { stdin, lastFrame, unmount } = render(
-    <CLI.ProjectPrompt choicesFor={(text) => CLI.projectChoices(text, recents)} onDone={onDone} />
-  )
+  // the choices are read from disk, which takes longer on a busy machine:  settled is none still being read
+  let reading = 0
+  const choicesFor = (text: string) => {
+    reading++
+    return CLI.projectChoices(text, recents).finally(() => reading--)
+  }
+  const settle = async () => {
+    do await tick()
+    while (reading)
+    await tick()
+  }
+  const { stdin, lastFrame, unmount } = render(<CLI.ProjectPrompt choicesFor={choicesFor} onDone={onDone} />)
   await settle()
   for (const key of keys) {
     stdin.write(key)

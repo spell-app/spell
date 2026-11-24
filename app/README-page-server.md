@@ -7,7 +7,7 @@
     { "src": "/element/spell-language.js", "file": "app/dist-element/spell-language.js", "skip": ["/components/"] }
   ],
   "componentSets": {
-    "app": { "name": "App UI", "dir": "app/docs", "assets": "../ui/site/_assets" }
+    "app": { "name": "App UI", "dir": "app/docs", "assets": "../ui/site/_assets", "sitePage": "index.html" }
   },
   "engineRoutes": { "/element/": "app/dist-element" }
 }
@@ -27,7 +27,7 @@ with the epic repo's and those of any repos beside the kit.
 | --- | --- |
 | `routes` | the app's route module, [appRoutes.ts](src/spaces/server/node/routes/appRoutes.ts):  the editor, its API, the built-in projects' build (below) |
 | `pageScripts` | `spell-language.js`, which colours blocks of Spell on the docs pages;  not on the component sets' pages, and only while its file exists, so a checkout that hasn't run `yarn build:element` gets no 404 |
-| `componentSets` | App UI, the docs pages of the app's components, from [app/docs/](app/docs/), at `/components/app/` ([README-app.md](README-app.md)) |
+| `componentSets` | App UI, the guide to the app's components, a Spell guide shown at `/components/app/` by [app/docs/](app/docs/)'s one page ([README-app.md](README-app.md)) |
 | `engineRoutes` | the editor's element bundles at `/element/`, from `app/dist-element/`, so the page server serves them under every worktree's address too, not only through `appRoutes` |
 
 The app names no other folder's routes:  the `epic/` folder, Spell UI and the epic repo each declare their own.

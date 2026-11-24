@@ -116,6 +116,9 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
     its description);  and where an edit of them goes.
     - A later look keeps them with their line, drops them with it (saying so), and dates what it finds new or can't
       find:  `-- NEW as of 2026-11-18`, `-- APPARENTLY DELETED as of 2026-11-18` (`mergedSpell()`'s `marks`).
+    - A program's read of a field marked `APPARENTLY DELETED` gets a warning with that date, on each read, and a likely
+      new name when the same look marked one NEW:  `SP.PlaceFieldMarks` (epic `language` P68, Q82), reading the marks
+      off the field's parsed lines with `PlaceWords.markIn()`.
   - `PlaceSpec` (epic `data` P49):  an OpenAPI 3 description read whole as one more look (`--spec`), every list, field,
     write and action route from its schemas, `$ref`s by a small reader of its own;  each collection's `state` says
     whether it was tried, and `PlaceIngest.verify()` (`spell place verify`) tries it, on a deployment the project's
@@ -158,6 +161,9 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
   - The app's `<spell-code>` colours pages with it, from source, in a lazy chunk
     ([SpellLanguage](../../../app/src/app/components/spell-code/SpellLanguage.ts)):
     nothing to regenerate after a grammar change.
+- [PageChunks.ts](PageChunks.ts):  a built site's compiled program cut into its main chunk and a chunk per page alone in
+  its file (epic `solid-2-final` P13), by its text alone:  the page server cuts a built file as it serves it
+  (`?pages=lazy`, `?page=<Class>`), and the runner's `LazyPages` loads each page as it's first shown.
 - [targets.ts](targets.ts):  the TARGETS spell compiles to, `SP.TARGETS`.
   Each is a language, the runtime its code runs on, and the writer that writes it:
   - `js/solid`:  ALWAYS compiled, as the editor, the runners and `spell run` run it
@@ -192,6 +198,10 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
       - `SpellProject.compileCache`:  the editor's keeps it on disk through the page server, `~/.spell/cache/compiles`
       - a project not parsed yet asks it first:  found, it takes what's kept and saves it, compiling nothing
         (`compiledFrom` is `"cache"`;  nothing is parsed till something asks)
+      - the same entry is what the editor's language worker hands back from its compile:  the page takes it as its own,
+        its parse as it was (`takeCompiled()`;  `compiledFrom` is `"elsewhere"`;  epic `solid-2-final` P18);
+        a clean one is kept in the cache too, under the key of the text it compiled (`compileCacheKey()`, asked
+        before;  I57)
       - its key:  what its project file says, its files' text, its targets, and each import's declarations
         (or a `source` import's files);  the compiler's version is the store's
       - whole projects:  a project compiles as one module, so any edit compiles it all again

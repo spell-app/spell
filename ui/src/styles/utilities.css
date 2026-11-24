@@ -1,7 +1,8 @@
 /*
  * Utility classes, `@layer ui.utilities`, modelled on Web Awesome's layout / text utilities.
- * - Injected into the page AND adopted into every shadow root, so they work on light-DOM markup and on
- *   component internals alike.  The utilities layer beats component layers, and page rules targeting a host
+ * - Injected into the page, and adopted into the shadow root of each family whose own markup uses one
+ *   (`yarn gen:root`'s scan;  epic `solid-2-final` P4), so they work on light-DOM markup and on component internals
+ *   alike.  The utilities layer beats component layers, and page rules targeting a host
  *   beat its `:host` rules, so `class="ui-out-of-view"` on a component works without `!important`.
  * - Token driven:  lengths are `em` of the LOCAL font size (spacing tokens), never rem or bare px.
  * - Generated siblings (from the vocabulary, `yarn gen:styles`):

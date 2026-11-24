@@ -20,7 +20,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   ```
 
 - Made by `spell pack create __pack__ --prefix __prefix__`:  a repo of its own, inside the kit (`spell`), laid
-  out as spell-brand is.  It may use the kit and Spell UI, and nothing above them.
+  out as every pack repo is.  It may use the kit and Spell UI, and nothing above them.
 - Its build and check are the kit's pack tooling (`spell-pack`, `spell/element-tools/ComponentPack`), so
   every pack builds and checks the same way, in any repo.
 - ALL its code is in ONE `src/`:

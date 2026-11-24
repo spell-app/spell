@@ -16,6 +16,8 @@ import { uiReady } from "spell/app/app/solid/loadUI"
  * - In the page's language:  its title, labels and tips are `appTexts`'.
  * - What it edits:  the project file's `title`, `version`, `targets` and `listsStartAt`,
  *   a copy of what the project's index says (`settingsOf()`).
+ * - What it shows, read only, under them:  the Spell it's written for, "Written for Spell 0.9" (`writtenFor()`;
+ *   epic `language` P68), which `spell upgrade` and the editor's Upgrade write, never a person.
  * - `apply="on save"`:  the editor holds every edit until Save, which validates first.
  *   - Save:  the project's group writes them into the project file (`SPACES.SpellProjectRoot.saveSettings()`),
  *     and the dialog closes.
@@ -59,6 +61,10 @@ export function ProjectSettings(props: ProjectSettingsProps) {
           <ui-property name="listsStartAt" width="1/2" as="buttons"></ui-property>
           <ui-property name="targets" width="1/2" as={CHOICES}></ui-property>
         </ui-property-editor>
+        {/* the Spell it's written for:  read only, as no person edits it (epic `language` P68) */}
+        <ui-text class="ProjectSettingsSpell" paragraph="" size="small" color="grey">
+          {writtenFor(props.project)}
+        </ui-text>
       </ui-content>
     </ui-modal>
   )
@@ -134,6 +140,17 @@ function settingsOf(project: SP.SpellProject): SPACES.ProjectSettings {
     targets: (contents?.targets ?? []).filter((name) => name !== SP.RUNNING_TARGET),
     listsStartAt: contents?.listsStartAt ?? 1
   }
+}
+
+/**
+ * The Spell `project` is written for, in the page's words:  "Written for Spell 0.9" (its file's `spellVersion`),
+ * or "Written for an older version of Spell" when its file names none.
+ */
+export function writtenFor(project: SP.SpellProject): string {
+  const version = project.contents?.spellVersion
+  return version
+    ? appTexts.text("writtenForSpell", { version: SP.OldForms.shortVersion(version) })
+    : appTexts.text("writtenForOlderSpell")
 }
 
 /** The control kind for picking several choices:  a multiple-selection dropdown, as wide as its column. */

@@ -165,8 +165,8 @@ export class SiteEdits {
   /**
    * `text` with the part `name` called `newName`:  in its site's list, and in its own declaration.
    * - Lines elsewhere naming it (`go to the films page`) aren't this text edit's:
-   *   `SiteWrites.renamePart()` finds them by the project's parse, in every file,
-   *   and renames them in the same step (epic `mockup` P6, T13).
+   *   `SiteWrites.renamePart()` asks the language worker where they are, in every file (`spell/sitePartUses`),
+   *   and renames them in the same step (epic `mockup` P6, T13;  epic `solid-2-final` I56).
    * - throws `TypeError` when `newName` is taken, or isn't one the language reads as this kind of part
    */
   static withPartRenamed(text: string, name: string, newName: string): string {

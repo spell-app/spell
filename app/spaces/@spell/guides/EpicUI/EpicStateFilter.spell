@@ -1,0 +1,200 @@
+"epic state filter" is a notebook page
+	<header level="1">
+		&lt;epic-state-filter&gt;
+		<header>The &lt;epic-state-filter&gt; element: the state filter's chips, a pill per item state with how many, solid while it shows.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-state-filter&gt;</> is the state filter's chips: a pill per state the items are in, in the state's colour, with how many. Solid while that state's items show, outlined while hidden.</>
+	<list bulleted>
+		<item>It filters nothing itself: a click tells its owner what was picked, and what should show next.</>
+		<item>A click toggles a chip and every state of its colour (turning off the last one shows the next colour instead); ⌥-click (Alt-click) a chip to show ONLY that colour, whatever showed (epic <text code>epic-engine</> I166).</>
+		<item>ONE element for every filter by state: an item section's title, an epic page's toolbar, the Epics page's lists.</>
+	</>
+	<text class="meta" paragraph>For anyone changing how items are filtered.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-state-filter" link="/epic/src/components/epic-state-filter/"><text title="epic/src/components/epic-state-filter/" code>epic-state-filter</></> family, with <link target="src-spell-epic-src-docs-epic-hidden-note-html" link="/epic-hidden-note"><text code>&lt;epic-hidden-note&gt;</></>.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-state-filter-epicstatefilter-en-ts" link="/epic/src/components/epic-state-filter/EpicStateFilter.en.ts"><text title="epic/src/components/epic-state-filter/EpicStateFilter.en.ts" code>EpicStateFilter.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-state-filter-epicstatefilter-tsx" link="/epic/src/components/epic-state-filter/EpicStateFilter.tsx"><text title="epic/src/components/epic-state-filter/EpicStateFilter.tsx" code>EpicStateFilter.tsx</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<epic-state-filter counts="attention:1 open:4 recent:3" shown="attention open"></epic-state-filter>
+			</html>
+		</example>
+		<text paragraph>Red and yellow show, green is hidden. A click here only says so: nothing on this page listens.</>
+		<text paragraph>Mid-pass, three items marked: they leave their chips for the blue badge, first.</>
+		<html>
+			<epic-state-filter counts="open:2 recent:3" shown="open" marked="3"></>
+		</>
+		<text paragraph>The marked example:</>
+		<markdown>
+			```html
+			<epic-state-filter counts="open:2 recent:3" shown="open" marked="3"></epic-state-filter>
+			```
+		</>
+		<text paragraph>The Phases section's (<text code>phases</>, epic <text code>epic-engine</> I170): a phase's states, in your order. Red needs you, orange changed since you looked, green done lately, grey done before; the ones under way and the ones scheduled together in the ONE blue badge (epic <text code>epic-engine</> I260).</>
+		<html>
+			<epic-state-filter phases counts="attention:1 updated:2 progress:1 scheduled:4 recent:2 old:40" shown="attention updated scheduled progress"></>
+		</>
+		<text paragraph>The phases example:</>
+		<markdown>
+			```html
+			<epic-state-filter phases counts="attention:1 updated:2 progress:1 scheduled:4 recent:2 old:40" shown="attention updated scheduled progress"></epic-state-filter>
+			```
+		</>
+		<text paragraph>The page's toolbar, while its sections disagree about a colour (<text code>mixed</>, epic <text code>epic-engine</> I259): that chip has a pale fill, here the grey, shown in some sections and hidden in others. A click shows it in every section, the Phases section too.</>
+		<html>
+			<epic-state-filter counts="attention:1 open:4 old:12" shown="attention open" mixed="old"></>
+		</>
+		<text paragraph>The mixed example:</>
+		<markdown>
+			```html
+			<epic-state-filter counts="attention:1 open:4 old:12" shown="attention open" mixed="old"></epic-state-filter>
+			```
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Nobody writes it in a doc: <link target="src-spell-epic-src-docs-epic-section-html" link="/epic-section"><text code>&lt;epic-section&gt;</></> and <link target="src-spell-epic-src-docs-epic-page-html" link="/epic-page"><text code>&lt;epic-page&gt;</></> draw it in their shadow roots, and the docs runtime puts one in a section's title on the Epics page (<link target="src-spell-epic-src-tools-assets-spell-doc-runtime-js" link="/epic/src/tools/_assets/spell-doc-runtime.js"><text title="epic/src/tools/_assets/spell-doc-runtime.js" code>wireItemFilters()</></>).</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Parent</>
+				<cell>How many</>
+				<cell>As</>
+			</>
+			<row>
+				<cell><text code>&lt;epic-section&gt;</>'s title</>
+				<cell>one</>
+				<cell>An item section's filter.</>
+			</>
+			<row>
+				<cell><text code>&lt;epic-page&gt;</>'s toolbar</>
+				<cell>one</>
+				<cell>Every section filtered at once, the Phases section too:  a click SETS its colour in each.</>
+			</>
+			<row>
+				<cell>a docs page's <text code>&lt;ui-section&gt;</>, <text code>slot="actions"</></>
+				<cell>one</>
+				<cell>The Epics page's lists (<text code>.spell-item-filter</>).</>
+			</>
+		</>
+		<text paragraph>It has no children.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Attribute</>
+				<cell>What it is</>
+			</>
+			<row>
+				<cell>
+					<text code>counts</>
+				</>
+				<cell>How many items are in each state: <text code>attention:2 open:5</>. A chip per state with any, in the filter's order: progress, attention, replied, open, recent, old.</>
+			</>
+			<row>
+				<cell>
+					<text code>phases</>
+				</>
+				<cell>The Phases section's chips (epic <text code>epic-engine</> I170): <text code>counts</> names a phase's states, in your order: attention (red), updated (orange), progress and scheduled (blue, both in the one badge, I260), recent (green), old (grey), each with its own words.</>
+			</>
+			<row>
+				<cell>
+					<text code>shown</>
+				</>
+				<cell>The states showing. No attribute: every state; <text code>""</>: none.</>
+			</>
+			<row>
+				<cell>
+					<text code>mixed</>
+				</>
+				<cell>The states drawn mixed (epic <text code>epic-engine</> I259): the page's toolbar, while some sections show that colour and some hide it. A pale fill, <text code>aria-pressed="mixed"</>; a click shows it everywhere.</>
+			</>
+			<row>
+				<cell>
+					<text code>marked</>
+				</>
+				<cell>How many items you marked in this pass, not applied yet (epic <text code>epic-engine</> P43): the blue badge, left of the chips, drawn whatever <text code>shown</> says. Left out of <text code>counts</>. None or 0: no badge.</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The group of chips.</>
+				</>
+				<row>
+					<cell>
+						<text code>chip</>
+					</>
+					<cell>Each chip, a <text code>&lt;button&gt;</>: <text code>data-state</>, <text code>data-color</>, <text code>data-fill</> (<text code>dotted</>: a phase scheduled), <text code>aria-pressed</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>marked</>
+					</>
+					<cell>The blue badge: everything with Claude and the items marked in this pass. The blues' chip: a click toggles them.</>
+				</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<text paragraph>What it tells its owner.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Detail</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>epic-state-changed</>
+					</>
+					<cell>
+						<text code>&#123; state, shown, how &#125;</>
+					</>
+					<cell>A chip was clicked: its state, and what should show next by the one rule (<text code>StateFilter.nextShown()</>); <text code>how</> is <text code>click</>, or <text code>only</> for an ⌥-click, which shows its state alone.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Each state in its colour: blue Claude is on it, red needs you, orange your turn to pick, yellow open, green done lately, grey older.</>
+			<item>A phase scheduled, still to do: a DOTTED blue outline, its count in blue, never filled; faded while hidden (epic <text code>epic-engine</> I170).</>
+			<item>The colours come from the page: an epic page's <text code>--epic-state-*</>, a docs page's <text code>--spell-state-*</>.</>
+			<item>Each chip's tooltip says how many, which state, and what a click does; its second line, that ⌥-click shows only that colour.</>
+			<item>The marked badge: solid blue, the Send plane's, with white numbers, first in the row; its tooltip "3 marked in this pass, waiting for Claude".</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>&lt;epic-section&gt;</>, <text code>&lt;epic-page&gt;</> and the docs runtime (before epic <text code>epic-engine</> P3, each drew its own chips).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-25 against branch <ui-text code>epic-engine</> (P43).</>
+		</>
+	</>

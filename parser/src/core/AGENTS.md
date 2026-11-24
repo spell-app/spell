@@ -92,6 +92,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Each call spreads in `SPELL_WINDOW` ([ui.ts](ui.ts)):
     a spell cell says how many are drawn, and `scroll to the top` keeps a list coming back at the top.
   - Up to 24 items it's a plain drawing, no different;  past that, 24 at a time, as the end of the list comes near the view.
+  - Past 300 items, only the items within a few screens of the view stay drawn, the rest taken down as they scroll away
+    and drawn again as they come back (epic `solid-2-final` P17):  never the one with the focus, nor one whose form was
+    typed into.
   - What it drew last took no room (items still reading, or drawing nothing):  it waits a second before more,
     so a list of the Met's artworks, read one by one, isn't read all at once (epic `mockup` T42).
   - Find and printing draw the rest first, up to 5,000.  Going back to the same list draws as many, and scrolls where it was.
@@ -451,6 +454,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       one file a class, e.g. `Person.schema.json`, in a schemas folder.
     - The code:  cli's `writeSchemas()`.
   - Both read a property's kind through ONE function, `kindOf()`, so they can't disagree.
+    - It's in [kinds.ts](kinds.ts), which imports only `spell/util`:  the lazy sample rows (`placeSamples.ts`) read it
+      too, and through the checker they pulled `core` into the chunk every runtime copy shares (from-console I37).
   - In `spell/parser/core/model` too:  the people store checks with it.
 - A type as a LEXICON, AT Protocol's schema language ([lexicon.ts](lexicon.ts), epic `atmosphere` P10):
   - `lexiconFor(Class, { id })`:  its records' shape for other apps, by the same `kindOf()`.

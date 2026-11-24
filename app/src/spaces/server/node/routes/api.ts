@@ -16,6 +16,7 @@ import * as prefsRoutes from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import * as changesRoutes from "spell/app/spaces/server/node/changes/changesRoutes"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 import * as homeOrderRoutes from "spell/app/spaces/server/node/projects/homeOrderRoutes"
+import * as spellVersions from "spell/app/spaces/server/node/projects/spellVersions"
 import * as responseUtils from "spell/app/spaces/server/node/projects/response-utils"
 import { ProjectBuild } from "./ProjectBuild"
 
@@ -70,6 +71,7 @@ api.post("/projects/create/project", projectUtils.request_createProject)
 api.post("/projects/rename/project", projectUtils.request_renameApp)
 api.post("/projects/duplicate/project", projectUtils.request_duplicateApp)
 api.post("/projects/settings/project", projectUtils.request_saveProjectSettings)
+api.post("/projects/spellVersion/project", spellVersions.request_saveSpellVersion)
 api.delete("/projects/remove/project", projectUtils.request_deleteApp)
 api.post("/projects/unsaved/project", projectUtils.request_markUnsaved)
 

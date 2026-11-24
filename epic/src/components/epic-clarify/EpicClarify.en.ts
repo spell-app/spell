@@ -70,11 +70,6 @@ export const epicClarifyVocabulary = {
   texts: [
     { key: "clarify", text: "Clarify", description: "The link's words." },
     {
-      key: "clarifyTip",
-      text: "Ask Claude for details now",
-      description: "The link's tooltip."
-    },
-    {
       key: "iconTip",
       text: "Rewrite it in plainer words, now",
       description: "With `icon`:  the button's tooltip and name."

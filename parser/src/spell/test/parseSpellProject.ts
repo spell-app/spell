@@ -1,6 +1,9 @@
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
+// every language pack, past English:  tests read them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
+
 /**
  * Parse + compile a spell project headlessly, the same way `SpellProject` does in the app:
  * - ONE `ProjectScope` with a clone of the root spell parser

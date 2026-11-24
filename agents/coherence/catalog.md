@@ -42,7 +42,7 @@ What `/coherence sweep` reads, an agent each.
 | `ui-docs-tools` | `ui/src/docs-components/`, `ui/src/tools/`, `ui/site/`, `ui/scripts/` |
 | `epic-pages` | `epic/src/components/`, `epic/src/tools/_assets/` (hand-written only), `epic/src/answers/`, `epic/src/review/` |
 | `epic-tools-kit` | `epic/src/` (the rest), `epic/hooks/`, the kit's `src/`, `tools/`, `scripts/` |
-| `parser-app` | `parser/src/`, `app/src/`, `spell-brand/src/`, `spell-brand/scripts/` |
+| `parser-app` | `parser/src/`, `app/src/` |
 | `ui-shared` | `ui/src/`'s other folders:  `cli/`, `icons/`, `property/`, `util/`, `vocabulary/`, its top-level files |
 | `vscode` | the two VS Code extensions:  `app/vscode/`, `epic/vscode/` |
 
@@ -129,14 +129,21 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `inString|let depth = 0` in a new scan of spell text
 - **Copies:**  `--`  (epic `coherence` P16 moved spellx's tokenizer, view and writer onto them)
 
-### A retired word
+### An old form
 
-- **It is:**  a word the language no longer takes, listed in a language's `retiredWords` / `retiredRuleWords`:
-  it still reads, as a parse error naming its replacement (`""`:  simply gone), which `spell lint --fix` writes
-  (`SpellType.noteRetiredLiterals()`, `retiredWordErrorsIn()`, `spell/parser/spell`;  `fixRetiredWords()`, spell-app's `lintCommand.ts`)
-- **Use it when:**  taking a word out of the language:  no rewrite command of its own.
-- **Flag:**  a new `spell upgrade`, or a script rewriting spell source by text
-- **Copies:**  `--`  (epic `language` P13 nearly built a second one, for lack of this entry)
+- **It is:**  a way of writing Spell that still works but is on its way out, a deprecation:  ONE list,
+  `SP.OLD_FORMS` (`spell/parser/spell`'s `OldForms.ts`;  epic `language` P68), each with the day it changed, the Spell
+  that deprecated it and the one that drops it.
+  - Retired words are some (a language's `retiredWords` / `retiredRuleWords`, `SpellType.noteRetiredLiterals()`),
+    and so is a `//` note after a line's code (`SP.LineEndComments`).
+  - A warning until its drop version, an error from then on;  reported by `OldForms.report()`.
+  - ONE rewrite, `OldForms.uses()` + `upgraded()`:  `spell lint --fix` and `spell upgrade` (`fixOldForms()`, the
+    app's `lintCommand.ts`), the language server's quick fixes and "Fix it", the editor's Upgrade.
+- **Use it when:**  taking a word or a way of writing out of the language:  add a form, never a rewriter of its own.
+- **Flag:**  a second rewrite command or pass, a script rewriting spell source by text, a deprecation warning with no
+  form on the list
+- **Copies:**  `--`  (epic `language` P13 nearly built a second one, for lack of this entry;  T166's own pass joined
+  the list in P68)
 
 ### Our TypeScript, read
 
@@ -388,7 +395,6 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Score:**  `function parseArgs\(|argv\.indexOf\(["']--`
   · home `src/cli/`, `epic/src/cli/`
 - **Copies:**
-  - `spell-brand/scripts/compare.ts`
   - the kit's `tools/content-links.ts`, `scripts/favicon.ts`, `tools/repos.ts`;  spell-epic's demo checks'
     `flagValue()`
   - P20 moved spell-epic's onto `parseVerbArgs()`:  six hand-written `parseArgs()` (`PlanDocCommands`, `design.js`,
@@ -516,12 +522,15 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - Epic `data` T76;  the parser's core's until an epic moved it to the kit.
   - It draws the first lot of items (`MOST_AT_ONCE`), then more as a sentinel nears the view,
     reading a place's next page.
-  - What's drawn stays drawn.
+  - Up to `MOST_KEPT` (300) items, what's drawn stays drawn;  past that, the lots more than a few screens from the
+    view are taken down, a stand-in as tall as they were in their place (epic `solid-2-final` P17):
+    never the one with the focus, one typed into, or the one the caller asks for.
   - An item the caller needs (`through`:  a pick, a key's target) is drawn at once.
   - In Spell it's every loop in a drawing, and `<for>` (epic `data` P22) adds the loader, Try again, the empty message,
     pages and a title.
   - In Spell UI it's each `<ui-tree>` column drawn from its items list (`UITree.itemRows()`):
-    5,000 rows open in 33 ms, as 300 do.
+    5,000 rows open in 33 ms, as 300 do;  and a `<ui-table>`'s data rows (`UITable.bodyRows()`), whose own windowing
+    (spacer rows, a scroll listener) moved onto it in P17.
 - **Use it when:**  a list a page draws could be long.  Never a scroll listener or a list's own paging.
 
 ### Remembering a preference
@@ -640,6 +649,13 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
     design check and comparison;  the kit's publish check;  the app's examples script;  Spell UI's smoke pages
     (`SmokeRunner`) since P23.
   - Fine:  the kit's `scripts/favicon.ts` (renders an image, checks no page).
+- Its rows and columns lined up:  `Alignment` (`spell/test-helpers/Alignment`, plain `node` too;  epic `epic-engine` P83,
+  T166):  every row on a page whose items' drawn middles differ by more than half a pixel, and every centred column
+  (a rail of icons ...) with an item drawn more than half a pixel left or right of its middle, through shadow roots
+  - `Alignment.scanPage(page)` in a Playwright page, `Alignment.scan()` in a component test, `report()` for the lines
+  - its users:  the page checker (`check-spell.js`), the designer's shots, every editor test (`runningEditor.ts`)
+  - a copy:  the editor epic's `alignment.ts` (`app/tests/app/pages/`, its I327), on its branch:  its test moves onto
+    the scan as it merges
 
 ### The page server, from an epic page
 
@@ -670,6 +686,20 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Score:**  `listeners = new Set<\(\) => void>\(\)|static adopt\(` · in `epic/src/`
   · home `epic/src/review/PageStore.ts`
 - **Copies:**  `--` since P22 (the six stores)
+
+### Drawing ahead on the server:  diagrams, coloured code
+
+- **It is:**  `SRV.Drawings` (the kit's server, epic `solid-2-final` P15):  a drawer per kind of drawing, ONE disk cache
+  (a `DiskCache` per drawer), ONE route (`/api/server/drawings/<kind>`), and the page server filling each page it
+  serves with what it has;  the elements' half is Spell UI's `GivenDrawings`
+- **Use it when:**  an element draws something that doesn't change from page to page with a heavy engine
+  (Mermaid, highlight.js, Spell's parser):  add a drawer from the folder's route module, and have the element look it
+  up first (`GivenDrawings.find()`, `spell/ui/elements/GivenDrawings`)
+- **Flag:**  a second cache of drawn markup, a page server hook that draws, an element fetching its own pre-drawn copy
+- **Copies:**  none.  Its drawers:  Spell UI's `CodeOnServer`, `MermaidOnServer`;  the app's `SpellOnServer`
+  - NOT the static render (`spell/ui/static`):  it turns elements into plain markup for search engines, no shadow DOM;
+    a drawing ahead keeps the element and hands it its finished picture
+  - NOT `spell readme pictures`:  pictures for GitHub, files beside the README
 
 ## Errors and logging
 
@@ -741,9 +771,19 @@ Plain, Command or Control, and Shift, one rule.
 One press, past a few pixels, with Escape to cancel and the closed hand over the page.
 - **It is:**  `Dragging` (`src/util/Dragging.ts`):
   plain DOM, carrying what its owner says, finding a list to drop on or leaving the place to its owner (`placing`).
-- **Used by:**  a program's views and lists (`SpellElement`), the editor's parts and palette (`PartEdits`).
+- **Used by:**  a program's views and lists (`SpellElement`), the editor's parts and palette (`PartEdits`),
+  a Feature Set's reorder dialog (`EpicFeatureSet`, its place worked out by itself:  `placing`).
 - **Copies:**  `PhaseDrag` (`epic/src/components/epic-section/PhaseDrag.ts`), a smaller one for an epic page's phases.
 - **Instead of:**  pointer listeners and a threshold of its own.
+
+### A long press
+
+A press held still, about half a second:  `ui-long-press` on what was pressed, the click after it swallowed.
+- **It is:**  `LongPress` (`src/util/LongPress.ts`, epic `editor` T157):  ONE per page, each owner saying which
+  presses are its, and for which pointers (`LongPress.listen(isFor)`).
+- **Used by:**  a program's views, fingers only (`SpellElement`:  `on long press`, else a right-click menu on a phone);
+  the editor's long press to move a part in Edit (I330).
+- **Instead of:**  a timer on `pointerdown` of its own.
 
 ### The highlighted option of a list
 
@@ -1015,6 +1055,15 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
   - the runtime's `EPIC_LAND_GAP` is its own since P22, no mirror:  `EpicFold`'s `LAND_GAP` went in P18
   - Left:  the site sections' sticking, in the site (the finding's "later":  into Spell UI's own code)
 
+### Back putting the reader where they were
+
+- **It is:**  `backPlacesFor(main)` (`epic/src/tools/_assets/spell-doc-back.js`;  epic `epic-engine` P80):  a place per
+  history entry, the scroll and the folds, kept as a link is clicked and as the page goes, used only by Back and Forward
+- **Use it when:**  a long docs page's links lead away and Back must return to the row, not the section's top:
+  today a Feature Set alone keeps places
+- **Flag:**  `navigation.currentEntry`
+- **Copies:**  `--`
+
 ### Keeping the reader's place while much of the page folds or hides
 
 - **It is:**  `ScrollAnchor.keep(change, root?)` (`epic/src/components/epic-item/ScrollAnchor.ts`;  epic `epic-engine`
@@ -1069,11 +1118,14 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 - **Use it when:**  a script builds a bundle the page server serves.
 - **Copies:**  `--` since P11 (Spell UI's site bundle, the brand's build)
 
-### A component set's data
+### A component set's guide
 
-- **It is:**  Spell UI's `SiteDataBuilder` (`ui/src/tools/SiteDataBuilder.ts`), its `set` and `forSet()`
-  (epic `coherence` P11):  a set's own groups as the topics, its own side-column links, its pages one flat folder
-- **Copies:**  `--` since P11 (the brand's, Epic UI's and App UI's data)
+- **It is:**  a Spell guide in `@spell/guides` (`SpellUI`, `EpicUI`, `AppUI`;  epic `editor` P43-P44):  its site file
+  says each page's address and group;  `SpellUIGuide` (`ui/src/util/SpellUIGuide.ts`) each page's address on the page
+  server, and the link mender's rule for the old HTML pages;  `yarn site:check [--site epics | app]` checks it
+- **Use it when:**  a set of elements needs its pages:  never HTML components pages again.
+- **Copies:**  `--` since P44 (`SiteDataBuilder`'s set mode, `forSet()`, went with the other sets' HTML pages;  epic
+  `coherence` P11 had made it the one way to build a set's data)
 
 ### A docs element's site data
 
@@ -1108,7 +1160,7 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 
 ### Spell UI's folder, the site's pages, the page server
 
-- **It is:**  `SPELL_UI_ROOT` and `sitePages()` (`ui/src/tools/tools.types.ts`), `ensurePageServer()`
+- **It is:**  `SPELL_UI_ROOT` (`ui/src/tools/tools.types.ts`;  `sitePages()` went in epic `editor` P44), `ensurePageServer()`
   (`ui/src/tools/pageServer.ts`;  epic `coherence` P23)
 - **Use it when:**  a Spell UI script or tool needs the repo's folder, the docs site's pages, or the page server
   running.

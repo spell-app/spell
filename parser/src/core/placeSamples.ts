@@ -13,7 +13,7 @@
 import { schemaOf, type PropInfo, type Schema } from "spell/util"
 import type { PlaceRow } from "spell/places/places.types"
 
-import { kindOf } from "./checking"
+import { kindOf } from "./kinds"
 
 /** How many rows it makes. */
 const ROWS_MADE = 5

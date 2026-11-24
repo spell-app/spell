@@ -2,9 +2,8 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
 import { escapeRegExp } from "spell/util/string"
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { modalVocabulary } from "spell/ui/components/ui-modal/UIModal.en"
@@ -36,7 +35,7 @@ const ALLOWED_IMPORTANT = 0
 async function example(name: string, width = 1000): Promise<HTMLElement> {
   await resize(width)
   Sheets.adopt([...foundationCSS, buttonCSS, modalCSS])
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 /** The static modal in `root` whose header reads `text`. */
@@ -77,7 +76,7 @@ describe("UIModal.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = modalRaw + colorsCSS
+    const css = modalRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(modalVocabulary))
       expect(Sheets.covers(css, phrase), `${modalVocabulary.tag}: ${phrase}`).toBe(true)
   })
@@ -103,7 +102,7 @@ describe("UIModal.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every modal in %s", async (path) => {
     await resize(1000)
     Sheets.adopt([...foundationCSS, modalCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     for (const modal of root.querySelectorAll<HTMLElement>(".ui.modal")) {
       const style = getComputedStyle(modal)
       expect(style.display, modal.outerHTML.slice(0, 80)).toBe("block")
@@ -117,7 +116,7 @@ describe("UIModal.css examples", () => {
     const modal = modalNamed(root, "Profile Picture")
     const style = getComputedStyle(modal)
     const probe = getComputedStyle(
-      Fixture.render(`<span style="background: var(--ui-surface); color: var(--ui-surface-muted)"></span>`)
+      Sheets.render(`<span style="background: var(--ui-surface); color: var(--ui-surface-muted)"></span>`)
     )
     expect(style.backgroundColor).toBe(probe.backgroundColor)
     expect(style.boxShadow).not.toBe("none")
@@ -195,7 +194,7 @@ describe("UIModal.css examples", () => {
   it("static close icon sits OUTSIDE the box on computers", async () => {
     await resize(1000)
     Sheets.adopt([...foundationCSS, modalCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="padding: 60px"><div class="ui active modal" style="position: relative">` +
         `<button type="button" class="close icon" aria-label="Close">x</button><div class="header">H</div></div></div>`
     )
@@ -270,7 +269,7 @@ async function resize(width: number) {
 describe("UIModal.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, modalCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-modal-radius: 20px"><div class="ui active modal"><div class="content">x</div></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.modal")!).borderTopLeftRadius).toBe("20px")

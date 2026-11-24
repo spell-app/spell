@@ -239,7 +239,8 @@ and `spell` on your `PATH` ([README/cli.md](README/cli.md#setting-it-up), "Setti
    - It refuses on a branch behind `main`:  every window runs the ONE installed extension,
      so an older build would downgrade them all.
      It says to merge `main` in first (`epic worktree merge-main`);  `--force` builds anyway.
-   - The build fails unless the extension's version matches spell-parser's:  they're released together.
+   - The build fails unless the extension's version is the kit's:  they're released together.
+     Spell Epic's, below, does the same.
 3. Spell Epic, for the epic pages and the docs beside your code:
 
    ```sh
@@ -252,8 +253,8 @@ and `spell` on your `PATH` ([README/cli.md](README/cli.md#setting-it-up), "Setti
    - Or `yarn vscode:package` at spell-epic's root, then the same `code --install-extension`.
    - Or, once it's built, `epic plugin install` (and so `epic init`) runs that last line.
      With no `.vsix`, and a fresh clone has none, it skips the step and says nothing.
-     It installs only a version VS Code doesn't have, and a build alone doesn't change the version:
-     so after a rebuild, use the `code` line.
+     It installs when VS Code has another version, or an older build of this one.
+     After a version bump, build again first:  it won't install a package from the version before.
    - Install it again after a change you want in every window.
    - Then reload each window ("Developer:  Reload Window"):  a window keeps running the copy it started with.
 4. From the Marketplace, Oxc at least (the table below):  `code --install-extension oxc.oxc-vscode`.
@@ -614,6 +615,7 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
 
 ## See also
 
+- The guide:  [VS Code](guides/intellisense.html), in the kit's guides/ folder
 - [spell-app's README-lsp.md](https://github.com/spell-app/spell/blob/main/app/README-lsp.md):  the language server under the extension,
   every feature it answers
 - [spell-epic's README-vscode.md](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md):  Spell Epic in full,

@@ -29,7 +29,7 @@
  *   - `show-doc { file, hash?, view?, query? }`:  `DocPreview.show(file, hash, query)`
  *     - `hash`:  an id on the page to land on
  *     - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`)
- *     - `view`:  the side bar tab asked for, `"review"`, `"details"` or `"docs"`;
+ *     - `view`:  the side bar tab asked for, `"review"`, `"servers"`, `"details"` or `"docs"`;
  *       the page's kind decides, never `view` (`docViewFor()`:  a details or choice page to Details, an epic doc to
  *       Epic Docs, everything else to Review), and the answer says which, `{ file, view }`
  *   - `reload-view { view? }`:  rebuild that doc view (Review when none) from scratch, a new iframe at the page in view

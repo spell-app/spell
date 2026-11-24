@@ -61,7 +61,8 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  *   (the settings' `"siteTabs"`) ... and what route modules add (`addPageConfig()`), e.g. epics' airplane mode
  * - route modules (`RouteModule`) from the settings (`"routes"`) add the rest, e.g. the running epics, the app's `/api`
  * - the settings:  every installed repo's `"pageServer"` part, merged (`pageServerSettings()`, epic `repo-split` P16)
- * - the bundles there (`"bundles"`) are built as it starts, if stale (`BundleBuild`):  they're never committed
+ * - the bundles there (`"bundles"`) are built once it listens, if stale or a file short (`BundleBuild`):
+ *   they're never committed
  * - the page scripts there (`"pageScripts"`) go on every page, before `</body>` (`withPageScripts()`)
  * - the local copies there (`"localCopies"`) stand in for the CDN files pages load (`withLocalCopies()`)
  * - what's `"gone"` there answers "not found", though the epic folder still holds it
@@ -71,10 +72,17 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  * - NO redirects for old URLs (epic `people-and-orgs`, Q30):  an old address answers "not found"
  * - The server knows nothing of what the sets, routes, scripts and tabs are:  they come from the settings
  *   (epic `repo-split` P4).
+ * - CACHING (epic `solid-2-final` P2):  a worktree's server says "never store" (`caching: "never"`), so development
+ *   never sees a stale file;  the main checkout's `"normal"`:  pages and files checked each time by their `ETag`
+ *   ("not modified"), the bundles' hashed names (`builtNames()`) kept a year
  * - port:  `DEFAULT_PORT` (4747) for the main checkout, and ONLY that:  taken, it fails to start
  *   (epic `epic-engine` I332:  a restart that found an orphan on 4747 started on 59931, and the side bar lost it);
- *   a WORKTREE's server never asks for it (`portFor()`), and takes any free one:
+ *   a WORKTREE's server never asks for it (`portFor()`):
  *   it's the main checkout's, which the side bar and every opener expect (epic `epic-engine` I276)
+ *   - a worktree's takes the port written down for it instead, the same at every start (`SRV.PortBook`, epic
+ *     `epic-engine` P82):  a link to it stays good across restarts
+ * - the MAIN checkout's is the SERVER KEEPER's to start, stop and restart, when one runs (`SRV.KeeperLink`, epic
+ *   `epic-engine` P82):  `ensure()`, `stop()` and `restart()` ask it;  `ensureHere()` and `stopHere()` are what it runs
  *   - the real one goes in `<root>/.spell-server.json`, where `spell server start` and the openers find it
  * - its root:  the kit, from any folder of it (`pageServerRoot()`, epic `repo-split` P16)
  * - Run it with `spell server` (`page/cli.ts`), never by hand.
@@ -105,7 +113,7 @@ export class PageServer {
    */
   readonly siteTabs?: readonly SiteTab[]
 
-  /** the bundles' build as it starts (`BundleBuild`):  `start()` begins it, `stop()` ends it */
+  /** the bundles' build (`BundleBuild`):  `start()` begins it once it listens, `stop()` ends it */
   readonly bundles: BundleBuild
 
   /** its own lines in its log (`SPELL_DEBUG` name `server`):  where it listens, a route module that failed */
@@ -125,6 +133,9 @@ export class PageServer {
 
   /** the folders `/worktrees/<w>/` serves, in order, once `serveWorktrees()` has said;  none before */
   private worktrees: string[] = []
+
+  /** which names are a build's hashed ones (`builtNames()`):  in this checkout, and in each worktree it serves */
+  private readonly hashed: { own: RegExp; worktrees: RegExp }
 
   /** the epic folder served after the checkout, once `serveContent()` has said;  none before */
   private content?: string
@@ -147,7 +158,18 @@ export class PageServer {
   /** CDN URLs pages load, each with its local copy's URL (`"localCopies"`, `withLocalCopies()`) */
   private readonly localCopies: Record<string, string>
 
-  constructor({ root, token }: { root: string; token?: string }) {
+  /**
+   * what pages show drawn ahead (`SRV.Drawings`, epic `solid-2-final` P15):  route modules add their drawers
+   * (`RouteContext.drawings`);  each page filled in as it's served, the rest asked for at `SRV.Drawings.API`
+   * - its cache under the settings' `cacheLimit`, as the compile cache's
+   * - `SPELL_DRAWINGS=0` in its environment:  route modules get no `drawings`, so nothing is drawn ahead
+   */
+  readonly drawings: SRV.Drawings
+
+  /**
+   * - `certificate`:  HTTPS and HTTP/2 too, on the same port (`certificateFor()`);  plain HTTP stays for the tools
+   */
+  constructor({ root, token, certificate }: { root: string; token?: string; certificate?: SRV.CertificateFiles }) {
     this.root = resolve(root)
     // its spaces' own record (`--spaces`, `SPELL_SPACES_DIR`)
     this.pidFile = SRV.PidFile.forPageServer(this.root)
@@ -160,7 +182,11 @@ export class PageServer {
       ...(this.pidFile.spaces && { spaces: this.pidFile.spaces })
     }
     const settings = this.settings()
-    const { writable, pageScripts = [], siteTabs, localCopies = {}, gone = [] } = settings
+    const { writable, pageScripts = [], siteTabs, localCopies = {}, gone = [], cacheLimit } = settings
+    this.drawings = new SRV.Drawings({
+      ...(cacheLimit !== undefined && { limit: SRV.sizeInBytes(cacheLimit) }),
+      log: new SRV.ServerLog({ prefix: "drawings" })
+    })
     this.pageScripts = pageScripts
     this.localCopies = localCopies
     this.componentSets = componentSets(settings)
@@ -171,13 +197,18 @@ export class PageServer {
       tab.path.startsWith(`${COMPONENTS_PREFIX}/`) && !tab.sets?.some((set) => served.has(set))
     this.siteTabs = siteTabs?.filter((tab) => !unserved(tab))
     this.bundles = new BundleBuild({ root: this.root })
+    this.hashed = builtNames(this.root)
     this.web = new SRV.WebServer({
       root: this.root,
       token,
+      certificate,
       live: true,
-      mounts: [{ prefix: "/", dir: this.root }],
+      caching: this.info.worktree ? "never" : "normal",
+      mounts: [{ prefix: "/", dir: this.root, hashed: this.hashed.own }],
       html: [
         (page) => this.withLocalCopies(page),
+        // before the page scripts:  a page whose drawings are all in needs none of the scripts that draw them
+        (page, served) => this.drawings.fillServed(page, served),
         (page, served) => this.withPageScripts(page, served),
         (page, served) => this.withWorktreeLoads(page, served)
       ],
@@ -192,12 +223,14 @@ export class PageServer {
         ...this.contentFileConfig(served.file),
         edit: PageEditor.PREFIX,
         // its own file in the writable folders:  the docs runtime edits its text in place (epic `epic-engine` P60)
-        writable: this.writes.writable.some((folder) => SRV.pathInside(folder, served.file)),
+        writable: this.writes.canWrite(served.file),
         // a stale generated file, as a page finds it (`reportStale()`):  rebuilt in a worktree (epic `epic-engine` P54)
         staleReport: STALE_API,
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
         // the site header's tabs:  what the settings name (`"siteTabs"`)
         ...(this.siteTabs && { siteTabs: this.siteTabs }),
+        // what it draws ahead, and where a page asks for the rest (`SRV.Drawings`)
+        ...(this.drawings.pageConfig() && { drawings: this.drawings.pageConfig() }),
         // e.g. Owen is offline, no Claude:  pages say "queued for when you land" (epics' airplane mode)
         ...Object.assign({}, ...this.pageConfigs.map((add) => add(served)))
       })
@@ -208,9 +241,13 @@ export class PageServer {
       this.web.files.mount({ prefix: folderUrl(folder), dir: join(this.root, folder) })
     this.web.files.overlays.push(
       (path) => componentSetPath(path, this.componentSets),
-      (path) => engineRoutePath(path, this.engineRoutes)
+      (path) => engineRoutePath(path, this.engineRoutes),
+      // last:  a Spell site's address, which has no file of its own
+      (path) => componentSetSitePath(path, this.componentSets)
     )
     const router = this.web.router
+    // every request but the keeper's look at `/api/server` counts as use:  a worktree's idle stop (epic `epic-engine` P82)
+    router.use(this.noteRequest)
     // a request for a bundle's missing file waits while the bundles build (`start()`)
     router.use(this.bundles.wait)
     // and a worktree's, at its component sets' addresses:  built by that worktree, as the request first comes (r35)
@@ -227,9 +264,11 @@ export class PageServer {
       router.get(set.prefix, (request, reply, next) =>
         request.path.endsWith("/") ? next() : reply.redirect(`${set.prefix}/`)
       )
-    router.get(SERVER_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(this.info))
+    router.get(SERVER_API, (_request, reply) => reply.noStore().json(this.liveInfo()))
     router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
     router.get(SERVER_REPORTS_API, this.onReportsAsked)
+    // drawings asked for by a page:  its own origin only, no token (a page from an earlier run asks too)
+    router.use(SRV.Drawings.API, this.web.guard.originCheck, this.drawings.router())
     // NOTE: no body parsing here:  each route parses its own (the app's `/api` is JSON5), and the proxy streams.
 
     // `/api/pages` and `/api/files`:  saving, making, moving and deleting files, only inside the `"writable"` folders
@@ -239,8 +278,10 @@ export class PageServer {
   }
 
   /**
-   * Start watching, build the stale bundles in the background, load the route modules, listen, write the pid file,
+   * Start watching, load the route modules, listen, build the stale bundles in the background, write the pid file,
    * then run route modules' `onListening`s.
+   * - the builds only once it listens (epic `epic-engine` I362):
+   *   begun first, they took the processor from the start, and its starter gave up
    * - `port`:  its port (default `DEFAULT_PORT`);  0:  any free one
    *   - a worktree asking for `DEFAULT_PORT` gets any free one instead (`portFor()`)
    *   - throws when it's taken, BEFORE loading anything:  never another port (epic `epic-engine` I332), and a
@@ -266,12 +307,11 @@ export class PageServer {
     // the engine routes' files at their routes too, so a page loading `/_epic/...` hot-reloads them
     for (const [route, folder] of Object.entries(settings.engineRoutes ?? {}))
       this.web.live!.watch(join(this.root, folder), { servedAt: route.endsWith("/") ? route : `${route}/` })
-    if (routes) {
-      this.bundles.start().watch()
-      for (const path of settings.routes ?? []) await this.loadRoutes(path)
-    }
+    if (routes) for (const path of settings.routes ?? []) await this.loadRoutes(path)
     const { port: actual } = await this.web.listen({ port: wanted, fallback: false })
     this.info.port = actual
+    if (routes) this.bundles.start().watch()
+    if (this.web.secureUrl) this.info.https = this.web.secureUrl
     if (pidFile) {
       this.pidFile.write(this.info)
       // for a program this machine's person runs against it:  a Python program's places (epic `data` P40)
@@ -284,9 +324,53 @@ export class PageServer {
     return this
   }
 
+  /**
+   * What `/api/server` answers:  `info`, plus how it's used now, for the server keeper's idle stop (epic `epic-engine`
+   * P82):  `lastRequest`, when it last answered a request, and `pages`, how many pages hold its live socket open
+   */
+  liveInfo(): ServerInfo {
+    return {
+      ...this.info,
+      lastRequest: new Date(this.lastRequest).toISOString(),
+      pages: this.web.live?.clientCount ?? 0
+    }
+  }
+
+  /** when the server last answered a request but `/api/server`, ms;  its start, before any */
+  private lastRequest = Date.now()
+
+  /** middleware:  note the time of every request but `/api/server` (`liveInfo()`) */
+  private noteRequest: Handler = (request, _reply, next) => {
+    if (request.path !== SERVER_API) this.lastRequest = Date.now()
+    next()
+  }
+
+  /**
+   * The certificate a page server listens with for HTTPS and HTTP/2, when this machine has one it trusts
+   * (`SRV.LocalCertificate.forPageServer()`, made and trusted by `spell server certificate`);
+   * else why not, in a line for its log.
+   * - makes NOTHING and asks for nothing:  a server started from a skill has no terminal, and every page keeps working
+   *   on plain HTTP until the person runs `spell server certificate`
+   * - none in tests and CI (`VITEST`, `CI`), nor with `SPELL_HTTPS=0`:  `env`, default `process.env`
+   * - NEVER throws
+   */
+  static certificateFor(
+    certificate = SRV.LocalCertificate.forPageServer(),
+    env: Record<string, string | undefined> = process.env
+  ): { tls?: SRV.CertificateFiles; why?: string } {
+    if (env.VITEST || env.CI || env.SPELL_HTTPS === "0") return {}
+    const state = certificate.state
+    if (state === "ready") {
+      const tls = certificate.tls
+      return tls ? { tls } : { why: PLAIN_HTTP_WHY.missing }
+    }
+    return { why: PLAIN_HTTP_WHY[state] }
+  }
+
   /** stop:  the bundles' build, route modules' stops, the pid file (if ours), the server */
   async stop(): Promise<void> {
     this.bundles.stop()
+    await this.drawings.stop()
     for (const build of this.worktreeBuilds.values()) build.stop()
     for (const stop of this.stops) await Promise.resolve(stop()).catch(() => {})
     this.pidFile.removeIfOurs()
@@ -308,7 +392,20 @@ export class PageServer {
    * - the main checkout's:  on `DEFAULT_PORT`, only (`PidFile.ensure()`'s `port`, epic `epic-engine` I332):  this
    *   checkout's server elsewhere, or one the pid file lost, is restarted onto it;  throws while something else holds it
    */
-  static ensure(_root: string, port = DEFAULT_PORT) {
+  static async ensure(_root: string, port = DEFAULT_PORT): Promise<SRV.RunningServer & { launched: boolean }> {
+    const root = kitRootOf(_root)
+    // the MAIN checkout's:  the server keeper's to start, when one runs (epic `epic-engine` P82, `SRV.KeeperLink`)
+    const kept = await PageServer.askKeeper("start", root, port)
+    if (kept) return kept
+    return PageServer.ensureHere(root, port)
+  }
+
+  /**
+   * `ensure()` in this process, never asking the server keeper:  what the keeper itself runs.
+   * - a WORKTREE's:  on the port written down for it (`SRV.PortBook`, epic `epic-engine` P82), the same at every
+   *   start, and its editor on its own (`SPELL_EDITOR_PORT`)
+   */
+  static async ensureHere(_root: string, port = DEFAULT_PORT): Promise<SRV.RunningServer & { launched: boolean }> {
     const root = kitRootOf(_root)
     // its code:  the server's folder, and the whole `src/` each route module is in;  a server older than them restarts
     // (I5 of `skillz`).  The whole `src/`, not the route's folder (epic `epic-engine` I219):  a route imports far
@@ -320,6 +417,7 @@ export class PageServer {
     const code = PageServer.codeFor(root)
     // the spaces it serves name its record:  the new server is told them too
     const pidFile = SRV.PidFile.forPageServer(root)
+    const booked = await PageServer.bookedPorts(root, port, pidFile.spaces)
     return pidFile.ensure({
       command: [
         process.execPath,
@@ -332,7 +430,7 @@ export class PageServer {
         "--root",
         resolve(root),
         "--port",
-        String(port),
+        String(booked?.port ?? port),
         ...(pidFile.spaces ? ["--spaces", pidFile.spaces] : [])
       ],
       // its log in colour (`SRV.ServerLog`), read in a terminal (`tail -f`, `less -R`);  never with `NO_COLOR`
@@ -340,11 +438,56 @@ export class PageServer {
       env: {
         TSX_TSCONFIG_PATH: code.tsconfig,
         [LOADED_CODE_VARIABLE]: pidFile.codeFile,
+        ...(booked && { [EDITOR_PORT_VARIABLE]: String(booked.editor) }),
         ...(process.env.NO_COLOR ? {} : { FORCE_COLOR: "1" })
       },
       sources: [code.source, ...new Set(routes)],
-      port: portFor(root, port, pidFile.spaces) || undefined
+      port: booked?.port ?? (portFor(root, port, pidFile.spaces) || undefined)
     })
+  }
+
+  /**
+   * The ports written down for worktree `root`'s page server and editor (`SRV.PortBook`), when it's asked for the
+   * usual port (`portFor()` gives it none);  else `undefined`:  the main checkout's, a project's, a port given by hand
+   */
+  static async bookedPorts(
+    root: string,
+    port: number,
+    spaces?: string
+  ): Promise<{ port: number; editor: number } | undefined> {
+    if (port !== DEFAULT_PORT || spaces !== undefined || portFor(root, port, spaces) !== 0) return undefined
+    const book = new SRV.PortBook()
+    return { port: await book.portFor(root), editor: await book.portFor(root, "editor") }
+  }
+
+  /**
+   * Restart the page server of the checkout at `root`, on its code now:  stopped, its editor's vite kept up for the
+   * next one (`PidFile.stop()`'s `restart`), then started;  the server keeper's to do for a MAIN checkout, when one runs
+   * (epic `epic-engine` P82).
+   */
+  static async restart(_root: string): Promise<SRV.RunningServer & { launched: boolean }> {
+    const root = kitRootOf(_root)
+    const kept = await PageServer.askKeeper("restart", root)
+    if (kept) return kept
+    await PageServer.stopHere(root, { restart: true })
+    return PageServer.ensureHere(root)
+  }
+
+  /**
+   * Ask the server keeper to `action` the page server of `root`, when `root` is a MAIN checkout on the usual port
+   * and a keeper runs (`SRV.KeeperLink`);  its answer, else `undefined`:  the caller does it itself
+   * - the keeper's own process never asks itself (`KeeperLink.running()`)
+   */
+  static async askKeeper(
+    action: SRV.KeeperAction,
+    root: string,
+    port = DEFAULT_PORT
+  ): Promise<(SRV.RunningServer & { launched: boolean }) | undefined> {
+    if (port !== DEFAULT_PORT || portFor(root, port, SRV.PidFile.forPageServer(root).spaces) !== DEFAULT_PORT) return
+    const answer = await new SRV.KeeperLink().ask<SRV.RunningServer & { launched: boolean }>(action, {
+      checkout: root
+    })
+    return answer
   }
 
   /**
@@ -353,10 +496,26 @@ export class PageServer {
    *   I332):  so `spell server stop` frees 4747 for the next start
    * - `restart`:  another starts right after;  the editor's vite stays up for it (`PidFile.stop()`, I329)
    */
-  static stop(_root: string, { port = DEFAULT_PORT, restart = false }: { port?: number; restart?: boolean } = {}) {
+  static async stop(
+    _root: string,
+    { port = DEFAULT_PORT, restart = false }: { port?: number; restart?: boolean } = {}
+  ): Promise<boolean> {
+    const root = kitRootOf(_root)
+    // the MAIN checkout's:  the server keeper's (epic `epic-engine` P82);  a plain stop it leaves stopped until a start
+    const kept = await PageServer.askKeeper(restart ? "restart" : "stop", root, port)
+    if (kept) return true
+    return PageServer.stopHere(root, { port, restart })
+  }
+
+  /** `stop()` in this process, never asking the server keeper:  what the keeper itself runs. */
+  static async stopHere(
+    _root: string,
+    { port = DEFAULT_PORT, restart = false }: { port?: number; restart?: boolean } = {}
+  ): Promise<boolean> {
     const root = kitRootOf(_root)
     const pidFile = SRV.PidFile.forPageServer(root)
-    return pidFile.stop({ restart, port: portFor(root, port, pidFile.spaces) || undefined })
+    const booked = await PageServer.bookedPorts(root, port, pidFile.spaces)
+    return pidFile.stop({ restart, port: booked?.port ?? (portFor(root, port, pidFile.spaces) || undefined) })
   }
 
   /**
@@ -411,8 +570,10 @@ export class PageServer {
     for (const dir of dirs.map((each) => resolve(each))) {
       if (this.worktrees.includes(dir)) continue
       this.worktrees.push(dir)
-      this.web.files.mount({ prefix: WORKTREES_PREFIX, dir })
+      this.web.files.mount({ prefix: WORKTREES_PREFIX, dir, hashed: this.hashed.worktrees })
     }
+    // a worktree's page edited in place saves in that worktree (epic `epic-engine` T132)
+    this.writes.worktrees = [...this.worktrees]
     this.info.worktrees = this.worktrees[0]
     this.info.worktreesFolders = [...this.worktrees]
     this.mountContentInWorktrees()
@@ -506,15 +667,21 @@ export class PageServer {
    * each one whose file exists, unless `served`'s path is under one of its `skip` prefixes.
    * - The settings are read as the server starts;  the files at each page, so a build that lands meanwhile counts.
    * - The server knows nothing of what they are (the app's `spell-language.js`):  the paths come from the settings.
+   * - a script a drawer replaces (`SRV.Drawer.replaces`) is left out of a page whose items that drawer takes are all
+   *   filled in (`SRV.Drawings.fill()`):  spell's `spell-language.js`, on a page whose spell is drawn already
    * - each tag is marked `data-spell-page-script`:  the docs runtime patches a page in place only when every script
    *   on it is one it knows, and without the mark this one made every epic page reload on every edit (2026-10-25)
    */
   withPageScripts(page: string, served: ServedFile): string {
     const path = served.path.replace(WORKTREE_ADDRESS, "/")
+    const filled = this.drawings.filledFor(served)
+    const replaced = filled ? this.drawings.replacedScripts(filled) : new Set<string>()
     const tags = this.pageScripts
       .filter(
-        ({ file, skip }) =>
-          !skip?.some((prefix) => path.startsWith(prefix)) && (!file || existsSync(join(this.root, file)))
+        ({ src, file, skip }) =>
+          !replaced.has(src) &&
+          !skip?.some((prefix) => path.startsWith(prefix)) &&
+          (!file || existsSync(join(this.root, file)))
       )
       // marked, so a page patching itself in place knows the server added it (`PAGE_SCRIPT_ATTRIBUTE`)
       .map(({ src }) => `<script type="module" src="${src}" ${PAGE_SCRIPT_ATTRIBUTE}></script>\n`)
@@ -549,15 +716,13 @@ export class PageServer {
   private waitForWorktreeBundles: Handler = async (request, _reply, next) => {
     if (request.method !== "GET" && request.method !== "HEAD") return next()
     const build = this.worktreeBuildFor(request.path)
-    if (build && this.isAtComponentSet(request.path)) await build.untilBuilt()
+    const match = build && WORKTREE_ADDRESS.exec(request.path)
+    const inside = match ? request.path.slice(match[0].length - 1) : ""
+    if (build && this.componentSets.some((set) => inside.startsWith(`${set.prefix}/`))) {
+      build.repairIfMissing(inside)
+      await build.untilBuilt()
+    }
     next()
-  }
-
-  /** Is URL path `path` at one of a worktree's component set addresses (`/worktrees/<w>/components/<set>/...`)? */
-  private isAtComponentSet(path: string): boolean {
-    const match = WORKTREE_ADDRESS.exec(path)
-    const inside = match ? path.slice(match[0].length - 1) : ""
-    return this.componentSets.some((set) => inside.startsWith(`${set.prefix}/`))
   }
 
   /**
@@ -656,6 +821,8 @@ export class PageServer {
       serveWorktrees: (...dirs) => void this.serveWorktrees(...dirs),
       serveContent: (dir) => void this.serveContent(dir),
       addPageConfig: (add) => void this.addPageConfig(add),
+      // `SPELL_DRAWINGS=0`:  none, so every page draws as it did before (a before / after measure)
+      ...(process.env.SPELL_DRAWINGS !== "0" && { drawings: this.drawings }),
       onListening: (start) => this.listenings.push(start),
       onStop: (stop) => this.stops.push(stop),
       addServerReport: (report) => this.reports.push(report)
@@ -672,7 +839,7 @@ export class PageServer {
         .then(report)
         .catch(() => undefined)
     )
-    reply.set("Cache-Control", "no-store").json((await Promise.all(asked)).filter(Boolean))
+    reply.noStore().json((await Promise.all(asked)).filter(Boolean))
   }
 }
 
@@ -712,8 +879,20 @@ const WORKTREES_PREFIX = "/worktrees/"
 /** A worktree's address, `/worktrees/<w>/...`:  `[1]` is `<w>`. */
 const WORKTREE_ADDRESS = /^\/worktrees\/([^/]+)\//
 
+/** Why a page server speaks plain HTTP only, by its certificate's state:  a line in its log. */
+const PLAIN_HTTP_WHY: Record<Exclude<SRV.CertificateState, "ready">, string> = {
+  "no-mkcert": "plain HTTP only:  HTTPS needs mkcert (brew install mkcert), then spell server certificate",
+  missing: "plain HTTP only:  for HTTPS, run spell server certificate",
+  uncovered: "plain HTTP only:  its certificate is out of date;  run spell server certificate",
+  expired: "plain HTTP only:  its certificate is out of date;  run spell server certificate",
+  untrusted: "plain HTTP only:  this computer doesn't trust its certificate yet;  run spell server certificate"
+}
+
 /** Port the page server asks for first:  `SPELL_SERVER_PORT`, else 4747 (the goals server's old port). */
 export const DEFAULT_PORT = Number(process.env.SPELL_SERVER_PORT) || 4747
+
+/** The variable that tells the editor (spell-app's `EditorServer`) its port:  a worktree's, from `SRV.PortBook`. */
+const EDITOR_PORT_VARIABLE = "SPELL_EDITOR_PORT"
 
 /**
  * The port the page server of checkout `root` asks for, when `wanted` is asked:  `wanted`, but never
@@ -827,6 +1006,24 @@ export function componentSetPath(path: string, sets: readonly ComponentSet[]): s
 }
 
 /**
+ * The URL path of the page that shows a component set's Spell site, for one of its site's addresses
+ * (`ComponentSet.sitePage`, epic `editor` P43):  `/components/ui/button/api` => `/ui/docs/index.html`;  else
+ * `undefined`.
+ * - only for a path with no `.` in its last part, and not in the set's bundle (`_assets/`), data (`__data/`) or
+ *   page parts:  a missing picture is still a 404
+ * - a `StaticHandler` overlay, after `componentSetPath()`:  a real file or folder at the address wins
+ * - the same under `/worktrees/<w>/`, as `componentSetPath()`
+ */
+export function componentSetSitePath(path: string, sets: readonly ComponentSet[]): string | undefined {
+  const match = /^((?:\/worktrees\/[^/]+)?)(\/[^/]+\/[^/]+)(\/.*)$/.exec(path)
+  const set = match && sets.find((each) => each.prefix === match[2])
+  if (!match || !set?.sitePage) return undefined
+  const [, base = "", , rest = "/"] = match
+  if (/\/_|\.[^/]*$/.test(rest)) return undefined
+  return `${isBeside(set.dir) ? "" : base}${folderUrl(set.dir)}/${set.sitePage}`
+}
+
+/**
  * `page` with each CDN URL of `copies` (the settings' `"localCopies"`:  CDN URL => local URL) pointing at its local
  * copy instead, so it loads offline.
  * - for every page server:  this one's `withLocalCopies()`, spell-epic's `EpicServer`
@@ -896,4 +1093,28 @@ function checkoutInfo(root: string): { branch?: string; worktree?: string } {
   const found = SRV.checkoutOf(root)
   const worktree = found?.root === resolve(root) ? found.worktree : undefined
   return { ...(branch && { branch }), ...(worktree && { worktree }) }
+}
+
+/** A `Mount.hashed` that takes no name. */
+const NO_NAMES = /(?!)/
+
+/**
+ * The hashed names of the bundles the checkout at `root` builds and never commits (`SRV.Bundle.specs()`:  Spell UI's
+ * site bundle, `ui/site/_assets/`), as `Mount.hashed`:  for the checkout's own mount (`own`), and for every worktree's
+ * at `/worktrees/<w>/` (`worktrees`).
+ * - NEVER a committed bundle's (the docs bundle, the epics pack):  their names carry no hash, so a year would be stale
+ * - NEVER throws:  settings that won't read have none
+ */
+function builtNames(root: string): { own: RegExp; worktrees: RegExp } {
+  let folders: string[] = []
+  try {
+    folders = SRV.Bundle.all(root)
+      .filter((bundle) => !bundle.spec.committed)
+      .map((bundle) => relative(root, bundle.outputDir).split(sep).join("/"))
+      .filter((folder) => folder && !folder.startsWith(".."))
+  } catch {
+    // no bundles to mark:  everything is checked each time
+  }
+  if (!folders.length) return { own: NO_NAMES, worktrees: NO_NAMES }
+  return { own: SRV.hashedIn(...folders), worktrees: SRV.hashedIn(...folders.map((folder) => `*/${folder}`)) }
 }

@@ -1,0 +1,146 @@
+"epic choices bar" is a notebook page
+	<header level="1">
+		&lt;epic-choices-bar&gt;
+		<header>A choice page's bar: the feedback, Do it, and where things stand.</>
+	</>
+
+	<text class="lede" paragraph>A choice page's bar, last on the page and pinned to the window's bottom: the feedback, then "Do it", which sends every changed box and the feedback to Claude. What's typed is kept in the browser at once and saves itself to the page server as a draft as you type.</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choices-bar" link="/epic/src/components/epic-choices-bar/"><text title="epic/src/components/epic-choices-bar/" code>epic-choices-bar/</></> (epic <text code>epic-workflow</> P12).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choices-bar-epicchoicesbar-en-ts" link="/epic/src/components/epic-choices-bar/EpicChoicesBar.en.ts"><text title="epic/src/components/epic-choices-bar/EpicChoicesBar.en.ts" code>EpicChoicesBar.en.ts</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads. Off a details page's own address nothing is saved or sent: Send says so.</>
+		<html>
+			<epic-choices-bar></>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>choice page · its end:</>
+		<markdown>
+			```html
+			<epic-choices-bar></epic-choices-bar>
+			<!-- no footer:  the bar is the page's bottom -->
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<list bulleted>
+			<item>Once a page, last in its <text code>main</>.</>
+			<item>No children.</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<text paragraph>None.</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-choices-bar::part(base)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The bar.</>
+				</>
+				<row>
+					<cell>
+						<text code>feedback</>
+					</>
+					<cell>The feedback box, an <text code>&lt;epic-text-box type="feedback"&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>send</>
+					</>
+					<cell>"Do it" (<text code>&lt;ui-button&gt;</>): its tooltip counts the changed boxes.</>
+				</>
+				<row>
+					<cell>
+						<text code>meta</>
+					</>
+					<cell>The line under them: the save status (only when it failed), Copy my answers, Expand all.</>
+				</>
+				<row>
+					<cell>
+						<text code>copy</>
+					</>
+					<cell>Copy my answers (<text code>&lt;ui-button&gt;</>): what's typed, as the draft's JSON, onto the clipboard.</>
+				</>
+				<row>
+					<cell>
+						<text code>expand</>
+					</>
+					<cell>Expand all / Collapse all: every section of rows.</>
+				</>
+				<row>
+					<cell>
+						<text code>error</>
+					</>
+					<cell>Why "Do it" failed.</>
+				</>
+				<row>
+					<cell>
+						<text code>sent</>
+					</>
+					<cell>What was sent, and when; orange once changed since.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-choices-bar:state(stale)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>stale</>
+					</>
+					<cell>Changed since the answer was sent: press Do it again.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Ivory, as the page's toolbar at the top; pinned to the window's bottom while the rows scroll above it.</>
+			<item>The feedback box grows with its text; "Do it" (a pill with a paper plane) at its right, its tooltip counting the changed boxes.</>
+			<item>Under them: the save status only when a save failed (red, bold), then Copy my answers and Expand all at the right; then what was sent (green, orange once changed since), or why not (red).</>
+		</>
+		<text paragraph>What's typed is never only in the open page (epic <text code>epic-engine</> P15):</>
+		<list bulleted>
+			<item>Every change goes into the browser's storage at once, and to the page server half a second later.</>
+			<item>A save that fails says why in red, "Kept in this browser; trying again every 3s", and does: once the page server answers again (a restart's new token too), it saves with no keystroke and no reload.</>
+			<item>On load, the newest of the server's draft, the browser's copy and the answer sent comes back.</>
+			<item>Copy my answers puts what's typed on the clipboard, as the draft's JSON: for a page whose server is gone for good, where even a reload brings back nothing. Saved as <text code>&lt;slug&gt;.draft.json5</> beside the page, the page shows it again.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic choices create</>: in the template.</>
+			<item>Older pages: the migration step <text code>answer-elements</>.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-14 against branch <ui-text code>epic-workflow</> (P12): the tables are its vocabulary's (epic-choices-bar); the rest from its component and its stylesheet.</>
+		</>
+	</>

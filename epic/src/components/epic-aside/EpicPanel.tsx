@@ -47,7 +47,7 @@ export abstract class EpicPanel<V extends E.ComponentVocabulary> extends E.UICom
     return false
   }
 
-  /** The heading's words, after the chevron:  text, so a folded heading can carry them as its tooltip. */
+  /** The heading's words, after the chevron:  its button's name;  no tooltip, the words are on it. */
   protected abstract heading(): string
 
   /** What the body shows:  the element's children. */
@@ -63,10 +63,6 @@ export abstract class EpicPanel<V extends E.ComponentVocabulary> extends E.UICom
             className: TOGGLE,
             part: this.partForName("toggle" as never),
             controls: BODY_ID,
-            tips: {
-              fold: this.translationForKey("foldTip" as never),
-              unfold: this.translationForKey("unfoldTip" as never)
-            },
             // in full, wrapped, folded or open (EpicPanel.css)
             label: (
               <span class={HEADING} part={this.partForName("heading" as never)}>

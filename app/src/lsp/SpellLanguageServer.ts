@@ -2,9 +2,13 @@ import {
   CodeActionKind,
   DidChangeWatchedFilesNotification,
   FileChangeType,
+  MarkupKind,
   TextDocuments,
   TextDocumentSyncKind,
   type Connection,
+  type Hover,
+  type MarkupContent,
+  type Position,
   type ServerCapabilities
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
@@ -67,6 +71,8 @@ export class SpellLanguageServer {
 
   /** Every change so far, in order -- see `enqueue()`. */
   #queue: Promise<unknown> = Promise.resolve()
+  /** Projects `offerUpgrade()` has looked at already, by id:  it asks once per project. */
+  #upgradeOffered = new Set<string>()
   /** Files whose diagnostics are due, and the timer that will publish them. */
   #toPublish = new Set<SP.SpellFile>()
   #publishTimer: ReturnType<typeof setTimeout> | undefined
@@ -93,6 +99,10 @@ export class SpellLanguageServer {
     documents.onDidChangeContent(({ document }) =>
       this.enqueue(() => workspace.update(document.uri, document.getText()))
     )
+    // after its `onDidChangeContent`, which fires next:  so the file's update is queued first
+    documents.onDidOpen(({ document }) =>
+      queueMicrotask(() => void this.offerUpgrade(document.uri).catch((error: unknown) => this.logError(error)))
+    )
     documents.onDidClose(({ document }) => this.enqueue(() => workspace.close(document.uri)))
     connection.onDidChangeWatchedFiles(({ changes }) => {
       for (const { uri, type } of changes) {
@@ -103,84 +113,29 @@ export class SpellLanguageServer {
       }
     })
 
-    connection.onDocumentSymbol(({ textDocument }) =>
-      this.answer(textDocument.uri, [], (file) => service.documentSymbols(file))
-    )
-    connection.onFoldingRanges(({ textDocument }) =>
-      this.answer(textDocument.uri, [], (file) => service.foldingRanges(file))
-    )
-    connection.onSelectionRanges(({ textDocument, positions }) =>
-      this.answer(textDocument.uri, [], (file) => service.selectionRanges(file, positions))
+    // every request about a file, from the ONE table the app's editor answers from too (`LSP.LANGUAGE_REQUESTS`)
+    for (const method of Object.keys(LSP.LANGUAGE_REQUESTS) as LSP.LanguageMethod[]) {
+      if (method === "textDocument/hover") continue
+      const { fallback } = LSP.LANGUAGE_REQUESTS[method] as { fallback: unknown }
+      connection.onRequest(method, (params: LSP.FileParams): Promise<unknown> =>
+        this.answer(LSP.uriOf(params), fallback, (file) => LSP.answerRequest(service, file, method, params as never))
+      )
+    }
+    // the table's, with a "Fix it" link where there's one
+    connection.onHover(({ textDocument, position }) =>
+      this.answer(textDocument.uri, null, (file) => this.withFixIt(file, position, service.hover(file, position)))
     )
     connection.onWorkspaceSymbol(async ({ query }) => {
       await this.#queue
       return service.workspaceSymbols(query)
     })
 
-    connection.languages.semanticTokens.on(({ textDocument }) =>
-      this.answer(textDocument.uri, { data: [] }, (file) => service.semanticTokens(file))
-    )
-    connection.languages.semanticTokens.onDelta(({ textDocument, previousResultId }) =>
-      this.answer(textDocument.uri, { data: [] }, (file) => service.semanticTokensDelta(file, previousResultId))
-    )
-    connection.languages.semanticTokens.onRange(({ textDocument, range }) =>
-      this.answer(textDocument.uri, { data: [] }, (file) => service.semanticTokens(file, range))
-    )
-    connection.onHover(({ textDocument, position }) =>
-      this.answer(textDocument.uri, null, (file) => service.hover(file, position))
-    )
-    connection.onDefinition(({ textDocument, position }) =>
-      this.answer(textDocument.uri, [], (file) => service.definition(file, position))
-    )
-    connection.onTypeDefinition(({ textDocument, position }) =>
-      this.answer(textDocument.uri, [], (file) => service.typeDefinition(file, position))
-    )
-    connection.onReferences(({ textDocument, position, context }) =>
-      this.answer(textDocument.uri, [], (file) => service.references(file, position, context.includeDeclaration))
-    )
-    connection.onDocumentHighlight(({ textDocument, position }) =>
-      this.answer(textDocument.uri, [], (file) => service.documentHighlights(file, position))
-    )
-    connection.onPrepareRename(({ textDocument, position }) =>
-      this.answer(textDocument.uri, null, (file) => service.prepareRename(file, position))
-    )
-    connection.onRenameRequest(({ textDocument, position, newName }) =>
-      this.answer(textDocument.uri, null, (file) => service.rename(file, position, newName))
-    )
-    connection.onDocumentFormatting(({ textDocument, options }) =>
-      this.answer(textDocument.uri, [], (file) => service.formatting(file, options))
-    )
-    connection.onDocumentRangeFormatting(({ textDocument, range, options }) =>
-      this.answer(textDocument.uri, [], (file) => service.formatting(file, options, range))
-    )
-    connection.onDocumentOnTypeFormatting(({ textDocument, position, ch }) =>
-      this.answer(textDocument.uri, [], (file) => service.onTypeFormatting(file, position, ch))
-    )
-    connection.onCompletion(({ textDocument, position }) =>
-      this.answer(textDocument.uri, { isIncomplete: false, items: [] }, (file) => service.completion(file, position))
-    )
-    connection.onSignatureHelp(({ textDocument, position }) =>
-      this.answer(textDocument.uri, null, (file) => service.signatureHelp(file, position))
-    )
-    connection.onCodeAction(({ textDocument, range }) =>
-      this.answer(textDocument.uri, [], (file) => service.codeActions(file, range))
-    )
-
-    connection.onRequest("spell/compiled", ({ uri, target }: LSP.CompiledParams) =>
-      this.answer(uri, null, (file) => service.compiled(file, target))
-    )
-    connection.onRequest("spell/bubbly", ({ uri }: { uri: string }) =>
-      this.answer(uri, [], (file) => service.bubbly(file))
-    )
-    connection.onRequest("spell/lineTree", ({ uri, line }: { uri: string; line: number }) =>
-      this.answer(uri, null, (file) => service.lineTree(file, line))
-    )
-    connection.onRequest("spell/project", ({ uri }: { uri: string }) =>
-      this.answer(uri, null, (file) => service.projectInfo(file))
-    )
     connection.onRequest("spell/compileProject", ({ uri }: { uri: string }) => this.compileProject(uri))
     connection.onRequest("spell/compiledImport", ({ uri, projectId }: LSP.CompiledImportParams) =>
       this.compiledImport(uri, projectId)
+    )
+    connection.onRequest("spell/codeFile", ({ uri, module }: LSP.CodeFileParams) =>
+      this.inQueue(uri, null, () => this.workspace.codeFileJavascript(module))
     )
     connection.onRequest("spell/scopes", ({ uri }: { uri: string }) => this.scopeTree(uri))
     connection.onRequest("spell/scopeDetails", ({ uri, path }: { uri: string; path: string }) =>
@@ -218,6 +173,56 @@ export class SpellLanguageServer {
         ]
       })
       .catch(() => undefined)
+  }
+
+  /**
+   * `hover`, with a "Fix it" link at its end when `position` is on one of Spell's old forms (epic `language` P68,
+   * Owen's C3):  one click applies its fix, the same edit as its quick fix.
+   * - A `command:` link to the extension's `spell.fixIt`, which applies the edit it's handed:
+   *   VS Code shows the warning's hover and ours in one box, so the link sits under the warning.
+   * - The extension trusts that one command in our hovers (its `markdown.isTrusted`).
+   */
+  private withFixIt(file: SP.SpellFile, position: Position, hover: Hover | null): Hover | null {
+    const fix = this.service.oldFormFixAt(file, position)
+    if (!fix) return hover
+    const args = encodeURIComponent(JSON.stringify([fix.edit]))
+    const label = LSP.LspTexts.for(file.language).text("fixIt")
+    const link = `[**${label}**](command:${FIX_IT_COMMAND}?${args}):  ${fix.title}`
+    const contents = hover?.contents as MarkupContent | undefined
+    const value = contents?.value ? `${link}\n\n---\n\n${contents.value}` : link
+    return { contents: { kind: MarkupKind.Markdown, value }, range: hover?.range }
+  }
+
+  /**
+   * Once per project, as one of its files opens:  if it was written for an older Spell and still holds old forms,
+   * upgrade it (`spell.upgradeOnOpen` on), or offer to (off, the default), in a notice (epic `language` P68, Q80).
+   * - The upgrade is `SpellDiskWorkspace.upgrade()`, `spell upgrade`'s rewrite;  then a notice says what it changed.
+   * - Its words are in the file's language (`LSP.LspTexts`).
+   * - Waits for the person's answer OUTSIDE the queue, so edits go on parsing meanwhile.
+   */
+  private async offerUpgrade(uri: string): Promise<void> {
+    const found = await this.inQueue(uri, null, async ({ project, language }) => {
+      if (this.#upgradeOffered.has(project.projectId)) return null
+      this.#upgradeOffered.add(project.projectId)
+      if (!SP.OldForms.isOlderSpell(project.contents?.spellVersion)) return null
+      const isOld = project.spellFiles.some((file) => SP.OldForms.uses(file).length)
+      return isOld ? { project, texts: LSP.LspTexts.for(language) } : null
+    })
+    if (!found) return
+    const { project, texts } = found
+    const settings = (await this.connection.workspace.getConfiguration("spell").catch(() => undefined)) as
+      | { upgradeOnOpen?: boolean }
+      | undefined
+    if (!settings?.upgradeOnOpen) {
+      const upgrade = { title: texts.text("upgrade") }
+      const picked = await this.connection.window.showInformationMessage(texts.text("upgradeNotice"), upgrade)
+      if (picked?.title !== upgrade.title) return
+    }
+    const count = await this.inQueue(uri, 0, async () => this.workspace.upgrade(project))
+    const version = SP.OldForms.shortVersion(SP.SPELL_VERSION)
+    this.connection.window.showInformationMessage(
+      texts.text(count === 1 ? "upgradedOne" : "upgraded", { count, version })
+    )
   }
 
   /**
@@ -377,6 +382,9 @@ export class SpellLanguageServer {
     this.connection.console.error(`spell: ${error instanceof Error ? error.stack : error}`)
   }
 }
+
+/** The VS Code extension's command a hover's "Fix it" link runs:  it applies the edit it's handed (`withFixIt()`). */
+const FIX_IT_COMMAND = "spell.fixIt"
 
 /** `LSP.DiskChange` for each `FileChangeType`. */
 const DISK_CHANGES: Record<number, LSP.DiskChange> = {

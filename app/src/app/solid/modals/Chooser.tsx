@@ -24,7 +24,7 @@ import type { ChooserModalProps, ChooserOption, ChooserOptionInput } from "spell
  *   this is a plain list, fine for the handful of options callers pass.
  *   A long list would want `<ui-dropdown search>` instead.
  * - Show one with `openChooser()`, which mounts it and cleans up.
- * - SEE:  its App UI components page, `app/docs/Chooser.html` (`/components/app/Chooser.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/chooser`.
  ****************/
 export function Chooser(props: ChooserProps) {
   let modal: HTMLElement | undefined

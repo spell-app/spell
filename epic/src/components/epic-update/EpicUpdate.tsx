@@ -41,8 +41,9 @@ import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
  * - A bare LABEL:  no summary, no date, no children.
  *   An orange `UPDATE` inline, on an item changed (`phase 3 done` removes a
  *   phase's labels;  Owen's ✓ any label, I285;  on any epic, a phase under way or not, I290).
- *   Its tooltip names the phase:  `Changed during P3`.
  *   - A status change says which (`became`;  Owen, 2026-11-14, epic `epic-engine` T75):  `FIXED`.
+ *     - `UNDERWAY` is solid blue, not orange (T146);  grey beside its item's chip of that blue (T149).
+ *   - In an item's title, the item draws it next to its id chip instead (`EpicItem.updateLabel`, T149).
  *   - Then a blue `Not in main` pill while that work is on its epic's branch alone (`unmerged`).
  *   - Gone once Owen checks its item (his ✓;  I285):  at once on the page, and from the file as it's applied.
  *   - A copy of it ends each line of "0. While you were out" about that item (`PlanDoc.awayBody()`, I302).
@@ -132,14 +133,6 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
     return PlanDates.format(this.at)
   }
 
-  /** The date's tooltip:  `at` as written, then the phase under way then, then when it was seen. */
-  get dateTip(): string | undefined {
-    if (!this.at) return undefined
-    const during = this.phase === undefined ? "" : ` · ${this.translationForKey("during", { phase: this.phase })}`
-    const seen = this.seen ? ` · ${this.translationForKey("seenAt", { when: PlanDates.format(this.seen) })}` : ""
-    return `${this.at}${during}${seen}`
-  }
-
   render(): JSX.Element {
     return (
       <Show when={this.isBlock} fallback={<Show when={!this.isChecked}>{this.renderLabel()}</Show>}>
@@ -157,8 +150,7 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
             {this.fold.button({
               controls: BODY_ID,
               labelledBy: TITLE_ID,
-              part: this.partForName("toggle"),
-              tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
+              part: this.partForName("toggle")
             })}
           </Show>
           {/* the date (and the page's own buttons) float right of the title's FIRST line only:  the lines under it run
@@ -177,7 +169,7 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
                   />
                 </Show>
                 <Show when={this.date}>
-                  <time class={TIME} part={this.partForName("time")} datetime={this.at} data-tooltip={this.dateTip}>
+                  <time class={TIME} part={this.partForName("time")} datetime={this.at}>
                     {this.date}
                   </time>
                 </Show>
@@ -212,26 +204,18 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
   }
 
   /**
-   * The bare label:  an orange `UPDATE` (`FIXED` after a status change), its phase in its tooltip;
+   * The bare label:  an orange `UPDATE` (`FIXED` after a status change);
    * after it, a blue `Not in main` pill while that change's work isn't merged (`unmerged`, epic `epic-engine` T75).
    */
   private renderLabel(): JSX.Element {
     return (
       <span class={this.rootClass} part={this.partForName("base")}>
-        <span
-          class={LABEL}
-          part={this.partForName("label")}
-          data-tooltip={this.phase === undefined ? undefined : this.translationForKey("tip", { phase: this.phase })}
-        >
+        <span class={LABEL} part={this.partForName("label")} data-became={this.became}>
           {this.labelText}
         </span>
         <Show when={this.became && this.unmerged}>
           {(branch) => (
-            <span
-              class={UNMERGED}
-              part={this.partForName("unmerged")}
-              data-tooltip={this.translationForKey("unmergedTip", { branch: branch() })}
-            >
+            <span class={UNMERGED} part={this.partForName("unmerged")}>
               {this.translationForKey("unmerged")}
             </span>
           )}

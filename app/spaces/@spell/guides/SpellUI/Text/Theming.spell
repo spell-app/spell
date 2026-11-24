@@ -53,7 +53,7 @@
 
 	<section label="Themes">
 		<markdown>
-			The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes text's colours and fonts through
+			The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix, Mockup) changes text's colours and fonts through
 			the shared tokens.
 		</>
 	</>

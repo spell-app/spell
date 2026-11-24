@@ -1955,7 +1955,7 @@ describe('<ui-tree appearance="columns"> from `items`, a big column', () => {
     await ElementFixture.settle()
   }
 
-  it("draws its first rows, then more as the column scrolls toward its end;  what's drawn stays drawn", async () => {
+  it("draws its first rows, then the rows near the view as it scrolls;  the far ones are taken down", async () => {
     const host = await bigTree()
     await nextPaint()
     const first = rowsIn(host)
@@ -1966,10 +1966,48 @@ describe('<ui-tree appearance="columns"> from `items`, a big column', () => {
       column.scrollTop = column.scrollHeight
       await nextPaint()
     }
-    expect(rowsIn(host)).toBeGreaterThan(first)
+    await expect.poll(() => dataRow(host, `row-${COUNT - 1}`)).not.toBeNull()
+    expect(dataRow(host, "row-100")).toBeNull()
+    // the row with the tab stop stays drawn, wherever the view is
+    expect(dataRow(host, "row-0")).not.toBeNull()
+    expect(rowsIn(host)).toBeLessThan(200)
+    column.scrollTop = 0
+    await expect.poll(() => dataRow(host, "row-30")).not.toBeNull()
+    expect(dataRow(host, `row-${COUNT - 1}`)).toBeNull()
+    expect(rowsIn(host)).toBeLessThan(200)
+  })
+
+  it("each row says its place in the whole column, drawn or not", async () => {
+    const host = await bigTree()
+    await nextPaint()
+    const row = dataRow(host, "row-2")!
+    expect(row.getAttribute("aria-posinset")).toBe("3")
+    expect(row.getAttribute("aria-setsize")).toBe(String(COUNT))
+  })
+
+  it("Home from the end goes to a row taken down, drawing it first, and focuses it;  the focused row stays drawn", async () => {
+    const host = await bigTree()
+    await nextPaint()
+    const column = host.shadowRoot!.querySelector<HTMLElement>('ul[data-depth="0"]')!
+    dataRow(host, "row-0")!.focus()
+    await press(host, "End")
+    await nextPaint()
+    await nextPaint()
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, `row-${COUNT - 1}`))
+    // far from the focused row, scrolled away and back:  it's still there, still focused
     column.scrollTop = 0
     await nextPaint()
-    expect(rowsIn(host)).toBeGreaterThan(first)
+    await nextPaint()
+    expect(dataRow(host, `row-${COUNT - 1}`)).not.toBeNull()
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, `row-${COUNT - 1}`))
+    column.scrollTop = column.scrollHeight
+    await nextPaint()
+    await nextPaint()
+    for (let at = 0; at < 4; at++) await nextPaint()
+    expect(dataRow(host, "row-0")).toBeNull()
+    await press(host, "Home")
+    expect(host.path).toEqual(["row-0"])
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, "row-0"))
   })
 
   it("End goes to the last row, drawing down to it first, and focuses it;  right goes in", async () => {
@@ -2019,9 +2057,10 @@ describe('<ui-tree appearance="columns"> from `items`, a big column', () => {
       column.scrollTop = column.scrollHeight
       await nextPaint()
     }
-    expect(rowsIn(host)).toBeGreaterThan(first)
+    await expect.poll(() => dataRow(host, `row-${COUNT - 1}`)).not.toBeNull()
+    expect(first).toBeGreaterThan(0)
     column.scrollTop = 0
-    await nextPaint()
+    await expect.poll(() => dataRow(host, "row-0")).not.toBeNull()
     expect(whichLeft()).toBe(before)
   })
 

@@ -29,10 +29,10 @@ async function render(html: string) {
 describe("<ui-ad> classes", () => {
   it.each([
     ["", "ui ad"],
-    ['unit="medium rectangle"', "ui medium rectangle ad"],
+    ['unit="medium rectangle"', "ui medium rectangle ad medium-rectangle"],
     ['unit="leaderboard" align="center"', "ui leaderboard centered ad"],
-    ['unit="large mobile banner"', "ui large mobile banner ad"],
-    ['unit="small square" test', "ui small square test ad"],
+    ['unit="large mobile banner"', "ui large mobile banner ad large-mobile-banner"],
+    ['unit="small square" test', "ui small square test ad small-square"],
     ['unit="huge rectangle"', "ui ad"]
   ])("<ui-ad %s>", async (attributes, classes) => {
     const { root } = await render(`<ui-ad ${attributes}></ui-ad>`)
@@ -92,7 +92,7 @@ describe("<ui-ad> units and test", () => {
     host.removeAttribute("test")
     await ElementFixture.tick()
     expect(root.hasAttribute("data-text")).toBe(false)
-    expect(root.className).toBe("ui small rectangle ad")
+    expect(root.className).toBe("ui small rectangle ad small-rectangle")
   })
 
   it("keeps its margin between siblings, and drops it as first / last child", async () => {

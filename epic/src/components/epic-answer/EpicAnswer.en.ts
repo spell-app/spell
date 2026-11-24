@@ -64,11 +64,7 @@ export const epicAnswerVocabulary = {
     { name: "thread-start", description: "First in the thread:  the frame's top edge and corners." },
     { name: "thread-end", description: "Last in the thread:  the frame's bottom edge and corners." }
   ],
-  texts: [
-    { key: "foldTip", text: "Fold the answer", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Unfold the answer", description: "Tooltip of its fold button while folded." },
-    { key: "answer", text: "Answer", description: "The card's label, without an old decision's id." }
-  ],
+  texts: [{ key: "answer", text: "Answer", description: "The card's label, without an old decision's id." }],
   children: [
     { tag: "flow", slot: "title", max: 1, description: "A title with markup." },
     { tag: "flow", description: "The answer, and why." }

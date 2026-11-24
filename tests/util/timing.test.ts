@@ -1,6 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { afterSolidUpdate, Queued, soon, soonEvenHidden, waitUntil, within } from "spell/util/timing"
+import {
+  afterSolidUpdate,
+  letBrowserIn,
+  Queued,
+  soon,
+  soonEvenHidden,
+  waitUntil,
+  whenIdle,
+  within
+} from "spell/util/timing"
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -89,6 +98,28 @@ describe("Queued", () => {
     // a timer made inside another one waits a millisecond under fake timers
     await vi.advanceTimersByTimeAsync(10)
     expect(runs).toBe(2)
+  })
+})
+
+describe("letBrowserIn()", () => {
+  test("waits for the browser:  what's already queued as microtasks runs first", async () => {
+    const ran: string[] = []
+    void Promise.resolve().then(() => ran.push("queued"))
+    await letBrowserIn()
+    ran.push("after")
+    expect(ran).toEqual(["queued", "after"])
+  })
+})
+
+describe("whenIdle()", () => {
+  test("runs once the browser is idle, or at the timeout;  cancelled, never", async () => {
+    vi.useRealTimers()
+    const ran: string[] = []
+    whenIdle(() => ran.push("idle"), { timeout: 0.05 })
+    whenIdle(() => ran.push("cancelled"), { timeout: 0.05 })()
+    await vi.waitFor(() => expect(ran).toEqual(["idle"]), { timeout: 1000 })
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(ran).toEqual(["idle"])
   })
 })
 

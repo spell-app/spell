@@ -23,11 +23,14 @@ import type { UI } from "spell/app/app/ui"
  * - `details`:  answer to our `details` -- as the language server's `spell/scopeDetails`
  * - `imported`:  answer to our `loadImport`:  project `projectId`'s compiled javascript,
  *   or `error`, why it couldn't be loaded
+ * - `native`:  answer to our `loadNative`:  the javascript of the code file the program imports as `module`,
+ *   its types taken out, or `error`, why it couldn't be loaded
  */
 export type ToRunnerMessage =
   | { type: "run"; compiled: string; words?: string[]; runTests?: boolean }
   | { type: "runTests" }
   | { type: "imported"; projectId: string; compiled?: string; error?: string }
+  | { type: "native"; module: string; javascript?: string; error?: string }
   | { type: "scopes"; tree: LSP.ScopeNode }
   | { type: "settings"; settings: ProjectSettings }
   | { type: "details"; path: string; details: LSP.ScopeDetails | null }
@@ -43,6 +46,8 @@ export type ToRunnerMessage =
  * - `refreshScopes`:  the Type Explorer's Refresh button -- send fresh `scopes`
  * - `loadImport`:  the program imports project `projectId`, e.g. `@spell/library/people` --
  *   send its compiled javascript, as the language server's `spell/compiledImport`, in an `imported` message
+ * - `loadNative`:  the program calls code file `module` (`call native`), e.g. `@spell/native/owen@spell/clip/clip.ts` --
+ *   send its javascript, as the language server's `spell/codeFile`, in a `native` message
  * - `testResults`:  how the project's tests went, after each test run -- for the editor to show each failed check
  *   on its line (the language server's `spell/testDiagnostics`)
  */
@@ -55,6 +60,7 @@ export type FromRunnerMessage =
   | { type: "details"; path: string }
   | { type: "refreshScopes" }
   | { type: "loadImport"; projectId: string }
+  | { type: "loadNative"; module: string }
   | { type: "testResults"; tests: LSP.TestReport[] }
 
 /**

@@ -2,6 +2,8 @@ import type { SP } from "spell/parser/spell"
 import { initialCaps, slug } from "spell/util/string"
 // Import directly:  `<spell-viewer>` loads this file alone, without spell's barrel and its parser
 import { SpellSetup } from "spell/parser/spell/SpellSetup"
+// Import directly:  a leaf with no imports, where Spell UI's barrel would load every component
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 
 /**
  * Spell's own org, `spell`:  where Spell accounts are (`ana@spell`), and Spell admins (`spell-admin` there).
@@ -63,10 +65,11 @@ export function personIdFor(text: string): string {
 }
 
 /**
- * Spell UI's component pages, one site of notebooks in the Guides group (epic `notebook` P10).
+ * Spell UI's component pages, one site of notebooks in the Guides group (epic `notebook` P10):  `@spell/guides/SpellUI`.
  * - Its project file says `"onHome": false`, so the home page shows no card for it.
+ * - Spell UI's own `SpellUIGuide.project`:  the page server shows the same site at `/components/ui/`.
  */
-export const SPELL_UI_SITE_PROJECT = "@spell/guides/SpellUI"
+export const SPELL_UI_SITE_PROJECT = SpellUIGuide.project
 
 /**
  * The groups whose projects people open AS EXAMPLES (epic `mockup` T52):  the examples and the guides,
@@ -80,6 +83,19 @@ export const EXAMPLE_GROUPS = ["@spell/examples", "@spell/guides"] as const
 /** Is project `projectPath` one people open as an example (`EXAMPLE_GROUPS`):  `@spell/examples/Solitaire`? */
 export function isExampleProject(projectPath: string): boolean {
   return EXAMPLE_GROUPS.some((group) => projectPath.startsWith(`${group}/`))
+}
+
+/**
+ * The group the editor's own Spell is a project of (epic `editor` P22):  `@spell/editor/spell-editor`.
+ * - Run in the app pane, its views show as zones, one each (`<EditorZones>`, T63), not as an app.
+ * - A save to one is always your draft, never its file:  the editor you're using reads the published file, and
+ *   changes only on Publish (J73;  `project-utils`' `savesInPlace()`).
+ */
+export const EDITOR_PIECES = "@spell/editor"
+
+/** Is project `projectPath` one of the editor's own pieces (`EDITOR_PIECES`):  `@spell/editor/spell-editor`? */
+export function isEditorPieceProject(projectPath: string): boolean {
+  return projectPath.startsWith(`${EDITOR_PIECES}/`)
 }
 
 /**
@@ -208,7 +224,7 @@ export const PROJECT_GROUPS: SP.ProjectRootSpec[] = [
     icon: "puzzle piece"
   },
   {
-    path: "@spell/editor",
+    path: EDITOR_PIECES,
     space: "@spell",
     domain: "editor",
     title: "The editor",

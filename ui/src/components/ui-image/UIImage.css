@@ -203,25 +203,25 @@
   }
 
   /* Vertically aligned:  inline, against the text (or, in a group, the row). */
-  .ui:is([class*="top aligned"], [class*="middle aligned"], [class*="bottom aligned"]).image {
+  .ui:is(.top-aligned, .middle-aligned, .bottom-aligned).image {
     --_image-display: inline-block;
   }
-  .ui[class*="top aligned"].image {
+  .ui.top-aligned.image {
     --_image-valign: top;
     --_image-align: flex-start;
   }
-  .ui[class*="middle aligned"].image {
+  .ui.middle-aligned.image {
     --_image-valign: middle;
     --_image-align: center;
   }
-  .ui[class*="bottom aligned"].image {
+  .ui.bottom-aligned.image {
     --_image-valign: bottom;
     --_image-align: flex-end;
   }
-  .ui[class*="top aligned"].images {
+  .ui.top-aligned.images {
     align-items: flex-start;
   }
-  .ui[class*="bottom aligned"].images {
+  .ui.bottom-aligned.images {
     align-items: flex-end;
   }
 
@@ -317,50 +317,50 @@
     --_image-fit: cover;
     object-position: var(--_image-crop, center);
   }
-  .ui[class*="top cropped"].image {
+  .ui.top-cropped.image {
     --_image-crop: top;
   }
-  .ui[class*="bottom cropped"].image {
+  .ui.bottom-cropped.image {
     --_image-crop: bottom;
   }
-  .ui[class*="left cropped"].image {
+  .ui.left-cropped.image {
     --_image-crop: left;
   }
-  .ui[class*="right cropped"].image {
+  .ui.right-cropped.image {
     --_image-crop: right;
   }
-  .ui[class*="top left cropped"].image {
+  .ui.top-left-cropped.image {
     --_image-crop: top left;
   }
-  .ui[class*="top right cropped"].image {
+  .ui.top-right-cropped.image {
     --_image-crop: top right;
   }
-  .ui[class*="bottom left cropped"].image {
+  .ui.bottom-left-cropped.image {
     --_image-crop: bottom left;
   }
-  .ui[class*="bottom right cropped"].image {
+  .ui.bottom-right-cropped.image {
     --_image-crop: bottom right;
   }
 
   /* Spaced:  room on both sides (or one) from the text around it. */
   .ui.spaced.image,
-  .ui:is([class*="left spaced"], [class*="right spaced"]).image {
+  .ui:is(.left-spaced, .right-spaced).image {
     --_image-display: inline-block;
     --_image-margin: 0 var(--_ui-image-spaced-distance);
   }
-  .ui[class*="left spaced"].image {
+  .ui.left-spaced.image {
     --_image-margin: 0 0 0 var(--_ui-image-spaced-distance);
   }
-  .ui[class*="right spaced"].image {
+  .ui.right-spaced.image {
     --_image-margin: 0 var(--_ui-image-spaced-distance) 0 0;
   }
 
   /* Floated:  text wraps around it;  none below the last one.  Bare `floated` (static markup) floats left. */
-  .ui:is(.floated, [class*="left floated"]):is(.image, .images) {
+  .ui:is(.floated, .left-floated):is(.image, .images) {
     --_image-floated-bottom: var(--_ui-image-floated-margin-y);
     float: left;
   }
-  .ui[class*="right floated"]:is(.image, .images) {
+  .ui.right-floated:is(.image, .images) {
     float: right;
   }
   .ui.floated:is(.image, .images):last-child {
@@ -373,14 +373,14 @@
   .ui.floated.image {
     --_image-margin: 0 var(--_ui-image-floated-margin-x) var(--_image-floated-bottom) 0;
   }
-  .ui[class*="right floated"].image {
+  .ui.right-floated.image {
     --_image-margin: 0 0 var(--_image-floated-bottom) var(--_ui-image-floated-margin-x);
   }
   /* A group's own margin is plain:  its private tokens would leak into its children. */
   .ui.floated.images {
     margin: 0 var(--_ui-image-floated-margin-x) var(--_image-floated-bottom) 0;
   }
-  .ui[class*="right floated"].images {
+  .ui.right-floated.images {
     margin: 0 0 var(--_image-floated-bottom) var(--_ui-image-floated-margin-x);
   }
 

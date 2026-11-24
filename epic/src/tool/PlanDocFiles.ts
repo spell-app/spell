@@ -11,6 +11,7 @@ import { ChunkFiles } from "spell/server/places/ChunkFiles"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
+import type { BadgeLimits } from "spell/epic/components/epic-item/ItemBadge"
 import { LayeredSettings } from "spell/epic/config/LayeredSettings"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { DataFile, type DataFileMove } from "spell/epic/data/DataFile"
@@ -38,6 +39,7 @@ import { PART_SOURCE, PARTS_DIR, PlanParts } from "./PlanParts"
 import { ReviewInbox } from "./ReviewInbox"
 import { SagaPage } from "./SagaPage"
 import { epicNamed } from "./SeeAlso"
+import { SelfFix } from "./SelfFix"
 import { ServedFolders } from "./ServedFolders"
 
 /****************
@@ -132,7 +134,7 @@ export class PlanDocFiles {
     // under the checkout the content is served in, which isn't this one for spell-epic's own epics (I22);  told its
     // served addresses, so `components/epics/` and `templates/` check as the folders they serve (I27)
     const linkRoot = new RepoList().linkRootOf(root, content)
-    this.linker = new SRV.Linker(linkRoot, { served: ServedFolders.under(linkRoot) })
+    this.linker = new SRV.Linker(linkRoot, { served: ServedFolders.under(linkRoot), sites: ServedFolders.sites })
   }
 
   /** The environment the docs tools run in:  this process's, with `root` as the checkout they work on. */
@@ -281,6 +283,9 @@ export class PlanDocFiles {
   // ## Reading and writing
   ////////////////
 
+  /** The repo's `issueBadges`, once asked. */
+  private issueBadges: BadgeLimits | undefined
+
   /**
    * The epic page at `file`, parsed:  a `PlanDoc`.  `options` as its constructor's;  its `person` this machine's
    * (`EpicHome.personName()`) unless they say.
@@ -298,11 +303,23 @@ export class PlanDocFiles {
     const plan = PlanDoc.parse(html, undefined, {
       person: () => EpicHome.personName(),
       agent: () => EpicHome.agentName(),
+      // the repo's percentages for its item badges, read as they're first used (epic `epic-engine` P81)
+      badgeLimits: () => (this.issueBadges ??= EpicConfig.of(this.root).issueBadges),
       ...options
     })
     plan.parts = assembleEpic(plan.document, file)
     // the epic's comments, for a change mark naming one (epic `epic-engine` T100):  read only when one does
     plan.readComments = () => ReviewInbox.read(ReviewInbox.pathFor(file)).comments
+    // what the person got to, read only as an issue is fixed (epic `epic-engine` T143)
+    plan.readActedOn = () => SelfFix.actedOn(ReviewInbox.read(ReviewInbox.pathFor(file)))
+    // what it says holds an item open, read only as one is closed (epic `epic-engine` I435)
+    plan.readHeld = () => {
+      const { drafts, working } = ReviewInbox.read(ReviewInbox.pathFor(file))
+      return new Map([
+        ...Object.keys(drafts).map((id) => [id.toLowerCase(), "their note on it isn't sent yet"] as const),
+        ...Object.keys(working).map((id) => [id.toLowerCase(), "being worked on"] as const)
+      ])
+    }
     for (const id of plan.parts.missing)
       process.stderr.write(
         `epic:  ${relative(this.content, PlanParts.partFile(file, id))} is missing:  #${id} has no body\n`
@@ -398,12 +415,14 @@ export class PlanDocFiles {
     const inboxFile = ReviewInbox.pathFor(file)
     const result = await lockedPage(file, async (): Promise<MigrateResult> => {
       const plan = this.read(file, { recentSince: this.recentSince(file) })
+      const inbox = ReviewInbox.read(inboxFile)
       const context: MigrationContext = {
         now,
         epic: basename(file).replace(/(\.plan)?\.html$/, ""),
         folder: dirname(file),
         root: this.content,
-        inbox: inboxView(ReviewInbox.read(inboxFile)),
+        inbox: inboxView(inbox),
+        actedOn: SelfFix.actedOn(inbox),
         rootLinks: (html) => this.linker.rootLinks(html, dirname(file), { mend: true }).changes,
         history: () => this.historyOrNone(file),
         notes: [],
@@ -669,31 +688,53 @@ export class PlanDocFiles {
    * What of the epic at `file` isn't on main yet (epic `epic-engine` I273):  its branch's commits not in `main`
    * (`git log main..<epic>`), the phases and items their subjects name, and their shas;  `PlanDoc.updateLanded()`
    * marks the page from it.
-   * - the branch is the epic's id (`editor`), a standing epic's too;  no such branch:  everything is on main
+   * - the branch is the epic's (`EpicConfig.branchOf()`:  its id, `editor`, unless its page names another;  a
+   *   standing epic's too);  no such branch:  everything is on main
    * - `undefined`:  git can't tell (no git, a doc outside a checkout):  the page's marks stay as they are
    * - NEVER throws
    */
   landing(file: string): Landing | undefined {
     const epic = basename(file).replace(/\.plan\.html$/, "")
     const cwd = this.checkoutOf(file)
-    const ref = `refs/heads/${epic}`
+    const branch = branchOrId(epic, cwd)
+    const ref = `refs/heads/${branch}`
     if (!SRV.Git.run(["rev-parse", "--verify", "--quiet", BASE_BRANCH], cwd).ok) return undefined
-    if (!SRV.Git.run(["rev-parse", "--verify", "--quiet", ref], cwd).ok)
-      return { branch: epic, ids: new Set(), shas: [] }
+    if (!SRV.Git.run(["rev-parse", "--verify", "--quiet", ref], cwd).ok) return { branch, ids: new Set(), shas: [] }
     const log = SRV.Git.run(["log", "--format=%H%x09%s", `${BASE_BRANCH}..${ref}`], cwd)
     if (!log.ok) return undefined
     const ids = new Set<string>()
     const shas: string[] = []
+    const landed = this.landedPhases(epic, branch, cwd)
     for (const line of log.out.split("\n").filter(Boolean)) {
       const [sha, subject = ""] = line.split("\t")
       shas.push(sha!)
       const parsed = PlanCommits.parseCommitSubject(subject)
       // another epic's commit, merged into this branch:  not this page's work
-      if (!parsed || (parsed.epic && parsed.epic !== epic)) continue
+      // its subjects may name the branch instead (`from-console J104` on epic from-project)
+      if (!parsed || (parsed.epic && parsed.epic !== epic && parsed.epic !== branch)) continue
       for (const phase of parsed.phases) ids.add(`p${phase}`)
       for (const item of parsed.items) ids.add(item.toLowerCase())
     }
-    return { branch: epic, ids, shas }
+    return { branch, ids, shas, landed }
+  }
+
+  /**
+   * When `main`'s latest commit naming each of epic `epic`'s phases was made (ms), by phase id (`p80`):
+   * its last `LANDED_COMMITS` commits (epic `epic-engine` I439).
+   * - NEVER throws:  no git, none
+   */
+  private landedPhases(epic: string, branch: string, cwd: string): Map<string, number> {
+    const landed = new Map<string, number>()
+    const log = SRV.Git.run(["log", "-n", String(LANDED_COMMITS), "--format=%cI%x09%s", BASE_BRANCH], cwd)
+    if (!log.ok) return landed
+    for (const line of log.out.split("\n").filter(Boolean)) {
+      const [time = "", subject = ""] = line.split("\t")
+      const parsed = PlanCommits.parseCommitSubject(subject)
+      if (!parsed || (parsed.epic && parsed.epic !== epic && parsed.epic !== branch)) continue
+      const at = Date.parse(time)
+      for (const phase of parsed.phases) if (!landed.has(`p${phase}`)) landed.set(`p${phase}`, at)
+    }
+    return landed
   }
 
   /** The main checkout's root:  the parent of git's common dir (`.git`), the same from any worktree. */
@@ -760,9 +801,9 @@ export class PlanDocFiles {
   /**
    * The repos a doc's commits can be in, the doc's checkout first:  it, then each of its child repos that's there
    * (`EpicConfig.repos`:  a multi-repo top's, `spell-parser` ...;  none for a single repo), then each of the kit's
-   * PEERS that's on disk (`EpicConfig.peers`:  spell-brand, beside the kit;  epic `epic-engine` P52, J150).
+   * PEERS that's on disk (`EpicConfig.peers`:  none today, beside the kit;  epic `epic-engine` P52, J150).
    * - every repo's work counts toward an epic (epic `epic-engine` r17):  outline-spell's phases are mostly
-   *   spell-parser's, spell-ui's and spell-app's commits;  a spell-brand commit naming the epic is its too
+   *   spell-parser's, spell-ui's and spell-app's commits;  a peer's commit naming the epic is its too
    * - a peer by its MAIN checkout:  its own worktrees' commits count once merged there
    */
   repoFolders(file: string): string[] {
@@ -1033,5 +1074,17 @@ const EARLIER_COMMITS = 3
 /** A commit as `docLog()` reads it:  its sha, its commit time (ISO with offset), its subject;  tab-separated. */
 const TIMED_FORMAT = "%H%x09%cI%x09%s"
 
+/** How far back `main`'s log is read for each phase's latest commit (`landedPhases()`):  newest first. */
+const LANDED_COMMITS = 400
+
 /** The branch a phase's commit is merged into (`isMerged()`). */
 const BASE_BRANCH = "main"
+
+/** Epic `epic`'s branch (`EpicConfig.branchOf()`), from checkout `cwd`;  its id when the repo's config won't read. */
+function branchOrId(epic: string, cwd: string): string {
+  try {
+    return EpicConfig.of(cwd).branchOf(epic)
+  } catch {
+    return epic
+  }
+}

@@ -12,6 +12,8 @@
  *       <span class="ui label" part="label"><slot name="label">text</slot></span>      (labeled, before)
  *       <slot name="action"></slot>                                                    (left action)
  *       <input part="control">   or   <textarea part="control">                       (always)
+ *       <span class="clear" part="clear"><ui-button icon="xmark" ...></span>         (clearable, with text)
+ *       <span class="shortcut" part="shortcut"><ui-keys shortcut="mod+F"></span>      (shortcut, while empty)
  *       <span class="icon" part="icon"><slot name="icon">svg</slot></span>            (icon, or loading)
  *       <span class="ui label" part="label">...</span>                                 (right labeled)
  *       <span class="ui [left] corner label" part="label">
@@ -28,6 +30,12 @@
  * - The DOM element:  `inline-flex`, `:state(fluid)` block-level.
  *   An owner (`<ui-field>`) sizes it with the inherited `--_ui-input-owner-width` (default `auto`);
  *   the root and the native control grow to fill.
+ * - The clear button's box (`F.ClearButton`):  a flex item right after the native control, pulled back over its end
+ *   by its own width, so it sits in the end column whatever follows (a label, an action).
+ *   - The control makes room for it (`--_input-pad-end`);  a trailing icon hides while it shows, a `left icon` stays.
+ *   - `<ui-search>` draws one in its `ui icon input` too:  this sheet lays it out there.
+ * - A `shortcut`'s keys (`F.FieldShortcut`):  over the field's end while it's empty, out of the way of clicks;
+ *   the control keeps `--ui-input-shortcut-width` (4.5em) free for them, so a placeholder never runs under them.
  * - Action buttons (`<ui-button slot="action">`) are FLEX ITEMS of the root (a slot is `display: contents`).
  *   - The input squares their joined corners through UIButton.css's group corner tokens (`--_ui-buttons-ss` ...):
  *     a joined action is a one-sided button group.
@@ -122,6 +130,7 @@
     );
     --_ui-input-disabled-opacity: var(--ui-input-disabled-opacity, var(--ui-disabled-opacity));
     --_ui-input-icon-width: var(--ui-input-icon-width, 2.67142em);
+    --_ui-input-shortcut-width: var(--ui-input-shortcut-width, 4.5em);
     --_ui-input-icon-size: var(--ui-input-icon-size, 1em);
     --_ui-input-icon-opacity: var(--ui-input-icon-opacity, 0.5);
     --_ui-input-icon-focus-opacity: var(--ui-input-icon-focus-opacity, 1);
@@ -329,6 +338,42 @@
     block-size: 3em;
   }
 
+  /* Clear button:  over the control's end, in the icon column, its `x` centred. */
+  .ui.input > .clear {
+    position: relative;
+    z-index: 2;
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--_input-icon-width, var(--_ui-input-icon-width));
+    margin-inline-start: calc(-1 * var(--_input-icon-width, var(--_ui-input-icon-width)));
+  }
+  /* the browser's own clear button of a `type="search"` field:  ours replaces it (`clearable`) */
+  .ui.input > input::-webkit-search-cancel-button {
+    display: none;
+    appearance: none;
+  }
+  /* Shortcut:  its keys over the field's end, while it's empty. */
+  .ui.input > .shortcut {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    padding-inline-end: 0.5em;
+    color: var(--ui-text-muted);
+    pointer-events: none;
+  }
+
+  /* a trailing icon gives the clear button, or the keys, its column while they show */
+  .ui.input:not(.left-icon) > :is(.clear, .shortcut) ~ .icon {
+    visibility: hidden;
+  }
+
   /* File:  Fomantic's grey choose-file button inside the field. */
   .ui.file.input > input[type="file"] {
     --_input-pad-block: 0;
@@ -365,14 +410,23 @@
   .ui.icon.input:not(.corner) {
     --_input-pad-end: var(--_ui-input-icon-width);
   }
-  .ui[class*="left icon"].input > .icon {
+  .ui.left-icon.input > .icon {
     inset-inline: 0 auto;
   }
-  .ui[class*="left icon"].input:not([class*="left corner"]) {
+  .ui.left-icon.input:not(.left-corner) {
     --_input-pad-start: var(--_ui-input-icon-width);
   }
-  .ui[class*="left icon"].input:not(.corner) {
+  .ui.left-icon.input:not(.corner) {
     --_input-pad-end: var(--_ui-input-padding-inline);
+  }
+  /* Clear button:  room for it at the end, a `left icon` too. */
+  .ui.input:has(> .clear),
+  .ui.left-icon.input:has(> .clear) {
+    --_input-pad-end: var(--_input-icon-width, var(--_ui-input-icon-width));
+  }
+  .ui.input:has(> .shortcut),
+  .ui.left-icon.input:has(> .shortcut) {
+    --_input-pad-end: var(--_ui-input-shortcut-width);
   }
 
   /* Loading:  the icon box becomes a spinner (a track and a turning arc). */
@@ -416,7 +470,7 @@
   .ui.transparent.icon.input > :is(input, textarea) {
     --_input-pad-end: var(--_ui-input-transparent-icon-margin);
   }
-  .ui.transparent[class*="left icon"].input > :is(input, textarea) {
+  .ui.transparent.left-icon.input > :is(input, textarea) {
     --_input-pad-start: var(--_ui-input-transparent-icon-margin);
     --_input-pad-end: 0;
   }
@@ -447,27 +501,27 @@
   .ui.labeled.input > .ui.label:not(.corner) {
     padding-block: 0.78571em;
   }
-  .ui.labeled.input:not([class*="corner labeled"]) > .ui.label:first-child {
+  .ui.labeled.input:not(.corner-labeled) > .ui.label:first-child {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
   }
-  .ui.labeled.input:not([class*="corner labeled"]) > .ui.label:first-child ~ :is(input, textarea) {
+  .ui.labeled.input:not(.corner-labeled) > .ui.label:first-child ~ :is(input, textarea) {
     border-start-start-radius: 0;
     border-end-start-radius: 0;
     border-inline-start-color: transparent;
   }
-  .ui.labeled.input:not([class*="corner labeled"]) > .ui.label:first-child ~ :is(input, textarea):focus {
+  .ui.labeled.input:not(.corner-labeled) > .ui.label:first-child ~ :is(input, textarea):focus {
     border-inline-start-color: var(--_ui-input-border-color-focus);
   }
-  .ui[class*="right labeled"].input > :is(input, textarea) {
+  .ui.right-labeled.input > :is(input, textarea) {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
     border-inline-end-color: transparent;
   }
-  .ui[class*="right labeled"].input > :is(input, textarea):focus {
+  .ui.right-labeled.input > :is(input, textarea):focus {
     border-inline-end-color: var(--_ui-input-border-color-focus);
   }
-  .ui[class*="right labeled"].input > .ui.label:last-child {
+  .ui.right-labeled.input > .ui.label:last-child {
     border-start-start-radius: 0;
     border-end-start-radius: 0;
   }
@@ -489,25 +543,25 @@
     --_ui-icon-owner-margin: 0;
     --_ui-icon-owner-align: top;
   }
-  .ui[class*="corner labeled"]:not([class*="left corner labeled"]).input {
+  .ui.corner-labeled:not(.left-corner-labeled).input {
     --_input-pad-end: var(--_ui-input-labeled-margin);
   }
-  .ui[class*="corner labeled"]:not([class*="left corner labeled"]).icon.input {
+  .ui.corner-labeled:not(.left-corner-labeled).icon.input {
     --_input-pad-end: var(--_ui-input-labeled-icon-input-margin);
   }
-  .ui[class*="corner labeled"]:not([class*="left corner labeled"]).icon.input > .icon {
+  .ui.corner-labeled:not(.left-corner-labeled).icon.input > .icon {
     margin-inline-end: var(--_ui-input-labeled-icon-margin);
   }
-  .ui[class*="left corner labeled"].input {
+  .ui.left-corner-labeled.input {
     --_input-pad-start: var(--_ui-input-labeled-margin);
   }
-  .ui[class*="left corner labeled"][class*="left icon"].input {
+  .ui.left-corner-labeled.left-icon.input {
     --_input-pad-start: var(--_ui-input-labeled-and-icon-margin);
   }
-  .ui[class*="left corner labeled"].icon.input > .icon {
+  .ui.left-corner-labeled.icon.input > .icon {
     margin-inline-start: var(--_ui-input-labeled-icon-margin);
   }
-  .ui[class*="left corner labeled"].icon:not([class*="left icon"]).input {
+  .ui.left-corner-labeled.icon:not(.left-icon).input {
     --_input-pad-end: var(--_ui-input-labeled-margin);
   }
 
@@ -531,43 +585,43 @@
   .ui.action.input:is(.error, .info, .success, .warning) > .ui.button {
     --_button-edge: inset 0 0 0 var(--_ui-input-border-width) var(--ui-color-border);
   }
-  .ui.action.input:not([class*="left action"]) > :is(input, textarea) {
+  .ui.action.input:not(.left-action) > :is(input, textarea) {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
     border-inline-end-color: transparent;
   }
-  .ui.action.input:not([class*="left action"]) > :is(input, textarea):focus {
+  .ui.action.input:not(.left-action) > :is(input, textarea):focus {
     border-inline-end-color: var(--_ui-input-border-color-focus);
   }
-  .ui.action.input:not([class*="left action"]) > ::slotted(*),
-  .ui.action.input:not([class*="left action"]) > .ui.button {
+  .ui.action.input:not(.left-action) > ::slotted(*),
+  .ui.action.input:not(.left-action) > .ui.button {
     --_ui-buttons-ss: 0;
     --_ui-buttons-es: 0;
     --_ui-buttons-se: 0;
     --_ui-buttons-ee: 0;
   }
-  .ui.action.input:not([class*="left action"]) > ::slotted(:last-child),
-  .ui.action.input:not([class*="left action"]) > .ui.button:last-child {
+  .ui.action.input:not(.left-action) > ::slotted(:last-child),
+  .ui.action.input:not(.left-action) > .ui.button:last-child {
     --_ui-buttons-se: 1;
     --_ui-buttons-ee: 1;
   }
-  .ui[class*="left action"].input > :is(input, textarea) {
+  .ui.left-action.input > :is(input, textarea) {
     border-start-start-radius: 0;
     border-end-start-radius: 0;
     border-inline-start-color: transparent;
   }
-  .ui[class*="left action"].input > :is(input, textarea):focus {
+  .ui.left-action.input > :is(input, textarea):focus {
     border-inline-start-color: var(--_ui-input-border-color-focus);
   }
-  .ui[class*="left action"].input > ::slotted(*),
-  .ui[class*="left action"].input > .ui.button {
+  .ui.left-action.input > ::slotted(*),
+  .ui.left-action.input > .ui.button {
     --_ui-buttons-ss: 0;
     --_ui-buttons-es: 0;
     --_ui-buttons-se: 0;
     --_ui-buttons-ee: 0;
   }
-  .ui[class*="left action"].input > ::slotted(:first-child),
-  .ui[class*="left action"].input > .ui.button:first-child {
+  .ui.left-action.input > ::slotted(:first-child),
+  .ui.left-action.input > .ui.button:first-child {
     --_ui-buttons-ss: 1;
     --_ui-buttons-es: 1;
   }
@@ -619,13 +673,13 @@
   .ui.input:is(.error, .info, .success, .warning) > .icon {
     color: var(--ui-color-text);
   }
-  .ui.labeled.input:is(.error, .info, .success, .warning):not([class*="corner labeled"]) > .ui.label {
+  .ui.labeled.input:is(.error, .info, .success, .warning):not(.corner-labeled) > .ui.label {
     border-block: var(--_ui-input-border-width) solid var(--ui-color-border);
   }
-  .ui.labeled.input:is(.error, .info, .success, .warning):not(.right, [class*="corner labeled"]) > .ui.label {
+  .ui.labeled.input:is(.error, .info, .success, .warning):not(.right, .corner-labeled) > .ui.label {
     border-inline-start: var(--_ui-input-border-width) solid var(--ui-color-border);
   }
-  .ui.right.labeled.input:is(.error, .info, .success, .warning):not([class*="corner labeled"]) > .ui.label {
+  .ui.right.labeled.input:is(.error, .info, .success, .warning):not(.corner-labeled) > .ui.label {
     border-inline-end: var(--_ui-input-border-width) solid var(--ui-color-border);
   }
 

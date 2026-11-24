@@ -69,8 +69,8 @@ describe("<ui-dimmer> classes", () => {
   it.each([
     ["", "ui dimmer"],
     ["visible", "ui active dimmer"],
-    ['shade="very light" inverted', "ui very light inverted dimmer"],
-    ['blurring appearance="simple" vertical-align="top"', "ui blurring simple top aligned dimmer"],
+    ['shade="very light" inverted', "ui very light inverted dimmer very-light"],
+    ['blurring appearance="simple" vertical-align="top"', "ui blurring simple top aligned dimmer top-aligned"],
     ["page", "ui page dimmer"],
     ["visible disabled", "ui disabled dimmer"]
   ])("<ui-dimmer %s>", async (attributes, classes) => {
@@ -116,6 +116,18 @@ describe("<ui-dimmer> element dimmer", () => {
     await settle()
     await hidden
     expect(getComputedStyle(box).display).toBe("none")
+  })
+
+  it("a transition the box still lists once it has finished doesn't hold `ui-opened` (I422)", async () => {
+    const { host, box } = await dimmer(`<ui-segment><ui-dimmer>x</ui-dimmer></ui-segment>`)
+    // Chromium lists a finished transition until the page next draws:  waiting on it again and again spun the tab
+    const finished = { playState: "finished", finished: Promise.resolve() } as unknown as Animation
+    box.getAnimations = () => [finished]
+    const shown = next(host, "ui-opened")
+    host.visible = true
+    await settle()
+    await shown
+    expect(host.visible).toBe(true)
   })
 
   it("positions a plain parent for itself (the page sheet)", async () => {

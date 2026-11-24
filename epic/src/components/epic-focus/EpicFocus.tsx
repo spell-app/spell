@@ -8,7 +8,9 @@ import { PhaseIds } from "spell/epic/phases"
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 // the page's colour rules and the chips' event:  their files, not their families' barrels
 import { EpicBodies } from "spell/epic/components/epic-item/EpicBodies"
-import { DrawnState, buttonsForItem } from "spell/epic/components/epic-item/EpicItem.types"
+import { BADGE, DrawnState, buttonsForItem, type ItemState } from "spell/epic/components/epic-item/EpicItem.types"
+import { ItemBadge } from "spell/epic/components/epic-item/ItemBadge"
+import { TitlePrefix } from "spell/epic/components/epic-item/TitlePrefix"
 import { PhaseState } from "spell/epic/components/epic-section/PhaseState"
 import { MARKED_SHOWS_AS, StateFilter } from "spell/epic/components/epic-section/StateFilter"
 import { STATE_PICK, type StatePickDetail } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
@@ -28,6 +30,7 @@ import {
   type FocusToggledDetail
 } from "./EpicFocus.types"
 
+import badgeCSS from "spell/epic/components/epic-item/ItemBadge.css?inline"
 import focusCSS from "./EpicFocus.css?inline"
 
 /****************
@@ -80,7 +83,7 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
   @E.proto static vocabulary = epicFocusVocabulary
   @E.protoMerged static elementSetup = {
     DOMElement: DOMEpicFocusElement,
-    styleSheets: { "epic-focus": focusCSS },
+    styleSheets: { "epic-focus": focusCSS, "epic-badge": badgeCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -465,7 +468,6 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
               class="back"
               part={this.partForName("back")}
               appearance="basic"
-              data-tooltip={this.translationForKey("backTip")}
               disabled={this.atEnd(-1) ? "" : undefined}
               onClick={() => this.move(-1)}
             >
@@ -478,7 +480,6 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
               appearance="primary"
               icon="chevron right"
               icon-position="right"
-              data-tooltip={this.translationForKey("nextTip")}
               disabled={this.atEnd(1) ? "" : undefined}
               onClick={() => this.move(1)}
             >
@@ -511,7 +512,6 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
                 <ui-item
                   data-kind={look.kind}
                   selected={this.tab === look.kind ? "" : undefined}
-                  data-tooltip={this.translationForKey("tabTip", { tab: name(), count: count() })}
                   onClick={() => this.pickTab(look.kind)}
                 >
                   <ui-icon name={look.icon} />
@@ -575,14 +575,46 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
     return at < 0 || !walk[at + step]
   }
 
-  /** The item's head:  its id chip in its state's colour, and its title. */
+  /** `entry`'s badge as the page draws it, in words (`ItemBadge`, epic `epic-engine` P81);  none without badges. */
+  private badgeOf(entry: FocusEntry): string | undefined {
+    const { element, kind, state } = entry
+    const badge =
+      kind === "phases"
+        ? element.hasAttribute("badged")
+          ? ItemBadge.ofPhase(state, element.getAttribute("status"))
+          : undefined
+        : ItemBadge.drawn(
+            {
+              badge: TitlePrefix.badgeOfItem(element),
+              kind: ItemBadge.kindOf(element.id, element.hasAttribute("limit"))
+            },
+            state as ItemState,
+            this.review.liveOf(element.id)
+          )
+    if (!badge) return undefined
+    return this.translationForKey(`badge_${badge}`, { id: element.getAttribute("badge-item")?.toUpperCase() ?? "" })
+  }
+
+  /** The item's head:  its id chip in its state's colour, its badge and its title, as its line starts (I415). */
   private card(item: () => FocusEntry): JSX.Element {
     return (
       <h2 class="head" part={this.partForName("item")}>
         <span class="chip" data-state={item().state}>
           {EpicFocus.labelOf(item())}
         </span>
-        <span class="title">{EpicFocus.titleOf(item().element)}</span>
+        <span class="title">
+          <Show when={this.badgeOf(item())}>
+            {(badge) => (
+              <>
+                {/* its chip beside it, a phase's too, says that colour already (T149) */}
+                <span class={BADGE} data-state={item().state} data-echo="">
+                  {badge()}
+                </span>{" "}
+              </>
+            )}
+          </Show>
+          {TitlePrefix.titled(EpicFocus.titleOf(item().element), this.badgeOf(item()) ? undefined : item().element)}
+        </span>
       </h2>
     )
   }
@@ -647,7 +679,11 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
     if (item.kind !== "phases")
       return buttonsForItem(item.id, {
         limit: item.element.hasAttribute("limit"),
-        inPhase: item.element.hasAttribute("handled") || item.element.hasAttribute("taken-in")
+        inPhase: item.element.hasAttribute("handled") || item.element.hasAttribute("taken-in"),
+        // a fix waiting for a check, or a closed item, has its own (epic `epic-engine` I415)
+        status: item.element.getAttribute("status"),
+        fixed: item.element.hasAttribute("fixed"),
+        state: item.state
       })
     const phase = item.element as Element & { component?: { reviewKind?: string } }
     return phase.component?.reviewKind ?? "phase"
@@ -699,6 +735,9 @@ const TAB_COLORS: readonly (readonly [string, TabColor])[] = [
   ["waiting", "orange"],
   ["updated", "orange"],
   ["open", "yellow"],
+  ["someday", "yellow"],
+  // a recheck waits on Claude:  after what's theirs (epic `epic-engine` Q82)
+  ["recheck", "orange"],
   ["progress", "blue"],
   ["handed", "blue"],
   ["scheduled", "blue"]

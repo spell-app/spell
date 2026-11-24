@@ -226,6 +226,14 @@ export function compiledFixture(
 }
 
 /**
+ * Fixture `projectName`'s running code as a built site has it (`compiledFor: "built"`, epic `solid-2-final` P11):
+ * `compiledFixture()` with no comments, no `declaredAt` marks and no headings, as `spell compile` writes it.
+ */
+export function builtFixture(projectName: TestProjectName): string {
+  return compileFixture(projectName, SP.RUNNING_TARGET, { compiledFor: "built" }).code
+}
+
+/**
  * Fixture `projectName` compiled with its source map, as `SpellProject.compile()` makes one (epic `elemental-spell` P14):
  * `code`, the marks taken out again, must be `compiledFixture()`'s.
  */
@@ -277,12 +285,13 @@ export function fixtureWords(projectName: TestProjectName, lang = fixtureLanguag
  *   - NOT their code:  that's theirs
  * - `version` / `exports` / `listsStartAt` from its `project.json`, as a compile would (`SP.SpellProject.writerOptionsFor()`).
  * - `target`'s writer writes it, `js/solid`'s by default -- or `target` itself, a writer.
+ * - `compiledFor`:  the editor's code (the default), or a built site's (`P.WriterOptions.compiledFor`).
  * - `draws`:  does it hold a drawing -- see `SP.SpellProject.draws()`.
  */
 function compileFixture(
   projectName: TestProjectName,
   target: string | P.ProgramWriter = SP.RUNNING_TARGET,
-  { sourceMap = false }: { sourceMap?: boolean } = {}
+  { sourceMap = false, compiledFor }: { sourceMap?: boolean; compiledFor?: P.CompiledFor } = {}
 ): { code: string; declarations: SP.SpellDeclarationsData; draws: boolean; map?: P.SourceMapV3 } {
   const projectDir = fixtureFolder(projectName)
   const { version, exports, imports, listsStartAt } = readProjectFile(projectDir)
@@ -310,13 +319,10 @@ function compileFixture(
     : undefined
   const combine = () =>
     scope.parser!.inPlay(() =>
-      SP.SpellProject.combineCompiled(
-        parts,
-        writer,
-        importLines,
-        scope,
-        SP.SpellProject.writerOptionsFor({ exports, listsStartAt, version })
-      )
+      SP.SpellProject.combineCompiled(parts, writer, importLines, scope, {
+        ...SP.SpellProject.writerOptionsFor({ exports, listsStartAt, version }),
+        compiledFor
+      })
     )
   const marked = errors.join("") + (sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()) + "\n"
   const split = SP.SpellDeclarations.split(marked, scope, { version, exports, languages })

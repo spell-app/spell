@@ -84,12 +84,12 @@
  * - A single repo (no `repos`, other people's setups):  everything above, as before.
  *
  * ## The kit after repo-split's P20 · One Repo (epic-engine's P49)
- * - ONE repo:  its `repos` file lists only PEERS (`"peer": true`, spell-brand), so an epic's worktree is the kit's
- *   alone, made as a single repo's;  a peer is never part of it (Q50 D).
- * - Run in a PEER (spell-brand, whose settings say `{ "top": "../spell" }`):  its lone worktree, in its own
- *   `../spell-brand.worktrees/<name>/`, then its own install;  the epic folder and windows are the kit's.
- * - `create` copies the main checkout's `page-server.local.json5` (the outside projects the page server serves,
- *   spell-brand's Brand tab) into a new worktree, its paths made absolute:  it's git-ignored, so a worktree lacks it.
+ * - ONE repo:  its `repos` file lists only PEERS (`"peer": true`;  none since epic-engine's T124),
+ *   so an epic's worktree is the kit's alone, made as a single repo's;  a peer is never part of it (Q50 D).
+ * - Run in a PEER (whose settings say `{ "top": "../spell" }`):  its lone worktree, in its own
+ *   `../<peer>.worktrees/<name>/`, then its own install;  the epic folder and windows are the kit's.
+ * - `create` copies the main checkout's `page-server.local.json5` (the outside projects the page server
+ *   serves) into a new worktree, its paths made absolute:  it's git-ignored, so a worktree lacks it.
  * - `create` reusing a branch cut BEFORE P20:  the kit's worktree only;  an old clone (`oldLayout.oldClones`,
  *   `~/www/spell.old/`) that still has the branch is named, with how to cross it over.
  * - `remove` of an OLD-LAYOUT worktree (a worktree of an old child repo still inside, `spell-ui/` ...:
@@ -326,7 +326,7 @@ class Worktree {
 
   /**
    * Copy main checkout `root`'s `page-server.local.json5` into new worktree `path`, its `projects` made absolute
-   * (epic-engine's P49):  the outside projects the page server serves (spell-brand's Brand tab, Q49), which a
+   * (epic-engine's P49):  the outside projects the page server serves (Q49), which a
    * worktree lacks, the file being git-ignored.
    * - nothing when main has none, or the worktree has one already;  a file that won't read or write is a warning
    */

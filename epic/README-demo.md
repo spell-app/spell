@@ -93,6 +93,7 @@ export const joke: BriefingSource = {
 - You pressed Send before Accept:  Claude says to press Accept when it looks right.  Press it.
 - Claude seems stuck:  type `next` in the chat.  It carries on from where the page is.
 - The side bar says "waiting for the page server":  it loads by itself once the server answers.
+- The Review tab is empty:  `epic open morning-briefing` in a terminal, or the checklist button in the tab's title bar.
 - A permission prompt:  answer it on screen, and say why it asks.
 - The live run stalls for good:  play the recording.
 
@@ -239,13 +240,13 @@ Then the toolbar buttons, one by one:  Judgement calls, Todo, Issues, Manual tes
 Unfold a red judgement call to show its options, and point at the coloured counts at the top right.
 Open 2. Phases:  P4 is green, P1 to P3 still to do.
 
-![The section 0. While you were out:  Waiting on you, J2;  What was done, P4 A Joke;  Fixed, to review, I2;  Newly
-opened issues, I1;  New manual tests, M1.](docs/images/demo/away.png)
+![The section 0. While you were out:  Waiting on you, J2;  What was done, P4 A Joke;  Fixed, to review, I2, its line
+starting FIXED;  Newly opened issues, I1;  New manual tests, M1.](docs/images/demo/away.png)
 
 _"0. While you were out":  what waits on you first, then what was done._
 
 ![The Judgement calls, Todo, Issues and Manual tests sections, each item with a coloured id chip:  J1 yellow, J2 red,
-T1 yellow, T2 grey, T3 blue and under way, I1 red, I2 orange and fixed, I3 light orange, M1
+T1 yellow, T2 grey, T3 solid blue with a blue UNDERWAY, I1 red, I2 orange, its line starting FIXED, I3 light orange, M1
 yellow.](docs/images/demo/items.png)
 
 _The items, in every colour._
@@ -289,6 +290,10 @@ _The items, in every colour._
 - "Can I try it today?"  Yes:  `npx spell@next epic init`, in a git repo.
   Say `@next`:  `latest` is still an old version.
 - "Staying current?"  `epic upgrade`, then `/reload-plugins` in any open Claude Code session.
+- "Will two plugins fight?"  No:  in an epic's worktree, superpowers is told to stand aside for planning,
+  worktrees and finishing.
+- "Where are the docs?"  The Docs tab on the epic pages' top bar:
+  setting up, the pages, the skills, the `epic` command, and a FAQ for when something goes wrong.
 
 ## Afterwards
 

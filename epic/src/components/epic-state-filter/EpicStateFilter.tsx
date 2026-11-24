@@ -131,7 +131,11 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     return [state, ...others]
   }
 
-  /** How many are in `state`'s chip:  it and the states of its colour (`sameColor()`). */
+  /**
+   * The number on `state`'s chip:  it and the states of its colour (`sameColor()`).
+   * - a recheck's chip is its own, light orange, with its real count:  orange's number stays what needs the person
+   *   (epic `epic-engine` Q82, J335)
+   */
   private chipCount(state: string): number {
     return this.sameColor(state).reduce((count, each) => count + (this.stateCounts.get(each) ?? 0), 0)
   }

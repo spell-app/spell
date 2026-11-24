@@ -107,7 +107,7 @@ export class DirectReads {
     }
     router.get(`${this.prefix}/:path*`, guard.hostCheck, async (request, reply) => {
       const text = await this.read(request.params.path ?? "", cookiesOf(request, READ_CREDENTIAL_COOKIE))
-      reply.set("Cache-Control", "no-store").type("application/json").send(text)
+      reply.noStore().type("application/json").send(text)
     })
     return this
   }
@@ -137,7 +137,7 @@ export class DirectReads {
     }).catch((error: unknown) => {
       throw new SRV.HttpError(502, `${space}'s host didn't answer:  ${(error as Error).message}`)
     })
-    reply.status(answer.status).set("Cache-Control", "no-store")
+    reply.status(answer.status).noStore()
     answer.headers.forEach((value, name) => {
       if (PASSED_HEADERS.test(name)) reply.set(name, value)
     })

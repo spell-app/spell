@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solid 2 in Spell</title>
+    <meta
+      name="description"
+      content="What Spell needs to know about Solid 2 that the Solid docs don't say:  the rendering model, Spell cells (a write read back on the next line) and the one bridge into Solid, the gotchas, ideas for Spell UI, and a quick reference to Solid 2's API."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="Elements and UI" />
+    <meta name="spell-voice" content="readme 2026-10-22" />
+    <meta name="spell-saga" content="spell-ui" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Solid 2 in Spell</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Solid 2 in Spell</h1></header></ui-sticky
+        >
+        <p class="lede">
+          In Spell, <code>set the score to 5</code> then <code>print the score</code> must print 5. In Solid 2, a write
+          isn't visible until the next flush, even on the very next line. This page is what Spell needs to know about
+          Solid 2 that the Solid docs don't tell you, and how Spell cells close that gap.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user"
+            >Written for: anyone writing Solid code in Spell (the editor, compiled Spell's drawing, Spell UI's
+            components), or reasoning about Spell's reactivity</ui-item
+          >
+          <ui-item icon="flask"
+            >Checked: 2026-11-21, on Solid <code>2.0.0-rc.21</code>, every experiment beside this page re-run that
+            day</ui-item
+          >
+          <ui-item icon="book open"
+            >The rules beside it:
+            <a href="/agents/solid/solid-2.md" title="agents/solid/solid-2.md" target="src-agents-solid-solid-2-md"
+              >the Solid 2 rules</a
+            >, which every agent reads in full before Solid work, and which win where the two differ</ui-item
+          >
+        </ui-list>
+
+        <ui-section id="summary" label="1. What it adds up to" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>
+              <b>Everything draws with Solid 2:</b> the editor, <code>&lt;spell-viewer&gt;</code>, Spell UI's elements,
+              and compiled Spell, in JavaScript and TypeScript alike.
+            </li>
+            <li>
+              <b>Every package is pinned to <code>2.0.0-rc.21</code></b
+              >, one copy at the kit's root: one Solid per page is not optional.
+            </li>
+            <li>
+              <b>Spell state is NOT Solid signals.</b> It's Spell cells: a plain record read and written at once, which
+              Solid observes through one bridge. So a write reads back on the next line.
+            </li>
+            <li>
+              <b>The traps are real:</b> a write in a memo throws in dev, an uncaught error halts every update on the
+              page, a direct store write is silently ignored.
+            </li>
+            <li>
+              <b>Solid's own docs for agents ship inside <code>solid-js</code></b> (its <code>skills/</code> folder,
+              <code>diagnostics.json</code>): trust them first, then this page.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="model" label="2. The rendering model in one page" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="sitemap"></ui-icon>
+          <p>
+            Solid 2 builds one idea: <strong>the reactive graph always knows</strong>. Here it is compressed, with what
+            each part means for Spell.
+          </p>
+
+          <ui-section
+            id="components-run-once-expressions-are-the-unit-of-"
+            label="Components run once; expressions are the unit of update"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>A component is a setup function that runs a single time.</p>
+            <ul>
+              <li>No re-render and no diff</li>
+              <li>Each dynamic JSX expression compiles to its own tiny tracking scope</li>
+              <li>Props arrive as lazy getters, so "passing isn't reading"</li>
+              <li>
+                When a signal changes, only expressions that read it re-run and patch their text node or attribute
+              </li>
+            </ul>
+            <ui-message state="info" heading="For Spell">
+              <ul>
+                <li>
+                  Compiled Spell hands Solid a <em>function</em> for every value that can change:
+                  <code>h("span", { class: "suit" }, () =&gt; this.shortSuit)</code>.
+                </li>
+                <li>Solid calls it, and again when what it read changes: nothing redraws a whole board.</li>
+                <li>
+                  Without a JSX compiler, as in <code>@solidjs/h</code> hyperscript, nothing else makes an expression
+                  reactive.
+                </li>
+                <li>
+                  Each drawn thing sits in its own error boundary, so a <code>draw()</code> that throws shows a small
+                  stand-in and the rest keeps drawing.
+                </li>
+              </ul>
+            </ui-message>
+          </ui-section>
+          <ui-section
+            id="writes-are-staged-the-graph-never-shows-half-an-"
+            label="Writes are staged; the graph never shows half an update"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>Solid 2 batches every write.</p>
+            <ul>
+              <li>
+                A write is <em>staged</em> and committed with all its neighbours on the next microtask, or when you call
+                <code>flush()</code>
+              </li>
+              <li>
+                Until then every read returns the last <em>committed</em> value, even a read on the very next line
+              </li>
+              <li>That's the price of the headline guarantee: "at no point does the UI disagree with itself"</li>
+              <li>There is no <code>batch()</code>, because everything is a batch</li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="async-is-a-property-of-a-value-not-a-mode-of-the"
+            label="Async is a property of a value, not a mode of the app"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>A memo may return a Promise.</p>
+            <ul>
+              <li>Everything downstream just waits</li>
+              <li><code>&lt;Loading&gt;</code> covers only the first load</li>
+              <li>
+                Once a value has shown, a new write that feeds async work is <em>held</em>:
+                <ul>
+                  <li>old content stays on screen until the new answer lands</li>
+                  <li><strong>every other write in the same batch is held with it</strong></li>
+                </ul>
+              </li>
+              <li>That's what replaced transitions</li>
+              <li>
+                <code>isPending(x)</code> asks "is something on the way?"; <code>latest(x)</code> asks "what is it?"
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="mutations-are-speculative-overlays"
+            label="Mutations are speculative overlays"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>
+              <code>action(function* () { ...; yield api.save(); refresh(src) })</code> holds a transaction open across
+              awaits.
+            </p>
+            <ul>
+              <li>
+                Optimistic writes (<code>createOptimistic</code>, <code>createOptimisticStore</code>) are a layer over
+                the confirmed value
+              </li>
+              <li>The layer is dropped when the action settles, pass or fail, so there's no rollback code</li>
+              <li>
+                Errors are another status of part of the graph: <code>&lt;Errored&gt;</code> heals by itself when the
+                data underneath recovers
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="the-core-tension" label="The core tension" sticky collapsible dividing open="false">
+            <ui-message state="negative">
+              <ul>
+                <li>
+                  Spell is imperative: <code>set the score to 5</code> then <code>print the score</code> must print 5
+                </li>
+                <li>A worked-out property must be current on the very next line</li>
+                <li>Solid 2's staged commit is exactly what breaks that</li>
+                <li>So <strong>Spell state cannot be Solid signals as its source of truth</strong></li>
+                <li>Spell state is a synchronous source that the graph <em>observes</em>: section 3</li>
+              </ul>
+            </ui-message>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="raw"
+          label="3. Spell cells:  a write, read back at once"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="bolt"></ui-icon>
+          <ui-section
+            id="what-solid-2-actually-does-measured-rc-11"
+            label="What Solid 2 actually does (measured on rc.21)"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>
+              None of this is spelled out in the docs. Each row is a script beside this page (<a href="#experiments"
+                >Experiments</a
+              >), re-run on rc.21.
+            </p>
+            <ui-table celled padding="compact" appearance="striped">
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Situation</th>
+                    <th>What you read</th>
+                  </tr>
+                  <tr>
+                    <td><code>setX(5); x()</code> at top level</td>
+                    <td>old value</td>
+                  </tr>
+                  <tr>
+                    <td><code>latest(x)</code> after a plain synchronous write</td>
+                    <td>old value: <code>latest</code> only sees values held for async work</td>
+                  </tr>
+                  <tr>
+                    <td>A memo over <code>x</code>, read before flush, lazy or not</td>
+                    <td>stale: it computes from committed values</td>
+                  </tr>
+                  <tr>
+                    <td><code>setX(5); flush(); x()</code></td>
+                    <td>new value</td>
+                  </tr>
+                  <tr>
+                    <td><code>flush()</code> inside a memo's compute</td>
+                    <td>drains: a downstream memo updates too</td>
+                  </tr>
+                  <tr>
+                    <td>A write in a <code>createRoot</code> body, memo or render-effect compute (dev)</td>
+                    <td>
+                      throws <code>REACTIVE_WRITE_IN_OWNED_SCOPE</code>, unless the signal has
+                      <code>ownedWrite: true</code>; <code>untrack</code> doesn't exempt it. Production doesn't check.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>An async memo is pending on <code>a</code>; then <code>setA(2); setB(2); flush()</code></td>
+                    <td>
+                      <code>b()</code> is still the old value until the fetch resolves: <code>b</code> was entangled
+                      with <code>a</code>'s batch
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>The same, but <code>setB</code> in a later, separate flush</td>
+                    <td>new value</td>
+                  </tr>
+                  <tr>
+                    <td>A queued async-feeding write elsewhere, then <code>flush(() =&gt; setB(2))</code></td>
+                    <td><code>b()</code> still the old value: a flush-per-write scheme is not immune</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                An unowned, eager memo recomputes on every flush that touches its inputs, forever, even with no readers.
+              </li>
+              <li>A lazy memo read from untracked code recomputes on every read, and memoizes nothing.</li>
+              <li>
+                So nothing Solid provides gives a fresh read: <code>latest</code> doesn't see synchronous writes, lazy
+                memos read committed values, there's no mutable store, and <code>flush()</code> per write is entangled
+                with async.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="how-spell-cells-work" label="How Spell cells work" sticky collapsible dividing open="false">
+            <p>
+              Spell's own small reactive engine, <code>spell/util/reactive</code>, under every reactive class: compiled
+              Spell's <code>Thing</code> and <code>List</code>, the editor, Spell's project objects.
+            </p>
+            <ui-steps class="spell-steps" ordered>
+              <ui-step
+                heading="a write"
+                description="setProp() changes the object's record, a Map, at once:  the next line reads the new value."
+              ></ui-step>
+              <ui-step
+                heading="readers marked"
+                description="Direct readers go dirty, readers of derived values go check;  an equal (===) write marks nobody."
+              ></ui-step>
+              <ui-step
+                heading="readers re-run"
+                description="Solid re-runs its computations on its own schedule (a microtask, or flush), and observe() functions re-run."
+              ></ui-step>
+            </ui-steps>
+            <ul>
+              <li>
+                <b>The record is the truth:</b> each object's own <code>Map</code>. Cells hold no value; they only know
+                who read what.
+              </li>
+              <li>
+                <b>Derived values pull:</b> <code>Derived</code>, <code>derive()</code> and <code>@derived</code>
+                re-check their sources, and notify only if their value really changed.
+              </li>
+              <li>
+                <b>Readers are Reactions:</b> one per Solid computation, one per <code>observe()</code>. A reader never
+                re-runs for a change its own run made.
+              </li>
+              <li>
+                <b>One cells context per page</b>, on <code>globalThis</code> (<code>Symbol.for("spell:cells")</code>):
+                the app's <code>spell/util</code> and every <code>spell-runtime.js</code> copy share it.
+                <code>CONTEXT_VERSION</code> guards its shape.
+              </li>
+              <li>
+                <b>Values aren't made reactive:</b> no proxies, so <code>===</code> holds everywhere.
+                <ul>
+                  <li>
+                    The catch: change a list or object a prop holds IN PLACE, and nobody hears. Set the prop to a new
+                    one instead; Spell's <code>List</code> copies on write.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <b>The DOM lags Spell by one microtask.</b> Tests and imperative code call
+                <code>core.flush()</code> (<code>flushCells()</code>): pending derived checks, then the host's Solid
+                <code>flush()</code>. Never Solid's own directly.
+              </li>
+              <li>
+                The engine's files:
+                <a href="/src/util/reactive/" title="src/util/reactive" target="src-src-util-reactive"
+                  ><code>src/util/reactive/</code></a
+                >, and the util folder's
+                <a href="/src/util/AGENTS.md" title="src/util/AGENTS.md" target="src-src-util-agents-md"
+                  ><code>AGENTS.md</code></a
+                >, "The reactive engine".
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="keys" label="Keys in creation order" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>keys()</code> lists a thing's own properties in the order they were first set.
+                <ul>
+                  <li>An overwrite keeps the position; a delete takes the key out; setting it again appends it.</li>
+                </ul>
+              </li>
+              <li>
+                The record is a <code>Map</code> because an object hoists integer-like keys:
+                <code>b, 10, a, 2</code> comes back as <code>["2", "10", "b", "a"]</code>.
+              </li>
+              <li>
+                <code>keys()</code> tracks a keys cell of its own, changed only when the key set changes: a property
+                list redraws when a property appears or goes, not on every value change.
+              </li>
+              <li>
+                <code>@prop</code>s are keys, and <code>toJSON()</code> lists them; <code>@state</code> is internal,
+                never listed.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="types" label="Property types" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Each class has a schema, <code>schemaOf(Class)</code>: a type per property.
+                <ul>
+                  <li>Compiled Spell declares them, <code>static { this.declareProp("rank", { ... }) }</code>.</li>
+                  <li>Hand-written classes declare them with <code>@prop({ type, default })</code>.</li>
+                </ul>
+              </li>
+              <li>An undeclared property's type is observed per class, widened on a mismatch, with a dev warning.</li>
+              <li>
+                <code>Thing</code> and <code>List</code> check a declared type on the program's console when a value
+                changes; the value is still stored.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="decorators"
+            label="Decorators for hand-written classes"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>
+              Hand-written classes use standard (TC39) decorators, from
+              <a
+                href="/src/util/reactive/decorators.ts"
+                title="src/util/reactive/decorators.ts"
+                target="src-src-util-reactive-decorators-ts"
+                ><code>decorators.ts</code></a
+              >; compiled Spell writes the same runtime shape without them.
+            </p>
+            <ul>
+              <li>
+                <code>@prop(info) accessor x!: T</code>: a reactive prop, listed by <code>keys()</code>, declared in the
+                class's schema. NEVER an initializer: say <code>{ default: 1 }</code>, or
+                <code>{ init: () =&gt; [] }</code> for an object made once per instance.
+              </li>
+              <li><code>@state accessor x = v</code>: internal state, never listed; the initializer is its start.</li>
+              <li>
+                <code>@derived get y()</code>: memoized, its readers re-run only when its value REALLY changes. Only for
+                pure, worth-it getters: memoizing a cheap one is about 2x slower.
+              </li>
+              <li>
+                <code>@state({ equals })</code> and <code>@derived({ equals })</code>: an equal value is no change.
+              </li>
+              <li>
+                <code>@thing</code>, Spell's own (<code>spell/util/spell</code>): runs <code>create()</code> exactly
+                once, after the most-derived class's field initializers.
+              </li>
+              <li>
+                Spell UI's components have their own with the same names and options:
+                <a
+                  href="/guides/custom-elements/custom-elements.html#decorators"
+                  target="src-guides-custom-elements-custom-elements-html"
+                  >Custom Elements</a
+                >.
+              </li>
+              <li>A decorator must start its line: the toolchain's decorator pre-pass looks for it there.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="bridge" label="The one bridge into Solid" sticky collapsible dividing open="false">
+            <p>
+              <code>spell/util</code> and compiled Spell's core never import Solid. So the HOST wires cells to Solid,
+              once.
+            </p>
+            <!-- prettier-ignore -->
+            <ui-code language="ts" collapsed>import { enableExternalSource, flush } from "solid-js"
+
+import { bridgeSolid } from "spell/util"
+
+bridgeSolid({ enableExternalSource, flush })</ui-code>
+            <ul>
+              <li>
+                <b><code>bridgeSolid()</code></b> makes EVERY Solid computation (a JSX expression, a memo, an effect's
+                compute) a cells reader, so a plain <code>{editor.notice}</code> in JSX is reactive.
+                <ul>
+                  <li>
+                    The editor app calls it in
+                    <a
+                      href="/app/src/app/solid/cellsBridge.ts"
+                      title="app/src/app/solid/cellsBridge.ts"
+                      target="src-app-src-app-solid-cellsbridge-ts"
+                      ><code>cellsBridge.ts</code></a
+                    >, imported before anything renders.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <b>ONCE per Solid</b>, however many hosts call it: Solid pipes every
+                <code>enableExternalSource()</code> into the last, so a second would wrap every computation twice. The
+                cells context remembers it.
+              </li>
+              <li>
+                <b>Solid re-runs readers on ITS schedule</b>: never in the middle of a program's own writes, and ten
+                writes re-run a reader once.
+              </li>
+              <li>
+                <b><code>tracked(read)</code></b
+                >, in the app's
+                <a
+                  href="/app/src/app/solid/tracked.ts"
+                  title="app/src/app/solid/tracked.ts"
+                  target="src-app-src-app-solid-tracked-ts"
+                  ><code>tracked.ts</code></a
+                >: one Solid memo over a read of Spell state, however many places read it. Its value is Solid's, so it's
+                staged; a plain <code>editor.x</code> read never is.
+              </li>
+              <li>
+                <b><code>observe(fn)</code></b> re-runs a plain function at once as what it read changes.
+              </li>
+              <li>
+                <b>One Solid per page:</b> the app's bundles share <a href="/app/app/dist-page/spell-solid.js" target="src-app-app-dist-page-spell-solid-js"><code>spell-solid.js</code></a>, which holds Solid, Spell
+                UI's element core and the <code>h()</code> compiled Spell draws with; the runtime takes Solid from the
+                page, never a copy of its own.
+                <a href="/app/README-app.md" target="src-app-readme-app-md">README-app</a>, "How the bundles share one
+                Solid".
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="caveats" label="Caveats for Spell cells" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <b><code>enableExternalSource</code> is global:</b> registering it wraps every Solid computation on the
+                page, Spell UI's included.
+              </li>
+              <li>
+                <b>Check timing:</b> derived-only readers are re-checked in a microtask, which may come after Solid's
+                own flush. That costs a second small pass, never a wrong value.
+              </li>
+              <li>
+                <b>Equality is <code>===</code>:</b> a new array with the same contents counts as a change. It errs
+                toward updating.
+              </li>
+              <li>
+                <b>Cycles:</b> a derived value that reads itself overflows the stack; there's no Spell-level error for
+                it yet.
+              </li>
+              <li>
+                <b>No async in cells:</b> Spell values are synchronous. A fetched value enters through a Solid async
+                memo at the UI edge, never a cell, which keeps Spell immune to holds.
+              </li>
+              <li>
+                <b>Memory:</b> cells and derived values are made lazily, referenced only from their object and their
+                readers; bridge nodes unlink on dispose.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="gotchas"
+          label="4. Gotchas, with the Spell consequence"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="exclamation triangle"></ui-icon>
+          <ui-section
+            id="reactivity-and-effects"
+            label="Reactivity and effects"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <b>An effect's apply function returns its cleanup.</b>
+                <code>createRenderEffect(() =&gt; x(), v =&gt; list.push(v))</code> returns a number, which Solid then
+                calls; the dev build throws <code>PRIMITIVE_IN_EFFECT_CALLBACK</code>. Always write
+                <code>v =&gt; { ... }</code>.
+              </li>
+              <li>
+                <b>One uncaught error halts every later update, page-wide</b> (<code>REACTIVITY_HALTED</code>). A buggy
+                Spell program must never take down the editor around it:
+                <ul>
+                  <li>each drawn thing sits in its own <code>&lt;Errored&gt;</code> boundary</li>
+                  <li>each Spell UI element has its own boundary too</li>
+                  <li><code>resetErrorHalt()</code> exists for recovery</li>
+                </ul>
+              </li>
+              <li>
+                <b>Owned-scope writes throw in dev</b>, even in a <code>createRoot</code> body. Spell cells never write
+                Solid state, so Spell is unaffected; app code still follows the rule.
+              </li>
+              <li>
+                <b>Memo lifetimes:</b> a non-lazy memo lives until its owner dies. In app code, make memos inside
+                components, never at module scope.
+              </li>
+              <li>
+                <b>Holds are narrower than the docs say:</b> a write feeding async work is held only when a render
+                effect reads the async value with no <code>&lt;Loading&gt;</code> to catch it. Later batches go through.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="stores" label="Stores" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <b>No mutable store:</b> a direct write to a Solid store (<code>s.a = 2</code>) is ignored; dev warns
+                <code>STORE_WRITE_OUTSIDE_SETTER</code>, production says nothing. Hence the editor's store is on Spell
+                cells.
+              </li>
+              <li>
+                <b>Stores wrap class instances:</b> <code>createStore({ card })</code> hands back a proxy, and
+                <code>===</code> against the raw thing fails. Never put a Spell thing in a Solid store.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="dom-events-and-custom-elements"
+            label="DOM, events and custom elements"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <b>The 1.x forms are compile errors</b> since rc.17: <code>on:</code>, <code>attr:</code>,
+                <code>bool:</code>, <code>use:</code>, <code>classList</code>.
+              </li>
+              <li>
+                <b>On a tag with a dash</b>, Solid sets a plain prop with <code>setAttribute()</code>. Spell's own
+                elements take a function or object as itself; anyone else's turns it into text, so rich data there is
+                <code>prop:options={...}</code>.
+              </li>
+              <li>
+                <b>Only <code>on</code> and an uppercase letter is an event</b>, its name lowercased:
+                <code>onUIChange</code> listens for <code>uichange</code>, not <code>ui-change</code>.
+                <ul>
+                  <li>On Spell's elements, write the event's own name: <code>on-ui-change={f}</code>.</li>
+                  <li>Any other element's dashed event: a ref that adds the listener.</li>
+                </ul>
+              </li>
+              <li>
+                <b><code>Portal</code> defaults to <code>document.body</code>:</b> inside a shadow root, pass
+                <code>mount</code>, or content and styles escape.
+              </li>
+              <li>
+                <b>React habits that silently break:</b> destructuring props reads them once; <code>class</code>, not
+                <code>className</code>; <code>onChange</code> is the native change event, so use <code>onInput</code>;
+                refs are callbacks; the context is its own provider.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="hyperscript-and-bundling"
+            label="Hyperscript and bundling"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <b>The arity trap:</b> hyperscript turns a zero-argument function prop on a component into a getter.
+                <code>h(Comp, { onPick: () =&gt; go() })</code> passes the result of <code>go()</code>; a handler takes
+                an argument (<code>e =&gt; go()</code>). Compiled Spell's handlers take <code>(event)</code>.
+              </li>
+              <li>
+                <b><code>@solidjs/h</code> imports <code>@solidjs/web</code> by bare name</b>, so compiled Spell never
+                imports it directly: it imports only <code>@spell/core</code>, which takes Solid from the page.
+              </li>
+              <li>
+                <b>Two Solids on one page fail SILENTLY:</b> each copy has its own graph, so an element built by one
+                never hears a change made through the other. A second copy's <code>UIComponent.define()</code> finds
+                each tag defined and keeps the first copy's class.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="testing-and-versions" label="Testing and versions" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <b>Under Node, <code>@solidjs/web</code> resolves to its server build</b>, with no DOM
+                <code>render</code>: component tests run in a real browser (Vitest's browser mode).
+              </li>
+              <li><b>After any event, flush before asserting.</b></li>
+              <li>
+                <b>Every package is pinned exactly</b>, in the kit's root <code>resolutions</code>, and upgraded
+                together: <code>solid-js</code>, <code>@solidjs/web</code>, <code>@solidjs/h</code>,
+                <code>@solidjs/signals</code> at <code>2.0.0-rc.21</code>.
+              </li>
+              <li>
+                <b>On an RC bump</b>, run the experiments on the old and the new Solid and compare:
+                <code>SOLID_NODE_MODULES=&lt;dir&gt;</code> picks the one an experiment loads.
+              </li>
+              <li>
+                What changed since rc.13, and bit us, is in
+                <a href="/agents/solid/solid-2.md" title="agents/solid/solid-2.md" target="src-agents-solid-solid-2-md"
+                  >the Solid 2 rules</a
+                >, marked with the release.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="ui" label="5. Ideas for Spell UI" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb outline"></ui-icon>
+          <p>Ways Spell UI could use what Solid 2 gives. <b>Not built</b>, but the first.</p>
+          <ui-section
+            id="element-state-and-data"
+            label="Element state and data"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <b>Read-after-write on element properties:</b> built. <code>DOMElement</code> keeps one plain record of
+                attribute values, up to date at once: <code>el.value = 3; el.value</code> reads 3.
+              </li>
+              <li>
+                <b>Async options with no loading flags:</b> <code>&lt;ui-dropdown&gt;</code> could take a function that
+                returns a Promise, made an async memo inside; <code>isPending()</code> would drive its loading look.
+              </li>
+              <li>
+                <b><code>createProjection</code> for selection:</b> only the two rows whose selection changed would
+                update.
+              </li>
+              <li>
+                <b><code>action</code> and <code>createOptimistic</code> for form controls:</b> a checkbox bound to a
+                server write shows its new state at once, and falls back on failure.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="performance" label="Performance" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <b><code>unobserved</code> callbacks:</b> start a <code>ResizeObserver</code> or
+                <code>IntersectionObserver</code> only while something reads the value it feeds.
+              </li>
+              <li>
+                <b><code>&lt;Repeat&gt;</code> for table virtualization:</b> it renders a window by index, with no
+                diffing.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="integration" label="Integration" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <b>Context across elements:</b> with one Solid per page, an app's context (theme, locale) can reach
+                every element's render.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="robustness" label="Robustness" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <b>Errors that heal:</b> an element's fallback could draw again when its inputs change, instead of
+                staying in <code>:state(errored)</code> until reload.
+              </li>
+              <li>
+                <b>Refuse a cross-Solid swap loudly:</b> stamp each class with its Solid, and on a mismatch log one
+                clear "two Solids on this page" error.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="quick-reference" label="6. Quick reference" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="list"></ui-icon>
+          <p>
+            What's new or different in Solid 2, from Solid 1 and from React habits, a line each. Solid's own cheatsheet,
+            as a skill, is in <code>solid-js</code>'s <code>skills/solid-2.0-cheatsheet/</code>.
+          </p>
+          <ui-section id="qr-packages" label="Packages and setup" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The reactive core is <code>@solidjs/signals</code>; <code>solid-js</code> re-exports it and holds stores
+                too. <code>solid-js/web</code> is <code>@solidjs/web</code>; <code>solid-js/h</code> is
+                <code>@solidjs/h</code>.
+              </li>
+              <li>
+                JSX: <code>"jsx": "preserve"</code>, <code>"jsxImportSource": "@solidjs/web"</code>. Custom elements are
+                declared on <code>"@solidjs/web/types/jsx.js"</code>.
+              </li>
+              <li>
+                Vite: <code>@solidjs/vite-plugin</code>, after the decorator pre-pass, so Solid's compiler sees
+                decorator-free code.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="qr-timing" label="Write timing" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="ts" collapsed>setCount(1)
+count()                     // still 0
+flush()                     // drain queued updates now
+count()                     // 1
+flush(() =&gt; setCount(6))    // run fn, drain as it returns
+createSignal(0, { ownedWrite: true })   // may be written in an owned scope
+runWithOwner(null, () =&gt; setX(1))      // also escapes</ui-code>
+            <ul>
+              <li><code>batch()</code> is gone: everything batches.</li>
+              <li>
+                <code>flush()</code> never inside an action body (<code>FLUSH_IN_ACTION</code>), nor in an effect's
+                apply.
+              </li>
+              <li><code>await resolve(() =&gt; x())</code> waits for async work; <code>flush()</code> doesn't.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="qr-signals" label="Signals and memos" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="ts" collapsed>const [value, setValue] = createSignal(() =&gt; props.initial)   // writable memo
+createSignal(v, { equals: false, ownedWrite: true, unobserved: () =&gt; stop(), name: "count" })
+createMemo(fn, { lazy: true, equals: (a, b) =&gt; a.id === b.id, sync: true })</ui-code>
+            <ul>
+              <li>
+                Memos are eager by default; <code>initialValue</code> is gone, the compute gets <code>prev</code>.
+              </li>
+              <li>
+                <code>getObserver()</code> was <code>getListener</code>; <code>isEqual</code> was <code>equalFn</code>.
+              </li>
+              <li>
+                <code>enableExternalSource</code> lets Solid track another reactive system: how Spell cells reach it.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="qr-effects" label="Effects and lifecycle" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="ts" collapsed>createEffect(
+  () =&gt; count(),               // compute:  tracks
+  (value, prev) =&gt; {           // apply:  untracked side effects
+    el.title = value
+    return () =&gt; {}            // optional cleanup
+  }
+)
+onSettled(() =&gt; {
+  const id = setInterval(tick, 1000)
+  return () =&gt; clearInterval(id)
+})</ui-code>
+            <ul>
+              <li>The single-argument effect is an error; every compute runs before any apply.</li>
+              <li><code>onSettled</code> replaces <code>onMount</code> plus <code>onCleanup</code>.</li>
+              <li><code>createEffect(fn, { effect, error })</code> catches compute-phase errors.</li>
+              <li>An effect with no owner warns <code>NO_OWNER_EFFECT</code>: it's never disposed.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="qr-async" label="Async" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="tsx" collapsed>const user = createMemo(() =&gt; fetchUser(props.id))
+&lt;Loading fallback={&lt;Skeleton /&gt;}&gt;&lt;h1&gt;{user().name}&lt;/h1&gt;&lt;/Loading&gt;
+&lt;ul class={{ stale: isPending(() =&gt; results()) }}&gt;
+refresh(user)
+const add = action(function* (todo) { setTodos((s) =&gt; { s.push(todo) }); yield api.add(todo); refresh(todos) })</ui-code>
+            <ul>
+              <li>Any memo may return a Promise; it replaces <code>createResource</code>.</li>
+              <li>
+                <code>&lt;Loading&gt;</code> was <code>Suspense</code>, <code>&lt;Errored&gt;</code> was
+                <code>ErrorBoundary</code>, <code>&lt;Reveal&gt;</code> was <code>SuspenseList</code>.
+              </li>
+              <li><code>startTransition</code> is gone: held writes do it.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="qr-stores" label="Stores" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="ts" collapsed>const [store, setStore] = createStore({ user: { name: "A" }, list: [] })
+setStore((s) =&gt; { s.user.name = "B"; s.list.push("x") })   // a draft:  produce is the default
+const items = createProjection(async () =&gt; api.list(), [], { key: "id" })
+JSON.stringify(snapshot(store))                           // was unwrap</ui-code>
+            <ul>
+              <li><code>createMutable</code> is gone, and a direct write is ignored.</li>
+              <li><code>createProjection</code> replaces <code>createSelector</code>.</li>
+              <li>
+                <code>Map</code>, <code>Date</code> and frozen objects are stored raw; the rest are wrapped in proxies.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="qr-jsx" label="Components and JSX" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="tsx" collapsed>&lt;For each={items()}&gt;{(item, i) =&gt; ...}&lt;/For&gt;                 // by identity
+&lt;For each={items()} keyed={(t) =&gt; t.id}&gt;{(item) =&gt; ...}&lt;/For&gt;  // by key
+&lt;Repeat count={rows.length}&gt;{(i) =&gt; &lt;Row data={rows[i]} /&gt;}&lt;/Repeat&gt;
+const Active = dynamic(() =&gt; (editing() ? Editor : Viewer))
+const all = merge(defaults, props)          // was mergeProps
+const rest = omit(props, "class", "ref")    // was splitProps
+&lt;Todos value={createTodos()}&gt;&lt;List /&gt;&lt;/Todos&gt;   // no .Provider
+&lt;li class={["todo", { done: done() }]} /&gt;</ui-code>
+            <ul>
+              <li><code>Index</code> is gone: <code>&lt;For keyed={false}&gt;</code>.</li>
+              <li>Destructuring props freezes them (<code>STRICT_READ_UNTRACKED</code>).</li>
+              <li>
+                <code>render(() =&gt; &lt;App /&gt;, el)</code> takes a function; a shadow root works as a container.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="qr-diagnostics" label="Diagnostics" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped">
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Code</th>
+                    <th>Means, and the fix</th>
+                  </tr>
+                  <tr>
+                    <td><code>REACTIVE_WRITE_IN_OWNED_SCOPE</code></td>
+                    <td>
+                      a write in a component, memo, effect compute or root body: move it to a handler or
+                      <code>onSettled</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>STRICT_READ_UNTRACKED</code></td>
+                    <td>a reactive read in a component body: read in JSX or a memo; don't destructure props</td>
+                  </tr>
+                  <tr>
+                    <td><code>REACTIVITY_HALTED</code></td>
+                    <td>
+                      an uncaught error stopped the scheduler: <code>&lt;Errored&gt;</code>, an effect's
+                      <code>error</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>NO_OWNER_EFFECT</code></td>
+                    <td>an effect outside any owner: make it in a component or <code>createRoot</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>UNSTABLE_LIST_IDENTITY</code></td>
+                    <td>
+                      <code>.map()</code> in JSX, or fresh objects per update: <code>&lt;For&gt;</code>, keyed by id
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>
+              Every code, with its fix: <code>solid-js</code>'s <code>diagnostics.json</code> and
+              <code>skills/reactivity-diagnostics/</code>.
+            </p>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="sources" label="7. Sources and experiments" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="flask"></ui-icon>
+          <ui-section id="read" label="Read" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <a href="https://v2.solidjs.com/" target="ext-v2-solidjs-com">v2.solidjs.com</a>: the 2.0 reference
+              </li>
+              <li>
+                <a href="/agents/solid/solid-2.md" title="agents/solid/solid-2.md" target="src-agents-solid-solid-2-md"
+                  >the Solid 2 rules</a
+                >: the same ground, as rules for agents
+              </li>
+              <li>
+                <a href="/src/util/AGENTS.md" title="src/util/AGENTS.md" target="src-src-util-agents-md"
+                  >the util folder's <code>AGENTS.md</code></a
+                >, "The reactive engine"
+              </li>
+              <li>
+                <a
+                  href="/guides/custom-elements/custom-elements.html"
+                  target="src-guides-custom-elements-custom-elements-html"
+                  >Custom Elements</a
+                >: Spell UI's elements, drawn with Solid
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="experiments" label="Experiments" sticky collapsible dividing open="false">
+            <p>Each runs from the kit's root, on the kit's Solid; <code>[dev|prod]</code> picks the build.</p>
+            <ui-table celled padding="compact" appearance="striped">
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Run</th>
+                    <th>What it shows</th>
+                  </tr>
+                  <tr>
+                    <td><code>node guides/solid/experiments/read-after-write.mjs</code></td>
+                    <td>stale reads, owned-scope writes, <code>flush()</code> in a memo</td>
+                  </tr>
+                  <tr>
+                    <td><code>node guides/solid/experiments/entanglement.mjs</code></td>
+                    <td>a write held with an async batch</td>
+                  </tr>
+                  <tr>
+                    <td><code>node guides/solid/experiments/flush-per-write-entanglement.mjs</code></td>
+                    <td>flush per write is still entangled</td>
+                  </tr>
+                  <tr>
+                    <td><code>node guides/solid/experiments/flush-per-write.mjs</code></td>
+                    <td>the Solid-native candidate, timed</td>
+                  </tr>
+                  <tr>
+                    <td><code>node guides/solid/experiments/cells-vs-notifiers.mjs</code></td>
+                    <td>Spell cells beside a record with notifiers</td>
+                  </tr>
+                  <tr>
+                    <td><code>node guides/solid/experiments/flush-cost-and-holds.mjs</code></td>
+                    <td>what a flush costs, and when a write is held</td>
+                  </tr>
+                  <tr>
+                    <td><code>yarn tsx guides/solid/experiments/spell-cells.ts</code></td>
+                    <td>the cells prototype: key order, types, the equality cutoff</td>
+                  </tr>
+                  <tr>
+                    <td><code>yarn tsx guides/solid/experiments/decorators.ts</code></td>
+                    <td>the decorators prototype, and <code>@thing</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, on Solid 2.0.0-rc.21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

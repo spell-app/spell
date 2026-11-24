@@ -4,6 +4,7 @@
 		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
               this site.</>
 	</>
+
 	<!--
 		EXAMPLES:  ours only, no Fomantic page.  The old Astro page's examples (Types, Variations), restyled, plus a markup
 		example.  Files shown:  `site/examples/` (`../examples/sample.json`).
@@ -64,7 +65,15 @@
 
 		<section label="Copy button" sticky="stack" collapsible dividing>
 			<example "Copy button" description="`copy` adds a button that copies the code.">
-				<code language="bash" copy>yarn add spell-ui</code>
+				<code language="bash" copy>npm install spell-ui@next</code>
+			</example>
+		</>
+	</>
+
+	<section label="Sizing">
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example "Height" description="`height` gives the code a height, and its lines scroll;  `resizable=\"height\"` lets people drag it.">
+				<code language="ts" height="6em" resizable="height">type Rack = &#123; name: string; ports: number &#125; const racks: Rack\[] = \[ &#123; name: "Rack 1", ports: 4 &#125;, &#123; name: "Rack 2", ports: 8 &#125;, &#123; name: "Rack 3", ports: 12 &#125;, &#123; name: "Rack 4", ports: 16 &#125; ] const ports = racks.reduce((sum, rack) =&gt; sum + rack.ports, 0) console.log(ports)</code>
 			</example>
 		</>
 	</>

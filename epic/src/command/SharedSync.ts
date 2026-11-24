@@ -11,6 +11,7 @@ import { SharedComments } from "spell/epic/tool/SharedComments"
 
 import { ContentMerge } from "./ContentMerge"
 import { EpicCheckout } from "./EpicCheckout"
+import { GitHubVisibility } from "./GitHubVisibility"
 import type { Shared } from "./Shared"
 import { SyncState, type SyncRecord, type SyncResult } from "./SyncState"
 
@@ -69,6 +70,7 @@ export class SharedSync {
     const record: SyncRecord = { at: PlanTime.clockTime(now), result: report.result }
     if (report.files?.length) record.files = report.files
     if (report.error) record.error = report.error
+    if (report.public) record.public = true
     SyncState.write(this.dir, record)
     return report
   }
@@ -107,7 +109,7 @@ export class SharedSync {
    * - no renumbering or log tidying:  both need a commit the two sides share, to tell whose ids and lines are new
    * - a clash stops it as any other does (`rebase()`)
    */
-  private ontoUnrelated(theirs: string): SyncReport {
+  private async ontoUnrelated(theirs: string): Promise<SyncReport> {
     const pulled = this.count(theirs)
     const files = this.rebase(theirs)
     if (files) return { result: "conflict", files, renumbered: [] }
@@ -343,10 +345,17 @@ export class SharedSync {
     return joined
   }
 
-  /** Push the branch to `origin`, tracking it:  the report, `synced` or `up to date`, else `not pushed`. */
-  private push(report: Omit<SyncReport, "result">): SyncReport {
+  /**
+   * Push the branch to `origin`, tracking it:  the report, `synced` or `up to date`, else `not pushed`.
+   * - NEVER while GitHub says the repo is public (`GitHubVisibility`;  epic `epic-engine` T153):  epic pages may name
+   *   what the code repos mustn't.  `public` in the report then, the commits kept for a push once it's private.
+   */
+  private async push(report: Omit<SyncReport, "result">): Promise<SyncReport> {
     const ahead = Git.out(["rev-list", "--count", "@{upstream}..HEAD"], this.dir)
     if (ahead === "0") return { ...report, result: report.pulled ? "synced" : "up to date" }
+    const url = Git.out(["remote", "get-url", "origin"], this.dir) ?? ""
+    if (await GitHubVisibility.isPublic(url, join(this.dir, ".git")))
+      return { ...report, result: "not pushed", public: true, error: PUBLIC_REFUSED }
     const push = Git.run(["push", "-q", "-u", "origin", "HEAD"], this.dir, { timeout: NETWORK_WAIT })
     if (!push.ok) return { ...report, result: "not pushed", error: push.err || `exit ${push.code}` }
     return { ...report, result: "synced", pushed: true }
@@ -395,7 +404,14 @@ export type SyncReport = {
   files?: string[]
   /** git's words, when it failed */
   error?: string
+  /** not pushed because GitHub says the repo is public */
+  public?: boolean
 }
+
+/** Why a public epic repo wasn't pushed, in one line. */
+export const PUBLIC_REFUSED =
+  "Not pushed:  GitHub shows the epic repo as public, and epic pages may hold private names.  " +
+  "Set it to private on GitHub, and the next sync pushes it."
 
 /** One epic's renumbering:  old id => new. */
 export type Renumbered = { epic: string; renames: Record<string, string> }

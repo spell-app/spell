@@ -537,10 +537,16 @@ export type SiteHost = {
    * - None, or `undefined`:  the program has it already.
    */
   pageNeeded?(className: string): Promise<boolean> | boolean | undefined
-  /** Scroll to the section `id` of the page being shown, once it's drawn:  a link's `#section`. */
+  /**
+   * Scroll to the section `id` of the page being shown, once it's drawn:  a link's `#section`.
+   * - Asked once the page is shown (`SiteBase.followLink()`), so the section is looked for on it, not the page left.
+   */
   landOn?(id: string): void
-  /** Call `showAddress` whenever the host's address changes by itself:  back, forward, typed in. */
-  listen(showAddress: (address: string) => void): void
+  /**
+   * Call `showAddress` whenever the host's address changes by itself:  back, forward, typed in.
+   * - What it returns resolves once that page is shown:  the host lands on the address's `#section` then.
+   */
+  listen(showAddress: (address: string) => Promise<void> | void): void
   /**
    * Make a page at `address`, which the site has none for:  only while the program is being designed.
    * - So its not found page offers it, and shows what went wrong on its error page;  a visitor sees neither.

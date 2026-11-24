@@ -12,7 +12,7 @@ import { packageRootFor } from "./sourceNames.ts"
 /****************
  * ### `Declarations`
  * Builds the `.d.ts` files of the kit or one of its folders, which a program that can't read their source reads
- * instead (epic `repo-split` I12, Owen's pick (c)):  the app's node program, and spell-brand beside the kit.
+ * instead (epic `repo-split` I12, Owen's pick (c)):  the app's node program, and a project beside the kit.
  *
  * ```sh
  * spell-types            # this package (the current folder):  type-checks it and writes `dist-types/`
@@ -116,7 +116,7 @@ export class Declarations {
    * The programs of the packages BELOW `dir`'s that it reads, lowest first:  what `spell-types --below` builds.
    * - A folder of the kit (its `package.json`'s `workspaces`, epic `repo-split` P20):  the kit's own, then each folder
    *   before it in that list, lowest first (`ui/`:  the kit's, `parser/`'s).
-   * - Any other package (a project beside the kit, spell-brand):  the local packages it depends on (`workspace:`,
+   * - Any other package (a project beside the kit):  the local packages it depends on (`workspace:`,
    *   `portal:`, `link:` or `file:`), found through `node_modules`, theirs first;  a kit among them brings its folders
    *   too, after its own.
    * - Only packages with `"spellTypes"`, each of its programs in its order.

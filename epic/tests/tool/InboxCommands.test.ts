@@ -498,7 +498,7 @@ test("status noted:  Claude only RECORDED Owen's choice -- an underway card turn
   expect(printed).toEqual(["J1 underway:  a real choice", "J1 noted:  a real choice"])
 })
 
-test("status done on an issue (I148):  the card turns green AND the issue closes, green, logged, in one write", async () => {
+test("status done on an issue (I148):  the card turns green AND the issue closes, grey (T143), logged, in one write", async () => {
   const owner = commands()
   vi.spyOn(owner, "warn").mockImplementation(() => undefined)
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -509,12 +509,12 @@ test("status done on an issue (I148):  the card turns green AND the issue closes
   expect(issue().getAttribute("state")).toBe("attention")
   expect(await owner.run(["status", "x", "i1", "underway", "Fix it."])).toBe(0)
   expect(await owner.run(["status", "x", "i1", "done", "Fixed:  CI is green."])).toBe(0)
-  expect([issue().getAttribute("status"), issue().getAttribute("state")]).toEqual(["done", "recent"])
+  expect([issue().getAttribute("status"), issue().getAttribute("state")]).toEqual(["done", "handled"])
   expect(issue().querySelector("epic-status")!.getAttribute("state")).toBe("done")
   const log = Array.from(PlanDoc.parse(readFileSync(file, "utf8")).document.querySelectorAll("#log > epic-event"))
   // as written to disk, formatted:  one space
-  expect(log.at(-1)!.textContent).toMatch(/^I1 closed:\s+it stays red$/)
-  expect(printed).toEqual(["I1 underway:  it stays red", "I1 done, closed:  it stays red"])
+  expect(log.at(-1)!.textContent).toMatch(/^I1 fixed, grey \(found by Claude\):\s+it stays red$/)
+  expect(printed).toEqual(["I1 underway:  it stays red", "I1 fixed, grey, nothing for you to do:  it stays red"])
 })
 
 test("clear / done:  a pick riding on the mark (pick B, but ...) stays CHOSEN, its line on the set;  logged", async () => {
@@ -759,6 +759,25 @@ test("the kickoff box:  wait prints its words and each picture's file by label; 
   ])
   expect(prompt.querySelector("epic-picture img")?.getAttribute("src")).toBe("pictures/kickoff-20261117-2300.png")
   expect(ReviewInbox.read(inboxFile).marks).toEqual({})
+})
+
+// epic `epic-engine` T165:  what a test's steps printed, handed over word for word with its answer
+test("a test's pasted outputs:  listed, and handed over by wait under its mark, step by step", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addItem("test", "one")
+  writeFileSync(file, plan.toString())
+  const outputs = [{ step: 2, text: "Ready\n  Firefox:  ready" }]
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("m1", { action: "approve", outputs }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, [], {})
+  expect(printed.join("\n")).toContain("M1  one  · pasted output for step 2")
+  printed = []
+  await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
+  expect(printed.join("\n")).toContain(
+    ["        step 2 printed (pasted by the person):", "          | Ready", "          |   Firefox:  ready"].join("\n")
+  )
 })
 
 // epic `epic-engine` I44:  a failure's screenshot in its new issue, in a split page's part, as the part reads it

@@ -4,12 +4,9 @@ import { createRouter, defineRoutes, useNavigate, type RouterHistory, type Route
 
 import { editor } from "spell/app/app/editor"
 import { setNavigator } from "./navigation"
-import { PlaceReferencePage } from "./PlaceReference"
-import { ProjectChooser } from "./ProjectChooser"
-import { SiteEditorRoute } from "./SiteEditorPage"
+import { PageViews } from "./pageViews"
 import { ProjectPageRoute } from "./SpellEditor"
-import { ThemeEditorPage } from "./ThemeEditorPage"
-import { PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
+import { GUIDES_PAGE, PALETTE_PAGE, PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
 
 /**
  * The app's routes (`@solidjs/router`):  `/edit/`, `/design/` or `/run/`, then an address (decision Q40, epic
@@ -18,15 +15,20 @@ import { PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
  * - `/design/<address>`:  the same page in Design (epic `editor` P37), e.g. `/design/@spell/examples/Solitaire/Card.spell`
  * - `/run/<address>`:  the same page in Run, e.g. `/run/owen@spell/errors`
  * - `/theme`:  the theme editor (`<ThemeEditorPage>`)
+ * - `/palette`:  the + menu's groups, to arrange and save (`<PaletteGroupsPage>`, epic `editor` T81)
  * - `/site`:  every site there is (`<SitesHomePage>`)
  * - `/site/<project>`:  a site's editor, its pages and their addresses (`<SiteEditorPage>`, epic `mockup` P4)
  * - `/site/<group>`:  the group's sites (`<SiteGroupPage>`);  a registered group's address, else it's a project's
  * - `/place/<description>`:  a place's reference page (`<PlaceReferencePage>`, epic `data` P52), e.g.
  *   `/place/@spell/examples/StarWars/StarWars.api.json5`
+ * - `/guides`:  the guides that ship with Spell (`<GuidesPage>`, epic `epic-engine` P79);  `/guides/<path>` one of them,
+ *   e.g. `/guides/data/data.html`
  * - ONE route for all three (`ProjectPageRoute`), so switching between them keeps the page.
  * - anything else:  `<ProjectChooser>`
  * - Each page is ONE route:  it stays mounted while only its address changes, e.g.
  *   moving between files, and follows them (`followRoute()`).
+ * - Every page but the editor's loads the first time it shows (`PageViews`, epic `solid-2-final` P11):
+ *   the editor's first load carries none of them.
  */
 export const ROUTES = defineRoutes([
   {
@@ -34,9 +36,11 @@ export const ROUTES = defineRoutes([
     matchFilters: { page: ["edit", "design", "run"] },
     component: ProjectPageRoute
   },
-  { path: THEME_PAGE, component: ThemeEditorPage },
-  { path: `${SITE_PAGE}/*address`, component: SiteEditorRoute },
-  { path: `${PLACE_PAGE}/*address`, component: PlaceReferencePage },
+  { path: THEME_PAGE, component: PageViews.theme.view("ThemeEditorPage") },
+  { path: PALETTE_PAGE, component: PageViews.palette.view("PaletteGroupsPage") },
+  { path: `${SITE_PAGE}/*address`, component: PageViews.site.view("SiteEditorRoute") },
+  { path: `${PLACE_PAGE}/*address`, component: PageViews.place.view("PlaceReferencePage") },
+  { path: [GUIDES_PAGE, `${GUIDES_PAGE}/*path`], component: PageViews.guides.view("GuidesPage") },
   { path: "*", component: HomeRoute }
 ])
 
@@ -50,6 +54,9 @@ function HomeRoute() {
   onSettled(() => void editor.leaveProject())
   return <ProjectChooser />
 }
+
+/** `<ProjectChooser>`, loaded the first time the home page shows (`PageViews`). */
+const ProjectChooser = PageViews.home.view("ProjectChooser")
 
 /**
  * A router over `ROUTES`;  `history` defaults to the browser's (tests pass `memoryHistory()`).

@@ -6,10 +6,12 @@ import type { DOMFormControl } from "spell/ui/elements"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Alignment } from "spell/test-helpers/Alignment"
 
 import "spell/ui/components/ui-input"
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-modal"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-input/examples/elements/*.html", {
@@ -51,17 +53,17 @@ describe("<ui-input> classes", () => {
     ['fluid="yes"', "ui fluid input"],
     ["disabled", "ui disabled input"],
     ['icon="search"', "ui icon input"],
-    ['icon="search" icon-position="left"', "ui left icon input"],
+    ['icon="search" icon-position="left"', "ui left icon input left-icon"],
     ["loading", "ui loading icon input"],
     ['label="http://"', "ui labeled input"],
-    ['labeled="right" label="kg"', "ui right labeled input"],
-    ['labeled="corner" label="asterisk"', "ui corner labeled input"],
+    ['labeled="right" label="kg"', "ui right labeled input right-labeled"],
+    ['labeled="corner" label="asterisk"', "ui corner labeled input corner-labeled"],
     [
       'labeled="left corner" label="asterisk" icon="user" icon-position="left"',
-      "ui left icon left corner labeled input"
+      "ui left icon left corner labeled input corner-labeled left-corner left-corner-labeled left-icon"
     ],
     ["action", "ui action input"],
-    ['action="left"', "ui left action input"]
+    ['action="left"', "ui left action input left-action"]
   ])("<ui-input %s>", async (attributes, classes) => {
     const { root, control } = await input(`<ui-input ${attributes} aria-label="Field"></ui-input>`)
     expect(root.localName).toBe("div")
@@ -677,6 +679,178 @@ describe("<ui-input> joined buttons", () => {
     const [first, last] = boxes
     expect([first.borderTopLeftRadius, first.borderTopRightRadius]).toEqual(["10px", "0px"])
     expect([last.borderTopLeftRadius, last.borderTopRightRadius]).toEqual(["0px", "0px"])
+  })
+})
+
+////////////////
+// ## Clearing
+////////////////
+
+describe("<ui-input clearable>", () => {
+  /** The clear button's box, if it shows. */
+  const clearBox = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>("[part~=clear]")
+
+  it('shows an `x` once there\'s text, on a `type="search"` field by itself', async () => {
+    const { host, control } = await input(`<ui-input type="search" aria-label="Find"></ui-input>`)
+    expect(clearBox(host)).toBeNull()
+    await userEvent.type(control, "cats")
+    await ElementFixture.settle()
+    expect(clearBox(host)?.querySelector("ui-button")?.getAttribute("aria-label")).toBe("Clear")
+    // out of the Tab order, as the browser's own clear button is
+    const after = document.createElement("button")
+    host.after(after)
+    onTestFinished(() => after.remove())
+    await userEvent.tab()
+    expect(document.activeElement).toBe(after)
+  })
+
+  it("empties the field as typing would, then focuses it", async () => {
+    const { host, control } = await input(`<ui-input clearable value="cats" aria-label="Find"></ui-input>`)
+    const typed = record(host, "ui-typed")
+    const changed = record(host, "ui-changed")
+    await ElementFixture.settle()
+    await userEvent.click(clearBox(host)!.querySelector("ui-button")!)
+    await ElementFixture.settle()
+    expect([host.value, control.value]).toEqual(["", ""])
+    expect(typed.map((detail) => detail.value)).toEqual([""])
+    expect(changed.map((detail) => detail.value)).toEqual([""])
+    expect(host.shadowRoot!.activeElement).toBe(control)
+    expect(clearBox(host)).toBeNull()
+  })
+
+  it('is off on a plain field, and `clearable="false"` turns a search field\'s off', async () => {
+    for (const html of [
+      `<ui-input value="cats" aria-label="A"></ui-input>`,
+      `<ui-input type="search" clearable="false" value="cats" aria-label="A"></ui-input>`,
+      `<ui-input type="search" disabled value="cats" aria-label="A"></ui-input>`,
+      `<ui-input type="search" readonly value="cats" aria-label="A"></ui-input>`
+    ]) {
+      const { host } = await input(html)
+      await ElementFixture.settle()
+      expect(clearBox(host), html).toBeNull()
+    }
+  })
+
+  it("takes the trailing icon's place, and sits in the end column beside a `left icon`", async () => {
+    const { host, control } = await input(
+      `<ui-input type="search" icon="search" value="cats" aria-label="A"></ui-input>`
+    )
+    await ElementFixture.settle()
+    const icon = host.shadowRoot!.querySelector<HTMLElement>("[part~=icon]")!
+    expect(getComputedStyle(icon).visibility).toBe("hidden")
+    const field = control.getBoundingClientRect()
+    const clear = clearBox(host)!.getBoundingClientRect()
+    expect(Math.abs(clear.right - field.right)).toBeLessThan(1)
+    expect(Math.abs(clear.top + clear.height / 2 - (field.top + field.height / 2))).toBeLessThan(1)
+    // the text never runs under it
+    expect(Number.parseFloat(getComputedStyle(control).paddingRight)).toBeGreaterThanOrEqual(clear.width - 1)
+
+    const left = await input(
+      `<ui-input type="search" icon="search" icon-position="left" value="cats" aria-label="A"></ui-input>`
+    )
+    await ElementFixture.settle()
+    expect(getComputedStyle(left.host.shadowRoot!.querySelector("[part~=icon]")!).visibility).toBe("visible")
+    expect(Number.parseFloat(getComputedStyle(left.control).paddingRight)).toBeGreaterThanOrEqual(
+      clearBox(left.host)!.getBoundingClientRect().width - 1
+    )
+  })
+
+  it("lines its `x` up with the text, at every size", async () => {
+    for (const size of ["mini", "small", "medium", "large"]) {
+      const { host } = await input(
+        `<ui-input size="${size}" type="search" icon="search" icon-position="left" value="cats" aria-label="A"></ui-input>`
+      )
+      await ElementFixture.settle()
+      await (clearBox(host)!.querySelector("ui-button") as unknown as { ready: Promise<unknown> }).ready
+      expect(Alignment.report(Alignment.scan({ within: "ui-input" })), size).toEqual([])
+      host.remove()
+    }
+  })
+})
+
+////////////////
+// ## Search fields and shortcuts
+////////////////
+
+/** Press `ctrl+F` on the page, as a person would;  returns the event, to see whether something took it. */
+function pressCtrlF(target: EventTarget = document.body): KeyboardEvent {
+  const event = new KeyboardEvent("keydown", { key: "f", code: "KeyF", ctrlKey: true, bubbles: true, cancelable: true })
+  target.dispatchEvent(event)
+  return event
+}
+
+describe('<ui-input type="search">', () => {
+  it("shows a magnifying glass at its start, unless it names an icon", async () => {
+    const { root } = await input(`<ui-input type="search" aria-label="Find"></ui-input>`)
+    expect(root.className).toBe("ui left icon input left-icon")
+    const named = await input(`<ui-input type="search" icon="users" aria-label="Find"></ui-input>`)
+    expect(named.root.className).toBe("ui icon input")
+  })
+})
+
+describe("<ui-input shortcut>", () => {
+  /** The keys' box, if it shows. */
+  const keysBox = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>("[part~=shortcut]")
+
+  it("shows its keys at its end while it's empty;  the clear x takes their place", async () => {
+    const { host, control } = await input(`<ui-input type="search" shortcut="ctrl+F" aria-label="Find"></ui-input>`)
+    expect(keysBox(host)?.querySelector("ui-keys")?.getAttribute("shortcut")).toBe("ctrl+F")
+    expect(control.getAttribute("aria-keyshortcuts")).toBe("Control+F")
+    await userEvent.type(control, "cats")
+    await ElementFixture.settle()
+    expect(keysBox(host)).toBeNull()
+    expect(host.shadowRoot!.querySelector("[part~=clear]")).not.toBeNull()
+  })
+
+  it("focuses the field while it shows, and stops the browser's find only then", async () => {
+    const { host, control } = await input(`<ui-input shortcut="ctrl+F" value="cats" aria-label="Find"></ui-input>`)
+    await ElementFixture.settle()
+    const event = pressCtrlF()
+    expect(event.defaultPrevented).toBe(true)
+    expect(host.shadowRoot!.activeElement).toBe(control)
+    expect([control.selectionStart, control.selectionEnd]).toEqual([0, 4])
+    control.blur()
+
+    // hidden:  the key is the browser's
+    host.style.display = "none"
+    expect(pressCtrlF().defaultPrevented).toBe(false)
+  })
+
+  it("leaves a key someone already handled alone", async () => {
+    const { host } = await input(`<ui-input shortcut="ctrl+F" aria-label="Find"></ui-input>`)
+    const other = document.createElement("div")
+    other.tabIndex = 0
+    document.body.append(other)
+    onTestFinished(() => other.remove())
+    other.addEventListener("keydown", (event) => event.preventDefault())
+    pressCtrlF(other)
+    expect(host.shadowRoot!.activeElement).toBeNull()
+  })
+
+  it("picks the field in an open modal over the page's, which the modal covers", async () => {
+    const { host: page } = await input(`<ui-input shortcut="ctrl+F" aria-label="Page"></ui-input>`)
+    const modal = await ElementFixture.render<HTMLElement & { visible: boolean }>(
+      `<ui-modal><ui-input shortcut="ctrl+F" aria-label="Modal"></ui-input></ui-modal>`
+    )
+    const opened = new Promise((resolve) => modal.addEventListener("ui-opened", resolve, { once: true }))
+    modal.visible = true
+    await opened
+    await ElementFixture.settle()
+    // the modal focuses its field as it opens:  move the focus off, to see the key bring it back
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    const inModal = modal.querySelector("ui-input")!
+    pressCtrlF()
+    expect(document.activeElement).toBe(inModal)
+    expect(page.shadowRoot!.activeElement).toBeNull()
+  })
+
+  it("lines its keys up with the field's text", async () => {
+    const { host } = await input(
+      `<ui-input type="search" shortcut="ctrl+F" placeholder="Search" aria-label="A"></ui-input>`
+    )
+    await ElementFixture.settle()
+    await (keysBox(host)!.querySelector("ui-keys") as unknown as { ready: Promise<unknown> }).ready
+    expect(Alignment.report(Alignment.scan({ within: "ui-input" }))).toEqual([])
   })
 })
 

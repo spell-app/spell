@@ -57,6 +57,14 @@ export const searchVocabulary = {
       kind: "keyOnly",
       description: "Takes the full width of its container;  so do the results."
     },
+    {
+      name: "collapsed",
+      group: "layout",
+      kind: "keyOnly",
+      description:
+        "Starts as a search button;  a click slides the field open, focused.  Escape, or leaving it empty, folds it " +
+        "back.  `:state(expanded)` and `ui-toggled` tell the page, to hide a title the field covers."
+    },
     { name: "scrolling", group: "layout", kind: "keyOnly", description: "The results scroll after a fixed height." },
     {
       name: "resizable",
@@ -116,6 +124,15 @@ export const searchVocabulary = {
     },
     { ...UIT.FormControlAttributes.placeholder, description: "Placeholder text of the input." },
     {
+      name: "clearable",
+      group: "behaviour",
+      kind: "boolean",
+      default: true,
+      description:
+        "Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  " +
+        '`clearable="false"` turns it off.'
+    },
+    {
       name: "value",
       group: "form",
       kind: "string",
@@ -124,6 +141,15 @@ export const searchVocabulary = {
     { ...UIT.FormControlAttributes.name, description: "Form field name:  submits the input's text." },
     UIT.FormControlAttributes.parameter,
     { ...UIT.FormControlAttributes.required, description: "Form validation:  the input can't be empty." },
+    {
+      name: "shortcut",
+      group: "behaviour",
+      kind: "string",
+      description:
+        "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a " +
+        "Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the " +
+        "field shows."
+    },
     {
       name: "url",
       group: "link",
@@ -227,6 +253,11 @@ export const searchVocabulary = {
         "after an edit.  Once per new text."
     },
     {
+      name: "ui-toggled",
+      detail: "{ expanded: boolean }",
+      description: "A `collapsed` search slid open (`expanded: true`) or folded back."
+    },
+    {
       name: "ui-replied",
       detail: "{ query: string, results: SearchResult[] }",
       description: "A remote query answered."
@@ -250,6 +281,9 @@ export const searchVocabulary = {
     { name: "input", description: "The `ui icon input` box around the text field." },
     { name: "prompt", description: "The text `<input>` (the combobox)." },
     { name: "icon", description: "The icon box." },
+    { name: "clear", description: "The box of the clear button, in place of the icon while there's text." },
+    { name: "shortcut", description: "The box of its `shortcut`'s keys, at the end while it's empty." },
+    { name: "opener", description: "The search button a `collapsed` search shows while folded." },
     { name: "results", description: "The results popover (the listbox while there are results)." },
     { name: "result", description: "Each result." },
     { name: "category", description: "Each group of a `category` search." },
@@ -258,6 +292,7 @@ export const searchVocabulary = {
   ],
   states: [
     { name: "open", description: "The results are showing." },
+    { name: "expanded", description: "A `collapsed` search's field is open." },
     { name: "disabled", description: "Can't be used." },
     UIT.FormControlStates.readonly,
     { name: "loading", description: "Busy (`loading`, or a remote query running)." },
@@ -267,6 +302,7 @@ export const searchVocabulary = {
   // NOTE: text keys share ONE namespace across components (`UI.i18n`, first registration wins), hence the prefix
   texts: [
     { key: "searchLabel", text: "Search", description: "Accessible name of the input when nothing else names it." },
+    { key: "searchClear", text: "Clear search", description: "Accessible name of the clear button." },
     { key: "searchNoResultsHeader", text: "No Results", description: "Header of the no-results message." },
     { key: "searchNoResults", text: "Your search returned no results", description: "The no-results message." },
     {

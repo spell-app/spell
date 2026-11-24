@@ -37,7 +37,7 @@
 
 			<!-- GAP I45:  in a stacked grid the vertical divider stays vertical, and the grid's gutters clip the form. -->
 			<example "Vertical Divider">
-				<segment placeholder="">
+				<segment appearance="placeholder">
 					<grid columns="2" spacing="xl" stackable>
 						<column>
 							<form>
@@ -124,6 +124,15 @@
 		<section label="Fitted" sticky="stack" collapsible dividing>
 			<example "Fitted" description="A divider can be fitted, without any space above or below it.">
 				<segment>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. <divider padding="none"/> Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</segment>
+			</example>
+		</>
+
+		<section label="Dashed" sticky="stack" collapsible dividing>
+			<example "Dashed" description="A divider can be dashed, `appearance=\"dashed\"`:  2px, a shade darker, where one kind of thing ends and another begins.  A menu's divider item takes the same look (`<ui-item kind=\"divider\" appearance=\"dashed\">`).">
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<divider appearance="dashed"/>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<divider direction="horizontal" appearance="dashed">Dashed</divider>
 			</example>
 		</>
 

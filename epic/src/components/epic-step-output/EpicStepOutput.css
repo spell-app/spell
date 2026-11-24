@@ -1,0 +1,17 @@
+/*
+ * `<epic-step-output>` (`EpicStepOutput.tsx`):  the box under a manual test's command, for what it printed.
+ * - Under the command block, as wide as it, with the step's own gap below a block (4px grid).
+ * - The box's look is `<epic-text-box>`'s own (the page's note boxes), monospace (`code`), no margin (`note`).
+ */
+
+@layer ui.components.epic-step-output.types;
+
+@layer ui.components.epic-step-output.types {
+  :host {
+    display: block;
+    margin: 4px 0 8px;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+}

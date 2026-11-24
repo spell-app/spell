@@ -23,6 +23,8 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  * - `stop`:  stop it
  * - `status`:  JSON, exit 1 when it isn't running
  * - `url <file>`:  ensure it runs, then print the URL that serves `<file>` (a page in a registered repo's content)
+ * - `kick`:  ensure it runs, then have its SERVER KEEPER look at every server now (`ServerKeeper`, epic `epic-engine`
+ *   P82):  what every session's start runs (`hooks/server-keeper.mjs`);  quiet, and nothing to do with no repos
  *
  * - Its repos:  `epic repo` (`Repos`);  `epic server <verb>` in a repo `epic init` set up registers that one first
  *   (`registerHere()`)
@@ -58,13 +60,16 @@ export class Hub {
         CLI.out(running ? JSON.stringify(running, null, 2) : "not running")
         return running ? EXIT.OK : EXIT.ERRORS
       }
+      case "kick":
+        await this.kick(process.cwd(), port)
+        return EXIT.OK
       case "url": {
         if (!file) throw new EpicCommandError("url:  which file?  epic hub url <file>", EXIT.USAGE)
         CLI.out(await this.urlOf(resolve(file), port))
         return EXIT.OK
       }
       default:
-        throw new EpicCommandError(`unknown verb '${verb ?? ""}':  serve, start, ensure, stop, status or url`)
+        throw new EpicCommandError(`unknown verb '${verb ?? ""}':  serve, start, ensure, kick, stop, status or url`)
     }
   }
 
@@ -130,6 +135,27 @@ export class Hub {
     }
   }
 
+  /**
+   * The hub running, and its server keeper looking at every server now:  `epic hub kick`.
+   * - `here`:  the checkout the session starts in, registered first when `epic init` set it up (`registerHere()`)
+   * - a hub just started looks as it starts;  one already running is asked (`POST /api/servers/look`)
+   * - no repos:  nothing to keep, nothing done
+   */
+  async kick(here: string, port = DEFAULT_EPIC_PORT): Promise<void> {
+    this.registerHere(here)
+    if (!new RepoList({ home: this.home }).repos().length) return
+    const { launched } = await this.ensure(port)
+    if (launched) return
+    const { SRV } = await import("spell/server")
+    const keeper = new SRV.KeeperLink().running()
+    if (!keeper) return
+    await fetch(`${keeper.base}${SRV.KEEPER_API}/look`, {
+      method: "POST",
+      headers: { "x-server-token": keeper.token },
+      signal: AbortSignal.timeout(KICK_WAIT_MS)
+    }).catch(() => undefined)
+  }
+
   /** Serve in the foreground until `Ctrl-C`;  resolves to 0 once stopped. */
   private async serve(port: number): Promise<number> {
     const [{ EpicServer }, { SRV }] = await Promise.all([
@@ -149,3 +175,6 @@ export class Hub {
     return new SRV.PidFile(this.home, PID_FILE)
   }
 }
+
+/** How long `kick` waits for the keeper's look:  a page server's start may take two minutes. */
+const KICK_WAIT_MS = 150_000

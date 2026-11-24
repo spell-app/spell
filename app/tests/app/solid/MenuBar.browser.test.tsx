@@ -105,7 +105,7 @@ describe("<AppBarMenus>", () => {
     expect(popup.visible).toBe(false)
   })
 
-  test("Help:  Keyboard Shortcuts, its key ?, opens the shortcuts dialog;  then the tours (P40), then Help (epic `editor` P36)", async () => {
+  test("Help:  Keyboard Shortcuts, its key ?, opens the shortcuts dialog;  All Icons (T158);  then the tours (P40), then Help (epic `editor` P36)", async () => {
     const showShortcuts = spyOnEditor("showShortcuts")
     const host = await mount(() => <AppBarMenus mode="edit" />)
     const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=HelpBarMenu]")!
@@ -120,6 +120,7 @@ describe("<AppBarMenus>", () => {
     )
     expect(rows).toEqual([
       `Keyboard Shortcuts ${EDITOR_HOTKEYS.showShortcuts.shortcut}`,
+      `All Icons… ${EDITOR_HOTKEYS.showIcons.shortcut}`,
       "",
       "Design Tour",
       "Anatomy Tour",
@@ -277,7 +278,7 @@ describe("<ProjectBarMenu>", () => {
     const [address, target, features] = opened.mock.calls[1]!
     const url = new URL(String(address))
     expect([url.origin + url.pathname, url.searchParams.get("pages"), target, features]).toEqual([
-      "http://127.0.0.1:4747/components/ui/theme-bench.html",
+      "http://127.0.0.1:4747/components/ui/theme-bench",
       "app",
       "_blank",
       "noopener"

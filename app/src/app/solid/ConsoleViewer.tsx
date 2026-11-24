@@ -64,7 +64,7 @@ export function ConsoleToolbar() {
  * - Logging REPLACES the console's `lines` array with one more line,
  *   and `<ConsoleLines>` keys rows by line, so only the new line's row is drawn.
  * - An error drawing the lines shows in place of them (`<ErrorBoundary>`), and goes to `showError`.
- * - SEE:  its App UI components page, `app/docs/ConsoleViewer.html` (`/components/app/ConsoleViewer.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/console-viewer`.
  ****************/
 export function ConsoleViewer(props: ConsoleViewerProps) {
   const lines = tracked(() => runtimeConsole()?.lines ?? [])

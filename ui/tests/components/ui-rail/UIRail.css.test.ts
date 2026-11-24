@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { railVocabulary } from "spell/ui/components/ui-rail/UIRail.en"
@@ -30,7 +29,7 @@ const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
 /** Adopt the sheets and render example `name` wide enough for outside rails. */
 function example(name: string): HTMLElement {
   Sheets.adopt([...foundationCSS, segmentCSS, railCSS])
-  return Fixture.render(`<div style="width: 1400px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
+  return Sheets.render(`<div style="width: 1400px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
 }
 
 /** Rail `selector` and its container segment, measured. */
@@ -102,7 +101,7 @@ describe("UIRail.css examples", () => {
 describe("UIRail.css tokens", () => {
   it("takes a public token from a wrapper or the rail itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, railCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-rail-width: 200px"><div class="ui left rail">A</div></div>` +
         `<div class="ui left close rail" style="--ui-rail-close-distance: 40px">B</div>`
     )

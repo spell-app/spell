@@ -21,7 +21,7 @@ const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConf
  * - `integration` -- the slow node tests that run real processes, one file at a time (`INTEGRATION_TESTS`)
  * - `node` -- everything but the elements and those:  the epic code's tests, `pack.test.ts` among them (`spell-pack check`:
  *   `src/components/__pack/` is current), and `tools/**`, the docs tools' own tests
- * - `browser` -- `components/**`:  the `<epic-*>` elements, in a REAL browser (Vitest browser mode + Playwright,
+ * - `browser` -- `components/**` and the docs tools' browser tests (`BROWSER_TOOL_TESTS`):  the `<epic-*>` elements, in a REAL browser (Vitest browser mode + Playwright,
  *   chromium, animations off), as Spell UI's are;  `motion`:  the few that test motion itself, animations on.  `baseConfig()`:  Spell UI's plugins (decorators BEFORE Solid), Solid dedupe,
  *   Lightning CSS;  the test helpers come from the kit (`spell/test-helpers/...`)
  * - NOT here:  the window script's and the extension's tests (`tests/window.test.mjs`, `tests/vscode/`), plain
@@ -80,6 +80,12 @@ const INTEGRATION_TESTS = [
   "command/PullRequest.test.ts"
 ]
 
+/**
+ * The docs tools' tests that need a REAL browser's layout (`tests/tools/`, named `.browser.test.ts`):  the `browser` project's,
+ * not `node`'s.  The first:  where a widened table lands (`widenTable.browser.test.ts`, epic `epic-engine` I367).
+ */
+const BROWSER_TOOL_TESTS = "tools/**/*.browser.test.{ts,tsx}"
+
 export function epicsProjects({
   prefix = "",
   root
@@ -95,7 +101,7 @@ export function epicsProjects({
         dir: TESTS,
         environment: "node",
         include: ["**/*.test.{js,ts}"],
-        exclude: ["**/node_modules/**", "components/**", "vscode/**", ...INTEGRATION_TESTS],
+        exclude: ["**/node_modules/**", "components/**", "vscode/**", BROWSER_TOOL_TESTS, ...INTEGRATION_TESTS],
         // a scratch epic home, its person "Owen":  what the tools write never names whoever runs the tests
         setupFiles: [EPIC_HOME_SETUP]
       }
@@ -141,7 +147,7 @@ function browserProject({
     test: {
       name,
       dir: TESTS,
-      include: animations === "off" ? ["components/**/*.test.{ts,tsx}"] : MOTION_TESTS,
+      include: animations === "off" ? ["components/**/*.test.{ts,tsx}", BROWSER_TOOL_TESTS] : MOTION_TESTS,
       exclude: animations === "off" ? ["**/node_modules/**", ...MOTION_TESTS] : [],
       // Spell UI's core first, as a page has it:  its settings for `spell/element` (spell-ui's
       // `test/setup.ts`)

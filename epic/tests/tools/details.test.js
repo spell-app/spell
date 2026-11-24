@@ -42,7 +42,8 @@ test("new:  scratch and epic pages from the tool's template, in the epics pack's
   expect(html).not.toMatch(/details\.(css|js)"/)
   // root paths, the same from any folder;  no site header `root` (epic `epic-engine` P46)
   expect(html).toContain("<spell-site-header></spell-site-header>")
-  expect(html).toContain('link="/pages/index.html"')
+  // no crumb to the home page:  the site header's Spell Epic is that link (epic `epic-engine` T148)
+  expect(html).not.toContain("<ui-breadcrumb link=")
   expect(html).not.toContain("TEMPLATE:")
   expect(html).toMatch(/<epic-field label="Asked" data-details-asked>\d{4}-\d\d-\d\d</)
   expect(html).toContain("<epic-send></epic-send>")
@@ -54,7 +55,7 @@ test("new:  scratch and epic pages from the tool's template, in the epics pack's
   expect(deep).toContain('href="/_epic/assets/spell-doc.css"')
   expect(deep).toContain('source="/_epic/pack/epics.pack.js"')
   expect(deep).toContain("<spell-site-header></spell-site-header>")
-  expect(deep).toContain('link="/pages/index.html"')
+  expect(deep).not.toContain("<ui-breadcrumb link=")
 })
 
 test("new --from:  the whole page from a spec", () => {
@@ -144,6 +145,25 @@ test("formats an answer with the page's titles", () => {
   )
 })
 
+// epic `epic-engine` T121:  a compact question's Other is its comment box
+test("formats a compact question's Other as its comment", () => {
+  const page = join(docs, "pages/details/pick-compact.html")
+  const layout = readFileSync(join(docs, "pages/details/pick-layout.html"), "utf8")
+  writeFileSync(page, layout.replace(/<epic-ask\b/, "<epic-ask compact"))
+  const answer = {
+    page: "/pages/details/pick-compact.html",
+    answered: "2026-10-03T22:00:00.000Z",
+    changes: 0,
+    answers: { q1: { picked: ["A"], other: "but later" } },
+    comments: {},
+    notes: ""
+  }
+  expect(formatAnswer(page, answer).split("\n")[2]).toBe(
+    "  Q1 · Short question:  A · First option (recommended);  Comment:  but later"
+  )
+  rmSync(page)
+})
+
 test("formats an option's comment with its question and title", () => {
   const page = join(docs, "pages/details/pick-layout.html")
   const answer = {
@@ -191,6 +211,33 @@ test("formats a page with no questions:  its comments and notes, no count of wha
     "    2.2 The main checkout:  Make the top project just spell",
     "  Notes:  Is this worth it?"
   ])
+})
+
+// epic `ast-markup`:  a SEEDED box sends only what changed;  the rest reads as kept
+test("formats seeded boxes:  the person's version, an emptied one, the ones kept as suggested", () => {
+  const page = join(docs, "seeded.html")
+  const box = (id, label) =>
+    `<ui-section id="${id}" label="${label}"><epic-text-box for="${id}" code>` +
+    `<script type="text/plain"><ui-button label="{x}"></ui-button></script></epic-text-box></ui-section>`
+  writeFileSync(page, `<h1>Shapes</h1>${box("s1", "1. Buttons")}${box("s2", "2. Lists")}${box("s3", "3. Forms")}`)
+  const answer = {
+    page: "/x",
+    answered: "2026-11-21T02:22:00.000Z",
+    changes: 0,
+    answers: {},
+    comments: { s1: '<ui-button label="{y}">\n  go\n</ui-button>', s2: "(emptied:  none of the suggested text kept)" },
+    notes: ""
+  }
+  expect(formatAnswer(page, answer).split("\n").slice(1)).toEqual([
+    "  Comments:",
+    "    1. Buttons, their version of the suggestion:",
+    '      <ui-button label="{y}">',
+    "        go",
+    "      </ui-button>",
+    "    2. Lists:  (emptied:  none of the suggested text kept)",
+    "  Kept as suggested:  3. Forms"
+  ])
+  rmSync(page)
 })
 
 // epic `epic-engine` T79 (request r71):  the page's bullhorn comments, sent with its answer

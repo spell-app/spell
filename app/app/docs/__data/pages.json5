@@ -1,10 +1,5 @@
 {
-  "$comment": "Hand-kept facts of the App UI docs set (epic `epic-workflow`, P11):  the side column's groups, and one entry per page (title, summary, status, group;  `file`:  a Solid component file, from spell-app's root).  Read by `yarn site:data` (src/app/tools/AppUIDataBuilder.ts), never written.  Shape:  `AppUIPagesFile` in src/app/tools/tools.types.ts.  A new page:  add its entry here, run `yarn site:data`, then write its page as a copy of one like it (Notice.html:  a picture;  spell-viewer.html:  live), and link it from index.html.",
-  "nav": {
-    "start": [{ "id": "index", "file": "index.html", "label": "Overview", "icon": "house" }],
-    "foundation": [],
-    "titles": { "start": "App UI", "components": "Components" }
-  },
+  "$comment": "Hand-kept facts of App UI's guide (epic `epic-workflow` P11, epic `editor` P44):  its groups, and one entry per page (title, summary, status, group;  `file`:  a Solid component file, from the app folder's root).  Read by `yarn site:data` (src/app/tools/AppUIDataBuilder.ts), never written.  Shape:  `AppUIPagesFile` in src/app/tools/tools.types.ts.  A new page:  add its entry here, run `yarn site:data`, then write its page in the guide (@spell/guides/AppUI) as a copy of one like it (Notice.spell:  a picture;  SpellViewer.spell:  live), and its line in AppUI.spell, under its group.",
   "groups": [
     { "id": "web components", "title": "Web components" },
     { "id": "shell", "title": "Page shell" },

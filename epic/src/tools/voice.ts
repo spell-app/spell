@@ -27,7 +27,7 @@ import { basename, resolve } from "node:path"
 import { localDate } from "spell/util/time.ts"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
-import { GUIDES, ROOT, findPages, pageFile, pagePath } from "./pages.js"
+import { GUIDES, GUIDE_FOLDERS, ROOT, findPages, pageFile, pagePath } from "./pages.js"
 
 /**
  * The voice stamp on a docs page:  reading it, writing it, and which guides lack it.
@@ -128,7 +128,7 @@ export function run(args: string[]): number {
 
   const files: string[] = named.length
     ? named.map((page) => pageFile(page))
-    : findPages([GUIDES]).filter(PageVoice.isGuide)
+    : findPages(GUIDE_FOLDERS).filter(PageVoice.isGuide)
   const pages: VoicePage[] = files.map((file) => {
     const html = readFileSync(file, "utf8")
     return {

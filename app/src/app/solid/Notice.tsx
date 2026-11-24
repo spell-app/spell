@@ -9,7 +9,7 @@ import "./Notice.css"
 
 /****************
  * ### `<Notice>`
- * `editor.notice` as a success `<ui-message>`, fixed near the top of the page;  closing it calls
+ * `editor.notice` as a success `<ui-message floating>`, fixed near the top of the page (it drops in);  closing it calls
  * `editor.hideNotice()`.
  * - Its first line is the heading, any more under it, each on its own line.
  * - Each line on ONE line, never wrapped
@@ -20,7 +20,7 @@ import "./Notice.css"
  *   (`FLOATING_MESSAGE_STYLE`).
  * - SIDE EFFECT:  hides it after 3s (`editor.hideNotice()`), unless `autoHide` is `false` -- only if
  *   `editor.notice` is still the one the timer was started for.
- * - SEE:  its App UI components page, `app/docs/Notice.html` (`/components/app/Notice.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/notice`.
  ****************/
 export function Notice(props: NoticeProps) {
   const notice = tracked(() => editor.notice)
@@ -44,11 +44,58 @@ export function Notice(props: NoticeProps) {
       {(notice) => (
         <div class="Notice" style={NOTICE_STYLE}>
           {/* its first line the heading, the rest under it, a line each (epic `editor` I124) */}
-          <ui-message state="success" heading={notice().split("\n")[0]} dismissible="" ref={on("ui-closing", dismiss)}>
+          <ui-message
+            state="success"
+            heading={notice().split("\n")[0]}
+            dismissible=""
+            floating=""
+            ref={on("ui-closing", dismiss)}
+          >
             <Show when={notice().split("\n").slice(1).join("\n")}>{(rest) => <p>{rest()}</p>}</Show>
           </ui-message>
         </div>
       )}
+    </Show>
+  )
+}
+
+/****************
+ * ### `<UpgradeNotice>`
+ * Offers to upgrade a project written for an older Spell, as it opens (epic `language` P68):
+ * `editor.upgradeOffered`, while it's the project shown.
+ * - An info `<ui-message>` where `<Notice>` floats, 560px wide, its lines wrapped (`Notice.css`):
+ *   its first line the heading, the rest under it, a line each;
+ *   then a primary Upgrade button (`editor.upgradeProject()`).
+ * - Closing it is `editor.dismissUpgrade()`:  it never shows again for that project (`editor.offerUpgrade()`).
+ * - Never hides by itself:  it waits for an answer.
+ ****************/
+export function UpgradeNotice() {
+  const project = tracked(() => (editor.upgradeOffered === editor.project ? editor.upgradeOffered : undefined))
+  const lines = () => appTexts.text("upgradeNotice").split("\n")
+  return (
+    <Show when={project()}>
+      <div class="UpgradeNotice" style={UPGRADE_NOTICE_STYLE}>
+        <ui-message
+          state="info"
+          heading={lines()[0]}
+          dismissible=""
+          floating=""
+          aria-label={lines()[0]}
+          ref={on("ui-closing", (event: Event) => {
+            event.preventDefault()
+            editor.dismissUpgrade()
+          })}
+        >
+          <p>{lines().slice(1).join("\n")}</p>
+          <ui-button
+            size="small"
+            color="primary"
+            onClick={() => void editor.upgradeProject().catch((error) => editor.showError(error))}
+          >
+            {appTexts.text("upgrade")}
+          </ui-button>
+        </ui-message>
+      </div>
     </Show>
   )
 }
@@ -150,6 +197,12 @@ const NOTICE_STYLE: JSX.CSSProperties = {
   ...FLOATING_MESSAGE_STYLE,
   width: "max-content",
   "min-width": "min(500px, calc(100vw - 32px))"
+}
+
+/** Where `<UpgradeNotice>` sits:  a floating message, as `<Notice>`, 560px wide at most, its long lines wrapped. */
+const UPGRADE_NOTICE_STYLE: JSX.CSSProperties = {
+  ...FLOATING_MESSAGE_STYLE,
+  width: "min(560px, calc(100vw - 32px))"
 }
 
 /** How long a notice shows, ms, at least. */

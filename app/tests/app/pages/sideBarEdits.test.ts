@@ -305,7 +305,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     async () => {
       const page = await context.newPage()
       await open(page, "Counter", { codeEditor: false })
-      const close = page.locator(".InspectorCard[data-panel=properties] ui-icon.InspectorClose")
+      const close = page.locator(".InspectorCard[data-panel=properties] [part~=close]")
       expect(await close.count()).toBe(1)
       await close.click()
       await page.waitForTimeout(500)

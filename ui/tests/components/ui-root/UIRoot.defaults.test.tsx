@@ -62,7 +62,7 @@ describe("<ui-root defaults>", () => {
     root("app").defaults = { "ui-button": { appearance: "pill", size: "large" } }
     await expect.poll(() => buttonClasses("go")).toBe("ui large circular button")
     root("app").defaults = { "ui-button": { size: "small" } }
-    await expect.poll(() => buttonClasses("go")).toBe("ui small button")
+    await expect.poll(() => buttonClasses("go")).toBe("ui small button small-button")
     root("app").defaults = undefined
     await expect.poll(() => buttonClasses("go")).toBe("ui button")
   })

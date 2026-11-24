@@ -76,6 +76,9 @@ describe("savesInPlace():  a built-in's file saved to the file itself (epic `moc
     expect(projectUtils.savesInPlace("@spell/examples/Solitaire", inCheckout)).toBe(false)
     expect(projectUtils.savesInPlace("@spell/guides/how-solitaire-works", inCheckout)).toBe(false)
   })
+  test("one of the editor's own pieces:  never, your draft, so the editor you're using changes only on Publish (epic `editor` J73, I329)", () => {
+    expect(projectUtils.savesInPlace("@spell/editor/spell-editor", inCheckout)).toBe(false)
+  })
   test("a frozen test project, anyone's own, an org's:  never", () => {
     expect(projectUtils.savesInPlace("@spell/test/fizzbuzz", inCheckout)).toBe(false)
     expect(projectUtils.savesInPlace("owen@spell/errors", inCheckout)).toBe(false)

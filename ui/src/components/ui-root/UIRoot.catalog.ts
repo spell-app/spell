@@ -45,6 +45,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "selected",
       "padding",
       "kind",
+      "closable",
       "action",
       "shortcut",
       "icon-only"
@@ -322,7 +323,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "resizable"
     ]
   },
-  "ui-content": { folder: "ui-parts", attributes: ["image", "scrolling", "align", "vertical-align"] },
+  "ui-content": { folder: "ui-parts", attributes: ["image", "scrolling", "align", "markdown", "vertical-align"] },
   "ui-date": { folder: "ui-parts", attributes: ["datetime"] },
   "ui-description": { folder: "ui-parts", attributes: [] },
   "ui-detail": { folder: "ui-parts", attributes: ["link"] },
@@ -426,7 +427,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     },
     attributes: ["current", "base", "view", "size"]
   },
-  "ui-docs-palette": { folder: "ui-docs-palette", skeleton: { height: "40em" }, attributes: [] },
   "ui-docs-search": {
     folder: "ui-docs-search",
     skeleton: { width: "16em", height: "2.25em" },
@@ -658,6 +658,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "corner"
     ]
   },
+  "ui-icon-browser": {
+    folder: "ui-icon-browser",
+    skeleton: { height: "30em" },
+    attributes: ["pack", "query", "address", "pick", "compact"]
+  },
   "ui-icon-picker": {
     folder: "ui-icon-picker",
     skeleton: { display: "inline", width: "14em", height: "2.5em" },
@@ -738,6 +743,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "multiple",
       "accept",
       "folder",
+      "clearable",
+      "shortcut",
       "autocomplete",
       "inputmode",
       "rules"
@@ -761,7 +768,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "disabled",
       "selected",
       "padding",
-      "kind"
+      "kind",
+      "closable"
     ]
   },
   "ui-items": {
@@ -1010,7 +1018,9 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "loading",
       "disabled",
       "source",
-      "selector"
+      "selector",
+      "closable",
+      "close-label"
     ]
   },
   "ui-placeholder": { folder: "ui-placeholder", attributes: ["fluid", "inverted"] },
@@ -1284,6 +1294,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "category",
       "direction",
       "fluid",
+      "collapsed",
       "scrolling",
       "resizable",
       "length",
@@ -1293,10 +1304,12 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "readonly",
       "open",
       "placeholder",
+      "clearable",
       "value",
       "name",
       "parameter",
       "required",
+      "shortcut",
       "url",
       "min-characters",
       "max-results",
@@ -1439,6 +1452,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "selected",
       "padding",
       "kind",
+      "closable",
       "toggles"
     ]
   },
@@ -1745,9 +1759,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "interactive",
       "show-keys",
       "scroll-first",
+      "scroll-only",
       "max-visible",
       "remember",
       "all-items-icon",
+      "reorderable",
       "all-items-at-end"
     ],
     formControl: true

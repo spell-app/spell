@@ -1,0 +1,66 @@
+"error boundary" is a notebook page
+	<header level="1">
+		ErrorBoundary
+		<header>Shows an error in place of what it guards, when that throws.</>
+	</>
+
+	<text class="lede" paragraph>A guard around one of the editor's panes. When drawing what's inside it goes wrong, the pane shows the error instead, and the rest of the page keeps working.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone writing or changing a pane of the spell app</>
+		<item icon="image">A picture, not live: it draws nothing of its own until something throws, then an <link target="src-packages-app-docs-errornotice-html" link="/error-notice">ErrorDisplay</></>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>It looks like nothing while all is well. When what it guards throws, its default stand-in is an <link target="src-packages-app-docs-errornotice-html" link="/error-notice">ErrorDisplay</> of the error, which looks like this, in the pane rather than over the page:</>
+		<image src="/components/app/_images/ErrorNotice.png" alt="A red error message with a header, Error, and the error's text" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Each viewer wraps what it draws in one. The input editor falls back to a plain-text editor, and tells the editor of the error:</>
+		<text paragraph>InputEditor.tsx · the code editor, guarded:</>
+		<markdown>
+			```typescript
+			<div class="InputEditor">
+			  <ErrorBoundary
+			    onError={(error) => props.showError?.(error)}
+			    fallback={() => <FallbackEditor />}
+			  >
+			    <FileInputEditor />
+			  </ErrorBoundary>
+			</div>
+			```
+		</>
+		<list bulleted>
+			<item>WHY every pane wants one: an error nobody catches stops Solid updating the WHOLE page, not just the pane.</>
+			<item>It's Solid's <text code>&lt;Errored&gt;</>, with the app's defaults: an ErrorDisplay of the error, unless you pass <text code>fallback</>.</>
+			<item>It heals by itself: when the data underneath changes and its children draw, they come back. <text code>fallback</> is also given <text code>reset()</>, to try again now.</>
+			<item><text code>onError</> hears of each error caught, to log it or show it with <text code>editor.showError()</>. It may change the editor's state: it runs outside the drawing.</>
+			<item>A thrown value that isn't an <text code>Error</> is made into one.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="ErrorBoundary"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-errorboundary-tsx" link="/src/app/solid/ErrorBoundary.tsx"><text title="src/app/solid/ErrorBoundary.tsx" code>ErrorBoundary.tsx</></>: the component, and its props</>
+			<item><link target="src-tests-app-src-solid-sharedui-browser-test-tsx" link="/tests/app/solid/sharedUI.browser.test.tsx"><text title="tests/app/solid/sharedUI.browser.test.tsx" code>sharedUI.browser.test.tsx</></>: its tests</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

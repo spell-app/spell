@@ -1,0 +1,36 @@
+"tour theming" is a notebook page
+	<header level="1">
+		Tour
+		<header>A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-tour" playground>
+				<ui-stack class="ui-stack">
+					<ui-stack direction="horizontal" wrap>
+						<ui-button id="tour-new-playground" icon="plus">New</>
+						<ui-button id="tour-save-playground" icon="save">Save</>
+						<ui-button commandfor="tour-example-playground" command="--start" appearance="basic" icon="map signs">Take the tour</>
+					</>
+					<ui-tour id="tour-example-playground" name="The toolbar" summary="What its buttons do.">
+						<ui-tour-step target="tour-new">New starts a fresh page.</>
+						<ui-tour-step name="save" target="tour-save" dim>Save keeps what you've done.</>
+						<ui-tour-step>That's it. You can take this tour again any time.</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>

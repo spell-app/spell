@@ -23,6 +23,7 @@ import type {
   PageInbox,
   PickFields,
   SetPick,
+  StepOutput,
   AddedOption,
   EditedOption,
   WaitingComment,
@@ -308,6 +309,14 @@ export type NewItem = { id: string } & InboxMark & { kind: NewKind; title: strin
  */
 export type TestAnswer = { result: TestResult; note?: string; shot?: string }
 
+/** What a section's Close all did (`POST close-all`, epic `epic-engine` T158):  the ids closed and left, its Undo's key. */
+export type CloseAllAnswer = { closed: string[]; left: string[]; batch?: string }
+
+/** `value`'s strings, when it's a list:  a route's ids;  else `[]`. */
+export function idsOf(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((id): id is string => typeof id === "string") : []
+}
+
 /** An epic with open tests (`GET /api/epics/tests`):  its name, how many, and its epic page's address. */
 export type TestsEntry = { epic: string; open: number; page: string }
 
@@ -381,9 +390,9 @@ export type WriteOptions = {
  * - the list's own `RunningAgent` (`tools/AgentList.ts`), every field filled in (`agentsOf()`)
  * - `started`:  `""` for unknown
  * - `redirects`:  `[]` for none
- * - not `taskId`:  the page has no use for it
+ * - not `taskId`, nor what a pause saved:  the page has no use for them
  */
-export type RunningAgent = Required<Omit<ListedAgent, "taskId" | "redirects" | "files">> & {
+export type RunningAgent = Required<Omit<ListedAgent, "taskId" | "redirects" | "files" | "paused" | "resumedFrom">> & {
   redirects: AgentRedirect[]
 }
 
@@ -401,6 +410,7 @@ export type {
   NowRequest,
   PickFields,
   SetPick,
+  StepOutput,
   AddedOption,
   EditedOption,
   WaitingComment,
@@ -520,12 +530,12 @@ export function isImmediate(mark: { action: string; when?: string }): boolean {
 export const INSTANT_GRACE_MS = 2000
 
 /**
- * How long past its grace an instant mark may still stand before the page gives up on it
- * (`ReviewClient.isClosing()`, epic `epic-engine` I306):  its item shows again, and a notice says the server didn't
- * apply it.
- * - long enough for a page server restart (`ServerLink.post()` tries for 30s) and its first look at the inbox
+ * How long past its grace an instant mark may stand before the page asks the page server again
+ * (`ReviewClient.trackInstant()`, epic `epic-engine` I463):  its read of the inbox applies what's due, and the item
+ * stays grey meanwhile.  Never a "try again" for the person:  a tick always lands (Owen:  "This is lame -- just do it").
+ * - before I463 the page gave up after 40s, showed the item again, and said "the page server didn't apply it"
  */
-export const INSTANT_FAIL_MS = 40_000
+export const INSTANT_NUDGE_MS = 10_000
 
 /**
  * How long an item stays drawn closed after the page server applied its instant mark (`ReviewClient.isClosing()`):
@@ -746,6 +756,24 @@ export function pickedLetters(pick: string | null | undefined): string[] {
 /** `mark`'s comments, to carry into another revisit (epic `epic-engine` I140):  `{ comments }`, or `{}`. */
 export function commentsOf(mark: { comments?: string[] } | null | undefined): { comments?: string[] } {
   return mark?.comments?.length ? { comments: mark.comments } : {}
+}
+
+/**
+ * The marks that carry a manual test's pasted outputs (`outputs`, epic `epic-engine` T165):  every note box's mark,
+ * and Approve.
+ * - any other mark made on the test (a pick) gives way to a revisit carrying them:  what was pasted is never dropped
+ */
+export const OUTPUT_ACTIONS: ReadonlySet<string> = new Set(["revisit", "approve", "todo", "next", "drop", "skip"])
+
+/**
+ * `outputs` with step `step`'s text set to `text`, in step order;  an empty `text` takes the step out.
+ * - its text as pasted, only blank lines before it and spaces after it trimmed (as `ReviewInbox` keeps it)
+ */
+export function outputsWith(outputs: readonly StepOutput[] | undefined, step: number, text: string): StepOutput[] {
+  const kept = text.replace(/^\s*\n/, "").trimEnd()
+  const others = (outputs ?? []).filter((each) => each.step !== step)
+  const next = kept.trim() ? [...others, { step, text: kept }] : others
+  return next.sort((a, b) => a.step - b.step)
 }
 
 /**

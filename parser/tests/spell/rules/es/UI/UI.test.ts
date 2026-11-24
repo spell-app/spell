@@ -4,5 +4,5 @@ import { SP } from "spell/parser/spell"
 import { core } from "spell/parser/core"
 
 describe("testing spell module UI, in Spanish", () => {
-  unitTestModuleRules(SP.spanish.parser, "UI", core.resetRuntime)
+  unitTestModuleRules(SP.Language.for("es").parser, "UI", core.resetRuntime)
 })

@@ -1,0 +1,49 @@
+// App UI's pages as one site (epic `editor` P44):  each page one notebook, each at its own address.
+// This file says where each page is, and which group of the side navigation lists it.
+app ui is a site
+	it has a home page at "/", named "App UI"
+
+	group "Web components"
+	it has a spell code page at "/spell-code", named "<spell-code>"
+	it has a spell editor page at "/spell-editor", named "<spell-editor>"
+	it has a spell markdown page at "/spell-markdown", named "<spell-markdown>"
+	it has a spell reference page page at "/spell-reference-page", named "<spell-reference-page>"
+	it has a spell viewer page at "/spell-viewer", named "<spell-viewer>"
+
+	group "Page shell"
+	it has an app container page at "/app-container", named "AppContainer"
+	it has an app root page at "/app-root", named "AppRoot"
+	it has a chrome page at "/chrome", named "Chrome"
+	it has a spell page page at "/spell-page", named "SpellPage"
+
+	group "Panes"
+	it has an app anatomy view page at "/app-anatomy-view", named "AppAnatomyView"
+	it has a console lines element page at "/console-lines", named "ConsoleLines"
+	it has a console viewer page at "/console-viewer", named "ConsoleViewer"
+	it has a markdown page at "/markdown", named "Markdown"
+	it has a scope details pane page at "/scope-details-pane", named "ScopeDetailsPane"
+	it has a thing explorer page at "/thing-explorer", named "ThingExplorer"
+	it has a tree viewer page at "/tree-viewer", named "TreeViewer"
+	it has a type explorer page at "/type-explorer", named "TypeExplorer"
+
+	group "Editors"
+	it has a code mirror editor page at "/code-mirror-editor", named "CodeMirrorEditor"
+	it has a file editor page at "/file-editor", named "FileEditor"
+	it has an input editor page at "/input-editor", named "InputEditor"
+
+	group "Menus and dialogs"
+	it has an actions element page at "/actions", named "Actions"
+	it has a chooser page at "/chooser", named "Chooser"
+	it has a file tabs element page at "/file-tabs", named "FileTabs"
+	it has a menu bar page at "/menu-bar", named "MenuBar"
+
+	group "Notices"
+	it has an error boundary page at "/error-boundary", named "ErrorBoundary"
+	it has an error notice page at "/error-notice", named "ErrorNotice"
+	it has a notice page at "/notice", named "Notice"
+
+	group "The runner's pieces"
+	it has a runner console page at "/runner-console", named "RunnerConsole"
+	it has a runner pane page at "/runner-pane", named "RunnerPane"
+	it has a spell element page at "/spell-element", named "SpellElement"
+	it has a not found page

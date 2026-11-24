@@ -175,6 +175,8 @@ describe.skipIf(!SERVING)("the Views card's Reference tab", { timeout: 120_000 }
     })
     const details = page.locator(".ProgramPanel .ReferenceDetails")
     await expect.poll(() => details.locator("h4").textContent(), { timeout: 8000 }).toMatch(/Deck\s*"deck"/)
-    await expect.poll(() => details.textContent(), { timeout: 8000 }).toContain('a Deck of playing cards named "deck"')
+    await expect
+      .poll(() => details.textContent(), { timeout: 8000 })
+      .toContain('a Deck of 52 playing cards named "deck"')
   })
 })

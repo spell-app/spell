@@ -29,7 +29,8 @@
  *   The container's `--ui-toast-container-distance` likewise (`UIToast.container.css`).
  * - Countdown:  the progress bar's `progressing` animation runs while `:state(paused)` is off.
  *   - It is `data-ui-motion="essential"` (it IS the remaining time), so reduced motion keeps it (`reset.css`).
- *   - The entry / exit animations are `UI.transitions`' `scale`, timed by `--ui-toast-duration`.
+ *   - It comes in with `UI.transitions`' `fade-down` (`fade-up` at the bottom), and leaves with its `scale`,
+ *     both timed by `--ui-toast-duration`.
  * - NOTE: left out, on purpose:
  *   - `.ui.message` / `.ui.card` toasts (Fomantic's `$('.ui.message').toast()`):  a toast is a `<ui-toast>`;
  *     slot a message's content instead

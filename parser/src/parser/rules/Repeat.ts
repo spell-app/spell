@@ -1,4 +1,4 @@
-import flattenDeep from "lodash/flattenDeep"
+import { flattenDeep } from "lodash-es"
 
 import { P } from "spell/parser/parser"
 // Import directly to avoid circular import

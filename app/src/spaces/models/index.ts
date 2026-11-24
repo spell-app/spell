@@ -11,6 +11,8 @@
  * - `SPACE_NAMES`:  spaces' own `__` names, never a project's file.
  * - `inHomeOrder()`:  the editor's home page's order of each group's cards, `HOME_ORDER` (epic `mockup` P19).
  * - `layeredHome()`:  its layout, everyone's with a person's own changes over it (epic `mockup` T51).
+ * - `PALETTE_GROUPS_API`, `PaletteTable`:  the editor palette's groups, as saved (`paletteTable.ts`;
+ *   the table itself, `paletteGroups.json`, is in the editor's folder, beside `PaletteGroups`).
  * - `SpaceStorage`:  where spaces' files are kept (a type;  the disk's is `spell/app/spaces/server/node/storage/DiskStorage`).
  * - `PersonView`, `MeAnswer` ...:  what the app and the server say about people (types, epic `people-and-orgs` P9).
  * - NOTE: nothing here may touch `node:*`, `process` or the disk:  the editor imports it.
@@ -27,6 +29,7 @@ export * from "./starterProjects"
 export * from "./projectArchive"
 export * from "./homeOrder"
 export * from "./homeLayout"
+export * from "./paletteTable"
 export type * from "./SpaceStorage"
 export type * from "./people"
 export type * from "./changes"

@@ -160,7 +160,7 @@ Names people choose keep their accents.
 
    ```text
    tests/spell/rules/es/<module>/<module>.test.ts
-   unitTestModuleRules(SP.spanish.parser, "<module>", ...)
+   unitTestModuleRules(SP.Language.for("es").parser, "<module>", ...)
    ```
 
 8. A Spanish phrasing you had to choose, which a native speaker might choose differently:

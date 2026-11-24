@@ -23,7 +23,7 @@ import {
   favoritesIn,
   type SagaLook
 } from "./EpicCards"
-import { URGENT_STATES } from "./EpicState"
+import { needsOwen } from "./EpicState"
 
 /****************
  * ### `RunningEpics`
@@ -403,7 +403,7 @@ function remark(card: string, { running, favorite }: { running: boolean; favorit
  * - `future`:  written down with `/epic future`, not planned yet
  * - `standing`:  open for good, every phase merging on its own (epic `epic-workflow`)
  * - `saga`:  the saga its page names, its id (`<epic-page saga>`, epic `epic-workflow` P15)
- * - `urgent`:  the ids of the items that need Owen (red and orange chips:  `URGENT_STATES`):
+ * - `urgent`:  the ids of the items that need Owen (red and orange chips:  `needsOwen()`):
  *   every phase done with some left, it has errors
  * - `worked`:  when it was last worked on, as the doc says:  the latest of its `updated` day and its log lines' times
  *   (`EpicCards` `lastWorked()`;  `docs index` adds the branch's last commit)
@@ -523,7 +523,7 @@ function read(
   const standing = /\sstanding(?=[\s=>])/.test(page)
   const saga = attribute(page, "saga")
   const urgent = tags(/<epic-item\b[^>]*>/g)
-    .filter((tag) => (URGENT_STATES as readonly string[]).includes(attribute(tag, "state") ?? ""))
+    .filter((tag) => needsOwen(attribute(tag, "state"), attribute(tag, "status")))
     .map((tag) => attribute(tag, "id") ?? "")
     .filter(Boolean)
   const badges = badgesOf(tags(/<epic-item\b[^>]*>/g), tags(/<epic-phase\b[^>]*>/g), attribute)
@@ -575,10 +575,10 @@ function badgesOf(
   return badges.urgent || badges.replied || badges.running ? badges : undefined
 }
 
-/** How many agents run for the epic page at `file` (`AgentList`);  `0` when its list won't read.  NEVER throws. */
+/** How many agents run for the epic page at `file`, paused ones left out (`AgentList.running`);  `0` when its list won't read.  NEVER throws. */
 function agentsOf(file: string): number {
   try {
-    return AgentList.forPlanDoc(file).agents.length
+    return AgentList.forPlanDoc(file).running.length
   } catch {
     return 0
   }

@@ -1,6 +1,6 @@
 import type { CodeAction, Hover, Position, Range, WorkspaceEdit } from "vscode-languageserver"
 
-import type { SP } from "spell/parser/spell"
+import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { appTexts, renameRefusal } from "spell/app/app/ui/AppTexts"
 import { codeHover, type HoverMode } from "spell/app/app/ui/codePopups"
@@ -36,7 +36,34 @@ export class CodeEditorFeatures {
    * - None that only names a command:  the app's editors run no language-server commands of their own.
    */
   static codeActions(service: LSP.SpellLanguageService, file: SP.SpellFile, range: Range): CodeAction[] {
-    return service.codeActions(file, range).filter((action) => !!action.edit)
+    return CodeEditorFeatures.withEdits(service.codeActions(file, range))
+  }
+
+  /** Those of `actions` that make an edit:  what `codeActions()` offers of the service's answer. */
+  static withEdits(actions: CodeAction[]): CodeAction[] {
+    return actions.filter((action) => !!action.edit)
+  }
+
+  ////////////////
+  // ## Fix it
+  ////////////////
+
+  /**
+   * Where `file`'s problems with a "Fix it" button start, as offsets into its parsed text (Owen's C3, epic `language`
+   * P68):  each of Spell's old forms written in it (`SP.OldForms.uses()`), the warning's preferred quick fix.
+   * - Read from its last parse:  none for a file not parsed.
+   */
+  static fixItStarts(file: SP.SpellFile): Set<number> {
+    return new Set(SP.OldForms.uses(file).map((use) => use.start))
+  }
+
+  /**
+   * The edit "Fix it" makes on the problem at `position` of `file`:  its old form rewritten the new way,
+   * the same edit as the language service's preferred "Change ..." (`LSP.SpellLanguageService.oldFormFixAt()`).
+   * - `undefined` where there's no old form any more.
+   */
+  static fixItAt(service: LSP.SpellLanguageService, file: SP.SpellFile, position: Position): WorkspaceEdit | undefined {
+    return service.oldFormFixAt(file, position)?.edit
   }
 
   ////////////////
@@ -67,11 +94,34 @@ export class CodeEditorFeatures {
     try {
       edit = service.renameSaying(file, position, newName)
     } catch (error) {
-      if (!(error instanceof LSP.RenameError)) throw error
-      throw new RenameRefusedError(renameRefusal(error, newName), { cause: error })
+      throw CodeEditorFeatures.renameRefused(error, newName)
     }
     if (!edit) throw new RenameRefusedError(appTexts.text("renameRefused", { oldName, newName }))
     return edit
+  }
+
+  /**
+   * `rename()`, its edits from `ask`, the service's `renameSaying()` asked wherever it runs (the language worker).
+   * - throws `RenameRefusedError` where it can't, in the same words
+   */
+  static async renamed(
+    ask: () => Promise<WorkspaceEdit | null>,
+    { newName, oldName }: { newName: string; oldName: string }
+  ): Promise<WorkspaceEdit> {
+    let edit: WorkspaceEdit | null
+    try {
+      edit = await ask()
+    } catch (error) {
+      throw CodeEditorFeatures.renameRefused(error, newName)
+    }
+    if (!edit) throw new RenameRefusedError(appTexts.text("renameRefused", { oldName, newName }))
+    return edit
+  }
+
+  /** What a rename to `newName` that threw `error` throws:  an `LSP.RenameError` in the Inspector's words. */
+  private static renameRefused(error: unknown, newName: string): unknown {
+    if (!(error instanceof LSP.RenameError)) return error
+    return new RenameRefusedError(renameRefusal(error, newName), { cause: error })
   }
 
   /** What F2 says where nothing can be renamed:  what can be. */

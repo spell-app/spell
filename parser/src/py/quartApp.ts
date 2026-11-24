@@ -6,6 +6,7 @@
  *   - `/<Project>.elements.spell.js`, and each imported project's:  served from beside the program
  *   - `/spell/...`:  the javascript core, Solid and Spell UI (`spell_quart.assets_folder()`)
  *   - `/ws`:  the WebSocket:  a click up, the state and what changed down;  a game per visitor
+ *   - as it stops, every visitor's saves are sent first (epic `data` P62)
  *   - a place for their own routes
  * - The app is committed beside the project's source.
  * - The program and its page file are BUILT, into the project's build folder (epic `people-and-orgs` P11).
@@ -62,7 +63,7 @@ export function quartApp({ projectName, program, elements, outputs, projects = {
 import os
 from pathlib import Path
 
-from quart import Quart, make_response, request, send_from_directory, websocket
+from quart import Quart, make_response, request, websocket
 
 from spell_quart import ${importsOf(outputs)}
 
@@ -88,19 +89,25 @@ async def elements(name: str):
     """The program's drawing half, and each imported project's."""
     if f"{name}${ELEMENTS_SUFFIX}" not in ${py(files)}:
         return "Not found", 404
-    return fresh(await send_from_directory(OUTPUTS, f"{name}${ELEMENTS_SUFFIX}", mimetype="text/javascript"))
+    return await send_built(OUTPUTS, f"{name}${ELEMENTS_SUFFIX}", mimetype="text/javascript")
 
 
 @app.get(f"{ASSETS_URL}/<path:path>")
 async def assets(path: str):
     """The javascript core, Solid and Spell UI."""
-    return fresh(await send_from_directory(assets_folder(), path))
+    return await send_built(assets_folder(), path)
 
 
 @app.websocket("/ws")
 async def ws():
     """The page's WebSocket:  its clicks up, the state and what changed down."""
     await sessions.serve(websocket, visitor_of(websocket))
+
+
+@app.after_serving
+async def stop():
+    """The app stops:  every visitor's saves are sent first."""
+    await sessions.saves_sent()
 
 
 # Your own routes go here, e.g.:
@@ -142,7 +149,7 @@ function outputsLine(outputs: string): string {
 /** What the app imports from `spell_quart`:  `built_folder` only when its program is in the build folder. */
 function importsOf(outputs: string): string {
   const names = ["ASSETS_URL", "SpellSessions", "assets_folder", ...(outputs === "." ? [] : ["built_folder"])]
-  return [...names, "fresh", "page_html", "remember_visitor", "visitor_of"].join(", ")
+  return [...names, "page_html", "remember_visitor", "send_built", "visitor_of"].join(", ")
 }
 
 /** `text`'s hash:  FNV-1a, 32 bits, in hex -- enough to tell an edit, in a browser as in node. */

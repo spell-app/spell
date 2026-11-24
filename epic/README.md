@@ -11,8 +11,8 @@ and you review it on the page itself, in VS Code, while it works.
 
 - **Real today:**  the repo this plugin lives in is built this way.  Its pages hold 70 epics, 48 of them done.
 - **Not yet:**  all of it in any agent but Claude Code.
-  It's a Claude Code plugin first;  Codex runs seventeen of its twenty-two skills and its end-of-turn hooks from the same
-  files, not yet tried with a real Codex (below, "Coming").
+  It's a Claude Code plugin first;  Codex runs most of its skills ([which](README-skills.md#in-codex)) and its
+  end-of-turn hooks from the same files, not yet tried with a real Codex (below, "Coming").
 
 Here to run one?  [Skip to "Try it"](#try-it--a-small-epic-in-your-own-repo).
 
@@ -318,6 +318,22 @@ _Trimmed from the real files:  data in attributes, prose in children, and the bo
 - The `epic` command writes its markup from the same element definitions the elements are drawn from,
   so the tool and the page can't disagree about what a tag holds.
 
+Think of a stylesheet, one level up.
+CSS restyles a page without touching its HTML;  these elements re-DRAW a page, its chips, buttons and cards,
+without touching its file.
+So a change to the look is a change to one element, and every epic page follows at once, with none rewritten.
+
+- What an element draws itself (the id chip, the review buttons, the fold) lives in its shadow root,
+  as every Spell UI element's does.
+- The prose stays the page's own children:
+  find-in-page and `#id` links reach it, and a live edit patches it in place,
+  so an open item stays open and a half-typed note keeps its text.
+- Questions, judgement calls, todos, issues and manual tests are all one element, `<epic-item>`:
+  its kind is its id's letter (`q7`, `j3`) and the section it sits in, so there's one element to style and test,
+  and no kind attribute to keep in step with the id.
+- A change to the markup ships with a migration that rewrites every page, never with a second way to read the old
+  markup:  no tag carries a version, and `epic migrate` brings each page up to today's.
+
 The cost:  nothing draws without a server, the epic server or a checkout's page server.
 How a page loads its elements, what it looks like from disk, and every element:
 [README-pages.md](README-pages.md#the-epic--elements--the-page-is-data-they-draw-it).
@@ -337,28 +353,22 @@ epic summary spanish
 
 ```text
 Spanish
-  [x] P1 · Unicode Words  (2-3h)
-...
-  [x] P11 · Solitario  (3-4h)
-...
-  [x] P17 · Parser Warnings in Spanish  (3-4h)
-...
-estimate:  ... in all, ... left
-...
-open limits:
-  - T1  Agreement is a warning, never an error
-  - T2  ser and estar are interchangeable to the parser
+  32 phases done  (--all lists them)
+estimate:  ... in all, 0m left
+open judgements:
+  - J4  The inflector in play: the parsing parser's, else English
+  - J5  Element tags keep the project's name as written
 ...
 ```
 
 </details>
 
-_On Spell's own pages:  the plan for writing Spell in Spanish, its Solitario done, its limits still open._
+_On Spell's own pages:  the plan for writing Spell in Spanish, every phase done, its judgement calls still open for review._
 
 Every verb, by group, and how to name what one acts on:  [README-cli.md](README-cli.md).
 
-The skills are what you type:  `/epic`, `/isolate`, `/details`, `/bg` and eighteen more,
-plus fourteen hooks that run without being asked.
+The skills are what you type:  `/epic`, `/isolate`, `/details`, `/bg` and the rest,
+plus the hooks that run without being asked.
 When to reach for which:  [README-skills.md](README-skills.md).
 
 ## Beyond Spell:  what it takes
@@ -383,7 +393,7 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 | --- | --- |
 | [.claude-plugin/](.claude-plugin/) | the plugin's manifest, `epic`;  its marketplace, `spell`, is the repo's root `.claude-plugin/marketplace.json`.  Claude Code installs a copy of this folder, which `epic plugin install` links back to it |
 | [.codex-plugin/](.codex-plugin/) | the same plugin's manifest for Codex, naming this same folder:  `epic plugin install --codex` |
-| [skills/](skills/) | the twenty-two skills, a `SKILL.md` each |
+| [skills/](skills/) | the skills, a `SKILL.md` each ([README-skills.md](README-skills.md)) |
 | [coherence/](coherence/) | the coherence review's rules ([procedures](coherence/procedures.md)) and the `coherence` agent that reads them:  ONE way of doing each thing;  each repo's own catalog and word list are its `agents/coherence/` |
 | [designer/](designer/) | the design review's rules:  [the house taste](designer/designer.md), with the asks behind it quoted;  [craft](designer/craft.md), interfaces.dev's and jakub.kr's rules;  [procedures](designer/procedures.md);  and the `designer` agent that reads them |
 | [plan-check/](plan-check/) | the `plan-check` agent, which holds a phase's diff up against its accepted build plan before the phase closes:  what wasn't built, and what was built unasked |
@@ -391,11 +401,10 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 | [hooks/](hooks/) | `hooks.json` and the eleven scripts it runs, plus `patch-checkout.mjs`, which one of them starts;  `codex-hooks.json`, three of the same scripts for Codex |
 | [monitors/](monitors/) | `listen.mjs` (`InboxPoller`), which keeps an epic's session listening to its epic page:  a small poller that runs `epic session listen` for a moment as the page's inbox changes.  The `Stop` hook starts it at each turn's end in every session (`--hook`, `asyncRewake`:  its exit wakes the session);  `monitors.json` runs it as a monitor too, which Claude Code starts only in a terminal session, never in VS Code's panel |
 | [bin/epic](bin/epic) | the `epic` command:  its program in [src/cli/](src/cli/), the work its verbs do in [src/command/](src/command/) |
-| [src/](src/) | the code:  the `<epic-*>` elements, the epic tool, the epic server, the docs tools, Epic UI's pages |
+| [src/](src/) | the code:  the `<epic-*>` elements, the epic tool, the epic server, the docs tools, Epic UI's viewer page |
 | [tests/](tests/) | its tests, at the same paths as the code;  and the extension's |
 | [templates/](templates/) | the pages' starting points, and the epic-page writing rules ([plan-doc.md](templates/epics/plan-doc.md)) |
 | [vscode/](vscode/) | the VS Code extension, a yarn project of its own |
-| [scripts/](scripts/) | dev-only scripts:  Epic UI's data |
 | [epic_settings.json5](epic_settings.json5) | how the tooling behaves, every key with its default;  yours and your team's override it ([Your settings](README-config.md#your-settings)) |
 | [docs/images/](docs/images/) | the pictures on these pages |
 
@@ -458,20 +467,32 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 
 | Page | What's on it |
 | --- | --- |
-| [README.md](README.md) | <ul><li>this page:  an epic page, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do, the commands</li><li>beyond Spell;  working on it</li></ul> |
+| [README.md](README.md) | <ul><li>this page:  an epic page, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do;  how a page is built;  the commands</li><li>beyond Spell;  working on it</li></ul> |
 | [README-how-it-works.md](README-how-it-works.md) | <ul><li>sagas, epics and guides:  how each holds the next</li><li>the workflow:  two Accepts, then it builds</li><li>the page in annotated pictures:  header, items, "While you were out", the Review tab</li></ul> |
-| [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round, comments and manual tests;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
-| [README-skills.md](README-skills.md) | <ul><li>twenty-two skills you type, fourteen hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
-| [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
-| [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
+| [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round and Claude's status cards, comments and manual tests;  what each colour means</li><li>saga, details, choice and run pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
+| [README-skills.md](README-skills.md) | <ul><li>the skills you type, and the hooks that run by themselves:  how many, and what each does</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
+| [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  one writer for every epic page;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
+| [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>three views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>windows you tell apart:  a look, a title, a ✅</li><li>working on it</li></ul> |
 | [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>what an epic is, why you'd want one, how you'll use it</li><li>try it, in one command</li></ul> |
 | [README-setup.md](README-setup.md) | <ul><li>every step of setting a repo up;  the extension</li><li>on GitLab;  when main takes only pull or merge requests</li><li>the plans live beside your repo;  what your AGENTS.md adds</li></ul> |
-| [README-teams.md](README-teams.md) | <ul><li>joining, who you are, every turn syncs</li><li>two people on one page;  whose agent answers whom</li><li>with Codex, or another agent</li></ul> |
+| [README-teams.md](README-teams.md) | <ul><li>joining, who you are and your colour, every turn syncs</li><li>two people on one page;  whose agent answers whom</li><li>with Codex, or another agent</li></ul> |
 | [README-config.md](README-config.md) | <ul><li>the epic folder;  your settings;  every key of the config file</li><li>worktrees;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
 | [README-superpowers.md](README-superpowers.md) | <ul><li>epics beside the superpowers plugin:  who plans, who finishes</li><li>the stand-aside words, and where they reach a session</li><li>a live trial;  common clashes and their fixes</li></ul> |
+| [README-demo.md](README-demo.md) | <ul><li>showing epics to a room in about 20 minutes:  one ask, a plan on a page, two Accepts, a phase built</li><li>the clock times, the pitch, and what to do when something goes wrong</li></ul> |
 | [README-faq.md](README-faq.md) | <ul><li>when something goes wrong:  what you see, why, and the fix</li></ul> |
 
 Every other folder's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
+
+## The guides
+
+Three longer pages, about the epic tooling and shipped with it, in [the guides folder](guides/):
+VS Code's Epic Docs tab shows them, and so does the page server at their own addresses (`/guides/...`).
+
+| Guide | What's in it |
+| --- | --- |
+| [Epic Pages, a Tour](guides/plan-docs/plan-docs.html) | <ul><li>an epic page's parts, each drawn live:  the header, the Overview, phases, items, the Log</li><li>what each colour and mark means, and what a click does</li></ul> |
+| [Background Agents](guides/background-agents.html) | <ul><li>`/bg`:  a task handed to a helper, so the panel is free again</li><li>names, the running list, redirecting one, what comes back</li></ul> |
+| [Airplane Mode](guides/airplane.html) | <ul><li>`/airplane`:  working on the pages with no Claude</li><li>what's kept for later, and `/airplane land` when you're back</li></ul> |
 
 ## See also
 

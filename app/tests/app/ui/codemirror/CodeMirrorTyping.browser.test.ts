@@ -6,7 +6,7 @@ import { EditorSelection, EditorState, type Extension } from "@codemirror/state"
 import { EditorView, keymap, runScopeHandlers } from "@codemirror/view"
 
 import { declareProp, Observable } from "spell/util"
-import type { SP } from "spell/parser/spell"
+import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
 import { CodeMirrorTyping } from "spell/app/app/ui/codemirror/CodeMirrorTyping"
@@ -337,7 +337,9 @@ describe("typing Spell in a real CodeMirror editor", () => {
       expect(withCaret()).toBe(`\t<action |`)
     })
 
-    test("Spanish's `<acción`, in a Spanish file", () => {
+    test("Spanish's `<acción`, in a Spanish file", async () => {
+      // Spanish loads on first use (epic `solid-2-final` P11)
+      await SP.Language.load("es")
       editorOf([`<acción`], 1, 8, "es")
       type(" ")
       expect(withCaret()).toBe(`<acción "|" />`)

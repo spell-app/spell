@@ -1,7 +1,9 @@
-import { existsSync, realpathSync } from "node:fs"
-import { join, relative } from "node:path"
+import { existsSync, readdirSync, realpathSync } from "node:fs"
+import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
+import type { SRV } from "spell/server"
 import { componentSets, pageServerSettings } from "spell/server/page/settings"
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
@@ -24,12 +26,33 @@ import { EPIC_UI } from "spell/epic/server/server.types"
  *   repo, found as the templates are
  * - the engine's templates, at `templates/` (epic `epic-eject` T11), through the checkout's `spell-epic` link when it
  *   has one to this engine's repo;  nothing when they ARE the checkout's (spell-epic's own)
+ * - the epic plugin's guides, at `guides/` (epic `epic-engine` I402), FILE by file:  the checkout and the epic folder
+ *   have guides at that address too, and a guide the checkout has is its own
  * - Who asks:  the docs tools' linker (`doc-links.js`) and the `epic` tool's (`PlanDocFiles.linker`:  `epic lint`'s
  *   link check, and every write), so both read `../../components/epics/` and `../../templates/` alike
  *   (epic `epic-engine` I27:  `epic lint` called them missing)
+ * - And the sites the page server shows with no file per page (`sites`, `SRV.Linker`'s too):  the Spell UI site,
+ *   Epic UI's and App UI's.
  * - STATIC:  reads the disk (the link), keeps nothing.
  ****************/
 export class ServedFolders {
+  /**
+   * The sites a checkout's page server shows at an address with no file per page, for its linker (`SRV.LinkSite`):
+   * the Spell UI site, a Spell site at `/components/ui/` (epic `editor` P43);  Epic UI's and App UI's at
+   * `/components/epics/` and `/components/app/` (P44).
+   * - Their pages' addresses (`/components/ui/button/api`) check as found;  a link to one of the old components
+   *   pages (`/components/ui/ui-button.html`, `/components/epics/epic-card.html`) is mended to its page's address
+   *   (`SpellUIGuide.mendedPath()`, `setMendedPath()`).
+   */
+  static readonly sites: readonly SRV.LinkSite[] = [
+    { address: SpellUIGuide.address, mendedPath: (path) => SpellUIGuide.mendedPath(path) },
+    // Epic UI's and App UI's guides (epic `editor` P44)
+    ...Object.values(SpellUIGuide.sets).map(({ address }) => ({
+      address,
+      mendedPath: (path: string) => SpellUIGuide.setMendedPath(path)
+    }))
+  ]
+
   /** spell-epic's root:  this engine's folder (`EngineFiles.root`). */
   static readonly ENGINE = EngineFiles.root
 
@@ -42,8 +65,31 @@ export class ServedFolders {
     return {
       [EPIC_UI.path]: ServedFolders.engineDir(root, engine, EPIC_UI.dir),
       ...Object.fromEntries(componentSets(pageServerSettings(root)).map((set) => [set.prefix.slice(1), set.dir])),
-      ...(templates !== "templates" && { templates })
+      ...(templates !== "templates" && { templates }),
+      ...ServedFolders.pluginGuidesUnder(root)
     }
+  }
+
+  /**
+   * The epic plugin's guide files by the address they're served at under checkout `root`, both relative to it:
+   * `{ "guides/airplane.html": "epic/guides/airplane.html" }`.
+   * - through the checkout's link to the engine, as the templates are (`engineDir()`)
+   * - never one whose address the checkout has a file at:  the page server serves that first
+   */
+  private static pluginGuidesUnder(root: string): Record<string, string> {
+    const guides = EpicConfig.pluginGuides()
+    if (!guides) return {}
+    const dir = ServedFolders.engineDir(root, dirname(guides), basename(guides))
+    const folder = resolve(root, dir)
+    if (!existsSync(folder)) return {}
+    const served: Record<string, string> = {}
+    for (const entry of readdirSync(folder, { recursive: true, withFileTypes: true })) {
+      if (!entry.isFile()) continue
+      const path = relative(folder, join(entry.parentPath, entry.name)).split(sep).join("/")
+      const address = `guides/${path}`
+      if (!existsSync(join(root, address))) served[address] = `${dir}/${path}`
+    }
+    return served
   }
 
   /**

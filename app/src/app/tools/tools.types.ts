@@ -38,8 +38,6 @@ export type AppUIUse = NonNullable<AppUITag["usedIn"]>[number]
 export type AppUIPagesFile = {
   /** what the file is, and who reads it */
   readonly $comment: string
-  /** the side column's own links, around the component list:  the set's home above, any others below */
-  readonly nav: NonNullable<AppUIData["nav"]>
   /** the side column's groups, in its order */
   readonly groups: readonly AppUIGroup[]
   /** one entry per page:  family id => its facts, in the side column's order within each group */

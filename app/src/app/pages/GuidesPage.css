@@ -1,0 +1,45 @@
+/*
+ * Look of the Guides page, `<GuidesPage>` (`GuidesPage.tsx`, epic `epic-engine` P79):  the page's paper, one reading
+ * column, the guides' cards in a grid;  a guide's body drawn by its own `<ui-*>` elements, in the app's theme.
+ */
+#GuidesPage {
+  background: var(--ui-background);
+  color: var(--ui-text-color);
+}
+
+#GuidesPage .GuidesColumn {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 16px 96px 16px;
+}
+
+#GuidesPage .GuidesLede,
+#GuidesPage .GuidesMissing {
+  white-space: pre-line;
+  color: var(--ui-muted-text-color, inherit);
+}
+
+#GuidesPage .GuidesSearch {
+  display: block;
+  margin: 16px 0 24px 0;
+}
+
+#GuidesPage .GuideCards {
+  margin: 12px 0 24px 0;
+}
+
+#GuidesPage .GuideCard {
+  cursor: pointer;
+}
+
+#GuidesPage .GuidesBack {
+  margin-bottom: 16px;
+}
+
+#GuidesPage .GuideBody {
+  line-height: 1.55;
+}
+
+#GuidesPage .GuideBody pre {
+  overflow-x: auto;
+}

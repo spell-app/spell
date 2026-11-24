@@ -506,7 +506,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
 
   /**
    * The position words before the noun, then Fomantic's `visible` while shown:  `ui top left visible popup`.
-   * - After the position:  a phrase rule (`[class*="left top"]`) needs its words side by side.
+   * - After the position:  a phrase rule (`.left-top`) needs its words side by side.
    */
   protected get extraClass(): string | undefined {
     const position = this.point ? `${BASIC_CLASS} ${AT_POINT_POSITION}` : (this.position ?? DEFAULT_POSITION)

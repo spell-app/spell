@@ -46,7 +46,15 @@ import { RepoList } from "spell/epic/server/RepoList"
 import { ENGINE_ROUTES, PID_FILE } from "spell/epic/server/server.types"
 
 import { DocView, docsIndex, ensurePageServer } from "./DocView"
-import { EPIC_DOCS_HOME, PREVIEW_PATH, type DocViewName, docViewFor, isLoopback, stamped } from "./docUrls"
+import {
+  EPIC_DOCS_HOME,
+  PREVIEW_PATH,
+  SERVERS_HOME,
+  type DocViewName,
+  docViewFor,
+  isLoopback,
+  stamped
+} from "./docUrls"
 
 /****************
  * ### `DocPreview`
@@ -91,6 +99,7 @@ export class DocPreview {
    * Where view `view` opens:
    * - `review`:  the home page, the default repo's on the epic server when it runs;  else the window's first folder's
    * - `docs`:  the front page for epics (`EPIC_DOCS_HOME`), on that same server, under the same worktree's address
+   * - `servers`:  the Servers page (`SERVERS_HOME`), the same way
    * - `undefined`:  neither has one;  always for `details`, which opens on its list
    */
   static async homeUrl(view: DocViewName = "review"): Promise<string | undefined> {
@@ -105,7 +114,7 @@ export class DocPreview {
     if (!home || view === "review") return home
     const url = new URL(home)
     const worktree = WORKTREE_ADDRESS.exec(url.pathname)?.[0] ?? ""
-    return new URL(`${worktree}${EPIC_DOCS_HOME}`, url.origin).href
+    return new URL(`${worktree}${view === "servers" ? SERVERS_HOME : EPIC_DOCS_HOME}`, url.origin).href
   }
 
   /**

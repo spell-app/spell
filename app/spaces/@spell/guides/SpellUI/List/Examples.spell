@@ -140,7 +140,7 @@
 				</list>
 			</example>
 		</>
-		<message size="small" class="site-not-ported">Not ported: Fomantic's plain <text code>&lt;ul class="ui list"&gt;</> / <text code>&lt;ol class="ui list"&gt;</> markup. <text code>&lt;ui-list bulleted&gt;</> / <text code>&lt;ui-list ordered&gt;</> render a real ul / ol in their shadow root.</>
+		<message size="small" class="site-not-ported">Not ported: plain <text code>&lt;ul&gt;</> / <text code>&lt;ol&gt;</> markup styled as a list. <text code>&lt;ui-list bulleted&gt;</> / <text code>&lt;ui-list ordered&gt;</> render a real ul / ol in their shadow root.</>
 		<example "Types">
 			<list direction="horizontal" bulleted>
 				<item link="#list">About Us</item>

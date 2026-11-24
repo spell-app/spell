@@ -58,6 +58,7 @@ export function ShortcutsDialog(props: ShortcutsDialogProps) {
         <h2 class="ShortcutsTitle">{appTexts.text("shortcuts")}</h2>
         <ui-input
           class="ShortcutsSearch"
+          type="search"
           icon="search"
           icon-position="left"
           size="small"

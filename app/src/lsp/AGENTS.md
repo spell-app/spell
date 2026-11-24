@@ -27,7 +27,17 @@ when working with code in this folder, `src/lsp/` of the kit's app folder (`spel
     line lands, which words open quotes, the Enter rules' ONE table, where an attribute's quoted value is ...):
     the app's CodeMirror editor wires them to its keys (`CodeMirrorTyping`)
   - `AppAddresses`:  how the app's editors address files, `spell:/<file.path>`, with no editor's code in it
-  - `SpellLanguageServer`:  wires it to an LSP connection
+  - `LANGUAGE_REQUESTS` (`LanguageRequests.ts`):  the ONE table of requests the service answers about a file, by name,
+    the protocol's own (`textDocument/hover` ...) and Spell's (`spell/bubbly` ...):  VS Code's server and the app's
+    language worker answer from it (epic `solid-2-final` P18)
+  - `LanguageHost`:  the service with projects of its own, kept in step by messages (a file opened with its text, its
+    edits as changes):  what the app's language worker runs;  it compiles a project when asked, and hands back what
+    the compile wrote (`SP.CompiledEntry`), for the editor to run
+  - `SpellLanguageServer`:  wires it to an LSP connection;  not in the barrel, `server.ts` imports it by file
+  - `SemanticTokensBuilder`:  a file's semantic tokens for VS Code, ported from `vscode-languageserver`'s own
+  - Its browser files import the protocol's values and types from `vscode-languageserver-types`, never
+    `vscode-languageserver` (the server itself, about 170 KB of the editor's language worker:  epic `solid-2-final`
+    P19, Q35);  only `SpellLanguageServer` and `server.ts` use the server package
   - `ScopeExplorer`
   - `ScopesSource` / `ScopePack`:  the scope packs, `<Project>.scopes.js`
   - `SpellDiskWorkspace`:  loads from disk, through spaces' disk reader (`installDiskFetch()`)
@@ -55,6 +65,7 @@ when working with code in this folder, `src/lsp/` of the kit's app folder (`spel
     - `SpellDiskWorkspace.ts`
     - `server.ts`
     - `stdioGuard.ts`
+  - And `SpellLanguageServer.ts`:  browser-safe, but it brings `vscode-languageserver`, so only the process imports it
 - It depends on `spell/parser/spell` (and below).
   - Its node-only files also import spaces' (`spell/app/spaces/server/node/...`):
     where projects are on disk, and spaces' disk reader, which registers spell's project groups.

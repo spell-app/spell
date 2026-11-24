@@ -1,5 +1,5 @@
 {
-  "spellVersion": "0.8.0",
+  "spellVersion": "0.9.0",
   "provides": [
     "Tally",
     "test_the_imported_counter"

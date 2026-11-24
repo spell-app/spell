@@ -133,6 +133,8 @@ export const carryMethods = defineCoreModule({
    * - Each exclusive family keeps who holds what (`carryListFamily()`):  so a card still knows its pile.
    * - A property whose starting value changed:  things still holding the old one follow, as the side bar's do.
    * - The chain never grows:  classes retired before point at the newest.
+   *   - Held weakly (epic `solid-2-final` P10):  an old class nothing uses any more is let go, and with it the old
+   *     program's code.  Held, every edit typed kept the whole program as it was, about 0.2 MB an edit.
    * - Pure bookkeeping:  nothing draws, see `core.drawAgain()`.
    *   - Then the page hears of the new classes' elements, held back since `loadOverRunning()`:
    *     a property the edit added is now one each running thing has, so its element can follow it.
@@ -140,23 +142,27 @@ export const carryMethods = defineCoreModule({
    * - NEVER throws on what isn't a class of the same name:  that's left alone.
    */
   takeNewClasses(previous: Record<string, unknown>, next: Record<string, unknown>): void {
-    const retired = core.getRuntimeState("retiredClasses", () => new Map<string, Function[]>())
+    const retired = core.getRuntimeState("retiredClasses", () => new Map<string, RetiredClass[]>())
     for (const [name, Old] of Object.entries(previous)) {
       const New = next[name]
       if (!isThingClass(Old) || !isThingClass(New) || Old === New) continue
       followStartingValues(Old, New)
       carryListFamily(Old as unknown as typeof List, New as unknown as typeof List)
       retireClass(Old, New)
-      const older = retired.get(name) ?? []
+      // what's left of the classes retired before:  each one nothing holds any more is gone
+      const older = (retired.get(name) ?? []).filter((it) => it.prototype.deref() || it.Class.deref())
       for (const before of older) {
-        Object.setPrototypeOf(before.prototype, New.prototype)
-        Object.setPrototypeOf(before, New)
-        Object.defineProperty(before, Symbol.hasInstance, {
+        const prototype = before.prototype.deref()
+        if (prototype) Object.setPrototypeOf(prototype, New.prototype)
+        const Class = before.Class.deref()
+        if (!Class) continue
+        Object.setPrototypeOf(Class, New)
+        Object.defineProperty(Class, Symbol.hasInstance, {
           configurable: true,
           value: (value: unknown) => value instanceof New
         })
       }
-      retired.set(name, [...older, Old])
+      retired.set(name, [...older, { Class: new WeakRef(Old), prototype: new WeakRef(Old.prototype as object) }])
     }
     // each running thing of an old class is of the new one now:  file it under its classes again
     core.things.reindex()
@@ -164,6 +170,12 @@ export const carryMethods = defineCoreModule({
   }
 })
 Object.assign(core, carryMethods)
+
+/**
+ * A class `takeNewClasses()` retired:  it and its prototype, each held weakly.
+ * - The prototype lives on in the things made of it;  the class in whatever still names it, e.g. a closure.
+ */
+type RetiredClass = { Class: WeakRef<Function>; prototype: WeakRef<object> }
 
 /** The running program's variables, while a new version of it loads -- see `core.loadOverRunning()`. */
 let runningTopLevel: Record<string, unknown> | undefined

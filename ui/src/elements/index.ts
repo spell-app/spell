@@ -8,7 +8,7 @@
  *   - `DOMElement` / `DOMFormControl` (DOM element bases), `UIComponent` (the component base), `FormComponent`
  *   - `Reactive` (its reactive members' decorators)
  *   - `ElementDefinition` (vocabulary => attribute names and conversions)
- *   - `Cell`, `SlotContent`, `IconGlyph`, `CloseButton`, `ControlLabels`
+ *   - `Cell`, `SlotContent`, `IconGlyph`, `CloseButton`, `ClearButton`, `FieldShortcut`, `ControlLabels`
  *   - `AddressParameter` (a value kept in the page's address)
  *   - `PartContext` + `PartComponent` (owner context)
  *   - `RootSettings` (what a `<ui-root>` sets for its subtree)
@@ -39,6 +39,8 @@ export * from "./PartComponent"
 export * from "./RootSettings"
 export * from "./IconGlyph"
 export * from "./CloseButton"
+export * from "./ClearButton"
+export * from "./FieldShortcut"
 export * from "./ClipboardCopy"
 export * from "./AddressParameter"
 export * from "./DOMLoadableElement"

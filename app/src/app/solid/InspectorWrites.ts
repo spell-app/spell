@@ -15,13 +15,14 @@ import { textAt, type TextChange } from "spell/app/app/EditorHistory"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
+import { FieldHomes } from "./FieldHomes"
 
 /**
  * What a change in the Inspector does to the program's source (epic `editor`, "Side-bar edits write the source").
  * - The field has already written the running app:  this adds the same change to the file's text, as a step of
  *   `editor.history`.
  * - Each field acts on its home (`SourceHomes`):  written or not yet on its tag;  and for a thing, by what the person
- *   chose (`InspectorScope`):
+ *   chose (`InspectorScope`), asked of the language worker (`FieldHomes`):
  *   - "This one":  the line that made it, adding it there if the line doesn't say it
  *   - "All of them":  its type's default, and every thing still holding the old one
  * - A thing made in a loop has no line of its own, so "This one" writes nothing:  it's there to play with.
@@ -35,14 +36,22 @@ export class InspectorWrites {
   /**
    * Field `name` of what's inspected became `value`:  write it to the source.
    * - `element`:  the drawn element, when it's one;  `value` of a thing's field when it isn't.
-   * - Answers what couldn't be written, for the Inspector's note;  `undefined` when it was.
+   * - Answers what couldn't be written, for the Inspector's note;  `undefined` when it was, or will be.
+   * - A thing's field whose homes aren't known yet (`FieldHomes`) is written once they are, in the order changed:
+   *   what can't be written then is told to `whenNotWrittenLate`.
    * - NEVER throws:  a failure is logged, and the running app keeps the change.
    */
   static written(part: WrittenPart, name: string, value: unknown, scope: InspectorScope): NotWritten | undefined {
     try {
-      return part.element && !SpellElement.thingOf(part.element)
-        ? InspectorWrites.writeTag(part.element, name, value)
-        : InspectorWrites.writeProperty(part.value, name, value, scope)
+      if (part.element && !SpellElement.thingOf(part.element))
+        return InspectorWrites.writeTag(part.element, name, value)
+      const thing = part.value
+      if (FieldHomes.of(thing, [name])) return InspectorWrites.writeProperty(thing, name, value, scope)
+      FieldHomes.whenKnown(thing, (late) => {
+        const why = InspectorWrites.writeProperty(thing, name, value, scope)
+        if (why && late) InspectorWrites.whenNotWrittenLate?.(part, name, why)
+      })
+      return undefined
     } catch (error) {
       console.error(`InspectorWrites.written():  couldn't write ${name} to the source:`, error)
       return { reason: "running" }
@@ -81,12 +90,14 @@ export class InspectorWrites {
   ): NotWritten | undefined {
     const files = homeFiles()
     const made = madeAt(thing, files)
+    const homes = FieldHomes.of(thing, [name])
+    if (!homes) return { reason: "running" }
     if (scope === "this") {
       if (!InspectorWrites.hasOwnLine(thing) || !made) return { reason: "playing" }
-      if (SourceHomes.ofDefault(files, typeNamesOf(thing), name)) return { reason: "typeSets" }
+      if (homes.start[name]) return { reason: "typeSets" }
       const onTag = tagHomeOf(made, name)
       if (onTag) return InspectorWrites.writeMadeByTag(made.file, onTag, thing, name, value)
-      const home = SourceHomes.ofMaking(made.file, made.offset, name)
+      const home = homes.making[name]
       if (!home) return { reason: "running" }
       if (home.kind === "expression") return { reason: "expression", file: home.file, span: home.span }
       const file = made.file.file
@@ -100,12 +111,12 @@ export class InspectorWrites {
       return undefined
     }
     // all of them:  what the type sets;  else what a line says is that line's
-    const home = SourceHomes.ofDefault(files, typeNamesOf(thing), name)
+    const home = homes.start[name]
     const onTag = made && tagHomeOf(made, name)
     if (!home && made && onTag && onTag.kind !== "notWritten") {
       return { reason: "expression", file: made.file.path, span: onTag.anchor }
     }
-    const onLine = made && !onTag && SourceHomes.ofMaking(made.file, made.offset, name)
+    const onLine = made && !onTag && homes.making[name]
     if (!home && onLine && onLine.kind !== "notWritten") {
       return { reason: "expression", file: onLine.file, span: lineSpan(onLine) }
     }
@@ -155,19 +166,27 @@ export class InspectorWrites {
   }
 
   /**
+   * Can field `name` of `part` be written now?  A drawn element's always;  a thing's once where it lives is known
+   * (`FieldHomes`).
+   */
+  static knowsHomes(part: WrittenPart, name: string): boolean {
+    if (part.element && !SpellElement.thingOf(part.element)) return true
+    return !!FieldHomes.of(part.value, [name])
+  }
+
+  /**
    * Is `thing` the only one its program can have of its type, so "this one" and "all of them" are the same?
    * (epic `editor` I183)
    * - A one of a kind:  a type and its one thing declared together, `solitaire is an app`,
    *   `leaderboard is a page`, a site, a place (`family cookbook is a web server at ...`).
-   *   The parse says so:  its thing is a variable of kind `only` in the project's scope.
+   *   The parse says so:  its thing is a variable of kind `only` in the project's scope, as the language worker
+   *   answers (`FieldHomes.onlyTypes()`);  until it has, no.
    * - The program's app (`core.RUNTIME.app`), however it's declared:  a program has one app.
-   *   So it holds before the editor's first parse, while the program runs from a kept compile.
+   *   So it holds before any parse, while the program runs from a kept compile.
    */
   static isOneOfAKind(thing: object): boolean {
     if (runtimeCore()?.RUNTIME?.app === thing) return true
-    const className = thing.constructor.name
-    const variables = editor.project?.scope?.variables?.get() ?? []
-    return variables.some((variable) => variable.kind === "only" && variable.datatype === className)
+    return FieldHomes.onlyTypes(thing)?.includes(thing.constructor.name) ?? false
   }
 
   /**
@@ -210,12 +229,15 @@ export class InspectorWrites {
 
   /**
    * Take field `name` off the source, so it's no longer set here, and the running app with it.
+   * - A thing's field whose homes aren't known yet (`FieldHomes`) is reset once they are.
    * - NEVER throws:  a failure is logged, and nothing changes.
    */
   static reset(part: WrittenPart, name: string): void {
     try {
-      if (part.element && !SpellElement.thingOf(part.element)) InspectorWrites.resetTag(part.element, name)
-      else InspectorWrites.resetProperty(part.value, name)
+      if (part.element && !SpellElement.thingOf(part.element)) return InspectorWrites.resetTag(part.element, name)
+      const thing = part.value
+      if (FieldHomes.of(thing, [name])) return InspectorWrites.resetProperty(thing, name)
+      FieldHomes.whenKnown(thing, () => InspectorWrites.resetProperty(thing, name))
     } catch (error) {
       console.error(`InspectorWrites.reset():  couldn't reset ${name}:`, error)
     }
@@ -246,9 +268,10 @@ export class InspectorWrites {
   private static resetProperty(thing: object, name: string): void {
     const files = homeFiles()
     const made = madeAt(thing, files)
-    if (!made) return
+    const homes = FieldHomes.of(thing, [name])
+    if (!made || !homes) return
     const onTag = tagHomeOf(made, name)
-    const home = !onTag && SourceHomes.ofMaking(made.file, made.offset, name)
+    const home = !onTag && homes.making[name]
     const file = made.file.file
     const text = file.contents ?? ""
     // made by a tag:  its attribute goes;  by a line:  what the line says of it
@@ -262,7 +285,7 @@ export class InspectorWrites {
     if (!edits || !anchor) return
     const record = thing as Record<string, unknown>
     const old = record[name]
-    const start = SourceHomes.ofDefault(files, typeNamesOf(thing), name)
+    const start = homes.start[name]
     const live =
       start?.kind === "default"
         ? (way: "undo" | "redo") => {
@@ -314,6 +337,8 @@ export class InspectorWrites {
       after: after.slice(anchor.start, anchor.end + grown)
     }
     if (change.before === change.after) return
+    const path = pathOf(file)
+    FieldHomes.edited(path, after, anchor.start, change.before.length, change.after.length)
     editor.history.change(change, {
       title: InspectorWrites.titleOf(name),
       // a run of changes to this field folds into one step;  a reset is a step of its own
@@ -363,6 +388,12 @@ export class InspectorWrites {
   static pathOf(file: SP.AnySpellFile): string {
     return pathOf(file)
   }
+
+  /**
+   * Told what a change written late couldn't write (`written()`):  the Inspector shows it as it would at once.
+   * - `undefined`:  nobody listening, so it's only not written.
+   */
+  static whenNotWrittenLate: ((part: WrittenPart, name: string, why: NotWritten) => void) | undefined = undefined
 }
 
 ////////////////
@@ -424,10 +455,10 @@ function languageOf(file: SP.AnySpellFile): string {
   return file instanceof SP.SpellFile ? file.language.lang : "en"
 }
 
-/** The project's spell files, as `SourceHomes` reads them. */
+/** The project's spell files, their text as the page has it:  never its parse, which is the language worker's. */
 function homeFiles(): (HomeFile & { file: SP.AnySpellFile })[] {
   return (editor.project?.spellFiles ?? []).flatMap((file) =>
-    file.contents === undefined ? [] : [{ path: pathOf(file), contents: file.contents, match: file.match, file }]
+    file.contents === undefined ? [] : [{ path: pathOf(file), contents: file.contents, file }]
   )
 }
 
@@ -507,11 +538,13 @@ function defaultsFileOf(element: Element, name: string): string | undefined {
 function originOfProperty(thing: object, name: string, scope: InspectorScope): PropertyOrigin | undefined {
   const files = homeFiles()
   const made = madeAt(thing, files)
-  // what made it says:  its tag in a drawing, or its line
+  // what made it says:  its tag in a drawing, or its line;  nothing said till the language worker has said
+  const homes = FieldHomes.of(thing, [name])
+  if (!homes) return undefined
   const onTag = made && tagHomeOf(made, name)
-  const onLine = made && !onTag ? SourceHomes.ofMaking(made.file, made.offset, name) : onTag
+  const onLine = made && !onTag ? (homes.making[name] ?? undefined) : onTag
   const says = onLine && onLine.kind !== "notWritten"
-  const start = SourceHomes.ofDefault(files, typeNamesOf(thing), name)
+  const start = homes.start[name]
   if (scope === "all") {
     // what the type sets, it sets after the line
     if (start?.kind === "expression") {
@@ -547,20 +580,6 @@ const SHOW_CODE = "show code"
 /** `file`'s name in its project, as the compiler's marks name it. */
 function pathOf(file: SP.AnySpellFile): string {
   return SP.SpellLocation.filePathOf(file.path)?.replace(/^\//, "") ?? file.path
-}
-
-/** The names of `thing`'s class and those it inherits, its own first:  as the type's written in spell. */
-function typeNamesOf(thing: object): string[] {
-  const names: string[] = []
-  for (
-    let proto = Object.getPrototypeOf(thing) as object | null;
-    proto && proto !== Object.prototype;
-    proto = Object.getPrototypeOf(proto)
-  ) {
-    const { name } = proto.constructor
-    if (name) names.push(name)
-  }
-  return names
 }
 
 /** A field's name for a step's title:  `shortName` => `Short Name`. */

@@ -361,6 +361,33 @@ describe("SourceEdits, on whole elements", () => {
     expect(text.startsWith("<ui-divider", starts[1]!)).toBe(true)
   })
 
+  test("into an empty slot:  inside a new tag of the slot's name, a level in (editor T150)", () => {
+    const button = SourceEdits.elementAt(APP, at(APP, "ui-button"))!
+    const { text, starts } = SourceEdits.moved(APP, [button], {
+      opening: at(APP, "ui-card"),
+      where: "inside",
+      wrap: "ui-actions"
+    })
+    expect(text).toContain(
+      "\t\t\t<ui-text>Inside</ui-text>\n\t\t\t<ui-actions>\n\t\t\t\t<ui-button>One</ui-button>\n\t\t\t</ui-actions>\n\t\t</ui-card>"
+    )
+    expect(text.startsWith("<ui-button", starts[0]!)).toBe(true)
+  })
+
+  test("into an empty slot before a part:  the new tag goes before it, closed as the file closes tags", () => {
+    const spell = APP.replace("\t\t</ui-card>", "\t\t</>")
+    const { text, starts } = SourceEdits.writtenAll(
+      spell,
+      { opening: at(spell, "ui-text"), where: "before", wrap: "header" },
+      ["<text>Title</text>", "<text>More</text>"]
+    )
+    expect(text).toContain(
+      "\t\t\t<header>\n\t\t\t\t<text>Title</text>\n\t\t\t\t<text>More</text>\n\t\t\t</>\n\t\t\t<ui-text>Inside"
+    )
+    expect(text.startsWith("<text>Title", starts[0]!)).toBe(true)
+    expect(text.startsWith("<text>More", starts[1]!)).toBe(true)
+  })
+
   test("nothing goes inside itself", () => {
     const card = SourceEdits.elementAt(APP, at(APP, "ui-card"))!
     expect(() => SourceEdits.moved(APP, [card], { opening: at(APP, "ui-text"), where: "after" })).toThrow(TypeError)

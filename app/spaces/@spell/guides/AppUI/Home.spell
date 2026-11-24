@@ -1,0 +1,108 @@
+"home" is a notebook page
+	<header level="1">
+		The App's Components
+		<header>Every component the spell app is built from, by where it sits, and a page for each.</>
+	</>
+
+	<text class="lede" paragraph>The spell app is its editor, its runners, and two web components any page can embed. All of it is drawn by the components below: Solid components on Spell UI's widgets, and the two web components on top.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app, or putting spell programs in a page</>
+		<item icon="play">Live where a component can be drawn alone (the web components, the runner's pieces); a picture of the editor otherwise</>
+		<item icon="book">The app's notes: <link target="src-packages-app-agents-md" link="/src/app/AGENTS.md"><text title="src/app/AGENTS.md" code>AGENTS.md</></></>
+	</>
+
+	<section label="1. Web components">
+		<icon slot="icon" name="puzzle piece"/>
+		<text paragraph>The tags a page can embed, with no editor app around them:</>
+		<list bulleted>
+			<item><link target="src-packages-app-docs-spell-viewer-html" link="/spell-viewer"><text code>&lt;spell-viewer&gt;</></>: runs a spell project</>
+			<item><link target="src-packages-app-docs-spell-editor-html" link="/spell-editor"><text code>&lt;spell-editor&gt;</></>: edits one, and runs it in the <text code>&lt;spell-viewer&gt;</>s beside it</>
+			<item><link target="src-packages-app-docs-spell-code-html" link="/spell-code"><text code>&lt;spell-code&gt;</></>: a block of spell, coloured by spell's own parser</>
+			<item><link target="src-packages-app-docs-spell-markdown-html" link="/spell-markdown"><text code>&lt;spell-markdown&gt;</></>: markdown drawn by spell's own engine</>
+			<item><link target="src-packages-app-docs-spell-reference-page-html" link="/spell-reference-page"><text code>&lt;spell-reference-page&gt;</></>: a reference page, made from its source, its words made clearer with an option-click</>
+		</>
+	</>
+
+	<section label="2. Page shell">
+		<icon slot="icon" name="table columns"/>
+		<text paragraph>Every editor page is a box of panes, with menus along their tops:</>
+		<list bulleted>
+			<item><link target="src-packages-app-docs-spellpage-html" link="/spell-page">SpellPage</>: a whole page's box</>
+			<item><link target="src-packages-app-docs-approot-html" link="/app-root">AppRoot</>: the running program, under its toolbar</>
+			<item><link target="src-packages-app-docs-appcontainer-html" link="/app-container">AppContainer</>: the box the program draws in</>
+			<item><link target="src-packages-app-docs-chrome-html" link="/chrome">Chrome</>: the menus and toolbars around the panes</>
+		</>
+	</>
+
+	<section label="3. Panes">
+		<icon slot="icon" name="window maximize"/>
+		<text paragraph>What the panes show, besides the code:</>
+		<list bulleted>
+			<item><link target="src-packages-app-docs-thingexplorer-html" link="/thing-explorer">ThingExplorer</>: the things a running program has made</>
+			<item><link target="src-packages-app-docs-typeexplorer-html" link="/type-explorer">TypeExplorer</>: the scopes a project parses in</>
+			<item><link target="src-packages-app-docs-scopedetailspane-html" link="/scope-details-pane">ScopeDetailsPane</>: the details of the scope picked there</>
+			<item><link target="src-packages-app-docs-markdown-html" link="/markdown">Markdown</>: a docstring, drawn</>
+			<item><link target="src-packages-app-docs-treeviewer-html" link="/tree-viewer">TreeViewer</>: the spell tree of the line the cursor is on</>
+			<item><link target="src-packages-app-docs-consoleviewer-html" link="/console-viewer">ConsoleViewer</>: what programs print, in the editor</>
+			<item><link target="src-packages-app-docs-consolelines-html" link="/console-lines">ConsoleLines</>: the lines every console draws</>
+			<item><link target="src-packages-app-docs-appanatomyview-html" link="/app-anatomy-view">AppAnatomyView</>: the running app pulled apart into layers, in 3D</>
+		</>
+	</>
+
+	<section label="4. Editors">
+		<icon slot="icon" name="pen to square"/>
+		<text paragraph>The code editors, all CodeMirror, loaded once the program has compiled and run:</>
+		<list bulleted>
+			<item><link target="src-packages-app-docs-inputeditor-html" link="/input-editor">InputEditor</>: the spell source of the open file</>
+			<item><link target="src-packages-app-docs-codemirroreditor-html" link="/code-mirror-editor">CodeMirrorEditor</>: a CodeMirror editor, which the others are</>
+			<item><link target="src-packages-app-docs-fileeditor-html" link="/file-editor">FileEditor</>: one on a spell file, kept in step with it</>
+		</>
+	</>
+
+	<section label="5. Menus and dialogs">
+		<icon slot="icon" name="bars"/>
+		<text paragraph>Picking a project or a file, and doing something with it:</>
+		<list bulleted>
+			<item><link target="src-packages-app-docs-menubar-html" link="/menu-bar">MenuBar</>: the top bar's menus, the Spell menu listing every project of the group</>
+			<item><link target="src-packages-app-docs-filetabs-html" link="/file-tabs">FileTabs</>: the open project's files, as tabs over the code</>
+			<item><link target="src-packages-app-docs-actions-html" link="/actions">Actions</>: the editor's actions, as menu items or buttons</>
+			<item><link target="src-packages-app-docs-chooser-html" link="/chooser">Chooser</>: a dialog to choose from a list</>
+		</>
+	</>
+
+	<section label="6. Notices">
+		<icon slot="icon" name="bell"/>
+		<text paragraph>Telling people what happened:</>
+		<list bulleted>
+			<item><link target="src-packages-app-docs-notice-html" link="/notice">Notice</>: something worked</>
+			<item><link target="src-packages-app-docs-errornotice-html" link="/error-notice">ErrorNotice</>: something didn't</>
+			<item><link target="src-packages-app-docs-errorboundary-html" link="/error-boundary">ErrorBoundary</>: a part of the page broke, and the rest goes on</>
+		</>
+	</>
+
+	<section label="7. The runner's pieces">
+		<icon slot="icon" name="play"/>
+		<text paragraph>What every runner draws around a program: a <text code>&lt;spell-viewer&gt;</>, VS Code's "Run Project", and the editor's own:</>
+		<list bulleted>
+			<item><link target="src-packages-app-docs-runnerpane-html" link="/runner-pane">RunnerPane</>: a pane with a toolbar of tabs</>
+			<item><link target="src-packages-app-docs-runnerconsole-html" link="/runner-console">RunnerConsole</>: one program's console</>
+			<item><link target="src-packages-app-docs-spell-element-html" link="/spell-element">SpellElement</>: a view, drawn as its own element</>
+		</>
+	</>
+
+	<section label="8. How these pages work">
+		<icon slot="icon" name="circle info"/>
+		<text paragraph>The pages live beside the web components' code, so a component's page changes in the same commit as the component:</>
+		<list bulleted>
+			<item>Each page's props, attributes and "Used in" tables come from the code itself: <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></> reads every documented component's banner and props, and where the app draws it.</>
+			<item>The pictures are headless screenshots of the editor: <text code>yarn site:pictures</>, with the editor running.</>
+			<item>The live examples need the app's element build: <text code>yarn build:element</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+			<item>A new page: add it to the set's hand-kept facts, <link target="src-packages-app-docs-data-pages-json5" link="/app/docs/__data/pages.json5"><text title="app/docs/__data/pages.json5" code>pages.json5</></>, run <text code>yarn site:data</>, then copy a page like it (<link target="src-packages-app-docs-notice-html" link="/notice">Notice</> for a picture, <link target="src-packages-app-docs-spell-viewer-html" link="/spell-viewer">&lt;spell-viewer&gt;</> for a live one) and link it here.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

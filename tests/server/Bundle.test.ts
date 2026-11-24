@@ -1,7 +1,9 @@
+import { execFile } from "node:child_process"
 import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   readdirSync,
   readlinkSync,
   realpathSync,
@@ -12,6 +14,7 @@ import {
 } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
+import { promisify } from "node:util"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell/server"
@@ -107,6 +110,10 @@ describe("Bundle", () => {
     bundle.build({ stdio: "ignore" })
     const later = new Date(Date.now() + 60_000)
     utimesSync(join(root, "pkg/out/entry.js"), later, later)
+    // built by hand from the same sources (epic `epic-engine` I363):  the same bytes, written again
+    expect(bundle.check().stale).toBeUndefined()
+    put(root, "pkg/out/entry.js", "someone else's")
+    utimesSync(join(root, "pkg/out/entry.js"), later, later)
     expect(bundle.check().stale).toBe("entry.js changed since")
     rmSync(join(root, "pkg/out/entry.js"))
     expect(bundle.check().stale).toBe("no entry.js")
@@ -123,10 +130,59 @@ describe("Bundle", () => {
   })
 })
 
-/** An install holding Spell UI's, spell-epic's and the brand's packages, each its own repo beside the checkout, `app/`. */
+// epic `epic-engine` I364:  only the entry was looked for, so a missing engine or chunk was never built again
+describe("Bundle.check():  every file the build made is required", () => {
+  const root = mkdtempSync(join(tmpdir(), "assembler-bundle-made-"))
+  install(root, { "@demo/made": "made" })
+  mkdirSync(join(root, "app"))
+  put(root, "made/src/a.ts", "a")
+  put(root, "made/icons/x.svg", "<svg/>")
+  const bundle = new SRV.Bundle(join(root, "app"), {
+    ...SPEC,
+    package: "@demo/made",
+    sources: ["@demo/made/src"],
+    generated: ["out", "beside.js", "never-written"],
+    run: [
+      process.execPath,
+      "-e",
+      `const fs = require("fs");
+      fs.rmSync("out", { recursive: true, force: true });
+      fs.mkdirSync("out/engines", { recursive: true });
+      fs.mkdirSync("out/engines.building-123");
+      for (const file of ["out/entry.js", "out/engines/code.js", "out/chunk-Bq3xZ9aP.js", "out/engines.building-123/left.js", "beside.js"])
+        fs.writeFileSync(file, "built");
+      fs.symlinkSync("../icons", "out/icon-packs")`
+    ]
+  })
+
+  afterAll(() => rmSync(root, { recursive: true, force: true }))
+
+  test.each([
+    ["a lazy engine", "out/engines/code.js"],
+    ["a chunk", "out/chunk-Bq3xZ9aP.js"],
+    ["a whole folder", "out/engines", "out/engines/code.js"],
+    ["a file beside its folder", "beside.js"],
+    ["a link", "out/icon-packs"]
+  ])("stale without %s, %s;  current once built again", (_what, path, named = path) => {
+    bundle.build({ stdio: "ignore" })
+    expect(bundle.isStale).toBe(false)
+    rmSync(join(root, "made", path), { recursive: true, force: true })
+    expect(bundle.check().stale).toBe(`no ${named}`)
+    bundle.build({ stdio: "ignore" })
+    expect(bundle.isStale).toBe(false)
+  })
+
+  test("not what another run was still building, nor a generated path it never wrote", () => {
+    bundle.build({ stdio: "ignore" })
+    rmSync(join(root, "made/out/engines.building-123"), { recursive: true })
+    expect(bundle.isStale).toBe(false)
+  })
+})
+
+/** An install holding Spell UI's and spell-epic's packages, each its own repo beside the checkout, `app/`. */
 function top(): string {
   const dir = mkdtempSync(join(tmpdir(), "assembler-bundles-"))
-  install(dir, { "spell-ui": "ui", "spell-epic": "epic", "spell-brand": "spell-brand" })
+  install(dir, { "spell-ui": "ui", "spell-epic": "epic" })
   mkdirSync(join(dir, "spell-app"))
   return dir
 }
@@ -135,9 +191,8 @@ function top(): string {
 const BUNDLES = [
   "../ui/src/components/ui-root",
   "../ui/site/_assets",
-  "../spell-brand/_assets/ui",
   "../epic/src/components/__pack",
-  "../epic/src/tools/_assets"
+  "../epic/src/tools/_assets/spell-ui"
 ]
 
 // epic `epic-engine` P54 (Owen, Q61:  "Only in a worktree")
@@ -208,7 +263,9 @@ describe("Bundle sources", () => {
   put(root, "epic/src/tool/Tool.ts", "tool")
   put(root, "epic/src/components/__pack/epics.pack.js", "pack")
   put(root, "epic/src/docs/__data/components.json5", "{}")
-  put(root, "epic/src/tools/_assets/spell-ui.js", "bundle")
+  put(root, "epic/src/tools/_assets/spell-ui.js", "loader")
+  put(root, "epic/src/tools/_assets/spell-ui/main.js", "bundle")
+  put(root, "epic/src/tools/_assets/spell-comments.js", "comments")
   put(root, "epic/src/tools/_assets/emoji/cldr/a.js", "emoji")
   put(root, "epic/src/tools/_assets/spell-doc-runtime.js", "runtime")
   afterAll(() => rmSync(root, { recursive: true, force: true }))
@@ -220,14 +277,16 @@ describe("Bundle sources", () => {
       SRV.BUNDLES.find((spec) => spec.name === name)!
     )
 
-  test("never what any committed one generates, nor its own entry:  so no build makes another stale", () => {
+  test("never what any bundle generates, nor its own entry:  so no build makes another stale", () => {
     const epicFiles = (name: string) =>
       bundleOf(name)
         .sourceFiles()
         .filter((file) => file.startsWith("spell/epic/"))
+    // the docs bundle's own classic loader, `spell-ui.js`, is committed:  a source of both
     expect(epicFiles("epics-pack")).toEqual([
       "spell/epic/src/tool/Tool.ts",
-      "spell/epic/src/tools/_assets/spell-doc-runtime.js"
+      "spell/epic/src/tools/_assets/spell-doc-runtime.js",
+      "spell/epic/src/tools/_assets/spell-ui.js"
     ])
     expect(epicFiles("epic-docs")).toEqual(epicFiles("epics-pack"))
   })
@@ -276,6 +335,19 @@ describe("a build script's steps", () => {
     const only = SRV.Bundle.sizeReport({ name: "b", folder: out, seconds: 0, entries: ["site.js"], only: /\.js$/ })
     expect(only.at(-2)).toMatch(/all 3 files/)
   })
+
+  // epic `solid-2-final` P1:  brotli is the size budgets' unit
+  test("firstLoad():  the eager files' sizes raw, gzipped and brotli, summed;  the rest lazy", () => {
+    const load = SRV.Bundle.firstLoad({ folder: out, entries: ["site.js"], only: /\.js$/ })
+    expect(load.files.map((size) => size.file).sort()).toEqual(["shared.js", "site.js"])
+    expect(load.lazy.map((size) => size.file)).toEqual(["lazy.js"])
+    expect(load.raw).toBe(load.files[0]!.raw + load.files[1]!.raw)
+    expect(load.brotli).toBe(load.files[0]!.brotli + load.files[1]!.brotli)
+    const big = Buffer.from("spell ".repeat(2000))
+    const sizes = SRV.Bundle.sizesOf(big)
+    expect(sizes.raw).toBe(12_000)
+    expect(sizes.brotli).toBeLessThan(sizes.gzip)
+  })
 })
 
 describe("Bundle.all()", () => {
@@ -286,20 +358,14 @@ describe("Bundle.all()", () => {
   afterAll(() => rmSync(dir, { recursive: true, force: true }))
 
   test("every bundle, or the ones named, in that order;  an unknown name says which there are", () => {
-    expect(SRV.Bundle.all(repo).map((bundle) => bundle.name)).toEqual([
-      "ui-root",
-      "ui-site",
-      "brand",
-      "epics-pack",
-      "epic-docs"
-    ])
-    expect(SRV.Bundle.all(repo, ["brand", "ui-site"]).map((bundle) => bundle.outputDir)).toEqual([
-      join(realpathSync(dir), "spell-brand/_assets/ui"),
+    expect(SRV.Bundle.all(repo).map((bundle) => bundle.name)).toEqual(["ui-root", "ui-site", "epics-pack", "epic-docs"])
+    expect(SRV.Bundle.all(repo, ["epics-pack", "ui-site"]).map((bundle) => bundle.outputDir)).toEqual([
+      join(realpathSync(dir), "epic/src/components/__pack"),
       join(realpathSync(dir), "ui/site/_assets")
     ])
     expect(SRV.Bundle.all(repo).map((bundle) => bundle.output)).toEqual(BUNDLES)
     expect(() => SRV.Bundle.all(repo, ["nope"])).toThrow(
-      "Bundle.all():  no bundle 'nope';  bundles:  ui-root, ui-site, brand, epics-pack, epic-docs"
+      "Bundle.all():  no bundle 'nope';  bundles:  ui-root, ui-site, epics-pack, epic-docs"
     )
   })
 })
@@ -316,8 +382,8 @@ describe("Bundle.specs()", () => {
   }
 
   test("the folders the root's package.json names, in its order, each with the bundle that builds into it", () => {
-    const only = checkout("only", { pageServer: { bundles: ["../spell-brand/_assets/ui"] } })
-    expect(SRV.Bundle.specs(only).map((spec) => spec.name)).toEqual(["brand"])
+    const only = checkout("only", { pageServer: { bundles: ["../ui/site/_assets", "../ui/src/components/ui-root"] } })
+    expect(SRV.Bundle.specs(only).map((spec) => spec.name)).toEqual(["ui-site", "ui-root"])
   })
 
   test("none without a list, as the page server;  a folder no bundle builds into throws", () => {
@@ -335,9 +401,49 @@ describe("Bundle.specs()", () => {
   })
 })
 
-// the ONE list, as the kit's settings merge it:  Spell UI's part names its site's bundle, spell-brand's its pages'
-// (spell-app's own test until epic `repo-split` P16);  only where spell-brand is beside the kit (the kit's CI has none)
-describe.skipIf(!SRV.Bundle.packageDirFor("spell-brand", KIT))("the kit's bundles", () => {
+// two page servers watch one worktree, its own and main's:  each starts a check when a source changes
+describe("builds of one bundle take turns (epic `epic-engine` I363)", () => {
+  const top = mkdtempSync(join(tmpdir(), "assembler-bundle-turns-"))
+  install(top, { "@demo/pkg": "pkg" })
+  put(top, "pkg/src/a.ts", "a")
+
+  afterAll(() => rmSync(top, { recursive: true, force: true }))
+
+  test("two that find it stale at once build it once;  the second finds it current", { timeout: 60_000 }, async () => {
+    const write = `const fs = require("fs");  fs.appendFileSync("runs", "x");  setTimeout(() => {
+      fs.mkdirSync("out", { recursive: true });  fs.writeFileSync("out/entry.js", "built")
+    }, 1000)`
+    const spec = { ...SPEC, run: [process.execPath, "-e", write] }
+    // each a process of its own, as the servers' `spell bundle --stale`:  it waits till both have found it stale
+    const check = `
+      import { existsSync, writeFileSync } from "node:fs"
+      import { SRV } from "spell/server"
+      const [top, spec, me, other] = JSON.parse(process.env.TURN)
+      const bundle = new SRV.Bundle(top, spec)
+      if (!bundle.isStale) throw new Error("not stale to start with")
+      writeFileSync(top + "/ready-" + me, "")
+      while (!existsSync(top + "/ready-" + other)) await new Promise((done) => setTimeout(done, 20))
+      bundle.buildIfStale({ stdio: "ignore" })
+    `
+    const run = (me: string, other: string) =>
+      promisify(execFile)(process.execPath, ["--import", "tsx", "--input-type=module", "-e", check], {
+        cwd: KIT,
+        timeout: 50_000,
+        env: {
+          ...process.env,
+          TSX_TSCONFIG_PATH: join(KIT, "tsconfig.node.json"),
+          TURN: JSON.stringify([top, spec, me, other])
+        }
+      })
+    await Promise.all([run("a", "b"), run("b", "a")])
+    expect(readFileSync(join(top, "pkg/runs"), "utf8")).toBe("x")
+    expect(new SRV.Bundle(top, spec).isStale).toBe(false)
+  })
+})
+
+// the ONE list, as the kit's settings merge it:  Spell UI's part names its site's bundle, epic/'s its pack and docs
+// bundle (spell-app's own test until epic `repo-split` P16)
+describe("the kit's bundles", () => {
   test("the installed repos' settings name every bundle, each once", () => {
     const outputs = SRV.Bundle.specs(KIT).map((spec) => spec.name)
     expect([...outputs].sort()).toEqual(SRV.BUNDLES.map((spec) => spec.name).sort())

@@ -4,7 +4,11 @@
 		<header>Every component family's main example on one page, live: pick a theme and see it everywhere at once.</>
 	</>
 
-	<!-- A snapshot of the docs site's kitchen sink (`yarn site:kitchen`, each family's main example). -->
+	<!--
+		Every family's main example, live:  everything between the kitchen:start / kitchen:end comments is WRITTEN by
+		`yarn site:kitchen` (Spell UI's scripts/site-kitchen.ts) from each family's examples/elements/types.html:
+		edit the example files, not this block.  The rest of the page is hand-kept.
+	-->
 	<markdown>
 		Every component family's main example, live, on one page: pick a theme and a colour scheme below and see it on
 		everything at once. The choice is remembered on every page of this site. Each family's own page has the rest of
@@ -16,6 +20,7 @@
 		</>
 	</>
 
+	<!-- kitchen:start -->
 	<section label="Elements">
 		<section label="Button" sticky="stack" collapsible dividing>
 			<example "Button" description="A button indicates a possible user action. \[Button page](/button)">
@@ -191,7 +196,7 @@
 				<input placeholder="Search..." aria-label="Search"/>
 			</example>
 			<example "Input" description="Native types">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<input type="password" placeholder="Password" aria-label="Password"/>
 					<input type="email" placeholder="E-mail" aria-label="E-mail"/>
 					<input type="number" placeholder="Quantity" aria-label="Quantity"/>
@@ -470,7 +475,7 @@
 				</segment>
 			</example>
 			<example "Segment" description="Placeholder segment">
-				<segment placeholder="">
+				<segment appearance="placeholder">
 					<text style="text-align: center" paragraph>No documents are listed for this customer.</text>
 					<button type="button">Add document</button>
 				</segment>
@@ -722,21 +727,7 @@
 		<section label="Property Editor" sticky="stack" collapsible dividing>
 			<example "Property Editor" description="A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many. \[Property Editor page](/property-editor)">
 				<html>
-					<ui-property-editor compact show-defaults label="Routine" style="max-width: 340px" schema="{\"name\": \"Routine\", \"attributes\": \[
-                    {\"name\": \"name\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"hint\": \"LaTeX\", \"tip\": \"Shown on the circuit.\"},
-                    {\"name\": \"kind\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"gate\", \"measure\", \"reset\"], \"default\": \"gate\", \"description\": \"\"},
-                    {\"name\": \"steps\", \"kind\": \"number\", \"type\": \"number\", \"default\": 1, \"description\": \"\"},
-                    {\"name\": \"angle\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"hint\": \"LaTeX or a #\"},
-                    {\"name\": \"align\", \"kind\": \"textAlign\", \"default\": \"left\", \"description\": \"\", \"tip\": \"Where its label sits.\"},
-                    {\"name\": \"color\", \"kind\": \"color\", \"description\": \"\"},
-                    {\"name\": \"margin\", \"kind\": \"json\", \"type\": \"sides\", \"description\": \"\"},
-                    {\"name\": \"padding\", \"kind\": \"json\", \"type\": \"sides\", \"description\": \"\"},
-                    {\"name\": \"controlled\", \"kind\": \"boolean\", \"description\": \"\", \"tip\": \"Runs only when its control is on.\"},
-                    {\"name\": \"inverse\", \"kind\": \"boolean\", \"description\": \"\"},
-                    {\"name\": \"barrier\", \"kind\": \"boolean\", \"description\": \"\"},
-                    {\"name\": \"visible\", \"kind\": \"boolean\", \"default\": true, \"description\": \"\"},
-                    {\"name\": \"locked\", \"kind\": \"boolean\", \"description\": \"\"}
-                  ]}" value="{\"name\": \"QFT\", \"kind\": \"gate\", \"steps\": 3, \"angle\": \"\", \"align\": \"center\", \"color\": \"violet\", \"margin\": \"0 0 0 0\", \"padding\": \"4 8 4 8\", \"controlled\": true, \"inverse\": false, \"barrier\": true, \"visible\": true, \"locked\": false}">
+					<ui-property-editor compact show-defaults label="Routine" style="max-width: 340px" schema="{\"name\": \"Routine\", \"attributes\": \[ {\"name\": \"name\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"hint\": \"LaTeX\", \"tip\": \"Shown on the circuit.\"}, {\"name\": \"kind\", \"kind\": \"enum\", \"type\": \"choice\", \"values\": \[\"gate\", \"measure\", \"reset\"], \"default\": \"gate\", \"description\": \"\"}, {\"name\": \"steps\", \"kind\": \"number\", \"type\": \"number\", \"default\": 1, \"description\": \"\"}, {\"name\": \"angle\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"hint\": \"LaTeX or a #\"}, {\"name\": \"align\", \"kind\": \"textAlign\", \"default\": \"left\", \"description\": \"\", \"tip\": \"Where its label sits.\"}, {\"name\": \"color\", \"kind\": \"color\", \"description\": \"\"}, {\"name\": \"margin\", \"kind\": \"json\", \"type\": \"sides\", \"description\": \"\"}, {\"name\": \"padding\", \"kind\": \"json\", \"type\": \"sides\", \"description\": \"\"}, {\"name\": \"controlled\", \"kind\": \"boolean\", \"description\": \"\", \"tip\": \"Runs only when its control is on.\"}, {\"name\": \"inverse\", \"kind\": \"boolean\", \"description\": \"\"}, {\"name\": \"barrier\", \"kind\": \"boolean\", \"description\": \"\"}, {\"name\": \"visible\", \"kind\": \"boolean\", \"default\": true, \"description\": \"\"}, {\"name\": \"locked\", \"kind\": \"boolean\", \"description\": \"\"} ]}" value="{\"name\": \"QFT\", \"kind\": \"gate\", \"steps\": 3, \"angle\": \"\", \"align\": \"center\", \"color\": \"violet\", \"margin\": \"0 0 0 0\", \"padding\": \"4 8 4 8\", \"controlled\": true, \"inverse\": false, \"barrier\": true, \"visible\": true, \"locked\": false}">
 						<ui-property-group label="Defaults" collapsible>
 							<ui-property name="name"></ui-property>
 							<ui-property name="kind"></ui-property>
@@ -1064,6 +1055,386 @@
 			</example>
 		</>
 
+		<section label="Diagram" sticky="stack" collapsible dividing>
+			<example "Diagram" description="A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it. \[Diagram page](/diagram)">
+				<diagram remember="example-recipe-box">
+					<json>
+						{
+						  "columns": [
+						    {
+						      "groups": [
+						        {
+						          "label": "Recipe Box",
+						          "color": "#047857",
+						          "lanes": [
+						            [
+						              {
+						                "name": "Recipe",
+						                "note": "One dish, written down",
+						                "gap_before": 50,
+						                "fields": [
+						                  "cuisine",
+						                  "tags[]",
+						                  "method",
+						                  "photos[]",
+						                  "notes[]",
+						                  "adapted_from",
+						                  "replaces",
+						                  "related_recipes[]"
+						                ]
+						              }
+						            ],
+						            [
+						              {
+						                "name": "Cuisine",
+						                "note": "e.g. Thai, Basque"
+						              },
+						              {
+						                "name": "Tag",
+						                "note": "Quick, vegetarian, spicy"
+						              },
+						              {
+						                "name": "Method",
+						                "note": "Varies by cuisine",
+						                "fields": ["technique", "timer"]
+						              },
+						              {
+						                "name": "Photo",
+						                "note": "Kept by a photo host",
+						                "fields": ["host / photo_id"]
+						              },
+						              {
+						                "name": "Note",
+						                "note": "A cook's remark"
+						              }
+						            ]
+						          ]
+						        }
+						      ]
+						    },
+						    {
+						      "groups": [
+						        {
+						          "legend": true
+						        },
+						        {
+						          "label": "Elsewhere",
+						          "color": "#6b7280",
+						          "gap_before": 60,
+						          "nodes": [
+						            {
+						              "name": "Technique",
+						              "note": "Kitchen guide",
+						              "color": "#7c3aed"
+						            },
+						            {
+						              "name": "Timer",
+						              "note": "Kitchen guide",
+						              "color": "#7c3aed"
+						            },
+						            {
+						              "name": "Photo hosts",
+						              "note": "Outside services"
+						            }
+						          ]
+						        }
+						      ]
+						    }
+						  ],
+						  "edges": [
+						    {
+						      "from": "Recipe.cuisine",
+						      "to": "Cuisine"
+						    },
+						    {
+						      "from": "Recipe.tags[]",
+						      "to": "Tag"
+						    },
+						    {
+						      "from": "Recipe.method",
+						      "to": "Method",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "Recipe.photos[]",
+						      "to": "Photo",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "Recipe.notes[]",
+						      "to": "Note",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "Recipe.adapted_from",
+						      "to": "Recipe"
+						    },
+						    {
+						      "from": "Recipe.replaces",
+						      "to": "Recipe"
+						    },
+						    {
+						      "from": "Recipe.related_recipes[]",
+						      "to": "Recipe"
+						    },
+						    {
+						      "from": "Method.technique",
+						      "to": "Technique"
+						    },
+						    {
+						      "from": "Method.timer",
+						      "to": "Timer"
+						    },
+						    {
+						      "from": "Photo.host / photo_id",
+						      "to": "Photo hosts"
+						    }
+						  ]
+						}
+					</json>
+				</diagram>
+			</example>
+			<example "Diagram" description="Several concepts, in three columns">
+				<diagram>
+					<json>
+						{
+						  "columns": [
+						    {
+						      "groups": [
+						        {
+						          "legend": true
+						        },
+						        {
+						          "label": "Library",
+						          "color": "#0f766e",
+						          "nodes": [
+						            {
+						              "name": "Ingredient",
+						              "note": "What a dish can use",
+						              "bullets": ["Flour", "Saffron"]
+						            },
+						            {
+						              "name": "Tool",
+						              "note": "Reusable equipment",
+						              "bullets": ["Oven", "Mandoline", "Blowtorch"]
+						            }
+						          ]
+						        }
+						      ]
+						    },
+						    {
+						      "groups": [
+						        {
+						          "label": "Menu",
+						          "color": "#1d4ed8",
+						          "nodes": [
+						            {
+						              "name": "Course",
+						              "note": "Ingredient + amounts",
+						              "fields": ["ingredient"]
+						            },
+						            {
+						              "name": "Menu",
+						              "note": "A season's plan",
+						              "fields": ["courses[]", "steps[]"]
+						            },
+						            {
+						              "name": "Step",
+						              "note": "Tool + timing",
+						              "fields": ["tool", "course", "next_steps[]"]
+						            },
+						            {
+						              "name": "NextStep",
+						              "note": "Where cooking goes next",
+						              "fields": ["to_step"]
+						            }
+						          ]
+						        },
+						        {
+						          "label": "Pantry",
+						          "color": "#047857",
+						          "nodes": [
+						            {
+						              "name": "Shelf",
+						              "note": "Jar, crate, fridge"
+						            }
+						          ]
+						        }
+						      ]
+						    },
+						    {
+						      "groups": [
+						        {
+						          "label": "Cooking",
+						          "color": "#7c3aed",
+						          "nodes": [
+						            {
+						              "name": "Service",
+						              "note": "One evening's covers",
+						              "fields": ["menu", "cooks[]", "shelves[]"]
+						            },
+						            {
+						              "name": "Cook",
+						              "note": "One person's station",
+						              "fields": [
+						                "menu",
+						                "head_cook",
+						                "shelves[]",
+						                "tasks[]",
+						                {
+						                  "name": "current_tasks[]",
+						                  "derived": true
+						                }
+						              ]
+						            },
+						            {
+						              "name": "Task",
+						              "note": "One step, done once",
+						              "fields": ["step", "shelves[]", "timers[]"]
+						            },
+						            {
+						              "name": "Timer",
+						              "note": "Set by a task",
+						              "fields": ["shelves[]"]
+						            }
+						          ]
+						        }
+						      ]
+						    }
+						  ],
+						  "edges": [
+						    {
+						      "from": "Course.ingredient",
+						      "to": "Ingredient"
+						    },
+						    {
+						      "from": "Menu.courses[]",
+						      "to": "Course",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "Menu.steps[]",
+						      "to": "Step",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "Step.tool",
+						      "to": "Tool"
+						    },
+						    {
+						      "from": "Step.course",
+						      "to": "Course",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "Step.next_steps[]",
+						      "to": "NextStep",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "NextStep.to_step",
+						      "to": "Step"
+						    },
+						    {
+						      "from": "Service.menu",
+						      "to": "Menu"
+						    },
+						    {
+						      "from": "Service.cooks[]",
+						      "to": "Cook"
+						    },
+						    {
+						      "from": "Service.shelves[]",
+						      "to": "Shelf"
+						    },
+						    {
+						      "from": "Cook.menu",
+						      "to": "Menu"
+						    },
+						    {
+						      "from": "Cook.head_cook",
+						      "to": "Cook"
+						    },
+						    {
+						      "from": "Cook.shelves[]",
+						      "to": "Shelf"
+						    },
+						    {
+						      "from": "Cook.tasks[]",
+						      "to": "Task",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "Cook.current_tasks[]",
+						      "to": "Task"
+						    },
+						    {
+						      "from": "Task.step",
+						      "to": "Step"
+						    },
+						    {
+						      "from": "Task.shelves[]",
+						      "to": "Shelf"
+						    },
+						    {
+						      "from": "Task.timers[]",
+						      "to": "Timer",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "Timer.shelves[]",
+						      "to": "Shelf"
+						    }
+						  ]
+						}
+					</json>
+				</diagram>
+			</example>
+			<example "Diagram" description="A flat spec, put in columns">
+				<diagram columns="2">
+					<json>
+						{
+						  "nodes": [
+						    {
+						      "name": "Order",
+						      "note": "One customer's basket",
+						      "fields": ["customer", "lines[]"]
+						    },
+						    {
+						      "name": "Customer",
+						      "note": "Someone who buys"
+						    },
+						    {
+						      "name": "Line",
+						      "note": "A product and how many",
+						      "fields": ["product"]
+						    },
+						    {
+						      "name": "Product",
+						      "note": "Something we sell"
+						    }
+						  ],
+						  "edges": [
+						    {
+						      "from": "Order.customer",
+						      "to": "Customer"
+						    },
+						    {
+						      "from": "Order.lines[]",
+						      "to": "Line",
+						      "kind": "contains"
+						    },
+						    {
+						      "from": "Line.product",
+						      "to": "Product"
+						    }
+						  ]
+						}
+					</json>
+				</diagram>
+			</example>
+		</>
+
 		<section label="Feed" sticky="stack" collapsible dividing>
 			<example "Feed" description="A feed presents user activity chronologically. \[Feed page](/feed)">
 				<feed>
@@ -1093,6 +1464,24 @@
 						</content>
 					</event>
 				</feed>
+			</example>
+		</>
+
+		<section label="Graph" sticky="stack" collapsible dividing>
+			<example "Graph" description="A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead. \[Graph page](/graph)">
+				<html>
+					<ui-graph style="--ui-graph-height: 16em" graph="{\"nodes\":\[{\"id\":\"in\",\"label\":\"Input\",\"ports\":\[{\"id\":\"out\",\"kind\":\"out\"}]},{\"id\":\"parse\",\"label\":\"Parse\",\"ports\":\[{\"id\":\"src\",\"label\":\"src\",\"kind\":\"in\"},{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"out\"},{\"id\":\"errors\",\"label\":\"errors\",\"kind\":\"out\"}]},{\"id\":\"check\",\"label\":\"Check\",\"ports\":\[{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"in\"},{\"id\":\"ok\",\"label\":\"ok\",\"kind\":\"out\"}]},{\"id\":\"report\",\"label\":\"Report\"},{\"id\":\"emit\",\"label\":\"Emit\"}],\"edges\":\[{\"from\":{\"node\":\"in\",\"port\":\"out\"},\"to\":{\"node\":\"parse\",\"port\":\"src\"}},{\"from\":{\"node\":\"parse\",\"port\":\"ast\"},\"to\":{\"node\":\"check\",\"port\":\"ast\"},\"label\":\"tree\"},{\"from\":{\"node\":\"parse\",\"port\":\"errors\"},\"to\":{\"node\":\"report\"}},{\"from\":{\"node\":\"check\",\"port\":\"ok\"},\"to\":{\"node\":\"emit\"}}]}"></ui-graph>
+				</html>
+			</example>
+			<example "Graph" description="Children: inline">
+				<html>
+					<ui-graph style="--ui-graph-height: 24em" child-view="inline" graph="{\"nodes\":\[{\"id\":\"mem\",\"label\":\"Memory\",\"ports\":\[{\"id\":\"d\",\"label\":\"data\",\"kind\":\"out\"},{\"id\":\"a\",\"label\":\"addr\",\"kind\":\"in\"}]},{\"id\":\"cpu\",\"label\":\"CPU\",\"open\":true,\"ports\":\[{\"id\":\"clk\",\"label\":\"clk\",\"kind\":\"in\"},{\"id\":\"bus\",\"label\":\"bus\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"fetch\",\"label\":\"Fetch\",\"ports\":\[{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"in\"},{\"id\":\"op\",\"label\":\"op\",\"kind\":\"out\"}]},{\"id\":\"alu\",\"label\":\"ALU\",\"ports\":\[{\"id\":\"op\",\"label\":\"op\",\"kind\":\"in\"},{\"id\":\"r\",\"label\":\"r\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"add\",\"label\":\"Adder\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"shift\",\"label\":\"Shifter\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"mux\",\"label\":\"Mux\",\"ports\":\[{\"id\":\"x\",\"kind\":\"in\"},{\"id\":\"y\",\"kind\":\"in\"},{\"id\":\"o\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"add\",\"port\":\"a\"}},{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"shift\",\"port\":\"a\"}},{\"from\":{\"node\":\"add\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"x\"}},{\"from\":{\"node\":\"shift\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"y\"}},{\"from\":{\"node\":\"mux\",\"port\":\"o\"},\"to\":{\"port\":\"r\"}}]}},{\"id\":\"regs\",\"label\":\"Registers\",\"ports\":\[{\"id\":\"w\",\"label\":\"w\",\"kind\":\"in\"},{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"clk\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"fetch\",\"port\":\"op\"},\"to\":{\"node\":\"alu\",\"port\":\"op\"},\"label\":\"op\"},{\"from\":{\"node\":\"alu\",\"port\":\"r\"},\"to\":{\"node\":\"regs\",\"port\":\"w\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"port\":\"bus\"}}]}},{\"id\":\"clock\",\"label\":\"Clock\",\"ports\":\[{\"id\":\"t\",\"kind\":\"out\"}]},{\"id\":\"io\",\"label\":\"I/O\"}],\"edges\":\[{\"from\":{\"node\":\"clock\",\"port\":\"t\"},\"to\":{\"node\":\"cpu\",\"port\":\"clk\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"mem\",\"port\":\"a\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"io\"}},{\"from\":{\"node\":\"mem\",\"port\":\"d\"},\"to\":{\"node\":\"io\"},\"label\":\"dma\"}]}"></ui-graph>
+				</html>
+			</example>
+			<example "Graph" description="Children: modal">
+				<html>
+					<ui-graph style="--ui-graph-height: 24em" child-view="modal" graph="{\"nodes\":\[{\"id\":\"mem\",\"label\":\"Memory\",\"ports\":\[{\"id\":\"d\",\"label\":\"data\",\"kind\":\"out\"},{\"id\":\"a\",\"label\":\"addr\",\"kind\":\"in\"}]},{\"id\":\"cpu\",\"label\":\"CPU\",\"ports\":\[{\"id\":\"clk\",\"label\":\"clk\",\"kind\":\"in\"},{\"id\":\"bus\",\"label\":\"bus\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"fetch\",\"label\":\"Fetch\",\"ports\":\[{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"in\"},{\"id\":\"op\",\"label\":\"op\",\"kind\":\"out\"}]},{\"id\":\"alu\",\"label\":\"ALU\",\"ports\":\[{\"id\":\"op\",\"label\":\"op\",\"kind\":\"in\"},{\"id\":\"r\",\"label\":\"r\",\"kind\":\"out\"}],\"children\":{\"nodes\":\[{\"id\":\"add\",\"label\":\"Adder\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"shift\",\"label\":\"Shifter\",\"ports\":\[{\"id\":\"a\",\"kind\":\"in\"},{\"id\":\"s\",\"kind\":\"out\"}]},{\"id\":\"mux\",\"label\":\"Mux\",\"ports\":\[{\"id\":\"x\",\"kind\":\"in\"},{\"id\":\"y\",\"kind\":\"in\"},{\"id\":\"o\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"add\",\"port\":\"a\"}},{\"from\":{\"port\":\"op\"},\"to\":{\"node\":\"shift\",\"port\":\"a\"}},{\"from\":{\"node\":\"add\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"x\"}},{\"from\":{\"node\":\"shift\",\"port\":\"s\"},\"to\":{\"node\":\"mux\",\"port\":\"y\"}},{\"from\":{\"node\":\"mux\",\"port\":\"o\"},\"to\":{\"port\":\"r\"}}]}},{\"id\":\"regs\",\"label\":\"Registers\",\"ports\":\[{\"id\":\"w\",\"label\":\"w\",\"kind\":\"in\"},{\"id\":\"pc\",\"label\":\"pc\",\"kind\":\"out\"}]}],\"edges\":\[{\"from\":{\"port\":\"clk\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"fetch\",\"port\":\"op\"},\"to\":{\"node\":\"alu\",\"port\":\"op\"},\"label\":\"op\"},{\"from\":{\"node\":\"alu\",\"port\":\"r\"},\"to\":{\"node\":\"regs\",\"port\":\"w\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"node\":\"fetch\",\"port\":\"pc\"}},{\"from\":{\"node\":\"regs\",\"port\":\"pc\"},\"to\":{\"port\":\"bus\"}}]}},{\"id\":\"clock\",\"label\":\"Clock\",\"ports\":\[{\"id\":\"t\",\"kind\":\"out\"}]},{\"id\":\"io\",\"label\":\"I/O\"}],\"edges\":\[{\"from\":{\"node\":\"clock\",\"port\":\"t\"},\"to\":{\"node\":\"cpu\",\"port\":\"clk\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"mem\",\"port\":\"a\"}},{\"from\":{\"node\":\"cpu\",\"port\":\"bus\"},\"to\":{\"node\":\"io\"}},{\"from\":{\"node\":\"mem\",\"port\":\"d\"},\"to\":{\"node\":\"io\"},\"label\":\"dma\"}]}"></ui-graph>
+				</html>
 			</example>
 		</>
 
@@ -1141,6 +1530,37 @@
 						</content>
 					</item>
 				</items>
+			</example>
+		</>
+
+		<section label="Mermaid diagram" sticky="stack" collapsible dividing>
+			<example "Mermaid diagram" description="A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site. \[Mermaid diagram page](/mermaid-diagram)">
+				<html>
+					<ui-mermaid-diagram>
+						<script type="text/mermaid">
+							flowchart LR
+							  idea[An idea] --> draft[A draft]
+							  draft --> review{Reviewed?}
+							  review -->|yes| ship[Shipped]
+							  review -->|not yet| draft
+						</script>
+					</ui-mermaid-diagram>
+				</html>
+			</example>
+			<example "Mermaid diagram" description="From a file">
+				<mermaid-diagram source="/components/ui/examples/release.mmd"/>
+			</example>
+			<example "Mermaid diagram" description="Hand-drawn, with the colours menu">
+				<html>
+					<ui-mermaid-diagram look="hand-drawn" controls remember="examples-hand-drawn">
+						<script type="text/mermaid">
+							flowchart TD
+							  start([Start]) --> pick[Pick a card]
+							  pick --> play[Play it]
+							  play --> start
+						</script>
+					</ui-mermaid-diagram>
+				</html>
 			</example>
 		</>
 
@@ -1231,7 +1651,7 @@
 				<calendar value="2026-09-30T14:30" locale="en-US" placeholder="Date and time" today/>
 			</example>
 			<example "Calendar" description="Date, time, month, year">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<calendar type="date" locale="en-US" placeholder="Date"/>
 					<calendar type="time" locale="en-US" placeholder="Time"/>
 					<calendar type="month" locale="en-US" placeholder="Month"/>
@@ -1239,7 +1659,7 @@
 				</stack>
 			</example>
 			<example "Calendar" description="Inline">
-				<stack class="ui-cluster">
+				<stack direction="horizontal" wrap>
 					<calendar inline type="date" value="2026-09-30" locale="en-US" aria-label="Inline date"/>
 					<calendar inline type="month" value="2026-09" locale="en-US" aria-label="Inline month"/>
 					<calendar inline type="time" value="14:30" locale="en-US" aria-label="Inline time"/>
@@ -1262,11 +1682,21 @@
 			</example>
 		</>
 
+		<section label="Dial" sticky="stack" collapsible dividing>
+			<example "Dial" description="A dial lets people pick a number by turning it, with its value in the middle and its label under it. \[Dial page](/dial)">
+				<stack direction="horizontal" wrap style="gap: 24px">
+					<dial size="small" label="Weight" color="orange" min="100" max="900" value="777" ticks style="--ui-dial-value-font-weight: 777"/>
+					<dial size="small" label="Roundness" color="teal" value="50"/>
+					<dial size="small" label="Size" color="blue" max="250" value="104"/>
+					<dial size="small" label="Line height" color="red" min="80" max="200" value="98" unit="%"/>
+					<dial size="small" label="Spacing" color="yellow" min="-20" max="50" value="0" unit="%"/>
+				</stack>
+			</example>
+		</>
+
 		<section label="Dimmer" sticky="stack" collapsible dividing>
 			<example "Dimmer" description="A dimmer hides distractions to focus attention on particular content. \[Dimmer page](/dimmer)">
-				<html>
-					<button type="button" class="ui button" commandfor="dimmer-types-plain" command="--toggle">Toggle</button>
-				</html>
+				<button commandfor="dimmer-types-plain" command="--toggle">Toggle</button>
 				<segment>
 					<text paragraph>A segment holding some text that the dimmer covers.</text>
 					<text paragraph>Another paragraph, so the segment has some height.</text>
@@ -1283,9 +1713,7 @@
 				</segment>
 			</example>
 			<example "Dimmer" description="Page dimmer">
-				<html>
-					<button type="button" class="ui button" commandfor="dimmer-types-page" command="--show">Dim the page</button>
-				</html>
+				<button commandfor="dimmer-types-page" command="--show">Dim the page</button>
 				<dimmer id="dimmer-types-page" page aria-label="Dark page dimmer">
 					<header level="2">Dark page dimmer</header>
 					<text paragraph>A click anywhere, or Escape, brings the page back.</text>
@@ -1334,9 +1762,7 @@
 
 		<section label="Flyout" sticky="stack" collapsible dividing>
 			<example "Flyout" description="A flyout is a modal that slides in from a side of the page. \[Flyout page](/flyout)">
-				<html>
-					<button type="button" class="ui button" commandfor="flyout-types-standard" command="--show">Show</button>
-				</html>
+				<button commandfor="flyout-types-standard" command="--show">Show</button>
 				<flyout id="flyout-types-standard" closable>
 					<header>Archive old messages</header>
 					<content>
@@ -1349,15 +1775,11 @@
 				</flyout>
 			</example>
 			<example "Flyout" description="Right, shorthands">
-				<html>
-					<button type="button" class="ui button" commandfor="flyout-types-right" command="--show">Show right</button>
-				</html>
+				<button commandfor="flyout-types-right" command="--show">Show right</button>
 				<flyout id="flyout-types-right" position="right" width="thin" heading="Profile" content="A thin flyout." closable/>
 			</example>
 			<example "Flyout" description="Top, inverted">
-				<html>
-					<button type="button" class="ui button" commandfor="flyout-types-top" command="--show">Show top</button>
-				</html>
+				<button commandfor="flyout-types-top" command="--show">Show top</button>
 				<flyout id="flyout-types-top" position="top" inverted heading="Notice" closable>
 					<content>
 						<text paragraph>A top flyout is full width, as tall as its content.</text>
@@ -1379,18 +1801,26 @@
 		</>
 
 		<section label="JSON data" sticky="stack" collapsible dividing>
-			<example "JSON data" description="JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it. \[JSON data page](/json)">
-				<tree-diagram>
-					<json>&#123; "label": "Add", "children": \[&#123; "label": "Number 1" &#125;, &#123; "label": "Number 2" &#125;] &#125;</json>
-				</tree-diagram>
+			<example "JSON data" description="JSON data holds data in a page, as its text or from a file, and shows it as an outline that opens and closes. \[JSON data page](/json)">
+				<json>
+					{ "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null, "tags": ["in", "test"],
+					"bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 } }
+				</json>
+			</example>
+			<example "JSON data" description="Three levels open, editable">
+				<json depth="3" editable>
+					{ "board": { "name": "demo", "parts": { "a1": { "kind": "switch", "on": false }, "b2": { "kind": "lamp", "watts":
+					60 } } }, "made": "2026-11-18" }
+				</json>
+			</example>
+			<example "JSON data" description="All closed, no header">
+				<json depth="0" no-header>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]</json>
 			</example>
 		</>
 
 		<section label="Modal" sticky="stack" collapsible dividing>
 			<example "Modal" description="A modal displays content that temporarily blocks interactions with the main view of a site. \[Modal page](/modal)">
-				<html>
-					<button type="button" class="ui button" commandfor="modal-types-standard" command="--show">Show</button>
-				</html>
+				<button commandfor="modal-types-standard" command="--show">Show</button>
 				<modal id="modal-types-standard" closable>
 					<header>Profile Picture</header>
 					<content>
@@ -1406,9 +1836,7 @@
 				</modal>
 			</example>
 			<example "Modal" description="Basic">
-				<html>
-					<button type="button" class="ui button" commandfor="modal-types-basic" command="--show">Show basic</button>
-				</html>
+				<button commandfor="modal-types-basic" command="--show">Show basic</button>
 				<modal id="modal-types-basic" appearance="basic" size="small" heading="Archive Old Messages">
 					<content>
 						<text paragraph>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</text>
@@ -1536,9 +1964,7 @@
 
 		<section label="Shape" sticky="stack" collapsible dividing>
 			<example "Shape" description="A shape is a three dimensional object displayed on a two dimensional plane. \[Shape page](/shape)">
-				<html>
-					<button type="button" class="ui button" commandfor="shape-demo-plain" command="--next">Flip left</button>
-				</html>
+				<button commandfor="shape-demo-plain" command="--next">Flip left</button>
 				<shape id="shape-demo-plain">
 					<side>
 						<text paragraph>This side starts visible.</text>
@@ -1552,10 +1978,8 @@
 				</shape>
 			</example>
 			<example "Shape" description="Cube">
-				<html>
-					<button type="button" class="ui button" commandfor="shape-demo-cube" command="--next">Flip up</button>
-					<button type="button" class="ui button" commandfor="shape-demo-cube" command="--previous">Back</button>
-				</html>
+				<button commandfor="shape-demo-cube" command="--next">Flip up</button>
+				<button commandfor="shape-demo-cube" command="--previous">Back</button>
 				<shape id="shape-demo-cube" cube direction="up">
 					<side>
 						<text>1</text>
@@ -1569,37 +1993,31 @@
 				</shape>
 			</example>
 			<example "Shape" description="Text">
-				<html>
-					<button type="button" class="ui button" commandfor="shape-demo-text" command="--next">Flip down</button>
-				</html>
+				<button commandfor="shape-demo-text" command="--next">Flip down</button>
 				<text paragraph>Flip to <shape id="shape-demo-text" text direction="down" active-index="1"><side>Scale</side> <side>Fade</side></shape></text>
 			</example>
 		</>
 
 		<section label="Sidebar" sticky="stack" collapsible dividing>
 			<example "Sidebar" description="A sidebar hides additional content beside a page. \[Sidebar page](/sidebar)">
-				<html>
-					<ui-pushable style="height: 14em">
-						<ui-sidebar id="sidebar-demo-left" inverted aria-label="Site">
-							<ui-menu direction="vertical" inverted fluid aria-label="Site">
-								<ui-item link="#home">Home</ui-item>
-								<ui-item link="#games">Games</ui-item>
-								<ui-item link="#channels">Channels</ui-item>
-							</ui-menu>
-						</ui-sidebar>
-						<ui-pusher>
-							<ui-segment appearance="basic">
-								<button type="button" class="ui button" commandfor="sidebar-demo-left" command="--toggle">Menu</button>
-								<ui-text paragraph>The default left sidebar uncovers itself from under this content, which dims.</ui-text>
-							</ui-segment>
-						</ui-pusher>
-					</ui-pushable>
-				</html>
+				<pushable style="height: 14em">
+					<sidebar id="sidebar-demo-left" inverted aria-label="Site">
+						<menu direction="vertical" inverted fluid aria-label="Site">
+							<item link="#home">Home</item>
+							<item link="#games">Games</item>
+							<item link="#channels">Channels</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<button commandfor="sidebar-demo-left" command="--toggle">Menu</button>
+							<text paragraph>The default left sidebar uncovers itself from under this content, which dims.</text>
+						</segment>
+					</pusher>
+				</pushable>
 			</example>
 			<example "Sidebar" description="Overlay, right, thin">
-				<html>
-					<button type="button" class="ui button" commandfor="sidebar-demo-right" command="--toggle">Toggle right</button>
-				</html>
+				<button commandfor="sidebar-demo-right" command="--toggle">Toggle right</button>
 				<pushable style="height: 12em">
 					<sidebar id="sidebar-demo-right" position="right" width="thin" transition="overlay" inverted>
 						<menu direction="vertical" inverted fluid aria-label="Numbers">
@@ -1717,14 +2135,29 @@
 			</example>
 		</>
 
+		<section label="Tour" sticky="stack" collapsible dividing>
+			<example "Tour" description="A tour leads someone through a feature one numbered step at a time, pointing at what each step is about. \[Tour page](/tour)">
+				<stack class="ui-stack">
+					<stack direction="horizontal" wrap>
+						<button id="tour-new" icon="plus">New</button>
+						<button id="tour-save" icon="save">Save</button>
+						<button commandfor="tour-example" command="--start" appearance="basic" icon="map signs">Take the tour</button>
+					</stack>
+					<tour id="tour-example" name="The toolbar" summary="What its buttons do.">
+						<tour-step target="tour-new">New starts a fresh page.</tour-step>
+						<tour-step name="save" target="tour-save" dim>Save keeps what you've done.</tour-step>
+						<tour-step>That's it. You can take this tour again any time.</tour-step>
+					</tour>
+				</stack>
+			</example>
+		</>
+
 		<section label="Transition" sticky="stack" collapsible dividing>
 			<example "Transition" description="A transition is an animation used to show or hide content, or to draw attention to it. \[Transition page](/transition)">
-				<html>
-					<button type="button" class="ui button" commandfor="transition-demo-fade" command="--toggle">Fade up</button>
-					<button type="button" class="ui button" commandfor="transition-demo-scale" command="--toggle">Scale</button>
-					<button type="button" class="ui button" commandfor="transition-demo-flip" command="--toggle">Horizontal flip</button>
-				</html>
-				<stack class="ui-cluster">
+				<button commandfor="transition-demo-fade" command="--toggle">Fade up</button>
+				<button commandfor="transition-demo-scale" command="--toggle">Scale</button>
+				<button commandfor="transition-demo-flip" command="--toggle">Horizontal flip</button>
+				<stack direction="horizontal" wrap>
 					<transition id="transition-demo-fade" animation="fade up" inline visible>
 						<segment>Fade up</segment>
 					</transition>
@@ -1737,11 +2170,9 @@
 				</stack>
 			</example>
 			<example "Transition" description="Attention">
-				<html>
-					<button type="button" class="ui button" commandfor="transition-demo-shake" command="--transition">Shake</button>
-					<button type="button" class="ui button" commandfor="transition-demo-tada" command="--transition">Tada</button>
-				</html>
-				<stack class="ui-cluster">
+				<button commandfor="transition-demo-shake" command="--transition">Shake</button>
+				<button commandfor="transition-demo-tada" command="--transition">Tada</button>
+				<stack direction="horizontal" wrap>
 					<transition id="transition-demo-shake" animation="shake" inline visible>
 						<segment>Shake</segment>
 					</transition>
@@ -1751,9 +2182,7 @@
 				</stack>
 			</example>
 			<example "Transition" description="Hidden">
-				<html>
-					<button type="button" class="ui button" commandfor="transition-demo-hidden" command="--show">Show</button>
-				</html>
+				<button commandfor="transition-demo-hidden" command="--show">Show</button>
 				<transition id="transition-demo-hidden" animation="drop">
 					<segment>Hidden until shown</segment>
 				</transition>
@@ -1779,6 +2208,40 @@
 	</>
 
 	<section label="Spell UI's own">
+		<section label="App menu" sticky="stack" collapsible dividing>
+			<example "App menu" description="An app menu is an app's top bar, joined to the top of its window or page:  a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons. \[App menu page](/app-menu)">
+				<app-menu aria-label="Editor demo">
+					<item slot="start" icon="magic">
+						<text bold>My App</text>
+					</item>
+					<item slot="start">File</item>
+					<item slot="start">Edit</item>
+					<item slot="start">View</item>
+					<menu appearance="segmented" aria-label="Mode">
+						<item value="run" icon="play">Run</item>
+						<item value="edit" icon="pencil alternate" selected>Edit</item>
+					</menu>
+					<item slot="end" link="#settings" icon="cog" aria-label="Settings"/>
+					<item slot="end" link="#you" icon="user circle" aria-label="You"/>
+				</app-menu>
+			</example>
+			<example "App menu" description="Site bar">
+				<app-menu aria-label="Site demo">
+					<item slot="start" link="#side-bar" icon="columns" aria-label="Show or hide the side bar"/>
+					<item slot="start">
+						<breadcrumbs aria-label="Where you are">
+							<breadcrumb link="#home">Home</breadcrumb>
+							<breadcrumb link="#guides">Guides</breadcrumb>
+							<breadcrumb selected>Getting started</breadcrumb>
+						</breadcrumbs>
+					</item>
+					<item slot="end" link="#notices" icon="bell" aria-label="Notices"/>
+					<item slot="end" link="#help" icon="circle question" aria-label="Help"/>
+					<avatar slot="end" link="#you" tooltip="You">O</avatar>
+				</app-menu>
+			</example>
+		</>
+
 		<section label="Code" sticky="stack" collapsible dividing>
 			<example "Code" description="Code shows a block of source code coloured by its language, from the element's own text or a file on this site. \[Code page](/code)">
 				<html>
@@ -1805,21 +2268,54 @@
 			</example>
 		</>
 
+		<section label="Device" sticky="stack" collapsible dividing>
+			<example "Device" description="A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge. \[Device page](/device)">
+				<device device="phone">
+					<segment appearance="basic">
+						<header size="large">Hello</header>
+						<text paragraph>An app on a phone's screen, 390 by 844.</text>
+						<button color="primary">Start</button>
+					</segment>
+					<button slot="buttons" size="small" color="primary">Done</button>
+				</device>
+			</example>
+		</>
+
+		<section label="Dimension" sticky="stack" collapsible dividing>
+			<example "Dimension" description="A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere. \[Dimension page](/dimension)">
+				<text paragraph>Luke is <dimension value="172" dimension="length" unit="cm"/> tall, and weighs <dimension value="77" dimension="weight" unit="kg"/>.</text>
+			</example>
+			<example "Dimension" description="In the units it's asked for">
+				<text paragraph><dimension value="172" dimension="length" unit="cm" in="feet and inches"/>, <dimension value="172" dimension="length" unit="cm" in="cm"/>, <dimension value="100" dimension="temperature" unit="°C" in="°F"/></text>
+			</example>
+		</>
+
 		<section label="Example" sticky="stack" collapsible dividing>
 			<example "Example" description="An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides. \[Example page](/example)">
-				<stack class="ui-stack">
-					<example "Button" description="A standard button.">
-						<button>Follow</button>
-					</example>
-					<example "Emphasis" code description="A button can be formatted to show different levels of emphasis.">
-						<button color="primary">Save</button>
-						<button>Discard</button>
-					</example>
-					<example "Rich description">
-						<button color="secondary">Okay</button>
-						<text slot="description" paragraph>A description with a <link link="#rich">link</link>, from the <text code>description</text> slot.</text>
-					</example>
-				</stack>
+				<html>
+					<ui-stack class="ui-stack">
+						<ui-example heading="Button" description="A standard button.">
+							<ui-button>Follow</ui-button>
+						</ui-example>
+						<ui-example heading="Emphasis" description="A button can be formatted to show different levels of emphasis." code>
+							<ui-button color="primary">Save</ui-button>
+							<ui-button>Discard</ui-button>
+						</ui-example>
+						<ui-example heading="Rich description">
+							<ui-text slot="description" paragraph>A description with a <ui-link link="#rich">link</ui-link>, from the <ui-text code>description</ui-text> slot.</ui-text>
+							<ui-button color="secondary">Okay</ui-button>
+						</ui-example>
+					</ui-stack>
+				</html>
+			</example>
+		</>
+
+		<section label="Icon Browser" sticky="stack" collapsible dividing>
+			<example "Icon Browser" description="An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it. \[Icon Browser page](/icon-browser)">
+				<icon-browser/>
+			</example>
+			<example "Icon Browser" description="On a pack and a search">
+				<icon-browser pack="fa7-brands" query="git"/>
 			</example>
 		</>
 
@@ -1855,7 +2351,11 @@
 				</html>
 			</example>
 			<example "Markdown" description="Small">
-				<markdown>Smaller text, the _same_ look.</>
+				<html>
+					<ui-markdown size="small">
+						<script type="text/markdown">Smaller text, the _same_ look.</script>
+					</ui-markdown>
+				</html>
 			</example>
 		</>
 
@@ -1874,6 +2374,24 @@
 						<text slot="footer" color="grey">© 2026 Inbox</text>
 					</page>
 				</stack>
+			</example>
+		</>
+
+		<section label="Page layout" sticky="stack" collapsible dividing>
+			<example "Page layout" description="A page layout puts what stays on screen around a page:  a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer. \[Page layout page](/page-layout)">
+				<html>
+					<ui-page-layout style="min-height: 18em">
+						<ui-app-menu slot="menu">
+							<ui-site-nav-button slot="start"></ui-site-nav-button>
+							<ui-site-breadcrumbs slot="start"></ui-site-breadcrumbs>
+							<ui-button slot="end" icon="bell" appearance="tertiary" size="small" title="Notices"></ui-button>
+						</ui-app-menu>
+						<ui-site-tabs slot="page-menu"></ui-site-tabs>
+						<ui-site-nav slot="drawer" appearance="nav" current="#api" pages="\[{ \"title\": \"Home\", \"href\": \"#home\", \"icon\": \"home\" }, { \"title\": \"Parts\", \"id\": \"group:Parts\", \"band\": \"group\", \"icon\": \"cubes\", \"pages\": \[{ \"title\": \"Button\", \"tab\": \"Usage\", \"href\": \"#usage\", \"pages\": \[{ \"title\": \"API\", \"href\": \"#api\" }, { \"title\": \"Theming\", \"href\": \"#theming\" }] }] }]"></ui-site-nav>
+						<ui-text paragraph>The page goes here. Going to another page redraws only this part.</ui-text>
+						<ui-text slot="footer" color="grey">Made with Spell</ui-text>
+					</ui-page-layout>
+				</html>
 			</example>
 		</>
 
@@ -1896,7 +2414,7 @@
 				</panel>
 			</example>
 			<example "Panel" description="Colors">
-				<stack style="align-items: start" class="ui-cluster">
+				<stack direction="horizontal" wrap style="align-items: start">
 					<panel label="Violet" level="5" color="violet" style="width: 200px">
 						<panel label="Tweak">
 							<text paragraph>Any hue.</text>
@@ -1983,6 +2501,37 @@
 			</example>
 		</>
 
+		<section label="Site breadcrumbs" sticky="stack" collapsible dividing>
+			<example "Site breadcrumbs" description="Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page, each page above a link. \[Site breadcrumbs page](/site-breadcrumbs)">
+				<html>
+					<ui-site-breadcrumbs current="#systems" pages="\[{ \"title\": \"Hardware\", \"id\": \"group:Hardware\", \"band\": \"group\", \"pages\": \[{ \"title\": \"Machines\", \"href\": \"#machines\", \"pages\": \[{ \"title\": \"Systems\", \"href\": \"#systems\" }] }] }]"></ui-site-breadcrumbs>
+				</html>
+			</example>
+		</>
+
+		<section label="Site links" sticky="stack" collapsible dividing>
+			<example "Site links" description="Site links are the page shown's own links, for an app menu's end:  the real page it stands for (its live link, Fomantic UI's original for Spell UI's pages), and a way to report a problem with it. \[Site links page](/site-links)">
+				<html>
+					<ui-site-links current="#api" report="https://github.com/spell-app/spell-ui/issues/new?title={title}" pages="\[{ \"title\": \"Button\", \"href\": \"#usage\", \"live\": \"https://fomantic-ui.com/elements/button.html\", \"pages\": \[{ \"title\": \"API\", \"href\": \"#api\" }] }]"></ui-site-links>
+				</html>
+			</example>
+		</>
+
+		<section label="Site nav button" sticky="stack" collapsible dividing>
+			<example "Site nav button" description="A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one. \[Site nav button page](/site-nav-button)">
+				<html>
+					<ui-page-layout style="min-height: 12em">
+						<ui-app-menu slot="menu">
+							<ui-site-nav-button slot="start"></ui-site-nav-button>
+							<ui-item slot="start">My site</ui-item>
+						</ui-app-menu>
+						<ui-site-nav slot="drawer" appearance="nav" current="#home" pages="\[{ \"title\": \"Home\", \"href\": \"#home\", \"icon\": \"home\" }, { \"title\": \"Films\", \"href\": \"#films\", \"icon\": \"film\" }]"></ui-site-nav>
+						<ui-text paragraph>Press the button: the drawer shows only its icons, or all of it again.</ui-text>
+					</ui-page-layout>
+				</html>
+			</example>
+		</>
+
 		<section label="Site tabs" sticky="stack" collapsible dividing>
 			<example "Site tabs" description="Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link. \[Site tabs page](/site-tabs)">
 				<html>
@@ -2046,22 +2595,24 @@
 
 		<section label="Table of contents" sticky="stack" collapsible dividing>
 			<example "Table of contents" description="A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all. \[Table of contents page](/table-of-contents)">
-				<stack style="align-items: flex-start" class="ui-cluster ui-gap-l">
-					<toc for="toc-example-content" heading="Button" style="width: 12em"/>
-					<section style="flex: 1" id="toc-example-content">
-						<header level="2" dividing>Types</header>
-						<example "Button" description="A standard button.">
-							<button>Follow</button>
-						</example>
-						<example "Emphasis" description="A button can show different levels of emphasis.">
-							<button color="primary">Save</button>
-						</example>
-						<header level="2" dividing>States</header>
-						<example "Disabled" description="A button can't be used.">
-							<button disabled>Followed</button>
-						</example>
-					</section>
-				</stack>
+				<html>
+					<ui-stack direction="horizontal" wrap style="align-items: flex-start" class="ui-gap-l">
+						<ui-toc for="toc-example-content" heading="Button" style="width: 12em"></ui-toc>
+						<ui-section style="flex: 1" id="toc-example-content">
+							<ui-header level="2" dividing>Types</ui-header>
+							<ui-example heading="Button" description="A standard button.">
+								<ui-button>Follow</ui-button>
+							</ui-example>
+							<ui-example heading="Emphasis" description="A button can show different levels of emphasis.">
+								<ui-button color="primary">Save</ui-button>
+							</ui-example>
+							<ui-header level="2" dividing>States</ui-header>
+							<ui-example heading="Disabled" description="A button can't be used.">
+								<ui-button disabled>Followed</ui-button>
+							</ui-example>
+						</ui-section>
+					</ui-stack>
+				</html>
 			</example>
 		</>
 
@@ -2087,16 +2638,26 @@
 
 		<section label="Tree" sticky="stack" collapsible dividing>
 			<example "Tree" description="A tree shows rows nested in rows, which open and close, and can be selected one or many at a time. \[Tree page](/tree)">
-				<tree choose="many" label="Files" style="width: 16em">
-					<tree-item label="src" icon="folder" open>
-						<tree-item label="Card.spell" icon="file code" selected/>
-						<tree-item label="Deck.spell" icon="file code"/>
-						<tree-item label="styles" icon="folder">
-							<tree-item label="card.css" icon="file code"/>
+				<tree appearance="columns" column-titles="Clients, Projects, Files" show="icon which count chevron" label="Work" style="height: 12em; width: 44em">
+					<tree-item label="Acme Bakery" icon="building outline" open>
+						<tree-item label="Spring menu" icon="folder" open>
+							<tree-item label="menu.pdf" icon="file pdf outline" selected/>
+							<tree-item label="prices.csv" icon="file alternate outline"/>
+						</tree-item>
+						<tree-item label="Website" icon="folder">
+							<tree-item label="home.html" icon="file code outline"/>
 						</tree-item>
 					</tree-item>
-					<tree-item label="README.md" which="notes" icon="file alternate outline"/>
+					<tree-item label="Harbor Books" icon="building outline">
+						<tree-item label="Catalogue" icon="folder"/>
+					</tree-item>
 				</tree>
+			</example>
+		</>
+
+		<section label="Uploader" sticky="stack" collapsible dividing>
+			<example "Uploader" description="An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action. \[Uploader page](/uploader)">
+				<uploader extensions="json" multiple max-files="5" max-size="2 MB"/>
 			</example>
 		</>
 
@@ -2129,3 +2690,4 @@
 			</example>
 		</>
 	</>
+	<!-- kitchen:end -->

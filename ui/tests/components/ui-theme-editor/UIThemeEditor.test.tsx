@@ -1,5 +1,6 @@
 import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
+import { OBSERVE } from "solid-js"
 
 import { UI } from "spell/ui/runtime"
 import { UIT } from "spell/ui/core"
@@ -118,6 +119,25 @@ afterEach(async () => {
   forget()
   const { themes } = await UI.load()
   await themes.apply(undefined)
+})
+
+////////////////
+// ## Solid's warnings
+////////////////
+
+// First in the file:  Solid's dev build warns once per attribute name on a page, so a later test would see none
+describe("<ui-theme-editor> and Solid", () => {
+  it("hears its controls' `ui-*` events by a ref:  no `LOWERCASE_EVENT_ATTRIBUTE`", async () => {
+    const events = OBSERVE!.diagnostics.capture()
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    try {
+      await editor()
+      const named = events.stop().filter((event) => event.code === "LOWERCASE_EVENT_ATTRIBUTE")
+      expect(named.map((event) => event.message)).toEqual([])
+    } finally {
+      warn.mockRestore()
+    }
+  })
 })
 
 ////////////////

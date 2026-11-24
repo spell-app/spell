@@ -14,11 +14,18 @@
  * - A bare label:  an inline orange `UPDATE`, its text centred, sitting on the text's middle;
  *   just the status word after a status change (`FIXED`, `UNDERWAY`;  T75, I295), then a blue `Not in main` pill
  *   while its work isn't merged.
+ *   - `UNDERWAY` is solid blue (epic `epic-engine` T146), but grey beside an id chip that's that blue (T149).
  * - Public tokens (`--epic-update-*`) are never declared here:  read through private aliases.
+ *   - `--epic-update-word-display`, `--epic-update-unmerged-display`:  any word's and the `Not in main` pill's
+ *     `display`;  `none` where the line starts with a badge that says it (epic `epic-engine` P81)
+ *   - `--epic-update-fixed-display`:  the `FIXED` word's `display`;  `none` where the line already starts with it
+ *     (epic `epic-engine` T143), its `Not in main` pill still showing
  *   - `--epic-update-accent`:  the orange of the box, its outline and the label:  by default the pages' own amber orange,
  *     the one an item's orange id pill wears (`--epic-state-replied`), else `--ui-orange`
  *     (Owen, 2026-11-15, epic `epic-engine` I295:  "The `update` pill should be the same orange as the 'updated' pill
  *     rather than red")
+ *   - `--epic-update-accent-on`:  the label's ink on that accent
+ *   - `--epic-update-underway`, `--epic-update-underway-on`:  the `UNDERWAY` label's ground and ink
  *   - `--epic-update-background`:  the box's ground (default the accent, 8% into the page's)
  */
 
@@ -27,6 +34,12 @@
 @layer ui.components.epic-update.types {
   :host {
     --_epic-update-accent: var(--epic-update-accent, var(--epic-state-replied, var(--ui-orange)));
+    --_epic-update-word-display: var(--epic-update-word-display, inline-flex);
+    --_epic-update-fixed-display: var(--epic-update-fixed-display, var(--_epic-update-word-display));
+    --_epic-update-unmerged-display: var(--epic-update-unmerged-display, inline-flex);
+    --_epic-update-accent-on: var(--epic-update-accent-on, var(--epic-state-replied-on, var(--ui-orange-on)));
+    --_epic-update-underway: var(--epic-update-underway, var(--epic-state-progress, var(--ui-blue)));
+    --_epic-update-underway-on: var(--epic-update-underway-on, var(--epic-state-progress-on, var(--ui-blue-on)));
     --_epic-update-background: var(
       --epic-update-background,
       color-mix(in srgb, var(--_epic-update-accent) 8%, var(--epic-bg, var(--ui-background)))
@@ -110,20 +123,29 @@
 
   /* ## The bare label */
   .label {
-    display: inline-flex;
+    display: var(--_epic-update-word-display);
     align-items: center;
     box-sizing: border-box;
     height: 18px;
     padding: 0 6px;
     border-radius: 4px;
     background: var(--_epic-update-accent);
-    color: var(--epic-state-replied-on, var(--ui-orange-on));
+    color: var(--_epic-update-accent-on);
     font: 700 10px/1 var(--epic-sans, var(--ui-font-family));
     letter-spacing: 0.06em;
   }
+  /* UNDERWAY, solid blue on its own (T146);  its item greys it beside a chip that blue (T149) */
+  .label[data-became="underway"] {
+    background: var(--_epic-update-underway);
+    color: var(--_epic-update-underway-on);
+  }
+  /* FIXED, not said again at the end of a line that starts with it (T143) */
+  .label[data-became="fixed"] {
+    display: var(--_epic-update-fixed-display);
+  }
   /* its status change's work not in main yet (T75):  a small blue outlined pill, as a status card's (I273) */
   .unmerged {
-    display: inline-flex;
+    display: var(--_epic-update-unmerged-display);
     align-items: center;
     box-sizing: border-box;
     height: 18px;

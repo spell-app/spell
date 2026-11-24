@@ -46,6 +46,8 @@ import {
  * - A hole is spell exactly, as everywhere else:  `{the score of the game}`, never `{score of the game}` (J26).
  * - Kept live by Solid effects:  a hole re-runs when what it read changes.
  * - Holds spell's PARSER:  the runner loads it lazily, only for a layout with spell in it (`layoutHasSpell()`).
+ *   - Built, the parser is `spell-grammar.js`'s, the grammar `<spell-code>`'s colours load too:
+ *     one per page (`sharedGrammar()`, `vite.element.config.ts`;  epic `solid-2-final` P11).
  * - `bind()` returns what takes it all back:  the layout's markup as it was written.
  ****************/
 export class LayoutSpell {
@@ -69,6 +71,15 @@ export class LayoutSpell {
 
   /** The text of each `<markdown>` block drawn:  its holes are bound already -- see `bindMarkdown()`. */
   private markdownTexts = new WeakSet<Text>()
+
+  /**
+   * Load the language packs `declarations`, a program's, are written in, past English:  they load on first use
+   * (epic `solid-2-final` P11).  Before `new LayoutSpell()` for a program in Spanish, Solitario.
+   */
+  static async loadLanguagesOf(declarations: unknown): Promise<void> {
+    const data = SP.SpellDeclarations.read(JSON.stringify(declarations))
+    if (data) await SP.Language.loadFor(SP.SpellDeclarations.languagesOf(data))
+  }
 
   constructor(options: LayoutSpellOptions) {
     this.options = options

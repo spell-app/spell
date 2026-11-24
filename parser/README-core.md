@@ -413,7 +413,7 @@ Park and Miller's "minimal standard" generator, multiply by 16,807 and keep the 
 That's simple enough to copy into a second language step for step, which is the point.
 A shuffle is lodash's, step for step, in both.
 
-**Not yet:**  44 of the core's names have no Python twin, mostly a browser's own:
+**Not yet:**  107 of the core's names have no Python twin, mostly a page's own:
 a view's element, a page's shadow root, carrying things over a recompile, remembering props from run to run
 ([the list, by why](README-targets.md#the-python-half)).
 
@@ -424,8 +424,24 @@ Running the Python half (uv, Python 3.12 or later, the standard library only):  
 The core keeps two things for the person using a program:  an undo history, and the props declared `remembered`.
 Both are plain declarations on a class, beside `declareProp()`.
 
-**Not yet:**  the compiler writes neither, so for now a program's own TypeScript declares them, as the core's tests do.
-And Python's `spell_core` has neither:  a program compiled to Python keeps no undo history, and remembers nothing.
+The compiler writes the undo history's:  every action is one step by itself, named by its title.
+
+```spell
+to "turn over", undoable as "Turn Card"
+	set its direction to down
+
+to "give a hint", can't be undone
+	-- ...
+```
+
+_`undoable as` names the step "Undo Turn Card";  `can't be undone` makes no step, and keeps the steps before it._
+
+- On a type, an action compiles to `core.describeAction(...)`;  at the top level, it runs inside `core.asAction(...)`.
+- Python's `spell_core` keeps the same history, step for step and titled the same:
+  [undoing.py](src/py/core/spell_core/undoing.py), held to the JavaScript core by a shared file of moves.
+
+**Not yet:**  Spell has no words for a remembered prop, so for now a program's own TypeScript declares one,
+as the core's tests do;  and a program compiled to Python remembers nothing.
 
 ### One undo step per action, however long it waits
 
@@ -599,6 +615,7 @@ These guides need a checkout with the epic folder beside it, and the page server
 
 ## See also
 
+- The guide:  [What Compiled Spell Runs On](../guides/prefs-and-undo.html), in the kit's guides/ folder
 - [README-targets](README-targets.md):  the writers that turn the Spell tree into these calls, and how to run the
   Python half
 - [README-spell](README-spell.md):  the sentences behind each call, from types and lists to saving by id

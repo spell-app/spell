@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS, tokensCSS } from "spell/ui/styles"
+import { colorsCSS, colorsSharedCSS, foundationCSS, tokensCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { textVocabulary } from "spell/ui/components/ui-text/UIText.en"
@@ -56,11 +55,11 @@ describe("UIText.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = textRaw + colorsCSS
+    const css = textRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(textVocabulary))
       expect(Sheets.covers(css, phrase), `${textVocabulary.tag}: ${phrase}`).toBe(true)
     const [, , state] = textVocabulary.attributes
-    for (const value of state.values) expect(colorsCSS).toContain(`.ui.${value},`)
+    for (const value of state.values) expect(colorsSharedCSS).toContain(`.ui.${value},`)
   })
 
   it("never aliases a global --ui-text-* colour token", () => {
@@ -79,7 +78,7 @@ describe("UIText.css source", () => {
 describe("UIText.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every text in %s as one tight line", (path) => {
     Sheets.adopt([...foundationCSS, textCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const texts = root.querySelectorAll<HTMLElement>("span.ui.text")
     expect(texts.length).toBeGreaterThan(0)
     for (const text of texts) {
@@ -92,19 +91,19 @@ describe("UIText.css examples", () => {
 
   it("colours hues and semantic states with their text role", () => {
     Sheets.adopt([...foundationCSS, textCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     for (const name of ["red", "blue", "yellow", "primary", "info", "success", "warning", "error"]) {
-      const probe = Fixture.render(`<span style="color: var(--ui-${name}-text)"></span>`)
+      const probe = Sheets.render(`<span style="color: var(--ui-${name}-text)"></span>`)
       expect(getComputedStyle(root.querySelector(`.ui.${name}.text`)!).color, name).toBe(getComputedStyle(probe).color)
     }
-    const plain = Fixture.render(`<p style="color: rgb(1, 2, 3)"><span class="ui text">plain</span></p>`)
+    const plain = Sheets.render(`<p style="color: rgb(1, 2, 3)"><span class="ui text">plain</span></p>`)
     expect(getComputedStyle(plain.firstElementChild!).color).toBe("rgb(1, 2, 3)")
   })
 
   it("uses the inverted hue on dark surfaces;  uncoloured inverted text inherits", () => {
     Sheets.adopt([...foundationCSS, textCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
-    const probe = Fixture.render(`<span style="color: var(--ui-red-inverted)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
+    const probe = Sheets.render(`<span style="color: var(--ui-red-inverted)"></span>`)
     expect(getComputedStyle(root.querySelector(".ui.inverted.red.text")!).color).toBe(getComputedStyle(probe).color)
     const plain = root.querySelector<HTMLElement>('.ui.inverted.text[class="ui inverted text"]')!
     expect(getComputedStyle(plain).color).toBe(getComputedStyle(plain.parentElement!).color)
@@ -112,7 +111,7 @@ describe("UIText.css examples", () => {
 
   it("sizes on Fomantic's text ladder, relative to the surrounding text", () => {
     Sheets.adopt([...foundationCSS, textCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const base = parseFloat(getComputedStyle(root.querySelector(".ui.medium.text")!.parentElement!).fontSize)
     const ratio = (size: string) =>
       parseFloat(getComputedStyle(root.querySelector(`.ui.${size}.text`)!).fontSize) / base
@@ -123,7 +122,7 @@ describe("UIText.css examples", () => {
 
   it("fades disabled text", () => {
     Sheets.adopt([...foundationCSS, textCSS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     expect(parseFloat(getComputedStyle(root.querySelector(".ui.disabled.text")!).opacity)).toBeCloseTo(0.45, 2)
   })
 })
@@ -135,12 +134,12 @@ describe("UIText.css examples", () => {
 describe("UIText.css in shadow roots", () => {
   it("renders the host as contents and the root as the coloured, sized text", () => {
     Sheets.adopt(foundationCSS)
-    const wrapper = Fixture.render(`<div style="font-size: 20px"><span></span></div>`)
+    const wrapper = Sheets.render(`<div style="font-size: 20px"><span></span></div>`)
     const host = wrapper.firstElementChild!
     Sheets.attach(host, `<span class="ui large error text" part="text"><slot></slot></span>`, sheets())
     host.textContent = "Oops"
     const inner = Sheets.inner(host)
-    const probe = Fixture.render(`<span style="color: var(--ui-error-text)"></span>`)
+    const probe = Sheets.render(`<span style="color: var(--ui-error-text)"></span>`)
     expect(getComputedStyle(host).display).toBe("contents")
     expect(getComputedStyle(inner).color).toBe(getComputedStyle(probe).color)
     expect(getComputedStyle(inner).fontSize).toBe("30px")
@@ -148,7 +147,7 @@ describe("UIText.css in shadow roots", () => {
 
   it("keeps a parent's colour and scale out", () => {
     Sheets.adopt(foundationCSS)
-    const wrapper = Fixture.render(
+    const wrapper = Sheets.render(
       `<div class="ui-red ui-large" style="color: rgb(1, 2, 3); font-size: 20px"><span></span></div>`
     )
     const host = wrapper.firstElementChild!
@@ -171,7 +170,7 @@ function sheets(): string[] {
 describe("UIText.css tokens", () => {
   it("takes a public token from a wrapper or the text itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, textCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-text-disabled-opacity: 0.25"><span class="ui disabled text">A</span></div>` +
         `<span class="ui large text" style="--ui-text-size-large: 3">B</span>`
     )

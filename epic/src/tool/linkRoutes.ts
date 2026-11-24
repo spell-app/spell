@@ -39,7 +39,7 @@ const linkRoutes: RouteModule = {
         throw new SRV.HttpError(400, (error as Error).message)
       }
       if (!address.page) throw new SRV.HttpError(400, "send a saga or an epic:  the page itself is the caller's")
-      reply.set("Cache-Control", "no-store").json(targets.answerFor(address))
+      reply.noStore().json(targets.answerFor(address))
     })
     for (const pattern of ["/saga/*", "/worktrees/:worktree/saga/*"])
       router.get(pattern, (request, reply) => {

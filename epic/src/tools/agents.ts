@@ -31,16 +31,24 @@
  *   - `add ... --files <path,path...>`:  claimed as it starts
  *   - `claims [--json]`:  every running agent's, one line each
  *   - they go with the agent (`done`)
+ * - PAUSE (epic `epic-engine` T139), for `epic fresh all --pause`:
+ *   - `pause <name> --next "<step>" [--item <id>] [--tests "<runs abandoned>"]`:  saved as it stands (`AgentPause`):
+ *     task, item, claims, uncommitted files, commits and whether each is merged, a merge left part way, the next step
+ *   - `resume <name>`:  paused no more, its brief printed to start it again;  once, and never during a round
+ *   - `add` and `resume` exit 1 while a round holds the epic:  a paused session starts no new work
+ *   - `done` of a paused one exits 1 (`--finished`:  its whole task really is done)
  * - `--epic <name>`, any verb:  that epic's list, e.g. from the main checkout;  default:  the worktree's epic, if any
  * - Which checkout:  the one this file is in, which `epic` picks from the current folder (`EpicTools.run()`)
  */
 import { waitUntil } from "spell/util/timing"
 import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
+import { FreshPause } from "spell/epic/command/FreshPause"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 import { PlanTime } from "spell/epic/tool/PlanTime"
 
 import { AgentList, AgentListError, type RunningAgent, type Untold } from "./AgentList"
+import { AgentPause } from "./AgentPause"
 import { ROOT } from "./pages.js"
 
 const { positional, flags } = parseVerbArgs(process.argv.slice(2))
@@ -73,6 +81,9 @@ async function run(
     }
     if (!name || (verb === "add" && !task)) return usage()
     if (verb === "last") return lastStanding(list, name)
+    if (verb === "pause") return pauseAgent(list, name, flags)
+    if (verb === "resume") return resumeAgent(list, name)
+    if (verb === "add" && FreshPause.holds(list.epic, process.env.CLAUDE_CODE_SESSION_ID)) return heldByPause()
     if (verb === "add") console.log(list.add(name, task!, { status, taskId, files }).name)
     else if (verb === "claim") {
       if (!task) return usage()
@@ -82,7 +93,7 @@ async function run(
       // Done already, by the agent itself (I288):  said, not an error
       const already = list.agents.some((agent) => agent.name === list.fullName(name)) ? undefined : list.doneSaid(name)
       if (already) console.log(`${list.fullName(name)} was marked done already:  ${already}`)
-      else await recordTook(list, list.done(name))
+      else await recordTook(list, list.done(name, { finished: Boolean(flags.finished) }))
     } else if (verb === "told") list.told(name)
     else return usage()
     return 0
@@ -105,7 +116,7 @@ async function run(
  */
 async function waitForRedirects(list: AgentList, flags: Record<string, string | true>): Promise<number> {
   // Until a redirect is untold or no agent runs, looking every `--every`;  gives up after `--max`
-  const found = await waitUntil(() => (list.untold.length ? "untold" : !list.agents.length ? "none" : undefined), {
+  const found = await waitUntil(() => (list.untold.length ? "untold" : !list.running.length ? "none" : undefined), {
     timeout: duration(stringFlag(flags.max) ?? "3600") / 1000,
     every: duration(stringFlag(flags.every) ?? "2") / 1000
   })
@@ -119,6 +130,48 @@ async function waitForRedirects(list: AgentList, flags: Record<string, string | 
     return 3
   }
   return 2
+}
+
+/**
+ * `pause <name>`:  saved as it stands, so any session can start it again;  exit 2 without its next step.
+ * - works with no round too:  pausing only ever saves
+ */
+function pauseAgent(list: AgentList, name: string, flags: Record<string, string | true>): number {
+  const next = stringFlag(flags.next)?.trim()
+  if (!next) {
+    console.error('usage:  epic agents pause <name> --next "<what it does next>" [--item <id>] [--tests "<...>"]')
+    return 2
+  }
+  const { agent, saved } = AgentPause.save(list, name, {
+    root: ROOT,
+    next,
+    item: stringFlag(flags.item),
+    tests: stringFlag(flags.tests),
+    session: process.env.CLAUDE_CODE_SESSION_ID
+  })
+  const open = saved.commits.filter(({ merged }) => !merged).length
+  console.log(
+    `${agent.name} paused and saved:  ${saved.uncommitted.length} uncommitted file(s), ` +
+      `${saved.commits.length} commit(s), ${open} not merged;  next:  ${saved.next}`
+  )
+  return 0
+}
+
+/** `resume <name>`:  paused no more, and the brief that starts it again;  exit 1 while a pause round is under way. */
+function resumeAgent(list: AgentList, name: string): number {
+  const session = process.env.CLAUDE_CODE_SESSION_ID
+  if (FreshPause.round() || FreshPause.holds(list.epic, session)) return heldByPause()
+  console.log(AgentPause.brief(list.resume(name, { session }), { session }))
+  return 0
+}
+
+/** Refused:  a pause round, or this paused session's own wait to go fresh;  exit 1. */
+function heldByPause(): number {
+  console.error(
+    "epic agents:  paused for epic fresh all --pause:  no agent starts until it's over " +
+      "(`epic fresh status`;  `epic fresh cancel` calls it off)"
+  )
+  return 1
 }
 
 /**
@@ -178,7 +231,8 @@ function age(ms: number): string {
 function usage(): number {
   console.error(
     'usage:  epic agents add <name> "<task>" [--status ...] [--task-id <id>] [--files <path,...>] | ' +
-      "set <name> [--status ...] [--task-id <id>] | claim <name> <path...> | claims [--json] | done <name> | " +
+      "set <name> [--status ...] [--task-id <id>] | claim <name> <path...> | claims [--json] | done <name> [--finished] | " +
+      "pause <name> --next <step> [--item <id>] [--tests <runs>] | resume <name> | " +
       "list [--json] | last <name> | wait[--every <s>] [--max <s>] [--json] | told <name>   " +
       "(any verb:  [--epic <name>])"
   )

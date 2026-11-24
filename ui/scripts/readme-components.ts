@@ -5,13 +5,17 @@
  * - Grouped as the kitchen sink is (`site:kitchen`):  Fomantic's four groups by each family's main tag's topic, the
  *   generic content parts, then Spell UI's own;  A-Z by title inside a group.
  *   The docs site's own `<ui-docs-*>` families get a table of their own, last.
- * - A row:  thumbnail, the family (linked to its docs page, with its status unless done), its tags (a sub-tag with a
- *   page of its own linked to it), the main tag's one-line description, other libraries' names for it (`aka`).
+ * - A row:  thumbnail, the family (linked to its page of the Spell UI site, with its status unless done), its tags
+ *   (a sub-tag with a page of its own linked to it), the main tag's one-line description, other libraries' names for
+ *   it (`aka`).
+ *   - A link is to the page's Spell file in the repo (`Button/Usage.spell`), so on GitHub it shows its source;
+ *     the page server shows the page itself at its address (`SpellUIGuide.addressOf()`, `/components/ui/button`).
  * - Thumbnails:  `docs/images/components/<folder>.png`, shown when the file exists, scaled to fit `THUMBNAIL_BOX`.
  *   - Delete a file to drop its picture;  `--shoot <url> <family>` adds one.
- * - `--shoot <base url> [family ...]`:  retake the thumbnails first, headless (Playwright's chromium), from the docs
- *   site served at `<base url>` (e.g. `http://localhost:4747/components/ui/`):  each family page's FIRST example,
- *   trimmed to what it draws.
+ *   - Not the site's own pictures (`snapshots/button.jpg`):  those are whole pages, unreadable at this size.
+ * - `--shoot <page server> [family ...]`:  retake the thumbnails first, headless (Playwright's chromium), from the
+ *   Spell UI site on the page server at `<page server>` (e.g. `http://localhost:4747`):  each family page's FIRST
+ *   example, trimmed to what it draws.
  *   - No families named:  the ones that have a thumbnail already.
  *   - Needs the page server running;  it doesn't start one.
  * - Writes ONLY between the page's `<!-- components:start -->` and `<!-- components:end -->` markers:  the rest of
@@ -30,8 +34,10 @@ import { BrowserPage } from "spell/element-tools/BrowserPage"
 import { Terminal } from "spell/element-tools/Terminal"
 import { spliceGenerated, writeOrCheck } from "spell/element-tools/generatedFiles"
 
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 import type { SiteDataFile, SiteFamily } from "spell/ui/docs-components/docs-components.types"
-import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
+import { SpellUISite } from "spell/ui/tools/SpellUISite"
+import { SITE_DATA, SPELL_UI_ROOT, SPELL_UI_SITE_FOLDER } from "spell/ui/tools/tools.types"
 
 import { STATUS_TEXT } from "spell/ui/tools/generatedFiles"
 
@@ -103,7 +109,7 @@ class ComponentCatalogWriter {
   private row(family: SiteFamily, { hasPictures }: { hasPictures: boolean }): string {
     const main = this.tags.get(family.mainTag)
     const status = family.status === "done" ? "" : ` *(${STATUS_TEXT[family.status] ?? family.status})*`
-    const name = family.docs ? family.title : `[${family.title}](${SITE_PAGES}/${family.mainTag}.html)${status}`
+    const name = family.docs ? family.title : `[${family.title}](${this.pageLink(family.mainTag, family.title)})${status}`
     const tags = family.tags.map((tag) => this.tagCell(family, tag)).join(" ")
     const aka = (main?.aka ?? []).slice(0, MAX_AKA).join(", ")
     const description = main?.description ?? family.summary
@@ -112,10 +118,26 @@ class ComponentCatalogWriter {
     return `| ${cells.map((cell) => ComponentCatalogWriter.cell(cell)).join(" | ")} |`
   }
 
-  /** A tag in its family's row:  linked when it has a docs page of its own besides the family's. */
+  /** A tag in its family's row:  linked when it has a page of its own besides the family's. */
   private tagCell(family: SiteFamily, tag: string): string {
     const code = `\`<${tag}>\``
-    return family.pages?.[tag] ? `[${code}](${SITE_PAGES}/${tag}.html)` : code
+    const page = family.pages?.[tag]
+    return page ? `[${code}](${this.pageLink(tag, page.title)})` : code
+  }
+
+  /**
+   * The link to `tag`'s page of the Spell UI site (its Usage page, titled `title`), from this README:
+   * `../app/spaces/@spell/guides/SpellUI/Button/Usage.spell`.
+   * - Its folder is named for its site address (`/json` => `Json`), else for its title (`Components`).
+   * - throws when the site has neither:  a family with no page there
+   */
+  private pageLink(tag: string, title: string): string {
+    const address = SpellUIGuide.siteAddressOf(tag)
+    const folder = [address, title]
+      .map((name) => SpellUISite.folderFor(name))
+      .find((name) => existsSync(path.join(SPELL_UI_SITE_FOLDER, name, USAGE_PAGE)))
+    if (!folder) throw new Error(`readme:components:  the Spell UI site has no page for ${tag} (${address})`)
+    return path.relative(SPELL_UI_ROOT, path.join(SPELL_UI_SITE_FOLDER, folder, USAGE_PAGE))
   }
 
   /** Which group `family` files under:  `GROUPS`' ids. */
@@ -152,11 +174,11 @@ class ComponentCatalogWriter {
  * Takes each family's thumbnail headless, from the docs site:  its page's first example, trimmed to what it draws.
  ****************/
 class ComponentThumbnails {
-  /** The docs site's address, ending in `/`. */
+  /** The page server's address, with no `/` at its end:  `http://localhost:4747`. */
   private readonly baseUrl: string
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`
+    this.baseUrl = baseUrl.replace(/\/+$/, "")
   }
 
   /** Shoot each of `families` (folders, `ui-button`);  prints one line each, and never throws for one family. */
@@ -177,7 +199,7 @@ class ComponentThumbnails {
 
   /** Load `family`'s page, wait for its root, and save its first example's picture. */
   private async shootOne(page: Page, family: SiteFamily): Promise<void> {
-    await page.goto(`${this.baseUrl}${family.mainTag}.html`, { waitUntil: "load" })
+    await page.goto(`${this.baseUrl}${SpellUIGuide.addressOf(family.mainTag)}`, { waitUntil: "load" })
     await page.waitForFunction(() => document.querySelector("ui-root")?.matches(":state(ready)"), undefined, {
       timeout: READY_TIMEOUT
     })
@@ -300,6 +322,9 @@ const GROUPS: readonly { id: string; title: string; topic?: string; lead: string
 
 /** Families filed under the content parts, whatever their main tag's topics say. */
 const PARTS_FAMILIES: readonly string[] = ["ui-parts"]
+
+/** A component's first page in the Spell UI site, in its folder. */
+const USAGE_PAGE = "Usage.spell"
 
 /** Thumbnails' folder, from the repo's root. */
 const THUMBNAILS = "docs/images/components"

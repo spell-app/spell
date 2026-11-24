@@ -1,9 +1,12 @@
-import { existsSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { defineConfig, type Plugin } from "vite-plus"
 
 import { fmtConfig, packageLint } from "spell/toolchain/lint"
+// Import directly:  the server barrel would load linkedom and the rest into every Vite start
+import { KeeperLink } from "spell/server/KeeperLink"
 import environment from "spell/app/spaces/server/node/environment"
+import { editorPageFor } from "spell/app/spaces/server/node/routes/editorPaths"
 import { appConfig, pageServerProxy } from "./vite.shared.ts"
 
 /** Name of the runtime's entry in a build:  `dist/spell-runtime.js` -- see `editor.loadRuntime()`. */
@@ -11,6 +14,9 @@ const RUNTIME_ENTRY = "spell-runtime"
 
 /** The runtime's source, from this folder:  the entry of `spell-runtime.js`. */
 const RUNTIME_SOURCE = "../src/app/runner/spellRuntime.ts"
+
+/** The kit's root, two folders up from this one (`app/app/`):  whose editor this is. */
+const KIT_ROOT = path.resolve(import.meta.dirname, "../..")
 
 /** Plugins, dedupe and CSS:  `appConfig()`, with `spell-ui`'s icon packs. */
 const APP_CONFIG = appConfig({ builtInFiles: true })
@@ -31,7 +37,14 @@ export default defineConfig({
     ignorePatterns: ["build", "dist", ".cache", "dist-runner", "dist-element", "static"]
   }),
   ...APP_CONFIG,
-  plugins: [...APP_CONFIG.plugins, repoSourceInDev(), runtimeCopyInDev(), runtimeOwnCoreInBuild()],
+  plugins: [
+    keeperStartsMainsEditor(),
+    ...APP_CONFIG.plugins,
+    repoSourceInDev(),
+    runPageInDev(),
+    runtimeCopyInDev(),
+    runtimeOwnCoreInBuild()
+  ],
   server: {
     ...APP_CONFIG.server,
     port: environment.vitePort,
@@ -53,10 +66,11 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: false,
     rollupOptions: {
-      // the app, and the runtime its programs run on -- its own entry, so it holds ALL of `core`
+      // the app;  the run page, a project running alone (`run.html`, epic `solid-2-final` P12);
+      // and the runtime their programs run on -- its own entry, so it holds ALL of `core`
       // (`runtimeOwnCoreInBuild()`), at a FIXED name for `editor.loadRuntime()` to import.
       // See `spellRuntime.ts`.
-      input: { index: "index.html", [RUNTIME_ENTRY]: RUNTIME_SOURCE },
+      input: { index: "index.html", run: "run.html", [RUNTIME_ENTRY]: RUNTIME_SOURCE },
       // keep `spell-runtime.js`'s exports by NAME:  it's compiled spell's `@spell/core`
       preserveEntrySignatures: "exports-only",
       output: {
@@ -76,6 +90,27 @@ export default defineConfig({
 })
 
 /**
+ * In dev, the MAIN checkout's editor starts only from the server keeper or a person's own terminal (epic `epic-engine`
+ * P84):  an agent's `vp dev` in main's `app/` stops at once, saying to ask the keeper (`KeeperLink.refusedStart()`).
+ * - main's page server starts it with its token, so the keeper's starts pass;  a worktree's editor always does
+ * - why:  a session started main's editor by hand while the keeper's ran, and three editors took 3000, 3001 and 3002
+ */
+function keeperStartsMainsEditor(): Plugin {
+  return {
+    name: "spell:keeper-starts-mains-editor",
+    apply: "serve",
+    config() {
+      // a page server's own editor (`EditorServer`, which hands it the server's token):  the page server passed the
+      // same check as it started;  one started before P84 has no keeper's mark to hand on, and Vite asks again here
+      // each time this file changes
+      if (process.env.SPELL_SERVER_TOKEN) return
+      const refused = new KeeperLink().refusedStart("editor", KIT_ROOT)
+      if (refused) throw new Error(refused)
+    }
+  }
+}
+
+/**
  * The dev server's `/src/...`:  the repo's `src/`, beside vite's root `app/` -- for `index.html`'s entry.
  * - `index.html` loads `../src/app/index.tsx`, a path from `app/`:  the build reads it so.
  * - The dev server can't go above its root in a URL:  it asks for `/src/app/index.tsx`, which isn't in `app/`
@@ -92,6 +127,39 @@ function repoSourceInDev(): Plugin {
       if (!id.startsWith("/src/") || existsSync(path.join(import.meta.dirname, id))) return null
       const file = path.join(repoRoot, id.split("?")[0]!)
       return existsSync(file) ? file + id.slice(id.split("?")[0]!.length) : null
+    }
+  }
+}
+
+/**
+ * The dev server's run page:  `run.html` for a `/run/...` address opened straight, as the built editor's server sends
+ * it (`editorPageFor()`, `EditorServer`;  epic `solid-2-final` P12).
+ * - Only a page the browser asks for (`Accept: text/html`):  the editor's own switch to Run never asks the server.
+ * - Before vite's own middleware, which would send `index.html` for any address it has no file for.
+ * - Its paths from `app/` (`../src/app/run/index.tsx`) made the dev server's own (`/src/app/run/index.tsx`):
+ *   vite does that for `index.html` alone, so a page at `/run/<project>` would ask for them under its own address.
+ */
+function runPageInDev(): Plugin {
+  return {
+    name: "spell-app:run-page-in-dev",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        const url = request.url ?? ""
+        const page = editorPageFor(url.split("?")[0]!)
+        if (request.method !== "GET" || page === "index.html" || !/text\/html/.test(request.headers.accept ?? "")) {
+          return next()
+        }
+        const html = readFileSync(path.join(import.meta.dirname, page), "utf8").replaceAll('="../', '="/')
+        server
+          .transformIndexHtml(url, html)
+          .then((transformed) => {
+            response.setHeader("Content-Type", "text/html")
+            response.setHeader("Cache-Control", "no-cache")
+            response.end(transformed)
+          })
+          .catch(next)
+      })
     }
   }
 }

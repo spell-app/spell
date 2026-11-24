@@ -1,0 +1,69 @@
+"runner console" is a notebook page
+	<header level="1">
+		RunnerConsole
+		<header>One running program's console, in a runner.</>
+	</>
+
+	<text class="lede" paragraph>What a running program says: each <text code>print</>, and what it logs, a line at a time as they come. A runner shows it on its debug pane's Console tab, or on top for a program with no app of its own.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the runner, or how a program's output shows</>
+		<item icon="play">Live: inside a real <text code>&lt;spell-viewer&gt;</>, from the app's element build this page loads</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>FizzBuzz has no app, so the runner shows its console on top: that list of lines is a RunnerConsole. The debug pane below it has the explorers.</>
+		<example "1. Example" description="A program with no app:  its console on top.">
+			<html>
+				<spell-viewer project="@spell/examples/fizzbuzz" toolbar debug="console" height="360px"></spell-viewer>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from the app's element build, which this set's pages load: <text code>/element/spell.pack.js</>. <link target="src-packages-app" link="/src/app/">The app package</> builds it with <text code>yarn build:element</>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph><text code>&lt;spell-viewer&gt;</>'s runner shows its own runtime's console, once that's loaded:</>
+		<text paragraph>SpellAppRunner.tsx · the program's console:</>
+		<markdown>
+			```typescript
+			function output() {
+			  return (
+			    <Show when={loaded()} keyed>
+			      {(copy) => <RunnerConsole console={copy.runtime.core.console} />}
+			    </Show>
+			  )
+			}
+			```
+		</>
+		<list bulleted>
+			<item><text code>console</> is the program's own: each <text code>&lt;spell-viewer&gt;</> runs on its own copy of the spell runtime, so each shows its own console.</>
+			<item>It reads <text code>console</> once: draw a new one for another, as the <text code>keyed</> above does.</>
+			<item>Its lines are followed as they change, so a line logged adds a row at once.</>
+			<item>It draws them as the editor's <link target="src-packages-app-docs-consoleviewer-html" link="/console-viewer">ConsoleViewer</> does, with <link target="src-packages-app-docs-consolelines-html" link="/console-lines">ConsoleLines</>, and scrolls within its pane, a <link target="src-packages-app-docs-runnerpane-html" link="/runner-pane">RunnerPane</>.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="RunnerConsole"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-runner-runnerconsole-tsx" link="/src/app/runner/RunnerConsole.tsx"><text title="src/app/runner/RunnerConsole.tsx" code>RunnerConsole.tsx</></>: the component, and its props</>
+			<item><link target="src-packages-app-src-runner-runnerconsole-css" link="/src/app/runner/RunnerConsole.css"><text title="src/app/runner/RunnerConsole.css" code>RunnerConsole.css</></>: its look, on top of the console lines'</>
+			<item><link target="src-tests-app-src-runner-runner-browser-test-tsx" link="/tests/app/runner/runner.browser.test.tsx"><text title="tests/app/runner/runner.browser.test.tsx" code>runner.browser.test.tsx</></>: its tests, through the runner that draws it</>
+			<item>In the runner's pieces, <text code>app/app/runner</>: <link target="src-packages-app-src-runner" link="/src/app/runner/"><text title="src/app/runner/" code>src/runner/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

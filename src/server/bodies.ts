@@ -85,9 +85,14 @@ export function readBody(raw: IncomingMessage, limit = DEFAULT_BODY_LIMIT): Prom
   })
 }
 
-/** Whether a request carries a body:  a `transfer-encoding`, or a `content-length` (even `0`), as `type-is`. */
+/**
+ * Whether a request carries a body:  a `transfer-encoding`, or a `content-length` (even `0`), as `type-is`.
+ * - over HTTP/2, which has no `transfer-encoding`:  any request but a `GET` or `HEAD` may
+ */
 export function hasBody(raw: IncomingMessage): boolean {
-  return raw.headers["transfer-encoding"] !== undefined || !Number.isNaN(Number(raw.headers["content-length"] ?? NaN))
+  if (raw.headers["transfer-encoding"] !== undefined || !Number.isNaN(Number(raw.headers["content-length"] ?? NaN)))
+    return true
+  return raw.httpVersionMajor === 2 && raw.method !== "GET" && raw.method !== "HEAD"
 }
 
 /** Whether content type `type` is JSON:  `application/json`, `application/json5`, or `*+json`. */

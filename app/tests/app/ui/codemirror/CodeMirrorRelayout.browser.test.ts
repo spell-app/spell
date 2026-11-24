@@ -242,3 +242,41 @@ describe("typing keeps the caret's line still", () => {
     }
   })
 })
+
+/**
+ * Each layout keeps only the state that holds it (epic `solid-2-final` I26):  a layout's marks are drawn from the state
+ * it was made from, so one made from the view's state beforehand kept that state, and with it the layout before it.
+ * - Every layout ever made stayed:  181 kB a file switch, and more at each pause in the typing.
+ */
+describe("the pause's layout", () => {
+  let view: EditorView | undefined
+
+  afterEach(() => {
+    view?.dom.parentElement?.remove()
+    view?.destroy()
+    view = undefined
+  })
+
+  test("is made from the state that keeps it, never from the one before it", async () => {
+    const madeFrom: EditorState[] = []
+    const host = document.body.appendChild(document.createElement("div"))
+    view = new EditorView({
+      parent: host,
+      state: EditorState.create({
+        doc: "a\nb\nc",
+        extensions: [
+          CodeMirrorRelayout.extension((state) => {
+            madeFrom.push(state)
+            return { decorations: Decoration.none, marksIn: () => Decoration.none }
+          }, 20)
+        ]
+      })
+    })
+    for (const letter of "xyz") {
+      view.dispatch(view.state.replaceSelection(letter))
+      await new Promise((done) => setTimeout(done, 60))
+      // the pause's layout:  of this very state, the one the editor shows now
+      expect(madeFrom.at(-1)).toBe(view.state)
+    }
+  })
+})

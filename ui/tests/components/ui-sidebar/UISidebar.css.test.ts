@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { sidebarVocabulary } from "spell/ui/components/ui-sidebar/UISidebar.en"
@@ -31,7 +30,7 @@ const ALLOWED_IMPORTANT = 0
 /** Adopt the sheets and render the example. */
 function example(): HTMLElement {
   Sheets.adopt([...foundationCSS, segmentCSS, menuCSS, sidebarCSS])
-  return Fixture.render(EXAMPLES["./examples/sidebar.html"]!)
+  return Sheets.render(EXAMPLES["./examples/sidebar.html"]!)
 }
 
 /** The x / y translation of an element's computed transform. */
@@ -68,7 +67,7 @@ describe("UISidebar.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = sidebarRaw + colorsCSS
+    const css = sidebarRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(sidebarVocabulary))
       expect(Sheets.covers(css, phrase), `${sidebarVocabulary.tag}: ${phrase}`).toBe(true)
     for (const spec of sidebarVocabulary.attributes) {
@@ -119,7 +118,7 @@ describe("UISidebar.css examples", () => {
     const sidebar = pushable.querySelector<HTMLElement>(".sidebar")!
     // `%` of the containing block:  the viewport, or the pushable when it is one (a transform)
     expect(sidebar.getBoundingClientRect().width).toBeCloseTo(innerWidth / 4, -1)
-    const pushed = Fixture.render(
+    const pushed = Sheets.render(
       `<div class="pushable" style="height: 100px"><div class="ui left four wide visible sidebar"></div>` +
         `<div class="pusher"></div></div>`
     )
@@ -128,7 +127,7 @@ describe("UISidebar.css examples", () => {
 
   it("hidden sidebars sit off their edge;  uncover ones under the pusher, in place", () => {
     Sheets.adopt([...foundationCSS, sidebarCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div class="pushable" style="height: 100px"><div class="ui left sidebar"></div>` +
         `<div class="ui right sidebar"></div><div class="ui left uncover sidebar"></div>` +
         `<div class="ui left slide along sidebar"></div><div class="pusher"></div></div>`
@@ -150,7 +149,7 @@ describe("UISidebar.css examples", () => {
 describe("UISidebar.css pusher tokens", () => {
   it("moves, shrinks and dims the pusher by its private tokens", () => {
     Sheets.adopt([...foundationCSS, sidebarCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div class="pushable" style="--_ui-pusher-transform: scale(0.75); --_ui-pusher-origin: 75% 50%; ` +
         `--_ui-pusher-dimmed: 1; --ui-sidebar-duration: 0s"><div class="pusher" style="height: 50px"></div></div>`
     )
@@ -164,7 +163,7 @@ describe("UISidebar.css pusher tokens", () => {
 describe("UISidebar.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, sidebarCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-sidebar-width: 222px"><div class="pushable"><div class="ui left sidebar">x</div><div class="pusher">y</div></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.sidebar")!).width).toBe("222px")

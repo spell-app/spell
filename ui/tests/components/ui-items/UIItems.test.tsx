@@ -76,7 +76,7 @@ describe("<ui-items> classes and markup", () => {
     ["", "ui items"],
     ['size="small"', "ui small items"],
     ["divided", "ui divided items"],
-    ['spacing="xl" divided appearance="link"', "ui very relaxed divided link items"],
+    ['spacing="xl" divided appearance="link"', "ui very relaxed divided link items very-relaxed"],
     ['spacing="lg" unstackable inverted', "ui relaxed inverted unstackable items"],
     ['divided="no" disabled', "ui disabled items"]
   ])("<ui-items %s>", async (attributes, classes) => {
@@ -211,7 +211,7 @@ describe("<ui-items> images", () => {
       `<ui-item><img src="${PHOTO}" alt=""><ui-content vertical-align="middle">Middle</ui-content></ui-item>`
     )
     const content = partRoot(items[0]!.querySelector("ui-content")!)
-    expect(content.className).toBe("middle aligned content")
+    expect(content.className).toBe("middle aligned content middle-aligned")
     expect(style(content).alignSelf).toBe("center")
   })
 })

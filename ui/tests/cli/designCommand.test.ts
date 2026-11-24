@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { basename, join } from "node:path"
-import { describe, expect, test } from "vite-plus/test"
+import { join } from "node:path"
+import { describe, expect, test, vi } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
 import { DESIGN_TOOLS, designBuildArgs, designCommand } from "spell/ui/cli/designCommand"
@@ -26,25 +26,25 @@ describe("DESIGN_TOOLS", () => {
 })
 
 describe("designBuildArgs()", () => {
-  test("spell-brand, the kit's peer, before the caller's own arguments;  none beside the kit:  no --brand", () => {
+  test("the brand book when the epic folder has one, never a --brand;  none:  nothing", () => {
     const kit = mkdtempSync(join(tmpdir(), "design-kit-"))
-    const brand = `${kit}-brand`
-    mkdirSync(brand)
-    writeFileSync(join(brand, "package.json"), JSON.stringify({ name: "spell-brand" }))
-    writeFileSync(
-      join(kit, "repos.json5"),
-      `{ repos: [{ name: "spell-brand", path: "../${basename(brand)}", peer: true }] }`
-    )
-    expect(designBuildArgs(kit).slice(0, 2)).toEqual(["--brand", brand])
-    expect(designBuildArgs("/no-such-kit")).not.toContain("--brand")
-    for (const dir of [kit, brand]) rmSync(dir, { recursive: true, force: true })
+    vi.stubEnv("SPELL_SHARED_DIR", kit)
+    writeFileSync(join(kit, "repos.json5"), "{ repos: [] }")
+    expect(designBuildArgs(kit)).toEqual([])
+    const book = join(kit, "brand/spell-design-system/readme.md")
+    mkdirSync(join(kit, "brand/spell-design-system"), { recursive: true })
+    writeFileSync(book, "# Brand\n")
+    expect(designBuildArgs(kit)).toEqual(["--brand-book", book])
+    vi.unstubAllEnvs()
+    expect(designBuildArgs("/no-such-kit")).toEqual([])
+    rmSync(kit, { recursive: true, force: true })
   })
 })
 
 describe("designCommand()", () => {
   test("another verb is a usage error, naming the verbs", () => {
     expect(() => designCommand("make", [])).toThrow(
-      new CLI.CliError("unknown verb 'make':  build, bundle, check, pull, changed, pushed, state")
+      new CLI.CliError("unknown verb 'make':  build, pull, changed, pushed, state")
     )
   })
 })

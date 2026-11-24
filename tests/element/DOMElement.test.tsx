@@ -51,6 +51,13 @@ class Shows extends UIComponent<any> {
   }
 }
 
+/** `Shows`, drawn as a button:  for focus. */
+class ShowsButton extends Shows {
+  render(): JSX.Element {
+    return <button part="text">client</button>
+  }
+}
+
 /** Options of `testTag()`. */
 type TagOptions = {
   /** the component class to extend;  default `Shows` */
@@ -681,13 +688,44 @@ describe("DOMElement shadow root", () => {
     expect(rest.some((record) => record.removedNodes.length)).toBe(false)
   })
 
-  test("it's emptied ONCE:  later calls leave the client's content", async () => {
+  test("it's taken ONCE:  later calls leave the client's content", async () => {
     const { tag, define } = testTag("dsd-once", [attribute("label", "string")])
     const host = serverRendered(tag)
     define()
     await ElementFixture.settle(host)
-    host.clearServerContent()
+    expect(host.takeServerDrawing()).toBeUndefined()
     expect(shown(host)).toBe("string:client")
+  })
+
+  test("the server's sheets style the root until the element's own are in, then go", async () => {
+    const { tag, define } = testTag("dsd-sheets", [attribute("label", "string")])
+    container().setHTMLUnsafe(
+      `<${tag} label="client"><template shadowrootmode="open"><style>p { color: red }</style><p>server</p></template></${tag}>`
+    )
+    const host = document.querySelector<Host>(tag)!
+    const sheet = host.shadowRoot!.querySelector("style")!
+    define()
+    // drawn again at once, the server's sheet still there
+    expect(host.serverDrawing?.sheets).toEqual([sheet])
+    expect(shown(host)).toBe("string:client")
+    await ElementFixture.settle(host)
+    expect(sheet.isConnected).toBe(false)
+    expect(host.serverDrawing).toBeUndefined()
+    expect(shown(host)).toBe("string:client")
+  })
+
+  test("focus in the server's drawing moves to the element in the same place in the new one", async () => {
+    const { tag, define } = testTag("dsd-focus", [attribute("label", "string")], { Component: ShowsButton })
+    container().setHTMLUnsafe(
+      `<${tag} label="client"><template shadowrootmode="open"><button>server</button></template></${tag}>`
+    )
+    const host = document.querySelector<Host>(tag)!
+    host.shadowRoot!.querySelector("button")!.focus()
+    define()
+    await ElementFixture.settle(host)
+    const button = host.shadowRoot!.querySelector("button")!
+    expect(button.textContent).toBe("client")
+    expect(host.shadowRoot!.activeElement).toBe(button)
   })
 })
 
@@ -1067,6 +1105,24 @@ describe("DOMElement defined early", () => {
       missing: expect.arrayContaining(["label"]),
       isFormControlWrong: false
     })
+  })
+
+  test("each element made while its tag is pending is told to pendingMade(), in a shadow root too", async () => {
+    const made: string[] = []
+    E.DOMElement.pendingMade = (tag) => made.push(tag)
+    try {
+      const { tag, define } = earlyTag("early-first-use", [])
+      container().appendChild(document.createElement(tag))
+      const shadow = container().attachShadow({ mode: "open" })
+      shadow.innerHTML = `<${tag}></${tag}>`
+      expect(made).toEqual([tag, tag])
+      define()
+      await (shadow.firstElementChild as Host).ready
+      container().appendChild(document.createElement(tag))
+      expect(made).toEqual([tag, tag])
+    } finally {
+      E.DOMElement.pendingMade = undefined
+    }
   })
 
   test("a tag defined already is left alone", () => {

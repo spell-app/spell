@@ -95,16 +95,19 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `editor` | not written:  `""` | the editor the tools drive, `code` (VS Code) or `cursor`, when neither this machine (`SPELL_EPIC_EDITOR`) nor the window they run in says;  `""`:  VS Code |
 | `engineFolder` | `""` | an engine checkout to link in at each checkout's root, for a repo whose own code imports the engine;  `""`:  none |
 | `repoTemplates` | `""` | the repo's own page templates, a folder from each checkout's root;  `""`:  only the engine's |
+| `guidesFolder` | not written:  `""` | the repo's own guides, a folder from each checkout's root (`"guides"`):  versioned with your code and shipped with it;  [Guides that ship with your code](#guides-that-ship-with-your-code) |
 | `app.path` | not written:  a comment shows how | the repo's APP:  its address on the epic server, `/editor/`, the top bar's App tab |
 | `app.url` | not written | where the app answers (`"http://localhost:3000/"`);  `""` with no `urlFile`:  no app |
 | `app.urlFile` | not written | or a JSON file its server writes once it's up, `{ "url": ... }`, from the main checkout |
 | `app.start` | not written | the shell command that starts the app, run in the background when it doesn't answer (`"npm run dev"`) |
+| `servers` | not written | the repo's OWN servers, which the epic server keeps beside Spell's and shows on its Servers tab (a proxy server, say):  each a `name`, a `check` (a URL, or just a port, up while something listens there), and, for Start and Restart, a `start` command and the `folder` it runs in;  one without `start` is only watched |
 | `repos` | not written | a MULTI-REPO checkout's child repos (a list, or a file such as `"repos.json5"`):  an epic's worktree is then a worktree of the top with one of every child repo inside it, all on the epic's branch;  a child finds its top as the folder above it (`epic config top`) |
 | `checkoutPatches` | not written:  a comment shows how | fixes every checkout gets at once, the worktrees behind `main` too (`epic worktree patch`):  each an `id`, a `date`, a `why`, and a `copy` (a file of `main`'s, put where it isn't tracked yet, git-excluded) or a `run` (a command, once per checkout) |
 | `voices` | not written | the repo's own voices, a name to a file from the main checkout (`"code": "agents/wwod/writing.md"`), over the engine's `voices/<name>.md` (`epic voice`) |
 | `pageVoices` | not written | the voice each kind of page is written in, over the defaults:  `readme` for READMEs and guides, `code` for code and epic pages |
 | `promptAck` | not written | whether the prompt hook shows an "On it:  ..." line for a message sent while the session is busy;  on unless `false` |
 | `freshHintMB` | not written:  `8` | the size, in MB, past which an epic's session gets a line suggesting `/epic fresh` (from the prompt hook the first time, then again after a phase done, a merge or an agent back, at most every 15 minutes), a new session that picks the epic up from its page (every turn re-reads the conversation, so a big one costs each turn);  `0`:  never |
+| `issueBadges` | not written:  `{ recheckAt: 50, closeBelow: 25, fixAbove: 60 }` | the percentages an epic page's item badges are worked out by:  doubt at or over `recheckAt` is rechecked first, care under `closeBelow` is closed, care over `fixAbove` is fixed |
 | `localSetup` | `true` with `--local`, else not written | the repo was set up on this machine only ([`--local`](README-setup.md#nothing-in-your-repo)):  `epic init` run again stays local |
 | `top` | not written | a PEER repo's kit, its main checkout (`{ top: "../spell" }`):  the peer takes the kit's epic folder, windows, shared folders, engine and voices for each key it leaves out, and keeps its own worktrees, install, base branch and app.  A multi-repo child finds its top as the folder above instead;  `epic config top` prints either |
 | `renamedRepos` | not written | the repo's old GitHub addresses, each to the one it was renamed to, so an epic page that recorded the old address is still this repo's |
@@ -134,6 +137,27 @@ A key the file leaves out reads as `epic init` would write it for your repo:  th
   - The engine's folder's own list is `[]`.
 
 </details>
+
+## Guides that ship with your code
+
+A guide starts in the epic folder's `guides/`, beside the plans.
+One your users need belongs with your code instead:  versioned on branches, reviewed as a diff, shipped in your package.
+- Name the folder once, in the config file:  `"guidesFolder": "guides"`, at your repo's root.
+  - Named `guides`, a guide keeps its address (`/guides/data/data.html`):  the page server serves your checkout's
+    copy first, the epic folder's after it.
+- Move a guide in, in a worktree:  `epic guides move guides/data/data.html`.
+  - Or a saga's address, `SAGA:/<id>`:  every guide naming that saga.
+  - It's copied, with its pictures, experiments and twin `.md`;  its comments stay in the epic folder.
+  - The epic folder keeps its copy until the branch merges:  `epic merge` then deletes it (`epic guides prune`).
+- Every epic tool finds a guide in both places, yours first:  the Guides list page, saga pages, See Also, the voice
+  pass, editing in place.
+- Say who each shipped guide is for in its head, then write their list:
+  - three metas:  who it's for (`spell-audience`, makers or programmers), its topic, and its place in Start here
+  - `epic guides index` writes their list beside them, for your app to read
+- `epic guides check` fails a shipped guide that links your epic repo or a guide that doesn't ship, or names a
+  command or file that isn't there.
+  - In the repo that holds the epic plugin, it checks the plugin's own guides too:  they may link each other.
+- `epic guides list` says where each guide is:  in your code, in the epic folder, or both while a move waits.
 
 ## <a id="your-house-style"></a>Your house style
 
@@ -230,6 +254,13 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
   - `server.json`:  its process
   - `server.log`
   - `person.json5`:  who you are
+- It KEEPS every repo's servers too (the server keeper):  it looks at each every 10 seconds, and when a Claude
+  session starts.
+  - The repo's own servers (`servers`, above):  watched, and started when they're down and say how.
+  - Spell's own repo:  its main page server always on, restarted when `main` moves;  each worktree's on one port,
+    stopped after 30 minutes unused.
+  - The top bar's Servers tab shows them, with Start, Restart and Stop;  a red dot on the tab while one is down.
+  - A stop by hand stays stopped until Start:  `~/.spell-epic/server-keeper.json`.
 - The app is the repo's own server, never the epic server's:  `/editor/` only finds it, or starts it
   (its output in `~/.spell-epic/app-<repo>.log`).
   With no app declared, it shows a page saying so.
@@ -248,6 +279,8 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 | `/...` | the default repo's epic folder too |
 | `/editor/` | the default repo's APP (each repo's at `/r/<repo>/editor/`):  a redirect when it answers;  else started in the background behind a "Starting ..." page;  with none declared, a page saying so |
 | `/api/app/<repo>` | how a repo's app stands:  up, starting, or failed and why |
+| `/_epic/servers/` | the Servers tab:  every server it keeps, what just reached `main`, what waits |
+| `/api/servers` | the same, as data;  `/api/servers/dot`, the tab's red dot;  `POST /api/servers/<start\|stop\|restart>` |
 | `/api/server` | what it serves:  its port, its repos, the default one |
 | `/api/...` | the review, details, choices, comments, agents, airplane and links routes, for the default repo |
 
@@ -275,7 +308,7 @@ What you'd trip on today, roughly in the order you'd meet it.
    `epic repos default <name>` picks which repo that is.
 4. **Your pages wear Spell's look.**
    They load Spell's theme.
-   The top bar shows three tabs, Epic Pages, Sagas and Guides, centred, unless your settings name others.
+   The top bar shows three tabs, Epics, Sagas and Guides, centred, unless your settings name others.
 5. **A few skills reach for Spell's own tools.**
    Where a skill wants the repo's house style or text-rewriting skill, its example is Spell's.
    - The epic skill's three test tiers name Spell's folders and scripts, `yarn test:unit` among them:

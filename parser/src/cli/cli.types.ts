@@ -20,6 +20,7 @@ import type { GlobalOptions } from "spell/cli"
 export type LanguageCommands = {
   compile(projects: string[], options: CompileOptions): Promise<number>
   lint(projects: string[], options: LintOptions): Promise<number>
+  upgrade(projects: string[], options: UpgradeOptions): Promise<number>
   describe(args: string[], options: DescribeOptions): Promise<number>
   run(project: string[], options: RunOptions): Promise<number>
   test(projects: string[], options: TestOptions): Promise<number>
@@ -122,6 +123,16 @@ export type LintOptions = GlobalOptions & {
 }
 
 /**
+ * `spell upgrade` flags (epic `language` P68).
+ * - `dryRun`:  list what it would change, and write nothing
+ * - `json`:  print what it changed (or would) as a JSON array of problems, one per change
+ */
+export type UpgradeOptions = GlobalOptions & {
+  dryRun?: boolean
+  json?: boolean
+}
+
+/**
  * `spell describe` flags.
  * - `inherited`:  list members types inherit, too
  * - `compiled`:  show the javascript something compiles to -- when describing ONE thing
@@ -200,6 +211,11 @@ export type SpeedtestOptions = GlobalOptions & {
   baseline?: string
   /** a percent:  time against the baseline, and fail over it */
   budget?: string
+  /**
+   * time the editing pipeline instead of the rule tests:  Solitaire's whole parse, its edits, its compile, a run and
+   * startup (epic `solid-2-final` P1)
+   */
+  pipeline?: boolean
 }
 
 /**

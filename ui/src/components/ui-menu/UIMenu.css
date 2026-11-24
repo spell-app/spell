@@ -954,7 +954,7 @@
   }
 
   /* ## Evenly divided:  `equal width`, or `N item`. */
-  .ui[class*="equal width"].menu,
+  .ui.equal-width.menu,
   .ui.item.menu {
     --_ui-menu-item-width: 100%;
     --_ui-menu-item-padding: 0.92857em 0;
@@ -963,7 +963,7 @@
     --_ui-menu-item-text-align: center;
     --_ui-menu-divider-last-display: none;
   }
-  .ui[class*="equal width"].menu {
+  .ui.equal-width.menu {
     --_ui-menu-item-flex: 1;
   }
   .ui.secondary.item.menu,
@@ -1259,28 +1259,28 @@
    * ## Alignment (`alignment`):  where the items sit along a horizontal bar -- packed at one end, or filling it.
    * A segmented group (and an `equal` packed one, below) IS its items, so it moves as a whole instead.
    */
-  .ui[class*="left aligned"].menu {
+  .ui.left-aligned.menu {
     justify-content: flex-start;
   }
-  .ui[class*="center aligned"].menu {
+  .ui.center-aligned.menu {
     justify-content: center;
   }
-  .ui[class*="right aligned"].menu {
+  .ui.right-aligned.menu {
     justify-content: flex-end;
   }
-  .ui[class*="fluid aligned"].menu:not(.vertical) {
+  .ui.fluid-aligned.menu:not(.vertical) {
     --_ui-menu-item-flex: 1 1 auto;
     --_ui-menu-item-justify: center;
     --_ui-menu-item-text-align: center;
     --_ui-menu-divider-last-display: none;
   }
-  .ui.segmented[class*="center aligned"].menu:not(.vertical) {
+  .ui.segmented.center-aligned.menu:not(.vertical) {
     margin-inline: auto;
   }
-  .ui.segmented[class*="right aligned"].menu:not(.vertical) {
+  .ui.segmented.right-aligned.menu:not(.vertical) {
     margin-inline: auto 0;
   }
-  .ui.segmented[class*="fluid aligned"].menu:not(.vertical) {
+  .ui.segmented.fluid-aligned.menu:not(.vertical) {
     width: auto;
   }
 
@@ -1291,7 +1291,7 @@
    * - `fluid aligned`:  an equal share of the bar each (`flex: 1 1 0`)
    * - NOTE: a packed `tabular` bar hugs its tabs too, so its rule ends at the last tab
    */
-  .ui.equal.menu:not(.width, .vertical, [class*="fluid aligned"]) {
+  .ui.equal.menu:not(.width, .vertical, .fluid-aligned) {
     --_ui-menu-item-justify: center;
     --_ui-menu-item-text-align: center;
     --_ui-menu-divider-last-display: none;
@@ -1302,16 +1302,16 @@
     max-width: 100%;
   }
   /* the clearfix would be a grid item:  an empty last column */
-  .ui.equal.menu:not(.width, .vertical, [class*="fluid aligned"])::after {
+  .ui.equal.menu:not(.width, .vertical, .fluid-aligned)::after {
     display: none;
   }
-  .ui.equal[class*="center aligned"].menu:not(.width, .vertical) {
+  .ui.equal.center-aligned.menu:not(.width, .vertical) {
     margin-inline: auto;
   }
-  .ui.equal[class*="right aligned"].menu:not(.width, .vertical) {
+  .ui.equal.right-aligned.menu:not(.width, .vertical) {
     margin-inline: auto 0;
   }
-  .ui.equal[class*="fluid aligned"].menu:not(.width, .vertical) {
+  .ui.equal.fluid-aligned.menu:not(.width, .vertical) {
     --_ui-menu-item-flex: 1 1 0%;
   }
 
@@ -1382,27 +1382,27 @@
     margin-right: 0;
     margin-left: 0;
   }
-  .ui[class*="top attached"].menu {
+  .ui.top-attached.menu {
     --_ui-menu-first-radius: var(--_ui-menu-radius) 0 0 0;
     margin-top: var(--_menu-margin-top, 1em);
     margin-bottom: 0;
     border-radius: var(--_ui-menu-radius) var(--_ui-menu-radius) 0 0;
   }
-  .ui[class*="top attached"].tabular.menu {
+  .ui.top-attached.tabular.menu {
     --_ui-menu-first-radius: 0;
     border-radius: 0;
   }
-  .ui[class*="bottom attached"].menu {
+  .ui.bottom-attached.menu {
     --_ui-menu-first-radius: 0 0 0 var(--_ui-menu-radius);
     margin-top: 0;
     margin-bottom: var(--_menu-margin-bottom, 1em);
     border-radius: 0 0 var(--_ui-menu-radius) var(--_ui-menu-radius);
   }
-  .ui[class*="bottom attached"].tabular.menu {
+  .ui.bottom-attached.tabular.menu {
     --_ui-menu-first-radius: 0;
     border-radius: 0;
   }
-  .ui[class*="equal width"].attached.menu:not(.tabular),
+  .ui.equal-width.attached.menu:not(.tabular),
   .ui.attached.item.menu:not(.tabular) {
     margin: 0 -1px;
   }
@@ -1419,12 +1419,12 @@
     margin: 0;
     border-radius: 0;
   }
-  .ui[class*="top fixed"].menu {
+  .ui.top-fixed.menu {
     border-top: none;
     border-right: none;
     border-left: none;
   }
-  .ui[class*="right fixed"].menu {
+  .ui.right-fixed.menu {
     inset: 0 0 auto auto;
     width: auto;
     height: 100%;
@@ -1432,13 +1432,13 @@
     border-right: none;
     border-bottom: none;
   }
-  .ui[class*="bottom fixed"].menu {
+  .ui.bottom-fixed.menu {
     inset: auto auto 0 0;
     border-right: none;
     border-bottom: none;
     border-left: none;
   }
-  .ui[class*="left fixed"].menu {
+  .ui.left-fixed.menu {
     inset: 0 auto auto 0;
     width: auto;
     height: 100%;

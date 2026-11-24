@@ -27,7 +27,6 @@ export class EpicHiddenNote extends E.UIComponent<typeof epicHiddenNoteVocabular
         type="button"
         class={this.rootClass}
         part={this.partForName("base")}
-        data-tooltip={this.translationForKey("hiddenTip")}
         onClick={() => this.send(SHOW_ALL, {})}
       >
         {this.translationForKey("hiddenNote", { count: this.count ?? 0 })}

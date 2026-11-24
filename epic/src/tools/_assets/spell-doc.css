@@ -136,6 +136,22 @@ html {
   --epic-turn-duration: 0s;
   --epic-flash-duration: 0s;
 }
+/*
+ * the site's bar hides what scrolls under it, completely, as the page's head does (`spell-toolbar.css`, epic
+ * `epic-engine` I372):  a glass theme's bar colour, made opaque, and no blur behind it;  a browser without relative
+ * colours keeps the theme's glass
+ */
+@supports (color: rgb(from light-dark(red, blue) r g b / 1)) {
+  body.spell-doc-page {
+    --spell-site-bar-opaque: rgb(
+      from var(--ui-bar-background, var(--spell-site-header-fill, light-dark(#fff, #18181c))) r g b / 1
+    );
+  }
+  body.spell-doc-page spell-site-header {
+    --ui-bar-background: var(--spell-site-bar-opaque);
+    --ui-bar-filter: none;
+  }
+}
 body.plan-doc {
   --spell-site-header-fill: var(--spell-bg);
   --spell-site-header-rule: transparent;
@@ -341,6 +357,13 @@ body.spell-doc-page .spell-doc-main ui-section {
 }
 body.spell-doc-page .spell-doc-main ui-section ui-section {
   --ui-section-title-padding: var(--spell-title-top) var(--spell-column-inset) 6px;
+}
+/*
+ * a nested section inside a block that sits in the column already (a kept round in a <div>):  only the small inset
+ * - with the column inset again, a wide window left its title no width, a word to a line (epic epic-engine I429)
+ */
+body.spell-doc-page .spell-doc-main ui-section > :not(ui-section, .spell-full-width) ui-section {
+  --ui-section-title-padding: var(--spell-title-top) 4px 6px;
 }
 body.spell-doc-page .spell-doc-main ui-section::part(title) {
   margin-inline: 0;
@@ -739,6 +762,22 @@ ui-button.spell-fold {
   font-size: 0.72em;
   font-weight: 600;
   white-space: pre;
+}
+/*
+ * the joined row stays on ONE line, inside the window:  cut short with "…" where it doesn't fit (epic `epic-engine`
+ * I368:  a long sub-section title after its parent's scrolled a phone's page sideways);  the title wraps again, in
+ * full, once nothing is joined to it
+ */
+.spell-doc-main ui-section[data-spell-trail] {
+  &::part(heading),
+  &::part(toggle) {
+    min-width: 0;
+  }
+  &::part(header) {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
 /* the `open/all` count:  big enough to read at a glance beside a title */
 .spell-doc-main ui-section {
@@ -1678,4 +1717,145 @@ main :is(td, th)[data-spell-editing] {
   border-radius: 8px;
   background: var(--spell-card);
   box-shadow: var(--ui-shadow-floating);
+}
+
+/*******************************
+          A Feature Set
+*******************************/
+
+/*
+ * A ranked list to pick from (`epic ask create --template feature-set`, epic `epic-engine` P80), after Solid TLDR:
+ * - three columns and no more, Item | Your pick | Facts;  narrower than 860px it scrolls in its own box, as every
+ *   table does, its pick still in view
+ * - at 720px and under (the side bar, a phone) the pick would be off to the side, so (its design review):
+ *   - Your pick first, 170px, then Item, its Facts under it in the same column;  nothing scrolls sideways
+ *   - still a table, never stacked cards:  each row a grid of the same cells, in their order in the page
+ * - an item's name (F1) is a chip in its row's state colour:  red till its pick and its Priority are both in, then
+ *   green (No needs no Priority:  it's off), blue only a comment (its question shows no chip of its own)
+ */
+body.spell-doc-page .spell-doc-main > ui-section > ui-table.spell-feature-table {
+  margin: 12px 16px 20px 16px;
+}
+.spell-feature-table > table {
+  width: 100%;
+  min-width: 860px;
+  table-layout: fixed;
+}
+.spell-feature-table col.spell-feature-col-pick {
+  width: 20%;
+}
+.spell-feature-table col.spell-feature-col-facts {
+  width: 22%;
+}
+.spell-feature-table td p {
+  max-width: none;
+  margin: 0 0 4px 0;
+}
+.spell-feature-table td > p:last-child {
+  margin-bottom: 0;
+}
+.spell-feature-table td > p.spell-feature-changes-head {
+  margin: 8px 0 4px 0;
+}
+.spell-feature-table ul.spell-feature-changes {
+  margin: 0;
+  padding-inline-start: 20px;
+}
+.spell-feature-table ul.spell-feature-changes > li {
+  max-width: none;
+  margin: 0 0 4px 0;
+}
+.spell-feature-why {
+  color: var(--spell-muted);
+}
+.spell-feature-pick > epic-ask {
+  margin: 0;
+}
+@media (max-width: 720px) {
+  .spell-feature-table > table {
+    display: block;
+    min-width: 0;
+  }
+  .spell-feature-table > table > colgroup {
+    display: none;
+  }
+  .spell-feature-table > table > :is(thead, tbody) {
+    display: block;
+  }
+  .spell-feature-table > table > :is(thead, tbody) > tr {
+    position: relative;
+    display: grid;
+    grid-template-columns: min(170px, 48%) minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+  .spell-feature-table > table > tbody > tr {
+    grid-template-rows: auto 1fr;
+  }
+  /* the table rounds its first and last cells' corners:  they aren't its corners here */
+  .spell-feature-table > table > * > tr > :is(th, td) {
+    border-radius: 0;
+  }
+  .spell-feature-table > table > * > tr > :is(:nth-child(1), .spell-feature-facts) {
+    border-inline-start: var(--ui-border-width) solid var(--ui-border-color);
+  }
+  .spell-feature-table > table > * > tr > :nth-child(1) {
+    grid-area: 1 / 2;
+    min-width: 0;
+  }
+  .spell-feature-table > table > * > tr > :nth-child(2) {
+    grid-area: 1 / 1;
+    min-width: 0;
+    border-inline-start: 0;
+  }
+  .spell-feature-table > table > tbody > tr > .spell-feature-pick {
+    grid-row: 1 / 3;
+  }
+  .spell-feature-table > table > tbody > tr > .spell-feature-facts {
+    grid-area: 2 / 2;
+    min-width: 0;
+    border-top: 0;
+  }
+  /* the Facts' head:  still read out, with no room of its own */
+  .spell-feature-table > table > thead > tr > :nth-child(3) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+.spell-feature-table a.spell-feature-name {
+  --_feature-state: var(--spell-state-attention);
+  --_feature-state-on: var(--spell-state-attention-on);
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--_feature-state);
+  color: var(--_feature-state-on);
+  font: 600 12px / 1 var(--ui-font-family-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+.spell-feature-table tr:has(> .spell-feature-pick > epic-ask:state(done)) a.spell-feature-name {
+  --_feature-state: var(--spell-state-recent);
+  --_feature-state-on: var(--spell-state-recent-on);
+}
+/* picked, its Priority still to pick:  not decided yet */
+.spell-feature-table
+  tr:has(> .spell-feature-pick > epic-ask:state(done) > epic-ask[slot="then"]:not(:state(off)):not(:state(done)))
+  a.spell-feature-name {
+  --_feature-state: var(--spell-state-attention);
+  --_feature-state-on: var(--spell-state-attention-on);
+}
+.spell-feature-table tr:has(> .spell-feature-pick > epic-ask:state(working)) a.spell-feature-name {
+  --_feature-state: var(--spell-state-progress);
+  --_feature-state-on: var(--spell-state-progress-on);
 }

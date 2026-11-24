@@ -18,10 +18,13 @@ import {
 
 import { AnswerThread } from "./AnswerThread"
 import { EpicBodies } from "./EpicBodies"
-import { epicItemVocabulary } from "./EpicItem.en"
+import { epicItemVocabulary, type BadgeWord } from "./EpicItem.en"
 import { Fold, type FoldButtonOptions, type Opener } from "./Fold"
+import { ItemBadge } from "./ItemBadge"
 import { NearScreen } from "./NearScreen"
+import { TitlePrefix, type TitlePrefixWord } from "./TitlePrefix"
 import {
+  BADGE,
   BED_ICON,
   CANCELED,
   CELL,
@@ -36,6 +39,7 @@ import {
   FLOW_TAGS,
   FOLD,
   GIT,
+  COMMIT_PILL,
   HAS_DETAILS,
   LABEL,
   LINE,
@@ -53,19 +57,26 @@ import {
   DrawnState,
   MANUAL_TEST,
   THREAD_ATTRIBUTES,
+  STATE_FILLS,
   TITLE,
+  TITLE_PREFIX,
   TOGGLE,
+  UPDATE,
   UNDER_LINE,
   UNDER_TITLE,
   UNFOLDED,
   type ChipMark,
+  type ItemButtons,
   type EpicItemVocabulary,
   type StateFields,
+  type ItemLook,
   type ItemState,
+  type MarkStage,
   type ReviewLabel,
   buttonsForItem
 } from "./EpicItem.types"
 
+import badgeCSS from "./ItemBadge.css?inline"
 import itemCSS from "./EpicItem.css?inline"
 
 /****************
@@ -76,11 +87,19 @@ import itemCSS from "./EpicItem.css?inline"
  * - Its LINE, in the shadow root, sticky while open (under the section titles stuck above it):
  *   - the fold chevron (only with details)
  *   - the id chip (`Q7`, a link to `#q7`), in its state's colour
+ *   - its BADGE, first in the title, what happens next in the item's colour (`WILL FIX`;  epic `epic-engine` P81):
+ *     the word the tool wrote (`badge`), following what's live (`ItemBadge.drawn()`);  it replaces the UPDATE word
+ *   - its UPDATE label, after the badge, next to the id chip (T149):  the one in its title, drawn here instead
+ *     (Owen:  "Update can stay next to the item number rather than at the end")
+ *   - a badge or label in the id chip's own colour is grey (T149;  Owen:  "Don't need to repeat the color in pill
+ *     and label if it is the same")
  *   - the title (`title`, or `slot="title"`):  in full, as many lines as it needs, folded or open (Owen,
  *     2026-10-19:  "always show the full title, wrapped")
  *   - the page's own buttons (`slot="actions"`, and the docs runtime's bullhorn):  before its own;
  *     a click on one never folds it
  *   - the bed icon (`overnight`:  made overnight), the git icon (with commits)
+ *     - its phase known (`commitPill`), the git icon is its `in P4` pill:  a click still shows its commits
+ *       (epic `epic-engine` I380)
  *   - handled in a phase (`handled`, epic `epic-engine` P31):  `in P4`, linking the phase;  the item grey
  *   - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P4`, the item still green
  *   - the review label (`reviewed 10/6/26`, `deferred`, `to do`) and the review buttons
@@ -114,8 +133,8 @@ import itemCSS from "./EpicItem.css?inline"
  *     - without details:  under its line once Revisit opens it, lined up with where details start;
  *       its chevron then shows, and folding closes the box
  *   - a marked note just above the box, with Edit, and Claude's status cards between the two
- *   - While it carries a mark (a button dashed or outlined, or a pick), its id chip keeps its state's colour and
- *     wears the mark's fill (`chipMark`, Owen, 2026-10-11);  without one, its state's colour, solid.
+ *   - Marked, not sent:  it looks as it did, a dotted ring round its id chip (`drawnLook`, epic `epic-engine` T145).
+ *   - Sent:  the id chip dotted blue, handed to Claude;  solid blue once Claude is on it (T146).
  *   - Once Claude has handled the mark, the buttons CLEAR (Owen's input, taken):  the chip carries the result.
  *   - The id chip of an item Owen may call urgent or not (`canCalm`) is a button:
  *     urgent <-> not urgent, through the inbox (`ReviewClient.toggleCalm()`).
@@ -146,7 +165,7 @@ import itemCSS from "./EpicItem.css?inline"
 export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   @E.proto static vocabulary = epicItemVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-item": itemCSS },
+    styleSheets: { "epic-item": itemCSS, "epic-badge": badgeCSS },
     DOMElement: E.DOMLoadableBodyElement,
     // a container:  a click on its text must not jump to the fold button or a link inside
     delegatesFocus: false
@@ -175,9 +194,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   readonly reviewState = new ReviewState(() => this.id)
 
   /**
-   * Owen marked it in this pass, not applied yet (epic `epic-engine` P43):  its id chip ringed in the blue badge's blue
-   * (Owen, 2026-10-25:  "the T1 should be blue outline");  the section's count's rule, so a set change that picks
-   * nothing isn't one (`ReviewState.isMarked()`)
+   * Owen marked it in this pass, not applied yet (epic `epic-engine` P43):  the section's count's rule, so a set change
+   * that picks nothing isn't one (`ReviewState.isMarked()`)
    */
   readonly isMarkedInPass = (): boolean => this.reviewState.isMarked(this.id ?? "")
 
@@ -277,15 +295,12 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 
   /**
-   * Where Owen's answer on it stands, as its id chip wears it (Owen, 2026-10-10:  "leaning into outlines"):
-   * the FILL says how far it got, so he sees at a glance what he already answered.
-   * - his live mark:  the item's OWN state colour, DASHED until sent, then OUTLINED (Owen, 2026-10-11:  a red item
-   *   marked Revisit turned blue, and the section's red count no longer matched any chip;  no `color` here)
+   * Where Owen's answer on it stands (Owen, 2026-10-10:  "leaning into outlines"), for its chip's tooltip, and its fill
+   * once sent (`chipFill`).
+   * - his live mark:  DASHED until sent, then OUTLINED;  no `color` of its own (Owen, 2026-10-11:  a red item
+   *   marked Revisit turned blue, and the section's red count no longer matched any chip)
    *   - the note box's x (`skip`, Owen, 2026-10-09) has no button on the line:  the chip alone shows it
    * - a pick Claude took off the inbox, its `chosen` not on the page yet:  green, outlined
-   * - answered, and the work still due:  OUTLINED
-   *   - queued (`queued`:  a review said "do it", a todo's plane):  green
-   *   - Claude working on it (an underway card, an agent at work:  `progress`):  blue
    * - `undefined` once nothing more is due, so the chip shows its state SOLID:
    *   the RESULT (Owen, 2026-10-08):
    *   green decided or done, yellow still open, red needs Owen, orange Owen's turn to pick
@@ -306,9 +321,61 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     const taken = pickLabel(this.reviewState.takenPick())
     if (taken && !this.domElement.querySelector(CHOSEN_SET))
       return { color: "green", fill: "outline", label: { pick: taken } }
-    if (this.itemState() === "progress" || this.itemState() === "handed") return { color: "blue", fill: "outline" }
-    if (this.itemState() === "scheduled") return { color: "blue", fill: "dotted" }
     return undefined
+  })
+
+  /**
+   * Where his mark stands, as its id chip rings it:
+   * - `unsent`:  a dotted ring round the chip as it was (epic `epic-engine` T145;  Owen, 2026-11-22:  "leave those the
+   *   color they were before, but do the dotted outline on them")
+   * - `sent`:  the chip itself dotted blue, handed to Claude (P43), till Claude is at work on it (`progress`:  solid
+   *   blue, T146)
+   */
+  readonly markStage = createMemo((): MarkStage | undefined => {
+    if (!this.isMarkedInPass()) return undefined
+    if (!this.reviewState.isSent()) return "unsent"
+    return this.itemState() === "progress" ? undefined : "sent"
+  })
+
+  /**
+   * How its id chip and title look:  as drawn (`itemState`), but while his mark waits for Send, as before it
+   * (epic `epic-engine` T145;  Owen:  "I have to uncheck to know what it's color was before").
+   * - his instant ✓ or x (`pressedAs`):  HELD from before the click, so the server's apply changes nothing on screen
+   *   (I308, I360);  his Send lets it go, grey
+   * - his other ✓ (with a note, a pick):  not greyed for it either
+   * - the counts and filters still count his ✓ closed (`DrawnState`, I306)
+   */
+  readonly drawnLook = createMemo((was?: ItemLook): ItemLook => {
+    const live = this.reviewState.liveOf()
+    const held = !!live.pressedAs
+    if (held && was) return was
+    const asWas = { ...live, closing: false, approved: false }
+    const isUnsent = this.markStage() === "unsent"
+    const state = isUnsent ? DrawnState.of(this.stateFields(), asWas) : this.itemState()
+    return {
+      state,
+      badge: ItemBadge.drawn(
+        { badge: TitlePrefix.knownBadge(this.badge), kind: ItemBadge.kindOf(this.id, !!this.limit) },
+        state,
+        isUnsent ? asWas : live
+      ),
+      canceled: (this.status === CANCELED && !this.isReopening) || (!held && live.closingAs === "drop")
+    }
+  })
+
+  /** `badge`'s words, as its line says them:  `SEE T38`. */
+  private badgeText(badge: BadgeWord): string {
+    return this.translationForKey(`badge_${badge}`, { id: this.badgeItem?.toUpperCase() ?? "" })
+  }
+
+  /**
+   * Its id chip's fill:  its mark's once sent (`chipMark`), else its state's own (`STATE_FILLS`).
+   * - until Send, as it was (epic `epic-engine` T145);  under way, always solid blue (T146)
+   */
+  readonly chipFill = createMemo(() => {
+    const { state } = this.drawnLook()
+    const isItsState = state === "progress" || this.markStage() === "unsent"
+    return (isItsState ? undefined : this.chipMark()) ?? STATE_FILLS[state]
   })
 
   /** Is its id chip a button (urgent <-> not urgent) now?  Only while the page is reviewed. */
@@ -387,12 +454,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /** The review label, from its marks:  `to do`, else `deferred`, else `reviewed 10/6/26`;  none when unmarked. */
   readonly review = createMemo((): ReviewLabel | undefined => {
-    const { queued, deferred, reviewed, work } = this
-    if (queued) return { words: this.translationForKey("reviewTodo"), look: "todo", tip: work || undefined }
-    if (deferred) {
-      const tip = this.translationForKey("tipDeferred", { date: PlanDates.format(deferred) })
-      return { words: this.translationForKey("reviewDeferred"), look: "deferred", tip }
-    }
+    const { queued, deferred, reviewed } = this
+    if (queued) return { words: this.translationForKey("reviewTodo"), look: "todo" }
+    if (deferred) return { words: this.translationForKey("reviewDeferred"), look: "deferred" }
     if (reviewed) {
       const look = this.itemState() === "recent" ? "recent" : "old"
       return { words: this.translationForKey("reviewed", { date: PlanDates.format(reviewed) }), look }
@@ -423,10 +487,46 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       this.failed !== undefined ||
       !!this.phasePill ||
       !!this.donePill ||
+      !!this.fixIn ||
       this.hasCommits() ||
       !!this.review() ||
       this.reviewState.reviewing()
   )
+
+  /** The word its line starts with (`TitlePrefix`, epic `epic-engine` T143):  `fixed`;  `undefined` for none. */
+  readonly titlePrefix = createMemo((): TitlePrefixWord | undefined => {
+    const { status, state, fixed, selfFixed } = this
+    const { approved, closing } = this.reviewState.liveOf()
+    return TitlePrefix.of({ status, state, fixed, selfFixed, badge: this.badge }, { accepted: approved || closing })
+  })
+
+  /**
+   * Is its id chip in its state's colour, so a word beside it in that colour needn't say it again (epic
+   * `epic-engine` T149)?  Not while it wears a mark's:  sent, or a pick taken.
+   */
+  readonly chipWearsState = createMemo(() => {
+    if (this.markStage() === "sent") return false
+    const color = this.chipFill()?.color
+    return !color || color === STATE_FILLS[this.drawnLook().state]?.color
+  })
+
+  /**
+   * Its UPDATE label, as drawn next to the id chip (T149):  the one in its title, read off it.
+   * - none once his ✓ is on the item (as `EpicUpdate.isChecked`)
+   * - none with nothing left to show:  a badge, or `FIXED -`, says the word, and there's no `Not in main`
+   */
+  readonly updateLabel = createMemo((): UpdateLabel | undefined => {
+    void this.threadChange
+    if (isServer) return undefined
+    const label = this.domElement.querySelector(':scope > [slot="title"] > epic-update')
+    if (!label || this.reviewState.liveOf().approved) return undefined
+    const became = label.getAttribute("became") ?? undefined
+    const unmerged = label.getAttribute("unmerged") ?? undefined
+    const { badge } = this.drawnLook()
+    const saidWord = !!badge || (became === "fixed" && this.titlePrefix() === "fixed")
+    const saysUnmerged = !!became && !!unmerged && badge !== "notInMain"
+    return saidWord && !saysUnmerged ? undefined : { became, unmerged }
+  })
 
   /**
    * The id chip's tooltip:  where it stands, then its review marks (`Needs attention · not reviewed yet`);
@@ -434,17 +534,20 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    */
   readonly chipTip = createMemo(() => {
     const { queued, work, reviewed, deferred, status } = this
+    const { state } = this.drawnLook()
     // greyed with age (`ItemAge`), it's still decided or done, not "no longer relevant"
-    const aged = this.itemState() === "old" && this.status !== "canceled"
+    const aged = state === "old" && this.status !== "canceled"
     const parts = [
       this.translationForKey(
         this.fixed
           ? "stateFixed"
-          : this.isWaitingTest
-            ? "stateTestWaiting"
-            : this.isCommentTurn
-              ? "stateCommentReplied"
-              : STATE_TIP_KEYS[aged ? "recent" : this.itemState()]
+          : this.selfFixed && state === "handled"
+            ? "stateSelfFixed"
+            : this.isWaitingTest
+              ? "stateTestWaiting"
+              : this.isCommentTurn
+                ? "stateCommentReplied"
+                : STATE_TIP_KEYS[aged ? "recent" : state]
       )
     ]
     const mark = this.chipMark()
@@ -495,16 +598,15 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * Words before the noun:  its state (`attention item`), `canceled`, `limit`, `has-details`, `note-open`, `unfolded`.
    * - NOTE: `unfolded`, not `open`:  `open` is a state (yellow) already.
    * - Of the statuses only `canceled` looks different (struck through), so only it is a word here.
-   *   - struck at his x's click too (`closingAs`, epic `epic-engine` I308), before the server cancels it:  so its
-   *     update lands with nothing left to change on screen
+   *   - struck at his Send after his x (`drawnLook`, epic `epic-engine` T145), before the server cancels it or after:
+   *     so its update lands with nothing left to change on screen (I308)
    *   - NOT struck once his Do this, Make Todo or Revisit wants it back (`isReopening`, epic `epic-engine` I359):
    *     drawn as `inbox apply` will leave it, from the click
    */
   protected get extraClass(): string | undefined {
-    const live = this.reviewState.liveOf()
-    const canceled = (this.status === CANCELED && !this.isReopening) || live.closingAs === "drop"
+    const { state, canceled } = this.drawnLook()
     return [
-      this.itemState(),
+      state,
       canceled && CANCELED,
       this.limit && LIMIT,
       this.hasDetails() && HAS_DETAILS,
@@ -617,9 +719,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
                 class={CHIP}
                 part={this.partForName("id")}
                 href={`#${this.id ?? ""}`}
-                data-color={this.chipMark()?.color}
-                data-fill={this.chipMark()?.fill}
-                data-marked={this.isMarkedInPass() ? "" : undefined}
+                data-color={this.chipFill()?.color}
+                data-fill={this.chipFill()?.fill}
+                data-marked={this.markStage()}
                 data-tooltip={this.chipTip()}
               >
                 {this.label()}
@@ -630,9 +732,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
               type="button"
               class={CHIP}
               part={this.partForName("id")}
-              data-color={this.chipMark()?.color}
-              data-fill={this.chipMark()?.fill}
-              data-marked={this.isMarkedInPass() ? "" : undefined}
+              data-color={this.chipFill()?.color}
+              data-fill={this.chipFill()?.fill}
+              data-marked={this.markStage()}
               aria-pressed={this.itemState() === "attention" ? "true" : "false"}
               data-unsent={this.reviewState.urgency()?.sent === false ? "" : undefined}
               data-tooltip={this.chipTip()}
@@ -643,7 +745,49 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           </Show>
         </span>
         {/* in full, wrapped, folded or open (EpicItem.css) */}
-        <span class={TITLE} part={this.partForName("title")}>
+        <span
+          class={TITLE}
+          part={this.partForName("title")}
+          data-prefix={this.titlePrefix()}
+          data-badge={this.drawnLook().badge}
+          data-echo={this.chipWearsState() ? this.drawnLook().state : undefined}
+        >
+          <Show when={this.drawnLook().badge}>
+            {(badge) => (
+              <>
+                <span
+                  class={BADGE}
+                  part={this.partForName("badge")}
+                  data-state={this.drawnLook().state}
+                  data-echo={this.chipWearsState() ? "" : undefined}
+                  data-tooltip={this.judgedWhy}
+                >
+                  {this.badgeText(badge())}
+                </span>{" "}
+              </>
+            )}
+          </Show>
+          <Show when={this.updateLabel()}>
+            {(label) => (
+              <>
+                <epic-update
+                  class={UPDATE}
+                  part={this.partForName("update")}
+                  became={label().became}
+                  unmerged={label().unmerged}
+                />{" "}
+              </>
+            )}
+          </Show>
+          <Show when={this.titlePrefix()}>
+            {(word) => (
+              <>
+                <span class={TITLE_PREFIX} part={this.partForName("title-prefix")}>
+                  {this.translationForKey(word())}
+                </span>{" "}
+              </>
+            )}
+          </Show>
           <slot name={this.slotForName("title")}>{this.title}</slot>
         </span>
         <span class={EXTRAS} part={this.partForName("actions")} hidden={!this.hasExtras()}>
@@ -654,8 +798,15 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             <Show when={this.hasBeenNear}>{this.lineMarks()}</Show>
           </span>
           {/* its phase, `in P4`, on a small line of its own under the buttons (I348):  the title wraps the same with or
-              without it */}
-          <Show when={this.hasBeenNear && (this.phasePill || this.donePill)}>
+              without it;  a finished one's is on the line instead (T152) */}
+          <Show
+            when={
+              this.hasBeenNear &&
+              !this.commitPill &&
+              !this.pillOnLine &&
+              (this.phasePill || this.donePill || this.fixIn)
+            }
+          >
             <span class={PHASE_ROW}>
               <Show when={this.phasePill} fallback={this.doneMark()}>
                 {this.handledMark()}
@@ -670,7 +821,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   /**
    * The line's own marks and buttons, at its end:  bed, failed, git, review label or buttons,
    * then the (i) Clarify button (epic `epic-engine` T95:  on every item, its line, so it's found without opening it).
-   * - its phase pill (`in P4`) is under them, on a line of its own (`PHASE_ROW`, I348)
+   * - its phase pill (`in P4`) is under them, on a line of its own (`PHASE_ROW`, I348);
+   *   with commits, the git icon's place instead (`commitPill`, I380)
+   * - a finished one's pill is on the line, before its buttons, so the item fits one line (`pillOnLine`, T152)
    */
   private lineMarks(): JSX.Element {
     return (
@@ -687,10 +840,19 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           </span>
         </Show>
         <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
-        <Show when={this.hasCommits()}>{this.gitButton()}</Show>
+        <Show when={!this.commitPill && this.pillOnLine}>
+          <Show when={this.phasePill} fallback={this.doneMark()}>
+            {this.handledMark()}
+          </Show>
+        </Show>
+        <Show when={this.hasCommits()}>
+          <Show when={this.commitPill} fallback={this.gitButton()}>
+            {this.commitMark()}
+          </Show>
+        </Show>
         <Show when={!this.reviewState.reviewing() && this.review()}>
           {(review) => (
-            <span class={[REVIEW, review().look]} part={this.partForName("review")} data-tooltip={review().tip}>
+            <span class={[REVIEW, review().look]} part={this.partForName("review")}>
               {review().words}
             </span>
           )}
@@ -719,7 +881,6 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         appearance="basic"
         color="red"
         link={issue() ? `#${issue()}` : undefined}
-        data-tooltip={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
       >
         {this.translationForKey(issue() ? "failedMark" : "failedMarkNone", { id: issue().toUpperCase() })}
       </ui-label>
@@ -782,39 +943,65 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * - `handled` keeps its own `in P4` pill (`phasePill`):  never both
    */
   get donePill(): string {
-    if (this.handled) return ""
-    if (!this.takenIn) return this.acceptingFixIn
+    if (this.handled || !this.takenIn) return ""
     return FINISHED.test(this.status ?? "") ? this.takenIn : ""
   }
 
   /**
-   * The phase his ✓ on a fix waiting for him (`fixed`, Accept the fix) will take this item up in, from the click:  the
-   * page's active phase, as the page server's apply stamps it (`PlanDoc.setItem()`'s `taken-in`);  else `""`
-   * (epic `epic-engine` I360).
-   * - so its `in P20` pill is there from the click, as the server will leave it:  appearing with the page's update,
-   *   it grew the line a row and moved everything under it as that update cross-faded in (Owen, 2026-11-20:  "still
-   *   seeing flash when claude comes back to mark the item as 'really grey'")
-   * - only work an active phase takes up (`PhaseTakes.isWork()`):  an issue, or a todo that isn't a limit
+   * The phase its git icon names, as its `in P21` pill, for an item with commits;  `""`:  the plain git icon
+   * (epic `epic-engine` I380;  Owen, 2026-11-20:  "show that when the code is committed, *before* the accept ... the
+   * in P21 pill could take the place of the git icon").
+   * - `handled`, else `taken-in`, else, still open, the phase its work is being done in:  the page's active one, as
+   *   the page server's apply will stamp it (`activeWorkPhase`)
+   * - so his ✓ and the apply change nothing on its line:  the pill was there, in the same place, since the commit
+   * - drawn instead of the phase row's pill:  never both
    */
-  get acceptingFixIn(): string {
-    if (this.status !== "open" || !this.fixed || this.limit) return ""
-    if (this.reviewState.liveOf().closingAs !== "approve" || !this.domElement.closest(WORK_SECTION)) return ""
+  get commitPill(): string {
+    if (!this.hasCommits()) return ""
+    if (this.handled) return this.handled
+    if (this.takenIn) return this.takenIn
+    return this.status === "open" ? this.activeWorkPhase : ""
+  }
+
+  /**
+   * A fix waiting for him with no commits (`fixed`, Accept the fix):  the phase his ✓ will take it up in, its pill's
+   * place on the phase row held from the start, the pill hidden till his click (epic `epic-engine` I380;  I360 drew
+   * it from the click, which added the row then);  else `""`.
+   */
+  get fixIn(): string {
+    if (this.status !== "open" || !this.fixed || this.phasePill || this.hasCommits()) return ""
+    return this.activeWorkPhase
+  }
+
+  /**
+   * The page's active phase, for work an active phase takes up as it's closed done (`PhaseTakes.isWork()`:  an
+   * issue, or a todo that isn't a limit), as `PlanDoc.setItem()` stamps its `taken-in`;  else `""`.
+   * - read from the page when drawn
+   */
+  private get activeWorkPhase(): string {
+    if (this.limit || !this.domElement.closest(WORK_SECTION)) return ""
     return this.domElement.closest(PAGE_TAG)?.querySelector(ACTIVE_PHASE)?.id ?? ""
   }
 
   /**
    * A finished item's `in P20` pill (`donePill`):  the same quiet grey label as a phase pill still to finish, a click
    * going to the phase;  no ⌥-click start, the work is done.
+   * - a fix waiting for him (`fixIn`):  the same pill, hidden (`data-reserved`) till his ✓, so the click and the
+   *   apply never add its row (epic `epic-engine` I380)
    */
   private doneMark(): JSX.Element {
-    const phase = () => this.phaseNamed(this.donePill)
+    const phaseId = () => this.donePill || this.fixIn
+    const phase = () => this.phaseNamed(phaseId())
+    const reserved = () => !this.donePill && this.reviewState.liveOf().closingAs !== "approve"
     return (
       <ui-label
         class={HANDLED}
         part={this.partForName("done-in")}
         size="mini"
         appearance="basic"
-        link={`#${this.donePill}`}
+        link={`#${phaseId()}`}
+        data-reserved={reserved() ? "" : undefined}
+        aria-hidden={reserved() ? "true" : undefined}
         data-tooltip={`${this.translationForKey("takenTip", { phase: phase().full })}\n${this.translationForKey("donePillTip", { phase: phase().short })}`}
       >
         {this.translationForKey("handledIn", { phase: phase().short })}
@@ -845,6 +1032,49 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     if (!phaseId || phase?.localName !== "epic-phase") return
     const plan = phase.getAttribute("plan")
     this.reviewState.client?.press(phaseId.toLowerCase(), plan === "waiting" || plan === "held" ? "approve" : "todo")
+  }
+
+  /**
+   * The git icon as its phase's pill (`commitPill`, epic `epic-engine` I380):  `in P21`, in the git icon's place;  a
+   * click shows or hides its own commits, as the icon's did, pressed while they show.
+   * - still to finish (`phasePill`), an ⌥-click starts the phase, as the phase row's pill does (I271)
+   * - its tooltip names the phase and what a click does:  "in P21" doesn't say it shows commits
+   */
+  private commitMark(): JSX.Element {
+    const phase = () => this.phaseNamed(this.commitPill)
+    const words = () => this.translationForKey(this.showCommits ? "hideCommits" : "showCommits")
+    const where = () =>
+      this.translationForKey(
+        this.handled ? "handledTip" : FINISHED.test(this.status ?? "") ? "takenTip" : "workedTip",
+        { phase: phase().full }
+      )
+    const tip = () =>
+      [
+        where(),
+        words(),
+        ...(this.phasePill ? [this.translationForKey("startTip", { phase: phase().short })] : [])
+      ].join("\n")
+    const pill = () => this.translationForKey("handledIn", { phase: phase().short })
+    return (
+      <button
+        type="button"
+        class={[GIT, COMMIT_PILL]}
+        part={this.partForName("git")}
+        aria-pressed={this.showCommits ? "true" : "false"}
+        aria-label={`${pill()} · ${words()}`}
+        data-tooltip={tip()}
+        onClick={(event: MouseEvent) => {
+          if (event.altKey && this.phasePill) {
+            event.preventDefault()
+            this.startPhase(this.phasePill)
+          } else this.flipCommits()
+        }}
+      >
+        <ui-label class={HANDLED} size="mini" appearance="basic" selected={this.showCommits ? "" : undefined}>
+          {pill()}
+        </ui-label>
+      </button>
+    )
   }
 
   /** The git icon:  shows or hides its own commits;  pressed while they show. */
@@ -884,20 +1114,52 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /**
    * Which review buttons it draws:  a todo already in a phase draws no plane (`todo-in-phase`, I271);
-   * a finished one, Revisit and Saw it (`todo-done`, I296).
+   * a finished one, Reopen alone (`finished`, T152), with Saw it only while it waits for their check (I296).
    */
-  get buttonsKind(): ReturnType<typeof buttonsForItem> {
+  get buttonsKind(): ItemButtons {
     // held in view after his instant ✓ or x (T80):  the buttons it had when he marked it, so the same button is there
     // to click again and take it back (T81), though the server has closed it since
-    if (this.reviewState.liveOf().heldInView && this.keptButtons) return this.keptButtons
+    const live = this.reviewState.liveOf()
+    if (live.heldInView && this.keptButtons) return this.keptButtons
+    // his instant ✓ or x sent:  as the server will leave it, closed, so its update changes nothing on screen (I360)
+    const mark = this.reviewState.mark()
+    const closedBySend = !!live.closingAs && !live.pressedAs
     this.keptButtons = buttonsForItem(this.id, {
       limit: this.limit,
       inPhase: !!(this.handled || this.takenIn),
       // his Do this on it canceled (I359):  the open item's buttons, his pressed, as `inbox apply` will leave it
-      status: this.isReopening ? "open" : this.status,
-      fixed: !!this.fixed
+      status: this.isReopening
+        ? "open"
+        : closedBySend
+          ? live.closingAs === "drop"
+            ? "canceled"
+            : "done"
+          : this.status,
+      fixed: !!this.fixed,
+      // as before his check, so pressing it never takes the button away (not `drawnLook`:  a memo made after the first
+      // that asks for the buttons, `chipMark`)
+      state: closedBySend ? undefined : DrawnState.of(this.stateFields(), { ...live, closing: false, approved: false }),
+      checked: !closedBySend && mark?.action === "approve",
+      // his ✓ takes the label off, sent or not (`updateLabel`)
+      updated: !live.approved && this.hasLoneUpdateLabel()
     })
     return this.keptButtons
+  }
+
+  /**
+   * Is its UPDATE label the only thing on it waiting for their look:  a label in its title, on a page with no badges?
+   * - his Saw it is the one way to clear it (epic `epic-engine` I285), so a finished one keeps it (T152)
+   * - read off the title, not `updateLabel`:  a memo made after the first that asks for the buttons
+   */
+  private hasLoneUpdateLabel(): boolean {
+    if (isServer || this.badge) return false
+    return !!this.domElement.querySelector(':scope > [slot="title"] > epic-update')
+  }
+
+  /** Its phase pill is on its line, not under it:  it's finished, so it fits one line (epic `epic-engine` T152). */
+  get pillOnLine(): boolean {
+    // `fixIn` too:  his ✓ sent on a fix draws it finished before the server stamps its `taken-in` (I360)
+    return FINISHED_BUTTON_KINDS.has(this.buttonsKind) && !!(this.phasePill || this.donePill || this.fixIn)
   }
 
   /**
@@ -905,7 +1167,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * - `declare`d, so no field initializer runs:  the first render happens inside the base constructor, and an
    *   initializer after it would wipe what that render kept (epic `epic-engine` I308)
    */
-  declare private keptButtons: ReturnType<typeof buttonsForItem> | undefined
+  declare private keptButtons: ItemButtons | undefined
 
   /** One of its review controls (`<epic-review>`):  what it `shows`, as its `part`. */
   private reviewControl(shows: ReviewShows, part: "review-buttons" | "note-box" | "said"): JSX.Element {
@@ -1206,8 +1468,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 /** The statuses of a finished item:  its `taken-in` draws its `in P20` pill (`donePill`, J231), never `phasePill`'s (I307). */
 const FINISHED = /^(done|canceled|decided)$/
 
+/** The buttons of a finished item (`buttonsKind`). */
+const FINISHED_BUTTON_KINDS: ReadonlySet<ItemButtons> = new Set(["finished", "issue-done", "todo-done"])
+
 /**
- * Where an item an active phase takes up when it's closed done sits (`acceptingFixIn`):  the issues, the todos
+ * Where an item an active phase takes up when it's closed done sits (`activeWorkPhase`):  the issues, the todos
  * (`PhaseTakes`' sections);  and the page and its active phase.
  */
 const WORK_SECTION = 'epic-section:is([kind="issues"], [kind="todos"], [kind="caveats"])'
@@ -1224,6 +1489,14 @@ const BODY = "body"
 const IN_THREAD = "in-thread"
 const THREAD_END = "thread-end"
 const THREAD_HIDDEN = "thread-hidden"
+
+/** An item's UPDATE label, as its line draws it (`EpicItem.updateLabel`). */
+type UpdateLabel = {
+  /** its status change:  `fixed` */
+  became?: string
+  /** its branch, while that work isn't on main */
+  unmerged?: string
+}
 
 /** `EpicItem.scanChildren()`'s answer. */
 type ChildScan = {

@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
+import { GivenDrawings } from "spell/ui/elements/GivenDrawings"
 import { UI } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -313,5 +314,45 @@ describe("<ui-markdown> mermaid blocks", () => {
     const diagram = markdown.shadowRoot!.querySelector("ui-mermaid-diagram") as DOMMermaidDiagramElement
     await vi.waitFor(() => expect(diagram.diagramType).toMatch(/flowchart/))
     expect(markdown.shadowRoot!.querySelector("ui-code")).toBeNull()
+  })
+})
+
+describe("<ui-mermaid-diagram> drawn on the page server", () => {
+  afterEach(() => {
+    document.querySelectorAll("script[data-spell-drawings]").forEach((table) => table.remove())
+    GivenDrawings.reset()
+  })
+
+  /** A page's table holding one drawing of `FLOWCHART`, in the light, its look `look`. */
+  function giveDrawing(look: string) {
+    const settings = { theme: "spell", scheme: "light", look: "classic", layout: "auto", seed: 1 }
+    const key = GivenDrawings.keyFor({ kind: "mermaid", settings, text: FLOWCHART })
+    const table = document.createElement("script")
+    table.type = "application/json"
+    table.setAttribute("data-spell-drawings", "")
+    const markup = '<svg id="given-drawing" viewBox="0 0 10 10"></svg>'
+    table.textContent = JSON.stringify({
+      drawings: { [key]: { markup, data: { diagramType: "flowchart-v2", look } } },
+      sheets: {}
+    })
+    document.head.append(table)
+  }
+
+  it("shows the drawing the page was given for its text, colours and font, and never draws it with Mermaid", async () => {
+    const config = { theme: "base", given: true }
+    vi.spyOn(MermaidDrawer, "configFor").mockReturnValue(config)
+    const draw = vi.spyOn((await MermaidDrawer.load()).instance, "draw")
+    giveDrawing(MermaidDrawer.lookOf(config, MermaidDrawer.bodyTextOf(document)))
+    const host = await drawn(`<ui-mermaid-diagram scheme="light">${FLOWCHART}</ui-mermaid-diagram>`)
+    expect(host.svg).toContain("given-drawing")
+    expect(host.diagramType).toBe("flowchart-v2")
+    expect(draw).not.toHaveBeenCalled()
+  })
+
+  it("draws it itself when the page's colours or font aren't the ones it was drawn in", async () => {
+    giveDrawing("another look")
+    const host = await drawn(`<ui-mermaid-diagram scheme="light">${FLOWCHART}</ui-mermaid-diagram>`)
+    expect(host.svg).not.toContain("given-drawing")
+    expect(host.svg).toContain("<svg")
   })
 })

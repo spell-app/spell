@@ -61,7 +61,7 @@ const runningRoutes: RouteModule = {
     if (content !== resolve(root)) context.serveContent?.(content)
     const epics = new RunningEpics(root)
     router.get(RUNNING_API, (request, reply) =>
-      reply.set("Cache-Control", "no-store").json(request.query.every === undefined ? epics.list() : epics.everyEpic())
+      reply.noStore().json(request.query.every === undefined ? epics.list() : epics.everyEpic())
     )
     web.files.html.push((page, served) => (epics.isIndex(served.file) ? epics.render(page) : page))
     epics.watch(live)

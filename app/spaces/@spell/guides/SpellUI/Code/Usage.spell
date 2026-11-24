@@ -4,6 +4,7 @@
 		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
               this site.</>
 	</>
+
 	<!-- USAGE:  from the old Astro page's Behaviour, plus the vocabulary's events and the shadow markup's a11y. -->
 	<section label="Using it">
 		<markdown>

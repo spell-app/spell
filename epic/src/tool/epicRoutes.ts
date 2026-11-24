@@ -116,17 +116,15 @@ const epicRoutes: RouteModule = {
     router.get(PAGES_API, (request, reply) => {
       const name = String(request.query.epic ?? "")
       if (!EPIC_NAME.test(name)) throw new SRV.HttpError(400, `not an epic's name:  "${name}"`)
-      reply
-        .set("Cache-Control", "no-store")
-        .json({ pages: new SeeAlso(root).linksOf(name), saga: sagaLinkOf(root, name) })
+      reply.noStore().json({ pages: new SeeAlso(root).linksOf(name), saga: sagaLinkOf(root, name) })
     })
     router.get(TESTS_API, (_request, reply) => {
-      reply.set("Cache-Control", "no-store").json(new EpicTests(content ?? EpicConfig.contentOf(root)).waiting())
+      reply.noStore().json(new EpicTests(content ?? EpicConfig.contentOf(root)).waiting())
     })
     const lifecycle = () => new EpicLifecycle({ root, ...(content && { content }) })
     const body = SRV.parseBodies({ limit: MAX_BODY })
     router.get(MANAGE_API, (request, reply) => {
-      reply.set("Cache-Control", "no-store").json(lifecycle().facts(String(request.query.epic ?? "")))
+      reply.noStore().json(lifecycle().facts(String(request.query.epic ?? "")))
     })
     router.post(`${MANAGE_API}/resume`, guard.writeCheck, body, async (request, reply) => {
       reply.json({ said: await lifecycle().resume(nameIn(request.body)) })
@@ -145,7 +143,7 @@ const epicRoutes: RouteModule = {
     router.get(SAGA_EPICS_API, (request, reply) => {
       const saga = String(request.query.saga ?? "")
       if (!Sagas.isId(saga)) throw new SRV.HttpError(400, `not a saga's id:  "${saga}"`)
-      reply.set("Cache-Control", "no-store").json(new SagaEpics(root).of(saga))
+      reply.noStore().json(new SagaEpics(root).of(saga))
     })
   }
 }

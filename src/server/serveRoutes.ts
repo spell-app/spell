@@ -35,7 +35,7 @@ export async function serveRoutes(
     }
     const answer = await routes(path)
     if (!answer) return next()
-    if ("text" in answer) return void reply.type(answer.type).set("Cache-Control", "no-store").send(answer.text)
+    if ("text" in answer) return void reply.type(answer.type).noStore().send(answer.text)
     await reply.sendFile(answer.file, { dotfiles: "allow" })
   })
   const { port: actual } = await web.listen({ port, fallback: false })

@@ -21,6 +21,10 @@
  *   - two running agents never claim the same file:  `claim()` refuses one that overlaps another's, naming it
  *   - a merge never moves aside a file a running agent claims (`claimOf()`, `StrayFiles.checkClaims()`)
  *   - they go with the agent (`done()`)
+ * - PAUSED (epic `epic-engine` T139):  an agent stopped for `epic fresh all --pause`, with what it takes to start it
+ *   again in a NEW session (`pause()`, `AgentPause`):
+ *   - it stays on the list, so its claims still guard its uncommitted files from merges and other agents
+ *   - it doesn't count as running (`running`), and only `resume()` starts it again, once
  * - an agent leaves the list when it finishes (`done()`):  the list is what's RUNNING;  empty, the file goes
  * - NOT in the record:  the epic page says what agents DID;  this says what they're doing now
  */
@@ -82,11 +86,16 @@ export class AgentList {
     return DataFile.read<RunningAgent[]>(this.file) ?? []
   }
 
+  /** The agents at work:  `agents` less the paused ones. */
+  get running(): RunningAgent[] {
+    return this.agents.filter((agent) => !agent.paused)
+  }
+
   /**
    * The agents running besides `name`, oldest first:  none means `name` is the LAST ONE STANDING (epic `epic-engine`
    * T90), the one that runs the full test suite after it merges.
    * - `name` itself needn't be listed:  short or full name
-   * - a `blocked on` agent counts:  it still has work to merge
+   * - a `blocked on` agent counts:  it still has work to merge;  so does a paused one
    */
   othersThan(name: string): RunningAgent[] {
     const fullName = this.fullName(name)
@@ -106,7 +115,11 @@ export class AgentList {
     const entry: RunningAgent = { name: this.fullName(name), task, status, started: new Date().toISOString() }
     if (taskId) entry.taskId = taskId
     this.update((agents) => {
-      if (agents.some((agent) => agent.name === entry.name)) {
+      const same = agents.find((agent) => agent.name === entry.name)
+      if (same?.paused) {
+        throw new AgentListError(`AgentList.add():  \`${entry.name}\` is paused;  \`epic agents resume\` restarts it`)
+      }
+      if (same) {
         throw new AgentListError(`AgentList.add():  \`${entry.name}\` is running already;  pick another name`)
       }
       if (files.length) entry.files = AgentList.checkClaims(agents, entry.name, files)
@@ -178,22 +191,72 @@ export class AgentList {
 
   /**
    * Change agent `name`'s entry:  its `status` (`active`, `blocked on <name>`), and / or its `taskId`.
-   * - throws if no such agent is running
+   * - throws if no such agent is running, or its status is changed while it's paused
    */
   set(name: string, change: { status?: string; taskId?: string }): RunningAgent {
     if (change.status) checkStatus(change.status)
     // Only the fields given:  `{ status: undefined }` (no `--status` flag) mustn't erase the status.
     const given = Object.fromEntries(Object.entries(change).filter(([, value]) => value !== undefined))
-    return this.update((agents) => Object.assign(this.find(agents, name), given))
+    return this.update((agents) => {
+      const agent = this.find(agents, name)
+      if (agent.paused && change.status)
+        throw new AgentListError(`AgentList.set():  \`${agent.name}\` is paused;  \`epic agents resume\` restarts it`)
+      return Object.assign(agent, given)
+    })
+  }
+
+  ////////////////
+  // ## Pause and resume
+  ////////////////
+
+  /**
+   * Agent `name` is paused as `saved` (`AgentPause.save()`);  returns its entry.
+   * - paused again:  saved again, as it stands now
+   * - throws if no such agent is running
+   */
+  pause(name: string, saved: PausedWork): RunningAgent {
+    return this.update((agents) => Object.assign(this.find(agents, name), { status: PAUSED, paused: saved }))
+  }
+
+  /**
+   * Paused agent `name` starts again;  returns it as it was saved, for its brief (`AgentPause.brief()`).
+   * - ONCE:  the record is cleared here, so a second call throws
+   * - `started` is now:  an older start would read as cut off by a restart (`RestartWake`)
+   * - in another session (`session`) its task id is dropped:  that agent lived in the old one
+   * - its next step is kept (`resumedFrom`), in case a restart cuts it off before it's under way
+   * - throws if no such agent is listed, or it isn't paused
+   */
+  resume(name: string, { session, now = Date.now() }: { session?: string; now?: number } = {}): RunningAgent {
+    return this.update((agents) => {
+      const agent = this.find(agents, name)
+      const { paused } = agent
+      if (!paused) {
+        throw new AgentListError(
+          `AgentList.resume():  \`${agent.name}\` isn't paused:  it was restarted already, so don't start it again`
+        )
+      }
+      const was = structuredClone(agent)
+      delete agent.paused
+      if (!session || session !== paused.session) delete agent.taskId
+      Object.assign(agent, { status: "active", started: new Date(now).toISOString(), resumedFrom: paused.next })
+      return was
+    })
   }
 
   /**
    * Agent `name` finished:  off the list (the file goes with the last one);  returns its entry.
-   * - throws if no such agent is running
+   * - throws if no such agent is running, or it's paused and not `finished`:  its notice as it stops for a pause
+   *   mustn't throw away what was saved
    */
-  done(name: string): RunningAgent {
+  done(name: string, { finished = false } = {}): RunningAgent {
     return this.update((agents) => {
       const agent = this.find(agents, name)
+      if (agent.paused && !finished) {
+        throw new AgentListError(
+          `AgentList.done():  \`${agent.name}\` is paused, not done:  it stays saved to start again;  ` +
+            "only if its whole task finished:  --finished"
+        )
+      }
       agents.splice(agents.indexOf(agent), 1)
       return agent
     })
@@ -231,9 +294,10 @@ export class AgentList {
   /**
    * Owen's notes for running agents that no session has passed on yet, oldest first:  `{ name, note, at }` each.
    * - a session waiting on the list (`epic agents wait`) sends each to its agent, then marks it `told()`
+   * - a paused agent's wait until it starts again:  its brief has them
    */
   get untold(): Untold[] {
-    return this.agents.flatMap((agent) =>
+    return this.running.flatMap((agent) =>
       (agent.redirects ?? []).filter((it) => !it.told).map(({ note, at }) => ({ name: agent.name, note, at }))
     )
   }
@@ -338,7 +402,10 @@ export const CHECKOUT_LIST_FILE = ".spell-agents.json5"
 /** The agents' prefix in the main checkout, with no epic:  its name, `main`. */
 const MAIN_PREFIX = "main"
 
-/** The statuses an agent can have. */
+/** A paused agent's status:  `pause()` sets it, never `set()`. */
+const PAUSED = "paused"
+
+/** The statuses an agent can be given. */
 const STATUS = /^(active|blocked on \S+)$/
 
 /** One agent on the list. */
@@ -347,7 +414,7 @@ export type RunningAgent = {
   name: string
   /** what it does, a sentence or less */
   task: string
-  /** `active`, or `blocked on <name>`:  waiting for that agent to finish first (same files) */
+  /** `active`;  `blocked on <name>`:  waiting for that agent to finish first (same files);  `paused` */
   status: string
   /** when it was added, ISO */
   started: string
@@ -357,6 +424,34 @@ export type RunningAgent = {
   files?: string[]
   /** Owen's notes to steer it, from the epic page's agents popover, oldest first */
   redirects?: Redirect[]
+  /** what was saved as it was paused (`pause()`);  running:  absent */
+  paused?: PausedWork
+  /** the next step it was last resumed at (`resume()`) */
+  resumedFrom?: string
+}
+
+/** What's saved of a paused agent, enough for a session with no memory of it to start it again. */
+export type PausedWork = {
+  /** when it was paused, ISO */
+  at: string
+  /** the session that paused it:  only that one can still message the agent itself */
+  session?: string
+  /** the checkout it worked in */
+  checkout: string
+  /** what to do next, in words */
+  next: string
+  /** the item or phase it was on */
+  item?: string
+  /** the test runs abandoned, to run again */
+  tests?: string
+  /** a merge it left part way, and how to carry that on */
+  merge?: string
+  /** its claimed files with uncommitted changes */
+  uncommitted: string[]
+  /** uncommitted files there that no agent claims:  possibly its, never to be swept up */
+  unclaimed: string[]
+  /** the branch's commits to its claimed files since it started, and whether each is in the base branch */
+  commits: { sha: string; subject: string; merged: boolean }[]
 }
 
 /** One of Owen's notes to a running agent. */

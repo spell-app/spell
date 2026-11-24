@@ -26,5 +26,6 @@
 
   "development": {
     "apis": ["PokeSpell.api.json5"]
-  }
+  },
+  "spellVersion": "0.9.0"
 }

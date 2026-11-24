@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { stepsVocabulary } from "spell/ui/components/ui-step/UISteps.en"
@@ -30,7 +29,7 @@ const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
 /** Adopt the sheets and render example `name` at `width` px. */
 function example(name: string, width = 1000): HTMLElement {
   Sheets.adopt([...foundationCSS, partsCSS, stepCSS])
-  return Fixture.render(`<div style="width: ${width}px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
+  return Sheets.render(`<div style="width: ${width}px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
 }
 
 /** Steps of the first group matching `selector`. */
@@ -65,7 +64,7 @@ describe("UIStep.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = stepRaw + colorsCSS
+    const css = stepRaw + colorsSharedCSS
     for (const vocabulary of [stepsVocabulary, stepVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -90,7 +89,7 @@ describe("UIStep.css examples", () => {
     expect(getComputedStyle(active!).backgroundColor).not.toBe(getComputedStyle(first!).backgroundColor)
     expect(getComputedStyle(active!).getPropertyValue("--_ui-step-state").trim()).toBe("active")
     const title = getComputedStyle(active!.querySelector(".title")!)
-    const link = Fixture.render(`<span style="color: var(--ui-link)"></span>`)
+    const link = Sheets.render(`<span style="color: var(--ui-link)"></span>`)
     expect(title.color).toBe(getComputedStyle(link).color)
     expect(getComputedStyle(last!).getPropertyValue("--_ui-step-state").trim()).toBe("disabled")
     expect(getComputedStyle(last!).pointerEvents).toBe("none")
@@ -154,7 +153,7 @@ describe("UIStep.css examples", () => {
 
   it("takes a public token from a wrapper of the group (static markup)", () => {
     Sheets.adopt([...foundationCSS, partsCSS, stepCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="width: 1000px; --ui-step-padding: 20px"><ol class="ui unstackable steps">` +
         `<li class="step"><div class="content"><div class="title">A</div></div></li>` +
         `<li class="step">B</li></ol></div>`
@@ -166,12 +165,12 @@ describe("UIStep.css examples", () => {
     const root = example("variations")
     const [completed, active, last] = steps(root, ".ui.circular.steps:not(.ordered, .vertical)")
     expect(parseFloat(getComputedStyle(completed!).height)).toBeLessThan(4)
-    const positive = Fixture.render(`<span style="color: var(--ui-positive)"></span>`)
+    const positive = Sheets.render(`<span style="color: var(--ui-positive)"></span>`)
     expect(getComputedStyle(completed!).backgroundColor).toBe(getComputedStyle(positive).color)
     expect(getComputedStyle(completed!, "::after").maskImage).toContain("url(")
     expect(getComputedStyle(active!, "::before").borderTopColor).toBe(getComputedStyle(positive).color)
     expect(getComputedStyle(last!, "::before").borderTopLeftRadius).toBe("50%")
-    const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
+    const red = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
     const [, redActive] = steps(root, ".ui.red.circular.ordered.steps")
     expect(getComputedStyle(redActive!, "::before").borderTopColor).toBe(getComputedStyle(red).color)
     expect(getComputedStyle(redActive!, "::before").content).toContain("counter(ui-step)")

@@ -43,7 +43,6 @@ export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
               <ui-button
                 icon={button.icon}
                 selected={inUse() ? "" : undefined}
-                data-tooltip={this.translationForKey(button.tip)}
                 aria-label={inUse() ? this.translationForKey("inUse", { words: words() }) : words()}
                 onClick={() => this.pick(button.sort)}
               >
@@ -68,8 +67,8 @@ export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicSort extends E.AttributeValues<typeof epicSortVocabulary> {}
 
-/** The buttons, in order:  each one's sort, icon, and its words' and tooltip's text keys. */
+/** The buttons, in order:  each one's sort, icon, and its words' text key. */
 const SORT_BUTTONS = [
-  { sort: "title", icon: "arrow down a z", words: "title", tip: "titleTip" },
-  { sort: "date", icon: "clock", words: "date", tip: "dateTip" }
+  { sort: "title", icon: "arrow down a z", words: "title" },
+  { sort: "date", icon: "clock", words: "date" }
 ] as const

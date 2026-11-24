@@ -720,7 +720,7 @@
   }
 
   /*
-   * ## Sections and tabs:  the pages' nested `<ui-section sticky collapsible dividing>`s (`yarn site:sections`) and
+   * ## Sections and tabs:  the pages' nested `<ui-section sticky collapsible dividing>`s and
    * the tabs' bar above them (`_src/SiteSections.ts` measures and lands).
    * - The tabs and the shown pane's section toolbar share ONE PANEL, floating in the column, not out to its edges
    *   (Owen, 2026-10-23:  "these two tab bars ... in a single glass surround, with a little bit of padding between them"):

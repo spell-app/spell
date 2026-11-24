@@ -1,0 +1,66 @@
+"error notice" is a notebook page
+	<header level="1">
+		ErrorNotice
+		<header>An error as a message: inline, or over the page.</>
+	</>
+
+	<text class="lede" paragraph>What the editor says when something went wrong: "Couldn't load Card.spell". It floats over the top of every page, as <link target="src-packages-app-docs-notice-html" link="/notice">Notice</> does for good news, and stays until its close button is clicked.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or reading its code</>
+		<item icon="image">A picture, not live: it shows what the editor's <text code>editor.error</> holds</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The editor, when a file wouldn't load:</>
+		<image src="/components/app/_images/ErrorNotice.png" alt="A red error message saying Couldn't load Card.spell: the server didn't answer, over the editor" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The app draws ONE, over every page, beside <link target="src-packages-app-docs-notice-html" link="/notice">Notice</>:</>
+		<text paragraph>index.tsx · the app's page entry:</>
+		<markdown>
+			```typescript
+			render(
+			  () => (
+			    <>
+			      <Routes />
+			      <Notice />
+			      <ErrorNotice />
+			    </> // the fragment's end
+			  ),
+			  document.getElementById("app-root")!
+			)
+			```
+		</>
+		<list bulleted>
+			<item>It shows what <text code>editor.error</> holds, which <text code>editor.showError(error)</> sets. Its close button calls <text code>editor.hideError()</>.</>
+			<item>It draws the error with <text code>&lt;ErrorDisplay&gt;</>, fixed near the top of the page.</>
+			<item><text code>&lt;ErrorDisplay&gt;</> is one error as an error <text code>&lt;ui-message&gt;</>, anywhere: <list bulleted><item>its header (the error's kind), its message, and a spell error's context and params, if any</> <item>a close button only with <text code>onDismiss</>, which it calls; it never hides itself, the caller drops it</> <item><text code>autoHide</>: calls <text code>onDismiss</> by itself, after 3 seconds</> <item><link target="src-packages-app-docs-errorboundary-html" link="/error-boundary">ErrorBoundary</> shows one in place of what threw, by default</></></>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="ErrorNotice"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-errornotice-tsx" link="/src/app/solid/ErrorNotice.tsx"><text title="src/app/solid/ErrorNotice.tsx" code>ErrorNotice.tsx</></>: ErrorNotice and ErrorDisplay, and their props</>
+			<item><link target="src-packages-app-src-index-tsx" link="/src/app/index.tsx"><text title="src/app/index.tsx" code>index.tsx</></>: the app's page entry, which draws it</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

@@ -17,7 +17,7 @@ import {
 /****************
  * ### `TocIndex`
  * The page side of `<ui-toc>`:  which content it follows, the sections and entries in it, the one in view.
- * - Plain DOM, no Solid:  node scripts load it by path (`scripts/site-sections.ts`, `src/tools/SiteCheck.ts`),
+ * - Plain DOM, no Solid:  node tools load it by path (`src/tools/SiteCheck.ts`, `PageOutline`),
  *   so it NEVER imports a value from `spell/ui/core`.
  * - Static only:  pure reads (and id writes) of the DOM it's given.
  * - Entries form a tree:  level 2 headings and top-level `<ui-section>`s,

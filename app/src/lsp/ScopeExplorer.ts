@@ -68,6 +68,14 @@ export class ScopeExplorer {
   static BUILT_INS_PACK_ID = "@spell/core"
 
   /**
+   * Let go of what `tree()` kept of `project` for `details()`:  it read its parse, which the editor is dropping
+   * (epic `solid-2-final` P10).  The next `tree()` of it keeps them again.
+   */
+  forget(project: SP.SpellProject): void {
+    this.#details.delete(project)
+  }
+
+  /**
    * `project`'s scope pack:  its entries, and those of the projects it imports compiled, each with its details --
    * for a page with no parser to show, e.g. `<spell-viewer>`.  See `LSP.ScopePack`.
    * - NOT the built-in types:  they're in their own pack, see `exportBuiltIns()`.

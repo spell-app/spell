@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url"
  *   before Vite+ (`vp lint`, `vp fmt`, `vp check`) folded them into `vite.config.ts`.
  * - Plain objects, spread by each repo's root `vite.config.ts` and each package's:
  *   - the kit:  its root's block is `rootLint()`
- *   - a standalone repo (spell-brand) is ONE package (epic `repo-split` P11):  `packageLint()` at its root
+ *   - a standalone repo (a project beside the kit) is ONE package (epic `repo-split` P11):  `packageLint()` at its root
  *   `lint.extends` only takes FILE paths, and the files are gone.
  * - NOTE: a package's `lint` block does NOT inherit the root's:
  *   oxlint reads the nearest config only, so each package spreads `packageLint()`.
@@ -180,10 +180,10 @@ export const testLint = {
 } satisfies NonNullable<OxlintConfig["overrides"]>[number]
 
 /**
- * The folders of COMPONENT files, by package name (`ui` is spell-ui, `brand` spell-brand), each from the package's
+ * The folders of COMPONENT files, by package name (`ui` is spell-ui), each from the package's
  * folder:  `patternLint()` turns the `spell-ui/*` rules on there (`packageLint({ name })`).
  * - Every set's elements, all written on `spell/element`, held to the same patterns, each in its package's
- *   `src/components/`:  Spell UI's (and its docs site's widgets, `src/docs-components/`), the brand's.
+ *   `src/components/`:  Spell UI's (and its docs site's widgets, `src/docs-components/`).
  *   - The app's (`<spell-viewer>`, `<spell-editor>`) and the epics' are held to the same rules in their own repos
  *     (`patternLintIn()`).
  * - Not:
@@ -192,9 +192,8 @@ export const testLint = {
  *   - tests (`testLint`)
  */
 export const PATTERN_FOLDERS: Record<string, string[]> = {
-  // spell-ui's and the brand's families moved into their one `src/` (epic `repo-split` P14)
-  ui: ["src/components", "src/docs-components"],
-  brand: ["src/components"]
+  // spell-ui's families moved into its one `src/` (epic `repo-split` P14)
+  ui: ["src/components", "src/docs-components"]
 }
 
 /**
@@ -246,7 +245,7 @@ const KIT_REACT_FOLDERS = ["cli", "util"]
 
 /**
  * The kit's root `lint` block:  `lintBase` everywhere, `reactLint` on top in `KIT_REACT_FOLDERS` and their tests.
- * - A standalone repo (spell-brand) is one package:  `packageLint()` at its root.
+ * - A standalone repo (a project beside the kit) is one package:  `packageLint()` at its root.
  */
 export function rootLint() {
   return {
@@ -267,7 +266,7 @@ export function rootLint() {
  * A package's `lint` block:  `lintBase`, plus `reactLint` when `react`.
  * - `ignorePatterns`:  the package's own, relative to its folder;  NOT inherited from the root's.
  *   - Plus every component pack's generated folder, `components/__pack/` at any depth (`spell pack build`), always.
- * - `name`:  its name in `PATTERN_FOLDERS` (`ui`, `brand`), for the `spell-ui/*` rules there.
+ * - `name`:  its name in `PATTERN_FOLDERS` (`ui`), for the `spell-ui/*` rules there.
  * - `ignorePatterns` always gets `dist-types` too (`spell-types`'s declarations).
  */
 export function packageLint({
@@ -350,10 +349,6 @@ export const fmtConfig = {
     "**/src/icons/icon-packs/**",
     "**/components/ui-emoji/data/**",
     "**/ui/site/_assets/**",
-    // the brand set's data, ALL of it (`yarn site:data` in spell-brand):  `pages.json5` too, which it rewrites.
-    // From spell-brand's own root:  `docs/__data/` is a flat repo's, matched below for every set but `pages.json5`
-    "**/brand/docs/__data/**",
-    "**/spell-brand/docs/__data/**",
     // App UI's generated data (`yarn site:data` in spell-app's `app/`;  `.json5` since epic `epic-workflow` P20):  the bytes
     // stay the generator's.
     // `**/docs/...`:  matched from the root AND from the package, whose `vp fmt .` runs there

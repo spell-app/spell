@@ -40,7 +40,8 @@ export class Guard {
   allowPort(port: number): this {
     for (const host of [`127.0.0.1:${port}`, `localhost:${port}`, `[::1]:${port}`]) {
       this.hosts.add(host)
-      this.origins.add(`http://${host}`)
+      // the same port speaks HTTPS too, with a certificate (`WebServer`'s `certificate`)
+      this.origins.add(`http://${host}`).add(`https://${host}`)
     }
     return this
   }
@@ -50,7 +51,8 @@ export class Guard {
    * server (`EditorServer`, epic `language` T68).  Their origin only:  their requests are addressed to that port, not ours.
    */
   allowOriginPort(port: number): this {
-    for (const host of [`127.0.0.1:${port}`, `localhost:${port}`, `[::1]:${port}`]) this.origins.add(`http://${host}`)
+    for (const host of [`127.0.0.1:${port}`, `localhost:${port}`, `[::1]:${port}`])
+      this.origins.add(`http://${host}`).add(`https://${host}`)
     return this
   }
 
@@ -94,6 +96,21 @@ export class Guard {
     if (request.get("x-server-token") !== this.token) throw new HttpError(403, "bad token:  reload the page")
     const origin = request.get("origin")
     if (origin && !this.origins.has(origin)) throw new HttpError(403, "wrong origin")
+  }
+
+  /**
+   * `HttpError(403)` when `request` comes from a page of another origin;  no token needed
+   * - for a request that changes nothing a person keeps, but costs the server work (`SRV.Drawings`)
+   */
+  checkOrigin(request: Request): void {
+    const origin = request.get("origin")
+    if (origin && !this.origins.has(origin)) throw new HttpError(403, "wrong origin")
+  }
+
+  /** middleware:  `checkOrigin` */
+  originCheck: Handler = (request, _reply, next) => {
+    this.checkOrigin(request)
+    next()
   }
 
   /** middleware:  `checkHost` */

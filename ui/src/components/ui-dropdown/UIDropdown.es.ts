@@ -22,7 +22,6 @@ export const dropdownEs = {
   },
   events: { "ui-added": "agregado" },
   slots: { trigger: "disparador", header: "encabezado" },
-  parts: { clear: "borrar" },
   texts: {
     noResults: "No se encontraron resultados.",
     addItem: "Añadir {value}",

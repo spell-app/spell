@@ -39,8 +39,6 @@ a "game menu" is a view
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
 		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
 		  `.another.example`:  a second `<ui-example>` in the same section.
-		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
-		  it nests it and writes the ids (and fixes them after a title changes).
 		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
 		  shows in its code).
 	-->
@@ -68,6 +66,16 @@ a "game menu" is a view
 					<action icon="play" shortcut="mod+N">New game</action>
 					<action icon="undo" shortcut="mod+Z">Undo</action>
 					<action icon="redo" shortcut="mod+shift+Z" disabled>Redo</action>
+				</toolbar>
+			</example>
+		</>
+
+		<section label="Icon only" sticky="stack" collapsible dividing>
+			<example "Icon only" description="`icon-only`:  its icon alone, at every width;  its title is its tooltip and its name.  In a `shrinkable` toolbar it still folds into the `…` button with the rest.">
+				<toolbar aria-label="Game" shrinkable>
+					<action icon="play" shortcut="mod+N">New game</action>
+					<action icon="undo" shortcut="mod+Z" icon-only>Undo Turn Card</action>
+					<action icon="redo" shortcut="mod+shift+Z" icon-only disabled>Redo</action>
 				</toolbar>
 			</example>
 		</>

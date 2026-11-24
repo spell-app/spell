@@ -31,7 +31,7 @@ const vocabulary = {
  * - Its DOM element is `<ui-code>`'s, `DOMCodeElement` (`detectedLanguage`).
  * - On a page with Spell UI of its own (a docs page), it extends the PAGE's `UICode`:
  *   `spell/ui/components/ui-code` comes from `SpellUI.packModules` there (`spell-ui-shared.js`, `vite.solid.config.ts`).
- * - SEE:  its App UI components page, `app/docs/spell-code.html` (`/components/app/spell-code.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/spell-code`.
  ****************/
 export class SpellCode extends UICode {
   @E.proto static vocabulary: E.ComponentVocabulary = vocabulary

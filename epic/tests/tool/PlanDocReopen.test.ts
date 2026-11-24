@@ -15,10 +15,11 @@ const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
 /** When the tests' edits happen:  local 2026-10-01 09:05. */
 const NOW = new Date(2026, 9, 1, 9, 5)
 
-/** A fresh epic page, its person Owen:  issue I1, fixed for his review. */
+/** A fresh epic page, its person Owen:  issue I1, which he got to (his Revisit, T143), fixed for his review. */
 function planWithFix() {
   const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"), NOW, { person: "Owen" })
   plan.addItem("issue", "Restore does nothing")
+  plan.reviewedAs(plan.item("i1"), "revisit")
   plan.addStatus("i1", "fixing it")
   plan.fixedForReview("i1", "fixed")
   return plan

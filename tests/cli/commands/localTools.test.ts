@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { localTools } from "spell/cli/commands/localTools"
+import { vsixAt } from "spell/cli/test/vsixAt"
 
 /**
  * `localTools()` in a made-up home:  a checkout, a project that installs spell 0.8.16 from npm, links on a made-up
@@ -157,5 +158,10 @@ describe("localTools()", () => {
     })
     utimesSync(copy, new Date(), new Date(Date.now() + 60_000))
     expect(extension()).toMatchObject({ follows: true, fix: undefined })
+
+    // a .vsix from before the last bump (epic `epic-engine` T140):  build it, not "run spell local on again"
+    vsixAt(join(kit, "epic", "vscode", "spell-epic.vsix"), "0.8.16")
+    same.extensions = () => "spell-app.spell-epic@0.8.16\n"
+    expect(extension()).toMatchObject({ follows: false, fix: expect.stringMatching(/^build it first:/) })
   })
 })

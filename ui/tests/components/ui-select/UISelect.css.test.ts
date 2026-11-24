@@ -3,10 +3,9 @@ import { userEvent } from "vite-plus/test/browser"
 
 import { ClassBuilder } from "spell/ui/elements"
 import { UI } from "spell/ui/runtime"
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { selectVocabulary } from "spell/ui/components/ui-select/UISelect.en"
@@ -69,7 +68,7 @@ describe("UISelect.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = selectRaw + colorsCSS
+    const css = selectRaw + colorsSharedCSS
     for (const phrase of classPhrases(selectVocabulary)) {
       expect(Sheets.covers(css, phrase), phrase).toBe(true)
     }
@@ -83,7 +82,7 @@ describe("UISelect.css source", () => {
 describe("UISelect.css examples", () => {
   it.each(Object.keys(EXAMPLES))("draws every select in %s as a closed selection box", (path) => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const selects = root.querySelectorAll<HTMLSelectElement>("select.ui.select")
     expect(selects.length).toBeGreaterThan(0)
     for (const select of selects) {
@@ -97,7 +96,7 @@ describe("UISelect.css examples", () => {
 
   it("draws the caret in every browser:  two gradients in currentColor, room for it at the end", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const select = root.querySelector<HTMLSelectElement>("select.ui.select")!
     const style = getComputedStyle(select)
     expect(style.backgroundImage.match(/linear-gradient/g)).toHaveLength(2)
@@ -109,14 +108,14 @@ describe("UISelect.css examples", () => {
 
   it("greys the placeholder while it's shown", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const [placeholder, chosen] = root.querySelectorAll<HTMLSelectElement>("select.ui.select")
     expect(getComputedStyle(placeholder!).color).not.toBe(getComputedStyle(chosen!).color)
   })
 
   it.skipIf(!BASE_SELECT)("is the customizable select where supported, with a hidden picker icon", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const select = root.querySelector<HTMLSelectElement>("select.ui.select")!
     expect(getComputedStyle(select).appearance).toBe("base-select")
     expect(getComputedStyle(select, "::picker-icon").display).toBe("none")
@@ -124,7 +123,7 @@ describe("UISelect.css examples", () => {
 
   it.skipIf(!BASE_SELECT)("opens the picker below the box, anchored and at least as wide", async () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const select = root.querySelector<HTMLSelectElement>("select.ui.select")!
     await userEvent.click(select)
     await expect.poll(() => select.matches(":open")).toBe(true)
@@ -142,7 +141,7 @@ describe("UISelect.css examples", () => {
 
   it("takes a public token from a wrapper (static markup)", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-select-radius: 12px"><select class="ui select" aria-label="A"><option>A</option></select></div>`
     )
     expect(getComputedStyle(root.querySelector("select")!).borderTopLeftRadius).toBe("12px")
@@ -150,7 +149,7 @@ describe("UISelect.css examples", () => {
 
   it("scales by size;  medium is the default", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     expect(size(".ui.mini.select")).toBeLessThan(size(".ui.massive.select"))
     expect(size(".ui.medium.select")).toBe(size(".ui.compact.select"))
@@ -158,7 +157,7 @@ describe("UISelect.css examples", () => {
 
   it("fills its container when fluid, and drops the minimum width when compact", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div style="width: 600px">${EXAMPLES["./examples/variations.html"]!}</div>`)
+    const root = Sheets.render(`<div style="width: 600px">${EXAMPLES["./examples/variations.html"]!}</div>`)
     const fluid = root.querySelector<HTMLElement>(".ui.fluid.select")!
     expect(Math.round(fluid.getBoundingClientRect().width)).toBe(600)
     expect(getComputedStyle(root.querySelector(".ui.compact.select")!).minWidth).toBe("0px")
@@ -166,13 +165,13 @@ describe("UISelect.css examples", () => {
 
   it("tints form states, dims disabled, and switches inverted to the dark scheme", () => {
     Sheets.adopt(SHEETS)
-    const states = Fixture.render(EXAMPLES["./examples/states.html"]!)
-    const tint = Fixture.render(`<span style="background-color: var(--ui-error-background)"></span>`)
+    const states = Sheets.render(EXAMPLES["./examples/states.html"]!)
+    const tint = Sheets.render(`<span style="background-color: var(--ui-error-background)"></span>`)
     expect(getComputedStyle(states.querySelector(".ui.error.select")!).backgroundColor).toBe(
       getComputedStyle(tint).backgroundColor
     )
     expect(parseFloat(getComputedStyle(states.querySelector(".ui.disabled.select")!).opacity)).toBeCloseTo(0.45, 2)
-    const variations = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const variations = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     expect(getComputedStyle(variations.querySelector(".ui.inverted.select")!).colorScheme).toBe("dark")
   })
 })

@@ -1,0 +1,96 @@
+"uploader examples" is a notebook page
+	<header level="1">
+		Uploader
+		<header>An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action.</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Hero" sticky="stack" collapsible dividing>
+			<example "Hero" description="The default look, `appearance=\"hero\"`:  a big drop area with an icon, a line of help, a Choose files button and its limits.  Pick or drop `.json` files on it:  a row per file shows under it, each with its size, then a tick, or the reason it was turned away.  With no `destination` or `action`, it only holds them.">
+				<uploader extensions="json" multiple max-files="5" max-size="2 MB"/>
+			</example>
+		</>
+
+		<section label="Button" sticky="stack" collapsible dividing>
+			<example "Button" description="`appearance=\"button\"`:  just a button, for a toolbar or a card's corner.  A click opens the file dialog, and files can be dropped on it.  Its limits are its tooltip;  its file rows show in a popup from it for a moment as an upload starts, then on hover or focus.">
+				<uploader appearance="button" extensions="json" multiple max-files="5" max-size="2 MB"/>
+			</example>
+		</>
+
+		<section label="Input" sticky="stack" collapsible dividing>
+			<example "Input" description="`appearance=\"input\"`:  a field with a Browse button, to line up with the other fields of a form.  The field says how many files it holds;  the rows list under it, smaller.">
+				<uploader appearance="input" extensions="json" multiple aria-label="Netlists" style="max-width: 480px"/>
+			</example>
+		</>
+
+		<section label="Compact" sticky="stack" collapsible dividing>
+			<example "Compact" description="`appearance=\"compact\"`:  a one-line drop area with a small Choose button, for a side bar or a narrow panel.  Under it, one line of status and one progress bar for every file.">
+				<uploader appearance="compact" extensions="json" multiple style="max-width: 360px"/>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Its own words" sticky="stack" collapsible dividing>
+			<example "Its own words" description="Slots for a page's own icon, message and button (`slot=\"icon\"`, `slot=\"message\"`, `slot=\"button\"`);  each falls back to the uploader's own.  A click on a slotted button opens the file dialog too.  The words it shows while busy are attributes:  `drop-message`, `uploading-message` and `done-message`, with `{count}` and `{done}` filled in.">
+				<html>
+					<ui-uploader extensions="json" multiple drop-message="Let go to bring in {count} netlists">
+						<ui-icon slot="icon" name="microchip" size="big"></ui-icon>
+						<ui-header slot="message" size="small">Bring in your netlists <ui-header>Drag the .json files from your chip tools here</ui-header></ui-header>
+						<ui-button slot="button" color="violet">Pick netlists…</ui-button>
+					</ui-uploader>
+				</html>
+			</example>
+		</>
+
+		<section label="Restyled" sticky="stack" collapsible dividing>
+			<example "Restyled" description="Its look from `--ui-uploader-*` tokens, set on the element or anywhere above it:  the drop area's border, background and corners, its padding, the icon's colour.">
+				<uploader extensions="json" style="--ui-uploader-border-style: solid; --ui-uploader-border-width: 1px; --ui-uploader-border-color: oklch(0.6 0.15 300 / 0.45); --ui-uploader-background: linear-gradient(160deg, oklch(0.6 0.15 300 / 0.12), oklch(0.6 0.15 250 / 0.1)); --ui-uploader-radius: 16px; --ui-uploader-padding: 32px 24px; --ui-uploader-icon-color: oklch(0.55 0.18 300);"/>
+			</example>
+		</>
+	</>
+
+	<section label="Behaviour">
+		<section label="Folders" sticky="stack" collapsible dividing>
+			<example "Folders" description="`folder`:  it takes whole folders, each with its files and their paths in it.  Its events say folder:  `ui-folder-dropping`, `ui-folder-dropped`, then `ui-file-dropped` for each file.  A plain file dropped on it is turned away.">
+				<uploader folder multiple/>
+			</example>
+		</>
+
+		<section label="A drop zone" sticky="stack" collapsible dividing>
+			<example "A drop zone" description="`drop-zone`:  a drop anywhere in its zone counts as a drop on it.  Here the zone is the box around it (`drop-zone=\"ui-segment\"`, the nearest segment round it);  `page` is the whole page, and `#id` any element.  The zone shows a light overlay while files are dragged over it.">
+				<stack style="max-width: 480px">
+					<segment>
+						<text paragraph>Drop a .json file anywhere in this box.</text>
+						<uploader appearance="compact" extensions="json" drop-zone="ui-segment"/>
+					</segment>
+				</stack>
+			</example>
+		</>
+
+		<section label="An action" sticky="stack" collapsible dividing>
+			<example "An action" description="`action`, a property:  a function called with the files kept, instead of posting them.  Here it reads each file and says how many lines it holds.  `destination` posts them instead, one request per file, each row showing its own progress.">
+				<uploader id="line-counter" appearance="compact" multiple/>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Disabled" sticky="stack" collapsible dividing>
+			<example "Disabled" description="`disabled`:  greyed, in every look;  it takes no files, picked or dropped.">
+				<uploader appearance="compact" disabled style="max-width: 360px"/>
+			</example>
+		</>
+	</>

@@ -319,20 +319,20 @@
   }
 
   /* Right aligned:  the box after the label. */
-  .ui[class*="right aligned"].checkbox > label {
+  .ui.right-aligned.checkbox > label {
     padding-inline: 0 var(--_checkbox-distance);
   }
-  .ui[class*="right aligned"].checkbox > input,
-  .ui[class*="right aligned"].checkbox > label::before,
-  .ui[class*="right aligned"].checkbox > label::after {
+  .ui.right-aligned.checkbox > input,
+  .ui.right-aligned.checkbox > label::before,
+  .ui.right-aligned.checkbox > label::after {
     right: 0;
     left: auto;
   }
-  .ui[class*="right aligned"].slider.checkbox > label::after {
+  .ui.right-aligned.slider.checkbox > label::after {
     right: calc(var(--_ui-checkbox-slider-width) - var(--_ui-checkbox-slider-handle));
     transition: right var(--_ui-checkbox-switch-duration) var(--ui-ease);
   }
-  .ui[class*="right aligned"].toggle.checkbox > label::after {
+  .ui.right-aligned.toggle.checkbox > label::after {
     right: calc(var(--_ui-checkbox-toggle-width) - var(--_ui-checkbox-toggle-handle) + 0.15em);
     transition:
       background var(--_ui-checkbox-switch-duration) var(--ui-ease),
@@ -452,7 +452,7 @@
   .ui.slider.checkbox > input:checked ~ label::after {
     left: calc(var(--_ui-checkbox-slider-width) - var(--_ui-checkbox-slider-handle));
   }
-  .ui[class*="right aligned"].slider.checkbox > input:checked ~ label::after {
+  .ui.right-aligned.slider.checkbox > input:checked ~ label::after {
     right: 0;
     left: auto;
   }
@@ -472,7 +472,7 @@
   .ui.toggle.checkbox > input:checked ~ label::after {
     left: calc(var(--_ui-checkbox-toggle-width) - var(--_ui-checkbox-toggle-handle) + 0.15em);
   }
-  .ui[class*="right aligned"].toggle.checkbox > input:checked ~ label::after {
+  .ui.right-aligned.toggle.checkbox > input:checked ~ label::after {
     right: -0.05em;
     left: auto;
   }

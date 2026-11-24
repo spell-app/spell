@@ -136,16 +136,17 @@ export function toggleCode() {
  * Run | Edit | Design | Site in the top bar, as the theme's segmented tabs:  the one showing is chosen;
  * Design only for a project with something to design (`Design.canShow`, epic `editor` P37);
  * Site only for a project that declares a site (`EditorMode.hasSite`);
- * then, in Edit and Design, the code's icon, which shows the code or closes it, the compiled code's (`compiled`), Inspect app
- * (`inspect`), then Add (`add`) (Owen:  "it should be part of the run|edit group";  2026-11-14, I77:  "the code and
- * inspect buttons should be swapped";  T76:  "add a 'compiled code' button between `</>` and the inspector";
- * T83:  "Move `add` to the immediate right of the inspector crosshair").
+ * then, in Edit and Design, Inspect app (`inspect`), the code's icon, which shows the code or closes it,
+ * the compiled code's (`compiled`), Anatomy (`anatomy`), then Add (`add`)
+ * (Owen:  "it should be part of the run|edit group";  T76:  "add a 'compiled code' button between `</>` and the
+ * inspector";  2026-11-24, T168:  "button order should be:  inspect, spell code, JS, anatomy").
  * - The draft's pill is the bar's own part now, after Help (`<PublishDraft>`, T107).
  * - None of the icons is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on;
  *   Add's `aria-haspopup`, that it opens a menu.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
  * - `compiled`:  the compiled code's item (`<CompiledCodeButton>`), handed in as `inspect` is.
  * - `inspect`:  Inspect app's item (`<InspectAppButton item>`), handed in so this file needs nothing of the Inspector's.
+ * - `anatomy`:  Anatomy's item (`<AnatomyButton>`), handed in as `inspect` is.
  * - `add`:  Add's item and its menu (`<AddPartButton>`), handed in as `inspect` is.
  * - A header's segmented menu (`appearance="segmented link header"`), inside the bar's own:
  *   its thumb slides to the mode chosen, the same look as every header's tabs.
@@ -155,6 +156,7 @@ export function ModeButtons(props: {
   current: Mode
   compiled?: JSX.Element
   inspect?: JSX.Element
+  anatomy?: JSX.Element
   add?: JSX.Element
 }): JSX.Element {
   return (
@@ -180,6 +182,7 @@ export function ModeButtons(props: {
           <ModeTab mode="site" current={props.current} />
         </Show>
         <Show when={EditorMode.isEditing(props.current)}>
+          {props.inspect}
           <ui-item
             icon="code"
             appearance="circular"
@@ -190,7 +193,7 @@ export function ModeButtons(props: {
             onClick={() => toggleCode()}
           />
           {props.compiled}
-          {props.inspect}
+          {props.anatomy}
           {props.add}
         </Show>
       </ui-menu>
@@ -198,7 +201,10 @@ export function ModeButtons(props: {
   )
 }
 
-/** One mode's tab in `<ModeButtons>`:  chosen while the page is in `mode`. */
+/**
+ * One mode's tab in `<ModeButtons>`:  chosen while the page is in `mode`.
+ * - Design's loads what draws Design ahead, while the pointer rests on it (`Design.views.ahead`).
+ */
 function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
   const look = () => MODE_LOOKS[props.mode]
   return (
@@ -208,6 +214,9 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
       data-tour={props.mode}
       {...barTooltip(appTexts.text(modeTipFor(props.mode, props.current)))}
       onClick={() => EditorMode.show(props.mode)}
+      ref={(tab: Element) => {
+        if (props.mode === "design") Design.views.ahead(tab)
+      }}
     >
       <span class="ModeText">{appTexts.text(look().text)}</span>
     </ui-item>

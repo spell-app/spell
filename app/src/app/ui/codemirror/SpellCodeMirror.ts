@@ -28,6 +28,7 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
 import { CodeMirrorTokens } from "./CodeMirrorTokens"
 import { CodeMirrorTyping } from "./CodeMirrorTyping"
 import { FileStates } from "./FileStates"
+import { LanguageClient } from "./LanguageClient"
 import { LspToCodeMirror, type CodeMirrorLocation } from "./LspToCodeMirror"
 
 import "spell/app/app/components/spell-code/bubbly.css"
@@ -77,13 +78,28 @@ export class SpellCodeMirror implements CodeEditorHandle {
   static get states(): FileStates {
     SpellCodeMirror._states ??= new FileStates({
       service: SpellCodeMirror.service,
+      client: SpellCodeMirror.languageWorker
+        ? LanguageClient.inWorker(SpellCodeMirror.service, SpellCodeMirror.languageWorker())
+        : LanguageClient.inThread(SpellCodeMirror.service),
       onEdit: (file) => {
         for (const listener of SpellCodeMirror.editListeners) listener(file)
+      },
+      onTaken: (file) => {
+        for (const listener of SpellCodeMirror.takenListeners) listener(file)
       }
     })
     return SpellCodeMirror._states
   }
   private static _states: FileStates | undefined
+
+  /**
+   * What starts the editor's language worker, which then answers what a person asks of the code
+   * (suggestions, hovers, Go to Definition ...) off the page's thread (epic `solid-2-final` P18).
+   * - Set by the editor app before the first editor is made, to what starts it (`startLanguageWorker()`),
+   *   where a worker can load the projects itself:
+   *   not in the static build, nor in `<spell-editor>`, nor in a test, which ask the page's own service.
+   */
+  static languageWorker: (() => Worker) | undefined
 
   /**
    * Hear each edit of a file's state, once it's gone into the file, e.g. to compile or save soon.
@@ -97,6 +113,18 @@ export class SpellCodeMirror implements CodeEditorHandle {
 
   /** Who hears each edit -- see `onEdit()`. */
   private static editListeners = new Set<(file: SP.AnySpellFile) => void>()
+
+  /**
+   * Hear each time a spell file's typed text reaches its `contents`:  once the typing pauses, or as something reads it
+   * (`FileStates`, epic `solid-2-final` P9).  Returns what stops it.
+   */
+  static onTaken(listener: (file: SP.SpellFile) => void): () => void {
+    SpellCodeMirror.takenListeners.add(listener)
+    return () => SpellCodeMirror.takenListeners.delete(listener)
+  }
+
+  /** Who hears each hand-over -- see `onTaken()`. */
+  private static takenListeners = new Set<(file: SP.SpellFile) => void>()
 
   /**
    * An editor of project files in `view`, showing `options.file`'s state.

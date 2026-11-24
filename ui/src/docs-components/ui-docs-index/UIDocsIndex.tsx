@@ -19,7 +19,8 @@ import indexCSS from "./UIDocsIndex.css?inline"
  * - A card's words:  its page's title, and what the docs site's data says of it (`SiteData`), when it says anything.
  * - The search field above them is `<ui-docs-search>`, given the same pages.
  * - Groups in the order of the docs site's topics, then the rest.
- * - Links are plain:  a site that shows its pages without loading another takes them as it takes any link.
+ * - Links are plain:  a site that shows its pages without loading another takes them as it takes any link,
+ *   the search's results too (`<ui-docs-search>` follows a pick as a plain link click).
  * - A doc-only element (`src/docs-components/`):  its shadow DOM is built of other families' widgets,
  *   which its barrel imports.
  ****************/
@@ -106,21 +107,6 @@ export class UIDocsIndex extends E.UIComponent<typeof docsIndexVocabulary> {
     return Object.values(data.families).find((family) => !family.docs && family.title === page.title)
   }
 
-  /**
-   * A result was picked:  taken as a click on a plain link, so a site showing its pages itself takes it,
-   * and anywhere else the browser follows it.
-   */
-  private onNavigating(event: CustomEvent<{ href: string }>) {
-    event.preventDefault()
-    const { pathname, search, hash } = new URL(event.detail.href)
-    const link = document.createElement("a")
-    link.setAttribute("href", pathname + search + hash)
-    link.hidden = true
-    this.domElement.shadowRoot!.append(link)
-    link.click()
-    link.remove()
-  }
-
   render(): JSX.Element {
     return (
       <div class={SECTIONS} part={this.partForName("index")}>
@@ -130,10 +116,6 @@ export class UIDocsIndex extends E.UIComponent<typeof docsIndexVocabulary> {
           pages={this.pagesText}
           placeholder={this.translationForKey("search")}
           shortcuts="false"
-          ref={(element: HTMLElement) =>
-            element.addEventListener("ui-navigating", ((event: CustomEvent<{ href: string }>) =>
-              this.onNavigating(event)) as EventListener)
-          }
         />
         <For each={this.groups} keyed={(group) => group.tag}>
           {(group) => (

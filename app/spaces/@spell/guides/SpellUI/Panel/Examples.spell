@@ -19,6 +19,35 @@
 			</example>
 		</>
 
+		<section label="Pane" sticky="stack" collapsible dividing>
+			<example "Pane" description="`appearance=\"pane\"` is a whole pane under one flat bar, with no box of its own.  Put a toolbar in its `slot=\"actions\"`, and the chevron, the toolbar's items and its actions read as one row.  Closed, only the bar is left, still saying which is chosen.  Give it a hidden `slot=\"label\"`:  the fold button needs a name.">
+				<stack style="max-width: 380px; height: 160px; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
+					<panel appearance="pane" collapsible fold-icon="start">
+						<text class="ui-visually-hidden" slot="label">Views</text>
+						<toolbar slot="actions" appearance="segmented link header" shrinkable aria-label="Views">
+							<item selected>Views</item>
+							<item>Things</item>
+							<item>Templates</item>
+							<icon slot="right" name="eye slash" link label="Hide"/>
+						</toolbar>
+						<text style="margin: 12px" paragraph>The pane's content fills what's left, and can scroll by itself.</text>
+					</panel>
+				</stack>
+			</example>
+			<example "Pane" description="With no `collapsible`, the bar is just what's in it, the same height:  the way to head a pane that doesn't fold, such as a row of file tabs.  In a pane, `label` is for screen readers:  what the bar says is in its actions.">
+				<stack style="max-width: 380px; height: 110px; border: 1px solid var(--ui-border-color); border-radius: 12px; overflow: hidden">
+					<panel appearance="pane" label="Files">
+						<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first aria-label="Files">
+							<item selected>Card.spell</item>
+							<item>Deck.spell</item>
+							<item>Pile.spell</item>
+						</toolbar>
+						<text style="margin: 12px" paragraph>The file's code.</text>
+					</panel>
+				</stack>
+			</example>
+		</>
+
 		<section label="Sub-panels" sticky="stack" collapsible dividing>
 			<example "Sub-panels" description="A panel inside a panel is a SUB-HEAD BAND:  small capitals, a hairline above, reaching the box's edges.  Group a panel's fields under them.">
 				<panel label="Color Set" style="max-width: 320px">
@@ -80,7 +109,7 @@
 
 		<section label="Fold icon" sticky="stack" collapsible dividing>
 			<example "Fold icon" description="`fold-icon`:  where a band's chevron sits.  `end` (the panel's default) at the far end of the band, after any actions;  `start` before the title, as a plain `<ui-section>`'s.">
-				<stack style="align-items: start" class="ui-cluster">
+				<stack style="align-items: start" direction="horizontal" wrap>
 					<panel label="Preview" collapsible style="width: 240px">
 						<button slot="actions" size="mini" icon="moon outline" appearance="circular basic">Dark</button>
 						<text paragraph>fold-icon="end"</text>
@@ -97,7 +126,7 @@
 	<section label="Variations">
 		<section label="Colors" sticky="stack" collapsible dividing>
 			<example "Colors" description="`color` paints the whole panel from a hue:  the header band, a lighter box, the border, the sub-head bands.  No `color` is `primary`;  sub-panels follow their panel's hue.  A hue a theme adds works too (the brand pages' `accent`).">
-				<stack style="align-items: start" class="ui-cluster">
+				<stack style="align-items: start" direction="horizontal" wrap>
 					<panel label="Default" style="width: 200px">
 						<panel label="Tweak">
 							<text paragraph>No <text code>color</text>: primary.</text>
@@ -124,12 +153,7 @@
 
 		<section label="Tokens" sticky="stack" collapsible dividing>
 			<example "Tokens" description="Every colour, the radius, the padding and the spacing are tokens (`--ui-panel-*`):  set them on the panel or any ancestor.  The Theming tab lists them.">
-				<panel label="Settings" style="
-                      max-width: 320px;
-                      --ui-panel-background: var(--ui-surface);
-                      --ui-panel-header-background: var(--ui-surface-strong);
-                      --ui-panel-radius: 22px;
-                    ">
+				<panel label="Settings" style="max-width: 320px; --ui-panel-background: var(--ui-surface); --ui-panel-header-background: var(--ui-surface-strong); --ui-panel-radius: 22px;">
 					<checkbox appearance="toggle" selected>Notifications</checkbox>
 				</panel>
 			</example>

@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Example Apps</title>
+    <meta
+      name="description"
+      content="Spell's example apps, simplest first:  FizzBuzz, four small apps, Task List, Star Wars and Solitaire, each in today's Spell, with where to open it."
+    />
+    <meta name="spell-audience" content="makers" />
+    <meta name="spell-topic" content="Writing Spell" />
+    <meta name="spell-start-here" content="2" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Example Apps</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Example Apps</h1></header></ui-sticky
+        >
+        <!-- prettier-ignore -->
+        <ui-code language="spell">a "column" is a pile with layout "vertical"
+	-- A column, built down from king to ace, red and black in turn
+	its cards are draggable when the card is face up
+	it is droppable when
+		it is empty and the card is a king
+		or
+		its color is not the color of the card
+			and its value is the value of the card + 1</ui-code>
+        <p class="lede">
+          If you've played Klondike, you just read the rule for a column: a king on an empty one, and after that, one
+          card lower, in the other color. That isn't a comment above the code that checks a move. It IS the check.
+        </p>
+        <p>
+          The Spell editor comes with example apps, from FizzBuzz up to that solitaire. Each one is a real project: open
+          it, and its app runs beside its text; change a line, and the app follows. This page takes them simplest first,
+          each adding an idea or two to the one before.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user">Written for: someone about to write their first Spell programs</ui-item>
+          <ui-item icon="book"
+            >Every example, with a picture of each, and how to add one:
+            <a href="/app/README-examples.md" target="src-app-readme-examples-md">the examples README</a></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-opening" label="1. Opening one" sticky collapsible dividing open="false">
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>the editor, open on an example · 1 line</ui-title>
+            <ui-content>
+              <pre><code class="language-sh">spell app serve @spell/examples/calculator</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>It opens your browser on the example, until Ctrl-C.</li>
+            <li>In the editor, <b>Home</b> (the house icon in the top bar) lists every project, these among them.</li>
+            <li>
+              <code>/run/</code> in place of <code>/edit/</code> shows the app alone, full size, with its console.
+            </li>
+            <li>
+              <code>spell run @spell/examples/fizzbuzz</code> compiles one and runs it: in your terminal, or, for one
+              with an app, in your browser.
+            </li>
+            <li><code>spell test @spell/examples/Solitaire</code> runs an example's own tests, written in Spell.</li>
+            <li>
+              Each example's address is <code>@spell/examples/&lt;Name&gt;</code>; most have a guide beside them,
+              <code>@spell/guides/how-&lt;name&gt;-works</code>, a short program of its own that takes the example's key
+              lines apart.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="2-fizzbuzz" label="2. FizzBuzz:  a loop, and events" sticky collapsible dividing open="false">
+          <p>
+            Count to 100, saying "fizz" for multiples of 3, "buzz" for multiples of 5, and "fizzbuzz" for both. Here's
+            all of <a href="/app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spell" target="src-app-spaces-spell-examples-fizzbuzz-fizzbuzz-spell"><code>FizzBuzz.spell</code></a>, its comments left out:
+          </p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell">to play fizzbuzz
+	for number from 1 to 100
+		if the number divided by 15 is an integer: trigger fizzbuzz with number = the number
+		otherwise if the number divided by 3 is an integer: trigger fizz with number = the number
+		otherwise if the number divided by 5 is an integer: trigger buzz with number = the number
+		otherwise trigger plain number with number = the number
+
+play fizzbuzz</ui-code>
+          <ul>
+            <li>
+              <code>to play fizzbuzz</code> defines a new phrase, and <code>play fizzbuzz</code> says it.
+              <code>for number from 1 to 100</code> names its loop variable, and later lines call it "the number".
+            </li>
+            <li>
+              The counting prints nothing itself: it says what each number is, as an event, to whoever's listening.
+              <a href="/app/spaces/@spell/examples/fizzbuzz/Console.spell" target="src-app-spaces-spell-examples-fizzbuzz-console-spell"><code>Console.spell</code></a> listens and prints each one, <code>on fizz with number as a number</code>;
+              <a href="/app/spaces/@spell/examples/fizzbuzz/Explainer.spell" target="src-app-spaces-spell-examples-fizzbuzz-explainer-spell"><code>Explainer.spell</code></a> listens too, and draws them on a page beside the results.
+            </li>
+          </ul>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>spell run @spell/examples/fizzbuzz, shortened · 7 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-text">✓ Compiling @spell/examples/fizzbuzz
+1
+2
+3 fizz
+...
+15 fizzbuzz
+...
+100 buzz</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <p>
+            Where it is: <code>@spell/examples/fizzbuzz</code>; its guide,
+            <code>@spell/guides/how-fizzbuzz-works</code>.
+          </p>
+        </ui-section>
+
+        <ui-section id="3-small-apps" label="3. Four small apps" sticky collapsible dividing open="false">
+          <p>A game, a form, a quiz and a checklist. Each shows one thing the language does well.</p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>App</th>
+                  <th>What to look at</th>
+                  <th>Where</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Tic-Tac-Toe</td>
+                  <td>the rule for a win, as sentences: <code>check the line from square 1 through 2 to 3</code></td>
+                  <td><code>@spell/examples/tic-tac-toe</code></td>
+                </tr>
+                <tr>
+                  <td>Bill Splitter</td>
+                  <td>
+                    worked-out values a form changes: <code>its "share" is the amount + the tip</code>, each sum
+                    following every keystroke
+                  </td>
+                  <td><code>@spell/examples/bill-splitter</code></td>
+                </tr>
+                <tr>
+                  <td>Flash Cards</td>
+                  <td>a card that turns over on a click, a two sided view, and a toolbar that keeps the score</td>
+                  <td><code>@spell/examples/flash-cards</code></td>
+                </tr>
+                <tr>
+                  <td>Habit Tracker</td>
+                  <td>a week of checkboxes per habit, its longest streak worked out as you tick</td>
+                  <td><code>@spell/examples/habit-tracker</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <!-- prettier-ignore -->
+          <ui-code language="spell">to check the line from square (a as a number) through (b as a number) to (c as a number)
+	// the same mark in all three squares wins
+	set mark to the mark of square a of its board
+	if mark is "" return
+	if the mark of square b of its board is mark and the mark of square c of its board is mark
+		set its winner to mark</ui-code>
+          <ul>
+            <li>From Tic-Tac-Toe: a phrase with three blanks, which the game says eight times, once a line.</li>
+            <li>
+              Each has a test of its own: <code>spell test @spell/examples/tic-tac-toe</code> plays a game to a win.
+            </li>
+            <li>
+              Tic-Tac-Toe, Bill Splitter and Habit Tracker draw their rows as things of their own:
+              <code>&lt;tic-tac-toe-square&gt;</code>, <code>&lt;bill-splitter-diner&gt;</code>,
+              <code>&lt;habit-tracker-habit&gt;</code>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section
+          id="4-task-list"
+          label="4. Task List:  things that draw themselves, kept on this device"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <p>
+            Type a task and add it, tick it off, delete it, drag the tasks into another order: they're kept on this
+            device, so they're still there next time, with no server and no sign-in. First, what a task IS:
+          </p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell">a "task" is a draggable view
+	its "title" is text
+		// What to do
+	its "done" is yes or no
+	its "order" is number
+		// Where it sits in its checklist, from 1
+	it "is done" if its done is yes
+	it "is active" if it is not done</ui-code>
+          <ul>
+            <li>
+              <code>a "task" is a view</code> declares a new template; <code>draggable</code> lets people drag a task to
+              another place in its list.
+            </li>
+            <li>Each <code>its "..." is</code> line gives it a property, with its kind.</li>
+            <li>The aliases are new ways to talk about a task: later lines can say <code>where it is active</code>.</li>
+            <li>A view makes each task an element of its own on the page, <code>&lt;task-list-task&gt;</code>.</li>
+            <li>
+              It draws as a form bound to the task, <code>&lt;form value={it}&gt;</code>: each named field shows its
+              task's property and writes it back as you type or tick. There's no change handler anywhere.
+            </li>
+          </ul>
+          <p>Where it keeps its tasks is two lines, in a file of its own:</p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell">my tasks is stored on this device
+a task lives in my tasks</ui-code>
+          <ul>
+            <li>
+              After them, the words you already know reach the device: <code>every task</code> reads them,
+              <code>add task to the tasks</code> keeps a new one, <code>remove it from the tasks</code> throws one away.
+            </li>
+            <li>A task saves itself as it changes: there's no save step.</li>
+            <li>
+              To keep them somewhere else, change the first line: <code>my tasks is a data folder at "tasks"</code>, and
+              nothing else changes (<a href="/guides/data/data.html" target="src-guides-data-data-html">Data</a>).
+            </li>
+          </ul>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>spell test @spell/examples/TaskList · 5 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-text">✓ Compiling @spell/examples/TaskList
+✓ test a dragged order is kept  (3 checks)
+✓ test checking one off  (2 checks)
+
+2 passed</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <p>
+            Where it is: <code>@spell/examples/TaskList</code>. Its Spanish twin, an earlier, fuller list with a toolbar
+            that filters it: <code>@spell/examples/ListaDeTareas</code>.
+          </p>
+        </ui-section>
+
+        <ui-section
+          id="5-star-wars"
+          label="5. Star Wars:  servers other people run"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <p>
+            Star Wars reads <code>swapi.py4e.com</code> for the films, characters, planets and ships, and Wikipedia for
+            their pictures. Each server is a line, and its rows' fields, in a file of its own:
+          </p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell">star wars is a web server at "https://swapi.py4e.com/api"
+	its id is its "url"
+	its rows are its "results"
+	its next page is its "next"
+	it searches names and titles with "search"
+	check it once a day at 5am
+	keep a copy on this device
+
+a "character" is a thing
+	it lives in star wars
+	its "height" is a length in cm or "unknown"
+	its "hair color" is text
+	its "homeworld" is a planet
+	its "films" is a list of films</ui-code>
+          <ul>
+            <li>
+              <code>spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"</code>
+              wrote those lines by looking at the server; <code>spell place update StarWars.api.spell</code> looks
+              again.
+            </li>
+            <li>
+              Its rows link to each other by address. Say what a field links to (<code>its "homeworld" is a planet</code
+              >), and reading it follows the link: <code>the name of its homeworld</code>.
+            </li>
+            <li>
+              Each field finds the server's own spelling by its words: <code>its "hair color"</code> reads
+              <code>hair_color</code>; <code>"172"</code> reads as a number, <code>"unknown"</code> as nothing.
+            </li>
+            <li>
+              What's drawn is in its own file, adding to those types with <code>&lt;extend&gt;</code>: so looking at the
+              server again never touches a line of it.
+            </li>
+            <li>A long list draws what fits, and more as you scroll.</li>
+            <li>
+              It keeps a copy of what it reads on this device: its first load sends 6 requests, and a reload before 5am
+              sends none.
+            </li>
+            <li>
+              <b>The catch:</b> not every name has a Wikipedia page, so about one in five of its 260 names has a picture
+              that's really of it; the rest are an initial on a colour.
+            </li>
+          </ul>
+          <p>
+            Where it is: <code>@spell/examples/StarWars</code>; the same as a site,
+            <code>@spell/examples/StarWarsSite</code> (<a href="/guides/mockup/mockup.html" target="src-guides-mockup-mockup-html">Sites and Mockups</a>).
+          </p>
+        </ui-section>
+
+        <ui-section
+          id="6-solitaire"
+          label="6. Solitaire:  a whole game in plain Spell"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <p>
+            Klondike in five files: its cards, its deck and its piles are files of their own, before the game itself,
+            <a href="/app/spaces/@spell/examples/Solitaire/Solitaire.spell" target="src-app-spaces-spell-examples-solitaire-solitaire-spell"><code>Solitaire.spell</code></a>. Each file sees the ones before it in the project's list.
+          </p>
+          <p>The deal is a loop with pauses in it, so you watch it happen:</p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell">to "deal the cards" with shortcut "R", icon "sync alternate"
+	clear the score
+	for each card in the deck
+		turn the card face down without waiting
+	for each card in the cards which are not in the stock
+		add the card to the stock without waiting
+		pause for 10 msec
+	shuffle the stock
+	-- each row's first card lands face down, then turns up where it lies
+	for row from 1 to 7
+		for column from row to 7
+			add the top card of the stock to item column of the columns
+			pause for 20 msec
+			if column is the same as row
+				turn the last card of (item column of the columns) face up
+	turn over the next card</ui-code>
+          <ul>
+            <li>
+              <code>pause for 20 msec</code> lets the page draw before the next line runs. What a person starts runs one
+              at a time: a second Restart during the deal can't deal on top of the first.
+            </li>
+            <li>
+              The action's head line gives it its key and icon: <code>&lt;action "deal the cards" /&gt;</code> in a
+              drawing is its button, and the board's right-click menu lists it with its key.
+            </li>
+            <li>
+              The card is a two sided view: its direction, face up or down, and turning it over come from that built-in
+              template, and it says what its front and its back look like.
+            </li>
+            <li>
+              Each card is its own element, <code>&lt;solitaire-card&gt;</code>; each pile is a viewable list, its own
+              element too, holding its cards' elements.
+            </li>
+            <li>A click on a card plays it, and the game moves it to the first pile that says it can take it.</li>
+          </ul>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>spell test @spell/examples/Solitaire · 8 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-text">✓ Compiling @spell/examples/Solitaire
+✓ test card setup  (15 checks)
+✓ test card images  (10 checks)
+✓ test piles  (8 checks)
+✓ test a new deck  (5 checks)
+✓ test the moves  (11 checks)
+
+5 passed</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <p>
+            Where it is: <code>@spell/examples/Solitaire</code>; written again in Spanish, file for file,
+            <code>@spell/examples/Solitario</code> (<a href="/guides/spanish.html" target="src-guides-spanish-html">Spell in Spanish</a>).
+          </p>
+        </ui-section>
+
+        <ui-section id="7-more" label="7. And the rest" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              More examples: Counter, Weekend Countdown, Calculator, Weather, Checkers, Shopping List, Recipe Cards,
+              Recipe Box, Family Cookbook, Recipe File, PokéSpell, Artworks from the Met, Public Servers, Statusphere,
+              and several Spanish twins. Every one, with a picture:
+              <a href="/app/README-examples.md" target="src-app-readme-examples-md">the examples README</a>.
+            </li>
+            <li>
+              Guides that read as prose, in <code>@spell/guides</code>: <code>a-first-spell</code>, five steps on a
+              hello sign, and <code>a-tour-of-spell</code>, on a windowsill of plants that say when they need water.
+            </li>
+            <li>
+              The language, sentence by sentence:
+              <a href="/guides/spell-language/spell-language.html" target="src-guides-spell-language-spell-language-html">The Spell Language</a>.
+            </li>
+          </ul>
+          <p>
+            <b>The edges:</b> the guides step around a few phrases Spell doesn't read yet, such as
+            <code>is at least</code>, and <code>a + b as a number</code>.
+          </p>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Updated 2026-11-21.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

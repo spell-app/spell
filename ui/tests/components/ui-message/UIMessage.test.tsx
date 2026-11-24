@@ -53,11 +53,11 @@ describe("<ui-message> classes", () => {
     ['size="medium"', "ui message"],
     ['color="teal"', "ui teal message"],
     ['state="negative"', "ui negative message"],
-    ['state="warning" attach-to="bottom"', "ui warning bottom attached message"],
+    ['state="warning" attach-to="bottom"', "ui warning bottom attached message bottom-attached"],
     ['attach-to="both"', "ui attached message"],
     // old names (`compact`, `text-align`, `attached`) and the new ones draw the same words (epic `ui-gaps` P4)
     ['floating padding="compact" centered inverted', "ui compact centered floating inverted message"],
-    ['attach-to="bottom" align="right"', "ui bottom attached right aligned message"],
+    ['attach-to="bottom" align="right"', "ui bottom attached right aligned message bottom-attached right-aligned"],
     ['floating="no"', "ui message"],
     ['icon="envelope"', "ui icon message"]
   ])("<ui-message %s>", async (attributes, classes) => {

@@ -14,7 +14,8 @@ import type { ClaudeRunner } from "spell/parser/spell/translate/translate.types"
  *   fields of several words, joined (`device-ids`), one a list of values.
  * - A list wrapped in its answer, `{ sources: [...], warnings: [...], next_offset }`:  unwrapped, as no other is.
  * - A list whose answer it describes as `{}`:  kept with no fields, for a read to fill, its id a slug.
- * - Beside a shop's place:  a device of each (named apart), and the shop's jobs, copied by the lab untyped (left out).
+ * - Beside a shop's place:  a device of each (named apart), and the shop's jobs, copied by the lab untyped (left out);
+ *   an inspection inside each one's rows, the lab's found by a verify's read (named apart too).
  * - A question Spell can't say, `1st_page`:  its line is left out, the rest written.
  */
 
@@ -258,7 +259,14 @@ describe("beside another place", () => {
     },
     components: {
       schemas: {
-        Device: { type: "object", properties: { id: { type: "string" }, aisle: { type: "string" } } },
+        Device: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            aisle: { type: "string" },
+            inspection: { type: "object", properties: { by: { type: "string" }, passed: { type: "boolean" } } }
+          }
+        },
         Job: { type: "object", properties: { id: { type: "string" }, state: { type: "string" } } }
       }
     }
@@ -318,6 +326,48 @@ describe("beside another place", () => {
     expect(spell).not.toMatch(/^a "device" is a thing$/m)
     const project = [...texts].map(([path, contents]) => ({ path: `/${path}`, contents }))
     expect(parseSpellProject(project).files.flatMap(({ errors }) => errors)).toEqual([])
+  })
+  /** Its designs' rows, read by a verify:  each with an inspection, as the shop's devices have. */
+  function answerDesigns(fetch: { answer: (url: URL) => Response }): void {
+    const design = { slug: "top-level", name: "Top level", inspection: { by: "ana", passed: true, at: "bench 2" } }
+    fetch.answer = (url) =>
+      url.pathname === "/api/designs"
+        ? Response.json([design])
+        : url.pathname === "/api/designs/top-level"
+          ? Response.json(design)
+          : new Response("nope", { status: 404 })
+  }
+
+  /** Every error in the project:  each file beside the others. */
+  function projectErrors(texts: ReadonlyMap<string, string>): unknown[] {
+    const project = [...texts].map(([path, contents]) => ({ path: `/${path}`, contents }))
+    return parseSpellProject(project).files.flatMap(({ errors }) => errors)
+  }
+
+  test("a type a verify's read makes is named apart too:  the lab's inspection, beside the shop's", async () => {
+    const { ingest, texts, fetch, descriptions } = await besideShop()
+    expect(texts.get("Shop.api.spell")).toMatch(/^an "inspection" is a thing$/m)
+    answerDesigns(fetch)
+    const { spell } = await ingest.verify("Lab.api.spell")
+    expect(spell).toMatch(/^a "lab inspection" is a thing$/m)
+    expect(spell).toMatch(/^\tits "inspection" is a lab inspection$/m)
+    expect(spell).not.toMatch(/^an "inspection" is a thing$/m)
+    expect(descriptions.get("Lab.api.json5")!.notes).toContainEqual(
+      expect.stringMatching(/^"inspection" is shop's too, so this one is a "lab inspection"/)
+    )
+    expect(projectErrors(texts)).toEqual([])
+  })
+
+  test("verified again, and looked at again by an update, it stays apart and the project compiles", async () => {
+    const { ingest, texts, fetch } = await besideShop()
+    answerDesigns(fetch)
+    await ingest.verify("Lab.api.spell")
+    const { spell: again } = await ingest.verify("Lab.api.spell")
+    expect(again).toMatch(/^a "lab inspection" is a thing$/m)
+    expect(projectErrors(texts)).toEqual([])
+    const { spell: updated } = await ingest.update("Lab.api.spell")
+    expect(updated).not.toMatch(/^an "inspection" is a thing$/m)
+    expect(projectErrors(texts)).toEqual([])
   })
 })
 

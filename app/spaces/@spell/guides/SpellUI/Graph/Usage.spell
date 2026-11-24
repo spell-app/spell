@@ -1,0 +1,114 @@
+"graph usage" is a notebook page
+	<header level="1">
+		Graph
+		<header>A graph draws nodes joined by edges, laid out left to right. A node may hold a graph of its own, opened in place, in a modal, or in its stead.</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Data">
+		<markdown>
+			A graph draws any nodes and edges:  it knows nothing about where they came from.
+			Give it the `graph` property, or JSON in the attribute on a static page:
+
+			- `nodes`, each `{ id, label?, kind?, ports?, children?, childView?, open?, title?, data? }`
+			  - `ports`, each `{ id, label?, side?, kind? }`.  With no `side`:  `kind` `in` or `input` is on the
+			    left, `out` or `output` on the right, else the side most of its edges come from.
+			  - `children`:  a graph, or a function giving one (or a promise of one), called the first time it opens.
+			  - `kind`:  a word added to its classes and parts (`kind-hub`), for a page's own style.
+			- `edges`, each `{ id?, from: { node, port? }, to: { node, port? }, kind?, label?, data? }`
+			  - Inside a child graph, an end with NO `node` is the enclosing node:  `port` names its port.
+
+			It lays the graph out in layers, left to right, and fits it to the view.
+			Set a NEW graph to redraw:  one changed in place isn't seen.
+		</>
+		<markdown>
+			```js
+			const graph = document.querySelector("ui-graph")
+			graph.graph = {
+			  nodes: [
+			    { id: "source", label: "Source", ports: [{ id: "out", kind: "out" }] },
+			    {
+			      id: "filter",
+			      label: "Filter",
+			      ports: [{ id: "in", kind: "in" }, { id: "out", kind: "out" }],
+			      children: async () => (await fetch("/filter.json")).json()
+			    }
+			  ],
+			  edges: [{ from: { node: "source", port: "out" }, to: { node: "filter", port: "in" } }]
+			}
+			graph.addEventListener("ui-changed", (event) => console.log(event.detail))
+			```
+		</>
+	</>
+
+	<section label="Children">
+		<markdown>
+			A node with `children` has a toggle.  `child-view` says how they show, for the whole graph;
+			a node's own `childView` wins for it.
+
+			| `child-view` | What opening does |
+			| --- | --- |
+			| `inline` | The node grows into a container, and its graph is laid out inside it. |
+			| `modal` | A modal opens, holding another graph of the same tag:  the node's ports are pins on its sides. |
+			| `drill` | The drawing shows the children instead, with breadcrumbs back up. |
+
+			`ui-node-toggled` says which node opened or closed, and how.
+			From script:  `el.open(path, view?)`, `el.close(path)`, `el.drillTo(path?)` and `el.fit()`.
+		</>
+	</>
+
+	<section label="Paths">
+		<markdown>
+			Everything in a graph is known by its PATH, so ids mustn't hold `/`, `:` or `#`:
+
+			- a node:  its ids from the top, joined by `/` (`cpu/alu`)
+			- a port:  its node's path, `:` and its id (`cpu/alu:op`)
+			- an edge:  its graph's path, `#` and its id (`cpu#e3`);  an edge with no id is `#<index>`
+
+			The `path` attribute is the node drilled into.  Set it to drill there, loading lazy children on the way.
+			A drill, a breadcrumb or a double-click sets it back, and sends `ui-changed` `{ kind: "path", path }`.
+
+			A click selects a node, an edge or a port:  `ui-selecting` first (cancel it to keep the selection),
+			then the `selected` property, `{ kind, id, path }`, and `ui-changed`.
+		</>
+	</>
+
+	<section label="Extending">
+		<markdown>
+			A set's own graph element extends the component, `UIGraph`, and overrides its hooks:
+
+			| Hook | What it gives |
+			| --- | --- |
+			| `nodeLabel(node)` | A node's text (it's measured, so the box fits it). |
+			| `nodeClass(node)` | Extra classes on its group;  `kind-<kind>` is there already. |
+			| `renderNode(placed)` | What its group holds:  the box and label, inside the box the layout gave it. |
+			| `edgeLabel(edge)`, `edgeClass(edge)` | An edge's text and classes. |
+			| `portLabel(port, node)`, `portClass(port, node)` | A port's text and classes. |
+			| `metrics` | The sizes the layout works in. |
+			| `trail()` | The breadcrumbs. |
+			| `toolButtons()`, `overlay()` | More buttons beside Fit;  something drawn over the drawing. |
+
+			The modal opens a graph of the same tag, so a subclass keeps its look there.
+			Every node, container, edge, port and pin is a part, with `kind-<kind>` beside it:
+			`ui-graph::part(kind-hub)`.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			| Key | What it does |
+			| --- | --- |
+			| Tab | Moves to the next open / close toggle, then the Fit button |
+			| Enter or Space | Opens or closes the node of the toggle in focus |
+
+			Moving between nodes with the keys isn't built yet.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			The drawing is a group (`role="group"`), named by how many nodes it has:  "Graph:  4 nodes".
+			Each toggle is a button, named "Open CPU" or "Close CPU", and says whether it's open.
+			A node's `title` is its hover text.  A page that relies on the graph should say what it shows in words too.
+		</>
+	</>

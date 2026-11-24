@@ -1,6 +1,8 @@
 import { defineConfig, type UserConfig } from "vite"
 import { fileURLToPath } from "node:url"
 
+import { brotliCopies } from "spell/toolchain/brotliCopies"
+
 import { baseConfig } from "./vite.config.ts"
 
 /** Spell UI's root. */
@@ -13,6 +15,12 @@ export const SITE_ASSETS = `${ROOT}site/_assets`
 export const SITE_ENTRY = `${ROOT}site/_src/site.ts`
 
 /**
+ * The second entry:  `site/_src/drawings.ts`, the headless page the page server draws Mermaid in
+ * (`spell/ui/drawings`), sharing the site's chunks.
+ */
+export const DRAWINGS_ENTRY = `${ROOT}site/_src/drawings.ts`
+
+/**
  * The Spell UI site's bundle (`yarn site:bundle`, run by `scripts/site-bundle.ts`):
  * `site/_src/site.ts` => `site/_assets/site.js` + `site.css` + lazy chunks.  See the entry for what's in it.
  * - `baseConfig()`:  the library's own plugins (decorators BEFORE Solid), Solid dedupe, Lightning CSS targets.
@@ -22,6 +30,7 @@ export const SITE_ENTRY = `${ROOT}site/_src/site.ts`
  * - Stable names where the tree is stable, so a rebuild's diff is small:  `site.js`, `site.css`,
  *   one `<family>.js` per family barrel (`ui-button.js`, `ui-example.js`), emoji data under `emoji/<set>/`;
  *   every other chunk (shared code, the runtime, engines) `<name>-<hash>.js`.
+ * - A brotli copy beside each file (`brotliCopies()`):  the kit's servers send it to a browser that takes brotli.
  * - Minified, no sourcemaps:  as a deploy would ship it.  `emptyOutDir: false`:
  *   `scripts/site-bundle.ts` clears the folder itself, keeping the `icon-packs` link.
  * - No aliases:  `site/_src` imports Spell UI and the kit by their package names, through their `exports`
@@ -34,6 +43,7 @@ export default defineConfig(() => {
   const base = baseConfig()
   return {
     ...base,
+    plugins: [...(base.plugins ?? []), brotliCopies()],
     root: ROOT,
     base: "./",
     publicDir: false,
@@ -49,7 +59,7 @@ export default defineConfig(() => {
       // `brands.json`-sized icon data and highlight.js's languages are lazy chunks, loaded only when used
       chunkSizeWarningLimit: 700,
       rolldownOptions: {
-        input: { site: SITE_ENTRY },
+        input: { site: SITE_ENTRY, drawings: DRAWINGS_ENTRY },
         preserveEntrySignatures: "allow-extension",
         output: {
           // custom element class names are read by dev-time warnings and the manifest (see `vite.config.ts`)

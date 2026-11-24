@@ -6,8 +6,7 @@
  *   - math, random numbers and primitive iteration
  * - Collection-shaped methods (`itemCountOf`, `forEach`, etc) live in `collection-core.ts` / `collection-other.ts`.
  */
-import _isArrayLike from "lodash/isArrayLike"
-import isEqual from "lodash/isEqual"
+import { isArrayLike as _isArrayLike, isEqual } from "lodash-es"
 
 import { brokenRule, flushCells, onThingMade, peekProp, ruleWarning, withoutCreate } from "spell/util"
 // Import directly, never through the barrel:
@@ -57,8 +56,41 @@ export const core = new (class core {})() as Core
 /**
  * Each class that declares a property, by its name, as it's made:  so a place's row can make the thing held inside it (`PlaceThings`).
  * - One per page's copy of the core:  a recompile's class of the same name replaces the last.
+ * - A program's class is held only as long as a run of it keeps it (`heldByRun()`, epic `solid-2-final` I24):
+ *   read them with `declaredClassNamed()` / `declaredClasses()`, never the map itself.
  */
-export const CLASSES_DECLARED = new Map<string, Function>()
+export const CLASSES_DECLARED = new Map<string, Function | WeakRef<Function>>()
+
+/** The class called `name` that declared a property, while it's still held -- see `CLASSES_DECLARED`. */
+export function declaredClassNamed(name: string): Function | undefined {
+  return stillHeld(CLASSES_DECLARED.get(name))
+}
+
+/** Every class that declared a property, still held -- see `CLASSES_DECLARED`. */
+export function declaredClasses(): Function[] {
+  return [...CLASSES_DECLARED.values()].flatMap((kept) => stillHeld(kept) ?? [])
+}
+
+/**
+ * Keep `value` for as long as the program running now does, under `key`, and return how a page-wide registry should
+ * hold it (epic `solid-2-final` I24):
+ * - a program running (`core.RUNTIME`):  a `WeakRef`, the run holding `value` itself (`SpellRuntime.held`), so once no
+ *   run of it is left, and nothing else uses it, it can be freed:  a program the editor showed and left, and its
+ *   view tags' classes, which the page's custom elements outlive
+ * - none (the runtime's own classes, made as its module loads):  `value` itself, for good
+ * - `key` names it in the run, e.g. `class:Card`:  held again under it (a live edit), the last one goes
+ */
+export function heldByRun<T extends object>(key: string, value: T): T | WeakRef<T> {
+  const held = (core.RUNTIME as { held?: Map<string, object> } | undefined)?.held
+  if (!held) return value
+  held.set(key, value)
+  return new WeakRef(value)
+}
+
+/** What `heldByRun()` returned, as it is now:  `undefined` once no run holds it and it's been freed. */
+export function stillHeld<T extends object>(kept: T | WeakRef<T> | undefined): T | undefined {
+  return kept instanceof WeakRef ? kept.deref() : kept
+}
 
 /**
  * The running program's things, `core.things` (`things.ts`), for the Thing Explorer.

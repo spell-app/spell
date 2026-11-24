@@ -21,7 +21,7 @@ import {
   type VerifyAsk
 } from "./ingest.types"
 import { descriptionFromDisk, descriptionOnDisk, stateOfRead } from "./PlaceOnDisk"
-import { agentRead, renameCollections } from "./PlaceReading"
+import { agentRead, isUniqueIn, renameCollections } from "./PlaceReading"
 import {
   answersUnder,
   IS_WEB_ADDRESS,
@@ -32,7 +32,15 @@ import {
   lookAtPlace,
   messageOf
 } from "./PlaceLook"
-import { checkSecondsWithin, describeLook, fieldsOf, fingerprintOf, idFieldOf, plainNameFor } from "./PlaceShape"
+import {
+  checkSecondsWithin,
+  describeLook,
+  fieldsOf,
+  fingerprintOf,
+  idFieldOf,
+  plainNameFor,
+  wordsFor
+} from "./PlaceShape"
 import { MAKES_A_TOKEN } from "./PlaceSpec"
 import { partsInLanguageOf } from "./PlaceInLanguage"
 import { PlaceWords } from "./PlaceWords"
@@ -45,6 +53,7 @@ import {
   spellPartsFor,
   spellLinesOf,
   spellTextOf,
+  wordsSpellReads,
   type MergeMarks,
   type SpellLine,
   type SpellParts,
@@ -268,6 +277,10 @@ export class PlaceIngest {
       await this.readWithAgent(description, look, { keepName: true })
       carryOver(description, old)
     }
+    // after the agent's names, as ingest's:  a new type, a list's or one inside a row, named apart from those beside it
+    const others = await files.otherSpellBeside(file)
+    const listsBefore = new Set(Object.values(old.collections).map(({ at }) => withoutEndSlash(at)))
+    awayFromTypesBeside(description, others, listsBefore)
     const shapeSame = (await fingerprintOf(description)) === old.about.fingerprint
     if (shapeSame) {
       description.canDo = old.canDo
@@ -283,7 +296,6 @@ export class PlaceIngest {
     const after = partsInLanguageOf(file, spellPartsFor(description))
     const written = (await files.read(file)) ?? ""
     const text = written
-    const others = await files.otherSpellBeside(file)
     const merge = mergedSpell(
       text,
       before,
@@ -349,22 +361,45 @@ export class PlaceIngest {
     this.say(`Verifying ${address}${deployment ? `, its ${deployment.name} deployment` : ""} ...`)
     const changes: string[] = []
     const read: CollectionLook[] = []
-    for (const [name, collection] of Object.entries(description.collections)) {
+    // a list asked what another list's things answer after the others, so that one's read (`asksFrom`)
+    const inOrder = Object.entries(description.collections).sort(
+      ([, one], [, other]) => Number(!!one.asksFrom) - Number(!!other.asksFrom)
+    )
+    for (const [name, collection] of inOrder) {
       if (collection.leftOut || collection.state?.is === "disabled") continue
-      if (!isListed(collection) && !isSearchToTry(collection)) continue
       // a `GET` that makes a token, or signs in or out, is never read
       if (MAKES_A_TOKEN.test(collection.at)) continue
+      const was = collection.state?.is
+      // a question its description gives no value for:  a real one, from the list that answers it
+      const unanswered = Object.keys(collection.askedBy ?? {}).filter((param) => collection.askedBy![param] === "")
+      const answers = unanswered.length ? answersFrom(unanswered, collection, description, read) : undefined
+      if (unanswered.length && !answers) {
+        if (!isListed({ ...collection, askedBy: undefined })) continue
+        collection.state = { is: "unverified", reason: `${NEEDS_A_QUESTION}${unanswered.join(", ")}` }
+        if (was !== "unverified")
+          changes.push(`${name}:  ${was ?? "never tried"} => unverified -- ${collection.state.reason}.`)
+        continue
+      }
+      if (!answers && !isListed(collection) && !isSearchToTry(collection)) continue
       // each list its own allowance:  a whole description has hundreds, each read once, a gap between each request
       reader.startAgain()
-      const was = collection.state?.is
       const { state, rows } = await this.verifyCollection(
         address,
         collection,
         reader,
         deployment?.name,
-        description.about.rows
+        description.about.rows,
+        {
+          answers,
+          fromDescription: description.about.specAt !== undefined,
+          answered: (asks) => answersFrom(asks, collection, description, read)
+        }
       )
       collection.state = state
+      // each question it's asked for by, a field of its own:  `stacks are asked for by their owner-id`
+      if (Object.keys(collection.fields).length)
+        for (const param of Object.keys(collection.askedBy ?? {}))
+          collection.fields[param] ??= { words: wordsFor(param), type: "text" }
       if (rows.length) read.push({ name, at: collection.at, rows, paging: "none", pagesRead: 1, hasMore: false })
       if (state.is !== was) {
         changes.push(`${name}:  ${was ?? "never tried"} => ${state.is}${state.reason ? ` -- ${state.reason}` : ""}.`)
@@ -391,12 +426,15 @@ export class PlaceIngest {
       if (seen) description.canDo.write = writeWordsFor(seen)
     }
     await this.keepPrivate(description, { address, collections: read, headers: {}, notes: [] }, file)
+    // the types its reads made, named apart from those beside it, as ingest's are;  its lists are the ones it had
+    const others = await files.otherSpellBeside(file)
+    const lists = new Set(Object.values(description.collections).map(({ at }) => withoutEndSlash(at)))
+    awayFromTypesBeside(description, others, lists)
     description.about.fingerprint = await fingerprintOf(description)
     description.spell = spellTextOf(spellPartsFor(description)).trimEnd().split("\n")
     const before = partsInLanguageOf(file, writtenOf(spellPartsFor(old), old.spell))
     const after = partsInLanguageOf(file, spellPartsFor(description))
     const text = (await files.read(file)) ?? ""
-    const others = await files.otherSpellBeside(file)
     const merge = mergedSpell(
       text,
       before,
@@ -431,7 +469,8 @@ export class PlaceIngest {
     collection: CollectionDescription,
     reader: PoliteReader,
     deployment: string | undefined,
-    pageSize?: number
+    pageSize?: number,
+    { answers, fromDescription = false, answered }: VerifyAsking = {}
   ): Promise<{ state: PlaceState; rows: Array<Record<string, unknown>> }> {
     const tried = { at: this.nowISO(), ...(deployment !== undefined && { deployment }) }
     const failed = (reason: string, status?: number) => ({
@@ -439,26 +478,38 @@ export class PlaceIngest {
       rows: []
     })
     // a search is asked something:  what its description says to search for, else a letter (epic `data` I140, J295);
-    // a list asked for by a query, what its description's example says (epic `data` P56)
+    // a list asked for by a query, what its description's example says (epic `data` P56), or a real value it hasn't
     const { searchedOnly, searchedBy, searchedFor, askedBy = {} } = collection
     // each question beside the others, a search's first, a list of values as the question repeated;
     // a space as `%20`, as a server reads it in an address
     const searched = !!(searchedOnly && searchedBy)
-    const asked: Array<[string, unknown]> = [
-      ...(searchedOnly && searchedBy ? [[searchedBy.param, searchedFor ?? SEARCH_TRIED] as [string, unknown]] : []),
-      ...Object.entries(askedBy),
-      ...(collection.isOne ? [] : pageAsked(collection, pageSize, askedBy))
-    ]
-    const query = asked
-      .flatMap(([param, value]) => [value].flat().map((each) => `${param}=${encodeURIComponent(`${each}`)}`))
-      .join("&")
-    const url = `${address}${collection.at}${query ? `${collection.at.includes("?") ? "&" : "?"}${query}` : ""}`
+    const urlAsking = (more: Record<string, string>) => {
+      const asking = { ...askedBy, ...more }
+      const asked: Array<[string, unknown]> = [
+        ...(searchedOnly && searchedBy ? [[searchedBy.param, searchedFor ?? SEARCH_TRIED] as [string, unknown]] : []),
+        ...Object.entries(asking),
+        ...(collection.isOne ? [] : pageAsked(collection, pageSize, asking))
+      ]
+      const query = asked
+        .flatMap(([param, value]) => [value].flat().map((each) => `${param}=${encodeURIComponent(`${each}`)}`))
+        .join("&")
+      return `${address}${collection.at}${query ? `${collection.at.includes("?") ? "&" : "?"}${query}` : ""}`
+    }
+    const url = urlAsking(answers ?? {})
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
       answer = await reader.read(url, { mostBytes: collection.mostBytes })
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
       return failed(`it didn't answer:  ${messageOf(error).replaceAll(url, collection.at)}`)
+    }
+    // asked nothing, it says it needs a question, though its description says none is needed:  each it takes that
+    // another list's things answer, asked with a real one, till one answers (a layer stack, by its owner)
+    if (ASKS_A_QUESTION.has(answer.status) && !Object.keys(askedBy).length && collection.asksFrom && answered) {
+      const hint = detailOf(answer.text)
+      if (hint) this.say(`${collection.at} answered ${answer.status}${hint}`)
+      const found = await this.askedAgain(collection, reader, urlAsking, answered)
+      if (found) answer = found
     }
     if (answer.status >= 400) {
       // the server's own message is a hint, said as it runs and never kept:  it may name a real value
@@ -505,9 +556,45 @@ export class PlaceIngest {
     if (missing.length)
       return failed(`its rows don't hold ${missing.join(", ")}, which its description says each has`, answer.status)
     // a search's answers are found elsewhere by id, if at all:  nothing says where
-    const byId = searched ? undefined : await this.thingById(address, collection, rows[0], reader)
-    if (byId) return failed(byId)
-    return { state: { is: "verified", ...tried, status: answer.status, rows: rows.length }, rows }
+    const byId = searched ? undefined : await this.thingById(address, collection, rows, reader, fromDescription)
+    if (byId && byId !== NO_READ_BY_ID) return failed(byId)
+    return {
+      state: {
+        is: "verified",
+        ...tried,
+        status: answer.status,
+        rows: rows.length,
+        ...(byId === NO_READ_BY_ID && { reason: NO_READ_BY_ID })
+      },
+      rows
+    }
+  }
+
+  /**
+   * `collection` asked again with each question another list's things answer (`asksFrom`), a real value each:  the
+   * first answer that isn't a refusal;  `undefined` for none.
+   * - SIDE EFFECT:  that question is the list's from now on, `askedBy`, its value kept nowhere:
+   *   `stacks are asked for by their owner-id`.
+   */
+  private async askedAgain(
+    collection: CollectionDescription,
+    reader: PoliteReader,
+    urlAsking: (answers: Record<string, string>) => string,
+    answered: (params: string[]) => Record<string, string> | undefined
+  ): Promise<Awaited<ReturnType<PoliteReader["read"]>> | undefined> {
+    for (const param of Object.keys(collection.asksFrom ?? {})) {
+      const answers = answered([param])
+      if (!answers) continue
+      try {
+        const answer = await reader.read(urlAsking(answers), { mostBytes: collection.mostBytes })
+        if (answer.status >= 400) continue
+        collection.askedBy = { [param]: "" }
+        return answer
+      } catch (error) {
+        if (error instanceof IngestStopped && !reader.hasRoom) throw error
+      }
+    }
+    return undefined
   }
 
   /**
@@ -563,20 +650,33 @@ export class PlaceIngest {
   }
 
   /**
-   * Read `row` again by its id, at its own address:  why it couldn't be, or `undefined` when it could, or has none.
+   * Its first thing read by its id:  why that failed;  `NO_READ_BY_ID` when there's nowhere to;  `undefined` when it read.
+   * - Where its description says (`oneAt`), by the field its brace names:  `/types/{type_id}` by its `type_id`, else
+   *   its id.  From a description offering none (`fromDescription`):  nowhere.
+   * - A place looked at with no description:  its list's address and its id, or where one's changed or deleted.
    * - Why names its route, `/jobs/{id}`, and its status, never the id nor its address:  a description holds no real
    *   value
+   * - SIDE EFFECT:  read by a field that isn't its id, and every row read has its own:  that's its id from now on, so
+   *   the place reads one where its server does (`a type's id is its "type_id"`).
    */
   private async thingById(
     address: string,
-    { at, idField = "id", operations }: CollectionDescription,
-    row: Record<string, unknown> | undefined,
-    reader: PoliteReader
+    collection: CollectionDescription,
+    rows: ReadonlyArray<Record<string, unknown>>,
+    reader: PoliteReader,
+    fromDescription: boolean
   ): Promise<string | undefined> {
-    const id = row?.[idField]
+    const { at, idField = "id", operations, oneAt } = collection
+    if (oneAt === undefined && fromDescription) return NO_READ_BY_ID
+    const brace = oneAt === undefined ? undefined : /\{([^{}/]+)\}/.exec(oneAt)?.[1]
+    const by = brace !== undefined && rows[0] && brace in rows[0] ? brace : idField
+    const id = rows[0]?.[by]
     if (typeof id !== "string" && typeof id !== "number") return undefined
     const template =
-      operations?.change?.at ?? operations?.delete?.at ?? `${at.replace(/\/+$/, "")}/{id}${at.endsWith("/") ? "/" : ""}`
+      oneAt ??
+      operations?.change?.at ??
+      operations?.delete?.at ??
+      `${at.replace(/\/+$/, "")}/{id}${at.endsWith("/") ? "/" : ""}`
     // an id that's its own address (NetBox's background queues' `url`) is read where it says
     const url = IS_ITS_OWN_ADDRESS.test(`${id}`)
       ? `${id}`
@@ -584,11 +684,13 @@ export class PlaceIngest {
     const route = IS_ITS_OWN_ADDRESS.test(`${id}`) ? "the address its id is" : template
     try {
       const { status } = await reader.read(url)
-      return status >= 400 ? `its first thing, read by its id at ${route}, answered ${status}` : undefined
+      if (status >= 400) return `its first thing, read by its id at ${route}, answered ${status}`
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
       return `its first thing, read by its id at ${route}, didn't answer`
     }
+    if (by !== idField && isUniqueIn(rows, by)) collection.idField = by
+    return undefined
   }
 
   /**
@@ -853,8 +955,9 @@ export class PlaceIngest {
     const most = description.about.specAt ? MOST_COMPILES_OF_A_SPEC : MOST_COMPILES
     // the English it wrote:  whatever language the file is in, that's checked after
     const englishFile = file.replace(/\.[a-z]{2}\.spell$/, ".spell")
-    // what Spell couldn't read last time may read now
-    delete description.linesLeftOut
+    // what Spell couldn't read last time may read now:  its words said as Spell reads them, and every line tried again
+    wordsSpellReads(description)
+    triedAgain(description)
     for (let round = 0; round < most; round++) {
       const parts = spellPartsFor(description)
       const text = spellTextOf(parts)
@@ -1096,6 +1199,49 @@ function isSearchToTry({ at, searchedOnly, searchedBy, askedBy, samples }: Colle
   return !!searchedOnly && !!searchedBy && !/\{[^{}/]*\}/.test(at) && !askedBy && !samples
 }
 
+/** What verify says of a list its description offers no read by id for:  verified all the same. */
+const NO_READ_BY_ID = "no read by id:  its description has no route for one"
+
+/** What verify says of a list it can't ask:  a question its description gives no value for, nor another list. */
+const NEEDS_A_QUESTION = "needs a question:  "
+
+/** A list's refusal that says it needs a question:  a bad request, or one it couldn't read. */
+const ASKS_A_QUESTION: ReadonlySet<number> = new Set([400, 422])
+
+/** How verify asks one list a question its description gives no value for:  see `PlaceIngest.verifyCollection()`. */
+type VerifyAsking = {
+  /** A real value for each, from another list's first thing:  in the address only, kept nowhere. */
+  answers?: Record<string, string>
+  /** It's read from an OpenAPI description, which says where one thing's read by its id, or that it can't be. */
+  fromDescription?: boolean
+  /** Real values for these questions, from the lists each is asked from (`asksFrom`):  `undefined` for none. */
+  answered?: (params: string[]) => Record<string, string> | undefined
+}
+
+/**
+ * A real value for each of `params`, from the first thing the list it's asked from read (`asksFrom`):  its field of
+ * that name, else its id;  `undefined` when one has none.
+ * - In a question's address only:  never kept, in the description or the Spell.
+ */
+function answersFrom(
+  params: readonly string[],
+  { asksFrom = {} }: CollectionDescription,
+  description: PlaceDescription,
+  read: readonly CollectionLook[]
+): Record<string, string> | undefined {
+  const answers: Record<string, string> = {}
+  for (const param of params) {
+    const at = asksFrom[param]
+    const row = at === undefined ? undefined : read.find((each) => each.at === at)?.rows[0]
+    if (!row) return undefined
+    const idField = Object.values(description.collections).find((each) => each.at === at)?.idField
+    const value = row[param] ?? (idField === undefined ? undefined : row[idField])
+    if (typeof value !== "string" && typeof value !== "number") return undefined
+    answers[param] = `${value}`
+  }
+  return answers
+}
+
 /**
  * Can a collection be read as a list:  not one found by name, nor only by a search?
  * - One asked for by a query is, with what its description gave to ask (epic `data` P56);  not with nothing to ask.
@@ -1235,6 +1381,31 @@ function withoutPlaceInFile(error: string): string {
   return error.replace(/^\d+:\d+ /, "")
 }
 
+/** Why `leaveOutLine()` leaves a line out. */
+const COULDNT_READ = "Spell couldn't read its line:  "
+
+/**
+ * SIDE EFFECT:  every line Spell couldn't read last time is written again, to be tried:  a field, a collection, an
+ * action, a line by its key, and the notes saying so.
+ */
+function triedAgain(description: PlaceDescription): void {
+  const again = (fields: Record<string, FieldDescription>) => {
+    for (const field of Object.values(fields)) {
+      if (field.leftOut?.startsWith(COULDNT_READ)) delete field.leftOut
+      if (field.inside) again(field.inside)
+    }
+  }
+  for (const collection of Object.values(description.collections)) {
+    if (collection.leftOut?.startsWith(COULDNT_READ)) delete collection.leftOut
+    again(collection.fields)
+    for (const action of Object.values(collection.operations ?? {}))
+      if (action.state?.is === "disabled" && action.state.reason?.startsWith(COULDNT_READ))
+        action.state = { is: "unverified" }
+  }
+  delete description.linesLeftOut
+  description.notes = description.notes.filter((note) => !note.includes(COULDNT_READ))
+}
+
 /**
  * SIDE EFFECT:  the Spell leaves out the line `line` is, with why:  `false` if it's no line it can leave out.
  * - A field's line, its field;  a collection's `lives at` or its type's header, the collection.
@@ -1242,7 +1413,7 @@ function withoutPlaceInFile(error: string): string {
  *   (epic `data` I106).
  */
 function leaveOutLine(description: PlaceDescription, line: WrittenLine, why: string): boolean {
-  const reason = `Spell couldn't read its line:  ${line.text.trim()} -- ${why}`
+  const reason = `${COULDNT_READ}${line.text.trim()} -- ${why}`
   const { key, type } = line
   if (key) {
     const [kind, collection, field] = key.split(":") as [string, string, string?]
@@ -1333,8 +1504,17 @@ const DECLARED_TYPE = /^(?:a|an|un|una) (?:"([^"\n]+)"|([\p{L}\d ]+?)) (?:is a t
  * SIDE EFFECT:  a type another Spell file beside it already declares goes by the place's name too,
  * as one project holds every type once (epic `data` P30):
  * JSONPlaceholder's `user`, beside GitHub's, is a `jsonplaceholder user`.
+ * - Every type it writes:  each list's own, and each type inside a row, whoever made it (a look, the agent, a verify's
+ *   read):  a lab's verify reading its designs' `inspection` beside a shop's `inspection` writes a `lab inspection`.
+ * - The one step ingest, `spell place update` and `spell place verify` each run, last, once the types are named.
+ * - `listsKept`:  the addresses of lists already written, whose own types stay as they are (a person's, or ones
+ *   that clash already, a person's to settle):  only a new list's is named apart.
  */
-function awayFromTypesBeside(description: PlaceDescription, others: readonly string[]): void {
+function awayFromTypesBeside(
+  description: PlaceDescription,
+  others: readonly string[],
+  listsKept: ReadonlySet<string> = new Set()
+): void {
   // each type declared beside it, by the place whose file declares it:  a file of a person's own, by none
   const declared = new Map(
     others.flatMap((text) => {
@@ -1343,21 +1523,36 @@ function awayFromTypesBeside(description: PlaceDescription, others: readonly str
     })
   )
   const { name } = description.about
+  // the other half:  the one already there keeps the bare name till a person renames it, which every update keeps
+  const noteApart = (words: string, type: string) => {
+    const other = declared.get(words)
+    if (other === undefined || words.startsWith(`${other.toLowerCase()} `)) return
+    const note = `"${words}" is ${other}'s too, so this one is a "${type}":  to tell them apart both ways, rename ${other}'s in its own file, a "${other} ${words}" (spell place update keeps a name you give).`
+    if (!description.notes.includes(note)) description.notes.push(note)
+  }
   let isRenamed = false
   for (const collection of Object.values(description.collections)) {
     const words = collection.type.toLowerCase()
-    if (collection.leftOut || !declared.has(words)) continue
-    const other = declared.get(words)
+    if (collection.leftOut || listsKept.has(withoutEndSlash(collection.at)) || !declared.has(words)) continue
     collection.type = `${name} ${collection.type}`
     isRenamed = true
-    // the other half:  the one already there keeps the bare name till a person renames it, which every update keeps
-    if (other !== undefined && !words.startsWith(`${other.toLowerCase()} `)) {
-      description.notes.push(
-        `"${words}" is ${other}'s too, so this one is a "${collection.type}":  to tell them apart both ways, rename ${other}'s in its own file, a "${other} ${words}" (spell place update keeps a name you give).`
-      )
-    }
+    noteApart(words, collection.type)
   }
   if (isRenamed) renameCollections(description)
+  // each type inside a row, by the name the writer gives it:  one renamed may free a name inside it, so again
+  for (let isInsideRenamed = true; isInsideRenamed; ) {
+    isInsideRenamed = false
+    for (const { header, isInside, heldBy = [] } of spellPartsFor(description).types) {
+      const words = /"([^"]+)"/.exec(header)?.[1]?.toLowerCase()
+      if (!isInside || words === undefined || !declared.has(words) || !heldBy.length) continue
+      const type = `${name} ${words}`
+      // a name the writer can't take (too many words) stays:  nothing to name it, and the merge's check says so
+      if (heldBy.every(({ field }) => field.insideType === type)) continue
+      for (const { field } of heldBy) field.insideType = type
+      isInsideRenamed = true
+      noteApart(words, type)
+    }
+  }
 }
 
 /**

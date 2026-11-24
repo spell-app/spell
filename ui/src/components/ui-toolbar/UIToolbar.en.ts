@@ -5,7 +5,8 @@
  *   so an attribute the menu gains reaches the toolbar with no change here.
  * - Its own:  the `toolbar` box around the menu,
  *   the two scroll buttons (`scroll-start`, `scroll-end`) and their names,
- *   `show-keys`, and the `pills` look (`appearance`, the menu's words and one more).
+ *   `show-keys`, and the `pills` look (`appearance`, the menu's words and one more);
+ *   `reorderable` and its `ui-item-dropped`.
  * - Its slots, a bar's layout:  `icon`, `title`, `center` and `right` around the items (the default slot).
  * - The same noun (`menu`):  its items draw as a menu's, and `UIMenu.css` styles it.
  */
@@ -67,6 +68,14 @@ export const toolbarVocabulary = {
         "`--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files."
     },
     {
+      name: "scroll-only",
+      group: "layout",
+      kind: "boolean",
+      description:
+        "`scroll-first` that never stops:  however narrow, its items scroll with `‹` / `›`, and it's never the " +
+        "dropdown.  For a row whose own button already lists every item (`max-visible`), such as a project's files."
+    },
+    {
       name: "max-visible",
       group: "layout",
       kind: "string",
@@ -90,12 +99,31 @@ export const toolbarVocabulary = {
         "(a project's files:  `file outline`).  Without it, the button is the caret alone."
     },
     {
+      name: "reorderable",
+      group: "behaviour",
+      kind: "boolean",
+      description:
+        "Its items can be dragged along the row:  the dragged one dimmed, a line where it would land, before or after " +
+        "the item under the pointer.  The drop sends `ui-item-dropped`;  the page puts it there (a project's files:  " +
+        "their order).  Escape puts it back."
+    },
+    {
       name: "all-items-at-end",
       group: "layout",
       kind: "boolean",
       description:
         "With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  " +
         "Without it, it sits right after the last one."
+    }
+  ],
+  events: [
+    ...menuVocabulary.events,
+    {
+      name: "ui-item-dropped",
+      detail: '{ item: Element, target: Element, place: "before" | "after" }',
+      description:
+        "`reorderable`:  `item` was dragged and dropped `place` (`before` or `after`) `target`, another item of " +
+        "the row.  The toolbar moves nothing:  the page does, as the row is its own."
     }
   ],
   slots: [

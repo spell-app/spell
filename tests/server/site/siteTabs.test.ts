@@ -28,14 +28,17 @@ function litName(path: string): string | undefined {
 describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
   "the site header's tabs (the settings' `siteTabs`)",
   () => {
-    it("are in Owen's order (Epic Pages, Sagas, Guides, Docs;  epic-engine), each list page its tab's home", () => {
-      expect(TABS.map((tab) => tab.name)).toEqual(["Epic Pages", "Sagas", "Guides", "Docs"])
+    it("are in Owen's order (Epics, Sagas, Guides, Docs, Servers;  epic-engine), each list page its tab's home", () => {
+      expect(TABS.map((tab) => tab.name)).toEqual(["Epics", "Sagas", "Guides", "Docs", "Servers"])
       expect(TABS.map((tab) => tab.path)).toEqual([
         "epics/index.html",
         "sagas/index.html",
         "guides/index.html",
-        "/_epic/docs/README-epics.md"
+        "/_epic/docs/README-epics.md",
+        "/_epic/servers/"
       ])
+      // the Servers tab's red dot, from the server keeper (epic `epic-engine` P82)
+      expect(TABS.find((tab) => tab.name === "Servers")?.dot).toBe("/api/servers/dot")
     })
 
     // epic `epic-engine` P46:  every page is served, so no tab is "only when served" (`serverOnly`, gone)
@@ -45,15 +48,18 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
 
     it.each([
       // served by the page server
-      ["/epics/index.html", "Epic Pages"],
-      ["/epics/seo/seo.plan.html", "Epic Pages"],
-      ["/epics/seo/details/q1.html", "Epic Pages"],
+      ["/epics/index.html", "Epics"],
+      ["/epics/seo/seo.plan.html", "Epics"],
+      ["/epics/seo/details/q1.html", "Epics"],
       ["/guides/index.html", "Guides"],
       ["/guides/solid/solid-2.html", "Guides"],
       // the epic tooling's READMEs (`docsRoutes`), a worktree's address too;  a folder named docs elsewhere lights none
       ["/_epic/docs/README-epics.md", "Docs"],
       ["/_epic/docs/epic/README-setup.md", "Docs"],
       ["/worktrees/w/_epic/docs/epic/README.md", "Docs"],
+      // the server keeper's tab (epic `epic-engine` P82)
+      ["/_epic/servers/", "Servers"],
+      ["/worktrees/w/_epic/servers/", "Servers"],
       ["/docs/README.md", undefined],
       ["/brand/index.html", undefined],
       ["/brand/pony.html", undefined],
@@ -94,7 +100,7 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       // no Templates tab since 2026-10-22 (Owen:  "we're not using it at this point"):  the templates' own list lights
       // none;  a template under an area's folder name lights that area's tab
       ["/templates/index.html", undefined],
-      ["/templates/epics/plan.html", "Epic Pages"],
+      ["/templates/epics/plan.html", "Epics"],
       ["/templates/goals/set/index.html", "Sagas"],
       // the saga pages, and the parked goal sets under the same tab (epic `epic-workflow` P15)
       ["/sagas/index.html", "Sagas"],
@@ -106,7 +112,7 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       ["/pages/index.html", undefined],
       ["/pages/details/x.html", undefined],
       // a worktree's pages, from the main checkout's server:  inside the worktree, whatever it's called
-      ["/worktrees/goals/epics/goals/goals.plan.html", "Epic Pages"],
+      ["/worktrees/goals/epics/goals/goals.plan.html", "Epics"],
       ["/worktrees/seo/guides/seo/seo.html", "Guides"],
       // from disk, in a checkout and in a worktree
       ["/Users/owen/www/spell-app/spell-app/guides/cli.html", "Guides"],
@@ -114,11 +120,11 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       ["/Users/owen/www/spell-app/spell-app-dev/brand/pony.html", undefined],
       // older checkouts' paths (the docs package, before 2026-10-05):  their area folders still light their tabs;
       // a guide straight under the old folder lights none since the tabs became data (epic `repo-split` I4)
-      ["/packages/docs/content/epics/seo/seo.html", "Epic Pages"],
+      ["/packages/docs/content/epics/seo/seo.html", "Epics"],
       ["/packages/docs/content/templates/durable.html", undefined],
       ["/packages/docs/content/solid/solid-2.html", undefined],
       ["/packages/docs/content/index.html", undefined],
-      ["/packages/docs/epics/seo/seo.html", "Epic Pages"],
+      ["/packages/docs/epics/seo/seo.html", "Epics"],
       ["/packages/docs/solid/solid-2.html", undefined],
       // other folders' files
       ["/_beside/ui/AGENTS.md", undefined],

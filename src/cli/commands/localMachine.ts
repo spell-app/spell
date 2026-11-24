@@ -4,6 +4,7 @@ import { homedir } from "node:os"
 import { dirname, join } from "node:path"
 
 import { kitFileAt } from "spell/cli/projectBin"
+import { vsixIsStale } from "spell/cli/vsix"
 
 /****************
  * ### `MachineTools`
@@ -52,7 +53,7 @@ export class MachineTools {
       const projects = [...new Set([...(record?.projects ?? []), project])]
       this.writeRecord({ kit, projects })
     }
-    const vsix = existsSync(join(kit, VSIX)) ? undefined : join(kit, VSIX)
+    const vsix = this.hasExtension(kit) ? undefined : join(kit, VSIX)
     return { outcome: ran.changes.length ? "switched" : "kept", changes: ran.changes, missingExtension: vsix }
   }
 
@@ -92,6 +93,15 @@ export class MachineTools {
     } catch {
       return undefined
     }
+  }
+
+  /** Whether `kit` has built its extension at the version it's at now. */
+  private hasExtension(kit: string): boolean {
+    const vsix = join(kit, VSIX)
+    if (!existsSync(vsix)) return false
+    const manifest = join(kit, dirname(VSIX), "package.json")
+    if (!existsSync(manifest)) return true
+    return !vsixIsStale(vsix, (JSON.parse(readFileSync(manifest, "utf8")) as { version?: string }).version)
   }
 
   /** Run `kit`'s `epic plugin install <args> --json`:  its changes, or why it failed. */
@@ -157,7 +167,7 @@ export type MachineSwitch = {
   projects?: string[]
   /** why nothing changed, in words */
   problem?: string
-  /** `on`:  the extension package the checkout hasn't built yet, so the editor keeps its own */
+  /** `on`:  the extension package the checkout hasn't built at its version, so the editor keeps its own */
   missingExtension?: string
 }
 

@@ -11,11 +11,18 @@
 
 			- `text` narrows it to a reading column with slightly larger type; `wide` makes it a fifth wider; `fluid` drops the
 			  maximum width (useful only for `align` on unstyled content).
+			- `width` gives it a width of its own, any CSS length (`width="20em"`): centred, and never wider than the page.
+			- `columns` lays its children out as a grid of that many columns, as `<ui-grid columns>` does, each child a cell:
+			  `<ui-container padding="small" columns="7" spacing="xs">` is a game board in one element. `spacing` takes the
+			  grid's words for the room between them (`xs`, `compact`, `lg`, `xl`).
+			- `padding`, `size` and `inverted` are a segment's: room inside its edges (`small`, `md`, `lg`), its text size,
+			  and the dark scheme for everything inside.
 			- `grid` is for a container that holds a `<ui-grid>`: it adds the grid's gutters so the columns line up with other
 			  containers; add `spacing="lg"` (or `xl`) to match a grid with wider gutters.
 			- `scrolling` caps the height (per breakpoint) and scrolls; `short`, `very short`, `long`, `very long` scale the cap,
 			  and `resizable` lets the reader drag it.
-			- The host is a block; the look lives on the `container` part inside, around one slot.
+			- The DOM element has no box of its own: the look lives on the `container` part inside, around one slot (with
+			  `columns`, in the `grid` part inside that).
 			- No events: a container is pure layout.
 		</>
 	</>

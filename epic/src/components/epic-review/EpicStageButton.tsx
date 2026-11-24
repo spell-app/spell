@@ -31,14 +31,14 @@ import stageButtonCSS from "./EpicStageButton.css?inline"
  *   - a Send PRESSED before then carries it along, the countdown cut short (epic `epic-engine` I222);
  *     only Auto Send leaves it to run out
  *   - Send's own ring round the icon (`CountdownRing`), green, filling in as the 5 minutes go (`:state(counting)`);
- *     its tooltip says how long is left, and that a click calls it off
+ *     its name says how long is left, and that a click calls it off (no tooltip:  its words are on it, I370)
  *   - nothing typed on the page starts it again:  it's a decision, not a pause in the work (Auto Send's is)
  *   - pressed again while it counts:  called off, the mark gone, as before the first press
  *   - run out (`tick()`):  Send, as a press did before I180, so it goes with whatever else is unsent, and wakes the
  *     epic when nobody listens;  then `:state(accepted)`, waiting for Claude
  *   - pressed once it's gone:  sent again, nothing more (the mark stands until the session applies it)
  *   - the page closed through the end:  it goes as the page opens again
- * - its tooltip says what's still open ("2 questions open", `open` from its owner):  a reminder, never a lock
+ * - its name says what's still open ("2 questions open", `open` from its owner):  a reminder, never a lock
  * - its view of the inbox is its own `ReviewState`, keyed `stage`;  the countdown's Send never accepts (J143)
  ****************/
 export class EpicStageButton extends E.UIComponent<typeof epicStageButtonVocabulary> {
@@ -56,7 +56,7 @@ export class EpicStageButton extends E.UIComponent<typeof epicStageButtonVocabul
     return this.review.connect()
   }
 
-  /** The time now, ms:  set each second (`tick()`), so the ring and its tooltip follow the clock. */
+  /** The time now, ms:  set each second (`tick()`), so the ring and its name follow the clock. */
   @E.state accessor now = Date.now()
 
   /** Tick each second while connected:  the ring fills, and the accept goes once its time is up;  returns the undo. */
@@ -102,7 +102,7 @@ export class EpicStageButton extends E.UIComponent<typeof epicStageButtonVocabul
   }
 
   /**
-   * Its tooltip:  what a press does, what's still open, what it sends along;  once pressed, that it waits for Claude.
+   * Its name (`aria-label`):  what a press does, what's still open, what it sends along;  once pressed, that it waits for Claude.
    */
   get tip(): string {
     if (this.isCounting)
@@ -134,7 +134,6 @@ export class EpicStageButton extends E.UIComponent<typeof epicStageButtonVocabul
         class={this.rootClass}
         part={this.partForName("base")}
         data-state={this.buttonState}
-        data-tooltip={this.tip}
         aria-label={this.tip}
         onClick={(event: MouseEvent) => {
           // a title row's tool:  not a click on the title, which would fold it

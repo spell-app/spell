@@ -6,7 +6,7 @@
 
 	<!--
 		EXAMPLES:  Fomantic's segment page, section by section, in its order (Types, Groups, States, Variations).
-		- Fomantic's `<img class="ui wireframe image">` => `<ui-image src>`.
+		- Images are `<ui-image src>`.
 	-->
 	<section label="Types">
 		<section label="Segment" sticky="stack" collapsible dividing>
@@ -598,6 +598,32 @@
 				<segment size="big">Big</segment>
 				<segment size="huge">Huge</segment>
 				<segment size="massive">Massive</segment>
+			</example>
+		</>
+	</>
+
+	<section label="Sizing">
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example "Height" description="`height` gives the segment a height, and what doesn't fit scrolls;  `resizable=\"width, height\"` lets people drag either way.  `min-height` and `max-height` hold the drag.">
+				<segment height="8em" min-height="5em" max-height="20em" resizable="width, height">
+					<text paragraph>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.</text>
+					<text paragraph>Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</text>
+					<text paragraph>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem.</text>
+				</segment>
+			</example>
+		</>
+
+		<section label="Fluid" sticky="stack" collapsible dividing>
+			<example "Fluid" description="`height=\"fluid\"` takes what's left of its parent's height, here a stack 16em tall:  the list under the heading fills the rest, and scrolls.  A fluid segment lays its own content in a column, so a fluid segment inside it shares out its height in turn.">
+				<stack height="16em" spacing="sm">
+					<header size="small">Recent runs</header>
+					<segment height="fluid" appearance="secondary">
+						<text paragraph>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</text>
+						<text paragraph>Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.</text>
+						<text paragraph>Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est.</text>
+						<text paragraph>Mauris placerat eleifend leo.  Te eum doming eirmod, nominati pertinacia argumentum ad his.</text>
+					</segment>
+				</stack>
 			</example>
 		</>
 	</>

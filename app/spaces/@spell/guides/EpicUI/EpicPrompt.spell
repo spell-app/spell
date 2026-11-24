@@ -1,0 +1,150 @@
+"epic prompt" is a notebook page
+	<header level="1">
+		&lt;epic-prompt&gt;
+		<header>The &lt;epic-prompt&gt; element: the prompt that started the plan, folded under Kickoff prompt.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-prompt&gt;</> is the prompt that started the plan, as you typed it. It draws a fold titled "Kickoff prompt" on faint violet, your colour; unfolded, the prompt shows as a quoted card.</>
+
+	<!-- no ui-list.spell-meta here:  any ui-item element on the page leaves epic-item unstyled (issue I9 of epic-components) -->
+	<text class="meta" paragraph>Written for: anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-prompt" link="/epic/src/components/epic-prompt/"><text title="epic/src/components/epic-prompt/" code>epic-prompt/</></>.</>
+	<text class="meta" paragraph>Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-prompt-epicprompt-en-ts" link="/epic/src/components/epic-prompt/EpicPrompt.en.ts"><text title="epic/src/components/epic-prompt/EpicPrompt.en.ts" code>EpicPrompt.en.ts</></>.</>
+	<text class="meta" paragraph>The component: <link target="src-spell-epic-src-components-epic-prompt-epicprompt-tsx" link="/epic/src/components/epic-prompt/EpicPrompt.tsx"><text title="epic/src/components/epic-prompt/EpicPrompt.tsx" code>EpicPrompt.tsx</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<epic-prompt>
+					<p>Plan docs (epic pages) as Solid web components, instead of HTML that carries its own layout:</p>
+					<p>&lt;epic-page epic="windows-and-review" title="xxx"&gt; ... &lt;/epic-page&gt;</p>
+				</epic-prompt>
+			</html>
+		</example>
+		<text paragraph>Click "Kickoff prompt" to unfold it. The start of this epic's own prompt.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>A kickoff prompt:</>
+		<markdown>
+			```html
+			<epic-prompt><p>OK, let's sketch it out. Ask me your questions</p></epic-prompt>
+			```
+		</>
+		<text paragraph>From <link title="epics/output-targets/output-targets.plan.html" target="output-targets" link="/epics/output-targets/output-targets.plan.html"><text code>output-targets.plan.html</></>. The prompt is one or more <text code>&lt;p&gt;</>s (lists work too), its words as typed.</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+
+		<section label="Its parents" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Parent</>
+					<cell>How</>
+					<cell>How many</>
+					<cell>As</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-overview-html" link="/epic-overview">
+							<text code>&lt;epic-overview&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>one at most</>
+					<cell>The kickoff prompt, as typed.</>
+				</>
+			</>
+		</>
+
+		<section label="Its children" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Child</>
+					<cell>Where</>
+					<cell>How many</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>prose</>
+					<cell/>
+					<cell>any number</>
+					<cell>The prompt, as typed.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<text paragraph>None: it takes no attributes.</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Where its children show: a child goes in a slot by its <text code>slot</> attribute.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes in it</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>The prompt: <text code>&lt;p&gt;</>s.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws, which a page's CSS can style from outside with <text code>::part(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The fold: a <text code>&lt;details&gt;</>, folded to start with.</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell>Its <text code>&lt;summary&gt;</>: the chevron and <text code>Kickoff prompt</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>quote</>
+					</>
+					<cell>The card around the prompt, shown unfolded.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item><text bold>Folded</> (as it starts): a chevron and "Kickoff prompt", in italic serif, on faint violet: your voice in <link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">the colour scheme</>.</>
+			<item><text bold>Unfolded:</> the chevron turns down, and the prompt shows as a white card with a thin rule, on the violet.</>
+			<item>Whether it's open is the reader's, never written in the file. Find-in-page unfolds it.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic create &lt;epic&gt; --prompt "..."</> or <text code>--prompt-file &lt;path&gt;</>: the prompt, as the doc is made.</>
+			<item><text code>epic prompt &lt;epic&gt; "..."</> or <text code>--file &lt;path&gt;</>: sets or replaces it; <text code>""</> removes it. On an older doc it turns the old quote into an <text code>&lt;epic-prompt&gt;</> where it stood.</>
+			<item><text code>epic convert</>'s second pass: an older doc's <text code>&lt;blockquote slot="prompt"&gt;</> became one.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>: the tables come from its vocabulary file, so they change with it.</>
+		</>
+	</>

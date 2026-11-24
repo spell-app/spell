@@ -54,8 +54,10 @@ describe("incremental parsing ~== full parse", () => {
         const where = `${file.path} line ${index + 1}, ${name}`
 
         const editedFiles = files.map((it) => (it.path === file.path ? { ...it, contents: edited.join("\n") } : it))
+        // with the span an editor would hand it (`P.EditedSpan`):  MUST give what a full parse gives;  undone without
+        const text = edited.join("\n")
         const result = outcome(() => {
-          project.update(file.path, edited.join("\n"))
+          project.update(file.path, text, P.EditedSpan.between(file.contents, text))
           return summarizeIncremental(project)
         })
         expect(result, where).toEqual(outcome(() => summarize(parseSpellProject(editedFiles))))
@@ -167,12 +169,14 @@ describe("incremental parsing ~== full parse", () => {
           const [name, applyEdit] = Object.entries(EDITS)[edit++ % 4]!
           const edited = [...lines]
           applyEdit(edited, index)
+          // with spans both ways (`P.EditedSpan`):  what keeps a line's declarations reads only the lines it touches
+          const text = edited.join("\n")
           try {
-            project.update(file.path, edited.join("\n"))
+            project.update(file.path, text, P.EditedSpan.between(file.contents, text))
           } catch {
             // crashes a full parse too -- see `outcome()`
           }
-          project.update(file.path, file.contents)
+          project.update(file.path, file.contents, P.EditedSpan.between(text, file.contents))
           expect(summarizeIncremental(project), `${file.path} line ${index + 1}, ${name}, undone`).toEqual(original)
         }
       }

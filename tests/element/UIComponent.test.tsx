@@ -482,9 +482,54 @@ describe("UIComponent hostLayout", () => {
     }).toEqual({ before: "7px", after: "3px", display: "flex", sheets: 1, style: null })
   })
 
+  test("elements with the same declarations share ONE sheet;  new declarations swap theirs (solid-2-final P4)", async () => {
+    const tag = defineLayout((component) => `gap: ${(component.gap as string | undefined) ?? 0}px`)
+    const host = await ElementFixture.render(`<div><${tag} gap="5"></${tag}><${tag} gap="5"></${tag}></div>`)
+    const [one, two] = [...host.querySelectorAll<DOMElement>(tag)]
+    const shared = one!.shadowRoot!.adoptedStyleSheets[0]
+    expect(two!.shadowRoot!.adoptedStyleSheets[0]).toBe(shared)
+    two!.setAttribute("gap", "9")
+    await ElementFixture.settle()
+    expect({
+      one: [...one!.shadowRoot!.adoptedStyleSheets],
+      two: two!.shadowRoot!.adoptedStyleSheets.length,
+      isOther: two!.shadowRoot!.adoptedStyleSheets[0] !== shared,
+      gap: getComputedStyle(two!).columnGap
+    }).toEqual({ one: [shared], two: 1, isOther: true, gap: "9px" })
+  })
+
   test("a class without one adopts no sheet for it", async () => {
     const tag = defineLabel()
     const element = await ElementFixture.render<DOMElement>(`<${tag} label="x"></${tag}>`)
     expect(element.shadowRoot!.adoptedStyleSheets.length).toBe(0)
+  })
+})
+
+////////////////
+// ## Moving
+////////////////
+
+describe("UIComponent moved with `moveBefore()`", () => {
+  test("keeps its component and what it drew:  `onMove()`, no `onDisconnect()` / `onConnect()`", async () => {
+    const tag = defineLabel()
+    const element = await ElementFixture.render<DOMElement>(`<${tag} label="x"></${tag}>`)
+    const target = document.createElement("div")
+    element.parentElement!.after(target)
+    onTestFinished(() => target.remove())
+    const component = element.component!
+    const drawn = element.shadowRoot!.firstElementChild
+    const calls: string[] = []
+    for (const hook of ["onConnect", "onDisconnect", "onMove"] as const) {
+      const original = component[hook].bind(component)
+      vi.spyOn(component, hook).mockImplementation(() => {
+        calls.push(hook)
+        original()
+      })
+    }
+    ;(target as Element & { moveBefore(node: Node, child: Node | null): void }).moveBefore(element, null)
+    expect(element.parentElement).toBe(target)
+    expect(calls).toEqual(["onMove"])
+    expect(element.component).toBe(component)
+    expect(element.shadowRoot!.firstElementChild).toBe(drawn)
   })
 })

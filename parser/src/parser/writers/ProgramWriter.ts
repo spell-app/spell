@@ -116,6 +116,14 @@ export abstract class ProgramWriter extends Writer {
   /** Where a debugging build's lines stop:  none in any other build -- see `P.WriterOptions.debugging`. */
   debugSteps: DebugSteps | undefined
 
+  /** Who the code is for:  the editor (the default), or a built site, which leaves out the editor's text -- see `P.WriterOptions.compiledFor`. */
+  compiledFor: P.CompiledFor = "editor"
+
+  /** Is it a built site's code, with no editor text (`compiledFor`)? */
+  get isBuilt(): boolean {
+    return this.compiledFor === "built"
+  }
+
   /**
    * The language of the project's code files we call, `call native copyText`:
    * `js` for javascript and TypeScript (`clipboard.ts`), `py` for Python (`clipboard.py`) -- see `P.ASTNativeCall`.
@@ -158,6 +166,7 @@ export abstract class ProgramWriter extends Writer {
     writer.naming = this.naming
     writer.listsStartAt = options?.listsStartAt ?? 1
     writer.extendable = options?.extendable
+    writer.compiledFor = options?.compiledFor ?? "editor"
     writer.project.findWaiting(files, scope, {
       canWait: (name, isGetter) => writer.canWait(name, isGetter),
       coreCallWaits: (call) => writer.coreCallWaits(call),

@@ -5,7 +5,8 @@
  * (see `src/tools/DesignExport.ts`).
  * - `--brand`:  the brand's package folder, whose `<brand-*>` cards join the system (a "Brand" group);
  *   `--brand-book`:  Claude Design's brand book, whose content rules join the README.
- *   Spell UI never names either itself (epic `repo-split` P5):  `spell design build` passes the kit's spell-brand.
+ *   Spell UI never names either itself (epic `repo-split` P5):  `spell design build` passes the brand book only
+ *   (no `--brand` since epic `epic-engine` T124).
  * - Every path is relative to the folder `yarn` ran from (`environment.invocationDir`).
  * - Reads `components.json5` as committed:  run `yarn site:data` first after changing a vocabulary.
  * - Leaves `project/components/bundle.js` / `bundle.css` alone:  the design bundle's build (epic `claude-design`, P8).

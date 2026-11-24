@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { toastVocabulary } from "spell/ui/components/ui-toast/UIToast.en"
@@ -53,7 +52,7 @@ describe("UIToast.css source", () => {
   })
 
   it("covers every class word the vocabulary and the element emit", () => {
-    const css = toastRaw + colorsCSS
+    const css = toastRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(toastVocabulary))
       expect(Sheets.covers(css, phrase), `${toastVocabulary.tag}: ${phrase}`).toBe(true)
     for (const word of ["neutral", "vertical", "actions", "attached", "compact", "unclickable", "progressing"])
@@ -75,7 +74,7 @@ describe("UIToast.css source", () => {
 describe("UIToast.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every toast in %s", (path) => {
     Sheets.adopt([...foundationCSS, toastCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const toasts = root.querySelectorAll<HTMLElement>(".ui.toast")
     expect(toasts.length).toBeGreaterThan(0)
     for (const toast of toasts) {
@@ -89,7 +88,7 @@ describe("UIToast.css examples", () => {
 
   it("draws a floating box at Fomantic's compact width (as wide as it may be on phones)", () => {
     Sheets.adopt([...foundationCSS, toastCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const box = root.querySelector<HTMLElement>(".toast-box.compact")!
     const style = getComputedStyle(box)
     const width = box.getBoundingClientRect().width
@@ -99,7 +98,7 @@ describe("UIToast.css examples", () => {
     } else expect(width).toBe(350)
     expect(style.boxShadow).toMatch(/\d+px/)
     expect(style.borderTopWidth).toBe("1px")
-    const wide = Fixture.render(EXAMPLES["./examples/variations.html"]!).querySelector<HTMLElement>(
+    const wide = Sheets.render(EXAMPLES["./examples/variations.html"]!).querySelector<HTMLElement>(
       ".toast-box:not(.compact)"
     )!
     expect(wide.getBoundingClientRect().width).toBeLessThan(350)
@@ -107,19 +106,17 @@ describe("UIToast.css examples", () => {
 
   it("fills types and colours from their remap, neutral from the surface", () => {
     Sheets.adopt([...foundationCSS, toastCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const probe = (classes: string) =>
       getComputedStyle(
-        Fixture.render(
-          `<span class="${classes}" style="background: var(--ui-color); color: var(--ui-color-on)"></span>`
-        )
+        Sheets.render(`<span class="${classes}" style="background: var(--ui-color); color: var(--ui-color-on)"></span>`)
       )
     for (const type of ["info", "success", "warning", "error"]) {
       const style = getComputedStyle(root.querySelector(`.ui.${type}.toast`)!)
       expect(style.backgroundColor, type).toBe(probe(`ui ${type}`).backgroundColor)
       expect(style.color, type).toBe(probe(`ui ${type}`).color)
     }
-    const surface = getComputedStyle(Fixture.render(`<span style="background: var(--ui-surface)"></span>`))
+    const surface = getComputedStyle(Sheets.render(`<span style="background: var(--ui-surface)"></span>`))
     expect(getComputedStyle(root.querySelector('.ui.toast[class="ui toast"]')!).backgroundColor).toBe(
       surface.backgroundColor
     )
@@ -127,7 +124,7 @@ describe("UIToast.css examples", () => {
 
   it("turns inverted toasts dark", () => {
     Sheets.adopt([...foundationCSS, toastCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const inverted = getComputedStyle(root.querySelector('.ui.inverted.toast[class="ui inverted toast compact"]')!)
     expect(inverted.colorScheme).toBe("dark")
     expect(Painted.luminance(inverted.backgroundColor)).toBeLessThan(0.07)
@@ -136,7 +133,7 @@ describe("UIToast.css examples", () => {
 
   it("places the icon beside the content and the close icon top right", () => {
     Sheets.adopt([...foundationCSS, toastCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const info = root.querySelector<HTMLElement>(".ui.info.toast")!
     const icon = info.querySelector<HTMLElement>(":scope > .icon")!
     const content = info.querySelector<HTMLElement>(":scope > .content")!
@@ -156,7 +153,7 @@ describe("UIToast.css examples", () => {
 
   it("lays actions out:  a bar below, none when basic, a column when vertical, joined when attached", () => {
     Sheets.adopt([...foundationCSS, toastCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const bar = getComputedStyle(root.querySelector(".ui.toast > .actions:not(.basic, .vertical)")!)
     expect(bar).toMatchObject({ textAlign: "right", borderTopWidth: "1px", marginLeft: `-${bar.fontSize}` })
     const basic = getComputedStyle(root.querySelector(".ui.toast > .basic.actions")!)
@@ -173,7 +170,7 @@ describe("UIToast.css examples", () => {
 
   it("draws the progress bar as a thin coloured track on the box's edge", () => {
     Sheets.adopt([...foundationCSS, toastCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const track = root.querySelector<HTMLElement>(".ui.attached.progress.top")!
     const height = track.getBoundingClientRect().height
     expect(height).toBeGreaterThan(2)
@@ -193,7 +190,7 @@ describe("UIToast.css examples", () => {
 describe("UIToast.container.css", () => {
   it("pins a container to its corner, over the page, undoing the popover box", () => {
     Sheets.adopt([...foundationCSS, containerCSS])
-    const container = Fixture.render(
+    const container = Sheets.render(
       `<div class="ui bottom left toast-container" popover="manual"><div style="width: 100px; height: 40px"></div></div>`
     )
     container.showPopover()
@@ -211,7 +208,7 @@ describe("UIToast.container.css", () => {
   it("centres `top center` and `centered` containers", () => {
     Sheets.adopt([...foundationCSS, containerCSS])
     for (const position of ["top center", "centered"]) {
-      const container = Fixture.render(
+      const container = Sheets.render(
         `<div class="ui ${position} toast-container" popover="manual"><div style="width: 100px; height: 40px"></div></div>`
       )
       container.showPopover()
@@ -229,7 +226,7 @@ describe("UIToast.container.css", () => {
 describe("UIToast.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, toastCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-toast-radius: 20px"><div class="floating toast-box"><div class="ui toast"><div class="content">x</div></div></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.toast")!).borderTopLeftRadius).toBe("20px")

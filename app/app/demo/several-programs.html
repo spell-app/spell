@@ -1,0 +1,35 @@
+<!doctype html>
+<!--
+  Several programs on one plain page, each in its own `<spell-viewer>`:  what a guide with live examples loads.
+  - Served by the page server at `/app/app/demo/several-programs.html`, after `yarn build:element`
+    (or the dev server at `/demo/several-programs.html`).
+  - `spell perf run --page programs` measures it (epic `solid-2-final` P19):  each viewer runs its own copy of
+    Spell's engine today, so this is the page one shared engine would change (Q24).
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Several programs</title>
+    <script type="module" src="/element/spell-viewer.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: Georgia, serif;
+        background: #f4f1ea;
+      }
+      spell-viewer {
+        display: block;
+        height: 480px;
+        margin-bottom: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Several programs</h1>
+    <spell-viewer project="@spell/examples/Counter"></spell-viewer>
+    <spell-viewer project="@spell/examples/TaskList"></spell-viewer>
+    <spell-viewer project="@spell/examples/Solitaire"></spell-viewer>
+  </body>
+</html>

@@ -1,4 +1,6 @@
 import { withoutAccents } from "spell/ui/util"
+// A leaf, not the barrel:  the one place that knows the Spell UI site's addresses
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell/ui/docs-components/docs-components.types"
 import { SitePages, type SitePage } from "spell/ui/components/ui-site-nav/SitePages"
 // A leaf, not the barrel:  the barrel defines `<ui-toc>`
@@ -22,6 +24,10 @@ import {
  * page's sections, built once from the site's data (`components.json5` + `search.json5`);  the page shown's sections
  * come live, per search (`here()`, on the table of contents' `PageOutline`).
  * - Or a site's own list of pages (`pages`):  each found by its title and its tags.
+ * - The Spell UI site's search file lists its pages by ADDRESS (`/button/api`, `SiteSearchBuilder.spellSite()`):
+ *   then every component and attribute links to that site too (`landing()`), not to the old page its data names
+ *   (`ui-button.html#ui-or`):  a component to its family's page (or the section of it named for the tag),
+ *   an attribute to the Attributes section of its family's API page.
  * - Matching is blind to case and accents.  The WHOLE query is tried against the title (exact, start,
  *   a word's start, inside), then against each term (a tag, another name, a topic ...);  failing those,
  *   every WORD of the query must start a word somewhere (title or terms), so `button circular` finds `circular` on
@@ -49,15 +55,20 @@ export class SearchIndex {
     const pageOf = new Map<SearchEntry, string>()
     const families = data?.families ?? {}
     const topics = data?.topics ?? []
+    const site = SearchIndex.siteOf(search)
     for (const tag of data?.components ?? []) {
-      const page = tag.href?.replace(/#.*$/, "") ?? `components/${tag.mainTag}.html`
+      const link = tag.href ?? `${tag.mainTag}.html#${tag.tag}`
       const family = Object.hasOwn(families, tag.folder) ? families[tag.folder]!.title : tag.name
-      const component = SearchIndex.component(tag, family, topics)
+      const href = site ? SearchIndex.landing(site, link, [link.split("#")[1] ?? "", tag.tag]) : link
+      const component = SearchIndex.component(tag, family, topics, href)
       entries.push(component)
-      pageOf.set(component, page)
-      for (const attribute of SearchIndex.attributes(tag, page, family)) {
+      pageOf.set(component, href.replace(/#.*$/, ""))
+      const api = site
+        ? SearchIndex.landing(site, link, [tag.tag, ATTRIBUTES])
+        : `${link.replace(/#.*$/, "")}#${tag.tag}`
+      for (const attribute of SearchIndex.attributes(tag, api, family)) {
         entries.push(attribute)
-        pageOf.set(attribute, page)
+        pageOf.set(attribute, api.replace(/#.*$/, ""))
       }
     }
     for (const page of search?.pages ?? []) {
@@ -122,6 +133,32 @@ export class SearchIndex {
       if (list) list.push(hit)
       else hits.set(entry.kind, [hit])
     }
+  }
+
+  ////////////////
+  // ## The Spell UI site's links
+  ////////////////
+
+  /** The Spell UI site's pages, with their sections' ids:  `search`'s, when it lists pages by address;  else none. */
+  private static siteOf(search: SiteSearchFile | undefined): SitePageIds[] | undefined {
+    const pages = search?.pages ?? []
+    if (!pages.length || !pages.every((page) => page.path.startsWith("/"))) return undefined
+    return pages.map((page) => ({ path: page.path, ids: new Set(page.sections.map((section) => section.id)) }))
+  }
+
+  /**
+   * Where `link`, an old components page (`ui-button.html#ui-or`), lands on the Spell UI site:
+   * the first of `ids` that a page of its family has (the family's page or one under it:  `/button/api#attributes`),
+   * else the family's page (`/button`).
+   */
+  private static landing(site: readonly SitePageIds[], link: string, ids: readonly string[]): string {
+    const address = SpellUIGuide.siteAddressOf(link.replace(/[?#].*$/, ""))
+    const pages = site.filter((page) => page.path === address || page.path.startsWith(`${address}/`))
+    for (const id of ids) {
+      const page = id ? pages.find((each) => each.ids.has(id)) : undefined
+      if (page) return `${page.path}#${id}`
+    }
+    return address
   }
 
   ////////////////
@@ -271,31 +308,33 @@ export class SearchIndex {
     return href ? [{ kind: "page", title, ...(tags[0] && { context: tags.join(", ") }), href, terms: [...tags] }] : []
   }
 
-  /** A component tag:  its name, its tag in mono, found by its tag, other names and topics. */
-  private static component(tag: SiteTag, family: string, topics: SiteDataFile["topics"]): SearchEntry {
+  /** A component tag, linking to `href`:  its name, its tag in mono, found by its tag, other names and topics. */
+  private static component(tag: SiteTag, family: string, topics: SiteDataFile["topics"], href: string): SearchEntry {
     const titles = tag.topics.map((id) => topics.find((topic) => topic.id === id)?.title ?? id)
     return {
       kind: "component",
       title: tag.name,
       code: `<${tag.tag}>`,
       ...(!tag.main && { context: family }),
-      href: tag.href ?? `components/${tag.mainTag}.html#${tag.tag}`,
+      href,
       terms: [tag.tag, ...tag.aka, ...(tag.main ? [] : [family]), ...titles],
       ...(tag.page && { boost: PAGE_BOOST })
     }
   }
 
   /**
-   * `tag`'s attributes:  each lands on its tag's API tables, `#<tag>` on `page`:  a family `<ui-docs-api>`'s header for
-   * that tag, or a page's own `<ui-docs-api tag>` (`ui-radio.html#ui-radio`;  `SiteSections` lands both).
+   * `tag`'s attributes:  each lands on its tag's API tables, `href`:
+   * - the Spell UI site's:  its family's API page, its Attributes section (`/button/api#attributes`)
+   * - an old components page's:  `#<tag>`, a family `<ui-docs-api>`'s header for that tag, or a page's own
+   *   `<ui-docs-api tag>` (`ui-radio.html#ui-radio`;  `SiteSections` lands both)
    */
-  private static attributes(tag: SiteTag, page: string, family: string): SearchEntry[] {
+  private static attributes(tag: SiteTag, href: string, family: string): SearchEntry[] {
     return tag.attributes.map((attribute) => ({
       kind: "attribute",
       title: attribute.name,
       code: `<${tag.tag}>`,
       context: family,
-      href: `${page}#${tag.tag}`,
+      href,
       terms: [tag.tag, tag.name, ...(attribute.aliases ?? [])]
     }))
   }
@@ -336,6 +375,17 @@ type Key = {
   /** the terms, letters and digits only */
   readonly termsCompact: readonly string[]
 }
+
+/** A page of the Spell UI site, and its sections' ids:  where a component or attribute lands (`landing()`). */
+type SitePageIds = {
+  /** its address, `/button/api` */
+  readonly path: string
+  /** its sections' ids */
+  readonly ids: ReadonlySet<string>
+}
+
+/** The section of a family's API page that lists every tag's attributes (`API.spell`'s `Attributes`). */
+const ATTRIBUTES = "attributes"
 
 /** Boost of a tag with a page of its own (a family's main tag, `ui-radio`) over a sub-tag on its family's page. */
 const PAGE_BOOST = 20

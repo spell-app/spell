@@ -760,6 +760,22 @@ test("fresh():  a NEW session in this window, /epic resume typed in;  refused wh
       fresh: true
     }
     assert.deepEqual(JSON.parse(readFileSync(Window.handoffFile(SESSION), "utf8")), record)
+    // paused for epic fresh all --pause (T139):  refused while the round is on, in a scratch epic home;  after, not
+    const epicHome = process.env.SPELL_EPIC_HOME
+    process.env.SPELL_EPIC_HOME = mkdtempSync(join(tmpdir(), "spell-windows-pause-"))
+    try {
+      writeFileSync(agents, `[{ name: "${epic}-docs", status: "paused", paused: { next: "the docs" } }]`)
+      mkdirSync(join(process.env.SPELL_EPIC_HOME, "fresh-pause"))
+      const round = join(process.env.SPELL_EPIC_HOME, "fresh-pause", "round.json5")
+      writeFileSync(round, JSON.stringify({ since: "2026-11-22", initiator: {}, sessions: [{ epic }] }))
+      assert.throws(() => Window.fresh(epic, SESSION), /--pause is under way/)
+      rmSync(round)
+      assert.deepEqual(Window.fresh(epic, SESSION), record)
+    } finally {
+      rmSync(process.env.SPELL_EPIC_HOME, { recursive: true, force: true })
+      if (epicHome === undefined) delete process.env.SPELL_EPIC_HOME
+      else process.env.SPELL_EPIC_HOME = epicHome
+    }
     // none running:  no --force needed
     rmSync(agents)
     assert.deepEqual(Window.fresh(epic, SESSION), record)

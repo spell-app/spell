@@ -66,7 +66,7 @@ export type GeneratedOutput = [file: string, text: string]
 
 /** `writeOrCheck()`'s options. */
 export type WriteOrCheckOptions = {
-  /** the yarn script that writes these files, e.g. `site:index`:  what a stale file says to run */
+  /** the yarn script that writes these files, e.g. `site:kitchen`:  what a stale file says to run */
   command: string
   /** `--check`:  write nothing, fail if stale */
   isCheck: boolean

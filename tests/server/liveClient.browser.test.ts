@@ -317,3 +317,26 @@ describe("liveClient's reload while the server is down", () => {
     await page.close()
   }, 30_000)
 })
+
+// epic `solid-2-final` P1:  every change anywhere in the kit made the editor search its ~400 script tags
+describe("liveClient's changes to files the page never loaded", () => {
+  it("a burst of 1,000 does no script work:  the page's script tags searched not once", async () => {
+    const page = await browser.newPage()
+    await page.goto(`http://127.0.0.1:${server.info.port}/docs/page.html`)
+    await page.waitForFunction(() => !!(window as { SPELL_SERVER?: { reload?: unknown } }).SPELL_SERVER?.reload)
+    const searches = await page.evaluate(() => {
+      let count = 0
+      const search = Document.prototype.querySelectorAll
+      Document.prototype.querySelectorAll = function (this: Document, selectors: string) {
+        if (selectors.includes("script[src]")) count++
+        return search.call(this, selectors)
+      } as typeof search
+      const change = (window as unknown as { __spellLiveChange(path: string): void }).__spellLiveChange
+      for (let index = 0; index < 1000; index++)
+        change(index % 2 ? `/parser/src/x${index}.ts` : `/ui/src/styles/x${index}.css`)
+      return count
+    })
+    expect(searches).toBe(0)
+    await page.close()
+  }, 30_000)
+})

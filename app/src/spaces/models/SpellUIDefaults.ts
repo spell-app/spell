@@ -6,14 +6,17 @@ import {
   ValueSets,
   Vocabulary,
   type ComponentVocabulary,
+  type Dictionary,
   type LocalizedVocabulary
 } from "spell/ui/vocabulary"
 import { DEFAULTS_TABLE } from "spell/ui/vocabulary/defaults.generated"
 import { HOOKS_TABLE } from "spell/ui/vocabulary/hooks.generated"
-import { es } from "spell/ui/components/components.es"
 
 /** The attribute kinds written by their name alone, `fluid`, `disabled`:  they take no value. */
 const BARE_KINDS: readonly string[] = ["keyOnly", "boolean"]
+
+/** Spanish's code:  the one language past English with Spell UI's names, from its dictionary. */
+const SPANISH = "es"
 
 /****************
  * ### `SpellUIDefaults`
@@ -27,6 +30,8 @@ const BARE_KINDS: readonly string[] = ["keyOnly", "boolean"]
  *   `yarn site:data`), and its Spanish names from its dictionary, through Spell UI's own `Vocabulary`:
  *   the names a Spanish page reads.
  * - Browser-safe, as the rest of spaces' models:  the editor compiles too.
+ * - Spanish's names load on first use (`loadLanguage()`, epic `solid-2-final` P11):
+ *   Spell UI's Spanish dictionary is about 70 KB brotli, which an English editor never needs.
  * - STATIC and instance-free on purpose:  ONE registry, made the first time it's asked.
  ****************/
 export class SpellUIDefaults {
@@ -170,7 +175,7 @@ export class SpellUIDefaults {
         ...(valueOutputs && { valueOutputs })
       }
     })
-    const translated = language === es.lang ? es.components?.[canonical]?.hooks : undefined
+    const translated = language === SPANISH ? SpellUIDefaults.dictionary?.components?.[canonical]?.hooks : undefined
     const hooks = (HOOKS_TABLE[canonical] ?? []).map(({ name, words }) => ({
       name,
       words: translated?.[name] ?? words
@@ -181,10 +186,10 @@ export class SpellUIDefaults {
   /** Each of Spell UI's tags in `language`, bare as a drawing writes it (`button`, `botón`), with its canonical tag. */
   static tagsIn(language: string): { tag: string; canonical: string }[] {
     const canonicals = Object.keys(DEFAULTS_TABLE)
-    if (language !== es.lang) return canonicals.map((canonical) => ({ tag: canonical.replace(/^ui-/, ""), canonical }))
+    if (language !== SPANISH) return canonicals.map((canonical) => ({ tag: canonical.replace(/^ui-/, ""), canonical }))
     return canonicals.flatMap((canonical) => {
       const tag = SpellUIDefaults.spanish.get(canonical)?.tag.replace(/^es-/, "")
-      return tag ? [{ tag: es.tags?.[canonical] ?? tag, canonical }] : []
+      return tag ? [{ tag: SpellUIDefaults.dictionary?.tags?.[canonical] ?? tag, canonical }] : []
     })
   }
 
@@ -203,7 +208,7 @@ export class SpellUIDefaults {
 
   /** `tag`'s names in `language`:  Spanish's from the dictionary;  English (and any other) its own. */
   private static localizedFor(tag: string, language: string): LocalizedVocabulary {
-    if (language === es.lang) return SpellUIDefaults.spanish.get(tag) ?? SpellUIDefaults.registry.localizedFor(tag)!
+    if (language === SPANISH) return SpellUIDefaults.spanish.get(tag) ?? SpellUIDefaults.registry.localizedFor(tag)!
     return SpellUIDefaults.registry.localizedFor(tag)!
   }
 
@@ -229,16 +234,36 @@ export class SpellUIDefaults {
     return (SpellUIDefaults.made = registry)
   }
 
-  /** Every tag's Spanish names, by canonical tag. */
-  private static get spanish(): Map<string, LocalizedVocabulary> {
-    return (SpellUIDefaults.spanishMade ??= SpellUIDefaults.registry.define(es.lang, es))
+  /**
+   * Load Spell UI's names in `language`:  Spanish's dictionary, the first time;  English's are always here.
+   * - Once:  every later call the same promise.  The Spell UI pack's `loadLanguage()`.
+   */
+  static loadLanguage(language: string): Promise<void> {
+    if (language !== SPANISH) return Promise.resolve()
+    return (SpellUIDefaults.spanishLoad ??= import("spell/ui/components/components.es").then(({ es }) => {
+      SpellUIDefaults.dictionary = es
+      // made without it:  made again
+      SpellUIDefaults.spanishMade = undefined
+      SpellUIDefaults.localTagsMade = undefined
+    }))
   }
 
-  /** Each Spanish tag, without accents (`es-boton`) => its canonical tag. */
+  /** Spell UI's Spanish dictionary, once loaded (`loadLanguage()`);  `undefined` till then. */
+  static dictionary: Dictionary | undefined
+
+  /** Every tag's Spanish names, by canonical tag:  none till the dictionary's loaded. */
+  private static get spanish(): Map<string, LocalizedVocabulary> {
+    const { dictionary } = SpellUIDefaults
+    if (!dictionary) return new Map()
+    return (SpellUIDefaults.spanishMade ??= SpellUIDefaults.registry.define(SPANISH, dictionary))
+  }
+
+  /** Each Spanish tag, without accents (`es-boton`) => its canonical tag:  none till the dictionary's loaded. */
   private static get localTags(): Map<string, string> {
     if (SpellUIDefaults.localTagsMade) return SpellUIDefaults.localTagsMade
     const tags = new Map<string, string>()
     for (const [canonical, localized] of SpellUIDefaults.spanish) tags.set(withoutAccents(localized.tag), canonical)
+    if (!SpellUIDefaults.dictionary) return tags
     return (SpellUIDefaults.localTagsMade = tags)
   }
 
@@ -248,6 +273,8 @@ export class SpellUIDefaults {
   private static spanishMade: Map<string, LocalizedVocabulary> | undefined
   /** The Spanish tags, once made. */
   private static localTagsMade: Map<string, string> | undefined
+  /** The Spanish dictionary's load, once started. */
+  private static spanishLoad: Promise<void> | undefined
 }
 
 /**

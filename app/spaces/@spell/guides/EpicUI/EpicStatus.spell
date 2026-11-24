@@ -1,0 +1,370 @@
+"epic status element" is a notebook page
+	<header level="1">
+		&lt;epic-status&gt;
+		<header>Claude's status card on an item: what Claude took your mark to mean, then that it's done.</>
+	</>
+
+	<text class="lede" paragraph>Claude's status card on an item: what Claude took your review mark to mean, then that it's done. It reads <text code>Claude • Underway</> (blue) while Claude works, then <text code>Claude • Done</> (green), the reading kept and a summary added when there's something worth saying. Done, its work not on main yet (<text code>unmerged</>), its line says <text code>not on main yet</> after Done.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take the "item" style sheet before the pack's
+		              <epic-item> can, and the live items draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-status" link="/epic/src/components/epic-status/"><text title="epic/src/components/epic-status/" code>epic-status/</></>.</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-status-epicstatus-en-ts" link="/epic/src/components/epic-status/EpicStatus.en.ts"><text title="epic/src/components/epic-status/EpicStatus.en.ts" code>EpicStatus.en.ts</></>.</>
+	<text class="meta" paragraph>The markup rules: <link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+		<list bulleted>
+			<item>Click a line to unfold it.</>
+			<item>The review buttons don't show here: they show only on an epic page being reviewed.</>
+		</>
+		<text paragraph>An underway card (the item's chip blue: Claude is working on it), then manual test M1 of the <text code>epic-components</> epic, its card done with a summary.</>
+		<html>
+			<epic-item id="t9" title="Make ui-components a Spell UI library entry" status="open" state="progress" working open>
+				<p>Add it to the library's entries, and give it a docs page.</>
+				<epic-status slot="status" state="underway" at="2026-10-08 15:02">
+					<p>Add ui-components to the library's entries and give it a docs page.</>
+				</>
+			</>
+			<epic-item id="m1" title="Hover an item's line, a phase and a section in a converted doc" status="open" state="recent" open>
+				<p>No browser tooltip shows the element's whole title over its body: only real tooltips on buttons and labels.</>
+				<epic-status state="done" at="2026-10-08 22:26" done-at="2026-10-09 00:04" slot="status">
+					<p>Find which comments on this test went missing, when and how, put them back if they're recoverable, and say what happened.</>
+					<p slot="summary">It was transient, nothing to restore.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="1b. On an answered item">
+		<icon slot="icon" name="comments"/>
+		<text paragraph>Live: an answered question. A drive-by first (taken before your reply), the Choices with no Answer strip, then the thread:  your reply, Claude's (NEW until seen), and the Noted / Done line last.</>
+		<html>
+			<epic-item id="q16" title="What are the tags called?" status="decided" state="recent" answered open>
+				<epic-status slot="status" state="done" at="2026-10-24 14:02" done-at="2026-10-24 14:05">
+					<p>Added the alias example to the question.</>
+				</>
+				<epic-status slot="status" state="noted" at="2026-10-24 15:21" done-at="2026-10-24 15:25">
+					<p>Recording your tag model.</>
+				</>
+				<epic-status slot="status" state="done" at="2026-10-24 15:25" done-at="2026-10-24 15:25">
+					<p>Recording your tag model.</>
+					<p slot="summary">recorded template= and your tag model</>
+				</>
+				<epic-question>
+					<p>One tag per kind of template:  what are they called?</>
+				</>
+				<epic-choices chosen="A">
+					<epic-option letter="A" title="template=, as you wrote it" recommended>
+						<p>Matches your card.</>
+					</>
+					<epic-option letter="B" title="is=">
+						<p>Reads like code spell.</>
+					</>
+				</>
+				<epic-answer title="template=, as you wrote it"></>
+				<epic-reply from="Ana" at="2026-10-24 14:46" re="revisit soon">
+					<p>&lt;spell-thing&gt; creates a "class" ...</>
+				</>
+				<epic-reply from="Claude" at="2026-10-24 15:34">
+					<p>Recorded:  here is the model in one table.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From manual test M1 of the <text code>epic-components</> epic (<link title="epics/epic-components/epic-components.plan.html" target="epic-components" link="/epics/epic-components/epic-components.plan.html"><text code>epic-components.plan.html</></>). Status cards stay in the doc's skeleton beside the item's title, never in its part file.</>
+		<text paragraph>epics/epic-components/epic-components.plan.html, #m1:</>
+		<markdown>
+			```html
+			<epic-status state="done" at="2026-10-08 22:26" done-at="2026-10-09 00:04" slot="status"
+			  ><p>
+			    Find which comments on this test went missing, when and how, put them back if they're recoverable,
+			    and say what happened.
+			  </p>
+			  <p slot="summary">It was transient, nothing to restore.</p></epic-status
+			>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><text code>&lt;epic-item&gt;</></>, as <text code>slot="status"</>: written last in the item, drawn last in its details, under your marked note and above the note box</>
+			<item><link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><text code>&lt;epic-section&gt;</></> of kind <text code>overview-part</> (an Overview sub-section), as <text code>slot="status"</></>
+		</>
+		<text paragraph>A later mark on the same item gets a new card after the old ones, which stay as the record.</>
+		<text paragraph>Its children:</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Child</>
+				<cell>How many</>
+				<cell>What it holds</>
+			</>
+			<row>
+				<cell>prose</>
+				<cell>any number</>
+				<cell>The reading: one or two sentences, no file names.</>
+			</>
+			<row>
+				<cell>prose, <text code>slot="summary"</></>
+				<cell>any number</>
+				<cell>The summary, once done: <text code>&lt;p slot="summary"&gt;</>, one or more.</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>state</>
+				</>
+				<cell><text code>underway</>, <text code>done</></>
+				<cell><text code>underway</> (blue: Claude is on it; absent too), <text code>done</> (green: finished).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>at</>
+				</>
+				<cell>a time, <text code>2026-10-06 23:55</></>
+				<cell>When Claude took the mark: <text code>2026-10-08 14:34</>, drawn <text code>10/8/26 14:34</> (<text code>PlanDates</>).</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>from</>
+				</>
+				<cell>text</>
+				<cell>Whose session wrote it (epic <text code>epic-friend</> P2): the person's name, <text code>Ana</>, drawn <text code>Claude (Ana) • Done</> to anyone but Ana, and plain <text code>Claude • Done</> to her. None (a card written before): <text code>Claude</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>agent</>
+				</>
+				<cell>text</>
+				<cell>Which agent wrote it (epic <text code>epic-friend</> P10): its id, <text code>codex</>, drawn by its name, <text code>Codex (Ana) • Done</>, or <text code>Codex • Done</> to Ana. None (a card written before): <text code>Claude</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>done-at</>
+				</>
+				<cell>a time, <text code>2026-10-06 23:55</></>
+				<cell>When it was done (a card that was underway first); drawn in its place once there. A card born done (a pick or a todo <text code>inbox apply</> filed) has <text code>at</> alone.</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A slot is a place in the drawing that a child goes to: a child with <text code>slot="name"</> goes to that name's place, every other child to the default one (shown as <text italic>default</>).</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes there</>
+				</>
+				<row>
+					<cell>
+						<text italic>default</>
+					</>
+					<cell>The reading: what Claude understood the task to be, in a sentence or two.</>
+				</>
+				<row>
+					<cell>
+						<text code>summary</>
+					</>
+					<cell>Once done, and only when worth saying: what you should know about it.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-status::part(header)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The card: blue underway, green done.</>
+				</>
+				<row>
+					<cell>
+						<text code>header</>
+					</>
+					<cell>Its heading band, a flex row: the fold chevron, <text code>who</> left, <text code>date</> right; a click folds it.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>The fold chevron, a <text code>&lt;button&gt;</>, first in the band: folds reading and summary.</>
+				</>
+				<row>
+					<cell>
+						<text code>who</>
+					</>
+					<cell>The heading's left: <text code>Claude • Underway</> / <text code>Claude • Done</>; <text code>Claude (Ana) • Done</> for a card another person's session wrote (<text code>from</>); <text code>Codex • Underway</> for another agent's (<text code>agent</>).</>
+				</>
+				<row>
+					<cell>
+						<text code>date</>
+					</>
+					<cell>The heading's right: <text code>done-at</>, else <text code>at</>, as <text code>10/8/26 14:34</>; never wraps.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>The reading.</>
+				</>
+				<row>
+					<cell>
+						<text code>summary</>
+					</>
+					<cell>The summary, under the reading; not drawn without one. A line's text.</>
+				</>
+				<row>
+					<cell>
+						<text code>steps</>
+					</>
+					<cell>A line's steps: <text code>Noted 10/24/26 15:21 → Done 15:25</>, each its state and when.</>
+				</>
+				<row>
+					<cell>
+						<text code>earlier</>
+					</>
+					<cell>A drive-by's line: <text code>your earlier comment</>, after its steps.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-status:state(open)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>underway</>
+					</>
+					<cell><text code>state=underway</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>done</>
+					</>
+					<cell><text code>state=done</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>noted</>
+					</>
+					<cell><text code>state=noted</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>Unfolded: it starts so (page state, never written).</>
+				</>
+				<row>
+					<cell>
+						<text code>line</>
+					</>
+					<cell>In an item: drawn as a line, not a card.</>
+				</>
+				<row>
+					<cell>
+						<text code>merged</>
+					</>
+					<cell>A line's earlier card, drawn in by the run's last one: hidden.</>
+				</>
+				<row>
+					<cell>
+						<text code>drive-by</>
+					</>
+					<cell>Taken before your first reply on the item: its line above the Choices.</>
+				</>
+				<row>
+					<cell>
+						<text code>in-thread</>
+					</>
+					<cell>Its line in the item's thread, after the replies: inside the thread's one frame.</>
+				</>
+				<row>
+					<cell>
+						<text code>thread-end</>
+					</>
+					<cell>Last in the thread: the frame's bottom edge and corners.</>
+				</>
+				<row>
+					<cell>
+						<text code>thread-hidden</>
+					</>
+					<cell>The thread's first reply is folded: hidden with the rest of the thread.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<text paragraph>The colours mean the same on every doc page: the whole scheme is on <link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">Epic Page Colours</> (its source: <link title="epic/templates/epics/plan-doc.md" target="src-spell-epic-templates-epics-plan-doc-md" link="/epic/templates/epics/plan-doc.md"><text code>plan-doc.md</></>, "Colours").</>
+		<list bulleted>
+			<item><label size="mini" color="blue">Claude • Underway</>: blue, Claude is working on it. An underway card turns its item's chip blue (<text code>progress</>) until it's done.</>
+			<item><label size="mini" color="green">Claude • Done</>: green, finished. The date on the right is <text code>done-at</>; its tooltip says when Claude took the mark (<text code>at</>).</>
+			<item>Its border is stronger than a reply's, so it stands out from the reply cards around it.</>
+			<item>The reading first; the summary under it, across a rule, only when there is one.</>
+		</>
+		<text paragraph><text bold>In an item</> (epic <text code>epic-engine</> P27, your layout A), a LINE, not a card:</>
+		<list bulleted>
+			<item><text code>✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did</>: a run of cards about one task is ONE line, drawn by its last card; the others hide. A card continues the one before it when it was taken the minute that one finished.</>
+			<item>What Claude did: the last card's summary, else its reading.</>
+			<item>Last in the item's thread, after Claude's reply, inside the thread's one frame, hidden while the thread's first reply is folded. A DRIVE-BY's line (a card taken before your first reply, about a comment you made before answering) goes first in the item's details, above the Choices, with <text italic>your earlier comment</> after its steps.</>
+			<item>Outside an item (an Overview sub-section), the card above.</>
+		</>
+		<text paragraph>It folds by its heading band: a click anywhere on the band (but on a link or a button in it) folds or unfolds it, the chevron first in the band. It starts open, since it's the text being read; folding is the reader's own and never written into the file. Folded text is still found by the browser's find-in-page, which unfolds it.</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<text paragraph>Only the epic tool writes them:</>
+		<list bulleted>
+			<item><text code>plan-doc status &lt;name&gt; &lt;id&gt; underway "html"</>: a new underway card, stamped now, with Claude's reading of the task (a sentence or two, no file names); the page's spinner on</>
+			<item><text code>plan-doc status &lt;name&gt; &lt;id&gt; done \["html"]</>: the latest underway card turns done (<text code>done-at</>), the reading kept, the summary added; refused with no underway card</>
+			<item><text code>plan-doc status &lt;name&gt; &lt;id&gt; done --filed "html"</>: a card born done (<text code>at</> alone)</>
+			<item><text code>epic inbox apply &lt;name&gt;</>: a card born done for each todo it files; none for an approval, and none for a pick, whose line goes in its Choices (<text code>&lt;epic-choices chosen-note&gt;</>)</>
+			<item>A rewrite of the item's text leaves its cards where they are: they never reach its Original Discussion.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>: the tables are its vocabulary's; the rest from its component, its stylesheet and <ui-link title="epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><ui-text code>PLAN-DOC.md</></>.</>
+		</>
+	</>

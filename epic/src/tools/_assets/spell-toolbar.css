@@ -37,6 +37,18 @@
     linear-gradient(var(--spell-rail-bg), var(--spell-rail-bg)) var(--ui-surface, Canvas)
   );
 }
+/*
+ * The stuck bars hide what scrolls under them, completely (epic `epic-engine` I372):  the same colours, made opaque.
+ * - why:  a glass theme's bars (`--ui-bar-background`, 95% opaque, the page's default) left the text scrolled under
+ *   them showing faintly through the page's head and toolbar, a table's bold titles most of all
+ * - a browser without relative colours keeps the colours as they are
+ */
+@supports (color: rgb(from light-dark(red, blue) r g b / 1)) {
+  :root {
+    --spell-head-fill: rgb(from color-mix(in oklab, var(--spell-rail-bg) 45%, var(--spell-bg)) r g b / 1);
+    --spell-rail-fill: rgb(from var(--spell-rail-bg) r g b / 1);
+  }
+}
 
 /*
  * THE TOOLBAR, every page's navigation:  Spell UI's menu, `<ui-menu class="spell-toolbar" appearance="secondary">`, one

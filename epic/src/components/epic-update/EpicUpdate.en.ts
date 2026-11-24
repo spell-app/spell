@@ -92,7 +92,12 @@ export const epicUpdateVocabulary = {
         'A new block\'s ✓ Seen, before its date, while the page is reviewed:  an `<epic-review buttons="update">`.'
     },
     { name: "body", description: "What changed, under the title row;  hidden (`until-found`) while folded." },
-    { name: "label", description: "The bare orange `UPDATE` label (just `FIXED`, `UNDERWAY` ... with `became`)." },
+    {
+      name: "label",
+      description:
+        "The bare orange `UPDATE` label (just `FIXED` ... with `became`;  `UNDERWAY` solid blue);  grey beside " +
+        "an id chip of its own colour."
+    },
     {
       name: "unmerged",
       description: "A bare label's `Not in main` pill, after it, while its item's work is on its branch alone."
@@ -112,15 +117,9 @@ export const epicUpdateVocabulary = {
     }
   ],
   texts: [
-    { key: "foldTip", text: "Close this update", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Open this update", description: "Tooltip of its fold button while folded." },
-
     { key: "buttonsLabel", text: "this update", description: "Seen's group, spoken." },
-    { key: "seenAt", text: "Seen {when}", description: "The date's tooltip, after the full date:  when it was seen." },
     { key: "title", text: "Update", description: "A block's title, in bold, before `: <summary>`." },
-    { key: "during", text: "Written during P{phase}", description: "The date's tooltip, after the full date." },
     { key: "label", text: "UPDATE", description: "The bare label." },
-    { key: "tip", text: "Changed during P{phase}", description: "The bare label's tooltip." },
     {
       key: "became",
       text: "{status}",
@@ -134,12 +133,7 @@ export const epicUpdateVocabulary = {
     { key: "decided", text: "DECIDED", description: "`became` decided:  a question answered." },
     { key: "reopened", text: "REOPENED", description: "`became` reopened." },
     { key: "underway", text: "UNDERWAY", description: "`became` underway:  Claude took it up (its card is Underway)." },
-    { key: "unmerged", text: "Not in main", description: "The pill after the label while its work isn't merged." },
-    {
-      key: "unmergedTip",
-      text: "On {branch}, not merged yet",
-      description: "That pill's tooltip."
-    }
+    { key: "unmerged", text: "Not in main", description: "The pill after the label while its work isn't merged." }
   ],
   children: [{ tag: "flow", description: "What changed, and why." }, ACTIONS_CHILD],
   flow: true

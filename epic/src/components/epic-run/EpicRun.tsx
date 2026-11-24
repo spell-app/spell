@@ -194,7 +194,7 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
         <Show when={this.whoLine.text} fallback={<p class={WHO}>{this.translationForKey("loading")}</p>}>
-          <p class={WHO} part={this.partForName("who")} data-tooltip={this.whoLine.title}>
+          <p class={WHO} part={this.partForName("who")}>
             <Show when={this.isWaiting}>
               <code>{this.form?.page?.command}</code>{" "}
             </Show>

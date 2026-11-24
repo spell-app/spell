@@ -1,0 +1,204 @@
+"epic choice rows element" is a notebook page
+	<header level="1">
+		&lt;epic-choice-rows&gt;
+		<header>A choice page's table: its column heads, then its rows.</>
+	</>
+
+	<text class="lede" paragraph>One section's table on a choice page: File | Purpose | Current | Recommended | Explanation, then its rows, <text code>&lt;epic-choice-row&gt;</>s, each with a comment box under its box. It counts its section's rows on the section's title.</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choice-rows" link="/epic/src/components/epic-choice-rows/"><text title="epic/src/components/epic-choice-rows/" code>epic-choice-rows/</></> (epic <text code>epic-workflow</> P12).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choice-rows-epicchoicerows-en-ts" link="/epic/src/components/epic-choice-rows/EpicChoiceRows.en.ts"><text title="epic/src/components/epic-choice-rows/EpicChoiceRows.en.ts" code>EpicChoiceRows.en.ts</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads. Off a details page's own address nothing is saved or sent: Send says so.</>
+		<text class="spell-choices-rule" paragraph>What a class holds or works out: <text code>is</> / <text code>has</>.</>
+		<html>
+			<epic-choice-rows>
+				<epic-choice-row name="q1-UIDropdown-187" file="packages/ui/src/components/ui-dropdown/UIDropdown.tsx" line="187" purpose="menu open" note="already `is`:  stays" current="this.isOpen()" recommended="this.isOpen()"></>
+				<epic-choice-row name="q1-LoadableComponent-70" file="packages/ui/src/elements/LoadableComponent.tsx" line="70" purpose="save in flight" current="this.saving.get()" recommended="this.isSaving.get()"></>
+			</>
+		</>
+
+		<section label="With reorder" sticky="stack" collapsible dividing open="false">
+			<text paragraph><text code>reorder</>: you put the rows in order. Each row's place comes first, with move up and move down; the badge says <text code>moved</> once they're out of the order proposed.</>
+			<html>
+				<epic-choice-rows no-file reorder>
+					<epic-choice-row name="pythonic-spell" file="epics/" line="1" purpose="Spell compiled to Python a person would write, and running on a server." current="(new)" recommended="Pythonic Spell · pythonic-spell"></>
+					<epic-choice-row name="drawable-spell" file="epics/" line="1" purpose="A spell type drawn as a web component." current="(new)" recommended="Drawable Spell · drawable-spell"></>
+					<epic-choice-row name="dev-tooling" file="epics/" line="1" purpose="The repo's own tools." current="(new)" recommended="Dev Tooling · dev-tooling"></>
+				</>
+			</>
+		</>
+
+		<section label="With blank" sticky="stack" collapsible dividing open="false">
+			<text paragraph><text code>blank</> (epic <text code>epic-engine</> P13): boxes you type into, not recommendations. Today's text comes first with an empty box under it, and blank means no change. A click on today's text copies it into the box. The badge counts the rows and the changes (<text code>noun</> names them).</>
+			<html>
+				<epic-choice-rows no-file blank noun="commands">
+					<epic-choice-row name="help" file="cli/src/main.ts" line="228" purpose="Shows the help for spell, or for one command (spell help compile)." current="spell help \[command]" recommended></>
+					<epic-choice-row name="pony" file="cli/src/main.ts" line="240" purpose="Draws the pony. It imports nothing, so it proves spell runs with nothing else installed." current="spell pony" recommended></>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>choice page · a section:</>
+		<markdown>
+			```html
+			<ui-section id="q1" label="Q1 · Our own members">
+			  <p class="spell-choices-rule">What a class holds or works out: <code>is</code> / <code>has</code>.</p>
+			  <epic-choice-rows>
+			    <epic-choice-row name="q1-UIDropdown-187" file="packages/ui/src/components/ui-dropdown/UIDropdown.tsx" line="187" purpose="menu open" note="already `is`:  stays" current="this.isOpen()" recommended="this.isOpen()"></epic-choice-row>
+			    <epic-choice-row name="q1-LoadableComponent-70" file="packages/ui/src/elements/LoadableComponent.tsx" line="70" purpose="save in flight" current="this.saving.get()" recommended="this.isSaving.get()"></epic-choice-row>
+			  </epic-choice-rows>
+			</ui-section>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<text paragraph><text bold>Its parent:</> a <text code>&lt;ui-section&gt;</> of a choice page, after the section's rule.</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Child</>
+				<cell>How many</>
+				<cell>What it holds</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-choice-row-html" link="/epic-choice-row">
+						<text code>&lt;epic-choice-row&gt;</>
+					</>
+				</>
+				<cell>any number</>
+				<cell>Its rows, in order.</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>stacked</>
+				</>
+				<cell>present or absent</>
+				<cell>Current and Recommended in ONE column, Syntax: today's text over the box (<text code>stacked: true</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>no-file</>
+				</>
+				<cell>present or absent</>
+				<cell>No File column (<text code>fileColumn: false</>): for rows whose place in the code doesn't matter to the reader.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>reorder</>
+				</>
+				<cell>present or absent</>
+				<cell>You put the rows in order (a section's <text code>reorder: true</>): a first column, Order, with each row's place and its move up / move down buttons. The order goes with the draft and "Do it".</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>blank</>
+				</>
+				<cell>present or absent</>
+				<cell>Boxes you type into, not recommendations (<text code>blank: true</>; epic <text code>epic-engine</> P13): one first column, today's text with an EMPTY box under it, then Purpose. Blank means no change; a click on today's text copies it into the box.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>noun</>
+				</>
+				<cell>a word</>
+				<cell>What <text code>blank</>'s count calls its rows: <text code>commands</> reads "42 commands · 3 changed".</>
+				<cell>
+					<text code>rows</>
+				</>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A slot is a place in the drawing that a child goes to: a child with <text code>slot="name"</> goes to that name's place, every other child to the default one (shown as <text italic>default</>).</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes there</>
+				</>
+				<row>
+					<cell>
+						<text italic>default</>
+					</>
+					<cell>Its rows, <text code>&lt;epic-choice-row&gt;</>s, in order.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-choice-rows::part(base)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The box that scrolls sideways when narrow.</>
+				</>
+				<row>
+					<cell>
+						<text code>table</>
+					</>
+					<cell>The grid: the heads, then the rows.</>
+				</>
+				<row>
+					<cell>
+						<text code>head</>
+					</>
+					<cell>The column heads' row.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>A grid: each row's cells on the heads' columns (fixed shares, so the boxes stay in view).</>
+			<item>Explanation (epic <text code>epic-engine</> P58): the rows' notes, a column of their own, LAST in every layout, when some row has a note. Each layout's shares make room for it.</>
+			<item>Under 720px (800px with Explanation) it keeps that width, and scrolls inside its own box, never the page.</>
+			<item><text code>no-file</>: no File column; <text code>stacked</>: one Syntax column, today's text over the box.</>
+			<item><text code>reorder</> (epic <text code>epic-workflow</> P15): an Order column first, as narrow as a place and two buttons. The badge counts the rows (<text code>9 in order</>), then <text code>· moved</>. The order you left comes back on load (<text code>ChoicesForm</>'s <text code>restoredOrder</>).</>
+			<item><text code>blank</> (epic <text code>epic-engine</> P13, your layout A): today's text and its box in one column, first, then Purpose. No <text code>stays</> tag; the round button clears the box. The badge reads <text code>42 commands · 3 changed</>.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic choices create &lt;slug&gt; --rows &lt;rows.json&gt;</>: one per section of the rows (<link target="src-spell-epic-src-tools-choices-js" link="/epic/src/tools/choices.js"><text code>choices.js</></>, <link target="src-spell-epic-src-tools-answerpages-js" link="/epic/src/tools/answerPages.js"><text code>answerPages.js</></> <text code>choiceSections()</>).</>
+			<item>Older pages: the migration step <text code>answer-elements</>, from the rows file beside the page.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-31 against branch <ui-text code>epic-engine</> (P58): the tables are its vocabulary's (epic-choice-rows); the rest from its component and its stylesheet.</>
+		</>
+	</>

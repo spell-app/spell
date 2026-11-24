@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { breadcrumbVocabulary } from "spell/ui/components/ui-breadcrumbs/UIBreadcrumb.en"
@@ -61,7 +60,7 @@ describe("UIBreadcrumbs.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = breadcrumbRaw + colorsCSS
+    const css = breadcrumbRaw + colorsSharedCSS
     for (const vocabulary of [breadcrumbsVocabulary, breadcrumbVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -76,7 +75,7 @@ describe("UIBreadcrumbs.css source", () => {
 describe("UIBreadcrumbs.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every breadcrumb in %s", (path) => {
     Sheets.adopt([...foundationCSS, breadcrumbCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const breadcrumbs = root.querySelectorAll<HTMLElement>(".ui.breadcrumb")
     expect(breadcrumbs.length).toBeGreaterThan(0)
     for (const breadcrumb of breadcrumbs) {
@@ -90,9 +89,9 @@ describe("UIBreadcrumbs.css examples", () => {
 
   it("colours links, dims dividers and keeps the trail on one line", () => {
     Sheets.adopt([...foundationCSS, breadcrumbCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const breadcrumb = root.querySelector<HTMLElement>(".ui.breadcrumb")!
-    const link = Fixture.render(`<span style="color: var(--ui-link)"></span>`)
+    const link = Sheets.render(`<span style="color: var(--ui-link)"></span>`)
     expect(getComputedStyle(breadcrumb.querySelector("a.section")!).color).toBe(getComputedStyle(link).color)
     const divider = getComputedStyle(breadcrumb.querySelector(".divider")!)
     expect(divider.opacity).toBe("0.7")
@@ -103,7 +102,7 @@ describe("UIBreadcrumbs.css examples", () => {
 
   it("draws the token divider in the semantic form, hiding the first", () => {
     Sheets.adopt([...foundationCSS, breadcrumbCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const [plain, arrow] = root.querySelectorAll<HTMLElement>(".ui.breadcrumb:has(ol)")
     const dividers = plain!.querySelectorAll(".divider")
     expect(getComputedStyle(dividers[0]!).display).toBe("none")
@@ -119,7 +118,7 @@ describe("UIBreadcrumbs.css examples", () => {
 
   it("scales by size;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, breadcrumbCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     const ladder = ["mini", "tiny", "small", "large", "big", "huge", "massive"].map((name) =>
       size(`.ui.${name}.breadcrumb`)
@@ -130,7 +129,7 @@ describe("UIBreadcrumbs.css examples", () => {
 
   it("takes a public token from a wrapper or the breadcrumb itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, breadcrumbCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-breadcrumb-divider-opacity: 0.5"><nav class="ui breadcrumb">` +
         `<a class="section">A</a><span class="divider">/</span><span class="active section">B</span></nav></div>` +
         `<nav class="ui breadcrumb" style="--ui-breadcrumb-active-font-weight: 400">` +
@@ -142,7 +141,7 @@ describe("UIBreadcrumbs.css examples", () => {
 
   it("inverts to the dark scheme, the active section brightest", () => {
     Sheets.adopt([...foundationCSS, breadcrumbCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const breadcrumb = root.querySelector<HTMLElement>(".ui.inverted.breadcrumb")!
     expect(getComputedStyle(breadcrumb).colorScheme).toBe("dark")
     expect(getComputedStyle(breadcrumb).getPropertyValue("--ui-inverted").trim()).toBe("1")
@@ -182,7 +181,7 @@ describe("UIBreadcrumbs.css in shadow roots", () => {
     // shown:  a flex item of the list's row (`block`), so the white space between sections draws nothing
     expect(getComputedStyle(divider(1)).display).toBe("block")
     expect(getComputedStyle(divider(1), "::before").content).toBe('"/"')
-    const link = Fixture.render(`<span style="color: var(--ui-link)"></span>`)
+    const link = Sheets.render(`<span style="color: var(--ui-link)"></span>`)
     expect(getComputedStyle(sections[0]!.shadowRoot!.querySelector("a")!).color).toBe(getComputedStyle(link).color)
     expect(getComputedStyle(sections[2]!.shadowRoot!.querySelector(".active")!).fontWeight).toBe("700")
     const nav = Sheets.inner(breadcrumb)

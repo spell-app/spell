@@ -2,10 +2,10 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
 import { ClassBuilder } from "spell/ui/elements"
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { CLASS_PHRASES } from "spell/ui/elements/ClassPhrases"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { searchVocabulary } from "spell/ui/components/ui-search/UISearch.en"
@@ -60,7 +60,7 @@ describe("UISearch.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = searchRaw + colorsCSS
+    const css = searchRaw + colorsSharedCSS
     for (const phrase of classPhrases(searchVocabulary)) {
       expect(Sheets.covers(css, phrase), phrase).toBe(true)
     }
@@ -74,7 +74,7 @@ describe("UISearch.css source", () => {
 describe("UISearch.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every search in %s", (path) => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const searches = root.querySelectorAll<HTMLElement>(".ui.search")
     expect(searches.length).toBeGreaterThan(0)
     for (const search of searches) {
@@ -90,7 +90,7 @@ describe("UISearch.css examples", () => {
 
   it("draws results:  dividers, the highlighted one, price, image room, links without underlines", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const results = root.querySelector<HTMLElement>(".ui.search > .visible.results")!
     expect(getComputedStyle(results).display).toBe("block")
     const [apple, apricot, grape] = results.querySelectorAll<HTMLElement>(".result")
@@ -106,7 +106,7 @@ describe("UISearch.css examples", () => {
     await page.viewport(1000, 800)
     onTestFinished(() => page.viewport(414, 896))
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div style="padding-left: 20em">${EXAMPLES["./examples/types.html"]!}</div>`)
+    const root = Sheets.render(`<div style="padding-left: 20em">${EXAMPLES["./examples/types.html"]!}</div>`)
     const search = root.querySelector<HTMLElement>(".ui.search")!
     const results = open(search)
     const box = search.getBoundingClientRect()
@@ -114,14 +114,14 @@ describe("UISearch.css examples", () => {
     expect(rect.top).toBeGreaterThanOrEqual(box.bottom)
     expect(Math.abs(rect.left - box.left)).toBeLessThan(1)
     expect(Math.round(rect.width)).toBe(Math.round(18 * parseFloat(getComputedStyle(search).fontSize)))
-    search.classList.add("right", "aligned")
+    search.classList.add("right", "aligned", "right-aligned")
     const right = results.getBoundingClientRect()
     expect(Math.abs(right.right - box.right)).toBeLessThan(1)
   })
 
   it("lays categories out as a table:  the name beside its results;  horizontal stacks them", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div>${EXAMPLES["./examples/types.html"]!}</div>`)
+    const root = Sheets.render(`<div>${EXAMPLES["./examples/types.html"]!}</div>`)
     const search = root.querySelector<HTMLElement>(".ui.category.search")!
     const results = search.querySelector<HTMLElement>(":scope > .results")!
     expect(getComputedStyle(results).display).toBe("table")
@@ -134,7 +134,7 @@ describe("UISearch.css examples", () => {
 
   it("spins while loading, dims when disabled, and draws the messages", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div>${EXAMPLES["./examples/states.html"]!}</div>`)
+    const root = Sheets.render(`<div>${EXAMPLES["./examples/states.html"]!}</div>`)
     const icon = root.querySelector(".ui.loading.search .search.icon")!
     expect(getComputedStyle(icon, "::after").animationName).toMatch(/^ui-(input|search)-spin$/)
     expect(parseFloat(getComputedStyle(root.querySelector(".ui.disabled.search")!).opacity)).toBeCloseTo(0.45, 2)
@@ -145,7 +145,7 @@ describe("UISearch.css examples", () => {
 
   it("scales by size and fills its container when fluid", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div style="width: 600px">${EXAMPLES["./examples/variations.html"]!}</div>`)
+    const root = Sheets.render(`<div style="width: 600px">${EXAMPLES["./examples/variations.html"]!}</div>`)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     expect(size(".ui.mini.search")).toBeLessThan(size(".ui.massive.search"))
     expect(size(".ui.mini.search .prompt")).toBeLessThan(size(".ui.massive.search .prompt"))
@@ -155,7 +155,7 @@ describe("UISearch.css examples", () => {
 
   it("takes a public token from a wrapper (static markup), over the viewport's default", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-search-results-max-height: 100px">${EXAMPLES["./examples/variations.html"]!}</div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.scrolling.search > .results")!).maxHeight).toBe("100px")
@@ -163,7 +163,7 @@ describe("UISearch.css examples", () => {
 
   it("scrolls results after a height with `scrolling`", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const results = root.querySelector<HTMLElement>(".ui.scrolling.search > .results")!
     expect(getComputedStyle(results).overflowY).toBe("auto")
     expect(getComputedStyle(results).maxHeight).not.toBe("none")
@@ -197,7 +197,8 @@ function open(search: HTMLElement): HTMLElement {
  */
 function classPhrases(vocabulary: ComponentVocabulary): string[] {
   const builder = new ClassBuilder(vocabulary)
-  const skip = new Set(["ui", vocabulary.noun])
+  // the phrases' joined words too:  `covers()` looks for them itself
+  const skip = new Set(["ui", vocabulary.noun, ...CLASS_PHRASES.map((phrase) => phrase.replaceAll(" ", "-"))])
   const phrases = new Set<string>()
   for (const spec of vocabulary.attributes) {
     if (spec.kind === "size" || (spec.kind === "color" && !Array.isArray(spec.values))) continue

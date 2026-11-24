@@ -7,7 +7,7 @@ import type { RootCatalogEntry } from "./UIRoot.types"
  * Every family's barrel, loaded on demand (`import.meta.glob`, lazy):  `../ui-card/index.ts` => `import()` of it.
  * - A LITERAL glob, so each becomes a literal `import()`:
  *   the lib build reuses each family's own entry chunk (`ui-card.js`),
- *   and the docs' single-file bundle (`epic/src/tools/bundle-spell-ui.js`) inlines them.
+ *   and the docs pages' bundle (`epic/src/tools/bundle-spell-ui.js`) makes each a lazy chunk of its own.
  * - Relative on purpose, the one `../` in `ui`'s components:
  *   Vite resolves a glob's literal pattern, not an alias,
  *   and its keys (`../ui-card/index.ts`) are what `load()` looks up.
@@ -70,9 +70,16 @@ export class RootLoader {
   // ## Tags
   ////////////////
 
-  /** The folder (family) that defines `tag`;  `undefined` for a tag no family defines. */
+  /**
+   * The folder (family) that defines `tag`;  `undefined` for a tag no family defines.
+   * - a pack's tag too, when its families were `add()`ed (a pack that loads each family on first use:  the docs
+   *   bundle's `registerPack()`, epic `solid-2-final` P7);  a pack defining all its tags at once has none here
+   */
   static folderFor(tag: string): string | undefined {
-    return RootLoader.catalogEntry(tag)?.folder
+    const own = RootLoader.catalogEntry(tag)?.folder
+    if (own !== undefined) return own
+    const packs = ComponentPacks.entryOf(tag)?.folder
+    return packs !== undefined && RootLoader.added.has(packs) ? packs : undefined
   }
 
   /**
@@ -107,12 +114,13 @@ export class RootLoader {
    * - What the platform fixes as a tag is defined comes from the catalog:  the attributes it observes
    *   (its own, the shared ones, `hidden`), and whether it's a form control.
    * - Skips a tag defined already, one with no `attributes` in the catalog, and a server (no `customElements`).
+   * - `catalog`:  Spell UI's by default;  a pack's, for a pack whose families load on first use
    * - SIDE EFFECT:  the root's family calls it once, as it loads.
    */
-  static defineEarly(): void {
+  static defineEarly(catalog: Readonly<Record<string, RootCatalogEntry>> = ROOT_CATALOG): void {
     if (typeof customElements === "undefined") return
     const shared = [...E.SharedVocabulary.attributeNames, HIDDEN]
-    for (const [tag, { attributes, formControl }] of Object.entries(ROOT_CATALOG)) {
+    for (const [tag, { attributes, formControl }] of Object.entries(catalog)) {
       if (!attributes) continue
       E.DOMElement.defineEarly(tag, {
         attributes: [...new Set([...attributes, ...shared])],
@@ -143,6 +151,40 @@ export class RootLoader {
       const importer = FAMILIES[`../${folder}/index.ts`] ?? RootLoader.added.get(folder)
       return importer ? importer().then(() => undefined) : Promise.reject(RootLoader.noFamily(folder))
     })
+  }
+
+  /**
+   * Load each family the FIRST time one of its elements is made, anywhere on the page:  in the page, in another
+   * element's shadow root, or by a script (epic `solid-2-final` P7).
+   * - For a page with no `<ui-root>` around its elements, whose bundle defines no family up front:  the docs bundle.
+   * - How:  every catalog tag is defined early (`defineEarly()`, as the root does), so each element made is pending,
+   *   and `E.DOMElement.pendingMade` loads its family (`loadTag()`).
+   * - A family that fails is a console warning naming the tag:  its elements stay pending.
+   * - A tag whose family the page can't import (a doc-only one no bundle `add()`ed) is left alone:  a page's own
+   *   script may define it (a guide's experiment, `<ui-docs-inspector>`).
+   * - So wait for an element with `E.DOMElement.whenAttached()`, never `customElements.whenDefined()`:  that
+   *   resolves as soon as the tag is defined early.
+   * - SIDE EFFECT:  page-wide, for the page's life;  calling it again changes nothing.
+   */
+  static loadOnFirstUse(): void {
+    if (typeof customElements === "undefined") return
+    const loadFamilyOf = (tag: string) => {
+      // a tag whose family this page can't import (a doc-only one, which a page's own script defines):  left to it
+      const folder = RootLoader.folderFor(tag)
+      if (folder === undefined || !RootLoader.canLoad(folder)) return
+      RootLoader.load(folder).catch((error: unknown) =>
+        E.Warnings.warn("RootLoader", `<${tag}>'s family didn't load;  its elements stay pending`, error)
+      )
+    }
+    E.DOMElement.pendingMade = loadFamilyOf
+    RootLoader.defineEarly()
+    // elements made pending before the hook was in (the root's barrel defines its catalog early as it loads)
+    for (const tag of RootLoader.undefinedTags(document)) loadFamilyOf(tag)
+  }
+
+  /** Can `load()` import `folder`'s family:  a family of the library's, or one a bundle `add()`ed? */
+  static canLoad(folder: string): boolean {
+    return `../${folder}/index.ts` in FAMILIES || RootLoader.added.has(folder)
   }
 
   ////////////////

@@ -13,8 +13,17 @@
  *     when that one runs and serves worktrees (`SRV.mainServerUrl()`)
  *   - a file of the epic folder:  its path there (`/epics/...`), on the main checkout's server if it runs,
  *     else this checkout's (`SRV.contentPathOf()`)
+ * - `certificate [--check] [--undo]` -- the certificate that gives the page server HTTPS and HTTP/2 (epic `solid-2-final`
+ *   P14):  made by mkcert, and trusted by this computer, asking for the password once in the terminal
+ *   (`SRV.LocalCertificate`);  a running server takes it at its next start, which the server keeper makes at once for
+ *   main's (it watches the certificate's files);  the Servers tab turns it on and off too (epic `epic-engine` T164)
+ *   - `--check`:  only says what's missing;  exit 1 until it's ready
+ *   - `--undo`:  its files go;  the next start is plain HTTP only
+ *   - without it, every server speaks plain HTTP, as before;  with it, plain HTTP stays on the same port, for the tools
  * - `prune [--dry-run]` -- stop the page and vite servers whose checkout is gone (`pruneServers()`), on any checkout;
  *   `--dry-run` only says which
+ * - What can't be done (`SRV.HttpError`:  a start that failed, a port held) is one line and exit 1:
+ *   callers show the last line, which was node's version under a stack (epic `epic-engine` I362)
  * - `--root <dir>`:  the kit (default:  the kit holding the folder `yarn` ran in, `INIT_CWD`, from any folder of it,
  *   `pageServerRoot()`);  the page server starts from the kit's root ONLY:  any other folder is an error, naming the
  *   kit (`kitRootOf()`, epic `repo-split` P16)
@@ -39,7 +48,59 @@ import {
   pruneServers
 } from "spell/server/page"
 
-await main(process.argv.slice(2))
+/** What `spell server certificate` says, for each state and step. */
+const CERTIFICATE_WORDS = {
+  ready:
+    "Ready.  Your computer trusts the certificate, so browsers open your pages over a secure (HTTPS) link.\n" +
+    "Each server that shows your pages uses it from its next start:  https://localhost:4747",
+  "no-mkcert": SRV.INSTALL_MKCERT,
+  missing:
+    "There's no certificate yet.  A certificate lets your browser open your pages over a secure (HTTPS) link.\n" +
+    "To make one, type this in a terminal:  spell server certificate",
+  uncovered: "The certificate is out of date.  To make a new one, type this in a terminal:  spell server certificate",
+  expired: "The certificate is out of date.  To make a new one, type this in a terminal:  spell server certificate",
+  untrusted:
+    "The certificate is made, but your computer doesn't trust it yet, so browsers would warn you.\n" +
+    "To fix that, type this in a terminal:  spell server certificate",
+  needsTerminal:
+    "The certificate is made.  To trust it, your computer asks for your password.\n" +
+    "To finish, type this in a terminal:  spell server certificate",
+  asking:
+    "Your computer will now ask for the password you use to log in to it.\n" +
+    "Type it in to continue.  It asks only once.",
+  done:
+    "Done.  Your computer now trusts the certificate for the server that shows your pages.\n" +
+    "Your pages reload by themselves in a few seconds, over the secure link.\n" +
+    "If they haven't after a minute, type  spell server stop  in this terminal, then  spell server start.\n" +
+    "Then open your pages at https://localhost:4747.\n" +
+    "Other spell commands still use http://127.0.0.1:4747.  You don't need to change anything.",
+  firefoxNeedsNss:
+    "Firefox is on this computer.  It keeps its own list of the certificates it accepts, apart from Chrome and Safari.\n" +
+    "(A certificate is what lets your browser open your pages over a secure link.)\n" +
+    "To add this one to Firefox, first install NSS, a small program that adds certificates to Firefox.\n" +
+    "Type this here, in this terminal (it uses Homebrew, the Mac app installer mkcert came from):  brew install nss\n" +
+    "Then type  spell server certificate  again, and it adds the certificate to Firefox.  Chrome and Safari need nothing more.",
+  firefoxNeedsOpening:
+    "Firefox makes its list of certificates the first time it opens, and it hasn't been opened on this computer yet.\n" +
+    "Open Firefox, close it, then type  spell server certificate  again.",
+  firefoxAdding: "Adding the certificate to Firefox now.  Chrome and Safari already have it.",
+  firefoxTrusted: "Firefox accepts the certificate too.",
+  firefoxUntrusted:
+    "Firefox doesn't accept the certificate yet.  To add it, type this in a terminal:  spell server certificate",
+  undone:
+    "Done.  The secure link is turned off.\n" +
+    "Your pages will open with a plain link (HTTP) again, not a secure one (HTTPS).\n" +
+    "They reload by themselves in a few seconds.\n" +
+    "If they haven't after a minute, type  spell server stop  in this terminal, then  spell server start."
+} as const
+
+try {
+  await main(process.argv.slice(2))
+} catch (error) {
+  if (!(error instanceof SRV.HttpError)) throw error
+  console.error(error.message)
+  process.exitCode = 1
+}
 
 /** Run `args`. */
 async function main(args: string[]): Promise<void> {
@@ -74,10 +135,21 @@ async function main(args: string[]): Promise<void> {
         process.exitCode = 2
         return
       }
-      const server = await new PageServer({ root }).start({ port })
+      // main's:  the server keeper's to start, never an agent's command (epic `epic-engine` P84)
+      const keeper = new SRV.KeeperLink()
+      const refused = keeper.refusedStart("page server", root)
+      if (refused) {
+        console.error(refused)
+        process.exitCode = 2
+        return
+      }
+      const https = PageServer.certificateFor()
+      const server = await new PageServer({ root, certificate: https.tls }).start({ port })
       // a group of its own, so each start stands out in the log
       server.log.gap()
       server.log.info(`${server.web.url}/  (root ${root})`)
+      if (server.web.secureUrl) server.log.info(`${server.web.secureUrl}/  (HTTPS and HTTP/2, for browsers)`)
+      else if (https.why) server.log.info(https.why)
       server.log.gap()
       await SRV.untilInterrupted(server.web.server, () => server.stop())
       return
@@ -102,25 +174,99 @@ async function main(args: string[]): Promise<void> {
       if (!file) throw new Error("usage:  spell server url <file>")
       const absolute = resolve(process.env.INIT_CWD ?? process.cwd(), file)
       // a worktree's file:  the MAIN checkout's server, when it serves worktrees, so every link is on one port
+      // for people:  the server's HTTPS address once it has one;  the tools fetch the plain one
       const main = await SRV.mainServerUrl(absolute, root)
-      if (main) return console.log(main)
+      if (main) return console.log(forPeople(main, await SRV.serverAt(new URL(main).origin)))
       const running = await PageServer.ensure(root, port)
       const path = relative(root, absolute)
       const served =
         SRV.contentPathOf(absolute, running) ??
         componentSetAddressOf(root, absolute) ??
         `/${path.split(sep).map(encodeURIComponent).join("/")}`
-      return console.log(`${running.base}${served}`)
+      return console.log(forPeople(`${running.base}${served}`, running))
     }
+    case "certificate":
+      process.exitCode = certificate(rest)
+      return
     case "prune": {
       const dryRun = rest.includes("--dry-run")
       return console.log(pruneReport(pruneServers({ dryRun }), { dryRun }))
     }
     default:
       console.log(
-        `usage:  spell server local|start|stop|status|url <file>|prune [--dry-run]  [--root <dir>] [--port <n>] [--spaces <dir>]`
+        `usage:  spell server local|start|stop|status|url <file>|certificate [--check] [--undo]|prune [--dry-run]  [--root <dir>] [--port <n>] [--spaces <dir>]`
       )
   }
+}
+
+/**
+ * `spell server certificate [--check] [--undo]`:  make and trust the page server's certificate;  its exit code.
+ * - trusting it asks for this computer's password, so only in a terminal:  elsewhere it says to run it in one
+ * - Firefox keeps its own list (`LocalCertificate.firefox`):  without NSS it says so FIRST, before making anything,
+ *   so it isn't missed under mkcert's own lines;  with NSS, once the Mac trusts it, Firefox is added too
+ * - the exit code is the Mac's trust alone:  Firefox's is said, never failed on
+ */
+function certificate(args: string[]): number {
+  const local = SRV.LocalCertificate.forPageServer()
+  try {
+    if (args.includes("--undo")) {
+      local.undo()
+      console.log(CERTIFICATE_WORDS.undone)
+      return 0
+    }
+    if (args.includes("--check")) {
+      console.log(CERTIFICATE_WORDS[local.state])
+      if (local.state === "ready") sayFirefox(local.firefox)
+      return local.state === "ready" ? 0 : 1
+    }
+    if (local.state === "no-mkcert") {
+      console.log(SRV.INSTALL_MKCERT)
+      return 1
+    }
+    if (local.firefox === "no-nss") console.log(`${CERTIFICATE_WORDS.firefoxNeedsNss}\n`)
+    if (local.makeIfNeeded() === "untrusted") {
+      if (!process.stdin.isTTY) {
+        console.log(CERTIFICATE_WORDS.needsTerminal)
+        return 1
+      }
+      console.log(CERTIFICATE_WORDS.asking)
+      local.trust()
+    }
+    const ready = local.state === "ready"
+    if (ready && local.firefox === "untrusted" && process.stdin.isTTY) {
+      console.log(CERTIFICATE_WORDS.firefoxAdding)
+      local.trustInFirefox()
+    }
+    console.log(ready ? CERTIFICATE_WORDS.done : CERTIFICATE_WORDS[local.state])
+    if (ready) sayFirefox(local.firefox)
+    return ready ? 0 : 1
+  } catch (error) {
+    if (!(error instanceof SRV.CertificateError)) throw error
+    console.error(error.message)
+    return 1
+  }
+}
+
+/** What Firefox's trust adds, after the Mac's:  nothing when there's no Firefox. */
+function sayFirefox(firefox: SRV.FirefoxState): void {
+  const words = {
+    none: undefined,
+    "no-nss": CERTIFICATE_WORDS.firefoxNeedsNss,
+    "no-profile": CERTIFICATE_WORDS.firefoxNeedsOpening,
+    untrusted: CERTIFICATE_WORDS.firefoxUntrusted,
+    trusted: CERTIFICATE_WORDS.firefoxTrusted
+  }[firefox]
+  if (words) console.log(words)
+}
+
+/** `url`, at `server`'s HTTPS address when it has one:  the address people open. */
+function forPeople(url: string, server: { https?: string } | undefined): string {
+  if (!server?.https) return url
+  const plain = new URL(url)
+  const secure = new URL(server.https)
+  plain.protocol = secure.protocol
+  plain.host = secure.host
+  return plain.href
 }
 
 /** Value after `name` in `args`. */

@@ -1,0 +1,25 @@
+"uploader theming" is a notebook page
+	<header level="1">
+		Uploader
+		<header>An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action.</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-uploader" playground>
+				<ui-uploader extensions="json" multiple max-files="5" max-size="2 MB"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>

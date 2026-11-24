@@ -75,6 +75,11 @@ export type MigrationContext = {
    */
   inbox?: InboxView
   /**
+   * The items the person acted on in that inbox, lower case (`SelfFix.actedOn()`), when the runner read it:
+   * for `self-fixed-issues`.
+   */
+  actedOn?: ReadonlySet<string>
+  /**
    * The links `html` (the page, assembled) holds that its next write makes ROOT PATHS (`root-links`, epic
    * `epic-engine` P46):  the page's linker's `rootLinks()`, mending, from its folder;  when the runner has one
    */

@@ -154,7 +154,7 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
           <slot name={this.slotForName("summary")} />
           <Show when={this.slots.hasContent(this.slotForName("prompt"))}>
             <details class={PROMPT} part={this.partForName("prompt")}>
-              <summary data-tooltip={this.translationForKey("promptTip")}>
+              <summary>
                 <span class="chevron" aria-hidden="true">
                   {this.icons.chevron.svg}
                 </span>

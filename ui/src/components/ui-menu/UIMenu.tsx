@@ -465,6 +465,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return false
   }
 
+  /** A segmented row that scrolls first is never a dropdown, however narrow:  a menu's never is (`UIToolbar`). */
+  protected get scrollsOnly(): boolean {
+    return false
+  }
+
   /** It fits its titles to its row:  `shrinkable`, a top-level menu whose items run sideways. */
   get isShrinking(): boolean {
     return this.shrinkable && !this.parentMenu && !this.isVertical
@@ -510,6 +515,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       children: () => this.fitChildren(),
       isSegmented: () => this.isSegmented,
       scrollsFirst: () => this.scrollsFirst,
+      scrollsOnly: () => this.scrollsOnly,
       holdBack: () => this.fitHoldBack,
       onAnswer: (answer) => this.onFitAnswer(answer)
     })

@@ -43,12 +43,23 @@ export class SyncState {
   }
 
   /**
-   * What a new session is told about the epic repo at `dir`, when its last sync stopped on a conflict:
+   * What a new session is told about the epic repo at `dir`, when its last sync stopped on a conflict, or wasn't
+   * pushed because GitHub says the repo is public:
    * `person`, the line for the person (`systemMessage`);  `claude`, Claude's (`additionalContext`).
    * - `undefined` when it went through, was offline, or never ran
    */
   static notice(dir: string): SyncNotice | undefined {
     const record = SyncState.read(dir)
+    if (record?.public)
+      return {
+        person:
+          `Your shared plans weren't uploaded at ${record.at}, because GitHub shows their repo as public.  ` +
+          "Set it to private on GitHub, and they'll upload after your next message.",
+        claude:
+          `The epic repo (${dir}) wasn't pushed at ${record.at}:  GitHub says its repo is public, and epic pages may ` +
+          "name what the code repos mustn't (epic-engine T153).  Tell the person in one line;  never make it private " +
+          "or push it yourself."
+      }
     if (record?.result !== "conflict") return undefined
     const files = record.files?.length ? record.files.join(", ") : "(git didn't say which)"
     return {
@@ -74,6 +85,8 @@ export type SyncRecord = {
   files?: string[]
   /** git's words, when it failed (offline, a push refused) */
   error?: string
+  /** not pushed because GitHub says the repo is public (epic `epic-engine` T153) */
+  public?: boolean
 }
 
 /** What a sync came to:  see `SharedSync.run()`. */

@@ -3,7 +3,7 @@
  * TODO: some way to control output
  */
 
-import isArrayLikeObject from "lodash/isArrayLikeObject"
+import { isArrayLikeObject } from "lodash-es"
 // Import directly, never through the barrel:
 // `spell/parser/core/model` loads this file, and must not load drawing (Solid)
 import { core } from "./core"

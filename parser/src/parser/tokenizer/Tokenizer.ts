@@ -1271,11 +1271,13 @@ export class Tokenizer {
    * Break random `tokens` into array of `BlockToken`s by:
    * - first breaking into `LineToken`s and then
    * - creating nested `BlockToken`s as `line.indent` changes.
+   *   - A comment never cuts a block, whatever its indent:  `placeAsides()` fits it to the code around it first.
    */
   breakIntoIndentedBlocks = (tokens: P.Token[]): P.BlockToken[] => {
     // break into lines & return early if no lines
     const lines = this.breakIntoLines(tokens)
     if (lines.length === 0) return []
+    this.placeAsides(lines)
 
     // Establish the first block at the MINIMUM of all indents
     // in case the top of the block is indented LESS than somewhere below.
@@ -1317,6 +1319,63 @@ export class Tokenizer {
     })
 
     return [block]
+  }
+
+  /**
+   * SIDE EFFECT:  gives each aside (`isAside()`) that would cut a block the indent of the code below it,
+   * so typing one never breaks the lines under it (epic `language` I181).
+   * - Outdented from the code below it:  it's read at that code's indent.
+   * - Between a head and its body's first line:  at that line's indent, however it's written,
+   *   until one is written at that indent:  one deeper after it is under it, as written.
+   * - Anywhere else it's as written:  after a block's last line, or deeper, under the line it describes.
+   * - A comment being typed, a lone `-` or `/`, never starts a block under the line above it:
+   *   that would make it that line's body, and break it.
+   * - A blank line among them takes the indent of the line after it, as in `breakIntoLines()`.
+   * - For nesting only:  `TokenFormatter` still reads each line's indent as written.
+   */
+  private placeAsides(lines: P.LineToken[]) {
+    let codeAbove = -Infinity
+    let runStart = 0
+    lines.forEach((code, at) => {
+      if (this.isAside(code)) return
+      if (runStart < at) this.placeRun(lines.slice(runStart, at), codeAbove, code)
+      codeAbove = code.indent
+      runStart = at + 1
+    })
+  }
+
+  /** SIDE EFFECT:  places `run`, the asides between a line indented `codeAbove` and `code`:  see `placeAsides()`. */
+  private placeRun(run: P.LineToken[], codeAbove: number, code: P.LineToken) {
+    const isBlank = (line: P.LineToken) => !line.tokens.length && line.leading === undefined
+    const place = (aside: P.LineToken, indent: number) => Object.assign(aside.record, { indent, isPlaced: true })
+    let inBody = codeAbove >= code.indent
+    for (const aside of run) {
+      if (isBlank(aside)) continue
+      if (aside.indent === code.indent) inBody = true
+      else if (aside.indent < code.indent || !inBody) place(aside, code.indent)
+      else if (aside.tokens[0] instanceof P.SymbolToken && aside.indent > codeAbove)
+        place(aside, Math.max(codeAbove, code.indent))
+    }
+    for (let index = run.length - 1; index >= 0; index--) {
+      if (isBlank(run[index]!)) run[index]!.record.indent = (run[index + 1] ?? code).indent
+    }
+  }
+
+  /**
+   * Is `line` an aside, with no say in how the lines around it nest -- see `placeAsides()`?
+   * - a comment on a line of its own, `-- ...` or `// ...`:  NOT a `#` heading, which starts a section
+   * - a line of nothing, or only whitespace
+   * - a comment being typed, a line of just `-` or `/`:  it reads as it did, only never cutting a block
+   */
+  isAside(line: P.LineToken): boolean {
+    const [first] = line.tokens
+    if (!first) return true
+    if (first instanceof P.CommentToken) return !first.commentSymbol.startsWith("#")
+    return (
+      first instanceof P.SymbolToken &&
+      COMMENT_BEGUN.test(first.value) &&
+      line.tokens.every((token) => token === first || token instanceof P.WhitespaceToken)
+    )
   }
 
   ////////////////
@@ -1543,6 +1602,9 @@ export const HTML_COMMENT_END = "-->"
  * - A value can run over several lines, but not with a line that starts a tag.
  */
 const UNCLOSED_QUOTE = /\n\s*</
+
+/** All that's typed so far of a comment's `--` or `//`:  see `Tokenizer.isAside()`. */
+const COMMENT_BEGUN = /^[-/]$/
 
 /** Spaces a tab swallows:  fewer than a tab's width, right before it -- see `indentWidth()`. */
 const SPACES_BEFORE_TAB = / {1,3}\t/g

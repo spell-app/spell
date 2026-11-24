@@ -172,15 +172,103 @@ describe("<epic-item>", () => {
     expect(chip.dataset.tooltip).toMatch(/^Fixed:  your review/)
   })
 
-  test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked", async () => {
+  test("`self-fixed` (T143):  grey, `FIXED -` before its title, the stored title as it was;  finished buttons", async () => {
+    const { host, chip, title } = await item(
+      `<epic-item id="i7" title="It jumps" status="done" state="handled" self-fixed></epic-item>`
+    )
+    expect(host.shadowRoot!.querySelector("[part~='base']")!.className).toBe("handled item")
+    expect(title.querySelector("[part~='title-prefix']")!.textContent).toBe("FIXED -")
+    expect(title.textContent).toBe("FIXED - It jumps")
+    expect(host.getAttribute("title")).toBe("It jumps")
+    expect(chip.dataset.tooltip).toMatch(/^Claude found this and fixed it\./)
+    expect(buttonsForItem("i7", { status: "done" })).toBe("finished")
+  })
+
+  test("a fix from his words (T143):  light orange, waiting for his look, `FIXED -` first too", async () => {
+    const { host, chip, title } = await item(
+      `<epic-item id="i7" title="It jumps" status="open" state="requested" requested fixed></epic-item>`
+    )
+    expect(host.shadowRoot!.querySelector("[part~='base']")!.className).toBe("requested item")
+    expect(title.querySelector("[part~='title-prefix']")!.textContent).toBe("FIXED -")
+    expect(chip.dataset.tooltip).toMatch(/^Fixed:  your review/)
+  })
+
+  test("FIXED is said first, once (T143):  no word at the line's end, `Not in main` still there", async () => {
+    const { host, title } = await item(
+      `<epic-item id="i7" status="open" state="replied" fixed><span slot="title">It jumps <epic-update became="fixed" unmerged="branch"></epic-update></span></epic-item>`
+    )
+    // drawn next to the id chip (T149), the title's own not shown
+    const shows = (part: string) => {
+      const update = host.shadowRoot!.querySelector("[part~='update']")!.shadowRoot!
+      const found = update.querySelector(`[part~='${part}']`)
+      return !!found && getComputedStyle(found).display !== "none"
+    }
+    expect(title.querySelector("[part~='title-prefix']")!.textContent).toBe("FIXED -")
+    expect([shows("label"), shows("unmerged")]).toEqual([false, true])
+    // sent back and reopened:  no prefix, and the label says its word again
+    host.removeAttribute("fixed")
+    host.querySelector("epic-update")!.setAttribute("became", "reopened")
+    await ElementFixture.settle()
+    expect(title.querySelector("[part~='title-prefix']")).toBeNull()
+    expect(shows("label")).toBe(true)
+  })
+
+  test("a badge (P81):  first in the title, grey in its chip's colour (T149);  it replaces the UPDATE word", async () => {
+    const { host, chip, title } = await item(
+      `<epic-item id="i7" status="open" state="open" badge="willFix" judged-why="It breaks Send"><span slot="title">It jumps <epic-update became="reopened"></epic-update></span></epic-item>`
+    )
+    const badge = title.querySelector<HTMLElement>("[part~='badge']")!
+    expect([title.firstElementChild, badge.textContent, badge.dataset.tooltip]).toEqual([
+      badge,
+      "WILL FIX",
+      "It breaks Send"
+    ])
+    expect(getComputedStyle(badge).backgroundColor).not.toBe(getComputedStyle(chip).backgroundColor)
+    expect(badge.hasAttribute("data-echo")).toBe(true)
+    expect(host.shadowRoot!.querySelector("[part~='update']")).toBeNull()
+    const label = host.querySelector("epic-update")!.shadowRoot!.querySelector("[part~='label']")!
+    expect(getComputedStyle(label).display).toBe("none")
+    host.setAttribute("badge", "see")
+    host.setAttribute("badge-item", "t38")
+    host.setAttribute("state", "handed")
+    await ElementFixture.settle()
+    expect(title.querySelector("[part~='badge']")!.textContent).toBe("SEE T38")
+    expect(host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!.dataset.fill).toBe("outline")
+    // none, or one a newer engine wrote:  as a page without badges
+    host.setAttribute("badge", "somethingNew")
+    await ElementFixture.settle()
+    expect(title.querySelector("[part~='badge']")).toBeNull()
+  })
+
+  test("UPDATE (T149):  next to the id chip, not at the title's end;  grey only in the chip's own colour", async () => {
+    const { host, title } = await item(
+      `<epic-item id="j3" status="open" state="progress" style="--epic-state-echo: rgb(1, 2, 3)"><span slot="title">It jumps <epic-update></epic-update></span></epic-item>`
+    )
+    const drawn = () => title.querySelector<HTMLElement>("[part~='update']")!
+    const ground = () => getComputedStyle(drawn().shadowRoot!.querySelector("[part~='label']")!).backgroundColor
+    expect(title.firstElementChild).toBe(drawn())
+    const atEnd = host.querySelector("epic-update")!.shadowRoot!.querySelector("[part~='label']")!
+    expect(getComputedStyle(atEnd).display).toBe("none")
+    // orange beside blue:  its own colour;  orange beside orange, and UNDERWAY beside blue:  grey
+    expect(ground()).not.toBe("rgb(1, 2, 3)")
+    host.querySelector("epic-update")!.setAttribute("became", "underway")
+    await ElementFixture.settle()
+    expect(ground()).toBe("rgb(1, 2, 3)")
+    host.querySelector("epic-update")!.removeAttribute("became")
+    host.setAttribute("state", "replied")
+    await ElementFixture.settle()
+    expect(ground()).toBe("rgb(1, 2, 3)")
+  })
+
+  test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked;  no tooltip (I370)", async () => {
     const labels = []
     for (const marks of [`queued="2026-10-06" work="Skip it"`, `deferred="2026-10-05"`, `reviewed="2026-10-06"`, ""]) {
       const { review } = await item(`<epic-item id="j1" title="A" status="open" state="recent" ${marks}></epic-item>`)
       labels.push(review() ? [review()!.textContent, review()!.className, review()!.dataset.tooltip] : null)
     }
     expect(labels).toEqual([
-      ["to do", "review todo", "Skip it"],
-      ["deferred", "review deferred", "deferred 10/5/26"],
+      ["to do", "review todo", undefined],
+      ["deferred", "review deferred", undefined],
       ["reviewed 10/6/26", "review old", undefined],
       null
     ])
@@ -412,32 +500,32 @@ describe("<epic-item>", () => {
       host.setAttribute("status", "canceled")
       await Promise.resolve()
       expect(buttonsOf()).toBe("issue-open")
-      // let go at his Send:  its own buttons again, a finished issue's (J231)
+      // let go at his Send:  its own buttons again, a finished item's, Reopen alone (T152)
       held.mockReturnValue(false)
-      expect(buttonsOf()).toBe("issue-done")
+      expect(buttonsOf()).toBe("finished")
     } finally {
       held.mockRestore()
     }
   })
 
   // epic `epic-engine` I308:  "it looks correct, then flashes ... when the update comes in.  Shouldn't flash"
-  test("closing at his x:  struck and grey from the click, as the server will leave it, so its update changes nothing", async () => {
+  test("closing at his x:  as it was till his Send, a ring round its id (T145), so its update changes nothing", async () => {
     const closing = vi.spyOn(ReviewClient.prototype, "isClosing").mockReturnValue(true)
     const closingAs = vi.spyOn(ReviewClient.prototype, "closingAs").mockReturnValue("drop")
     const held = vi.spyOn(ReviewClient.prototype, "isHeldInView").mockReturnValue(true)
     try {
       const { host, chip } = await item(`<epic-item id="i8" title="Gone soon" status="open"></epic-item>`)
       const base = () => host.shadowRoot!.querySelector("[part~='base']")!.className
-      expect(base()).toBe("old canceled item")
-      // its x still pressed, though the server took the mark off the inbox
-      expect(chip.dataset.fill).toBe("dashed")
+      expect(base()).toBe("open item")
+      // marked, its x still pressed, though the server took the mark off the inbox:  the chip's own fill, ringed
+      expect([chip.dataset.fill, chip.dataset.marked]).toEqual([undefined, "unsent"])
       // the server's update lands:  the same look
       host.setAttribute("status", "canceled")
       host.setAttribute("state", "old")
       await Promise.resolve()
-      expect(base()).toBe("old canceled item")
+      expect(base()).toBe("open item")
       const chipNow = host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!
-      expect([chipNow.dataset.fill, chipNow.hasAttribute("data-marked")]).toEqual(["dashed", true])
+      expect([chipNow.dataset.fill, chipNow.dataset.marked]).toEqual([undefined, "unsent"])
     } finally {
       closing.mockRestore()
       closingAs.mockRestore()
@@ -499,8 +587,8 @@ describe("<epic-item>", () => {
   })
 
   test("buttonsForItem():  a finished todo draws Revisit and Saw it, never the x that drops it (I296)", () => {
-    expect(buttonsForItem("t1", { status: "done", inPhase: true })).toBe("todo-done")
-    expect(buttonsForItem("t1", { status: "canceled" })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "done", inPhase: true, state: "requested" })).toBe("todo-done")
+    expect(buttonsForItem("t1", { status: "canceled", state: "replied" })).toBe("todo-done")
     expect(buttonsForItem("t1", { status: "open", inPhase: true })).toBe("todo-in-phase")
     expect(BUTTONS_OF["todo-done"].map((spec) => [spec.action, spec.label])).toEqual([
       ["revisit", "revisitNote"],
@@ -510,13 +598,28 @@ describe("<epic-item>", () => {
 
   test("buttonsForItem():  a finished issue or call draws Revisit and Saw it, no plane (J231)", () => {
     for (const status of ["done", "canceled", "decided"]) {
-      expect(buttonsForItem("i1", { status })).toBe("issue-done")
-      expect(buttonsForItem("j1", { status, fixed: true })).toBe("issue-done")
+      expect(buttonsForItem("i1", { status, state: "replied" })).toBe("issue-done")
+      expect(buttonsForItem("j1", { status, fixed: true, state: "requested" })).toBe("issue-done")
     }
     expect(BUTTONS_OF["issue-done"].map((spec) => [spec.action, spec.icon])).toEqual([
       ["revisit", "history"],
       ["approve", "check"]
     ])
+  })
+
+  test("buttonsForItem():  answered or finished, Reopen alone, unless it waits for their check (T152)", () => {
+    for (const status of ["done", "canceled", "decided"])
+      for (const id of ["q1", "j1", "i1", "t1", "m1"])
+        for (const state of ["recent", "old", "handled", undefined])
+          expect(buttonsForItem(id, { status, state }), `${id} ${status} ${state}`).toBe("finished")
+    expect(buttonsForItem("q1", { status: "decided", state: "replied" })).toBe("issue-done")
+    expect(buttonsForItem("q1", { status: "open", state: "attention" })).toBe("item")
+    // their check pressed stays, to take back
+    expect(buttonsForItem("q1", { status: "decided", checked: true })).toBe("issue-done")
+    // an UPDATE label with no badge to say it (I285):  Saw it is the one way to clear it
+    expect(buttonsForItem("q1", { status: "decided", updated: true })).toBe("issue-done")
+    expect(buttonsForItem("t1", { status: "done", updated: true })).toBe("todo-done")
+    expect(BUTTONS_OF.finished.map((spec) => [spec.action, spec.label])).toEqual([["revisit", "reopenItem"]])
   })
 
   test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  `in P2` while still to finish, its tooltip saying so", async () => {
@@ -537,7 +640,7 @@ describe("<epic-item>", () => {
     }
   })
 
-  test("a FINISHED item's `taken-in` draws its own `in P2` under its buttons (J231, I348), not `phasePill`'s (I307);  `handled` keeps its pill", async () => {
+  test("a FINISHED item's `taken-in` draws its own `in P2` on its line (J231, T152), not `phasePill`'s (I307);  `handled` keeps its pill", async () => {
     const phases = document.createElement("div")
     phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
     document.body.append(phases)
@@ -549,8 +652,9 @@ describe("<epic-item>", () => {
         expect(host.shadowRoot!.querySelector("[part~='handled']")).toBeNull()
         const done = host.shadowRoot!.querySelector<HTMLElement>("[part~='done-in']")!
         expect([done.textContent, done.getAttribute("link")]).toEqual(["in P2", "#p-fix"])
-        // on its own line, under the buttons (I348)
-        expect(done.parentElement!.classList.contains("phase-row")).toBe(true)
+        // on the line, with the buttons, so the item fits one line (T152)
+        expect(done.parentElement!.classList.contains("marks")).toBe(true)
+        expect(host.shadowRoot!.querySelector(".phase-row")).toBeNull()
         expect(done.dataset.tooltip).toBe("Done in P2 · Fix Open Issues\nGo to P2")
         expect(chip.dataset.tooltip).toContain("Done in P2 · Fix Open Issues")
       }
@@ -794,7 +898,11 @@ function lookOf(host: Element): string {
       review?.shadowRoot?.querySelectorAll<HTMLElement>("ui-button[data-action]") ?? [],
       (button) => `${button.dataset.action}:${button.dataset.fill ?? ""}`
     ),
-    pill: root.querySelector("[part~='done-in']")?.textContent ?? "",
+    // the phase's pill as shown:  the phase row's (not while its place is only held) or the git icon's (I380)
+    pill: [root.querySelector("[part~='done-in']:not([data-reserved])"), root.querySelector("[part~='git']")]
+      .map((pill) => pill?.textContent ?? "")
+      .join(""),
+    prefix: root.querySelector("[part~='title-prefix']")?.textContent ?? "",
     label: !!label?.shadowRoot?.querySelector("[part~='label']")
   })
 }
@@ -813,25 +921,30 @@ function watchLooks(host: Element): { looks: string[]; stop(): void } {
   return { looks, stop: () => (going = false) }
 }
 
-/** A page with an active phase, and issue I1, a fix waiting for Owen's review:  its `FIXED` label in its title. */
-const FIXED_PAGE = `<epic-page>
+/**
+ * A page with an active phase, and issue I1, a fix waiting for Owen's review:  its `FIXED` label in its title;
+ * `commits`, its fix's commit under it.
+ */
+const fixedPage = (commits = "") => `<epic-page>
   <epic-section kind="phases"><epic-phase id="p-two" title="Two" status="active"></epic-phase></epic-section>
   <epic-section kind="issues">
     <epic-item id="i1" status="open" state="replied" changed="2026-11-20T10:00:00-05:00" fixed
       ><span slot="title">It jumps when it loads <epic-update phase="2" became="fixed"></epic-update></span
-      ><p>The details.</p></epic-item
+      ><p>The details.</p>${commits}</epic-item
     >
   </epic-section>
 </epic-page>`
+const FIXED_PAGE = fixedPage()
+const COMMIT = `<epic-commit sha="abc1234">Fix the jump</epic-commit>`
 
 describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", () => {
   afterEach(() => ReviewClient.adopt(undefined))
 
   /** The page, reviewed, I1's ✓ (Accept the fix) pressed and drawn;  its host, client and routes. */
-  async function accepted() {
+  async function accepted(html = FIXED_PAGE) {
     const routes = new FakeRoutes()
     const client = await adoptClient(routes)
-    const page = await render<HTMLElement>(FIXED_PAGE)
+    const page = await render<HTMLElement>(html)
     const host = page.querySelector("epic-item")!
     await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:none"'))
     client.press("i1", "approve")
@@ -859,6 +972,40 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     await nextFrame(3)
   }
 
+  test("its pill's row held from the start, the pill shown from the click:  his ✓ never grows the line (I380)", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const page = await render<HTMLElement>(FIXED_PAGE)
+    const host = page.querySelector("epic-item")!
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:none"'))
+    const before = JSON.parse(lookOf(host)) as { height: number; pill: string }
+    // its place held, hidden:  no pill yet
+    expect(before.pill).toBe("")
+    expect(host.shadowRoot!.querySelector("[part~='done-in'][data-reserved]")).not.toBeNull()
+    client.press("i1", "approve")
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:dashed"'))
+    const after = JSON.parse(lookOf(host)) as { height: number; pill: string }
+    expect([after.pill, after.height]).toEqual(["in P1", before.height])
+  })
+
+  test("his ✓ keeps its colour and title till his Send, a ring round its id;  his Send greys it (T145)", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const host = (await render<HTMLElement>(FIXED_PAGE)).querySelector("epic-item")!
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:none"'))
+    type Look = { base: string; ink: string; chip: [string, boolean, string] }
+    const before = JSON.parse(lookOf(host)) as Look
+    client.press("i1", "approve")
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:dashed"'))
+    const marked = JSON.parse(lookOf(host)) as Look
+    expect([marked.base, marked.ink, marked.chip]).toEqual([before.base, before.ink, ["", true, before.chip[2]]])
+    const chip = host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!
+    expect([chip.dataset.marked, getComputedStyle(chip).outlineStyle]).toEqual(["unsent", "dotted"])
+    await client.send()
+    await nextFrame(2)
+    expect((JSON.parse(lookOf(host)) as Look).base).toMatch(/^old\b/)
+  })
+
   test("held in view:  its `in P` pill from the click, so the page's update changes nothing on screen;  Send lets go once", async () => {
     const { host, client, routes } = await accepted()
     const atClick = JSON.parse(lookOf(host)) as { pill: string; label: boolean }
@@ -872,10 +1019,8 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     await client.send()
     await nextFrame(2)
     const sent = JSON.parse(lookOf(host)) as { buttons: string[]; chip: [string, boolean, string] }
-    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([
-      ["revisit:none", "approve:none"],
-      ["", false]
-    ])
+    // drawn as the server leaves it:  finished, Reopen alone (T152)
+    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([["revisit:none"], ["", false]])
   })
 
   test("Send before the server applies it:  let go at the Send, and the page's update then changes nothing", async () => {
@@ -884,14 +1029,99 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     await nextFrame(2)
     const watch = watchLooks(host)
     const sent = JSON.parse(lookOf(host)) as { buttons: string[]; chip: [string, boolean, string]; pill: string }
-    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([
-      ["revisit:none", "approve:none"],
-      ["", false]
-    ])
+    // drawn as the server leaves it:  finished, Reopen alone (T152)
+    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([["revisit:none"], ["", false]])
     expect(sent.pill).toMatch(/^in P\d+$/)
     await apply(host, client, routes)
     watch.stop()
     // before:  pressed again till the apply, then unpressed, a row taller and its label back a moment, as it landed
     expect(watch.looks).toHaveLength(1)
+  })
+})
+
+////////////////
+// ## The git icon is its phase's pill (I380)
+////////////////
+
+// epic `epic-engine` I380;  Owen, 2026-11-20:  "Can you show that when the code is committed, *before* the accept,
+// e.g. so the item text will be the same size before/after you've updated?  Also, the in P21 pill could take the place
+// of the git icon you're showing now."
+
+describe("<epic-item> with commits:  its phase's pill in the git icon's place (I380)", () => {
+  afterEach(() => ReviewClient.adopt(undefined))
+
+  test("a committed fix waiting for him:  `in P1` where the git icon was, no git glyph, no phase row;  a click shows its commits", async () => {
+    const page = await render<HTMLElement>(fixedPage(COMMIT))
+    const host = page.querySelector<ItemHost>("epic-item")!
+    await vi.waitFor(() => expect(host.shadowRoot!.querySelector("[part~='git']")).not.toBeNull())
+    const root = host.shadowRoot!
+    const git = root.querySelector<HTMLButtonElement>("[part~='git']")!
+    expect([git.textContent, git.classList.contains("commit-pill"), root.querySelector(".phase-row")]).toEqual([
+      "in P1",
+      true,
+      null
+    ])
+    // still open, not taken in yet:  no ⌥-click start, which is `taken-in`'s pill's (I271)
+    expect(git.dataset.tooltip).toBe("Worked on in P1 · Two\nShow this item's commits")
+    expect(root.querySelector("[part~='line'] .marks")!.contains(git)).toBe(true)
+    git.click()
+    await ElementFixture.tick()
+    expect([
+      host.open,
+      git.getAttribute("aria-pressed"),
+      git.querySelector("ui-label")!.hasAttribute("selected")
+    ]).toEqual([true, "true", true])
+    await expectAccessible(host)
+  })
+
+  test("his ✓ on a committed fix, then the apply:  the same pill in the same place, the line's height never changes", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const page = await render<HTMLElement>(fixedPage(COMMIT))
+    const host = page.querySelector("epic-item")!
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:none"'))
+    const heights: number[] = []
+    const pills = new Set<string>()
+    const watch = watchLooks(host)
+    const sample = () => {
+      const look = JSON.parse(lookOf(host)) as { height: number; pill: string }
+      heights.push(look.height)
+      pills.add(look.pill)
+    }
+    sample()
+    client.press("i1", "approve")
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:dashed"'))
+    sample()
+    delete routes.inbox.marks.i1
+    await client.refresh()
+    await nextFrame(2)
+    sample()
+    host.setAttribute("status", "done")
+    host.setAttribute("state", "recent")
+    host.setAttribute("reviewed", "2026-11-20")
+    host.setAttribute("review-as", "approve")
+    host.setAttribute("taken-in", "p-two")
+    host.removeAttribute("fixed")
+    host.querySelector("epic-update")!.remove()
+    await ElementFixture.settle()
+    await nextFrame(3)
+    sample()
+    await client.send()
+    await nextFrame(2)
+    sample()
+    watch.stop()
+    expect([...pills]).toEqual(["in P1"])
+    expect(
+      new Set([...heights, ...watch.looks.map((look) => (JSON.parse(look) as { height: number }).height)]).size
+    ).toBe(1)
+    expect(host.shadowRoot!.querySelector(".phase-row")).toBeNull()
+  })
+
+  test("no phase to name (a finished item never taken in):  the plain git icon", async () => {
+    const { host } = await item(
+      `<epic-item id="i2" title="Fixed" status="done"><p>Why.</p><epic-commit sha="abc1234">Fix it</epic-commit></epic-item>`
+    )
+    const git = host.shadowRoot!.querySelector("[part~='git']")!
+    expect([git.querySelector("ui-label"), git.textContent]).toEqual([null, ""])
   })
 })

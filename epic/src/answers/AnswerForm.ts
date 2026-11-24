@@ -1,9 +1,20 @@
+import { BrowserCopy } from "spell/places/SaveQueue"
+
 import { PlanDates } from "spell/epic/dates"
-import { PageStore, ServerLink, clockOf, sentence, type ServerLinkOptions, type StorageFinder } from "spell/epic/review"
+import {
+  PageStore,
+  ServerLink,
+  clockOf,
+  sentence,
+  storageNow,
+  type ServerLinkOptions,
+  type StorageFinder
+} from "spell/epic/review"
 
 import { AnswerDraft } from "./AnswerDraft"
 import { DraftSaver } from "./DraftSaver"
 import {
+  ANSWER_RETRY_MS,
   DETAILS_API,
   DETAILS_DRAFT_API,
   DETAILS_LISTEN_POLL_MS,
@@ -12,6 +23,7 @@ import {
   DETAILS_SAVE_MS,
   DETAILS_SETTLE_MS,
   DRAFT_KEY_PREFIX,
+  EARLY_KEY_PREFIX,
   PAGE_COMMENTS_ATTRIBUTE,
   PAGE_COMMENTS_EVENT,
   type AnswerListener,
@@ -65,6 +77,12 @@ export type AnswerFormOptions = ServerLinkOptions & {
  *   - saved by the page's `DraftSaver` (epic `coherence` C10):  one save at a time, a failure said in red and tried
  *     again every 3s until one goes through (a page server back on its address takes it, with its new token)
  *   - the draft wakes nobody:  only Send does;  Send deletes it
+ *   - it's as new as its last change of Owen's (`typedAt`):  putting it back, keeping a gone question's text
+ *     and saving never make it newer, so an old copy can't outdate the answer sent (epic `epic-engine` I377)
+ *   - until the answer sent is read back, nothing is saved or sent:  the page still shows its preset picks, which
+ *     aren't Owen's.  What he changed meanwhile is laid over the answer once it's read (epic `epic-engine` I377)
+ *     - kept in the browser meanwhile, apart from the draft (`EARLY_KEY_PREFIX`, J340):  closed or reloaded before the
+ *       read, the next visit lays it over once it has read the answer (Owen's "kept as typed", epic-workflow P18)
  *   - on load, the newest draft newer than the answer (the server's, else the browser's) goes back into the parts,
  *     by id, over the answer sent (`AnswerDraft.over()`):  "Changes not sent"
  *   - an agent's rewrite patched IN PLACE replaces the questions that changed:
@@ -127,6 +145,28 @@ export class AnswerForm extends PageStore {
   /** The page server, as answers are sent to it:  the write token, its refresh. */
   private readonly link: ServerLink
 
+  /** The answer sent has been read back (or there's no server to ask):  only then is the page Owen's. */
+  private hasRead = false
+
+  /** Owen changed something before that. */
+  private isEditedEarly = false
+
+  /**
+   * What he typed before the read, in the browser, apart from the draft (`EarlyTyping`, epic `epic-engine` J340):
+   * so closing or reloading the page then loses nothing.  Dropped once it's laid over the answer read.
+   */
+  private readonly early: BrowserCopy
+
+  /**
+   * When Owen last changed what's in `typed`, ISO:  set by `edited()`, or the draft's own as it's put back.
+   * - the draft's `saved`, here and on the page server:  NEVER the time of a save
+   * - stays after a Send:  a save that was on its way is then older than the answer
+   */
+  private typedAt = ""
+
+  /** The page as each part joined it before that:  its preset picks. */
+  private readonly untouched: PageAnswer = { answers: {}, comments: {}, notes: "" }
+
   /** `load()`'s promise:  one load per form. */
   private loading: Promise<void> | undefined
 
@@ -135,6 +175,9 @@ export class AnswerForm extends PageStore {
 
   /** `settle()` waiting for the parts of a rewrite to join. */
   private settleTimer: ReturnType<typeof setTimeout> | undefined
+
+  /** `read()` waiting to try again. */
+  private readTimer: ReturnType<typeof setTimeout> | undefined
 
   /**
    * The page as typed just before each `settle()` that kept something, laid over the last:
@@ -152,6 +195,10 @@ export class AnswerForm extends PageStore {
       storage: options.storage,
       link: this.link,
       onChange: () => this.changed()
+    })
+    this.early = new BrowserCopy({
+      key: `${EARLY_KEY_PREFIX}${options.page}`,
+      storage: () => ("storage" in options ? storageNow(options.storage) : globalThis.localStorage)
     })
   }
 
@@ -181,6 +228,7 @@ export class AnswerForm extends PageStore {
    */
   add(part: AnswerPart): () => void {
     this.parts.add(part)
+    if (!this.hasRead) part.gatherInto(this.untouched)
     const isTakenBack = this.takeBack(part)
     const shown = this.shown
     if (shown) {
@@ -221,17 +269,23 @@ export class AnswerForm extends PageStore {
    * `typed` at once, the browser's copy at once, the page server's a moment later.
    */
   edited() {
-    if (this.keepsDrafts) {
+    if (this.isReading) {
+      this.isEditedEarly = true
+      // saved once the answer sent is read back (`putEarly()`);  kept in the browser till then (J340)
+      this.early.keep({ typed: new Date().toISOString(), ...this.current() } satisfies EarlyTyping)
+      this.drafts.tell("not saved yet")
+    } else if (this.keepsDrafts) {
       this.typed = AnswerDraft.over(this.typed ?? EMPTY, this.current())
+      this.typedAt = AnswerDraft.typedAt(Date.now(), this.sent)
       this.writeLocal()
       this.saveSoon()
     }
     this.changed()
   }
 
-  /** The questions, in page order. */
+  /** The questions, in page order;  a follow-up (a Priority) goes with its question, not counted by itself. */
   get asks(): AskPart[] {
-    return this.inPageOrder().filter((part): part is AskPart => "askState" in part)
+    return this.inPageOrder().filter((part): part is AskPart => "askState" in part && !(part as AskPart).isFollowUp)
   }
 
   /** How many questions are decided (anything but `attention`), of how many. */
@@ -355,6 +409,10 @@ export class AnswerForm extends PageStore {
    */
   async send(): Promise<void> {
     if (this.isSending) return
+    if (this.isReading) {
+      await this.loading
+      if (this.isReading) return this.fail(STILL_READING)
+    }
     if (!this.sent && this.isEmpty && !this.pageComments)
       return this.fail("Pick an option, or write something (Other, a comment, a note) first.")
     if (!this.link.isServed)
@@ -397,14 +455,29 @@ export class AnswerForm extends PageStore {
     return this.loading
   }
 
-  /** `load()`'s work. */
+  /** The answer sent is still to be read back:  the page shows its preset picks. */
+  private get isReading(): boolean {
+    return !!this.loading && !this.hasRead && this.keepsDrafts
+  }
+
+  /** `load()`'s work;  tried again every `ANSWER_RETRY_MS` while the page server doesn't answer. */
   private async read() {
     if (!this.keepsDrafts) return
-    const [reply, draft] = await Promise.all([
+    const [reply, draftReply] = await Promise.all([
       this.fetchReply<{ answer?: SentAnswer | null; listening?: AnswerListener | null }>(DETAILS_API),
-      this.fetchJson<DetailsDraft>(DETAILS_DRAFT_API, "draft")
+      this.fetchReply<{ draft?: DetailsDraft | null }>(DETAILS_DRAFT_API)
     ])
+    // either unread:  this browser's copy would be saved over what the page server has
+    if ((!reply || !draftReply) && this.link.isServed) {
+      this.readAgainSoon()
+      return
+    }
+    // typed before the read:  in this visit, or kept from one closed before its read (J340)
+    const early: Partial<EarlyTyping> | undefined = this.isEditedEarly ? this.current() : this.keptEarly()
+    this.hasRead = true
+    if (this.error === STILL_READING) this.error = ""
     const answer = reply?.answer ?? undefined
+    const draft = draftReply?.draft ?? undefined
     if (reply && reply.listening !== undefined) this.listening = reply.listening
     if (answer) {
       this.sent = answer
@@ -415,22 +488,49 @@ export class AnswerForm extends PageStore {
     const local = this.readLocal()
     const newest = AnswerDraft.newest([draft, local], answer)
     if (newest) this.putBack(newest, { isSaved: newest === draft })
+    // older than the answer sent:  a later Send had it, or overruled it
+    if (early && !(answer && early.typed && early.typed <= answer.answered)) {
+      const { answers = {}, comments = {}, notes = "", labels = {}, kept } = early
+      this.putEarly({ answers, comments, notes, labels, ...(kept && { kept }) })
+    }
+    this.early.drop()
     this.changed()
+  }
+
+  /** What a visit closed before its read had typed (`early`), or `undefined`. */
+  private keptEarly(): EarlyTyping | undefined {
+    const kept = this.early.kept<EarlyTyping>()
+    return kept && typeof kept.typed === "string" && kept.answers && kept.labels ? kept : undefined
   }
 
   /**
    * Put `draft` back into the parts, over the answer sent;  then keep what was typed for ids gone from the page.
    * - `isSaved`:  the page server has it;  else (the browser's copy) it's saved there once more
+   * - it isn't typing:  the draft stays as old as it was (`typedAt`)
    */
   private putBack(draft: DetailsDraft, { isSaved }: { isSaved: boolean }) {
     const { answers, comments, notes, labels, kept } = draft
     this.typed = { answers, comments, notes, labels, ...(kept?.length ? { kept } : {}) }
+    this.typedAt = draft.saved
     this.kept = kept ?? []
     const shown = this.shown!
     for (const part of this.parts) part.showAnswer(shown)
     this.drafts.tell(`draft from ${clockOf(draft.saved)} put back`)
     if (!isSaved) this.saveSoon()
     this.settleSoon()
+  }
+
+  /** `read()` again in `ANSWER_RETRY_MS`:  the page server didn't answer. */
+  private readAgainSoon() {
+    if (this.readTimer) clearTimeout(this.readTimer)
+    this.readTimer = setTimeout(() => void this.read(), ANSWER_RETRY_MS)
+  }
+
+  /** Lay what Owen changed before the read over what it found, as a change of his. */
+  private putEarly(early: TypedAnswer) {
+    const view = AnswerDraft.withEdits(this.shown ?? this.untouched, this.untouched, early)
+    for (const part of this.parts) part.showAnswer({ page: this.options.page, answered: "", changes: 0, ...view })
+    this.edited()
   }
 
   /**
@@ -518,15 +618,15 @@ export class AnswerForm extends PageStore {
    *   and it tries again in 3s (`DraftSaver`)
    */
   async saveDraft({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
+    if (!keepalive && this.isReading) await this.loading
     await this.drafts.save({ keepalive })
   }
 
-  /** `DraftSaver`'s save:  the draft as it stands to the page server;  when it was saved. */
+  /** `DraftSaver`'s save:  the draft as it stands to the page server;  when it was typed. */
   private async postDraft({ keepalive }: { keepalive: boolean }): Promise<string> {
-    // the server stamps it `saved`
-    const { page, answers, comments, notes, labels, kept } = this.draftNow()
+    const { page, saved, answers, comments, notes, labels, kept } = this.draftNow()
     this.writeLocal()
-    const body = { page, answers, comments, notes, labels, kept: kept ?? [] }
+    const body = { page, saved, answers, comments, notes, labels, kept: kept ?? [] }
     const reply = (await this.link.post(DETAILS_DRAFT_API, body, { keepalive })) as { draft: DetailsDraft }
     return reply.draft.saved
   }
@@ -538,6 +638,8 @@ export class AnswerForm extends PageStore {
    * - SIDE EFFECT:  listens on `window` and its document until undone
    */
   watch(window: Window): () => void {
+    // `<epic-send>` moved or redrawn while the read was waiting to try again
+    if (this.isReading && this.readTimer) this.readAgainSoon()
     const unsave = this.drafts.watch(window)
     const unpoll = ServerLink.watch(window, undefined, () => void this.refreshListening(), {
       every: DETAILS_LISTEN_POLL_MS
@@ -550,6 +652,7 @@ export class AnswerForm extends PageStore {
       unsave()
       unpoll()
       if (this.settleTimer) clearTimeout(this.settleTimer)
+      if (this.readTimer) clearTimeout(this.readTimer)
     }
   }
 
@@ -567,10 +670,10 @@ export class AnswerForm extends PageStore {
     return { ...this.gather(), labels: this.labels() }
   }
 
-  /** The draft as it stands:  `typed`, with the page as it is now laid over it. */
+  /** The draft as it stands:  `typed`, with the page as it is now laid over it, dated when it was typed. */
   private draftNow(): DetailsDraft {
     const typed = AnswerDraft.over(this.typed ?? EMPTY, this.current())
-    return { page: this.options.page, saved: new Date().toISOString(), ...typed }
+    return { page: this.options.page, saved: this.typedAt, ...typed }
   }
 
   /** Save the draft `DETAILS_SAVE_MS` after the last change (a details page only). */
@@ -602,14 +705,6 @@ export class AnswerForm extends PageStore {
   }
 
   /**
-   * `GET <api>?page=` for this page:  the reply's `what`, or `undefined` (none, no route, no page server).
-   * - NEVER throws
-   */
-  private async fetchJson<T>(api: string, what: string): Promise<T | undefined> {
-    return (await this.fetchReply<Record<string, T | null>>(api))?.[what] ?? undefined
-  }
-
-  /**
    * `GET <api>?page=` for this page:  the whole reply, or `undefined` (no route, no page server, a failure).
    * - NEVER throws
    */
@@ -629,6 +724,12 @@ const NOBODY_NOTICE = "Saved:  nobody is waiting yet;  Claude reads it when it n
 function epicOf(page: string): string | undefined {
   return /\/epics\/([^/]+)\/details\/[^/]+\.html$/.exec(page)?.[1]
 }
+
+/** What Send says before the answer sent is read back. */
+const STILL_READING = "This page is still loading the answers you sent before.  Wait a moment, then press Send again."
+
+/** What was typed before the read (`AnswerForm.early`, J340):  the page as it was, and when, ISO. */
+type EarlyTyping = TypedAnswer & { typed: string }
 
 /** A page with nothing on it:  what a first change is laid over. */
 const EMPTY: TypedAnswer = { answers: {}, comments: {}, notes: "", labels: {} }

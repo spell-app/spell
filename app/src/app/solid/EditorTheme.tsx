@@ -6,6 +6,7 @@ import { SPACES } from "spell/app/spaces"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
+import { PageViews } from "spell/app/app/pages/pageViews"
 import { uiReady } from "./loadUI"
 import { tracked } from "./tracked"
 // Import directly:  static and DOM-only, so the bench's address needs none of Spell UI's lazy chunk
@@ -249,7 +250,13 @@ export function ThemeMenu(): JSX.Element {
   return (
     <ui-item class="ThemeMenu">
       <ui-theme-menu size="small" bench={import.meta.env.DEV ? String(import.meta.env.SPELL_PAGE_SERVER) : "none"}>
-        <button type="button" slot="end" class="EditThemeEntry" onClick={() => editor.showThemeEditor()}>
+        <button
+          type="button"
+          slot="end"
+          class="EditThemeEntry"
+          onClick={() => editor.showThemeEditor()}
+          ref={(element: Element) => PageViews.theme.ahead(element)}
+        >
           <ui-icon name="paint brush" />
           {appTexts.text("editTheme")}
         </button>

@@ -480,11 +480,11 @@
   }
 
   /* Floated content (static markup:  `right floated content`). */
-  :is(.ui.list, .ui.list .list) > .item [class*="left floated"] {
+  :is(.ui.list, .ui.list .list) > .item .left-floated {
     float: left;
     margin: 0 1em 0 0;
   }
-  :is(.ui.list, .ui.list .list) > .item [class*="right floated"] {
+  :is(.ui.list, .ui.list .list) > .item .right-floated {
     float: right;
     margin: 0 0 0 1em;
   }
@@ -785,7 +785,7 @@
   .ui.relaxed.list:not(.horizontal) {
     --_ui-list-item-padding-block: 0.42857143em;
   }
-  .ui[class*="very relaxed"].list:not(.horizontal) {
+  .ui.very-relaxed.list:not(.horizontal) {
     --_ui-list-item-padding-block: 0.85714286em;
   }
   .ui.horizontal.relaxed.list {
@@ -794,7 +794,7 @@
     --_ui-list-item-first-padding-left: 0;
     --_ui-list-item-last-padding-right: 0;
   }
-  .ui.horizontal[class*="very relaxed"].list {
+  .ui.horizontal.very-relaxed.list {
     --_ui-list-item-padding-left: 1.5em;
     --_ui-list-item-padding-right: 1.5em;
   }
@@ -823,21 +823,21 @@
   }
 
   /* Aligned:  the icon, image and content of every item. */
-  .ui[class*="top aligned"].list {
+  .ui.top-aligned.list {
     --_ui-list-align: top;
   }
-  .ui[class*="middle aligned"].list {
+  .ui.middle-aligned.list {
     --_ui-list-align: middle;
   }
-  .ui[class*="bottom aligned"].list {
+  .ui.bottom-aligned.list {
     --_ui-list-align: bottom;
   }
 
   /* Floated. */
-  .ui[class*="left floated"].list {
+  .ui.left-floated.list {
     float: left;
   }
-  .ui[class*="right floated"].list {
+  .ui.right-floated.list {
     float: right;
   }
 }

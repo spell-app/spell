@@ -39,9 +39,9 @@ describe("<ui-rail> classes", () => {
     ["", "ui rail"],
     ['position="left"', "ui left rail"],
     ['position="right" internal', "ui right internal rail"],
-    ['position="left" dividing attach-to="both"', "ui left attached dividing rail"],
+    ['position="left" dividing attach-to="both"', "ui left attached dividing rail left-attached"],
     ['position="right" close', "ui right close rail"],
-    ['position="left" close="very"', "ui left very close rail"],
+    ['position="left" close="very"', "ui left very close rail very-close"],
     ['position="right" size="large"', "ui large right rail"],
     ['position="up"', "ui rail"]
   ])("<ui-rail %s>", async (attributes, classes) => {

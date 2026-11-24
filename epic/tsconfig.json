@@ -1,5 +1,5 @@
 {
-  // spell-epic's TypeScript program (epic `repo-split` P14, Q47):  everything in `src/`, `scripts/` and the configs.
+  // spell-epic's TypeScript program (epic `repo-split` P14, Q47):  everything in `src/` and the configs.
   // - It extends the settings every repo shares, the kit's toolchain's (`spell/toolchain/tsconfig.base.json`).
   // - NO `paths`:  every file is imported by its package name and its path under `src/`
   //   (`spell/epic/tool/PlanDoc`), spell-epic's own files too.
@@ -21,7 +21,7 @@
     // types
     "types": ["vite/client", "node", "spell/toolchain/types"]
   },
-  "include": ["src", "scripts", "vite.config.ts", "vitest.config.ts"],
+  "include": ["src", "vite.config.ts", "vitest.config.ts"],
   // - `src/components/__pack/` is generated (`spell-pack build`, `yarn pack:build`):  not ours to check
   // - `src/tools/_assets/`:  the docs pages' browser code (`spell-ui.entry.js` pulls in UI source), bundled, not checked
   "exclude": ["src/components/__pack", "node_modules", "src/tools/_assets"]

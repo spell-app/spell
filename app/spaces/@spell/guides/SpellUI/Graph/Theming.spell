@@ -1,0 +1,26 @@
+"graph theming" is a notebook page
+	<header level="1">
+		Graph
+		<header>A graph draws nodes joined by edges, laid out left to right. A node may hold a graph of its own, opened in place, in a modal, or in its stead.</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-graph" playground>
+				<ui-graph style="--ui-graph-height: 16em" graph="{\"nodes\":\[{\"id\":\"in\",\"label\":\"Input\",\"ports\":\[{\"id\":\"out\",\"kind\":\"out\"}]},{\"id\":\"parse\",\"label\":\"Parse\",\"ports\":\[{\"id\":\"src\",\"label\":\"src\",\"kind\":\"in\"},{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"out\"},{\"id\":\"errors\",\"label\":\"errors\",\"kind\":\"out\"}]},{\"id\":\"check\",\"label\":\"Check\",\"ports\":\[{\"id\":\"ast\",\"label\":\"ast\",\"kind\":\"in\"},{\"id\":\"ok\",\"label\":\"ok\",\"kind\":\"out\"}]},{\"id\":\"report\",\"label\":\"Report\"},{\"id\":\"emit\",\"label\":\"Emit\"}],\"edges\":\[{\"from\":{\"node\":\"in\",\"port\":\"out\"},\"to\":{\"node\":\"parse\",\"port\":\"src\"}},{\"from\":{\"node\":\"parse\",\"port\":\"ast\"},\"to\":{\"node\":\"check\",\"port\":\"ast\"},\"label\":\"tree\"},{\"from\":{\"node\":\"parse\",\"port\":\"errors\"},\"to\":{\"node\":\"report\"}},{\"from\":{\"node\":\"check\",\"port\":\"ok\"},\"to\":{\"node\":\"emit\"}}]}"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.  Its colours come from the theme, so it follows
+			light and dark mode by itself.
+		</>
+	</>

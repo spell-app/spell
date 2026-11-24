@@ -252,7 +252,7 @@ describe("<ui-card> content parts", () => {
   it("aligns content (`text-align`)", async () => {
     const host = await render(`<ui-card><ui-content align="center">Centred</ui-content></ui-card>`)
     const [centred] = host.querySelectorAll("ui-content")
-    expect(partRoot(centred!).className).toBe("center aligned content")
+    expect(partRoot(centred!).className).toBe("center aligned content center-aligned")
     expect(style(partRoot(centred!)).textAlign).toBe("center")
   })
 

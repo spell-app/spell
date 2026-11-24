@@ -71,11 +71,15 @@ then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is
     - `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
     - this folder's until epic `coherence` P19:  util's now, so node code that may not load `spell/element` uses it
   - [drawnWindow](drawnWindow.ts):  a long list, drawn as you scroll (`drawnInWindow()`):
-    the first 24 items, then 24 more each time its end comes near the view;  what's drawn stays drawn
+    the first 24 items, then 24 more each time its end comes near the view
+    - past 300 items (`MOST_KEPT`), only the items within a few screens of the view stay drawn, an empty element
+      standing in for the rest, as tall as they were (epic `solid-2-final` P17)
+    - never taken down:  the item with the focus, one whose form was typed into, the one the caller asks for
     - NOT in the barrel:  reached by path, `spell/element/drawnWindow`
     - who draws with it:
       - every loop in a Spell drawing (the parser's core:  `drawing.ts`, `saved.ts`)
       - a `<ui-tree>` column drawn from its items list (Spell UI's `UITree`)
+      - a long `<ui-table>`'s data rows (Spell UI's `UITable`:  its own windowing until epic `solid-2-final` P17)
     - the parser's core's until an epic moved it here, so Spell UI could use it too
     - Spell's own parts are handed in:
       - its `Cell`, to say the count changed (`changes`)
@@ -153,6 +157,10 @@ then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is
     `breakRender()`, a forced render failure
   - [`A11y`](../test-helpers/A11y.ts):  axe on a live element (`expectAccessible()`), and WCAG contrast
   - [`Viewport`](../test-helpers/Viewport.ts):  resize the test iframe for one test
+  - [`Alignment`](../test-helpers/Alignment.ts):  every row on a page with an item drawn more than half a pixel off
+    its row's middle, and every centred column with one off its column's (epic `epic-engine` P83, T166);  in a component test (`scan()`) or a Playwright page (`scanPage()`),
+    plain `node` too, as the page checker, the designer's shots and every editor test run it
+    - its test is in the `element` project, [`tests/element/test-helpers/`](../../tests/element/test-helpers/Alignment.test.ts)
   - They know only the DOM, Solid, `DOMElement` and `UIComponent`:  a helper that needs Spell UI stays in Spell UI's
     `test-helpers/` (`MemberClashes`, `ThemeHarness`, `Sheets` ...).
     - What needs Spell UI's real runtime is tested in Spell UI's tests:
@@ -193,6 +201,7 @@ As WWOD §4, plus:
     - for node code that mustn't load the element layer (the vocabularies, the epics' definitions)
   - `spell/element/SkeletonText`:  node code that parses skeletons
   - `spell/element/drawnWindow`:  a long list, drawn as you scroll, for the parser's core and Spell UI's `<ui-tree>`
+    and `<ui-table>`
     - Bundled by whoever draws with it, a copy each:  it holds nothing a page must share,
       so the app's element builds bundle it (`BUNDLED_ELEMENT_LEAVES`, [the app's shared build](../../app/app/vite.shared.ts))
   - `spell/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path;

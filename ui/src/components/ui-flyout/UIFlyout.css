@@ -254,10 +254,10 @@
   .ui.flyout > .left.actions > .button:not(.fluid) {
     margin-inline: 0.5em;
   }
-  .ui.flyout > :is(.centered, [class*="center aligned"]) {
+  .ui.flyout > :is(.centered, .center-aligned) {
     text-align: center;
   }
-  .ui.flyout > :is(.centered, [class*="center aligned"]).actions > .button:not(.fluid) {
+  .ui.flyout > :is(.centered, .center-aligned).actions > .button:not(.fluid) {
     margin-inline: 0.5em;
   }
   .ui.flyout > .basic:is(.header, .actions) {
@@ -311,64 +311,64 @@
    * ## Widths:  Fomantic's words, then columns of the viewport (`four wide` = 4 / 16).  A column width also has the
    * class `wide`, so its rules come LATER at the same specificity (Fomantic's `:not(.fullscreen)`) and win.
    */
-  .ui[class*="very thin"].flyout {
+  .ui.very-thin.flyout {
     --_ui-flyout-width: 120px;
   }
-  .ui.thin.flyout:not([class*="very thin"]) {
+  .ui.thin.flyout:not(.very-thin) {
     --_ui-flyout-width: 200px;
   }
-  .ui.wide.flyout:not([class*="very wide"]) {
+  .ui.wide.flyout:not(.very-wide) {
     --_ui-flyout-width: 600px;
   }
-  .ui[class*="very wide"].flyout:not(.fullscreen) {
+  .ui.very-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: 800px;
   }
-  .ui[class*="one wide"].flyout:not(.fullscreen) {
+  .ui.one-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(100% / 16);
   }
-  .ui[class*="two wide"].flyout:not(.fullscreen) {
+  .ui.two-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(200% / 16);
   }
-  .ui[class*="three wide"].flyout:not(.fullscreen) {
+  .ui.three-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(300% / 16);
   }
-  .ui[class*="four wide"].flyout:not(.fullscreen) {
+  .ui.four-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(400% / 16);
   }
-  .ui[class*="five wide"].flyout:not(.fullscreen) {
+  .ui.five-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(500% / 16);
   }
-  .ui[class*="six wide"].flyout:not(.fullscreen) {
+  .ui.six-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(600% / 16);
   }
-  .ui[class*="seven wide"].flyout:not(.fullscreen) {
+  .ui.seven-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(700% / 16);
   }
-  .ui[class*="eight wide"].flyout:not(.fullscreen) {
+  .ui.eight-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(800% / 16);
   }
-  .ui[class*="nine wide"].flyout:not(.fullscreen) {
+  .ui.nine-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(900% / 16);
   }
-  .ui[class*="ten wide"].flyout:not(.fullscreen) {
+  .ui.ten-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(1000% / 16);
   }
-  .ui[class*="eleven wide"].flyout:not(.fullscreen) {
+  .ui.eleven-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(1100% / 16);
   }
-  .ui[class*="twelve wide"].flyout:not(.fullscreen) {
+  .ui.twelve-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(1200% / 16);
   }
-  .ui[class*="thirteen wide"].flyout:not(.fullscreen) {
+  .ui.thirteen-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(1300% / 16);
   }
-  .ui[class*="fourteen wide"].flyout:not(.fullscreen) {
+  .ui.fourteen-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(1400% / 16);
   }
-  .ui[class*="fifteen wide"].flyout:not(.fullscreen) {
+  .ui.fifteen-wide.flyout:not(.fullscreen) {
     --_ui-flyout-width: calc(1500% / 16);
   }
-  .ui[class*="sixteen wide"].flyout,
+  .ui.sixteen-wide.flyout,
   .ui.fullscreen.flyout {
     --_ui-flyout-width: 100%;
   }

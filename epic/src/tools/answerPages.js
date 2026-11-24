@@ -118,7 +118,8 @@ export function questionSection(document, question, i) {
     multiple: !!question.multiple,
     "select-all": !!question.selectAll,
     filter: !!question.filter,
-    "more-details": !!question.moreDetails
+    "more-details": !!question.moreDetails,
+    compact: !!question.compact
   })
   if (question.text) ask.append(make(document, QUESTION, {}, [htmlIn(document, "p", question.text)]))
   const options = (question.options ?? []).map((option, j) => optionElement(document, option, j))

@@ -1160,6 +1160,7 @@ export class TSWriter extends JSWriter {
     "onFormStateRestore",
     "onLayoutChanged",
     "onMount",
+    "onMove",
     "onPlacingLeft",
     "onPlatformsChanged",
     "onPointerDown",

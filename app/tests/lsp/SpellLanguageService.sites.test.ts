@@ -35,6 +35,14 @@ describe("SpellLanguageService.sitePartUses()", () => {
       "films page"
     ])
     expect(LSP.SpellLanguageService.sitePartUses(project, "film page")).toEqual([])
+    // the language worker's answer (`spell/sitePartUses`):  where the name itself is, by path
+    const spans = LSP.SpellLanguageService.sitePartSpans(project, "films page")
+    expect(spans.map(({ start, end }) => contents.slice(start, end))).toEqual([
+      "films page",
+      "films page",
+      "films page"
+    ])
+    expect(new Set(spans.map(({ path }) => path))).toEqual(new Set([project.spellFiles[0]!.path]))
   })
 })
 

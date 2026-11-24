@@ -5,9 +5,11 @@
  * - The shadow markup it expects (class grammar on semantic elements), in this order inside the root:
  *
  *     <div class="ui [size] [category horizontal fluid scrolling resizable short ...] [left|right aligned]
- *                 [loading disabled read-only] search" style="anchor-name: --ui-search-4">
- *       <div class="ui icon [loading fluid disabled] input" part="input">
+ *                 [collapsed loading disabled read-only] search" style="anchor-name: --ui-search-4">
+ *       <ui-button class="opener" part="opener" icon="magnifying-glass">                 (collapsed)
+ *       <div class="ui [left] icon [loading fluid disabled] input" part="input">         (left:  collapsed)
  *         <input class="prompt" part="prompt" role="combobox">
+ *         <span class="clear" part="clear"><ui-button icon="xmark" ...></span>         (while there's text)
  *         <span class="search icon" part="icon"><slot name="icon"><svg></slot></span>
  *       </div>
  *       <div class="results" popover part="results" role="listbox" style="position-anchor: --ui-search-4">
@@ -40,7 +42,14 @@
  *     (from `--ui-search-prompt-radius`), as a page would.
  * - NOTE: left out, on purpose:
  *   - the "view all results" `.action` link of a remote answer:  a link inside a listbox;  put one near the search
- *   - the `clearable` variation (`.remove.icon`, the webkit cancel button):  Escape clears
+ * - The clear button (`clearable`, on by default):  laid out by `UIInput.css`, in place of the magnifying glass.
+ *   Fomantic's own `clearable` variation (`.remove.icon`, the webkit cancel button) isn't ported.
+ * - `collapsed`:  folded, the input box is a circle the size of its icon column, hidden under the search button
+ *   (`.opener`, the same circle);  `:state(expanded)` grows it to `--ui-search-expanded-width`, from its start,
+ *   its magnifying glass staying where the button's was.
+ *   - The growing is a transition on its width:  none with reduced motion, or `--ui-motion: none` around it.
+ *   - The page places the host:  to cover a title beside it, make the expanded host span the row
+ *     (`position: absolute;  inset-inline: 0`), with `--ui-search-expanded-width: 100%`.
  * - Scrolling heights stay Fomantic's per-breakpoint result counts (4 / 6 / 8 / 12), by viewport `@media`
  *   (`--_search-results-rows`), as the DEFAULT of one token, `--ui-search-results-max-height`:
  *   a value set from outside wins at every width.
@@ -125,6 +134,8 @@
       calc(var(--_search-results-rows) * (2 * 0.85714em + 1.33em))
     );
     --_ui-search-disabled-opacity: var(--ui-search-disabled-opacity, var(--ui-disabled-opacity));
+    --_ui-search-expanded-width: var(--ui-search-expanded-width, 16em);
+    --_ui-search-expand-duration: var(--ui-search-expand-duration, var(--ui-duration, 0.2s));
   }
 
   /* Root */
@@ -373,13 +384,13 @@
   .ui.short.search > .results {
     max-height: var(--_ui-search-results-max-height);
   }
-  .ui[class*="very short"].search > .results {
+  .ui.very-short.search > .results {
     max-height: calc(var(--_ui-search-results-max-height) * 0.75);
   }
   .ui.long.search > .results {
     max-height: calc(var(--_ui-search-results-max-height) * 2);
   }
-  .ui[class*="very long"].search > .results {
+  .ui.very-long.search > .results {
     max-height: calc(var(--_ui-search-results-max-height) * 3);
   }
   .ui.scrolling.resizable.search > .results {
@@ -404,16 +415,16 @@
   }
 
   /* Aligned:  which edge the results line up with. */
-  .ui[class*="left aligned"].search > .results:not([popover]) {
+  .ui.left-aligned.search > .results:not([popover]) {
     inset-inline: 0 auto;
   }
-  .ui[class*="right aligned"].search > .results:not([popover]) {
+  .ui.right-aligned.search > .results:not([popover]) {
     inset-inline: auto 0;
   }
-  .ui[class*="left aligned"].search > .results[popover] {
+  .ui.left-aligned.search > .results[popover] {
     position-area: block-end span-inline-end;
   }
-  .ui[class*="right aligned"].search > .results[popover] {
+  .ui.right-aligned.search > .results[popover] {
     position-area: block-end span-inline-start;
   }
 
@@ -427,6 +438,56 @@
   }
   .ui.fluid.search > .results[popover] {
     width: anchor-size(width);
+  }
+
+  /* Collapsed:  a search button, until the field slides open from it (`:state(expanded)`). */
+  .ui.collapsed.search {
+    /* the folded circle:  the input's icon column wide, as tall as the field */
+    --_search-folded-size: var(--ui-input-icon-width, 2.67142em);
+    display: block;
+  }
+  .ui.collapsed.search > .opener {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 1;
+    display: flex;
+  }
+  .ui.collapsed.search > .opener::part(button) {
+    box-sizing: border-box;
+    inline-size: var(--_search-folded-size);
+    block-size: 100%;
+    padding: 0;
+  }
+  .ui.collapsed.search > .ui.input {
+    max-inline-size: 100%;
+    inline-size: var(--_ui-search-expanded-width);
+    transition:
+      inline-size var(--_ui-search-expand-duration) var(--ui-ease),
+      visibility 0s;
+  }
+  :host(:not(:state(expanded))) .ui.collapsed.search > .ui.input {
+    inline-size: var(--_search-folded-size);
+    overflow: hidden;
+    visibility: hidden;
+    transition:
+      inline-size var(--_ui-search-expand-duration) var(--ui-ease),
+      visibility 0s var(--_ui-search-expand-duration);
+  }
+  :host(:state(expanded)) .ui.collapsed.search > .opener {
+    visibility: hidden;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ui.collapsed.search > .ui.input,
+    :host(:not(:state(expanded))) .ui.collapsed.search > .ui.input {
+      transition: none;
+    }
+  }
+  @container style(--ui-motion: none) {
+    .ui.collapsed.search > .ui.input,
+    :host(:not(:state(expanded))) .ui.collapsed.search > .ui.input {
+      transition: none;
+    }
   }
 
   /* Phones:  never wider than the screen. */

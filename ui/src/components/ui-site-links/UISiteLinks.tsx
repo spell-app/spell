@@ -119,14 +119,17 @@ export class UISiteLinks extends E.UIComponent<typeof siteLinksVocabulary> {
   render(): JSX.Element {
     return (
       <div class={LINKS} part={this.partForName("links")}>
-        <Show when={this.originalLink}>{(link) => this.button("original", ORIGINAL_ICON, link())}</Show>
-        <Show when={this.reportLink}>{(link) => this.button("report", REPORT_ICON, link())}</Show>
+        <Show when={this.originalLink}>{(link) => this.button("original", ORIGINAL_ICON, link)}</Show>
+        <Show when={this.reportLink}>{(link) => this.button("report", REPORT_ICON, link)}</Show>
       </div>
     )
   }
 
-  /** One link:  a small tertiary icon button opening `link` in a new tab, named by its words. */
-  private button(name: "original" | "report", icon: string, link: string): JSX.Element {
+  /**
+   * One link:  a small tertiary icon button opening `link` in a new tab, named by its words.
+   * - `link` stays an accessor, read in the JSX:  read in `<Show>`'s callback it wouldn't follow a change.
+   */
+  private button(name: "original" | "report", icon: string, link: () => string): JSX.Element {
     const words = this.translationForKey(name)
     return (
       <ui-button
@@ -134,7 +137,7 @@ export class UISiteLinks extends E.UIComponent<typeof siteLinksVocabulary> {
         icon={icon}
         appearance={TERTIARY}
         size={SMALL}
-        link={link}
+        link={link()}
         target={NEW_TAB}
         aria-label={words}
         title={words}

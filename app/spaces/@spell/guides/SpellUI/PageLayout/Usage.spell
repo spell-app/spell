@@ -17,7 +17,7 @@
 			- `drawer="compact"` shows only the drawer's icons:  the layout sets `collapsed` on each `<ui-site-nav>` in it.
 			- `toggleDrawer()` is what a `<ui-site-nav-button>` calls:
 			  - narrow, it slides the drawer in or out
-			  - wide, it switches `drawer` and sends `ui-toggle`, `{ newState, oldState }`, each `compact` or `full`;
+			  - wide, it switches `drawer` and sends `ui-toggle`, `{ region, newState, oldState }`, each `compact` or `full`;
 			    to `full` a frame later, so the column widens from where it was
 			- The layout remembers nothing:  keep the choice yourself, and set `drawer` again next time.
 			- `drawer-hides`:  its button hides the whole drawer (`drawer="hidden"`) and shows it again,
@@ -25,9 +25,14 @@
 			- `right="hidden"` (or `left`) hides a side bar;  `toggleSidebar("right")`,
 			  what a `<ui-site-nav-button toggles="right">` calls, switches it and sends `ui-toggle`,
 			  `{ region: "right", newState, oldState }`, each `hidden` or `shown`.
-			  Narrow, a side bar with such a button hides behind it, and slides over the page while it's open.
+			  Below 64em of its own box, a side bar with such a button hides behind it, and slides over the page while it's open:
+			  a middling width keeps the page's room.
 			- `floating`:  the drawer and the side bars float, rounded cards with a soft shadow and room round them,
 			  over the page's own ground;  a `<ui-toc>` in a side bar is headed by a band, as the editor's panels are.
+			- `page-height="fluid"`:  the layout is exactly as tall as what's seen of the window (or the pane it scrolls in),
+			  never scrolling it;  the page is a column taking what's left under the menus,
+			  and its children with `height="fluid"` share it out, each scrolling inside.
+			  A Spell site's page asks for it on its own line:  `home is a page, filling the window`.
 		</>
 		<markdown>
 			```js

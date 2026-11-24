@@ -1,0 +1,54 @@
+"file tabs element" is a notebook page
+	<header level="1">
+		FileTabs
+		<header>The open project's files, as tabs over the code, and a button at their end listing them all.</>
+	</>
+
+	<text class="lede" paragraph>Every file of the open project, as a tab over its code. Clicking a tab shows that file. When some files aren't tabs you can see, a button at the end of the row lists every one of them.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or reading its code</>
+		<item icon="image">A picture, not live: it needs the whole editor around it</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The tab row made narrow, so most files are put away, with its all-files button open:</>
+		<image src="/components/app/_images/FileTabs.png" alt="The code pane's tab row, its all-files list open, listing Card.spell, Pile.spell, Deck.spell and the rest" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph><link target="src-packages-app-docs-inputeditor-html" link="/input-editor">InputEditor</>'s code column draws it over the code (<text code>&lt;FileTabs /&gt;</>, no props):</>
+		<list bulleted>
+			<item>The tabs themselves are Spell: the <text code>file tab bar</> of the editor's own Spell, <text code>SpellEditor.spell</>. This component hands it the project's files, and what showing one does.</>
+			<item>Which files there are, and which is showing, come from <text code>trackProjectFiles()</>, in the same file.</>
+			<item>More than eight files: the ones opened lately are tabs, the rest only in the all-files list. A tab's ✕, or a middle click, closes it.</>
+			<item>A tab dragged along the row moves its file there, in the project's file order.</>
+			<item>A tab's right-click menu: Duplicate, Rename, Delete and the app's actions.</>
+			<item>The ✕ at the row's far right hides the code, as the top bar's code icon does.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="FileTabs"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-filetabs-tsx" link="/src/app/solid/FileTabs.tsx"><text title="src/app/solid/FileTabs.tsx" code>FileTabs.tsx</></>: the component, and <text code>trackProjectFiles()</>, the project's files as Solid reads them</>
+			<item><link target="src-packages-app-src-solid-filetabs-css" link="/src/app/solid/FileTabs.css"><text title="src/app/solid/FileTabs.css" code>FileTabs.css</></>: its look</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-16 against branch <ui-text code>codemirror</>.</>
+		</>
+	</>

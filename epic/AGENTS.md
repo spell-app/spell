@@ -32,7 +32,7 @@ a folder of the kit `spell`.
 - Laid out as a plain JS project (epic `epic-eject` J14):
   - `src/`:  the code, the elements and the docs tools included;  its rules:  [src/AGENTS.md](src/AGENTS.md)
   - `tests/`:  its tests, at the same paths as the code (`tests/command/X.test.ts` for `src/command/X.ts`)
-  - `scripts/`:  dev-only scripts;  `vscode/`:  the extension, its own yarn project
+  - `vscode/`:  the extension, its own yarn project (no `scripts/` since epic `editor` P44:  its one, Epic UI's data, went)
   - the plugin's parts at the folder's root:  `.claude-plugin/`, `skills/`, `hooks/`, `bin/epic`
 - [src/AGENTS.md](src/AGENTS.md) was written inside spell-app, as `packages/epics/AGENTS.md`.
   - Its links lead from where it is now:  the epic folder's pages through `../../spell.epics/`,
@@ -66,7 +66,7 @@ a folder of the kit `spell`.
       copied to the repo's `.epic/house-style.md` and named its `code` voice (`RepoInit.houseStyleStep()`).
   - Configurable (epic `readme` P13):  a repo's `.epic/config.json5` names its own voices (`"voices"`, a name to a
     file) and which voice each kind of page takes (`"pageVoices"`);  a repo whose settings name a top
-    (spell-brand's name the kit) takes the top's.
+    (a peer's names the kit) takes the top's.
     The skills ask by name:  `epic voice <name>`, `epic voice --for <kind>` print the file (`EpicConfig.voiceFile()`).
   - `epic voice check [--voice <name>] <file | - | --text "...">` (`VoiceCheck`, epic `epic-engine` T92):  a FRESH
     reader, `claude -p` with Sonnet and nothing of the repo, checks a text against a voice (novice by default):
@@ -83,16 +83,93 @@ a folder of the kit `spell`.
     Codex's hooks run it for you once installed (`epic plugin install --codex`) and trusted (`/hooks`).
   - Wait for the person's next Send with `epic inbox wait <epic>`.
 - Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it;  Codex's, [codex-hooks.json](hooks/codex-hooks.json),
-  three of the same scripts, and the Codex manifest beside Claude Code's ([.codex-plugin/](.codex-plugin/plugin.json)).
+  four of the same scripts, and the Codex manifest beside Claude Code's ([.codex-plugin/](.codex-plugin/plugin.json)).
   - Codex's file passes each script `--codex-plugin`:  started so, a script stands down while Codex's own
     `~/.codex/hooks.json` runs it (`CodexHome.skipPluginHook()`), so they never run twice (J37).
+  - The SERVER GUARD (epic `epic-engine` P84), `PreToolUse` on Bash in both files:  [server-guard.mjs](hooks/server-guard.mjs)
+    runs `ServerGuard` ([ServerGuard.ts](src/server/ServerGuard.ts)) on each command an agent is about to run, and
+    answers "deny" for one that would start, stop, restart or kill a MAIN checkout's server (the hub's repos), naming
+    `epic servers ...` instead;  a worktree's servers, reading (`ps`, `lsof`, `curl`) and hands off go through;  it
+    fails open
+    - the person's `!` commands never reach it:  they're typed into the chat, not a tool call (kept in a transcript
+      as `<bash-input>`)
   - Every hook exits 0 whatever happens.
   - Except the worktree hook:  its failure is Claude Code's answer.
   - And the inbox poller, the `asyncRewake` `Stop` hook (`monitors/listen.mjs --hook`, epic `epic-engine` I144):
     it runs in the background and exits 2 with its `📬` line, which is how it wakes the session.
+  - The epic hub listens for every session (`InboxHub`, epic `epic-engine` T163):  the poller hears its note while the
+    session is idle, the `PostToolUse` hook ([inbox-note.mjs](hooks/inbox-note.mjs)) hands it over at the next tool
+    call while it works;  so no session runs `epic inbox wait` in the background.
 - Removing a worktree stops its page and vite servers FIRST (`CheckoutServers`, epic `epic-engine` I53):
   - `epic worktree remove <name>`, never a bare `git worktree remove`, in the skills and anything new
   - the worktree hook and `epic worktree move` do it themselves;  the session-start hook stops the rest, hourly
+- The epic server, the hub, is also the SERVER KEEPER (epic `epic-engine` P82;  [ServerKeeper.ts](src/server/ServerKeeper.ts)):
+  - every repo's main page server kept up on main's code, each worktree's page server stopped after 30 minutes unused,
+    and the repo's own servers (its `.epic/config.json5`'s `servers`:  a name, a URL or port to check, and a `start`
+    command if it wants Start and Restart) watched and started
+  - main's editor kept through its page server, when the repo's `app` names a `start`:  down, the page server is
+    restarted (at most every 3 minutes), and its Start and Restart do the same;  else only watched
+    - the page server itself starts a vite that ends by itself again within seconds (`EditorServer.relaunchSoon()`,
+      at most 3 times an hour), and stops every other vite of its checkout first, so a checkout has ONE editor:  main's
+      on 3000 (a worktree's vite found there stopped), a worktree's on its booked port, on 127.0.0.1 (epic
+      `epic-engine` I455)
+  - what waits for main, for each repo the hub serves:  what merged into main lately (each branch that brought commits
+    of its own, never one that only merged main into itself), each epic worktree's commits not merged, phase, open
+    issues, todos and questions, busy or idle
+  - it looks every 10 seconds, and when a session starts (the `SessionStart` hook
+    [server-keeper.mjs](hooks/server-keeper.mjs) runs `epic hub kick`)
+  - the ONLY one that starts, stops or restarts a main checkout's page server:  the kit's `PageServer.ensure()`,
+    `stop()` and `restart()` ask it (`SRV.KeeperLink`, its record `~/.spell/server-keeper.json`)
+    - agents ask it with `epic servers start|stop|restart|status <server> [--repo <name>]` ([Servers.ts](src/command/Servers.ts);
+      epic `epic-engine` P84), the calls the Servers tab's buttons make;  the guard above refuses the other ways
+    - what it starts carries its mark (`SPELL_KEEPER_START`), so main's page server and editor, which refuse an
+      agent's start (`SRV.KeeperLink.refusedStart()`), know it was the keeper
+  - a stop by hand is held until Start (`~/.spell-epic/server-keeper.json`);  its own code changing, it hands over to a
+    fresh hub on its port
+  - the page server's certificate WATCHED (epic `epic-engine` T164):  each look compares its two files
+    (`~/.spell/localhost/`, `HttpsSwitch.filesStamp`) with the last;  made, made again or deleted (the tab's card, or
+    `spell server certificate` / `--undo` in a terminal), every main page server not held stopped is restarted, so it
+    takes HTTPS or drops it with no restart by hand
+  - HANDS OFF (T164):  a switch at the top of the Servers tab, kept in the hold file (`handsOff`) until turned off;
+    while it's on, the keeper starts, stops and restarts nothing of main's by itself (no keep-alive, no editor restart,
+    no repo's own server, no certificate restart) but still looks and reports, the tab's dot saying so;  the person's
+    own buttons and Restart all still work;  turned off, it looks at once:  what's down comes back, a certificate
+    changed meanwhile is taken up
+  - the top bar's Servers tab ([serverRoutes.ts](src/server/serverRoutes.ts), its page
+    [servers-page.html](src/tools/servers-page.html)):  `GET /api/servers`, `/api/servers/dot`, `POST
+    /api/servers/<start|stop|restart>`, `POST /api/servers/https` (`{ turn }`), `POST /api/servers/hands-off` (`{ on }`),
+    `POST /api/servers/restart-all`;
+    what just merged into main and what waits:  `ServerFacts`, no Claude call
+    - the page (epic `epic-engine` T162):  nothing folds;  "main" and its servers as cards, what merged into main
+      lately, main's commits not on GitHub, then each epic's worktree (`⎇ <name>`):  its servers' cards, what it
+      hasn't merged
+      - I449:  cards three a row at most, the name the link, page server, editor, hub, then a repo's own;  the
+        worktrees newest worked on first (its last commit, or a file changed since), "last commit 3 weeks ago" beside each
+      - I451:  each card's address under its name, its state on the right, and under the state its buttons as icons
+        (restart, stop;  start when stopped);  one a server can't take drawn disabled, its tooltip saying why (the hub
+        keeps the rest, so it never stops;  an editor goes with its page server);  what merged into main, and each
+        worktree's open work, as rows in columns, nothing wrapping, the GitHub line their quiet last row
+      - I456:  the state is ONE icon on the right of the name, its words the tooltip ("Running", "Down:  <why>"):  a
+        green circle check, a red triangle, a grey circle while stopped, a turning blue notch while starting;  under
+        it the buttons, a tight group (compact icon buttons, 4px apart), the state centred over the last;  the name
+        never cut at three a row
+      - T164, I454, I456:  the SECURE LINK, HTTPS on the page servers (`HttpsSwitch`, on `SRV.LocalCertificate`, none
+        of its logic copied), is ONE lock, before main's page server's address, and it IS the switch:  closed while on
+        (a click turns it off), open while off, waiting for the password or expired (a click turns it on;  disabled,
+        saying why, with no mkcert);  its tooltip says which first, "browsers use HTTP/2";  a worktree's page server on
+        its https address shows a plain lock there;  only the page servers have it, the editor and the hub stay plain
+        HTTP (a card of its own before I454 read as if every server had it);  Turn on makes the certificate and has
+        the Mac ask for the password in its own window (`trustInWindow()`, the person's login keychain:  the hub has
+        no terminal for `sudo`);  the restart is the keeper's watch, asked to look just after the answer
+      - I455:  a look that fails (the hub handing over, a page server restarting) asks again every 2 seconds, the page
+        as it was and a calm "Reconnecting…";  only after 30 seconds the problem;  a down editor's card says what to
+        do in plain words, never a log file's name
+      - T164:  main's heading has RESTART ALL at its right:  every main page server restarted, its editor with it, one
+        stopped by hand too, just after the answer (the call comes through main's page server);  the hands-off switch
+        first on the page, a notice under it while it's on;  a card whose server isn't running says "Not running"
+        under its name, never its description
+    - VS Code's side bar shows it in a tab of its own, Servers, between Epic Docs and Details
+      ([README-vscode.md](README-vscode.md))
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.
@@ -110,7 +187,7 @@ As WWOD §4, plus these.
   - `spell/epic` (the barrel, `EP`), `spell/epic/markup`, `spell/epic/tool/PlanDoc`,
     `spell/epic/components/epic-page`
   - Same-folder peers stay `./PlanItem`;  NEVER a `../` climb, NEVER a `$/` alias.
-  - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, the extension's `vscode/`) import `src/` the same way.
+  - Files outside `src/` (`tests/`, `hooks/`, the extension's `vscode/`) import `src/` the same way.
     The two files code imports from OUTSIDE `src/` have an explicit key each in the kit's `exports`, for their tests:
     `spell/epic/vscode/src/docUrls.ts`, `spell/epic/vscode/src/ClipboardImage.ts` (epic `epic-friend` P15).
   - Nothing imports by the folder's old name, `spell-epic/...`:  the hooks too say `spell/epic/...`.

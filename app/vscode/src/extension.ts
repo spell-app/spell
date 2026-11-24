@@ -22,7 +22,8 @@ import {
   LanguageClient,
   TransportKind,
   type LanguageClientOptions,
-  type ServerOptions
+  type ServerOptions,
+  type WorkspaceEdit as LspWorkspaceEdit
 } from "vscode-languageclient/node"
 
 import { BubblyDecorations } from "./BubblyDecorations"
@@ -130,7 +131,9 @@ async function startLanguageServer(context: vscode.ExtensionContext): Promise<vo
     options: { cwd: repoRoot }
   }
   const clientOptions: LanguageClientOptions = {
-    documentSelector: RunnerPanel.LANGUAGES.map((language) => ({ scheme: "file", language }))
+    documentSelector: RunnerPanel.LANGUAGES.map((language) => ({ scheme: "file", language })),
+    // an old form's hover ends in a "Fix it" link, `command:spell.fixIt?...`:  trust that one command only
+    markdown: { isTrusted: { enabledCommands: [FIX_IT_COMMAND] } }
   }
   client = new LanguageClient("spell", "Spell", serverOptions, clientOptions)
   client.info(`Language server from ${repoRoot}:  ${choice.reason}`)
@@ -143,10 +146,28 @@ async function startLanguageServer(context: vscode.ExtensionContext): Promise<vo
     vscode.workspace.onDidChangeTextDocument(({ document }) => compiled.sourceChanged(document.uri)),
     vscode.commands.registerCommand("spell.showCompiled", () => showCompiled("js")),
     vscode.commands.registerCommand("spell.showCompiledTypeScript", () => showCompiled("ts")),
-    vscode.commands.registerCommand("spell.showCompiledPython", () => showCompiled("py"))
+    vscode.commands.registerCommand("spell.showCompiledPython", () => showCompiled("py")),
+    vscode.commands.registerCommand(FIX_IT_COMMAND, (edit: LspWorkspaceEdit) => fixIt(edit))
   )
   await client.start()
   BubblyDecorations.register(context, client)
+}
+
+/** The command a "Fix it" link in the language server's hover runs:  `fixIt()`. */
+const FIX_IT_COMMAND = "spell.fixIt"
+
+/**
+ * Apply `edit`, the fix a "Fix it" link on an old form's hover carries (epic `language` P68, Owen's C3):
+ * the same edit as its quick fix, so it's undoable like any edit.
+ * - NEVER throws:  a failure is shown.
+ */
+async function fixIt(edit: LspWorkspaceEdit): Promise<void> {
+  try {
+    if (!client) return
+    await vscode.workspace.applyEdit(await client.protocol2CodeConverter.asWorkspaceEdit(edit))
+  } catch (error) {
+    void vscode.window.showErrorMessage(`Spell couldn't fix it:  ${error instanceof Error ? error.message : error}`)
+  }
 }
 
 /** Stop the language server. */
