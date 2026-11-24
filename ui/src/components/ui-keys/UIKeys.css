@@ -40,5 +40,7 @@
     background: var(--_ui-keys-background);
     color: var(--_ui-keys-color);
     font: 500 var(--_ui-keys-font-size) / 1 var(--ui-font-family-mono);
+    /* a symbol, never its emoji (↩):  the caps' text asks for it too (`TEXT_FORM`) */
+    font-variant-emoji: text;
   }
 }
