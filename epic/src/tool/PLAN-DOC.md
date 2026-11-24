@@ -894,6 +894,9 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
     - None:  a card born noted (`at` alone).
     - Spinner off.
     - `done --filed "<what>"`, the older spelling, writes the same Noted card.
+    - Never finished work:  a card starting `Fixed`, `Done`, `Built` or `Merged` is refused (epic `epic-engine` I452),
+      saying to run `fixed` / `done` once merged, `underway` while the merge waits.
+      The end-of-turn tidy marks an older one fixed once the sha it names is on `main` (`StaleUnderway`).
   - `inbox apply`:  a card born NOTED for each of these (none for an approval):
     - each todo it files (Q19):  `Made todo T23 to follow this up.`
       - a pick has none since I153:  its set's `chosen-on` and `chosen-note`, drawn in its Choices

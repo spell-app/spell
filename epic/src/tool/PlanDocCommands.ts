@@ -1037,6 +1037,9 @@ export class PlanDocCommands {
    *   - the spinner off
    *   - `inbox apply` writes these itself for picks, todos and new items (Q19)
    *   - `done --filed "<what>"`, the older spelling, means `noted` too:  what was filed is a record
+   *   - REFUSED when it says the work is finished (`Fixed in <sha>`, `Done`, `Built`, `Merged`;  epic `epic-engine`
+   *     I452):  a Noted card turned the item red with its fix waiting, and nothing ever said `fixed`;
+   *     `StaleUnderway.refuseFinishedNote()` says what to run instead
    * - reading, summary:  HTML, as `updated` takes (plain text works as it is), or `--file <html>` for a long one
    *   - in short paragraphs or bullets (`CardText`, I339):  a blank line starts a paragraph, `- ` lines are bullets;
    *     a paragraph or bullet over `CardText.MOST_WORDS` words is refused
@@ -1063,6 +1066,7 @@ export class PlanDocCommands {
       title = await this.edit(file, (plan) => plan.addStatus(id, need(text, "the reading (html)")))
     else if (state === "noted" || (state === "done" && filed !== undefined)) {
       const what = state === "noted" ? need(text, "what was recorded (html)") : String(filed)
+      StaleUnderway.refuseFinishedNote(id, what)
       title = await this.edit(file, (plan) => plan.noteStatus(id, what, { quiet }))
       said = "noted"
     } else if (state === "done") {
@@ -2072,6 +2076,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    an underway card turns noted;  spinner off.  inbox apply
                                                    writes these for picks, todos and new items itself
                                                    (done --filed "html":  the older spelling, the same)
+                                                   NEVER finished work ("Fixed in <sha>", Done, Built, Merged:
+                                                   refused):  merged is fixed / done, waiting is underway
   original <name> <id> --file <html> [--as-of "YYYY-MM-DD HH:MM"]
                                                    put earlier text (from git) into an item's Original
                                                    Discussion:  as first written, or dated --as-of (when it was

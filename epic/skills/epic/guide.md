@@ -170,6 +170,8 @@ Then, for what it printed:
    Work in the item:  no proposed fix yet?  write one first, in its "Proposed fix" field;  then build it, commits named
    `<epic> I3:  ...`.  Done:  `epic update <epic>#I3 fixed "<what changed>"` turns it orange (light orange, from their words), for the person to review;
    their Approve closes it.  Never `epic close` it yourself.
+   Committed but not merged yet:  keep it `underway` ("merging next");  commit, merge, THEN `fixed`.
+   Never a Noted "Fixed in <sha>":  it turns the item red, and the tool refuses it (I452).
    Every card (underway, done, fixed, noted):  a short lead sentence saying what happened, then short paragraphs or
    `- ` bullets, one idea each (`\n\n` between);  code names and numbers only where the reader needs them;
    the full story goes in the item's body (`epic details --append`).  The tool refuses a paragraph over 50 words.
