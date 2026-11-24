@@ -424,6 +424,11 @@ function builtInFilesBesideTheirCode(): Plugin {
 /** The editor's own Spell, the group `@spell/editor`:  any other `.spell` is a program's, read as text (a test's `?raw`). */
 const LAYOUT_FOLDER = "/spaces/@spell/editor/"
 
+/** Is `file` (a path, its query gone) a Spell file of the editor's own Spell (`LAYOUT_FOLDER`)? */
+function isEditorSpell(file: string): boolean {
+  return /\.spell(?:ml)?$/.test(file) && file.includes(LAYOUT_FOLDER)
+}
+
 /** Where the editor's own Spell keeps its last good compile:  the app's `build/`, never committed, one file per project. */
 const LAST_GOOD_FOLDER = "app/build/editor-pieces"
 
@@ -437,6 +442,9 @@ const LAST_GOOD_FOLDER = "app/build/editor-pieces"
  *   - the dev server:  Spell that doesn't compile falls back to its last good compile, and the module tells the
  *     editor why (`layoutPieceBroken()`), which says so in plain words
  *   - a build, or a test, or a project never compiled before:  it stops, saying why, so nothing broken ships
+ * - The file changing on disk (a Publish, or an edit by hand) RELOADS the editor's page, never a hot update:
+ *   a hot update put the new Spell on the copy's runtime while the old menus were still drawn, and drew them half
+ *   one, half the other (epic `editor` I329).  An edit in the editor is your draft, so it never changes this file.
  */
 function compiledSpell(): Plugin {
   let canFallBack = false
@@ -446,9 +454,14 @@ function compiledSpell(): Plugin {
     configResolved(config) {
       canFallBack = config.command === "serve" && !process.env.VITEST
     },
+    handleHotUpdate({ file, server }) {
+      if (!isEditorSpell(file)) return
+      server.ws.send({ type: "full-reload" })
+      return []
+    },
     load(id) {
       const file = id.split("?")[0]!
-      if (!/\.spell(?:ml)?$/.test(file) || !file.includes(LAYOUT_FOLDER)) return null
+      if (!isEditorSpell(file)) return null
       this.addWatchFile(file)
       const bin = path.join(TOP_REPO, "bin/spell.mjs")
       const { status, stdout, stderr } = spawnSync(process.execPath, [bin, "compile", path.dirname(file), "--stdout"], {

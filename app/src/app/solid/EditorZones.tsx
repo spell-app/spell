@@ -176,9 +176,9 @@ function drawStandIns(EditorPart: new () => object, core: ZoneCore): void {
     configurable: true,
     writable: true,
     value: function drawStandIn(this: object) {
-      const standIn = document.createElement("span")
+      defineStandIn()
+      const standIn = document.createElement(STAND_IN_TAG)
       standIn.className = "EditorZoneStandIn"
-      standIn.style.cssText = STAND_IN_STYLE
       const [open, close] = [ANGLE_OPEN, ANGLE_CLOSE].map((angle) => {
         const mark = document.createElement("span")
         mark.style.cssText = ANGLE_STYLE
@@ -191,20 +191,55 @@ function drawStandIns(EditorPart: new () => object, core: ZoneCore): void {
   })
 }
 
+/****************
+ * ### `<editor-stand-in>`
+ * What the editor draws in place of one of its own parts, in the zones:  a tag pill naming it, `⟨tools⟩`.
+ * - Looks as where it lands asks, decided as it's added to the page (epic `editor` I327, T146):
+ *   - in a row (the top bar, a menu):  a pill 24px tall, centred on the row, as every other pill in it
+ *   - a pane of a split panel (`editor layout`):  filling its pane, so `⟨app⟩` is as tall as code and the
+ *     Program panel together, as the editor lays them out
+ * - An element of its own, not a `<span>`:  only on being added does it know which, and a span can't hear that.
+ * - Its look is written on it, not in `EditorZones.css`:  a view with a `<css>` of its own draws inside its element
+ *   (`hasOwnCss()`), where the page's sheets don't reach.
+ ****************/
+class EditorStandIn extends HTMLElement {
+  connectedCallback(): void {
+    this.style.cssText = STAND_IN_STYLE + (this.parentElement?.localName === "ui-split-panel" ? IN_PANE : IN_ROW)
+  }
+}
+
+/** A stand-in's tag. */
+const STAND_IN_TAG = "editor-stand-in"
+
+/** Define `<editor-stand-in>`, once per page. */
+function defineStandIn(): void {
+  if (!customElements.get(STAND_IN_TAG)) customElements.define(STAND_IN_TAG, EditorStandIn)
+}
+
 /**
  * A stand-in's look:  the code pane's tag pill (`bubbly.css`, `.bubbly-tag-pill`), in a view's purple, its ends cut
  * to points, its name bold between steep angle brackets.
- * - Written on it, not in `EditorZones.css`:  a view with a `<css>` of its own draws inside its element
- *   (`hasOwnCss()`), where the page's sheets don't reach.
- * - Its height pinned:  a pane's split panel (`<ui-split-panel>`) sizes its children itself, and squeezed a pill in a
- *   column of panes to nothing.
  */
 const STAND_IN_STYLE =
-  "display: inline-flex; flex: none; align-items: center; gap: 3px; height: 24px; min-height: 24px; max-height: 24px; " +
+  "display: inline-flex; align-items: center; justify-content: center; gap: 3px; box-sizing: border-box; " +
   "margin: 2px; padding: 0 9px; " +
   "border-radius: 7px / 12px; corner-shape: bevel; white-space: nowrap; font-size: 13px; font-weight: 650; " +
   "color: light-dark(#1f1f26, #f6f5fb); " +
-  "background: light-dark(color-mix(in srgb, #7c5cd6 20%, white), color-mix(in srgb, #7c5cd6 34%, #1c1b22))"
+  "background: light-dark(color-mix(in srgb, #7c5cd6 20%, white), color-mix(in srgb, #7c5cd6 34%, #1c1b22)); "
+
+/**
+ * ... in a row:  24px, centred on the row.
+ * - Centred, not stretched:  a row stretches its items, and a pill pinned at 24px in it sat at the row's top,
+ *   while one inside a capsule (`⟨tools⟩`) sat at its centre, 6px lower (I327).
+ */
+const IN_ROW = "flex: none; align-self: center; height: 24px"
+
+/**
+ * ... a pane of a split panel:  filling it, never less than a pill.
+ * - The split panel sizes its panes along its length (their `flex`);  across, the pane stretches.
+ * - Its least height kept:  the panel shrinks its panes to nothing (`min-height: 0`), which squeezed a pill away.
+ */
+const IN_PANE = "align-self: stretch; min-height: 24px; min-width: 24px"
 
 /** A stand-in's angle brackets:  faint, heavy, as the code pane draws a tag's. */
 const ANGLE_STYLE = "font-weight: 800; opacity: 0.45"

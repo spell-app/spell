@@ -1,6 +1,7 @@
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
+import { boxesIn, expectCentred, expectSpanning } from "./alignment"
 import { EDITOR, SERVING } from "./runningEditor"
 
 /**
@@ -9,6 +10,7 @@ import { EDITOR, SERVING } from "./runningEditor"
  * - What the editor draws in a view's place is a tag pill naming it, `⟨spell menu⟩`, never words around it (T141).
  * - A menu shows every row it can, the ones the editor hides here too, as the bar's menus draw them (T142).
  * - About Spell and Versions show inline, their title, words and buttons, never over the page (T143).
+ * - The pills line up:  a row of them on one line (I327);  a pane of the layout as tall as the panes beside it (T146).
  * - Read only:  it writes nothing, so it never races another change to the editor's Spell.
  * - Needs this checkout's editor running:  `spell server start all`.  Skips itself when it isn't, as in CI.
  */
@@ -71,5 +73,21 @@ describe.skipIf(!SERVING)("the editor's own Spell, in its zones", { timeout: 180
         )
       )
     ).toBe(false)
+  })
+
+  /** The zone drawing the view `name`. */
+  const zone = (name: string) =>
+    page.locator(".EditorZone").filter({ has: page.locator(".EditorZoneTitle", { hasText: name }) })
+
+  test("the top bar's pills sit on one line, the one in the tools' capsule too (I327)", async () => {
+    expectCentred(await boxesIn(zone("editor bar"), ".EditorZoneStandIn"))
+  })
+
+  test("the app and the Inspector are as tall as the code and the Program panel together (T146)", async () => {
+    const boxes = await boxesIn(zone("editor layout"), ".EditorZoneStandIn")
+    const named = (name: string) => boxes.find((box) => box.name === `⟨${name}⟩`)!
+    const column = { top: named("code").top, bottom: named("program panel").bottom }
+    expectSpanning(named("app"), column)
+    expectSpanning(named("inspector"), column)
   })
 })

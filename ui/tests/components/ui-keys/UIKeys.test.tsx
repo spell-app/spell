@@ -41,6 +41,13 @@ describe("<ui-keys>", () => {
     expect(spoken).toBe("Shift Option ↑, or esc")
   })
 
+  it("draws Return as the plain ↩ symbol, never its emoji, wherever its cap is drawn (epic `editor` I328)", async () => {
+    const { root, caps } = await keys(`shortcut="mod+Enter" platform="apple"`)
+    expect(caps).toEqual([["⌘", "↩︎"]])
+    const key = root.querySelector<HTMLElement>("[part~=key]")!
+    expect(getComputedStyle(key).getPropertyValue("font-variant-emoji")).toBe("text")
+  })
+
   it("reads a shortcut as `UI.keyboard` does:  the plus key, its keys in the order written, a key as written", async () => {
     expect((await keys(`shortcut="mod++" platform="other"`)).caps).toEqual([["Ctrl", "+"]])
     expect((await keys(`shortcut="shift+mod+PageUp" platform="other"`)).caps).toEqual([["Shift", "Ctrl", "PageUp"]])

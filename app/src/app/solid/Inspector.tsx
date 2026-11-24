@@ -1845,6 +1845,10 @@ const CONTROL_TAGS = new Set([
   "ui-progress"
 ])
 
+/** A content block, and its attribute that makes its words Markdown:  `isWordsBlock()`. */
+const CONTENT_TAG = "ui-content"
+const MARKDOWN_ATTRIBUTE = "markdown"
+
 /**
  * What else a click selects, in the app's own drawing:  what the palette adds, so a click finds it again.
  * - Not in a drawn thing's shadow root:  there it's how the thing looks, and a click means the thing.
@@ -1870,7 +1874,17 @@ const ADDED_TAGS = new Set([
  */
 function isClickableTag(element: Element): boolean {
   if (CONTROL_TAGS.has(element.localName)) return true
-  return (ADDED_TAGS.has(element.localName) || isWrittenTag(element)) && !(element.getRootNode() instanceof ShadowRoot)
+  const isAdded = ADDED_TAGS.has(element.localName) || isWordsBlock(element) || isWrittenTag(element)
+  return isAdded && !(element.getRootNode() instanceof ShadowRoot)
+}
+
+/**
+ * Is `element` a block of words, as a `<ui-text>` is:  a `<content markdown>`, whose words are its Markdown
+ * (epic `editor` T148).
+ * - Any other `<ui-content>` is a box of parts:  a click on it means what it's in (a card).
+ */
+function isWordsBlock(element: Element): boolean {
+  return element.localName === CONTENT_TAG && element.hasAttribute(MARKDOWN_ATTRIBUTE)
 }
 
 /**

@@ -86,6 +86,19 @@ export function isExampleProject(projectPath: string): boolean {
 }
 
 /**
+ * The group the editor's own Spell is a project of (epic `editor` P22):  `@spell/editor/spell-editor`.
+ * - Run in the app pane, its views show as zones, one each (`<EditorZones>`, T63), not as an app.
+ * - A save to one is always your draft, never its file:  the editor you're using reads the published file, and
+ *   changes only on Publish (J73;  `project-utils`' `savesInPlace()`).
+ */
+export const EDITOR_PIECES = "@spell/editor"
+
+/** Is project `projectPath` one of the editor's own pieces (`EDITOR_PIECES`):  `@spell/editor/spell-editor`? */
+export function isEditorPieceProject(projectPath: string): boolean {
+  return projectPath.startsWith(`${EDITOR_PIECES}/`)
+}
+
+/**
  * A project of a group's list, as the home page reads it:  `SP.ProjectListEntry`, and what only the home page needs.
  */
 export type ProjectListEntryWithHome = SP.ProjectListEntry & {
@@ -211,7 +224,7 @@ export const PROJECT_GROUPS: SP.ProjectRootSpec[] = [
     icon: "puzzle piece"
   },
   {
-    path: "@spell/editor",
+    path: EDITOR_PIECES,
     space: "@spell",
     domain: "editor",
     title: "The editor",

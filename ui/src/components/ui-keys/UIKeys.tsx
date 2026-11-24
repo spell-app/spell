@@ -134,6 +134,15 @@ const CHORD = "chord"
 /** One cap's class. */
 const KEY = "key"
 
+/**
+ * After a symbol that also has an emoji form (↩), the variation selector that asks for the plain symbol (U+FE0E).
+ * - Without it, macOS draws ↩ as a blue emoji, in every menu and dialog that shows a shortcut (epic `editor` I328).
+ * - Of the caps here, only ↩ has an emoji form:  ⌘ ⌃ ⌥ ⇧ ⇥ ⌫ ⌦ and the plain arrows (↑ ↓ ← →) have none.
+ * - In the text itself, not only the CSS (`font-variant-emoji`), so a cap stays a symbol wherever its text is drawn:
+ *   `<ui-action>` and the Keyboard Shortcuts dialog draw `capsOf()`'s text in their own elements.
+ */
+const TEXT_FORM = "︎"
+
 /** A key's cap:  a symbol, drawn as it is;  or a word, by the text the page's language says it with. */
 type Cap = string | { readonly word: KeyCapText }
 
@@ -143,7 +152,7 @@ const APPLE_CAPS: Readonly<Record<string, Cap>> = {
   ctrl: "⌃",
   alt: "⌥",
   shift: "⇧",
-  enter: "↩",
+  enter: `↩${TEXT_FORM}`,
   escape: "esc",
   tab: "⇥",
   backspace: "⌫",

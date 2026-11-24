@@ -9327,6 +9327,11 @@
           "description": "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name was `text-align`."
         },
         {
+          "name": "markdown",
+          "kind": "keyOnly",
+          "description": "Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.  Without it, its content shows as written."
+        },
+        {
           "name": "vertical-align",
           "kind": "verticalAlign",
           "values": [
@@ -9528,6 +9533,10 @@
         {
           "name": "content",
           "description": "The content box."
+        },
+        {
+          "name": "markdown",
+          "description": "With `markdown`:  the `<ui-markdown>` its words are drawn in."
         }
       ],
       "states": [

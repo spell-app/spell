@@ -1,47 +1,53 @@
 // By file:  the drag in progress is all this needs
-import { Dragging } from "spell/util/Dragging"
+import { Dragging } from "./Dragging"
 
 /****************
  * ### `LongPress`
- * A finger held still on a view is a long press:  a view's `on long press` hears it, and on a phone or tablet with no
- * mouse it's also a right click, opening the view's right-click menu.
- * - Held `LONG_PRESS_MS` without moving more than `LONG_PRESS_MOVE_PX`:  a `LONG_PRESS_EVENT` on what was pressed
- *   (`SpellElement.onThingLongPress()`, epic `language` T154).
- *   - A view whose thing takes it (`on long press`, up its chain) says so, `preventDefault()`:  the press is that.
- *   - Else, on a device with no mouse (`hasNoMouse()`):  a `contextmenu` event at the press point, so every right-click
- *     menu opens from it as it is, and `on right click` hears it (`SpellElement.onThingRightClick()`, the editor's own
- *     in Edit;  epic `language` P62).
+ * A press held still is a long press:  ONE detector for the page, sending `ui-long-press` (`LONG_PRESS_EVENT`) to what
+ * was pressed (epic `editor` T157;  first a finger's alone, epic `language` T154).
+ * - Its owners say which presses are theirs, and for which pointers (`listen(isFor)`):
+ *   - a program's views, fingers only (`SpellElement`):  `on long press`, `on long-press`, hears it;
+ *     with a mouse, a press and hold on a card is still the card's own drag
+ *   - the editor in Edit, a mouse too:  a long press picks a part up to move it (I330)
+ * - Held `LONG_PRESS_MS` without moving more than `LONG_PRESS_MOVE_PX`:  a cancelable `MouseEvent` at the press point,
+ *   bubbling and composed.
+ *   - Whoever takes it says so, `preventDefault()`:  the press is that.
+ *   - Else, for a finger on a device with no mouse (`hasNoMouse()`):  a `contextmenu` event at the press point, so
+ *     every right-click menu opens from it as it is, and `on right click` hears it (`SpellElement.onThingRightClick()`,
+ *     the editor's own in Edit;  epic `language` P62).
  *   - With a mouse, a right click stays the mouse's:  a long press is only a long press.
  * - One press, whatever the phone:
  *   - Android Chrome sends its own `contextmenu` for a long press;  iPhone Safari never does.
  *   - Whichever comes first is the long press;  the browser's own is swallowed.
  * - Nothing when, before then:
- *   - the finger lifts (a tap), or moves (a drag, a scroll)
+ *   - the pointer lifts (a tap, a click), or moves (a drag, a scroll)
  *   - a second finger comes down (a pinch)
  *   - a drag has started (`Dragging.current`)
  * - Once it's a long press, the press is its:
  *   - whatever else was watching it hears `pointercancel`, so a card held under it never drags
  *   - the click the lift would make is swallowed
- *   - so is the text selection a held finger starts (`selectstart`)
- * - Only fingers:  a mouse and a pen right-click as ever.
- *   Nor a press in a text field:  holding there is the field's, to select and paste.
- * - Page-wide, ONE per page however many runtime copies run on it (`listen()`):
- *   each would otherwise send its own events.
- * - Plain DOM:  no Solid, no core.  Its owner says which presses are its (`isFor`).
+ *   - so is the text selection a held press starts (`selectstart`)
+ * - The mouse's main button only;  never a press in a text field:  holding there is the field's, to select and paste.
+ * - No keyboard long press:  a key held down repeats.  What a long press does needs another way by keyboard.
+ * - Page-wide, ONE per page however many runtime copies run on it, each owner added to it (`listen()`).
+ * - Plain DOM:  no Solid, no core.  Taken by file, `spell/util/LongPress`, in no barrel (as `Dragging`).
  ****************/
 export class LongPress {
   /**
-   * Send a long press, for each press `isFor` says is a view's, e.g. on a `<solitaire-card>`.
-   * - Once per page:  again does nothing, even from another runtime copy.
+   * Send a long press for each press `isFor` says is its owner's, e.g. a finger on a `<solitaire-card>`.
+   * - The page's ONE detector, made by the first call, even from another runtime copy;  each later `isFor` is added.
+   * - The same `isFor` twice is kept once.
    */
-  static listen(isFor: (path: readonly EventTarget[]) => boolean): void {
-    const page = globalThis as typeof globalThis & { [LISTENING]?: true }
-    if (page[LISTENING]) return
-    page[LISTENING] = true
-    new LongPress(isFor)
+  static listen(isFor: LongPressOwner): void {
+    const page = globalThis as typeof globalThis & { [LISTENING]?: LongPress }
+    const detector = (page[LISTENING] ??= new LongPress())
+    if (!detector.owners.includes(isFor)) detector.owners.push(isFor)
   }
 
-  private constructor(private readonly isFor: (path: readonly EventTarget[]) => boolean) {
+  /** Who a press may be a long press for:  any one of them saying so makes it one. */
+  private readonly owners: LongPressOwner[] = []
+
+  private constructor() {
     const capture = { capture: true }
     window.addEventListener("pointerdown", this.onDown, capture)
     window.addEventListener("pointermove", this.onMove, capture)
@@ -51,10 +57,10 @@ export class LongPress {
     window.addEventListener("selectstart", this.onSelectStart, capture)
   }
 
-  /** The finger held down now, till it's a long press, lifts, moves or is joined by another. */
+  /** The press held down now, till it's a long press, lifts, moves or a second finger joins it. */
   private press: Press | undefined
 
-  /** The finger whose press was a long press, till it lifts:  its click is swallowed. */
+  /** The pointer whose press was a long press, till it lifts:  its click is swallowed. */
   private menuPointer: number | undefined
 
   /** What we send for a long press:  never mistaken for the browser's own. */
@@ -66,11 +72,13 @@ export class LongPress {
   private readonly onDown = (event: PointerEvent) => {
     // a second finger:  a pinch, never a long press
     if (this.press) return this.end()
-    if (event.pointerType !== "touch" || !event.isPrimary) return
+    if (!event.isPrimary || (event.pointerType !== "touch" && event.button !== 0)) return
     const path = event.composedPath()
-    if (LongPress.isInATextField(path) || !this.isFor(path)) return
+    const { pointerType } = event
+    if (LongPress.isInATextField(path) || !this.owners.some((isFor) => isFor(path, pointerType))) return
     const timer = setTimeout(() => this.open(), LONG_PRESS_MS)
-    this.press = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, target: path[0], timer }
+    const { pointerId, clientX: x, clientY: y } = event
+    this.press = { pointerId, pointerType, x, y, target: path[0], timer }
   }
 
   private readonly onMove = (event: PointerEvent) => {
@@ -114,7 +122,7 @@ export class LongPress {
   }
 
   /**
-   * Held long enough:  the long press, where the finger is;  with no mouse and nothing taking it, the right-click menu.
+   * Held long enough:  the long press, where the press is;  for a finger, with no mouse and nothing taking it, the right-click menu.
    * - Nothing happens if a drag has started meanwhile.
    */
   private open() {
@@ -127,12 +135,12 @@ export class LongPress {
     const at = { bubbles: true, cancelable: true, composed: true, clientX, clientY }
     const longPress = this.send(new MouseEvent(LONG_PRESS_EVENT, at))
     press.target.dispatchEvent(longPress)
-    if (!longPress.defaultPrevented && LongPress.hasNoMouse()) {
+    if (!longPress.defaultPrevented && press.pointerType === "touch" && LongPress.hasNoMouse()) {
       press.target.dispatchEvent(this.send(new MouseEvent("contextmenu", { ...at, button: 2, buttons: 0 })))
     }
     // the press is the long press's now:  e.g. a card held under it never drags (`Dragging`)
     window.dispatchEvent(
-      this.send(new PointerEvent("pointercancel", { pointerId: press.pointerId, pointerType: "touch" }))
+      this.send(new PointerEvent("pointercancel", { pointerId: press.pointerId, pointerType: press.pointerType }))
     )
   }
 
@@ -173,10 +181,12 @@ export class LongPress {
   }
 }
 
-/** A finger held down, waiting to be a long press. */
+/** A press held down, waiting to be a long press. */
 type Press = {
   /** its pointer:  another finger is a pinch */
   pointerId: number
+  /** a finger, a mouse or a pen:  only a finger's may be a right click too */
+  pointerType: string
   /** where it came down, in the window */
   x: number
   y: number
@@ -187,18 +197,19 @@ type Press = {
 }
 
 /**
- * The event a long press sends to what was pressed, a `MouseEvent` at the press point:  `on long press` hears it.
+ * The event a long press sends to what was pressed, Spell UI's `ui-long-press`, a `MouseEvent` at the press point:
+ * a program's `on long press` hears it, and so can any element.
  * - Cancelable:  a view whose thing takes it cancels it, so it's no right click as well.
  */
-export const LONG_PRESS_EVENT = "spell-long-press"
+export const LONG_PRESS_EVENT = "ui-long-press"
 
 /** Some pointer that points finely is here:  a mouse, a trackpad. */
 const FINE_POINTER = "(any-pointer: fine)"
 
-/** How long a finger is held still for a long press, in ms:  about what a phone's own long press takes. */
+/** How long a press is held still for a long press, in ms:  about what a phone's own long press takes. */
 export const LONG_PRESS_MS = 500
 
-/** How far a held finger may wander and still be a long press, in px:  more is a drag or a scroll. */
+/** How far a held press may wander and still be a long press, in px:  more is a drag or a scroll. */
 export const LONG_PRESS_MOVE_PX = 8
 
 /** How long after a long press the browser's own events for the same press may still come, in ms. */
@@ -208,4 +219,10 @@ const ECHO_MS = 1000
 const TEXT_FIELD_SELECTOR = "input, textarea, [contenteditable]:not([contenteditable=false])"
 
 /** Marks the page as listening:  one `LongPress` per page. */
-const LISTENING = Symbol.for("spell-app:long-press")
+const LISTENING = Symbol.for("spell:long-press")
+
+/**
+ * Says whether a press is a long press for its owner:  what it pressed (`composedPath()`), and its pointer,
+ * `"touch"`, `"mouse"` or `"pen"`.
+ */
+export type LongPressOwner = (path: readonly EventTarget[], pointerType: string) => boolean

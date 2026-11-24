@@ -775,6 +775,15 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 - **Copies:**  `PhaseDrag` (`epic/src/components/epic-section/PhaseDrag.ts`), a smaller one for an epic page's phases.
 - **Instead of:**  pointer listeners and a threshold of its own.
 
+### A long press
+
+A press held still, about half a second:  `ui-long-press` on what was pressed, the click after it swallowed.
+- **It is:**  `LongPress` (`src/util/LongPress.ts`, epic `editor` T157):  ONE per page, each owner saying which
+  presses are its, and for which pointers (`LongPress.listen(isFor)`).
+- **Used by:**  a program's views, fingers only (`SpellElement`:  `on long press`, else a right-click menu on a phone);
+  the editor's long press to move a part in Edit (I330).
+- **Instead of:**  a timer on `pointerdown` of its own.
+
 ### The highlighted option of a list
 
 - **It is:**  `F.HighlightedOption` (`ui/src/elements/HighlightedOption.ts`):  the ONE highlighted option a

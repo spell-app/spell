@@ -10277,6 +10277,16 @@ export interface UIContentAttributes {
    */
   "prop:align"?: "left" | "center" | "right" | "justified"
   /**
+   * Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.  Without it, its content shows as written.
+   * - takes:  flag (present / absent)
+   */
+  markdown?: boolean | ""
+  /**
+   * `markdown`, as the DOM element's property.
+   * @deprecated write `markdown` -- `prop:` stays only for compiled spell
+   */
+  "prop:markdown"?: boolean | ""
+  /**
    * In an item or a list:  `top`, `middle` or `bottom` against the image or icon beside it.
    * - takes:  `top` · `middle` · `bottom`
    */

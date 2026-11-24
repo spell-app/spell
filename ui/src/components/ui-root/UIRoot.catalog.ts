@@ -322,7 +322,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "resizable"
     ]
   },
-  "ui-content": { folder: "ui-parts", attributes: ["image", "scrolling", "align", "vertical-align"] },
+  "ui-content": { folder: "ui-parts", attributes: ["image", "scrolling", "align", "markdown", "vertical-align"] },
   "ui-date": { folder: "ui-parts", attributes: ["datetime"] },
   "ui-description": { folder: "ui-parts", attributes: [] },
   "ui-detail": { folder: "ui-parts", attributes: ["link"] },

@@ -185,6 +185,7 @@ const environment = {
    * Whether saving a built-in project's file (`@spell/library/OrgChat/OrgChat.spell`) writes the file itself,
    * not your draft of it (epic `mockup` P20, r3):  so the edit shows in git.
    * - Never an example's or a guide's (epic `mockup` T52):  your draft, which "Update the Example" publishes.
+   * - Never one of the editor's own pieces (epic `editor` J73, I329):  your draft, which Publish makes the editor's.
    * - On by default where the built-ins are this checkout's own source, as the kit's page server serves them;
    *   off in the published `spell`, and wherever `SPELL_BUILTINS_DIR` moves them (tests).
    * - `SPELL_EDITS_BUILTINS`:  `1` turns it on, `0` off.
