@@ -115,7 +115,7 @@ export class FileLock {
 
   /** Run `fn` holding the lock;  BLOCKS the thread while waiting (`waitUntilSync()`), for sync scripts. */
   run<T>(fn: () => T): T {
-    if (HELD_HERE.has(this.lockFile)) throw this.heldHere()
+    if (this.isHeldHere()) throw this.heldHere()
     // Takes it when free, looking every 0.1s;  gives up after `wait`
     if (!waitUntilSync(this.attempt(), { timeout: this.wait / 1000 })) throw this.timeout()
     try {
@@ -186,6 +186,19 @@ export class FileLock {
   /** the error for a lock held too long, naming its holder when the lock file says */
   private timeout(): FileLockError {
     return new FileLockError(`${this.lockFile} held for ${this.wait / 1000}s${FileLock.byWhom(this.holder())}:  stuck?`)
+  }
+
+  /**
+   * Does this process hold the lock now, and not so long that it's stale (`stale`, which `tryAcquire()` takes over)?
+   * - so a blocking wait for it could only time out (`run()`)
+   */
+  private isHeldHere(): boolean {
+    if (!HELD_HERE.has(this.lockFile)) return false
+    const holder = this.holder()
+    if (holder?.pid === process.pid && !this.isStale(holder)) return true
+    // gone, taken over by another, or stale:  a wait may end
+    HELD_HERE.delete(this.lockFile)
+    return false
   }
 
   /** the error for a blocking wait on a lock this process holds itself (`run()`) */
