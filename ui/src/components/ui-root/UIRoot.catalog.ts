@@ -208,6 +208,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "inverted",
       "disabled",
       "loading",
+      "selected",
       "link",
       "target",
       "heading",
