@@ -297,8 +297,8 @@ a "home row" is a view
 	to draw it
 		<menu direction="vertical" size="small" class="SpellMenuHome" ticks>
 			<action "home"/>
-			<action "spell ui"/>
 			<action "about spell"/>
+			<action "spell ui"/>
 			<divider/>
 		</menu>
 
@@ -312,9 +312,9 @@ an "about box" is a view
 			<content>
 				<text paragraph>Write programs in plain words, and see them run as you type.</text>
 				<text paragraph>Spell draws with Spell UI, and runs in your browser.</text>
-				<text color="grey">Version {its version}</text>
 			</content>
 			<actions>
+				<text color="grey">Version {its version}</text>
 				<button appearance="tertiary" link="https://github.com/spell-app/spell" target="_blank" icon="github">Source</button>
 				<button class="approve" color="primary">OK</button>
 			</actions>
