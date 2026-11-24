@@ -111,9 +111,20 @@ a folder of the kit `spell`.
     `stop()` and `restart()` ask it (`SRV.KeeperLink`, its record `~/.spell/server-keeper.json`)
   - a stop by hand is held until Start (`~/.spell-epic/server-keeper.json`);  its own code changing, it hands over to a
     fresh hub on its port
+  - the page server's certificate WATCHED (epic `epic-engine` T164):  each look compares its two files
+    (`~/.spell/localhost/`, `HttpsSwitch.filesStamp`) with the last;  made, made again or deleted (the tab's card, or
+    `spell server certificate` / `--undo` in a terminal), every main page server not held stopped is restarted, so it
+    takes HTTPS or drops it with no restart by hand
+  - HANDS OFF (T164):  a switch at the top of the Servers tab, kept in the hold file (`handsOff`) until turned off;
+    while it's on, the keeper starts, stops and restarts nothing of main's by itself (no keep-alive, no editor restart,
+    no repo's own server, no certificate restart) but still looks and reports, the tab's dot saying so;  the person's
+    own buttons and Restart all still work;  turned off, it looks at once:  what's down comes back, a certificate
+    changed meanwhile is taken up
   - the top bar's Servers tab ([serverRoutes.ts](src/server/serverRoutes.ts), its page
     [servers-page.html](src/tools/servers-page.html)):  `GET /api/servers`, `/api/servers/dot`, `POST
-    /api/servers/<start|stop|restart>`;  what just merged into main and what waits:  `ServerFacts`, no Claude call
+    /api/servers/<start|stop|restart>`, `POST /api/servers/https` (`{ turn }`), `POST /api/servers/hands-off` (`{ on }`),
+    `POST /api/servers/restart-all`;
+    what just merged into main and what waits:  `ServerFacts`, no Claude call
     - the page (epic `epic-engine` T162):  nothing folds;  "main" and its servers as cards, what merged into main
       lately, main's commits not on GitHub, then each epic's worktree (`⎇ <name>`):  its servers' cards, what it
       hasn't merged
@@ -123,6 +134,15 @@ a folder of the kit `spell`.
         (restart, stop;  start when stopped);  one a server can't take drawn disabled, its tooltip saying why (the hub
         keeps the rest, so it never stops;  an editor goes with its page server);  what merged into main, and each
         worktree's open work, as rows in columns, nothing wrapping, the GitHub line their quiet last row
+      - T164:  main's last card is the SECURE LINK's, HTTPS on the page servers (`HttpsSwitch`, on `SRV.LocalCertificate`,
+        none of its logic copied):  On, Off, Needs password or Expired, Turn on and Turn off as its icons (the one that
+        can't, disabled, saying why:  no mkcert, already off);  Turn on makes the certificate and has the Mac ask for
+        the password in its own window (`trustInWindow()`, the person's login keychain:  the hub has no terminal for
+        `sudo`);  the restart is the keeper's watch, asked to look just after the answer
+      - T164:  main's heading has RESTART ALL at its right:  every main page server restarted, its editor with it, one
+        stopped by hand too, just after the answer (the call comes through main's page server);  the hands-off switch
+        first on the page, a notice under it while it's on;  a card whose server isn't running says "Not running"
+        under its name, never its description
     - VS Code's side bar shows it in a tab of its own, Servers, between Epic Docs and Details
       ([README-vscode.md](README-vscode.md))
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App

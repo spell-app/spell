@@ -2,18 +2,24 @@
  * The Servers tab's page script (`servers-page.html`, epic `epic-engine` P82, T162):  draws `/api/servers` (the
  * server keeper's `ServersAnswer`) as Spell UI elements, and asks again every 10 seconds while the page shows.
  * - The page, top to bottom, nothing folding:
- *   - "main":  a card per server of the main checkout (the hub, the page server, the editor, a repo's own)
+ *   - the HANDS-OFF switch (`handsOffSwitch()`, T164):  on, the keeper leaves main's servers alone, and a notice
+ *     under it says so plainly
+ *   - "main", with Restart all at its right (the page server and editor together, `restartAllButton()`, T164):  a card
+ *     per server of the main checkout (the hub, the page server, the editor, a repo's own), and last
+ *     the secure link's card:  HTTPS on the page servers, turned on and off here (`httpsCard()`, epic `epic-engine`
+ *     T164)
  *   - "Merged into main recently":  the branches that landed on main, newest first (`ServerFacts.mergedIntoMain()`),
  *     a row each in columns, and last, quieter, a row per repo for main's commits not on GitHub yet
  *   - each epic's worktree, `⎇ <worktree>`, the one worked on last first, how long ago beside its name:  a card per
  *     server it has, then what it holds that main hasn't got
- * - Each card:  the server's name, a link, and its address under it;  its state on the right, and under the state its
+ * - Each card:  the server's name, a link, and its address under it ("Not running" while it isn't, T164);  its state on the right, and under the state its
  *   buttons, icons only;  three a row at most, fewer as the page narrows (epic `epic-engine` I449, I451).
  * - Built with `document.createElement()`, never markup in strings;  every control a `<ui-button>`.
  * - Start, Restart and Stop POST `/api/servers/<action>` with this page's write token (`SPELL_SERVER.token`);  the
  *   page server hands them on to the hub (`serverRoutes`).
  * - Plain DOM, no imports:  the page loads it as it is, beside the docs bundle;  so `ago()` is its own.
- *   - Its pure parts are exported for its tests (`worktreeOrder()`, `inCardOrder()`, `firstClause()`);  it starts only on its page.
+ *   - Its pure parts are exported for its tests (`worktreeOrder()`, `inCardOrder()`, `firstClause()`, `httpsButtons()`,
+ *     `addressLine()`);  it starts only on its page.
  * - Its own timer, not the kit's `pollWhileVisible()`:  that's for bundled code, and this page has no bundle of its own;
  *   the same rule, by hand:  no look while the page is hidden, one as soon as it shows again.
  */
@@ -62,6 +68,54 @@ const NO_RESTART = {
   editor: "This editor runs inside its page server.\nRestart that server to restart the editor."
 }
 
+/** The secure link's card (`HttpsStatus.state`):  its state's words and colour. */
+const HTTPS_STATES = {
+  on: { words: "On", color: "green" },
+  off: { words: "Off", color: "grey" },
+  "needs-trust": { words: "Needs password", color: "orange" },
+  "out-of-date": { words: "Expired", color: "orange" }
+}
+
+/** The secure link's buttons:  icon, accessible name, tooltip, and the words when it can't */
+const HTTPS_ACTIONS = {
+  on: {
+    icon: "lock",
+    label: "Turn on the secure link",
+    tip: "Turn on the secure link (HTTPS).\nYour Mac will ask for your password one time, to approve it.",
+    whyNot: "The secure link is already on."
+  },
+  off: {
+    icon: "unlock",
+    label: "Turn off the secure link",
+    tip: "Turn off the secure link.\nYour pages open over a plain link (HTTP) again.",
+    whyNot: "The secure link is already off."
+  }
+}
+
+/** What's said while the Mac's password window is open. */
+const HTTPS_ASKING =
+  "Your Mac is asking for your password, to approve the secure link.\nType it in the box that just appeared."
+
+/** The hands-off switch's label, and what's said while it's on (novice voice, checked) */
+const HANDS_OFF_LABEL = "I'm working on the servers myself.  Spell should leave them alone until I turn this off."
+const HANDS_OFF_NOTICE =
+  "Spell won't start, stop or restart your servers under main by itself until you turn the switch off.\n" +
+  "The buttons on each card still work."
+
+/** What a card says under its name while its server isn't running (Owen, T164:  its description wasn't helpful) */
+const NOT_RUNNING = "Not running"
+
+/** Restart all's tooltip */
+const RESTART_ALL_TIP =
+  "Restart the page server and the editor together, so both use your latest changes.\nYour pages reload by themselves."
+
+/** How long Restart all spins:  about as long as a restart takes, ms */
+const RESTART_ALL_WAIT_MS = 5000
+
+/** What's said once it's on:  where to open the pages */
+const HTTPS_ON = (address) =>
+  `Your pages reload to use it, which takes a moment.\nFrom now on, open them at ${address ?? "https://localhost:4747/"}`
+
 /** How each kind of last work is said (`WorktreeWorked.by`):  `last commit 3 weeks ago` */
 const WORKED_WORDS = { commit: "last commit", change: "last change", page: "last worked on" }
 
@@ -70,6 +124,9 @@ const WORKTREE = "⎇"
 
 /** whether a look is under way */
 let isLooking = false
+
+/** whether the secure link is being turned:  a look leaves the message saying so */
+let isTurning = false
 
 /** the element `tag`, with `attributes` and `children` (text or elements) */
 function el(tag, attributes = {}, ...children) {
@@ -117,7 +174,7 @@ async function look() {
     const response = await fetch("/api/servers", { cache: "no-store" })
     const answer = await response.json()
     if (!response.ok) throw new Error(answer.error ?? `The server answered ${response.status}.`)
-    sayProblem()
+    if (!isTurning) sayProblem()
     draw(answer)
   } catch (error) {
     sayProblem("Can't see the servers right now", error.message)
@@ -126,10 +183,10 @@ async function look() {
   }
 }
 
-/** a problem at the top, as a `<ui-message>`;  none:  it goes */
-function sayProblem(heading, words) {
+/** a problem at the top, as a `<ui-message>` (`state`:  `info` for news that's no problem);  none:  it goes */
+function sayProblem(heading, words, state = "negative") {
   const place = document.getElementById("servers-problem")
-  place.replaceChildren(...(heading ? [el("ui-message", { state: "negative", heading }, words)] : []))
+  place.replaceChildren(...(heading ? [el("ui-message", { state, heading }, words)] : []))
 }
 
 /** the whole page, from `answer` */
@@ -139,32 +196,191 @@ function draw(answer) {
   document
     .getElementById("servers-page")
     .replaceChildren(
-      heading("main"),
-      cards(onMain, named),
+      handsOffSwitch(Boolean(answer.handsOff)),
+      ...(answer.handsOff ? [el("ui-message", { state: "warning", heading: "Hands off" }, HANDS_OFF_NOTICE)] : []),
+      heading("main", undefined, undefined, restartAllButton()),
+      cards(onMain, named, answer.https ? [httpsCard(answer.https)] : []),
       el("h3", { className: "servers-sub" }, "Merged into main recently"),
       mergedList(answer.mergedIntoMain ?? [], answer.notOnGitHub ?? [], named),
       ...worktreeGroups(answer, named)
     )
 }
 
-/** a group's heading:  `main`, `⎇ atmosphere` (its epic page linked), and a muted note after it */
-function heading(words, url, note) {
+/** a group's heading:  `main`, `⎇ atmosphere` (its epic page linked), a muted note after it, and its `tools` at the right */
+function heading(words, url, note, tools) {
   return el(
     "h2",
-    { className: "servers-head" },
+    { className: `servers-head${tools ? " servers-head-tools" : ""}` },
     url ? el("a", { href: url }, words) : words,
-    note ? el("span", { className: "servers-age" }, note) : undefined
+    note ? el("span", { className: "servers-age" }, note) : undefined,
+    tools ? el("span", { className: "servers-tools" }, tools) : undefined
   )
 }
 
-/** a card per server, in a grid that fits the side bar and a phone;  none:  a line saying so */
-function cards(servers, named) {
-  if (!servers.length) return el("p", { className: "servers-quiet" }, "No servers running.")
+/**
+ * the hands-off switch (epic `epic-engine` T164):  on, the keeper starts, stops and restarts nothing of main's by
+ * itself, until it's turned off;  the cards' buttons and Restart all still work
+ */
+function handsOffSwitch(isOn) {
+  const toggle = el("ui-checkbox", {
+    className: "servers-hands-off",
+    appearance: "toggle",
+    label: HANDS_OFF_LABEL,
+    selected: isOn
+  })
+  toggle.addEventListener("ui-changed", async (event) => {
+    isTurning = true
+    try {
+      const response = await fetch("/api/servers/hands-off", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-server-token": window.SPELL_SERVER?.token ?? "" },
+        body: JSON.stringify({ on: Boolean(event.detail?.selected) })
+      })
+      const answer = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(answer.error ?? `The server answered ${response.status}.`)
+      sayProblem()
+    } catch (error) {
+      sayProblem("Couldn't change the switch", error.message)
+    } finally {
+      isTurning = false
+      void look()
+    }
+  })
+  return toggle
+}
+
+/**
+ * main's Restart all (epic `epic-engine` T164):  every main page server restarted, its editor with it, one stopped by
+ * hand too;  the keeper answers first, then restarts them, so the page loses its server for a moment
+ */
+function restartAllButton() {
+  const button = el(
+    "ui-button",
+    { size: "tiny", appearance: "basic", icon: "rotate right", "data-tooltip": RESTART_ALL_TIP },
+    "Restart all"
+  )
+  button.addEventListener("click", async () => {
+    button.setAttribute("loading", "")
+    try {
+      const response = await fetch("/api/servers/restart-all", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-server-token": window.SPELL_SERVER?.token ?? "" },
+        body: "{}"
+      })
+      const answer = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(answer.error ?? `The server answered ${response.status}.`)
+    } catch (error) {
+      sayProblem("Couldn't restart the servers", error.message)
+    } finally {
+      // the restart comes just after the answer:  the next looks show them coming back
+      setTimeout(() => button.removeAttribute("loading"), RESTART_ALL_WAIT_MS)
+      void look()
+    }
+  })
+  return button
+}
+
+/** a card per server, then `more` cards, in a grid that fits the side bar and a phone;  none:  a line saying so */
+function cards(servers, named, more = []) {
+  if (!servers.length && !more.length) return el("p", { className: "servers-quiet" }, "No servers running.")
   return el(
     "div",
     { className: "servers-cards" },
-    servers.map((server) => serverCard(server, named))
+    servers.map((server) => serverCard(server, named)),
+    more
   )
+}
+
+/**
+ * the secure link's card, as a server's (epic `epic-engine` T164):  "Secure link", its address while it's on (else
+ * "plain HTTP"), its state on the right, and under it Turn on and Turn off as icons, the one that can't drawn disabled,
+ * its tooltip saying why
+ * - one for every page server of this Mac:  the main page servers restart to take it, a worktree's at its next start
+ */
+function httpsCard(https) {
+  const state = HTTPS_STATES[https.state] ?? HTTPS_STATES.off
+  const address = https.address?.replace(/^https?:\/\//, "").replace(/\/$/, "")
+  return el(
+    "ui-card",
+    { className: "servers-card servers-https", fluid: true, "data-state": https.state },
+    el(
+      "ui-content",
+      {},
+      el(
+        "div",
+        { className: "servers-card-grid" },
+        el(
+          "strong",
+          { className: "servers-name" },
+          https.address ? el("a", { href: https.address, target: "_blank" }, "Secure link") : "Secure link"
+        ),
+        el(
+          "ui-label",
+          { className: "servers-state", size: "mini", color: state.color, "data-tooltip": https.words },
+          state.words
+        ),
+        el("span", { className: "servers-address", "data-tooltip": https.words }, address ?? "plain HTTP"),
+        el(
+          "span",
+          { className: "servers-actions" },
+          httpsButtons(https).map(({ turn, whyNot }) => httpsButton(turn, whyNot))
+        )
+      )
+    )
+  )
+}
+
+/**
+ * The secure link's buttons, in order:  `turn` and, for one that can't, `whyNot`;  pure, for the page's tests
+ * - not on:  Turn on, disabled saying why when it can't (no mkcert, not a Mac);  then Turn off, once there's a
+ *   certificate to take away (one made and not approved, or expired)
+ * - on:  Turn on disabled, saying it's on, then Turn off:  the icons in the same places, as a server card's
+ */
+export function httpsButtons(https) {
+  if (https.state === "on") return [{ turn: "on", whyNot: HTTPS_ACTIONS.on.whyNot }, { turn: "off" }]
+  return [
+    https.canTurnOn ? { turn: "on" } : { turn: "on", whyNot: https.whyNot ?? https.words },
+    https.canTurnOff ? { turn: "off" } : { turn: "off", whyNot: HTTPS_ACTIONS.off.whyNot }
+  ]
+}
+
+/** a secure-link icon button, turning it `turn`;  `whyNot`:  disabled, saying why in its tooltip */
+function httpsButton(turn, whyNot) {
+  const { icon, label, tip } = HTTPS_ACTIONS[turn]
+  const button = el("ui-button", {
+    className: "servers-action",
+    size: "tiny",
+    appearance: "circular basic",
+    icon,
+    "aria-label": label,
+    disabled: Boolean(whyNot)
+  })
+  // a disabled button takes no pointer:  its tooltip goes on a box round it
+  if (whyNot) return el("span", { className: "servers-why-not", "data-tooltip": whyNot }, button)
+  button.dataset.tooltip = tip
+  button.addEventListener("click", async () => {
+    button.setAttribute("loading", "")
+    isTurning = true
+    if (turn === "on") sayProblem("Waiting for your password", HTTPS_ASKING, "info")
+    try {
+      const response = await fetch("/api/servers/https", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-server-token": window.SPELL_SERVER?.token ?? "" },
+        body: JSON.stringify({ turn })
+      })
+      const answer = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(answer.error ?? `The server answered ${response.status}.`)
+      if (answer.state === "on") sayProblem("The secure link is on", HTTPS_ON(answer.address), "positive")
+      else sayProblem()
+    } catch (error) {
+      sayProblem(`Couldn't turn ${turn} the secure link`, error.message)
+    } finally {
+      isTurning = false
+      button.removeAttribute("loading")
+      void look()
+    }
+  })
+  return button
 }
 
 /**
@@ -199,13 +415,23 @@ function serverCard(server, named) {
         ),
         el(
           "span",
-          { className: "servers-address", "data-tooltip": server.what || undefined },
-          address ?? server.what ?? ""
+          { className: "servers-address", "data-tooltip": (isRunning(server) ? server.what : server.why) || undefined },
+          addressLine(server, address)
         ),
         el("span", { className: "servers-actions" }, cardButtons(server))
       )
     )
   )
+}
+
+/** the line under a card's name:  its address;  not running, saying so;  else what it's for */
+export function addressLine(server, address = server.address) {
+  return isRunning(server) ? (address ?? server.what ?? "") : NOT_RUNNING
+}
+
+/** whether `server` runs, or is starting:  neither stopped nor down */
+function isRunning(server) {
+  return server.state !== "stopped" && server.state !== "down"
 }
 
 /** the icons under a card's state:  what it can do now, and, disabled, what it can't and why */

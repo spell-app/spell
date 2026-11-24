@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { firstClause, inCardOrder, worktreeOrder } from "spell/epic/tools/_assets/servers-page.js"
+import {
+  addressLine,
+  firstClause,
+  httpsButtons,
+  inCardOrder,
+  worktreeOrder
+} from "spell/epic/tools/_assets/servers-page.js"
 
 /** a server of `worktree` (none:  the main checkout's), as `/api/servers` lists it */
 const server = (name: string, worktree?: string, more: Record<string, unknown> = {}) => ({
@@ -69,5 +75,39 @@ describe("the Servers page's merged list (epic `epic-engine` I451)", () => {
     expect(firstClause("I449:  the epics pack rebuilt (server.types.ts changed)")).toBe(
       "I449:  the epics pack rebuilt (server.types.ts changed)"
     )
+  })
+})
+
+describe("the Servers page's secure link card (epic `epic-engine` T164)", () => {
+  test("httpsButtons():  on, Turn on disabled and Turn off;  off, Turn on and a disabled Turn off saying why", () => {
+    expect(httpsButtons({ state: "on", canTurnOn: false, canTurnOff: true })).toEqual([
+      { turn: "on", whyNot: "The secure link is already on." },
+      { turn: "off" }
+    ])
+    expect(httpsButtons({ state: "off", canTurnOn: true, canTurnOff: false })).toEqual([
+      { turn: "on" },
+      { turn: "off", whyNot: "The secure link is already off." }
+    ])
+    expect(httpsButtons({ state: "needs-trust", canTurnOn: true, canTurnOff: true })).toEqual([
+      { turn: "on" },
+      { turn: "off" }
+    ])
+  })
+
+  test("httpsButtons():  no mkcert, Turn on disabled with the server's reason", () => {
+    const [on] = httpsButtons({ state: "off", canTurnOn: false, canTurnOff: false, whyNot: "install mkcert" })
+    expect(on).toEqual({ turn: "on", whyNot: "install mkcert" })
+  })
+})
+
+describe("a card's line under its name (epic `epic-engine` T164)", () => {
+  test("running:  its address;  stopped or down:  Not running, never its description", () => {
+    expect(addressLine(server("page server", undefined, { address: "http://127.0.0.1:4747/" }), "127.0.0.1:4747")).toBe(
+      "127.0.0.1:4747"
+    )
+    expect(addressLine(server("page server", "atmosphere", { state: "stopped", what: "epic pages, guides" }))).toBe(
+      "Not running"
+    )
+    expect(addressLine(server("editor", "atmosphere", { state: "down", what: "the Spell app" }))).toBe("Not running")
   })
 })

@@ -45,6 +45,7 @@ describe("LocalCertificate:  mkcert's certificate, every program a stand-in", ()
   let installed: boolean
   let trusted: boolean
   let made: { cert: string; key: string } | undefined
+  let cancels: boolean
 
   /** the stand-ins:  mkcert copies `made` into place;  `security verify-cert` says `trusted` */
   const tools: SRV.CertificateTools = {
@@ -60,6 +61,10 @@ describe("LocalCertificate:  mkcert's certificate, every program a stand-in", ()
         copyFileSync(made.cert, args[1]!)
         copyFileSync(made.key, args[3]!)
       }
+    },
+    ask: async (command, args) => {
+      ran.push([command, ...args])
+      if (cancels) throw new SRV.CertificateError("security add-trusted-cert didn't work")
     }
   }
 
@@ -72,6 +77,7 @@ describe("LocalCertificate:  mkcert's certificate, every program a stand-in", ()
     installed = true
     trusted = false
     made = covering
+    cancels = false
   })
 
   afterAll(() => rmSync(scratch, { recursive: true, force: true }))
@@ -145,6 +151,21 @@ describe("LocalCertificate:  mkcert's certificate, every program a stand-in", ()
     ran = []
     certificate("linux").trust()
     expect(ran).toEqual([["mkcert", "-install"]])
+  })
+
+  it("trusts in the Mac's own password window with no terminal:  this person's keychain, no sudo", async () => {
+    writeFileSync(join(scratch, "rootCA.pem"), "the authority's public file")
+    await certificate().trustInWindow()
+    expect(ran).toEqual([["security", ...SRV.TRUST_IN_WINDOW_COMMAND(join(scratch, "rootCA.pem"))]])
+    expect(SRV.TRUST_IN_WINDOW_COMMAND("x")).not.toContain("-d")
+    cancels = true
+    await expect(certificate().trustInWindow()).rejects.toThrow(SRV.CertificateError)
+    // off a Mac only a terminal can ask:  it says the command, and runs nothing
+    ran = []
+    await expect(certificate("linux").trustInWindow()).rejects.toThrow("spell server certificate")
+    expect(ran).toEqual([])
+    installed = false
+    await expect(certificate().trustInWindow()).rejects.toThrow("mkcert")
   })
 
   it.skipIf(!covering)("undo takes its files away, and leaves mkcert's authority alone", () => {

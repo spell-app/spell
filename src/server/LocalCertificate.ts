@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process"
+import { spawn, spawnSync } from "node:child_process"
 import { X509Certificate } from "node:crypto"
 import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs"
 import { isIPv6 } from "node:net"
@@ -14,6 +14,7 @@ import { join } from "node:path"
  * - `state`:  what's missing, in order:  mkcert, the files, the names, the date, the Mac's trust
  * - `make()`:  the files, with mkcert;  no password asked
  * - `trust()`:  this Mac trusts mkcert's authority, asking for the password once in the terminal (`sudo`)
+ * - `trustInWindow()`:  the same with no terminal, for this person only:  the Mac asks in a window of its own
  * - `undo()`:  the files go;  the authority stays trusted, since the house-network site's certificate needs it too
  * - Every outside program goes through `CertificateTools`, so tests run none of them.
  * - Node built-ins only:  the kit's server and the app's command line both use it.
@@ -107,6 +108,11 @@ export class LocalCertificate {
     ])
   }
 
+  /** whether it's on a Mac:  only a Mac asks for the password in a window of its own (`trustInWindow()`) */
+  get isOnMac(): boolean {
+    return this.platform === "darwin"
+  }
+
   /** The key and certificate, for `https` / `http2`, when it's `"ready"`;  else `undefined`.  - NEVER throws */
   get tls(): CertificateFiles | undefined {
     if (this.state !== "ready") return undefined
@@ -167,6 +173,23 @@ export class LocalCertificate {
     if (!authority || !existsSync(authority))
       throw new CertificateError("mkcert didn't say where its certificates are:  run mkcert -CAROOT to see why")
     this.tools.run("sudo", TRUST_COMMAND(authority))
+  }
+
+  /**
+   * SIDE EFFECT:  this person's login keychain trusts mkcert's authority, the Mac asking for their password in a
+   * window of its own:  `trust()` for a program with no terminal (the Servers tab's Turn on, epic `epic-engine` T164)
+   * - no `sudo`:  the trust is this person's, not the whole Mac's, which every browser they run honours
+   * - waits while the window is open, never holding up the program that asks
+   * - throws `CertificateError` without mkcert, off a Mac (only a terminal can ask there), or when the person
+   *   cancels or trusting fails
+   */
+  async trustInWindow(): Promise<void> {
+    this.mkcertOrDie()
+    if (this.platform !== "darwin") throw new CertificateError(NEEDS_TERMINAL)
+    const authority = this.authorityFile
+    if (!authority || !existsSync(authority))
+      throw new CertificateError("mkcert didn't say where its certificates are:  run mkcert -CAROOT to see why")
+    await this.tools.ask("security", TRUST_IN_WINDOW_COMMAND(authority))
   }
 
   /** SIDE EFFECT:  the certificate's two files go.  mkcert's authority stays trusted. */
@@ -234,6 +257,11 @@ export type CertificateTools = {
   succeeds(command: string, args: string[]): boolean
   /** run a program in this terminal, which it may ask for a password in;  - throws `CertificateError` when it fails */
   run(command: string, args: string[]): void
+  /**
+   * run a program that asks in a window of its own (the Mac's password window), waiting without blocking;
+   * - throws `CertificateError` when it fails, or the person cancels
+   */
+  ask(command: string, args: string[]): Promise<void>
 }
 
 /** What's wrong, in words for the person:  the command line prints it plainly. */
@@ -264,6 +292,22 @@ export const TRUST_COMMAND = (authorityFile: string): string[] => [
   authorityFile
 ]
 
+/**
+ * The arguments, after `security`, that make this person's programs trust `authorityFile`, asking in the Mac's own
+ * password window:  no `-d` (the whole Mac's settings), so no `sudo`
+ */
+export const TRUST_IN_WINDOW_COMMAND = (authorityFile: string): string[] => [
+  "add-trusted-cert",
+  "-r",
+  "trustRoot",
+  "-k",
+  join(homedir(), "Library", "Keychains", "login.keychain-db"),
+  authorityFile
+]
+
+/** What's said off a Mac, where only a terminal can ask for the password. */
+const NEEDS_TERMINAL = "To trust the certificate, type this in a terminal:  spell server certificate"
+
 /** Where a Mac keeps the programs this runs:  a server started from an app may have a short `PATH`. */
 const SEARCH_PATH = [process.env.PATH, "/opt/homebrew/bin", "/usr/local/bin", "/usr/sbin", "/usr/bin", "/sbin", "/bin"]
   .filter(Boolean)
@@ -284,6 +328,18 @@ export function certificateTools(): CertificateTools {
       const { status, error } = spawnSync(command, args, { stdio: "inherit", env })
       if (status !== 0)
         throw new CertificateError(`${command} ${args.join(" ")} didn't work${error ? `:  ${error.message}` : ""}`)
-    }
+    },
+    ask: (command, args) =>
+      new Promise((resolve, reject) => {
+        const child = spawn(command, args, { stdio: ["ignore", "ignore", "pipe"], env })
+        let said = ""
+        child.stderr.on("data", (chunk: Buffer) => (said += chunk.toString()))
+        child.once("error", (error) => reject(new CertificateError(`${command} didn't start:  ${error.message}`)))
+        child.once("close", (status) =>
+          status === 0
+            ? resolve()
+            : reject(new CertificateError(`${command} ${args[0]} didn't work${said.trim() ? `:  ${said.trim()}` : ""}`))
+        )
+      })
   }
 }

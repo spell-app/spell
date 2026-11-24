@@ -238,8 +238,13 @@ So the page server speaks both, on one port, once this computer trusts its certi
 ```sh
 brew install mkcert
 spell server certificate
-spell server stop && spell server start
 ```
+
+- Or from the Servers tab, with no terminal:  the "Secure link" card under main turns it on and off.
+  - Turning on there, the Mac asks for the password in its own window, and trusts it for you alone (your login
+    keychain), where the command trusts it for the whole Mac.
+- Either way, the server keeper restarts main's page server by itself within a few seconds:  it watches the
+  certificate's files.  A worktree's page server takes it at its next start.
 
 - `spell server certificate` has mkcert make a certificate for `localhost`, `127.0.0.1` and `::1`, kept in
   `~/.spell/localhost/`, and has this computer trust mkcert's own authority:  it asks for the password once, in the
@@ -252,11 +257,12 @@ spell server stop && spell server start
   - Websockets (live reload) upgrade on HTTP/1.1 over TLS, as on plain HTTP.
 - Without a trusted certificate nothing changes:  plain HTTP, and one line in the log saying how to turn HTTPS on.
   - `spell server start` never makes or trusts one itself:  it often runs from a skill, with no terminal to ask in.
+    Only the command, or the Servers tab's card when someone presses it.
   - Tests and CI never use one (`VITEST`, `CI`);  `SPELL_HTTPS=0` turns it off.
 - Firefox keeps a list of its own:  mkcert fills it only when `certutil` is installed (`brew install nss`).
 - Not yet over HTTPS:  the VS Code side bar and `epic pages link` (their tools check the address from node first),
   and the editor's dev server (Vite), which Caddy's house-network site and the tests reach over plain HTTP.
-- The code:  `LocalCertificate`, and `WebServer`'s `certificate`.
+- The code:  `LocalCertificate`, and `WebServer`'s `certificate`;  the tab's card, spell-epic's `HttpsSwitch`.
 
 ## Five flows, a picture each
 

@@ -15,7 +15,8 @@
  *     else this checkout's (`SRV.contentPathOf()`)
  * - `certificate [--check] [--undo]` -- the certificate that gives the page server HTTPS and HTTP/2 (epic `solid-2-final`
  *   P14):  made by mkcert, and trusted by this computer, asking for the password once in the terminal
- *   (`SRV.LocalCertificate`);  a running server takes it at its next start
+ *   (`SRV.LocalCertificate`);  a running server takes it at its next start, which the server keeper makes at once for
+ *   main's (it watches the certificate's files);  the Servers tab turns it on and off too (epic `epic-engine` T164)
  *   - `--check`:  only says what's missing;  exit 1 until it's ready
  *   - `--undo`:  its files go;  the next start is plain HTTP only
  *   - without it, every server speaks plain HTTP, as before;  with it, plain HTTP stays on the same port, for the tools
@@ -69,14 +70,16 @@ const CERTIFICATE_WORDS = {
     "Type it in to continue.  It asks only once.",
   done:
     "Done.  Your computer now trusts the certificate for the server that shows your pages.\n" +
-    "To start using it, restart that server.  Type  spell server stop,  then  spell server start.\n" +
+    "Your pages reload by themselves in a few seconds, over the secure link.\n" +
+    "If they haven't after a minute, type  spell server stop  in this terminal, then  spell server start.\n" +
     "Then open your pages at https://localhost:4747.\n" +
     "Other spell commands still use http://127.0.0.1:4747.  You don't need to change anything.\n" +
     "If you use Firefox, it needs one more step.  Run  brew install nss,  then run  spell server certificate  again.",
   undone:
-    "Done.  The certificate is gone.\n" +
-    "Your pages will open without the secure link (HTTP) again.\n" +
-    "To apply this, restart the server.  Type  spell server stop,  then  spell server start."
+    "Done.  The secure link is turned off.\n" +
+    "Your pages will open with a plain link (HTTP) again, not a secure one (HTTPS).\n" +
+    "They reload by themselves in a few seconds.\n" +
+    "If they haven't after a minute, type  spell server stop  in this terminal, then  spell server start."
 } as const
 
 try {
