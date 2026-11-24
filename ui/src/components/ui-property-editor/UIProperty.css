@@ -10,7 +10,7 @@
  *   half a row, as a select (its kind's `width`), its tip's icon at the row's end.
  * - `:state(compact)`:  the tip's icon shows only while the field is hovered or holds the focus.
  * - `:state(set)` under `:state(show-defaults)`:  its value bold, through the owner token every control reads
- *   (`InputOwnerTokens.weight`).
+ *   (`InputOwnerTokens.weight`);  never a box of prose (`:state(long-text)`, an element's own words).
  * - Where its value comes from (`PropertyOrigin`):  `:state(here)` draws nothing of its own;  `:state(inherited)`,
  *   a quieter label;  `.origin`, its small button at the row's end:  a reset only while it's hovered or focused.
  * - `:state(data)`, kept in a place outside the program:  a square before its label, and `.origin.mark`, its few words.
@@ -95,7 +95,8 @@
   }
 
   /* ## A value other than its default, bold */
-  :host(:state(set):state(show-defaults)) .field {
+  /* not a box of prose (`:state(long-text)`):  a paragraph in bold is hard to read */
+  :host(:state(set):state(show-defaults):not(:state(long-text))) .field {
     --_ui-input-owner-weight: var(--ui-font-weight-bold, 700);
   }
 
