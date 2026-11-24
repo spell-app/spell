@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell/ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { messageVocabulary } from "./UIMessage.en"
 
 import messageCSS from "./UIMessage.css?inline"
@@ -28,6 +28,12 @@ import messageCSS from "./UIMessage.css?inline"
  *   - It never removes itself:  a framework that drew the node still owns it.
  *
  * - No role:  a message inserted to announce something gets `role="status"` or `alert` from the page.
+ *
+ * - A `floating` message, lifted over the page (a warning, a notice), drops in as it first shows:
+ *   a short slide and fade, `UI.transitions`' `fade-down`, so it catches the eye (epic `editor` T154).
+ *   - Only the first time it's drawn:  a message the page hides and shows again fades, as every element does.
+ *   - Reduced motion:  none, as every `UI.transitions` animation.
+ *   - A message in the page's flow never moves:  a page full of them would all slide in at once.
  ****************/
 export class UIMessage extends E.UIComponent<typeof messageVocabulary> {
   @E.proto static vocabulary = messageVocabulary
@@ -71,6 +77,23 @@ export class UIMessage extends E.UIComponent<typeof messageVocabulary> {
     onClick: (event) => this.disclosure.close(event)
   })
 
+  /** Its box, which the entrance animates. */
+  private box?: HTMLDivElement
+
+  /** Has it come in already?  A `floating` message drops in only the first time it shows. */
+  private hasEntered = false
+
+  /**
+   * Connected and ready, and `floating`:  drop in, once (see the class's docs).
+   * - It waits for the runtime (`isReady`), as the render does:  the entrance animates the rendered box.
+   */
+  @E.onChange("isConnected", "isReady")
+  protected onConnectedChanged(isConnected: boolean, isReady: boolean) {
+    if (!isConnected || !isReady || this.hasEntered || !this.floating || !this.box) return
+    this.hasEntered = true
+    void UI.transitions.animate({ element: this.box, name: FADE_DOWN, direction: UIT.IN })
+  }
+
   /** Has an icon (shorthand or `icon` slot)? */
   get hasIcon(): boolean {
     return !!this.icon || this.slots.hasContent(this.slotForName(UIT.ICON))
@@ -87,7 +110,7 @@ export class UIMessage extends E.UIComponent<typeof messageVocabulary> {
 
   render(): JSX.Element {
     return (
-      <div class={this.rootClass} part={this.partForName("message")}>
+      <div class={this.rootClass} part={this.partForName("message")} ref={(element) => (this.box = element)}>
         <Show when={this.hasIcon}>
           <span class={UIT.ICON} part={this.partForName("icon")}>
             <slot name={this.slotForName(UIT.ICON)}>{this.iconGlyph.svg}</slot>
@@ -108,3 +131,6 @@ export class UIMessage extends E.UIComponent<typeof messageVocabulary> {
 }
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UIMessage extends E.AttributeValues<typeof messageVocabulary> {}
+
+/** `UI.transitions` animation a `floating` message comes in with:  it drops in. */
+const FADE_DOWN = "fade-down"
