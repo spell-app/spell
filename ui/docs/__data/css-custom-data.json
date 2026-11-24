@@ -7240,6 +7240,13 @@
       }
     },
     {
+      "name": "--ui-page-layout-drawer-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-page-layout>`'s token.  Default:  `16em`"
+      }
+    },
+    {
       "name": "--ui-panel-background",
       "description": {
         "kind": "markdown",
@@ -10884,6 +10891,20 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-tree>`'s token.  Default:  `var(--ui-background)`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-font-size",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `0.875em`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-row-height",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `round(2.25em, var(--ui-grid, 4px))`"
       }
     },
     {

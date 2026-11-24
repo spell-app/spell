@@ -2034,10 +2034,11 @@ function keepHeaderRow(row: Element, table: Element, items: () => readonly unkno
 
 /**
  * A list drawn a page at a time, with Previous and Next:  `paging="pages"`.
- * - A page holds `atOnce`:  `MOST_AT_ONCE`, unless the program says (`show them 12 at a time`).
+ * - A page holds `atOnce`:  `MOST_AT_ONCE`, unless the program says (`show them 12 at a time`);  the person can pick
+ *   another from the footer's page size (`PAGE_SIZES`, with the program's own among them).
  * - Next at the end of what's read asks a place for its next page.
- * - Its footer says which it shows, "Showing 1-10 of 42" ("of 42+" while a place has more), on every page;
- *   Previous, "Page 1 of 5" and Next beside it once there's more than one page.
+ * - Its footer, on every page, as a console's table's:  "Showing 1-10 of 42" ("of 42+" while a place has more) at its
+ *   start;  at its end the page size, then Previous, "Page 1 of 5" and Next, each button dimmed where it can't go.
  * - Hands back the page's items and the pager apart:  the caller draws the pager AFTER what's around the items
  *   (`<ui-cards>`, `<ui-table>`), so it's never one of them.
  */
@@ -2054,15 +2055,25 @@ function drawnInPages<Item>({
 }): { list: JSX.Element; pager: JSX.Element } {
   const pageChanged = new Cell()
   let page = 0
+  let size = atOnce
   const pageNow = () => {
     pageChanged.read()
     return page
+  }
+  const sizeNow = () => {
+    pageChanged.read()
+    return size
   }
   const goTo = (to: number) => {
     page = to
     pageChanged.changed()
   }
-  const lastDrawn = () => (pageNow() + 1) * atOnce
+  // a new page size starts again at the first page
+  const sizeTo = (to: number) => {
+    size = to
+    goTo(0)
+  }
+  const lastDrawn = () => (pageNow() + 1) * sizeNow()
   const hasNext = () => items().length > lastDrawn() || !!more()?.hasMorePages
   const next = async () => {
     if (items().length <= lastDrawn()) await more()?.readNextPage()
@@ -2072,27 +2083,39 @@ function drawnInPages<Item>({
     For as never,
     {
       get each() {
-        return items().slice(pageNow() * atOnce, lastDrawn())
+        return items().slice(pageNow() * sizeNow(), lastDrawn())
       },
-      children: (item: Item, position: () => number) => drawItem(item, () => pageNow() * atOnce + position())
+      children: (item: Item, position: () => number) => drawItem(item, () => pageNow() * sizeNow() + position())
     } as never
   ) as JSX.Element
-  ////// The footer:  "Showing 1-10 of 42" at its start;  Previous, "Page 1 of 5" and Next at its end, while there's more
-  // than one page
+  ////// The footer:  "Showing 1-10 of 42" at its start;  the page size, Previous, "Page 1 of 5" and Next at its end
   const isMore = () => !!more()?.hasMorePages
   const showing = () => {
     const count = items().length
-    const said = { first: pageNow() * atOnce + 1, last: Math.min(lastDrawn(), count), count }
+    const said = { first: Math.min(pageNow() * sizeNow() + 1, count), last: Math.min(lastDrawn(), count), count }
     return core.message(isMore() ? "page-showing-more" : "page-showing", said)
   }
   const pageNumber = () => {
     const at = pageNow() + 1
     if (isMore()) return core.message("page-number", { page: at })
-    return core.message("page-number-of", { page: at, pages: Math.max(1, Math.ceil(items().length / atOnce)) })
+    return core.message("page-number-of", { page: at, pages: Math.max(1, Math.ceil(items().length / sizeNow())) })
   }
+  const sizes = [...new Set([...PAGE_SIZES, atOnce])].sort((a, b) => a - b)
+  const sizePicker = h(
+    "ui-select",
+    {
+      size: "small",
+      padding: "compact",
+      value: () => String(sizeNow()),
+      "aria-label": core.message("page-size"),
+      "onUi-changed": (event: Event) => sizeTo(Number((event as CustomEvent<{ value: string }>).detail.value))
+    },
+    ...sizes.map((each) => h("ui-item", { value: String(each) }, String(each)))
+  )
   const buttons = h(
     "ui-stack",
     { direction: "horizontal", align: "center", spacing: "xs" },
+    sizePicker,
     h(
       "ui-button",
       { size: "small", appearance: "basic", disabled: () => !pageNow(), onClick: () => goTo(page - 1) },
@@ -2109,10 +2132,13 @@ function drawnInPages<Item>({
     "ui-stack",
     { direction: "horizontal", justify: "between", align: "center", spacing: "sm", wrap: "", [PAGER]: "" },
     h("ui-text", { size: "small", color: "grey" }, showing),
-    () => (hasNext() || pageNow() ? buttons : null)
+    buttons
   )
   return { list, pager: pager as unknown as JSX.Element }
 }
+
+/** The page sizes a paged list's footer offers, beside the program's own:  a console's table's. */
+const PAGE_SIZES = [10, 25, 50, 100]
 
 /** The mark on a paged list's footer:  a theme or a page styles it by this (`[data-pager]`). */
 const PAGER = "data-pager"

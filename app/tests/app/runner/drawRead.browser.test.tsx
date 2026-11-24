@@ -44,16 +44,36 @@ describe("<for>'s attributes, as core.drawRead() draws them", () => {
   })
 
   test("paging=pages:  a page at a time, with Previous and Next", async () => {
-    drawn(rowsOf(MOST_AT_ONCE + 5), { paging: () => "pages" })
+    const all = MOST_AT_ONCE + 5
+    drawn(rowsOf(all), { paging: () => "pages" })
     expect(texts(".row")).toHaveLength(MOST_AT_ONCE)
-    expect(texts("ui-text")).toEqual(["Page 1"])
+    expect(texts("ui-text")).toEqual([`Showing 1-${MOST_AT_ONCE} of ${all}`, "Page 1 of 2"])
     const [previous, next] = box.querySelectorAll("ui-button")
     expect(previous!.hasAttribute("disabled")).toBe(true)
     ;(next as HTMLElement).click()
     await new Promise((resolve) => setTimeout(resolve))
     flush()
     expect(texts(".row")).toEqual(rowsOf(5).map((row) => `${MOST_AT_ONCE + row}`))
-    expect(texts("ui-text")).toEqual(["Page 2"])
+    expect(texts("ui-text")).toEqual([`Showing ${MOST_AT_ONCE + 1}-${all} of ${all}`, "Page 2 of 2"])
+  })
+
+  test("paging=pages:  the footer on one page too, its buttons dimmed;  a page size picked starts again", () => {
+    drawn(rowsOf(30), { paging: () => "pages", pageSize: () => 12 })
+    expect(texts("ui-text")).toEqual(["Showing 1-12 of 30", "Page 1 of 3"])
+    const picker = box.querySelector("ui-select")!
+    expect([...picker.querySelectorAll("ui-item")].map((item) => item.getAttribute("value"))).toEqual([
+      "10",
+      "12",
+      "25",
+      "50",
+      "100"
+    ])
+    picker.dispatchEvent(new CustomEvent("ui-changed", { detail: { value: "50" } }))
+    flush()
+    expect(texts(".row")).toHaveLength(30)
+    expect(texts("ui-text")).toEqual(["Showing 1-30 of 30", "Page 1 of 1"])
+    const [previous, next] = box.querySelectorAll("ui-button")
+    expect([previous!.hasAttribute("disabled"), next!.hasAttribute("disabled")]).toEqual([true, true])
   })
 
   test("paging=pages, as=cards or a table:  the pager comes after them, never one more card or row", () => {
