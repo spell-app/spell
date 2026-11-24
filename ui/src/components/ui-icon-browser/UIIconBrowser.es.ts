@@ -13,7 +13,7 @@ export const iconBrowserEs = {
   tag: "ui-icon-browser",
   name: "explorador-iconos",
   aka: ["galería de iconos", "lista de iconos", "buscador de iconos", "catálogo de iconos"],
-  attributes: { pack: "paquete", query: "consulta", address: "direccion" },
+  attributes: { pack: "paquete", query: "consulta", address: "direccion", pick: "elegir" },
   parts: {
     packs: "paquetes",
     usage: "uso",
@@ -36,11 +36,12 @@ export const iconBrowserEs = {
       "Para usarlo en una página, añade {markup}.  Algunos nombres, como {examples}, están en los dos:  esa página usa el icono de este.",
     loading: "Cargando iconos…",
     count: "Mostrando {matches} de {total} iconos",
-    copied: "Copiado «{name}»",
+    copied: "Copiado el nombre «{name}».  Ya puedes pegarlo.",
     notCopied: "No se pudo copiar «{name}».  Selecciona el nombre y cópialo tú.",
     copyTip: "Copiar «{name}»",
     copyTipAlso: "Copiar «{name}».  También:  {others}",
     grid: "Iconos",
-    noMatches: "Ningún icono coincide"
+    noMatches: "Ningún icono coincide",
+    dialogTitle: "Iconos"
   }
 } as const satisfies E.TagDictionary

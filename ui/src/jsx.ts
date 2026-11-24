@@ -20961,6 +20961,15 @@ export interface UIIconAttributes {
 export interface UIIconJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIIconAttributes>, UIIconAttributes {}
 
+/** `<ui-icon-browser>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIIconBrowserEventMap {
+  /**
+   * `ui-chosen`:  A tile was clicked:  `name` draws its icon;  `isCopied`, whether it reached the clipboard (never with `pick`).
+   * - `event.detail`:  `{ name: string, isCopied: boolean }`
+   */
+  "ui-chosen": CustomEvent<{ name: string; isCopied: boolean }>
+}
+
 /** `<ui-icon-browser>`'s own attributes, from its vocabulary. */
 export interface UIIconBrowserAttributes {
   /**
@@ -20994,6 +21003,26 @@ export interface UIIconBrowserAttributes {
    * @deprecated write `address` -- `prop:` stays only for compiled spell
    */
   "prop:address"?: boolean | ""
+  /**
+   * A click picks the icon instead of copying its name:  `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse).
+   * - takes:  flag (present / absent)
+   */
+  pick?: boolean | ""
+  /**
+   * `pick`, as the DOM element's property.
+   * @deprecated write `pick` -- `prop:` stays only for compiled spell
+   */
+  "prop:pick"?: boolean | ""
+  /**
+   * Tighter, for a dialog:  the search first, smaller tiles closer together, and no line about adding the pack to a page.
+   * - takes:  flag (present / absent)
+   */
+  compact?: boolean | ""
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
+  "prop:compact"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -21270,11 +21299,18 @@ export interface UIIconBrowserAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-chosen`:  A tile was clicked:  `name` draws its icon;  `isCopied`, whether it reached the clipboard (never with `pick`).
+   * - `event.detail`:  `{ name: string, isCopied: boolean }`
+   */
+  "on-ui-chosen"?: (event: UIIconBrowserEventMap["ui-chosen"]) => void
 }
 
 /** `<ui-icon-browser>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UIIconBrowserJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIIconBrowserAttributes>, UIIconBrowserAttributes {}
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIIconBrowserEventMap>>, keyof UIIconBrowserAttributes>,
+    UIIconBrowserAttributes {}
 
 /** `<ui-icon-picker>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIIconPickerEventMap {
@@ -63224,6 +63260,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-icon-browser>`:  An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.
        * - also known as:  icon gallery, icon list, icon finder, glyph browser, icon catalog, icon search
+       * - events:  `ui-chosen`
        */
       "ui-icon-browser": UIIconBrowserJSXAttributes
       /**
@@ -64068,11 +64105,11 @@ export interface UIEventMap {
   "ui-cancelled": CustomEvent<unknown>
   "ui-selecting": CustomEvent<unknown>
   "ui-node-toggled": CustomEvent<unknown>
+  "ui-chosen": CustomEvent<unknown>
   "ui-drawing": CustomEvent<unknown>
   "ui-typed": CustomEvent<unknown>
   "ui-navigating": CustomEvent<unknown>
   "ui-removing": CustomEvent<unknown>
-  "ui-chosen": CustomEvent<unknown>
   "ui-drawn": CustomEvent<unknown>
   "ui-ready": CustomEvent<unknown>
   "ui-toggle": CustomEvent<unknown>
@@ -64168,7 +64205,7 @@ declare global {
     "ui-grid": HTMLElement
     "ui-header": HTMLElement
     "ui-icon": HTMLElement
-    "ui-icon-browser": HTMLElement
+    "ui-icon-browser": UIHTMLElement<UIIconBrowserEventMap>
     "ui-icon-picker": UIHTMLElement<UIIconPickerEventMap>
     "ui-icons": HTMLElement
     "ui-image": HTMLElement

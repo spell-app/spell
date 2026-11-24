@@ -96,3 +96,19 @@
     text-align: center;
   }
 }
+
+@layer ui.components.icon-browser.variations {
+  /* `compact`:  tighter, for a dialog (`openInDialog()`):  smaller tiles, closer together, their names smaller */
+  .ui.compact.browser {
+    --_ui-icon-browser-tile-width: var(--ui-icon-browser-tile-width, 6em);
+    --_ui-icon-browser-glyph-size: var(--ui-icon-browser-glyph-size, 1.25em);
+    --_ui-icon-browser-gap: var(--ui-icon-browser-gap, 0.25em);
+
+    & .tile::part(button) {
+      padding-block: 0.5em;
+    }
+    & .name {
+      font-size: 0.75em;
+    }
+  }
+}

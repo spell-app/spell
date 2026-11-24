@@ -673,7 +673,9 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-icon-browser": [
     { name: "pack", kind: "enum", group: "content", values: ["fa7-free", "fa7-brands", "fomantic"] },
     { name: "query", kind: "string", group: "content" },
-    { name: "address", kind: "keyOnly", group: "behaviour" }
+    { name: "address", kind: "keyOnly", group: "behaviour" },
+    { name: "pick", kind: "keyOnly", group: "behaviour" },
+    { name: "compact", kind: "keyOnly", group: "appearance" }
   ],
   "ui-icon-picker": [
     { name: "value", kind: "string", group: "form" },

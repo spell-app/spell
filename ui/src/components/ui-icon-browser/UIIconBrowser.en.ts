@@ -46,9 +46,30 @@ export const iconBrowserVocabulary = {
       description:
         "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, " +
         "as `spell icon --open` writes it;  ahead of `query` and `pack`."
+    },
+    {
+      name: "pick",
+      group: "behaviour",
+      kind: "keyOnly",
+      description:
+        "A click picks the icon instead of copying its name:  `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse)."
+    },
+    {
+      name: "compact",
+      group: "appearance",
+      kind: "keyOnly",
+      description:
+        "Tighter, for a dialog:  the search first, smaller tiles closer together, and no line about adding the pack to a page."
     }
   ],
-  events: [],
+  events: [
+    {
+      name: "ui-chosen",
+      detail: "{ name: string, isCopied: boolean }",
+      description:
+        "A tile was clicked:  `name` draws its icon;  `isCopied`, whether it reached the clipboard (never with `pick`)."
+    }
+  ],
   slots: [],
   parts: [
     { name: "packs", description: "The pack switch:  a `<ui-buttons>`, one `<ui-button>` per pack." },
@@ -97,7 +118,11 @@ export const iconBrowserVocabulary = {
       text: "Showing {matches} of {total} icons",
       description: "The count:  icons matching, of the pack's."
     },
-    { key: "copied", text: "Copied “{name}”", description: "After a click:  the name is on the clipboard." },
+    {
+      key: "copied",
+      text: "Copied the name “{name}”.  You can paste it now.",
+      description: "After a click:  the name is on the clipboard."
+    },
     {
       key: "notCopied",
       text: "Couldn't copy “{name}”.  Select the name and copy it yourself.",
@@ -110,6 +135,7 @@ export const iconBrowserVocabulary = {
       description: "A tile's tooltip, when other names draw the same icon."
     },
     { key: "grid", text: "Icons", description: "The grid's accessible name." },
-    { key: "noMatches", text: "No icons match", description: "The grid, when the search finds nothing." }
+    { key: "noMatches", text: "No icons match", description: "The grid, when the search finds nothing." },
+    { key: "dialogTitle", text: "Icons", description: "The title of the dialog `UIIconBrowser.openInDialog()` opens." }
   ]
 } as const satisfies E.ComponentVocabulary

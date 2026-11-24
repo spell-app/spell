@@ -828,7 +828,10 @@ export const HELP_TABLE: Readonly<
       query:
         "What it starts searching for: a name or what an icon shows (`mail` finds `envelope`, by Font Awesome's terms).",
       address:
-        "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it; ahead of `query` and `pack`."
+        "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it; ahead of `query` and `pack`.",
+      pick: "A click picks the icon instead of copying its name: `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse).",
+      compact:
+        "Tighter, for a dialog: the search first, smaller tiles closer together, and no line about adding the pack to a page."
     }
   },
   "ui-icon-picker": {

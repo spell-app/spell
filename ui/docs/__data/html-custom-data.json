@@ -23747,7 +23747,7 @@
       "name": "ui-icon-browser",
       "description": {
         "kind": "markdown",
-        "value": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.\n\nAlso known as:  icon gallery, icon list, icon finder, glyph browser, icon catalog, icon search."
+        "value": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.\n\nAlso known as:  icon gallery, icon list, icon finder, glyph browser, icon catalog, icon search.\n\n**Events:**  `ui-chosen`"
       },
       "attributes": [
         {
@@ -23780,6 +23780,20 @@
           "description": {
             "kind": "markdown",
             "value": "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it;  ahead of `query` and `pack`.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "pick",
+          "description": {
+            "kind": "markdown",
+            "value": "A click picks the icon instead of copying its name:  `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "compact",
+          "description": {
+            "kind": "markdown",
+            "value": "Tighter, for a dialog:  the search first, smaller tiles closer together, and no line about adding the pack to a page.\n\nTakes:  flag (present / absent)"
           }
         },
         {

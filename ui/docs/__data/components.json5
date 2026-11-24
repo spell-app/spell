@@ -19291,6 +19291,16 @@
           "description": "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it;  ahead of `query` and `pack`."
         },
         {
+          "name": "pick",
+          "kind": "keyOnly",
+          "description": "A click picks the icon instead of copying its name:  `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse)."
+        },
+        {
+          "name": "compact",
+          "kind": "keyOnly",
+          "description": "Tighter, for a dialog:  the search first, smaller tiles closer together, and no line about adding the pack to a page."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,
@@ -19471,7 +19481,13 @@
         }
       ],
       "slots": [],
-      "events": [],
+      "events": [
+        {
+          "name": "ui-chosen",
+          "detail": "{ name: string, isCopied: boolean }",
+          "description": "A tile was clicked:  `name` draws its icon;  `isCopied`, whether it reached the clipboard (never with `pick`)."
+        }
+      ],
       "parts": [
         {
           "name": "packs",
@@ -19618,7 +19634,7 @@
         },
         {
           "key": "copied",
-          "text": "Copied “{name}”",
+          "text": "Copied the name “{name}”.  You can paste it now.",
           "description": "After a click:  the name is on the clipboard."
         },
         {
@@ -19645,6 +19661,11 @@
           "key": "noMatches",
           "text": "No icons match",
           "description": "The grid, when the search finds nothing."
+        },
+        {
+          "key": "dialogTitle",
+          "text": "Icons",
+          "description": "The title of the dialog `UIIconBrowser.openInDialog()` opens."
         }
       ],
       "mainTag": "ui-icon-browser",
@@ -19953,6 +19974,10 @@
           "description": "The search box at the panel's top (`<input type=search>`)."
         },
         {
+          "name": "browse",
+          "description": "Beside the search box, a `<ui-button>`:  every icon in a dialog, to pick from (`UIIconBrowser.openInDialog()`)."
+        },
+        {
           "name": "grid",
           "description": "The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
         },
@@ -20028,6 +20053,11 @@
           "key": "searchIcons",
           "text": "Search icons",
           "description": "The search box's placeholder and accessible name."
+        },
+        {
+          "key": "browseIcons",
+          "text": "Show all icons, with their names",
+          "description": "The Browse button's tooltip and accessible name."
         },
         {
           "key": "noIcon",

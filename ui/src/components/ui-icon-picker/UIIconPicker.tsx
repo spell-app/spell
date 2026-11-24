@@ -19,6 +19,8 @@ import iconPickerCSS from "./UIIconPicker.css?inline"
  *   its grid scrolls), with:
  *   - a search box, focused, that filters as you type, over the icons' names AND Font Awesome's search terms
  *     (`IconCatalog`:  `mail` finds `envelope`)
+ *   - beside it Browse, a button showing every icon with its name in a dialog, to pick from
+ *     (`UIIconBrowser.openInDialog()`, its family loaded the first time;  epic `editor` T158)
  *   - a grid of glyphs, the first one "none" (a circle with a slash), which clears the value;
  *     not offered while `required`
  *   - each glyph's name as its tooltip (`title`)
@@ -552,23 +554,34 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
         popover={isServer ? undefined : "manual"}
         onMouseDown={this.onPanelMouseDown}
       >
-        <input
-          ref={(element) => (this.search = element)}
-          type="search"
-          class={SEARCH}
-          part={this.partForName("search")}
-          role="combobox"
-          placeholder={this.translationForKey("searchIcons")}
-          aria-label={this.translationForKey("searchIcons")}
-          aria-expanded={this.popover.ariaExpanded}
-          aria-controls={this.ids.grid}
-          aria-autocomplete="list"
-          aria-activedescendant={this.highlighted.index >= 0 ? this.cellId(this.highlighted.index) : undefined}
-          autocomplete="off"
-          spellcheck={false}
-          onInput={this.onSearchInput}
-          onKeyDown={this.onSearchKeyDown}
-        />
+        <div class={SEARCH_ROW}>
+          <input
+            ref={(element) => (this.search = element)}
+            type="search"
+            class={SEARCH}
+            part={this.partForName("search")}
+            role="combobox"
+            placeholder={this.translationForKey("searchIcons")}
+            aria-label={this.translationForKey("searchIcons")}
+            aria-expanded={this.popover.ariaExpanded}
+            aria-controls={this.ids.grid}
+            aria-autocomplete="list"
+            aria-activedescendant={this.highlighted.index >= 0 ? this.cellId(this.highlighted.index) : undefined}
+            autocomplete="off"
+            spellcheck={false}
+            onInput={this.onSearchInput}
+            onKeyDown={this.onSearchKeyDown}
+          />
+          <ui-button
+            part={this.partForName("browse")}
+            size="small"
+            appearance="basic"
+            icon="expand"
+            aria-label={this.translationForKey("browseIcons")}
+            data-tooltip={this.translationForKey("browseIcons")}
+            onClick={this.onBrowse}
+          />
+        </div>
         <div
           ref={(element) => (this.grid = element)}
           id={this.ids.grid}
@@ -679,6 +692,22 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
       event.preventDefault()
       this.open(key, event)
     }
+  }
+
+  /**
+   * Browse:  every icon in a dialog (`UIIconBrowser.openInDialog()`), searching for what's typed;
+   * a click there picks the icon for this field, as a click in the panel does.
+   * - The panel closes first:  the dialog takes the page.
+   * - The browser's family loads the first time:  a page whose pickers never browse never downloads it.
+   */
+  @E.untracked
+  private readonly onBrowse = async (event: Event) => {
+    const query = this.query
+    this.close()
+    const { UIIconBrowser } = await import("spell/ui/components/ui-icon-browser")
+    const name = await UIIconBrowser.openInDialog({ pick: true, query: query || undefined })
+    if (name !== undefined) this.choose(name, event)
+    else this.domElement.focus()
   }
 
   /** A click in the panel keeps the focus in the search box:  only the box itself takes it. */
@@ -834,6 +863,9 @@ const PANEL = "panel"
 
 /** Class of the search box. */
 const SEARCH = "search"
+
+/** Class of the search row:  the search box, then Browse. */
+const SEARCH_ROW = "search-row"
 
 /** Class of the grid. */
 const GRID = "grid"

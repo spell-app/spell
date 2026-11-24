@@ -261,11 +261,19 @@
     font-style: var(--_ui-icon-picker-placeholder-style);
   }
 
-  /* The search box:  the field's box, full width. */
-  .panel > .search {
-    box-sizing: border-box;
+  /* The search row:  the search box, then the Browse button that opens every icon in a dialog. */
+  .panel > .search-row {
+    display: flex;
     flex: none;
-    inline-size: 100%;
+    gap: 4px;
+    align-items: center;
+  }
+
+  /* The search box:  the field's box, the row's width but for the button. */
+  .search-row > .search {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-inline-size: 0;
     margin: 0;
     padding: var(--_ui-icon-picker-padding-block) var(--_ui-icon-picker-padding-inline);
     border: var(--ui-border-width) solid var(--_ui-icon-picker-border-color);
@@ -276,10 +284,10 @@
     font: inherit;
     appearance: none;
   }
-  .panel > .search::placeholder {
+  .search-row > .search::placeholder {
     color: var(--_ui-icon-picker-placeholder-color);
   }
-  .panel > .search:focus {
+  .search-row > .search:focus {
     border-color: var(--_ui-icon-picker-border-color-focus);
   }
 

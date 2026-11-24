@@ -104,8 +104,76 @@ describe("<ui-icon-browser>", () => {
     typeSearch(host, "bell")
     await expect.poll(() => names()[0], { timeout: 10_000 }).toBe("bell")
     await userEvent.click(tiles()[0])
-    await expect.poll(() => copied()).toBe("Copied “bell”")
+    await expect.poll(() => copied()).toBe("Copied the name “bell”.  You can paste it now.")
     expect(writeText).toHaveBeenCalledWith("bell")
+  })
+
+  test("a click sends `ui-chosen`:  the name, and that it was copied", async () => {
+    vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined)
+    const { host, tiles, names } = await browser('<ui-icon-browser query="bell"></ui-icon-browser>')
+    await expect.poll(() => names()[0], { timeout: 10_000 }).toBe("bell")
+    const chosen = new Promise<unknown>((resolve) =>
+      host.addEventListener("ui-chosen", (event) => resolve((event as CustomEvent).detail), { once: true })
+    )
+    await userEvent.click(tiles()[0])
+    expect(await chosen).toEqual({ name: "bell", isCopied: true })
+  })
+
+  test("`pick`:  a click picks, copying nothing", async () => {
+    const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined)
+    const { host, tiles, names, copied } = await browser('<ui-icon-browser pick query="bell"></ui-icon-browser>')
+    await expect.poll(() => names()[0], { timeout: 10_000 }).toBe("bell")
+    const chosen = new Promise<unknown>((resolve) =>
+      host.addEventListener("ui-chosen", (event) => resolve((event as CustomEvent).detail), { once: true })
+    )
+    await userEvent.click(tiles()[0])
+    expect({ chosen: await chosen, wrote: writeText.mock.calls.length, copied: copied() }).toEqual({
+      chosen: { name: "bell", isCopied: false },
+      wrote: 0,
+      copied: undefined
+    })
+  })
+
+  test("`compact`:  the search first, then the switch, no usage line, smaller tiles", async () => {
+    const { host, tiles } = await browser("<ui-icon-browser compact></ui-icon-browser>")
+    const root = host.shadowRoot!
+    const order = [...root.querySelector(".browser")!.children].map(
+      (child) => child.getAttribute("part") ?? child.localName
+    )
+    expect({
+      order: order.slice(0, 2),
+      usage: root.querySelector("[part~=usage]"),
+      tileWidth: Math.round(tiles()[0].getBoundingClientRect().width) < 8 * 16
+    }).toEqual({ order: ["search", "packs"], usage: null, tileWidth: true })
+  })
+
+  test("`openInDialog()`:  copies in a dialog, saying so in a toast;  `pick` closes it with the icon", async () => {
+    vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined)
+    const { UIIconBrowser } = await import("spell/ui/components/ui-icon-browser")
+    const dialogBrowser = () => document.querySelector<HTMLElement>("ui-modal ui-icon-browser")
+    // to copy:  the dialog stays, a toast says what was copied
+    void UIIconBrowser.openInDialog({ query: "bell" })
+    await expect.poll(() => dialogBrowser() && parts(dialogBrowser()!).names()[0], { timeout: 10_000 }).toBe("bell")
+    expect(document.querySelector("ui-modal")!.getAttribute("heading")).toBe("Icons")
+    await expect
+      .poll(
+        () =>
+          dialogBrowser()!.shadowRoot!.activeElement?.closest("[part~=search]") ??
+          dialogBrowser()!.shadowRoot!.activeElement?.getAttribute("part")
+      )
+      .toBeTruthy()
+    await userEvent.click(parts(dialogBrowser()!).tiles()[0])
+    await expect.poll(() => document.querySelector("ui-toast")?.getAttribute("message")).toBe("Copied the name “bell”.  You can paste it now.")
+    expect(document.querySelector("ui-modal")).not.toBeNull()
+    UI.overlays.closeAll("toast")
+    ;(document.querySelector("ui-modal") as HTMLElement & { visible: boolean }).visible = false
+    await expect.poll(() => document.querySelector("ui-modal")).toBeNull()
+    // to pick:  a click closes it, with the name
+    const picked = UIIconBrowser.openInDialog({ pick: true, query: "bell" })
+    await expect.poll(() => dialogBrowser() && parts(dialogBrowser()!).names()[0], { timeout: 10_000 }).toBe("bell")
+    await userEvent.click(parts(dialogBrowser()!).tiles()[0])
+    expect(await picked).toBe("bell")
+    await expect.poll(() => document.querySelector("ui-modal")).toBeNull()
   })
 
   test("`address`:  opens on the address's search and pack, ahead of `query` and `pack`", async () => {

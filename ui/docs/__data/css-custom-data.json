@@ -11414,6 +11414,13 @@
       }
     },
     {
+      "name": "::part(browse)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-icon-picker>`:  Beside the search box, a `<ui-button>`:  every icon in a dialog, to pick from (`UIIconBrowser.openInDialog()`)."
+      }
+    },
+    {
       "name": "::part(button)",
       "description": {
         "kind": "markdown",

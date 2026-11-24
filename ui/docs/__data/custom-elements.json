@@ -17172,6 +17172,22 @@
               "fieldName": "address"
             },
             {
+              "name": "pick",
+              "description": "A click picks the icon instead of copying its name:  `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "pick"
+            },
+            {
+              "name": "compact",
+              "description": "Tighter, for a dialog:  the search first, smaller tiles closer together, and no line about adding the pack to a page.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "compact"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {
@@ -17309,7 +17325,15 @@
             }
           ],
           "members": [],
-          "events": [],
+          "events": [
+            {
+              "name": "ui-chosen",
+              "description": "A tile was clicked:  `name` draws its icon;  `isCopied`, whether it reached the clipboard (never with `pick`).",
+              "type": {
+                "text": "CustomEvent<{ name: string, isCopied: boolean }>"
+              }
+            }
+          ],
           "slots": [],
           "cssParts": [
             {
@@ -17699,6 +17723,10 @@
             {
               "name": "search",
               "description": "The search box at the panel's top (`<input type=search>`)."
+            },
+            {
+              "name": "browse",
+              "description": "Beside the search box, a `<ui-button>`:  every icon in a dialog, to pick from (`UIIconBrowser.openInDialog()`)."
             },
             {
               "name": "grid",

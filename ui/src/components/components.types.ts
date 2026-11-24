@@ -441,6 +441,14 @@ export type MessageDismissDetail = {
   originalEvent?: Event
 }
 
+/** `detail` of `ui-chosen`, from a click on an `<ui-icon-browser>` tile. */
+export type IconBrowserChosenDetail = {
+  /** what draws the icon:  `name` takes it */
+  name: string
+  /** whether it reached the clipboard;  never with `pick`, which only picks */
+  isCopied: boolean
+}
+
 ////////////////
 // ## Breadcrumb
 ////////////////

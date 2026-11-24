@@ -175,11 +175,19 @@ export class UIIconBrowser extends E.UIComponent<typeof iconBrowserVocabulary> {
   /** The name last copied, and whether it got there;  `undefined` before the first click. */
   @E.state accessor lastCopy: { name: string; isCopied: boolean } | undefined = undefined
 
-  /** A tile was clicked:  its name to the clipboard, and say so. */
+  /**
+   * A tile was clicked:  its name to the clipboard, and say so;  with `pick`, only `ui-chosen`.
+   * - `ui-chosen` either way, `isCopied` saying whether the name reached the clipboard.
+   */
   @E.untracked
-  private async copy(name: string) {
+  private async choose(name: string) {
+    if (this.pick) {
+      this.send("ui-chosen", { name, isCopied: false })
+      return
+    }
     const isCopied = await this.clipboard.copy(name)
     this.lastCopy = { name, isCopied }
+    this.send("ui-chosen", { name, isCopied })
   }
 
   /** What the copied label says:  while a copy is fresh, or after one was refused. */
@@ -197,7 +205,7 @@ export class UIIconBrowser extends E.UIComponent<typeof iconBrowserVocabulary> {
   render(): JSX.Element {
     return (
       <div class={this.rootClass}>
-        {this.packSwitch()}
+        <Show when={!this.compact}>{this.packSwitch()}</Show>
         <ui-input
           ref={(input: HTMLElement) => input.addEventListener("ui-typed", this.onSearchInput)}
           part={this.partForName("search")}
@@ -209,9 +217,16 @@ export class UIIconBrowser extends E.UIComponent<typeof iconBrowserVocabulary> {
           aria-label={this.translationForKey("searchLabel")}
           autocomplete="off"
         />
-        <ui-message part={this.partForName("usage")} size="small">
-          {this.usage()}
-        </ui-message>
+        <Show
+          when={this.compact}
+          fallback={
+            <ui-message part={this.partForName("usage")} size="small">
+              {this.usage()}
+            </ui-message>
+          }
+        >
+          {this.packSwitch()}
+        </Show>
         <ui-labels>
           <ui-label part={this.partForName("count")} appearance="basic" role="status">
             {this.countText}
@@ -301,7 +316,7 @@ export class UIIconBrowser extends E.UIComponent<typeof iconBrowserVocabulary> {
         role="listitem"
         data-tooltip={tip}
         data-name={choice.name}
-        onClick={() => void this.copy(choice.name)}
+        onClick={() => void this.choose(choice.name)}
       >
         <span class={GLYPH} part={this.partForName("glyph")} aria-hidden="true">
           {glyph?.svg}
@@ -325,6 +340,71 @@ export class UIIconBrowser extends E.UIComponent<typeof iconBrowserVocabulary> {
       script: code(`UI.icons.use("${pack}")`),
       examples: `${code("x")}, ${code("warning")}`
     }
+  }
+
+  /**
+   * Every icon in a dialog over the page:  a `compact` browser in a `<ui-modal>`, its search focused on top.
+   * - To COPY (the default):  a click copies the icon's name and says so in a toast;  the dialog stays open.
+   * - To PICK (`pick`):  a click closes it, and the promise has that name;  `undefined` when closed without one
+   *   (`<ui-icon-picker>`'s Browse).
+   * - Loads the dialog's family (and the toast's, to copy) itself, the first time:
+   *   a page that never opens one never downloads them.
+   * - SIDE EFFECT:  the dialog is added to `<body>`, and removed once it has closed.
+   */
+  static async openInDialog({ pick = false, query }: { pick?: boolean; query?: string } = {}): Promise<
+    string | undefined
+  > {
+    const [{ UIModal }, ui] = await Promise.all([
+      import("spell/ui/components/ui-modal"),
+      UI.load(),
+      // to copy:  the toast that says so
+      pick ? undefined : import("spell/ui/components/ui-toast")
+    ])
+    const browserTag = UIIconBrowser.vocabulary.tag
+    const modal = document.createElement(UIModal.vocabulary.tag) as HTMLElement & { visible: boolean }
+    modal.setAttribute("size", DIALOG_SIZE)
+    modal.setAttribute("closable", "")
+    modal.setAttribute("closedby", "closerequest")
+    modal.setAttribute(UIT.HEADING, ui.i18n.t("dialogTitle", undefined, browserTag))
+    const browser = document.createElement(browserTag) as E.DOMElement<UIIconBrowser>
+    browser.setAttribute("compact", "")
+    if (pick) browser.setAttribute("pick", "")
+    if (query) browser.setAttribute("query", query)
+    // in the dialog's content box, as every dialog's body is:  its padding, its scrolling (`ui-parts`, which the dialog's family loads)
+    const content = document.createElement(UIIconBrowser.tagFor(ui, UIT.CONTENT))
+    content.append(browser)
+    modal.append(content)
+    document.body.append(modal)
+    modal.visible = true
+    // the search takes the keys at once:  type to find, as the picker's panel does
+    void browser.ready.then(() => browser.shadowRoot?.querySelector<HTMLElement>("[part~=search]")?.focus())
+    return new Promise((resolve) => {
+      let picked: string | undefined
+      browser.addEventListener("ui-chosen", (event) => {
+        const { name, isCopied } = (event as CustomEvent<UIT.IconBrowserChosenDetail>).detail
+        if (pick) {
+          picked = name
+          modal.visible = false
+          return
+        }
+        const said = browser.component?.copyNote?.text
+        if (said) ui.toast({ message: said, class: isCopied ? "success" : "error", displayTime: TOAST_MS })
+      })
+      modal.addEventListener(
+        "ui-closed",
+        () => {
+          modal.remove()
+          resolve(picked)
+        },
+        { once: true }
+      )
+    })
+  }
+
+  /** The tag of the part whose class noun is `noun` (`content` => `<ui-content>`), as this page names it. */
+  private static tagFor(ui: typeof UI, noun: string): string {
+    for (const vocabulary of ui.vocabulary.vocabularies.values()) if (vocabulary.noun === noun) return vocabulary.tag
+    return `ui-${noun}`
   }
 
   /** `text` when it's a pack Spell UI ships;  else `undefined`. */
@@ -382,6 +462,12 @@ const TILES_AT_ONCE = 120
 
 /** How long the copied label stays, in seconds. */
 const COPIED_SECONDS = 4
+
+/** `openInDialog()`'s dialog:  wide enough for several columns of tiles. */
+const DIALOG_SIZE = "large"
+
+/** `openInDialog()`'s toast after a copy, in ms. */
+const TOAST_MS = 2000
 
 /** Class of the grid. */
 const GRID = "grid"
