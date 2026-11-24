@@ -211,7 +211,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       what the keeper runs
     - `refusedStart(server, checkout)` (epic `epic-engine` P84):  why a main checkout's server mustn't start now:  an
       agent's mark on the environment (`agentOf()`:  `CLAUDECODE`, `CODEX_THREAD_ID`, `SPELL_EPIC_AGENT`), no keeper's
-      mark (`SPELL_KEEPER_START`, `KEEPER_START_VARIABLE`), its parent not the keeper, not a worktree, not a test run;
+      mark (`SPELL_KEEPER_START`, `KEEPER_START_VARIABLE`), its parent not the keeper, not a worktree, not a test run,
+      and the agent's own process among its parents (`agentAbove()`:  `CLAUDE_PID`, a `claude` or `codex` program),
+      so a person's terminal that inherited the mark starts it;  `spell server local|start --force` sets the keeper's
+      mark, a person's way past it;
       the page server's `serve` / `local` asks it before it starts, the app's `vite.config.ts` as Vite starts in dev
       (but for a page server's own editor, which it hands its token:  `SPELL_SERVER_TOKEN`)
       - so `KeeperLink.ts` imports its peers WITH `.ts` (`./checkout.ts`, `./Heartbeat.ts`):  Vite loads the config's

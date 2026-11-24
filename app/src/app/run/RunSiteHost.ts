@@ -1,11 +1,20 @@
-import type { SiteHost } from "spell/parser/core/core.types"
+import type { SiteHost, SitePageEntry } from "spell/parser/core/core.types"
 import { SiteThemes } from "spell/app/app/runner/SiteThemes"
+import { fetchJSON } from "spell/app/app/runner/fetchFresh"
 
 /****************
  * ### `RunSiteHost`
  * A running site's host whose address is the page's own:  the run page (`/run/<project>`), and a `<spell-viewer>`
  * given a `base` (the Spell UI site at `/components/ui/`, epic `editor` P43).
  * - `/run/@spell/examples/StarWarsSite/films/4` shows the site's `/films/4`;  the base itself, its `/`.
+ * - A page alone in its own FILE is named by that file too, as the editor's Run names it (`RunSite`, epic `mockup` I15):
+ *   `/run/owen@spell/dashboard/home.spell` shows the page `home.spell` declares, at its address (`opened`).
+ *   - So the address the editor's Run puts in the browser opens the same page when it's reloaded, or bookmarked:
+ *     a reload goes to the run page, never the editor.
+ *   - Which page a file declares, from the project's declarations (`OpenedFile.of()`), read before the site starts;
+ *     the page's address, from the running site's pages as it starts (`address(site)`).
+ *   - A file that declares no page (the site file) shows the site's `/`, as the editor's Run does.
+ *   - The page's address stays as it was opened, until the site goes to another.
  * - A page the site goes to is a new address in the browser's history, so Back and Forward step through its pages.
  * - A link's `#section`, and one the page was opened or went back to, is landed on once it's drawn (`landOn()`),
  *   looked for in `root`:  where the site draws, a `<spell-viewer>`'s shadow root;  the document by default.
@@ -20,16 +29,35 @@ export class RunSiteHost implements SiteHost {
   /** Where the site draws, where a link's section is looked for. */
   private readonly root: ParentNode
 
-  constructor(base: string, root: ParentNode = document) {
+  /** The file the page was opened at, and the pages it declares:  `undefined` when it was opened at an address. */
+  private readonly opened?: OpenedFile
+
+  /** The site running, once it asked for its address:  its pages say where a file's page is. */
+  private site?: SitePages
+
+  constructor(base: string, root: ParentNode = document, opened?: OpenedFile) {
     this.base = base.replace(/\/+$/, "")
     this.root = root
+    this.opened = opened
   }
 
-  /** The site's address the page's URL names:  what follows the base, `/` for none. */
-  address(): string {
+  /**
+   * The site's address the page's URL names:  what follows the base, `/` for none.
+   * - A file's (`/home.spell`):  the address of the page it declares, alone, with no value to fill;  `/` for none.
+   * - `site`:  the site asking, as it starts;  remembered, for Back and Forward to the file's address.
+   */
+  address(site?: SitePages): string {
+    if (site) this.site = site
     const { pathname } = location
     const rest = pathname.startsWith(this.base) ? pathname.slice(this.base.length) : ""
+    if (this.opened && safelyDecoded(rest) === this.opened.path) return this.addressOfFile(this.opened) ?? "/"
     return rest.length > 1 ? rest : "/"
+  }
+
+  /** The running site's address of the first page `file` declares with no value to fill:  `undefined` for none. */
+  private addressOfFile(file: OpenedFile): string | undefined {
+    const pages = this.site?.allPages() ?? []
+    return pages.find((entry) => !entry.params?.length && file.pages.includes(entry.page))?.address
   }
 
   /**
@@ -108,6 +136,53 @@ export class RunSiteHost implements SiteHost {
     requestAnimationFrame(look)
   }
 }
+
+/** A running site, as far as its host needs it:  its pages. */
+type SitePages = { allPages(): SitePageEntry[] }
+
+/****************
+ * ### `OpenedFile`
+ * A project's file the run page was opened at, `/run/owen@spell/dashboard/home.spell`, and the pages it declares:
+ * what `RunSiteHost` shows for it.
+ ****************/
+export type OpenedFile = {
+  /** The file, from the project's folder:  `/home.spell`. */
+  path: string
+  /** The classes of the pages it declares, in its order:  `["HomeScreen"]`. */
+  pages: string[]
+}
+
+export const OpenedFile = {
+  /**
+   * The file `rest` names, the part of the run page's address after its project, and the pages it declares, read from
+   * the project's declarations at `declarationsUrl`:  `undefined` when `rest` names no Spell file (`/films/4`).
+   * - NEVER throws:  declarations that can't be read declare no page, so the file shows the site's `/`.
+   */
+  async of(rest: string, declarationsUrl: string): Promise<OpenedFile | undefined> {
+    const path = `/${rest.replace(/^\/+/, "")}`
+    if (!SPELL_FILE.test(path)) return undefined
+    const declarations = await fetchJSON<DeclaredStatements>(declarationsUrl)
+    return { path, pages: OpenedFile.pagesIn(declarations, path) }
+  },
+
+  /**
+   * The classes of the pages file `path` declares, in `declarations` (a project's `<project>.declarations.json5`):
+   * each type it defines whose super type is a page.
+   */
+  pagesIn(declarations: DeclaredStatements | undefined, path: string): string[] {
+    return (declarations?.statements ?? [])
+      .filter((statement) => statement.superType === "Page" && statement.defined?.startsWith(`${path}:`))
+      .flatMap((statement) => (statement.type ? [statement.type] : []))
+  }
+}
+
+/** What `OpenedFile` reads of a project's declarations:  each statement's type, its super type and where it is. */
+export type DeclaredStatements = {
+  statements?: { type?: string; superType?: string; defined?: string }[]
+}
+
+/** A Spell file's path:  its last part ends `.spell`. */
+const SPELL_FILE = /\.spell$/
 
 /** How many times a link's section is looked for, `SECTION_PAUSE` apart:  five seconds. */
 const SECTION_TRIES = 50

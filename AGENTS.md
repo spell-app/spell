@@ -360,8 +360,10 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
       the Servers tab's hands-off switch is on
     - the SERVERS THEMSELVES:  main's page server and editor stop at once when an agent's command starts them and the
       keeper didn't (`SRV.KeeperLink.refusedStart()`:  the agent's mark, `CLAUDECODE` / `CODEX_THREAD_ID`, with no
-      `SPELL_KEEPER_START`), which catches a script or a command built in pieces;  the person's own terminal still
-      starts them;  main's editor stays on 3000 (`--strictPort`, `yarn start:dev` too)
+      `SPELL_KEEPER_START`, and the agent's own process among its parents:  a person's terminal can inherit the
+      mark), which catches a script or a command built in pieces;  the person's own terminal still starts them, and
+      `spell server local|start --force` sets the keeper's mark for a person by hand;  main's editor stays on 3000
+      (`--strictPort`, `yarn start:dev` too)
     - a worktree's own servers are its session's, as before
   - A worktree's page server and editor keep ONE port each, written down (`SRV.PortBook`), and stop after 30 minutes
     unused.
