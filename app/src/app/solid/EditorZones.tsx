@@ -19,8 +19,13 @@ import "./EditorZones.css"
  *   the editor runs on:  run as a layout, its app never starts itself (`editor.isEditorPiece()`), and a live edit
  *   draws each zone again where it is.
  * - The zones are the app's views, in the order the app lists them, found as it runs:  a view added shows by itself.
- * - What the editor draws in a view's place for it (a pane, the Spell menu's projects) is a stand-in naming it.
- * - A modal (About Spell, Versions) waits behind a Show button:  open, it would cover the page.
+ * - Each view drawn in place, as the editor draws it (`EditorSpell.drawInPlace()`), so the editor's own sheets reach
+ *   it and a menu looks as it does in the bar;  a view with a `<css>` of its own draws as its element, as the file
+ *   tab bar does in the editor.
+ * - What the editor draws in a view's place for it (a pane, the Spell menu's projects) is a stand-in:  its name in a
+ *   tag pill, `⟨spell menu⟩` (T141).
+ * - Every row a menu can show shows, whatever the editor would hide or grey here (`showEveryRow()`, T142).
+ * - A modal (About Spell, Versions) shows inline, its box in the zone, never over the page (`InlineDialog`, T143).
  * - A zone whose drawing throws shows its error, and the others go on drawing.
  ****************/
 export function EditorZones(): JSX.Element {
@@ -29,7 +34,6 @@ export function EditorZones(): JSX.Element {
     void editor.programRuns
     return zonesOf(runtimeCore())
   })
-  onCleanup(closeZoneModals)
   return (
     <div class="EditorZones">
       <Show when={zones().length} fallback={<p class="EditorZonesWaiting">{appTexts.text("editorZonesWaiting")}</p>}>
@@ -45,6 +49,7 @@ export function EditorZones(): JSX.Element {
 function EditorZone(props: { zone: Zone }): JSX.Element {
   const { view, name, core } = untrack(() => props.zone)
   standInsFor(view, core)
+  showEveryRow(core)
   const isModal = drawsAModal(view)
   return (
     <section class="EditorZone">
@@ -52,11 +57,11 @@ function EditorZone(props: { zone: Zone }): JSX.Element {
       <div class="EditorZoneBody">
         <ErrorBoundary fallback={(error) => <p class="EditorZoneError">{error.message}</p>}>
           {isModal ? (
-            <ui-button size="small" icon="window maximize outline" onClick={() => showModal(view, core)}>
-              {appTexts.text("editorZonesShow")}
-            </ui-button>
-          ) : (
+            <InlineDialog view={view} core={core} />
+          ) : hasOwnCss(view) ? (
             (core.drawThing(view) as JSX.Element)
+          ) : (
+            (core.drawOwn(view) as JSX.Element)
           )}
         </ErrorBoundary>
       </div>
@@ -117,6 +122,14 @@ function wordsOf(key: string): string {
   return kebabCase(key).replaceAll("-", " ")
 }
 
+/**
+ * Does `view`'s type have a `<css>` of its own (`static css`, `spell/parser/core`'s `css`)?
+ * - Its sheet reaches only its element's shadow root:  so it draws as its element, the page's sheets left outside.
+ */
+function hasOwnCss(view: object): boolean {
+  return Object.hasOwn(view.constructor, "css")
+}
+
 /** Does `member` draw itself, a view?  A thing with a `draw()` of its own type's. */
 function isView(member: unknown): member is object {
   return typeof member === "object" && member !== null && typeof (member as { draw?: unknown }).draw === "function"
@@ -151,7 +164,8 @@ function standInsFor(view: object, core: ZoneCore): void {
 }
 
 /**
- * Make the program's editor parts draw as stand-ins, each naming the place it's in:  `The editor's own:  spell menu`.
+ * Make the program's editor parts draw as stand-ins, each naming the place it's in in a tag pill:  `⟨spell menu⟩`,
+ * as the code pane draws a tag (Owen, T141).
  * - On the type, not each part:  a live edit carries a part over as a new one, which keeps no `draw` of its own.
  * - SIDE EFFECT:  replaces `EditorPart.prototype.draw`, once per compile of the Spell (a new class each time).
  */
@@ -165,20 +179,38 @@ function drawStandIns(EditorPart: new () => object, core: ZoneCore): void {
       const standIn = document.createElement("span")
       standIn.className = "EditorZoneStandIn"
       standIn.style.cssText = STAND_IN_STYLE
-      standIn.textContent = appTexts.text("editorZonesStandIn", { part: placeOf(this, core) })
+      const [open, close] = [ANGLE_OPEN, ANGLE_CLOSE].map((angle) => {
+        const mark = document.createElement("span")
+        mark.style.cssText = ANGLE_STYLE
+        mark.textContent = angle
+        return mark
+      })
+      standIn.append(open, placeOf(this, core), close)
       return standIn
     }
   })
 }
 
 /**
- * A stand-in's look:  a dashed grey chip.  Written on it, as it's drawn inside its view's element,
- * where the page's sheets don't reach;  the theme's colours still do.
+ * A stand-in's look:  the code pane's tag pill (`bubbly.css`, `.bubbly-tag-pill`), in a view's purple, its ends cut
+ * to points, its name bold between steep angle brackets.
+ * - Written on it, not in `EditorZones.css`:  a view with a `<css>` of its own draws inside its element
+ *   (`hasOwnCss()`), where the page's sheets don't reach.
+ * - Its height pinned:  a pane's split panel (`<ui-split-panel>`) sizes its children itself, and squeezed a pill in a
+ *   column of panes to nothing.
  */
 const STAND_IN_STYLE =
-  "display: inline-flex; align-items: center; min-height: 24px; padding: 2px 8px; " +
-  "border: 1px dashed var(--ui-border-color); border-radius: 6px; font-size: 12px; white-space: nowrap; " +
-  "color: var(--ui-text-muted, var(--ui-muted-color))"
+  "display: inline-flex; flex: none; align-items: center; gap: 3px; height: 24px; min-height: 24px; max-height: 24px; " +
+  "margin: 2px; padding: 0 9px; " +
+  "border-radius: 7px / 12px; corner-shape: bevel; white-space: nowrap; font-size: 13px; font-weight: 650; " +
+  "color: light-dark(#1f1f26, #f6f5fb); " +
+  "background: light-dark(color-mix(in srgb, #7c5cd6 20%, white), color-mix(in srgb, #7c5cd6 34%, #1c1b22))"
+
+/** A stand-in's angle brackets:  faint, heavy, as the code pane draws a tag's. */
+const ANGLE_STYLE = "font-weight: 800; opacity: 0.45"
+
+/** The brackets round a stand-in's name:  math's angle brackets, as the code pane draws a tag's `<` and `>`. */
+const [ANGLE_OPEN, ANGLE_CLOSE] = ["\u27E8", "\u27E9"]
 
 /** The editor part classes drawing as stand-ins:  `drawStandIns()`. */
 const STANDING_IN = new WeakSet<object>()
@@ -218,24 +250,40 @@ function drawsAModal(view: object): boolean {
 const MODAL_DRAWING = /\bh\("ui-(modal|flyout)"/
 
 /**
- * Open `view`'s modal over the page, filled with sample words where the editor fills them (`sampleFill()`),
- * and take it away once it closes, as the editor's own About and Versions do.
+ * `view`'s modal drawn inline, in its zone:  its box, title, words and buttons, as the page shows it, never over the
+ * page (Owen, T143).
+ * - Filled with sample words where the editor fills them as it opens one (`sampleFill()`).
+ * - Drawn first into a box off the page, and put in the zone only once its dialog is made and its `visible` taken off:
+ *   shown, it would open in the top layer, over everything, and make the page inert.
+ *   - The drawing makes its elements a moment after `render()` returns (its error boundary's memo), so it waits for
+ *     the dialog to appear (`MutationObserver`), not a fixed time.
+ * - Its closed `<dialog>` shown as a box in the zone's flow, through its `modal` part (`EditorZones.css`).
  */
-function showModal(view: object, core: ZoneCore): void {
+function InlineDialog(props: { view: object; core: ZoneCore }): JSX.Element {
+  const { view, core } = untrack(() => props)
   sampleFill(view, core)
-  const host = document.createElement("div")
-  host.className = "EditorZoneModal"
-  document.body.append(host)
-  const dispose = render(() => core.drawOwn(view) as JSX.Element, host)
-  host.addEventListener(
-    "ui-closed",
-    () => {
-      dispose()
-      host.remove()
-    },
-    { once: true }
-  )
+  const zone = document.createElement("div")
+  zone.className = "EditorZoneDialog"
+  const offPage = document.createElement("div")
+  const dispose = render(() => core.drawOwn(view) as JSX.Element, offPage)
+  const putInZone = (): boolean => {
+    const dialogs = offPage.querySelectorAll(DIALOG_TAGS)
+    if (!dialogs.length) return false
+    for (const dialog of dialogs) dialog.removeAttribute("visible")
+    zone.append(offPage)
+    return true
+  }
+  if (!putInZone()) {
+    const watching = new MutationObserver(() => putInZone() && watching.disconnect())
+    watching.observe(offPage, { childList: true, subtree: true })
+    onCleanup(() => watching.disconnect())
+  }
+  onCleanup(dispose)
+  return zone as unknown as JSX.Element
 }
+
+/** The dialogs a modal view draws, shown inline:  Spell UI's modal and flyout. */
+const DIALOG_TAGS = "ui-modal, ui-flyout"
 
 /**
  * Fill `view`'s text with sample words where the editor fills them as it opens one:
@@ -269,7 +317,36 @@ function sampleFill(view: object, core: ZoneCore): void {
 /** Two versions a Versions box shows in its zone:  when each was kept. */
 const SAMPLE_VERSIONS = ["Nov 14, 2026, 9:15:02 AM", "Nov 3, 2026, 4:40:31 PM"]
 
-/** Take away any of the zones' modals still open:  they go with the pane. */
-function closeZoneModals(): void {
-  for (const host of document.querySelectorAll(".EditorZoneModal")) host.remove()
+/**
+ * Show every row the app's menus can show, and title the ones the editor titles (Owen, T142:  "show all of the
+ * optional bits in the menu, even if hidden"):  what's behind an `if` here is what the editor hides or greys, by
+ * where it runs and what it may do.
+ * - On the app the zones run, the programs' copy (`runtimeCore()`), never the editor's own:  the bar's menus are
+ *   unchanged.
+ * - Its titles in the page's language, for a sample project, as the editor words them for the project open.
+ * - SIDE EFFECT:  writes them on the app, each time a zone draws;  a live edit makes the app anew.
+ */
+function showEveryRow(core: ZoneCore): void {
+  const app = core.things.topLevel().find(({ thing }) => membersOf(thing).some(([, member]) => isView(member)))?.thing
+  if (!app) return
+  const project = { project: SAMPLE_PROJECT }
+  const shown: Partial<Record<EditorMemberName<"SpellEditor", "value">, unknown>> = {
+    onAServer: true,
+    mayCreate: true,
+    mayDesign: true,
+    mayChangeProject: true,
+    mayReset: true,
+    fileChanged: true,
+    drafted: true,
+    canPublish: true,
+    revertWords: appTexts.text("revertChanges"),
+    renameWords: appTexts.text("renameProject", project),
+    deleteWords: appTexts.text("deleteProject", project),
+    duplicateWords: appTexts.text("duplicateProject", project)
+  }
+  const fields = app as unknown as Record<string, unknown>
+  for (const [key, value] of Object.entries(shown)) if (key in fields) fields[key] = value
 }
+
+/** The project a menu's titles name in a zone. */
+const SAMPLE_PROJECT = "Counter"

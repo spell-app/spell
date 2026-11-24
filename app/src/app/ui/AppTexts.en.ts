@@ -681,8 +681,6 @@ export const APP_TEXTS = {
   editorNameOfType: "`{name}`, of `{type}`",
   editorTypeName: "`{type}`, the whole type",
   editorZonesWaiting: "Each of the editor's parts shows here, in a zone of its own, once its Spell runs.",
-  editorZonesShow: "Show",
-  editorZonesStandIn: "The editor's own:  {part}",
   editorZonesCancel: "Cancel",
   homeEditorLine: "The editor's own pieces, in Spell:\nchange one, publish it, and the editor you're using changes.",
   homeNoGuides: "Guides are on their way.",

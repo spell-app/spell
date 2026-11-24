@@ -32,7 +32,7 @@ export const EDITOR_NAMES = {
       aboutBox: { kind: "view", words: "about box", for: "what About Spell… shows" },
       versionsBox: { kind: "view", words: "versions box", for: "what Versions shows" },
 
-      canRevert: { kind: "value", words: "can revert", for: "greys Discard Changes" },
+      fileChanged: { kind: "value", words: "file changed", for: "greys Discard Changes" },
       drafted: { kind: "value", words: "drafted", for: "greys Delete Draft" },
       autoSaving: { kind: "value", words: "auto saving", for: "ticks AutoSave" },
       canPublish: { kind: "value", words: "can publish", for: "greys Publish" },

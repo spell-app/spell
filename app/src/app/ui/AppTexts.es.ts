@@ -794,8 +794,6 @@ const APP_TEXTS_ES: AppTextPack = {
   editorNameOfType: "`{name}`, de `{type}`",
   editorTypeName: "`{type}`, el tipo entero",
   editorZonesWaiting: "Cada parte del editor se muestra aquí, en una zona propia, en cuanto su Encanto se ejecuta.",
-  editorZonesShow: "Mostrar",
-  editorZonesStandIn: "Del propio editor:  {part}",
   editorZonesCancel: "Cancelar",
   homeEditorLine: "Las piezas del propio editor, en Encanto:\ncambia una, publícala, y el editor que usas cambia.",
   homeNoGuides: "Las guías están en camino.",

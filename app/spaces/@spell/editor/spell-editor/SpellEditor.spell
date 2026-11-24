@@ -19,7 +19,7 @@ spell editor is an app
 
 	group "Editor State"
 	// The editor's state, which the menus grey and tick by:  the editor keeps each in step
-	its "can revert" is yes or no
+	its "file changed" is yes or no
 		// The file has something to revert:  edits not saved, or with AutoSave on, a draft
 	its "drafted" is yes or no
 		// The project has a draft:  Delete Draft puts every file back as published
@@ -109,7 +109,7 @@ spell editor is an app
 	to "delete file" with icon "trash alternate outline"
 	to "revert changes" with title "[its revert words]", icon "undo"
 		shortcut shift+meta+R
-		enabled when its can revert is yes
+		enabled when its file changed is yes
 
 	group "Editing"
 	to "find" with icon "search"

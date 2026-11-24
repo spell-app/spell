@@ -368,7 +368,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     )
   })
   followEditor(spell, (): EditorValues => ({
-    canRevert: editor.canRevertChanges,
+    fileChanged: editor.canRevertChanges,
     revertWords: appTexts.text("revertChanges"),
     autoSaving: editor.isAutoSaving,
     unsaved: editor.hasUnsavedEdits,
