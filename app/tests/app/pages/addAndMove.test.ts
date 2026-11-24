@@ -32,6 +32,9 @@ blank is an app
 /** What a compile and redraw takes, at most. */
 const SETTLE_MS = 2500
 
+/** How long the mouse rests on an add bar button before its menu shows:  the page's hover delay, and some (T162). */
+const HOVER_OPENS_MS = 1500
+
 /** A part as it's drawn. */
 type Drawn = { tag: string; x: number; y: number; width: number; height: number }
 
@@ -1088,16 +1091,39 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
             )
           }),
           names: buttons.map((button) => button.getAttribute("aria-label") ?? ""),
-          tooltips: buttons.every((button) => !!button.getAttribute("data-tooltip"))
+          // no tooltips:  a group's menu, opening as the mouse rests, names it (T162)
+          tooltips: buttons.some((button) => button.hasAttribute("data-tooltip")),
+          // a + atop, saying what it's for;  the buttons 4px apart (T162)
+          plus: !!document.querySelector(".PaletteRail .PaletteRailAdd ui-icon[name=plus]"),
+          touching: (() => {
+            const top = (button: Element) =>
+              button.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect().top
+            return (
+              Math.min(...buttons.slice(1).map((button, index) => Math.round(top(button) - top(buttons[index]!)))) ===
+              36
+            )
+          })(),
+          // docked to the window's left edge:  no room on its left, its left corners square (T162)
+          docked:
+            rail.left === 0 && getComputedStyle(document.querySelector(".PaletteRail")!).borderTopLeftRadius === "0px"
         }
       })
     const laidOut = await across()
-    expect(laidOut).toMatchObject({ order: true, railWidth: 40, squares: true, centred: true, tooltips: true })
+    expect(laidOut).toMatchObject({
+      order: true,
+      railWidth: 40,
+      squares: true,
+      centred: true,
+      tooltips: false,
+      plus: true,
+      touching: true,
+      docked: true
+    })
     // every row in it lined up (the kit's alignment check)
     expect(Alignment.report(await Alignment.scanPage(page, { within: ".PaletteRailPlace" }))).toEqual([])
     expect(laidOut.names).toContain("Layout")
 
-    // a group's button opens its parts beside the bar, its search focused;  Escape closes it
+    // a group's button opens its parts beside the bar as the mouse rests on it (T162);  Escape closes it
     const flyoutsOpen = () =>
       page.evaluate(
         () =>
@@ -1105,13 +1131,17 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
             (menu) => (menu as HTMLElement & { visible?: boolean }).visible
           ).length
       )
-    await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Layout"] [part~=item]').click()
-    await page.waitForTimeout(600)
+    await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Layout"] [part~=item]').hover()
+    await page.waitForTimeout(HOVER_OPENS_MS)
     expect(await flyoutsOpen()).toBe(1)
     const layout = page.locator('ui-popup.PaletteFlyout[aria-label="Layout"]')
     expect(await layout.locator('ui-tree-item[label="Grid"]').count()).toBe(1)
-    // its search keeps only the matches, by name, other names or description (Column's says it's a grid's)
+    // its search, a button beside its name until clicked (T162), keeps only the matches, by name, other names or
+    // description (Column's says it's a grid's)
     const allRows = await layout.locator("ui-tree-item").count()
+    await layout.locator(".PaletteFlyoutSearch [part~=opener]").click()
+    await page.waitForTimeout(300)
+    expect(await layout.locator(".PaletteFlyoutSearch input").getAttribute("placeholder")).toBe("Search Layout")
     await layout.locator(".PaletteFlyoutSearch input").fill("grid")
     await page.waitForTimeout(400)
     const gridRows = await layout
@@ -1123,8 +1153,11 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForTimeout(400)
 
     // a part's star puts it atop the bar, starred;  a right click takes the star away (T152)
-    await layout.locator('ui-tree-item[label="Grid"]').hover()
-    await layout.locator('ui-tree-item[label="Grid"] ui-button.PaletteStar').click()
+    await layout.locator('ui-tree-item[label="Grid"]').locator("[part~=row]").first().hover()
+    // its icon alone, no tooltip (T162)
+    const star = layout.locator('ui-tree-item[label="Grid"] > ui-button.PaletteStar')
+    expect(await star.getAttribute("data-tooltip")).toBeNull()
+    await star.locator("[part~=button]").click()
     await page.waitForTimeout(400)
     expect(await page.locator(".PaletteRail ui-item.PaletteFavorite").count()).toBe(1)
     await page.keyboard.press("Escape")
@@ -1155,8 +1188,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     // Search looks through every group, each a row holding its matches;  choosing one closes it (I176) and picks it up
     await page
       .locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Search everything you can add"] [part~=item]')
-      .click()
-    await page.waitForTimeout(600)
+      .hover()
+    await page.waitForTimeout(HOVER_OPENS_MS)
     const everything = page.locator('ui-popup.PaletteFlyout[aria-label="Search everything you can add"]')
     await everything.locator(".PaletteFlyoutSearch input").fill("butt")
     await page.waitForTimeout(600)
@@ -1165,6 +1198,24 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForTimeout(600)
     expect(await flyoutsOpen()).toBe(0)
     // ... picked up to place, as a starred one is;  put down again
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(400)
+
+    // a family's parts inside its main one (T162):  Statistics and Value inside Statistic, found by a search too
+    await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Data display"] [part~=item]').hover()
+    await page.waitForTimeout(HOVER_OPENS_MS)
+    const data = page.locator('ui-popup.PaletteFlyout[aria-label="Data display"]')
+    const inside = (outer: string) =>
+      data
+        .locator(`ui-tree-item[label="${outer}"] > ui-tree-item`)
+        .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
+    expect(await inside("Statistic")).toEqual(["Statistics", "Value"])
+    expect(await inside("Card")).toEqual(["Cards"])
+    await data.locator(".PaletteFlyoutSearch [part~=opener]").click()
+    await data.locator(".PaletteFlyoutSearch input").fill("value")
+    await page.waitForTimeout(400)
+    expect(await inside("Statistic")).toEqual(["Value"])
+    await page.keyboard.press("Escape")
     await page.keyboard.press("Escape")
     await page.waitForTimeout(400)
 

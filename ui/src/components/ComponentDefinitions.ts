@@ -25,6 +25,12 @@ export type ComponentDefinition = {
    * - Which components the palette offers, and in which group, is the Spell editor's own.
    */
   readonly snippet?: string
+  /**
+   * The generic content parts it owns, by their names without `ui-` (the vocabulary's `ownsParts`):
+   * `<ui-statistic>`'s are `value` and `label`.
+   * - The editor's add bar shows such a part inside its owner (epic `editor` T162).
+   */
+  readonly ownsParts?: readonly string[]
 }
 
 /** Every English vocabulary module, by path.  Above the class:  `ComponentDefinitions.all` reads it at definition. */
@@ -137,7 +143,8 @@ export class ComponentDefinitions {
           aka: value.aka ?? [],
           description: value.description,
           icon: value.icon,
-          snippet: value.snippet
+          snippet: value.snippet,
+          ownsParts: value.ownsParts
         })
       }
     }

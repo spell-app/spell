@@ -356,6 +356,46 @@ export function partMatches(part: ComponentDefinition, words: string): boolean {
   return `${part.name} ${part.aka.join(" ")} ${part.description ?? ""}`.toLowerCase().includes(words)
 }
 
+/** A row of the add bar's menus:  a part, and the parts of its family shown inside it (`partBranches()`). */
+export type PartBranch = {
+  /** the part */
+  definition: ComponentDefinition
+  /** its family's parts, shown inside it:  `Cards` inside `Card` */
+  inside: ComponentDefinition[]
+}
+
+/**
+ * `parts` as the add bar's menus show them, each family's own parts inside its main one (epic `editor` T162):
+ * - a tag of a family's folder inside the family's main tag:  `Cards` inside `Card`, `Statistics` inside `Statistic`
+ * - a generic content part its owner names (`ownsParts`) inside that owner:  `Value` inside `Statistic`
+ * - only inside a part of the same list, one level deep, each part once:  inside the first that takes it
+ * - `words` (lowercase):  only what matches, a match inside shown under its family's main part, matching or not
+ */
+export function partBranches(parts: readonly ComponentDefinition[], words: string): PartBranch[] {
+  const outerOf = new Map<ComponentDefinition, ComponentDefinition>()
+  for (const part of parts) {
+    const outer = parts.find((other) => holds(other, part))
+    if (outer) outerOf.set(part, outer)
+  }
+  const branches: PartBranch[] = []
+  for (const part of parts) {
+    if (outerOf.has(part)) continue
+    const inside = parts.filter((other) => outerOf.get(other) === part && (!words || partMatches(other, words)))
+    if (!words || partMatches(part, words) || inside.length) branches.push({ definition: part, inside })
+  }
+  return branches
+}
+
+/** Is `part` one of `outer`'s family, shown inside it:  `partBranches()`'s rule. */
+function holds(outer: ComponentDefinition, part: ComponentDefinition): boolean {
+  if (outer === part || outer.tag !== outer.folder) return false
+  if (part.folder === outer.folder) return true
+  return part.folder === GENERIC_PARTS && !!outer.ownsParts?.includes(part.tag.replace(/^ui-/, ""))
+}
+
+/** The folder of Spell UI's generic content parts (`<ui-value>`, `<ui-header>` ...), owned by what they're in. */
+const GENERIC_PARTS = "ui-parts"
+
 /** Every topic with a part matching `words`, cut to those parts, in the palette's order. */
 export function groupsMatching(words: string): PaletteGroup[] {
   if (!words) return [...offered()]
