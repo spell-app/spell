@@ -340,6 +340,26 @@ export class GraphLayout {
     }
   }
 
+  /** The bounds of what a level draws:  its boxes, and its edges but those to its pins. */
+  private static insideOf(level: Level): { x: number; y: number; width: number; height: number } {
+    const xs: number[] = []
+    const ys: number[] = []
+    for (const unit of level.units) {
+      xs.push(unit.x, unit.x + unit.width)
+      ys.push(unit.y, unit.y + unit.height)
+    }
+    for (const edge of level.edges) {
+      if (edge.fromPin !== undefined || edge.toPin !== undefined) continue
+      for (const point of edge.points) {
+        xs.push(point.x)
+        ys.push(point.y)
+      }
+    }
+    if (!xs.length) return { x: 0, y: 0, width: level.width, height: level.height }
+    const [x, y] = [Math.min(...xs), Math.min(...ys)]
+    return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y }
+  }
+
   /** A node's box:  a leaf sized to its label and ports, or a container round its laid out child graph. */
   private box(node: GraphNode, path: string, sideOf: (port: GraphPort) => GraphPortSide): Unit {
     const m = this.metrics
@@ -371,19 +391,25 @@ export class GraphLayout {
     if (childGraph) {
       const child = this.level(childGraph, path, ports, sides)
       unit.child = child
-      unit.width = Math.max(labelWidth, child.width + 2 * m.containerPadding)
-      unit.height = m.headerHeight + child.height + m.containerPadding
-      const insetX = (unit.width - child.width) / 2
+      // Round what's drawn inside (its boxes, and the edges between them), not the room the child graph keeps for its
+      // pins and for edges going round:  the same padding on every side, under the header.  No frame:  none of either.
+      const framed = node.frame !== false
+      const header = framed ? m.headerHeight : 0
+      const padding = framed ? m.containerPadding : 0
+      const inside = GraphLayout.insideOf(child)
+      unit.width = Math.max(framed ? labelWidth : 0, inside.width + 2 * padding)
+      unit.height = header + inside.height + 2 * padding
+      const offset = { x: (unit.width - inside.width) / 2 - inside.x, y: header + padding - inside.y }
       for (const pin of child.pins) {
         const side = pin.side
         unit.ports.push({
           port: pin.port,
           side,
           dx: side === "left" ? 0 : unit.width,
-          dy: m.headerHeight + pin.y
+          dy: Math.min(unit.height, Math.max(header, offset.y + pin.y))
         })
       }
-      unit.childOffset = { x: insetX, y: m.headerHeight }
+      unit.childOffset = offset
       this.spread(unit, on("top"), "top")
       this.spread(unit, on("bottom"), "bottom")
       return unit
@@ -961,7 +987,16 @@ export class GraphLayout {
     const graphPath = level.prefix
     for (const edge of level.edges) {
       const points = edge.points.map((point) => ({ x: point.x + x, y: point.y + y }))
-      // A pin inside a container reaches out to the container's own port, on its side.
+      // A pin inside a container reaches out to the container's own port, on its side:  its route kept inside the
+      // container (the child graph's pin columns lie past its sides).
+      if (container && (edge.fromPin !== undefined || edge.toPin !== undefined)) {
+        const { x: left, y: top } = container
+        const [right, bottom] = [left + container.unit.width, top + container.unit.height]
+        for (const point of points) {
+          point.x = Math.min(right, Math.max(left, point.x))
+          point.y = Math.min(bottom, Math.max(top, point.y))
+        }
+      }
       if (container) {
         const portAt = (id: string) => container.unit.ports.find((port) => port.port.id === id)
         const from = edge.fromPin !== undefined ? portAt(edge.fromPin) : undefined

@@ -321,8 +321,21 @@ export type CollectionLook = {
    * - Its `at` is then without them.
    */
   askedBy?: Record<string, string>
+  /**
+   * Where ONE of its things is read by its id:  its description's own `GET` route, under the place's address, its brace
+   * naming the field it's read by, `/types/{type_id}` (verify reads it there).
+   * - Left out, from a description:  it offers none, and verify reads none.
+   */
+  oneAt?: string
+  /**
+   * The questions its description says it takes that another list's things answer, each with that list's address:
+   * `{ owner_id: "/owners" }` (verify asks with that list's first thing, kept nowhere).
+   */
+  asksFrom?: Record<string, string>
   /** It answered with one thing, not a list:  that's its one row. */
   answersOne?: boolean
+  /** It's ONE thing at its own address, not a list:  a server's status, `the server status lives at "/api/status"`. */
+  isOne?: boolean
   /** Its list holds only ids, as it's read:  each read whole by id, a few of them (epic `data` P34). */
   ids?: Array<string | number>
   /** Its answer was too big to read whole:  a list of ids, read as far as it was. */
@@ -643,6 +656,17 @@ export type CollectionDescription = {
    */
   askedBy?: Record<string, string>
   /**
+   * Where ONE of its things is read by its id:  its description's own `GET` route, under the place's address, its brace
+   * naming the field it's read by, `/types/{type_id}` (verify reads it there).
+   * - Left out, from a description:  it offers none, and verify reads none.
+   */
+  oneAt?: string
+  /**
+   * The questions its description says it takes that another list's things answer, each with that list's address:
+   * `{ owner_id: "/owners" }` (verify asks with that list's first thing, kept nowhere).
+   */
+  asksFrom?: Record<string, string>
+  /**
    * The lists it keeps under each of its things, by the collection each is of,
    * at an address with the thing's id in braces (epic `data` P30):  `{ comments: "/posts/{id}/comments" }`.
    */
@@ -653,8 +677,20 @@ export type CollectionDescription = {
    * - Where:  the owner's `listsUnder`;  its own `at` is that address too, `snapshots are found at "..."`.
    */
   isOneUnder?: boolean
+  /**
+   * It's ONE thing at its own address, not a list:  a server's status, `the server status lives at "/api/status"`.
+   * - Its description says its answer is one object;  or, saying nothing of it, a read found one (`spell place verify`).
+   */
+  isOne?: boolean
   /** Why the Spell leaves it out. */
   leftOut?: string
+  /**
+   * The most bytes verify and a look read of its one answer, when that's more than every other list's 2 MB:
+   * a list answered whole, too big for that, `mostBytes: 8000000`.
+   * - Written by a person, in the description:  only verify and a look are held to a size;  a read through the Spell
+   *   takes its answer whole.  Every look again keeps it.
+   */
+  mostBytes?: number
   /**
    * Whether it was tried, and how it went (epic `data` P49):  a read through the Spell, or `spell place verify`.
    * - It was `readThrough`, which an older description still says:  read as this (`descriptionFromDisk()`).

@@ -39,10 +39,16 @@ const DOCUMENT = JSON.parse(
 /**
  * The place's Spell and description, from an ingest of the description:  in Spanish for an `.es.spell` file.
  * - `answer`:  what the running server answers, for a verify after;  the ingest itself reads only the description.
+ * - `rows`:  how many it reads at a time, as `it gives up to 20 at a time` says.
  */
-async function ingestOf(into: string, answer: (url: URL) => Response = () => new Response("nope", { status: 404 })) {
+async function ingestOf(
+  into: string,
+  answer: (url: URL) => Response = () => new Response("nope", { status: 404 }),
+  rows?: number
+) {
   const texts = new Map<string, string>()
   const descriptions = new Map<string, PlaceDescription>()
+  const said: string[] = []
   const files: IngestFiles = {
     read: async (path) => texts.get(path),
     write: async (path, text) => void texts.set(path, text),
@@ -63,11 +69,20 @@ async function ingestOf(into: string, answer: (url: URL) => Response = () => new
     files,
     readThrough: readThroughSpell,
     sleep: async () => {},
-    now: () => new Date("2026-11-19T12:00:00Z")
+    now: () => new Date("2026-11-19T12:00:00Z"),
+    say: (line) => void said.push(line)
   })
-  const result = await ingest.add({ address: ACME, spec: SPEC_AT, into, name: "acme jobs" })
+  const result = await ingest.add({ address: ACME, spec: SPEC_AT, into, name: "acme jobs", ...(rows && { rows }) })
   const descriptionAt = into.replace(/(\.es)?\.spell$/, ".json5")
-  return { ingest, result, texts, descriptions, spell: texts.get(into)!, description: descriptions.get(descriptionAt)! }
+  return {
+    ingest,
+    result,
+    texts,
+    descriptions,
+    said,
+    spell: texts.get(into)!,
+    description: descriptions.get(descriptionAt)!
+  }
 }
 
 describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
@@ -150,7 +165,7 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
     const document: OpenApiDocument = {
       openapi: "3.1.0",
       paths: {
-        // an object, no list:  a collection only if things by id are under it, and `/api/stats-history/{id}` isn't
+        // an object, no list:  ONE thing, not a list, as `/api/stats-history/{id}` isn't a thing under it
         "/api/stats": { get: answers({ type: "object", properties: { count: { type: "integer" } } }) },
         "/api/stats-history/{id}": { get: answers({ type: "object", properties: { id: { type: "integer" } } }) },
         "/api/reports": {
@@ -162,11 +177,13 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
       }
     }
     const other = new PlaceSpec(document, SPEC_AT).lookAt(ACME)
-    expect(other.collections.map(({ name }) => name)).toEqual(["reports"])
+    expect(other.collections.map(({ name }) => name)).toEqual(["stats", "reports"])
+    expect(other.collections[0]!).toMatchObject({ isOne: true, fields: { count: expect.anything() } })
+    expect(other.collections[0]!.takesLimit).toBeUndefined()
     // asked for by it, with nothing to try it with
-    expect(other.collections[0]!.askedBy).toEqual({ team: "" })
+    expect(other.collections[1]!.askedBy).toEqual({ team: "" })
     expect(other.notes).toContain(
-      '/api/reports can\'t be read without "team", and its description gives no example to try:  verify skips it.'
+      '/api/reports can\'t be read without "team", and its description gives no example to try:  verify asks it with a thing of the list it names, if one does, else skips it.'
     )
     expect(other.serverTakes).toBeUndefined()
   })
@@ -391,20 +408,57 @@ describe("spell place verify, of a FastAPI service", () => {
     expect(collections.stacks!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
   })
 
-  test("a refusal says FastAPI's own message:  `detail`, a list of what was wrong", async () => {
-    const { ingest, descriptions } = await ingestOf("AcmeJobs.api.spell", (url) =>
+  test("each list is asked for a page of the place's size, by its own limit's name, up to the most it gives", async () => {
+    const asked: string[] = []
+    const { ingest } = await ingestOf(
+      "AcmeJobs.api.spell",
+      (url) => {
+        asked.push(`${url.pathname}${url.search}`)
+        return fastApi(url)
+      },
+      1000
+    )
+    await ingest.verify("AcmeJobs.api.spell")
+    expect(asked).toContain("/api/jobs?limit=500")
+    expect(asked).toContain("/api/events?take=100")
+  })
+
+  test("a list answered whole, too big for verify, is read whole when its description gives it more room", async () => {
+    // about 3 MB at once, more than the 2 MB verify reads of any other answer
+    const many = Array.from({ length: 12_000 }, () => ({ ...JOB, notes: "x".repeat(200) }))
+    const big = (url: URL) => (url.pathname === "/api/jobs" ? Response.json({ items: many }) : fastApi(url))
+    const { ingest, descriptions } = await ingestOf("AcmeJobs.api.spell", big)
+    await ingest.verify("AcmeJobs.api.spell")
+    const jobs = () => descriptions.get("AcmeJobs.api.json5")!.collections.jobs!
+    expect(jobs().state).toMatchObject({ is: "failed", reason: expect.stringMatching(/too big to read whole/) })
+    jobs().mostBytes = 8_000_000
+    await ingest.verify("AcmeJobs.api.spell")
+    expect(jobs().state).toMatchObject({ is: "verified", rows: 12_000 })
+    expect(jobs().mostBytes).toBe(8_000_000)
+  })
+
+  test("a list giving fewer than the place asks for says so under its own line, though it pages as the place does", async () => {
+    const { spell } = await ingestOf("AcmeJobs.api.spell", fastApi, 1000)
+    expect(spell).toMatch(/^\tit gives up to 1000 at a time$/m)
+    expect(spell).toMatch(/^\tjobs live at "\/api\/jobs"\n\t\tit gives up to 500 at a time$/m)
+    const { files } = parseSpellProject([{ path: "/AcmeJobs.api.spell", contents: spell }])
+    expect(files[0]!.errors).toEqual([])
+  })
+
+  test("a refusal keeps only its status and route:  FastAPI's own message is said as it runs, never kept", async () => {
+    const { ingest, descriptions, said } = await ingestOf("AcmeJobs.api.spell", (url) =>
       url.pathname === "/api/jobs"
-        ? Response.json(
-            { detail: [{ loc: ["query", "limit"], msg: "Input should be less than 500" }] },
-            { status: 422 }
-          )
+        ? Response.json({ detail: [{ loc: ["query", "rack"], msg: "No rack named demo_rack_7" }] }, { status: 422 })
         : fastApi(url)
     )
     await ingest.verify("AcmeJobs.api.spell")
-    expect(descriptions.get("AcmeJobs.api.json5")!.collections.jobs!.state).toMatchObject({
+    const description = descriptions.get("AcmeJobs.api.json5")!
+    expect(description.collections.jobs!.state).toMatchObject({
       is: "failed",
       status: 422,
-      reason: "it answered 422:  Input should be less than 500"
+      reason: "it answered 422 at /api/jobs"
     })
+    expect(JSON.stringify(description)).not.toContain("demo_rack_7")
+    expect(said.join("\n")).toContain("/api/jobs answered 422:  No rack named demo_rack_7")
   })
 })

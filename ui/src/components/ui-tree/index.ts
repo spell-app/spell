@@ -19,4 +19,4 @@ UITree.define()
 UITreeItem.define()
 
 export { UITree, UITreeItem, DOMTreeElement }
-export type { TreeItemData } from "./UITree.types"
+export type { TreeItemData, TreeItemKind } from "./UITree.types"

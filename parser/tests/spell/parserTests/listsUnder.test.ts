@@ -3,6 +3,8 @@
  * server shaped like JSONPlaceholder.
  * - `- a post's comments live at "/posts/{id}/comments"`:  reading a post's comments reads there, the first time it's read.
  * - `- a system's snapshot lives at "/systems/{id}/snapshot"`:  ONE thing there, its answer's one row.
+ * - `- an order's receipt lives at "/shops/{shop}/orders/{id}/receipts/{current receipt id}"`:  each brace one of the
+ *   order's own fields, `{id}` its id;  an order with no current receipt reads nothing.
  * - Adding, changing and removing a thing send a `POST`, a `PATCH` and a `DELETE`;  a thing added takes the id the server answers with.
  */
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
@@ -152,6 +154,70 @@ describe("one thing under each", () => {
     const snapshot = (await core.answerOf(one, "snapshot")) as { state: string; components: { items: string[] } }
     expect(snapshot.state).toBe("deployed")
     expect([...snapshot.components.items]).toEqual(["fridge", "laser"])
+  })
+})
+
+describe("an address naming the thing's own fields", () => {
+  const SHOP = [
+    `shop is a web server at "${HOST}":`,
+    `\t- orders live at "/orders"`,
+    `\t- an order's receipt lives at "/shops/{shop}/orders/{id}/receipts/{current_receipt_id}"`,
+    `\t- an order's notes live at "/orders/{orderId}/notes"`,
+    `an "order" is a thing:`,
+    `\t- it lives in shop`,
+    `\t- its "shop" is text`,
+    `\t- its "current receipt id" is text`,
+    `\t- its "receipt" is a receipt`,
+    `\t- its "notes" is a list of notes`,
+    `a "receipt" is a thing:`,
+    `\t- it lives in shop`,
+    `\t- its "total" is a number`,
+    `a "note" is a thing:`,
+    `\t- it lives in shop`,
+    `\t- its "text" is text`
+  ]
+
+  test("compiles each brace to the field it names, as compiled code names it", () => {
+    const { compiled, errors } = parseSpellProject([{ path: "/T.spell", contents: `${SHOP.join("\n")}\n` }]).files[0]!
+    expect(errors).toEqual([])
+    expect(compiled).toContain(`receipt: "/shops/{shop}/orders/{id}/receipts/{currentReceiptId}"`)
+    expect(compiled).toContain(`notes: "/orders/{orderId}/notes"`)
+  })
+
+  test("an order's receipt is read from an address holding its shop, its id and its current receipt", async () => {
+    const asked = serve({
+      [`${HOST}/orders`]: [{ id: 5, shop: "north side", current_receipt_id: "r2" }],
+      [`${HOST}/shops/north%20side/orders/5/receipts/r2`]: { total: 12 }
+    })
+    core.resetRuntime()
+    const { Order, Receipt } = runSpell(SHOP)("Order, Receipt")
+    delete (Receipt as { savedIn: { select?: unknown } }).savedIn.select
+    const [one] = await every(Order)
+    const receipt = (await core.answerOf(one, "receipt")) as { total: number }
+    expect(receipt.total).toBe(12)
+    expect(asked.map(({ url }) => url)).toEqual([`${HOST}/orders`, `${HOST}/shops/north%20side/orders/5/receipts/r2`])
+  })
+
+  test("an order with no current receipt has none:  nothing is read, no address with a hole in it", async () => {
+    const asked = serve({ [`${HOST}/orders`]: [{ id: 6, shop: "north side" }] })
+    core.resetRuntime()
+    const { Order } = runSpell(SHOP)("Order")
+    const [one] = await every(Order)
+    expect(await core.answerOf(one, "receipt")).toBeUndefined()
+    expect(asked.map(({ url }) => url)).toEqual([`${HOST}/orders`])
+  })
+
+  test("a first brace naming no field of the thing is still its id, as before", async () => {
+    const asked = serve({
+      [`${HOST}/orders`]: [{ id: 5, shop: "north side" }],
+      [`${HOST}/orders/5/notes`]: [{ id: 1, text: "fragile" }]
+    })
+    core.resetRuntime()
+    const { Order } = runSpell(SHOP)("Order")
+    const [one] = await every(Order)
+    const notes = (await core.answerOf(one, "notes")) as { items: Array<{ text: string }> }
+    expect(notes.items.map(({ text }) => text)).toEqual(["fragile"])
+    expect(asked.map(({ url }) => url)).toEqual([`${HOST}/orders`, `${HOST}/orders/5/notes`])
   })
 })
 

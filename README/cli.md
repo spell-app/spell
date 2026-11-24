@@ -1371,6 +1371,8 @@ owen@spell       Projects       ...
 | `spell app serve <project>` | opens the editor on that project, e.g. `@spell/examples/Solitaire`;  default:  the project here, else the chooser |
 | `spell app serve --port <n>` | the editor's port, for a page server this starts;  default 3000, else any free one |
 | `spell app serve --headless` | doesn't open a browser:  just prints the address |
+| `spell app serve --spaces <dir>` | the spaces its page server serves:  a project's own;  default the `spaces/` of the project's checkout it runs in |
+| `spell app serve --page-port <n>` | the page server's port, for one this starts;  taken by another server or program, it says so and takes a free one |
 | `spell app vscode build` | makes the `.vsix`, in `spell-app`'s `vscode/` folder:  `yarn install`, `yarn build`, `yarn package` there |
 | `spell app vscode install` | installs the built `.vsix` into VS Code |
 | `spell app vscode --force` | builds or installs even from a branch behind `main`, which would downgrade every window |
@@ -1387,6 +1389,11 @@ owen@spell       Projects       ...
     the page server's own child, which it starts once it listens and stops with itself,
     so `yarn server` alone runs it too
 - Their output is hidden unless `--verbose`, or one fails.
+- Which page server:
+  - run in a project's own checkout (one whose `node_modules/spell` is the kit), or with `--spaces <dir>`:
+    that project's own, as `spell server local --spaces spaces` runs it, on any free port:  never the kit's 4747
+  - it never starts, stops or restarts a page server another checkout owns:  run from a project's checkout with no
+    `spaces/`, it uses the kit's only while it's running, as it is
 - It starts the page server only if it isn't running.
   - One already running keeps its editor where it is:  `--port` applies to a page server this starts, and it says so.
   - With `--port`, it refuses a port in use rather than drifting to another:

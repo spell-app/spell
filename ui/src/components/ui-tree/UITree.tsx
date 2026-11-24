@@ -95,6 +95,12 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *     Each column draws its first rows, then more as its end scrolls near (`drawnInWindow()`, `itemRows()`):
  *     5,000 rows open as fast as 300;  past a few hundred, the rows far from the view are taken down again.
  *     Rows from markup draw themselves, as in every tree:  none builds a shadow root it doesn't show.
+ *     - An item `kind: "header"` is the label line over the rows after it, its group (`headerRow()`):  never picked,
+ *       selected, counted or a step of `path`;  the arrow keys skip it, and `filter` keeps it only while a row under
+ *       it shows.  It sticks, at the column's top under the headers above it and at its bottom over the ones below.
+ *     - `groups="accordion"`:  one group open a column (`openHeaderIn()`), kept by the column, its header's click
+ *       (Enter, Space) opens another.
+ *       Markup has no such row in columns (`band="group"` is `appearance="nav"`'s).
  * - `ui-settled`:  `ui-changed`'s detail again, once what's selected has stayed put for a moment (the arrow keys stopped).
  * - For subclasses (a `<netlist-columns>` built on it):
  *   - `rowClass(item)`:  class names for a row drawn from `items`, which the subclass's own sheet styles
@@ -1417,17 +1423,19 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     if (kept?.key === key) return kept.tracks
     const widest = (texts: (string | undefined)[], font: string) =>
       Math.ceil(Math.max(0, ...texts.map((text) => (text ? (TreeMeasure.widthOf(text, font) ?? 0) : 0))))
-    const hasWhich = this.shows("which") && items.some((item) => item.which)
+    const hasWhich = this.shows("which") && items.some((item) => item.which && !isHeader(item))
+    // a header spans the whole row, cut short with an ellipsis:  it widens no track
+    const rows = rowsOnly(items)
     const tracks: TextTracks = {
       words: widest(
-        items.map((item) => item.label),
+        rows.map((item) => item.label),
         wordsFont
       ),
       which: !hasWhich
         ? 0
         : which
           ? widest(
-              items.map((item) => item.which),
+              rows.map((item) => item.which),
               whichFont
             ) + Math.ceil(whichMargin)
           : undefined
@@ -1537,7 +1545,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     if (this.hasItemData) {
       const depth = this.selectedDepth
       if (depth < 0) return undefined
-      return this.columnLists[depth]?.find((item) => item.id === this.openPath[depth])
+      return pickIn(this.columnLists[depth], this.openPath[depth])
     }
     const chain = this.openChain
     return (chain.find((row) => row.selected) ?? chain.at(-1))?.domElement
@@ -1667,7 +1675,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     if (!this.stickyPath) return []
     if (!this.hasItemData) return this.openChain
     const lists = this.columnLists
-    return this.openPath.flatMap((id, depth) => lists[depth]?.find((item) => item.id === id) ?? [])
+    return this.openPath.flatMap((id, depth) => pickIn(lists[depth], id) ?? [])
   }
 
   /** In columns, the column of the selected row, by level:  the last pick's, unless the keys or the path went back. */
@@ -1684,7 +1692,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    */
   private pickFromPath(depth: number, event: MouseEvent) {
     if (this.hasItemData) {
-      const item = this.columnLists[depth]?.find((each) => each.id === this.openPath[depth])
+      const item = pickIn(this.columnLists[depth], this.openPath[depth])
       if (!item) return
       this.pickItem(item, depth, event, { keepsInside: true })
       E.afterSolidUpdate(() => this.focusKeyRow())
@@ -2221,7 +2229,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       for (const step of level) {
         const known = step.item ? this.childrenOfItem.get(step.item) : this.topItems
         const isFiltered = step.path.join("\n") === filtered
-        for (const child of Array.isArray(known) ? known : []) {
+        for (const child of Array.isArray(known) ? rowsOnly(known) : []) {
           if (++looked > REACH_ROWS) break
           const childStep = { item: child, path: [...step.path, child.id], names: [...step.names, child.label] }
           next.push(childStep)
@@ -2482,22 +2490,23 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return promised
   }
 
-  /** Does `item` open a column?  A `children` function does until it's run;  then, if it made any. */
+  /** Does `item` open a column?  A `children` function does until it's run;  then, if it made any.  A header never. */
   private hasChildren(item: TreeItemData): boolean {
     void this.childrenVersion
+    if (isHeader(item)) return false
     const known = this.childrenOfItem.get(item)
     if (known) return !Array.isArray(known) || known.length > 0
     return typeof item.children === "function" || (item.children?.length ?? 0) > 0
   }
 
-  /** The count `item`'s row shows:  its own, else how many children it has, once known. */
+  /** The count `item`'s row shows:  its own, else how many rows its children hold (not headers), once known. */
   private countOf(item: TreeItemData): number | undefined {
     void this.childrenVersion
+    if (item.count !== undefined || isHeader(item)) return item.count
     const known = this.childrenOfItem.get(item)
-    if (item.count !== undefined) return item.count
     // a list made by a function:  a look through the tree keeps an empty one for an item with no `children` too
-    if (Array.isArray(known) && typeof item.children === "function") return known.length
-    return Array.isArray(item.children) ? item.children.length : undefined
+    if (Array.isArray(known) && typeof item.children === "function") return rowsOnly(known).length
+    return Array.isArray(item.children) ? rowsOnly(item.children).length : undefined
   }
 
   /**
@@ -2507,7 +2516,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   private get columnLists(): (readonly TreeItemData[] | undefined)[] {
     const lists: (readonly TreeItemData[] | undefined)[] = [this.topItems]
     for (const id of this.openPath) {
-      const item = lists.at(-1)?.find((each) => each.id === id)
+      const item = pickIn(lists.at(-1), id)
       if (!item || !this.hasChildren(item)) break
       const children = this.childrenOf(item)
       if (children?.length === 0) break
@@ -2520,12 +2529,30 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /**
    * The items column `depth` shows:  `list`, filtered if it's `filter`'s column.
    * - Its pick stays, though it doesn't match:  the columns after it hang from it (a match elsewhere, picked).
+   * - A header stays only while a row under it does;  its own words never match.
+   * - `groups="accordion"`:  every header, and the rows of the open one's group only (`openHeaderIn()`).
+   *   Rows before the first header always show.
    */
   private shownIn(list: readonly TreeItemData[], depth: number): readonly TreeItemData[] {
     const text = this.filterText
-    if (!text || depth !== this.filteredColumn) return list
-    const pick = this.openPath[depth]
-    return list.filter((item) => item.id === pick || wordsOf(item).includes(text))
+    if (text && depth === this.filteredColumn) {
+      const pick = this.openPath[depth]
+      const shown: TreeItemData[] = []
+      let header: TreeItemData | undefined
+      for (const item of list) {
+        if (isHeader(item)) header = item
+        else if (item.id === pick || wordsOf(item).includes(text)) {
+          if (header) shown.push(header)
+          header = undefined
+          shown.push(item)
+        }
+      }
+      return shown
+    }
+    const open = this.openHeaderIn(list, depth)
+    if (!open) return list
+    const { headerOf } = this.groupsOf(list)
+    return list.filter((item) => isHeader(item) || (headerOf.get(item) ?? open) === open)
   }
 
   /**
@@ -2540,10 +2567,10 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return back && back.path === this.openPath ? back.depth : this.openPath.length - 1
   }
 
-  /** The item that takes the tab stop in column `depth`:  its pick, else its first. */
+  /** The item that takes the tab stop in column `depth`:  its pick, else its first row. */
   private keyItemIn(depth: number): TreeItemData | undefined {
-    const list = this.shownIn(this.columnLists[depth] ?? [], depth)
-    return list.find((item) => item.id === this.openPath[depth]) ?? list[0]
+    const rows = rowsOnly(this.shownIn(this.columnLists[depth] ?? [], depth))
+    return rows.find((item) => item.id === this.openPath[depth]) ?? rows[0]
   }
 
   /**
@@ -2595,7 +2622,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
           )}
         </Show>
         {this.trackProbe(shown)}
-        {this.itemRows(shown, depth)}
+        {this.itemRows(shown, list, depth)}
         <Show when={!list()}>
           <li class="loading" role="none">
             <ui-loader visible="" size="small" aria-label={this.translationForKey("loading")} />
@@ -2622,23 +2649,48 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    *   a path set, `openTo()`, a match elsewhere picked, or End pressed, draws down to it first.
    * - Past a few hundred rows, the rows far from the view are taken down, as in every long list, and drawn again as they
    *   come back:  never the row with the tab stop, or the focus (epic `solid-2-final` P17).
+   * - With headers:  every header shown is drawn, each with a window of its own rows after it,
+   *   so the headers below a long group are there to stick at the column's bottom.
    */
-  private itemRows(shown: () => readonly TreeItemData[], depth: number) {
-    // read once per change, not by every row:  `shown()` filters the whole column each time it's read
-    const setSize = createMemo(() => shown().length)
+  private itemRows(
+    shown: () => readonly TreeItemData[],
+    list: Accessor<readonly TreeItemData[] | undefined>,
+    depth: number
+  ) {
+    const headers = createMemo(() => shown().filter(isHeader))
+    const rowsUnder = (header: TreeItemData | undefined) => () => {
+      const { headerOf } = this.groupsOf(list() ?? [])
+      return shown().filter((item) => !isHeader(item) && headerOf.get(item) === header)
+    }
+    return (
+      <Show when={headers().length} fallback={this.rowWindow(shown, list, depth)}>
+        {this.rowWindow(rowsUnder(undefined), list, depth)}
+        <For each={headers()}>
+          {(header) => [this.headerRow(header, depth, list, headers), this.rowWindow(rowsUnder(header), list, depth)]}
+        </For>
+      </Show>
+    )
+  }
+
+  /** `rows` of column `depth`, drawn a window at a time (`itemRows()`):  each row says its place among them. */
+  private rowWindow(
+    rows: () => readonly TreeItemData[],
+    list: Accessor<readonly TreeItemData[] | undefined>,
+    depth: number
+  ) {
+    // read once per change, not by every row:  `rows()` filters the whole column each time it's read
+    const drawn = createMemo(rows)
+    const setSize = createMemo(() => drawn().length)
     const keyItem = createMemo(() => this.keyItemIn(depth))
     const through = createMemo(() => {
-      const list = shown()
+      const items = drawn()
       const key = keyItem()
-      const pick = this.openPath[depth]
-      return Math.max(
-        key ? list.indexOf(key) : -1,
-        list.findIndex((item) => item.id === pick)
-      )
+      const pick = pickIn(items, this.openPath[depth])
+      return Math.max(key ? items.indexOf(key) : -1, pick ? items.indexOf(pick) : -1)
     })
     return drawnInWindow({
-      items: shown,
-      drawItem: (item, position) => this.itemRow(item, { depth, position, setSize, keyItem }),
+      items: drawn,
+      drawItem: (item, position) => this.itemRow(item, { depth, position, setSize, keyItem, list }),
       through
     })
   }
@@ -2654,7 +2706,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return (
       <li class="track-probe" role="none" aria-hidden="true">
         {(() => {
-          const items = shown()
+          // a header spans the whole row, so it holds no track open
+          const items = rowsOnly(shown())
           const icon = this.shows("icon") ? items.find((item) => item.icon)?.icon : undefined
           const counts = this.shows("count") ? items.map((item) => this.countOf(item) ?? "").map(String) : []
           const count = counts.reduce((longest, each) => (each.length > longest.length ? each : longest), "")
@@ -2674,11 +2727,164 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /**
+   * A header in a column:  the label line over the rows after it, up to the next header, with its icon and count.
+   * - Not a `treeitem`, and never picked:  a screen reader hears it with each row under it,
+   *   which names it in `aria-describedby` (`itemRow()`).
+   * - Not a `group` of its rows labelled by it, as the tree pattern nests groups:  the rows are ONE flat list a column,
+   *   drawn a window at a time (`drawnInWindow()`), and the keys move along it.
+   * - `groups="open"`:  no tab stop, no click.
+   * - `groups="accordion"`:  a `<button>` that opens its group (`aria-expanded`), in the tab order, with a chevron;
+   *   a click, Enter or Space opens it, as any button;  the arrow keys still skip it.
+   * - It sticks (`UITreeColumns.css`):  at the column's top under the headers above it (`--_above`),
+   *   at its bottom over the ones below it (`--_below`).
+   */
+  private headerRow(
+    item: TreeItemData,
+    depth: number,
+    list: Accessor<readonly TreeItemData[] | undefined>,
+    shownHeaders: () => readonly TreeItemData[]
+  ) {
+    const isOpen = () => {
+      const open = this.openHeaderIn(list() ?? [], depth)
+      return !open || open === item
+    }
+    const count = () => item.count ?? this.groupsOf(list() ?? []).sizeOf.get(item)
+    const above = () => shownHeaders().indexOf(item)
+    const words = () => [
+      <Show when={item.icon}>
+        {(icon) => (
+          <span class="icon">
+            <ui-icon name={icon()} />
+          </span>
+        )}
+      </Show>,
+      <span class="words">{item.label}</span>,
+      <Show when={count() !== undefined}>
+        <span class="count">{count()?.toLocaleString()}</span>
+      </Show>
+    ]
+    return (
+      <li
+        class={["column-header", { closed: !isOpen() }]}
+        role="none"
+        part={this.partForName("column-header")}
+        id={this.headerIdOf(item)}
+        style={{ "--_above": String(above()), "--_below": String(shownHeaders().length - 1 - above()) }}
+      >
+        <Show when={this.groups === ACCORDION} fallback={<span class="head">{words()}</span>}>
+          <button
+            type="button"
+            class="head"
+            aria-expanded={isOpen() ? "true" : "false"}
+            onClick={() => this.openGroup(item, depth)}
+          >
+            <span class="chevron" aria-hidden="true" />
+            {words()}
+          </button>
+        </Show>
+      </li>
+    )
+  }
+
+  /** Each header's element id, made the first time it's drawn:  what its rows' `aria-describedby` names. */
+  private readonly headerIds = new WeakMap<TreeItemData, string>()
+
+  /** `header`'s element id;  `undefined` for none. */
+  private headerIdOf(header: TreeItemData | undefined): string | undefined {
+    if (!header) return undefined
+    let id = this.headerIds.get(header)
+    if (!id) this.headerIds.set(header, (id = UI.ids.next(HEADER_ID, this.domElement.renderRoot)))
+    return id
+  }
+
+  /** Each column list's groups:  made once a list. */
+  private readonly groupsOfList = new WeakMap<readonly TreeItemData[], ColumnGroups>()
+
+  /** `list`'s groups, a column's whole list:  its headers, the header over each row, how many rows each holds. */
+  private groupsOf(list: readonly TreeItemData[]): ColumnGroups {
+    let groups = this.groupsOfList.get(list)
+    if (groups) return groups
+    groups = { headers: [], headerOf: new Map(), sizeOf: new Map() }
+    let header: TreeItemData | undefined
+    for (const each of list) {
+      if (isHeader(each)) {
+        header = each
+        groups.headers.push(each)
+        groups.sizeOf.set(each, 0)
+      } else if (header) {
+        groups.headerOf.set(each, header)
+        groups.sizeOf.set(header, groups.sizeOf.get(header)! + 1)
+      }
+    }
+    this.groupsOfList.set(list, groups)
+    return groups
+  }
+
+  /**
+   * `groups="accordion"`:  the group each column has open, by the picks before it (`columnKey()`).
+   * - With the column's pick when it was opened:  a new pick there opens the pick's group instead.
+   */
+  @E.state private accessor openGroups: Readonly<Record<string, OpenGroup>> = {}
+
+  /** `path` changed:  a group opened in a column whose pick has changed since, or that closed, is forgotten. */
+  @E.onChange("openPath", { defer: true })
+  protected onPathForGroups(path: readonly string[]) {
+    const opened = Object.entries(this.openGroups)
+    const kept = opened.filter(([key, group]) => {
+      const before = key ? key.split("\n") : []
+      return before.every((id, depth) => path[depth] === id) && path[before.length] === group.pick
+    })
+    if (kept.length < opened.length) this.openGroups = Object.fromEntries(kept)
+  }
+
+  /** Which column `depth` is, for what's kept of it:  the picks before it. */
+  private columnKey(depth: number): string {
+    return this.openPath.slice(0, depth).join("\n")
+  }
+
+  /**
+   * The header whose rows column `depth` shows, of `list`, its whole list:  `undefined` while every group shows.
+   * - `groups="accordion"`:  the one opened last, while the column's pick hasn't changed;
+   *   else the one over its pick, else its first.
+   * - Every group shows with `groups="open"`, or none set, and in the column `filter` filters.
+   */
+  private openHeaderIn(list: readonly TreeItemData[], depth: number): TreeItemData | undefined {
+    if (this.groups !== ACCORDION || (!!this.filterText && depth === this.filteredColumn)) return undefined
+    const { headers, headerOf } = this.groupsOf(list)
+    if (!headers.length) return undefined
+    const pick = this.openPath[depth]
+    const opened = this.openGroups[this.columnKey(depth)]
+    const chosen = opened && opened.pick === pick ? headers.find((header) => header.id === opened.header) : undefined
+    const picked = pickIn(list, pick)
+    return chosen ?? (picked && headerOf.get(picked)) ?? headers[0]
+  }
+
+  /**
+   * Open `header`'s group in column `depth`, closing the one open there:  a click, Enter or Space on it.
+   * - Its rows then scroll to just under it, stuck under the headers above.
+   */
+  @E.untracked
+  private openGroup(header: TreeItemData, depth: number) {
+    const key = this.columnKey(depth)
+    this.openGroups = { ...this.openGroups, [key]: { header: header.id, pick: this.openPath[depth] } }
+    if (isServer) return
+    E.beforeNextPaint(() => {
+      const column = this.domElement.renderRoot.querySelector<HTMLElement>(`ul[data-depth="${depth}"]`)
+      const head = column?.querySelector<HTMLElement>(`#${CSS.escape(this.headerIdOf(header)!)}`)
+      const first = head?.nextElementSibling as HTMLElement | null | undefined
+      if (!column || !head || !first?.classList.contains("column-row")) return
+      const stuckAt = Number.parseFloat(getComputedStyle(head).top) || 0
+      column.scrollTop = Math.max(0, first.offsetTop - stuckAt - head.offsetHeight)
+    })
+  }
+
+  /**
    * `item`'s row in column `depth`:  icon, label and which, count, chevron, each as `show` says.
    * - It says its place in the whole column (`position`, of `setSize`):  a long column draws only the rows near the view.
    * - `keyItem`:  the column's row with the tab stop, worked out once for every row
    */
-  private itemRow(item: TreeItemData, { depth, position, setSize, keyItem }: ItemRowPlace) {
+  private itemRow(item: TreeItemData, { depth, position, setSize, keyItem, list }: ItemRowPlace) {
+    const header = () => this.groupsOf(list() ?? []).headerOf.get(item)
     const isPicked = () => this.openPath[depth] === item.id
     const isSelected = () => isPicked() && depth === this.selectedDepth
     // the pick kept in the filtered column, though it doesn't match:  dimmed, so it doesn't read as a match
@@ -2701,6 +2907,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         aria-setsize={setSize()}
         aria-selected={isSelected() ? "true" : "false"}
         aria-expanded={this.hasChildren(item) ? (isPicked() ? "true" : "false") : undefined}
+        aria-describedby={this.headerIdOf(header())}
         onClick={(event: MouseEvent) => this.pickItem(item, depth, event)}
       >
         <Show when={this.shows("icon") && item.icon}>
@@ -2760,7 +2967,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     const box = (event.composedPath()[0] as Element).closest?.("li[data-id]") as HTMLElement | null | undefined
     const depth = Number((box?.parentElement as HTMLElement | null | undefined)?.dataset.depth)
     if (!box || Number.isNaN(depth)) return
-    const list = this.shownIn(this.columnLists[depth] ?? [], depth)
+    // the rows alone:  the keys skip the headers
+    const list = rowsOnly(this.shownIn(this.columnLists[depth] ?? [], depth))
     const at = list.findIndex((each) => each.id === box.dataset.id)
     const item = list[at]
     if (!item) return
@@ -2775,17 +2983,13 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     }
     const goIn = () => {
       if (this.openPath[depth] !== item.id || !this.hasChildren(item)) return false
-      const inside = this.shownIn(this.childrenOf(item) ?? [], depth + 1)
+      const inside = rowsOnly(this.shownIn(this.childrenOf(item) ?? [], depth + 1))
       return pick(inside.find((each) => each.id === this.openPath[depth + 1]) ?? inside[0], depth + 1, true)
     }
     const goOut = () => {
       if (!depth) return false
       const before = this.shownIn(this.columnLists[depth - 1] ?? [], depth - 1)
-      return pick(
-        before.find((each) => each.id === this.openPath[depth - 1]),
-        depth - 1,
-        true
-      )
+      return pick(pickIn(before, this.openPath[depth - 1]), depth - 1, true)
     }
     const actions: Record<string, () => boolean> = {
       ArrowDown: () => moveTo(at + 1),
@@ -2877,6 +3081,39 @@ type OtherMatch = {
 /** An item `lookInItems()` looks inside, with the ids and names down to it:  no item, the top. */
 type LookStep = { item?: TreeItemData; path: readonly string[]; names: readonly string[] }
 
+/** A column's groups, made once a list (`groupsOf()`). */
+type ColumnGroups = {
+  /** Its headers, in order. */
+  headers: TreeItemData[]
+  /** The header over each row under one. */
+  headerOf: Map<TreeItemData, TreeItemData>
+  /** How many rows each header's group holds. */
+  sizeOf: Map<TreeItemData, number>
+}
+
+/** `groups="accordion"`:  the group a column has open (`UITree.openGroups`). */
+type OpenGroup = {
+  /** Its header's id. */
+  header: string
+  /** The column's pick when it was opened:  a new pick opens the pick's group instead. */
+  pick: string | undefined
+}
+
+/** Is `item` a header, a label line over the rows after it, rather than a row? */
+function isHeader(item: TreeItemData): boolean {
+  return item.kind === HEADER
+}
+
+/** `list`'s rows, without its headers:  what's picked, counted, keyed through and looked in. */
+function rowsOnly(list: readonly TreeItemData[]): readonly TreeItemData[] {
+  return list.some(isHeader) ? list.filter((item) => !isHeader(item)) : list
+}
+
+/** The row of `list` whose id is `id`, a pick of `path`:  never a header. */
+function pickIn(list: readonly TreeItemData[] | undefined, id: string | undefined): TreeItemData | undefined {
+  return id === undefined ? undefined : list?.find((item) => item.id === id && !isHeader(item))
+}
+
 /** The words `filter` looks in, for an item from `items`:  its label and `which`, lower case. */
 function wordsOf(item: TreeItemData): string {
   return `${item.label} ${item.which ?? ""}`.toLowerCase()
@@ -2958,12 +3195,20 @@ function rowBoxOf(row: UITreeItem): DOMRect {
 /**
  * Scroll `column` the least that shows `row`, up or down only, so the page itself never moves.
  * - `row`'s offset parent is `column` (the sheet makes it `position: relative`).
+ * - Clear of what sticks over it:  the column's title, and its headers.
  */
 function revealIn(column: HTMLElement, row: HTMLElement) {
   const { offsetTop: top, offsetHeight: height } = row
-  const titleHeight = column.querySelector<HTMLElement>(".column-title")?.offsetHeight ?? 0
-  if (top - titleHeight < column.scrollTop) column.scrollTop = top - titleHeight
-  else if (top + height > column.scrollTop + column.clientHeight) column.scrollTop = top + height - column.clientHeight
+  // what sticks over it:  the title and the headers before it at the top, the headers after it at the bottom
+  let above = column.querySelector<HTMLElement>(".column-title")?.offsetHeight ?? 0
+  let below = 0
+  for (const header of column.querySelectorAll<HTMLElement>(":scope > .column-header")) {
+    if (header.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_FOLLOWING) above += header.offsetHeight
+    else below += header.offsetHeight
+  }
+  if (top - above < column.scrollTop) column.scrollTop = top - above
+  else if (top + height + below > column.scrollTop + column.clientHeight)
+    column.scrollTop = top + height + below - column.clientHeight
 }
 
 /** What the path line's outer names fold into, when they'd show too little of themselves. */
@@ -2995,6 +3240,15 @@ const SETTLE_SECONDS = 0.3
 
 /** The tree's `appearance` that shows a column per level. */
 const COLUMNS = "columns"
+
+/** `TreeItemData.kind` for a header. */
+const HEADER = "header"
+
+/** `groups`:  one group open a column. */
+const ACCORDION = "accordion"
+
+/** The prefix of a header's element id, which its rows' `aria-describedby` names. */
+const HEADER_ID = "ui-tree-header"
 
 /** A column's width while nobody has sized it. */
 const DEFAULT_WIDTH = "var(--_ui-tree-column-width)"
@@ -3045,4 +3299,6 @@ type ItemRowPlace = {
   setSize: () => number
   /** the column's row with the tab stop */
   keyItem: () => TreeItemData | undefined
+  /** the column's whole list, headers and all */
+  list: Accessor<readonly TreeItemData[] | undefined>
 }

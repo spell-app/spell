@@ -6506,6 +6506,13 @@
           }
         },
         {
+          "name": "selected",
+          "description": {
+            "kind": "markdown",
+            "value": "The one chosen among its neighbours:  its border the primary colour and its fill a touch of it, its text as the others';  `--ui-card-selected-border-color` and `--ui-card-selected-background` change them.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "link",
           "description": {
             "kind": "markdown",
@@ -66413,6 +66420,21 @@
             "kind": "markdown",
             "value": "`appearance=\"columns\"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "groups",
+          "description": {
+            "kind": "markdown",
+            "value": "`appearance=\"columns\"` with headers in `items` (`kind: \"header\"`):  how a column shows the groups under them.  `open`, the default:  every group.  `accordion`:  one group a column, the first, or the one its pick is in;  a click on a header (Enter, Space) opens its group and closes the other.  Either way, the headers stick as the column scrolls:  at its top under the ones above, at its bottom over the ones below.\n\nTakes:  `open` · `accordion`"
+          },
+          "values": [
+            {
+              "name": "open"
+            },
+            {
+              "name": "accordion"
+            }
+          ]
         },
         {
           "name": "sticky-path",

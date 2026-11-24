@@ -64,6 +64,19 @@ export type ConditionalOwner = {
   isOwnerOf(noun: string): boolean
 }
 
+/**
+ * A component parts may climb PAST, while it says so, implemented on its COMPONENT:
+ * a view's own element (app's `SpellElement`) while it lays out as its drawing, with no box of its own --
+ * so a `<ui-card>` it draws is still a card of the `<ui-cards>` around it.
+ * - `PartContext` registers such a class (it has `letsPartsThrough()`), and asks it during every climb;
+ *   while it says yes, it's no barrier.
+ * - MUST read the DOM now, not signals, as `ConditionalOwner`'s `isOwnerOf()`.
+ */
+export type SeeThroughElement = {
+  /** Do parts inside this element climb on past it right now?  Read from the DOM. */
+  letsPartsThrough(): boolean
+}
+
 /** What `PartContext.define()` records for one defined tag. */
 export type PartDefinition = {
   /** the element's vocabulary:  its `noun`, and the part nouns it `ownsParts` */
@@ -74,6 +87,8 @@ export type PartDefinition = {
   isAPart: boolean
   /** owns its parts only while its component says so (`ConditionalOwner`) */
   isConditionalOwner?: boolean
+  /** no barrier to other parts' climbs while its component says so (`SeeThroughElement`) */
+  isSeeThrough?: boolean
 }
 
 /** Options for `OwnerContext.find()`. */

@@ -3,7 +3,7 @@ import { jsonIn } from "spell/parser/spell/translate/NamesPass"
 import type { ClaudeRunner, JsonSchema } from "spell/parser/spell/translate/translate.types"
 
 import type { CollectionLook, PlaceDescription, PlaceLook, PlaceVersion } from "./ingest.types"
-import { isSpellsOwnType } from "./PlaceShape"
+import { isSpellsOwnType, oneNamedBy } from "./PlaceShape"
 
 /** How many rows of each collection the agent sees:  samples, never the whole of it. */
 const SAMPLE_ROWS = 3
@@ -188,7 +188,9 @@ function applyReading(
   for (const said of reading.collections) {
     const collection = description.collections[said.name]
     if (!collection) continue
-    if (IS_WORDS.test(said.typeWords) && !isSpellsOwnType(said.typeWords)) collection.type = said.typeWords
+    // ONE thing of it, as Spell reads a type:  an agent's `run data` is a `run datum`, as `a run data` reads as many
+    const typeWords = IS_WORDS.test(said.typeWords) ? oneNamedBy(said.typeWords) : undefined
+    if (typeWords && !isSpellsOwnType(typeWords)) collection.type = typeWords
     if (said.about) collection.about = said.about
     const rows = look.collections.find(({ at }) => at === collection.at)?.rows ?? []
     if (said.idField && said.idField in collection.fields && isUniqueIn(rows, said.idField)) {
@@ -229,7 +231,7 @@ export function renameCollections(description: PlaceDescription): void {
 }
 
 /** Does every one of `rows` hold its own value in `field`? */
-function isUniqueIn(rows: ReadonlyArray<Record<string, unknown>>, field: string): boolean {
+export function isUniqueIn(rows: ReadonlyArray<Record<string, unknown>>, field: string): boolean {
   const values = rows.map((row) => row[field])
   return (
     values.every((value) => value !== undefined && value !== null && value !== "") &&

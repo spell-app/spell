@@ -25,7 +25,7 @@ import {
 import { FieldNames, type NameStyle } from "./FieldNames"
 import { DEFAULT_CEILING } from "./PlaceQuery"
 import { jsonIn, valueAt, WebPlace, type WebPlaceProps } from "./WebPlace"
-import { wrappedRows } from "./wrappedRows"
+import { rowsIn } from "./wrappedRows"
 
 /** The word for every operation, in a list of enabled ones:  `enabled operations are all`. */
 const ALL_OPERATIONS = "all"
@@ -319,7 +319,8 @@ export class RestPlace extends WebPlace implements Place {
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
     this.refuseUnlessEnabled(collection, READ_OPERATION)
     const paging = this.pagingOf(collection)
-    const { page, at, size } = this.pageOf(query, paging)
+    const { isOne } = this.mappingOf(collection)
+    const { page, at, size } = isOne ? { page: "none" as const, at: undefined, size: 1 } : this.pageOf(query, paging)
     const handled: ListHandled = {}
     // a next page's whole address carries the query its first page was asked with:  what that one did, this one did
     const asked = this.paramsFor(collection, query, handled)
@@ -334,7 +335,7 @@ export class RestPlace extends WebPlace implements Place {
       // its next link says the rest, the size asked for included:  PokéAPI's `?offset=2000&limit=2000`
       if (paging.pagesByLastId) {
         if (!paging.sendsNoCount) data[paging.limit] = size
-      } else if (query.page?.size !== undefined) data[paging.limit] = query.page.size
+      } else if (query.page?.size !== undefined) data[paging.limit] = size
       else if (paging.asksForSize && !at) data[paging.limit] = paging.size
       if (at && !nextAddress) data[paging.cursor] = at
     }
@@ -354,7 +355,8 @@ export class RestPlace extends WebPlace implements Place {
     const rows =
       held === null
         ? []
-        : (askedBy || (query.under && (query.oneThing || this.isFoundAtItsOwner(collection)))) && isOneRow(held)
+        : (askedBy || isOne || (query.under && (query.oneThing || this.isFoundAtItsOwner(collection)))) &&
+            isOneRow(held)
           ? [held]
           : !Array.isArray(held) &&
               (query.under ||
@@ -362,7 +364,7 @@ export class RestPlace extends WebPlace implements Place {
                 (held === undefined && rowsAt !== undefined) ||
                 // a list whose rows are wrapped, as no other's are:  `{ sources: [...], next_offset: 20 }`
                 (rowsAt === undefined && held === body))
-            ? ((Array.isArray(body) ? body : wrappedRows(body)?.rows) ?? (query.under && isOneRow(held) ? [held] : held))
+            ? (rowsIn(body)?.rows ?? (query.under && isOneRow(held) ? [held] : held))
             : held
     if (!Array.isArray(rows)) {
       throw new TypeError(
@@ -375,19 +377,21 @@ export class RestPlace extends WebPlace implements Place {
     const wanted = paging.sendsNoCount && query.page?.size !== undefined ? rows.slice(0, query.page.size) : rows
     const kept = wanted.length > mostRows ? wanted.slice(0, mostRows) : wanted
     const sizeIsKnown = paging.asksForSize || query.page?.size !== undefined
-    const nextPage = this.nextPageOf({
-      paging,
-      page,
-      at,
-      size,
-      sizeIsKnown,
-      count: kept.length,
-      body,
-      nextAt,
-      response,
-      collection,
-      lastRow: kept.at(-1)
-    })
+    const nextPage = isOne
+      ? undefined
+      : this.nextPageOf({
+          paging,
+          page,
+          at,
+          size,
+          sizeIsKnown,
+          count: kept.length,
+          body,
+          nextAt,
+          response,
+          collection,
+          lastRow: kept.at(-1)
+        })
     // what it was asked for, sent as the query, each row holds
     const askedValues = handled.filter ? askedValuesIn(askedBy, query.filter) : undefined
     const read = (kept as unknown[]).map((row) =>
@@ -606,18 +610,20 @@ export class RestPlace extends WebPlace implements Place {
 
   /** How to page this query, `paging`'s way. */
   private pageOf({ page }: ListQuery, paging: Paging): { page: PageKind; at: string | undefined; size: number } {
-    return { page: paging.page, at: page?.at, size: page?.size ?? paging.size }
+    // never more than a list's own most, whatever a read asks:  a server refuses more (`422`)
+    return { page: paging.page, at: page?.at, size: Math.min(page?.size ?? paging.size, paging.most ?? Infinity) }
   }
 
   /**
    * How `collection` pages:  its own way, when it says one (`RestCollection.paging`, epic `data` P56), else the place's.
    * - Its own kind of paging is whole:  the names it asks with are its own, or the usual `limit`, `offset` and `cursor`.
    * - Only how many it gives:  the place's way, that many at a time.
+   * - How many it gives is the most it's ever asked for (`Paging.most`):  `it gives up to 10 at a time`.
    */
   private pagingOf(collection: string): Paging {
     const own = this.mappingOf(collection).paging
     if (!own) return this.paging
-    const size = own.pageSize === undefined ? {} : { size: own.pageSize, asksForSize: true }
+    const size = own.pageSize === undefined ? {} : { size: own.pageSize, asksForSize: true, most: own.pageSize }
     if (own.page === undefined)
       return { ...this.paging, ...size, ...(own.params?.limit && { limit: own.params.limit }) }
     return {
@@ -891,6 +897,11 @@ export type RestCollection = {
    */
   askedBy?: readonly string[]
   /**
+   * It's ONE thing at its address, not a list:  a server's status, `{ ok: true, version: "2.1" }`.
+   * - Read, it's a list of that one row, asked for with no page.
+   */
+  isOne?: boolean
+  /**
    * How this collection searches, when it isn't the place's way (`RestPlace.searches`):
    * GitHub's users at `/search/users`, its repositories at `/search/repositories`, each with `q`.
    * - `users are searched with "q" at "/search/users"`
@@ -932,6 +943,8 @@ type Paging = {
   firstPageNumber: number | undefined
   /** It's never told how many to give:  `RestPlaceProps.sendsNoCount`. */
   sendsNoCount: boolean
+  /** The most a list gives at a time, said under its own line:  a read asking for more asks for this many. */
+  most?: number
   /** Its next page is asked for by the last row's id:  `RestPlaceProps.pagesByLastId`. */
   pagesByLastId: { moreAt?: string } | undefined
 }
@@ -953,7 +966,6 @@ function capitalized(text: string): string {
 function listed(items: readonly string[]): string {
   return items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : (items[0] ?? "")
 }
-
 
 /** The values of `filter` for the fields a list is asked for by (`RestCollection.askedBy`):  none, `undefined`. */
 function askedValuesIn(

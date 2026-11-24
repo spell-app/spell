@@ -9,13 +9,16 @@ import type { P } from "spell/parser/parser"
  *   the thing's id in its braces, the first time something reads it.
  * - Or ONE thing under each, `- a system's snapshot lives at "/instances/{id}/snapshot"`:
  *   its property is that one thing, `its "snapshot" is a snapshot`, read from there the same way.
- * - Whatever the braces say, it's the thing's id.
+ * - Each brace names one of the thing's own fields, in words or as compiled code names it:
+ *   `- an order's receipt lives at "/orders/{id}/receipts/{current receipt id}"`.  `{id}` is its id.
+ *   - A first brace naming no field of the thing is its id, as every line said before:  `"/posts/{postId}/comments"`.
+ *   - A thing whose field holds no value has nothing there:  nothing is read.
  */
 export class ListsUnder extends PlaceDetail<"owner|property|path"> {
   detailOf(match: P.MatchFor<this>): PlaceDetailValue {
     const { owner, property, path } = match.groups
     const collection = collectionNameFor(`${owner.raw}`)
-    const at = textIn(path).replace(/\{[^{}/]*\}/, "{id}")
+    const at = textIn(path).replace(/\{([^{}/]*)\}/g, (_brace, name: string) => `{${fieldNamed(name)}}`)
     return { listsUnder: { [collection]: { [fieldNamed(textIn(property))]: at } } }
   }
 }

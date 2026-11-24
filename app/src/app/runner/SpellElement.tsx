@@ -33,8 +33,15 @@ import { UIViewElements } from "./UIViewElements"
  *   `--spell-drop-line` (a color) and `--spell-drop-line-width` change it.
  * - A selected thing (`:state(selected)`) has a purple outline:
  *   `--spell-selected-outline` and `--spell-selected-outline-offset` change it.
+ * - A view that lays out as its drawing (`:state(lays-out-as-drawing)`, `laysOutAsDrawing`) has no box of its own:
+ *   its drawing sits in its parent's layout as if written there, as a `<ui-card>`'s or `<ui-segment>`'s does.
+ *   - A stack's or a stretched column's mark on it (`--_ui-stacked`, `--_ui-grown`, `reset.css`) reaches its
+ *     drawing's top boxes, rather than being reset there.
+ *   - The page's own rule giving its tag a `display` wins:  a rule from outside beats a `:host` one.
  */
 const STATES_CSS = `
+  :host(:state(lays-out-as-drawing)) { display: contents; }
+  :host(:state(lays-out-as-drawing)) > * { --_ui-stacked: inherit; --_ui-grown: inherit; }
   :host(:state(clickable)) { cursor: var(--ui-control-cursor, pointer); }
   :host(:state(clickable)), :host(:state(draggable)) { user-select: none; -webkit-user-select: none; }
   :host(:state(draggable)) { touch-action: none; }
@@ -337,6 +344,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     this.joinOurTag()
     this.keepThingAndElementAgreeing()
     this.loadSpellUIFamilies()
+    this.isListItem = this.findIfListItem()
+    this.countDrawnElements()
     this.numberItems()
     this.onChildrenDrawn()
     const mounted = super.onMount()
@@ -419,6 +428,80 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   @E.cssState("draws-in-children")
   get isDrawingInChildren(): boolean {
     return !!this.currentThing && !!this.entry && drawsInItsChildren(this.entry.Class)
+  }
+
+  ////////////////
+  // ## Laying out as its drawing
+  ////////////////
+
+  /**
+   * Do we lay out as our drawing, with no box of our own (`:state(lays-out-as-drawing)`, `display: contents`)?
+   * - So what a view draws takes part in the layout around it, as a Spell UI element's drawing does:
+   *   the `<card>` an entity card draws is a card of the `<cards columns="2">` around it, two to a row;
+   *   the `<segment height="fluid">` a panel draws fills its column.
+   * - Yes for a plain view drawing ONE element (`drawnElements`).
+   * - No for a view whose box does something, as it did before:
+   *   - an app's or a page's, which draws in its children
+   *   - a viewable list's (it glows as things are dragged over it, and shows where they'd go)
+   *   - an item of one (it glides from list to list, is dragged, dims while carried)
+   *   - a thing people may drag or select (its outline)
+   *   - a drawing of no element, or of several:  one box still holds them, as before
+   * - Its tag given a `display` by the page's own CSS keeps it (`STATES_CSS`).
+   */
+  @E.cssState("lays-out-as-drawing")
+  get laysOutAsDrawing(): boolean {
+    const thing = this.currentThing
+    const core = this.entry?.core
+    if (!thing || !core || this.drawnElements !== 1) return false
+    if (this.isDrawingInChildren || "items" in thing || this.ownerList || this.isListItem) return false
+    return !core.isAble(thing, "draggable") && !core.isAble(thing, "selectable")
+  }
+
+  /**
+   * Are we an item a viewable list's element draws, as its children (its `<game-chip>`s)?  Set once mounted.
+   * - Its children, or inside what its `to draw each item` wraps each in:  the first view element above us in our
+   *   light DOM is the list's.
+   */
+  @E.state private accessor isListItem = false
+
+  /** Is the first view element above us, in our light DOM, a viewable list's?  Read from the DOM. */
+  private findIfListItem(): boolean {
+    for (let at = this.domElement.parentElement; at; at = at.parentElement) {
+      const view = SpellElement.componentOf(at)
+      if (view) return !!view.currentThing && "items" in view.currentThing
+    }
+    return false
+  }
+
+  /** How many elements our shadow root draws at its top:  `countDrawnElements()` keeps it. */
+  @E.state private accessor drawnElements = 0
+
+  /** Keep `drawnElements` as our drawing changes. */
+  private countDrawnElements() {
+    const root = this.domElement.renderRoot
+    const count = () => {
+      this.drawnElements = root.children.length
+    }
+    count()
+    const observer = new MutationObserver(count)
+    observer.observe(root, { childList: true })
+    this.domElement.addReleaseCallback(() => observer.disconnect())
+  }
+
+  /**
+   * Parts inside us climb past us to their owner while we have no box (`SeeThroughElement`):
+   * the `<ui-card>` we draw finds the `<ui-cards>` around us.
+   * - Read from the DOM, as a climb must:  our `display`, so a page's own rule giving us one makes us a barrier again.
+   */
+  letsPartsThrough(): boolean {
+    return getComputedStyle(this.domElement).display === "contents"
+  }
+
+  /** We stopped or started laying out as our drawing:  the parts inside us find their owners again. */
+  @E.onChange("laysOutAsDrawing")
+  protected onLayoutChanged() {
+    const { domElement } = this
+    E.afterSolidUpdate(() => E.PartContext.refreshInside(domElement))
   }
 
   /** May things be dropped on our list?  Its type says `droppable`, or its `- on card dropped:` implies it. */

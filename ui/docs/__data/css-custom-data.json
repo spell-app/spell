@@ -975,6 +975,20 @@
       }
     },
     {
+      "name": "--ui-card-selected-border-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-card>`'s token.  Default:  `var(--ui-primary)`"
+      }
+    },
+    {
+      "name": "--ui-card-selected-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-card>`'s token.  Default:  `color-mix(in oklch, var(--ui-primary) 5%, var(--ui-card-background))`"
+      }
+    },
+    {
       "name": "--ui-checkbox-size",
       "description": {
         "kind": "markdown",
@@ -7282,6 +7296,13 @@
       }
     },
     {
+      "name": "--ui-page-layout-drawer-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-page-layout>`'s token.  Default:  `16em`"
+      }
+    },
+    {
       "name": "--ui-panel-background",
       "description": {
         "kind": "markdown",
@@ -10964,6 +10985,20 @@
       }
     },
     {
+      "name": "--ui-tree-nav-font-size",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `0.875em`"
+      }
+    },
+    {
+      "name": "--ui-tree-nav-row-height",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `round(2.25em, var(--ui-grid, 4px))`"
+      }
+    },
+    {
       "name": "--ui-tree-nav-border-color",
       "description": {
         "kind": "markdown",
@@ -11558,6 +11593,13 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-column>`:  The column box (a flex item).\n- `<ui-graph>`:  Each column of the `groups` arrangement:  its band and header.\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  one column."
+      }
+    },
+    {
+      "name": "::part(column-header)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  a header, the label line over its group of rows (`kind: \"header\"`);  `groups=\"accordion\"`:  the button that opens its group."
       }
     },
     {
@@ -12495,7 +12537,7 @@
       "name": "::part(preview)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-json>`:  A closed object or array, on one line.\n- `<ui-theme-editor>`:  The sample app, light and dark, when no pages are given."
+        "value": "Part of:\n\n- `<ui-json>`:  A closed object or array, on one line;  a click opens it, as the toggle does.  A click on a member shown in it (a key, a nested `{ ... }`, a value) opens every level down to that member, and shows it.\n- `<ui-theme-editor>`:  The sample app, light and dark, when no pages are given."
       }
     },
     {

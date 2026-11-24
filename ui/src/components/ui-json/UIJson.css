@@ -6,6 +6,9 @@
  *   - An object's or array's line is also `.container`,
  *     with a `<button class="toggle">` (a chevron `<ui-icon>`) in the gutter and, closed, `<span class="preview">`.
  *   - Text spans:  `.key`, `.string`, `.number`, `.boolean`, `.null`, `.punct`;  the clickable ones also `.link`.
+ *   - What opens an object or array, as its toggle does:  its key and its closed line, `.opens`.
+ *   - A closed line's members, `.member` (nested, as the data is):  a click opens the way down to one.
+ *     Then its row is `.found` for a moment.
  *   - Editing (`editable`):  a `<ui-input>`, `<ui-select>` or `<ui-checkbox>`, `.edit`, in a key's or value's place.
  *   - Before them, the source parts:  `<ui-loader part="loader">` while loading, `<ui-message part="error">`.
  * - The gutter:  a toggle's column, `--_json-gutter` wide, just before its own row's indent.
@@ -48,6 +51,7 @@
     /* an example's code button's size */
     --_json-tool-size: 28px;
     --_json-gutter: 1.5em;
+    --_json-found-background: color-mix(in srgb, var(--_ui-json-focus-color) 16%, transparent);
 
     position: relative;
     font-family: var(--_ui-json-font-family);
@@ -191,6 +195,40 @@
     text-underline-offset: 0.2em;
   }
 
+  /* an object's or array's key and closed line:  a click opens it, so its chevron lights up too */
+  .opens {
+    cursor: pointer;
+  }
+  .key.opens:hover {
+    text-decoration: underline dotted;
+    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+    text-underline-offset: 0.2em;
+  }
+  .key.opens:focus-visible {
+    outline: 2px solid var(--_ui-json-focus-color);
+    outline-offset: 1px;
+    border-radius: 0.25em;
+  }
+  .row.container:has(> .opens:hover):not(:has(.member:hover)) > .toggle {
+    color: var(--_ui-json-color);
+  }
+
+  /* a member shown in a closed line:  a click opens the way down to it, so the one under the pointer is lit */
+  .member:hover:not(:has(.member:hover)) {
+    background: var(--_json-found-background);
+    border-radius: 0.25em;
+  }
+  .member:hover:not(:has(.member:hover)) > .key {
+    text-decoration: underline dotted;
+    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+    text-underline-offset: 0.2em;
+  }
+
+  /* the line a click in a closed line opened the way down to:  lit for a moment */
+  .row.found {
+    animation: json-found 1.2s ease-out;
+  }
+
   /*
    * An editor sits in the line, in the code's font and size, and no taller than the line, so the rows below stay put.
    * - The editors' own tokens:  each draws its text at `--ui-font-size` times `--ui-scale`, in `--ui-font-family`.
@@ -254,5 +292,11 @@
     visibility: hidden;
     white-space: pre;
     pointer-events: none;
+  }
+}
+
+@keyframes json-found {
+  from {
+    background: var(--_json-found-background);
   }
 }

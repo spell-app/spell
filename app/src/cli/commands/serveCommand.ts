@@ -2,17 +2,21 @@ import { readFileSync } from "fs"
 
 import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
-import { PageServer, pageServerRoot } from "spell/server/page"
+import { DEFAULT_PORT, PageServer, pageServerRoot } from "spell/server/page"
 import environment from "spell/app/spaces/server/node/environment"
 import { editorRecordFile } from "spell/app/spaces/server/node/routes/EditorServer"
 import { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"
+import { planPageServer } from "spell/app/cli/servePageServer"
 
 /** The page server's root:  the kit this checkout is in (`pageServerRoot()`, epic `repo-split` P16), else this checkout. */
 const SERVER_ROOT = pageServerRoot(environment.repoDir)
 
-/** Where the page server records its editor:  at its root, named by its spaces (`editorRecordFile()`). */
-const EDITOR_FILE = editorRecordFile(SERVER_ROOT)
+/**
+ * Where the page server records its editor:  at its root, named by its spaces (`editorRecordFile()`).
+ * - the spaces `environment` read as it loaded:  `--spaces`, or the project's own, set before it did (`commands.ts`)
+ */
+const EDITOR_FILE = editorRecordFile(SERVER_ROOT, environment.spellSpacesDir)
 
 /** How long to wait for the editor to answer:  vite may be building its dependency cache. */
 const START_TIMEOUT_MS = 90_000
@@ -21,7 +25,12 @@ const START_TIMEOUT_MS = 90_000
  * `spell app serve [project]` (`spell serve` until epic `repo-split` P13):  run EVERYTHING --
  * the kit's page server, with the app's API, the editor UI,
  * docs, epics, goals and Spell UI -- and open the editor in a browser.
- * - The PAGE SERVER (`yarn server`, `spell/server/page`), started if it isn't running.
+ * - The PAGE SERVER (`yarn server`, `spell/server/page`), started if it isn't running:  WHICH one, `planPageServer()`
+ *   - run from a project's checkout, or with `--spaces <dir>`:  that project's own, on any free port, as
+ *     `spell server local --spaces spaces` runs it;  never the kit's on 4747
+ *   - never starts, stops or restarts a page server another checkout owns:  the kit's own, run from a project's
+ *     checkout with no `spaces/`, is used only when it's running, as it is
+ *   - `--page-port`:  its port;  held by another checkout's or project's server, it says so and takes a free one
  *   - The editor is ITS child:  `app`'s route module starts vite once the page server listens,
  *     and stops it with the page server (`EditorServer.ts`).  So `yarn server` alone runs it too.
  *   - This waits for the editor's record (`.spell-server.editor.json`) to answer.
@@ -58,7 +67,7 @@ export async function serveCommand(
   const pageRow = status.start("Starting the page server")
   let page: Awaited<ReturnType<typeof PageServer.ensure>>
   try {
-    page = await PageServer.ensure(SERVER_ROOT)
+    page = await pageServer(session, options.pagePort)
     status.done(pageRow, "ok", `${page.base}/${page.launched ? "" : "  (already running)"}`)
   } catch (error) {
     status.done(pageRow, "failed", error instanceof Error ? error.message : String(error))
@@ -98,6 +107,27 @@ export async function serveCommand(
   clearInterval(keepAlive)
   if (page.launched) await SRV.PidFile.forPageServer(SERVER_ROOT).stop()
   return CLI.EXIT.OK
+}
+
+/**
+ * The page server `serveCommand()` runs the editor on (`planPageServer()`), started if it's this checkout's own;
+ * throws `CLI.CliError` when it's another checkout's, and isn't running.
+ */
+async function pageServer(session: CLI.CliSession, pagePort: number | undefined) {
+  if (pagePort !== undefined && (!Number.isInteger(pagePort) || pagePort < 1 || pagePort > 65_534)) {
+    throw new CLI.CliError(`--page-port must be a port number`)
+  }
+  const spaces = process.env.SPELL_SPACES_DIR
+  const plan = await planPageServer({ root: SERVER_ROOT, cwd: process.cwd(), spaces, pagePort })
+  for (const note of plan.notes) session.err(note)
+  if (plan.use === "own") return PageServer.ensure(SERVER_ROOT, plan.port)
+  const pidFile = SRV.PidFile.forPageServer(SERVER_ROOT, spaces)
+  const running = (await pidFile.status()) ?? (await pidFile.ourServerOn(DEFAULT_PORT))
+  if (running) return { ...running, launched: false }
+  throw new CLI.CliError(
+    `${SERVER_ROOT}'s page server isn't running, and \`spell app serve\` never starts another checkout's:  ` +
+      `serve this project's own spaces (\`--spaces <dir>\`), or start that one from its checkout (\`spell server start\`)`
+  )
 }
 
 /** The editor's URL once the page server has recorded it and it answers -- `undefined` after `START_TIMEOUT_MS`. */

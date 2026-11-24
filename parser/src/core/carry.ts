@@ -164,6 +164,8 @@ export const carryMethods = defineCoreModule({
       }
       retired.set(name, [...older, { Class: new WeakRef(Old), prototype: new WeakRef(Old.prototype as object) }])
     }
+    // each running thing of an old class is of the new one now:  file it under its classes again
+    core.things.reindex()
     tellHeldDefinitions()
   }
 })

@@ -4259,6 +4259,14 @@
               "fieldName": "loading"
             },
             {
+              "name": "selected",
+              "description": "The one chosen among its neighbours:  its border the primary colour and its fill a touch of it, its text as the others';  `--ui-card-selected-border-color` and `--ui-card-selected-background` change them.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "selected"
+            },
+            {
               "name": "link",
               "description": "Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance=\"link\"`.  Its old name was `href`.",
               "type": {
@@ -4703,6 +4711,14 @@
             {
               "name": "--ui-cards-stackable-spacing",
               "default": "1em"
+            },
+            {
+              "name": "--ui-card-selected-border-color",
+              "default": "var(--ui-primary)"
+            },
+            {
+              "name": "--ui-card-selected-background",
+              "default": "color-mix(in oklch, var(--ui-primary) 5%, var(--ui-card-background))"
             }
           ]
         },
@@ -21229,7 +21245,7 @@
             },
             {
               "name": "ui-navigating",
-              "description": "A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "A key or a value was clicked (not a double-click, nor the end of a text selection).  An object's or array's key opens and closes it instead, and sends none.  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an empty object or array too);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ path: (string | number)[], key: string | number | undefined, value: unknown, part: \"key\" | \"value\" }>"
               }
@@ -21274,7 +21290,7 @@
             },
             {
               "name": "preview",
-              "description": "A closed object or array, on one line."
+              "description": "A closed object or array, on one line;  a click opens it, as the toggle does.  A click on a member shown in it (a key, a nested `{ ... }`, a value) opens every level down to that member, and shows it."
             },
             {
               "name": "editor",
@@ -28219,6 +28235,10 @@
             },
             {
               "name": "--ui-page-layout-sidebar-width",
+              "default": "16em"
+            },
+            {
+              "name": "--ui-page-layout-drawer-width",
               "default": "16em"
             }
           ]
@@ -55314,6 +55334,14 @@
               "fieldName": "show"
             },
             {
+              "name": "groups",
+              "description": "`appearance=\"columns\"` with headers in `items` (`kind: \"header\"`):  how a column shows the groups under them.  `open`, the default:  every group.  `accordion`:  one group a column, the first, or the one its pick is in;  a click on a header (Enter, Space) opens its group and closes the other.  Either way, the headers stick as the column scrolls:  at its top under the ones above, at its bottom over the ones below.",
+              "type": {
+                "text": "\"open\" | \"accordion\""
+              },
+              "fieldName": "groups"
+            },
+            {
               "name": "sticky-path",
               "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.  `appearance=\"columns\"`:  a line above the columns naming each column's pick, shown once something is picked;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.",
               "type": {
@@ -55486,7 +55514,7 @@
             {
               "kind": "field",
               "name": "items",
-              "description": "`appearance=\"columns\"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.  A JS property (rich data), not an attribute.",
+              "description": "`appearance=\"columns\"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, kind?, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.  `kind: \"header\"` makes an item the label line over the rows after it, up to the next header (its group), as `<ui-item kind=\"header\">` is in a menu:  never picked, selected, counted or in `path`, skipped by the arrow keys, and kept by `filter` only while a row under it shows.  It draws its `label`, `icon` and `count` (none:  how many rows its group holds), and sticks at the column's top or bottom as it scrolls (`groups`).  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }
@@ -55573,6 +55601,10 @@
             {
               "name": "column-row",
               "description": "`appearance=\"columns\"` with `items`:  one row of a column."
+            },
+            {
+              "name": "column-header",
+              "description": "`appearance=\"columns\"` with `items`:  a header, the label line over its group of rows (`kind: \"header\"`);  `groups=\"accordion\"`:  the button that opens its group."
             },
             {
               "name": "tools",
@@ -55689,6 +55721,14 @@
             {
               "name": "--ui-tree-path-background",
               "default": "var(--ui-background)"
+            },
+            {
+              "name": "--ui-tree-nav-font-size",
+              "default": "0.875em"
+            },
+            {
+              "name": "--ui-tree-nav-row-height",
+              "default": "round(2.25em, var(--ui-grid, 4px))"
             },
             {
               "name": "--ui-tree-nav-border-color",

@@ -5,13 +5,14 @@
  *   it sends each open file's problems back after each parse that changes them.
  * - It loads each project itself, through the page server, as the page does.
  * - With each file's problems, what the editor draws it with, in its look (`lookOf()`).
- * - Spaces' models register spell's project groups and Spell UI's names for a drawing's tags, as on the page.
+ * - Spaces' models register spell's project groups and Spell UI's names for a drawing's tags, as on the page;
+ *   the page's person and their org's own groups come first, in a `groups` message.
  * - Its position in the import graph:  an entry of its own, made by `new Worker(new URL(...))`:
  *   the parser, spaces' models and the language service;  NEVER the editor, Solid or CodeMirror.
  */
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import "spell/app/spaces"
+import { SPACES } from "spell/app/spaces"
 import { LSP } from "spell/app/lsp"
 import { CodeColours } from "spell/app/app/ui/CodeColours"
 import { plainError, type LanguageWorkerMessage, type LanguageWorkerReply } from "./LanguageClient"
@@ -28,7 +29,11 @@ host.service.picksValues = true
 
 addEventListener("message", (event: MessageEvent<LanguageWorkerMessage>) => {
   const message = event.data
-  if (message.kind === "open") host.open(message)
+  if (message.kind === "groups") {
+    // the page's person and their org's groups, before any project (`LanguageClient`'s `groupsOnPage()`)
+    SPACES.setLocalPerson(message.person)
+    SPACES.addOrgGroups(message.orgGroups)
+  } else if (message.kind === "open") host.open(message)
   else if (message.kind === "change") host.change(message)
   else if (message.kind === "close") host.close(message)
   else if (message.kind === "look") host.look(message)
