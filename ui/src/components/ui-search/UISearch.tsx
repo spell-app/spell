@@ -43,6 +43,13 @@ import searchCSS from "./UISearch.css?inline"
  * - The rows render only while shown;  `aria-activedescendant` points at the highlighted one.
  *   - A polite live region announces the result count and messages.
  *   - Escape and outside clicks come from `UI.overlays`.
+ * - The clear button (`F.ClearButton`):  an `x` in place of the magnifying glass while there's text
+ *   (unless `clearable="false"`);  a click empties it, as Escape does, and puts the focus back in it.
+ * - `collapsed`:  a search button (`opener`) until clicked;  then the field slides open from it, focused.
+ *   - Escape on the empty field, or leaving it empty, folds it back.
+ *   - `:state(expanded)` follows it, and `ui-toggled` says so:
+ *     so a page can hide what the opening field covers (a title beside it).
+ *   - It stays open while it has text.
  * - A form control (decided 2026-09-30):  Fomantic's search wraps a REAL `<input class="prompt">`,
  *   which submits its text under its `name`;  so does this one, with `required` => `valueMissing`.
  ****************/
@@ -113,6 +120,72 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     this.settledValue = value
     this.inputRevision++
   }
+
+  ////////////////
+  // ## Clearing
+  ////////////////
+
+  /** Shows the clear button:  `clearable`, with text, someone could change it, and no spinner in its place. */
+  get showsClear(): boolean {
+    return this.clearable !== false && this.query !== "" && !this.isDisabled && !this.isReadOnly && !this.isLoading
+  }
+
+  /**
+   * Empty the field as Escape does:  the results hide, `ui-changed` with `""`;  then focus it.
+   * - A `ui-changed` handler that sets `value` again wins, as for every commit.
+   */
+  @E.untracked
+  clear(originalEvent?: Event) {
+    this.requestOpen(false, originalEvent)
+    if (this.query !== "") this.commit("", originalEvent)
+    this.input?.focus()
+  }
+
+  /** The clear button's click. */
+  private readonly onClear = (event: MouseEvent) => this.clear(event)
+
+  ////////////////
+  // ## Collapsed
+  ////////////////
+
+  /** A `collapsed` search's field, opened by someone (`expand()`) and not folded back since. */
+  @E.state accessor isFieldOpen = false
+
+  /** A `collapsed` search shows its field:  opened, or holding text;  always in a server render, which no click opens. */
+  @E.cssState("expanded")
+  get isExpanded(): boolean {
+    return this.collapsed && (isServer || this.isFieldOpen || this.query !== "")
+  }
+
+  /** A `collapsed` search shows only its search button. */
+  get isFolded(): boolean {
+    return this.collapsed && !this.isExpanded
+  }
+
+  /** Slide the field open from the search button, and focus it. */
+  @E.untracked
+  expand() {
+    if (!this.collapsed || this.isDisabled) return
+    this.isFieldOpen = true
+    E.afterSolidUpdate(() => this.input?.focus())
+  }
+
+  /** Fold the empty field back into the search button;  `focusOpener`:  and focus the button (Escape). */
+  @E.untracked
+  fold(focusOpener = false) {
+    if (!this.isFieldOpen) return
+    this.isFieldOpen = false
+    if (focusOpener) E.afterSolidUpdate(() => this.opener?.focus())
+  }
+
+  /** Opened or folded:  `ui-toggled`, for a page that hides what the field covers. */
+  @E.onChange("isExpanded", { defer: true })
+  protected onExpandedChanged(expanded: boolean) {
+    this.send("ui-toggled", { expanded })
+  }
+
+  /** The search button's click. */
+  private readonly onOpenerClick = () => this.expand()
 
   ////////////////
   // ## Settling
@@ -457,12 +530,30 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   /** The results popover. */
   private resultsBox?: HTMLElement
 
+  /** The search button of a `collapsed` search. */
+  private opener?: HTMLElement
+
   render(): JSX.Element {
     this.ids = { results: UI.ids.next(ID_PREFIX) }
     return (
       <div class={this.rootClass} part={this.partForName("search")} style={this.popover.anchorStyle}>
+        <Show when={this.collapsed && !isServer}>
+          <ui-button
+            ref={(element: HTMLElement) => (this.opener = element)}
+            class={OPENER}
+            part={this.partForName("opener")}
+            icon={SEARCH_ICON}
+            appearance="basic circular"
+            aria-label={this.label}
+            disabled={this.isDisabled}
+            onClick={this.onOpenerClick}
+          />
+        </Show>
         <div
-          class={[INPUT, { [LOADING]: this.isLoading, [UIT.FLUID]: this.fluid, [UIT.DISABLED]: this.isDisabled }]}
+          class={[
+            this.collapsed ? E.ClassBuilder.withPhrases(LEFT_ICON_INPUT) : INPUT,
+            { [LOADING]: this.isLoading, [UIT.FLUID]: this.fluid, [UIT.DISABLED]: this.isDisabled }
+          ]}
           part={this.partForName("input")}
         >
           <input
@@ -496,6 +587,12 @@ export class UISearch extends F.FormComponent<Vocabulary> {
             onBlur={this.onBlur}
             onClick={this.onClick}
           />
+          {F.ClearButton.draw({
+            shows: () => this.showsClear,
+            label: () => this.translationForKey("searchClear"),
+            part: this.partForName("clear"),
+            onClear: this.onClear
+          })}
           <span class={SEARCH_ICON_CLASS} part={this.partForName("icon")}>
             <slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>
           </span>
@@ -690,8 +787,9 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     this.settleAfterPause(event)
   }
 
-  /** Focus:  show the results of what's there (Fomantic's `searchOnFocus`). */
+  /** Focus:  show the results of what's there (Fomantic's `searchOnFocus`);  a `collapsed` field stays open. */
   private readonly onFocus = (event: FocusEvent) => {
+    if (this.collapsed) this.isFieldOpen = true
     this.runQuery(this.query, event)
   }
 
@@ -708,6 +806,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     if (next && (this.domElement.contains(next) || this.domElement.renderRoot.contains(next))) return
     this.requestOpen(false, event)
     this.settle(event)
+    if (!this.query) this.fold()
   }
 
   /** Combobox keys:  arrows move, Enter chooses, Escape clears a closed search (an open one closes, overlays). */
@@ -738,8 +837,14 @@ export class UISearch extends F.FormComponent<Vocabulary> {
         return
       }
       case UIT.Key.escape:
-        // showing:  `UI.overlays` closes it;  else Escape clears (APG)
-        if (isShowing || !this.query) return
+        // showing:  `UI.overlays` closes it;  else Escape clears (APG);  then folds a `collapsed` one
+        if (isShowing) return
+        if (!this.query) {
+          if (!this.isFieldOpen) return
+          event.preventDefault()
+          this.fold(true)
+          return
+        }
         event.preventDefault()
         this.requestOpen(false, event)
         this.commit("", event)
@@ -805,6 +910,12 @@ const SEARCH_ICON = "magnifying-glass"
  * - NOTE: `active` (`UIT.ACTIVE`) === the HIGHLIGHTED result (and its category):  Fomantic's meaning.
  */
 const LOADING = "loading"
+
+/** Class words of a `collapsed` search's input box:  the magnifying glass at its start, where the button's was. */
+const LEFT_ICON_INPUT = "ui left icon input"
+
+/** Class word of a `collapsed` search's button. */
+const OPENER = "opener"
 
 /** Class words of the icon box. */
 const SEARCH_ICON_CLASS = "search icon"

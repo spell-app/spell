@@ -19297,6 +19297,14 @@
               "fieldName": "folder"
             },
             {
+              "name": "clearable",
+              "description": "Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type=\"search\"`;  `clearable=\"false\"` turns it off there.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "clearable"
+            },
+            {
               "name": "autocomplete",
               "description": "Autofill hint, forwarded to the native input.",
               "type": {
@@ -19481,6 +19489,10 @@
             {
               "name": "icon",
               "description": "The icon box (the spinner while `loading`)."
+            },
+            {
+              "name": "clear",
+              "description": "The box of the clear button, at the field's end (`clearable`, while it has text)."
             }
           ],
           "cssStates": [
@@ -38757,6 +38769,14 @@
               "fieldName": "fluid"
             },
             {
+              "name": "collapsed",
+              "description": "Starts as a search button;  a click slides the field open, focused.  Escape, or leaving it empty, folds it back.  `:state(expanded)` and `ui-toggled` tell the page, to hide a title the field covers.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "collapsed"
+            },
+            {
               "name": "scrolling",
               "description": "The results scroll after a fixed height.",
               "type": {
@@ -38827,6 +38847,15 @@
                 "text": "string"
               },
               "fieldName": "placeholder"
+            },
+            {
+              "name": "clearable",
+              "description": "Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable=\"false\"` turns it off.",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true",
+              "fieldName": "clearable"
             },
             {
               "name": "value",
@@ -39101,6 +39130,13 @@
               }
             },
             {
+              "name": "ui-toggled",
+              "description": "A `collapsed` search slid open (`expanded: true`) or folded back.",
+              "type": {
+                "text": "CustomEvent<{ expanded: boolean }>"
+              }
+            },
+            {
               "name": "ui-replied",
               "description": "A remote query answered.",
               "type": {
@@ -39146,6 +39182,14 @@
               "description": "The icon box."
             },
             {
+              "name": "clear",
+              "description": "The box of the clear button, in place of the icon while there's text."
+            },
+            {
+              "name": "opener",
+              "description": "The search button a `collapsed` search shows while folded."
+            },
+            {
               "name": "results",
               "description": "The results popover (the listbox while there are results)."
             },
@@ -39170,6 +39214,10 @@
             {
               "name": "open",
               "description": "The results are showing."
+            },
+            {
+              "name": "expanded",
+              "description": "A `collapsed` search's field is open."
             },
             {
               "name": "disabled",
@@ -39361,6 +39409,14 @@
             {
               "name": "--ui-search-disabled-opacity",
               "default": "var(--ui-disabled-opacity)"
+            },
+            {
+              "name": "--ui-search-expanded-width",
+              "default": "16em"
+            },
+            {
+              "name": "--ui-search-expand-duration",
+              "default": "var(--ui-duration, 0.2s)"
             }
           ]
         }

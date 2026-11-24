@@ -21764,6 +21764,11 @@
           "description": "`file`:  picks whole folders instead of files;  `files` holds every file in them, each with its path in its folder (`webkitRelativePath`)."
         },
         {
+          "name": "clearable",
+          "kind": "boolean",
+          "description": "Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type=\"search\"`;  `clearable=\"false\"` turns it off there."
+        },
+        {
           "name": "autocomplete",
           "kind": "string",
           "description": "Autofill hint, forwarded to the native input."
@@ -21994,6 +21999,10 @@
         {
           "name": "icon",
           "description": "The icon box (the spinner while `loading`)."
+        },
+        {
+          "name": "clear",
+          "description": "The box of the clear button, at the field's end (`clearable`, while it has text)."
         }
       ],
       "states": [
@@ -22054,7 +22063,13 @@
           "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
-      "texts": [],
+      "texts": [
+        {
+          "key": "inputClear",
+          "text": "Clear",
+          "description": "Accessible name of the clear button (`clearable`)."
+        }
+      ],
       "mainTag": "ui-input",
       "main": true,
       "page": true,
@@ -38712,6 +38727,11 @@
           "description": "Takes the full width of its container;  so do the results."
         },
         {
+          "name": "collapsed",
+          "kind": "keyOnly",
+          "description": "Starts as a search button;  a click slides the field open, focused.  Escape, or leaving it empty, folds it back.  `:state(expanded)` and `ui-toggled` tell the page, to hide a title the field covers."
+        },
+        {
           "name": "scrolling",
           "kind": "keyOnly",
           "description": "The results scroll after a fixed height."
@@ -38766,6 +38786,12 @@
           "name": "placeholder",
           "kind": "string",
           "description": "Placeholder text of the input."
+        },
+        {
+          "name": "clearable",
+          "kind": "boolean",
+          "default": true,
+          "description": "Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable=\"false\"` turns it off."
         },
         {
           "name": "value",
@@ -39048,6 +39074,11 @@
           "description": "The text settled:  typing paused for `delay`, Enter pressed, a result chosen, the input cleared, or left after an edit.  Once per new text."
         },
         {
+          "name": "ui-toggled",
+          "detail": "{ expanded: boolean }",
+          "description": "A `collapsed` search slid open (`expanded: true`) or folded back."
+        },
+        {
           "name": "ui-replied",
           "detail": "{ query: string, results: SearchResult[] }",
           "description": "A remote query answered."
@@ -39083,6 +39114,14 @@
           "description": "The icon box."
         },
         {
+          "name": "clear",
+          "description": "The box of the clear button, in place of the icon while there's text."
+        },
+        {
+          "name": "opener",
+          "description": "The search button a `collapsed` search shows while folded."
+        },
+        {
           "name": "results",
           "description": "The results popover (the listbox while there are results)."
         },
@@ -39107,6 +39146,10 @@
         {
           "name": "open",
           "description": "The results are showing."
+        },
+        {
+          "name": "expanded",
+          "description": "A `collapsed` search's field is open."
         },
         {
           "name": "disabled",
@@ -39174,6 +39217,11 @@
           "key": "searchLabel",
           "text": "Search",
           "description": "Accessible name of the input when nothing else names it."
+        },
+        {
+          "key": "searchClear",
+          "text": "Clear search",
+          "description": "Accessible name of the clear button."
         },
         {
           "key": "searchNoResultsHeader",
@@ -69979,6 +70027,16 @@
           "name": "--ui-search-disabled-opacity",
           "default": "var(--ui-disabled-opacity)",
           "type": "other"
+        },
+        {
+          "name": "--ui-search-expanded-width",
+          "default": "16em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-search-expand-duration",
+          "default": "var(--ui-duration, 0.2s)",
+          "type": "time"
         }
       ]
     },

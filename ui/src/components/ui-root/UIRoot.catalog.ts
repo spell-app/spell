@@ -742,6 +742,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "multiple",
       "accept",
       "folder",
+      "clearable",
       "autocomplete",
       "inputmode",
       "rules"
@@ -1291,6 +1292,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "category",
       "direction",
       "fluid",
+      "collapsed",
       "scrolling",
       "resizable",
       "length",
@@ -1300,6 +1302,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "readonly",
       "open",
       "placeholder",
+      "clearable",
       "value",
       "name",
       "parameter",

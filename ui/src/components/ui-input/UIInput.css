@@ -12,6 +12,7 @@
  *       <span class="ui label" part="label"><slot name="label">text</slot></span>      (labeled, before)
  *       <slot name="action"></slot>                                                    (left action)
  *       <input part="control">   or   <textarea part="control">                       (always)
+ *       <span class="clear" part="clear"><ui-button icon="xmark" ...></span>         (clearable, with text)
  *       <span class="icon" part="icon"><slot name="icon">svg</slot></span>            (icon, or loading)
  *       <span class="ui label" part="label">...</span>                                 (right labeled)
  *       <span class="ui [left] corner label" part="label">
@@ -28,6 +29,10 @@
  * - The DOM element:  `inline-flex`, `:state(fluid)` block-level.
  *   An owner (`<ui-field>`) sizes it with the inherited `--_ui-input-owner-width` (default `auto`);
  *   the root and the native control grow to fill.
+ * - The clear button's box (`F.ClearButton`):  a flex item right after the native control, pulled back over its end
+ *   by its own width, so it sits in the end column whatever follows (a label, an action).
+ *   - The control makes room for it (`--_input-pad-end`);  a trailing icon hides while it shows, a `left icon` stays.
+ *   - `<ui-search>` draws one in its `ui icon input` too:  this sheet lays it out there.
  * - Action buttons (`<ui-button slot="action">`) are FLEX ITEMS of the root (a slot is `display: contents`).
  *   - The input squares their joined corners through UIButton.css's group corner tokens (`--_ui-buttons-ss` ...):
  *     a joined action is a one-sided button group.
@@ -329,6 +334,23 @@
     block-size: 3em;
   }
 
+  /* Clear button:  over the control's end, in the icon column, its `x` centred. */
+  .ui.input > .clear {
+    position: relative;
+    z-index: 2;
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--_input-icon-width, var(--_ui-input-icon-width));
+    margin-inline-start: calc(-1 * var(--_input-icon-width, var(--_ui-input-icon-width)));
+  }
+  /* a trailing icon gives the clear button its column while it shows */
+  .ui.input:not(.left-icon) > .clear ~ .icon {
+    visibility: hidden;
+  }
+
   /* File:  Fomantic's grey choose-file button inside the field. */
   .ui.file.input > input[type="file"] {
     --_input-pad-block: 0;
@@ -373,6 +395,11 @@
   }
   .ui.left-icon.input:not(.corner) {
     --_input-pad-end: var(--_ui-input-padding-inline);
+  }
+  /* Clear button:  room for it at the end, a `left icon` too. */
+  .ui.input:has(> .clear),
+  .ui.left-icon.input:has(> .clear) {
+    --_input-pad-end: var(--_input-icon-width, var(--_ui-input-icon-width));
   }
 
   /* Loading:  the icon box becomes a spinner (a track and a turning arc). */

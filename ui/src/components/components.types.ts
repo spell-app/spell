@@ -1694,7 +1694,10 @@ export const FLUID = "fluid"
 /** Class words of a close button's icon (`close icon`). */
 export const CLOSE_CLASS = "close icon"
 
-/** Glyph of a close button's icon (Fomantic's `close icon`). */
+/** Class word of a text field's clear button box (`ClearButton`, `UIInput.css`). */
+export const CLEAR_CLASS = "clear"
+
+/** Glyph of a close button's icon (Fomantic's `close icon`);  also a text field's clear button's `x`. */
 export const CLOSE_ICON = "xmark"
 
 /** Text a native fallback's close button shows instead of `CLOSE_ICON`'s glyph (no icon packs without Solid). */

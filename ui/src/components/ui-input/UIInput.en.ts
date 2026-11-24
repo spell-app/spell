@@ -193,6 +193,14 @@ export const inputVocabulary = {
         "each with its path in its folder (`webkitRelativePath`)."
     },
     {
+      name: "clearable",
+      group: "behaviour",
+      kind: "boolean",
+      description:
+        "Shows a clear button (an `x`) at its end while it has text;  a click empties it.  " +
+        'On by default for `type="search"`;  `clearable="false"` turns it off there.'
+    },
+    {
       name: "autocomplete",
       group: "form",
       kind: "string",
@@ -242,7 +250,8 @@ export const inputVocabulary = {
     { name: "input", description: "The root box." },
     { name: "control", description: "The native `<input>`." },
     { name: "label", description: "The joined label box." },
-    { name: "icon", description: "The icon box (the spinner while `loading`)." }
+    { name: "icon", description: "The icon box (the spinner while `loading`)." },
+    { name: "clear", description: "The box of the clear button, at the field's end (`clearable`, while it has text)." }
   ],
   states: [
     UIT.FormControlStates.invalid,
@@ -250,5 +259,6 @@ export const inputVocabulary = {
     { name: "loading", description: "Busy." },
     { name: "fluid", description: "The host is block-level (`fluid`, or inside a `<ui-field>`)." }
   ],
-  texts: []
+  // NOTE: text keys share ONE namespace across components (`UI.i18n`, first registration wins), hence the prefix
+  texts: [{ key: "inputClear", text: "Clear", description: "Accessible name of the clear button (`clearable`)." }]
 } as const satisfies ComponentVocabulary

@@ -953,6 +953,7 @@ export const HELP_TABLE: Readonly<
       accept: "`file`: accepted file types.",
       folder:
         "`file`: picks whole folders instead of files; `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).",
+      clearable: "Shows a clear button (an `x`) at its end while it has text; a click empties it.",
       autocomplete: "Autofill hint, forwarded to the native input.",
       inputmode: "Virtual keyboard hint, forwarded to the native input.",
       rules:
@@ -1704,6 +1705,7 @@ export const HELP_TABLE: Readonly<
       category: "Results in named groups (`category` of each result).",
       direction: "`horizontal`, with `category`: each group's name above its results, not beside them.",
       fluid: "Takes the full width of its container; so do the results.",
+      collapsed: "Starts as a search button; a click slides the field open, focused.",
       scrolling: "The results scroll after a fixed height.",
       resizable: "`scrolling`: people can resize the results vertically.",
       length: "How far the results go before they scroll: `very-short`, `short`, `long`, `very-long`.",
@@ -1713,6 +1715,8 @@ export const HELP_TABLE: Readonly<
       readonly: "Shows its value but can't be typed in, and the results never open; still focusable and submitted.",
       open: "The results are showing.",
       placeholder: "Placeholder text of the input.",
+      clearable:
+        "Shows a clear button (an `x`) in place of the magnifying glass while there's text; a click empties it.",
       value: "The input's text: the query, or a chosen result's title.",
       name: "Form field name: submits the input's text.",
       parameter:

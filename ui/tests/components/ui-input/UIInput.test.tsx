@@ -6,6 +6,7 @@ import type { DOMFormControl } from "spell/ui/elements"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Alignment } from "spell/test-helpers/Alignment"
 
 import "spell/ui/components/ui-input"
 import "spell/ui/components/ui-button"
@@ -677,6 +678,92 @@ describe("<ui-input> joined buttons", () => {
     const [first, last] = boxes
     expect([first.borderTopLeftRadius, first.borderTopRightRadius]).toEqual(["10px", "0px"])
     expect([last.borderTopLeftRadius, last.borderTopRightRadius]).toEqual(["0px", "0px"])
+  })
+})
+
+////////////////
+// ## Clearing
+////////////////
+
+describe("<ui-input clearable>", () => {
+  /** The clear button's box, if it shows. */
+  const clearBox = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>("[part~=clear]")
+
+  it('shows an `x` once there\'s text, on a `type="search"` field by itself', async () => {
+    const { host, control } = await input(`<ui-input type="search" aria-label="Find"></ui-input>`)
+    expect(clearBox(host)).toBeNull()
+    await userEvent.type(control, "cats")
+    await ElementFixture.settle()
+    expect(clearBox(host)?.querySelector("ui-button")?.getAttribute("aria-label")).toBe("Clear")
+    // out of the Tab order, as the browser's own clear button is
+    const after = document.createElement("button")
+    host.after(after)
+    onTestFinished(() => after.remove())
+    await userEvent.tab()
+    expect(document.activeElement).toBe(after)
+  })
+
+  it("empties the field as typing would, then focuses it", async () => {
+    const { host, control } = await input(`<ui-input clearable value="cats" aria-label="Find"></ui-input>`)
+    const typed = record(host, "ui-typed")
+    const changed = record(host, "ui-changed")
+    await ElementFixture.settle()
+    await userEvent.click(clearBox(host)!.querySelector("ui-button")!)
+    await ElementFixture.settle()
+    expect([host.value, control.value]).toEqual(["", ""])
+    expect(typed.map((detail) => detail.value)).toEqual([""])
+    expect(changed.map((detail) => detail.value)).toEqual([""])
+    expect(host.shadowRoot!.activeElement).toBe(control)
+    expect(clearBox(host)).toBeNull()
+  })
+
+  it('is off on a plain field, and `clearable="false"` turns a search field\'s off', async () => {
+    for (const html of [
+      `<ui-input value="cats" aria-label="A"></ui-input>`,
+      `<ui-input type="search" clearable="false" value="cats" aria-label="A"></ui-input>`,
+      `<ui-input type="search" disabled value="cats" aria-label="A"></ui-input>`,
+      `<ui-input type="search" readonly value="cats" aria-label="A"></ui-input>`
+    ]) {
+      const { host } = await input(html)
+      await ElementFixture.settle()
+      expect(clearBox(host), html).toBeNull()
+    }
+  })
+
+  it("takes the trailing icon's place, and sits in the end column beside a `left icon`", async () => {
+    const { host, control } = await input(
+      `<ui-input type="search" icon="search" value="cats" aria-label="A"></ui-input>`
+    )
+    await ElementFixture.settle()
+    const icon = host.shadowRoot!.querySelector<HTMLElement>("[part~=icon]")!
+    expect(getComputedStyle(icon).visibility).toBe("hidden")
+    const field = control.getBoundingClientRect()
+    const clear = clearBox(host)!.getBoundingClientRect()
+    expect(Math.abs(clear.right - field.right)).toBeLessThan(1)
+    expect(Math.abs(clear.top + clear.height / 2 - (field.top + field.height / 2))).toBeLessThan(1)
+    // the text never runs under it
+    expect(Number.parseFloat(getComputedStyle(control).paddingRight)).toBeGreaterThanOrEqual(clear.width - 1)
+
+    const left = await input(
+      `<ui-input type="search" icon="search" icon-position="left" value="cats" aria-label="A"></ui-input>`
+    )
+    await ElementFixture.settle()
+    expect(getComputedStyle(left.host.shadowRoot!.querySelector("[part~=icon]")!).visibility).toBe("visible")
+    expect(Number.parseFloat(getComputedStyle(left.control).paddingRight)).toBeGreaterThanOrEqual(
+      clearBox(left.host)!.getBoundingClientRect().width - 1
+    )
+  })
+
+  it("lines its `x` up with the text, at every size", async () => {
+    for (const size of ["mini", "small", "medium", "large"]) {
+      const { host } = await input(
+        `<ui-input size="${size}" type="search" icon="search" icon-position="left" value="cats" aria-label="A"></ui-input>`
+      )
+      await ElementFixture.settle()
+      await (clearBox(host)!.querySelector("ui-button") as unknown as { ready: Promise<unknown> }).ready
+      expect(Alignment.report(Alignment.scan({ within: "ui-input" })), size).toEqual([])
+      host.remove()
+    }
   })
 })
 

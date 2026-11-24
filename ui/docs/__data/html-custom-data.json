@@ -26773,6 +26773,13 @@
           }
         },
         {
+          "name": "clearable",
+          "description": {
+            "kind": "markdown",
+            "value": "Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type=\"search\"`;  `clearable=\"false\"` turns it off there.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "autocomplete",
           "description": {
             "kind": "markdown",
@@ -46513,7 +46520,7 @@
       "name": "ui-search",
       "description": {
         "kind": "markdown",
-        "value": "A search module lets people query for results from a selection of data.\n\nAlso known as:  autocomplete, typeahead, search box, combobox, lookup.\n\n**Slots:**  `icon`\n\n**Events:**  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-replied`, `ui-opening`, `ui-closing`"
+        "value": "A search module lets people query for results from a selection of data.\n\nAlso known as:  autocomplete, typeahead, search box, combobox, lookup.\n\n**Slots:**  `icon`\n\n**Events:**  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-toggled`, `ui-replied`, `ui-opening`, `ui-closing`"
       },
       "attributes": [
         {
@@ -46573,6 +46580,13 @@
           "description": {
             "kind": "markdown",
             "value": "Takes the full width of its container;  so do the results.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "collapsed",
+          "description": {
+            "kind": "markdown",
+            "value": "Starts as a search button;  a click slides the field open, focused.  Escape, or leaving it empty, folds it back.  `:state(expanded)` and `ui-toggled` tell the page, to hide a title the field covers.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -46658,6 +46672,13 @@
           "description": {
             "kind": "markdown",
             "value": "Placeholder text of the input.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "clearable",
+          "description": {
+            "kind": "markdown",
+            "value": "Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable=\"false\"` turns it off.\n\nTakes:  flag (present / absent)\nDefault:  `true`"
           }
         },
         {

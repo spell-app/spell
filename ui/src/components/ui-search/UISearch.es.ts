@@ -23,10 +23,18 @@ export const searchEs = {
     "select-first-result": "seleccionar-primero",
     "show-no-results": "mostrar-sin-resultados"
   },
-  events: { "ui-replied": "respondido" },
-  parts: { prompt: "indicacion", results: "resultados", result: "resultado", category: "categoria", name: "nombre" },
+  events: { "ui-replied": "respondido", "ui-toggled": "desplegado" },
+  parts: {
+    prompt: "indicacion",
+    results: "resultados",
+    result: "resultado",
+    category: "categoria",
+    name: "nombre",
+    opener: "abridor"
+  },
   texts: {
     searchLabel: "Buscar",
+    searchClear: "Borrar la búsqueda",
     searchNoResultsHeader: "Sin resultados",
     searchNoResults: "La búsqueda no devolvió resultados",
     searchServerError: "Hubo un problema al consultar el servidor.",

@@ -47,6 +47,8 @@ export class DOMInputElement extends F.DOMFormControl<UIInput> {
  * - `showPicker()` opens the native input's picker from script (`DOMInputElement`):
  *   `<ui-uploader>` opens its file dialog that way.
  *   `percent` is ours (epic `language` P34):  a number field for a part of a whole, see `isPercent`.
+ * - `clearable` (on by default for `type="search"`):  an `x` at its end while it has text (`F.ClearButton`);
+ *   a click empties it as typing would (`ui-typed`, then `ui-changed`), and puts the focus back in it.
  * - Enter submits the form, as in a native field ("implicit submission"):
  *   it clicks the form's first submit button, else calls `requestSubmit()`.
  *   The native input can't do it itself:  inside a shadow root, it belongs to no form.
@@ -106,6 +108,40 @@ export class UIInput extends TextControl<Vocabulary> {
 
   /** The glyph of the `icon` attribute. */
   readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.icon })
+
+  ////////////////
+  // ## Clearing
+  ////////////////
+
+  /** Does it offer a clear button?  `clearable`, written;  else only `type="search"`. */
+  get isClearable(): boolean {
+    const written = this.attributes.clearable
+    if (written == null) return this.type === "search"
+    return E.Converters.boolean(written)
+  }
+
+  /** Shows the clear button:  clearable, with text, and someone could change it. */
+  get showsClear(): boolean {
+    return (
+      this.isClearable && this.value !== "" && !this.isFileInput && !this.isDisabled && !this.readonly && !this.loading
+    )
+  }
+
+  /**
+   * Empty the field as someone typing would:  `ui-typed`, then `ui-changed`;  then focus it.
+   * - A `ui-typed` handler that sets `value` again wins, as when typing (`requestChange()`).
+   */
+  @E.untracked
+  clear(originalEvent?: Event) {
+    if (this.value === "") return
+    const applied = this.requestChange("value", "", () => this.send("ui-typed" as never, { value: "", originalEvent }))
+    if (!applied) E.afterSolidUpdate(() => this.syncControl())
+    this.send("ui-changed" as never, { value: this.value, originalEvent })
+    this.focus()
+  }
+
+  /** The clear button's click. */
+  private readonly onClear = (event: MouseEvent) => this.clear(event)
 
   ////////////////
   // ## Percent
@@ -269,6 +305,12 @@ export class UIInput extends TextControl<Vocabulary> {
           onBlur={this.onBlur}
           onKeyDown={this.onKeyDown}
         />
+        {F.ClearButton.draw({
+          shows: () => this.showsClear,
+          label: () => this.translationForKey("inputClear"),
+          part: this.partForName("clear"),
+          onClear: this.onClear
+        })}
         <Show when={this.hasIconBox}>
           <span class={UIT.ICON} part={this.partForName("icon")}>
             <slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>

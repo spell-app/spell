@@ -440,7 +440,9 @@ export const sharedEs = {
     progress: "progreso",
     bar: "barra",
     "error-line": "linea-error",
-    scroller: "desplazador"
+    scroller: "desplazador",
+    // a dropdown's, an input's and a search's clear button (`clearable`)
+    clear: "borrar"
   },
   values: {
     hues: {

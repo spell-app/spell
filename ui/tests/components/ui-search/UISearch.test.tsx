@@ -358,6 +358,109 @@ describe("<ui-search> keyboard", () => {
 // ## Remote
 ////////////////
 
+describe("<ui-search> clear button", () => {
+  /** The clear button's box, if it shows. */
+  const clearBox = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>("[part~=clear]")
+
+  it("shows an `x` in place of the magnifying glass while there's text;  a click empties it", async () => {
+    const { host, input, results } = await search(`<ui-search aria-label="Fruit"></ui-search>`, FRUIT)
+    const changed = record(host, "ui-changed")
+    expect(clearBox(host)).toBeNull()
+    await userEvent.type(input, "ban")
+    await ElementFixture.settle()
+    expect(results.matches(":popover-open")).toBe(true)
+    expect(getComputedStyle(host.shadowRoot!.querySelector("[part~=icon]")!).visibility).toBe("hidden")
+    await userEvent.click(clearBox(host)!.querySelector("ui-button")!)
+    await ElementFixture.settle()
+    expect([host.value, input.value]).toEqual(["", ""])
+    expect(changed).toEqual([expect.objectContaining({ value: "" })])
+    expect(results.matches(":popover-open")).toBe(false)
+    expect(host.shadowRoot!.activeElement).toBe(input)
+    expect(clearBox(host)).toBeNull()
+  })
+
+  it('`clearable="false"` turns it off', async () => {
+    const { host } = await search(`<ui-search clearable="false" value="ban" aria-label="Fruit"></ui-search>`)
+    await ElementFixture.settle()
+    expect(clearBox(host)).toBeNull()
+  })
+})
+
+describe("<ui-search collapsed>", () => {
+  /** A header row:  a title, and the search beside it. */
+  async function header() {
+    const row = await ElementFixture.render<HTMLElement>(
+      `<div style="display: flex; align-items: center; gap: 8px; width: 320px">
+        <b>Overlays</b><ui-search collapsed placeholder="Search Overlays"></ui-search>
+      </div>`
+    )
+    const host = row.querySelector("ui-search") as Search
+    await ElementFixture.settle()
+    const root = host.shadowRoot!.firstElementChild as HTMLElement
+    const opener = root.querySelector<HTMLElement>("[part~=opener]")!
+    const input = root.querySelector<HTMLInputElement>("input.prompt")!
+    return { row, host, root, opener, input, toggled: record(host, "ui-toggled") }
+  }
+
+  it("starts as a search button, as tall as the field would be", async () => {
+    const { host, opener, input } = await header()
+    expect(host.matches(":state(expanded)")).toBe(false)
+    expect(getComputedStyle(input).visibility).toBe("hidden")
+    await (opener as unknown as { ready: Promise<unknown> }).ready
+    const button = opener.shadowRoot!.querySelector("[part~=button]")!.getBoundingClientRect()
+    const box = input.parentElement!.getBoundingClientRect()
+    expect(Math.abs(button.height - box.height)).toBeLessThan(1)
+    expect(Math.abs(button.width - box.width)).toBeLessThan(1)
+  })
+
+  it("slides open from a click, focused;  Escape folds it back and focuses the button", async () => {
+    const { host, opener, input, toggled } = await header()
+    await userEvent.click(opener)
+    await ElementFixture.settle()
+    expect(host.matches(":state(expanded)")).toBe(true)
+    expect(host.shadowRoot!.activeElement).toBe(input)
+    expect(toggled).toEqual([{ expanded: true }])
+    await userEvent.keyboard("{Escape}")
+    await ElementFixture.settle()
+    expect(host.matches(":state(expanded)")).toBe(false)
+    expect(toggled).toEqual([{ expanded: true }, { expanded: false }])
+    expect(host.shadowRoot!.activeElement).toBe(opener)
+  })
+
+  it("folds back when left empty, and stays open with text", async () => {
+    const { host, opener, input } = await header()
+    await userEvent.click(opener)
+    await ElementFixture.settle()
+    await userEvent.type(input, "fade")
+    input.blur()
+    await ElementFixture.settle()
+    expect(host.matches(":state(expanded)")).toBe(true)
+    input.focus()
+    await userEvent.click(host.shadowRoot!.querySelector("[part~=clear] ui-button")!)
+    await ElementFixture.settle()
+    expect(host.matches(":state(expanded)")).toBe(true)
+    input.blur()
+    await ElementFixture.settle()
+    expect(host.matches(":state(expanded)")).toBe(false)
+  })
+
+  it("grows to `--ui-search-expanded-width`, its magnifying glass where the button's was", async () => {
+    const { host, opener, root } = await header()
+    host.style.setProperty("--ui-search-expanded-width", "200px")
+    host.style.setProperty("--ui-motion", "none")
+    const glass = () => root.querySelector("[part~=icon] svg")!.getBoundingClientRect()
+    await (opener as unknown as { ready: Promise<unknown> }).ready
+    const before = opener.shadowRoot!.querySelector("[part~=icon]")!.getBoundingClientRect()
+    await userEvent.click(opener)
+    await ElementFixture.settle()
+    await Promise.all(host.shadowRoot!.getAnimations().map((animation) => animation.finished))
+    expect(root.querySelector("[part~=input]")!.getBoundingClientRect().width).toBeCloseTo(200, 0)
+    const after = glass()
+    expect(Math.abs(after.left + after.width / 2 - (before.left + before.width / 2))).toBeLessThan(1.5)
+    expect(Math.abs(after.top + after.height / 2 - (before.top + before.height / 2))).toBeLessThan(1)
+  })
+})
+
 describe("<ui-search> remote", () => {
   it("fills the url template, shows loading, then the answer;  caches per query", async () => {
     const calls = stubFetch((url) => ({
