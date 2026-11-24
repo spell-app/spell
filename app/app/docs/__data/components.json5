@@ -2041,7 +2041,7 @@
           "name": "mode",
           "type": "Mode",
           "required": true,
-          "description": "### `<AppBarMenus>` The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name. - File, Edit, View and Run are Spell, `SpellEditor.spell`'s `bar menu`s (epic `editor` P29):  each a Spell UI menu of the app's actions, its rows drawn, greyed and ticked by the Spell, each title in the page's language; each menu's title, the bar's word for it, the Spell's too. - What each row does is the editor's, handed over by its name (`handOverActions()`). - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them: Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards. - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File. - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings…. - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Anatomy (epic `editor` P34), Program Panel, ─, Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on. - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console. - Help:  Keyboard Shortcuts (epic `editor` P36), ─, the editor's tours and Tours… (`<TourMenuItems>`, epic `editor` P40), ─, then Help, which does nothing yet;  the editor's own, not the Spell's. - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there. - `mode`:  the page's, ticked in View. - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows."
+          "description": "### `<AppBarMenus>` The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name. - File, Edit, View and Run are Spell, `SpellEditor.spell`'s `bar menu`s (epic `editor` P29):  each a Spell UI menu of the app's actions, its rows drawn, greyed and ticked by the Spell, each title in the page's language; each menu's title, the bar's word for it, the Spell's too. - What each row does is the editor's, handed over by its name (`handOverActions()`). - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them: Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards. - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File. - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings…. - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Anatomy (epic `editor` P34), Program Panel, ─, Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on. - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console. - Help:  Keyboard Shortcuts (epic `editor` P36), All Icons (T158), ─, the editor's tours and Tours… (`<TourMenuItems>`, epic `editor` P40), ─, then Help, which does nothing yet;  the editor's own, not the Spell's. - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there. - `mode`:  the page's, ticked in View. - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows."
         }
       ],
       "usedIn": [
@@ -2899,6 +2899,11 @@
           "description": "Auto-hide delay, ms.  Default:  `3000`."
         },
         {
+          "name": "floating",
+          "type": "boolean",
+          "description": "Lifted over the page:  the floating shadow, and it drops in as it first shows (`<ui-message floating>`)."
+        },
+        {
           "name": "id",
           "type": "string",
           "description": "Id of the message."
@@ -3279,7 +3284,7 @@
         "notices"
       ],
       "aka": [],
-      "description": "`editor.notice` as a success `<ui-message>`, fixed near the top of the page;  closing it calls `editor.hideNotice()`.",
+      "description": "`editor.notice` as a success `<ui-message floating>`, fixed near the top of the page (it drops in);  closing it calls `editor.hideNotice()`.",
       "noun": "Notice",
       "attributes": [],
       "slots": [],
