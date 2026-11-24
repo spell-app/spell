@@ -4,6 +4,7 @@
  * - Its description says nothing of the answer (`{}`):  an untyped list, till verify reads one object there.
  * - An object holding several lists is one thing, its lists its fields:  `{ nodes: [...], edges: [...] }`.
  * - A `GET` that makes a token is never read.
+ * - A field verify reads that Spell can't say is left out, saying why:  a load average's `load_1min`.
  */
 import { describe, expect, test } from "vite-plus/test"
 
@@ -36,6 +37,7 @@ const DOCUMENT: OpenApiDocument = {
     "/api/pictures": { get: answers({ $ref: "#/components/schemas/Pictures" }) },
     // nothing said of its answer
     "/api/heartbeat": { get: answers({}) },
+    "/api/load": { get: answers({}) },
     "/api/topology": { get: answers({}) },
     "/api/auth/token": { get: answers({}) },
     // a map from each address to its rack, inside it:  its keys are values
@@ -75,6 +77,7 @@ function racks(asked: string[]) {
     if (url.pathname === "/api/rack-of-address")
       return Response.json({ updated: "today", mapping: { "192.0.2.7": "r1", "192.0.2.8": "r2" } })
     if (url.pathname === "/api/heartbeat") return Response.json({ ok: true, checks: 3 })
+    if (url.pathname === "/api/load") return Response.json({ host: "h1", load_1min: 0.5, load_5min: 0.4 })
     if (url.pathname === "/api/topology")
       return Response.json({ nodes: [{ id: 1 }], edges: [{ source: 1, target: 1 }] })
     return Response.json({ detail: "Not Found" }, { status: 404 })
@@ -163,6 +166,18 @@ describe("one thing at its own address", () => {
     expect(asked).toContain("/api/version")
     expect(asked).toContain("/api/heartbeat")
     expect(asked.some((each) => each.startsWith("/api/auth"))).toBe(false)
+    const { files } = parseSpellProject([{ path: "/Racks.api.spell", contents: spell() }])
+    expect(files[0]!.errors).toEqual([])
+  })
+
+  test("verify:  a field it read that Spell can't say is left out, saying why, and the file still compiles", async () => {
+    const { ingest, spell, description } = await ingestOf()
+    await ingest.verify("Racks.api.spell")
+    const { fields } = description().collections.loads!
+    expect(fields.host!.leftOut).toBeUndefined()
+    expect(fields.load_1min!.leftOut).toMatch(/^Spell couldn't read its line/)
+    expect(spell()).toMatch(/^\tits "host" is text$/m)
+    expect(spell()).not.toMatch(/its "load \d/)
     const { files } = parseSpellProject([{ path: "/Racks.api.spell", contents: spell() }])
     expect(files[0]!.errors).toEqual([])
   })

@@ -430,6 +430,8 @@ export class PlaceIngest {
     const others = await files.otherSpellBeside(file)
     const lists = new Set(Object.values(description.collections).map(({ at }) => withoutEndSlash(at)))
     awayFromTypesBeside(description, others, lists)
+    // a field its reads made that Spell can't read is left out, as ingest's and update's are:  a server's `load_1min`
+    this.compileLeavingOut(description, file)
     description.about.fingerprint = await fingerprintOf(description)
     description.spell = spellTextOf(spellPartsFor(description)).trimEnd().split("\n")
     const before = partsInLanguageOf(file, writtenOf(spellPartsFor(old), old.spell))
