@@ -89,7 +89,8 @@ async function perfBudget(options: PerfOptions): Promise<number> {
   const budget = new PerfBudget(BUDGETS_FILE, KIT_ROOT)
   const builds = new PerfBuilds(join(APP_FOLDER, "app"))
   try {
-    const results = budget.check(builds, new PerfResults(KIT_ROOT).latest(), say)
+    const runs = new PerfResults(KIT_ROOT)
+    const results = budget.check(builds, (number) => runs.latestMeasuring(number), say)
     const { lines, isPassing } = PerfBudget.report(results)
     for (const line of lines) say(line)
     if (options.tighten) {

@@ -70,6 +70,16 @@ describe("PerfBudget", () => {
     expect(PerfBudget.report([PerfBudget.judged(entry(), 250)]).isPassing).toBe(false)
   })
 
+  test("report():  a browser number no run measured fails;  one from an older run is said to be stale (J28)", () => {
+    const unmeasured = { entry: entry(), skipped: "no spell perf run has measured x", isUnmeasured: true }
+    const failing = PerfBudget.report([{ ...unmeasured, isOverBudget: false, isOverCeiling: false }])
+    expect(failing.isPassing).toBe(false)
+    expect(failing.lines.some((line) => line.includes("NOT MEASURED"))).toBe(true)
+    const stale = PerfBudget.report([{ ...PerfBudget.judged(entry(), 90), staleSince: "2026-11-22T04:59:00.000Z" }])
+    expect(stale.isPassing).toBe(true)
+    expect(stale.lines[1]).toContain("stale:  measured 2026-11-22")
+  })
+
   test("tighten():  each ceiling lowered to the size plus 2%, never raised;  the file's comments kept", () => {
     const file = join(dir, "budgets.json5")
     writeFileSync(

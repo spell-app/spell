@@ -4,7 +4,7 @@ import { join, posix } from "node:path"
 
 import { json5Edited, readJSON5File } from "spell/util/node/json5"
 import { SRV } from "spell/server"
-import type { BudgetEntry, BudgetResult, PerfRecord } from "./perf.types"
+import type { BudgetEntry, BudgetResult } from "./perf.types"
 import { BUILT_AT, type PerfBuild, type PerfBuilds } from "./PerfBuilds"
 
 /**
@@ -40,10 +40,17 @@ export class PerfBudget {
 
   /**
    * Size every budget's bundle, and say how each stands.
-   * - `builds`:  where the app's builds are made (each one once);  `lastRun`:  where a `run` entry's number is from
+   * - `builds`:  where the app's builds are made (each one once);  `measured`:  a `run` entry's number, from the newest
+   *   run that measured it (`PerfResults.latestMeasuring()`)
+   *   - none ever did:  it FAILS, unsized (`isUnmeasured`):  a limit nobody measures mustn't pass (epic `solid-2-final` J28)
+   *   - an older run than the newest:  judged, and said to be stale (`staleSince`)
    * - before a `folder` is sized, its stale bundles are built (`spell bundle --stale`):  a worktree's site bundle
    */
-  check(builds: PerfBuilds, lastRun: PerfRecord | undefined, say: (line: string) => void): BudgetResult[] {
+  check(
+    builds: PerfBuilds,
+    measured: (number: string) => MeasuredNumber | undefined,
+    say: (line: string) => void
+  ): BudgetResult[] {
     const built = this.built
     const folderOf = (entry: BudgetEntry): string => {
       if (entry.folder) return join(this.kitRoot, entry.folder)
@@ -57,9 +64,10 @@ export class PerfBudget {
     if (this.entries.some((entry) => entry.folder)) this.buildStaleBundles(say)
     return this.entries.map((entry) => {
       if (entry.run) {
-        const value = lastRun?.numbers[entry.run]
-        if (value === undefined) return skipped(entry, `no spell perf run has measured ${entry.run} yet`)
-        return PerfBudget.judged(entry, value / 1024)
+        const number = measured(entry.run)
+        if (!number) return { ...skipped(entry, `no spell perf run has measured ${entry.run}`), isUnmeasured: true }
+        const result = PerfBudget.judged(entry, number.value / 1024)
+        return number.isNewest ? result : { ...result, staleSince: number.when }
       }
       const folder = folderOf(entry)
       if (!existsSync(folder)) return skipped(entry, `${folder} isn't there`)
@@ -82,19 +90,27 @@ export class PerfBudget {
         : result.isOverBudget
           ? "over budget"
           : result.skipped
-            ? `not sized:  ${result.skipped}`
+            ? `${result.isUnmeasured ? "NOT MEASURED" : "not sized"}:  ${result.skipped}`
             : "within budget"
+      const stale = result.staleSince
+        ? `  (stale:  measured ${result.staleSince.slice(0, 10)}, before the newest run)`
+        : ""
       lines.push(
         `${entry.name.slice(0, 47).padEnd(48)}${(size === undefined ? "-" : size.toFixed(0)).padStart(10)}` +
-          `${String(entry.budget).padStart(10)}${String(entry.ceiling).padStart(10)}  ${verdict}`
+          `${String(entry.budget).padStart(10)}${String(entry.ceiling).padStart(10)}  ${verdict}${stale}`
       )
     }
     const over = results.filter((result) => result.isOverBudget)
     const broken = results.filter((result) => result.isOverCeiling)
+    const unmeasured = results.filter((result) => result.isUnmeasured)
     lines.push("")
     if (over.length) lines.push(`Over budget:  ${over.map((result) => result.entry.id).join(", ")}`)
     if (broken.length) lines.push(`Past its ceiling (it grew):  ${broken.map((result) => result.entry.id).join(", ")}`)
-    return { lines, isPassing: !broken.length }
+    if (unmeasured.length)
+      lines.push(
+        `Not measured (spell perf run measures them):  ${unmeasured.map((result) => result.entry.id).join(", ")}`
+      )
+    return { lines, isPassing: !broken.length && !unmeasured.length }
   }
 
   /**
@@ -275,6 +291,9 @@ const CEILING_SHARE = 0.02
 
 /** A page's first loads:  `<script src>`, `<link rel="modulepreload" href>`, `<link rel="stylesheet" href>`. */
 const LOADS = /<(?:script[^>]*\ssrc|link[^>]*rel="(?:modulepreload|stylesheet)"[^>]*\shref)="([^"]+)"/g
+
+/** A `run` entry's number, as `PerfResults.latestMeasuring()` finds it. */
+type MeasuredNumber = { value: number; when: string; isNewest: boolean }
 
 /** The budgets' file:  its list. */
 type BudgetFile = { budgets: BudgetEntry[] }

@@ -282,6 +282,10 @@ export type BudgetResult = {
   size?: number
   /** why it couldn't be sized */
   skipped?: string
+  /** a browser-measured number no `spell perf run` has measured:  it fails the check (epic `solid-2-final` J28) */
+  isUnmeasured?: boolean
+  /** a browser-measured number from a run older than the newest:  when that run was */
+  staleSince?: string
   isOverBudget: boolean
   isOverCeiling: boolean
 }
