@@ -372,6 +372,7 @@ const APP_TEXTS_ES: AppTextPack = {
   shortcutsWhileInspecting: "Solo mientras eliges una parte de la app",
   shortcutFind: "Buscar y reemplazar",
   shortcutShowShortcuts: "Mostrar los atajos de teclado",
+  shortcutShowIcons: "Mostrar todos los iconos, con sus nombres",
   shortcutChangeThis: "Pedir un cambio en lo seleccionado",
   shortcutFormat: "Dar formato al documento",
   shortcutExpandSelection: "Ampliar la selección",

@@ -384,6 +384,7 @@ export const APP_TEXTS = {
   // its rows the menus don't name
   shortcutFind: "Find and Replace",
   shortcutShowShortcuts: "Show Keyboard Shortcuts",
+  shortcutShowIcons: "Show All Icons, With Their Names",
   shortcutChangeThis: "Ask for a Change to What's Selected",
   shortcutFormat: "Format Document",
   shortcutExpandSelection: "Expand Selection",
