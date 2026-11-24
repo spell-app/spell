@@ -30,8 +30,8 @@ const SERVERS = [
   {
     pid: 102,
     command: `node ${MAIN}/node_modules/vite-plus/bin/vp dev --port 3000 --strictPort`,
-    cwd: `${MAIN}/app/app`,
-    port: 3000
+    // no port of its own:  its child, Vite, listens
+    cwd: `${MAIN}/app/app`
   },
   { pid: 103, command: `node --import tsx ${MAIN}/epic/bin/epic hub serve --port 4848`, port: 4848 },
   {
@@ -42,13 +42,23 @@ const SERVERS = [
   {
     pid: 202,
     command: `node ${WORKTREE}/node_modules/vite-plus/bin/vp dev --port 52001`,
-    cwd: `${WORKTREE}/app/app`,
-    port: 52001
+    cwd: `${WORKTREE}/app/app`
   }
 ]
 
 /** The guard, main the one main checkout, the servers above. */
-const guard = new ServerGuard({ mains: [MAIN], servers: () => SERVERS })
+const guard = new ServerGuard({
+  mains: [MAIN],
+  servers: () => SERVERS,
+  // `vp dev` runs Vite as its child, which holds the port:  `lsof -ti:3000` names the child
+  listeners: (port) => (port === 3000 ? [1102] : port === 52001 ? [1202] : []),
+  parents: () =>
+    new Map([
+      [1102, 102],
+      [1202, 202],
+      [102, 1]
+    ])
+})
 
 describe("ServerGuard.check():  a table of real commands", () => {
   // [command, folder it runs in, refused (what to run instead) or let through]
@@ -65,6 +75,7 @@ describe("ServerGuard.check():  a table of real commands", () => {
     ["kill -9 101 202", WORKTREE, "epic servers restart page-server"],
     ["lsof -ti:3000 | xargs kill -9", WORKTREE, "epic servers restart editor"],
     ["kill $(lsof -ti tcp:4747)", WORKTREE, "epic servers restart page-server"],
+    ["kill 1102", WORKTREE, "epic servers restart editor"],
     ["pkill -f vite", WORKTREE, "epic servers restart editor"],
     ["(sleep 1; kill 103)", WORKTREE, "epic servers status"],
     // the editor started from main's app folder

@@ -1,8 +1,10 @@
+import { spawnSync } from "node:child_process"
 import { homedir } from "node:os"
 import { basename, isAbsolute, join, resolve } from "node:path"
 
 import { checkoutOf } from "spell/server/checkout"
 import { DataFile } from "spell/server/DataFile"
+import { Processes } from "spell/server/Processes"
 import { RealPath } from "spell/server/RealPath"
 import { kindOf, serverCheckoutOf, serverProcesses, type ServerProcess } from "spell/server/page/prune"
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
@@ -54,21 +56,36 @@ export class ServerGuard {
   /** the machine's web servers, asked only when a kill is there to judge;  a test hands its own */
   private readonly listServers: () => ServerProcess[]
 
+  /** the processes listening on a TCP port;  a test hands its own */
+  private readonly listeners: (port: number) => number[]
+
+  /** each process's parent, by pid;  a test hands its own */
+  private readonly listParents: () => Map<number, number>
+
   /** the servers, once asked */
   private servers?: ServerProcess[]
+
+  /** the parents, once asked */
+  private parents?: Map<number, number>
 
   constructor({
     mains,
     isHandsOff = false,
-    servers = serverProcesses
+    servers = serverProcesses,
+    listeners = listenersOn,
+    parents = () => Processes.parents()
   }: {
     mains: string[]
     isHandsOff?: boolean
     servers?: () => ServerProcess[]
+    listeners?: (port: number) => number[]
+    parents?: () => Map<number, number>
   }) {
     this.mains = mains.map((main) => resolve(main))
     this.isHandsOff = isHandsOff
     this.listServers = servers
+    this.listeners = listeners
+    this.listParents = parents
   }
 
   /**
@@ -449,12 +466,27 @@ export class ServerGuard {
     return this.allServers().filter((server) => this.isMainServer(server))
   }
 
-  /** the servers among `pids`, or listening on `ports` */
+  /**
+   * the servers among `pids`, or listening on `ports`, a server's child counted as it:  `vp dev` runs Vite as its child,
+   * which is what holds the port (`lsof -ti:3000` names the child)
+   */
   private serversWith({ pids = [], ports = [] }: { pids?: number[]; ports?: number[] }): ServerProcess[] {
     if (!pids.length && !ports.length) return []
-    return this.allServers().filter(
-      (server) => pids.includes(server.pid) || (server.port !== undefined && ports.includes(server.port))
-    )
+    const servers = this.allServers()
+    const byPid = new Map(servers.map((server) => [server.pid, server]))
+    const found = new Set<ServerProcess>()
+    for (const server of servers) if (server.port !== undefined && ports.includes(server.port)) found.add(server)
+    const asked = [...pids, ...ports.flatMap((port) => this.listeners(port))]
+    for (const pid of asked) {
+      let at: number | undefined = pid
+      for (let up = 0; at && up < ANCESTORS; up++) {
+        const server = byPid.get(at)
+        if (server) found.add(server)
+        this.parents ??= this.listParents()
+        at = this.parents.get(at)
+      }
+    }
+    return [...found]
   }
 
   /**
@@ -506,6 +538,18 @@ export type Piece = {
 
 /** What joins two pieces. */
 type Operator = "start" | "&&" | "||" | ";" | "|" | "&"
+
+/** How far up a process's parents a kill is followed to the server it belongs to. */
+const ANCESTORS = 6
+
+/** The processes listening on TCP `port` (`lsof`);  none when it can't tell.  NEVER throws. */
+function listenersOn(port: number): number[] {
+  const ran = spawnSync("lsof", ["-nP", "-t", `-iTCP:${port}`, "-sTCP:LISTEN"], { encoding: "utf8", timeout: 3000 })
+  return (ran.stdout ?? "")
+    .split(/\s+/)
+    .filter((pid) => /^\d+$/.test(pid))
+    .map(Number)
+}
 
 /** What runs another command:  skipped, so the command after it is judged. */
 const WRAPPERS = new Set(["sudo", "env", "nohup", "exec", "time", "command", "builtin", "nice", "caffeinate"])
