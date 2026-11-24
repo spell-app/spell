@@ -415,6 +415,8 @@ export const HELP_TABLE: Readonly<
       image: "In a modal: an image beside the description (a flex row).",
       scrolling: "In a modal: a capped height that scrolls.",
       align: "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).",
+      markdown:
+        "Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.",
       "vertical-align": "In an item or a list: `top`, `middle` or `bottom` against the image or icon beside it."
     }
   },

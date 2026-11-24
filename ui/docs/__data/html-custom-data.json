@@ -11760,6 +11760,13 @@
           ]
         },
         {
+          "name": "markdown",
+          "description": {
+            "kind": "markdown",
+            "value": "Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.  Without it, its content shows as written.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "vertical-align",
           "description": {
             "kind": "markdown",

@@ -309,9 +309,10 @@ an "about box" is a view
 		// The editor's version, "0.8.9":  the editor's own
 	to draw it
 		<modal heading="About Spell" size="tiny" closable visible>
-			<content>
-				<text paragraph>Write programs in plain words, and see them run as you type.</text>
-				<text paragraph>Spell draws with Spell UI, and runs in your browser.</text>
+			<content markdown>
+				Write programs in plain words, and see them run as you type.
+
+				Spell draws with Spell UI, and runs in your browser.
 			</content>
 			<actions>
 				<text color="grey">Version {its version}</text>

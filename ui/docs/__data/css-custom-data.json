@@ -12177,6 +12177,13 @@
       }
     },
     {
+      "name": "::part(markdown)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-content>`:  With `markdown`:  the `<ui-markdown>` its words are drawn in."
+      }
+    },
+    {
       "name": "::part(match)",
       "description": {
         "kind": "markdown",

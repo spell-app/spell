@@ -29681,6 +29681,14 @@
               "fieldName": "align"
             },
             {
+              "name": "markdown",
+              "description": "Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.  Without it, its content shows as written.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "markdown"
+            },
+            {
               "name": "vertical-align",
               "description": "In an item or a list:  `top`, `middle` or `bottom` against the image or icon beside it.",
               "type": {
@@ -29837,6 +29845,10 @@
             {
               "name": "content",
               "description": "The content box."
+            },
+            {
+              "name": "markdown",
+              "description": "With `markdown`:  the `<ui-markdown>` its words are drawn in."
             }
           ],
           "cssStates": [

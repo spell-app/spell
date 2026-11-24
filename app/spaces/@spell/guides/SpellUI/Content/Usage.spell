@@ -14,6 +14,9 @@
 			  or icon beside it in an item or a list.  To put content at the left or right, a `<ui-stack>` inside it
 			  places it.
 			- In a modal, `image` puts an image beside the description and `scrolling` caps the height and scrolls.
+			- `markdown` reads its own words as Markdown, drawn as `<ui-markdown>` draws them:  `**bold**`, `_italic_`,
+			  lists, links and code, a blank line between paragraphs.  The words stay as you wrote them, for an editor to
+			  change;  without `markdown` they show as written.
 			- In a `<ui-header>` it is the text column beside an icon or image.
 		</>
 	</>
