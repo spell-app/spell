@@ -4,7 +4,7 @@
 		<header>The &lt;epic-pills&gt; element: the docs home page's Active epics, a live pill per epic worked on this week.</>
 	</>
 
-	<text class="lede" paragraph><text code>&lt;epic-pills&gt;</> is the Active epics list on the docs home page's Epic Pages card. Each pill shows an epic's name, what waits on it, its phase and its agents. It asks the page server, so it stays up to date all night.</>
+	<text class="lede" paragraph><text code>&lt;epic-pills&gt;</> is the Active epics list on the docs home page's Epics card. Each pill shows an epic's name, what waits on it, its phase and its agents. It asks the page server, so it stays up to date all night.</>
 	<text class="meta" paragraph>Written for: anyone changing the docs home page, or this element.</>
 	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> T99), in the <link target="src-spell-epic-src-components-epic-pills" link="/epic/src/components/epic-pills/"><text title="epic/src/components/epic-pills/" code>epic-pills</></> folder of the epics package.</>
 	<text class="meta" paragraph>Its vocabulary (parts, texts): <link target="src-spell-epic-src-components-epic-pills-epicpills-en-ts" link="/epic/src/components/epic-pills/EpicPills.en.ts"><text title="epic/src/components/epic-pills/EpicPills.en.ts" code>EpicPills.en.ts</></>.</>
@@ -22,12 +22,12 @@
 
 	<section label="2. Markup">
 		<icon slot="icon" name="code"/>
-		<text paragraph><text code>epic pages index</> writes it into the home page's Epic Pages card, under the card's description. Nothing goes inside it: the pills come from the page server.</>
+		<text paragraph><text code>epic pages index</> writes it into the home page's Epics card, under the card's description. Nothing goes inside it: the pills come from the page server.</>
 	</>
 
 	<section label="3. Where it goes">
 		<icon slot="icon" name="compass"/>
-		<text paragraph>In the docs home page's Epic Pages card (<text code>pages/index.html</>), once. It works on any served page. It has no children and no attributes.</>
+		<text paragraph>In the docs home page's Epics card (<text code>pages/index.html</>), once. It works on any served page. It has no children and no attributes.</>
 
 		<section label="Parts" sticky="stack" collapsible dividing open="false">
 			<text paragraph>Pieces of what it draws, which a page's CSS can style from outside with <text code>::part(name)</>.</>

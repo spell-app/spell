@@ -18,8 +18,17 @@
  *   - its file:  `~/.spell-epic/listeners/<session pid>.pid`, the poller's process id
  *   - so the page server knows a poller runs for a session (`listenerOf()`), and asks it to start a review through
  *     the inbox instead of typing into the session (`ReviewStart`)
- * - It runs a LOOK, `epic session listen --json` (`InboxMonitor`), and prints the line the look gives (`notice`):
- *   the line wakes the session.  It prints nothing else, ever, so it costs no tokens while idle.
+ * - With the epic hub up, it HEARS THE HUB (epic `epic-engine` T163):  the hub's one listener (`InboxHub`) looks at
+ *   every epic's inbox, and leaves this session a note when the person sends (`WakeNotes`)
+ *   - the poller takes the note while the session is IDLE (its registry record's `status`), prints its line, and (as a
+ *     `hook`) exits 2, which wakes the session
+ *   - while the session is at work, it leaves the note to the `PostToolUse` hook (`hooks/inbox-note.mjs`), which puts
+ *     the line in front of the session at its next tool call;  whichever takes it first, the other finds none
+ *   - it watches the note and the session's record, a `stat` each, and runs no look of its own
+ *   - the session:  the hook's input names it (`sessionId`, its `session_id`);  `monitor` mode has none, and looks
+ * - Else (no hub, or no session id) it runs a LOOK, `epic session listen --json` (`InboxMonitor`), and prints the line
+ *   the look gives (`notice`):  the line wakes the session.  It prints nothing else, ever, so it costs no tokens while
+ *   idle.
  * - When it looks:
  *   - at start
  *   - `SETTLE_MS` after a file the last look named (`watch`) changes:  the epic's inbox, the inboxes of the pages it
@@ -51,6 +60,8 @@ import { fileURLToPath } from "node:url"
 import { ClaudeSession } from "spell/epic/config/ClaudeSession.mjs"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 
+import { WakeNotes } from "./WakeNotes.mjs"
+
 export class InboxPoller {
   /**
    * - `look`:  one look, its answer (`MonitorCheck`), or `undefined` when it failed;  default `epic session listen
@@ -60,9 +71,14 @@ export class InboxPoller {
    * - `listeners`:  the folder of the one-poller-per-session files (`claim()`);  default `listenersFolder()`
    * - `pollMs`, `settleMs`, `retryMs`:  tests make them short
    * - `env`:  the environment Claude Code started it in (`ClaudeSession.isUnattended()`);  default `process.env`
+   * - `sessionId`:  the Claude session it listens for, from the hook's input;  with it, the hub's notes are heard
+   * - `notes`:  the hub's notes (`WakeNotes`);  `recordOf`:  a session's registry record (`ClaudeSession.recordOf()`)
    */
   constructor({
     look = lookWithEpic,
+    sessionId = /** @type {string | undefined} */ (undefined),
+    notes = new WakeNotes(),
+    recordOf = (id) => ClaudeSession.recordOf(id),
     mode = "monitor",
     print = printTo(mode === "hook" ? process.stderr : process.stdout),
     listeners = listenersFolder(),
@@ -79,12 +95,17 @@ export class InboxPoller {
     this.settleMs = settleMs
     this.retryMs = retryMs
     this.env = env
+    this.sessionId = sessionId
+    this.notes = notes
+    this.recordOf = recordOf
     /** whether this batch of work was announced already */
     this.announced = false
     /** the session's process this poller claimed (`claim()`), once a look found it */
     this.claimed = undefined
     /** the batch the last line announced, this poller's or (from its listener file) the one before it */
     this.lastBatch = undefined
+    /** whether it hears the hub's notes now, rather than looking itself */
+    this.hearsHub = false
   }
 
   /**
@@ -95,13 +116,43 @@ export class InboxPoller {
   async run() {
     if (ClaudeSession.isUnattended(this.env)) return 0
     for (;;) {
-      const found = this.lookSafely()
+      const hearsHub = Boolean(this.sessionId) && this.notes.hubIsLive()
+      // the listener file says which:  the hub takes the inbox's place only from a poller that hears it
+      if (hearsHub !== this.hearsHub) {
+        this.hearsHub = hearsHub
+        this.writeClaim()
+      }
+      const found = hearsHub ? this.hearHub() : this.lookSafely()
       if (found?.ended) return 0
       this.claim(found?.pid)
-      if (this.announce(found) && this.mode === "hook") return 2
-      const next = await this.waitForChange(found)
+      const printed = hearsHub ? Boolean(found?.printed) : this.announce(found)
+      if (printed && this.mode === "hook") return 2
+      const next = await this.waitForChange(found, hearsHub ? 0 : this.settleMs)
       if (next === "ended" || next === "superseded") return 0
     }
+  }
+
+  /**
+   * One look at the hub's note for this session (epic `epic-engine` T163):  taken and its line printed while the
+   * session is idle;  left for the `PostToolUse` hook while it's at work.
+   * - answers as a look does (`watch`, `recheckMs`, `pid`, `ended`), plus `printed`
+   * - the session not in the registry yet:  looked at again soon
+   */
+  hearHub() {
+    const record = this.recordOf(this.sessionId)
+    if (!record) return { watch: [], waiting: false, recheckMs: UNFOUND_MS }
+    if (!isAlive(record.pid)) return { pid: record.pid, ended: true, watch: [], waiting: false, recheckMs: 0 }
+    const watch = [this.notes.fileOf(this.sessionId), record.file]
+    const found = { pid: record.pid, watch, waiting: false, recheckMs: HUB_RECHECK_MS }
+    if (record.status === "busy") return found
+    // claimed first:  the batch the poller before this one printed is known
+    this.claim(record.pid)
+    const note = this.notes.take(this.sessionId)
+    if (!note?.notice || note.batch === this.lastBatch) return found
+    this.print(note.notice)
+    this.lastBatch = note.batch
+    this.writeClaim()
+    return { ...found, printed: true }
   }
 
   /**
@@ -145,12 +196,15 @@ export class InboxPoller {
     return this.claimed ? join(this.listeners, `${this.claimed}.pid`) : ""
   }
 
-  /** Write the listener file:  this poller's process id, then the batch last announced.  NEVER throws. */
+  /**
+   * Write the listener file:  this poller's process id, then the batch last announced, then `hub` while it hears the
+   * hub's notes.  NEVER throws.
+   */
   writeClaim() {
     if (!this.claimed) return
     try {
       mkdirSync(this.listeners, { recursive: true, mode: 0o700 })
-      writeFileSync(this.claimFile, `${process.pid}\n${this.lastBatch ?? ""}\n`)
+      writeFileSync(this.claimFile, `${process.pid}\n${this.lastBatch ?? ""}\n${this.hearsHub ? HEARS_HUB : ""}\n`)
     } catch {
       // best effort:  see claim()
     }
@@ -167,7 +221,7 @@ export class InboxPoller {
    * Wait until it's time to look again:  a watched file changed (then `settleMs` more), or the look's `recheckMs`
    * passed;  `"ended"` once the session's process is gone, `"superseded"` once a newer poller claimed it.
    */
-  async waitForChange(found) {
+  async waitForChange(found, settleMs = this.settleMs) {
     const files = found?.watch ?? []
     const before = files.map(stampOf)
     const until = Date.now() + (found ? found.recheckMs : this.retryMs)
@@ -176,7 +230,7 @@ export class InboxPoller {
       if (found?.pid && !isAlive(found.pid)) return "ended"
       if (this.isSuperseded) return "superseded"
       if (files.some((file, at) => stampOf(file) !== before[at])) {
-        await sleep(this.settleMs)
+        await sleep(settleMs)
         return "changed"
       }
     }
@@ -198,6 +252,12 @@ export const POLL_MS = 2_000
 
 /** How long after a change before it looks, ms:  a `wait` running in the session takes the work first. */
 export const SETTLE_MS = 4_000
+
+/** How long, hearing the hub, before it looks again with nothing changed, ms:  the hub going away, say. */
+const HUB_RECHECK_MS = 60_000
+
+/** How long, hearing the hub, before it looks again for a session not in the registry yet, ms. */
+const UNFOUND_MS = 10_000
 
 /** How long after a failed look before it looks again, ms. */
 const RETRY_MS = 60_000
@@ -228,6 +288,20 @@ export function listenerOf(sessionPid, folder = listenersFolder()) {
 }
 
 /**
+ * Does the poller running for the Claude session whose process is `sessionPid` hear the epic hub's notes
+ * (`WakeNotes`), rather than look at the inbox itself?  Its listener file says so, and it's alive.
+ * - the hub takes the inbox's listener place only from such a poller:  one that looks itself would take it back
+ * - NEVER throws
+ */
+export function listenerHearsHub(sessionPid, folder = listenersFolder()) {
+  const { pid, hearsHub } = readClaim(join(folder, `${sessionPid}.pid`))
+  return Boolean(pid && hearsHub && isAlive(pid))
+}
+
+/** A listener file's third line while its poller hears the hub. */
+const HEARS_HUB = "hub"
+
+/**
  * One look:  `epic session listen --json`, in a process of its own, its last line parsed;  `undefined` when it failed.
  * - `--monitor`, this process:  the inbox's listener place is held while it runs (`ReviewInbox.liveListener()`)
  * - this node (`process.execPath`), not the `PATH`'s:  no version manager's shim in between
@@ -246,14 +320,21 @@ function printTo(stream) {
   return (line) => void stream.write(`${line}\n`)
 }
 
-/** A listener file's poller process id and last batch announced;  each `undefined` when it isn't there. */
+/**
+ * A listener file's poller process id, last batch announced and whether it hears the hub;  `undefined` (`false`) for
+ * what isn't there.
+ */
 function readClaim(file) {
   try {
-    const [first = "", batch = ""] = readFileSync(file, "utf8").split("\n")
+    const [first = "", batch = "", mode = ""] = readFileSync(file, "utf8").split("\n")
     const pid = Number(first.trim())
-    return { pid: Number.isInteger(pid) && pid > 0 ? pid : undefined, batch: batch.trim() || undefined }
+    return {
+      pid: Number.isInteger(pid) && pid > 0 ? pid : undefined,
+      batch: batch.trim() || undefined,
+      hearsHub: mode.trim() === HEARS_HUB
+    }
   } catch {
-    return { pid: undefined, batch: undefined }
+    return { pid: undefined, batch: undefined, hearsHub: false }
   }
 }
 

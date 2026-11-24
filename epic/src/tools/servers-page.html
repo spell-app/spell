@@ -9,6 +9,9 @@
       - Served by `serverRoutes` at `/_epic/servers/`, on the epic hub and every page server;  the same page each time.
       - Drawn by `servers-page.js` from `/api/servers`, the server keeper's, asked again every 10 seconds.
       - Nothing folds, nothing numbered:  it's one short page to glance at (T162).
+      - Cards three a row at most, the name the link;  worktrees newest worked first (I449).
+      - Each card:  its address under its name, its state on the right, its buttons as icons under the state;  the lists
+        as rows in columns, the GitHub line their quiet last row (I451).
     -->
     <title>Servers</title>
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
@@ -20,69 +23,140 @@
         color: inherit;
         text-decoration: none;
       }
-      .servers-head a:hover {
+      .servers-name a {
+        text-decoration: none;
+      }
+      .servers-head a:hover,
+      .servers-name a:hover {
         text-decoration: underline;
       }
       .spell-doc-main .servers-sub {
         margin: 24px 0 4px 0;
       }
-      .servers-list ui-item {
-        padding: 2px 0;
-      }
+      /* at most three a row:  never narrower than 200px, so the side bar and a phone take fewer */
       .servers-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-        gap: 12px;
-        --ui-card-margin-block: 0;
-      }
-      .servers-line {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        grid-template-columns: repeat(auto-fill, minmax(max(min(100%, 200px), calc((100% - 16px) / 3)), 1fr));
         gap: 8px;
-        min-height: 28px;
+        --ui-card-margin-block: 0;
+        --ui-card-content-padding: 8px 12px;
       }
-      .servers-line + .servers-line {
-        margin-top: 4px;
+      /* name and address on the left;  the state and, under it, its icons on the right, their left edges lined up */
+      .servers-card-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        justify-items: start;
+        gap: 4px 12px;
       }
+      .servers-name,
       .servers-address {
-        font-variant-numeric: tabular-nums;
+        max-width: 100%;
+        min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .servers-buttons {
-        display: flex;
-        gap: 4px;
-        flex-shrink: 0;
+      .servers-name {
+        line-height: 24px;
       }
-      .servers-stopped {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px 16px;
-        margin-top: 8px;
-        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
-      }
-      .servers-stopped-one {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .servers-list {
-        margin-top: 8px;
-      }
-      .servers-when,
-      .servers-quiet,
-      .servers-github {
-        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
-      }
-      .servers-when {
+      .servers-address {
+        font-family: var(--spell-mono);
+        font-size: 12px;
+        line-height: 24px;
+        color: var(--spell-muted);
         font-variant-numeric: tabular-nums;
       }
-      .servers-github {
-        margin: 16px 0 0 0;
+      /* the glyphs' left edge on the state's:  a button's glyph sits in from its box */
+      .servers-actions {
+        display: flex;
+        gap: 4px;
+        margin: 0 0 0 var(--servers-glyph-inset, -9px);
+        min-height: 24px;
+        --ui-button-basic-border-width: 0px;
       }
-      .servers-ahead strong {
+      /* in a row's last column:  the glyph's right edge on the column's */
+      .servers-row .servers-actions {
+        margin: 0 var(--servers-glyph-inset, -9px) 0 0;
+      }
+      .servers-why-not {
+        display: inline-flex;
+      }
+      /* wraps whole, under the name, when the line is short */
+      .servers-age {
+        display: inline-block;
+        white-space: nowrap;
+        margin-left: 12px;
+        font-size: 0.875rem;
+        font-weight: normal;
+        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
+      }
+      .servers-quiet {
+        color: var(--spell-muted);
+      }
+      /*
+       * the rows of a list:  ONE grid, its columns shared by every row (each item and row a subgrid), so a tag, a count
+       * or a time lines up from row to row whatever its width;  nothing wraps
+       */
+      .servers-rows {
+        margin: 12px 0 0 0;
+        --ui-list-margin: 0;
+        --ui-list-item-display: grid;
+        --ui-list-item-padding-block: 4px;
+      }
+      .servers-rows::part(list) {
+        display: grid;
+        grid-template-columns: 8px auto minmax(0, 1fr) auto auto;
+        column-gap: 12px;
+      }
+      .servers-rows-plain::part(list) {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+      .servers-rows > ui-item::part(item),
+      .servers-row {
+        grid-column: 1 / -1;
+        grid-template-columns: subgrid;
+      }
+      .servers-row {
+        display: grid;
+        align-items: center;
+        min-height: 24px;
+      }
+      .servers-dot {
+        display: flex;
+        justify-content: center;
+      }
+      .servers-tag {
+        display: flex;
+        white-space: nowrap;
+      }
+      .servers-words {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .servers-count,
+      .servers-when {
+        justify-self: end;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+        color: var(--spell-muted);
+      }
+      /* narrow (the side bar, a phone):  the commit counts go, into the time's tooltip, so the words keep room */
+      @media (max-width: 520px) {
+        .servers-rows:not(.servers-rows-plain)::part(list) {
+          grid-template-columns: 8px auto minmax(0, 1fr) auto;
+        }
+        .servers-rows:not(.servers-rows-plain) .servers-count {
+          display: none;
+        }
+      }
+      .servers-row-quiet .servers-words {
+        color: var(--spell-muted);
+      }
+      .servers-loud {
+        font-weight: 600;
         color: var(--ui-orange, light-dark(#c2410c, #fb923c));
       }
     </style>

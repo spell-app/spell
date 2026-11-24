@@ -90,6 +90,9 @@ a folder of the kit `spell`.
   - Except the worktree hook:  its failure is Claude Code's answer.
   - And the inbox poller, the `asyncRewake` `Stop` hook (`monitors/listen.mjs --hook`, epic `epic-engine` I144):
     it runs in the background and exits 2 with its `📬` line, which is how it wakes the session.
+  - The epic hub listens for every session (`InboxHub`, epic `epic-engine` T163):  the poller hears its note while the
+    session is idle, the `PostToolUse` hook ([inbox-note.mjs](hooks/inbox-note.mjs)) hands it over at the next tool
+    call while it works;  so no session runs `epic inbox wait` in the background.
 - Removing a worktree stops its page and vite servers FIRST (`CheckoutServers`, epic `epic-engine` I53):
   - `epic worktree remove <name>`, never a bare `git worktree remove`, in the skills and anything new
   - the worktree hook and `epic worktree move` do it themselves;  the session-start hook stops the rest, hourly
@@ -112,9 +115,16 @@ a folder of the kit `spell`.
     [servers-page.html](src/tools/servers-page.html)):  `GET /api/servers`, `/api/servers/dot`, `POST
     /api/servers/<start|stop|restart>`;  what just merged into main and what waits:  `ServerFacts`, no Claude call
     - the page (epic `epic-engine` T162):  nothing folds;  "main" and its servers as cards, what merged into main
-      lately, main's commits not on GitHub, then each epic's worktree (`⎇ <name>`, busy ones first):  its servers'
-      cards, what it hasn't merged
-    - VS Code's side bar shows it in a tab of its own, Servers, before Epic Docs ([README-vscode.md](README-vscode.md))
+      lately, main's commits not on GitHub, then each epic's worktree (`⎇ <name>`):  its servers' cards, what it
+      hasn't merged
+      - I449:  cards three a row at most, the name the link, page server, editor, hub, then a repo's own;  the
+        worktrees newest worked on first (its last commit, or a file changed since), "last commit 3 weeks ago" beside each
+      - I451:  each card's address under its name, its state on the right, and under the state its buttons as icons
+        (restart, stop;  start when stopped);  one a server can't take drawn disabled, its tooltip saying why (the hub
+        keeps the rest, so it never stops;  an editor goes with its page server);  what merged into main, and each
+        worktree's open work, as rows in columns, nothing wrapping, the GitHub line their quiet last row
+    - VS Code's side bar shows it in a tab of its own, Servers, between Epic Docs and Details
+      ([README-vscode.md](README-vscode.md))
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.

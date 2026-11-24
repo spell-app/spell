@@ -342,8 +342,12 @@ export class InboxCommands {
   /**
    * `inbox wait <name>`:  poll the inbox every second until there's work (`hasWork`),
    * TAKE it under the lock (`takeWork()`) and print it (`printWork()`).
-   * - none by `timeout` (default 3300 seconds, 55 minutes;  a time with its unit too, `8h`:  `duration()`):  exit code 2
-   * - how a `/epic review` session hears the page:  run in the background, its EXIT wakes the session
+   * - none by `timeout` (default 3300 seconds, 55 minutes;  a time with its unit too, `8h`:  `duration()`):  exit code
+   *   2, and NOTHING printed (`--json` still prints its empty answer):  an ending with nothing to say is never a turn's
+   *   worth of words (epic `epic-engine` T163)
+   * - run in the FOREGROUND:  a Claude session takes the work the `📬` line names with `--timeout 5`;  an agent
+   *   without the epic hub's wake (Codex) waits for the person's Send with it.  A Claude session never runs it in the
+   *   background any more:  the epic hub listens for it (`InboxHub`)
    * - the poll reads without the lock (atomic writes:  never half a file);  only taking locks
    * - LISTENS while it waits, when nobody else does (epic `epic-friend` P11):  any agent's way to hear a Send, so the
    *   page says "Your Codex is listening" (`setListening()` with this process's pid:  gone the moment it ends);
@@ -379,7 +383,6 @@ export class InboxCommands {
     if (found)
       return this.printWork(name, file, this.owner.read(file), found.work ?? NO_WORK, found.sent, Boolean(json))
     if (json) this.owner.print(JSON.stringify({ timeout: seconds, now: [], sent: null, guides: [] }))
-    else this.owner.print(`nothing to do:  no send and no request in ${seconds}s`)
     return 2
 
     /**
@@ -558,12 +561,11 @@ export class InboxCommands {
           "not), then `epic comments answer <page>#<M id> --file <answer.html> [--commit <sha>]`"
       )
     }
-    // keep listening while the work goes on (epic `epic-engine` I286;  Owen, 2026-11-15:  "keep a listener open so it
-    // responds to my marks quickly even if it is not going to act on them right away")
+    // heard at once even when busy (epic `epic-engine` I286);  nothing to arm:  the epic hub listens (T163)
     lines.push(
-      `FIRST, keep listening:  \`epic inbox wait ${name}\` again, in the background, before any of this;  ` +
-        `busy with other work:  apply the quick marks and put a Noted card on each heavy one now ` +
-        `(\`epic update ${name}#<id> noted "Queued:  after <what you're on>"\`), then go back to it`
+      `busy with other work:  apply the quick marks and put a Noted card on each heavy one now ` +
+        `(\`epic update ${name}#<id> noted "Queued:  after <what you're on>"\`), then go back to it;  ` +
+        `nothing to arm:  the epic hub keeps listening for this session`
     )
     this.owner.print(lines.join("\n"))
 

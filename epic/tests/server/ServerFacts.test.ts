@@ -1,10 +1,11 @@
 import { execFileSync } from "node:child_process"
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, utimesSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vite-plus/test"
 
 import { AT_LEAST, ServerFacts, openItemsOf } from "spell/epic/server/ServerFacts"
+import type { EpicWorktree } from "spell/epic/server/server.types"
 
 describe("ServerFacts:  what the Servers tab says beside the servers (epic `epic-engine` P82)", () => {
   let folder: string
@@ -64,5 +65,41 @@ describe("ServerFacts:  what the Servers tab says beside the servers (epic `epic
     )
     expect(openItemsOf(page)).toBe("2 issues, 1 todo open")
     expect(openItemsOf(join(folder, "missing.html"))).toBeUndefined()
+  })
+
+  it("lastWorked:  the branch's newest commit, or an uncommitted file changed since", () => {
+    git("init", "-q", "-b", "prefs")
+    git("commit", "-q", "--allow-empty", "-m", "start", "--date=2026-11-01T10:00:00Z")
+    const committed = ServerFacts.lastWorked(folder, "prefs")
+    expect(committed?.by).toBe("commit")
+
+    // a file older than the commit doesn't count;  a newer one does
+    const file = join(folder, "draft.txt")
+    writeFileSync(file, "x")
+    const old = new Date("2020-01-01T00:00:00Z")
+    utimesSync(file, old, old)
+    expect(ServerFacts.lastWorked(folder, "prefs")).toEqual(committed)
+    const later = new Date(Date.parse(committed!.at) + 60_000)
+    utimesSync(file, later, later)
+    expect(ServerFacts.lastWorked(folder, "prefs")).toEqual({ at: later.toISOString(), by: "change" })
+
+    expect(ServerFacts.lastWorked(join(folder, "gone"), "prefs")).toBeUndefined()
+  })
+
+  it("newestFirst:  the worktree worked on last comes first;  never worked out, last", () => {
+    const worktree = (name: string, at?: string): EpicWorktree => ({
+      epic: name,
+      worktree: name,
+      url: "",
+      ahead: 0,
+      ...(at && { worked: { at, by: "commit" as const } })
+    })
+    const sorted = ServerFacts.newestFirst([
+      worktree("prefs-and-undo", "2026-10-30T10:00:00.000Z"),
+      worktree("unknown"),
+      worktree("editor", "2026-11-23T09:00:00.000Z"),
+      worktree("atmosphere", "2026-11-22T09:00:00.000Z")
+    ])
+    expect(sorted.map((one) => one.worktree)).toEqual(["editor", "atmosphere", "prefs-and-undo", "unknown"])
   })
 })

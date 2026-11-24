@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs"
+import { readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
 
 import { SRV } from "spell/server"
@@ -7,7 +7,7 @@ import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { RunningEpics } from "spell/epic/list/RunningEpics"
 import { Turns } from "spell/epic/command/Turns"
 
-import type { EpicWorktree, MainMove, NotOnGitHub, Repo, ServerFactsAnswer } from "./server.types"
+import type { EpicWorktree, MainMove, NotOnGitHub, Repo, ServerFactsAnswer, WorktreeWorked } from "./server.types"
 
 /****************
  * ### `ServerFacts`
@@ -19,6 +19,8 @@ import type { EpicWorktree, MainMove, NotOnGitHub, Repo, ServerFactsAnswer } fro
  *   - NOT a branch that only merged `main` into itself, then fast-forwarded `main` to that merge:  it brought nothing
  * - `epicWorktrees`:  every running epic's worktree, busy or idle:  its commits `main` hasn't got, the phase under way,
  *   its open issues, todos and questions, its agents, a turn it holds (the test queue)
+ *   - newest first, by when it was last worked on (`lastWorked()`), so one with no commit in weeks sinks to the
+ *     bottom (epic `epic-engine` I449:  "prefs and undo hasn't had a checkin in weeks");  never worked out:  last
  * - `notOnGitHub`:  `main`'s commits `origin` hasn't got;  only the tooling home's session pushes
  * - EVERY repo the tab lists:  each one's own git and epic folder, its name on each once there are two or more
  * - static, NEVER throws:  what can't be read is left out
@@ -50,6 +52,7 @@ export class ServerFacts {
       }
     }
     mergedIntoMain.sort((one, other) => other.at.localeCompare(one.at))
+    ServerFacts.newestFirst(epicWorktrees)
     return { mergedIntoMain, epicWorktrees, notOnGitHub }
   }
 
@@ -99,10 +102,15 @@ export class ServerFacts {
    */
   static epicWorktrees(checkout: string, base: string, epics = epicsFolderOf(checkout)): EpicWorktree[] {
     const turns = Turns.held()
-    return new RunningEpics(checkout).list().map((epic) => {
+    const running = new RunningEpics(checkout)
+    const worktrees = running.list().map((epic) => {
       const ahead = Number(SRV.Git.out(["rev-list", "--count", `${base}..${epic.worktree}`], checkout) || 0)
       const turn = turns.find(({ holder }) => holder.label.includes(epic.worktree))
       const open = epics && openItemsOf(join(epics, epic.name, `${epic.name}.plan.html`))
+      // a worktree git no longer knows (an old layout's):  the epic's own last-worked day (its page, its log)
+      const worked =
+        ServerFacts.lastWorked(running.checkoutOf(epic.worktree), epic.worktree) ??
+        (epic.worked ? { at: new Date(epic.worked).toISOString(), by: "page" as const } : undefined)
       return {
         epic: epic.name,
         worktree: epic.worktree,
@@ -111,9 +119,40 @@ export class ServerFacts {
         ...(epic.active && { phase: epic.active }),
         ...(open && { open }),
         ...(epic.agents && { agents: epic.agents }),
-        ...(turn && { turn: turn.kind })
+        ...(turn && { turn: turn.kind }),
+        ...(worked && { worked })
       }
     })
+    return ServerFacts.newestFirst(worktrees)
+  }
+
+  /**
+   * when the worktree at `worktree` was last worked on:  its branch's newest commit, or a file it hasn't committed yet
+   * when that changed later (`by: "change"`);  neither reads:  `undefined`
+   * - the uncommitted files:  what `git status` lists (an untracked folder as one), at most `CHANGES_LOOK` of them
+   */
+  static lastWorked(worktree: string, branch: string): WorktreeWorked | undefined {
+    const committed = SRV.Git.out(["log", "-1", "--format=%cI", branch], worktree)
+    let at = committed ? Date.parse(committed) : Number.NaN
+    let by: WorktreeWorked["by"] = "commit"
+    const status = SRV.Git.out(["status", "--porcelain", "-z", "--no-renames"], worktree, { trim: false }) ?? ""
+    for (const entry of status.split("\0").filter(Boolean).slice(0, CHANGES_LOOK)) {
+      try {
+        const time = statSync(join(worktree, entry.slice(3))).mtimeMs
+        if (!(time <= at)) [at, by] = [time, "change"]
+      } catch {
+        // deleted:  nothing to time
+      }
+    }
+    return Number.isNaN(at) ? undefined : { at: new Date(at).toISOString(), by }
+  }
+
+  /** `worktrees`, sorted in place newest worked on first, those never worked out last, each half by name */
+  static newestFirst(worktrees: EpicWorktree[]): EpicWorktree[] {
+    return worktrees.sort(
+      (one, other) =>
+        (other.worked?.at ?? "").localeCompare(one.worked?.at ?? "") || one.worktree.localeCompare(other.worktree)
+    )
   }
 
   /** how many of `base`'s commits `origin` hasn't got;  no `origin`:  0 */
@@ -121,6 +160,9 @@ export class ServerFacts {
     return Number(SRV.Git.out(["rev-list", "--count", `origin/${base}..${base}`], checkout) || 0)
   }
 }
+
+/** The most uncommitted files `lastWorked()` looks at. */
+const CHANGES_LOOK = 200
 
 /** How far back the reflog is read. */
 const REFLOG_LOOK = 40

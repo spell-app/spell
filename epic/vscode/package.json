@@ -3,7 +3,7 @@
   "displayName": "Spell Epic",
   "version": "0.8.19",
   "private": true,
-  "description": "spell-epic's side bar:  the Review, Servers, Details and Epic Docs tabs, live from spell-epic's one page server per machine;  the window bridge Claude Code sessions reach their window through, and the handoff.",
+  "description": "spell-epic's side bar:  the Review, Epic Docs, Servers and Details tabs, live from spell-epic's one page server per machine;  the window bridge Claude Code sessions reach their window through, and the handoff.",
   "license": "MIT",
   "repository": "https://github.com/spell-app/spell-epic",
   "publisher": "spell-app",
@@ -469,14 +469,14 @@
           "icon": "media/spell.svg"
         },
         {
-          "id": "spell-epic-servers",
-          "title": "Servers",
-          "icon": "$(server)"
-        },
-        {
           "id": "spell-epic-docs",
           "title": "Epic Docs",
           "icon": "$(library)"
+        },
+        {
+          "id": "spell-epic-servers",
+          "title": "Servers",
+          "icon": "$(server)"
         },
         {
           "id": "spell-epic-details",
@@ -493,18 +493,18 @@
           "name": "Review"
         }
       ],
-      "spell-epic-servers": [
-        {
-          "type": "webview",
-          "id": "spellEpic.serversView",
-          "name": "Servers"
-        }
-      ],
       "spell-epic-docs": [
         {
           "type": "webview",
           "id": "spellEpic.docsView",
           "name": "Epic Docs"
+        }
+      ],
+      "spell-epic-servers": [
+        {
+          "type": "webview",
+          "id": "spellEpic.serversView",
+          "name": "Servers"
         }
       ],
       "spell-epic-details": [

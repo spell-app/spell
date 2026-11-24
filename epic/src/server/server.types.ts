@@ -325,6 +325,19 @@ export type EpicWorktree = {
   open?: string
   /** its repo, once the tab lists two or more */
   repo?: string
+  /** when it was last worked on (`ServerFacts.lastWorked()`):  the tab lists the worktrees newest first by it */
+  worked?: WorktreeWorked
+}
+
+/** When a worktree was last worked on, and by what (`ServerFacts.lastWorked()`). */
+export type WorktreeWorked = {
+  /** ISO time */
+  at: string
+  /**
+   * its branch's newest commit, or a file changed since and not committed;  `page`:  git couldn't say (a worktree
+   * git no longer knows), so the epic's own last-worked day (`RunningEpic.worked`)
+   */
+  by: "commit" | "change" | "page"
 }
 
 /** A base branch's commits GitHub (`origin`) hasn't got (`ServerFacts.notOnGitHub()`). */

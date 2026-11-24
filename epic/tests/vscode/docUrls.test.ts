@@ -303,14 +303,14 @@ test("title bars:  every tab's buttons, each a short plain tooltip, each answere
   )
 })
 
-test("four side-bar tabs:  Review (the Spell hat), Servers (a server, before Epic Docs:  T162), Epic Docs (books on a shelf), Details;  Owen, 2026-11-19", () => {
+test("four side-bar tabs:  Review (the Spell hat), Epic Docs (books on a shelf), Servers (a server, between Epic Docs and Details:  T162, I449), Details;  Owen, 2026-11-19", () => {
   const { contributes } = MANIFEST
   deepEqual(
     contributes.viewsContainers.secondarySidebar!.map((each) => [each.title, each.icon]),
     [
       ["Review", "media/spell.svg"],
-      ["Servers", "$(server)"],
       ["Epic Docs", "$(library)"],
+      ["Servers", "$(server)"],
       ["Details", "$(comment-discussion)"]
     ]
   )
@@ -318,7 +318,7 @@ test("four side-bar tabs:  Review (the Spell hat), Servers (a server, before Epi
   equal(existsSync(join(import.meta.dirname, "../../vscode/media/spell.svg")), true)
   deepEqual(
     Object.values(contributes.views).flatMap((views) => views.map((view) => view.id)),
-    ["spellEpic.reviewView", "spellEpic.serversView", "spellEpic.docsView", "spellEpic.detailsView"]
+    ["spellEpic.reviewView", "spellEpic.docsView", "spellEpic.serversView", "spellEpic.detailsView"]
   )
   // NOT the first Epic Docs tab's id, nor its setting (epic `epic-engine` Q73):  a new view, with its own place
   const everything = JSON.stringify(contributes)

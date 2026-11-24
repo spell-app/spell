@@ -497,8 +497,10 @@ function epicFacts(page) {
 ////////////////
 
 /**
- * The home's cards:  Guides, Sagas, Epics, the areas an epic user works in;  then Epic Documentation, the epic
+ * The home's cards:  Epics, Sagas, Guides, the areas an epic user works in;  then Epic Documentation, the epic
  * tooling's own READMEs.
+ * - in the top bar's order, its tabs' names (Owen, 2026-11-23, epic `epic-engine` I450:  "reorder to the same as the
+ *   epic top toolbar";  the Epics card was "Epic Pages")
  * - Epic Documentation (Owen, 2026-11-19), in place of Templates:  `/_epic/docs/README-epics.md`, on every page server
  *   (spell-epic's `docsRoutes.ts`);  in VS Code's side bar it opens the Epic Docs tab (`opensTab`)
  *   - the Templates list page is still written, but no longer on the home:  not ready for other people to edit
@@ -522,12 +524,16 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
   const counts = EPIC_GROUPS.map((name) => [name, groups.filter((group) => group === name).length])
   return [
     {
-      id: "guides",
-      title: "Guides",
-      icon: "book open",
-      href: "/guides/index.html",
-      count: plural(of("guides").length, "guide"),
-      description: `Design notes, references and how-tos:  how each part works, and why.`
+      id: "epics",
+      title: "Epics",
+      icon: "layer group",
+      href: "/epics/index.html",
+      count: counts
+        .filter(([, count]) => count)
+        .map(([name, count]) => `${count} ${GROUP_COUNTS[name]}`)
+        .join(" · "),
+      description: "Epic pages, one per /epic session:  phases, questions, decisions and the log of the work.",
+      pills: true
     },
     {
       id: "sagas",
@@ -539,16 +545,12 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       meta: existsSync(GOALS) ? `and ${plural(goalSets(), "parked saga set")}, read only` : undefined
     },
     {
-      id: "epics",
-      title: "Epic Pages",
-      icon: "layer group",
-      href: "/epics/index.html",
-      count: counts
-        .filter(([, count]) => count)
-        .map(([name, count]) => `${count} ${GROUP_COUNTS[name]}`)
-        .join(" · "),
-      description: "Epic pages, one per /epic session:  phases, questions, decisions and the log of the work.",
-      pills: true
+      id: "guides",
+      title: "Guides",
+      icon: "book open",
+      href: "/guides/index.html",
+      count: plural(of("guides").length, "guide"),
+      description: `Design notes, references and how-tos:  how each part works, and why.`
     },
     {
       id: "epic-docs",
@@ -612,7 +614,7 @@ ${cards.map(areaCard).join("\n")}
 
 /**
  * An area's card:  icon and linked title, its count, what's there.
- * - `pills`:  the Epic Pages card's Active epics, `<epic-pills>`, which draws itself from the page server, live (epic
+ * - `pills`:  the Epics card's Active epics, `<epic-pills>`, which draws itself from the page server, live (epic
  *   `epic-engine` T99;  J276 wrote a pill per epic here, as of the last `epic pages index`)
  * - `opensTab`:  in VS Code's side bar, the page opens in the tab it belongs to (`data-spell-open="tab"`, the kit's live
  *   client);  in a browser, a plain link
