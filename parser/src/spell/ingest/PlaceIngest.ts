@@ -277,6 +277,10 @@ export class PlaceIngest {
       await this.readWithAgent(description, look, { keepName: true })
       carryOver(description, old)
     }
+    // after the agent's names, as ingest's:  a new type, a list's or one inside a row, named apart from those beside it
+    const others = await files.otherSpellBeside(file)
+    const listsBefore = new Set(Object.values(old.collections).map(({ at }) => withoutEndSlash(at)))
+    awayFromTypesBeside(description, others, listsBefore)
     const shapeSame = (await fingerprintOf(description)) === old.about.fingerprint
     if (shapeSame) {
       description.canDo = old.canDo
@@ -292,7 +296,6 @@ export class PlaceIngest {
     const after = partsInLanguageOf(file, spellPartsFor(description))
     const written = (await files.read(file)) ?? ""
     const text = written
-    const others = await files.otherSpellBeside(file)
     const merge = mergedSpell(
       text,
       before,
@@ -423,12 +426,15 @@ export class PlaceIngest {
       if (seen) description.canDo.write = writeWordsFor(seen)
     }
     await this.keepPrivate(description, { address, collections: read, headers: {}, notes: [] }, file)
+    // the types its reads made, named apart from those beside it, as ingest's are;  its lists are the ones it had
+    const others = await files.otherSpellBeside(file)
+    const lists = new Set(Object.values(description.collections).map(({ at }) => withoutEndSlash(at)))
+    awayFromTypesBeside(description, others, lists)
     description.about.fingerprint = await fingerprintOf(description)
     description.spell = spellTextOf(spellPartsFor(description)).trimEnd().split("\n")
     const before = partsInLanguageOf(file, writtenOf(spellPartsFor(old), old.spell))
     const after = partsInLanguageOf(file, spellPartsFor(description))
     const text = (await files.read(file)) ?? ""
-    const others = await files.otherSpellBeside(file)
     const merge = mergedSpell(
       text,
       before,
@@ -1498,8 +1504,17 @@ const DECLARED_TYPE = /^(?:a|an|un|una) (?:"([^"\n]+)"|([\p{L}\d ]+?)) (?:is a t
  * SIDE EFFECT:  a type another Spell file beside it already declares goes by the place's name too,
  * as one project holds every type once (epic `data` P30):
  * JSONPlaceholder's `user`, beside GitHub's, is a `jsonplaceholder user`.
+ * - Every type it writes:  each list's own, and each type inside a row, whoever made it (a look, the agent, a verify's
+ *   read):  a lab's verify reading its designs' `inspection` beside a shop's `inspection` writes a `lab inspection`.
+ * - The one step ingest, `spell place update` and `spell place verify` each run, last, once the types are named.
+ * - `listsKept`:  the addresses of lists already written, whose own types stay as they are (a person's, or ones
+ *   that clash already, a person's to settle):  only a new list's is named apart.
  */
-function awayFromTypesBeside(description: PlaceDescription, others: readonly string[]): void {
+function awayFromTypesBeside(
+  description: PlaceDescription,
+  others: readonly string[],
+  listsKept: ReadonlySet<string> = new Set()
+): void {
   // each type declared beside it, by the place whose file declares it:  a file of a person's own, by none
   const declared = new Map(
     others.flatMap((text) => {
@@ -1508,21 +1523,36 @@ function awayFromTypesBeside(description: PlaceDescription, others: readonly str
     })
   )
   const { name } = description.about
+  // the other half:  the one already there keeps the bare name till a person renames it, which every update keeps
+  const noteApart = (words: string, type: string) => {
+    const other = declared.get(words)
+    if (other === undefined || words.startsWith(`${other.toLowerCase()} `)) return
+    const note = `"${words}" is ${other}'s too, so this one is a "${type}":  to tell them apart both ways, rename ${other}'s in its own file, a "${other} ${words}" (spell place update keeps a name you give).`
+    if (!description.notes.includes(note)) description.notes.push(note)
+  }
   let isRenamed = false
   for (const collection of Object.values(description.collections)) {
     const words = collection.type.toLowerCase()
-    if (collection.leftOut || !declared.has(words)) continue
-    const other = declared.get(words)
+    if (collection.leftOut || listsKept.has(withoutEndSlash(collection.at)) || !declared.has(words)) continue
     collection.type = `${name} ${collection.type}`
     isRenamed = true
-    // the other half:  the one already there keeps the bare name till a person renames it, which every update keeps
-    if (other !== undefined && !words.startsWith(`${other.toLowerCase()} `)) {
-      description.notes.push(
-        `"${words}" is ${other}'s too, so this one is a "${collection.type}":  to tell them apart both ways, rename ${other}'s in its own file, a "${other} ${words}" (spell place update keeps a name you give).`
-      )
-    }
+    noteApart(words, collection.type)
   }
   if (isRenamed) renameCollections(description)
+  // each type inside a row, by the name the writer gives it:  one renamed may free a name inside it, so again
+  for (let isInsideRenamed = true; isInsideRenamed; ) {
+    isInsideRenamed = false
+    for (const { header, isInside, heldBy = [] } of spellPartsFor(description).types) {
+      const words = /"([^"]+)"/.exec(header)?.[1]?.toLowerCase()
+      if (!isInside || words === undefined || !declared.has(words) || !heldBy.length) continue
+      const type = `${name} ${words}`
+      // a name the writer can't take (too many words) stays:  nothing to name it, and the merge's check says so
+      if (heldBy.every(({ field }) => field.insideType === type)) continue
+      for (const { field } of heldBy) field.insideType = type
+      isInsideRenamed = true
+      noteApart(words, type)
+    }
+  }
 }
 
 /**
