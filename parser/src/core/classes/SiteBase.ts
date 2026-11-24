@@ -1001,6 +1001,9 @@ type LayoutSlot = "drawDrawer" | "drawAppMenu" | "drawPageMenu" | "drawLeftSideb
 /**
  * How a site fills the box Run gives it:  its page layout the whole height of that box, the layouts not shown hidden.
  * - The regions themselves are `<ui-page-layout>`'s:  a slot's wrapper is only a way into it.
+ * - A kept page's wrapper (`KeptPages`, `display: contents`) is what `<ui-page-layout page-height="fluid">`'s
+ *   `::slotted(*)` column reaches, and a wrapper with no box takes nothing from it:  the same column is given to the
+ *   page inside, so a `height="fluid"` grid on it fills the window again, as before pages were kept.
  */
 const SITE_CSS = `
 /* the whole height of the box its element is drawn in (Run's):  that element, whatever its tag, a column */
@@ -1009,6 +1012,8 @@ const SITE_CSS = `
 .spell-site, .spell-site-alone { flex: 1 0 auto }
 .spell-site[hidden], .spell-site-alone[hidden] { display: none }
 .spell-site-slot, .spell-site-page { display: contents }
+/* a kept page's wrapper is no box:  a fluid layout's column for its page (\`::slotted(*)\`) reaches the page */
+:state(page-fluid) > .spell-site-page > * { flex: 1 1 0; min-block-size: 0; display: flex; flex-direction: column }
 /* a page whose whole drawing waits:  its spinner in the middle of the page's room (core's \`pageWaitingLoader()\`) */
 .spell-page-waiting { display: flex; align-items: center; justify-content: center; min-height: 50vh; height: 100% }
 `
