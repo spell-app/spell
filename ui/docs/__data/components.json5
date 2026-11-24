@@ -5370,6 +5370,11 @@
           "description": "Dimmed under a spinner, announced as busy."
         },
         {
+          "name": "selected",
+          "kind": "keyOnly",
+          "description": "The one chosen among its neighbours:  its border the primary colour and its fill a touch of it, its text as the others';  `--ui-card-selected-border-color` and `--ui-card-selected-background` change them."
+        },
+        {
           "name": "link",
           "kind": "string",
           "description": "Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance=\"link\"`.  Its old name was `href`."
@@ -23144,7 +23149,7 @@
           "name": "ui-navigating",
           "detail": "{ path: (string | number)[], key: string | number | undefined, value: unknown, part: \"key\" | \"value\" }",
           "cancelable": true,
-          "description": "A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`."
+          "description": "A key or a value was clicked (not a double-click, nor the end of a text selection).  An object's or array's key opens and closes it instead, and sends none.  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an empty object or array too);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`."
         },
         {
           "name": "ui-copied",
@@ -23183,7 +23188,7 @@
         },
         {
           "name": "preview",
-          "description": "A closed object or array, on one line."
+          "description": "A closed object or array, on one line;  a click opens it, as the toggle does.  A click on a member shown in it (a key, a nested `{ ... }`, a value) opens every level down to that member, and shows it."
         },
         {
           "name": "editor",
@@ -56279,7 +56284,7 @@
           "name": "items",
           "kind": "json",
           "reflect": false,
-          "description": "`appearance=\"columns\"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn."
+          "description": "`appearance=\"columns\"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, kind?, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.  `kind: \"header\"` makes an item the label line over the rows after it, up to the next header (its group), as `<ui-item kind=\"header\">` is in a menu:  never picked, selected, counted or in `path`, skipped by the arrow keys, and kept by `filter` only while a row under it shows.  It draws its `label`, `icon` and `count` (none:  how many rows its group holds), and sticks at the column's top or bottom as it scrolls (`groups`)."
         },
         {
           "name": "path",
@@ -56312,6 +56317,15 @@
           "name": "show",
           "kind": "string",
           "description": "`appearance=\"columns\"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows."
+        },
+        {
+          "name": "groups",
+          "kind": "valueOnly",
+          "values": [
+            "open",
+            "accordion"
+          ],
+          "description": "`appearance=\"columns\"` with headers in `items` (`kind: \"header\"`):  how a column shows the groups under them.  `open`, the default:  every group.  `accordion`:  one group a column, the first, or the one its pick is in;  a click on a header (Enter, Space) opens its group and closes the other.  Either way, the headers stick as the column scrolls:  at its top under the ones above, at its bottom over the ones below."
         },
         {
           "name": "sticky-path",
@@ -56583,6 +56597,10 @@
         {
           "name": "column-row",
           "description": "`appearance=\"columns\"` with `items`:  one row of a column."
+        },
+        {
+          "name": "column-header",
+          "description": "`appearance=\"columns\"` with `items`:  a header, the label line over its group of rows (`kind: \"header\"`);  `groups=\"accordion\"`:  the button that opens its group."
         },
         {
           "name": "tools",
@@ -63505,6 +63523,16 @@
           "name": "--ui-cards-stackable-spacing",
           "default": "1em",
           "type": "length"
+        },
+        {
+          "name": "--ui-card-selected-border-color",
+          "default": "var(--ui-primary)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-card-selected-background",
+          "default": "color-mix(in oklch, var(--ui-primary) 5%, var(--ui-card-background))",
+          "type": "color"
         }
       ]
     },
@@ -68833,6 +68861,11 @@
           "name": "--ui-page-layout-sidebar-width",
           "default": "16em",
           "type": "length"
+        },
+        {
+          "name": "--ui-page-layout-drawer-width",
+          "default": "16em",
+          "type": "length"
         }
       ]
     },
@@ -72370,6 +72403,16 @@
           "name": "--ui-tree-path-background",
           "default": "var(--ui-background)",
           "type": "color"
+        },
+        {
+          "name": "--ui-tree-nav-font-size",
+          "default": "0.875em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-tree-nav-row-height",
+          "default": "round(2.25em, var(--ui-grid, 4px))",
+          "type": "length"
         },
         {
           "name": "--ui-tree-nav-border-color",
