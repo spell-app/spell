@@ -346,6 +346,11 @@
     inline-size: var(--_input-icon-width, var(--_ui-input-icon-width));
     margin-inline-start: calc(-1 * var(--_input-icon-width, var(--_ui-input-icon-width)));
   }
+  /* the browser's own clear button of a `type="search"` field:  ours replaces it (`clearable`) */
+  .ui.input > input::-webkit-search-cancel-button {
+    display: none;
+    appearance: none;
+  }
   /* a trailing icon gives the clear button its column while it shows */
   .ui.input:not(.left-icon) > .clear ~ .icon {
     visibility: hidden;

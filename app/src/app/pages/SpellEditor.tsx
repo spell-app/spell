@@ -476,6 +476,7 @@ export function ProgramPanel(props: { onClose: () => void }) {
             search={
               <ui-input
                 class="ReferenceSearch"
+                type="search"
                 size="small"
                 icon="search"
                 aria-label={appTexts.text("referenceSearch")}
