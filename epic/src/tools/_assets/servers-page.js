@@ -44,6 +44,9 @@ const ACTIONS = {
   stop: { words: "Stop", tip: "Stop it.  It stays off until you press Start." }
 }
 
+/** How each kind of last work is said (`WorktreeWorked.by`):  `last commit 3 weeks ago` */
+const WORKED_WORDS = { commit: "last commit", change: "last change", page: "last worked on" }
+
 /** The glyph a worktree's name wears, as every window title and page does. */
 const WORKTREE = "⎇"
 
@@ -305,7 +308,7 @@ export function inCardOrder(servers) {
 /** when the worktree was last worked on, a few words:  `last commit 3 weeks ago`;  not known:  `undefined` */
 function workedWords(epic) {
   if (!epic?.worked) return undefined
-  return `${epic.worked.by === "change" ? "last change" : "last commit"} ${agoLong(epic.worked.at)}`
+  return `${WORKED_WORDS[epic.worked.by] ?? WORKED_WORDS.commit} ${agoLong(epic.worked.at)}`
 }
 
 /** the worktree's stopped servers, one line:  `page server stopped  [Start]` */

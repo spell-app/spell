@@ -333,8 +333,11 @@ export type EpicWorktree = {
 export type WorktreeWorked = {
   /** ISO time */
   at: string
-  /** its branch's newest commit, or a file changed since and not committed */
-  by: "commit" | "change"
+  /**
+   * its branch's newest commit, or a file changed since and not committed;  `page`:  git couldn't say (a worktree
+   * git no longer knows), so the epic's own last-worked day (`RunningEpic.worked`)
+   */
+  by: "commit" | "change" | "page"
 }
 
 /** A base branch's commits GitHub (`origin`) hasn't got (`ServerFacts.notOnGitHub()`). */

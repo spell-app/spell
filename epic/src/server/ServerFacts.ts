@@ -107,7 +107,10 @@ export class ServerFacts {
       const ahead = Number(SRV.Git.out(["rev-list", "--count", `${base}..${epic.worktree}`], checkout) || 0)
       const turn = turns.find(({ holder }) => holder.label.includes(epic.worktree))
       const open = epics && openItemsOf(join(epics, epic.name, `${epic.name}.plan.html`))
-      const worked = ServerFacts.lastWorked(running.checkoutOf(epic.worktree), epic.worktree)
+      // a worktree git no longer knows (an old layout's):  the epic's own last-worked day (its page, its log)
+      const worked =
+        ServerFacts.lastWorked(running.checkoutOf(epic.worktree), epic.worktree) ??
+        (epic.worked ? { at: new Date(epic.worked).toISOString(), by: "page" as const } : undefined)
       return {
         epic: epic.name,
         worktree: epic.worktree,
