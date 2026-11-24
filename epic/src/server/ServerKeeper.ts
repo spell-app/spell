@@ -14,10 +14,12 @@ import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { HttpsSwitch, afterAnswer } from "./HttpsSwitch"
 import { ServerFacts } from "./ServerFacts"
 import {
+  EDITOR_SPACES_API,
   HTTPS_API,
   RESTART_ALL_API,
   HANDS_OFF_API,
   HOLD_FILE,
+  type EditorSpaces,
   type HandsOff,
   type HttpsTurn,
   type KeptServer,
@@ -459,6 +461,8 @@ export class ServerKeeper {
    * - `POST /api/servers/hands-off`, `{ on }`:  hands off turned on or off (`setHandsOff()`)
    * - `POST /api/servers/restart-all`:  `{ state: "restarting" }`, then every main page server restarted, its editor
    *   with it (`restartMainPageServers()`), just after the answer:  the call came through one of them
+   * - `POST /api/servers/editor-spaces`, `{ repo, worktree? }`:  that checkout's `spaces/` served by the kit's page
+   *   server (`showInEditor()`), then every main page server restarted, just after the answer
    * - `POST /api/servers/<start|stop|restart>`, `{ checkout, server }`:  `act()`
    * - every POST needs the hub's write token (`guard`)
    */
@@ -477,11 +481,72 @@ export class ServerKeeper {
       await this.setHandsOff(on)
       reply.noStore().json({ handsOff: this.isHandsOff })
     })
+    router.post(EDITOR_SPACES_API, guard.writeCheck, SRV.parseBodies(), (request, reply) => {
+      const { repo, worktree } = (request.body ?? {}) as { repo?: string; worktree?: string }
+      if (!repo) throw new SRV.HttpError(400, "which repo?  { repo, worktree }")
+      const orgs = this.showInEditor(repo, worktree)
+      afterAnswer(() => this.restartMainPageServers({ withHeld: true }))
+      reply.noStore().json({ state: "restarting", orgs })
+    })
     router.post(RESTART_ALL_API, guard.writeCheck, (_request, reply) => {
       afterAnswer(() => this.restartMainPageServers({ withHeld: true }))
       reply.noStore().json({ state: "restarting" })
     })
     router.post(`${SRV.KEEPER_API}/:action`, guard.writeCheck, SRV.parseBodies(), this.onAct)
+  }
+
+  ////////////////
+  // ## Spaces in the editor
+  ////////////////
+
+  /**
+   * Each repo whose `spaces/` the kit's page server can serve (`EditorSpaces`), and which checkout it serves now, from
+   * the more spaces file (`SRV.moreSpacesInFile()`):  none without a kit among the repos.
+   * - a repo's `spaces/` holding an org's folder (`@acme/`), not Spell's own (`@spell`);  never a kit's
+   * - `file`:  the more spaces file;  tests hand their own
+   */
+  editorSpaces(file: string = SRV.MORE_SPACES_FILE): EditorSpaces[] {
+    if (!this.repos.some((repo) => isKit(repo.checkout))) return []
+    const served = SRV.servedSpaces(SRV.moreSpacesInFile(file))
+    return this.repos.flatMap((repo): EditorSpaces[] => {
+      if (isKit(repo.checkout)) return []
+      const orgs = SRV.orgsIn(join(repo.checkout, SPACES)).filter((org) => org !== "spell")
+      if (!orgs.length) return []
+      const isServed = (folder: string) =>
+        served.some(({ dir, orgs: its }) => its.some((org) => orgs.includes(org)) && SRV.RealPath.same(dir, folder))
+      const worktrees = worktreesOf(repo.checkout)
+        .filter(([, folder]) => existsSync(join(folder, SPACES)))
+        .sort(([one], [other]) => one.localeCompare(other))
+      return [
+        {
+          repo: repo.name,
+          orgs,
+          checkouts: [
+            { served: isServed(join(repo.checkout, SPACES)) },
+            ...worktrees.map(([worktree, folder]) => ({ worktree, served: isServed(join(folder, SPACES)) }))
+          ]
+        }
+      ]
+    })
+  }
+
+  /**
+   * Serve `repo`'s `spaces/` from its main checkout, or from `worktree`'s (`SRV.switchSpaces()`):  the orgs it serves.
+   * - by name, never by a folder the page sends:  only a repo the hub serves, and one of its own worktrees
+   * - the caller restarts the page server, which reads the file as it starts
+   * - throws `SRV.HttpError` 404 for a repo or worktree it doesn't know, 400 for one with no `spaces/`
+   */
+  showInEditor(repo: string, worktree?: string, file: string = SRV.MORE_SPACES_FILE): string[] {
+    const known = this.repos.find((each) => each.name === repo && !isKit(each.checkout))
+    if (!known) throw new SRV.HttpError(404, `the hub serves no project named ${repo}`)
+    const checkout = worktree ? worktreesOf(known.checkout).find(([name]) => name === worktree)?.[1] : known.checkout
+    if (!checkout) throw new SRV.HttpError(404, `${repo} has no worktree named ${worktree}`)
+    try {
+      return SRV.switchSpaces(join(checkout, SPACES), { file })
+    } catch (error) {
+      if (error instanceof TypeError) throw new SRV.HttpError(400, error.message)
+      throw error
+    }
   }
 
   /** `POST /api/servers/https` */
@@ -499,7 +564,8 @@ export class ServerKeeper {
       lookSeconds: LOOK_SECONDS,
       ...ServerFacts.of(this.repos),
       https: this.https.status,
-      ...(this.isHandsOff && { handsOff: true })
+      ...(this.isHandsOff && { handsOff: true }),
+      editorSpaces: this.editorSpaces()
     }
     reply.noStore().json(answer)
   }
@@ -698,6 +764,9 @@ const STOP_WAIT_MS = 10_000
 function idOf(repo: Repo, name: string, worktree?: string): string {
   return [repo.name, worktree, name].filter(Boolean).join("/")
 }
+
+/** a project's spaces folder, in its checkout:  `spaces/` */
+const SPACES = "spaces"
 
 /** whether `checkout` is a Spell kit, which runs a page server of its own */
 function isKit(checkout: string): boolean {

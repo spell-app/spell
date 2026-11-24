@@ -301,6 +301,25 @@ export default function appCommands(spell: Command): void {
       )
     )
 
+  // Which spaces folders the kit's page server serves, by org:  a project's main, or one of its worktrees'
+  const spaces = spell
+    .command("spaces")
+    .description("which spaces folders the page server serves, by org;  `use` switches one")
+    .action(() =>
+      CLI.runCommand(async () => (await import("spell/app/cli/commands/spacesCommand")).spacesCommand())
+    )
+  spaces
+    .command("use")
+    .description("serve a spaces folder (a project's main, or a worktree's), then restart the page server")
+    .argument("<folder>", "a checkout's spaces folder, e.g. ~/work/acme-app.worktrees/fix/spaces")
+    .option("--org <org>", "only this org of it, e.g. acme:  default every org it holds")
+    .option("--no-restart", "only write the setting:  say how to restart the page server")
+    .action((folder: string, _options, command: Command) =>
+      CLI.runCommand(async () =>
+        (await import("spell/app/cli/commands/spacesCommand")).useCommand(folder, command.optsWithGlobals())
+      )
+    )
+
   // Spell's hosting:  its own noun, apart from the app (Owen, 2026-11-06, epic `atmosphere` P14)
   const space = spell
     .command("space")

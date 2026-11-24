@@ -18,6 +18,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `spell content check [--bless]`
       - `spell content compare [--against <ref>] [--target <name>]`
       - `spell content update [--json] [--done]`
+    - which spaces folders the page server serves, by org ([spacesCommand.ts](commands/spacesCommand.ts)):
+      `spell spaces`, `spell spaces use <folder> [--org] [--no-restart]` (the kit's `SRV.switchSpaces()`, then the server
+      keeper restarts the page server)
     - taking things down (epic `atmosphere` P6):  `spell space takedown hide | delete | restore | list`
     - keeping spaces safe (P7, [spaceCommand.ts](commands/spaceCommand.ts)):
       `spell space backup now | list | status | restore`, `spell space export`, `spell space delete`;

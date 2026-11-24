@@ -1,11 +1,17 @@
-import { existsSync, readdirSync, readFileSync } from "fs"
-import { homedir } from "os"
 import { basename, delimiter, dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
-import JSON5 from "json5"
 
 // The server's checkout finder, node built-ins only:  the main checkout from any worktree.
 import { checkoutOf } from "spell/server/checkout"
+// the more spaces file's reader, node built-ins and json5 only
+import {
+  MORE_SPACES_FILE,
+  moreSpacesInFile,
+  servedSpaces,
+  type MoreSpaces
+} from "spell/server/MoreSpaces"
+
+export type { MoreSpaces }
 
 /**
  * Where this checkout is, and where spell.spaces is:  the part of `environment` that loads anywhere.
@@ -58,81 +64,34 @@ export const defaultSpellSpacesDir = resolve(dirname(mainRepoDir), "spell.spaces
 ////////////////
 
 /**
- * More SPACES FOLDERS this machine's page server serves beside spell.spaces, each holding orgs of its own:
- * a project's `spaces/`, whose `@acme/` the kit's server then opens at `/run/@acme/tools/dashboard`, with no second
- * page server (`--spaces`).
- * - Set in `~/.spell/more-spaces.json5` (`MORE_SPACES_FILE`), this machine's own, never committed:
- *   `{ spaces: ["~/work/acme-app/spaces"] }`
- * - `SPELL_MORE_SPACES` overrides it:  folders split by the path delimiter (`:`), empty for none.  Tests set it, and
- *   never read the person's file (`VITEST`).
- * - The file is read only where the spaces are the kit's own spell.spaces:  a page server given `--spaces`
+ * The more spaces folders this program serves, from `env` and the kit's file (`spell/server/MoreSpaces`:
+ * `~/.spell/more-spaces.json5`, which `spell spaces use <folder>` writes):  each folder, with the orgs served from it.
+ * - `SPELL_MORE_SPACES` overrides the file:  folders split by the path delimiter (`:`), empty for none.  Tests set it,
+ *   and never read the person's file (`VITEST`).
+ * - `kitOwn`:  are the spaces the kit's own spell.spaces?  Else the file isn't read:  a page server given `--spaces`
  *   (`SPELL_SPACES_DIR`, `spell server local`) serves exactly that folder, as before.
- * - A folder that isn't there is left out, and said once on the console.
- */
-export const MORE_SPACES_FILE = join(homedir(), ".spell", "more-spaces.json5")
-
-/** One more spaces folder:  where it is, and the orgs it holds (`acme` for its `@acme/`). */
-export type MoreSpaces = { dir: string; orgs: string[] }
-
-/**
- * The more spaces folders, from `env` and the config `file` (see `MORE_SPACES_FILE`).
- * - `kitOwn`:  are the spaces the kit's own?  Else the file isn't read (`SPELL_MORE_SPACES` still counts).
- * - Each folder's orgs:  its `@org/` folders, never `@spell` (Spell's own org stays in spell.spaces);  an org in two
- *   folders is the first one's.
- * - NEVER throws:  a file that won't read is none, said on the console.
+ * - NEVER throws.
  */
 export function moreSpacesFrom({
   env = process.env,
   file = MORE_SPACES_FILE,
   kitOwn = !env.SPELL_SPACES_DIR || resolve(env.SPELL_SPACES_DIR) === defaultSpellSpacesDir
 }: { env?: NodeJS.ProcessEnv; file?: string; kitOwn?: boolean } = {}): MoreSpaces[] {
-  const named =
+  const entries =
     env.SPELL_MORE_SPACES !== undefined
       ? env.SPELL_MORE_SPACES.split(delimiter).filter(Boolean)
       : env.VITEST || !kitOwn
         ? []
-        : foldersInFile(file)
-  const taken = new Set(["spell"])
-  const found: MoreSpaces[] = []
-  for (const name of named) {
-    const dir = resolve(name.replace(/^~(?=$|\/)/, homedir()))
-    if (!existsSync(dir)) {
-      console.warn(`More spaces:  ${dir} isn't there, so it's left out (${MORE_SPACES_FILE})`)
-      continue
-    }
-    const orgs = orgsIn(dir).filter((org) => !taken.has(org))
-    for (const org of orgs) taken.add(org)
-    found.push({ dir, orgs })
-  }
-  return found
-}
-
-/** The folders `file` names (`{ spaces: [...] }`);  none when it isn't there, or won't read. */
-function foldersInFile(file: string): string[] {
-  if (!existsSync(file)) return []
-  try {
-    const { spaces } = JSON5.parse(readFileSync(file, "utf8")) as { spaces?: unknown }
-    return Array.isArray(spaces) ? spaces.filter((each): each is string => typeof each === "string") : []
-  } catch (error) {
-    console.error(`${file} won't read, so no more spaces are served:`, error)
-    return []
-  }
-}
-
-/** The orgs a spaces folder holds:  `acme` for its `@acme/` folder. */
-function orgsIn(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && /^@[a-z][a-z0-9_]*$/.test(entry.name))
-    .map((entry) => entry.name.slice(1))
-    .sort()
+        : moreSpacesInFile(file)
+  return servedSpaces(entries)
 }
 
 /** This program's more spaces folders, read once as it loads (`moreSpacesFrom()`). */
 export const moreSpaces: MoreSpaces[] = moreSpacesFrom()
 
 /**
- * The ONE answer to "which spaces folder holds org `org`?":  the more spaces folder holding it, else spell.spaces.
- * - `@acme` => `~/work/acme-app/spaces` when that folder holds `@acme/`
+ * The ONE answer to "which spaces folder holds org `org`?":  the more spaces folder serving it, else spell.spaces.
+ * - `@acme` => `~/work/acme-app/spaces` when that folder serves `@acme/`
  */
 export function spacesDirForOrg(org: string, more: MoreSpaces[] = moreSpaces, spaces = spellSpacesDir): string {
   return more.find((each) => each.orgs.includes(org))?.dir ?? spaces

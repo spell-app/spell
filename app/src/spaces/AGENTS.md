@@ -134,7 +134,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | --- | --- | --- |
   | `spaceFolders.builtins` | `spaces/`:  the built-in groups and the test projects, `testFilesRoot` | `SPELL_BUILTINS_DIR` |
   | `spaceFolders.spaces`, `spellSpacesDir` | spell.spaces, beside the kit's main checkout | `SPELL_SPACES_DIR` |
-  | `moreSpaces` | more spaces folders served beside spell.spaces, each with the orgs it holds:  `~/.spell/more-spaces.json5`, `{ spaces: ["~/work/acme-app/spaces"] }`;  an address's org picks its folder (`spacesDirForOrg()`) | `SPELL_MORE_SPACES` |
+  | `moreSpaces` | more spaces folders served beside spell.spaces, each with the orgs it holds:  `~/.spell/more-spaces.json5`, `{ spaces: ["~/work/acme-app/spaces"] }`, any checkout's (a worktree's too), written by `spell spaces use <folder>` and the epic hub's `POST /api/servers/editor-spaces` (the kit's `SRV.switchSpaces()`);  an address's org picks its folder (`spacesDirForOrg()`) | `SPELL_MORE_SPACES` (`SPELL_MORE_SPACES_FILE`:  another file) |
   | `buildDir` | `build/` at the app folder's root | `SPELL_BUILD_DIR` |
   | `backupsDir` | every space's nightly backups (epic `atmosphere` P7):  `~/.spell/backups`, or a second disk | `SPELL_BACKUPS_DIR` |
   | `repoDir`, `packagesDir` | the app folder's root, `app/` (its `src/`, `spaces/` and build folder are there) | |

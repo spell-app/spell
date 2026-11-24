@@ -221,6 +221,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         imports in plain `node`
     - this side names nothing of the keeper:  the server package imports no other
     - `/api/server` answers `lastRequest` and `pages` (open live sockets), for its idle stop of a worktree's server
+  - `MoreSpaces` -- the MORE SPACES FOLDERS the kit's page server serves beside spell.spaces, one per org:
+    `~/.spell/more-spaces.json5` (`SPELL_MORE_SPACES_FILE`), `{ spaces: ["~/work/acme-app/spaces"] }`, a folder or
+    `{ folder, orgs }` each;  any checkout's `spaces/`, a project's main or a worktree's, to see work before it's merged
+    - `moreSpacesInFile()` reads it, `servedSpaces()` says which folder serves each org (first come;  never `@spell`)
+    - `switchSpaces(folder, { org })` switches one, in place of the folder that served its orgs:  `spell spaces use`, and
+      the epic hub's `POST /api/servers/editor-spaces` (spell-epic's `ServerKeeper.showInEditor()`);  the caller
+      restarts the page server, which reads it as it starts (spell-app's `spellSpacesDir.ts`)
+    - node built-ins and json5 only:  spell-app's lightest module, which Vite's config loads, imports it
   - `Heartbeat` -- how a process WAITING on someone says it's there, one rule for whoever asks (epic `coherence` P28):
     - 90s without a beat, or its process gone, and it's gone (`isLive()`)
     - `hold(file, record)`:  `{ ...record, pid, seen }` written every 30s, the file removed however the process ends;

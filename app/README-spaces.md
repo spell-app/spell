@@ -435,7 +435,8 @@ the table is [api.ts](src/spaces/server/node/routes/api.ts), and
 | Variable | What it sets | Default |
 | --- | --- | --- |
 | `SPELL_SPACES_DIR` | the spaces folder;  the page server's `--spaces <dir>` sets it too | `spell.spaces`, beside the main checkout |
-| `SPELL_MORE_SPACES` | more spaces folders served beside it, split by `:`, each holding orgs of its own (`@acme/`) | `~/.spell/more-spaces.json5`'s `spaces`, read only beside the kit's own spell.spaces |
+| `SPELL_MORE_SPACES` | more spaces folders served beside it, split by `:`, each holding orgs of its own (`@acme/`) | `~/.spell/more-spaces.json5`'s `spaces` (`spell spaces use <folder>` writes it), read only beside the kit's own spell.spaces |
+| `SPELL_MORE_SPACES_FILE` | that file, somewhere else:  a scratch server's | `~/.spell/more-spaces.json5` |
 | `SPELL_BUILTINS_DIR` | the built-in projects' folder, the frozen test projects' too | spell-app's `spaces/` |
 | `SPELL_BUILD_DIR` | where compiled output goes | spell-app's `build/` |
 | `SPELL_EDITS_BUILTINS` | `1`:  saving a built-in project's file writes the file itself, not your draft;  `0`:  never | on in a checkout whose built-ins are its own source |
