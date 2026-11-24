@@ -112,9 +112,13 @@ a folder of the kit `spell`.
     [servers-page.html](src/tools/servers-page.html)):  `GET /api/servers`, `/api/servers/dot`, `POST
     /api/servers/<start|stop|restart>`;  what just merged into main and what waits:  `ServerFacts`, no Claude call
     - the page (epic `epic-engine` T162):  nothing folds;  "main" and its servers as cards, what merged into main
-      lately, main's commits not on GitHub, then each epic's worktree (`⎇ <name>`, busy ones first):  its servers'
-      cards, what it hasn't merged
-    - VS Code's side bar shows it in a tab of its own, Servers, before Epic Docs ([README-vscode.md](README-vscode.md))
+      lately, main's commits not on GitHub, then each epic's worktree (`⎇ <name>`):  its servers' cards, what it
+      hasn't merged
+      - I449:  cards three a row at most, the name the link, the buttons along the bottom, page server, editor, hub,
+        then a repo's own;  the worktrees newest worked on first (its last commit, or a file changed since),
+        "last commit 3 weeks ago" beside each
+    - VS Code's side bar shows it in a tab of its own, Servers, between Epic Docs and Details
+      ([README-vscode.md](README-vscode.md))
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.

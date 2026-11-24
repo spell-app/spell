@@ -5,11 +5,15 @@
  *   - "main":  a card per server of the main checkout (the hub, the page server, the editor, a repo's own)
  *   - "Merged into main recently":  the branches that landed on main, newest first (`ServerFacts.mergedIntoMain()`)
  *   - one line per repo:  main's commits not on GitHub yet
- *   - each epic's worktree, `⎇ <worktree>`:  a card per server it has, then what it holds that main hasn't got
+ *   - each epic's worktree, `⎇ <worktree>`, the one worked on last first, how long ago beside its name:  a card per
+ *     server it has, then what it holds that main hasn't got
+ * - Each card:  the server's name, a link to its address, its state, and its buttons along its bottom;  three a row at
+ *   most, fewer as the page narrows (epic `epic-engine` I449).
  * - Built with `document.createElement()`, never markup in strings;  every control a `<ui-button>`.
  * - Start, Restart and Stop POST `/api/servers/<action>` with this page's write token (`SPELL_SERVER.token`);  the
  *   page server hands them on to the hub (`serverRoutes`).
  * - Plain DOM, no imports:  the page loads it as it is, beside the docs bundle;  so `ago()` is its own.
+ *   - Its pure parts are exported for its tests (`worktreeOrder()`, `inCardOrder()`);  it starts only on its page.
  * - Its own timer, not the kit's `pollWhileVisible()`:  that's for bundled code, and this page has no bundle of its own;
  *   the same rule, by hand:  no look while the page is hidden, one as soon as it shows again.
  */
@@ -73,6 +77,17 @@ function ago(iso) {
   return `${at.getMonth() + 1}/${at.getDate()}`
 }
 
+/** how long ago, in words, for days and weeks too:  `20 min ago`, `3 days ago`, `3 weeks ago`, `2 months ago` */
+function agoLong(iso) {
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000))
+  const days = Math.round(minutes / (24 * 60))
+  if (minutes < 60) return minutes < 1 ? "just now" : `${counted(minutes, "minute")} ago`
+  if (minutes < 24 * 60) return `${counted(Math.round(minutes / 60), "hour")} ago`
+  if (days < 14) return `${counted(days, "day")} ago`
+  if (days < 60) return `${counted(Math.round(days / 7), "week")} ago`
+  return `${counted(Math.round(days / 30), "month")} ago`
+}
+
 /** ask the keeper, and draw what it says;  a failure says so at the top */
 async function look() {
   if (isLooking || document.visibilityState === "hidden") return
@@ -99,7 +114,7 @@ function sayProblem(heading, words) {
 /** the whole page, from `answer` */
 function draw(answer) {
   const named = new Set(answer.servers.map((server) => server.repo).filter(Boolean)).size > 1
-  const onMain = answer.servers.filter((server) => !server.worktree)
+  const onMain = inCardOrder(answer.servers.filter((server) => !server.worktree))
   document
     .getElementById("servers-page")
     .replaceChildren(
@@ -112,9 +127,14 @@ function draw(answer) {
     )
 }
 
-/** a group's heading:  `main`, `⎇ atmosphere` (its epic page linked) */
-function heading(words, url) {
-  return el("h2", { className: "servers-head" }, url ? el("a", { href: url }, words) : words)
+/** a group's heading:  `main`, `⎇ atmosphere` (its epic page linked), and a muted note after it */
+function heading(words, url, note) {
+  return el(
+    "h2",
+    { className: "servers-head" },
+    url ? el("a", { href: url }, words) : words,
+    note ? el("span", { className: "servers-age" }, note) : undefined
+  )
 }
 
 /** a card per server, in a grid that fits the side bar and a phone;  none:  a line saying so */
@@ -128,23 +148,18 @@ function cards(servers, named) {
 }
 
 /**
- * one server's card, two lines:
- * - its name (what it's for, the tooltip) and its state
- * - its address, and its buttons;  stopped:  why, the state's tooltip
+ * one server's card:
+ * - its name, a link to its address (the address and what it's for, its tooltip), and its state;  stopped:  why, the
+ *   state's tooltip
+ * - its buttons in a row along the bottom
  */
 function serverCard(server, named) {
   const state = STATES[server.state] ?? STATES.down
-  const address = server.address
-    ? el(
-        "a",
-        { href: server.address, target: "_blank", className: "servers-address" },
-        server.address.replace(/^https?:\/\//, "").replace(/\/$/, "")
-      )
-    : undefined
   // its own list, when it takes only some (main's editor:  never Stop)
   const actions = (BUTTONS[server.state] ?? []).filter((action) => !server.actions || server.actions.includes(action))
   const buttons = server.canStart ? actions.map((action) => actionButton(server, action)) : []
   const name = named && server.repo && !server.worktree ? `${server.repo} ${server.name}` : server.name
+  const tip = [server.address?.replace(/^https?:\/\//, "").replace(/\/$/, ""), server.what].filter(Boolean).join(":  ")
   return el(
     "ui-card",
     { className: "servers-card", fluid: true, "data-state": server.state },
@@ -154,15 +169,14 @@ function serverCard(server, named) {
       el(
         "div",
         { className: "servers-line" },
-        el("strong", { "data-tooltip": server.what || undefined }, name),
+        el(
+          "strong",
+          { className: "servers-name", "data-tooltip": tip || undefined },
+          server.address ? el("a", { href: server.address, target: "_blank" }, name) : name
+        ),
         el("ui-label", { size: "mini", color: state.color, "data-tooltip": server.why || undefined }, state.words)
       ),
-      el(
-        "div",
-        { className: "servers-line" },
-        address ?? el("span"),
-        el("span", { className: "servers-buttons" }, buttons)
-      )
+      buttons.length ? el("div", { className: "servers-buttons" }, buttons) : undefined
     )
   )
 }
@@ -228,33 +242,70 @@ function gitHubLines(waiting) {
 }
 
 /**
- * each epic's worktree, by name:  its heading, its servers' cards, then what it holds that main hasn't got
- * - every worktree a server or a running epic names, busy or idle:  the busy ones first (a server running, commits not
- *   merged, agents, a phase or a turn), each half by name
+ * each epic's worktree:  its heading, its servers' cards, then what it holds that main hasn't got
+ * - every worktree a server or a running epic names, busy or idle
+ * - in the order the keeper sends them, the one worked on last first (`ServerFacts.newestFirst()`, epic `epic-engine`
+ *   I449);  a worktree only a server names, after them, by name
  */
 function worktreeGroups(answer, named) {
-  const epics = new Map((answer.epicWorktrees ?? []).map((epic) => [epic.worktree, epic]))
-  const names = [...new Set([...answer.servers.map((server) => server.worktree).filter(Boolean), ...epics.keys()])]
-  const serversOf = (worktree) => answer.servers.filter((server) => server.worktree === worktree)
-  const isBusy = (worktree) => {
-    const epic = epics.get(worktree)
-    return (
-      serversOf(worktree).some((server) => server.state !== "stopped") ||
-      !!(epic?.ahead || epic?.agents || epic?.phase || epic?.turn)
-    )
-  }
-  const ordered = names.sort((one, other) => Number(isBusy(other)) - Number(isBusy(one)) || one.localeCompare(other))
-  return ordered.flatMap((worktree) => {
-    const epic = epics.get(worktree)
-    const servers = serversOf(worktree)
+  return worktreeOrder(answer).flatMap(({ worktree, epic, servers }) => {
     const running = servers.filter((server) => server.state !== "stopped")
     return [
-      heading(`${WORKTREE} ${named && epic?.repo ? `${epic.repo} ` : ""}${worktree}`, epic?.url),
+      heading(`${WORKTREE} ${named && epic?.repo ? `${epic.repo} ` : ""}${worktree}`, epic?.url, workedWords(epic)),
       ...(running.length ? [cards(running, named)] : []),
       stoppedLine(servers.filter((server) => server.state === "stopped")),
       openStuff(epic)
     ].filter(Boolean)
   })
+}
+
+/**
+ * The worktrees the page lists, in order, each with its epic (if one runs there) and its servers in card order
+ * - the epics' worktrees first, in the order the keeper sends them (newest worked on first), then a worktree only a
+ *   server names, by name
+ * - a server is its worktree's by name, and by repo where the answer names the epic's repo (two repos may each have
+ *   a worktree of one name)
+ * - pure:  the page's tests call it
+ */
+export function worktreeOrder(answer) {
+  const servers = answer.servers ?? []
+  const groups = (answer.epicWorktrees ?? []).map((epic) => ({
+    worktree: epic.worktree,
+    epic,
+    servers: inCardOrder(
+      servers.filter((server) => server.worktree === epic.worktree && (!epic.repo || epic.repo === server.repo))
+    )
+  }))
+  const left = servers.filter((server) => server.worktree && !groups.some((group) => group.servers.includes(server)))
+  const names = [...new Set(left.map((server) => server.worktree))].sort((one, other) => one.localeCompare(other))
+  return [
+    ...groups,
+    ...names.map((worktree) => ({
+      worktree,
+      servers: inCardOrder(left.filter((server) => server.worktree === worktree))
+    }))
+  ]
+}
+
+/** The order of a checkout's cards, by server name:  the page server, its editor, the hub;  a repo's own after. */
+const CARD_ORDER = ["page server", "editor", "epic hub"]
+
+/** `servers` in card order (`CARD_ORDER`), a repo's own servers after, each kept in the order it came;  a new list */
+export function inCardOrder(servers) {
+  const rank = (server) => {
+    const place = server.own ? -1 : CARD_ORDER.indexOf(server.name)
+    return place < 0 ? CARD_ORDER.length : place
+  }
+  return servers
+    .map((server, index) => ({ server, index }))
+    .sort((one, other) => rank(one.server) - rank(other.server) || one.index - other.index)
+    .map(({ server }) => server)
+}
+
+/** when the worktree was last worked on, a few words:  `last commit 3 weeks ago`;  not known:  `undefined` */
+function workedWords(epic) {
+  if (!epic?.worked) return undefined
+  return `${epic.worked.by === "change" ? "last change" : "last commit"} ${agoLong(epic.worked.at)}`
 }
 
 /** the worktree's stopped servers, one line:  `page server stopped  [Start]` */
@@ -294,6 +345,9 @@ function openStuff(epic) {
   return el("ui-list", { className: "servers-list", bulleted: true }, lines.filter(Boolean))
 }
 
-void look()
-setInterval(() => void look(), LOOK_SECONDS * 1000)
-document.addEventListener("visibilitychange", () => void look())
+// only on the page:  its tests import this file for its pure parts
+if (typeof document !== "undefined" && document.getElementById("servers-page")) {
+  void look()
+  setInterval(() => void look(), LOOK_SECONDS * 1000)
+  document.addEventListener("visibilitychange", () => void look())
+}

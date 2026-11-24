@@ -83,7 +83,7 @@ export function isLoopback(url: string): boolean {
  * The side bar's doc views, each its own tab, in its order (Owen, 2026-11-19):
  * - "Review" (the Spell hat):  epic pages, guides, the home page, the list pages
  * - "Details" (a speech bubble):  the pages you answer on
- * - "Servers" (a server rack, before Epic Docs;  epic `epic-engine` T162):  the Servers page, `/_epic/servers/`,
+ * - "Servers" (a server rack, between Epic Docs and Details;  epic `epic-engine` T162, I449):  the Servers page, `/_epic/servers/`,
  *   every project's servers, what just merged into main, what each worktree holds
  * - "Epic Docs" (a book):  the epic tooling's READMEs, from the page server's `/_epic/docs/`
  * - the first "Epic Docs" tab (until epic `epic-engine` Q73) held guides and the home page:  they stay in Review

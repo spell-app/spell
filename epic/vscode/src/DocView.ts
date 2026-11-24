@@ -19,7 +19,7 @@
  *     epic's details and choice pages, newest first, the waiting ones red, the pages waiting their turn on top
  *     (`showList()`);  "Other epic..." picks another
  *   - why (request r50):  a choice page Owen was answering vanished, the epic page shown in both other tabs
- * - "Servers" (`spellEpic.serversView`, a server rack, before Epic Docs):  the Servers page (`/_epic/servers/`),
+ * - "Servers" (`spellEpic.serversView`, a server rack, between Epic Docs and Details):  the Servers page (`/_epic/servers/`),
  *   the hub's:  every project's servers, what just merged into main, what each worktree holds;  its Home button
  * - "Epic Docs" (`spellEpic.docsView`, a book):  the epic tooling's READMEs, rendered by the page server
  *   (`/_epic/docs/README-epics.md` and the pages it links to;  spell-epic's `docsRoutes.ts`)

@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process"
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -11,7 +11,8 @@ import {
   EditorServer,
   editorFileName,
   editorRecordFile,
-  steadyPort
+  steadyPort,
+  worktreeEditorPort
 } from "spell/app/spaces/server/node/routes/EditorServer"
 import { defaultSpellSpacesDir } from "spell/app/spaces/server/node/spellSpacesDir"
 
@@ -90,6 +91,31 @@ describe("one editor per page server's spaces:  starting one never stops another
       vite.kill()
       otherServer.kill()
       rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
+describe("worktreeEditorPort():  3000 is the main checkout's editor's alone (epic `epic-engine` I449)", () => {
+  test("a worktree asking for 3000 gets its booked port;  main, and a port given by hand, keep theirs", async () => {
+    const folder = mkdtempSync(join(tmpdir(), "editor-port-"))
+    const ports = join(folder, "ports.json")
+    vi.stubEnv("SPELL_PORTS_FILE", ports)
+    try {
+      const main = join(folder, "main")
+      const worktree = join(folder, "worktrees", "solid")
+      mkdirSync(join(main, ".git", "worktrees", "solid"), { recursive: true })
+      writeFileSync(join(main, ".git", "worktrees", "solid", "commondir"), "../..\n")
+      mkdirSync(worktree, { recursive: true })
+      writeFileSync(join(worktree, ".git"), `gitdir: ${join(main, ".git", "worktrees", "solid")}\n`)
+
+      const booked = await worktreeEditorPort(worktree, 3000)
+      expect(booked).not.toBe(3000)
+      expect(booked).toBe(await new SRV.PortBook(ports).portFor(worktree, "editor"))
+      expect(await worktreeEditorPort(main, 3000)).toBe(3000)
+      expect(await worktreeEditorPort(worktree, 3123)).toBe(3123)
+    } finally {
+      vi.unstubAllEnvs()
+      rmSync(folder, { recursive: true, force: true })
     }
   })
 })

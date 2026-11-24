@@ -31,7 +31,9 @@ import {
  * of the PAGE server:  it starts when the page server listens, and stops when it stops (`appRoutes.ts`).  So however
  * the page server starts -- `spell server`, `spell app serve`, an opener, VS Code -- the site header's "Editor" works.
  * - Port:  `SPELL_EDITOR_PORT`, else `VITE_PORT`, else 3000, if free;  taken (another checkout's editor):  any free
- *   one.  The real URL goes in `<root>/.spell-server.editor.json` (`EDITOR_FILE`) once it answers, where `/editor`
+ *   one.
+ *   - 3000 is the MAIN checkout's alone (epic `epic-engine` I449):  a worktree's editor takes the port written down
+ *     for it (`SRV.PortBook`, 4900 up), never the main one's, so main's editor is never pushed off 3000.  The real URL goes in `<root>/.spell-server.editor.json` (`EDITOR_FILE`) once it answers, where `/editor`
  *   and `spell app serve` find it.
  * - ONE editor per page server's spaces (`--spaces`, `SPELL_SPACES_DIR`):  its record and
  *   log are named by them (`editorFileName()`), so two projects whose page servers run on one kit (two checkouts of
@@ -44,6 +46,7 @@ import {
  * - Its output goes to `<root>/.spell-server.editor.log`, straight from vite:  the record is written when vite itself
  *   says it's ready there.
  * - It OUTLIVES a page server's restart (`PidFile.stop({ restart })`;  epic `epic-engine` I329):
+ *   - but not when it's off its port and that port is free again (`isOnWantedPort()`, I449):  it starts anew there
  *   the next page server takes it over (`adopt()`), so the editor's pages keep running, with no reload.
  *   - Not when what it runs on changed since it started:  the packages (`packagesStamp()`), the page server's port,
  *     or whether it listens on this machine alone.  Then it's stopped, and a new one starts:  an install's new
@@ -130,7 +133,7 @@ export class EditorServer {
     const log = this.logFile
     const taken: number[] = []
     for (let tries = 0; tries < PORT_TRIES && !this.isStopped; tries++) {
-      const port = await editorPort({ thisMachineOnly, taken })
+      const port = await editorPort({ root: this.root, thisMachineOnly, taken })
       if (this.isStopped) break
       this.port = port
       guard.allowOriginPort(port)
@@ -233,7 +236,8 @@ export class EditorServer {
     const fits =
       kept.pagePort === pagePort &&
       kept.thisMachineOnly === thisMachineOnly &&
-      kept.packages === packagesStamp(this.root)
+      kept.packages === packagesStamp(this.root) &&
+      (await this.isOnWantedPort(kept.url))
     if (fits && kept.url && (await answers(kept.url))) {
       this.adoptedPid = kept.pid
       this.port = Number(new URL(kept.url).port)
@@ -245,6 +249,18 @@ export class EditorServer {
     await endGroup(kept.pid)
     rmSync(this.recordFile, { force: true })
     return undefined
+  }
+
+  /**
+   * whether a kept editor at `url` is where this page server wants it, or that port is held:  so an editor that
+   * landed off its port (main's on 3001, while a worktree's held 3000) moves back once the port is free
+   * (epic `epic-engine` I449)
+   */
+  private async isOnWantedPort(url: string | undefined): Promise<boolean> {
+    if (!url) return false
+    const wanted = await worktreeEditorPort(this.root, Number(process.env.SPELL_EDITOR_PORT) || environment.vitePort)
+    if (Number(new URL(url).port) === wanted) return true
+    return !((await SRV.isFree(wanted, "0.0.0.0")) && (await SRV.isFree(wanted, "::")))
   }
 
   /**
@@ -260,7 +276,7 @@ export class EditorServer {
     { thisMachineOnly }: { thisMachineOnly: boolean }
   ): Promise<number> {
     const web = EditorServer.builtServer({ dir: BUILT_EDITOR, pagePort, token: () => guard.token })
-    const wanted = await editorPort({ thisMachineOnly })
+    const wanted = await editorPort({ root: this.root, thisMachineOnly })
     const { port } = await web.listen({ port: wanted, host: thisMachineOnly ? "127.0.0.1" : "0.0.0.0" })
     this.port = port
     guard.allowOriginPort(port)
@@ -528,19 +544,34 @@ const STOP_LOOK_MS = 100
  * The editor's port:  the wanted one if free on IPv4 AND IPv6 (vite listens on 0.0.0.0), else any free one.
  * - NOTE: both:  on macOS `::` binds even while another process holds `0.0.0.0:<port>` -- another checkout's editor.
  * - `thisMachineOnly`:  the house site's editor, whose port is in Caddy's file:  `steadyPort()`.
+ * - `root`:  the page server's;  a WORKTREE's never wants the main checkout's port (`worktreeEditorPort()`)
  */
 async function editorPort({
+  root,
   thisMachineOnly,
   taken = []
 }: {
+  root: string
   thisMachineOnly: boolean
   taken?: number[]
 }): Promise<number> {
-  const wanted = Number(process.env.SPELL_EDITOR_PORT) || environment.vitePort
+  const wanted = await worktreeEditorPort(root, Number(process.env.SPELL_EDITOR_PORT) || environment.vitePort)
   const isFreeEverywhere = async (port: number) =>
     !taken.includes(port) && (await SRV.isFree(port, "0.0.0.0")) && (await SRV.isFree(port, "::"))
   if (thisMachineOnly) return (await steadyPort(wanted, isFreeEverywhere)) ?? SRV.freePort()
   return (await isFreeEverywhere(wanted)) ? wanted : SRV.freePort()
+}
+
+/**
+ * The port a page server at `root` asks its editor to take, `wanted` but in a worktree:
+ * - a WORKTREE asking for the main checkout's port (3000, `environment.vitePort`):  the port written down for its
+ *   editor instead (`SRV.PortBook`, the same one `PageServer` hands it), so main's editor keeps 3000
+ *   (epic `epic-engine` I449:  a worktree's editor, started before the port book, took 3000 and main's landed on 3001)
+ * - anything else, the main checkout, a port given by hand:  `wanted`
+ */
+export async function worktreeEditorPort(root: string, wanted: number): Promise<number> {
+  if (wanted !== environment.vitePort || !SRV.checkoutOf(root)?.worktree) return wanted
+  return new SRV.PortBook().portFor(root, "editor")
 }
 
 /**

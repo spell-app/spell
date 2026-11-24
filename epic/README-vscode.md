@@ -15,8 +15,8 @@ The page stays there, beside the session, for as long as the epic runs.
 It reloads itself each time the agent edits it, and takes your review marks while the agent works.
 
 Spell Epic is [spell-epic](README.md)'s VS Code extension, and it does two jobs:
-- **four views in the right side bar**, Review, Servers, Details and Epic Docs, each holding one live page from a server
-  on your machine:  one for reading, one for your servers, one for answering, one for these READMEs
+- **four views in the right side bar**, Review, Epic Docs, Servers and Details, each holding one live page from a server
+  on your machine:  one for reading, one for these READMEs, one for your servers, one for answering
 - **the window bridge**, which lets a Claude Code session reach the window it runs in, not just the one in front
 
 ```mermaid
@@ -157,9 +157,9 @@ docked in the right side bar beside your code and the Claude panel.
 | View | Icon | What it shows | What opens it |
 | --- | --- | --- | --- |
 | Review, `spellEpic.reviewView` | the Spell hat | epic pages and saga pages, and every other page:  guides, the home page, the list pages | `/epic review <name>`, `epic open <name>`, `epic test <name>`, `epic pages open <page> --vs`;  its checklist button;  "Review:  Open Epic..." in the Command Palette;  the page's own top bar (Guides, Sagas, Epic Pages) |
-| Servers, `spellEpic.serversView` | a server, before Epic Docs | the Servers page (`/_epic/servers/`):  every server as a card, under main and under each epic's worktree;  what just merged into main;  what each worktree hasn't merged yet | opening the tab;  its Home button;  the page's own top bar (Servers) |
-| Details, `spellEpic.detailsView` | a speech bubble | details, review and choice pages:  the questions you answer on a page | `epic ask show <page>`, `epic choices show <page>`, `/details`;  its own list button |
 | Epic Docs, `spellEpic.docsView` | a book | these READMEs, rendered by the page server (`/_epic/docs/README-epics.md`) | opening the tab;  its Home button;  the epics home's Epic Documentation card |
+| Servers, `spellEpic.serversView` | a server, between Epic Docs and Details | the Servers page (`/_epic/servers/`):  every server as a card, under main and under each epic's worktree;  what just merged into main;  what each worktree hasn't merged yet | opening the tab;  its Home button;  the page's own top bar (Servers) |
+| Details, `spellEpic.detailsView` | a speech bubble | details, review and choice pages:  the questions you answer on a page | `epic ask show <page>`, `epic choices show <page>`, `/details`;  its own list button |
 
 - Each view holds ONE page, and keeps its own:  the question you're answering stays put while you read.
 - The page's kind picks the tab, whichever command showed it:  a details, review or choice page lands in Details,
@@ -228,7 +228,7 @@ VS Code's own maximize comes last.
 | Restart Page Server | stops and starts the server behind the page, then shows the page again, on its new port if it moved |
 
 Each tooltip is the button's name only;  in the Command Palette, each is listed under its tab's name
-(Review, Servers, Details), e.g. "Review:  Epics Home";  Servers has a Home button too, "Servers Home".
+(Review, Epic Docs, Servers, Details), e.g. "Review:  Epics Home";  Servers has a Home button too, "Servers Home".
 
 ### When a page misbehaves
 
