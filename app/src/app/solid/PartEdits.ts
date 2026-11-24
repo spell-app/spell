@@ -15,6 +15,7 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { Inspector, type PartRow } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
+import { PartPlacing } from "./PartPlacing"
 import { PartSlots } from "./PartSlots"
 
 /**
@@ -378,6 +379,8 @@ export class PartEdits {
   ) {
     if (event.button !== 0) return
     loadSlotNames()
+    // a drag from the rail puts down what a click there picked up (T153):  one part in hand at a time
+    PartPlacing.putDown()
     const ghost = document.createElement("div")
     ghost.className = "PaletteGhost"
     ghost.textContent = label
@@ -446,7 +449,7 @@ export class PartEdits {
    * - Over a part with empty slots, a modal with no `<actions>`:  they show as drop zones, and one under the pointer
    *   is the place (`placeInZone()`, epic `editor` T150).
    */
-  private static placeAt(x: number, y: number, moving: readonly Element[]): ShownPlace | undefined {
+  static placeAt(x: number, y: number, moving: readonly Element[]): ShownPlace | undefined {
     const inTree = PartEdits.placeInTree(x, y, moving)
     if (inTree) return inTree
     const area = Inspector.area
@@ -627,8 +630,35 @@ export class PartEdits {
   /** Where a drop would land now. */
   private static lastPlace: FilePlace | undefined
 
+  /** Where a drop, or a part being placed (`PartPlacing`), would land now:  the place shown. */
+  static get placeShown(): FilePlace | undefined {
+    return PartEdits.lastPlace
+  }
+
+  /**
+   * The places a part being placed can go, in the order the arrow keys step through them (epic `editor` T153):
+   * after each part of the app that can be changed, in the order they're drawn, each as its drop line shows.
+   * - The first one before the app's first part, so the start can be reached too.
+   */
+  static keyPlaces(): ShownPlace[] {
+    const area = Inspector.area
+    if (!area) return []
+    const parts = PartEdits.placeableParts(area).filter(({ element }) => PartEdits.isWritten(element))
+    const places = parts.flatMap(({ element }) => {
+      const box = boxOf(element)
+      // just inside its far end:  `placeBeside()` reads that as after it
+      const shown = liesInRow(element)
+        ? PartEdits.placeBeside(element, box, box.right - 1, box.top + box.height / 2)
+        : PartEdits.placeBeside(element, box, box.left + box.width / 2, box.bottom - 1)
+      return shown ? [shown] : []
+    })
+    const first = parts[0]?.element
+    const before = first && PartEdits.placeBeside(first, boxOf(first), boxOf(first).left + 1, boxOf(first).top + 1)
+    return before ? [before, ...places] : places
+  }
+
   /** Show where a drop would land:  a line between things, or a ring round what it'd go in. */
-  private static showPlace(shown: ShownPlace | undefined): void {
+  static showPlace(shown: ShownPlace | undefined): void {
     PartEdits.lastPlace = shown?.place
     let marker = document.body.querySelector<HTMLElement>(`:scope > .${MARKER_CLASS}`)
     if (!shown) {
@@ -830,7 +860,7 @@ type WrittenPart = {
 type NotEditable = "partFromLoop" | "partNotWritten" | "partBusy"
 
 /** A place, and what shows it. */
-type ShownPlace = {
+export type ShownPlace = {
   /** the place */
   place: FilePlace
   /** the line, or the box round what it goes in */

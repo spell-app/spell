@@ -1,0 +1,11 @@
+/* a part picked up to place it (`PartPlacing`, epic `editor` T153):  its name follows the pointer, as a drag's ghost */
+.PartPlaceGhost {
+  position: fixed;
+  z-index: 2147483646;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--ui-primary);
+  color: var(--ui-primary-contrast, white);
+  font-size: 13px;
+  pointer-events: none;
+}
