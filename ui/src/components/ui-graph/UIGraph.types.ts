@@ -54,6 +54,11 @@ export type GraphNode = {
   /** Starts open (`inline` only). */
   open?: boolean
   /**
+   * Opened in place, drawn with a frame (the default):  a header and padding round its insides.  `false`:  none, its
+   * insides alone, as a row of their own (its box, label and toggle up to the page's style).
+   */
+  frame?: boolean
+  /**
    * The column it goes in (`arrange` `groups`, or `auto` when any node has one):  nodes of a group are stacked top
    * to bottom by `order`, then label.
    */
