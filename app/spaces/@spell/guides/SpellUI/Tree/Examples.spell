@@ -79,6 +79,47 @@
 			</example>
 		</>
 
+		<section label="Grouped columns" sticky="stack" collapsible dividing>
+			<example "Grouped columns" description="A column's rows can sit in groups, each under a header that stays in view.">
+				<tree id="docs-tree-columns-groups" appearance="columns" groups="accordion" column-titles="Rooms, Things" show="icon count chevron" label="House, in groups" style="height: 16em" path={["Kitchen"]} items="[[
+					{ \"id\": \"Kitchen\", \"label\": \"Kitchen\", \"icon\": \"home\", \"children\": [[
+						{ \"id\": \"Kitchen furniture\", \"kind\": \"header\", \"label\": \"Furniture\" },
+						{ \"id\": \"Table\", \"label\": \"Table\", \"icon\": \"couch\" },
+						{ \"id\": \"Bench\", \"label\": \"Bench\", \"icon\": \"couch\" },
+						{ \"id\": \"Stool\", \"label\": \"Stool\", \"icon\": \"couch\" },
+						{ \"id\": \"Shelf\", \"label\": \"Shelf\", \"icon\": \"couch\" },
+						{ \"id\": \"Dresser\", \"label\": \"Dresser\", \"icon\": \"couch\" },
+						{ \"id\": \"Cupboard\", \"label\": \"Cupboard\", \"icon\": \"couch\" },
+						{ \"id\": \"Island\", \"label\": \"Island\", \"icon\": \"couch\" },
+						{ \"id\": \"Bin\", \"label\": \"Bin\", \"icon\": \"couch\" },
+						{ \"id\": \"Rack\", \"label\": \"Rack\", \"icon\": \"couch\" },
+						{ \"id\": \"Trolley\", \"label\": \"Trolley\", \"icon\": \"couch\" },
+						{ \"id\": \"Chair\", \"label\": \"Chair\", \"icon\": \"couch\" },
+						{ \"id\": \"Hooks\", \"label\": \"Hooks\", \"icon\": \"couch\" },
+						{ \"id\": \"Kitchen lights\", \"kind\": \"header\", \"label\": \"Lights\" },
+						{ \"id\": \"Pendant\", \"label\": \"Pendant\", \"icon\": \"lightbulb outline\" },
+						{ \"id\": \"Spotlights\", \"label\": \"Spotlights\", \"icon\": \"lightbulb outline\" },
+						{ \"id\": \"Under-cabinet strip\", \"label\": \"Under-cabinet strip\", \"icon\": \"lightbulb outline\" }
+					] },
+					{ \"id\": \"Study\", \"label\": \"Study\", \"icon\": \"home\", \"children\": [[
+						{ \"id\": \"Study furniture\", \"kind\": \"header\", \"label\": \"Furniture\" },
+						{ \"id\": \"Desk\", \"label\": \"Desk\", \"icon\": \"couch\" },
+						{ \"id\": \"Study chair\", \"label\": \"Chair\", \"icon\": \"couch\" },
+						{ \"id\": \"Bookcase\", \"label\": \"Bookcase\", \"icon\": \"couch\" },
+						{ \"id\": \"Study lights\", \"kind\": \"header\", \"label\": \"Lights\" },
+						{ \"id\": \"Desk lamp\", \"label\": \"Desk lamp\", \"icon\": \"lightbulb outline\" },
+						{ \"id\": \"Floor lamp\", \"label\": \"Floor lamp\", \"icon\": \"lightbulb outline\" }
+					] }
+				]"/>
+				<list slot="description" bulleted>
+					<item>The tree's rows are written right here, as JSON in its <text code>items</text> attribute.  <text code>path</text> picks Kitchen to begin with.</item>
+					<item>An item with <text code>kind: "header"</text> is a header:  the rows after it, up to the next header, are its group.  It shows how many rows its group holds.  It's never picked, and the arrow keys go past it.</item>
+					<item>With <text code>groups="accordion"</text>, one group is open at a time, the first to begin with.  Click a header, or press Enter or Space on it, to open its group.</item>
+					<item>Scroll a long group:  the headers stick, at the top of the column under the ones above, and at its bottom over the ones below.</item>
+				</list>
+			</example>
+		</>
+
 		<section label="Deep paths" sticky="stack" collapsible dividing>
 			<example "Deep paths" description="When the open path is deeper than the tree is wide, the first columns narrow to strips.">
 				<tree id="docs-tree-columns-deep" appearance="columns" sticky-path column-titles="Parts" show="icon which count chevron" label="Parts" style="height: 15em"/>
