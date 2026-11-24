@@ -289,6 +289,9 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       expect.stringMatching(/^Inspect /),
       "Inspect Other Views",
       "-",
+      // the editor's own Undo and Redo, named for its next step (T171)
+      expect.stringMatching(/^Undo/),
+      expect.stringMatching(/^Redo/),
       "Cut",
       "Copy",
       "Paste",
@@ -601,6 +604,9 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       expect.stringMatching(/^Inspect /),
       "Inspect Other Views",
       "-",
+      // the editor's own Undo and Redo, named for its next step (T171)
+      expect.stringMatching(/^Undo/),
+      expect.stringMatching(/^Redo/),
       "Cut",
       "Copy",
       "Paste",
@@ -612,8 +618,9 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "Cheat",
       "Deal the Cards",
       "-",
-      "Undo",
-      "Redo",
+      // the app's own, named for it in Edit (T171)
+      "Undo in Solitaire",
+      "Redo in Solitaire",
       "=",
       "Show in Code",
       "Change This..."
@@ -1000,7 +1007,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(lines.filter((line) => line.startsWith("thick"))).toEqual(["thick 2px", "thick 2px"])
     expect(lines.filter((line) => line.startsWith("thin")).every((line) => line === "thin 1px")).toBe(true)
 
-    // Cheat runs in the program, as in Run:  the menu closes, and its Undo says so
+    // Cheat runs in the program, as in Run:  the menu closes, and its Undo can undo it
     const cheat = await other.evaluate(() => {
       const item = [...document.querySelectorAll("ui-popup.PartMenu ui-action")].find(
         (action) => (action as Element & { action?: { title: string } }).action?.title === "Cheat"
@@ -1014,7 +1021,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(SETTLE_MS)
     const after = await rows()
-    expect(after[after.indexOf("App Menu") + 5]).toBe("Undo Cheat")
+    const undoInApp = after.indexOf("Undo in Solitaire")
+    expect(undoInApp).toBeGreaterThan(after.indexOf("App Menu"))
     await other.keyboard.press("Escape")
     await other.close()
   })

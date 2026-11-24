@@ -950,8 +950,30 @@ export function listenForUndoKeys(element: HTMLElement): () => void {
   }
 }
 
+/**
+ * Does the page around the program take its keys now?  The editor's Edit and Design (epic `editor` T171):
+ * its own Undo and Redo, and no shortcut of the program's (`core.runShortcut()`).
+ * - Set by `core._giveKeysToPage()`, outside the core contract (its `_`):  only the editor's runtime copy is told.
+ * - Kept across `resetRuntime()`:  it's the page's, not a run's.
+ */
+let keysGoToPage = false
+
+/** Does the page around the program take its keys now (`keysGoToPage`)? */
+export function keysGoToThePage(): boolean {
+  return keysGoToPage
+}
+
+Object.assign(core, {
+  /** The page takes the program's keys, or gives them back:  see `keysGoToPage`. */
+  _giveKeysToPage(isTaken: boolean): void {
+    keysGoToPage = isTaken
+  }
+})
+
 /** Undo or redo for a key pressed:  true if it did, false to pass the key on (see `listenForUndoKeys()`). */
 function undoKeyPressed(event: KeyboardEvent, element: HTMLElement, action: "undo" | "redo"): boolean {
+  // the editor's Edit:  ⌘Z is the editor's own (epic `editor` T171)
+  if (keysGoToPage) return false
   const path = event.composedPath()
   const [focused] = path
   if (isTypedIn(focused)) return false

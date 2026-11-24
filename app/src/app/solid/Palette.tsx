@@ -3,6 +3,7 @@ import { render, type JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
+import type { MenuItem } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
 // Import directly, NOT through the `spell/app/lsp` barrel, which would pull the language service into the bundle.
 import type { ScopeNode } from "spell/app/lsp/lsp.types"
@@ -11,7 +12,7 @@ import { cutCopyOrPaste, EDITOR_HOTKEYS, undoWay } from "spell/app/app/pages/edi
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
-import { Action } from "./Actions"
+import { Action, Actions } from "./Actions"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { ChangeThis } from "./ChangeThis"
 import { Inspector, type PartRow } from "./Inspector"
@@ -527,9 +528,11 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
 /**
  * The ONE right-click menu on the app's parts, in the app and the Views tree (epic `editor` T160, Owen's order):
  * - Inspect first, under the mouse:  "Inspect Card", then Inspect Other Views (`<InspectRow>`)
- * - a line, then `PartMenuItems`, the same as the Edit menu's
+ * - a line, then the editor's Undo and Redo, as the Edit menu's (epic `editor` T171), then `PartMenuItems`, the same as
+ *   the Edit menu's
  * - the program's own right-click menu there, if it has one (`<context-menu>`, `context-menu=`), between dashed lines,
- *   under its header, App Menu:  drawn as Run draws it (`ActionMenus.itemsFor()`;  epic `editor` I76)
+ *   under its header, App Menu:  drawn as Run draws it (`ActionMenus.itemsFor()`;  epic `editor` I76),
+ *   less its keys, which the editor takes in Edit, and its Undo and Redo named for the app (`asTheAppsInEdit()`, T171)
  *   - Spell UI's dashed divider, `<ui-action kind="divider" appearance="dashed">`, edge to edge (`MenuBar.css`)
  * - a line, then Show in Code and Change This, together at the bottom
  * - Drawn as every right click's menu is, `<MenuPopup>`:  at once, inside the window, with arrow keys, Enter and Esc.
@@ -557,7 +560,7 @@ export function PartMenu(): JSX.Element {
         <ui-item kind="header" class={APP_MENU_HEADER}>
           {appTexts.text("menuAppMenu")}
         </ui-item>
-        {ActionMenus.itemsFor(items)}
+        {ActionMenus.itemsFor(asTheAppsInEdit(items))}
         <ui-action kind="divider" appearance="dashed" />
       </>
     )
@@ -578,6 +581,8 @@ export function PartMenu(): JSX.Element {
         >
           <InspectRow part={opening()?.part} partsUnder={opening()?.partsUnder} />
           <ui-action kind="divider" />
+          <Actions.undo menu icon="undo" />
+          <Actions.redo menu icon="redo" />
           <PartMenuItems whyNot={(action) => whyNotAt(where(), action)} />
           {programItems()}
           <Show when={!programMenu()}>
@@ -772,6 +777,28 @@ function isAnItem(event: Event): boolean {
 
 /** The class of the part menu's App Menu header, over the program's own items (`Palette.css`). */
 const APP_MENU_HEADER = "AppMenuHeader"
+
+/**
+ * The program's menu `items` as the part menu shows them in Edit (epic `editor` T171, Owen:  "duplicate the app's
+ * `undo` and `redo` as "Undo in Solitaire", and disable the command keys for all of the app menu items"):
+ * - no shortcut shown:  in Edit the editor takes the keys (`editorHotkeys()`), so none of them runs the app's
+ * - its `undo` and `redo` read "Undo in Solitaire", "Redo in Solitaire":  the editor's own are above them
+ * - each item read live still, through its own (a copy whose prototype is the item);  a sub-menu's items too
+ */
+function asTheAppsInEdit(items: readonly MenuItem[]): MenuItem[] {
+  const app = editor.project ? new SP.SpellProject(editor.project.path).title : ""
+  return items.map((item): MenuItem => {
+    if (item.kind === "separator") return item
+    if (item.kind === "menu") {
+      return Object.create(item, { items: { get: () => asTheAppsInEdit(item.items) } }) as MenuItem
+    }
+    const inApp = item.name === "undo" ? "menuUndoInApp" : item.name === "redo" ? "menuRedoInApp" : undefined
+    return Object.create(item, {
+      shortcut: { value: undefined },
+      ...(inApp ? { title: { get: () => appTexts.text(inApp, { app }) } } : {})
+    }) as MenuItem
+  })
+}
 
 /** The class of the part menu's Inspect Other Views row (`Palette.css`). */
 const INSPECT_ROW = "InspectRow"
