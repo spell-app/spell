@@ -1082,10 +1082,13 @@ export function TypeTestsCard(props: { thing: object }): JSX.Element {
       setRunning(false)
     }
   }
-  // a result is named for its function, `testCardSetup` (`test card setup`):  its words, `card setup`, with `test`
+  // a result is named for its function, `testCardSetup`:  the test's compiled name (`test_card_setup`), in any language;
+  // else its words, `card setup`, with `test` (a plain-Spell head, `to test card setup`, has its own `test`)
   const resultOf = (test: { words: string; output?: string }) =>
-    results()?.find((result) =>
-      [result.method, result.name].some((name) => name && letters(name) === letters(`test ${test.words}`))
+    results()?.find(
+      (result) =>
+        (!!test.output && !!result.method && letters(result.method) === letters(test.output)) ||
+        [result.method, result.name].some((name) => name && letters(name) === letters(`test ${test.words}`))
     )
   return (
     <InspectorCard

@@ -137,7 +137,7 @@ describe("<AppBarMenus>", () => {
     expect(popup.visible).toBe(false)
   })
 
-  test("View:  Run, Edit, Site ─ Add a View… ─ Code, Compiled Code, Inspector, Anatomy, Program Panel ─ Line Numbers, Soft Wrap;  Soft Wrap turns long lines' wrapping on and off, ticked while on, remembered", async () => {
+  test("View:  Run, Edit, Site, Preview ─ Add a View… ─ Code, Compiled Code, Inspector, Anatomy, Program Panel ─ Line Numbers, Soft Wrap;  Soft Wrap turns long lines' wrapping on and off, ticked while on, remembered", async () => {
     const wrappedBefore = CodeSettings.choices.wrapLines
     cleanups.push(() => CodeSettings.choose("wrapLines", wrappedBefore))
     CodeSettings.choose("wrapLines", false)
@@ -155,6 +155,7 @@ describe("<AppBarMenus>", () => {
       "Run",
       "Edit",
       "Site",
+      "Preview",
       "─",
       "Add a View…",
       "─",
@@ -190,7 +191,7 @@ describe("<AppBarMenus>", () => {
 })
 
 describe("<SpellBarMenu>", () => {
-  test("its top row:  Home, Spell UI, About Spell…;  Spell UI opens Spell UI's site in the editor (T55)", async () => {
+  test("its top row:  Home, About Spell…, Spell UI (Owen's order, I329);  Spell UI opens Spell UI's site in the editor (T55)", async () => {
     const showSpellUI = spyOnEditor("showSpellUI", () => {})
     const host = await mount(() => <SpellBarMenu />)
     const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=SpellBarMenu]")!
@@ -201,7 +202,7 @@ describe("<SpellBarMenu>", () => {
     const row = found()!
     await rowsReady(row)
     const items = [...row.children].map((item) => (item.getAttribute("kind") === "divider" ? "─" : rowText(item)))
-    expect(items).toEqual(["Home", "Spell UI", "About Spell…", "─"])
+    expect(items).toEqual(["Home", "About Spell…", "Spell UI", "─"])
     const spellUI = [...row.querySelectorAll<HTMLElement>("ui-action")].find((item) => rowText(item) === "Spell UI")!
     spellUI.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
     flush()

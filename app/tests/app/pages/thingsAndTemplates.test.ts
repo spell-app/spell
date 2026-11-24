@@ -193,8 +193,9 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
         .map((file) => file.contents)
         .join("\n")
     )
-    // it draws:  what a card must be told, its rank and suit, written in with the first of each (T51)
-    expect(written).toContain("{draw a new card whose rank is ace and suit is clubs}")
+    // it draws:  what a card must be told, its rank and suit, written in with the first of each (T51);
+    // among the drawing's own lines, past its last part, as a line of its own, not in braces (I342)
+    expect(written).toContain("\n\t\tdraw a new card whose rank is ace and suit is clubs\n")
     // loose on the table, in no pile:  a card's size, face up (I45)
     const looks = await page.evaluate(() => {
       const all = [...document.querySelectorAll("solitaire-card")]
