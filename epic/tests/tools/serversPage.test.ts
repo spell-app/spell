@@ -3,7 +3,8 @@ import { describe, expect, test } from "vite-plus/test"
 import {
   addressLine,
   firstClause,
-  httpsButtons,
+  httpsToggle,
+  withSecureAddress,
   inCardOrder,
   worktreeOrder
 } from "spell/epic/tools/_assets/servers-page.js"
@@ -78,25 +79,27 @@ describe("the Servers page's merged list (epic `epic-engine` I451)", () => {
   })
 })
 
-describe("the Servers page's secure link card (epic `epic-engine` T164)", () => {
-  test("httpsButtons():  on, Turn on disabled and Turn off;  off, Turn on and a disabled Turn off saying why", () => {
-    expect(httpsButtons({ state: "on", canTurnOn: false, canTurnOff: true })).toEqual([
-      { turn: "on", whyNot: "The secure link is already on." },
-      { turn: "off" }
-    ])
-    expect(httpsButtons({ state: "off", canTurnOn: true, canTurnOff: false })).toEqual([
-      { turn: "on" },
-      { turn: "off", whyNot: "The secure link is already off." }
-    ])
-    expect(httpsButtons({ state: "needs-trust", canTurnOn: true, canTurnOff: true })).toEqual([
-      { turn: "on" },
-      { turn: "off" }
-    ])
+describe("the page server's HTTPS switch, a lock among its buttons (epic `epic-engine` I454)", () => {
+  test("httpsToggle():  on, a closed lock that turns it off;  off, an open lock that turns it on", () => {
+    expect(httpsToggle({ state: "on", canTurnOn: false, canTurnOff: true })).toMatchObject({
+      turn: "off",
+      icon: "lock"
+    })
+    expect(httpsToggle({ state: "on" }).tip).toMatch(/^Secure link \(HTTPS\) is on\.\n.*HTTP\/2/)
+    expect(httpsToggle({ state: "off", canTurnOn: true })).toMatchObject({ turn: "on", icon: "unlock" })
+    expect(httpsToggle({ state: "needs-trust", canTurnOn: true }).tip).toMatch(/hasn't approved it yet/)
   })
 
-  test("httpsButtons():  no mkcert, Turn on disabled with the server's reason", () => {
-    const [on] = httpsButtons({ state: "off", canTurnOn: false, canTurnOff: false, whyNot: "install mkcert" })
-    expect(on).toEqual({ turn: "on", whyNot: "install mkcert" })
+  test("withSecureAddress():  on, main's page server at its https address;  off, as the keeper named it", () => {
+    const page = server("page server", undefined, { address: "http://127.0.0.1:4747/" })
+    const on = { state: "on", address: "https://localhost:4747/" }
+    expect(withSecureAddress(page, on).address).toBe("https://localhost:4747/")
+    expect(withSecureAddress(page, { state: "off" }).address).toBe("http://127.0.0.1:4747/")
+    expect(withSecureAddress(page, undefined)).toBe(page)
+  })
+
+  test("httpsToggle():  no mkcert, disabled with the server's reason", () => {
+    expect(httpsToggle({ state: "off", canTurnOn: false, whyNot: "install mkcert" }).whyNot).toMatch(/install mkcert$/)
   })
 })
 

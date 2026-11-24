@@ -4,8 +4,10 @@ import {
   existsSync,
   fstatSync,
   openSync,
+  readdirSync,
   readFileSync,
   readSync,
+  realpathSync,
   rmSync,
   statSync,
   writeFileSync
@@ -40,7 +42,12 @@ import {
  *   one project, each with its own `spaces/`) each get their own vite, on its own port.
  *   - Why:  the record was one per kit, and the second page server took the first one's vite for the last page
  *     server's, on another port, and stopped it:  the main checkout's editor went away.
- *   - And a vite whose page server is still running, and isn't this one, is never stopped (`adopt()`):  it's another's.
+ * - ONE editor per checkout's spaces (epic `epic-engine` I455):
+ *   - every other vite run in its app folder that no record names is stopped as it starts (`stopStrays()`)
+ *   - the last page server's, still ending as a restart begins, is waited for, then taken over or stopped (`adopt()`)
+ *   - main's also stops a worktree's vite found on 3000;  a worktree's listens on 127.0.0.1 alone
+ *   - a vite that ends by itself is started again in a moment (`relaunchSoon()`)
+ *   - why:  three of main's at once, on 3000, 3001 and 3002, each page server's restart starting one more
  * - It reaches the page server's `/api` through vite's proxy, by IP:  `localhost` may be ::1 first, where the page
  *   server doesn't listen.
  * - Its output goes to `<root>/.spell-server.editor.log`, straight from vite:  the record is written when vite itself
@@ -91,6 +98,12 @@ export class EditorServer {
   /** `stop()` was called:  a start under way picks no more ports */
   private isStopped = false
 
+  /** what the last vite that got ready was started with:  a vite that ends by itself is started again with it */
+  private relaunchWith?: { pagePort: number; guard: SRV.Guard; thisMachineOnly: boolean }
+
+  /** when this page server started its editor again by itself, newest last:  at most `RELAUNCHES` an hour */
+  private relaunches: number[] = []
+
   /** the spaces the page server serves:  what names the record (`editorFileName()`) */
   readonly spaces: string
 
@@ -127,8 +140,11 @@ export class EditorServer {
    */
   async start(pagePort: number, guard: SRV.Guard, { thisMachineOnly = false } = {}): Promise<void> {
     if (process.env.SPELL_NO_EDITOR || this.child || this.built) return this.pickedPort(this.port)
+    // a worktree's editor is for this Mac alone:  127.0.0.1, never every address (epic `epic-engine` I455)
+    thisMachineOnly ||= Boolean(SRV.checkoutOf(this.root)?.worktree)
     if (isBuiltEditor()) return this.pickedPort(await this.serveBuilt(pagePort, guard, { thisMachineOnly }))
     const kept = await this.adopt(pagePort, guard, { thisMachineOnly })
+    await this.stopStrays()
     if (kept) return this.pickedPort(kept)
     const log = this.logFile
     const taken: number[] = []
@@ -138,7 +154,10 @@ export class EditorServer {
       this.port = port
       guard.allowOriginPort(port)
       const outcome = await this.launch(port, pagePort, guard, { thisMachineOnly, log })
-      if (outcome === "ready") return this.pickedPort(port)
+      if (outcome === "ready") {
+        this.relaunchWith = { pagePort, guard, thisMachineOnly }
+        return this.pickedPort(port)
+      }
       if (outcome !== "port taken") break
       taken.push(port)
     }
@@ -201,13 +220,100 @@ export class EditorServer {
       }, READY_LOOK_MS)
       child.on("exit", () => {
         clearInterval(looking)
-        if (this.child === child) {
+        const wasOurs = this.child === child
+        if (wasOurs) {
           this.child = undefined
           rmSync(this.recordFile, { force: true })
         }
         settle(!ready && PORT_IN_USE.test(output()) ? "port taken" : "ended")
+        if (wasOurs && ready) this.relaunchSoon()
       })
     })
+  }
+
+  /**
+   * SIDE EFFECT:  a vite that was ready and ended by itself (killed, crashed) started again in a moment, on the same
+   * page server, so the editor comes back without waiting for the server keeper (epic `epic-engine` I455)
+   * - not once `stop()` was called, nor while the page server restarts (the next one takes it over)
+   * - at most `RELAUNCHES` an hour:  one that keeps ending is left down, for the keeper and the person
+   * - NEVER throws
+   */
+  private relaunchSoon(): void {
+    const how = this.relaunchWith
+    if (!how || this.isStopped || this.pageServerFile.isRestarting()) return
+    const now = Date.now()
+    this.relaunches = this.relaunches.filter((at) => now - at < 60 * 60_000)
+    if (this.relaunches.length >= RELAUNCHES) {
+      console.warn(`editor:  vite ended ${RELAUNCHES} times this hour;  left down until the page server restarts`)
+      return
+    }
+    this.relaunches.push(now)
+    console.warn("editor:  vite ended by itself;  starting it again")
+    setTimeout(() => {
+      if (this.isStopped || this.child) return
+      this.start(how.pagePort, how.guard, { thisMachineOnly: how.thisMachineOnly }).catch((error: unknown) =>
+        console.error("editor:  couldn't start vite again:", error)
+      )
+    }, RELAUNCH_WAIT_MS).unref()
+  }
+
+  /**
+   * SIDE EFFECT:  every OTHER editor in the way stopped, so this checkout has ONE (epic `epic-engine` I455), found by
+   * process, never by a record (`editorsInTheWay()`):
+   * - a vite run in this checkout's app folder that no record names:  left by a page server that died, or by one that
+   *   started its own beside it
+   * - the main checkout's:  a vite of ANOTHER checkout (a worktree's) on 3000, main's port alone
+   * - never one another spaces' page server on this kit runs (its record names it, its page server alive)
+   * - NEVER throws
+   */
+  private async stopStrays(): Promise<void> {
+    try {
+      const processes = SRV.Processes.table({ args: true })
+      const editors = [...processes].filter(([, { command }]) => EDITOR_COMMAND.test(command)).map(([pid]) => pid)
+      if (!editors.length) return
+      const folders = SRV.Processes.folderOf(editors)
+      const ports = SRV.Processes.portsOf(editors)
+      const isMain = !SRV.checkoutOf(this.root)?.worktree
+      const strays = editorsInTheWay({
+        editors: editors.map((pid) => ({
+          pid,
+          parent: processes.get(pid)?.ppid,
+          folder: folders.get(pid),
+          port: ports.get(pid)
+        })),
+        appDir: realPathOf(APP_DIR),
+        keep: this.editorsOfRecord(),
+        mainPort: isMain ? environment.vitePort : undefined
+      })
+      for (const pid of strays) {
+        console.warn(`editor:  stopping vite (pid ${pid}, in ${folders.get(pid)}):  one editor per checkout`)
+        await endGroup(pid)
+      }
+    } catch (error) {
+      console.error("editor:  couldn't look for other editors:", error)
+    }
+  }
+
+  /** the vites a record in this kit names (ours, kept, and other spaces' page servers' while they run) */
+  private editorsOfRecord(): Set<number> {
+    const pids = new Set<number>()
+    for (const pid of [this.child?.pid, this.adoptedPid]) if (pid) pids.add(pid)
+    let names: string[] = []
+    try {
+      names = readdirSync(this.root).filter((name) => EDITOR_RECORD_NAME.test(name))
+    } catch {
+      return pids
+    }
+    for (const name of names) {
+      try {
+        const record = JSON.parse(readFileSync(join(this.root, name), "utf8")) as Partial<EditorRecord>
+        const isOurs = join(this.root, name) === this.recordFile
+        if (record.pid && (isOurs || !record.server || SRV.isProcessAlive(record.server))) pids.add(record.pid)
+      } catch {
+        // not a record
+      }
+    }
+    return pids
   }
 
   /**
@@ -216,22 +322,28 @@ export class EditorServer {
    * - fits:  alive, answering its address, for the same page server port and address, on the same packages
    *   (`packagesStamp()`)
    * - one that doesn't fit is stopped first, so its port is free for the new one
-   * - one whose page server (`server`) still runs, and isn't this one, is left alone:  another page server's;
-   *   this one starts its own beside it
+   * - one whose page server (`server`) still runs, and isn't this one:  the last page server, still ending as a
+   *   restart begins;  waited for, up to `waitMs`, then taken over or stopped as any other (epic `epic-engine` I455)
+   *   - the record is this page server's spaces' alone (`editorFileName()`), so it's never another project's
+   *   - before:  left running, and one of our own started beside it, on the next port up:  three of main's at once
    * - NEVER throws
    */
   private async adopt(
     pagePort: number,
     guard: SRV.Guard,
-    { thisMachineOnly }: { thisMachineOnly: boolean }
+    { thisMachineOnly }: { thisMachineOnly: boolean },
+    waitMs = STOP_WAIT_MS
   ): Promise<number | undefined> {
     const kept = this.readRecord()
     if (!kept?.pid || !SRV.isProcessAlive(kept.pid)) return undefined
-    if (kept.server && kept.server !== process.pid && SRV.isProcessAlive(kept.server)) {
-      console.warn(
-        `editor:  vite (pid ${kept.pid}) is page server ${kept.server}'s:  left running, and one of our own started`
-      )
-      return undefined
+    const server = kept.server
+    if (server && server !== process.pid && SRV.isProcessAlive(server)) {
+      for (let waited = 0; waited < waitMs && SRV.isProcessAlive(server); waited += STOP_LOOK_MS)
+        await sleep(STOP_LOOK_MS)
+      if (SRV.isProcessAlive(server))
+        console.warn(
+          `editor:  page server ${server} still runs;  its vite (pid ${kept.pid}) is this checkout's one editor now`
+        )
     }
     const fits =
       kept.pagePort === pagePort &&
@@ -463,7 +575,12 @@ async function endGroup(pid: number): Promise<void> {
     try {
       process.kill(-pid, name)
     } catch {
-      // already gone
+      // not a group's leader (a vite found by process), or already gone
+      try {
+        process.kill(pid, name)
+      } catch {
+        // already gone
+      }
     }
   }
   signal("SIGTERM")
@@ -536,6 +653,41 @@ const PORT_IN_USE = /\bis already in use\b/
 /** How many ports `start()` tries before it gives up on an editor. */
 const PORT_TRIES = 3
 
+/** How many times an hour a page server starts its editor again by itself (`relaunchSoon()`), and after how long. */
+const RELAUNCHES = 3
+const RELAUNCH_WAIT_MS = 2000
+
+/** An editor's command line, as `ps` shows it:  `vp dev` (`launch()`'s) or the vite under it, `vite.js dev`. */
+const EDITOR_COMMAND = /(?:\/vite-plus\/bin\/vp|\/vite\/bin\/vite\.js) dev\b/
+
+/** A record's file name:  `editorFileName()`'s, for any spaces */
+const EDITOR_RECORD_NAME = /^\.spell-server\.editor(?:\..+)?\.json$/
+
+/**
+ * The editors to stop before this checkout starts its own (`EditorServer.stopStrays()`):  pure, for its tests
+ * - one in `appDir` that `keep` doesn't name, nor its parent:  a stray of this checkout
+ * - with `mainPort` (the main checkout's):  one of another folder listening there, a worktree's on main's port
+ * - one whose folder can't be told is left alone
+ */
+export function editorsInTheWay({
+  editors,
+  appDir,
+  keep,
+  mainPort
+}: {
+  editors: { pid: number; parent?: number; folder?: string; port?: number }[]
+  appDir: string
+  keep: Set<number>
+  mainPort?: number
+}): number[] {
+  const isKept = (editor: { pid: number; parent?: number }) =>
+    keep.has(editor.pid) || (editor.parent !== undefined && keep.has(editor.parent))
+  return editors
+    .filter((editor) => editor.folder !== undefined && !isKept(editor))
+    .filter((editor) => editor.folder === appDir || (mainPort !== undefined && editor.port === mainPort))
+    .map((editor) => editor.pid)
+}
+
 /** How long `stop()` waits for vite to end before `SIGKILL`, and how often it looks. */
 const STOP_WAIT_MS = 5000
 const STOP_LOOK_MS = 100
@@ -599,3 +751,12 @@ const WANTED_PORT_LOOK_MS = 200
 
 /** How many ports above the wanted one `steadyPort()` tries. */
 const SPARE_PORTS = 20
+
+/** `folder`'s real path, as `lsof` names a process's folder;  `folder` itself when it can't be told */
+function realPathOf(folder: string): string {
+  try {
+    return realpathSync(folder)
+  } catch {
+    return folder
+  }
+}
