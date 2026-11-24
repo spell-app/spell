@@ -1,0 +1,42 @@
+/* The add panel's and the add bar's menus' own looks:  `PaletteView.tsx`;  the rest of the palette's, `Palette.css`. */
+
+/*
+ * `<PartAbout>`:  what the part under the mouse is, else the hint (epic `editor` T165).
+ * - two lines at most (three in the add bar's narrow menus), cut short with a `…`, its box always that tall:
+ *   the menu never jumps as it changes
+ */
+.PartAbout {
+  display: flex;
+  align-items: center;
+  block-size: 32px;
+  min-inline-size: 0;
+  line-height: 16px;
+
+  & .PartAboutText {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+/* ... at the foot of an add bar's menu, staying there as its parts scroll under it */
+.PaletteFlyoutFoot {
+  position: sticky;
+  inset-block-end: -4px;
+  padding: 8px 8px 4px 8px;
+  margin-block-end: -4px;
+  /* a hairline above it, drawn as a shadow, as the editor's surfaces part */
+  box-shadow: 0 -1px 0 var(--ui-border-color, rgb(0 0 0 / 0.1));
+  background: var(--ui-popup-background, var(--ui-surface));
+  color: var(--ui-text-muted);
+  font-size: 12px;
+
+  /* three lines here:  the menu is narrow */
+  & .PartAbout {
+    block-size: 48px;
+  }
+  & .PartAboutText {
+    -webkit-line-clamp: 3;
+  }
+}

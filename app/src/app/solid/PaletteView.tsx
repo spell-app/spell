@@ -30,6 +30,8 @@ import {
   OwnView
 } from "./Palette"
 
+import "./PaletteView.css"
+
 /****************
  * ### `<PaletteRail>`
  * The add bar down the editor's left edge, in Edit (epic `editor` T151):  a button per group of what can be added.
@@ -111,7 +113,8 @@ function railTooltip(text: string): BarTooltip {
  * ### `<RailFlyout>`
  * One button of the add bar, and the flyout it opens beside the bar.
  * - The button:  its icon alone, `name` its tooltip and its name for a screen reader.
- * - The flyout:  `name` atop, a search field (focused as it opens), then `rows`, handed the words typed (lowercase).
+ * - The flyout:  `name` atop, a search field (focused as it opens), then `rows`, handed the words typed (lowercase);
+ *   at its foot, what the part under the mouse is (`<PartAbout>`, epic `editor` T165).
  * - Choosing a row, or dragging one, closes it (`Palette.closeMenus()`).
  */
 function RailFlyout(props: {
@@ -157,6 +160,9 @@ function RailFlyout(props: {
         <ui-tree class="PaletteTree" label={props.name} ref={treeChoosesRows}>
           {props.children(words)}
         </ui-tree>
+        <div class="PaletteFlyoutFoot">
+          <PartAbout />
+        </div>
       </ui-popup>
     </>
   )
@@ -213,6 +219,7 @@ function FavoriteButton(props: { definition: ComponentDefinition }): JSX.Element
  * what to do and its search, then App views, the app's own views, then every part, by topic.
  * - Every group shows everything in it, as the palette's table orders it (`ui/paletteGroups.json`;  epic `editor` I174, T81).
  * - A search looks through all of them, by name, other names and description.
+ * - Its header's words say what the part under the mouse is, else how to add one (`<PartAbout>`, epic `editor` T165).
  */
 export function PaletteMenu(): JSX.Element {
   const [filter, setFilter] = createSignal("")
@@ -222,7 +229,7 @@ export function PaletteMenu(): JSX.Element {
   return (
     <div class="PaletteBody">
       <div class="PaletteHead">
-        <span class="PaletteHint">{appTexts.text("paletteHint")}</span>
+        <PartAbout class="PaletteHint" />
         <ui-input
           class="PaletteSearch"
           size="small"
@@ -270,8 +277,11 @@ function ThisGroupRows(props: { words: () => string }): JSX.Element {
         <ui-tree-item
           icon={NEW_VIEW_ICON}
           label={appTexts.text("paletteNewView")}
-          title={appTexts.text("paletteNewViewTip")}
-          ref={(row: Element) => chooseRow(() => Palette.addNewView())(row)}
+          aria-description={appTexts.text("paletteNewViewTip")}
+          ref={(row: Element) => {
+            chooseRow(() => Palette.addNewView())(row)
+            describes(row, () => appTexts.text("paletteNewViewTip"))
+          }}
         />
       </Show>
       <Show when={Palette.isPageShown}>
@@ -356,7 +366,8 @@ const NEW_VIEW_ICON = "plus square outline"
  * - `picksUp`, in the add bar's flyouts:  a click (or Enter) picks it up instead, to put in the app with the next click
  *   (`PartPlacing`, epic `editor` T153);  in the top bar's popup it's added at once.
  * - Its star, at its end, stars it, or takes its star away (epic `editor` T152):  shown while the row is hovered or
- *   focused, and always on a starred one.
+ *   focused, and always on a starred one;  no tooltip, people know a star (T165).
+ * - No tooltip of its description either:  the menu's own field shows it while the row is hovered (`<PartAbout>`).
  */
 function PaletteRow(props: { definition: ComponentDefinition; picksUp?: boolean }): JSX.Element {
   const isStarred = () => Palette.isFavorite(props.definition)
@@ -365,10 +376,11 @@ function PaletteRow(props: { definition: ComponentDefinition; picksUp?: boolean 
     <ui-tree-item
       icon={props.definition.icon}
       label={props.definition.name}
-      title={props.definition.description}
+      aria-description={props.definition.description}
       ref={(row: Element) => {
         chooseRow((event) => (props.picksUp ? pickUp(props.definition, event) : Palette.add(props.definition)))(row)
         startsDrag(row, props.definition)
+        describes(row, () => props.definition.description)
       }}
     >
       <ui-button
@@ -379,7 +391,6 @@ function PaletteRow(props: { definition: ComponentDefinition; picksUp?: boolean 
         icon={isStarred() ? "star" : "star outline"}
         aria-pressed={isStarred() ? "true" : "false"}
         aria-label={starText()}
-        data-tooltip={starText()}
         onPointerDown={(event: PointerEvent) => event.stopPropagation()}
         onClick={(event: MouseEvent) => {
           event.stopPropagation()
@@ -387,5 +398,35 @@ function PaletteRow(props: { definition: ComponentDefinition; picksUp?: boolean 
         }}
       />
     </ui-tree-item>
+  )
+}
+
+/** The description of the part under the mouse or focused, in a menu of parts:  `<PartAbout>` shows it. */
+const [described, setDescribed] = createSignal<string>()
+
+/** `row`, hovered or focused, has `<PartAbout>` show `description`;  left, the hint again. */
+function describes(row: Element, description: () => string | undefined): void {
+  const show = () => setDescribed(description())
+  const hide = () => setDescribed(undefined)
+  row.addEventListener("pointerenter", show)
+  row.addEventListener("pointerleave", hide)
+  row.addEventListener("focusin", show)
+  row.addEventListener("focusout", hide)
+}
+
+/**
+ * ### `<PartAbout>`
+ * What the part under the mouse (or the keyboard's focus) is, in a menu of parts (epic `editor` T165:  "have a field
+ * somewhere that describes the item on hover"):  its description, from Spell UI's vocabularies, in place of a tooltip.
+ * - With none hovered:  how to add one, "Click or drag to add to the page".
+ * - In the add panel's header, and at the foot of each of the add bar's menus.
+ * - Two lines at most, three in the add bar's narrow menus, cut short with a `…`:
+ *   its box always that tall, so the menu never jumps as it changes (`PaletteView.css`).
+ */
+function PartAbout(props: { class?: string }): JSX.Element {
+  return (
+    <span class={["PartAbout", props.class]}>
+      <span class="PartAboutText">{described() || appTexts.text("paletteHint")}</span>
+    </span>
   )
 }
