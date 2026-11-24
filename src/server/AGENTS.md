@@ -849,6 +849,9 @@ The steps between a page's content and its file on disk, for every tool that wri
   - `firstLoad()`:  what a page loads first of a bundle, each file sized raw, gzipped and brotli (`sizesOf()`):
     the ONE way a bundle is sized, by `sizeReport()` and the app's size budgets (`spell perf budget`, epic
     `solid-2-final` P1)
+  - `BundleContents`:  WHAT'S IN a built file and WHO LOADS it (epic `solid-2-final` P19):  its bytes by the module
+    each source map names, gathered by package or folder (`grouped()`), the files that load it, static or later, and the
+    modules built into more than one file (`duplicates()`);  `spell perf budget --why` prints it
   - Its command line:  `spell bundle [<name>...] [--stale]` / `check`.
   - The page server runs `build --stale` once it listens:  `BundleBuild`, in `page/`.
   - Why (Owen, 2026-10-07):  their chunk names carry content hashes,

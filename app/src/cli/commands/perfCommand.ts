@@ -81,7 +81,7 @@ async function perfReport(): Promise<number> {
   return CLI.EXIT.OK
 }
 
-/** `spell perf budget [--tighten]`. */
+/** `spell perf budget [--tighten] [--why <ids>]`. */
 async function perfBudget(options: PerfOptions): Promise<number> {
   const { PerfBudget } = await import("spell/app/cli/perf/PerfBudget")
   const { PerfBuilds } = await import("spell/app/cli/perf/PerfBuilds")
@@ -95,6 +95,10 @@ async function perfBudget(options: PerfOptions): Promise<number> {
     if (options.tighten) {
       const lowered = budget.tighten(results)
       say(lowered.length ? `Ceilings lowered:  ${lowered.join(", ")}` : "No ceiling to lower")
+    }
+    if (options.why) {
+      const ids = options.why === "all" ? budget.entries.map((entry) => entry.id) : commaList(options.why)
+      for (const line of budget.explain(ids, builds, say)) say(line)
     }
     return isPassing ? CLI.EXIT.OK : CLI.EXIT.ERRORS
   } finally {
@@ -156,6 +160,7 @@ function say(line: string): void {
  * - `wait`:  minutes to wait for a quiet machine;  `force`:  don't wait
  * - `out`:  a file to write instead of the dated one;  `baseline`:  `save`
  * - `tighten`:  `budget`'s:  lower the ceilings
+ * - `why`:  `budget`'s:  the ids to explain, a comma list, or `all`
  */
 export type PerfOptions = {
   page?: string
@@ -168,5 +173,6 @@ export type PerfOptions = {
   out?: string
   baseline?: string
   tighten?: boolean
+  why?: string
   https?: boolean
 }

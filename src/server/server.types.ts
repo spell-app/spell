@@ -329,6 +329,27 @@ export type FileSizes = CompressedSizes & { file: string }
  */
 export type BundleLoad = CompressedSizes & { files: FileSizes[]; lazy: FileSizes[]; all: FileSizes[] }
 
+/** What one module adds to a built file, raw bytes (`BundleContents`). */
+export type ModuleBytes = { module: string; bytes: number }
+
+/** A file that loads another:  `static` with it, `dynamic` later (`import()`, a worker, a URL). */
+export type FileImporter = { file: string; how: "static" | "dynamic" }
+
+/**
+ * What a built file holds and who loads it (`BundleContents.of()`).
+ * - `raw`:  its size;  `isMapped`:  a source map was beside it, so `modules` say what's in it, biggest first
+ */
+export type BuiltFileContents = {
+  file: string
+  raw: number
+  isMapped: boolean
+  modules: ModuleBytes[]
+  importedBy: FileImporter[]
+}
+
+/** A module built into more than one file (`BundleContents.duplicates()`):  each file's bytes of it, and their sum. */
+export type DuplicateModule = { module: string; bytes: number; files: Array<{ file: string; bytes: number }> }
+
 /** What a build records in its `output` folder (`BUNDLE_RECORD`), for `Bundle.check()` to compare. */
 export type BundleRecord = {
   /** the hash of the sources it was built from */

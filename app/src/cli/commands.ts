@@ -238,8 +238,14 @@ export default function appCommands(spell: Command): void {
       "measure the editor, a docs page, an epic page and run mode on a desktop and an emulated phone (CPU slowed 4x, " +
         "a 5G-like network), in the machine's test turn;  then the report.  About 5 minutes;  --full measures everything"
     )
-    .option("--full", "every measurement:  load, leaks, huge lists, typing, accessibility, listeners, sheets, CPU, the pipeline")
-    .option("--page <pages>", "which pages, e.g. editor,docs -- default editor, docs, epic, run")
+    .option(
+      "--full",
+      "every measurement:  load, leaks, huge lists, typing, accessibility, listeners, sheets, CPU, the pipeline"
+    )
+    .option(
+      "--page <pages>",
+      "which pages, e.g. editor,docs -- default editor, docs, epic, run;  also site, cloud, programs"
+    )
     .option("--profile <profiles>", "which profiles:  desktop, phone, phonewide -- default desktop, phone")
     .option("--steps <steps>", "which measurements, e.g. load,typing -- default load (all with --full)")
     .option("--runs <count>", "cold loads per page and profile, medians reported -- default 1 (5 with --full)")
@@ -264,6 +270,11 @@ export default function appCommands(spell: Command): void {
         "past its ceiling"
     )
     .option("--tighten", "lower each ceiling to the bundle's size now plus 2%:  after a phase that shrank one")
+    .option(
+      "--why <ids>",
+      "for these budgets (a comma list of ids, or all):  what's in each file, by where it's from, who loads it, " +
+        "and what's built in twice"
+    )
     .action((_options, command: Command) =>
       CLI.runCommand(async () =>
         (await import("./commands/perfCommand")).perfCommand("budget", command.optsWithGlobals())

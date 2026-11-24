@@ -12,7 +12,7 @@ import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 ////////////////
 
 /** The pages measured, by name. */
-export const PERF_PAGE_NAMES = ["editor", "docs", "epic", "run"] as const
+export const PERF_PAGE_NAMES = ["editor", "docs", "epic", "run", "site", "cloud", "programs"] as const
 
 /** One of `PERF_PAGE_NAMES`. */
 export type PerfPageName = (typeof PERF_PAGE_NAMES)[number]
@@ -48,6 +48,9 @@ const EDITOR_STORAGE = {
   "spellEditor:autoSave": "false"
 }
 
+/** A page function's SOURCE that finds a selector's first match through shadow roots:  `(root, selector) => Element`. */
+const DEEP_QUERY = `(function find(root, selector) { const it = root.querySelector(selector); if (it) return it; for (const each of root.querySelectorAll("*")) { const found = each.shadowRoot && find(each.shadowRoot, selector); if (found) return found } return null })`
+
 /** Every element is defined:  `<ui-tooltip>` left out, as it stays undefined on the epic page (2026-11-20). */
 const ALL_DEFINED = `!document.querySelector(":not(:defined):not(ui-tooltip)")`
 
@@ -58,6 +61,12 @@ const ALL_DEFINED = `!document.querySelector(":not(:defined):not(ui-tooltip)")`
  * - `docs`:  Spell UI's kitchen sink;  `epic`:  epic-engine's epic page, the biggest;  both ready once every element
  *   is defined
  * - `run`:  Solitaire running alone, the editor's Run mode
+ * - the kinds epic `solid-2-final` P19 added, not in a quick run's default pages (`--page site,cloud,programs`):
+ *   - `site`:  a built site on the run page, the Spell UI site's guide;  ready once its layout has drawn
+ *   - `cloud`:  a cloud app, one program on a plain page in a `<spell-viewer>` (the view elements demo:  Solitaire,
+ *     its own tags);  ready once its tags are defined
+ *   - `programs`:  several programs on one plain page, a viewer each (Counter, Task List, Solitaire);  ready once the
+ *     last one's tags are defined
  */
 export const PERF_PAGES: Record<PerfPageName, PerfPage> = {
   editor: {
@@ -86,6 +95,25 @@ export const PERF_PAGES: Record<PerfPageName, PerfPage> = {
     blockWrites: true,
     isEditorBuild: true,
     ready: `() => !!document.querySelector("solitaire-card")`
+  },
+  site: {
+    name: "site",
+    url: ({ editor }) => `${editor}run/@spell/guides/SpellUI`,
+    blockWrites: true,
+    isEditorBuild: true,
+    ready: `() => !!${DEEP_QUERY}(document, "ui-page-layout ui-header, ui-page-layout h1")`
+  },
+  cloud: {
+    name: "cloud",
+    url: ({ pageServer }) => `${pageServer}/app/app/demo/drawable-elements.html`,
+    blockWrites: true,
+    ready: `() => !!customElements.get("solitaire-card") && !!document.querySelector("solitaire-card")`
+  },
+  programs: {
+    name: "programs",
+    url: ({ pageServer }) => `${pageServer}/app/app/demo/several-programs.html`,
+    blockWrites: true,
+    ready: `() => document.readyState === "complete" && !!customElements.get("solitaire-card")`
   }
 }
 

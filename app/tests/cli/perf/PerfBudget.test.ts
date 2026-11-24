@@ -44,6 +44,22 @@ describe("PerfBudget", () => {
     expect(lazy).toBeLessThan(15_000)
   })
 
+  test("explainIn():  each file it counts, who loads it, what's in it;  a file with no map says so", () => {
+    writeFileSync(
+      join(build, "assets", "shared.js.map"),
+      JSON.stringify({ version: 3, sources: ["../../src/shared.ts"], mappings: "AAAA" })
+    )
+    const lines = PerfBudget.explainIn(entry({ only: "\\.js$" }), build, { root: dir, builtAt: build })
+    expect(lines[0]).toMatch(/^  assets\/(index|shared)\.js  [\d.]+ KB brotli, [\d.]+ KB raw;  loaded by /)
+    expect(lines).toContain("    (no source map beside it:  what's in it can't be said)")
+    expect(lines.some((line) => /^ +0\.0 KB  src\/shared\.ts$/.test(line))).toBe(true)
+    expect(lines.find((line) => line.includes("assets/shared.js "))).toContain("loaded by assets/index.js (static)")
+    expect(lines.at(-1)).toBe("  built in twice:  nothing")
+    const lazy = PerfBudget.explainIn(entry({ only: "\\.js$", measure: "lazy" }), build, { root: dir, builtAt: build })
+    expect(lazy[0]).toContain("assets/lazy.js")
+    expect(lazy[0]).toContain("loaded by assets/index.js (dynamic)")
+  })
+
   test("judged():  over budget is said;  only over the ceiling fails", () => {
     expect(PerfBudget.judged(entry(), 150)).toMatchObject({ isOverBudget: true, isOverCeiling: false })
     expect(PerfBudget.judged(entry(), 201)).toMatchObject({ isOverCeiling: true })
