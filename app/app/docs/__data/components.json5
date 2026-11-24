@@ -7365,12 +7365,18 @@
     {
       "id": "motion",
       "title": "Motion",
-      "description": "Durations, easing curves, and how long a hover waits.",
+      "description": "Durations, easing curves, and how long a hover or a tooltip waits.",
       "tokens": [
         {
           "name": "--ui-hover-delay",
           "default": "800ms",
           "description": "How long a hover popup waits before it shows.",
+          "type": "time"
+        },
+        {
+          "name": "--ui-tooltip-delay",
+          "default": "1500ms",
+          "description": "How long a tooltip waits before it shows:  as long as the browser's own.",
           "type": "time"
         },
         {
