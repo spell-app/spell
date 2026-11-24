@@ -1,5 +1,5 @@
 import { For, Show, createSignal, flush, onSettled } from "solid-js"
-import type { JSX } from "@solidjs/web"
+import { render, type JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
@@ -17,6 +17,7 @@ import { ChangeThis } from "./ChangeThis"
 import { Inspector, type PartRow } from "./Inspector"
 import { on } from "./on"
 import { LazyPiece } from "./LazyPiece"
+import { uiReady } from "./loadUI"
 import { PartEdits, type MenuOpening, type PartAction } from "./PartEdits"
 
 import "./Palette.css"
@@ -38,13 +39,13 @@ import "./Palette.css"
  *   `<example>`, `<section>`.
  *   `<example>` is then the page's own example, its code editable in place.
  * - Its menu and its add bar are in `PaletteView.tsx`, loaded as it first opens (`Palette.views`, a `LazyPiece`):
- *   here are its state, Add a View's button and the right click's menu, in the editor's first load.
+ *   here are its state, the add panel's opener and the right click's menu, in the editor's first load.
  */
 export class Palette {
   /** The palette's menu and strip, loaded the first time it opens:  see `LazyPiece`. */
   static views = new LazyPiece(() => import("./PaletteView"))
 
-  /** Open it by itself, the next time the top bar's `+` is drawn:  a blank app shows what it can hold. */
+  /** Open the add panel by itself, the next time the add bar is drawn:  a blank app shows what it can hold. */
   static openOnArrival(): void {
     opensOnArrival = true
     Palette.load()
@@ -55,6 +56,35 @@ export class Palette {
     const opens = opensOnArrival
     opensOnArrival = false
     return opens
+  }
+
+  /**
+   * Show the add panel over the editor, a `<ui-modal>` of every part (`<PalettePanel>`;  epic `editor` T167):
+   * its key, ⌥⌘V, and View › Add a View….
+   * - SIDE EFFECT:  a `<div class="PalettePanelRoot">` in `<body>` holding it, until it closes.
+   * - Shown already:  nothing more.
+   * - NEVER throws:  its view failing to load is the editor's error to show.
+   */
+  static async showPanel(): Promise<void> {
+    if (panelRoot) return
+    const root = (panelRoot = document.createElement("div"))
+    root.className = "PalettePanelRoot"
+    Palette.load()
+    try {
+      const [{ PalettePanel }] = await Promise.all([Palette.views.load(), uiReady])
+      document.body.append(root)
+      const dispose = render(() => <PalettePanel onClose={close} />, root)
+
+      /** Unmount once it's closed. */
+      function close() {
+        dispose()
+        root.remove()
+        panelRoot = undefined
+      }
+    } catch (error) {
+      panelRoot = undefined
+      editor.showError(error)
+    }
   }
 
   /**
@@ -181,8 +211,11 @@ let groupRule: typeof import("spell/app/app/ui/PaletteGroups").PaletteGroups | u
 /** Its loading, once it's asked for. */
 let loading: Promise<void> | undefined
 
-/** Does it open when the `+` is next drawn?  `Palette.openOnArrival()`. */
+/** Does the add panel open when the add bar is next drawn?  `Palette.openOnArrival()`. */
 let opensOnArrival = false
+
+/** The add panel's place in `<body>`, while it shows:  `Palette.showPanel()`. */
+let panelRoot: HTMLElement | undefined
 
 /** Has the add bar (`<PaletteRail>`) shown on this page yet?  `Palette.takeRailArrival()`. */
 let hasRailShown = false
@@ -428,69 +461,8 @@ export function thisGroupMatches(words: string): boolean {
   return onPage || ownViewsMatching(words).length > 0
 }
 
-/**
- * The top bar's "+ Add a View":  opens the palette, a menu with its search;  beside the add bar down the left edge.
- * - Its plus, then its words, in the round pill its neighbours have, as wide as its words (epic `editor` I250, C5:
- *   "Change plus to `+ Add a View`"):  no tooltip, the words say it.
- * - An item of the Run | Edit group, right after Inspect app (`<ModeButtons add>`;  epic `editor` T83:
- *   "Move `add` to the immediate right of the inspector crosshair"), so it stands as its neighbours do.
- * - It opens a menu, never becomes the mode chosen (its `aria-haspopup`).
- */
-export function AddPartButton(): JSX.Element {
-  let popup: (HTMLElement & { visible?: boolean }) | undefined
-  // its menu is drawn once wanted:  its view loads then, not with the editor
-  const [isWanted, setWanted] = createSignal(false)
-  const want = () => {
-    Palette.load()
-    setWanted(true)
-  }
-  onSettled(() => {
-    if (Palette.takeOpenOnArrival() && popup) {
-      want()
-      popup.visible = true
-    }
-  })
-  return (
-    <>
-      <ui-item
-        id={ADD_BUTTON_ID}
-        icon="plus"
-        appearance="circular"
-        class="AddPartButton"
-        aria-haspopup="menu"
-        onPointerEnter={want}
-        onFocusIn={want}
-        onClick={want}
-      >
-        <span class="AddViewText">{appTexts.text("paletteAddView")}</span>
-      </ui-item>
-      <ui-popup
-        for={ADD_BUTTON_ID}
-        open-on="click"
-        position="bottom center"
-        class="PalettePopup"
-        aria-label={appTexts.text("addPart")}
-        ref={(element: HTMLElement) => {
-          popup = element
-          closesWithPalette(element)
-        }}
-      >
-        <Show when={isWanted()}>
-          <PaletteMenu />
-        </Show>
-      </ui-popup>
-    </>
-  )
-}
-
-/** The palette's menu, in Add a View's popup:  loaded on first use, see `PaletteView.tsx`. */
-const PaletteMenu = Palette.views.view("PaletteMenu")
-
 /** The add bar down the editor's left edge, in Edit:  loaded on first use, see `PaletteView.tsx` (epic `editor` T151). */
 export const PaletteRail = Palette.views.view("PaletteRail")
-
-/** Add a View's id, which its popup points at. */
-const ADD_BUTTON_ID = "AddPartButton"
 
 /**
  * Edit › Cut, Copy, Paste, Duplicate and Delete, and the same in a right click's menu.

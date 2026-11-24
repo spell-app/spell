@@ -610,6 +610,7 @@ function handOverActions(spell: EditorSpell) {
     showProgramPanel: () => toggleProgramPanel(app.running ? "run" : "edit"),
     showInspector: () => Inspector.showOrHide(),
     showAnatomy: () => AppAnatomy.toggle(),
+    showAddPanel: () => EDITOR_HOTKEYS.addView.run(),
     showLineNumbers: () => LineNumbers.toggle(),
     // the same choice as Code Editor Settings…' Wrap long lines:  one preference, so both agree
     softWrap: () => CodeSettings.choose("wrapLines", !CodeSettings.choices.wrapLines),

@@ -17,7 +17,6 @@ import {
   InspectorData,
   InspectorPane,
   InspectHelp,
-  AddPartButton,
   AnatomyButton,
   AppAnatomy,
   AppAnatomyView,
@@ -588,7 +587,8 @@ function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
  * - left:  Spell's menu (its hat and name:  the group's projects, Home), the project's menu (its name),
  *   then File · Edit · View · Run · Help (`MenuBar.tsx`), then the draft's pill while you have drafts (T107)
  * - middle:  Run | Edit | Design | Site, then in Edit and Design, Inspect app, the code's icon,
- *   the compiled code's (its language's icon), Anatomy and Add, in the same group (epic `editor` T83, T168)
+ *   the compiled code's (its language's icon) and Anatomy, in the same group (epic `editor` T83, T168);
+ *   no Add a View since T167:  ⌥⌘V or View › Add a View… opens the add panel
  * - right, ONE group of icons:  Restart, the theme, you
  *   - no Inspector button (T83):  View › Inspector shows or hides it, and the Inspector card's ✕ hides it
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
@@ -610,7 +610,6 @@ export function EditorToolbar(props: { mode: Mode }) {
           compiled={<CompiledCodeButton />}
           inspect={<InspectAppButton id={INSPECT_APP_ID} />}
           anatomy={<AnatomyButton />}
-          add={<AddPartButton />}
         />
       )
     },

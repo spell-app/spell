@@ -93,6 +93,7 @@ export const EDITOR_NAMES = {
       showProgramPanel: { kind: "action", words: "show program panel", for: "View › Program Panel" },
       showInspector: { kind: "action", words: "show inspector", for: "View › Inspector" },
       showAnatomy: { kind: "action", words: "show anatomy", for: "View › Anatomy" },
+      showAddPanel: { kind: "action", words: "show add panel", for: "View › Add a View…" },
       showLineNumbers: { kind: "action", words: "show line numbers", for: "View › Line Numbers" },
       softWrap: { kind: "action", words: "soft wrap", for: "View › Soft Wrap" },
       compileAndRun: { kind: "action", words: "compile and run", for: "Compile and Run" },
