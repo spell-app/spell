@@ -125,6 +125,14 @@ export const cardVocabulary = {
     },
     { name: "loading", group: "states", kind: "keyOnly", description: "Dimmed under a spinner, announced as busy." },
     {
+      name: "selected",
+      group: "states",
+      kind: "keyOnly",
+      description:
+        "The one chosen among its neighbours:  its border the primary colour and its fill a touch of it, its text as " +
+        "the others';  `--ui-card-selected-border-color` and `--ui-card-selected-background` change them."
+    },
+    {
       name: "link",
       group: "link",
       kind: "string",

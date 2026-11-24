@@ -55,7 +55,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-ended`, `sign-in-failed`, `sign-in-who` | the same | `name`, `why` |
 | `sign-in`, `sign-out` | its buttons | |
 | `page-previous`, `page-next`, `page-number` | a list read a page at a time:  the JavaScript core's | `page` |
-| `page-number-of`, `page-showing`, `page-showing-more` | its footer:  the same | `pages`, `first`, `last`, `count` |
+| `page-number-of`, `page-showing`, `page-showing-more`, `page-size` | its footer:  the same | `pages`, `first`, `last`, `count` |
 | `sign-in-as-spell`, `sign-in-spell-signed-out` | a Spell account's:  the JavaScript core's | `place`, `name` |
 | `sign-in-cloud-signed-out` | the cloud's, nobody signed in:  the JavaScript core's | `place` |
 | `sign-in-check-email` | the same, waiting for its link or code | `email` |
@@ -198,6 +198,7 @@ MESSAGES: dict[str, str] = {
     "page-number-of": "Page {page} of {pages}",
     "page-showing": "Showing {first}-{last} of {count}",
     "page-showing-more": "Showing {first}-{last} of {count}+",
+    "page-size": "Rows per page",
     "site-no-such-page": "No such page",
     "site-page-waiting": "This page hasn't been made yet.",
     "site-create-page": "Would you like to create one?",

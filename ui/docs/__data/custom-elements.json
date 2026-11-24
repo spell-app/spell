@@ -27788,6 +27788,10 @@
             {
               "name": "--ui-page-layout-sidebar-width",
               "default": "16em"
+            },
+            {
+              "name": "--ui-page-layout-drawer-width",
+              "default": "16em"
             }
           ]
         }
@@ -55107,6 +55111,14 @@
             {
               "name": "--ui-tree-path-background",
               "default": "var(--ui-background)"
+            },
+            {
+              "name": "--ui-tree-nav-font-size",
+              "default": "0.875em"
+            },
+            {
+              "name": "--ui-tree-nav-row-height",
+              "default": "round(2.25em, var(--ui-grid, 4px))"
             },
             {
               "name": "--ui-tree-nav-border-color",

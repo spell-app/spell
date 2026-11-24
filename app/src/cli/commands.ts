@@ -1,7 +1,8 @@
 /**
  * spell-app's `spell` commands (its `package.json`'s `"spell": { "commands" }`, epic `repo-split` Q33):
  * - `spell app create <name> [--site]`:  a new spell project, or a site, in your space
- * - `spell app serve [project]`:  the editor and its page server, opened in a browser
+ * - `spell app serve [project]`:  the editor and its page server, opened in a browser;  from a project's checkout,
+ *   that project's own page server (`--spaces`, `--page-port`), never the kit's
  * - `spell app preview build | serve`:  the editor's static build, the public preview -- written, then shown as a host would
  * - `spell app preview viewer <folder> <project...> [--editor]`:  `<spell-viewer>` (and `<spell-editor>`) and those
  *   projects, into a site's folder
@@ -48,6 +49,8 @@
  *   keep each command's name a literal at its call.
  */
 import type { Command } from "commander"
+import { dirname } from "path"
+import { fileURLToPath } from "url"
 
 import { CLI } from "spell/cli"
 import { checkProjectName } from "spell/app/cli/cli.types"
@@ -102,11 +105,28 @@ export default function appCommands(spell: Command): void {
       "the editor's port, for a page server this starts -- default 3000, else any free one",
       (value) => Number(value)
     )
+    .option(
+      "--page-port <port>",
+      "the page server's port, for a page server this starts -- default any free one for a project's own",
+      (value) => Number(value)
+    )
+    .option(
+      "--spaces <dir>",
+      "the spaces its page server serves, a project's own -- default the spaces/ of the project's checkout run in"
+    )
     .option("--headless", "don't open a browser:  just print the URL")
     .action((project: string | undefined, _options, command: Command) =>
-      CLI.runCommand(async () =>
-        (await loadApp()).appCommands.serve(project ? [project] : [], command.optsWithGlobals())
-      )
+      CLI.runCommand(async () => {
+        // the project's own spaces, before the app loads:  its `environment` reads them once, as it loads
+        const options = command.optsWithGlobals<{ spaces?: string }>()
+        const { serveSpaces } = await import("./servePageServer")
+        const { pageServerRoot } = await import("spell/server/page")
+        const root = pageServerRoot(dirname(fileURLToPath(import.meta.url)))
+        const env = process.env.SPELL_SPACES_DIR
+        const spaces = serveSpaces({ given: options.spaces, env, cwd: process.cwd(), root })
+        if (spaces) process.env.SPELL_SPACES_DIR = spaces
+        return (await loadApp()).appCommands.serve(project ? [project] : [], command.optsWithGlobals())
+      })
     )
 
   const changes = app

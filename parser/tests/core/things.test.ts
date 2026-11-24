@@ -186,6 +186,97 @@ describe("core.things", () => {
     }
   })
 
+  describe("`ofClass()`:  by class, as `every card` reads them (I63)", () => {
+    test("a class's things and its sub-classes', in the order made -- each that's `instanceof` it", () => {
+      const ace = new Card({})
+      const game = new Game({})
+      const joker = new Joker({})
+      expect(core.things.ofClass(Card)).toEqual([ace, joker])
+      expect(core.things.ofClass(Joker)).toEqual([joker])
+      expect(core.things.ofClass(App)).toEqual([game])
+      expect(core.things.ofClass(Thing)).toEqual([ace, game, joker])
+      expect(core.everyThing(Card).items).toEqual([ace, joker])
+    })
+
+    test("a thing of type A made re-runs NO reader of type B;  one of A, or of a sub-class of A, does", async () => {
+      new Card({})
+      await settle()
+      const runs = { cards: 0, games: 0 }
+      const stops = [
+        observe(() => {
+          core.everyThing(Card)
+          runs.cards++
+        }),
+        observe(() => {
+          core.filter(core.everyThing(Game), (game) => game.score > 0)
+          runs.games++
+        })
+      ]
+      try {
+        new Card({})
+        new Card({})
+        await settle()
+        expect(runs).toEqual({ cards: 2, games: 1 })
+        new Joker({})
+        await settle()
+        expect(runs).toEqual({ cards: 3, games: 1 })
+        new Game({})
+        await settle()
+        expect(runs).toEqual({ cards: 3, games: 2 })
+      } finally {
+        for (const stop of stops) stop()
+      }
+    })
+
+    test("a thing forgotten leaves its classes, and their readers re-run", async () => {
+      const ace = new Card({})
+      const king = new Card({})
+      await settle()
+      let seen: unknown[] = []
+      const stop = observe(() => {
+        seen = core.things.ofClass(Card)
+      })
+      try {
+        core.things.forget(ace)
+        await settle()
+        expect(seen).toEqual([king])
+      } finally {
+        stop()
+      }
+    })
+
+    test("a new run starts with no things of any class;  its readers re-run", async () => {
+      new Card({})
+      await settle()
+      let count = -1
+      const stop = observe(() => {
+        count = core.things.ofClass(Card).length
+      })
+      try {
+        expect(count).toBe(1)
+        core.resetRuntime()
+        await settle()
+        expect(count).toBe(0)
+        new Card({})
+        await settle()
+        expect(count).toBe(1)
+      } finally {
+        stop()
+      }
+    })
+
+    test("after a live edit, a running thing of the old class is one of the new class's", () => {
+      class Old extends Thing {}
+      class New extends Thing {}
+      const running = new Old({})
+      const made = new New({})
+      core.takeNewClasses({ Pawn: Old }, { Pawn: New })
+      expect(core.things.ofClass(New)).toEqual([running, made])
+      // a closure still naming the old class finds them too, as `instanceof Old` does
+      expect(core.things.ofClass(Old)).toEqual([running, made])
+    })
+  })
+
   describe("inspecting things", () => {
     test("`propertiesOf()`:  its own, then inherited -- NOT the built-in types'", () => {
       const joker = new Joker({ color: "red" })
