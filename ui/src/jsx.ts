@@ -530,6 +530,16 @@ export interface UIAccordionJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UIAccordionEventMap>>, keyof UIAccordionAttributes>,
     UIAccordionAttributes {}
 
+/** `<ui-action>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIActionEventMap {
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{ originalEvent?: Event }>
+}
+
 /** `<ui-action>`'s own attributes, from its vocabulary. */
 export interface UIActionAttributes {
   /**
@@ -717,6 +727,16 @@ export interface UIActionAttributes {
    * @deprecated write `kind` -- `prop:` stays only for compiled spell
    */
   "prop:kind"?: "item" | "header" | "divider"
+  /**
+   * A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.
+   * - takes:  text
+   */
+  closable?: string
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
+  "prop:closable"?: string
   /**
    * PROPERTY:  the action it draws and runs:  `{ title, icon?, shortcut?, isEnabled, isSelected, run() }`, read live.  Spell's `core.menuOf()` gives a menu's.
    * - a JS property (rich data):  an object, array or function, given as it is
@@ -984,11 +1004,17 @@ export interface UIActionAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UIActionEventMap["ui-closing"]) => void
 }
 
 /** `<ui-action>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UIActionJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIActionAttributes>, UIActionAttributes {}
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIActionEventMap>>, keyof UIActionAttributes>, UIActionAttributes {}
 
 /** `<ui-actions>`'s own attributes, from its vocabulary. */
 export interface UIActionsAttributes {
@@ -23894,6 +23920,16 @@ export interface UIInputAttributes {
 export interface UIInputJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIInputEventMap>>, keyof UIInputAttributes>, UIInputAttributes {}
 
+/** `<ui-item>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIItemEventMap {
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{ originalEvent?: Event }>
+}
+
 /** `<ui-item>`'s own attributes, from its vocabulary. */
 export interface UIItemAttributes {
   /**
@@ -24081,6 +24117,16 @@ export interface UIItemAttributes {
    * @deprecated write `kind` -- `prop:` stays only for compiled spell
    */
   "prop:kind"?: "item" | "header" | "divider"
+  /**
+   * A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.
+   * - takes:  text
+   */
+  closable?: string
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
+  "prop:closable"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
@@ -24317,11 +24363,17 @@ export interface UIItemAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UIItemEventMap["ui-closing"]) => void
 }
 
 /** `<ui-item>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UIItemJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIItemAttributes>, UIItemAttributes {}
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIItemEventMap>>, keyof UIItemAttributes>, UIItemAttributes {}
 
 /** `<ui-items>`'s own attributes, from its vocabulary. */
 export interface UIItemsAttributes {
@@ -32176,6 +32228,11 @@ export interface UIPanelEventMap {
     source: string
     error: unknown
   }>
+  /**
+   * `ui-dismissed`:  Its ✕ was clicked (`closable`):  the page closes it.  The panel doesn't hide itself, so the page can hide what it belongs to.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   */
+  "ui-dismissed": CustomEvent<{ originalEvent?: Event }>
 }
 
 /** `<ui-panel>`'s own attributes, from its vocabulary. */
@@ -32497,6 +32554,26 @@ export interface UIPanelAttributes {
    */
   "prop:selector"?: string
   /**
+   * A ✕ at the far end of its bar, after its actions and chevron, light until hovered:  a click sends `ui-dismissed`, and the page closes it (hides it, or the column it's in).  It never folds the panel.
+   * - takes:  flag (present / absent)
+   */
+  closable?: boolean | ""
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
+  "prop:closable"?: boolean | ""
+  /**
+   * With `closable`:  the ✕'s name and tooltip, what closing it does (`Hide the code`).  None:  `Close`.
+   * - takes:  text
+   */
+  "close-label"?: string
+  /**
+   * `close-label`, as the DOM element's property.
+   * @deprecated write `close-label` -- `prop:` stays only for compiled spell
+   */
+  "prop:closeLabel"?: string
+  /**
    * Failed, with what went wrong if it says:  `error="The server didn't answer"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot="error"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).
    * - takes:  text
    */
@@ -32785,6 +32862,11 @@ export interface UIPanelAttributes {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-error"?: (event: UIPanelEventMap["ui-error"]) => void
+  /**
+   * `ui-dismissed`:  Its ✕ was clicked (`closable`):  the page closes it.  The panel doesn't hide itself, so the page can hide what it belongs to.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   */
+  "on-ui-dismissed"?: (event: UIPanelEventMap["ui-dismissed"]) => void
 }
 
 /** `<ui-panel>` in JSX:  its own attributes, and HTML's global ones. */
@@ -46676,6 +46758,16 @@ export interface UISiteNavJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UISiteNavEventMap>>, keyof UISiteNavAttributes>,
     UISiteNavAttributes {}
 
+/** `<ui-site-nav-button>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UISiteNavButtonEventMap {
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{ originalEvent?: Event }>
+}
+
 /** `<ui-site-nav-button>`'s own attributes, from its vocabulary. */
 export interface UISiteNavButtonAttributes {
   /**
@@ -46863,6 +46955,16 @@ export interface UISiteNavButtonAttributes {
    * @deprecated write `kind` -- `prop:` stays only for compiled spell
    */
   "prop:kind"?: "item" | "header" | "divider"
+  /**
+   * A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.
+   * - takes:  text
+   */
+  closable?: string
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
+  "prop:closable"?: string
   /**
    * What it shows and hides:  the layout's `drawer` (its side navigation), or its `left` or `right` side bar.  With one for a side bar, a narrow layout hides that side bar behind it.
    * - takes:  `drawer` · `left` · `right`
@@ -47110,11 +47212,19 @@ export interface UISiteNavButtonAttributes {
    * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
    */
   "prop:onPlatform"?: string
+  /**
+   * `ui-closing`:  Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it.
+   * - `event.detail`:  `{ originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UISiteNavButtonEventMap["ui-closing"]) => void
 }
 
 /** `<ui-site-nav-button>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UISiteNavButtonJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UISiteNavButtonAttributes>, UISiteNavButtonAttributes {}
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UISiteNavButtonEventMap>>, keyof UISiteNavButtonAttributes>,
+    UISiteNavButtonAttributes {}
 
 /** `<ui-site-tabs>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISiteTabsEventMap {
@@ -57139,6 +57249,11 @@ export interface UIToolbarEventMap {
    * - `event.detail`:  `{}`
    */
   "ui-form-value": CustomEvent<{}>
+  /**
+   * `ui-item-dropped`:  `reorderable`:  `item` was dragged and dropped `place` (`before` or `after`) `target`, another item of the row.  The toolbar moves nothing:  the page does, as the row is its own.
+   * - `event.detail`:  `{ item: Element, target: Element, place: "before" | "after" }`
+   */
+  "ui-item-dropped": CustomEvent<{ item: Element; target: Element; place: "before" | "after" }>
 }
 
 /** `<ui-toolbar>`'s own attributes, from its vocabulary. */
@@ -57512,6 +57627,16 @@ export interface UIToolbarAttributes {
    */
   "prop:scrollFirst"?: boolean | ""
   /**
+   * `scroll-first` that never stops:  however narrow, its items scroll with `‹` / `›`, and it's never the dropdown.  For a row whose own button already lists every item (`max-visible`), such as a project's files.
+   * - takes:  flag (present / absent)
+   */
+  "scroll-only"?: boolean | ""
+  /**
+   * `scroll-only`, as the DOM element's property.
+   * @deprecated write `scroll-only` -- `prop:` stays only for compiled spell
+   */
+  "prop:scrollOnly"?: boolean | ""
+  /**
    * More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button lists every item while some aren't in view.  An item picked there joins the row, and the one chosen longest ago leaves it.
    * - takes:  text
    */
@@ -57541,6 +57666,16 @@ export interface UIToolbarAttributes {
    * @deprecated write `all-items-icon` -- `prop:` stays only for compiled spell
    */
   "prop:allItemsIcon"?: string
+  /**
+   * Its items can be dragged along the row:  the dragged one dimmed, a line where it would land, before or after the item under the pointer.  The drop sends `ui-item-dropped`;  the page puts it there (a project's files:  their order).  Escape puts it back.
+   * - takes:  flag (present / absent)
+   */
+  reorderable?: boolean | ""
+  /**
+   * `reorderable`, as the DOM element's property.
+   * @deprecated write `reorderable` -- `prop:` stays only for compiled spell
+   */
+  "prop:reorderable"?: boolean | ""
   /**
    * With `max-visible`:  the button listing every item sits at the toolbar's far end, however few items show.  Without it, it sits right after the last one.
    * - takes:  flag (present / absent)
@@ -57843,6 +57978,11 @@ export interface UIToolbarAttributes {
    * - `event.detail`:  `{}`
    */
   "on-ui-form-value"?: (event: UIToolbarEventMap["ui-form-value"]) => void
+  /**
+   * `ui-item-dropped`:  `reorderable`:  `item` was dragged and dropped `place` (`before` or `after`) `target`, another item of the row.  The toolbar moves nothing:  the page does, as the row is its own.
+   * - `event.detail`:  `{ item: Element, target: Element, place: "before" | "after" }`
+   */
+  "on-ui-item-dropped"?: (event: UIToolbarEventMap["ui-item-dropped"]) => void
 }
 
 /** `<ui-toolbar>` in JSX:  its own attributes, and HTML's global ones. */
@@ -62706,6 +62846,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
        *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
+       * - events:  `ui-closing`
        */
       "ui-action": UIActionJSXAttributes
       /**
@@ -63127,6 +63268,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
        *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
+       * - events:  `ui-closing`
        */
       "ui-item": UIItemJSXAttributes
       /**
@@ -63282,7 +63424,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
        *   - `loading`:  While `loading`:  shown in place of the content (a skeleton, its own words), the pane's veil gone;  empty, the veil as ever.
        *   - `error`:  While `error`:  shown in place of the content;  empty, the error's words (or "Couldn't load this.") and a Try again button.
-       * - events:  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
+       * - events:  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`, `ui-dismissed`
        */
       "ui-panel": UIPanelJSXAttributes
       /**
@@ -63570,6 +63712,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
        *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
+       * - events:  `ui-closing`
        */
       "ui-site-nav-button": UISiteNavButtonJSXAttributes
       /**
@@ -63765,7 +63908,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `title`:  After the icon:  the title, never squeezed.
        *   - `center`:  After the title, taking the room left, what's in it centred there:  e.g. a row of links.
        *   - `right`:  Last, pushed to the end:  e.g. search and settings.
-       * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`
+       * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`, `ui-item-dropped`
        */
       "ui-toolbar": UIToolbarJSXAttributes
       /**
@@ -63923,6 +64066,7 @@ export interface UIEventMap {
   "ui-drawn": CustomEvent<unknown>
   "ui-ready": CustomEvent<unknown>
   "ui-toggle": CustomEvent<unknown>
+  "ui-dismissed": CustomEvent<unknown>
   "ui-completed": CustomEvent<unknown>
   "ui-show-code": CustomEvent<unknown>
   "ui-replied": CustomEvent<unknown>
@@ -63935,6 +64079,7 @@ export interface UIEventMap {
   "ui-send": CustomEvent<unknown>
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
+  "ui-item-dropped": CustomEvent<unknown>
   "ui-starting": CustomEvent<unknown>
   "ui-started": CustomEvent<unknown>
   "ui-stepped": CustomEvent<unknown>
@@ -63963,7 +64108,7 @@ export interface UIEventMap {
 declare global {
   interface HTMLElementTagNameMap {
     "ui-accordion": UIHTMLElement<UIAccordionEventMap>
-    "ui-action": HTMLElement
+    "ui-action": UIHTMLElement<UIActionEventMap>
     "ui-actions": HTMLElement
     "ui-ad": HTMLElement
     "ui-app-menu": UIHTMLElement<UIAppMenuEventMap>
@@ -64020,7 +64165,7 @@ declare global {
     "ui-images": HTMLElement
     "ui-include": UIHTMLElement<UIIncludeEventMap>
     "ui-input": UIHTMLElement<UIInputEventMap>
-    "ui-item": HTMLElement
+    "ui-item": UIHTMLElement<UIItemEventMap>
     "ui-items": HTMLElement
     "ui-json": UIHTMLElement<UIJsonEventMap>
     "ui-keys": HTMLElement
@@ -64073,7 +64218,7 @@ declare global {
     "ui-site-breadcrumbs": HTMLElement
     "ui-site-links": HTMLElement
     "ui-site-nav": UIHTMLElement<UISiteNavEventMap>
-    "ui-site-nav-button": HTMLElement
+    "ui-site-nav-button": UIHTMLElement<UISiteNavButtonEventMap>
     "ui-site-tabs": UIHTMLElement<UISiteTabsEventMap>
     "ui-slider": UIHTMLElement<UISliderEventMap>
     "ui-space": HTMLElement

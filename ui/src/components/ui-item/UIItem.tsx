@@ -46,6 +46,13 @@ import itemCSS from "./UIItem.css?inline"
  *
  * - `active` is an ALIAS of `selected` (Fomantic's word), read from the DOM element's attribute.
  *
+ * - `closable`:  a tab you can close (the editor's file tabs;  epic `editor` T77, T82, moved here by T145).
+ *   - A ✕ in its icon's place while it's hovered, the icon hidden, both in one cell:  no tab grows or moves.
+ *   - `closable="when-limited"`:  only while its toolbar has items put away (`ItemContext.limited`).
+ *   - A click on the ✕, a middle click or Delete sends `ui-closing`;  unless cancelled, its owner closes it
+ *     (`<ui-toolbar>`'s `closeItem()`), and a chosen item's neighbour is chosen in its place, as a click would.
+ *   - The ✕'s click is its own:  it neither chooses the item nor starts a drag.
+ *
  * - A part (`elementSetup.isAPart`):  transparent to other parts' climbs,
  *   so a `<ui-header>` inside an item in a list is the LIST's header (`.ui.list > .item > .content > .header`).
  *   - Except in the Items view (`<ui-items>`):
@@ -255,6 +262,99 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   }
 
   ////////////////
+  // ## Dragged along a row (`<ui-toolbar reorderable>`)
+  ////////////////
+
+  /** Its part in a drag along its toolbar's row, which the toolbar sets:  dragged, or where the dragged one lands. */
+  @E.state accessor dragMark: DragMark | undefined = undefined
+
+  /** Being dragged:  `:state(dragged)`, dimmed by its toolbar's sheet. */
+  @E.cssState("dragged")
+  get isDragged(): boolean {
+    return this.dragMark === "dragged"
+  }
+
+  /** The dragged item would land before it:  `:state(drop-before)`. */
+  @E.cssState("drop-before")
+  get isDropBefore(): boolean {
+    return this.dragMark === "before"
+  }
+
+  /** The dragged item would land after it:  `:state(drop-after)`. */
+  @E.cssState("drop-after")
+  get isDropAfter(): boolean {
+    return this.dragMark === "after"
+  }
+
+  ////////////////
+  // ## Closing (`closable`)
+  ////////////////
+
+  /** It shows its ✕ now:  `closable`, and with `when-limited` only while its toolbar has items put away. */
+  get canClose(): boolean {
+    const closable = this.attributes[CLOSABLE]
+    if (closable == null || this.kind !== UIT.ITEM || !this.itemContext) return false
+    if (closable === WHEN_LIMITED) return !!this.itemContext.limited
+    return E.Converters.boolean(closable, CLOSABLE)
+  }
+
+  /** The ✕'s glyph, while it can close. */
+  readonly closeGlyph = new E.IconGlyph({ owner: this, name: () => (this.canClose ? UIT.CLOSE_ICON : undefined) })
+
+  /**
+   * Close it:  `ui-closing`, then, unless cancelled, its owner closes it (`<ui-toolbar>`'s `closeItem()`);
+   * a chosen item's neighbour is chosen in its place, as a click on it would.
+   */
+  @E.untracked
+  requestClose(originalEvent?: Event) {
+    if (!this.canClose || !this.send("ui-closing", { originalEvent })) return
+    const owner = this.context.ownerComponent<E.UIComponent & ClosingOwner>()
+    const next = owner?.closeItem?.(this.domElement)
+    const box = next && ((next as E.DOMElement).component as UIItem | undefined)?.focusTarget
+    box?.click()
+  }
+
+  /** A click on the ✕:  its own, never choosing the item. */
+  private readonly onCloseClick = (event: MouseEvent) => {
+    event.stopPropagation()
+    event.preventDefault()
+    this.requestClose(event)
+  }
+
+  /** A press on the ✕:  its own, never the start of a drag. */
+  private readonly onClosePress = (event: PointerEvent) => event.stopPropagation()
+
+  /** A middle click on a closable item closes it, as a browser's own tabs do. */
+  private readonly onAuxClick = (event: MouseEvent) => {
+    if (event.button !== 1 || !this.canClose) return
+    event.preventDefault()
+    this.requestClose(event)
+  }
+
+  /** Delete on a closable item closes it. */
+  private readonly onBoxKey = (event: KeyboardEvent) => {
+    if (event.key !== UIT.Key.delete || !this.canClose) return
+    event.preventDefault()
+    this.requestClose(event)
+  }
+
+  /** The ✕, over the icon's place, shown while hovered. */
+  private closeMark(): JSX.Element {
+    return (
+      <span
+        class={CLOSE}
+        part={this.partForName(CLOSE)}
+        aria-hidden="true"
+        title={this.translationForKey(CLOSE)}
+        onClick={this.onCloseClick}
+        onPointerDown={this.onClosePress}
+      >
+        {this.closeGlyph.svg}
+      </span>
+    )
+  }
+
+  ////////////////
   // ## Icon and image
   ////////////////
 
@@ -440,6 +540,8 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         aria-haspopup={this.rootTag === "button" ? this.boxHasPopup : undefined}
         aria-expanded={this.rootTag === "button" ? this.boxExpanded : undefined}
         data-value={this.value}
+        onAuxClick={this.onAuxClick}
+        onKeyDown={this.onBoxKey}
       >
         <Show when={this.isInTicks}>
           <span class={TICK} part={this.partForName(TICK)} aria-hidden="true">
@@ -457,8 +559,13 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
           />
         </Show>
         <Show when={this.hasIcon || this.isInIconColumn}>
-          <span class={UIT.ICON} part={this.partForName("icon")}>
-            <slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>
+          <span class={[UIT.ICON, { [CLOSABLE]: this.canClose }]} part={this.partForName("icon")}>
+            <Show when={this.canClose} fallback={<slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>}>
+              <span class={GLYPH}>
+                <slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>
+              </span>
+              {this.closeMark()}
+            </Show>
           </span>
         </Show>
         <Show when={this.letterIcon}>
@@ -516,6 +623,12 @@ export interface UIItem extends E.AttributeValues<typeof itemVocabulary> {}
 /** An owner's component as the item first sees it:  `itemContext` only when it renders items (`ItemOwner`). */
 type ItemOwnerComponent = E.UIComponent & Partial<UIT.ItemOwner>
 
+/** An item's part in a drag along its toolbar's row:  the one dragged, or where it would land beside this one. */
+export type DragMark = "dragged" | "before" | "after"
+
+/** An owner that closes its items (`<ui-toolbar>`):  answers the item to choose in a closed chosen one's place. */
+type ClosingOwner = { closeItem?: (item: Element) => Element | undefined }
+
 /** Root element names. */
 type RootTag = "a" | "button" | "div"
 
@@ -534,6 +647,15 @@ const IMAGE_CLASS = "ui avatar image"
 
 /** Class word and part of the title box, in a `shrinkable` menu. */
 const TITLE = "title"
+
+/** The `closable` attribute, and the icon box's class word while it shows its ✕. */
+const CLOSABLE = "closable"
+/** `closable`'s value for a ✕ only while its toolbar has items put away. */
+const WHEN_LIMITED = "when-limited"
+/** Class word and part of the ✕, and its text's key. */
+const CLOSE = "close"
+/** Class word of the box around the icon's glyph, sharing its cell with the ✕. */
+const GLYPH = "glyph"
 
 /** Class word of the `badge` slot's box. */
 const BADGE = "badge"

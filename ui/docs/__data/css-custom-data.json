@@ -4384,6 +4384,20 @@
       }
     },
     {
+      "name": "--ui-item-close-size",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-item>`'s token.  Default:  `0.8em`"
+      }
+    },
+    {
+      "name": "--ui-item-close-opacity",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-item>`'s token.  Default:  `0.6`"
+      }
+    },
+    {
       "name": "--ui-item-tick-width",
       "description": {
         "kind": "markdown",
@@ -7356,6 +7370,27 @@
       "description": {
         "kind": "markdown",
         "value": "how far under the bar the top shade starts: under a line of the body's that sticks at its top\n\n`<ui-panel>`'s token.  Default:  `0px`"
+      }
+    },
+    {
+      "name": "--ui-panel-close-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-panel>`'s token.  Default:  `color-mix(in oklab, var(--ui-text-muted) 50%, transparent)`"
+      }
+    },
+    {
+      "name": "--ui-panel-close-hover-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-panel>`'s token.  Default:  `var(--ui-text-color)`"
+      }
+    },
+    {
+      "name": "--ui-panel-close-end",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-panel>`'s token.  Default:  `4px`"
       }
     },
     {
@@ -11480,7 +11515,7 @@
       "name": "::part(close)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-flyout>`:  The close icon of a `closable` flyout.\n- `<ui-message>`:  The close button of a `dismissible` message.\n- `<ui-modal>`:  The close icon of a `closable` modal.\n- `<ui-nag>`:  The close icon.\n- `<ui-toast>`:  The close icon of a `closable` toast.\n- `<ui-tour>`:  The box's close icon."
+        "value": "Part of:\n\n- `<ui-action>`:  A `closable` item's ✕, in its icon's place while hovered.\n- `<ui-flyout>`:  The close icon of a `closable` flyout.\n- `<ui-item>`:  A `closable` item's ✕, in its icon's place while hovered.\n- `<ui-message>`:  The close button of a `dismissible` message.\n- `<ui-modal>`:  The close icon of a `closable` modal.\n- `<ui-nag>`:  The close icon.\n- `<ui-panel>`:  With `closable`:  the ✕ at the bar's far end.\n- `<ui-site-nav-button>`:  A `closable` item's ✕, in its icon's place while hovered.\n- `<ui-toast>`:  The close icon of a `closable` toast.\n- `<ui-tour>`:  The box's close icon."
       }
     },
     {
@@ -13285,6 +13320,13 @@
       }
     },
     {
+      "name": ":state(dragged)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-action>`:  Being dragged along a `<ui-toolbar reorderable>`'s row.\n- `<ui-item>`:  Being dragged along a `<ui-toolbar reorderable>`'s row.\n- `<ui-site-nav-button>`:  Being dragged along a `<ui-toolbar reorderable>`'s row."
+      }
+    },
+    {
       "name": ":state(dragged-over)",
       "description": {
         "kind": "markdown",
@@ -13317,6 +13359,20 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-graph>`:  It shows a node's children instead of its graph."
+      }
+    },
+    {
+      "name": ":state(drop-after)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-action>`:  Where a dragged item of the row would land:  after this one.\n- `<ui-item>`:  Where a dragged item of the row would land:  after this one.\n- `<ui-site-nav-button>`:  Where a dragged item of the row would land:  after this one."
+      }
+    },
+    {
+      "name": ":state(drop-before)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-action>`:  Where a dragged item of the row would land:  before this one.\n- `<ui-item>`:  Where a dragged item of the row would land:  before this one.\n- `<ui-site-nav-button>`:  Where a dragged item of the row would land:  before this one."
       }
     },
     {

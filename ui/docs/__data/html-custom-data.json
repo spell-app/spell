@@ -432,7 +432,7 @@
       "name": "ui-action",
       "description": {
         "kind": "markdown",
-        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`, `badge`"
+        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`, `badge`\n\n**Events:**  `ui-closing`"
       },
       "attributes": [
         {
@@ -633,6 +633,13 @@
               "name": "divider"
             }
           ]
+        },
+        {
+          "name": "closable",
+          "description": {
+            "kind": "markdown",
+            "value": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.\n\nTakes:  text"
+          }
         },
         {
           "name": "shortcut",
@@ -27101,7 +27108,7 @@
       "name": "ui-item",
       "description": {
         "kind": "markdown",
-        "value": "An item of a dropdown, list, menu or Items view.\n\nAlso known as:  list item, media object, row.\n\n**Slots:**  default, `icon`, `badge`"
+        "value": "An item of a dropdown, list, menu or Items view.\n\nAlso known as:  list item, media object, row.\n\n**Slots:**  default, `icon`, `badge`\n\n**Events:**  `ui-closing`"
       },
       "attributes": [
         {
@@ -27302,6 +27309,13 @@
               "name": "divider"
             }
           ]
+        },
+        {
+          "name": "closable",
+          "description": {
+            "kind": "markdown",
+            "value": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.\n\nTakes:  text"
+          }
         },
         {
           "name": "loading",
@@ -36328,7 +36342,7 @@
       "name": "ui-panel",
       "description": {
         "kind": "markdown",
-        "value": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`, `loading`, `error`\n\n**Events:**  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
+        "value": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`, `loading`, `error`\n\n**Events:**  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`, `ui-dismissed`"
       },
       "attributes": [
         {
@@ -36704,6 +36718,20 @@
           "description": {
             "kind": "markdown",
             "value": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "closable",
+          "description": {
+            "kind": "markdown",
+            "value": "A ✕ at the far end of its bar, after its actions and chevron, light until hovered:  a click sends `ui-dismissed`, and the page closes it (hides it, or the column it's in).  It never folds the panel.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "close-label",
+          "description": {
+            "kind": "markdown",
+            "value": "With `closable`:  the ✕'s name and tooltip, what closing it does (`Hide the code`).  None:  `Close`.\n\nTakes:  text"
           }
         },
         {
@@ -52346,7 +52374,7 @@
       "name": "ui-site-nav-button",
       "description": {
         "kind": "markdown",
-        "value": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu.\n\nAlso known as:  side bar button, drawer button, hamburger, menu button, navigation toggle, sidebar toggle.\n\n**Slots:**  default, `icon`, `badge`"
+        "value": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu.\n\nAlso known as:  side bar button, drawer button, hamburger, menu button, navigation toggle, sidebar toggle.\n\n**Slots:**  default, `icon`, `badge`\n\n**Events:**  `ui-closing`"
       },
       "attributes": [
         {
@@ -52547,6 +52575,13 @@
               "name": "divider"
             }
           ]
+        },
+        {
+          "name": "closable",
+          "description": {
+            "kind": "markdown",
+            "value": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.\n\nTakes:  text"
+          }
         },
         {
           "name": "toggles",
@@ -64173,7 +64208,7 @@
       "name": "ui-toolbar",
       "description": {
         "kind": "markdown",
-        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`, `ui-changed`, `ui-form-value`"
+        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`, `ui-changed`, `ui-form-value`, `ui-item-dropped`"
       },
       "attributes": [
         {
@@ -64628,6 +64663,13 @@
           }
         },
         {
+          "name": "scroll-only",
+          "description": {
+            "kind": "markdown",
+            "value": "`scroll-first` that never stops:  however narrow, its items scroll with `‹` / `›`, and it's never the dropdown.  For a row whose own button already lists every item (`max-visible`), such as a project's files.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "max-visible",
           "description": {
             "kind": "markdown",
@@ -64646,6 +64688,13 @@
           "description": {
             "kind": "markdown",
             "value": "With `max-visible`:  an icon before the caret of the button listing every item, saying what they are (a project's files:  `file outline`).  Without it, the button is the caret alone.\n\nTakes:  icon name"
+          }
+        },
+        {
+          "name": "reorderable",
+          "description": {
+            "kind": "markdown",
+            "value": "Its items can be dragged along the row:  the dragged one dimmed, a line where it would land, before or after the item under the pointer.  The drop sends `ui-item-dropped`;  the page puts it there (a project's files:  their order).  Escape puts it back.\n\nTakes:  flag (present / absent)"
           }
         },
         {

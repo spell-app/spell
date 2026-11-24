@@ -186,6 +186,11 @@ export type ItemContext = {
    * Where the item sits in its pill (`<ui-toolbar appearance="pills">`):  each run of items between two dividers is
    * one rounded track, and the item draws its piece of it (classes `pill`, `pill-start`, `pill-end`).
    */
+  /**
+   * Its toolbar has items put away (`<ui-toolbar max-visible>`'s `:state(limited)`):
+   * a `closable="when-limited"` item shows its ✕ only then.
+   */
+  limited?: boolean
   pill?: PillPlace
 }
 

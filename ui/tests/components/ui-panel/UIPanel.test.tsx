@@ -63,9 +63,15 @@ describe("<ui-panel> structure", () => {
 
   it("takes every `<ui-section>` attribute, slot, part, event and state (so the section's new ones reach it)", () => {
     const names = (specs: readonly { name: string }[]) => specs.map((spec) => spec.name)
-    for (const key of ["attributes", "slots", "parts", "events"] as const) {
-      expect(names(panelVocabulary[key])).toEqual(names(sectionVocabulary[key]))
-    }
+    expect(names(panelVocabulary.slots)).toEqual(names(sectionVocabulary.slots))
+    // and its ✕'s:  `closable`, `close-label`, its part and `ui-dismissed`
+    expect(names(panelVocabulary.attributes)).toEqual([
+      ...names(sectionVocabulary.attributes),
+      "closable",
+      "close-label"
+    ])
+    expect(names(panelVocabulary.parts)).toEqual([...names(sectionVocabulary.parts), "close"])
+    expect(names(panelVocabulary.events)).toEqual([...names(sectionVocabulary.events), "ui-dismissed"])
     // and a pane's scroll shades' two
     expect(names(panelVocabulary.states)).toEqual([...names(sectionVocabulary.states), "more-above", "more-below"])
     expect(UIPanel.prototype.vocabulary.tag).toBe("ui-panel")
@@ -478,5 +484,47 @@ describe('<ui-panel appearance="pane"> scroll shades', () => {
   it("leaves a panel that isn't a pane alone", async () => {
     const host = await ElementFixture.render(`<ui-panel label="Theme"><p>fields</p></ui-panel>`)
     expect(host.shadowRoot!.querySelector(".scroll.shade")).toBeNull()
+  })
+})
+
+describe("<ui-panel closable>", () => {
+  /** A pane with a toolbar in its bar's actions, and a ✕ last. */
+  const PANE = `<div style="width: 400px"><ui-panel appearance="pane" label="Files" closable close-label="Hide the code">
+    <ui-toolbar slot="actions" appearance="segmented link header" tabs><ui-item selected>A</ui-item></ui-toolbar>
+    <p>code</p></ui-panel></div>`
+
+  it("draws a ✕ last in its bar, named by `close-label`, with it as a tooltip", async () => {
+    const box = await ElementFixture.render(PANE)
+    const host = box.querySelector("ui-panel")!
+    const close = host.shadowRoot!.querySelector<HTMLButtonElement>("[part~=close]")!
+    expect(close).not.toBeNull()
+    expect(close.getAttribute("aria-label")).toBe("Hide the code")
+    expect(close.parentElement!.title).toBe("Hide the code")
+    const bar = host.shadowRoot!.querySelector("[part~=title]")!
+    expect(bar.lastElementChild).toBe(close.parentElement)
+    await expectAccessible(box)
+  })
+
+  it("a click sends `ui-dismissed`, and neither hides nor folds the panel", async () => {
+    const host = await ElementFixture.render(`<ui-panel label="Theme" collapsible closable><p>fields</p></ui-panel>`)
+    const dismissed = vi.fn()
+    host.addEventListener("ui-dismissed", dismissed)
+    host.shadowRoot!.querySelector<HTMLButtonElement>("[part~=close]")!.click()
+    await ElementFixture.settle()
+    expect(dismissed).toHaveBeenCalledOnce()
+    expect(host.hidden).toBe(false)
+    expect(host.matches(":state(collapsed)")).toBe(false)
+  })
+
+  it("is named Close with no `close-label`, and is light until hovered", async () => {
+    const host = await ElementFixture.render(`<ui-panel label="Theme" closable><p>fields</p></ui-panel>`)
+    const close = host.shadowRoot!.querySelector<HTMLButtonElement>("[part~=close]")!
+    expect(close.getAttribute("aria-label")).toBe("Close")
+    expect(getComputedStyle(close).color).not.toBe(probe("var(--ui-text-color)"))
+  })
+
+  it("draws no ✕ without `closable`", async () => {
+    const host = await ElementFixture.render(`<ui-panel label="Theme"><p>fields</p></ui-panel>`)
+    expect(host.shadowRoot!.querySelector("[part~=close]")).toBeNull()
   })
 })

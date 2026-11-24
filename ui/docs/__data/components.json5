@@ -708,6 +708,11 @@
           "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`."
         },
         {
+          "name": "closable",
+          "kind": "string",
+          "description": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place."
+        },
+        {
           "name": "action",
           "kind": "json",
           "reflect": false,
@@ -893,7 +898,14 @@
           "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "name": "ui-closing",
+          "detail": "{ originalEvent?: Event }",
+          "cancelable": true,
+          "description": "Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it."
+        }
+      ],
       "parts": [
         {
           "name": "item",
@@ -920,6 +932,10 @@
           "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
         },
         {
+          "name": "close",
+          "description": "A `closable` item's ✕, in its icon's place while hovered."
+        },
+        {
           "name": "shortcut",
           "description": "The key caps of its shortcut, at the end:  a `<kbd>` each."
         }
@@ -932,6 +948,18 @@
         {
           "name": "disabled",
           "description": "Can't be chosen."
+        },
+        {
+          "name": "dragged",
+          "description": "Being dragged along a `<ui-toolbar reorderable>`'s row."
+        },
+        {
+          "name": "drop-before",
+          "description": "Where a dragged item of the row would land:  before this one."
+        },
+        {
+          "name": "drop-after",
+          "description": "Where a dragged item of the row would land:  after this one."
         },
         {
           "name": "icon-only",
@@ -22127,6 +22155,11 @@
           "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`."
         },
         {
+          "name": "closable",
+          "kind": "string",
+          "description": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place."
+        },
+        {
           "name": "loading",
           "kind": "boolean",
           "shared": true,
@@ -22296,7 +22329,14 @@
           "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "name": "ui-closing",
+          "detail": "{ originalEvent?: Event }",
+          "cancelable": true,
+          "description": "Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it."
+        }
+      ],
       "parts": [
         {
           "name": "item",
@@ -22321,6 +22361,10 @@
         {
           "name": "tick",
           "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+        },
+        {
+          "name": "close",
+          "description": "A `closable` item's ✕, in its icon's place while hovered."
         }
       ],
       "states": [
@@ -22331,6 +22375,18 @@
         {
           "name": "disabled",
           "description": "Can't be chosen."
+        },
+        {
+          "name": "dragged",
+          "description": "Being dragged along a `<ui-toolbar reorderable>`'s row."
+        },
+        {
+          "name": "drop-before",
+          "description": "Where a dragged item of the row would land:  before this one."
+        },
+        {
+          "name": "drop-after",
+          "description": "Where a dragged item of the row would land:  after this one."
         },
         {
           "name": "loading",
@@ -22377,7 +22433,13 @@
           "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
-      "texts": [],
+      "texts": [
+        {
+          "key": "close",
+          "text": "Close",
+          "description": "A `closable` item's ✕:  its tooltip."
+        }
+      ],
       "mainTag": "ui-item",
       "main": true,
       "page": true,
@@ -30119,6 +30181,16 @@
           "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`."
         },
         {
+          "name": "closable",
+          "kind": "boolean",
+          "description": "A ✕ at the far end of its bar, after its actions and chevron, light until hovered:  a click sends `ui-dismissed`, and the page closes it (hides it, or the column it's in).  It never folds the panel."
+        },
+        {
+          "name": "close-label",
+          "kind": "string",
+          "description": "With `closable`:  the ✕'s name and tooltip, what closing it does (`Hide the code`).  None:  `Close`."
+        },
+        {
           "name": "error",
           "kind": "string",
           "property": "sharedError",
@@ -30361,6 +30433,11 @@
           "detail": "{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'render', source: string, error: unknown }",
           "cancelable": true,
           "description": "The `source` file couldn't be loaded or shown;  `kind` says why.  An error line shows in the content unless cancelled;  opening it again tries again."
+        },
+        {
+          "name": "ui-dismissed",
+          "detail": "{ originalEvent?: Event }",
+          "description": "Its ✕ was clicked (`closable`):  the page closes it.  The panel doesn't hide itself, so the page can hide what it belongs to."
         }
       ],
       "parts": [
@@ -30423,6 +30500,10 @@
         {
           "name": "error-pane",
           "description": "The box round the `error` slot, or the error message and Try again."
+        },
+        {
+          "name": "close",
+          "description": "With `closable`:  the ✕ at the bar's far end."
         }
       ],
       "states": [
@@ -30586,6 +30667,11 @@
           "key": "sourceRenderError",
           "text": "Couldn't show {source}.",
           "description": "The text arrived, but couldn't be shown."
+        },
+        {
+          "key": "close",
+          "text": "Close",
+          "description": "The ✕'s name and tooltip, with `closable` and no `close-label`."
         }
       ],
       "mainTag": "ui-panel",
@@ -43710,6 +43796,11 @@
           "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`."
         },
         {
+          "name": "closable",
+          "kind": "string",
+          "description": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place."
+        },
+        {
           "name": "toggles",
           "kind": "valueOnly",
           "values": [
@@ -43890,7 +43981,14 @@
           "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "name": "ui-closing",
+          "detail": "{ originalEvent?: Event }",
+          "cancelable": true,
+          "description": "Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it."
+        }
+      ],
       "parts": [
         {
           "name": "item",
@@ -43915,6 +44013,10 @@
         {
           "name": "tick",
           "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+        },
+        {
+          "name": "close",
+          "description": "A `closable` item's ✕, in its icon's place while hovered."
         }
       ],
       "states": [
@@ -43925,6 +44027,18 @@
         {
           "name": "disabled",
           "description": "Can't be chosen."
+        },
+        {
+          "name": "dragged",
+          "description": "Being dragged along a `<ui-toolbar reorderable>`'s row."
+        },
+        {
+          "name": "drop-before",
+          "description": "Where a dragged item of the row would land:  before this one."
+        },
+        {
+          "name": "drop-after",
+          "description": "Where a dragged item of the row would land:  after this one."
         },
         {
           "name": "loading",
@@ -54543,6 +54657,11 @@
           "description": "With `shrinkable`:  once only its icons are left, they scroll with `‹` / `›`, no overflow button.  With a `segmented` look too:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files."
         },
         {
+          "name": "scroll-only",
+          "kind": "boolean",
+          "description": "`scroll-first` that never stops:  however narrow, its items scroll with `‹` / `›`, and it's never the dropdown.  For a row whose own button already lists every item (`max-visible`), such as a project's files."
+        },
+        {
           "name": "max-visible",
           "kind": "string",
           "description": "More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button lists every item while some aren't in view.  An item picked there joins the row, and the one chosen longest ago leaves it."
@@ -54556,6 +54675,11 @@
           "name": "all-items-icon",
           "kind": "icon",
           "description": "With `max-visible`:  an icon before the caret of the button listing every item, saying what they are (a project's files:  `file outline`).  Without it, the button is the caret alone."
+        },
+        {
+          "name": "reorderable",
+          "kind": "boolean",
+          "description": "Its items can be dragged along the row:  the dragged one dimmed, a line where it would land, before or after the item under the pointer.  The drop sends `ui-item-dropped`;  the page puts it there (a project's files:  their order).  Escape puts it back."
         },
         {
           "name": "all-items-at-end",
@@ -54784,6 +54908,11 @@
           "name": "ui-form-value",
           "detail": "{}",
           "description": "A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it."
+        },
+        {
+          "name": "ui-item-dropped",
+          "detail": "{ item: Element, target: Element, place: \"before\" | \"after\" }",
+          "description": "`reorderable`:  `item` was dragged and dropped `place` (`before` or `after`) `target`, another item of the row.  The toolbar moves nothing:  the page does, as the row is its own."
         }
       ],
       "parts": [
@@ -66313,6 +66442,16 @@
       ],
       "tokens": [
         {
+          "name": "--ui-item-close-size",
+          "default": "0.8em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-item-close-opacity",
+          "default": "0.6",
+          "type": "number"
+        },
+        {
           "name": "--ui-item-tick-width",
           "default": "1em",
           "type": "length"
@@ -68667,6 +68806,21 @@
           "name": "--ui-panel-scroll-shade-top",
           "default": "0px",
           "description": "how far under the bar the top shade starts: under a line of the body's that sticks at its top",
+          "type": "length"
+        },
+        {
+          "name": "--ui-panel-close-color",
+          "default": "color-mix(in oklab, var(--ui-text-muted) 50%, transparent)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-panel-close-hover-color",
+          "default": "var(--ui-text-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-panel-close-end",
+          "default": "4px",
           "type": "length"
         },
         {

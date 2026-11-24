@@ -45,6 +45,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "selected",
       "padding",
       "kind",
+      "closable",
       "action",
       "shortcut",
       "icon-only"
@@ -764,7 +765,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "disabled",
       "selected",
       "padding",
-      "kind"
+      "kind",
+      "closable"
     ]
   },
   "ui-items": {
@@ -1013,7 +1015,9 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "loading",
       "disabled",
       "source",
-      "selector"
+      "selector",
+      "closable",
+      "close-label"
     ]
   },
   "ui-placeholder": { folder: "ui-placeholder", attributes: ["fluid", "inverted"] },
@@ -1442,6 +1446,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "selected",
       "padding",
       "kind",
+      "closable",
       "toggles"
     ]
   },
@@ -1748,9 +1753,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "interactive",
       "show-keys",
       "scroll-first",
+      "scroll-only",
       "max-visible",
       "remember",
       "all-items-icon",
+      "reorderable",
       "all-items-at-end"
     ],
     formControl: true

@@ -36,6 +36,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
     { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] },
+    { name: "closable", kind: "string", group: "behaviour" },
     { name: "action", kind: "json", group: "behaviour" },
     { name: "shortcut", kind: "string", group: "content" },
     { name: "icon-only", kind: "keyOnly", group: "appearance" }
@@ -806,7 +807,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
-    { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] }
+    { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] },
+    { name: "closable", kind: "string", group: "behaviour" }
   ],
   "ui-items": [
     { name: "size", kind: "size", group: "appearance" },
@@ -1099,7 +1101,9 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "loading", kind: "keyOnly", group: "states" },
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "source", kind: "string" },
-    { name: "selector", kind: "string" }
+    { name: "selector", kind: "string" },
+    { name: "closable", kind: "boolean", group: "behaviour" },
+    { name: "close-label", kind: "string", group: "content" }
   ],
   "ui-placeholder": [
     { name: "fluid", kind: "keyOnly", group: "layout" },
@@ -1605,6 +1609,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
     { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] },
+    { name: "closable", kind: "string", group: "behaviour" },
     { name: "toggles", kind: "valueOnly", group: "behaviour", values: ["drawer", "left", "right"] }
   ],
   "ui-site-tabs": [
@@ -1955,9 +1960,11 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "interactive", kind: "boolean", group: "behaviour" },
     { name: "show-keys", kind: "boolean", group: "content" },
     { name: "scroll-first", kind: "boolean", group: "layout" },
+    { name: "scroll-only", kind: "boolean", group: "layout" },
     { name: "max-visible", kind: "string", group: "layout" },
     { name: "remember", kind: "string", group: "layout" },
     { name: "all-items-icon", kind: "icon", group: "content" },
+    { name: "reorderable", kind: "boolean", group: "behaviour" },
     { name: "all-items-at-end", kind: "boolean", group: "layout" }
   ],
   "ui-tour": [

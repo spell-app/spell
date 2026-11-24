@@ -1,6 +1,9 @@
 <!-- <ui-action>'s property editor layout:  move, pair (<ui-fields>) or leave out (data-omit) its properties.  How:  Spell UI's AGENTS.md, "Property editor layouts". -->
 <!-- Owen (epic `editor` I208):  one Appearance section;  no Name, Content, Form, Link or Behaviour:  an action's words, icon and what it does are its action's. -->
-<ui-property-editor schema="ui-action" data-omit="description image flag kind shortcut value link target action">
+<ui-property-editor
+  schema="ui-action"
+  data-omit="description image flag kind shortcut value link target action closable"
+>
   <ui-property-group label="Appearance" data-group="appearance">
     <ui-fields>
       <ui-property name="label"></ui-property>

@@ -678,6 +678,11 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
     return undefined
   }
 
+  /** Drawn last in the title bar, after the chevron:  for a subclass (a panel's ✕);  nothing here. */
+  protected titleBarLast(): JSX.Element {
+    return undefined
+  }
+
   /** The content box's inline style:  its `height`;  a subclass may add its own (a property group's columns). */
   protected get contentStyle(): Record<string, string> | undefined {
     return this.height ? { [HEIGHT_PROPERTY]: this.height } : undefined
@@ -741,6 +746,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
         </Show>
         {this.titleBarEnd()}
         <Show when={this.isCollapsible && this.foldIconIsAtEnd}>{this.foldChevron(this.onFoldIconClick)}</Show>
+        {this.titleBarLast()}
         <Show when={this.hasDescription}>
           <span id={TIP_ID} class={TIP} part={this.partForName("tip")} role="tooltip">
             <slot name={this.slotForName("description")}>{this.descriptionText}</slot>

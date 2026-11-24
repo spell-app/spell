@@ -11,6 +11,8 @@ export const panelEs = {
   tag: "ui-panel",
   name: "panel",
   aka: ["panel", "sección", "inspector", "panel de propiedades", "panel de ajustes"],
+  attributes: { "close-label": "etiqueta-cerrar" },
+  events: { "ui-dismissed": "descartado" },
   texts: {
     loading: "Cargando…",
     closeSection: "Cerrar esta sección",
@@ -19,6 +21,7 @@ export const panelEs = {
     sourceCrossOrigin: "No se puede mostrar {source}:  solo se pueden mostrar archivos de este sitio.",
     sourceFileProtocol:
       "No se puede cargar {source}:  esta página se abrió desde el disco.  Ábrela desde un servidor web para verla.",
-    sourceRenderError: "No se pudo mostrar {source}."
+    sourceRenderError: "No se pudo mostrar {source}.",
+    close: "Cerrar"
   }
 } as const satisfies E.TagDictionary
