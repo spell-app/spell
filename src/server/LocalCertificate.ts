@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
 import { X509Certificate } from "node:crypto"
-import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs"
 import { isIPv6 } from "node:net"
 import { homedir } from "node:os"
 import { join } from "node:path"
@@ -17,7 +17,8 @@ import { join } from "node:path"
  * - `undo()`:  the files go;  the authority stays trusted, since the house-network site's certificate needs it too
  * - Every outside program goes through `CertificateTools`, so tests run none of them.
  * - Node built-ins only:  the kit's server and the app's command line both use it.
- * - Firefox keeps a list of its own:  mkcert fills it only with `certutil` installed (the page server guide).
+ * - Firefox keeps a list of its own, apart from the Mac's (`firefox`):  mkcert fills it only with NSS's `certutil`
+ *   installed (`brew install nss`), and only for a profile Firefox has made (`trustInFirefox()`).
  ****************/
 export class LocalCertificate {
   /** the folder its two files are in */
@@ -38,12 +39,20 @@ export class LocalCertificate {
   /** `process.platform` */
   private readonly platform: string
 
+  /** where Firefox may be installed:  each a path to its app */
+  private readonly firefoxApps: string[]
+
+  /** the folder Firefox keeps its profiles in, each with its own list of trusted certificates */
+  private readonly firefoxProfiles: string
+
   constructor({
     folder,
     names,
     file = "certificate",
     tools = certificateTools(),
-    platform = process.platform
+    platform = process.platform,
+    firefoxApps = FIREFOX_APPS,
+    firefoxProfiles = FIREFOX_PROFILES
   }: LocalCertificateProps) {
     this.folder = folder
     this.names = names
@@ -51,6 +60,8 @@ export class LocalCertificate {
     this.key = join(folder, `${file}-key.pem`)
     this.tools = tools
     this.platform = platform
+    this.firefoxApps = firefoxApps
+    this.firefoxProfiles = firefoxProfiles
   }
 
   /**
@@ -105,6 +116,25 @@ export class LocalCertificate {
       "-s",
       this.names[0]!
     ])
+  }
+
+  /**
+   * Whether Firefox trusts it too:  it keeps its own list of trusted certificates, apart from the Mac's.
+   * - `"none"`:  no Firefox installed, or not a Mac
+   * - `"no-nss"`:  Firefox, but no `certutil` (NSS, `brew install nss`), which mkcert needs to add to Firefox's list
+   * - `"no-profile"`:  Firefox has never been opened, so it has no list yet
+   * - `"untrusted"`:  a profile that doesn't hold mkcert's authority;  `trustInFirefox()` adds it
+   * - `"trusted"`:  every profile holds it
+   * - NEVER throws
+   */
+  get firefox(): FirefoxState {
+    if (this.platform !== "darwin" || !this.firefoxApps.some((app) => existsSync(app))) return "none"
+    if (!this.tools.has("certutil")) return "no-nss"
+    const profiles = this.firefoxProfileFolders()
+    if (!profiles.length) return "no-profile"
+    const holds = (folder: string) =>
+      MKCERT_AUTHORITY.test(this.tools.output("certutil", ["-L", "-d", `sql:${folder}`]))
+    return profiles.every(holds) ? "trusted" : "untrusted"
   }
 
   /** The key and certificate, for `https` / `http2`, when it's `"ready"`;  else `undefined`.  - NEVER throws */
@@ -169,6 +199,16 @@ export class LocalCertificate {
     this.tools.run("sudo", TRUST_COMMAND(authority))
   }
 
+  /**
+   * SIDE EFFECT:  Firefox trusts mkcert's authority too, in every profile:  `mkcert -install`, which uses `certutil`.
+   * - asks for nothing once the Mac trusts it (`trust()` first):  mkcert sees that, and only fills Firefox's lists
+   * - throws `CertificateError` without mkcert, or when it fails
+   */
+  trustInFirefox(): void {
+    this.mkcertOrDie()
+    this.tools.run("mkcert", ["-install"])
+  }
+
   /** SIDE EFFECT:  the certificate's two files go.  mkcert's authority stays trusted. */
   undo(): void {
     rmSync(this.certificate, { force: true })
@@ -182,6 +222,17 @@ export class LocalCertificate {
   /** - throws `CertificateError` naming how to install mkcert, when it isn't */
   private mkcertOrDie(): void {
     if (!this.tools.has("mkcert")) throw new CertificateError(INSTALL_MKCERT)
+  }
+
+  /** Firefox's profile folders that hold a list of trusted certificates (`cert9.db`).  - NEVER throws */
+  private firefoxProfileFolders(): string[] {
+    try {
+      return readdirSync(this.firefoxProfiles)
+        .map((name) => join(this.firefoxProfiles, name))
+        .filter((folder) => existsSync(join(folder, "cert9.db")))
+    } catch {
+      return []
+    }
   }
 
   /** The names and end date in its certificate file;  `undefined` when it can't be read.  - NEVER throws */
@@ -216,10 +267,17 @@ export type LocalCertificateProps = {
   tools?: CertificateTools
   /** `process.platform` */
   platform?: string
+  /** where Firefox may be installed;  default `FIREFOX_APPS` */
+  firefoxApps?: string[]
+  /** where Firefox keeps its profiles;  default `FIREFOX_PROFILES` */
+  firefoxProfiles?: string
 }
 
 /** What a `LocalCertificate` lacks:  `state`. */
 export type CertificateState = "no-mkcert" | "missing" | "uncovered" | "expired" | "untrusted" | "ready"
+
+/** Whether Firefox trusts it too:  `firefox`. */
+export type FirefoxState = "none" | "no-nss" | "no-profile" | "untrusted" | "trusted"
 
 /** A certificate's two files' text, as `https.createServer()` and `http2.createSecureServer()` take them. */
 export type CertificateFiles = { key: string; cert: string }
@@ -248,6 +306,17 @@ export const INSTALL_MKCERT =
   "You need to install a small program called mkcert first.  It makes certificates your computer trusts.\n" +
   "On a Mac, type this in a terminal (it needs Homebrew, a Mac app installer):  brew install mkcert\n" +
   "On Windows or Linux, follow the steps at https://github.com/FiloSottile/mkcert#installation"
+
+/** Where a Mac may have Firefox:  each of its editions, for everyone or for this person. */
+const FIREFOX_APPS = ["/Applications", join(homedir(), "Applications")].flatMap((folder) =>
+  ["Firefox", "Firefox Developer Edition", "Firefox Nightly"].map((name) => join(folder, `${name}.app`))
+)
+
+/** Where Firefox keeps its profiles on a Mac. */
+const FIREFOX_PROFILES = join(homedir(), "Library", "Application Support", "Firefox", "Profiles")
+
+/** What `certutil -L` lists for mkcert's authority, in a Firefox profile. */
+const MKCERT_AUTHORITY = /mkcert development CA/
 
 /** A certificate this close to its end date is made again:  a week. */
 const EXPIRY_MARGIN_MS = 7 * 24 * 60 * 60 * 1000

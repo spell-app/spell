@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { copyFileSync, existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeEach, describe, expect, it } from "vite-plus/test"
@@ -145,6 +145,63 @@ describe("LocalCertificate:  mkcert's certificate, every program a stand-in", ()
     ran = []
     certificate("linux").trust()
     expect(ran).toEqual([["mkcert", "-install"]])
+  })
+
+  describe("Firefox, which keeps its own list of trusted certificates", () => {
+    let app: string
+    let profiles: string
+    let nss: boolean
+    let listed: string
+
+    /** the stand-ins again, with NSS's certutil (`nss`) listing `listed` for every profile */
+    const withNss: SRV.CertificateTools = {
+      ...tools,
+      has: (command) => (command === "certutil" ? nss : tools.has(command)),
+      output: (command, args) => (command === "certutil" ? listed : tools.output(command, args))
+    }
+
+    /** the page server's certificate, with Firefox at `app` and its profiles in `profiles` */
+    const page = (platform = "darwin") =>
+      SRV.LocalCertificate.forPageServer({
+        folder,
+        tools: withNss,
+        platform,
+        firefoxApps: [app],
+        firefoxProfiles: profiles
+      })
+
+    beforeEach(() => {
+      app = join(folder, "Firefox.app")
+      profiles = join(folder, "Profiles")
+      nss = true
+      listed = ""
+    })
+
+    it("says none when Firefox isn't installed, or this isn't a Mac", () => {
+      expect(page().firefox).toBe("none")
+      mkdirSync(app)
+      expect(page("linux").firefox).toBe("none")
+    })
+
+    it("needs NSS first, then an opened profile, then mkcert's authority in every profile", () => {
+      mkdirSync(app)
+      nss = false
+      expect(page().firefox).toBe("no-nss")
+      nss = true
+      expect(page().firefox).toBe("no-profile")
+      for (const name of ["one.default", "two.default-release"]) {
+        mkdirSync(join(profiles, name), { recursive: true })
+        writeFileSync(join(profiles, name, "cert9.db"), "")
+      }
+      expect(page().firefox).toBe("untrusted")
+      listed = "mkcert development CA 1234   C,,\n"
+      expect(page().firefox).toBe("trusted")
+    })
+
+    it("is trusted in Firefox through mkcert -install, which fills its profiles", () => {
+      page().trustInFirefox()
+      expect(ran).toEqual([["mkcert", "-install"]])
+    })
   })
 
   it.skipIf(!covering)("undo takes its files away, and leaves mkcert's authority alone", () => {

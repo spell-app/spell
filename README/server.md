@@ -237,6 +237,7 @@ So the page server speaks both, on one port, once this computer trusts its certi
 
 ```sh
 brew install mkcert
+brew install nss            # only if you use Firefox
 spell server certificate
 spell server stop && spell server start
 ```
@@ -253,7 +254,11 @@ spell server stop && spell server start
 - Without a trusted certificate nothing changes:  plain HTTP, and one line in the log saying how to turn HTTPS on.
   - `spell server start` never makes or trusts one itself:  it often runs from a skill, with no terminal to ask in.
   - Tests and CI never use one (`VITEST`, `CI`);  `SPELL_HTTPS=0` turns it off.
-- Firefox keeps a list of its own:  mkcert fills it only when `certutil` is installed (`brew install nss`).
+- Which browsers it covers:
+  - Chrome, Safari and VS Code's side bar use the Mac's own list of trusted certificates:  nothing more to do.
+  - Firefox keeps a list of its own.  It needs NSS first, then the certificate again:  `brew install nss`, then
+    `spell server certificate`.  The command says so up front when Firefox is installed and NSS isn't;  `--check`
+    says whether Firefox trusts it too.  A Firefox never opened has no list yet:  open it once first.
 - Not yet over HTTPS:  the VS Code side bar and `epic pages link` (their tools check the address from node first),
   and the editor's dev server (Vite), which Caddy's house-network site and the tests reach over plain HTTP.
 - The code:  `LocalCertificate`, and `WebServer`'s `certificate`.
