@@ -56,7 +56,7 @@ export class SearchFallback extends E.NativeFallback<Vocabulary> {
     }
     for (const title of titles) list.append(this.create("option", { value: title }))
 
-    const box = this.create("div", { class: INPUT, part: INPUT_PART }, input, list)
+    const box = this.create("div", { class: E.ClassBuilder.withPhrases(INPUT), part: INPUT_PART }, input, list)
     const root = this.create("div", { class: this.classes() }, box)
 
     this.listen(input, "input", () => {

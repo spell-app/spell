@@ -15,6 +15,7 @@ export const iconPickerEs = {
   parts: { glyph: "glifo", panel: "panel", cell: "celda", browse: "explorar" },
   texts: {
     searchIcons: "Buscar iconos",
+    clearIconSearch: "Borrar la búsqueda",
     browseIcons: "Ver todos los iconos, con sus nombres",
     noIcon: "ninguno",
     noIconsMatch: "Ningún icono coincide",

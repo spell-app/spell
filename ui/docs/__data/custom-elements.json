@@ -17722,7 +17722,11 @@
             },
             {
               "name": "search",
-              "description": "The search box at the panel's top (`<input type=search>`)."
+              "description": "The search box at the panel's top (`<input type=search>`), in a `ui left icon input`:  its magnifying glass at its start, the clear `x` at its end, as every search field's."
+            },
+            {
+              "name": "clear",
+              "description": "The search box's clear button, at its end while there's text."
             },
             {
               "name": "browse",
@@ -19137,7 +19141,7 @@
             },
             {
               "name": "icon-position",
-              "description": "`left` puts the icon at the start (`left icon`);  default the end.",
+              "description": "`left` puts the icon at the start (`left icon`);  default the end, but a `type=\"search\"` field's is always at the start.",
               "type": {
                 "text": "\"left\""
               },
@@ -19161,7 +19165,7 @@
             },
             {
               "name": "icon",
-              "description": "Icon name, drawn inside the field;  the root gets `icon`.  A `type=\"search\"` field shows a magnifying glass at its start when it names none.",
+              "description": "Icon name, drawn inside the field;  the root gets `icon`.  A `type=\"search\"` field shows a magnifying glass when it names none, at its start, as every search field does.",
               "type": {
                 "text": "string"
               },
@@ -38866,7 +38870,7 @@
             },
             {
               "name": "clearable",
-              "description": "Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable=\"false\"` turns it off.",
+              "description": "Shows a clear button (an `x`) at its end while there's text;  a click empties it.  `clearable=\"false\"` turns it off.",
               "type": {
                 "text": "boolean"
               },
@@ -38907,7 +38911,7 @@
             },
             {
               "name": "shortcut",
-              "description": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows.",
+              "description": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows.",
               "type": {
                 "text": "string"
               },
@@ -39185,7 +39189,7 @@
           "slots": [
             {
               "name": "icon",
-              "description": "Replaces the magnifying glass."
+              "description": "Replaces the magnifying glass, at its start."
             }
           ],
           "cssParts": [
@@ -39207,7 +39211,7 @@
             },
             {
               "name": "clear",
-              "description": "The box of the clear button, in place of the icon while there's text."
+              "description": "The box of the clear button, at its end while there's text."
             },
             {
               "name": "shortcut",

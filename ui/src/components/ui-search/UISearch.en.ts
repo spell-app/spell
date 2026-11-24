@@ -129,7 +129,7 @@ export const searchVocabulary = {
       kind: "boolean",
       default: true,
       description:
-        "Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  " +
+        "Shows a clear button (an `x`) at its end while there's text;  a click empties it.  " +
         '`clearable="false"` turns it off.'
     },
     {
@@ -147,7 +147,7 @@ export const searchVocabulary = {
       kind: "string",
       description:
         "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a " +
-        "Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the " +
+        "Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the " +
         "field shows."
     },
     {
@@ -275,13 +275,13 @@ export const searchVocabulary = {
       description: "The results are about to hide;  `preventDefault()` keeps them showing."
     }
   ],
-  slots: [{ name: "icon", description: "Replaces the magnifying glass." }],
+  slots: [{ name: "icon", description: "Replaces the magnifying glass, at its start." }],
   parts: [
     { name: "search", description: "The root box (`ui search`):  where the `--ui-search-*` tokens are read." },
     { name: "input", description: "The `ui icon input` box around the text field." },
     { name: "prompt", description: "The text `<input>` (the combobox)." },
     { name: "icon", description: "The icon box." },
-    { name: "clear", description: "The box of the clear button, in place of the icon while there's text." },
+    { name: "clear", description: "The box of the clear button, at its end while there's text." },
     { name: "shortcut", description: "The box of its `shortcut`'s keys, at the end while it's empty." },
     { name: "opener", description: "The search button a `collapsed` search shows while folded." },
     { name: "results", description: "The results popover (the listbox while there are results)." },

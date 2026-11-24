@@ -10,7 +10,14 @@
  *       <span class="text [placeholder]" part="text">star</span>
  *     </button>
  *     <div class="panel" popover part="panel" style="position-anchor: --ui-icon-picker-7">
- *       <input type="search" class="search" part="search">
+ *       <div class="search-row">
+ *         <div class="ui small left icon input left-icon">                   (a shared search field, `UIInput.css`)
+ *           <input type="search" class="search" part="search">
+ *           <span class="clear" part="clear"><ui-button icon="xmark" ...></span>   (while there's text)
+ *           <span class="icon"><svg></span>                                (the magnifying glass)
+ *         </div>
+ *         <ui-button part="browse" icon="expand">
+ *       </div>
  *       <div class="grid" role="listbox" part="grid">
  *         <div class="heading stuck" part="heading" aria-hidden="true"><span>Animals</span></div>  (scrolled)
  *         <div class="rows" role="none" style="padding-block-start: <rows above>;  block-size: <every row>">
@@ -269,26 +276,10 @@
     align-items: center;
   }
 
-  /* The search box:  the field's box, the row's width but for the button. */
-  .search-row > .search {
-    box-sizing: border-box;
+  /* The search box:  a small shared search field (`UIInput.css`), the row's width but for the button. */
+  .search-row > .ui.input {
     flex: 1 1 auto;
     min-inline-size: 0;
-    margin: 0;
-    padding: var(--_ui-icon-picker-padding-block) var(--_ui-icon-picker-padding-inline);
-    border: var(--ui-border-width) solid var(--_ui-icon-picker-border-color);
-    border-radius: var(--_ui-icon-picker-radius);
-    outline: none;
-    background: var(--_ui-icon-picker-background);
-    color: inherit;
-    font: inherit;
-    appearance: none;
-  }
-  .search-row > .search::placeholder {
-    color: var(--_ui-icon-picker-placeholder-color);
-  }
-  .search-row > .search:focus {
-    border-color: var(--_ui-icon-picker-border-color-focus);
   }
 
   /* The grid:  scrolling when it's taller than the panel's room. */

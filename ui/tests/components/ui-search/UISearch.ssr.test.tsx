@@ -18,7 +18,9 @@ describe("<ui-search> static render", () => {
     const html = StaticRender.fragment(
       `<ui-search id="find" name="q" value="spell" placeholder="Search..."></ui-search>`
     )
-    expect(html).toMatch(/^<div [^>]*class="ui search"[^>]*><div class="ui icon input" part="input"><input /)
+    expect(html).toMatch(
+      /^<div [^>]*class="ui search"[^>]*><div class="ui left icon input left-icon" part="input"><input /
+    )
     const input = html.match(/<input [^>]*>/)?.[0] ?? ""
     for (const attribute of [
       `role="combobox"`,
@@ -43,7 +45,7 @@ describe("<ui-search> static render", () => {
 
   it("renders states on the input box", () => {
     const html = StaticRender.fragment(`<ui-search loading disabled fluid></ui-search>`)
-    expect(html).toMatch(/class="ui icon input loading fluid disabled"/)
+    expect(html).toMatch(/class="ui left icon input left-icon loading fluid disabled"/)
     expect(html).toMatch(/<input [^>]*disabled/)
   })
 })

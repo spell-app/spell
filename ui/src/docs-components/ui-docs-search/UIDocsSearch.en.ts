@@ -91,6 +91,7 @@ export const docsSearchVocabulary = {
     { name: "search", description: "The box around the field and its results." },
     { name: "field", description: "The pill:  the icon, the `<input>`, the clear button and the shortcut hint." },
     { name: "input", description: "The `<input role=combobox>`." },
+    { name: "clear", description: "The clear button's box, while there's text:  the shared search field's `x`." },
     { name: "keys", description: "The shortcut hint, shown while the field is empty and not focused." },
     { name: "results", description: "The results card (a popover under the field)." },
     { name: "group", description: "One group of results under its label." },

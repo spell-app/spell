@@ -49,7 +49,8 @@ export class DOMInputElement extends F.DOMFormControl<UIInput> {
  *   `percent` is ours (epic `language` P34):  a number field for a part of a whole, see `isPercent`.
  * - `clearable` (on by default for `type="search"`):  an `x` at its end while it has text (`F.ClearButton`);
  *   a click empties it as typing would (`ui-typed`, then `ui-changed`), and puts the focus back in it.
- * - `type="search"`:  a magnifying glass at its start, unless it names an `icon`.
+ * - `type="search"`:  its icon at its start, a magnifying glass unless it names one,
+ *   as every search field's (Owen, 2026-11-24, epic `editor` T169);  the clear `x` and a `shortcut`'s keys at its end.
  * - `shortcut="mod+F"`:  those keys focus it while it shows on screen (`F.FieldShortcut`),
  *   drawn at its end with `<ui-keys>` while it's empty (the clear `x` takes their place once there's text).
  * - Enter submits the form, as in a native field ("implicit submission"):
@@ -109,10 +110,9 @@ export class UIInput extends TextControl<Vocabulary> {
     return this.icon || (this.type === "search" ? UIT.SEARCH_ICON : undefined)
   }
 
-  /** Where its icon goes:  its `icon-position`;  a search field's own magnifying glass at the start. */
+  /** Where its icon goes:  its `icon-position`;  a search field's always at its start, as every search field's. */
   get iconSide(): string | undefined {
-    if (!this.icon && !this.iconPosition && this.type === "search") return UIT.LEFT
-    return this.iconPosition
+    return this.type === "search" ? UIT.LEFT : this.iconPosition
   }
 
   /** Shows the icon box:  an icon, or the spinner. */

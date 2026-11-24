@@ -7,7 +7,7 @@
  *     <div class="ui [size] [category horizontal fluid scrolling resizable short ...] [left|right aligned]
  *                 [collapsed loading disabled read-only] search" style="anchor-name: --ui-search-4">
  *       <ui-button class="opener" part="opener" icon="magnifying-glass">                 (collapsed)
- *       <div class="ui [left] icon [loading fluid disabled] input" part="input">         (left:  collapsed)
+ *       <div class="ui left icon [loading fluid disabled] input left-icon" part="input">
  *         <input class="prompt" part="prompt" role="combobox">
  *         <span class="clear" part="clear"><ui-button icon="xmark" ...></span>         (while there's text)
  *         <span class="search icon" part="icon"><slot name="icon"><svg></slot></span>
@@ -42,7 +42,8 @@
  *     (from `--ui-search-prompt-radius`), as a page would.
  * - NOTE: left out, on purpose:
  *   - the "view all results" `.action` link of a remote answer:  a link inside a listbox;  put one near the search
- * - The clear button (`clearable`, on by default):  laid out by `UIInput.css`, in place of the magnifying glass.
+ * - The magnifying glass is at the prompt's start, as every search field's (Owen, 2026-11-24, epic `editor` T169);
+ *   the clear button (`clearable`, on by default) and a `shortcut`'s keys at its end, laid out by `UIInput.css`.
  *   Fomantic's own `clearable` variation (`.remove.icon`, the webkit cancel button) isn't ported.
  * - `collapsed`:  folded, the input box is a circle the size of its icon column, hidden under the search button
  *   (`.opener`, the same circle);  `:state(expanded)` grows it to `--ui-search-expanded-width`, from its start,

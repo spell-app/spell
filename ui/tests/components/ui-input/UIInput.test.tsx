@@ -732,9 +732,7 @@ describe("<ui-input clearable>", () => {
   })
 
   it("takes the trailing icon's place, and sits in the end column beside a `left icon`", async () => {
-    const { host, control } = await input(
-      `<ui-input type="search" icon="search" value="cats" aria-label="A"></ui-input>`
-    )
+    const { host, control } = await input(`<ui-input clearable icon="users" value="cats" aria-label="A"></ui-input>`)
     await ElementFixture.settle()
     const icon = host.shadowRoot!.querySelector<HTMLElement>("[part~=icon]")!
     expect(getComputedStyle(icon).visibility).toBe("hidden")
@@ -780,11 +778,11 @@ function pressCtrlF(target: EventTarget = document.body): KeyboardEvent {
 }
 
 describe('<ui-input type="search">', () => {
-  it("shows a magnifying glass at its start, unless it names an icon", async () => {
+  it("shows a magnifying glass at its start;  an icon it names goes there too", async () => {
     const { root } = await input(`<ui-input type="search" aria-label="Find"></ui-input>`)
     expect(root.className).toBe("ui left icon input left-icon")
     const named = await input(`<ui-input type="search" icon="users" aria-label="Find"></ui-input>`)
-    expect(named.root.className).toBe("ui icon input")
+    expect(named.root.className).toBe("ui left icon input left-icon")
   })
 })
 

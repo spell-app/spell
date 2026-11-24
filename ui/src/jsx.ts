@@ -23443,7 +23443,7 @@ export interface UIInputAttributes {
    */
   "prop:readOnly"?: boolean | ""
   /**
-   * `left` puts the icon at the start (`left icon`);  default the end.
+   * `left` puts the icon at the start (`left icon`);  default the end, but a `type="search"` field's is always at the start.
    * - takes:  `left`
    */
   "icon-position"?: "left"
@@ -23473,7 +23473,7 @@ export interface UIInputAttributes {
    */
   "prop:action"?: boolean | "" | "left"
   /**
-   * Icon name, drawn inside the field;  the root gets `icon`.  A `type="search"` field shows a magnifying glass at its start when it names none.
+   * Icon name, drawn inside the field;  the root gets `icon`.  A `type="search"` field shows a magnifying glass when it names none, at its start, as every search field does.
    * - takes:  icon name
    */
   icon?: string
@@ -41673,7 +41673,7 @@ export interface UISearchAttributes {
    */
   "prop:placeholder"?: string
   /**
-   * Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable="false"` turns it off.
+   * Shows a clear button (an `x`) at its end while there's text;  a click empties it.  `clearable="false"` turns it off.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
@@ -41724,7 +41724,7 @@ export interface UISearchAttributes {
    */
   "prop:required"?: boolean | ""
   /**
-   * Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows.
+   * Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows.
    * - takes:  text
    */
   shortcut?: string
@@ -63708,7 +63708,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * `<ui-search>`:  A search module lets people query for results from a selection of data.
        * - also known as:  autocomplete, typeahead, search box, combobox, lookup
        * - slots:
-       *   - `icon`:  Replaces the magnifying glass.
+       *   - `icon`:  Replaces the magnifying glass, at its start.
        * - events:  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-toggled`, `ui-replied`, `ui-opening`, `ui-closing`
        */
       "ui-search": UISearchJSXAttributes

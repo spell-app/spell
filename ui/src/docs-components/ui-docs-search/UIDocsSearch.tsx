@@ -2,6 +2,7 @@ import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { SiteData } from "spell/ui/docs-components/SiteData"
 import { SitePages, type SitePage } from "spell/ui/components/ui-site-nav/SitePages"
 // A leaf, not the barrel:  the barrel defines `<ui-toc>`
@@ -10,7 +11,6 @@ import { docsSearchVocabulary } from "./UIDocsSearch.en"
 import { SearchData } from "./SearchData"
 import { SearchIndex } from "./SearchIndex"
 import {
-  CLEAR_ICON,
   DEFAULT_PAGE,
   DRAWERS,
   KIND_ICON,
@@ -565,18 +565,12 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
             onKeyDown={(event) => this.onKeyDown(event)}
             onFocus={() => this.onFocus()}
           />
-          <Show when={this.isSearching}>
-            <button
-              type="button"
-              class={CLEAR}
-              tabindex="-1"
-              aria-label={this.translationForKey("clear")}
-              title={this.translationForKey("clear")}
-              onClick={(event) => this.onClearClick(event)}
-            >
-              <ui-icon name={CLEAR_ICON} />
-            </button>
-          </Show>
+          {F.ClearButton.draw({
+            shows: () => this.isSearching,
+            label: () => this.translationForKey("clear"),
+            part: this.partForName("clear"),
+            onClear: (event) => this.onClearClick(event)
+          })}
           <Show when={this.hasShortcuts}>
             <span class={KEYS} part={this.partForName("keys")} aria-hidden="true">
               <ui-keys shortcut={PILL_SHORTCUT} />
@@ -802,9 +796,6 @@ const PILL_SHORTCUT = "mod+K"
 
 /** Class word of an icon's box (the field's, a result's). */
 const GLYPH = "glyph"
-
-/** Class word of the clear button. */
-const CLEAR = "clear"
 
 /** Class word of the shortcut hint. */
 const KEYS = "keys"

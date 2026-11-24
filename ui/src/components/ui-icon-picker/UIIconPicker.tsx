@@ -7,6 +7,7 @@ import { IconCatalog, type IconChoice, type IconGroup, type IconSearchWords } fr
 import { iconPickerVocabulary } from "./UIIconPicker.en"
 import { IconPickerFallback } from "./UIIconPicker.fallback"
 
+import inputCSS from "spell/ui/components/ui-input/UIInput.css?inline"
 import iconPickerCSS from "./UIIconPicker.css?inline"
 
 /****************
@@ -51,7 +52,8 @@ import iconPickerCSS from "./UIIconPicker.css?inline"
 export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   @E.proto static vocabulary = iconPickerVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { iconPicker: iconPickerCSS },
+    // the search box is a shared search field:  `UIInput.css` lays out its glass and its clear `x`
+    styleSheets: { input: inputCSS, iconPicker: iconPickerCSS },
     cssStates: ["fluid"],
     Fallback: IconPickerFallback
   } satisfies Partial<E.ElementSetup>
@@ -97,6 +99,9 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
    * (a property editor's placeholder for an action's own icon:  epic `editor` I208).
    */
   readonly chosenGlyph = new E.IconGlyph({ owner: this, name: () => this.iconName || this.placeholder || undefined })
+
+  /** The search box's magnifying glass. */
+  readonly searchGlyph = new E.IconGlyph({ owner: this, name: () => UIT.SEARCH_ICON })
 
   ////////////////
   // ## Form
@@ -555,23 +560,34 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
         onMouseDown={this.onPanelMouseDown}
       >
         <div class={SEARCH_ROW}>
-          <input
-            ref={(element) => (this.search = element)}
-            type="search"
-            class={SEARCH}
-            part={this.partForName("search")}
-            role="combobox"
-            placeholder={this.translationForKey("searchIcons")}
-            aria-label={this.translationForKey("searchIcons")}
-            aria-expanded={this.popover.ariaExpanded}
-            aria-controls={this.ids.grid}
-            aria-autocomplete="list"
-            aria-activedescendant={this.highlighted.index >= 0 ? this.cellId(this.highlighted.index) : undefined}
-            autocomplete="off"
-            spellcheck={false}
-            onInput={this.onSearchInput}
-            onKeyDown={this.onSearchKeyDown}
-          />
+          <div class={E.ClassBuilder.withPhrases(SEARCH_BOX)}>
+            <input
+              ref={(element) => (this.search = element)}
+              type="search"
+              class={SEARCH}
+              part={this.partForName("search")}
+              role="combobox"
+              placeholder={this.translationForKey("searchIcons")}
+              aria-label={this.translationForKey("searchIcons")}
+              aria-expanded={this.popover.ariaExpanded}
+              aria-controls={this.ids.grid}
+              aria-autocomplete="list"
+              aria-activedescendant={this.highlighted.index >= 0 ? this.cellId(this.highlighted.index) : undefined}
+              autocomplete="off"
+              spellcheck={false}
+              onInput={this.onSearchInput}
+              onKeyDown={this.onSearchKeyDown}
+            />
+            {F.ClearButton.draw({
+              shows: () => this.query !== "",
+              label: () => this.translationForKey("clearIconSearch"),
+              part: this.partForName("clear"),
+              onClear: this.onClearSearch
+            })}
+            <span class={UIT.ICON} aria-hidden="true">
+              {this.searchGlyph.svg}
+            </span>
+          </div>
           <ui-button
             part={this.partForName("browse")}
             size="small"
@@ -713,6 +729,17 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   /** A click in the panel keeps the focus in the search box:  only the box itself takes it. */
   private readonly onPanelMouseDown = (event: MouseEvent) => {
     if (event.target !== this.search) event.preventDefault()
+  }
+
+  /** The search box's clear `x`:  every icon again, from the top, the focus back in the box. */
+  @E.untracked
+  private readonly onClearSearch = () => {
+    if (this.search) this.search.value = ""
+    this.query = ""
+    this.highlighted.index = 0
+    if (this.grid) this.grid.scrollTop = 0
+    this.scrollTop = 0
+    this.search?.focus()
   }
 
   /** Typing filters the grid, from its top, the best match highlighted. */
@@ -866,6 +893,9 @@ const SEARCH = "search"
 
 /** Class of the search row:  the search box, then Browse. */
 const SEARCH_ROW = "search-row"
+
+/** Class words of the box round the search box:  a small shared search field, its glass at its start. */
+const SEARCH_BOX = "ui small left icon input"
 
 /** Class of the grid. */
 const GRID = "grid"
