@@ -1,9 +1,10 @@
 import { chmodSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
-import { dirname, join, resolve } from "node:path"
+import { basename, dirname, join, resolve } from "node:path"
 
 import { checkoutOf } from "./checkout.ts"
 import { isProcessAlive } from "./Heartbeat.ts"
+import { Processes } from "./Processes.ts"
 
 /****************
  * ### `KeeperLink`
@@ -81,14 +82,24 @@ export class KeeperLink {
    *     parent isn't the keeper's process (a keeper on code from before P84 sets no mark)
    *   - `checkout` is a MAIN checkout, not a worktree:  a worktree's servers are its session's own
    *   - not a test run (`VITEST`, `CI`):  tests start page servers in scratch checkouts
+   *   - and the agent's process is one of its PARENTS (`agentAbove()`):  a person's terminal can carry the agent's
+   *     mark too, inherited (a VS Code window opened from a Claude Code session gives every terminal in it
+   *     `CLAUDECODE=1`), and was refused as "Claude Code ran this";  the processes can't be listed:  the mark alone
    * - The mark is a mark, not a secret:  it stops an agent's mistake, not an agent set on getting round it.
-   * - `env`, `ppid`:  default this process's (the tests hand their own)
+   * - A person forces a start with `spell server local|start --force`, which sets the keeper's mark
+   *   (`KEEPER_START_VARIABLE`);  an agent's `--force` in a main checkout is still refused by the command guard
+   * - `env`, `ppid`:  default this process's;  `lineage`:  its parents, nearest first (default the process table's);
+   *   the tests hand their own
    * - NEVER throws
    */
   refusedStart(
     server: string,
     checkout: string,
-    { env = process.env, ppid = process.ppid }: { env?: Record<string, string | undefined>; ppid?: number } = {}
+    {
+      env = process.env,
+      ppid = process.ppid,
+      lineage
+    }: { env?: Record<string, string | undefined>; ppid?: number; lineage?: Lineage } = {}
   ): string | undefined {
     if (env.VITEST || env.CI || env[KEEPER_START_VARIABLE]) return undefined
     const agent = KeeperLink.agentOf(env)
@@ -96,11 +107,30 @@ export class KeeperLink {
     const where = checkoutOf(checkout)
     if (!where || where.worktree !== undefined) return undefined
     if (this.read()?.pid === ppid) return undefined
+    if (!KeeperLink.agentAbove(env, lineage ?? lineageOf(process.pid))) return undefined
     const name = server === "page server" ? "page-server" : server
+    // the repo, as `epic repos add` names it unless told otherwise:  its main checkout's folder
+    const repo = basename(where.main)
     return (
       `${server}:  not started.  Only the server keeper starts ${where.main}'s ${server}, and ${agent} ran this.\n` +
-      `Ask the keeper instead:  epic servers start ${name}\n` +
-      `(A worktree's own servers are yours to start;  a person's own terminal still starts this one.)`
+      `Ask the keeper instead:  epic servers start ${name} --repo ${repo}\n` +
+      `(A worktree's own servers are yours to start.  A person starting it by hand:  add --force.)`
+    )
+  }
+
+  /**
+   * Whether an agent's process is among `lineage`, this process's parents:  `env`'s mark is then the agent's own,
+   * not one a person's terminal inherited.
+   * - an agent's own setting (`SPELL_EPIC_AGENT`):  always
+   * - Claude Code's process, by the pid it hands its commands (`CLAUDE_PID`), else by its program's name (`claude`);
+   *   Codex's by its program's name (`codex`)
+   * - `lineage` empty (the process table can't be read):  `true`, the mark alone, as before
+   */
+  static agentAbove(env: Record<string, string | undefined>, lineage: Lineage): boolean {
+    if (env.SPELL_EPIC_AGENT?.trim() || !lineage.length) return true
+    const agentPid = Number(env.CLAUDE_PID) || undefined
+    return lineage.some(
+      ({ pid, command }) => pid === agentPid || AGENT_PROGRAMS.has(basename(command))
     )
   }
 
@@ -164,6 +194,28 @@ const AGENT_MARKS: readonly (readonly [variable: string, agent: string])[] = [
   ["CLAUDECODE", "Claude Code"],
   ["CODEX_THREAD_ID", "Codex"]
 ]
+
+/** A process's parents, nearest first:  each one's pid and program's path (`KeeperLink.agentAbove()`). */
+export type Lineage = { pid: number; command: string }[]
+
+/** The programs an agent runs as:  Claude Code's `claude`, Codex's `codex`. */
+const AGENT_PROGRAMS = new Set(["claude", "codex"])
+
+/** How far up `lineageOf()` looks. */
+const LINEAGE_DEPTH = 12
+
+/** `pid`'s parents, nearest first (`Processes.table()`);  none when the processes can't be listed.  NEVER throws. */
+function lineageOf(pid: number): Lineage {
+  try {
+    const table = Processes.table()
+    const lineage: Lineage = []
+    for (let at = table.get(pid)?.ppid; at && at > 1 && lineage.length < LINEAGE_DEPTH; at = table.get(at)?.ppid)
+      lineage.push({ pid: at, command: table.get(at)?.command ?? "" })
+    return lineage
+  } catch {
+    return []
+  }
+}
 
 /** How long `ask()` waits:  a server's start may take two minutes (`PidFile`'s `START_LIMIT_MS`). */
 const ASK_WAIT_MS = 150_000

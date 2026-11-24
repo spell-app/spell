@@ -6,6 +6,9 @@
  *   prints JSON `{ base, port, pid, root, launched }`
  *   - `start all`:  every web server of the checkout, the kit's `spell server start all` (not this file's)
  *   - `ensure`:  the same, hidden:  the old name, which spell-epic's `epic server ensure` still hands on
+ * - `--force` (`local`, `start`):  a PERSON's start by hand of a server the keeper keeps (main's), past the servers' own refusal of an agent's start (`SRV.KeeperLink.refusedStart()`):  for a terminal
+ *   that carries an agent's mark it inherited;  an agent's command is still refused by the command guard
+ *   (`ServerGuard`, epic `epic-engine` P84)
  * - `stop` -- stop it
  * - `status` -- JSON, or exit 1 when not running
  * - `url <file>` -- `start`, then print the URL that serves `file`
@@ -118,6 +121,9 @@ async function main(args: string[]): Promise<void> {
   const port = Number(flag(rest, "--port") ?? DEFAULT_PORT)
   const spaces = flag(rest, "--spaces")
   if (spaces) process.env.SPELL_SPACES_DIR = resolve(spaces)
+  // a person's start by hand, past the keeper's refusal (`SRV.KeeperLink.refusedStart()`):  its mark, which a
+  // background server inherits;  an agent's is still refused, by the command guard
+  if (rest.includes("--force")) process.env[SRV.KEEPER_START_VARIABLE] = "1"
   // the record of the spaces it serves (`--spaces`, above):  a project's is its own
   const pidFile = SRV.PidFile.forPageServer(root)
 
@@ -194,7 +200,7 @@ async function main(args: string[]): Promise<void> {
     }
     default:
       console.log(
-        `usage:  spell server local|start|stop|status|url <file>|certificate [--check] [--undo]|prune [--dry-run]  [--root <dir>] [--port <n>] [--spaces <dir>]`
+        `usage:  spell server local|start|stop|status|url <file>|certificate [--check] [--undo]|prune [--dry-run]  [--root <dir>] [--port <n>] [--spaces <dir>] [--force]`
       )
   }
 }
