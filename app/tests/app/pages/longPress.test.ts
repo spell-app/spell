@@ -75,7 +75,8 @@ describe.skipIf(!SERVING)("a long press in Edit", { timeout: 180_000 }, () => {
     expect(await page.evaluate(() => (globalThis as any).Inspector.allSelected.length)).toBe(0)
   })
 
-  test("held still first:  the words are lifted, and dropped in the row of buttons, after OK", async () => {
+  // off with the long press itself (editor T161):  back on with `PartLongPress.isOn`
+  test.skip("held still first:  the words are lifted, and dropped in the row of buttons, after OK", async () => {
     await pressAndMove(700)
     expect(saved).toBeDefined()
     const actions = saved!.slice(saved!.indexOf("<actions>", saved!.indexOf('<modal heading="About')))
