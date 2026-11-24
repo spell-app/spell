@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { EDITOR, SERVING, openAddPanel } from "./runningEditor"
 
 /**
  * What took over from the Things and Templates tabs, on Solitaire (epic `editor`, Rethink Things Templates):
@@ -62,7 +62,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     )
     page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
-    await page.waitForSelector("#AddPartButton", { state: "attached", timeout: 60_000 })
+    await page.waitForSelector(".PaletteRail", { state: "attached", timeout: 60_000 })
     await page.waitForTimeout(4000)
     if (!(await page.locator('[data-panel="views"]').count())) {
       await page.evaluate(() => (window as unknown as { Inspector: { toggle(): void } }).Inspector.toggle())
@@ -83,7 +83,7 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     // by tag:  `solitaire-stock-pile` last of the program's own, then Spell UI's `ui-spacer`
     expect((await boardRows()).slice(-2)).toEqual(["Stock Pile", "Spacer"])
     await page.reload()
-    await page.waitForSelector("#AddPartButton", { state: "attached", timeout: 60_000 })
+    await page.waitForSelector(".PaletteRail", { state: "attached", timeout: 60_000 })
     await page.waitForTimeout(4000)
     expect((await boardRows()).slice(-2)).toEqual(["Stock Pile", "Spacer"])
     await sortBy("In document order")
@@ -176,16 +176,16 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
   })
 
   test("App views comes first in the add menu, and adds the app's own view, told what it needs to draw (T51)", async () => {
-    await page.locator("#AddPartButton [part~=item]").click()
+    await openAddPanel(page)
     await page.waitForTimeout(1500)
     const own = await page
-      .locator(".PalettePopup .ThisApp ui-tree-item")
+      .locator(".PalettePanel .ThisApp ui-tree-item")
       .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
     // Solitaire as it is now:  a tableau is a column, and its deck is drawn too (I62)
     expect(own).toEqual(["Card", "Card image", "Column", "Deck", "Discard pile", "Foundation", "Pile", "Stock pile"])
     const cards = () => page.evaluate(() => document.querySelectorAll("solitaire-card").length)
     const before = await cards()
-    await page.locator('.PalettePopup .ThisApp ui-tree-item[label="Card"]').click()
+    await page.locator('.PalettePanel .ThisApp ui-tree-item[label="Card"]').click()
     await page.waitForTimeout(SETTLE_MS)
     expect(await cards()).toBe(before + 1)
     const written = await page.evaluate(() =>

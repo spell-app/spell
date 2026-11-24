@@ -1,7 +1,7 @@
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { EDITOR, SERVING, openAddPanel } from "./runningEditor"
 
 /**
  * Where a drop or a palette click lands in a site with a main layout (epic `editor` P35, Placing And Isolation):
@@ -67,12 +67,12 @@ describe.skipIf(!SERVING)("placing in a site with a layout", { timeout: 180_000 
 
   /** Open the palette. */
   async function openPalette(): Promise<void> {
-    await page.locator("#AddPartButton [part~=item]").click()
+    await openAddPanel(page)
     await page.waitForTimeout(800)
   }
 
   /** The palette's Button row, open. */
-  const buttonRow = () => page.locator('.PalettePopup ui-tree-item[label="Button"]').first()
+  const buttonRow = () => page.locator('.PalettePanel ui-tree-item[label="Button"]').first()
 
   /** Drag the palette's Button to (`toX`, `toY`), as a person does. */
   async function dropButton(toX: number, toY: number): Promise<void> {
@@ -199,7 +199,7 @@ describe.skipIf(!SERVING)("placing in a site with a layout", { timeout: 180_000 
     await letGo()
     await page.evaluate(() => ((window as unknown as { editor: { notice?: string } }).editor.notice = undefined))
     await openPalette()
-    await page.locator('.PalettePopup ui-tree-item[label="Container"]').first().click()
+    await page.locator('.PalettePanel ui-tree-item[label="Container"]').first().click()
     await page.waitForTimeout(SETTLE_MS)
     const { notice, selected } = await page.evaluate(() => {
       const { editor, Inspector } = window as unknown as {

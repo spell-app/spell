@@ -98,7 +98,13 @@ export const iconPickerVocabulary = {
     { name: "glyph", description: "The chosen icon's glyph, in the field." },
     { name: "text", description: "The chosen icon's name, or the placeholder, in the field." },
     { name: "panel", description: "The open panel:  a popover under the field, holding the search box and the grid." },
-    { name: "search", description: "The search box at the panel's top (`<input type=search>`)." },
+    {
+      name: "search",
+      description:
+        "The search box at the panel's top (`<input type=search>`), in a `ui left icon input`:  its magnifying glass " +
+        "at its start, the clear `x` at its end, as every search field's."
+    },
+    { name: "clear", description: "The search box's clear button, at its end while there's text." },
     {
       name: "browse",
       description:
@@ -122,6 +128,7 @@ export const iconPickerVocabulary = {
   ],
   texts: [
     { key: "searchIcons", text: "Search icons", description: "The search box's placeholder and accessible name." },
+    { key: "clearIconSearch", text: "Clear search", description: "The search box's clear button's accessible name." },
     {
       key: "browseIcons",
       text: "Show all icons, with their names",

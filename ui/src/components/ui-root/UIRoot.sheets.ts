@@ -67,7 +67,7 @@ export const ROOT_SHEETS: Readonly<Record<string, readonly OptionalSheetName[]>>
   "ui-header": [],
   "ui-icon": [],
   "ui-icon-browser": [],
-  "ui-icon-picker": [],
+  "ui-icon-picker": ["sizes-shared"],
   "ui-icons": [],
   "ui-image": [],
   "ui-images": [],

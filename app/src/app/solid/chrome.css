@@ -237,27 +237,14 @@ ui-menu.ModeTabs ui-item:not([appearance~="circular"]) + ui-item[appearance~="ci
   /* less the 1px the header tabs' track already keeps between its options (Spell UI's `UIMenu.css`) */
   margin-inline-start: 15px;
 }
-/*
- * ... and Add a View 16px after Inspect app (C5:  "16px between inspector and plus"):
- * a pill of its plus and its words, the circles' height and round ends, as wide as its words
- * (C5:  "Change plus to `+ Add a View`")
- */
-ui-menu.ModeTabs ui-item.AddPartButton::part(item) {
-  margin-inline-start: 15px;
-  inline-size: auto;
-  padding-inline: 12px 16px;
-  gap: round(0.4em, var(--ui-grid, 4px));
-  border-radius: 999px;
-  white-space: nowrap;
-}
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
 ui-menu.ModeTabs ui-item:not([appearance~="circular"])::part(item) {
   gap: round(0.4em, var(--ui-grid, 4px));
   padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
   padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, round(0.9em, var(--ui-grid, 4px)));
 }
-/* ... its icons (the code, the compiled code, Inspect app) are Spell UI's circular items, and Add a View too, widened
-   for its words above (`appearance="circular"`;  epic `editor` T90):  the tabs' padding above isn't theirs */
+/* ... its icons (Inspect app, the code, the compiled code, Anatomy) are Spell UI's circular items
+   (`appearance="circular"`;  epic `editor` T90):  the tabs' padding above isn't theirs */
 
 /* the palette menu's "Edit theme..." row:  its icon the width of a theme row's check, so their words line up */
 .EditThemeEntry > ui-icon {

@@ -105,7 +105,8 @@ export const inputVocabulary = {
       kind: "valueAndKey",
       key: "icon",
       values: ["left"],
-      description: "`left` puts the icon at the start (`left icon`);  default the end."
+      description:
+        '`left` puts the icon at the start (`left icon`);  default the end, but a `type="search"` field\'s is always at the start.'
     },
     {
       name: "labeled",
@@ -130,7 +131,7 @@ export const inputVocabulary = {
       kind: "icon",
       description:
         'Icon name, drawn inside the field;  the root gets `icon`.  A `type="search"` field shows a magnifying ' +
-        "glass at its start when it names none."
+        "glass when it names none, at its start, as every search field does."
     },
     {
       name: "label",

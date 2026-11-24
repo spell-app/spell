@@ -1,9 +1,18 @@
-import { createSignal, onSettled } from "solid-js"
+import { createEffect, createSignal, onCleanup, onSettled } from "solid-js"
 
 import { UI } from "spell/ui/core"
-import { editor } from "spell/app/app/editor"
+import { editor, runtimeCore } from "spell/app/app/editor"
 import { debugging } from "spell/app/app/Debugging"
-import { AppAnatomy, ChangeThis, Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
+import {
+  AppAnatomy,
+  ChangeThis,
+  EditorMode,
+  Inspector,
+  Palette,
+  PartEdits,
+  uiReady,
+  type PartAction
+} from "spell/app/app/solid"
 import { codeEditors, type CodeEditorCommand, type CodeEditorHandle } from "spell/app/app/ui/ui.types"
 import type { AppTextKey } from "spell/app/app/ui/AppTexts.en"
 
@@ -27,10 +36,11 @@ import type { AppTextKey } from "spell/app/app/ui/AppTexts.en"
  *   where the page leaves them alone.
  * - Undo and Redo go by focus (`undoWay()`):
  *   - in the code:  the code editor's own undo
- *   - in the running app, or on nothing (the page's body), in Run or Edit:
+ *   - in the running app, or on nothing (the page's body), in Run:
  *     the program's own first, a move in the game;  with none to undo, the key comes on to ours (epic `editor` I167)
  *     - the program's keys are registered after ours, so they're asked first (core's `listenForUndoKeys()`)
- *   - anywhere else in Edit, the Inspector's fields too:  the editor's history (`editor.history`);
+ *   - in Edit and Design, the app too, the Inspector's fields too:  the editor's history (`editor.history`;  epic
+ *     `editor` T171:  the program passes its keys on, `giveKeysToEditor()`);
  *     with nothing there, what was typed in the code, so a click on the app doesn't strand it (epic
  *     `elemental-spell` J116)
  */
@@ -91,6 +101,18 @@ export const EDITOR_HOTKEYS = {
     },
     group: "editing",
     name: "shortcutShowIcons"
+  },
+  // the add panel over the editor (epic `editor` T167);  ⌥⌘V, "view", which no browser takes (Paste and Match Style is
+  // ⌥⇧⌘V);  in Run, it switches to Edit first;  in the code too, as the panel adds beside what's selected
+  addView: {
+    shortcut: "alt+mod+V",
+    run: () => {
+      if (isRunningNow()) EditorMode.show("edit")
+      void Palette.showPanel()
+    },
+    inFields: true,
+    group: "editing",
+    name: "paletteAddView"
   },
 
   ////////////////
@@ -276,6 +298,8 @@ export type Hotkey = {
   outsideCode?: boolean
   /** A key that's still the page's in a property editor's field:  Undo, where the field's change is a step. */
   inProperties?: boolean
+  /** A key that's the page's in any field too:  one no field types with, ⌥⌘V (the add panel). */
+  inFields?: boolean
 }
 
 /**
@@ -317,9 +341,18 @@ export type HotkeyGroup = keyof typeof HOTKEY_GROUPS
  * - A running program's ⌘Z, in the app or on nothing, is asked before ours:  its keys are registered later.
  * - A Mod key works with Command or Control, on every system.
  * - A key typed into a field, or into the code editor, is left alone:  the code editor runs its own.
+ *   - but one marked `inFields`, which no field types with (⌥⌘V)
  * - Its keys are registered once Spell UI has loaded (`uiReady`), and taken off with the page.
+ * - In Edit and Design the running program's keys are the editor's (epic `editor` T171):  its ⌘Z is the editor's
+ *   history, and its actions' shortcuts don't run (`giveKeysToEditor()`).
  */
 export function editorHotkeys(isRunning: () => boolean): void {
+  // in Edit and Design the program's keys are the editor's:  its ⌘Z, and no shortcut of the app's (epic `editor` T171)
+  createEffect(
+    () => ({ core: runtimeCore(), isEditing: !isRunning() }),
+    ({ core, isEditing }) => giveKeysToEditor(core, isEditing)
+  )
+  onCleanup(() => giveKeysToEditor(runtimeCore(), false))
   onSettled(() => {
     isRunningNow = isRunning
     const disposers: (() => void)[] = []
@@ -333,7 +366,8 @@ export function editorHotkeys(isRunning: () => boolean): void {
           for (const chord of chordsFor(hotkey.shortcut)) {
             // `false`:  not ours, so the key goes on (typed in a field, or Esc while not inspecting)
             const handler = (event: KeyboardEvent) =>
-              (isEditable(event) && !(hotkey.inProperties && isInProperties(event))) || run() === false
+              (isEditable(event) && !hotkey.inFields && !(hotkey.inProperties && isInProperties(event))) ||
+              run() === false
                 ? false
                 : undefined
             disposers.push(UI.keyboard.register({ chord, handler }))
@@ -355,6 +389,16 @@ export function editorHotkeys(isRunning: () => boolean): void {
       for (const dispose of disposers) dispose()
     }
   })
+}
+
+/**
+ * Tell the running program whether the editor takes its keys (`core._giveKeysToPage()`, epic `editor` T171):
+ * in Edit and Design, Owen:  "have main Undo and Redo be the editors ... disable the command keys for all of the app
+ * menu items".
+ * - None loaded yet:  nothing to tell;  the effect asks again once it is.
+ */
+function giveKeysToEditor(core: object | undefined, isEditing: boolean): void {
+  ;(core as { _giveKeysToPage?: (isTaken: boolean) => void } | undefined)?._giveKeysToPage?.(isEditing)
 }
 
 /**

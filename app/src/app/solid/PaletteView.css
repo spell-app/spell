@@ -40,3 +40,36 @@
     -webkit-line-clamp: 3;
   }
 }
+
+/*
+ * `<PalettePanel>`:  the add panel, a `<ui-modal>` over the editor (epic `editor` T167), as the Keyboard Shortcuts
+ * dialog is laid out:
+ * - its header row (what's under the mouse, the search) on the dialog's own glass, the ✕ on its centre line
+ * - every part on the theme's plain surface, made opaque:  the app showing through Glass made them hard to read
+ * - as wide as the palette's columns (`--palette-width`, `Palette.css`), 20px each side
+ */
+.PalettePanel {
+  --PalettePanel-bar-height: 40px;
+  --PalettePanel-paper: oklch(from var(--ui-surface) l c h / 1);
+  --ui-modal-width: min(calc(var(--palette-width) + 40px), 95vw);
+  --ui-modal-close-hitbox: 32px;
+  --ui-modal-inner-close-top: calc((var(--PalettePanel-bar-height) - 32px) / 2);
+  --ui-modal-inner-close-right: 12px;
+
+  & .PaletteBody {
+    gap: 0;
+    width: auto;
+    /* the window's height, less the modal's own margin round it */
+    max-height: calc(100dvh - 32px);
+  }
+  & .PaletteHead {
+    box-sizing: border-box;
+    height: var(--PalettePanel-bar-height);
+    padding: 0 56px 0 20px;
+  }
+  & .PaletteGroups {
+    /* little above and below:  Owen's longer topics still fit a 1440 x 800 window without scrolling (I185) */
+    padding: 4px 20px 4px 20px;
+    background: var(--PalettePanel-paper);
+  }
+}

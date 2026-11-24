@@ -47,12 +47,17 @@ import "./PaletteView.css"
  * - Marked as the rail (`RAIL_MARK`), its flyouts too:  a press on it is its own while a part is picked up.
  * - Slides in the first time it shows on a page, under a top bar already drawn (epic `editor` I255);  never again,
  *   switching modes or pages:  it stays where it was.
+ * - Drawn on a blank app just made (`Palette.openOnArrival()`), it opens the add panel (`<PalettePanel>`).
  * - Spell UI's own:  a vertical icon `<ui-menu>`, its buttons `<ui-item>`s, its flyouts `<ui-popup>`s.
  ****************/
 export function PaletteRail(): JSX.Element {
   const isArriving = Palette.takeRailArrival()
   const thisGroup = () => appTexts.text(Palette.isPageShown ? "thisPage" : "paletteAppViews")
-  onSettled(() => Palette.load())
+  onSettled(() => {
+    Palette.load()
+    // a blank app just made:  the add panel shows what it can hold
+    if (Palette.takeOpenOnArrival()) void Palette.showPanel()
+  })
   return (
     <div class={["PaletteRailPlace", { arriving: isArriving }]} {...{ [RAIL_MARK]: "" }}>
       <div class="SplitPane PaletteRail" data-tour="add-bar">
@@ -118,6 +123,7 @@ function railTooltip(text: string): BarTooltip {
  * - The button:  its icon alone, `name` its name for a screen reader;  no tooltip:  its menu, opening, names it (T162).
  * - The flyout opens as the mouse rests on the button, after the page's hover delay (`--ui-hover-delay`;  T162),
  *   or as the button gets the focus;  it stays open while the mouse is over it.
+ * - A click on the button opens it at once, with no wait (T170, Owen:  "Click opens it too").
  * - The flyout:  `name` atop, a search button beside it (T162), then `rows`, handed the words typed (lowercase);
  *   - the search button slides the field open over the name, "Search <group>" (`<ui-search collapsed>`);
  *     Search's own (`isSearch`) is open from the start
@@ -135,16 +141,29 @@ function RailFlyout(props: {
 }): JSX.Element {
   const [filter, setFilter] = createSignal("")
   const words = () => filter().trim().toLowerCase()
+  let flyout: (HTMLElement & { visible?: boolean }) | undefined
   return (
     <>
-      <ui-item id={props.id} class="PaletteRailButton" icon={props.icon} aria-haspopup="menu" aria-label={props.name} />
+      <ui-item
+        id={props.id}
+        class="PaletteRailButton"
+        icon={props.icon}
+        aria-haspopup="menu"
+        aria-label={props.name}
+        onClick={() => {
+          if (flyout) flyout.visible = true
+        }}
+      />
       <ui-popup
         for={props.id}
         open-on="hover"
         position="right top"
         class={["BarMenuPopup", "PaletteFlyout"]}
         aria-label={props.name}
-        ref={closesWithPalette}
+        ref={(popup: HTMLElement & { visible?: boolean }) => {
+          flyout = popup
+          closesWithPalette(popup)
+        }}
         {...{ [RAIL_MARK]: "" }}
       >
         <div class="PaletteFlyoutHead">
@@ -218,11 +237,38 @@ function FavoriteButton(props: { definition: ComponentDefinition }): JSX.Element
   )
 }
 
+/****************
+ * ### `<PalettePanel>`
+ * The add panel, over the editor (epic `editor` T167:  "Shortcut key to bring up the Add View panel in a modal"):
+ * the palette's menu, `<PaletteMenu>`, in a `<ui-modal>`.
+ * - Opened by its key, ⌥⌘V, or View › Add a View…:  `Palette.showPanel()`, which mounts it and cleans up.
+ * - A click on a part adds it, a drag places it, as in the add bar's menus.
+ * - Closes like every dialog:  its ✕, Escape, or a click beside it;
+ *   and once a part is added, or a drag starts from it (`closesWithPalette`), so it lands on a page you can see.
+ ****************/
+export function PalettePanel(props: { onClose: () => void }): JSX.Element {
+  return (
+    <ui-modal
+      class="PalettePanel"
+      closedby="any"
+      closable=""
+      aria-label={appTexts.text("addPart")}
+      visible=""
+      ref={(modal: HTMLElement & { visible?: boolean }) => {
+        closesWithPalette(modal)
+        modal.addEventListener("ui-closed", () => props.onClose(), { once: true })
+      }}
+    >
+      <PaletteMenu />
+    </ui-modal>
+  )
+}
+
 /**
  * The palette as a menu, in columns:
  * what to do and its search, then App views, the app's own views, then every part, by topic.
  * - Every group shows everything in it, as the palette's table orders it (`ui/paletteGroups.json`;  epic `editor` I174, T81).
- * - A search looks through all of them, by name, other names and description.
+ * - A search looks through all of them, by name, other names and description:  ⌘F jumps into it (epic `editor` T166).
  * - Its header's words say what the part under the mouse is, else how to add one (`<PartAbout>`, epic `editor` T165).
  */
 export function PaletteMenu(): JSX.Element {
@@ -236,6 +282,8 @@ export function PaletteMenu(): JSX.Element {
         <PartAbout class="PaletteHint" />
         <ui-input
           class="PaletteSearch"
+          type="search"
+          shortcut="mod+F"
           size="small"
           aria-label={appTexts.text("paletteSearch")}
           placeholder={appTexts.text("paletteSearch")}

@@ -1,8 +1,9 @@
 import { For, Show, createSignal, flush, onSettled } from "solid-js"
-import type { JSX } from "@solidjs/web"
+import { render, type JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
+import type { MenuItem } from "spell/parser/core"
 import { SP } from "spell/parser/spell"
 // Import directly, NOT through the `spell/app/lsp` barrel, which would pull the language service into the bundle.
 import type { ScopeNode } from "spell/app/lsp/lsp.types"
@@ -11,12 +12,13 @@ import { cutCopyOrPaste, EDITOR_HOTKEYS, undoWay } from "spell/app/app/pages/edi
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
-import { Action } from "./Actions"
+import { Action, Actions } from "./Actions"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { ChangeThis } from "./ChangeThis"
 import { Inspector, type PartRow } from "./Inspector"
 import { on } from "./on"
 import { LazyPiece } from "./LazyPiece"
+import { uiReady } from "./loadUI"
 import { PartEdits, type MenuOpening, type PartAction } from "./PartEdits"
 
 import "./Palette.css"
@@ -38,13 +40,13 @@ import "./Palette.css"
  *   `<example>`, `<section>`.
  *   `<example>` is then the page's own example, its code editable in place.
  * - Its menu and its add bar are in `PaletteView.tsx`, loaded as it first opens (`Palette.views`, a `LazyPiece`):
- *   here are its state, Add a View's button and the right click's menu, in the editor's first load.
+ *   here are its state, the add panel's opener and the right click's menu, in the editor's first load.
  */
 export class Palette {
   /** The palette's menu and strip, loaded the first time it opens:  see `LazyPiece`. */
   static views = new LazyPiece(() => import("./PaletteView"))
 
-  /** Open it by itself, the next time the top bar's `+` is drawn:  a blank app shows what it can hold. */
+  /** Open the add panel by itself, the next time the add bar is drawn:  a blank app shows what it can hold. */
   static openOnArrival(): void {
     opensOnArrival = true
     Palette.load()
@@ -55,6 +57,35 @@ export class Palette {
     const opens = opensOnArrival
     opensOnArrival = false
     return opens
+  }
+
+  /**
+   * Show the add panel over the editor, a `<ui-modal>` of every part (`<PalettePanel>`;  epic `editor` T167):
+   * its key, ⌥⌘V, and View › Add a View….
+   * - SIDE EFFECT:  a `<div class="PalettePanelRoot">` in `<body>` holding it, until it closes.
+   * - Shown already:  nothing more.
+   * - NEVER throws:  its view failing to load is the editor's error to show.
+   */
+  static async showPanel(): Promise<void> {
+    if (panelRoot) return
+    const root = (panelRoot = document.createElement("div"))
+    root.className = "PalettePanelRoot"
+    Palette.load()
+    try {
+      const [{ PalettePanel }] = await Promise.all([Palette.views.load(), uiReady])
+      document.body.append(root)
+      const dispose = render(() => <PalettePanel onClose={close} />, root)
+
+      /** Unmount once it's closed. */
+      function close() {
+        dispose()
+        root.remove()
+        panelRoot = undefined
+      }
+    } catch (error) {
+      panelRoot = undefined
+      editor.showError(error)
+    }
   }
 
   /**
@@ -181,8 +212,11 @@ let groupRule: typeof import("spell/app/app/ui/PaletteGroups").PaletteGroups | u
 /** Its loading, once it's asked for. */
 let loading: Promise<void> | undefined
 
-/** Does it open when the `+` is next drawn?  `Palette.openOnArrival()`. */
+/** Does the add panel open when the add bar is next drawn?  `Palette.openOnArrival()`. */
 let opensOnArrival = false
+
+/** The add panel's place in `<body>`, while it shows:  `Palette.showPanel()`. */
+let panelRoot: HTMLElement | undefined
 
 /** Has the add bar (`<PaletteRail>`) shown on this page yet?  `Palette.takeRailArrival()`. */
 let hasRailShown = false
@@ -428,69 +462,8 @@ export function thisGroupMatches(words: string): boolean {
   return onPage || ownViewsMatching(words).length > 0
 }
 
-/**
- * The top bar's "+ Add a View":  opens the palette, a menu with its search;  beside the add bar down the left edge.
- * - Its plus, then its words, in the round pill its neighbours have, as wide as its words (epic `editor` I250, C5:
- *   "Change plus to `+ Add a View`"):  no tooltip, the words say it.
- * - An item of the Run | Edit group, right after Inspect app (`<ModeButtons add>`;  epic `editor` T83:
- *   "Move `add` to the immediate right of the inspector crosshair"), so it stands as its neighbours do.
- * - It opens a menu, never becomes the mode chosen (its `aria-haspopup`).
- */
-export function AddPartButton(): JSX.Element {
-  let popup: (HTMLElement & { visible?: boolean }) | undefined
-  // its menu is drawn once wanted:  its view loads then, not with the editor
-  const [isWanted, setWanted] = createSignal(false)
-  const want = () => {
-    Palette.load()
-    setWanted(true)
-  }
-  onSettled(() => {
-    if (Palette.takeOpenOnArrival() && popup) {
-      want()
-      popup.visible = true
-    }
-  })
-  return (
-    <>
-      <ui-item
-        id={ADD_BUTTON_ID}
-        icon="plus"
-        appearance="circular"
-        class="AddPartButton"
-        aria-haspopup="menu"
-        onPointerEnter={want}
-        onFocusIn={want}
-        onClick={want}
-      >
-        <span class="AddViewText">{appTexts.text("paletteAddView")}</span>
-      </ui-item>
-      <ui-popup
-        for={ADD_BUTTON_ID}
-        open-on="click"
-        position="bottom center"
-        class="PalettePopup"
-        aria-label={appTexts.text("addPart")}
-        ref={(element: HTMLElement) => {
-          popup = element
-          closesWithPalette(element)
-        }}
-      >
-        <Show when={isWanted()}>
-          <PaletteMenu />
-        </Show>
-      </ui-popup>
-    </>
-  )
-}
-
-/** The palette's menu, in Add a View's popup:  loaded on first use, see `PaletteView.tsx`. */
-const PaletteMenu = Palette.views.view("PaletteMenu")
-
 /** The add bar down the editor's left edge, in Edit:  loaded on first use, see `PaletteView.tsx` (epic `editor` T151). */
 export const PaletteRail = Palette.views.view("PaletteRail")
-
-/** Add a View's id, which its popup points at. */
-const ADD_BUTTON_ID = "AddPartButton"
 
 /**
  * Edit › Cut, Copy, Paste, Duplicate and Delete, and the same in a right click's menu.
@@ -555,9 +528,11 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
 /**
  * The ONE right-click menu on the app's parts, in the app and the Views tree (epic `editor` T160, Owen's order):
  * - Inspect first, under the mouse:  "Inspect Card", then Inspect Other Views (`<InspectRow>`)
- * - a line, then `PartMenuItems`, the same as the Edit menu's
+ * - a line, then the editor's Undo and Redo, as the Edit menu's (epic `editor` T171), then `PartMenuItems`, the same as
+ *   the Edit menu's
  * - the program's own right-click menu there, if it has one (`<context-menu>`, `context-menu=`), between dashed lines,
- *   under its header, App Menu:  drawn as Run draws it (`ActionMenus.itemsFor()`;  epic `editor` I76)
+ *   under its header, App Menu:  drawn as Run draws it (`ActionMenus.itemsFor()`;  epic `editor` I76),
+ *   less its keys, which the editor takes in Edit, and its Undo and Redo named for the app (`asTheAppsInEdit()`, T171)
  *   - Spell UI's dashed divider, `<ui-action kind="divider" appearance="dashed">`, edge to edge (`MenuBar.css`)
  * - a line, then Show in Code and Change This, together at the bottom
  * - Drawn as every right click's menu is, `<MenuPopup>`:  at once, inside the window, with arrow keys, Enter and Esc.
@@ -585,7 +560,7 @@ export function PartMenu(): JSX.Element {
         <ui-item kind="header" class={APP_MENU_HEADER}>
           {appTexts.text("menuAppMenu")}
         </ui-item>
-        {ActionMenus.itemsFor(items)}
+        {ActionMenus.itemsFor(asTheAppsInEdit(items))}
         <ui-action kind="divider" appearance="dashed" />
       </>
     )
@@ -606,6 +581,8 @@ export function PartMenu(): JSX.Element {
         >
           <InspectRow part={opening()?.part} partsUnder={opening()?.partsUnder} />
           <ui-action kind="divider" />
+          <Actions.undo menu icon="undo" />
+          <Actions.redo menu icon="redo" />
           <PartMenuItems whyNot={(action) => whyNotAt(where(), action)} />
           {programItems()}
           <Show when={!programMenu()}>
@@ -800,6 +777,28 @@ function isAnItem(event: Event): boolean {
 
 /** The class of the part menu's App Menu header, over the program's own items (`Palette.css`). */
 const APP_MENU_HEADER = "AppMenuHeader"
+
+/**
+ * The program's menu `items` as the part menu shows them in Edit (epic `editor` T171, Owen:  "duplicate the app's
+ * `undo` and `redo` as "Undo in Solitaire", and disable the command keys for all of the app menu items"):
+ * - no shortcut shown:  in Edit the editor takes the keys (`editorHotkeys()`), so none of them runs the app's
+ * - its `undo` and `redo` read "Undo in Solitaire", "Redo in Solitaire":  the editor's own are above them
+ * - each item read live still, through its own (a copy whose prototype is the item);  a sub-menu's items too
+ */
+function asTheAppsInEdit(items: readonly MenuItem[]): MenuItem[] {
+  const app = editor.project ? new SP.SpellProject(editor.project.path).title : ""
+  return items.map((item): MenuItem => {
+    if (item.kind === "separator") return item
+    if (item.kind === "menu") {
+      return Object.create(item, { items: { get: () => asTheAppsInEdit(item.items) } }) as MenuItem
+    }
+    const inApp = item.name === "undo" ? "menuUndoInApp" : item.name === "redo" ? "menuRedoInApp" : undefined
+    return Object.create(item, {
+      shortcut: { value: undefined },
+      ...(inApp ? { title: { get: () => appTexts.text(inApp, { app }) } } : {})
+    }) as MenuItem
+  })
+}
 
 /** The class of the part menu's Inspect Other Views row (`Palette.css`). */
 const INSPECT_ROW = "InspectRow"
