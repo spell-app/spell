@@ -32,6 +32,7 @@ export function ErrorDisplay(props: ErrorDisplayProps) {
           state="error"
           heading={info().header}
           dismissible={!!props.onDismiss}
+          floating={props.floating}
           id={props.id}
           class={props.class}
           style={props.style}
@@ -77,6 +78,8 @@ export type ErrorDisplayProps = {
   autoHide?: boolean
   /** Auto-hide delay, ms.  Default:  `3000`. */
   autoHideDelay?: number
+  /** Lifted over the page:  the floating shadow, and it drops in as it first shows (`<ui-message floating>`). */
+  floating?: boolean
   /** Id of the message. */
   id?: string
   /** Class of the message. */
@@ -149,7 +152,7 @@ export function ErrorNotice() {
     <Show when={error()}>
       {(error) => (
         <div class="ErrorNotice" style={FLOATING_MESSAGE_STYLE}>
-          <ErrorDisplay error={error()} onDismiss={() => editor.hideError()} />
+          <ErrorDisplay error={error()} floating onDismiss={() => editor.hideError()} />
         </div>
       )}
     </Show>

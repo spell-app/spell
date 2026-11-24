@@ -1,7 +1,8 @@
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { boxesIn, expectCentred, expectSpanning } from "./alignment"
+import { Alignment } from "spell/test-helpers/Alignment"
+
 import { EDITOR, SERVING } from "./runningEditor"
 
 /**
@@ -23,7 +24,8 @@ describe.skipIf(!SERVING)("the editor's own Spell, in its zones", { timeout: 180
     page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
     await page.goto(`${EDITOR}edit/@spell/editor/spell-editor`, { timeout: 60_000 })
     await page.locator(".EditorZones .EditorZoneStandIn").first().waitFor({ timeout: 90_000 })
-  })
+    // the waits above take up to 150s on a busy machine:  never Vitest's 10s for a hook
+  }, 180_000)
 
   afterAll(async () => {
     await browser?.close()
@@ -75,19 +77,29 @@ describe.skipIf(!SERVING)("the editor's own Spell, in its zones", { timeout: 180
     ).toBe(false)
   })
 
-  /** The zone drawing the view `name`. */
-  const zone = (name: string) =>
-    page.locator(".EditorZone").filter({ has: page.locator(".EditorZoneTitle", { hasText: name }) })
+  /** What the kit's alignment check finds in the zone of the view `name`:  `[]` when its rows line up. */
+  const misalignedIn = async (name: string) =>
+    Alignment.report(await Alignment.scanPage(page, { within: `.EditorZone[data-zone="${name}"]` }))
 
   test("the top bar's pills sit on one line, the one in the tools' capsule too (I327)", async () => {
-    expectCentred(await boxesIn(zone("editor bar"), ".EditorZoneStandIn"))
+    expect(await misalignedIn("editor bar")).toEqual([])
   })
 
   test("the app and the Inspector are as tall as the code and the Program panel together (T146)", async () => {
-    const boxes = await boxesIn(zone("editor layout"), ".EditorZoneStandIn")
-    const named = (name: string) => boxes.find((box) => box.name === `⟨${name}⟩`)!
-    const column = { top: named("code").top, bottom: named("program panel").bottom }
-    expectSpanning(named("app"), column)
-    expectSpanning(named("inspector"), column)
+    expect(await misalignedIn("editor layout")).toEqual([])
+    // the same middle isn't the same height:  each runs from the code's top to the Program panel's bottom
+    const boxOf = async (name: string) =>
+      (await page
+        .locator(`.EditorZone[data-zone="editor layout"] .EditorZoneStandIn`, { hasText: `⟨${name}⟩` })
+        .boundingBox())!
+    const [code, programPanel] = [await boxOf("code"), await boxOf("program panel")]
+    for (const pane of ["app", "inspector"]) {
+      const box = await boxOf(pane)
+      expect(Math.abs(box.y - code.y), `${pane}'s top`).toBeLessThanOrEqual(Alignment.TOLERANCE_PX)
+      expect(
+        Math.abs(box.y + box.height - (programPanel.y + programPanel.height)),
+        `${pane}'s bottom`
+      ).toBeLessThanOrEqual(Alignment.TOLERANCE_PX)
+    }
   })
 })

@@ -9,7 +9,7 @@ import "./Notice.css"
 
 /****************
  * ### `<Notice>`
- * `editor.notice` as a success `<ui-message>`, fixed near the top of the page;  closing it calls
+ * `editor.notice` as a success `<ui-message floating>`, fixed near the top of the page (it drops in);  closing it calls
  * `editor.hideNotice()`.
  * - Its first line is the heading, any more under it, each on its own line.
  * - Each line on ONE line, never wrapped
@@ -44,7 +44,13 @@ export function Notice(props: NoticeProps) {
       {(notice) => (
         <div class="Notice" style={NOTICE_STYLE}>
           {/* its first line the heading, the rest under it, a line each (epic `editor` I124) */}
-          <ui-message state="success" heading={notice().split("\n")[0]} dismissible="" ref={on("ui-closing", dismiss)}>
+          <ui-message
+            state="success"
+            heading={notice().split("\n")[0]}
+            dismissible=""
+            floating=""
+            ref={on("ui-closing", dismiss)}
+          >
             <Show when={notice().split("\n").slice(1).join("\n")}>{(rest) => <p>{rest()}</p>}</Show>
           </ui-message>
         </div>
@@ -73,6 +79,7 @@ export function UpgradeNotice() {
           state="info"
           heading={lines()[0]}
           dismissible=""
+          floating=""
           aria-label={lines()[0]}
           ref={on("ui-closing", (event: Event) => {
             event.preventDefault()
