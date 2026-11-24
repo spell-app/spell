@@ -55,9 +55,11 @@ export class PerfBuilds {
     const outDir = join(this.folder, build)
     for (const config of CONFIGS[build]) {
       const minify = build === "editor-unminified" ? ["--minify", "false"] : []
+      // its maps beside its files, named by none:  the same files, byte for byte (`spell perf budget --why`)
+      const maps = MAPPED.has(build) ? ["--sourcemap", "hidden"] : []
       const result = spawnSync(
         process.execPath,
-        [vpScript(this.appBuildFolder), "build", "-c", config, ...minify, "--outDir", outDir],
+        [vpScript(this.appBuildFolder), "build", "-c", config, ...minify, ...maps, "--outDir", outDir],
         { cwd: this.appBuildFolder, encoding: "utf8" }
       )
       if (result.status !== 0) {
@@ -105,8 +107,23 @@ export class PerfBuilds {
   }
 }
 
-/** A build `PerfBuilds` makes. */
-export type PerfBuild = "editor" | "editor-unminified" | "element"
+/**
+ * A build `PerfBuilds` makes.
+ * - `editor-mapped`:  the editor's, with its source maps beside its files, which name them nowhere:  the same files
+ *   as `editor`'s, for saying what's in each (`spell perf budget --why`);  the element builds write their maps anyway
+ */
+export type PerfBuild = "editor" | "editor-unminified" | "editor-mapped" | "element"
+
+/** The builds made with their source maps:  `editor-mapped`. */
+const MAPPED = new Set<PerfBuild>(["editor-mapped"])
+
+/** Where each build is set to write, from the app's build folder:  the maps' paths are from there (`BundleContents`). */
+export const BUILT_AT: Record<PerfBuild, string> = {
+  editor: "dist",
+  "editor-unminified": "dist",
+  "editor-mapped": "dist",
+  element: "dist-element"
+}
 
 /**
  * Each build's Vite configs, in the app's build folder, built one after another into one folder:
@@ -115,6 +132,7 @@ export type PerfBuild = "editor" | "editor-unminified" | "element"
 const CONFIGS: Record<PerfBuild, string[]> = {
   editor: ["vite.config.ts"],
   "editor-unminified": ["vite.config.ts"],
+  "editor-mapped": ["vite.config.ts"],
   element: ["vite.solid.config.ts", "vite.element.config.ts", "vite.editor.config.ts", "vite.code.config.ts"]
 }
 

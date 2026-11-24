@@ -94,6 +94,42 @@
       measure: "lazy"
     },
     {
+      id: "language-worker",
+      name: "The editor's language worker",
+      // Review Chunking (epic solid-2-final P19):  410 KB, the worker's own copy of the grammar, the parser and the
+      // language service.  Its budget is the lazy pieces' ceiling it breaks;  that ceiling still counts it too.
+      budget: 351,
+      ceiling: 419,
+      build: "editor",
+      entries: ["index.html"],
+      only: "languageWorker-[^/]*\\.js$",
+      measure: "lazy"
+    },
+    {
+      id: "site-page",
+      name: "A built site on the run page (the Spell UI site)",
+      // P19:  1,292 KB, everything a first visit fetches;  its budget is today's size until a layout is picked
+      budget: 1292,
+      ceiling: 1319,
+      run: "load site/desktop brotliLoaded"
+    },
+    {
+      id: "cloud-page",
+      name: "A plain page with one program (a cloud app)",
+      // P19:  596 KB, everything a first visit fetches, where the cloud-app entry counts the viewer's first files only
+      budget: 596,
+      ceiling: 608,
+      run: "load cloud/desktop brotliLoaded"
+    },
+    {
+      id: "programs-page",
+      name: "A plain page with several programs",
+      // P19:  899 KB for three viewers, each running its own copy of the engine (Q24)
+      budget: 899,
+      ceiling: 917,
+      run: "load programs/desktop brotliLoaded"
+    },
+    {
       id: "warm-visit",
       name: "A warm visit to the editor",
       budget: 10,

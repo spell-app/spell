@@ -22,7 +22,7 @@ describe("spell perf run's flags", () => {
   })
 
   test("a page, profile or step it doesn't know, runs that aren't whole, another baseline word:  an error", () => {
-    expect(() => runOptionsOf({ page: "editor,home" })).toThrow("--page takes editor, docs, epic, run;  not home")
+    expect(() => runOptionsOf({ page: "editor,home" })).toThrow("--page takes editor, docs, epic, run, site, cloud, programs;  not home")
     expect(() => runOptionsOf({ steps: "speed" })).toThrow("--steps takes")
     expect(() => runOptionsOf({ runs: "1.5" })).toThrow("--runs must be a whole number")
     expect(() => runOptionsOf({ baseline: "keep" })).toThrow("--baseline takes one word, save")

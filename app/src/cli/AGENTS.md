@@ -113,7 +113,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - one class per measurement:  `LoadMeasure`, `LeaksMeasure`, `HugeListsMeasure`, `TypingMeasure`, `A11yMeasure`,
     `ListenersMeasure`, `SheetsMeasure`, `CpuMeasure`, each on `PerfBrowser` (a cold page in headless Chromium, its CPU and network slowed)
   - `PerfResults`:  each run a dated file in the kit's `.perf-results/`;  the baseline, `perfBaseline.json` beside it
-  - `PerfBudget`:  the bundles' size budgets, [perf-budgets.json5](../../perf-budgets.json5) at the app folder's root
+  - `PerfBudget`:  the bundles' size budgets, [perf-budgets.json5](../../perf-budgets.json5) at the app folder's root;
+    `--why` says what's in each file a budget counts (the kit's `SRV.BundleContents`, on the editor built with its maps)
 - Each command's work is a file in [commands/](commands/), `<name>Command.ts`:
   `(session, args, options) => Promise<exitCode>`.
   - `lintCommand` was `checkCommand`, `speedtestCommand` `speedCommand`, until P13.

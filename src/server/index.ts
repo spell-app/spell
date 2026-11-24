@@ -65,6 +65,7 @@ export * from "./DataFile"
 export * from "./Linker"
 export * from "./format"
 export * from "./Bundle"
+export * from "./BundleContents"
 
 export * from "./runs/runs.types"
 export * from "./runs/CommandRun"

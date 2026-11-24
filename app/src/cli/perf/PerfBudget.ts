@@ -5,7 +5,7 @@ import { join, posix } from "node:path"
 import { json5Edited, readJSON5File } from "spell/util/node/json5"
 import { SRV } from "spell/server"
 import type { BudgetEntry, BudgetResult, PerfRecord } from "./perf.types"
-import type { PerfBuilds } from "./PerfBuilds"
+import { BUILT_AT, type PerfBuild, type PerfBuilds } from "./PerfBuilds"
 
 /**
  * The bundles' SIZE BUDGETS (epic `solid-2-final` P1, Q14):  `app/perf-budgets.json5`, brotli on the wire, KB.
@@ -25,6 +25,9 @@ export class PerfBudget {
   /** the kit's root, where `folder`s are from */
   readonly kitRoot: string
 
+  /** each build made, by its name, made once for every check and explanation:  its folder */
+  private readonly built = new Map<PerfBuild, string>()
+
   constructor(file: string, kitRoot: string) {
     this.file = file
     this.kitRoot = kitRoot
@@ -41,7 +44,7 @@ export class PerfBudget {
    * - before a `folder` is sized, its stale bundles are built (`spell bundle --stale`):  a worktree's site bundle
    */
   check(builds: PerfBuilds, lastRun: PerfRecord | undefined, say: (line: string) => void): BudgetResult[] {
-    const built = new Map<string, string>()
+    const built = this.built
     const folderOf = (entry: BudgetEntry): string => {
       if (entry.folder) return join(this.kitRoot, entry.folder)
       const build = entry.build!
@@ -92,6 +95,85 @@ export class PerfBudget {
     if (over.length) lines.push(`Over budget:  ${over.map((result) => result.entry.id).join(", ")}`)
     if (broken.length) lines.push(`Past its ceiling (it grew):  ${broken.map((result) => result.entry.id).join(", ")}`)
     return { lines, isPassing: !broken.length }
+  }
+
+  /**
+   * WHY each of the budgets `ids` weighs what it does (`spell perf budget --why`;  epic `solid-2-final` P19):  the lines
+   * that say it.
+   * - per file it counts (the biggest first, at most `FILES_SHOWN`):  its size, who loads it, and what's in it by where
+   *   it's from (`SRV.BundleContents`), raw
+   * - then the modules built into more than one of them, and for a lazy piece, into it and the page's first load too:
+   *   what a page downloads twice
+   * - the editor is built WITH its source maps for this (`editor-mapped`:  the same files);  a `run` entry is a number a
+   *   browser measured, so it's said and skipped
+   * - throws a `TypeError` naming an id the file hasn't got
+   */
+  explain(ids: string[], builds: PerfBuilds, say: (line: string) => void): string[] {
+    const built = this.built
+    const lines: string[] = []
+    for (const id of ids) {
+      const entry = this.entries.find((each) => each.id === id)
+      if (!entry) {
+        const known = this.entries.map((each) => each.id).join(", ")
+        throw new TypeError(`PerfBudget.explain():  no budget ${id};  the budgets are ${known}`)
+      }
+      lines.push("", `${entry.id}:  ${entry.name}`)
+      if (entry.run) {
+        lines.push(`  a number spell perf run measured in a browser (${entry.run}):  nothing to open here`)
+        continue
+      }
+      const build = entry.build === "editor" ? "editor-mapped" : entry.build
+      if (build && !built.has(build)) {
+        say(`Building ${build} into a temporary folder ...`)
+        built.set(build, builds.build(build))
+      }
+      const folder = build ? built.get(build)! : join(this.kitRoot, entry.folder!)
+      const builtAt = build ? join(builds.appBuildFolder, BUILT_AT[build]) : folder
+      lines.push(...PerfBudget.explainIn(entry, folder, { root: this.kitRoot, builtAt }))
+    }
+    return lines
+  }
+
+  /** `explain()`'s lines for `entry`, built in `folder`;  `root` and `builtAt` as `SRV.BundleContents` takes them. */
+  static explainIn(entry: BudgetEntry, folder: string, { root, builtAt }: { root: string; builtAt: string }): string[] {
+    const entries = (entry.entries ?? []).flatMap((file) =>
+      file.endsWith(".html") ? PerfBudget.loadsOf(join(folder, file)) : [file]
+    )
+    const only = entry.only ? new RegExp(entry.only) : undefined
+    const load = SRV.Bundle.firstLoad({ folder, entries, only })
+    const isLazy = entry.measure === "lazy"
+    const eager = load.files.filter((file) => file.file.endsWith(".js"))
+    const counted = isLazy ? load.lazy.filter((file) => file.file.endsWith(".js")).slice(0, 1) : eager
+    const contents = new SRV.BundleContents(folder, { root, builtAt })
+    const lines: string[] = []
+    for (const size of [...counted].sort((a, b) => b.brotli - a.brotli).slice(0, FILES_SHOWN)) {
+      const file = contents.of(size.file)
+      const named = file.importedBy.slice(0, LOADERS_SHOWN).map((each) => `${each.file} (${each.how})`)
+      const more = file.importedBy.length - named.length
+      const loaders = named.length ? `${named.join(", ")}${more > 0 ? ` and ${more} more` : ""}` : "the page itself"
+      lines.push(`  ${size.file}  ${kbOf(size.brotli)} brotli, ${kbOf(size.raw)} raw;  loaded by ${loaders}`)
+      if (!file.isMapped) {
+        lines.push("    (no source map beside it:  what's in it can't be said)")
+        continue
+      }
+      for (const group of SRV.BundleContents.grouped(file.modules).slice(0, GROUPS_SHOWN)) {
+        lines.push(`    ${kbOf(group.bytes).padStart(9)}  ${group.module}`)
+      }
+    }
+    if (counted.length > FILES_SHOWN) lines.push(`  ... and ${counted.length - FILES_SHOWN} smaller files`)
+    const compared = [...new Set([...counted, ...(isLazy ? eager : [])].map((size) => size.file))]
+    const twice = contents.duplicates(compared)
+    if (!twice.length) lines.push("  built in twice:  nothing")
+    else {
+      const extra = twice.reduce((sum, each) => sum + each.bytes - Math.max(...each.files.map((one) => one.bytes)), 0)
+      lines.push(`  built in twice:  ${twice.length} modules, ${kbOf(extra)} raw more than one copy each`)
+      for (const each of twice.slice(0, GROUPS_SHOWN)) {
+        lines.push(
+          `    ${kbOf(each.bytes).padStart(9)}  ${each.module}  (${each.files.map((one) => one.file).join(", ")})`
+        )
+      }
+    }
+    return lines
   }
 
   /**
@@ -172,6 +254,20 @@ export class PerfBudget {
     )
     if (result.status !== 0) say(`spell bundle --stale failed;  sizing what's there:\n${result.stderr.trim()}`)
   }
+}
+
+/** How many of a budget's files `explain()` opens, biggest first. */
+const FILES_SHOWN = 8
+
+/** How many of the files that load a file `explain()` names. */
+const LOADERS_SHOWN = 4
+
+/** How many of a file's sources (or of the modules built in twice) `explain()` lists. */
+const GROUPS_SHOWN = 8
+
+/** `bytes` as KB, one decimal:  `12.3 KB`. */
+function kbOf(bytes: number): string {
+  return `${(bytes / 1024).toFixed(1)} KB`
 }
 
 /** A ceiling's room over today's size:  2%. */

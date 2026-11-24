@@ -112,6 +112,16 @@ const MOTION: Record<PerfPageName, (page: Page) => Promise<void>> = {
     await page.evaluate(() => document.querySelectorAll("epic-item")[3]?.setAttribute("open", ""))
     await page.waitForTimeout(600)
     await page.evaluate(() => document.querySelectorAll("epic-item")[3]?.removeAttribute("open"))
+  },
+  // P19's kinds:  nothing chosen to animate yet, so they count what animates by itself
+  site: async (page) => {
+    await page.waitForTimeout(600)
+  },
+  cloud: async (page) => {
+    await page.waitForTimeout(600)
+  },
+  programs: async (page) => {
+    await page.waitForTimeout(600)
   }
 }
 

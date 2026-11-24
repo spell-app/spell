@@ -865,6 +865,7 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 | `spell perf run` | measures the editor, a docs page, an epic page and run mode in a headless browser, on a desktop and an emulated phone, then prints the report;  about 5 minutes |
 | `spell perf report` | the last run's numbers beside the run before it and the baseline, "WORSE" past 10% |
 | `spell perf budget` | every bundle's size, brotli, against its budget and its ceiling;  exits 1 when one grew past its ceiling |
+| `spell perf budget --why <ids>` | for those budgets (or `all`):  what's in each file by where it's from, who loads it, and what's built in twice |
 
 <details>
 <summary>Every option of perf, and how it measures</summary>
@@ -872,7 +873,7 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 | Option | What it does |
 | --- | --- |
 | `spell perf run --full` | every measurement, 5 loads each:  load, leaks, huge lists (a 100,000-row table and tree scrolled on the docs page), typing, accessibility, listeners, style sheets, a CPU profile and the editing pipeline |
-| `spell perf run --page editor,docs` | which pages:  `editor`, `docs`, `epic`, `run` (default all) |
+| `spell perf run --page editor,docs` | which pages:  `editor`, `docs`, `epic`, `run` (the default);  also `site` (a built site on the run page), `cloud` (one program on a plain page) and `programs` (several on one page) |
 | `spell perf run --profile phone` | which profiles:  `desktop`, `phone`, `phonewide` (default `desktop` and `phone`) |
 | `spell perf run --steps load,typing` | which measurements (default `load`) |
 | `spell perf run --runs <count>` | cold loads per page and profile, medians reported (default 1, 5 with `--full`) |
