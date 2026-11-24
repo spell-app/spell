@@ -446,10 +446,8 @@
     margin-inline: 0 var(--_ui-panel-close-end);
   }
   .ui.section.panel > .title > .dismiss > .close.icon {
-    display: inline-grid;
-    place-items: center;
-    width: 1em;
-    height: 1em;
+    display: inline-flex;
+    align-items: center;
     margin: 0;
     padding: 0;
     border: 0;
@@ -462,8 +460,9 @@
   .ui.section.panel > .title > .dismiss > .close.icon:is(:hover, :focus-visible) {
     color: var(--_ui-panel-close-hover-color);
   }
+  /* its box the drawn ✕'s own width, so the bar's room ends at the ✕ itself */
   .ui.section.panel > .title > .dismiss > .close.icon > svg {
-    width: 1em;
+    width: auto;
     height: 1em;
     fill: currentColor;
   }

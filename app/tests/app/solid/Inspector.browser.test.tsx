@@ -376,7 +376,7 @@ describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a ca
     cleanups.push(() => open.mockRestore())
     ;(buttons[0] as HTMLElement).click()
     expect(open).toHaveBeenCalledWith(expect.stringMatching(/\/components\/ui\/segment$/), "spell-ui-docs")
-    expect(host.querySelector(".InspectorCard ui-icon.PanelClose.InspectorClose")).not.toBeNull()
+    expect(host.querySelector(".InspectorCard")!.shadowRoot!.querySelector("[part~=close]")).not.toBeNull()
     // a program's own view:  no docs
     Inspector.select(view)
     flush()
@@ -434,12 +434,12 @@ describe("the cards", () => {
     flush()
     expect(titles()).toEqual([false, true, true])
     // no card is hidden on its own:  the one ✕ is the top card's Close, right of Inspect app, which hides the column (I186);
-    // beside its bar, a panel's ✕ as the file bar's is (T95)
-    const closes = host.querySelectorAll<HTMLElement>(".InspectorCard ui-icon[name=close]")
+    // the panel's own, last in its bar, as the file bar's is (T95, T145)
+    const closes = [...host.querySelectorAll(".InspectorCard")].flatMap((card) => [
+      ...card.shadowRoot!.querySelectorAll<HTMLElement>("[part~=close]")
+    ])
     expect(closes).toHaveLength(1)
-    expect(
-      closes[0]!.matches('[data-panel="properties"] > ui-toolbar[slot="actions"] ~ ui-icon.PanelClose[slot="actions"]')
-    ).toBe(true)
+    expect(closes[0]!.getRootNode()).toBe(host.querySelector('.InspectorCard[data-panel="properties"]')!.shadowRoot)
     // closed by it, then opened again:  every card, the folded one still folded
     closes[0]!.click()
     flush()

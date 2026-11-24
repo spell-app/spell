@@ -13,6 +13,7 @@ import { barTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
 import { LazyCodeMirror } from "./LazyCodeMirror"
+import { on } from "./on"
 
 import "./CodeOutput.css"
 
@@ -163,7 +164,14 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
     }
   )
   return (
-    <ui-panel appearance="pane" class="CodeOutputPane" label={appTexts.text("codeOutputHeader")}>
+    <ui-panel
+      appearance="pane"
+      class="CodeOutputPane"
+      label={appTexts.text("codeOutputHeader")}
+      closable=""
+      close-label={appTexts.text("codeOutputClose")}
+      ref={on("ui-dismissed", () => CodeOutputShown.set(undefined))}
+    >
       <ui-toolbar slot="actions" appearance="segmented link header" tabs label={appTexts.text("codeOutputHeader")}>
         <For each={Object.keys(OUTPUT_TARGETS) as OutputTarget[]}>
           {(target) => (
@@ -176,15 +184,6 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
             </ui-item>
           )}
         </For>
-        <ui-icon
-          slot="right"
-          name="close"
-          link=""
-          class="PanelClose"
-          label={appTexts.text("codeOutputClose")}
-          title={appTexts.text("codeOutputClose")}
-          onClick={() => CodeOutputShown.set(undefined)}
-        />
       </ui-toolbar>
       <div class="CodeOutputCode">
         <ErrorBoundary onError={(error) => editor.showError(error)}>

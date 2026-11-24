@@ -29,7 +29,7 @@ import "./CodeCard.css"
 /****************
  * ### `<InspectorCard>`
  * One of the Inspector's cards:  a pane (`<ui-panel appearance="pane">`), ONE bar over its body.
- * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`, then its `close`.
+ * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`, then its ✕ (`onClose`).
  * - The chevron folds the card to its bar, or unfolds it (`Inspector.toggleFolded()`), which remembers.
  * - No ✕:  a card isn't hidden on its own;  the top bar's Inspector button shows and hides the whole column
  *   (Owen, 2026-11-15, epic `editor` T78:  "no need to hide the sections of the inspector sidebar separately").
@@ -48,10 +48,12 @@ export function InspectorCard(props: {
   /** Its own buttons, at its bar's right:  `slot="right"`. */
   actions?: JSX.Element
   /**
-   * Its ✕, after the bar, as the file bar's is:  a panel's action beside the bar, not in it (`PanelClose`, T95),
-   * so its size and the room before it are the file bar's own.
+   * Its ✕, last in its bar, as the file bar's and the compiled code's:  the panel's own (`<ui-panel closable>`,
+   * T95, T145), named `closeLabel`;  what a click on it does.
    */
-  close?: JSX.Element
+  onClose?: () => void
+  /** Its ✕'s name and tooltip. */
+  closeLabel?: string
   /** The body's class. */
   class?: string
   /** The body. */
@@ -70,7 +72,10 @@ export function InspectorCard(props: {
       collapsible={props.locked ? undefined : ""}
       fold-icon="start"
       open={isFolded() ? "false" : undefined}
+      closable={props.onClose ? "" : undefined}
+      close-label={props.closeLabel}
       ref={(panel: HTMLElement) => {
+        on("ui-dismissed", () => props.onClose?.())(panel)
         // its own:  a row of a tree inside it sends these too
         on("ui-closing", (event) => {
           if (event.target === panel) setFolded(true)
@@ -84,7 +89,6 @@ export function InspectorCard(props: {
         {props.bar}
         {props.actions}
       </ui-toolbar>
-      {props.close}
       <Show when={!isFolded()}>
         <div class={["Inspector", "InspectorSection", props.class]}>{props.children}</div>
       </Show>

@@ -242,33 +242,25 @@ a "file" is a thing
 		// What its pen's tip says, "Updated in your draft.", in the page's language:  the editor's own
 	its "discard words" is text
 		// The tip's link, "Discard changes", in the page's language:  the editor's own
-	its "close words" is text
-		// Its ✕'s tooltip, "Close", in the page's language:  the editor's own
 	to show it
 	to discard it
 		// Your draft of it goes, back to what's published:  the editor's own
-	to close it
-		// Its tab leaves the bar, the file still in the list of every file:  the editor's own (T77)
 
 a "file list" is a viewable list of files
 	// Every file of the project, a tab each:  a click shows it;  a right click shows it, and its menu
-	// Its ✕, in its file icon's place while hovered, closes its tab, only while some files are put away in the list (T77, T82)
+	// Its ✕, in its file icon's place while hovered, closes its tab, only while some files are put away in the list:  the item's own `closable="when-limited"` (T77, T82, T145)
 	to draw each item
-		<item icon={the icon of the file} label={the name of the file} value={the path of the file} selected={the file is chosen} onClick={show the file}>
+		<item icon={the icon of the file} label={the name of the file} value={the path of the file} selected={the file is chosen} closable="when-limited" onClick={show the file}>
 			<context-menu>
 				<action "duplicate file"/>
 				<action "rename file"/>
 				<action "delete file"/>
 			</>
-			<span class="TabIcon" slot="icon">
-				<icon name={the icon of the file} />
-				<icon class="CloseTab" name="close" title={the close words of the file} onClick={close the file} />
-			</span>
 			{the name of the file}
-			<if the file is changed><span class="NotSaved"/></if>
+			<if the file is changed><label slot="badge" circular empty color="orange" size="mini" /></if>
 			<if the file is drafted>
-				<span class="Drafted">
-					<icon name="fa7-free:pen-to-square"/>
+				<span slot="badge" class="Drafted">
+					<icon name="fa7-free:pen-to-square" size="small" color="primary" />
 					<popup class="DraftTip" position="bottom center">
 						{the draft note of the file}
 						<button appearance="tertiary" color="primary" size="small" onClick={discard the file}>{the discard words of the file}</>
@@ -285,100 +277,19 @@ a "file tab bar" is a view
 	// At its far right a ✕ hides the code, as the top bar's code icon does, which shows it again (T83).
 	// Then a tab hovered shows a ✕ in its file icon's place:  it closes the tab, the file still in the list, and picking it there opens it again (T77).  The ✕ takes no room of its own, so no tab grows or moves (T82).
 	// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14):  hovered, it says so, with a link that discards that file's draft (I92).
-	// A site's own file, `Dashboard.site.spell`, is always a tab;  and however narrow the bar, it's never one tab with a ▾ of its own:  the row scrolls (I188).
+	// A site's own file, `Dashboard.site.spell`, is always a tab;  and however narrow the bar, it's never one tab with a ▾ of its own:  the row scrolls (I188, its toolbar's `scroll-only`).
+	// Every look is Spell UI's own:  no CSS of its own (T145).
 	// The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 	"files" is a new file list
 	its "remember as" is text
 		// What this project's open tabs are kept under, the editor's own
 	its "hide words" is text
 		// The ✕'s tooltip, "Hide the code", in the page's language:  the editor's own
-	to hide the code
-		// The ✕:  the code's column hides, as the top bar's code icon hides it:  the editor's own (T83)
-	<css>
-		/* the dot on a tab whose file isn't saved:  the theme's warning hue */
-		.NotSaved {
-			display: inline-block;
-			margin-inline-start: 6px;
-			width: 7px;
-			height: 7px;
-			border-radius: 50%;
-			background: var(--ui-warning, var(--ui-orange, #f2994a));
-		}
-		/* a tab whose file is your draft, saved but not published:  a pen on a square, small, in the theme's primary hue;  its tip, the popup, as any */
-		.Drafted {
-			display: inline-flex;
-			margin-inline-start: 6px;
-		}
-		.Drafted > ui-icon {
-			font-size: 0.8em;
-			color: var(--ui-primary, var(--ui-blue, #2185d0));
-		}
-		/* a tab being dragged along the row:  dimmed;  a line where it would land, before or after the tab under it */
-		ui-item[dragged]::part(item) {
-			opacity: 0.5;
-		}
-		ui-item[drop="before"]::part(item) {
-			box-shadow: inset 2px 0 0 var(--ui-primary);
-		}
-		ui-item[drop="after"]::part(item) {
-			box-shadow: inset -2px 0 0 var(--ui-primary);
-		}
-		/* a tab's file icon, and its ✕ in the same spot:  the ✕ only while some files are put away in the list (the toolbar's limited), on a tab hovered;  the file icon then hidden, its room kept, so no tab grows or moves */
-		.TabIcon {
-			display: inline-grid;
-			place-items: center;
-		}
-		/* a `<ui-icon>` draws no box of its own:  its glyph's box is the one placed, both in the one cell */
-		.TabIcon > ui-icon::part(icon) {
-			grid-area: 1 / 1;
-			margin: 0;
-		}
-		.CloseTab {
-			visibility: hidden;
-			font-size: 0.8em;
-			opacity: 0.6;
-			cursor: pointer;
-		}
-		ui-toolbar:state(limited) > ui-item:hover .TabIcon > ui-icon {
-			visibility: hidden;
-		}
-		ui-toolbar:state(limited) > ui-item:hover .TabIcon > .CloseTab {
-			visibility: visible;
-		}
-		.CloseTab:hover {
-			opacity: 1;
-		}
-		/* never the one-tab dropdown, however narrow:  the row scrolls, and the Files button lists every file (I188) */
-		ui-toolbar {
-			--ui-toolbar-scroll-min: 0px;
-		}
-		/* the ✕ that hides the code, at the bar's far right:  every panel's ✕, the editor's tokens (`PanelClose`, T95) */
-		.HideCode {
-			display: inline-flex;
-			/* its box the glyph's own, no room after it for a label:  so the bar's room ends at the drawn ✕ (I213) */
-			--ui-icon-width: auto;
-			--ui-icon-distance: 0;
-			flex: none;
-			/* 12px from the bar's edge:  its 8px, then this (I233) */
-			margin-inline: var(--spell-panel-close-gap) var(--spell-panel-close-end);
-			color: var(--spell-panel-close-color);
-			transition: color var(--spell-panel-close-fade);
-			cursor: pointer;
-		}
-		.HideCode:is(:hover, :focus-visible, :focus-within) {
-			color: var(--spell-panel-close-hover-color);
-		}
-		.NotSaved[hidden],
-		.Drafted[hidden] {
-			display: none;
-		}
-	</css>
 	to draw it
-		<panel appearance="pane" label="Files">
-			<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first max-visible all-items-icon="file outline" all-items-at-end remember={its remember as} label="Files">
+		<panel appearance="pane" label="Files" closable close-label={its hide words}>
+			<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-only reorderable max-visible all-items-icon="file outline" all-items-at-end remember={its remember as} label="Files">
 				{draw each file in its files}
 			</toolbar>
-			<icon slot="actions" class="HideCode" name="close" title={its hide words} label={its hide words} onClick={hide the code} />
 		</panel>
 
 a "home row" is a view
