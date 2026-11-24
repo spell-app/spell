@@ -7,6 +7,7 @@ import {
   stateLook,
   withSecureAddress,
   inCardOrder,
+  worktreeCards,
   worktreeOrder
 } from "spell/epic/tools/_assets/servers-page.js"
 
@@ -65,6 +66,16 @@ describe("the Servers page's order (epic `epic-engine` I449)", () => {
       epicWorktrees: [epic("editor"), epic("prefs-and-undo")]
     })
     expect(groups.map((group) => group.worktree)).toEqual(["editor", "prefs-and-undo", "alpha", "zeta"])
+  })
+})
+
+describe("a worktree's cards (epic `epic-engine` I465)", () => {
+  test("worktreeCards():  nothing running, no cards;  anything running, every server's card, the stopped ones too", () => {
+    const stopped = { state: "stopped" }
+    expect(worktreeCards([server("page server", "editor", stopped)])).toEqual([])
+    const servers = [server("page server", "ast-markup"), server("editor", "ast-markup", stopped)]
+    expect(worktreeCards(servers).map((one: { name: string }) => one.name)).toEqual(["page server", "editor"])
+    expect(worktreeCards([server("page server", "x", { state: "down" })])).toHaveLength(1)
   })
 })
 
