@@ -820,6 +820,26 @@ describe("a running site", () => {
       await shown()
       expect(element.querySelector(".spell-site-page")).toBe(films)
     })
+
+    test("one page at another address is drawn afresh:  what was drawn at the first never shows at the next (P13)", async () => {
+      dispose?.()
+      new Film({ id: "empire", title: "The Empire Strikes Back" })
+      drawSite()
+      await site.showAddress("/films/a-new-hope")
+      expect(await shown()).toBe("A New Hope")
+      const hopes = element.querySelector(".spell-site-page")
+      // something only this drawing has, as a view's own choice is (a rack picked in a list)
+      hopes!.setAttribute("data-chosen", "yes")
+      await site.showAddress("/films/empire")
+      expect(await shown()).toBe("The Empire Strikes Back")
+      const empires = element.querySelector(".spell-site-page")
+      expect(empires).not.toBe(hopes)
+      expect(empires!.hasAttribute("data-chosen")).toBe(false)
+      // Back to the first address:  its own drawing, as it was left
+      await site.showAddress("/films/a-new-hope")
+      expect(await shown()).toBe("A New Hope")
+      expect(element.querySelector(".spell-site-page")).toBe(hopes)
+    })
   })
 
   test("with no site, `go to the ...` says so", () => {
