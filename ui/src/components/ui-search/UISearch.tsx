@@ -151,9 +151,12 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   // ## Shortcut
   ////////////////
 
-  /** Shows its `shortcut`'s keys:  while it's empty, and could take them. */
+  /**
+   * Shows its `shortcut`'s keys:  while it's empty, and could take them.
+   * - Not while it's folded to its search button:  the keys would hang past the closing field as it slides shut (I343)
+   */
   get showsShortcut(): boolean {
-    return !!this.shortcut && this.query === "" && !this.isDisabled
+    return !!this.shortcut && this.query === "" && !this.isDisabled && !this.isFolded
   }
 
   /** Its `shortcut` focuses it, while it shows:  listening only while it has one and is in the page. */
