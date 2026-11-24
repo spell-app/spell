@@ -29,6 +29,19 @@ describe("FileLock", () => {
     rmSync(`${file}.lock`)
   })
 
+  // epic `epic-engine` I463:  the epic hub froze 20s at a time, a blocking wait behind its own async edit
+  test("run():  a lock this process holds in `runAsync()` throws at once, never blocking", async () => {
+    const file = join(DIR, "own.json")
+    let blocked = -1
+    await SRV.FileLock.runAsync(file, async () => {
+      const started = Date.now()
+      expect(() => SRV.FileLock.run(file, () => 1, { wait: 5000 })).toThrow(/held by this process/)
+      blocked = Date.now() - started
+    })
+    expect(blocked).toBeLessThan(500)
+    expect(SRV.FileLock.run(file, () => 2)).toBe(2)
+  })
+
   test("runOnce():  `held` without running `fn` while another holder has it;  a stale lock is taken over", () => {
     const file = join(DIR, "once.json")
     let ran = 0

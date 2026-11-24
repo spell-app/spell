@@ -231,9 +231,15 @@ export class ServerLink {
    * - a 403 on the token:  takes the server's new token (`refreshToken()`) and tries once more
    * - no answer at all (the server restarting):  tries again, quietly, waiting longer each time, for up to
    *   `RESTART_WAIT_MS`;  not with `keepalive` (the page is going away)
+   * - `whileBusy`:  a 503 (busy:  the page's lock held) is tried again, quietly, for up to `BUSY_WAIT_MS`;
+   *   for a caller with no retry of its own (`ReviewClient`'s marks:  a tick always lands, I463)
    * - throws a `ServerWriteError` saying why, for people:  the route's `error`, a stale token, no server
    */
-  async post(url: string, body: object, { keepalive = false }: { keepalive?: boolean } = {}): Promise<unknown> {
+  async post(
+    url: string,
+    body: object,
+    { keepalive = false, whileBusy = false }: { keepalive?: boolean; whileBusy?: boolean } = {}
+  ): Promise<unknown> {
     const startedAt = Date.now()
     let unreached = 0
     let refreshed = false
@@ -264,6 +270,12 @@ export class ServerLink {
       }
       const reply = (await response.json().catch(() => ({}))) as { error?: string }
       if (response.ok) return reply
+      // busy, not broken (a file's lock held by a long edit, epic `epic-engine` I463):  tried again, quietly, so a tick
+      // lands without the person trying again
+      if (whileBusy && response.status === BUSY && !keepalive && Date.now() - startedAt < BUSY_WAIT_MS) {
+        await new Promise((waited) => setTimeout(waited, backoffFor(++unreached, { mostMs: RETRY_MOST_MS })))
+        continue
+      }
       const stale = response.status === 403 && /token/i.test(reply.error ?? "")
       if (stale && !refreshed && (await this.refreshToken())) {
         refreshed = true
@@ -325,6 +337,12 @@ export class ServerLink {
 
 /** How long `post()` keeps trying a server that doesn't answer (restarting), in ms. */
 const RESTART_WAIT_MS = 30_000
+
+/** How long `post()` keeps trying a server that answers it's busy (503), in ms:  each answer took its own wait. */
+const BUSY_WAIT_MS = 120_000
+
+/** The status a busy server answers (`reviewRoutes`' held lock):  "try again". */
+const BUSY = 503
 
 /** The longest `post()` waits between two tries, in ms. */
 const RETRY_MOST_MS = 4000

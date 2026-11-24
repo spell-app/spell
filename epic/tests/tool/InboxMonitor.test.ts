@@ -60,6 +60,20 @@ test("check:  listens for the session at once, held by its monitor;  watches the
   expect(ReviewInbox.read(inboxFile).listening).toMatchObject({ session: "s1", pid: process.pid })
 })
 
+// epic `epic-engine` I463:  in the epic hub a blocking wait here froze the hub, its own routes holding the lock
+test("check:  the inbox's lock held (a write under way):  never waits for it, looks again in a moment", async () => {
+  await SRV.FileLock.runAsync(inboxFile, async () => {
+    const started = Date.now()
+    const check = monitor().check(MONITOR)
+    expect(Date.now() - started).toBeLessThan(1000)
+    expect(check.waiting).toBe(false)
+    expect(check.recheckMs).toBeLessThanOrEqual(1000)
+  })
+  expect(ReviewInbox.read(inboxFile).listening).toBeFalsy()
+  expect(monitor().check(MONITOR)).toMatchObject({ waiting: false })
+  expect(ReviewInbox.read(inboxFile).listening).toMatchObject({ session: "s1" })
+})
+
 // epic `epic-engine` I286:  the line is the first thing Owen sees of a session a Send woke:  it says what it takes;
 // T163:  and never asks for a `wait` in the background, the epic hub listening instead
 test("check:  the line names what's waiting, in the page's words, and arms nothing", () => {

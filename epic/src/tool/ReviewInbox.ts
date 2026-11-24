@@ -319,6 +319,22 @@ export class ReviewInbox {
   }
 
   /**
+   * `update()` only if nobody holds the lock now (`SRV.FileLock.runOnce()`):  the inbox written, else `undefined`,
+   * nothing changed.
+   * - for a look that runs again soon (the epic hub's `InboxMonitor`):  NEVER blocks a server's thread, which a
+   *   `update()` there did while its own routes held the lock (epic `epic-engine` I463)
+   */
+  static updateIfFree(file: string, change: (inbox: ReviewInbox) => unknown): ReviewInbox | undefined {
+    const done = SRV.FileLock.runOnce(file, () => {
+      const inbox = ReviewInbox.read(file)
+      change(inbox)
+      inbox.writeTo(file)
+      return inbox
+    })
+    return done === SRV.FileLock.HELD ? undefined : done
+  }
+
+  /**
    * `update()` for a server:  waits for the lock with timers, so it keeps serving meanwhile.
    * - `change` runs synchronously, under the lock
    * - SIDE EFFECT:  writes `file` (or removes it:  `writeAsync()`)

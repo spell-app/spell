@@ -530,12 +530,12 @@ export function isImmediate(mark: { action: string; when?: string }): boolean {
 export const INSTANT_GRACE_MS = 2000
 
 /**
- * How long past its grace an instant mark may still stand before the page gives up on it
- * (`ReviewClient.isClosing()`, epic `epic-engine` I306):  its item shows again, and a notice says the server didn't
- * apply it.
- * - long enough for a page server restart (`ServerLink.post()` tries for 30s) and its first look at the inbox
+ * How long past its grace an instant mark may stand before the page asks the page server again
+ * (`ReviewClient.trackInstant()`, epic `epic-engine` I463):  its read of the inbox applies what's due, and the item
+ * stays grey meanwhile.  Never a "try again" for the person:  a tick always lands (Owen:  "This is lame -- just do it").
+ * - before I463 the page gave up after 40s, showed the item again, and said "the page server didn't apply it"
  */
-export const INSTANT_FAIL_MS = 40_000
+export const INSTANT_NUDGE_MS = 10_000
 
 /**
  * How long an item stays drawn closed after the page server applied its instant mark (`ReviewClient.isClosing()`):

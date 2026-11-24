@@ -310,18 +310,6 @@ export const epicSectionVocabulary = {
       description: "Close all's tooltip."
     },
     {
-      key: "closeAllTitle",
-      text: "Close {count} {things}?",
-      description: "Close all's confirm dialog:  its heading."
-    },
-    {
-      key: "closeAllAsk",
-      text: "Each one turns grey, as if you had ticked it yourself.\nNothing is deleted, and the message that comes next has an Undo button.",
-      description: "Close all's confirm dialog:  its message, a line each."
-    },
-    { key: "closeAllOk", text: "Close them", description: "Close all's confirm dialog:  its OK button." },
-    { key: "closeAllCancel", text: "Cancel", description: "Close all's confirm dialog:  its Cancel button." },
-    {
       key: "closedAll",
       text: "Closed {count} {things}.",
       description: "The notice after Close all, with its Undo."

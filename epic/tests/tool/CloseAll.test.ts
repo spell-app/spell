@@ -136,4 +136,18 @@ describe("CloseAll.run() and its Undo", () => {
     expect(files.read(file).item("t1").getAttribute("reviewed")).toBeNull()
     await expect(InstantUndo.undoBatch(file, root, result.batch!)).rejects.toThrow(/nothing to undo/)
   })
+
+  // epic `epic-engine` I462:  each drawn as his ✓ on it, so a second click on one takes back that one alone
+  test("each item's own record is kept too:  one put back alone", async () => {
+    const folder = join(root, "epics", "one")
+    mkdirSync(folder, { recursive: true })
+    const file = join(folder, "one.plan.html")
+    const files = new PlanDocFiles({ root })
+    await files.writeDoc(file, plan, true)
+    const result = await CloseAll.run(file, root, "todos", ["t1"])
+    expect(result.closed).toEqual(["t1"])
+    expect(await InstantUndo.undo(file, root, "t1")).toMatch(/taken back/)
+    expect(files.read(file).item("t1").getAttribute("reviewed")).toBeNull()
+    expect(await InstantUndo.undoBatch(file, root, result.batch!)).toEqual({ restored: [], left: ["t1"] })
+  })
 })
