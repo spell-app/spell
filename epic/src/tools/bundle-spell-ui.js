@@ -228,6 +228,10 @@ const ICONS = {
   "solid/eraser": ["eraser"],
   "solid/circle-play": ["circle play"],
   "solid/circle-pause": ["circle pause"], // an epic's state:  paused (`spell/epic/list/EpicState`)
+  // the Servers tab's buttons (`servers-page.js`):  start, restart, stop
+  "solid/play": ["play"],
+  "solid/rotate-right": ["rotate right"],
+  "solid/stop": ["stop"],
   // an Epics card's star (`spell/epic/list/EpicCards`):  a favourite, or not;  the Favorites group's heading
   "solid/star": ["star"],
   "regular/star": ["star outline"],

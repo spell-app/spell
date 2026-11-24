@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { inCardOrder, worktreeOrder } from "spell/epic/tools/_assets/servers-page.js"
+import { firstClause, inCardOrder, worktreeOrder } from "spell/epic/tools/_assets/servers-page.js"
 
 /** a server of `worktree` (none:  the main checkout's), as `/api/servers` lists it */
 const server = (name: string, worktree?: string, more: Record<string, unknown> = {}) => ({
@@ -57,5 +57,17 @@ describe("the Servers page's order (epic `epic-engine` I449)", () => {
       epicWorktrees: [epic("editor"), epic("prefs-and-undo")]
     })
     expect(groups.map((group) => group.worktree)).toEqual(["editor", "prefs-and-undo", "alpha", "zeta"])
+  })
+})
+
+describe("the Servers page's merged list (epic `epic-engine` I451)", () => {
+  test("firstClause():  a commit subject up to its first `;` or ` -- `", () => {
+    expect(
+      firstClause("T163, I450:  ONE listener for every epic's page, in the epic hub;  no session arms a wait")
+    ).toBe("T163, I450:  ONE listener for every epic's page, in the epic hub")
+    expect(firstClause("P3:  Tidy -- the rest")).toBe("P3:  Tidy")
+    expect(firstClause("I449:  the epics pack rebuilt (server.types.ts changed)")).toBe(
+      "I449:  the epics pack rebuilt (server.types.ts changed)"
+    )
   })
 })
