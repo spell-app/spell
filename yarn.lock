@@ -6031,6 +6031,7 @@ __metadata:
     vscode-css-languageservice: "npm:^6.3.10"
     vscode-languageserver: "npm:^10.1.2"
     vscode-languageserver-textdocument: "npm:^1.0.15"
+    vscode-languageserver-types: "npm:^3.17.5"
     wrap-ansi: "npm:^9"
   languageName: unknown
   linkType: soft
@@ -6212,6 +6213,7 @@ __metadata:
     vscode-css-languageservice: "npm:^6.3.10"
     vscode-languageserver: "npm:^10.1.2"
     vscode-languageserver-textdocument: "npm:^1.0.15"
+    vscode-languageserver-types: "npm:^3.17.5"
     wrap-ansi: "npm:^9"
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   peerDependencies:
@@ -7081,6 +7083,13 @@ __metadata:
   version: 3.18.4
   resolution: "vscode-languageserver-types@npm:3.18.4"
   checksum: 10c0/95a58eba94900bd9e685b44b840497c40709a8f643a4fa0945daa40affa45246ee843d786aa5ce9d64fe573cec1ef9530d3519ae01e8b4aa0ff2c83ba7608ccc
+  languageName: node
+  linkType: hard
+
+"vscode-languageserver-types@npm:^3.17.5":
+  version: 3.18.6
+  resolution: "vscode-languageserver-types@npm:3.18.6"
+  checksum: 10c0/854854dc0bdeaedb640a18ec8d022058f5b70108c6a6a109c8295632c7bbd31d411f758c49141480d7bd8427e05ab25b0d194f00597d1fac55932d38ed605721
   languageName: node
   linkType: hard
 

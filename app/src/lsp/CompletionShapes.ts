@@ -1,4 +1,4 @@
-import { InsertTextFormat, type Command, type CompletionItem } from "vscode-languageserver"
+import { InsertTextFormat, type Command, type CompletionItem } from "vscode-languageserver-types"
 
 import { withoutAccents } from "spell/util/string"
 import { P } from "spell/parser/parser"

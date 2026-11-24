@@ -1401,6 +1401,7 @@
     "vscode-css-languageservice": "^6.3.10",
     "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15",
+    "vscode-languageserver-types": "^3.17.5",
     "wrap-ansi": "^9",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
@@ -1522,6 +1523,7 @@
       "vscode-css-languageservice",
       "vscode-languageserver",
       "vscode-languageserver-textdocument",
+      "vscode-languageserver-types",
       "wrap-ansi",
       "xlsx"
     ],

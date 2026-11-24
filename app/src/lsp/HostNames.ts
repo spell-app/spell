@@ -1,4 +1,4 @@
-import { DiagnosticSeverity, type Diagnostic, type DocumentSymbol, type Range } from "vscode-languageserver"
+import { DiagnosticSeverity, type Diagnostic, type DocumentSymbol, type Range } from "vscode-languageserver-types"
 
 import type { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
