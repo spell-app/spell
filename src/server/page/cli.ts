@@ -143,8 +143,6 @@ async function main(args: string[]): Promise<void> {
         process.exitCode = 2
         return
       }
-      // its editor passes the same check:  it starts as this server's child (`EditorServer`)
-      if (SRV.KeeperLink.agentOf()) process.env[SRV.KEEPER_START_VARIABLE] = "1"
       const https = PageServer.certificateFor()
       const server = await new PageServer({ root, certificate: https.tls }).start({ port })
       // a group of its own, so each start stands out in the log

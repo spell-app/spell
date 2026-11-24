@@ -212,8 +212,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `refusedStart(server, checkout)` (epic `epic-engine` P84):  why a main checkout's server mustn't start now:  an
       agent's mark on the environment (`agentOf()`:  `CLAUDECODE`, `CODEX_THREAD_ID`, `SPELL_EPIC_AGENT`), no keeper's
       mark (`SPELL_KEEPER_START`, `KEEPER_START_VARIABLE`), its parent not the keeper, not a worktree, not a test run;
-      the page server's `serve` / `local` asks it before it starts (and marks itself for the editor it starts), the
-      app's `vite.config.ts` as Vite starts in dev
+      the page server's `serve` / `local` asks it before it starts, the app's `vite.config.ts` as Vite starts in dev
+      (but for a page server's own editor, which it hands its token:  `SPELL_SERVER_TOKEN`)
       - so `KeeperLink.ts` imports its peers WITH `.ts` (`./checkout.ts`, `./Heartbeat.ts`):  Vite loads the config's
         imports in plain `node`
     - this side names nothing of the keeper:  the server package imports no other

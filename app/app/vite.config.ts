@@ -92,7 +92,7 @@ export default defineConfig({
 /**
  * In dev, the MAIN checkout's editor starts only from the server keeper or a person's own terminal (epic `epic-engine`
  * P84):  an agent's `vp dev` in main's `app/` stops at once, saying to ask the keeper (`KeeperLink.refusedStart()`).
- * - main's page server starts it with the keeper's mark, so the keeper's starts pass;  a worktree's editor always does
+ * - main's page server starts it with its token, so the keeper's starts pass;  a worktree's editor always does
  * - why:  a session started main's editor by hand while the keeper's ran, and three editors took 3000, 3001 and 3002
  */
 function keeperStartsMainsEditor(): Plugin {
@@ -100,6 +100,10 @@ function keeperStartsMainsEditor(): Plugin {
     name: "spell:keeper-starts-mains-editor",
     apply: "serve",
     config() {
+      // a page server's own editor (`EditorServer`, which hands it the server's token):  the page server passed the
+      // same check as it started;  one started before P84 has no keeper's mark to hand on, and Vite asks again here
+      // each time this file changes
+      if (process.env.SPELL_SERVER_TOKEN) return
       const refused = new KeeperLink().refusedStart("editor", KIT_ROOT)
       if (refused) throw new Error(refused)
     }
