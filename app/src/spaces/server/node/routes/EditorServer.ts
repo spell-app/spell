@@ -145,7 +145,11 @@ export class EditorServer {
     if (isBuiltEditor()) return this.pickedPort(await this.serveBuilt(pagePort, guard, { thisMachineOnly }))
     const kept = await this.adopt(pagePort, guard, { thisMachineOnly })
     await this.stopStrays()
-    if (kept) return this.pickedPort(kept)
+    if (kept) {
+      this.relaunchWith = { pagePort, guard, thisMachineOnly }
+      this.watchAdopted()
+      return this.pickedPort(kept)
+    }
     const log = this.logFile
     const taken: number[] = []
     for (let tries = 0; tries < PORT_TRIES && !this.isStopped; tries++) {
@@ -255,6 +259,25 @@ export class EditorServer {
         console.error("editor:  couldn't start vite again:", error)
       )
     }, RELAUNCH_WAIT_MS).unref()
+  }
+
+  /**
+   * SIDE EFFECT:  the vite taken over from the last page server (`adoptedPid`) watched, every `ADOPTED_LOOK_MS`:
+   * it's no child of ours, so no `exit` event says it ended;  once it's gone, its record goes and it starts again
+   * (`relaunchSoon()`), as our own child's would
+   */
+  private watchAdopted(): void {
+    const pid = this.adoptedPid
+    if (!pid) return
+    const watching = setInterval(() => {
+      if (this.adoptedPid !== pid) return clearInterval(watching)
+      if (SRV.isProcessAlive(pid)) return
+      clearInterval(watching)
+      this.adoptedPid = undefined
+      rmSync(this.recordFile, { force: true })
+      this.relaunchSoon()
+    }, ADOPTED_LOOK_MS)
+    watching.unref()
   }
 
   /**
@@ -656,6 +679,9 @@ const PORT_TRIES = 3
 /** How many times an hour a page server starts its editor again by itself (`relaunchSoon()`), and after how long. */
 const RELAUNCHES = 3
 const RELAUNCH_WAIT_MS = 2000
+
+/** How often a vite taken over from the last page server is looked at, to see it's still there (`watchAdopted()`). */
+const ADOPTED_LOOK_MS = 3000
 
 /** An editor's command line, as `ps` shows it:  `vp dev` (`launch()`'s) or the vite under it, `vite.js dev`. */
 const EDITOR_COMMAND = /(?:\/vite-plus\/bin\/vp|\/vite\/bin\/vite\.js) dev\b/

@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process"
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -91,6 +91,34 @@ describe("one editor per page server's spaces:  starting one never stops another
     } finally {
       vite.kill()
       otherServer.kill()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
+describe("a vite that ends by itself comes back (epic `epic-engine` I455)", () => {
+  test("one taken over from the last page server is watched:  gone, its record goes and it starts again", async () => {
+    vi.useFakeTimers()
+    const root = mkdtempSync(join(tmpdir(), "editor-"))
+    const vite = spawn("sleep", ["30"], { detached: true, stdio: "ignore" })
+    try {
+      const editor = new EditorServer(root, "/x/my-project/spaces")
+      writeFileSync(editor.recordFile, JSON.stringify({ url: "http://localhost:1/", pid: vite.pid }))
+      const relaunch = vi
+        .spyOn(editor as never as { relaunchSoon(): void }, "relaunchSoon")
+        .mockImplementation(() => {})
+      editor["adoptedPid"] = vite.pid
+      editor["watchAdopted"]()
+      await vi.advanceTimersByTimeAsync(3000)
+      expect(relaunch).not.toHaveBeenCalled()
+      vite.kill()
+      await vi.waitFor(() => expect(SRV.isProcessAlive(vite.pid!)).toBe(false))
+      await vi.advanceTimersByTimeAsync(3000)
+      expect(relaunch).toHaveBeenCalledOnce()
+      expect(existsSync(editor.recordFile)).toBe(false)
+    } finally {
+      vi.useRealTimers()
+      vite.kill()
       rmSync(root, { recursive: true, force: true })
     }
   })
