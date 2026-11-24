@@ -5,6 +5,7 @@ import { Dragging } from "spell/util/Dragging"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { drawnInWindow } from "spell/element/drawnWindow"
 import { E, UI } from "spell/ui/core"
+import { JSON_CHANGED, JsonChild } from "spell/ui/components/ui-json/JsonChild"
 import { TreeMeasure } from "spell/ui/components/ui-tree-diagram/TreeMeasure"
 import { treeVocabulary } from "./UITree.en"
 import { DEFAULT_ROW_PARTS, type RowPart, type TreeItemData } from "./UITree.types"
@@ -91,6 +92,8 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *   - `show`:  which parts each row shows (`icon which count chevron`).
  *   - An `expandable` row picked before its rows come shows a spinner in its column (`<ui-loader>`).
  *   - Its rows can be DATA instead:  `items`, a `TreeItemData` list, drawn in its shadow root ("Columns from data").
+ *     Or a `<ui-json>` child holding that list (`JsonChild`), as a page writes it, plain JSON (`itemData`);
+ *     `items` set wins.  A `<ui-json>` in a named slot (`detail`) isn't read:  it's shown.
  *     For big trees:  a `children` function runs the first time its item opens, and only the open path is drawn.
  *     Each column draws its first rows, then more as its end scrolls near (`drawnInWindow()`, `itemRows()`):
  *     5,000 rows open as fast as 300;  past a few hundred, the rows far from the view are taken down again.
@@ -2012,7 +2015,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * The text to look for changed, or the rows it looks in:  as it starts, in a column view, the last column on screen
    * is the one it filters.
    */
-  @E.onChange("filter", "isReady", "items")
+  @E.onChange("filter", "isReady", "itemData")
   protected onFilterChanged(filter: string | undefined) {
     if (filter && !this.hadFilter) this.filterColumn = Math.max(0, this.columnIndexes.length - 1)
     this.hadFilter = !!filter
@@ -2429,14 +2432,60 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   // ## Columns from data
   ////////////////
 
-  /** `items` is set:  the columns are drawn from it, here, not from `<ui-tree-item>`s. */
+  /**
+   * Text of the JSON child, `<ui-json>` or `<script type="application/json">`, not in a named slot;  `undefined`
+   * without one.
+   * - Follows it as the page changes it.
+   */
+  @E.watches({ childList: true, characterData: true, subtree: true })
+  get childText(): string | undefined {
+    return isServer ? undefined : JsonChild.textOf(this.domElement)
+  }
+
+  /** Bumped when a `<ui-json>` child's data changes with no change in the page:  its `source` loaded. */
+  @E.state accessor childDataVersion = 0
+
+  /** A `<ui-json>` child says its data changed. */
+  @E.on(JSON_CHANGED)
+  protected onChildDataChanged() {
+    this.childDataVersion++
+  }
+
+  /**
+   * The JSON child's list;  `undefined` without one, when it isn't a list, or when its JSON is invalid (warned once).
+   * - `@derived`:  parses JSON.
+   */
+  @E.derived
+  get childItems(): readonly TreeItemData[] | undefined {
+    const text = this.childText
+    void this.childDataVersion
+    if (text === undefined || isServer) return undefined
+    try {
+      const value = JsonChild.valueOf(this.domElement)
+      return Array.isArray(value) ? (value as TreeItemData[]) : undefined
+    } catch (error) {
+      if (text !== this.warnedText) E.Warnings.warn("<ui-tree>", "invalid JSON in its <ui-json> child:", error)
+      this.warnedText = text
+      return undefined
+    }
+  }
+
+  /** Invalid JSON already warned about:  a re-read of the same text stays quiet. */
+  private warnedText: string | undefined
+
+  /** The tree as data:  `items` when it's set, else the JSON child's list;  `undefined`:  rows from markup. */
+  get itemData(): readonly TreeItemData[] | undefined {
+    return Array.isArray(this.items) ? (this.items as unknown as readonly TreeItemData[]) : this.childItems
+  }
+
+  /** It has data (`itemData`):  the columns are drawn from it, here, not from `<ui-tree-item>`s. */
   get hasItemData(): boolean {
-    return Array.isArray(this.items)
+    return this.itemData !== undefined
   }
 
   /** The top items. */
   private get topItems(): readonly TreeItemData[] {
-    return (this.items as unknown as readonly TreeItemData[] | undefined) ?? []
+    return this.itemData ?? []
   }
 
   /** Each item's children once its `children` has run:  the list, or the promise of it. */
