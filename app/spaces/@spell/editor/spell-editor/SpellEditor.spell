@@ -178,7 +178,7 @@ spell editor is an app
 		its "draft" is an editor part
 			// Draft, Publish and Discard, one pill, after Help, while you have drafts of the project
 		its "mode buttons" is an editor part
-			// Run and Edit, then in Edit the code's icon, the compiled code's, Inspect app, Anatomy and Add
+			// Run and Edit, then in Edit Inspect app, the code's icon, the compiled code's, Anatomy and Add
 		its "tools" is an editor part
 			// Restart and the theme
 		its "you" is an editor part

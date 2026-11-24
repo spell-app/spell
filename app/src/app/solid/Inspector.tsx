@@ -2877,8 +2877,8 @@ export const OwnEditorPage = Inspector.views.view("OwnEditorPage")
 
 /****************
  * ### `<InspectAppButton>`
- * Inspect app, in the top bar's Run | Edit group, after the compiled code's button (and in the Inspector card's
- * header, `<InspectAppMenu>`):  select a part of the app.
+ * Inspect app, in the top bar's Run | Edit group, the first of its icons (epic `editor` T168;  and in the Inspector
+ * card's header, `<InspectAppMenu>`):  select a part of the app.
  * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
  * - With the Inspector closed, it opens it, which starts inspecting.
  * - A menu item of its icon alone, in a circle (Spell UI's `appearance="circular"`), pressed while inspecting:
