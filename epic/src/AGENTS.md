@@ -1798,7 +1798,8 @@ In `tools/`:
       page or in a control the runtime or a tool draws (see "Layout" › `spell-doc-runtime.js`).
       - Its icon centred by the component:  no CSS of ours sizing or moving the icon.
       - A block's own controls share its one actions row, the bullhorn first (`addBlockAction()`).
-  - TOOLTIPS are Spell UI's own, with the standard delay (`--ui-tooltip-delay`, by default `--ui-hover-delay`):
+  - TOOLTIPS are Spell UI's own, with the standard delay (`--ui-tooltip-delay`, 1.5s, as long as the browser's own
+    `title` tooltip on a Mac;  epic `editor` T164):
     - `data-tooltip="..."` on any element:  the runtime (`DataTooltips`) shows it in the top layer
     - a richer one:  `<ui-tooltip>`, or a component's own `TopLayerTip`
     - `aria-label` on icon-only controls, as well

@@ -17,10 +17,15 @@ import type { Browser } from "./Browser"
  *   that shows (`visiblePartOf()`).
  * - It takes the target's `--ui-tooltip-*` values as they resolve there, so a theme around the target still shows.
  * - When it shows:
- *   - the pointer on a target:  after `--ui-tooltip-delay` (by default `--ui-hover-delay`)
+ *   - the pointer on a target:  after `--ui-tooltip-delay`, 1.5s, as long as the browser's own `title` tooltip waits
+ *     (`styles.en.ts`'s `tooltipDelay`);  a page without the token, `--ui-hover-delay`
  *   - on to another target while one is showing:  at once
  *   - keyboard focus:  at once
  *   - Escape hides it, until the pointer or the focus comes back
+ * - ONE tooltip at a time:  while the pointer is on a target, no `title` under the pointer shows the browser's own
+ *   (`hideTitlesOn()`), whether the page wrote it, a component drew it in its shadow root, or a box around has one.
+ *   - Each is taken off as the pointer comes onto it, and put back as the pointer leaves the target.
+ *   - Owen, 2026-11-24 (epic `editor` T164):  the add bar's star showed ours and the browser's, the same words.
  * - In the runtime, not `core`:  it's page-wide, and it only ever runs once the runtime's chunk has loaded.
  * - Plain DOM:  no Solid.  Listens on the document, for the life of the page.
  * - Pairs with `TopLayerTip`, a component's own tip:  this is for a tip anywhere on a page, by attribute.
@@ -43,6 +48,8 @@ export class DataTooltips {
   private focused: Element | undefined
   /** A hover waiting out its delay. */
   private pending: CancelablePromise<void> | undefined
+  /** The `title`s taken off while the pointer's on a target, each with its text, to put back (`hideTitlesOn()`). */
+  private readonly hiddenTitles = new Map<Element, string>()
   /** Follows the shown target's attributes:  a changed tooltip shows as it changes. */
   private observer: MutationObserver | undefined
 
@@ -75,8 +82,35 @@ export class DataTooltips {
 
   private readonly onPointerOver = (event: Event) => {
     this.pointedAt = event.composedPath()[0]
-    this.hovered = tooltipTargetIn(event)
+    const hovered = tooltipTargetIn(event)
+    if (hovered !== this.hovered) this.putTitlesBack()
+    this.hovered = hovered
+    if (hovered) this.hideTitlesOn(event.composedPath())
     this.update()
+  }
+
+  /**
+   * Take the `title` off every element on `path`, so the browser shows no tooltip of its own beside ours.
+   * - The browser shows the `title` of the innermost element under the pointer that has one, across shadow roots:
+   *   an icon button's inner `<button>`, the target, or a row around it (the add bar's star, in a row whose `title`
+   *   says what the part is).
+   * - The text is kept, and put back as the pointer leaves the target (`putTitlesBack()`).
+   */
+  private hideTitlesOn(path: EventTarget[]) {
+    for (const node of path) {
+      const title = (node as Element).getAttribute?.("title")
+      if (title == null) continue
+      this.hiddenTitles.set(node as Element, title)
+      ;(node as Element).removeAttribute("title")
+    }
+  }
+
+  /** Put back the `title`s `hideTitlesOn()` took off, unless the page has written one since. */
+  private putTitlesBack() {
+    for (const [element, title] of this.hiddenTitles) {
+      if (!element.hasAttribute("title")) element.setAttribute("title", title)
+    }
+    this.hiddenTitles.clear()
   }
 
   /**
@@ -94,6 +128,7 @@ export class DataTooltips {
     if ((event as PointerEvent).relatedTarget) return
     this.pointedAt = undefined
     this.hovered = undefined
+    this.putTitlesBack()
     this.update()
   }
 
@@ -337,7 +372,7 @@ function tooltipTargetIn(event: Event): Element | undefined {
   return undefined
 }
 
-/** How long a hover on `target` waits, in seconds:  `--ui-tooltip-delay`, else `--ui-hover-delay`:  `800ms`, `2s`. */
+/** How long a hover on `target` waits, in seconds:  `--ui-tooltip-delay`, else `--ui-hover-delay`:  `1500ms`, `2s`. */
 function delayOf(target: Element): number {
   return cssSecondsFor(target, "--ui-tooltip-delay", "--ui-hover-delay") ?? 0
 }

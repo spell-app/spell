@@ -363,6 +363,7 @@ and in the app's build folder, `app/` at the app folder's root.
       (the page's `--ui-hover-delay`, read live, 800 msec by default), each key starting the wait again (epic `codemirror` I22);
       Ctrl+Space, ⇧⌘Space and ⌥↓ show at once.
       - Settings… › "Delay before showing help" (Short, Standard, Long) sets `--ui-hover-delay` on the page,
+        and `--ui-tooltip-delay` with it (Short 0.75 s, Standard 1.5 s, Long 3 s;  epic `editor` T164),
         so every hover, popup and tooltip follows;  CodeMirror's own waits are made again as it changes (`CodeMirrorPopups.waiting()`;  epic `codemirror` T19).
     - Settings… drives the editors live:
       `codeMirrorOptionsFor()`, in a compartment ([CodeMirrorPopups](ui/codemirror/CodeMirrorPopups.ts)), following `codeChoices`, which `CodeSettings` sets.
