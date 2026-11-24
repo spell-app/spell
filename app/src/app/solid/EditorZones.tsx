@@ -52,7 +52,8 @@ function EditorZone(props: { zone: Zone }): JSX.Element {
   showEveryRow(core)
   const isModal = drawsAModal(view)
   return (
-    <section class="EditorZone">
+    // its view's name (`editor bar`):  a test finds the zone by it
+    <section class="EditorZone" data-zone={name}>
       <header class="EditorZoneTitle">{name}</header>
       <div class="EditorZoneBody">
         <ErrorBoundary fallback={(error) => <p class="EditorZoneError">{error.message}</p>}>
