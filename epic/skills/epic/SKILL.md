@@ -860,7 +860,7 @@ Until a `/back:  ...` message (or `epic focus status` says off):
      (`node epic/src/tools/check-spell.js <page>`) or the designer's shots (`designer-shots.js`) on what it changed,
      and fixes each misaligned row in its component, or marks one meant to be uneven
      (`data-align="free: <why>"`);  the editor's tests check it after every test by themselves.
-     The scan:  `Alignment` (`spell/test-helpers/Alignment`), one item drawn more than half a pixel off its row.
+     The scan:  `Alignment` (`spell/test-helpers/Alignment`), one item drawn more than half a pixel off its row or column.
 4. The reviews before the phase closes.
    - A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
      ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).

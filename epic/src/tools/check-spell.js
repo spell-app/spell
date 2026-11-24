@@ -25,9 +25,10 @@
  *   - an epic page's open item (`<epic-item>`, epic `windows-and-review` Q6) whose line doesn't stick right under
  *     its section's stuck title while its details are read
  *     - at desktop and phone width (`checkItemLine()`)
- *   - a row whose items don't line up:  one drawn more than half a pixel above or below the rest
- *     (`Alignment`, the kit's shared scan;  epic `epic-engine` P83), at desktop and phone width
- *     - a row meant to be uneven says so:  `data-align="free: <why>"`, and it's left alone
+ *   - a row whose items don't line up:  one drawn more than half a pixel above or below the rest;
+ *     a centred column (a rail of icons) with one drawn left or right of its middle
+ *     (`Alignment`, the kit's shared scan;  epic `epic-engine` P83, T166), at desktop and phone width
+ *     - a row or column meant to be uneven says so:  `data-align="free: <why>"`, and it's left alone
  * - loads the page from the page server, always (epic `epic-engine` P46);  `file://` before, for a page that didn't need it
  *   - a page from disk (none since P46) had the engine's routes (`/_epic/assets/...`, `/_epic/pack/...`, epic
  *     `epic-eject` P7) answered from this engine's own folders (`engineFileFor()`), as the epic server would serve them

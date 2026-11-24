@@ -353,9 +353,9 @@ function notePage(page: Page): void {
 const saidMisaligned = new Set<string>()
 
 /**
- * Fail the test if a page it left open shows a row whose items don't line up (epic `epic-engine` P83):
- * any editor test checks the rows it shows, whatever it was testing.
- * - the scan:  the kit's `Alignment`;  a row meant to be uneven says so with `data-align="free: <why>"`
+ * Fail the test if a page it left open shows a row or column whose items don't line up (epic `epic-engine` P83, T166):
+ * any editor test checks the rows and columns it shows, whatever it was testing.
+ * - the scan:  the kit's `Alignment`;  one meant to be uneven says so with `data-align="free: <why>"`
  * - a page that can't be scanned (closing, navigating) is left alone
  */
 async function failOnMisalignedRows(): Promise<void> {

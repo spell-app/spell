@@ -98,7 +98,13 @@
     overflow-y: auto;
     padding-block: 4px;
   }
+  /* the buttons a column down the panel's middle:  as wide as the panel, its items centred across it
+     (a vertical icon menu is as narrow as its items, at the panel's left:  its icons sat 4px left of its middle, T166) */
   & > ui-menu::part(menu) {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
     align-items: center;
     gap: 4px;
     margin: 0;

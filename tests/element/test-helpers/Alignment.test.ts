@@ -79,9 +79,73 @@ describe("Alignment", () => {
     expect(findings.map(({ text }) => text)).toEqual(["slotted"])
   })
 
+  describe("columns", () => {
+    /** A 20px icon whose glyph is a 12px square, `x` from its box's left. */
+    const icon = (x = 4) =>
+      `<svg width="20" height="20" viewBox="0 0 20 20"><rect x="${x}" y="4" width="12" height="12" /></svg>`
+    /** A 32px square button, its icon centred in it. */
+    const button = (glyph = icon()) =>
+      `<span class="button" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px">${glyph}</span>`
+    /**
+     * A rail like the editor's add bar:  a painted strip 40px wide, its buttons in a 32px stack inside it, marked `id="rail"`.
+     * - `stack`:  how the stack sits;  by default at the rail's left, as the add bar's did
+     */
+    const rail = (stack = "display: inline-block; width: 32px") =>
+      `<div id="rail" style="width: 40px; height: 240px; background: #eee">` +
+      `<div class="stack" style="${stack}">${button() + button() + button()}</div></div>`
+
+    test("a rail whose icons sit left of its middle fails, naming the stack and how far", () => {
+      Fixture.render(rail())
+      const findings = scanFixture()
+      expect(findings).toHaveLength(1)
+      expect(findings[0]).toMatchObject({ axis: "column", item: "div.stack", offset: -4 })
+      expect(findings[0].message).toMatch(/div#rail:  div\.stack is drawn 4\.00px left of its column's middle/)
+    })
+
+    test("the same rail with its stack in its middle passes", () => {
+      Fixture.render(rail("display: flex; flex-direction: column; align-items: center"))
+      expect(scanFixture()).toEqual([])
+    })
+
+    test("a centred column with one glyph drawn off its box's middle fails", () => {
+      const column = (items: string) =>
+        `<div id="column" style="display: flex; flex-direction: column; align-items: center; width: 60px">${items}</div>`
+      Fixture.render(column(button() + button(icon(8)) + button()))
+      const findings = scanFixture()
+      expect(findings).toHaveLength(1)
+      expect(findings[0]).toMatchObject({ axis: "column", item: "span.button", offset: 4 })
+      expect(findings[0].message).toMatch(/is drawn 4\.00px right of its column's middle/)
+    })
+
+    test("a column marked as meant passes", () => {
+      Fixture.render(`<div data-align="free: pinned left">${rail()}</div>`)
+      expect(scanFixture()).toEqual([])
+    })
+
+    test("an unpainted column holding one icon off its box's middle passes:  nobody sees that middle", () => {
+      Fixture.render(`<div style="display: inline-grid; place-items: center; width: 32px">${icon(0)}</div>`)
+      expect(scanFixture()).toEqual([])
+    })
+
+    test("a column left at the start (a list of labels) is not checked", () => {
+      Fixture.render(
+        `<div style="display: flex; flex-direction: column; width: 300px">${pill("one")}${pill("a longer label")}</div>`
+      )
+      expect(scanFixture()).toEqual([])
+    })
+  })
+
   test("report() says each kind of finding once, with a count", () => {
-    const rowBox = { x: 0, y: 0, width: 10, height: 10 }
-    const finding = { row: "r", item: "i", text: "a", offset: 1, message: 'r:  i "a" is drawn 1.00px lower', rowBox }
+    const lineBox = { x: 0, y: 0, width: 10, height: 10 }
+    const finding = {
+      axis: "row" as const,
+      line: "r",
+      item: "i",
+      text: "a",
+      offset: 1,
+      message: 'r:  i "a" is drawn 1.00px lower',
+      lineBox
+    }
     const sameKind = { ...finding, text: "b", message: 'r:  i "b" is drawn 1.00px lower' }
     expect(Alignment.report([finding, sameKind, { ...finding, offset: 2, message: "other" }])).toEqual([
       `${finding.message}  (x2)`,

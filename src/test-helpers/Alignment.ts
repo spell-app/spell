@@ -1,13 +1,23 @@
 /****************
  * ### `Alignment`
- * Finds rows on a page whose items don't line up:  an item drawn more than half a pixel above or below
- * the others in its row (epic `epic-engine` P83).
+ * Finds rows and columns on a page whose items don't line up (epic `epic-engine` P83, T166):
+ * - in a ROW, an item drawn more than half a pixel above or below the others
+ * - in a COLUMN, an item drawn more than half a pixel left or right of the column's middle
  * - Owen, 2026-11-23:  "Would love to never have to tell you to fix vertical alignment again."
+ *   And 2026-11-24, of the editor's add bar, its icons left of its middle:  "Need to do it for horizontals as well".
  * - A ROW:  an element that lays its children out side by side
  *   (a flex row centring them or left at the default, a grid centring them):
  *   a toolbar, a pill row, a card's header, an icon by its label.
  *   - shadow roots and slots included
  *   - a group inside a row (a toolbar's start, a logo and its menus) is lined up by the middle its own items share
+ * - A COLUMN:  an element that stacks its items and centres them across
+ *   - a flex column centring them (`align-items: center`), a one-column grid centring them (`justify-items: center`)
+ *   - a RAIL:  a painted strip no wider than 80px and at least twice as tall as it is wide (an icon bar down a side),
+ *     whatever its layout:  what's in it belongs in its middle
+ *   - a PAINTED column's items are held to its own middle line (its content box, less a scrollbar), not to each other:
+ *     a stack of buttons all left of a rail's middle is off, though they agree with each other
+ *   - an unpainted one's to the middle they share, as a row's:  nobody sees where its own middle is
+ *     (a search field's icon in a box with room after it for the words)
  * - Each item is measured by what's DRAWN, never its outer box:
  *   - an element with a background, border or shadow:  that shape
  *   - an icon:  its glyph's own paths, not the `<svg>`'s box
@@ -19,31 +29,32 @@
  *   is never seen
  * - Left alone:
  *   - rows laid out on a text baseline (`align-items: baseline`, plain inline text):  they're not centred rows
- *   - rows of big blocks, an item over 80px tall (a hero's words beside its picture):  rows of panels, not controls
+ *   - rows of big blocks, an item over 80px tall (a hero's words beside its picture):  rows of panels, not controls;
+ *     columns of big blocks the same way, an item over 80px wide (a centred page's paragraphs)
  *   - hidden items, items taken out of the flow (`position: absolute`), items with an `align-self` of their own
  *   - anything inside an element marked as meant:  `data-align="free: <the reason>"`, e.g. `free: raised badge`
  * - Its users:  the page checker (`check-spell.js`), the designer's screenshots (`designer-shots.js`),
  *   every editor test (`runningEditor.ts`), and any component test (`Alignment.scan()`, in its own page).
  * - Its position:  imports nothing, so plain `node` loads it (`spell/test-helpers/Alignment.ts`), and the scan,
- *   `scanRows()`, runs in any page as it is:  every helper it needs is inside it.
+ *   `scanLines()`, runs in any page as it is:  every helper it needs is inside it.
  ****************/
 export class Alignment {
   /** How far, in CSS px, an item's drawn middle may be from its row's and still count as lined up. */
   static readonly TOLERANCE_PX = 0.5
 
-  /** Every misaligned row item in THIS page (a component test's), in document order. */
+  /** Every misaligned row or column item in THIS page (a component test's), in document order. */
   static scan(options: AlignmentOptions = {}): AlignmentFinding[] {
-    return scanRows({ tolerance: Alignment.TOLERANCE_PX, ...options })
+    return scanLines({ tolerance: Alignment.TOLERANCE_PX, ...options })
   }
 
   /**
-   * Every misaligned row item in a Playwright `page`, in document order.
+   * Every misaligned row or column item in a Playwright `page`, in document order.
    * - Sent as text, with a stand-in for `__name`:  `tsx` and Vite may wrap the scan's inner functions in it,
    *   a helper only their compiled file has.
    * - throws when the page can't run it (closed, navigated away mid-scan)
    */
   static async scanPage(page: ScriptPage, options: AlignmentOptions = {}): Promise<AlignmentFinding[]> {
-    const script = `(() => { var __name = globalThis.__name ?? ((fn) => fn);  return (${scanRows.toString()})(${JSON.stringify({ tolerance: Alignment.TOLERANCE_PX, ...options })}) })()`
+    const script = `(() => { var __name = globalThis.__name ?? ((fn) => fn);  return (${scanLines.toString()})(${JSON.stringify({ tolerance: Alignment.TOLERANCE_PX, ...options })}) })()`
     return (await page.evaluate(script)) as AlignmentFinding[]
   }
 
@@ -53,8 +64,8 @@ export class Alignment {
    */
   static report(findings: AlignmentFinding[]): string[] {
     const kinds = new Map<string, { message: string; count: number }>()
-    for (const { row, item, offset, message } of findings) {
-      const kind = `${row}|${item}|${offset}`
+    for (const { line, item, offset, message } of findings) {
+      const kind = `${line}|${item}|${offset}`
       const seen = kinds.get(kind)
       if (seen) seen.count++
       else kinds.set(kind, { message, count: 1 })
@@ -65,27 +76,36 @@ export class Alignment {
 
 /** What `Alignment.scan()` takes. */
 export interface AlignmentOptions {
-  /** only rows inside the first element matching this selector, found through shadow roots;  default the whole page */
+  /** only rows and columns inside the first element matching this selector, found through shadow roots;  default the whole page */
   within?: string
   /** how far off counts, in CSS px;  default `Alignment.TOLERANCE_PX` */
   tolerance?: number
 }
 
-/** One row item drawn off its row's middle. */
+/** One row or column item drawn off its row's or column's middle. */
 export interface AlignmentFinding {
-  /** the row, as a short path:  `ui-toolbar › div[part=row]` */
-  row: string
+  /** `"row"`:  the item is off up or down;  `"column"`:  off left or right */
+  axis: AlignmentAxis
+  /** the row or column, as a short path:  `ui-toolbar › div[part=row]` */
+  line: string
   /** the item:  its tag, id, first class or part:  `ui-label.beta` */
   item: string
   /** what the item says, cut to 24 characters:  `beta`;  `""`:  nothing */
   text: string
-  /** how far its drawn middle is from the row's, in CSS px, to 2 places;  more than 0:  lower */
+  /** how far its drawn middle is from the line's, in CSS px, to 2 places;  more than 0:  lower in a row, right in a column */
   offset: number
-  /** what to say:  `ui-toolbar › div:  ui-label.beta "beta" is drawn 2.00px lower than the rest of its row` */
+  /**
+   * what to say:
+   * - `ui-toolbar › div:  ui-label.beta "beta" is drawn 2.00px lower than the rest of its row`
+   * - `div.PaletteRail:  nav[part=menu] is drawn 4.00px left of its column's middle`
+   */
   message: string
-  /** where the row is drawn, in the page's coordinates (scrolled with it):  to picture it */
-  rowBox: { x: number; y: number; width: number; height: number }
+  /** where the row or column is drawn, in the page's coordinates (scrolled with it):  to picture it */
+  lineBox: { x: number; y: number; width: number; height: number }
 }
+
+/** Which way a line runs:  a row's items side by side, a column's stacked. */
+export type AlignmentAxis = "row" | "column"
 
 /** Any page that runs a script and answers with its value:  Playwright's `Page`, or a `Locator`'s page. */
 export interface ScriptPage {
@@ -93,12 +113,14 @@ export interface ScriptPage {
 }
 
 /**
- * The scan itself:  every misaligned row item in the page it runs in.
+ * The scan itself:  every misaligned row or column item in the page it runs in.
+ * - ONE scan for both:  everything measured along an axis (`middleOf()`, `spanOf()`), so a column is checked exactly
+ *   as a row is, but for the middle its items are held to (`checkLine()`)
  * - SELF-CONTAINED on purpose:  sent to a page as its text (`Alignment.scanPage()`), so it may use nothing from
  *   outside its own body, not even `Alignment`'s constants (repeated here, the one place they're copied).
  * - NEVER throws on what it measures:  an element it can't read is left out.
  */
-export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
+export function scanLines(options: AlignmentOptions = {}): AlignmentFinding[] {
   const tolerance = options.tolerance ?? 0.5
   const FREE = "data-align"
   /** How deep to look inside an item for what it draws, before taking its own box. */
@@ -109,11 +131,18 @@ export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
    */
   const TEXT_SLACK = 0.5
   /**
-   * The tallest item a checked row may have, in px:  rows of controls, pills, icons and labels, not of panels.
+   * The biggest an item of a checked line may be across it, in px (a row's tallest, a column's widest):
+   * lines of controls, pills, icons and labels, not of panels.
    * - Two big blocks side by side (a page's hero:  its words beside a picture) are centred by their boxes,
-   *   and what's drawn in them is rightly uneven.
+   *   and what's drawn in them is rightly uneven;  so are a centred column's paragraphs.
    */
-  const TALLEST_ITEM = 80
+  const BIGGEST_ITEM = 80
+  /**
+   * The widest a RAIL may be, in px:  a painted strip down a side, its icons in its middle (the editor's add bar).
+   * - And it's at least twice as tall as it's wide (`RAIL_SHAPE`):  so never a button or a badge.
+   */
+  const WIDEST_RAIL = 80
+  const RAIL_SHAPE = 2
   /**
    * `at` to the nearest half pixel:  a screen draws whole pixels (half ones on a 2x screen), so a quarter of a pixel
    * between an icon's glyph and a painted circle beside it is never seen, and isn't a finding.
@@ -123,9 +152,11 @@ export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
 
   /** A box;  `isText`:  measured from text alone, by its font's numbers, so up to half a pixel out. */
   type Box = { top: number; bottom: number; left: number; right: number; isText?: boolean }
-  /** A row's item:  its node, its box in the row, what it draws, and the middle it's lined up by. */
+  /** Which way a line runs:  a row's items side by side, a column's stacked. */
+  type Axis = "row" | "column"
   /**
-   * A row's item:  its node, its box in the row, what it draws, and the middle it's lined up by.
+   * A line's item:  its node, its box in the line, what it draws, and the middle it's lined up by, across the line
+   * (up and down in a row, left and right in a column).
    * - `inkMiddle`:  a painted item's words or icon inside its shape:  a button beside plain text is lined up when
    *   its label is on the text's line, though its shape is taller
    */
@@ -148,6 +179,25 @@ export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
   const boxOf = (element: Element): Box => {
     const { top, bottom, left, right } = element.getBoundingClientRect()
     return { top, bottom, left, right }
+  }
+  /** Where `box` starts and ends across a line running along `axis`:  top and bottom in a row, left and right in a column. */
+  const spanOf = (box: Box, axis: Axis): [number, number] =>
+    axis === "row" ? [box.top, box.bottom] : [box.left, box.right]
+  const middleOf = (box: Box, axis: Axis) => {
+    const [start, end] = spanOf(box, axis)
+    return (start + end) / 2
+  }
+  /** Where `element` lays its items out:  inside its border and padding, and its scrollbar. */
+  const contentBoxOf = (element: Element, css: CSSStyleDeclaration): Box => {
+    const { top, left } = element.getBoundingClientRect()
+    const px = (value: string) => parseFloat(value) || 0
+    const [innerTop, innerLeft] = [top + element.clientTop, left + element.clientLeft]
+    return {
+      top: innerTop + px(css.paddingTop),
+      bottom: innerTop + element.clientHeight - px(css.paddingBottom),
+      left: innerLeft + px(css.paddingLeft),
+      right: innerLeft + element.clientWidth - px(css.paddingRight)
+    }
   }
   /** The lines `text` is laid out in, each its font's full height:  where it sits in its row. */
   const textLines = (text: Text): Box[] => {
@@ -253,13 +303,13 @@ export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
     return isEmpty(clipped) ? undefined : clipped
   }
 
-  /** A row's items:  its laid-out children, `display: contents` ones opened up, the ones left alone left out. */
-  const itemsOf = (row: Element): Item[] => {
+  /** A line's items:  its laid-out children, `display: contents` ones opened up, the ones left alone left out. */
+  const itemsOf = (line: Element, axis: Axis): Item[] => {
     const items: Item[] = []
     const add = (node: Node) => {
       if (node instanceof Text) {
         const [layout, drawn] = [textBox(node), textInk(node)]
-        if (layout && drawn) items.push({ node, layout, drawn, middle: toHalfPixel((drawn.top + drawn.bottom) / 2) })
+        if (layout && drawn) items.push({ node, layout, drawn, middle: toHalfPixel(middleOf(drawn, axis)) })
         return
       }
       if (!(node instanceof Element)) return
@@ -268,6 +318,9 @@ export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
       if (css.display === "contents") return flatChildren(node).forEach(add)
       if (/^(absolute|fixed)$/.test(css.position) || css.visibility === "hidden") return
       if (!/^(auto|center|normal|stretch)$/.test(css.alignSelf.replace(/^(safe|unsafe) /, ""))) return
+      // a column's item placed by itself across it (`justify-self` in a grid) is meant where it is
+      if (axis === "column" && !/^(auto|center|normal|stretch)$/.test(css.justifySelf.replace(/^(safe|unsafe) /, "")))
+        return
       const layout = boxOf(node)
       const drawn = drawnBox(node)
       if (isEmpty(layout) || !drawn || isEmpty(drawn)) return
@@ -276,39 +329,61 @@ export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
         node,
         layout,
         drawn,
-        middle: toHalfPixel(groupMiddle(node, css) ?? (drawn.top + drawn.bottom) / 2),
-        inkMiddle: ink ? toHalfPixel((ink.top + ink.bottom) / 2) : undefined
+        middle: toHalfPixel(groupMiddle(node, css, axis) ?? middleOf(drawn, axis)),
+        inkMiddle: ink ? toHalfPixel(middleOf(ink, axis)) : undefined
       })
     }
-    flatChildren(row).forEach(add)
+    flatChildren(line).forEach(add)
     return items
   }
 
   /**
-   * Does `css` lay its children out side by side, as a row whose items should share a middle?
-   * - a flex row centring them, or left at the default (`stretch`):  a toolbar of pills packed at its top is a row
-   *   whose items should share a middle too (epic `editor` I327's stand-ins sat so)
-   * - a grid only when it centres them:  a grid left at the default is a layout, not a row
+   * Which way `element` lines its items up, to share a middle;  `undefined`:  neither.
+   * - a ROW:  a flex row centring them, or left at the default (`stretch`):  a toolbar of pills packed at its top is
+   *   a row whose items should share a middle too (epic `editor` I327's stand-ins sat so);
+   *   a grid only when it centres them:  a grid left at the default is a layout, not a row
+   * - a COLUMN:  a flex column centring them, a one-column grid centring them, or a RAIL (`isRail()`)
    * - never one that chose `flex-start`, `end` or `baseline`:  uneven on purpose
    */
-  const isRow = (css: CSSStyleDeclaration) => {
+  const axisOf = (element: Element, css: CSSStyleDeclaration): Axis | undefined => {
     const align = css.alignItems.replace(/^(safe|unsafe) /, "")
-    if (/^(inline-)?flex$/.test(css.display))
-      return css.flexDirection.startsWith("row") && /^(center|normal|stretch)$/.test(align)
-    if (/^(inline-)?grid$/.test(css.display)) return align === "center"
-    return false
+    if (/^(inline-)?flex$/.test(css.display)) {
+      if (css.flexDirection.startsWith("row")) return /^(center|normal|stretch)$/.test(align) ? "row" : undefined
+      if (align === "center") return "column"
+    } else if (/^(inline-)?grid$/.test(css.display)) {
+      const oneColumn =
+        css.gridTemplateColumns
+          .replace(/\[[^\]]*\]/g, "")
+          .trim()
+          .split(/\s+/).length === 1
+      if (oneColumn && css.justifyItems.replace(/^(safe|unsafe) /, "") === "center") return "column"
+      if (align === "center") return "row"
+    }
+    return isRail(element, css) ? "column" : undefined
   }
 
-  /** The row's items in lines:  one line unless it wraps, or is a grid;  then by their boxes overlapping. */
-  const linesOf = (items: Item[], css: CSSStyleDeclaration): Item[][] => {
+  /** Is `element` a RAIL:  a painted strip down a side, no wider than `WIDEST_RAIL`, at least twice as tall as wide? */
+  const isRail = (element: Element, css: CSSStyleDeclaration) => {
+    if (!isPainted(css) || css.display === "contents" || /^inline$/.test(css.display)) return false
+    const { width, height } = element.getBoundingClientRect()
+    return width > 0 && width <= WIDEST_RAIL && height >= RAIL_SHAPE * width
+  }
+
+  /**
+   * A row's or column's items in lines:  one line unless it wraps, or is a grid;
+   * then by their boxes overlapping across the line (a row's by their tops and bottoms, a column's by their sides).
+   */
+  const linesOf = (items: Item[], css: CSSStyleDeclaration, axis: Axis): Item[][] => {
     if (/flex$/.test(css.display) && css.flexWrap === "nowrap") return [items]
-    const lines: { bottom: number; items: Item[] }[] = []
-    for (const item of [...items].sort((a, b) => a.layout.top - b.layout.top)) {
-      const line = lines.find(({ bottom }) => item.layout.top < bottom - 1)
+    const lines: { end: number; items: Item[] }[] = []
+    const startOf = (item: Item) => spanOf(item.layout, axis)[0]
+    for (const item of [...items].sort((a, b) => startOf(a) - startOf(b))) {
+      const [start, end] = spanOf(item.layout, axis)
+      const line = lines.find((each) => start < each.end - 1)
       if (line) {
         line.items.push(item)
-        line.bottom = Math.max(line.bottom, item.layout.bottom)
-      } else lines.push({ bottom: item.layout.bottom, items: [item] })
+        line.end = Math.max(line.end, end)
+      } else lines.push({ end, items: [item] })
     }
     return lines.map(({ items: line }) => line.sort((a, b) => items.indexOf(a) - items.indexOf(b)))
   }
@@ -329,10 +404,10 @@ export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
     const text = (node.textContent ?? "").replace(/\s+/g, " ").trim()
     return text.length > 24 ? text.slice(0, 23) + "…" : text
   }
-  /** The row's name:  it and two elements it's in, across shadow roots. */
-  const rowName = (row: Element): string => {
+  /** The row's or column's name:  it and two elements it's in, across shadow roots. */
+  const lineName = (line: Element): string => {
     const names: string[] = []
-    for (let at: Element | undefined = row; at && names.length < 3;) {
+    for (let at: Element | undefined = line; at && names.length < 3;) {
       names.unshift(nameOf(at))
       const root = at.getRootNode()
       at = at.parentElement ?? (root instanceof ShadowRoot ? root.host : undefined)
@@ -364,13 +439,13 @@ export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
   }
 
   /**
-   * The middle of a GROUP inside a row (a toolbar's start, holding a logo and its menus):  the middle its own items
-   * share, not its drawn box's, which a tall logo pulls off.  `undefined`:  not a group.
-   * - a group:  a row of its own that paints nothing (so its shape isn't what's seen)
+   * The middle of a GROUP inside a row or column (a toolbar's start, holding a logo and its menus):  the middle its own
+   * items are lined up by, not its drawn box's, which a tall logo pulls off.  `undefined`:  not a group.
+   * - a group:  a line of its own, the same way, that paints nothing (so its shape isn't what's seen)
    */
-  const groupMiddle = (element: Element, css: CSSStyleDeclaration): number | undefined => {
-    if (!isRow(css) || isPainted(css)) return undefined
-    const [line] = linesOf(itemsOf(element), css)
+  const groupMiddle = (element: Element, css: CSSStyleDeclaration, axis: Axis): number | undefined => {
+    if (axisOf(element, css) !== axis || isPainted(css)) return undefined
+    const [line] = linesOf(itemsOf(element, axis), css, axis)
     return line?.length
       ? agreedMiddle(
           line.map(({ middle }) => middle),
@@ -379,47 +454,65 @@ export function scanRows(options: AlignmentOptions = {}): AlignmentFinding[] {
       : undefined
   }
 
-  /** Check one line of a row:  the middle most of its items share, and each item off it. */
-  const checkLine = (row: Element, line: Item[]) => {
-    if (line.length < 2 || line.some(({ drawn }) => drawn.bottom - drawn.top > TALLEST_ITEM)) return
+  /**
+   * Check one line of a row or column:  each item off the middle it's held to.
+   * - a row's:  the middle most of its items share, as nothing else says where they belong
+   * - a painted column's:  its own middle line, which is seen:  a stack all to one side is off, though its items agree
+   * - an unpainted column's:  the middle its items share, as a row's
+   */
+  const checkLine = (element: Element, css: CSSStyleDeclaration, line: Item[], axis: Axis) => {
+    // a painted column's middle line is seen, so one item can be off it;  anything else needs two to disagree
+    const centre = axis === "column" && isPainted(css) ? middleOf(contentBoxOf(element, css), axis) : undefined
+    if (line.length < (centre === undefined ? 2 : 1)) return
+    if (line.some(({ drawn }) => spanOf(drawn, axis)[1] - spanOf(drawn, axis)[0] > BIGGEST_ITEM)) return
     const allowed = allowedFor(line)
-    const middle = agreedMiddle(
-      line.map(({ middle }) => middle),
-      allowed
-    )
+    const middle =
+      centre ??
+      agreedMiddle(
+        line.map(({ middle }) => middle),
+        allowed
+      )
     // the line's words and icons, painted shapes looked through:  where a reader's eye runs along it
     const inkAllowed = allowed + TEXT_SLACK
-    const inkLine = agreedMiddle(
-      line.map(({ middle, inkMiddle }) => inkMiddle ?? middle),
-      inkAllowed
-    )
+    const inkLine =
+      centre ??
+      agreedMiddle(
+        line.map(({ middle, inkMiddle }) => inkMiddle ?? middle),
+        inkAllowed
+      )
     line.forEach((item) => {
       const offset = item.middle - middle
       if (Math.abs(toHalfPixel(offset)) <= allowed) return
       // a button among plain words:  its label on their line is lined up
       if (item.inkMiddle !== undefined && Math.abs(toHalfPixel(item.inkMiddle - inkLine)) <= inkAllowed) return
       const rounded = Math.round(offset * 100) / 100
-      const [rowText, itemText, text] = [rowName(row), nameOf(item.node), textOf(item.node)]
-      const how = `${Math.abs(rounded).toFixed(2)}px ${rounded > 0 ? "lower" : "higher"}`
+      const [lineText, itemText, text] = [lineName(element), nameOf(item.node), textOf(item.node)]
+      const distance = `${Math.abs(rounded).toFixed(2)}px`
+      const how =
+        axis === "row"
+          ? `${distance} ${rounded > 0 ? "lower" : "higher"} than the rest of its row`
+          : `${distance} ${rounded > 0 ? "right" : "left"} of its column's middle`
       const said = text ? ` "${text}"` : ""
-      const { top, bottom, left, right } = boxOf(row)
+      const { top, bottom, left, right } = boxOf(element)
       findings.push({
-        row: rowText,
+        axis,
+        line: lineText,
         item: itemText,
         text,
         offset: rounded,
-        message: `${rowText}:  ${itemText}${said} is drawn ${how} than the rest of its row`,
-        rowBox: { x: left + scrollX, y: top + scrollY, width: right - left, height: bottom - top }
+        message: `${lineText}:  ${itemText}${said} is drawn ${how}`,
+        lineBox: { x: left + scrollX, y: top + scrollY, width: right - left, height: bottom - top }
       })
     })
   }
 
-  /** Visit `element` and everything laid out inside it, checking each centred row. */
+  /** Visit `element` and everything laid out inside it, checking each centred row and column. */
   const visit = (element: Element) => {
     if (isFree(element)) return
     const css = style(element)
     if (css.display === "none") return
-    if (isRow(css)) for (const line of linesOf(itemsOf(element), css)) checkLine(element, line)
+    const axis = axisOf(element, css)
+    if (axis) for (const line of linesOf(itemsOf(element, axis), css, axis)) checkLine(element, css, line, axis)
     for (const child of flatChildren(element)) if (child instanceof Element) visit(child)
   }
 
