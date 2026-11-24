@@ -54,6 +54,7 @@ import { InspectorData } from "./InspectorData"
 import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { FieldHomes } from "./FieldHomes"
 import { PartEdits } from "./PartEdits"
+import { PartLongPress } from "./PartLongPress"
 import { NotebookDocs } from "./notebook/NotebookDocs"
 import { LazyPiece } from "./LazyPiece"
 import { PageLoading } from "./PageLoading"
@@ -740,12 +741,15 @@ export class Inspector {
   static watch(area: HTMLElement): () => void {
     setArea(area)
     if (isInspecting()) PartSelector.listen(area)
-    const stopEditing = PartEdits.watch(area, (event) => {
+    const partAt = (event: Event) => {
       const part = PartSelector.partAt(event, area)
       const cell = Inspector.pagePartAt?.(event)
       // a control inside a page's cell is a part of its own;  else the cell, never the page round it
       return cell && !(part && part !== cell && cell.contains(part)) ? cell : part
-    })
+    }
+    const stopEditing = PartEdits.watch(area, partAt)
+    // a long press lifts a part to rearrange it, as Owen asked (I330):  a plain press stays the app's
+    const stopLongPress = PartLongPress.watch(area, partAt)
     const clicked = (event: MouseEvent) => {
       if (event.defaultPrevented || isInspecting()) return
       const cell = Inspector.pagePartAt?.(event)
@@ -758,6 +762,7 @@ export class Inspector {
     return () => {
       area.removeEventListener("click", clicked)
       stopEditing()
+      stopLongPress()
       if (appArea !== area) return
       setArea(undefined)
       PartSelector.stop()
