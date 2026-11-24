@@ -136,9 +136,11 @@ export class DesignSamples {
    * The Spell a sample is saved as:  its name, and the making of a thing with `thing`'s settings.
    * - `"queen of spades" is a new card whose rank is queen, suit is spades and direction is down`
    * - Only its own settings with a plain value (a word, text, a number, yes or no), in its type's order.
+   * - Never its `id`:  one the program made up for it (`card-h2s01zff`), which the sample's own name stands for.
    */
   static spellFor(view: OwnView, thing: object, name: string): string {
     const own = new Set((thing as { keys?: () => string[] }).keys?.() ?? [])
+    own.delete("id")
     const said = ClassSchemas.fromClass(thing.constructor)
       .attributes.filter((attribute) => own.has(attribute.name))
       .flatMap((attribute) => {
