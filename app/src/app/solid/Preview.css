@@ -1,0 +1,26 @@
+/*
+ * Preview (`Preview.ts`, epic `editor` T172):  the running app alone, edge to edge, nothing of the editor round it
+ * - the root's class while it's on, `spell-previewing`
+ * - Run already leaves out the code, the Inspector, the Program panel and the add bar:
+ *   these hide what Run still shows, never taking the app's elements out, so it's never drawn again
+ */
+
+/* the top bar, the sample bar, a notebook's own header, and the editor's notices */
+:root.spell-previewing {
+  & #SpellEditor .EditorBarPlace,
+  & #SpellEditor .SampleBar,
+  & #SpellEditor .NotebookHeader,
+  & .Notice,
+  & .UpgradeNotice {
+    display: none;
+  }
+
+  /* no room round the app's pane, nor round corners:  the app runs to the window's edges */
+  & #SpellEditor .EditorColumns {
+    padding: 0;
+  }
+  & #SpellEditor .SplitPane:has(> .AppPane) {
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
