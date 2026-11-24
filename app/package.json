@@ -24,7 +24,7 @@
     "/////// THE EDITOR APP (src/app/;  its build:  app/)": "",
     "start": "yarn && spell server stop && cd app && spell app serve --headless",
     "stop": "cd app && node scripts/stop.mjs",
-    "start:dev": "cd app && vp dev",
+    "start:dev": "cd app && vp dev --strictPort",
     "start:server": "tsx watch src/spaces/server/node/routes/cli.ts",
     "start:server:prod": "tsx src/spaces/server/node/routes/cli.ts",
     "build": "tsc -p tsconfig.json && cd app && vp build",

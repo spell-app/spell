@@ -21,6 +21,12 @@ export const HOME_FOLDER = ".spell-epic"
 /** The env var that moves `HOME_FOLDER` (tests). */
 export const HOME_ENV = "SPELL_EPIC_HOME"
 
+/**
+ * The server keeper's hold file, in `HOME_FOLDER`:  `{ held, handsOff }`, the servers stopped by hand and the hands-off
+ * switch (`ServerKeeper`);  the command guard reads the switch too (`ServerGuard`).
+ */
+export const HOLD_FILE = "server-keeper.json"
+
 /** The registered repos, in `HOME_FOLDER`:  `RepoList`. */
 export const REPOS_FILE = "repos.json5"
 

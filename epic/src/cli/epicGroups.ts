@@ -1147,6 +1147,40 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     }
   ],
+  servers: [
+    {
+      name: "restart",
+      usage: "<server> [--repo <name>]",
+      description:
+        "ask the server keeper to restart a main checkout's server:  page-server, editor (its page server restarts with it), or a repo's own by name",
+      example: "epic servers restart editor",
+      flags: { "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)" }
+    },
+    {
+      name: "start",
+      usage: "<server> [--repo <name>]",
+      description: "ask the server keeper to start a main checkout's server, one stopped by hand too",
+      example: "epic servers start page-server",
+      flags: { "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)" }
+    },
+    {
+      name: "stop",
+      usage: "<server> [--repo <name>]",
+      description: "ask the server keeper to stop a main checkout's server, and leave it stopped until a start",
+      example: "epic servers stop page-server",
+      flags: { "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)" }
+    },
+    {
+      name: "status",
+      usage: "[--repo <name>] [--json]",
+      description: "main's servers as the server keeper last saw them:  name, state, address, why",
+      example: "epic servers status",
+      flags: {
+        "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)",
+        "--json": "print them as JSON"
+      }
+    }
+  ],
   hub: [
     {
       name: "serve",
@@ -1521,7 +1555,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  * - a docs tool or script passed through:
  *   `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`, `server`
  * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
- *   `hub` (`Hub`), `repo` (`Repos`), `turns` (`Turns`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
+ *   `servers` (`Servers`), `hub` (`Hub`), `repo` (`Repos`), `turns` (`Turns`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
  *   `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  * - the `epic` tool's, every epic at once:  `focus` (`FocusCommands`, epic `epic-engine` T93), `fresh`
@@ -1544,6 +1578,7 @@ export type GroupName =
   | "shared"
   | "window"
   | "server"
+  | "servers"
   | "hub"
   | "repos"
   | "turns"

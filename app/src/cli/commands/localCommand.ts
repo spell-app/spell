@@ -427,6 +427,8 @@ export type LocalTools = LocalSiteTools & {
   succeeds(command: string, args: string[]): boolean
   /** Run a program on this terminal, `input` its standard input.  - throws `CliError` when it fails, naming no input */
   run(command: string, args: string[], options?: { input?: string }): void
+  /** Run a program that asks in a window of its own (the Mac's password window):  the certificate's `ask`. */
+  ask: SRV.CertificateTools["ask"]
   /** Open in the default browser. */
   open(url: string): void
   /** This Mac's address on its network. */
@@ -545,6 +547,7 @@ function macTools(): LocalTools {
         throw new CLI.CliError(`${command} ${args.join(" ")} didn't work${error ? `:  ${error.message}` : ""}`)
       }
     },
+    ask: SRV.certificateTools().ask,
     open: (url) => void SRV.openBrowser(url),
     lanAddress: () => lanAddressOf(networkInterfaces()),
     askSecret: (question) => CLI.askSecret(question),
