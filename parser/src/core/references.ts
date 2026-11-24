@@ -104,13 +104,13 @@ export const referencesMethods = defineCoreModule({
    */
   thingNamed<T>(Class: abstract new (...args: never[]) => T, name: string): T | undefined {
     const things = thingsSearched()
-    for (const thing of things.all()) {
-      if (thing instanceof Class && nameOf(thing) === name) return thing
+    const ofClass = thingsOf(things, Class)
+    for (const thing of ofClass) {
+      if (nameOf(thing) === name) return thing
     }
     // a member's thing takes its words joined by `-`:  `discard pile` finds `discard-pile` too (language T147)
     const oneWord = name.trim().split(/\s+/).join("-")
-    for (const thing of things.all()) {
-      if (!(thing instanceof Class)) continue
+    for (const thing of ofClass) {
       const id = chosenIdOf(thing)
       if (id === name || id === oneWord) return thing
     }
@@ -128,9 +128,7 @@ export const referencesMethods = defineCoreModule({
    * - Tracked, as `thingForReference()`.
    */
   thingAtPlace<T>(Class: abstract new (...args: never[]) => T, place: number): T | undefined {
-    const things = thingsSearched()
-      .all()
-      .filter((thing) => thing.constructor === Class)
+    const things = thingsOf(thingsSearched(), Class).filter((thing) => thing.constructor === Class)
     if (!Number.isInteger(place) || place === 0) return undefined
     return things.at(place > 0 ? place - 1 : place) as T | undefined
   },
@@ -143,9 +141,7 @@ export const referencesMethods = defineCoreModule({
    * - Tracked, as `thingForReference()` is:  whatever reads it re-runs as things are made.
    */
   everyThing<T>(Class: abstract new (...args: never[]) => T): List<T> {
-    const things = thingsSearched()
-      .all()
-      .filter((thing): thing is T & object => thing instanceof Class)
+    const things = thingsOf(thingsSearched(), Class)
     const list = new List<T>({ instanceType: Class.name }).asScratch().append(...things)
     nameTableColumns(list, Class)
     return list
@@ -165,9 +161,7 @@ export const referencesMethods = defineCoreModule({
     if (Class.prototype instanceof List && (Class as typeof List).exclusive && item && typeof item === "object") {
       return (Class as typeof List).ownerOf(item) instanceof Class
     }
-    return thingsSearched()
-      .all()
-      .some((thing) => thing instanceof Class && thing instanceof List && thing.includes(item))
+    return thingsOf(thingsSearched(), Class).some((thing) => thing instanceof List && thing.includes(item))
   },
 
   /**
@@ -185,8 +179,7 @@ export const referencesMethods = defineCoreModule({
     const Class = thing.constructor as abstract new (...args: never[]) => unknown
     const name = nameOf(thing) ?? chosenIdOf(thing) ?? topLevelNameOf(things, thing)
     if (name && !PLACE.test(name) && core.thingNamed(Class, name) === thing) return `${Class.name}#${name}`
-    const place = things
-      .all()
+    const place = thingsOf(things, Class)
       .filter((each) => each.constructor === Class)
       .indexOf(thing)
     return place < 0 ? undefined : `${Class.name}#${place + 1}`
@@ -229,6 +222,12 @@ Object.assign(core, referencesMethods)
 export type ThingsToSearch = {
   /** Every thing to search, in the order they were made:  a place counts in it. */
   all(): readonly object[]
+  /**
+   * Those of class `Class`, or of a sub-class, in the order made:  as `all()`'s, of `Class` -- see `thingsOf()`.
+   * - Optional:  the running program's things have one, `ThingRegistry.ofClass()`, which re-runs a reader only as
+   *   things of `Class` come and go.
+   */
+  ofClass?<T>(Class: abstract new (...args: never[]) => T): readonly (T & object)[]
   /** The class named `name`, e.g. `Person` for `Person#owen`;  `undefined` if there's none. */
   classNamed(name: string): (abstract new (...args: never[]) => unknown) | undefined
   /** Things kept under a top-level name, e.g. `{ game }`:  found by that name too.  None if left out. */
@@ -244,6 +243,16 @@ const NOTHING: ThingsToSearch = { all: () => [], classNamed: () => undefined }
 /** What the lookups search now:  `searchThings()`'s, else the running program's things, else nothing. */
 function thingsSearched(): ThingsToSearch {
   return searched ?? programThings() ?? NOTHING
+}
+
+/**
+ * Those of `things` of class `Class`, or of a sub-class, in the order made:  its own `ofClass()`, if it has one,
+ * else `all()`'s, looked through.
+ */
+function thingsOf<T>(things: ThingsToSearch, Class: abstract new (...args: never[]) => T): readonly (T & object)[] {
+  return things.ofClass
+    ? things.ofClass(Class)
+    : things.all().filter((thing): thing is T & object => thing instanceof Class)
 }
 
 /** The top-level name `things` keep `thing` under, e.g. `game` -- `undefined` if none. */

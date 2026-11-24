@@ -11,6 +11,7 @@ import environment from "spell/app/spaces/server/node/environment"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 import { SP } from "spell/parser/spell"
 import { hasProjectFile } from "spell/parser/spell/node/projectFile"
+import { appDir } from "spell/app/spaces/server/node/people/localPerson"
 
 /**
  * Builds spell projects when the API needs what they build:  their compiled output and scope packs are in `build/`
@@ -29,6 +30,9 @@ import { hasProjectFile } from "spell/parser/spell/node/projectFile"
  * - A child process, the checkout's OWN `spell` CLI, never this one:
  *   - it compiles exactly as `spell compile` does:  every target, the scope pack, the checks
  *   - the page server runs the API in its own process, and keeps serving pages while it compiles
+ *   - told the page server's own app (`SPELL_APP_DIR`, `localPerson.ts`'s `appDir()`), e.g. a project outside the
+ *     kit with its own org:  else it'd take the kit's, and not know that org's groups (`@acme/tools/...` "isn't a
+ *     project");  `SPELL_SPACES_DIR` passes through as it is
  * - Its output goes to the server's log, each line prefixed `projects:  ` (`SRV.ServerLog`, `server:projects`):
  *   - shown:  each project compiled, with how many warnings, and every error;  each run a group of its own
  *   - debug (`SPELL_DEBUG=server:projects`):  the command, the projects up to date, each warning, the files written
@@ -37,6 +41,9 @@ import { hasProjectFile } from "spell/parser/spell/node/projectFile"
 export class ProjectBuild {
   /** the checkout whose CLI compiles */
   readonly root: string
+
+  /** the app the page server runs for, whose org's groups the compile knows (`SPELL_APP_DIR`) */
+  readonly app: string
 
   /** ms a request waits for its project to compile */
   readonly timeout: number
@@ -56,8 +63,9 @@ export class ProjectBuild {
   /** every child still running, for `stop()` */
   private children = new Set<ChildProcess>()
 
-  constructor({ root = CHECKOUT_ROOT, timeout = COMPILE_WAIT_MS, spawn = nodeSpawn }: ProjectBuildProps = {}) {
+  constructor({ root = CHECKOUT_ROOT, app, timeout = COMPILE_WAIT_MS, spawn = nodeSpawn }: ProjectBuildProps = {}) {
     this.root = root
+    this.app = app ?? appDir()
     this.timeout = timeout
     this.spawn = spawn
   }
@@ -156,8 +164,9 @@ export class ProjectBuild {
     try {
       child = this.spawn(process.execPath, [cli, ...args], {
         cwd: this.root,
-        // not this server's `TSX_TSCONFIG_PATH`:  the CLI registers its own `tsconfig.json`
-        env: { ...process.env, INIT_CWD: this.root, TSX_TSCONFIG_PATH: undefined },
+        // not this server's `TSX_TSCONFIG_PATH`:  the CLI registers its own `tsconfig.json`;
+        // this server's app, so a project outside the kit is known by its org's groups
+        env: { ...process.env, INIT_CWD: this.root, SPELL_APP_DIR: this.app, TSX_TSCONFIG_PATH: undefined },
         stdio: ["ignore", "pipe", "pipe"],
         detached: true
       })
@@ -211,10 +220,11 @@ export type SpawnBuild = (command: string, args: string[], options: SpawnOptions
 /**
  * `new ProjectBuild()` props.
  * - `root`:  the checkout whose CLI compiles (default:  this one)
+ * - `app`:  the app the page server runs for (default:  `appDir()`, this server's)
  * - `timeout`:  ms a request waits (default `COMPILE_WAIT_MS`)
  * - `spawn`:  starts a child (default `child_process`'s);  tests pass a stub
  */
-export type ProjectBuildProps = { root?: string; timeout?: number; spawn?: SpawnBuild }
+export type ProjectBuildProps = { root?: string; app?: string; timeout?: number; spawn?: SpawnBuild }
 
 /**
  * The kit's `spell` command (`spell`'s `bin/spell.mjs`), as checkout `root`'s install resolves the kit:
