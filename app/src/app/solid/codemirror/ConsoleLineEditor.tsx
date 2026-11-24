@@ -2,7 +2,7 @@ import { untrack } from "solid-js"
 import { autocompletion, type CompletionContext, type CompletionResult } from "@codemirror/autocomplete"
 import { EditorSelection, Prec, type Extension } from "@codemirror/state"
 import { EditorView, keymap, placeholder } from "@codemirror/view"
-import { SymbolKind } from "vscode-languageserver"
+import { SymbolKind } from "vscode-languageserver-types"
 
 import type { SP } from "spell/parser/spell"
 

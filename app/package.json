@@ -29,7 +29,7 @@
     "start:server:prod": "tsx src/spaces/server/node/routes/cli.ts",
     "build": "tsc -p tsconfig.json && cd app && vp build",
     "build:runner": "cd app && vp build -c vite.solid.config.ts --outDir dist-runner && vp build -c vite.runner.config.ts",
-    "build:element": "cd app && vp build -c vite.solid.config.ts && vp build -c vite.element.config.ts && vp build -c vite.editor.config.ts && vp build -c vite.code.config.ts",
+    "build:element": "cd app && vp build -c vite.solid.config.ts && vp build -c vite.element.config.ts && vp build -c vite.code.config.ts",
     "build:page": "cd app && vp build -c vite.solid.config.ts --outDir dist-page && vp build -c vite.page.config.ts",
     "preview": "cd app && vp preview",
     "site:data": "tsx app/scripts/site-data.ts",
@@ -86,6 +86,7 @@
     "vscode-css-languageservice": "^6.3.10",
     "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15",
+    "vscode-languageserver-types": "^3.17.5",
     "wrap-ansi": "^9"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js"
 import { render, type JSX } from "@solidjs/web"
-import { SymbolKind, type CodeAction, type DocumentSymbol } from "vscode-languageserver"
+import { SymbolKind, type CodeAction, type DocumentSymbol } from "vscode-languageserver-types"
 
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { wordsForLine, type ExplainedLine } from "spell/app/app/ui/ExplainedLines"

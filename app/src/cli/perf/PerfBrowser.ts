@@ -224,6 +224,9 @@ export class PerfBrowser {
     })
     page.on("response", (response) => {
       const url = response.url()
+      // a page's own copy (a `blob:` script it made from code it fetched, a `data:` URL):  never downloaded, so never
+      // counted (epic `solid-2-final` J28:  two blob scripts, 90 KB, counted twice since P2)
+      if (!NETWORK_URL.test(url)) return
       const entry: PerfResponse = { url, type: response.request().resourceType(), status: response.status() }
       this.responses.set(url, entry)
       const read = response.body().then(
@@ -497,6 +500,9 @@ export type PerfResponse = {
   /** from the page asking for it until it was sent:  the queue, the wait for a free connection, the connecting */
   waitMs?: number
 }
+
+/** A URL that crosses the network:  `http(s):`, never a `blob:` or `data:` copy the page made itself. */
+const NETWORK_URL = /^https?:/
 
 /** What `domCensus()` counts. */
 export type DomCensus = {

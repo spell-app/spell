@@ -73,8 +73,20 @@ const CERTIFICATE_WORDS = {
     "Your pages reload by themselves in a few seconds, over the secure link.\n" +
     "If they haven't after a minute, type  spell server stop  in this terminal, then  spell server start.\n" +
     "Then open your pages at https://localhost:4747.\n" +
-    "Other spell commands still use http://127.0.0.1:4747.  You don't need to change anything.\n" +
-    "If you use Firefox, it needs one more step.  Run  brew install nss,  then run  spell server certificate  again.",
+    "Other spell commands still use http://127.0.0.1:4747.  You don't need to change anything.",
+  firefoxNeedsNss:
+    "Firefox is on this computer.  It keeps its own list of the certificates it accepts, apart from Chrome and Safari.\n" +
+    "(A certificate is what lets your browser open your pages over a secure link.)\n" +
+    "To add this one to Firefox, first install NSS, a small program that adds certificates to Firefox.\n" +
+    "Type this here, in this terminal (it uses Homebrew, the Mac app installer mkcert came from):  brew install nss\n" +
+    "Then type  spell server certificate  again, and it adds the certificate to Firefox.  Chrome and Safari need nothing more.",
+  firefoxNeedsOpening:
+    "Firefox makes its list of certificates the first time it opens, and it hasn't been opened on this computer yet.\n" +
+    "Open Firefox, close it, then type  spell server certificate  again.",
+  firefoxAdding: "Adding the certificate to Firefox now.  Chrome and Safari already have it.",
+  firefoxTrusted: "Firefox accepts the certificate too.",
+  firefoxUntrusted:
+    "Firefox doesn't accept the certificate yet.  To add it, type this in a terminal:  spell server certificate",
   undone:
     "Done.  The secure link is turned off.\n" +
     "Your pages will open with a plain link (HTTP) again, not a secure one (HTTPS).\n" +
@@ -182,6 +194,9 @@ async function main(args: string[]): Promise<void> {
 /**
  * `spell server certificate [--check] [--undo]`:  make and trust the page server's certificate;  its exit code.
  * - trusting it asks for this computer's password, so only in a terminal:  elsewhere it says to run it in one
+ * - Firefox keeps its own list (`LocalCertificate.firefox`):  without NSS it says so FIRST, before making anything,
+ *   so it isn't missed under mkcert's own lines;  with NSS, once the Mac trusts it, Firefox is added too
+ * - the exit code is the Mac's trust alone:  Firefox's is said, never failed on
  */
 function certificate(args: string[]): number {
   const local = SRV.LocalCertificate.forPageServer()
@@ -193,12 +208,14 @@ function certificate(args: string[]): number {
     }
     if (args.includes("--check")) {
       console.log(CERTIFICATE_WORDS[local.state])
+      if (local.state === "ready") sayFirefox(local.firefox)
       return local.state === "ready" ? 0 : 1
     }
     if (local.state === "no-mkcert") {
       console.log(SRV.INSTALL_MKCERT)
       return 1
     }
+    if (local.firefox === "no-nss") console.log(`${CERTIFICATE_WORDS.firefoxNeedsNss}\n`)
     if (local.makeIfNeeded() === "untrusted") {
       if (!process.stdin.isTTY) {
         console.log(CERTIFICATE_WORDS.needsTerminal)
@@ -208,13 +225,30 @@ function certificate(args: string[]): number {
       local.trust()
     }
     const ready = local.state === "ready"
+    if (ready && local.firefox === "untrusted" && process.stdin.isTTY) {
+      console.log(CERTIFICATE_WORDS.firefoxAdding)
+      local.trustInFirefox()
+    }
     console.log(ready ? CERTIFICATE_WORDS.done : CERTIFICATE_WORDS[local.state])
+    if (ready) sayFirefox(local.firefox)
     return ready ? 0 : 1
   } catch (error) {
     if (!(error instanceof SRV.CertificateError)) throw error
     console.error(error.message)
     return 1
   }
+}
+
+/** What Firefox's trust adds, after the Mac's:  nothing when there's no Firefox. */
+function sayFirefox(firefox: SRV.FirefoxState): void {
+  const words = {
+    none: undefined,
+    "no-nss": CERTIFICATE_WORDS.firefoxNeedsNss,
+    "no-profile": CERTIFICATE_WORDS.firefoxNeedsOpening,
+    untrusted: CERTIFICATE_WORDS.firefoxUntrusted,
+    trusted: CERTIFICATE_WORDS.firefoxTrusted
+  }[firefox]
+  if (words) console.log(words)
 }
 
 /** `url`, at `server`'s HTTPS address when it has one:  the address people open. */

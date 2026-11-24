@@ -49,6 +49,21 @@ export class PerfResults {
     return file ? (JSON.parse(readFileSync(file, "utf8")) as PerfRecord) : undefined
   }
 
+  /**
+   * The newest run that measured `number`, with its value:  `undefined` when none did.
+   * - `isNewest`:  is it the newest run of all?  An older one is a stale number:  `spell perf budget` says so
+   *   (epic `solid-2-final` J28:  a run that didn't load the editor made its limit pass, unsized)
+   */
+  latestMeasuring(number: string): { value: number; when: string; isNewest: boolean } | undefined {
+    const files = this.files
+    for (let at = files.length - 1; at >= 0; at--) {
+      const record = JSON.parse(readFileSync(files[at]!, "utf8")) as PerfRecord
+      const value = record.numbers[number]
+      if (value !== undefined) return { value, when: record.when, isNewest: at === files.length - 1 }
+    }
+    return undefined
+  }
+
   /** SIDE EFFECT:  write `record` as its dated file (or `out`);  returns the file. */
   write(record: PerfRecord, out?: string): string {
     mkdirSync(this.folder, { recursive: true })

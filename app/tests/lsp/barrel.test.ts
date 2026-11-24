@@ -12,7 +12,8 @@ import { LSP } from "spell/app/lsp"
 describe("spell/app/lsp barrel", () => {
   test("exports the portable pieces", () => {
     expect(LSP.SpellLanguageService).toBeTypeOf("function")
-    expect(LSP.SpellLanguageServer).toBeTypeOf("function")
+    // the server wiring, and so `vscode-languageserver` itself, is the process's alone (epic `solid-2-final` Q35)
+    expect("SpellLanguageServer" in LSP).toBe(false)
     expect("SpellDiskWorkspace" in LSP).toBe(false)
   })
 

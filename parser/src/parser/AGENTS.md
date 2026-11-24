@@ -99,7 +99,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `P.Rule.ruleNameFor()` works it out.
   - The builds, app's:
     - [vite.config.ts](../../../app/app/vite.config.ts)
-    - [vite.editor.config.ts](../../../app/app/vite.editor.config.ts)
+    - [vite.code.config.ts](../../../app/app/vite.code.config.ts), which builds `<spell-editor>` too
   - Pinned by app's [build.test.ts](../../../app/tests/app/build.test.ts).
 
 ## Imports

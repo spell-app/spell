@@ -2,7 +2,7 @@
  * The `spell-editor` family:  defines `<spell-editor>` and exports its component, `SpellEditor`,
  * and its DOM element, `DOMSpellEditorElement`.
  * - SIDE EFFECT:  importing it defines the tag (nothing, if something already has).
- * - Also the entry of `spell-editor.js` (`yarn build:element`, `vite.editor.config.ts`), which a page loads to edit
+ * - Also the entry of `spell-editor.js` (`yarn build:element`, `vite.code.config.ts`, built with `<spell-code>`), which a page loads to edit
  *   spell, by itself or through the component pack, `spell.pack.js`:
  *
  *       <script type="module" src="/element/spell-editor.js"></script>

@@ -12,6 +12,7 @@ const { createConnection, ProposedFeatures } = await import("vscode-languageserv
 await import("spell/parser/spell/languages/all")
 const { LSP } = await import("spell/app/lsp")
 const { SpellDiskWorkspace } = await import("spell/app/lsp/SpellDiskWorkspace")
+const { SpellLanguageServer } = await import("spell/app/lsp/SpellLanguageServer")
 
 const connection = createConnection(ProposedFeatures.all)
 // `createConnection()` sends `console.*` to the editor's log.  Drop `info` / `debug`, which are parser chatter,
@@ -19,4 +20,4 @@ const connection = createConnection(ProposedFeatures.all)
 console.info = console.debug = () => {}
 // the CSS service at start:  the browser loads it on a file's first `<css>` block, but nothing waits here
 await LSP.SpellCSS.load()
-new LSP.SpellLanguageServer(connection, new SpellDiskWorkspace()).listen()
+new SpellLanguageServer(connection, new SpellDiskWorkspace()).listen()

@@ -6,7 +6,6 @@ import {
   FoldingRangeKind,
   InsertTextFormat,
   MarkupKind,
-  SemanticTokensBuilder,
   SymbolKind,
   type CodeAction,
   type CompletionItem,
@@ -30,7 +29,7 @@ import {
   type TextEdit,
   type WorkspaceEdit,
   type WorkspaceSymbol
-} from "vscode-languageserver"
+} from "vscode-languageserver-types"
 
 import { withoutAccents } from "spell/util/string"
 import { P } from "spell/parser/parser"
@@ -38,6 +37,7 @@ import { MD, type InlineNode } from "spell/parser/markdown"
 import { SP } from "spell/parser/spell"
 import { BuiltInSounds } from "spell/ui/sounds"
 import { LSP } from "spell/app/lsp"
+import { SemanticTokensBuilder } from "./SemanticTokensBuilder"
 import { SourceHomes, type FieldHomes, type MadeAt } from "./SourceHomes"
 
 /**
