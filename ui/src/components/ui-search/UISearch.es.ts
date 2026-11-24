@@ -21,7 +21,8 @@ export const searchEs = {
     "ignore-diacritics": "ignorar-acentos",
     "highlight-matches": "resaltar-coincidencias",
     "select-first-result": "seleccionar-primero",
-    "show-no-results": "mostrar-sin-resultados"
+    "show-no-results": "mostrar-sin-resultados",
+    shortcut: "atajo"
   },
   events: { "ui-replied": "respondido", "ui-toggled": "desplegado" },
   parts: {
@@ -30,7 +31,8 @@ export const searchEs = {
     result: "resultado",
     category: "categoria",
     name: "nombre",
-    opener: "abridor"
+    opener: "abridor",
+    shortcut: "atajo"
   },
   texts: {
     searchLabel: "Buscar",

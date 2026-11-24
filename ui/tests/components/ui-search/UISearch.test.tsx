@@ -461,6 +461,42 @@ describe("<ui-search collapsed>", () => {
   })
 })
 
+describe("<ui-search shortcut>", () => {
+  /** Press `ctrl+F` on the page;  returns the event. */
+  function pressCtrlF(): KeyboardEvent {
+    const event = new KeyboardEvent("keydown", {
+      key: "f",
+      code: "KeyF",
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true
+    })
+    document.body.dispatchEvent(event)
+    return event
+  }
+
+  it("shows its keys at its end while empty, its magnifying glass at its start;  the keys focus it", async () => {
+    const { host, root, input } = await search(`<ui-search shortcut="ctrl+F" aria-label="Fruit"></ui-search>`, FRUIT)
+    await ElementFixture.settle()
+    expect(root.querySelector("[part~=input]")!.className).toContain("left-icon")
+    expect(root.querySelector("[part~=shortcut] ui-keys")?.getAttribute("shortcut")).toBe("ctrl+F")
+    expect(pressCtrlF().defaultPrevented).toBe(true)
+    expect(host.shadowRoot!.activeElement).toBe(input)
+    await userEvent.type(input, "ap")
+    await ElementFixture.settle()
+    expect(root.querySelector("[part~=shortcut]")).toBeNull()
+  })
+
+  it("opens a `collapsed` search, focused", async () => {
+    const { host, input } = await search(`<ui-search collapsed shortcut="ctrl+F" aria-label="Fruit"></ui-search>`)
+    await ElementFixture.settle()
+    pressCtrlF()
+    await ElementFixture.settle()
+    expect(host.matches(":state(expanded)")).toBe(true)
+    expect(host.shadowRoot!.activeElement).toBe(input)
+  })
+})
+
 describe("<ui-search> remote", () => {
   it("fills the url template, shows loading, then the answer;  caches per query", async () => {
     const calls = stubFetch((url) => ({

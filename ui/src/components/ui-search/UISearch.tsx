@@ -45,6 +45,8 @@ import searchCSS from "./UISearch.css?inline"
  *   - Escape and outside clicks come from `UI.overlays`.
  * - The clear button (`F.ClearButton`):  an `x` in place of the magnifying glass while there's text
  *   (unless `clearable="false"`);  a click empties it, as Escape does, and puts the focus back in it.
+ * - `shortcut="mod+F"`:  those keys focus it (and open a `collapsed` one) while it shows on screen
+ *   (`F.FieldShortcut`);  `<ui-keys>` draws them at its end while it's empty, its magnifying glass at its start.
  * - `collapsed`:  a search button (`opener`) until clicked;  then the field slides open from it, focused.
  *   - Escape on the empty field, or leaving it empty, folds it back.
  *   - `:state(expanded)` follows it, and `ui-toggled` says so:
@@ -143,6 +145,34 @@ export class UISearch extends F.FormComponent<Vocabulary> {
 
   /** The clear button's click. */
   private readonly onClear = (event: MouseEvent) => this.clear(event)
+
+  ////////////////
+  // ## Shortcut
+  ////////////////
+
+  /** Shows its `shortcut`'s keys:  while it's empty, and could take them. */
+  get showsShortcut(): boolean {
+    return !!this.shortcut && this.query === "" && !this.isDisabled
+  }
+
+  /** Its magnifying glass at its start:  a `collapsed` search's, where its button's was, or one showing keys. */
+  get hasStartIcon(): boolean {
+    return this.collapsed || !!this.shortcut
+  }
+
+  /** Its `shortcut` focuses it, while it shows:  listening only while it has one and is in the page. */
+  @E.onChange("isConnected", "shortcut")
+  protected onShortcutChanged(isConnected: boolean, shortcut: string | undefined) {
+    if (isConnected && shortcut) return F.FieldShortcut.listen(this)
+  }
+
+  /** Its `shortcut` was pressed:  open a folded one, and focus it, its text selected to type over. */
+  @E.untracked
+  focusFromShortcut() {
+    if (this.isFolded) return this.expand()
+    this.input?.focus()
+    this.input?.select()
+  }
 
   ////////////////
   // ## Collapsed
@@ -507,7 +537,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   ////////////////
 
   /** The magnifying glass. */
-  readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => SEARCH_ICON })
+  readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => UIT.SEARCH_ICON })
 
   /** Match highlighting (`MenuOptions.highlights()`). */
   private readonly highlighter = new F.MenuOptions()
@@ -542,7 +572,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
             ref={(element: HTMLElement) => (this.opener = element)}
             class={OPENER}
             part={this.partForName("opener")}
-            icon={SEARCH_ICON}
+            icon={UIT.SEARCH_ICON}
             appearance="basic circular"
             aria-label={this.label}
             disabled={this.isDisabled}
@@ -551,7 +581,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
         </Show>
         <div
           class={[
-            this.collapsed ? E.ClassBuilder.withPhrases(LEFT_ICON_INPUT) : INPUT,
+            this.hasStartIcon ? E.ClassBuilder.withPhrases(LEFT_ICON_INPUT) : INPUT,
             { [LOADING]: this.isLoading, [UIT.FLUID]: this.fluid, [UIT.DISABLED]: this.isDisabled }
           ]}
           part={this.partForName("input")}
@@ -578,6 +608,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
             }
             aria-label={this.label}
             aria-busy={this.isLoading ? "true" : undefined}
+            aria-keyshortcuts={F.FieldShortcut.ariaFor(this.shortcut)}
             aria-required={this.required ? "true" : undefined}
             aria-invalid={this.validation.valid ? undefined : "true"}
             {...this.staticControl}
@@ -592,6 +623,11 @@ export class UISearch extends F.FormComponent<Vocabulary> {
             label: () => this.translationForKey("searchClear"),
             part: this.partForName("clear"),
             onClear: this.onClear
+          })}
+          {F.FieldShortcut.draw({
+            shows: () => this.showsShortcut,
+            shortcut: () => this.shortcut,
+            part: this.partForName("shortcut")
           })}
           <span class={SEARCH_ICON_CLASS} part={this.partForName("icon")}>
             <slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>
@@ -901,9 +937,6 @@ const ID_PREFIX = "ui-search"
 /** Infix of a category name's id, between the results id and the category's index. */
 const CATEGORY_ID_INFIX = "-category-"
 
-/** The input's icon:  FA's magnifying glass. */
-const SEARCH_ICON = "magnifying-glass"
-
 /**
  * Class word of the input box while busy.
  * - Class words are the markup contract (`UISearch.css`) -- grammar, not attributes, so not in the vocabulary.
@@ -911,7 +944,7 @@ const SEARCH_ICON = "magnifying-glass"
  */
 const LOADING = "loading"
 
-/** Class words of a `collapsed` search's input box:  the magnifying glass at its start, where the button's was. */
+/** Class words of the input box with its magnifying glass at its start (`hasStartIcon`). */
 const LEFT_ICON_INPUT = "ui left icon input"
 
 /** Class word of a `collapsed` search's button. */

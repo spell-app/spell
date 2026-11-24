@@ -21660,7 +21660,7 @@
         {
           "name": "icon",
           "kind": "icon",
-          "description": "Icon name, drawn inside the field;  the root gets `icon`."
+          "description": "Icon name, drawn inside the field;  the root gets `icon`.  A `type=\"search\"` field shows a magnifying glass at its start when it names none."
         },
         {
           "name": "label",
@@ -21767,6 +21767,11 @@
           "name": "clearable",
           "kind": "boolean",
           "description": "Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type=\"search\"`;  `clearable=\"false\"` turns it off there."
+        },
+        {
+          "name": "shortcut",
+          "kind": "string",
+          "description": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows."
         },
         {
           "name": "autocomplete",
@@ -21999,6 +22004,10 @@
         {
           "name": "icon",
           "description": "The icon box (the spinner while `loading`)."
+        },
+        {
+          "name": "shortcut",
+          "description": "The box of its `shortcut`'s keys, at the field's end while it's empty."
         },
         {
           "name": "clear",
@@ -38814,6 +38823,11 @@
           "description": "Form validation:  the input can't be empty."
         },
         {
+          "name": "shortcut",
+          "kind": "string",
+          "description": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows."
+        },
+        {
           "name": "url",
           "kind": "string",
           "description": "Remote results:  a `UI.api` URL template with `{query}`, e.g. `/api/search?q={query}`."
@@ -39116,6 +39130,10 @@
         {
           "name": "clear",
           "description": "The box of the clear button, in place of the icon while there's text."
+        },
+        {
+          "name": "shortcut",
+          "description": "The box of its `shortcut`'s keys, at the end while it's empty."
         },
         {
           "name": "opener",
@@ -66383,6 +66401,11 @@
         {
           "name": "--ui-input-icon-width",
           "default": "2.67142em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-input-shortcut-width",
+          "default": "4.5em",
           "type": "length"
         },
         {

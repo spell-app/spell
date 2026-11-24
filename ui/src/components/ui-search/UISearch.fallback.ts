@@ -24,7 +24,8 @@ export class SearchFallback extends E.NativeFallback<Vocabulary> {
     "Fomantic's matching (`full-text-search`, `search-fields`, `max-results`):  the browser's own",
     "`ui-search`, `ui-select`, `ui-replied`, `ui-opening`, `ui-closing`;  following a result's `url`",
     "the magnifying glass and the loading spinner",
-    "the clear button (the browser's own, on its search field), and `collapsed`:  the field always shows"
+    "the clear button (the browser's own, on its search field), and `collapsed`:  the field always shows",
+    "`shortcut`:  its keys do nothing, and show no caps"
   ]
 
   /** The native input, once built, for `sync()`. */

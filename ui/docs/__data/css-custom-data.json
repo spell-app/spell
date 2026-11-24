@@ -4202,6 +4202,13 @@
       }
     },
     {
+      "name": "--ui-input-shortcut-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-input>`'s token.  Default:  `4.5em`"
+      }
+    },
+    {
       "name": "--ui-input-icon-size",
       "description": {
         "kind": "markdown",
@@ -12719,7 +12726,7 @@
       "name": "::part(shortcut)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-action>`:  The key caps of its shortcut, at the end:  a `<kbd>` each."
+        "value": "Part of:\n\n- `<ui-action>`:  The key caps of its shortcut, at the end:  a `<kbd>` each.\n- `<ui-input>`:  The box of its `shortcut`'s keys, at the field's end while it's empty.\n- `<ui-search>`:  The box of its `shortcut`'s keys, at the end while it's empty."
       }
     },
     {

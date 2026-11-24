@@ -23473,7 +23473,7 @@ export interface UIInputAttributes {
    */
   "prop:action"?: boolean | "" | "left"
   /**
-   * Icon name, drawn inside the field;  the root gets `icon`.
+   * Icon name, drawn inside the field;  the root gets `icon`.  A `type="search"` field shows a magnifying glass at its start when it names none.
    * - takes:  icon name
    */
   icon?: string
@@ -23683,6 +23683,16 @@ export interface UIInputAttributes {
    * @deprecated write `clearable` -- `prop:` stays only for compiled spell
    */
   "prop:clearable"?: boolean | ""
+  /**
+   * Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows.
+   * - takes:  text
+   */
+  shortcut?: string
+  /**
+   * `shortcut`, as the DOM element's property.
+   * @deprecated write `shortcut` -- `prop:` stays only for compiled spell
+   */
+  "prop:shortcut"?: string
   /**
    * Autofill hint, forwarded to the native input.
    * - takes:  text
@@ -41713,6 +41723,16 @@ export interface UISearchAttributes {
    * @deprecated write `required` -- `prop:` stays only for compiled spell
    */
   "prop:required"?: boolean | ""
+  /**
+   * Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows.
+   * - takes:  text
+   */
+  shortcut?: string
+  /**
+   * `shortcut`, as the DOM element's property.
+   * @deprecated write `shortcut` -- `prop:` stays only for compiled spell
+   */
+  "prop:shortcut"?: string
   /**
    * Remote results:  a `UI.api` URL template with `{query}`, e.g. `/api/search?q={query}`.
    * - takes:  text

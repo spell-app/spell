@@ -13,6 +13,7 @@
  *       <slot name="action"></slot>                                                    (left action)
  *       <input part="control">   or   <textarea part="control">                       (always)
  *       <span class="clear" part="clear"><ui-button icon="xmark" ...></span>         (clearable, with text)
+ *       <span class="shortcut" part="shortcut"><ui-keys shortcut="mod+F"></span>      (shortcut, while empty)
  *       <span class="icon" part="icon"><slot name="icon">svg</slot></span>            (icon, or loading)
  *       <span class="ui label" part="label">...</span>                                 (right labeled)
  *       <span class="ui [left] corner label" part="label">
@@ -33,6 +34,8 @@
  *   by its own width, so it sits in the end column whatever follows (a label, an action).
  *   - The control makes room for it (`--_input-pad-end`);  a trailing icon hides while it shows, a `left icon` stays.
  *   - `<ui-search>` draws one in its `ui icon input` too:  this sheet lays it out there.
+ * - A `shortcut`'s keys (`F.FieldShortcut`):  over the field's end while it's empty, out of the way of clicks;
+ *   the control keeps `--ui-input-shortcut-width` (4.5em) free for them, so a placeholder never runs under them.
  * - Action buttons (`<ui-button slot="action">`) are FLEX ITEMS of the root (a slot is `display: contents`).
  *   - The input squares their joined corners through UIButton.css's group corner tokens (`--_ui-buttons-ss` ...):
  *     a joined action is a one-sided button group.
@@ -127,6 +130,7 @@
     );
     --_ui-input-disabled-opacity: var(--ui-input-disabled-opacity, var(--ui-disabled-opacity));
     --_ui-input-icon-width: var(--ui-input-icon-width, 2.67142em);
+    --_ui-input-shortcut-width: var(--ui-input-shortcut-width, 4.5em);
     --_ui-input-icon-size: var(--ui-input-icon-size, 1em);
     --_ui-input-icon-opacity: var(--ui-input-icon-opacity, 0.5);
     --_ui-input-icon-focus-opacity: var(--ui-input-icon-focus-opacity, 1);
@@ -351,8 +355,22 @@
     display: none;
     appearance: none;
   }
-  /* a trailing icon gives the clear button its column while it shows */
-  .ui.input:not(.left-icon) > .clear ~ .icon {
+  /* Shortcut:  its keys over the field's end, while it's empty. */
+  .ui.input > .shortcut {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    padding-inline-end: 0.5em;
+    color: var(--ui-text-muted);
+    pointer-events: none;
+  }
+
+  /* a trailing icon gives the clear button, or the keys, its column while they show */
+  .ui.input:not(.left-icon) > :is(.clear, .shortcut) ~ .icon {
     visibility: hidden;
   }
 
@@ -405,6 +423,10 @@
   .ui.input:has(> .clear),
   .ui.left-icon.input:has(> .clear) {
     --_input-pad-end: var(--_input-icon-width, var(--_ui-input-icon-width));
+  }
+  .ui.input:has(> .shortcut),
+  .ui.left-icon.input:has(> .shortcut) {
+    --_input-pad-end: var(--_ui-input-shortcut-width);
   }
 
   /* Loading:  the icon box becomes a spinner (a track and a turning arc). */

@@ -26610,7 +26610,7 @@
           "name": "icon",
           "description": {
             "kind": "markdown",
-            "value": "Icon name, drawn inside the field;  the root gets `icon`.\n\nTakes:  icon name"
+            "value": "Icon name, drawn inside the field;  the root gets `icon`.  A `type=\"search\"` field shows a magnifying glass at its start when it names none.\n\nTakes:  icon name"
           }
         },
         {
@@ -26777,6 +26777,13 @@
           "description": {
             "kind": "markdown",
             "value": "Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type=\"search\"`;  `clearable=\"false\"` turns it off there.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "shortcut",
+          "description": {
+            "kind": "markdown",
+            "value": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows.\n\nTakes:  text"
           }
         },
         {
@@ -46707,6 +46714,13 @@
           "description": {
             "kind": "markdown",
             "value": "Form validation:  the input can't be empty.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "shortcut",
+          "description": {
+            "kind": "markdown",
+            "value": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows.\n\nTakes:  text"
           }
         },
         {

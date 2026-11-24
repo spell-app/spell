@@ -142,6 +142,15 @@ export const searchVocabulary = {
     UIT.FormControlAttributes.parameter,
     { ...UIT.FormControlAttributes.required, description: "Form validation:  the input can't be empty." },
     {
+      name: "shortcut",
+      group: "behaviour",
+      kind: "string",
+      description:
+        "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a " +
+        "Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the " +
+        "field shows."
+    },
+    {
       name: "url",
       group: "link",
       kind: "string",
@@ -273,6 +282,7 @@ export const searchVocabulary = {
     { name: "prompt", description: "The text `<input>` (the combobox)." },
     { name: "icon", description: "The icon box." },
     { name: "clear", description: "The box of the clear button, in place of the icon while there's text." },
+    { name: "shortcut", description: "The box of its `shortcut`'s keys, at the end while it's empty." },
     { name: "opener", description: "The search button a `collapsed` search shows while folded." },
     { name: "results", description: "The results popover (the listbox while there are results)." },
     { name: "result", description: "Each result." },

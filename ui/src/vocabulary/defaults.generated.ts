@@ -787,6 +787,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "accept", kind: "string", group: "form" },
     { name: "folder", kind: "boolean", group: "form" },
     { name: "clearable", kind: "boolean", group: "behaviour" },
+    { name: "shortcut", kind: "string", group: "behaviour" },
     { name: "autocomplete", kind: "string", group: "form" },
     {
       name: "inputmode",
@@ -1415,6 +1416,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "name", kind: "string", group: "name" },
     { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
+    { name: "shortcut", kind: "string", group: "behaviour" },
     { name: "url", kind: "string", group: "link" },
     { name: "min-characters", kind: "number", group: "form" },
     { name: "max-results", kind: "number", group: "appearance" },

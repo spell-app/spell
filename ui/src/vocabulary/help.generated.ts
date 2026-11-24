@@ -954,6 +954,8 @@ export const HELP_TABLE: Readonly<
       folder:
         "`file`: picks whole folders instead of files; `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).",
       clearable: "Shows a clear button (an `x`) at its end while it has text; a click empties it.",
+      shortcut:
+        "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them: `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.",
       autocomplete: "Autofill hint, forwarded to the native input.",
       inputmode: "Virtual keyboard hint, forwarded to the native input.",
       rules:
@@ -1722,6 +1724,8 @@ export const HELP_TABLE: Readonly<
       parameter:
         'Keep the value in the page\'s address, as this query parameter (`parameter="s"` => `?s=van+gogh`): each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.',
       required: "Form validation: the input can't be empty.",
+      shortcut:
+        "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them: `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.",
       url: "Remote results: a `UI.api` URL template with `{query}`, e.g.",
       "min-characters": "Characters to type before a search runs.",
       "max-results": "The most results shown (before categories); `0` for no limit.",

@@ -743,6 +743,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "accept",
       "folder",
       "clearable",
+      "shortcut",
       "autocomplete",
       "inputmode",
       "rules"
@@ -1307,6 +1308,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "name",
       "parameter",
       "required",
+      "shortcut",
       "url",
       "min-characters",
       "max-results",

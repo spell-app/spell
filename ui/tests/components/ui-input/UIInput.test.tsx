@@ -11,6 +11,7 @@ import { Alignment } from "spell/test-helpers/Alignment"
 import "spell/ui/components/ui-input"
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-modal"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-input/examples/elements/*.html", {
@@ -764,6 +765,92 @@ describe("<ui-input clearable>", () => {
       expect(Alignment.report(Alignment.scan({ within: "ui-input" })), size).toEqual([])
       host.remove()
     }
+  })
+})
+
+////////////////
+// ## Search fields and shortcuts
+////////////////
+
+/** Press `ctrl+F` on the page, as a person would;  returns the event, to see whether something took it. */
+function pressCtrlF(target: EventTarget = document.body): KeyboardEvent {
+  const event = new KeyboardEvent("keydown", { key: "f", code: "KeyF", ctrlKey: true, bubbles: true, cancelable: true })
+  target.dispatchEvent(event)
+  return event
+}
+
+describe('<ui-input type="search">', () => {
+  it("shows a magnifying glass at its start, unless it names an icon", async () => {
+    const { root } = await input(`<ui-input type="search" aria-label="Find"></ui-input>`)
+    expect(root.className).toBe("ui left icon input left-icon")
+    const named = await input(`<ui-input type="search" icon="users" aria-label="Find"></ui-input>`)
+    expect(named.root.className).toBe("ui icon input")
+  })
+})
+
+describe("<ui-input shortcut>", () => {
+  /** The keys' box, if it shows. */
+  const keysBox = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>("[part~=shortcut]")
+
+  it("shows its keys at its end while it's empty;  the clear x takes their place", async () => {
+    const { host, control } = await input(`<ui-input type="search" shortcut="ctrl+F" aria-label="Find"></ui-input>`)
+    expect(keysBox(host)?.querySelector("ui-keys")?.getAttribute("shortcut")).toBe("ctrl+F")
+    expect(control.getAttribute("aria-keyshortcuts")).toBe("Control+F")
+    await userEvent.type(control, "cats")
+    await ElementFixture.settle()
+    expect(keysBox(host)).toBeNull()
+    expect(host.shadowRoot!.querySelector("[part~=clear]")).not.toBeNull()
+  })
+
+  it("focuses the field while it shows, and stops the browser's find only then", async () => {
+    const { host, control } = await input(`<ui-input shortcut="ctrl+F" value="cats" aria-label="Find"></ui-input>`)
+    await ElementFixture.settle()
+    const event = pressCtrlF()
+    expect(event.defaultPrevented).toBe(true)
+    expect(host.shadowRoot!.activeElement).toBe(control)
+    expect([control.selectionStart, control.selectionEnd]).toEqual([0, 4])
+    control.blur()
+
+    // hidden:  the key is the browser's
+    host.style.display = "none"
+    expect(pressCtrlF().defaultPrevented).toBe(false)
+  })
+
+  it("leaves a key someone already handled alone", async () => {
+    const { host } = await input(`<ui-input shortcut="ctrl+F" aria-label="Find"></ui-input>`)
+    const other = document.createElement("div")
+    other.tabIndex = 0
+    document.body.append(other)
+    onTestFinished(() => other.remove())
+    other.addEventListener("keydown", (event) => event.preventDefault())
+    pressCtrlF(other)
+    expect(host.shadowRoot!.activeElement).toBeNull()
+  })
+
+  it("picks the field in an open modal over the page's, which the modal covers", async () => {
+    const { host: page } = await input(`<ui-input shortcut="ctrl+F" aria-label="Page"></ui-input>`)
+    const modal = await ElementFixture.render<HTMLElement & { visible: boolean }>(
+      `<ui-modal><ui-input shortcut="ctrl+F" aria-label="Modal"></ui-input></ui-modal>`
+    )
+    const opened = new Promise((resolve) => modal.addEventListener("ui-opened", resolve, { once: true }))
+    modal.visible = true
+    await opened
+    await ElementFixture.settle()
+    // the modal focuses its field as it opens:  move the focus off, to see the key bring it back
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    const inModal = modal.querySelector("ui-input")!
+    pressCtrlF()
+    expect(document.activeElement).toBe(inModal)
+    expect(page.shadowRoot!.activeElement).toBeNull()
+  })
+
+  it("lines its keys up with the field's text", async () => {
+    const { host } = await input(
+      `<ui-input type="search" shortcut="ctrl+F" placeholder="Search" aria-label="A"></ui-input>`
+    )
+    await ElementFixture.settle()
+    await (keysBox(host)!.querySelector("ui-keys") as unknown as { ready: Promise<unknown> }).ready
+    expect(Alignment.report(Alignment.scan({ within: "ui-input" }))).toEqual([])
   })
 })
 

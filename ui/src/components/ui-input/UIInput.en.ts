@@ -128,7 +128,9 @@ export const inputVocabulary = {
       name: "icon",
       group: "content",
       kind: "icon",
-      description: "Icon name, drawn inside the field;  the root gets `icon`."
+      description:
+        'Icon name, drawn inside the field;  the root gets `icon`.  A `type="search"` field shows a magnifying ' +
+        "glass at its start when it names none."
     },
     {
       name: "label",
@@ -201,6 +203,15 @@ export const inputVocabulary = {
         'On by default for `type="search"`;  `clearable="false"` turns it off there.'
     },
     {
+      name: "shortcut",
+      group: "behaviour",
+      kind: "string",
+      description:
+        "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a " +
+        "Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the " +
+        "field shows."
+    },
+    {
       name: "autocomplete",
       group: "form",
       kind: "string",
@@ -251,6 +262,7 @@ export const inputVocabulary = {
     { name: "control", description: "The native `<input>`." },
     { name: "label", description: "The joined label box." },
     { name: "icon", description: "The icon box (the spinner while `loading`)." },
+    { name: "shortcut", description: "The box of its `shortcut`'s keys, at the field's end while it's empty." },
     { name: "clear", description: "The box of the clear button, at the field's end (`clearable`, while it has text)." }
   ],
   states: [
