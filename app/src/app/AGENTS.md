@@ -617,7 +617,8 @@ and in the app's build folder, `app/` at the app folder's root.
   - its demo:  `/demo/spell-editor.html`
   - It edits a server project, and feeds `<spell-viewer>`s what it compiles.
     - That's `SPELL_COMPILED_EVENT`, and `SpellCompiled` in [runner.types.ts](runner/runner.types.ts).
-  - Its OWN build, `vite.editor.config.ts`, so the editor's CSS (the bubbly look's) stays out of `spell-app.css`.
+  - Built with `<spell-code>` (`vite.code.config.ts`, epic `solid-2-final` P19, Q31's A), so the two share ONE grammar,
+    `spell-grammar.js`'s;  never with `<spell-viewer>`, so the editor's CSS (the bubbly look's) stays out of `spell-app.css`.
     - CodeMirror is a lazy chunk, `spell-editor-codemirror.js`:  the parser compiles, and apps run, before it loads.
     - Pinned by `element.build.test.ts`.
   - Several on a page edit several projects.

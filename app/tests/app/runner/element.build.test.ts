@@ -54,7 +54,7 @@ describe("runner builds", () => {
 
   beforeAll(() => {
     element = mkdtempSync(join(tmpdir(), "spell-element-"))
-    build(element, "vite.solid.config.ts", "vite.element.config.ts", "vite.editor.config.ts", "vite.code.config.ts")
+    build(element, "vite.solid.config.ts", "vite.element.config.ts", "vite.code.config.ts")
     runner = mkdtempSync(join(tmpdir(), "spell-runner-"))
     build(runner, "vite.solid.config.ts", "vite.runner.config.ts")
   }, 180_000)
@@ -282,16 +282,15 @@ describe("runner builds", () => {
     expect(readFileSync(join(element, "spell-ui.js"), "utf8")).toMatch(/SpellUI\b[^;]*registerPack/)
   })
 
-  test("one grammar for a layout's spell and `<spell-code>`'s colours:  `spell-grammar.js`'s;  `<spell-editor>` keeps its own", () => {
-    // spell's rules, in every chunk but the editor's own (its language service watches its projects through its own
-    // `spell/util`):  ONE chunk, which `spell-grammar.js` imports (epic `solid-2-final` P11)
+  test("one grammar for a layout's spell, `<spell-code>`'s colours and `<spell-editor>`:  `spell-grammar.js`'s", () => {
+    // spell's rules:  ONE chunk, which `spell-grammar.js` imports (epic `solid-2-final` P11), and `<spell-editor>`
+    // too, built with the code elements so its language service and the grammar share one `spell/util` (P19, Q31's A)
     const holding = (pattern: RegExp) =>
-      chunks(element).filter(
-        (file) => !file.startsWith("spell-editor") && sources(element, file).some((source) => pattern.test(source))
-      )
+      chunks(element).filter((file) => sources(element, file).some((source) => pattern.test(source)))
     const withRules = holding(SPELL_RULES)
     expect(withRules).toHaveLength(1)
     expect(staticImports(element, "spell-grammar.js")).toContain(withRules[0])
+    expect(staticImports(element, "spell-editor.js")).toContain(withRules[0])
     // Spanish's registrations:  one chunk too, which nothing loads up front (`SP.Language.loadsOnFirstUse()`)
     const spanish = holding(SPANISH_RULES)
     expect(spanish).toHaveLength(1)
@@ -369,17 +368,21 @@ describe("runner builds", () => {
   })
 
   test("the built-in sounds beside each chunk holding `BuiltInSounds` (epic `mockup` P28)", () => {
-    // `spell-editor.js` bundles its own copy too, for the sounds' NAMES alone (`vite.shared.ts`'s `UI_DATA`):
-    // where their files are is the page's runtime's to say, the copy in the shared files
+    // `<spell-editor>`'s language service (`spell-code-lsp.js`, built with the code elements) bundles its own copy
+    // too, for the sounds' NAMES alone (`vite.shared.ts`'s `UI_DATA`):  where their files are is the page's
+    // runtime's to say, the copy in the shared files
     for (const dir of [element, runner]) {
       const soundCode = chunks(dir).filter(
-        (file) => file !== "spell-editor.js" && sources(dir, file).some((source) => BUILT_IN_SOUNDS.test(source))
+        (file) => !NAMES_ONLY.test(file) && sources(dir, file).some((source) => BUILT_IN_SOUNDS.test(source))
       )
       expect(soundCode, dir).toHaveLength(1)
       expect(existsSync(join(dir, dirname(soundCode[0]!), "sound-library", "card-slide.ogg")), dir).toBe(true)
     }
   })
 })
+
+/** The editor's language service, which holds the built-in sounds' names alone:  `spell-editor.js` before P19. */
+const NAMES_ONLY = /^spell-(editor|code-lsp)\.js$/
 
 /** Modules of each package a test asks about, as they appear in a sourcemap's `sources`. */
 const PACKAGES = {

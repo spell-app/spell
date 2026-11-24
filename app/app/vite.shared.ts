@@ -329,7 +329,7 @@ const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)
 
 /**
  * For a build that takes Solid and `spell-ui` from `SHARED_SOLID`'s files beside it, instead of bundling its own:
- * `vite.element.config.ts`, `vite.editor.config.ts`, `vite.runner.config.ts`, `vite.code.config.ts`.
+ * `vite.element.config.ts`, `vite.runner.config.ts`, `vite.code.config.ts` (`<spell-editor>` too).
  * - Such an import resolves to an EXTERNAL id, which `output.paths` writes as `./spell-solid-shared.js` /
  *   `./spell-ui.js`:  relative.
  *   So every chunk that imports one MUST sit at the output folder's top level (ours do:  fixed names, no folders).

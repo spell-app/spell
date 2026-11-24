@@ -32,7 +32,6 @@ export const CLOUD_BROWSER_BUNDLE: SRV.BundleSpec = {
     "spell/app/app/vite.shared.ts",
     "spell/app/app/vite.solid.config.ts",
     "spell/app/app/vite.element.config.ts",
-    "spell/app/app/vite.editor.config.ts",
     "spell/app/app/vite.code.config.ts",
     "yarn.lock"
   ]

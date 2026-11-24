@@ -133,7 +133,7 @@ const CONFIGS: Record<PerfBuild, string[]> = {
   editor: ["vite.config.ts"],
   "editor-unminified": ["vite.config.ts"],
   "editor-mapped": ["vite.config.ts"],
-  element: ["vite.solid.config.ts", "vite.element.config.ts", "vite.editor.config.ts", "vite.code.config.ts"]
+  element: ["vite.solid.config.ts", "vite.element.config.ts", "vite.code.config.ts"]
 }
 
 /**

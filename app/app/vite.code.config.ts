@@ -13,6 +13,15 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
  *   - `spell-grammar.js`:  spell's parser and rules, `P` and `SP` (`src/app/spellGrammar.ts`), the ONE grammar of the
  *     element builds (epic `solid-2-final` P11):  the colours here, and a `<spell-viewer>` layout's spell, import it
  *     (`sharedGrammar()`, `vite.element.config.ts`)
+ *   - `spell-editor.js`:  `<spell-editor>` (`src/app/components/spell-editor/`), built HERE so it shares that grammar
+ *     with `<spell-code>`:  a page with both loads one (epic `solid-2-final` P19, Q31's A;  its own build before)
+ *     - CodeMirror is a chunk of its own, `spell-editor-codemirror.js`, loaded once there's a project to show.
+ *     - One `spell-editor.css`, ours, the bubbly look's and `codemirror.css`, which the element puts in its shadow
+ *       root (`shadowStyles.ts`):  `cssCodeSplit: false`, every CSS asset named so.  The other entries bring no CSS
+ *       file of their own (their styles are `?inline`).
+ *     - No worker:  its language service runs in the page.
+ *     - Never with `<spell-viewer>` (`vite.element.config.ts`), so the bubbly look's CSS stays out of
+ *       `spell-app.css`, which every `<spell-viewer>` adopts.
  * - The component pack, `spell.pack.js` (`vite.element.config.ts`), imports the first three too.
  * - Its own build, not more entries of `vite.element.config.ts`:
  *   that one puts everything its entries share in ONE chunk (`spell-shared.js`), which `<spell-viewer>` loads up front.
@@ -43,19 +52,23 @@ export default defineConfig({
     // `vite.solid.config.ts` emptied it
     emptyOutDir: false,
     sourcemap: true,
+    cssCodeSplit: false,
     rolldownOptions: {
       input: {
         "spell-code": "../src/app/components/spell-code/index.ts",
         "spell-markdown": "../src/app/components/spell-markdown/index.ts",
         "spell-reference-page": "../src/app/components/spell-reference-page/index.ts",
         "spell-language": "../src/app/spellLanguage.ts",
-        "spell-grammar": "../src/app/spellGrammar.ts"
+        "spell-grammar": "../src/app/spellGrammar.ts",
+        "spell-editor": "../src/app/components/spell-editor/index.ts"
       },
       // `spell-grammar.js` keeps `P` and `SP`:  the viewer's build imports them from it, by URL
       preserveEntrySignatures: "exports-only",
       output: {
         entryFileNames: "[name].js",
-        chunkFileNames: "spell-code-[name].js",
+        chunkFileNames: (chunk) => (chunk.name === "codemirror" ? "spell-editor-[name].js" : "spell-code-[name].js"),
+        assetFileNames: (asset) =>
+          asset.names?.some((name) => name.endsWith(".css")) ? "spell-editor.css" : "[name][extname]",
         keepNames: true,
         codeSplitting: {
           groups: [
