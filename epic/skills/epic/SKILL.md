@@ -783,6 +783,9 @@ Until a `/back:  ...` message (or `epic focus status` says off):
          - nothing Claude can check itself:  CI (`gh run list`), a command's output, a page's markup are Claude's to check
          - three or more steps with commands:  write them as a runbook, and the Step is its start command,
            `spell runbook start <name>` (the kit's AGENTS.md, "Commands")
+         - each step's COMMAND (a code block in it) gets a box under it on the page, "Paste what this command
+           printed" (epic `epic-engine` T165):  one box per step, so a command whose output they should send you is a
+           step of its own, a numbered list item;  the page reads it off the markup, nothing to add
        - `--example`:  a screenshot you took of it working, copied beside the page (`tests/<id>.png`)
        - `details <name>#M3 --step ... --should ...` rewrites an older manual test in these fields
      - They answer it WHERE IT IS, with the page's own marks (epic `epic-engine` P51, Q53:  no separate test run,
@@ -1364,6 +1367,9 @@ want you to just do it").
      - The note box's ✕ (`skip`) on a test:  `apply` CANCELS it, "no longer applies";  their note, if any, says why.
      - A REVISIT note on a test (or their comment in its Step or Should, which presses Revisit itself, I158) is what they
        saw, left for you.  A picture they pasted comes with it:  `wait` prints `screenshot:  tests/...png` under the mark.
+       What a step's command printed, pasted in the box under it (T165), comes with ANY of their marks on the test
+       (Approve, Revisit, the ✕), or alone as a revisit:  `wait` prints `step 2 printed (pasted by the person):` and the
+       text under the mark;  read it before `apply` closes a passed test (it may show a problem they missed).
        Read it, then:
        - it says it passed:  `epic close <name>#M3`
          (a passed test with a comment may still need work:  a todo or issue for what it asks)

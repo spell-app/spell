@@ -2174,6 +2174,19 @@ the epic page shown in both tabs).
       session, which closes it (their note says it passed) or files "M3 failed:  <title>", linked both ways
     - the note box's ✕ (`skip`) on a test:  `apply` CANCELS it, "no longer applies"
       (`PlanDoc.applyAction()` hands it to `applyTest()`'s skip)
+    - WHAT A STEP PRINTED (epic `epic-engine` T165;  Owen, 2026-11-23:  "a 'paste the output of this command here'
+      ... for each step"):  a box under each step's command, `<epic-step-output item="m3" step="2">`
+      - put there by the test's Step field as the page draws it (`<epic-field>`, `StepOutputs`):  each `<li>` of its
+        lists holding a `<pre>` (a field with no list, one step), never in its `<epic-original>`;  `data-spell-added`,
+        so the live patch, comments and the field's taste step around it;  no test's markup names them
+      - an `<epic-text-box type="note" code>`, "Paste what this command printed", shown while the page is reviewed
+      - saved 1.5s after the last key, and as the box loses focus or the page goes (`DraftSaver`), into the test's
+        MARK as `outputs`, `[{ step, text }]` (`ReviewClient.saveOutput()`, checked by `ReviewInbox.toMark()`'s
+        `toStepOutputs()`):  his Approve, Revisit, Make Todo or ✕ carries them (`OUTPUT_ACTIONS`;  `save()` keeps them
+        through every press), no mark yet makes a revisit with no words, as a picture alone does;  every box emptied,
+        that bare revisit goes
+      - a revisit carrying them is never made a comment (`isNoteToTalkOver()`);  `epic inbox` lists "pasted output for
+        step 2", `wait` prints each step's text under the mark, word for word
     - left alone:  still open
   - START TESTING, the Manual tests section's button:  a request for now, `prepare`, keyed on the section's id,
     `tests` (`TESTS_ID`;  `ReviewClient.prepareTests()`)

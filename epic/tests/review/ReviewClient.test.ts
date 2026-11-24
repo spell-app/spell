@@ -18,7 +18,7 @@ import {
 
 const PAGE = "/epics/sample/sample.plan.html"
 const TOKEN = "token-1"
-const ITEMS = new Set(["q1", "j2", "o1"])
+const ITEMS = new Set(["q1", "j2", "o1", "m1"])
 
 /**
  * The page server's review routes over a REAL `ReviewInbox`, as `fetch`:
@@ -733,6 +733,52 @@ describe("ReviewClient's pictures and testing", () => {
     expect(client.markOf("q1")).toMatchObject({ action: "skip", note: "gone", shot })
     await client.useNote("q1", "soon", "look at this")
     expect(client.markOf("q1")).toMatchObject({ action: "revisit", note: "look at this", shot })
+  })
+
+  // epic `epic-engine` T165:  what a test's steps printed, pasted under each command
+  test("saveOutput():  a paste alone is a revisit;  his Approve carries it;  taken back, the revisit stays", async () => {
+    const { client, server } = await started()
+    expect(await client.saveOutput("m1", 2, "\nDone.  Your computer trusts it\n  ")).toBe(true)
+    expect(server.posts.at(-1)).toEqual([
+      "mark",
+      {
+        page: PAGE,
+        id: "m1",
+        mark: {
+          action: "revisit",
+          when: "soon",
+          note: "",
+          outputs: [{ step: 2, text: "Done.  Your computer trusts it" }]
+        }
+      }
+    ])
+    await client.saveOutput("m1", 1, "ok")
+    expect(client.outputOf("m1", 1)).toBe("ok")
+    expect(server.inbox.marks.m1!.outputs).toEqual([
+      { step: 1, text: "ok" },
+      { step: 2, text: "Done.  Your computer trusts it" }
+    ])
+    client.press("m1", "approve")
+    await vi.waitFor(() => expect(server.inbox.marks.m1!.action).toBe("approve"))
+    expect(server.inbox.marks.m1!.outputs).toHaveLength(2)
+    // his ✓ taken back:  what he pasted stays, a revisit again
+    client.press("m1", "approve")
+    await vi.waitFor(() => expect(server.inbox.marks.m1!.action).toBe("revisit"))
+    expect(client.outputOf("m1", 2)).toBe("Done.  Your computer trusts it")
+  })
+
+  test("saveOutput():  a note typed keeps the pastes;  every box emptied, the bare revisit goes", async () => {
+    const { client, server } = await started()
+    await client.saveOutput("m1", 1, "h2 h2 h2")
+    await client.saveTyped("m1", "all green")
+    expect(server.inbox.marks.m1).toMatchObject({ action: "revisit", note: "all green", outputs: [{ step: 1 }] })
+    await client.saveOutput("m1", 1, "")
+    expect(server.inbox.marks.m1).toMatchObject({ action: "revisit", note: "all green" })
+    expect(server.inbox.marks.m1!.outputs).toBeUndefined()
+    await client.saveTyped("m1", "")
+    await client.saveOutput("m1", 3, "x")
+    await client.saveOutput("m1", 3, "  ")
+    expect(server.inbox.marks.m1).toBeUndefined()
   })
 
   test("prepareTests():  a request for now under `tests`, running until it's done", async () => {

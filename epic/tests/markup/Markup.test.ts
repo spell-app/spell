@@ -110,6 +110,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
     submit: "Add"
   },
   "epic-kickoff": {},
+  "epic-step-output": { item: "m3", step: 2 },
   "epic-agents": {},
   "epic-ask": {
     name: "q1",

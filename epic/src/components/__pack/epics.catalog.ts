@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  b6b7642f6d33b849
+// sources:  e7fb97224c17ce5a
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -58,6 +58,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-stage-button": {"folder":"epic-review","skeleton":{"display":"inline","width":"8em","height":"1.6em"},"attributes":["stage","open"]},
   "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","phases","mixed","shown"]},
   "epic-status": {"folder":"epic-status","attributes":["state","at","done-at","from","unmerged","agent"]},
+  "epic-step-output": {"folder":"epic-step-output","attributes":["item","step"]},
   "epic-summary": {"folder":"epic-summary","attributes":[]},
   "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height","code"]},
   "epic-thread": {"folder":"epic-thread","attributes":["comment","open","unseen","moved","boxed","saved","failed"]},
