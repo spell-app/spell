@@ -42,6 +42,13 @@ export const contentVocabulary = {
         "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name was `text-align`."
     },
     {
+      name: "markdown",
+      group: "content",
+      kind: "keyOnly",
+      description:
+        "Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.  Without it, its content shows as written."
+    },
+    {
       name: "vertical-align",
       group: "layout",
       kind: "verticalAlign",
@@ -51,7 +58,10 @@ export const contentVocabulary = {
   ],
   events: [],
   slots: [{ name: "", description: "Content, usually other parts." }],
-  parts: [{ name: "content", description: "The content box." }],
+  parts: [
+    { name: "content", description: "The content box." },
+    { name: "markdown", description: "With `markdown`:  the `<ui-markdown>` its words are drawn in." }
+  ],
   states: [
     { name: "in-card", description: "Owned by a card." },
     { name: "in-item", description: "Owned by an item." },

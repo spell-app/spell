@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { iconVocabulary } from "spell/ui/components/ui-icon/UIIcon.en"
@@ -56,7 +55,7 @@ describe("UIIcon.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = iconRaw + colorsCSS
+    const css = iconRaw + colorsSharedCSS
     for (const vocabulary of [iconVocabulary, iconsVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -71,7 +70,7 @@ describe("UIIcon.css source", () => {
 describe("UIIcon.css examples", () => {
   it.each(Object.keys(EXAMPLES))("draws every icon in %s as a one-line glyph box", (path) => {
     Sheets.adopt([...foundationCSS, iconCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const icons = root.querySelectorAll<HTMLElement>(".ui.icon")
     expect(icons.length).toBeGreaterThan(0)
     for (const icon of icons) {
@@ -85,7 +84,7 @@ describe("UIIcon.css examples", () => {
 
   it("scales with the surrounding text on Fomantic's ladder;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, iconCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     const text = parseFloat(getComputedStyle(root).fontSize)
     const ladder = ["mini", "tiny", "small", "large", "big", "huge", "massive"].map((name) => size(`.ui.${name}.icon`))
@@ -98,17 +97,17 @@ describe("UIIcon.css examples", () => {
 
   it("colours with the resolved hue and dims disabled icons", () => {
     Sheets.adopt([...foundationCSS, iconCSS])
-    const variations = Fixture.render(EXAMPLES["./examples/variations.html"]!)
-    const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
+    const variations = Sheets.render(EXAMPLES["./examples/variations.html"]!)
+    const red = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
     expect(getComputedStyle(variations.querySelector(".ui.red.icon")!).color).toBe(getComputedStyle(red).color)
-    const states = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const states = Sheets.render(EXAMPLES["./examples/states.html"]!)
     expect(parseFloat(getComputedStyle(states.querySelector(".ui.disabled.icon")!).opacity)).toBeCloseTo(0.45, 2)
     expect(getComputedStyle(states.querySelector(".ui.loading.icon")!).animationName).toBe("ui-icon-spin")
   })
 
   it("rings circular and bordered icons, and fills inverted ones", () => {
     Sheets.adopt([...foundationCSS, iconCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const circular = root.querySelector<HTMLElement>(".ui.circular.icon:not(.inverted)")!
     const box = circular.getBoundingClientRect()
     expect(box.width).toBeCloseTo(box.height, 1)
@@ -121,7 +120,7 @@ describe("UIIcon.css examples", () => {
 
   it("flips and rotates with one transform", () => {
     Sheets.adopt([...foundationCSS, iconCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const matrix = (selector: string) => new DOMMatrix(getComputedStyle(root.querySelector(selector)!).transform)
     expect(matrix("[class*='horizontally flipped']").a).toBeCloseTo(-1)
     expect(matrix("[class*='vertically flipped']").d).toBeCloseTo(-1)
@@ -131,7 +130,7 @@ describe("UIIcon.css examples", () => {
 
   it("stacks a group on its first icon and pins corners", () => {
     Sheets.adopt([...foundationCSS, iconCSS])
-    const root = Fixture.render(EXAMPLES["./examples/groups.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/groups.html"]!)
     const group = root.querySelector<HTMLElement>(".ui.huge.icons:has([class*='top left'])")!
     const [base, corner] = group.querySelectorAll<HTMLElement>(".icon")
     expect(getComputedStyle(base!).position).toBe("static")
@@ -153,7 +152,7 @@ describe("UIIcon.css examples", () => {
 describe("UIIcon.css in shadow roots", () => {
   it("resets an inherited scale and colour on the host", () => {
     Sheets.adopt(foundationCSS)
-    const wrapper = Fixture.render(`<div class="ui-large ui-red"><span></span></div>`)
+    const wrapper = Sheets.render(`<div class="ui-large ui-red"><span></span></div>`)
     const host = wrapper.querySelector("span")!
     Sheets.attach(host, `<span class="ui icon" part="icon"><svg viewBox="0 0 10 10"></svg></span>`, [
       ...foundationCSS,
@@ -212,7 +211,7 @@ function defineTestIcon() {
 describe("UIIcon.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, iconCSS])
-    const root = Fixture.render(`<div style="--ui-icon-width: 30px"><span class="ui icon"></span></div>`)
+    const root = Sheets.render(`<div style="--ui-icon-width: 30px"><span class="ui icon"></span></div>`)
     expect(getComputedStyle(root.querySelector("span.ui.icon")!).width).toBe("30px")
   })
 })

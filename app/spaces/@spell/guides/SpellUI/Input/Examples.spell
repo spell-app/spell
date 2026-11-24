@@ -27,6 +27,9 @@
 				<input type="number" value="250" labeled="right" label="°" aria-label="Hue"/>
 				<input inputmode="decimal" value="55.5" labeled="right" label="%" aria-label="Lightness"/>
 			</example>
+			<example "Native types" description="A percent:  `type=\"percent\"` keeps a part of a whole as its fraction, `0.18`, the way Spell keeps one, and shows it as `18` with a `%` label.  `min`, `max` and `step` count in what it shows.">
+				<input type="percent" value="0.18" min="0" step="1" aria-label="Tip"/>
+			</example>
 		</>
 
 		<section label="File Input" sticky="stack" collapsible dividing>
@@ -36,7 +39,13 @@
 			</example>
 		</>
 
-		<!-- GAP I95:  no invisible file input that a separate `<label for>` (a button, a placeholder segment) triggers;  left out. -->
+		<section label="Folder Input" sticky="stack" collapsible dividing>
+			<example "Folder Input" description="A folder input:  `folder` on a `file` input picks whole folders.  Its `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).">
+				<input type="file" folder aria-label="Upload a folder"/>
+			</example>
+		</>
+
+		<!-- GAP I95:  a separate `<label for>` (a button, a placeholder segment) doesn't open a file input's dialog;  script does, with `showPicker()`. -->
 		<section label="Textarea" sticky="stack" collapsible dividing>
 			<example "Textarea" description="A `<ui-textarea>` allows extended user input. Its states, variations and the rest are on the \[Textarea](/textarea) page.">
 				<textarea fluid rows="3" placeholder="Tell us more" aria-label="Tell us more"/>
@@ -158,11 +167,9 @@
 					<button slot="action" color="green" labeled icon="cart">Checkout</button>
 				</input>
 			</example>
-
-			<!-- GAP I11:  a `basic` dropdown button draws no basic look. -->
 			<example "Action">
 				<input icon="search" icon-position="left" placeholder="Search" aria-label="Search">
-					<dropdown slot="action" button basic floating label="This Page">
+					<dropdown slot="action" button appearance="basic" floating label="This Page">
 						<item>This Organization</item>
 						<item>Entire Site</item>
 					</dropdown>
@@ -191,7 +198,7 @@
 		</>
 
 		<!-- GAP I100:  a `file` input's trigger is the native choose-file button:  no custom content (Fomantic's File Action label button). -->
-		<section label="File Action" sticky="stack" collapsible dividing id="variations-file-action">
+		<section label="File Action" sticky="stack" collapsible dividing>
 			<example "File Action" description="A file input's choose-file button takes a `color`.">
 				<input type="file" color="blue" aria-label="Choose wisely"/>
 			</example>

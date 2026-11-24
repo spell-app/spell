@@ -1,0 +1,76 @@
+"runner pane" is a notebook page
+	<header level="1">
+		RunnerPane
+		<header>One of a runner's panes: a toolbar of tabs, and what the chosen tab shows.</>
+	</>
+
+	<text class="lede" paragraph>The debug pane under a running app: a row of tabs (Type Explorer, Thing Explorer, Console), and below it whichever one is chosen. Every runner draws it, in a page and in VS Code alike.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the runner, or adding a tab to its debug pane</>
+		<item icon="play">Live: inside a real <text code>&lt;spell-viewer&gt;</>, from the app's element build this page loads</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>The todos example, with its debug pane open on the Thing Explorer. That pane, its tabs and what they show, is a RunnerPane: click a tab to switch.</>
+		<example "1. Example" description="The debug pane below the app:  a RunnerPane of three tabs.">
+			<html>
+				<spell-viewer project="@spell/examples/TaskList" toolbar debug="things" height="480px"></spell-viewer>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from the app's element build, which this set's pages load: <text code>/element/spell.pack.js</>. <link target="src-packages-app" link="/src/app/">The app package</> builds it with <text code>yarn build:element</>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph><text code>&lt;spell-viewer&gt;</>'s runner draws two: the debug pane, and, for a program with no app of its own, its console on top.</>
+		<text paragraph>SpellAppRunner.tsx · the debug pane, and a lone console:</>
+		<markdown>
+			```typescript
+			bottom={
+			  <RunnerPane tabs={debugTabs().map((id) => DEBUG_TABS[id])} pane={showing()} onPane={setPane}>
+			    <Switch>
+			      <Match when={showing() === "explorer"}>{explorer()}</Match>
+			      <Match when={showing() === "things"}>{things()}</Match>
+			      <Match when={showing() === "console"}>{output()}</Match>
+			    </Switch>
+			  </RunnerPane>
+			}
+
+			<RunnerPane tabs={[DEBUG_TABS.console]} pane="console">
+			  {output()}
+			</RunnerPane>
+			```
+		</>
+		<list bulleted>
+			<item>It holds no state: <text code>pane</> says which tab shows, and <text code>onPane</> is told when one is clicked. Its children are what that tab shows.</>
+			<item>With no <text code>onPane</>, or a single tab, the tabs just say what the pane is.</>
+			<item>Each tab has an id, a Fomantic icon name and a title: <text code>sitemap</>, "Type Explorer".</>
+			<item>Its tabs are <text code>&lt;ui-item&gt;</>s in a <text code>&lt;ui-menu&gt;</>. So whatever draws a runner loads those tags too, as <text code>&lt;spell-viewer&gt;</> does.</>
+			<item>It sits in a <text code>&lt;ui-split-panel&gt;</>, and shows a <link target="src-packages-app-docs-typeexplorer-html" link="/type-explorer">TypeExplorer</>, a <link target="src-packages-app-docs-thingexplorer-html" link="/thing-explorer">ThingExplorer</> or a <link target="src-packages-app-docs-runnerconsole-html" link="/runner-console">RunnerConsole</>.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="RunnerPane"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-runner-runnerpane-tsx" link="/src/app/runner/RunnerPane.tsx"><text title="src/app/runner/RunnerPane.tsx" code>RunnerPane.tsx</></>: the component, its props, and a tab's type</>
+			<item><link target="src-packages-app-src-runner-runnerpane-css" link="/src/app/runner/RunnerPane.css"><text title="src/app/runner/RunnerPane.css" code>RunnerPane.css</></>: the tabs on top, what they show filling the rest</>
+			<item><link target="src-tests-app-src-runner-runner-browser-test-tsx" link="/tests/app/runner/runner.browser.test.tsx"><text title="tests/app/runner/runner.browser.test.tsx" code>runner.browser.test.tsx</></>: its tests, through the runner that draws it</>
+			<item>In the runner's pieces, <text code>app/app/runner</>: <link target="src-packages-app-src-runner" link="/src/app/runner/"><text title="src/app/runner/" code>src/runner/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

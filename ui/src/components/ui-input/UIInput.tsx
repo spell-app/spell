@@ -47,6 +47,11 @@ export class DOMInputElement extends F.DOMFormControl<UIInput> {
  * - `showPicker()` opens the native input's picker from script (`DOMInputElement`):
  *   `<ui-uploader>` opens its file dialog that way.
  *   `percent` is ours (epic `language` P34):  a number field for a part of a whole, see `isPercent`.
+ * - `clearable` (on by default for `type="search"`):  an `x` at its end while it has text (`F.ClearButton`);
+ *   a click empties it as typing would (`ui-typed`, then `ui-changed`), and puts the focus back in it.
+ * - `type="search"`:  a magnifying glass at its start, unless it names an `icon`.
+ * - `shortcut="mod+F"`:  those keys focus it while it shows on screen (`F.FieldShortcut`),
+ *   drawn at its end with `<ui-keys>` while it's empty (the clear `x` takes their place once there's text).
  * - Enter submits the form, as in a native field ("implicit submission"):
  *   it clicks the form's first submit button, else calls `requestSubmit()`.
  *   The native input can't do it itself:  inside a shadow root, it belongs to no form.
@@ -99,13 +104,80 @@ export class UIInput extends TextControl<Vocabulary> {
   // ## The icon
   ////////////////
 
-  /** Shows the icon box:  an icon, or the spinner. */
-  get hasIconBox(): boolean {
-    return !!this.icon || this.slots.hasContent(this.slotForName("icon")) || !!this.loading
+  /** The icon it shows:  its `icon`, else a search field's magnifying glass. */
+  get iconName(): string | undefined {
+    return this.icon || (this.type === "search" ? UIT.SEARCH_ICON : undefined)
   }
 
-  /** The glyph of the `icon` attribute. */
-  readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.icon })
+  /** Where its icon goes:  its `icon-position`;  a search field's own magnifying glass at the start. */
+  get iconSide(): string | undefined {
+    if (!this.icon && !this.iconPosition && this.type === "search") return UIT.LEFT
+    return this.iconPosition
+  }
+
+  /** Shows the icon box:  an icon, or the spinner. */
+  get hasIconBox(): boolean {
+    return !!this.iconName || this.slots.hasContent(this.slotForName("icon")) || !!this.loading
+  }
+
+  /** The glyph of its icon (`iconName`). */
+  readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.iconName })
+
+  ////////////////
+  // ## Clearing
+  ////////////////
+
+  /** Does it offer a clear button?  `clearable`, written;  else only `type="search"`. */
+  get isClearable(): boolean {
+    const written = this.attributes.clearable
+    if (written == null) return this.type === "search"
+    return E.Converters.boolean(written)
+  }
+
+  /** Shows the clear button:  clearable, with text, and someone could change it. */
+  get showsClear(): boolean {
+    return (
+      this.isClearable && this.value !== "" && !this.isFileInput && !this.isDisabled && !this.readonly && !this.loading
+    )
+  }
+
+  /**
+   * Empty the field as someone typing would:  `ui-typed`, then `ui-changed`;  then focus it.
+   * - A `ui-typed` handler that sets `value` again wins, as when typing (`requestChange()`).
+   */
+  @E.untracked
+  clear(originalEvent?: Event) {
+    if (this.value === "") return
+    const applied = this.requestChange("value", "", () => this.send("ui-typed" as never, { value: "", originalEvent }))
+    if (!applied) E.afterSolidUpdate(() => this.syncControl())
+    this.send("ui-changed" as never, { value: this.value, originalEvent })
+    this.focus()
+  }
+
+  /** The clear button's click. */
+  private readonly onClear = (event: MouseEvent) => this.clear(event)
+
+  ////////////////
+  // ## Shortcut
+  ////////////////
+
+  /** Shows its `shortcut`'s keys:  while it's empty, and could take them. */
+  get showsShortcut(): boolean {
+    return !!this.shortcut && this.value === "" && !this.isFileInput && !this.isDisabled
+  }
+
+  /** Its `shortcut` focuses it, while it shows:  listening only while it has one and is in the page. */
+  @E.onChange("isConnected", "shortcut")
+  protected onShortcutChanged(isConnected: boolean, shortcut: string | undefined) {
+    if (isConnected && shortcut) return F.FieldShortcut.listen(this)
+  }
+
+  /** Its `shortcut` was pressed:  focus it, its text selected to type over. */
+  @E.untracked
+  focusFromShortcut() {
+    this.control?.focus()
+    this.control?.select()
+  }
 
   ////////////////
   // ## Percent
@@ -215,12 +287,12 @@ export class UIInput extends TextControl<Vocabulary> {
     if (name === "labeled")
       return this.labelPlace ? this.labeled || (this.labelPlace === "end" ? "right" : true) : false
     if (name === "action") return this.actionPlace ? this.action || true : false
-    if (name === "icon-position") return this.hasIconBox ? this.iconPosition : undefined
+    if (name === "icon-position") return this.hasIconBox ? this.iconSide : undefined
     return super.classValue(name)
   }
 
   protected get extraClass(): string | undefined {
-    const extra = [this.hasIconBox && this.iconPosition !== UIT.LEFT ? UIT.ICON : "", this.isFileInput ? "file" : ""]
+    const extra = [this.hasIconBox && this.iconSide !== UIT.LEFT ? UIT.ICON : "", this.isFileInput ? "file" : ""]
     return extra.filter(Boolean).join(" ") || undefined
   }
 
@@ -259,6 +331,7 @@ export class UIInput extends TextControl<Vocabulary> {
           disabled={this.isDisabled}
           readonly={this.readonly}
           aria-busy={this.loading ? "true" : undefined}
+          aria-keyshortcuts={F.FieldShortcut.ariaFor(this.shortcut)}
           {...this.constraints}
           {...this.folderMode}
           {...this.controlAria}
@@ -269,6 +342,17 @@ export class UIInput extends TextControl<Vocabulary> {
           onBlur={this.onBlur}
           onKeyDown={this.onKeyDown}
         />
+        {F.ClearButton.draw({
+          shows: () => this.showsClear,
+          label: () => this.translationForKey("inputClear"),
+          part: this.partForName("clear"),
+          onClear: this.onClear
+        })}
+        {F.FieldShortcut.draw({
+          shows: () => this.showsShortcut,
+          shortcut: () => this.shortcut,
+          part: this.partForName("shortcut")
+        })}
         <Show when={this.hasIconBox}>
           <span class={UIT.ICON} part={this.partForName("icon")}>
             <slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>
@@ -277,7 +361,7 @@ export class UIInput extends TextControl<Vocabulary> {
         <Show when={this.labelPlace === "end"}>{this.labelBox()}</Show>
         <Show when={this.labelPlace === "corner"}>
           <span
-            class={this.labeled === "left corner" ? LEFT_CORNER_LABEL : CORNER_LABEL}
+            class={this.labeled === "left corner" ? E.ClassBuilder.withPhrases(LEFT_CORNER_LABEL) : CORNER_LABEL}
             part={this.partForName("label")}
             aria-hidden="true"
           >

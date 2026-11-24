@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { emojiVocabulary } from "spell/ui/components/ui-emoji/UIEmoji.en"
@@ -52,7 +51,7 @@ describe("UIEmoji.css source", () => {
 describe("UIEmoji.css examples", () => {
   it("draws one emoji glyph per box, in an emoji font", () => {
     Sheets.adopt([...foundationCSS, emojiCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const emoji = root.querySelector<HTMLElement>(".ui.emoji")!
     const style = getComputedStyle(emoji)
     expect(style.display).toBe("inline-block")
@@ -62,7 +61,7 @@ describe("UIEmoji.css examples", () => {
 
   it("sizes on Fomantic's ladder, dims, spins and points", () => {
     Sheets.adopt([...foundationCSS, emojiCSS])
-    const root = Fixture.render(`<div style="font-size: 16px">${EXAMPLES["./examples/variations.html"]!}</div>`)
+    const root = Sheets.render(`<div style="font-size: 16px">${EXAMPLES["./examples/variations.html"]!}</div>`)
     const sizes = [...root.querySelectorAll<HTMLElement>("section:first-child .ui.emoji")].map((emoji) =>
       parseFloat(getComputedStyle(emoji).fontSize)
     )
@@ -70,7 +69,7 @@ describe("UIEmoji.css examples", () => {
     expect(getComputedStyle(root.querySelector(".ui.link.emoji")!).cursor).toBe("pointer")
     expect(parseFloat(getComputedStyle(root.querySelector(".ui.disabled.emoji")!).opacity)).toBeCloseTo(0.45, 2)
     expect(getComputedStyle(root.querySelector(".ui.loading.emoji")!).animationName).toBe("ui-emoji-spin")
-    const medium = Fixture.render(`<p style="font-size: 16px"><span class="ui medium emoji">x</span></p>`)
+    const medium = Sheets.render(`<p style="font-size: 16px"><span class="ui medium emoji">x</span></p>`)
     expect(parseFloat(getComputedStyle(medium.querySelector(".ui.emoji")!).fontSize)).toBe(48)
   })
 })
@@ -82,7 +81,7 @@ describe("UIEmoji.css examples", () => {
 describe("UIEmoji.css tokens", () => {
   it("takes a public token from a wrapper or the emoji itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, emojiCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-emoji-opacity: 0.5"><span class="ui emoji">😄</span></div>` +
         `<span style="--ui-emoji-line-height: 3px" class="ui emoji">😄</span>`
     )

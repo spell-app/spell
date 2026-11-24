@@ -1,8 +1,27 @@
 /**
  * Types and constants of `spell/epic/links`:  pointing at a saga, an epic, a phase or an item, the same way everywhere
  * (epic `epic-workflow` P15, J32).
- * - Pure data and types:  nothing here runs.
+ * - Pure data and types, and the small pure checks on them:  nothing runs as it loads.
+ * - Node-safe, and imports nothing that runs:  the plain-node tools load this file by itself.
  */
+
+////////////////
+// ## Source links
+////////////////
+
+/** How `doc-links.js` names a link's tab:  this, then its path. */
+const SOURCE_TARGET = "src-"
+
+/** The paths of pages:  an HTML file, or a folder's address. */
+const PAGE_PATH = /(\.html?|\/)$/i
+
+/**
+ * Is a link to `path` (no query, no `#`), its `target` given, a source file's:  one the side bar opens in the editor?
+ * - A page's link is none, though its tab is named the same way.
+ */
+export function isSourceFileLink(target: string, path: string): boolean {
+  return target.startsWith(SOURCE_TARGET) && !PAGE_PATH.test(path)
+}
 
 ////////////////
 // ## Addresses

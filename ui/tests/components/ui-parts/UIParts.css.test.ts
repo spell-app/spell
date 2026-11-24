@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { PartNouns, PartVocabularies } from "spell/ui/components/ui-parts/UIParts.types"
@@ -67,7 +66,7 @@ describe("UIParts.css source", () => {
 
   it("lists one vocabulary per part noun, and covers the header's class words", () => {
     expect(PartVocabularies.map((vocabulary) => vocabulary.noun)).toEqual([...PartNouns])
-    const css = partsRaw + colorsCSS
+    const css = partsRaw + colorsSharedCSS
     for (const vocabulary of PartVocabularies) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -82,7 +81,7 @@ describe("UIParts.css source", () => {
 describe("UIParts.css examples", () => {
   it.each(Object.keys(EXAMPLES))("names and styles every owned part in %s", (path) => {
     Sheets.adopt([...foundationCSS, iconCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const owned = root.querySelectorAll<HTMLElement>("[class*='in-']")
     expect(owned.length).toBeGreaterThan(0)
     for (const part of owned) {
@@ -94,7 +93,7 @@ describe("UIParts.css examples", () => {
 
   it("sizes page headers by level and content headers by size;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, iconCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/header.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/header.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     const base = parseFloat(getComputedStyle(root).fontSize)
     const levels = ["h1", "h2", "h3", "h4", "h5", "h6"].map((tag) => size(`${tag}.ui.header:not([class*='massive'])`))
@@ -109,10 +108,10 @@ describe("UIParts.css examples", () => {
 
   it("draws header variations", () => {
     Sheets.adopt([...foundationCSS, iconCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/header.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/header.html"]!)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
-    const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
-    const pair = Fixture.render(`<div><h2 class="ui header">A</h2><h2 class="ui header">B</h2></div>`)
+    const red = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
+    const pair = Sheets.render(`<div><h2 class="ui header">A</h2><h2 class="ui header">B</h2></div>`)
     const [a, b] = [...pair.children].map((header) => getComputedStyle(header))
     expect(parseFloat(a!.marginTop)).toBeLessThanOrEqual(0)
     expect(parseFloat(b!.marginTop)).toBeGreaterThan(0)
@@ -134,7 +133,7 @@ describe("UIParts.css examples", () => {
 
   it("hands icons their header size, and styles content and sub headers inside a header", () => {
     Sheets.adopt([...foundationCSS, iconCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/header.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/header.html"]!)
     const iconHeader = root.querySelector<HTMLElement>(".ui.icon.header:has(.content)")!
     const icon = iconHeader.querySelector<HTMLElement>(".ui.icon")!
     expect(parseFloat(getComputedStyle(icon).fontSize)).toBeCloseTo(
@@ -148,9 +147,7 @@ describe("UIParts.css examples", () => {
       1.5 * parseFloat(getComputedStyle(plain.parentElement!).fontSize),
       0
     )
-    const picture = Fixture.render(
-      `<h2 class="ui icon header"><img src="" alt="" width="40" height="40" />Theming</h2>`
-    )
+    const picture = Sheets.render(`<h2 class="ui icon header"><img src="" alt="" width="40" height="40" />Theming</h2>`)
     const img = getComputedStyle(picture.querySelector("img")!)
     expect(img.display).toBe("block")
     expect(parseFloat(img.marginLeft)).toBeCloseTo(parseFloat(img.marginRight), 0)
@@ -162,36 +159,36 @@ describe("UIParts.css examples", () => {
 
   it("styles owned headers by owner, never as a ui header", () => {
     Sheets.adopt([...foundationCSS, iconCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/header.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/header.html"]!)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     const card = style(".in-card.header")
     expect(card.fontWeight).toBe("700")
     expect(parseFloat(card.fontSize)).toBeCloseTo(1.28571 * parseFloat(style(".in-card.content").fontSize), 0)
     expect(style(".in-modal.header").borderBottomStyle).toBe("solid")
     expect(parseFloat(style(".in-message.header").fontSize)).toBeGreaterThan(parseFloat(style(".ui.message").fontSize))
-    const red = Fixture.render(`<span style="color: var(--ui-red-header)"></span>`)
+    const red = Sheets.render(`<span style="color: var(--ui-red-header)"></span>`)
     expect(style(".ui.red.message .in-message.header").color).toBe(getComputedStyle(red).color)
-    const link = Fixture.render(`<span style="color: var(--ui-link)"></span>`)
+    const link = Sheets.render(`<span style="color: var(--ui-link)"></span>`)
     expect(style("a.in-list.header").color).toBe(getComputedStyle(link).color)
   })
 
   it("lays card parts out, and follows the horizontal card's owner token", () => {
     Sheets.adopt([...foundationCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/content.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/content.html"]!)
     const [first, second] = root.querySelectorAll<HTMLElement>(".ui.card:not(.horizontal) > .in-card.content")
     expect(getComputedStyle(first!).borderTopStyle).toBe("none")
     expect(getComputedStyle(second!).borderTopStyle).toBe("solid")
     expect(getComputedStyle(second!).paddingTop).toBe(getComputedStyle(second!).fontSize)
     const horizontal = root.querySelectorAll<HTMLElement>(".ui.horizontal.card > .in-card.content")[1]!
     expect(getComputedStyle(horizontal).borderTopStyle).toBe("none")
-    const description = Fixture.render(EXAMPLES["./examples/description.html"]!)
+    const description = Sheets.render(EXAMPLES["./examples/description.html"]!)
     const after = getComputedStyle(description.querySelector(".in-card.description")!)
     expect(parseFloat(after.marginTop)).toBeCloseTo(0.5 * parseFloat(after.fontSize), 1)
   })
 
   it("inlines a date inside a feed summary through the --_ui-part token", () => {
     Sheets.adopt([...foundationCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/date.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/date.html"]!)
     const [alone, inline] = root.querySelectorAll<HTMLElement>(".in-feed.date")
     expect(getComputedStyle(inline!).display).toBe("inline-block")
     expect(getComputedStyle(alone!).display).not.toBe("inline-block")
@@ -200,7 +197,7 @@ describe("UIParts.css examples", () => {
 
   it("sizes and colours statistic values, and lines up horizontal ones", () => {
     Sheets.adopt([...foundationCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/value.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/value.html"]!)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     const base = parseFloat(getComputedStyle(root).fontSize)
     expect(parseFloat(style(".ui.statistic:not(.horizontal, .red) > .value:not(.text)").fontSize)).toBeCloseTo(
@@ -211,22 +208,22 @@ describe("UIParts.css examples", () => {
     expect(style(".ui.horizontal.statistic > .value").display).toBe("inline-block")
     expect(style(".ui.horizontal.statistic > .label").display).toBe("inline-block")
     expect(style(".in-statistic.label").textTransform).toBe("uppercase")
-    const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
+    const red = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
     expect(style(".ui.red.statistic > .value").color).toBe(getComputedStyle(red).color)
     expect(style(".in-search.value").float).toBe("right")
   })
 
   it("follows step, accordion and label owner tokens", () => {
     Sheets.adopt([...foundationCSS, partsCSS])
-    const titles = Fixture.render(EXAMPLES["./examples/title.html"]!)
-    const link = Fixture.render(`<span style="color: var(--ui-link)"></span>`)
+    const titles = Sheets.render(EXAMPLES["./examples/title.html"]!)
+    const link = Sheets.render(`<span style="color: var(--ui-link)"></span>`)
     expect(getComputedStyle(titles.querySelector(".active.step .in-step.title")!).color).toBe(
       getComputedStyle(link).color
     )
     const [first, second] = titles.querySelectorAll(".ui.styled.accordion > .title")
     expect(getComputedStyle(first!).borderTopStyle).toBe("none")
     expect(getComputedStyle(second!).borderTopStyle).toBe("solid")
-    const details = Fixture.render(EXAMPLES["./examples/detail.html"]!)
+    const details = Sheets.render(EXAMPLES["./examples/detail.html"]!)
     const [plain, tab] = details.querySelectorAll(".in-label.detail")
     expect(getComputedStyle(plain!).backgroundColor).toBe("rgba(0, 0, 0, 0)")
     expect(getComputedStyle(tab!).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
@@ -234,13 +231,13 @@ describe("UIParts.css examples", () => {
 
   it("styles comment, modal and toast parts", () => {
     Sheets.adopt([...foundationCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/actions.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/actions.html"]!)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     expect(style(".in-modal.actions").textAlign).toBe("right")
     expect(style(".in-modal.actions").borderTopStyle).toBe("solid")
     expect(parseFloat(style(".in-comment.actions").fontSize)).toBeLessThan(parseFloat(style(".ui.comments").fontSize))
     expect(style(".in-comment.actions > a").display).toBe("inline-block")
-    const avatars = Fixture.render(EXAMPLES["./examples/avatar.html"]!)
+    const avatars = Sheets.render(EXAMPLES["./examples/avatar.html"]!)
     expect(getComputedStyle(avatars.querySelector(".in-comment.avatar")!).float).toBe("left")
     expect(getComputedStyle(avatars.querySelector(".in-card.avatar")!).borderTopLeftRadius).toBe("50%")
   })
@@ -254,7 +251,7 @@ describe("UIParts.css in shadow roots", () => {
   it("styles a part by its host's in-<owner> state, and reads the owner's tokens", () => {
     Sheets.adopt(foundationCSS)
     definePart()
-    const card = Fixture.render(`<div class="ui card" style="--_ui-card-layout: vertical"></div>`)
+    const card = Sheets.render(`<div class="ui card" style="--_ui-card-layout: vertical"></div>`)
     card.innerHTML = `<test-part noun="content" owner="card"></test-part><test-part noun="content" owner="card"></test-part>`
     const [first, second] = [...card.querySelectorAll("test-part")].map((host) => Sheets.inner(host))
     expect(getComputedStyle(card.querySelector("test-part")!).display).toBe("contents")

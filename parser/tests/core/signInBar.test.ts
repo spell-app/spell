@@ -50,3 +50,50 @@ describe("a place's sign-in bar", () => {
     expect(page.document.querySelectorAll("ui-message.spell-sign-in")).toHaveLength(1)
   })
 })
+
+describe("signing back in as the program starts (epic `solid-2-final` P13)", () => {
+  let asked: string[] = []
+
+  beforeAll(() => {
+    const page = parseHTML("<!doctype html><html><head></head><body></body></html>")
+    for (const name of ["window", "document", "Node", "Element", "HTMLElement", "Event", "CustomEvent"]) {
+      vi.stubGlobal(name, page[name as keyof typeof page])
+    }
+    vi.stubGlobal("fetch", async (url: string | URL | Request) => {
+      asked.push(new URL(String(url instanceof Request ? url.url : url), "http://localhost").host)
+      return new Response("{}", { headers: { "Content-Type": "application/json" } })
+    })
+    bridgeSolid({ enableExternalSource, flush })
+  })
+
+  afterAll(() => vi.unstubAllGlobals())
+
+  beforeEach(() => {
+    core.resetRuntime()
+    asked = []
+  })
+
+  test("only the first place where each person is someone asks who's signed in;  the second, on its first read", async () => {
+    class Recipe extends Thing {
+      static savedIn = { place: "second", collection: "recipes" }
+    }
+    class Cloud extends Place {}
+    core.place(new Cloud(), {
+      name: "first",
+      kind: "the cloud",
+      at: "https://one.example/api/places/spaces/personal/a"
+    })
+    core.place(new Cloud(), {
+      name: "second",
+      kind: "the cloud",
+      at: "https://two.example/api/places/spaces/personal/b"
+    })
+    await settled()
+    expect(asked).toContain("one.example")
+    expect(asked).not.toContain("two.example")
+
+    await core.savedThings(Recipe)
+    await settled()
+    expect(asked).toContain("two.example")
+  })
+})

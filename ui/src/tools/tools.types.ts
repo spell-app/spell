@@ -4,15 +4,13 @@
  * (`IconPackError` ...).
  * - The component packs' shapes (their reports, `ComponentPackError`) are the kit's, beside its pack tooling:
  *   `spell/element-tools/tools.types` (epic `repo-split` P10).
- * - At the BOTTOM of the tools' import graph:  `import type` only, and node's own modules (`SPELL_UI_ROOT`,
- *   `sitePages()`),
+ * - At the BOTTOM of the tools' import graph:  `import type` only, and node's own modules (`SPELL_UI_ROOT`),
  *   so every tool (and Spell UI's `spell` commands, `src/cli/`, through `spell/ui/tools/tools.types`) imports it without
  *   loading another.
  * - Every `results/*-results.json` has one of these shapes;  `ReportTables` reads them.
  * - The perf shapes (`PerfRecord` ...) live beside the benchmark, in `src/test-helpers/PerfRun.ts` (it runs in the browser).
  */
 
-import { existsSync, readdirSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -314,37 +312,34 @@ export type ImportMap = {
 export const SPELL_UI_ROOT = resolve(fileURLToPath(import.meta.url), "../../..")
 
 /**
- * Spell UI's docs site's PAGES, from the repo's root:  its `docs/` folder, a component set laid out as every set is
- * (epic `people-and-orgs` P18;  until then the epic repo, the checkout's `ui/`, from claude-design P6).
+ * The Spell UI site's folder, absolute:  Spell UI's pages as Spell, one project of notebooks,
+ * `@spell/guides/SpellUI` (epic `notebook` P10), its site file `SpellUI.spell`.
+ * - Found through the kit's package (`spell/package.json`), never by a path from Spell UI's folder.
+ * - `yarn site:kitchen` writes its Kitchen Sink page (epic `editor` P42).
+ */
+export const SPELL_UI_SITE_FOLDER = join(
+  resolve(fileURLToPath(import.meta.resolve("spell/package.json")), ".."),
+  "app/spaces/@spell/guides/SpellUI"
+)
+
+/**
+ * Spell UI's docs folder, from its folder's root:  `docs/`, a component set laid out as every set is
+ * (epic `people-and-orgs` P18), served by the page server at `/components/ui/`.
  * - What's in it:
- *   - the pages, `*.html`, flat:  an element's page is its tag, `ui-button.html`
- *   - the component index, `components.html`
- *   - the layout (`__parts/`), the data (`__data/`, `SITE_DATA`)
+ *   - `index.html`:  the page that shows the Spell UI site (a Spell guide, `SPELL_UI_SITE_FOLDER`) at every one of
+ *     its addresses, with no editor (the component set's `sitePage`;  epic `editor` P43)
+ *   - the data (`__data/`, `SITE_DATA`), which the Spell pages read
  *   - the files examples load (`examples/`), Fomantic's images (`images/`)
- * - Tracked with the branch, so a page changes in the same commit as its element.
- * - The page server serves it at `/components/ui/`, with the site bundle (`SITE_BUILD`'s `_assets/`) laid over it,
- *   so a page's `_assets/site.js` resolves (the page server's `componentSets` setting).
+ * - Its HTML components pages, one per tag (`ui-button.html`), went in epic `editor` P43:
+ *   the Spell UI site has every page they had.
+ * - The site bundle (`SITE_BUILD`'s `_assets/`) is still laid over it (the page server's `componentSets` setting).
  */
 export const SITE_PAGES = "docs"
 
 /**
- * Every page of a component set's site:  the `.html` files right in `folder`, A-Z, absolute;  none when it's missing.
- * - `folder`:  Spell UI's pages (`SITE_PAGES`) by default;  another set's for its data (`SiteDataBuilder`'s `set`).
- * - Not a `_`-prefixed file:  a partial or a smoke page, never one of the site's pages.
- * - What `site:sections`, `site:kitchen`, `site:check --all` and the site search's index read (epic `coherence` P23).
- */
-export function sitePages(folder = join(SPELL_UI_ROOT, SITE_PAGES)): string[] {
-  if (!existsSync(folder)) return []
-  return readdirSync(folder)
-    .filter((name) => name.endsWith(".html") && !name.startsWith("_"))
-    .sort()
-    .map((name) => join(folder, name))
-}
-
-/**
  * Spell UI's docs site's DATA, from the repo's root:  `docs/__data/`.
  * - GENERATED, committed (`yarn site:data`):
- *   - `components.json5`, `icons.json5`, `search.json5`
+ *   - `components.json5`;  `search.json5`, from the Spell pages as drawn (`yarn site:check --all`)
  *   - `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`
  * - hand-kept:  `pages.json5`, the per-family facts they're built from
  */
@@ -484,6 +479,15 @@ export type IconPackErrorCause = {
 /** How `StaticDocument.render()` treats one page's stylesheet. */
 export type StaticDocumentOptions = {
   /**
+   * What it writes (`StaticRender.page()`'s `output`):  `"light"`, the default, or `"shadow"`, each element's shadow
+   * root drawn ahead, to paint before any script (epic `solid-2-final` P16).
+   * - `"shadow"`:  the page keeps its scripts, and links the sheets its roots adopt at `sheetsHref`, returned as
+   *   `sheets`;  `href`, `shared`, `minify`, `input` and `output` do nothing.
+   */
+  staticOutput?: "light" | "shadow"
+  /** `"shadow"`:  the URL of the folder of its sheets, relative to the page, ending `/`;  default `ui-sheets/` */
+  sheetsHref?: string
+  /**
    * Link the stylesheet at this URL, relative to the page (`page.static.css`).
    * - Left out:  the page's stylesheet goes INLINE, in a `<style>`.
    */
@@ -519,6 +523,8 @@ export type StaticDocumentResult = {
   dropped: string[]
   /** each local linked stylesheet rewritten and inlined (`StaticDocument.inlineLinkedSheets()`):  its `href` */
   inlined: string[]
+  /** `"shadow"`:  the sheet files it links, by file name (in `sheetsHref`):  their text */
+  sheets?: Record<string, string>
 }
 
 /**

@@ -182,6 +182,11 @@ export class PageTokenizer extends P.Tokenizer {
     return token
   }
 
+  /** As plain Spell's, but a line of prose is never an aside:  it's what the page shows, though it reads as a comment. */
+  isAside(line: P.LineToken): boolean {
+    return !(line.tokens[0] instanceof SP.PageProseToken) && super.isAside(line)
+  }
+
   ////////////////
   // ## A line's start
   ////////////////

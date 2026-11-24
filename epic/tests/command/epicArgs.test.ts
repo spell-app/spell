@@ -276,6 +276,14 @@ describe("planDocArgs():  update", () => {
     expect(planDocArgs("update", ["seo#I3", "--requested"])).toEqual([["requested", "seo", "I3"]])
   })
 
+  // epic `epic-engine` T123:  a title kept as it is, unread
+  test("--title-ok goes through to rename, and only with --title", () => {
+    expect(planDocArgs("update", ["seo#J3", "--title-ok", "--title", "T"])).toEqual([
+      ["rename", "seo", "J3", "T", "--title-ok"]
+    ])
+    expect(() => planDocArgs("update", ["seo#J3", "--title-ok"])).toThrow("--title-ok goes with --title")
+  })
+
   // epic `epic-engine` I174:  a manual test the session filed as failed
   test("a manual test:  --failed I12 marks it failed, --failed off takes it off;  a value it needs", () => {
     expect(planDocArgs("update", ["seo#M3", "--failed", "I12"])).toEqual([["failed", "seo", "M3", "I12"]])
@@ -287,6 +295,13 @@ describe("planDocArgs():  update", () => {
   test("the page:  standing on or off", () => {
     expect(planDocArgs("update", ["seo", "--standing", "off"])).toEqual([["standing", "seo", "off"]])
     expect(planDocArgs("update", ["seo", "--no-standing"])).toEqual([["standing", "seo", "off"]])
+  })
+
+  test("the page:  its branch, apart from its id (I378)", () => {
+    expect(planDocArgs("update", ["from-project", "--branch", "from-console"])).toEqual([
+      ["branch", "from-project", "from-console"]
+    ])
+    expect(() => planDocArgs("update", ["seo", "--branch"])).toThrow(/--branch needs a value/)
   })
 
   test("refuses no field, a field the target lacks, and a field with no value", () => {

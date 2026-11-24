@@ -75,6 +75,11 @@ What it costs:
 The pages are plain HTML files, in a git repo of their own beside your code, so a whole team can share them.
 A question or a bug has an id you can say out loud:  "approve J3" works in the chat.
 
+A guide your users need can ship with your code instead, from any repo:
+- name a folder of your repo once, then `epic guides move` takes a guide there, versioned on branches like your code
+- it keeps its address, so every link to it still works, and `epic guides check` fails one that links the epic repo
+- every step:  [Guides that ship with your code](epic/README-config.md#guides-that-ship-with-your-code)
+
 ## Try it
 
 You need Claude Code, VS Code, git, Node 24.11 or later, and your code host's command, logged in.
@@ -125,7 +130,8 @@ Four things to know before you start:
   Bitbucket or a bare git server work too, but you make the repo by hand and pass its address
   (`epic init --remote <address>`).
 - **Claude Code first, Codex beside it.**
-  Seventeen of the twenty-two skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
+  Most of the skills run in both, from one copy ([which](epic/README-skills.md#in-codex));
+  the moves between worktrees and windows are Claude Code's,
   in VS Code or Cursor, on macOS, Linux or Windows (Cursor, Windows and Linux not yet tried by a person).
   Any other agent works an epic from `epic guide` and its own end-of-turn step:
   [With Codex](epic/README-teams.md#with-codex).

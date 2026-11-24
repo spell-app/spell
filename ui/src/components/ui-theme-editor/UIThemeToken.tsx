@@ -30,6 +30,8 @@ import themeTokenCSS from "./UIThemeToken.css?inline"
  *   - a plain colour:  per scheme, a picker, its hex (8ch) and its opacity on a slider, the % after it;  anything else, its text (a length, a slider too)
  * - Data in (`row`, a `TokenRow`), events out:  `ui-changed` for a value, `ui-command` for a button, the name or a
  *   link.  The editor decides what each means for the theme.
+ * - Hears its own controls by a ref on each (`addEventListener()`), never `on-ui-moved={f}`:
+ *   Solid's dev build would warn `LOWERCASE_EVENT_ATTRIBUTE` (epic `editor` I291).
  * - `:state(here)` while the theme sets it, `:state(open)` while its drawer is open.
  ****************/
 export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
@@ -276,10 +278,7 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
             step={1}
             value={mix().amount}
             aria-label={t("amount")}
-            ref={(element: HTMLElement) =>
-              element.addEventListener("ui-moved", ((event: CustomEvent<{ value: number }>) =>
-                write({ amount: event.detail.value })) as EventListener)
-            }
+            ref={(slider) => slider.addEventListener("ui-moved", (event) => write({ amount: event.detail.value }))}
           ></ui-slider>
           <span class="amount">{mix().amount}%</span>
         </label>
@@ -312,10 +311,7 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
           size="small"
           fluid=""
           aria-label={label}
-          ref={(element: HTMLElement) =>
-            element.addEventListener("ui-changed", ((event: CustomEvent<{ value: string | string[] }>) =>
-              choose(String(event.detail.value))) as EventListener)
-          }
+          ref={(select) => select.addEventListener("ui-changed", (event) => choose(String(event.detail.value)))}
         >
           <ui-item value={TRANSPARENT}>{this.text("clear")}</ui-item>
           <For each={this.data!.options ?? []}>
@@ -345,9 +341,8 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
                 fluid=""
                 value={value().text}
                 aria-label={`${name()}:  ${this.text("value")}`}
-                ref={(element: HTMLElement) =>
-                  element.addEventListener("ui-changed", ((event: CustomEvent<{ value: string }>) =>
-                    this.change(event.detail.value.trim(), forScheme())) as EventListener)
+                ref={(input) =>
+                  input.addEventListener("ui-changed", (event) => this.change(event.detail.value.trim(), forScheme()))
                 }
               ></ui-input>
               <Show when={value().kind === "length"}>
@@ -357,9 +352,8 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
                   step={1}
                   value={parseFloat(value().text) || 0}
                   aria-label={name()}
-                  ref={(element: HTMLElement) =>
-                    element.addEventListener("ui-moved", ((event: CustomEvent<{ value: number }>) =>
-                      this.change(`${event.detail.value}px`, forScheme())) as EventListener)
+                  ref={(slider) =>
+                    slider.addEventListener("ui-moved", (event) => this.change(`${event.detail.value}px`, forScheme()))
                   }
                 ></ui-slider>
               </Show>
@@ -372,12 +366,10 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
             size="small"
             value={value().hex ?? FALLBACK_HEX}
             aria-label={name()}
-            ref={(element: HTMLElement) =>
-              element.addEventListener("ui-typed", ((event: CustomEvent<{ value: string }>) =>
-                this.change(
-                  TokenColor.join(event.detail.value, value().opacity ?? FULL),
-                  forScheme()
-                )) as EventListener)
+            ref={(input) =>
+              input.addEventListener("ui-typed", (event) =>
+                this.change(TokenColor.join(event.detail.value, value().opacity ?? FULL), forScheme())
+              )
             }
           ></ui-input>
           <ui-input
@@ -385,12 +377,10 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
             size="small"
             value={value().hex ?? ""}
             aria-label={`${name()}:  ${this.text("value")}`}
-            ref={(element: HTMLElement) =>
-              element.addEventListener("ui-changed", ((event: CustomEvent<{ value: string }>) =>
-                this.change(
-                  TokenColor.join(event.detail.value.trim(), value().opacity ?? FULL),
-                  forScheme()
-                )) as EventListener)
+            ref={(input) =>
+              input.addEventListener("ui-changed", (event) =>
+                this.change(TokenColor.join(event.detail.value.trim(), value().opacity ?? FULL), forScheme())
+              )
             }
           ></ui-input>
           <ui-slider
@@ -400,12 +390,10 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
             step={1}
             value={value().opacity ?? FULL}
             aria-label={`${name()}:  ${this.text("alpha")}`}
-            ref={(element: HTMLElement) =>
-              element.addEventListener("ui-moved", ((event: CustomEvent<{ value: number }>) =>
-                this.change(
-                  TokenColor.join(value().hex ?? FALLBACK_HEX, event.detail.value),
-                  forScheme()
-                )) as EventListener)
+            ref={(slider) =>
+              slider.addEventListener("ui-moved", (event) =>
+                this.change(TokenColor.join(value().hex ?? FALLBACK_HEX, event.detail.value), forScheme())
+              )
             }
           ></ui-slider>
           <span class="percent">{value().opacity ?? FULL}%</span>

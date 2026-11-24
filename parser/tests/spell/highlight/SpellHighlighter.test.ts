@@ -43,7 +43,7 @@ el valor de una pila es:
 \tsi la pila está vacía devolver 0
 \tdevolver el valor de su última carta
 `
-    expect(coloured(PILA, "keyword", SP.spanish.parser)).toEqual(expect.arrayContaining(["si", "devolver"]))
+    expect(coloured(PILA, "keyword", SP.Language.for("es").parser)).toEqual(expect.arrayContaining(["si", "devolver"]))
     expect(coloured(PILA, "keyword")).not.toContain("devolver")
   })
 

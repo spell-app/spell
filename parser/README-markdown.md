@@ -235,7 +235,7 @@ The time is fine for a page;  the bytes are the real cost.
 <summary>How these were measured</summary>
 
 - On 2026-10-21, with Node 24.21 on an Apple M5 Pro.
-- The files:  every `.md` file git tracked in the kit and its four child repos (its folders now), 166 files and 2 MB,
+- The files:  every `.md` file git tracked in the kit, its four big folders included, 166 files and 2 MB,
   joined into one text.
   The page:  a 28 kB README.
 - Times:  the median of 7 runs after a warm-up, as the docs site's comparison script runs them;
@@ -302,7 +302,7 @@ The cost lands on the page:  its first `<spell-markdown>` loads the engine when 
 ## Working on it:  the spec is the scoreboard
 
 Progress here is a number you can read:  670 of 670, section by section, and a test that fails when it moves.
-From spell-parser's root, in a checkout set up as [the kit's README](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) says:
+From the parser folder, in a checkout set up as [the kit's README](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) says:
 
 ```sh
 cd ~/www/spell/parser

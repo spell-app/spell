@@ -157,7 +157,7 @@ describe("<ui-docs-search>", () => {
       mark: first.querySelector("mark")!.textContent,
       code: first.querySelector("code")!.textContent,
       href: first.getAttribute("href")
-    }).toEqual({ mark: "Or", code: "<ui-or>", href: "#/components/ui-button.html#ui-or" })
+    }).toEqual({ mark: "Or", code: "<ui-or>", href: "#/ui-button.html#ui-or" })
     expect(field.matches(":state(open)")).toBe(true)
     expect(find(field, "[role=status]").textContent).toMatch(/results?$/)
   })
@@ -181,7 +181,7 @@ describe("<ui-docs-search>", () => {
     await type(field, "button circular")
     const attribute = options(field).find((option) => option.classList.contains("attribute"))!
     expect(attribute.querySelector("code")!.textContent).toBe("<ui-button>")
-    expect(attribute.getAttribute("href")).toBe("#/components/ui-button.html#ui-button")
+    expect(attribute.getAttribute("href")).toBe("#/ui-button.html#ui-button")
   })
 
   it("finds other pages and their sections", async () => {
@@ -282,7 +282,7 @@ describe("<ui-docs-search> keyboard", () => {
     expect(enter.defaultPrevented).toBe(true)
     expect(picked).toHaveLength(1)
     expect(picked[0]!.kind).toBe("component")
-    expect(picked[0]!.href).toBe(new URL("#/components/ui-button.html#ui-or", location.href).href)
+    expect(picked[0]!.href).toBe(new URL("#/ui-button.html#ui-or", location.href).href)
     await expect.poll(() => input(field).value).toBe("")
     expect(open(field)).toBe(false)
   })
@@ -403,5 +403,73 @@ describe("<ui-docs-search> a11y", () => {
       await ElementFixture.settle(root)
       await expectAccessible(root)
     }
+  })
+})
+
+describe("<ui-docs-search> in a Spell site", () => {
+  /** The search file of a site that lists its pages by address, as Spell UI's does. */
+  const SITE = {
+    $comment: "test",
+    pages: [
+      {
+        path: "/divider",
+        title: "Divider",
+        tag: "ui-divider",
+        sections: [{ id: "usage-keyboard", title: "Keyboard" }]
+      },
+      { path: "/button/api", title: "Button › API", sections: [{ id: "attributes", title: "Attributes" }] }
+    ]
+  }
+
+  /**
+   * A site's frame:  its navigation (showing `/divider`), and a page layout holding the field and the page;
+   * every link click stopped and recorded, as a Spell site takes them.
+   */
+  async function renderSite() {
+    SearchData.url = serve(SITE)
+    const frame = Fixture.render(`
+      <div>
+        <ui-site-nav current="/divider"></ui-site-nav>
+        <ui-page-layout>
+          <ui-docs-search slot="end" base="/"></ui-docs-search>
+          <div>${PAGE}</div>
+        </ui-page-layout>
+      </div>`)
+    const field = frame.querySelector<DOMDocsSearchElement>("ui-docs-search")!
+    await field.ready
+    await settle(field)
+    const followed: string[] = []
+    const onClick = (event: MouseEvent) => {
+      const link = event.composedPath().find((target) => (target as Element).localName === "a") as Element | undefined
+      if (!link) return
+      event.preventDefault()
+      followed.push(link.getAttribute("href")!)
+    }
+    frame.addEventListener("click", onClick)
+    return { field, followed }
+  }
+
+  it("reads the page of the page layout it's in, and links its sections at the site's address of it", async () => {
+    const { field } = await renderSite()
+    await type(field, "vertical divider")
+    const here = find<HTMLAnchorElement>(field, "a.option.here")
+    expect(here.getAttribute("href")).toBe("/divider#examples-types-vertical-divider")
+  })
+
+  it("links other pages at their addresses;  skips the search file's copy of the page shown", async () => {
+    const { field } = await renderSite()
+    await type(field, "attributes")
+    expect(find<HTMLAnchorElement>(field, "a.option.section").getAttribute("href")).toBe("/button/api#attributes")
+    input(field).value = ""
+    await type(field, "keyboard")
+    const kinds = [...field.shadowRoot!.querySelectorAll("a.option")].map((option) => option.classList[1])
+    expect(kinds).toEqual(["here"])
+  })
+
+  it("Enter follows the pick as a plain link click, which the site takes", async () => {
+    const { field, followed } = await renderSite()
+    await type(field, "attributes")
+    await press(field, "Enter")
+    expect(followed).toEqual(["/button/api#attributes"])
   })
 })

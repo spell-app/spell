@@ -324,10 +324,10 @@
   .ui.modal > .left.actions > .button:not(.fluid) {
     margin-inline: 0.5em;
   }
-  .ui.modal > :is(.centered, [class*="center aligned"]) {
+  .ui.modal > :is(.centered, .center-aligned) {
     text-align: center;
   }
-  .ui.modal > :is(.centered, [class*="center aligned"]).actions > .button:not(.fluid) {
+  .ui.modal > :is(.centered, .center-aligned).actions > .button:not(.fluid) {
     margin-inline: 0.5em;
   }
 
@@ -444,10 +444,10 @@
   }
 
   /* ## Aligned:  pinned near the top or bottom instead of centred. */
-  dialog.ui[class*="top aligned"].modal {
+  dialog.ui.top-aligned.modal {
     margin-block: var(--_ui-modal-aligned-margin) auto;
   }
-  dialog.ui[class*="bottom aligned"].modal {
+  dialog.ui.bottom-aligned.modal {
     margin-block: auto var(--_ui-modal-aligned-margin);
   }
   @media (--ui-mobile) {

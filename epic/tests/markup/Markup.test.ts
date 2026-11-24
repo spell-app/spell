@@ -110,8 +110,19 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
     submit: "Add"
   },
   "epic-kickoff": {},
+  "epic-step-output": { item: "m3", step: 2 },
   "epic-agents": {},
-  "epic-ask": { name: "q1", multiple: true, selectAll: true, filter: true, moreDetails: true },
+  "epic-ask": {
+    name: "q1",
+    multiple: true,
+    selectAll: true,
+    filter: true,
+    moreDetails: true,
+    noChip: true,
+    label: "S1F2 · Share a link",
+    offFor: "N"
+  },
+  "epic-feature-set": {},
   "epic-text-box": { type: "comment", for: "q1-B", placeholder: "Comment on B", label: "Comment on B · Blue" },
   "epic-send": {},
   "epic-send-buttons": { state: "unsent", sendTip: "Send 2 marks to Claude", count: 2, busy: true },
@@ -175,7 +186,6 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   },
   "epic-comment-pane": {
     headline: "“2. Context”",
-    about: "On “2. Context”",
     saved: "Saved 14:02",
     failed: true,
     deletable: true

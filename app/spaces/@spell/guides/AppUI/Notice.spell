@@ -1,0 +1,66 @@
+"notice" is a notebook page
+	<header level="1">
+		Notice
+		<header>A success message near the top of the page, which hides itself.</>
+	</>
+
+	<text class="lede" paragraph>What the editor says when something worked: "File saved.", "Project renamed." It floats over the top of every page, and goes away by itself after 3 seconds, or when its close button is clicked.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or reading its code</>
+		<item icon="image">A picture, not live: it shows what the editor's <text code>editor.notice</> says</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The editor, just after a file was saved:</>
+		<image src="/components/app/_images/Notice.png" alt="A green notice saying File saved, over the editor" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The app draws ONE, over every page, beside <link target="src-packages-app-docs-errornotice-html" link="/error-notice">ErrorNotice</>:</>
+		<text paragraph>index.tsx · the app's page entry:</>
+		<markdown>
+			```typescript
+			render(
+			  () => (
+			    <>
+			      <Routes />
+			      <Notice />
+			      <ErrorNotice />
+			    </> // the fragment's end
+			  ),
+			  document.getElementById("app-root")!
+			)
+			```
+		</>
+		<list bulleted>
+			<item>It shows what <text code>editor.notice</> holds, which <text code>editor.showNotice("File saved.")</> sets. <text code>editor.hideNotice()</> clears it.</>
+			<item>The close button calls <text code>editor.hideNotice()</>.</>
+			<item>It hides itself after 3 seconds, unless <text code>autoHide</> is <text code>false</>: only if the notice is still the one it timed.</>
+			<item>It's a success <text code>&lt;ui-message&gt;</>, fixed near the top of the page.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="Notice"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-notice-tsx" link="/src/app/solid/Notice.tsx"><text title="src/app/solid/Notice.tsx" code>Notice.tsx</></>: the component, and its props</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

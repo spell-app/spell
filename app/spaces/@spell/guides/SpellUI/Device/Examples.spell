@@ -1,0 +1,107 @@
+"device examples" is a notebook page
+	<header level="1">
+		Device
+		<header>A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge.</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="A phone" sticky="stack" collapsible dividing>
+			<example "A phone" description="A phone round what it holds:  an app laid out at a phone's screen size, 390 by 844, scaled down to fit the page.  Its own buttons are in its thick bottom edge:  the phone / tablet / desktop switch and Rotate.  The page's buttons follow them (`slot=\"buttons\"`).">
+				<device>
+					<segment appearance="basic">
+						<header size="large">Groceries</header>
+						<checkbox label="Apples"/>
+						<checkbox label="Bread" selected/>
+						<checkbox label="Coffee"/>
+					</segment>
+					<button slot="buttons" size="small" color="primary">Done</button>
+				</device>
+			</example>
+		</>
+
+		<section label="A tablet" sticky="stack" collapsible dividing>
+			<example "A tablet" description="`device=\"tablet\"`:  820 by 1180, a thinner bezel and a camera dot.">
+				<device device="tablet" controls="none">
+					<segment appearance="basic">
+						<header size="large">A tablet</header>
+						<text paragraph>What it holds is laid out at the tablet's size.</text>
+					</segment>
+				</device>
+			</example>
+		</>
+
+		<section label="A desktop" sticky="stack" collapsible dividing>
+			<example "A desktop" description="`device=\"desktop\"`:  a laptop, its screen 1280 by 800.  A desktop is always wide, so it shows no Rotate.">
+				<device device="desktop" controls="none">
+					<segment appearance="basic">
+						<header size="large">A desktop</header>
+						<text paragraph>What it holds is laid out at a laptop's size.</text>
+					</segment>
+				</device>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="On its side" sticky="stack" collapsible dividing>
+			<example "On its side" description="`orientation=\"landscape\"`:  844 by 390, the camera island in the left edge.  Rotate turns it back;  either way it sends `ui-changed`.">
+				<device orientation="landscape" controls="rotate">
+					<segment appearance="basic">
+						<header>On its side</header>
+						<text paragraph>The buttons stay in the bottom edge, the right way up.</text>
+					</segment>
+				</device>
+			</example>
+		</>
+
+		<section label="Its own buttons" sticky="stack" collapsible dividing>
+			<example "Its own buttons" description="`controls` turns its own buttons off:  `rotate` or `device` keeps only that one, `none` neither.  Here, only the switch:  pick a tablet or a desktop.">
+				<device controls="device">
+					<segment appearance="basic">
+						<text paragraph>Pick a device below.</text>
+					</segment>
+				</device>
+			</example>
+		</>
+	</>
+
+	<section label="Modal">
+		<section label="A device as a modal" sticky="stack" collapsible dividing>
+			<example "A device as a modal" description="`modal`:  the device alone, floating over the dimmed page, no box round it.  It starts hidden, as a modal does:  a button with `commandfor` shows it, or `visible`.  Escape, a click on the dimmer or a `cancel` button in its edge hides it.">
+				<button commandfor="device-modal" command="--show" icon="mobile">Show the phone</button>
+				<device id="device-modal" modal aria-label="A phone">
+					<segment appearance="basic">
+						<header size="large">Hello</header>
+						<text paragraph>A phone in a modal.  Rotate it, or make it a tablet.</text>
+					</segment>
+					<button slot="buttons" size="small" class="cancel">Close</button>
+				</device>
+			</example>
+		</>
+
+		<section label="In a basic modal" sticky="stack" collapsible dividing>
+			<example "In a basic modal" description="The same, written as a device in a `<ui-modal appearance=\"basic\">`:  a basic modal draws no box, so only the device shows.">
+				<button commandfor="device-in-modal" command="--show" icon="tablet">Show the tablet</button>
+				<modal id="device-in-modal" appearance="basic" aria-label="A tablet">
+					<device device="tablet" controls="rotate">
+						<segment appearance="basic">
+							<text paragraph>A tablet in a basic modal.</text>
+						</segment>
+						<button slot="buttons" size="small" class="cancel">Close</button>
+					</device>
+				</modal>
+			</example>
+		</>
+	</>

@@ -354,16 +354,16 @@
     --_message-margin-top: calc(var(--_ui-message-border-width) * -1);
     --_message-radius: 0;
   }
-  .ui[class*="bottom attached"].message {
+  .ui.bottom-attached.message {
     --_message-margin-top: calc(var(--_ui-message-border-width) * -1);
     --_message-margin-bottom: var(--_ui-message-margin);
     --_message-radius: 0 0 var(--_ui-message-radius) var(--_ui-message-radius);
     --_message-shadow: var(--_ui-message-bottom-shadow);
   }
-  .ui[class*="bottom attached"].message:last-child {
+  .ui.bottom-attached.message:last-child {
     --_message-margin-bottom: 0;
   }
-  :host(:not(:last-child)) > .ui[class*="bottom attached"].message {
+  :host(:not(:last-child)) > .ui.bottom-attached.message {
     --_message-margin-bottom: var(--_ui-message-margin);
   }
   .ui.attached.icon.message {
@@ -371,14 +371,14 @@
   }
 
   /* Aligned */
-  .ui:is(.centered, [class*="center aligned"]).message {
+  .ui:is(.centered, .center-aligned).message {
     --_message-text-align: center;
     justify-content: center;
   }
-  .ui:is(.centered, [class*="center aligned"]).message > .content {
+  .ui:is(.centered, .center-aligned).message > .content {
     flex: 0 0 auto;
   }
-  .ui[class*="right aligned"].message {
+  .ui.right-aligned.message {
     --_message-text-align: right;
   }
 

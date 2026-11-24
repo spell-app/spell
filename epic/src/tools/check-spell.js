@@ -25,6 +25,10 @@
  *   - an epic page's open item (`<epic-item>`, epic `windows-and-review` Q6) whose line doesn't stick right under
  *     its section's stuck title while its details are read
  *     - at desktop and phone width (`checkItemLine()`)
+ *   - a row whose items don't line up:  one drawn more than half a pixel above or below the rest;
+ *     a centred column (a rail of icons) with one drawn left or right of its middle
+ *     (`Alignment`, the kit's shared scan;  epic `epic-engine` P83, T166), at desktop and phone width
+ *     - a row or column meant to be uneven says so:  `data-align="free: <why>"`, and it's left alone
  * - loads the page from the page server, always (epic `epic-engine` P46);  `file://` before, for a page that didn't need it
  *   - a page from disk (none since P46) had the engine's routes (`/_epic/assets/...`, `/_epic/pack/...`, epic
  *     `epic-eject` P7) answered from this engine's own folders (`engineFileFor()`), as the epic server would serve them
@@ -46,6 +50,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import { BrowserPage } from "spell/element-tools/BrowserPage"
+import { Alignment } from "spell/test-helpers/Alignment.ts"
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
 
 import { PACK_TAG, openPage, settle } from "./browserPage.js"
@@ -82,6 +87,7 @@ if (desktop.missingFromRail.length)
 if (desktop.oldRail) problem("the page drew the old floating rail, not a toolbar")
 if (desktop.danglingRail.length) problem(`toolbar entries pointing nowhere:  ${desktop.danglingRail.join(", ")}`)
 if (desktop.codeWithoutPre) problem(`${desktop.codeWithoutPre} ui-accordion.spell-code without a <pre>`)
+await checkAlignment(desk, "desktop")
 if (desktop.icons.blankCount) console.error(`NOTE: ${desktop.icons.blankCount} icon(s) with no <svg> drawn`)
 
 await desk.evaluate(openBiggestSection)
@@ -113,6 +119,7 @@ const mainWidth = await phone.evaluate(() =>
   Math.round((document.querySelector("main") ?? document.body).getBoundingClientRect().width)
 )
 if (mainWidth < 390 - 40) problem(`content column only ${mainWidth}px wide at phone width (390px)`)
+await checkAlignment(phone, "phone")
 const rail = await phone.evaluate(navOnScreen, NAV)
 if (desktop.topLevel && !rail.shown) problem("the toolbar isn't shown at the top at phone width")
 
@@ -171,6 +178,11 @@ function pageUrl(file) {
 function problem(text) {
   const line = String(text).split("\n")[0].slice(0, 300)
   seen.set(line, (seen.get(line) ?? 0) + 1)
+}
+
+/** Each row on `page` whose items don't line up, a problem, saying at which width (`at`). */
+async function checkAlignment(page, at) {
+  for (const line of Alignment.report(await Alignment.scanPage(page))) problem(`misaligned at ${at} width:  ${line}`)
 }
 
 /** A page of the browser at `url`, at `viewport`, settled;  a server's error page ends the run (exit 1). */

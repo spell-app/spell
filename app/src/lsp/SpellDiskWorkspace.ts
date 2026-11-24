@@ -3,8 +3,9 @@ import { basename, dirname, resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
 import { SP } from "spell/parser/spell"
+import { writeSpellVersion } from "spell/parser/spell/node/projectFile"
 import environment from "spell/app/spaces/server/node/environment"
-import { installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import { diskFetch, installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import { LSP } from "spell/app/lsp"
 
 /**
@@ -76,6 +77,22 @@ export class SpellDiskWorkspace implements LSP.FileAddresses {
     return { uri: pathToFileURL(diskPath).href, text: readFileSync(diskPath, "utf8") }
   }
 
+  /**
+   * Javascript of the code file compiled spell imports as `module`, for `call native` (epic `from-console` P10):
+   * `@spell/native/owen@spell/clipboard/clipboard.ts` => `clipboard.ts` from disk, its types taken out.
+   * - What VS Code's runner links in (`spell/codeFile`), as the editor's runner links what the page server makes of it:
+   *   the same `codeFileAsJavascript()`.
+   * - Read afresh each time, so an edit to it shows on the next run.
+   * - throws `MissingResourceError` when it's not on disk, esbuild's error when it isn't valid TypeScript
+   */
+  async codeFileJavascript(module: string): Promise<string> {
+    const path = SP.SpellUrls.codeFilePathFor(module)
+    const code = await diskFetch<string>({ url: SP.SpellUrls.fileUrl(path) })
+    // loaded when asked:  its file brings esbuild and Solid's compiler, which nothing else here needs
+    const { codeFileAsJavascript } = await import("spell/parser/spell/node/buildTsx")
+    return codeFileAsJavascript(code, { filename: basename(path) })
+  }
+
   ////////////////
   // ## Changes
   ////////////////
@@ -134,6 +151,32 @@ export class SpellDiskWorkspace implements LSP.FileAddresses {
    */
   track(project: SP.SpellProject): Promise<void> {
     return this.parseOnce(project)
+  }
+
+  ////////////////
+  // ## Upgrading old Spell
+  ////////////////
+
+  /**
+   * Bring `project` up to date on disk (epic `language` P68):  each of its files with Spell's old forms rewritten the new
+   * way (`SP.OldForms`), then its project file naming the Spell it now matches (`writeSpellVersion()`).
+   * - The same rewrite `spell upgrade` makes;  for the language server's notice, and `spell.upgradeOnOpen`.
+   * - Writes the files, NOT the editor's copies:  an open file reloads from disk, as the editor sees it change.
+   * - Not a test project's:  they stay frozen.
+   * - Returns how many old forms it rewrote.
+   */
+  upgrade(project: SP.SpellProject): number {
+    const folder = new SP.SpellLocation(project.projectId).serverPath
+    if (folder.startsWith(environment.testFilesRoot)) return 0
+    let count = 0
+    for (const file of project.spellFiles) {
+      const uses = SP.OldForms.uses(file)
+      if (!uses.length) continue
+      writeFileSync(file.location.serverPath, SP.OldForms.upgraded(file.parseText, uses))
+      count += uses.length
+    }
+    if (writeSpellVersion(folder) && project.contents) project.contents.spellVersion = SP.SPELL_VERSION
+    return count
   }
 
   ////////////////

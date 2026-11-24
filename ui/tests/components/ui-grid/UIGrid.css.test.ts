@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 import { Viewport } from "spell/test-helpers/Viewport"
 
@@ -63,7 +62,7 @@ describe("UIGrid.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = gridRaw + colorsCSS
+    const css = gridRaw + colorsSharedCSS
     for (const vocabulary of [gridVocabulary, rowVocabulary, columnVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -72,10 +71,10 @@ describe("UIGrid.css source", () => {
 
   it("has a width rule for every column count and every device", () => {
     for (const word of ["one", "four", "nine", "sixteen"]) {
-      expect(gridRaw).toContain(`[class*="${word} column"]`)
-      expect(gridRaw).toContain(`[class*="${word} wide"]`)
+      expect(gridRaw).toContain(`.${word}-column`)
+      expect(gridRaw).toContain(`.${word}-wide`)
       for (const device of ["mobile", "tablet", "computer", "large screen", "widescreen"])
-        expect(gridRaw).toContain(`[class*="${word} wide ${device}"]`)
+        expect(gridRaw).toContain(`.${word}-wide-${device.replace(" ", "-")}`)
     }
   })
 })
@@ -87,7 +86,7 @@ describe("UIGrid.css source", () => {
 describe("UIGrid.css tokens", () => {
   it("takes a public token from a wrapper or the grid itself;  columns follow (static markup)", () => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-grid-gutter: 40px"><div class="ui grid"><div class="ui column">A</div></div></div>` +
         `<div><div class="ui celled grid" style="--ui-grid-celled-padding: 7px"><div class="ui column">B</div></div></div>`
     )
@@ -105,7 +104,7 @@ describe("UIGrid.css tokens", () => {
 describe("UIGrid.css examples", () => {
   it.each(Object.keys(EXAMPLES))("lays out every column in %s", (path) => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const columns = root.querySelectorAll<HTMLElement>(".ui.column:not(.grid, .row)")
     expect(columns.length).toBeGreaterThan(0)
     for (const column of columns) {
@@ -124,7 +123,7 @@ describe("UIGrid.css examples", () => {
 
   it("sizes columns by width, by count, by row count and as an only child", () => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(`<div style="width: 800px">${EXAMPLES["./examples/variations.html"]}</div>`)
+    const root = Sheets.render(`<div style="width: 800px">${EXAMPLES["./examples/variations.html"]}</div>`)
     const [four, eight, lastFour] = sizes(root, "section:nth-of-type(2) .ui.grid > .column")
     const width = (selector: string) => root.querySelector(selector)!.getBoundingClientRect().width
     const grid = width("section:nth-of-type(2) .ui.grid")
@@ -136,7 +135,7 @@ describe("UIGrid.css examples", () => {
     const two = width(".ui.two.column.grid")
     expect(sizes(root, ".ui.two.column.grid > .column")[0]! / two).toBeCloseTo(0.5, 3)
     expect(sizes(root, ".ui.four.column.row > .column")[0]! / two).toBeCloseTo(0.25, 3)
-    const content = Fixture.render(`<div style="width: 800px">${EXAMPLES["./examples/content.html"]}</div>`)
+    const content = Sheets.render(`<div style="width: 800px">${EXAMPLES["./examples/content.html"]}</div>`)
     const only = content.querySelector<HTMLElement>("section:nth-of-type(3) .column")!
     expect(only.getBoundingClientRect().width).toBeCloseTo(only.parentElement!.getBoundingClientRect().width, 0)
     const sixteenth = content.querySelector<HTMLElement>("section:nth-of-type(2) .column")!
@@ -147,7 +146,7 @@ describe("UIGrid.css examples", () => {
 
   it("pulls gutters out with negative margins, relaxes, compacts and pads them", () => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(`<div style="width: 800px">${EXAMPLES["./examples/variations.html"]}</div>`)
+    const root = Sheets.render(`<div style="width: 800px">${EXAMPLES["./examples/variations.html"]}</div>`)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     const plain = style("section:nth-of-type(2) .ui.grid")
     expect(plain.marginLeft).toBe("-16px")
@@ -165,7 +164,7 @@ describe("UIGrid.css examples", () => {
 
   it("draws dividers and cells, skipping each line's first column", () => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(`<div style="width: 800px">${EXAMPLES["./examples/types.html"]}</div>`)
+    const root = Sheets.render(`<div style="width: 800px">${EXAMPLES["./examples/types.html"]}</div>`)
     const style = (selector: string, pseudo?: string) => getComputedStyle(root.querySelector(selector)!, pseudo)
     expect(style(".ui.divided.grid > .row > .column:first-child").boxShadow).toBe("none")
     expect(style(".ui.divided.grid > .row > .column:nth-child(2)").boxShadow).toMatch(/-1px 0px 0px 0px/)
@@ -185,7 +184,7 @@ describe("UIGrid.css examples", () => {
 
   it("aligns, floats, centres, stretches and grows columns", () => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(`<div style="width: 800px">${EXAMPLES["./examples/variations.html"]}</div>`)
+    const root = Sheets.render(`<div style="width: 800px">${EXAMPLES["./examples/variations.html"]}</div>`)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     expect(style(".ui.left.floated.column").marginRight).not.toBe("0px")
     expect(style(".ui.right.floated.column").marginLeft).not.toBe("0px")
@@ -216,8 +215,8 @@ describe("UIGrid.css examples", () => {
 
   it("fills coloured rows and columns, never plain ones", () => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
-    const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
+    const red = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
     expect(getComputedStyle(root.querySelector(".ui.red.column")!).backgroundColor).toBe(getComputedStyle(red).color)
     const plain = root.querySelector(".ui.five.column.grid > .column:not(.red, .orange, .teal, .blue)")!
     expect(getComputedStyle(plain).backgroundColor).toBe("rgba(0, 0, 0, 0)")
@@ -228,7 +227,7 @@ describe("UIGrid.css examples", () => {
 
   it("stacks, doubles, reverses and re-sizes columns by the grid's width", () => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(EXAMPLES["./examples/responsive.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/responsive.html"]!)
     // the example's wrappers (850px, 1000px) clamp to their column:  give it room
     root.style.width = "1100px"
     const stacked = root.querySelectorAll<HTMLElement>(".ui.stackable.grid > .column")
@@ -263,7 +262,7 @@ describe("UIGrid.css examples", () => {
 
   it("follows the SCREEN under `--ui-stack-with: page` (static markup)", async () => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(EXAMPLES["./examples/responsive.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/responsive.html"]!)
     root.style.width = "1100px"
     root.style.setProperty("--ui-stack-with", "page")
     await Viewport.resize(1200)
@@ -276,7 +275,7 @@ describe("UIGrid.css examples", () => {
 
   it("shows `only` rows and columns by the viewport", () => {
     Sheets.adopt([...foundationCSS, gridCSS])
-    const root = Fixture.render(EXAMPLES["./examples/responsive.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/responsive.html"]!)
     const shown = (selector: string) => getComputedStyle(root.querySelector(selector)!).display !== "none"
     const width = window.innerWidth
     expect(shown(".ui.mobile.only.two.column.row")).toBe(width < 768)
@@ -296,7 +295,7 @@ describe("UIGrid.css examples", () => {
 describe("UIGrid.css in shadow roots", () => {
   it("lays out slotted column hosts by their own width:  4 / 8 / 4 => 25% / 50% / 25%", () => {
     Sheets.adopt(foundationCSS)
-    const frame = Fixture.render(`<div style="width: 800px"></div>`)
+    const frame = Sheets.render(`<div style="width: 800px"></div>`)
     const grid = host(frame, `<div class="ui grid" part="grid"><slot></slot></div>`)
     const columns = ["four", "eight", "four"].map((word) =>
       Sheets.inner(host(grid, `<div class="ui ${word} wide column" part="column"><slot></slot></div>`))
@@ -316,7 +315,7 @@ describe("UIGrid.css in shadow roots", () => {
 
   it("hands a grid's and a row's count, gutters and dividers to columns in rows, through three shadow roots", () => {
     Sheets.adopt(foundationCSS)
-    const frame = Fixture.render(`<div style="width: 800px"></div>`)
+    const frame = Sheets.render(`<div style="width: 800px"></div>`)
     const grid = host(frame, `<div class="ui divided relaxed three column grid" part="grid"><slot></slot></div>`)
     const row = host(grid, `<div class="ui row" part="row"><slot></slot></div>`)
     const counted = host(grid, `<div class="ui four column row" part="row"><slot></slot></div>`)
@@ -333,7 +332,7 @@ describe("UIGrid.css in shadow roots", () => {
   it("keeps a nested grid, a column's colour and its content clean of inherited layout", () => {
     Sheets.adopt(foundationCSS)
     // Wide enough that 1/16 of the nested grid beats a column's own gutter padding.
-    const frame = Fixture.render(`<div style="width: 1600px"></div>`)
+    const frame = Sheets.render(`<div style="width: 1600px"></div>`)
     const grid = host(frame, `<div class="ui two column grid"><slot></slot></div>`)
     const red = host(grid, `<div class="ui red eight wide column"><slot></slot></div>`)
     const plain = Sheets.inner(host(grid, `<div class="ui column"><slot></slot></div>`))
@@ -345,7 +344,7 @@ describe("UIGrid.css in shadow roots", () => {
     expect(getComputedStyle(nested).containerType).toBe("inline-size")
     const nestedWidth = Sheets.inner(nested).getBoundingClientRect().width
     expect(inner[0]!.getBoundingClientRect().width / nestedWidth).toBeCloseTo(1 / 16, 3)
-    const redColor = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
+    const redColor = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
     expect(getComputedStyle(Sheets.inner(red)).backgroundColor).toBe(getComputedStyle(redColor).color)
     expect(getComputedStyle(plain).backgroundColor).toBe("rgba(0, 0, 0, 0)")
     expect(getComputedStyle(inner[0]!).backgroundColor).toBe("rgba(0, 0, 0, 0)")
@@ -354,7 +353,7 @@ describe("UIGrid.css in shadow roots", () => {
 
   it("stacks and reverses slotted columns by the grid host's width", () => {
     Sheets.adopt(foundationCSS)
-    const frame = Fixture.render(`<div style="width: 600px"></div>`)
+    const frame = Sheets.render(`<div style="width: 600px"></div>`)
     const grid = host(frame, `<div class="ui stackable mobile reversed three column grid"><slot></slot></div>`)
     const columns = [1, 2, 3].map(() => Sheets.inner(host(grid, `<div class="ui column"><slot></slot></div>`)))
     const width = Sheets.inner(grid).getBoundingClientRect().width

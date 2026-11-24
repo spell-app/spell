@@ -66,6 +66,13 @@
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
         },
         {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
+        },
+        {
           "name": "visible",
           "kind": "boolean",
           "shared": true,
@@ -239,6 +246,14 @@
           "description": "`loading` is set."
         },
         {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+        },
+        {
           "name": "busy",
           "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
         },
@@ -275,7 +290,7 @@
       "mainTag": "spell-code",
       "main": true,
       "page": true,
-      "href": "spell-code.html"
+      "href": "/components/app/spell-code"
     },
     {
       "tag": "spell-editor",
@@ -339,6 +354,13 @@
           "kind": "boolean",
           "shared": true,
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
         },
         {
           "name": "visible",
@@ -514,6 +536,14 @@
           "description": "`loading` is set."
         },
         {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+        },
+        {
           "name": "busy",
           "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
         },
@@ -561,7 +591,7 @@
       "mainTag": "spell-editor",
       "main": true,
       "page": true,
-      "href": "spell-editor.html"
+      "href": "/components/app/spell-editor"
     },
     {
       "tag": "spell-markdown",
@@ -596,6 +626,13 @@
           "kind": "boolean",
           "shared": true,
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
         },
         {
           "name": "visible",
@@ -771,6 +808,14 @@
           "description": "`loading` is set."
         },
         {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+        },
+        {
           "name": "busy",
           "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
         },
@@ -807,7 +852,7 @@
       "mainTag": "spell-markdown",
       "main": true,
       "page": true,
-      "href": "spell-markdown.html"
+      "href": "/components/app/spell-markdown"
     },
     {
       "tag": "spell-reference-page",
@@ -846,6 +891,13 @@
           "kind": "boolean",
           "shared": true,
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
         },
         {
           "name": "visible",
@@ -1058,6 +1110,14 @@
         {
           "name": "loading",
           "description": "`loading` is set."
+        },
+        {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
         },
         {
           "name": "busy",
@@ -1367,7 +1427,7 @@
       "mainTag": "spell-reference-page",
       "main": true,
       "page": true,
-      "href": "spell-reference-page.html"
+      "href": "/components/app/spell-reference-page"
     },
     {
       "tag": "spell-viewer",
@@ -1409,6 +1469,11 @@
           "name": "editor",
           "kind": "string",
           "description": "A CSS selector for a `<spell-editor>` in the same document or shadow root:  runs what it compiles, and what it compiled already.  Waits for it without `project` or `src`."
+        },
+        {
+          "name": "base",
+          "kind": "string",
+          "description": "The page's address a site it runs goes under, `/components/ui`:  the site's address follows the page's, so `/components/ui/button/api` shows its `/button/api`, the browser's back and forward work, and a link's `#section` lands.  Without it, the site keeps its own address."
         },
         {
           "name": "toolbar",
@@ -1474,6 +1539,13 @@
           "kind": "boolean",
           "shared": true,
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
         },
         {
           "name": "visible",
@@ -1649,6 +1721,14 @@
           "description": "`loading` is set."
         },
         {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+        },
+        {
           "name": "busy",
           "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
         },
@@ -1696,7 +1776,7 @@
       "mainTag": "spell-viewer",
       "main": true,
       "page": true,
-      "href": "spell-viewer.html"
+      "href": "/components/app/spell-viewer"
     },
     {
       "tag": "Action",
@@ -1840,7 +1920,7 @@
           "file": "src/app/solid/Actions.tsx"
         }
       ],
-      "href": "Actions.html"
+      "href": "/components/app/actions"
     },
     {
       "tag": "AnatomyButton",
@@ -1867,7 +1947,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "AppAnatomyView.html#AnatomyButton"
+      "href": "/components/app/app-anatomy-view#AnatomyButton"
     },
     {
       "tag": "AppAnatomy",
@@ -1888,7 +1968,7 @@
       "parts": [],
       "states": [],
       "texts": [],
-      "href": "AppAnatomyView.html#AppAnatomy"
+      "href": "/components/app/app-anatomy-view#AppAnatomy"
     },
     {
       "tag": "AppAnatomyView",
@@ -1935,7 +2015,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "AppAnatomyView.html"
+      "href": "/components/app/app-anatomy-view"
     },
     {
       "tag": "AppBarMenus",
@@ -1961,7 +2041,7 @@
           "name": "mode",
           "type": "Mode",
           "required": true,
-          "description": "### `<AppBarMenus>` The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name. - File, Edit, View and Run are Spell, `SpellEditor.spell`'s `bar menu`s (epic `editor` P29):  each a Spell UI menu of the app's actions, its rows drawn, greyed and ticked by the Spell, each title in the page's language; each menu's title, the bar's word for it, the Spell's too. - What each row does is the editor's, handed over by its name (`handOverActions()`). - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them: Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards. - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File. - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings…. - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Anatomy (epic `editor` P34), Program Panel, ─, Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on. - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console. - Help:  Keyboard Shortcuts (epic `editor` P36), ─, the editor's tours and Tours… (`<TourMenuItems>`, epic `editor` P40), ─, then Help, which does nothing yet;  the editor's own, not the Spell's. - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there. - `mode`:  the page's, ticked in View. - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows."
+          "description": "### `<AppBarMenus>` The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name. - File, Edit, View and Run are Spell, `SpellEditor.spell`'s `bar menu`s (epic `editor` P29):  each a Spell UI menu of the app's actions, its rows drawn, greyed and ticked by the Spell, each title in the page's language; each menu's title, the bar's word for it, the Spell's too. - What each row does is the editor's, handed over by its name (`handOverActions()`). - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them: Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards. - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File. - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings…. - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Anatomy (epic `editor` P34), Program Panel, ─, Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on. - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console. - Help:  Keyboard Shortcuts (epic `editor` P36), All Icons (T158), ─, the editor's tours and Tours… (`<TourMenuItems>`, epic `editor` P40), ─, then Help, which does nothing yet;  the editor's own, not the Spell's. - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there. - `mode`:  the page's, ticked in View. - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows."
         }
       ],
       "usedIn": [
@@ -1970,7 +2050,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "MenuBar.html#AppBarMenus"
+      "href": "/components/app/menu-bar#AppBarMenus"
     },
     {
       "tag": "AppContainer",
@@ -2019,7 +2099,7 @@
           "file": "src/app/solid/AppRoot.tsx"
         }
       ],
-      "href": "AppContainer.html"
+      "href": "/components/app/app-container"
     },
     {
       "tag": "AppMenu",
@@ -2057,7 +2137,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "chrome.html"
+      "href": "/components/app/chrome"
     },
     {
       "tag": "AppRoot",
@@ -2106,7 +2186,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "AppRoot.html"
+      "href": "/components/app/app-root"
     },
     {
       "tag": "AppToolbar",
@@ -2133,7 +2213,7 @@
           "file": "src/app/solid/AppRoot.tsx"
         }
       ],
-      "href": "AppRoot.html#AppToolbar"
+      "href": "/components/app/app-root#AppToolbar"
     },
     {
       "tag": "BackToSite",
@@ -2160,7 +2240,7 @@
           "file": "src/app/index.tsx"
         }
       ],
-      "href": "Notice.html#BackToSite"
+      "href": "/components/app/notice#BackToSite"
     },
     {
       "tag": "BarMenu",
@@ -2239,7 +2319,7 @@
           "file": "src/app/solid/MenuBar.tsx"
         }
       ],
-      "href": "MenuBar.html#BarMenu"
+      "href": "/components/app/menu-bar#BarMenu"
     },
     {
       "tag": "Chooser",
@@ -2279,7 +2359,7 @@
           "file": "src/app/solid/modals/Chooser.tsx"
         }
       ],
-      "href": "Chooser.html"
+      "href": "/components/app/chooser"
     },
     {
       "tag": "CodeMirrorEditor",
@@ -2372,7 +2452,7 @@
           "file": "src/app/solid/codemirror/FileEditor.tsx"
         }
       ],
-      "href": "CodeMirrorEditor.html"
+      "href": "/components/app/code-mirror-editor"
     },
     {
       "tag": "ConsoleGroup",
@@ -2413,7 +2493,7 @@
           "file": "src/app/solid/ConsoleLines.tsx"
         }
       ],
-      "href": "ConsoleLines.html#ConsoleGroup"
+      "href": "/components/app/console-lines#ConsoleGroup"
     },
     {
       "tag": "ConsoleLine",
@@ -2463,7 +2543,7 @@
           "file": "src/app/solid/ConsoleLines.tsx"
         }
       ],
-      "href": "ConsoleLines.html#ConsoleLine"
+      "href": "/components/app/console-lines#ConsoleLine"
     },
     {
       "tag": "ConsoleLines",
@@ -2521,7 +2601,7 @@
           "file": "src/app/runner/RunnerConsole.tsx"
         }
       ],
-      "href": "ConsoleLines.html"
+      "href": "/components/app/console-lines"
     },
     {
       "tag": "ConsoleObject",
@@ -2556,7 +2636,7 @@
           "file": "src/app/solid/ConsoleLines.tsx"
         }
       ],
-      "href": "ConsoleLines.html#ConsoleObject"
+      "href": "/components/app/console-lines#ConsoleObject"
     },
     {
       "tag": "ConsoleRoot",
@@ -2600,7 +2680,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "ConsoleViewer.html#ConsoleRoot"
+      "href": "/components/app/console-viewer#ConsoleRoot"
     },
     {
       "tag": "ConsoleToolbar",
@@ -2627,7 +2707,7 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         }
       ],
-      "href": "ConsoleViewer.html#ConsoleToolbar"
+      "href": "/components/app/console-viewer#ConsoleToolbar"
     },
     {
       "tag": "ConsoleValue",
@@ -2673,7 +2753,7 @@
           "file": "src/app/solid/ConsoleLines.tsx"
         }
       ],
-      "href": "ConsoleLines.html#ConsoleValue"
+      "href": "/components/app/console-lines#ConsoleValue"
     },
     {
       "tag": "ConsoleViewer",
@@ -2712,7 +2792,7 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         }
       ],
-      "href": "ConsoleViewer.html"
+      "href": "/components/app/console-viewer"
     },
     {
       "tag": "ErrorBoundary",
@@ -2776,7 +2856,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "ErrorBoundary.html"
+      "href": "/components/app/error-boundary"
     },
     {
       "tag": "ErrorDisplay",
@@ -2819,6 +2899,11 @@
           "description": "Auto-hide delay, ms.  Default:  `3000`."
         },
         {
+          "name": "floating",
+          "type": "boolean",
+          "description": "Lifted over the page:  the floating shadow, and it drops in as it first shows (`<ui-message floating>`)."
+        },
+        {
           "name": "id",
           "type": "string",
           "description": "Id of the message."
@@ -2844,7 +2929,7 @@
           "file": "src/app/solid/ErrorNotice.tsx"
         }
       ],
-      "href": "ErrorNotice.html#ErrorDisplay"
+      "href": "/components/app/error-notice#ErrorDisplay"
     },
     {
       "tag": "ErrorNotice",
@@ -2871,7 +2956,7 @@
           "file": "src/app/index.tsx"
         }
       ],
-      "href": "ErrorNotice.html"
+      "href": "/components/app/error-notice"
     },
     {
       "tag": "FileEditor",
@@ -2925,7 +3010,7 @@
           "file": "src/app/solid/InputEditor.tsx"
         }
       ],
-      "href": "FileEditor.html"
+      "href": "/components/app/file-editor"
     },
     {
       "tag": "FileTabs",
@@ -2952,7 +3037,7 @@
           "file": "src/app/solid/InputEditor.tsx"
         }
       ],
-      "href": "FileTabs.html"
+      "href": "/components/app/file-tabs"
     },
     {
       "tag": "InputEditor",
@@ -2986,7 +3071,7 @@
           "file": "src/app/solid/InputEditor.tsx"
         }
       ],
-      "href": "InputEditor.html"
+      "href": "/components/app/input-editor"
     },
     {
       "tag": "InputRoot",
@@ -3020,7 +3105,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "InputEditor.html#InputRoot"
+      "href": "/components/app/input-editor#InputRoot"
     },
     {
       "tag": "LineNumbers",
@@ -3041,7 +3126,7 @@
       "parts": [],
       "states": [],
       "texts": [],
-      "href": "InputEditor.html#LineNumbers"
+      "href": "/components/app/input-editor#LineNumbers"
     },
     {
       "tag": "Markdown",
@@ -3091,7 +3176,7 @@
           "file": "src/app/solid/SpellReference.tsx"
         }
       ],
-      "href": "Markdown.html"
+      "href": "/components/app/markdown"
     },
     {
       "tag": "MenuHeader",
@@ -3130,14 +3215,14 @@
         },
         {
           "name": "DesignPicker",
-          "file": "src/app/solid/Design.tsx"
+          "file": "src/app/solid/DesignView.tsx"
         },
         {
           "name": "TreeToolbar",
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "chrome.html#MenuHeader"
+      "href": "/components/app/chrome#MenuHeader"
     },
     {
       "tag": "MoreMenu",
@@ -3186,7 +3271,7 @@
           "file": "src/app/pages/ProjectChooser.tsx"
         }
       ],
-      "href": "chrome.html#MoreMenu"
+      "href": "/components/app/chrome#MoreMenu"
     },
     {
       "tag": "Notice",
@@ -3199,7 +3284,7 @@
         "notices"
       ],
       "aka": [],
-      "description": "`editor.notice` as a success `<ui-message>`, fixed near the top of the page;  closing it calls `editor.hideNotice()`.",
+      "description": "`editor.notice` as a success `<ui-message floating>`, fixed near the top of the page (it drops in);  closing it calls `editor.hideNotice()`.",
       "noun": "Notice",
       "attributes": [],
       "slots": [],
@@ -3220,7 +3305,7 @@
           "file": "src/app/index.tsx"
         }
       ],
-      "href": "Notice.html"
+      "href": "/components/app/notice"
     },
     {
       "tag": "PanelMenu",
@@ -3262,7 +3347,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "chrome.html#PanelMenu"
+      "href": "/components/app/chrome#PanelMenu"
     },
     {
       "tag": "ProjectBarMenu",
@@ -3289,7 +3374,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "MenuBar.html#ProjectBarMenu"
+      "href": "/components/app/menu-bar#ProjectBarMenu"
     },
     {
       "tag": "RestartNeeded",
@@ -3316,7 +3401,7 @@
           "file": "src/app/index.tsx"
         }
       ],
-      "href": "Notice.html#RestartNeeded"
+      "href": "/components/app/notice#RestartNeeded"
     },
     {
       "tag": "RunnerConsole",
@@ -3355,7 +3440,7 @@
           "file": "src/app/runner/VSCodeRunner.tsx"
         }
       ],
-      "href": "RunnerConsole.html"
+      "href": "/components/app/runner-console"
     },
     {
       "tag": "RunnerPane",
@@ -3424,7 +3509,7 @@
           "file": "src/app/runner/VSCodeRunner.tsx"
         }
       ],
-      "href": "RunnerPane.html"
+      "href": "/components/app/runner-pane"
     },
     {
       "tag": "ScopeDetailsPane",
@@ -3518,7 +3603,7 @@
           "file": "src/app/solid/TypeExplorer.tsx"
         }
       ],
-      "href": "ScopeDetailsPane.html"
+      "href": "/components/app/scope-details-pane"
     },
     {
       "tag": "SectionMarker",
@@ -3565,7 +3650,7 @@
           "file": "src/app/solid/ThingExplorer.tsx"
         }
       ],
-      "href": "ScopeDetailsPane.html#SectionMarker"
+      "href": "/components/app/scope-details-pane#SectionMarker"
     },
     {
       "tag": "SpellBarMenu",
@@ -3590,7 +3675,7 @@
         {
           "name": "useRunner",
           "type": "boolean",
-          "description": "### `<SpellBarMenu>` The top bar's first menu, Spell's:  the hat and Spell's name, our major branding, as `<AppMark>` draws them (Owen, 2026-11-06:  \"Change the Spell menu in the editor to show the Examples menu\"). - Opens the project's group's projects (`<ProjectsMenu>`): the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more. - At its top, one row, `SpellEditor.spell`'s `home row`:  Home, where the hat linked to before; Spell UI, its site in the editor (`editor.showSpellUI()`, epic `mockup` T55); and About Spell, which shows its `about box` (epic `editor` I94, I114). - New Example (`Actions.createApp`:  New Guide among the guides) is the last of the projects it adds to (Owen, 2026-11-14:  \"Put <pen> New Example at the end of the list of examples\"). - `useRunner`:  the one chosen opens in Run. - The Spell UI site's:  \"Spell Notebooks\". - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`). - SEE:  its App UI components page, with the bar's other menus: `app/docs/MenuBar.html` (`/components/app/MenuBar.html`)."
+          "description": "### `<SpellBarMenu>` The top bar's first menu, Spell's:  the hat and Spell's name, our major branding, as `<AppMark>` draws them (Owen, 2026-11-06:  \"Change the Spell menu in the editor to show the Examples menu\"). - Opens the project's group's projects (`<ProjectsMenu>`): the Examples, or the Guides, the one shown ticked, in columns of 10 when there are more. - At its top, one row, `SpellEditor.spell`'s `home row`:  Home, where the hat linked to before; Spell UI, its site in the editor (`editor.showSpellUI()`, epic `mockup` T55); and About Spell, which shows its `about box` (epic `editor` I94, I114). - New Example (`Actions.createApp`:  New Guide among the guides) is the last of the projects it adds to (Owen, 2026-11-14:  \"Put <pen> New Example at the end of the list of examples\"). - `useRunner`:  the one chosen opens in Run. - The Spell UI site's:  \"Spell Notebooks\". - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`). - SEE:  its page in App UI's guide, with the bar's other menus: `/components/app/menu-bar`."
         }
       ],
       "usedIn": [
@@ -3599,7 +3684,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "MenuBar.html"
+      "href": "/components/app/menu-bar"
     },
     {
       "tag": "spell-element",
@@ -3637,6 +3722,13 @@
           "kind": "boolean",
           "shared": true,
           "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
         },
         {
           "name": "visible",
@@ -3857,6 +3949,14 @@
           "description": "`loading` is set."
         },
         {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+        },
+        {
           "name": "busy",
           "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
         },
@@ -3893,7 +3993,7 @@
       "mainTag": "spell-element",
       "main": true,
       "page": true,
-      "href": "spell-element.html"
+      "href": "/components/app/spell-element"
     },
     {
       "tag": "SpellPage",
@@ -3973,8 +4073,16 @@
       ],
       "usedIn": [
         {
+          "name": "GuidesPage",
+          "file": "src/app/pages/GuidesPage.tsx"
+        },
+        {
           "name": "NamePage",
           "file": "src/app/solid/NamePage.tsx"
+        },
+        {
+          "name": "PaletteGroupsPage",
+          "file": "src/app/pages/PaletteGroupsPage.tsx"
         },
         {
           "name": "PlaceReferencePage",
@@ -4001,7 +4109,7 @@
           "file": "src/app/pages/ThemeEditorPage.tsx"
         }
       ],
-      "href": "SpellPage.html"
+      "href": "/components/app/spell-page"
     },
     {
       "tag": "Spring",
@@ -4035,7 +4143,7 @@
           "file": "src/app/solid/chrome.tsx"
         }
       ],
-      "href": "chrome.html#Spring"
+      "href": "/components/app/chrome#Spring"
     },
     {
       "tag": "Submenu",
@@ -4106,7 +4214,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "chrome.html#Submenu"
+      "href": "/components/app/chrome#Submenu"
     },
     {
       "tag": "ThingExplorer",
@@ -4165,7 +4273,7 @@
           "file": "src/app/runner/VSCodeRunner.tsx"
         }
       ],
-      "href": "ThingExplorer.html"
+      "href": "/components/app/thing-explorer"
     },
     {
       "tag": "TreeRoot",
@@ -4199,7 +4307,7 @@
           "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
-      "href": "TreeViewer.html#TreeRoot"
+      "href": "/components/app/tree-viewer#TreeRoot"
     },
     {
       "tag": "TreeToolbar",
@@ -4226,7 +4334,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "TreeViewer.html#TreeToolbar"
+      "href": "/components/app/tree-viewer#TreeToolbar"
     },
     {
       "tag": "TreeViewer",
@@ -4249,6 +4357,11 @@
       "texts": [],
       "props": [
         {
+          "name": "tree",
+          "type": "P.TreeNode",
+          "description": "The tree to draw, worked out already:  then `match` and `offset` aren't read."
+        },
+        {
           "name": "match",
           "type": "P.Match",
           "description": "The file's whole match."
@@ -4270,7 +4383,7 @@
           "file": "src/app/solid/TreeViewer.tsx"
         }
       ],
-      "href": "TreeViewer.html"
+      "href": "/components/app/tree-viewer"
     },
     {
       "tag": "TypeExplorer",
@@ -4345,7 +4458,34 @@
           "file": "src/app/runner/VSCodeRunner.tsx"
         }
       ],
-      "href": "TypeExplorer.html"
+      "href": "/components/app/type-explorer"
+    },
+    {
+      "tag": "UpgradeNotice",
+      "name": "UpgradeNotice",
+      "folder": "Notice",
+      "mainTag": "Notice",
+      "main": false,
+      "page": false,
+      "topics": [
+        "notices"
+      ],
+      "aka": [],
+      "description": "Offers to upgrade a project written for an older Spell, as it opens (epic `language` P68): `editor.upgradeOffered`, while it's the project shown.",
+      "noun": "UpgradeNotice",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "usedIn": [
+        {
+          "name": "index",
+          "file": "src/app/index.tsx"
+        }
+      ],
+      "href": "/components/app/notice#UpgradeNotice"
     }
   ],
   "docs": [],
@@ -4669,6 +4809,7 @@
       "docs": false,
       "tags": [
         "Notice",
+        "UpgradeNotice",
         "RestartNeeded",
         "BackToSite"
       ],
@@ -7411,20 +7552,5 @@
         }
       ]
     }
-  ],
-  "nav": {
-    "start": [
-      {
-        "id": "index",
-        "file": "index.html",
-        "label": "Overview",
-        "icon": "house"
-      }
-    ],
-    "foundation": [],
-    "titles": {
-      "start": "App UI",
-      "components": "Components"
-    }
-  }
+  ]
 }

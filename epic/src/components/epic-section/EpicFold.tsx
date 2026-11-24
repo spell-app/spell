@@ -9,7 +9,7 @@ import { PageStages, PhaseIds, type PlanningStage } from "spell/epic/phases"
 import { EpicPage } from "spell/epic/components/epic-page/EpicPage"
 import { SHOW_NOTE, stopIfOwn } from "spell/epic/components/epic-review/EpicReview.types"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel
-import { CONTROLS, DEEP_TIPS, Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
+import { CONTROLS, Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
 import { EpicBodies } from "spell/epic/components/epic-item/EpicBodies"
 import { NearScreen } from "spell/epic/components/epic-item/NearScreen"
 
@@ -60,7 +60,7 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  *   - folded:  opens it and everything inside it, parts loading as they open (`expandAll()`)
  *   - open:  folds everything inside it, and then itself (`foldAll()`)
  *   - each open is the reader's, as a click's:  the page remembers the blocks' and items' folds
- *   - the chevron's tooltip says so (`DEEP_TIPS`, on `<ui-section>`'s `toggleTipMore`)
+ *   - no tooltip says so:  its title has words, and shows none (epic `epic-engine` I370)
  *   - before:  a double-chevron toggle-all button in its title row (airplane P8, Owen 2026-10-20 / 2026-10-25),
  *     gone with I161;  `<epic-page>`'s toolbar keeps one, which has no chevron to hold
  * - Its title row's empty space folds it too (`onTitleRowClick()`), and shows the pointer;  a to-do phase on a reviewed
@@ -295,12 +295,6 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     // ⌥-click (or ⌥+Enter / ⌥+Space) on the chevron or title:  everything inside too
     if (Fold.isDeep(detail.originalEvent)) this.toggleDeep()
     else this.toggle(detail.originalEvent)
-  }
-
-  /** The inner section's fold button's tooltip ends with what ⌥-click does (`DEEP_TIPS`), as every fold's does. */
-  @E.onChange("isOpen", "inner")
-  protected onTipShown(open: boolean, inner: SectionStack | undefined) {
-    if (inner) inner.toggleTipMore = open ? DEEP_TIPS.fold : DEEP_TIPS.open
   }
 
   /**

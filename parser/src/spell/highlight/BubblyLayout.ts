@@ -84,6 +84,12 @@ export class BubblyLayout {
   /** Was the text parsed here, alone, with no project's parse of it?  Only then is a line read again (`rereadIn()`). */
   private isAlone = false
 
+  /**
+   * The indent the parse read a comment at, or another aside, where that's not as written:  by line index.
+   * - So one written out of line doesn't cut a band, as it doesn't cut a block (epic `language` I181).
+   */
+  private readonly asideIndents = new Map<number, number>()
+
   /** Where each line starts. */
   private readonly lineStarts: number[] = []
 
@@ -151,7 +157,12 @@ export class BubblyLayout {
     } catch {
       // the spans stand alone
     }
-    if (match) this.read(match)
+    if (!match) return
+    this.read(match)
+    P.Tokenizer.forEachToken(match.tokens, (token) => {
+      if (token instanceof P.LineToken && token.record.isPlaced)
+        this.asideIndents.set(this.lineIndexOf(token.start), token.indent)
+    })
   }
 
   /**
@@ -415,7 +426,8 @@ export class BubblyLayout {
   ////////////////
 
   /**
-   * The text's lines, nested by indent:  a blank line sits where the next line does.
+   * The text's lines, nested by indent:
+   * a blank line sits where the next line does, and a comment where the parse read it (`asideIndents`).
    * - EXCEPT a blank line with an indent of its own (the caret on a new line in a body):  it sits at that indent,
    *   so it's part of the block above it, and the block's foot goes under it (Owen, 2026-11-11)
    */
@@ -428,7 +440,7 @@ export class BubblyLayout {
         index,
         start: lineStart + indent,
         end: lineStart + (words.trim() ? words.trimEnd().length : indent),
-        width: indent,
+        width: this.asideIndents.get(index) ?? indent,
         isBlank: !words.trim() && !indent,
         children: []
       }

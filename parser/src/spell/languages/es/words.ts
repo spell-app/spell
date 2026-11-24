@@ -192,6 +192,16 @@ export const spanishWords: SP.LanguageWords = {
     esperar: "",
     "esperar a": ""
   },
+  /** La forma vieja de Spell que es cada palabra retirada (`SP.OLD_FORMS`, épica `language` P68). */
+  oldForms: {
+    partes: "parts",
+    animación: "animation",
+    animacion: "animation",
+    "crear animación": "animation",
+    "crear animacion": "animation",
+    esperar: "wait-for",
+    "esperar a": "wait-for"
+  },
   retiredRuleWords: {
     start_process: { animación: "proceso", animacion: "proceso" },
     stop_process: { animación: "proceso", animacion: "proceso" },

@@ -20,9 +20,9 @@ describe("<ui-grid> static render", () => {
     )
     expect(sorted(html)).toBe(
       sorted(
-        `<div data-ui="grid" class="ui divided two column grid" part="grid">` +
+        `<div data-ui="grid" class="ui divided two column grid two-column" part="grid">` +
           `<div data-ui-slotted="" data-ui="row" class="ui row" part="row">` +
-          `<div data-ui-slotted="" data-ui="column" class="ui four wide column" part="column">` +
+          `<div data-ui-slotted="" data-ui="column" class="ui four wide column four-wide" part="column">` +
           `<p data-ui-slotted="">A</p></div>` +
           `<div data-ui-slotted="" data-ui="column" class="ui column" part="column"><p data-ui-slotted="">B</p></div>` +
           `</div></div>`

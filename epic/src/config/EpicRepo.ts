@@ -10,7 +10,7 @@ import { EpicConfig } from "./EpicConfig.ts"
 /****************
  * ### `EpicRepo`
  * Which REPO an epic is worked in, seen from a checkout of some repo (epic `epic-engine` I47).
- * - a CODE repo (the kit, spell-brand, an adopter's app), never the epic repo, `spell.epics`, which holds the
+ * - a CODE repo (the kit, an adopter's app), never the epic repo, `spell.epics`, which holds the
  *   pages:  the name only code reads keeps its spelling (the kit's `AGENTS.md`, "Words";  epic `epic-engine` P56)
  *
  * ```ts

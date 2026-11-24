@@ -252,3 +252,43 @@ describe("FileOperations.route()", () => {
     expect(existsSync(join(ROOT, "pages", "made.md"))).toBe(true)
   })
 })
+
+describe("FileOperations, once there's an epic folder (epic-engine P79)", () => {
+  test("a file the checkout has in a writable folder of its own (a moved guide) is that one;  the rest the epic folder's", () => {
+    const top = join(DIR, "moved")
+    const checkout = join(top, "checkout")
+    const content = join(top, "checkout.epics")
+    mkdirSync(join(checkout, "guides"), { recursive: true })
+    mkdirSync(join(content, "guides"), { recursive: true })
+    writeFileSync(join(checkout, "guides", "moved.html"), "<p>code</p>\n")
+    const files = new SRV.FileOperations({ root: checkout, writable: ["guides", "epics"] })
+    files.content = content
+    expect(files.writable).toEqual([join(checkout, "guides"), join(content, "guides"), join(content, "epics")])
+    expect(files.writableFile("/guides/moved.html").file).toBe(join(checkout, "guides", "moved.html"))
+    expect(files.writableFile("/guides/private.html").file).toBe(join(content, "guides", "private.html"))
+    expect(() => files.writableFile("/packages/x.html")).toThrow(/only files in/)
+  })
+
+  test("a worktree's own guide, its page served under /worktrees/<w>/, is that worktree's copy (epic-engine T132)", () => {
+    const top = join(DIR, "worktree")
+    const checkout = join(top, "checkout")
+    const content = join(top, "checkout.epics")
+    const worktrees = join(top, "checkout.worktrees")
+    for (const folder of [join(checkout, "guides"), join(content, "guides"), join(worktrees, "w", "guides")])
+      mkdirSync(folder, { recursive: true })
+    writeFileSync(join(worktrees, "w", "guides", "moved.html"), "<p>branch</p>\n")
+    const files = new SRV.FileOperations({ root: checkout, writable: ["guides"] })
+    files.content = content
+    files.worktrees = [worktrees]
+    const mine = join(worktrees, "w", "guides", "moved.html")
+    // as the page is told its path (`SPELL_SERVER.file`), and by its address
+    expect(files.writableFile("/../checkout.worktrees/w/guides/moved.html").file).toBe(mine)
+    expect(files.writableFile("/worktrees/w/guides/moved.html").file).toBe(mine)
+    expect(files.canWrite(mine)).toBe(true)
+    // the worktree's other folders aren't writable;  nor a worktree that isn't there
+    writeFileSync(join(worktrees, "w", "package.json"), "{}\n")
+    expect(files.canWrite(join(worktrees, "w", "package.json"))).toBe(false)
+    expect(() => files.writableFile("/worktrees/w/package.json")).toThrow(/only files in/)
+    expect(() => files.writableFile("/worktrees/gone/guides/moved.html")).toThrow(/only files in/)
+  })
+})

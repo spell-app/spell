@@ -1,6 +1,7 @@
 /**
  * `yarn gen:styles [--check]`:  regenerate every generated sheet in `src/styles/`.
- * - `tokens.css`, `colors.css`, `sizes.css`, from `styles.en.ts` (`StyleGenerator`).
+ * - `tokens.css`, `colors.css`, `sizes.css` and their parts, from `styles.en.ts` (`StyleGenerator`);
+ *   and `sheetWords.ts`, the class words the shared parts' remaps match.
  * - Each theme's sheet, from its theme file (`ThemeFile`;  epic `debut` P18):
  *   `themes/<name>.theme.json5` => `themes/<name>.css`, `themes/palettes/<name>.palette.json5` => `palettes/<name>.css`;
  *   and `themes/theme.schema.json`, from the theme tree.
@@ -40,10 +41,12 @@ class GenStylesCommand {
    * - throws a `TypeError` on a mistake in a theme file, naming it
    */
   async run({ isCheck }: { isCheck: boolean }) {
-    const outputs: GeneratedOutput[] = Object.entries(new StyleGenerator().sheets()).map(([name, css]) => [
+    const generator = new StyleGenerator()
+    const outputs: GeneratedOutput[] = Object.entries(generator.sheets()).map(([name, css]) => [
       `${this.directory}${name}`,
       css
     ])
+    outputs.push([`${this.directory}sheetWords.ts`, generator.wordsModule()])
     const sheets = ThemeFile.sheets({
       themes: this.themeFiles("", "theme"),
       palettes: this.themeFiles("palettes/", "palette")

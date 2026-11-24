@@ -1,0 +1,71 @@
+"mermaid-diagram usage" is a notebook page
+	<header level="1">
+		Mermaid diagram
+		<header>A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.</>
+	</>
+
+	<!-- USAGE:  what to write, where Mermaid comes from, the events, keyboard and accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Write Mermaid's text inside `<ui-mermaid-diagram>`:  every kind of diagram Mermaid has today draws, with
+			nothing to turn on.  The text comes from, first match wins:
+
+			- `source`:  a file of this site (same origin only), fetched when `load` says.
+			- A `<script type="text/mermaid">` child:  its text exactly, so `<`, `>` and `&` need no escaping.
+			- The element's own text, dedented.
+
+			It draws again when the text changes:  typing in the editor, a script setting `content`, or the file
+			changing.  A setting written in the diagram's own text (its front matter, or a `%%{init: ...}%%` line)
+			wins over the attributes, as it does on GitHub.
+
+			In `<ui-markdown>`, a ````mermaid```` block draws as a diagram too.
+		</>
+	</>
+
+	<section label="Loading">
+		<markdown>
+			Mermaid is big, so it loads only the first time a page draws a diagram, in files of its own:  a page without
+			one pays nothing.  Mermaid then loads only the part for each kind of diagram it draws.  ELK, the layout
+			engine for flowcharts, state, class and ER diagrams, loads once a page, when one needs it.
+
+			Mermaid draws in its strict mode:  HTML in a label shows as text, and clicks that would run code are off,
+			so it's safe with text you didn't write.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-drawn` -- drawn:  `{ diagramType }`, what Mermaid read the text as (`flowchart-v2`, `sequence` ...).
+			- `ui-error` (cancelable) -- loading or drawing failed:  `{ kind, source, error }`, `kind` `render` for text
+			  Mermaid can't read.  Cancel it to skip the message.
+			- `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved` -- the text, shared with `<ui-code>` and `<ui-markdown>`.
+
+			The drawing itself is the `svg` property, as SVG text, for copying or saving;  `diagramType` and `error`
+			say what was drawn, or what went wrong.  `putBack()` forgets a reader's picks from the menu.
+		</>
+		<markdown>
+			```js
+			const diagram = document.querySelector("ui-mermaid-diagram")
+			diagram.addEventListener("ui-drawn", (event) => console.log("drew a", event.detail.diagramType))
+			diagram.content = "flowchart LR\n  a --> b"
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- With `controls`, **Tab** reaches the menu button, which shows at once;  **Enter** or **Space** opens it,
+			  and the arrow keys move through the themes and light or dark.
+			- Without it, the drawing is no tab stop:  there's nothing in it to use.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The drawing is an image (`role="img"`), named by `label`;  without one, by the title in the diagram's own
+			  text (`accTitle`, or a `title`);  else by its kind ("Flowchart diagram").  Give a `label` that says what
+			  the diagram shows.
+			- An error is a `<ui-message>`, one short line per thing:  what went wrong, the line, what was expected.
+			- The menu's words are translated, with the rest of the tag's.
+		</>
+	</>

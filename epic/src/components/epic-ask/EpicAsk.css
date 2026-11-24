@@ -112,9 +112,83 @@
   .other {
     margin: 10px 0 0;
   }
+
+  /*
+   * `compact` (epic `epic-engine` T121):  its text, then one row:  the chip, the select, the comment box taking the
+   * rest;  narrow, the comment box goes under them, the full width.  Its cards stay in the page, hidden.
+   */
+  :host([compact]) ::slotted(epic-choices) {
+    display: none;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px 12px;
+    margin-top: 8px;
+  }
+  /*
+   * the chip and the select, centred on the comment box's first line:  its height, one line high to start
+   * - the chip keeps its whole label on one line (epic `epic-engine` I371:  in a 20%-wide table column `Q50 · a` wrapped
+   *   and was cut off inside its pill);  the select gives way instead, and in a column too narrow for both it goes under
+   */
+  .pick-line {
+    display: inline-flex;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 2.4em;
+  }
+  .pick-line > .chip {
+    flex: none;
+    white-space: nowrap;
+  }
+  .pick {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* nothing picked yet is still text to read, 4.5:1 or more:  pale is only a select that's off (P80's design review) */
+  .pick:not([disabled])::part(select) {
+    --_ui-select-placeholder-color: var(--ui-text-muted);
+  }
+  .comment {
+    flex: 1 1 16em;
+    min-width: 0;
+    margin: 0;
+  }
+  /* no chip (a table's Your pick):  the select as wide as the comment box under it, never past its column */
+  :host(:is([no-chip], [slot="then"])) .pick-line {
+    flex: 1 1 100%;
+  }
+  :host(:is([no-chip], [slot="then"])) .pick {
+    flex: 1 1 auto;
+  }
+  /* a follow-up (a Priority, epic `epic-engine` P80):  a line of its own, above the one comment box */
+  ::slotted(epic-ask[slot="then"]) {
+    flex: 1 1 100%;
+    min-width: 0;
+    margin: 0;
+  }
+  :host([no-chip]) .row {
+    margin-top: 0;
+  }
+  :host([slot="then"]) .row {
+    margin-top: 4px;
+  }
 }
 
 @layer ui.components.epic-ask.states {
+  :host(:state(off)) {
+    color: var(--ui-text-muted, GrayText);
+  }
+  :host(:state(off)) ::slotted(:is(epic-question, p)) {
+    color: var(--ui-text-muted, GrayText);
+    opacity: 0.6;
+  }
   :host(:state(done)) {
     --_epic-ask-state: var(--epic-state-recent, var(--spell-state-recent, var(--ui-green, #21ba45)));
     --_epic-ask-state-on: var(--epic-state-recent-on, var(--spell-state-recent-on, #fff));

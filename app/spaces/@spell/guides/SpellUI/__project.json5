@@ -104,6 +104,22 @@
       "active": true
     },
     {
+      "path": "/AppMenu/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/AppMenu/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/AppMenu/API.spell",
+      "active": true
+    },
+    {
+      "path": "/AppMenu/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/Audio/Usage.spell",
       "active": true
     },
@@ -348,6 +364,22 @@
       "active": true
     },
     {
+      "path": "/Device/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/Device/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/Device/API.spell",
+      "active": true
+    },
+    {
+      "path": "/Device/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/Diagram/Usage.spell",
       "active": true
     },
@@ -564,6 +596,22 @@
       "active": true
     },
     {
+      "path": "/Graph/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/Graph/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/Graph/API.spell",
+      "active": true
+    },
+    {
+      "path": "/Graph/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/Grid/Usage.spell",
       "active": true
     },
@@ -593,6 +641,22 @@
     },
     {
       "path": "/Icon/Theming.spell",
+      "active": true
+    },
+    {
+      "path": "/IconBrowser/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/IconBrowser/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/IconBrowser/API.spell",
+      "active": true
+    },
+    {
+      "path": "/IconBrowser/Theming.spell",
       "active": true
     },
     {
@@ -793,6 +857,22 @@
     },
     {
       "path": "/Menu/Theming.spell",
+      "active": true
+    },
+    {
+      "path": "/MermaidDiagram/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/MermaidDiagram/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/MermaidDiagram/API.spell",
+      "active": true
+    },
+    {
+      "path": "/MermaidDiagram/Theming.spell",
       "active": true
     },
     {
@@ -1196,6 +1276,10 @@
       "active": true
     },
     {
+      "path": "/SiteLinks/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/SiteNav/Usage.spell",
       "active": true
     },
@@ -1221,6 +1305,10 @@
     },
     {
       "path": "/SiteNavButton/API.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteNavButton/Theming.spell",
       "active": true
     },
     {
@@ -1524,6 +1612,22 @@
       "active": true
     },
     {
+      "path": "/Tour/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/Tour/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/Tour/API.spell",
+      "active": true
+    },
+    {
+      "path": "/Tour/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/Transition/Usage.spell",
       "active": true
     },
@@ -1569,6 +1673,22 @@
     },
     {
       "path": "/TreeDiagram/Theming.spell",
+      "active": true
+    },
+    {
+      "path": "/Uploader/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/Uploader/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/Uploader/API.spell",
+      "active": true
+    },
+    {
+      "path": "/Uploader/Theming.spell",
       "active": true
     },
     {
@@ -1631,5 +1751,6 @@
       "path": "/SpellUI.spell",
       "active": true
     }
-  ]
+  ],
+  "spellVersion": "0.9.0"
 }

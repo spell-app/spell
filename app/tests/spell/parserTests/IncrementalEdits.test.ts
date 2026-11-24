@@ -71,7 +71,8 @@ describe("incremental parsing after each kind of edit ~== full parse", () => {
           const editedFiles = files.map((it) => (it.path === file.path ? { ...it, contents: edited } : it))
           project.update(file.path, edited)
           expect(incrementalOutput(project), where).toEqual(fullParse(editedFiles, options))
-          project.update(file.path, file.contents)
+          // undone with the span an editor would hand it (`P.EditedSpan`):  the same either way
+          project.update(file.path, file.contents, P.EditedSpan.between(edited, file.contents))
           expect(incrementalOutput(project), `${where}, undone`).toEqual(original)
         }
       }

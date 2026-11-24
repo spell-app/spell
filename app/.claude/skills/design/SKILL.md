@@ -21,11 +21,9 @@ Spell's claude.ai DESIGN SYSTEM is generated from the code, so Claude Design dra
     - `index.d.ts`, in `components/`
     - a README + live `preview.html` per family
     - the cover
-  - And by `spell design bundle`:  the bundle.
-    - `bundle.js`, in `components/`
-    - ONE classic script, `window.SpellUI`
-    - every Font Awesome Free icon
-    - the code and markdown engines
+  - NOT the bundle (`bundle.js`, in `components/`:  ONE classic script, `window.SpellUI`):
+    `spell design bundle | check` ran spell-brand's scripts, gone with it (epic `epic-engine` T124).
+    A push keeps the bundle claude.ai already holds;  no command rebuilds it now.
 - The rules a design follows:  that README's "Consuming" section.  In short:
   - load the bundle once
   - write PLAIN markup (`<ui-button color="primary" icon="check">`), never `x-import` or React
@@ -40,11 +38,8 @@ Spell's claude.ai DESIGN SYSTEM is generated from the code, so Claude Design dra
 
 1. A vocabulary changed:  `yarn site:data` in `../spell-ui` first.
    The cards and `index.d.ts` read its output.
-2. Build, bundle, check:
-   - `spell design build`
-   - then `spell design bundle`:  a few minutes, since it builds ui first
-   - then `spell design check`:  must pass.
-     It checks the bundle inlined in a srcdoc frame, and on a Design board.
+2. Build:  `spell design build`.
+   - No bundle or check step since epic `epic-engine` T124 (above).
 3. `spell design changed --json`:  `{ root, url, changed, removed }`.
    - The index, `design-system.json` in `project/`, is last.
    - Nothing changed:  say so and stop.

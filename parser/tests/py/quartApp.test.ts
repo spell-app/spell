@@ -22,15 +22,17 @@ describe("PY.quartApp()", () => {
     expect(app).toContain('html = page_html("Solitaire", elements="/Solitaire.elements.spell.js", projects=projects)')
     expect(app).toContain('@app.get("/<name>.elements.spell.js")')
     expect(app).toContain('@app.websocket("/ws")')
+    expect(app).toContain("@app.after_serving")
+    expect(app).toContain("await sessions.saves_sent()")
     expect(app).toContain("# Your own routes go here")
   })
 
   test("finds the program and its drawing half in their build folder, from its own", () => {
     const app = PY.quartApp({ ...SPEC, outputs: "spaces/@spell/examples/solitaire" })
     expect(app).toContain('OUTPUTS = built_folder("spaces/@spell/examples/solitaire")')
-    expect(app).toContain("assets_folder, built_folder, fresh")
+    expect(app).toContain("assets_folder, built_folder, page_html")
     expect(app).toContain('sessions = SpellSessions(OUTPUTS / "Solitaire.spell.py")')
-    expect(app).toContain('send_from_directory(OUTPUTS, f"{name}.elements.spell.js"')
+    expect(app).toContain('send_built(OUTPUTS, f"{name}.elements.spell.js"')
   })
 
   test("serves each imported project's drawing half too", () => {

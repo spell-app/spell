@@ -10,6 +10,8 @@ import { PrefStore } from "spell/util/persist/PrefStore"
 import { FOLDS, Fold } from "spell/epic/components/epic-item/Fold"
 // Spell UI's page zoom (the docs runtime's too):  its plain-DOM leaf alone, so the pack holds no second `<ui-zoom>`
 import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
+// a test's paste boxes, placed by plain DOM:  the file alone, so their family loads only once one is on the page
+import { StepOutputs } from "spell/epic/components/epic-step-output/StepOutputs"
 
 import { epicFieldVocabulary } from "./EpicField.en"
 import { ICON, LABEL, TEXT } from "./EpicPhase.types"
@@ -49,6 +51,8 @@ import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
  *   - its screenshots are thumbnails, a page sheet's (`EpicField.requests.css`:  they're light DOM, out of reach of
  *     the shadow sheet);  a click shows one full size in the page's `<ui-zoom>` (Spell UI's `ImageZoom`), never its link
  *     (kept for a page without scripts, or opened from disk)
+ * - A manual test's STEP field (`label="Step"` in `<epic-item id="m3">`;  epic `epic-engine` T165):  a paste box under
+ *   each step's command (`<epic-step-output>`), put there and kept in step with its text by `StepOutputs`
  ****************/
 export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
   @E.proto static vocabulary = epicFieldVocabulary
@@ -196,6 +200,21 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
     return text
   }
 
+  /**
+   * A manual test's Step field (T165):  where its paste boxes stand (`StepOutputs.signature()`), followed as its text
+   * changes;  `""` for any other field.
+   */
+  @E.watches({ childList: true, subtree: true })
+  get stepOutputs(): string {
+    return this.isConnected ? StepOutputs.signature(this.domElement) : ""
+  }
+
+  /** Its paste boxes out of step with its text:  put right, after the Solid update that said so. */
+  @E.onChange("stepOutputs")
+  protected onStepOutputs(signature: string) {
+    if (signature) E.afterSolidUpdate(() => StepOutputs.place(this.domElement))
+  }
+
   /** A request's screenshots are thumbnails:  the page sheet that draws them, registered once per page. */
   @E.onChange("isRequest")
   protected onRequest(request: boolean) {
@@ -253,8 +272,7 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
             controls: BODY_ID,
             labelledBy: LABEL_ID,
             clicks: true,
-            part: this.partForName("toggle"),
-            tips: { fold: this.translationForKey("foldFieldTip"), unfold: this.translationForKey("unfoldFieldTip") }
+            part: this.partForName("toggle")
           })}
         </span>
         <span class={ICON} part={this.partForName("icon")} aria-hidden="true" onClick={toggle}>
@@ -310,8 +328,7 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
           {this.requestFold.button({
             controls: BODY_ID,
             labelledBy: LABEL_ID,
-            part: this.partForName("toggle"),
-            tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
+            part: this.partForName("toggle")
           })}
           <b id={LABEL_ID} class={LABEL} part={this.partForName("label")}>
             {this.label}

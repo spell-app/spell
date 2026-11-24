@@ -210,17 +210,27 @@ MESSAGES: dict[str, str] = {
     "file-open": "Open a file",
     "file-reopen": "Reopen {file} to save to it.",
     "file-reopen-button": "Reopen",
-    "file-missing": "Can't find {file}. It may have been moved, renamed or deleted. Your changes are safe on this device.",
+    "file-missing": (
+        "Can't find {file}. It may have been moved, renamed or deleted. Your changes are safe on this device."
+    ),
     "file-find": "Find it",
     "file-save-new": "Save as new file",
     "file-changed": "{file} changed. Read it again?",
     "file-read-again": "Read it again",
     "file-conflict-title": "{file} changed",
-    "file-conflict": "Someone changed {file} after you opened it. Which version do you want to keep?\nKeep theirs: open their version. Your changes are kept on this device, not lost.\nKeep yours: save your version over theirs.\nKeep both: save your version as a new file.",
+    "file-conflict": (
+        "Someone changed {file} after you opened it. Which version do you want to keep?\n"
+        "Keep theirs: open their version. Your changes are kept on this device, not lost.\n"
+        "Keep yours: save your version over theirs.\n"
+        "Keep both: save your version as a new file."
+    ),
     "file-keep-theirs": "Keep theirs",
     "file-keep-yours": "Keep yours",
     "file-keep-both": "Keep both",
-    "file-downloaded": "{file} is in your Downloads folder. This browser can't save back to the file you opened, so each save downloads a new copy.",
+    "file-downloaded": (
+        "{file} is in your Downloads folder. "
+        "This browser can't save back to the file you opened, so each save downloads a new copy."
+    ),
 }
 
 # A named placeholder in a message, `{type}`.

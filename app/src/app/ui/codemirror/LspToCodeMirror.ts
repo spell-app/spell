@@ -14,7 +14,7 @@ import {
   type Range,
   type TextEdit,
   type WorkspaceEdit
-} from "vscode-languageserver"
+} from "vscode-languageserver-types"
 
 import { LSP } from "spell/app/lsp"
 

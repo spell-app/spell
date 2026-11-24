@@ -1,10 +1,11 @@
-import { existsSync, readFileSync } from "node:fs"
+import { readFileSync } from "node:fs"
 import path from "node:path"
 
 import { describe, expect, test } from "vite-plus/test"
 
 import { keepingCommentsIn } from "spell/util/node/json5"
 import { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
+import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
 
 import { AppUIDataBuilder } from "spell/app/app/tools/AppUIDataBuilder"
 
@@ -29,21 +30,12 @@ describe("AppUIDataBuilder.build()", () => {
     )
   })
 
-  test("search.json5 is up to date with the pages' sections", () => {
-    expect(readFileSync(BUILDER.searchFile, "utf8")).toBe(keepingCommentsIn(BUILDER.searchFile, BUILDER.searchText()))
-  })
-
-  test("EVERY page it lists is there, in the set's folder", () => {
-    const missing = Object.keys(DATA.families)
-      .map((family) => `${family}.html`)
-      .filter((page) => !existsSync(path.join(BUILDER.dataFolder, "..", page)))
+  test("EVERY page it lists is in the guide's site, at its address (epic `editor` P44)", () => {
+    const site = readFileSync(path.join(BUILDER.root, "spaces/@spell/guides/AppUI/AppUI.spell"), "utf8")
+    const missing = Object.keys(DATA.families).filter(
+      (family) => !site.includes(`page at "${SpellUIGuide.setAddressOf("app", family).replace("/components/app", "")}"`)
+    )
     expect(missing).toEqual([])
-  })
-
-  test("the set's home links EVERY page", () => {
-    const home = readFileSync(path.join(BUILDER.dataFolder, "..", "index.html"), "utf8")
-    const unlinked = Object.keys(DATA.families).filter((family) => !home.includes(`href="${family}.html"`))
-    expect(unlinked).toEqual([])
   })
 
   test("EVERY page's component points at its page, in its banner", () => {
@@ -52,7 +44,8 @@ describe("AppUIDataBuilder.build()", () => {
       ...VOCABULARY_FAMILY_FILES
     }
     const silent = Object.entries(files).filter(
-      ([family, file]) => !file || !readFileSync(path.join(BUILDER.root, file), "utf8").includes(`docs/${family}.html`)
+      ([family, file]) =>
+        !file || !readFileSync(path.join(BUILDER.root, file), "utf8").includes(SpellUIGuide.setAddressOf("app", family))
     )
     expect(silent.map(([family]) => family)).toEqual([])
   })
@@ -63,7 +56,7 @@ describe("AppUIDataBuilder.build()", () => {
     expect(DATA.components.find((tag) => tag.tag === "spell-viewer")).toMatchObject({
       name: "<spell-viewer>",
       topics: ["web components"],
-      href: "spell-viewer.html"
+      href: "/components/app/spell-viewer"
     })
   })
 

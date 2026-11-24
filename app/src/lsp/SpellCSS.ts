@@ -1,13 +1,8 @@
 import { TextDocument } from "vscode-languageserver-textdocument"
 // NOTE: `TextDocument` isn't taken from here:  node can't see this package's re-export of it
-import {
-  getCSSLanguageService,
-  type CompletionList,
-  type Diagnostic,
-  type Hover,
-  type LanguageService,
-  type Position
-} from "vscode-css-languageservice"
+import type { CompletionList, Diagnostic, Hover, LanguageService, Position } from "vscode-css-languageservice"
+
+import { LoadOnce } from "spell/util/LoadOnce"
 
 /**
  * CSS inside spell:  the `<css>` blocks a type's outline holds, edited AS CSS.
@@ -29,6 +24,12 @@ import {
  *   so the spell editor's instant colouring, which never parses, uses the same lines (`SpellCSS.OPEN_LINE` ...).
  * - Spell's own rule for the block is `css_block`:  it compiles the CSS to the type's class.
  * - Browser-safe, like the rest of `spell/app/lsp`.
+ * - VS Code's CSS service loads on first use (`SpellCSS.load()`, epic `solid-2-final` P6):
+ *   it's 180 KB brotli, and 1.25 MB to parse, that a file with no `<css>` block never needs.
+ *   - finding a block starts loading it (`regionsIn()`)
+ *   - until it's in, completion in a block answers no items, hover nothing, and the block no mistakes:
+ *     whoever shows mistakes works them out again once it lands (`SpellCSS.load()`, the editor's `FileStates`)
+ *   - the language server's own process (VS Code's) loads it at start (`server.ts`):  nothing waits there
  */
 export class SpellCSS {
   /** A line that opens a CSS block:  `<css>` alone, indented to anything. */
@@ -38,10 +39,35 @@ export class SpellCSS {
   /** URI the CSS service sees for a block's document:  it reads none of it but the scheme. */
   static DOCUMENT_URI = "spell-css://block.css"
 
-  /** VS Code's CSS service, made the first time something asks. */
-  static #service: LanguageService | undefined
-  static get service(): LanguageService {
-    return (SpellCSS.#service ??= getCSSLanguageService())
+  /** VS Code's CSS service, loaded once:  `load()`, `service`. */
+  private static loads = new LoadOnce<"service", LanguageService>()
+
+  /**
+   * Load VS Code's CSS service, once;  resolves to it.
+   * - Its module is imported then, not before:  see the class.
+   */
+  static load(): Promise<LanguageService> {
+    return SpellCSS.loads.get("service", async () =>
+      (await import("vscode-css-languageservice")).getCSSLanguageService()
+    )
+  }
+
+  /** VS Code's CSS service, once it's loaded;  `undefined` until then, and asking starts the load. */
+  static get service(): LanguageService | undefined {
+    const service = SpellCSS.loads.valueOf("service")
+    if (!service) SpellCSS.loadSoon()
+    return service
+  }
+
+  /** Is the CSS service in, so a block's answers are the real ones? */
+  static get isLoaded(): boolean {
+    return SpellCSS.loads.valueOf("service") !== undefined
+  }
+
+  /** Start loading the CSS service, if it isn't yet.  NEVER throws:  a failure is logged, and blocks answer nothing. */
+  static loadSoon(): void {
+    if (SpellCSS.loads.has("service")) return
+    SpellCSS.load().catch((error: unknown) => console.error("SpellCSS:  couldn't load the CSS service", error))
   }
 
   /** Blocks of the text worked out last, with that text:  every request in a row asks about the same text. */
@@ -69,10 +95,15 @@ export class SpellCSS {
     return regions
   }
 
-  /** Blocks in `text`, worked out once per text. */
+  /**
+   * Blocks in `text`, worked out once per text.
+   * - SIDE EFFECT:  a block found starts loading the CSS service (`SpellCSS.loadSoon()`).
+   */
   regionsIn(text: string): CSSRegion[] {
     if (this.#regionsCache?.text !== text) this.#regionsCache = { text, regions: SpellCSS.regionsIn(text) }
-    return this.#regionsCache.regions
+    const { regions } = this.#regionsCache
+    if (regions.length && !SpellCSS.isLoaded) SpellCSS.loadSoon()
+    return regions
   }
 
   /** Block whose CSS holds `offset`, if any -- NOT its `<css>` / `</css>` lines. */
@@ -85,27 +116,43 @@ export class SpellCSS {
     return this.regionsIn(text).some((region) => region.start <= offset && offset < region.end)
   }
 
-  /** CSS completions at `position` (at `offset`) in `text`, or `undefined` outside every block. */
+  /**
+   * CSS completions at `position` (at `offset`) in `text`, or `undefined` outside every block.
+   * - No items, marked incomplete, while the CSS service loads:  spell's own never show inside a block.
+   */
   completion(text: string, offset: number, position: Position): CompletionList | undefined {
     const region = this.regionAt(text, offset)
     if (!region) return undefined
+    const { service } = SpellCSS
+    if (!service) return { isIncomplete: true, items: [] }
     const document = SpellCSS.documentFor(text, region)
-    return SpellCSS.service.doComplete(document, position, SpellCSS.service.parseStylesheet(document))
+    return service.doComplete(document, position, service.parseStylesheet(document))
   }
 
-  /** CSS hover at `position` (at `offset`) in `text`, or `undefined` outside every block. */
+  /**
+   * CSS hover at `position` (at `offset`) in `text`, or `undefined` outside every block.
+   * - `null` while the CSS service loads.
+   */
   hover(text: string, offset: number, position: Position): Hover | null | undefined {
     const region = this.regionAt(text, offset)
     if (!region) return undefined
+    const { service } = SpellCSS
+    if (!service) return null
     const document = SpellCSS.documentFor(text, region)
-    return SpellCSS.service.doHover(document, position, SpellCSS.service.parseStylesheet(document))
+    return service.doHover(document, position, service.parseStylesheet(document))
   }
 
-  /** CSS mistakes in every block of `text`, at their place in the text. */
+  /**
+   * CSS mistakes in every block of `text`, at their place in the text.
+   * - None while the CSS service loads:  work them out again once `SpellCSS.load()` resolves.
+   */
   diagnostics(text: string): Diagnostic[] {
-    return this.regionsIn(text).flatMap((region) => {
+    const regions = this.regionsIn(text)
+    const { service } = SpellCSS
+    if (!regions.length || !service) return []
+    return regions.flatMap((region) => {
       const document = SpellCSS.documentFor(text, region)
-      return SpellCSS.service.doValidation(document, SpellCSS.service.parseStylesheet(document)) ?? []
+      return service.doValidation(document, service.parseStylesheet(document)) ?? []
     })
   }
 

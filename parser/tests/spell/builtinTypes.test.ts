@@ -155,7 +155,7 @@ describe("built-in type table", () => {
   })
 
   test("a `stored` member in another language's words compiles to its own name:  Spanish's `nombre` is `name`", () => {
-    const list = SP.spanish.rootScope.types.get("list", "LOCAL_ONLY")!
+    const list = SP.Language.for("es").rootScope.types.get("list", "LOCAL_ONLY")!
     expect(list.getMember("nombre")).toMatchObject({ name: "nombre", output: "name", datatype: "text" })
     expect(list.getMember("id")).toMatchObject({ name: "id" })
     expect(list.getMember("id")).not.toHaveProperty("output")

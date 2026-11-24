@@ -362,6 +362,8 @@ export class UIProperty extends UIField {
   get controlKind(): string | undefined {
     if (!this.isReady) return undefined
     if (this.requestedKind) return this.requestedKind
+    // an element's own words are prose, as long as they like:  a box that grows with them (epic `editor` T147)
+    if (this.propertyName === WORDS_PROPERTY) return TEXT_KIND
     const choices = this.choices
     const isIconRow =
       this.valueType === CHOICE &&
@@ -378,6 +380,15 @@ export class UIProperty extends UIField {
   get control(): PropertyControl | undefined {
     const kind = this.controlKind
     return kind ? UI.propertyControls.get(kind) : undefined
+  }
+
+  /**
+   * `:state(long-text)`:  its control is a box of prose (the `text` kind).
+   * - Never bold for being set, as a word in a field is:  a whole paragraph in bold is hard to read (epic `editor` T147).
+   */
+  @E.cssState("long-text")
+  get isLongText(): boolean {
+    return this.controlKind === TEXT_KIND
   }
 
   /** `:state(buttons)`:  its control is a row of choices (a kind drawn as `radios`). */
@@ -968,6 +979,10 @@ const SEGMENTED_KIND = "buttons"
 /** The built-in kind of a yes or no, a box;  and its switch, which a compact editor draws instead. */
 const CHECKBOX_KIND = "checkbox"
 const TOGGLE_KIND = "toggle"
+
+/** The kind of a box of prose, `<ui-textarea grow>`;  and the property it's the default for, an element's own words. */
+const TEXT_KIND = "text"
+const WORDS_PROPERTY = "textContent"
 
 /** A segmented menu's look word. */
 const SEGMENTED = "segmented"

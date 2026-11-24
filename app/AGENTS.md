@@ -134,7 +134,7 @@ Each folder of `src/` links to its own `AGENTS.md`:  read it before working ther
 
 | Folder | Import | Namespace | What it is |
 | --- | --- | --- | --- |
-| [app](src/app/AGENTS.md) | `spell/app/app` | `UI` | the web app, the runner, and the `<spell-viewer>` / `<spell-editor>` web components (`src/app/components/`);  `yarn start` / `build*` are its scripts, at `app/`'s root;  its build folder is `app/` (Vite's configs and root), with App UI, the docs pages of its components, in `app/docs/` (at `/components/app/`) |
+| [app](src/app/AGENTS.md) | `spell/app/app` | `UI` | the web app, the runner, and the `<spell-viewer>` / `<spell-editor>` web components (`src/app/components/`);  `yarn start` / `build*` are its scripts, at `app/`'s root;  its build folder is `app/` (Vite's configs and root), with App UI's viewer page and data in `app/docs/` (at `/components/app/`;  its guide, `@spell/guides/AppUI`) |
 | [spaces](src/spaces/AGENTS.md) | `spell/app/spaces` | `SPACES` | where projects and people live:  its models (`models/`, browser-safe:  spell's project groups and lists), projects on disk (`server/node/projects/`), and the servers that serve them, the editor's (`server/node/`) and Python's, `spell_quart` (`server/py/`, a uv project);  the built-in projects are in `spaces/@spell/`, beside `src/` |
 | [lsp](src/lsp/AGENTS.md) | `spell/app/lsp` | `LSP` | spell's language server:  the service browser-safe, its process (`server.ts`) and disk workspace node only |
 | [cli](src/cli/AGENTS.md) | `spell/app/cli` | `CLI` | the app's part of the `spell` command-line tool, running the kit's SOURCE through `tsx`;  see the kit's [README/cli.md](../README/cli.md) too |
@@ -163,9 +163,8 @@ More on some of them:
     - The extension's output says which it picked;  the code is `findSpellApp()` ([spellAppRoot.ts](vscode/src/spellAppRoot.ts)).
   - In `.tsx` / `.jsx` files it also gives custom elements' slot, part and dashed-attribute help
     ([ElementsHelp.ts](vscode/src/ElementsHelp.ts), the kit's `JsxElementHelp` bundled in, with TypeScript 6 to read JSX);
-    and it carries Spell UI's and the brand's HTML and CSS data, copied in by its build:
+    and it carries Spell UI's HTML and CSS data, copied in by its build:
     a vocabulary change shows there after `spell app vscode`.
-    - The brand's comes from spell-brand, beside the kit (`~/www/spell-brand`);  without it, an empty set.
   - The Review and Details tabs and the window bridge are the `epic/` folder's own extension, not this one.
 - THE PAGE SERVER is the kit's, started from the kit's root only (`spell server start`, from any folder;
   epic `repo-split` P16):  [the kit's server AGENTS.md](../src/server/AGENTS.md).
@@ -174,31 +173,34 @@ More on some of them:
     - `routes`:  the app's route module, [appRoutes.ts](src/spaces/server/node/routes/appRoutes.ts) (the app's
       `/api`, `/element/`, the editor, the built-in projects' build)
     - `pageScripts`:  `spell-language.js` (`app/dist-element/`), which colours spell on the docs pages
-    - `componentSets`:  App UI, `app/docs`, with Spell UI's site bundle (`../ui/site/_assets`)
+    - `componentSets`:  App UI, `app/docs`, its `sitePage` the viewer page of its guide (`@spell/guides/AppUI`)
   - Until P16 its `src/page-server/` added the bundles' build, the offline highlight.js swap and the `/ui/` bridge,
     and its `package.json` held every repo's settings:  now the kit's server, the `epic/` folder's `localCopies` and the
     epic repo's `gone`.
   - The editor's record, `.spell-server.editor.json`, is at the page server's root:  the kit's
     ([the kit's epic settings](../.epic/config.json5)' `app.urlFile`).
-- COMPONENT SETS (epic `epic-workflow` P10;  one layout since `people-and-orgs` P18):
-  a set of elements and their docs pages in Spell UI's page shape, tracked with their folder.
+- COMPONENT SETS (epic `epic-workflow` P10;  one layout since `people-and-orgs` P18;  Spell guides since epic
+  `editor` P43-P44):  a set of elements, and its guide, a Spell guide in the `@spell/guides` group.
   - In the set's folder:
     - `components/`:  the elements (the app's:  `src/app/components/`)
-    - `docs/`:  ONE flat folder of pages (the app's:  `app/docs/`);  an element's page is its tag, `epic-item.html`
-      - `__parts/`:  every page's frame
-      - `__data/`:  the side column's data
-  - Served at `/components/<set>/` by the kit's page server,
-    which lays a build of Spell UI's site over the folder at `_assets/`.
+    - `docs/`:  the page that shows its guide with no editor (`index.html`, the set's `sitePage`), and the data and
+      pictures the guide reads
+  - Served at `/components/<set>/` by the kit's page server:  every address there gets that page, whose
+    `<spell-viewer>` shows the guide's page it names (`/components/app/menu-bar`).
     - The list:  `componentSets`, in each folder's part of the settings (its `package.json`'s `"pageServer"`).
   - The sets:
-    - Spell UI:  [spell-ui's docs/](../ui/docs/), at `/components/ui/`
-    - Epic UI:  [epic's docs/](../epic/src/docs/), at `/components/epics/`
-    - App UI:  [app's docs/](app/docs/), at `/components/app/`:  the app folder's only one
-    - Brand UI:  spell-brand's `docs/`, beside the kit (`~/www/spell-brand/docs/`), at `/components/brand/`
-  - A set that's a component PACK (epics, brand) is built by the kit's pack tooling, `spell-pack build`
+    - Spell UI:  [spell-ui's docs/](../ui/docs/), at `/components/ui/`:  the Spell UI site, `@spell/guides/SpellUI`
+    - Epic UI:  [epic's docs/](../epic/src/docs/), at `/components/epics/`:  `@spell/guides/EpicUI`
+    - App UI:  [app's docs/](app/docs/), at `/components/app/`:  `@spell/guides/AppUI`, the app folder's only one
+    - (Brand UI, spell-brand's, went with that repo:  epic `epic-engine` T124)
+    - Each page's address:  `SpellUIGuide` (Spell UI's util), which mends a link to an old HTML page too
+      (`/components/app/MenuBar.html` => `/components/app/menu-bar`).
+  - A set that's a component PACK (epics) is built by the kit's pack tooling, `spell-pack build`
     ([ComponentPack.ts](../src/element-tools/ComponentPack.ts)):  each pack's `yarn pack:build`.
-    `spell pack build <pack>` calls the same tool, and finds the brand's pack in spell-brand, beside the kit.
-  - The top bar's Spell/UI, Epic/UI and App/UI tabs;  the brand's set lights the Brand tab.
+    `spell pack build <pack>` calls the same tool.
+    - A guide draws a pack's elements live:  its layout names the pack (`<ui-components source>`), which a page with
+      only `<spell-viewer>` loads (`PagePacks`, the app's components folder).
+  - The top bar's Spell/UI, Epic/UI and App/UI tabs.
     - The tabs are settings too:  `siteTabs`, in the Epic repo's part (`spell.epics/page-server.json5`), in the
       bar's order, each naming what lights it (epic `repo-split` I4, P16;
       [the kit's server AGENTS.md](../src/server/AGENTS.md)).
@@ -213,13 +215,12 @@ Everything else is in the kit `spell` (`~/www/spell`):  its own `src/`, and the 
   "Which folder holds what".
 - Each folder's rules:  its own `AGENTS.md`
   ([parser's](../parser/AGENTS.md), [ui's](../ui/AGENTS.md), [epic's](../epic/AGENTS.md)).
-- Beside the kit, NOT in it:  spell-brand, its own repo, at `~/www/spell-brand`.
+- Beside the kit, NOT in it:  nothing today (spell-brand was dropped, epic `epic-engine` T124).
 - `app/` is the highest folder.
   - It NEEDS the kit's `src/`, `parser/` and `ui/`:  it imports them.
   - It names `epic/` nowhere since epic `repo-split` P16:  the `epic/` folder declares its own part of the kit's page
     server's settings.
     - One command imports the epic tool's node files, by path:  `spell content update` (below, "The `epic/` folder").
-  - It imports nothing of spell-brand;  only the VS Code extension's build copies the brand's data, when it's there.
   - Nothing imports the app:  every arrow points down (the lint's `spell/no-upward-import`).
 
 ### Which folder may import which
@@ -372,7 +373,6 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
 - `spell dev` and its old spellings of the epic verbs are gone (epic `repo-split` P13):
   callers say `epic <verb>` (`epic pages <verb>` for the docs tools, `epic ask` for details pages).
   - `spell design <sync verb>` (Spell UI's command) runs the engine's design tool.
-  - `spell design bundle | check` run spell-brand's (epic `repo-split` P10).
 - The engine's generated files (the docs bundle, the epics pack, Epic UI's data) are the `epic/` folder's to build.
 - Its page bundles are built from the MAIN checkout:
   a worktree's change to Spell UI shows on the epic pages only once it's merged,
@@ -388,7 +388,7 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
   (the kit's [AGENTS.md](../AGENTS.md), at its top).
   - NOT `@`-imported on purpose:  it loads only when the task needs it.
   - Claude also has the [solid-2 skill](.claude/skills/solid-2/SKILL.md), which triggers on Solid work.
-- The why and the measurements:  [the Solid 2 guide](../spell.epics/guides/solid/solid-2.html).
+- The why and the measurements:  [the Solid 2 guide](../guides/solid/solid-2.html).
 - The API:  [the Solid 2 cheatsheet](../spell.epics/guides/solid/cheatsheet.html).
 - MUST keep `solid-2.md` up to date when a Solid decision changes, or an RC bump changes behaviour.
 - How `ui` writes its elements on Solid:  "Solid authoring" in [spell-ui's AGENTS.md](../ui/AGENTS.md).

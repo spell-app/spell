@@ -1,4 +1,4 @@
-import { InsertTextFormat, type Command, type CompletionItem } from "vscode-languageserver"
+import { InsertTextFormat, type Command, type CompletionItem } from "vscode-languageserver-types"
 
 import { withoutAccents } from "spell/util/string"
 import { P } from "spell/parser/parser"
@@ -93,9 +93,16 @@ export class CompletionShapes {
    *   but its closing tag is written out in full, on the same line (Owen, T68):  the caret's in the tag, not under it.
    * - `scope`:  any scope of the file's language, its components' help from its packs (`SP.ComponentPacks`);
    *   help that hasn't loaded yet leaves a component as "anything else".
+   * - `isOwnType(tag)`:  does the tag name one of the program's types?  Default:  `scope` knows it.
+   *   The app's editor asks its language worker's last parse, where the page's own may be behind
+   *   (epic `solid-2-final` T36).
    */
-  static spaceAfterTag(scope: P.Scope, tag: string): Partial<CompletionItem> {
-    const shape = CompletionShapes.shapeOf(scope, tag)
+  static spaceAfterTag(
+    scope: P.Scope,
+    tag: string,
+    isOwnType: (tag: string) => boolean = (each) => !!scope.getType(SP.typeName(each))
+  ): Partial<CompletionItem> {
+    const shape = CompletionShapes.shapeOf(scope, tag, isOwnType)
     // oxfmt-ignore
     const snippet =
       shape === "named" ? `"$1" />`
@@ -113,11 +120,15 @@ export class CompletionShapes {
    * The shape tag `tag` is written in, as `scope`'s language reads it:
    * spell's own tag's (`SPELL_TAG_SHAPES`), else its component's, else `holds`.
    */
-  private static shapeOf(scope: P.Scope, tag: string): TagShape {
+  private static shapeOf(
+    scope: P.Scope,
+    tag: string,
+    isOwnType: (tag: string) => boolean = (each) => !!scope.getType(SP.typeName(each))
+  ): TagShape {
     const meaning = SP.spellTagsIn(scope).find((each) => each.tag === tag)?.meaning
     if (meaning) return SPELL_TAG_SHAPES[meaning] ?? "holds"
     // the program's own view (`<column>` => `column`):  named by its id, it draws itself, so it closes itself (I149)
-    if (scope.getType(SP.typeName(tag))) return "named"
+    if (isOwnType(tag)) return "named"
     const packs = (scope.parser as SP.SpellParser | undefined)?.packs ?? SP.ComponentPacks.DEFAULT
     const help = SP.ComponentPacks.help(SP.Language.of(scope).lang, packs)?.tags.find((each) => each.tag === tag)
     return CompletionShapes.componentShape(scope, help ?? { tag })

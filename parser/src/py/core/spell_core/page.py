@@ -24,6 +24,7 @@ session.handle({"trigger": "card-click", "details": {"card": {"$id": "12"}}})
   - A reference's place (`Tableau#1`) counts the things this page was sent, in the order it was sent them:
     the order its copies were made in.
 - Each message is run, then answered with what it changed (`StateWriter.patch()`).
+  - Its saves are sent before the next line is read, which holds up the loop until it comes.
 - A dialog the program shows (`alert`, `confirm` ...) is a question to the page, `{"ui": "confirm", ..., "asks": 1}`,
   which the page's next line answers, `{"answer": 1, "value": true}` (`spell_core.ui_methods`).
 - A page's messages use Python's names:  its javascript was written with them (`PY.ElementsWriter`).
@@ -239,6 +240,8 @@ def main(argv: list[str] | None = None) -> None:
             if line.strip():
                 patch = await session.handle_async(json.loads(line))
                 print(json.dumps(patch, ensure_ascii=False), flush=True)
+                # reading the next line stops the loop, and the saves' tasks with it:  so they go first
+                await core.saves_sent()
 
     asyncio.run(answer_each_line())
 

@@ -128,9 +128,26 @@ export const itemVocabulary = {
       description:
         "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, " +
         "toolbar;  upright in a row).  Its old name was `type`."
+    },
+    {
+      name: "closable",
+      group: "behaviour",
+      kind: "string",
+      description:
+        "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows " +
+        "or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put " +
+        "away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, " +
+        "unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place."
     }
   ],
-  events: [],
+  events: [
+    {
+      name: "ui-closing",
+      detail: "{ originalEvent?: Event }",
+      cancelable: true,
+      description: "Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it."
+    }
+  ],
   slots: [
     {
       name: "",
@@ -156,12 +173,16 @@ export const itemVocabulary = {
     {
       name: "tick",
       description: "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
-    }
+    },
+    { name: "close", description: "A `closable` item's ✕, in its icon's place while hovered." }
   ],
   states: [
     { name: "selected", description: "Chosen (`selected` or `active`)." },
-    { name: "disabled", description: "Can't be chosen." }
+    { name: "disabled", description: "Can't be chosen." },
+    { name: "dragged", description: "Being dragged along a `<ui-toolbar reorderable>`'s row." },
+    { name: "drop-before", description: "Where a dragged item of the row would land:  before this one." },
+    { name: "drop-after", description: "Where a dragged item of the row would land:  after this one." }
   ],
-  texts: [],
+  texts: [{ key: "close", text: "Close", description: "A `closable` item's ✕:  its tooltip." }],
   ownsParts: ["content", "header", "meta", "description", "extra", "avatar"]
 } as const satisfies E.ComponentVocabulary

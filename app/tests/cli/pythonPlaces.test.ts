@@ -13,7 +13,7 @@ import { spawn } from "child_process"
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "fs"
 import { createServer } from "http"
 import { tmpdir } from "os"
-import { join, resolve } from "path"
+import { dirname, join, resolve } from "path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell/server"
@@ -196,6 +196,10 @@ describe("a Python program's places, over a restart", () => {
       atmosphere = await new FakeAtmosphere().start(["host-1"])
       atmosphere.addAccount(DID, { handle: "ana.test", host: "host-1", password: "an-app-password" })
       writeFileSync(join(kept, "TaskList.spell.py"), compiledFixture(TASK_LIST, "py"))
+      // the project's on disk, as a real run's is:  a CSV file is served only then, and no place's read waits for
+      // another place's saves, so the data folder's can't be what makes it
+      const sheet = SP.SpellUrls.folderFor(`@spell/test/${TASK_LIST}/__data/tasks.csv`)!
+      mkdirSync(dirname(dirname(join(spaces, ...sheet.path.split("/")))), { recursive: true })
     })
 
     afterAll(() => atmosphere?.close())

@@ -1,6 +1,6 @@
 import { existsSync, lstatSync, statSync } from "node:fs"
 import { cp, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises"
-import { basename, dirname, join, relative, resolve } from "node:path"
+import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
 import { SRV } from "spell/server"
 
@@ -31,6 +31,13 @@ export class FileOperations {
    */
   content?: string
 
+  /**
+   * the folders worktrees are in, once the page server serves them at `/worktrees/<w>/` (`PageServer.serveWorktrees()`)
+   * - a worktree's own file in a writable folder of its own (a guide moved into its code) is written THERE, by the
+   *   path its page is told (`worktreeFileOf()`;  epic `epic-engine` T132)
+   */
+  worktrees: string[] = []
+
   /** the `writable` folders' names, relative to `writableRoot` */
   private writableNames: string[]
 
@@ -44,9 +51,16 @@ export class FileOperations {
     return this.content ?? this.root
   }
 
-  /** absolute folders `/api/files` may change things in;  nothing outside them */
+  /**
+   * absolute folders `/api/files` may change things in;  nothing outside them
+   * - once there's an epic folder, its folders AND the checkout's own folders of those names that it has:
+   *   a guide moved into the code (the kit's `guides/`, epic `epic-engine` P79) is edited where it is, on its branch
+   */
   get writable(): string[] {
-    return this.writableNames.map((folder) => resolve(this.writableRoot, folder))
+    const folders = this.writableNames.map((folder) => resolve(this.writableRoot, folder))
+    if (!this.content) return folders
+    const own = this.writableNames.map((folder) => resolve(this.root, folder)).filter((folder) => existsSync(folder))
+    return [...own, ...folders]
   }
 
   ////////////////
@@ -93,7 +107,7 @@ export class FileOperations {
     if (typeof contents !== "string")
       throw new SRV.HttpError(400, "nothing to save:  send the contents as text, or as JSON { contents }")
     const etag = await FileOperations.save(file, contents, { ifMatch: request.get("if-match") })
-    reply.set("Cache-Control", "no-store").json({ path, etag })
+    reply.noStore().json({ path, etag })
   }
 
   /**
@@ -107,7 +121,7 @@ export class FileOperations {
     const { path, file } = this.writableFile(body.path)
     const contents = typeof body.contents === "string" ? body.contents : undefined
     const etag = await FileOperations.create(file, { contents, folder: body.folder === true })
-    reply.set("Cache-Control", "no-store").json({ path, etag })
+    reply.noStore().json({ path, etag })
   }
 
   /**
@@ -119,7 +133,7 @@ export class FileOperations {
   private async request_rename(request: SRV.Request, reply: SRV.Reply): Promise<void> {
     const { from, to } = this.writablePair(request.body)
     await FileOperations.rename(from.file, to.file)
-    reply.set("Cache-Control", "no-store").json({ path: from.path, to: to.path })
+    reply.noStore().json({ path: from.path, to: to.path })
   }
 
   /**
@@ -131,7 +145,7 @@ export class FileOperations {
   private async request_duplicate(request: SRV.Request, reply: SRV.Reply): Promise<void> {
     const { from, to } = this.writablePair(request.body)
     await FileOperations.duplicate(from.file, to.file)
-    reply.set("Cache-Control", "no-store").json({ path: from.path, to: to.path })
+    reply.noStore().json({ path: from.path, to: to.path })
   }
 
   /**
@@ -142,11 +156,12 @@ export class FileOperations {
   private async request_delete(request: SRV.Request, reply: SRV.Reply): Promise<void> {
     const { path, file } = this.writableFile(request.query.path)
     await FileOperations.delete(file)
-    reply.set("Cache-Control", "no-store").json({ path })
+    reply.noStore().json({ path })
   }
 
   /**
    * The file a request names by URL path:  under `writableRoot`, inside a `writable` folder, there or not.
+   * - the checkout's own file first, when it has one in a writable folder of its own (`writable`)
    * - throws `HttpError`:  400 no path or a bad one;  403 `..`, a dot file, or not in a `writable` folder
    *   (nor a `writable` folder itself)
    * - the page editor (`/api/pages`) holds its writes to the same list through this
@@ -156,7 +171,12 @@ export class FileOperations {
     if (typeof one !== "string" || !one)
       throw new SRV.HttpError(400, "a path is required, e.g. /guides/server/notes.md")
     const path = one.startsWith("/") ? one : `/${one}`
-    const file = SRV.fileInside(this.writableRoot, path)
+    // a worktree's own file, in a writable folder of ITS own (a guide moved on its branch):  that worktree's copy
+    const inWorktree = this.worktreeFileOf(path)
+    if (inWorktree) return { path, file: inWorktree }
+    // a file the checkout itself has, in a writable folder of its own (a moved guide):  that one, as it's served
+    const own = this.content ? SRV.fileInside(this.root, path) : undefined
+    const file = own && existsSync(own) ? own : SRV.fileInside(this.writableRoot, path)
     const writable = this.writable
     if (!writable.some((folder) => file !== folder && SRV.isInside(folder, file))) {
       const folders = writable.map((folder) => `${relative(this.writableRoot, folder)}/`).join(", ")
@@ -166,6 +186,45 @@ export class FileOperations {
       )
     }
     return { path, file }
+  }
+
+  /**
+   * Whether absolute `file` may be written here:  inside a `writable` folder, or one of a served worktree's own
+   * (`worktreeFileOf()`);  what tells a page it may be edited in place (`SPELL_SERVER.writable`)
+   */
+  canWrite(file: string): boolean {
+    if (this.writable.some((folder) => SRV.pathInside(folder, file))) return true
+    return this.worktrees.some((folder) => {
+      const name = SRV.pathInside(folder, file)?.split("/")[0]
+      if (!name) return false
+      return this.writableNames.some((each) => SRV.pathInside(join(folder, name, each), file))
+    })
+  }
+
+  /**
+   * The file of a WORKTREE that URL path `path` names, when it's in one of that worktree's own writable folders
+   * (`guides/` of a branch that moved a guide in);  `undefined` for any other path.
+   * - `path` as the page is told it (`SPELL_SERVER.file`):  from the checkout's root to the worktree's file,
+   *   `/../<worktrees folder>/<w>/guides/x.html`;  or by its address, `/worktrees/<w>/guides/x.html`
+   * - there or not (a new file):  only its folder must be a writable one the worktree has
+   * - why:  a page served under `/worktrees/<w>/` is read from that worktree, so an edit made on it must be saved
+   *   there, never in the main checkout or the epic folder (epic `epic-engine` T132)
+   * - throws `HttpError` as `fileInside()` does, for a bad name after the worktree's
+   */
+  worktreeFileOf(path: string): string | undefined {
+    for (const folder of this.worktrees) {
+      const prefixes = [`/${relative(this.root, folder).split(sep).join("/")}/`, WORKTREE_ADDRESS]
+      const prefix = prefixes.find((each) => path.startsWith(each))
+      if (!prefix) continue
+      const [name = "", ...rest] = path.slice(prefix.length).split("/")
+      if (!name || name.startsWith(".") || name === ".." || !rest.length) continue
+      const worktree = join(folder, decodeURIComponent(name))
+      if (!existsSync(worktree)) continue
+      const file = SRV.fileInside(worktree, `/${rest.join("/")}`)
+      const own = this.writableNames.map((each) => resolve(worktree, each)).filter((each) => existsSync(each))
+      if (own.some((each) => file !== each && SRV.isInside(each, file))) return file
+    }
+    return undefined
   }
 
   /** `{ path, to }` from a request's body, both writable;  throws as `writableFile()` */
@@ -348,3 +407,6 @@ export type FileSaveOptions = { ifMatch?: string }
  * - `folder`:  make a folder instead
  */
 export type FileCreateOptions = { contents?: string | Buffer; folder?: boolean }
+
+/** A worktree's address on the page server, before its name:  `/worktrees/<w>/...`. */
+const WORKTREE_ADDRESS = "/worktrees/"

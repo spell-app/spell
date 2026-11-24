@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { nagVocabulary } from "spell/ui/components/ui-nag/UINag.en"
@@ -48,7 +47,7 @@ describe("UINag.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = nagRaw + colorsCSS
+    const css = nagRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(nagVocabulary))
       expect(Sheets.covers(css, phrase), `${nagVocabulary.tag}: ${phrase}`).toBe(true)
   })
@@ -61,7 +60,7 @@ describe("UINag.css source", () => {
 describe("UINag.css examples", () => {
   it("draws a nag as a full-width, centred, dark bar with light text", () => {
     Sheets.adopt([...foundationCSS, nagCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const nag = root.querySelector<HTMLElement>('.ui.nag[class="ui nag"]')!
     const style = getComputedStyle(nag)
     expect(style.position).toBe("relative")
@@ -81,7 +80,7 @@ describe("UINag.css examples", () => {
 
   it("puts overlay nags over the frame's top and bottom edges", () => {
     Sheets.adopt([...foundationCSS, nagCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const top = root.querySelector<HTMLElement>(".ui.overlay.nag:not(.bottom)")!
     const bottom = root.querySelector<HTMLElement>(".ui.bottom.overlay.nag")!
     const frame = top.parentElement!.getBoundingClientRect()
@@ -94,19 +93,19 @@ describe("UINag.css examples", () => {
 
   it("fixes a fixed nag to the viewport", () => {
     Sheets.adopt([...foundationCSS, nagCSS])
-    const nag = Fixture.render(`<div class="ui bottom fixed nag">Fixed</div>`)
+    const nag = Sheets.render(`<div class="ui bottom fixed nag">Fixed</div>`)
     expect(getComputedStyle(nag).position).toBe("fixed")
     expect(nag.getBoundingClientRect().bottom).toBeCloseTo(window.innerHeight, 0)
   })
 
   it("inverts light, and colours by remap", () => {
     Sheets.adopt([...foundationCSS, nagCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const inverted = getComputedStyle(root.querySelector('.ui.inverted.nag[class="ui inverted nag"]')!)
     expect(Painted.luminance(inverted.backgroundColor)).toBeGreaterThan(0.6)
     expect(Painted.luminance(inverted.color)).toBeLessThan(0.07)
     const probe = getComputedStyle(
-      Fixture.render(`<span class="ui teal" style="background: var(--ui-color); color: var(--ui-color-on)"></span>`)
+      Sheets.render(`<span class="ui teal" style="background: var(--ui-color); color: var(--ui-color-on)"></span>`)
     )
     const teal = getComputedStyle(root.querySelector(".ui.teal.nag")!)
     expect(teal.backgroundColor).toBe(probe.backgroundColor)
@@ -115,7 +114,7 @@ describe("UINag.css examples", () => {
 
   it("scales by size;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, nagCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const size = (name: string) => parseFloat(getComputedStyle(root.querySelector(`.ui.${name}.nag`)!).fontSize)
     const ladder = ["mini", "small", "medium", "large", "huge"].map(size)
     expect([...ladder].sort((a, b) => a - b)).toEqual(ladder)
@@ -131,7 +130,7 @@ describe("UINag.css examples", () => {
 describe("UINag.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, nagCSS])
-    const root = Fixture.render(`<div style="--ui-nag-radius: 20px"><div class="ui nag">x</div></div>`)
+    const root = Sheets.render(`<div style="--ui-nag-radius: 20px"><div class="ui nag">x</div></div>`)
     expect(getComputedStyle(root.querySelector(".ui.nag")!).borderBottomLeftRadius).toBe("20px")
   })
 })

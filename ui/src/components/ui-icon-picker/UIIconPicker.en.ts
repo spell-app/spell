@@ -100,6 +100,11 @@ export const iconPickerVocabulary = {
     { name: "panel", description: "The open panel:  a popover under the field, holding the search box and the grid." },
     { name: "search", description: "The search box at the panel's top (`<input type=search>`)." },
     {
+      name: "browse",
+      description:
+        "Beside the search box, a `<ui-button>`:  every icon in a dialog, to pick from (`UIIconBrowser.openInDialog()`)."
+    },
+    {
       name: "grid",
       description:
         "The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
@@ -117,6 +122,11 @@ export const iconPickerVocabulary = {
   ],
   texts: [
     { key: "searchIcons", text: "Search icons", description: "The search box's placeholder and accessible name." },
+    {
+      key: "browseIcons",
+      text: "Show all icons, with their names",
+      description: "The Browse button's tooltip and accessible name."
+    },
     { key: "noIcon", text: "none", description: "The field's text, and the first cell's name, for no icon." },
     { key: "noIconsMatch", text: "No icons match", description: "The grid's message when the search finds nothing." },
     {

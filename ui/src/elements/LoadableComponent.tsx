@@ -2,7 +2,7 @@ import { untrack } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 // Import directly to avoid circular import
-import { lazy, proto, protoMerged } from "spell/ui/util"
+import { LoadOnce, lazy, proto, protoMerged } from "spell/ui/util"
 import { E, UI, type UIT } from "spell/ui/core"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
 import { UIComponent, cssState, watches, onChange, state, untracked } from "spell/element"
@@ -204,9 +204,9 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
       void UI.load().then(() => {
         if (!controller.signal.aborted) undo = UI.visibility.observe(this.domElement, { onOnScreen: start, once: true })
       })
-    } else if (policy === "idle" && typeof requestIdleCallback === "function") {
-      const id = requestIdleCallback(start, { timeout: IDLE_LOAD_LIMIT_MS })
-      undo = () => cancelIdleCallback(id)
+    } else if (policy === "idle") {
+      // a load that must happen, only later:  so it runs under Save-Data too
+      undo = LoadOnce.atIdle(start, { timeout: IDLE_LOAD_LIMIT_MS, ahead: false })
     } else start()
     return () => {
       controller.abort()
@@ -460,34 +460,16 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
    *   shared code never names a DOM global (`AGENTS.md` "Solid authoring" › SSR).
    */
   static inlineTextOf(domElement: HTMLElement): string {
-    let text = domElement.textContent ?? ""
-    for (const child of domElement.children) {
-      if (child.localName === "script" && (child as HTMLScriptElement).type.startsWith("text/")) {
-        text = (child as HTMLScriptElement).text
-        break
-      }
-      if (child.localName === "template") {
-        text = child.innerHTML
-        break
-      }
-    }
-    return LoadableComponent.dedent(text)
+    return E.InlineText.of(domElement)
   }
 
   /**
    * `text` without its common indent, and without blank first / last lines:
    * inline content is indented with the page's markup.
-   * - Tabs and spaces count one each;  blank lines don't set the indent.
-   * - Static:  pure text, no element needed.
+   * - `E.InlineText.dedent()`, which the page server's drawers read pages with too
    */
   static dedent(text: string): string {
-    const lines = text.replace(/\r\n?/g, "\n").split("\n")
-    while (lines.length && !lines[0].trim()) lines.shift()
-    while (lines.length && !lines[lines.length - 1].trim()) lines.pop()
-    let indent = Infinity
-    for (const line of lines) if (line.trim()) indent = Math.min(indent, line.length - line.trimStart().length)
-    if (!Number.isFinite(indent) || indent === 0) return lines.join("\n")
-    return lines.map((line) => line.slice(Math.min(indent, line.length - line.trimStart().length))).join("\n")
+    return E.InlineText.dedent(text)
   }
 }
 

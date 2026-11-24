@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { revealVocabulary } from "spell/ui/components/ui-reveal/UIReveal.en"
@@ -27,7 +26,7 @@ const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
 /** Adopt the sheet and render `html`. */
 function render(html: string): HTMLElement {
   Sheets.adopt([...foundationCSS, revealCSS])
-  return Fixture.render(html)
+  return Sheets.render(html)
 }
 
 /** The visible content of the reveal in `root` matching `selector`. */
@@ -117,7 +116,7 @@ describe("UIReveal.css examples", () => {
 describe("UIReveal.css tokens", () => {
   it("takes a public token from a wrapper or the reveal itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, revealCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-reveal-duration: 1s"><div class="ui fade reveal"><div class="visible content">A</div>` +
         `<div class="hidden content">B</div></div></div>` +
         `<div class="ui rotate reveal" style="--ui-reveal-duration: 2s"><div class="visible content">A</div>` +

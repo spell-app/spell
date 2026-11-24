@@ -66,6 +66,8 @@ function checkoutCheck(root: string): FlightCheck {
 /**
  * The checkout's page server, running;  `fix`:  `PageServer.ensure()`, which also restarts one older than its code
  * (after the merge that brought this epic in, so pages get airplane mode).
+ * - the main checkout's:  the server keeper starts it, when one runs (`PageServer.ensure()` asks it;  epic
+ *   `epic-engine` P82)
  */
 async function serverCheck(checkout: string, fix: boolean): Promise<FlightCheck> {
   const name = "page server"

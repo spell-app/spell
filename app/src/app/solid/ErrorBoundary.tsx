@@ -16,7 +16,7 @@ import { ErrorDisplay } from "spell/app/app/solid"
  * - It heals by itself:  when the data underneath changes and the children render, they come back.
  *   `reset()` (given to `fallback`) retries now.
  * - Non-`Error` throws are wrapped:  `new Error(String(thrown))`.
- * - SEE:  its App UI components page, `app/docs/ErrorBoundary.html` (`/components/app/ErrorBoundary.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/error-boundary`.
  ****************/
 export function ErrorBoundary(props: ErrorBoundaryProps) {
   return (

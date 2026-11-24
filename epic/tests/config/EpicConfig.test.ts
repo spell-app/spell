@@ -70,6 +70,7 @@ describe("EpicConfig", () => {
       sharedFolders: "epics,sagas,guides,pages",
       engineFolder: "",
       repoTemplates: "",
+      guidesFolder: "",
       windowsFolder: join(TOP, "repo.epics", "windows"),
       "app.path": "/editor/",
       "app.url": "",
@@ -90,6 +91,9 @@ describe("EpicConfig", () => {
       checkoutPatches: "",
       promptAck: true,
       freshHintMB: 8,
+      "issueBadges.recheckAt": 50,
+      "issueBadges.closeBelow": 25,
+      "issueBadges.fixAbove": 60,
       editor: "code",
       renamedRepos: "{}",
       colors: '{"people":{},"agents":{}}',
@@ -282,6 +286,9 @@ describe("EpicConfig", () => {
     // epic-eject T11:  the repo's own templates, none by default;  a folder from each checkout's root, as written
     expect(new EpicConfig(MAIN).repoTemplates).toBe("")
     expect(EpicConfig.settingsFrom('{ "repoTemplates": "docs/templates" }').repoTemplates).toBe("docs/templates")
+    // epic-engine P79:  the repo's own guides, none by default;  a folder from each checkout's root, as written
+    expect(new EpicConfig(MAIN).guidesFolder).toBe("")
+    expect(EpicConfig.settingsFrom('{ "guidesFolder": "guides" }').guidesFolder).toBe("guides")
     expect(() => EpicConfig.settingsFrom('{ "sharedFolders": "epics" }', "x.json5")).toThrow(
       /"sharedFolders" must be a list of folder names/
     )

@@ -25,7 +25,7 @@ import "./chrome.css"
  * - Its start section starts with Spell's hat (`<Submenu left mark>`).
  * - Goes straight in its page, outside any padding:  the bar runs the window's whole width.
  *   - The violet bar it was under any other theme went in epic `debut` P17:  every theme of the set dresses it.
- * - SEE:  its App UI components page, `app/docs/chrome.html` (`/components/app/chrome.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/chrome`.
  ****************/
 export function AppMenu(props: AppMenuProps) {
   return (
@@ -136,8 +136,13 @@ export function MoreMenu(props: MoreMenuProps) {
     <Show
       when={!props.stub}
       fallback={
-        // a dropdown's `padding` (`compact`) and `resizable` (its menu's height) are no item's
-        <ui-item disabled="" icon={icon()} {...omit(rest, "padding", "prop:padding", "resizable", "prop:resizable")} />
+        // a dropdown's `padding` (`compact`) and `resizable` (its menu's height) are no item's;
+        // the rest as plain attributes:  its listeners are typed for a dropdown's events, an item's differ
+        <ui-item
+          disabled=""
+          icon={icon()}
+          {...(omit(rest, "padding", "prop:padding", "resizable", "prop:resizable") as Record<string, unknown>)}
+        />
       }
     >
       <Show when={props.item ?? true} fallback={dropdown()}>
@@ -189,7 +194,7 @@ function choose(event: CustomEvent<{ value: string }>) {
 /**
  * Spell UI's tooltip for a button of the top bar or the Add View bar:  spread it on the button,
  * `<ui-item {...barTooltip(text)} />`.
- * - A small dark bubble under it, after the page's hover pause (`--ui-hover-delay`), at once on keyboard focus:
+ * - A small dark bubble under it, after the page's tooltip pause (`--ui-tooltip-delay`), at once on keyboard focus:
  *   Spell UI's `data-tooltip`, shown in the top layer (its runtime's `DataTooltips`).
  * - It stays inside the window:  near an edge it slides along, its arrow still at the button.
  * - Text with line breaks (`\n`) shows as those lines.

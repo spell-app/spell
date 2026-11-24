@@ -55,12 +55,13 @@ describe("<epic-card>", () => {
     expect(mark(host)).toEqual(["ui-label", "1/3", `in progress:  P2 · Site Map under way, updated ${TODAY}`])
     expect(root.querySelector("ui-description")).toBeTruthy()
     const saga = root.querySelector(".saga")!
-    expect([saga.textContent!.trim(), saga.getAttribute("data-tooltip")]).toEqual(["Epic Tooling", "Epics & co"])
+    expect([saga.textContent!.trim(), saga.getAttribute("data-tooltip")]).toEqual(["Epic Tooling", null])
     const worked = root.querySelector("time")!
     expect(worked.textContent).toBe(
       `${new Date("2026-10-09T14:34-04:00").getMonth() + 1}/${new Date("2026-10-09T14:34-04:00").getDate()}`
     )
-    expect(worked.getAttribute("data-tooltip")).toMatch(/^Last worked on \d+\/\d+\/26 \d\d:\d\d$/)
+    // no tooltip on the saga or the day (I370)
+    expect(worked.getAttribute("data-tooltip")).toBeNull()
     // the title is its own link, in its header
     expect((root.querySelector(".header slot") as HTMLSlotElement).assignedElements()[0]!.localName).toBe("a")
     await expectAccessible(host)

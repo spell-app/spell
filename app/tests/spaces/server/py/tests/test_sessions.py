@@ -1,10 +1,13 @@
 """A spell app on Quart:  its page, and its WebSocket, a game per visitor -- on Quart's own test client."""
 
+import asyncio
 import json
+import time
 from pathlib import Path
 
 import pytest
 from quart import Quart, make_response, request, websocket
+from spell_core.place_kinds import DeviceFile
 
 from spell_quart import SpellSessions, page_html, remember_visitor, visitor_of
 
@@ -117,3 +120,123 @@ async def test_a_dialog_is_asked_of_the_page_whose_answer_the_program_waits_for(
         assert question == {"ui": "prompt", "args": ["Which color?", "blue"], "asks": 1}
         await socket.send(json.dumps({"answer": 1, "value": "green"}))
         assert json.loads(await socket.receive()) == [{"$type": "Lamp", "$id": "2", "color": "green"}]
+
+
+SAVING_PROGRAM = """\
+from spell_core import Place, Thing, core, prop
+
+
+class Shelf(Place):
+    pass
+
+
+shelf = core.place(Shelf(), {"name": "shelf", "kind": "database on this device"})
+
+
+class Note(Thing):
+    saved_in = {"place": "shelf", "collection": "notes"}
+    text = prop(type="text")
+
+
+class Counter(Thing):
+    count = prop(type="number", default=0)
+
+
+counter = Counter()
+
+
+@core.on("save")
+def on_save(event):
+    core.save_thing(Note(text="milk"))
+    counter.count += 1
+
+
+@core.on("play")
+def on_play(event):
+    counter.count += 1
+"""
+
+
+@pytest.fixture
+def saving(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Quart, SpellSessions, list[str]]:
+    """An app that saves to a slow place, as it stops too, and what happened, in order."""
+    happened: list[str] = []
+    apply = DeviceFile.apply
+
+    def slow_apply(self: DeviceFile, changes: list[dict[str, object]]) -> None:
+        time.sleep(0.5)
+        apply(self, changes)
+        happened.append("saved")
+
+    monkeypatch.setattr(DeviceFile, "apply", slow_apply)
+    program = tmp_path / "Saving.spell.py"
+    program.write_text(SAVING_PROGRAM)
+    app = Quart(__name__)
+    sessions = SpellSessions(program, seed=1)
+    app.after_serving(sessions.saves_sent)
+
+    @app.websocket("/ws")
+    async def ws():
+        await sessions.serve(websocket, visitor_of(websocket))
+
+    return app, sessions, happened
+
+
+async def test_one_visitors_save_never_stalls_anothers_game(saving: tuple[Quart, SpellSessions, list[str]]) -> None:
+    app, sessions, happened = saving
+    client = app.test_client()
+    async with (
+        client.websocket("/ws", headers={"Cookie": "spell-visitor=ann"}) as ann,
+        client.websocket("/ws", headers={"Cookie": "spell-visitor=bob"}) as bob,
+    ):
+        await ann.receive()
+        await bob.receive()
+        await ann.send(json.dumps({"trigger": "save"}))
+        await ann.receive()
+        await bob.send(json.dumps({"trigger": "play"}))
+        await bob.receive()
+        happened.append("bob played")
+        await sessions.saves_sent()
+    assert happened == ["bob played", "saved"]
+
+
+async def test_the_app_stopping_waits_for_the_last_save(saving: tuple[Quart, SpellSessions, list[str]]) -> None:
+    app, _sessions, happened = saving
+    await app.startup()
+    async with app.test_client().websocket("/ws", headers={"Cookie": "spell-visitor=ann"}) as ann:
+        await ann.receive()
+        await ann.send(json.dumps({"trigger": "save"}))
+        await ann.receive()
+        assert happened == []
+        await app.shutdown()
+        assert happened == ["saved"]
+
+
+class ClosingSocket:
+    """A page that saves, hears the answer, and closes."""
+
+    def __init__(self) -> None:
+        """A page yet to say anything."""
+        self.frames: asyncio.Queue[str] = asyncio.Queue()
+        self.has_saved = False
+
+    async def send(self, data: str) -> None:
+        """The page's next frame."""
+        await self.frames.put(data)
+
+    async def receive(self) -> str:
+        """The save, then, once it's answered, the page closing."""
+        await self.frames.get()
+        if self.has_saved:
+            raise ConnectionError("the page closed")
+        self.has_saved = True
+        return json.dumps({"trigger": "save"})
+
+
+async def test_a_visitors_game_ending_waits_for_their_last_save(
+    saving: tuple[Quart, SpellSessions, list[str]],
+) -> None:
+    _app, sessions, happened = saving
+    with pytest.raises(ConnectionError):
+        await sessions.serve(ClosingSocket(), "ann")
+    assert happened == ["saved"]

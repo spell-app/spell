@@ -4,8 +4,13 @@ import { type DecorationSet, EditorView } from "@codemirror/view"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { CodeColours } from "spell/app/app/ui/CodeColours"
 import { CodeRules, type CodeRole } from "spell/app/app/ui/CodeRules"
+import { CodeMirrorLanguage } from "spell/app/app/ui/codemirror/CodeMirrorLanguage"
+import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
+import type { LanguageClient } from "spell/app/app/ui/codemirror/LanguageClient"
 import { CodeMirrorTokens } from "spell/app/app/ui/codemirror/CodeMirrorTokens"
+import type { LSP } from "spell/app/lsp"
 
 /**
  * `CodeMirrorTokens`, Spell coloured by the parser's own tokens with the bubbly look off (epic `codemirror` P3).
@@ -112,7 +117,7 @@ describe("CodeMirrorTokens", () => {
     const page = ['"cards" is a page', '\t<for card in its cards loading="Wait">', "\t\t<card />", "\t</for>"].join(
       "\n"
     )
-    const spans = CodeMirrorTokens.pageSpans(page, pageParser())
+    const spans = CodeColours.pageSpans(page, pageParser())
     for (const [index, span] of spans.entries()) {
       expect(span.end).toBeGreaterThan(span.start)
       if (index) expect(span.start).toBeGreaterThanOrEqual(spans[index - 1]!.end)
@@ -129,6 +134,54 @@ describe("CodeMirrorTokens", () => {
     const ranges: string[] = []
     marks!.between(0, edited.doc.length, (from, to) => void ranges.push(edited.doc.sliceString(from, to)))
     expect(ranges).toEqual(["// note"])
+  })
+
+  test("typing steadily:  a parse of an earlier key is drawn at once, moved along the keys since (J70)", () => {
+    // the language worker parses the file:  its colours come with each parse, by the edit they're of
+    const client = { answersOnPage: () => false } as unknown as LanguageClient
+    const file = { language: SP.Language.for("en") } as unknown as SP.SpellFile
+    const language = new CodeMirrorLanguage({
+      service: {} as LSP.SpellLanguageService,
+      client,
+      file,
+      parseNow: () => {}
+    })
+    const parsed = (version: number, text: string) =>
+      ({
+        uri: "spell:/x",
+        version,
+        diagnostics: [],
+        fixItStarts: [],
+        folds: [],
+        types: [],
+        views: [],
+        colours: CodeColours.spansOf(text, SP.spellParser)
+      }) as LSP.LanguageParsed
+    /** The stretches of `state`'s text marked. */
+    const marked = (state: EditorState) => {
+      const [marks] = state.facet(EditorView.decorations) as DecorationSet[]
+      const ranges: string[] = []
+      marks!.between(0, state.doc.length, (from, to) => void ranges.push(state.doc.sliceString(from, to)))
+      return ranges
+    }
+    let state = EditorState.create({
+      doc: "// a",
+      extensions: CodeMirrorTokens.extension(() => undefined, language.elsewhere)
+    })
+    language.tookParse(parsed(0, "// a"), state.doc)
+    state = state.update({ effects: CodeMirrorSetup.PARSED.of(null) }).state
+    expect(marked(state)).toEqual(["// a"])
+    // a key, sent to the worker:  its parse comes after the next key, typed at the start
+    const typed = state.update({ changes: { from: 4, insert: " b" } }).state
+    const next = typed.update({ changes: { from: 0, insert: "x " } })
+    state = next.state
+    language.tookParse(parsed(1, "// a b"), typed.doc, { doc: state.doc, changes: next.changes })
+    state = state.update({ effects: CodeMirrorSetup.PARSED.of(null) }).state
+    // the first key's colours, where its text is now;  the second's come with its own parse
+    expect(marked(state)).toEqual(["// a b"])
+    expect(state.doc.toString()).toBe("x // a b")
+    // a parse older than the one taken is no news:  the editor drops it (`FileStates`), and asks only for the version
+    expect(language.lastParseVersion).toBe(1)
   })
 
   test("text it can't read is left plain:  NEVER throws", () => {

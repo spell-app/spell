@@ -27,6 +27,7 @@ import os from "node:os"
 import path from "node:path"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
+import { SPELL_VERSION } from "spell/parser/spell/spell.types"
 // the one naming rule for what belongs to a spaces folder that isn't the kit's own:  here, the temp folder's
 import { spacesTag } from "spell/server/PidFile"
 
@@ -761,6 +762,22 @@ describe("POST /api/projects/settings/project", () => {
       "application/json"
     )
     expect(cleared.json()).toEqual({ version: "1.2.0", listsStartAt: 0 })
+  })
+})
+
+describe("POST /api/projects/spellVersion/project", () => {
+  it("says in the project file that it's written for today's Spell, keeping its imports (epic `language` P68)", async () => {
+    const saved = await request(
+      "POST",
+      "/api/projects/spellVersion/project",
+      JSON.stringify({ projectId: PROJECT }),
+      "application/json"
+    )
+    expect(saved.status).toBe(200)
+    expect(saved.json()).toEqual({ spellVersion: SPELL_VERSION })
+    const file = readFixture("user/Proj/__project.json5")!
+    expect(file).toContain(`"spellVersion": "${SPELL_VERSION}"`)
+    expect(file).toContain("/top.spell")
   })
 })
 

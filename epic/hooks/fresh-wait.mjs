@@ -4,6 +4,8 @@
  * pending by `epic fresh all` is woken at its first CLEAR MOMENT, to run `/epic fresh`.
  * - stdin `{ session_id, transcript_path, cwd, ... }`.
  * - Not pending (every other turn):  exits 0 at once.
+ * - During `epic fresh all --pause` (epic `epic-engine` T139) nobody is pending;  after it, paused agents don't count
+ *   as running.
  * - Pending:  waits in the background (`FreshAll.waitForClear()`) until the session is clear:  no agents of its epic
  *   running, no question waiting on the person, no prompt from them in the last few minutes;  the one that asked goes
  *   last.  Then prints the line to stderr and exits 2, which wakes the session.

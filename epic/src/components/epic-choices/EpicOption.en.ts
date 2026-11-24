@@ -178,8 +178,6 @@ export const epicOptionVocabulary = {
     { name: "removing", description: "Removed in its set's mark, not applied yet:  faded, with Undo." }
   ],
   texts: [
-    { key: "foldTip", text: "Fold option {letter}", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Unfold option {letter}", description: "Tooltip of its fold button while folded." },
     { key: "zoomTip", text: "Full size", description: "A picture in an edit not applied yet:  its tooltip." },
 
     {
@@ -206,14 +204,6 @@ export const epicOptionVocabulary = {
       text: "Comment",
       description: "In an `<epic-ask>`:  the link its comment box folds under (P50, Q55)."
     },
-    { key: "tipChosen", text: "{letter} picked:  un-pick it", description: "The picked pill's tooltip." },
-    { key: "tipSent", text: "sent", description: "The picked pill's tooltip, once its mark went to Claude." },
-    { key: "tipNotSent", text: "not sent yet", description: "The picked pill's tooltip, before Send." },
-    {
-      key: "tipApplied",
-      text: "{letter} chosen",
-      description: "The chosen option's pill's tooltip:  the pick applied."
-    },
     { key: "moreTip", text: "Add details", description: "In an `<epic-ask>`:  the (?)'s tooltip." },
     { key: "commentOn", text: "Comment on {letter}", description: "In an `<epic-ask>`:  its comment box's hint." },
     {
@@ -224,14 +214,11 @@ export const epicOptionVocabulary = {
     { key: "editHeading", text: "Edit {letter}", description: "The pencil's form:  its heading." },
     { key: "pickedOn", text: "Picked {date}", description: "A standing set's picked option:  when." },
     { key: "was", text: "Was", description: "The folded line of its earlier text." },
-    { key: "foldWasTip", text: "Fold the earlier text", description: "The `Was` line's button, while open." },
-    { key: "unfoldWasTip", text: "Show the earlier text", description: "The `Was` line's button, while folded." },
     { key: "editedNotSent", text: "Edited · not sent", description: "Under a card edited, not sent yet." },
     { key: "editedSent", text: "Edited · sent", description: "Under a card edited, sent, not applied yet." },
     { key: "removedNotSent", text: "Removed · not sent", description: "Under a card removed, not sent yet." },
     { key: "removedSent", text: "Removed · sent", description: "Under a card removed, sent, not applied yet." },
-    { key: "undo", text: "Undo", description: "After a change's line:  takes it back out of the mark." },
-    { key: "undoTip", text: "Undo this change", description: "Undo's tooltip." }
+    { key: "undo", text: "Undo", description: "After a change's line:  takes it back out of the mark." }
   ],
   children: [
     { tag: "flow", slot: "title", max: 1, description: "A title with markup." },

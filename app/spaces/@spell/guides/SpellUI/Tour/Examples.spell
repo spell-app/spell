@@ -1,0 +1,73 @@
+"tour examples" is a notebook page
+	<header level="1">
+		Tour
+		<header>A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Tour" sticky="stack" collapsible dividing>
+			<example "Tour" description="Three steps:  two point at a button, the last at nothing.  Its button starts it;  Escape or its ✕ ends it.">
+				<stack direction="horizontal" wrap>
+					<button id="tour-new" icon="plus">New</button>
+					<button id="tour-save" icon="save">Save</button>
+					<button commandfor="tour-toolbar" command="--start" appearance="basic" icon="map signs">Take the tour</button>
+				</stack>
+				<tour id="tour-toolbar" name="The toolbar" summary="What its buttons do.">
+					<tour-step target="tour-new">New starts a fresh page.</tour-step>
+					<tour-step name="save" target="tour-save">Save keeps what you've done.</tour-step>
+					<tour-step>That's it.  You can take this tour again any time.</tour-step>
+				</tour>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Dim" sticky="stack" collapsible dividing>
+			<example "Dim" description="`dim` darkens all but what the step points at.  Off by default;  a step can say `dim=\"false\"`.">
+				<stack direction="horizontal" wrap>
+					<button id="tour-dim-target" color="primary">Publish</button>
+					<button commandfor="tour-dim" command="--start" appearance="basic" icon="map signs">Take the tour</button>
+				</stack>
+				<tour id="tour-dim" name="Publishing" dim>
+					<tour-step target="tour-dim-target">Publish puts your page on the web.</tour-step>
+				</tour>
+			</example>
+		</>
+
+		<section label="Wait for" sticky="stack" collapsible dividing>
+			<example "Wait for" description="`wait-for=\"click\"`:  the rest of the page can't be clicked, and the tour goes on once its target is.">
+				<stack direction="horizontal" wrap>
+					<button id="tour-wait-target" icon="redo">Deal again</button>
+					<button commandfor="tour-wait" command="--start" appearance="basic" icon="map signs">Take the tour</button>
+				</stack>
+				<tour id="tour-wait" name="Dealing">
+					<tour-step target="tour-wait-target" wait-for="click">Press Deal again to go on.</tour-step>
+					<tour-step>Well done.</tour-step>
+				</tour>
+			</example>
+		</>
+
+		<section label="Offer" sticky="stack" collapsible dividing>
+			<example "Offer" description="A tour that starts by itself offers itself first (`offerToStart()`):  `offer=\"ask\"`, a note (the default);  `start`, straight away;  `dot`, a pulsing dot.  With `remember`, once taken or turned down it isn't offered again.">
+				<stack direction="horizontal" wrap>
+					<button id="tour-offer-target" icon="images outline">Gallery</button>
+					<button id="tour-offer-button" appearance="basic" icon="bell outline">Offer it</button>
+				</stack>
+				<tour id="tour-offer" name="The gallery" summary="See all your saved drawings at once." offer="dot">
+					<tour-step target="tour-offer-target">The gallery shows every sample at once.</tour-step>
+				</tour>
+			</example>
+		</>
+	</>

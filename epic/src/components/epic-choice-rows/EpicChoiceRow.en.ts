@@ -98,7 +98,6 @@ export const epicChoiceRowVocabulary = {
     { key: "reset", text: "Back to the recommendation", description: "The reset button's name." },
     { key: "resetTip", text: "Back to {recommended}", description: "The reset button's tooltip." },
     { key: "blankLabel", text: "Yours for {current}:  blank keeps it", description: "With `blank`:  the box's name." },
-    { key: "copyTip", text: "Copy into the box", description: "With `blank`:  today's text's tooltip." },
     { key: "clear", text: "Clear the box", description: "With `blank`:  the reset button's name and tooltip." },
     {
       key: "commentPlaceholder",
@@ -110,7 +109,6 @@ export const epicChoiceRowVocabulary = {
       text: "Your notes on {current}",
       description: "The comment box's name, for a screen reader."
     },
-    { key: "openTip", text: "Open {file}:{line} in VS Code", description: "The file link's tooltip." },
     { key: "up", text: "Move up", description: "The move up button's name and tooltip." },
     { key: "down", text: "Move down", description: "The move down button's name and tooltip." }
   ],

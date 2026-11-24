@@ -7,7 +7,8 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { APP_TEXTS } from "spell/app/app/ui/AppTexts.en"
 import { appTextsEs } from "spell/app/app/ui/AppTexts.es"
 import { uiReady } from "spell/app/app/solid"
-import { openShortcuts, shortcutRows } from "spell/app/app/solid/modals"
+import { openShortcuts } from "spell/app/app/solid/modals"
+import { shortcutRows } from "spell/app/app/solid/modals/ShortcutsDialog"
 import { EDITOR_HOTKEYS, HOTKEY_GROUPS, editorHotkeys, type ListedHotkey } from "spell/app/app/pages/editorHotkeys"
 
 /**
@@ -121,11 +122,11 @@ describe("<ShortcutsDialog>", () => {
     // "Ctrl S" is Save alone:  not Ctrl Shift R, nor the fold keys (Ctrl Shift [ and ])
     for (const typed of ["Ctrl S", "Ctrl+S", "ctrl s", "Control S", "ctrl + s"]) {
       await type(modal, typed)
-      await expect.poll(() => names(modal), typed).toEqual(["Save"])
+      await expect.poll(() => names(modal), { message: typed }).toEqual(["Save"])
     }
     for (const typed of ["Ctrl Shift R", "Shift Ctrl R", "shift+ctrl+r"]) {
       await type(modal, typed)
-      await expect.poll(() => names(modal), typed).toEqual(["Discard Changes"])
+      await expect.poll(() => names(modal), { message: typed }).toEqual(["Discard Changes"])
     }
     await type(modal, "Ctrl Shift")
     await expect.poll(() => modal.querySelector(".ShortcutsNone")).not.toBeNull()
@@ -136,12 +137,12 @@ describe("<ShortcutsDialog>", () => {
     const modal = await current()
     for (const typed of ["Cmd S", "command+s", "⌘ S"]) {
       await type(modal, typed)
-      await expect.poll(() => names(modal), typed).toEqual(["Save"])
+      await expect.poll(() => names(modal), { message: typed }).toEqual(["Save"])
     }
     const newFile = APP_TEXTS.newSpellFile
     for (const typed of ["⌥⌘N", "⌘⌥N", "Option Cmd N", "alt+cmd+n"]) {
       await type(modal, typed)
-      await expect.poll(() => names(modal), typed).toEqual([newFile])
+      await expect.poll(() => names(modal), { message: typed }).toEqual([newFile])
     }
   })
 

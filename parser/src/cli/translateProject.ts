@@ -78,6 +78,9 @@ import type {
   UIVocabulary
 } from "spell/parser/spell/translate/translate.types"
 
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
+
 /** A parsed project to translate:  what spell-app's command hands `translateProject()`. */
 export type TranslateSource = {
   /** Its name, e.g. `Solitaire`:  its dictionary is `Solitaire.es.names.json5`. */

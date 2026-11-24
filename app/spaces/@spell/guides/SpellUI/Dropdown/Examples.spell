@@ -9,7 +9,7 @@
 		its Examples tab:  Selection Dropdowns, Remote Content, Menus, Adjusting Actions, Coupling), plus our extras
 		(Form states, Colored, Invoker commands).
 		- Options are slotted `<ui-item>`s;  Fomantic's long country / state lists are shortened.
-		- Fomantic's `<select class="ui dropdown">` forms are `<ui-dropdown selection>` (with `multiple` for a multi-select).
+		- Select forms are `<ui-dropdown selection>` (with `multiple` for a multi-select).
 	-->
 	<section label="Types">
 		<!-- GAP I53:  no nested sub-menu (`Publish To Web`);  left out. -->
@@ -451,10 +451,9 @@
 			</example>
 		</>
 
-		<!-- GAP I11:  no basic button look. -->
 		<section label="Search Dropdown" sticky="stack" collapsible dividing>
 			<example "Search Dropdown" description="A dropdown can be searchable, on a labeled icon button too.">
-				<dropdown floating labeled button search icon="world" placeholder="Select Language">
+				<dropdown floating labeled button appearance="basic" search icon="world" placeholder="Select Language">
 					<item>Arabic</item>
 					<item>Chinese</item>
 					<item>Danish</item>
@@ -1393,6 +1392,19 @@
 				</dropdown>
 			</example>
 		</>
+
+		<section label="Basic" sticky="stack" collapsible dividing>
+			<example "Basic" description="A button dropdown can be basic, as a basic button is:  `appearance=\"basic\"`, a hairline ring and no fill.">
+				<dropdown button appearance="basic" label="Actions">
+					<item>Edit</item>
+					<item>Delete</item>
+				</dropdown>
+				<dropdown color="primary" button appearance="basic" label="Share">
+					<item>Email</item>
+					<item>Link</item>
+				</dropdown>
+			</example>
+		</>
 	</>
 
 	<section label="Selection Dropdowns">
@@ -1624,10 +1636,9 @@
 	</>
 
 	<section label="Coupling">
-		<!-- GAP I11:  no basic look, so the button group's dropdowns are filled. -->
 		<section label="Button Group" sticky="stack" collapsible dividing>
 			<example "Button Group" description="A button group can be formatted to show additional content as a dropdown.">
-				<buttons>
+				<buttons appearance="basic">
 					<dropdown button pointing="top left" label="Visit">
 						<item>Home</item>
 						<item>Blog</item>

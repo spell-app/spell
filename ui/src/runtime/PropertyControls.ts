@@ -156,12 +156,15 @@ const FLUID: Readonly<Record<string, string>> = { fluid: "" }
  * - `color` is the browser's own picker for now:  Spell UI's colour pickers come later (epic `property-editor` T4).
  * - `icon` draws `<ui-icon-picker>`:  every `icon` attribute (a button's, a rating's) is picked from a grid of glyphs,
  *   not typed (epic `debut` P14).
+ * - `text` is a box of prose that grows with its words, from one line (`grow`;  Owen's standing rule:  every
+ *   "tell me more" field grows).  `<ui-property>` draws an element's own words (`textContent`) with it
+ *   (epic `editor` T147).
  * - `toggle` is a switch with no room for text of its own (`padding="none"`):  its label is its field's.
  *   A compact editor draws every yes or no with it (epic `editor` I177), two to a row, as its selects (I199).
  */
 const BUILT_IN_KINDS: Record<string, PropertyControl> = {
   input: { tag: "ui-input", attributes: FLUID, types: ["text", "data"] },
-  text: { tag: "ui-textarea", attributes: FLUID },
+  text: { tag: "ui-textarea", attributes: { ...FLUID, grow: "" } },
   number: { tag: "ui-input", attributes: { ...FLUID, type: "number" }, types: ["number"], width: "half" },
   date: { tag: "ui-input", attributes: { ...FLUID, type: "date" }, types: ["date"], width: "half" },
   select: { tag: "ui-select", attributes: FLUID, choices: "items", types: ["choice"], width: "half" },

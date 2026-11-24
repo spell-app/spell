@@ -5,12 +5,13 @@ import { StoragePlace } from "spell/util/persist/StoragePlace"
 import { AWAY_ID } from "spell/epic/definitions/definitions.types"
 import {
   CLOSED_HOLD_MS,
-  INSTANT_FAIL_MS,
   INSTANT_GRACE_MS,
+  INSTANT_NUDGE_MS,
   REVIEW_ACTIONS,
   REVIEW_API,
   REVISIT_KEY_PREFIX,
   NOBODY_LISTENING,
+  OUTPUT_ACTIONS,
   STAGE_COUNTDOWN_MS,
   SUMMARY_ID,
   TESTS_API,
@@ -27,6 +28,7 @@ import {
   isInstant,
   isSent,
   isWorkOnMark,
+  outputsWith,
   pickFieldsOf,
   pickOf,
   setPicksOf,
@@ -49,6 +51,8 @@ import {
   type Running,
   type StartAnswer,
   type TestsEntry,
+  type CloseAllAnswer,
+  idsOf,
   sentence,
   storageNow,
   wakeOf,
@@ -152,9 +156,6 @@ export class ReviewClient extends PageStore {
    */
   private readonly closedHere = new Map<string, number>()
 
-  /** Instant marks the page server never applied (`id@at`):  the item shows again, and a notice says so. */
-  private readonly failedInstant = new Set<string>()
-
   /**
    * Items Owen closed with an instant ✓ or x this visit, id -> the action:  kept in view, grey, until his next Send
    * or Auto Send (`isHeldInView()`, epic `epic-engine` T80;  Owen:  "mark as grey & collapse, then keep it
@@ -176,7 +177,7 @@ export class ReviewClient extends PageStore {
    */
   private readonly releasedHere = new Set<string>()
 
-  /** Timers for `trackInstant()`, by `fail:<id>` and `hold:<id>`. */
+  /** Timers for `trackInstant()`, by `nudge:<id>` and `hold:<id>`. */
   private readonly instantTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
   /** Notes of sent marks the last inbox read no longer has, id -> words:  `changed()` lets their boxes go of them. */
@@ -298,17 +299,25 @@ export class ReviewClient extends PageStore {
   }
 
   /**
+   * What test `id`'s step `step` printed, as pasted in the box under its command (epic `epic-engine` T165):
+   * its mark's `outputs`, the one Claude took too;  `""` for nothing.
+   */
+  outputOf(id: string, step: number): string {
+    return this.inbox.marks[id]?.outputs?.find((each) => each.step === step)?.text ?? ""
+  }
+
+  /**
    * Is item `id` closing:  Owen's ✓ or x on it with nothing for Claude (`isInstant()`), which the page server applies
    * by itself (epic `epic-engine` I306;  Owen:  "it should show as grey and hide with an animate up immediately")?
    * - true from the click:  the item draws grey at once (`DrawnState`), and its section folds it away when grey items
    *   are hidden
    * - and for a while after the server applied it (`CLOSED_HOLD_MS`):  the page's own update lands meanwhile
-   * - false once taken back (a second click), or when the server never applied it (`INSTANT_FAIL_MS`):
-   *   the item shows again, and a notice says so
+   * - false once taken back (a second click);  NEVER given up on while the mark stands:  the page asks the server
+   *   again until it's applied (`trackInstant()`, epic `epic-engine` I463)
    */
   isClosing(id: string): boolean {
     const mark = this.inbox.marks[id]
-    if (mark && isInstant(id, mark)) return !this.failedInstant.has(`${id}@${mark.at}`)
+    if (mark && isInstant(id, mark)) return true
     // his Do this (or Make Todo, Revisit) after his x wants it back (epic `epic-engine` I359):  no longer closing
     if (wantsBack(mark)) return false
     if (this.heldInView.has(id)) return true
@@ -845,6 +854,45 @@ export class ReviewClient extends PageStore {
   }
 
   /**
+   * A section's Close all (`POST close-all`, epic `epic-engine` T158):  each of `ids`, of section kind `kind`, closed
+   * as his ✓ would, in one edit;  the ids closed and left, and the Undo's key;  `undefined` when it failed (a notice
+   * says why).
+   * - each drawn closed AT ONCE, exactly as his own ✓ on it draws (`keepInstant()`:  grey, held in view till Send, a
+   *   second click on its ✓ putting that one back), then posted (epic `epic-engine` I462;  Owen:  "update them
+   *   immediately as if I had clicked each manually")
+   * - one the server left (no longer closable), or all of them when the post failed:  drawn as before at once
+   * - NEVER throws
+   */
+  async closeAll(kind: string, ids: readonly string[]): Promise<CloseAllAnswer | undefined> {
+    for (const id of ids) this.keepInstant(id, "approve")
+    this.changed()
+    const reply = (await this.post("close-all", { kind, ids })) as Partial<CloseAllAnswer> | undefined
+    const answer = reply && {
+      closed: idsOf(reply.closed),
+      left: idsOf(reply.left),
+      ...(reply.batch && { batch: reply.batch })
+    }
+    for (const id of answer ? answer.left : ids) this.letGoOfClose(id)
+    this.changed()
+    return answer
+  }
+
+  /**
+   * Undo Close all `batch` (`POST undo-close-all`):  each item put back, unless it changed since, and drawn open at once;
+   * the ids put back and left;  `undefined` when it failed (a notice says why).
+   * - NEVER throws
+   */
+  async undoCloseAll(batch: string): Promise<{ restored: string[]; left: string[] } | undefined> {
+    const reply = (await this.post("undo-close-all", { batch })) as { restored?: unknown; left?: unknown } | undefined
+    if (!reply) return undefined
+    const undone = { restored: idsOf(reply.restored), left: idsOf(reply.left) }
+    // put back:  no longer held closed, so each draws open at once (I462)
+    for (const id of undone.restored) this.letGoOfClose(id)
+    this.changed()
+    return undone
+  }
+
+  /**
    * Every epic with open tests, in Owen's saga order (`GET /api/epics/tests`):  where a run across every epic
    * (`epic test --all`) goes next;  `[]` when the server can't say.
    * - NEVER throws
@@ -988,8 +1036,57 @@ export class ReviewClient extends PageStore {
       .map(([id, mark]) => ({ id, to: mark.to! }))
   }
 
+  /**
+   * Put what test `id`'s step `step` printed (`text`, pasted under its command) in the test's mark
+   * (epic `epic-engine` T165;  Owen, 2026-11-23:  "a 'paste the output of this command here' ... for each step");
+   * true when saved.
+   * - into the mark he made (an Approve, a Revisit note, the x ...:  `OUTPUT_ACTIONS`), so it goes with his answer
+   * - no such mark:  a revisit with no words of his, as a picture alone makes one;  Send hands it over
+   * - every step's box emptied, and nothing else in that revisit:  the mark goes
+   */
+  saveOutput(id: string, step: number, text: string, options: WriteOptions = {}): Promise<boolean> {
+    const mark = this.inbox.marks[id]
+    const outputs = outputsWith(mark?.outputs, step, text)
+    const own = mark && !this.isTaken(id) && !isImmediate(mark) && OUTPUT_ACTIONS.has(mark.action)
+    const {
+      at: _at,
+      outputs: _old,
+      ...base
+    }: Partial<InboxMark> & MarkInput = own ? mark : { action: "revisit", when: "soon", note: "", ...pickOf(mark) }
+    if (!outputs.length && ReviewClient.isBareRevisit(base)) {
+      const pick = pickOf(base)
+      return this.put(id, hasPick(pick) ? { action: "pick", ...pick } : null, { quiet: true, ...options })
+    }
+    return this.put(id, { ...base, ...(outputs.length ? { outputs } : {}) }, { quiet: true, ...options })
+  }
+
+  /** Is `mark` a revisit with nothing in it but maybe a pick:  no words, picture or comments of his? */
+  private static isBareRevisit(mark: MarkInput): boolean {
+    return mark.action === "revisit" && !mark.note?.trim() && !mark.shot && !mark.comments?.length
+  }
+
+  /**
+   * The mark to save for `mark` on test `id`, what was pasted under its steps carried over (`outputs`, T165):
+   * - a mark that can't carry them, or none to carry:  as it is
+   * - nothing (a button taken back, a note emptied):  a revisit carrying them, as a picture alone makes one
+   * - from his own mark only:  one Claude took lends them to none
+   */
+  private withOutputsKept(id: string, mark: MarkInput | null): MarkInput | null {
+    const was = this.inbox.marks[id]
+    const outputs = was && !this.isTaken(id) ? was.outputs : undefined
+    if (!outputs?.length) return mark
+    if (!mark) return { action: "revisit", when: "soon", note: "", ...pickOf(was), outputs }
+    return OUTPUT_ACTIONS.has(mark.action) && !isImmediate(mark) ? { ...mark, outputs } : mark
+  }
+
   /** Mark item `id` (`mark`, or `null` to clear), shown at once, then saved. */
-  async save(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
+  save(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
+    // what he pasted under a test's steps stays with whatever he marks it (T165)
+    return this.put(id, this.withOutputsKept(id, mark), options)
+  }
+
+  /** `save()`, `mark` as it is:  what a test's steps printed only as it says (`saveOutput()`). */
+  private async put(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
     // Owen marked it again:  what Claude took before is no longer his latest word
     this.taken.delete(id)
     // a stage accept's countdown (I181):  held from the first frame, as the server dates it
@@ -1181,8 +1278,8 @@ export class ReviewClient extends PageStore {
 
   /**
    * Follow the instant marks from the inbox (`isClosing()`, epic `epic-engine` I306):
-   * - a new one:  a timer that, should the mark still stand `INSTANT_FAIL_MS` after its grace, gives up on it
-   *   (`failedInstant`) and says so
+   * - a new one:  a timer that, should the mark still stand `INSTANT_NUDGE_MS` after its grace, asks the server again
+   *   (`nudgeLater()`):  the item stays grey, and nothing is said (epic `epic-engine` I463)
    * - one gone, not taken back:  the server applied it;  its item stays closed `CLOSED_HOLD_MS` (`closedHere`)
    * - SIDE EFFECT:  timers, which call `changed()` when they fire
    */
@@ -1193,19 +1290,12 @@ export class ReviewClient extends PageStore {
       this.instantMarks.set(id, mark.at)
       this.closedHere.delete(id)
       this.closedAs.set(id, mark.action)
-      const key = `${id}@${mark.at}`
-      const wait = Date.parse(mark.at) + INSTANT_GRACE_MS + INSTANT_FAIL_MS - now
-      this.later(`fail:${id}`, wait, () => {
-        if (this.inbox.marks[id]?.at !== mark.at || this.failedInstant.has(key)) return
-        this.failedInstant.add(key)
-        this.notify(`${id.toUpperCase()} isn't closed:  the page server didn't apply it.\nIt's back;  try again.`)
-        this.changed()
-      })
+      this.nudgeLater(id, mark.at, Date.parse(mark.at) + INSTANT_GRACE_MS + INSTANT_NUDGE_MS - now)
     }
     for (const [id, at] of this.instantMarks) {
       if (this.inbox.marks[id]?.at === at) continue
       this.instantMarks.delete(id)
-      this.stopTimer(`fail:${id}`)
+      this.stopTimer(`nudge:${id}`)
       if (this.undoneInstant.delete(id) || this.inbox.marks[id]) continue
       this.closedHere.set(id, now + CLOSED_HOLD_MS)
       this.later(`hold:${id}`, CLOSED_HOLD_MS, () => {
@@ -1214,6 +1304,19 @@ export class ReviewClient extends PageStore {
         this.changed()
       })
     }
+  }
+
+  /**
+   * In `wait` ms, should instant mark `at` on `id` still stand, ask the server for the inbox again, which applies what's
+   * due (`refresh()`, the route's `GET inbox`);  again every `INSTANT_NUDGE_MS` while it stands.
+   * - the server tries by itself too (`reviewRoutes`' `instantLater()`):  this covers a timer it lost to a restart
+   */
+  private nudgeLater(id: string, at: string, wait: number) {
+    this.later(`nudge:${id}`, wait, () => {
+      if (this.inbox.marks[id]?.at !== at) return
+      void this.refresh()
+      this.nudgeLater(id, at, INSTANT_NUDGE_MS)
+    })
   }
 
   /** Run `act` in `wait` ms, under `key`:  one timer per key, the last one set winning. */
@@ -1405,7 +1508,11 @@ export class ReviewClient extends PageStore {
     this.writing++
     let error = ""
     try {
-      const reply = await this.link.post(`${REVIEW_API}/${route}`, { page: this.options.page, ...body }, { keepalive })
+      const reply = await this.link.post(
+        `${REVIEW_API}/${route}`,
+        { page: this.options.page, ...body },
+        { keepalive, whileBusy: true }
+      )
       this.replaceInbox(inboxOf(reply))
       this.changed()
       return reply ?? {}

@@ -4,6 +4,7 @@ import { render } from "@solidjs/web"
 
 import {
   MOST_AT_ONCE,
+  MOST_KEPT,
   WAIT_WHEN_NOTHING_MOVED_MS,
   drawnInWindow,
   rowAt,
@@ -70,7 +71,7 @@ describe("a long list draws what fits", () => {
   })
 
   test("a long one draws a little, then more as you scroll, and nothing's left behind at its end", async () => {
-    drawn(rowsOf(500))
+    drawn(rowsOf(MOST_KEPT))
     expect(rowsDrawn()).toBe(MOST_AT_ONCE)
     expect(box.querySelector("spell-more-below")).not.toBeNull()
     await expect.poll(rowsDrawn).toBeGreaterThan(MOST_AT_ONCE)
@@ -78,12 +79,14 @@ describe("a long list draws what fits", () => {
     const settled = rowsDrawn()
     // what's near the view, and no further
     expect(settled).toBeLessThan(200)
-    for (let at = 0; at < 40 && rowsDrawn() < 500; at++) {
+    for (let at = 0; at < 40 && rowsDrawn() < MOST_KEPT; at++) {
       box.scrollTop = box.scrollHeight
       await nextFrames()
     }
-    expect(rowsDrawn()).toBe(500)
+    expect(rowsDrawn()).toBe(MOST_KEPT)
     expect(box.querySelector("spell-more-below")).toBeNull()
+    // up to `MOST_KEPT`, nothing stands in:  only the rows, as a plain `<For>` draws them
+    expect(box.querySelector("spell-not-drawn")).toBeNull()
   })
 
   test("rows that take no room (reading, or drawing nothing) draw more a moment later, not all at once (epic `mockup` T42)", async () => {
@@ -169,15 +172,15 @@ describe("a long list draws what fits", () => {
 
   test("an item that must be drawn is drawn at once, with everything before it", () => {
     const [through, setThrough] = createSignal(-1)
-    drawn(rowsOf(500), { through })
+    drawn(rowsOf(MOST_KEPT), { through })
     expect(rowsDrawn()).toBe(MOST_AT_ONCE)
     setThrough(100)
     flush()
     // whole lots:  up to the end of the lot it's in
     expect(rowsDrawn()).toBe(Math.ceil(101 / MOST_AT_ONCE) * MOST_AT_ONCE)
-    setThrough(499)
+    setThrough(MOST_KEPT - 1)
     flush()
-    expect(rowsDrawn()).toBe(500)
+    expect(rowsDrawn()).toBe(MOST_KEPT)
     expect(box.querySelector("spell-more-below")).toBeNull()
   })
 
@@ -196,6 +199,83 @@ describe("a long list draws what fits", () => {
     expect(rowsDrawn()).toBeGreaterThanOrEqual(count)
     await nextFrames(6)
     expect(box.scrollTop).toBe(0)
+  })
+})
+
+describe("a huge list lets go of what's far from the view (epic `solid-2-final` P17)", () => {
+  const HUGE = 100_000
+  const texts = () => [...box.querySelectorAll(".row")].map((row) => Number(row.textContent))
+  /** Scroll the box by `by` pixels a frame, `times` times. */
+  const scrollBy = async (by: number, times: number) => {
+    for (let at = 0; at < times; at++) {
+      box.scrollTop += by
+      await nextFrames(2)
+    }
+  }
+
+  test("scrolled top to bottom, it keeps a bounded number of rows drawn, and reaches the end", async () => {
+    drawn(rowsOf(HUGE))
+    await nextFrames(4)
+    // the scroll bar stands for the whole list:  rows never drawn count as the average, 20 px
+    expect(box.scrollHeight).toBeGreaterThan(HUGE * 20 * 0.99)
+    await scrollBy(200, 60)
+    expect(rowsDrawn()).toBeLessThan(400)
+    // rows near the view, none from the top
+    expect(Math.min(...texts())).toBeGreaterThan(MOST_AT_ONCE)
+    box.scrollTop = box.scrollHeight
+    await expect.poll(() => texts().includes(HUGE)).toBe(true)
+    expect(rowsDrawn()).toBeLessThan(400)
+    box.scrollTop = 0
+    await expect.poll(() => texts().includes(1)).toBe(true)
+    expect(rowsDrawn()).toBeLessThan(400)
+  })
+
+  test("a row taken down and drawn again stands where it was:  the rows above keep their heights", async () => {
+    drawn(rowsOf(HUGE))
+    await nextFrames(4)
+    await scrollBy(200, 60)
+    await scrollBy(-200, 30)
+    const row = [...box.querySelectorAll(".row")].find((each) => each.textContent === "300")!
+    const top = row.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop
+    expect(top).toBe(299 * 20)
+  })
+
+  test("the row with the focus survives a scroll far away and back", async () => {
+    drawn(rowsOf(HUGE))
+    await nextFrames(4)
+    const first = box.querySelector(".row") as HTMLElement
+    first.tabIndex = 0
+    first.focus()
+    await scrollBy(400, 40)
+    box.scrollTop = box.scrollHeight / 2
+    await nextFrames(8)
+    expect(first.isConnected).toBe(true)
+    expect(document.activeElement).toBe(first)
+    box.scrollTop = 0
+    await nextFrames(8)
+    expect(document.activeElement).toBe(first)
+    expect(box.querySelectorAll(".row")[0]).toBe(first)
+  })
+
+  test("a row asked for far down is drawn with the rows around it, the rest standing in", () => {
+    const [through, setThrough] = createSignal(-1)
+    drawn(rowsOf(HUGE), { through })
+    setThrough(HUGE - 1)
+    flush()
+    expect(texts()).toContain(HUGE)
+    expect(rowsDrawn()).toBeLessThanOrEqual(4 * MOST_AT_ONCE)
+    expect(box.querySelectorAll("spell-not-drawn").length).toBeGreaterThan(0)
+  })
+
+  test("Find draws the first `MOST_FOR_FIND` rows, and keeps them till the person scrolls", async () => {
+    drawn(rowsOf(HUGE))
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "f", metaKey: true }))
+    flush()
+    // whole lots:  up to the end of the lot the 5,000th is in
+    const forFind = Math.ceil(5_000 / MOST_AT_ONCE) * MOST_AT_ONCE
+    expect(rowsDrawn()).toBe(forFind)
+    await nextFrames(6)
+    expect(rowsDrawn()).toBe(forFind)
   })
 })
 

@@ -317,6 +317,27 @@ describe("PendingChanges, closing the tab", () => {
     expect(heard).toHaveBeenCalled()
   })
 
+  test("a write left for a place this visit never names is named, so the program can make the place and send it", async () => {
+    const storage = new MemoryStorage()
+    const props = { keepPendingAs: "@owen/cookbook", storage: () => storage }
+    const first = cookbook({}, { ...props, retry: 10_000 })
+    first.place.nextWrites = ["fails"]
+    first.pending.setField(titleWrite("Broth", "Soup"))
+    await vi.waitFor(() => expect(first.pending.queue.state.kind).toBe("failed"))
+    first.pending.queue.stop()
+
+    // the same device, a new page that names no place yet:  nothing is sent, as nothing knows where to
+    const places = new Places({ wait: 0, retry: 1, ...props })
+    expect(places.waitingPlaceNames()).toEqual(["cookbook"])
+    const place = new TroubledPlace({ collections: { recipes: [{ id: "r-1", title: "Soup" }] } })
+    expect(place.sent).toEqual([])
+    // the program makes just that place:  what was waiting goes
+    places.add("cookbook", place)
+    await allSent(places.pendingFor("cookbook"))
+    expect((await kept(place))!.title).toBe("Broth")
+    expect(places.waitingPlaceNames()).toEqual([])
+  })
+
   test("an unfinished action is never kept:  closing the tab really drops it", () => {
     const storage = new MemoryStorage()
     const props = { keepPendingAs: "@owen/cookbook", storage: () => storage }

@@ -50,6 +50,12 @@ export const DETAILS_SETTLE_MS = 250
 export const DRAFT_KEY_PREFIX = "spell-details-draft:"
 
 /**
+ * The browser's copy of what was typed on a details page before it read the answers sent (`AnswerForm`, epic
+ * `epic-engine` J340):  this, then the page's path.  Apart from the draft:  the draft can't be saved till then.
+ */
+export const EARLY_KEY_PREFIX = "spell-details-early:"
+
+/**
  * How long after a draft's save FAILED an answer page tries again, in ms, until one goes through (epic `epic-engine`
  * P15):  a page server that's back takes it with no keystroke and no reload, its new token too (`ServerLink`).
  * - Why:  a failed save used to wait for the next keystroke, and with every box filled none came (r14).
@@ -58,6 +64,13 @@ export const ANSWER_RETRY_MS = 3000
 
 /** The key of the page's notes, among the ids a page's parts hold (`PartLabels`). */
 export const NOTES_KEY = "notes"
+
+/**
+ * What a SEEDED box sends when the person emptied it (`<epic-text-box>` with a seed, epic `ast-markup`):
+ * a box left as seeded sends nothing (`epic ask answer` says it was kept), so an empty one needs words of its own.
+ * - its box shows it as empty again when the answer comes back
+ */
+export const SEED_EMPTIED = "(emptied:  none of the suggested text kept)"
 
 /**
  * A page the details route answers for:  in a `details/` folder (`detailsRoutes.ts` `DETAILS_PAGE`);  any other page
@@ -110,6 +123,18 @@ export const RUN_POLL_MS = 30_000
 
 /** The docs runtime's per-page fold store:  `spell-doc-runtime.js` `FOLD_KEY_PREFIX`, `{ [section id]: folded }`. */
 export const FOLD_KEY_PREFIX = "spell-folds:"
+
+////////////////
+// ## A Feature Set's order
+////////////////
+
+/** The answer key of a Feature Set's order of sections (epic `epic-engine` P80):  their ids, when the person moved one. */
+export const ORDER_KEY = "order"
+
+/** The answer key of the order of the items in section `section` (`order-s2`). */
+export function orderKeyFor(section: string): string {
+  return `${ORDER_KEY}-${section}`
+}
 
 ////////////////
 // ## A one-line answer box
@@ -189,7 +214,8 @@ export type TypedAnswer = PageAnswer & { labels: PartLabels }
 /**
  * A details page's draft, `<slug>.draft.json5` beside it (P18):  what was typed and not sent, saved a moment after
  * each change, and put back when the page loads again (a reload, an agent's rewrite).
- * - `page`:  the page's URL path;  `saved`:  when, ISO
+ * - `page`:  the page's URL path
+ * - `saved`:  when it was typed, ISO:  putting it back or saving it again NEVER makes it newer
  * - only a draft NEWER than the answer sent counts:  Send deletes it
  */
 export type DetailsDraft = TypedAnswer & { page: string; saved: string }
@@ -226,6 +252,8 @@ export type AnswerPart = {
 /** A question on a details page:  a part with a state, which the Send bar counts ("5 of 17 decided"). */
 export type AskPart = AnswerPart & {
   readonly askState: AskState
+  /** it follows another question (a Priority, epic `epic-engine` P80):  not counted by itself */
+  readonly isFollowUp?: boolean
 }
 
 /**

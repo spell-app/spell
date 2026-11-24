@@ -42,7 +42,7 @@ import apiCSS from "./UIDocsApi.css?inline"
  *     (`HashLanding`):  once its tables are drawn, and on every `hashchange` while connected;
  *     unless the page lands its hashes itself (the site).
  * - `only` (`only="attributes"`):  ONE kind of table, as one section of a page (the site's API tab:  a section per
- *   kind, written by `yarn site:sections`).
+ *   kind, as `yarn site:new` writes it).
  *   - No table title:  the page's section has it.
  *   - A family's tags each under a small header, when it has more than one;  a tag without that table is left out.
  *     No summaries under them:  seven sections would say them seven times.

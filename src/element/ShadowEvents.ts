@@ -26,12 +26,28 @@ import { DelegatedEvents, getDelegatedRoot, registerDelegatedContainer, unregist
  *   - before it:  when an inner element's root already walked part of the path,
  *     Solid resumes right after that part (a one-shot `composedPath()` slice),
  *     instead of dropping the event or walking it twice
- * - Cost:  one wrapper call per delegated event per render root on its path;  no extra listeners.
+ * - It also keeps each shadow root to the event kinds it USES (epic `solid-2-final` P8, part 1 of Q22):
+ *   - Solid adds its listener for a kind to EVERY container the first time anything on the page uses that kind:
+ *     the editor's 5,594 elements held about 28,700 listeners, most for kinds nothing inside them handles.
+ *   - So the bridge HOLDS Solid's listener for a kind back,
+ *     and adds it to the root the first time a node in that root is given a handler of that kind.
+ *   - How it hears of a handler:  Solid gives the node its handler as `node._$$click = handler`;
+ *     a setter for each kind on `Element.prototype` (`watchHandlers()`) notes the node, then steps aside
+ *     (an own property from then on, so Solid reads and rewrites it as before).
+ *   - A node given its handler before it's in a root (still in its template's fragment) waits a moment:
+ *     its root is looked up again a microtask later, and again before any event of that kind reaches the page
+ *     (one capturing listener per kind on the document, added only once a node has waited).
+ *   - So `<ui-icon>`, `<ui-text>` and every root without a handler hold no delegated listener at all;
+ *     a root that uses a kind gets Solid's own listener, behind the same bridge:  nothing about order changes.
+ * - Cost:  one wrapper call per delegated event per render root on its path.
  *   - A `composedPath()` only for nested roots, or when the host itself has a delegated handler.
- * - HACK:  reads dom-expressions internals, as of `@solidjs/web` rc.17 (`ShadowEvents.test.tsx` fails when they move):
+ * - HACK:  reads dom-expressions internals, as of `@solidjs/web` rc.21 (`ShadowEvents.test.tsx` fails when they move):
  *   - `registerDelegatedContainer()` returns the container's state (typed `void`):
  *     its `handlers` map tells Solid's listener apart from a component's own
  *   - `_$SOLID_EVENT_OWNER` (the marker) and `_$$<type>` / `_$$<type>Data` (a node's delegated handler)
+ *   - a node's handler is SET as `node._$$<type> = handler` (dom-expressions `addEvent()`), which the setter hears
+ *   - Solid 2.0 final (this epic's "Solid 2.0 Final" phase) must keep all three, or this file follows it;
+ *     if Solid itself adds a container's listener only for the kinds used inside it, the holding goes
  * - STATIC and instance-free:  one set of bridged roots per page.
  * - Began as solid-element's fix 10 (numbered in its old `UPSTREAM.md`),
  *   moved here as is (epic `spell-element`, Q10).
@@ -39,10 +55,18 @@ import { DelegatedEvents, getDelegatedRoot, registerDelegatedContainer, unregist
 export class ShadowEvents {
   /** Register `root` as a delegation root, as `registerDelegatedRoot` does, with the shadow-safe bridge. */
   static register(root: HTMLElement | ShadowRoot) {
+    ShadowEvents.watchHandlers()
     if (!bridged.has(root)) ShadowEvents.bridge(root)
-    const state = (registerDelegatedContainer as (root: Node, owner: Node) => unknown)(root, root) as
-      | DelegationState
-      | undefined
+    // every delegated listener added while Solid registers the root is Solid's own
+    registering = root
+    let state: DelegationState | undefined
+    try {
+      state = (registerDelegatedContainer as (root: Node, owner: Node) => unknown)(root, root) as
+        | DelegationState
+        | undefined
+    } finally {
+      registering = undefined
+    }
     if (!state) return
     // `registerDelegatedRoot()` ~== this + the `roots` count, which `getDelegatedRoot()` (portals) looks for
     state.roots = (state.roots ?? 0) + 1
@@ -73,6 +97,24 @@ export class ShadowEvents {
     // weak, so the listeners Solid drops on every re-render go with their wrappers
     const wrappers = new WeakMap<EventListener, EventListener>()
     const shadow = root instanceof ShadowRoot
+    const wrapperFor = (listener: EventListener) => {
+      let wrapper = wrappers.get(listener)
+      if (!wrapper) wrappers.set(listener, (wrapper = wrap(listener)))
+      return wrapper
+    }
+    const used = new Set<string>()
+    // a shadow root holds Solid's listener for a kind until a node inside uses it;  an element root never does
+    if (shadow) {
+      kindsInUse.set(root, {
+        used,
+        use(type) {
+          if (used.has(type)) return
+          used.add(type)
+          const listener = states.get(root)?.handlers.get(type)
+          if (listener) add.call(root, type, wrapperFor(listener))
+        }
+      })
+    }
     Object.defineProperties(root, {
       addEventListener: {
         configurable: true,
@@ -80,8 +122,10 @@ export class ShadowEvents {
           if (typeof listener !== "function" || options !== undefined || !DelegatedEvents.has(type)) {
             return add.call(root, type, listener!, options)
           }
-          let wrapper = wrappers.get(listener)
-          if (!wrapper) wrappers.set(listener, (wrapper = wrap(listener)))
+          const wrapper = wrapperFor(listener)
+          // Solid's own, for a kind nothing inside uses yet:  held, `use()` adds it
+          const isSolids = registering === root || states.get(root)?.handlers.get(type) === listener
+          if (shadow && isSolids && !used.has(type)) return
           return add.call(root, type, wrapper)
         }
       },
@@ -145,7 +189,10 @@ export class ShadowEvents {
    * put the event back the way the platform had it, and hand the walk on at the host.
    * - `delete` removes only OWN properties, so the prototype's retargeting `target` / `currentTarget` return.
    * - The host's own delegated handler (`<ui-button onClick>` from the enclosing Solid code)
-   *   runs HERE when the next walker is a plain Solid container:  that one would resume at the host's PARENT.
+   *   runs from here when the next walker is a plain Solid container:  that one would resume at the host's PARENT.
+   *   - It runs as the event reaches the host (`runAtHost()`), not at once:
+   *     a listener on this root after Solid's may still stop the event here
+   *     (`<ui-button>` pressing its inner button keeps that second click inside), and then it never runs.
    *   - An enclosing element's root walks it itself (`before()` resumes at the host).
    * - The marker becomes the host
    *   (or, when the host ran here and the event came from slotted light content, the host's parent):
@@ -159,7 +206,7 @@ export class ShadowEvents {
     const slotted = !root.contains(event.target as Node)
     let last: Node = root
     if (host[`${HANDLER}${event.type}`] !== undefined && !ShadowEvents.bridgeWalksNext(event, root, host)) {
-      ShadowEvents.runHandler(event, host)
+      ShadowEvents.runAtHost(event, host)
       last = host
     }
     const marker = last === host && slotted ? (ShadowEvents.parentOf(host) ?? true) : host
@@ -171,12 +218,92 @@ export class ShadowEvents {
   private static bridgeWalksNext(event: Event, root: ShadowRoot, host: Node): boolean {
     const path = event.composedPath()
     const start = path.indexOf(root) + 1
-    const next = path.findIndex((node, index) => index > start && bridged.has(node as Node))
+    const next = path.findIndex((node, index) => index > start && ShadowEvents.listens(node as Node, event.type))
     if (next < 0) return false
     const parent = ShadowEvents.parentOf(host)
     const plain = parent ? getDelegatedRoot(parent as HTMLElement) : undefined
     const index = plain ? path.indexOf(plain) : -1
     return index < 0 || next <= index
+  }
+
+  /** Whether `node` is a bridged root with Solid's listener for `type` on it (not held back). */
+  private static listens(node: Node, type: string): boolean {
+    if (!bridged.has(node)) return false
+    const kinds = kindsInUse.get(node)
+    return !kinds || kinds.used.has(type)
+  }
+
+  ////////////////
+  // ## Only the kinds a root uses
+  ////////////////
+
+  /**
+   * Hear every node given a delegated handler:  a setter for each kind Solid delegates, on `Element.prototype`.
+   * - Solid sets `node._$$click = handler` (`addEvent()`);  the setter makes that an OWN property of the node,
+   *   so every later read and write is a plain one, then notes the node (`noteHandler()`).
+   * - No getter:  a node without a handler reads `undefined`, as before.
+   * - SIDE EFFECT:  page-wide, as this file loads:  an element may draw before its root is registered
+   *   (its content is built inside its error boundary first).
+   *   - Where there is no DOM yet (node), the first `register()` installs it.
+   * - And again at every `register()`, for the kinds Solid delegates SINCE (`watched`):  a bundle that loads each
+   *   family on first use (the docs bundle, epic `solid-2-final` P7) runs a family's `delegateEvents(["click"])` long
+   *   after the first element drew;  unwatched, its buttons' handlers reached no listener, and no fold folded.
+   */
+  static watchHandlers() {
+    if (typeof Element === "undefined") return
+    for (const type of DelegatedEvents) {
+      if (watched.has(type)) continue
+      watched.add(type)
+      const key = `${HANDLER}${type}`
+      Object.defineProperty(Element.prototype, key, {
+        configurable: true,
+        set(this: Element, value: unknown) {
+          Object.defineProperty(this, key, { configurable: true, enumerable: true, writable: true, value })
+          if (value != null) ShadowEvents.noteHandler(this, type)
+        }
+      })
+    }
+  }
+
+  /** `node` was given a handler for `type`:  its root starts listening, or it waits until it's in one. */
+  private static noteHandler(node: Element, type: string) {
+    const root = node.getRootNode()
+    const kinds = kindsInUse.get(root)
+    if (kinds) kinds.use(type)
+    // not in a root yet, or in a shadow root not registered yet:  look again in a moment
+    else if (!(root instanceof Document)) ShadowEvents.wait(node, type)
+  }
+
+  /**
+   * `node` isn't in a root yet (its template is still being drawn):  look again a microtask later,
+   * and before any event of `type` reaches the page (a capturing listener on its document, once per kind).
+   */
+  private static wait(node: Element, type: string) {
+    waiting.push({ node: new WeakRef(node), type })
+    if (!isSettleQueued) {
+      isSettleQueued = true
+      queueMicrotask(settle)
+    }
+    // the page's document, not the node's:  a node cloned from a template belongs to the template's until inserted
+    const document = node.ownerDocument.defaultView?.document ?? globalThis.document
+    let kinds = capturing.get(document)
+    if (!kinds) capturing.set(document, (kinds = new Set()))
+    if (kinds.has(type)) return
+    kinds.add(type)
+    document.addEventListener(type, settle, { capture: true })
+  }
+
+  /**
+   * Run `host`'s delegated handler for `event` as the event reaches `host`:  a one-time listener there.
+   * - A listener added to a node while an event is on its way there still hears that event.
+   * - The platform's own `addEventListener()`, past any the host has of its own (`<ui-card>`'s wraps its clicks).
+   * - An event stopped before the host leaves the listener for the next event of its type, which it ignores.
+   */
+  private static runAtHost(event: Walked, host: Delegating) {
+    const listener = (heard: Event) => {
+      if (heard === event) ShadowEvents.runHandler(event, host)
+    }
+    EventTarget.prototype.addEventListener.call(host, event.type, listener, { once: true })
   }
 
   /** Run `node`'s delegated handler for `event`, as dom-expressions' `handleNode()` does. */
@@ -220,8 +347,49 @@ const HANDLER = "_$$"
 /** Render roots with the bridge installed. */
 const bridged = new WeakSet<Node>()
 
+/** The root `register()` is registering:  every delegated listener added meanwhile is Solid's. */
+let registering: Node | undefined
+
+/** Each bridged shadow root's kinds in use (`used`), and `use(type)`, which adds Solid's held listener. */
+const kindsInUse = new WeakMap<Node, { used: Set<string>; use(type: string): void }>()
+
+/** The kinds `watchHandlers()` has put a setter on `Element.prototype` for. */
+const watched = new Set<string>()
+
+/** Nodes given a handler before they were in a root, and its kind:  `settle()` looks again. */
+let waiting: { node: WeakRef<Element>; type: string }[] = []
+
+/** Whether a microtask's `settle()` is on its way. */
+let isSettleQueued = false
+
+/** Per document, the kinds with a capturing `settle()` listener on it. */
+const capturing = new WeakMap<Document, Set<string>>()
+
+/**
+ * Look again for the root of every node still waiting (`ShadowEvents.wait()`).
+ * - A listener added to a root while an event is on its way there still hears that event:
+ *   the platform reads a node's listeners as the event reaches it.
+ * - A node still in no root keeps waiting, weakly:  one never drawn is let go.
+ */
+function settle() {
+  isSettleQueued = false
+  if (!waiting.length) return
+  const list = waiting
+  waiting = []
+  for (const { node: ref, type } of list) {
+    const node = ref.deref()
+    if (!node) continue
+    const root = node.getRootNode()
+    // a shadow root still not registered is someone else's:  nothing of ours to add
+    if (root instanceof ShadowRoot) kindsInUse.get(root)?.use(type)
+    else if (!(root instanceof Document)) waiting.push({ node: ref, type })
+  }
+}
+
 /** Each registered root's delegation state (from `registerDelegatedContainer()`). */
 const states = new WeakMap<Node, DelegationState>()
+
+ShadowEvents.watchHandlers()
 
 /**
  * Per event in flight, what the last bridged root did.

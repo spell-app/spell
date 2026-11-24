@@ -54,7 +54,8 @@ export {
   type SaverOptions,
   type LoaderOptions
 } from "./saving"
-export { checkEntry, jsonSchemaFor, kindOf, type EntryProblem, type CheckOptions, type Kind } from "./checking"
+export { checkEntry, jsonSchemaFor, type EntryProblem, type CheckOptions } from "./checking"
+export { kindOf, type Kind } from "./kinds"
 export {
   lexiconFor,
   nsidFor,

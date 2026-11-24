@@ -53,6 +53,7 @@ import {
   growField,
   noteToast,
   readJSON,
+  whenAttached,
   writeJSON
 } from "./spell-doc-helpers.js"
 
@@ -565,11 +566,7 @@ class PageComments {
     const state = unsent ? "unsent" : send.waiting.length ? "sent" : "idle"
     const button = el(SEND_BUTTONS_TAG, { state, count: unsent || undefined, "send-tip": sendWords(send, state) })
     button.addEventListener(SEND_ASKED, () => void this.sendNow())
-    const who = el(
-      "span",
-      { class: "spell-send-who", "data-listening": send.listening ? "yes" : "no", "data-tooltip": whoWords(send) },
-      whoLabel(send)
-    )
+    const who = el("span", { class: "spell-send-who", "data-listening": send.listening ? "yes" : "no" }, whoLabel(send))
     // the header's tools row, first (`addHeadTool()`)
     addHeadTool(
       head,
@@ -710,8 +707,8 @@ class PageComments {
     const showing = new Set()
     if (!this.send || this.send.byPage || !this.main.querySelector("epic-text-box")) return showing
     // its `value` is the element's own, once the epics pack defines it:  set before, it would hide that for good
-    if (!customElements.get("epic-text-box")) {
-      this.boxesDefined ??= customElements.whenDefined("epic-text-box").then(() => this.draw())
+    if (!customElements.get("epic-text-box")?.isAttached?.("epic-text-box")) {
+      this.boxesDefined ??= whenAttached("epic-text-box").then(() => this.draw())
       return showing
     }
     for (const [box, note] of this.noteBoxes)
@@ -1017,7 +1014,7 @@ class PageComments {
     const id = `C${ThreadFacts.numberOf(comment.id)}`
     const row = el(
       "button",
-      { type: "button", class: `${PROMOTED}-row`, "data-tooltip": `${id}:  show this comment` },
+      { type: "button", class: `${PROMOTED}-row` },
       el("ui-icon", { name: "bullhorn" }),
       el("b", {}, id),
       el("span", {}, ThreadFacts.headline(comment))
@@ -1837,8 +1834,7 @@ class PageComments {
       PANE_TAG,
       {
         "data-spell-added": true,
-        headline: ThreadFacts.headline(open.place),
-        about: ThreadFacts.aboutTip(open)
+        headline: ThreadFacts.headline(open.place)
       },
       field
     ))
@@ -2098,14 +2094,6 @@ function whoLabel({ epic, owned, wakes, listening }) {
   return wakes ? `nobody is listening:  Send wakes ${epic}` : "no epic owns this page"
 }
 
-/** The tooltip of who is listening, beside a docs page's Send (`drawSend()`):  where its comments go, and when. */
-function whoWords({ epic, owned, wakes, listening }) {
-  const where = owned ? epic : `${epic}, for pages no epic owns`
-  if (listening) return `Claude is reviewing ${where}:  Send hands these over now`
-  if (wakes) return `Nobody is reviewing ${where}:  Send wakes it`
-  return `No epic owns this page yet:  its comments wait`
-}
-
 /** The first line of `words`, cut to a short line with `…`. */
 export function firstWords(words) {
   const line = String(words ?? "")
@@ -2250,7 +2238,7 @@ export function holdFocusIn(pane, field) {
 
 /** Resolves once `element` (one of the pack's) is defined and has drawn.  NEVER rejects. */
 async function drawn(element) {
-  await customElements.whenDefined(element.localName)
+  await whenAttached(element.localName)
   await element.ready?.catch(() => undefined)
 }
 

@@ -67,7 +67,7 @@ export class DOMThreadElement extends E.DOMElement<EpicThread> {
  *   hasn't answered (`unseen`;  Owen, 2026-10-10:  "make the background of the entire bullhorn thread + the last
  *   claude reply orange").
  * - Its HEADER (`head()`):  the fold -- a chevron, the bullhorn (a green check circle once done), its id (`C3`), the
- *   first words it's on (its tooltip the block in full) -- then:
+ *   first words it's on (no tooltip, I370) -- then:
  *   - Owen's answer while it's his turn:  an item's review pills (`<epic-review buttons="thread">`;  Owen,
  *     2026-10-10:  "Make top buttons same semantics/look as pills in item header");  Reopen once done
  *   - the pen, while his first words wait and Claude hasn't had them
@@ -121,13 +121,6 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
     const by = (this.comment as ThreadComment | undefined)?.by
     const viewer = ThreadFacts.viewer()
     return !by || !viewer || ThreadFacts.sameName(by, viewer)
-  }
-
-  /** Where it is, in full, then what a click on its header does:  the fold's tooltip. */
-  get foldTip(): string {
-    const comment = this.comment as ThreadComment | undefined
-    const about = comment ? ThreadFacts.aboutTip({ id: comment.id, place: comment }) : ""
-    return `${about}\n(${this.translationForKey(this.open ? "foldTip" : "unfoldTip")})`
   }
 
   /**
@@ -249,7 +242,6 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
           class={FOLD}
           part={this.partForName("fold")}
           aria-expanded={this.open ? "true" : "false"}
-          data-tooltip={this.foldTip}
         >
           <span class={CHEVRON}>
             <ui-icon name="chevron right" />

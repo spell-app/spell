@@ -2,6 +2,7 @@
 import { pickedLetters, setLetter, setPicksOf } from "spell/epic/review/review.types"
 
 import { PhaseStatuses } from "spell/epic/phases"
+import type { BadgeLimits } from "spell/epic/components/epic-item/ItemBadge"
 
 import {
   CALM_ID,
@@ -44,6 +45,7 @@ import type { Comment } from "./CommentList"
 import type { PickFields } from "./ReviewInbox"
 
 import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
+import { ItemBadges } from "./ItemBadges"
 import { OptionSets } from "./OptionSets"
 import { PlanItem } from "./PlanItem"
 import { PlanTime } from "./PlanTime"
@@ -96,11 +98,26 @@ export abstract class PlanReader {
    */
   readComments?: () => Record<string, Comment>
 
+  /**
+   * The items the person acted on in the epic's review inbox (`SelfFix.actedOn()`), read as an issue is fixed
+   * (epic `epic-engine` T143).
+   * - set by the command line's `read()`;  none (a test, a page off disk):  the page alone says what they got to
+   */
+  readActedOn?: () => ReadonlySet<string>
+
+  /**
+   * What the review inbox says holds an item open, by id (lower case):  Claude at work on it, a note of theirs not
+   * sent yet (epic `epic-engine` I435;  `PlanDoc.closeRefusal()`).
+   * - set by the command line's `read()`;  none (a test, a page off disk):  the page alone says
+   */
+  readHeld?: () => ReadonlyMap<string, string>
+
   constructor(
     document: Document,
     now = new Date(),
-    { recentSince, person = SOMEONE, agent = GUESSED_AGENT }: PlanDocOptions = {}
+    { recentSince, person = SOMEONE, agent = GUESSED_AGENT, badgeLimits }: PlanDocOptions = {}
   ) {
+    this.badgeLimits = badgeLimits
     this.document = document
     this.now = now
     this.recentSince = recentSince
@@ -115,6 +132,28 @@ export abstract class PlanReader {
   get person(): string {
     return this.whoWrites()
   }
+
+  /**
+   * The page's item badges (epic `epic-engine` P81):  the ONE rule (`ItemBadge`) asked about this page's items.
+   * - made as it's first asked:  it reads `readActedOn`, which the command line sets after making the doc
+   */
+  get badges(): ItemBadges {
+    this.itemBadges ??= new ItemBadges({
+      document: this.document,
+      factsOf: (item) => this.facts(item),
+      limitsOf: this.badgeLimits,
+      readActedOn: () => this.readActedOn?.() ?? new Set(),
+      personOf: () => this.person,
+      nowOf: () => this.now
+    })
+    return this.itemBadges
+  }
+
+  /** `badges`, once asked. */
+  private itemBadges: ItemBadges | undefined
+
+  /** The constructor's `badgeLimits`. */
+  private readonly badgeLimits: (() => BadgeLimits) | undefined
 
   /** The constructor's `person`, as a function. */
   private readonly whoWrites: () => string
@@ -264,7 +303,12 @@ export abstract class PlanReader {
     const item = this.findItem(id)
     if (!item) return null
     const facts = this.facts(item)
-    return { id: facts.id.toUpperCase(), kind: PlanItem.kindOf(facts.id), status: facts.status, title: facts.title }
+    return {
+      id: facts.id.toUpperCase(),
+      kind: PlanItem.kindOf(facts.id),
+      status: facts.status,
+      title: PlanItem.listedTitle(item)
+    }
   }
 
   /**
@@ -282,11 +326,11 @@ export abstract class PlanReader {
       OPEN_KINDS.map((kind) => {
         const items: ItemSummary[] = []
         for (const item of this.itemsOf(kind)) {
-          const { id, title, status } = this.facts(item)
+          const { id, status } = this.facts(item)
           if (status !== "open") continue
           const isQuiet = QUIET_STATES.includes(this.itemState(item))
           if (isQuiet) quiet++
-          if (!isQuiet || scope === "all") items.push({ id, title, status })
+          if (!isQuiet || scope === "all") items.push({ id, title: PlanItem.listedTitle(item), status })
         }
         return [kind, items]
       })
@@ -315,18 +359,33 @@ export abstract class PlanReader {
 
   /**
    * Item `item`'s standing, the `state` the page colours it by (`STATE_COLORS`):
+   * - on a page with badges (epic `epic-engine` P81), its badge's colour (`ItemBadge`'s tables);
+   *   an item with none, and every item of a page without them:  as below (`plainState()`)
+   */
+  itemState(item: Element): ItemState {
+    return this.badges.badgeOf(item).state ?? this.plainState(item)
+  }
+
+  /**
+   * Item `item`'s standing without badges:
    * - Claude is working on it (an underway status card, or `working`):  `progress`, closed or not (a revisit of a
    *   decided question is work too)
    * - canceled (made moot, struck through):  `old`, grey -- the ONE "no longer relevant"
    * - handled in a phase (`handled`, epic `epic-engine` P31):  `handled`, grey:  its answer is that phase's text now
+   *   - NEVER an open fix waiting for his check (`fixed`, epic `epic-engine` I411:  I88, reopened, stayed grey)
    * - an issue Claude found and fixed itself, never needing Owen (epic `epic-engine` I236):  `handled`, grey:
    *   closed done, `calm`, never reviewed, not one he asked for (Owen:  "I don't need to worry about transient stuff")
+   * - an issue Claude found, fixed before he got to it (`self-fixed`, epic `epic-engine` T143):  `handled`, grey
+   *   (`SelfFix` decides as it's fixed)
    * - an issue or todo filed from his own words (`requested`;  a todo since T88), closed done, never reviewed:
    *   `requested`, light orange
    *   (epic `epic-engine` P63;  Owen, 2026-11-08:  "light orange until reviewed")
    * - closed otherwise (done, decided, an old doc's `d7`):  `recent`, green, however long ago (Owen, 2026-10-08:
    *   "green across the board is good")
-   * - fixed, waiting for his review (`fixed`, epic `epic-engine` I232):  `replied`, orange, Owen's turn
+   * - fixed, waiting for his review (`fixed`, epic `epic-engine` I232):  Owen's turn
+   *   - from his own words (`requested`):  `requested`, light orange (T143;  Owen, 2026-11-22:  "Issue from my words
+   *     which you are leaving orange should be light orange")
+   *   - else `replied`, orange
    * - work a review queued, not started (`queued`):  `scheduled`, blue dotted:  agreed, nothing for him to do
    *   (epic `epic-engine` P63)
    * - Claude answered it last, with options nothing is picked in yet (`PlanItem.awaitsPick()`):  `replied`, Owen's
@@ -345,15 +404,16 @@ export abstract class PlanReader {
    * - a manual test:  `manualTestState()`
    * - else `open`:  a revisit or Do Now Claude answered leaves it open, yellow (J10)
    */
-  itemState(item: Element): ItemState {
+  protected plainState(item: Element): ItemState {
     const facts = this.facts(item)
     if (facts.underway || facts.working) return "progress"
     if (facts.status === CANCELED) return "old"
     // its answer in a phase's text now (epic `epic-engine` P31):  quiet, out of "what needs you"
-    if (facts.handled || isSelfFixed(facts)) return "handled"
+    const awaitsCheck = facts.fixed && facts.status === "open"
+    if (!awaitsCheck && (facts.handled || facts.selfFixed || isSelfFixed(facts))) return "handled"
     if (isRequestedFix(facts)) return "requested"
     if (CLOSED.has(facts.status) || OLD_DECISION.test(facts.id)) return "recent"
-    if (facts.fixed) return "replied"
+    if (facts.fixed) return facts.requested ? "requested" : "replied"
     if (facts.queued !== undefined) return "scheduled"
     if (facts.awaitsPick) return "replied"
     if (QUESTION_ID.test(facts.id)) return "attention"
@@ -438,7 +498,7 @@ export abstract class PlanReader {
     const facts = this.facts(item)
     return {
       id: facts.id.toUpperCase(),
-      title: facts.title,
+      title: PlanItem.listedTitle(item),
       status: facts.status,
       state: this.reviewState(item),
       docState: this.itemState(item),

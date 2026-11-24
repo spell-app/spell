@@ -1,0 +1,196 @@
+"epic note" is a notebook page
+	<header level="1">
+		&lt;epic-note&gt;
+		<header>The &lt;epic-note&gt; element: a small UPDATE or DONE note in prose that stays.</>
+	</>
+
+	<text class="lede" paragraph>A small note in prose that stays: an orange UPDATE card (changed since you looked) or a green DONE card (decided or done). It draws the heading, the label then the note's title; the note is its children.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
+		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-note-epicnote-en-ts" link="/epic/src/components/epic-note/EpicNote.en.ts"><text title="epic/src/components/epic-note/EpicNote.en.ts" code>EpicNote.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-note-epicnote-tsx" link="/epic/src/components/epic-note/EpicNote.tsx"><text title="epic/src/components/epic-note/EpicNote.tsx" code>EpicNote.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Two real ones from epic <text code>outline-spell</>, shortened: an UPDATE on issue I6, and a DONE on judgement call J9. Each heading folds its note.</>
+		<html>
+			<epic-note state="update" title="partly fixed by J9, 2026-10-06">
+				<p>A phrase starting <code>is</>, with nothing after it, is now an error instead of an empty getter: <code>- it "is a suit"</> says to write a blank in parens, or an <code>if ...</> (J9).</>
+			</>
+			<epic-note state="done" title="option A, 2026-10-06">
+				<p>Done as option A ("require the parens"). In two commits on <code>outline-spell</>.</>
+			</>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From <link title="epics/outline-spell/parts/i6.html" target="src-epics-outline-spell-parts-i6-html" link="/epics/outline-spell/parts/i6.html"><text code>i6.html</></>, shortened:</>
+		<text paragraph>i6.html · its note:</>
+		<markdown>
+			```html
+			<epic-note state="update" title="partly fixed by J9, 2026-10-06"
+			  ><p>
+			    A phrase starting <code>is</code>, with nothing after it, is now an error instead of an empty getter ...
+			  </p></epic-note
+			>
+			```
+		</>
+		<text paragraph>A note with no body is its heading alone: <text code>&lt;epic-note state="done" title="option A, 2026-10-06"&gt;&lt;/epic-note&gt;</>.</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<html>
+			<ui-list bulleted>
+				<ui-item>Anywhere prose goes: it's a <dfn class="spell-term" tabindex="0">prose element</><ui-popup heading="prose element" label="An <epic-*> element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."></>: <ui-list bulleted><ui-item><ui-link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><ui-text code>&lt;epic-item&gt;</></>: among an item's own text, before its cards</> <ui-item><ui-link target="src-packages-epics-docs-epic-answer-html" link="/epic-answer"><ui-text code>&lt;epic-answer&gt;</></>, <ui-link target="src-packages-epics-docs-epic-more-html" link="/epic-more"><ui-text code>&lt;epic-more&gt;</></>, <ui-link target="src-packages-epics-docs-epic-reply-html" link="/epic-reply"><ui-text code>&lt;epic-reply&gt;</></>: the cards under an item</> <ui-item><ui-link target="src-packages-epics-docs-epic-option-html" link="/epic-option"><ui-text code>&lt;epic-option&gt;</></>: an option card's pros and cons</> <ui-item><ui-link target="src-packages-epics-docs-epic-field-html" link="/epic-field"><ui-text code>&lt;epic-field&gt;</></>: a phase's field, or a labelled block</> <ui-item><ui-link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated"><ui-text code>&lt;epic-updated&gt;</></>: a change to a phase's plan</> <ui-item><ui-link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><ui-text code>&lt;epic-section&gt;</></>: an Overview sub-section's prose, or a report's</> <ui-item><ui-link target="src-packages-epics-docs-epic-version-html" link="/epic-version"><ui-text code>&lt;epic-version&gt;</></>: an earlier version, kept as it was</> <ui-item>another prose element (a note inside an aside), or plain HTML around it (a <ui-text code>&lt;li&gt;</>, a <ui-text code>&lt;div&gt;</>)</></></>
+			</>
+		</>
+		<text paragraph>
+			<text bold>Its children:</>
+		</>
+		<list bulleted>
+			<item>prose: the note</>
+			<item>or nothing: the heading alone</>
+		</>
+		<text paragraph>Not <text code>&lt;epic-update&gt;</>: that one belongs to a phase, and goes when the phase is done. This one stays.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>state</>
+				</>
+				<cell><text code>update</> or <text code>done</></>
+				<cell><text code>update</>: an orange UPDATE (changed since you looked). <text code>done</>: a green DONE (decided or done).</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>title</>
+				</>
+				<cell>text</>
+				<cell>After the label, WITHOUT it: <text code>partly fixed by J9, 2026-10-06</>, drawn <text code>UPDATE · partly fixed by J9, 2026-10-06</>. None: the label alone.</>
+				<cell>no</>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">slot</><ui-popup heading="slot" label="Where the element shows its own children:  the doc's prose, inside its drawing."></> is where the element's own children show.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>Holds</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>The note.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">part</><ui-popup heading="part" label="A named piece of the element's drawing, which a page's CSS can reach from outside:  epic-note::part(label)."></> is a piece of the drawing a page's CSS can reach.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>Is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The card: orange (<text code>update</>) or green (<text code>done</>).</>
+				</>
+				<row>
+					<cell>
+						<text code>header</>
+					</>
+					<cell>Its heading: the fold chevron, the label, then the title. A click folds it.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>The fold chevron, a <text code>&lt;button&gt;</>, first in the heading; only with a body.</>
+				</>
+				<row>
+					<cell>
+						<text code>label</>
+					</>
+					<cell><text code>UPDATE</> or <text code>DONE</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>The note. Not drawn when empty; hidden (<text code>until-found</>) while folded.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">state</><ui-popup heading="state" label="A CSS custom state the element sets on itself as it changes:  epic-aside:state(open)."></> is set by the element on itself; none is ever written in the doc.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>Unfolded. It starts so.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>One meaning per colour (decision Q20): <text code>update</> orange, changed since you looked; <text code>done</> green, decided or done.</>
+			<item>A card: a hairline in its colour, a faint fill of it, and the heading's text in that colour's readable ink (light and dark).</>
+			<item>The label is bold and letter-spaced; the title follows it after <text code>·</>.</>
+			<item>It folds by its heading, chevron first, when it has a body. It starts open; folded, the note is <text code>hidden="until-found"</>.</>
+			<item>At most 44em wide (<text code>--epic-note-width</>). No fill lifecycle: it's not a button.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Claude writes it inside the HTML it passes to <text code>epic</> (<text code>add ... --details</>, <text code>decide --details</>, <text code>details --file</>, <text code>updated</>): no command makes one by itself.</>
+			<item>The epic tool turns the OLD hand-shaped markup into this element, so a doc never holds the old shape. <list bulleted><item>It does this in any HTML a command takes: <text code>add --details</>, <text code>decide --details</>, <text code>details --file</>, <text code>updated</>.</> <item>The code that does it: <text code>IncomingHtml</> and <text code>ProseRewrite</>.</> <item>Prose edited by hand in a part file isn't passed through it.</> <item>The old shape: a hand-written <text code>ui-message.plan-update</>.</></></>
+			<item>The converter did the same to every converted doc (<text code>ProseUpgrader</>).</>
+			<item>The tool never removes one.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>.</>
+		</>
+	</>

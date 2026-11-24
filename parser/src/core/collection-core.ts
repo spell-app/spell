@@ -8,7 +8,7 @@
  *   - For objects: use natural key order for position.
  * - TODO: collections for `words`, `lines`, etc?
  */
-import _ from "lodash"
+import { range } from "lodash-es"
 import { core } from "./core"
 // Import directly, never through the barrel:
 // `spell/parser/core/model` loads this file, and must not load drawing (Solid)
@@ -129,7 +129,7 @@ export const collectionCoreMethods = defineCoreModule({
     const coll = asCollection(collection)
     if (typeof coll.getKeys === "function") return coll.getKeys()
     if (core.isArrayLike(collection)) {
-      return _.range(0, core.itemCountOf(collection))
+      return range(0, core.itemCountOf(collection))
     }
     return Object.keys(coll)
   },

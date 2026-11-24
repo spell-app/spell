@@ -10,7 +10,7 @@ import "./AppContainer.css"
  * - Its `id` is `core.REACT_APP_ROOT_ID`, where a program looks if no one says where.
  *   It's WRITTEN OUT, NOT imported:  the app MUST NOT load `core` itself, see `spellRuntime.ts`.
  * - NOTE: imports nothing from the `spell/app/app/solid` barrel, so a runner could use it without pulling in the editor.
- * - SEE:  its App UI components page, `app/docs/AppContainer.html` (`/components/app/AppContainer.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/app-container`.
  ****************/
 export function AppContainer(props: AppContainerProps) {
   return (

@@ -8,7 +8,8 @@ import { join } from "node:path"
 
 import { afterAll, expect, test } from "vite-plus/test"
 
-import { InboxPoller, listenerOf } from "spell/epic/tool/InboxPoller.mjs"
+import { InboxPoller, listenerHearsHub, listenerOf } from "spell/epic/tool/InboxPoller.mjs"
+import { WakeNotes } from "spell/epic/tool/WakeNotes.mjs"
 
 const folder = mkdtempSync(join(tmpdir(), "inbox-poller-"))
 const watched = join(folder, "x.inbox.json5")
@@ -138,4 +139,58 @@ test("announce:  a batch the poller before announced is not announced again;  a 
   expect(await next.run()).toBe(2)
   expect(printed).toEqual(["📬 x", "📬 x"])
   expect(next.lastBatch).toBe("b2")
+})
+
+////////////////
+// ## Hearing the hub (epic `epic-engine` T163)
+////////////////
+
+/** A poller hearing the hub's notes for session `s1`, whose record is `record` (then the session ended). */
+function hubPoller(records: object[], printed: string[], wakes: WakeNotes) {
+  let count = 0
+  listeners ||= mkdtempSync(join(folder, "listeners-"))
+  return new InboxPoller({
+    mode: "hook",
+    listeners,
+    sessionId: "s1",
+    notes: wakes,
+    recordOf: () => records[count++] ?? { pid: 999_999_999, file: watched },
+    look: () => {
+      throw new Error("a poller hearing the hub runs no look")
+    },
+    print: (line: string) => void printed.push(line),
+    pollMs: 5,
+    settleMs: 5,
+    retryMs: 5
+  })
+}
+
+/** Notes in a fresh folder, a hub listening (this process). */
+function hubNotes(): WakeNotes {
+  const wakes = new WakeNotes({ folder: mkdtempSync(join(folder, "wakes-")) })
+  wakes.writeHub()
+  return wakes
+}
+
+test("run, hearing the hub:  idle, it takes the note, prints its line and exits 2;  the note is gone", async () => {
+  const wakes = hubNotes()
+  wakes.leave("s1", { epic: "x", batch: "b1", notice: "📬 x" })
+  const printed: string[] = []
+  const code = await hubPoller([{ pid: process.pid, file: watched, status: "idle" }], printed, wakes).run()
+  expect({ code, printed }).toEqual({ code: 2, printed: ["📬 x"] })
+  expect(wakes.take("s1")).toBeUndefined()
+  expect(listenerHearsHub(process.pid, listeners)).toBe(true)
+})
+
+test("run, hearing the hub:  busy, it leaves the note for the PostToolUse hook", async () => {
+  const wakes = hubNotes()
+  wakes.leave("s1", { epic: "x", batch: "b1", notice: "📬 x" })
+  const printed: string[] = []
+  writeFileSync(watched, "{}")
+  const running = hubPoller([{ pid: process.pid, file: watched, status: "busy" }], printed, wakes).run()
+  // the session's record changes (its turn goes on):  the next look finds it ended
+  setTimeout(() => writeFileSync(watched, "{ busy: 1 }"), 20)
+  const code = await running
+  expect({ code, printed }).toEqual({ code: 0, printed: [] })
+  expect(wakes.take("s1")).toMatchObject({ notice: "📬 x" })
 })

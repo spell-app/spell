@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The spell Command</title>
+    <meta
+      name="description"
+      content="spell, Spell's one command line:  the language commands, each folder's own tools by noun and verb, how a project is named, how it runs your checkout's source, and where the epic command's verbs are."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="Tools" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>The spell Command</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>The spell Command</h1></header></ui-sticky
+        >
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>spell lint, on a project whose last line Spell can't read · 4 lines</ui-title>
+          <ui-content>
+            <pre><code class="language-text">$ spell lint Hello
+✗ @local/clihook/Hello  1 error · 1 warning
+Hello/Hello.spell:4:1  Don't understand "print greeting"
+$ echo $?
+1</code></pre>
+          </ui-content>
+        </ui-accordion>
+        <p class="lede">
+          That's the same error the editor underlines, because <code>spell</code> loads projects the way the language
+          server does. One command over every folder of the kit: if you've used <code>git</code> or <code>cargo</code>,
+          you know the shape, a verb after it and <code>--help</code> on everything.
+        </p>
+        <p>
+          What's different is where the verbs come from: each folder names its own in its
+          <a href="/package.json" target="src-package-json"><code>package.json</code></a
+          >, and <code>spell --help</code> lists them under the folder that added them. And there's no build step: in a
+          checkout, <code>spell</code> runs your source through <code>tsx</code>, so the next run runs your edit.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user">Written for: anyone running Spell projects from a terminal, or adding a command</ui-item>
+          <ui-item icon="flask"
+            >Checked: 2026-11-21, every command against <code>spell --help</code> and its own help that day</ui-item
+          >
+          <ui-item icon="book open"
+            >The reference beside it, with every verb and flag:
+            <a href="/README/cli.md" target="src-readme-cli-md">the command-line README</a></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>
+              Set it up once: <code>yarn cli:install</code> at the kit's root links
+              <a href="/bin/spell.mjs" target="src-bin-spell-mjs"><code>bin/spell.mjs</code></a> onto your
+              <code>PATH</code>. It's a link, so a <code>git pull</code> is an upgrade.
+            </li>
+            <li>
+              The parser folder's commands compile, lint, run, test, format, explain and translate Spell projects.
+            </li>
+            <li>
+              The repo tools go by noun, then verb: <code>spell server start</code>, <code>spell pack build</code>,
+              <code>spell runbook start</code>.
+            </li>
+            <li>
+              <code>epic</code> is the other command you'll type: epic pages, worktrees, windows, reviews. It's the epic
+              folder's, with its own verbs.
+            </li>
+            <li>Output goes to stdout; progress and screens go to stderr.</li>
+            <li>Exit codes: 0 fine; 1 the Spell has errors, or a test failed; 2 the command line is wrong.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="naming" label="2. Naming a project" sticky collapsible dividing open="false">
+          <p>Every project command takes the same kinds of target:</p>
+          <ul>
+            <li>a <code>.spell</code> file, or a project folder (one with a <code>__project.json5</code>)</li>
+            <li><code>@here</code>: the project in the current folder</li>
+            <li>a project by its address: <code>@spell/examples/fizzbuzz</code></li>
+            <li>a file in one: its name has a dot</li>
+            <li>a group, <code>@spell/examples</code>: pick from its projects, or <code>--all</code> takes them all</li>
+            <li>none: the project here, or, outside one, a prompt that completes as you type</li>
+          </ul>
+          <ul>
+            <li>
+              <code>spell projects</code> lists the groups; <code>spell projects &lt;group&gt;</code>, its projects.
+            </li>
+            <li><code>--verbose</code>, on any command, shows Spell's own logging on stderr.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="2-commands" label="3. The language commands" sticky collapsible dividing open="false">
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>command</th>
+                  <th>what it does</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>compile</code></td>
+                  <td>
+                    writes <code>&lt;Project&gt;.spell.js</code>, and each <code>*.editor.html</code>'s module;
+                    <code>--target</code> for another writer, <code>--stdout</code> to print it
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>lint</code></td>
+                  <td>
+                    errors, one a line as <code>path:line:col</code>, exit 1 if any; <code>--fix</code> rewrites old
+                    forms
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>upgrade</code></td>
+                  <td>brings a project written for an older Spell up to date, then records its Spell version</td>
+                </tr>
+                <tr>
+                  <td><code>run</code></td>
+                  <td>compiles and runs a project; one with a UI opens in your browser, until Ctrl-C</td>
+                </tr>
+                <tr>
+                  <td><code>test</code></td>
+                  <td>runs each <code>to test ...</code>, reporting ✓ or ✗; exit 1 if any fail</td>
+                </tr>
+                <tr>
+                  <td><code>watch</code></td>
+                  <td>recompiles as files change, showing errors, until q or Ctrl-C</td>
+                </tr>
+                <tr>
+                  <td><code>format</code></td>
+                  <td>tidies a <code>.spell</code> file's whitespace, as VS Code's Format Document does</td>
+                </tr>
+                <tr>
+                  <td><code>describe</code></td>
+                  <td>what a file or project declares, as the Type Explorer shows it, or all about one thing</td>
+                </tr>
+                <tr>
+                  <td><code>parse</code>, <code>repl</code></td>
+                  <td>how Spell reads a line: its match tree, then the JavaScript it compiles to</td>
+                </tr>
+                <tr>
+                  <td><code>explain</code></td>
+                  <td>what a word means to Spell: the rules it names or starts</td>
+                </tr>
+                <tr>
+                  <td><code>speedtest</code></td>
+                  <td>times the parser's rule tests; <code>--against HEAD</code> compares with a commit</td>
+                </tr>
+                <tr>
+                  <td><code>translate</code></td>
+                  <td>
+                    writes a project in another language: its names, then line by line, then Claude fixes each line that
+                    fails a check
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>place</code></td>
+                  <td>the places a program's data lives in: look at a source, sign in, check its reference page</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <code>compile</code> writes the targets the project file names; <code>--target ts/solid</code> adds one.
+              <code>spell run &lt;project&gt; --target py</code> runs it as Python.
+            </li>
+            <li>
+              The catch: their work is the app folder's for now, through its language hook. In a clone the app folder is
+              always there; without it, each stops and exits 2.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="spell-dev" label="4. The repo tools" sticky collapsible dividing open="false">
+          <p>
+            Every other command goes by noun, then verb. <code>spell --help</code> lists them under the folder that adds
+            them, the kit's own first.
+          </p>
+          <ui-section id="dev-docs" label="The kit's own" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>command</th>
+                    <th>what it does</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>server</code></td>
+                    <td>
+                      the page server: <code>start [all]</code>, <code>stop</code>, <code>status</code>,
+                      <code>url</code>, <code>local</code>, <code>prune</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>bundle</code></td>
+                    <td>builds the bundles the page server serves; <code>check</code> says which are stale</td>
+                  </tr>
+                  <tr>
+                    <td><code>commands</code></td>
+                    <td>every yarn script, command and skill, against the commands page; <code>check</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>wwod</code></td>
+                    <td><code>check</code> every citation of the agents' rules; <code>init</code> them in a project</td>
+                  </tr>
+                  <tr>
+                    <td><code>local</code></td>
+                    <td>
+                      <code>on</code>: run your own checkout in a project that installs Spell from npm, for you alone;
+                      <code>off</code> puts it back
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>deps</code></td>
+                    <td>
+                      <code>check</code>: fails on a deprecated package, or a critical or high advisory not on the
+                      known-open list
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>publish</code></td>
+                    <td>
+                      builds, packs and checks spell, spell-ui and spell-epic, tries them in a scratch project, then
+                      publishes; <code>--dry-run</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>readme</code></td>
+                    <td>
+                      every README: <code>check</code> links and words, <code>test</code> its examples,
+                      <code>pictures</code> of its markup
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>map</code></td>
+                    <td>a map of the code and the docs: <code>uses</code>, <code>explain</code>, <code>query</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>coherence</code></td>
+                    <td><code>score</code>: each mechanism's copies left and its users, 0-100</td>
+                  </tr>
+                  <tr>
+                    <td><code>runbook</code></td>
+                    <td>
+                      walks you through a file of steps: <code>start</code>, <code>status</code>, <code>reset</code>,
+                      <code>list</code>, <code>check</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>rename</code></td>
+                    <td>the renames a branch reruns over its own lines before merging main</td>
+                  </tr>
+                  <tr>
+                    <td><code>pony</code></td>
+                    <td>a pony in Spell's wizard hat, saying your words, or one of its own</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+          <ui-section id="dev-packs" label="The other folders'" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>folder</th>
+                    <th>commands</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Spell UI</td>
+                    <td>
+                      <code>icon</code> (find an icon), <code>ssr</code> (pages as plain HTML),
+                      <code>pack</code> (component packs: <code>create</code>, <code>add</code>, <code>build</code>,
+                      <code>check</code>), <code>design</code> (the claude.ai design system), <code>ui rename</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>the epic folder</td>
+                    <td><code>voice check</code>: text people see, checked by a reader with no context</td>
+                  </tr>
+                  <tr>
+                    <td>the app</td>
+                    <td>
+                      <code>app</code> (<code>create</code>, <code>serve</code>, <code>preview</code>,
+                      <code>vscode</code> ...), <code>projects</code>, <code>space</code> (hosting: orgs, the cloud,
+                      backups, takedowns, lexicons), <code>content</code>, <code>site</code>, <code>events</code>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+          <ui-section id="dev-epics" label="The epic command" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>epic</code> holds the epic tools: epic pages, the pages you answer on, windows, worktrees, agents,
+                airplane mode, requests between sessions. <code>spell epic ...</code> runs it too.
+              </li>
+              <li>
+                Every verb:
+                <a href="/epic/README-cli.md" target="src-epic-readme-cli-md">the epic command's README</a>, or
+                <code>epic --help</code>.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="3-how-it-works" label="5. How it works" sticky collapsible dividing open="false">
+          <ui-section
+            id="structure"
+            label="Each folder brings its own commands"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>
+              The base is the kit's <a href="/src/cli/" target="src-src-cli"><code>src/cli/</code></a
+              >: it reads the arguments, prints the help, and finds the commands. Each folder hands it a list, named in
+              its own <a href="/package.json" target="src-package-json"><code>package.json</code></a
+              >.
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>a folder's package.json · 1 line</ui-title>
+              <ui-content>
+                <pre><code class="language-json">"spell": { "commands": "./src/cli/commands.ts" }</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                It reads the root's <a href="/package.json" target="src-package-json"><code>package.json</code></a
+                >, then each folder's, lowest first: <a href="/parser/" target="src-parser"><code>parser/</code></a
+                >, <code data-no-link>ui/</code>, <a href="/epic/" target="src-epic"><code>epic/</code></a
+                >, <a href="/app/" target="src-app"><code>app/</code></a
+                >.
+              </li>
+              <li>
+                A word two folders both add goes under each one's short name, and the bare word only says where they
+                went. No two clash today.
+              </li>
+              <li>
+                A folder can plug work into a lower one's commands, by hook: the app's <code>language</code> hook does
+                the parser's commands' work.
+              </li>
+              <li>
+                Adding a command: read the commands guide first, then keep the commands page true with
+                <code>spell commands check</code>.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="in-the-browser" label="Which checkout runs" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The link runs the checkout it was made from. Run from inside another checkout of the kit (an epic's
+                worktree), it hands off to that checkout's own
+                <a href="/bin/spell.mjs" target="src-bin-spell-mjs"><code>bin/spell.mjs</code></a
+                >, so the worktree's code runs.
+              </li>
+              <li>
+                In a project that installs <code>spell</code> from npm, and runs no checkout, it hands off to the
+                project's own install.
+              </li>
+              <li>
+                The first run takes a few seconds, while <code>tsx</code> compiles the source and caches it. After that
+                the base answers in about 0.1 s, and a language command in about one.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="5-limits" label="6. Limits" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <b>The language commands need the app folder</b>: moving their work down into the parser is still to come.
+            </li>
+            <li>
+              <b>The repo checks aren't <code>spell</code> commands</b>: <code>yarn ts</code>,
+              <code>yarn test</code> and the rest are yarn scripts; <code>spell lint</code> and
+              <code>spell format</code> are for <code>.spell</code> programs.
+            </li>
+            <li>
+              <b>No command starts the language server yet</b>: the VS Code extension starts the language server by its
+              file, with <code>tsx</code>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="6-sources" label="7. Where things are" sticky collapsible dividing open="false">
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>file</th>
+                  <th>what it is</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <a href="/bin/spell.mjs" target="src-bin-spell-mjs"><code title="bin/spell.mjs">spell.mjs</code></a>
+                  </td>
+                  <td>the command's bin, which <code>yarn cli:install</code> links</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/src/cli/" target="src-src-cli"><code title="src/cli/">src/cli/</code></a>
+                  </td>
+                  <td>the base: arguments, help, every folder's commands and hooks; the kit's own commands</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/parser/src/cli/commands.ts" target="src-parser-src-cli-commands-ts"
+                      ><code title="parser/src/cli/commands.ts">commands.ts</code></a
+                    >
+                  </td>
+                  <td>the parser folder's list: the language commands</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/README/cli.md" target="src-readme-cli-md">The command-line README</a>: every command, verb and
+              flag, by folder
+            </li>
+            <li>
+              <a href="/epic/README-cli.md" target="src-epic-readme-cli-md">The epic command's README</a>: every epic
+              verb
+            </li>
+            <li>
+              <a href="/guides/server.html" target="src-guides-server-html">The Page Server</a>: what
+              <code>spell server</code> starts
+            </li>
+            <li>
+              <a href="/guides/vite-plus.html" target="src-guides-vite-plus-html">Working on Spell</a>: the yarn checks
+              beside these commands
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

@@ -14,7 +14,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     It was the kit's `assembler/` (namespace `AS`) until epic `repo-split` P14 (Q43).
   - Before this package, six servers each had their own mime table, path check, port choice and opener.
     Now they share these.
-  - Docs:  [the page server guide](../../spell.epics/guides/server.html):  the library, the page server's flows,
+  - Docs:  [the page server guide](../../guides/server.html):  the library, the page server's flows,
     route modules, safety, why.
 - What's in it:
   - [mime.ts](mime.ts) -- ONE content-type table, `typeFor()`
@@ -25,7 +25,24 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - html / per-extension hooks
     - overlays:  one folder laid over another
     - an `ETag`
+    - CACHING, its `caching` setting (`Caching`;  epic `solid-2-final` P2):
+      - `"never"`, the default:  `Cache-Control: no-store`;  every worktree's page server, so development never sees a
+        stale file
+      - `"normal"`:  the main checkout's page server, the built editor (`EditorServer.builtServer()`), the cloud's
+        `/element/`
+        - a name carrying a build's hash (`Mount.hashed`, made by `hashedIn()`) kept a year, `immutable`
+        - everything else `no-cache`:  checked each time, "not modified" (304) while the browser's copy matches its
+          `ETag`;  a page through the `html` hooks only while they'd make the same page again
   - `Request`, `Reply`, `Router` and [bodies.ts](bodies.ts) -- the part of Express the app's API uses
+    - `Reply` COMPRESSES what it sends, when the browser takes it ([compress.ts](compress.ts), node's zlib;
+      epic `solid-2-final` P2):
+      - `sendFile()`:  the file's brotli copy beside it (`x.js.br`, no older than the file), as it is;
+        else text of 1 KB or more gzipped, a file's gzip kept in memory by its path, size and time (128 MB at most)
+      - `send()` / `json()`:  text of 1 KB or more gzipped
+      - each says `Vary: Accept-Encoding`;  a request that takes neither gets the body as it is
+      - the brotli copies:  the builds' `brotliCopies()` (`spell/toolchain/brotliCopies`), in the app's builds,
+        Spell UI's site bundle and the docs pages' bundle;  never a committed file, which is gzipped once a run instead
+    - `reply.noStore()`:  the ONE way an answer says "never keep a copy" (`Cache-Control: no-store`), every route's
   - [listener.ts](listener.ts) -- `toListener()`:  a handler as node's `(req, res)`, with the 404 / error answers
   - [ports.ts](ports.ts) -- choosing a port:
 
@@ -84,12 +101,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - its own file:  patched in place (the kit's `PagePatch`, run by the docs runtime and Spell UI's site), else
         reloaded
         - its own file is also the file at its ADDRESS:  a component set's page is reported where it's served
-          (`/components/ui/ui-button.html`), not as its file in the checkout (P40)
+          (`/components/app/spell-viewer.html`), not as its file in the checkout (P40)
       - a stylesheet it uses:  swapped in place, no reload
         - in VS Code's side-bar views too (spell-epic's Review and Details):  the live client runs inside their frame,
           with its own socket (the frame is cross-origin to the view)
-        - nothing caches a stale one:  every answer is `Cache-Control: no-store`, `_assets/` included,
-          so a reload always fetches the stylesheet as it is now
+        - nothing caches a stale one:  a worktree's server answers `Cache-Control: no-store`, `_assets/` included;
+          the main checkout's checks each file every time (`no-cache`, "not modified" while it's current),
+          so a reload always gets the stylesheet as it is now
       - a script it loaded, or one beside it:  reloaded, keeping the scroll
         - which:  its `<script src>` tags, and `performance`'s resource entries
           (lazy chunks, `epics.pack.js`, an experiment's `*.bundle.js`)
@@ -163,6 +181,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Nothing restarts it by itself:  the next `spell server start` (an opener, `/airplane`),
         or the side bar's "Restart Page Server".  Its open pages reconnect (`hello`), and reload only for code of
         theirs that changed (epic `epic-engine` I293).
+    - ONE start at a time per pid file (epic `epic-engine` I421):  `ensure` holds `<file>.start.lock` (`FileLock`)
+      while it starts one, so a second start at the same moment waits and finds it, rather than starting another
+    - `ensure` waits for the server it started AS LONG AS that's still starting (epic `epic-engine` I362):
+      until it answers, or its process ends (said at once, how it ended the log's last line)
+      - 2 minutes with neither (`START_LIMIT_MS`) is hung:  it's stopped, so none given up on listens just after
+      - a caller with a time limit of its own allows more than that (Spell UI's `ensurePageServer()`)
+      - Why:  it was a flat 15s;  on a busy machine the server listened just after, and its starter had failed
+      - the page server listens BEFORE it begins the bundles' build (`PageServer.start()`), for the same reason
     - `stop` waits for the old PROCESS to end (`SIGTERM`, then `SIGKILL` after 10s), not just for it to stop answering.
       - Why:  it stops answering before it lets go of its port.
         `ensure` started the new one while the old one held the port, so the new one took another port,
@@ -174,6 +200,24 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - one on 4747 the pid file lost, on current code:  `ensure` takes it as the running one
       - Why:  two servers started at once both ran;  the second wrote the pid file, the first kept 4747 unseen,
         and every restart after started on a new port (52841, 59537 ... 59931)
+  - `PortBook` -- the port each WORKTREE's servers keep, written down once in `~/.spell/server-ports.json`
+    (`SPELL_PORTS_FILE`;  epic `epic-engine` P82):  a worktree's page server and its editor are on the same ports at
+    every start, so a link to them stays good;  forgotten when the worktree is removed (`forget()`)
+  - `KeeperLink` -- asking the SERVER KEEPER, the one program that starts, stops and restarts a main checkout's
+    servers (spell-epic's `ServerKeeper`, in its hub;  epic `epic-engine` P82):  its record, `~/.spell/server-keeper.json`
+    (`SPELL_KEEPER_FILE`), `{ pid, base, token }`;  `ask("start" | "stop" | "restart", { checkout })`, `undefined` when
+    none runs, so the caller does it itself
+    - `PageServer.ensure()`, `stop()` and `restart()` ask it for a MAIN checkout;  `ensureHere()` and `stopHere()` are
+      what the keeper runs
+    - `refusedStart(server, checkout)` (epic `epic-engine` P84):  why a main checkout's server mustn't start now:  an
+      agent's mark on the environment (`agentOf()`:  `CLAUDECODE`, `CODEX_THREAD_ID`, `SPELL_EPIC_AGENT`), no keeper's
+      mark (`SPELL_KEEPER_START`, `KEEPER_START_VARIABLE`), its parent not the keeper, not a worktree, not a test run;
+      the page server's `serve` / `local` asks it before it starts, the app's `vite.config.ts` as Vite starts in dev
+      (but for a page server's own editor, which it hands its token:  `SPELL_SERVER_TOKEN`)
+      - so `KeeperLink.ts` imports its peers WITH `.ts` (`./checkout.ts`, `./Heartbeat.ts`):  Vite loads the config's
+        imports in plain `node`
+    - this side names nothing of the keeper:  the server package imports no other
+    - `/api/server` answers `lastRequest` and `pages` (open live sockets), for its idle stop of a worktree's server
   - `Heartbeat` -- how a process WAITING on someone says it's there, one rule for whoever asks (epic `coherence` P28):
     - 90s without a beat, or its process gone, and it's gone (`isLive()`)
     - `hold(file, record)`:  `{ ...record, pid, seen }` written every 30s, the file removed however the process ends;
@@ -221,7 +265,27 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - the page server's setting `cacheLimit` sets it (below), `sizeInBytes()` reading `"200MB"`, `"1GB"` ...
     - `codeVersion(paths)`:  a version for some code, a hash of its files' text, read again only when one changes
     - `DiskCache.home`:  Spell's caches on this machine, `~/.spell/cache`
-    - Today one:  the app's compile cache, `/api/compiles` (spaces' `api.ts`):  it knows nothing of spell projects.
+    - Today two:  the app's compile cache, `/api/compiles` (spaces' `api.ts`):  it knows nothing of spell projects;
+      and the drawings' (`Drawings`, below)
+  - `Drawings` -- what pages show that never changes, DRAWN AHEAD on the server (epic `solid-2-final` P15):
+    Mermaid's diagrams and coloured code, so a page whose drawings are all in loads none of what draws them
+    - ONE mechanism, a DRAWER per kind (`SRV.Drawer`:  its kind, name and version, `find()` in a page, `draw()`),
+      handed in by each folder's route module (`RouteContext.drawings.add()`):  it names none itself
+      - Spell UI's:  `<ui-code>`'s highlight.js, in process;  `<ui-mermaid-diagram>`'s Mermaid, in ONE headless page
+        it keeps open (`spell/ui/drawings`)
+      - the app's:  Spell's bubbly look, in process (`SpellOnServer`);  it `replaces` `spell-language.js`
+    - ONE cache on disk, a `DiskCache` per drawer, `~/.spell/cache/drawings/<drawer>/<version>/<key>`, under
+      `cacheLimit`;  the key a hash of the item's kind, settings and text (`Drawings.keyFor()`, on util's
+      `stableHash()`), the same in a page (Spell UI's `GivenDrawings`)
+    - FILLED IN as a page is served (`fill()`, an html hook before the page scripts):  what's cached goes into a table
+      in its `<head>`, `<script type="application/json" data-spell-drawings>`, a shared sheet once;  the rest is drawn
+      in the background, one at a time, for the next view
+      - a page whose items a drawer takes are ALL in doesn't get the page scripts it `replaces` (`withPageScripts()`)
+    - ASKED for:  `POST /api/server/drawings/<kind>`, `{ text, settings, hints? }`, same origin, no token;
+      the drawing, or 204 when none came in 2s (a headless browser starting):  the page draws it itself meanwhile
+    - told every page as `SPELL_SERVER.drawings` (`DrawingsConfig`):  its address, its kinds, its tables' selector
+    - NEVER fails a page:  a drawer that throws is logged (`SPELL_DEBUG=server:drawings`), and the page draws as before
+    - `SPELL_DRAWINGS=0` in the page server's environment turns it off:  every page draws as it did before
   - `Git` -- running git, for every tool in every repo (epic `coherence` P7, from spell-epic):
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
@@ -241,6 +305,22 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [Test helpers](test/checkouts.ts) that fake one:  `fakeMainCheckout()`, `fakeWorktree()`.
   - [proxy.ts](proxy.ts) -- `proxyTo()` / `proxyUpgrade()`:  HTTP and websockets to another local server
   - `WebServer` -- all of the above on node's HTTP server
+    - with a `certificate`, HTTPS and HTTP/2 too, on the SAME port (epic `solid-2-final` P14):  each connection
+      handed on by its first byte, a TLS hello to node's HTTP/2 server (`allowHTTP1`, so websockets still upgrade),
+      anything else to the plain one;  `url` stays `http://127.0.0.1:<port>` for the tools, `secureUrl` is
+      `https://localhost:<port>` for browsers
+    - HTTP/2's requests:  `Host` is its `:authority` (`Request.get()`), a body needs no length (`hasBody()`), and a
+      proxied one goes on as HTTP/1.1, its answer's connection headers dropped (`proxyTo()`)
+  - `LocalCertificate` -- a certificate this machine's browsers trust, made by mkcert (epic `solid-2-final` P14):
+    `state`, `make()`, `trust()` (`sudo security add-trusted-cert`, the password asked once), `undo()`;
+    its programs through `CertificateTools`, so tests run none
+    - `trustInWindow()` (epic `epic-engine` T164):  the same with no terminal, a Mac only, for this person's login
+      keychain (no `sudo`):  the Mac asks for the password in its own window (`CertificateTools.ask()`, which waits
+      without blocking);  the Servers tab's Turn on
+    - the page server's:  `forPageServer()`, `localhost` / `127.0.0.1` / `::1` in `~/.spell/localhost/`;  made and
+      trusted only by `spell server certificate` or the Servers tab's card (spell-epic's `HttpsSwitch`), taken by `PageServer.certificateFor()` once it's `"ready"`
+      (never in tests or CI, nor with `SPELL_HTTPS=0`);  its HTTPS address is `ServerInfo.https`
+    - the house-network site's too (the app's `spell space local setup`):  its own names and folder, the same steps
   - [serveRoutes.ts](serveRoutes.ts) -- `serveRoutes()`, `folderRoute()`:  a small loopback server for a command's
     page (spell-app's `spell run`), each path answered with text, a file, or 404 (epic `coherence` P25)
   - [untilInterrupted.ts](untilInterrupted.ts) -- run until `Ctrl-C`
@@ -291,7 +371,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `epic/`:  its route modules, engine routes, watched folders, Epic UI, `localCopies`
         - `app/`:  the app's route module, App UI, `pageScripts`
       - A project beside the kit declares its part the same way, in its own `package.json`:
-        spell-brand, its set, engine routes, watched folders, bundle.
+        its set, engine routes, watched folders, bundle (none today:  spell-brand, the only one, was dropped by epic
+        `epic-engine` T124).
       - The epic repo's part:  `page-server.json5` at the epic folder's root
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
       - The kit's own part (its `package.json`'s `"pageServer"`):  two route modules:  the recipe box demo's servers' start and stop
@@ -301,7 +382,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         server starts, a line for each secret a place needs that isn't set.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
         the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
-        each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout;  the ONE
+        each peer `repos.json5` names that's there (`peerRepos()`:  none today, beside the MAIN checkout;  the ONE
         reader of the kit's peers, each one's name and folder, epic `coherence` P29),
         then each project the checkout's git-ignored `page-server.local.json5` names (`localProjects()`).
         - names no folder:  the lists are the kit's data
@@ -310,13 +391,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - lists end to end;  maps (`componentSets`, `engineRoutes`, `localCopies`) entry by entry, a later part winning
         - outside a kit:  `root`'s own `package.json` alone (the tests' scratch checkouts)
       - `componentSets()` and `engineRoutes()` read their two lists out of them;  `repoSettings()` reads one part.
+      - `ui/`'s route module adds its drawers, `src/drawings/drawingRoutes.server.ts`;  the app's, Spell's,
+        `src/app/components/spell-code/spellDrawingRoutes.server.ts` (`SRV.Drawings`, above)
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
         local copies, what's gone, the site header's tabs, the caches' cap
     - THE CACHES' CAP (`"cacheLimit"`, epic `language` Q41):  the most the server's caches on disk may take, every
       version's entries together, e.g. `"200MB"`, `"1GB"`, `"512KB"` (`SRV.sizeInBytes()`);  200 MB by default
       - the kit's part says `"200MB"`;  a later part's wins, so the epic repo's `page-server.json5` may change it
       - past it, a write drops the entries used least recently first (`SRV.DiskCache`)
-      - today one cache:  the app's compile cache, `~/.spell/cache/compiles` (its route module sets the cap as it starts)
+      - two caches:  the app's compile cache, `~/.spell/cache/compiles` (its route module sets the cap as it starts),
+        and each drawer's, `~/.spell/cache/drawings/<drawer>` (`SRV.Drawings`)
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
         node built-ins, `json5`, `spell/server/contentFolder`, `spell/server/kitFolders`, `spell/util/node/findUp`
         and type imports only,
@@ -352,10 +436,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The list:  the settings' `"engineRoutes"`, each a route and its folder (epic `repo-split` P4).
       - Today spell-epic's (`/_epic/assets/`, `/_epic/pack/` and `/templates/`):
         where spell-epic's one server per machine serves the engine too, and the pages load it from.
-      - And spell-brand's:
-        - `/_brand/assets/`:  its `assets/`, the logo, fonts and reference images (epic `repo-split` P10)
-        - `/packages/brand/_assets/` and `/packages/brand/components/__pack/`:  its `_assets/` and its pack,
-          at the paths the Brand tab's pages load them by (`../packages/brand/_assets/...`)
+      - spell-brand's (`/_brand/assets/`, `/packages/brand/...`) went with it (epic `epic-engine` T124):
+        the epic repo's `brand/` pages that load them draw without them.
       - A kit without spell-epic answers "not found" there, and loads no epic route module.
       - Live reload reports a change in one at its route.
     - Route modules add to every page's `window.SPELL_SERVER`:  `addPageConfig()`.
@@ -389,7 +471,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The list:  the settings' `"componentSets"`, by id, in the top bar's order
         (`componentSets()`, epic `repo-split` P4;  `ComponentSet`, in [page.types.ts](page/page.types.ts)).
         - Each:  its `name`, its pages' folder (`dir`) and the site bundle laid over it (`assets`).
-        - Today four, one per repo's part:  Spell UI, the brand's, Epic UI, App UI (repo order).
+        - Today three, one per folder's part:  Spell UI, Epic UI, App UI (folder order).
       - Since epic `epic-workflow` P10 / P11;  one layout since `people-and-orgs` P18.
       - Each at `/components/<id>/`.  A new set is one more entry in the settings.
       - No dev server:  the pages are static, loading their site bundle.
@@ -398,6 +480,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           - it loads the component packs a set's pages name (`SitePacks`):  the epics pack, for the comments, on all
           - the other sets had their own build (its `sets/`), until epic `epic-engine`
         - the rest is the set's own folder:  its pages, `__parts/`, `__data/`
+        - a set whose guide is a Spell site (`sitePage`, `componentSetSitePath()`;  epic `editor` P43-P44):  every
+          address with no file of its own and no `.` in its last part gets its viewer page;  all three since P44, so
+          the site bundle and `__parts/` serve no set's pages now
       - The same at `/worktrees/<w>/components/<set>/`.
         - with that worktree's own site bundle (epic `epic-engine` r35):
           - a page there that loads a set's address by its root path (`/components/ui/_assets/site.js`)
@@ -408,11 +493,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `<prefix>` redirects to `<prefix>/`:  the one redirect left.
       - Live reload watches each set's folder and its bundle, reporting their changes at the set's address.
       - Settings that name no sets:  no sets served.
-    - The bundles it serves are NOT committed:  it builds the stale ones as it starts
+    - The bundles it serves are NOT committed:  it builds the stale ones once it listens
       (`BundleBuild`, in [page/](page/BundleBuild.ts):  `spell bundle --stale`, as a child;  spell-app's until P16).
       - and again whenever their sources change while it runs (`BundleBuild.watch()`), once quiet 3s:  a merge into
         the checkout never leaves pages on an old bundle (epic `epic-engine`, 2026-10-25)
-      - A request for a MISSING file of one waits while that runs (`BUNDLE_WAIT_MS`).
+      - A request for a MISSING file of one waits while that runs (`BUNDLE_WAIT_MS`),
+        at the engine routes too (`/_epic/pack/`, `/_epic/assets/spell-ui/`).
+      - With none running, that request starts one when a bundle lost a file (`repairIfMissing()`, epic
+        `epic-engine` I364):  no watcher sees a deleted output, as no source changed.
       - A worktree's too, seen through this server (`worktreeBuildFor()`, r35):  built by the worktree's own `spell`
         at the first request at its address, a page of any kind (an epic page too, since epic `epic-engine` P54), then
         watched;  while it builds, requests at its sets' addresses wait, pages too
@@ -609,6 +697,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - read only when its lines or its deployment say so:  a write refused, a graphql server's mutation too
       - a secret that isn't set:  refused in words naming it and the place, `PAGE_SERVER_ANSWER_HEADER` on the answer,
         which the page says;  and said as the server starts (`sayMissing()`), never a value
+      - a place its source refused (`AuthenticatedPlace.refusal`:  the app's, for a deployment its project file doesn't
+        list):  every request refused in those words, nothing passed on;  said as the server starts too
       - ONE per page server (`AuthenticatedPlaces.for()`):  `placeRoutes.ts` makes it;  its places come from SOURCES, the
         app's `ProjectPlaces` (every project's, from what it compiled to) and the Airtable base
       - behind `Guard`, reads too, as `PlaceServer` is;  an old run's write token is answered 403 marked
@@ -726,6 +816,10 @@ The steps between a page's content and its file on disk, for every tool that wri
     P46, `rootLinks()`):  the same text from any folder, a part or a template;  a link to the page's own folder stays
     relative, and so does a load below it (`_assets/`, `parts/`);  a link a move broke goes to its one new home
   - `check()` verifies them, and refuses a relative one (`relative:  ../x.ts -- write /spell-ui/x.ts`)
+  - a SITE shown with no file per page (`sites`, `SRV.LinkSite`;  epic `editor` P43):  the Spell UI site at
+    `/components/ui/`, handed in by the epic tools (spell-epic's `ServedFolders.sites`), since the kit names no site
+    - its pages' addresses check as found;  a link to one of its old pages is mended to its page's address
+      (`/components/ui/ui-button.html` => `/components/ui/button`), and `check()` calls it an `old page`
   - a worktree's page lays its root links under its address as they're clicked:  the live client's `worktreeHref()`,
     the rule the site header's tabs follow too
   - It was the docs tools' `doc-links.js`, which is now its command line.
@@ -733,7 +827,7 @@ The steps between a page's content and its file on disk, for every tool that wri
   It was the docs tools' `plan-parts.js`'s.
 - `Bundle` -- the bundles only the page server serves, BUILT on demand instead of committed.
   - WHICH bundles exist:  the output folders the page server's settings list (`Bundle.specs()`),
-    from spell-ui's and spell-brand's parts.
+    from spell-ui's part.
     The page server reads the same list:
 
     ```json
@@ -742,18 +836,34 @@ The steps between a page's content and its file on disk, for every tool that wri
 
   - HOW each is built:  `BUNDLES`, in [server.types.ts](server.types.ts):
     - `ui-site`:  Spell UI's docs site
-    - `brand`:  the brand pages
-  - `check()`:  stale when never built, its entry missing or rewritten, or its sources' hash changed.
-  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog, the
-    epics pack, spell-epic's docs bundle
+    - `epics-pack`:  the epics pack's script and its families' modules
+    - `epic-docs`:  the docs pages' bundle (`_assets/spell-ui/`), and the scripts beside it
+  - `check()`:  stale when never built, its entry rewritten with other bytes, its sources' hash changed,
+    or ANY file its build made is missing (epic `epic-engine` I364):  a lazy engine, a chunk, a script beside its folder.
+  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog
+    (the epics pack and spell-epic's docs bundle were too, until epic `solid-2-final` P7:  bundles now, git-ignored)
     - built by `--stale` only in a worktree (`buildsWhenStale`);  named (`spell bundle ui-root`), anywhere
     - its record in the install's git-ignored cache, `node_modules/.cache/spell-bundles/`, never beside it
     - the main checkout tells by its `check` command (`yarn pack:check`);  a worktree by its record, or that check
       when it has none
     - what its build writes beside other sources (`generated`) is no bundle's source, so no build makes another stale
-  - `build()`:  runs its package's script, then records the hash in its output folder (`.bundle.json`).
+  - `build()`:  runs its package's script, then records the hash and the files it made in its output folder
+    (`.bundle.json`):  everything there, and under its `generated`, as the build ends.
+    - so a file a build writes outside its output folder is listed in `generated`, or it isn't required
+    - `isIncomplete`:  a file gone, asked without reading a source
+    - builds of one bundle take turns, across processes (epic `epic-engine` I363):
+      a worktree's own page server and main's both watch it, and both see each change
+      - the lock:  `node_modules/.cache/spell-bundles/<name>.build.lock`
+      - `buildIfStale()`, `spell bundle --stale`'s:  looks again on its turn, so the second builds nothing
+      - the entry's hash is recorded too:  `yarn pack:build` by hand over the same sources leaves it current
+  - `firstLoad()`:  what a page loads first of a bundle, each file sized raw, gzipped and brotli (`sizesOf()`):
+    the ONE way a bundle is sized, by `sizeReport()` and the app's size budgets (`spell perf budget`, epic
+    `solid-2-final` P1)
+  - `BundleContents`:  WHAT'S IN a built file and WHO LOADS it (epic `solid-2-final` P19):  its bytes by the module
+    each source map names, gathered by package or folder (`grouped()`), the files that load it, static or later, and the
+    modules built into more than one file (`duplicates()`);  `spell perf budget --why` prints it
   - Its command line:  `spell bundle [<name>...] [--stale]` / `check`.
-  - The page server runs `build --stale` when it starts:  `BundleBuild`, in `page/`.
+  - The page server runs `build --stale` once it listens:  `BundleBuild`, in `page/`.
   - Why (Owen, 2026-10-07):  their chunk names carry content hashes,
     so every Spell UI change deleted and re-added most of their files, in every diff and merge.
   - A new bundle:
@@ -761,7 +871,7 @@ The steps between a page's content and its file on disk, for every tool that wri
     - its output folder in its folder's part of the settings (above)
     - and in the `.gitignore` of the folder that builds it (`/site/_assets/`, in `ui/`'s)
 - JSON5 written with its comments kept moved to util, `spell/util/node/json5` (epic `repo-split` P1):
-  its users (ui's tools, app, brand, spaces, spell-epic) need util, not the assembler.
+  its users (ui's tools, app, spaces, spell-epic) need util, not the assembler.
   - `DataFile` writes through it.
 - Grow it by capability:  one class per file, its types in [server.types.ts](server.types.ts).
 - Node only:  node's file system and child processes, `git`, oxfmt and linkedom.
@@ -779,7 +889,7 @@ The steps between a page's content and its file on disk, for every tool that wri
     - `packages/*/src`, and `packages/*/components` (a component set's elements):
       the old monorepo's spelling, in every page written before the split
       - Under the kit, an old `packages/<name>/` is found through `node_modules`:
-        spell-ui, spell-brand, spell-epic, and the folders of spell, spell-parser and spell-app.
+        spell-ui, spell-epic, and the folders of spell, spell-parser and spell-app.
       - A folder now in its repo's one `src/` drops the old `src/` (epic `repo-split` P11, P14):
         `packages/server/src/x.ts` is the kit's `src/server/x.ts`.
     - `tests/`, where every package's tests live

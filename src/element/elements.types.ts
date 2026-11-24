@@ -701,8 +701,12 @@ export type StyleSettings = {
   registerOnce(sheets: Readonly<Record<string, string>>): void
   /** Register one sheet, or replace it (hot reload). */
   register(name: string, css: string): void
-  /** Adopt the shared sheets, then the named ones, into `root`. */
-  adoptInto(root: ShadowRoot, names: string[]): void
+  /**
+   * Adopt the shared sheets, then the named ones, into `root`.
+   * - `vocabulary`:  the element's, so the set can give `root` only the shared sheets its family uses
+   *   (Spell UI's `RootSheets`, epic `solid-2-final` P4);  left out, every shared sheet.
+   */
+  adoptInto(root: ShadowRoot, names: string[], vocabulary?: E.ComponentVocabulary): void
 }
 
 /**

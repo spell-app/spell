@@ -1,7 +1,8 @@
 import h from "@solidjs/h"
-import { For, createEffect, createMemo } from "solid-js"
+import { For, createEffect, createMemo, createRoot, getOwner, runWithOwner, untrack, type Owner } from "solid-js"
 
 import { PrefStore, schemaOf } from "spell/util"
+import { MostRecent } from "spell/util/MostRecent"
 import { waitUntil } from "spell/util/timing"
 import { compilePattern, filledPattern, type AddressParams } from "spell/util/addressPattern"
 
@@ -160,7 +161,7 @@ export class SiteBase extends App {
     if (!entry)
       throw new TypeError(`SiteBase.show():  ${this.constructor.name} has no page or part "${name}";  list it`)
     const param = thing === undefined ? undefined : this.paramFor(entry, thing)
-    this.navigate(this.addressWith(name, thing), param ? { [propertyFor(param)]: thing } : {})
+    void this.navigate(this.addressWith(name, thing), param ? { [propertyFor(param)]: thing } : {})
   }
 
   /**
@@ -188,10 +189,12 @@ export class SiteBase extends App {
   /**
    * Go to `address`:  through the host when there is one (the editor's Run puts it in its URL), and shown here at once.
    * - `known`:  a parameter's thing, when the program handed it over:  no need to look it up again.
+   * - Resolves once its page is shown (`showAddress()`):  a link's `#section` is landed on then, not on the page left.
+   * - NEVER rejects.
    */
-  navigate(address: string, known: Record<string, unknown> = {}): void {
+  navigate(address: string, known: Record<string, unknown> = {}): Promise<void> {
     core.siteHost?.go(address)
-    void this.showAddress(address, known)
+    return this.showAddress(address, known)
   }
 
   /**
@@ -305,7 +308,7 @@ export class SiteBase extends App {
   start(): void {
     const host = core.siteHost
     void this.showAddress(host?.address() ?? this.currentAddressHere ?? "/")
-    host?.listen((address) => void this.showAddress(address))
+    host?.listen((address) => this.showAddress(address))
     this.wearTheme()
     super.start()
   }
@@ -345,6 +348,7 @@ export class SiteBase extends App {
    *   - A slot the page shown draws itself (`to draw its right sidebar`) is the page's while it's shown.
    * - Drawn ONCE per layout, and kept:  going to a page in the same layout redraws only the page, so nothing around
    *   it flashes;  a page in another layout shows that one, and the first is kept, hidden, as it was left.
+   * - Each layout keeps its last 3 pages drawn (`KeptPages`, epic `solid-2-final` P13):  Back is instant.
    * - A site with no main layout draws every page in its built-in frame:  the navigation and the page.
    *   A page whose line says `, no layout` is drawn alone.
    *   A page whose line says `, filling the window` makes its layout the window's height (`shownFillsWindow`).
@@ -453,7 +457,8 @@ export class SiteBase extends App {
    */
   private drawLayout(name: string): unknown {
     const isShown = () => this.shownLayoutName === name
-    const page = () => (isShown() ? made(this.drawShowing()) : null)
+    const kept = new KeptPages(getOwner())
+    const page = () => (isShown() ? this.drawShowingIn(kept) : null)
     if (name === JUST_THE_PAGE)
       return h("div", { class: "spell-site-alone", hidden: () => (isShown() ? undefined : "") }, page)
     const layout = name === BUILT_IN_FRAME ? undefined : this.layoutNamed(name)
@@ -544,7 +549,7 @@ export class SiteBase extends App {
       event.preventDefault()
       const { href } = (event as CustomEvent<{ href: string }>).detail
       // a link out of the site (`- it has a link to ...`):  a new tab, the site left as it is
-      if (SiteBase.isOwnAddress(href)) this.navigate(href)
+      if (SiteBase.isOwnAddress(href)) void this.navigate(href)
       else globalThis.open?.(href, "_blank", "noopener")
     })
   }
@@ -772,8 +777,10 @@ export class SiteBase extends App {
   /**
    * A click on a link to one of its own addresses:  shown here, not loaded as a new page.
    * - A link to download a file, or one with its own `target`, is left to the browser.
-   * - An address may end in a `#section`:  the part before it picks the page,
-   *   and Spell UI's `HashLanding` lands on the section, as the docs site's links do.
+   * - An address may end in a `#section`:  the part before it picks the page, and the host lands on the section
+   *   (`SiteHost.landOn()`) once that page is shown, as the docs site's links do.
+   *   - Not before:  the page being left may have a section of the same id (Button's Usage and Examples both have
+   *     "State texts"), and the landing would find that one (epic `editor` I293).
    */
   followLink(event: MouseEvent): void {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
@@ -784,8 +791,18 @@ export class SiteBase extends App {
     if (!href || !SiteBase.isOwnAddress(href) || link?.target || link?.hasAttribute("download")) return
     event.preventDefault()
     const [address = "", section] = href.split("#")
-    this.navigate(address)
-    if (section) core.siteHost?.landOn?.(section)
+    const shown = this.navigate(address)
+    if (section) void shown.then(() => core.siteHost?.landOn?.(section))
+  }
+
+  /**
+   * What it shows now, in a layout that keeps the last pages it drew (`kept`):  a page drawn before is shown again as it
+   * was left, at once;  anything else as `drawShowing()` draws it.
+   */
+  private drawShowingIn(kept: KeptPages): unknown {
+    const showing = this.getState<Showing>("showing")
+    if (showing?.kind === "page" && showing.page.draw !== Thing.prototype.draw) return kept.drawingOf(showing.page)
+    return made(this.drawShowing())
   }
 
   /** What it shows now:  its page (a spinner while its parameters are read), the not found page or the error page. */
@@ -991,10 +1008,63 @@ const SITE_CSS = `
 .spell-site-frame { flex: 1 0 auto; display: flex; flex-direction: column }
 .spell-site, .spell-site-alone { flex: 1 0 auto }
 .spell-site[hidden], .spell-site-alone[hidden] { display: none }
-.spell-site-slot { display: contents }
+.spell-site-slot, .spell-site-page { display: contents }
 /* a page whose whole drawing waits:  its spinner in the middle of the page's room (core's \`pageWaitingLoader()\`) */
 .spell-page-waiting { display: flex; align-items: center; justify-content: center; min-height: 50vh; height: 100% }
 `
+
+/****************
+ * ### `KeptPages`
+ * The last pages a layout drew, kept drawn while another is shown (epic `solid-2-final` P13, TLDR 47):
+ * so Back to one of them shows it at once, as it was left, scrolled lists, typing and folds and all.
+ * - The last `KEPT_PAGES`, newest first (`MostRecent`):  an older one is let go, its drawing disposed, and with it
+ *   every read it held (a place's read is left as its draw goes), so memory stays flat however many pages are seen.
+ * - A page not shown is out of the page's elements altogether, not hidden:  a table of contents, a search or a
+ *   `#section` finds only the page shown.  Its elements live on across the move (a Spell UI element is kept until
+ *   it's disposed), and come back as they were.
+ * - Each drawing is a root of its own, owned by the layout's drawing:  the layout drawn again, or the site, lets every
+ *   one go with it.
+ ****************/
+class KeptPages {
+  /** what owns each page's root:  the layout's drawing */
+  private readonly owner: Owner | null
+  /** each page drawn, its element and what lets it go */
+  private readonly drawings = new Map<object, { element: unknown; dispose: () => void }>()
+  /** the pages drawn, newest first:  the oldest let go */
+  private readonly recent = new MostRecent<object>(KEPT_PAGES, { onDropped: (page) => this.letGo(page) })
+
+  constructor(owner: Owner | null) {
+    this.owner = owner
+  }
+
+  /**
+   * `page`'s drawing:  the one kept, else drawn now, in a root of its own.
+   * - SIDE EFFECT:  it's the newest now;  the page that pushes out is let go.
+   */
+  drawingOf(page: Page): unknown {
+    let drawn = this.drawings.get(page)
+    if (!drawn) {
+      const make = () =>
+        createRoot((dispose) => ({
+          element: untrack(() => made(h("div", { class: "spell-site-page" }, () => core.drawThing(page)))),
+          dispose
+        }))
+      drawn = this.owner ? runWithOwner(this.owner, make) : make()
+      this.drawings.set(page, drawn)
+    }
+    this.recent.use(page)
+    return drawn.element
+  }
+
+  /** Let `page`'s drawing go:  its root disposed, every read it held left. */
+  private letGo(page: object): void {
+    this.drawings.get(page)?.dispose()
+    this.drawings.delete(page)
+  }
+}
+
+/** How many of the last pages a layout keeps drawn:  Back to any of them is instant. */
+const KEPT_PAGES = 3
 
 /** What a site shows:  a page, the not found page for an address, or the error page for a page that failed. */
 type Showing =

@@ -87,7 +87,8 @@ describe("<epic-clarify>", () => {
     await vi.waitFor(() => expect(linkOf(clarify)).not.toBeNull())
     const link = linkOf(clarify)!
     expect(link.textContent).toBe("Clarify")
-    expect(link.dataset.tooltip).toBe("Ask Claude for details now")
+    // no tooltip:  its word is on it (I370)
+    expect(link.dataset.tooltip).toBeUndefined()
     await expectAccessible(clarify)
     link.click()
     await vi.waitFor(() =>

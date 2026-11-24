@@ -5,11 +5,11 @@ import { SP } from "spell/parser/spell"
 import { core } from "spell/parser/core"
 
 describe("testing spell module classes, in Spanish", () => {
-  unitTestModuleRules(SP.spanish.parser, "classes", core.resetRuntime)
+  unitTestModuleRules(SP.Language.for("es").parser, "classes", core.resetRuntime)
 
   /** `lines` as one block in a fresh Spanish scope:  its compiled code, and the lines it couldn't read. */
   function compiled(name: string, lines: string[]) {
-    const block = SP.spanish.parser.getScope(name).parse(lines.join("\n"), "block")!
+    const block = SP.Language.for("es").parser.getScope(name).parse(lines.join("\n"), "block")!
     const code = `${block.compile()}`
     return { code, errors: code.split("\n").filter((line) => line.includes("PARSE ERROR")) }
   }
@@ -242,7 +242,7 @@ describe("testing spell module classes, in Spanish", () => {
     ]
 
     test("each line reads as the sentence style says it, in Spanish, and compiles the same", () => {
-      const block = SP.spanish.parser.getScope("long-forms-es").parse(OUTLINE.join("\n"), "block")!
+      const block = SP.Language.for("es").parser.getScope("long-forms-es").parse(OUTLINE.join("\n"), "block")!
       const typeLine = block.matched[1] as P.Match
       const body = (typeLine.data.statement as P.Match).data.body as P.Match
       const longForms = body.matched
@@ -285,7 +285,7 @@ describe("testing spell module classes, in Spanish", () => {
         "\t\t\tdevolver sí",
         "\t\tdevolver no"
       ]
-      const block = SP.spanish.parser.getScope("long-forms-es-guards").parse(lines.join("\n"), "block")!
+      const block = SP.Language.for("es").parser.getScope("long-forms-es-guards").parse(lines.join("\n"), "block")!
       const typeLine = block.matched[1] as P.Match
       const body = (typeLine.data.statement as P.Match).data.body as P.Match
       const longForms = body.matched

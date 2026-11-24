@@ -159,7 +159,7 @@ export class EpicOwners {
 
   /**
    * The git repos of checkout `checkout`:  it, then each folder right inside it that's a repo of its own (has a
-   * `.git`:  the child repos of a multi-repo top, `spell-brand` ...).
+   * `.git`:  the child repos of a multi-repo top ...).
    * - a single repo's checkout:  just it
    * - a LINK is never one:  a worktree's link to the epic folder is the epic repo, nobody's branch
    */

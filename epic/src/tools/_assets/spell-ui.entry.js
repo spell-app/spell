@@ -1,49 +1,46 @@
 /**
- * Entry of `spell-ui.js`, the ONE classic script a `.html` doc loads -- `file://` blocks ES modules.
- * - Built by `node src/tools/bundle-spell-ui.js`, from spell-epic's root (part of `epic pages update`);  edit THIS,
- *   never the bundle.
- * - `spell-ui` ~== UI's built `dist/index.js`:  every family, each `define()`s its tags as it's imported.
- *   Solid comes from UI's `node_modules`, so there's exactly one copy.
- * - Order matters -- imports run top to bottom:
- *   - `spell-ui:icons` FIRST:  a module the bundler writes, registering the icons our widgets and pages draw
- *     with `UI.icons` before any element asks for one (a classic script can't load UI's icon packs)
- *   - then UI, which defines -- and so upgrades -- every `ui-*` already in the page
- *   - then `spell-ui:lazy`, pointing `<ui-code>` / `<ui-markdown>`'s engine loaders at their lazy scripts (before
- *     any element highlights:  that waits for `UI.load()`), and the source elements' saver (`spell-ui-sources.js`)
- *   - then the page runtime, with every tag defined
- *   - then the site header (`spell/server/site`):  `defineSite()` runs once every import has, so `<spell-site-header>`
- *     upgrades -- and sets `--spell-site-header-height` -- before the runtime first measures its sticky offsets
- *     (the runtime waits for the `ui-*` definitions first)
- * - Every import is a package name:  Spell UI's from its built `dist/` (`spellUiResolver()`), spell-epic's as their
- *   source files (the kit's `sourceNames()`), the rest by their packages' `exports`.
- * - Exports become `window.SpellUI` (`UI`), for the page runtime's checks and for poking in DevTools.
- * - Component packs (epic `epic-components`):  `<ui-components source="x.pack.js">` in a `<ui-root>` loads a pack's
- *   classic script, which calls `SpellUI.registerPack(pack)` and imports the modules it shares with the page from
- *   `SpellUI.packModules` (`spell pack build` maps each of their specifiers there, as written), so a pack never brings a
- *   second Solid or Spell UI.
+ * Entry of the docs pages' bundle, the ES module `spell-ui/main.js` that `spell-ui.js` (a few lines of classic script,
+ * the ONE script a page names) imports (epic `solid-2-final` P7).
+ * - Built by `node src/tools/bundle-spell-ui.js` (from `epic/`), from Spell UI's SOURCE, with Vite, as the Spell UI
+ *   site's bundle is:  code-split, every family a lazy chunk.  Edit THIS, never the build (`_assets/spell-ui/`,
+ *   git-ignored, built by the page server when stale:  `spell bundle epic-docs`).
+ * - What it holds, in import order (ES modules evaluate top to bottom):
+ *   - `spell-ui:icons` FIRST:  a module the build writes, registering the icons our widgets and pages draw with
+ *     `UI.icons` before any element asks for one (`ICONS` in the build;  no icon pack is fetched)
+ *   - Spell UI's core and the root's loader, but NO family:  each loads the first time one of its elements is made,
+ *     in the page, in a shadow root or by a script (`RootLoader.loadOnFirstUse()`), as the site's root loads them
+ *     - a page has no `<ui-root>` around its elements (most guides):  this does what a root would, for the page
+ *     - so the code waiting for an element waits for its FAMILY (`whenAttached()`, the docs helpers), never
+ *       `customElements.whenDefined()`, which every catalog tag passes at once
+ *   - the source elements' saver (`spell-ui-sources.js`), then the page runtime
+ *   - then the site header (`spell/server/site`):  `defineSite()` runs once every import has, so
+ *     `<spell-site-header>` upgrades -- and sets `--spell-site-header-height` -- before the runtime first measures its
+ *     sticky offsets (the runtime starts a microtask later)
+ * - The source elements' engines (highlight.js, marked, Mermaid, ELK), the runtime, emoji names and the theme sheets
+ *   are lazy chunks of their own, as in the site's bundle.
+ * * - `globalThis.SpellUI` (`UI`, `registerPack`, `packModules`, `themed`, `ready`), for the page runtime, the component packs and
+ *   poking in DevTools;  set as this module runs.  A classic script that reads it waits for `SpellUI.loading` (set by
+ *   `spell-ui.js`).
+ * - Component packs (epic `epic-components`):  `<ui-components source="x.pack.js">` loads a pack's classic script,
+ *   which calls `SpellUI.registerPack(pack)` and takes the modules it shares with the page from `SpellUI.packModules`.
+ *   - a pack built as a family per chunk (`loadFamily`, the epics pack since epic `solid-2-final` P7) loads each
+ *     family on first use too (`registerPackLazily()`);  an older pack is defined whole
  *   - `packModules` is the EXACT specifier a pack's build leaves external => that module's namespace.  Add one here
- *     AND to the pack build's externals, together.
+ *     AND to the pack build's externals (`PACK_MODULES`), together.
  *   - `import * as` a Solid package, against Spell UI's `AGENTS.md` ("One Solid per page"), on purpose and ONLY
- *     here:  that rule keeps a library's bundles from pinning all of Solid, but this map exists so a pack can use any
- *     export, which no tree-shaker can know ahead.  So the whole of `solid-js` / `@solidjs/web` stays in this bundle
- *     (`ui`'s own code never holds such a map).
- * - The theme:  the ONE the person picked, for every place Spell draws (`ThemePreference`, epic `debut` P21:
- *   kept in their space, the editor's and Spell UI's pages' too), applied as soon as the bundle runs;
- *   Glass until they pick another
+ *     here and in the site's bundle:  a pack may use any export, so the whole of `solid-js` / `@solidjs/web` stays.
+ * - The theme:  the ONE the person picked, for every place Spell draws (`ThemePreference`, epic `debut` P21),
+ *   applied as soon as the bundle runs;  Glass until they pick another.
  *   - light / dark:  part of the same choice (`ColorScheme`)
- *   - a theme remembered under an old name comes back as its new one (`studio` as `merlot`)
  *   - Spell's sheet adds the brand's roles (`--spell-surface-warm`, `--spell-type-lede` ...), which `spell-doc.css` and
- *     the other docs sheets read for eyebrows, ledes, asides and panels;  in another theme they're missing, and every
- *     sheet that reads one has a fallback
- *   - each sheet is inlined like every other `import()`, so it registers a few microtasks after the bundle runs, not
- *     a network round trip later;  none ships font files
+ *     the other docs sheets read;  in another theme they're missing, and every sheet that reads one has a fallback
  * - The theme menu (`<ui-theme-menu>`) goes in the site header's `theme` slot, in place of its light / dark button
  *   (Q30):  the header names no menu, it only gives the page's own a place (`addThemeMenu()`).
+ * - Before P7 it was ONE classic script of every family (an IIFE, 873 KB brotli), so a page opened from `file://`
+ *   worked;  pages are always served now (epic `epic-engine` P46).
  */
 
 import "spell-ui:icons"
-import "spell-ui:emoji"
-import { UI, ThemePreference } from "spell/ui"
 import * as solidH from "@solidjs/h"
 import * as solidWeb from "@solidjs/web"
 import * as solid from "solid-js"
@@ -53,18 +50,47 @@ import * as uiRoot from "spell/ui/components/ui-root"
 import * as uiCode from "spell/ui/components/ui-code"
 import * as uiMarkdown from "spell/ui/components/ui-markdown"
 import * as imageZoom from "spell/ui/components/ui-zoom/ImageZoom"
+import { ComponentPacks, registerPack } from "spell/ui/components/ui-components"
+import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
 import { PackHotSwap } from "spell/ui/hot"
-import "spell-ui:lazy"
 import "./spell-ui-sources.js"
 import "./spell-doc-runtime.js"
 import { defineSite } from "spell/server/site"
 
+const { UI } = uiCore
+const { RootLoader } = uiRoot
+
+/**
+ * The tags nearly every docs page draws, in its own markup or its elements' shadow roots (the site header's bar, a
+ * section, the toolbar, a block's actions, the theme menu):  their families start loading as the bundle runs
+ * (epic `solid-2-final` P7;  measured on a guide, an epic page, a details page and the changelog).
+ * - Above the code below:  it's read as the module runs
+ */
+const EVERY_PAGE = [
+  "ui-section",
+  "ui-button",
+  "ui-icon",
+  "ui-label",
+  "ui-menu",
+  "ui-toolbar",
+  "ui-breadcrumbs",
+  "ui-divider",
+  "ui-dropdown",
+  "ui-popup",
+  "ui-sticky",
+  "ui-table",
+  "ui-theme-menu"
+]
+
+// every family on first use, anywhere on the page:  before the runtime starts (a microtask after this module runs)
+RootLoader.loadOnFirstUse()
+// and the ones nearly every docs page draws, at once and side by side:  waiting to find each in a shadow root
+// (an epic element's, a section's) costs a round trip per level, 1.3 => 3.2s to an epic page's ready (P7, measured)
+for (const tag of EVERY_PAGE) RootLoader.loadTag(tag)?.catch((error) => console.error(`spell-ui:  <${tag}>`, error))
+
 // a rebuilt pack (a merge) swaps into the live page instead of reloading it (epic `epic-engine` I116):
 // installed now, before any pack defines its tags
 PackHotSwap.install()
-
-export { UI }
-export { registerPack } from "spell/ui"
 
 /**
  * What a component pack imports, by the specifier its build leaves external => the page's copy of that module.
@@ -83,7 +109,7 @@ export { registerPack } from "spell/ui"
  * - `spell/ui/components/ui-zoom/ImageZoom`:  the page's zoom for its screenshots (epic `ui-gaps` P14), the same one the
  *   docs runtime wires up, which `<epic-field>`'s request thumbnails open in.
  */
-export const packModules = Object.freeze({
+const packModules = Object.freeze({
   "solid-js": solid,
   "@solidjs/web": solidWeb,
   "@solidjs/h": solidH,
@@ -116,6 +142,29 @@ function addThemeMenu() {
  * - a live reload's new page waits for it before it shows (the docs runtime's `reveal()`, epic `epic-engine` I164):
  *   without it, the reload cross-faded through a frame in Spell UI's plain look (white bands, no Fruity backdrop)
  */
-export const themed = ThemePreference.restore().catch((error) => console.error("spell-ui:  the page's theme", error))
+const themed = ThemePreference.restore().catch((error) => console.error("spell-ui:  the page's theme", error))
+
+/**
+ * Register `pack`:  one built a family per chunk (`loadFamily`) loads each family the first time one of its elements is
+ * made, as Spell UI's own do;  any other is defined whole (`registerPack()`).
+ * - Its families go to the root's loader (`RootLoader.add()`), by folder, so `loadOnFirstUse()` finds them.
+ * - Its tags are defined early once it's registered (a microtask on:  `registerPack()` adds its catalog after calling
+ *   `define()`), so each of its elements already in the page loads its family as it upgrades.
+ * - A rebuilt pack swapped in (`PackHotSwap`):  its own `define()`, which loads every family, for the swap.
+ */
+function registerPackLazily(pack) {
+  const { loadFamily, families } = pack
+  const isNew = !ComponentPacks.entryOf(Object.keys(pack.catalog)[0] ?? "")
+  if (!loadFamily || !families || !isNew) return registerPack(pack)
+  RootLoader.add(
+    Object.fromEntries(Object.keys(families).map((folder) => [`${folder}/index.ts`, () => loadFamily(folder)]))
+  )
+  registerPack({ ...pack, define: () => Promise.resolve().then(() => RootLoader.defineEarly(pack.catalog)) })
+}
+
+// `ready`:  the UI runtime loaded (its own chunk), which `SpellUI.loading` waits for too:  a script run after it may use
+// `UI.i18n` ... at once, as it could when the runtime was inlined
+const ready = UI.load().catch((error) => console.error("spell-ui:  the UI runtime didn't load", error))
+Object.assign((globalThis.SpellUI ??= {}), { UI, registerPack: registerPackLazily, packModules, themed, ready })
 addThemeMenu()
 defineSite()

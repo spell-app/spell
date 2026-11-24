@@ -1,5 +1,6 @@
-import { describe, test, expect } from "vite-plus/test"
+import { afterEach, describe, test, expect, vi } from "vite-plus/test"
 
+import { LoadableFile } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
@@ -92,5 +93,93 @@ describe("getFileForPath():  a file's kind is the END of its name", () => {
   test("CSS, and property editor pages", () => {
     expect(fileNamed("theme.dark.css")).toBeInstanceOf(SP.SpellCSSFile)
     expect(fileNamed(`Card${SP.EDITOR_PAGE_SUFFIX}`)).toBeInstanceOf(SP.SpellJSFile)
+  })
+})
+
+/**
+ * What a compile saves (epic `solid-2-final` P9):  `save: "later"` sends nothing till `saveUnsavedOutput()`,
+ * and a built file is sent only when its text changed since we last sent it.
+ */
+describe("saving what a compile wrote", () => {
+  const realFetch = LoadableFile.fetch
+  afterEach(() => {
+    LoadableFile.fetch = realFetch
+  })
+
+  /** A project with output written as a compile would, and every url saving it sends. */
+  function compiledProject(projectName: string) {
+    const project = new SP.SpellProject(`@spell/test/${projectName}`)
+    project.contents = { manifest: {}, imports: [] }
+    project.outputFile.contents = "export const one = 1\n"
+    project.declarationsFile.contents = "{}"
+    const sent: string[] = []
+    LoadableFile.fetch = (async ({ url }: { url: string }) => {
+      sent.push(url.split("/").at(-1)!)
+      return ""
+    }) as unknown as typeof LoadableFile.fetch
+    return { project, sent }
+  }
+
+  test('`save: "later"`:  nothing sent, till `saveUnsavedOutput()`;  then once', async () => {
+    const { project, sent } = compiledProject("LaterSaves")
+    project.saveCompiled = "later"
+    await project.saveOutput()
+    expect(sent).toEqual([])
+    expect(project.hasUnsavedOutput).toBe(true)
+    await project.saveUnsavedOutput()
+    expect(sent.sort()).toEqual(["LaterSaves.declarations.json5", "LaterSaves.en.js", "LaterSaves.spell.js"])
+    expect(project.hasUnsavedOutput).toBe(false)
+    sent.length = 0
+    await project.saveUnsavedOutput()
+    expect(sent).toEqual([])
+  })
+
+  test("a built file whose text hasn't changed isn't sent again", async () => {
+    const { project, sent } = compiledProject("ChangedSaves")
+    project.saveCompiled = true
+    await project.saveOutput()
+    expect(sent.length).toBe(3)
+    sent.length = 0
+    await project.saveOutput()
+    expect(sent).toEqual([])
+    project.outputFile.contents = "export const one = 2\n"
+    await project.saveOutput()
+    expect(sent).toEqual(["ChangedSaves.spell.js"])
+  })
+
+  test("a compile of some pages taken from elsewhere isn't saved:  its files load, to tell (editor I293)", async () => {
+    const { project, sent } = compiledProject("SomePages")
+    project.pagesInPlay = new Set()
+    // a page is known by its text:  none is, till its file has loaded
+    let isLoaded = false
+    const page = { load: async () => (isLoaded = true) } as unknown as SP.SpellFile
+    vi.spyOn(project, "load").mockResolvedValue(undefined as never)
+    vi.spyOn(project, "spellFiles", "get").mockReturnValue([page])
+    vi.spyOn(project, "hasAlonePages", "get").mockImplementation(() => isLoaded)
+    const entry = { compiled: "", declarations: "{}", languages: [], words: {}, targets: {} }
+    await project.takeCompiled(entry)
+    expect(isLoaded).toBe(true)
+    expect(sent).toEqual([])
+  })
+
+  test("a clean compile taken from elsewhere is kept in the compile cache, under the key it was asked by (I57)", async () => {
+    const { project } = compiledProject("KeptElsewhere")
+    const entries = new Map<string, string>()
+    const cache = SP.CompileCache.inMemory(entries)
+    vi.spyOn(cache, "keep")
+    SP.SpellProject.compileCache = cache
+    try {
+      const entry = { compiled: "x", declarations: "{}", languages: [], words: {}, targets: {} }
+      // with errors:  never kept;  no key:  never kept
+      await project.takeCompiled({ ...entry, clean: false }, { save: false, cacheKey: "k1" })
+      await project.takeCompiled({ ...entry, clean: true }, { save: false })
+      expect(cache.keep).not.toHaveBeenCalled()
+      await project.takeCompiled({ ...entry, clean: true }, { save: false, cacheKey: "k2" })
+      // kept as compile() keeps its own:  the cache's own shape, without `clean`
+      expect(cache.keep).toHaveBeenCalledWith("k2", entry)
+      expect(project.compiledFrom).toBe("elsewhere")
+    } finally {
+      SP.SpellProject.compileCache = undefined
+    }
   })
 })

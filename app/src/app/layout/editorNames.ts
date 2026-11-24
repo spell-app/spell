@@ -32,10 +32,10 @@ export const EDITOR_NAMES = {
       aboutBox: { kind: "view", words: "about box", for: "what About Spell… shows" },
       versionsBox: { kind: "view", words: "versions box", for: "what Versions shows" },
 
-      canRevert: { kind: "value", words: "can revert", for: "greys Discard Changes" },
+      fileChanged: { kind: "value", words: "file changed", for: "greys Discard Changes" },
       drafted: { kind: "value", words: "drafted", for: "greys Delete Draft" },
       autoSaving: { kind: "value", words: "auto saving", for: "ticks AutoSave" },
-      canPublish: { kind: "value", words: "can publish", for: "greys Publish" },
+      readyToPublish: { kind: "value", words: "ready to publish", for: "greys Publish" },
       unsaved: { kind: "value", words: "unsaved", for: "ticks Save" },
       running: { kind: "value", words: "running", for: "ticks Run or Edit" },
       codeIsShowing: { kind: "value", words: "code is showing", for: "ticks View › Code" },
@@ -49,10 +49,14 @@ export const EDITOR_NAMES = {
       siteReady: { kind: "value", words: "site ready", for: "greys View › Site" },
       consoleEmpty: { kind: "value", words: "console empty", for: "greys Clear Console" },
       onAServer: { kind: "value", words: "on a server", for: "shows Publish, Versions and the project's settings" },
-      mayCreate: { kind: "value", words: "may create", for: "shows New Spell File and New CSS File" },
-      mayDesign: { kind: "value", words: "may design", for: "shows Save" },
-      mayChangeProject: { kind: "value", words: "may change project", for: "shows Rename, Delete and Duplicate" },
-      mayReset: { kind: "value", words: "may reset", for: "shows Reset to Saved" },
+      newFilesAllowed: { kind: "value", words: "new files allowed", for: "shows New Spell File and New CSS File" },
+      draftsAllowed: { kind: "value", words: "drafts allowed", for: "shows Save" },
+      projectChangesAllowed: {
+        kind: "value",
+        words: "project changes allowed",
+        for: "shows Rename, Delete and Duplicate"
+      },
+      resetAllowed: { kind: "value", words: "reset allowed", for: "shows Reset to Saved" },
       revertWords: { kind: "value", words: "revert words", for: "Discard Changes' title" },
       renameWords: { kind: "value", words: "rename words", for: "Rename the project…'s title" },
       deleteWords: { kind: "value", words: "delete words", for: "Delete the project…'s title" },
@@ -141,10 +145,8 @@ export const EDITOR_NAMES = {
       place: { kind: "value", words: "place", for: "the tab chosen" },
       draftNote: { kind: "value", words: "draft note", for: "the pen's tip" },
       discardWords: { kind: "value", words: "discard words", for: "the tip's Discard changes" },
-      closeWords: { kind: "value", words: "close words", for: "the tab's ✕'s tooltip" },
       show: { kind: "action", words: "show it", for: "a click on the tab" },
-      discard: { kind: "action", words: "discard it", for: "the tip's Discard changes" },
-      close: { kind: "action", words: "close it", for: "the tab's ✕" }
+      discard: { kind: "action", words: "discard it", for: "the tip's Discard changes" }
     }
   },
   FileTabBar: {
@@ -153,8 +155,7 @@ export const EDITOR_NAMES = {
     members: {
       files: { kind: "value", words: "files", for: "the tabs" },
       rememberAs: { kind: "value", words: "remember as", for: "what the open tabs are kept under" },
-      hideWords: { kind: "value", words: "hide words", for: "the ✕'s tooltip, which hides the code" },
-      hideTheCode: { kind: "action", words: "hide the code", for: "the ✕ at the bar's far right:  hides the code" }
+      hideWords: { kind: "value", words: "hide words", for: "the ✕'s tooltip, which hides the code" }
     }
   },
   AboutBox: {

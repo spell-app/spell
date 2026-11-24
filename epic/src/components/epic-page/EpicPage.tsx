@@ -94,13 +94,13 @@ import crumbsCSS from "./Crumbs.css?inline"
  * The component behind `<epic-page>`:  an epic page --
  * one epic's page, its data in attributes, its Overview and sections as children.
  * - Draws, top to bottom:
- *   - the sticky page header:  ONE line of crumbs, `DOCS / EPICS / <NAME>`, the name in their type, twice their size and bold, the h1
+ *   - the sticky page header:  ONE line of crumbs, `EPICS / <NAME>`, the name in their type, twice their size and bold, the h1
  *     (Owen, 2026-10-13:  "This is all redundant ... Just go with a single set of breadcrumbs")
  *     - a click on the name copies `/epic resume <name>`, and a quiet toast says so
- *     - no `DOCS / EPICS /` while the doc still holds its old `.spell-crumbs` before the page, nor narrow, 720px or
+ *     - no `EPICS /` while the doc still holds its old `.spell-crumbs` before the page, nor narrow, 720px or
  *       less, where the side bar is too narrow for them (`Crumbs.css`)
  *     - the epic's title isn't drawn:  the name says it (the page's `<title>` and the Epics list still show it)
- *     - one line, cut short with its full name as the tooltip when the header is too narrow (epic `epic-engine` P53)
+ *     - one line, cut short when the header is too narrow (epic `epic-engine` P53;  no tooltip since I370)
  *     in its MIDDLE, while reviewed, Send alone (P53;  Owen's comment C7;  no session's line since I340);
  *     at its right the bedtime label, the step label (the state's icon in it) and the gear (P53, where the git toggle
  *     was;  Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle is) (git icon, but bigger)";
@@ -108,7 +108,7 @@ import crumbsCSS from "./Crumbs.css?inline"
  *   - the toolbar's bar, sticky again, right below the header (`--epic-head-h`):  the new item form, the toolbar
  *   - the review line, and the pill under it while it shows
  *   - the meta lines (branch, worktree, dates, the saga it serves, the guide's link from `slot="durable"`)
- *     - the saga (`saga`, epic `epic-workflow` P15):  a link to its saga page, by its title, its purpose the tooltip
+ *     - the saga (`saga`, epic `epic-workflow` P15):  a link to its saga page, by its title
  *       - once the page server says them (`GET /api/epics/pages`'s `saga`);  by its id until then, and from `file://`
  *   - a future epic's notice, then its children
  * - The step label follows the phases, in the colours of decision Q20;  while the page is in a stage (P29), the stage
@@ -209,7 +209,7 @@ import crumbsCSS from "./Crumbs.css?inline"
  * - SHARED LOOK:  `EpicPage.css` declares the pack's tokens on its `:host`
  *   (`--epic-*`:  colours, bands, the inset, item state colours, the chip);  every `<epic-*>` below inherits them.
  * - A SAGA PAGE (`kind="saga"`, epic `epic-workflow` P15):  the same page for a saga, `saga` naming it
- *   - crumbs `DOCS / SAGAS / <ID>`;  a click on the id copies `/epic review SAGA:/<id>`, as the review line does
+ *   - crumbs `SAGAS / <ID>`;  a click on the id copies `/epic review SAGA:/<id>`, as the review line does
  *   - no step label, state, Plan hung?, See Also or Agents running:  a saga has no phases, branch or agents
  *   - one meta line, its short address (`SAGA:/drawable-spell`, copied on click), then its dates
  *   - Send and the review line as on an epic page:  its marks and comments wait in its own inbox,
@@ -758,9 +758,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                 <span class="see-also-kind">
                   {this.translationForKey(SEE_ALSO_KINDS[page.kind]?.key ?? "seeAlsoDetails")}
                 </span>
-                <time datetime={page.updated} data-tooltip={new Date(page.updated).toLocaleString()}>
-                  {PlanDates.formatDate(new Date(page.updated), false)}
-                </time>
+                <time datetime={page.updated}>{PlanDates.formatDate(new Date(page.updated), false)}</time>
               </li>
             )}
           </For>
@@ -776,15 +774,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         <header ref={(element) => (this.header = element)} class={HEAD} part={this.partForName("header")}>
           <h1 class={HEADING} part={this.partForName("heading")}>
             <Show when={!this.hasOldCrumbs()}>{this.crumbs()}</Show>
-            <button
-              type="button"
-              class={HEADING_COPY}
-              data-tooltip={this.translationForKey("copyHeading", {
-                name: this.isSaga ? (this.saga ?? "") : (this.epic ?? ""),
-                command: this.headingCommand()
-              })}
-              onClick={() => this.copyHeading()}
-            >
+            <button type="button" class={HEADING_COPY} onClick={() => this.copyHeading()}>
               {this.isSaga ? this.saga : this.epic}
             </button>
           </h1>
@@ -796,13 +786,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           <span class={STATUS} part={this.partForName("status")}>
             <Show when={this.bedtime}>
               {(phases) => (
-                <ui-label
-                  class="bedtime-label"
-                  appearance="basic"
-                  color="violet"
-                  icon="bed"
-                  data-tooltip={this.translationForKey("bedtimeTip", { phases: phases() })}
-                >
+                <ui-label class="bedtime-label" appearance="basic" color="violet" icon="bed">
                   <span class="bedtime">{this.translationForKey("bedtime", { phases: phases() })}</span>
                 </ui-label>
               )}
@@ -858,8 +842,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * The crumbs before the epic's name, in the h1:  `Docs / Epics /`, the docs' eyebrow;  the name after them is the
+   * The crumbs before the epic's name, in the h1:  `Epics /`, the docs' eyebrow;  the name after them is the
    * h1's own button (Owen, 2026-10-13:  "Just go with a single set of breadcrumbs").
+   * - No Spell Epic first:  the top bar says it, its link the home page (epic `epic-engine` T148).
    */
   private crumbs(): JSX.Element {
     return (
@@ -870,9 +855,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           size="small"
           aria-label={this.translationForKey("crumbs")}
         >
-          <ui-breadcrumb link={CRUMB_LINKS.docs.href} target={CRUMB_LINKS.docs.target}>
-            {this.translationForKey("crumbDocs")}
-          </ui-breadcrumb>
           <ui-breadcrumb
             link={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].href}
             target={CRUMB_LINKS[this.isSaga ? "sagas" : "epics"].target}
@@ -985,11 +967,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         {this.icon(this.icons.saga)}
         <span>
           <b>{this.translationForKey("saga")}</b>{" "}
-          <a
-            href={known()?.href ?? sagaHref(id)}
-            target={`saga-${id}`}
-            data-tooltip={known() ? this.translationForKey("sagaTip", { purpose: known()!.purpose }) : undefined}
-          >
+          <a href={known()?.href ?? sagaHref(id)} target={`saga-${id}`}>
             {known()?.title ?? id}
           </a>
         </span>
@@ -1131,7 +1109,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           type="button"
           class={[PILL, { flash: this.isCopied }]}
           part={this.partForName("pill")}
-          data-tooltip={this.translationForKey("copyWait")}
           onClick={() => void this.copyWait()}
         >
           {idle()} <code>{this.waitCommand()}</code>
@@ -1142,7 +1119,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         type="button"
         class={[PILL, { airplane: isAirplane(), flash: this.isCopied }]}
         part={this.partForName("pill")}
-        data-tooltip={this.translationForKey(isAirplane() ? "copyCommand" : "startReview")}
         onClick={() => void this.copyCommand()}
       >
         <Show
@@ -1191,19 +1167,12 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         type="button"
         class={[REVIEW_LINE, { flash: this.isCopied }]}
         part={this.partForName("review-line")}
-        data-tooltip={this.translationForKey("copyCommand")}
         onClick={() => void this.copyCommand()}
       >
         {this.icon(this.icons.copy)}
         <span>
           {this.translationForKey(isAirplane() ? "reviewLineAirplane" : "reviewLine")} <code>{this.command()}</code>
-          <Show when={this.marks()?.listener}>
-            {(words) => (
-              <span class={LISTENER} data-tooltip={this.translationForKey("listeningTitle")}>
-                {words()}
-              </span>
-            )}
-          </Show>
+          <Show when={this.marks()?.listener}>{(words) => <span class={LISTENER}>{words()}</span>}</Show>
         </span>
         <span class="done" aria-live="polite">
           {this.isCopied ? this.translationForKey("copied") : ""}
@@ -1306,7 +1275,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   part={this.partForName("gear-row")}
                   role="menuitem"
                   value={FOCUS_ROW}
-                  data-tooltip={this.translationForKey("focusModeTip")}
                   tabindex="-1"
                   onClick={() => this.openFocus()}
                 >
@@ -1575,7 +1543,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   private hungNotice(): JSX.Element {
     return (
       <details class={HUNG} part={this.partForName("hung")}>
-        <summary data-tooltip={this.translationForKey("hungTip")}>
+        <summary>
           <span class="chevron" aria-hidden="true">
             {this.icons.chevron.svg}
           </span>
@@ -1915,4 +1883,4 @@ function pillColorOf(color: StepLabel["color"] | undefined): StepLabel["color"] 
 const ACTIVE_ICON = "circle notch"
 
 /** The toolbar chips whose badge already says items need Owen:  the step label isn't red for them too (I216). */
-const URGENT_CHIPS: ReadonlySet<string> = new Set(URGENT_STATES)
+const URGENT_CHIPS: ReadonlySet<string> = new Set([...URGENT_STATES, "requested"])

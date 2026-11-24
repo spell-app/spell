@@ -122,15 +122,13 @@ export const epicThreadVocabulary = {
       description: "The fold:  the chevron, the bullhorn (a check circle once done), its id, the first words it's on."
     },
     { name: "id", description: "Its id, `C3`:  small and muted, an outline and no fill." },
-    { name: "headline", description: "The first words it's on, in quotes;  its tooltip says the block in full." },
+    { name: "headline", description: "The first words it's on, in quotes." },
     { name: "answer", description: "Your answer while it's your turn (the review pills), or Reopen once done." },
     { name: "body", description: "The messages and the box:  shown while open." },
     { name: "reply", description: "Your box, its floppy in the corner." }
   ],
   states: [],
   texts: [
-    { key: "foldTip", text: "Close this thread", description: "After the fold's tooltip while open." },
-    { key: "unfoldTip", text: "Open this thread", description: "After the fold's tooltip while folded." },
     { key: "editTitle", text: "Edit your last words", description: "The pen's tooltip." },
     {
       key: "editLabel",

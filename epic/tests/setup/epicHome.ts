@@ -39,3 +39,10 @@ process.env.SPELL_EPIC_EDITOR = "code"
 // and Claude Code's folder and session (`ClaudeHome`):  no plugin on, no command line, whoever runs the tests
 process.env.CLAUDE_CONFIG_DIR = join(home, "claude")
 process.env.CLAUDE_PID = "0"
+// and no epic plugin guides (`EpicConfig.pluginGuides()`, epic `epic-engine` T130):  a scratch repo's guide lists hold
+// only its own, never the kit's `epic/guides/`;  a test of them names its own folder
+process.env.SPELL_EPIC_PLUGIN_GUIDES = ""
+// and the server keeper's record and the worktrees' port book (`SRV.KeeperLink`, `SRV.PortBook`, epic `epic-engine`
+// P82):  a test's page server never asks the machine's keeper, nor takes a real worktree's port
+process.env.SPELL_KEEPER_FILE = join(home, "server-keeper.json")
+process.env.SPELL_PORTS_FILE = join(home, "server-ports.json")

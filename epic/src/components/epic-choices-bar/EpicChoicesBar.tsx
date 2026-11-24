@@ -17,8 +17,7 @@ import barCSS from "./EpicChoicesBar.css?inline"
  * The component behind `<epic-choices-bar>`:  a choice page's bar (epic `epic-workflow` P12), pinned to the
  * window's bottom while the rows scroll above it;  ivory, as the page's toolbar at the top (Owen, 2026-10-13).
  * - Draws the page's `ChoicesForm`:
- *   - the feedback box (it grows with its text), then "Do it", whose tooltip counts the changed boxes and the
- *     commented rows
+ *   - the feedback box (it grows with its text), then "Do it"
  *   - under them:  the save status only when a save FAILED (Owen, 2026-10-13:  "Lose the `0 boxes saved` bit"), in
  *     red, bold;  then Copy my answers and Expand all
  *     - Copy my answers (epic `epic-engine` P15):  what's typed, as the draft's JSON, onto the clipboard
@@ -55,9 +54,6 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
 
   /** Copy my answers' copy:  "Copied" for a moment (Spell UI's `ClipboardCopy`). */
   readonly clipboard = new E.ClipboardCopy()
-
-  /** Copy my answers' last copy was refused:  its tooltip says so until the next click. */
-  @E.state accessor isCopyRefused = false
 
   /** While connected:  follow the form, save as the page goes away, and bring back what was typed;  the undo. */
   @E.whileConnected
@@ -101,7 +97,6 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             appearance="circular"
             icon="paper plane"
             loading={this.isSending ? "" : undefined}
-            data-tooltip={this.sendTip}
             onClick={this.onSend}
           >
             {this.translationForKey("doIt")}
@@ -119,7 +114,6 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             size="mini"
             appearance="basic circular"
             icon={this.clipboard.isCopied ? "check" : "copy"}
-            data-tooltip={this.translationForKey(this.isCopyRefused ? "copyFailed" : "copyTip")}
             onClick={this.onCopy}
           >
             {this.translationForKey(this.clipboard.isCopied ? "copied" : "copyAnswers")}
@@ -152,14 +146,6 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
   ////////////////
   // ## What it shows
   ////////////////
-
-  /** "Do it"'s tooltip:  how many boxes changed, of how many, and how many rows have a comment (when any). */
-  get sendTip(): string {
-    void this.version
-    const { rows, changed, commented } = this.form?.counts ?? { rows: 0, changed: 0, commented: 0 }
-    const counts = { changed: String(changed), rows: String(rows), commented: String(commented) }
-    return this.translationForKey(commented ? "sendTipCommented" : "sendTip", counts)
-  }
 
   /** "Do it" on its way:  it spins. */
   get isSending(): boolean {
@@ -203,7 +189,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
   private readonly onCopy = async () => {
     const form = this.form
     if (!form) return
-    this.isCopyRefused = !(await this.clipboard.copy(form.copyText()))
+    await this.clipboard.copy(form.copyText())
   }
 
   /** Expand all, or Collapse all. */

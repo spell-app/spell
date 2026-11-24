@@ -2,7 +2,6 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { treeDiagramVocabulary } from "spell/ui/components/ui-tree-diagram/UITreeDiagram.en"
@@ -51,9 +50,7 @@ describe("UITreeDiagram.css source", () => {
 describe("UITreeDiagram.css examples", () => {
   test("sizes the svg from its natural width, in em of its own font size", () => {
     Sheets.adopt([...foundationCSS, treeDiagramCSS])
-    const root = Fixture.render(
-      `<div style="width: 2000px; font-size: 16px">${EXAMPLES["./examples/types.html"]}</div>`
-    )
+    const root = Sheets.render(`<div style="width: 2000px; font-size: 16px">${EXAMPLES["./examples/types.html"]}</div>`)
     const svg = root.querySelector("svg")!
     expect(getComputedStyle(svg).fontSize).toBe("13px")
     expect(svg.getBoundingClientRect().width).toBeCloseTo(37.35 * 13, 0)
@@ -62,7 +59,7 @@ describe("UITreeDiagram.css examples", () => {
 
   test("draws boxes with a fill and border, edges as strokes with no fill, texts centred", () => {
     Sheets.adopt([...foundationCSS, treeDiagramCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const box = getComputedStyle(root.querySelector("g:not(.root) rect.box")!)
     const rootBox = getComputedStyle(root.querySelector("g.root rect.box")!)
     expect(box.fill).not.toBe("none")

@@ -47,6 +47,9 @@ export const OPEN_STATES: ReadonlySet<string> = new Set([
   "progress",
   "handed",
   "open",
+  // a page with badges (epic `epic-engine` P81):  light orange to recheck, light yellow no hurry
+  "recheck",
+  "someday",
   // a phase's own:  orange (a plan to accept, or its plan changed);  dotted blue, an item's too (scheduled)
   "waiting",
   "updated",

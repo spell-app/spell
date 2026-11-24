@@ -30,6 +30,13 @@ describe("SpellUrls", () => {
     expect(() => SP.SpellUrls.fileUrl("owen@spell/solitaire/rules")).toThrow(/isn't a file's address/)
   })
 
+  test("a code file `call native` imports:  its address, and its javascript's URL (from-console J110)", () => {
+    const module = SP.NativeCode.moduleFor("@local/My Folder/clip", "/clip board.ts")
+    expect(SP.SpellUrls.codeFilePathFor(module)).toBe("@local/My Folder/clip/clip board.ts")
+    expect(SP.SpellUrls.codeFileUrl(module)).toBe("/spaces/@local/My%20Folder/clip/clip%20board.ts?as=javascript")
+    expect(() => SP.SpellUrls.codeFilePathFor("@spell/project/x")).toThrow(/isn't a code file's module/)
+  })
+
   test("each part is encoded on its own:  the slashes and the `@` stay as they are", () => {
     const url = SP.SpellUrls.fileUrl("@local/My Folder/my project/a folder/Card #2.spell")
     expect(url).toBe("/spaces/@local/My%20Folder/my%20project/a%20folder/Card%20%232.spell")

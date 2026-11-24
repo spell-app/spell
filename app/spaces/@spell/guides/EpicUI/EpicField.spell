@@ -1,0 +1,308 @@
+"epic field" is a notebook page
+	<header level="1">
+		&lt;epic-field&gt;
+		<header>The &lt;epic-field&gt; element: one named field of a phase (Symptom, Goal ...), or a labelled block in prose.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-field&gt;</> is one named field of a phase: Symptom, Changes, Requests, Goal, Done, Files, Verify or To review.</>
+	<list bulleted>
+		<item>It draws the field's icon and its bold label (<text code>Symptom:</>) before its prose.</>
+		<item>In any other prose, with <text code>label</> instead of <text code>name</>, it's a LABELLED BLOCK: <text code>Where:</> and its text, no icon.</>
+	</>
+
+	<!-- no ui-list.spell-meta here:  any ui-item element on the page leaves epic-item unstyled (issue I9 of epic-components) -->
+	<text class="meta" paragraph>Written for: anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-phase" link="/epic/src/components/epic-phase/"><text title="epic/src/components/epic-phase/" code>epic-phase/</></>.</>
+	<text class="meta" paragraph>Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-phase-epicfield-en-ts" link="/epic/src/components/epic-phase/EpicField.en.ts"><text title="epic/src/components/epic-phase/EpicField.en.ts" code>EpicField.en.ts</></>.</>
+	<text class="meta" paragraph>The component: <link target="src-spell-epic-src-components-epic-phase-epicfield-tsx" link="/epic/src/components/epic-phase/EpicField.tsx"><text title="epic/src/components/epic-phase/EpicField.tsx" code>EpicField.tsx</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<html>
+			<epic-field name="symptom">26 docs in today's markup, in several generations of it.</>
+			<epic-field name="goal">
+				<ul>
+					<li>reads every generation of the old markup</>
+					<li>the 6 docs still in one file come out split</>
+				</>
+			</>
+			<epic-field label="Where">
+				<p><code>Color Set Chooser.spell.html</>: the page script moves <code>active</> by hand.</>
+			</>
+		</>
+		<example "Example">
+			<html>
+				<epic-field name="requests">
+					<epic-field label="r31 · 🚧 debut (ad62dff0)">
+						<blockquote>
+							<p>Make these TOCs expandable with an expand all / collapse all icon in the header.</p>
+						</blockquote>
+						<p>Looking at: Spell UI docs pages' 'On this page' side column.</p>
+						<p>Sent 2026-10-25 14:05-04:00</p>
+						<p>
+							<a href="/components/ui/images/hello-light.png">
+								<img src="/components/ui/images/hello-light.png" alt="r31, screenshot 1" style="max-width: 100%" />
+							</a>
+						</p>
+					</epic-field>
+				</epic-field>
+			</html>
+		</example>
+		<html>
+			<ui-list bulleted>
+				<ui-item>A phase's fields: an icon in a column, then the bold label and the prose beside it. A list drops below the label.</>
+				<ui-item>Each named field folds: a click on its chevron, its icon or its label. Folded, its label row stays, with one line of its text after the label, or a list's count ("2 items"), so a folded phase still reads. They start open, and the page remembers the ones you fold, in this browser. <kbd>⌥</>-click on a phase's chevron, and the page's expand all and collapse all, reach them too; a link or a comment landing inside one opens it.</>
+				<ui-item>The third is a labelled block, as items use it: no icon column.</>
+				<ui-item>The last is a phase's Requests field, as <ui-text code>epic file</> writes it: each request in it folds, its label the title, folded to start with. Open it, and its screenshot is a thumbnail; a click shows it full size over the page (Spell UI's <ui-link link="/components/ui/zoom">&lt;ui-zoom&gt;</>), which Escape, a click anywhere or its close button closes.</>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Fields, from real epic pages:</>
+		<markdown>
+			```html
+			<epic-field name="symptom">26 docs in today's markup, in several generations of it.</epic-field>
+			<epic-field name="to-review"><a href="#j38">J38</a>, <a href="#j39">J39</a>, <a href="#t19">T19</a></epic-field>
+
+			<epic-field label="Where"><p>the inbox file</p></epic-field>
+			```
+		</>
+		<list bulleted>
+			<item>The first from <link title="epics/epic-components/parts/p-converter.html" target="src-epics-epic-components-parts-p-converter-html" link="/epics/epic-components/parts/p-converter.html"><text code>p-converter.html</></>, the second from <link title="epics/claude-design/parts/p-pony.html" target="src-epics-claude-design-parts-p-pony-html" link="/epics/claude-design/parts/p-pony.html"><text code>p-pony.html</></>.</>
+			<item>A field has <text code>name</> OR <text code>label</>, never both; the check refuses one with neither.</>
+			<item>Labels in use: <text code>Where</>, <text code>What should happen</>, <text code>Step</>, <text code>Step 1</> ...</>
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+
+		<section label="Its parents" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Parent</>
+					<cell>How</>
+					<cell>How many</>
+					<cell>As</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>as <text code>name="symptom"</></>
+					<cell>one at most</>
+					<cell>Symptom: what's wrong today, one line.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>as <text code>name="changes"</></>
+					<cell>one at most</>
+					<cell>Changes: what changes, two or three lines.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>as <text code>name="goal"</></>
+					<cell>one at most</>
+					<cell>Goal: a bullet per outcome.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>as <text code>name="done"</></>
+					<cell>one at most</>
+					<cell>Done: what was built, once done.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>as <text code>name="dropped"</></>
+					<cell>one at most</>
+					<cell>Dropped: why a dropped phase was never built, in place of Done (epic <text code>epic-engine</> I228).</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>as <text code>name="files"</></>
+					<cell>one at most</>
+					<cell>Files: what changes.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>as <text code>name="verify"</></>
+					<cell>one at most</>
+					<cell>Verify: how we know it worked.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>as <text code>name="to-review"</></>
+					<cell>one at most</>
+					<cell>To review: the items added during it still open and not reviewed (written by the script).</>
+				</>
+			</>
+			<text paragraph>It's a PROSE element (<text code>flow</>): it goes anywhere prose goes, inside <link target="src-packages-epics-docs-epic-overview-html" link="/epic-overview"><text code>&lt;epic-overview&gt;</></>, <link target="src-packages-epics-docs-epic-summary-html" link="/epic-summary"><text code>&lt;epic-summary&gt;</></>, <link target="src-packages-epics-docs-epic-prompt-html" link="/epic-prompt"><text code>&lt;epic-prompt&gt;</></>, <link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><text code>&lt;epic-section&gt;</></>, <text code>&lt;epic-field&gt;</>, <link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated"><text code>&lt;epic-updated&gt;</></>, <link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><text code>&lt;epic-item&gt;</></>, <link target="src-packages-epics-docs-epic-question-html" link="/epic-question"><text code>&lt;epic-question&gt;</></>, <link target="src-packages-epics-docs-epic-option-html" link="/epic-option"><text code>&lt;epic-option&gt;</></>, <link target="src-packages-epics-docs-epic-answer-html" link="/epic-answer"><text code>&lt;epic-answer&gt;</></>, <link target="src-packages-epics-docs-epic-more-html" link="/epic-more"><text code>&lt;epic-more&gt;</></>, <link target="src-packages-epics-docs-epic-reply-html" link="/epic-reply"><text code>&lt;epic-reply&gt;</></>, <link target="src-packages-epics-docs-epic-status-html" link="/epic-status"><text code>&lt;epic-status&gt;</></>, <link target="src-packages-epics-docs-epic-version-html" link="/epic-version"><text code>&lt;epic-version&gt;</></>, <link target="src-packages-epics-docs-epic-commit-html" link="/epic-commit"><text code>&lt;epic-commit&gt;</></>, <link target="src-packages-epics-docs-epic-event-html" link="/epic-event"><text code>&lt;epic-event&gt;</></>, <link target="src-packages-epics-docs-epic-update-html" link="/epic-update"><text code>&lt;epic-update&gt;</></>, <link target="src-packages-epics-docs-epic-net-effect-html" link="/epic-net-effect"><text code>&lt;epic-net-effect&gt;</></>, <link target="src-packages-epics-docs-epic-note-html" link="/epic-note"><text code>&lt;epic-note&gt;</></>, <link target="src-packages-epics-docs-epic-aside-html" link="/epic-aside"><text code>&lt;epic-aside&gt;</></>, <link target="src-packages-epics-docs-epic-code-html" link="/epic-code"><text code>&lt;epic-code&gt;</></>.</>
+		</>
+
+		<section label="Its children" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Prose: text, a <text code>&lt;p&gt;</>, a list. A first paragraph runs on after the label; lists and later paragraphs go below it.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Child</>
+					<cell>Where</>
+					<cell>How many</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>prose</>
+					<cell/>
+					<cell>any number</>
+					<cell>The field's prose.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>name</>
+				</>
+				<cell><text code>symptom</>, <text code>changes</>, <text code>goal</>, <text code>done</>, <text code>dropped</>, <text code>files</>, <text code>verify</>, <text code>to-review</></>
+				<cell>A phase's field (every field in a phase has one): <text code>symptom</> (one line), <text code>changes</> (two or three), <text code>goal</> (a bullet per outcome), <text code>done</> (what was built), <text code>dropped</> (why a dropped phase was never built), <text code>files</>, <text code>verify</> (both hidden until the Phases title's toggles), <text code>to-review</> (the script's).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>label</>
+				</>
+				<cell>text</>
+				<cell>A labelled block's label, WITHOUT its colon (drawn): <text code>Where</>, <text code>What should happen</>, <text code>Step</>. For a field in prose, never in a phase: a field has <text code>name</> or <text code>label</>.</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Where its children show: a child goes in a slot by its <text code>slot</> attribute.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes in it</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>The field's prose.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws, which a page's CSS can style from outside with <text code>::part(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The field: its icon column, then its label and prose.</>
+				</>
+				<row>
+					<cell>
+						<text code>icon</>
+					</>
+					<cell>Its icon, centred on its first line: none on a labelled block.</>
+				</>
+				<row>
+					<cell>
+						<text code>label</>
+					</>
+					<cell>Its label: <text code>Symptom:</>, <text code>Where:</> ...</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>The fold button: a named field's, before its icon;  a request's, before its label.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>A named field's or a request's prose, hidden while folded.</>
+				</>
+				<row>
+					<cell>
+						<text code>taste</>
+					</>
+					<cell>A folded named field's one line after its label: its text, or a list's count.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item><text bold>The icon</>, grey, centred on the first line: Symptom an exclamation circle, Changes a magic wand, Goal a bullseye, Done a check circle, Files a folder, Verify a flask, To review a checklist.</>
+			<item><text bold>Files and Verify</> are hidden until the Phases title's toggles show them.</>
+			<item><text bold>To review</>: each <text code>#link</> shows as a chip in its item's state colour (<link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">the colour scheme</>): red needs you, blue Claude is working on it, yellow open, green decided or done, grey no longer relevant.</>
+			<item><text bold>A labelled block:</> no icon column, a paragraph's spacing.</>
+			<item><text bold>A named field</> folds, a chevron before its icon, open to start with;  folded, its label and one grey line of its text, cut off with "…".  Hidden by a phase's settings (Files, Verify), it stays hidden however it's folded.</>
+			<item><text bold>A labelled block</> doesn't fold:  a line or two of prose in an item that folds already.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic add-phase</>: Symptom, Changes, then Goal, Files, Verify (without <text code>--symptom</> / <text code>--changes</>: Goal, Files, Verify); a field not given reads <text code>TBD</>.</>
+			<item><text code>epic update &lt;epic&gt;#P&lt;N&gt; --goal ...</>: sets a field, in its place; <text code>""</> removes it.</>
+			<item><text code>epic phase &lt;epic&gt;#P&lt;N&gt; done --done "..."</>: the Done field.</>
+			<item>To review: written by the tool on every edit, LAST in the phase: the items added while it was active, still open and not reviewed.</>
+			<item>Labelled blocks: by hand, in an item's text (<text code>add --details</>, <text code>details --file</>); <text code>epic convert</>'s second pass turned <text code>&lt;p&gt;&lt;b&gt;Where:&lt;/b&gt; ...</> into them.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>: the tables come from its vocabulary file, so they change with it.</>
+		</>
+	</>

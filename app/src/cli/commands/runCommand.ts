@@ -166,13 +166,14 @@ function checkSeed(seed: number | undefined): void {
 
 /**
  * Each place's deployment named `deployment`:  `SP.SpellProject.deploymentsPicked()`, the page server's way too.
- * - throws `CliError` for a deployment no place in the project's file has
+ * - throws `CliError` for a deployment no place in the project's file has (`SP.UnlistedDeploymentError`), in its words
  */
 function deploymentsPicked(project: SP.SpellProject, deployment: string): NonNullable<CLI.RunSpec["deployments"]> {
   try {
     return project.deploymentsPicked(deployment)
   } catch (error) {
-    throw new CLI.CliError((error as Error).message)
+    if (error instanceof SP.UnlistedDeploymentError) throw new CLI.CliError(error.message)
+    throw error
   }
 }
 

@@ -1,0 +1,87 @@
+"spell element" is a notebook page
+	<header level="1">
+		SpellElement
+		<header>A view, drawn as an element of its own, one tag per template.</>
+	</>
+
+	<text class="lede" paragraph>A spell template declared as <text code>a card is a view</> draws each of its things as its own element, with its own shadow root, styles and error boundary. Its properties are the element's attributes, and its actions the element's methods, so a page's own markup and script can use it too.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone writing a view in spell, or changing how programs draw</>
+		<item icon="play">Live: a real program's elements, in a <text code>&lt;spell-viewer&gt;</> this page loads</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Solitaire, drawn with views: each card is its own <text code>&lt;solitaire-card&gt;</> element, and each pile, e.g. a <text code>&lt;solitaire-tableau&gt;</>, holds its cards' elements.</>
+		<example "1. Example" description="Every card and pile in this game is a SpellElement, styled by its type's own CSS.">
+			<html>
+				<spell-viewer project="@spell/examples/Solitaire" toolbar height="420px"></spell-viewer>
+			</html>
+		</example>
+		<text paragraph>Its tags work outside the program too. Written by hand, each card makes its own card from its attributes:</>
+		<example "1. Example" description="Cards written by hand:  the hidden app only runs the project, which defines the tags.">
+			<html>
+				<spell-viewer project="@spell/examples/Solitaire" hidden></spell-viewer>
+				<ui-grid columns="4">
+					<ui-column>
+						<solitaire-card rank="ace" suit="spades" direction="up"></solitaire-card>
+					</ui-column>
+					<ui-column>
+						<solitaire-card rank="queen" suit="hearts" direction="up"></solitaire-card>
+					</ui-column>
+					<ui-column>
+						<solitaire-card rank="7" suit="clubs" direction="down"></solitaire-card>
+					</ui-column>
+				</ui-grid>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from the app's element build, which this set's pages load: <text code>/element/spell.pack.js</>. <link target="src-packages-app" link="/src/app/">The app package</> builds it with <text code>yarn build:element</>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Nobody draws it by name: a program does, when it draws a thing whose template is a view.</>
+		<text paragraph>Card.spell · a view, with its own styles:</>
+		<text paragraph>Solitaire.spell · drawing the piles, each its own element:</>
+		<text paragraph>Solitaire.spell.js · the class names its tag:</>
+		<markdown>
+			```typescript
+			export class Card extends View {
+			  static elementTag = core.defineElement(this, "Solitaire")
+			}
+			```
+		</>
+		<list bulleted>
+			<item>ONE tag per view template, named for its app and template, and defined the first time a program defines its elements. A program run again takes the tag over, and restyles every element of it at once.</>
+			<item><text code>draw the card</> draws the card's element, with the card as its <text code>thing</>. The element draws the card inside its shadow root.</>
+			<item>Each property the type declares is an attribute and a property: <text code>rank="queen"</>, or <text code>card.rank = "jack"</>. Each action is a method: <text code>card.turnOver()</>.</>
+			<item>Written by hand, with no <text code>thing</>, it makes its own: a new thing of its type.</>
+			<item>In a <link target="src-packages-app-docs-spell-viewer-html" link="/spell-viewer"><text code>&lt;spell-viewer&gt;</></>'s own markup, it draws the program's thing of its type named by its <text code>id</>, or says there's none.</>
+			<item>Its styles: the page's theme, then its type's <text code>&lt;css&gt;</>, after its super-types'.</>
+		</>
+	</>
+
+	<section label="3. Attributes">
+		<icon slot="icon" name="list check"/>
+		<text paragraph>The attributes every view's element starts with. Each template adds one per property it declares: a card's rank, suit and direction.</>
+		<html>
+			<ui-docs-api family="spell-element"></>
+		</>
+		<text class="meta" paragraph>From its vocabulary, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-runner-spellelement-tsx" link="/src/app/runner/SpellElement.tsx"><text title="src/app/runner/SpellElement.tsx" code>SpellElement.tsx</></>: its component, and how each type's tag is defined</>
+			<item><link target="src-packages-app-src-runner-spellelement-en-ts" link="/src/app/runner/SpellElement.en.ts"><text title="src/app/runner/SpellElement.en.ts" code>SpellElement.en.ts</></>: its vocabulary, the names each type's element copies</>
+			<item><link target="src-tests-app-src-runner-spellelement-browser-test-tsx" link="/tests/app/runner/SpellElement.browser.test.tsx"><text title="tests/app/runner/SpellElement.browser.test.tsx" code>SpellElement.browser.test.tsx</></>: its tests</>
+			<item>The example project: <text title="spaces/@spell/examples/Solitaire/" code>Solitaire</>; its demo of hand-written tags, <text code>/demo/drawable-elements.html</> on the editor's server</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

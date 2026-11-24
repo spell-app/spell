@@ -57,7 +57,11 @@ describe("<epic-mark>", () => {
       await vi.waitFor(() => expect(chipOf(mark).dataset.state).toBe("progress"))
       // the item's own chip says the same:  blue
       const chip = root.querySelector("#q9")!.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!
-      expect(chip.dataset.color).toBe("blue")
+      // solid, its state's fill (T146)
+      expect([chip.closest("[part~='base']")!.classList.contains("progress"), chip.dataset.fill]).toEqual([
+        true,
+        undefined
+      ])
     } finally {
       ReviewClient.adopt(undefined)
     }

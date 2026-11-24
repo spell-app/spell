@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spaces and the Cloud</title>
+    <meta
+      name="description"
+      content="Where Spell's projects, people and data live:  one address for everything, things saved by id, the people library written in Spell, spaces on disk, and the server half of the cloud -- members and roles, projections, takedowns, backups and Lexicons."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="The App" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Spaces and the Cloud</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Spaces and the Cloud</h1></header></ui-sticky
+        >
+        <pre><code class="language-plaintext">@spell/examples/Solitaire/Solitaire.spell
+└──── group ──┘ └project─┘ └──── file ──┘</code></pre>
+        <p class="lede">
+          One file of the Solitaire example, named by what it is rather than where it is. The editor, the command line,
+          an importing project and the server all write that same address, and one function turns it into a folder. A
+          SPACE is a person's or an org's folder of projects; this page is how they're named, how things in them are
+          saved, and what Spell's server does to keep them shared and safe.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user">Written for: anyone working on where projects, people or a program's data live</ui-item>
+          <ui-item icon="flask">Checked: 2026-11-21, every command and file against that day's code</ui-item>
+          <ui-item icon="book open"
+            >The reference beside it:
+            <a href="/app/README-spaces.md" target="src-app-readme-spaces-md">README-spaces</a>; for a program's author,
+            <a href="/guides/data/data.html" target="src-guides-data-data-html">Data</a></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>Everything Spell names has ONE kind of address: a group, a project, a file, a folder.</li>
+            <li>
+              Every thing has a built-in id, and saves by it: written whole inside what holds it the first time, a
+              reference after. So a card in two piles saves once.
+            </li>
+            <li>
+              Saved files have versions, upgraded as they're read, and are checked against their class. The Spell
+              declaration is the only description anyone writes.
+            </li>
+            <li>
+              People and orgs are Spell: the people library, compiled to a TypeScript library the server imports. A
+              person is a readable <code>__me.json5</code>.
+            </li>
+            <li>Your own projects live in <code>spell.spaces</code>, beside the kit's folder, in no repo.</li>
+            <li>
+              Spell's server writes a space's data for its members, by role; projects part of it into another space; and
+              takes it down, backs it up and exports it.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="addresses" label="2. Addresses" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="map signs"></ui-icon>
+          <ui-section id="address-forms" label="The forms" sticky collapsible dividing open="false">
+            <pre><code class="language-plaintext">address  = group "/" project [ "/" path ]
+group    = "@" org "/" domain            built-in:  @spell/examples, @spell/library, @spell/test
+         | person "@" org                a person's own:  owen@spell
+project  = name                          one part, no dot;  lower-kebab by convention
+path     = file | folder "/"             a file has a dot;  a folder ends in a slash</code></pre>
+            <ul>
+              <li>Only the group is looked up; everything after it is a folder or a file in the group's folder.</li>
+              <li>
+                One function turns an address into a folder,
+                <a href="/parser/src/spell/SpellUrls.ts" target="src-parser-src-spell-spellurls-ts"
+                  ><code title="parser/src/spell/SpellUrls.ts">SpellUrls.folderFor()</code></a
+                >, so nothing can disagree about where a project is.
+              </li>
+              <li>
+                If you know npm, <code>@spell/library/people</code> reads like a scoped package. The difference: no
+                registry and no install. A library on your disk is importable the moment it exists.
+              </li>
+              <li>The old forms (<code>@system:examples:Solitaire</code>) are read nowhere.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="address-groups" label="The groups" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Group</th>
+                    <th>Its folder</th>
+                    <th>What's in it</th>
+                  </tr>
+                  <tr>
+                    <td><code>owen@spell</code></td>
+                    <td><code>spell.spaces/@spell/owen@/</code>, beside the kit, in no repo</td>
+                    <td>your own projects</td>
+                  </tr>
+                  <tr>
+                    <td><code>@spell/examples</code></td>
+                    <td>
+                      <a href="/app/spaces/@spell/examples/" target="src-app-spaces-spell-examples"
+                        ><code title="app/spaces/@spell/examples">app/spaces/@spell/examples</code></a
+                      >
+                    </td>
+                    <td>the example apps</td>
+                  </tr>
+                  <tr>
+                    <td><code>@spell/library</code></td>
+                    <td>
+                      <a href="/app/spaces/@spell/library/" target="src-app-spaces-spell-library"
+                        ><code title="app/spaces/@spell/library">app/spaces/@spell/library</code></a
+                      >
+                    </td>
+                    <td>projects others import (people, games), and the apps every org runs on</td>
+                  </tr>
+                  <tr>
+                    <td><code>@spell/guides</code>, <code>@spell/sites</code></td>
+                    <td>beside them</td>
+                    <td>programs that read as prose; Spell's own sites</td>
+                  </tr>
+                  <tr>
+                    <td><code>@spell/test</code></td>
+                    <td>
+                      <a href="/app/spaces/@spell/test/" target="src-app-spaces-spell-test"
+                        ><code title="app/spaces/@spell/test">app/spaces/@spell/test</code></a
+                      >, frozen
+                    </td>
+                    <td>the projects the tests compile and compare against snapshots</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                <code>spell projects</code> lists them; a project in no group runs as
+                <code>@local/&lt;folder&gt;</code>.
+              </li>
+              <li>
+                Your own group is you at your org: the app's <code>"spell": { "org": "acme" }</code> setting, else
+                <code>spell</code>. In a checkout of Spell itself, it's <code>owen@spell</code>.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="address-names" label="Project names and titles" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A project's folder is its name, lower-kebab: the address IS the folder.
+                <code>"Drawable Solitaire"</code> typed is <code>drawable-solitaire</code>.
+              </li>
+              <li>
+                The menus show a TITLE, made from the name, or the project file's <code>"title"</code> when the name
+                can't say it: <code>"Todos - Form Based"</code>.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="address-urls" label="In URLs" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>What</th>
+                    <th>URL</th>
+                  </tr>
+                  <tr>
+                    <td>edit a file</td>
+                    <td><code>/edit/@spell/examples/Solitaire/Card.spell</code></td>
+                  </tr>
+                  <tr>
+                    <td>read a project's file</td>
+                    <td><code>/spaces/@spell/examples/Solitaire/Card.spell</code></td>
+                  </tr>
+                  <tr>
+                    <td>save it</td>
+                    <td><code>POST /api/projects/file/&lt;project&gt;/&lt;file&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td>a group's projects</td>
+                    <td><code>/api/projects/list/owen@spell</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>Every URL holds the address as it is, and one class makes them all, <code>SpellUrls</code>.</li>
+              <li>Spell never sees a path on disk. Under node, spaces' disk reader answers the same URLs.</li>
+              <li>No old URL is redirected: an old address answers "not found".</li>
+            </ul>
+          </ui-section>
+          <ui-section id="address-cli" label="On the command line" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A space stands for every group in it (<code>spell compile @spell</code>), a group for its projects;
+                <code>spell</code> asks which one, or <code>--all</code> takes them all.
+              </li>
+              <li>
+                <code>@here</code> is the project in the folder you're in: <code>@here/Card.spell</code> is
+                <code>./Card.spell</code>.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="saving" label="3. Things and saving" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="save"></ui-icon>
+          <pre><code class="language-json5">{
+  "root": "Person#owen",
+  "entries": {
+    "Person#owen": {
+      "$type": "Person",
+      "id": "owen",
+      "name": "Owen",
+      "dates": [{ "$type": "DatedEvent", "label": "birthday", "day": "1970-01-01T00:00:00.000Z" }],
+      "friends": [{ "$ref": "Person#matt" }]
+    },
+    "Person#matt": { "$type": "Person", "id": "matt", "name": "Matt", "friends": [{ "$ref": "Person#owen" }] }
+  }
+}</code></pre>
+          <p>
+            Two friends, saved by the core's
+            <a href="/parser/src/core/saving.ts" target="src-parser-src-core-saving-ts"
+              ><code title="parser/src/core/saving.ts">Saver</code></a
+            >: both cores write and read this same file,
+            <a
+              href="/parser/tests/core/savedById.expected.json5"
+              target="src-parser-tests-core-savedbyid-expected-json5"
+              ><code title="parser/tests/core/savedById.expected.json5">savedById.expected.json5</code></a
+            >, so they agree.
+          </p>
+          <ui-section id="saving-ids" label="Ids" sticky collapsible dividing open="false">
+            <ul>
+              <li>Every thing and list has an id, built in; a program that declares one is refused.</li>
+              <li>
+                Read before it's set, it's made up, like <code>person-k3x9q2mf</code>, from real randomness, never the
+                seeded random.
+              </li>
+              <li>Set it like any property: <code>a new person with id = "owen"</code>.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="saving-inside" label="Saved inside what holds it" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A thing is written whole the first time it's reached, a reference after:
+                <code>{ "$ref": "Card#ace" }</code>. So a saved game is a handful of entries, never a file per card.
+              </li>
+              <li>A reference to a thing in ANOTHER place names it: <code>Person#matt@three-degrees</code>.</li>
+              <li>
+                Every key the JSON uses for itself starts with <code>$</code>: <code>$type</code>, <code>$items</code>,
+                <code>$ref</code>, <code>$in</code>, <code>$version</code>.
+              </li>
+              <li><code>a person is saved in its own file</code> gives a kind an entry of its own.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="saving-versions" label="Versions and upgrades" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>a person version 2 renames name to names</code> compiles to
+                <code>Person.v2RenamesName = "names"</code>; <code>... drops nickname</code> likewise.
+              </li>
+              <li>
+                <code>to upgrade (a person) to version 4:</code> does the rest, on a thing read from an older file.
+              </li>
+              <li>The loader brings an older entry up step by step; the next save writes the newest version.</li>
+              <li>Adding a property needs no new version: only renaming, dropping or changing one does.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="saving-checking" label="Checking a file" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>checkEntry()</code>, in
+                <a href="/parser/src/core/checking.ts" target="src-parser-src-core-checking-ts"
+                  ><code title="parser/src/core/checking.ts">checking.ts</code></a
+                >, checks each property is one the class declares, of its kind, and says where:
+                <code>dates[0].label</code>: <code>label is text, not a number</code>.
+              </li>
+              <li>
+                <code>jsonSchemaFor()</code> writes the same as JSON Schema, for VS Code only: a compile writes it into
+                the build folder, never committed.
+              </li>
+              <li>
+                The kit's VS Code settings map <code>__me.json5</code> to Person's schema and
+                <code>__org.json5</code> to Org's.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="people" label="4. People and orgs" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="users"></ui-icon>
+          <pre><code class="language-plaintext">an org is a thing
+	it is saved in its own file
+	it has a name as text
+	its "members" is a list of memberships</code></pre>
+          <ul>
+            <li>
+              No schema file, no ORM: those sentences are the schema, in
+              <a
+                href="/app/spaces/@spell/library/people/People.spell"
+                target="src-app-spaces-spell-library-people-people-spell"
+                ><code title="app/spaces/@spell/library/people/People.spell">People.spell</code></a
+              >.
+            </li>
+            <li>
+              The library compiles to TypeScript (its <code>ts/lib</code> target,
+              <a
+                href="/app/spaces/@spell/library/people/people.lib.ts"
+                target="src-app-spaces-spell-library-people-people-lib-ts"
+                ><code>people.lib.ts</code></a
+              >), which the app, the people store and <code>spell</code> import.
+            </li>
+            <li>
+              A person, <code>Person#owen@spell</code>, is <code>__me.json5</code> in their space; an org,
+              <code>Org#spell</code>, is <code>__org.json5</code> in its folder.
+            </li>
+            <li>
+              The people store,
+              <a
+                href="/app/src/spaces/server/node/people/PeopleStore.ts"
+                target="src-app-src-spaces-server-node-people-peoplestore-ts"
+                ><code title="app/src/spaces/server/node/people/PeopleStore.ts">PeopleStore</code></a
+              >, reads and writes them a file at a time, keeping every comment. A file with a problem is read anyway,
+              the problem listed.
+            </li>
+            <li>
+              The editor's "You" panel edits this machine's person through <code>/api/people/me</code>; their orgs and
+              roles are read only.
+            </li>
+            <li>
+              Spaces' own names (<code>__me.json5</code> ...) are known by a list, never by the <code>__</code> alone,
+              so Python's
+              <a href="/parser/src/py/core/spell_core/__init__.py" target="src-parser-src-py-core-spell-core-init-py"
+                ><code>__init__.py</code></a
+              >
+              still lists as a file.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="spaces" label="5. Spaces on disk and the servers" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="hdd outline"></ui-icon>
+          <ul>
+            <li>
+              The code is the app folder's spaces,
+              <a href="/app/src/spaces/" target="src-app-src-spaces"
+                ><code title="app/src/spaces">app/src/spaces</code></a
+              >: its models (browser-safe), projects on disk, and the servers that serve them.
+            </li>
+            <li>
+              Its route module is the app's part of the kit's page server. The editor reads files at
+              <code>/spaces/...</code> and saves through <code>/api/projects/...</code>.
+            </li>
+            <li>
+              A compile writes to the build folder,
+              <a href="/app/build/" target="src-app-build"><code>app/build/</code></a
+              >, which mirrors the project's address and is never committed.
+            </li>
+            <li>Python's programs are served by <code>spell_quart</code>, a uv project in the same folder.</li>
+            <li>
+              Each person's preferences are a JSON5 file in their space, <code>__prefs/</code>, kept by
+              <a
+                href="/app/src/spaces/server/node/prefs/SpacePrefs.ts"
+                target="src-app-src-spaces-server-node-prefs-spaceprefs-ts"
+                ><code title="app/src/spaces/server/node/prefs/SpacePrefs.ts">SpacePrefs</code></a
+              >.
+            </li>
+            <li>
+              Spell's own files are JSON5 (<code>__project.json5</code>, declarations); the kit's VS Code settings open
+              them as JSON with comments.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="cloud" label="6. The cloud's server half" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="cloud"></ui-icon>
+          <pre><code class="language-plaintext">family cookbook is a data folder at "@family/cookbook"</code></pre>
+          <p>
+            A Firebase app keeps its rows in a database a console sets up. Here they're files in a space's folder,
+            <code>@family/__data/cookbook</code>, one per thing, written through Spell's server and read straight from
+            the files.
+          </p>
+          <ui-section id="members" label="Members and roles" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A space's folder is written by its members: a viewer reads; an editor adds and changes rows, and removes
+                only their own; a manager also publishes, removes anything and adds people.
+              </li>
+              <li>
+                Every row is the space's, with <code>by</code> naming who saved it, so two people editing one recipe
+                keep one record.
+              </li>
+              <li>
+                Reads skip the server: <code>/api/reads/spaces/&lt;address&gt;/</code>, with a credential for the whole
+                space, good for 30 days. Every read checks the member list again, so someone who leaves is cut off at
+                once.
+              </li>
+              <li>
+                An org's roles are kept once, in its Admin space; every space's list is worked out from them.
+                <code>spell space org audit</code> says where a list differs.
+              </li>
+              <li>Sign-in is an emailed link and a 6-digit code, invite only.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="projections" label="Projections" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A projection writes part of one space's data into another, where its readers can see it:
+                <code>the published sheet is a projection of the sign up sheet</code>.
+              </li>
+              <li>Its lines say where it goes, which fields it shows, and which rows.</li>
+              <li>
+                <code>spell space projection list &lt;space&gt;</code> lists them; <code>rebuild</code> writes one again
+                from nothing (<a
+                  href="/app/src/spaces/server/node/places/SpaceProjections.ts"
+                  target="src-app-src-spaces-server-node-places-spaceprojections-ts"
+                  ><code title="app/src/spaces/server/node/places/SpaceProjections.ts">SpaceProjections</code></a
+                >).
+              </li>
+              <li>
+                One retry queue, on the server's disk, carries every write that has to go somewhere else: a projection's
+                target, an inbox's copy, a mail.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="safe" label="Takedowns, limits, backups, export" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>spell space takedown hide | delete | restore | list</code>: a Spell admin hides a record, a space
+                or an account, with a reason, logged in the folder's own log (<a
+                  href="/app/src/spaces/server/node/places/Takedowns.ts"
+                  target="src-app-src-spaces-server-node-places-takedowns-ts"
+                  ><code title="app/src/spaces/server/node/places/Takedowns.ts">Takedowns</code></a
+                >).
+              </li>
+              <li>
+                A refusal says "taken down" and where to ask, never why: HTTP 451, with the abuse contact,
+                <code>abuse@spell.spaces</code> unless <code>SPELL_ABUSE_CONTACT</code> says otherwise.
+              </li>
+              <li>
+                Each space has public read and public write, off until a manager turns them on, in
+                <code>__settings/space.json5</code>.
+              </li>
+              <li>Limits: 1 MB a thing, 100 MB a space. A save over either is refused, and stays on the page.</li>
+              <li>
+                <code>spell space backup now | list | status | restore</code>: every space copied nightly, a week kept,
+                a missed night logged (<a
+                  href="/app/src/spaces/server/node/places/SpaceBackups.ts"
+                  target="src-app-src-spaces-server-node-places-spacebackups-ts"
+                  ><code title="app/src/spaces/server/node/places/SpaceBackups.ts">SpaceBackups</code></a
+                >).
+              </li>
+              <li>
+                <code>spell space export &lt;space&gt; &lt;folder&gt;</code>: a space as plain JSON, which a program
+                runs on with one line changed. <code>spell space delete</code> deletes one for good.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="lexicons" label="Lexicons" sticky collapsible dividing open="false">
+            <pre><code class="language-plaintext">a "status" is a thing:
+	- it is published as "xyz.statusphere.status"
+	- its "status" is required text, with maximum length 1
+	- its "created at" is a required date</code></pre>
+            <ul>
+              <li>
+                <code>spell space lexicon read</code> turns another app's Lexicon, AT Protocol's schema language, into a
+                Spell type, as above: Bluesky's Statusphere example.
+              </li>
+              <li><code>spell compile</code> writes a Lexicon beside each library type's JSON Schema.</li>
+              <li>
+                <code>spell space lexicon publish</code> writes a library's published types as schema records, and
+                prints the DNS record to make.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="cloud-server" label="Running the cloud" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The cloud is its own server, apart from the page server, on port 4949:
+                <code>spell space cloud serve</code>, for a tunnel or a proxy to give it an address (<a
+                  href="/app/src/spaces/server/node/routes/SpellCloud.ts"
+                  target="src-app-src-spaces-server-node-routes-spellcloud-ts"
+                  ><code title="app/src/spaces/server/node/routes/SpellCloud.ts">SpellCloud</code></a
+                >).
+              </li>
+              <li>
+                It serves sign-in, project data folders, the terms page and the built-in programs, and nothing else.
+              </li>
+              <li>
+                <code>spell space cloud status</code> exits 1 when it isn't running, or a backup night was missed.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="left" label="7. Limits" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="exclamation circle"></ui-icon>
+          <ul>
+            <li>No public address yet, and no real mail: codes are read with <code>spell space cloud mail</code>.</li>
+            <li>Pending sign-ins live in memory: a restart loses them.</li>
+            <li>A hidden account stays signed in where it already was; shared rooms don't check takedowns yet.</li>
+            <li>Backups cover <code>spell.spaces</code> only, not the sign-ins.</li>
+            <li>
+              Orgs live on Spell's server, shaped like AT Protocol's Spaces; Spaces itself was tried on its alpha, not
+              used.
+            </li>
+            <li>Only the JavaScript core checks a saved file, and Python's core doesn't upgrade old files yet.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="where" label="8. Where things are" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="folder open"></ui-icon>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                </tr>
+                <tr>
+                  <td>addresses and URLs</td>
+                  <td>
+                    <a href="/parser/src/spell/SpellLocation.ts" target="src-parser-src-spell-spelllocation-ts"
+                      ><code title="parser/src/spell/SpellLocation.ts">SpellLocation.ts</code></a
+                    >,
+                    <a href="/parser/src/spell/SpellUrls.ts" target="src-parser-src-spell-spellurls-ts"
+                      ><code title="parser/src/spell/SpellUrls.ts">SpellUrls.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>saving, references, checking</td>
+                  <td>
+                    <a href="/parser/src/core/saving.ts" target="src-parser-src-core-saving-ts"
+                      ><code title="parser/src/core/saving.ts">saving.ts</code></a
+                    >,
+                    <a href="/parser/src/core/references.ts" target="src-parser-src-core-references-ts"
+                      ><code title="parser/src/core/references.ts">references.ts</code></a
+                    >,
+                    <a href="/parser/src/core/checking.ts" target="src-parser-src-core-checking-ts"
+                      ><code title="parser/src/core/checking.ts">checking.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the people library</td>
+                  <td>
+                    <a href="/app/spaces/@spell/library/people/" target="src-app-spaces-spell-library-people"
+                      ><code title="app/spaces/@spell/library/people">app/spaces/@spell/library/people</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>spaces' servers</td>
+                  <td>
+                    <a href="/app/src/spaces/server/node/" target="src-app-src-spaces-server-node"
+                      ><code title="app/src/spaces/server/node">app/src/spaces/server/node</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the hosting commands</td>
+                  <td><code>spell space --help</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/app/README-spaces.md" target="src-app-readme-spaces-md">README-spaces</a>: addresses, the
+              servers, people, preferences, data folders and orgs, in full
+            </li>
+            <li>
+              <a href="/guides/data/data.html" target="src-guides-data-data-html">Data</a>: a program's data, as its
+              author writes it
+            </li>
+            <li>
+              <a href="/guides/codemirror.html" target="src-guides-codemirror-html">The Editor</a>: what saves through
+              these servers
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

@@ -1,5 +1,6 @@
 import { ThreadFacts } from "spell/epic/comments"
 import { Markup } from "spell/epic/markup"
+import { TitlePrefix } from "spell/epic/components/epic-item/TitlePrefix"
 
 import { KINDS, OLD_DECISION, type OptionCard } from "./planDoc.types"
 
@@ -28,6 +29,11 @@ export class PlanItem {
     if (title !== null) return title
     const slot = element.querySelector(':scope > [slot="title"]')
     return slot ? PlanMarkup.squeeze(slot.textContent ?? "") : element.id
+  }
+
+  /** `item`'s title as a listing says it, behind the word or badge its line starts with:  `WILL FIX - It jumps`. */
+  static listedTitle(item: Element): string {
+    return TitlePrefix.titled(PlanItem.titleOf(item), item)
   }
 
   /**
@@ -90,6 +96,21 @@ export class PlanItem {
     return (
       node.localName === "epic-question" && inside.length > 0 && inside.every((child) => PlanItem.isTitleBody(child))
     )
+  }
+
+  /**
+   * About when `item` was made, in ms:  the earliest time on it -- its change stamp, when it was judged (P81), its
+   * cards' and replies' times;  `Infinity` with none.
+   * - not its change stamp alone:  a retitle or a review stamps that later (epic `epic-engine` I439);
+   *   the badges' "new call" asks it too (`ItemBadges`, I435)
+   */
+  static madeAt(item: Element): number {
+    const times = [
+      item.getAttribute("changed"),
+      item.getAttribute("judged"),
+      ...Array.from(item.querySelectorAll("[at]"), (dated) => dated.getAttribute("at"))
+    ].map((time) => Date.parse((time ?? "").replace(" ", "T")))
+    return Math.min(Infinity, ...times.filter((time) => Number.isFinite(time)))
   }
 
   /**

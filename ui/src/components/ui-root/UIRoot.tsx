@@ -34,6 +34,7 @@ import rootCSS from "./UIRoot.css?inline"
  *   - Then `:state(ready)`, `ui-ready { failed }`, and the content shows.
  *   - Each tag that didn't load fires a cancelable `ui-error` first.
  *   - Content added later loads too, but is never hidden again.
+ * - A root the server drew shows its content at once, whatever its `display` (epic `solid-2-final` P16).
  * - While loading (`display`, not `immediately`):
  *   the slot is hidden by an INLINE style (`canRenderUnstyled`, before any sheet), with its space kept (`when-ready`),
  *   or not drawn at all when the `loading` message or the skeletons show instead.
@@ -116,10 +117,18 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
   // ## While loading
   ////////////////
 
-  /** The display mode. */
+  /**
+   * The display mode.
+   * - A root the server drew (Spell UI's static render, its shadow output) shows its content `immediately`:
+   *   it's drawn and styled already, and hiding it until the families load would only lose the early paint.
+   */
   private get displayMode(): NonNullable<UIRoot["display"]> {
+    if (this.isServerDrawn) return DISPLAY.immediately
     return this.display ?? DISPLAY.skeleton
   }
+
+  /** Drawn by the server:  its shadow root came with the page (`domElement.serverDrawing`, when it was built). */
+  private readonly isServerDrawn = !!this.domElement.serverDrawing
 
   /** The skeletons to draw while loading (`display="skeleton"`), found when loading starts. */
   @E.state accessor skeletons: readonly RootSkeleton[] = []

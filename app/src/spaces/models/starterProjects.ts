@@ -74,6 +74,20 @@ a counter lives in my counters
 ## A counter
 
 a "counter" is a view
+\tto draw it
+\t\t// A form of its own, bound to it:  typing its name or its step changes the counter
+\t\t<form value={it}>
+\t\t\t<stack direction="horizontal" spacing="sm">
+\t\t\t\t<input name="name" aria-label="Name" appearance="transparent" fluid />
+\t\t\t\t<action "count down" icon-only />
+\t\t\t\t<header level="3">{the count}</header>
+\t\t\t\t<action "count up" icon-only />
+\t\t\t\t<input name="step" type="number" aria-label="Step" size="small" style="width: 5em" />
+\t\t\t\t<action "reset" icon-only appearance="tertiary" />
+\t\t\t\t<action "delete" icon-only appearance="tertiary" />
+\t\t\t</stack>
+\t\t</form>
+
 \tits "name" is text
 \tits "count" is a number starting at 0
 \tits "step" is a number starting at 1
@@ -88,20 +102,6 @@ a "counter" is a view
 \tto "delete" with title "Delete", icon "trash alternate outline"
 \t\tremove it from its tally
 \t\tremove it from the counters
-
-\tto draw it
-\t\t// A form of its own, bound to it:  typing its name or its step changes the counter
-\t\t<form value={it}>
-\t\t\t<stack direction="horizontal" spacing="sm">
-\t\t\t\t<input name="name" aria-label="Name" appearance="transparent" fluid />
-\t\t\t\t<action "count down" icon-only />
-\t\t\t\t<header level="3">{the count}</header>
-\t\t\t\t<action "count up" icon-only />
-\t\t\t\t<input name="step" type="number" aria-label="Step" size="small" style="width: 5em" />
-\t\t\t\t<action "reset" icon-only appearance="tertiary" />
-\t\t\t\t<action "delete" icon-only appearance="tertiary" />
-\t\t\t</stack>
-\t\t</form>
 
 \tto test counting by its step
 \t\tset the counter to a new counter with step = 5
@@ -125,6 +125,22 @@ a counter belongs to one tally
 ## The app
 
 my app is an app
+\tto draw it
+\t\t<container>
+\t\t\t<stack>
+\t\t\t\t<stack direction="horizontal" justify="between">
+\t\t\t\t\t<header level="2">${title}</header>
+\t\t\t\t\t<label size="large">Total {the total}</label>
+\t\t\t\t</stack>
+\t\t\t\t{draw the tally}
+\t\t\t\t<form value={it}>
+\t\t\t\t\t<input name="draft" placeholder="Count something else" aria-label="New counter" fluid action>
+\t\t\t\t\t\t<button slot="action" color="primary" disabled={the draft is ""} onClick={add the draft}>Add</button>
+\t\t\t\t\t</input>
+\t\t\t\t</form>
+\t\t\t</stack>
+\t\t</container>
+
 \t"tally" is a new tally
 \tits "draft" is text
 \t\t// The next counter's name, as the field holds it
@@ -152,22 +168,6 @@ my app is an app
 \t\tif the draft is "" return
 \t\tadd the counter the draft
 \t\tclear the draft
-
-\tto draw it
-\t\t<container>
-\t\t\t<stack>
-\t\t\t\t<stack direction="horizontal" justify="between">
-\t\t\t\t\t<header level="2">${title}</header>
-\t\t\t\t\t<label size="large">Total {the total}</label>
-\t\t\t\t</stack>
-\t\t\t\t{draw the tally}
-\t\t\t\t<form value={it}>
-\t\t\t\t\t<input name="draft" placeholder="Count something else" aria-label="New counter" fluid action>
-\t\t\t\t\t\t<button slot="action" color="primary" disabled={the draft is ""} onClick={add the draft}>Add</button>
-\t\t\t\t\t</input>
-\t\t\t\t</form>
-\t\t\t</stack>
-\t\t</container>
 `
   },
   /**
@@ -212,6 +212,12 @@ my app is an app:
 // A little game:  how many rolls does it take to roll a six?
 
 my app is an app:
+\tto draw it:
+\t\t<container>
+\t\t\t<button onClick={roll the die}>Roll</button>
+\t\t\t<text>You rolled {its roll}, in {its rolls} rolls</text>
+\t\t</container>
+
 \tits "roll" is a number
 \tits "rolls" is a number
 \twhen creating it:
@@ -220,11 +226,6 @@ my app is an app:
 \tto roll the die:
 \t\tset its roll to a random number in [1, 2, 3, 4, 5, 6]
 \t\tset its rolls to its rolls + 1
-\tto draw it:
-\t\t<container>
-\t\t\t<button onClick={roll the die}>Roll</button>
-\t\t\t<text>You rolled {its roll}, in {its rolls} rolls</text>
-\t\t</container>
 `
   },
   /**

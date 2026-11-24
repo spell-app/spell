@@ -83,16 +83,21 @@ export function isLoopback(url: string): boolean {
  * The side bar's doc views, each its own tab, in its order (Owen, 2026-11-19):
  * - "Review" (the Spell hat):  epic pages, guides, the home page, the list pages
  * - "Details" (a speech bubble):  the pages you answer on
+ * - "Servers" (a server rack, between Epic Docs and Details;  epic `epic-engine` T162, I449):  the Servers page, `/_epic/servers/`,
+ *   every project's servers, what just merged into main, what each worktree holds
  * - "Epic Docs" (a book):  the epic tooling's READMEs, from the page server's `/_epic/docs/`
  * - the first "Epic Docs" tab (until epic `epic-engine` Q73) held guides and the home page:  they stay in Review
  */
-export type DocViewName = "review" | "details" | "docs"
+export type DocViewName = "review" | "servers" | "details" | "docs"
 
 /** Every doc view's name, in the side bar's order. */
-export const DOC_VIEWS: readonly DocViewName[] = ["review", "details", "docs"]
+export const DOC_VIEWS: readonly DocViewName[] = ["review", "servers", "details", "docs"]
 
 /** Where the "Epic Docs" tab opens, on any page server:  the front page for epics (spell-epic's `docsRoutes.ts`). */
 export const EPIC_DOCS_HOME = "/_epic/docs/README-epics.md"
+
+/** Where the "Servers" tab opens, on any page server:  the Servers page (spell-epic's `serverRoutes.ts`). */
+export const SERVERS_HOME = "/_epic/servers/"
 
 /** An epic page's path:  `epics/<id>/<id>.plan.html`. */
 const EPIC_PAGE = /(?:^|\/)epics\/([^/]+)\/\1\.plan\.html$/
@@ -103,10 +108,14 @@ const DETAILS_PAGE = /(?:^|\/)details\/[^/]+\.html$/
 /** An epic doc's path:  a README under `/_epic/docs/`, under a worktree's address too. */
 const EPIC_DOC = /^(?:\/worktrees\/[^/]+)?\/_epic\/docs\//
 
+/** The Servers page's path, under a worktree's address too. */
+const SERVERS_PAGE = /^(?:\/worktrees\/[^/]+)?\/_epic\/servers\/?$/
+
 /**
  * The tab page `path` goes to (a file path or a URL's path), the ONE rule every show takes (epic `epic-engine` P59):
  * - a details, review or choice page (a page in a `details/` folder, an epic's or `pages/details/`):  `details`
  * - an epic doc (`/_epic/docs/...`, a README the page server renders):  `docs`
+ * - the Servers page (`/_epic/servers/`):  `servers`
  * - anything else -- epic pages, saga pages, guides, the home page, the list pages:  `review`
  * - never the tab a command asked for:  each command picked its tab by its own flag, so an epic page landed in two
  *   tabs, and a choice page still waiting for Owen's answer was replaced (request r50)
@@ -115,6 +124,7 @@ const EPIC_DOC = /^(?:\/worktrees\/[^/]+)?\/_epic\/docs\//
 export function docViewFor(path: string): DocViewName {
   const unix = path.split("\\").join("/")
   if (EPIC_DOC.test(unix)) return "docs"
+  if (SERVERS_PAGE.test(unix)) return "servers"
   return !EPIC_PAGE.test(unix) && DETAILS_PAGE.test(unix) ? "details" : "review"
 }
 

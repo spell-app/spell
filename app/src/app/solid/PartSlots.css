@@ -1,0 +1,45 @@
+/*
+ * A part's empty slot while something is dragged or placed (`PartSlots`, epic `editor` T150):
+ * a dashed drop zone, its slot's name in the editor's tag pill, `⟨actions⟩` (a view's purple, its ends cut to points,
+ * as the code pane draws a tag and the editor's zones draw its stand-ins).
+ */
+.PartSlotZone {
+  position: fixed;
+  z-index: 2147483645;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  pointer-events: none;
+  border: 1px dashed color-mix(in oklab, var(--ui-primary) 60%, transparent);
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--ui-primary) 6%, transparent);
+
+  /* where the drop would land */
+  &.landing {
+    border-style: solid;
+    border-width: 2px;
+    background: color-mix(in oklab, var(--ui-primary) 16%, transparent);
+  }
+}
+
+.PartSlotPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 6px / 10px;
+  corner-shape: bevel;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 650;
+  color: light-dark(#1f1f26, #f6f5fb);
+  background: light-dark(color-mix(in srgb, #7c5cd6 20%, white), color-mix(in srgb, #7c5cd6 34%, #1c1b22));
+}
+
+/* its angle brackets:  faint, heavy, as the code pane draws a tag's */
+.PartSlotAngle {
+  font-weight: 800;
+  opacity: 0.45;
+}

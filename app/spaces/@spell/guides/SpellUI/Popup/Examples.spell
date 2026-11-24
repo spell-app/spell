@@ -12,7 +12,7 @@
 	-->
 	<section label="Types">
 		<section label="Popup element" sticky="stack" collapsible dividing>
-			<message size="small" state="info">Popup comes as an element, <text code>&lt;ui-popup&gt;</>, with the full feature set (any markup, triggers, events, flipping), and as a CSS-only <text code>data-tooltip</> attribute, which needs no script and suits pages with many short hints.</>
+			<message size="small" state="info">Popup comes as an element, <text code>&lt;ui-popup&gt;</>, with the full feature set (any markup, triggers, events, flipping), and as a <text code>data-tooltip</> attribute, which needs no script of its own and suits pages with many short hints.</>
 
 			<section label="Popup" sticky="stack" collapsible dividing>
 				<example "Popup" description="An element can specify popup content to appear.  With no `for`, the popup attaches to the element just before it.">
@@ -97,10 +97,10 @@
 
 		<section label="No JavaScript" sticky="stack" collapsible dividing>
 			<section label="Tooltip" sticky="stack" collapsible dividing>
-				<example "Tooltip" description="An element can specify a simple tooltip that can appear without JavaScript via the `data-tooltip` attribute. If the tooltip should be shown inverted, also add the `data-inverted` attribute.">
+				<example "Tooltip" description="An element can specify a simple tooltip via the `data-tooltip` attribute. If the tooltip should be shown inverted, also add the `data-inverted` attribute.">
 					<button icon="plus" aria-label="Add users" data-tooltip="Add users to your feed"/>
 					<button icon="plus" aria-label="Add users" data-tooltip="Add users to your feed" data-inverted/>
-					<message slot="description" size="small" state="warning">Tooltips use an element's <text code>::before</text> and <text code>::after</text> pseudo-elements, and screen readers don't reliably announce them. Use them for hints only, and a <text code>&lt;ui-popup&gt;</text> for anything that matters.</message>
+					<message slot="description" size="small" state="warning">Once Spell UI's runtime has loaded, a tooltip shows in the browser's top layer, so no parent frame can cut it off, and it flips to stay in the window. With no script, or with <text code>data-variation="visible"</text>, it's the element's <text code>::before</text> and <text code>::after</text>, which a frame can cut off. Screen readers don't reliably announce a tooltip either way: use them for hints only, and a <text code>&lt;ui-popup&gt;</text> for anything that matters.</message>
 				</example>
 			</>
 

@@ -85,6 +85,85 @@
 			</example>
 		</>
 
+		<section label="Width" sticky="stack" collapsible dividing>
+			<example "Width" description="A width of its own, any CSS length (`20em`, `320px`):  centred, and never wider than the page.  For content as wide as it needs, a calculator or a game board, with no CSS.">
+				<container width="20em">
+					<segment>A container 20em wide, centred in the page.</segment>
+				</container>
+			</example>
+		</>
+
+		<section label="Columns" sticky="stack" collapsible dividing>
+			<example "Columns" description="Its children laid out as a grid of `columns`, as `<ui-grid columns>` does:  each child a cell, with no `<ui-grid>` or `<ui-column>` around them.  `spacing` takes the grid's words for the room between them (`xs`, `compact`, `lg`, `xl`).">
+				<container padding="small" columns="7" spacing="xs">
+					<stack>
+						<image src="/components/ui/images/wireframe/square-image.png" alt="" fluid/>
+					</stack>
+					<stack>
+						<image src="/components/ui/images/wireframe/square-image.png" alt="" fluid/>
+					</stack>
+					<stack>
+						<image src="/components/ui/images/wireframe/square-image.png" alt="" fluid/>
+					</stack>
+					<stack>
+						<image src="/components/ui/images/wireframe/square-image.png" alt="" fluid/>
+					</stack>
+					<stack>
+						<image src="/components/ui/images/wireframe/square-image.png" alt="" fluid/>
+					</stack>
+					<stack>
+						<image src="/components/ui/images/wireframe/square-image.png" alt="" fluid/>
+					</stack>
+					<stack>
+						<image src="/components/ui/images/wireframe/square-image.png" alt="" fluid/>
+					</stack>
+					<stack>
+						<image src="/components/ui/images/wireframe/square-image.png" alt="" fluid/>
+					</stack>
+					<stack>
+						<image src="/components/ui/images/wireframe/square-image.png" alt="" fluid/>
+					</stack>
+				</container>
+			</example>
+		</>
+
+		<section label="Padding" sticky="stack" collapsible dividing>
+			<example "Padding" description="Room inside its edges, a segment's steps:  `small` (1em, a segment's own), `md` (1.5em), `lg` (3em);  `none` is the default.">
+				<container padding="small" inverted>
+					<text paragraph>padding="small"</text>
+				</container>
+				<divider spacer/>
+				<container padding="md" inverted>
+					<text paragraph>padding="md"</text>
+				</container>
+				<divider spacer/>
+				<container padding="lg" inverted>
+					<text paragraph>padding="lg"</text>
+				</container>
+			</example>
+		</>
+
+		<section label="Inverted" sticky="stack" collapsible dividing>
+			<example "Inverted" description="The dark scheme, as a segment's:  a dark surface, and everything inside follows.">
+				<container inverted padding="small">
+					<header>A dark container</header>
+					<text paragraph>Headers, buttons and text inside it take the dark scheme.</text>
+					<button color="primary">Play</button>
+				</container>
+			</example>
+		</>
+
+		<section label="Size" sticky="stack" collapsible dividing>
+			<example "Size" description="Its text size, `mini` ... `massive`, as a segment's;  `medium` is the default.">
+				<container size="small">
+					<text paragraph>A small container's text.</text>
+				</container>
+				<container size="large">
+					<text paragraph>A large container's text.</text>
+				</container>
+			</example>
+		</>
+
 		<section label="Grid" sticky="stack" collapsible dividing>
 			<example "Grid" description="A container that holds a grid is widened by the grid's gutters, so its columns line up with other containers;  `spacing=\"lg\"` (or `xl`) makes room for a grid's wider gutters.">
 				<container grid>

@@ -83,12 +83,72 @@ describe("production build", () => {
         expect(existsSync(join(packs, pack, "pack.js")), pack).toBe(true)
       }
       // the built-in sounds where `BuiltInSounds` looks:  beside its own chunk (epic `mockup` P28)
-      const soundCode = files.filter((file) =>
-        sources(join(assets, file)).some((source) => BUILT_IN_SOUNDS.test(source))
+      // - the language worker keeps its own copy, for their names in the suggestions (epic `solid-2-final` P18)
+      const soundCode = files.filter(
+        (file) =>
+          !LANGUAGE_WORKER.test(file) && sources(join(assets, file)).some((source) => BUILT_IN_SOUNDS.test(source))
       )
       expect(soundCode).toHaveLength(1)
+      // the language worker:  its own bundle, the parser in it, rule names kept as the page's are
+      const worker = files.find((file) => LANGUAGE_WORKER.test(file))
+      expect(worker).toBeDefined()
+      expect(readFileSync(join(assets, worker!), "utf8")).toMatch(
+        new RegExp(String.raw`\b${RULE}\s*=\s*class\b|\bclass ${RULE}\b|\([\w$]+,\s*[\`"']${RULE}[\`"']\)`)
+      )
       expect(existsSync(join(assets, dirname(soundCode[0]!), "sound-library", "card-slide.ogg"))).toBe(true)
     }
+  })
+
+  /**
+   * The editor's first screen (epic `solid-2-final` P6):  what `index.html` loads at once, its scripts and preloads and
+   * every chunk they import statically, holds none of the pieces loaded on first use.
+   * - Each mode's and box's view (`LazyPiece`), and VS Code's CSS service (`SpellCSS.load()`).
+   * - Each dialog, every page but the editor's (`PageViews`), Spanish's grammar and Spell UI's Spanish dictionary
+   *   (epic `solid-2-final` P11).
+   * - A static import of one, from anything in the first load, would put it back:  this names the chunk.
+   */
+  test("the first screen holds no view loaded on first use, nor the CSS service", () => {
+    const html = readFileSync(join(outDir, "index.html"), "utf8")
+    const entries = [
+      ...html.matchAll(/<(?:script[^>]*type="module"[^>]*src|link[^>]*rel="modulepreload"[^>]*href)="\/([^"]+\.js)"/g)
+    ].map(([, file]) => file!)
+    expect(entries.length).toBeGreaterThan(0)
+    const eager = new Set(entries.flatMap((entry) => [entry, ...importedChunks(outDir, entry, "static")]))
+    const held = [...eager].flatMap((file) =>
+      sources(join(outDir, file))
+        .filter((source) => ON_FIRST_USE.test(source))
+        .map((source) => `${file}:  ${source.replace(/^.*\/(app|node_modules)\//, "$1/")}`)
+    )
+    expect(held).toEqual([])
+    // and they ARE built, each its own lazy chunk
+    const all = readdirSync(join(outDir, "assets")).filter((file) => file.endsWith(".js"))
+    const built = all
+      .flatMap((file) => sources(join(outDir, "assets", file)))
+      .filter((source) => ON_FIRST_USE.test(source))
+    expect(built.length).toBeGreaterThanOrEqual(8)
+  })
+
+  test("the run page, `run.html`, loads no editor:  no CodeMirror, Inspector, language service or parser", () => {
+    const html = readFileSync(join(outDir, "run.html"), "utf8")
+    const entries = [
+      ...html.matchAll(/<(?:script[^>]*type="module"[^>]*src|link[^>]*rel="modulepreload"[^>]*href)="\/([^"]+\.js)"/g)
+    ].map(([, file]) => file!)
+    expect(entries.length).toBeGreaterThan(0)
+    // what it loads up front, then what it may load later (a layout's spell compiles in the page:  `LayoutSpell`)
+    const eager = new Set(entries.flatMap((entry) => [entry, ...importedChunks(outDir, entry, "static")]))
+    const held = (files: Iterable<string>, pattern: RegExp) =>
+      [...files].flatMap((file) =>
+        sources(join(outDir, file))
+          .filter((source) => pattern.test(source))
+          .map((source) => `${file}:  ${source.replace(/^.*\/(app|parser|node_modules)\//, "$1/")}`)
+      )
+    expect(held(eager, NOT_ON_THE_RUN_PAGE)).toEqual([])
+    expect(held(eager, PARSER)).toEqual([])
+    // nor later:  only a layout's spell brings the parser
+    const later = new Set(entries.flatMap((entry) => importedChunks(outDir, entry)))
+    expect(held(later, NOT_ON_THE_RUN_PAGE)).toEqual([])
+    // it runs its program on the editor's own runtime, by its fixed name
+    expect(existsSync(join(outDir, "spell-runtime.js"))).toBe(true)
   })
 
   test("what a runtime keeps per copy -- `core` and the runner -- is in `spell-runtime.js`, never in a chunk it loads", () => {
@@ -251,18 +311,38 @@ function importsOf(source: string): string[] {
 /** What a runtime keeps per copy, as it appears in a sourcemap's `sources`:  `PER_COPY` in `vite.config.ts`. */
 const PER_COPY = /\/(parser\/src\/core|app\/src\/app\/runner)\//
 
+/** What the editor loads on first use, as it appears in a sourcemap's `sources`:  the views a `LazyPiece` loads, the CSS service. */
+const ON_FIRST_USE =
+  /\/app\/src\/app\/(solid\/(InspectorView|InspectorParts|PaletteView|AppAnatomyStack|DesignView|ChangeThisView|EditorToursView)\.tsx|solid\/modals\/\w+\.tsx|pages\/(ProjectChooser|ThemeEditorPage|SiteEditorPage|PlaceReference|GuidesPage|PaletteGroupsPage)\.tsx)$|\/node_modules\/vscode-css-languageservice\/|\/parser\/src\/spell\/(languages\/es\/|rules\/.*\.es\.ts$)|\/ui\/src\/components\/components\.es\.ts$/
+
+/**
+ * What the run page never loads, as it appears in a sourcemap's `sources`:  the editor, CodeMirror, the Inspector,
+ * the language service.
+ */
+const NOT_ON_THE_RUN_PAGE =
+  /\/app\/src\/app\/(editor\.ts|solid\/(Inspector|SpellPage)|ui\/codemirror\/)|\/app\/src\/lsp\/SpellLanguageService|\/node_modules\/@codemirror\//
+
+/** The parser:  its rules, writers and tokenizer, and spell's grammar. */
+const PARSER =
+  /\/parser\/src\/(parser\/(rules|writers\/(?!SourceMarks)|tokenizer\/(?!.*\.types)|Parser\.ts)|spell\/rules\/)/
+
+/** A static relative import in minified output, never a lazy one:  `from"./x.js"`, `import"./x.js"`. */
+const STATIC_IMPORT = /(?:\bfrom|\bimport)\s*["'`](\.{1,2}\/[^"'`]+\.js)["'`]/g
+
 /** A relative import in minified output, static or lazy:  `from"./x.js"`, `import"./x.js"`, ``import(`./x.js`)``. */
 const RELATIVE_IMPORT = /(?:\bfrom|\bimport)\s*\(?\s*["'`](\.{1,2}\/[^"'`]+\.js)["'`]/g
 
 /**
  * `entry`'s chunks, every one it imports, transitively, at once or lazily -- paths from `dir`, `entry` left out.
  * - Reads the minified output's relative imports (`RELATIVE_IMPORT`).
+ * - `"static"`:  only what it imports at once (`STATIC_IMPORT`), what loads with it.
  */
-function importedChunks(dir: string, entry: string): string[] {
+function importedChunks(dir: string, entry: string, imports: "all" | "static" = "all"): string[] {
+  const pattern = imports === "static" ? STATIC_IMPORT : RELATIVE_IMPORT
   const seen = new Set<string>([entry])
   const queue = [entry]
   for (let file = queue.shift(); file; file = queue.shift()) {
-    for (const [, specifier] of readFileSync(join(dir, file), "utf8").matchAll(RELATIVE_IMPORT)) {
+    for (const [, specifier] of readFileSync(join(dir, file), "utf8").matchAll(pattern)) {
       const imported = posix.join(posix.dirname(file), specifier!)
       if (seen.has(imported)) continue
       seen.add(imported)
@@ -292,6 +372,9 @@ const REACT = /\/node_modules\/(react|react-dom|scheduler|semantic-ui-react)\//
 
 /** `ui`'s `BuiltInPacks`, which looks for the packs beside its own chunk. */
 const BUILT_IN_PACKS = /\/ui\/src\/icons\/BuiltInPacks\.ts$/
+
+/** The editor's language worker's chunk (`languageWorker.ts`). */
+const LANGUAGE_WORKER = /^languageWorker-[\w-]+\.js$/
 
 /** `ui`'s `BuiltInSounds`, which looks for the sounds beside its own chunk. */
 const BUILT_IN_SOUNDS = /\/ui\/src\/sounds\/BuiltInSounds\.ts$/

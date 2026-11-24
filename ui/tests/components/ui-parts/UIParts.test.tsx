@@ -182,13 +182,13 @@ describe("<ui-header> standalone", () => {
     ['dividing="no"', "ui header"],
     ['sub="yes"', "ui sub header"],
     ["icon block", "ui block icon header"],
-    ['attach-to="top"', "ui top attached header"],
+    ['attach-to="top"', "ui top attached header top-attached"],
     ['attach-to="both"', "ui attached header"],
-    ['align="center"', "ui center aligned header"],
+    ['align="center"', "ui center aligned header center-aligned"],
     ['align="justified"', "ui justified header"],
     // the old names (epic ui-gaps P4), and the new
     ['padding="none" disabled inverted', "ui fitted disabled inverted header"],
-    ['attach-to="top"', "ui top attached header"],
+    ['attach-to="top"', "ui top attached header top-attached"],
     ['size="huge" color="teal" inverted', "ui huge teal inverted header"]
   ])("<ui-header %s>", async (attributes, classes) => {
     const host = await ElementFixture.render(`<ui-header ${attributes}>H</ui-header>`)
@@ -541,5 +541,39 @@ describe("<ui-detail> link", () => {
   it.each(["link"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(`<ui-detail NAME="#there">Go</ui-detail>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})
+
+describe("<ui-content markdown>", () => {
+  it("draws its words as Markdown, in a <ui-markdown>, and keeps them in its light DOM (epic `editor` T148)", async () => {
+    const host = await ElementFixture.render(
+      `<ui-content markdown>
+         Write programs in **plain words**.
+
+         See them _run_ as you type.
+       </ui-content>`
+    )
+    await import("spell/ui/components/ui-markdown")
+    const markdown = () => host.shadowRoot!.querySelector("ui-markdown")
+    await expect.poll(() => !!markdown()?.shadowRoot?.querySelector("strong")).toBe(true)
+    const article = markdown()!.shadowRoot!
+    expect(article.querySelector("strong")!.textContent).toBe("plain words")
+    expect(article.querySelector("em")!.textContent).toBe("run")
+    expect(article.querySelectorAll("p")).toHaveLength(2)
+    expect(host.shadowRoot!.querySelector("slot")).toBeNull()
+    // the words stay as written, for an editor to change
+    expect(host.textContent).toContain("**plain words**")
+  })
+
+  it("follows its words as they change, and shows them as written without `markdown`", async () => {
+    const host = await ElementFixture.render(`<ui-content markdown>Was **this**</ui-content>`)
+    await import("spell/ui/components/ui-markdown")
+    const drawn = () => host.shadowRoot!.querySelector("ui-markdown")?.shadowRoot?.querySelector("strong")?.textContent
+    await expect.poll(drawn).toBe("this")
+    host.textContent = "Now **that**"
+    await expect.poll(drawn).toBe("that")
+    host.removeAttribute("markdown")
+    await expect.poll(() => !!host.shadowRoot!.querySelector("slot")).toBe(true)
+    expect(host.shadowRoot!.querySelector("ui-markdown")).toBeNull()
   })
 })

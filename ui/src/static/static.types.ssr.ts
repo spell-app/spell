@@ -67,8 +67,7 @@ export type ServerDOMElementState = {
 
 /**
  * The attributes that name other elements by id, a space-separated list in some:  what follows an id when it changes.
- * - `StaticInteractions` renames a repeated id and its references;  `yarn site:kitchen` gives a playground's copy of
- *   an example ids of its own (the ONE list, epic `coherence` P23).
+ * - `StaticInteractions` renames a repeated id and its references with it (the ONE list, epic `coherence` P23).
  */
 export const ID_REFERENCE_ATTRIBUTES = [
   "aria-controls",
@@ -132,12 +131,40 @@ export type StaticSheetUsage = {
   orders: Map<string, readonly string[]>
 }
 
+/**
+ * What `StaticRender.page()` / `fragment()` write:
+ * - `"light"`, the default:  plain light-DOM HTML, no shadow roots, no scripts needed (`StaticFlattener`),
+ *   for crawlers and no-JS readers
+ * - `"shadow"`:  each element keeps its tag and gets its shadow root as a declarative template (`StaticShadowRoots`):
+ *   it paints before any script, and each element draws again in its place when it starts
+ */
+export type StaticOutput = "light" | "shadow"
+
+/** `StaticRender.page()` / `fragment()`'s options. */
+export type StaticRenderOptions = {
+  /** what it writes;  default `"light"` */
+  output?: StaticOutput
+  /** `"shadow"`:  where its linked sheets are (`StaticStylesheet.shadowSheets()`);  default `ShadowSheets.href`'s */
+  sheets?: ShadowSheets
+}
+
+/** Where the shadow output's linked sheets are served (`StaticStylesheet.shadowSheets()`'s files). */
+export type ShadowSheets = {
+  /** the folder's URL, ending in `/`, e.g. `ui-sheets/` (`SHADOW_SHEETS_FOLDER`) */
+  href: string
+}
+
+/** The folder the shadow output's sheets go in, beside the page, by default. */
+export const SHADOW_SHEETS_FOLDER = "ui-sheets/"
+
 /** One rendered element, before flattening. */
 export type StaticView = {
   /** The page element (`<ui-button>`), a stand-in DOM element. */
   element: Element
   /** Its family. */
   family: StaticFamily
+  /** The sheets its component adopts (`styleSheetNames`), for the shadow output's links. */
+  sheetNames?: readonly string[]
   /** Its shadow content as HTML. */
   html: string
 }

@@ -946,17 +946,73 @@ describe("SpellLanguageService", () => {
       await fixes("set y to", (titles) => expect(titles).toEqual([]))
     })
 
+    /** `service`'s warnings and errors in Solitaire about one of Spell's old forms, by their words. */
+    const oldFormProblems = () =>
+      service
+        .diagnostics(solitaire)
+        .filter((it) => typeof it.message === "string" && / changed this on \d{4}-\d\d-\d\d/.test(it.message))
+
     test("a note after a line's code, `// ...`:  moved to the line under it, as `--`, with its warning (epic `language` T166)", async () => {
       await fixes("set x to 1  // so it runs", async (titles, fixed) => {
-        expect(titles).toEqual(['Move the note below, changing "//" to "--"'])
+        expect(titles).toEqual(['Move the note below, changing "//" to "--"', "Upgrade this file to Spell 0.9"])
         expect(fixed).toMatch(/\nset x to 1\n\t-- so it runs$/)
-        const warned = service.diagnostics(solitaire).filter((it) => String(it.message).startsWith('A note after "//"'))
-        expect(warned).toHaveLength(1)
+        expect(oldFormProblems().map((it) => it.severity)).toEqual([DiagnosticSeverity.Warning])
         await workspace.update(solitaireUri, fixed!)
-        expect(
-          service.diagnostics(solitaire).filter((it) => String(it.message).startsWith('A note after "//"'))
-        ).toEqual([])
+        expect(oldFormProblems()).toEqual([])
       })
+    })
+
+    test("an old word:  Change ... to ..., the warning's preferred fix, its diagnostic attached;  applied, the warning goes (epic `language` P68)", async () => {
+      await fixes("to toss it\n\tpause for 1 sec\nto throw it\n\twait for: toss it", async (titles, fixed) => {
+        expect(titles).toEqual(['Take out "wait for"', "Upgrade this file to Spell 0.9"])
+        expect(fixed).toMatch(/\nto throw it\n\ttoss it$/)
+        const [warning] = oldFormProblems()
+        expect(warning?.message).toMatch(/^This line uses "wait for", which Spell doesn't need now/)
+        const last = solitaire.parseText.split("\n").length - 1
+        const [fix] = service.codeActions(solitaire, {
+          start: { line: last, character: 0 },
+          end: { line: last, character: 0 }
+        })
+        expect([fix?.isPreferred, fix?.diagnostics?.[0]?.message]).toEqual([true, warning?.message])
+        expect(service.oldFormFixAt(solitaire, { line: last, character: 3 })?.title).toBe('Take out "wait for"')
+        await workspace.update(solitaireUri, fixed!)
+        expect(oldFormProblems()).toEqual([])
+      })
+    })
+
+    test("Upgrade this file:  applied, every old form in the file goes at once, not just the line's (epic `language` I179)", async () => {
+      const original = solitaire.contents!
+      const text =
+        `${original.trimEnd()}\nto toss it\n\tpause for 1 sec\nanimation spin it\n\twait for: toss it\n` +
+        "set x to 1  // so it runs"
+      try {
+        await workspace.update(solitaireUri, text)
+        expect(oldFormProblems()).toHaveLength(3)
+        const last = text.split("\n").length - 1
+        const actions = service.codeActions(solitaire, {
+          start: { line: last, character: 0 },
+          end: { line: last, character: 0 }
+        })
+        const upgrade = actions.find(({ title }) => title === "Upgrade this file to Spell 0.9")
+        const upgraded = applyEdits(text, upgrade!.edit!.changes![solitaireUri]!)
+        expect(upgraded).toMatch(/\nto spin it\n\ttoss it\nset x to 1\n\t-- so it runs$/)
+        await workspace.update(solitaireUri, upgraded)
+        expect(oldFormProblems()).toEqual([])
+      } finally {
+        await workspace.update(solitaireUri, original)
+      }
+    })
+
+    test("past an old form's drop version (a test's own Spell):  an error, its fix still offered (epic `language` P68, J288)", async () => {
+      SP.OldForms.spellVersion = "1.0.0"
+      try {
+        await fixes("set x to 1  // so it runs", (titles) => {
+          expect(oldFormProblems().map((it) => it.severity)).toEqual([DiagnosticSeverity.Error])
+          expect(titles[0]).toBe('Move the note below, changing "//" to "--"')
+        })
+      } finally {
+        SP.OldForms.spellVersion = SP.SPELL_VERSION
+      }
     })
 
     test("a drawing's attribute value:  Make it code, or Make it text, its words kept (epic `editor` T74)", () => {
@@ -1142,6 +1198,8 @@ describe("SpellLanguageService", () => {
   })
 
   describe("<css> blocks (see LSP.SpellCSS)", () => {
+    // the CSS service loads on first use:  in before these ask it
+    beforeAll(() => LSP.SpellCSS.load())
     // a block in the card type's outline, its CSS with a typo:  `colr`
     const withBlock = cardText.replace(
       'a "card" is a two sided view:\n',
@@ -1346,6 +1404,56 @@ describe("SpellLanguageService, outline style", () => {
     const symbols = service.documentSymbols(card)
     const cardSymbol = symbols.find((symbol) => symbol.name === "Card")!
     expect(cardSymbol.children?.map((child) => child.name)).toEqual(expect.arrayContaining(["suit", "rank", "color"]))
+  })
+})
+
+/**
+ * A place's field marked gone, read by a program:  the warning, and "Change to ..." its likely new name
+ * (`SP.PlaceFieldMarks`, epic `language` P68, Q82).
+ * - Its own small project:  NetBox's Spell file as a later look left it, `user` gone and `owner` new the same day.
+ */
+describe("SpellLanguageService, a place's field marked gone", () => {
+  const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-place-"))
+  const netbox = [
+    'netbox is a web server at "https://demo.netbox.dev"',
+    "\tcheck it every 30 seconds",
+    '\tjobs live at "/api/jobs"',
+    "",
+    'a "job" is a thing',
+    "\tit lives in netbox",
+    '\tits "user" is text',
+    "\t\t-- APPARENTLY DELETED as of 2026-11-19",
+    '\tits "owner" is text',
+    "\t\t-- NEW as of 2026-11-19",
+    ""
+  ].join("\n")
+  const mainText = "to check (a job)\n\tset who to the job's user\n"
+  const mainUri = pathToFileURL(resolve(dir, "main.spell")).href
+  writeFileSync(resolve(dir, "NetBox.api.spell"), netbox)
+  writeFileSync(resolve(dir, "main.spell"), mainText)
+  const imports = ["main.spell", "NetBox.api.spell"].map((file) => ({ path: `/${file}`, active: true }))
+  writeFileSync(resolve(dir, SP.PROJECT_FILE), JSON.stringify({ title: "Jobs", imports }))
+  const workspace = new SpellDiskWorkspace()
+  const service = new LSP.SpellLanguageService(workspace)
+
+  test("Change to the new field:  applied, the warning goes", async () => {
+    await workspace.update(mainUri, mainText)
+    const main = workspace.fileFor(mainUri)!
+    const gone = () =>
+      service
+        .diagnostics(main)
+        .filter((it) => (typeof it.message === "string" ? it.message : it.message.value).includes("2026-11-19"))
+    expect(gone()).toHaveLength(1)
+    expect(gone()[0]!.severity).toBe(DiagnosticSeverity.Warning)
+    const actions = service.codeActions(main, rangeAt(mainText, 2, "user"))
+    expect(actions.map(({ title }) => title)).toEqual(['Change to "owner"'])
+    expect(actions[0]!.isPreferred).toBe(true)
+    expect(actions[0]!.diagnostics).toEqual([gone()[0]])
+    const fixed = applyEdits(mainText, actions[0]!.edit!.changes![mainUri]!)
+    expect(fixed).toBe("to check (a job)\n\tset who to the job's owner\n")
+    await workspace.update(mainUri, fixed)
+    expect(gone()).toEqual([])
+    expect(errorsIn(service, main)).toEqual([])
   })
 })
 

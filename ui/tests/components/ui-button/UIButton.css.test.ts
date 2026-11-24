@@ -1,10 +1,10 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { ClassBuilder } from "spell/ui/elements"
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { CLASS_PHRASES } from "spell/ui/elements/ClassPhrases"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 import type { ComponentVocabulary } from "spell/ui/vocabulary"
-
-import { Fixture } from "spell/test-helpers/Fixture"
 
 import { buttonsVocabulary } from "spell/ui/components/ui-button/UIButtons.en"
 import { buttonVocabulary } from "spell/ui/components/ui-button/UIButton.en"
@@ -66,7 +66,7 @@ describe("UIButton.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = buttonRaw + colorsCSS
+    const css = buttonRaw + colorsSharedCSS
     for (const vocabulary of [buttonVocabulary, buttonsVocabulary, orVocabulary]) {
       for (const phrase of classPhrases(vocabulary))
         expect(covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -81,7 +81,7 @@ describe("UIButton.css source", () => {
 describe("UIButton.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every button in %s", (path) => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const buttons = root.querySelectorAll<HTMLElement>(".ui.button")
     expect(buttons.length).toBeGreaterThan(0)
     for (const button of buttons) {
@@ -94,7 +94,7 @@ describe("UIButton.css examples", () => {
 
   it("takes a public token from a wrapper or the button itself (static markup)", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-button-radius: 20px"><button class="ui button">A</button></div>` +
         `<button class="ui button" style="--ui-button-padding-block: 20px">B</button>`
     )
@@ -105,25 +105,25 @@ describe("UIButton.css examples", () => {
 
   it("fills primary with the resolved --ui-blue", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
-    const blue = Fixture.render(`<span style="background-color: var(--ui-blue)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
+    const blue = Sheets.render(`<span style="background-color: var(--ui-blue)"></span>`)
     const primary = root.querySelector(".ui.primary.button:not(.basic)")!
     expect(getComputedStyle(primary).backgroundColor).toBe(getComputedStyle(blue).backgroundColor)
   })
 
   it("scales by size;  medium is the default", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     expect(size(".ui.mini.button")).toBeLessThan(size(".ui.massive.button"))
     expect(size(".ui.mini.button")).toBeLessThan(size(".ui.small.button"))
-    const plain = Fixture.render(`<button class="ui button">Plain</button>`)
+    const plain = Sheets.render(`<button class="ui button">Plain</button>`)
     expect(size(".ui.medium.button")).toBe(parseFloat(getComputedStyle(plain).fontSize))
   })
 
   it("dims disabled buttons, by class or attribute", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     for (const button of root.querySelectorAll(".ui.disabled.button, .ui.button:disabled")) {
       expect(parseFloat(getComputedStyle(button).opacity)).toBeCloseTo(0.45, 2)
     }
@@ -131,7 +131,7 @@ describe("UIButton.css examples", () => {
 
   it("draws basic buttons as a transparent ring, and loading ones with a spinner", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     const basic = getComputedStyle(root.querySelector(".ui.basic.active.button")!)
     expect(basic.boxShadow).toContain("inset")
     const loading = root.querySelector(".ui.loading.button")!
@@ -141,7 +141,7 @@ describe("UIButton.css examples", () => {
 
   it("keeps inverted buttons transparent with an outline on dark surfaces", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     for (const button of root.querySelectorAll(".ui.inverted.button")) {
       const style = getComputedStyle(button)
       expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)")
@@ -151,7 +151,7 @@ describe("UIButton.css examples", () => {
 
   it("draws a group as a track:  its buttons set in, see-through, every corner the track's inner radius", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(EXAMPLES["./examples/groups.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/groups.html"]!)
     const group = root.querySelector<HTMLElement>(".ui.buttons")!
     const track = getComputedStyle(group)
     const inset = parseFloat(track.paddingTop)
@@ -164,24 +164,24 @@ describe("UIButton.css examples", () => {
       for (const corner of CORNERS) expect(radius(button, corner)).toBeCloseTo(inner, 1)
     }
     // as tall as a lone button:  the buttons give up the inset from their own padding
-    const lone = Fixture.render(`<button class="ui button">Lone</button>`)
+    const lone = Sheets.render(`<button class="ui button">Lone</button>`)
     expect(group.getBoundingClientRect().height).toBeCloseTo(lone.getBoundingClientRect().height, 1)
   })
 
   it("rounds a vertical group with the theme's corner, never a pill's", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-button-radius: 9999px"><div class="ui vertical buttons">` +
         `<button class="ui button">A</button><button class="ui button">B</button></div></div>`
     )
     const group = root.querySelector(".ui.vertical.buttons")!
-    const theme = Fixture.render(`<span style="border-radius: var(--ui-radius)"></span>`)
+    const theme = Sheets.render(`<span style="border-radius: var(--ui-radius)"></span>`)
     expect(getComputedStyle(group).borderTopLeftRadius).toBe(getComputedStyle(theme).borderTopLeftRadius)
   })
 
   it("gives equal-width groups equal buttons, and basic groups one border", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(EXAMPLES["./examples/groups.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/groups.html"]!)
     const widths = [...root.querySelectorAll(".ui.three.buttons > .button")].map((b) => b.getBoundingClientRect().width)
     expect(Math.max(...widths) - Math.min(...widths)).toBeLessThan(1)
     const basic = root.querySelector(".ui.basic.buttons:not(.vertical)")!
@@ -193,7 +193,7 @@ describe("UIButton.css examples", () => {
 
   it("draws the or badge between buttons", () => {
     adoptIntoPage([...foundationCSS, buttonCSS])
-    const root = Fixture.render(EXAMPLES["./examples/content.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/content.html"]!)
     const [or, translated] = root.querySelectorAll(".or")
     expect(getComputedStyle(or!, "::before").content).toBe('"or"')
     expect(getComputedStyle(translated!, "::before").content).toBe('"ou"')
@@ -208,7 +208,7 @@ describe("UIButton.css in shadow roots", () => {
   it("styles a host's inner <button> and keeps the host inline-flex", () => {
     adoptIntoPage(foundationCSS)
     const host = shadowHost(`<button class="ui primary button" part="button">Save</button>`)
-    const blue = Fixture.render(`<span style="background-color: var(--ui-blue)"></span>`)
+    const blue = Sheets.render(`<span style="background-color: var(--ui-blue)"></span>`)
     expect(getComputedStyle(host).display).toBe("inline-flex")
     expect(getComputedStyle(inner(host)).backgroundColor).toBe(getComputedStyle(blue).backgroundColor)
   })
@@ -285,7 +285,8 @@ describe("UIButton.css in shadow roots", () => {
  */
 function classPhrases(vocabulary: ComponentVocabulary): string[] {
   const builder = new ClassBuilder(vocabulary)
-  const skip = new Set(["ui", vocabulary.noun])
+  // the phrases' joined words too:  `covers()` looks for them itself
+  const skip = new Set(["ui", vocabulary.noun, ...CLASS_PHRASES.map((phrase) => phrase.replaceAll(" ", "-"))])
   const phrases = new Set<string>()
   for (const spec of vocabulary.attributes) {
     if (spec.kind === "size" || spec.kind === "color") continue
@@ -316,10 +317,9 @@ function listOf(values: ComponentVocabulary["attributes"][number]["values"]): st
   return [...values]
 }
 
-/** `css` styles `phrase`:  as a `[class*="..."]` phrase, or every word as a class selector. */
+/** `css` styles `phrase`:  as its joined word (`.bottom-attached`), or every word as a class selector. */
 function covers(css: string, phrase: string): boolean {
-  if (css.includes(`[class*="${phrase}"]`)) return true
-  return phrase.split(" ").every((word) => new RegExp(`\\.${word}(?![\\w-])`).test(css))
+  return Sheets.covers(css, phrase)
 }
 
 /** Every `CSSStyleRule` in `sheet`, including those nested in `@layer` / `@media`. */
@@ -347,7 +347,7 @@ function radius(element: Element, corner: "start-start" | "start-end" | "end-sta
  * - Stands in for a `<ui-button>` / `<ui-buttons>` element.
  */
 function shadowHost(html: string): HTMLElement {
-  const host = Fixture.render(`<span></span>`)
+  const host = Sheets.render(`<span></span>`)
   shadowInto(host, html)
   return host
 }

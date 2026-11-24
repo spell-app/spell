@@ -47,6 +47,13 @@ import panelCSS from "./UIPanel.css?inline"
  *     - The body is the first child in its content that scrolls by itself (`ScrollShades`).
  *     - Tokens:  `--ui-panel-scroll-shade` (its colour), `-size` (its height), `-top` (how far down the
  *       top one starts, under a line of the body's that sticks at the top).
+ * - `closable`:  a ✕ last in its bar, after the actions and the chevron (`E.CloseButton`, `titleBarLast()`).
+ *   - Light until hovered or focused, then the text's colour, fading in;  12px from the bar's end to the drawn ✕
+ *     (the editor's panels' ✕, epic `editor` T95, I233, moved here by T145).
+ *   - A click sends `ui-dismissed`:  the page closes what it belongs to (the code's column, the Inspector's).
+ *     The panel never hides or folds itself for it.
+ *   - Its name and tooltip:  `close-label`, else the `close` text ("Close").
+ *   - Tokens:  `--ui-panel-close-color`, `-hover-color`, `-end` (its room after it).
  ****************/
 export class UIPanel extends UISection {
   // the section's names under the panel's tag:  same shape, but TypeScript only knows the section's literals
@@ -94,8 +101,12 @@ export class UIPanel extends UISection {
     return () => this.scrollShades.stop()
   }
 
-  /** What's in it changed:  its body may be another, or another size. */
-  @E.watches({ childList: true, subtree: true })
+  /**
+   * Its own children changed:  its body may be another.
+   * - Not every change inside it (epic `solid-2-final` P3):  deeper in only changes sizes, which `ScrollShades`'
+   *   resize watcher already sees, and each refresh here was a style read in a busy Inspector card.
+   */
+  @E.watches({ childList: true })
   protected onBodyChanged() {
     if (this.isReady && this.domElement.isConnected && this.isPane) this.scrollShades.refresh()
   }
@@ -110,12 +121,68 @@ export class UIPanel extends UISection {
     )
   }
 
+  ////////////////
+  // ## Its ✕ (`closable`)
+  ////////////////
+
+  /** `closable`:  read from its attribute, as a property group's vocabulary has none. */
+  get isClosable(): boolean {
+    return E.Converters.boolean(this.attributes[CLOSABLE], CLOSABLE)
+  }
+
+  /** The ✕'s name and tooltip:  `close-label`, else "Close". */
+  get closeLabel(): string {
+    return this.attributes[CLOSE_LABEL]?.trim() || this.translationForKey(CLOSE as never)
+  }
+
+  /** The ✕, while `closable`. */
+  readonly closeButton = new E.CloseButton({
+    owner: this,
+    shows: () => this.isClosable,
+    label: () => this.closeLabel,
+    part: this.partForName(CLOSE as never),
+    onClick: (event) => this.dismiss(event)
+  })
+
+  /** Its ✕ was clicked:  `ui-dismissed`, for the page to close it;  never a fold of its bar. */
+  @E.untracked
+  private dismiss(event: MouseEvent) {
+    event.stopPropagation()
+    this.send(DISMISSED as never, { originalEvent: event } as never)
+  }
+
+  /** The ✕, last in the bar, with its tooltip. */
+  protected titleBarLast(): JSX.Element {
+    return (
+      <Show when={this.isClosable}>
+        <span class={CLOSE_BOX} title={this.closeLabel}>
+          {this.closeButton.draw()}
+        </span>
+      </Show>
+    )
+  }
+
   /** `panel`, and `sub` inside another panel. */
   protected get extraClass(): string | undefined {
     const sub = this.enclosingSection instanceof UIPanel ? SUB_PANEL : undefined
     return [super.extraClass, PANEL, sub].filter(Boolean).join(" ")
   }
 }
+
+/** The `closable` attribute:  a ✕ last in the bar. */
+const CLOSABLE = "closable"
+
+/** The `close-label` attribute:  the ✕'s name. */
+const CLOSE_LABEL = "close-label"
+
+/** The ✕'s part, and its text's key. */
+const CLOSE = "close"
+
+/** What a click on the ✕ sends. */
+const DISMISSED = "ui-dismissed"
+
+/** Class word of the box around the ✕, which holds its tooltip. */
+const CLOSE_BOX = "dismiss"
 
 /** Class word added before the section's noun:  `ui ... panel section`. */
 const PANEL = "panel"

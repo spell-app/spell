@@ -9,7 +9,7 @@ import { FOLDS_KEY, OLD_FOLDS_KEY } from "./site.types"
 
 /****************
  * ### `SiteSections`
- * The page side of the site's nested `<ui-section>`s (written into the pages by `yarn site:sections`):
+ * The page side of the site's nested `<ui-section>`s (written into the pages):
  * where their titles stick, which sections the viewer closed, and LANDING on a `#hash`.
  * - ONE per page (`SiteSections.instance`), following whichever `main` the router shows (`show()`).
  * - Sticky:  the page header's title line sticks under the top bar, and the tabs' bar under it
@@ -557,7 +557,7 @@ type DrawnFound = {
   tag?: string
 }
 
-/** An API section's table (`yarn site:sections` writes one per kind):  its rows' ids start with its section's. */
+/** An API section's table (one per kind):  its rows' ids start with its section's. */
 const API_SECTION = "ui-docs-api[only]"
 
 /** Frames a section takes to draw what an opening revealed:  its animation stays off that long (`instantly()`). */

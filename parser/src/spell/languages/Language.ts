@@ -1,3 +1,4 @@
+import { LoadOnce } from "spell/util"
 import { P } from "spell/parser/parser"
 
 import { SPELL_BASE_TYPES, type CoreMessages } from "spell/parser/core/core.types"
@@ -16,6 +17,8 @@ import { PARSER_MESSAGES } from "spell/parser/spell/languages/en/parserMessages"
  *   - its words for what the parser says to the person writing one (`parserMessages`)
  * - A FILE's name says its language (epic `spanish` P19):  `Carta.es.spell` is Spanish, a plain `Card.spell` English.
  *   - `Language.forFile(name)` finds its pack;  `Language.for(lang)` finds one by its code.
+ * - English is always there;  every other pack loads on first use (epic `solid-2-final` P11):
+ *   `await Language.loadFor(files)` before reading them -- see `loadsOnFirstUse()`.
  *   - So one project may mix languages:  see `rootScopeFor()`.
  * - The rule classes are shared:  a pack holds only words.
  */
@@ -276,6 +279,64 @@ export class Language {
   /** Every language pack loaded, by its code. */
   static readonly all = new Map<string, Language>()
 
+  /** How each pack that loads on first use loads, by its code:  see `loadsOnFirstUse()`. */
+  private static readonly loaders = new Map<string, () => Promise<unknown>>()
+
+  /** Each pack's load, once asked for:  every caller the same one. */
+  private static readonly loads = new LoadOnce<string, Language>()
+
+  /**
+   * Say pack `lang` loads on first use, by `load()`, e.g. `() => import("./languages/es")` (epic `solid-2-final` P11).
+   * - Its module registers it as it loads (`register()`), as English's does.
+   * - So a page that reads only English never downloads Spanish's grammar:  about 120 KB brotli in each build.
+   * - Node programs and tests, which read every language, load them all at once:  `spell/parser/spell/languages/all`.
+   */
+  static loadsOnFirstUse(lang: string, load: () => Promise<unknown>): void {
+    Language.loaders.set(lang, load)
+  }
+
+  /**
+   * Pack `lang`, loaded first if it loads on first use:  then `for(lang)` has it.
+   * - throws a `TypeError`, as `for()`, for a language with no pack
+   */
+  static async load(lang: string): Promise<Language> {
+    if (Language.all.has(lang)) return Language.all.get(lang)!
+    const load = Language.loaders.get(lang)
+    if (!load) return Language.for(lang)
+    return await Language.loads.get(lang, async () => {
+      await load()
+      return Language.for(lang)
+    })
+  }
+
+  /**
+   * Load the pack of every language `names` are written in:  files (`Carta.es.spell`), else language codes (`es`).
+   * - What a program's files, or a project's declarations, are read in:  call it before reading them.
+   * - And each component pack's words in those languages (`SP.ComponentPacks.loadLanguage()`).
+   * - A name in no language (`Card.spell`) is English, always there;  one in a language with no pack is left to
+   *   `for()` to say so.
+   */
+  static async loadFor(names: Iterable<string | undefined>): Promise<void> {
+    const langs = new Set<string>()
+    for (const name of names) {
+      const lang = name && LANGUAGE_CODE.test(name) ? name : Language.langOfFile(name)
+      if (lang && lang !== Language.default.lang && Language.isKnown(lang)) langs.add(lang)
+    }
+    // and the component packs' words in it (Spell UI's Spanish tags):  a pack registered after the language loaded
+    // gets its turn here too
+    await Promise.all(
+      [...langs].map(async (lang) => {
+        await Language.load(lang)
+        await SP.ComponentPacks.loadLanguage(lang)
+      })
+    )
+  }
+
+  /** Is there a pack for `lang`, loaded or loading on first use? */
+  static isKnown(lang: string): boolean {
+    return Language.all.has(lang) || Language.loaders.has(lang)
+  }
+
   /** Add `language` to the packs `for()` finds;  the first is the default.  Returns it. */
   static register(language: Language): Language {
     Language.all.set(language.lang, language)
@@ -290,8 +351,13 @@ export class Language {
   static for(lang: string | undefined): Language {
     if (lang === undefined) return Language.default
     const language = Language.all.get(lang)
+    if (!language && Language.loaders.has(lang)) {
+      throw new TypeError(
+        `Language.for():  the "${lang}" pack loads on first use, and isn't loaded yet;  \`await SP.Language.load("${lang}")\` first`
+      )
+    }
     if (!language) {
-      const known = [...Language.all.keys()].join(", ")
+      const known = [...new Set([...Language.all.keys(), ...Language.loaders.keys()])].join(", ")
       throw new TypeError(`Language.for():  no language pack for "${lang}";  spell reads ${known}`)
     }
     return language
@@ -365,6 +431,9 @@ export type ParserMessages = Record<ParserMessageKey, string>
  * - A page file says it the same way:  `Carta.es.spell`.
  * - A path may follow with a range, as in declarations' `defined`:  `/Carta.es.spell:71-92`.
  */
+/** A language's code alone, `es`, `pt-BR`:  not a file's name. */
+const LANGUAGE_CODE = /^[a-z]{2}(?:-[A-Za-z]{2,4})?$/
+
 const FILE_LANGUAGE = /\.([a-z]{2}(?:-[A-Za-z]{2,4})?)\.spell(?::[\d-]*)?$/
 
 /** A named placeholder in a message, `{type}` -- see `Language.parserMessage()`. */
@@ -581,8 +650,10 @@ export type LanguageWords = {
    * English's `{ parts: "slots" }` (epic `elemental-spell` P27).
    * - Two words at most:  `wait for`.
    * - A replacement of nothing, `""`:  the word is simply gone, e.g. `wait for: deal` is now `deal` (epic `language` P13).
-   * - Still read where a rule spells it, so the line keeps its meaning;  but each is a parse error naming its
-   *   replacement, which `spell lint --fix` puts in its place -- see `SpellType.noteRetiredLiterals()`.
+   * - Still read where a rule spells it, so the line keeps its meaning;  but each is one of Spell's old forms, a
+   *   warning naming its replacement, which `spell lint --fix` puts in its place -- see `SpellType.noteRetiredLiterals()`
+   *   and `SP.OldForms` (epic `language` P68).
+   * - Which old form each is:  `oldForms`.
    * - None:  nothing retired.
    * - NOT a type's word:  the old words for views (`drawable thing`, `dibujable`) are gone,
    *   free for a program's own names (epic `language` T25).
@@ -593,6 +664,13 @@ export type LanguageWords = {
    * English's `{ start_process: { animation: "process" } }`, as `animation` alone is now `to`.
    */
   retiredRuleWords?: Record<string, Record<string, string>>
+  /**
+   * Which of Spell's old forms each of `retiredWords` (and `retiredRuleWords`) is, by its id in `SP.OLD_FORMS`:
+   * English's `{ parts: "parts", "wait for": "wait-for" ... }` (epic `language` P68).
+   * - The form says when it changed, and the Spell versions that deprecated it and will drop it.
+   * - A word not listed:  `"parts"`'s, the first.
+   */
+  oldForms?: Record<string, SP.OldFormId>
   /**
    * The line saying a thing has an ability, by the ability's English name:  `it is draggable`, Spanish's `es arrastrable`.
    * - What `DragAndDrop`'s warning for the old words (`can be dragged`) says to write.

@@ -30,7 +30,7 @@ export const epicChoicesBarVocabulary = {
   parts: [
     { name: "base", description: "The bar." },
     { name: "feedback", description: 'The feedback box, an `<epic-text-box type="feedback">`.' },
-    { name: "send", description: '"Do it" (`<ui-button>`):  its tooltip counts the changed boxes.' },
+    { name: "send", description: '"Do it" (`<ui-button>`).' },
     {
       name: "meta",
       description: "The line under them:  the save status (only when it failed), Copy my answers, Expand all."
@@ -46,28 +46,8 @@ export const epicChoicesBarVocabulary = {
   states: [{ name: "stale", description: "Changed since the answer was sent:  press Do it again." }],
   texts: [
     { key: "doIt", text: "Do it", description: "The button." },
-    {
-      key: "sendTip",
-      text: "Send {changed} of {rows} changed, and the feedback",
-      description: "The button's tooltip:  the count."
-    },
-    {
-      key: "sendTipCommented",
-      text: "Send {changed} of {rows} changed, {commented} commented, and the feedback",
-      description: "The button's tooltip, once a row's comment box holds anything (epic `epic-engine` P58)."
-    },
     { key: "copyAnswers", text: "Copy my answers", description: "Puts what's typed on the clipboard." },
     { key: "copied", text: "Copied", description: "Copy my answers, for a moment after a click." },
-    {
-      key: "copyTip",
-      text: "Copy your changes and feedback as JSON, when the page can't save",
-      description: "Copy my answers' tooltip."
-    },
-    {
-      key: "copyFailed",
-      text: "Couldn't copy:  the browser blocked the clipboard",
-      description: "Copy my answers' tooltip after a copy failed."
-    },
     { key: "expandAll", text: "Expand all", description: "Unfolds every section of rows." },
     { key: "collapseAll", text: "Collapse all", description: "Once every section is open:  folds them." }
   ],

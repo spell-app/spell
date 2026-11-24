@@ -395,11 +395,12 @@
 
 @layer ui.components.epic-fold.types {
   /* "0. While you were out":  a line whose badge is turned off (its lines may load after the click, so a rule) */
-  :host([data-away-hides~="recent"]) ::slotted(epic-away-line[state="recent"]),
-  :host([data-away-hides~="progress"]) ::slotted(epic-away-line[state="progress"]),
-  :host([data-away-hides~="replied"]) ::slotted(epic-away-line[state="replied"]),
-  :host([data-away-hides~="open"]) ::slotted(epic-away-line[state="open"]),
-  :host([data-away-hides~="attention"]) ::slotted(epic-away-line[state="attention"]) {
+  /* a heading over lines of several colours (`mixed`, I435) stays:  a line under it may still show */
+  :host([data-away-hides~="recent"]) ::slotted(epic-away-line[state="recent"]:not([mixed])),
+  :host([data-away-hides~="progress"]) ::slotted(epic-away-line[state="progress"]:not([mixed])),
+  :host([data-away-hides~="replied"]) ::slotted(epic-away-line[state="replied"]:not([mixed])),
+  :host([data-away-hides~="open"]) ::slotted(epic-away-line[state="open"]:not([mixed])),
+  :host([data-away-hides~="attention"]) ::slotted(epic-away-line[state="attention"]:not([mixed])) {
     display: none;
   }
 }

@@ -8,6 +8,8 @@
  *   - this box's look on its native `<textarea>`, its `control` part:  these rules win over its own sheet's
  * - A notes box's KEPT text (P18), above its field:  the page changed under Owen, a warning, so an ORANGE edge and
  *   title;  the texts are his own words, so their VIOLET (`templates/epics/plan-doc.md`, "Colours").
+ * - `code` (epic `ast-markup`):  the page's monospace, lines kept whole (it scrolls sideways), still growing in height;
+ *   a seeded box's reset sits under its field, at its end.
  * - Public tokens (`--epic-text-box-*`) are never declared here:  read through private aliases.
  */
 
@@ -47,6 +49,21 @@
     font: inherit;
     line-height: 1.45;
     resize: vertical;
+  }
+  :host([code]) .field::part(control) {
+    inline-size: 100%;
+    font-family: var(--ui-font-family-mono, ui-monospace, monospace);
+    font-size: 0.875em;
+    line-height: 1.5;
+    tab-size: 2;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+  }
+  .reset-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
   }
   .field::part(control)::placeholder {
     color: var(--ui-text-muted, GrayText);

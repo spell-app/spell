@@ -19,8 +19,8 @@ const RUNNER = resolve(CLI_DIR, "runner", "renderStatic.ts")
  * scripts that load the elements -- and the stylesheet that styles it.  `spell-ui`'s static render
  * (`spell/ui/static`), through `src/tools/StaticDocument.ts`.
  * - Was `spell static`, spell-app's, until epic `repo-split` P13.
- * - A page:  an `.html` file;  a folder:  every `.html` in it, at any depth, except `*.static.html` (what this
- *   writes), `node_modules` and dot folders.
+ * - A page:  an `.html` file;  a folder:  every `.html` in it, at any depth, except `*.static.html` and
+ *   `*.shadow.html` (what this writes), `node_modules` and dot folders.
  * - Writes, for `page.html`:
  *   - `page.static.html` beside it -- or `-o <file>` for one page, `-o <folder>` for several (each keeps its name,
  *     under the folder, as under the folder named)
@@ -33,17 +33,28 @@ const RUNNER = resolve(CLI_DIR, "runner", "renderStatic.ts")
  *   Minified (Lightning CSS);  `--no-minify` to read it.
  * - Removes each `<script>` that loads the elements (`StaticDocument.ELEMENT_SCRIPT`):  an upgrade would show the
  *   content twice.  Other scripts stay.
+ * - `--shadow-roots`:  the shadow output instead (epic `solid-2-final` P16), `page.shadow.html`:
+ *   - each element keeps its tag, and gets its shadow root drawn ahead:  it paints before the scripts start it
+ *   - its scripts stay;  each family's sheets are linked from `ui-sheets/`, beside the page, written there too
  * - Renders in a child process, through Vite -- see `runner/renderStatic.ts`.
  * - Lists each page it wrote on stdout;  sizes, removed scripts and tags it left as they were on stderr.
  * - Returns the exit code:  `EXIT.ERRORS` if a page failed.
  */
 export async function ssrCommand(args: string[], options: SsrOptions = {}): Promise<number> {
   if (options.inlineCss && options.css) throw new CLI.CliError("--inline-css and --css:  pick one")
-  const pages = staticPages(args, options)
+  const { shadowRoots = false } = options
+  if (shadowRoots && (options.inlineCss || options.css)) {
+    throw new CLI.CliError("--shadow-roots links each family's own sheets:  leave out --inline-css and --css")
+  }
+  const pages = staticPages(args, options, shadowRoots ? SHADOW_PAGE : STATIC_PAGE)
   const minify = options.minify !== false
-  // each page's shared sheet:  `--css`, else its folder's;  none with `--inline-css`
+  // each page's shared sheet:  `--css`, else its folder's;  none with `--inline-css` or `--shadow-roots`
   const sheetOf = (output: string) =>
-    options.inlineCss ? undefined : options.css ? resolve(options.css) : resolve(dirname(output), FOLDER_SHEET)
+    options.inlineCss || shadowRoots
+      ? undefined
+      : options.css
+        ? resolve(options.css)
+        : resolve(dirname(output), FOLDER_SHEET)
   const sheets = new Map<string, StaticSheetJob>()
   for (const [index, page] of pages.entries()) {
     const path = sheetOf(page.output)
@@ -61,6 +72,7 @@ export async function ssrCommand(args: string[], options: SsrOptions = {}): Prom
       return {
         html: readFileSync(page.input, "utf8"),
         options: {
+          staticOutput: shadowRoots ? ("shadow" as const) : undefined,
           href: sheet ? href(page.output, sheet) : undefined,
           shared: !!sheet,
           minify,
@@ -92,9 +104,13 @@ export async function ssrCommand(args: string[], options: SsrOptions = {}): Prom
       CLI.err(color("red", `${CLI.relativePath(page.input)}:  ${reply.error}`))
       continue
     }
-    const { html, css, unrendered, dropped } = reply.result
+    const { html, css, unrendered, dropped, sheets: shadowSheets } = reply.result
     write(page.output, html)
     const notes = [size(html)]
+    // the shadow output's sheets, in the folder its links name, beside the page
+    for (const [file, text] of Object.entries(shadowSheets ?? {}))
+      write(resolve(dirname(page.output), SHADOW_SHEETS, file), text)
+    if (shadowSheets) notes.push(`${Object.keys(shadowSheets).length} sheets in ${SHADOW_SHEETS}`)
     if (css) notes.push(`inline css ${size(css.text)}${minify ? ` from ${kb(css.fullSize)}` : ""}`)
     CLI.out(CLI.relativePath(page.output))
     CLI.err(`${CLI.relativePath(page.input)} -> ${CLI.relativePath(page.output)}  ${color("dim", notes.join(", "))}`)
@@ -137,7 +153,11 @@ type StaticPage = {
  * The pages `args` name, and where each goes -- see `staticCommand()`.
  * - Throws `CLI.CliError` for a missing page, no pages at all, or an output that would overwrite its input.
  */
-export function staticPages(args: string[], options: Pick<SsrOptions, "output">): StaticPage[] {
+export function staticPages(
+  args: string[],
+  options: Pick<SsrOptions, "output">,
+  suffix: string = STATIC_PAGE
+): StaticPage[] {
   if (!args.length) throw new CLI.CliError("Name a page, e.g. spell ssr page.html -- or a folder of them")
   // each page, with the folder its name under `-o <folder>` is relative to
   const found: { input: string; base: string }[] = []
@@ -157,7 +177,7 @@ export function staticPages(args: string[], options: Pick<SsrOptions, "output">)
     !!output &&
     (found.length > 1 || /[/\\]$/.test(options.output!) || (existsSync(output) && statSync(output).isDirectory()))
   return found.map(({ input, base }) => {
-    let path = input.replace(/(\.html?)?$/i, ".static.html")
+    let path = input.replace(/(\.html?)?$/i, suffix)
     if (output) path = intoFolder ? resolve(output, relative(base, input)) : output
     if (path === input) throw new CLI.CliError(`Won't overwrite the page itself:  ${input}`)
     return { input, output: path }
@@ -176,10 +196,22 @@ function htmlFiles(folder: string): string[] {
     if (entry.isDirectory() && entry.name === "parts") continue
     const path = resolve(folder, entry.name)
     if (entry.isDirectory()) files.push(...htmlFiles(path))
-    else if (/\.html$/i.test(entry.name) && !/\.static\.html$/i.test(entry.name)) files.push(path)
+    else if (/\.html$/i.test(entry.name) && !WRITTEN_PAGE.test(entry.name)) files.push(path)
   }
   return files.sort()
 }
+
+/** What a page's static twin is called:  `page.html` => `page.static.html`. */
+const STATIC_PAGE = ".static.html"
+
+/** What a page's shadow twin is called (`--shadow-roots`):  `page.html` => `page.shadow.html`. */
+const SHADOW_PAGE = ".shadow.html"
+
+/** The pages this command writes, which a folder's run never reads back in. */
+const WRITTEN_PAGE = /\.(static|shadow)\.html$/i
+
+/** The folder of the shadow output's sheets, beside each page:  what its links name (`SSR.SHADOW_SHEETS_FOLDER`). */
+const SHADOW_SHEETS = "ui-sheets"
 
 /** The shared stylesheet every static page in a folder links, unless `--css` / `--inline-css` say otherwise. */
 export const FOLDER_SHEET = "ui.static.css"

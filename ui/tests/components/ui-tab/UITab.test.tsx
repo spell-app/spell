@@ -110,8 +110,16 @@ afterEach(() => {
 describe("<ui-tabs> classes", () => {
   it.each([
     ["", "ui tabs", "ui menu"],
-    ['appearance="tabular" attach-to="top"', "ui top attached tabular tabs", "ui top attached tabular menu"],
-    ['appearance="tabular" attach-to="bottom"', "ui bottom attached tabular tabs", "ui bottom attached tabular menu"],
+    [
+      'appearance="tabular" attach-to="top"',
+      "ui top attached tabular tabs top-attached",
+      "ui top attached tabular menu top-attached"
+    ],
+    [
+      'appearance="tabular" attach-to="bottom"',
+      "ui bottom attached tabular tabs bottom-attached",
+      "ui bottom attached tabular menu bottom-attached"
+    ],
     ['appearance="pointing secondary"', "ui pointing secondary tabs", "ui pointing secondary menu"],
     ['size="small" color="red" appearance="text"', "ui small red text tabs", "ui small red text menu"],
     [
@@ -127,17 +135,21 @@ describe("<ui-tabs> classes", () => {
     ['inverted appearance="basic"', "ui inverted basic tabs", "ui inverted menu"],
     ['padding="compact" appearance="basic"', "ui compact basic tabs", "ui compact menu"],
     ['appearance="segmented basic"', "ui segmented basic tabs", "ui segmented menu"],
-    ['appearance="tabular" attach-to="top"', "ui top attached tabular tabs", "ui top attached tabular menu"],
+    [
+      'appearance="tabular" attach-to="top"',
+      "ui top attached tabular tabs top-attached",
+      "ui top attached tabular menu top-attached"
+    ],
     [
       'appearance="segmented" align="fluid" equal',
-      "ui equal fluid aligned segmented tabs",
-      "ui equal fluid aligned segmented menu"
+      "ui equal fluid aligned segmented tabs fluid-aligned",
+      "ui equal fluid aligned segmented menu fluid-aligned"
     ],
     // the docs site's page tabs, in the new words (epic `ui-gaps` P4)
     [
       'appearance="segmented basic" align="fluid" equal',
-      "ui equal fluid aligned segmented basic tabs",
-      "ui equal fluid aligned segmented menu"
+      "ui equal fluid aligned segmented basic tabs fluid-aligned",
+      "ui equal fluid aligned segmented menu fluid-aligned"
     ],
     ['direction="vertical" align="center"', "ui vertical tabs", "ui vertical menu"]
   ])("<ui-tabs %s>", async (attributes, rootClass, menuClasses) => {
@@ -148,8 +160,8 @@ describe("<ui-tabs> classes", () => {
 
   it.each([
     ["", "ui active tab segment"],
-    ['appearance="tabular" attach-to="top"', "ui bottom attached active tab segment"],
-    ['attach-to="bottom"', "ui top attached active tab segment"],
+    ['appearance="tabular" attach-to="top"', "ui bottom attached active tab segment bottom-attached"],
+    ['attach-to="bottom"', "ui top attached active tab segment top-attached"],
     ['appearance="basic" inverted', "ui inverted active basic tab segment"]
   ])("panes of <ui-tabs %s>", async (attributes, classes) => {
     const { panes } = await tabs(attributes)

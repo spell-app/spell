@@ -169,15 +169,12 @@ describe("<epic-item>'s thread, drawn", () => {
     })
   })
 
-  test("done, not on main yet (I273):  `not on main yet` after Done, the branch in its tooltip;  none once it lands", async () => {
+  test("done, not on main yet (I273):  `not on main yet` after Done, no tooltip (I370);  none once it lands", async () => {
     const host = await ElementFixture.render(ANSWERED.replace(`state="done" at=`, `state="done" unmerged="editor" at=`))
     await ElementFixture.settle()
     const done = host.querySelectorAll<HTMLElement>("epic-status")[1]!
     const pill = () => done.shadowRoot!.querySelector<HTMLElement>("[part~='unmerged']")
-    expect([pill()?.textContent, pill()?.dataset.tooltip]).toEqual([
-      "not on main yet",
-      "Done on editor, not merged yet"
-    ])
+    expect([pill()?.textContent, pill()?.dataset.tooltip]).toEqual(["not on main yet", undefined])
     done.removeAttribute("unmerged")
     await ElementFixture.settle()
     expect(pill()).toBeNull()

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { messageVocabulary } from "spell/ui/components/ui-message/UIMessage.en"
@@ -58,7 +57,7 @@ describe("UIMessage.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = messageRaw + colorsCSS
+    const css = messageRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(messageVocabulary))
       expect(Sheets.covers(css, phrase), `${messageVocabulary.tag}: ${phrase}`).toBe(true)
   })
@@ -77,7 +76,7 @@ describe("UIMessage.css source", () => {
 describe("UIMessage.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every message in %s", (path) => {
     Sheets.adopt([...foundationCSS, messageCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const messages = root.querySelectorAll<HTMLElement>(".ui.message")
     expect(messages.length).toBeGreaterThan(0)
     for (const message of messages) {
@@ -92,10 +91,10 @@ describe("UIMessage.css examples", () => {
 
   it("draws a plain message as a tinted, bordered, rounded box with a bold header", () => {
     Sheets.adopt([...foundationCSS, messageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const message = root.querySelector<HTMLElement>('.ui.message[class="ui message"]')!
     const style = getComputedStyle(message)
-    const surface = Fixture.render(`<span style="background: var(--ui-surface-muted)"></span>`)
+    const surface = Sheets.render(`<span style="background: var(--ui-surface-muted)"></span>`)
     expect(style.backgroundColor).toBe(getComputedStyle(surface).backgroundColor)
     expect(parseFloat(style.borderTopLeftRadius)).toBeGreaterThan(0)
     expect(style.marginTop).toBe("16px")
@@ -111,7 +110,7 @@ describe("UIMessage.css examples", () => {
 
   it("lays an icon message out as a row, the icon large beside the content", () => {
     Sheets.adopt([...foundationCSS, messageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const message = root.querySelector<HTMLElement>(".ui.icon.message")!
     const style = getComputedStyle(message)
     expect(style.display).toBe("flex")
@@ -126,7 +125,7 @@ describe("UIMessage.css examples", () => {
 
   it("pins the close button top right", () => {
     Sheets.adopt([...foundationCSS, messageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const close = root.querySelector<HTMLElement>(".ui.message > .close.icon")!
     const message = close.parentElement!.getBoundingClientRect()
     const box = close.getBoundingClientRect()
@@ -138,7 +137,7 @@ describe("UIMessage.css examples", () => {
 
   it("tints colours and states from their roles:  surface, text, header and border", () => {
     Sheets.adopt([...foundationCSS, messageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     for (const [selector, hue] of [
       [".ui.red.message:not(.inverted)", "red"],
       [".ui.warning.message", "warning"],
@@ -156,7 +155,7 @@ describe("UIMessage.css examples", () => {
     /** `hue`'s roles on a probe:  surface as its background, text as its colour, header as its outline. */
     function roles(hue: string) {
       return getComputedStyle(
-        Fixture.render(
+        Sheets.render(
           `<span style="background: var(--ui-${hue}-background); color: var(--ui-${hue}-text); outline-color: var(--ui-${hue}-header)"></span>`
         )
       )
@@ -165,7 +164,7 @@ describe("UIMessage.css examples", () => {
 
   it("floats, compacts, attaches, aligns and inverts", () => {
     Sheets.adopt([...foundationCSS, messageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     expect(style(".ui.floating.message").boxShadow.split("inset").length).toBeGreaterThan(1)
     expect(style(".ui.floating.message").boxShadow).toMatch(/\d+px \d+px \d+px/)
@@ -191,7 +190,7 @@ describe("UIMessage.css examples", () => {
 
   it("scales by size;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, messageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     const ladder = ["mini", "tiny", "small", "large", "big", "huge", "massive"].map((name) =>
       size(`.ui.${name}.message`)
@@ -202,7 +201,7 @@ describe("UIMessage.css examples", () => {
 
   it("hides hidden messages and shows visible ones", () => {
     Sheets.adopt([...foundationCSS, messageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     expect(getComputedStyle(root.querySelector(".ui.hidden.message")!).display).toBe("none")
     expect(getComputedStyle(root.querySelector(".ui.visible.message")!).display).toBe("block")
   })
@@ -215,7 +214,7 @@ describe("UIMessage.css examples", () => {
 describe("UIMessage.css in shadow roots", () => {
   it("styles slotted paragraphs and lists, and spaces hosts by their position", () => {
     Sheets.adopt(foundationCSS)
-    const frame = Fixture.render(`<div></div>`)
+    const frame = Sheets.render(`<div></div>`)
     const [first, second] = [1, 2].map(() => {
       const host = document.createElement("span")
       frame.append(host)
@@ -241,7 +240,7 @@ describe("UIMessage.css in shadow roots", () => {
 
   it("hands slotted parts its header colour, header size and icon layout, but not its fill or scale", () => {
     Sheets.adopt(foundationCSS)
-    const host = Fixture.render(`<span></span>`)
+    const host = Sheets.render(`<span></span>`)
     Sheets.attach(
       host,
       `<div class="ui large red icon message"><span class="icon"><slot name="icon"></slot></span><div class="content"><slot></slot></div></div>`,
@@ -258,7 +257,7 @@ describe("UIMessage.css in shadow roots", () => {
       ...foundationCSS,
       partsCSS
     ])
-    const redHeader = Fixture.render(`<span style="color: var(--ui-red-header)"></span>`)
+    const redHeader = Sheets.render(`<span style="color: var(--ui-red-header)"></span>`)
     const inner = getComputedStyle(Sheets.inner(header))
     expect(inner.color).toBe(getComputedStyle(redHeader).color)
     expect(parseFloat(inner.fontSize)).toBeCloseTo(
@@ -284,7 +283,7 @@ function sheets(): string[] {
 describe("UIMessage.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, messageCSS])
-    const root = Fixture.render(`<div style="--ui-message-radius: 20px"><div class="ui message">x</div></div>`)
+    const root = Sheets.render(`<div style="--ui-message-radius: 20px"><div class="ui message">x</div></div>`)
     expect(getComputedStyle(root.querySelector(".ui.message")!).borderTopLeftRadius).toBe("20px")
   })
 })

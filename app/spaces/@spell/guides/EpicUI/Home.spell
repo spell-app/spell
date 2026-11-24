@@ -1,0 +1,307 @@
+"home" is a notebook page
+	<header level="1">
+		The Epic Elements
+		<header>Every &lt;epic-*&gt; element an epic page is made of, how they nest, and a page for each.</>
+	</>
+
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone reading or writing an epic page's markup, or changing an element</>
+		<item icon="flag">Status: <label size="mini" color="green">built</> every tag in <link title="epic/src/components/" target="src-spell-epic-src-components" link="/epic/src/components/"><text code>components/</></></>
+		<item icon="book">The full markup rules: <link title="epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text code>PLAN-DOC.md</></></>
+	</>
+
+	<section label="1. How they nest">
+		<icon slot="icon" name="layer group"/>
+		<list bulleted>
+			<item>Each tag is an element: it draws itself. <list bulleted><item>Its ATTRIBUTES are data (an item's <text code>status</>).</> <item>Its CHILDREN are prose (the doc's own words).</></></>
+			<item>What it draws (chips, title lines, buttons, card headings) lives in its shadow root, never in the file.</>
+			<item>Each is described once, in its vocabulary file (<text code>&lt;Name&gt;.en.ts</>): its attributes, their values, and which children it takes. <list bulleted><item>The browser and the epic tool both read it.</></></>
+		</>
+		<text paragraph>How the tags nest:</>
+		<markdown>
+			```text
+			epic-page                    the whole doc:  header, crumbs, Send
+			  epic-overview              the Overview
+			    epic-summary             its two-sentence lede
+			    epic-prompt              the kickoff prompt, folded
+			    epic-section             one Overview part (kind="overview-part")
+			  epic-section               phases, questions, judgements, todos, issues, manual tests, log
+			    epic-phase               a phase
+			      epic-field             Symptom, Changes, Goal, Done, Files, Verify ...
+			      epic-update            a change to the phase's plan, after Goal
+			      epic-commit            a commit
+			    epic-item                a question, judgement call, todo, issue or manual test
+			      epic-question          a question's text as first asked
+			      prose elements         net effect, code, aside, note, labelled fields
+			      epic-choices           option cards
+			        epic-option          one option
+			      epic-answer            the answer
+			      epic-more              More Details
+			      epic-reply             a reply card
+			      epic-original          the Original Discussion
+			        epic-version         one earlier version
+			      epic-status            Claude's status card
+			    epic-event               a log line (kind="log")
+			```
+		</>
+		<text paragraph>Why it's built this way, and how a page draws: <link target="src-guides-epic-components-epic-components-html" link="/guides/epic-components/epic-components.html">Epic Pages as Components</>.</>
+	</>
+
+	<section label="2. The page and its sections">
+		<icon slot="icon" name="map"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Tag</>
+				<cell>Its role</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+						<text code>epic-page</>
+					</>
+				</>
+				<cell>The whole doc: holds its data (epic, title, branch, dates) and draws the header, crumbs, and Send.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-overview-html" link="/epic-overview">
+						<text code>epic-overview</>
+					</>
+				</>
+				<cell>The Overview: the summary, the kickoff prompt and the plan's prose parts, with the estimate total.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-summary-html" link="/epic-summary">
+						<text code>epic-summary</>
+					</>
+				</>
+				<cell>The Overview's two-sentence lede.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-prompt-html" link="/epic-prompt">
+						<text code>epic-prompt</>
+					</>
+				</>
+				<cell>The prompt that started the epic, as typed, folded under "Kickoff prompt".</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-section-html" link="/epic-section">
+						<text code>epic-section</>
+					</>
+				</>
+				<cell>One section by its <text code>kind</>: its numbered title, count and state filter; or an Overview part.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+						<text code>epic-phase</>
+					</>
+				</>
+				<cell>A phase: its status, estimate and fields.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-field-html" link="/epic-field">
+						<text code>epic-field</>
+					</>
+				</>
+				<cell>A labelled block: a phase's Symptom, Goal, Done ..., or "Where:" in an item.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated">
+						<text code>epic-updated</>
+					</>
+				</>
+				<cell>RETIRED (2026-10-11): an older doc's change to a phase's plan, migrated to epic-update.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-update-html" link="/epic-update">
+						<text code>epic-update</>
+					</>
+				</>
+				<cell>An update: <text bold>Update</>: &lt;summary&gt; and its date, after what it changed (a phase's plan change, or prose); empty, the orange UPDATE label on an item changed while its phase runs.</>
+			</>
+		</>
+	</>
+
+	<section label="3. Items and their cards">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Tag</>
+				<cell>Its role</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-item-html" link="/epic-item">
+						<text code>epic-item</>
+					</>
+				</>
+				<cell>Any item (its kind is its id's letter): the line with its chip, the review buttons, the folded details.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-question-html" link="/epic-question">
+						<text code>epic-question</>
+					</>
+				</>
+				<cell>A question's text as first asked, under "Question".</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-choices-html" link="/epic-choices">
+						<text code>epic-choices</>
+					</>
+				</>
+				<cell>A set of option cards, on any item; which one was chosen.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-option-html" link="/epic-option">
+						<text code>epic-option</>
+					</>
+				</>
+				<cell>One option card: its letter, title, the recommended thumbs-up, the Choose pill.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-answer-html" link="/epic-answer">
+						<text code>epic-answer</>
+					</>
+				</>
+				<cell>A question's answer card.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-more-html" link="/epic-more">
+						<text code>epic-more</>
+					</>
+				</>
+				<cell>The "More Details" card that Add Details writes.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-reply-html" link="/epic-reply">
+						<text code>epic-reply</>
+					</>
+				</>
+				<cell>A reply card, yours or Claude's, dated at the right of its band.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-status-html" link="/epic-status">
+						<text code>epic-status</>
+					</>
+				</>
+				<cell>Claude's status card on a mark: blue "Underway", then green "Done".</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-original-html" link="/epic-original">
+						<text code>epic-original</>
+					</>
+				</>
+				<cell>The folded Original Discussion: text a rewrite replaced.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-version-html" link="/epic-version">
+						<text code>epic-version</>
+					</>
+				</>
+				<cell>One earlier version inside it, dated.</>
+			</>
+		</>
+	</>
+
+	<section label="4. Prose elements">
+		<icon slot="icon" name="feather"/>
+		<text paragraph>Blocks prose used to shape by hand. Each goes wherever prose goes: an item's text, a reply, an option card, a phase field.</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Tag</>
+				<cell>Its role</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-net-effect-html" link="/epic-net-effect">
+						<text code>epic-net-effect</>
+					</>
+				</>
+				<cell>"Net effect (A, recommended):" over its list.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-code-html" link="/epic-code">
+						<text code>epic-code</>
+					</>
+				</>
+				<cell>A folded, highlighted code block.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-aside-html" link="/epic-aside">
+						<text code>epic-aside</>
+					</>
+				</>
+				<cell>A folded "Aside:" the main text can skip.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-note-html" link="/epic-note">
+						<text code>epic-note</>
+					</>
+				</>
+				<cell>A small orange UPDATE (or green DONE) note that stays in the prose.</>
+			</>
+		</>
+		<text paragraph><text code>epic-field</> (above) is one too, with a <text code>label</>: "Where:", "Step:".</>
+	</>
+
+	<section label="5. The log and commits">
+		<icon slot="icon" name="clock rotate left"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Tag</>
+				<cell>Its role</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-commit-html" link="/epic-commit">
+						<text code>epic-commit</>
+					</>
+				</>
+				<cell>A commit under a phase or an item, linked through the page's <text code>repo</>.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-event-html" link="/epic-event">
+						<text code>epic-event</>
+					</>
+				</>
+				<cell>One line of the log, in its own date format.</>
+			</>
+		</>
+	</>
+
+	<section label="6. Changing an element">
+		<icon slot="icon" name="puzzle piece"/>
+		<list bulleted>
+			<item>A new one: <text code>spell pack add epics epic-&lt;name&gt;</>. Change the vocabulary first, then the class and its sheet.</>
+			<item>Then <text code>yarn pack:build</> in the <link title="spell-epic" target="src-spell-epic" link="/spell-epic/">epics package</>, and commit its built pack (<link target="src-spell-epic-src-components-pack" link="/epic/src/components/__pack/"><text title="epic/src/components/__pack/" code>components/__pack/</></>) with the change. <list bulleted><item><text code>yarn test</> fails while the pack is stale.</></></>
+			<item>Epic pages draw with <text code>main</>'s pack, so a change shows only once it merges. <list bulleted><item>Small fixes go straight on <text code>main</>.</></></>
+			<item>A tag the docs already use, changed in its markup: a converter run, never a second way to read the old markup.</>
+		</>
+		<text paragraph>The rules in full: <link title="epic/src/AGENTS.md" target="src-spell-epic-src-agents-md" link="/epic/src/AGENTS.md">epics's <text code>AGENTS.md</></>.</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>.</>
+		</>
+	</>

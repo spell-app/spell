@@ -1,0 +1,271 @@
+"epic reply" is a notebook page
+	<header level="1">
+		&lt;epic-reply&gt;
+		<header>A reply on an item: headed who and what about, the date at its right; Claude's violet, your ivory.</>
+	</>
+
+	<text class="lede" paragraph>A reply on an item: a card headed <text code>&lt;who&gt; · re: &lt;what about&gt;</>, the date at its right, the reply itself its children. Claude's are terracotta, yours violet.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take the "item" style sheet before the pack's
+		              <epic-item> can, and the live items draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-answer" link="/epic/src/components/epic-answer/"><text title="epic/src/components/epic-answer/" code>epic-answer/</></>.</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-answer-epicreply-en-ts" link="/epic/src/components/epic-answer/EpicReply.en.ts"><text title="epic/src/components/epic-answer/EpicReply.en.ts" code>EpicReply.en.ts</></>.</>
+	<text class="meta" paragraph>The markup rules: <link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+		<list bulleted>
+			<item>Click a line to unfold it.</>
+			<item>The review buttons don't show here: they show only on an epic page being reviewed.</>
+		</>
+		<text paragraph>Your note, kept as your reply once Claude took it, then Claude's answer: issue I6 of the <text code>epic-components</> epic, cut down.</>
+		<html>
+			<epic-item id="i6" title="An open item's details flicker when its part is edited" status="done" state="recent" open>
+				<p>A re-fetch counted as "on its way" again, so an open item hid its details until the new part arrived.</>
+				<epic-reply from="Ana" at="2026-10-07 10:44" re="revisit soon">
+					<p>fix it</>
+				</>
+				<epic-reply from="Ana" agent="claude" at="2026-10-07 10:56" re="\"fix it\"">
+					<p>Fixed at the source, <code>SourceBody</> in Spell UI, so every element that loads a part gets it.</>
+				</>
+			</>
+		</>
+		<text paragraph>Any agent, in any person's session (epic <text code>epic-friend</> P10): Bob's Codex reads <text code>Codex (Bob)</>, in the agent's colour. Ana has a colour of her own here, the theme token <text code>--epic-voice-person-ana</> (a repo sets it with <text code>colors</> in its epic settings).</>
+		<html>
+			<ui-stack style="--epic-voice-person-ana: #2f9e6e">
+				<epic-reply from="Ana" at="2026-11-02 10:00" re="revisit soon">
+					<p>Can it skip the empty ones?</>
+				</>
+				<epic-reply from="Bob" agent="codex" at="2026-11-02 10:12" re="\"skip the empty ones\"">
+					<p>Done: an empty part is left out of the list.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From todo T1 of the <text code>windows-and-review</> epic (<link title="epics/windows-and-review/parts/t1.html" target="src-epics-windows-and-review-parts-t1-html" link="/epics/windows-and-review/parts/t1.html"><text code>t1.html</></>).</>
+		<text paragraph>t1.html:</>
+		<markdown>
+			```html
+			<epic-reply from="Claude" at="2026-10-06 23:55" re="as built (Doc Review)"
+			  ><p>
+			    Checked in P5 on a throwaway window: changing a window's colours, theme or title restarts nothing (Q11). A new
+			    window takes its colours a moment late, for another reason (C5).
+			  </p></epic-reply
+			>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><text code>&lt;epic-item&gt;</></>: after its answer and More Details, oldest first</>
+			<item><link target="src-packages-epics-docs-epic-version-html" link="/epic-version"><text code>&lt;epic-version&gt;</></>: replies as they were, in an Original Discussion</>
+		</>
+		<text paragraph>Its children are prose, and may hold the prose elements, option cards (<link target="src-packages-epics-docs-epic-choices-html" link="/epic-choices"><text code>&lt;epic-choices&gt;</></>) among them.</>
+		<text paragraph>Its children:</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Child</>
+				<cell>How many</>
+				<cell>What it holds</>
+			</>
+			<row>
+				<cell>prose</>
+				<cell>any number</>
+				<cell>The reply.</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>from</>
+				</>
+				<cell>text</>
+				<cell>Who wrote it, a person's name (<text code>Ana</>); on an agent's reply, whose session wrote it. Drawn <text code>You</> when it's the reader's own; before epic <text code>epic-friend</> P2, Claude's said <text code>Claude</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>agent</>
+				</>
+				<cell>text</>
+				<cell>The agent that wrote it (<text code>claude</>), else none: the person in <text code>from</> did. Drawn <text code>Claude (Ana)</>, or <text code>Claude</> for the reader's own session. An old reply without it is Claude's when <text code>from</> says <text code>Claude</>; the migration <text code>agents-marked</> adds it.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>at</>
+				</>
+				<cell>a time, <text code>2026-10-06 23:55</></>
+				<cell>When: <text code>2026-10-06 23:55</>, drawn <text code>10/6/26 23:55</> (<text code>PlanDates</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>re</>
+				</>
+				<cell>text</>
+				<cell>What it's about (<text code>as built (Doc Review)</>, <text code>revisit soon</>).</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A slot is a place in the drawing that a child goes to: a child with <text code>slot="name"</> goes to that name's place, every other child to the default one (shown as <text italic>default</>).</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes there</>
+				</>
+				<row>
+					<cell>
+						<text italic>default</>
+					</>
+					<cell>The reply.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-reply::part(header)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The card: Claude's terracotta, yours violet (<text code>from</>).</>
+				</>
+				<row>
+					<cell>
+						<text code>header</>
+					</>
+					<cell>Its heading band, a flex row: the fold chevron, <text code>who</> left, <text code>date</> right; a click folds it.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>The fold chevron, a <text code>&lt;button&gt;</>, first in the band; only with a body.</>
+				</>
+				<row>
+					<cell>
+						<text code>who</>
+					</>
+					<cell>The heading's left: <text code>&lt;from&gt; · re: &lt;re&gt;</>; wraps within itself.</>
+				</>
+				<row>
+					<cell>
+						<text code>date</>
+					</>
+					<cell>The heading's right: <text code>at</>, <text code>10/6/26 23:55</>, on the top line; never wraps.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>The reply; not drawn when empty; hidden (<text code>until-found</>) while folded.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-reply:state(open)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>Unfolded: it starts so (page state, never written).</>
+				</>
+				<row>
+					<cell>
+						<text code>in-thread</>
+					</>
+					<cell>In its item's thread: inside the thread's one frame, with the item's other replies and its status lines.</>
+				</>
+				<row>
+					<cell>
+						<text code>thread-start</>
+					</>
+					<cell>First in the thread: the frame's top edge and corners.</>
+				</>
+				<row>
+					<cell>
+						<text code>thread-end</>
+					</>
+					<cell>Last in the thread, or its folded first reply: the frame's bottom edge and corners.</>
+				</>
+				<row>
+					<cell>
+						<text code>thread-hidden</>
+					</>
+					<cell>After the thread's first reply, which is folded: hidden with it.</>
+				</>
+				<row>
+					<cell>
+						<text code>new</>
+					</>
+					<cell>Claude's newest reply in its item (none of yours after it), not seen yet in this browser: an orange edge and <text code>NEW</>. Seen once on screen for 1.2s.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<text paragraph>The colours mean the same on every doc page: the whole scheme is on <link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">Epic Page Colours</> (its source: <link title="epic/templates/epics/plan-doc.md" target="src-spell-epic-templates-epics-plan-doc-md" link="/epic/templates/epics/plan-doc.md"><text code>plan-doc.md</></>, "Colours").</>
+		<list bulleted>
+			<item>WHO wrote it (epic <text code>epic-friend</> P2): a person's reply (no <text code>agent</>) says <text code>You</> when it's yours (the name the page server gives the page), else their name, every person's in the one person's look; an agent's (<text code>agent="claude"</>) says <text code>Claude (Ana)</> for another person's session, plain <text code>Claude</> for your own or an old one, in Claude's look. A round mark of the name's initial comes first.</>
+			<item>Any agent by its name (epic <text code>epic-friend</> P10): <text code>agent="codex"</> says <text code>Codex (Bob)</>, or <text code>Codex</>; one epic doesn't know, its id capitalised.</>
+			<item>A colour of their own: a person or an agent the repo gives a colour (<text code>colors</> in its epic settings) draws in it, through their own theme token (<text code>--epic-voice-person-ana</>, <text code>--epic-voice-agent-codex</>); an agent's words take the agent's. Anyone else keeps the shared voice.</>
+			<item>The band: <text code>Claude · re: as built (Doc Review)</> on the left, free to wrap; the date (<text code>10/6/26 23:55</>) on the right of the top line, never wrapping.</>
+			<item>In an item, every reply is part of ONE section, the item's THREAD, in the order said: one card frame round them all, a thin rule between them, with Claude's status line last;  the first reply's fold folds the whole thread (epic <text code>epic-engine</> P27).</>
+			<item>Claude's newest reply, with none of yours after it, has an orange edge and a small <label size="mini" color="orange">NEW</> in its band until you have seen it: on screen for 1.2 seconds, remembered in this browser (orange: changed since you looked).</>
+			<item>Your note asking for More Details sits just ABOVE Claude's More Details card, which answers it, and starts FOLDED to its band: it came first (2026-10-24).</>
+		</>
+		<text paragraph>It folds by its heading band: a click anywhere on the band (but on a link or a button in it) folds or unfolds it, the chevron first in the band. It starts open, since it's the text being read; folding is the reader's own and never written into the file. Folded text is still found by the browser's find-in-page, which unfolds it.</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>plan-doc details &lt;name&gt; &lt;id&gt; --file html --append</>, the HTML an <text code>&lt;epic-reply&gt;</>: goes after the other replies. An old <text code>div.plan-reply</> is turned into one on the way in (<text code>IncomingHtml</>).</>
+			<item><text code>epic inbox done &lt;name&gt;</> or <text code>clear</>, on a mark with a note: your note is kept as the person's own reply (<text code>from="Ana"</>, <text code>re="revisit soon"</> ...), placed before Claude's answer to it;  an agent's own replies handed in are marked its on the way (<text code>from="Ana" agent="codex"</>, the agent running the command:  <text code>IncomingHtml</>)</>
+			<item>older docs: the converter, from <text code>div.plan-reply</></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>: the tables are its vocabulary's; the rest from its component, its stylesheet and <ui-link title="epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><ui-text code>PLAN-DOC.md</></>.</>
+		</>
+	</>

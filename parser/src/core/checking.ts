@@ -23,6 +23,7 @@
  */
 import { ITEMS_KEY, rulePattern, schemaOf, TYPE_KEY, type PropInfo, type PropRule } from "spell/util"
 
+import { kindOf, type Kind } from "./kinds"
 import { REF_KEY, upgradeEntry } from "./saving"
 
 /** A problem `checkEntry()` found:  the property it's in (`""` for the entry itself), and what's wrong, in words. */
@@ -32,36 +33,6 @@ export type EntryProblem = { property: string; message: string }
 export type CheckOptions = {
   /** The class named `name`, e.g. `Person`;  `undefined` if there's none. */
   classNamed: (name: string) => Function | undefined
-}
-
-/**
- * What a property holds, as the checker and the schema writer both read it from its declaration.
- * - `text`, `number`, `choice`, `date`:  a value of that kind
- * - `thing`:  a thing of `className` (or a kind of it), by reference or written whole
- * - `list`:  an array, each item of `item`'s kind
- * - `any`:  declared with no kind the checker knows:  anything goes
- * - `oneOf`:  its legal values, when they're plain values
- */
-export type Kind =
-  | { kind: "text" | "number" | "choice" | "date" | "any"; oneOf?: readonly unknown[] }
-  | { kind: "thing"; className: string }
-  | { kind: "list"; item: Kind }
-
-/** The kinds spell's runtime names that aren't classes, by name. */
-const VALUE_KINDS = new Set(["text", "number", "choice", "date"])
-
-/**
- * What a property declared as `info` holds -- see `Kind`.
- * - A declared `itemType` makes it a list;  a capitalised `type` is a class.
- */
-export function kindOf(info: PropInfo | undefined): Kind {
-  if (!info) return { kind: "any" }
-  if (info.itemType) return { kind: "list", item: kindOf({ type: info.itemType }) }
-  const type = info.type ?? ""
-  const oneOf = legalValues(info)
-  if (VALUE_KINDS.has(type)) return { kind: type as "text", ...(oneOf && { oneOf }) }
-  if (/^[A-Z]/.test(type)) return { kind: "thing", className: type }
-  return { kind: "any", ...(oneOf && { oneOf }) }
 }
 
 ////////////////
@@ -280,13 +251,6 @@ function declaredProps(Class: Function): Map<string, PropInfo> {
 ////////////////
 // ## Helpers
 ////////////////
-
-/** `info`'s legal values, when they're all plain values (text, numbers, yes or no):  else `undefined`. */
-function legalValues(info: PropInfo): readonly unknown[] | undefined {
-  const values = typeof info.oneOf === "function" ? info.oneOf() : info.oneOf
-  if (!values?.length || !values.every((it) => it === null || typeof it !== "object")) return undefined
-  return values
-}
 
 /** Is `value` a plain object? */
 function isObject(value: unknown): value is Record<string, unknown> {

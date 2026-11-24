@@ -12,10 +12,12 @@ export const inputEs = {
   name: "entrada",
   snippet: '<es-entrada marcador="Escribe aquí"></es-entrada>',
   aka: ["entrada", "campo de texto", "cuadro de texto", "campo de entrada", "cuadro de búsqueda"],
-  attributes: { action: "accion", folder: "carpeta" },
+  attributes: { action: "accion", folder: "carpeta", shortcut: "atajo" },
   values: {
     type: { text: "text", date: "date", time: "time", month: "month", percent: "porcentaje" },
     inputmode: { none: "none", text: "text" }
   },
-  slots: { action: "accion" }
+  slots: { action: "accion" },
+  parts: { shortcut: "atajo" },
+  texts: { inputClear: "Borrar" }
 } as const satisfies E.TagDictionary

@@ -135,7 +135,7 @@ describe("<epic-page>", () => {
   })
 
   // epic `epic-workflow` P15:  a saga's page, from the same elements
-  test("a saga page:  crumbs DOCS / SAGAS / <id>, its short address in the meta lines, its review command;  no step label, Plan hung?, See Also or agents", async () => {
+  test("a saga page:  crumbs SAGAS / <id>, its short address in the meta lines, its review command;  no step label, Plan hung?, See Also or agents", async () => {
     const fetched = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ pages: [] })))
     const host = await render(
       `<epic-page kind="saga" saga="epics" title="Epic Tooling" started="2026-10-14" updated="2026-10-14">` +
@@ -144,17 +144,13 @@ describe("<epic-page>", () => {
     )
     const shadow = host.shadowRoot!
     expect(shadow.querySelector("h1 button")!.textContent).toBe("epics")
-    expect(shadow.querySelector("h1 button")!.getAttribute("data-tooltip")).toBe(
-      "epics:  copy /epic review SAGA:/epics"
-    )
+    // no tooltip over the title (I370)
+    expect(shadow.querySelector("h1 button")!.getAttribute("data-tooltip")).toBeNull()
     const crumbs = Array.from(shadow.querySelectorAll("ui-breadcrumb"), (crumb) => [
       crumb.textContent,
       crumb.getAttribute("link")
     ])
-    expect(crumbs).toEqual([
-      ["Spell Epic", "/pages/index.html"],
-      ["Sagas", "/sagas/index.html"]
-    ])
+    expect(crumbs).toEqual([["Sagas", "/sagas/index.html"]])
     const lines = Array.from(shadow.querySelectorAll('[part~="meta"] > li'), (li) =>
       li.textContent!.replace(/\s+/g, " ").trim()
     )
@@ -263,7 +259,7 @@ describe("<epic-page>", () => {
   })
 
   // Owen, 2026-10-13:  "Just go with a single set of breadcrumbs"
-  test("draws its crumbs in the h1, `Docs / Epics /` then the name;  NONE while the doc still holds its old crumbs before it", async () => {
+  test("draws its crumb in the h1, `Epics /` then the name, never the top bar's Spell Epic again (T148);  NONE while the doc still holds its old crumbs before it", async () => {
     const host = await render(page("", ["todo"]))
     const crumbs = host.shadowRoot!.querySelector('[part~="crumbs"]')!
     expect(
@@ -272,10 +268,7 @@ describe("<epic-page>", () => {
         crumb.getAttribute("link"),
         crumb.hasAttribute("selected")
       ])
-    ).toEqual([
-      ["Spell Epic", "/pages/index.html", false],
-      ["Epics", "/epics/index.html", false]
-    ])
+    ).toEqual([["Epics", "/epics/index.html", false]])
     expect(crumbs.parentElement!.localName).toBe("h1")
     expect(crumbs.nextElementSibling!.textContent).toBe("demo")
 
@@ -435,7 +428,7 @@ describe("<epic-page>", () => {
     const named = await render(page(`saga="epics"`, ["todo"]))
     const namedLink = () => named.shadowRoot!.querySelector<HTMLAnchorElement>('[part~="meta"] li.saga a')!
     await vi.waitFor(() => expect(namedLink().textContent).toBe("Epic Tooling"))
-    expect(namedLink().getAttribute("data-tooltip")).toBe("Saga:  Epics")
+    expect(namedLink().getAttribute("data-tooltip")).toBeNull()
     const none = await render(page("", ["todo"]))
     expect(none.shadowRoot!.querySelector('[part~="meta"] li.saga')).toBeNull()
     fetched.mockRestore()
@@ -656,7 +649,7 @@ describe("<epic-page> Send and its countdown", () => {
       expect(pill.textContent!.replace(/\s+/g, " ").trim()).toBe(
         "Bob's Codex isn't listening: ask it to run epic inbox wait demo"
       )
-      expect(pill.dataset.tooltip).toBe("Copy the command")
+      expect(pill.dataset.tooltip).toBeUndefined()
       pill.click()
       await ElementFixture.tick()
       // nothing woken:  no POST at all (the Claude pill's click starts a review)
@@ -706,7 +699,7 @@ describe("<epic-page> Send and its countdown", () => {
     await client.refresh()
     await ElementFixture.tick()
     expect(pill()!.textContent).toBe(message)
-    expect(pill()!.dataset.tooltip).toBe("Start the review in this epic's session")
+    expect(pill()!.dataset.tooltip).toBeUndefined()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     await client.refresh()
     await ElementFixture.tick()
@@ -1013,7 +1006,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(markedBadge(host)).toEqual(["3", "3 with Claude\nHide these · ⌥-click:  only these"])
     expect(chipsOf(questions).map((chip) => `${chip.dataset.state}:${chip.textContent}`)).toEqual(["open:1"])
     expect(markedBadge(questions)).toEqual(["2", "2 with Claude\nHide these · ⌥-click:  only these"])
-    // each marked item's id chip ringed in the badge's blue (Owen:  "the T1 should be blue outline");  an unmarked one not
+    // each marked item's id chip ringed in the badge's blue (T145:  its own colour inside till Send);  an unmarked one not
     const idChip = (id: string) => host.querySelector(`#${id}`)!.shadowRoot!.querySelector<HTMLElement>('[part~="id"]')!
     expect(["q1", "q2", "t1"].map((id) => idChip(id).hasAttribute("data-marked"))).toEqual([true, true, true])
     expect(idChip("t2").hasAttribute("data-marked")).toBe(false)
@@ -1513,10 +1506,8 @@ describe("<epic-page> the header (P53)", () => {
     const heading = host.shadowRoot!.querySelector('[part~="heading"]')!
     expect(box(heading).right).toBeLessThanOrEqual(planeBox().left)
     expect(planeBox().right).toBeLessThanOrEqual(box(host.shadowRoot!.querySelector('[part~="status"]')!).left)
-    // the name cut short, its whole name in its tooltip
-    expect(host.shadowRoot!.querySelector("h1 button")!.getAttribute("data-tooltip")).toBe(
-      "demo:  copy /epic resume demo"
-    )
+    // the name cut short, no tooltip (I370)
+    expect(host.shadowRoot!.querySelector("h1 button")!.getAttribute("data-tooltip")).toBeNull()
   })
 
   test("with a mark unsent and 2 minutes:  the ring round the plane;  a press sends at once (not `now`)", async () => {
@@ -1745,7 +1736,7 @@ describe("<epic-page> stages", () => {
   })
 
   // epic `epic-engine` I180 (Owen, 2026-10-29:  "This should just be normal paper plane");  its countdown I181
-  test("a stage:  the header keeps the paper plane;  Accept Overview on the Overview's title row, what's open in its tooltip;  a press holds its mark, counting;  run out:  sent, outlined green", async () => {
+  test("a stage:  the header keeps the paper plane;  Accept Overview on the Overview's title row, what's open in its name;  a press holds its mark, counting;  run out:  sent, outlined green", async () => {
     const routes = new FakeRoutes()
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
@@ -1759,7 +1750,7 @@ describe("<epic-page> stages", () => {
     expect(step(host)?.words).toBe("OVERVIEW")
     // none on the Phases section:  the page isn't agreeing its phases yet
     expect(stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)).toBeUndefined()
-    expect(accept()!.dataset.tooltip).toBe(
+    expect(accept()!.getAttribute("aria-label")).toBe(
       "Agree the Overview:  Claude writes the phases next · 2 questions open · " + "sent 5 minutes after a press"
     )
     expect(accept()!.querySelector("ui-icon")!.getAttribute("name")).toBe("thumbs up")
@@ -1776,12 +1767,14 @@ describe("<epic-page> stages", () => {
     // counting:  the ring round the thumbs up, how long is left in its tooltip;  nothing sent
     await vi.waitFor(() => expect(accept()!.dataset.state).toBe("counting"))
     expect(accept()!.querySelector('[part~="ring"]')).not.toBeNull()
-    expect(accept()!.dataset.tooltip).toMatch(/sends in [45]:\d\d:  press again to stop$/)
+    expect(accept()!.getAttribute("aria-label")).toMatch(/sends in [45]:\d\d:  press again to stop$/)
     // run out (its `at` passed):  the page sends it
     routes.inbox.marks.stage = { action: "accept", stage: "overview", countdown: true, at }
     await vi.waitFor(async () => expect(await ReviewClient.forPage().refresh()).toBe(true))
     await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]), { timeout: 3000 })
-    await vi.waitFor(() => expect(accept()!.dataset.tooltip).toBe("Accepted:  Claude writes the phases next"))
+    await vi.waitFor(() =>
+      expect(accept()!.getAttribute("aria-label")).toBe("Accepted:  Claude writes the phases next")
+    )
     expect(accept()!.dataset.state).toBe("accepted")
     expect(getComputedStyle(accept()!).borderTopColor).not.toBe(grey)
     expect(getComputedStyle(accept()!).borderTopColor).toBe(getComputedStyle(accept()!).color)
@@ -1860,7 +1853,7 @@ describe("<epic-page> stages", () => {
     const again = await render(stagedPage("phases"))
     const reloaded = () => stageButtonOf(again.querySelector('epic-section[kind="phases"]')!)
     await vi.waitFor(() => expect(reloaded()?.dataset.state).toBe("counting"))
-    expect(reloaded()!.dataset.tooltip).toMatch(/sends in (3:00|2:5\d):/)
+    expect(reloaded()!.getAttribute("aria-label")).toMatch(/sends in (3:00|2:5\d):/)
     const done = reloaded()!.querySelector<SVGCircleElement>('[part~="ring"] .done')!
     expect(Number.parseFloat(done.style.strokeDasharray)).toBeCloseTo(40, 0)
     const sends = routes.posts.filter(([route]) => route === "send").length
@@ -1913,7 +1906,7 @@ describe("<epic-page> stages", () => {
   })
 
   // epic `epic-engine` P30:  the change marks waiting for Accept, counted from the skeleton's lists and the page
-  test("change marks need no approval (Owen, 2026-10-25):  no count in the header, none in the stage button's tooltip", async () => {
+  test("change marks need no approval (Owen, 2026-10-25):  no count in the header, none in the stage button's name", async () => {
     await adoptClient(new FakeRoutes())
     const html = stagedPage("overview")
       .replace(`<epic-phase id="p-one"`, `<epic-phase id="p-one" to-accept="ch2"`)
@@ -1926,8 +1919,10 @@ describe("<epic-page> stages", () => {
     await vi.waitFor(() => expect(plane(host).dataset.tooltip).toBeTruthy())
     expect(host.shadowRoot!.querySelector('[part~="changes"]')).toBeNull()
     expect(plane(host).dataset.tooltip).not.toMatch(/to accept/)
-    await vi.waitFor(() => expect(stageButtonOf(host.querySelector("epic-overview")!)?.dataset.tooltip).toBeTruthy())
-    expect(stageButtonOf(host.querySelector("epic-overview")!)!.dataset.tooltip).not.toMatch(/to accept/)
+    await vi.waitFor(() =>
+      expect(stageButtonOf(host.querySelector("epic-overview")!)?.getAttribute("aria-label")).toBeTruthy()
+    )
+    expect(stageButtonOf(host.querySelector("epic-overview")!)!.getAttribute("aria-label")).not.toMatch(/to accept/)
   })
 
   test("phases:  an open phase's pills are Looks good and Defer;  a done one's, and every one once building, the usual", async () => {

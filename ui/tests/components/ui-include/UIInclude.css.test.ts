@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { includeVocabulary } from "spell/ui/components/ui-include/UIInclude.en"
@@ -38,7 +37,7 @@ describe("UIInclude.css source", () => {
 describe("UIInclude.css examples", () => {
   it("makes the box a block that adds nothing of its own", () => {
     Sheets.adopt([...foundationCSS, includeCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const box = root.querySelector<HTMLElement>(".ui.include")!
     expect(getComputedStyle(box)).toMatchObject({ display: "block", paddingTop: "0px", borderTopStyle: "none" })
   })

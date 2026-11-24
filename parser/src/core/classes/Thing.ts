@@ -2,7 +2,7 @@
  * Base classes for spell.
  */
 import { isLastToConstruct, Observable, peekProp, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell/util"
-import { CLASSES_DECLARED, registerThing, noteMade, noteSetting, core } from "spell/parser/core/core"
+import { CLASSES_DECLARED, heldByRun, registerThing, noteMade, noteSetting, core } from "spell/parser/core/core"
 import type { Drawing } from "spell/parser/core/drawing"
 import { Eventful } from "spell/parser/core/SpellEvent"
 import type { PropCheck } from "spell/parser/core/core.types"
@@ -113,7 +113,7 @@ export class Thing extends Eventful(Observable) {
    */
   static declareProp(name: string, info: PropInfo): void {
     super.declareProp(name, info)
-    CLASSES_DECLARED.set(this.name, this)
+    CLASSES_DECLARED.set(this.name, heldByRun(`class:${this.name}`, this))
   }
 
   /**

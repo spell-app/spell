@@ -6,6 +6,8 @@ import type { Plugin, PluginOption, ProxyOptions, UserConfig } from "vite"
 
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
+import { brotliCopies } from "spell/toolchain/brotliCopies"
+import { ruleTestsOutOfBuilds } from "spell/toolchain/stripRuleTests"
 import { CSS_TARGETS, DEV_SERVER_SETTINGS, SOLID_DEDUPE, cssBuildTarget } from "spell/element-tools/elementConfig"
 import { emitIconPacks, emitSoundLibrary } from "spell/ui/vite.config.ts"
 import {
@@ -46,9 +48,12 @@ export const TOP_REPO = (() => {
  * - A FUNCTION, so every config gets its own plugin instances:
  *   the Solid plugin picks client or server posture from the config it's created in
  *   (`vitest`:  node, so `@solidjs/web`'s server build, `renderToString`).
- * - `standardDecorators()` FIRST:  it and the Solid plugin are both `enforce: "pre"`,
+ * - `ruleTestsOutOfBuilds()` first:  a BUILD ships each grammar rule with its first example only, not its tests.
+ * - `standardDecorators()` BEFORE the Solid plugin:  both are `enforce: "pre"`,
  *   and the Solid compiler must see decorator-free code.
  * - `compiledSpell()`:  every config, so a test or a build that reaches `<FileTabs>` reads its `.spell`.
+ * - `brotliCopies()`:  a BUILD writes a brotli copy beside each text file it writes (`x.js.br`), which the kit's
+ *   servers send as is to a browser that takes brotli (epic `solid-2-final` P2)
  * - `builtInFiles`:  a BUILD that bundles `spell-ui` emits its built-in icon packs and sounds
  *   beside the chunks that load them (`builtInFilesBesideTheirCode()`).
  *   Omit for `vitest`, and for builds that import `ui` from `spell-ui.js`.
@@ -58,15 +63,24 @@ export const TOP_REPO = (() => {
  */
 export function appConfig({ builtInFiles }: { builtInFiles?: boolean } = {}) {
   const plugins: PluginOption[] = [
+    ruleTestsOutOfBuilds(),
     standardDecorators(),
     packageVersion(import.meta.dirname),
     solid({ exclude: [NOT_SOLID_SOURCE] }),
     compiledSpell(),
-    cssBuildTarget()
+    cssBuildTarget(),
+    brotliCopies()
   ]
   if (builtInFiles) plugins.push(builtInFilesBesideTheirCode())
   return {
     plugins,
+    // the editor's language worker (`languageWorker.ts`, epic `solid-2-final` P18):  the parser, built as the page's is
+    worker: {
+      format: "es" as const,
+      plugins: () => [ruleTestsOutOfBuilds(), standardDecorators(), packageVersion(import.meta.dirname)],
+      // MUST stay on, as the page's:  rules register under their class name (`Rule.instantiate()`)
+      rollupOptions: { output: { keepNames: true } }
+    },
     // every import a package name, found through `package.json`s' `exports` (epic `repo-split` P14):  no aliases
     resolve: { dedupe: SOLID_DEDUPE },
     // every repo's files, beside spell-app (`TOP_REPO`)
@@ -284,23 +298,38 @@ const UI_DATA = /^spell\/ui\/(.+\.generated|sounds)$/
 /**
  * `spell/element`'s leaves that hold no state a page must share,
  * so each build bundles its own copy, as any plain module is.
- * - Today one:  `drawnWindow`, every long list's drawing, which the parser's core draws with.
- * - It imports only Solid and util's generic files, which come from the shared files as usual.
+ * - `drawnWindow`, every long list's drawing, which the parser's core draws with.
+ *   It imports only Solid and util's generic files, which come from the shared files as usual.
+ * - `SkeletonText` and `SkeletonShapes`:  a skeleton's text read, and the shapes it's drawn with, pure data.
+ *   The language reads the text (`loading="skeleton ..."`), and the core draws the shapes.
  */
-const BUNDLED_ELEMENT_LEAVES = new Set(["spell/element/drawnWindow"])
+const BUNDLED_ELEMENT_LEAVES = new Set([
+  "spell/element/drawnWindow",
+  "spell/element/SkeletonText",
+  "spell/element/SkeletonShapes"
+])
 
 /**
  * Spell UI's leaves that are plain DOM, with no element and no state a page must share:  bundled, as `UI_DATA` is.
  * - `DroppedFiles`, the uploader's reading of a desktop drop, which a view that takes files reads too (epic `language` P67).
+ * - The theme tree, which a site's own theme is checked and built with (`SiteThemes`, I36):  `ThemeTokens` reads every
+ *   theme and palette file (a lazy chunk each), `ThemeFile` works one out, `styles.en` is the tree itself.
+ * - `SpellUIGuide`, where the Spell UI site is (epic `editor` P43):  spell's project groups name its project.  No imports.
  */
-const BUNDLED_UI_LEAVES = new Set(["spell/ui/components/ui-uploader/DroppedFiles"])
+const BUNDLED_UI_LEAVES = new Set([
+  "spell/ui/util/SpellUIGuide",
+  "spell/ui/components/ui-uploader/DroppedFiles",
+  "spell/ui/components/ui-theme-editor/ThemeTokens",
+  "spell/ui/styles/ThemeFile",
+  "spell/ui/styles/styles.en"
+])
 
 /** Any other import from Solid's or `ui`'s packages:  `sharedSolid()` refuses it, as the shared files may lack it. */
 const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)/
 
 /**
  * For a build that takes Solid and `spell-ui` from `SHARED_SOLID`'s files beside it, instead of bundling its own:
- * `vite.element.config.ts`, `vite.editor.config.ts`, `vite.runner.config.ts`, `vite.code.config.ts`.
+ * `vite.element.config.ts`, `vite.runner.config.ts`, `vite.code.config.ts` (`<spell-editor>` too).
  * - Such an import resolves to an EXTERNAL id, which `output.paths` writes as `./spell-solid-shared.js` /
  *   `./spell-ui.js`:  relative.
  *   So every chunk that imports one MUST sit at the output folder's top level (ours do:  fixed names, no folders).
@@ -395,6 +424,11 @@ function builtInFilesBesideTheirCode(): Plugin {
 /** The editor's own Spell, the group `@spell/editor`:  any other `.spell` is a program's, read as text (a test's `?raw`). */
 const LAYOUT_FOLDER = "/spaces/@spell/editor/"
 
+/** Is `file` (a path, its query gone) a Spell file of the editor's own Spell (`LAYOUT_FOLDER`)? */
+function isEditorSpell(file: string): boolean {
+  return /\.spell(?:ml)?$/.test(file) && file.includes(LAYOUT_FOLDER)
+}
+
 /** Where the editor's own Spell keeps its last good compile:  the app's `build/`, never committed, one file per project. */
 const LAST_GOOD_FOLDER = "app/build/editor-pieces"
 
@@ -408,6 +442,9 @@ const LAST_GOOD_FOLDER = "app/build/editor-pieces"
  *   - the dev server:  Spell that doesn't compile falls back to its last good compile, and the module tells the
  *     editor why (`layoutPieceBroken()`), which says so in plain words
  *   - a build, or a test, or a project never compiled before:  it stops, saying why, so nothing broken ships
+ * - The file changing on disk (a Publish, or an edit by hand) RELOADS the editor's page, never a hot update:
+ *   a hot update put the new Spell on the copy's runtime while the old menus were still drawn, and drew them half
+ *   one, half the other (epic `editor` I329).  An edit in the editor is your draft, so it never changes this file.
  */
 function compiledSpell(): Plugin {
   let canFallBack = false
@@ -417,9 +454,14 @@ function compiledSpell(): Plugin {
     configResolved(config) {
       canFallBack = config.command === "serve" && !process.env.VITEST
     },
+    handleHotUpdate({ file, server }) {
+      if (!isEditorSpell(file)) return
+      server.ws.send({ type: "full-reload" })
+      return []
+    },
     load(id) {
       const file = id.split("?")[0]!
-      if (!/\.spell(?:ml)?$/.test(file) || !file.includes(LAYOUT_FOLDER)) return null
+      if (!isEditorSpell(file)) return null
       this.addWatchFile(file)
       const bin = path.join(TOP_REPO, "bin/spell.mjs")
       const { status, stdout, stderr } = spawnSync(process.execPath, [bin, "compile", path.dirname(file), "--stdout"], {

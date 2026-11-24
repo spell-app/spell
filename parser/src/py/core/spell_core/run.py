@@ -20,6 +20,7 @@
   Without it, English.
 - The program's own folder is first on the import path:
   another project it imports (`from cards import Card`) sits beside it.
+- It ends once its last save is sent (`core.send_saves_now()`, epic data P62).
 - A database on this device it keeps things in is a file beside it, `<Program>.device.json` (`place_kinds.py`).
 """
 
@@ -75,6 +76,7 @@ def run_program(path: str | Path, seed: int | None = None, pauses: bool = True) 
     # its whole opening can't be undone:  Undo isn't lit the moment it starts (epic `language` J180)
     names = core.run_opening(lambda: runpy.run_path(str(program), run_name="__main__"))
     core.send_waiting_changes()
+    core.send_saves_now()
     return names
 
 

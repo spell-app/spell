@@ -33,7 +33,7 @@ export class DOMToastElement extends E.DOMElement<UIToast> {
  *     a popover in the top layer.
  *   - A `<ui-toast>` written in the page is an ordinary block.
  *
- * - Its life:  once connected it animates in (Fomantic's `scale`), fires `ui-opened`,
+ * - Its life:  once connected it slides and fades in from the edge it sits at (`entrance`), fires `ui-opened`,
  *   and starts counting down `display-time` (absent or `0`:  it stays).
  *   - Closing (the countdown, the close icon, a click, Escape inside it, an action, `domElement.close()`)
  *     fires the cancelable `ui-closing` (with a `reason`), animates out,
@@ -310,11 +310,25 @@ export class UIToast extends E.UIComponent<Vocabulary> {
     this.startTimer()
     const box = this.box
     const entered = box
-      ? UI.transitions.animate({ element: box, name: SCALE, direction: UIT.IN })
+      ? UI.transitions.animate({ element: box, name: this.entrance, direction: UIT.IN })
       : Promise.resolve(true)
     void entered.then(() => {
       if (!this.isClosing) this.disclosure.sendAfter(true)
     })
+  }
+
+  /**
+   * How it comes in:  a short slide and fade from the edge it sits at, so it catches the eye (epic `editor` T154).
+   * - In a bottom container (`UI.toast({ position: "bottom right" })`) it rises (`fade-up`);
+   *   anywhere else, a top container or a page's own markup, it drops in (`fade-down`).
+   * - Its way out stays the `scale` it always had.
+   * - Reduced motion:  none, as every `UI.transitions` animation.
+   */
+  private get entrance(): typeof FADE_UP | typeof FADE_DOWN {
+    const container = this.domElement.parentElement
+    return container?.classList.contains(CONTAINER_CLASS) && container.classList.contains(UIT.BOTTOM)
+      ? FADE_UP
+      : FADE_DOWN
   }
 
   /** Disconnected:  leave `UI.overlays`, hold the countdown. */
@@ -645,8 +659,17 @@ const WORDS_PER_MINUTE = 120
 /** `display-time="auto"`:  the floor, in ms (Fomantic's `minDisplayTime`). */
 const MIN_DISPLAY_TIME = 1000
 
-/** `UI.transitions` animation in and out (Fomantic's `showMethod` / `hideMethod`). */
+/** `UI.transitions` animation out (Fomantic's `hideMethod`). */
 const SCALE = "scale"
+
+/** `UI.transitions` animation in, at the top or in a page's own markup:  it drops in (`entrance`). */
+const FADE_DOWN = "fade-down"
+
+/** `UI.transitions` animation in, at the bottom:  it rises (`entrance`). */
+const FADE_UP = "fade-up"
+
+/** Class word of `ToastStack`'s containers (`UIToast.container.css`):  a toast inside one sits at its position. */
+const CONTAINER_CLASS = "toast-container"
 
 /** Class words of the icon box (`UIToast.css`). */
 const ICON_BOX_CLASS = "centered icon"

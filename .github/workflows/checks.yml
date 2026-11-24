@@ -2,7 +2,6 @@
 # `yarn ts`, `yarn lint` and `yarn test`, over the kit and each of its folders, lowest first (`tools/repos.ts run`).
 # - ONE repo since epic `repo-split` P20:  the kit's own `src/`, and its folders `parser/`, `ui/`, `epic/` and `app/`,
 #   once spell-parser, spell-ui, spell-epic and spell-app, each with a workflow of its own.
-# - spell-brand, a project beside the kit, has its own workflow, which checks it on this repo.
 name: checks
 
 on:
@@ -47,6 +46,8 @@ jobs:
       - run: yarn ts
       - run: yarn lint
       - run: yarn test
+      # every bundle's size against its ceiling:  a bundle that grew fails (epic `solid-2-final` P1)
+      - run: node bin/spell.mjs perf budget
       # epic's slow, process-spawning tests, which its `yarn test` leaves out (epic `epic-engine` I313)
       - run: yarn test:integration
         working-directory: epic

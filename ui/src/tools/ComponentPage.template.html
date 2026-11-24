@@ -1,0 +1,168 @@
+<!doctype html>
+<!--
+  TEMPLATE:  `yarn site:new`'s, a new component's four pages in the Spell UI site (Usage, Examples, API, Theming), as
+  Spell UI's HTML, which `SpellUISite` writes as the site's Spell (`SpellMarkup`;  `ui/scripts/site-new.ts`).
+  - Never served, nor copied by hand:  `yarn site:new <tag>` fills the `{{...}}` placeholders from
+    `ui/docs/__data/pages.json5`, keeps the `site:component` blocks, drops the status label for a `done` family, and
+    rewrites the `../ui/` paths to the site's.
+  - A family's page keeps the `site:family` API block;  a sub-tag with a page of its own (pages.json5 `pages`:
+    `ui-radio`) keeps `site:tag` instead, and drops `site:theming` when no family token names it (`ui-meta`).
+  - Only each tab's markup, the title and its summary are read:  the page's `<head>` and frame are left out.
+  - How to write a page:  `epics/spell-ui-pages/PAGES.md`.  Check the Spell pages it wrote:  `yarn site:check <page>`.
+  - It was spell-epic's components page template (`templates/spell-ui-docs.html`), the HTML components pages' every
+    page, until epic `editor` P44 moved the last of those pages to Spell guides.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>A new component's Spell UI site pages</title>
+    <meta
+      name="description"
+      content="yarn site:new's template:  a new component's Usage, Examples, API and Theming pages, which it writes as Spell."
+    />
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="{{title}}">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title={{bugTitle}}"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+            <!-- site:fomantic:start -->
+            <ui-item
+              link="{{fomantic}}"
+              icon="up right from square"
+              aria-label="Fomantic UI's original page"
+              title="Fomantic UI's original page"
+            ></ui-item>
+            <!-- site:fomantic:end -->
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            {{title}}
+            <!-- site:status:start -->
+            <ui-label color="yellow" size="small">{{status}}</ui-label>
+            <!-- site:status:end -->
+            <ui-header>{{summary}}</ui-header>
+          </ui-header>
+          <!-- site:component:start -->
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+          <!-- site:component:end -->
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <!-- site:component:start -->
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+                its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+                description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+                shows in its code).
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-title" label="{{title}}" sticky="stack" collapsible dividing>
+                <ui-example description="A standard {{title}}.">
+                  <!-- the live example -->
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Short how-to: what to write, which attributes matter, the events to listen for.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  document.querySelector("{{tag}}").addEventListener("ui-change", (event) => console.log(event.detail))
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Which keys do what.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  What the shadow markup exposes, and what an author must add (`aria-label` ...).
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <!-- site:family:start -->
+            <ui-docs-api family="{{family}}"></ui-docs-api>
+            <!-- site:family:end -->
+            <!-- site:tag:start -->
+            <ui-docs-api tag="{{tag}}"></ui-docs-api>
+            <!-- site:tag:end -->
+          </ui-tab>
+
+          <!-- site:theming:start -->
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="{{family}}" playground></ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+          <!-- site:theming:end -->
+        </ui-tabs>
+        <!-- site:component:end -->
+
+        <!-- site:page:start -->
+        <article class="site-article">
+          <!--
+            PAGE:  nested `<ui-section id label sticky="stack" collapsible dividing>`s around `<ui-markdown>` / widgets;  no
+            tabs, so ids start at the top section's slug (`#overview`, `#overview-details`).
+          -->
+          <ui-section id="overview" label="Overview" sticky="stack" collapsible dividing>
+            <ui-markdown>
+              <script type="text/markdown">
+                What this page is about.
+              </script>
+            </ui-markdown>
+          </ui-section>
+        </article>
+        <!-- site:page:end -->
+      </ui-container>
+    </main>
+  </body>
+</html>

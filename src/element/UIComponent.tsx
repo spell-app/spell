@@ -183,11 +183,12 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   // 5. form controls only, as the browser reports them:
   //    `onFormAssociated()`, `onFormDisabled()`, `onFormReset()`, `onFormStateRestore()`
   // 6. `onDisconnect()`:  every time it's removed;  the component stays for the next connect
+  // -  `onMove()`:  instead of 6 then 3, when the page moves it with `moveBefore()`
   //
   // - The DOM element calls 3, 5 and 6 as the browser reports each event
   //   (DOM API `connectedCallback()`, the form callbacks ...).
   // - Each is a hook:  override the ones you need.
-  // - The base class's own work is in `onMount()`, `onConnect()`, `onDisconnect()` and `onFormDisabled()`:
+  // - The base class's own work is in `onMount()`, `onConnect()`, `onDisconnect()`, `onMove()` and `onFormDisabled()`:
   //   an override of those calls `super`.
   ////////////////
 
@@ -229,7 +230,11 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
       () => this.styleSheetNames.join(separator),
       (names) => {
         if (untrack(() => this.isReady)) {
-          E.SpellSolid.settings.styles.adoptInto(this.domElement.renderRoot, names ? names.split(separator) : [])
+          E.SpellSolid.settings.styles.adoptInto(
+            this.domElement.renderRoot,
+            names ? names.split(separator) : [],
+            this.vocabulary
+          )
         }
       },
       { defer: true }
@@ -281,6 +286,16 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    * - `mode`:  `"restore"` or `"autocomplete"`.
    */
   onFormStateRestore(_state: File | string | FormData | null, _mode: string) {}
+
+  /**
+   * Hook:  the page moved the element with `moveBefore()` (DOM API `connectedMoveCallback()`).
+   * - It stayed connected:  no `onDisconnect()`, no `onConnect()`, so nothing set up while connected starts again.
+   * - A part re-checks which element it belongs to (`PartContext`):  a move can change it.
+   * - It may run while Solid is drawing (Solid moves a node holding the focus with `moveBefore()`).
+   */
+  onMove() {
+    E.PartContext.connected(this.domElement)
+  }
 
   /** Hook:  the element was removed from its page.  The component stays, for the next connect. */
   onDisconnect() {
@@ -678,21 +693,24 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * Keep the sheet of `hostLayout` current, for a class that works one out (it overrides the hook).
-   * - The sheet is made on the first declarations, and emptied when there are none.
+   * - The sheet is the page's ONE sheet for those declarations, shared by value (`HostLayoutSheets`):
+   *   200 stacks with the same attributes adopt one sheet, not 200 (epic `solid-2-final` P4).
+   * - New declarations swap the root's sheet for theirs;  none, and it has none.
    * - Spell UI's `UI.styles` keeps it when it adopts the class's own sheets again (a sheet it didn't make).
    */
   private followHostLayout() {
     if (isServer || !UIComponent.overrides(this, "hostLayout")) return
     const root = this.domElement.renderRoot
-    let sheet: CSSStyleSheet | undefined
     const declarations = createMemo(() => this.hostLayout ?? "")
     createEffect(declarations, (text) => {
-      if (!text && !sheet) return
-      if (!sheet) {
-        sheet = new CSSStyleSheet()
-        root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
+      if (!text) return
+      const sheet = HostLayoutSheets.take(text)
+      root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
+      // before the next declarations, and as the element is disposed
+      return () => {
+        HostLayoutSheets.release(text)
+        root.adoptedStyleSheets = root.adoptedStyleSheets.filter((each) => each !== sheet)
       }
-      sheet.replaceSync(text ? `:host { ${text} }` : "")
     })
   }
 
@@ -855,7 +873,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   private adoptStyleSheets() {
     const { styles } = E.SpellSolid.settings
     styles.registerOnce(this.elementSetup.styleSheets)
-    styles.adoptInto(this.domElement.renderRoot, this.styleSheetNames)
+    styles.adoptInto(this.domElement.renderRoot, this.styleSheetNames, this.vocabulary)
   }
 
   ////////////////
@@ -1380,6 +1398,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    *   it lives until `domElement.dispose()`, whatever happens around it.
    *   - So a Solid app's context doesn't reach inside (`appContext` does that).
    * - Inside an error boundary (Solid's `<Errored>`), always:  see "Errors and fallback".
+   * - A shadow root the server drew (`domElement.serverDrawing`):  see "Server-drawn shadow roots".
    * - Released with the DOM element:  the root is disposed, the shadow root emptied.
    */
   private static mount(
@@ -1388,6 +1407,16 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     domElement: DOMElement,
     Fallback: E.FallbackClass | undefined
   ) {
+    const drawing = domElement.serverDrawing
+    // a server's drawing shows meanwhile, styled:  the component waits for the runtime, as its first render needs it
+    const { runtime } = E.SpellSolid.settings
+    if (drawing && !runtime.isLoaded) {
+      runtime
+        .load()
+        .then(() => UIComponent.mountLater(Class, definition, domElement, Fallback))
+        .catch((error: unknown) => console.error(`<${domElement.localName}>:  the runtime didn't load`, error))
+      return
+    }
     E.Reactive.ownRoot((dispose) => {
       const root = domElement.renderRoot
       domElement.addReleaseCallback(() => {
@@ -1395,22 +1424,70 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
         root.textContent = ""
         dispose()
       })
-      // `<Errored>` called as a function;  `children` is a GETTER, so the component is built inside the boundary
-      const view = Errored({
-        get children() {
-          return untrack(() => new Class(domElement, definition).onMount())
-        },
-        fallback: (error: Accessor<unknown>) => {
-          const cause = error()
-          const showsFallback = runWithOwner(null, () => UIComponent.onError(domElement, cause))
-          return showsFallback ? UIComponent.renderFallback(domElement, cause, Fallback) : undefined
-        }
-      })
-      domElement.clearServerContent()
+      const view = UIComponent.boundary(Class, definition, domElement, Fallback)
+      domElement.takeServerDrawing()
       ShadowEvents.register(root)
       insert(root, view)
+      if (!drawing) return
+      domElement.restoreServerFocus()
+      // its own custom states are set by the time the page paints:  the server's stand-in for them goes
+      domElement.removeAttribute(UIComponent.SERVER_STATES)
     })
   }
+
+  /**
+   * The attribute a server drawing writes the element's custom states into (`in-card` ...), and its sheets select
+   * beside `:state()`:  a page can't set custom states before a script runs.
+   * - Spell UI's static render writes it, and the sheets it links say `:is(:state(x), [data-ui-states~="x"])`.
+   */
+  static readonly SERVER_STATES = "data-ui-states"
+
+  /** `mount()`, put off from the first connect:  then the connect's own step, `onConnect()`, if it's still connected. */
+  private static mountLater(
+    Class: E.UIComponentClass,
+    definition: E.ElementDefinition,
+    domElement: DOMElement,
+    Fallback: E.FallbackClass | undefined
+  ) {
+    UIComponent.mount(Class, definition, domElement, Fallback)
+    if (domElement.isConnected) domElement.component?.onConnect()
+  }
+
+  /**
+   * `Class`'s component, built and drawn inside its error boundary:  `<Errored>`, called as a function.
+   * - `children` is a GETTER, so the component is built inside the boundary.
+   */
+  private static boundary(
+    Class: E.UIComponentClass,
+    definition: E.ElementDefinition,
+    domElement: DOMElement,
+    Fallback: E.FallbackClass | undefined
+  ): JSX.Element {
+    return Errored({
+      get children() {
+        return untrack(() => new Class(domElement, definition).onMount())
+      },
+      fallback: (error: Accessor<unknown>) => {
+        const cause = error()
+        const showsFallback = runWithOwner(null, () => UIComponent.onError(domElement, cause))
+        return showsFallback ? UIComponent.renderFallback(domElement, cause, Fallback) : undefined
+      }
+    })
+  }
+
+  ////////////////
+  // ## Server-drawn shadow roots
+  //
+  // A page drawn on the server (Spell UI's static render, its shadow output) holds each element's shadow root
+  // already, as a declarative `<template shadowrootmode>`:  it paints before any script (epic `solid-2-final` P16).
+  // - Meanwhile it shows as the server drew it, styled by the sheets the server linked.
+  // - When the element starts, it waits for the runtime, as every first render does (`mount()`),
+  //   then draws again in place of the server's drawing, in the same task:  nothing flashes, nothing moves,
+  //   and the focus moves to the element in the same place (`DOMElement.takeServerDrawing()`).
+  // - Its custom states, which a page can't set before a script runs, came as an attribute (`SERVER_STATES`).
+  // - The server's sheets go once its own are in (`DOMElement.markReady()`).
+  // - Not hydrated:  Solid's hydration worked, but was slower than drawing again (epic `solid-2-final` J62).
+  ////////////////
 
   ////////////////
   // ## Errors and fallback
@@ -1687,6 +1764,37 @@ const ON_PLATFORM = "on-platform"
 
 /** The attribute naming the container an element joins ("Parent"). */
 const PARENT = "parent"
+
+/****************
+ * ### `HostLayoutSheets`
+ * The page's `:host` sheets for `UIComponent.hostLayout`, ONE per text of declarations, shared by every root that
+ * uses it (epic `solid-2-final` P4).
+ * - Counted:  a sheet no root uses any more is let go.
+ * - NEVER changes a sheet's text:  other roots hold it.  A root whose declarations change takes another.
+ * - Static:  page-wide, as the sheets are.
+ ****************/
+class HostLayoutSheets {
+  /** The sheet for `declarations`, made the first time;  one more root uses it. */
+  static take(declarations: string): CSSStyleSheet {
+    let entry = HostLayoutSheets.byText.get(declarations)
+    if (!entry) {
+      const sheet = new CSSStyleSheet()
+      sheet.replaceSync(`:host { ${declarations} }`)
+      HostLayoutSheets.byText.set(declarations, (entry = { sheet, users: 0 }))
+    }
+    entry.users++
+    return entry.sheet
+  }
+
+  /** One root fewer uses the sheet for `declarations`;  the last one lets it go. */
+  static release(declarations: string) {
+    const entry = HostLayoutSheets.byText.get(declarations)
+    if (entry && --entry.users <= 0) HostLayoutSheets.byText.delete(declarations)
+  }
+
+  /** declarations => their sheet, and how many roots use it */
+  private static readonly byText = new Map<string, { sheet: CSSStyleSheet; users: number }>()
+}
 
 /** `UIComponent.internalState`:  what only the base class uses inside. */
 type InternalState = {

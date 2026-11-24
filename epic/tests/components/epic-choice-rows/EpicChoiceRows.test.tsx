@@ -187,7 +187,8 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
     const headLeft = part(table, "head")!.children[0]!.getBoundingClientRect().left
     expect(part(row, "pick")!.getBoundingClientRect().left).toBeCloseTo(headLeft, 0)
     expect(part(row, "copy")!.textContent).toBe("this.open")
-    expect(part(row, "copy")!.dataset.tooltip).toBe("Copy into the box")
+    // no tooltip:  its words are on it (I370)
+    expect(part(row, "copy")!.dataset.tooltip).toBeUndefined()
     expect(part<HTMLTextAreaElement>(row, "box")!.value).toBe("")
     expect(part(other, "purpose")!.textContent).not.toContain("stays")
     expect(root.getAttribute("badge")).toBe("2 commands · 0 changed")

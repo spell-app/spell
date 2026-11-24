@@ -93,6 +93,7 @@ export function declaredPrefix(words: P.Match, isDeclared: (words: string) => bo
  * lowercase, a space between, e.g. `card in play`, `lado de juego` (epic `spanish` P14).
  * - `wordsOf`:  a name's words, e.g. `CardInPlay` => `["card", "in", "play"]`.
  * - `isGrammarWord`:  a word which ends a name, e.g. one on the language's blacklist.
+ *   - MUST be the same function each time for the same words (`isWordIn()`):  a file's outline keeps each one.
  *   The FIRST word is never asked:  a name can't start with one, apart from a member's leading words (`in play`).
  * - So a MENTION of a declared name can read past a word that would otherwise end it:
  *   `the c is a new card in play`, after `a card in play is a thing`.
@@ -110,13 +111,10 @@ export function namesWithGrammarWords<Item>(
   localOnly?: "LOCAL_ONLY"
 ): string[] {
   const names: string[] = []
-  const nameOf = (item: Item) => {
-    const words = wordsOf(item).map((word) => word.toLowerCase())
-    return words.length > 1 && words.slice(1).some(isGrammarWord) ? words.join(" ") : undefined
-  }
+  const { nameOf, test } = grammarWordNaming(wordsOf, isGrammarWord)
   for (let current = list; current; current = localOnly ? undefined : current.parent) {
     // only an item with a grammar word in its name matters to us (`P.Outline`)
-    const items = current.scan((item) => nameOf(item) !== undefined)
+    const items = current.scan(test)
     const cache = (GRAMMAR_WORD_NAMES[kind] ??= new WeakMap())
     let found = cache.get(items)
     if (!found) {
@@ -131,6 +129,49 @@ export function namesWithGrammarWords<Item>(
   }
   return names
 }
+
+/**
+ * `namesWithGrammarWords()`' name of an item, and its outline test, ONE pair for each `wordsOf` and `isGrammarWord`.
+ * - Why one:  a file's outline keeps every test its parse hands a list (`P.Outline`), so a new one at every word
+ *   kept thousands for every edit typed, never let go till the file parsed whole again (epic `solid-2-final` P10).
+ * - So callers hand the same `isGrammarWord` each time:  `isWordIn()`.
+ */
+function grammarWordNaming<Item>(
+  wordsOf: (item: Item) => string[],
+  isGrammarWord: (word: string) => boolean
+): GrammarWordNaming<Item> {
+  let byTest = GRAMMAR_WORD_NAMING.get(wordsOf)
+  if (!byTest) GRAMMAR_WORD_NAMING.set(wordsOf, (byTest = new WeakMap()))
+  let naming = byTest.get(isGrammarWord) as GrammarWordNaming<Item> | undefined
+  if (!naming) {
+    const nameOf = (item: Item) => {
+      const words = wordsOf(item).map((word) => word.toLowerCase())
+      return words.length > 1 && words.slice(1).some(isGrammarWord) ? words.join(" ") : undefined
+    }
+    naming = { nameOf, test: (item: Item) => nameOf(item) !== undefined }
+    byTest.set(isGrammarWord, naming as GrammarWordNaming<unknown>)
+  }
+  return naming
+}
+
+/** An item's name with a grammar word in it, and the outline's test for one -- see `grammarWordNaming()`. */
+type GrammarWordNaming<Item> = { nameOf: (item: Item) => string | undefined; test: (item: Item) => boolean }
+
+/** `grammarWordNaming()`'s pairs, by `wordsOf`, then by `isGrammarWord`. */
+const GRAMMAR_WORD_NAMING = new WeakMap<Function, WeakMap<Function, GrammarWordNaming<any>>>()
+
+/**
+ * `(word) => !!words[word]`, ONE function for each table of words, e.g. a language's blacklist:
+ * the `isGrammarWord` to hand `namesWithGrammarWords()`, so its outline test is the same each time.
+ */
+export function isWordIn(words: Readonly<Record<string, unknown>>): (word: string) => boolean {
+  let test = WORD_TESTS.get(words)
+  if (!test) WORD_TESTS.set(words, (test = (word: string) => !!words[word]))
+  return test
+}
+
+/** `isWordIn()`'s tests, by table. */
+const WORD_TESTS = new WeakMap<object, (word: string) => boolean>()
 
 /** `namesWithGrammarWords()`' cache:  by kind, then by a list's items array. */
 const GRAMMAR_WORD_NAMES: Record<string, WeakMap<readonly unknown[], string[]>> = Object.create(null)

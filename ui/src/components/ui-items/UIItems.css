@@ -43,7 +43,7 @@
  * - `inverted` sets `color-scheme: dark` (+ `--ui-inverted: 1`):  the parts' `light-dark()` colours follow.
  * - NOTE: left out, on purpose:
  *   - favorite / like icons (`.favorite.icon`, `.like.icon`):  icon looks
- *   - floated components inside an item (`.ui.items > .item [class*="right floated"]`):
+ *   - floated components inside an item (`.ui.items > .item .right-floated`):
  *     elements have no `floated` (a `<ui-stack>` places them);  the static rules stay
  *   - Fomantic's `!important`s (first / last item spacing, mobile image sizes):
  *     the DOM element's position and layers decide
@@ -243,17 +243,17 @@
   }
 
   /* Static markup:  floated components, and their spacing inside meta / extra content. */
-  .ui.items > .item [class*="left floated"] {
+  .ui.items > .item .left-floated {
     float: left;
   }
-  .ui.items > .item [class*="right floated"] {
+  .ui.items > .item .right-floated {
     float: right;
   }
-  .ui.items > .item .meta [class*="right floated"] {
+  .ui.items > .item .meta .right-floated {
     margin-right: 0;
     margin-left: 0.3em;
   }
-  .ui.items > .item .extra > [class*="right floated"] {
+  .ui.items > .item .extra > .right-floated {
     margin: 0.25em 0 0.25em 0.5em;
   }
 }
@@ -267,7 +267,7 @@
   .ui.relaxed.items {
     --_items-item-margin: var(--_ui-items-relaxed-spacing) 0;
   }
-  .ui[class*="very relaxed"].items {
+  .ui.very-relaxed.items {
     --_items-item-margin: var(--_ui-items-very-relaxed-spacing) 0;
   }
 
@@ -280,7 +280,7 @@
   .ui.relaxed.divided.items {
     --_items-item-padding: var(--_ui-items-relaxed-spacing) 0;
   }
-  .ui[class*="very relaxed"].divided.items {
+  .ui.very-relaxed.divided.items {
     --_items-item-padding: var(--_ui-items-very-relaxed-spacing) 0;
   }
 

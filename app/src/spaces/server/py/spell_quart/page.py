@@ -20,9 +20,13 @@ page_html("Solitaire", elements="/Solitaire.elements.spell.js")
 
 import html
 import json
+import mimetypes
 import os
 from pathlib import Path
 from typing import Any
+
+from quart import request, send_from_directory
+from werkzeug.security import safe_join
 
 # Where the page side's files are served from:  see `page_html()`, `assets_folder()`.
 ASSETS_URL = "/spell"
@@ -107,6 +111,29 @@ def fresh(response: Any) -> Any:
     """
     response.cache_control.no_cache = True
     return response
+
+
+async def send_built(folder: Path | str, name: str, mimetype: str | None = None) -> Any:
+    """Built file `name` in `folder`, compressed when it can be, and checked each time (`fresh()`).
+
+    - its brotli copy beside it (`name.br`, the builds' `brotliCopies()`) when the browser takes brotli and the copy
+      is no older than the file:  sent as it is, about a fifth of the file (epic `solid-2-final` P2)
+    - "not modified" (304) while the browser's copy matches its `ETag`, as Quart's `send_from_directory()` answers
+    - never kept a year:  the page side's names carry no hash, so a stale copy would mix old files with new ones
+    - `mimetype`:  the file's own type, else the one its name says
+    - 404 for a name outside `folder`, or missing, as `send_from_directory()`
+    """
+    mimetype = mimetype or mimetypes.guess_type(name)[0]
+    file = safe_join(str(folder), name)
+    copy = f"{file}.br" if file else None
+    takes_brotli = "br" in request.accept_encodings
+    if file and copy and takes_brotli and os.path.isfile(copy) and os.path.getmtime(copy) >= os.path.getmtime(file):
+        response = await send_from_directory(folder, f"{name}.br", mimetype=mimetype)
+        response.headers["Content-Encoding"] = "br"
+    else:
+        response = await send_from_directory(folder, name, mimetype=mimetype)
+    response.vary.add("Accept-Encoding")
+    return fresh(response)
 
 
 # What the page shows until its app draws:  a card with a spinner, "Loading <title>".

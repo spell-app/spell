@@ -55,7 +55,7 @@ const showRoutes: RouteModule = {
         const key = path.slice(Math.max(0, path.indexOf("/packages/")))
         openUrlInChrome(`http://${request.get("host")}${path}${hash ? `#${hash}` : ""}`, key, { front: true })
         closeShownTab(pickWindow(Number(request.query.window), file))
-        return void reply.set("Cache-Control", "no-store").send(closingPage(path, "Chrome"))
+        return void reply.noStore().send(closingPage(path, "Chrome"))
       }
       const window = pickWindow(Number(request.query.window), file)
       if (!window) throw new SRV.HttpError(404, "no VS Code window with the spell extension is open")
@@ -66,9 +66,7 @@ const showRoutes: RouteModule = {
         window
       )
       const tab = TAB_NAMES[shown.view as keyof typeof TAB_NAMES]
-      reply
-        .set("Cache-Control", "no-store")
-        .send(closingPage(path, tab ? `VS Code's side bar (${tab})` : "VS Code's side bar"))
+      reply.noStore().send(closingPage(path, tab ? `VS Code's side bar (${tab})` : "VS Code's side bar"))
       closeShownTab(window)
       if (process.platform === "darwin") void after(FOCUS_DELAY / 1000, focusVSCode).catch(console.error)
     })

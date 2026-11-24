@@ -1,0 +1,64 @@
+"app root" is a notebook page
+	<header level="1">
+		AppRoot
+		<header>The running program in the editor's pages, under its toolbar.</>
+	</>
+
+	<text class="lede" paragraph>The pane where the program you're editing runs, on the editor's page in every mode. It's a toolbar to restart the program, over the box the program draws in, and it tells the editor where that box is.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or how it runs programs</>
+		<item icon="image">A picture, not live: the editor's App pane, with Solitaire running in it</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The editor's App pane, with Solitaire running. The editor draws it without its AppToolbar, so it's just the <link target="src-packages-app-docs-appcontainer-html" link="/app-container">AppContainer</> the program draws in, and the same picture as that page's.</>
+		<image src="/components/app/_images/AppRoot.png" alt="The App pane:  a game of Spell Solitaire, its own dark header with a menu and the score over the cards" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The editor page puts it in its right-hand column, with no toolbar and no header (its tools are the top bar's, epic <text code>debut</> P32), in <text code>&lt;AppPane&gt;</>; in Run, the page keeps that same pane, and only the code column goes:</>
+		<text paragraph>SpellEditor.tsx · the editor's right-hand column, AppPane:</>
+		<markdown>
+			```typescript
+			<div class="AppPaneBody" ref={(area) => onCleanup(Inspector.watch(area))}>
+			  <div class={["AppPaneProgram", { hidden: !!notebook() }]}>
+			    <AppRoot showToolbar={false} />
+			  </div>
+			</div>
+			```
+		</>
+		<list bulleted>
+			<item>Once drawn, it hands its box to the editor with <text code>editor.setAppRoot()</>: that's where the editor runs programs from then on.</>
+			<item>When it goes, it takes the box back with <text code>editor.releaseAppRoot()</>, but only if it's still the editor's: a page that's leaving may let go after the next page's AppRoot handed its box over. Switching between Edit and Run keeps the same one.</>
+			<item><text code>&lt;AppToolbar&gt;</>, above it: an "App" header, then Restart (one of the app's <link target="src-packages-app-docs-actions-html" link="/actions">Actions</>), as an icon. The editor's pages hide it, and draw their own header: the project's group icon and title, then Restart, the Inspector's button and Settings.</>
+			<item>The program's box scrolls, and runs to its edges unless told to pad it.</>
+			<item>A live <link target="src-packages-app-docs-spell-viewer-html" link="/spell-viewer"><text code>&lt;spell-viewer&gt;</></> doesn't use it: the runner has its own panes.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="AppRoot"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-approot-tsx" link="/src/app/solid/AppRoot.tsx"><text title="src/app/solid/AppRoot.tsx" code>AppRoot.tsx</></>: AppRoot and AppToolbar, and their props</>
+			<item><link target="src-packages-app-src-solid-approot-css" link="/src/app/solid/AppRoot.css"><text title="src/app/solid/AppRoot.css" code>AppRoot.css</></>: its look</>
+			<item><link target="src-tests-app-src-pages-pages-browser-test-tsx" link="/tests/app/pages/pages.browser.test.tsx"><text title="tests/app/pages/pages.browser.test.tsx" code>pages.browser.test.tsx</></>: the pages' tests, which draw it</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

@@ -18,6 +18,7 @@ export {
   FIXTURES_GROUP,
   fixtureProjectNames,
   compiledFixture,
+  builtFixture,
   compiledFixtureWithMap,
   fixtureDeclarations,
   fixtureDraws,

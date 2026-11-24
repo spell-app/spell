@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell/ui/styles"
+import { fallbackCSS, shadowFoundationCSS } from "spell/ui/styles"
 
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
@@ -46,7 +46,7 @@ describe("UIDocsNav.css layout", () => {
   }
 
   it("scrolls the list inside the panel, under the header band, at the height asked for", () => {
-    const host = Sheets.host(MARKUP, [...foundationCSS, navCSS])
+    const host = Sheets.host(MARKUP, [...shadowFoundationCSS, ...fallbackCSS, navCSS])
     host.style.setProperty("--ui-docs-nav-height", "300px")
     const panel = find(host, "[part~=nav]")
     const list = find(host, "[part~=menu]")
@@ -58,12 +58,12 @@ describe("UIDocsNav.css layout", () => {
   })
 
   it("grows with its list when nothing sizes it", () => {
-    const host = Sheets.host(MARKUP, [...foundationCSS, navCSS])
+    const host = Sheets.host(MARKUP, [...shadowFoundationCSS, ...fallbackCSS, navCSS])
     expect(find(host, "[part~=nav]").getBoundingClientRect().height).toBeGreaterThan(2100)
   })
 
   it("draws a card:  a border, a radius", () => {
-    const host = Sheets.host(MARKUP, [...foundationCSS, navCSS])
+    const host = Sheets.host(MARKUP, [...shadowFoundationCSS, ...fallbackCSS, navCSS])
     const panel = getComputedStyle(find(host, "[part~=nav]"))
     expect(panel.borderTopWidth).toBe("1px")
     expect(parseFloat(panel.borderTopLeftRadius)).toBeGreaterThan(0)
@@ -71,7 +71,8 @@ describe("UIDocsNav.css layout", () => {
 
   it("hands its site nav the panel's colours, through the tree's nav tokens", () => {
     const host = Sheets.host(MARKUP.replace("</div>\n    </div>", "<ui-site-nav></ui-site-nav></div>\n    </div>"), [
-      ...foundationCSS,
+      ...shadowFoundationCSS,
+      ...fallbackCSS,
       navCSS
     ])
     const nav = host.shadowRoot!.querySelector("ui-site-nav")!

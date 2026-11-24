@@ -39,6 +39,16 @@ export type FileMatch = {
   unsure?: boolean
 }
 
+/** Where a line names a site's part (`SpellLanguageService.sitePartSpans()`):  what renaming the part replaces. */
+export type SitePartSpan = {
+  /** the file's path in its project, `file.path` */
+  path: string
+  /** where the part's name starts in the file's text */
+  start: number
+  /** where it ends */
+  end: number
+}
+
 // ## Symbols
 
 /**
@@ -306,6 +316,20 @@ export type CompiledImportParams = {
   uri: string
   /** Project imported, as compiled spell names it after `@spell/project/`:  `@spell/library/people`. */
   projectId: string
+}
+
+/**
+ * Asked as `spell/codeFile`:  the javascript of a code file the project of `uri` calls
+ * (`call native`, epic `from-console` P10),
+ * for VS Code's runner to link it in -- see `runCompiled()`'s `loadNative`.
+ * - Answered with the file read fresh from disk, its types taken out (`SpellDiskWorkspace.codeFileJavascript()`).
+ * - `null` if it isn't there, or isn't valid TypeScript (logged).
+ */
+export type CodeFileParams = {
+  /** One of the calling project's spell files. */
+  uri: string
+  /** The module compiled spell imports it as:  `@spell/native/owen@spell/clipboard/clipboard.ts`. */
+  module: string
 }
 
 /** Sent as `spell/projectCompiled` after a project compiles, e.g. from `spell/compileProject`. */

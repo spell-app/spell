@@ -3,6 +3,7 @@ import { lazy, type Component } from "solid-js"
 import { editor } from "spell/app/app/editor"
 import { editorHostNames } from "spell/app/app/layout/editorNames"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import type {
   CodeMirrorEditorProps,
   ConsoleLineEditorProps,
@@ -71,8 +72,17 @@ let loading: Promise<CodeMirrorModule> | undefined
 function loadCodeMirror(): Promise<CodeMirrorModule> {
   loading ??= import("spell/app/app/solid/codemirror").then(async (module) => {
     const { SpellCodeMirror } = module
+    // what a person asks of the code answered off the page's thread, where the worker can load the projects
+    if (!isStaticBuild && typeof Worker !== "undefined") {
+      const { startLanguageWorker } = await import("spell/app/app/ui/codemirror/startLanguageWorker")
+      SpellCodeMirror.languageWorker = startLanguageWorker
+    }
     SpellCodeMirror.onEdit((file) => editor.onFileEdited(file))
+    SpellCodeMirror.onTaken((file) => editor.onFileTextTaken(file))
     editor.codeEditorEdits = (file, edits, way) => SpellCodeMirror.states.applyEdits(file, edits, way)
+    editor.compileElsewhere = (project) => SpellCodeMirror.states.client.compile(project)
+    editor.oldFormsElsewhere = (file) => SpellCodeMirror.states.oldForms(file)
+    editor.askLanguage = (file, method, params) => SpellCodeMirror.states.ask(file, method, params)
     // the Types tab's tree, from the same language service:  `spell/app/lsp` is already in CodeMirror's chunk
     const { LSP } = await import("spell/app/lsp")
     const { service } = SpellCodeMirror

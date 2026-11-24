@@ -4,7 +4,9 @@ import { P } from "spell/parser/parser"
 import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
 import {
+  EXAMPLE_PROJECTS,
   LIBRARY_FIXTURES,
+  builtFixture,
   PYTHON_FIXTURES,
   compiledFixture,
   fixtureDeclarations,
@@ -26,6 +28,8 @@ import {
  *
  * Each one's:
  * - `<Project>.snapshot.js`:  the javascript (`js/solid` target)
+ * - `<Project>.built.snapshot.js`:  an example's javascript as a built site has it, none of the editor's text
+ *   (`builtFixture()`, epic `solid-2-final` P11)
  * - `<Project>.snapshot.declarations.json5`:  its declarations
  * - `<Project>.<lang>.snapshot.js`:  its words, in its language (`Solitaire.en.snapshot.js`, `Solitario.es.snapshot.js`)
  * - `<Project>.snapshot.tsx`:  the TypeScript (`ts/solid` target)
@@ -56,6 +60,17 @@ describe("fixture projects compile to their snapshots", () => {
         await expect(compiledFixture(name)).toMatchFileSnapshot(snapshotPath(name, `${file}${SP.SNAPSHOT_JS_SUFFIX}`))
         await expect(fixtureDeclarations(name)).toMatchFileSnapshot(
           snapshotPath(name, `${file}.snapshot${SP.DECLARATIONS_JSON_SUFFIX}`)
+        )
+      },
+      30_000
+    )
+
+    // an example as a built site runs it, `spell compile`'s:  no comments, `declaredAt` marks or headings
+    test.runIf(EXAMPLE_PROJECTS.has(name))(
+      `${name}, built`,
+      async () => {
+        await expect(builtFixture(name)).toMatchFileSnapshot(
+          snapshotPath(name, `${file}.built${SP.SNAPSHOT_JS_SUFFIX}`)
         )
       },
       30_000

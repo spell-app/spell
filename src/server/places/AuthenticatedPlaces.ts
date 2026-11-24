@@ -49,12 +49,14 @@ const ONE_PER_ROUTER = new WeakMap<SRV.Router, AuthenticatedPlaces>()
  *   - A token made from it (`it is authenticated with a token from "..."`):  made here, kept, made again before it
  *     runs out (`PlaceToken`), and taken out of answers too.
  *   - Not set:  refused, saying which secret and which place need it, and the page says those words.
+ * - REFUSED by its source (`AuthenticatedPlace.refusal`):  every read and write, in the source's words, nothing passed
+ *   on;  said as the page server starts too.  The app's:  a deployment its project file doesn't list (from-console J104).
  * - READ ONLY when its lines or its deployment say so:  only reads go on;  a write is refused.
  *   A graphql server's reads are `POST`s, so a mutation is the write.
  * - Which places there are comes from SOURCES (`addSource()`):  the app's route module hands in every project's,
  *   from what each project compiled to;  this knows nothing of projects.
  * - Behind `Guard`, reads too, as `PlaceServer` is:  a read spends the secret.
- * - Says each secret that isn't set as the page server starts (`sayMissing()`), never a value.
+ * - Says each secret that isn't set as the page server starts (`sayMissing()`), never a value;  and each refusal.
  * - Airtable's base, served by its own `PlaceServer` (`serveAirtableBase()`, [placeRoutes.ts](placeRoutes.ts)), is one
  *   of its sources too, for that.
  * - A pass-through that keeps nothing, as `DirectReads`' read through to a host is.  Node only.
@@ -111,7 +113,7 @@ export class AuthenticatedPlaces {
     (request, reply, next) => {
       const token = request.get(TOKEN_HEADER)
       if (request.person !== undefined || token === undefined || token === guard.token) return next()
-      reply.status(403).set("Cache-Control", "no-store").set(PAGE_SERVER_ANSWER_HEADER, STALE_TOKEN_ANSWER)
+      reply.status(403).noStore().set(PAGE_SERVER_ANSWER_HEADER, STALE_TOKEN_ANSWER)
       reply.type("application/json")
       reply.send(
         JSON.stringify({ error: "this page's write token is from before the page server restarted:  reload the page" })
@@ -142,18 +144,31 @@ export class AuthenticatedPlaces {
       )
     )
     return lists.flat().flatMap((place) => {
+      // a refused place is said by its refusal:  its secret's name may not be the one it'd read with
+      if (place.refusal !== undefined) return []
       const keys = new PlaceKeys({ names: [place.keyNamed], from: this.from })
       return keys.missing().map((name) => ({ name, place }))
     })
   }
 
   /**
+   * Each refusal a source gave its places, once each:  a project's places share one.
+   * - NEVER throws:  a source that fails is left out (`missing()` logs it).
+   */
+  async refusals(): Promise<string[]> {
+    const lists = await Promise.all(this.sources.map((source) => Promise.resolve(source.every()).catch(() => [])))
+    return [...new Set(lists.flat().flatMap(({ refusal }) => (refusal === undefined ? [] : [refusal])))]
+  }
+
+  /**
    * SIDE EFFECT:  says each secret that isn't set, one line each, never a value:
    * `JOBS_TOKEN is not set:  the jobs place in @acme/jobs needs it.`
+   * - Then each refusal (`refusals()`), in its source's words.
    * - NEVER throws.
    */
   async sayMissing(say: (line: string) => void = console.warn): Promise<void> {
     for (const { name, place } of await this.missing()) say(notSetLine(name, place))
+    for (const refusal of await this.refusals()) say(refusal)
   }
 
   ////////////////
@@ -162,8 +177,8 @@ export class AuthenticatedPlaces {
 
   /**
    * A page's request, passed on to the place its path names, with the secret added;  its answer passed back, scrubbed.
-   * - Refused, with the page server's own words (`PAGE_SERVER_ANSWER_HEADER`):  a secret that isn't set, a write to a
-   *   place that's read only.
+   * - Refused, with the page server's own words (`PAGE_SERVER_ANSWER_HEADER`):  a place its source refused, a secret
+   *   that isn't set, a write to a place that's read only.
    * - throws `HttpError`:  404 for a path that names no place, 502 when the place doesn't answer
    */
   private passOn = async (request: SRV.Request, reply: SRV.Reply): Promise<void> => {
@@ -175,6 +190,9 @@ export class AuthenticatedPlaces {
     try {
       const body =
         request.method === "GET" || request.method === "HEAD" ? undefined : await SRV.readBody(request.raw, BODY_LIMIT)
+      if (place.refusal !== undefined) {
+        throw new PlaceError(place.refusal, { cause: { kind: "refused", whyNot: "place" } })
+      }
       if (place.readOnly && !isRead(request.method, place, body, rest)) {
         throw new PlaceError(`${place.name} is read only:  its lines say so, so it takes no changes`, {
           cause: { kind: "refused", whyNot: "place" }
@@ -195,7 +213,7 @@ export class AuthenticatedPlaces {
       }).catch((error: unknown) => {
         throw new SRV.HttpError(502, keys.scrubbed(`${place.name} didn't answer:  ${(error as Error).message}`))
       })
-      reply.status(answer.status).set("Cache-Control", "no-store")
+      reply.status(answer.status).noStore()
       answer.headers.forEach((value, name) => {
         if (PASSED_BACK.test(name)) reply.set(name, keys.scrubbed(value.replaceAll(place.at, servedAddress(served))))
       })
@@ -205,10 +223,7 @@ export class AuthenticatedPlaces {
     } catch (error) {
       if (!(error instanceof PlaceError)) throw error
       const { kind, whyNot } = error.cause ?? ({} as Partial<PlaceErrorCause>)
-      reply
-        .status(PlaceServer.statusOf(error))
-        .set("Cache-Control", "no-store")
-        .set(PAGE_SERVER_ANSWER_HEADER, "refused")
+      reply.status(PlaceServer.statusOf(error)).noStore().set(PAGE_SERVER_ANSWER_HEADER, "refused")
       reply.type("application/json")
       reply.send(
         keys.scrubbed(JSON.stringify({ error: error.message, ...(kind && { kind }), ...(whyNot && { whyNot }) }))
@@ -285,6 +300,11 @@ export type AuthenticatedPlace = {
   tokenFrom?: string
   /** It takes no writes. */
   readOnly?: boolean
+  /**
+   * Why it's not read at all, in words for people:  every request refused with them, and said at startup.
+   * - e.g. the app's, for a deployment its project file doesn't list (`SP.UnlistedDeploymentError`'s words).
+   */
+  refusal?: string
   /** Its write and action routes, under `at`:  a read only one refuses each, a `GET` too.  See `SP.ServedPlace.writes`. */
   writes?: readonly string[]
 }

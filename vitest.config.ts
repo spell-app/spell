@@ -1,5 +1,6 @@
 import solid from "@solidjs/vite-plugin"
-import { resolve } from "node:path"
+import { tmpdir } from "node:os"
+import { join, resolve } from "node:path"
 import { defineConfig, type TestProjectInlineConfiguration } from "vite-plus"
 import { playwright } from "vite-plus/test/browser-playwright"
 
@@ -52,6 +53,15 @@ const PLACES_NODE = [
   "LexiconSchemas.test.ts",
   "PlaceCopy.test.ts"
 ]
+
+/**
+ * The server keeper's record and the worktrees' port book, scratch files for the tests (epic `epic-engine` P82):
+ * a test's page server never asks the machine's keeper, nor takes a port written down for a real worktree
+ */
+const NO_KEEPER = {
+  SPELL_KEEPER_FILE: join(tmpdir(), `spell-tests-${process.pid}`, "server-keeper.json"),
+  SPELL_PORTS_FILE: join(tmpdir(), `spell-tests-${process.pid}`, "server-ports.json")
+}
 
 export default defineConfig({
   test: {
@@ -118,5 +128,5 @@ function testsOf(name: string): string {
 
 /** A project of node tests:  every `*.test.ts` in `tests/<name>/`. */
 function nodeProject(name: string): TestProjectInlineConfiguration {
-  return { test: { name, environment: "node", dir: testsOf(name), include: ["**/*.test.ts"] } }
+  return { test: { name, environment: "node", dir: testsOf(name), include: ["**/*.test.ts"], env: NO_KEEPER } }
 }

@@ -51,6 +51,22 @@ describe("<epic-state-filter>", () => {
     await expectAccessible(host)
   })
 
+  test("light yellow counts with yellow;  a recheck has its own light orange chip, never in orange's number (P81, Q82, J335)", async () => {
+    const host = await ElementFixture.render(
+      `<epic-state-filter counts="replied:4 recheck:9 open:8 someday:3"></epic-state-filter>`
+    )
+    expect(chips(host)).toEqual(["replied:4+", "recheck:9+", "open:11+"])
+    expect(chip(host, "recheck").dataset.color).toBe("lightOrange")
+    expect(chip(host, "recheck").dataset.tooltip).toContain("9 waiting for Claude to check again, not for you")
+    const picked = new Promise<string[]>((done) =>
+      host.addEventListener("epic-state-changed", (event) => done((event as CustomEvent).detail.shown), { once: true })
+    )
+    chip(host, "replied").click()
+    expect(await picked).toEqual(["recheck", "open", "someday"])
+    const alone = await ElementFixture.render(`<epic-state-filter counts="recheck:9"></epic-state-filter>`)
+    expect(chips(alone)).toEqual(["recheck:9+"])
+  })
+
   // epic `epic-engine` I157, recoloured in I170 (Owen, 2026-10-29:  "this doesn't match our other colors");  ONE blue
   // badge in I260 (Owen, 2026-11-11:  "These should just be one set, confusing to have 2 blues")
   test("a phase's states (`phases`):  Owen's order and colours;  under way AND scheduled in the one blue badge", async () => {
@@ -208,10 +224,10 @@ describe("<epic-state-filter>", () => {
 })
 
 describe("<epic-hidden-note>", () => {
-  test("`3 hidden · show all`, its tooltip;  a click asks to show all;  axe", async () => {
+  test("`3 hidden · show all`, no tooltip;  a click asks to show all;  axe", async () => {
     const host = await ElementFixture.render(`<epic-hidden-note count="3"></epic-hidden-note>`)
     const button = host.shadowRoot!.querySelector("button")!
-    expect([button.textContent, button.dataset.tooltip]).toEqual(["3 hidden · show all", "Show everything"])
+    expect([button.textContent, button.dataset.tooltip]).toEqual(["3 hidden · show all", undefined])
     const heard = vi.fn()
     host.addEventListener("epic-all-showing", heard)
     button.click()

@@ -20,7 +20,7 @@
 			- `value` starts it from a theme you made before (`{"primary": "pink", "corners": "soft"}`);
 			  `base` from another base.
 			- Events:  `ui-changed` (`{ value, css }`) on every choice, `ui-copied` (`{ text }`) from Copy changes,
-			  `ui-saved` from Use this theme and Stop using.
+			  `ui-saved` from Stop using.
 			- Script:  `el.theme` (every choice now), `el.css` (the sheet), `el.changes` (the theme file).
 		</>
 		<markdown>
@@ -32,10 +32,10 @@
 		</>
 	</>
 
-	<section label="Use this theme">
+	<section label="A kept theme">
 		<markdown>
-			Use this theme keeps the theme in this browser, and the Spell editor starts in it.
-			Any page can wear it too:  `SavedTheme.restore()` applies its base, then its sheet.
+			A theme kept in this browser from before is worn by the Spell editor over its base;
+			Stop using forgets it.  Any page can wear it too:  `SavedTheme.restore()` applies its base, then its sheet.
 
 			- `SavedTheme.has`, `.choices`, `.css`:  what's kept;  `SavedTheme.forget()` drops it.
 			- Kept in `localStorage` (`spell-ui:theme`):  a private window keeps nothing.

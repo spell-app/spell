@@ -2,11 +2,11 @@ import { untrack } from "solid-js"
 import { autocompletion, type CompletionContext, type CompletionResult } from "@codemirror/autocomplete"
 import { EditorSelection, Prec, type Extension } from "@codemirror/state"
 import { EditorView, keymap, placeholder } from "@codemirror/view"
-import { SymbolKind } from "vscode-languageserver"
+import { SymbolKind } from "vscode-languageserver-types"
 
 import type { SP } from "spell/parser/spell"
 
-import { CodeMirrorPopups, SpellCodeMirror } from "spell/app/app/ui/codemirror"
+import { CodeMirrorPopups, LanguageClient, SpellCodeMirror } from "spell/app/app/ui/codemirror"
 import { CodeMirrorEditor } from "./CodeMirrorEditor"
 
 /****************
@@ -15,7 +15,8 @@ import { CodeMirrorEditor } from "./CodeMirrorEditor"
  * drawn as the code is, in the bubbly look.
  * - Return runs it (`onRun`), and empties it;  Up and Down bring back earlier lines (`earlier`), as a terminal does.
  * - Suggestions:  the names the open project declares (`project`), its things, templates, actions and properties, as Go to Symbol
- *   lists them (the language service's `workspaceSymbols()`).
+ *   lists them (the language service's `workspaceSymbols()`, asked as `spell/projectSymbols`, the language worker's where
+ *   it parses the project).
  *   NOT the code editor's own list, which answers for a place in a file:  a typed line is in no file.
  * - With the suggestion list open, Return, Up and Down are the list's.
  * - Its props are read once, as it's made.
@@ -91,15 +92,26 @@ export type ConsoleLineEditorProps = {
   onMount?: (view: EditorView) => void
 }
 
-/** `project`'s names with the word at the caret's letters in order, for the suggestion list. */
-function suggestions(context: CompletionContext, project: SP.SpellProject | undefined): CompletionResult | null {
+/**
+ * `project`'s names with the word at the caret's letters in order, for the suggestion list:
+ * asked of the language service through the code's client, the editor's language worker where it parses the project
+ * (epic `solid-2-final` T36).
+ */
+async function suggestions(
+  context: CompletionContext,
+  project: SP.SpellProject | undefined
+): Promise<CompletionResult | null> {
   const word = context.matchBefore(/[\p{L}\p{M}\d_-]*/u)
-  if (!word || (word.from === word.to && !context.explicit)) return null
+  const [file] = project?.spellFiles ?? []
+  if (!word || !file || (word.from === word.to && !context.explicit)) return null
+  const textDocument = { uri: LanguageClient.uriOf(file) }
+  const symbols = await SpellCodeMirror.states.client.request("spell/projectSymbols", {
+    textDocument,
+    query: word.text
+  })
+  if (context.aborted) return null
   const seen = new Set<string>()
-  const { service } = SpellCodeMirror
-  const options = service
-    .workspaceSymbols(word.text)
-    .filter((symbol) => service.addresses.fileFor(symbol.location.uri)?.project === project)
+  const options = symbols
     .filter((symbol) => !seen.has(symbol.name) && seen.add(symbol.name))
     .map((symbol) => ({ label: symbol.name, type: SYMBOL_TYPES[symbol.kind] ?? "variable" }))
   return options.length ? { from: word.from, options, validFor: /^[\p{L}\p{M}\d_-]*$/u } : null

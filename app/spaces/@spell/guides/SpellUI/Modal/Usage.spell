@@ -4,6 +4,7 @@
 		<header>A modal displays content that temporarily blocks interactions with the main view of a
               site.</>
 	</>
+
 	<!-- USAGE:  opening, dismissal, actions, events, the dialog helpers, keyboard, accessibility, frameworks. -->
 	<section label="Using it">
 		<markdown>
@@ -105,6 +106,10 @@
 			Each takes `{ title, message, okText, cancelText }` (and `value` for `prompt()`); the buttons default to the
 			translated `ok` / `cancel` texts. **Escape** answers "cancel"; a click on the dimmer does nothing, so a stray
 			click can't answer.
+
+			- `size`:  the message's text size, `small`, `big`, `huge` ...;  the title and buttons keep theirs
+			- `markdown: true`:  a message with Markdown in it (a heading, bold, a list, a link) is drawn by a
+			  sanitized `<ui-markdown>`;  a plain one stays plain text, exactly as without it
 		</>
 		<markdown>
 			```js
@@ -114,6 +119,7 @@
 			await UI.load()
 			const ok = await UI.modals.confirm({ title: "Delete draft?", message: "The draft will be gone for good." })
 			await UI.modals.alert({ title: "Saved", message: "Your changes are safe." })
+			await UI.modals.alert({ title: "Solitaire", message: "# You won!\nScore:  **42**", markdown: true, size: "big" })
 			const name = await UI.modals.prompt({ title: "Rename", message: "New name", value: "Untitled" })
 			```
 		</>

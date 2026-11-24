@@ -28,6 +28,12 @@
  *   console, match and AST viewers, type and thing explorers, the code editors, `FileTabs`.
  * - NOTE: deliberately NOT here:
  *   - `./codemirror`:  CodeMirror loads on first use, through `LazyCodeMirror`;  NEVER import it statically, types aside
+ *   - the modes' and boxes' VIEWS (epic `solid-2-final` P6), each loaded the first time it's used, by a `LazyPiece`
+ *     on its state:  `InspectorView` (and `InspectorParts`), `PaletteView`, `AppAnatomyStack`, `DesignView`,
+ *     `ChangeThisView`, `EditorToursView`
+ *     - the state files here export each view under its old name (`InspectorPane`, `PaletteRail`, `DesignStage` ...),
+ *       drawn inside a `<Loading>` of its own
+ *     - NEVER import a view file statically, types aside:  `build.test.ts`, "the first screen", fails then
  *   - `./modals`:  `editor.ts` imports it on first use (`import()`), so the editor never loads Solid up front
  * - NOTE: runner bundles import the files they need DIRECTLY (`spell/app/app/solid/ThingExplorer`, `.../loadUI`):
  *   this barrel pulls in the editor.

@@ -1,0 +1,90 @@
+"epic run" is a notebook page
+	<header level="1">
+		&lt;epic-run&gt;
+		<header>The &lt;epic-run&gt; element: a run page's body: a command asks, you answer each row, Send.</>
+	</>
+
+	<text class="lede" paragraph>A run page's body: a command stopped to ask you, and waits for your answers.</>
+	<text class="meta" paragraph>For anyone writing a command that asks you on a page, or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-run" link="/epic/src/components/epic-run/"><text title="epic/src/components/epic-run/" code>epic-run/</></> (epic <text code>epic-engine</> P23).</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-run-epicrun-en-ts" link="/epic/src/components/epic-run/EpicRun.en.ts"><text title="epic/src/components/epic-run/EpicRun.en.ts" code>EpicRun.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-run-epicrun-tsx" link="/epic/src/components/epic-run/EpicRun.tsx"><text title="epic/src/components/epic-run/EpicRun.tsx" code>EpicRun.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>No live example here: it draws a RUN, which only a command makes, and reads it from the page server (<text code>GET /api/runs/&lt;id&gt;</>). A run's page is <text code>/runs/&lt;id&gt;/</>.</>
+		<text paragraph>What you see there, top to bottom:</>
+		<list bulleted>
+			<item>the page's title (the run's), then who is waiting: <text code>spell translate todos --to es</> is waiting, with a green dot; or why nobody is (it finished, it stopped, its wait ran out, it isn't running)</>
+			<item>the status card (epic <text code>epic-engine</> P25), when the command writes passes or offers an effort: the effort picker (<text code>fast | balanced | best</>, saved at once, taking effect at the next pass), then a line per pass, with its name, <text code>212 of 380</>, its calls and its time; only the running pass has a bar, and its time ticks on by the second</>
+			<item>the command's line about what it asks, and its latest progress line; every line, folded (with a status card, only the fold)</>
+			<item>the table: the command's columns, then the answer's; a row per thing to answer, each an <link target="src-packages-epics-docs-epic-run-row-html" link="/epic-run-row"><text code>&lt;epic-run-row&gt;</></></>
+			<item>the Send bar, stuck to the window's bottom: <text code>3 of 5 answered · not sent</>, the last save, and Send, with no countdown: a command carries on with exactly what you sent</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Once a page, in the run page's template; the route module sets its run:</>
+		<text paragraph>run.html · the run's body:</>
+		<markdown>
+			```html
+			<epic-run run="spell-translate-20261023-1912"></epic-run>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<list bulleted>
+			<item>Its parent: a run page's <text code>main</>, under the sticky page header, from the template (spell-epic's <text title="epic/src/tools/templates/run.html" code>run.html</>).</>
+			<item>Its children: none. It draws its rows, <text code>&lt;epic-run-row&gt;</>, in its shadow root.</>
+			<item>Its run: the epic folder's <text code>pages/runs/&lt;id&gt;/</>, written by the kit's <text code>SRV.CommandRun</>; served and answered by spell-epic's <text title="epic/src/tools/runRoutes.ts" code>runRoutes.ts</>.</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>run</>
+				</>
+				<cell>a run's id (<text code>\[a-z0-9-]</>)</>
+				<cell>The run to draw: its folder's name in <text code>pages/runs/</>.</>
+				<cell>yes</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Who is waiting: muted; the command in mono, a green dot before it while it waits.</>
+			<item>The status card: a quiet rounded box. The effort a pill track, the chosen one a raised thumb; disabled once the run is over. The passes on one grid: the running one in full ink with a blue dot and bar, the done ones muted with a green check.</>
+			<item>The table: a grid in a rounded box, its heads on a faint band; the answer's column the widest.</>
+			<item>Too narrow for its columns (a phone): the table scrolls sideways inside its own box, never stacked.</>
+			<item>Send: blue by the fill rule (dashed: not sent, or changes since; outlined: sent), the line before it green once sent.</>
+			<item>A failed read, save or Send: red, bold, under the bar. A failed save tries again every 3s.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Nobody writes it: the run page's template holds it, and the route module serves that at <text code>/runs/&lt;id&gt;/</>.</>
+			<item>A command opens a run with the kit's <text code>SRV.CommandRun.open()</>, shows it with <text code>show()</> (<text code>epic pages open &lt;run folder&gt; --review</>), and waits with <text code>wait()</>.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-23 against branch <ui-text code>epic-engine</>.</>
+		</>
+	</>

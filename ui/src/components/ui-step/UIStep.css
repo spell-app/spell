@@ -525,7 +525,7 @@
   }
   @container ui-steps (width < 992px) {
     @container not style(--ui-stack-with: page) {
-      .ui[class*="tablet stackable"].steps:not(.circular):not(.stack-with-page) {
+      .ui.tablet-stackable.steps:not(.circular):not(.stack-with-page) {
         --_ui-steps-layout: stacked;
         --_ui-steps-column: 1;
         --_ui-steps-first-radius: var(--_ui-steps-radius) var(--_ui-steps-radius) 0 0;
@@ -536,7 +536,7 @@
       }
     }
     @container style(--ui-stack-with: page) {
-      .ui[class*="tablet stackable"].steps:not(.circular).stack-with-container {
+      .ui.tablet-stackable.steps:not(.circular).stack-with-container {
         --_ui-steps-layout: stacked;
         --_ui-steps-column: 1;
         --_ui-steps-first-radius: var(--_ui-steps-radius) var(--_ui-steps-radius) 0 0;
@@ -549,7 +549,7 @@
   }
   @media (--ui-mobile), (--ui-tablet) {
     @container style(--ui-stack-with: page) {
-      .ui[class*="tablet stackable"].steps:not(.circular):not(.stack-with-container) {
+      .ui.tablet-stackable.steps:not(.circular):not(.stack-with-container) {
         --_ui-steps-layout: stacked;
         --_ui-steps-column: 1;
         --_ui-steps-first-radius: var(--_ui-steps-radius) var(--_ui-steps-radius) 0 0;
@@ -560,7 +560,7 @@
       }
     }
     @container not style(--ui-stack-with: page) {
-      .ui[class*="tablet stackable"].steps:not(.circular).stack-with-page {
+      .ui.tablet-stackable.steps:not(.circular).stack-with-page {
         --_ui-steps-layout: stacked;
         --_ui-steps-column: 1;
         --_ui-steps-first-radius: var(--_ui-steps-radius) var(--_ui-steps-radius) 0 0;

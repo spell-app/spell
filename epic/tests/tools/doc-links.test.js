@@ -64,11 +64,31 @@ describe("command line", () => {
     delete env.EPIC_CHECKOUT
     const run = spawnSync(
       process.execPath,
-      ["--import", "tsx", "src/tools/doc-links.js", "--check", "src/docs/epic-actions.html"],
+      ["--import", "tsx", "src/tools/doc-links.js", "--check", "guides/background-agents.html"],
       { cwd: PACKAGE, encoding: "utf8", env: { ...env, TSX_TSCONFIG_PATH: join(PACKAGE, "tsconfig.json") } }
     )
-    expect(run.stdout).toMatch(/^epic-actions\.html: {2}\d+ destinations, 0 problems\n$/)
+    expect(run.stdout).toMatch(/^background-agents\.html: {2}\d+ destinations, 0 problems\n$/)
     expect(run.status).toBe(0)
+  })
+
+  it("knows the epic plugin's guides at their address, /guides/ (epic `epic-engine` I402)", () => {
+    const {
+      command,
+      args,
+      env: base
+    } = docLinksRun([
+      "--check",
+      "guides/airplane.html",
+      "guides/background-agents.html",
+      "guides/plan-docs/plan-docs.html"
+    ])
+    // the real ones, which the tests' setup turns off;  and the kit's root, as from `epic/`
+    const env = { ...process.env, ...base }
+    delete env.SPELL_EPIC_PLUGIN_GUIDES
+    delete env.EPIC_CHECKOUT
+    const run = spawnSync(command, args, { cwd: PACKAGE, encoding: "utf8", env })
+    expect(run.stdout).not.toContain("missing:")
+    expect(run.status, run.stdout).toBe(0)
   })
 
   it("prints usage and exits 1 with no pages", () => {

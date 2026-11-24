@@ -299,7 +299,7 @@
 
   /* Corner:  a triangle folded over an owner's corner (`right corner` === bare), holding an icon. */
   .ui.corner.label,
-  .ui[class*="right corner"].label {
+  .ui.right-corner.label {
     position: absolute;
     top: calc(var(--_ui-label-owner-edge, var(--ui-label-owner-edge, 0px)) * -1);
     right: calc(var(--_ui-label-owner-edge, var(--ui-label-owner-edge, 0px)) * -1);
@@ -366,7 +366,7 @@
     border-right-color: var(--ui-color-down, var(--_ui-label-ribbon-fold));
     background-color: transparent;
   }
-  .ui[class*="right ribbon"].label {
+  .ui.right-ribbon.label {
     left: calc(100% + var(--_ui-label-ribbon-margin) + var(--_ui-label-ribbon-triangle));
     padding-inline: var(--_ui-label-ribbon-triangle)
       calc(var(--_ui-label-ribbon-margin) + var(--_ui-label-ribbon-triangle));
@@ -374,7 +374,7 @@
     text-align: left;
     translate: -100% 0;
   }
-  .ui[class*="right ribbon"].label::after {
+  .ui.right-ribbon.label::after {
     right: 0;
     left: auto;
     border-width: var(--_ui-label-ribbon-triangle) var(--_ui-label-ribbon-triangle) 0 0;
@@ -384,7 +384,7 @@
 
   /* Attached:  across (or on a corner of) the owner's top / bottom edge. */
   .ui.attached.label,
-  .ui[class*="top attached"].label {
+  .ui.top-attached.label {
     position: absolute;
     top: calc(var(--_ui-label-owner-edge, var(--ui-label-owner-edge, 0px)) * -1);
     left: calc(var(--_ui-label-owner-edge, var(--ui-label-owner-edge, 0px)) * -1);
@@ -394,22 +394,22 @@
     border-radius: var(--_ui-label-owner-radius, var(--ui-label-owner-radius, var(--_ui-label-attached-corner-radius)))
       var(--_ui-label-owner-radius, var(--ui-label-owner-radius, var(--_ui-label-attached-corner-radius))) 0 0;
   }
-  /* NOTE:  `[class*="bottom attached"]` misses `bottom left attached`:  the corners need their own selectors here. */
-  .ui[class*="bottom attached"].label,
-  .ui[class*="bottom left attached"].label,
-  .ui[class*="bottom right attached"].label {
+  /* NOTE:  `.bottom-attached` misses `bottom left attached`:  the corners need their own selectors here. */
+  .ui.bottom-attached.label,
+  .ui.bottom-left-attached.label,
+  .ui.bottom-right-attached.label {
     top: auto;
     bottom: calc(var(--_ui-label-owner-edge, var(--ui-label-owner-edge, 0px)) * -1);
     border-radius: 0 0
       var(--_ui-label-owner-radius, var(--ui-label-owner-radius, var(--_ui-label-attached-corner-radius)))
       var(--_ui-label-owner-radius, var(--ui-label-owner-radius, var(--_ui-label-attached-corner-radius)));
   }
-  .ui[class*="top left attached"].label {
+  .ui.top-left-attached.label {
     width: auto;
     border-radius: var(--_ui-label-owner-radius, var(--ui-label-owner-radius, var(--_ui-label-attached-corner-radius)))
       0 var(--_ui-label-radius) 0;
   }
-  .ui[class*="top right attached"].label {
+  .ui.top-right-attached.label {
     right: calc(var(--_ui-label-owner-edge, var(--ui-label-owner-edge, 0px)) * -1);
     left: auto;
     width: auto;
@@ -417,12 +417,12 @@
       var(--_ui-label-owner-radius, var(--ui-label-owner-radius, var(--_ui-label-attached-corner-radius))) 0
       var(--_ui-label-radius);
   }
-  .ui[class*="bottom left attached"].label {
+  .ui.bottom-left-attached.label {
     width: auto;
     border-radius: 0 var(--_ui-label-radius) 0
       var(--_ui-label-owner-radius, var(--ui-label-owner-radius, var(--_ui-label-attached-corner-radius)));
   }
-  .ui[class*="bottom right attached"].label {
+  .ui.bottom-right-attached.label {
     right: calc(var(--_ui-label-owner-edge, var(--ui-label-owner-edge, 0px)) * -1);
     left: auto;
     width: auto;
@@ -432,7 +432,7 @@
 
   /* Pointing:  an arrow on one side (above by default), drawn by a rotated square in the label's colours. */
   .ui.pointing.label,
-  .ui[class*="above pointing"].label {
+  .ui.above-pointing.label {
     position: relative;
     margin-top: var(--_ui-label-pointing-distance);
   }
@@ -455,28 +455,28 @@
     translate: -50% -50%;
     rotate: 45deg;
   }
-  .ui:is([class*="below pointing"], [class*="bottom pointing"]).label {
+  .ui:is(.below-pointing, .bottom-pointing).label {
     margin-top: 0;
     margin-bottom: var(--_ui-label-pointing-distance);
   }
-  .ui:is([class*="below pointing"], [class*="bottom pointing"]).label::before {
+  .ui:is(.below-pointing, .bottom-pointing).label::before {
     top: 100%;
     border-width: 0 var(--_label-border-width, 0) var(--_label-border-width, 0) 0;
   }
-  .ui[class*="left pointing"].label {
+  .ui.left-pointing.label {
     margin-top: 0;
     margin-left: var(--_ui-label-pointing-size);
   }
-  .ui[class*="left pointing"].label::before {
+  .ui.left-pointing.label::before {
     top: 50%;
     left: 0;
     border-width: 0 0 var(--_label-border-width, 0) var(--_label-border-width, 0);
   }
-  .ui[class*="right pointing"].label {
+  .ui.right-pointing.label {
     margin-top: 0;
     margin-right: var(--_ui-label-pointing-size);
   }
-  .ui[class*="right pointing"].label::before {
+  .ui.right-pointing.label::before {
     top: 50%;
     right: 0;
     left: auto;

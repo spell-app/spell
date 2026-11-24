@@ -11,5 +11,6 @@
   ],
   "development": {
     "apis": ["Weather.api.json5"]
-  }
+  },
+  "spellVersion": "0.9.0"
 }

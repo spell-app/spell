@@ -35,6 +35,31 @@
 				</segment>
 			</example>
 		</>
+
+		<section label="Only on Some Devices" sticky="stack" collapsible dividing>
+			<markdown>
+				Every element takes `on-platform`:  a list of the devices it shows on, `phone`, `tablet` and `desktop`.
+				On any other device it's hidden.
+				Use it for what a device can't do (a phone has no screen capture), or has no room for.
+
+				```html
+				<ui-buttons>
+				  <ui-button on-platform="desktop,tablet" icon="camera">Capture the Screen</ui-button>
+				  <ui-button on-platform="phone" icon="mobile alternate">Phones Only</ui-button>
+				</ui-buttons>
+				```
+			</>
+			<markdown>
+				- A `phone` has a touch screen, small on at least one side (under 600px), so it's still a phone
+				  turned sideways.
+				- A `tablet` has a touch screen, big both ways.
+				- A `desktop` has a mouse or a trackpad.
+				- The list is split at its commas:  `desktop, tablet` means the same as `desktop,tablet`.
+				- It follows a resize, or a turn of the device, at once.
+				- Scripts ask the same question with `currentPlatform()` and `isOnPlatform("desktop,tablet")`,
+				  from `spell/util/platform`.
+			</>
+		</>
 	</>
 
 	<section label="Installation">

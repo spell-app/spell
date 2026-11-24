@@ -16,9 +16,6 @@ export const KIT_ROOT = dirname(fileURLToPath(import.meta.resolve("spell/package
 /** The kit's `spell` command (`bin/spell.mjs`), never the `spell` on `PATH` (maybe another checkout's). */
 export const SPELL_CLI = resolve(KIT_ROOT, "bin", "spell.mjs")
 
-/** Where the page server serves Spell UI's docs (the page server's `componentSets` setting):  `site:check`, `spell icon --open`. */
-export const SITE_ADDRESS = "/components/ui"
-
 /**
  * The kit's page server's origin, e.g. `http://127.0.0.1:54769`:  it serves this site (epic `coherence` P23, from
  * `site:dev`'s and `site:check`'s own copies).
@@ -37,5 +34,11 @@ export function ensurePageServer(): string {
   return (JSON.parse(text.slice(text.indexOf("{"))) as { base: string }).base.replace(/\/$/, "")
 }
 
+/**
+ * The Spell UI site's own file, from the page server's root:
+ * it lists every page with its address (`it has a button usage page at "/button" ...`).
+ */
+export const SPELL_UI_SITE_FILE = "spaces/@spell/guides/SpellUI/SpellUI.spell"
+
 /** Longest `spell server start` may take, ms:  a stale site bundle is built first. */
-const SERVER_START_MS = 60_000
+const SERVER_START_MS = 150_000

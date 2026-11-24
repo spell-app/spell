@@ -1,9 +1,10 @@
 import { spawn } from "child_process"
-import { existsSync, readFileSync, writeFileSync } from "fs"
+import { existsSync } from "fs"
 import { resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
 import { CLI } from "spell/app/cli"
+import { Baseline } from "spell/app/cli/Baseline"
 import { addCheckout, git, linkInstall, removeCheckout } from "spell/app/cli/tempCheckout"
 import environment from "spell/app/spaces/server/node/environment"
 
@@ -25,6 +26,8 @@ const FLUKE_RATIO = 1.25
  * (epic `language` P21, Q24).
  */
 const BASELINE_FILE = resolve(CLI_SRC_DIR, "runner", "speedBaseline.json")
+/** The saved baseline itself (`BASELINE_FILE`). */
+const BASELINE = new Baseline<SavedSpeed>(BASELINE_FILE, "spell speedtest --baseline save")
 /** How many of the rules that grew most `--by-module` lists, and `--budget` names. */
 const TOP_RULES = 10
 
@@ -51,6 +54,7 @@ export async function speedtestCommand(
   args: string[],
   options: CLI.SpeedtestOptions
 ): Promise<number> {
+  if (options.pipeline) return pipelineCommand(session, options)
   const [module = ""] = args
   const runs = options.runs ?? 3
   if (!Number.isInteger(runs) || runs < 1) throw new CLI.CliError(`--runs must be a whole number, 1 or more`)
@@ -60,7 +64,7 @@ export async function speedtestCommand(
   if (options.baseline !== undefined && options.baseline !== "save") {
     throw new CLI.CliError(`--baseline takes one word, save`)
   }
-  const against = options.against ?? (budget === undefined ? undefined : savedBaseline().commit)
+  const against = options.against ?? (budget === undefined ? undefined : BASELINE.savedOrDie().commit)
   const byTest = !!(options.byModule || budget !== undefined || options.baseline)
 
   const status = new CLI.StatusReporter(session.isInteractive)
@@ -356,23 +360,18 @@ export function moduleTable(times: ModuleTimes): string {
   ].join("\n")
 }
 
-/** `(now - was) / was`, as a whole percent;  0 when `was` is. */
+/** `(now - was) / was`, as a whole percent;  0 when `was` is (`Baseline.change()`). */
 function percentChange(now: number, was: number): number {
-  return was ? Math.round(((now - was) / was) * 100) : 0
+  return was ? Baseline.change(now, was) : 0
 }
 
 /** A percent with its sign:  `+5%`, `-3%`, `0%`. */
 function signed(percent: number): string {
-  return `${percent > 0 ? "+" : ""}${percent}%`
+  return Baseline.signed(percent)
 }
 
-/** The saved baseline:  its commit and numbers.  throws if there's none yet. */
-function savedBaseline(): { commit: string } {
-  if (!existsSync(BASELINE_FILE)) {
-    throw new CLI.CliError(`no saved baseline:  run spell speedtest --baseline save first`)
-  }
-  return JSON.parse(readFileSync(BASELINE_FILE, "utf8")) as { commit: string }
-}
+/** What `--baseline save` keeps beside its commit:  the totals, only a record. */
+type SavedSpeed = Pick<SideTotal, "average" | "min" | "max" | "pass" | "fail">
 
 /**
  * SIDE EFFECT:  save this checkout's commit and `total` as the baseline `--budget` times against.
@@ -380,13 +379,126 @@ function savedBaseline(): { commit: string } {
  */
 function saveBaseline(total: Omit<SideTotal, "label">): void {
   const { average, min, max, pass, fail } = total
-  const saved = { commit: currentCommit(), saved: new Date().toISOString(), average, min, max, pass, fail }
-  writeFileSync(BASELINE_FILE, `${JSON.stringify(saved, null, 2)}\n`)
+  BASELINE.save({ average, min, max, pass, fail }, currentCommit())
 }
 
 /** This checkout's commit. */
 function currentCommit(): string {
   return git(["rev-parse", "HEAD"], environment.srcDir)
+}
+
+////////////////
+// ## The editing pipeline
+////////////////
+
+/** The child process that times the pipeline once -- see its header. */
+const PIPELINE_RUNNER = resolve(CLI_SRC_DIR, "runner", "pipelineTimes.mts")
+
+/** The tsconfig `tsx` runs it under:  the kit's, over every folder's files (as `spell` runs). */
+const KIT_TSCONFIG = resolve(CLI_SRC_DIR, "..", "..", "..", "tsconfig.tsx.json")
+
+/** The project the pipeline times, and the run it makes. */
+const PIPELINE_PROJECT = "@spell/examples/Solitaire"
+
+/** Where the pipeline's numbers are named in `spell perf`'s results and baseline:  `pipeline Solitaire parse`. */
+const PIPELINE_PREFIX = "pipeline Solitaire "
+
+/**
+ * `spell speedtest --pipeline`:  the editing pipeline on Solitaire, in `--runs` fresh processes (default 3), each
+ * number the median of the runs (`pipelineTimes.mts`):  startup, a cold parse, the four edits, a compile;
+ * and a run, the compiled program loaded once in node as the core contract runs it (its clock time:  it's another
+ * process).
+ * - `--json`:  the medians as JSON
+ * - `--baseline save`:  saves them into `spell perf`'s baseline (`perfBaseline.json`), as its `pipeline` numbers
+ * - `--budget <percent>`:  fails (`EXIT.ERRORS`) when a number is that much over the baseline's, naming each
+ * - Returns the exit code.
+ */
+async function pipelineCommand(session: CLI.CliSession, options: CLI.SpeedtestOptions): Promise<number> {
+  const runs = options.runs ?? 3
+  if (!Number.isInteger(runs) || runs < 1) throw new CLI.CliError(`--runs must be a whole number, 1 or more`)
+  const budget = options.budget === undefined ? undefined : Number(String(options.budget).replace(/%$/, ""))
+  if (budget !== undefined && !(budget >= 0)) throw new CLI.CliError(`--budget must be a percent, e.g. 5`)
+  const { PerfResults } = await import("spell/app/cli/perf/PerfResults")
+  const baseline = PerfResults.baseline
+  const saved = budget === undefined ? undefined : baseline.savedOrDie()
+
+  const status = new CLI.StatusReporter(session.isInteractive)
+  const results: Array<Record<string, number>> = []
+  try {
+    const { compiledFixture } = await import("spell/app/spaces/test")
+    const code = compiledFixture(PIPELINE_PROJECT)
+    for (let run = 1; run <= runs; run++) {
+      const row = status.start(`Pipeline  run ${run} of ${runs}`)
+      const times = await pipelineOnce()
+      const started = performance.now()
+      await CLI.runCode("run", "Solitaire", code, { capture: true, dom: true, seed: 1, offline: true })
+      times.run = performance.now() - started
+      results.push(times)
+      status.done(row, "ok", `parse ${Math.round(times.parse ?? 0)}ms`)
+    }
+  } catch (error) {
+    status.done(status.rows.at(-1)!, "failed", error instanceof Error ? error.message : String(error))
+    return CLI.EXIT.ERRORS
+  } finally {
+    status.finish()
+  }
+  const medians: Record<string, number> = {}
+  for (const name of Object.keys(results[0]!)) {
+    const sorted = results.map((it) => it[name]!).sort((a, b) => a - b)
+    const middle = sorted.length >> 1
+    medians[name] = +(sorted.length % 2 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2).toFixed(2)
+  }
+  if (options.baseline) {
+    const numbers = { ...baseline.saved?.numbers }
+    for (const [name, ms] of Object.entries(medians)) numbers[`${PIPELINE_PREFIX}${name}`] = ms
+    baseline.save({ numbers, when: baseline.saved?.when }, currentCommit(), { merge: true })
+  }
+  if (options.json) {
+    session.out(JSON.stringify(medians))
+  } else {
+    session.out(pipelineTable(medians, saved?.numbers))
+    if (options.baseline) session.out(`\nBaseline saved:  ${currentCommit()}, in ${session.relative(baseline.file)}`)
+  }
+  if (budget === undefined) return CLI.EXIT.OK
+  const over = Object.entries(medians).filter(([name, ms]) => {
+    const was = saved?.numbers[`${PIPELINE_PREFIX}${name}`]
+    return was !== undefined && percentChange(ms, was) > budget
+  })
+  session.out(
+    `\nBudget ${budget}%:  ${over.length ? `OVER:  ${over.map(([name]) => name).join(", ")}` : "within budget"}`
+  )
+  return over.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
+}
+
+/**
+ * Markdown table of the pipeline's medians, ms, with the baseline's beside them and the change, when there's one.
+ * - Owen's format:  value columns right-aligned
+ */
+export function pipelineTable(medians: Record<string, number>, saved?: Record<string, number>): string {
+  const rows = Object.entries(medians).map(([name, ms]) => {
+    const was = saved?.[`${PIPELINE_PREFIX}${name}`]
+    return `| ${name} | ${ms.toFixed(1)} | ${was === undefined ? "" : was.toFixed(1)} | ${was === undefined ? "" : signed(percentChange(ms, was))} |`
+  })
+  return ["| Step | ms | Baseline | Change |", "|---|--:|--:|--:|", ...rows].join("\n")
+}
+
+/** Run `pipelineTimes.mts` once, in a fresh node process;  rejects when it fails. */
+function pipelineOnce(): Promise<Record<string, number>> {
+  const args = ["--import", import.meta.resolve("tsx/esm"), PIPELINE_RUNNER]
+  const env = { ...process.env, TSX_TSCONFIG_PATH: KIT_TSCONFIG }
+  return new Promise((done, fail) => {
+    const child = spawn(process.execPath, args, { stdio: ["ignore", "pipe", "pipe"], env })
+    let stdout = ""
+    let stderr = ""
+    child.stdout.on("data", (data) => (stdout += data))
+    child.stderr.on("data", (data) => (stderr += data))
+    child.on("error", fail)
+    child.on("exit", (code) => {
+      const last = stdout.trim().split("\n").at(-1) ?? ""
+      if (code === 0 && last.startsWith("{")) return done(JSON.parse(last) as Record<string, number>)
+      fail(new Error(`the pipeline failed:  ${stderr.trim().split("\n").slice(-3).join("\n") || `exit code ${code}`}`))
+    })
+  })
 }
 
 ////////////////

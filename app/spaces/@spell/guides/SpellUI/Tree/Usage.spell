@@ -12,10 +12,64 @@
 			- `open` shows the rows inside it.  A row whose rows are drawn only once it opens says `expandable`.
 			- `ui-changed` hands over what's selected.  To decide that yourself, cancel `ui-selecting`, and set each row's `selected`.
 			- `filter` looks only at rows that are drawn.
+			- `tools` puts Open&nbsp;2&nbsp;levels, Open&nbsp;3&nbsp;levels and Close&nbsp;all above the rows;  a script calls `openTo(levels)` and `closeAll()`, which waits for rows still to come, level by level.
+			- The `tools` slot goes at the end of that line:  a filter field, say.
+			- `ui-settled` hands it over again once it stays put for a moment:  for a page doing heavy work on each pick, as the arrow keys go by.
 		</>
 		<markdown>
 			```js
 			document.querySelector("ui-tree").addEventListener("ui-changed", (event) => show(event.detail.values))
+			```
+		</>
+	</>
+
+	<section label="Columns">
+		<markdown>
+			`appearance="columns"` shows a column per level.  Its rows are `<ui-tree-item>`s, or data in the `items` property.
+			- `items`:  `{ id, label, icon?, which?, count?, children?, data? }[]`.  `children` is a list, or a function run the first time its item opens, which may return a promise.
+			- A column from `items` draws its first rows, then more as you scroll near its end, so a column of 5,000 rows opens as fast as one of 300.  Its pick, and a row the keys move to, are drawn at once.  What's drawn stays drawn.  Rows from markup are all drawn:  for a big tree, use `items`.
+			- `path` is the ids of each column's pick, from the top.  Set it to open a path, its last item selected;  `ui-changed` hands it over with the `item`.
+			- `filter` filters one column:  the last one on screen as the filter starts, until it's cleared.  After its rows, it lists the matches elsewhere in the tree, at any depth, each with the rows it's inside;  a click on one opens the path to it.  From `items`, it runs the `children` functions to look inside (waiting for promised ones), but opens no column.  It lists the first 200, and stops after 100,000 rows.
+			- `openTo(levels)` shows that many columns, keeping each column's pick, else picking its first row that holds rows;  `closeAll()` goes back to the first column.
+			- `show` picks each row's parts:  `icon which count chevron`;  without it, `icon which chevron`.
+			- `sticky-path` puts a line above the columns naming each column's pick;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.  Like the outline's, a screen reader skips it:  the columns' own keys are the way back.
+			- While the columns don't fit the tree's width, the first ones narrow to a strip with their pick's name, as few as it takes.  The last `narrow-before` (2) and the selected row's never do;  the pointer or the focus on one widens it again, over the columns after it.
+			- Pointing at a narrow strip, or moving the focus into it, draws it whole over the columns after it, which stay where they are.  While even the strips don't make room, the full columns share what's left, so the selected one shows whole.
+			- `size` sets each column's width, by level, the last one going on for every deeper column:  px, `em`, a percent of the tree's width, `auto` to fit the rows it shows, or `*` for the token's.  `size="auto"` fits every column to its rows.
+			- Resizing works as in the Finder:  drag the line after a column;  hold Option (Alt) to resize every column together;  double-click the line to fit the column to its longest row, with Option every column.  The arrow keys on a line resize it too, Shift by ten times as much, Option every column.  A width you set wins over `size`, and with an `id` the tree remembers it in this browser.
+			- With an `id`, the tree also keeps its `path`:  a reload opens it where it was left, unless the page sets a `path` of its own (or, from markup, marks rows `open` or `selected`).
+			- An element with `slot="detail"` is a pane after the last column, tight against it, showing what's picked:  the tree sets its `item` property to the picked `items` entry or `<ui-tree-item>`, and sends `ui-changed`.  It's drawn only while something is picked, as wide as its content (up to `--ui-tree-detail-max-width`, half the tree), and the columns narrow to make room for it.  Drag the line after it to resize it, double-click to fit its content again;  with an `id`, the tree keeps that width too.  `sticky-detail` keeps it in view while the columns scroll sideways.
+			- `--ui-tree-columns-height` sets its height, `--ui-tree-column-width` each column's width, `--ui-tree-narrow-width` a narrow one's.
+		</>
+	</>
+
+	<section label="A look of your own">
+		<markdown>
+			A subclass gives a column view its own look.
+			- `rowClass(item)` puts class names on each row drawn from `items`.
+			- The subclass's own sheet, added to the tree's in `elementSetup`, styles them:  rows are `.column-row`s.
+			- Its tokens set the tree's.
+		</>
+		<markdown>
+			```js
+			import { E } from "spell/ui/core"
+			import { UITree } from "spell/ui/ui-tree"
+
+			const sheet = `
+			  :host { --ui-tree-column-selected-background: var(--files-accent, teal); }
+			  .column-row.secret .words { font-style: italic; }
+			`
+
+			class FileColumns extends UITree {
+			  @E.protoMerged static elementSetup = {
+			    styleSheets: { ...UITree.prototype.elementSetup.styleSheets, "file-columns": sheet }
+			  }
+
+			  rowClass(item) {
+			    return item.data?.isSecret ? "secret" : undefined
+			  }
+			}
+			FileColumns.define("file-columns") // <file-columns appearance="columns">
 			```
 		</>
 	</>
@@ -26,6 +80,11 @@
 			- Up and down move between the rows on screen;  Home and End go to the ends.
 			- Right opens a row, then goes into it;  left closes it, then goes out to its parent.
 			- Enter and Space select, with Shift, Command or Control as a click takes them.
+
+			With `appearance="columns"`, the keys select as they move, as a Mac's Finder's do, and a selected row's rows show in the next column.
+			- Up and down move within a column;  Home and End go to its ends.
+			- Right goes into the next column, onto the row picked there before, else its first;  left goes back to the previous column's pick.  Right to left, they swap.
+			- On the line after a column, left and right make it narrower and wider, ten times as far with Shift;  with Option (Alt), every column.
 		</>
 	</>
 

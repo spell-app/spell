@@ -54,7 +54,7 @@ describe("<ui-docs-index>", () => {
     expect(drawn(element).map(([label]) => label)).toEqual(["Basic", "Forms"])
   })
 
-  it("its search's `ui-navigating` goes by a same-page link (its own listener, not an `on-ui-*` prop)", async () => {
+  it("leaves its search's `ui-navigating` alone:  the search follows its own pick, as a plain link", async () => {
     const element = Fixture.render(`<ui-docs-index pages='${JSON.stringify(PAGES)}'></ui-docs-index>`)
     await (element as unknown as { ready: Promise<void> }).ready
     flush()
@@ -68,7 +68,7 @@ describe("<ui-docs-index>", () => {
       cancelable: true
     })
     element.shadowRoot!.querySelector("ui-docs-search")!.dispatchEvent(navigating)
-    expect(navigating.defaultPrevented).toBe(true)
-    expect(followed).toEqual(["/a/b?c#d"])
+    expect(navigating.defaultPrevented).toBe(false)
+    expect(followed).toEqual([])
   })
 })

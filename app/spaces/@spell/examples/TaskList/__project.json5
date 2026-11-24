@@ -8,5 +8,6 @@
     { "path": "/TaskList.api.spell", "active": true },
     { "path": "/TaskList.spell", "active": true },
     { "path": "/styles.css", "active": true }
-  ]
+  ],
+  "spellVersion": "0.9.0"
 }

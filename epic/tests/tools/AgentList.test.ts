@@ -168,3 +168,48 @@ describe("done already (epic `epic-engine` I288)", () => {
     expect(new AgentList(checkout("plain")).doneSaid("aaa")).toBeUndefined()
   })
 })
+
+describe("pause and resume (epic-engine T139)", () => {
+  const SAVED = {
+    at: "2026-11-22T12:00:00.000Z",
+    session: "old",
+    checkout: "/repo",
+    next: "the tests",
+    uncommitted: [],
+    unclaimed: [],
+    commits: []
+  }
+
+  test("paused:  listed and guarding its files, but not running;  its notes wait;  done and set refuse", async () => {
+    const list = new AgentList(checkout("paused"))
+    list.add("one", "the fix", { files: ["src/one.ts"], taskId: "a1" })
+    list.add("two", "the docs")
+    await list.redirect("one", "keep it small")
+    list.pause("one", SAVED)
+    expect(list.running.map((it) => it.name)).toEqual(["paused-two"])
+    expect(list.untold).toEqual([])
+    expect(list.claimOf("src/one.ts")?.name).toBe("paused-one")
+    expect(list.othersThan("two").map((it) => it.name)).toEqual(["paused-one"])
+    expect(() => list.done("one")).toThrow(/paused, not done/)
+    expect(() => list.set("one", { status: "active" })).toThrow(/agents resume/)
+    expect(() => list.add("one", "again")).toThrow(/agents resume/)
+    expect(list.done("one", { finished: true }).name).toBe("paused-one")
+  })
+
+  test("resume:  ONCE, the record cleared, started now, its task id kept only for the session that paused it", () => {
+    const list = new AgentList(checkout("resumed"))
+    for (const name of ["same", "other"]) {
+      list.add(name, "work", { taskId: `${name}-id` })
+      list.pause(name, SAVED)
+    }
+    const now = Date.parse("2026-11-22T13:00:00Z")
+    expect(list.resume("same", { session: "old", now }).paused).toEqual(SAVED)
+    expect(() => list.resume("same", { session: "old", now })).toThrow(/don't start it again/)
+    list.resume("other", { session: "new", now })
+    const started = new Date(now).toISOString()
+    expect(list.agents).toEqual([
+      { name: "resumed-same", task: "work", status: "active", started, taskId: "same-id", resumedFrom: "the tests" },
+      { name: "resumed-other", task: "work", status: "active", started, resumedFrom: "the tests" }
+    ])
+  })
+})

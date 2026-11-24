@@ -12,6 +12,12 @@ export const iconPickerEs = {
   tag: "ui-icon-picker",
   name: "selector-icono",
   aka: ["selector de iconos", "elegir icono", "buscador de iconos", "selector de símbolos"],
-  parts: { glyph: "glifo", panel: "panel", cell: "celda" },
-  texts: { searchIcons: "Buscar iconos", noIcon: "ninguno", noIconsMatch: "Ningún icono coincide", otherIcons: "Otros" }
+  parts: { glyph: "glifo", panel: "panel", cell: "celda", browse: "explorar" },
+  texts: {
+    searchIcons: "Buscar iconos",
+    browseIcons: "Ver todos los iconos, con sus nombres",
+    noIcon: "ninguno",
+    noIconsMatch: "Ningún icono coincide",
+    otherIcons: "Otros"
+  }
 } as const satisfies E.TagDictionary

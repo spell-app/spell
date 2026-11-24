@@ -1,9 +1,10 @@
+import { createHash } from "node:crypto"
 import type { Stats } from "node:fs"
 import { readFile } from "node:fs/promises"
 import type { IncomingMessage } from "node:http"
-import { extname, resolve } from "node:path"
+import { extname, relative, resolve, sep } from "node:path"
 
-import type { FileTransform, Handler, HtmlTransform, Mount, PageSource } from "spell/server"
+import type { Caching, FileTransform, Handler, HtmlTransform, Mount, PageSource } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { typeFor } from "./mime"
 import { Reply } from "./Reply"
@@ -20,8 +21,14 @@ import { HttpError } from "./server.types"
  *     e.g. the epic folder under every worktree's address, after the worktrees' own files
  * - a folder serves its `index.html`;  asked for without its trailing `/`, it redirects (301) to it
  * - names starting with `.` are 403 unless the mount says `dotFiles`
- * - every answer is `Cache-Control: no-store` (pages change under us),
- *   with an `ETag` of the file on disk, so a page editor can say `If-Match`
+ * - every answer has an `ETag` of the file on disk, so a page editor can say `If-Match`
+ * - how long a browser keeps a copy:  the `caching` setting (`Caching`;  epic `solid-2-final` P2)
+ *   - `"never"` (the default):  `Cache-Control: no-store`, as every worktree's page server answers
+ *   - `"normal"`:  a hashed name (`Mount.hashed`) a year, `immutable`;  the rest `no-cache`, each load answered
+ *     "not modified" (304) while the browser's copy matches its `ETag`
+ *     - a page through the `html` hooks is "not modified" only while the hooks still make what they made for its last
+ *       answer at that address:  the server's settings in it (the write token, airplane mode ...) are never stale
+ *   - a file the hooks rewrite says `Vary: Sec-Fetch-Dest`:  a script's `fetch()` of it (below) is a copy of its own
  * - hooks:
  *   - `transforms[".ts"]`:  rewrites a file by extension, e.g. `ui`'s smoke server turns `.ts` into JavaScript
  *   - `html`:  rewrites every `.html` page in turn, e.g. inject an import map or `window.SPELL_SERVER`
@@ -37,13 +44,22 @@ export class StaticHandler {
    * folders served, longest prefix first;  at one prefix, in the order mounted (`sort()` is stable),
    * the catch-alls (`skip`) last
    */
-  private mounts: Required<Mount>[] = []
+  private mounts: (Required<Omit<Mount, "hashed">> & Pick<Mount, "hashed">)[] = []
 
   /** rewrites of `.html` pages, in order */
   readonly html: HtmlTransform[]
 
   /** rewrites by extension (`.ts`), applied before `html` */
   readonly transforms: Record<string, FileTransform>
+
+  /** how long browsers keep copies (`Caching`) */
+  readonly caching: Caching
+
+  /**
+   * what the `html` hooks made of each page last, by its address and `ETag`:  a hash of it, so a page is
+   * "not modified" (304) only while they'd make the same again (`caching: "normal"`)
+   */
+  private pagesSent = new Map<string, string>()
 
   /**
    * OVERLAYS:  each maps a URL path to another one, served in its place WHEN a file is there,
@@ -54,9 +70,10 @@ export class StaticHandler {
    */
   readonly overlays: ((path: string) => string | undefined)[] = []
 
-  constructor({ mounts = [], html = [], transforms = {} }: StaticHandlerProps = {}) {
+  constructor({ mounts = [], html = [], transforms = {}, caching = "never" }: StaticHandlerProps = {}) {
     this.html = html
     this.transforms = transforms
+    this.caching = caching
     for (const mount of mounts) this.mount(mount)
   }
 
@@ -79,7 +96,7 @@ export class StaticHandler {
       if (resolved.status === 404) return next()
       throw new HttpError(resolved.status, resolved.message)
     }
-    await this.serve(request, reply, resolved.file, resolved.stat)
+    await this.serve(request, reply, resolved)
   }
 
   /**
@@ -88,7 +105,7 @@ export class StaticHandler {
    * - for routes that act on a page by its URL, e.g. `docs`' details answers (`/worktrees/<w>/...` included)
    * - an overlay's file first (`overlays`)
    */
-  resolve(path: string): Resolved | undefined {
+  resolve(path: string): StaticFound | undefined {
     for (const overlay of this.overlays) {
       const other = overlay(path)
       const found = other === undefined ? undefined : this.resolveMounted(other)
@@ -102,7 +119,7 @@ export class StaticHandler {
    * - several folders at the longest matching prefix:  the first one that has the path (not a 404) answers
    * - a catch-all (`skip`) looks without the path's first folders;  a path too short for it isn't its
    */
-  private resolveMounted(path: string): Resolved | undefined {
+  private resolveMounted(path: string): StaticFound | undefined {
     const mount = this.mounts.find((each) => path.startsWith(each.prefix) || `${path}/` === each.prefix)
     if (!mount) return undefined
     // a mount's own folder without its slash (`/ui`):  redirect like any folder, so its pages' relative links resolve
@@ -113,19 +130,30 @@ export class StaticHandler {
       const at = each.skip ? skipFolders(inside, each.skip) : inside
       if (at === undefined) continue
       resolved = resolveInside(each.dir, at, each)
+      if ("file" in resolved && each.hashed) {
+        const inside = relative(each.dir, resolved.file).split(sep).join("/")
+        return { ...resolved, hashed: each.hashed.test(inside) }
+      }
       if (!("status" in resolved) || resolved.status !== 404) return resolved
     }
     return resolved
   }
 
-  /** answer with `file`, through the hooks */
-  private async serve(request: Request, reply: Reply, file: string, stat: Stats): Promise<void> {
-    reply.set({ "Cache-Control": "no-store", ETag: StaticHandler.etagOf(stat) })
+  /** answer with `resolved`'s file, through the hooks;  "not modified" when the browser's copy is current */
+  private async serve(request: Request, reply: Reply, { file, stat, hashed }: Served): Promise<void> {
+    const etag = StaticHandler.etagOf(stat)
+    reply.set("ETag", etag)
+    if (this.caching === "never") reply.noStore()
+    else reply.set("Cache-Control", hashed ? HASHED_CACHE : CHECK_EACH_TIME)
     const ext = extname(file).toLowerCase()
     const transform = this.transforms[ext]
     const isHtml = ext === ".html" || ext === ".htm"
+    const hooked = !!transform || (isHtml && this.html.length > 0)
+    if (hooked) reply.vary("Sec-Fetch-Dest")
+    const isCurrent = this.caching === "normal" && matchesEtag(request.get("if-none-match"), etag)
     const raw = request.get("sec-fetch-dest") === "empty"
-    if (raw || (!transform && !(isHtml && this.html.length))) {
+    if (raw || !hooked) {
+      if (isCurrent) return void reply.status(304).end()
       reply.type(typeFor(file))
       return reply.sendFile(file, { dotfiles: "allow" })
     }
@@ -134,6 +162,13 @@ export class StaticHandler {
     let type = typeFor(file)
     if (transform) ({ body, type } = transform(body, context))
     if (isHtml && typeof body === "string") for (const hook of this.html) body = hook(body, context)
+    if (this.caching === "normal") {
+      const key = `${request.originalUrl}\0${etag}`
+      const made = createHash("sha1").update(body).digest("hex")
+      if (isCurrent && this.pagesSent.get(key) === made) return void reply.status(304).end()
+      if (this.pagesSent.size >= PAGES_SENT_LIMIT) this.pagesSent.clear()
+      this.pagesSent.set(key, made)
+    }
     reply.type(type).send(body)
   }
 
@@ -168,6 +203,30 @@ export class StaticHandler {
   }
 }
 
+/** A hashed name's `Cache-Control`, with `caching: "normal"`:  kept a year, never asked about again. */
+const HASHED_CACHE = "public, max-age=31536000, immutable"
+
+/** Everything else's, with `caching: "normal"`:  kept, but checked with the server before each use. */
+const CHECK_EACH_TIME = "no-cache"
+
+/** The most pages `pagesSent` remembers before it starts again:  forgetting one only costs a page sent whole. */
+const PAGES_SENT_LIMIT = 5000
+
+/** A file `resolve()` found, and whether its name carries a build's hash (`Mount.hashed`). */
+type Served = { file: string; stat: Stats; hashed?: boolean }
+
+/** What `resolve()` finds:  a file (and whether its name is hashed), a redirect or a refusal. */
+export type StaticFound = Resolved | Served
+
+/** Whether request header `If-None-Match` (`ifNoneMatch`) names `etag`:  one of a list, weak (`W/`) or not, or `*`. */
+function matchesEtag(ifNoneMatch: string | undefined, etag: string): boolean {
+  if (!ifNoneMatch) return false
+  return ifNoneMatch.split(",").some((each) => {
+    const named = each.trim().replace(/^W\//, "")
+    return named === etag || named === "*"
+  })
+}
+
 /**
  * URL path `path` (`/w/epics/x.html`) without its first `count` folders (`/epics/x.html`);
  * `undefined` when it has no more than that (`/w`).
@@ -180,9 +239,11 @@ function skipFolders(path: string, count: number): string | undefined {
  * `new StaticHandler()` props.
  * - `mounts`:  folders to serve
  * - `html` / `transforms`:  the hooks (see the class)
+ * - `caching`:  how long browsers keep copies (`Caching`);  default `"never"`
  */
 export type StaticHandlerProps = {
   mounts?: Mount[]
   html?: HtmlTransform[]
   transforms?: Record<string, FileTransform>
+  caching?: Caching
 }

@@ -1,11 +1,12 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell/ui/core"
+import { E, UIT } from "spell/ui/core"
 
 import {
   AnswerForm,
   NOTES_KEY,
+  SEED_EMPTIED,
   type AnswerPart,
   type KeptText,
   type PageAnswer,
@@ -71,6 +72,12 @@ export class DOMTextBoxElement extends E.DOMElement<EpicTextBox> {
  *     element drawing it reads it (`<epic-option-form>`'s, `<epic-new-item>`'s)
  * - Its `input` events are the native `<textarea>`'s own:  they bubble out of both shadow roots, so the element that
  *   draws it hears them (`onInput`).
+ * - A SEED (epic `ast-markup`):  the text it starts with, Claude's suggestion, written as its child
+ *   `<script type="text/plain">` (`seed`), so markup needs no escaping.
+ *   - the seed is the baseline:  the box's answer is what's typed only once it differs, so a box left as seeded
+ *     sends nothing (`epic ask answer` says it was kept), and an emptied one sends `SEED_EMPTIED`
+ *   - a button under it puts the seed back (`reset`), while what's in it differs
+ * - `code`:  monospace, no wrapping (it scrolls sideways), Tab indents (`onKeyDown`).
  * - The NOTES box also draws, above its field, what the page KEPT (epic `epic-workflow` P18):  text Owen typed for
  *   a question, option or section an agent's rewrite took off the page (`AnswerForm.kept`), "Kept from before the
  *   page changed", each with its old title and a × to drop it.  It's sent with the rest.
@@ -82,13 +89,68 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
     DOMElement: DOMTextBoxElement
   } satisfies Partial<E.ElementSetup>
 
-  /** What's typed in it;  to start with, a `value` set before it was built. */
-  @E.state accessor text = (this.domElement as DOMTextBoxElement).startValue ?? ""
+  /**
+   * Its SEED, the text it starts with (Claude's suggestion):  its own `<script type="text/plain">` (or `<template>`),
+   * dedented, as `<ui-code>` reads its own;  `undefined` without one.
+   * - follows the page:  a rewrite patched in place changes it
+   */
+  @E.watches({ childList: true, characterData: true, subtree: true })
+  get seed(): string | undefined {
+    return hasSeed(this.domElement) ? E.LoadableComponent.inlineTextOf(this.domElement) : undefined
+  }
+
+  /** What's typed in it;  to start with, a `value` set before it was built, else its seed. */
+  @E.state accessor text = (this.domElement as DOMTextBoxElement).startValue ?? this.seed ?? ""
 
   /** Something is typed. */
   @E.cssState("filled")
   get isFilled(): boolean {
     return !!this.text.trim()
+  }
+
+  /** A seeded box whose text is no longer its seed. */
+  @E.cssState("edited")
+  get isEdited(): boolean {
+    return this.seed !== undefined && this.said !== undefined
+  }
+
+  /**
+   * What it says for the answer:  what's typed, trimmed (a `code` box keeps its first line's indent);
+   * `undefined` for nothing to send.
+   * - a seeded box:  nothing while it still holds its seed, `SEED_EMPTIED` once emptied
+   */
+  get said(): string | undefined {
+    const text = this.code ? this.text.replace(/^\s*\n/, "").trimEnd() : this.text.trim()
+    const seed = this.seed
+    if (seed === undefined) return text || undefined
+    if (text === (this.code ? seed.trimEnd() : seed.trim())) return undefined
+    return text || SEED_EMPTIED
+  }
+
+  /** The text a part of an answer puts back:  sent text as it is, the seed for none, nothing for `SEED_EMPTIED`. */
+  private shownFor(sent: string | undefined): string {
+    if (sent === SEED_EMPTIED) return ""
+    return sent ?? this.seed ?? ""
+  }
+
+  /**
+   * The seed changed under it:  a box still holding the old one (or nothing) takes the new.
+   * - a rewrite patched in place;  and a box built before its children were in (a page's router drawing it)
+   */
+  @E.onChange("seed")
+  protected onSeedChanged(seed: string | undefined) {
+    if (seed !== this.lastSeed && this.text === (this.lastSeed ?? "")) this.text = seed ?? ""
+    this.lastSeed = seed
+  }
+
+  /** The seed as last seen, for `onSeedChanged()`. */
+  private lastSeed = this.seed
+
+  /** Put the seed back (the reset button):  a change like any typed one, so the draft follows. */
+  private readonly resetToSeed = () => {
+    this.text = this.seed ?? ""
+    this.form?.edited()
+    this.field?.focus()
   }
 
   /** Its placeholder:  its own, else its type's. */
@@ -145,7 +207,23 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
           placeholder={this.hint}
           aria-label={this.label ?? this.hint}
           style={this.maxHeight ? { "--ui-input-textarea-grow-max-height": this.maxHeight } : undefined}
+          onKeyDown={this.onKeyDown}
         />
+        <Show when={this.isEdited}>
+          <div class={RESET_ROW}>
+            <ui-button
+              class={RESET}
+              part={this.partForName("reset")}
+              size="mini"
+              appearance="basic"
+              icon="rotate left"
+              data-tooltip={this.translationForKey("resetTip")}
+              onClick={this.resetToSeed}
+            >
+              {this.translationForKey("reset")}
+            </ui-button>
+          </div>
+        </Show>
       </div>
     )
   }
@@ -166,9 +244,7 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
         <For each={this.kept}>
           {(item) => (
             <div class={KEPT_ITEM} part={this.partForName("kept-item")}>
-              <p class={KEPT_LABEL} data-tooltip={this.translationForKey("keptIdTip", { id: item.id })}>
-                {item.label}
-              </p>
+              <p class={KEPT_LABEL}>{item.label}</p>
               <p class={KEPT_TEXT}>{item.text}</p>
               <ui-button
                 class={KEPT_DROP}
@@ -201,6 +277,40 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
     if (this.field && this.field.value !== text) this.field.value = text
   }
 
+  /**
+   * A `code` box's Tab:  indents (two spaces, or every line picked), Shift-Tab takes it back;
+   * after Escape, Tab moves on as usual, so the keyboard can always leave.
+   * - typed through the browser's own editing (`insertText`), so Undo takes it back and the field's `input` follows
+   */
+  private readonly onKeyDown = (event: KeyboardEvent) => {
+    if (!this.code) return
+    if (event.key === UIT.Key.escape) {
+      this.tabLeaves = true
+      return
+    }
+    const leaves = this.tabLeaves
+    this.tabLeaves = false
+    if (event.key !== UIT.Key.tab || leaves || event.altKey || event.ctrlKey || event.metaKey) return
+    const textarea = (this.domElement as DOMTextBoxElement).textarea
+    if (!textarea) return
+    event.preventDefault()
+    const { value, selectionStart: start, selectionEnd: end } = textarea
+    if (start === end && !event.shiftKey) {
+      insertText(textarea, INDENT)
+      return
+    }
+    // every line the pick touches, from its first line's start
+    const from = value.lastIndexOf("\n", start - 1) + 1
+    const lines = value.slice(from, end).split("\n")
+    const shifted = lines.map((line) => (event.shiftKey ? line.replace(OUTDENT, "") : INDENT + line))
+    textarea.setSelectionRange(from, end)
+    insertText(textarea, shifted.join("\n"))
+    textarea.setSelectionRange(from, from + shifted.join("\n").length)
+  }
+
+  /** Escape was the last key:  the next Tab leaves the box. */
+  private tabLeaves = false
+
   /** A keystroke:  the text, and the page's form told (its draft follows). */
   private readonly onTyped = (event: CustomEvent<{ value: string }>) => {
     this.text = event.detail.value
@@ -211,11 +321,14 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
   // ## Its part of the answer
   ////////////////
 
-  /** Add what's typed to `page`, by its type:  the notes, a comment, a question's Other;  nothing when blank. */
+  /**
+   * Add what it says (`said`) to `page`, by its type:  the notes, a comment, a question's Other;
+   * nothing when blank, or left as seeded.
+   */
   gatherInto(page: PageAnswer) {
-    const text = this.text.trim()
+    const text = this.said
     const type = this.type ?? "comment"
-    if (type === "notes") page.notes = text
+    if (type === "notes") page.notes = text ?? ""
     else if (type === "other") {
       if (!this.for) return
       const answer = (page.answers[this.for] ??= { picked: [] })
@@ -238,9 +351,9 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
   showAnswer(answer: SentAnswer) {
     const type = this.type ?? "comment"
     const id = this.for ?? ""
-    if (type === "notes") this.text = answer.notes ?? ""
-    else if (type === "other") this.text = answer.answers?.[id]?.other ?? ""
-    else if (type === "comment") this.text = answer.comments?.[id] ?? ""
+    if (type === "notes") this.text = this.shownFor(answer.notes || undefined)
+    else if (type === "other") this.text = this.shownFor(answer.answers?.[id]?.other)
+    else if (type === "comment") this.text = this.shownFor(answer.comments?.[id])
   }
 }
 
@@ -252,6 +365,37 @@ type DOMFieldElement = HTMLElement & { value: string }
 
 /** Class of the `<ui-textarea>`. */
 const FIELD = "field"
+
+/** Classes of a seeded box's reset:  its row, its button. */
+const RESET_ROW = "reset-row"
+const RESET = "reset"
+
+/** What a `code` box's Tab types;  Shift-Tab takes up to that much off a line's start. */
+const INDENT = "  "
+const OUTDENT = /^ {1,2}|^\t/
+
+/** Does `element` hold a seed:  a `<script type="text/...">` or a `<template>` child, as `<ui-code>` reads? */
+function hasSeed(element: Element): boolean {
+  for (const child of element.children)
+    if (
+      child.localName === "template" ||
+      (child.localName === "script" && (child as HTMLScriptElement).type.startsWith("text/"))
+    )
+      return true
+  return false
+}
+
+/**
+ * Type `text` into `textarea` over its selection, as the person would:  the browser's own editing, so Undo takes it
+ * back and its `input` event fires;  where that's refused, set in place and announced.
+ */
+function insertText(textarea: HTMLTextAreaElement, text: string) {
+  textarea.focus()
+  // the one way to type into a field that keeps its Undo (deprecated, still in every browser)
+  if (document.execCommand("insertText", false, text)) return
+  textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, "end")
+  textarea.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+}
 
 /** Classes of a notes box's kept text:  its box, title, why, each text (its title, text, ×). */
 const KEPT = "kept"

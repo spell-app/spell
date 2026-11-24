@@ -64,7 +64,7 @@ describe("<epic-status>", () => {
     await expectAccessible(host)
   })
 
-  test("done:  `Claude • Done`, the done time right (taken in its tooltip), the reading kept, the summary under it;  green (done, Q20);  passes axe", async () => {
+  test("done:  `Claude • Done`, the done time right (no tooltip), the reading kept, the summary under it;  green (done, Q20);  passes axe", async () => {
     const host = await ElementFixture.render(DONE)
     const summary = host.querySelector('[slot="summary"]')!
     expect({
@@ -78,7 +78,7 @@ describe("<epic-status>", () => {
     }).toEqual({
       who: "Claude • Done",
       date: "10/8/26 14:34",
-      tip: "taken 10/8/26 14:20",
+      tip: undefined,
       base: "done status",
       summarySlot: "summary",
       summaryShown: true,

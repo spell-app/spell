@@ -772,7 +772,7 @@ describe("PlanDoc phases", () => {
     const plan = freshPlan()
     plan.addPhase("One")
     plan.setPhase(1, "active")
-    plan.addItem("issue", "the help is missing")
+    plan.addItem("issue", "the help is missing", { requested: true })
     plan.addItem("todo", "a plain edit")
     plan.addItem("todo", "closed, then opened")
     const became = (id: string) => PlanItem.updateLabelOf(el(plan, id))!.getAttribute("became")
@@ -802,7 +802,7 @@ describe("PlanDoc phases", () => {
     const plan = freshPlan()
     plan.addPhase("One")
     plan.setPhase(1, "active")
-    plan.addItem("issue", "a step's target is underlined too")
+    plan.addItem("issue", "a step's target is underlined too", { requested: true })
     const became = () => PlanItem.updateLabelOf(el(plan, "i1"))!.getAttribute("became")
     plan.addStatus("i1", "Taken up at once:  agent language-quoted-head is on it.")
     expect(became()).toBe("underway")
@@ -815,7 +815,7 @@ describe("PlanDoc phases", () => {
     const plan = freshPlan()
     plan.addPhase("One")
     plan.setPhase(1, "active")
-    plan.addItem("issue", "the help is missing")
+    plan.addItem("issue", "the help is missing", { requested: true })
     plan.fixedForReview("i1", "the help shows")
     expect(PlanItem.updateLabelOf(el(plan, "i1"))!.getAttribute("became")).toBe("fixed")
     plan.applyMark({ id: "i1", action: "approve" } as PlanMark)
@@ -1010,24 +1010,24 @@ describe("PlanDoc questions and decisions", () => {
     '<ui-column><ui-segment><ui-label attach-to="top">B · Unfold <code>it</code> (recommended)</ui-label><p>b</p></ui-segment></ui-column>' +
     "</ui-grid>"
 
-  test("one section (D13):  open questions on top, then the answered ones in id order;  a decision is born answered", () => {
+  test("one section (D13), in number order, open or answered (T151);  a decision is born answered", () => {
     const plan = freshPlan()
     expect(plan.addItem("decision", "first")).toBe("q1")
     plan.addItem("question", "which?")
     plan.addItem("decision", "second")
     plan.addItem("question", "and?")
-    expect(order(plan)).toEqual(["q2:open", "q4:open", "q1:decided", "q3:decided"])
+    expect(order(plan)).toEqual(["q1:decided", "q2:open", "q3:decided", "q4:open"])
     expect(el(plan, "q1").hasAttribute("answered")).toBe(true)
     expect(plan.summary().open.question.map((item) => item.id)).toEqual(["q2", "q4"])
   })
 
-  test("decide:  an <epic-answer> INTO the question, after its text;  it keeps its title and moves", () => {
+  test("decide:  an <epic-answer> INTO the question, after its text;  it keeps its title and its place (T151)", () => {
     const plan = freshPlan()
     plan.addItem("question", "which browser?", { details: "<p>the options</p>" })
     plan.addItem("question", "later?")
     plan.addItem("decision", "earlier")
     expect(plan.decide("Q1", "Chrome first", { details: "<p>most readers</p>" })).toBe("q1")
-    expect(order(plan)).toEqual(["q2:open", "q1:decided", "q3:decided"])
+    expect(order(plan)).toEqual(["q1:decided", "q2:open", "q3:decided"])
     const question = el(plan, "q1")
     expect([PlanItem.titleOf(question), question.hasAttribute("answered")]).toEqual(["which browser?", true])
     // no phase under way, and still `DECIDED` (epic `epic-engine` I290):  the title moves into its slot
@@ -1144,7 +1144,7 @@ describe("PlanDoc questions and decisions", () => {
     expect(order(plan)).toEqual(["q1:done", "q2:done"])
     plan.setItem("q1", "open")
     plan.setItem("q2", "open")
-    expect(order(plan)).toEqual(["q2:open", "q1:decided"])
+    expect(order(plan)).toEqual(["q1:decided", "q2:open"])
   })
 
   test("an old decision's id on an answer (d7) finds its question, and stays on a new answer", () => {
@@ -1265,6 +1265,19 @@ describe("PlanDoc states", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  // epic `epic-engine` I411:  I88, reopened for his check, still drew grey by its old `handled`
+  test("an open fix waiting for his check is orange, never grey, though a phase once handled it", () => {
+    const plan = freshPlan()
+    plan.addItem("issue", "fixed long ago", { calm: true })
+    const item = el(plan, "i1")
+    item.setAttribute("handled", "p-the-new-flow")
+    expect(stateOf(plan, "i1")).toEqual(["handled"])
+    item.setAttribute("fixed", "")
+    expect(stateOf(plan, "i1")).toEqual(["replied"])
+    item.setAttribute("requested", "")
+    expect(stateOf(plan, "i1")).toEqual(["requested"])
+  })
+
   describe("One Color Each (epic `epic-engine` P63)", () => {
     test("an issue filed from his own words, closed by Claude:  light orange until he reviews it;  Claude's own stays grey", () => {
       const plan = freshPlan()
@@ -1361,6 +1374,20 @@ describe("PlanDoc states", () => {
     plan.updateStates()
     expect(stateOf(plan, "j1", "j2")).toEqual(["open", "progress"])
     expect(phases()).toEqual([null, null])
+
+    // its phase's later work not on main, but a commit of it from after the call is (I439):  landed, yellow
+    const made = Date.parse(el(plan, "j1").getAttribute("changed")!)
+    plan.landing = { branch: "editor", ids: new Set(["p1"]), shas: [], landed: new Map([["p1", made + 60_000]]) }
+    plan.updateStates()
+    expect(stateOf(plan, "j1")).toEqual(["open"])
+    // main's last commit of P1 is from before the call:  still blue
+    plan.landing = { branch: "editor", ids: new Set(["p1"]), shas: [], landed: new Map([["p1", made - 60_000]]) }
+    plan.updateStates()
+    expect(stateOf(plan, "j1")).toEqual(["progress"])
+    // retitled since:  made when it was first judged, not at the retitle
+    Markup.set(el(plan, "j1"), { judged: PlanTime.isoTime(new Date(made - 120_000)) })
+    plan.updateStates()
+    expect(stateOf(plan, "j1")).toEqual(["open"])
 
     // landed:  every mark gone, the calls yellow
     plan.landing = { branch: "editor", ids: new Set(), shas: [] }
@@ -1568,8 +1595,8 @@ describe("PlanDoc review", () => {
       "Manual tests"
     ])
     expect(sections[0]!.items.map((item) => [item.id, item.state])).toEqual([
-      ["Q2", "outstanding"],
-      ["Q1", "reviewed"]
+      ["Q1", "reviewed"],
+      ["Q2", "outstanding"]
     ])
   })
 
@@ -2937,9 +2964,10 @@ describe("PlanDoc status cards (P13)", () => {
     expect(["i1", "t1"].map((id) => el(plan, id).getAttribute("taken-in"))).toEqual([active, active])
     expect(ids.map((id) => cards(el(plan, id)).at(-1)!.state)).toEqual(Array(ids.length).fill("done"))
     const log = Array.from(plan.document.querySelectorAll("#log > epic-event"), (event) => event.textContent)
-    expect(log.slice(-2)).toEqual(["I1 closed:  it breaks", "T1 closed:  build it"])
+    // an issue Claude found is grey once fixed (T143)
+    expect(log.slice(-2)).toEqual(["I1 fixed, grey (found by Claude):  it breaks", "T1 closed:  build it"])
     plan.updateStates()
-    expect(["i1", "t1"].map((id) => el(plan, id).getAttribute("state"))).toEqual(["recent", "recent"])
+    expect(["i1", "t1"].map((id) => el(plan, id).getAttribute("state"))).toEqual(["handled", "recent"])
     // closed, a second done:  its summary goes under the Done card, nothing reopens (I355)
     expect(plan.finishWork("i1", "and more").closed).toBe(false)
     expect(cards(el(plan, "i1")).at(-1)!.summary).toBe('<p slot="summary">and more</p>')
@@ -2961,16 +2989,19 @@ describe("PlanDoc status cards (P13)", () => {
       return { cards: cards(el(plan, id)).map((card) => card.state), state: el(plan, id).getAttribute("state") }
     }
 
-    test("done (`epic update ... done`):  both cards done, the item green", () => {
+    test("done (`epic update ... done`):  both cards done, the item green;  an issue Claude found, grey (T143)", () => {
       const plan = freshPlan()
       const id = takenUp(plan, "issue", "it breaks")
+      const todo = takenUp(plan, "todo", "build it")
       plan.finishWork(id, "fixed")
-      expect(after(plan, id)).toEqual({ cards: ["done", "done"], state: "recent" })
+      plan.finishWork(todo, "built")
+      expect(after(plan, id)).toEqual({ cards: ["done", "done"], state: "handled" })
+      expect(after(plan, todo)).toEqual({ cards: ["done", "done"], state: "recent" })
     })
 
     test("fixed for review:  both cards done, the item orange", () => {
       const plan = freshPlan()
-      const id = takenUp(plan, "issue", "it breaks")
+      const id = takenUp(plan, "judgement", "which way")
       plan.fixedForReview(id, "fixed")
       expect(after(plan, id)).toEqual({ cards: ["done", "done"], state: "replied" })
     })

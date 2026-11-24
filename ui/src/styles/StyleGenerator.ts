@@ -24,6 +24,7 @@ import {
   captionRatio,
   disabledOpacity,
   hoverDelay,
+  tooltipDelay,
   controlCursor,
   controlHeight,
   durations,
@@ -54,15 +55,24 @@ import {
 
 /****************
  * ### `StyleGenerator`
- * Writes the GENERATED foundation sheets -- `tokens.css`, `colors.css`, `sizes.css` -- from
+ * Writes the GENERATED foundation sheets -- `tokens.css`, `colors.css`, `sizes.css` and their parts -- from
  * `styles.en.ts`.
+ * - Each axis is written in up to three PARTS, one file each, so a shadow root adopts only what it can use
+ *   (epic `solid-2-final` P3):
+ *   - the PAGE part, `<axis>.css`:  the `@property` registrations and the `:root` tokens.
+ *     Only the page adopts it:  `:root` matches nothing inside a shadow root, and a shadow root's `@property` is
+ *     ignored.  The tokens reach every shadow root by inheritance.
+ *   - the SHARED part, `<axis>.shared.css`:  the remaps (`.ui.red`, `.ui.large`) and the axis's utilities.
+ *     The page and every shadow root adopt it.  (`colors` and `sizes` only:  `tokens.css` has only tokens.)
+ *   - the FALLBACK part, `<axis>.fallback.css`:  the `:host` copy of every token, for a shadow root on a page that
+ *     never loaded them.  The runtime adopts it only on such a page (`UI.styles`' `setFallback()`).
  * - Pure:  returns CSS text and touches no file system, so it runs both in node (`scripts/gen-styles.ts`,
  *   `yarn gen:styles`) and in the browser test that checks the committed sheets are current.
  * - Imports only its own folder (the vocabulary, types), `spell/ui/util`'s `kebabCase` and the kit's `color` and
  *   `number`, by file:  never the element layer, which node can't load.  Build-time only, so left out of the `spell/ui/styles` barrel.
  * - Output is close to oxfmt's CSS style;  the script runs oxfmt afterwards, and the staleness test
  *   compares with whitespace stripped, so line breaking never matters.
- * - Token declarations go on `:root`, plus a `:host` copy guarded by
+ * - Token declarations go on `:root`, plus the fallback part's `:host` copy, guarded by
  *   `@container not style(--ui-sheet-<name>: loaded)`:
  *   - the guard is true only when NO ancestor (across shadow boundaries) has the page-level sheet, so a
  *     component rendered where the page never loaded the tokens still resolves them
@@ -80,11 +90,49 @@ import {
 export class StyleGenerator {
   /** Every generated sheet:  file name inside `src/styles/` => CSS text. */
   sheets(): Record<GeneratedSheetName, string> {
+    const tokens = this.tokensParts()
+    const colors = this.colorsParts()
+    const sizes = this.sizesParts()
     return {
-      "tokens.css": this.tokensCSS(),
-      "colors.css": this.colorsCSS(),
-      "sizes.css": this.sizesCSS()
+      "tokens.css": this.sheet(tokens.page),
+      "tokens.fallback.css": this.sheet(tokens.fallback),
+      "colors.css": this.sheet(colors.page),
+      "colors.shared.css": this.sheet(colors.shared),
+      "colors.fallback.css": this.sheet(colors.fallback),
+      "sizes.css": this.sheet(sizes.page),
+      "sizes.shared.css": this.sheet(sizes.shared),
+      "sizes.fallback.css": this.sheet(sizes.fallback)
     }
+  }
+
+  /**
+   * `sheetWords.ts`:  the class words each shared part's remaps match, by axis (`.ui.red` => `red`, `.ui.small` =>
+   * `small`), as a module of data (epic `solid-2-final` P4).
+   * - So a shadow root takes a shared part only when its family can put one of those words on a box:
+   *   Spell UI's `RootSheets` reads them against each family's vocabulary.
+   * - Written beside the sheets, from the same lists the remaps are written from:  a new colour reaches every family
+   *   that offers it.
+   */
+  wordsModule(): string {
+    const { colors, sizes } = this.sheetWords()
+    // unquoted keys, as the formatter writes them
+    const words = `{ colors: ${JSON.stringify(colors)}, sizes: ${JSON.stringify(sizes)} }`
+    return [
+      BANNER,
+      "",
+      "/**",
+      " * The class words each shared sheet's remaps match (`.ui.red`, `.ui.small`), by axis:",
+      " * `colors.shared.css`, `sizes.shared.css`.",
+      " * - A shadow root takes a shared sheet only when its family can put one of its words on a box (`RootSheets`).",
+      " */",
+      `export const SHEET_WORDS = ${words} as const`,
+      ""
+    ].join("\n")
+  }
+
+  /** The class words `wordsModule()` writes, by axis. */
+  sheetWords(): { colors: string[]; sizes: string[] } {
+    return { colors: this.colorNames(), sizes: this.keys(sizes) }
   }
 
   ////////////////
@@ -92,11 +140,12 @@ export class StyleGenerator {
   ////////////////
 
   /**
-   * `tokens.css`:  every non-palette global token in `@layer ui.tokens`.
+   * `tokens.css`:  every non-palette global token in `@layer ui.tokens`;  and its fallback part.
    * - Type, spacing, radii, borders, ink + text / border alphas, shadows, focus ring, motion, stacking,
    *   breakpoints.
+   * - No shared part:  it's only tokens.
    */
-  tokensCSS(): string {
+  tokensParts(): SheetParts {
     const declarations: GeneratedDeclaration[] = [
       ["--ui-font-size", `${fontSize}px`],
       ...this.entries(fonts).map(([name, stack]): GeneratedDeclaration => [
@@ -149,6 +198,7 @@ export class StyleGenerator {
       ["--ui-focus-offset", `${focusRing.offset}px`],
       ["--ui-disabled-opacity", String(disabledOpacity)],
       ["--ui-hover-delay", `${hoverDelay}ms`],
+      ["--ui-tooltip-delay", `${tooltipDelay}ms`],
       ["--ui-control-cursor", controlCursor],
       ["--ui-control-height", controlHeight],
       ...this.entries(durations).map(([name, ms]): GeneratedDeclaration => [`--ui-duration-${name}`, `${ms}ms`]),
@@ -159,7 +209,11 @@ export class StyleGenerator {
         `${px}px`
       ])
     ]
-    return this.sheet([...this.layer("ui.tokens", this.tokenBlock("tokens", declarations))])
+    return {
+      page: this.layer("ui.tokens", this.rootTokens("tokens", declarations)),
+      shared: [],
+      fallback: this.layer("ui.tokens", this.fallbackTokens("tokens", declarations))
+    }
   }
 
   ////////////////
@@ -167,28 +221,33 @@ export class StyleGenerator {
   ////////////////
 
   /**
-   * `colors.css`:  palette, semantic and neutral colour tokens, the colour REMAP rules and colour utilities.
+   * `colors.css`:  palette, semantic and neutral colour tokens;  `colors.shared.css`:  the colour REMAP rules and
+   * colour utilities;  and the tokens' fallback part.
    * - Remaps:  `.ui.red, .ui-red { --ui-color: var(--ui-red) ... }`, then ONE rule deriving
    *   `--ui-color-hover` ... from `--ui-color` for every remap selector.  Component CSS consumes only the
    *   generic `--ui-color*` tokens, replacing Fomantic's 13x per-hue rule loops.
    * - Derived generics are computed from `--ui-color` on the SAME element, so a per-instance
    *   `style="--ui-color: hotpink"` on a coloured element gets matching hover / text / background.
    */
-  colorsCSS(): string {
-    const lines: string[] = []
-    lines.push(...this.comment("Concrete per-scheme bases:  registered, so they animate and type-check."))
+  colorsParts(): SheetParts {
+    const page: string[] = []
+    page.push(...this.comment("Concrete per-scheme bases:  registered, so they animate and type-check."))
     for (const [name, color] of this.schemeBases()) {
-      lines.push(...this.property(`--ui-${name}-on-light`, this.oklch(color.onLight)))
-      lines.push(...this.property(`--ui-${name}-on-dark`, this.oklch(color.onDark)))
+      page.push(...this.property(`--ui-${name}-on-light`, this.oklch(color.onLight)))
+      page.push(...this.property(`--ui-${name}-on-dark`, this.oklch(color.onDark)))
     }
-    const tokens = this.tokenBlock("colors", this.colorDeclarations(), [
-      `@media ${DARK_QUERY}`,
-      [["--ui-scheme", "dark"]]
-    ])
-    const remaps = this.colorRemaps()
-    lines.push("", ...this.layer("ui.tokens", [...tokens, "", ...remaps]))
-    lines.push("", ...this.layer("ui.utilities", this.colorUtilities()))
-    return this.sheet(lines)
+    const declarations = this.colorDeclarations()
+    const dark: TokenMedia = [`@media ${DARK_QUERY}`, [["--ui-scheme", "dark"]]]
+    page.push("", ...this.layer("ui.tokens", this.rootTokens("colors", declarations, dark)))
+    return {
+      page,
+      shared: [
+        ...this.layer("ui.tokens", this.colorRemaps()),
+        "",
+        ...this.layer("ui.utilities", this.colorUtilities())
+      ],
+      fallback: this.layer("ui.tokens", this.fallbackTokens("colors", declarations, dark))
+    }
   }
 
   /** Declarations of the `:root` colour block. */
@@ -350,12 +409,13 @@ export class StyleGenerator {
   ////////////////
 
   /**
-   * `sizes.css`:  size ratio tokens, the `--ui-scale` remaps, and the size / spacing driven utilities.
+   * `sizes.css`:  size ratio tokens;  `sizes.shared.css`:  the `--ui-scale` remaps, and the size / spacing driven
+   * utilities;  and the tokens' fallback part.
    * - Components set `font-size: calc(var(--ui-font-size) * var(--ui-scale, 1))` on their root and use `em`
    *   inside, so ONE remap per size replaces Fomantic's per-component size rules.
    * - `medium` emits `--ui-scale: 1`, a no-op that also resets a size inherited from a wrapper.
    */
-  sizesCSS(): string {
+  sizesParts(): SheetParts {
     const declarations = this.entries(sizes).map(([name, ratio]): GeneratedDeclaration => [
       `--ui-size-${name}`,
       String(ratio)
@@ -390,11 +450,11 @@ export class StyleGenerator {
         }
       }
     }
-    return this.sheet([
-      ...this.layer("ui.tokens", [...this.tokenBlock("sizes", declarations), "", ...remaps]),
-      "",
-      ...this.layer("ui.utilities", utilities)
-    ])
+    return {
+      page: this.layer("ui.tokens", this.rootTokens("sizes", declarations)),
+      shared: [...this.layer("ui.tokens", remaps), "", ...this.layer("ui.utilities", utilities)],
+      fallback: this.layer("ui.tokens", this.fallbackTokens("sizes", declarations))
+    }
   }
 
   ////////////////
@@ -548,26 +608,41 @@ export class StyleGenerator {
   }
 
   /**
-   * Token rules for sheet `name`:  `:root`, plus the guarded `:host` fallback (see class docs).
-   * - `media` optionally adds a `[condition, declarations]` block to both, e.g. the dark `--ui-scheme`.
+   * The page part's token rules for sheet `name`, on `:root`, its marker (`--ui-sheet-<name>: loaded`) first.
+   * - `media` optionally adds a `[condition, declarations]` block, e.g. the dark `--ui-scheme`.
    */
-  private tokenBlock(
+  private rootTokens(name: string, declarations: GeneratedDeclaration[], media?: TokenMedia): string[] {
+    return this.scopedTokens(":root", name, declarations, media)
+  }
+
+  /**
+   * The fallback part's token rules for sheet `name`:  the same as `rootTokens()`, on `:host`, guarded so they
+   * apply only where no ancestor carries the page part (see class docs).
+   */
+  private fallbackTokens(name: string, declarations: GeneratedDeclaration[], media?: TokenMedia): string[] {
+    return [
+      ...this.comment("Fallback for shadow roots on pages that never loaded this sheet."),
+      ...this.block(
+        `@container not style(${this.marker(name)}: loaded)`,
+        this.scopedTokens(":host", name, declarations, media)
+      )
+    ]
+  }
+
+  /** `declarations` on `selector`, the sheet's marker first, then `media`'s block. */
+  private scopedTokens(
+    selector: string,
     name: string,
     declarations: GeneratedDeclaration[],
-    media?: [string, GeneratedDeclaration[]]
+    media?: TokenMedia
   ): string[] {
-    const marker = `--ui-sheet-${name}`
-    const all: GeneratedDeclaration[] = [[marker, "loaded"], ...declarations]
-    const scoped = (selector: string) => [
-      ...this.rule([selector], all),
-      ...(media ? this.block(media[0], this.rule([selector], media[1])) : [])
-    ]
-    return [
-      ...scoped(":root"),
-      "",
-      ...this.comment("Fallback for shadow roots on pages that never loaded this sheet."),
-      ...this.block(`@container not style(${marker}: loaded)`, scoped(":host"))
-    ]
+    const all: GeneratedDeclaration[] = [[this.marker(name), "loaded"], ...declarations]
+    return [...this.rule([selector], all), ...(media ? this.block(media[0], this.rule([selector], media[1])) : [])]
+  }
+
+  /** `--ui-sheet-<name>`:  set to `loaded` wherever sheet `name`'s tokens are. */
+  private marker(name: string): string {
+    return `--ui-sheet-${name}`
   }
 
   /** `@layer <name> { ... }`. */
@@ -626,6 +701,19 @@ export class StyleGenerator {
     return Object.keys(object) as Array<keyof T & string>
   }
 }
+
+/** One axis's sheet, as lines, in its three parts:  see the class docs. */
+type SheetParts = {
+  /** `<axis>.css`:  `@property` registrations and `:root` tokens, for the page alone */
+  page: string[]
+  /** `<axis>.shared.css`:  remaps and utilities, for the page and every shadow root;  empty for `tokens` */
+  shared: string[]
+  /** `<axis>.fallback.css`:  the guarded `:host` copy of the tokens, for a page that never loaded them */
+  fallback: string[]
+}
+
+/** A `[condition, declarations]` block a token rule also gets, e.g. the dark `--ui-scheme`. */
+type TokenMedia = [condition: string, declarations: GeneratedDeclaration[]]
 
 /** What `derived()` takes. */
 type DerivedParams = {

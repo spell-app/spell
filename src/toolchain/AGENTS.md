@@ -31,6 +31,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       layout and alias table.
   - `spell/toolchain/decorators` ([decorators.ts](decorators.ts)):  the decorator pre-pass, every Vite and Vitest
     config's (standard decorators lowered by esbuild, before the Solid plugin)
+  - `spell/toolchain/stripRuleTests` ([stripRuleTests.ts](stripRuleTests.ts)):  the grammar rules' tests out of BUILT code
+    (epic `ast-markup` T1)
+    - `ruleTestsOutOfBuilds()`, a build-only Vite plugin:  the app's builds (`appConfig()`) and the elements'
+      (`elementBaseConfig()`);  `ruleTestsOutOfBundles()`, the same for esbuild:  the docs bundle
+    - each rule keeps its first example's input, all the language server reads (`firstExample()`);  dev, Vitest and
+      the syntax table read the source, every test with it
+    - fails the build on a `tests` it can't read as array and object literals
+  - `spell/toolchain/brotliCopies` ([brotliCopies.ts](brotliCopies.ts)):  `brotliCopies()`, a build-only Vite plugin
+    writing a brotli copy beside each built text file of 1 KB or more (`x.js.br`;  epic `solid-2-final` P2)
+    - the app's builds (`appConfig()`), Spell UI's site bundle and the docs pages' bundle;  the kit's servers send the
+      copy as it is (`SRV.Reply.sendFile()`)
+    - never a committed file:  a copy would double what git keeps
   - `spell/toolchain/packageVersion` ([packageVersion.ts](packageVersion.ts)):  `__PACKAGE_VERSION__`
   - `spell/toolchain/browserMode` ([browserMode.ts](browserMode.ts)):  `browserMode()`, the `browser` block of every
     repo's browser test projects:  headless Playwright, animations off (reduced motion;  epic `debut` I77)
@@ -56,8 +68,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The bins import them by package name (`spell/toolchain/declarations`).
   - Why:  node runs them as they are, types stripped,
     and the `./toolchain/*` entry of the kit's `exports` names each `.ts`.
-  - No package but its tools (`vite-plus`, esbuild) and `json5`;  of the kit, only util's `findUp()`
-    (`spell/util/node/findUp`, epic `coherence` P29), which imports nothing.
+  - No package but its tools (`vite-plus`, esbuild) and `json5`;
+    and `magic-string` (a dev dependency), loaded only as `stripRuleTests.ts` cuts a file.
+  - Of the kit, only util's `findUp()` (`spell/util/node/findUp`, epic `coherence` P29) and its TypeScript reader,
+    `readTypeScript()` (`spell/util/node/typescript`, `stripRuleTests.ts`'s since epic `solid-2-final` P11),
+    which import nothing.
 - Its tests:  [tests/toolchain/](../../tests/toolchain/), at the same paths as the code.
   - The `spell-ui/*` rules' tests stay Spell UI's:  their allow-list is Spell UI's.
 - Every folder manifest names the kit, `spell`, in its dependencies (`workspace:*`), for the bins.
@@ -71,7 +86,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (the kit's [AGENTS.md](../../AGENTS.md), "Imports across repos"):
     - the app's node program (`app/tsconfig.node.json`, React's JSX for the Ink screens), which has no
       `spell-source` condition:  the `epic/` folder's among them, for `spell content update` (epic `content` P3)
-    - spell-brand, a project beside the kit
+    - a project beside the kit (none today)
   - Every other program reads every folder's SOURCE (`"customConditions": ["spell-source"]`), not these.
   - Not built yet (a fresh clone):  TS2307 in the readers.  Their `yarn ts` builds them first (`--below`).
 - Why:  a program that can't share the folders' settings must not read their SOURCE:
@@ -108,7 +123,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   - `--below`, in a folder:  the kit's own, then each folder before it in the kit's `workspaces`
     (`ui/`:  the kit's, `parser/`'s);  up-to-date ones take a second or two.
-    - In a project beside the kit (spell-brand):  the local packages it depends on (`workspace:`, `portal:` ...),
+    - In a project beside the kit:  the local packages it depends on (`workspace:`, `portal:` ...),
       through `node_modules`, a kit among them with its folders.
     - The app's `yarn ts` runs it first, for its node program:  what that reads is never stale.
     - One program's own `tsc` (`yarn tsc -p tsconfig.node.json`) doesn't:  it reads what was last built.

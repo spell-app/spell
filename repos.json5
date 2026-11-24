@@ -2,17 +2,17 @@
 // other project would (epic `repo-split` P20).
 // - The kit's own folders -- `src/`, then `parser/`, `ui/`, `epic/` and `app/` -- are ONE repo and ONE package now:
 //   they're its `package.json`'s `workspaces`, lowest first, not listed here.
-// - Each repo here is its own git repo with its own install (spell-brand:  private, never published), at `path` from
-//   the kit's folder:  `~/www/spell-brand`, beside `~/www/spell`.
-// - `url`:  where `yarn clone <name>` clones it from;  over SSH, falling back to HTTPS (GitHub's login, `gh auth`).
-// - `peer`:  a repo beside the kit the kit's tools know (epic-engine Q48):  the page server serves its part of the
-//   settings (its `package.json`'s `"pageServer"`), from `path`;  a kit worktree has none beside it, so it uses the
-//   main checkout's (`~/www/spell-brand`).
+// - None today:  spell-brand, the only one, was dropped (epic `epic-engine` T124).
+// - Each repo here is its own git repo with its own install, at `path` from the kit's folder
+//   (`../x` is `~/www/x`, beside `~/www/spell`):
+//   - `name`:  its name on GitHub
+//   - `url`:  where `yarn clone <name>` clones it from;  over SSH, falling back to HTTPS (GitHub's login, `gh auth`)
+//   - `peer`:  a repo beside the kit the kit's tools know (epic-engine Q48):  the page server serves its part of the
+//     settings (its `package.json`'s `"pageServer"`), from `path`;  a kit worktree has none beside it, so it uses
+//     the main checkout's
 // - Read by `tools/repos.ts` (`yarn clone`, `yarn pull`, `yarn status`, `yarn repos`), the page server's settings
 //   (`peerRepos()`) and `spell rename imports`.
 // - This file also marks a folder as a kit (`KIT_MARKER`).
 {
-  "repos": [
-    { "name": "spell-brand", "url": "git@github.com:spell-app/spell-brand.git", "path": "../spell-brand", "peer": true }
-  ]
+  "repos": []
 }

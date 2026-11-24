@@ -8,31 +8,25 @@
  * - Bundles the kit's elements help (`spell/element-tools/jsx-help/...`) and TypeScript 6, which it reads JSX
  *   with:  found by their package names, as source files, by the kit's `sourceNames()`, which `buildExtension()`
  *   bundles with (esbuild alone finds neither a name without its extension nor a folder's `index.ts`).
- * - Copies Spell UI's and Spell Brand's HTML and CSS data into `out/data/`, where `package.json` names them
+ * - Copies Spell UI's HTML and CSS data into `out/data/`, where `package.json` names them
  *   (`contributes.html.customData`, `contributes.css.customData`).
- *   - Each set's `docs/__data/`, written by its `yarn site:data`:  Spell UI's in the kit's `ui/` folder,
- *     the brand's in spell-brand, beside the kit (an empty set without it).
+ *   - Its `docs/__data/`, written by its `yarn site:data`, in the kit's `ui/` folder.
  *   - So a vocabulary change shows in the editor after the next build and install (`yarn vscode`).
  * - Writes every Spell theme as a VS Code colour theme first (`scripts/vscode-themes.ts`, `VscodeThemes`):
  *   "Spell Matrix Dark" and the rest, in `themes/`, listed in `contributes.themes`.
- * - Fails unless our `version` matches `spell`'s -- the two are pinned together.
+ * - Fails unless our `version` is the kit's -- the two are pinned together.
  * - SIDE EFFECT: also builds `app`'s runner bundle, `dist-runner/`, for "Run Project".
  */
 import { execSync } from "child_process"
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "fs"
 import { resolve } from "path"
 
-import { buildExtension } from "spell/toolchain/buildExtension"
+import { buildExtension, checkKitVersion } from "spell/toolchain/buildExtension"
 
 const here = import.meta.dirname
 
-// The extension's version is PINNED to spell's (spell-parser's one version, epic `repo-split` P11):  release them
-// together.
-const { version } = readJson(resolve(here, "package.json"))
-const { version: parserVersion } = readJson(resolve(here, "../../parser/package.json"))
-if (version !== parserVersion) {
-  throw new Error(`vscode extension version ${version} !== spell version ${parserVersion}:  change them together.`)
-}
+// The extension's version is PINNED to the kit's (epic `repo-split` P11):  release them together.
+checkKitVersion({ folder: here, kit: resolve(here, "../..") })
 
 // Every Spell theme as a VS Code theme, `themes/` and `contributes.themes`, current with the theme sheets (epic `debut`
 // P22):  written where they changed, so they're in the package below
@@ -42,11 +36,10 @@ execSync("yarn tsx scripts/vscode-themes.ts", { cwd: resolve(here, ".."), stdio:
 execSync("yarn build:runner", { cwd: resolve(here, "../app"), stdio: "inherit" })
 
 // The HTML and CSS data, each set's, as `out/data/<set>.<file>`:
-// - Spell UI's from the kit's `ui/` folder
-// - the brand's from spell-brand, a project BESIDE the kit;  without it (CI, someone else's checkout), an empty set
+// - Spell UI's from the kit's `ui/` folder;  without it, an empty set
+// - (spell-brand's too, until epic `epic-engine` T124 dropped it)
 const DATA_SETS = {
-  "spell-ui": resolve(here, "../../ui/docs/__data"),
-  "spell-brand": resolve(here, "../../../spell-brand/docs/__data")
+  "spell-ui": resolve(here, "../../ui/docs/__data")
 }
 const DATA_FILES = ["html-custom-data.json", "css-custom-data.json"]
 mkdirSync(resolve(here, "out/data"), { recursive: true })
@@ -59,8 +52,3 @@ for (const [set, folder] of Object.entries(DATA_SETS)) {
 }
 
 await buildExtension({ folder: here, constants: { BUILT_IN_SPELL_APP: resolve(here, "..") } })
-
-/** Contents of JSON file `path`. */
-function readJson(path) {
-  return JSON.parse(readFileSync(path, "utf8"))
-}

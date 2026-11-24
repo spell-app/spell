@@ -4,6 +4,7 @@
 		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
               scrolled into view.</>
 	</>
+
 	<!--
 		EXAMPLES:  ours only, no Fomantic page.  The old Astro page's examples (Types, Variations, States), restyled.
 		Page included:  `site/examples/release-notes.html`.

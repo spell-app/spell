@@ -184,10 +184,26 @@ export class SourceEdits {
    * - Inside a tag closed with `/>`:  it opens to hold it.
    * - Beside a run of prose (`place.whole`), or a run of prose written:  a blank line between them,
    *   so two runs never join into one (epic `notebook` P5).
+   * - With `place.wrap`:  inside a new tag of that name, a level in, closed as the file closes its tags
+   *   (`</>` where it uses Spell's own closer).
    * - `start`:  where `code` starts in the new text, to find it by.
    * - throws `TypeError` when no element opens at `place.opening`, or `place` is inside a run of prose.
    */
   static written(text: string, place: ElementPlace, code: string): { text: string; start: number } {
+    if (place.wrap) {
+      const step = indentStep(text)
+      const closer = text.includes("</>") ? "</>" : `</${place.wrap}>`
+      const opener = `<${place.wrap}>\n`
+      const wrapped = SourceEdits.written(
+        text,
+        { ...place, wrap: undefined },
+        `${opener}${step}${indented(code, step)}\n${closer}`
+      )
+      // the code's own start:  past the new tag's line, and its indent there
+      const codeStart = wrapped.start + opener.length
+      const lineIndent = /^[ \t]*/.exec(wrapped.text.slice(codeStart))![0]
+      return { text: wrapped.text, start: codeStart + lineIndent.length }
+    }
     if (place.where === "inside" && !place.whole && isPageHeadAt(text, place.opening))
       return SourceEdits.writtenInPage(text, place.opening, code)
     const element = place.whole ? undefined : SourceEdits.elementAt(text, place.opening)
@@ -304,7 +320,8 @@ export class SourceEdits {
     // runs of prose written together keep a blank line between them, as `written()` does
     const joiner = codes.some(isProse) ? `\n\n` : `\n`
     const indent =
-      place.where === "inside" ? indentAt(text, place.opening) + indentStep(text) : indentAt(text, place.opening)
+      (place.where === "inside" ? indentAt(text, place.opening) + indentStep(text) : indentAt(text, place.opening)) +
+      (place.wrap ? indentStep(text) : "")
     const { text: result, start } = SourceEdits.written(text, place, codes.join(joiner))
     const starts: number[] = []
     let at = start
@@ -377,6 +394,11 @@ export type ElementPlace = {
    * - only beside it:  nothing goes inside prose
    */
   whole?: TextSpan
+  /**
+   * the tag of a slot not written yet, to write what goes there inside:  `"actions"` puts it in a new
+   * `<actions>...</actions>` at the place (epic `editor` T150, a drop on an empty slot)
+   */
+  wrap?: string
 }
 
 /** What an attribute can be set to:  see `SourceEdits.settingAttribute()`. */

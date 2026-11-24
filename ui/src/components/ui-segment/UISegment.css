@@ -496,10 +496,10 @@
   .ui.padded.segment {
     --_segment-padding: var(--_ui-segment-padded);
   }
-  .ui[class*="very padded"].segment {
+  .ui.very-padded.segment {
     --_segment-padding: var(--_ui-segment-very-padded);
   }
-  .ui:is(.padded, [class*="very padded"]).vertical.segment {
+  .ui:is(.padded, .very-padded).vertical.segment {
     padding-inline: 0;
   }
 
@@ -547,23 +547,23 @@
 
   /* Floated */
   .ui.floated.segment,
-  .ui[class*="left floated"].segment {
+  .ui.left-floated.segment {
     --_segment-margin-inline: 0 var(--_ui-segment-floated-margin);
     float: left;
   }
-  .ui[class*="right floated"].segment {
+  .ui.right-floated.segment {
     --_segment-margin-inline: var(--_ui-segment-floated-margin) 0;
     float: right;
   }
 
   /* Aligned */
-  .ui[class*="left aligned"].segment {
+  .ui.left-aligned.segment {
     --_segment-text-align: left;
   }
-  .ui[class*="center aligned"].segment {
+  .ui.center-aligned.segment {
     --_segment-text-align: center;
   }
-  .ui[class*="right aligned"].segment {
+  .ui.right-aligned.segment {
     --_segment-text-align: right;
   }
 
@@ -658,47 +658,47 @@
   .ui.attached.segment:not(.basic) {
     --_segment-border: var(--_ui-segment-border-width) solid var(--_ui-segment-attached-border-color);
   }
-  .ui.attached.segment:not(.top, [class*="left attached"], [class*="right attached"]) {
+  .ui.attached.segment:not(.top, .left-attached, .right-attached) {
     border-top-style: none;
   }
-  .ui.attached.segment:not(.top, [class*="left attached"], [class*="right attached"]):first-child {
+  .ui.attached.segment:not(.top, .left-attached, .right-attached):first-child {
     border-top-style: solid;
   }
-  :host(:not(:first-child)) > .ui.attached.segment:not(.top, [class*="left attached"], [class*="right attached"]) {
+  :host(:not(:first-child)) > .ui.attached.segment:not(.top, .left-attached, .right-attached) {
     border-top-style: none;
   }
-  .ui[class*="top attached"].segment {
+  .ui.top-attached.segment {
     --_segment-margin-top: var(--_ui-segment-margin);
     --_segment-margin-bottom: 0;
     --_segment-radius: var(--_ui-segment-radius) var(--_ui-segment-radius) 0 0;
   }
-  .ui[class*="top attached"].segment:first-child {
+  .ui.top-attached.segment:first-child {
     --_segment-margin-top: 0;
   }
-  :host(:not(:first-child)) > .ui[class*="top attached"].segment {
+  :host(:not(:first-child)) > .ui.top-attached.segment {
     --_segment-margin-top: var(--_ui-segment-margin);
   }
-  .ui[class*="bottom attached"].segment {
+  .ui.bottom-attached.segment {
     --_segment-margin-top: 0;
     --_segment-margin-bottom: var(--_ui-segment-margin);
     --_segment-radius: 0 0 var(--_ui-segment-radius) var(--_ui-segment-radius);
     --_segment-shadow: var(--_ui-segment-bottom-shadow);
   }
-  .ui[class*="bottom attached"].segment:last-child {
+  .ui.bottom-attached.segment:last-child {
     --_segment-margin-bottom: 0;
   }
-  :host(:not(:last-child)) > .ui[class*="bottom attached"].segment {
+  :host(:not(:last-child)) > .ui.bottom-attached.segment {
     --_segment-margin-bottom: var(--_ui-segment-margin);
   }
-  .ui[class*="left attached"].segment {
+  .ui.left-attached.segment {
     --_segment-margin-inline: calc(var(--_ui-segment-border-width) * -1) 0;
   }
-  .ui[class*="right attached"].segment {
+  .ui.right-attached.segment {
     --_segment-margin-inline: 0 calc(var(--_ui-segment-border-width) * -1);
   }
 
   /* Seamless:  no line where attached segments meet. */
-  .ui.seamless.attached.segment:not(.top, .bottom, [class*="left attached"], [class*="right attached"]) {
+  .ui.seamless.attached.segment:not(.top, .bottom, .left-attached, .right-attached) {
     border-block-style: none;
   }
   .ui.seamless.attached.segment.top {
@@ -707,10 +707,10 @@
   .ui.seamless.attached.segment.bottom {
     border-top-style: none;
   }
-  .ui.seamless[class*="left attached"].segment {
+  .ui.seamless.left-attached.segment {
     border-right-style: none;
   }
-  .ui.seamless[class*="right attached"].segment {
+  .ui.seamless.right-attached.segment {
     border-left-style: none;
   }
 
@@ -724,13 +724,13 @@
   .ui.short.scrolling.segment {
     --_segment-scroll-ratio: 0.75;
   }
-  .ui[class*="very short scrolling"].short.segment {
+  .ui.very-short-scrolling.short.segment {
     --_segment-scroll-ratio: 0.5;
   }
   .ui.long.scrolling.segment {
     --_segment-scroll-ratio: 2;
   }
-  .ui[class*="very long scrolling"].long.segment {
+  .ui.very-long-scrolling.long.segment {
     --_segment-scroll-ratio: 3;
   }
   @media (--ui-tablet), (--ui-computer) {
@@ -780,8 +780,8 @@
   .ui.horizontal.segments > ::slotted(:last-child) {
     --_ui-segments-radius: 0 var(--_ui-segment-radius) var(--_ui-segment-radius) 0;
   }
-  .ui[class*="equal width"].horizontal.segments > *,
-  .ui[class*="equal width"].horizontal.segments > ::slotted(*) {
+  .ui.equal-width.horizontal.segments > *,
+  .ui.equal-width.horizontal.segments > ::slotted(*) {
     --_ui-segments-width: 100%;
   }
   .ui:is(.wrapping, .stackable).horizontal.segments {

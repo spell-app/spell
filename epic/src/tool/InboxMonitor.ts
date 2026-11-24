@@ -65,11 +65,14 @@ export class InboxMonitor {
 
   /**
    * One look:  find the session and its epic, listen for it, and say what's waiting and what to watch.
-   * - `monitor`:  the poller's process id, which the listener's place is held by
+   * - `monitor`:  the poller's process id, which the listener's place is held by;  the epic hub's look
+   *   (`InboxHub`) holds it by the SESSION's own process, live while the session runs
+   * - `takesOver`:  whether a live listener of the same session, process `pid`, is one this look replaces;  default
+   *   any (the session's older poller);  the hub's look replaces only the session's poller, never its own `wait`
    * - NEVER throws:  a failure says to look again in `RECHECK_MS`
    * - SIDE EFFECT:  takes the inbox's listener place when nobody holds it (`listen()`)
    */
-  check({ monitor, now = Date.now() }: { monitor?: number; now?: number } = {}): MonitorCheck {
+  check({ monitor, now = Date.now(), takesOver }: CheckOptions = {}): MonitorCheck {
     try {
       const session = this.findSession()
       // not registered yet (a session just starting):  soon again
@@ -79,7 +82,7 @@ export class InboxMonitor {
       const epic = this.epicOf(session)
       // no epic yet:  its registry record changes as it's titled (and on every turn)
       if (!epic) return { pid, watch: [this.recordFile(session)], waiting: false, recheckMs: IDLE_RECHECK_MS }
-      return { pid, epic: epic.name, ...this.listen(session, epic, monitor, now) }
+      return { pid, epic: epic.name, ...this.listen(session, epic, { monitor, now, takesOver }) }
     } catch {
       return { watch: [], waiting: false, recheckMs: RECHECK_MS }
     }
@@ -90,20 +93,28 @@ export class InboxMonitor {
    * - another live listener holds it:  nothing to watch until it would go stale
    *   (a monitor's, with its process:  `RECHECK_MS`)
    */
-  private listen(session: RunningSession, epic: MonitoredEpic, monitor: number | undefined, now: number): ListenResult {
+  private listen(
+    session: RunningSession,
+    epic: MonitoredEpic,
+    { monitor, now = Date.now(), takesOver = () => true }: CheckOptions
+  ): ListenResult {
     const inbox = ReviewInbox.read(epic.inbox)
     const live = inbox.liveListener(now)
     const mine = live?.session === session.sessionId && Boolean(monitor) && live.pid === monitor
     // the same session's older poller (the last turn's hook):  this newer one takes over, and the old one ends
-    const older = live?.session === session.sessionId && Boolean(monitor && live.pid) && !mine
+    const older = live?.session === session.sessionId && Boolean(monitor && live.pid) && !mine && takesOver(live.pid!)
     if (live && !mine && !older) {
       const seen = Date.parse(live.seen ?? live.since)
       const recheckMs = live.pid ? RECHECK_MS : Math.max(seen + SRV.Heartbeat.STALE_MS - now, 0) + STALE_MARGIN_MS
       return { watch: [], waiting: false, recheckMs }
     }
-    if (!live || older) {
-      ReviewInbox.update(epic.inbox, (box) => box.setListening(session.sessionId, undefined, monitor))
-    }
+    // never a blocking wait:  in the epic hub a wait here froze the hub, its own routes holding the lock (I463);
+    // held, the next look takes the listener's place
+    if (
+      (!live || older) &&
+      !ReviewInbox.updateIfFree(epic.inbox, (box) => box.setListening(session.sessionId, undefined, monitor))
+    )
+      return { watch: [epic.inbox], waiting: false, recheckMs: LOCK_RECHECK_MS }
     const guideSends = epic.guides.newSends
     const hasWork = inbox.hasWork || Boolean(guideSends)
     const waiting = hasWork || Boolean(inbox.reviewAsked)
@@ -182,14 +193,13 @@ export class InboxMonitor {
   /**
    * The one line that tells the session work is waiting on epic `name`'s page, what it is (`summary`), and how to take
    * it;  it's the first thing Owen sees of a session a Send woke (epic `epic-engine` I286).
-   * - and to keep a `wait` running in the background from then on:  the next Send reaches the session mid-work, not
-   *   once its turn ends (Owen, 2026-11-15:  "keep a listener open so it responds to my marks quickly")
+   * - nothing to arm after it (epic `epic-engine` T163):  the epic hub listens for every session, and the next Send
+   *   reaches it at its next tool call, or wakes it once idle
    */
   static notice(name: string, summary = "marks, comments or Do Now"): string {
     return (
       `📬 ${name}:  taking your Send from the epic page (${summary}).  ` +
-      `Take it:  \`epic inbox wait ${name} --timeout 5\`, then the /epic skill's "7.3 Woken";  ` +
-      `and keep \`epic inbox wait ${name}\` running in the background while you work.`
+      `Take it:  \`epic inbox wait ${name} --timeout 5\`, then the /epic skill's "7.3 Woken".`
     )
   }
 
@@ -250,6 +260,16 @@ export type MonitorCheck = {
   recheckMs: number
 }
 
+/** `InboxMonitor.check()`'s options. */
+export type CheckOptions = {
+  /** the process that holds the listener's place for the session:  its poller's, or (the hub's look) the session's */
+  monitor?: number
+  /** the time of the look, ms */
+  now?: number
+  /** whether a live listener of the same session, process `pid`, is one this look replaces;  default any */
+  takesOver?: (pid: number) => boolean
+}
+
 /** `listen()`'s part of a look. */
 type ListenResult = Pick<MonitorCheck, "watch" | "waiting" | "notice" | "batch" | "recheckMs">
 
@@ -270,6 +290,9 @@ const UNFOUND_RECHECK_MS = 30_000
 
 /** Past a heartbeat listener's going stale, ms, before looking again:  so it IS stale by then. */
 const STALE_MARGIN_MS = 1_000
+
+/** How long until the next look when the inbox's lock was held, ms:  a write of a moment, so soon. */
+const LOCK_RECHECK_MS = 1_000
 
 /** How many items `summaryOf()` names before counting the rest. */
 const SUMMARY_IDS = 6

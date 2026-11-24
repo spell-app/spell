@@ -41,20 +41,23 @@ function fractions(box: Element, grid: Element = box.querySelector("ui-grid")!):
 describe("<ui-grid> classes", () => {
   it.each([
     ["", "ui grid"],
-    ['columns="3"', "ui three column grid"],
-    ['columns="1/4"', "ui four column grid"],
-    ['columns="25%"', "ui four column grid"],
-    ['columns="equal"', "ui equal width grid"],
-    ["equal-width", "ui equal width grid"],
-    ['divided="vertically" stackable', "ui stackable vertically divided grid"],
+    ['columns="3"', "ui three column grid three-column"],
+    ['columns="1/4"', "ui four column grid four-column"],
+    ['columns="25%"', "ui four column grid four-column"],
+    ['columns="equal"', "ui equal width grid equal-width"],
+    ["equal-width", "ui equal width grid equal-width"],
+    ['divided="vertically" stackable', "ui stackable vertically divided grid vertically-divided"],
     // the old names (epic ui-gaps P4), and the new
-    ['celled="internally" spacing="xl"', "ui very relaxed internally celled grid"],
-    ['padding="md-y"', "ui vertically padded grid"],
-    ['align="center"', "ui center aligned grid"],
+    ['celled="internally" spacing="xl"', "ui very relaxed internally celled grid internally-celled very-relaxed"],
+    ['padding="md-y"', "ui vertically padded grid vertically-padded"],
+    ['align="center"', "ui center aligned grid center-aligned"],
     ['centered="yes" doubling="no" inverted', "ui centered inverted grid"],
-    ['only="mobile tablet"', "ui mobile only tablet only grid"],
-    ['only="large screen"', "ui large screen only grid"],
-    ['reversed="mobile tablet vertically"', "ui mobile reversed tablet vertically reversed grid"],
+    ['only="mobile tablet"', "ui mobile only tablet only grid mobile-only tablet-only"],
+    ['only="large screen"', "ui large screen only grid large-screen-only"],
+    [
+      'reversed="mobile tablet vertically"',
+      "ui mobile reversed tablet vertically reversed grid mobile-reversed tablet-vertically-reversed"
+    ],
     ['stack-with="container"', "ui stack-with-container grid"]
   ])("<ui-grid %s>", async (attributes, classes) => {
     const host = await ElementFixture.render<DOMElement>(`<ui-grid ${attributes}></ui-grid>`)
@@ -66,10 +69,10 @@ describe("<ui-grid> classes", () => {
 
   it.each([
     ["", "ui row"],
-    ['color="red" columns="4"', "ui red four column row"],
-    ['columns="equal" divided centered', "ui centered divided equal width row"],
-    ['only="mobile" reversed="computer"', "ui mobile only computer reversed row"],
-    ['align="right" vertical-align="bottom"', "ui right aligned bottom aligned row"]
+    ['color="red" columns="4"', "ui red four column row four-column"],
+    ['columns="equal" divided centered', "ui centered divided equal width row equal-width"],
+    ['only="mobile" reversed="computer"', "ui mobile only computer reversed row computer-reversed mobile-only"],
+    ['align="right" vertical-align="bottom"', "ui right aligned bottom aligned row bottom-aligned right-aligned"]
   ])("<ui-row %s>", async (attributes, classes) => {
     const grid = await ElementFixture.render<DOMElement>(`<ui-grid><ui-row ${attributes}></ui-row></ui-grid>`)
     const root = rootOf(grid.querySelector("ui-row")!)
@@ -79,19 +82,22 @@ describe("<ui-grid> classes", () => {
 
   it.each([
     ["", "ui column"],
-    ['width="4"', "ui four wide column"],
-    ['width="1/4"', "ui four wide column"],
-    ['width="25%"', "ui four wide column"],
-    ['width="sixteen"', "ui sixteen wide column"],
-    ['width="4" width-mobile="16"', "ui four wide sixteen wide mobile column"],
+    ['width="4"', "ui four wide column four-wide"],
+    ['width="1/4"', "ui four wide column four-wide"],
+    ['width="25%"', "ui four wide column four-wide"],
+    ['width="sixteen"', "ui sixteen wide column sixteen-wide"],
+    [
+      'width="4" width-mobile="16"',
+      "ui four wide sixteen wide mobile column four-wide sixteen-wide sixteen-wide-mobile"
+    ],
     [
       'width-tablet="8" width-computer="4" width-large="3" width-widescreen="2"',
-      "ui eight wide tablet four wide computer three wide large screen two wide widescreen column"
+      "ui eight wide tablet four wide computer three wide large screen two wide widescreen column eight-wide eight-wide-tablet four-wide four-wide-computer three-wide three-wide-large-screen two-wide two-wide-widescreen"
     ],
-    ['color="teal" attach-to="left"', "ui teal left attached column"],
-    ['color="teal" attach-to="left"', "ui teal left attached column"],
+    ['color="teal" attach-to="left"', "ui teal left attached column left-attached"],
+    ['color="teal" attach-to="left"', "ui teal left attached column left-attached"],
     ['centered stretched="no"', "ui centered column"],
-    ['only="computer" align="center"', "ui computer only center aligned column"]
+    ['only="computer" align="center"', "ui computer only center aligned column center-aligned computer-only"]
   ])("<ui-column %s>", async (attributes, classes) => {
     const grid = await ElementFixture.render<DOMElement>(`<ui-grid><ui-column ${attributes}></ui-column></ui-grid>`)
     const root = rootOf(grid.querySelector("ui-column")!)
@@ -104,7 +110,7 @@ describe("<ui-grid> classes", () => {
     const column = grid.querySelector("ui-column")!
     column.setAttribute("width", "1/2")
     await ElementFixture.tick()
-    expect(rootOf(column).className).toBe("ui eight wide column")
+    expect(rootOf(column).className).toBe("ui eight wide column eight-wide")
   })
 })
 
@@ -283,7 +289,9 @@ describe("<ui-grid stack-with>", () => {
 
   it("`page` follows the SCREEN:  no stacking in a narrow box on a desktop, stacking on a phone", async () => {
     const box = await inBox(500, stackable('stack-with="page"'))
-    expect(rootOf(box.querySelector("ui-grid")!).className).toBe("ui stackable three column stack-with-page grid")
+    expect(rootOf(box.querySelector("ui-grid")!).className).toBe(
+      "ui stackable three column stack-with-page grid three-column"
+    )
     await Viewport.resize(1200)
     await expect.poll(() => stacked(box)).toBe(false)
     await Viewport.resize(500)

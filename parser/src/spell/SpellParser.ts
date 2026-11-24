@@ -655,7 +655,7 @@ export class SpellParser extends P.Parser {
    * - Named in our language's word order:  `palo-de-carta` in Spanish (`SP.Language.propertyKindName()`).
    * - Only a list with `one of` / `either`, as `propertyListDeclaration` finds it:
    *   a bare `up or down` is known once its line parses.
-   * - Blank lines don't end a body;  any other line at the left edge does.
+   * - Blank lines and comments don't end a body;  any other line at the left edge does.
    * - `onlyOnes`:  the one-of-a-kinds `text` declares by a kind other than `app` (`oneOfAKindsIn()`).
    */
   private declaredPropertyKinds(text: string, onlyOnes?: ReadonlySet<string>): string[] {
@@ -663,7 +663,7 @@ export class SpellParser extends P.Parser {
     const found: string[] = []
     let subject = ""
     for (const line of text.split("\n")) {
-      if (!line.trim()) continue
+      if (!line.trim() || COMMENT_AT_LEFT.test(line)) continue
       if (!/^\s/.test(line)) {
         subject = this.subjectOf(line, onlyOnes) ?? ""
         continue
@@ -739,7 +739,7 @@ export class SpellParser extends P.Parser {
     const onlyOnes = new Set(this.oneOfAKindsIn(text))
     let subject = ""
     for (const line of text.split("\n")) {
-      if (!line.trim()) continue
+      if (!line.trim() || COMMENT_AT_LEFT.test(line)) continue
       if (!/^\s/.test(line)) {
         subject = this.subjectOf(line, onlyOnes) ?? ""
         continue
@@ -805,7 +805,7 @@ export class SpellParser extends P.Parser {
     let subject = ""
     for (const line of text.split("\n")) {
       // a blank line, or a comment at the left, doesn't end a type's outline
-      if (!line.trim() || line.startsWith("//") || line.startsWith("##")) continue
+      if (!line.trim() || COMMENT_AT_LEFT.test(line) || line.startsWith("##")) continue
       if (!/^\s/.test(line)) {
         subject = this.subjectOf(line, onlyOnes) ?? ""
         visit(subject, line, undefined)
@@ -1040,6 +1040,12 @@ type CallsAhead = { callAhead?: (match: P.Match) => void }
 
 /** Most words a kind's name may have, as `create_one_of_a_kind` reads it:  as many as a type's (drawable-thing J7). */
 const MAX_KIND_WORDS = 4
+
+/**
+ * A line at the left edge that ends no type's body, as the scans read one:
+ * a comment, or the first `-` or `/` of one being typed -- as the parse nests them, `P.Tokenizer.isAside()`.
+ */
+const COMMENT_AT_LEFT = /^(?:--|\/\/|[-/][ \t]*$)/
 
 /** A comment ending a line, `  -- A playing card`:  `declaredSuperTypes()` and `subjectOf()` read the line without it. */
 const TRAILING_COMMENT = /[ \t]+--(?:[ \t].*)?$/gm

@@ -24,6 +24,13 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
       (`indentWidth()`, epic `spanish`:  a stray space nested a card's `- its "value" ...` under the line above)
   - each extra level pushes a `BlockToken`
   - a blank line takes the indent of the NEXT non-blank line, so it doesn't break a nested block (lookahead)
+  - a comment on a line of its own never cuts a block, whatever its indent (`placeAsides()`, epic `language` I181):
+    - outdented from the code below it, or between a head and its body:  it's read at that code's indent
+      (but one deeper under a comment written at the body's indent stays under it)
+    - else as written:  a comment after a block's last line, or a description indented under its line
+    - the same for a line of only whitespace, and for a lone `-` or `/` (a comment being typed, still its own error)
+    - not a `#` heading, nor a page's prose
+    - the scans before parsing skip the same lines at the left edge (`COMMENT_AT_LEFT`)
   - a comment is a single `CommentToken`, to the end of the line:
     - `//` or `--`
     - or a heading's run of `#`s:  a markdown-style level (see `Block.getDocComments()`)
@@ -876,6 +883,8 @@ A kind that says so is saved in a file of its own.
     (`and the last card of each column`);  `and` then a condition goes on with it (`and it is red`)
     (`SpellStatement.conditionBeforeAlternatives()`;  epic `language` T152)
   - the tokens stay the lines' own:  every rule reads the joined line as one written whole
+  - a comment among those lines, or beside a lone `and` / `or`, doesn't end them:
+    it goes first in the joined line's body (epic `language` I181)
   - the editors indent the line after one as it's typed (`LSP.SpellKeywords.CONTINUES_LINE`)
 - Then it loops over the root `BlockToken`'s items:
   - a `LineToken` => `parser.parse(items, "line", scope)`
@@ -923,7 +932,7 @@ A kind that says so is saved in a file of its own.
   - `parseNestedBlock()` parses a `{nested_statements}` as a block.
     - in `statement.nestedScope`
     - It sets `data.enclose`.
-    - A `{nested_expression}` (e.g. `return`) accepts a single-line block only.
+    - A `{nested_expression}` (e.g. `return`) accepts a single line of code only, comments aside (epic `language` I181).
   - `nestedScope` comes from `rule.getNestedScopeForMatch()`:
     - default:  the same scope
     - `if` / `else` => a new `BlockScope`
@@ -991,6 +1000,16 @@ A kind that says so is saved in a file of its own.
       - e.g. `the name of the pile` => `A pile never says it has a name:  declare it, e.g. "a pile has a name as text"`
       - Only on a type the project declares, all of whose super-types are its own or spell's:
         an imported type's importer may give it anything (`MemberReadExpression.warnIfUndeclared()`, `noteIf()`).
+    - a read of a place's field that a later look couldn't find (epic `language` P68, Q82), on EACH read
+      - the place's Spell file marks it inside its line:  `-- APPARENTLY DELETED as of 2026-11-19` (the ingest's
+        `mergedSpell()`)
+      - e.g. `the job's user` => `This reads the "user" of a job from netbox ... no longer had a "user" for a job`
+      - its rules:  every member read (`property_expression`, `possessive_property`, `the_own_property`,
+        `its_known_property`, `its_property`), through `SP.PlaceFieldMarks.warnIfGone()`, `noteIf()`
+      - its marks are read off the field's declaration as parsed, its body's `--` lines (`PlaceWords.markIn()`):
+        no file is read again
+      - the same look marked ONE field of the type NEW, of the same type of value:  the warning names it, and the
+        language server offers "Change to ..." (`SP.PlaceFieldMarks.renameAt()`)
     - an article that doesn't agree with its noun (epic `spanish` P8), the ONE warning no rule notes:
       - e.g. `a apple` => `Did you mean "an apple"?`
       - Spanish's:  `el carta` => `¿Querías decir "la carta"?`
@@ -1475,8 +1494,9 @@ plain Spell.
   - `- it has slots "front" and "back"`:  [`has_slots`](rules/classes/HasSlots.ts) =>
     `static slots = ["front", "back"]`, and `P.TypeScope.declareSlot()` (journaled;  `hasSlot()` walks the chain).
     - Spanish:  `- tiene las ranuras "frente" y "dorso"`.
-    - The old word, `has parts` (`partes`), still reads:  an error over just the word, naming `slots`, whose
-      `data.replacement` `spell lint --fix` writes (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
+    - The old word, `has parts` (`partes`), still reads:  one of Spell's old forms, a warning over just the word,
+      naming `slots`, whose `data.replacement` `spell lint --fix` writes (the language's `retiredWords`,
+      `SpellType.noteRetiredLiterals()`;  "Old forms", below).
   - `- to draw its front:` / `to "draw its front":`:  `draw_it`'s slot drawing => `drawFront()`, declaring the slot too.
     - Unquoted, `to draw its {slot:member_words}`;  quoted, the `draw_its_slot` word rule's lead (`draw its`,
       `dibujar su`) then the name.
@@ -2029,6 +2049,48 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
 - `where the person is the cook` and `where they are the cook` read the item's own field, in both languages:
   [`TheyAre`](rules/places/TheyAre.ts), and a field it hasn't got says so.
 
+## Old forms:  `it has parts "front"`, `x is 3  // the count` (epic `language` P68)
+
+Ways of writing Spell that still work, but are on their way out:  each one a DEPRECATION, rewritten the new way by
+one step.
+- The list:  `SP.OLD_FORMS`, in [OldForms.ts](OldForms.ts), oldest first.
+  - Each has an id, the day it changed, the epic that changed it, and two Spell versions (Owen, 2026-11-20, C2):
+    the one that deprecated it, and the one that drops it.
+  - It's dropped in the next major by default (`1.0.0` for `0.8.0` and `0.9.0`), unless its own `droppedIn` says
+    otherwise (J287).
+  - Today's:  `parts` (elemental-spell P27), `animation` and `wait-for` (language P13), all from `0.8.0`;
+    `line-end-comment` (T166), from `0.9.0`.
+- Until its drop version, each use is a WARNING (Q81):  the line still compiles and runs.
+  - Its words:  the language pack's own for the form, then `old-form-deprecated`, the Spell that changed it, the day,
+    and the Spell that drops it (`OldForms.messageFor()`).
+  - From the drop version on (Spell's own, `OldForms.spellVersion`, which a test sets), the same line is an ERROR,
+    `old-form-dropped`, among the parse errors;  its fix is still offered (J288).
+- Reported while parsing, by `OldForms.report()`, each problem's `data.oldForm` naming its form:
+  - a retired word, by `BlockLine`, from `SpellType.reportRetiredWords()`;  which form each word is, the language's
+    `oldForms` (`{ parts: "parts", "wait for": "wait-for" }`)
+  - a `//` note after a line's code, by `BlockLine`, as it pops the line's comment (`SP.LineEndComments`)
+- ONE rewrite:  `OldForms.uses(file)` reads a parsed file's warnings and errors back, each with its edits;
+  `OldForms.upgraded(text, uses)` makes them.
+  - `spell lint --fix` and `spell upgrade`:  the app's `fixOldForms()`, then the project file's `spellVersion`
+    (`writeSpellVersion()`, the parser's `node/projectFile`).  `spell lint` lists each as a warning, `old-form`.
+  - The language server:  each use's quick fix ("Change "parts" to "slots"", preferred) and "Upgrade this file";
+    VS Code's hover ends in a "Fix it" link (`spell.fixIt`), the editor's problem popup in a Fix it button.
+  - Opening a project written for an older Spell:  a notice offers to upgrade it, once;  with `spell.upgradeOnOpen`
+    (VS Code) or the editor's switch on, it's upgraded at once.
+- A project says which Spell it matches in its project file, `spellVersion` (Q79, Q83):  never a line of Spell.
+  - Written when it's made, and by every upgrade;  none means a project written before projects said
+    (`OldForms.isOlderSpell()`).
+- Not a test project's files:  they stay frozen.
+- Adding one:
+  1. Bump `SPELL_VERSION`'s minor (`spell.types.ts`);  the new form is deprecated in that version.
+  2. Add it to `OLD_FORMS`, with its day and the epic that changed it;  a `droppedIn` only when it should go sooner
+     or later than the next major.
+  3. Report it where the parser reads it, through `OldForms.report()`, its words a key in each language's
+     `parserMessages` (novice voice, checked cold).
+  4. Write its rewrite:  a case in `OldForms.useOf()`.
+  5. Upgrade the built-in projects:  `spell upgrade --all @spell/examples @spell/library @spell/guides @spell/sites`,
+     then `spell content check --bless`, and read the diff.
+
 ## Scope:  what's stored where
 
 - All scope collections are [`ScopeList`s](../parser/scope/ScopeList.ts):
@@ -2316,8 +2378,8 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - A statement which declares something it also uses records it on that match, e.g. `property_value_either`.
 - What waits is worked out for the whole project, before any of it is written (`P.WriterProject.findWaiting()`):
   - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, the old tag form's `animated`) are retired:
-    each still reads, as an error over just the word, which `spell lint --fix` rewrites or takes out
-    (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
+    each still reads, as an old form's warning over just the word, which `spell lint --fix` rewrites or takes out
+    (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`;  "Old forms", below).
   - It starts from what waits by itself (`core`'s calls in `P.CORE_CALLS_THAT_WAIT`, and old source's `wait for`),
     then adds every function that calls one, by name, until nothing changes.
   - A `notify` is the one slow thing nothing waits for, unless it says `and wait`.
@@ -2631,6 +2693,12 @@ sidebars any of them opens.
 - So one file's types, constants and rules are visible to every later file.
 - A FILE's name says its language (epic `spanish` P19):  `Carta.es.spell` is Spanish, a plain `Card.spell` English.
   - `SP.Language.forFile()`;  `SpellFile.language`, `SpellProject.languages`.
+  - Every pack past English loads on FIRST USE (epic `solid-2-final` P11):  `SP.Language.loadsOnFirstUse()`.
+    - A project loads its files' packs as its project file loads (`getLoader()`), and again before it parses;
+      an import's, as its declarations are read (`declarationsOf()`).  `SP.Language.loadFor(files)` does it.
+    - With each, every component pack's words in it (Spell UI's Spanish tags, `SP.ComponentPacks.loadLanguage()`).
+    - `for()` of a pack not loaded yet throws, saying to load it first.
+    - Node programs and tests load them all at once:  `import "spell/parser/spell/languages/all"`.
   - One project may mix them:
     - Its root:  `SP.Language.rootScopeFor(languages)`.
       One language:  that language's own root, so its project parses as it always has.
@@ -2742,17 +2810,24 @@ sidebars any of them opens.
       - `@spell/project/<projectId>` => that project's compiled JS, fetched and linked the same way, afresh each run
     - The app, parser and forms NEVER load `core` themselves.
 - ALL files parse first, then ALL compile, so lazy compile-time lookups see the whole project.
-- The editor's code editor calls `project.takeText(file, text)` on every keystroke, and parses once the typing pauses
-  (`project.parseWaitingText()`, 200 msec after the last key:
-  `FileStates`, in [the app's CodeMirror folder](../../../app/src/app/ui/codemirror/)).
+- The editor's code editor holds what's typed in its own state, and hands it to the file once the typing pauses
+  (`project.textLater()`, then `project.parseWaitingText()`, 200 msec after the last key:
+  `FileStates`, in [the app's CodeMirror folder](../../../app/src/app/ui/codemirror/);  epic `solid-2-final` P9).
   - So no keystroke waits on a parse:  a parse of Solitaire's game took 50 msec a key (2026-11-12).
+  - Nor makes the file's text one string:  `takeText(file, text, span)` comes once, at the pause, or as anything is
+    about to read the file (a parse, a compile, a save:  `project.takeWaitingText()`).
+  - `span` (`P.EditedSpan`):  where the text changed since its last parse, from CodeMirror's change sets, joined over
+    the pause.  `incremental.update(path, text, span)` then reads only around it, to tell whether one line changed,
+    and which top-level items are the same;  without one (the language server, the tests), it compares the texts whole.
   - What needs the new parse sooner asks for it:  the language features, a click or focus elsewhere, `compile()`, `parse()`.
   - Everything else calls `project.updateText(file, text)`, which takes the text and parses it at once
     (`onInputChanged`, in [the app's editor](../../../app/src/app/editor.ts);  the language server).
   - Either way it calls `updatedContentsFor(file)`.
   - `project.incremental.update()` re-parses what changed, and hands changed files their new match.
   - If that couldn't cope, it parses from scratch straight away.
-  - After 2s:  it compiles, saves `<Project>.spell.js` and runs it.
+  - After 2s:  it compiles and runs it, from what's in memory:  nothing saved (`compile(..., { save: "later" })`);
+    Save writes the built files (`project.saveUnsavedOutput()`), and so does leaving the project or the page.
+    - A compile asked for on purpose (Cmd-Enter, Restart) saves them, as ever;  each only if its text changed.
 - A crash while parsing (a rule threw, NOT an error in the spell) is left in `project.parseError`.
 - `SpellProject`'s parse task list keeps its scope + `incremental` while they're good.
   See `needsFullParse`.
@@ -3015,7 +3090,8 @@ sidebars any of them opens.
   - Else, as before:  the comment-only lines directly above it, else the comments on its own line
     (one in code spell).  So a file written before still compiles as it did.
   - A `//` note after a line's code is the OLD way (epic `language` T166;  Owen, 2026-11-18):
-    `BlockLine` warns about it (`line-end-comment`), as it pops the line's comment.
+    `BlockLine` warns about it (`line-end-comment`), as it pops the line's comment:  one of Spell's old forms
+    ("Old forms", below).
     - Its place now:  the first line inside the line, `-- ...`, at the indent of the lines under it, else one deeper.
     - `SP.LineEndComments` finds them (a plain `CommentToken` written `//`, after code, on a line with no markup)
       and works out the move:  the language server's quick fix and `spell lint --fix` make it.
@@ -3032,6 +3108,13 @@ sidebars any of them opens.
   - Why:  as the program runs, the Thing Explorer knows which heading's code made each thing.
   - NOT in a plain block, e.g. a rule test's.
   - NOT for a heading with no text, e.g. `##########`.
+- A BUILT site's code leaves all of that out (`P.WriterOptions.compiledFor`, `"built"`;  epic `solid-2-final` P11):
+  - `spell compile`, a built site, the cloud:  no comments, docstrings or banners, no line's spell above its code,
+    no `declaredAt` marks, no `core.heading()` (Public Servers:  30.8 => 18.5 KB gzip)
+  - kept:  `/*! ... */` comments (a declaration's marker is data) and a parse error's
+  - the editor's own compile, the default, keeps everything;  only the running target is built so
+    (a library's `.lib.ts` is source people read)
+  - the examples' `<Project>.built.snapshot.js` pins it
 - A line of the program's START, at a FILE's top level, runs only when the program starts afresh
   (epic `drawable-thing` P17):  `if (!core.isCarryingOver) game.start()`.
   - Its lines:

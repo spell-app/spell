@@ -100,6 +100,13 @@ export type DepsOptions = GlobalOptions & {
   json?: boolean
 }
 
+/** `spell names`'s flags (epic `epic-engine` T153). */
+export type NamesOptions = GlobalOptions & {
+  /** check what a push to this remote sends:  git's pre-push lines, on stdin */
+  push?: string
+  json?: boolean
+}
+
 /**
  * `spell publish` flags.
  * - `dryRun`:  build, pack and check every package, then install them in a scratch project;  publish nothing

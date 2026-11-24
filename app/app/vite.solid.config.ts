@@ -18,6 +18,17 @@ const UI_CORE = sourceOf("spell/ui/core.ts")
  */
 const UI_ROOT = sourceOf("spell/ui/components/ui-root")
 
+/**
+ * Spell UI's docs elements (`<ui-docs-api>`, `<ui-docs-search>` ...), which a root loads on sight once told of them
+ * (`DocsFamilies.add()`):  each a lazy chunk of `ui/`, like every other family.
+ * - For the Spell UI site in `<spell-viewer>` (`/components/ui/`, epic `editor` P43):  its API tables, its search, its
+ *   component index.
+ */
+const DOCS_FAMILIES = sourceOf("spell/ui/docs-components/DocsFamilies.ts")
+
+/** What lets a page with only our bundles load a component pack (`SpellUI.registerPack`):  in `SHARED_SOLID.solid`. */
+const PAGE_PACKS = sourceOf("spell/app/app/components/PagePacks.ts")
+
 /** Spell UI's barrel, `spell/ui`:  in `SHARED_SOLID.ui`. */
 const UI_BARREL = sourceOf("spell/ui")
 
@@ -36,6 +47,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  *   - Each is re-exported WHOLE:  the other builds can't tell this one which names they use.
  *   - None of their names clash.
  *   - Importing it defines `<ui-root>` (and what a root draws:  `<ui-loader>`, `<ui-placeholder>`, `<ui-components>`).
+ *   - And lets a root load Spell UI's docs elements, `<ui-docs-*>`, on sight (`DOCS_FAMILIES`).
  * - `spell-solid-shared.js`, what the other builds import instead (`sharedPage()`):
  *   the same names, from the PAGE when it has them all (a docs page's `SpellUI.packModules`),
  *   else from `spell-solid.js`.
@@ -103,9 +115,15 @@ function sharedEntries(): Plugin {
       `export * from "@solidjs/web"`,
       `export * from ${JSON.stringify(UI_CORE)}`,
       `export * from ${JSON.stringify(UI_ROOT)}`,
+      // a root may load the docs elements too:  Spell UI's guide draws them (`DOCS_FAMILIES`)
+      `import { DocsFamilies } from ${JSON.stringify(DOCS_FAMILIES)}`,
+      `DocsFamilies.add()`,
       // what `core` draws compiled spell with:  `sharedSolid()` hands it to `spell-runtime.js`
       `export { default as h } from "@solidjs/h"`,
-      `export const loadSpellUI = () => import(${JSON.stringify(UI_ENTRY)})`
+      `export const loadSpellUI = () => import(${JSON.stringify(UI_ENTRY)})`,
+      // a component pack in a page with only our bundles (`<ui-components source>` in a Spell page):  `PagePacks`
+      `import { PagePacks } from ${JSON.stringify(PAGE_PACKS)}`,
+      `PagePacks.share(loadSpellUI)`
     ].join("\n"),
     [UI_ENTRY]: [
       `export * from ${JSON.stringify(UI_BARREL)}`,
@@ -130,7 +148,8 @@ function sharedEntries(): Plugin {
  *   `<spell-viewer>` there must use THOSE:  a second Solid on a page fails silently (`solid-2.md`).
  * - Only when the page has every specifier the other builds take from here (`SHARED_SPECIFIERS`):
  *   a page with some missing (an older docs bundle) gets ours, whole.
- * - Read as the module runs:  the docs bundle must run first (it does:  a classic script runs before any module).
+ * - Read as the module runs, once the docs bundle has (\`SpellUI.loading\`):  an ES module since epic \`solid-2-final\` P7,
+ *   imported by the page's classic \`spell-ui.js\`, it may run after this one starts
  * - A module with only a default export (`@solidjs/h`) is renamed:  `h`, as `spell-solid.js` exports it
  *   (`SHARED_DEFAULTS`).
  * - Ours is imported with `await import()`:  a page that has its own never downloads it.
@@ -167,7 +186,9 @@ function sharedPageSource(names: readonly string[]): string {
 /**
  * Solid and Spell UI's core for our other bundles:  the PAGE's own when it has them (a docs page's
  * \`SpellUI.packModules\`), else \`${SHARED_SOLID.solid}\` beside this file.  One Solid per page either way.
+ * - A docs page's bundle is an ES module its \`spell-ui.js\` imports:  wait for it (\`SpellUI.loading\`) first
  */
+await globalThis.SpellUI?.loading
 const page = globalThis.SpellUI?.packModules
 const specifiers = ${JSON.stringify(SHARED_SPECIFIERS)}
 // modules with only a default export, and the name it goes by here
@@ -198,7 +219,9 @@ function sharedFamiliesSource(): string {
 /**
  * Spell UI's code and markdown families, which \`<spell-code>\` and \`<spell-markdown>\` extend:  the PAGE's own when it
  * has Spell UI of its own (a docs page's \`SpellUI.packModules\`), else \`${SHARED_SOLID.ui}\`'s beside this file.
+ * - A docs page's bundle is an ES module its \`spell-ui.js\` imports:  wait for it (\`SpellUI.loading\`) first
  */
+await globalThis.SpellUI?.loading
 const page = globalThis.SpellUI?.packModules
 const specifiers = ${JSON.stringify(SHARED_SPECIFIERS)}
 const families = ${JSON.stringify(Object.keys(SHARED_FAMILIES))}

@@ -1,4 +1,4 @@
-import { type Diagnostic, forEachDiagnostic, linter } from "@codemirror/lint"
+import { type Action, type Diagnostic, forEachDiagnostic, linter } from "@codemirror/lint"
 import type { Extension } from "@codemirror/state"
 import { type EditorView, hoverTooltip, type Tooltip, ViewPlugin } from "@codemirror/view"
 
@@ -13,6 +13,8 @@ import { CodeMirrorPopups } from "./CodeMirrorPopups"
  * - ⌥ pressed while the mouse rests on a word:  the info hover comes up without moving the mouse
  *   (a mouse move replayed where it rests);  it waits `hoverDelay()` as any hover does
  * - errors, warnings and notes under the mouse:  each its own row, once the mouse rests `hoverDelay()`
+ *   - a problem with a fix in one click has its button on its row, "Fix it" (`Diagnostic.actions`, set by
+ *     `FileStates`;  Owen's C3, epic `language` P68):  a Spell UI button, pressed, makes the fix and the popup goes
  *   - in EVERY hover mode:  where the hover shows them alone (`CodeEditorFeatures.showsErrorsAlone()`) or in its own
  *     hover with the info, CodeMirror's hovers show together in one popup, the errors a section of it
  *   - so the rule needs no asking here:  the info's section comes and goes by it, the errors' stays
@@ -29,7 +31,8 @@ export class CodeMirrorHovers {
       // CodeMirror's own problems popup, empty:  its rows are `errorsAt()`'s
       linter(null, { tooltipFilter: () => [] }),
       CodeMirrorPopups.waiting((msec) =>
-        hoverTooltip((view, pos, side) => errorsAt(view, pos, side), { hoverTime: msec })
+        // hidden by an edit:  "Fix it" pressed, its problem's gone
+        hoverTooltip((view, pos, side) => errorsAt(view, pos, side), { hoverTime: msec, hideOnChange: true })
       )
     ]
   }
@@ -140,13 +143,37 @@ function errorsAt(view: EditorView, pos: number, side: -1 | 1): Tooltip | null {
     create: () => {
       const dom = document.createElement("div")
       dom.className = "cmb-errors"
-      for (const { diagnostic } of under) {
+      for (const { diagnostic, from, to } of under) {
         const row = document.createElement("div")
         row.className = `cmb-error-row is-${diagnostic.severity}`
         row.textContent = diagnostic.message
+        if (diagnostic.actions?.length) {
+          const actions = document.createElement("div")
+          actions.className = "cmb-error-actions"
+          for (const action of diagnostic.actions) actions.append(actionButton(view, action, from, to))
+          row.append(actions)
+        }
         dom.append(row)
       }
       return { dom }
     }
   }
+}
+
+/**
+ * A problem's `action` as a button on its row:  a small Spell UI button, its name its words ("Fix it").
+ * - Pressed:  the action runs on its problem's stretch, `from` ... `to`;  its edit hides the popup.
+ * - Pressed with the mouse, it keeps the code's focus:  the caret stays where it was.
+ */
+function actionButton(view: EditorView, action: Action, from: number, to: number): HTMLElement {
+  const button = document.createElement("ui-button")
+  button.setAttribute("size", "mini")
+  button.setAttribute("color", "primary")
+  button.textContent = action.name
+  button.addEventListener("mousedown", (event) => event.preventDefault())
+  button.addEventListener("click", () => {
+    action.apply(view, from, to)
+    view.focus()
+  })
+  return button
 }

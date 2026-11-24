@@ -1,0 +1,1657 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Custom Elements</title>
+    <meta
+      name="description"
+      content="How a Spell UI element works, for someone new to custom elements:  the platform in brief, the DOM element and its component, a live counter built step by step, a real button, and why it's built this way;  the full reference is the element README."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="Elements and UI" />
+    <meta name="spell-voice" content="readme 2026-10-22" />
+    <meta name="spell-saga" content="spell-ui" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+    <style>
+      /* A live example and its inspector:  side by side when there's room, stacked on a phone. */
+      .ce-live {
+        display: grid;
+        grid-template-columns: minmax(10em, 1fr) minmax(14em, 2fr);
+        gap: 1em;
+        align-items: start;
+        margin-block: 1em;
+      }
+      .ce-live > :first-child {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5em;
+        align-items: center;
+        padding: 1em;
+        border: 1px dashed var(--spell-rule);
+        border-radius: 8px;
+      }
+      @media (width < 640px) {
+        .ce-live {
+          grid-template-columns: 1fr;
+        }
+      }
+      /* The diagrams:  their boxes and words follow the page's light or dark look;  on a phone they scroll sideways. */
+      .ce-scroll {
+        overflow-x: auto;
+      }
+      .ce-scroll > .ce-diagram {
+        min-width: 600px;
+      }
+      .ce-diagram {
+        width: 100%;
+        height: auto;
+        margin-block: 0.75em;
+        font-family: var(--spell-sans);
+        font-size: 13px;
+      }
+      .ce-diagram .box {
+        fill: var(--spell-tint);
+        stroke: var(--spell-rule);
+      }
+      .ce-diagram .accent {
+        fill: var(--spell-doc-accent-soft);
+        stroke: var(--spell-doc-accent);
+      }
+      .ce-diagram .title {
+        fill: var(--spell-ink);
+        font-weight: 600;
+      }
+      .ce-diagram .mono {
+        fill: var(--spell-ink);
+        font-family: var(--spell-mono);
+        font-size: 12px;
+      }
+      .ce-diagram .note {
+        fill: var(--spell-muted);
+        font-size: 12px;
+      }
+      .ce-diagram .eyebrow {
+        fill: var(--spell-muted);
+        font: var(--spell-eyebrow-font);
+        letter-spacing: 0.1em;
+      }
+      .ce-diagram .line {
+        stroke: var(--spell-muted);
+        fill: none;
+      }
+      .ce-diagram .arrowhead {
+        fill: var(--spell-muted);
+      }
+    </style>
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Custom Elements</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Custom Elements</h1></header></ui-sticky
+        >
+        <p class="lede">
+          Click <b>+1</b> on the <code>&lt;ui-counter max="5"&gt;</code> in <a href="#ui-counter">section 4</a> five
+          times. The tag gains a <code>count="5"</code> attribute, a <code>count</code> property, and a
+          <code>:state(at-max)</code> for CSS, and its button turns off. It is four small files, 215 lines in all, built
+          step by step on this page.
+        </p>
+        <p>
+          That's how every <code>&lt;ui-*&gt;</code> element works. A React component is a function the framework calls,
+          and the page never holds it; a <code>&lt;ui-button&gt;</code> is a node the page holds, like
+          <code>&lt;video&gt;</code>. Below: how one works from the browser's side and from ours, for anyone about to
+          write or change a Spell UI component, new to custom elements or not.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user"
+            >Written for: whoever writes Spell UI components, or elements of their own on the same base; no
+            custom-element knowledge assumed</ui-item
+          >
+          <ui-item icon="flask"
+            >Checked: 2026-11-21, every code block against the file it names, the counter rebuilt that day</ui-item
+          >
+          <ui-item icon="book open"
+            >The reference beside it: <a href="/README/element.md" target="src-readme-element-md">README/element</a>,
+            the element base in full</ui-item
+          >
+        </ui-list>
+
+        <ui-section id="summary" label="1. What this guide is" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <p>
+            Every Spell UI tag (<code>&lt;ui-button&gt;</code>, <code>&lt;ui-select&gt;</code> ...) is a custom element:
+            a tag of our own, which the browser runs like one of its own. So are the epic pages' tags, and every view a
+            Spell program draws.
+          </p>
+          <ul>
+            <li>
+              Behind each tag are TWO objects (see <a href="#the-pair">Two objects per tag</a>):
+              <ul>
+                <li>the <b>DOM element</b> in the page, a <code>DOMElement</code></li>
+                <li>
+                  its <b>component</b>, a <code>UIComponent</code> subclass (<code>UIButton</code>), which holds the
+                  state and draws the element's inside
+                </li>
+              </ul>
+            </li>
+            <li>
+              A component is a class, with:
+              <ul>
+                <li>
+                  <b>decorators</b> that say how each member works (<code>@E.state</code>,
+                  <code>@E.controlled</code> ...)
+                </li>
+                <li><b>hooks</b> it fills in (<code>render()</code>, <code>onConnect()</code> ...)</li>
+              </ul>
+            </li>
+            <li>
+              A <b>lint guard</b> keeps component files on the decorators: it flags an effect, listener or timer written
+              by hand.
+            </li>
+            <li>The components draw with Solid 2; this guide only says what's ours, and links Solid's own rules.</li>
+            <li>
+              This page is the tutorial. The reference, every decorator and hook, is
+              <a href="/README/element.md" target="src-readme-element-md">README/element</a>.
+            </li>
+          </ul>
+          <ui-message state="info" heading="How to read it">
+            <ul>
+              <li>
+                New to custom elements: read <a href="#the-platform">2. The platform</a> first, then build the counter
+                in <a href="#ui-counter">4</a>.
+              </li>
+              <li>
+                Writing a component today: <a href="#ui-button">5. A real one</a>, then the reference (<a
+                  href="#reference"
+                  >7</a
+                >).
+              </li>
+              <li>
+                The live examples are real elements: click them, and their inspector beside them shows what changed.
+              </li>
+              <li>
+                Solid's rules (no writes while drawing, effects in two halves):
+                <a href="/guides/solid/solid-2.html" target="src-guides-solid-solid-2-html">Solid 2 in Spell</a>. The
+                short form for agents:
+                <a href="/ui/AGENTS.md" title="ui/AGENTS.md" target="src-ui-agents-md">ui's <code>AGENTS.md</code></a
+                >, "Solid authoring".
+              </li>
+            </ul>
+          </ui-message>
+        </ui-section>
+
+        <ui-section id="the-platform" label="2. The platform, in brief" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="globe"></ui-icon>
+          <p>
+            What the browser gives every custom element, each in a sentence or two, with where to read more. Spell UI
+            uses all of it.
+          </p>
+
+          <ui-section
+            id="platform-custom-elements"
+            label="Custom elements and the upgrade"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                A custom element is a tag with a dash in its name, backed by a class that extends
+                <code>HTMLElement</code>.
+              </li>
+              <li>
+                <code>customElements.define("ui-button", Class)</code> registers it.
+                <ul>
+                  <li>A tag already in the page before that is an ordinary element until then.</li>
+                  <li>Defining it <b>upgrades</b> every one of them in place.</li>
+                </ul>
+              </li>
+              <li>A tag can be defined only ONCE per page.</li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-web-components-using-custom-elements"
+                  >Using custom elements</a
+                >,
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/define"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-customelementregistry-define"
+                  >customElements.define()</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="platform-lifecycle" label="Lifecycle callbacks" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The browser calls methods of the class as things happen: <code>connectedCallback()</code> when the
+                element is added to a page, <code>disconnectedCallback()</code> when it's removed.
+              </li>
+              <li>
+                A move (re-parenting, sorting a list) is a disconnect, then a connect: the object itself stays the same.
+              </li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#custom_element_lifecycle_callbacks"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-web-components-using-custom-elements-cu"
+                  >Custom element lifecycle callbacks</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="platform-attributes" label="observedAttributes" sticky collapsible dividing open="false">
+            <ul>
+              <li>A static <code>observedAttributes</code> list names the attributes the class wants to hear about.</li>
+              <li>
+                The browser then calls <code>attributeChangedCallback(name, old, new)</code> on every change of one,
+                with the TEXT (or <code>null</code>, removed).
+              </li>
+              <li>It reads the list once, when the tag is defined.</li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#responding_to_attribute_changes"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-web-components-using-custom-elements-re"
+                  >Responding to attribute changes</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="platform-shadow-dom"
+            label="Shadow DOM, slots and parts"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                A <b>shadow root</b> is a private tree inside the element: the page's CSS and
+                <code>querySelector()</code> don't reach in, and its CSS doesn't leak out.
+                <ul>
+                  <li>Every Spell UI element draws into one.</li>
+                </ul>
+              </li>
+              <li>
+                The element's own children (its <b>light DOM</b>) show where the shadow tree has a
+                <code>&lt;slot&gt;</code>; <code>slot="icon"</code> on a child picks a named slot.
+              </li>
+              <li>
+                <code>part="button"</code> on a shadow node lets a page style it from outside:
+                <code>ui-button::part(button)</code>.
+              </li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-web-components-using-shadow-dom"
+                  >Using shadow DOM</a
+                >,
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/slot"
+                  target="ext-developer-mozilla-org-en-us-docs-web-html-reference-elements-slot"
+                  >&lt;slot&gt;</a
+                >,
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/CSS/::part"
+                  target="ext-developer-mozilla-org-en-us-docs-web-css-part"
+                  >::part()</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="platform-adopted-style-sheets"
+            label="adoptedStyleSheets"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                A shadow root can share one <code>CSSStyleSheet</code> object with every other root (<code
+                  >root.adoptedStyleSheets = [sheet]</code
+                >): 1,000 buttons, one parsed sheet.
+              </li>
+              <li>The runtime makes each component sheet once (<code>UI.styles</code>), and each element adopts it.</li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/adoptedStyleSheets"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-shadowroot-adoptedstylesheets"
+                  >ShadowRoot.adoptedStyleSheets</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="platform-internals" label="ElementInternals" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>attachInternals()</code> hands the class a private object for things only the element itself
+                should set: its default ARIA role and states, its custom states, and its form value.
+              </li>
+              <li>
+                ARIA set there (<code>internals.role = "group"</code>) is a DEFAULT: an <code>aria-*</code> attribute
+                the page writes still wins.
+              </li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-elementinternals"
+                  >ElementInternals</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="platform-custom-states"
+            label="Custom states:  :state()"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <code>internals.states.add("active")</code> puts the element in a state CSS can select:
+                <code>ui-button:state(active)</code>.
+              </li>
+              <li>
+                Like <code>:checked</code> for a checkbox: it isn't an attribute, so the page's markup stays as written.
+              </li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/CustomStateSet"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-customstateset"
+                  >CustomStateSet</a
+                >,
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/CSS/:state"
+                  target="ext-developer-mozilla-org-en-us-docs-web-css-state"
+                  >:state()</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="platform-forms" label="Form-associated elements" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A class with <code>static formAssociated = true</code> takes part in its form, as an input does:
+                <ul>
+                  <li>it submits a value (<code>internals.setFormValue()</code>)</li>
+                  <li>it has validity</li>
+                  <li>it's reset with the form</li>
+                </ul>
+              </li>
+              <li>
+                The browser reports form events through more callbacks:
+                <ul>
+                  <li><code>formAssociatedCallback()</code></li>
+                  <li><code>formDisabledCallback()</code></li>
+                  <li><code>formResetCallback()</code></li>
+                  <li><code>formStateRestoreCallback()</code></li>
+                </ul>
+              </li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/setFormValue"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-elementinternals-setformvalue"
+                  >ElementInternals.setFormValue()</a
+                >,
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/form"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-elementinternals-form"
+                  >ElementInternals.form</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="platform-events"
+            label="Events across the shadow boundary"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                An event made with <code>composed: true</code> leaves the shadow root; outside, its
+                <code>target</code> is the element itself (it's <b>retargeted</b>), not the inner node.
+              </li>
+              <li>
+                Spell UI's own events (<code>ui-change</code> ...) are <code>CustomEvent</code>s that bubble and are
+                composed.
+              </li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/Event/composed"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-event-composed"
+                  >Event.composed</a
+                >,
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent"
+                  target="ext-developer-mozilla-org-en-us-docs-web-api-customevent"
+                  >CustomEvent</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="platform-declarative-shadow-dom"
+            label="Declarative shadow DOM"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <code>&lt;template shadowrootmode="open"&gt;</code> in HTML makes a shadow root as the page parses,
+                before any script runs.
+              </li>
+              <li>
+                An element that finds one already there draws into it (see
+                <a href="#static-render">The static render</a>).
+              </li>
+              <li>
+                MDN:
+                <a
+                  href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/template#shadowrootmode"
+                  target="ext-developer-mozilla-org-en-us-docs-web-html-reference-elements-template-shadowroot"
+                  >&lt;template shadowrootmode&gt;</a
+                >
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="the-pair" label="3. Two objects per tag" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="cubes"></ui-icon>
+          <p>Each <code>&lt;ui-button&gt;</code> in a page is TWO objects that point at each other.</p>
+          <div class="ce-scroll">
+            <svg
+              class="ce-diagram"
+              viewBox="0 0 760 330"
+              role="img"
+              aria-label="The DOM element, the browser's side:  attributes and properties, internals, the shadow root, the DOM API callbacks.  The component, Solid's side:  attribute getters, state, render, handlers, hooks.  domElement.component points from the first to the second, component.domElement back.  The vocabulary feeds both."
+            >
+              <defs>
+                <marker
+                  id="ce-arrow1"
+                  viewBox="0 0 10 10"
+                  refX="9"
+                  refY="5"
+                  markerWidth="7"
+                  markerHeight="7"
+                  orient="auto"
+                >
+                  <path class="arrowhead" d="M0,0 L10,5 L0,10 z" />
+                </marker>
+              </defs>
+              <text class="eyebrow" x="160" y="18" text-anchor="middle">THE BROWSER'S SIDE</text>
+              <text class="eyebrow" x="600" y="18" text-anchor="middle">SOLID'S SIDE</text>
+              <rect class="box" x="10" y="30" width="300" height="215" rx="8" />
+              <text class="title" x="26" y="56">DOM element · &lt;ui-button&gt;</text>
+              <text class="note" x="26" y="76">a DOMElement: what the page and frameworks touch</text>
+              <text class="mono" x="26" y="104">attributes, a property each</text>
+              <text class="mono" x="26" y="126">attributeValues (converted)</text>
+              <text class="mono" x="26" y="148">internals: :state(), ARIA, form</text>
+              <text class="mono" x="26" y="170">renderRoot (the shadow root)</text>
+              <text class="mono" x="26" y="192">connectedCallback() ...</text>
+              <text class="note" x="26" y="224">one class per tag, made by define()</text>
+              <rect class="accent" x="450" y="30" width="300" height="215" rx="8" />
+              <text class="title" x="466" y="56">component · UIButton</text>
+              <text class="note" x="466" y="76">a UIComponent: state, drawing, behaviour</text>
+              <text class="mono" x="466" y="104">this.size, this.toggle ...</text>
+              <text class="mono" x="466" y="126">@E.state, @E.controlled ...</text>
+              <text class="mono" x="466" y="148">render() → JSX</text>
+              <text class="mono" x="466" y="170">onClick, @E.on("click") ...</text>
+              <text class="mono" x="466" y="192">onMount(), onConnect() ...</text>
+              <text class="note" x="466" y="224">built on the first connect</text>
+              <path class="line" d="M310,110 L448,110" marker-end="url(#ce-arrow1)" />
+              <text class="mono" x="380" y="102" text-anchor="middle">.component</text>
+              <path class="line" d="M450,160 L312,160" marker-end="url(#ce-arrow1)" />
+              <text class="mono" x="380" y="152" text-anchor="middle">.domElement</text>
+              <path class="line" d="M600,245 L600,270 M160,245 L160,270" />
+              <text class="note" x="380" y="200" text-anchor="middle">draws into</text>
+              <path class="line" d="M450,206 L312,206" marker-end="url(#ce-arrow1)" style="stroke-dasharray: 4 3" />
+              <rect class="box" x="150" y="270" width="460" height="48" rx="8" />
+              <text class="title" x="380" y="292" text-anchor="middle">vocabulary · UIButton.en.ts</text>
+              <text class="note" x="380" y="310" text-anchor="middle">
+                every name the tag uses, read through an ElementDefinition by both
+              </text>
+            </svg>
+          </div>
+
+          <ui-section id="pair-dom-element" label="The DOM element" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The <code>&lt;ui-button&gt;</code> in the page is an instance of
+                <a
+                  href="/src/element/DOMElement.ts"
+                  title="src/element/DOMElement.ts"
+                  target="src-src-element-domelement-ts"
+                  ><code>DOMElement</code></a
+                >.
+                <ul>
+                  <li>The same way, an <code>&lt;a&gt;</code> is an <code>HTMLAnchorElement</code>.</li>
+                </ul>
+              </li>
+              <li>
+                It's the browser's side:
+                <ul>
+                  <li>the DOM API callbacks</li>
+                  <li>a property per attribute (<code>button.size = "large"</code>)</li>
+                  <li>the converted values (<code>attributeValues</code>)</li>
+                  <li><code>internals</code></li>
+                  <li>the shadow root (<code>renderRoot</code>)</li>
+                  <li>the <code>ready</code> promise</li>
+                </ul>
+              </li>
+              <li>
+                Each tag gets its OWN subclass, made by <code title="DOMElement.subclassForTag()">define()</code>,
+                carrying that tag's <code>tagSetup</code>.
+              </li>
+              <li>
+                A family that adds script API names its own subclass (see
+                <a href="#patterns">Patterns that repeat</a>).
+                <ul>
+                  <li>
+                    <code>&lt;ui-include&gt;</code>'s is <code>DOMIncludeElement</code>. It adds
+                    <code>contentRoot</code>.
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="pair-component" label="The component" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                One instance per element of its
+                <a
+                  href="/src/element/UIComponent.tsx"
+                  title="src/element/UIComponent.tsx"
+                  target="src-src-element-uicomponent-tsx"
+                  ><code>UIComponent</code></a
+                >
+                subclass:
+                <ul>
+                  <li>built the first time the element connects</li>
+                  <li>kept across moves, until <code>domElement.dispose()</code></li>
+                </ul>
+              </li>
+              <li>It holds the state, draws the shadow DOM with <code>render()</code>, and handles the events.</li>
+              <li>
+                It reads every attribute as a getter, converted and typed: <code>this.size</code>,
+                <code>this.toggle</code>.
+              </li>
+              <li>
+                It draws inside a Solid root of its OWN: a Solid app's context doesn't reach in (<code>appContext</code>
+                does that).
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="pair-vocabulary"
+            label="The vocabulary and the ElementDefinition"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <a
+                  href="/ui/src/components/ui-button/UIButton.en.ts"
+                  target="src-ui-src-components-ui-button-uibutton-en-ts"
+                  ><code>UIButton.en.ts</code></a
+                >
+                names EVERYTHING the tag uses: its tag, attributes (and how each converts), events, slots, parts, states
+                and texts.
+              </li>
+              <li>
+                Code never writes those names as strings: it reads them through the vocabulary, so a translated tag
+                (<code>&lt;ie-boton primario&gt;</code>) runs the same code.
+              </li>
+              <li>
+                <code>define()</code> builds an <code>ElementDefinition</code> from it for the actual tag: each
+                attribute's attribute name, property name and canonical key, and the converters.
+              </li>
+              <li>
+                The vocabulary also gives:
+                <ul>
+                  <li>the tag's <code>topics</code> and <code>aka</code>: how people look for it</li>
+                  <li>its <code>skeleton</code>: what <code>&lt;ui-root display="skeleton"&gt;</code> draws</li>
+                </ul>
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="pair-define" label="define()" sticky collapsible dividing open="false">
+            <p>A family's <code>index.ts</code> calls <code>UIButton.define()</code> as it loads. In order, it:</p>
+            <ol>
+              <li>builds the definition</li>
+              <li>records it for the page</li>
+              <li>makes the tag's DOM element class</li>
+              <li>hands it to the browser</li>
+            </ol>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>UIComponent.define() · <code>UIComponent.tsx · 13 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">static define(this: E.UIComponentClass, tag?: string, dictionary?: E.Dictionary): CustomElementConstructor {
+  const definition = new E.ElementDefinition(this.prototype.vocabulary, { tag, dictionary })
+  const existing = customElements.get(definition.tag)
+  if (existing) return existing
+  // record it, make the tag's own DOM element class on `elementSetup.DOMElement`, and define it (DOM API)
+  UIComponent.register.call(this, definition)
+  const Class = DOMElement.subclassForTag(
+    this.prototype.elementSetup.DOMElement,
+    UIComponent.tagSetupFor(this, definition)
+  )
+  customElements.define(definition.tag, Class)
+  return Class
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="ui-counter" sticky collapsible dividing open="false">
+          <span slot="label">4. Build one: <code>&lt;ui-counter&gt;</code></span>
+          <ui-icon slot="icon" name="seedling"></ui-icon>
+          <p>
+            A small element, written step by step: a number, and a button that adds <code>step</code> to it, up to
+            <code>max</code>. It's no mock-up: the counter below is built from these files.
+          </p>
+          <div class="ce-live">
+            <div><ui-counter id="counter-demo" max="5">Clicks</ui-counter></div>
+            <ui-docs-inspector for="counter-demo"></ui-docs-inspector>
+          </div>
+          <ul>
+            <li>
+              Click <b>+1</b> (or focus it and press <kbd>+</kbd> or <kbd>↑</kbd>): <code>count</code> appears as an
+              attribute and a property.
+              <ul>
+                <li>At 5, <code>:state(at-max)</code> comes in and the button turns off.</li>
+              </ul>
+            </li>
+            <li>
+              Its files:
+              <a
+                href="/guides/custom-elements/experiments/ui-counter/"
+                title="guides/custom-elements/experiments/ui-counter/"
+                target="src-guides-custom-elements-experiments-ui-counter"
+                ><code>ui-counter/</code></a
+              >, beside this guide.
+              <ul>
+                <li>It's a GUIDE-ONLY element: not part of Spell UI, its site or its bundles.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <ui-section
+            id="counter-1-vocabulary"
+            label="Step 1:  the vocabulary"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                Every name the tag uses, in one object: the tag, its attributes (each with a <code>kind</code>, which
+                says how its text converts), its event, slot, parts, state and text.
+              </li>
+              <li>
+                <code>count</code> has no default: left out, it's <code>undefined</code>, and the counter keeps its own
+                number (step 3).
+              </li>
+              <li><code>step</code>'s default is 1.</li>
+              <li>
+                <code>size</code> is a <code>kind: "size"</code> attribute: it adds its word to the class, in Fomantic's
+                class grammar ("ui large counter").
+              </li>
+              <li>
+                <code>as const satisfies E.ComponentVocabulary</code>: the shape is checked, and every name stays a
+                literal type, so <code>this.partForName("buton")</code> fails TypeScript.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The vocabulary · <code>UICounter.en.ts · 35 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">export const counterVocabulary = {
+  tag: "ui-counter",
+  topics: ["controls", "inputs"],
+  aka: ["counter", "stepper", "tally"],
+  skeleton: "inline 6 x 2.5",
+  noun: "counter",
+  description: "A counter shows a number, and a button that adds to it.",
+  attributes: [
+    {
+      name: "count",
+      kind: "number",
+      description:
+        "The number shown.  Leave it out and the counter keeps its own, from 0;  set it, and the page's value wins."
+    },
+    { name: "step", kind: "number", default: 1, description: "How much one click adds." },
+    { name: "max", kind: "number", description: "The most it counts to;  none:  no limit." },
+    { name: "size", kind: "size", description: "Size, `mini` ... `massive`." }
+  ],
+  events: [
+    {
+      name: "ui-change",
+      detail: "{ count: number, originalEvent: Event }",
+      cancelable: true,
+      description: "The person asked to add:  cancel it (`preventDefault()`) to keep the old count."
+    }
+  ],
+  slots: [{ name: "", description: "A label before the number." }],
+  parts: [
+    { name: "counter", description: 'The whole box (`&lt;div class="ui counter"&gt;`).' },
+    { name: "count", description: "The number (`&lt;output&gt;`)." },
+    { name: "button", description: "The add button." }
+  ],
+  states: [{ name: "at-max", description: "The count has reached `max`:  the button is disabled." }],
+  texts: [{ key: "add", text: "Add {step}", description: "Accessible name of the add button." }]
+} as const satisfies E.ComponentVocabulary</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section
+            id="counter-2-class"
+            label="Step 2:  the class and render()"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                A component extends <code>E.UIComponent</code>, typed by its vocabulary.
+                <ul>
+                  <li>Everything shared comes from <code>spell/ui/core</code>, imported as <code>E</code>.</li>
+                </ul>
+              </li>
+              <li>
+                <code>@E.proto static vocabulary</code> and <code>@E.protoMerged static elementSetup</code> are CLASS
+                settings: set once on the prototype, not on each element (see <a href="#decorators">The decorators</a>).
+              </li>
+              <li>
+                <code>elementSetup.styleSheets</code>: the sheets the shadow root adopts.
+                <ul>
+                  <li><code>?inline</code> imports the CSS file as text.</li>
+                </ul>
+              </li>
+              <li>
+                <code>render()</code> returns the shadow DOM as JSX, and runs ONCE: later changes happen inside the JSX,
+                as what it reads changes.
+              </li>
+              <li>
+                Every name comes through the vocabulary:
+                <ul>
+                  <li>the class: <code>this.rootClass</code> ("ui counter")</li>
+                  <li>a part's name: <code>this.partForName("count")</code></li>
+                  <li>a text: <code>this.translationForKey("add", ...)</code></li>
+                </ul>
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The class and render() · <code>UICounter.tsx · 23 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">export class UICounter extends E.UIComponent&lt;typeof counterVocabulary&gt; {
+  @E.proto static vocabulary = counterVocabulary
+  @E.protoMerged static elementSetup = {
+    styleSheets: { counter: counterCSS }
+  } satisfies Partial&lt;E.ElementSetup&gt;
+// ...
+render(): JSX.Element {
+  return (
+    &lt;div class={this.rootClass} part={this.partForName("counter")}&gt;
+      &lt;slot /&gt;
+      &lt;output part={this.partForName("count")}&gt;{this.currentCount}&lt;/output&gt;
+      &lt;button
+        type="button"
+        part={this.partForName("button")}
+        disabled={this.isAtMax}
+        aria-label={this.translationForKey("add", { step: this.step! })}
+        onClick={(event) =&gt; this.add(event)}
+      &gt;
+        +{this.step}
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>Its style sheet, in layers · <code>UICounter.css · 14 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-css">@layer ui.components.counter.types, ui.components.counter.content, ui.components.counter.variations, ui.components.counter.states;
+/* ... */
+@layer ui.components.counter.types {
+  :host {
+    display: inline-block;
+  }
+
+  .ui.counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 1em;
+  }
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section
+            id="counter-3-controlled"
+            label="Step 3:  the count, @E.controlled"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <code>@E.controlled("count") accessor currentCount = 0</code> is the number shown: the DOM element's
+                <code>count</code> when the page set one, else the counter's own, from 0.
+              </li>
+              <li>
+                A write (<code>this.currentCount = 4</code>) goes to the DOM element's <code>count</code> PROPERTY,
+                which writes the attribute back.
+                <ul>
+                  <li><code>el.count</code> is always current, like a native control's value.</li>
+                </ul>
+              </li>
+              <li>
+                Not named <code>count</code>: that name is already the attribute's getter on the component.
+                <ul>
+                  <li><code>this.count</code> is the page's value, or <code>undefined</code>.</li>
+                </ul>
+              </li>
+              <li>The idea, and why: <a href="#decorators">The decorators</a>.</li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The count · <code>UICounter.tsx · 2 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">@E.controlled("count")
+accessor currentCount = 0</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section
+            id="counter-4-change"
+            label="Step 4:  a click, requestChange()"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                The person asked for a change, so <code>add()</code> calls
+                <code>requestChange("currentCount", next, announce)</code>.
+                <ul>
+                  <li>It first runs <code>announce()</code>, which sends the cancelable <code>ui-change</code>.</li>
+                </ul>
+              </li>
+              <li>
+                A page that calls <code>event.preventDefault()</code> keeps the old count; a page that sets
+                <code>el.count</code> itself while handling the event wins too.
+              </li>
+              <li>Otherwise <code>next</code> is written, and the view follows.</li>
+              <li>
+                <code>@E.untracked</code>: <code>add()</code> reads members to DECIDE, never to be followed by whatever
+                Solid computation called it.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>Adding · <code>UICounter.tsx · 6 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">@E.untracked
+add(originalEvent: Event) {
+  if (this.isAtMax) return
+  const next = Math.min(this.currentCount + this.step!, this.max ?? Infinity)
+  this.requestChange("currentCount", next, () =&gt; this.send("ui-change", { count: next, originalEvent }))
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section
+            id="counter-5-state"
+            label="Step 5:  a :state() and a key listener"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <code>@E.cssState("at-max")</code> on a getter: <code>:state(at-max)</code> follows it.
+                <ul>
+                  <li>So a page can style <code>ui-counter:state(at-max)</code>.</li>
+                </ul>
+              </li>
+              <li>
+                <code>@E.on("keydown")</code>: a listener on the DOM element for its whole life.
+                <ul>
+                  <li>Keys pressed on the inner button bubble out of the shadow root to it.</li>
+                </ul>
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The state and the keys · <code>UICounter.tsx · 12 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">@E.cssState("at-max")
+get isAtMax(): boolean {
+  return this.max !== undefined &amp;&amp; this.currentCount &gt;= this.max
+}
+
+// ...
+@E.on("keydown")
+protected onKeyDown(event: KeyboardEvent) {
+  if (event.key !== "+" &amp;&amp; event.key !== "ArrowUp") return
+  event.preventDefault()
+  this.add(event)
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section
+            id="counter-6-define"
+            label="Step 6:  define it, and load it"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                The family's <code>index.ts</code> calls <code>UICounter.define()</code>.
+                <ul>
+                  <li>Every counter already in the page upgrades at once.</li>
+                </ul>
+              </li>
+              <li>
+                A Spell UI family is bundled with the library. This one is the guide's own, so it loads by its own
+                script:
+                <ul>
+                  <li>
+                    <a
+                      href="/guides/custom-elements/experiments/custom-elements.entry.ts"
+                      target="src-guides-custom-elements-experiments-custom-elements-entry-ts"
+                      ><code>custom-elements.entry.ts</code></a
+                    >
+                    imports it, and <code>&lt;ui-docs-inspector&gt;</code>
+                  </li>
+                  <li>
+                    <a
+                      href="/epic/src/tools/bundle-experiment.ts"
+                      title="epic/src/tools/bundle-experiment.ts"
+                      target="src-epic-src-tools-bundle-experiment-ts"
+                      ><code>bundle-experiment.ts</code></a
+                    >
+                    builds that into one classic script
+                  </li>
+                  <li>
+                    this page loads it right after
+                    <a href="/epic/src/tools/_assets/spell-ui.js" target="src-epic-src-tools-assets-spell-ui-js"
+                      ><code>spell-ui.js</code></a
+                    >
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Its imports of Solid and <code>spell/ui/core</code> come from the page's own copies, as a component
+                pack's do: one Solid, one <code>UIComponent</code>.
+                <ul>
+                  <li>Those copies: <code>SpellUI.packModules</code>.</li>
+                </ul>
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The family barrel · <code>index.ts · 5 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">import { UICounter } from "./UICounter"
+
+UICounter.define()
+
+export { UICounter }</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The guide's script · <code>custom-elements.entry.ts · 2 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">import "./ui-counter"
+import "spell/ui/docs-components/ui-docs-inspector"</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section
+            id="counter-try"
+            label="Try it:  the page sets the count"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>
+              This one starts with <code>count="3" step="2"</code>: the page's value. A click still adds, by writing the
+              property, so the page and the counter never disagree.
+            </p>
+            <div class="ce-live">
+              <div><ui-counter id="counter-controlled" count="3" step="2" size="large">Points</ui-counter></div>
+              <ui-docs-inspector for="counter-controlled"></ui-docs-inspector>
+            </div>
+            <ul>
+              <li>
+                In the browser's console: <code>document.getElementById("counter-controlled").count = 10</code>, and the
+                inspector shows the attribute, the property and the number change together.
+              </li>
+              <li><code>.count = undefined</code> hands the number back to the counter's own (0).</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="ui-button" sticky collapsible dividing open="false">
+          <span slot="label">5. A real one: <code>&lt;ui-button&gt;</code></span>
+          <ui-icon slot="icon" name="code"></ui-icon>
+          <p>
+            The same pieces, in a component used everywhere. A toggle button: click it, and watch
+            <code>selected</code> come and go, with <code>:state(active)</code> beside it.
+          </p>
+          <div class="ce-live">
+            <div><ui-button id="button-demo" toggle icon="heart">Like</ui-button></div>
+            <ui-docs-inspector for="button-demo"></ui-docs-inspector>
+          </div>
+
+          <ui-section id="button-vocabulary" label="Its vocabulary" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Its first attributes:
+                <ul>
+                  <li><code>size</code> and <code>color</code> are value sets</li>
+                  <li>
+                    <code>appearance</code> takes several words at once (<code>kind: "multiple"</code>), each a class
+                  </li>
+                  <li>
+                    <code>replaces</code> keeps the old switches working: <code>&lt;ui-button appearance=&quot;basic&quot;&gt;</code> still
+                    reads as <code>appearance="basic"</code>
+                  </li>
+                </ul>
+              </li>
+              <li><code>topics</code> and <code>aka</code>: how people look for it.</li>
+              <li><code>skeleton</code>: what a loading page draws in its place.</li>
+              <li><code>group</code>: where the property editor and the components page show each attribute.</li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The start of buttonVocabulary · <code>UIButton.en.ts · 34 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">export const buttonVocabulary = {
+  tag: "ui-button",
+  icon: "hand point up outline",
+  snippet: "&lt;ui-button&gt;Click me&lt;/ui-button&gt;",
+  formControl: true,
+  topics: ["buttons", "basic", "controls", "forms", "elements"],
+  aka: ["btn", "action", "submit", "link button"],
+  skeleton: "inline 6 x 2.5",
+  noun: "button",
+  partOfSpeech: "action",
+  plural: "buttons",
+  description: "A button indicates a possible action.",
+  attributes: [
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      values: UIT.PosterSizes,
+      default: "medium",
+      // ...
+    },
+    {
+      name: "color",
+      group: "appearance",
+      kind: "color",
+      replaces: COLOR_SWITCHES,
+      // ...
+    },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["basic", "tertiary", "circular", "pill", "raised"],
+      classes: { pill: "circular" },
+      // ...</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section
+            id="button-class"
+            label="The class, and its pressed state"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <code>loading: "its own"</code>: every element gets <code>:state(loading)</code> from its base class;
+                this one draws its own spinner instead of the shared one.
+              </li>
+              <li>
+                <code>isAFormControl: true</code> makes it form-associated, so <code>type="submit"</code> can reach its
+                form.
+              </li>
+              <li><code>Fallback</code> is a plain button, shown if its render ever throws.</li>
+              <li>
+                <code>isActive</code> is both controlled and a CSS state:
+                <ul>
+                  <li>
+                    <code>@E.controlled("selected")</code>: the page may set <code>selected</code>, and a click may
+                    change it
+                  </li>
+                  <li><code>@E.cssState("active")</code>: <code>:state(active)</code> follows it either way</li>
+                </ul>
+              </li>
+              <li>
+                <code>isDisabled</code> is the base class's <code>isMarkedDisabled</code>: its attribute, or a disabled
+                fieldset around it.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The class · <code>UIButton.tsx · 22 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">export class UIButton extends E.UIComponent&lt;typeof buttonVocabulary&gt; {
+  @E.proto static vocabulary = buttonVocabulary
+  @E.protoMerged static elementSetup = {
+    styleSheets: { button: buttonCSS },
+    Fallback: ButtonFallback,
+    isAFormControl: true,
+    // `disabled`:  its `&lt;button&gt;` is disabled
+    disabled: "its own",
+    // `loading`:  its own spinner
+    loading: "its own",
+    // `ellipsis`:  the host is never wider than its parent, so the text has a width to cut at
+    cssStates: ["ellipsis"]
+  } satisfies Partial&lt;E.ElementSetup&gt;
+
+  ////////////////
+  // ## Pressed (`selected`)
+  ////////////////
+
+  /** `selected`:  set by the page, or toggled by a click (`toggle`). */
+  @E.cssState("active")
+  @E.controlled("selected")
+  accessor isActive = false</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="button-classes" label="Its classes" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>this.rootClass</code> builds Fomantic's class string from the attributes.
+                <ul>
+                  <li>
+                    <code>&lt;ui-button size="small" color="primary" appearance="basic"&gt;</code> =&gt;
+                    <code>ui small basic primary button</code>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <code>classValue()</code> lets a class follow STATE instead of its attribute.
+                <ul>
+                  <li><code>selected</code> follows <code>isActive</code>.</li>
+                </ul>
+              </li>
+              <li><code>extraClass</code> adds a word no attribute names: "icon", on an icon-only button.</li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>classValue() and extraClass · <code>UIButton.tsx · 13 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">protected classValue(name: E.AttributeName&lt;typeof buttonVocabulary&gt;): unknown {
+  if (name === "selected") return this.isActive
+  if (name === "disabled") return this.isDisabled
+  if (name === "labeled" &amp;&amp; this.hasBadge) return false
+  return super.classValue(name)
+}
+
+/** `icon` for icon-only buttons and for `labeled icon` buttons. */
+protected get extraClass(): string | undefined {
+  if (!this.hasIcon || this.reveal) return undefined
+  const isLabeledIcon = !!this.labeled &amp;&amp; !this.hasBadge
+  return !this.hasText || isLabeledIcon ? UIT.ICON_CLASS : undefined
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="button-render" label="render()" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A <code>&lt;Show&gt;</code>: a joined badge wraps the control in a <code>&lt;div&gt;</code>, else the
+                control alone.
+              </li>
+              <li>
+                <code>control()</code> is the inner button: a native <code>&lt;button&gt;</code>, or a link with
+                <code>link</code>.
+                <ul>
+                  <li>So keyboard, focus and screen readers work as on any button.</li>
+                </ul>
+              </li>
+              <li>
+                Render pieces are private methods named for what they draw: <code>control()</code>,
+                <code>iconBox()</code>.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>render() · <code>UIButton.tsx · 18 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">render(): JSX.Element {
+  return (
+    &lt;Show when={this.hasBadge} fallback={this.control()}&gt;
+      &lt;div
+        class={this.wrapperClass({
+          size: this.size,
+          color: this.color,
+          labeled: this.labeled || true
+        })}
+      &gt;
+        {this.control()}
+        &lt;span class={LABEL_CLASS} part={this.partForName("label")}&gt;
+          &lt;slot name={this.slotForName("label")}&gt;{this.badge}&lt;/slot&gt;
+        &lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/Show&gt;
+  )
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="button-click" label="A click" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The inner button's <code>onClick</code>: a toggle asks to flip <code>isActive</code>.
+                <ul>
+                  <li>
+                    It asks through <code>requestChange()</code>, sending <code>ui-selected</code> or
+                    <code>ui-deselected</code> first.
+                  </li>
+                  <li>The page may cancel it.</li>
+                </ul>
+              </li>
+              <li>
+                <code>@E.on("click")</code> on the DOM element itself: <code>button.click()</code> from script presses
+                the inner control too, so it submits or toggles as a real click would.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The click handler · <code>UIButton.tsx · 18 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">private readonly onClick = (event: MouseEvent) =&gt; {
+  if (this.isDisabled) {
+    event.preventDefault()
+    return
+  }
+  this.resolveInvoker()
+  this.runInvoker(event)
+  if (this.toggle) {
+    const next = !this.isActive
+    this.requestChange("isActive", next, () =&gt;
+      this.send(next ? "ui-selected" : "ui-deselected", { active: next, originalEvent: event })
+    )
+  }
+  const { form } = this.domElement.internals
+  if (!form) return
+  if (this.type === "submit") this.submit(form)
+  else if (this.type === "reset") form.reset()
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A click sent to the DOM element · <code>UIButton.tsx · 7 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">@E.on("click")
+protected onDOMElementClick(event: MouseEvent) {
+  const control = this.innerControl
+  if (event.composedPath()[0] !== this.domElement || !control?.isConnected) return
+  if (this.isDisabled || event.defaultPrevented) return
+  DOMElementClick.press(control)
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="button-define" label="Its getters, and define()" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                One line below the class types every attribute's getter (<code>this.size</code>,
+                <code>this.toggle</code>) from the vocabulary.
+              </li>
+              <li>
+                The family barrel defines the button and its two siblings, <code>&lt;ui-buttons&gt;</code> and
+                <code>&lt;ui-or&gt;</code>.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The getters' types · <code>UIButton.tsx · 1 line</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">export interface UIButton extends E.AttributeValues&lt;typeof buttonVocabulary&gt; {}</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The family barrel · <code>index.ts · 9 lines</code></ui-title>
+              <ui-content>
+                <pre><code class="language-ts">import { UIButton } from "./UIButton"
+import { UIButtons } from "./UIButtons"
+import { UIOr } from "./UIOr"
+
+UIButton.define()
+UIButtons.define()
+UIOr.define()
+
+export { UIButton, UIButtons, UIOr }</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="why" label="6. Why it's built this way" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="question circle outline"></ui-icon>
+          <p>
+            Spell UI follows the house style everywhere but a few places, and most of those have one reason: a component
+            library ships every byte to every page.
+          </p>
+          <ul>
+            <li>
+              <b>A module constant, not a private static:</b> one under a class minifies to one letter, and a static
+              keeps its name. Moving them to statics cost <code>forms.js</code> 0.27 kB gzipped, when it was tried.
+            </li>
+            <li>
+              <b>Fomantic's class grammar stays:</b> <code>ui small basic primary button</code> is what the sheets key
+              on, so <code>rootClass</code> writes it from the attributes.
+            </li>
+            <li>
+              <b>Vocabularies are data</b>, which node loads without a DOM: the components page, the static render, the
+              property editor and the Spanish tags all read them.
+            </li>
+            <li>
+              <b>Two objects per tag</b>, so the browser's side (attributes, internals, the shadow root) and Solid's
+              side (state, drawing) each stay in one place.
+            </li>
+            <li>
+              <b>Changing values are fields with a decorator</b>, read fresh right after a write, never a signal pair
+              written by hand.
+            </li>
+            <li>
+              Each exception, and the rule it departs from:
+              <a href="/ui/AGENTS.md" title="ui/AGENTS.md" target="src-ui-agents-md">ui's <code>AGENTS.md</code></a
+              >, where a section named like a house-style rule starts "As WWOD §N, plus:".
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="reference" label="7. The reference, in short" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="book"></ui-icon>
+          <p>
+            What's left of how an element works, a line or two each. The whole of it is
+            <a href="/README/element.md" target="src-readme-element-md">README/element</a>, and each class's own
+            docstring in <a href="/src/element/" target="src-src-element"><code>src/element/</code></a>.
+          </p>
+          <ui-section id="decorators" label="The decorators" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Standard (TC39) decorators, most in
+                <a href="/src/element/Reactive.ts" title="src/element/Reactive.ts" target="src-src-element-reactive-ts"
+                  ><code>Reactive.ts</code></a
+                >: <code>@E.state</code>, <code>@E.controlled</code>, <code>@E.derived</code>, <code>@E.cssState</code>,
+                <code>@E.aria</code>, <code>@E.onChange</code>, <code>@E.whileConnected</code>, <code>@E.watches</code>,
+                <code>@E.on</code>, <code>@E.untracked</code>.
+              </li>
+              <li><code>@E.proto</code> and <code>@E.protoMerged</code> set class settings once, on the prototype.</li>
+              <li>
+                The lint guard fails a hand-written effect, observer, listener, <code>untrack()</code> or timer in a
+                component file: "The lint guard" in ui's <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a>.
+              </li>
+              <li>README/element: "It renders once, and a write reaches only what read it".</li>
+            </ul>
+          </ui-section>
+          <ui-section id="lifecycle" label="The life of an element" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>define()</code>, then the DOM element's constructor; on its first connect,
+                <code>mount()</code> builds the component, then <code>onMount()</code> and <code>render()</code>, then
+                <code>onConnect()</code>.
+              </li>
+              <li>
+                A disconnect calls <code>onDisconnect()</code> and keeps the component; a reconnect calls
+                <code>onConnect()</code> again.
+              </li>
+              <li><code>dispose()</code> releases the component and its listeners.</li>
+              <li>
+                The hooks' docstrings:
+                <a
+                  href="/src/element/UIComponent.tsx"
+                  title="src/element/UIComponent.tsx"
+                  target="src-src-element-uicomponent-tsx"
+                  ><code>UIComponent.tsx</code></a
+                >.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="attributes"
+            label="How an attribute reaches the view"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <code>size="large"</code> or <code>button.size = "large"</code> converts through the tag's
+                <code>ElementDefinition</code> and is stored in <code>attributeValues</code>.
+              </li>
+              <li>A property write is written back to the attribute.</li>
+              <li>
+                The component's getter, <code>this.size</code>, reads the new value, and only what read it redraws.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="events" label="Events" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>this.send("ui-change", { ... })</code> sends the vocabulary's event from the DOM element: it
+                bubbles, and leaves the shadow root.
+              </li>
+              <li>
+                Cancelable when the vocabulary says so: then it returns <code>false</code> if a listener called
+                <code>preventDefault()</code>.
+              </li>
+              <li>
+                <code>@E.on("keydown")</code> listens on the DOM element for its whole life; a translated tag sends and
+                hears its own names.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="timing" label="Running something later" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Through the timing helpers, never the platform's calls, so the code says WHEN it runs:
+                <code>afterSolidUpdate()</code>, <code>after()</code>, <code>waitUntil()</code> ...
+              </li>
+              <li>They're <code>spell/util/timing</code>'s, re-exported as <code>E</code>'s.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="parts" label="How a part finds its owner" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The generic parts (<code>&lt;ui-header&gt;</code>, <code>&lt;ui-content&gt;</code> ...) are ONE element
+                each, wherever they sit.
+              </li>
+              <li>
+                A header in a card climbs to its owner and says so with <code>:state(in-card)</code>; the climb stops at
+                a component that isn't a part.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="patterns" label="Patterns that repeat" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A form control extends <code>F.FormComponent</code>, from <code>spell/ui/forms</code>: its DOM element
+                is a <code>DOMFormControl</code>, with <code>form</code>, <code>validity</code> and
+                <code>checkValidity()</code>.
+              </li>
+              <li>
+                A tag that shows a text file extends <code>LoadableComponent</code>: <code>source</code>, inline text,
+                <code>save()</code>.
+              </li>
+              <li>
+                A family with a script API of its own names its own DOM element class:
+                <code>&lt;ui-include&gt;</code>'s adds <code>contentRoot</code>.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="disabled-and-friends"
+            label="Disabled, visible, animation and friends"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                Every element takes <code>disabled</code>, <code>loading</code>, <code>visible</code> (or
+                <code>hidden</code>) and <code>animation</code>, though its vocabulary never names them, and the
+                platform's <code>inert</code>.
+              </li>
+              <li>README/element: "What every element gets without asking".</li>
+            </ul>
+          </ui-section>
+          <ui-section id="errors" label="When an element breaks" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Each element draws inside an error boundary of its own. When it throws, it gets
+                <code>:state(errored)</code>, one console error names the tag, and it sends a cancelable
+                <code>ui-error</code>.
+              </li>
+              <li>
+                Then it shows its fallback: a form control's plain native one, else a bare slot, so its children still
+                show.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="hot-reload" label="Hot reload" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                In development, an edit to a component swaps it into every live element, which redraws keeping its
+                attributes and properties; an edit to its CSS swaps the sheet with no redraw.
+              </li>
+              <li>
+                What the browser reads only once (the observed attributes, form association) reloads the page instead:
+                <a
+                  href="/src/element/HotDefinitions.ts"
+                  title="src/element/HotDefinitions.ts"
+                  target="src-src-element-hotdefinitions-ts"
+                  ><code>HotDefinitions.ts</code></a
+                >.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="static-render" label="The static render" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A page of <code>ui-*</code> elements as plain HTML, for search engines and readers with no JavaScript:
+                <code>spell ssr</code>.
+              </li>
+              <li>
+                Only <code>@E.aria</code> members and <code>@E.onChange(..., { writesDOMElement: true })</code> methods
+                run there.
+              </li>
+              <li>
+                How a page uses it:
+                <a href="/guides/ui-gaps.html" target="src-guides-ui-gaps-html">Pages with Spell UI</a>.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="sources" label="8. See also" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="book open"></ui-icon>
+          <ul>
+            <li>
+              <a href="/README/element.md" target="src-readme-element-md">README/element</a>: the element base in full,
+              packs and <code>&lt;ui-root&gt;</code>, styling, testing in a real browser, what it costs
+            </li>
+            <li>
+              <a href="/guides/solid/solid-2.html" target="src-guides-solid-solid-2-html">Solid 2 in Spell</a>: Solid's
+              own rules, which every component draws by
+            </li>
+            <li>
+              <a href="/ui/AGENTS.md" title="ui/AGENTS.md" target="src-ui-agents-md">ui's <code>AGENTS.md</code></a
+              >: "Solid authoring", "Classes", "Events", the same ground as rules for agents
+            </li>
+            <li>
+              <a href="/guides/spell-ui-pages.html" target="src-guides-spell-ui-pages-html">Spell UI's Docs Site</a>:
+              where every component's page lives
+            </li>
+            <li>
+              The counter's files:
+              <a
+                href="/guides/custom-elements/experiments/ui-counter/"
+                title="guides/custom-elements/experiments/ui-counter/"
+                target="src-guides-custom-elements-experiments-ui-counter"
+                ><code>ui-counter/</code></a
+              >, rebuilt into this page's script from the <a href="/epic/" target="src-epic"><code>epic/</code></a> folder:
+              <!-- prettier-ignore -->
+              <ui-code language="sh" collapsed>yarn tsx src/tools/bundle-experiment.ts ../guides/custom-elements/experiments/custom-elements.entry.ts</ui-code>
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+    <script src="experiments/custom-elements.bundle.js"></script>
+  </body>
+</html>

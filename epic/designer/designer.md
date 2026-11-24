@@ -237,6 +237,11 @@ Sources, short names used below:
   - "secondary tabs don't center within their button."
   - "\"code\" button should look centered vertically here"
 - Source:  epic `epic-components` Q16;  debut R5 (`v1-owen-9`, `-10`), R6;  debut late.
+- Checked by a scan, not by eye alone (epic `epic-engine` P83):  `designer-shots.js` and the page checker list every
+  row with an item drawn more than half a pixel off its row's middle, and every centred column (a rail of icons) with
+  one drawn left or right of its middle (`Alignment`;  epic `epic-engine` T166).
+  - Each is HIGH, and fixed in the component, never with page CSS.
+  - A row meant to be uneven (a raised badge) is marked `data-align="free: <why>"`, and left alone.
 
 #### T19 · Things line up with their neighbours
 - Look for:  links off the bar's line;  one icon higher than the rest;  chevrons and text edges not in one column;

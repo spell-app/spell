@@ -126,6 +126,8 @@ export class UpdateLabels implements Migration {
    * (I295), `fixed` while open and fixed (first), else its closed status.
    */
   private static becameOf(item: Element): UpdateBecame | undefined {
+    // closed grey by its fix (T143):  fixed, not done
+    if (item.hasAttribute("self-fixed")) return "fixed"
     const status = item.getAttribute("status")
     if (status === "open" || !status) {
       if (item.hasAttribute("fixed")) return "fixed"

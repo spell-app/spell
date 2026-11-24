@@ -1,0 +1,265 @@
+"epic send buttons element" is a notebook page
+	<header level="1">
+		&lt;epic-send-buttons&gt;
+		<header>The &lt;epic-send-buttons&gt; element: Send, the paper plane; with countdown, Auto Send's ring round it.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-send-buttons&gt;</> is Send: the paper plane. A press sends what you marked, typed or commented, at once.</>
+	<list bulleted>
+		<item>With <text code>countdown</> (an epic page's header only), it also sends by itself: AUTO SEND. A ring round the plane drains while you leave the page alone, 2 minutes by default, and at its end what's unsent goes.</>
+		<item>The header's gear chooses how long: Immediately, 2 minutes, 5 minutes or Off.</>
+		<item>Without it (a details page, a guide's comments), or with Auto Send off: the plane is filled blue while something waits, and only a press sends.</>
+		<item>The wand that turned the countdown on and off is gone for good (epic <text code>epic-engine</> P53).</>
+		<item>It sends nothing itself: it asks its owner, which sends its own way.</>
+	</>
+	<text class="meta" paragraph>For anyone changing how a page's answers or marks reach Claude.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P20, P53), in the <link target="src-spell-epic-src-components-epic-send-buttons" link="/epic/src/components/epic-send-buttons/"><text title="epic/src/components/epic-send-buttons/" code>epic-send-buttons</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-send-buttons-epicsendbuttons-en-ts" link="/epic/src/components/epic-send-buttons/EpicSendButtons.en.ts"><text title="epic/src/components/epic-send-buttons/EpicSendButtons.en.ts" code>EpicSendButtons.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-send-buttons-epicsendbuttons-tsx" link="/epic/src/components/epic-send-buttons/EpicSendButtons.tsx"><text title="epic/src/components/epic-send-buttons/EpicSendButtons.tsx" code>EpicSendButtons.tsx</></></>
+	<text class="meta" paragraph>The countdown: <link target="src-spell-epic-src-review-sendcountdown-ts" link="/epic/src/review/SendCountdown.ts"><text title="epic/src/review/SendCountdown.ts" code>SendCountdown</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<ui-text paragraph>
+					<epic-send-buttons state="idle" send-tip="Nothing to send"></epic-send-buttons>
+					<epic-send-buttons state="unsent" count="2" send-tip="Send 2 comments"></epic-send-buttons>
+					<epic-send-buttons state="sent" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
+					<epic-send-buttons state="idle" asks="waiting" send-tip="2 build plans wait for your Accept:  P43, P44 · Nothing to send"></epic-send-buttons>
+					<epic-send-buttons state="unsent" asks="taken" count="1" send-tip="2 build plans wait for your Accept:  P43, P44 · Send 1 mark"></epic-send-buttons>
+					<epic-send-buttons countdown state="unsent" count="3" send-tip="Send 3 marks"></epic-send-buttons>
+					<epic-send-buttons state="sent" working working-on="J201, J202" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
+				</ui-text>
+			</html>
+		</example>
+		<list bulleted>
+			<item>Nothing to send, something waiting, all of it sent;  then waiting on you, ringed 2px #666, and dotted once you've pressed what it waits for.</>
+			<item>The first five have no <text code>countdown</>: the one with something waiting is filled blue, for a press.</>
+			<item>The last one has it: a ring round its plane drains, clockwise from the top, while you leave this page alone. Any key, click or scroll fills it again; its tooltip says how long is left.</>
+			<item>Its wait running out sends nothing here: nobody on this page listens.</>
+			<item>The last is <text code>working</>: the session is working through what was sent, and a blue arc turns round the plane, in the countdown ring's frame (epic <text code>epic-engine</> P55). Its tooltip names what it's answering.</>
+			<item>The wait is this browser's Auto Send choice, made in an epic page header's gear: Off, and no ring shows.</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Nobody writes it in a doc: three owners draw it, each setting <text code>state</> and sending its own way.</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Owner</>
+				<cell>A press sends</>
+				<cell>The countdown sends (with <text code>countdown</> only)</>
+			</>
+			<row>
+				<cell><link target="src-spell-epic-src-docs-epic-page-html" link="/epic-page"><text code>&lt;epic-page&gt;</></>'s header</>
+				<cell>every unsent mark and comment</>
+				<cell>the same, every revisit asked now, as Review Now did (decision Q7);  with nobody listening, the page server wakes the epic (Q59)</>
+			</>
+			<row>
+				<cell><link target="src-spell-epic-src-docs-epic-send-html" link="/epic-send"><text code>&lt;epic-send&gt;</></> (a details page)</>
+				<cell>the whole page's answer</>
+				<cell>never: no <text code>countdown</> (J142)</>
+			</>
+			<row>
+				<cell>a docs page's comments (<link target="src-spell-epic-src-tools-assets-spell-doc-comments-js" link="/epic/src/tools/_assets/spell-doc-comments.js"><text title="epic/src/tools/_assets/spell-doc-comments.js" code>drawSend()</></>)</>
+				<cell>every comment not sent, to the page's epic</>
+				<cell>never: no <text code>countdown</> (J142)</>
+			</>
+		</>
+	</>
+
+	<section label="3. The countdown">
+		<icon slot="icon" name="clock"/>
+		<text paragraph>AUTO SEND, only with <text code>countdown</>. 2026-10-29: "Send works on a 2-minute no interaction timer. This is integrated into the single send button ... with the countdown ring. Pressing it sends immediately."</>
+		<list bulleted>
+			<item>The choice, in an epic page header's gear (Auto Send): <list bulleted><item>Immediately: each change goes as it's finished, a note once its box loses the focus;  no ring</> <item>2 minutes, the default</> <item>5 minutes</> <item>Off: only a press sends, and the plane is filled blue while something waits</></></>
+			<item>Remembered in this browser for every page (<text code>localStorage</>, <text code>spell-epics:auto-send</>; decision Q6). A new key in P53 (J147): the wand's old keys are ignored, so everyone starts at 2 minutes.</>
+			<item>It runs only while Auto Send is on and something waits (<text code>state="unsent"</>).</>
+			<item>Every key, click, wheel, scroll or input on the page starts it again, in a same-origin frame too;  a pointer only moving doesn't.</>
+			<item>A note box with the focus and words in it holds the ring full (J144): the wait starts once you leave the box. The plane's tooltip says so then.</>
+			<item>The time is read off the clock, not counted in ticks (J141): a hidden page, whose timers the browser slows, sends on its next tick or as soon as it's shown again, never minutes late.</>
+			<item>At its end it asks once (<text code>epic-send-saving</>, <text code>auto</> true), as a press would, and stops until something waits again. <list bulleted><item>It runs whether or not a session listens: with nobody listening, the page server wakes the epic, at most once per epic in 10 minutes, never in airplane mode (Q59, B).</> <item>An epic page's countdown send asks every revisit now (decision Q7).</> <item>It only ever sends the marks, never accepts a stage:  an epic page's Accept Overview and Accept Phases are on their sections' title rows (<text code>&lt;epic-stage-button&gt;</>, epic <text code>epic-engine</> I180;  in the plane's place before, P29).  A pressed Accept counts down five minutes of its own, its mark held:  no Send, a press or the countdown, carries it before then (I181).  The ring is the same ring, <text code>CountdownRing</>, green there.</></></>
+			<item>It's the PAGE's, one <text code>SendCountdown</>, shared with the header's gear: a Send drawn again finds it where it was, its ring too.</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Attribute</>
+				<cell>What it is</>
+			</>
+			<row>
+				<cell>
+					<text code>state</>
+				</>
+				<cell>Where what the owner sends stands: <text code>unsent</> or <text code>sent</>. Default <text code>idle</>, nothing to send.</>
+			</>
+			<row>
+				<cell>
+					<text code>send-tip</>
+				</>
+				<cell>The plane's tooltip and name: what a press sends. Default <text code>Send</>.</>
+			</>
+			<row>
+				<cell>
+					<text code>count</>
+				</>
+				<cell>How many things a press sends: a badge on the plane. None at 0.</>
+			</>
+			<row>
+				<cell>
+					<text code>busy</>
+				</>
+				<cell>A send on its way: the plane spins, and a press does nothing.</>
+			</>
+			<row>
+				<cell>
+					<text code>asks</>
+				</>
+				<cell>The pill WAITS ON YOU (2026-10-25): <text code>waiting</>, the pill's own border 2px #666, darker than its hairline, solid; <text code>taken</>, dotted once you've pressed what it waits for. An epic page's header sets it while Claude's build plans wait for your Accept on their phases: still the plane, never green.</>
+			</>
+			<row>
+				<cell>
+					<text code>working</>
+				</>
+				<cell>The session is working through what was sent (epic <text code>epic-engine</> P55): a blue arc turns round the plane, in the countdown ring's frame. The countdown wins: while it runs, its ring shows instead. An epic page's header sets it while its inbox's <text code>doing</> lists the items being answered; the spinner beside Send hides then.</>
+			</>
+			<row>
+				<cell>
+					<text code>working-on</>
+				</>
+				<cell>What the session is answering, for the plane's tooltip while the ring turns: <text code>J201, J202</>.</>
+			</>
+			<row>
+				<cell>
+					<text code>countdown</>
+				</>
+				<cell>Auto Send: counts down to Send by itself, a ring round the plane (section 3). Off by default: only an epic page's header sets it, as only it has the gear that chooses the wait (J142). <text code>wand</> before P53, which drew the wand too.</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The pill round the plane.</>
+				</>
+				<row>
+					<cell>
+						<text code>send</>
+					</>
+					<cell>The paper plane, a <text code>&lt;button&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>count</>
+					</>
+					<cell>The badge on the plane.</>
+				</>
+				<row>
+					<cell>
+						<text code>ring</>
+					</>
+					<cell>The countdown's ring round the plane, its ends round, draining clockwise;  only while it counts.</>
+				</>
+				<row>
+					<cell>
+						<text code>working</>
+					</>
+					<cell>The turning ring round the plane:  a blue arc going round, only while the session works on a Send.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Custom states, for <text code>:state()</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>countdown</>
+					</>
+					<cell>Auto Send is on, and this Send counts down (<text code>countdown</>).</>
+				</>
+				<row>
+					<cell>
+						<text code>counting</>
+					</>
+					<cell>The countdown runs with a wait (not Immediately): the ring drains.</>
+				</>
+				<row>
+					<cell>
+						<text code>working</>
+					</>
+					<cell>The session works through what was sent, and the countdown isn't running: the ring turns.</>
+				</>
+				<row>
+					<cell>
+						<text code>waiting</>
+					</>
+					<cell>Auto Send is off, or no <text code>countdown</>, and something isn't sent: the plane is filled blue.</>
+				</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<text paragraph>What it tells its owner.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Detail</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>epic-send-saving</>
+					</>
+					<cell>
+						<text code>&#123; auto &#125;</>
+					</>
+					<cell>The plane pressed (<text code>auto</> false), or the countdown ran out (<text code>auto</> true).</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>One round pill: the plane, and its words, "Send to Claude".</>
+			<item>Just after a send, a press or Auto Send's: "Sent to Claude" for 5 seconds, the plane's tooltip saying when it went; something new marked meanwhile brings "Send to Claude" back at once. The words keep the width of the longer of the two, so nothing beside the pill moves.</>
+			<item>The pill's outline: transparent while there is nothing new to send, idle or all sent, so the plane shows alone (2026-10-25); a grey hairline with something not sent; never dashed.</>
+			<item>The countdown's ring (your comment C10: "Prettier ring, with pill edges, not just border. Should look distinct from the button itself"): <list bulleted><item>round the plane, outside its pill: a 3px gap, then a 3px blue stroke over a faint track, its ends round</> <item>what's left of the wait, draining clockwise from the top, eased over each second</> <item>the pill's own outline goes while it counts, so ring and button never read as one border</> <item>room kept for it on both sides whenever <text code>countdown</> is set: nothing beside it moves as it comes and goes</></></>
+			<item>Auto Send off (or no <text code>countdown</>) with something waiting: the plane filled blue, its icon white.</>
+			<item>Waiting on you (<text code>asks</>): the pill's own border 2px #666 in place of its hairline, 1px out so nothing moves; dotted once pressed. The same ring as a waiting plan's buttons on its phase.</>
+			<item>Its tokens, which an epic page's header sets to its own: <list bulleted><item><text code>--epic-send-buttons-size</>: the pill's height (28px)</> <item><text code>--epic-send-buttons-rule</></> <item><text code>--epic-send-buttons-muted</></></></>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>&lt;epic-page&gt;</>, <text code>&lt;epic-send&gt;</> and the docs runtime's comments. Before epic <text code>epic-engine</> P20, an epic page's header had a round Send and a Review Now button, a details page a round Send, a docs page a Send pill.</>
+			<item>From P20 to P53 a wand beside the plane turned the countdown on and off (<text code>wand</>);  hidden everywhere from 2026-10-25, then replaced by the ring and the header's gear (P53).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-29 against branch <ui-text code>epic-engine</> (P53).</>
+		</>
+	</>

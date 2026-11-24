@@ -1,0 +1,269 @@
+"epic card" is a notebook page
+	<header level="1">
+		&lt;epic-card&gt;
+		<header>The &lt;epic-card&gt; element: one epic's card on the Epics page, its state, link, saga, star and last-worked day.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-card&gt;</> is one epic's card on the Epics page, drawn from what the epic's page says.</>
+	<list bulleted>
+		<item>Its state's mark before its title, by the one rule every list and page uses: in progress, errors, paused, future, done.</>
+		<item>Its description, its saga's label and its meta line.</>
+		<item>A star near its top right: a click stars or unstars the epic on the page server.</>
+		<item>A <text code>...</> menu in its top right corner: Resume (its session in its own VS Code window), Rename Epic..., Complete and Delete Epic..., each asking first in a dialog.</>
+		<item>The day it was last worked on at its bottom right, the full date its tooltip.</>
+	</>
+	<text class="meta" paragraph>For anyone changing the Epics page's cards.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-list" link="/epic/src/components/epic-list/"><text title="epic/src/components/epic-list/" code>epic-list</></> family, with <text code>&lt;epic-list&gt;</>, <text code>&lt;epic-card&gt;</> and <text code>&lt;epic-sort&gt;</>.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-list-epiccard-en-ts" link="/epic/src/components/epic-list/EpicCard.en.ts"><text title="epic/src/components/epic-list/EpicCard.en.ts" code>EpicCard.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-list-epiccard-tsx" link="/epic/src/components/epic-list/EpicCard.tsx"><text title="epic/src/components/epic-list/EpicCard.tsx" code>EpicCard.tsx</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<ui-stack style="max-width: 360px">
+					<epic-card id="epic-epic-engine" epic="epic-engine" updated="2026-10-19" phases="done done active todo" active="P3 · Pages as Components" running worked="2026-10-19T16:13-04:00" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
+						<a href="/epics/epic-engine/epic-engine.plan.html" target="epic-engine">Epic Engine</a>
+						<span slot="description">One engine for every repo's epics.</span>
+						<span slot="meta">P3 · Pages as Components · epics/epic-engine/epic-engine.plan.html</span>
+					</epic-card>
+				</ui-stack>
+			</html>
+		</example>
+		<text paragraph>A running epic, mid-way: in progress, its phases done of all in a blue label. Opened without the page server's write token, its star is disabled and says why.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>A card, written as from this page:</>
+		<markdown>
+			```html
+			<epic-card
+			  id="epic-airplane"
+			  epic="airplane"
+			  data-status="open"
+			  phases="done active todo"
+			  updated="2026-10-08"
+			  urgent="q3"
+			  active="P2 · Site Map"
+			  worked="2026-10-09T14:34-04:00"
+			  saga="epics"
+			  saga-title="Epic Tooling"
+			  saga-purpose="Epics:  their pages, the review loop ..."
+			  favorite
+			>
+			  <a href="../../epics/airplane/airplane.plan.html" target="airplane">Airplane</a>
+			  <span slot="description">Work with no Claude, on a plane.</span>
+			  <span slot="meta">P2 · Site Map · epics/airplane/airplane.plan.html</span>
+			</epic-card>
+			```
+		</>
+		<list bulleted>
+			<item>Written by <link target="src-spell-epic-src-list-epiccards-ts" link="/epic/src/list/EpicCards.ts"><text title="epic/src/list/EpicCards.ts" code>epicCardHtml()</></>, for <text code>epic pages index</> and the page server alike.</>
+			<item><text code>data-status</>: <text code>done</> or <text code>open</>, for the docs runtime's count and state chips.</>
+			<item>The page server marks each card <text code>running</> and <text code>favorite</> as they are now, as it serves the page.</>
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Parent</>
+				<cell>How many</>
+				<cell>As</>
+			</>
+			<row>
+				<cell>
+					<link target="src-spell-epic-src-docs-epic-list-html" link="/epic-list">
+						<text code>&lt;epic-list&gt;</>
+					</>
+				</>
+				<cell>any number</>
+				<cell>One epic.</>
+			</>
+		</>
+		<text paragraph>Its children: the title link, then <text code>slot="description"</> and <text code>slot="meta"</>.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Attribute</>
+				<cell>Value</>
+				<cell>What it is</>
+			</>
+			<row>
+				<cell><text code>epic</> (required)</>
+				<cell>an epic's name</>
+				<cell>Its folder in <link target="src-epics" link="/epics/"><text code>epics/</></>: <text code>airplane</>.</>
+			</>
+			<row>
+				<cell>
+					<text code>phases</>
+				</>
+				<cell>statuses, space-separated</>
+				<cell>Each phase's status, in order: <text code>done done active todo</>.</>
+			</>
+			<row>
+				<cell>
+					<text code>updated</>
+				</>
+				<cell>a date</>
+				<cell>Its page's <text code>updated</> day: paused after 3 days without one.</>
+			</>
+			<row>
+				<cell>
+					<text code>urgent</>
+				</>
+				<cell>item ids</>
+				<cell>Its items that need you: <text code>q3 j12</>.</>
+			</>
+			<row>
+				<cell>
+					<text code>future</>
+				</>
+				<cell>present or not</>
+				<cell>Written down with <text code>/epic future</>, not planned yet.</>
+			</>
+			<row>
+				<cell>
+					<text code>standing</>
+				</>
+				<cell>present or not</>
+				<cell>Open for good: every phase done is not done.</>
+			</>
+			<row>
+				<cell>
+					<text code>running</>
+				</>
+				<cell>present or not</>
+				<cell>A session runs for it: never paused. The page server's to set.</>
+			</>
+			<row>
+				<cell>
+					<text code>active</>
+				</>
+				<cell>text</>
+				<cell>The phase under way: <text code>P8 · Review Polish</>.</>
+			</>
+			<row>
+				<cell>
+					<text code>worked</>
+				</>
+				<cell>a time</>
+				<cell>When it was last worked on: drawn as <text code>10/9</>.</>
+			</>
+			<row>
+				<cell><text code>saga</>, <text code>saga-title</>, <text code>saga-purpose</></>
+				<cell>a saga id, text</>
+				<cell>The saga it serves: its label's words and tooltip.</>
+			</>
+			<row>
+				<cell>
+					<text code>favorite</>
+				</>
+				<cell>present or not</>
+				<cell>Starred: under Favorites, and only there.</>
+			</>
+			<row>
+				<cell>
+					<text code>away</>
+				</>
+				<cell>present or not</>
+				<cell>Its epic page has "0. While you were out" to read: a red mark under its title links it (epic <text code>epic-engine</> P62).</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws, which a page's CSS can style from outside with <text code>::part(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The card, a <text code>&lt;ui-card&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>mark</>
+					</>
+					<cell>Its state's mark before the title.</>
+				</>
+				<row>
+					<cell>
+						<text code>saga</>
+					</>
+					<cell>Its saga's label, a <text code>&lt;ui-label&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>star</>
+					</>
+					<cell>The star, left of its menu, a <text code>&lt;ui-button&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>menu</>
+					</>
+					<cell>The <text code>...</> menu at its top right, a <text code>&lt;ui-dropdown&gt;</>: Resume, Rename Epic..., Complete, Delete Epic...</>
+				</>
+				<row>
+					<cell>
+						<text code>worked</>
+					</>
+					<cell>The day it was last worked on, a <text code>&lt;time&gt;</>.</>
+				</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<text paragraph>What it tells the page.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Detail</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>epic-starred</>
+					</>
+					<cell>
+						<text code>&#123; epic, favorite, favorites &#125;</>
+					</>
+					<cell>The page server starred or unstarred it: <text code>favorites</> is every starred epic, which its list stars every card by.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>A Spell UI card (<text code>&lt;ui-card&gt;</>), as dense as the docs pages' card grids.</>
+			<item>The mark: in progress, its phases done of all (<text code>3/6</>, or <text code>planning</>) in a small blue outlined label; the rest, the state's icon in its colour.</>
+			<item>The star: grey until pointed at, the page's yellow once starred (2026-10-10: "make it yellow").</>
+			<item>The meta line in the brand's mono, small.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic pages index</>, from each epic page; the page server, for an epic still in its worktree.</>
+			<item>Its menu asks the page server (<text code>/api/epics/manage</>, <text code>EpicLifecycle</>): what it would refuse first (a worktree, a branch not merged, the tooling home), then the change. Resume runs <text code>epic window launch &lt;name&gt; --prompt "/epic resume &lt;name&gt;"</>; Rename moves the epic's folder and the links to it; Complete skips its phases left and closes what waits on you; Delete deletes its folder, which the epic repo's history keeps. A done epic's menu has no Resume or Complete.</>
+			<item>A star click writes the shared <link target="src-epics-favorites-json5" link="/epics/favorites.json5"><text code>epics/favorites.json5</></>, through <text code>POST /api/epics/favorite</>.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-19 against branch <ui-text code>epic-engine</> (P3).</>
+		</>
+	</>

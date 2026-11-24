@@ -269,6 +269,13 @@ export type ProjectManifestJSON5 = {
   /** Targets it compiles to, from its project file, e.g. `["ts/solid"]` -- `js/solid` always:  see `SP.TARGETS`. */
   targets?: string[]
   /**
+   * The Spell it was written for, from its project file, e.g. `"0.9.0"` (epic `language` P68, Q79, Q83):
+   * so it says which of Spell's old forms it may still hold (`SP.OLD_FORMS`).
+   * - Written when it's made, and by `spell upgrade` / `spell lint --fix`;  none:  written before projects said.
+   * - Shown in Project Settings, never edited there:  only an upgrade changes it.
+   */
+  spellVersion?: string
+  /**
    * The component packs its drawings name components from, by their bare names (`<button>`), first first,
    * from its project file -- default:  Spell UI's, `["spell-ui"]` (`SP.ComponentPacks`, epic `elemental-spell` P7).
    */
@@ -302,6 +309,27 @@ export type ProjectManifestJSON5 = {
  * `spell run` and the page server both read it (`SpellProject.deploymentsPicked()`).
  */
 export const DEPLOYMENT_VARIABLE = "SPELL_DEPLOYMENT"
+
+/**
+ * Thrown by `SpellProject.deploymentsPicked()` for a deployment no place in the project's file lists:
+ * `spell run` stops with its words, and the page server refuses to read that project's places with them.
+ * - Its message names the project, the deployment asked for, the ones the file lists, and the fix,
+ *   in short lines.
+ */
+export class UnlistedDeploymentError extends TypeError {
+  declare cause: UnlistedDeploymentCause | undefined
+}
+UnlistedDeploymentError.prototype.name = "UnlistedDeploymentError"
+
+/** Why an `UnlistedDeploymentError` was thrown. */
+export type UnlistedDeploymentCause = {
+  /** The project, by address:  `@acme/jobs`. */
+  projectId: string
+  /** The deployment asked for:  `prod`. */
+  deployment: string
+  /** The deployments its file does list, in its order:  `["dev", "staging"]`. */
+  listed: string[]
+}
 
 /** A single entry in `contents.manifest`, augmented with `path`/`location`/`file` once loaded. */
 export type ProjectManifestEntry = {
@@ -421,6 +449,12 @@ export type CompiledEntry = {
   words: Record<string, string>
   /** What it wrote for each target, by target name, `js/solid` first */
   targets: Record<string, CompiledTargetEntry>
+  /**
+   * Did it parse with no errors (`SpellProject.compiledCleanly`):  sent by the editor's language worker with its
+   * compile, so the page keeps a clean one in the cache (epic `solid-2-final` I57).
+   * - Never kept in the cache itself:  every entry there is clean.
+   */
+  clean?: boolean
 }
 
 /** What a project's compile wrote for one target:  see `CompiledEntry`. */
@@ -692,8 +726,11 @@ export type ReadAsTemplate = {
  *   that don't touch what compiled projects can read.
  * - Bump the MAJOR when declarations' shape, or generated-name mangling (e.g. `frobnicate_$thing`), changes:
  *   declarations from another major are refused.
+ * - Bump the MINOR once for each new old form, `SP.OLD_FORMS` (epic `language` P68, Q79):
+ *   `0.9.0` for a note after a line's code, `//` (T166).
+ *   A project's file says which Spell it matches, `spellVersion`, so it says which old forms it may still hold.
  */
-export const SPELL_VERSION = "0.8.0"
+export const SPELL_VERSION = "0.9.0"
 
 /**
  * Everything a project added to scope while parsing, as plain data -- see `SpellDeclarations`.

@@ -112,6 +112,8 @@ export class DOMThemeEditorElement extends E.DOMElement<UIThemeEditor> {
  *   Stop using forgets it.
  * - Events:  `ui-changed` on every change, `ui-copied` from Copy changes, `ui-saved` from Stop using.
  *   - The events of the elements it's built of stop at its shadow root:  their `ui-changed`'s detail isn't ours.
+ *   - It hears them by a ref on each (`addEventListener()`), never `on-ui-changed={f}`:
+ *     Solid's dev build would warn `LOWERCASE_EVENT_ATTRIBUTE` (epic `editor` I291).
  * - SIDE EFFECTS:  the page's theme (without pages), or the chrome's (`ThemePreference.wear()`);  each framed page's
  *   remembered theme, as its own menu would;  `window`'s messages while connected.
  * - Its families (panel, property editor, select, slider, menu, section, code, theme menu ...) are imported by its barrel.
@@ -1337,7 +1339,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         appearance="segmented link header"
         size="small"
         aria-label={t("schemes")}
-        ref={(element: HTMLElement) => element.addEventListener("ui-choosing", onChoosing as EventListener)}
+        ref={(menu) => menu.addEventListener("ui-choosing", onChoosing)}
       >
         <For each={SCHEME_CHOICES}>
           {(value) => (
@@ -1374,9 +1376,8 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         choose="many"
         size="small"
         aria-label={t("pages")}
-        ref={(element: HTMLElement) =>
-          element.addEventListener("ui-changed", ((event: CustomEvent<{ value?: string; values?: string[] }>) =>
-            this.showPages(this.orderedPageIds, event.detail.values ?? [])) as EventListener)
+        ref={(menu) =>
+          menu.addEventListener("ui-changed", (event) => this.showPages(this.orderedPageIds, event.detail.values ?? []))
         }
       >
         <For each={this.orderedPageIds}>
@@ -1456,10 +1457,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         appearance="segmented link"
         size="small"
         aria-label={this.text(name)}
-        ref={(element: HTMLElement) =>
-          element.addEventListener("ui-choosing", ((event: CustomEvent<{ value: string }>) =>
-            choose(event.detail.value)) as EventListener)
-        }
+        ref={(menu) => menu.addEventListener("ui-choosing", (event) => choose(event.detail.value))}
       >
         <For each={values}>
           {(value) => (
@@ -1796,11 +1794,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
             value={this.editingId ?? ""}
             placeholder={t("openMine")}
             aria-label={t("openMine")}
-            ref={(element: HTMLElement) =>
-              element.addEventListener("ui-changed", ((event: CustomEvent<{ value: string | string[] }>) => {
+            ref={(select) =>
+              select.addEventListener("ui-changed", (event) => {
                 const id = String(event.detail.value)
                 if (id && id !== this.editingId) this.open(id)
-              }) as EventListener)
+              })
             }
           >
             <For each={this.myThemes}>{(theme) => <ui-item value={theme.id}>{theme.name}</ui-item>}</For>
@@ -1851,10 +1849,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
                 aria-label={t("name")}
                 size="small"
                 fluid=""
-                ref={(element: HTMLElement) =>
-                  element.addEventListener("ui-typed", ((event: CustomEvent<{ value: string }>) =>
-                    this.choose({ name: event.detail.value })) as EventListener)
-                }
+                ref={(input) => input.addEventListener("ui-typed", (event) => this.choose({ name: event.detail.value }))}
               ></ui-input>
             </ui-property>
             <ui-property name="base" label={t("base")} description={t("baseTip")} width="1/2" default={DEFAULT_BASE}>
@@ -1863,12 +1858,12 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
                 aria-label={t("base")}
                 size="small"
                 fluid=""
-                ref={(element: HTMLElement) =>
-                  element.addEventListener("ui-changed", ((event: CustomEvent<{ value: string | string[] }>) => {
+                ref={(select) =>
+                  select.addEventListener("ui-changed", (event) => {
                     const value = String(event.detail.value)
                     if (value.startsWith(SavedTheme.PREFIX)) this.startFrom(value.slice(SavedTheme.PREFIX.length))
                     else this.choose({ base: value })
-                  }) as EventListener)
+                  })
                 }
               >
                 <For each={this.bases}>{(base) => <ui-item value={base}>{UIT.ThemeNames.titleOf(base)}</ui-item>}</For>
@@ -1926,13 +1921,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     }
     return (
       <ui-section
-        ref={[
-          (section) => this.branchSections.set(key, section),
-          (element: HTMLElement) => {
-            element.addEventListener("ui-opened", onFolded as EventListener)
-            element.addEventListener("ui-closed", onFolded as EventListener)
-          }
-        ]}
+        ref={(section) => {
+          this.branchSections.set(key, section)
+          section.addEventListener("ui-opened", onFolded)
+          section.addEventListener("ui-closed", onFolded)
+        }}
         class="group"
         label={label}
         collapsible=""
@@ -2062,11 +2055,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           aria-label={t(key)}
           size="small"
           fluid=""
-          ref={(element: HTMLElement) =>
-            element.addEventListener("ui-changed", ((event: CustomEvent<{ value: string | string[] }>) => {
+          ref={(select) =>
+            select.addEventListener("ui-changed", (event) => {
               const value = String(event.detail.value)
               this.choose({ [key]: value === OWN ? undefined : (value as UIT.ThemeFont) })
-            }) as EventListener)
+            })
           }
         >
           <ui-item value={OWN} style={own().stack ? `font-family: ${own().stack}` : undefined}>
@@ -2105,10 +2098,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           step={TEXT_SIZES.step}
           value={size()}
           aria-label={t("textSize")}
-          ref={(element: HTMLElement) =>
-            element.addEventListener("ui-moved", ((event: CustomEvent<{ value: number }>) =>
-              this.choose({ textSize: event.detail.value })) as EventListener)
-          }
+          ref={(slider) => slider.addEventListener("ui-moved", (event) => this.choose({ textSize: event.detail.value }))}
         ></ui-slider>
       </ui-property>
     )
@@ -2150,11 +2140,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           equal={own() ? "" : undefined}
           size="small"
           aria-label={t(key)}
-          ref={(element: HTMLElement) =>
-            element.addEventListener("ui-choosing", ((event: CustomEvent<{ value: string }>) => {
+          ref={(menu) =>
+            menu.addEventListener("ui-choosing", (event) => {
               const value = event.detail.value
               this.choose({ [key]: value === OWN ? undefined : value })
-            }) as EventListener)
+            })
           }
         >
           <For each={shown()}>
@@ -2202,20 +2192,20 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
             <div class="find-row">
               <ui-input
                 class="find"
+                type="search"
                 size="small"
                 icon="search"
                 fluid=""
                 placeholder={t("find")}
                 aria-label={t("find")}
                 value={this.filter}
-                ref={[
-                  (input) => (this.findInput = input),
-                  (element: HTMLElement) =>
-                    element.addEventListener("ui-typed", ((event: CustomEvent<{ value: string }>) => {
-                      this.filter = event.detail.value
-                      this.isFilterFolded = false
-                    }) as EventListener)
-                ]}
+                ref={(input) => {
+                  this.findInput = input
+                  input.addEventListener("ui-typed", (event) => {
+                    this.filter = event.detail.value
+                    this.isFilterFolded = false
+                  })
+                }}
               ></ui-input>
               <ui-button
                 class="chip"
@@ -2264,13 +2254,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     const onFolded = (event: CustomEvent<{ open: boolean; section: Element }>) => this.onBranchFolded(event, id)
     return (
       <ui-section
-        ref={[
-          (section) => this.branchSections.set(id, section),
-          (element: HTMLElement) => {
-            element.addEventListener("ui-opened", onFolded as EventListener)
-            element.addEventListener("ui-closed", onFolded as EventListener)
-          }
-        ]}
+        ref={(section) => {
+          this.branchSections.set(id, section)
+          section.addEventListener("ui-opened", onFolded)
+          section.addEventListener("ui-closed", onFolded)
+        }}
         class={isGroup ? "group" : "branch"}
         label={node()?.name ?? ""}
         collapsible=""
@@ -2309,13 +2297,9 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     return (
       <ui-theme-token
         row={this.rowOf(token, node()?.name ?? token)}
-        ref={(element: HTMLElement) => {
-          element.addEventListener("ui-changed", ((
-            event: CustomEvent<{ token: string; value: string; scheme?: Scheme }>
-          ) => this.onRowChanged(event)) as EventListener)
-          element.addEventListener("ui-command", ((
-            event: CustomEvent<{ token: string; command: string; place?: string }>
-          ) => this.onRowCommand(event)) as EventListener)
+        ref={(row) => {
+          row.addEventListener("ui-changed", (event) => this.onRowChanged(event))
+          row.addEventListener("ui-command", (event) => this.onRowCommand(event))
         }}
       ></ui-theme-token>
     )

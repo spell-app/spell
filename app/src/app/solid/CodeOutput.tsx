@@ -8,11 +8,12 @@ import { editor, type FollowedPlace } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import type { CodeMirrorFollowed, SpellCodeMirror } from "spell/app/app/solid/codemirror"
-import { ErrorBoundary, tracked } from "spell/app/app/solid"
+import { ErrorBoundary } from "spell/app/app/solid"
 import { barTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
 import { LazyCodeMirror } from "./LazyCodeMirror"
+import { on } from "./on"
 
 import "./CodeOutput.css"
 
@@ -120,22 +121,27 @@ export function CompiledCodeButton(): JSX.Element {
 /****************
  * ### `<CodeOutputPane>`
  * The compiled code beside the code, read only:  a bar choosing its language, as every header, then the code.
- * - The project as `target` writes it, afresh after each compile, with its source map (`project.codeWithMapFor()`).
+ * - The project as `target` writes it, afresh after each compile, with its source map:  asked of the code's language
+ *   service (`spell/codeWithMap`), the language worker's where it compiles the project (epic `solid-2-final` T36),
+ *   else written from the page's own parse (`project.codeWithMapFor()`).
  * - A click on a line says where in the program it came from (`editor.followed`), and its line follows a click elsewhere.
  * - A target whose writer can't write the project shows why, as a comment, and follows nothing.
  ****************/
 export function CodeOutputPane(props: { target: OutputTarget }) {
-  const written = tracked(() => {
-    const { project } = editor
-    // read so a compile writes it afresh
-    if (!project?.compiled) return { code: "" }
-    try {
-      return project.codeWithMapFor(props.target)
-    } catch (error) {
-      const comment = props.target === "py" ? "#" : "//"
-      return { code: `${comment} ${error instanceof Error ? error.message : String(error)}\n` }
+  const [written, setWritten] = createSignal<Written>({ code: "" })
+  // afresh after each compile:  its compiled code is read so one writes it again
+  createEffect(
+    () => [editor.project, editor.project?.compiled, props.target] as const,
+    ([project, compiled, target]) => {
+      let isCurrent = true
+      void writtenFor(project, compiled, target).then((made) => {
+        if (isCurrent) setWritten(made)
+      })
+      return () => {
+        isCurrent = false
+      }
     }
-  })
+  )
   const lines = createMemo(() => {
     const { map } = written() as { map?: P.SourceMapV3 }
     return map && new P.SourceMapLines(map)
@@ -158,7 +164,14 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
     }
   )
   return (
-    <ui-panel appearance="pane" class="CodeOutputPane" label={appTexts.text("codeOutputHeader")}>
+    <ui-panel
+      appearance="pane"
+      class="CodeOutputPane"
+      label={appTexts.text("codeOutputHeader")}
+      closable=""
+      close-label={appTexts.text("codeOutputClose")}
+      ref={on("ui-dismissed", () => CodeOutputShown.set(undefined))}
+    >
       <ui-toolbar slot="actions" appearance="segmented link header" tabs label={appTexts.text("codeOutputHeader")}>
         <For each={Object.keys(OUTPUT_TARGETS) as OutputTarget[]}>
           {(target) => (
@@ -171,15 +184,6 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
             </ui-item>
           )}
         </For>
-        <ui-icon
-          slot="right"
-          name="close"
-          link=""
-          class="PanelClose"
-          label={appTexts.text("codeOutputClose")}
-          title={appTexts.text("codeOutputClose")}
-          onClick={() => CodeOutputShown.set(undefined)}
-        />
       </ui-toolbar>
       <div class="CodeOutputCode">
         <ErrorBoundary onError={(error) => editor.showError(error)}>
@@ -195,6 +199,33 @@ export function CodeOutputPane(props: { target: OutputTarget }) {
       </div>
     </ui-panel>
   )
+}
+
+/** What the compiled-code pane shows:  the code, and the source map it was written with. */
+type Written = { code: string; map?: P.SourceMapV3 }
+
+/**
+ * `project` as `target` writes it, for `<CodeOutputPane>`:  asked of the language service, else from the page's parse.
+ * - A target whose writer can't write the project:  why, as a comment.
+ * - NEVER throws.
+ */
+async function writtenFor(
+  project: SP.SpellProject | undefined,
+  compiled: string | undefined,
+  target: OutputTarget
+): Promise<Written> {
+  if (!project || !compiled) return { code: "" }
+  const comment = target === "py" ? "#" : "//"
+  const file = editor.languageFileOf(project)
+  const answer =
+    editor.askLanguage && file ? await editor.askLanguage(file, "spell/codeWithMap", { target }) : undefined
+  // the worker's, where it compiled the project;  a project it hasn't compiled is written from the page's parse
+  if (answer && !("error" in answer)) return answer
+  try {
+    return project.codeWithMapFor(target)
+  } catch (error) {
+    return { code: `${comment} ${error instanceof Error ? error.message : String(error)}\n` }
+  }
 }
 
 /****************
@@ -230,8 +261,10 @@ export function FollowAlong() {
         // only a new place runs it, so what it reads (the selection, the trail) it reads as it is now,
         // untracked on purpose (I88)
         if (followed.from === "code" || followed.from === "edit") void followCodeCursor(followed, codeEditor, ifNone)
-        else if (followed.from !== "parts")
-          untrack(() => Inspector.selectWrittenAt(followed.path, followed.line, { ifNone }))
+        else if (followed.from !== "parts") {
+          const isWanted = () => editor.followed === followed
+          untrack(() => void Inspector.selectWrittenAt(followed.path, followed.line, { ifNone, isWanted }))
+        }
       }
       if (followed.from === "code" || followed.from === "edit") return follower.clear()
       if (!codeEditor || codeEditor.view.hasFocus) return
@@ -258,7 +291,8 @@ export function FollowAlong() {
 /**
  * The code's cursor rests at `followed`:  select the thing the word under it names, when it names one the app draws,
  * else what its line draws or makes, as ever (`Inspector.selectWrittenAt()`).
- * - The word is read by the language service, from its declaration (`<stock-pile "stock"/>`, `"stock" is a new ...`):
+ * - The word is read by the language service, the language worker's where it parses,
+ *   from its declaration (`<stock-pile "stock"/>`, `"stock" is a new ...`):
  *   that line's part is the thing, so what's inspected is what the program declared, never a guess from the text.
  * - Only a property or a variable counts (`declaredThingAt()`):  a type, an action or a keyword falls back to the line.
  * - A place followed since (the cursor moved on) is left alone:  the language service loads lazily.
@@ -271,10 +305,9 @@ async function followCodeCursor(
 ): Promise<void> {
   const named = codeEditor && (await thingNamedAtCursor(codeEditor, followed).catch(() => undefined))
   if (editor.followed !== followed) return
-  untrack(() => {
-    if (named && Inspector.selectWrittenAt(named.path, named.line)) return
-    Inspector.selectWrittenAt(followed.path, followed.line, { ifNone })
-  })
+  const isWanted = () => editor.followed === followed
+  if (named && (await untrack(() => Inspector.selectWrittenAt(named.path, named.line, { isWanted })))) return
+  if (isWanted()) await untrack(() => Inspector.selectWrittenAt(followed.path, followed.line, { ifNone, isWanted }))
 }
 
 /**
@@ -289,17 +322,15 @@ async function thingNamedAtCursor(
   const { main } = state.selection
   const caretLine = state.doc.lineAt(main.head)
   if (!main.empty || caretLine.number !== followed.line + 1) return undefined
-  const { SpellCodeMirror } = await LazyCodeMirror.load()
-  // the language service's own parse of the code showing, as its other features read it
-  SpellCodeMirror.states.parseNow()
-  const { file } = codeEditor
-  if (!(file instanceof SP.SpellFile) || !file.match || file.contents !== codeEditor.view.state.doc.toString())
-    return undefined
-  const declared = SpellCodeMirror.service.declaredThingAt(file, {
-    line: caretLine.number - 1,
-    character: main.head - caretLine.from
-  })
-  return declared && { path: SP.SpellProject.sourceNameOf(declared.file.path), line: declared.line }
+  await LazyCodeMirror.load()
+  const { language } = codeEditor
+  // the parse of the code showing, as its other features read it:  the language worker's, else the page's
+  if (!language || !(await language.fileReady(state.doc))) return undefined
+  const position = { line: caretLine.number - 1, character: main.head - caretLine.from }
+  const declared = await language.ask("spell/declaredThing", { position })
+  // typed in since it asked:  the answer is about other text
+  if (!declared || codeEditor.view.state.doc !== state.doc) return undefined
+  return { path: SP.SpellProject.sourceNameOf(declared.path), line: declared.line }
 }
 
 /**

@@ -708,6 +708,11 @@
           "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`."
         },
         {
+          "name": "closable",
+          "kind": "string",
+          "description": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place."
+        },
+        {
           "name": "action",
           "kind": "json",
           "reflect": false,
@@ -893,7 +898,14 @@
           "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "name": "ui-closing",
+          "detail": "{ originalEvent?: Event }",
+          "cancelable": true,
+          "description": "Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it."
+        }
+      ],
       "parts": [
         {
           "name": "item",
@@ -920,6 +932,10 @@
           "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
         },
         {
+          "name": "close",
+          "description": "A `closable` item's ✕, in its icon's place while hovered."
+        },
+        {
           "name": "shortcut",
           "description": "The key caps of its shortcut, at the end:  a `<kbd>` each."
         }
@@ -932,6 +948,18 @@
         {
           "name": "disabled",
           "description": "Can't be chosen."
+        },
+        {
+          "name": "dragged",
+          "description": "Being dragged along a `<ui-toolbar reorderable>`'s row."
+        },
+        {
+          "name": "drop-before",
+          "description": "Where a dragged item of the row would land:  before this one."
+        },
+        {
+          "name": "drop-after",
+          "description": "Where a dragged item of the row would land:  after this one."
         },
         {
           "name": "icon-only",
@@ -5342,6 +5370,11 @@
           "description": "Dimmed under a spinner, announced as busy."
         },
         {
+          "name": "selected",
+          "kind": "keyOnly",
+          "description": "The one chosen among its neighbours:  its border the primary colour and its fill a touch of it, its text as the others';  `--ui-card-selected-border-color` and `--ui-card-selected-background` change them."
+        },
+        {
           "name": "link",
           "kind": "string",
           "description": "Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance=\"link\"`.  Its old name was `href`."
@@ -9299,6 +9332,11 @@
           "description": "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name was `text-align`."
         },
         {
+          "name": "markdown",
+          "kind": "keyOnly",
+          "description": "Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.  Without it, its content shows as written."
+        },
+        {
           "name": "vertical-align",
           "kind": "verticalAlign",
           "values": [
@@ -9500,6 +9538,10 @@
         {
           "name": "content",
           "description": "The content box."
+        },
+        {
+          "name": "markdown",
+          "description": "With `markdown`:  the `<ui-markdown>` its words are drawn in."
         }
       ],
       "states": [
@@ -19212,6 +19254,431 @@
       "href": "ui-icon.html"
     },
     {
+      "tag": "ui-icon-browser",
+      "name": "Icon browser",
+      "folder": "ui-icon-browser",
+      "topics": [
+        "icons",
+        "media",
+        "lists",
+        "selection"
+      ],
+      "aka": [
+        "icon gallery",
+        "icon list",
+        "icon finder",
+        "glyph browser",
+        "icon catalog",
+        "icon search"
+      ],
+      "description": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.",
+      "noun": "icon browser",
+      "attributes": [
+        {
+          "name": "pack",
+          "kind": "enum",
+          "values": [
+            "fa7-free",
+            "fa7-brands",
+            "fomantic"
+          ],
+          "default": "fa7-free",
+          "description": "The pack it starts on:  `fa7-free` (the default), `fa7-brands` or `fomantic`.  Its buttons switch to another;  each is loaded on its own, so the page's own icons never change."
+        },
+        {
+          "name": "query",
+          "kind": "string",
+          "description": "What it starts searching for:  a name or what an icon shows (`mail` finds `envelope`, by Font Awesome's terms)."
+        },
+        {
+          "name": "address",
+          "kind": "keyOnly",
+          "description": "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it;  ahead of `query` and `pack`."
+        },
+        {
+          "name": "pick",
+          "kind": "keyOnly",
+          "description": "A click picks the icon instead of copying its name:  `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse)."
+        },
+        {
+          "name": "compact",
+          "kind": "keyOnly",
+          "description": "Tighter, for a dialog:  the search first, smaller tiles closer together, and no line about adding the pack to a page."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "error",
+          "kind": "string",
+          "property": "sharedError",
+          "shared": true,
+          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "coin",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "heavy",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "shadow",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "shared": true,
+          "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em)."
+        },
+        {
+          "name": "width",
+          "kind": "string",
+          "shared": true,
+          "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns."
+        },
+        {
+          "name": "min-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower."
+        },
+        {
+          "name": "max-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)"
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-chosen",
+          "detail": "{ name: string, isCopied: boolean }",
+          "description": "A tile was clicked:  `name` draws its icon;  `isCopied`, whether it reached the clipboard (never with `pick`)."
+        }
+      ],
+      "parts": [
+        {
+          "name": "packs",
+          "description": "The pack switch:  a `<ui-buttons>`, one `<ui-button>` per pack."
+        },
+        {
+          "name": "search",
+          "description": "The search box, a `<ui-input type=search>`."
+        },
+        {
+          "name": "usage",
+          "description": "What a page adds to use the pack shown:  a `<ui-message>`."
+        },
+        {
+          "name": "count",
+          "description": "How many icons match, of how many:  a `<ui-label>`."
+        },
+        {
+          "name": "copied",
+          "description": "The name just copied:  a green `<ui-label>`, once one is."
+        },
+        {
+          "name": "grid",
+          "description": "The icons, a grid of tiles:  the first ones, then more as it scrolls near."
+        },
+        {
+          "name": "tile",
+          "description": "One icon:  a `<ui-button>` showing its glyph over its name;  a click copies the name."
+        },
+        {
+          "name": "glyph",
+          "description": "A tile's glyph."
+        },
+        {
+          "name": "name",
+          "description": "A tile's name:  what `name` takes to draw it."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "failed",
+          "description": "`error` is set."
+        },
+        {
+          "name": "failed-look",
+          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+        }
+      ],
+      "texts": [
+        {
+          "key": "packs",
+          "text": "Icon pack",
+          "description": "The pack switch's accessible name."
+        },
+        {
+          "key": "packFree",
+          "text": "FA7 Free",
+          "description": "The `fa7-free` pack's button."
+        },
+        {
+          "key": "packBrands",
+          "text": "FA7 Brands",
+          "description": "The `fa7-brands` pack's button."
+        },
+        {
+          "key": "packFomantic",
+          "text": "Fomantic",
+          "description": "The `fomantic` pack's button."
+        },
+        {
+          "key": "searchLabel",
+          "text": "Search icons",
+          "description": "The search box's accessible name."
+        },
+        {
+          "key": "searchPlaceholder",
+          "text": "Search icons, like arrow, mail or heart",
+          "description": "The search box's placeholder."
+        },
+        {
+          "key": "usageFree",
+          "text": "The default pack:  every page has it.",
+          "description": "Under the switch, while `fa7-free` shows."
+        },
+        {
+          "key": "usageBrands",
+          "text": "To use it on a page, add {markup}, or run {script}.",
+          "description": "Under the switch, while `fa7-brands` shows;  `{markup}` and `{script}` are drawn as code."
+        },
+        {
+          "key": "usageFomantic",
+          "text": "To use it on a page, add {markup}.  A few names, like {examples}, are in both sets:  that page gets this set's icon.",
+          "description": "Under the switch, while `fomantic` shows;  the `{...}` parts are drawn as code."
+        },
+        {
+          "key": "loading",
+          "text": "Loading icons…",
+          "description": "The count, while the pack loads."
+        },
+        {
+          "key": "count",
+          "text": "Showing {matches} of {total} icons",
+          "description": "The count:  icons matching, of the pack's."
+        },
+        {
+          "key": "copied",
+          "text": "Copied the name “{name}”.  You can paste it now.",
+          "description": "After a click:  the name is on the clipboard."
+        },
+        {
+          "key": "notCopied",
+          "text": "Couldn't copy “{name}”.  Select the name and copy it yourself.",
+          "description": "After a click the browser refused:  nothing on the clipboard."
+        },
+        {
+          "key": "copyTip",
+          "text": "Copy “{name}”",
+          "description": "A tile's tooltip."
+        },
+        {
+          "key": "copyTipAlso",
+          "text": "Copy “{name}”.  Also:  {others}",
+          "description": "A tile's tooltip, when other names draw the same icon."
+        },
+        {
+          "key": "grid",
+          "text": "Icons",
+          "description": "The grid's accessible name."
+        },
+        {
+          "key": "noMatches",
+          "text": "No icons match",
+          "description": "The grid, when the search finds nothing."
+        },
+        {
+          "key": "dialogTitle",
+          "text": "Icons",
+          "description": "The title of the dialog `UIIconBrowser.openInDialog()` opens."
+        }
+      ],
+      "mainTag": "ui-icon-browser",
+      "main": true,
+      "page": true,
+      "href": "ui-icon-browser.html"
+    },
+    {
       "tag": "ui-icon-picker",
       "name": "Icon picker",
       "folder": "ui-icon-picker",
@@ -19512,6 +19979,10 @@
           "description": "The search box at the panel's top (`<input type=search>`)."
         },
         {
+          "name": "browse",
+          "description": "Beside the search box, a `<ui-button>`:  every icon in a dialog, to pick from (`UIIconBrowser.openInDialog()`)."
+        },
+        {
           "name": "grid",
           "description": "The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
         },
@@ -19587,6 +20058,11 @@
           "key": "searchIcons",
           "text": "Search icons",
           "description": "The search box's placeholder and accessible name."
+        },
+        {
+          "key": "browseIcons",
+          "text": "Show all icons, with their names",
+          "description": "The Browse button's tooltip and accessible name."
         },
         {
           "key": "noIcon",
@@ -21189,7 +21665,7 @@
         {
           "name": "icon",
           "kind": "icon",
-          "description": "Icon name, drawn inside the field;  the root gets `icon`."
+          "description": "Icon name, drawn inside the field;  the root gets `icon`.  A `type=\"search\"` field shows a magnifying glass at its start when it names none."
         },
         {
           "name": "label",
@@ -21291,6 +21767,16 @@
           "name": "folder",
           "kind": "boolean",
           "description": "`file`:  picks whole folders instead of files;  `files` holds every file in them, each with its path in its folder (`webkitRelativePath`)."
+        },
+        {
+          "name": "clearable",
+          "kind": "boolean",
+          "description": "Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type=\"search\"`;  `clearable=\"false\"` turns it off there."
+        },
+        {
+          "name": "shortcut",
+          "kind": "string",
+          "description": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows."
         },
         {
           "name": "autocomplete",
@@ -21523,6 +22009,14 @@
         {
           "name": "icon",
           "description": "The icon box (the spinner while `loading`)."
+        },
+        {
+          "name": "shortcut",
+          "description": "The box of its `shortcut`'s keys, at the field's end while it's empty."
+        },
+        {
+          "name": "clear",
+          "description": "The box of the clear button, at the field's end (`clearable`, while it has text)."
         }
       ],
       "states": [
@@ -21583,7 +22077,13 @@
           "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
-      "texts": [],
+      "texts": [
+        {
+          "key": "inputClear",
+          "text": "Clear",
+          "description": "Accessible name of the clear button (`clearable`)."
+        }
+      ],
       "mainTag": "ui-input",
       "main": true,
       "page": true,
@@ -21721,6 +22221,11 @@
           ],
           "default": "item",
           "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`."
+        },
+        {
+          "name": "closable",
+          "kind": "string",
+          "description": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place."
         },
         {
           "name": "loading",
@@ -21892,7 +22397,14 @@
           "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "name": "ui-closing",
+          "detail": "{ originalEvent?: Event }",
+          "cancelable": true,
+          "description": "Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it."
+        }
+      ],
       "parts": [
         {
           "name": "item",
@@ -21917,6 +22429,10 @@
         {
           "name": "tick",
           "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+        },
+        {
+          "name": "close",
+          "description": "A `closable` item's ✕, in its icon's place while hovered."
         }
       ],
       "states": [
@@ -21927,6 +22443,18 @@
         {
           "name": "disabled",
           "description": "Can't be chosen."
+        },
+        {
+          "name": "dragged",
+          "description": "Being dragged along a `<ui-toolbar reorderable>`'s row."
+        },
+        {
+          "name": "drop-before",
+          "description": "Where a dragged item of the row would land:  before this one."
+        },
+        {
+          "name": "drop-after",
+          "description": "Where a dragged item of the row would land:  after this one."
         },
         {
           "name": "loading",
@@ -21973,7 +22501,13 @@
           "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
-      "texts": [],
+      "texts": [
+        {
+          "key": "close",
+          "text": "Close",
+          "description": "A `closable` item's ✕:  its tooltip."
+        }
+      ],
       "mainTag": "ui-item",
       "main": true,
       "page": true,
@@ -29715,6 +30249,16 @@
           "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`."
         },
         {
+          "name": "closable",
+          "kind": "boolean",
+          "description": "A ✕ at the far end of its bar, after its actions and chevron, light until hovered:  a click sends `ui-dismissed`, and the page closes it (hides it, or the column it's in).  It never folds the panel."
+        },
+        {
+          "name": "close-label",
+          "kind": "string",
+          "description": "With `closable`:  the ✕'s name and tooltip, what closing it does (`Hide the code`).  None:  `Close`."
+        },
+        {
           "name": "error",
           "kind": "string",
           "property": "sharedError",
@@ -29957,6 +30501,11 @@
           "detail": "{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'render', source: string, error: unknown }",
           "cancelable": true,
           "description": "The `source` file couldn't be loaded or shown;  `kind` says why.  An error line shows in the content unless cancelled;  opening it again tries again."
+        },
+        {
+          "name": "ui-dismissed",
+          "detail": "{ originalEvent?: Event }",
+          "description": "Its ✕ was clicked (`closable`):  the page closes it.  The panel doesn't hide itself, so the page can hide what it belongs to."
         }
       ],
       "parts": [
@@ -30019,6 +30568,10 @@
         {
           "name": "error-pane",
           "description": "The box round the `error` slot, or the error message and Try again."
+        },
+        {
+          "name": "close",
+          "description": "With `closable`:  the ✕ at the bar's far end."
         }
       ],
       "states": [
@@ -30182,6 +30735,11 @@
           "key": "sourceRenderError",
           "text": "Couldn't show {source}.",
           "description": "The text arrived, but couldn't be shown."
+        },
+        {
+          "key": "close",
+          "text": "Close",
+          "description": "The ✕'s name and tooltip, with `closable` and no `close-label`."
         }
       ],
       "mainTag": "ui-panel",
@@ -38183,6 +38741,11 @@
           "description": "Takes the full width of its container;  so do the results."
         },
         {
+          "name": "collapsed",
+          "kind": "keyOnly",
+          "description": "Starts as a search button;  a click slides the field open, focused.  Escape, or leaving it empty, folds it back.  `:state(expanded)` and `ui-toggled` tell the page, to hide a title the field covers."
+        },
+        {
           "name": "scrolling",
           "kind": "keyOnly",
           "description": "The results scroll after a fixed height."
@@ -38239,6 +38802,12 @@
           "description": "Placeholder text of the input."
         },
         {
+          "name": "clearable",
+          "kind": "boolean",
+          "default": true,
+          "description": "Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable=\"false\"` turns it off."
+        },
+        {
           "name": "value",
           "kind": "string",
           "description": "The input's text:  the query, or a chosen result's title."
@@ -38257,6 +38826,11 @@
           "name": "required",
           "kind": "boolean",
           "description": "Form validation:  the input can't be empty."
+        },
+        {
+          "name": "shortcut",
+          "kind": "string",
+          "description": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows."
         },
         {
           "name": "url",
@@ -38519,6 +39093,11 @@
           "description": "The text settled:  typing paused for `delay`, Enter pressed, a result chosen, the input cleared, or left after an edit.  Once per new text."
         },
         {
+          "name": "ui-toggled",
+          "detail": "{ expanded: boolean }",
+          "description": "A `collapsed` search slid open (`expanded: true`) or folded back."
+        },
+        {
           "name": "ui-replied",
           "detail": "{ query: string, results: SearchResult[] }",
           "description": "A remote query answered."
@@ -38554,6 +39133,18 @@
           "description": "The icon box."
         },
         {
+          "name": "clear",
+          "description": "The box of the clear button, in place of the icon while there's text."
+        },
+        {
+          "name": "shortcut",
+          "description": "The box of its `shortcut`'s keys, at the end while it's empty."
+        },
+        {
+          "name": "opener",
+          "description": "The search button a `collapsed` search shows while folded."
+        },
+        {
           "name": "results",
           "description": "The results popover (the listbox while there are results)."
         },
@@ -38578,6 +39169,10 @@
         {
           "name": "open",
           "description": "The results are showing."
+        },
+        {
+          "name": "expanded",
+          "description": "A `collapsed` search's field is open."
         },
         {
           "name": "disabled",
@@ -38645,6 +39240,11 @@
           "key": "searchLabel",
           "text": "Search",
           "description": "Accessible name of the input when nothing else names it."
+        },
+        {
+          "key": "searchClear",
+          "text": "Clear search",
+          "description": "Accessible name of the clear button."
         },
         {
           "key": "searchNoResultsHeader",
@@ -43306,6 +43906,11 @@
           "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`."
         },
         {
+          "name": "closable",
+          "kind": "string",
+          "description": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place."
+        },
+        {
           "name": "toggles",
           "kind": "valueOnly",
           "values": [
@@ -43486,7 +44091,14 @@
           "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "name": "ui-closing",
+          "detail": "{ originalEvent?: Event }",
+          "cancelable": true,
+          "description": "Its ✕ was clicked (`closable`), or it was middle-clicked:  cancel to keep it."
+        }
+      ],
       "parts": [
         {
           "name": "item",
@@ -43511,6 +44123,10 @@
         {
           "name": "tick",
           "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+        },
+        {
+          "name": "close",
+          "description": "A `closable` item's ✕, in its icon's place while hovered."
         }
       ],
       "states": [
@@ -43521,6 +44137,18 @@
         {
           "name": "disabled",
           "description": "Can't be chosen."
+        },
+        {
+          "name": "dragged",
+          "description": "Being dragged along a `<ui-toolbar reorderable>`'s row."
+        },
+        {
+          "name": "drop-before",
+          "description": "Where a dragged item of the row would land:  before this one."
+        },
+        {
+          "name": "drop-after",
+          "description": "Where a dragged item of the row would land:  after this one."
         },
         {
           "name": "loading",
@@ -54139,6 +54767,11 @@
           "description": "With `shrinkable`:  once only its icons are left, they scroll with `‹` / `›`, no overflow button.  With a `segmented` look too:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files."
         },
         {
+          "name": "scroll-only",
+          "kind": "boolean",
+          "description": "`scroll-first` that never stops:  however narrow, its items scroll with `‹` / `›`, and it's never the dropdown.  For a row whose own button already lists every item (`max-visible`), such as a project's files."
+        },
+        {
           "name": "max-visible",
           "kind": "string",
           "description": "More items than this (a number;  with none, 8):  the row shows only the ones chosen lately, up to that many, and a button lists every item while some aren't in view.  An item picked there joins the row, and the one chosen longest ago leaves it."
@@ -54152,6 +54785,11 @@
           "name": "all-items-icon",
           "kind": "icon",
           "description": "With `max-visible`:  an icon before the caret of the button listing every item, saying what they are (a project's files:  `file outline`).  Without it, the button is the caret alone."
+        },
+        {
+          "name": "reorderable",
+          "kind": "boolean",
+          "description": "Its items can be dragged along the row:  the dragged one dimmed, a line where it would land, before or after the item under the pointer.  The drop sends `ui-item-dropped`;  the page puts it there (a project's files:  their order).  Escape puts it back."
         },
         {
           "name": "all-items-at-end",
@@ -54380,6 +55018,11 @@
           "name": "ui-form-value",
           "detail": "{}",
           "description": "A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it."
+        },
+        {
+          "name": "ui-item-dropped",
+          "detail": "{ item: Element, target: Element, place: \"before\" | \"after\" }",
+          "description": "`reorderable`:  `item` was dragged and dropped `place` (`before` or `after`) `target`, another item of the row.  The toolbar moves nothing:  the page does, as the row is its own."
         }
       ],
       "parts": [
@@ -60867,342 +61510,6 @@
       "page": false
     },
     {
-      "tag": "ui-docs-palette",
-      "name": "Docs palette",
-      "folder": "ui-docs-palette",
-      "topics": [
-        "documentation",
-        "forms",
-        "lists"
-      ],
-      "aka": [
-        "palette groups",
-        "palette editor",
-        "component groups",
-        "palette table"
-      ],
-      "description": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group or pick its icon, add or remove one, then save.",
-      "noun": "palette",
-      "attributes": [
-        {
-          "name": "disabled",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
-        },
-        {
-          "name": "loading",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
-        },
-        {
-          "name": "error",
-          "kind": "string",
-          "property": "sharedError",
-          "shared": true,
-          "description": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`)."
-        },
-        {
-          "name": "visible",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
-        },
-        {
-          "name": "animation",
-          "kind": "enum",
-          "values": [
-            "fade",
-            "fade up",
-            "fade down",
-            "fade left",
-            "fade right",
-            "scale",
-            "zoom",
-            "drop",
-            "browse",
-            "browse right",
-            "fly",
-            "fly up",
-            "fly down",
-            "fly left",
-            "fly right",
-            "slide",
-            "slide up",
-            "slide down",
-            "slide left",
-            "slide right",
-            "swing",
-            "swing up",
-            "swing down",
-            "swing left",
-            "swing right",
-            "horizontal flip",
-            "vertical flip",
-            "flash",
-            "shake",
-            "bounce",
-            "tada",
-            "pulse",
-            "jiggle",
-            "glow",
-            "coin",
-            "none"
-          ],
-          "shared": true,
-          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
-        },
-        {
-          "name": "link",
-          "kind": "string",
-          "shared": true,
-          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
-        },
-        {
-          "name": "target",
-          "kind": "string",
-          "shared": true,
-          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
-        },
-        {
-          "name": "font",
-          "kind": "multiple",
-          "values": [
-            "bold",
-            "heavy",
-            "italic",
-            "underline",
-            "strikethrough",
-            "code",
-            "highlight",
-            "subscript",
-            "superscript",
-            "all-caps",
-            "title-caps",
-            "headline",
-            "subhead",
-            "serif",
-            "sans-serif",
-            "typewriter"
-          ],
-          "shared": true,
-          "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
-        },
-        {
-          "name": "shadow",
-          "kind": "enum",
-          "values": [
-            "primary",
-            "secondary",
-            "red",
-            "orange",
-            "yellow",
-            "olive",
-            "green",
-            "teal",
-            "blue",
-            "violet",
-            "purple",
-            "pink",
-            "brown",
-            "grey",
-            "black",
-            "positive",
-            "negative"
-          ],
-          "valueSet": "hues",
-          "shared": true,
-          "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em)."
-        },
-        {
-          "name": "width",
-          "kind": "string",
-          "shared": true,
-          "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns."
-        },
-        {
-          "name": "min-width",
-          "kind": "string",
-          "shared": true,
-          "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower."
-        },
-        {
-          "name": "max-width",
-          "kind": "string",
-          "shared": true,
-          "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
-        },
-        {
-          "name": "tooltip",
-          "kind": "string",
-          "shared": true,
-          "description": "Its tooltip:  the browser's own, written as the element's `title`."
-        },
-        {
-          "name": "label",
-          "kind": "string",
-          "shared": true,
-          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
-        },
-        {
-          "name": "movable",
-          "kind": "string",
-          "shared": true,
-          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
-        },
-        {
-          "name": "resizable",
-          "kind": "string",
-          "shared": true,
-          "description": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)"
-        },
-        {
-          "name": "on-platform",
-          "kind": "string",
-          "shared": true,
-          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
-        }
-      ],
-      "slots": [],
-      "events": [],
-      "parts": [
-        {
-          "name": "bar",
-          "description": "Its bar:  what to do, Add group, Save and how the save went."
-        },
-        {
-          "name": "groups",
-          "description": "The groups, a column each, and Not in the palette last."
-        }
-      ],
-      "states": [
-        {
-          "name": "disabled",
-          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
-        },
-        {
-          "name": "loading",
-          "description": "`loading` is set."
-        },
-        {
-          "name": "failed",
-          "description": "`error` is set."
-        },
-        {
-          "name": "failed-look",
-          "description": "`error`, and the element shows the shared error look:  an outline in the error colour (`elementSetup.error`)."
-        },
-        {
-          "name": "busy",
-          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
-        },
-        {
-          "name": "dimmed",
-          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
-        },
-        {
-          "name": "hidden",
-          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
-        },
-        {
-          "name": "still",
-          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
-        },
-        {
-          "name": "hiding",
-          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
-        },
-        {
-          "name": "pending",
-          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
-        },
-        {
-          "name": "ready",
-          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
-        },
-        {
-          "name": "on-platform",
-          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
-        }
-      ],
-      "texts": [
-        {
-          "key": "hint",
-          "text": "Drag a component to another group or place, or a group by its handle.  Not in the palette keeps what it leaves out.",
-          "description": "What to do, in the bar."
-        },
-        {
-          "key": "addGroup",
-          "text": "Add group",
-          "description": "The button that adds an empty group at the end."
-        },
-        {
-          "key": "save",
-          "text": "Save",
-          "description": "The button that writes the table."
-        },
-        {
-          "key": "saved",
-          "text": "Saved:  the editor's palette shows it on its next load.",
-          "description": "After a save."
-        },
-        {
-          "key": "unsaved",
-          "text": "Changed, not saved",
-          "description": "While there are changes to save."
-        },
-        {
-          "key": "loading",
-          "text": "Loading the palette's groups…",
-          "description": "While the table loads."
-        },
-        {
-          "key": "noServer",
-          "text": "Can't reach the page server's palette groups:  open this page from the page server.",
-          "description": "When the table can't be loaded."
-        },
-        {
-          "key": "saveFailed",
-          "text": "Couldn't save:  {error}",
-          "description": "When a save fails;  `{error}` says why."
-        },
-        {
-          "key": "newGroup",
-          "text": "New group",
-          "description": "A new group's name."
-        },
-        {
-          "key": "groupName",
-          "text": "Group name",
-          "description": "The label of a group's name field."
-        },
-        {
-          "key": "groupIcon",
-          "text": "{group}'s icon, in the editor's Add bar",
-          "description": "A group's icon picker;  `{group}` is its name."
-        },
-        {
-          "key": "removeGroup",
-          "text": "Remove {group}:  its components go to Not in the palette",
-          "description": "A group's remove button."
-        },
-        {
-          "key": "moveGroup",
-          "text": "Drag to move {group}",
-          "description": "A group's drag handle."
-        },
-        {
-          "key": "notOffered",
-          "text": "Not in the palette",
-          "description": "The last column:  what the palette leaves out."
-        }
-      ],
-      "mainTag": "ui-docs-palette",
-      "main": true,
-      "page": false
-    },
-    {
       "tag": "ui-docs-search",
       "name": "Docs search",
       "folder": "ui-docs-search",
@@ -61233,12 +61540,12 @@
         {
           "name": "base",
           "kind": "string",
-          "description": "The site root, relative to the page, e.g. `../` from `components/`;  every result's link starts with it.  Default:  the folder above the site's data file (`SiteData`), so links are absolute."
+          "description": "The site root, relative to the page, e.g. `../` from `components/`;  every result's link starts with it.  In a Spell site, `/`:  links are the site's own addresses (`/button/api`), which it shows without loading a page.  Default:  the folder above the site's data file (`SiteData`), so links are absolute."
         },
         {
           "name": "page",
           "kind": "string",
-          "description": "Selector of the element whose sections \"On this page\" lists:  its `<ui-section id>`s and headers with ids, across every tab.  Default:  `main#main`, else the page's `main`."
+          "description": "Selector of the element whose sections \"On this page\" lists:  its `<ui-section id>`s and headers with ids, across every tab.  Default:  the page of the page layout the field is in (a Spell site's page), else `main#main`, else the page's `main`."
         },
         {
           "name": "shortcuts",
@@ -61458,7 +61765,7 @@
           "name": "ui-navigating",
           "detail": "{ href: string, kind: string, originalEvent: Event }",
           "cancelable": true,
-          "description": "A result was picked (Enter or a plain click):  `href` is absolute, `kind` its group (`here`, `component`, `page`, `section`, `attribute`).  `preventDefault()` keeps the browser on the page (a router takes over);  else a result on the page shown sets the hash, any other loads its page."
+          "description": "A result was picked (Enter or a plain click):  `href` is absolute, `kind` its group (`here`, `component`, `page`, `section`, `attribute`).  `preventDefault()` keeps the browser on the page (a router takes over);  else a result on the page shown sets the hash, and any other is followed as a plain link click, which a site showing its own pages takes."
         }
       ],
       "parts": [
@@ -63203,6 +63510,16 @@
           "name": "--ui-cards-stackable-spacing",
           "default": "1em",
           "type": "length"
+        },
+        {
+          "name": "--ui-card-selected-border-color",
+          "default": "var(--ui-primary)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-card-selected-background",
+          "default": "color-mix(in oklch, var(--ui-primary) 5%, var(--ui-card-background))",
+          "type": "color"
         }
       ]
     },
@@ -64242,18 +64559,6 @@
           "type": "color"
         }
       ]
-    },
-    "ui-docs-palette": {
-      "folder": "ui-docs-palette",
-      "mainTag": "ui-docs-palette",
-      "title": "Docs palette",
-      "summary": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save.",
-      "status": "done",
-      "docs": true,
-      "tags": [
-        "ui-docs-palette"
-      ],
-      "tokens": []
     },
     "ui-docs-search": {
       "folder": "ui-docs-search",
@@ -65313,7 +65618,7 @@
       "mainTag": "ui-graph",
       "title": "Graph",
       "summary": "A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.",
-      "status": "in-progress",
+      "status": "done",
       "docs": false,
       "tags": [
         "ui-graph"
@@ -65648,6 +65953,34 @@
           "name": "--ui-icon-size-massive",
           "default": "8",
           "type": "number"
+        }
+      ]
+    },
+    "ui-icon-browser": {
+      "folder": "ui-icon-browser",
+      "mainTag": "ui-icon-browser",
+      "title": "Icon Browser",
+      "summary": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-icon-browser"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-icon-browser-tile-width",
+          "default": "8em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-icon-browser-glyph-size",
+          "default": "1.5em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-icon-browser-gap",
+          "default": "0.5em",
+          "type": "length"
         }
       ]
     },
@@ -66099,6 +66432,11 @@
           "type": "length"
         },
         {
+          "name": "--ui-input-shortcut-width",
+          "default": "4.5em",
+          "type": "length"
+        },
+        {
           "name": "--ui-input-icon-size",
           "default": "1em",
           "type": "length"
@@ -66241,6 +66579,16 @@
         "ui-item"
       ],
       "tokens": [
+        {
+          "name": "--ui-item-close-size",
+          "default": "0.8em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-item-close-opacity",
+          "default": "0.6",
+          "type": "number"
+        },
         {
           "name": "--ui-item-tick-width",
           "default": "1em",
@@ -68604,6 +68952,21 @@
           "type": "length"
         },
         {
+          "name": "--ui-panel-close-color",
+          "default": "color-mix(in oklab, var(--ui-text-muted) 50%, transparent)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-panel-close-hover-color",
+          "default": "var(--ui-text-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-panel-close-end",
+          "default": "4px",
+          "type": "length"
+        },
+        {
           "name": "--ui-panel-pane-bar-height",
           "default": "max(40px, calc(var(--ui-control-height, 0px) + 12px))",
           "type": "length"
@@ -69320,7 +69683,7 @@
       "mainTag": "ui-property-editor",
       "title": "Property Editor",
       "summary": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.",
-      "status": "in-progress",
+      "status": "done",
       "docs": false,
       "tags": [
         "ui-property-editor",
@@ -69720,6 +70083,16 @@
           "name": "--ui-search-disabled-opacity",
           "default": "var(--ui-disabled-opacity)",
           "type": "other"
+        },
+        {
+          "name": "--ui-search-expanded-width",
+          "default": "16em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-search-expand-duration",
+          "default": "var(--ui-duration, 0.2s)",
+          "type": "time"
         }
       ]
     },
@@ -69728,7 +70101,7 @@
       "mainTag": "ui-section",
       "title": "Section",
       "summary": "A section is a titled block of content that can fold away and keep its title in view.",
-      "status": "in-progress",
+      "status": "done",
       "docs": false,
       "tags": [
         "ui-section",
@@ -71561,7 +71934,7 @@
       "mainTag": "ui-theme-editor",
       "title": "Theme Editor",
       "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.",
-      "status": "in-progress",
+      "status": "done",
       "docs": false,
       "tags": [
         "ui-theme-editor",
@@ -74838,12 +75211,18 @@
     {
       "id": "motion",
       "title": "Motion",
-      "description": "Durations, easing curves, and how long a hover waits.",
+      "description": "Durations, easing curves, and how long a hover or a tooltip waits.",
       "tokens": [
         {
           "name": "--ui-hover-delay",
           "default": "800ms",
           "description": "How long a hover popup waits before it shows.",
+          "type": "time"
+        },
+        {
+          "name": "--ui-tooltip-delay",
+          "default": "1500ms",
+          "description": "How long a tooltip waits before it shows:  as long as the browser's own.",
           "type": "time"
         },
         {

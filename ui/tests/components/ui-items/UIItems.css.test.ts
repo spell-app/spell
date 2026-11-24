@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { itemsVocabulary } from "spell/ui/components/ui-items/UIItems.en"
@@ -39,7 +38,7 @@ function adopt() {
 /** Render example `name` inside a `width`-px wrapper;  returns its root. */
 function example(name: string, width = 1000): HTMLElement {
   adopt()
-  return Fixture.render(`<div style="width: ${width}px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
+  return Sheets.render(`<div style="width: ${width}px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
 }
 
 /** The items of the `index`th group in the section whose `<h4>` says `title`. */
@@ -93,7 +92,7 @@ describe("UIItems.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = itemsRaw + colorsCSS
+    const css = itemsRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(itemsVocabulary))
       expect(Sheets.covers(css, phrase), `${itemsVocabulary.tag}: ${phrase}`).toBe(true)
   })
@@ -106,7 +105,7 @@ describe("UIItems.css source", () => {
 describe("UIItems.css examples", () => {
   it.each(Object.keys(EXAMPLES))("lays out every item in %s", (path) => {
     adopt()
-    const root = Fixture.render(`<div style="width: 1000px">${EXAMPLES[path]!}</div>`)
+    const root = Sheets.render(`<div style="width: 1000px">${EXAMPLES[path]!}</div>`)
     const items = root.querySelectorAll<HTMLElement>(".ui.items > .item")
     expect(items.length).toBeGreaterThan(0)
     for (const item of items) {
@@ -130,13 +129,13 @@ describe("UIItems.css examples", () => {
 
   it("takes a public token from a wrapper or the group itself (static markup)", () => {
     adopt()
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="width: 1000px; --ui-items-item-spacing: 2em"><div class="ui items">` +
         `<div class="item"><div class="content">A</div></div><div class="item"><div class="content">B</div></div>` +
         `</div></div>`
     )
     expect(style(root.querySelectorAll(".item")[1]!).marginTop).toBe("32px")
-    const group = Fixture.render(
+    const group = Sheets.render(
       `<div style="width: 1000px"><div class="ui items" style="--ui-items-content-distance: 40px"><div class="item">` +
         `<div class="image"><img src="" alt=""></div><div class="content in-item">A</div></div></div></div>`
     )

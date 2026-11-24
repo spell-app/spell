@@ -17,5 +17,6 @@
     { "path": "/RecipeCard.spell", "active": true },
     { "path": "/RecipeEditor.spell", "active": true },
     { "path": "/styles.css", "active": true }
-  ]
+  ],
+  "spellVersion": "0.9.0"
 }

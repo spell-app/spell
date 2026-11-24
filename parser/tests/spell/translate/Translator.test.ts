@@ -128,7 +128,9 @@ describe("Translator:  English to Spanish, rule by rule", () => {
     const spanish = parseSpellProject([{ path: "/Carta.es.spell", contents: CARTA }]).files[0]!
     expect(spanish.errors).toEqual([])
     // but its `// TODO: translate` note, after the line on purpose:  a mark for the fix-ups, never a note to keep
-    expect(spanish.warnings).toEqual([expect.stringMatching(/^8:47 Una nota con "\/\/" al final de una línea/)])
+    expect(spanish.warnings).toEqual([
+      expect.stringMatching(/^8:47 Esta nota usa el estilo viejo:  empieza con "\/\/"/)
+    ])
     expect(shapeOf(spanish.compiled)).toBe(shapeOf(english.compiled))
   })
 

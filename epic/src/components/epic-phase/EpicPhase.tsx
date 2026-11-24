@@ -8,7 +8,9 @@ import { PageStages, PhaseIds, PhaseStatuses } from "spell/epic/phases"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import { CHOSEN, stopIfOwn, type ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
-import { COMMIT_TAG, COMMITS_PROPERTY, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import { BADGE, COMMIT_TAG, COMMITS_PROPERTY, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import type { BadgeWord } from "spell/epic/components/epic-item/EpicItem.en"
+import { ItemBadge } from "spell/epic/components/epic-item/ItemBadge"
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell/epic/components/epic-section/EpicFold"
 import { phaseFields } from "spell/epic/components/epic-section/PhaseFields"
@@ -25,6 +27,7 @@ import { epicPhaseVocabulary } from "./EpicPhase.en"
 import { ICON } from "./EpicPhase.types"
 
 import foldCSS from "spell/epic/components/epic-section/EpicFold.css?inline"
+import badgeCSS from "spell/epic/components/epic-item/ItemBadge.css?inline"
 import phaseCSS from "./EpicPhase.css?inline"
 
 /****************
@@ -91,6 +94,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   @E.protoMerged static elementSetup = {
     styleSheets: {
       "epic-fold": foldCSS,
+      "epic-badge": badgeCSS,
       "epic-phase": phaseCSS
     }
   } satisfies Partial<E.ElementSetup>
@@ -227,6 +231,18 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /**
+   * Its badge, after its title, on a page with badges (epic `epic-engine` P81):  UNDERWAY on the phase being built, and
+   * no other (T154;  Owen, 2026-11-22:  "Don't need DONE here ... don't need badges here other than UNDERWAY").
+   * - its status circle says the rest already
+   * - after the title, so the title sits where it did before badges, with or without one
+   */
+  get phaseBadge(): BadgeWord | undefined {
+    if (!this.badged || this.isDraft) return undefined
+    const badge = ItemBadge.ofPhase(this.drawnState, this.status)
+    return badge === "underway" ? badge : undefined
+  }
+
+  /**
    * A DRAFT:  the page's Overview is still being agreed (`stage="overview"`, epic `epic-engine` P70):  its title reads
    * `P1. DRAFT: <title>`.  Owen, 2026-11-09:  "OK to show phases when in overview stage, but put as `P1. DRAFT: blah
    * blah`".
@@ -239,7 +255,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
 
   /**
    * It can be DRAGGED to another place by its title row (epic `epic-engine` P34, the Phases section's `PhaseDrag`):
-   * still to do, on a page being reviewed;  its title row shows the grab cursor and says so in its tooltip.
+   * still to do, on a page being reviewed;  its title row shows the grab cursor (no tooltip:  I370).
    */
   @E.cssState("movable")
   get isMovable(): boolean {
@@ -348,6 +364,16 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             <span class="draft">{this.translationForKey("draftMark")}</span>
           </Show>
           <slot name={this.slotForName("title")}>{this.title}</slot>
+          <Show when={this.phaseBadge}>
+            {(badge) => (
+              <span class="badge-cell">
+                {" "}
+                <span class={BADGE} data-state={this.drawnState}>
+                  {this.translationForKey(`badge_${badge()}`)}
+                </span>
+              </span>
+            )}
+          </Show>
         </>
       ),
       // after the title, on its first line:  a folded phase is where the pen matters
@@ -387,11 +413,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
         <>
           <Show when={this.shownStatus === "done" && this.unmerged}>
             {(branch) => (
-              <span
-                class={UNMERGED}
-                part={this.partForName("unmerged")}
-                data-tooltip={this.translationForKey("unmergedTip", { branch: branch() })}
-              >
+              <span class={UNMERGED} part={this.partForName("unmerged")}>
                 {this.translationForKey("unmerged")}
               </span>
             )}

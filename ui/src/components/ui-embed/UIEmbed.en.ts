@@ -3,7 +3,7 @@
  * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:  `<ui-embed active>` => `ui active embed`;
  *   the element adds the `aspect-ratio` word before the noun (`ui 4:3 embed`),
- *   which `UIEmbed.css` matches with `[class*="4:3"]`, as Fomantic's.
+ *   which `UIEmbed.css` matches as a class word (Fomantic matched `[class*="4:3"]`).
  * - Fomantic's `data-id` is `video-id` here:  `id` is the element's own id.
  */
 

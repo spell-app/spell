@@ -36,6 +36,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
     { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] },
+    { name: "closable", kind: "string", group: "behaviour" },
     { name: "action", kind: "json", group: "behaviour" },
     { name: "shortcut", kind: "string", group: "content" },
     { name: "icon-only", kind: "keyOnly", group: "appearance" }
@@ -244,6 +245,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "loading", kind: "keyOnly", group: "states" },
+    { name: "selected", kind: "keyOnly", group: "states" },
     { name: "link", kind: "string", group: "link" },
     { name: "target", kind: "string", group: "link" },
     { name: "heading", kind: "string", group: "name" },
@@ -363,6 +365,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "image", kind: "keyOnly", group: "content" },
     { name: "scrolling", kind: "keyOnly", group: "layout" },
     { name: "align", kind: "textAlign", group: "layout", values: "alignments" },
+    { name: "markdown", kind: "keyOnly", group: "content" },
     { name: "vertical-align", kind: "verticalAlign", group: "layout", values: "verticalAlignments" }
   ],
   "ui-date": [{ name: "datetime", kind: "string", group: "appearance" }],
@@ -668,6 +671,13 @@ export const DEFAULTS_TABLE: Readonly<
       values: ["top left", "top right", "bottom left", "bottom right"]
     }
   ],
+  "ui-icon-browser": [
+    { name: "pack", kind: "enum", group: "content", values: ["fa7-free", "fa7-brands", "fomantic"] },
+    { name: "query", kind: "string", group: "content" },
+    { name: "address", kind: "keyOnly", group: "behaviour" },
+    { name: "pick", kind: "keyOnly", group: "behaviour" },
+    { name: "compact", kind: "keyOnly", group: "appearance" }
+  ],
   "ui-icon-picker": [
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
@@ -777,6 +787,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "multiple", kind: "boolean", group: "form" },
     { name: "accept", kind: "string", group: "form" },
     { name: "folder", kind: "boolean", group: "form" },
+    { name: "clearable", kind: "boolean", group: "behaviour" },
+    { name: "shortcut", kind: "string", group: "behaviour" },
     { name: "autocomplete", kind: "string", group: "form" },
     {
       name: "inputmode",
@@ -801,7 +813,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
-    { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] }
+    { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] },
+    { name: "closable", kind: "string", group: "behaviour" }
   ],
   "ui-items": [
     { name: "size", kind: "size", group: "appearance" },
@@ -1094,7 +1107,9 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "loading", kind: "keyOnly", group: "states" },
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "source", kind: "string" },
-    { name: "selector", kind: "string" }
+    { name: "selector", kind: "string" },
+    { name: "closable", kind: "boolean", group: "behaviour" },
+    { name: "close-label", kind: "string", group: "content" }
   ],
   "ui-placeholder": [
     { name: "fluid", kind: "keyOnly", group: "layout" },
@@ -1387,6 +1402,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "category", kind: "keyOnly", group: "appearance" },
     { name: "direction", kind: "valueOnly", group: "layout", values: ["horizontal"] },
     { name: "fluid", kind: "keyOnly", group: "layout" },
+    { name: "collapsed", kind: "keyOnly", group: "layout" },
     { name: "scrolling", kind: "keyOnly", group: "layout" },
     { name: "resizable", kind: "keyOnly", group: "behaviour" },
     { name: "length", kind: "valueOnly", group: "appearance", values: ["very-short", "short", "long", "very-long"] },
@@ -1396,10 +1412,12 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "readonly", kind: "keyOnly", group: "form" },
     { name: "open", kind: "boolean", group: "states" },
     { name: "placeholder", kind: "string", group: "form" },
+    { name: "clearable", kind: "boolean", group: "behaviour" },
     { name: "value", kind: "string", group: "form" },
     { name: "name", kind: "string", group: "name" },
     { name: "parameter", kind: "string", group: "form" },
     { name: "required", kind: "boolean", group: "form" },
+    { name: "shortcut", kind: "string", group: "behaviour" },
     { name: "url", kind: "string", group: "link" },
     { name: "min-characters", kind: "number", group: "form" },
     { name: "max-results", kind: "number", group: "appearance" },
@@ -1600,6 +1618,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
     { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] },
+    { name: "closable", kind: "string", group: "behaviour" },
     { name: "toggles", kind: "valueOnly", group: "behaviour", values: ["drawer", "left", "right"] }
   ],
   "ui-site-tabs": [
@@ -1950,9 +1969,11 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "interactive", kind: "boolean", group: "behaviour" },
     { name: "show-keys", kind: "boolean", group: "content" },
     { name: "scroll-first", kind: "boolean", group: "layout" },
+    { name: "scroll-only", kind: "boolean", group: "layout" },
     { name: "max-visible", kind: "string", group: "layout" },
     { name: "remember", kind: "string", group: "layout" },
     { name: "all-items-icon", kind: "icon", group: "content" },
+    { name: "reorderable", kind: "boolean", group: "behaviour" },
     { name: "all-items-at-end", kind: "boolean", group: "layout" }
   ],
   "ui-tour": [

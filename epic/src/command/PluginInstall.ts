@@ -615,6 +615,7 @@ export class PluginInstall {
    * `vscode/spell-epic.vsix`, with `code --install-extension` (epic `epic-friend` P15);  skipped when the editor has
    * that version already, unless the `.vsix` was built after the editor's copy was installed (epic `repo-split` T72:
    * a checkout rebuilds it without a new version)
+   * - NEVER installs a `.vsix` from before the last bump:  one line saying to build it (epic `epic-engine` T140)
    * - into the editor `Editor` names (P16):  VS Code, or Cursor (`cursor --install-extension`, the same flags)
    * - no `.vsix` (a checkout that hasn't built one:  `yarn vscode:package`):  nothing, and no change said
    * - no editor command (`code`, `cursor`):  one line saying so
@@ -634,6 +635,17 @@ export class PluginInstall {
       return
     }
     const same = listed.split(/\r?\n/).some((line) => line.trim().toLowerCase() === `${id}@${version}`.toLowerCase())
+    if (CLI.vsixIsStale(vsix, version)) {
+      if (!same) {
+        step.change(
+          `${editorName}:  the add-on for epic pages is out of date.  ` +
+            `Version ${version} has to be built first, which takes about a minute.  ` +
+            `Copy this into your terminal to build it and add it to ${editorName}:  ` +
+            `cd ${this.engine} && yarn vscode:package && bin/epic plugin install`
+        )
+      }
+      return
+    }
     if (same && !this.isRebuilt(vsix, `${id}-${version}`.toLowerCase())) return
     if (!step.dryRun && this.code(["--install-extension", vsix, "--force"]) === undefined) {
       step.change(

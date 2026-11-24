@@ -1,5 +1,5 @@
 {
-  "spellVersion": "0.8.0",
+  "spellVersion": "0.9.0",
   "provides": [
     "Post",
     "FeedPage",

@@ -88,6 +88,33 @@ export class TabCopies {
     }
   }
 
+  /**
+   * The names kept under `prefix`, each once, whatever tab kept it, whose copy `holds()` says holds something:
+   * `spell-pending-changes:@owen/cookbook/` => `["family cookbook"]`.
+   * - What a page asks before it knows which copies it'll open:  the places with writes still waiting (epic
+   *   `solid-2-final` P13).
+   * - STATIC:  it reads what's kept, and opens no copy.
+   * - NEVER throws:  storage that can't be read keeps nothing.
+   */
+  static namesKeptUnder<T>(
+    prefix: string,
+    { storage, holds }: { storage?: (() => StorageLike | undefined) | undefined; holds: (kept: T) => boolean }
+  ): string[] {
+    const names = new Set<string>()
+    try {
+      for (const key of new BrowserCopy({ key: prefix, ...(storage && { storage }) }).keysStartingHere()) {
+        const kept = new BrowserCopy({ key, ...(storage && { storage }) }).kept<T>()
+        if (kept === undefined || !holds(kept)) continue
+        const rest = key.slice(prefix.length)
+        const tabAt = rest.indexOf(TAB_KEY)
+        names.add(tabAt >= 0 ? rest.slice(0, tabAt) : rest)
+      }
+    } catch (ignored) {
+      console.error("TabCopies.namesKeptUnder():", ignored)
+    }
+    return [...names]
+  }
+
   /** Every key kept for this copy but this tab's:  the plain one first, then the oldest tab's. */
   private keysOfOtherTabs(): string[] {
     return this.copyAt(this.plainKey)

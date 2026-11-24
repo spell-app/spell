@@ -2,6 +2,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import { Fixture } from "spell/test-helpers/Fixture"
+import { cssSecondsFor } from "spell/ui/util"
 import { UI } from "spell/ui/core"
 
 /** The shared bubble. */
@@ -153,6 +154,36 @@ describe("DataTooltips", () => {
     expect(isShowing()).toBe(true)
     await userEvent.keyboard("{Escape}")
     expect(isShowing()).toBe(false)
+  })
+
+  it("waits as long as the browser's own `title` tooltip on a Mac by default:  1.5s (epic `editor` T164)", () => {
+    const { style } = document.documentElement
+    style.removeProperty("--ui-tooltip-delay")
+    try {
+      expect(cssSecondsFor(document.documentElement, "--ui-tooltip-delay")).toBe(1.5)
+      expect(cssSecondsFor(document.documentElement, "--ui-hover-delay")).toBe(0.8)
+    } finally {
+      style.setProperty("--ui-tooltip-delay", "0ms")
+    }
+  })
+
+  it("only ours shows:  no `title` under the pointer while it's on a target, each put back as it leaves", async () => {
+    const row = Fixture.render(
+      `<div title="What the row is"><button aria-label="Star it" data-tooltip="Star it" title="Star it">*</button></div>`
+    )
+    const button = row.querySelector("button")!
+    const inner = button.appendChild(document.createElement("span"))
+    inner.textContent = "x"
+    inner.title = "Inner"
+    await userEvent.hover(inner)
+    await expect.poll(isShowing).toBe(true)
+    expect(button.hasAttribute("title")).toBe(false)
+    expect(row.hasAttribute("title")).toBe(false)
+    expect(inner.hasAttribute("title")).toBe(false)
+    await userEvent.unhover(button)
+    await expect.poll(() => button.getAttribute("title")).toBe("Star it")
+    expect(row.getAttribute("title")).toBe("What the row is")
+    expect(inner.getAttribute("title")).toBe("Inner")
   })
 
   it("a mouse click doesn't pin it open", async () => {

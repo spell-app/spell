@@ -1,7 +1,7 @@
 {
   "name": "spell-language",
   "displayName": "Spell",
-  "version": "0.8.18",
+  "version": "0.8.19",
   "private": true,
   "description": "Spell language support:  errors, hover, completion, go to definition, rename -- from spell's language server;  and custom elements' slots, parts, attributes and CSS data in JSX, HTML and CSS files.",
   "license": "MIT",
@@ -76,14 +76,12 @@
     ],
     "html": {
       "customData": [
-        "./out/data/spell-ui.html-custom-data.json",
-        "./out/data/spell-brand.html-custom-data.json"
+        "./out/data/spell-ui.html-custom-data.json"
       ]
     },
     "css": {
       "customData": [
-        "./out/data/spell-ui.css-custom-data.json",
-        "./out/data/spell-brand.css-custom-data.json"
+        "./out/data/spell-ui.css-custom-data.json"
       ]
     },
     "configuration": {
@@ -103,6 +101,11 @@
           "type": "boolean",
           "default": false,
           "description": "On save, compile the project to its .output.js, so a running app picks it up."
+        },
+        "spell.upgradeOnOpen": {
+          "type": "boolean",
+          "default": false,
+          "description": "On opening a project written for an older Spell, change its old wording to the new wording at once, then say what changed.  Off:  a notice offers to."
         }
       }
     },

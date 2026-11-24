@@ -39,7 +39,36 @@
   overflow: auto;
 }
 
-/* what the editor draws there itself is a grey stand-in naming it:  its look is written on it (`STAND_IN_STYLE`) */
+/* what the editor draws there itself is a tag pill naming it:  its look is written on it (`STAND_IN_STYLE`) */
+
+/* the panes (`editor layout`), drawn in place:  tall enough for a column of two of them, side by side */
+.EditorZoneBody > ui-split-panel {
+  min-height: 64px;
+}
+
+/*
+ * a modal view (About Spell, Versions) shown inline (`InlineDialog`):  its closed `<dialog>` drawn as a box in the
+ * zone's flow, as it looks open, never in the top layer over the page
+ */
+/*
+ * ... its element shown, though not `visible` (the page's `hidden`):  it has no box of its own
+ * - `!important`:  the running app's sheet hides every `[hidden]` so (`SpellAppRunner.css`)
+ */
+.EditorZoneDialog :is(ui-modal, ui-flyout)[hidden] {
+  display: contents !important;
+}
+.EditorZoneDialog :is(ui-modal, ui-flyout)::part(modal),
+.EditorZoneDialog :is(ui-modal, ui-flyout)::part(flyout) {
+  display: block;
+  position: relative;
+  inset: auto;
+  max-width: 100%;
+  max-height: none;
+  margin: 0;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
 
 /* a drawing that threw */
 .EditorZoneError {

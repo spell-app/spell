@@ -19,6 +19,7 @@ behind.apply([{"kind": "insert", "collection": "device_notes", "id": "device-not
 - A place's key comes from the environment (`key_from()`):  a Python program is a server side, as `spell run` is.
 - A server asking it to wait is waited out, when that's soon (`open_minding_limits()`):  what `WebPlace` does.
 - Standard library only:  HTTP through `urllib`, its waiting off the event loop (`asyncio.to_thread()`).
+  - `apply()` and `call()` wait where they're called:  `places.py` calls them off the loop.
 - Knows nothing of things:  rows are plain JSON, by the JavaScript names of their fields.  `places.py` makes things.
 """
 
@@ -26,13 +27,14 @@ import asyncio
 import json
 import os
 import re
+import threading
 import time
 import urllib.error
 import urllib.request
 from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime
 from email.utils import parsedate_to_datetime
-from http.client import HTTPResponse
+from http.client import HTTPException, HTTPResponse
 from pathlib import Path
 from typing import Any
 
@@ -70,6 +72,12 @@ SNAKE_WORD = re.compile(r"_([a-z0-9])")
 PROGRAM_SUFFIX = ".spell.py"
 # The end of its device file's name, beside it:  `Notes.device.json`.
 DEVICE_SUFFIX = ".device.json"
+# One write of a device file at a time in this process:  saves run in threads, and every visitor's core has the file.
+DEVICE_WRITES = threading.Lock()
+
+
+# The failures that say a place making all or none kept none of what it was sent:  no answer might have kept it.
+NOTHING_KEPT = {"refused", "not found", "out of date"}
 
 
 class PlaceError(Exception):
@@ -77,6 +85,8 @@ class PlaceError(Exception):
 
     - `kind`:  why, as the JavaScript names it:  `"refused"`, `"not found"`, `"out of date"`, `"no answer"` ...
     - `why_not`:  for a refusal, what the place said:  `"owner"`, `"role"` ...
+    - `has_kept_nothing`:  from a place that makes all or none, is it sure none of what was sent was kept?
+      Then each change can be tried alone.
     """
 
     def __init__(self, message: str, kind: str = "no answer", why_not: str | None = None) -> None:
@@ -84,22 +94,27 @@ class PlaceError(Exception):
         super().__init__(message)
         self.kind = kind
         self.why_not = why_not
+        self.has_kept_nothing = kind in NOTHING_KEPT
 
 
 # A place that can hold whatever field it's handed:  `PlaceBehind.times_held`.
 EVERY_FIELD = "every field"
 # The kinds on the page server that hold any field, as a sheet with no such column doesn't.
 HOLDS_ANY_FIELD = {"data folder", "the cloud"}
+# The kinds on the page server that make a send all or none:  a data folder keeps what came before a refusal.
+MAKES_ALL_OR_NONE = {"sheet", "excel file"}
 
 
 class PlaceBehind:
     """What's behind one place:  its rows, by collection, and the changes it takes.
 
-    - `rows()` waits, as any read does;  `apply()` doesn't, so a write is sent as it's made.
+    - `rows()` waits, as any read does;  `apply()` waits where it's called, in a thread (`place_queue.py`).
     """
 
     # the kind's word, as the program's line says it:  `data folder`
     kind = ""
+    # is a send made all or none:  else each change is a send of its own, as a failure may follow some it kept
+    makes_all_or_none = False
     # what it can hold of Spell's two times (`created`, `modified`):  `EVERY_FIELD`, or those fields;  none by default
     times_held: str | Sequence[str] = ()
 
@@ -108,7 +123,10 @@ class PlaceBehind:
         return None
 
     def fields_it_fills_in(self) -> Row:
-        """What it says of a new row by itself, whatever the program sent:  an atmosphere account's `owner`."""
+        """What it says of a new row by itself, whatever the program sent:  an atmosphere account's `owner`.
+
+        - Only what it knows already:  it's asked on the event loop, so it NEVER waits for an answer.
+        """
         return {}
 
     def know_numbers(self, collection: str, fields: list[str]) -> None:
@@ -123,7 +141,10 @@ class PlaceBehind:
         raise NotImplementedError
 
     def apply(self, changes: list[Change]) -> None:
-        """Make `changes`, in order, all or none where the place can.  - throws `PlaceError`"""
+        """Make `changes`, in order, all or none where the place can (`makes_all_or_none`).
+
+        - throws `PlaceError`:  `"no answer"` once it may have been sent and what came back can't say
+        """
         raise NotImplementedError
 
     def call(self, name: str, input: object) -> object:
@@ -142,10 +163,12 @@ class DeviceFile(PlaceBehind):
     - Read whole when a read asks;  written whole on each change, through a temporary file and a rename,
       so a run stopped halfway leaves the file as it was.
     - Every place on this device shares the file:  each keeps its own collections.
+      - and every visitor of a web app does:  so one write at a time (`DEVICE_WRITES`), or one would undo another
     """
 
     kind = "database on this device"
     times_held = EVERY_FIELD
+    makes_all_or_none = True
 
     def __init__(self, file: Path) -> None:
         """The database kept in `file`, which needn't exist yet."""
@@ -161,6 +184,11 @@ class DeviceFile(PlaceBehind):
 
     def apply(self, changes: list[Change]) -> None:
         """Make `changes`, then write the file whole."""
+        with DEVICE_WRITES:
+            self._change_file(changes)
+
+    def _change_file(self, changes: list[Change]) -> None:
+        """Read, change and write the file:  only while holding `DEVICE_WRITES`."""
         data = self._read()
         for change in changes:
             rows = data.setdefault(change["collection"], {})
@@ -172,7 +200,7 @@ class DeviceFile(PlaceBehind):
             else:
                 rows[the_id] = {**rows.get(the_id, {ID_FIELD: the_id}), **change.get("fields", {})}
         written = self.file.with_name(f"{self.file.name}.writing")
-        written.write_text(f"{json.dumps(data, ensure_ascii=False, indent=2)}\n", encoding="utf-8")
+        written.write_text(f"{json_text(data, indent=2, ensure_ascii=False)}\n", encoding="utf-8")
         written.replace(self.file)
 
     def _read(self) -> dict[str, dict[str, Row]]:
@@ -206,6 +234,7 @@ class ServerPlace(PlaceBehind):
     ) -> None:
         """The place at `address`, its whole URL, written with `token`."""
         self.kind = kind
+        self.makes_all_or_none = kind in MAKES_ALL_OR_NONE
         self.address = address
         self.token = token
         self.lines = dict(lines or {})
@@ -246,19 +275,53 @@ class ServerPlace(PlaceBehind):
 
 
 def post_json(url: str, body: dict[str, object], headers: dict[str, str]) -> object:
-    """`body` posted to `url` as JSON:  the answer's JSON.  - throws `PlaceError`, saying what the server said"""
-    data = json.dumps(body).encode("utf-8")
+    """`body` posted to `url` as JSON:  the answer's JSON.
+
+    - throws `PlaceError`:
+      - what the server said
+      - `"refused"`, with nothing sent, for a body JSON can't hold
+      - `"no answer"` for none, or one that can't be read:  what was sent may have been kept
+    """
+    data = json_text(body).encode("utf-8")
     request = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
         with open_minding_limits(request) as response:
-            return json.loads(response.read().decode("utf-8") or "null")
+            text = response.read()
     except urllib.error.HTTPError as error:
-        said = json_object_in(error.read())
+        said = json_object_in(body_of(error, url))
         message = said.get("error") or f"the server answered {error.code}"
         kind = said.get("kind") or ("refused" if error.code in (401, 403) else "no answer")
         raise PlaceError(f"{url}:  {message}", kind, said.get("whyNot")) from error
     except (urllib.error.URLError, OSError) as error:
         raise PlaceError(f"{url}:  no answer ({error}):  is the page server running?  `spell server start`") from error
+    except HTTPException as error:
+        raise cant_read_answer(url, error) from error
+    try:
+        return json.loads(text.decode("utf-8") or "null")
+    except ValueError as error:
+        raise cant_read_answer(url, error) from error
+
+
+def body_of(error: urllib.error.HTTPError, url: str) -> bytes:
+    """What `url` said with `error`.  - throws `PlaceError` `"no answer"` for one cut short"""
+    try:
+        return error.read()
+    except (OSError, HTTPException) as cut:
+        raise cant_read_answer(url, cut) from cut
+
+
+def cant_read_answer(url: str, error: Exception) -> PlaceError:
+    """`url`'s answer can't be read, as `error` says:  no answer, as what was sent may have been kept."""
+    return PlaceError(f"{url}:  no answer that can be read ({error}), so it may or may not have been kept")
+
+
+def json_text(value: object, indent: int | None = None, ensure_ascii: bool = True) -> str:
+    """`value` as JSON, to write or send.  - throws `PlaceError` `"refused"`, `"field"`:  JSON can't hold it"""
+    try:
+        return json.dumps(value, ensure_ascii=ensure_ascii, indent=indent)
+    except (TypeError, ValueError) as error:
+        message = f"it holds what JSON can't ({error}), so none of it was sent"
+        raise PlaceError(message, "refused", "field") from error
 
 
 def open_minding_limits(request: urllib.request.Request) -> HTTPResponse:
@@ -269,7 +332,7 @@ def open_minding_limits(request: urllib.request.Request) -> HTTPResponse:
       - told nothing:  it waits a second, then two, and asks again
       - told when, and that's over `LONGEST_WAIT_SECONDS`:  a `PlaceError` saying when, with nothing more sent
     - throws `urllib.error.HTTPError` for any other answer, and for one still saying to wait after `MOST_TRIES`
-    - SIDE EFFECT:  waits here, on the caller's thread:  a read is off the event loop, and a write waits for its answer.
+    - SIDE EFFECT:  waits here, on the caller's thread:  reads and writes are both off the event loop.
     """
     for attempt in range(MOST_TRIES):
         try:

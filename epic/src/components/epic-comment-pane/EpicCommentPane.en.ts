@@ -23,18 +23,13 @@ export const epicCommentPaneVocabulary = {
     "drawn by the docs runtime's comments when you click a bullhorn or comments on selected text.  Fixed on the " +
     "screen just under what you clicked (`near`), above it when there's no room below;  you drag it by its header.  " +
     "Ivory, 8px inside on every side, no buttons below its text.  Its header:  the bullhorn, the first words it's on " +
-    "(its tooltip the block in full), the floppy once saved, the trash once saved, and ×.  Its field is slotted:  " +
+    "the floppy once saved, the trash once saved, and ×.  Its field is slotted:  " +
     "the comments' code saves it as you type.",
   attributes: [
     {
       name: "headline",
       kind: "string",
       description: "The first words it's on, in quotes (`“Leave a comment …”`), or `This page`."
-    },
-    {
-      name: "about",
-      kind: "string",
-      description: "Which block it's on, in full (`On a table in “Comments”`):  its header's tooltip."
     },
     {
       name: "saved",
@@ -74,7 +69,6 @@ export const epicCommentPaneVocabulary = {
   states: [{ name: "placed", description: "Put on the screen (`near`):  it shows from then on." }],
   texts: [
     { key: "label", text: "Comment on {headline}", description: "The pane, a dialog, for a screen reader." },
-    { key: "dragTip", text: "Drag to move", description: "After its header's tooltip." },
     { key: "closeTitle", text: "Close", description: "×'s tooltip." },
     { key: "closeLabel", text: "Close the comment box", description: "×, for a screen reader." },
     { key: "deleteTitle", text: "Delete this comment", description: "The trash's tooltip." },

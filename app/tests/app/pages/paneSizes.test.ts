@@ -5,7 +5,8 @@ import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
  * The editor's columns in Edit:  the app takes every change of size (epic `editor` I32).
- * - The code on the left, the app after it, the Inspector at the far right (Owen, 2026-11-06).
+ * - The app first, the Inspector after it, the code at the far right (epic `editor` T151, Owen's B;  the code on the left
+ *   from 2026-11-06 until then).
  * - Dragging the code's bar sizes the code, and the app takes the difference:  the Inspector keeps its width.
  * - Real mouse drags, on Solitaire with the Inspector open.
  * - NOTHING is remembered:  the preference routes are answered here, so Owen's sizes stay as they are.
@@ -18,7 +19,7 @@ describe.skipIf(!SERVING)("the editor's columns", { timeout: 180_000 }, () => {
   let browser: Browser
   let page: Page
 
-  /** The widths of the code, the app and the Inspector, whole px. */
+  /** The widths of the app, the Inspector and the code, whole px. */
   async function widths(): Promise<number[]> {
     return page.evaluate(() => {
       const columns = document.querySelector("ui-split-panel.EditorColumns")!
@@ -67,21 +68,22 @@ describe.skipIf(!SERVING)("the editor's columns", { timeout: 180_000 }, () => {
   })
 
   test("dragging the code's bar sizes the code;  the app takes the difference, the Inspector keeps its width", async () => {
-    const [code, app, inspector] = await widths()
-    await drag(0, 100)
-    const [codeWider, appNarrower, inspectorAfter] = await widths()
+    const [app, inspector, code] = await widths()
+    // the code's bar, between the Inspector and the code:  leftward widens the code
+    await drag(1, -100)
+    const [appNarrower, inspectorAfter, codeWider] = await widths()
     expect(codeWider).toBe(code + 100)
     expect(inspectorAfter).toBe(inspector)
     expect(appNarrower).toBe(app - 100)
-    await drag(0, -100)
-    expect(await widths()).toEqual([code, app, inspector])
+    await drag(1, 100)
+    expect(await widths()).toEqual([app, inspector, code])
   })
 
   test("the window narrowing is the app's alone", async () => {
-    const [code, app, inspector] = await widths()
+    const [app, inspector, code] = await widths()
     await page.setViewportSize({ width: 1340, height: 800 })
     await page.waitForTimeout(400)
-    const [codeAfter, appNarrower, inspectorAfter] = await widths()
+    const [appNarrower, inspectorAfter, codeAfter] = await widths()
     expect([codeAfter, inspectorAfter]).toEqual([code, inspector])
     expect(appNarrower).toBe(app - 100)
   })

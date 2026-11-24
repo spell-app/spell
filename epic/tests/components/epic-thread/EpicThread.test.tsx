@@ -65,7 +65,7 @@ async function asViewer<T>(person: string, run: () => Promise<T>): Promise<T> {
 }
 
 describe("<epic-thread>", () => {
-  test("its header:  the bullhorn, its id `C3`, the first words it's on, the fold's tooltip the block in full", async () => {
+  test("its header:  the bullhorn, its id `C3`, the first words it's on, no tooltip (I370)", async () => {
     const host = await thread(comment())
     expect({
       id: part(host, "id").textContent,
@@ -76,7 +76,7 @@ describe("<epic-thread>", () => {
     }).toEqual({
       id: "C3",
       headline: "“Why asyncio? And `await`?”",
-      tip: "Comment C3, on “2. Context”\n(Open this thread)",
+      tip: undefined,
       expanded: "false",
       body: false
     })

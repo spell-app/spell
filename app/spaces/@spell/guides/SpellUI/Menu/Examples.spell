@@ -113,6 +113,64 @@
 			</example>
 		</>
 
+		<section label="Window Bar" sticky="stack" collapsible dividing>
+			<example "Window Bar" description="A menu can be a whole bar across the top of a window or a page:  flat and short, over a hairline, in the theme's bar.  An app's top bar is this.  With `segmented` too, `header` is instead the row of a pane's bar:  SEE ui-panel.">
+				<menu appearance="header" aria-label="Window bar">
+					<item link="#file">File</item>
+					<item link="#edit">Edit</item>
+					<item link="#view">View</item>
+					<menu position="right">
+						<item link="#help">Help</item>
+					</menu>
+				</menu>
+			</example>
+			<example "Window Bar" description="A nested menu can group a bar's actions on one piece of glass:  `appearance=\"capsule\"`.">
+				<menu appearance="header" aria-label="Window bar with a capsule">
+					<item link="#file">File</item>
+					<menu position="right">
+						<menu appearance="capsule">
+							<item link="#one" icon="crosshairs" aria-label="Inspect"/>
+							<item link="#two" icon="redo" aria-label="Restart"/>
+						</menu>
+					</menu>
+				</menu>
+			</example>
+			<example "Window Bar" description="An icon alone in a circle:  `appearance=\"circular\"` on the item, as wide as it's tall, its hover and its pressed look round too (`aria-pressed`, a toggle that's never the chosen one).">
+				<menu appearance="segmented link header" aria-label="Modes and tools">
+					<item selected icon="pencil alternate">Edit</item>
+					<item icon="code" appearance="circular" aria-label="Code" aria-pressed="true"/>
+					<item icon="crosshairs" appearance="circular" aria-label="Inspect" aria-pressed="false"/>
+					<item icon="plus" appearance="circular" aria-label="Add"/>
+				</menu>
+			</example>
+		</>
+
+		<section label="Ticks" sticky="stack" collapsible dividing>
+			<example "Ticks" description="A menu of things that are on or off:  `ticks` keeps a gutter before every row's words, with a tick there while `selected`, in plain text.  The row under the pointer or keyboard takes the fill.">
+				<menu direction="vertical" ticks aria-label="View" style="max-width: 240px">
+					<action>Run</action>
+					<action selected>Edit</action>
+					<action kind="divider"/>
+					<action selected>Inspector</action>
+					<action>Line Numbers</action>
+				</menu>
+			</example>
+		</>
+
+		<section label="Dashed Divider" sticky="stack" collapsible dividing>
+			<example "Dashed Divider" description="A divider item can be dashed, `appearance=\"dashed\"`:  2px, a shade darker, where one kind of item ends and another begins -- a program's own right-click items, then the editor's;  a project's themes, then Spell's.">
+				<menu direction="vertical" aria-label="Card" style="max-width: 240px">
+					<action>Auto Play</action>
+					<action>Deal the Cards</action>
+					<action kind="divider" appearance="dashed"/>
+					<action>Cut</action>
+					<action>Copy</action>
+					<action kind="divider"/>
+					<action>Show in Code</action>
+				</menu>
+			</example>
+		</>
+
 		<section label="Pointing" sticky="stack" collapsible dividing>
 			<example "Pointing" description="A menu can point to show its relationship to nearby content.  With `secondary` too, the active item is underlined.">
 				<menu appearance="pointing" aria-label="Pointing">
@@ -238,22 +296,15 @@
 					<item link="#month">Month</item>
 				</menu>
 			</example>
+			<example "Segmented" description="`header` beside it makes it the row of a pane's bar:  13px, with no track, as the bar behind it is the track, its items sharing the width.  `<ui-panel appearance=\"pane\">` shows it in place.">
+				<menu appearance="segmented link header" aria-label="Views, in a header">
+					<item selected>Views</item>
+					<item>Things</item>
+					<item>Templates</item>
+				</menu>
+			</example>
 			<example "Segmented" description="Its `--ui-menu-segmented-*` tokens draw it as a pill track with a raised thumb instead:  the track's background, border, radius, padding and gap, the options' colour and corners, the thumb's fill, colour and shadow (the `spell-brand` theme sets them).">
-				<menu appearance="segmented link" aria-label="Scheme, pill" style="
-                      --ui-menu-segmented-background: oklch(from var(--ui-ink) l c h / 0.05);
-                      --ui-menu-segmented-border: 1px solid var(--ui-border-color);
-                      --ui-menu-segmented-radius: var(--ui-radius-pill);
-                      --ui-menu-segmented-padding: 2px;
-                      --ui-menu-segmented-gap: 2px;
-                      --ui-menu-segmented-divider: transparent;
-                      --ui-menu-segmented-item-padding: 0.58em 1.08em;
-                      --ui-menu-segmented-item-color: var(--ui-text-muted);
-                      --ui-menu-segmented-item-radius: var(--ui-radius-pill);
-                      --ui-menu-segmented-active-background: var(--ui-surface);
-                      --ui-menu-segmented-active-hover-background: var(--ui-surface);
-                      --ui-menu-segmented-active-color: var(--ui-text-color);
-                      --ui-menu-segmented-active-shadow: var(--ui-shadow-raised);
-                    ">
+				<menu appearance="segmented link" aria-label="Scheme, pill" style="--ui-menu-segmented-background: oklch(from var(--ui-ink) l c h / 0.05); --ui-menu-segmented-border: 1px solid var(--ui-border-color); --ui-menu-segmented-radius: var(--ui-radius-pill); --ui-menu-segmented-padding: 2px; --ui-menu-segmented-gap: 2px; --ui-menu-segmented-divider: transparent; --ui-menu-segmented-item-padding: 0.58em 1.08em; --ui-menu-segmented-item-color: var(--ui-text-muted); --ui-menu-segmented-item-radius: var(--ui-radius-pill); --ui-menu-segmented-active-background: var(--ui-surface); --ui-menu-segmented-active-hover-background: var(--ui-surface); --ui-menu-segmented-active-color: var(--ui-text-color); --ui-menu-segmented-active-shadow: var(--ui-shadow-raised);">
 					<item value="light" icon="sun outline" selected>Light</item>
 					<item value="dark" icon="moon outline">Dark</item>
 				</menu>
@@ -535,7 +586,7 @@
 		</>
 
 		<section label="Sub Menu" sticky="stack" collapsible dividing>
-			<example "Sub Menu" description="A menu item may contain another menu nested inside that acts as a grouped sub-menu.">
+			<example "Sub Menu" description="A menu item may contain another menu nested inside that acts as a grouped sub-menu, always shown.  A menu that opens beside its row is a \[Submenu](#submenu).">
 				<menu direction="vertical" aria-label="Sub menu">
 					<item>
 						<input placeholder="Search..." aria-label="Search"/>
@@ -550,6 +601,39 @@
 							<item value="settings" icon="settings">Account Settings</item>
 						</dropdown>
 					</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Submenu" sticky="stack" collapsible dividing>
+			<example "Submenu" description="A `<ui-submenu>` is a row that opens another menu beside it, its fly-out:  the pointer over the row, a click, or → opens it;  ← or Escape closes it.  The items written inside it are its fly-out, in a menu it draws itself:  as wide as its widest item, with ticks when its own menu has them or an item inside is on or off (`selected`, true or false).  Style its box through `::part(flyout)`.">
+				<menu direction="vertical" icon-column aria-label="View">
+					<item appearance="link" icon="expand">Full Screen</item>
+					<submenu label="Theme" icon="paint brush">
+						<item icon="sun">Light</item>
+						<item icon="moon">Dark</item>
+						<item icon="adjust">Same as the System</item>
+					</submenu>
+					<submenu label="Panels" icon="columns">
+						<item>Tree</item>
+						<item>Inspector</item>
+						<submenu label="More">
+							<item>Console</item>
+							<item>Output</item>
+						</submenu>
+					</submenu>
+					<item appearance="link" icon="cog">Settings</item>
+				</menu>
+			</example>
+			<example "Submenu" description="Or it shows a `<ui-menu>` written elsewhere on the page, named by its id:  `menu=\"examples-menu\"`.  That menu stays where it is, and shows beside the row while open;  `popover` keeps it hidden until then.">
+				<menu direction="vertical" aria-label="File">
+					<item appearance="link" icon="folder open">Open</item>
+					<submenu label="More Examples" icon="book" menu="examples-menu"/>
+				</menu>
+				<menu id="examples-menu" popover direction="vertical" aria-label="More Examples">
+					<item>Solitaire</item>
+					<item>Todos</item>
+					<item>Calculator</item>
 				</menu>
 			</example>
 		</>

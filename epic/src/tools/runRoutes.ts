@@ -84,11 +84,11 @@ const runRoutes: RouteModule = {
       const served = { path: decodeURIComponent(request.path), file: TEMPLATE, request }
       let html = runPageHtml(readFileSync(TEMPLATE, "utf8"), page)
       for (const hook of web.files.html) html = hook(html, served)
-      reply.set("Cache-Control", "no-store").type("html").send(html)
+      reply.noStore().type("html").send(html)
     })
     const api = new SRV.Router()
     api.get("/:runId", (request, reply) => {
-      reply.set("Cache-Control", "no-store").json(runs.replyFor(request.params.runId))
+      reply.noStore().json(runs.replyFor(request.params.runId))
     })
     api.use(guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }))
     api.post("/:runId/answer", async (request, reply) => {

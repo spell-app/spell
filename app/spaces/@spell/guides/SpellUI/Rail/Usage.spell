@@ -4,6 +4,7 @@
 		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
               site.</>
 	</>
+
 	<!-- USAGE:  when to use a rail, how it's positioned, accessibility. -->
 	<section label="When to use">
 		<markdown>

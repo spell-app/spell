@@ -110,7 +110,7 @@ export class EpicLifecycle {
         `Claude is still working on ${name} in its own VS Code window.\n` +
         "To finish it, type /epic done in the chat with Claude in that window.\nThen come back here and try again."
       )
-    const branch = `refs/heads/${name}`
+    const branch = `refs/heads/${config.branchOf(name)}`
     if (!Git.run(["rev-parse", "--verify", "--quiet", branch], config.main).ok) return undefined
     const ahead = Number(Git.out(["rev-list", "--count", `${config.baseBranch}..${branch}`], config.main) ?? 0)
     if (ahead > 0)

@@ -943,6 +943,8 @@ export function namesOf(addresses: string[]): string[] {
  * - `lb_try_duration` holds each request up to 30s while what's behind it is down, trying again every 250ms:
  *   during a swap (T63) a page waits a few seconds, and never shows an error.
  *   A failed connection is retried for every method (Caddy's own rule), so a write waits too.
+ * - every site compresses what it sends (`encode zstd gzip`;  epic `solid-2-final` P2):  the editor's dev server sends
+ *   its files as they are;  an answer the cloud compressed already (a brotli copy) goes on as it is, its cache headers too
  */
 export function caddyFileFor({
   names,
@@ -955,7 +957,8 @@ export function caddyFileFor({
   key: string
   editor?: CaddyEditorSite | undefined
 }): string {
-  const tls = `\ttls "${certificate}" "${key}"`
+  // every site's first lines:  its certificate, and compression
+  const head = `\ttls "${certificate}" "${key}"\n\tencode zstd gzip`
   const cloudNames = names.filter((name) => name !== editor?.name)
   return [
     `# Written by Spell's local site:  changes here are written over.`,
@@ -963,8 +966,8 @@ export function caddyFileFor({
     `\tadmin off`,
     `}`,
     ``,
-    ...(cloudNames.length ? [`${cloudNames.join(", ")} {`, tls, ...caddyProxyTo(CLOUD_PORT), `}`, ``] : []),
-    ...(editor ? editorSite(editor, tls, cloudNames[0]) : [])
+    ...(cloudNames.length ? [`${cloudNames.join(", ")} {`, head, ...caddyProxyTo(CLOUD_PORT), `}`, ``] : []),
+    ...(editor ? editorSite(editor, head, cloudNames[0]) : [])
   ].join("\n")
 }
 
@@ -1014,13 +1017,13 @@ function caddyProxyTo(port: number, settings: string[] = []): string[] {
  */
 function editorSite(
   { name, port, thisMac = LOOPBACK }: CaddyEditorSite,
-  tls: string,
+  head: string,
   cloudName: string | undefined
 ): string[] {
   return [
     `# Spell's editor, for this house network only:  it runs as this machine's person, with no sign-in.`,
     `${name} {`,
-    tls,
+    head,
     ...(cloudName
       ? [
           `\t# A page of an org's opened here goes on to the cloud;  never the dev server's own files (/@vite/...).`,

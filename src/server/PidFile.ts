@@ -1,11 +1,12 @@
 import { spawn } from "node:child_process"
 import { createHash } from "node:crypto"
-import { existsSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
+import { existsSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync, writeSync } from "node:fs"
 import { basename, dirname, join, resolve } from "node:path"
 
 import { waitUntil } from "spell/util/timing"
 import type { ServerInfo } from "spell/server"
 import { checkoutOf } from "./checkout"
+import { FileLock } from "./FileLock"
 import { endProcess, isProcessAlive } from "./Heartbeat"
 import { SERVER_API } from "./liveClient"
 import { LoadedCode } from "./LoadedCode"
@@ -185,19 +186,42 @@ export class PidFile {
    * The running server, started in the background first if none runs.
    * - `command`:  argv that runs it in the foreground, e.g. `[node, --import, tsx, cli.ts, serve]`
    * - `log`:  file for its output (default:  the pid file's, `.log` for `.json`:  `<root>/.spell-server.log`)
-   * - waits up to `timeout` ms (15s) for it to answer
+   * - waits for it as long as it's still starting (epic `epic-engine` I362):  until it answers, or its process ends
+   *   - ended:  another started at the same moment may be the one, so it looks a little longer (`OTHER_START_MS`),
+   *     then throws `HttpError` 503, one line, and writes how it ended as the log's last
+   *   - neither, after `timeout` ms (`START_LIMIT_MS`, 2 minutes):  hung, so it's STOPPED, then the 503:
+   *     a start that's given up on never listens just after
    * - `port`:  the port it MUST hold (the main checkout's page server, 4747;  epic `epic-engine` I332)
    *   - a running one on another port is restarted, and this root's server holding `port` is stopped with it
    *   - one holding `port` the file doesn't name, on current code:  taken as the running one, its pid file rewritten
    *   - the new one starts only once `port` is free;  throws `HttpError` 409 while something else holds it
+   * - ONE start at a time per pid file, across processes (epic `epic-engine` I421):  a second `ensure()` while the
+   *   first is still starting waits for it under the file's `FileLock` (`startLock`), then finds its server running
+   *   - before, a start looked only for a server that already answered, so two at once each started one;  a
+   *     worktree's server took any free port, so both kept running
    * - SIDE EFFECT:  may spawn `command` detached, in `root`
    */
-  async ensure({
+  ensure(options: EnsureOptions): Promise<RunningServer & { launched: boolean }> {
+    const limit = (options.timeout ?? START_LIMIT_MS) + START_LOCK_MARGIN_MS
+    return FileLock.runAsync(this.startLock, () => this.ensureNow(options), {
+      wait: limit,
+      stale: limit,
+      label: "a server start"
+    })
+  }
+
+  /** `<file>` with `.start.lock` for `.json`:  the lock `ensure()` holds while it starts one */
+  get startLock(): string {
+    return this.file.replace(/\.json$/, ".start.lock")
+  }
+
+  /** `ensure()`, holding its lock */
+  private async ensureNow({
     command,
     env,
     log,
     sources = [],
-    timeout = 15_000,
+    timeout = START_LIMIT_MS,
     port
   }: EnsureOptions): Promise<RunningServer & { launched: boolean }> {
     const running = await this.status()
@@ -214,18 +238,39 @@ export class PidFile {
     if (running || holder) await this.stop({ restart: true, port })
     else await this.stopUnanswering()
     if (port) await this.takePort(port)
-    const out = openSync(log ?? this.file.replace(/\.json$/, ".log"), "a")
+    const logFile = log ?? this.file.replace(/\.json$/, ".log")
+    const out = openSync(logFile, "a")
     const [program, ...args] = command
-    spawn(program!, args, {
+    const child = spawn(program!, args, {
       cwd: this.root,
       detached: true,
       stdio: ["ignore", out, out],
       env: { ...process.env, ...env }
-    }).unref()
-    // Until it answers, looking every 0.1s;  gives up after `timeout`
-    const status = await waitUntil(() => this.status(), { timeout: timeout / 1000 })
-    if (status) return { ...status, launched: true }
-    throw new HttpError(503, `the server for ${this.root} didn't start in ${timeout / 1000}s:  see its log`)
+    })
+    /** how its process ended, once it has */
+    let ended: string | undefined
+    child.once("error", (error) => (ended ??= error.message))
+    child.once("exit", (code, signal) => (ended ??= signal ?? `exit ${code}`))
+    child.unref()
+    // Until it answers or ends, looking every 0.1s
+    const found = await waitUntil(async () => (await this.status()) ?? ended, { timeout: timeout / 1000 })
+    if (typeof found === "object") return { ...found, launched: true }
+    if (found) {
+      // it may have ended for the sake of one started at the same moment, which held the port first
+      const other = await waitUntil(() => this.status(), { timeout: OTHER_START_MS / 1000 })
+      if (other) return { ...other, launched: true }
+    } else if (child.pid) await endProcess(child.pid, STOP_WAIT_MS)
+    const seconds = timeout / 1000
+    // the log's last line, which the message points at:  a program that never ran, or was killed, wrote none
+    writeSync(out, `The start failed:  ${found ?? `no answer after ${seconds}s, so it was stopped`}\n`)
+    const what = found ? "It stopped before it was ready" : `It took more than ${seconds} seconds, so Spell stopped it`
+    // ONE line:  callers show a start's last line
+    throw new HttpError(
+      503,
+      "Spell couldn't start the local server.  That's the program that shows your pages on this computer.  " +
+        `${what}.  To see why, open ${logFile} in any text editor:  its last lines say what went wrong.  ` +
+        "Then run the same command again."
+    )
   }
 
   /**
@@ -367,6 +412,20 @@ const STOP_WAIT_MS = 10_000
 /** How long `ensure()` waits for a fixed port to be free once ours are stopped, in ms. */
 const PORT_WAIT_MS = 5_000
 
+/**
+ * The longest `ensure()` waits for a server that's still starting, in ms:  past it, the server is hung.
+ * - NOT how long a start takes:  one that ends says so at once.
+ *   15s was that guess, and a busy machine's start took longer (epic `epic-engine` I362).
+ * - A caller with a limit of its own must allow more than this (Spell UI's `SERVER_START_MS`).
+ */
+const START_LIMIT_MS = 120_000
+
+/** How long `ensure()` looks for another start's server once the one it started has ended, in ms. */
+const OTHER_START_MS = 2_000
+
+/** How much longer than a start's own limit its lock may be held, or waited for:  the stop before it, the port's wait. */
+const START_LOCK_MARGIN_MS = 30_000
+
 /** A server that answered:  its info and base URL, `http://127.0.0.1:<port>`. */
 export type RunningServer = ServerInfo & { base: string }
 
@@ -375,7 +434,7 @@ export type RunningServer = ServerInfo & { base: string }
  * - `command`:  argv to run
  * - `env`:  added to ours
  * - `log`:  output file
- * - `timeout`:  ms to wait
+ * - `timeout`:  ms after which a server still starting counts as hung, and is stopped (`START_LIMIT_MS`)
  * - `sources`:  folders of the server's code
  *   - a running server that started before a `.ts` / `.js` file in them last changed is restarted
  * - `port`:  the port it must hold;  none:  any
@@ -400,7 +459,9 @@ export type StopOptions = { wait?: number; restart?: boolean; port?: number }
 /**
  * The newest modification time (ms) of the code files under `folders`, all the way down;  0 for none.
  * - code:  `.ts`, `.js`, `.mjs`
- * - skips `node_modules`, `_assets` (built pages' assets, not the server's code) and dot folders
+ * - skips `node_modules`, `_assets` (built pages' assets, not the server's code), `__pack` (a component pack's build,
+ *   which a server writes as it starts:  the epic hub's keeper took it for new code, epic `epic-engine` P82) and dot
+ *   folders
  * - a missing folder counts as nothing
  */
 export function newestChange(folders: string[]): number {
@@ -419,4 +480,4 @@ export function newestChange(folders: string[]): number {
 const CODE = /\.(ts|js|mjs)$/
 
 /** Folders `newestChange()` skips, anywhere in a path. */
-const SKIPPED = /(^|[/\\])(node_modules|_assets|\.[^/\\]+)[/\\]/
+const SKIPPED = /(^|[/\\])(node_modules|_assets|__pack|\.[^/\\]+)[/\\]/

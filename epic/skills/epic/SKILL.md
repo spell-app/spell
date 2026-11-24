@@ -1,7 +1,7 @@
 ---
 name: epic
-description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic fresh` hands this epic to a new session in this window (`all`:  every running epic session, each at its next clear moment);  `/epic done` is `/isolate done`.
-argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | fresh [all | --force] | color <look>
+description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic hush` greys settled ones;  `/epic fresh` hands this epic to a new session in this window (`all [--pause]`:  every running epic session, at a clear moment);  `/epic done` is `/isolate done`.
+argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | hush [<epic> | all] | fresh [all | --force] | color <look>
 ---
 
 # /epic
@@ -78,6 +78,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - a **Net effect** list (`<epic-net-effect>`) closing every question, issue, judgement call and decision
   - NOT caveman (2026-10-04).
   - Replies:  short, the same plain words.
+  - Items listed in a reply:  a line each, `<ID> - <STATUS> - <title>`, the status word as the page shows it (OPEN, FIXED, DONE ...);  two blank lines between sections.
   - Replies with more than one topic:  a `##` header per topic, never `#` (Owen, 2026-11-17, r75 from epic `language`).
     - Anything waiting on the person comes FIRST, under `## Waiting on you`:  a page to answer, a modal's question,
       a pick, with its link pair.
@@ -127,6 +128,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     from the page:  NOT a new epic.  Go to "16. Fresh" (epic `epic-engine` T110).
     - `/epic fresh all`, typed in ANY session:  every running epic session does, each at its next clear moment.
       Go to "16. Fresh", "All epics" (epic `epic-engine` T113).
+    - `/epic fresh all --pause`:  every session pauses and saves its agents first, then all go.
+      Go to "16. Fresh", "Pause first" (epic `epic-engine` T139).
   - `demo`:  `/epic demo [pasted text]` runs the STAGED DEMO when its step files are ready (`epic demo check`):
     NOT a new epic.  Go to "15. Staged demo", and skip everything else here (epic `epic-engine` P77).
   - `done`:  `/epic done` is `/isolate done`, word for word.
@@ -207,11 +210,12 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - Do "2. Session" now anyway:  a stub doc with no prompt, then the move.
   - The stub page's Overview opens with the KICKOFF BOX (`<epic-kickoff>`):  a growing box the person types into,
     pasting or dropping several pictures, each labelled in the words (`![IMG2](pictures/kickoff-...png)`).
-  - Once the page shows, LISTEN:  `epic inbox listen <name>`, then `epic inbox wait <name>` in the background.
+  - Once the page shows, LISTEN:  `epic inbox listen <name>`;  nothing to run in the background, the epic hub listens
+    for this session ("7. Review", "This session LISTENS").
     - In Codex:  run `epic inbox wait <name>` and wait for it.
   - The last line says where:  "type what this epic should do in the kickoff box on its page, and Send".
-  - The Send wakes the session:  `wait` prints a `kickoff` mark, its words and a line per picture,
-    `IMG2:  <its file>`.  Then `epic inbox apply <name>` (it becomes the Kickoff prompt, pictures and all), then
+  - The Send wakes the session (its `📬` line):  `epic inbox wait <name> --timeout 5` prints a `kickoff` mark,
+    its words and a line per picture, `IMG2:  <its file>`.  Then `epic inbox apply <name>` (it becomes the Kickoff prompt, pictures and all), then
     "3. Plan", opening each picture's file.
   - The person types the plan in the chat instead (the NEXT prompt):  that's the kickoff prompt as before,
     `epic prompt <name> --file <file>` first, then "3. Plan";  the kickoff box gives way to it.
@@ -407,8 +411,8 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  2026-10-24).
      - `multiple` where several can be picked;  `fixed` where an added option makes no sense (every other set takes
        the person's);  `epic option close <name>#<id>` once a set is done
    - Loose ends:  `#T` (a todo, work still to do), `#T ... --limit` (a limit to know about).
-4. `epic lint <name>`, `epic open <name> --review`, then LISTEN:  `epic inbox listen <name>`, then
-   `epic inbox wait <name>` in the background ("7. Review", 7.3:  every Send wakes this session).
+4. `epic lint <name>`, `epic open <name> --review`, then LISTEN:  `epic inbox listen <name>`;  nothing in the
+   background:  the epic hub wakes this session at every Send ("7. Review", "This session LISTENS").
 5. Each answer REWRITES the Overview (Q13, B;  `plan-doc.md`, "Change marks"):
    - `decide <name>#Q<n> "..."`, then rewrite the Overview's words it changes, wrapping the changed words in
      `<epic-change item="q<n>">...</epic-change>`, in the part file
@@ -510,8 +514,8 @@ than just being able to move on").
     question, "(coherence)".
   - A plan that adds nothing new (a rename, docs, a test) is left out of it, in one line.
   - Again whenever a plan is written later:  a phase added, a request filed, a plan rewritten ("5. Each phase", step 1).
-- Then listen (`epic inbox wait <name>`) and END THE TURN with the Phases section's link pair:  "The phases and their
-  build plans are up, P3-P9:  one Accept Phases takes both".
+- Then END THE TURN (the epic hub listens for the Send:  nothing to arm) with the Phases section's link pair:
+  "The phases and their build plans are up, P3-P9:  one Accept Phases takes both".
 - The Doc Review phase's plan never waits:  `--plan` on it is accepted as it's written (2026-10-25).
 - The person accepts them on the page:  Accept Phases on the Phases section's title row (in the `phases` stage:  the phases and every waiting plan,
   ONE press, I125), or Accept Phase on each (once building:  the header's Send is ringed (2px #666) while any waits, its tooltip naming them);  one Send.  Or they say "go"
@@ -557,10 +561,13 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
         with no body)
       - a picture they pasted with it goes in too, never described in words instead (epic `epic-engine` T87):
         `--pasted <n>`, as the guide's "build" says (`epic guide build`)
-      - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
+      - the agent's `epic update <epic>#I<n> fixed "..."` turns it light orange, for their review
+        (`--requested`:  never leave it off their words, or the fix goes grey with nothing for them to press,
+        epic `epic-engine` T143)
   - passes their redirects on to the agent doing that work (`SendMessage`)
   - relays what an agent found, its first line bold, by itself:  `**Agent <full name> came back with:**`
-  - keeps the inbox listener open the whole time (7, "This session LISTENS")
+  - hears every Send at once, idle or at work:  the epic hub listens for it, with nothing to arm (7, "This session
+    LISTENS");  never a background `epic inbox wait`
   - does by itself only quick reads, and fixes under about a minute:  one file, one command
 - Everything longer goes to a NAMED background agent, as the root `CLAUDE.md`'s "Delegated work" says:
   a phase, an item's fix, a check run, Add Details, a revisit now.
@@ -568,6 +575,13 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
     description;  then AT ONCE `epic agents set <name> --task-id <the agent's id>`, the id from the `Agent` result
     (what resumes it after a restart, "After a restart" below);  `epic agents done <name>` when it's back
   - In Codex:  no background agents:  do it here, one item at a time, and check `epic inbox <epic>` between steps.
+- MAIN'S SERVERS (epic `epic-engine` P84):  the session and its agents never start, stop, restart or kill a main
+  checkout's servers (page server, editor, hub, a repo's own) by hand:  `epic servers start|stop|restart <server>`
+  asks the keeper, or the person's Servers tab;  a worktree's own servers are its session's.  Every brief says so.
+  - The plugin's command guard refuses such a command and names the one to run instead (`server-guard.mjs`,
+    `ServerGuard`), and main's page server and editor refuse an agent's start the keeper didn't make
+    (`SRV.KeeperLink.refusedStart()`).
+  - In Codex:  the same;  its `PreToolUse` hook runs the guard once installed (`epic plugin install --codex`).
 - Several agents share ONE worktree, so its brief tells each one to:
   - claim the files it will change, as it starts (`--files`) or as it finds them
     (`epic agents claim <name> <path...>`):  a file, a folder or a glob
@@ -577,6 +591,9 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
   - never mark ITSELF done (`epic agents done`):  the session does, when its notice arrives;  done early, `epic agents
     wait` stopped while it still worked (epic `epic-engine` I288)
   - merge with `epic worktree merge-main --as <name>`:  it never moves aside a file another running agent claims
+    - nor waits for another agent's uncommitted files (epic `epic-engine` I406):  only a file the merge changes holds it
+      up, named with the agent claiming it;  the rest are left alone, a real merge made in a temporary worktree
+    - `epic merge <epic>` the same:  it fast-forwards `main` to the branch's COMMITS, however dirty the worktree
   - test in THREE TIERS, never a full run per commit (epic `epic-engine` T90;  Owen, 2026-11-16, r74:  "this is taking
     too long!!!  Do we need to cut down on tests?":  the language epic's agents each ran the parser's and the app's full
     suites on every commit, 10-25 minutes each under load, one turn at a time, again after `merge-main`, and the speed
@@ -611,6 +628,8 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       (epic `epic-engine` I313)
     - waiters go first come, first served, and wait while the line moves;  `epic turns list` shows the holder, how
       long, and the line
+    - a run silent and idle (no output, next to no CPU) for 10 minutes is stopped by `epic turns run` itself, saying
+      where it was, and the turn freed (exit 1;  `--stall <minutes>`, epic `epic-engine` I384):  report it as an issue
   - record its choices as items (`epic add <epic>#J "<title>" --details "..." --calm`;  titles:  plan-doc.md's "Rules"),
     and come back with any question for the person,
     rather than ask it:  an agent has no question modal
@@ -647,8 +666,8 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
 
 ### After a restart
 
-A restart of VS Code (or a window reload) ends every background agent with the session that started them, and the
-session's own `epic inbox wait` (epic `epic-engine` I310;  Owen, 2026-11-15:  `mockup` sat idle an hour on four
+A restart of VS Code (or a window reload) ends every background agent with the session that started them
+(epic `epic-engine` I310;  Owen, 2026-11-15:  `mockup` sat idle an hour on four
 cut-off agents, "it should have restarted automatically").
 - The plugin's `SessionStart` hook wakes the session at once (`hooks/restarted.mjs`, `RestartWake`) with a `📬` line
   naming each agent still listed that the restart cut off, its id and its task.
@@ -657,9 +676,12 @@ cut-off agents, "it should have restarted automatically").
     check what it already committed, and to finish
   - one with no id:  start it again from its task, `Agent` with the same name and brief, then `epic agents set
     <name> --task-id <its new id>`
-  - start `epic inbox wait <epic>` again, in the background
   - then one line to the person:  "the restart cut off N agents:  resumed <names>"
-- No agents listed:  no wake.  The inbox poller's own hook listens again by itself.
+- No agents listed:  no wake.  Nothing to arm for the page either:  the epic hub listens for the new process, and
+  its poller's hook starts by itself.
+- PAUSED agents (`epic agents` says `paused`) weren't cut off:  never resume one for a restart.
+- A pause under way (the `📬` line says so, or `epic fresh status`):  resume none.  Save what was cut off
+  (`epic agents pause <name> --next "..."`), and go on from "Pause first" below.
 - In Codex:  no background agents to cut off:  `epic guide` says to start the epic's open items again from the page.
 
 ### Focus mode (`/focus`, `/back`)
@@ -702,8 +724,10 @@ Until a `/back:  ...` message (or `epic focus status` says off):
      - Fix what it finds, or say in the item why a finding is wrong;  its verdict goes in the item's details.
      - In Codex:  the same command;  it runs `claude -p` itself.
    Record as you go, not at the end:
-   - Every item's title is at most 30 plain words saying what it is, read cold, hours later:
-     nothing about a passing condition;  the rest goes in --details (the full rule:  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules").
+   - Every item's title is read by someone NOT following the work:  what changed or what's wrong, effect first,
+     named by what the person sees or types, never an internal name;  no visible effect ends "Nothing you'd see."
+     (the rule:  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules", TITLES;  `epic add`
+     has a fresh reader check it).  Tell every agent you start the same, pointing there.
    - Found a problem:  `add <name>#I`.
    - A limit we accept:  `add <name>#T ... --limit`.
    - A choice:  `add <name>#D` (a question born answered).
@@ -766,6 +790,9 @@ Until a `/back:  ...` message (or `epic focus status` says off):
          - nothing Claude can check itself:  CI (`gh run list`), a command's output, a page's markup are Claude's to check
          - three or more steps with commands:  write them as a runbook, and the Step is its start command,
            `spell runbook start <name>` (the kit's AGENTS.md, "Commands")
+         - each step's COMMAND (a code block in it) gets a box under it on the page, "Paste what this command
+           printed" (epic `epic-engine` T165):  one box per step, so a command whose output they should send you is a
+           step of its own, a numbered list item;  the page reads it off the markup, nothing to add
        - `--example`:  a screenshot you took of it working, copied beside the page (`tests/<id>.png`)
        - `details <name>#M3 --step ... --should ...` rewrites an older manual test in these fields
      - They answer it WHERE IT IS, with the page's own marks (epic `epic-engine` P51, Q53:  no separate test run,
@@ -828,10 +855,18 @@ Until a `/back:  ...` message (or `epic focus status` says off):
    - `epic agents add` / `done`
    - Paste the cheat sheet below into their prompts,
      with "record todos, issues and decisions in the epic page as you find them".
+   - An agent changing a page or an element (a docs page, a component, the editor app) is told, in its brief, that
+     "done" means its rows line up (epic `epic-engine` P83):  before it says done it runs the page checker
+     (`node epic/src/tools/check-spell.js <page>`) or the designer's shots (`designer-shots.js`) on what it changed,
+     and fixes each misaligned row in its component, or marks one meant to be uneven
+     (`data-align="free: <why>"`);  the editor's tests check it after every test by themselves.
+     The scan:  `Alignment` (`spell/test-helpers/Alignment`), one item drawn more than half a pixel off its row or column.
 4. The reviews before the phase closes.
    - A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
      ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).
      - It fixes the obvious things itself, and asks about the bigger ones with before / after pictures on a details page.
+     - Its shots list every row whose items don't line up (epic `epic-engine` P83):  each one fixed in its component,
+       or marked as meant (`data-align="free: <why>"`), before the phase closes.
      - Its fixes go in the phase's Done;  what it asks about waits on the person, as calm issues.
    - Every phase:  the PLAN CHECK (epic `epic-engine` P72;  the idea borrowed from superpowers' spec review, MIT):
      a `plan-check` agent, named and listed `<name>-p<N>-check`, given the epic, the phase and the phase's diff
@@ -875,7 +910,7 @@ Until a `/back:  ...` message (or `epic focus status` says off):
    - A multi-repo top:  one commit in EACH repo the phase changed, all with the same subject, each in the repo's
      folder (`epic worktree repos` lists what's uncommitted where);  the lowest repo first (`repos.json5`'s order).
    - The commits reach the epic page BY THEMSELVES (epic `epic-engine` I135), found by subject, in the kit, every
-     child repo and every peer (spell-brand;  a commit there links to that repo on GitHub):
+     child repo and every peer (a repo beside the kit;  a commit there links to that repo on GitHub):
      - under its phases and items, and as an entry in the page's LOG, the epic's change log (epic `epic-engine` P52):
        its time, its sha, its sentence, a chip per phase and item it names;  `<epic>:  ...` with no phase gets one too
      - `epic phase <name>#P<n> done` lists the branch's so far
@@ -904,6 +939,8 @@ Until a `/back:  ...` message (or `epic focus status` says off):
           - Never `ExitWorktree` and back for it:  entering asks the person every time (epic `epic-engine` P12, r11).
             - In Codex:  nothing to leave:  stay in the worktree's folder.
           - A multi-repo top:  every repo's main checkout;  only the repos whose `<name>` branch has commits move.
+          - The branch is the epic's id unless its page names another (`<epic-page branch>`, epic `epic-engine`
+            I378):  a branch renamed apart from its id, `epic update <name> --branch <branch>`, and every verb follows.
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
           - STRAY files in a main checkout (epic `epic-engine` I77;  "ask if I want to ditch them before merging
             rather than just bailing"):
@@ -1028,6 +1065,7 @@ Until a `/back:  ...` message (or `epic focus status` says off):
 
 The person reviews ON THE PAGE:  the epic page in the side bar's Review tab, where they mark items.
 - Each item's buttons:  one group, Make Todo, Revisit, Approve (no wand on them since 2026-10-25).
+  - Answered or finished:  Reopen alone, a `revisit` mark:  open it again, their note saying why.
 - An issue's or a judgement call's first button is Do this:  worked in the item itself, no todo
   (`epic guide review`, "Do this").
 - A todo that's WORK (no `limit`) has these instead:
@@ -1048,30 +1086,34 @@ The person reviews ON THE PAGE:  the epic page in the side bar's Review tab, whe
 - A running revisit now clicked again is "nevermind" (`canceled`, 7.3).
 
 This session LISTENS:  it waits on the doc's review inbox, and acts on what arrives.
-- EVERY epic session listens on its own while it's open, `/epic review` or not (epic `epic-engine` P18):
-  - the session's inbox POLLER holds the inbox for the session whose title, or worktree, names the epic, while it
-    runs:  the page says it's listening
-    - a small poller (`InboxPoller`), which runs `epic session listen` for a moment as the inbox changes
-      (epic `epic-engine` P19:  about 45MB a session, not 170)
-    - the plugin's `Stop` hook starts it at each turn's end (`asyncRewake`, epic `epic-engine` I144):  nothing to arm
-      - Claude Code starts plugin MONITORS only in a terminal session, never in VS Code's panel
-    - never in a scripted `claude -p` (CI, an agent harness):  it ends at once there, as Claude Code's
-      `CLAUDE_CODE_SESSION_ATTENDED` is `0`;  `claude -p` waits for every session-start hook (epic `epic-engine` I319)
-    - `/epic review`'s `epic inbox watch` takes the inbox over;  once that session's `wait` stops for good, the
-      monitor takes it back within about 90s
+- EVERY epic session listens while it's open, `/epic review` or not, with NOTHING to arm (epic `epic-engine` P18,
+  T163;  Owen, 2026-11-23:  "Can we have a single server which waits for comments on pages for all epics"):
+  - ONE listener, in the epic hub (`InboxHub`), looks at every epic's inbox for every running session whose title, or
+    worktree, names the epic:  it holds the inbox for the session while the session runs, so the page says it's
+    listening
+  - when the person sends, it leaves the session a NOTE (`WakeNotes`), and the note reaches it one of two ways,
+    whichever comes first:
+    - idle:  the session's inbox POLLER takes it and wakes the session (`InboxPoller`, started by the plugin's `Stop`
+      and `SessionStart` hooks, `asyncRewake`, epic `epic-engine` I144)
+    - at work:  the plugin's `PostToolUse` hook hands it to you at your next tool call, within seconds (I286's
+      promise, kept):  the same `📬` line, in a hook's context
+  - so NEVER run `epic inbox wait` in the background:  nothing times out, and no turn is woken with nothing to do
+    (the "still listening" turns are gone)
+  - no hub running (a machine without it, a hub restarting):  the poller looks at the inbox itself, as before
+  - never in a scripted `claude -p` (CI, an agent harness):  the poller and the hook stand down there, as Claude
+    Code's `CLAUDE_CODE_SESSION_ATTENDED` is `0`;  `claude -p` waits for every session-start hook (epic `epic-engine`
+    I319)
+  - `/epic review`'s `epic inbox watch` (or the session's own foreground `wait`) holds the inbox while it runs:  it
+    hears the work itself, and the hub leaves no note
   - it prints NOTHING until the person sends;  then ONE line, `📬 <epic>:  taking your Send ... (3 marks:  J149
-    approve, ...)`, which wakes the session
-  - that line:  take the work with `epic inbox wait <epic> --timeout 5`, then go on at 7.3, as if your own `wait` had
-    finished
-  - the poller ENDS once it has woken the session, and the next starts only at the turn's end:  so from then on keep
-    `epic inbox wait <epic>` running in the background (`run_in_background`) the whole time you work, armed again
-    each time it exits (epic `epic-engine` I286;  Owen, 2026-11-15:  "keep a listener open so it responds to my
-    marks quickly even if it is not going to act on them right away")
-    - a Send then reaches you mid-work, within seconds, at your next tool call:  not when the turn ends
-    - In Codex:  no background commands:  look with `epic inbox <epic>` between steps instead
+    approve, ...)`
+  - that line:  take the work with `epic inbox wait <epic> --timeout 5` (in the foreground), then go on at 7.3
+    - it found nothing (exit 2, no words:  something else took it first):  carry on with what you were doing, no
+      reply about it
+    - In Codex:  no hub wake:  look with `epic inbox <epic>` between steps, and wait with `epic inbox wait <epic>` in
+      the foreground when there's nothing else to do
   - `📬 <epic>:  the person pressed "start review" ...`:  they asked for a review from the page;  start one, `/epic review
     <epic>` (this section), as if they'd typed it
-  - a `wait` already running in the session takes the work first:  the monitor then says nothing
 - Mechanical marks:  at once.
 - Add Details and "revisit now":  by background agents ("The session answers;  agents build").
   - In Codex:  a Codex sub-agent each, waited for;  or answered here, one at a time.
@@ -1121,8 +1163,9 @@ epic list --json                           every epic:  status, checkout, not re
 epic items <name> --json                   where reviews stand;  sections, items, states
 epic pages link <ABS doc> --hash <id> --show   show the doc in its tab (an epic page Review), at <id>;  prints its links
 epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing:  the page says so
-epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
-                                           In Codex:  run it in the foreground;  it returns with the work
+epic inbox wait <name> --timeout 5        after a `📬` line, in the FOREGROUND:  takes the work (exit 2, silent:  none)
+                                           never in the background:  the epic hub listens (This session LISTENS)
+                                           In Codex:  `epic inbox wait <name>`, foreground;  it returns with the work
 epic inbox apply <name> [ids]              approve / pick / Make Todo / Do this marks into the doc;  prints what's left
                                            a pick on a PHASE's set ("P3's choices:  ...;  adjust its plan"):  rewrite
                                            that phase's plan to it;  on a STANDING set ("...:  act on this round"):
@@ -1172,7 +1215,10 @@ epic inbox <name> [--json]                 what's waiting, sent or not
    - none:  the top
    - `epic pages link <ABS doc> --hash <that id> --show`:  the doc opens in the Review tab, at it.
 4. `epic inbox watch <name>`.
-   - Then `epic inbox wait <name>`, with Bash `run_in_background: true`.
+   - Nothing to arm:  the epic hub wakes this session at the Send, when its title or worktree names the epic.
+   - Reviewing ANOTHER epic (a main or untitled session):  the hub doesn't listen for it;  run
+     `epic inbox wait <name> --timeout 8h` in the background, and once it ends with nothing (exit 2, silent), arm it
+     again without a word.
      - In Codex:  run it in the foreground, and take the work it returns;  end the turn only when it times out.
 5. END THE TURN, short:
    "Mark items in the Review tab:  each item's buttons;
@@ -1201,10 +1247,18 @@ Every card you finish says what REALLY happened, one of three
   - an answer or reply written, details added, the item condensed:  `"Answered their note:  options A and B"`
   - called off:  `"Called off on the page:  nothing written."`
   - An underway card turns noted.
-- `status ... fixed ["<what changed>"]`:  an issue or judgement call fixed, for the person to review
-  (`epic update <epic>#I3 fixed`):  orange, still open;  they close it.  `epic guide review`, "Do this".
+- `status ... fixed ["<what changed>"]`:  an issue or judgement call fixed (`epic update <epic>#I3 fixed`).
+  Who found it decides (epic `epic-engine` T143;  `done` on an issue you found means the same):
+  - an issue you found, fixed before they got to it:  grey by itself, `FIXED - <title>`, closed, nothing for them to
+    press (2026-11-22:  "Issues which are fixed before I get to them can just be labeled `FIXED - <description>` and
+    go to grey automatically")
+  - got to:  their Do this, Revisit or other mark, a comment or note, its id chip clicked.  Then orange, still open;
+    they close it, as with a judgement call
+  - an issue from their words (`--requested`):  light orange, still open;  they close it
+  - `epic guide review`, "Do this".
 - `status ... done ["<summary>"]` ONLY when the item's work is FINISHED:  an issue fixed, a todo built.
   - An open issue or todo CLOSES with it (status done, green, its phase stamped, logged), as `epic close` does.
+    - Except an issue you found:  it's `fixed`, below (grey, or orange if they got to it first;  epic `epic-engine` T143).
   - A question, judgement call or manual test keeps its status:  a question is decided (`decide`, `choose`), the
     other two are the person's to close (except a test you checked yourself, Q58:  "Start testing" below).
   - Meant "this step done"?  That's `noted`.
@@ -1219,16 +1273,17 @@ A revisit note that says just `do it` (now or soon) means:  DO it, no question b
 as asked.  Revisit puts it in a judgement call's or todo's empty note box for them (2026-10-19:  "I generally
 want you to just do it").
 
-0. Keep listening, FIRST of all:  `epic inbox wait <name>` again, `run_in_background`, before any of the work
-   (epic `epic-engine` I286).  Busy with something else when woken:
+0. Nothing to arm:  the epic hub keeps listening for this session (epic `epic-engine` T163), and the next Send reaches
+   you at your next tool call, or wakes you once idle.  Busy with something else when woken (I286):
    - apply the quick marks at once (`epic inbox apply`:  approve, close, pick, todo)
    - put a Noted card on each heavy one at once, `epic update <name>#<id> noted "Queued:  after <what you're on>"`,
      so the person sees it was heard
    - go back to what you were doing, and take the queued ones after it
-   - In Codex:  no background `wait`:  just the three steps above.
+   - In Codex:  just the three steps above.
 0b. What you're doing (epic `epic-engine` P35;  Send's ring turns while you answer, I340):  `epic inbox status <name> "Responding" --items <the ids
-   taken>`, so the person sees what you're answering;  `epic inbox status <name> --clear` as you arm `wait` again (step 4).
-1. Exit 2 (timeout, nothing happened):  arm `wait` again, and end the turn with one line ("still listening").
+   taken>`, so the person sees what you're answering;  `epic inbox status <name> --clear` once you've answered.
+1. `epic inbox wait <name> --timeout 5` found nothing (exit 2, no words):  something took it first;  carry on, with no
+   reply about it.  Never arm a `wait` in the background (epic `epic-engine` T163).
 
 1b. CANCELED:  The person said "nevermind" on a running request for now (epic `windows-and-review` P2).
    - Stop that item's background agent (`TaskStop`).
@@ -1327,6 +1382,9 @@ want you to just do it").
      - The note box's ✕ (`skip`) on a test:  `apply` CANCELS it, "no longer applies";  their note, if any, says why.
      - A REVISIT note on a test (or their comment in its Step or Should, which presses Revisit itself, I158) is what they
        saw, left for you.  A picture they pasted comes with it:  `wait` prints `screenshot:  tests/...png` under the mark.
+       What a step's command printed, pasted in the box under it (T165), comes with ANY of their marks on the test
+       (Approve, Revisit, the ✕), or alone as a revisit:  `wait` prints `step 2 printed (pasted by the person):` and the
+       text under the mark;  read it before `apply` closes a passed test (it may show a problem they missed).
        Read it, then:
        - it says it passed:  `epic close <name>#M3`
          (a passed test with a comment may still need work:  a todo or issue for what it asks)
@@ -1436,7 +1494,8 @@ want you to just do it").
      - First `epic comments gather`:  a phase per page (an Updated block in its phase while that's open),
        each comment marked taken.
      - Then work each phase as its Overview says, and close it when every comment in it is answered.
-4. Arm `wait` again (always, unless they said stop), then reply:
+4. Nothing to arm (the epic hub listens;  a session reviewing ANOTHER epic arms its `--timeout 8h` wait again, 7.2),
+   then reply:
    - what landed:  bullets, items in words, ids after
    - what's being worked on in the background
    - what needs them
@@ -1445,16 +1504,16 @@ want you to just do it").
 - A background agent's own completion notice wakes the session too.
   - In Codex:  no notices:  the sub-agents' results come back before the turn goes on.
   - Nothing to do but check `inbox` shows the item done.
-  - Don't re-arm a second `wait` while one runs:  `inbox` would print both.
+  - A session reviewing another epic:  don't re-arm a second `wait` while one runs:  `inbox` would print both.
     Check the background tasks.
 
 ### 7.4 Finish
 
 When the person says they're done ("stop reviewing", "that's it"), or the session must stop:
-- stop the waiter (`TaskStop`), then `epic inbox ignore <name>`
+- `epic inbox ignore <name>`;  a session reviewing ANOTHER epic stops its waiter first (`TaskStop`)
   - In Codex:  the foreground wait has ended already:  just `epic inbox ignore <name>`.
-  - a session whose title or worktree names the epic keeps listening anyway, through its inbox poller (P18, I144):  the next
-    Send still reaches it, as a `📬` line
+  - a session whose title or worktree names the epic keeps listening anyway, through the epic hub (P18, T163):  the
+    next Send still reaches it, as a `📬` line
 - `epic log <name> "Review:  <n> approved, <n> answered, <n> to todos, <n> details added"`
 - reply:  what was decided and done (in words, ids after), and what's still waiting on them;  the link pair
 - the doc's changes:  nothing to commit, from any checkout.
@@ -1549,11 +1608,19 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - No `node_modules/`:  the install command (`epic config installCommand`;  empty:  nothing to install).
    - `epic open <name> --review`.
      In a new window:  after the handoff, as "2. Session", step 5.
-   - `epic inbox wait <name>` in the background again ("7. Review", "This session LISTENS"):  a session started by
-     `/epic fresh` (or a restart) has none running.
+   - Nothing to arm for the page ("7. Review", "This session LISTENS"):  the epic hub listens for a session started
+     by `/epic fresh` (or a restart) from its first moment.
+   - Paused agents (`epic agents` says `paused`;  "Pause first", under "16. Fresh") start again now, once each,
+     with no modal:  it's work that was under way.  For each:
+     1. `epic agents resume <name>`:  it prints the brief, and clears what was saved, so it can't start twice
+        - refused, a pause still under way:  start none, say so, and start them when its go or cancel comes
+     2. start that agent:  `Agent`, its full name first in the description, the whole printed brief as its prompt
+     3. `epic agents set <name> --task-id <its id>`, then `epic agents wait` in the background once
+     - In Codex:  no background agents:  do each one's work here, one at a time, from the printed brief.
 5. Reply, for someone who remembers nothing:  three lines at most.
    - What the epic is, where it stopped, and what's waiting on the person (open questions, issues, tests).
    - Uncommitted work in bold.
+   - Paused agents restarted:  name them, and what each is on.  They're the carrying on, so ask nothing about them.
    - Then:
      - a phase `active` with work under way:
        AskUserQuestion "Carry on with P<N> · <Name> (Recommended)" / "Stop here"
@@ -1949,9 +2016,11 @@ A NEW session takes this session's epic on, in this window, from its page;  this
 
 0. Which epic:  this session's, its title (`🚧 <name>`), else its worktree's (`epic worktree path <name>`).
    None:  say so, and stop.
-1. Agents:  `epic agents`.  Any listed:  refuse, in one line naming them;  closing this tab would cut them off.
+1. Agents:  `epic agents`.  Any listed but not `paused`:  refuse, in one line naming them;  closing this tab would
+   cut them off.  Paused ones don't count:  they're saved, and the new session starts them ("8. Resume").
+   - A pause under way:  `epic window fresh` refuses until all are quiet.  Never `--force` past it.
    - Wait for their notices, then `/epic fresh` again;  or the person types `/epic fresh --force`.
-   - Background waits (`epic inbox wait`, `epic agents wait`) don't count:  the new session starts its own.
+   - Background waits (`epic agents wait`) don't count:  the new session starts its own.
 2. Write down what's open but NOT on the page yet:  the new session knows only the page.
    - a question asked of the person and not answered yet (in the chat, or on a details page):  a Q item,
      `epic add <name>#Q "<the question>" --details "<options, context>"`;  a choice made alone:  `#J ... --calm`
@@ -1995,7 +2064,128 @@ their next clear moment").
      step 0.
    - Refused there (no window, the end-of-turn hook won't run):  `epic fresh drop`, so it isn't woken again, and say why
      in one line.
+     - Its agents were paused ("Pause first"):  it's carrying on, so it resumes each ("8. Resume", step 4).
 - `epic fresh status`:  the sessions still waiting, and why each waits.
+
+### Pause first:  `/epic fresh all --pause`
+
+Every session stops its agents as fast as it can, saving enough to start them again;
+then, once ALL are quiet, all go fresh (epic `epic-engine` T139;  Owen, 2026-11-22:  "pause all active agents as
+quickly as possible, saving enough info about what is happening to restart again cleanly.  Test runs can be abandoned.
+Once they are quiet, they should report back to the initiating agent.  Then that session runs epic fresh all").
+- Quiet:  its agents paused and saved, no test or merge of its own running.
+- Settled by Owen, the same day:
+  - a session that doesn't report holds the round up:  name it to the person and wait, NEVER skip it after a time
+    - one whose process has exited doesn't hold it up
+  - a merge running finishes, or stops where it can be picked up again:  NEVER killed half way
+  - a round can be cancelled, and the agents then pick their work back up
+
+The session that starts it (any session, an epic's or not):
+1. `epic fresh all --pause`.  Send each `TELL:` line, as is, with `SendMessage`, all in one message.
+   - In Codex:  it can't start a round, or message a session:  say so, and have the person type it into a Claude Code
+     session.
+2. An epic's session itself:  pause your own agents, the steps below, and `epic fresh quiet`.
+3. `epic fresh wait` in the background, then END THE TURN, so reports reach you.
+   Reply one line:  "pausing <N> sessions;  I'll say who's outstanding".
+   - exit 2, time's up:  name each outstanding session and why to the person, in bold
+     (one waiting on their answer:  which window), then `epic fresh wait --max 10m` again.  Skip nobody.
+   - a report:  `epic fresh status`;  not all quiet yet, just end the turn
+   - a session that started since:  `epic fresh all --pause` again tells it
+   - exit 3:  it's over or cancelled:  nothing to do
+4. All quiet (exit 0, or status says so):  stop that wait, then `epic fresh all`, "All epics" above, from its step 1.
+   Never before:  it refuses, and there's no forcing it.
+   - This session went away meanwhile:  any session may run it once all are quiet.
+
+Each epic's session, when the line comes (and the one that started it):
+1. Start nothing new from now on:  no agent, item, phase, test or merge.  A Send waits in the inbox for the new session.
+2. `epic turns stop test`:  abandons this session's test runs, its agents' too, and frees the turn;  nobody else's.
+   - It names any merge of yours still running:  that finishes.
+   - A test of your own outside a turn, in a background Bash:  `TaskStop` it.
+   - In Codex:  Ctrl-C the test you started.
+3. Message EVERY running agent at once (`SendMessage`, one message with a call each;  `epic agents --json` has the ids):
+
+   > Stop now:  we're going fresh.  Start nothing.  Stop any test you started and don't rerun it.  A merge running:
+   > let it finish;  one stopped on conflicts:  leave it as it is, never abort it.  Don't commit unfinished work, and
+   > never stash, discard or commit another's files.  Claim what you changed (`epic agents claim`), then run
+   > `epic agents pause <name> --item <id> --next "<the next step, for someone who wasn't here>" --tests "<runs dropped>"`
+   > and return at once, saying it's paused.
+
+   - In Codex:  no background agents:  save your own state on the page and run `epic fresh quiet`.
+4. One not back within about a minute:
+   - `epic turns list` first:  a merge of yours running, wait for it;  stop no agent meanwhile
+   - then `TaskStop` it, and save for it:  `epic agents pause <name> --next "<from its task, its last report and
+     the diff>"`
+     - In Codex:  stop that sub-agent, and save for it the same way.
+   - what's saved by itself:  its task, item, claims, uncommitted files, commits and whether each is merged, a merge
+     stopped part way and how to carry it on.  The next step and the tests dropped are yours or the agent's to say.
+   - its uncommitted files stay put, and its claims keep other agents and merges off them
+   - a paused agent's notice arriving is NOT `epic agents done` (it refuses):  it's still saved
+     - it had finished its whole task:  `epic agents done <name> --finished`
+5. "16. Fresh", step 2:  what's open and not on the page, your own unfinished work too.
+6. `epic fresh quiet`:  it refuses, naming what still runs.  Send the line it prints to who started the pause
+   (`SendMessage`), reply one line, and end the turn.
+   - In Codex:  print the line for the person to paste there.
+7. Stay paused until `/epic fresh all`'s line comes:  then as "All epics", step 4.  Don't restart your agents:  the new
+   session does, "8. Resume", step 4.
+   - The person asks for work meanwhile:  say the pause is on, and that `epic fresh cancel` calls it off.
+
+Calling it off:  `epic fresh cancel`, from any session, until a session has gone fresh.
+- Send each `TELL:` line it prints (`SendMessage`).
+  - In Codex:  print each for the person to paste.
+- Each session told (and this one) resumes each paused agent:  `epic agents resume <name>`, then what it prints
+  (`SendMessage` to the agent in the session that paused it, else a new `Agent`).
+  - In Codex:  do each one's work here, from that brief.
+- `epic fresh status`:  who is quiet, and who is outstanding.
+
+## 17. Hush:  `/epic hush [<epic> | all]`
+
+Grey the green, yellow and orange items the person almost surely won't look at again (epic `epic-engine` T122;
+Owen, 2026-11-20:  "if you are 80% sure I don't care and the item was settled more than 3 days ago, mark it as
+settled").  Tidy's sibling:  tidy closes OPEN items other work made obsolete;  hush greys SETTLED ones.
+No `<epic>`:  this worktree's epic;  `all`:  every epic in progress.
+Only when the person asks:  it never runs by itself.
+
+1. `epic hush <epic> --dryrun`, and show the person its table:  each candidate's id, colour, age, hush or keep, why.
+   - Candidates (`Hush.candidates()`):  drawn green, yellow or orange (a fix waiting for review, a calm call, a
+     finished request), nothing on it for 3 days or more (its change stamp, its newest card or reply).
+   - Never:  red or blue items, open work (an open todo, an open issue not fixed), a manual test, a question, one
+     waiting on their pick, one they marked loud, one a tidy found promised, one with their mark not taken, Claude at
+     work on it, or a comment thread on it not finished with.
+   - The judge:  a fresh `claude -p` (Sonnet, nothing of the repo), 40 items a call, the rule:  hush only if 80% sure
+     they won't want to look again (routine fixes they asked for that shipped, calm calls following house style,
+     bookkeeping);  KEEP anything that changed what they'd notice, dropped or narrowed something, cost something, is
+     hard to undo, or is a choice they might have made differently.
+   - In Codex:  the same command;  it runs `claude -p` itself, so Claude Code must be installed.
+2. Only once they say go:  `epic hush <epic>` (the judge runs again:  its calls can differ a little from the dry run's).
+   - Each hushed item is approved as their ✓ would (a fix accepted, a call accepted, a finished item reviewed), its log
+     line `I4 hushed:  <why>`, then one line for the run, `Hush:  N greyed, M kept`;  one write of the page.
+   - It prints the counts and each kept item with its why.
+3. Reply:  the counts per epic, the kept ones worth their look, and the epic page's link pair.
+
+## 18. Item badges:  what each one asks of you
+
+Epic `epic-engine` P81.  On a page with badges (`<epic-page badges>`), each line starts with what happens next.
+The engine only stores judgements and draws them:  it starts no work.  These are YOUR steps, in that epic's session.
+
+- `URGENT`, `WILL FIX`, `WILL DO`:  do it without asking.  URGENT first, then WILL FIX, then WILL DO.
+  - Take it up as any item (an Underway card, an agent), and report it as usual (`fixed`, `done`).
+- `YOUR CALL`, `AGAINST YOUR ASK`:  WAIT on the person.  Never decide it, and never answer a question for them.
+- `WILL RECHECK`, `WILL CLOSE`:  check them in IDLE time, when nothing above is waiting.
+  - Put a card on it first (`epic update <epic>#I7 underway "Rechecking:  ..."`):  it reads RECHECKING.
+  - Then one of:
+    - it's real:  `epic badges <epic>#I7 set --doubt 5 [--care 80] --why "..."`, and the card noted
+    - it isn't, or isn't worth it:  `epic badges <epic> close I7 --as vanished | moot | duplicate | declined --why "..."`
+    - theirs (their words, or they got to it), so `close` refuses:  say what you found in a reply, and
+      `epic badges <epic>#I7 set --your-call yes`:  it waits on them
+- `SOMEDAY`, `OPTIONAL`:  nothing, unless asked.
+- `SEE T38`:  work the todo, never the item.  Its proposal needs an OK:  `epic badges <epic>#T38 set --your-call yes`.
+- `epic badges <epic> list`:  the scores, the badges, and what would close.
+- NEVER turn badges on, score, or close on an epic the person hasn't asked it for.
+  `trial` closes nothing;  `epic badges <epic> off` undoes them all.
+- With badges `on`, a new item its badge would grey still stays open until the person says yes to that too:
+  `epic badges <epic> close-new yes` (I435);  never a judgement call, never on your own.
+- In Codex:  the same commands;  the judge runs `claude -p`, so without Claude Code items stay unscored, drawn as
+  before badges.
 
 ## Migrations:  bringing epic pages up to today's markup
 
@@ -2052,7 +2242,7 @@ inbox working <name>#P<N> on|off                    Claude at work on a phase (o
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm] [--requested]   prints the id (T3)
 add <name>#I "title" --requested --start "<their words>" [--agent <name>]   filed and taken up at once:  blue (T78)
 add <name>#I|#T "title" ... --pasted <n> | --picture <file>...   with the pictures pasted last, or files (T87)
-stale <name> --underway [--apply]                   stale Underway items:  on main => fixed for review;  else a Stale card
+stale <name> --underway [--apply]                   stale Underway items:  on main => fixed;  else a Stale card
 add <name>#T "title" [--limit | --loud]             a todo:  work still to do;  --limit:  a limit to know about;  --loud:  red, a reminder
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, the person does it on the page
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)
@@ -2067,6 +2257,7 @@ update <name> --standing [on|off]                   a standing epic:  each phase
 close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, never delete
 close <name>#J3 <name>#I7 --why "<text>"            close as obsolete, the reason on each;  some refused ("14. Tidy")
 close <name> --why-file <file>                       a reason per item (JSON5 of id => reason), one write of the page
+hush [<name> | all] [--dryrun]                      grey settled items you won't look at again, 80% sure ("17. Hush")
 stale <name> [--json]                               the facts for judging which open items are stale;  decides nothing
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
 change <name> [--for <item id>]                     stamp the <epic-change item> marks written by hand, list them,
@@ -2074,6 +2265,11 @@ change <name> [--for <item id>]                     stamp the <epic-change item>
 log <name> ["text"] [--last <n>]                    timestamped review line in the log;  no text:  print the newest
 bedtime <name> start "P3-P6" | done "summary"       bedtime mode on / off:  the run's changes stay green (`/bedtime`)
 focus status | summary <name> [--since <t>]         focus mode:  on?  what happened since (`/focus`, `/back`)
+fresh all [--pause] | status | drop                 every running epic session to a fresh one;  --pause:  agents
+                                                    paused and saved first ("16. Fresh", "Pause first")
+fresh quiet | wait [--max <t>] | cancel             a pause:  this session's quiet;  wait for all;  call it off
+agents pause <agent> --next ".." / agents resume <agent>   save a stopped agent / start it again, once
+turns stop test                                     this session's own test runs abandoned;  never a merge
 prompt <name> "text" | --file f                     set the prompt quoted in the Overview
 migrate [<kind>] [<name>... | --all] [--file f] [--step s] [--dry-run] [--notify] [--list]
                                                     pages up to today's markup, every step of their kind, oldest

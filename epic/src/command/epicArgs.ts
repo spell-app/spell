@@ -84,6 +84,14 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
     case "saga":
       // its own verbs and arguments (`saga set seo epics`):  no epic page to aim at
       return [["saga", ...args]]
+    case "badges": {
+      // `badges seo#J3 set --care 80`:  the item goes after its verb (`BadgeCommands`, epic `epic-engine` P81)
+      if (ref === undefined) return [["badges", ...args]]
+      const [verbWord, ...after] = args.slice(at + 1)
+      if (!verbWord || verbWord.startsWith("--"))
+        throw new EpicCommandError(`badges:  what?  epic badges ${addressOf(target!.epic, ref)} set --care 80`)
+      return [["badges", ...args.slice(0, at), target!.epic, verbWord, ref, ...after]]
+    }
     case "test":
       // `test seo#M3`:  the run, landing on M3;  `test --all`:  no epic
       return [["test", ...around([]), ...(ref === undefined ? [] : ["--at", ref])]]
@@ -261,8 +269,8 @@ export function phaseRanges(text: string): string {
  *   - `--symptom`, `--changes`, `--goal`, `--files`, `--verify` (`phase-body`;  `""` removes one)
  *   - `--choices`:  its option sets, `<epic-choices>` HTML, its Choices field (epic `epic-engine` P50)
  *   - `--plan` [`--accepted`:  written accepted, his comments folded in;  epic `epic-engine` I163]
- *   - `--estimate` (`estimate`), `--title` [`--html`] (`rename`)
- * - an item (`seo#J3`):  `--title` [`--html`] (`rename`), `--calm` / `--loud` (`calm`), `--requested` (`requested`)
+ *   - `--estimate` (`estimate`), `--title` [`--html`] [`--title-ok`] (`rename`)
+ * - an item (`seo#J3`):  `--title` [`--html`] [`--title-ok`] (`rename`), `--calm` / `--loud` (`calm`), `--requested` (`requested`)
  *   - a manual test:  `--failed I12`, filed as that issue, `off` the mark taken off (`failed`;  epic `epic-engine` I174)
  * - the page (`seo`):  `--standing` [`on` | `off`], `--no-standing` (`standing`)
  * - Claude's status CARD on an item (or an Overview sub-section, a phase, the summary), a state word after the
@@ -292,13 +300,23 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
     return it!
   }
   const rename = (id: string) => {
-    if ("title" in flags) runs.push(["rename", epic, id, value("title"), ...(flags.html ? ["--html"] : [])])
+    if ("title" in flags)
+      runs.push([
+        "rename",
+        epic,
+        id,
+        value("title"),
+        ...(flags.html ? ["--html"] : []),
+        ...(flags.titleOk ? ["--title-ok"] : [])
+      ])
   }
   if (ref === undefined) {
     if ("standing" in flags || "noStanding" in flags) {
       const on = flags.noStanding ? "off" : flags.standing === true ? "on" : value("standing")
       runs.push(["standing", epic, on])
     }
+    // its git branch, when it isn't the epic's id (epic `epic-engine` I378):  `EpicConfig.branchOf()` reads it
+    if ("branch" in flags) runs.push(["branch", epic, value("branch")])
   } else if (phase !== undefined) {
     const body = PHASE_BODY.filter((key) => key in flags).flatMap((key) => [`--${key}`, value(key)])
     // a plan Owen accepted with his comments, folded in and written accepted (epic `epic-engine` I163)
@@ -316,6 +334,7 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
     rename(ref)
   }
   if (flags.html && !("title" in flags)) throw new EpicCommandError("update:  --html goes with --title")
+  if (flags.titleOk && !("title" in flags)) throw new EpicCommandError("update:  --title-ok goes with --title")
   return runs
 }
 
@@ -348,7 +367,7 @@ function cardArgs(args: string[], at: number, { epic, ref }: EpicTarget, state: 
  * camelCased);  a word that's no field's value is refused.
  */
 function flagsOf(args: string[]): Record<string, string | true> {
-  const { positional, flags } = parseVerbArgs(args)
+  const { positional, flags } = parseVerbArgs(args, ["titleOk"])
   if (positional.length)
     throw new EpicCommandError(
       `update:  "${positional[0]}"?  --field value pairs after the target, or a card:  underway | done | fixed | noted | promised`
@@ -468,7 +487,7 @@ const ITEM_VERBS = [
  * - or by a flag (`split --done`, `backfill --all`, `test --all`)
  * - or not on one (`saga`'s own verbs, `summaries`' files, `owns`' paths)
  */
-const NO_EPIC_VERBS = ["list", "migrate", "split", "backfill", "saga", "summaries", "owns", "update", "test"]
+const NO_EPIC_VERBS = ["list", "migrate", "split", "backfill", "saga", "summaries", "owns", "update", "test", "hush"]
 
 /** Verbs on one phase, its ref after the epic:  `epic phase seo#P3 done` -> `phase seo 3 done`. */
 const PHASE_VERBS = ["phase", "updated", "file"]
@@ -561,10 +580,10 @@ const CARD_EXAMPLES: Record<string, string> = {
 }
 
 /** What `update` sets on a phase. */
-const PHASE_FIELDS = [...PHASE_BODY, "accepted", "estimate", "title", "html"]
+const PHASE_FIELDS = [...PHASE_BODY, "accepted", "estimate", "title", "html", "titleOk"]
 
 /** What `update` sets on an item. */
-const ITEM_FIELDS = ["title", "html", "calm", "loud", "requested", "failed"]
+const ITEM_FIELDS = ["title", "html", "titleOk", "calm", "loud", "requested", "failed"]
 
 /** What `update` sets on the page, camelCased as `flagsOf()` reads them (`--no-standing`). */
-const PAGE_FIELDS = ["standing", "noStanding"]
+const PAGE_FIELDS = ["standing", "noStanding", "branch"]

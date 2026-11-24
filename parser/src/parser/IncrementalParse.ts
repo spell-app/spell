@@ -113,15 +113,18 @@ export class IncrementalParse {
    * - `"region"`:  just the changed items were re-parsed.  Everything after them, later files included, was kept.
    * - `"rewound"`:  re-parsed from the first changed item on.  Every LATER file was taken back, and MUST be
    *   re-parsed with `parseAll()`.
+   * - `span`:  where the text changed (`P.EditedSpan`), if the caller knows:  the items wholly before or after it are
+   *   known to be the same without comparing their text.  A span that doesn't fit the texts is ignored.
    * - SIDE EFFECT: kept tokens after the edit are moved to their new offsets / lines.
    */
-  update(text: string): IncrementalUpdate {
+  update(text: string, span?: P.EditedSpan): IncrementalUpdate {
     this.rewound = undefined
-    return (this.lastUpdate = this.outline.noting(() => this.reparse(text)))
+    const edited = P.EditedSpan.fits(span, this.text, text) ? span : undefined
+    return (this.lastUpdate = this.outline.noting(() => this.reparse(text, edited)))
   }
 
   /** Does `update()`'s work. */
-  private reparse(text: string): IncrementalUpdate {
+  private reparse(text: string, span: P.EditedSpan | undefined): IncrementalUpdate {
     if (text === this.text) return "same"
     const oldRoot = this.root
     const newRoot = this.parser.tokenizeRoot(text)
@@ -135,12 +138,12 @@ export class IncrementalParse {
     // How many items are the same at the start, and at the end?
     const shortest = Math.min(oldItems.length, newItems.length)
     let before = 0
-    while (before < shortest && itemsMatch(oldItems, this.text, before, newItems, text, before)) before++
+    const oldText = this.text
+    const same = (oldIndex: number, newIndex: number) =>
+      itemsMatch({ items: oldItems, text: oldText, index: oldIndex }, { items: newItems, text, index: newIndex }, span)
+    while (before < shortest && same(before, before)) before++
     let after = 0
-    while (
-      after < shortest - before &&
-      itemsMatch(oldItems, this.text, oldItems.length - 1 - after, newItems, text, newItems.length - 1 - after)
-    ) {
+    while (after < shortest - before && same(oldItems.length - 1 - after, newItems.length - 1 - after)) {
       after++
     }
 
@@ -378,26 +381,38 @@ export type IncrementalItem = {
 export type IncrementalUpdate = "same" | "body" | "region" | "rewound"
 
 /**
- * Is old item `oldIndex` the same as new item `newIndex`:  same kind, same source text, same indent?
+ * Is an old item the same as a new one:  same kind, same source text, same indent?
  * - An item's source runs from its `start` to the next item's, as `LineToken` / `BlockToken` have no `raw`.
  * - Compares `indent` too, as a blank line's comes from the line AFTER it.
+ * - With `span`:  two items at the same place wholly before it, or wholly after it, have the same text without
+ *   comparing it (epic `solid-2-final` P9).
  */
-function itemsMatch(
-  oldItems: P.Token[],
-  oldText: string,
-  oldIndex: number,
-  newItems: P.Token[],
-  newText: string,
-  newIndex: number
-) {
-  const oldItem = oldItems[oldIndex]!
-  const newItem = newItems[newIndex]!
+function itemsMatch(old: ItemAt, now: ItemAt, span: P.EditedSpan | undefined) {
+  const oldItem = old.items[old.index]!
+  const newItem = now.items[now.index]!
   if (oldItem.constructor !== newItem.constructor) return false
   if ((oldItem as P.LineToken).indent !== (newItem as P.LineToken).indent) return false
-  return itemText(oldItems, oldText, oldIndex) === itemText(newItems, newText, newIndex)
+  const oldEnd = itemEnd(old)
+  const newEnd = itemEnd(now)
+  if (span) {
+    // before the change:  the same offsets in both
+    if (oldItem.start === newItem.start && oldEnd === newEnd && oldEnd <= span.from) return true
+    // after it:  the same offsets, each from its text's end of the change
+    const startsAfter = oldItem.start >= span.to && newItem.start >= span.toNew
+    if (
+      startsAfter &&
+      oldItem.start - span.to === newItem.start - span.toNew &&
+      oldEnd - span.to === newEnd - span.toNew
+    )
+      return true
+  }
+  return old.text.slice(oldItem.start, oldEnd) === now.text.slice(newItem.start, newEnd)
 }
 
-/** Source text of item `index`, up to the next item. */
-function itemText(items: P.Token[], text: string, index: number) {
-  return text.slice(items[index]!.start, items[index + 1]?.start ?? text.length)
+/** An item of a parse, by its place in the root's tokens, and that parse's text. */
+type ItemAt = { items: P.Token[]; text: string; index: number }
+
+/** Where item `index`'s source ends:  the next item's start, or the text's end. */
+function itemEnd({ items, text, index }: ItemAt): number {
+  return items[index + 1]?.start ?? text.length
 }

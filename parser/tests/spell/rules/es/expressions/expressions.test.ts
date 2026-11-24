@@ -4,7 +4,7 @@ import { SP } from "spell/parser/spell"
 import { core } from "spell/parser/core"
 
 describe("testing spell module expressions, in Spanish", () => {
-  unitTestModuleRules(SP.spanish.parser, "expressions", core.resetRuntime)
+  unitTestModuleRules(SP.Language.for("es").parser, "expressions", core.resetRuntime)
 })
 
 /**
@@ -18,10 +18,12 @@ describe("article agreement, in Spanish", () => {
 
   /** `lines` parsed as a block, in a fresh Spanish scope called `scopeName`. */
   const parse = (lines: string[], scopeName: string) =>
-    SP.spanish.parser.getScope(scopeName).parse([...TYPES, ...lines].join("\n"), "block")
+    SP.Language.for("es")
+      .parser.getScope(scopeName)
+      .parse([...TYPES, ...lines].join("\n"), "block")
 
   test("a type's gender is read off its declaration", () => {
-    const scope = SP.spanish.parser.getScope("agreement-es-gender")
+    const scope = SP.Language.for("es").parser.getScope("agreement-es-gender")
     scope.parse(TYPES.join("\n"), "block")
     expect(scope.types.get("Carta")?.gender).toBe("feminine")
     expect(scope.types.get("Mazo")?.gender).toBe("masculine")

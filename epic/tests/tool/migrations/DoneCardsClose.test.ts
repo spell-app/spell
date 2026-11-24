@@ -71,6 +71,18 @@ describe("done-cards-close", () => {
     expect(STEP.run(document, { now: NOW })).toBe(false)
   })
 
+  test("left open:  an issue waiting for the person, fixed or his Do this (I232, T143);  an urgent todo still closes", () => {
+    const done = card("done", "2026-10-21 09:30")
+    const document = page([
+      ["i1", "open", done, " fixed"],
+      ["i2", "open", done, " requested fixed"],
+      ["i3", "open", done, " urgent"],
+      ["t1", "open", done, " urgent"]
+    ])
+    expect(STEP.run(document, { now: NOW })).toBe(true)
+    expect(statuses(document)).toEqual({ i1: "open", i2: "open", i3: "open", t1: "done" })
+  })
+
   test("left open:  reopened after its Done card, an underway card, Noted only;  a limit, a call, a question, a test", () => {
     const done = card("done", "2026-10-21 09:30")
     const document = page(

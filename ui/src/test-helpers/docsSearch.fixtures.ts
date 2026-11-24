@@ -46,7 +46,7 @@ export const SEARCH: SiteSearchFile = {
       ]
     },
     {
-      path: "components/ui-button.html",
+      path: "ui-button.html",
       title: "Button",
       tag: "ui-button",
       tabs: { examples: "Examples", usage: "Usage" },
@@ -57,7 +57,7 @@ export const SEARCH: SiteSearchFile = {
       ]
     },
     {
-      path: "components/ui-divider.html",
+      path: "ui-divider.html",
       title: "Divider",
       tag: "ui-divider",
       tabs: { examples: "Examples" },
@@ -97,7 +97,7 @@ export function siteTag(name: string, tagName: string, extra: Partial<SiteTag> =
     mainTag: folder,
     main: folder === tagName,
     page: folder === tagName,
-    href: folder === tagName ? `components/${folder}.html` : `components/${folder}.html#${tagName}`,
+    href: folder === tagName ? `${folder}.html` : `${folder}.html#${tagName}`,
     topics: [],
     aka: [],
     noun: name.toLowerCase(),

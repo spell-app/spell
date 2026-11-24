@@ -137,8 +137,6 @@
   padding-inline: 6px;
   font-family: var(--ui-font-family);
   font-weight: 700;
-  /* ↩ as a symbol, never the page font's emoji */
-  font-variant-emoji: text;
 }
 
 .ShortcutsDialog .ShortcutsNone {

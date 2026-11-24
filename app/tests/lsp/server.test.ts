@@ -10,7 +10,8 @@ import {
   StreamMessageWriter,
   type DocumentSymbol,
   type Hover,
-  type PublishDiagnosticsParams
+  type PublishDiagnosticsParams,
+  type ShowMessageRequestParams
 } from "vscode-languageserver/node"
 
 import type { LSP } from "spell/app/lsp"
@@ -196,6 +197,29 @@ describe("spell language server over stdio", () => {
     )
   }, 60_000)
 
+  test("`spell/codeFile` answers a code file's javascript, its types taken out, for VS Code's runner;  `null` for none (from-console J110)", async () => {
+    const projectDir = resolve(mkdtempSync(resolve(tmpdir(), "spell-stdio-")), "Native")
+    mkdirSync(projectDir)
+    writeFileSync(
+      resolve(projectDir, "project.json"),
+      JSON.stringify({ imports: [{ path: "/main.spell", active: true }] })
+    )
+    const text = "set foo to 1"
+    writeFileSync(resolve(projectDir, "main.spell"), text)
+    writeFileSync(resolve(projectDir, "shout.ts"), "export function shout(text: string): string { return text }\n")
+    const uri = pathToFileURL(resolve(projectDir, "main.spell")).href
+    await connection.sendNotification("textDocument/didOpen", {
+      textDocument: { uri, languageId: "spell", version: 1, text }
+    })
+    const info = (await connection.sendRequest("spell/project", { uri })) as { project: string }
+    // as `SP.NativeCode.moduleFor()` writes it
+    const module = `@spell/native/${encodeURI(info.project)}/shout.ts`
+    const javascript = (await connection.sendRequest("spell/codeFile", { uri, module })) as string
+    expect(javascript).toMatch(/function shout\(text\) {[\s\S]*export {\s*shout\s*}/)
+    const missing = `@spell/native/${encodeURI(info.project)}/nowhere.ts`
+    expect(await connection.sendRequest("spell/codeFile", { uri, module: missing })).toBe(null)
+  }, 60_000)
+
   test("`spell/compileProject` of a project that doesn't parse:  not ok, and sends nothing", async () => {
     const projectDir = resolve(mkdtempSync(resolve(tmpdir(), "spell-stdio-")), "Broken")
     mkdirSync(projectDir)
@@ -216,5 +240,41 @@ describe("spell language server over stdio", () => {
     // Sent before the answer, if at all -- messages arrive in order.
     expect(await connection.sendRequest("spell/compileProject", { uri })).toEqual({ ok: false })
     expect(sent).toEqual([])
+  }, 30_000)
+
+  test("a project written for an older Spell:  a Fix it link on an old line's hover, and a notice whose Upgrade rewrites it (epic `language` P68)", async () => {
+    const projectDir = resolve(mkdtempSync(resolve(tmpdir(), "spell-stdio-")), "Older")
+    mkdirSync(projectDir)
+    const projectFile = resolve(projectDir, "__project.json5")
+    writeFileSync(projectFile, JSON.stringify({ imports: [{ path: "/main.spell", active: true }] }))
+    const text = "set foo to 1  // the count\n"
+    const main = resolve(projectDir, "main.spell")
+    writeFileSync(main, text)
+    const uri = pathToFileURL(main).href
+    // the notice, answered Upgrade;  then what it did, asked the same way, with nothing to pick
+    const asked: string[] = []
+    let upgraded: (message: string) => void
+    const said = new Promise<string>((resolveSaid) => (upgraded = resolveSaid))
+    connection.onRequest("window/showMessageRequest", ({ message, actions }: ShowMessageRequestParams) => {
+      if (actions?.length) asked.push(message)
+      else upgraded(message)
+      return actions?.[0] ?? null
+    })
+    await connection.sendNotification("textDocument/didOpen", {
+      textDocument: { uri, languageId: "spell", version: 1, text }
+    })
+
+    const hover = (await connection.sendRequest("textDocument/hover", {
+      textDocument: { uri },
+      position: { line: 0, character: 16 }
+    })) as Hover
+    expect((hover.contents as { value: string }).value).toMatch(
+      /^\[\*\*Fix it\*\*\]\(command:spell\.fixIt\?%5B%7B%22changes[^)]*\):  Move the note below/
+    )
+
+    expect(await said).toMatch(/^Your project now matches Spell 0\.9\.  Spell rewrote 1 line that used an older style/)
+    expect(asked).toEqual([expect.stringMatching(/^This project was written for an older version of Spell\./)])
+    expect(readFileSync(main, "utf8")).toBe("set foo to 1\n\t-- the count\n")
+    expect(readFileSync(projectFile, "utf8")).toContain('"spellVersion": "0.9.0"')
   }, 30_000)
 })
