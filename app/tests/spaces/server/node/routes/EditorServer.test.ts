@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process"
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -11,6 +11,7 @@ import {
   EditorServer,
   editorFileName,
   editorRecordFile,
+  editorsInTheWay,
   steadyPort,
   worktreeEditorPort
 } from "spell/app/spaces/server/node/routes/EditorServer"
@@ -72,7 +73,7 @@ describe("one editor per page server's spaces:  starting one never stops another
     expect(editorRecordFile("/kit", "/x/my-project/spaces")).toBe(join("/kit", main))
   })
 
-  test("a vite whose page server still runs, and isn't this one, is left running", async () => {
+  test("a vite whose page server still runs past the wait:  stopped, not doubled (epic `epic-engine` I455)", async () => {
     const root = mkdtempSync(join(tmpdir(), "editor-"))
     const vite = spawn("sleep", ["30"], { detached: true, stdio: "ignore" })
     const otherServer = spawn("sleep", ["30"], { stdio: "ignore" })
@@ -83,15 +84,74 @@ describe("one editor per page server's spaces:  starting one never stops another
         JSON.stringify({ url: "http://localhost:1/", pid: vite.pid, pagePort: 4747, server: otherServer.pid })
       )
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-      const kept = await editor["adopt"](4760, {} as never, { thisMachineOnly: false })
+      const kept = await editor["adopt"](4760, {} as never, { thisMachineOnly: false }, 200)
       warn.mockRestore()
       expect(kept).toBeUndefined()
-      expect(SRV.isProcessAlive(vite.pid!)).toBe(true)
+      await vi.waitFor(() => expect(SRV.isProcessAlive(vite.pid!)).toBe(false))
     } finally {
       vite.kill()
       otherServer.kill()
       rmSync(root, { recursive: true, force: true })
     }
+  })
+})
+
+describe("a vite that ends by itself comes back (epic `epic-engine` I455)", () => {
+  test("one taken over from the last page server is watched:  gone, its record goes and it starts again", async () => {
+    vi.useFakeTimers()
+    const root = mkdtempSync(join(tmpdir(), "editor-"))
+    const vite = spawn("sleep", ["30"], { detached: true, stdio: "ignore" })
+    try {
+      const editor = new EditorServer(root, "/x/my-project/spaces")
+      writeFileSync(editor.recordFile, JSON.stringify({ url: "http://localhost:1/", pid: vite.pid }))
+      const relaunch = vi
+        .spyOn(editor as never as { relaunchSoon(): void }, "relaunchSoon")
+        .mockImplementation(() => {})
+      editor["adoptedPid"] = vite.pid
+      editor["watchAdopted"]()
+      await vi.advanceTimersByTimeAsync(3000)
+      expect(relaunch).not.toHaveBeenCalled()
+      vite.kill()
+      await vi.waitFor(() => expect(SRV.isProcessAlive(vite.pid!)).toBe(false))
+      await vi.advanceTimersByTimeAsync(3000)
+      expect(relaunch).toHaveBeenCalledOnce()
+      expect(existsSync(editor.recordFile)).toBe(false)
+    } finally {
+      vi.useRealTimers()
+      vite.kill()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
+describe("editorsInTheWay():  one editor per checkout, main's alone on 3000 (epic `epic-engine` I455)", () => {
+  const app = "/kit/app/app"
+  const worktreeApp = "/kit.worktrees/ast-markup/app/app"
+
+  test("a vite of this checkout no record names is stopped;  the kept one and its child stay", () => {
+    const editors = [
+      { pid: 10, folder: app, port: undefined },
+      { pid: 11, parent: 10, folder: app, port: 3000 },
+      { pid: 20, folder: app },
+      { pid: 21, parent: 20, folder: app, port: 3001 },
+      { pid: 30, folder: app, port: 3002 }
+    ]
+    expect(editorsInTheWay({ editors, appDir: app, keep: new Set([10]) })).toEqual([20, 21, 30])
+  })
+
+  test("main stops a worktree's vite on 3000;  a worktree never touches another checkout's", () => {
+    const editors = [
+      { pid: 40, parent: 39, folder: worktreeApp, port: 3000 },
+      { pid: 50, folder: "/kit.worktrees/editor/app/app", port: 4905 }
+    ]
+    expect(editorsInTheWay({ editors, appDir: app, keep: new Set(), mainPort: 3000 })).toEqual([40])
+    expect(editorsInTheWay({ editors, appDir: app, keep: new Set() })).toEqual([])
+  })
+
+  test("one whose folder can't be told is left alone", () => {
+    expect(
+      editorsInTheWay({ editors: [{ pid: 60, port: 3000 }], appDir: app, keep: new Set(), mainPort: 3000 })
+    ).toEqual([])
   })
 })
 

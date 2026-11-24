@@ -37,6 +37,7 @@ import {
   type ListedMark,
   type ListedUrgency,
   type PickFields,
+  type StepOutput,
   type TakenWork
 } from "./ReviewInbox"
 import { FEEDBACK, SeeAlso, epicNamed } from "./SeeAlso"
@@ -326,6 +327,7 @@ export class InboxCommands {
       if (mark.result) parts.push(TEST_WORDS[mark.result])
       if (mark.note) parts.push(mark.action === "test" ? `comment "${mark.note}"` : `"${mark.note}"`)
       if (mark.shot) parts.push(`screenshot ${mark.shot}`)
+      if (mark.outputs?.length) parts.push(`pasted output for step ${mark.outputs.map((each) => each.step).join(", ")}`)
       if (mark.near) parts.push(`about ${mark.near.toUpperCase()}`)
       if (mark.comments?.length) parts.push(`his comments ${upper(mark.comments)}`)
       if (mark.held) parts.push(`held:  goes at ${mark.at}, unless Owen calls it off`)
@@ -504,6 +506,8 @@ export class InboxCommands {
             // a test answer's screenshot, or a note's one picture from before P75:  apart from its words
             if (mark.shot) lines.push(`        screenshot:  ${mark.shot}`)
           }
+          // what a test's steps printed, pasted under each one's command (epic `epic-engine` T165):  his words too
+          lines.push(...stepOutputLines(mark.outputs, "        "))
           // an Accept that kept his comments in its text (epic `epic-engine` I163):  fold them in, no second Accept
           if (mark.action === "approve" && mark.inlineComments?.length) {
             const ids = mark.inlineComments.map((comment) => comment.id)
@@ -1034,6 +1038,19 @@ function commentLines(comment: IdentifiedComment, indent: string, unsent = false
   ]
   const reply = ThreadFacts.lastPersonReply(comment)
   if (reply?.text) lines.push(`${indent}  ${reply.by} replied:  "${reply.text.slice(0, 160)}"  (${reply.at})`)
+  return lines
+}
+
+/**
+ * What a test's steps printed (`outputs`, epic `epic-engine` T165), as `wait` hands them over:  a line per step, then
+ * the person's paste, indented, word for word;  none:  `[]`.
+ */
+function stepOutputLines(outputs: readonly StepOutput[] | undefined, indent: string): string[] {
+  const lines: string[] = []
+  for (const output of outputs ?? []) {
+    lines.push(`${indent}step ${output.step} printed (pasted by the person):`)
+    for (const line of output.text.split("\n")) lines.push(`${indent}  | ${line}`)
+  }
   return lines
 }
 

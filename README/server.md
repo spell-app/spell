@@ -241,7 +241,10 @@ brew install nss            # only if you use Firefox
 spell server certificate
 ```
 
-- Or from the Servers tab, with no terminal:  the "Secure link" card under main turns it on and off.
+- Or from the Servers tab, with no terminal:  the lock among the buttons of main's page server's card turns it on and
+  off, and a lock before a page server's address says it has it.
+  - Only the page servers speak HTTPS:  the editor (Vite) and the epic hub stay on plain HTTP.
+    The editor's HTTPS address is the house-network site's (`test.spell.app`, through Caddy), when it's set up.
   - Turning on there, the Mac asks for the password in its own window, and trusts it for you alone (your login
     keychain), where the command trusts it for the whole Mac.
 - Either way, the server keeper restarts main's page server by itself within a few seconds:  it watches the

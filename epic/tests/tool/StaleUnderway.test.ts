@@ -129,3 +129,79 @@ describe("StaleUnderway", () => {
     expect(item.querySelector(":scope > epic-commit")?.textContent?.trim()).toBe("the fix for I1")
   })
 })
+
+describe("StaleUnderway:  a Noted card saying it's fixed (I452)", () => {
+  /** A page with an issue whose Underway card turned Noted, its summary `words`, written `hoursAgo`. */
+  function saidPlan(words: string, hoursAgo = 0): PlanDoc {
+    const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"))
+    plan.now = new Date(Date.now() - hoursAgo * HOUR)
+    const id = plan.addItem("issue", "Said fixed", { requested: true })
+    plan.addStatus(id, "Finding why")
+    plan.noteStatus(id, words)
+    plan.now = new Date()
+    return plan
+  }
+
+  test("its sha on main, at any age:  fixed for review", () => {
+    const plan = saidPlan(`Fixed in ${landed.slice(0, 9)}, unit tests running before the merge.`)
+    const lines = new StaleUnderway({ plan, epic: "x", main: root }).apply()
+    expect(lines).toEqual([expect.stringMatching(/^I1 fixed, for review:  on main as /)])
+    expect(plan.item("i1").hasAttribute("fixed")).toBe(true)
+    expect(new StaleUnderway({ plan, epic: "x", main: root }).apply()).toEqual([])
+  })
+
+  test("not on main:  left alone while young, a Stale card once it's old", () => {
+    // epic z:  the scratch repo's first commit names x's I1
+    const young = saidPlan("Fixed in abcdef123, merging.")
+    const report = new StaleUnderway({ plan: young, epic: "z", main: root }).report()
+    expect(report.map((each) => [each.id, each.waiting])).toEqual([["i1", true]])
+    expect(new StaleUnderway({ plan: young, epic: "z", main: root }).apply()).toEqual([])
+    const old = saidPlan("Fixed in abcdef123, merging.", 48)
+    expect(new StaleUnderway({ plan: old, epic: "z", main: root }).apply()).toEqual([
+      "I1 stale:  said finished 2d ago, nothing on main"
+    ])
+    expect(old.item("i1").textContent).toContain("Stale:  Said finished on")
+    expect(new StaleUnderway({ plan: old, epic: "z", main: root }).apply()).toEqual([])
+  })
+
+  test("a sha rebased away counts by main's commit of the same subject;  another commit naming it doesn't", () => {
+    git("checkout", "-qb", "side")
+    writeFileSync(join(root, "b.txt"), "side\n")
+    git("add", "b.txt")
+    git("commit", "-qm", "w I1:  the real fix")
+    const rebased = git("rev-parse", "HEAD").trim()
+    git("checkout", "-q", "main")
+    git("branch", "-qD", "side")
+    writeFileSync(join(root, "c.txt"), "other\n")
+    git("add", "c.txt")
+    git("commit", "-qm", "w I1:  another change, before the fix")
+    writeFileSync(join(root, "b.txt"), "side\n")
+    git("add", "b.txt")
+    git("commit", "-qm", "w I1:  the real fix")
+    const copy = git("rev-parse", "HEAD").trim()
+    const plan = saidPlan(`Built and committed (${rebased.slice(0, 9)}), merging.`)
+    const [item] = new StaleUnderway({ plan, epic: "w", main: root }).report()
+    expect(item!.onMain.map((each) => each.full)).toEqual([copy])
+  })
+
+  test("named by no sha:  as an Underway card, a commit naming it", () => {
+    const plan = saidPlan("Merged into main with I3")
+    const [item] = new StaleUnderway({ plan, epic: "w", main: root }).report()
+    expect(item!.onMain.map((each) => each.subject)).toEqual([
+      "w I1:  the real fix",
+      "w I1:  another change, before the fix"
+    ])
+  })
+
+  test("any other Noted card is no candidate", () => {
+    const plan = saidPlan("Not merged:  a conflict in PlanDoc.ts")
+    expect(new StaleUnderway({ plan, epic: "x", main: root }).report()).toEqual([])
+  })
+
+  test("refuseFinishedNote():  Fixed, Done, Built, Merged refused, saying what to run;  a record passes", () => {
+    for (const words of ["Fixed in f43cc8655", "<p>Done, on main</p>", "Built and committed", "merged into main"])
+      expect(() => StaleUnderway.refuseFinishedNote("i3", words)).toThrow(/I3:  a Noted card is a record[\s\S]*fixed/)
+    expect(() => StaleUnderway.refuseFinishedNote("i3", "Chose B · keep one file")).not.toThrow()
+    expect(() => StaleUnderway.refuseFinishedNote("i3", "Not merged:  why")).not.toThrow()
+  })
+})

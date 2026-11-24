@@ -11,6 +11,7 @@ import {
   REVIEW_API,
   REVISIT_KEY_PREFIX,
   NOBODY_LISTENING,
+  OUTPUT_ACTIONS,
   STAGE_COUNTDOWN_MS,
   SUMMARY_ID,
   TESTS_API,
@@ -27,6 +28,7 @@ import {
   isInstant,
   isSent,
   isWorkOnMark,
+  outputsWith,
   pickFieldsOf,
   pickOf,
   setPicksOf,
@@ -297,6 +299,14 @@ export class ReviewClient extends PageStore {
   /** Item `id`'s mark, if any. */
   markOf(id: string): InboxMark | undefined {
     return this.inbox.marks[id]
+  }
+
+  /**
+   * What test `id`'s step `step` printed, as pasted in the box under its command (epic `epic-engine` T165):
+   * its mark's `outputs`, the one Claude took too;  `""` for nothing.
+   */
+  outputOf(id: string, step: number): string {
+    return this.inbox.marks[id]?.outputs?.find((each) => each.step === step)?.text ?? ""
   }
 
   /**
@@ -1012,8 +1022,57 @@ export class ReviewClient extends PageStore {
       .map(([id, mark]) => ({ id, to: mark.to! }))
   }
 
+  /**
+   * Put what test `id`'s step `step` printed (`text`, pasted under its command) in the test's mark
+   * (epic `epic-engine` T165;  Owen, 2026-11-23:  "a 'paste the output of this command here' ... for each step");
+   * true when saved.
+   * - into the mark he made (an Approve, a Revisit note, the x ...:  `OUTPUT_ACTIONS`), so it goes with his answer
+   * - no such mark:  a revisit with no words of his, as a picture alone makes one;  Send hands it over
+   * - every step's box emptied, and nothing else in that revisit:  the mark goes
+   */
+  saveOutput(id: string, step: number, text: string, options: WriteOptions = {}): Promise<boolean> {
+    const mark = this.inbox.marks[id]
+    const outputs = outputsWith(mark?.outputs, step, text)
+    const own = mark && !this.isTaken(id) && !isImmediate(mark) && OUTPUT_ACTIONS.has(mark.action)
+    const {
+      at: _at,
+      outputs: _old,
+      ...base
+    }: Partial<InboxMark> & MarkInput = own ? mark : { action: "revisit", when: "soon", note: "", ...pickOf(mark) }
+    if (!outputs.length && ReviewClient.isBareRevisit(base)) {
+      const pick = pickOf(base)
+      return this.put(id, hasPick(pick) ? { action: "pick", ...pick } : null, { quiet: true, ...options })
+    }
+    return this.put(id, { ...base, ...(outputs.length ? { outputs } : {}) }, { quiet: true, ...options })
+  }
+
+  /** Is `mark` a revisit with nothing in it but maybe a pick:  no words, picture or comments of his? */
+  private static isBareRevisit(mark: MarkInput): boolean {
+    return mark.action === "revisit" && !mark.note?.trim() && !mark.shot && !mark.comments?.length
+  }
+
+  /**
+   * The mark to save for `mark` on test `id`, what was pasted under its steps carried over (`outputs`, T165):
+   * - a mark that can't carry them, or none to carry:  as it is
+   * - nothing (a button taken back, a note emptied):  a revisit carrying them, as a picture alone makes one
+   * - from his own mark only:  one Claude took lends them to none
+   */
+  private withOutputsKept(id: string, mark: MarkInput | null): MarkInput | null {
+    const was = this.inbox.marks[id]
+    const outputs = was && !this.isTaken(id) ? was.outputs : undefined
+    if (!outputs?.length) return mark
+    if (!mark) return { action: "revisit", when: "soon", note: "", ...pickOf(was), outputs }
+    return OUTPUT_ACTIONS.has(mark.action) && !isImmediate(mark) ? { ...mark, outputs } : mark
+  }
+
   /** Mark item `id` (`mark`, or `null` to clear), shown at once, then saved. */
-  async save(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
+  save(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
+    // what he pasted under a test's steps stays with whatever he marks it (T165)
+    return this.put(id, this.withOutputsKept(id, mark), options)
+  }
+
+  /** `save()`, `mark` as it is:  what a test's steps printed only as it says (`saveOutput()`). */
+  private async put(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
     // Owen marked it again:  what Claude took before is no longer his latest word
     this.taken.delete(id)
     // a stage accept's countdown (I181):  held from the first frame, as the server dates it

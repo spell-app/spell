@@ -783,6 +783,9 @@ Until a `/back:  ...` message (or `epic focus status` says off):
          - nothing Claude can check itself:  CI (`gh run list`), a command's output, a page's markup are Claude's to check
          - three or more steps with commands:  write them as a runbook, and the Step is its start command,
            `spell runbook start <name>` (the kit's AGENTS.md, "Commands")
+         - each step's COMMAND (a code block in it) gets a box under it on the page, "Paste what this command
+           printed" (epic `epic-engine` T165):  one box per step, so a command whose output they should send you is a
+           step of its own, a numbered list item;  the page reads it off the markup, nothing to add
        - `--example`:  a screenshot you took of it working, copied beside the page (`tests/<id>.png`)
        - `details <name>#M3 --step ... --should ...` rewrites an older manual test in these fields
      - They answer it WHERE IT IS, with the page's own marks (epic `epic-engine` P51, Q53:  no separate test run,
@@ -845,10 +848,18 @@ Until a `/back:  ...` message (or `epic focus status` says off):
    - `epic agents add` / `done`
    - Paste the cheat sheet below into their prompts,
      with "record todos, issues and decisions in the epic page as you find them".
+   - An agent changing a page or an element (a docs page, a component, the editor app) is told, in its brief, that
+     "done" means its rows line up (epic `epic-engine` P83):  before it says done it runs the page checker
+     (`node epic/src/tools/check-spell.js <page>`) or the designer's shots (`designer-shots.js`) on what it changed,
+     and fixes each misaligned row in its component, or marks one meant to be uneven
+     (`data-align="free: <why>"`);  the editor's tests check it after every test by themselves.
+     The scan:  `Alignment` (`spell/test-helpers/Alignment`), one item drawn more than half a pixel off its row.
 4. The reviews before the phase closes.
    - A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
      ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).
      - It fixes the obvious things itself, and asks about the bigger ones with before / after pictures on a details page.
+     - Its shots list every row whose items don't line up (epic `epic-engine` P83):  each one fixed in its component,
+       or marked as meant (`data-align="free: <why>"`), before the phase closes.
      - Its fixes go in the phase's Done;  what it asks about waits on the person, as calm issues.
    - Every phase:  the PLAN CHECK (epic `epic-engine` P72;  the idea borrowed from superpowers' spec review, MIT):
      a `plan-check` agent, named and listed `<name>-p<N>-check`, given the epic, the phase and the phase's diff
@@ -1364,6 +1375,9 @@ want you to just do it").
      - The note box's ✕ (`skip`) on a test:  `apply` CANCELS it, "no longer applies";  their note, if any, says why.
      - A REVISIT note on a test (or their comment in its Step or Should, which presses Revisit itself, I158) is what they
        saw, left for you.  A picture they pasted comes with it:  `wait` prints `screenshot:  tests/...png` under the mark.
+       What a step's command printed, pasted in the box under it (T165), comes with ANY of their marks on the test
+       (Approve, Revisit, the ✕), or alone as a revisit:  `wait` prints `step 2 printed (pasted by the person):` and the
+       text under the mark;  read it before `apply` closes a passed test (it may show a problem they missed).
        Read it, then:
        - it says it passed:  `epic close <name>#M3`
          (a passed test with a comment may still need work:  a todo or issue for what it asks)

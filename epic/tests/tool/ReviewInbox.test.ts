@@ -72,6 +72,31 @@ describe("ReviewInbox marks", () => {
     expect(() => ReviewInbox.toMark({ action: "revisit", shot: "../x.png" })).toThrow(InboxError)
   })
 
+  // epic `epic-engine` T165:  what a test's steps printed, pasted under each command
+  test("a test's pasted outputs:  by step, empties dropped, on a revisit, an Approve and the x;  never a comment", () => {
+    const outputs = [
+      { step: 3, text: "\n\nthird\n  " },
+      { step: 1, text: "first" },
+      { step: 2, text: "   " }
+    ]
+    const kept = [
+      { step: 1, text: "first" },
+      { step: 3, text: "third" }
+    ]
+    expect(ReviewInbox.toMark({ action: "revisit", note: "", outputs })).toEqual({
+      action: "revisit",
+      when: "soon",
+      note: "",
+      outputs: kept
+    })
+    expect(ReviewInbox.toMark({ action: "approve", outputs })).toEqual({ action: "approve", outputs: kept })
+    expect(ReviewInbox.toMark({ action: "skip", outputs: [] })).toEqual({ action: "skip" })
+    expect(() => ReviewInbox.toMark({ action: "revisit", outputs: [{ step: 0, text: "x" }] })).toThrow(InboxError)
+    expect(() => ReviewInbox.toMark({ action: "revisit", outputs: "x" })).toThrow(InboxError)
+    const mark = { ...ReviewInbox.toMark({ action: "revisit", note: "all fine", outputs }) }
+    expect(ReviewInbox.isNoteToTalkOver(mark)).toBe(false)
+  })
+
   test("the kickoff box (P75):  a `kickoff` mark of words, only under `kickoff`, markable while there are no phases", () => {
     const inbox = new ReviewInbox()
     const note = "Make a list page.\n![IMG1](pictures/kickoff-20261117-2300.png)\nLike IMG1."

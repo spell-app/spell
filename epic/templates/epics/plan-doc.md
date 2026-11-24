@@ -350,6 +350,9 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
       - a wait or a look between commands is a step of its own, between their blocks
       - the real names:  the extension's output channel is `Spell`, not "Spell Language Server"
       - nothing Claude can check itself:  CI (`gh run list`), a command's output, a page's markup are Claude's to check
+      - a step's COMMAND (a code block) gets a box under it on the page, "Paste what this command printed"
+        (`<epic-step-output>`, epic `epic-engine` T165):  one per step, numbered as the list counts, so a command whose
+        output the person should send is a step of its own;  nothing to write for it, the page reads the markup
   - Should:  what should happen;  `--should`
   - Example, optional:  a screenshot Claude took (`--example shot.png`, copied to `tests/<id>.png` beside the page)
     and / or a line of text
@@ -707,6 +710,10 @@ with the page's own marks, sent with Send like any other:
   picture. Left for the session: it closes the test when their note says it passed, else files an issue
   "M3 failed: <title>" holding their note and picture, linked both ways, the test left open.
 - The note box's ✕ (`skip`): `inbox apply` CANCELS it, "no longer applies";  a note says why.
+- What a step's command printed, pasted in the box under it (epic `epic-engine` T165): it rides in their mark as
+  `outputs` (`[{ step, text }]`), with their Approve, Revisit note or ✕;  pasted with no mark yet, it's a revisit of
+  its own, as a picture alone is. `wait` prints each one under the mark, "step 2 printed (pasted by the person):",
+  word for word: read it before you apply or close the test.
 - Left alone: still open;  nothing to press for "not now".
 - A test Claude checked itself and saw pass, Claude MAY close, with a Done card saying how and the picture
   (Q58): the one exception to "a manual test is the person's to close".

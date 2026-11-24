@@ -843,6 +843,14 @@ describe("PlanDocCommands close --why", () => {
       "Maybe obsolete"
     )
   })
+
+  // epic `epic-engine` I452:  a Noted "Fixed in <sha>" left editor's I329 red, its fix never marked fixed
+  test("a noted card saying the work is finished is refused, saying what to run;  nothing written", async () => {
+    await seed((plan) => void add(plan, "issue", "Broken"))
+    expect(await commands().run(["status", "x", "i1", "noted", "Fixed in f43cc8655, merging next"])).toBe(1)
+    expect(warned.join("")).toMatch(/I1:  a Noted card is a record[\s\S]*fixed "<what changed>"[\s\S]*underway/)
+    expect(FILES.read(file).item("i1").querySelector("epic-status")).toBeNull()
+  })
 })
 
 // epic `epic-engine` T78:  an issue filed from the person's words and taken up at once is blue, never red

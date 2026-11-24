@@ -23,6 +23,7 @@ import type {
   PageInbox,
   PickFields,
   SetPick,
+  StepOutput,
   AddedOption,
   EditedOption,
   WaitingComment,
@@ -409,6 +410,7 @@ export type {
   NowRequest,
   PickFields,
   SetPick,
+  StepOutput,
   AddedOption,
   EditedOption,
   WaitingComment,
@@ -754,6 +756,24 @@ export function pickedLetters(pick: string | null | undefined): string[] {
 /** `mark`'s comments, to carry into another revisit (epic `epic-engine` I140):  `{ comments }`, or `{}`. */
 export function commentsOf(mark: { comments?: string[] } | null | undefined): { comments?: string[] } {
   return mark?.comments?.length ? { comments: mark.comments } : {}
+}
+
+/**
+ * The marks that carry a manual test's pasted outputs (`outputs`, epic `epic-engine` T165):  every note box's mark,
+ * and Approve.
+ * - any other mark made on the test (a pick) gives way to a revisit carrying them:  what was pasted is never dropped
+ */
+export const OUTPUT_ACTIONS: ReadonlySet<string> = new Set(["revisit", "approve", "todo", "next", "drop", "skip"])
+
+/**
+ * `outputs` with step `step`'s text set to `text`, in step order;  an empty `text` takes the step out.
+ * - its text as pasted, only blank lines before it and spaces after it trimmed (as `ReviewInbox` keeps it)
+ */
+export function outputsWith(outputs: readonly StepOutput[] | undefined, step: number, text: string): StepOutput[] {
+  const kept = text.replace(/^\s*\n/, "").trimEnd()
+  const others = (outputs ?? []).filter((each) => each.step !== step)
+  const next = kept.trim() ? [...others, { step, text: kept }] : others
+  return next.sort((a, b) => a.step - b.step)
 }
 
 /**

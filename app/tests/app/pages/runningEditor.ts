@@ -6,6 +6,8 @@ import type { EditorView } from "@codemirror/view"
 import { chromium, type BrowserContext, type Locator, type Page } from "playwright"
 import { afterAll, afterEach } from "vite-plus/test"
 
+import { Alignment } from "spell/test-helpers/Alignment"
+
 /**
  * How the editor's end-to-end tests find the running editor:  every test file here that opens it imports this.
  * - No record of an editor, as in CI:  `SERVING` is false, and the file skips itself.
@@ -14,6 +16,7 @@ import { afterAll, afterEach } from "vite-plus/test"
  *   - The editor is meant to be running, so skipping would look like a pass.
  *   - Start one with `spell server start all`.
  * - And it fails any test during which a page's updates stopped for good ("A stopped page", below).
+ * - And any test after which a page it opened shows a row whose items don't line up ("Rows lined up", below).
  * - Its pages keep running the code they loaded, though the editor's code changes on disk meanwhile
  *   ("Code as it was loaded", below).
  */
@@ -333,12 +336,58 @@ function codeChangeIn(message: string | Buffer): string | undefined {
 /** Has this test file said its pages kept their code (`keepCodeAsLoaded()`)? */
 let saidCodeChanged = false
 
+////////////////
+// ## Rows lined up
+////////////////
+
+/** Every page the test file's browsers opened, still open:  each is scanned after each test. */
+const openPages = new Set<Page>()
+
+/** Note `page`, forgotten once it closes. */
+function notePage(page: Page): void {
+  openPages.add(page)
+  page.once("close", () => openPages.delete(page))
+}
+
+/** What was already said this file, so a page kept open across tests fails the first test it shows in, once. */
+const saidMisaligned = new Set<string>()
+
+/**
+ * Fail the test if a page it left open shows a row whose items don't line up (epic `epic-engine` P83):
+ * any editor test checks the rows it shows, whatever it was testing.
+ * - the scan:  the kit's `Alignment`;  a row meant to be uneven says so with `data-align="free: <why>"`
+ * - a page that can't be scanned (closing, navigating) is left alone
+ */
+async function failOnMisalignedRows(): Promise<void> {
+  const reports: string[] = []
+  for (const page of openPages) {
+    if (page.isClosed()) continue
+    try {
+      for (const line of Alignment.report(await Alignment.scanPage(page))) {
+        const said = `${page.url()}\n${line}`
+        if (!saidMisaligned.has(said)) reports.push(said)
+        saidMisaligned.add(said)
+      }
+    } catch (ignored) {
+      // closing or navigating:  nothing to scan
+    }
+  }
+  if (reports.length)
+    throw new Error(
+      [
+        "A row on the page doesn't line up:  one item is drawn above or below the rest of its row.",
+        'Fix it in its component;  a row meant to be uneven says so:  data-align="free: <why>".',
+        ...reports
+      ].join("\n\n")
+    )
+}
+
 /**
  * Every test file's browsers watched for stopped pages, and kept on the code they loaded,
  * with nothing for a test to remember.
  * - HACK:  replaces `chromium.launch()`, and each browser's `newContext()` and `newPage()`:
  *   Playwright has no event for "a context was made".
- * - NEVER throws by itself:  `failOnStoppedPages()` is what fails the test.
+ * - NEVER throws by itself:  `failOnStoppedPages()` and `failOnMisalignedRows()` are what fail the test.
  */
 function watchEveryBrowser(): void {
   const launch = chromium.launch.bind(chromium)
@@ -350,12 +399,14 @@ function watchEveryBrowser(): void {
       const context = await newContext(...args)
       watchForStoppedPages(context)
       await keepCodeAsLoaded(context)
+      context.on("page", notePage)
       return context
     }
     browser.newPage = async (...args) => {
       const page = await newPage(...args)
       watchForStoppedPages(page.context())
       await keepCodeAsLoaded(page.context())
+      notePage(page)
       return page
     }
     return browser
@@ -390,4 +441,5 @@ function failOnStoppedPages(): void {
 
 watchEveryBrowser()
 afterEach(failOnStoppedPages)
+afterEach(failOnMisalignedRows)
 afterAll(failOnStoppedPages)

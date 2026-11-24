@@ -36,7 +36,7 @@ import {
  *     stopped, until Start
  *   - its editor:  it comes and goes with the page server (its child), so it's kept through it:  when the repo's
  *     settings say how the app starts (`EpicConfig.app.start`, the App tab's), an editor down under a running page
- *     server restarts the page server, at most once every `EDITOR_RETRY_MINUTES`;  its Start and Restart do the same;
+ *     server restarts the page server, at most once every `EDITOR_RETRY_MINUTES` (3);  its Start and Restart do the same;
  *     without a start command, it's only watched, with no buttons
  *   - the repo's OWN servers, from its `.epic/config.json5` (`servers`:  a proxy server, say):  watched, by a URL or a
  *     port;  started when down if it names a `start` command, else only shown
@@ -286,7 +286,7 @@ export class ServerKeeper {
     if (this.now() - started < EDITOR_WAIT_SECONDS * 1000) return { ...kept, state: "starting" }
     const tried = this.lastStart.get(row.id)
     if (tried !== undefined && this.now() - tried < EDITOR_RETRY_MINUTES * 60_000)
-      return { ...kept, state: "down", why: `It didn't come back:  see ${EDITOR_LOG}.  Restart tries again.` }
+      return { ...kept, state: "down", why: EDITOR_DOWN }
     await this.restartForEditor(repo)
     return { ...kept, state: "starting", why: "started:  it was down" }
   }
@@ -677,11 +677,16 @@ const EDITOR_FILE = ".spell-server.editor.json"
 /** How long an editor may take to answer after its page server starts, seconds:  Vite may be building its cache. */
 const EDITOR_WAIT_SECONDS = 90
 
-/** How long after the keeper restarted the page server for a down editor before it tries again, minutes. */
-const EDITOR_RETRY_MINUTES = 10
+/**
+ * How long after the keeper restarted the page server for a down editor before it tries again, minutes.
+ * - 3, not 10 (epic `epic-engine` I455):  the page server starts a vite that ends by itself again at once
+ *   (`EditorServer.relaunchSoon()`), so the keeper's turn comes only when that didn't work
+ */
+const EDITOR_RETRY_MINUTES = 3
 
-/** Where the editor's output goes, in the main checkout. */
-const EDITOR_LOG = ".spell-server.editor.log"
+/** What a down editor's card says, in plain words (novice voice):  never a log file's name */
+const EDITOR_DOWN =
+  "The editor didn't start.\nPress Restart to try again.\nSpell also tries again by itself every few minutes."
 
 /** How long a stop waits for a process to end before it kills it, ms. */
 const STOP_WAIT_MS = 10_000

@@ -101,7 +101,11 @@ a folder of the kit `spell`.
     and the repo's own servers (its `.epic/config.json5`'s `servers`:  a name, a URL or port to check, and a `start`
     command if it wants Start and Restart) watched and started
   - main's editor kept through its page server, when the repo's `app` names a `start`:  down, the page server is
-    restarted (at most every 10 minutes), and its Start and Restart do the same;  else only watched
+    restarted (at most every 3 minutes), and its Start and Restart do the same;  else only watched
+    - the page server itself starts a vite that ends by itself again within seconds (`EditorServer.relaunchSoon()`,
+      at most 3 times an hour), and stops every other vite of its checkout first, so a checkout has ONE editor:  main's
+      on 3000 (a worktree's vite found there stopped), a worktree's on its booked port, on 127.0.0.1 (epic
+      `epic-engine` I455)
   - what waits for main, for each repo the hub serves:  what merged into main lately (each branch that brought commits
     of its own, never one that only merged main into itself), each epic worktree's commits not merged, phase, open
     issues, todos and questions, busy or idle
@@ -134,11 +138,21 @@ a folder of the kit `spell`.
         (restart, stop;  start when stopped);  one a server can't take drawn disabled, its tooltip saying why (the hub
         keeps the rest, so it never stops;  an editor goes with its page server);  what merged into main, and each
         worktree's open work, as rows in columns, nothing wrapping, the GitHub line their quiet last row
-      - T164:  main's last card is the SECURE LINK's, HTTPS on the page servers (`HttpsSwitch`, on `SRV.LocalCertificate`,
-        none of its logic copied):  On, Off, Needs password or Expired, Turn on and Turn off as its icons (the one that
-        can't, disabled, saying why:  no mkcert, already off);  Turn on makes the certificate and has the Mac ask for
-        the password in its own window (`trustInWindow()`, the person's login keychain:  the hub has no terminal for
-        `sudo`);  the restart is the keeper's watch, asked to look just after the answer
+      - I456:  the state is ONE icon on the right of the name, its words the tooltip ("Running", "Down:  <why>"):  a
+        green circle check, a red triangle, a grey circle while stopped, a turning blue notch while starting;  under
+        it the buttons, a tight group (compact icon buttons, 4px apart), the state centred over the last;  the name
+        never cut at three a row
+      - T164, I454, I456:  the SECURE LINK, HTTPS on the page servers (`HttpsSwitch`, on `SRV.LocalCertificate`, none
+        of its logic copied), is ONE lock, before main's page server's address, and it IS the switch:  closed while on
+        (a click turns it off), open while off, waiting for the password or expired (a click turns it on;  disabled,
+        saying why, with no mkcert);  its tooltip says which first, "browsers use HTTP/2";  a worktree's page server on
+        its https address shows a plain lock there;  only the page servers have it, the editor and the hub stay plain
+        HTTP (a card of its own before I454 read as if every server had it);  Turn on makes the certificate and has
+        the Mac ask for the password in its own window (`trustInWindow()`, the person's login keychain:  the hub has
+        no terminal for `sudo`);  the restart is the keeper's watch, asked to look just after the answer
+      - I455:  a look that fails (the hub handing over, a page server restarting) asks again every 2 seconds, the page
+        as it was and a calm "Reconnecting…";  only after 30 seconds the problem;  a down editor's card says what to
+        do in plain words, never a log file's name
       - T164:  main's heading has RESTART ALL at its right:  every main page server restarted, its editor with it, one
         stopped by hand too, just after the answer (the call comes through main's page server);  the hands-off switch
         first on the page, a notice under it while it's on;  a card whose server isn't running says "Not running"

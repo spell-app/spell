@@ -761,6 +761,25 @@ test("the kickoff box:  wait prints its words and each picture's file by label; 
   expect(ReviewInbox.read(inboxFile).marks).toEqual({})
 })
 
+// epic `epic-engine` T165:  what a test's steps printed, handed over word for word with its answer
+test("a test's pasted outputs:  listed, and handed over by wait under its mark, step by step", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addItem("test", "one")
+  writeFileSync(file, plan.toString())
+  const outputs = [{ step: 2, text: "Ready\n  Firefox:  ready" }]
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("m1", { action: "approve", outputs }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, [], {})
+  expect(printed.join("\n")).toContain("M1  one  · pasted output for step 2")
+  printed = []
+  await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
+  expect(printed.join("\n")).toContain(
+    ["        step 2 printed (pasted by the person):", "          | Ready", "          |   Firefox:  ready"].join("\n")
+  )
+})
+
 // epic `epic-engine` I44:  a failure's screenshot in its new issue, in a split page's part, as the part reads it
 test("a failed test's issue on a split page:  its screenshot written into the part as its root path", async () => {
   const files = new PlanDocFiles({ root })
