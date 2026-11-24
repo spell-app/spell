@@ -222,6 +222,7 @@ export class LocalCertificate {
     await this.tools.ask("security", TRUST_IN_WINDOW_COMMAND(authority))
   }
 
+  /**
    * SIDE EFFECT:  Firefox trusts mkcert's authority too, in every profile:  `mkcert -install`, which uses `certutil`.
    * - asks for nothing once the Mac trusts it (`trust()` first):  mkcert sees that, and only fills Firefox's lists
    * - throws `CertificateError` without mkcert, or when it fails
