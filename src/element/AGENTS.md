@@ -157,6 +157,10 @@ then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is
     `breakRender()`, a forced render failure
   - [`A11y`](../test-helpers/A11y.ts):  axe on a live element (`expectAccessible()`), and WCAG contrast
   - [`Viewport`](../test-helpers/Viewport.ts):  resize the test iframe for one test
+  - [`Alignment`](../test-helpers/Alignment.ts):  every row on a page with an item drawn more than half a pixel off
+    its row's middle (epic `epic-engine` P83);  in a component test (`scan()`) or a Playwright page (`scanPage()`),
+    plain `node` too, as the page checker, the designer's shots and every editor test run it
+    - its test is in the `element` project, [`tests/element/test-helpers/`](../../tests/element/test-helpers/Alignment.test.ts)
   - They know only the DOM, Solid, `DOMElement` and `UIComponent`:  a helper that needs Spell UI stays in Spell UI's
     `test-helpers/` (`MemberClashes`, `ThemeHarness`, `Sheets` ...).
     - What needs Spell UI's real runtime is tested in Spell UI's tests:

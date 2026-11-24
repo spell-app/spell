@@ -848,10 +848,18 @@ Until a `/back:  ...` message (or `epic focus status` says off):
    - `epic agents add` / `done`
    - Paste the cheat sheet below into their prompts,
      with "record todos, issues and decisions in the epic page as you find them".
+   - An agent changing a page or an element (a docs page, a component, the editor app) is told, in its brief, that
+     "done" means its rows line up (epic `epic-engine` P83):  before it says done it runs the page checker
+     (`node epic/src/tools/check-spell.js <page>`) or the designer's shots (`designer-shots.js`) on what it changed,
+     and fixes each misaligned row in its component, or marks one meant to be uneven
+     (`data-align="free: <why>"`);  the editor's tests check it after every test by themselves.
+     The scan:  `Alignment` (`spell/test-helpers/Alignment`), one item drawn more than half a pixel off its row.
 4. The reviews before the phase closes.
    - A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
      ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).
      - It fixes the obvious things itself, and asks about the bigger ones with before / after pictures on a details page.
+     - Its shots list every row whose items don't line up (epic `epic-engine` P83):  each one fixed in its component,
+       or marked as meant (`data-align="free: <why>"`), before the phase closes.
      - Its fixes go in the phase's Done;  what it asks about waits on the person, as calm issues.
    - Every phase:  the PLAN CHECK (epic `epic-engine` P72;  the idea borrowed from superpowers' spec review, MIT):
      a `plan-check` agent, named and listed `<name>-p<N>-check`, given the epic, the phase and the phase's diff

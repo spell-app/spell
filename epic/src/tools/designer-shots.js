@@ -13,8 +13,11 @@
  *     content passes under the stuck bars):  `desk-dark-scroll-1.png` ...;  stuck headers show only here
  *   - each `--hover` / `--click`:  desk, the pointer over the selector's first shown match, or after clicking it (a
  *     menu, a popup, an open fold):  `desk-light-hover-1.png` ...
- * - prints a JSON summary on stdout (last thing written):  the URL, every shot's path, the page's console errors and
- *   any state it couldn't reach
+ * - prints a JSON summary on stdout (last thing written):  the URL, every shot's path, the page's console errors,
+ *   any state it couldn't reach, and every row whose items don't line up
+ * - each shot is scanned for rows whose items don't line up (`Alignment`, the kit's shared scan;  epic `epic-engine`
+ *   P83):  a problem per kind of finding, naming the shots it showed in;  a reviewer calls each one HIGH
+ *   (`designer.md`, "Icons and text centred"), fixed in the component, or marked as meant (`data-align="free: <why>"`)
  * - NEVER Claude-in-Chrome:  headless only (Owen's standing rule)
  */
 import { mkdirSync, mkdtempSync } from "node:fs"
@@ -22,6 +25,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import { BrowserPage } from "spell/element-tools/BrowserPage"
+import { Alignment } from "spell/test-helpers/Alignment.ts"
 
 import { openPage } from "./browserPage.js"
 import { browserUrlFor, pageFile } from "./pages.js"
@@ -73,6 +77,8 @@ try {
 
 const problems = []
 const shots = []
+/** Each misaligned row's message => the shots it showed in. */
+const misaligned = new Map()
 const browser = await BrowserPage.launch()
 try {
   for (const [name, viewport] of Object.entries(VIEWPORTS))
@@ -95,13 +101,16 @@ try {
 } finally {
   await browser.close()
 }
+for (const [message, stems] of misaligned) problems.push(`misaligned in ${[...stems].join(", ")}:  ${message}`)
 console.log(JSON.stringify({ url, out, shots, problems: [...new Set(problems)] }, null, 2))
 
-/** Screenshot `page` as `<stem>.png` in `out`, and list it. */
+/** Screenshot `page` as `<stem>.png` in `out`, list it, and note its misaligned rows. */
 async function shoot(page, stem, options = {}) {
   const path = join(out, `${stem}.png`)
   await page.screenshot({ path, ...options })
   shots.push(path)
+  for (const message of Alignment.report(await Alignment.scanPage(page)))
+    misaligned.set(message, (misaligned.get(message) ?? new Set()).add(stem))
 }
 
 /** The whole page, in slices `SLICE` tall:  `<stem>-1.png` ... */

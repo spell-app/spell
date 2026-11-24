@@ -649,6 +649,12 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
     design check and comparison;  the kit's publish check;  the app's examples script;  Spell UI's smoke pages
     (`SmokeRunner`) since P23.
   - Fine:  the kit's `scripts/favicon.ts` (renders an image, checks no page).
+- Its rows lined up:  `Alignment` (`spell/test-helpers/Alignment`, plain `node` too;  epic `epic-engine` P83):
+  every row on a page whose items' drawn middles differ by more than half a pixel, through shadow roots
+  - `Alignment.scanPage(page)` in a Playwright page, `Alignment.scan()` in a component test, `report()` for the lines
+  - its users:  the page checker (`check-spell.js`), the designer's shots, every editor test (`runningEditor.ts`)
+  - a copy:  the editor epic's `alignment.ts` (`app/tests/app/pages/`, its I327), on its branch:  its test moves onto
+    the scan as it merges
 
 ### The page server, from an epic page
 
