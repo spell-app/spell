@@ -106,8 +106,11 @@ async function pageServer(
   const router = new SRV.Router()
   const guard = new SRV.Guard({ token: TOKEN })
   const projectFileOf = async () => ({ ...(places && { places }) })
-  const served = AuthenticatedPlaces.for({ router, guard }, { from }).addSource(
-    new ProjectPlaces({ from, buildDir, projectFileOf })
+  // the project's own folder:  the build folder will do, as a test's project has none
+  const projectFolderOf = () => buildDir
+  const kept = { kept: () => undefined, keep: () => undefined }
+  const served = AuthenticatedPlaces.for({ router, guard }, { from, kept }).addSource(
+    new ProjectPlaces({ from, buildDir, projectFileOf, projectFolderOf })
   )
   const server = await serveHandler(router.handle)
   guard.allowPort(server.port)
@@ -234,5 +237,31 @@ describe("an authenticated place, read by a page through the page server", () =>
       readOnly: false
     })
     expect(SP.SpellProject.deploymentsIn(places, "staging", PROJECT).board!.readOnly).toBeUndefined()
+  })
+
+  test("a deployment's saved answers, under the project's folder:  read when its server doesn't answer", async () => {
+    // a port listened on, then closed:  nothing answers there
+    const closed = createServer()
+    const port = await SRV.listenPreferred(closed)
+    await new Promise<void>((done) => closed.close(() => done()))
+    const at = `http://127.0.0.1:${port}`
+    const lines = program(at)
+    const deployments = { board: { dev: { at, fixtures: "saved/dev" } } }
+    const { buildDir } = await pageServer(lines, { JOBS_TOKEN: SECRET, SPELL_DEPLOYMENT: "dev" }, deployments)
+    mkdirSync(join(buildDir, "saved/dev"), { recursive: true })
+    writeFileSync(join(buildDir, "saved/dev/jobs.json"), JSON.stringify([{ id: "j-9", title: "Saved plumber" }]))
+    const jobs = await jobsRead(lines)
+    expect(jobs.map(({ title }) => title)).toEqual(["Saved plumber"])
+  })
+
+  test("a token that renews itself:  its line reaches the page server, which says how it is", async () => {
+    const { url } = await standIn()
+    const lines = [...program(url).slice(0, 2), `\tits token is renewed at "/auth/refresh"`, ...program(url).slice(2)]
+    // a sign-in token with ten minutes left, not yet renewed:  expiring
+    const claims = Buffer.from(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 600 })).toString("base64url")
+    const { places } = await pageServer(lines, { JOBS_TOKEN: `e30.${claims}.sig` })
+    expect(await places.tokens()).toEqual([
+      expect.objectContaining({ project: PROJECT, place: "board", secret: "JOBS_TOKEN", state: "expiring" })
+    ])
   })
 })

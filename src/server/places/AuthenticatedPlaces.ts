@@ -5,8 +5,12 @@ import {
   STALE_TOKEN_ANSWER,
   type PlaceErrorCause
 } from "spell/places/places.types"
+import { readFile } from "node:fs/promises"
+import { join } from "node:path"
+
 import { putKeyOn, type KeyGoes } from "spell/places/keyGoes"
-import { PlaceToken, tokenServiceMint } from "spell/places/PlaceToken"
+import { PlaceToken, tokenEndOf, tokenRefreshMint, tokenServiceMint, type TokenState } from "spell/places/PlaceToken"
+import { answerFromSaved, isOffline, SAVED_ANSWER_HEADER, savedAnswerPath } from "spell/places/SavedAnswers"
 import { compilePattern } from "spell/util/addressPattern"
 import { CHANGE_ID_HEADER, TOKEN_HEADER } from "spell/places/WebPlace"
 import { SRV } from "spell/server"
@@ -29,6 +33,12 @@ const TEXT_TYPE = /json|text|xml|javascript|graphql/i
 /** A GraphQL request that writes. */
 const GRAPHQL_MUTATION = /^\s*mutation\b/
 
+/** A live answer a read takes a saved answer over:  refused for its token, or the server's own trouble. */
+const SAVED_INSTEAD = /^(401|403|5\d\d)$/
+
+/** How often the tokens that renew themselves are looked at, so one renews while nobody reads. */
+const RENEW_CHECK_MS = 5 * 60_000
+
 /** One server per router:  the kit's route module makes it, the app's adds its projects (`for()`). */
 const ONE_PER_ROUTER = new WeakMap<SRV.Router, AuthenticatedPlaces>()
 
@@ -49,6 +59,14 @@ const ONE_PER_ROUTER = new WeakMap<SRV.Router, AuthenticatedPlaces>()
  *   - A token made from it (`it is authenticated with a token from "..."`):  made here, kept, made again before it
  *     runs out (`PlaceToken`), and taken out of answers too.
  *   - Not set:  refused, saying which secret and which place need it, and the page says those words.
+ *   - A token that renews itself (`its token is renewed at "..."`):  renewed at its refresh route before it runs out,
+ *     kept where secrets are kept (`SRV.Secrets`), and looked at every 5 minutes so it renews while nobody reads
+ *     (`keepRenewing()`).  Of the environment's and the one kept, the one that lasts longer is sent.
+ *   - How each place's token is:  `tokens()`, at `/api/places/tokens` (`TOKENS_ROUTE`), never a token:
+ *     `ok`, `expiring`, `expired`, `renew-failed` or `missing`, its minutes left, and the line that fixes it.
+ * - SAVED ANSWERS (its deployment's `fixtures`, `SavedAnswers`):  a read its server won't answer (no answer, a 5xx, a
+ *   401 or 403, a secret not set or run out) is answered from the saved one, when there is one, marked
+ *   `SAVED_ANSWER_HEADER`;  `offline`, read from them alone, and a write refused.
  * - REFUSED by its source (`AuthenticatedPlace.refusal`):  every read and write, in the source's words, nothing passed
  *   on;  said as the page server starts too.  The app's:  a deployment its project file doesn't list (from-console J104).
  * - READ ONLY when its lines or its deployment say so:  only reads go on;  a write is refused.
@@ -72,10 +90,21 @@ export class AuthenticatedPlaces {
   private readonly keysByPlace = new Map<string, PlaceKeys>()
   /** The token each place's secret makes, by its address here, for a place whose line says so. */
   private readonly tokensByPlace = new Map<string, PlaceToken>()
+  /** Where a renewed token is kept, and read back. */
+  private readonly kept: Pick<SRV.Secrets, "kept" | "keep">
+  /** Says a renewal, or a failed one. */
+  private readonly say: (line: string) => void
 
-  constructor({ from = new SRV.Secrets().withEnvironment(), fetch = globalThis.fetch }: AuthenticatedPlacesProps = {}) {
+  constructor({
+    from = new SRV.Secrets().withEnvironment(),
+    fetch = globalThis.fetch,
+    kept = new SRV.Secrets(),
+    say = (line) => console.log(`places:  ${line}`)
+  }: AuthenticatedPlacesProps = {}) {
     this.from = from
     this.fetch = fetch
+    this.kept = kept
+    this.say = say
   }
 
   /**
@@ -93,6 +122,10 @@ export class AuthenticatedPlaces {
 
   /** Add its routes to `router`, each behind `guard`:  this run's token, the server's own host and origin. */
   route(router: SRV.Router, guard: SRV.Guard): this {
+    // only this machine's own host:  it says no secret, so a hook in a terminal may ask with no write token
+    router.get(TOKENS_ROUTE, guard.hostCheck, async (_request, reply) => {
+      reply.noStore().json(await this.tokens())
+    })
     router.all(
       `${AUTHENTICATED_PLACES_PREFIX}/:path*`,
       guard.hostCheck,
@@ -172,6 +205,48 @@ export class AuthenticatedPlaces {
   }
 
   ////////////////
+  // ## Tokens
+  ////////////////
+
+  /**
+   * How each place's token is (`PlaceTokenReport`), never a token:  each place with a secret, of every source.
+   * - A token made from a key, or one that renews itself:  as its keeper says (`PlaceToken.state()`).
+   * - Any other secret that's a JWT:  by its own end;  one that isn't:  `ok`, or `missing`.
+   * - NEVER throws:  a source that fails is left out (`missing()` logs it).
+   */
+  async tokens(): Promise<PlaceTokenReport[]> {
+    const lists = await Promise.all(this.sources.map((source) => Promise.resolve(source.every()).catch(() => [])))
+    return lists.flat().flatMap((place) => {
+      if (place.refusal !== undefined) return []
+      const state = this.tokenFor(servedOf(place), place)?.state() ?? stateOfSecret(this.from[place.keyNamed])
+      const report: PlaceTokenReport = { project: place.project, place: place.name, secret: place.keyNamed, ...state }
+      if (state.state !== "ok") report.fix = fixFor(place, state)
+      return [report]
+    })
+  }
+
+  /**
+   * SIDE EFFECT:  every token that renews itself is looked at now, and every 5 minutes, so it renews before it runs
+   * out while nobody reads;  each that goes bad is said once (`say`).  Returns what stops it.
+   * - NEVER throws.
+   */
+  keepRenewing(everyMs = RENEW_CHECK_MS): () => void {
+    const look = async () => {
+      const lists = await Promise.all(this.sources.map((source) => Promise.resolve(source.every()).catch(() => [])))
+      for (const place of lists.flat()) {
+        if (place.renewsAt === undefined || place.refusal !== undefined) continue
+        await this.tokenFor(servedOf(place), place)
+          ?.current()
+          .catch(() => undefined)
+      }
+    }
+    void look()
+    const timer = setInterval(() => void look(), everyMs)
+    timer.unref?.()
+    return () => clearInterval(timer)
+  }
+
+  ////////////////
   // ## Passing a request on
   ////////////////
 
@@ -187,32 +262,66 @@ export class AuthenticatedPlaces {
     if (!found) throw new SRV.HttpError(404, `no authenticated place is read at ${AUTHENTICATED_PLACES_PREFIX}/${path}`)
     const { place, served, rest } = found
     const keys = this.keysFor(served, place)
+    const query = request.originalUrl.includes("?") ? request.originalUrl.slice(request.originalUrl.indexOf("?")) : ""
+    const isGet = request.method === "GET" || request.method === "HEAD"
+    // its saved answer, for a read its server won't answer:  `undefined` for none
+    const saved = () =>
+      isGet && place.fixtures !== undefined ? savedAnswer(place.fixtures, `${rest}${query}`) : undefined
+    const answerSaved = (text: string) => {
+      reply.status(200).noStore().set(SAVED_ANSWER_HEADER, "saved")
+      reply.type("application/json")
+      reply.send(text.replaceAll(place.at, servedAddress(served)))
+    }
     try {
-      const body =
-        request.method === "GET" || request.method === "HEAD" ? undefined : await SRV.readBody(request.raw, BODY_LIMIT)
+      const body = isGet ? undefined : await SRV.readBody(request.raw, BODY_LIMIT)
       if (place.refusal !== undefined) {
         throw new PlaceError(place.refusal, { cause: { kind: "refused", whyNot: "place" } })
+      }
+      if (isOffline(rest, place.offline)) {
+        if (!isGet) {
+          throw new PlaceError(`${place.name} is offline:  it reads its saved answers, and takes no changes`, {
+            cause: { kind: "refused", whyNot: "place" }
+          })
+        }
+        const text = await saved()
+        if (text === undefined)
+          throw new SRV.HttpError(404, `${place.name} is offline, and has no saved answer for ${rest}`)
+        return answerSaved(text)
       }
       if (place.readOnly && !isRead(request.method, place, body, rest)) {
         throw new PlaceError(`${place.name} is read only:  its lines say so, so it takes no changes`, {
           cause: { kind: "refused", whyNot: "place" }
         })
       }
-      const secret = await this.secretFor(served, place, keys)
+      let secret: string
+      try {
+        secret = await this.secretFor(served, place, keys)
+      } catch (error) {
+        // no secret to send, or it's run out:  a saved answer, if there is one
+        const text = await saved()
+        if (text === undefined) throw error
+        return answerSaved(text)
+      }
       const headers = new Headers()
       for (const name of PASSED_ON) {
         const value = request.get(name)
         if (value) headers.set(name, value)
       }
-      const query = request.originalUrl.includes("?") ? request.originalUrl.slice(request.originalUrl.indexOf("?")) : ""
       const url = putKeyOn(`${place.at.replace(/\/+$/, "")}${rest}${query}`, headers, secret, place.keyGoes)
       const answer = await this.fetch(url, {
         method: request.method,
         headers,
         ...(body && body.length && { body: new Uint8Array(body) })
-      }).catch((error: unknown) => {
+      }).catch(async (error: unknown) => {
+        const text = await saved()
+        if (text !== undefined) return text
         throw new SRV.HttpError(502, keys.scrubbed(`${place.name} didn't answer:  ${(error as Error).message}`))
       })
+      if (typeof answer === "string") return answerSaved(answer)
+      if (SAVED_INSTEAD.test(`${answer.status}`)) {
+        const text = await saved()
+        if (text !== undefined) return answerSaved(text)
+      }
       reply.status(answer.status).noStore()
       answer.headers.forEach((value, name) => {
         if (PASSED_BACK.test(name)) reply.set(name, keys.scrubbed(value.replaceAll(place.at, servedAddress(served))))
@@ -250,27 +359,63 @@ export class AuthenticatedPlaces {
   }
 
   /**
-   * What goes on `place`'s requests:  its secret, or the token made from it.
-   * - throws `PlaceError` `"refused"` when the secret isn't set, saying which and for what
+   * What goes on `place`'s requests:  its secret, or the token made from it, or the token it renewed to.
+   * - throws `PlaceError` `"refused"` when the secret isn't set, saying which and for what;  or it's run out
    */
   private async secretFor(served: string, place: AuthenticatedPlace, keys: PlaceKeys): Promise<string> {
-    const { keyNamed, tokenFrom } = place
-    if (keys.keyNamed(keyNamed) === undefined) {
+    const { keyNamed } = place
+    const token = this.tokenFor(served, place, keys)
+    if (keys.keyNamed(keyNamed) === undefined && (!token || this.newestOf(keyNamed) === undefined)) {
       throw new PlaceError(notSetLine(keyNamed, place), { cause: { kind: "refused", whyNot: "place" } })
     }
-    if (tokenFrom === undefined) return keys.keyNamed(keyNamed)!
+    return token ? token.current() : keys.keyNamed(keyNamed)!
+  }
+
+  /**
+   * The keeper of `place`'s token, made once:  for a token made from its secret, or one that renews itself;
+   * `undefined` for a plain secret.
+   */
+  private tokenFor(
+    served: string,
+    place: AuthenticatedPlace,
+    keys = this.keysFor(served, place)
+  ): PlaceToken | undefined {
+    const { keyNamed, tokenFrom, renewsAt } = place
+    if (tokenFrom === undefined && renewsAt === undefined) return undefined
     let token = this.tokensByPlace.get(served)
-    if (!token) {
-      const mint = tokenServiceMint(tokenFrom, this.fetch)
-      token = new PlaceToken({
-        keyNamed,
-        keyFrom: keys.keyNamed,
-        mint,
-        hold: (name, secret) => keys.hold(name, secret)
-      })
-      this.tokensByPlace.set(served, token)
-    }
-    return token.current()
+    if (token) return token
+    const hold = (name: string, secret: string) => keys.hold(name, secret)
+    token =
+      renewsAt !== undefined
+        ? new PlaceToken({
+            keyNamed,
+            keyFrom: (name) => this.newestOf(name),
+            mint: tokenRefreshMint(addressUnder(place.at, renewsAt), this.fetch),
+            renews: true,
+            hold,
+            save: (fresh) => {
+              try {
+                this.kept.keep(keyNamed, fresh)
+              } catch (error) {
+                this.say(`couldn't keep the renewed ${keyNamed}:  ${(error as Error).message}`)
+              }
+            },
+            say: (line) => this.say(`${line} (the ${place.name} place in ${place.project})`)
+          })
+        : new PlaceToken({ keyNamed, keyFrom: keys.keyNamed, mint: tokenServiceMint(tokenFrom!, this.fetch), hold })
+    this.tokensByPlace.set(served, token)
+    return token
+  }
+
+  /**
+   * A token that renews itself, by its name:  of the environment's and the one kept, the one that lasts longer, so a
+   * renewal kept outlives the environment's older one;  the environment's when neither says.
+   */
+  private newestOf(name: string): string | undefined {
+    const kept = this.kept.kept(name)
+    const given = this.from[name]
+    if (kept === undefined || given === undefined || kept === given) return given ?? kept
+    return (tokenEndOf(kept) ?? 0) > (tokenEndOf(given) ?? 0) ? kept : given
   }
 }
 
@@ -280,6 +425,25 @@ export type AuthenticatedPlacesProps = {
   from?: Readonly<Record<string, string | undefined>>
   /** What sends requests on;  default the platform's. */
   fetch?: typeof globalThis.fetch
+  /** Where a renewed token is kept, and read back;  default the secrets kept (`SRV.Secrets`). */
+  kept?: Pick<SRV.Secrets, "kept" | "keep">
+  /** Says a renewal, or a failed one;  default the console. */
+  say?: (line: string) => void
+}
+
+/** Where the page server says how each place's token is:  `tokens()`. */
+export const TOKENS_ROUTE = "/api/places/tokens"
+
+/** How one place's token is, as the page server says it:  never the token. */
+export type PlaceTokenReport = TokenState & {
+  /** Its project:  `@acme/jobs`. */
+  project: string
+  /** The place:  `jobs`. */
+  place: string
+  /** The NAME of its secret. */
+  secret: string
+  /** The one line that fixes it, when it isn't `ok`. */
+  fix?: string
 }
 
 /** An authenticated place, as the page server needs it:  where it is, and the NAME of its secret. */
@@ -298,6 +462,12 @@ export type AuthenticatedPlace = {
   keyGoes?: KeyGoes
   /** Where a token is made from its secret, which is then what's sent. */
   tokenFrom?: string
+  /** Where its secret, a token, is renewed before it runs out:  under `at`, or whole. */
+  renewsAt?: string
+  /** The folder of its saved answers, whole:  read when its server won't answer (`SavedAnswers`). */
+  fixtures?: string
+  /** It reads only from its saved answers:  every path, or these and what's under them. */
+  offline?: boolean | readonly string[]
   /** It takes no writes. */
   readOnly?: boolean
   /**
@@ -347,6 +517,43 @@ function notSetLine(name: string, { name: place, project }: AuthenticatedPlace):
 function matchesRoute(route: string, path: string): boolean {
   const pattern = route.replace(/\{([^{}/]+)\}/g, (_brace, name: string) => `:${name.replace(/\W/g, "_")}`)
   return compilePattern(pattern)(path.replace(/[?#].*$/, "")) !== undefined
+}
+
+/** How a plain secret is, by its own end if it's a JWT. */
+function stateOfSecret(secret: string | undefined): TokenState {
+  if (secret === undefined) return { state: "missing" }
+  const ends = tokenEndOf(secret)
+  if (ends === undefined) return { state: "ok" }
+  const left = ends - Date.now()
+  const minutesLeft = Math.max(0, Math.floor(left / 60_000))
+  return left <= 0 ? { state: "expired", minutesLeft } : { state: "ok", minutesLeft }
+}
+
+/** The one line that fixes a place's token, in words for people:  never a value. */
+function fixFor({ keyNamed, tokenFrom }: AuthenticatedPlace, { state }: TokenState): string {
+  if (tokenFrom !== undefined && state === "renew-failed")
+    return `Check ${keyNamed}, the key its token is made from:  its token service turned it down, or didn't answer`
+  if (state === "renew-failed") return `It works until it runs out;  then keep a fresh ${keyNamed}`
+  return `Keep a fresh ${keyNamed} in ~/.spell/secrets/${keyNamed} (or the page server's environment):  the page server reads it at once`
+}
+
+/** Where a place's own address is read here, by the name its source finds it by:  `@acme/jobs/jobs`. */
+function servedOf({ project, name }: AuthenticatedPlace): string {
+  return `${project}/${name}`
+}
+
+/** `address` under a place's own, `at`, unless it's whole. */
+function addressUnder(at: string, address: string): string {
+  return /^[a-z][\w+.-]*:/i.test(address) ? address : `${at.replace(/\/+$/, "")}/${address.replace(/^\/+/, "")}`
+}
+
+/** The saved answer for `pathAndQuery` in `folder`, as it answers its question:  `undefined` for none. */
+async function savedAnswer(folder: string, pathAndQuery: string): Promise<string | undefined> {
+  const file = savedAnswerPath(pathAndQuery)
+  if (!file) return undefined
+  const text = await readFile(join(folder, file), "utf8").catch(() => undefined)
+  if (text === undefined) return undefined
+  return answerFromSaved(text, new URL(pathAndQuery, "http://saved.answer").searchParams)
 }
 
 /** Where a page reads a place:  `/api/places/projects/@acme/jobs/jobs`. */

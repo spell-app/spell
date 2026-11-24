@@ -3,13 +3,22 @@
  * and never sent back.
  * - A stand-in server that answers only with the secret, and says it back, so a test sees it scrubbed.
  */
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { createServer, type IncomingMessage } from "node:http"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
 import { AUTHENTICATED_PLACES_PREFIX, PAGE_SERVER_ANSWER_HEADER, STALE_TOKEN_ANSWER } from "spell/places/places.types"
+import { SAVED_ANSWER_HEADER } from "spell/places/SavedAnswers"
 import { SRV } from "spell/server"
-import { AuthenticatedPlaces, type AuthenticatedPlace } from "spell/server/places"
+import {
+  AuthenticatedPlaces,
+  TOKENS_ROUTE,
+  type AuthenticatedPlace,
+  type AuthenticatedPlacesProps
+} from "spell/server/places"
 import { ask, serveHandler } from "spell/server/test/serve"
 
 /** The secret the stand-in server wants. */
@@ -69,11 +78,16 @@ async function standIn(): Promise<{ url: string; asked: Array<{ method: string; 
   return { url: base, asked }
 }
 
-/** The page server's side:  `places` read through it, with `from` its environment. */
-async function pageServer(places: AuthenticatedPlace[], from: Record<string, string | undefined>) {
+/** The page server's side:  `places` read through it, with `from` its environment, and `more` of its props. */
+async function pageServer(
+  places: AuthenticatedPlace[],
+  from: Record<string, string | undefined>,
+  more: AuthenticatedPlacesProps = {}
+) {
   const router = new SRV.Router()
   const guard = new SRV.Guard({ token: TOKEN })
-  const served = AuthenticatedPlaces.for({ router, guard }, { from }).addSource({
+  const kept = { kept: () => undefined, keep: () => undefined }
+  const served = AuthenticatedPlaces.for({ router, guard }, { from, kept, ...more }).addSource({
     placeIn: (path) => {
       const place = places.find(
         ({ project, name }) => path === `${project}/${name}` || path.startsWith(`${project}/${name}/`)
@@ -96,7 +110,8 @@ async function pageServer(places: AuthenticatedPlace[], from: Record<string, str
       },
       ...(init.body !== undefined && { body: init.body })
     })
-  return { served, read }
+  const tokens = async () => ask(server.port, "GET", TOKENS_ROUTE, { headers: { host: `127.0.0.1:${server.port}` } })
+  return { served, read, tokens }
 }
 
 /** A place in `@acme/jobs` at `at`. */
@@ -214,5 +229,178 @@ describe("a secret that isn't set", () => {
       "JOBS_TOKEN is not set:  the jobs place in @acme/jobs needs it.  Set it where Spell's page server starts, then start it again"
     ])
     expect(said.join()).not.toContain("set,")
+  })
+})
+
+/** A folder of saved answers:  `jobs.json`, three rows, and `jobs/j-1.json`;  gone after the test. */
+function savedAnswers(): string {
+  const folder = mkdtempSync(join(tmpdir(), "spell-saved-answers-"))
+  closing.push(async () => rmSync(folder, { recursive: true, force: true }))
+  mkdirSync(join(folder, "jobs"))
+  const rows = [
+    { id: "j-1", title: "Plumber", next: "https://jobs.acme.test/jobs/j-2" },
+    { id: "j-2", title: "Welder" },
+    { id: "j-3", title: "Baker" }
+  ]
+  writeFileSync(join(folder, "jobs.json"), JSON.stringify(rows))
+  writeFileSync(join(folder, "jobs", "j-1.json"), JSON.stringify(rows[0]))
+  return folder
+}
+
+/** An address nothing answers at:  a port listened on, then closed. */
+async function nobodyThere(): Promise<string> {
+  const server = createServer()
+  const port = await SRV.listenPreferred(server)
+  await new Promise<void>((done) => server.close(() => done()))
+  return `http://127.0.0.1:${port}`
+}
+
+describe("saved answers", () => {
+  test("a read its server doesn't answer is answered from them, paged, marked saved;  a thing by its id too", async () => {
+    const at = await nobodyThere()
+    const { read } = await pageServer([jobs(at, { fixtures: savedAnswers() })], { JOBS_TOKEN: SECRET })
+    const page = await read("@acme/jobs/jobs/jobs?limit=2&offset=0")
+    expect(page.status).toBe(200)
+    expect(page.headers[SAVED_ANSWER_HEADER]).toBe("saved")
+    expect(JSON.parse(page.text).map(({ id }: { id: string }) => id)).toEqual(["j-1", "j-2"])
+    expect(JSON.parse((await read("@acme/jobs/jobs/jobs?limit=2&offset=2")).text)).toHaveLength(1)
+    expect(JSON.parse((await read("@acme/jobs/jobs/jobs/j-1")).text)).toMatchObject({ title: "Plumber" })
+    // nothing saved for it:  the server's own failure
+    expect((await read("@acme/jobs/jobs/people")).status).toBe(502)
+  })
+
+  test("a refusal for its token, a 5xx, or a secret not set:  saved;  a server that answers:  live", async () => {
+    const { url, asked } = await standIn()
+    const notSet = await pageServer([jobs(url, { fixtures: savedAnswers() })], {})
+    const saved = await notSet.read("@acme/jobs/jobs/jobs")
+    expect(saved.headers[SAVED_ANSWER_HEADER]).toBe("saved")
+    expect(asked).toHaveLength(0)
+    const wrong = await pageServer([jobs(url, { fixtures: savedAnswers() })], { JOBS_TOKEN: "not-the-secret" })
+    expect((await wrong.read("@acme/jobs/jobs/jobs")).headers[SAVED_ANSWER_HEADER]).toBe("saved")
+    const live = await pageServer([jobs(url, { fixtures: savedAnswers() })], { JOBS_TOKEN: SECRET })
+    const answer = await live.read("@acme/jobs/jobs/jobs")
+    expect(answer.headers[SAVED_ANSWER_HEADER]).toBeUndefined()
+    expect(JSON.parse(answer.text)).toMatchObject({ youSent: "[the key JOBS_TOKEN]" })
+  })
+
+  test("offline:  read from them alone, its server never asked;  a write refused;  nothing saved, not found", async () => {
+    const { url, asked } = await standIn()
+    const { read } = await pageServer([jobs(url, { fixtures: savedAnswers(), offline: true })], { JOBS_TOKEN: SECRET })
+    expect((await read("@acme/jobs/jobs/jobs")).headers[SAVED_ANSWER_HEADER]).toBe("saved")
+    expect((await read("@acme/jobs/jobs/people")).status).toBe(404)
+    const write = await read("@acme/jobs/jobs/jobs", { method: "POST", body: "{}" })
+    expect(write.status).toBe(422)
+    expect(JSON.parse(write.text).error).toMatch(/offline/)
+    expect(asked).toHaveLength(0)
+  })
+
+  test("offline for some paths:  those from them, the rest live", async () => {
+    const { url, asked } = await standIn()
+    const place = jobs(url, { fixtures: savedAnswers(), offline: ["/jobs/j-1"] })
+    const { read } = await pageServer([place], { JOBS_TOKEN: SECRET })
+    expect((await read("@acme/jobs/jobs/jobs/j-1")).headers[SAVED_ANSWER_HEADER]).toBe("saved")
+    expect((await read("@acme/jobs/jobs/jobs")).headers[SAVED_ANSWER_HEADER]).toBeUndefined()
+    expect(asked).toHaveLength(1)
+  })
+})
+
+/** A made-up JWT, unsigned, from `issued` to `ends` (msec):  only its claims are read. */
+function jwt(issued: number, ends: number, mark = "a"): string {
+  const part = (value: object) => Buffer.from(JSON.stringify(value)).toString("base64url")
+  return `${part({ alg: "none" })}.${part({ iat: Math.floor(issued / 1000), exp: Math.floor(ends / 1000), mark })}.sig`
+}
+
+/**
+ * A made-up server whose sign-in token renews itself:  `GET /auth/refresh` with a live token, a new one, 8 hours;
+ * `GET /jobs`, for the latest only, saying it back.
+ */
+function renewingServer() {
+  const hour = 3_600_000
+  const state = { latest: jwt(Date.now() - 7.5 * hour, Date.now() + 0.5 * hour, "given"), refreshes: 0 }
+  const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(`${input instanceof Request ? input.url : input}`)
+    const sent = new Headers(init?.headers).get("authorization")?.replace(/^Bearer /, "")
+    if (sent !== state.latest) return Response.json({ error: "who are you?" }, { status: 401 })
+    if (url.pathname === "/auth/refresh") {
+      state.refreshes++
+      state.latest = jwt(Date.now(), Date.now() + 8 * hour, `r${state.refreshes}`)
+      return Response.json({ access_token: state.latest })
+    }
+    return Response.json({ rows: [{ id: "j-1" }], youSent: sent })
+  }) as typeof globalThis.fetch
+  return { fetch, state, given: state.latest }
+}
+
+describe("a token that renews itself", () => {
+  test("renewed at its refresh route before it runs out, kept, sent, and never sent back", async () => {
+    const { fetch, state, given } = renewingServer()
+    const kept = new Map<string, string>()
+    const store = {
+      kept: (name: string) => kept.get(name),
+      keep: (name: string, value: string) => void kept.set(name, value)
+    }
+    const said: string[] = []
+    const place = jobs("https://jobs.acme.test", { renewsAt: "/auth/refresh" })
+    const { read, served } = await pageServer(
+      [place],
+      { JOBS_TOKEN: given },
+      { fetch, kept: store, say: (line) => said.push(line) }
+    )
+    const answer = await read("@acme/jobs/jobs/jobs")
+    expect(answer.status).toBe(200)
+    expect(state.refreshes).toBe(1)
+    expect(kept.get("JOBS_TOKEN")).toBe(state.latest)
+    expect(answer.text).not.toContain(state.latest)
+    expect(said).toEqual([
+      expect.stringMatching(/^renewed JOBS_TOKEN:  it has 4\d\d minutes left \(the jobs place in @acme\/jobs\)$/)
+    ])
+    // the renewed one lasts:  read again, nothing renewed
+    await read("@acme/jobs/jobs/jobs")
+    expect(state.refreshes).toBe(1)
+    const [report] = await served.tokens()
+    expect(report).toMatchObject({ project: "@acme/jobs", place: "jobs", secret: "JOBS_TOKEN", state: "ok" })
+    expect(report!.minutesLeft).toBeGreaterThan(470)
+  })
+
+  test("of the environment's and the one kept, the one that lasts longer is sent:  a renewal outlives a restart", async () => {
+    const { fetch, state, given } = renewingServer()
+    const fresher = jwt(Date.now(), Date.now() + 8 * 3_600_000, "kept")
+    state.latest = fresher
+    const store = { kept: () => fresher, keep: () => undefined }
+    const place = jobs("https://jobs.acme.test", { renewsAt: "/auth/refresh" })
+    const { read } = await pageServer([place], { JOBS_TOKEN: given }, { fetch, kept: store })
+    expect((await read("@acme/jobs/jobs/jobs")).status).toBe(200)
+    expect(state.refreshes).toBe(0)
+  })
+
+  test("how each token is, at the tokens route:  never a token, with the line that fixes one", async () => {
+    const { fetch, given } = renewingServer()
+    const places = [
+      jobs("https://jobs.acme.test", { renewsAt: "/auth/refresh" }),
+      jobs("https://hr.acme.test", { name: "people", keyNamed: "HR_TOKEN" })
+    ]
+    const { tokens } = await pageServer(places, { JOBS_TOKEN: given }, { fetch })
+    const answer = await tokens()
+    expect(answer.status).toBe(200)
+    expect(answer.text).not.toContain(given)
+    expect(JSON.parse(answer.text)).toEqual([
+      { project: "@acme/jobs", place: "jobs", secret: "JOBS_TOKEN", state: "ok", minutesLeft: expect.any(Number) },
+      {
+        project: "@acme/jobs",
+        place: "people",
+        secret: "HR_TOKEN",
+        state: "missing",
+        fix: "Keep a fresh HR_TOKEN in ~/.spell/secrets/HR_TOKEN (or the page server's environment):  the page server reads it at once"
+      }
+    ])
+  })
+
+  test("looked at every few minutes, so it renews while nobody reads", async () => {
+    const { fetch, state, given } = renewingServer()
+    const place = jobs("https://jobs.acme.test", { renewsAt: "/auth/refresh" })
+    const { served } = await pageServer([place], { JOBS_TOKEN: given }, { fetch })
+    const stop = served.keepRenewing(60_000)
+    closing.push(async () => stop())
+    await expect.poll(() => state.refreshes).toBe(1)
   })
 })

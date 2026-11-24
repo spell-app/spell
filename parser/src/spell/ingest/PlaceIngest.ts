@@ -1,6 +1,13 @@
 import type { KeyGoes } from "spell/places/keyGoes"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { tokenServiceMint } from "spell/places/PlaceToken"
+import {
+  answerFromSaved,
+  answerScrubber,
+  isOffline,
+  SAVED_ANSWER_HEADER,
+  savedAnswerPath
+} from "spell/places/SavedAnswers"
 import { rowsIn } from "spell/places/wrappedRows"
 import { SP } from "spell/parser/spell"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
@@ -332,9 +339,12 @@ export class PlaceIngest {
    * - A route that answers `Deprecation` or `Sunset` is noted, with its successor (J251).
    * - NEVER writes to the server unless asked (`triesWrites`), and never on a read only deployment.
    * - Keeps what a person wrote, as `update()` does (`mergedSpell()`).
-   * - throws `IngestStopped`:  no description, a deployment nobody listed, writes asked of a read only one
+   * - `savesAnswers`:  what it reads is saved, scrubbed, as the place's saved answers (`SavedAnswers`), for when its
+   *   server can't be reached;  an `offline` deployment is read from them instead of its server.
+   * - throws `IngestStopped`:  no description, a deployment nobody listed, writes asked of a read only one, saved
+   *   answers asked for with no folder
    */
-  async verify(file: string, { deployment: named, triesWrites }: VerifyAsk = {}): Promise<IngestResult> {
+  async verify(file: string, { deployment: named, triesWrites, savesAnswers }: VerifyAsk = {}): Promise<IngestResult> {
     const { files } = this.settings
     const descriptionPath = descriptionPathFor(file)
     const onDisk = await files.readDescription(descriptionPath)
@@ -352,13 +362,19 @@ export class PlaceIngest {
     const deployment = await this.deploymentFor(file, description, named)
     if (triesWrites) refuseWritesOn(deployment)
     const address = deployment?.at ?? description.about.address
+    const answers = this.savedAnswersFor(file, address, deployment, savesAnswers)
+    // read from its saved answers alone:  no key needed
+    const isAway = deployment?.offline === true
     const reader = await this.readerFor(
-      deployment?.key ?? keySecret,
-      signedIn,
+      isAway ? undefined : (deployment?.key ?? keySecret),
+      isAway ? undefined : signedIn,
       keyGoes,
-      deployment?.tokenFrom ?? tokenFrom
+      isAway ? undefined : (deployment?.tokenFrom ?? tokenFrom),
+      answers.fetch
     )
-    this.say(`Verifying ${address}${deployment ? `, its ${deployment.name} deployment` : ""} ...`)
+    this.say(
+      `Verifying ${address}${deployment ? `, its ${deployment.name} deployment` : ""}${deployment?.offline === true ? ", from its saved answers" : ""} ...`
+    )
     const changes: string[] = []
     const read: CollectionLook[] = []
     // a list asked what another list's things answer after the others, so that one's read (`asksFrom`)
@@ -446,6 +462,8 @@ export class PlaceIngest {
       this.marksFor(file)
     )
     const warnings = this.checkFileCompiles(text, merge.text, file)
+    const saved = await answers.save()
+    if (saved) changes.push(saved)
     await files.write(file, merge.text)
     await this.writeDescription(file, descriptionPath, description)
     return {
@@ -762,6 +780,81 @@ export class PlaceIngest {
   }
 
   /**
+   * The saved answers of a verify (`SavedAnswers`):  the `fetch` its reads go through, and what saves them.
+   * - `savesAnswers`:  each list and thing it reads, kept by its address under `address`, then written scrubbed,
+   *   the biggest answer an address had (a page of every row, not of one).
+   * - An `offline` deployment:  what's offline is read from its folder, its server never asked.
+   * - throws `IngestStopped` for saved answers asked for with no folder, or nothing to write them with
+   */
+  private savedAnswersFor(
+    file: string,
+    address: string,
+    deployment: (Deployment & { name: string }) | undefined,
+    savesAnswers: string | true | undefined
+  ): { fetch: typeof globalThis.fetch; save: () => Promise<string | undefined> } {
+    const { fetch, files } = this.settings
+    const named = savesAnswers === true ? deployment?.fixtures : savesAnswers
+    if (savesAnswers === true && named === undefined) {
+      throw new IngestStopped(
+        `--fixtures names no folder, and ${deployment ? `the ${deployment.name} deployment` : "the place"} has no "fixtures":  name one, --fixtures <folder>`
+      )
+    }
+    const folder = named === undefined ? undefined : folderBeside(file, named)
+    if (folder !== undefined && !files.writeAway) throw new IngestStopped("nothing here can write saved answers")
+    const offline = deployment?.offline
+    const readsFrom =
+      offline && deployment?.fixtures !== undefined ? folderBeside(file, deployment.fixtures) : undefined
+    if (offline && readsFrom === undefined) {
+      throw new IngestStopped(`the ${deployment!.name} deployment is offline, and names no "fixtures" folder to read`)
+    }
+    const base = address.replace(/\/+$/, "")
+    const kept = new Map<string, string>()
+    const secrets = new Set<string>()
+    const under = (url: string) =>
+      url.startsWith(`${base}/`) || url === base ? url.slice(base.length) || "/" : undefined
+    const fetchThrough: typeof globalThis.fetch = async (input, init) => {
+      const url = input instanceof Request ? input.url : `${input instanceof URL ? input.href : input}`
+      const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase()
+      const path = under(url)
+      if (path === undefined || method !== "GET") return fetch(input, init)
+      if (readsFrom !== undefined && isOffline(path, offline)) {
+        const name = savedAnswerPath(path)
+        const text = name === undefined ? undefined : await files.read(`${readsFrom}/${name}`)
+        if (text === undefined) return new Response(`no saved answer for ${path}`, { status: 404 })
+        const answer = answerFromSaved(text, new URL(path, "http://saved.answer").searchParams)
+        return new Response(answer, { headers: { "content-type": "application/json", [SAVED_ANSWER_HEADER]: "saved" } })
+      }
+      const answer = await fetch(input, init)
+      if (folder !== undefined && answer.ok && /json/i.test(answer.headers.get("content-type") ?? "")) {
+        const name = savedAnswerPath(path)
+        const text = await answer.clone().text()
+        if (name !== undefined && text.length > (kept.get(name)?.length ?? -1)) kept.set(name, text)
+        for (const [header, value] of new Headers(init?.headers)) {
+          if (header === "accept" || header === "content-type" || header === "x-request-id") continue
+          secrets.add(value.replace(/^(Bearer|Basic)\s+/i, ""))
+        }
+        for (const value of new URL(url).searchParams.values()) if (value.length >= 20) secrets.add(value)
+      }
+      return answer
+    }
+    const save = async () => {
+      if (folder === undefined || !kept.size) return undefined
+      const scrub = answerScrubber(secrets)
+      for (const [name, text] of kept) {
+        let value: unknown
+        try {
+          value = JSON.parse(text)
+        } catch {
+          continue
+        }
+        await files.writeAway!(`${folder}/${name}`, `${JSON.stringify(scrub.value(value), null, 2)}\n`)
+      }
+      return `Saved ${kept.size} answer${kept.size === 1 ? "" : "s"}, scrubbed, in ${folder}.`
+    }
+    return { fetch: fetchThrough, save }
+  }
+
+  /**
    * A reader for this place, with its key and session.
    * - `tokenFrom`:  the key sent is a token made there from the key (epic `data` P49), the same way a program's is
    *   (`tokenServiceMint()`).
@@ -771,9 +864,10 @@ export class PlaceIngest {
     keySecret: string | undefined,
     signedIn?: string,
     keyGoes?: KeyGoes,
-    tokenFrom?: string
+    tokenFrom?: string,
+    fetch = this.settings.fetch
   ): Promise<PoliteReader> {
-    const { fetch, sleep, keyNamed, sessionNamed, Socket } = this.settings
+    const { sleep, keyNamed, sessionNamed, Socket } = this.settings
     const secret = keySecret ? keyNamed?.(keySecret) : undefined
     if (keySecret && secret === undefined) {
       throw new IngestStopped(
@@ -1378,6 +1472,17 @@ function compile(text: string, file: string): { errors: string[]; warnings: stri
 /** Where a picture's id goes, in where its pictures are:  `{id}`. */
 const PICTURE_ID = /\{[^{}]*\}/
 
+/**
+ * `folder` as a path:  under the folder `file` is in, unless it starts `/`, or `~` (your home, which what reads and
+ * writes it says).
+ */
+function folderBeside(file: string, folder: string): string {
+  const clean = folder.replace(/\/+$/, "")
+  if (clean.startsWith("/") || clean === "~" || clean.startsWith("~/")) return clean
+  const at = file.lastIndexOf("/")
+  return at < 0 ? clean : `${file.slice(0, at)}/${clean.replace(/^\.\//, "")}`
+}
+
 /** What an error says, without where:  lines move when a place is added. */
 function withoutPlaceInFile(error: string): string {
   return error.replace(/^\d+:\d+ /, "")
@@ -1567,7 +1672,7 @@ function awayFromTypesBeside(
   }
   if (isRenamed) renameCollections(description)
   // each type inside a row, by the name the writer gives it:  one renamed may free a name inside it, so again
-  for (let isInsideRenamed = true; isInsideRenamed; ) {
+  for (let isInsideRenamed = true; isInsideRenamed;) {
     isInsideRenamed = false
     for (const { header, isInside, heldBy = [] } of spellPartsFor(description).types) {
       const words = /"([^"]+)"/.exec(header)?.[1]?.toLowerCase()

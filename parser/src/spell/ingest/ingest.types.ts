@@ -218,6 +218,10 @@ export type Deployment = {
   tokenFrom?: string
   /** It takes no writes:  `--try-writes` and `spell place verify` refuse to write there. */
   readOnly?: boolean
+  /** The folder of its saved answers, under the project's folder unless it starts `/` or `~`:  see `SavedAnswers`. */
+  fixtures?: string
+  /** It reads only from its saved answers:  every path, or these and what's under them. */
+  offline?: boolean | string[]
 }
 
 /** What `PlaceIngest.verify()` is asked. */
@@ -226,6 +230,11 @@ export type VerifyAsk = {
   deployment?: string
   /** It may try a write of each kind:  never on a read only deployment. */
   triesWrites?: boolean
+  /**
+   * Save what it reads as the place's saved answers, scrubbed (`spell place verify --fixtures`):  into this folder,
+   * or `true` for its deployment's `fixtures`.  Under the project's folder unless it starts `/` or `~`.
+   */
+  savesAnswers?: string | true
 }
 
 /** What one run did. */

@@ -389,6 +389,61 @@ describe("spell place verify (epic `data` P49)", () => {
       'netbox has no deployment "dev":  staging, production'
     )
   })
+
+  test("--fixtures saves what it read, scrubbed, one file an address;  an offline deployment reads them alone", async () => {
+    const STAGING = "https://staging.netbox.test"
+    const KEY = "made-up-key-0123456789"
+    const { fetch: answers, asked } = answering(STAGING)
+    // the tenants' list says back what it was sent, and a person's email
+    const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = `${input instanceof Request ? input.url : input}`
+      if (url.replace(/\?.*$/, "") !== `${STAGING}/api/tenancy/tenants/`) return answers(input, init)
+      asked.push(url)
+      const sent = new Headers(init?.headers).get("authorization")
+      return Response.json({ count: 1, next: null, results: [{ ...TENANT, sent, contact: "ada@lab.test" }] })
+    }) as typeof globalThis.fetch
+    const deployments = {
+      staging: { at: STAGING, key: "NETBOX_TOKEN", fixtures: "saved/staging" },
+      away: { at: STAGING, key: "AWAY_TOKEN", fixtures: "saved/staging", offline: true }
+    }
+    const { files, texts, descriptions } = memoryFiles()
+    files.deploymentsOf = async () => deployments
+    files.writeAway = async (path, text) => void texts.set(path, text)
+    const ingest = new PlaceIngest({
+      fetch,
+      ask: async () => undefined,
+      files,
+      readThrough: readThroughSpell,
+      keyNamed: (name) => (name === "NETBOX_TOKEN" ? KEY : undefined),
+      sleep: async () => {},
+      now: () => new Date("2026-11-17T12:00:00Z")
+    })
+    await ingest.add({ address: NETBOX, spec: SPEC_AT, into: "apis/NetBox.api.spell", name: "netbox" })
+    const result = await ingest.verify("apis/NetBox.api.spell", { deployment: "staging", savesAnswers: true })
+    const saved = JSON.parse(texts.get("apis/saved/staging/api/tenancy/tenants.json")!)
+    expect(saved.results[0]).toMatchObject({
+      name: "Acme",
+      sent: "Bearer [scrubbed]",
+      contact: "person-1@example.invalid"
+    })
+    expect(JSON.stringify(saved)).not.toContain(KEY)
+    expect(texts.has("apis/saved/staging/api/tenancy/tenants/1.json")).toBe(true)
+    // refused:  nothing saved for it
+    expect(texts.has("apis/saved/staging/api/core/jobs.json")).toBe(false)
+    expect(result.changes).toContainEqual(
+      expect.stringMatching(/^Saved \d+ answers, scrubbed, in apis\/saved\/staging\.$/)
+    )
+    // offline:  read from them, its server never asked, and no key needed (none's set for it)
+    const before = asked.length
+    await ingest.verify("apis/NetBox.api.spell", { deployment: "away" })
+    expect(asked.slice(before).filter((url) => url.startsWith(STAGING))).toEqual([])
+    expect(descriptions.get("apis/NetBox.api.json5")!.collections.tenants!.state).toMatchObject({
+      is: "verified",
+      deployment: "away",
+      rows: 1
+    })
+    await expect(ingest.verify("apis/NetBox.api.spell", { savesAnswers: true })).resolves.toBeDefined()
+  })
 })
 
 describe("spell place update, on a place read from its description (epic `data` P49)", () => {

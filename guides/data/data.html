@@ -333,10 +333,40 @@ a "recipe" is a thing
               description, and the rows read go in that folder. <code>spell place ingest --no-examples</code> writes it.
             </li>
             <li>
+              A key that's a sign-in token, which runs out:
+              <code>its token is renewed at "/api/auth/refresh"</code>, under
+              <code>it is authenticated with the secret "ACME_TOKEN"</code>.
+              <ul>
+                <li>
+                  Spell's page server renews it there before it runs out, sending the token as a Bearer, and keeps the
+                  new one in <code>~/.spell/secrets/ACME_TOKEN</code>: a token copied once lasts as long as the server
+                  lets it renew.
+                </li>
+                <li>
+                  <code>/api/places/tokens</code> on the page server says how each place's token is, never the token:
+                  <code>ok</code>, <code>expiring</code>, <code>expired</code>, <code>renew-failed</code> or
+                  <code>missing</code>, with its minutes left and the line that fixes it.
+                </li>
+              </ul>
+            </li>
+            <li>
               One place, several deployments (dev, staging, production): the project's file lists them under
               <code>places</code>, each its own address, key, and read only or not. <code>--deployment</code> or
               <code>SPELL_DEPLOYMENT</code> picks one for <code>spell place verify</code>, which never writes to a read
               only one.
+              <ul>
+                <li>
+                  A deployment's saved answers, for when its server can't be reached:
+                  <code>{ at: "https://acme.test/api", fixtures: "saved/dev" }</code>, a folder under the project's.
+                  <code>spell place verify --fixtures</code> writes them, one file an address, scrubbed of tokens, keys,
+                  cookies and emails.
+                </li>
+                <li>
+                  A read the server doesn't answer (no answer, a 5xx, a refused token, no secret set) is answered from
+                  them, as the page server reads an authenticated place. <code>offline: true</code> reads them alone,
+                  and takes no writes; <code>offline: ["/api/reports"]</code>, only those paths.
+                </li>
+              </ul>
             </li>
           </ul>
           <p>
@@ -1014,7 +1044,8 @@ a "recipe" is a thing
               <tr>
                 <td>What compiled Spell calls</td>
                 <td>
-                  <code>spell/parser/core</code>: <a href="/parser/src/core/saved.ts" target="src-parser-src-core-saved-ts"><code>saved.ts</code></a
+                  <code>spell/parser/core</code>:
+                  <a href="/parser/src/core/saved.ts" target="src-parser-src-core-saved-ts"><code>saved.ts</code></a
                   >,
                   <a href="/parser/src/core/places.ts" target="src-parser-src-core-places-ts"><code>places.ts</code></a>
                 </td>
@@ -1023,16 +1054,26 @@ a "recipe" is a thing
                 <td>A long list drawing what fits, and more as you scroll</td>
                 <td>
                   <code>spell/element</code>:
-                  <a href="/src/element/drawnWindow.ts" target="src-src-element-drawnwindow-ts"><code>drawnWindow.ts</code></a>
+                  <a href="/src/element/drawnWindow.ts" target="src-src-element-drawnwindow-ts"
+                    ><code>drawnWindow.ts</code></a
+                  >
                 </td>
               </tr>
               <tr>
                 <td>The words</td>
-                <td><a href="/parser/src/spell/rules/places/" target="src-parser-src-spell-rules-places"><code>parser/src/spell/rules/places</code></a></td>
+                <td>
+                  <a href="/parser/src/spell/rules/places/" target="src-parser-src-spell-rules-places"
+                    ><code>parser/src/spell/rules/places</code></a
+                  >
+                </td>
               </tr>
               <tr>
                 <td>The ingest</td>
-                <td><a href="/parser/src/spell/ingest/" target="src-parser-src-spell-ingest"><code>parser/src/spell/ingest</code></a>, <code>spell place ingest</code></td>
+                <td>
+                  <a href="/parser/src/spell/ingest/" target="src-parser-src-spell-ingest"
+                    ><code>parser/src/spell/ingest</code></a
+                  >, <code>spell place ingest</code>
+                </td>
               </tr>
               <tr>
                 <td>The examples</td>

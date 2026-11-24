@@ -694,6 +694,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         nothing, as `DirectReads`' read through is
       - the secret from the environment, by its name;  a token made from it at its token service (`PlaceToken`);
         both scrubbed from every answer, and the place's own address made this one
+      - a token that renews itself (`its token is renewed at "..."`, `renewsAt`):  renewed at its refresh route in the
+        last hour (or quarter) of its life, kept with `SRV.Secrets.keep()`, and looked at every 5 minutes
+        (`keepRenewing()`, started by `placeRoutes.ts`), so it renews while nobody reads;  of the environment's and the
+        one kept, the one that lasts longer is sent
+      - each place's token's state at `/api/places/tokens` (`TOKENS_ROUTE`, `tokens()`), host-checked only, never a
+        token:  `ok`, `expiring`, `expired`, `renew-failed`, `missing`, its minutes left and a `fix` line
+      - SAVED ANSWERS (a deployment's `fixtures`, `spell/places/SavedAnswers`):  a `GET` its server won't answer (none,
+        a 5xx, a 401 or 403, a secret not set or run out) answered from its saved file, marked `SAVED_ANSWER_HEADER`;
+        an `offline` deployment (or path) reads them alone, and refuses a write
       - read only when its lines or its deployment say so:  a write refused, a graphql server's mutation too
       - a secret that isn't set:  refused in words naming it and the place, `PAGE_SERVER_ANSWER_HEADER` on the answer,
         which the page says;  and said as the server starts (`sayMissing()`), never a value
