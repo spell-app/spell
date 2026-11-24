@@ -10,7 +10,7 @@ import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 import { PROPORTION } from "spell/util/measures/Dimension"
 
 import type { CollectionDescription, FieldDescription, PagesWith, PlaceDescription, ServerTakes } from "./ingest.types"
-import { isSpellsOwnType, wordsFor } from "./PlaceShape"
+import { isSpellsOwnType, oneNamedBy, wordsFor, yesOrNoWords } from "./PlaceShape"
 import { PlaceWords } from "./PlaceWords"
 
 /** What each thing a field can hold is, in a type's line. */
@@ -551,14 +551,52 @@ function typeInside(words: string): string {
 function insideTypeFor(
   { words, insideSchemaAt, insideType }: FieldDescription,
   owner: string,
-  own: ReadonlySet<string>
+  own: ReadonlySet<string>,
+  collections: Readonly<Record<string, CollectionDescription>>
 ): string {
   const one = typeInside(words)
   const owned = `${owner} ${one}`
-  const names = [insideType, typeOfSchema(insideSchemaAt, own), one, owned, `${owned} entry`, `${one} entry`]
+  const schema = singularTypeOf(typeOfSchema(insideSchemaAt, own), schemaTypesIn(collections, own))
+  const names = [insideType, schema, one, owned, `${owned} entry`, `${one} entry`]
   // none free:  the line can't be read, and the field holding it is left out
   return names.find((name) => name !== undefined && isFreeTypeName(name, own)) ?? owned
 }
+
+/**
+ * A schema's type, named as Spell reads ONE thing:  a name ending in a plural reads as many, so `a recipe options` and
+ * `a step data` are lines Spell can't read.
+ * - Its last word made singular, `step datum`;  or, when that's another schema's own name (`RecipeOption` beside
+ *   `RecipeOptions`), the plural kept with `set` after it, `recipe options set`.
+ */
+function singularTypeOf(name: string | undefined, schemaTypes: ReadonlySet<string>): string | undefined {
+  if (name === undefined) return undefined
+  const one = oneNamedBy(name)
+  if (one === name) return name
+  return schemaTypes.has(one) ? `${name} set` : one
+}
+
+/** Each schema's own type name in `collections`' fields, and inside them:  see `singularTypeOf()`. */
+function schemaTypesIn(
+  collections: Readonly<Record<string, CollectionDescription>>,
+  own: ReadonlySet<string>
+): ReadonlySet<string> {
+  const known = SCHEMA_TYPES.get(collections)
+  if (known) return known
+  const names = new Set<string>()
+  const add = (fields: Readonly<Record<string, FieldDescription>>) => {
+    for (const { insideSchemaAt, inside } of Object.values(fields)) {
+      const name = typeOfSchema(insideSchemaAt, own)
+      if (name !== undefined) names.add(name)
+      if (inside) add(inside)
+    }
+  }
+  for (const { fields } of Object.values(collections)) add(fields)
+  SCHEMA_TYPES.set(collections, names)
+  return names
+}
+
+/** `schemaTypesIn()`'s, once for each description's collections. */
+const SCHEMA_TYPES = new WeakMap<object, ReadonlySet<string>>()
 
 /** Can a type inside a row be called `words`:  no more words than a type's name holds, nor anyone's already? */
 function isFreeTypeName(words: string, own: ReadonlySet<string>): boolean {
@@ -582,7 +620,7 @@ function typesInside(
     for (const field of Object.values(fields)) {
       const { inside, leftOut } = field
       if (!inside || leftOut) continue
-      const words = insideTypeFor(field, owner, own)
+      const words = insideTypeFor(field, owner, own, collections)
       const held = types.get(words)
       if (held) {
         held.heldBy!.push({ owner, field })
@@ -596,7 +634,7 @@ function typesInside(
           { ...about, choices: undefined },
           typeWordsFor(about, collections, words, own, place)
         )
-        const line = `its "${about.words}" ${verbBefore(what)} ${what}${nothingWordsFor(about)}${storedAsFor(name, about)}`
+        const line = fieldLineFor(name, about, what)
         return [{ key: `inside:${words}:${about.words}`, text: line, note: noteFor(about, collections) }]
       })
       const header = `${articled(words).replace(words, `"${words}"`)} is a thing`
@@ -665,6 +703,50 @@ function namedLinkTypes(
 }
 
 /**
+ * A field's line:  `its "zip one" is text, stored as "zip_1", with maximum length 10`.
+ * - In the order Spell reads them (`DefinePropertyHas`'s `RULES`):  its words for none, its stored-as, then its length.
+ */
+function fieldLineFor(field: string, about: FieldDescription, what: string): string {
+  const [, kind = what, length = ""] = /^(.*?)(, with (?:maximum|minimum) length \d+)?$/s.exec(what) ?? []
+  return `its "${about.words}" ${verbBefore(what)} ${kind}${nothingWordsFor(about)}${storedAsFor(field, about)}${length}`
+}
+
+/**
+ * SIDE EFFECT:  each field's words are ones its line can say, whoever gave them (the description, a read, the agent,
+ * a look before):
+ * - a yes or no's without a leading `is` or `has`:  `its "hidden" is yes or no, stored as "is_hidden"`, as Spell
+ *   asks one `if it is hidden`;
+ * - a choice's its source's own, needing no stored-as:  Spell reads `one of a, b or c, stored as "x"` as one more
+ *   choice, so `its "state" as one of open, shipped or lost`, not `its "order state" ...`.
+ * - Never words another field of its type has already:  that one keeps the words it had.
+ */
+export function wordsSpellReads(description: PlaceDescription): void {
+  const sayIn = (fields: Record<string, FieldDescription>, choices: boolean) => {
+    const taken = new Set(Object.values(fields).map(({ words }) => words))
+    for (const [name, about] of Object.entries(fields)) {
+      const said =
+        about.type === "yes or no"
+          ? yesOrNoWords(about.words)
+          : choices && isChoiceStoredAs(name, about)
+            ? wordsFor(name)
+            : about.words
+      if (said !== about.words && !taken.has(said)) {
+        taken.delete(about.words)
+        taken.add(said)
+        about.words = said
+      }
+      if (about.inside) sayIn(about.inside, false)
+    }
+  }
+  for (const collection of Object.values(description.collections)) sayIn(collection.fields, true)
+}
+
+/** Is `about` a choice its line would write with a stored-as:  see `wordsSpellReads()`. */
+function isChoiceStoredAs(name: string, about: FieldDescription): boolean {
+  return about.type === "text" && !!about.choices && !!oneOfWords(about.choices) && !!storedAsFor(name, about)
+}
+
+/**
  * What the source calls a field, when its words don't find it:  `, stored as "avg_ht"` on its own line.
  * - Its words finding it is the rule for a line's named field too:  `its "created at"` finds `created_at` (`FieldNames`).
  * - `hair_color`, `hairColor` and `Hair Color` all find `its "hair color"` by its words (`FieldNames`):  nothing to say.
@@ -701,7 +783,7 @@ function typeLines(
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
     const what = schemaWordsFor(about, typeWordsFor(about, collections, description.type, own, place))
-    const line = `its "${about.words}" ${verbBefore(what)} ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
+    const line = fieldLineFor(field, about, what)
     lines.push({ key: `field:${collection}:${field}`, text: line, note: noteFor(about, collections) })
   }
   // each list it keeps under this one, read from there:  `its "comments" is a list of comments`;
@@ -814,7 +896,7 @@ function typeWordsFor(
   if (measure) return measure
   if (isItsOwner) return isListInside ? `a list of ${P.pluralize(owner)}` : articled(owner)
   if (inside) {
-    const held = insideTypeFor(about, owner, own)
+    const held = insideTypeFor(about, owner, own, collections)
     return isListInside ? `a list of ${P.pluralize(held)}` : articled(held)
   }
   const target = linksTo === undefined ? undefined : collections[linksTo]

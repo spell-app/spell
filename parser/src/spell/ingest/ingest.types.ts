@@ -321,6 +321,17 @@ export type CollectionLook = {
    * - Its `at` is then without them.
    */
   askedBy?: Record<string, string>
+  /**
+   * Where ONE of its things is read by its id:  its description's own `GET` route, under the place's address, its brace
+   * naming the field it's read by, `/types/{type_id}` (verify reads it there).
+   * - Left out, from a description:  it offers none, and verify reads none.
+   */
+  oneAt?: string
+  /**
+   * The questions its description says it takes that another list's things answer, each with that list's address:
+   * `{ owner_id: "/owners" }` (verify asks with that list's first thing, kept nowhere).
+   */
+  asksFrom?: Record<string, string>
   /** It answered with one thing, not a list:  that's its one row. */
   answersOne?: boolean
   /** It's ONE thing at its own address, not a list:  a server's status, `the server status lives at "/api/status"`. */
@@ -644,6 +655,17 @@ export type CollectionDescription = {
    * - `forecasts are asked for by their latitude and longitude`
    */
   askedBy?: Record<string, string>
+  /**
+   * Where ONE of its things is read by its id:  its description's own `GET` route, under the place's address, its brace
+   * naming the field it's read by, `/types/{type_id}` (verify reads it there).
+   * - Left out, from a description:  it offers none, and verify reads none.
+   */
+  oneAt?: string
+  /**
+   * The questions its description says it takes that another list's things answer, each with that list's address:
+   * `{ owner_id: "/owners" }` (verify asks with that list's first thing, kept nowhere).
+   */
+  asksFrom?: Record<string, string>
   /**
    * The lists it keeps under each of its things, by the collection each is of,
    * at an address with the thing's id in braces (epic `data` P30):  `{ comments: "/posts/{id}/comments" }`.
