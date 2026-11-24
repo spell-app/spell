@@ -21,6 +21,7 @@ import type { TestResult } from "spell/parser/core"
 import { InspectorActions, type InspectorAction } from "./InspectorActions"
 import { enabledWhenInSource, escapeForRegExp, type WrittenEvent } from "./InspectorSource"
 import { PartEdits } from "./PartEdits"
+import { PartSlots } from "./PartSlots"
 import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 import { on } from "./on"
 
@@ -397,6 +398,11 @@ function PartItem(props: {
   }
   // a thing made as the program runs is a pill, as the Inspector shows it;  markup the program wrote stays words (Owen)
   const isThingRow = () => !!SpellElement.thingOf(props.node.element)
+  // its empty slots (T150), again as the parts inside it change:  one filled loses its row
+  const emptySlots = createMemo(() => {
+    void props.node.children
+    return PartEdits.slotsOf(props.node.element)
+  })
   // the row, set by its ref:  a ref callback has no owner, so the effect below lives here, not in it
   let row: Element | undefined
   // selected from elsewhere, a click in the code or the app:  its row comes into view,
@@ -436,14 +442,43 @@ function PartItem(props: {
         </span>
       </Show>
       <For each={hidden()}>{(thing) => <HiddenItem thing={thing} hiddenIn={props.hiddenIn} />}</For>
+      <For each={emptySlots().filter((part) => PartSlots.isAtTop(part))}>
+        {(part) => <SlotItem holder={props.node.element} part={part} />}
+      </For>
       <For each={props.node.children} keyed={(child) => child.element}>
         {(child) => (
           <PartItem node={child()} shown={props.shown} revealing={props.revealing} hiddenIn={props.hiddenIn} />
         )}
       </For>
+      <For each={emptySlots().filter((part) => !PartSlots.isAtTop(part))}>
+        {(part) => <SlotItem holder={props.node.element} part={part} />}
+      </For>
     </ui-tree-item>
   )
 }
+
+/**
+ * A row for one of a part's empty slots, a modal's `⟨actions⟩` (epic `editor` T150):  greyed, and somewhere to drop
+ * something, even when the part isn't drawn (a closed modal).
+ * - Where the part draws it:  a slot at its top (`⟨header⟩`) before the rows inside it, the rest after them.
+ * - Nothing to select:  a slot isn't a part until something is in it.
+ */
+function SlotItem(props: { holder: Element; part: string }): JSX.Element {
+  return (
+    <ui-tree-item
+      class="InspectorSlotRow"
+      icon={SLOT_ICON}
+      label={`${SLOT_OPEN}${props.part}${SLOT_CLOSE}`}
+      ref={(row: Element) => untrack(() => PartEdits.rememberSlotRow(row, props.holder, props.part))}
+    />
+  )
+}
+
+/** An empty slot's row's icon:  an empty box. */
+const SLOT_ICON = "square outline"
+
+/** The brackets round an empty slot's name, as the editor's tag pills draw them:  `⟨actions⟩`. */
+const [SLOT_OPEN, SLOT_CLOSE] = ["⟨", "⟩"]
 
 /**
  * A row of the tree:  its part, its key, and the parts inside it.
