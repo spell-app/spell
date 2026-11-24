@@ -385,6 +385,7 @@ export const APP_TEXTS = {
   shortcutFind: "Find and Replace",
   shortcutShowShortcuts: "Show Keyboard Shortcuts",
   shortcutShowIcons: "Show All Icons, With Their Names",
+  allIcons: "All Icons…",
   shortcutChangeThis: "Ask for a Change to What's Selected",
   shortcutFormat: "Format Document",
   shortcutExpandSelection: "Expand Selection",

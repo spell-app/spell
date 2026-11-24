@@ -350,7 +350,8 @@ function ThemeItems(): JSX.Element {
  *   P34), Program Panel, ─,
  *   Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
- * - Help:  Keyboard Shortcuts (epic `editor` P36), ─, the editor's tours and Tours… (`<TourMenuItems>`, epic `editor` P40),
+ * - Help:  Keyboard Shortcuts (epic `editor` P36), All Icons (T158), ─,
+ *   the editor's tours and Tours… (`<TourMenuItems>`, epic `editor` P40),
  *   ─, then Help, which does nothing yet;  the editor's own, not the Spell's.
  *   - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there.
  * - `mode`:  the page's, ticked in View.
@@ -390,6 +391,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
   const help = () => (
     <>
       <Actions.showShortcuts menu />
+      <Actions.showIcons menu />
       <ui-divider />
       <TourMenuItems />
       <ui-divider />

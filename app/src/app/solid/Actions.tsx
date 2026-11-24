@@ -182,6 +182,16 @@ export const Actions = {
       {...props}
     />
   ),
+  /** Help › All Icons:  every icon with its name, in a dialog;  a click copies the name (epic `editor` T158). */
+  showIcons: (props: ActionProps) => (
+    <Action
+      title={appTexts.text("allIcons")}
+      icon="icons"
+      shortcut={EDITOR_HOTKEYS.showIcons.shortcut}
+      onClick={() => EDITOR_HOTKEYS.showIcons.run()}
+      {...props}
+    />
+  ),
   /**
    * The person, as their avatar:  their name's first letter in a circle, the "You" panel on a click.
    * - Drawn by its sheet (`.YouAvatar`, `chrome.css`) in the theme's primary colours, until people have pictures

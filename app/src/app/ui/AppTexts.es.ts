@@ -373,6 +373,7 @@ const APP_TEXTS_ES: AppTextPack = {
   shortcutFind: "Buscar y reemplazar",
   shortcutShowShortcuts: "Mostrar los atajos de teclado",
   shortcutShowIcons: "Mostrar todos los iconos, con sus nombres",
+  allIcons: "Todos los iconos…",
   shortcutChangeThis: "Pedir un cambio en lo seleccionado",
   shortcutFormat: "Dar formato al documento",
   shortcutExpandSelection: "Ampliar la selección",

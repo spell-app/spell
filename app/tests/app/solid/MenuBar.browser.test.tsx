@@ -105,7 +105,7 @@ describe("<AppBarMenus>", () => {
     expect(popup.visible).toBe(false)
   })
 
-  test("Help:  Keyboard Shortcuts, its key ?, opens the shortcuts dialog;  then the tours (P40), then Help (epic `editor` P36)", async () => {
+  test("Help:  Keyboard Shortcuts, its key ?, opens the shortcuts dialog;  All Icons (T158);  then the tours (P40), then Help (epic `editor` P36)", async () => {
     const showShortcuts = spyOnEditor("showShortcuts")
     const host = await mount(() => <AppBarMenus mode="edit" />)
     const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=HelpBarMenu]")!
@@ -120,6 +120,7 @@ describe("<AppBarMenus>", () => {
     )
     expect(rows).toEqual([
       `Keyboard Shortcuts ${EDITOR_HOTKEYS.showShortcuts.shortcut}`,
+      `All Icons… ${EDITOR_HOTKEYS.showIcons.shortcut}`,
       "",
       "Design Tour",
       "Anatomy Tour",
