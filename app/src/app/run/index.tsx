@@ -2,8 +2,9 @@ import { render } from "@solidjs/web"
 
 // Import directly, NOT through the `spell/parser/spell` barrel, which would pull in the whole parser.
 import { SpellUrls } from "spell/parser/spell/SpellUrls"
+import { SpellSetup } from "spell/parser/spell/SpellSetup"
 // Import directly:  spell's project groups alone (for `@spell/examples/...`), without spaces' or spell's barrels
-import "spell/app/spaces/models/projectGroups"
+import { addOrgGroups, setLocalPerson } from "spell/app/spaces/models/projectGroups"
 import { AppTexts } from "spell/app/app/ui/AppTexts"
 import { RunPage } from "./RunPage"
 
@@ -21,26 +22,53 @@ import builtInsUrl from "spell/parser/core/core.scopes.js?url"
  *   to run a program loads the runner alone;  the editor's own switch to Run stays on the editor's page.
  * - NEVER imports `spell/parser/core`, the editor or the parser:  the program runs on its own copy of
  *   `spell-runtime.js`, the editor's (`runtimeUrl()`).
+ * - An address only an org's own group holds (`@acme/tools/dashboard`):  the org's groups read first
+ *   (`orgGroupsRead()`), else it'd be taken for the org's program `tools`.
  */
 AppTexts.namePageLanguage()
 
 const root = document.getElementById("run-root")!
 const address = addressIn(location.pathname)
-let projectId: string | undefined
-try {
-  projectId = SpellUrls.split(address).projectId
-} catch {
-  projectId = undefined
+void start()
+
+/** Draw the run page for the project the URL names, once its group is known. */
+async function start(): Promise<void> {
+  await orgGroupsRead(address)
+  let projectId: string | undefined
+  try {
+    projectId = SpellUrls.split(address).projectId
+  } catch {
+    projectId = undefined
+  }
+  if (projectId) {
+    document.title = projectId.slice(projectId.lastIndexOf("/") + 1)
+    render(
+      () => <RunPage address={address} projectId={projectId} runtimeUrl={runtimeUrl()} builtInsUrl={builtInsUrl} />,
+      root
+    )
+  } else {
+    // no project group holds it:  the editor's home page says so, and lists what there is
+    location.replace(`/edit/${SpellUrls.encodeAddress(address)}`)
+  }
 }
-if (projectId) {
-  document.title = projectId.slice(projectId.lastIndexOf("/") + 1)
-  render(
-    () => <RunPage address={address} projectId={projectId} runtimeUrl={runtimeUrl()} builtInsUrl={builtInsUrl} />,
-    root
-  )
-} else {
-  // no project group holds it:  the editor's home page says so, and lists what there is
-  location.replace(`/edit/${SpellUrls.encodeAddress(address)}`)
+
+/**
+ * Read this machine's person and their org's own groups (`GET /api/people/local`, as the editor's `NamePage` does),
+ * when `address` is in an org:  so `@acme/tools/dashboard` is project `dashboard` of the group `@acme/tools`.
+ * - Spell's own addresses (`@spell/examples/...`, a person's) ask nothing:  their groups are known up front.
+ * - NEVER throws:  a failure is one line in the console, and the address is split as before.
+ */
+async function orgGroupsRead(address: string): Promise<void> {
+  if (SpellSetup.groupFor(address)?.domain !== "org") return
+  try {
+    const response = await fetch("/api/people/local", { headers: { accept: "application/json" } })
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
+    const answer = (await response.json()) as { id?: string; org: string; orgGroups?: string[] }
+    if (answer.id) setLocalPerson({ id: answer.id, org: answer.org })
+    addOrgGroups(answer.orgGroups ?? [])
+  } catch (error) {
+    console.error("/api/people/local didn't answer, so an org's own groups are unknown:", error)
+  }
 }
 
 /** The address a run page's `pathname` names, decoded:  `/run/@spell/examples/Solitaire` => `@spell/examples/Solitaire`. */
