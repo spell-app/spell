@@ -237,7 +237,7 @@ export class SiteBase extends App {
         if (this.currentAddressHere !== address) return
         ;(page as unknown as Record<string, unknown>)[property] = value
       }
-      this.showNow({ kind: "page", page, entry: found.entry })
+      this.showNow({ kind: "page", page, entry: found.entry, address })
     } catch (error) {
       if (this.currentAddressHere === address) this.showFailure(found.entry.name, error)
     }
@@ -307,7 +307,7 @@ export class SiteBase extends App {
    */
   start(): void {
     const host = core.siteHost
-    void this.showAddress(host?.address() ?? this.currentAddressHere ?? "/")
+    void this.showAddress(host?.address(this) ?? this.currentAddressHere ?? "/")
     host?.listen((address) => this.showAddress(address))
     this.wearTheme()
     super.start()
@@ -349,6 +349,8 @@ export class SiteBase extends App {
    * - Drawn ONCE per layout, and kept:  going to a page in the same layout redraws only the page, so nothing around
    *   it flashes;  a page in another layout shows that one, and the first is kept, hidden, as it was left.
    * - Each layout keeps its last 3 pages drawn (`KeptPages`, epic `solid-2-final` P13):  Back is instant.
+   *   Kept by ADDRESS:  a page at another address (`/racks/b16` after `/racks/d16`) is drawn afresh, so nothing
+   *   its views chose at the last one carries over.
    * - A site with no main layout draws every page in its built-in frame:  the navigation and the page.
    *   A page whose line says `, no layout` is drawn alone.
    *   A page whose line says `, filling the window` makes its layout the window's height (`shownFillsWindow`).
@@ -801,7 +803,7 @@ export class SiteBase extends App {
    */
   private drawShowingIn(kept: KeptPages): unknown {
     const showing = this.getState<Showing>("showing")
-    if (showing?.kind === "page" && showing.page.draw !== Thing.prototype.draw) return kept.drawingOf(showing.page)
+    if (showing?.kind === "page" && showing.page.draw !== Thing.prototype.draw) return kept.drawingOf(showing.page, showing.address)
     return made(this.drawShowing())
   }
 
@@ -1022,6 +1024,11 @@ const SITE_CSS = `
  * ### `KeptPages`
  * The last pages a layout drew, kept drawn while another is shown (epic `solid-2-final` P13, TLDR 47):
  * so Back to one of them shows it at once, as it was left, scrolled lists, typing and folds and all.
+ * - Kept by the ADDRESS it was shown at:  one page at two addresses (`/racks/d16`, `/racks/b16`) is two drawings,
+ *   so what its views chose at one (a rack picked in a list, a search typed) never shows at the other.
+ *   - The program makes ONE thing of each page class, its parameters set for each address:  kept by the page alone,
+ *     the drawing made at the first address came back at the next, its views' own choices with it.
+ *   - The page itself is part of the key:  a run's new page at the same address (a live edit) is drawn afresh.
  * - The last `KEPT_PAGES`, newest first (`MostRecent`):  an older one is let go, its drawing disposed, and with it
  *   every read it held (a place's read is left as its draw goes), so memory stays flat however many pages are seen.
  * - A page not shown is out of the page's elements altogether, not hidden:  a table of contents, a search or a
@@ -1033,38 +1040,44 @@ const SITE_CSS = `
 class KeptPages {
   /** what owns each page's root:  the layout's drawing */
   private readonly owner: Owner | null
-  /** each page drawn, its element and what lets it go */
-  private readonly drawings = new Map<object, { element: unknown; dispose: () => void }>()
-  /** the pages drawn, newest first:  the oldest let go */
-  private readonly recent = new MostRecent<object>(KEPT_PAGES, { onDropped: (page) => this.letGo(page) })
+  /** each page drawn, by the address it was shown at:  the page, its element and what lets it go */
+  private readonly drawings = new Map<string, { page: Page; element: unknown; dispose: () => void }>()
+  /** the addresses drawn, newest first:  the oldest let go */
+  private readonly recent = new MostRecent<string>(KEPT_PAGES, { onDropped: (address) => this.letGo(address) })
 
   constructor(owner: Owner | null) {
     this.owner = owner
   }
 
   /**
-   * `page`'s drawing:  the one kept, else drawn now, in a root of its own.
+   * `page`'s drawing at `address`:  the one kept, else drawn now, in a root of its own.
+   * - One kept at `address` for another page (a new run's) is let go, and this one drawn.
    * - SIDE EFFECT:  it's the newest now;  the page that pushes out is let go.
    */
-  drawingOf(page: Page): unknown {
-    let drawn = this.drawings.get(page)
+  drawingOf(page: Page, address: string): unknown {
+    let drawn = this.drawings.get(address)
+    if (drawn && drawn.page !== page) {
+      this.letGo(address)
+      drawn = undefined
+    }
     if (!drawn) {
       const make = () =>
         createRoot((dispose) => ({
+          page,
           element: untrack(() => made(h("div", { class: "spell-site-page" }, () => core.drawThing(page)))),
           dispose
         }))
       drawn = this.owner ? runWithOwner(this.owner, make) : make()
-      this.drawings.set(page, drawn)
+      this.drawings.set(address, drawn)
     }
-    this.recent.use(page)
+    this.recent.use(address)
     return drawn.element
   }
 
-  /** Let `page`'s drawing go:  its root disposed, every read it held left. */
-  private letGo(page: object): void {
-    this.drawings.get(page)?.dispose()
-    this.drawings.delete(page)
+  /** Let the drawing at `address` go:  its root disposed, every read it held left. */
+  private letGo(address: string): void {
+    this.drawings.get(address)?.dispose()
+    this.drawings.delete(address)
   }
 }
 
@@ -1073,7 +1086,8 @@ const KEPT_PAGES = 3
 
 /** What a site shows:  a page, the not found page for an address, or the error page for a page that failed. */
 type Showing =
-  | { kind: "page"; page: Page; entry: SitePageEntry }
+  /** `address`:  the one it's shown at, its parameters' values in it */
+  | { kind: "page"; page: Page; entry: SitePageEntry; address: string }
   | { kind: "missing"; address: string }
   | { kind: "waiting"; entry: SitePageEntry }
   /** a page whose address's parameters are still being read:  its layout, and a spinner where it goes */

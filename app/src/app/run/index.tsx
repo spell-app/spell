@@ -7,6 +7,8 @@ import { SpellSetup } from "spell/parser/spell/SpellSetup"
 import { addOrgGroups, setLocalPerson } from "spell/app/spaces/models/projectGroups"
 import { AppTexts } from "spell/app/app/ui/AppTexts"
 import { RunPage } from "./RunPage"
+import { OpenedFile } from "./RunSiteHost"
+import { projectSource } from "spell/app/app/components/spell-viewer/projectSource"
 
 // Solid follows spell cells:  BEFORE anything renders
 import "spell/app/app/solid/cellsBridge"
@@ -42,15 +44,52 @@ async function start(): Promise<void> {
   }
   if (projectId) {
     document.title = projectId.slice(projectId.lastIndexOf("/") + 1)
+    // a page by its file, as the editor's Run names it:  `/run/<project>/home.spell`
+    const opened = await OpenedFile.of(address.slice(projectId.length), projectSource(projectId).declarationsUrl!)
     render(
-      () => <RunPage address={address} projectId={projectId} runtimeUrl={runtimeUrl()} builtInsUrl={builtInsUrl} />,
+      () => (
+        <RunPage
+          address={address}
+          projectId={projectId}
+          opened={opened}
+          runtimeUrl={runtimeUrl()}
+          builtInsUrl={builtInsUrl}
+        />
+      ),
       root
     )
+    void wearEditorsTheme()
   } else {
     // no project group holds it:  the editor's home page says so, and lists what there is
     location.replace(`/edit/${SpellUrls.encodeAddress(address)}`)
   }
 }
+
+/**
+ * Wear the theme and light / dark the person picked in the editor, as the editor's Run wears them:  the editor's own
+ * choice, kept in their space's `spell-app` store (`EditorTheme.restore()`).
+ * - So a project opened at `/run/` looks as it does after Edit, then Run:  dark when they picked dark there.
+ *   Before, the page read only this browser's copy of the scheme (`spell-site:scheme`, which every Spell page writes
+ *   as it's shown), so it followed whichever page was shown last, or the OS when none had written it.
+ * - Spell UI's `ThemePreference` alone, never `EditorTheme`, which imports the editor;  loaded after the page draws.
+ * - The read-only public build keeps the choice in the browser, as the editor does there.
+ * - NEVER throws:  a failure leaves Spell UI's own look, said on the console.
+ */
+async function wearEditorsTheme(): Promise<void> {
+  try {
+    const [{ ThemePreference }, { isStaticBuild }] = await Promise.all([
+      import("spell/ui/components/ui-theme-menu/ThemePreference"),
+      import("spell/app/app/static/staticBuild")
+    ])
+    ThemePreference.keepIn(isStaticBuild ? "browser" : "space", EDITOR_THEME_STORE)
+    await ThemePreference.restore()
+  } catch (error) {
+    console.error("the run page couldn't wear the editor's theme", error)
+  }
+}
+
+/** The space's store the editor keeps its theme in:  `EditorTheme`'s, a copy (that file imports the editor). */
+const EDITOR_THEME_STORE = "spell-app"
 
 /**
  * Read this machine's person and their org's own groups (`GET /api/people/local`, as the editor's `NamePage` does),
