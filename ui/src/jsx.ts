@@ -5834,6 +5834,16 @@ export interface UICardAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
+   * The one chosen among its neighbours:  its border the primary colour and its fill a touch of it, its text as the others';  `--ui-card-selected-border-color` and `--ui-card-selected-background` change them.
+   * - takes:  flag (present / absent)
+   */
+  selected?: boolean | ""
+  /**
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
+  "prop:selected"?: boolean | ""
+  /**
    * Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance="link"`.  Its old name was `href`.
    * - takes:  text
    */
@@ -24829,7 +24839,7 @@ export interface UIJsonEventMap {
     error: unknown
   }>
   /**
-   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
+   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  An object's or array's key opens and closes it instead, and sends none.  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an empty object or array too);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
    * - `event.detail`:  `{ path: (string | number)[], key: string | number | undefined, value: unknown, part: "key" | "value" }`
    * - cancelable:  `preventDefault()` vetoes it
    */
@@ -25267,7 +25277,7 @@ export interface UIJsonAttributes {
    */
   "on-ui-error"?: (event: UIJsonEventMap["ui-error"]) => void
   /**
-   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
+   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  An object's or array's key opens and closes it instead, and sends none.  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an empty object or array too);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
    * - `event.detail`:  `{ path: (string | number)[], key: string | number | undefined, value: unknown, part: "key" | "value" }`
    * - cancelable:  `preventDefault()` vetoes it
    */
@@ -59338,12 +59348,12 @@ export interface UITreeAttributes {
    */
   "prop:columnTitles"?: string
   /**
-   * `appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.
+   * `appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, kind?, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.  `kind: "header"` makes an item the label line over the rows after it, up to the next header (its group), as `<ui-item kind="header">` is in a menu:  never picked, selected, counted or in `path`, skipped by the arrow keys, and kept by `filter` only while a row under it shows.  It draws its `label`, `icon` and `count` (none:  how many rows its group holds), and sticks at the column's top or bottom as it scrolls (`groups`).
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   items?: unknown
   /**
-   * `appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.
+   * `appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, kind?, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.  `kind: "header"` makes an item the label line over the rows after it, up to the next header (its group), as `<ui-item kind="header">` is in a menu:  never picked, selected, counted or in `path`, skipped by the arrow keys, and kept by `filter` only while a row under it shows.  It draws its `label`, `icon` and `count` (none:  how many rows its group holds), and sticks at the column's top or bottom as it scrolls (`groups`).
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `items` -- `prop:` stays only for compiled spell
    */
@@ -59410,6 +59420,16 @@ export interface UITreeAttributes {
    * @deprecated write `show` -- `prop:` stays only for compiled spell
    */
   "prop:show"?: string
+  /**
+   * `appearance="columns"` with headers in `items` (`kind: "header"`):  how a column shows the groups under them.  `open`, the default:  every group.  `accordion`:  one group a column, the first, or the one its pick is in;  a click on a header (Enter, Space) opens its group and closes the other.  Either way, the headers stick as the column scrolls:  at its top under the ones above, at its bottom over the ones below.
+   * - takes:  `open` · `accordion`
+   */
+  groups?: "open" | "accordion"
+  /**
+   * `groups`, as the DOM element's property.
+   * @deprecated write `groups` -- `prop:` stays only for compiled spell
+   */
+  "prop:groups"?: "open" | "accordion"
   /**
    * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.  `appearance="columns"`:  a line above the columns naming each column's pick, shown once something is picked;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.
    * - takes:  flag (present / absent)

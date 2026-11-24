@@ -110,6 +110,19 @@ describe("ProjectBuild", () => {
     expect(await Promise.all(waiting)).toEqual([true, true])
   })
 
+  test("a compile is told the page server's app (`SPELL_APP_DIR`), for its org's groups;  run in the checkout", async () => {
+    const { spawn, children } = spawnStub()
+    const app = join(root, "acme-app")
+    const build = new ProjectBuild({ root, app, spawn, timeout: 20 })
+    await build.untilBuilt(compiled)
+    expect(spawn).toHaveBeenCalledWith(
+      process.execPath,
+      [build.cli, "compile", projectId],
+      expect.objectContaining({ cwd: root, env: expect.objectContaining({ SPELL_APP_DIR: app, INIT_CWD: root }) })
+    )
+    children[0]!.exit(0)
+  })
+
   test("a project that isn't there:  no compile, not there", async () => {
     const { spawn } = spawnStub()
     const missing = SP.SpellLocation.getFileLocation(

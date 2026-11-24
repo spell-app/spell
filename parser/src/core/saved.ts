@@ -931,16 +931,31 @@ class ProgramPlaces {
 
   /**
    * Where the list the place keeps under `owner`, in its field `field`, is:  `/posts/1/comments`, its id in the braces.
-   * - An address that starts with the id takes the id as it is:  a path of its own, Open Library's `/works/OL45804W`.
+   * - Each brace names one of `owner`'s own fields, `{current_receipt_id}`;  `{id}` is its id.
+   *   - A first brace naming no field it has is its id too, as every line said before:  `"/posts/{postId}/comments"`.
+   * - An address that starts with a brace takes its value as it is:  a path of its own, Open Library's `/works/OL45804W`.
+   *   Elsewhere each value is made safe for an address.
    * - `undefined` for a field no line says lives under it (`- a post's comments live at "..."`),
-   *   or a thing read from no place.
+   *   a thing read from no place, or a brace whose field holds no value:  nothing is read, never a broken address.
    */
   addressUnder(owner: Thing, field: string): string | undefined {
     const Owner = owner.constructor as SavedClass
     const id = Owner.savedIn && this.things?.placeOf(owner)?.id
     if (id === undefined) return undefined
     const path = this.detailsOf(Owner).listsUnder?.[Owner.savedIn!.collection]?.[field]
-    return path?.replace("{id}", path.startsWith("{id}") ? id : encodeURIComponent(id))
+    if (path === undefined) return undefined
+    const schema = schemaOf(Owner)
+    let missing = false
+    let first = true
+    const filled = path.replace(/\{([^{}/]*)\}/g, (_brace, name: string, at: number) => {
+      const isFirst = first
+      first = false
+      const isId = name === "id" || (isFirst && schema.info(name) === undefined)
+      const value = isId ? id : valueInAddress(getProp(owner, name))
+      if (value === undefined) missing = true
+      return value === undefined ? "" : at === 0 ? value : encodeURIComponent(value)
+    })
+    return missing ? undefined : filled
   }
 
   /** What the lines of the place `Class` is saved in say. */
@@ -2087,10 +2102,11 @@ function headerRowOf(row: Element, named: Element[]): Element {
 
 /**
  * A list drawn a page at a time, with Previous and Next:  `paging="pages"`.
- * - A page holds `atOnce`:  `MOST_AT_ONCE`, unless the program says (`show them 12 at a time`).
+ * - A page holds `atOnce`:  `MOST_AT_ONCE`, unless the program says (`show them 12 at a time`);  the person can pick
+ *   another from the footer's page size (`PAGE_SIZES`, with the program's own among them).
  * - Next at the end of what's read asks a place for its next page.
- * - Its footer says which it shows, "Showing 1-10 of 42" ("of 42+" while a place has more), on every page;
- *   Previous, "Page 1 of 5" and Next beside it once there's more than one page.
+ * - Its footer, on every page, as a console's table's:  "Showing 1-10 of 42" ("of 42+" while a place has more) at its
+ *   start;  at its end the page size, then Previous, "Page 1 of 5" and Next, each button dimmed where it can't go.
  * - Hands back the page's items and the pager apart:  the caller draws the pager AFTER what's around the items
  *   (`<ui-cards>`, `<ui-table>`), so it's never one of them.
  */
@@ -2107,15 +2123,25 @@ function drawnInPages<Item>({
 }): { list: JSX.Element; pager: JSX.Element } {
   const pageChanged = new Cell()
   let page = 0
+  let size = atOnce
   const pageNow = () => {
     pageChanged.read()
     return page
+  }
+  const sizeNow = () => {
+    pageChanged.read()
+    return size
   }
   const goTo = (to: number) => {
     page = to
     pageChanged.changed()
   }
-  const lastDrawn = () => (pageNow() + 1) * atOnce
+  // a new page size starts again at the first page
+  const sizeTo = (to: number) => {
+    size = to
+    goTo(0)
+  }
+  const lastDrawn = () => (pageNow() + 1) * sizeNow()
   const hasNext = () => items().length > lastDrawn() || !!more()?.hasMorePages
   const next = async () => {
     if (items().length <= lastDrawn()) await more()?.readNextPage()
@@ -2125,27 +2151,39 @@ function drawnInPages<Item>({
     For as never,
     {
       get each() {
-        return items().slice(pageNow() * atOnce, lastDrawn())
+        return items().slice(pageNow() * sizeNow(), lastDrawn())
       },
-      children: (item: Item, position: () => number) => drawItem(item, () => pageNow() * atOnce + position())
+      children: (item: Item, position: () => number) => drawItem(item, () => pageNow() * sizeNow() + position())
     } as never
   ) as JSX.Element
-  ////// The footer:  "Showing 1-10 of 42" at its start;  Previous, "Page 1 of 5" and Next at its end, while there's more
-  // than one page
+  ////// The footer:  "Showing 1-10 of 42" at its start;  the page size, Previous, "Page 1 of 5" and Next at its end
   const isMore = () => !!more()?.hasMorePages
   const showing = () => {
     const count = items().length
-    const said = { first: pageNow() * atOnce + 1, last: Math.min(lastDrawn(), count), count }
+    const said = { first: Math.min(pageNow() * sizeNow() + 1, count), last: Math.min(lastDrawn(), count), count }
     return core.message(isMore() ? "page-showing-more" : "page-showing", said)
   }
   const pageNumber = () => {
     const at = pageNow() + 1
     if (isMore()) return core.message("page-number", { page: at })
-    return core.message("page-number-of", { page: at, pages: Math.max(1, Math.ceil(items().length / atOnce)) })
+    return core.message("page-number-of", { page: at, pages: Math.max(1, Math.ceil(items().length / sizeNow())) })
   }
+  const sizes = [...new Set([...PAGE_SIZES, atOnce])].sort((a, b) => a - b)
+  const sizePicker = h(
+    "ui-select",
+    {
+      size: "small",
+      padding: "compact",
+      value: () => String(sizeNow()),
+      "aria-label": core.message("page-size"),
+      "onUi-changed": (event: Event) => sizeTo(Number((event as CustomEvent<{ value: string }>).detail.value))
+    },
+    ...sizes.map((each) => h("ui-item", { value: String(each) }, String(each)))
+  )
   const buttons = h(
     "ui-stack",
     { direction: "horizontal", align: "center", spacing: "xs" },
+    sizePicker,
     h(
       "ui-button",
       { size: "small", appearance: "basic", disabled: () => !pageNow(), onClick: () => goTo(page - 1) },
@@ -2162,10 +2200,13 @@ function drawnInPages<Item>({
     "ui-stack",
     { direction: "horizontal", justify: "between", align: "center", spacing: "sm", wrap: "", [PAGER]: "" },
     h("ui-text", { size: "small", color: "grey" }, showing),
-    () => (hasNext() || pageNow() ? buttons : null)
+    buttons
   )
   return { list, pager: pager as unknown as JSX.Element }
 }
+
+/** The page sizes a paged list's footer offers, beside the program's own:  a console's table's. */
+const PAGE_SIZES = [10, 25, 50, 100]
 
 /** The mark on a paged list's footer:  a theme or a page styles it by this (`[data-pager]`). */
 const PAGER = "data-pager"
@@ -2270,5 +2311,15 @@ function responseOf(error: unknown): Response | undefined {
     if (response && typeof (response as Response).status === "number" && (response as Response).headers)
       return response as Response
   }
+  return undefined
+}
+
+/**
+ * A field's value as it goes in an address's braces:  a text, number or yes / no as it reads.
+ * - `undefined` for no value, or an empty text:  that address is never asked for.
+ */
+function valueInAddress(value: unknown): string | undefined {
+  if (typeof value === "string") return value === "" ? undefined : value
+  if (typeof value === "number" || typeof value === "bigint" || typeof value === "boolean") return `${value}`
   return undefined
 }

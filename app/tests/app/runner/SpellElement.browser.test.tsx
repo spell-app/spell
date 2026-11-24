@@ -193,6 +193,87 @@ describe("SpellElement", () => {
     root.remove()
   })
 
+  describe("a plain view lays out as its drawing:  no box of its own between its parent and what it draws", () => {
+    /** A view drawing one `<ui-card>`, as an entity card does. */
+    class Tile extends View {
+      draw(): ReturnType<View["draw"]> {
+        return (h("ui-card", {}, "a tile") as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+    /** A view drawing one `<ui-segment height="fluid">`, as a panel filling its column does. */
+    class Panel extends View {
+      draw(): ReturnType<View["draw"]> {
+        return (h("ui-segment", { height: "fluid" }, "a panel") as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+    /** A view drawing two elements:  one box still holds them. */
+    class Pair extends View {
+      draw(): ReturnType<View["draw"]> {
+        const pair = [h("ui-card", {}, "one"), h("ui-card", {}, "two")]
+        return pair.map((it) => (it as unknown as () => unknown)()) as unknown as ReturnType<View["draw"]>
+      }
+    }
+
+    /** Render `html`, once `Tile`, `Panel` and `Pair` and the Spell UI families they draw are defined. */
+    async function rendered(html: string): Promise<HTMLElement> {
+      await Promise.all([import("spell/ui/components/ui-card"), import("spell/ui/components/ui-segment")])
+      await import("spell/ui/components/ui-stack")
+      core.defineElement(Tile, "Layout")
+      core.defineElement(Panel, "Layout")
+      core.defineElement(Pair, "Layout")
+      await Promise.resolve()
+      const element = await ElementFixture.render<HTMLElement>(html)
+      onTestFinished(() => element.remove())
+      await ElementFixture.settle(element)
+      await ElementFixture.settle(element)
+      return element
+    }
+
+    /** The `.ui.card` box `<ui-card>` draws inside `view`. */
+    function cardIn(view: Element): HTMLElement {
+      const card = view.shadowRoot!.querySelector("ui-card") as E.DOMElement
+      return card.shadowRoot!.querySelector(".ui.card") as HTMLElement
+    }
+
+    test("a <ui-card> it draws is a card of the <ui-cards columns> around it:  two to a row, filling the width", async () => {
+      const cards = await rendered(
+        `<ui-cards columns="2" style="display: block; width: 800px"><layout-tile></layout-tile><layout-tile></layout-tile><layout-tile></layout-tile></ui-cards>`
+      )
+      const tiles = [...cards.querySelectorAll("layout-tile")]
+      for (const tile of tiles) expect(getComputedStyle(tile).display).toBe("contents")
+      const card = tiles[0]!.shadowRoot!.querySelector("ui-card") as E.DOMElement
+      await expect.poll(() => card.matches(":state(in-cards)")).toBe(true)
+      const [first, second, third] = tiles.map((tile) => cardIn(tile).getBoundingClientRect())
+      // two to a row:  each near half the group's width, the third on the next row
+      expect(first!.width).toBeGreaterThan(300)
+      expect(first!.width).toBeLessThan(400)
+      expect(second!.top).toBe(first!.top)
+      expect(third!.top).toBeGreaterThan(first!.bottom)
+    })
+
+    test("a <ui-segment height=fluid> it draws fills its column's height", async () => {
+      const stack = await rendered(`<ui-stack style="height: 400px"><layout-panel></layout-panel></ui-stack>`)
+      const panel = stack.querySelector("layout-panel")!
+      const segment = panel.shadowRoot!.querySelector("ui-segment") as E.DOMElement
+      const box = () => (segment.shadowRoot!.querySelector(".ui.segment") as HTMLElement).getBoundingClientRect()
+      await expect.poll(() => Math.round(box().height)).toBe(400)
+    })
+
+    test("a view drawing several elements, or whose tag the page gives a display, keeps its box;  its card is no group's", async () => {
+      const cards = await rendered(
+        `<ui-cards columns="2" style="display: block; width: 800px"><layout-pair></layout-pair><layout-tile style="display: block"></layout-tile></ui-cards>`
+      )
+      const pair = cards.querySelector("layout-pair")!
+      const tile = cards.querySelector("layout-tile")!
+      expect(getComputedStyle(pair).display).not.toBe("contents")
+      expect(pair.matches(":state(lays-out-as-drawing)")).toBe(false)
+      expect(getComputedStyle(tile).display).toBe("block")
+      const card = tile.shadowRoot!.querySelector("ui-card")!
+      await ElementFixture.tick()
+      expect(card.matches(":state(in-cards)")).toBe(false)
+    })
+  })
+
   describe("a program draws a view as its element (P5)", () => {
     /** A card that draws its rank as a button, counting its clicks;  a rank of `bad` throws. */
     class Ace extends View {

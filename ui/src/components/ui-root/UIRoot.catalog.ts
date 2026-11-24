@@ -209,6 +209,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "inverted",
       "disabled",
       "loading",
+      "selected",
       "link",
       "target",
       "heading",
@@ -1800,6 +1801,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "column-max-width",
       "narrow-before",
       "show",
+      "groups",
       "sticky-path",
       "sticky-detail"
     ]

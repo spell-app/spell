@@ -298,6 +298,8 @@ export class Loader {
   /**
    * `json` read back:
    * - a reference, followed (`follow()`)
+   *   - a `"$ref"` whose text isn't one, e.g. a JSON Schema's `"#/definitions/Settings"`:  data, read as it is,
+   *     never followed, with one warning per text (`warnNotRef()`)
    * - a thing written whole, made
    * - arrays and objects, read through
    */
@@ -311,8 +313,19 @@ export class Loader {
     }
     if (!isPlainObject(json)) return json
     if (isReference(json)) return this.follow(json)
+    if (typeof json[REF_KEY] === "string" && !isRefText(json[REF_KEY])) this.warnNotRef(json[REF_KEY])
     if (typeof json[TYPE_KEY] === "string") return this.make(json)
     return Object.fromEntries(Object.entries(json).map(([key, value]) => [key, this.read(value)]))
+  }
+
+  /** The `"$ref"` texts that weren't references it's warned of:  each one once. */
+  protected warnedRefs = new Set<string>()
+
+  /** Warn, once per `text`, that a `"$ref"` isn't a reference, so it's kept as data:  see `read()`. */
+  protected warnNotRef(text: string): void {
+    if (this.warnedRefs.has(text)) return
+    this.warnedRefs.add(text)
+    core.console.warn(`Loader.read():  "${text}" isn't a reference (Type#id);  it's kept as it is, as data`)
   }
 
   /**
@@ -514,11 +527,22 @@ function isPlainValue(value: unknown): boolean {
   return value === null || typeof value !== "object"
 }
 
-/** Is `json` a reference alone, `{ "$ref": ... }`? */
+/** Is `text` a saved reference, `Person#matt` or `Person#matt@three-degrees`:  one `parseRef()` reads? */
+function isRefText(text: unknown): boolean {
+  if (typeof text !== "string") return false
+  try {
+    parseRef(text)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Is `json` a reference alone, `{ "$ref": ... }`, its text one `parseRef()` reads? */
 function isReference(json: unknown): json is Record<string, unknown> {
   return (
     isPlainObject(json) &&
-    typeof json[REF_KEY] === "string" &&
+    isRefText(json[REF_KEY]) &&
     Object.keys(json).every((key) => key === REF_KEY || key === IN_KEY)
   )
 }

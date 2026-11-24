@@ -245,6 +245,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "inverted", kind: "keyOnly", group: "appearance" },
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "loading", kind: "keyOnly", group: "states" },
+    { name: "selected", kind: "keyOnly", group: "states" },
     { name: "link", kind: "string", group: "link" },
     { name: "target", kind: "string", group: "link" },
     { name: "heading", kind: "string", group: "name" },
@@ -2014,6 +2015,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "column-max-width", kind: "string", group: "appearance" },
     { name: "narrow-before", kind: "number", group: "appearance" },
     { name: "show", kind: "string", group: "appearance" },
+    { name: "groups", kind: "valueOnly", group: "behaviour", values: ["open", "accordion"] },
     { name: "sticky-path", kind: "keyOnly", group: "behaviour" },
     { name: "sticky-detail", kind: "keyOnly", group: "behaviour" }
   ],

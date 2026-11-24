@@ -2096,3 +2096,307 @@ describe('<ui-tree appearance="columns"> from `items`, a big column', () => {
     expect(dataRow(host, `row-${COUNT - 1}`)?.classList).toContain("selected")
   })
 })
+
+describe('<ui-tree appearance="columns"> from `items`, headers', () => {
+  type TreeHost = HTMLElement & {
+    items?: TreeItemData[]
+    path?: string[]
+    filter?: string
+    openTo(levels: number): Promise<void>
+  }
+
+  /** Ports:  in (x), out;  Connections:  wire (Ends:  a, b), with headers over each group. */
+  function grouped(): TreeItemData[] {
+    return [
+      { id: "ports", kind: "header", label: "Ports", icon: "plug", count: 2 },
+      { id: "in", label: "in", children: [{ id: "x", label: "x" }] },
+      { id: "out", label: "out" },
+      { id: "links", kind: "header", label: "Connections", count: 6 },
+      {
+        id: "wire",
+        label: "wire",
+        children: [
+          { id: "ends", kind: "header", label: "Ends" },
+          { id: "a", label: "a" },
+          { id: "b", label: "b" }
+        ]
+      }
+    ]
+  }
+
+  async function groupedTree(attributes = ""): Promise<TreeHost> {
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" ${attributes} label="Netlist" style="height: 300px; width: 900px"></ui-tree>`
+    )) as TreeHost
+    host.items = grouped()
+    await ElementFixture.settle()
+    return host
+  }
+
+  /** `key` pressed on what has the focus, inside the tree's shadow root too. */
+  async function pressFocused(key: string) {
+    let active = document.activeElement
+    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+    active!.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true, cancelable: true }))
+    await ElementFixture.settle()
+  }
+
+  /** `groups="accordion"`:  the button in the header labelled `label`. */
+  function headButton(host: Element, label: string): HTMLButtonElement {
+    return header(host, label).querySelector<HTMLButtonElement>("button.head")!
+  }
+
+  /** Each column's headers, by label. */
+  function headers(host: Element): string[][] {
+    return [...host.shadowRoot!.querySelectorAll("ul.column")].map((column) =>
+      [...column.querySelectorAll(".column-header .words")].map((words) => words.textContent!)
+    )
+  }
+
+  /** Each column's rows, by id. */
+  function rowIds(host: Element): string[][] {
+    return [...host.shadowRoot!.querySelectorAll("ul.column")].map((column) =>
+      [...column.querySelectorAll<HTMLElement>(".column-row")].map((row) => row.dataset.id!)
+    )
+  }
+
+  /** The row of id `id`. */
+  function dataRow(host: Element, id: string): HTMLElement {
+    return host.shadowRoot!.querySelector<HTMLElement>(`.column-row[data-id="${CSS.escape(id)}"]`)!
+  }
+
+  /** The header labelled `label`. */
+  function header(host: Element, label: string): HTMLElement {
+    return [...host.shadowRoot!.querySelectorAll<HTMLElement>(".column-header")].find(
+      (each) => each.querySelector(".words")!.textContent === label
+    )!
+  }
+
+  it("draws a header as a label line, not a row:  no tab stop, no click, named by the rows under it", async () => {
+    const host = await groupedTree()
+    expect(headers(host)).toEqual([["Ports", "Connections"]])
+    expect(rowIds(host)).toEqual([["in", "out", "wire"]])
+    const ports = header(host, "Ports")
+    expect(ports.getAttribute("role")).toBe("none")
+    expect(ports.getAttribute("part")).toBe("column-header")
+    expect(ports.hasAttribute("tabindex")).toBe(false)
+    expect(ports.querySelector("button, [tabindex]")).toBeNull()
+    expect(ports.querySelector("ui-icon")?.getAttribute("name")).toBe("plug")
+    expect(ports.querySelector(".count")?.textContent).toBe("2")
+    // each row says which header it's under
+    expect(dataRow(host, "in").getAttribute("aria-describedby")).toBe(ports.id)
+    expect(dataRow(host, "out").getAttribute("aria-describedby")).toBe(ports.id)
+    expect(dataRow(host, "wire").getAttribute("aria-describedby")).toBe(header(host, "Connections").id)
+    // the tab stop is the first row, not the header
+    expect(dataRow(host, "in").tabIndex).toBe(0)
+
+    const changed = vi.fn()
+    host.addEventListener("ui-changed", changed)
+    ports.click()
+    await ElementFixture.settle()
+    expect(changed).not.toHaveBeenCalled()
+    expect(host.path ?? []).toEqual([])
+    await expectAccessible(host)
+  })
+
+  it("the keys skip a header, in a column and going into the next", async () => {
+    const host = await groupedTree()
+    dataRow(host, "out").click()
+    await ElementFixture.settle()
+    dataRow(host, "out").focus()
+    await pressFocused("ArrowDown")
+    expect(host.path).toEqual(["wire"])
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, "wire"))
+    await pressFocused("ArrowUp")
+    expect(host.path).toEqual(["out"])
+    await pressFocused("Home")
+    expect(host.path).toEqual(["in"])
+    await pressFocused("ArrowUp")
+    expect(host.path).toEqual(["in"])
+    await pressFocused("End")
+    expect(host.path).toEqual(["wire"])
+    // into wire's column:  onto its first row, past its header
+    await pressFocused("ArrowRight")
+    expect(host.path).toEqual(["wire", "a"])
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, "a"))
+  })
+
+  it("`count` counts rows only;  a header shows its own", async () => {
+    const host = await groupedTree('show="count chevron"')
+    expect(dataRow(host, "wire").querySelector(".count")?.textContent).toBe("2")
+    expect(dataRow(host, "in").querySelector(".count")?.textContent).toBe("1")
+    expect(header(host, "Connections").querySelector(".count")?.textContent).toBe("6")
+  })
+
+  it("`filter` keeps a header only while a row under it matches, and never matches a header", async () => {
+    const host = await groupedTree()
+    host.filter = "ou"
+    await ElementFixture.settle()
+    expect(headers(host)).toEqual([["Ports"]])
+    expect(rowIds(host)).toEqual([["out"]])
+    host.filter = "wire"
+    await ElementFixture.settle()
+    expect(headers(host)).toEqual([["Connections"]])
+    expect(rowIds(host)).toEqual([["wire"]])
+    // a header's own words match nothing, here or elsewhere in the tree
+    host.filter = "ends"
+    await vi.waitFor(() => expect(host.matches(":state(no-matches)")).toBe(true))
+    expect(headers(host)).toEqual([[]])
+    expect(host.shadowRoot!.querySelectorAll('[part~="match"]').length).toBe(0)
+    host.filter = ""
+    await ElementFixture.settle()
+    expect(headers(host)).toEqual([["Ports", "Connections"]])
+  })
+
+  it("the path never lands on a header:  set, opened to a depth, or remembered", async () => {
+    localStorage.removeItem("ui-tree:path:grouped")
+    const host = await groupedTree('id="grouped"')
+    // a page's path naming a header:  nothing picked, no column opens
+    host.path = ["links"]
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector(".column-row.selected")).toBeNull()
+    expect(rowIds(host).length).toBe(1)
+    // opening to two levels picks the first row that holds rows
+    await host.openTo(2)
+    await ElementFixture.settle()
+    expect(host.path).toEqual(["in"])
+    expect(JSON.parse(localStorage.getItem("ui-tree:path:grouped")!)).toEqual(["in"])
+    // a click on a header keeps nothing
+    header(host, "Ports").click()
+    await ElementFixture.settle()
+    expect(JSON.parse(localStorage.getItem("ui-tree:path:grouped")!)).toEqual(["in"])
+    host.remove()
+
+    // a kept path naming a header opens nothing
+    localStorage.setItem("ui-tree:path:grouped", JSON.stringify(["links"]))
+    const again = await groupedTree('id="grouped"')
+    expect(again.shadowRoot!.querySelector(".column-row.selected")).toBeNull()
+    expect(rowIds(again).length).toBe(1)
+    localStorage.removeItem("ui-tree:path:grouped")
+  })
+
+  it('`groups="accordion"`:  one group open, the first;  a click on a header opens its group and closes the other', async () => {
+    const host = await groupedTree('groups="accordion"')
+    expect(headers(host)).toEqual([["Ports", "Connections"]])
+    expect(rowIds(host)).toEqual([["in", "out"]])
+    const ports = headButton(host, "Ports")
+    const links = headButton(host, "Connections")
+    expect(header(host, "Ports").getAttribute("role")).toBe("none")
+    expect(ports.getAttribute("aria-expanded")).toBe("true")
+    expect(links.getAttribute("aria-expanded")).toBe("false")
+    expect(header(host, "Connections").classList).toContain("closed")
+
+    const changed = vi.fn()
+    host.addEventListener("ui-changed", changed)
+    links.click()
+    await ElementFixture.settle()
+    expect(rowIds(host)).toEqual([["wire"]])
+    expect(links.getAttribute("aria-expanded")).toBe("true")
+    expect(ports.getAttribute("aria-expanded")).toBe("false")
+    // opening a group picks nothing
+    expect(changed).not.toHaveBeenCalled()
+    expect(host.path ?? []).toEqual([])
+    // its rows' count:  the group's own, given, or how many rows it holds
+    expect(ports.querySelector(".count")?.textContent).toBe("2")
+    await expectAccessible(host)
+  })
+
+  it('`groups="accordion"`:  Enter or Space on a header opens it;  the arrow keys skip the headers', async () => {
+    const host = await groupedTree('groups="accordion"')
+    // a header is in the tab order
+    expect(headButton(host, "Connections").tabIndex).toBe(0)
+    headButton(host, "Connections").focus()
+    await userEvent.keyboard("{Enter}")
+    await ElementFixture.settle()
+    expect(rowIds(host)).toEqual([["wire"]])
+    // Space, as a button takes it:  on the key's release
+    headButton(host, "Ports").focus()
+    await userEvent.keyboard(" ")
+    await ElementFixture.settle()
+    expect(rowIds(host)).toEqual([["in", "out"]])
+    // within the open group:  down from its last row stays on it
+    dataRow(host, "out").click()
+    await ElementFixture.settle()
+    dataRow(host, "out").focus()
+    await pressFocused("ArrowDown")
+    expect(host.path).toEqual(["out"])
+    await pressFocused("ArrowUp")
+    expect(host.path).toEqual(["in"])
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, "in"))
+  })
+
+  it('`groups="accordion"`:  a pick in a closed group opens it;  the group opened stays while the pick does', async () => {
+    const host = await groupedTree('groups="accordion"')
+    host.path = ["wire", "a"]
+    await ElementFixture.settle()
+    expect(rowIds(host)).toEqual([["wire"], ["a", "b"]])
+    expect(headButton(host, "Connections").getAttribute("aria-expanded")).toBe("true")
+    // a group opened by hand stays open as the next column's pick changes
+    headButton(host, "Ports").click()
+    await ElementFixture.settle()
+    expect(rowIds(host)[0]).toEqual(["in", "out"])
+    host.path = ["wire", "b"]
+    await ElementFixture.settle()
+    expect(rowIds(host)[0]).toEqual(["in", "out"])
+    // a new pick in the column opens its group
+    host.path = ["in"]
+    await ElementFixture.settle()
+    expect(rowIds(host)[0]).toEqual(["in", "out"])
+    host.path = ["wire"]
+    await ElementFixture.settle()
+    expect(rowIds(host)[0]).toEqual(["wire"])
+  })
+
+  it('`groups="accordion"`:  a `filter` shows every group with a match', async () => {
+    const host = await groupedTree('groups="accordion"')
+    host.filter = "i"
+    await ElementFixture.settle()
+    expect(headers(host)).toEqual([["Ports", "Connections"]])
+    expect(rowIds(host)).toEqual([["in", "wire"]])
+  })
+
+  it("a header sticks:  at the column's top under the ones above, at its bottom over the ones below", async () => {
+    const rows = (prefix: string, count: number) =>
+      Array.from({ length: count }, (_, at) => ({ id: `${prefix}${at}`, label: `${prefix} ${at}` }))
+    for (const [groups, titles] of [
+      ["open", 'column-titles="Things"'],
+      ["accordion", 'column-titles="Things"'],
+      ["accordion", ""]
+    ]) {
+      const host = (await ElementFixture.render(
+        `<ui-tree appearance="columns" groups="${groups}" ${titles} style="height: 300px; width: 600px"></ui-tree>`
+      )) as TreeHost
+      host.items = [
+        { id: "first", kind: "header", label: "First" },
+        ...rows("a", 40),
+        { id: "second", kind: "header", label: "Second" },
+        ...rows("b", 40),
+        { id: "third", kind: "header", label: "Third" },
+        ...rows("c", 5)
+      ]
+      await ElementFixture.settle()
+      const column = host.shadowRoot!.querySelector<HTMLElement>("ul.column")!
+      column.scrollTop = 200
+      await new Promise((done) => requestAnimationFrame(done))
+      const box = column.getBoundingClientRect()
+      const title = column.querySelector(".column-title")?.getBoundingClientRect() ?? {
+        bottom: column.getBoundingClientRect().top
+      }
+      const [first, second, third] = [...column.querySelectorAll(".column-header")].map((each) =>
+        each.getBoundingClientRect()
+      )
+      expect(Math.abs(first.top - title.bottom), groups).toBeLessThan(1.5)
+      expect(Math.abs(third.bottom - box.bottom), groups).toBeLessThan(1.5)
+      expect(Math.abs(second.bottom - third.top), groups).toBeLessThan(1.5)
+      // a row brought into view by the keys lands clear of the headers stuck over it
+      dataRow(host, "a20").click()
+      await ElementFixture.settle()
+      await new Promise((done) => requestAnimationFrame(done))
+      const picked = dataRow(host, "a20").getBoundingClientRect()
+      expect(picked.bottom, groups).toBeLessThanOrEqual(
+        column.querySelectorAll(".column-header")[1].getBoundingClientRect().top + 1
+      )
+      host.remove()
+    }
+  })
+})

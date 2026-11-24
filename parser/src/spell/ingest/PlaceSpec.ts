@@ -11,8 +11,7 @@ import type {
   PagesWith,
   PlaceLook
 } from "./ingest.types"
-import { wordsFor } from "./PlaceShape"
-
+import { oneNamedBy, wordsFor, yesOrNoWords } from "./PlaceShape"
 
 /** How deep it reads objects inside objects:  as deep as a look at rows reads (`PlaceShape`'s). */
 const DEEPEST_INSIDE = 3
@@ -25,6 +24,12 @@ const LOCAL_REF = /^#\//
 
 /** A path with a brace in it:  a thing by its id. */
 const HAS_BRACE = /\{[^{}/]+\}/
+
+/**
+ * A path a `GET` makes a token at, or signs in or out at, by its last word:  never read, as it does something
+ * (`/api/auth/token`, `/login`, `/oauth/authorize`).
+ */
+export const MAKES_A_TOKEN = /\/(?:tokens?|log-?in|log-?out|sign-?in|sign-?out|refresh|authorize)\/*$/i
 
 /** What a list's question saying how many is called, when it pages by offset:  FastAPI's `limit`. */
 const LIMIT_NAMES = /^(limit|page_?size|per_?page|size|take|top|max_?results)$/i
@@ -111,16 +116,32 @@ export class PlaceSpec {
     const paged: PagesWith[] = []
     for (const [path, item] of Object.entries(paths)) {
       if (HAS_BRACE.test(path) || !item?.get) continue
+      // a `GET` that makes a token, or signs in or out, is something done, never read
+      if (MAKES_A_TOKEN.test(path)) {
+        this.notes.push(`Left out "${path}":  a GET there makes a token, or signs in or out, so it's never read.`)
+        continue
+      }
+      // the server's own front page, `/`:  no word names a list there
+      if (!lastWordOf(path)) {
+        this.notes.push(`Left out "${path}":  the server's own address, which names no list.`)
+        continue
+      }
       // no list in its answer's schema, but things by id under it, or an answer it says nothing of (`{}`):
       // a collection all the same, untyped till a read fills it
       const untyped = hasThingsUnder(path, paths) || this.isUndescribed(item.get)
-      const rows = this.rowsOf(item.get) ?? (untyped ? { item: {} } : undefined)
+      // or ONE thing, not a list:  its status, or an object holding several lists
+      const one = untyped ? undefined : this.oneThingOf(path, item.get)
+      const rows = this.rowsOf(item.get) ?? one ?? (untyped ? { item: {} } : undefined)
       if (!rows) continue
       const at = underPlace(path, prefix)
       const search = this.searchOf(item.get)
       const askedBy = this.askedByOf(path, item.get, search?.param)
-      const pages = search ? undefined : this.offsetPagingOf(item.get, rows.answer)
+      const pages = search || one ? undefined : this.offsetPagingOf(item.get, rows.answer)
       if (pages) paged.push(pages)
+      const fields = this.withAskedFields(this.fieldsOf(rows.item, rows.schemaAt ?? path), item.get, askedBy, path)
+      const oneAt = one ? undefined : oneAtOf(path, at, paths)
+      // its id, as its read by id names it:  `/types/{type_id}` is read by its `type_id`
+      const byId = oneAt && /\{([^{}/]+)\}/.exec(oneAt)?.[1]
       const collection: CollectionLook = {
         name: lastWordOf(path),
         at,
@@ -130,8 +151,9 @@ export class PlaceSpec {
         hasMore: false,
         ...(rows.rowsAt !== undefined && { rowsAt: rows.rowsAt }),
         ...(rows.nextAt !== undefined && { nextAt: rows.nextAt }),
-        ...(this.takesLimit(item) && { takesLimit: true }),
+        ...(!one && this.takesLimit(item) && { takesLimit: true }),
         ...(pages && { pagesWith: pages }),
+        ...(one && { isOne: true }),
         ...(askedBy && { askedBy }),
         ...(rows.schemaAt !== undefined && { schemaAt: rows.schemaAt }),
         ...(item.get.tags?.[0] !== undefined && { tag: item.get.tags[0] }),
@@ -141,20 +163,22 @@ export class PlaceSpec {
           searchedBy: { param: search.param, field: "", searchesEverything: true },
           ...(search.example !== undefined && { searchedFor: search.example })
         }),
-        idAt: "id",
-        fields: this.withAskedFields(this.fieldsOf(rows.item, rows.schemaAt ?? path), item.get, askedBy, path),
+        idAt: byId && byId in fields ? byId : "id",
+        ...(oneAt !== undefined && { oneAt }),
+        fields,
         operations: this.operationsOf(path, at, paths)
       }
       collections.push(collection)
       specPaths.set(collection, path)
     }
+    this.notePlacesAsked(specPaths)
     const pagesWith = pagesWithOf(paged)
     const records = this.recordsUnder(paths, prefix, specPaths)
     collections.push(...records.map(({ record }) => record))
     this.actionsDeeper(paths, prefix, records)
     nameApart(collections)
     for (const collection of collections) {
-      if (!("id" in (collection.fields ?? {}))) delete collection.idAt
+      if (!(collection.idAt! in (collection.fields ?? {}))) delete collection.idAt
     }
     return {
       address: place,
@@ -290,7 +314,7 @@ export class PlaceSpec {
     const unsaid = needed.filter(({ name }) => askedBy[name!] === "").map(({ name }) => `"${name}"`)
     if (unsaid.length) {
       this.notes.push(
-        `${path} can't be read without ${unsaid.join(" and ")}, and its description gives no example to try:  verify skips it.`
+        `${path} can't be read without ${unsaid.join(" and ")}, and its description gives no example to try:  verify asks it with a thing of the list it names, if one does, else skips it.`
       )
     }
     return askedBy
@@ -318,6 +342,29 @@ export class PlaceSpec {
       fields[name] = this.fieldOf(name, param.schema ?? {}, `${path}?${name}`, false, 0, new Set())
     }
     return withSpellsOwnWordsApart(fields, 0)
+  }
+
+  /**
+   * SIDE EFFECT:  each list's `asksFrom`:  the questions its description takes, needed or not, that another list's things
+   * answer by their name:  `?owner_id=` is an owner's, from `/owners` (its path's last word, one of it).
+   * - So verify can ask one that answers 400 without (its description saying none is needed), and one needing a
+   *   question its description gives no example of, with a real value.
+   * - Of several lists, the one at the shortest address.
+   */
+  private notePlacesAsked(specPaths: ReadonlyMap<CollectionLook, string>): void {
+    const lists = [...specPaths].sort(([, one], [, other]) => one.split("/").length - other.split("/").length)
+    for (const [collection, path] of specPaths) {
+      const asks: Record<string, string> = {}
+      for (const { name } of this.queryParamsOf(this.document.paths![path]!.get!)) {
+        const owner = /^(.+) id$/.exec(wordsFor(name!))?.[1]
+        if (!owner) continue
+        const from = lists.find(
+          ([other, otherPath]) => other !== collection && oneNamedBy(wordsFor(lastWordOf(otherPath))) === owner
+        )
+        if (from) asks[name!] = from[0].at
+      }
+      if (Object.keys(asks).length) collection.asksFrom = asks
+    }
   }
 
   /** What a parameter's description says to ask with:  its `example`, its first `examples`, or its schema's. */
@@ -438,6 +485,23 @@ export class PlaceSpec {
     if (resolved?.type !== "array") return undefined
     const item = this.resolved(resolved.items)
     return item && (item.type === "object" || item.properties || item.allOf || item.anyOf) ? "things" : "values"
+  }
+
+  /**
+   * ONE thing at `path`, not a list:  its answer's schema is one object, with fields that aren't a list's rows
+   * (`isOneThing()`), or with any it likes (FastAPI's `additionalProperties: true`);  `undefined` for any other,
+   * or one a read must ask a question of.
+   * - Several lists in it are its fields, not rows:  `{ images: [...], uploaded: [...] }`.
+   */
+  private oneThingOf(path: string, operation: OpenApiOperation): ListAt | undefined {
+    if (this.rowsOf(operation)) return undefined
+    const written = this.answerOf(operation)
+    const answer = this.resolved(written)
+    if (!answer || answer.type === "array") return undefined
+    const isFreeForm = answer.type === "object" && !Object.keys(this.propertiesOf(answer)).length
+    if (!isFreeForm && !this.isOneThing(answer)) return undefined
+    if (this.askedByOf(path, operation, undefined)) return undefined
+    return { item: isFreeForm ? {} : answer, answer, ...(written && this.itemAt(written)) }
   }
 
   /** Is `answer` one object with fields, not a list, nor one wrapped under a name a list's rows go under? */
@@ -583,8 +647,7 @@ export class PlaceSpec {
     if (choices?.length && oneOfWords(choices)) said.choices = choices
     const kind = kindOfSchema(field)
     if (kind) {
-      const yesOrNo = kind === "yes or no" ? /^(?:is|has) (.+)$/.exec(words)?.[1] : undefined
-      return { words: yesOrNo ?? words, type: kind, ...said }
+      return { words: kind === "yes or no" ? yesOrNoWords(words) : words, type: kind, ...said }
     }
     const isList = field.type === "array"
     const inside = isList ? (field.items ?? {}) : schema
@@ -777,6 +840,23 @@ function isSeveralKinds(schema: Schema | undefined): boolean {
   return Boolean(schema?.anyOf ?? schema?.oneOf) || Array.isArray(schema?.type)
 }
 
+/**
+ * Where one thing of the list at `path` is read by its id, under the place's address:  its description's own `GET`
+ * route a brace below it, `/types/{type_id}`.
+ * - `undefined`:  its description offers none.
+ */
+function oneAtOf(
+  path: string,
+  at: string,
+  paths: Readonly<Record<string, OpenApiPathItem | undefined>>
+): string | undefined {
+  const base = path.replace(/\/+$/, "")
+  const other = Object.keys(paths).find(
+    (each) => paths[each]?.get && each.startsWith(`${base}/`) && /^\{[^{}/]+\}\/?$/.test(each.slice(base.length + 1))
+  )
+  return other === undefined ? undefined : `${at.replace(/\/+$/, "")}${other.slice(base.length)}`
+}
+
 /** Is there a thing by id under `path`:  `/background-tasks/{id}/`? */
 function hasThingsUnder(path: string, paths: Readonly<Record<string, OpenApiPathItem | undefined>>): boolean {
   return Object.keys(paths).some((other) => isUnder(other, path) && HAS_BRACE.test(other.slice(path.length)))
@@ -840,13 +920,39 @@ function lastWordOf(path: string): string {
  * NetBox's `/dcim/interfaces/` and `/virtualization/interfaces/`, `dcim interfaces` and `virtualization interfaces`.
  */
 function nameApart(collections: CollectionLook[]): void {
-  const counts = new Map<string, number>()
-  for (const { name } of collections) counts.set(name, (counts.get(name) ?? 0) + 1)
+  const counts = countsOf(collections)
   for (const collection of collections) {
     if (counts.get(collection.name)! < 2) continue
     const words = collection.at.replace(/\/+$/, "").split("/")
     collection.name = `${words.filter((word) => !HAS_BRACE.test(word)).at(-2) ?? ""} ${collection.name}`.trim()
   }
+  // still the same:  each by a word further up its path, never a version's nor `api`, till they differ or it has none:
+  // `/api/v1/maintenance/calendar` and `/api/v1/option3/maintenance/calendar`, a `option3 maintenance calendar`
+  for (let up = 3; up <= MOST_WORDS_UP; up++) {
+    const again = countsOf(collections)
+    for (const collection of collections) {
+      if (again.get(collection.name)! < 2) continue
+      const words = collection.at
+        .replace(/\/+$/, "")
+        .split("/")
+        .filter((word) => word && !HAS_BRACE.test(word))
+      const word = words.at(-up)
+      if (word !== undefined && !UNTELLING_WORD.test(word)) collection.name = `${word} ${collection.name}`
+    }
+  }
+}
+
+/** How far up its path a collection's name looks for a word to tell it from another's. */
+const MOST_WORDS_UP = 5
+
+/** A word in a path that tells nothing of what's there:  `api`, `v1`. */
+const UNTELLING_WORD = /^(?:api|v\d+(?:\.\d+)*)$/i
+
+/** How many collections go by each name. */
+function countsOf(collections: readonly CollectionLook[]): Map<string, number> {
+  const counts = new Map<string, number>()
+  for (const { name } of collections) counts.set(name, (counts.get(name) ?? 0) + 1)
+  return counts
 }
 
 /** What a JSON pointer, `#/components/schemas/Tenant`, points at in `document`. */

@@ -250,7 +250,7 @@ describe("spell place verify (epic `data` P49)", () => {
     expect(collections.jobs!.state).toMatchObject({
       is: "failed",
       status: 403,
-      reason: "it answered 403:  Authentication credentials were not provided"
+      reason: "it answered 403 at /api/core/jobs/"
     })
     // no schema said its fields:  what it read does
     expect(collections.background_tasks!.state).toMatchObject({ is: "verified", rows: 1 })
@@ -299,6 +299,76 @@ describe("spell place verify (epic `data` P49)", () => {
       `DELETE ${NETBOX}/api/tenancy/tenants/2/`
     ])
     expect(canDo.write).toMatch(/^Yes:  it took a write of each kind, tried on tenants/)
+  })
+
+  test("a bare list is its rows, though its description wraps them under a field", async () => {
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input}`
+      if (url === SPEC_AT) return Response.json(DOCUMENT)
+      const path = url.replace(NETBOX, "").replace(/\?.*$/, "")
+      if (path === "/api/tenancy/tenants/") return Response.json([TENANT])
+      if (path === "/api/tenancy/tenants/1/") return Response.json(TENANT)
+      return Response.json([])
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = await ingested(fetch)
+    await ingest.verify("NetBox.api.spell")
+    const { tenants, contacts } = descriptions.get("NetBox.api.json5")!.collections
+    expect(tenants!.state).toMatchObject({ is: "verified", rows: 1 })
+    expect(contacts!.state).toMatchObject({ is: "verified", rows: 0 })
+    // a read takes it wrapped too
+    expect(tenants!.rowsAt).toBe("results")
+  })
+
+  test("a list that takes a limit is asked for a page of the place's size;  one too big to read whole says so", async () => {
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input}`
+      asked.push(url)
+      if (url === SPEC_AT) return Response.json(DOCUMENT)
+      const path = url.replace(NETBOX, "").replace(/\?.*$/, "")
+      // more than a reader takes at once
+      if (path === "/api/tenancy/contacts/") return new Response(`[${" ".repeat(2_100_000)}]`)
+      return Response.json({ count: 0, next: null, results: [] })
+    }) as typeof globalThis.fetch
+    const { files, descriptions } = memoryFiles()
+    const ingest = new PlaceIngest({
+      fetch,
+      ask: async () => undefined,
+      files,
+      readThrough: readThroughSpell,
+      sleep: async () => {},
+      now: () => new Date("2026-11-17T12:00:00Z")
+    })
+    await ingest.add({ address: NETBOX, spec: SPEC_AT, into: "NetBox.api.spell", name: "netbox", rows: 20 })
+    await ingest.verify("NetBox.api.spell")
+    expect(asked).toContain(`${NETBOX}/api/tenancy/tenants/?limit=20`)
+    expect(descriptions.get("NetBox.api.json5")!.collections.contacts!.state).toMatchObject({
+      is: "failed",
+      reason: "its answer is more than it reads at once:  too big to read whole"
+    })
+  })
+
+  test("a read by id that fails names its route and status, never the id nor its address", async () => {
+    const MADE_UP_ID = 7301
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input}`
+      if (url === SPEC_AT) return Response.json(DOCUMENT)
+      const path = url.replace(NETBOX, "").replace(/\?.*$/, "")
+      if (path === "/api/tenancy/tenants/") return Response.json({ count: 1, results: [{ ...TENANT, id: MADE_UP_ID }] })
+      return path.endsWith(`/${MADE_UP_ID}/`)
+        ? Response.json({ detail: `No tenant ${MADE_UP_ID}` }, { status: 404 })
+        : Response.json({ count: 0, next: null, results: [] })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = await ingested(fetch)
+    await ingest.verify("NetBox.api.spell")
+    const description = descriptions.get("NetBox.api.json5")!
+    expect(description.collections.tenants!.state).toMatchObject({
+      is: "failed",
+      reason: "its first thing, read by its id at /api/tenancy/tenants/{id}/, answered 404"
+    })
+    const states = JSON.stringify(Object.values(description.collections).map(({ state }) => state))
+    expect(states).not.toContain(`${MADE_UP_ID}`)
+    expect(states).not.toContain(NETBOX)
   })
 
   test("on a deployment from the project's file;  a read only one takes no writes", async () => {

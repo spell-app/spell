@@ -21,6 +21,8 @@ export type PlaceDetailValue = {
       operations?: string[]
       /** How it pages, when it isn't the place's way:  see `CollectionAt` (epic `data` P56). */
       paging?: PagingDetails
+      /** It's ONE thing at its address, not a list:  see `OneThingAt`. */
+      isOne?: boolean
     }
   >
   keyNamed?: string

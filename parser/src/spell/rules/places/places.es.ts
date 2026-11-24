@@ -14,6 +14,7 @@ import { CheckedAt } from "./CheckedAt"
 import { KeptOnDevice } from "./KeptOnDevice"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
+import { OneThingAt } from "./OneThingAt"
 import { CreatePlace } from "./CreatePlace"
 import { StoredOnThisDevice } from "./StoredOnThisDevice"
 import { StoredInMemory } from "./StoredInMemory"
@@ -125,6 +126,11 @@ function addPublicacion(scope: P.Scope) {
 }
 
 /** A rule test's private sign-up sheet, in a space, for a projection of it (`ProjectionOf`). */
+/** A rule test's known type, for one thing at a place's own address (`OneThingAt`). */
+function addEstado(scope: P.Scope) {
+  ;(scope as P.RootScope).types.add({ name: "Estado" })
+}
+
 function addHojaDeInscripcion(scope: P.Scope) {
   scope.compile('hoja de inscripción es una carpeta de datos en "@rs/picnic-privado/inscripciones"', "block")
 }
@@ -433,6 +439,30 @@ placesEs.addRule(ConfirmedJoin, {
 
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text} {nested_statements}?` })
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} se encuentran en {path:text}` })
+placesEs.addRule(OneThingAt, {
+  syntax: `(el|la) {type:singular_type} está en {path:text}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addEstado,
+      tests: [
+        [
+          'acme es un servidor web en "https://acme.test"\n\t- el estado está en "/api/status"',
+          [
+            "export class Acme extends Place {}",
+            "export const acme = core.place(new Acme(), {",
+            '  name: "acme",',
+            '  kind: "web server",',
+            '  at: "https://acme.test",',
+            '  collections: { estados: { at: "/api/status", isOne: true } },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(SearchedAt, { syntax: `${THE} {collection:plural_type} se buscan en {path:text}` })
 placesEs.addRule(PictureAt, {
   syntax: `${THE} {property:member_words} de ${A} {owner:known_type} es una imagen en {path:text}`

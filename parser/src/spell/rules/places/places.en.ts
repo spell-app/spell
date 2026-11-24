@@ -13,6 +13,7 @@ import { CheckedAt } from "./CheckedAt"
 import { KeptOnDevice } from "./KeptOnDevice"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
+import { OneThingAt } from "./OneThingAt"
 import { CreatePlace } from "./CreatePlace"
 import { StoredOnThisDevice } from "./StoredOnThisDevice"
 import { StoredInMemory } from "./StoredInMemory"
@@ -126,6 +127,11 @@ const KINDS_AT = [
  */
 function addPost(scope: P.Scope) {
   ;(scope as P.RootScope).types.add({ name: "Post" })
+}
+
+/** A rule test's known type, for one thing at a place's own address (`OneThingAt`). */
+function addServerStatus(scope: P.Scope) {
+  ;(scope as P.RootScope).types.add({ name: "ServerStatus" })
 }
 
 /** A rule test's web server, for a type's lines about what it lets be done (`EnabledOperations`, epic `data` P49). */
@@ -494,6 +500,29 @@ places.addRule(ConfirmedJoin, { syntax: "confirmed {collection:identifier} join 
 
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text} {nested_statements}?" })
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} are found at {path:text}" })
+places.addRule(OneThingAt, {
+  syntax: "the {type:singular_type} lives at {path:text}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach: addServerStatus,
+      tests: [
+        [
+          'acme is a web server at "https://acme.test"\n\t- the server status lives at "/api/status"',
+          [
+            "export class Acme extends Place {}",
+            "export const acme = core.place(new Acme(), {",
+            '  name: "acme",',
+            '  kind: "web server",',
+            '  at: "https://acme.test",',
+            '  collections: { serverStatuses: { at: "/api/status", isOne: true } }',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(SearchedAt, { syntax: "{collection:plural_type} are searched at {path:text}" })
 places.addRule(PictureAt, {
   syntax: "(a|an) {owner:known_type}'s {property:member_words} is a picture at {path:text}"
@@ -942,7 +971,19 @@ places.addRule(ListsUnder, {
             '  name: "typicode",',
             '  kind: "web server",',
             '  at: "https://jsonplaceholder.typicode.com",',
-            '  listsUnder: { posts: { comments: "/posts/{id}/comments" } }',
+            '  listsUnder: { posts: { comments: "/posts/{postId}/comments" } }',
+            "})"
+          ]
+        ],
+        [
+          'typicode is a web server at "https://jsonplaceholder.typicode.com"\n\t- a post\'s receipt lives at "/shops/{shop_name}/posts/{id}/receipts/{current receipt id}"',
+          [
+            "export class Typicode extends Place {}",
+            "export const typicode = core.place(new Typicode(), {",
+            '  name: "typicode",',
+            '  kind: "web server",',
+            '  at: "https://jsonplaceholder.typicode.com",',
+            '  listsUnder: { posts: { receipt: "/shops/{shopName}/posts/{id}/receipts/{currentReceiptId}" } }',
             "})"
           ]
         ],

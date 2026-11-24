@@ -70,7 +70,14 @@
 			Set `item` to show a thing:  its `data`, else the thing itself, becomes `value`.
 			So slotted as a tree's `detail`, it shows each pick's data with no code:  the tree sets its `item`.
 
-			A click on a key or a value sends `ui-navigating`, with where it is:
+			A click on an object's or array's key, or on its closed line, opens it, as its toggle does;
+			a click on its key closes it again.
+
+			A click on something inside a closed line, such as a key or a nested `{ ... }`,
+			opens every level down to it, then scrolls to it and lights it for a moment.
+			A value inside a closed line is opened the same way:  a click on its own line then navigates.
+
+			A click on any other key or value sends `ui-navigating`, with where it is:
 			`path`, the keys from the top down, then `key`, `value` and `part` (`"key"` or `"value"`).
 			The page decides what it means, such as showing what a value names.
 
@@ -91,6 +98,7 @@
 	<section label="Accessibility">
 		<markdown>
 			Each object's and array's toggle is a real button:  it says what it opens, and whether it's open.
+			Its key is a button too:  Enter or Space opens and closes it.
 			Each one is a Tab stop;  the arrow keys don't move between lines yet.
 			A hidden `<ui-json>`, or one a diagram reads, shows nothing, and screen readers pass over it.
 		</>

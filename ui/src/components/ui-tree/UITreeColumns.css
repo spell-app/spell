@@ -21,8 +21,10 @@
  * - Rows from `items` are drawn in the tree's own shadow root instead:  each column a `ul.column.items`, its rows
  *   `li.column-row`s, ONE grid a column, so icon, label, `which`, count and chevron line up down it.
  *   - A row's classes:  `selected` (the selected pick), `on-path` (an earlier pick), and a subclass's `rowClass()`.
- *   - Parts:  `column`, `column-row`, `column-title`, and `narrow-column` on a narrow one (from markup, the first
- *     column's;  each deeper one's is its row's `<ui-tree-item>`'s).
+ *   - Parts:  `column`, `column-row`, `column-title`, `column-header`, and `narrow-column` on a narrow one (from
+ *     markup, the first column's;  each deeper one's is its row's `<ui-tree-item>`'s).
+ *   - A header (`kind: "header"`):  `li.column-header`, the label line across the whole row over its group, sticky at
+ *     both ends of the column;  its `.head` a `<button>` with `groups="accordion"`, `.closed` while its group is.
  * - The `detail` pane (`UITree.detailPane()`):  after the last column, tight against it, as wide as its content up to
  *   `--ui-tree-detail-max-width` until its line is dragged (`.sized`);  the space left over stays after it.
  *   - Its line is inside it, at its end, so it moves with it;  `sticky-detail` (`.sticky`) pins it to the box's end.
@@ -328,11 +330,12 @@
       1fr auto auto;
     align-content: start;
     margin: 0;
-    padding: 0 0 4px;
+    padding: 0 0 var(--_ui-tree-column-padding);
     list-style: none;
+    --_ui-tree-column-padding: 4px;
   }
   .column.items:not(:has(> .column-title)) {
-    padding-block-start: 4px;
+    padding-block-start: var(--_ui-tree-column-padding);
   }
   .column.items > .column-title {
     grid-column: 1 / -1;
@@ -340,6 +343,106 @@
   }
   .column.items > .empty {
     grid-column: 1 / -1;
+  }
+  /*
+   * a header:  the label line over its group of rows, across the whole row, never picked;  ONE height, so it sticks
+   * at the column's top under the headers above it (`--_above`, set on it), and at its bottom over the ones below
+   * (`--_below`):  every group's header stays in view
+   */
+  .column.items {
+    --_ui-tree-header-height: calc(var(--_ui-tree-row-height) + 4px);
+    --_ui-tree-headers-top: 0px;
+  }
+  .column.items:has(> .column-title) {
+    --_ui-tree-headers-top: var(--_ui-tree-title-height);
+  }
+  /* no title:  a header starts flush at the column's top, where it sticks, so it never jumps as the column scrolls */
+  .column.items:not(:has(> .column-title)):has(> .column-header) {
+    padding-block-start: 0;
+  }
+  .column-header {
+    position: sticky;
+    top: calc(var(--_ui-tree-headers-top) + var(--_above, 0) * var(--_ui-tree-header-height));
+    /* a sticky box keeps clear of its scroller's padding:  the column's own is taken back, so no row peeks under it */
+    bottom: calc(var(--_below, 0) * var(--_ui-tree-header-height) - var(--_ui-tree-column-padding));
+    z-index: 1;
+    grid-column: 1 / -1;
+    display: flex;
+    box-sizing: border-box;
+    min-width: 0;
+    height: var(--_ui-tree-header-height);
+    border-block: 1px solid var(--ui-border-color);
+    /* opaque, so the rows scrolling under it don't show through:  a tint over the page's background */
+    background:
+      linear-gradient(var(--_ui-tree-column-picked-background), var(--_ui-tree-column-picked-background)),
+      var(--ui-background);
+  }
+  /* the next header's top line is this one's bottom line */
+  .column-header + .column-header {
+    margin-block-start: -1px;
+  }
+  .column-header > .head {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--_ui-tree-gap);
+    min-width: 0;
+    margin: 0;
+    padding-block: 0;
+    padding-inline: 10px 8px;
+    border: none;
+    background: none;
+    color: var(--ui-text-color);
+    font: inherit;
+    font-size: 0.85em;
+    font-weight: var(--ui-font-weight-bold);
+    text-align: start;
+    white-space: nowrap;
+    cursor: default;
+    outline: none;
+  }
+  .head > .icon {
+    display: inline-flex;
+    color: var(--_ui-tree-muted-color);
+  }
+  .head > .words {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .head > .count {
+    margin-inline-start: auto;
+    color: var(--_ui-tree-muted-color);
+    font-weight: normal;
+    font-variant-numeric: tabular-nums;
+  }
+  /* `groups="accordion"`:  a button that opens its group;  its chevron points down while open, along while closed */
+  button.head {
+    cursor: pointer;
+    user-select: none;
+  }
+  button.head:hover {
+    background: var(--_ui-tree-hover-background);
+  }
+  button.head:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: calc(var(--ui-focus-width) * -1);
+  }
+  .head > .chevron {
+    flex: none;
+    width: 0.42em;
+    height: 0.42em;
+    margin-inline: 1px 2px;
+    border-inline-end: 1.5px solid var(--_ui-tree-muted-color);
+    border-block-end: 1.5px solid var(--_ui-tree-muted-color);
+    translate: 0 -0.12em;
+    rotate: 45deg;
+  }
+  .column-header.closed .chevron {
+    translate: 0;
+    rotate: -45deg;
+  }
+  .column-header.closed .chevron:dir(rtl) {
+    rotate: 135deg;
   }
   .column-row,
   .track-probe {

@@ -72,6 +72,7 @@ import {
   keysOf,
   schemaOf,
   getProp,
+  setProp,
   sourcesReadBy,
   TYPE_KEY,
   untrackCells,
@@ -1236,6 +1237,16 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   }
 
   /**
+   * Set `made`'s `key` to a row's `json`:  read back as an entry's are, when its type names `key`.
+   * - A field its type doesn't name is plain data, as the row holds it:  a `"$ref"` in it is never followed,
+   *   e.g. a JSON Schema's `{ "$ref": "#/definitions/Settings" }` (`isDeclared()`).
+   */
+  protected setRead(made: SpellObject, key: string, json: unknown): void {
+    if (isDeclared(made, key)) super.setRead(made, key, json)
+    else setProp(made, key, structuredClone(json))
+  }
+
+  /**
    * `json`, with each thing saved inside its owner that's already known here changed in place, and said by reference:
    * so a row read again leaves the things it holds the same things.
    */
@@ -1271,7 +1282,9 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       const listed = this.listedAs(declared, json)
       const sent = this.isHeldInside(held) ? listed : addressesOf(listed)
       const inside = typeof held === "string" ? this.markedInside(held, sent) : sent
-      const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(inside)))
+      // a field its type doesn't name is plain data, as the row holds it:  see `setRead()`
+      const read = isDeclared(thing, key) ? this.read(this.withKnownHeld(inside)) : structuredClone(json)
+      const value = valueAsDeclared(thing.constructor as never, key, read)
       if (current instanceof List && Array.isArray(value)) {
         if (!isSameItems(current.items, value)) current.items = value
       } else if (!isSameDate(current, value)) {
@@ -1627,6 +1640,12 @@ function writeInto(thing: SpellObject, field: string, value: unknown, kind?: "wr
     if (hasSetter(Object.getPrototypeOf(thing) as object, field)) fields[field] = value
     else (thing as unknown as { setProp(field: string, value: unknown): void }).setProp(field, value)
   } else setField(thing, field, value, true)
+}
+
+/** Does `thing`'s type name `key`:  a declared field, or one with its own setter? */
+function isDeclared(thing: SpellObject, key: string): boolean {
+  if (schemaOf(thing.constructor as never).info(key)) return true
+  return hasSetter(Object.getPrototypeOf(thing) as object, key)
 }
 
 /** The entry for `ref`, from the row the cache holds for it:  what a reference in a row finds. */

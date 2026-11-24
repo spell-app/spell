@@ -113,9 +113,10 @@ export const jsonVocabulary = {
       cancelable: true,
       detail: '{ path: (string | number)[], key: string | number | undefined, value: unknown, part: "key" | "value" }',
       description:
-        "A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys " +
+        "A key or a value was clicked (not a double-click, nor the end of a text selection).  An object's or " +
+        "array's key opens and closes it instead, and sends none.  `path`:  the keys " +
         "from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  " +
-        "`value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  " +
+        "`value`:  its value (an empty object or array too);  `part`:  which was clicked.  " +
         "The page decides what it means (jumping to what a value names) and calls `preventDefault()`."
     },
     { name: "ui-copied", detail: "{ content: string }", description: "The Copy button copied `content`, as JSON." }
@@ -136,7 +137,12 @@ export const jsonVocabulary = {
       description:
         "Each object's or array's open / close button, a chevron in the left gutter;  Alt-click:  its whole branch."
     },
-    { name: "preview", description: "A closed object or array, on one line." },
+    {
+      name: "preview",
+      description:
+        "A closed object or array, on one line;  a click opens it, as the toggle does.  A click on a member shown " +
+        "in it (a key, a nested `{ ... }`, a value) opens every level down to that member, and shows it."
+    },
     { name: "editor", description: "The control a key or value is edited in (`editable`)." }
   ],
   states: [...UIT.SourceStates],

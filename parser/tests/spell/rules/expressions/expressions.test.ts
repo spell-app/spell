@@ -183,6 +183,7 @@ describe("priority and precedence", () => {
         "now:  Priority.overridable",
         "number_of_things_where:  Priority.mostSpecific",
         "on:  Priority.preferred",
+        "one_thing_at:  Priority.declaration",
         "open_printing:  Priority.overridable",
         "operation_at:  Priority.declaration",
         "or:  Precedence.or",

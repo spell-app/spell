@@ -218,6 +218,19 @@
       box-shadow var(--ui-duration-fast) var(--ui-ease),
       transform var(--ui-duration-fast) var(--ui-ease);
   }
+  /*
+   * `selected`:  the one chosen among its neighbours, as a list of cards picks one (a rack in a rack viewer).
+   * Its border the primary colour, its fill a touch of it over the card's own;  its text as the others'.
+   */
+  .ui.selected.card,
+  .ui.cards > .selected.card {
+    --_card-border-shadow: 0 0 0 var(--ui-border-width)
+      var(--ui-card-selected-border-color, var(--ui-primary));
+    --_card-bg: var(
+      --ui-card-selected-background,
+      color-mix(in oklch, var(--ui-primary) 5%, var(--_ui-card-background))
+    );
+  }
   /* Spacing between neighbours:  none before the first, none after the last. */
   .ui.card:first-child {
     --_card-margin-top: 0;

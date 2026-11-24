@@ -5,7 +5,8 @@ import { parseSpellProject } from "spell/parser/spell/test"
 import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import { descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceOnDisk"
 import type { OpenApiDocument } from "spell/parser/spell/ingest/PlaceSpec"
-import type { IngestAsk, IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/ingest.types"
+import type { IngestAsk, IngestFiles, IngestSettings, PlaceDescription } from "spell/parser/spell/ingest/ingest.types"
+import type { ClaudeRunner } from "spell/parser/spell/translate/translate.types"
 
 /**
  * A made-up lab's API, read whole from its OpenAPI description:  what a bigger description tripped on.
@@ -13,7 +14,8 @@ import type { IngestAsk, IngestFiles, PlaceDescription } from "spell/parser/spel
  *   fields of several words, joined (`device-ids`), one a list of values.
  * - A list wrapped in its answer, `{ sources: [...], warnings: [...], next_offset }`:  unwrapped, as no other is.
  * - A list whose answer it describes as `{}`:  kept with no fields, for a read to fill, its id a slug.
- * - Beside a shop's place:  a device of each (named apart), and the shop's jobs, copied by the lab untyped (left out).
+ * - Beside a shop's place:  a device of each (named apart), and the shop's jobs, copied by the lab untyped (left out);
+ *   an inspection inside each one's rows, the lab's found by a verify's read (named apart too).
  * - A question Spell can't say, `1st_page`:  its line is left out, the rest written.
  */
 
@@ -96,7 +98,8 @@ async function ingestOf(
   document: OpenApiDocument = DOCUMENT,
   into = "Lab.api.spell",
   ask: Partial<IngestAsk> = {},
-  beside = { texts: new Map<string, string>(), descriptions: new Map<string, PlaceDescription>() }
+  beside = { texts: new Map<string, string>(), descriptions: new Map<string, PlaceDescription>() },
+  settings: Partial<IngestSettings> = {}
 ) {
   const { texts, descriptions } = beside
   const files: IngestFiles = {
@@ -123,7 +126,8 @@ async function ingestOf(
     files,
     readThrough: readThroughSpell,
     sleep: async () => {},
-    now: () => new Date("2026-11-23T12:00:00Z")
+    now: () => new Date("2026-11-23T12:00:00Z"),
+    ...settings
   })
   const result = await ingest.add({ address: LAB, spec: SPEC_AT, into, name: "lab", ...ask })
   // the files beside it:  another place's, ingested before
@@ -255,7 +259,14 @@ describe("beside another place", () => {
     },
     components: {
       schemas: {
-        Device: { type: "object", properties: { id: { type: "string" }, aisle: { type: "string" } } },
+        Device: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            aisle: { type: "string" },
+            inspection: { type: "object", properties: { by: { type: "string" }, passed: { type: "boolean" } } }
+          }
+        },
         Job: { type: "object", properties: { id: { type: "string" }, state: { type: "string" } } }
       }
     }
@@ -267,29 +278,96 @@ describe("beside another place", () => {
     get: { responses: { "200": { content: { "application/json": { schema: {} } } } } }
   }
 
-  /** The shop ingested into Shop.api.spell, then the lab beside it. */
-  async function besideShop() {
+  /** The shop ingested into Shop.api.spell, then the lab beside it, read by `settings`' agent. */
+  async function besideShop(settings: Partial<IngestSettings> = {}) {
     const beside = { texts: new Map<string, string>(), descriptions: new Map<string, PlaceDescription>() }
     const shop = await ingestOf(SHOP, "Shop.api.spell", { name: "shop" }, beside)
     expect(errorsOf(shop.spell, "/Shop.api.spell")).toEqual([])
-    return ingestOf(WITH_COPY, "Lab.api.spell", {}, beside)
+    return ingestOf(WITH_COPY, "Lab.api.spell", {}, beside, settings)
   }
 
   test("a list whose rows are the other place's is left out, saying which place has them", async () => {
     const { spell, description } = await besideShop()
     expect(spell).not.toMatch(/proxy/)
     expect(description.collections.jobs!.leftOut).toMatch(/its rows are shop's jobs, read there/)
-    expect(description.notes).toContainEqual(expect.stringMatching(/^Left out the collection "jobs":  its rows are shop's jobs/))
+    expect(description.notes).toContainEqual(
+      expect.stringMatching(/^Left out the collection "jobs":  its rows are shop's jobs/)
+    )
   })
 
   test("a type both have is named apart here, and the note says to rename the other's in its own file", async () => {
     const { spell, description, texts } = await besideShop()
     expect(spell).toMatch(/^a "lab device" is a thing$/m)
     expect(description.notes).toContainEqual(
-      expect.stringMatching(/^"device" is shop's too, so this one is a "lab device":  .*rename shop's in its own file, a "shop device"/)
+      expect.stringMatching(
+        /^"device" is shop's too, so this one is a "lab device":  .*rename shop's in its own file, a "shop device"/
+      )
     )
     const project = [...texts].map(([path, contents]) => ({ path: `/${path}`, contents }))
     expect(parseSpellProject(project).files.flatMap(({ errors }) => errors)).toEqual([])
+  })
+
+  test("named apart after the agent names its types:  an agent naming one the bare word can't undo it", async () => {
+    // an agent that calls the lab's devices plain devices, whatever they were named before it
+    const claude: ClaudeRunner = async () =>
+      JSON.stringify({
+        placeName: "",
+        notes: [],
+        collections: ["devices", "lab_devices"].map((name) => ({
+          name,
+          typeWords: "device",
+          about: "",
+          idField: "",
+          fields: []
+        }))
+      })
+    const { spell, texts } = await besideShop({ claude, claudeVia: "a test" })
+    expect(spell).toMatch(/^a "lab device" is a thing$/m)
+    expect(spell).not.toMatch(/^a "device" is a thing$/m)
+    const project = [...texts].map(([path, contents]) => ({ path: `/${path}`, contents }))
+    expect(parseSpellProject(project).files.flatMap(({ errors }) => errors)).toEqual([])
+  })
+  /** Its designs' rows, read by a verify:  each with an inspection, as the shop's devices have. */
+  function answerDesigns(fetch: { answer: (url: URL) => Response }): void {
+    const design = { slug: "top-level", name: "Top level", inspection: { by: "ana", passed: true, at: "bench 2" } }
+    fetch.answer = (url) =>
+      url.pathname === "/api/designs"
+        ? Response.json([design])
+        : url.pathname === "/api/designs/top-level"
+          ? Response.json(design)
+          : new Response("nope", { status: 404 })
+  }
+
+  /** Every error in the project:  each file beside the others. */
+  function projectErrors(texts: ReadonlyMap<string, string>): unknown[] {
+    const project = [...texts].map(([path, contents]) => ({ path: `/${path}`, contents }))
+    return parseSpellProject(project).files.flatMap(({ errors }) => errors)
+  }
+
+  test("a type a verify's read makes is named apart too:  the lab's inspection, beside the shop's", async () => {
+    const { ingest, texts, fetch, descriptions } = await besideShop()
+    expect(texts.get("Shop.api.spell")).toMatch(/^an "inspection" is a thing$/m)
+    answerDesigns(fetch)
+    const { spell } = await ingest.verify("Lab.api.spell")
+    expect(spell).toMatch(/^a "lab inspection" is a thing$/m)
+    expect(spell).toMatch(/^\tits "inspection" is a lab inspection$/m)
+    expect(spell).not.toMatch(/^an "inspection" is a thing$/m)
+    expect(descriptions.get("Lab.api.json5")!.notes).toContainEqual(
+      expect.stringMatching(/^"inspection" is shop's too, so this one is a "lab inspection"/)
+    )
+    expect(projectErrors(texts)).toEqual([])
+  })
+
+  test("verified again, and looked at again by an update, it stays apart and the project compiles", async () => {
+    const { ingest, texts, fetch } = await besideShop()
+    answerDesigns(fetch)
+    await ingest.verify("Lab.api.spell")
+    const { spell: again } = await ingest.verify("Lab.api.spell")
+    expect(again).toMatch(/^a "lab inspection" is a thing$/m)
+    expect(projectErrors(texts)).toEqual([])
+    const { spell: updated } = await ingest.update("Lab.api.spell")
+    expect(updated).not.toMatch(/^an "inspection" is a thing$/m)
+    expect(projectErrors(texts)).toEqual([])
   })
 })
 

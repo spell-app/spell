@@ -7,7 +7,7 @@
 	<!-- EXAMPLES:  the outline first, then data a diagram reads. -->
 	<section label="Types">
 		<section label="An outline" sticky="stack" collapsible dividing>
-			<example "An outline" description="Its text is the data, drawn as an outline.  The top level starts open;  a closed object or array sits on one line.  Alt-click a toggle to open or close everything inside it.">
+			<example "An outline" description="Its text is the data, drawn as an outline.  The top level starts open;  a closed object or array sits on one line.  Click its toggle, its key or its line to open it, or something inside its line to open the way down to that;  Alt-click to open or close everything inside it.">
 				<json>
 					{ "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null,
 					  "tags": ["in", "test", "v2"], "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 },

@@ -8933,7 +8933,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 125,
+          "line": 127,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9480,6 +9480,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "OneThingAt",
+          "ruleNames": ["one_thing_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/OneThingAt.ts",
+          "line": 11,
+          "purpose": "A web server answers ONE thing at an address of its own, not a list: its status, its version.",
+          "syntaxes": [
+            {
+              "syntax": "the {type:singular_type} lives at {path:text}",
+              "example": "acme is a web server at \"https://acme.test\"\n\t- the server status lives at \"/api/status\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  collections: { serverStatuses: { at: \"/api/status\", isOne: true } }\n})"
+                },
+                "ts": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  collections: { serverStatuses: { at: \"/api/status\", isOne: true } }\n})"
+                },
+                "py": {
+                  "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"collections\": {\"server_statuses\": {\"at\": \"/api/status\", \"is_one\": True}},\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "TokenFrom",
           "ruleNames": ["token_from"],
           "internal": false,
@@ -9823,7 +9849,7 @@
           "ruleNames": ["lists_under"],
           "internal": false,
           "file": "src/spell/rules/places/ListsUnder.ts",
-          "line": 14,
+          "line": 17,
           "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
           "syntaxes": [
             {
