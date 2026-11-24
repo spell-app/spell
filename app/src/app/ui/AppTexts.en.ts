@@ -249,7 +249,6 @@ export const APP_TEXTS = {
   discardDraftTip: "Throws your changes away.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
-  closeTab: "Close",
   /** The file bar's ✕ at its far right, which hides the code (epic `editor` T83). */
   hideCode: "Hide the code",
   versions: "Versions",

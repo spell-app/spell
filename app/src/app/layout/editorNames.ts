@@ -141,10 +141,8 @@ export const EDITOR_NAMES = {
       place: { kind: "value", words: "place", for: "the tab chosen" },
       draftNote: { kind: "value", words: "draft note", for: "the pen's tip" },
       discardWords: { kind: "value", words: "discard words", for: "the tip's Discard changes" },
-      closeWords: { kind: "value", words: "close words", for: "the tab's ✕'s tooltip" },
       show: { kind: "action", words: "show it", for: "a click on the tab" },
-      discard: { kind: "action", words: "discard it", for: "the tip's Discard changes" },
-      close: { kind: "action", words: "close it", for: "the tab's ✕" }
+      discard: { kind: "action", words: "discard it", for: "the tip's Discard changes" }
     }
   },
   FileTabBar: {
@@ -153,8 +151,7 @@ export const EDITOR_NAMES = {
     members: {
       files: { kind: "value", words: "files", for: "the tabs" },
       rememberAs: { kind: "value", words: "remember as", for: "what the open tabs are kept under" },
-      hideWords: { kind: "value", words: "hide words", for: "the ✕'s tooltip, which hides the code" },
-      hideTheCode: { kind: "action", words: "hide the code", for: "the ✕ at the bar's far right:  hides the code" }
+      hideWords: { kind: "value", words: "hide words", for: "the ✕'s tooltip, which hides the code" }
     }
   },
   AboutBox: {

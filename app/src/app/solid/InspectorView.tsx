@@ -531,23 +531,10 @@ function PropertiesCard(): JSX.Element {
         </Show>
       }
       // Inspect app in the card's header, at its right (Owen, 2026-11-13, I60;  kept, 2026-11-15, T78),
-      // then Close, which hides the column (I186):  a panel's ✕, as the file bar's is (`PanelClose`, T95)
+      // then Close, which hides the column (I186):  the panel's ✕, as the file bar's is (T95, T145)
       actions={<InspectAppMenu slot="right" />}
-      close={
-        <ui-icon
-          slot="actions"
-          name="close"
-          link=""
-          class={["PanelClose", "InspectorClose"]}
-          label={appTexts.text("inspectorClose")}
-          title={appTexts.text("inspectorClose")}
-          onClick={(event: MouseEvent) => {
-            // in the card's header:  a click closes the column, never folds the card
-            event.stopPropagation()
-            Inspector.close()
-          }}
-        />
-      }
+      closeLabel={appTexts.text("inspectorClose")}
+      onClose={() => Inspector.close()}
     >
       <Show
         when={inspected()}
@@ -1323,7 +1310,7 @@ const HALF_ROW = "1/2"
  * "Make these tabs look like the ones in the file menu").
  * - Spell UI docs, while a Spell UI element is selected (`<SpellUIDocsButton>`)
  * - Inspect app (`<InspectAppButton>`)
- * - The card's Close is after it, outside:  a panel's ✕, as the file bar's (`PanelClose`)
+ * - The card's Close is after it, the panel's own ✕, as the file bar's (`<ui-panel closable>`)
  * - Pressed, never chosen:  the menu's choosing is turned away.
  * - `slot`:  its place in the card's bar, `right`.
  ****************/
