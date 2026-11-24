@@ -24,7 +24,8 @@ import type { Browser } from "./Browser"
  *   - Escape hides it, until the pointer or the focus comes back
  * - ONE tooltip at a time:  while the pointer is on a target, no `title` under the pointer shows the browser's own
  *   (`hideTitlesOn()`), whether the page wrote it, a component drew it in its shadow root, or a box around has one.
- *   - Each is taken off as the pointer comes onto it, and put back as the pointer leaves the target.
+ *   - The innermost element under the pointer gets an empty `title`, which hides every one around it;
+ *     its own is put back as the pointer leaves the target.
  *   - Owen, 2026-11-24 (epic `editor` T164):  the add bar's star showed ours and the browser's, the same words.
  * - In the runtime, not `core`:  it's page-wide, and it only ever runs once the runtime's chunk has loaded.
  * - Plain DOM:  no Solid.  Listens on the document, for the life of the page.
@@ -48,8 +49,8 @@ export class DataTooltips {
   private focused: Element | undefined
   /** A hover waiting out its delay. */
   private pending: CancelablePromise<void> | undefined
-  /** The `title`s taken off while the pointer's on a target, each with its text, to put back (`hideTitlesOn()`). */
-  private readonly hiddenTitles = new Map<Element, string>()
+  /** The elements given an empty `title` while the pointer's on a target, each with its own (or none), to put back. */
+  private readonly hiddenTitles = new Map<Element, string | null>()
   /** Follows the shown target's attributes:  a changed tooltip shows as it changes. */
   private observer: MutationObserver | undefined
 
@@ -90,25 +91,32 @@ export class DataTooltips {
   }
 
   /**
-   * Take the `title` off every element on `path`, so the browser shows no tooltip of its own beside ours.
+   * Give the innermost HTML element on `path` an empty `title`, so the browser shows no tooltip of its own beside ours.
    * - The browser shows the `title` of the innermost element under the pointer that has one, across shadow roots:
    *   an icon button's inner `<button>`, the target, or a row around it (the add bar's star, in a row whose `title`
    *   says what the part is).
-   * - The text is kept, and put back as the pointer leaves the target (`putTitlesBack()`).
+   * - An empty one is a `title` too:  the browser stops there, and shows nothing.
+   * - Only that one element changes:  a `title` around it can be what a component draws (I469:  an `<epic-item>`'s
+   *   title is its `title`, and its line went blank while the pointer was on one of its buttons).
+   *   - Never a custom element itself, whose own `title` may be what it draws:  there, the browser may still show one.
+   * - Its own is kept, and put back as the pointer leaves the target (`putTitlesBack()`).
    */
   private hideTitlesOn(path: EventTarget[]) {
-    for (const node of path) {
-      const title = (node as Element).getAttribute?.("title")
-      if (title == null) continue
-      this.hiddenTitles.set(node as Element, title)
-      ;(node as Element).removeAttribute("title")
-    }
+    // An SVG drawing's `title` attribute is no tooltip, nor a `<slot>`'s in every browser:  the box around them is
+    const innermost = path.find(
+      (node) => (node as Element).namespaceURI === HTML_NAMESPACE && (node as Element).localName !== "slot"
+    ) as Element | undefined
+    if (!innermost || innermost.localName.includes("-") || this.hiddenTitles.has(innermost)) return
+    this.hiddenTitles.set(innermost, innermost.getAttribute("title"))
+    innermost.setAttribute("title", "")
   }
 
-  /** Put back the `title`s `hideTitlesOn()` took off, unless the page has written one since. */
+  /** Put back each `title` `hideTitlesOn()` emptied, unless the page has written one since. */
   private putTitlesBack() {
     for (const [element, title] of this.hiddenTitles) {
-      if (!element.hasAttribute("title")) element.setAttribute("title", title)
+      if (element.getAttribute("title") !== "") continue
+      if (title == null) element.removeAttribute("title")
+      else element.setAttribute("title", title)
     }
     this.hiddenTitles.clear()
   }
@@ -280,6 +288,8 @@ export class DataTooltips {
 const STAND_DOWN = "data-ui-top-layer-tooltips"
 /** The attribute that makes a tooltip. */
 const TEXT_ATTRIBUTE = "data-tooltip"
+/** An HTML element's namespace:  the elements whose `title` the browser shows. */
+const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml"
 /** What the bubble's look reads, copied from its target. */
 const COPIED_ATTRIBUTES = ["data-position", "data-inverted", "data-variation"]
 /** What a target's theme says, resolved on the target:  a shadow root's target has none, so the bubble's own apply. */

@@ -167,7 +167,7 @@ describe("DataTooltips", () => {
     }
   })
 
-  it("only ours shows:  no `title` under the pointer while it's on a target, each put back as it leaves", async () => {
+  it("only ours shows:  an empty `title` on what's under the pointer while it's on a target, put back as it leaves", async () => {
     const row = Fixture.render(
       `<div title="What the row is"><button aria-label="Star it" data-tooltip="Star it" title="Star it">*</button></div>`
     )
@@ -177,13 +177,25 @@ describe("DataTooltips", () => {
     inner.title = "Inner"
     await userEvent.hover(inner)
     await expect.poll(isShowing).toBe(true)
-    expect(button.hasAttribute("title")).toBe(false)
-    expect(row.hasAttribute("title")).toBe(false)
-    expect(inner.hasAttribute("title")).toBe(false)
-    await userEvent.unhover(button)
-    await expect.poll(() => button.getAttribute("title")).toBe("Star it")
+    expect(inner.getAttribute("title")).toBe("")
+    expect(button.getAttribute("title")).toBe("Star it")
     expect(row.getAttribute("title")).toBe("What the row is")
-    expect(inner.getAttribute("title")).toBe("Inner")
+    await userEvent.unhover(button)
+    await expect.poll(() => inner.getAttribute("title")).toBe("Inner")
+  })
+
+  it("leaves the `title` of an element around the target alone:  a component may draw it (epic `epic-engine` I469)", async () => {
+    const item = Fixture.render(`<x-item title="The item's title"></x-item>`)
+    const inner = item.attachShadow({ mode: "open" })
+    inner.innerHTML = `<button aria-label="Do this" data-tooltip="Do this"><svg width="16" height="16"><rect width="16" height="16" /></svg></button>`
+    const button = inner.querySelector("button")!
+    // the SVG under the pointer has no tooltip of its own:  the button around it is what gets the empty `title`
+    await userEvent.hover(inner.querySelector("svg")!)
+    await expect.poll(isShowing).toBe(true)
+    expect(item.getAttribute("title")).toBe("The item's title")
+    expect(button.getAttribute("title")).toBe("")
+    await userEvent.unhover(button)
+    await expect.poll(() => button.hasAttribute("title")).toBe(false)
   })
 
   it("a mouse click doesn't pin it open", async () => {
