@@ -230,6 +230,15 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await written()).toEqual(before)
   })
 
+  /** The words of the menu row that has the focus, inside its shadow root. */
+  const focusedRow = () =>
+    page.evaluate(() => {
+      let at = document.activeElement
+      while (at?.shadowRoot?.activeElement) at = at.shadowRoot.activeElement
+      const host = (at?.getRootNode() as ShadowRoot | undefined)?.host
+      return (host ?? at)?.textContent?.trim() ?? ""
+    })
+
   test("Delete, by click and by Enter, closes the menu, though it greys itself once it has run", async () => {
     const before = await written()
     for (const how of ["click", "Enter"] as const) {
@@ -238,7 +247,10 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       await page.waitForTimeout(500)
       if (how === "click") await page.locator('.PartMenu ui-action:has-text("Delete")').click()
       else {
-        for (let row = 0; row < 4; row++) await page.keyboard.press("ArrowDown")
+        // down the rows to Delete:  Inspect's come first (T160)
+        for (let row = 0; row < 8 && !(await focusedRow()).startsWith("Delete"); row++)
+          await page.keyboard.press("ArrowDown")
+        expect(await focusedRow()).toMatch(/^Delete/)
         await page.keyboard.press("Enter")
       }
       await page.waitForTimeout(SETTLE_MS)
@@ -269,7 +281,11 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.mouse.click(card!.x, card!.y, { button: "right" })
     await page.waitForTimeout(500)
     const rows = await menuRows(page)
+    // Inspect first, by the mouse;  Show in Code and Change This together at the bottom (T160)
     expect(rows.map((row) => row.title)).toEqual([
+      expect.stringMatching(/^Inspect /),
+      "Inspect Other Views",
+      "-",
       "Cut",
       "Copy",
       "Paste",
@@ -277,9 +293,6 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "Delete",
       "-",
       "Show in Code",
-      expect.stringMatching(/^Inspect /),
-      "Inspect Other Views",
-      "-",
       "Change This..."
     ])
     expect(rows.filter((row) => row.grey).map((row) => row.title)).toEqual([])
@@ -299,13 +312,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         const host = (at?.getRootNode() as ShadowRoot | undefined)?.host
         return (host ?? at)?.textContent?.trim() ?? ""
       })
-    expect(await focused()).toMatch(/^Cut/)
+    expect(await focused()).toMatch(/^Inspect (?!Other)/)
     await page.keyboard.press("ArrowDown")
-    expect(await focused()).toMatch(/^Copy/)
+    expect(await focused()).not.toMatch(/^Inspect (?!Other)/)
     await page.keyboard.press("Escape")
     await page.waitForTimeout(300)
     expect(await page.locator(".PartMenu").count()).toBe(0)
-    expect(await focused()).not.toMatch(/^Copy/)
+    expect(await focused()).not.toMatch(/^Inspect/)
   })
 
   test("Show in Code goes to the line;  Inspect opens the Inspector, with Inspect app off", async () => {
@@ -537,7 +550,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
-  test("in Edit, a part inside a program menu shows its items first, a thick line, then ours;  Run's is its own (I76)", async () => {
+  test("in Edit, a part inside a program menu shows its items under App Menu, between thick lines, below ours;  Run's is its own (I76, T160)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
     await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
@@ -573,24 +586,33 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
           ),
         selector
       )
-    // Solitaire's `<context-menu>`, then ours
+    // Solitaire's `<context-menu>`, as Run draws it
     const program = ["Auto Play", "Cheat", "Deal the Cards", "-"]
+    /** The program's rows in the part menu:  the four under its App Menu header. */
+    const programIn = (shown: string[]) => shown.slice(shown.indexOf("App Menu") + 1, shown.indexOf("App Menu") + 5)
+    // Inspect, ours, then Solitaire's `<context-menu>` under its header, then Show in Code and Change This (T160)
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(600)
     const shown = await rows(".PartMenu")
-    expect(shown.slice(0, 4)).toEqual(program)
-    expect(shown.slice(shown.indexOf("="))).toEqual([
-      "=",
+    expect(shown).toEqual([
+      expect.stringMatching(/^Inspect /),
+      "Inspect Other Views",
+      "-",
       "Cut",
       "Copy",
       "Paste",
       "Duplicate",
       "Delete",
+      "=",
+      "App Menu",
+      "Auto Play",
+      "Cheat",
+      "Deal the Cards",
       "-",
+      "Undo",
+      "Redo",
+      "=",
       "Show in Code",
-      expect.stringMatching(/^Inspect /),
-      "Inspect Other Views",
-      "-",
       "Change This..."
     ])
     const thickness = await other.evaluate(() => {
@@ -618,11 +640,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       })
     const before = await faceDown()
     // its row as drawn:  the host draws no box of its own
-    const cheat = await other.evaluate((index) => {
-      const row = document.querySelectorAll(".PartMenu :is(ui-action, ui-item)")[index]!
+    const cheat = await other.evaluate(() => {
+      const row = [...document.querySelectorAll(".PartMenu ui-menu > :is(ui-action, ui-item)")].find(
+        (each) => (each as { action?: { title: string } }).action?.title === "Cheat"
+      )!
       const { x, y, height } = row.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
       return { x, y, height }
-    }, program.indexOf("Cheat"))
+    })
     await other.mouse.click(cheat.x + 20, cheat.y + cheat.height / 2)
     await other.waitForTimeout(800)
     expect(await other.locator(".PartMenu").count()).toBe(0)
@@ -646,7 +670,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(box).toBeDefined()
     await other.mouse.click(box!.x + 40, box!.y + 10, { button: "right" })
     await other.waitForTimeout(600)
-    expect((await rows(".PartMenu")).slice(0, 4)).toEqual(program)
+    expect(programIn(await rows(".PartMenu"))).toEqual(program)
     await other.keyboard.press("Escape")
     await other.waitForTimeout(300)
 
@@ -764,7 +788,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
-  test("Inspect Card inspects the card;  Inspect Other Views lists every part under the mouse, which rings and selects (P31, Q37)", async () => {
+  test("Inspect Card inspects the card;  Inspect Other Views lists the parts seen under the mouse, which rings and selects (P31, Q37, T160)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
     await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
@@ -818,7 +842,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
     expect(await selected()).toEqual({ which: "card", count: 1, isOpen: true })
 
-    // Inspect Other Views:  every part under the mouse, outermost first, the card's picture inside it
+    // Inspect Other Views:  the parts seen under the mouse, outermost first, each inside the one before, flat (T160)
     await other.mouse.click(at.x, at.y, { button: "right" })
     await other.waitForTimeout(600)
     await inspectRow.locator("[part~=title]").first().hover()
@@ -827,19 +851,19 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const rows = await inspectRow.locator(":scope > ui-action").evaluateAll((actions) =>
       actions.map((action) => ({
         title: action.textContent!.trim(),
-        depth: Number((action as HTMLElement).style.getPropertyValue("--InspectRow-depth")),
-        ticked: action.getAttribute("selected") !== "false" && action.hasAttribute("selected")
+        // no tick, no indent:  a flat list (T160)
+        ticked: action.hasAttribute("selected") || action.hasAttribute("active"),
+        indent: getComputedStyle(action.shadowRoot!.querySelector("[part~=item]")!).paddingInlineStart
       }))
     )
-    const card = rows.findIndex((row) => row.ticked)
     expect(rows.length).toBeGreaterThanOrEqual(4)
-    expect(rows[0]!.depth).toBe(0)
-    expect(rows[card]!.title).toMatch(/^Card /)
-    // the pile round it (a column) just before it, a level out;  its picture after it, a level in
-    expect(rows[card - 1]!).toMatchObject({ title: expect.stringMatching(/^Column /), depth: rows[card]!.depth - 1 })
-    expect(rows[card + 1]!.depth).toBe(rows[card]!.depth + 1)
-    // a tree:  each row at most one level in from the row above
-    expect(rows.every((row, index) => index === 0 || row.depth <= rows[index - 1]!.depth + 1)).toBe(true)
+    expect(rows.some((row) => row.ticked)).toBe(false)
+    expect(new Set(rows.map((row) => row.indent)).size).toBe(1)
+    // one card, the one on top:  the cards it covers there are left out (T160)
+    expect(rows.filter((row) => row.title.startsWith('Card "')).length).toBe(1)
+    const card = rows.findIndex((row) => row.title.startsWith('Card "'))
+    // the pile round it (a column) just before it;  its picture after it
+    expect(rows[card - 1]!.title).toMatch(/^Column /)
 
     // pointing at the picture rings it;  choosing it selects it, and the properties card shows it
     const picture = inspectRow.locator(":scope > ui-action").nth(card + 1)
@@ -898,7 +922,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
-  test("in Edit, the game's own right-click menu comes first, a thick line, then the editor's (T120)", async () => {
+  test("in Edit, the game's own right-click menu is under App Menu, between thick lines, below the editor's (T120, T160)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
     await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
@@ -939,19 +963,23 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       await other.mouse.click(at.x, at.y, { button: "right" })
       await other.waitForTimeout(SETTLE_MS)
       const shown = await rows()
-      expect(shown.slice(0, 4)).toEqual(game)
-      expect(shown[4]).toMatch(/^Undo/)
-      expect(shown[5]).toMatch(/^Redo/)
-      expect(shown[6]).toBe("=====")
-      expect(shown.slice(7, 15).map((row) => row.replace(" (off)", ""))).toEqual([
+      // Inspect first, ours, the game's under App Menu between thick lines, then Show in Code and Change This (T160)
+      expect(shown[0]).toMatch(/^Inspect /)
+      const cut = shown.findIndex((row) => row.startsWith("Cut"))
+      expect(shown.slice(cut, cut + 5).map((row) => row.replace(" (off)", ""))).toEqual([
         "Cut",
         "Copy",
         "Paste",
         "Duplicate",
-        "Delete",
-        "---",
+        "Delete"
+      ])
+      expect(shown.slice(cut + 5, cut + 11)).toEqual(["=====", "App Menu", ...game])
+      expect(shown[cut + 11]).toMatch(/^Undo/)
+      expect(shown[cut + 12]).toMatch(/^Redo/)
+      expect(shown.slice(cut + 13).map((row) => row.replace(" (off)", ""))).toEqual([
+        "=====",
         "Show in Code",
-        expect.stringMatching(/^Inspect /)
+        "Change This..."
       ])
       await other.keyboard.press("Escape")
       await other.waitForTimeout(300)
@@ -961,12 +989,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(SETTLE_MS)
     const lines = await other.evaluate(() =>
-      [...document.querySelectorAll("ui-popup.PartMenu ui-action[kind=divider]")].map(
-        (divider) => getComputedStyle(divider.shadowRoot!.querySelector("[part~=item]")!).borderTopWidth
+      [...document.querySelectorAll("ui-popup.PartMenu ui-menu > ui-action[kind=divider]")].map(
+        (divider) =>
+          `${divider.matches("[appearance~=dashed]") ? "thick" : "thin"} ${getComputedStyle(divider.shadowRoot!.querySelector("[part~=item]")!).borderTopWidth}`
       )
     )
-    expect(lines[0]).toBe("2px")
-    expect(lines.slice(1).every((width) => width === "1px")).toBe(true)
+    expect(lines.filter((line) => line.startsWith("thick"))).toEqual(["thick 2px", "thick 2px"])
+    expect(lines.filter((line) => line.startsWith("thin")).every((line) => line === "thin 1px")).toBe(true)
 
     // Cheat runs in the program, as in Run:  the menu closes, and its Undo says so
     const cheat = await other.evaluate(() => {
@@ -981,7 +1010,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(SETTLE_MS)
-    expect((await rows())[4]).toBe("Undo Cheat")
+    const after = await rows()
+    expect(after[after.indexOf("App Menu") + 5]).toBe("Undo Cheat")
     await other.keyboard.press("Escape")
     await other.close()
   })

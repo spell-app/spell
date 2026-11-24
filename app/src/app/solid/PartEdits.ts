@@ -757,7 +757,7 @@ export class PartEdits {
   }
 
   /**
-   * Every part under (`x`, `y`) in `area`, outermost first, each under the one it's inside:
+   * The parts under (`x`, `y`) in `area`, outermost first, each inside the one before it:
    * a right click's Inspect submenu (epic `editor` P31).
    * - What the browser draws there (`elementsFromPoint()`), into each shadow root the app draws in,
    *   and the parts round each of those (a part with no box of its own, `display: contents`, is still around it).
@@ -765,10 +765,11 @@ export class PartEdits {
    *   so the picture inside a card counts (`Inspector.isPart()`).
    * - Never the editor's own boxes (`EDITOR_OWN`), nor what's inside a Spell UI element's own shadow root:
    *   a button's icon is the button's.
-   * - Each part once.  Parts side by side under the same one (overlapping cards in a pile):  the one on top first.
-   *   - One in the very same box as another above it (the stock's cards, squarely stacked) is hidden by it:
-   *     left out, with what's inside it, so the stock lists its top card, not all 24 (epic `editor` P31).
-   * - `depth`:  how many of the others it's inside.
+   * - Only what's seen under the mouse (epic `editor` T160):  of parts side by side in the same one
+   *   (overlapping cards in a pile), the one on top, and what's inside IT;
+   *   a card it covers there is left out, with what's inside that, though its box reaches the mouse.
+   *   - So the stock lists its top card, not all 24 (P31), and a fanned column the card under the mouse alone.
+   * - `depth`:  how many of the others it's inside, its place in the list.
    */
   static partsAt(x: number, y: number, area: HTMLElement): PartRow[] {
     const order = new Map<Element, number>()
@@ -784,22 +785,16 @@ export class PartEdits {
       while (outer && outer !== area && !isAPart.has(outer)) outer = composedParentOf(outer)
       return outer && isAPart.has(outer) ? outer : undefined
     }
-    const inside = new Map<Element | undefined, Element[]>()
-    for (const part of parts) inside.set(outerOf(part), [...(inside.get(outerOf(part)) ?? []), part])
-    const rows: PartRow[] = []
-    const add = (outer: Element | undefined, depth: number) => {
-      const own = [...(inside.get(outer) ?? [])].sort((a, b) => order.get(a)! - order.get(b)!)
-      const shown: DOMRect[] = []
-      for (const part of own) {
-        // one squarely under another, the same box (the stock's cards):  hidden by it, so left out
-        const box = part.getBoundingClientRect()
-        if (box.width && shown.some((above) => isSameBox(above, box))) continue
-        shown.push(box)
-        rows.push({ element: part, depth })
-        add(part, depth + 1)
-      }
+    // each part's top-most part inside it, under the mouse:  the first reached from what's drawn on top
+    const topInside = new Map<Element | undefined, Element>()
+    for (const part of parts.sort((a, b) => order.get(a)! - order.get(b)!)) {
+      const outer = outerOf(part)
+      if (!topInside.has(outer)) topInside.set(outer, part)
     }
-    add(undefined, 0)
+    const rows: PartRow[] = []
+    for (let part = topInside.get(undefined); part; part = topInside.get(part)) {
+      rows.push({ element: part, depth: rows.length })
+    }
     return rows
   }
 
@@ -1054,16 +1049,6 @@ function drawnAt(root: Document | ShadowRoot, x: number, y: number, seen = new S
     const inner = element.shadowRoot && !element.localName.startsWith(UI_PREFIX) ? element.shadowRoot : undefined
     return [element, ...(inner ? drawnAt(inner, x, y, seen) : [])]
   })
-}
-
-/** Are `a` and `b` the same box, to within a pixel on each edge? */
-function isSameBox(a: DOMRect, b: DOMRect): boolean {
-  return (
-    Math.abs(a.left - b.left) <= 1 &&
-    Math.abs(a.top - b.top) <= 1 &&
-    Math.abs(a.right - b.right) <= 1 &&
-    Math.abs(a.bottom - b.bottom) <= 1
-  )
 }
 
 /** The element `element` is inside, across shadow roots:  its parent, else its shadow root's host. */

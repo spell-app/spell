@@ -163,6 +163,7 @@ export const APP_TEXTS = {
   menuInspect: "Inspect {type}",
   menuInspectParts: "Pick one of the parts under the mouse",
   menuInspectOtherViews: "Inspect Other Views",
+  menuAppMenu: "App Menu",
   partIsApp: "That's the app itself:\nit can't be cut, duplicated or deleted.",
   partNothingCopied: "Nothing's been copied yet.",
   partNothingSelected: "Nothing's selected.",

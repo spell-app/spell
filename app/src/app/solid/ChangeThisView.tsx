@@ -57,7 +57,10 @@ export function ChangeThisBox(): JSX.Element {
             onDrop={(event: DragEvent) => takePictures(event, event.dataTransfer)}
           >
             <div class="ChangeThisTop">
-              <label class="ChangeThisHeader">{appTexts.text("changeThisHeader")}</label>
+              <label class="ChangeThisHeader">
+                <ui-icon name={ChangeThis.icon} />
+                {appTexts.text("changeThisHeader")}
+              </label>
               <ui-button
                 class="ChangeThisClose"
                 appearance="circular basic"
