@@ -738,6 +738,21 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `ReviewInbox`:  the inbox file
       - `ReviewStart`:  the pill's start, and WAKING the epic when Send finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
+    - `InboxHub`:  the ONE listener for every epic's page, in the epic hub (epic `epic-engine` T163;  Owen,
+      2026-11-23:  "Can we have a single server which waits for comments on pages for all epics")
+      - every 2 seconds, for each running Claude session:  an `InboxMonitor` look at its epic, only when its inbox, the
+        pages the epic owns or the session's record changed (or at most a minute on)
+      - holds the inbox for the session by the SESSION's own process, so the page says it listens exactly while it
+        runs;  a listener already there for the session keeps it (its own `wait`, `/epic review`'s `watch`, a poller
+        that looks itself), but a poller hearing the hub (`listenerHearsHub()`)
+      - work waiting:  a NOTE for the session, once per batch (`WakeNotes`, [WakeNotes.mjs](tool/WakeNotes.mjs),
+        `~/.spell-epic/wakes/<session id>.json`), its `📬` line;  taken once, by a rename, by whichever reader comes
+        first:
+        - idle (the registry record's `status`):  the session's `InboxPoller`, which prints it and wakes the session
+        - at work:  the `PostToolUse` hook ([inbox-note.mjs](../hooks/inbox-note.mjs)), which hands it to the session
+          as context at its next tool call (never a subagent's, `agent_id`)
+      - so no session runs `epic inbox wait` in the background, and nothing times out:  no "still listening" turns
+      - the hub's record, `hub.pid` beside the notes:  with none live, the pollers look themselves, as before
     - `InboxMonitor`:  `epic session listen`, ONE look for the session's inbox POLLER, one beside every session
       (epic `epic-engine` P18):  an epic's session listens to its page whenever it's open
       - the epic:  the session's title, else its worktree;  none, it does nothing
@@ -763,10 +778,12 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - plain JavaScript, node's own modules only:  bare node, about 45MB a session
         - the look, under `tsx`, about 150MB, runs for a moment as its own process
         - NEVER import TypeScript into it:  node's TypeScript support alone adds about 28MB
-      - looks at start, a few seconds after a watched file changes, and when the last look said to
+      - with the hub up (T163):  hears its note instead (the hook's `session_id` names the session), watching the
+        note and the session's record, and runs no look;  its listener file's third line says so (`hub`)
+      - else looks at start, a few seconds after a watched file changes, and when the last look said to
       - prints NOTHING while idle (no tokens)
-        - The person's Send:  the look's `📬` line, once per batch,
-          which wakes the session, which takes the work with its own `epic inbox wait`
+        - The person's Send:  the `📬` line, once per batch,
+          which wakes the session, which takes the work with `epic inbox wait <epic> --timeout 5`
     - the inboxes, one shape of comment for both (`CommentList`):
       - `ReviewInbox`:  an epic page's marks and comments
       - `GuideInbox`:  a docs page's comments and its Send (epic `epic-workflow` P13)
@@ -1010,19 +1027,19 @@ The shared folders:
   - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
 - [The docs' home page](../../spell.epics/pages/index.html):  a routing page (P5 of `claude-design`).
   - One card per area, each with its count, straight under the lede (no "Areas" section;  Owen, 2026-11-19):
-    Guides · Sagas · Epic Pages · Epic Documentation
+    Epics · Sagas · Guides · Epic Documentation
     - Epic Documentation:  the epic tooling's READMEs (`/_epic/docs/README-epics.md`), no count;  in VS Code's side bar
       it opens the Epic Docs tab (`data-spell-open="tab"`, the kit's live client), in a browser it's a plain link
     - no Templates card, nor an "About these pages" section:  the templates aren't ready for other people to edit
     - each card's description on two lines, broken at its first colon (`descriptionLines()`)
-    - the Epic Pages card:  its Active epics, the open epics worked on in the last week, a pill each in two columns:
+    - the Epics card:  its Active epics, the open epics worked on in the last week, a pill each in two columns:
       `<epic-pills>`, which draws itself from the page server, live (epic `epic-engine` T99;  J276's generator wrote
       plain pills into the page, as of the last `epic pages index`)
       - each pill:  the epic's name, what waits in its toolbar badge colours (red, orange, blue), its phase under way
         or `Done`, its agents (`🤖 2`);  the tooltip says it in words
       - its data:  `GET /api/epics/running?every` (`RunningEpics.everyEpic()`:  every epic, running or not, with its
         `badges` and `agents`), asked again as epic pages or their agents' lists change, and every 30 seconds
-    - the top bar's tab is "Epic Pages" too, and the bar says "Spell Epic" beside the hat (`SiteHeader`)
+    - the top bar's tab is "Epics" too, and the bar says "Spell Epic" beside the hat (`SiteHeader`)
     - Spell's own areas left out (2026-11-18, epic `epic-engine` J275:  "Remove anything Spell related in this page
       permanently.  No longer relevant to Epics"):  Epic/UI, Spell/UI, App, App/UI and Brand had cards, and tabs;
       their pages are still served at their addresses (`/components/ui/`, `/editor/`, `/brand/`)

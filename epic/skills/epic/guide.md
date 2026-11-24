@@ -148,15 +148,17 @@ The person marks items, leaves comments and presses Send on the epic page.
 Nothing reaches you until you look:
 - `epic inbox <epic>`:  what's waiting, sent or not.
 - `epic inbox wait <epic>`:  waits until they press Send, prints the work, and exits 0;
-  exit 2 after 55 minutes with nothing (`--timeout 2h` for longer).
+  exit 2, printing nothing, after 55 minutes with nothing (`--timeout 2h` for longer).
+  - Run it in the foreground.
+  - Claude Code never runs it in the background:  the epic hub listens for every Claude session, and wakes it at the
+    Send, or hands it the Send at its next tool call while it works (epic `epic-engine` T163).
   - While it waits, the page says so:  "Your Codex is listening".
   - Without it, the page says to ask you to run it.
 
 Then, for what it printed:
 0. Busy with other work when it came:  apply the quick marks now (`epic inbox apply <epic>`), put a Noted card on each
    heavy one (`epic update <epic>#I3 noted "Queued:  after <what you're on>"`), so they see it was heard, then finish
-   what you were on first.  An agent that can run a command in the background keeps `epic inbox wait <epic>` running
-   the whole time it works, armed again as it exits:  a Send then reaches it mid-work (epic `epic-engine` I286).
+   what you were on first.  Between steps, `epic inbox <epic>` says whether a new Send came meanwhile.
 1. `epic inbox status <epic> "Responding" --items <ids>`.
 2. Requests for now (Add Details, revisit now):  per item,
    `epic update <epic>#J3 underway "<what you take it to be>"`, write the answer
@@ -178,7 +180,7 @@ Then, for what it printed:
    then `epic inbox done <epic>#C3 --file answer.html`.
    Words holding `![IMG2](<path>)` (or an older `![picture](<path>)`) are a picture they pasted, labelled:  `wait`
    prints each one's file under the words (`IMG2:  <file>`);  look at it first.  "IMG2" in their words means that one.
-5. `epic inbox status <epic> --clear`, then `epic inbox wait <epic>` again, unless they said stop.
+5. `epic inbox status <epic> --clear`, then `epic inbox wait <epic>` again (in the foreground), unless they said stop.
 
 ## turn -- End every turn
 
@@ -304,11 +306,11 @@ Without them, every step still works:  each skill's "In Codex:" lines say it in 
 | background agents (`Agent`, `/bg`) | several items answered at once, the chat free meanwhile | Codex:  ask for sub-agents, one per item, and wait for them (Codex waits, so the chat isn't free);  else one at a time, in this session |
 | the designer, coherence and plan-check agents | a review by the plugin's own reviewer | Codex:  its custom agents `designer`, `coherence` and `plan-check`, which `epic plugin install --codex` writes into `~/.codex/agents/`;  else follow that skill's steps yourself |
 | messages to another session (`SendMessage`, `ListAgents`) | telling a running session to do something | print the line for the person to type into that session |
-| a background command (Bash `run_in_background`, `TaskStop`) | waiting on `epic ask wait` / `epic inbox wait` while the chat stays free | run it in the foreground and wait:  it ends when the person sends;  stop it with Ctrl-C |
+| a background command (Bash `run_in_background`, `TaskStop`) | waiting on `epic ask wait` while the chat stays free | run it in the foreground and wait:  it ends when the person sends;  stop it with Ctrl-C |
 | plan mode (`/comment`) | the person comments on a file in the plan tab | none:  take their notes in the chat, or open it as a guide with comments (`epic pages link <page> --show`) |
 | `${CLAUDE_PLUGIN_ROOT}` in a skill | the epic plugin's own folder, which Claude Code fills in | `epic guide --root` prints it:  read `${CLAUDE_PLUGIN_ROOT}` as that folder |
 | the pause before a fresh start (`epic fresh all --pause`) | every session saves its agents and reports back | can't start one:  it needs Claude Code's session messages;  `epic fresh status` and `cancel` work anywhere |
-| the inbox poller (its `Stop` hook) | wakes the session when the person sends | `epic inbox wait <epic>`, run yourself |
+| the epic hub's wake (the inbox poller's `Stop` hook, the `PostToolUse` hook) | wakes the session when the person sends, or hands it the Send at its next tool call | `epic inbox wait <epic>`, run yourself, in the foreground |
 | the end-of-turn hook | commits and syncs the plans | `epic turn end` (Codex's hook runs it too) |
 | `EnterWorktree` / `ExitWorktree` | moving the session into the epic's worktree | `epic worktree create <name>` (or `git worktree add`), then `cd "$(epic worktree path <epic>)"`;  leaving:  `cd` back to the main checkout |
 | the window moves (`epic window handoff`, `launch`) | the session in the epic's VS Code window | print `epic window open <name>` for the person to run, and carry on where you are |

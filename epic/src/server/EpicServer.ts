@@ -246,7 +246,8 @@ export class EpicServer {
    * - `watchCode`:  live-reload pages when the engine's code changes (its assets, pack and templates) and the
    *   component sets' bundles (default `true`);  a demo check's server turns it off (`DemoServer`):  a bundle rebuilt
    *   by another server in the checkout must never reload a page under a check (epic `epic-engine` I186)
-   * - `keep`:  keep every repo's servers (`ServerKeeper`;  default:  as `pidFile`, so the machine's hub only)
+   * - `keep`:  keep every repo's servers (`ServerKeeper`;  default:  as `pidFile`, so the machine's hub only), and
+   *   listen to every epic's page for every running Claude session (`InboxHub`)
    */
   async start({
     port = DEFAULT_EPIC_PORT,
@@ -289,6 +290,11 @@ export class EpicServer {
         isStale: () => SRV.newestChange(SOURCES) > started
       })
       this.stops.push(() => this.keeper.stop())
+      // the ONE listener for every epic's page, for every running session (epic `epic-engine` T163);  loaded here
+      // only, so a server that keeps nothing never loads the epic tool's inbox code
+      const { InboxHub } = await import("spell/epic/tool/InboxHub")
+      const inboxHub = new InboxHub().start()
+      this.stops.push(() => inboxHub.stop())
     }
     for (const start of this.listenings)
       await Promise.resolve(start()).catch((error: unknown) => {
@@ -698,7 +704,7 @@ const HOME_PAGE = "pages/index.html"
  * as Spell's epic repo names them (its `page-server.json5`).
  */
 const DEFAULT_SITE_TABS: readonly SiteTab[] = [
-  { name: "Epic Pages", path: "epics/index.html", areas: ["epics"] },
+  { name: "Epics", path: "epics/index.html", areas: ["epics"] },
   { name: "Sagas", path: "sagas/index.html", areas: ["sagas"] },
   { name: "Guides", path: "guides/index.html", areas: ["guides"] },
   // the engine's own READMEs, rendered (`docsRoutes`):  the same in every repo

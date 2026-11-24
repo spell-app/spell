@@ -60,9 +60,9 @@ test("check:  listens for the session at once, held by its monitor;  watches the
   expect(ReviewInbox.read(inboxFile).listening).toMatchObject({ session: "s1", pid: process.pid })
 })
 
-// epic `epic-engine` I286:  the line is the first thing Owen sees of a session a Send woke:  it says what it takes,
-// and to keep a `wait` running while it works
-test("check:  the line names what's waiting, in the page's words, and asks to keep listening", () => {
+// epic `epic-engine` I286:  the line is the first thing Owen sees of a session a Send woke:  it says what it takes;
+// T163:  and never asks for a `wait` in the background, the epic hub listening instead
+test("check:  the line names what's waiting, in the page's words, and arms nothing", () => {
   const each = monitor()
   each.check(MONITOR)
   ReviewInbox.update(inboxFile, (box) => {
@@ -73,7 +73,7 @@ test("check:  the line names what's waiting, in the page's words, and asks to ke
   const { notice } = each.check(MONITOR)
   expect(notice).toBe(InboxMonitor.notice("x", "2 marks:  j149 approve, i83 do this"))
   expect(notice).toContain("📬 x:  taking your Send from the epic page (2 marks:  j149 approve, i83 do this)")
-  expect(notice).toContain("keep `epic inbox wait x` running in the background")
+  expect(notice).not.toContain("background")
 })
 
 test("check:  run by hand (no monitor), it listens as inbox watch does:  a heartbeat, no process", () => {
@@ -117,6 +117,16 @@ test("check:  an older poller of this session holds it (the last turn's hook);  
   ReviewInbox.update(inboxFile, (box) => box.setListening("s1", undefined, process.ppid))
   expect(monitor().check(MONITOR)).toMatchObject({ watch: [inboxFile], waiting: false })
   expect(ReviewInbox.read(inboxFile).listening).toMatchObject({ session: "s1", pid: process.pid })
+})
+
+// epic `epic-engine` T163:  the hub's look replaces only a poller that hears it, never the session's own `wait`
+test("check:  takesOver says no (the session's own wait holds it):  the hub's look stands back", () => {
+  ReviewInbox.update(inboxFile, (box) => {
+    box.setListening("s1", undefined, process.ppid)
+    box.markSent()
+  })
+  expect(monitor().check({ ...MONITOR, takesOver: () => false })).toMatchObject({ watch: [], waiting: false })
+  expect(ReviewInbox.read(inboxFile).listening?.pid).toBe(process.ppid)
 })
 
 test("check:  another session's live poller holds it;  this one stands back", () => {

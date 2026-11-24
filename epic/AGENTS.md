@@ -90,6 +90,9 @@ a folder of the kit `spell`.
   - Except the worktree hook:  its failure is Claude Code's answer.
   - And the inbox poller, the `asyncRewake` `Stop` hook (`monitors/listen.mjs --hook`, epic `epic-engine` I144):
     it runs in the background and exits 2 with its `📬` line, which is how it wakes the session.
+  - The epic hub listens for every session (`InboxHub`, epic `epic-engine` T163):  the poller hears its note while the
+    session is idle, the `PostToolUse` hook ([inbox-note.mjs](hooks/inbox-note.mjs)) hands it over at the next tool
+    call while it works;  so no session runs `epic inbox wait` in the background.
 - Removing a worktree stops its page and vite servers FIRST (`CheckoutServers`, epic `epic-engine` I53):
   - `epic worktree remove <name>`, never a bare `git worktree remove`, in the skills and anything new
   - the worktree hook and `epic worktree move` do it themselves;  the session-start hook stops the rest, hourly
