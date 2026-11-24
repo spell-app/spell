@@ -1426,6 +1426,10 @@ function leaveOutLine(description: PlaceDescription, line: WrittenLine, why: str
         about.wordsInQuotes = true
         return true
       }
+      if (kind === "field" && goesByItsOwnName(field, about, held.fields)) {
+        description.notes.push(`${collection}'s "${field}" goes by its own name:  ${reason}`)
+        return true
+      }
       about.leftOut = reason
       description.notes.push(`Left out ${collection}'s "${field}":  ${reason}`)
       return true
@@ -1445,6 +1449,23 @@ function leaveOutLine(description: PlaceDescription, line: WrittenLine, why: str
     return leaveOutCollection(description, type.collection, reason)
   }
   return key ? leaveOutKeyed(description, key, reason) : false
+}
+
+/**
+ * SIDE EFFECT:  a field whose words Spell couldn't read goes by the source's own name instead, kept, never left out
+ * for that:  a server's `load_1min`, said `load 1min`, which Spell reads as a number run into a word, is
+ * `its "load_1min" is a number`.
+ * - `false` when it already does, or another field of its type has those words:  then it's left out, saying why.
+ */
+function goesByItsOwnName(
+  name: string,
+  about: FieldDescription,
+  fields: Readonly<Record<string, FieldDescription>>
+): boolean {
+  if (about.words === name || Object.values(fields).some((other) => other !== about && other.words === name))
+    return false
+  about.words = name
+  return true
 }
 
 /**
@@ -1475,6 +1496,10 @@ function leaveOutInside(
   const [name, about] =
     Object.entries(insideFields ?? {}).find(([, each]) => each.words === words && !each.leftOut) ?? []
   if (!about) return false
+  if (goesByItsOwnName(name!, about, insideFields!)) {
+    description.notes.push(`${typeWords}'s "${name}" goes by its own name:  ${reason}`)
+    return true
+  }
   about.leftOut = reason
   description.notes.push(`Left out ${typeWords}'s "${name}":  ${reason}`)
   return true
