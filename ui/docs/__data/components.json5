@@ -21660,7 +21660,7 @@
         {
           "name": "icon",
           "kind": "icon",
-          "description": "Icon name, drawn inside the field;  the root gets `icon`."
+          "description": "Icon name, drawn inside the field;  the root gets `icon`.  A `type=\"search\"` field shows a magnifying glass at its start when it names none."
         },
         {
           "name": "label",
@@ -21762,6 +21762,16 @@
           "name": "folder",
           "kind": "boolean",
           "description": "`file`:  picks whole folders instead of files;  `files` holds every file in them, each with its path in its folder (`webkitRelativePath`)."
+        },
+        {
+          "name": "clearable",
+          "kind": "boolean",
+          "description": "Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type=\"search\"`;  `clearable=\"false\"` turns it off there."
+        },
+        {
+          "name": "shortcut",
+          "kind": "string",
+          "description": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows."
         },
         {
           "name": "autocomplete",
@@ -21994,6 +22004,14 @@
         {
           "name": "icon",
           "description": "The icon box (the spinner while `loading`)."
+        },
+        {
+          "name": "shortcut",
+          "description": "The box of its `shortcut`'s keys, at the field's end while it's empty."
+        },
+        {
+          "name": "clear",
+          "description": "The box of the clear button, at the field's end (`clearable`, while it has text)."
         }
       ],
       "states": [
@@ -22054,7 +22072,13 @@
           "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
         }
       ],
-      "texts": [],
+      "texts": [
+        {
+          "key": "inputClear",
+          "text": "Clear",
+          "description": "Accessible name of the clear button (`clearable`)."
+        }
+      ],
       "mainTag": "ui-input",
       "main": true,
       "page": true,
@@ -38712,6 +38736,11 @@
           "description": "Takes the full width of its container;  so do the results."
         },
         {
+          "name": "collapsed",
+          "kind": "keyOnly",
+          "description": "Starts as a search button;  a click slides the field open, focused.  Escape, or leaving it empty, folds it back.  `:state(expanded)` and `ui-toggled` tell the page, to hide a title the field covers."
+        },
+        {
           "name": "scrolling",
           "kind": "keyOnly",
           "description": "The results scroll after a fixed height."
@@ -38768,6 +38797,12 @@
           "description": "Placeholder text of the input."
         },
         {
+          "name": "clearable",
+          "kind": "boolean",
+          "default": true,
+          "description": "Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable=\"false\"` turns it off."
+        },
+        {
           "name": "value",
           "kind": "string",
           "description": "The input's text:  the query, or a chosen result's title."
@@ -38786,6 +38821,11 @@
           "name": "required",
           "kind": "boolean",
           "description": "Form validation:  the input can't be empty."
+        },
+        {
+          "name": "shortcut",
+          "kind": "string",
+          "description": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows."
         },
         {
           "name": "url",
@@ -39048,6 +39088,11 @@
           "description": "The text settled:  typing paused for `delay`, Enter pressed, a result chosen, the input cleared, or left after an edit.  Once per new text."
         },
         {
+          "name": "ui-toggled",
+          "detail": "{ expanded: boolean }",
+          "description": "A `collapsed` search slid open (`expanded: true`) or folded back."
+        },
+        {
           "name": "ui-replied",
           "detail": "{ query: string, results: SearchResult[] }",
           "description": "A remote query answered."
@@ -39083,6 +39128,18 @@
           "description": "The icon box."
         },
         {
+          "name": "clear",
+          "description": "The box of the clear button, in place of the icon while there's text."
+        },
+        {
+          "name": "shortcut",
+          "description": "The box of its `shortcut`'s keys, at the end while it's empty."
+        },
+        {
+          "name": "opener",
+          "description": "The search button a `collapsed` search shows while folded."
+        },
+        {
           "name": "results",
           "description": "The results popover (the listbox while there are results)."
         },
@@ -39107,6 +39164,10 @@
         {
           "name": "open",
           "description": "The results are showing."
+        },
+        {
+          "name": "expanded",
+          "description": "A `collapsed` search's field is open."
         },
         {
           "name": "disabled",
@@ -39174,6 +39235,11 @@
           "key": "searchLabel",
           "text": "Search",
           "description": "Accessible name of the input when nothing else names it."
+        },
+        {
+          "key": "searchClear",
+          "text": "Clear search",
+          "description": "Accessible name of the clear button."
         },
         {
           "key": "searchNoResultsHeader",
@@ -66338,6 +66404,11 @@
           "type": "length"
         },
         {
+          "name": "--ui-input-shortcut-width",
+          "default": "4.5em",
+          "type": "length"
+        },
+        {
           "name": "--ui-input-icon-size",
           "default": "1em",
           "type": "length"
@@ -69979,6 +70050,16 @@
           "name": "--ui-search-disabled-opacity",
           "default": "var(--ui-disabled-opacity)",
           "type": "other"
+        },
+        {
+          "name": "--ui-search-expanded-width",
+          "default": "16em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-search-expand-duration",
+          "default": "var(--ui-duration, 0.2s)",
+          "type": "time"
         }
       ]
     },
@@ -75087,12 +75168,18 @@
     {
       "id": "motion",
       "title": "Motion",
-      "description": "Durations, easing curves, and how long a hover waits.",
+      "description": "Durations, easing curves, and how long a hover or a tooltip waits.",
       "tokens": [
         {
           "name": "--ui-hover-delay",
           "default": "800ms",
           "description": "How long a hover popup waits before it shows.",
+          "type": "time"
+        },
+        {
+          "name": "--ui-tooltip-delay",
+          "default": "1500ms",
+          "description": "How long a tooltip waits before it shows:  as long as the browser's own.",
           "type": "time"
         },
         {

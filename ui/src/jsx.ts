@@ -23473,7 +23473,7 @@ export interface UIInputAttributes {
    */
   "prop:action"?: boolean | "" | "left"
   /**
-   * Icon name, drawn inside the field;  the root gets `icon`.
+   * Icon name, drawn inside the field;  the root gets `icon`.  A `type="search"` field shows a magnifying glass at its start when it names none.
    * - takes:  icon name
    */
   icon?: string
@@ -23673,6 +23673,26 @@ export interface UIInputAttributes {
    * @deprecated write `folder` -- `prop:` stays only for compiled spell
    */
   "prop:folder"?: boolean | ""
+  /**
+   * Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type="search"`;  `clearable="false"` turns it off there.
+   * - takes:  flag (present / absent)
+   */
+  clearable?: boolean | ""
+  /**
+   * `clearable`, as the DOM element's property.
+   * @deprecated write `clearable` -- `prop:` stays only for compiled spell
+   */
+  "prop:clearable"?: boolean | ""
+  /**
+   * Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows.
+   * - takes:  text
+   */
+  shortcut?: string
+  /**
+   * `shortcut`, as the DOM element's property.
+   * @deprecated write `shortcut` -- `prop:` stays only for compiled spell
+   */
+  "prop:shortcut"?: string
   /**
    * Autofill hint, forwarded to the native input.
    * - takes:  text
@@ -41487,6 +41507,11 @@ export interface UISearchEventMap {
    */
   "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
   /**
+   * `ui-toggled`:  A `collapsed` search slid open (`expanded: true`) or folded back.
+   * - `event.detail`:  `{ expanded: boolean }`
+   */
+  "ui-toggled": CustomEvent<{ expanded: boolean }>
+  /**
    * `ui-replied`:  A remote query answered.
    * - `event.detail`:  `{ query: string, results: SearchResult[] }`
    */
@@ -41547,6 +41572,16 @@ export interface UISearchAttributes {
    * @deprecated write `fluid` -- `prop:` stays only for compiled spell
    */
   "prop:fluid"?: boolean | ""
+  /**
+   * Starts as a search button;  a click slides the field open, focused.  Escape, or leaving it empty, folds it back.  `:state(expanded)` and `ui-toggled` tell the page, to hide a title the field covers.
+   * - takes:  flag (present / absent)
+   */
+  collapsed?: boolean | ""
+  /**
+   * `collapsed`, as the DOM element's property.
+   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   */
+  "prop:collapsed"?: boolean | ""
   /**
    * The results scroll after a fixed height.
    * - takes:  flag (present / absent)
@@ -41638,6 +41673,17 @@ export interface UISearchAttributes {
    */
   "prop:placeholder"?: string
   /**
+   * Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable="false"` turns it off.
+   * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  clearable?: boolean | "" | "false"
+  /**
+   * `clearable`, as the DOM element's property.
+   * @deprecated write `clearable` -- `prop:` stays only for compiled spell
+   */
+  "prop:clearable"?: boolean | "" | "false"
+  /**
    * The input's text:  the query, or a chosen result's title.
    * - takes:  text
    */
@@ -41677,6 +41723,16 @@ export interface UISearchAttributes {
    * @deprecated write `required` -- `prop:` stays only for compiled spell
    */
   "prop:required"?: boolean | ""
+  /**
+   * Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows.
+   * - takes:  text
+   */
+  shortcut?: string
+  /**
+   * `shortcut`, as the DOM element's property.
+   * @deprecated write `shortcut` -- `prop:` stays only for compiled spell
+   */
+  "prop:shortcut"?: string
   /**
    * Remote results:  a `UI.api` URL template with `{query}`, e.g. `/api/search?q={query}`.
    * - takes:  text
@@ -42067,6 +42123,11 @@ export interface UISearchAttributes {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UISearchEventMap["ui-changed"]) => void
+  /**
+   * `ui-toggled`:  A `collapsed` search slid open (`expanded: true`) or folded back.
+   * - `event.detail`:  `{ expanded: boolean }`
+   */
+  "on-ui-toggled"?: (event: UISearchEventMap["ui-toggled"]) => void
   /**
    * `ui-replied`:  A remote query answered.
    * - `event.detail`:  `{ query: string, results: SearchResult[] }`
@@ -63648,7 +63709,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  autocomplete, typeahead, search box, combobox, lookup
        * - slots:
        *   - `icon`:  Replaces the magnifying glass.
-       * - events:  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-replied`, `ui-opening`, `ui-closing`
+       * - events:  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-toggled`, `ui-replied`, `ui-opening`, `ui-closing`
        */
       "ui-search": UISearchJSXAttributes
       /**
@@ -64116,6 +64177,7 @@ export interface UIEventMap {
   "ui-dismissed": CustomEvent<unknown>
   "ui-completed": CustomEvent<unknown>
   "ui-show-code": CustomEvent<unknown>
+  "ui-toggled": CustomEvent<unknown>
   "ui-replied": CustomEvent<unknown>
   "ui-animated": CustomEvent<unknown>
   "ui-starred": CustomEvent<unknown>

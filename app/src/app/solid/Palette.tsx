@@ -356,6 +356,46 @@ export function partMatches(part: ComponentDefinition, words: string): boolean {
   return `${part.name} ${part.aka.join(" ")} ${part.description ?? ""}`.toLowerCase().includes(words)
 }
 
+/** A row of the add bar's menus:  a part, and the parts of its family shown inside it (`partBranches()`). */
+export type PartBranch = {
+  /** the part */
+  definition: ComponentDefinition
+  /** its family's parts, shown inside it:  `Cards` inside `Card` */
+  inside: ComponentDefinition[]
+}
+
+/**
+ * `parts` as the add bar's menus show them, each family's own parts inside its main one (epic `editor` T162):
+ * - a tag of a family's folder inside the family's main tag:  `Cards` inside `Card`, `Statistics` inside `Statistic`
+ * - a generic content part its owner names (`ownsParts`) inside that owner:  `Value` inside `Statistic`
+ * - only inside a part of the same list, one level deep, each part once:  inside the first that takes it
+ * - `words` (lowercase):  only what matches, a match inside shown under its family's main part, matching or not
+ */
+export function partBranches(parts: readonly ComponentDefinition[], words: string): PartBranch[] {
+  const outerOf = new Map<ComponentDefinition, ComponentDefinition>()
+  for (const part of parts) {
+    const outer = parts.find((other) => holds(other, part))
+    if (outer) outerOf.set(part, outer)
+  }
+  const branches: PartBranch[] = []
+  for (const part of parts) {
+    if (outerOf.has(part)) continue
+    const inside = parts.filter((other) => outerOf.get(other) === part && (!words || partMatches(other, words)))
+    if (!words || partMatches(part, words) || inside.length) branches.push({ definition: part, inside })
+  }
+  return branches
+}
+
+/** Is `part` one of `outer`'s family, shown inside it:  `partBranches()`'s rule. */
+function holds(outer: ComponentDefinition, part: ComponentDefinition): boolean {
+  if (outer === part || outer.tag !== outer.folder) return false
+  if (part.folder === outer.folder) return true
+  return part.folder === GENERIC_PARTS && !!outer.ownsParts?.includes(part.tag.replace(/^ui-/, ""))
+}
+
+/** The folder of Spell UI's generic content parts (`<ui-value>`, `<ui-header>` ...), owned by what they're in. */
+const GENERIC_PARTS = "ui-parts"
+
 /** Every topic with a part matching `words`, cut to those parts, in the palette's order. */
 export function groupsMatching(words: string): PaletteGroup[] {
   if (!words) return [...offered()]
@@ -513,13 +553,13 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
 }
 
 /**
- * The ONE right-click menu on the app's parts, in the app and the Views tree:
- * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect, a line, then Change This.
- * - Inspect names what it inspects, "Inspect Card";
- *   Inspect Other Views lists every part under the mouse (`<InspectRow>`).
- * - The program's own right-click menu there comes first, if it has one (`<context-menu>`, `context-menu=`),
- *   drawn as Run draws it (`ActionMenus.itemsFor()`), then a dashed line, then ours (epic `editor` I76, Owen's pick):
- *   Spell UI's dashed divider, `<ui-action kind="divider" appearance="dashed">`, edge to edge (`MenuBar.css`).
+ * The ONE right-click menu on the app's parts, in the app and the Views tree (epic `editor` T160, Owen's order):
+ * - Inspect first, under the mouse:  "Inspect Card", then Inspect Other Views (`<InspectRow>`)
+ * - a line, then `PartMenuItems`, the same as the Edit menu's
+ * - the program's own right-click menu there, if it has one (`<context-menu>`, `context-menu=`), between dashed lines,
+ *   under its header, App Menu:  drawn as Run draws it (`ActionMenus.itemsFor()`;  epic `editor` I76)
+ *   - Spell UI's dashed divider, `<ui-action kind="divider" appearance="dashed">`, edge to edge (`MenuBar.css`)
+ * - a line, then Show in Code and Change This, together at the bottom
  * - Drawn as every right click's menu is, `<MenuPopup>`:  at once, inside the window, with arrow keys, Enter and Esc.
  * - What can't be done is greyed, and its tooltip says why (`PartEdits.whyNot()`).
  * - `PartEdits.openMenu()` opens it:  what was clicked is selected once the menu is on the screen.
@@ -534,13 +574,17 @@ export function PartMenu(): JSX.Element {
       setAt({ x: next.x, y: next.y })
     }
   })
-  // the program's items, drawn afresh each time the menu opens somewhere new, then the dashed line
+  // the program's items under their header, between dashed lines, drawn afresh each time the menu opens somewhere new
   const programItems = () => {
     at()
     const items = programMenu()
     if (!items) return null
     return (
       <>
+        <ui-action kind="divider" appearance="dashed" />
+        <ui-item kind="header" class={APP_MENU_HEADER}>
+          {appTexts.text("menuAppMenu")}
+        </ui-item>
         {ActionMenus.itemsFor(items)}
         <ui-action kind="divider" appearance="dashed" />
       </>
@@ -560,9 +604,13 @@ export function PartMenu(): JSX.Element {
           // the part right-clicked, if it's not selected yet:  the item acts on it
           onChoosing={() => PartEdits.selectMenuPart() && flush()}
         >
-          {programItems()}
-          <PartMenuItems whyNot={(action) => whyNotAt(where(), action)} />
+          <InspectRow part={opening()?.part} partsUnder={opening()?.partsUnder} />
           <ui-action kind="divider" />
+          <PartMenuItems whyNot={(action) => whyNotAt(where(), action)} />
+          {programItems()}
+          <Show when={!programMenu()}>
+            <ui-action kind="divider" />
+          </Show>
           <Action
             menu
             icon="code"
@@ -571,12 +619,10 @@ export function PartMenu(): JSX.Element {
             tip={whyNoCodeAt(where())}
             onClick={() => void Inspector.showWritten(Inspector.allSelected.at(-1)!.element!)}
           />
-          <InspectRow part={opening()?.part} partsUnder={opening()?.partsUnder} />
           <Show when={ChangeThis.isAvailable}>
-            <ui-action kind="divider" />
             <Action
               menu
-              icon="magic"
+              icon={ChangeThis.icon}
               title={appTexts.text("menuChangeThis")}
               shortcut={EDITOR_HOTKEYS.changeThis.shortcut}
               disabled={!!whyNoCodeAt(where())}
@@ -596,8 +642,8 @@ export function PartMenu(): JSX.Element {
  * - "Inspect Card", named by the type of the part the menu is for:
  *   a click selects that part, the top-most under the mouse, and opens the properties card.
  * - "Inspect Other Views", below it, with more than one part under the mouse:
- *   a plain submenu row whose side menu lists every one of them, outermost first,
- *   each indented under the one it's inside, the one the right click took ticked.
+ *   a plain submenu row whose side menu lists them, outermost first (`PartEdits.partsAt()`):
+ *   a flat list, no indent and no tick column (epic `editor` T160).
  *   - Pointing at one rings it in the app, as Inspect app does on hover.
  *   - Choosing one selects it, as a click on it would (Shift or Command adds it), and opens the properties card.
  * - Holding Option while the menu is open shows only "Inspect Other Views", in the first row's place,
@@ -641,8 +687,6 @@ function InspectRow(props: InspectRowProps): JSX.Element {
                 menu
                 icon={Inspector.iconFor(row.element)}
                 title={Inspector.labelFor(row.element)}
-                active={row.element === props.part}
-                style={{ "--InspectRow-depth": String(row.depth) }}
                 onClick={(event: MouseEvent) => inspectPart(row.element, event)}
                 onPointerEnter={() => Inspector.ring(row.element)}
                 onPointerLeave={() => Inspector.ring(undefined)}
@@ -659,7 +703,7 @@ function InspectRow(props: InspectRowProps): JSX.Element {
 type InspectRowProps = {
   /** the part the menu is for:  its type names the row */
   part?: Element
-  /** every part under the mouse, outermost first (`PartEdits.partsAt()`):  Inspect Other Views, with more than one */
+  /** the parts under the mouse, outermost first (`PartEdits.partsAt()`):  Inspect Other Views, with more than one */
   partsUnder?: readonly PartRow[]
 }
 
@@ -753,6 +797,9 @@ function isAnItem(event: Event): boolean {
     )
   })
 }
+
+/** The class of the part menu's App Menu header, over the program's own items (`Palette.css`). */
+const APP_MENU_HEADER = "AppMenuHeader"
 
 /** The class of the part menu's Inspect Other Views row (`Palette.css`). */
 const INSPECT_ROW = "InspectRow"

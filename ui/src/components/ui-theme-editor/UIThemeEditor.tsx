@@ -2192,6 +2192,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
             <div class="find-row">
               <ui-input
                 class="find"
+                type="search"
                 size="small"
                 icon="search"
                 fluid=""

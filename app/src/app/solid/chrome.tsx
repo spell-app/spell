@@ -194,7 +194,7 @@ function choose(event: CustomEvent<{ value: string }>) {
 /**
  * Spell UI's tooltip for a button of the top bar or the Add View bar:  spread it on the button,
  * `<ui-item {...barTooltip(text)} />`.
- * - A small dark bubble under it, after the page's hover pause (`--ui-hover-delay`), at once on keyboard focus:
+ * - A small dark bubble under it, after the page's tooltip pause (`--ui-tooltip-delay`), at once on keyboard focus:
  *   Spell UI's `data-tooltip`, shown in the top layer (its runtime's `DataTooltips`).
  * - It stays inside the window:  near an edge it slides along, its arrow still at the button.
  * - Text with line breaks (`\n`) shows as those lines.

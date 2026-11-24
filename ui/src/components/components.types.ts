@@ -1694,7 +1694,16 @@ export const FLUID = "fluid"
 /** Class words of a close button's icon (`close icon`). */
 export const CLOSE_CLASS = "close icon"
 
-/** Glyph of a close button's icon (Fomantic's `close icon`). */
+/** Class word of a text field's clear button box (`ClearButton`, `UIInput.css`). */
+export const CLEAR_CLASS = "clear"
+
+/** Class word of a text field's shortcut keys box (`FieldShortcut`, `UIInput.css`). */
+export const SHORTCUT_CLASS = "shortcut"
+
+/** Glyph of a search field's icon:  Font Awesome's magnifying glass. */
+export const SEARCH_ICON = "magnifying-glass"
+
+/** Glyph of a close button's icon (Fomantic's `close icon`);  also a text field's clear button's `x`. */
 export const CLOSE_ICON = "xmark"
 
 /** Text a native fallback's close button shows instead of `CLOSE_ICON`'s glyph (no icon packs without Solid). */

@@ -217,6 +217,12 @@ describe("<ui-button> tooltip", () => {
     const { control: link } = await button(`<ui-button link="#x" icon="cloud" aria-label="Cloud"></ui-button>`)
     expect(link.getAttribute("title")).toBe("Cloud")
   })
+
+  it("gives the browser's tooltip up to Spell UI's own (`data-tooltip`):  never two at once", async () => {
+    const { control } = await button(`<ui-button icon="star" aria-label="Star it" data-tooltip="Star it"></ui-button>`)
+    expect(control.hasAttribute("title")).toBe(false)
+    expect(control.getAttribute("aria-label")).toBe("Star it")
+  })
 })
 
 ////////////////

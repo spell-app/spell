@@ -75,6 +75,7 @@ function GuideIndex() {
       <p class="GuidesLede">{appTexts.text("guidesLede")}</p>
       <ui-input
         class="GuidesSearch"
+        type="search"
         icon="search"
         icon-position="left"
         aria-label={appTexts.text("guidesSearch")}

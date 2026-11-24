@@ -463,9 +463,9 @@
     opacity: 1;
     visibility: visible;
   }
-  /* a hover waits;  keyboard focus shows it at once */
+  /* a hover waits as long as any tooltip;  keyboard focus shows it at once */
   .ui.section > .title > :is(.heading:hover, .fold.icon:hover) ~ .tip {
-    transition-delay: var(--ui-hover-delay, 0s);
+    transition-delay: var(--ui-tooltip-delay, var(--ui-hover-delay, 0s));
   }
   .ui.section > .title > .heading:has(:focus-visible) ~ .tip {
     transition-delay: 0s;

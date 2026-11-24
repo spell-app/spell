@@ -476,6 +476,7 @@ export function ProgramPanel(props: { onClose: () => void }) {
             search={
               <ui-input
                 class="ReferenceSearch"
+                type="search"
                 size="small"
                 icon="search"
                 aria-label={appTexts.text("referenceSearch")}
@@ -586,8 +587,8 @@ function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
  * The editor's top bar (epic `debut` P32, as Owen drew it):
  * - left:  Spell's menu (its hat and name:  the group's projects, Home), the project's menu (its name),
  *   then File · Edit · View · Run · Help (`MenuBar.tsx`), then the draft's pill while you have drafts (T107)
- * - middle:  Run | Edit | Design | Site, then in Edit and Design, the code's icon,
- *   the compiled code's (its language's icon), Inspect app and Add, in the same group (epic `editor` T83)
+ * - middle:  Run | Edit | Design | Site, then in Edit and Design, Inspect app, the code's icon,
+ *   the compiled code's (its language's icon), Anatomy and Add, in the same group (epic `editor` T83, T168)
  * - right, ONE group of icons:  Restart, the theme, you
  *   - no Inspector button (T83):  View › Inspector shows or hides it, and the Inspector card's ✕ hides it
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
@@ -607,12 +608,8 @@ export function EditorToolbar(props: { mode: Mode }) {
         <ModeButtons
           current={props.mode}
           compiled={<CompiledCodeButton />}
-          inspect={
-            <>
-              <InspectAppButton id={INSPECT_APP_ID} />
-              <AnatomyButton />
-            </>
-          }
+          inspect={<InspectAppButton id={INSPECT_APP_ID} />}
+          anatomy={<AnatomyButton />}
           add={<AddPartButton />}
         />
       )

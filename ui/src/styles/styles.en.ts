@@ -408,9 +408,23 @@ export const disabledOpacity = 0.45
  * the page's preference for every `<ui-popup open-on="hover">` that names no `show-delay` of its own.
  * - Owen, 2026-10-25:  "have a theme preference somewhere for tooltip delay, they're all too quick" (Fomantic's 50ms)
  * - a theme or page sets the token:  `:root { --ui-hover-delay: 2s }`
+ * - NOT tooltips:  they wait `tooltipDelay`, longer
  * - NOT the browser's own `title` tooltips:  their delay is the operating system's
  */
 export const hoverDelay = 800
+
+/**
+ * How long, in ms, the pointer rests on a target before its TOOLTIP shows (`--ui-tooltip-delay`):
+ * every `data-tooltip`, and the tips a field's or a section's icon shows.
+ * - As long as the browser's own `title` tooltip waits, on a Mac:
+ *   Chrome hands a page's `title` to macOS (`ToolTipBaseView`, `addToolTipRect:`),
+ *   whose standard wait is 1.5 seconds (`NSToolTipManager`, measured on macOS 26, 2026-11-24).
+ * - Owen, 2026-11-24 (epic `editor` T164):  "our tooltip timing is too quick, match the browser "title" timing"
+ * - Longer than `hoverDelay`:  a tooltip only names what's there,
+ *   where a hover popup (a menu, a code hover) is what the pointer came for.
+ * - A theme or page sets the token:  `:root { --ui-tooltip-delay: 800ms }`
+ */
+export const tooltipDelay = 1500
 
 /**
  * The cursor over a control:  a button, a menu item, a tab (`--ui-control-cursor`).
@@ -727,7 +741,8 @@ export const themeTree = {
   motion: {
     duration: tokensFor(durations, "--ui-duration-"),
     ease: { ...tokensFor(easings, "--ui-ease-"), default: "--ui-ease" },
-    "hover-delay": "--ui-hover-delay"
+    "hover-delay": "--ui-hover-delay",
+    "tooltip-delay": "--ui-tooltip-delay"
   },
   cursors: { control: "--ui-control-cursor" },
   controls: { height: "--ui-control-height" }

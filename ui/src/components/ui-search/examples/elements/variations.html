@@ -22,6 +22,40 @@
   </section>
 
   <section>
+    <h4>Collapsed</h4>
+    <div class="ui-cluster">
+      <ui-search collapsed placeholder="Search..." aria-label="Search"></ui-search>
+      <ui-search collapsed value="fade" placeholder="Search..." aria-label="Search"></ui-search>
+    </div>
+  </section>
+
+  <section>
+    <h4>Collapsed, over a title</h4>
+    <!-- the page hides the title, and lets the open field span the row -->
+    <style>
+      .search-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 20em;
+      }
+      .search-header:has(ui-search:state(expanded)) b {
+        visibility: hidden;
+      }
+      .search-header ui-search:state(expanded) {
+        --ui-search-expanded-width: 100%;
+        position: absolute;
+        inset-inline: 0;
+      }
+    </style>
+    <div class="search-header">
+      <b>Overlays</b>
+      <ui-search collapsed size="small" placeholder="Search Overlays"></ui-search>
+    </div>
+  </section>
+
+  <section>
     <h4>Scrolling</h4>
     <ui-search scrolling aria-label="Scrolling"></ui-search>
   </section>

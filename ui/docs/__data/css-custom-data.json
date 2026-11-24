@@ -4202,6 +4202,13 @@
       }
     },
     {
+      "name": "--ui-input-shortcut-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-input>`'s token.  Default:  `4.5em`"
+      }
+    },
+    {
       "name": "--ui-input-icon-size",
       "description": {
         "kind": "markdown",
@@ -8346,6 +8353,20 @@
       }
     },
     {
+      "name": "--ui-search-expanded-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-search>`'s token.  Default:  `16em`"
+      }
+    },
+    {
+      "name": "--ui-search-expand-duration",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-search>`'s token.  Default:  `var(--ui-duration, 0.2s)`"
+      }
+    },
+    {
       "name": "--ui-section-margin",
       "description": {
         "kind": "markdown",
@@ -11515,7 +11536,7 @@
       "name": "::part(clear)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-dropdown>`:  The clear button of a `clearable` dropdown."
+        "value": "Part of:\n\n- `<ui-dropdown>`:  The clear button of a `clearable` dropdown.\n- `<ui-input>`:  The box of the clear button, at the field's end (`clearable`, while it has text).\n- `<ui-search>`:  The box of the clear button, in place of the icon while there's text."
       }
     },
     {
@@ -12303,6 +12324,13 @@
       }
     },
     {
+      "name": "::part(opener)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-search>`:  The search button a `collapsed` search shows while folded."
+      }
+    },
+    {
       "name": "::part(option)",
       "description": {
         "kind": "markdown",
@@ -12698,7 +12726,7 @@
       "name": "::part(shortcut)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-action>`:  The key caps of its shortcut, at the end:  a `<kbd>` each."
+        "value": "Part of:\n\n- `<ui-action>`:  The key caps of its shortcut, at the end:  a `<kbd>` each.\n- `<ui-input>`:  The box of its `shortcut`'s keys, at the field's end while it's empty.\n- `<ui-search>`:  The box of its `shortcut`'s keys, at the end while it's empty."
       }
     },
     {
@@ -13422,6 +13450,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-accordion>`:  With `source`:  the file couldn't be loaded or shown.\n- `<ui-code>`:  Loading or showing failed:  the error message shows.\n- `<ui-field>`:  In the error state (attribute, or failed validation).\n- `<ui-fields>`:  In the error state (attribute, or failed validation).\n- `<ui-form>`:  In the error state (attribute, or failed validation).\n- `<ui-include>`:  Loading or showing failed:  the error message shows.\n- `<ui-json>`:  Loading or showing failed:  the error message shows.\n- `<ui-markdown>`:  Loading or showing failed:  the error message shows.\n- `<ui-mermaid-diagram>`:  Loading or showing failed:  the error message shows.\n- `<ui-panel>`:  With `source`:  the file couldn't be loaded or shown.\n- `<ui-property>`:  In the error state (attribute, or failed validation).\n- `<ui-property-editor>`:  In the error state (attribute, or failed validation).\n- `<ui-property-group>`:  Its `error`, or a property in it failing validation.\n- `<ui-section>`:  With `source`:  the file couldn't be loaded or shown."
+      }
+    },
+    {
+      "name": ":state(expanded)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-search>`:  A `collapsed` search's field is open."
       }
     },
     {

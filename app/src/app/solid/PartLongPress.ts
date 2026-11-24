@@ -21,11 +21,16 @@ import { PartEdits } from "./PartEdits"
  * - SIDE EFFECT:  `watch()` adds the editor's owner to the page's detector, once.
  ****************/
 export class PartLongPress {
+  /** Long presses lift parts;  off for now (editor T161), so a press in Edit is the app's alone */
+  static isOn = false
+
   /**
    * Lift parts of the app drawn in `area` on a long press;  `partAt` finds the part an event is on.
    * - Returns the cleanup.
    */
   static watch(area: HTMLElement, partAt: (event: Event) => Element | undefined): () => void {
+    // OFF for now (Owen, 2026-11-24, editor T161):  the long press wasn't right for selecting
+    if (!PartLongPress.isOn) return () => {}
     watched = area
     LongPress.listen(isTheEditors)
     const stop = new AbortController()

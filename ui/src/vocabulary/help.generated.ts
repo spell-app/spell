@@ -953,6 +953,9 @@ export const HELP_TABLE: Readonly<
       accept: "`file`: accepted file types.",
       folder:
         "`file`: picks whole folders instead of files; `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).",
+      clearable: "Shows a clear button (an `x`) at its end while it has text; a click empties it.",
+      shortcut:
+        "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them: `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.",
       autocomplete: "Autofill hint, forwarded to the native input.",
       inputmode: "Virtual keyboard hint, forwarded to the native input.",
       rules:
@@ -1704,6 +1707,7 @@ export const HELP_TABLE: Readonly<
       category: "Results in named groups (`category` of each result).",
       direction: "`horizontal`, with `category`: each group's name above its results, not beside them.",
       fluid: "Takes the full width of its container; so do the results.",
+      collapsed: "Starts as a search button; a click slides the field open, focused.",
       scrolling: "The results scroll after a fixed height.",
       resizable: "`scrolling`: people can resize the results vertically.",
       length: "How far the results go before they scroll: `very-short`, `short`, `long`, `very-long`.",
@@ -1713,11 +1717,15 @@ export const HELP_TABLE: Readonly<
       readonly: "Shows its value but can't be typed in, and the results never open; still focusable and submitted.",
       open: "The results are showing.",
       placeholder: "Placeholder text of the input.",
+      clearable:
+        "Shows a clear button (an `x`) in place of the magnifying glass while there's text; a click empties it.",
       value: "The input's text: the query, or a chosen result's title.",
       name: "Form field name: submits the input's text.",
       parameter:
         'Keep the value in the page\'s address, as this query parameter (`parameter="s"` => `?s=van+gogh`): each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.',
       required: "Form validation: the input can't be empty.",
+      shortcut:
+        "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them: `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.",
       url: "Remote results: a `UI.api` URL template with `{query}`, e.g.",
       "min-characters": "Characters to type before a search runs.",
       "max-results": "The most results shown (before categories); `0` for no limit.",

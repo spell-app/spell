@@ -142,6 +142,7 @@
     --ui-focus-offset: 2px;
     --ui-disabled-opacity: 0.45;
     --ui-hover-delay: 800ms;
+    --ui-tooltip-delay: 1500ms;
     --ui-control-cursor: pointer;
     --ui-control-height: 0px;
     --ui-duration-fast: 100ms;

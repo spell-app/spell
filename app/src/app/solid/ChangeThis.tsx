@@ -33,6 +33,12 @@ export class ChangeThis {
   /** The box, loaded the first time it opens:  see `LazyPiece`. */
   static views = new LazyPiece(() => import("./ChangeThisView"))
 
+  /**
+   * Its icon, the magic wand, wherever Change This is drawn:  the part menu's row, its box's header
+   * (epic `editor` T160;  the plain `magic` wand read as a pencil).
+   */
+  static readonly icon = "magic wand sparkles"
+
   /** Can anything be asked here?  Not in the public preview. */
   static get isAvailable(): boolean {
     return !isStaticBuild
