@@ -280,6 +280,43 @@ events.addRule(On, {
             "}",
             "core.useElement(Card, CardElement)"
           ]
+        },
+        {
+          title: "`on long-press`, the event's own name, hyphenated (epic `editor` T157):  the same handler",
+          input: ["a card is a view where:", "\t- on long-press", "\t\tprint the long date"],
+          js: [
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onLongPress(event) {",
+            "    core.console.log(core.longDate(core.now()))",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onLongPress(event: LongPressEvent) {",
+            "    core.console.log(core.longDate(core.now()))",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-events-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its card's properties;  its methods call its card's.",
+            " * - What every view's element does, e.g. drawing its card, is `SpellElement`'s.",
+            " */",
+            "export class CardElement extends SpellElement<Card> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-events-card", "card", [])',
+            "",
+            "  onLongPress(event: LongPressEvent) {",
+            "    return this.currentThing?.onLongPress(event)",
+            "  }",
+            "}",
+            "core.useElement(Card, CardElement)"
+          ]
         }
       ]
     }

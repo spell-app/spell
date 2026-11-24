@@ -5,7 +5,7 @@ import h from "@solidjs/h"
 import { core, App, View } from "spell/parser/core"
 import { installSpellElements, SpellElement } from "spell/app/app/runner/SpellElement"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
-import { LONG_PRESS_MS, LongPress } from "spell/app/app/runner/LongPress"
+import { LONG_PRESS_MS, LongPress } from "spell/util/LongPress"
 
 import "spell/app/app/solid/cellsBridge"
 import "spell/ui/components/ui-action"

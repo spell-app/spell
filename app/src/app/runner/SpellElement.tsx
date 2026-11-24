@@ -13,7 +13,7 @@ import type { ElementApi, Core, MenuItem } from "spell/parser/core"
 import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
 import { ActionMenus } from "./ActionMenus"
-import { LONG_PRESS_EVENT, LongPress } from "./LongPress"
+import { LONG_PRESS_EVENT, LongPress } from "spell/util/LongPress"
 import { UIViewElements } from "./UIViewElements"
 
 // Above the class:  its `elementSetup` reads it while the class is defined
@@ -1296,9 +1296,13 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     return false
   }
 
-  /** Is a view's element on `path`, any runtime copy's:  a long press there opens its right-click menu (`LongPress`). */
-  private static isOnAView(path: readonly EventTarget[]): boolean {
-    return path.some((target) => target instanceof Element && isViewTag(target.localName))
+  /**
+   * Is a finger on a view's element, any runtime copy's:  a long press there is `on long press`, else its right-click
+   * menu (`LongPress`).
+   * - Fingers only:  with a mouse, a press held on a card is still its own drag (Owen, 2026-11-23, editor I330).
+   */
+  private static isLongPressOnAView(path: readonly EventTarget[], pointerType: string): boolean {
+    return pointerType === "touch" && path.some((target) => target instanceof Element && isViewTag(target.localName))
   }
 
   /** May people reorder `list`'s items, dragging them?  Its type says so:  `its items can be reordered`. */
@@ -1736,7 +1740,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     if (uiElement) return UIViewElements.defineFor(tag, Class, core, uiElement)
     SPELL_ELEMENTS.set(tag, heldByRunOf(core, `tag:${tag}`, { Class, core }))
     // on a phone, a finger held on a view opens its right-click menu (epic `language` P62)
-    LongPress.listen(SpellElement.isOnAView)
+    LongPress.listen(SpellElement.isLongPressOnAView)
     const Base = (core.elementClassOf(Class) ?? SpellElement) as typeof SpellElement
     // never "":  `UI.styles.register()` takes that as "unregister", and the tag's elements would lose the sheet
     const css = SpellElement.sheetFor(tag, Class, Base) || `/* <${tag}>:  no styles of its own */`
