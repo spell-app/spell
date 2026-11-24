@@ -353,6 +353,16 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - Every session's start makes sure it runs, and has it look at once;  it looks again every 10 seconds.
   - `spell server start | stop`, `epic merge`'s restart, the side bar's Restart Page Server and `/airplane` ask it
     (`SRV.KeeperLink`);  `spell server stop` in the main checkout leaves it stopped until Start.
+  - **An agent never starts, stops, restarts or kills a main checkout's servers by hand:  `epic servers
+    start|stop|restart|status <server>` asks the keeper** (epic `epic-engine` P84).  Enforced twice:
+    - the COMMAND GUARD, the epic plugin's `PreToolUse` hook on Bash (`server-guard.mjs`, `ServerGuard`), Claude Code's
+      and Codex's:  such a command is refused, naming the `epic servers` command to run instead;  let through while
+      the Servers tab's hands-off switch is on
+    - the SERVERS THEMSELVES:  main's page server and editor stop at once when an agent's command starts them and the
+      keeper didn't (`SRV.KeeperLink.refusedStart()`:  the agent's mark, `CLAUDECODE` / `CODEX_THREAD_ID`, with no
+      `SPELL_KEEPER_START`), which catches a script or a command built in pieces;  the person's own terminal still
+      starts them;  main's editor stays on 3000 (`--strictPort`, `yarn start:dev` too)
+    - a worktree's own servers are its session's, as before
   - A worktree's page server and editor keep ONE port each, written down (`SRV.PortBook`), and stop after 30 minutes
     unused.
   - The top bar's Servers tab shows them all, what just reached `main`, and what waits;  a red dot when one is down.

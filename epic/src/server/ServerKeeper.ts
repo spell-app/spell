@@ -17,6 +17,7 @@ import {
   HTTPS_API,
   RESTART_ALL_API,
   HANDS_OFF_API,
+  HOLD_FILE,
   type HandsOff,
   type HttpsTurn,
   type KeptServer,
@@ -43,6 +44,8 @@ import {
  *   - each WORKTREE's page server:  on demand (its first opener starts it), on the port written down for it
  *     (`SRV.PortBook`), and stopped after 30 minutes with no request and no page open (`IDLE_MINUTES`)
  *   - the hub itself, which serves the Servers tab
+ * - What it starts carries its mark (`SRV.KEEPER_START_VARIABLE`, epic `epic-engine` P84):  main's page server and
+ *   editor refuse an agent's start without it (`SRV.KeeperLink.refusedStart()`)
  * - Asked by others through `SRV.KeeperLink`:  its record, `~/.spell/server-keeper.json`, names it, and
  *   `POST /api/servers/<start|stop|restart>` does it;  every main-checkout start, stop and restart of the page server
  *   comes here (`PageServer.ensure()`, `stop()`, `restart()`)
@@ -138,6 +141,9 @@ export class ServerKeeper {
   start({ base, token, isStale }: { base: string; token: string; isStale?: () => boolean }): this {
     this.base = base
     this.link.write({ pid: process.pid, base, token })
+    // what it starts carries its mark, so main's page server and editor know the keeper started them, though an
+    // agent's session started the hub (`SRV.KeeperLink.refusedStart()`, epic `epic-engine` P84)
+    process.env[SRV.KEEPER_START_VARIABLE] = "1"
     let staleAsked = 0
     const look = () => {
       // its own code, at most once a minute:  a walk of every code file
@@ -661,9 +667,6 @@ const ACTIONS: readonly SRV.KeeperAction[] = ["start", "stop", "restart"]
 
 /** The hold file:  `held`, the servers stopped by hand;  `handsOff`, while the person works on them themselves. */
 type HoldFile = { held?: string[]; handsOff?: boolean }
-
-/** What a stop by hand holds, in the epic home. */
-const HOLD_FILE = "server-keeper.json"
 
 /** The own servers' logs' folder, in the epic home. */
 const LOGS = "servers"

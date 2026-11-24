@@ -5,7 +5,14 @@ description: Start the spell web servers of this checkout that aren't running --
 
 # /spell-serve
 
-1. From the checkout this session is in (a worktree has its OWN servers):
+0. In the MAIN checkout, never by hand (epic `epic-engine` P84):  the server keeper keeps main's servers up, and only it
+   starts, stops or restarts them.
+   - What's running:  `epic servers status`;  one down:  `epic servers start page-server` (or `editor`);
+     stuck:  `epic servers restart editor`.
+   - `spell server start all`, `yarn start:dev` or a `kill` of main's servers, run by an agent, are refused
+     (the command guard, and the servers' own check), naming the `epic servers` command instead.
+   - The person's own terminal still starts them by hand.
+1. From a WORKTREE (it has its OWN servers):
    `spell server start all` (the kit's `spell`;  spell-app's `scripts/serve.mjs` until epic `repo-split` P13).
    - It starts the page server if it isn't running (`spell server start`).
      The page server starts the editor once it listens ([EditorServer.ts](src/spaces/server/node/routes/EditorServer.ts)).

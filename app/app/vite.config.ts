@@ -3,6 +3,8 @@ import path from "node:path"
 import { defineConfig, type Plugin } from "vite-plus"
 
 import { fmtConfig, packageLint } from "spell/toolchain/lint"
+// Import directly:  the server barrel would load linkedom and the rest into every Vite start
+import { KeeperLink } from "spell/server/KeeperLink"
 import environment from "spell/app/spaces/server/node/environment"
 import { editorPageFor } from "spell/app/spaces/server/node/routes/editorPaths"
 import { appConfig, pageServerProxy } from "./vite.shared.ts"
@@ -12,6 +14,9 @@ const RUNTIME_ENTRY = "spell-runtime"
 
 /** The runtime's source, from this folder:  the entry of `spell-runtime.js`. */
 const RUNTIME_SOURCE = "../src/app/runner/spellRuntime.ts"
+
+/** The kit's root, two folders up from this one (`app/app/`):  whose editor this is. */
+const KIT_ROOT = path.resolve(import.meta.dirname, "../..")
 
 /** Plugins, dedupe and CSS:  `appConfig()`, with `spell-ui`'s icon packs. */
 const APP_CONFIG = appConfig({ builtInFiles: true })
@@ -32,7 +37,14 @@ export default defineConfig({
     ignorePatterns: ["build", "dist", ".cache", "dist-runner", "dist-element", "static"]
   }),
   ...APP_CONFIG,
-  plugins: [...APP_CONFIG.plugins, repoSourceInDev(), runPageInDev(), runtimeCopyInDev(), runtimeOwnCoreInBuild()],
+  plugins: [
+    keeperStartsMainsEditor(),
+    ...APP_CONFIG.plugins,
+    repoSourceInDev(),
+    runPageInDev(),
+    runtimeCopyInDev(),
+    runtimeOwnCoreInBuild()
+  ],
   server: {
     ...APP_CONFIG.server,
     port: environment.vitePort,
@@ -76,6 +88,23 @@ export default defineConfig({
     "import.meta.env.SPELL_PAGE_SERVER": JSON.stringify(`http://${environment.api_server}:${environment.expressPort}`)
   }
 })
+
+/**
+ * In dev, the MAIN checkout's editor starts only from the server keeper or a person's own terminal (epic `epic-engine`
+ * P84):  an agent's `vp dev` in main's `app/` stops at once, saying to ask the keeper (`KeeperLink.refusedStart()`).
+ * - main's page server starts it with the keeper's mark, so the keeper's starts pass;  a worktree's editor always does
+ * - why:  a session started main's editor by hand while the keeper's ran, and three editors took 3000, 3001 and 3002
+ */
+function keeperStartsMainsEditor(): Plugin {
+  return {
+    name: "spell:keeper-starts-mains-editor",
+    apply: "serve",
+    config() {
+      const refused = new KeeperLink().refusedStart("editor", KIT_ROOT)
+      if (refused) throw new Error(refused)
+    }
+  }
+}
 
 /**
  * The dev server's `/src/...`:  the repo's `src/`, beside vite's root `app/` -- for `index.html`'s entry.

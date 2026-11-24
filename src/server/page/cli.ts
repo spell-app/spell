@@ -135,6 +135,16 @@ async function main(args: string[]): Promise<void> {
         process.exitCode = 2
         return
       }
+      // main's:  the server keeper's to start, never an agent's command (epic `epic-engine` P84)
+      const keeper = new SRV.KeeperLink()
+      const refused = keeper.refusedStart("page server", root)
+      if (refused) {
+        console.error(refused)
+        process.exitCode = 2
+        return
+      }
+      // its editor passes the same check:  it starts as this server's child (`EditorServer`)
+      if (SRV.KeeperLink.agentOf()) process.env[SRV.KEEPER_START_VARIABLE] = "1"
       const https = PageServer.certificateFor()
       const server = await new PageServer({ root, certificate: https.tls }).start({ port })
       // a group of its own, so each start stands out in the log

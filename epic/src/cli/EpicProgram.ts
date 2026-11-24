@@ -13,6 +13,7 @@ import { EXIT, EpicCommandError, flagName } from "spell/epic/command/command.typ
 import { EpicTools, type EpicToolName } from "spell/epic/command/EpicTools"
 import { FreshHint } from "spell/epic/command/FreshHint"
 import { Hub } from "spell/epic/command/Hub"
+import { Servers } from "spell/epic/command/Servers"
 import { LinesOfCode } from "spell/epic/command/LinesOfCode"
 import { Parking } from "spell/epic/command/Parking"
 import { PersonCommands } from "spell/epic/command/PersonCommands"
@@ -680,7 +681,10 @@ export class EpicProgram {
     return hub.run(args)
   }
 
-  /** `window`, `server`:  scripts passed through;  `hub`, `repo`:  the machine's epic server (`Hub`, `Repos`). */
+  /**
+   * `window`, `server`:  scripts passed through;  `servers`:  main's servers, asked of the keeper (`Servers`);
+   * `hub`, `repo`:  the machine's epic server (`Hub`, `Repos`).
+   */
   private addWindowVerbs(): void {
     const epic = this.epic
     epic.commandsGroup("Windows and the page server:")
@@ -701,6 +705,12 @@ export class EpicProgram {
           : args[0] === "start" && args.includes("--all")
             ? EpicTools.run("serve", ["server", "start", "all", ...args.slice(1).filter((arg) => arg !== "--all")])
             : EpicTools.run("server", args)
+    )
+    this.group(
+      epic.command("servers"),
+      "ask the server keeper to start, stop or restart a MAIN checkout's servers (page server, editor, a repo's own):  " +
+        "the one way, never by hand;  a worktree's own servers are its session's",
+      (args) => new Servers().run(args)
     )
     this.group(
       epic.command("hub"),

@@ -2,7 +2,8 @@ import { chmodSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:
 import { homedir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 
-import { isProcessAlive } from "./Heartbeat"
+import { checkoutOf } from "./checkout.ts"
+import { isProcessAlive } from "./Heartbeat.ts"
 
 /****************
  * ### `KeeperLink`
@@ -16,6 +17,8 @@ import { isProcessAlive } from "./Heartbeat"
  * - Inside the keeper's own process, `ask()` answers `undefined` too:  the keeper does the work, never asks itself
  * - Who asks:  `PageServer.ensure()` / `stop()` / `restart()` for a MAIN checkout (`spell server start|stop`,
  *   `epic server`, the side bar's Restart Page Server, `epic merge`, `/airplane`)
+ * - And the servers' own refusal (epic `epic-engine` P84):  `refusedStart()`, which main's page server and main's
+ *   editor ask as they start, so an agent's command can't start them behind the keeper's back
  ****************/
 export class KeeperLink {
   /** the keeper's record */
@@ -69,6 +72,48 @@ export class KeeperLink {
     return body
   }
 
+  /**
+   * Why a server of checkout `checkout` mustn't start now, or `undefined` when it may (epic `epic-engine` P84).
+   * - Refused only when ALL of these hold:
+   *   - an AGENT runs it:  the mark Claude Code and Codex put on every command they run (`AGENT_MARKS`);
+   *     the person's own terminal carries none, so they still start it by hand (Owen's pick, A)
+   *   - the keeper didn't start it:  no `SPELL_KEEPER_START` in its environment (`KEEPER_START_VARIABLE`), and its
+   *     parent isn't the keeper's process (a keeper on code from before P84 sets no mark)
+   *   - `checkout` is a MAIN checkout, not a worktree:  a worktree's servers are its session's own
+   *   - not a test run (`VITEST`, `CI`):  tests start page servers in scratch checkouts
+   * - The mark is a mark, not a secret:  it stops an agent's mistake, not an agent set on getting round it.
+   * - `env`, `ppid`:  default this process's (the tests hand their own)
+   * - NEVER throws
+   */
+  refusedStart(
+    server: string,
+    checkout: string,
+    { env = process.env, ppid = process.ppid }: { env?: Record<string, string | undefined>; ppid?: number } = {}
+  ): string | undefined {
+    if (env.VITEST || env.CI || env[KEEPER_START_VARIABLE]) return undefined
+    const agent = KeeperLink.agentOf(env)
+    if (!agent) return undefined
+    const where = checkoutOf(checkout)
+    if (!where || where.worktree !== undefined) return undefined
+    if (this.read()?.pid === ppid) return undefined
+    const name = server === "page server" ? "page-server" : server
+    return (
+      `${server}:  not started.  Only the server keeper starts ${where.main}'s ${server}, and ${agent} ran this.\n` +
+      `Ask the keeper instead:  epic servers start ${name}\n` +
+      `(A worktree's own servers are yours to start;  a person's own terminal still starts this one.)`
+    )
+  }
+
+  /**
+   * The agent whose mark is on `env`, by name (`Claude Code`, `Codex`), or `undefined` for none:  the person's own.
+   * - `SPELL_EPIC_AGENT`, an agent's own setting, counts too
+   * - the same marks as spell-epic's `EpicHome.agent()`:  a small copy here, as the server package imports no other
+   */
+  static agentOf(env: Record<string, string | undefined> = process.env): string | undefined {
+    if (env.SPELL_EPIC_AGENT?.trim()) return env.SPELL_EPIC_AGENT.trim()
+    return AGENT_MARKS.find(([variable]) => env[variable])?.[1]
+  }
+
   /** SIDE EFFECT:  write this process's record, readable by this machine's person only (the keeper's start) */
   write(record: KeeperRecord): void {
     mkdirSync(dirname(this.file), { recursive: true })
@@ -104,6 +149,21 @@ export const KEEPER_API = "/api/servers"
 
 /** The variable naming another keeper record (the tests'). */
 export const KEEPER_FILE_VARIABLE = "SPELL_KEEPER_FILE"
+
+/**
+ * The mark the server keeper puts in the environment of what it starts (epic `epic-engine` P84):  main's page server,
+ * and through it main's editor, may then start though an agent's session started the hub (`refusedStart()`).
+ */
+export const KEEPER_START_VARIABLE = "SPELL_KEEPER_START"
+
+/**
+ * The mark each agent leaves on the commands it runs, and its name:  Claude Code's `CLAUDECODE=1`, Codex's
+ * `CODEX_THREAD_ID`.  The twin of spell-epic's `AGENT_MARKS` (`EpicHome`), which keeps the reasons.
+ */
+const AGENT_MARKS: readonly (readonly [variable: string, agent: string])[] = [
+  ["CLAUDECODE", "Claude Code"],
+  ["CODEX_THREAD_ID", "Codex"]
+]
 
 /** How long `ask()` waits:  a server's start may take two minutes (`PidFile`'s `START_LIMIT_MS`). */
 const ASK_WAIT_MS = 150_000

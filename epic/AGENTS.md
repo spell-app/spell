@@ -83,9 +83,16 @@ a folder of the kit `spell`.
     Codex's hooks run it for you once installed (`epic plugin install --codex`) and trusted (`/hooks`).
   - Wait for the person's next Send with `epic inbox wait <epic>`.
 - Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it;  Codex's, [codex-hooks.json](hooks/codex-hooks.json),
-  three of the same scripts, and the Codex manifest beside Claude Code's ([.codex-plugin/](.codex-plugin/plugin.json)).
+  four of the same scripts, and the Codex manifest beside Claude Code's ([.codex-plugin/](.codex-plugin/plugin.json)).
   - Codex's file passes each script `--codex-plugin`:  started so, a script stands down while Codex's own
     `~/.codex/hooks.json` runs it (`CodexHome.skipPluginHook()`), so they never run twice (J37).
+  - The SERVER GUARD (epic `epic-engine` P84), `PreToolUse` on Bash in both files:  [server-guard.mjs](hooks/server-guard.mjs)
+    runs `ServerGuard` ([ServerGuard.ts](src/server/ServerGuard.ts)) on each command an agent is about to run, and
+    answers "deny" for one that would start, stop, restart or kill a MAIN checkout's server (the hub's repos), naming
+    `epic servers ...` instead;  a worktree's servers, reading (`ps`, `lsof`, `curl`) and hands off go through;  it
+    fails open
+    - the person's `!` commands never reach it:  they're typed into the chat, not a tool call (kept in a transcript
+      as `<bash-input>`)
   - Every hook exits 0 whatever happens.
   - Except the worktree hook:  its failure is Claude Code's answer.
   - And the inbox poller, the `asyncRewake` `Stop` hook (`monitors/listen.mjs --hook`, epic `epic-engine` I144):
@@ -113,6 +120,10 @@ a folder of the kit `spell`.
     [server-keeper.mjs](hooks/server-keeper.mjs) runs `epic hub kick`)
   - the ONLY one that starts, stops or restarts a main checkout's page server:  the kit's `PageServer.ensure()`,
     `stop()` and `restart()` ask it (`SRV.KeeperLink`, its record `~/.spell/server-keeper.json`)
+    - agents ask it with `epic servers start|stop|restart|status <server> [--repo <name>]` ([Servers.ts](src/command/Servers.ts);
+      epic `epic-engine` P84), the calls the Servers tab's buttons make;  the guard above refuses the other ways
+    - what it starts carries its mark (`SPELL_KEEPER_START`), so main's page server and editor, which refuse an
+      agent's start (`SRV.KeeperLink.refusedStart()`), know it was the keeper
   - a stop by hand is held until Start (`~/.spell-epic/server-keeper.json`);  its own code changing, it hands over to a
     fresh hub on its port
   - the page server's certificate WATCHED (epic `epic-engine` T164):  each look compares its two files
