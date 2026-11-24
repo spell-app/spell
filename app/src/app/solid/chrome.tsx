@@ -136,8 +136,13 @@ export function MoreMenu(props: MoreMenuProps) {
     <Show
       when={!props.stub}
       fallback={
-        // a dropdown's `padding` (`compact`) and `resizable` (its menu's height) are no item's
-        <ui-item disabled="" icon={icon()} {...omit(rest, "padding", "prop:padding", "resizable", "prop:resizable")} />
+        // a dropdown's `padding` (`compact`) and `resizable` (its menu's height) are no item's;
+        // the rest as plain attributes:  its listeners are typed for a dropdown's events, an item's differ
+        <ui-item
+          disabled=""
+          icon={icon()}
+          {...(omit(rest, "padding", "prop:padding", "resizable", "prop:resizable") as Record<string, unknown>)}
+        />
       }
     >
       <Show when={props.item ?? true} fallback={dropdown()}>
