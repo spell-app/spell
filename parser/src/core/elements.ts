@@ -227,11 +227,11 @@ export const elementsMethods = defineCoreModule({
    *   - digits are a place:  `<solitaire-tableau id="1">` is the first tableau made
    * - No `id`:  its one thing of `Class` EXACTLY, if it made exactly one -- for a tag in a page's layout.
    * - `undefined` if none matches.
-   * - Reads the registry's `version`:  a reader re-runs as things are made.
+   * - Tracked:  a reader re-runs as things of `Class` are made (`core.things.ofClass()`).
    */
   thingFor(Class: Function, id?: string): object | undefined {
     if (id !== undefined) return core.thingCalled(Class as abstract new () => object, id)
-    const things = core.things.all().filter((thing) => thing.constructor === Class)
+    const things = core.things.ofClass(Class as abstract new () => object).filter((thing) => thing.constructor === Class)
     return things.length === 1 ? things[0] : undefined
   },
 
