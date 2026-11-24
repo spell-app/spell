@@ -112,8 +112,12 @@ export const APP_TEXTS = {
   paletteHint: "Click or drag to add to the page",
   paletteMore: "{count} more",
   paletteAppViews: "App views",
-  palettePin: "Keep this open",
-  paletteUnpin: "Unpin",
+  paletteSearchAll: "Search everything you can add",
+  paletteSearchIn: "Search {group}",
+  paletteStar: "Click the star to keep {part} at the top of the add bar",
+  paletteUnstar: "Take the star off {part}",
+  paletteFavoriteTip:
+    "{part}:  click it, then click in your app where you want it.  Or drag it there.  To unstar it, right-click it.",
   paletteAddView: "Add a View",
   paletteClearSearch: "Clear the search",
   partStepAdd: "Add {part}",
@@ -885,6 +889,8 @@ export const APP_TEXTS = {
   "palettePage.groupIcon": "Icon for the {group} group in the + menu",
   "palettePage.removeGroup": "Remove the {group} group.  Its components stay available under Not in the + menu.",
   "palettePage.moveGroup": "Drag to move the {group} group",
+  "palettePage.addDivider": "Draw a line under the {group} group in the add bar",
+  "palettePage.removeDivider": "Take away the line under the {group} group in the add bar",
   "palettePage.notOffered": "Not in the + menu",
   // an event's heading over its code (Owen:  "make label `on click`")
   inspectorEventHeading: "on {event}",

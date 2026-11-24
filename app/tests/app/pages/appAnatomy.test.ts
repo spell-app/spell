@@ -144,18 +144,12 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
 
   test("each view is a floor over the view holding it, tagged with its type;  a click selects;  off puts it back", async () => {
     const before = await stylesNow()
-    // the palette kept open, so its strip shows
-    if (!(await page.locator(".PaletteStrip").count())) {
-      // the pin is in Add a View's menu, drawn once the pointer reaches its button (`AddPartButton`)
-      await page.locator(".AddPartButton").first().dispatchEvent("pointerenter")
-      await page.waitForSelector(".PalettePin", { state: "attached" })
-      await page.evaluate(() => (document.querySelector(".PalettePin") as HTMLElement).click())
-    }
-    await page.waitForSelector(".PaletteStrip")
+    // the add bar, down the left edge in Edit (epic `editor` T151)
+    await page.waitForSelector(".PaletteRailPlace")
     await page.locator(".AnatomyButton [part~=item]").first().click()
-    // the palette's strip hidden while Anatomy shows (I263)
+    // the add bar hidden while Anatomy shows (I263)
     await page.waitForTimeout(300)
-    expect(await page.locator(".PaletteStrip").count()).toBe(0)
+    expect(await page.locator(".PaletteRailPlace").count()).toBe(0)
     const turn = () => page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.view)
 
     // the pane fills its split pane while it shows, so the turned app is cut off only at the pane's edges (I266)
@@ -339,8 +333,8 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     await page.locator(".AnatomyButton [part~=item]").first().click()
     await page.waitForTimeout(800)
     expect(await stylesNow()).toEqual(before)
-    // and the palette's strip back, without its first arrival again (I263)
-    expect(await page.locator(".PaletteStrip").getAttribute("class")).toBe("PaletteStrip")
+    // and the add bar back, without its first arrival again (I263)
+    expect(await page.locator(".PaletteRailPlace").getAttribute("class")).toBe("PaletteRailPlace")
     expect(warnings).toEqual([])
   })
 

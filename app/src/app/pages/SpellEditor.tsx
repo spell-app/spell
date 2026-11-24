@@ -23,8 +23,7 @@ import {
   AppAnatomyView,
   DesignStage,
   InspectAppButton,
-  Palette,
-  PaletteStrip,
+  PaletteRail,
   CodeShown,
   ChangeThisBox,
   PartMenu,
@@ -74,9 +73,10 @@ const OUTPUT_ROOM = 440
 /****************
  * ### `<SpellEditor>`
  * A project's page, in each of the editor's modes (`mode`, `EditorMode`):
- * - Edit:  the code (`<InputRoot>`) on the left, the running program (`<AppPane>`) to its right (Owen, 2026-11-06).
+ * - Edit:  the running program (`<AppPane>`), then the code (`<InputRoot>`) at the far right (epic `editor` T151;
+ *   the code on the left from Owen's 2026-11-06 until then).
  *   - The app takes every change of size:  dragging the code's bar gives the room to the app, or takes it,
- *     and the window growing or shrinking is the app's too (`appGrows()`).
+ *     and the window growing or shrinking is the app's too (`APP_GROWS`).
  * - Run:  the program alone, the code column gone.
  *   - ONE page for both (Owen:  "a discontinuity in the page when I switch between run / edit"):
  *     switching keeps the page, its bar and the running program where they are;  only the code column comes and goes.
@@ -88,9 +88,10 @@ const OUTPUT_ROOM = 440
  * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
  *   - How they're arranged is Spell, the `editor layout` of `SpellEditor.spell`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
- * - The palette, while it's kept open (`Palette.isPinned`), is a strip across the top of the panes.
- * - The Inspector, while it's open, is a pane at the far right, after the app (`<InspectorPane>`, epic `debut` P13);
- *   never in Run, which shows the app alone, and back as it was in Edit.
+ * - Across, in Edit (epic `editor` T151, Owen's B):  the add bar (`<PaletteRail>`), a thin column down the left edge,
+ *   then the app, the Inspector while it's open, and the code at the far right.
+ *   - Run shows the app alone:  the add bar, the Inspector and the code go, and come back as they were in Edit.
+ * - The Inspector, while it's open, is a pane after the app (`<InspectorPane>`, epic `debut` P13).
  *   It's a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
  *   - On a phone, a sheet that slides up over the page as something's picked (epic `debut` P17, Q6).
@@ -170,7 +171,7 @@ export function SpellEditor(props: { mode: Mode }) {
   const settings = (): Partial<Record<EditorMemberName<"EditorLayout", "value">, unknown>> => ({
     columns: columns.sizes(),
     codeRows: codeRows.sizes(),
-    grows: appGrows(hidesCode()),
+    grows: APP_GROWS,
     mode: hidesCode() ? "run" : "edit"
   })
   const layout = drawnView((app) => app.editorLayout, parts, settings)
@@ -191,23 +192,23 @@ export function SpellEditor(props: { mode: Mode }) {
     <SpellPage id="SpellEditor" fillWindow dark rows>
       <EditorToolbar mode={mode()} />
       {/* never before the top bar:  on a cold start it waits for the bar's menus to be drawn (I255);  hidden while Anatomy shows (I263) */}
-      <Show when={isBarDrawn() && !isRunning() && Palette.isPinned && !AppAnatomy.isShowing}>
-        <PaletteStrip />
-      </Show>
       <PartMenu />
       <ChangeThisBox />
       <FollowAlong />
       <div class="EditorLayoutPlace" ref={on("ui-changed", keepSizes)}>
+        <Show when={isBarDrawn() && !isRunning() && !AppAnatomy.isShowing}>
+          <PaletteRail />
+        </Show>
         {layout.drawing()}
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
         <Show when={layout.isBroken()}>
-          <ui-split-panel class="EditorColumns" columns={columns.sizes()} grows={appGrows(hidesCode())} resizable>
+          <ui-split-panel class="EditorColumns" columns={columns.sizes()} grows={APP_GROWS} resizable>
+            {parts.app.draw()}
+            {parts.inspector.draw()}
             <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesCode()}>
               {parts.code.draw()}
               {parts.programPanel.draw()}
             </ui-split-panel>
-            {parts.app.draw()}
-            {parts.inspector.draw()}
           </ui-split-panel>
         </Show>
       </div>
@@ -523,23 +524,42 @@ function notebookOf(
  */
 function columnsFor(isRunning: boolean, isInspecting: boolean, hasOutput: boolean): { id: string; sizes: string } {
   const isWide = hasOutput && !isRunning
-  // Edit's are the names they had before the code's 2 days at the far right (`-edit`, 2026-11-04 to 11-06):
-  // what they remember is for panes in this order, code first
-  const id = `spellEditor-columns${isRunning ? "-run" : ""}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
+  const id = `${COLUMNS_ID}${isRunning ? "-run" : ""}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
   if (!isInspecting && !isWide) return { id, sizes: "" }
   // with compiled code beside it, the code's column takes room from the app's, so both can be read
   const code = isWide ? "65%" : "*"
-  const panes = [...(isRunning ? [] : [code]), "*", ...(isInspecting ? ["380px"] : [])]
+  const panes = ["*", ...(isInspecting ? ["380px"] : []), ...(isRunning ? [] : [code])]
   return { id, sizes: panes.join(",") }
 }
 
+/** The start of the columns' remembered sizes' names:  the app first, the code last (epic `editor` T151). */
+const COLUMNS_ID = "spellEditor-panes"
+
 /**
- * Which of the columns takes every change of size (`<ui-split-panel grows>`):  the app's, by its place across.
- * - A hidden pane isn't counted:  with the code showing the app is 2nd, without it (Run, code closed) first.
+ * The sizes dragged before the code moved to the far right (`spellEditor-columns...`, code first), moved over once:
+ * the code's size, first, goes last;  in Run, with no code, they stay as they were (epic `editor` T151).
  */
-function appGrows(hidesCode: boolean): string {
-  return hidesCode ? "first" : "2"
+function moveOldColumnSizes(): void {
+  for (const run of ["", "-run"]) {
+    for (const output of ["", "-output"]) {
+      for (const inspector of ["", "-inspector"]) {
+        const ending = `${run}${output}${inspector}`
+        const old = editorPrefs.get<string>(`spellEditor-columns${ending}`)
+        if (!old || editorPrefs.get<string>(`${COLUMNS_ID}${ending}`)) continue
+        const sizes = old.split(",")
+        const moved = run ? sizes : [...sizes.slice(1), sizes[0]!]
+        editorPrefs.set(`${COLUMNS_ID}${ending}`, moved.join(","))
+      }
+    }
+  }
 }
+moveOldColumnSizes()
+
+/**
+ * Which of the columns takes every change of size (`<ui-split-panel grows>`):  the app's, first across since the
+ * code moved to the far right (epic `editor` T151).
+ */
+const APP_GROWS = "first"
 
 /** Tabs of `<ProgramPanel>`, in order. */
 const PROGRAM_TABS = ["output", "tree", "reference"] as const

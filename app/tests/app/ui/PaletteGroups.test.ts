@@ -43,6 +43,17 @@ describe("PaletteGroups.inGroups() and its table (epic `editor` T81)", () => {
     expect(groups[1]!.parts.map((definition) => definition.tag)).toEqual(["ui-buttons"])
   })
 
+  it("keeps a group's divider, for the add bar (epic `editor` T151)", () => {
+    const groups = PaletteGroups.inGroups({
+      groups: [
+        { title: "Mine", dividerAfter: true, tags: ["ui-card"] },
+        { topic: "buttons", tags: ["ui-buttons"] }
+      ]
+    })
+    expect(groups[0]).toMatchObject({ title: "Mine", dividerAfter: true })
+    expect(groups[1]!.dividerAfter).toBeUndefined()
+  })
+
   it("files what the table doesn't name by today's rule:  at its topic group's end, else a group of its own", () => {
     const groups = PaletteGroups.inGroups({
       groups: [{ topic: "buttons", tags: ["ui-buttons"] }],

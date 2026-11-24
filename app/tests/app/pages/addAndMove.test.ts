@@ -1,6 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
+import { Alignment } from "spell/test-helpers/Alignment"
 import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
@@ -995,7 +996,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
-  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80, T86, T87, T92, T99, T106)", async () => {
+  test("the add bar runs down the left edge in Edit, the app then the code across;  its groups open beside it, its stars stay (T151, T152)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
 
@@ -1026,175 +1027,116 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     })
     expect(modeBar).toEqual({ gaps: [16, 1, 1, 1, 16], words: "Add a View" })
 
-    await page.locator("#AddPartButton [part~=item]").click()
-    await page.waitForTimeout(600)
-    expect(await popupShows()).toBe(true)
-    await page.locator(".PalettePopup .PalettePin").click()
-    await page.waitForTimeout(600)
-    expect(await page.locator(".PaletteStrip").count()).toBe(1)
     expect(await popupShows()).toBe(false)
-    await page.reload()
-    await page.waitForSelector(".PaletteStrip .PaletteGroupName", { timeout: 60_000 })
-    await page.waitForTimeout(1000)
 
-    // its pin at its far left, Add a View in bold, each topic with its icon;  at 1290px wide, nothing scrolls (T86, T92)
-    await page.setViewportSize({ width: 1290, height: 800 })
-    await page.waitForTimeout(600)
-    const bar = () =>
+    // the add bar, the app, then the code at the far right (T151, Owen's B)
+    await page.waitForSelector(".PaletteRail ui-item.PaletteRailButton", { timeout: 60_000 })
+    await page.waitForTimeout(1000)
+    const across = () =>
       page.evaluate(() => {
-        const strip = document.querySelector(".PaletteStrip")!
-        const left = (el: Element | null | undefined) => el?.getBoundingClientRect().left ?? -1
-        const names = [...strip.querySelectorAll("ui-item.PaletteGroupName")]
+        const left = (selector: string) => document.querySelector(selector)?.getBoundingClientRect().left ?? -1
+        const rail = document.querySelector(".PaletteRail")!.getBoundingClientRect()
+        const buttons = [...document.querySelectorAll<HTMLElement>(".PaletteRail ui-item.PaletteRailButton")]
         return {
-          overflowing: strip.querySelector("ui-toolbar.PaletteStripGroups")!.matches(":state(overflowing)"),
-          pinFirst: left(strip.querySelector(".PalettePin")) < left(strip.querySelector(".PaletteStripLabel")),
-          label: strip.querySelector(".PaletteStripLabel")?.textContent,
-          bold: Number(getComputedStyle(strip.querySelector(".PaletteStripLabel")!).fontWeight) >= 700,
-          withIcons: names.every((name) => !!name.getAttribute("icon")),
-          closes: strip.querySelectorAll(".PaletteClose").length,
-          searchWidth: strip.querySelector(".PaletteStripSearch")!.getBoundingClientRect().width,
-          // centred, its content's width, 16px at its start and 4px past the search (T106, I252), the search right after the last name
-          ...(() => {
-            const box = strip.getBoundingClientRect()
-            const add = strip.querySelector(".PaletteStripAdd")!.getBoundingClientRect()
-            const end = strip.querySelector(".PaletteStripEnd")!.getBoundingClientRect()
-            return {
-              room: [Math.round(add.left - box.left), Math.round(box.right - end.right)],
-              centred: Math.abs(box.left - (innerWidth - box.right)) < 1,
-              searchAfterNames: Math.round(end.left - add.right)
-            }
-          })()
+          order: [left(".PaletteRail"), left(".AppPane"), left(".InputEditor")].every(
+            (at, index, all) => at >= 0 && (index === 0 || at > all[index - 1]!)
+          ),
+          railWidth: Math.round(rail.width),
+          // each button a 32px square, its icon centred in it
+          squares: buttons.every((button) => {
+            const box = (button.shadowRoot?.querySelector("[part~=item]") ?? button).getBoundingClientRect()
+            return Math.round(box.width) === 32 && Math.round(box.height) === 32
+          }),
+          centred: buttons.every((button) => {
+            const box = (button.shadowRoot?.querySelector("[part~=item]") ?? button).getBoundingClientRect()
+            const icon = button.shadowRoot?.querySelector("ui-icon, [part~=icon]")?.getBoundingClientRect()
+            if (!icon) return true
+            const middle = (a: number, b: number) => (a + b) / 2
+            return (
+              Math.abs(middle(icon.left, icon.right) - middle(box.left, box.right)) <= 0.5 &&
+              Math.abs(middle(icon.top, icon.bottom) - middle(box.top, box.bottom)) <= 0.5
+            )
+          }),
+          names: buttons.map((button) => button.getAttribute("aria-label") ?? ""),
+          tooltips: buttons.every((button) => !!button.getAttribute("data-tooltip"))
         }
       })
-    expect(await bar()).toMatchObject({
-      overflowing: false,
-      pinFirst: true,
-      label: "Add a View",
-      bold: true,
-      withIcons: true,
-      closes: 0,
-      room: [16, 4],
-      centred: true,
-      searchAfterNames: 16
-    })
-    const idleWidth = (await bar()).searchWidth
-    await page.setViewportSize({ width: 1440, height: 800 })
+    const laidOut = await across()
+    expect(laidOut).toMatchObject({ order: true, railWidth: 40, squares: true, centred: true, tooltips: true })
+    // every row in it lined up (the kit's alignment check)
+    expect(Alignment.report(await Alignment.scanPage(page, { within: ".PaletteRailPlace" }))).toEqual([])
+    expect(laidOut.names).toContain("Layout")
 
-    // the pinned bar:  a topic's name opens its menu, every part filed there;  choosing one closes it (I176)
-    const menusOpen = () =>
+    // a group's button opens its parts beside the bar, its search focused;  Escape closes it
+    const flyoutsOpen = () =>
       page.evaluate(
         () =>
-          [...document.querySelectorAll(".PaletteGroupPopup")].filter(
+          [...document.querySelectorAll(".PaletteFlyout")].filter(
             (menu) => (menu as HTMLElement & { visible?: boolean }).visible
           ).length
       )
-    await page.locator(".PaletteStrip .PaletteGroupName", { hasText: "Layout" }).click()
+    await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Layout"] [part~=item]').click()
     await page.waitForTimeout(600)
-    expect(await menusOpen()).toBe(1)
-    expect(await page.locator('.PaletteGroupPopup ui-tree-item[label="Grid"]').count()).toBe(1)
-    await page.keyboard.press("Escape")
-    await page.waitForTimeout(600)
-    expect(await menusOpen()).toBe(0)
+    expect(await flyoutsOpen()).toBe(1)
+    const layout = page.locator(".PaletteFlyout").filter({ has: page.locator('ui-tree-item[label="Grid"]') })
+    expect(await layout.locator('ui-tree-item[label="Grid"]').count()).toBe(1)
+    // its search keeps only the matches
+    await layout.locator(".PaletteFlyoutSearch input").fill("grid")
+    await page.waitForTimeout(400)
+    expect(await layout.locator("ui-tree-item").count()).toBe(1)
+    await layout.locator(".PaletteFlyoutSearch input").fill("")
+    await page.waitForTimeout(400)
 
-    // its search opens every topic with a match at once, each with only its matches, side by side (J140, revisited)
-    const matches = () =>
-      page.evaluate(() => {
-        const layer = document.querySelector(".PaletteMatches")!
-        if (!layer.matches(":popover-open")) return []
-        return [...layer.querySelectorAll<HTMLElement>(".PaletteMatchPanel")].map((panel) => {
-          const box = panel.getBoundingClientRect()
-          const labels = [...panel.querySelectorAll("ui-tree-item")].map((row) => row.getAttribute("label") ?? "")
-          const header = panel.querySelector<HTMLElement>(".PaletteMatchHeader")
-          const name = document.getElementById(panel.dataset.for ?? "")
-          return {
-            left: box.left,
-            right: box.right,
-            top: box.top,
-            bottom: box.bottom,
-            labels,
-            header: header?.textContent ?? "",
-            headerIcon: header?.querySelector("ui-icon")?.getAttribute("name") ?? "",
-            headerFirst: !!header && header === panel.firstElementChild,
-            headerFocusable: !!header && (header.tabIndex >= 0 || header.matches("ui-tree-item")),
-            groupName: name?.textContent?.trim() ?? "",
-            groupIcon: name?.getAttribute("icon") ?? ""
-          }
-        })
-      })
-    const search = page.locator(".PaletteStrip .PaletteStripSearch input")
-    await search.click()
-    await page.keyboard.type("butt", { delay: 30 })
-    await page.waitForTimeout(800)
-    // the field keeps its width typed in, with a ✕ inside it (T87)
-    expect((await bar()).searchWidth).toBe(idleWidth)
-    expect(await page.locator(".PaletteStrip .PaletteStripClear").count()).toBe(1)
-    const shown = await matches()
-    expect(shown.length).toBeGreaterThan(1)
-    expect(shown.flatMap(({ labels }) => labels)).toContain("Button")
-    // no topic with nothing to show;  none over another, none off the window
-    expect(shown.every(({ labels }) => labels.length > 0)).toBe(true)
-    // each headed by its topic's icon and name, a label, not a row (T99)
-    for (const one of shown) {
-      expect(one.headerFirst).toBe(true)
-      expect(one.headerFocusable).toBe(false)
-      expect(one.header).toBe(one.groupName)
-      expect(one.headerIcon).toBe(one.groupIcon)
-    }
-    expect(shown.map(({ header }) => header)).toContain("Actions")
-    const width = await page.evaluate(() => document.documentElement.clientWidth)
-    for (const [at, one] of shown.entries()) {
-      expect(one.left).toBeGreaterThanOrEqual(0)
-      expect(one.right).toBeLessThanOrEqual(width)
-      for (const other of shown.slice(at + 1)) {
-        const apart =
-          one.right <= other.left || other.right <= one.left || one.bottom <= other.top || other.bottom <= one.top
-        expect(apart).toBe(true)
-      }
-    }
-    // ↓ goes into the first match, past its header;  Escape there comes back to the field, and closes them
-    await page.keyboard.press("ArrowDown")
-    await page.waitForTimeout(200)
-    expect(await page.evaluate(() => document.activeElement?.localName)).toBe("ui-tree-item")
-    expect(await page.evaluate(() => document.activeElement?.getAttribute("label"))).toBe(shown[0]!.labels[0])
-    await page.keyboard.press("Escape")
+    // a part's star puts it atop the bar, starred;  a right click takes the star away (T152)
+    await layout.locator('ui-tree-item[label="Grid"]').hover()
+    await layout.locator('ui-tree-item[label="Grid"] ui-button.PaletteStar').click()
     await page.waitForTimeout(400)
-    expect(await matches()).toEqual([])
-    expect(await page.evaluate(() => document.activeElement?.className)).toContain("PaletteStripSearch")
-    // typing opens them again;  Escape in the field closes them;  so does clearing it
-    await page.keyboard.type("o")
-    await page.waitForTimeout(600)
-    expect((await matches()).length).toBeGreaterThan(0)
+    expect(await page.locator(".PaletteRail ui-item.PaletteFavorite").count()).toBe(1)
     await page.keyboard.press("Escape")
-    await page.waitForTimeout(400)
-    expect(await matches()).toEqual([])
-    await search.fill("grid")
     await page.waitForTimeout(600)
-    expect((await matches()).length).toBeGreaterThan(0)
-    await search.fill("")
-    await page.waitForTimeout(600)
-    expect(await matches()).toEqual([])
-    // its ✕ empties it and closes them, and the field keeps the focus (T87)
-    await search.fill("grid")
-    await page.waitForTimeout(600)
-    await page.locator(".PaletteStrip .PaletteStripClear").click()
-    await page.waitForTimeout(600)
-    expect(await matches()).toEqual([])
-    expect(await search.inputValue()).toBe("")
-    expect(await page.evaluate(() => document.activeElement?.className)).toContain("PaletteStripSearch")
-    expect(await page.locator(".PaletteStrip .PaletteStripClear").count()).toBe(0)
-    // choosing a match closes them all (I176)
+    expect(await flyoutsOpen()).toBe(0)
+    // ... kept across a reload
+    await page.reload()
+    await page.waitForSelector(".PaletteRail ui-item.PaletteFavorite", { timeout: 60_000 })
+    // its click picks it up to place with the next click in the app (T153's `PartPlacing`), lit while it's picked up;
+    // Escape puts it down, nothing added
     const grids = ((await text()).match(/<(ui-)?grid\b/g) ?? []).length
-    await search.fill("grid")
-    await page.waitForTimeout(600)
-    await page.locator('.PaletteMatchPanel ui-tree-item[label="Grid"]').first().click()
-    await page.waitForTimeout(SETTLE_MS)
-    expect(await matches()).toEqual([])
-    expect(((await text()).match(/<(ui-)?grid\b/g) ?? []).length).toBe(grids + 1)
+    const isPicked = () =>
+      page.evaluate(() =>
+        (window as unknown as { PartPlacing: { isPicked(label: string): boolean } }).PartPlacing.isPicked("Grid")
+      )
+    await page.locator(".PaletteRail ui-item.PaletteFavorite [part~=item]").click()
+    await page.waitForTimeout(400)
+    expect(await isPicked()).toBe(true)
+    expect(await page.locator(".PaletteRail ui-item.PaletteFavorite[selected]").count()).toBe(1)
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(400)
+    expect(await isPicked()).toBe(false)
+    expect(((await text()).match(/<(ui-)?grid\b/g) ?? []).length).toBe(grids)
+    await page.locator(".PaletteRail ui-item.PaletteFavorite [part~=item]").click({ button: "right" })
+    await page.waitForTimeout(400)
+    expect(await page.locator(".PaletteRail ui-item.PaletteFavorite").count()).toBe(0)
 
-    // its pin unpins it (T92)
-    await page.locator(".PaletteStrip .PalettePin").click()
+    // Search looks through every group, each a row holding its matches;  choosing one closes it (I176) and picks it up
+    await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Search everything you can add"] [part~=item]').click()
     await page.waitForTimeout(600)
-    expect(await page.locator(".PaletteStrip").count()).toBe(0)
+    const everything = page.locator(".PaletteFlyout").first()
+    await everything.locator(".PaletteFlyoutSearch input").fill("butt")
+    await page.waitForTimeout(600)
+    expect(await everything.locator('ui-tree-item[label="Button"]').count()).toBeGreaterThan(0)
+    await everything.locator('ui-tree-item[label="Button"]').first().click()
+    await page.waitForTimeout(600)
+    expect(await flyoutsOpen()).toBe(0)
+    // ... picked up to place, as a starred one is;  put down again
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(400)
+
+    // in Run, it goes
+    await page.locator(".ModeTabs [part~=item]", { hasText: "Run" }).first().click()
+    await page.waitForTimeout(800)
+    expect(await page.locator(".PaletteRail").count()).toBe(0)
+    await page.locator(".ModeTabs [part~=item]", { hasText: "Edit" }).first().click()
+    await page.waitForSelector(".PaletteRail", { timeout: 30_000 })
   })
 
   test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180, I185)", async () => {

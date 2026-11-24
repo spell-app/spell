@@ -31,7 +31,7 @@
  *   - the modes' and boxes' VIEWS (epic `solid-2-final` P6), each loaded the first time it's used, by a `LazyPiece`
  *     on its state:  `InspectorView` (and `InspectorParts`), `PaletteView`, `AppAnatomyStack`, `DesignView`,
  *     `ChangeThisView`, `EditorToursView`
- *     - the state files here export each view under its old name (`InspectorPane`, `PaletteStrip`, `DesignStage` ...),
+ *     - the state files here export each view under its old name (`InspectorPane`, `PaletteRail`, `DesignStage` ...),
  *       drawn inside a `<Loading>` of its own
  *     - NEVER import a view file statically, types aside:  `build.test.ts`, "the first screen", fails then
  *   - `./modals`:  `editor.ts` imports it on first use (`import()`), so the editor never loads Solid up front

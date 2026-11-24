@@ -29,8 +29,10 @@ export type PaletteTableGroup = {
   topic?: ComponentTopic
   /** Its own name, as written, in every language:  in place of its topic's word. */
   title?: string
-  /** Its icon, beside its name in the editor's pinned Add bar (`hand pointer`;  epic `editor` T86). */
+  /** Its icon:  its button in the editor's add bar, down the left edge (`hand pointer`;  epic `editor` T86, T151). */
   icon?: string
+  /** A divider under it in the add bar, between it and the next group (epic `editor` T151). */
+  dividerAfter?: boolean
   /** Its components' tags, in order. */
   tags: string[]
 }

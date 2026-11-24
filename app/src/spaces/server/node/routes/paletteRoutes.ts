@@ -63,11 +63,15 @@ export function paletteTableOrDie(body: unknown): PaletteTable {
     if (group.topic !== undefined && !isText(group.topic)) die(`group ${at + 1}'s \`topic\` isn't text`)
     if (group.title !== undefined && !isText(group.title)) die(`group ${at + 1}'s \`title\` isn't text`)
     if (group.icon !== undefined && !isText(group.icon)) die(`group ${at + 1}'s \`icon\` isn't text`)
+    if (group.dividerAfter !== undefined && typeof group.dividerAfter !== "boolean") {
+      die(`group ${at + 1}'s \`dividerAfter\` isn't true or false`)
+    }
     if (group.topic === undefined && group.title === undefined) die(`group ${at + 1} needs a \`topic\` or a \`title\``)
     return {
       ...(group.topic !== undefined && { topic: group.topic }),
       ...(group.title !== undefined && { title: group.title }),
       ...(group.icon !== undefined && { icon: group.icon }),
+      ...(group.dividerAfter && { dividerAfter: true }),
       tags: group.tags
     }
   })

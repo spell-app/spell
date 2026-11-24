@@ -18,8 +18,8 @@ import "./PaletteGroupsPage.css"
  *   shows it as the palette does:  `PaletteGroups.inGroups()`, so a component the table doesn't name shows where the
  *   palette would put it.
  * - Drag a component to another group or place;  drag a group by its handle;  rename a group in its field;
- *   pick its icon (the pinned Add bar shows it, epic `editor` T86);  add one, or remove one (its components go to
- *   Not in the + menu).
+ *   pick its icon (the add bar down the editor's left edge shows it, epic `editor` T86, T151);  put a divider under it
+ *   in that bar, or take it away (T151);  add one, or remove one (its components go to Not in the + menu).
  * - The last column, Not in the + menu, holds every other component:  drag one into a group to offer it.
  * - Save writes the table back (`PUT`):  the palette shows it on its next load.
  * - Reads `PaletteGroups` itself, a lazy chunk of this page alone (it loads every vocabulary):
@@ -51,10 +51,11 @@ export function PaletteGroupsPage(): JSX.Element {
       ])
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
       const table = (await response.json()) as SPACES.PaletteTable
-      const loaded = PaletteGroups.inGroups(table).map(({ topic, title, icon, parts }) => ({
+      const loaded = PaletteGroups.inGroups(table).map(({ topic, title, icon, dividerAfter, parts }) => ({
         topic,
         title,
         icon,
+        dividerAfter,
         tags: parts.map((definition) => definition.tag)
       }))
       const placed = new Set(loaded.flatMap((group) => group.tags))
@@ -80,10 +81,11 @@ export function PaletteGroupsPage(): JSX.Element {
     // what the palette's rule would offer, if the table didn't say to leave it out
     const offeredByRule = new Set(groupRule.byTopic().flatMap(({ parts }) => parts.map((definition) => definition.tag)))
     const table: SPACES.PaletteTable = {
-      groups: groups().map(({ topic, title, icon, tags }) => ({
+      groups: groups().map(({ topic, title, icon, dividerAfter, tags }) => ({
         ...(topic && { topic }),
         ...(title && { title }),
         ...(icon && { icon }),
+        ...(dividerAfter && { dividerAfter }),
         tags: [...tags]
       })),
       hidden: notOffered().filter((tag) => offeredByRule.has(tag))
@@ -132,6 +134,12 @@ export function PaletteGroupsPage(): JSX.Element {
     const group = groups()[at]
     if (!group || (group.icon ?? "") === icon) return
     setGroups(groups().map((each, index) => (index === at ? { ...each, icon: icon || undefined } : each)))
+    setStatus("changed")
+  }
+
+  /** A divider under group `at` in the add bar, or none:  the other of what it has. */
+  function toggleDivider(at: number): void {
+    setGroups(groups().map((each, index) => (index === at ? { ...each, dividerAfter: !each.dividerAfter } : each)))
     setStatus("changed")
   }
 
@@ -277,7 +285,10 @@ export function PaletteGroupsPage(): JSX.Element {
     const name = () => nameOf(group())
     return (
       <section
-        class={["group", { over: dropAt()?.list === at && dropAt()?.before === undefined }]}
+        class={[
+          "group",
+          { over: dropAt()?.list === at && dropAt()?.before === undefined, "divider-after": !!group().dividerAfter }
+        ]}
         onDragOver={(event) => onDragOver(event, at)}
         onDrop={(event) => onDrop(event, at)}
       >
@@ -307,6 +318,20 @@ export function PaletteGroupsPage(): JSX.Element {
             aria-label={text("palettePage.groupName")}
             ref={on<{ value: string }>("ui-changed", (event) => rename(at, event.detail.value))}
           ></ui-input>
+          <ui-button
+            class="divider"
+            size="mini"
+            appearance="basic"
+            icon="grip lines"
+            selected={!!group().dividerAfter}
+            aria-label={text(group().dividerAfter ? "palettePage.removeDivider" : "palettePage.addDivider", {
+              group: name()
+            })}
+            data-tooltip={text(group().dividerAfter ? "palettePage.removeDivider" : "palettePage.addDivider", {
+              group: name()
+            })}
+            onClick={() => toggleDivider(at)}
+          ></ui-button>
           <ui-button
             class="remove"
             size="mini"
@@ -403,6 +428,8 @@ type EditedGroup = {
   readonly topic?: SPACES.PaletteTableGroup["topic"]
   title?: string
   icon?: string
+  /** A divider under it in the add bar. */
+  dividerAfter?: boolean
   tags: string[]
 }
 

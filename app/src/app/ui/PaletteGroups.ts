@@ -33,10 +33,11 @@ export class PaletteGroups {
   static inGroups(table: SPACES.PaletteTable = SHIPPED_TABLE): PaletteGroup[] {
     const hidden = new Set(table.hidden ?? [])
     const placed = new Set<string>()
-    const groups: PaletteGroup[] = table.groups.map(({ topic, title, icon, tags }) => ({
+    const groups: PaletteGroup[] = table.groups.map(({ topic, title, icon, dividerAfter, tags }) => ({
       topic,
       title,
       icon,
+      ...(dividerAfter && { dividerAfter }),
       parts: tags.flatMap((tag) => {
         const definition = ComponentDefinitions.byTag(tag)
         if (!definition || placed.has(tag) || NEVER_ADDED.has(tag)) return []

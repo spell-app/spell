@@ -96,6 +96,23 @@ describe("paletteTableOrDie()", () => {
     )
   })
 
+  test("keeps a divider under a group, true or left out (epic `editor` T151)", () => {
+    expect(
+      paletteTableOrDie({
+        groups: [
+          { title: "A", dividerAfter: true, tags: [] },
+          { title: "B", dividerAfter: false, tags: [] }
+        ]
+      }).groups
+    ).toEqual([
+      { title: "A", dividerAfter: true, tags: [] },
+      { title: "B", tags: [] }
+    ])
+    expect(() => paletteTableOrDie({ groups: [{ title: "A", dividerAfter: "yes", tags: [] }] })).toThrow(
+      /group 1.s `dividerAfter` isn.t true or false/
+    )
+  })
+
   test("a group needs a topic or a title", () => {
     expect(() => paletteTableOrDie({ groups: [{ tags: [] }] })).toThrow(/group 1 needs a `topic` or a `title`/)
     expect(() => paletteTableOrDie({ groups: "no" })).toThrow(/send `\{ groups: \[...\] \}`/)

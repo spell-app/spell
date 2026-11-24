@@ -58,6 +58,10 @@
       outline: 1px dashed var(--ui-border-color);
       outline-offset: -1px;
     }
+    /* a divider under it in the add bar:  a line along its foot, as the bar draws one (epic `editor` T151) */
+    &.divider-after {
+      border-block-end: 2px solid var(--ui-border-color);
+    }
   }
 
   /* its handle, icon, name to type over and remove button:  on a band, as the palette's topic names are */

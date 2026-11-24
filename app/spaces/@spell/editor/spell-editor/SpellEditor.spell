@@ -208,7 +208,8 @@ spell editor is an app
 			</app-menu>
 
 	an "editor layout" is a view
-		// The editor's panes:  the code on the left, the Program panel under it, then the running app, and the Inspector at the far right while it's open (Owen, 2026-11-06).
+		// The editor's panes:  the running app first, the Inspector after it while it's open, then the code at the far right, the Program panel under it (Owen's B, epic `editor` T151).
+		// The add bar runs down the left edge before them, in Edit:  the editor's own (`<PaletteRail>`).
 		// What's in each is still the editor's own, `SpellEditor` in `SpellEditor.tsx`:  each is an editor part here, which draws itself.
 		// The app takes every change of size (`grows`, its place across):  dragging the code's bar sizes the code, the app gives or takes the room, and the Inspector keeps its width.
 		// The code's column stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
@@ -225,18 +226,18 @@ spell editor is an app
 		its "code rows" is text
 			// The sizes of the code and the Program panel
 		its "grows" is text
-			// The app's place across, which takes every change of size:  2 after the code, first without it
+			// The app's place across, which takes every change of size:  first
 		its "mode" is one of edit or run
 			it "is (mode)"
 
 		to draw it
 			<split-panel class="EditorColumns" columns={its columns} grows={its grows} resizable>
+				{draw its app}
+				{draw its inspector}
 				<split-panel class="EditorCode" rows={its code rows} resizable hidden={it is run}>
 					{draw its code}
 					{draw its program panel}
 				</split-panel>
-				{draw its app}
-				{draw its inspector}
 			</split-panel>
 
 	a "file" is a thing

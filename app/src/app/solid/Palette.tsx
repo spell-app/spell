@@ -23,8 +23,9 @@ import "./Palette.css"
 
 /**
  * What can be added to the app, and whether it's kept open.
- * - Closed, it's the top bar's popup:  a menu in columns by topic.
- * - Kept open, it's the top bar's second row:  its topics' names, each a menu (epic `editor` T80).
+ * - The top bar's popup:  a menu in columns by topic.
+ * - In Edit, the add bar down the editor's left edge:  a button per group, each opening its parts beside it, your
+ *   starred parts first (epic `editor` T151, T152;  a second row under the top bar, kept open by its pin, before).
  * - It reads the components' own descriptions (`ComponentDefinitions`), loaded the first time it opens:
  *   every vocabulary, which the page never needs otherwise;  and files them in its groups by its own rule and table
  *   (`PaletteGroups`, arranged on the palette groups page, `/palette`).
@@ -36,17 +37,12 @@ import "./Palette.css"
  * - In a page that draws its body, Spell UI's tags are written by their bare names, as a notebook writes them:
  *   `<example>`, `<section>`.
  *   `<example>` is then the page's own example, its code editable in place.
- * - Its menu and its strip are in `PaletteView.tsx`, loaded as it first opens (`Palette.views`, a `LazyPiece`):
+ * - Its menu and its add bar are in `PaletteView.tsx`, loaded as it first opens (`Palette.views`, a `LazyPiece`):
  *   here are its state, Add a View's button and the right click's menu, in the editor's first load.
  */
 export class Palette {
   /** The palette's menu and strip, loaded the first time it opens:  see `LazyPiece`. */
   static views = new LazyPiece(() => import("./PaletteView"))
-
-  /** Is it kept open as a strip (reactive)? */
-  static get isPinned(): boolean {
-    return isPinned()
-  }
 
   /** Open it by itself, the next time the top bar's `+` is drawn:  a blank app shows what it can hold. */
   static openOnArrival(): void {
@@ -62,28 +58,17 @@ export class Palette {
   }
 
   /**
-   * Is the strip showing for the first time on this page?  Says so once (epic `editor` I255):
-   * only its first showing animates, never a later one (Run and back, another page).
+   * Is the add bar's first showing on this page now?  Says so once (epic `editor` I255, T151):
+   * only its first showing slides in, never a later one (Run and back, another page).
    */
-  static takeStripArrival(): boolean {
-    const arrives = !hasStripShown
-    hasStripShown = true
+  static takeRailArrival(): boolean {
+    const arrives = !hasRailShown
+    hasRailShown = true
     return arrives
   }
 
   /**
-   * Keep it open, or stop;  remembered.
-   * - Its menus close either way (epic `editor` I175):  pinned, the bar shows in the popup's place.
-   */
-  static togglePinned(): void {
-    Palette.closeMenus()
-    const pinned = !isPinned()
-    setPinned(pinned)
-    editorPrefs.set(PINNED_PREF, pinned)
-  }
-
-  /**
-   * Close its menus, the popup and the pinned bar's:
+   * Close its menus, the popup and the add bar's flyouts:
    * what's added, or dragged, lands on a page you can see (epic `editor` I176).
    */
   static closeMenus(): void {
@@ -91,7 +76,30 @@ export class Palette {
       if (menu.isConnected) menu.visible = false
       else menus.delete(menu)
     }
-    for (const close of matchClosers) close()
+  }
+
+  /**
+   * The parts you've starred, in the order you starred them (reactive):  first in the add bar (epic `editor` T152).
+   * - Only those Spell UI still offers, once what's offered is loaded:  a tag gone from the palette drops out.
+   */
+  static get favorites(): readonly ComponentDefinition[] {
+    const parts = new Map(offered().flatMap((group) => group.parts.map((part) => [part.tag, part] as const)))
+    return favoriteTags().flatMap((tag) => parts.get(tag) ?? [])
+  }
+
+  /** Is `definition` starred (reactive)? */
+  static isFavorite(definition: ComponentDefinition): boolean {
+    return favoriteTags().includes(definition.tag)
+  }
+
+  /** Star `definition`, or take its star away;  remembered for you, across reloads (`editorPrefs`). */
+  static toggleFavorite(definition: ComponentDefinition): void {
+    const tags = favoriteTags()
+    const starred = tags.includes(definition.tag)
+      ? tags.filter((tag) => tag !== definition.tag)
+      : [...tags, definition.tag]
+    setFavoriteTags(starred)
+    editorPrefs.set(FAVORITES_PREF, starred)
   }
 
   /** Load what it offers, and its views, the first time. */
@@ -176,14 +184,11 @@ let loading: Promise<void> | undefined
 /** Does it open when the `+` is next drawn?  `Palette.openOnArrival()`. */
 let opensOnArrival = false
 
-/** Has `<PaletteStrip>` shown on this page yet?  `Palette.takeStripArrival()`. */
-let hasStripShown = false
+/** Has the add bar (`<PaletteRail>`) shown on this page yet?  `Palette.takeRailArrival()`. */
+let hasRailShown = false
 
-/** Its menus, the popup and the pinned bar's:  `Palette.closeMenus()` closes them, forgetting those gone. */
+/** Its menus, the popup and the add bar's flyouts:  `Palette.closeMenus()` closes them, forgetting those gone. */
 const menus = new Set<HTMLElement & { visible?: boolean }>()
-
-/** What closes the pinned bar's search results, while the bar is drawn (`<PaletteStrip>`). */
-export const matchClosers = new Set<() => void>()
 
 /** A `ref` for one of its popups:  closed by `Palette.closeMenus()`, and by a drag starting from it. */
 export function closesWithPalette(popup: HTMLElement & { visible?: boolean }): void {
@@ -230,11 +235,17 @@ const NEW_VIEWS: Record<string, string> = {
   es: 'una "nueva vista" es una vista\n\tpara dibujarla: <texto>Una vista nueva</texto>'
 }
 
-/** The preference that remembers whether it's kept open. */
-const PINNED_PREF = "palettePinned"
+/** The preference that remembers the parts you've starred, by tag (`Palette.favorites`, epic `editor` T152). */
+const FAVORITES_PREF = "paletteFavorites"
+editorPrefs.declare(FAVORITES_PREF, { type: "object", default: [] })
 
-const [isPinned, setPinned] = createSignal<boolean>(editorPrefs.get(PINNED_PREF) === true)
+const [favoriteTags, setFavoriteTags] = createSignal<readonly string[]>(starredIn(editorPrefs.get(FAVORITES_PREF)))
 export const [offered, setOffered] = createSignal<readonly PaletteGroup[]>([])
+
+/** The starred tags a saved preference holds:  none, for anything but a list of them. */
+function starredIn(saved: unknown): readonly string[] {
+  return Array.isArray(saved) ? saved.filter((tag): tag is string => typeof tag === "string") : []
+}
 
 /** One group of what's offered:  its topic or title, and its parts (`PaletteGroups.inGroups()`). */
 export type PaletteGroup = import("spell/app/app/ui/PaletteGroups").PaletteGroup
@@ -337,11 +348,11 @@ export function stepTitle(definition: ComponentDefinition): string {
 }
 
 ////////////////
-// ## Search:  the popup's, and the pinned bar's
+// ## Search:  the popup's, and the add bar's
 ////////////////
 
 /** Does `part` hold `words` (lowercase) in its name, its other names or its description?  Every part, for none. */
-function partMatches(part: ComponentDefinition, words: string): boolean {
+export function partMatches(part: ComponentDefinition, words: string): boolean {
   return `${part.name} ${part.aka.join(" ")} ${part.description ?? ""}`.toLowerCase().includes(words)
 }
 
@@ -378,7 +389,7 @@ export function thisGroupMatches(words: string): boolean {
 }
 
 /**
- * The top bar's "+ Add a View":  opens the palette, a menu with its search;  kept open too, beside the pinned bar.
+ * The top bar's "+ Add a View":  opens the palette, a menu with its search;  beside the add bar down the left edge.
  * - Its plus, then its words, in the round pill its neighbours have, as wide as its words (epic `editor` I250, C5:
  *   "Change plus to `+ Add a View`"):  no tooltip, the words say it.
  * - An item of the Run | Edit group, right after Inspect app (`<ModeButtons add>`;  epic `editor` T83:
@@ -435,8 +446,8 @@ export function AddPartButton(): JSX.Element {
 /** The palette's menu, in Add a View's popup:  loaded on first use, see `PaletteView.tsx`. */
 const PaletteMenu = Palette.views.view("PaletteMenu")
 
-/** The palette kept open, under the top bar:  loaded on first use, see `PaletteView.tsx`. */
-export const PaletteStrip = Palette.views.view("PaletteStrip")
+/** The add bar down the editor's left edge, in Edit:  loaded on first use, see `PaletteView.tsx` (epic `editor` T151). */
+export const PaletteRail = Palette.views.view("PaletteRail")
 
 /** Add a View's id, which its popup points at. */
 const ADD_BUTTON_ID = "AddPartButton"
