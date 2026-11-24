@@ -13,7 +13,6 @@ import type { LSP } from "spell/app/lsp"
 import type { SpellRuntime } from "spell/app/app/runner"
 import type { TestRun } from "spell/app/app/runner/spellRuntime"
 import type * as UIT from "spell/app/app/ui/ui.types"
-import { EDITOR_PIECES } from "spell/app/app/ui/ui.types"
 import type { EditWay, OldFormsFound, SpellCodeMirror } from "spell/app/app/ui/codemirror"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
@@ -783,7 +782,7 @@ export class EditorStore extends Observable {
    * - Its app pane shows each of its views in a zone (`<EditorZones>`, T63), not its app:  it runs as a layout.
    */
   isEditorPiece(project: SP.SpellProject | undefined): boolean {
-    return !!project?.path.startsWith(`${EDITOR_PIECES}/`)
+    return !!project && SPACES.isEditorPieceProject(project.path)
   }
 
   /** Is `project` a site of pages alone in their files, e.g. the Spell UI site?  It wears the docs look in Run. */

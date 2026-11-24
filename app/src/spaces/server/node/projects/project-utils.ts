@@ -833,6 +833,9 @@ export const request_saveFile = respondWithJSON(async (request) => {
  *   (`@spell/test/...`)
  * - Never an example's or a guide's (`SPACES.isExampleProject()`, epic `mockup` T52):  an edit to one is your draft,
  *   which leaving it offers to keep as your own app, or (a manager of `@spell`) to publish into the example
+ * - Never one of the editor's own pieces (`SPACES.isEditorPieceProject()`, epic `editor` J73, I329):  the editor
+ *   you're using reads the published file, so an edit (typed, dragged, from the Inspector) is your draft, and only
+ *   Publish changes the running editor
  * - only where `editsBuiltins` (`environment.editsBuiltins`:  the built-ins are this checkout's own source)
  * - never `viaHouseSite`:  a save from elsewhere on the house network stays a draft (`isViaHouseSite()`)
  */
@@ -840,7 +843,9 @@ export function savesInPlace(
   projectId: string,
   { editsBuiltins, viaHouseSite }: { editsBuiltins: boolean; viaHouseSite: boolean }
 ): boolean {
-  if (!editsBuiltins || viaHouseSite || SPACES.isExampleProject(projectId)) return false
+  if (!editsBuiltins || viaHouseSite || SPACES.isExampleProject(projectId) || SPACES.isEditorPieceProject(projectId)) {
+    return false
+  }
   return projectId.startsWith(BUILT_IN_SPACE) && !projectId.startsWith(FROZEN_TEST_PROJECTS)
 }
 

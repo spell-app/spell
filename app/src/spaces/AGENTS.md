@@ -157,6 +157,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - Never an example's or a guide's (`SPACES.isExampleProject()`, epic `mockup` T52):  opened as it is, your
           edits your draft;  leaving it asks to keep them as your own app (`duplicate/project`'s `withDraft`),
           drop them, or, a manager of `@spell`, publish them into the example.
+        - Never one of the editor's own pieces (`SPACES.isEditorPieceProject()`, epic `editor` J73, I329):  the editor
+          you're using reads the published file, so every edit to it is your draft, and only Publish changes it.
       - While you have drafts, what the editor compiles is YOUR build, `__draft/__build.<you>/`, served to you alone.
     - `POST /api/projects/keep-draft`:  your draft kept as a version of its own, never published (`keepDraft()`).
     - Publish writes the public files and zips the project into `versions/`;  neither folder is ever served.
