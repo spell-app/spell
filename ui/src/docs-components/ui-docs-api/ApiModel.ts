@@ -27,7 +27,7 @@ import {
  * - `json` attributes (rich data) are the `properties` table, not `attributes`:  they have no attribute.
  * - A function component's props (`SiteTag.props`) come first, and where it's drawn (`SiteTag.usedIn`) last.
  * - Each row also has its NAME (`ApiRow.name`):  what the "On this page" list shows, and its anchor's last word.
- * - Static and pure, so tests drive it directly;  node loads it too (`yarn site:sections` asks which tables a page has).
+ * - Static and pure, so tests drive it directly;  node loads it too (`yarn site:new` asks which tables a page has).
  ****************/
 export class ApiModel {
   /** `tag`'s non-empty tables, in `ApiSectionIds` order. */

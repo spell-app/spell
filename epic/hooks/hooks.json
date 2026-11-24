@@ -1,5 +1,5 @@
 {
-  "description": "spell-epic's hooks:  worktrees made and removed its way, the behind-main notice, the worktree guard (and, with superpowers on, where it stands aside in an epic), the hourly prune of servers whose checkout is gone, the closing-line reminder on leaving a worktree, the prompt gate, the end-of-turn window move and shared-content commit and sync, the sync-conflict notice, the focus-mode notice, the title of a session a Send started, the wake that resumes the agents a restart cut off, the wake at a clear moment for /epic fresh all, and the inbox poller each session's start and each turn's end starts, which wakes the session when the person sends from its epic page",
+  "description": "spell-epic's hooks:  worktrees made and removed its way, the behind-main notice, the worktree guard (and, with superpowers on, where it stands aside in an epic), the hourly prune of servers whose checkout is gone, the server guard (a command that would start, stop, restart or kill a main checkout's server refused, saying what to run instead), the server keeper started and asked to look, the closing-line reminder on leaving a worktree, the prompt gate, the end-of-turn window move and shared-content commit and sync, the sync-conflict notice, the focus-mode notice, the title of a session a Send started, the wake that resumes the agents a restart cut off, the wake at a clear moment for /epic fresh all, and the inbox poller each session's start and each turn's end starts, which wakes the session when the person sends from its epic page (the hub's note for it, when the epic hub listens), and the note handed to a session at work at its next tool call",
   "hooks": {
     "WorktreeCreate": [
       {
@@ -52,6 +52,11 @@
           },
           {
             "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/server-keeper.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/woken.mjs\"",
             "timeout": 10
           }
@@ -78,7 +83,28 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/server-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/inbox-note.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
       {
         "matcher": "EnterWorktree",
         "hooks": [

@@ -45,10 +45,10 @@ describe("<ui-segment> classes", () => {
     ['appearance="vertical placeholder"', "ui vertical placeholder segment"],
     // the old names (epic ui-gaps P4), and the new
     ['appearance="circular basic" padding="compact" clearing', "ui compact clearing circular basic segment"],
-    ['padding="lg"', "ui very padded segment"],
+    ['padding="lg"', "ui very padded segment very-padded"],
     ['appearance="tall-stacked raised"', "ui tall stacked raised segment"],
-    ['align="center"', "ui center aligned segment"],
-    ['attach-to="top" seamless', "ui top attached seamless segment"],
+    ['align="center"', "ui center aligned segment center-aligned"],
+    ['attach-to="top" seamless', "ui top attached seamless segment top-attached"],
     ["loading disabled", "ui disabled loading segment"],
     // `resizable` is the shared one, no class word:  `:state(resizable-height)`
     ['scrolling="long" resizable', "ui long scrolling segment"]
@@ -135,8 +135,8 @@ describe("<ui-segment> states and owner tokens", () => {
 describe("<ui-segments>", () => {
   it.each([
     ["", "ui segments"],
-    ['direction="horizontal" equal-width', "ui horizontal equal width segments"],
-    ['direction="horizontal" equal-width', "ui horizontal equal width segments"],
+    ['direction="horizontal" equal-width', "ui horizontal equal width segments equal-width"],
+    ['direction="horizontal" equal-width', "ui horizontal equal width segments equal-width"],
     ['appearance="raised"', "ui raised segments"],
     ['appearance="tall-stacked"', "ui tall stacked segments"],
     ['appearance="piled"', "ui piled segments"],

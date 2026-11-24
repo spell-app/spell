@@ -20,6 +20,9 @@ import { fetchText } from "./fetchFresh"
  *   - No `palette` or `rules`:  those are files of Spell UI's themes folder (`ThemeFile.standaloneCss()`).
  * - Read afresh each time a site starts, so an edit to the file shows on the next run.
  * - No Solid, no editor:  both hosts use it.
+ * - Spell UI's runtime from `spell/ui/core`, never `spell/ui`:  a page's `<spell-viewer>` shares the page's core, and
+ *   loads the rest of Spell UI tag by tag, never all of it (the app's `sharedSolid()`).
+ *   - The theme tree (`ThemeTokens`, `ThemeFile`) is bundled into each build:  plain data, nothing a page shares.
  ****************/
 export class SiteThemes {
   /**
@@ -35,7 +38,7 @@ export class SiteThemes {
    * - Rejects on a theme in neither place, naming both;  on a project theme file that won't read, or has a mistake.
    */
   static async tokens(name: string, projectFolder: string | undefined): Promise<string> {
-    const { UI } = await import("spell/ui")
+    const { UI } = await import("spell/ui/core")
     await UI.load()
     const sheetName = await SiteThemes.sheetFor(name, projectFolder)
     const [scoped, sheet] = await Promise.all([
@@ -100,7 +103,7 @@ export class SiteThemes {
     projectFolder: string | undefined,
     seen: readonly string[] = []
   ): Promise<string> {
-    const { UI } = await import("spell/ui")
+    const { UI } = await import("spell/ui/core")
     if (seen.includes(name)) {
       throw new TypeError(`SiteThemes:  theme \`${name}\` extends itself, through ${[...seen, name].join(" > ")}`)
     }
@@ -131,7 +134,7 @@ export class SiteThemes {
     projectFolder: string,
     seen: readonly string[]
   ): Promise<string> {
-    const { UI } = await import("spell/ui")
+    const { UI } = await import("spell/ui/core")
     const extended = data.extends
     const base =
       extended === name && UI.themes.isBuiltIn(name)

@@ -2,7 +2,8 @@
 /* as tall as what it shows, up to the window's bottom;  wider windows, more columns, so it's shorter (epic `editor` I180, I185):
    - 4 columns, then 5 from 1280px wide, 6 from 1400px, 7 from 1800px
    - its rows 20px tall, not a tree's 22px:  a topic stays whole in its column, so Owen's longer topics
-     (Forms, Text, Layout) still fit a 1440 x 800 window without scrolling */
+     (Forms, Text, Layout) still fit a 1440 x 800 window without scrolling
+   - and in a window no taller than 840px, less room between topics (epic `language` I182) */
 .PalettePopup {
   --palette-width: min(740px, 88vw);
   --ui-popup-max-width: calc(var(--palette-width) + 40px);
@@ -58,202 +59,190 @@
     font-weight: var(--ui-font-weight-bold, 700);
     line-height: 16px;
   }
+
+  /* a short window:  as the table grew, its tallest column was 18px too tall for a window 800px tall */
+  @media (height <= 840px) {
+    padding-block-end: 4px;
+
+    & h4 {
+      margin-block-end: 0;
+    }
+  }
 }
 
-/* kept open:  the top bar's second row, part of the bar (epic `editor` T83;  Owen:  "Pinned Add menu should
-   look like it is part of the app menubar -- same background.  Center the buttons."):
-   - centred under the top bar, only as wide as what it holds and 16px either side, its bottom corners a panel's;
-     the page shows beside it (T106, Owen:  "keep it centered but make it only 32px wider than the content it needs,
-     with rounded bottom corners, and show the page background in the unused space")
-   - a window too narrow for all of it:  the whole window's width, and its names scroll (T86)
-   - the top bar's own colour and blur (I251;  a step lighter in I248, undone), over the page as the bar's is
-     (on its `::before`, so a menu inside it isn't held in its box)
-   - its pin, Add a View in bold, then its topics' icons and names (T86, T92), quiet, as the bar's menus are;
-     its search right after the last one (T106;  at the window's far right before)
-   - a thin grey line between the two bars (T86, I232), a shadow inside its top edge taking no room, so both bars keep
-     their heights on the 4px grid (as a pane bar's line, I216);  and its own line round its sides and bottom */
-.PaletteStrip {
+/* The add bar down the editor's left edge, in Edit (epic `editor` T151):  a panel of its own, as narrow as its buttons,
+   beside the app;  room above and below it the page's (`--spell-page-padding`), the app's column its gap
+   - docked to the window's left edge (T162):  no room on its left, its left corners square
+   - a `+` atop, then a column of 32px buttons, 4px apart, each its icon alone, centred, 4px in from the panel's sides:
+     40px across */
+.PaletteRailPlace {
   flex: none;
-  position: relative;
-  isolation: isolate;
-  /* the search's width:  fixed, typed in or not (T87) */
-  --palette-search-width: 150px;
   display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  width: fit-content;
-  max-width: 100%;
-  height: 32px;
-  margin-inline: auto;
-  /* 16px to its outer edge at its start, its 1px line included;  4px past the search at its end
-     (I252, Owen:  "Make padding to the right of the search bar 4px") */
-  padding-inline: 15px 3px;
-  min-width: 0;
-  border: var(--ui-menu-header-bar-border, 1px solid var(--ui-border-color));
-  border-block-start: 0;
-  /* 20px round, every corner (I252, Owen:  "Make this border-radius 20px", then C5:  "All corners round";
-     the theme's pane radius, bottom only, before) */
-  border-radius: 20px;
-  /* the line under the top bar half as strong as a border (I251, Owen:  "I just wanted the border between the top menu
-     and the add bar to be lighter, not the bar itself") */
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ui-border-color) 50%, transparent);
+  box-sizing: content-box;
+  width: 40px;
+  padding-block: var(--spell-page-padding);
 
-  &::before {
-    content: "";
-    position: absolute;
-    /* clear of the line above it:  over it, this layer hid it (I232) */
-    inset: 1px 0 0;
-    z-index: -1;
-    border-radius: inherit;
-    /* the top bar's own fill, over the page as the top bar's is, so the two bars are one colour (epic `editor` I251,
-       Owen:  "The visible parts of this should have the same background as the menubar";  I248's lighter wash undone:
-       he meant the line between them) */
-    background: var(--spell-menu-bar-fill);
-    -webkit-backdrop-filter: var(--spell-menu-bar-filter);
-    backdrop-filter: var(--spell-menu-bar-filter);
-    pointer-events: none;
-  }
-
-  /* its first showing on the page, under the top bar already drawn:  a short fade and slide down (I255) */
+  /* its first showing on the page, under the top bar already drawn:  a short fade and slide in (I255) */
   &.arriving {
-    animation: palette-strip-arrives var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out) both;
+    animation: palette-rail-arrives var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out) both;
 
     @media (prefers-reduced-motion: reduce) {
       animation: none;
     }
   }
+}
+.PaletteRail {
+  flex: 1 1 auto;
 
-  /* its pin, Add a View, then the names:  they shrink and scroll in a narrow window, never the search */
-  & .PaletteStripAdd {
+  /* its one child, filling it:  the `+`, then the buttons */
+  & > .PaletteRailColumn {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+  }
+  /* the `+`:  what the bar is for, not a button (T162) */
+  & .PaletteRailAdd {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: var(--ui-text-muted);
+    /* its box its glyph's, with no room after it for words:  the glyph is what's centred */
+    --ui-icon-width: 1em;
+    --ui-icon-distance: 0;
+  }
+  /* the buttons a column down the panel's middle:  as wide as the panel, its items centred across it
+     (a vertical icon menu is as narrow as its items, at the panel's left:  its icons sat 4px left of its middle, T166) */
+  & ui-menu::part(menu) {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
     align-items: center;
     gap: 4px;
-    min-width: 0;
+    margin: 0;
+    padding: 0 0 4px 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
   }
-  & .PaletteStripLabel {
-    flex: none;
-    padding-inline-end: 4px;
-    font-size: 13px;
-    font-weight: var(--ui-font-weight-bold, 700);
-    white-space: nowrap;
-  }
-  & .PaletteStripGroups {
-    min-width: 0;
-  }
-  & .PaletteStripGroups::part(menu) {
-    /* no reach past its ends, as a row whose first word lines up with an edge has:  so the bar's room is even */
-    margin-inline: 0;
-  }
-  & .PaletteStripEnd {
-    flex: none;
-    /* the names never touch the search */
-    margin-inline-start: 16px;
+  /* its icon in the middle of its square, both ways:  a vertical menu's items lay out as a column, its icon on top */
+  & ui-item.PaletteRailButton::part(item) {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 8px;
-  }
-
-  /* each name's icon close to its word, Spell UI's own distance (its icon margin, no gap on top);
-     the names 16px apart, so an icon reads as its own name's (epic `editor` I203, Owen:  "Same with these") */
-  & ui-item.PaletteGroupName::part(item) {
-    gap: 0;
-    padding-inline: 8px;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    /* none of a vertical menu's room round each item:  4px apart, the column's gap (T162) */
+    margin: 0;
+    padding: 0;
     color: var(--ui-text-muted);
-    font-size: 13px;
-    font-weight: var(--ui-font-weight-normal, 400);
   }
-  & ui-item.PaletteGroupName:hover::part(item) {
+  /* ... its box the glyph's own, with no line's room under it, so the glyph is what's centred */
+  & ui-item.PaletteRailButton::part(icon) {
+    display: flex;
+    margin: 0;
+  }
+  & ui-item.PaletteRailButton:hover::part(item),
+  & ui-item.PaletteRailButton:focus-visible::part(item) {
     color: var(--ui-text-color);
   }
-}
-/* its search, at its end:  compact, the same width typed in or not (epic `editor` J140, T87);
-   a magnifying glass at its start, and its clear ✕ over its end while it holds text */
-.PaletteStrip .PaletteStripField {
-  position: relative;
-  flex: none;
-  display: flex;
-  align-items: center;
-}
-.PaletteStrip .PaletteStripSearch {
-  width: var(--palette-search-width);
-
-  /* room for the ✕, so the text never runs under it */
-  &::part(control) {
-    padding-inline-end: 24px;
+  /* a divider:  a hairline across, 8px in from each side */
+  & ui-item[kind="divider"] {
+    align-self: stretch;
+    margin-inline: 4px;
   }
 }
-.PaletteStrip .PaletteStripClear {
-  position: absolute;
-  inset-inline-end: 7px;
-  font-size: 12px;
+
+/* docked to the window's left edge:  its left corners square, over the theme's rounded panels (T162) */
+.PaletteRailPlace > .SplitPane.PaletteRail,
+:root[data-spell-theme] .PaletteRailPlace > .SplitPane.PaletteRail {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
 }
 
-/* its search's results:  a layer over the page, holding each topic's matches as a menu under its name;
-   where each goes is `layOutMatches()`'s */
-.PaletteMatches {
-  position: fixed;
-  inset: 0 auto auto 0;
-  width: 0;
-  height: 0;
+/* a group's flyout, beside the bar:  its name and search atop, its rows under, as many as fit the window, then they
+   scroll */
+ui-popup.PaletteFlyout::part(popup) {
+  width: 220px;
+  max-height: min(calc(100dvh - 120px), 560px);
+  overflow: auto;
+}
+.PaletteFlyoutHead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 40px;
+  padding: 4px 8px;
+
+  & .PaletteFlyoutName {
+    color: var(--ui-text-muted);
+    font-size: 11px;
+    font-weight: var(--ui-font-weight-bold, 700);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  /* its search button, beside the name, never in the name's way:  open, the field covers the row, the name hidden
+     under it (T162);  out of the row's flow, open or shut, so nothing under it moves as it folds */
+  &:has(ui-search:is(:state(expanded), :not([collapsed]))) .PaletteFlyoutName {
+    visibility: hidden;
+  }
+  & ui-search {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: 8px;
+    translate: 0 -50%;
+  }
+  /* ... and Search's own, open from the start, its words saying what the name did */
+  & ui-search:is(:state(expanded), :not([collapsed])) {
+    --ui-search-expanded-width: 100%;
+    inset-inline-start: 8px;
+  }
+}
+/* its rows thinner, their icons further in:  the triangle's room kept, though it never shows (T162) */
+ui-popup.PaletteFlyout {
+  --ui-tree-row-height: 24px;
+}
+ui-popup.PaletteFlyout .PaletteTree ui-tree-item::part(toggle) {
+  display: inline-flex;
+  visibility: hidden;
+}
+
+/* a row's star (epic `editor` T152):  shown while its row is hovered or focused, always on a starred one, in the
+   theme's warning hue;  its room kept, so the row's words never move
+   - its icon alone, no box (T162):  under the mouse, only its colour changes */
+.PaletteTree ui-button.PaletteStar {
+  margin-inline-end: 4px;
+}
+.PaletteTree ui-button.PaletteStar::part(button) {
+  min-height: 0;
   margin: 0;
   padding: 0;
   border: 0;
   background: none;
-  overflow: visible;
-}
-.PaletteMatchPanel {
-  position: fixed;
-  box-sizing: border-box;
-  padding: 4px;
-  /* as a menu of the top bar looks (`MenuBar.css`, `.BarMenuPopup`) */
-  border: var(--ui-border-width, 1px) solid var(--ui-border-color-strong);
-  border-radius: var(--ui-radius);
-  background: color-mix(in oklab, var(--ui-surface) 25%, var(--ui-background));
-  box-shadow: var(--ui-shadow-floating);
-  backdrop-filter: blur(24px) saturate(1.4);
-  /* its header stays put, its rows scroll under it */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  & .PaletteMatchRows {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    overscroll-behavior: contain;
-  }
-}
-
-/* its topic's icon and name, a menu section's header (T99):  as the popup's topic band (`.PaletteGroup h4`), not a row */
-.PaletteMatchHeader {
-  flex: none;
-  display: flex;
-  align-items: center;
-  /* its name lines up with the rows' labels, its icon with their icons (the icon's box is a little wider than its glyph) */
-  gap: 1px;
-  margin: 0 0 2px;
-  padding: 3px 8px;
-  border-radius: var(--ui-radius-sm, 6px);
-  background: color-mix(in oklab, var(--ui-text-color) 7%, transparent);
+  box-shadow: none;
   color: var(--ui-text-muted);
-  font-size: 12px;
-  font-weight: var(--ui-font-weight-bold, 700);
-  line-height: 16px;
-  white-space: nowrap;
-  cursor: default;
-  user-select: none;
-
-  & span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
-
-/* a topic's menu:  its rows, as many as fit the window, then it scrolls */
-ui-popup.PaletteGroupPopup::part(popup) {
-  min-width: 180px;
-  max-height: min(calc(100dvh - 120px), 560px);
-  overflow: auto;
+.PaletteTree ui-button.PaletteStar:not(.starred) {
+  visibility: hidden;
+}
+.PaletteTree
+  ui-tree-item:is(:hover, :focus-within):not(:has(ui-tree-item:is(:hover, :focus-within)))
+  > ui-button.PaletteStar {
+  visibility: visible;
+}
+.PaletteTree ui-button.PaletteStar:hover::part(button),
+.PaletteTree ui-button.PaletteStar.starred::part(button) {
+  color: var(--ui-warning, #f2c037);
 }
 
 /* an empty app, in Edit:  what to do */
@@ -297,21 +286,6 @@ ui-popup.PaletteGroupPopup::part(popup) {
   }
 }
 
-/* the pin while the palette is kept open:  the popup's in the theme's primary colour */
-.PalettePin.pinned {
-  color: var(--ui-primary);
-}
-/* ... the bar's, quiet:  the text's ink, a size smaller than the bar's icons, so it never vies with Spell's hat above it
-   (epic `editor` I191:  "Make pin in add view more subtle and black.  Fighting with the spell logo") */
-.PaletteStrip .PalettePin,
-.PaletteStrip .PalettePin.pinned {
-  /* the bar's first thing:  its room is the bar's (T106) */
-  margin-inline-start: 0;
-  font-size: 0.95em;
-  color: var(--ui-text-color);
-  opacity: 0.75;
-}
-
 .PaletteGhost {
   position: fixed;
   z-index: 2147483646;
@@ -348,13 +322,6 @@ ui-popup.MenuPopup {
 }
 
 /*
- * the part menu's Inspect Other Views row, with every part under the mouse at its side (`<InspectRow>`):
- * each part indented under the one it's inside, 12px a level (`--InspectRow-depth`)
- */
-ui-menu.BarMenuItems ui-submenu.InspectRow > ui-action::part(item) {
-  padding-inline-start: calc(12px + var(--InspectRow-depth, 0) * 12px);
-}
-/*
  * its side menu, often long (a column of fanned cards):  on the side of its row with the most room up or down,
  * rather than squeezed under a row low in the window, scrolled to the row pointed at
  */
@@ -362,10 +329,10 @@ ui-menu.BarMenuItems ui-submenu.InspectRow::part(flyout) {
   position-try-order: most-height;
 }
 
-/* `.PaletteStrip.arriving`:  in from just under the top bar */
-@keyframes palette-strip-arrives {
+/* `.PaletteRailPlace.arriving`:  in from the window's left edge */
+@keyframes palette-rail-arrives {
   from {
     opacity: 0;
-    translate: 0 -8px;
+    translate: -8px 0;
   }
 }

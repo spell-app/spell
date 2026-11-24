@@ -1,5 +1,6 @@
 import { NONE, proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { Priority, declaredPrefix } from "spell/parser/spell/rules/rules.types"
 import { MemberReadExpression } from "./MemberReadExpression"
 import { itsObject, type ItsMatchData } from "./properties.shared"
@@ -36,6 +37,7 @@ export class ItsKnownProperty extends MemberReadExpression<"property", ItsMatchD
     match.data.itVar = itVar ?? NONE
     match.data.ownerType = ownerType
     this.resolveMember(match, ownerType, `${property.raw}`)
+    SP.PlaceFieldMarks.warnIfGone(match, property)
     return match
   }
 

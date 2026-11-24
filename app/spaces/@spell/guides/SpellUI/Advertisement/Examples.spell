@@ -109,7 +109,7 @@
 			</example>
 		</>
 
-		<section label="Test" sticky="stack" collapsible dividing id="variations-test">
+		<section label="Test" sticky="stack" collapsible dividing>
 			<example "Test" description="An advertisement can be formatted to help verify placement.">
 				<ad unit="medium rectangle" test="Ad Unit 1"/>
 				<ad unit="medium rectangle" test="Ad Unit 2"/>

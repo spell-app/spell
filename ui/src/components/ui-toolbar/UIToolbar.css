@@ -17,7 +17,7 @@
  * | `--ui-toolbar-pill-item-padding` | room inside a pill's item | `0.5em 0.75em` |
  */
 
-@layer ui.components.toolbar.types;
+@layer ui.components.toolbar.types, ui.components.toolbar.states;
 
 @layer ui.components.toolbar.types {
   /* the toolbar itself (not an item, which adopts this sheet too):  a box of its own, whose width the page sets */
@@ -136,14 +136,14 @@
    * a segmented track hugs its items, as a segmented menu does (`alignment="fluid"` spreads it):
    * it shrinks and scrolls once they don't fit (Owen:  "second tab group doesn't need to be full width")
    */
-  .ui.toolbar > .ui.segmented.menu:not([class*="fluid aligned"]) {
+  .ui.toolbar > .ui.segmented.menu:not(.fluid-aligned) {
     flex: 0 1 auto;
   }
   /*
    * a header's row (`appearance="segmented header"`):  its items hug their words, its actions at the far end
    * - the actions as quiet as its caret, each with room to press:  `--ui-toolbar-header-action-gap`
    */
-  .ui.toolbar > .ui.segmented.header.menu:not([class*="fluid aligned"]) {
+  .ui.toolbar > .ui.segmented.header.menu:not(.fluid-aligned) {
     --_ui-menu-item-flex: 0 0 auto;
     flex: 0 1 auto;
   }
@@ -268,5 +268,23 @@
   }
   .ui.toolbar > .ui.pills.menu > .overflow.item:hover {
     background-image: linear-gradient(var(--_ui-menu-hover-background) 0 0);
+  }
+}
+
+/*******************************
+          Reorderable
+*******************************/
+
+/* `reorderable`, on its items (each adopts this sheet):  the one dragged dimmed, a line where it would land, before
+   or after the item under the pointer (the editor's file tabs:  epic `editor` T145) */
+@layer ui.components.toolbar.states {
+  :host(:state(dragged)) > .item {
+    opacity: 0.5;
+  }
+  :host(:state(drop-before)) > .item {
+    box-shadow: inset 2px 0 0 var(--ui-primary);
+  }
+  :host(:state(drop-after)) > .item {
+    box-shadow: inset -2px 0 0 var(--ui-primary);
   }
 }

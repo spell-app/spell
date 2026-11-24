@@ -42,7 +42,7 @@ describe("<ui-placeholder> classes", () => {
     ["ui-placeholder-header", "image", "image header", true],
     ["ui-placeholder-paragraph", "", "paragraph", true],
     ["ui-placeholder-line", "", "line", false],
-    ["ui-placeholder-line", 'length="very long"', "very long line", false],
+    ["ui-placeholder-line", 'length="very long"', "very long line very-long", false],
     ["ui-placeholder-line", 'length="medium"', "medium line", false],
     ["ui-placeholder-image", "", "image", false],
     ["ui-placeholder-image", "square", "square image", false],
@@ -53,7 +53,8 @@ describe("<ui-placeholder> classes", () => {
     )
     const root = rootOf(placeholder.querySelector(tag)!)
     expect(root.className).toBe(classes)
-    expect(root.getAttribute("part")).toBe(classes.split(" ").at(-1))
+    // the noun, before any phrase's joined word (`very-long`)
+    expect(root.getAttribute("part")).toBe(classes.split(" ").findLast((word) => !word.includes("-")))
     expect(!!root.querySelector("slot")).toBe(slotted)
   })
 })

@@ -1,0 +1,61 @@
+"tree viewer" is a notebook page
+	<header level="1">
+		TreeViewer
+		<header>The spell tree of the line the cursor is on.</>
+	</>
+
+	<text class="lede" paragraph>The Sentence Tree tab of the editor's Program panel, in Debug: how spell parsed the line the cursor is on, drawn as a tree. Move the cursor and it follows, so you can see what spell made of each line you write.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or reading its code</>
+		<item icon="image">A picture, not live: it needs the whole editor, and a cursor in its code</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The Program panel's Sentence tab, in Debug, with the cursor on the first line of Solitaire's Card.spell, which declares the card type: a statement group holding a comment and the type, then the type it's a kind of and its first member (the top of a taller tree).</>
+		<image src="/components/app/_images/TreeViewer.png" alt="The Sentence tab:  Statement group, holding Comment and Type Card;  under Type Card, Type TwoSidedView and Static elementTag" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>In Debug, the editor's page draws it as <text code>TreeRoot</>, without its toolbar, in the Program panel's last tab:</>
+		<text paragraph>SpellEditor.tsx · the Program panel's last tab:</>
+		<markdown>
+			```typescript
+			<Match when={tab() === "tree"}>
+			  <TreeRoot showToolbar={false} />
+			</Match>
+			```
+		</>
+		<list bulleted>
+			<item><link link="#TreeRoot">TreeRoot</> is the pane: a <link link="#TreeToolbar">TreeToolbar</> (just its "Spell Tree" header today) above a <text code>TreeViewer</>. It follows the open file's parse and the editor's cursor.</>
+			<item><text code>TreeViewer</> works out the tree of just the line under the cursor, so it stays small, and draws it with Spell UI's <text code>&lt;ui-tree-diagram&gt;</>. A new tree on every move.</>
+			<item>With no line there, or nothing parsed yet, it says to put the cursor on a line.</>
+			<item>An error working out the tree shows in its place and goes to <text code>showError</>; the next move tries again.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="TreeViewer"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-treeviewer-tsx" link="/src/app/solid/TreeViewer.tsx"><text title="src/app/solid/TreeViewer.tsx" code>TreeViewer.tsx</></>: the pane, its toolbar and the viewer, and their props</>
+			<item><link target="src-packages-app-src-solid-treeviewer-css" link="/src/app/solid/TreeViewer.css"><text title="src/app/solid/TreeViewer.css" code>TreeViewer.css</></>: its look</>
+			<item>Its tests: <link target="src-tests-app-src-solid-treeviewer-browser-test-tsx" link="/tests/app/solid/TreeViewer.browser.test.tsx"><text title="tests/app/solid/TreeViewer.browser.test.tsx" code>TreeViewer.browser.test.tsx</></></>
+			<item>Where it's drawn: <link target="src-packages-app-src-pages-spelleditor-tsx" link="/src/app/pages/SpellEditor.tsx"><text title="src/app/pages/SpellEditor.tsx" code>SpellEditor.tsx</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

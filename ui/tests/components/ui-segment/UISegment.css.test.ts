@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { segmentsVocabulary } from "spell/ui/components/ui-segment/UISegments.en"
@@ -59,7 +58,7 @@ describe("UISegment.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = segmentRaw + colorsCSS
+    const css = segmentRaw + colorsSharedCSS
     for (const vocabulary of [segmentVocabulary, segmentsVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -74,7 +73,7 @@ describe("UISegment.css source", () => {
 describe("UISegment.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every segment in %s", (path) => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const segments = root.querySelectorAll<HTMLElement>(".ui.segment")
     expect(segments.length).toBeGreaterThan(0)
     for (const segment of segments) {
@@ -87,7 +86,7 @@ describe("UISegment.css examples", () => {
 
   it("draws a plain segment as a bordered, rounded, lightly shadowed box", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const style = getComputedStyle(root.querySelector('.ui.segment[class="ui segment"]')!)
     expect(style.borderTopStyle).toBe("solid")
     expect(style.borderBottomWidth).toBe("1px")
@@ -102,14 +101,14 @@ describe("UISegment.css examples", () => {
 
   it("takes a public token from a wrapper (static markup)", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(`<div style="--ui-segment-radius: 12px"><div class="ui segment">x</div></div>`)
+    const root = Sheets.render(`<div style="--ui-segment-radius: 12px"><div class="ui segment">x</div></div>`)
     expect(getComputedStyle(root.querySelector(".ui.segment")!).borderTopLeftRadius).toBe("12px")
   })
 
   it("colours the top edge, and fills inverted ones in the dark scheme", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
-    const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
+    const red = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
     const colored = getComputedStyle(root.querySelector(".ui.red.segment:not(.inverted)")!)
     expect(colored.borderTopColor).toBe(getComputedStyle(red).color)
     expect(colored.boxShadow).toContain("inset")
@@ -124,7 +123,7 @@ describe("UISegment.css examples", () => {
 
   it("inverts the members of an inverted group (Fomantic: dark members), not segments nested in them", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div class="ui inverted segments"><div class="ui segment" id="m"><div class="ui segment" id="n">N</div></div></div>`
     )
     const member = getComputedStyle(root.querySelector("#m")!)
@@ -138,7 +137,7 @@ describe("UISegment.css examples", () => {
 
   it("resets a plain segment nested in an inverted one to the light scheme, Fomantic-style", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div class="ui inverted segment"><div class="ui segment"><p>Plain again</p></div></div>`
     )
     const outer = getComputedStyle(root)
@@ -151,7 +150,7 @@ describe("UISegment.css examples", () => {
 
   it("collapses a group nested directly in another group to a divider line, no box of its own", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(`<div class="ui segments">
+    const root = Sheets.render(`<div class="ui segments">
       <div class="ui segment"><p>Top</p></div>
       <div class="ui segments">
         <div class="ui segment"><p>Nested top</p></div>
@@ -169,7 +168,7 @@ describe("UISegment.css examples", () => {
 
   it("joins attached segments edge to edge", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const [top, middle, bottom] = root.querySelectorAll<HTMLElement>(".ui.attached.segment:not(.seamless)")
     expect(parseFloat(getComputedStyle(top!).borderTopLeftRadius)).toBeGreaterThan(0)
     expect(getComputedStyle(top!).borderBottomLeftRadius).toBe("0px")
@@ -182,7 +181,7 @@ describe("UISegment.css examples", () => {
 
   it("groups segments into one box with hairlines, stacked or side by side", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(EXAMPLES["./examples/groups.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/groups.html"]!)
     const group = root.querySelector<HTMLElement>(".ui.segments")!
     expect(getComputedStyle(group).borderTopStyle).toBe("solid")
     const [first, second] = group.querySelectorAll<HTMLElement>(":scope > .segment")
@@ -201,7 +200,7 @@ describe("UISegment.css examples", () => {
 
   it("dims disabled segments and spins loading ones", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     expect(parseFloat(getComputedStyle(root.querySelector(".ui.disabled.segment")!).opacity)).toBeCloseTo(0.45, 2)
     const loading = root.querySelector(".ui.loading.segment")!
     expect(getComputedStyle(loading, "::after").animationName).toBe("ui-segment-spin")
@@ -210,7 +209,7 @@ describe("UISegment.css examples", () => {
 
   it("pads, fits, compacts, rounds, piles and scrolls", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const variations = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const variations = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const style = (selector: string) => getComputedStyle(variations.querySelector(selector)!)
     expect(parseFloat(style(".ui.padded.segment").paddingTop)).toBeCloseTo(
       1.5 * parseFloat(style(".ui.padded.segment").fontSize)
@@ -231,14 +230,14 @@ describe("UISegment.css examples", () => {
     expect(veryShort).toBeGreaterThan(0)
     expect(short).toBeGreaterThan(veryShort)
     expect(style(".ui.short.scrolling.resizable.segment").resize).toBe("vertical")
-    const types = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const types = Sheets.render(EXAMPLES["./examples/types.html"]!)
     expect(getComputedStyle(types.querySelector(".ui.piled.segment")!, "::before").rotate).toMatch(/^-1\.2deg$/)
     expect(getComputedStyle(types.querySelector(".ui.piled.segment")!.parentElement!).zIndex).toBe("0")
   })
 
   it("scales by size;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, segmentCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     const ladder = ["mini", "tiny", "small", "large", "big", "huge", "massive"].map((name) =>
       size(`.ui.${name}.segment`)
@@ -267,7 +266,7 @@ describe("UISegment.css in shadow roots", () => {
     expect(getComputedStyle(children[1]!).borderTopLeftRadius).toBe("0px")
     expect(getComputedStyle(children[1]!).borderTopStyle).toBe("none")
     expect(parseFloat(getComputedStyle(children[2]!).borderBottomRightRadius)).toBeGreaterThan(0)
-    const loose = Fixture.render(`<div><span></span><span></span></div>`)
+    const loose = Sheets.render(`<div><span></span><span></span></div>`)
     const [a, b] = [...loose.children].map((host) => {
       Sheets.attach(host, `<div class="ui segment">x</div>`, sheets())
       return Sheets.inner(host)

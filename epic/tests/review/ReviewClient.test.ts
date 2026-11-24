@@ -5,8 +5,8 @@ import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 import { ReviewClient } from "spell/epic/review/ReviewClient"
 import {
   CLOSED_HOLD_MS,
-  INSTANT_FAIL_MS,
   INSTANT_GRACE_MS,
+  INSTANT_NUDGE_MS,
   NOBODY_LISTENING,
   REVISIT_KEY_PREFIX,
   type ReviewClientOptions
@@ -18,7 +18,7 @@ import {
 
 const PAGE = "/epics/sample/sample.plan.html"
 const TOKEN = "token-1"
-const ITEMS = new Set(["q1", "j2", "o1"])
+const ITEMS = new Set(["q1", "j2", "o1", "m1"])
 
 /**
  * The page server's review routes over a REAL `ReviewInbox`, as `fetch`:
@@ -735,6 +735,52 @@ describe("ReviewClient's pictures and testing", () => {
     expect(client.markOf("q1")).toMatchObject({ action: "revisit", note: "look at this", shot })
   })
 
+  // epic `epic-engine` T165:  what a test's steps printed, pasted under each command
+  test("saveOutput():  a paste alone is a revisit;  his Approve carries it;  taken back, the revisit stays", async () => {
+    const { client, server } = await started()
+    expect(await client.saveOutput("m1", 2, "\nDone.  Your computer trusts it\n  ")).toBe(true)
+    expect(server.posts.at(-1)).toEqual([
+      "mark",
+      {
+        page: PAGE,
+        id: "m1",
+        mark: {
+          action: "revisit",
+          when: "soon",
+          note: "",
+          outputs: [{ step: 2, text: "Done.  Your computer trusts it" }]
+        }
+      }
+    ])
+    await client.saveOutput("m1", 1, "ok")
+    expect(client.outputOf("m1", 1)).toBe("ok")
+    expect(server.inbox.marks.m1!.outputs).toEqual([
+      { step: 1, text: "ok" },
+      { step: 2, text: "Done.  Your computer trusts it" }
+    ])
+    client.press("m1", "approve")
+    await vi.waitFor(() => expect(server.inbox.marks.m1!.action).toBe("approve"))
+    expect(server.inbox.marks.m1!.outputs).toHaveLength(2)
+    // his ✓ taken back:  what he pasted stays, a revisit again
+    client.press("m1", "approve")
+    await vi.waitFor(() => expect(server.inbox.marks.m1!.action).toBe("revisit"))
+    expect(client.outputOf("m1", 2)).toBe("Done.  Your computer trusts it")
+  })
+
+  test("saveOutput():  a note typed keeps the pastes;  every box emptied, the bare revisit goes", async () => {
+    const { client, server } = await started()
+    await client.saveOutput("m1", 1, "h2 h2 h2")
+    await client.saveTyped("m1", "all green")
+    expect(server.inbox.marks.m1).toMatchObject({ action: "revisit", note: "all green", outputs: [{ step: 1 }] })
+    await client.saveOutput("m1", 1, "")
+    expect(server.inbox.marks.m1).toMatchObject({ action: "revisit", note: "all green" })
+    expect(server.inbox.marks.m1!.outputs).toBeUndefined()
+    await client.saveTyped("m1", "")
+    await client.saveOutput("m1", 3, "x")
+    await client.saveOutput("m1", 3, "  ")
+    expect(server.inbox.marks.m1).toBeUndefined()
+  })
+
   test("prepareTests():  a request for now under `tests`, running until it's done", async () => {
     const server = new FakeServer()
     const { client } = await started(server, { hasItem: (id) => ITEMS.has(id) || id === "tests" })
@@ -912,21 +958,64 @@ describe("ReviewClient.isClosing() (an instant ✓ or x, drawn closed at once)",
     }
   })
 
-  test("never applied:  given up on after its grace and INSTANT_FAIL_MS, the item back and a notice", async () => {
+  // epic `epic-engine` I463:  the page server busy (its lock held) answers 503:  the tick is sent again, quietly
+  test("the server busy:  the mark is sent again by itself, and nothing is said", async () => {
+    const { client, server } = await started()
+    const notices: string[] = []
+    client.onNotice((message) => notices.push(message))
+    server.failures.set("mark", { status: 503, error: "the page is busy" })
+    client.press("q1", "drop")
+    await vi.waitFor(() => expect(server.inbox.forPage().marks.q1?.action).toBe("drop"), { timeout: 5000 })
+    expect([client.isClosing("q1"), notices]).toEqual([true, []])
+  })
+
+  // epic `epic-engine` I463:  "This is lame -- just do it"
+  test("not applied yet:  stays closing, asks the server again, never says try again", async () => {
     vi.useFakeTimers()
     try {
-      const { client } = await started()
+      const { client, server } = await started()
       const notices: string[] = []
       client.onNotice((message) => notices.push(message))
       client.press("q1", "drop")
       await vi.waitFor(() => expect(client.markOf("q1")).toBeDefined())
+      const reads = () => server.fetch.mock.calls.filter(([url]) => url.startsWith("/api/epics/review/inbox")).length
+      const before = reads()
+      await vi.advanceTimersByTimeAsync(INSTANT_GRACE_MS + INSTANT_NUDGE_MS * 3 + 10)
       expect(client.isClosing("q1")).toBe(true)
-      vi.advanceTimersByTime(INSTANT_GRACE_MS + INSTANT_FAIL_MS + 10)
-      expect(client.isClosing("q1")).toBe(false)
-      expect(notices.at(-1)).toMatch(/Q1 isn't closed/)
+      expect(reads()).toBeGreaterThanOrEqual(before + 3)
+      expect(notices.some((notice) => /try again|isn't closed/.test(notice))).toBe(false)
+      // the server gets to it:  closed, as any applied mark
+      server.inbox.setMark("q1", null)
+      await vi.advanceTimersByTimeAsync(INSTANT_NUDGE_MS + 10)
+      expect([client.markOf("q1"), client.isClosing("q1")]).toEqual([undefined, true])
     } finally {
       vi.useRealTimers()
     }
+  })
+})
+
+// epic `epic-engine` I462:  "update them immediately as if I had clicked each manually"
+describe("ReviewClient.closeAll():  each drawn closed at once, as his ✓ on it", () => {
+  test("closing before the server answers;  one it left, drawn as before", async () => {
+    const { client, server } = await started()
+    server.hold("close-all")
+    const answer = client.closeAll("judgements", ["j2", "q1"])
+    expect([client.isClosing("j2"), client.isHeldInView("j2"), client.closingAs("j2")]).toEqual([true, true, "approve"])
+    expect(client.isClosing("q1")).toBe(true)
+    server.release()
+    await answer
+    // the fake answers no `left`;  a failure is the other way back
+    expect(client.isClosing("j2")).toBe(true)
+  })
+
+  test("the post failed:  every one drawn as before, and a notice says why", async () => {
+    const { client, server } = await started()
+    const notices: string[] = []
+    client.onNotice((message) => notices.push(message))
+    server.failures.set("close-all", { status: 500, error: "the page is gone" })
+    expect(await client.closeAll("judgements", ["j2"])).toBeUndefined()
+    expect(client.isClosing("j2")).toBe(false)
+    expect(notices.at(-1)).toMatch(/the page is gone/i)
   })
 })
 

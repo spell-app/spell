@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { embedVocabulary } from "spell/ui/components/ui-embed/UIEmbed.en"
@@ -42,7 +41,8 @@ describe("UIEmbed.css source", () => {
   it("covers every class word the vocabulary can emit, and every ratio", () => {
     for (const phrase of Sheets.classPhrases(embedVocabulary))
       expect(Sheets.covers(embedRaw, phrase), `${embedVocabulary.tag}: ${phrase}`).toBe(true)
-    for (const ratio of ["4:3", "16:9", "21:9"]) expect(Sheets.covers(embedRaw, ratio), ratio).toBe(true)
+    // a ratio's class word, escaped:  `.\34 \:3`
+    for (const ratio of ["4:3", "16:9", "21:9"]) expect(embedRaw, ratio).toContain(`.${CSS.escape(ratio)}`)
     expect(Sheets.covers(embedRaw, "square")).toBe(true)
   })
 })
@@ -54,7 +54,7 @@ describe("UIEmbed.css source", () => {
 describe("UIEmbed.css examples", () => {
   it("sizes each box by its ratio, 16:9 by default", () => {
     Sheets.adopt([...foundationCSS, embedCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     expect(ratio(".ui.embed:not([class*=':'], .square)")).toBeCloseTo(16 / 9, 1)
     expect(ratio('.ui.embed[class*="4:3"]')).toBeCloseTo(4 / 3, 1)
     expect(ratio('.ui.embed[class*="21:9"]')).toBeCloseTo(21 / 9, 1)
@@ -69,7 +69,7 @@ describe("UIEmbed.css examples", () => {
 
   it("fills the box with the play button, the placeholder and the icon overlay", () => {
     Sheets.adopt([...foundationCSS, embedCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const embed = root.querySelector<HTMLElement>(".ui.embed")!
     const box = embed.getBoundingClientRect()
     for (const selector of [".play", ".placeholder", ".icon"]) {
@@ -89,7 +89,7 @@ describe("UIEmbed.css examples", () => {
 
   it("shows an active embed's frame, edge to edge", () => {
     Sheets.adopt([...foundationCSS, embedCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const active = root.querySelector<HTMLElement>(".ui.active.embed")!
     const frame = active.querySelector("iframe")!
     expect(getComputedStyle(active.querySelector(".embed")!).display).toBe("block")
@@ -100,7 +100,7 @@ describe("UIEmbed.css examples", () => {
 
   it("hides the placeholder parts once active, and the frame before", () => {
     Sheets.adopt([...foundationCSS, embedCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div class="ui active embed"><button class="play" type="button" aria-label="Play"></button></div>` +
         `<div class="ui embed"><div class="embed"></div></div>`
     )
@@ -116,7 +116,7 @@ describe("UIEmbed.css examples", () => {
 describe("UIEmbed.css tokens", () => {
   it("takes a public token from a wrapper or the embed itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, embedCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-embed-ratio: 2 / 1"><div class="ui embed"></div></div>` +
         `<div class="ui embed" style="--ui-embed-background: rgb(255, 0, 0)"></div>`
     )

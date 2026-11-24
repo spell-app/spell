@@ -1,7 +1,7 @@
 import { NONE, proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import { longestNameIn, namesWithGrammarWords } from "spell/parser/spell/rules/rules.types"
+import { isWordIn, longestNameIn, namesWithGrammarWords } from "spell/parser/spell/rules/rules.types"
 
 /**
  * Base pattern rule for matching a type name, singular or plural, known or unknown:
@@ -132,30 +132,31 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   }
 
   /**
-   * A parse error for each retired word in `statement`, e.g. `it has parts "front" and "back"`:
-   * `"parts" is now "slots"`, over just those words.
-   * - Each error's `data.replacement` is the words to put in their place, for a quick fix;  `""` if they just go.
-   * - Reported by the line, as JSX errors are:  the statement still compiles, its words read as the new ones.
+   * Report each retired word in `statement`, e.g. `it has parts "front" and "back"`:
+   * `"parts" is now "slots"`, over just those words -- one of Spell's old forms (`SP.OldForms`, epic `language` P68).
+   * - A warning noted on `statement` until its form's drop version;  from then on an error, returned for the line to
+   *   report, as JSX errors are.
+   * - Either way the problem's `data.replacement` is the words to put in their place, for a fix;  `""` if they just go.
+   * - The statement still compiles, its words read as the new ones.
    */
-  static retiredWordErrorsIn(statement: P.Match): P.Match[] {
+  static reportRetiredWords(statement: P.Match): P.Match[] {
     const errors: P.Match[] = []
     visit(statement)
     return errors
 
-    /** Collect `match`'s retired word, if it has one, then look below it. */
+    /** Report `match`'s retired word, if it has one, then look below it. */
     function visit(match: P.Match) {
       if (match.rule.name === "block") return
       const { retired: replacement, retiredTokens } = match.data as RetiredData
       if (replacement !== undefined && retiredTokens) {
-        const { scope } = match
+        const language = SP.Language.of(match.scope)
         const words = retiredTokens.map((token) => token.value).join(" ")
-        const language = SP.Language.of(scope)
         const message = replacement
           ? language.parserMessage("retired-word", { words, replacement })
           : language.parserMessage("retired-word-gone", { words })
-        const error = SP.spellParser.createParseError(scope, [...retiredTokens], message)
-        error.data.replacement = replacement
-        errors.push(error)
+        const id = language.words.oldForms?.[words.toLowerCase()] ?? "parts"
+        const error = SP.OldForms.report(statement, [...retiredTokens], { id, message, replacement })
+        if (error) errors.push(error)
       }
       for (const item of match.matched) if (item instanceof P.Match) visit(item)
     }
@@ -210,7 +211,7 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     tokens: P.Token[]
   ): P.MatchFor<this> | undefined {
     const { blacklist } = SP.Language.of(scope).words
-    const names = namesWithGrammarWords(types, "type", SpellType.wordsOfTypeName, (word) => !!blacklist[word])
+    const names = namesWithGrammarWords(types, "type", SpellType.wordsOfTypeName, isWordIn(blacklist))
     if (!names.length) return undefined
     const written = SpellType.lowerWords(tokens, SpellType.MAX_NAME_WORDS)
     // plural by its first word, as a person writes it:  `cards in play`, `cartas de juego`

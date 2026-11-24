@@ -59,6 +59,7 @@ export const words = {
     "page-number-of": "Página {page} de {pages}",
     "page-showing": "Mostrando {first}-{last} de {count}",
     "page-showing-more": "Mostrando {first}-{last} de {count}+",
+    "page-size": "Filas por página",
     "read-failed": "No se puede leer ahora:  {why}",
     "read-too-soon": "El servidor pide esperar:  vuelve a intentarlo dentro de un rato",
     "read-too-soon-seconds": "El servidor pide esperar:  se volverá a intentar dentro de {seconds} segundos",

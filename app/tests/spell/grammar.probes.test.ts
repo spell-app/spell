@@ -310,7 +310,7 @@ describe("grammar probes", () => {
     `)
   })
 
-  test("T6  the retired `wait for`:  a statement waits for everything, an expression for an operand, each an error", () => {
+  test("T6  the retired `wait for`:  a statement waits for everything, an expression for an operand, each an old form's warning (epic language P68)", () => {
     expect(probe("to check: wait for x is 1", "to check again: if wait for x is 1: print 1")).toMatchInlineSnapshot(`
       "export async function check() {
         return core.asAction({ undoneAs: "Check" }, async () => await (x === 1))
@@ -319,9 +319,7 @@ describe("grammar probes", () => {
         return core.asAction({ undoneAs: "Check Again" }, async () => {
           if (await x === 1) core.console.log(1)
         })
-      }
-      ERROR 8:10 "wait for" isn't needed any more, as spell waits by itself:  take it out, or run \`spell lint --fix\`
-      ERROR 9:19 "wait for" isn't needed any more, as spell waits by itself:  take it out, or run \`spell lint --fix\`"
+      }"
     `)
   })
 

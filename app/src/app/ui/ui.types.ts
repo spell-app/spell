@@ -118,12 +118,6 @@ export const EDITOR_OWN = "data-editor-own"
  */
 export const EDITOR_FRAME = "data-editor-frame"
 
-/**
- * The group the editor's own Spell is a project of (epic `editor` P22):  `@spell/editor/spell-editor`.
- * - Run in the app pane, its views show as zones, one each (`<EditorZones>`, T63), not as an app.
- */
-export const EDITOR_PIECES = "@spell/editor"
-
 // ## The code editors
 
 /**

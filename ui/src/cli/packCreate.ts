@@ -17,7 +17,7 @@ import { buildPack, readPack } from "./packBuild"
 
 /**
  * `spell pack create <name> [--prefix x-]`:  make `spell-<name>/`, in kit `root`, a component pack that is a repo of
- * its own, laid out as spell-brand is (epic `repo-split` P14):
+ * its own, laid out as `epic/`'s pack is, but a repo of its own (epic `repo-split` P14):
  * - ALL its code in ONE `src/`, its families in `src/components/` (`"spellPack": { "components" }`)
  * - every file imported by its package name and path under `src/` (`spell-<name>/components/<tag>`), through
  *   `package.json`'s `exports`:  no alias table
@@ -30,7 +30,7 @@ import { buildPack, readPack } from "./packBuild"
  * - The kit's `workspaces` get `spell-<name>` (`joinWorkspaces()`), after its folders:
  *   - so the next `yarn install` takes it in, and its `workspace:*` dependencies resolve
  *   - so it's one of `kitFolders()`:  the kit's `yarn ts`, `yarn test` ... run it, and `spell pack` finds it
- * - The commands page (in the epic repo):  the pack's yarn scripts in its rows, beside spell-brand's (`wirePack()`).
+ * - The commands page (in the epic repo):  the pack's yarn scripts in its rows, beside spell-epic's (`wirePack()`).
  * - NOT `repos.json5`:  the repo has no remote yet;  `nextSteps()` says what to do.
  * - Then builds the pack (`buildPack()`), unless `build: false`.
  * - Idempotent:  a second run creates nothing and changes nothing.
@@ -156,7 +156,7 @@ function exportFamily(root: string, pack: ComponentPack, tag: string, report: Pa
 /**
  * What to do after `spell pack create <name>` made a new repo:  the kit can't do these for it.
  * - its own git repo (the kit git-ignores its `spell-*` folders), then the install, which takes it in (it's in `workspaces`)
- * - NOT `repos.json5`:  that lists the repos BESIDE the kit (spell-brand), with installs of their own
+ * - NOT `repos.json5`:  that lists the repos BESIDE the kit, with installs of their own
  */
 export function nextSteps(name: string): string[] {
   return [
@@ -382,7 +382,7 @@ function solidVersion(root: string): string {
  * `contentFolderOf()`):  `report.updated`, else `skipped`.
  * - a data file (`DataFile`, epic `epic-workflow` P21):  its old `commands.json` read while there's no `.json5`,
  *   and written as the `.json5`, its comments kept
- * - Its rows name each repo by its package (`spell-brand ts`):  the new pack's go beside spell-brand's
+ * - Its rows name each repo by its package (`spell-epic ts`):  the new pack's go beside spell-epic's
  *   (`commandsWithPack()`).
  */
 export function wirePack(root: string, pack: PackInfo, report: PackScaffoldReport) {
@@ -402,7 +402,7 @@ export function wirePack(root: string, pack: PackInfo, report: PackScaffoldRepor
 
 /**
  * The commands page's JSON with package `name`'s yarn scripts in its rows, or `undefined` when they're there:
- * - `review`, `ts`, `lint`, `lint:fix`, `format`, `test`:  beside `spell-brand`'s, in every row naming it
+ * - `review`, `ts`, `lint`, `lint:fix`, `format`, `test`:  beside `spell-epic`'s, in every row naming it
  * - `pack:build`, `pack:check`:  in the rows `pack-build` / `pack-check`
  */
 function commandsWithPack(text: string, name: string): string | undefined {
@@ -430,10 +430,11 @@ function commandsWithPack(text: string, name: string): string | undefined {
   return added ? DataFile.textFor(text, data) : undefined
 }
 
-/** The pack whose rows a new pack's scripts go beside:  every pack repo has the same scripts. */
-const BESIDE = "spell-brand"
+/** The pack whose rows a new pack's scripts go beside:  `epic/`'s, which has the same scripts (spell-brand's until
+ * epic `epic-engine` T124 dropped it). */
+const BESIDE = "spell-epic"
 
-/** A pack's check scripts, as every repo has them:  listed on the commands page beside spell-brand's. */
+/** A pack's check scripts, as every repo has them:  listed on the commands page beside spell-epic's. */
 const CHECK_SCRIPTS = ["review", "ts", "lint", "lint:fix", "format", "test"]
 
 /** The commands page's own pack rows, by `id`:  the pack script each lists. */

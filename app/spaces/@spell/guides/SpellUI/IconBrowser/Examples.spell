@@ -1,0 +1,21 @@
+"icon-browser examples" is a notebook page
+	<header level="1">
+		Icon Browser
+		<header>An icon browser shows every icon of a pack, to search through: clicking one copies the name that draws it.</>
+	</>
+
+	<section label="Types">
+		<section label="Icon Browser" sticky="stack" collapsible dividing>
+			<example "Icon Browser" description="Every icon of the default pack, Font Awesome's free icons.  Click one to copy its name.">
+				<icon-browser />
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Pack and search" sticky="stack" collapsible dividing>
+			<example "Pack and search" description="`pack` and `query` start it on a pack and a search.">
+				<icon-browser pack="fa7-brands" query="git" />
+			</example>
+		</>
+	</>

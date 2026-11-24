@@ -491,6 +491,12 @@ Their tabs share it, so a click in one shows in every one,
 and a patch goes down after each message and at each pause, so a game animates.
 That game lives in the server's memory, though:  restart the server, and every game ends.
 
+- A save is sent beside the games, so by itself it holds nobody else up,
+  and stopping the app waits until the last one's sent.
+  - Except where a program can't wait:  a drawing, or a thing being made, that reads while a save's being sent
+    waits for that save, and so does every other visitor.
+    An `in one go:` or a named operation there does the same.
+  - A save that fails is a line in the server's log, not an error the program catches.
 - A message that fails is logged, and the page carries on.
 - `--seed <n>` deals the same game every run.
 - A program that doesn't draw runs in the terminal instead, as `python -m spell_core.run`.
@@ -689,6 +695,7 @@ Here the org's roles are kept once, in its Admin space (`@rs/__admin`), and ever
 
 ## See also
 
+- The guide:  [Spaces and the Cloud](../guides/people-and-orgs.html), in the kit's guides/ folder
 - [The Spell app](README.md):  this folder's front page, and where spaces sit among its folders
 - [The editor](README-app.md):  what calls these models and saves through this API
 - [The example apps](README-examples.md):  what's in `@spell/examples`, and ideas for a project of your own

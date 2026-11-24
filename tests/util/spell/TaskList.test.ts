@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vite-plus/test"
 import { Task, TaskList } from "spell/util"
-import { after } from "spell/util/timing"
+import { after, soonEvenHidden } from "spell/util/timing"
 
 describe("TaskList.forEach", () => {
   test("reads a `list` function when it RUNS, so an earlier task can fill it", async () => {
@@ -48,6 +48,37 @@ describe("TaskList, cancelled and started again", () => {
     } finally {
       warn.mockRestore()
     }
+  })
+})
+
+describe("TaskList, letting the browser in between tasks (epic `solid-2-final` P9)", () => {
+  test("work queued during a task runs before the next task", async () => {
+    const ran: string[] = []
+    const taskList = new TaskList({
+      tasks: [
+        // a key typed during the first task:  a task of its own, queued while it runs
+        // - a message, not a timer:  with no `scheduler.yield()` (node) the list lets the browser in by a message too,
+        //   and a timer's turn comes after it in node
+        new Task({ name: "a", run: async () => void (ran.push("a"), soonEvenHidden(() => ran.push("key"))) }),
+        new Task({ name: "b", run: async () => void ran.push("b") })
+      ]
+    })
+    await taskList.start(undefined)
+    expect(ran).toEqual(["a", "key", "b"])
+  })
+
+  test("cancelled while it lets the browser in:  the next task never runs", async () => {
+    const ran: string[] = []
+    const taskList: TaskList = new TaskList({
+      tasks: [
+        // cancelled as it ends, e.g. by a key typed:  the list is then letting the browser in before "b"
+        new Task({ name: "a", run: async () => void (ran.push("a"), soonEvenHidden(() => taskList.cancel())) }),
+        new Task({ name: "b", run: async () => void ran.push("b") })
+      ]
+    })
+    await taskList.start(undefined)
+    await after(0.02)
+    expect(ran).toEqual(["a"])
   })
 })
 

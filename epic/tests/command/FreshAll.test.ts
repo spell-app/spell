@@ -76,6 +76,7 @@ describe("the marks", () => {
     ).toEqual([SEO, ME])
     FreshAll.drop(SEO)
     expect(FreshAll.pending(SEO)).toBeUndefined()
+    expect(FreshAll.mark(DOCS, "docs", { paused: true }).paused).toBe(true)
     expect(FreshAll.pending("../nope")).toBeUndefined()
     expect(() => FreshAll.mark("../nope", "seo")).toThrow(TypeError)
   })
@@ -86,6 +87,15 @@ describe("the clear moment", () => {
     const mark = FreshAll.mark(SEO, "seo", { round: "r1", now: NOW })
     const file = transcript("clear", [prompt(NOW - minutes(30)), toolResult(NOW - minutes(29)), peer(NOW - minutes(1))])
     expect(FreshAll.whyNot(SEO, mark, { transcript: file, cwd: root, now: NOW })).toBeNull()
+  })
+
+  test("paused agents aren't running (T139):  clear, and woken told to leave them saved", () => {
+    const mark = FreshAll.mark(SEO, "seo", { round: "r1", now: NOW, paused: true })
+    writeFileSync(agentsFile, '[{ name: "docs-pass", status: "paused", paused: { next: "the tests" } }]\n')
+    expect(FreshAll.whyNot(SEO, mark, { cwd: root, now: NOW })).toBeNull()
+    expect(FreshAll.runningAgents("seo", root)).toEqual([])
+    expect(FreshAll.pausedAgents("seo", root)).toEqual(["docs-pass"])
+    expect(FreshAll.wakeLine(mark)).toMatch(/don't restart them/)
   })
 
   test("waits:  agents running, a question waiting, a prompt in the last 5 minutes", () => {

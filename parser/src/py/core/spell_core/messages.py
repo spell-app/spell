@@ -55,7 +55,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-ended`, `sign-in-failed`, `sign-in-who` | the same | `name`, `why` |
 | `sign-in`, `sign-out` | its buttons | |
 | `page-previous`, `page-next`, `page-number` | a list read a page at a time:  the JavaScript core's | `page` |
-| `page-number-of`, `page-showing`, `page-showing-more`, `page-size` | its footer:  the same | `pages`, `first`, `last`, `count` |
+| `page-number-of`, `page-showing`, `page-showing-more` | its footer:  the same | `pages`, `first`, `last`, `count` |
+| `page-size` | its footer's page size:  the same | |
 | `sign-in-as-spell`, `sign-in-spell-signed-out` | a Spell account's:  the JavaScript core's | `place`, `name` |
 | `sign-in-cloud-signed-out` | the cloud's, nobody signed in:  the JavaScript core's | `place` |
 | `sign-in-check-email` | the same, waiting for its link or code | `email` |
@@ -210,17 +211,27 @@ MESSAGES: dict[str, str] = {
     "file-open": "Open a file",
     "file-reopen": "Reopen {file} to save to it.",
     "file-reopen-button": "Reopen",
-    "file-missing": "Can't find {file}. It may have been moved, renamed or deleted. Your changes are safe on this device.",
+    "file-missing": (
+        "Can't find {file}. It may have been moved, renamed or deleted. Your changes are safe on this device."
+    ),
     "file-find": "Find it",
     "file-save-new": "Save as new file",
     "file-changed": "{file} changed. Read it again?",
     "file-read-again": "Read it again",
     "file-conflict-title": "{file} changed",
-    "file-conflict": "Someone changed {file} after you opened it. Which version do you want to keep?\nKeep theirs: open their version. Your changes are kept on this device, not lost.\nKeep yours: save your version over theirs.\nKeep both: save your version as a new file.",
+    "file-conflict": (
+        "Someone changed {file} after you opened it. Which version do you want to keep?\n"
+        "Keep theirs: open their version. Your changes are kept on this device, not lost.\n"
+        "Keep yours: save your version over theirs.\n"
+        "Keep both: save your version as a new file."
+    ),
     "file-keep-theirs": "Keep theirs",
     "file-keep-yours": "Keep yours",
     "file-keep-both": "Keep both",
-    "file-downloaded": "{file} is in your Downloads folder. This browser can't save back to the file you opened, so each save downloads a new copy.",
+    "file-downloaded": (
+        "{file} is in your Downloads folder. "
+        "This browser can't save back to the file you opened, so each save downloads a new copy."
+    ),
 }
 
 # A named placeholder in a message, `{type}`.

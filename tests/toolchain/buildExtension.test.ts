@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { buildExtension } from "spell/toolchain/buildExtension"
+import { buildExtension, checkKitVersion } from "spell/toolchain/buildExtension"
 
 /**
  * `buildExtension()` (the toolchain's), on made-up extensions in a temp folder:  each its own `src/extension.ts`.
@@ -29,6 +29,21 @@ describe("buildExtension()", () => {
   test("a bundle that throws as it loads fails the build", async () => {
     const folder = extension([`throw new Error("broken as it loads")`, `export function activate(): void {}`])
     await expect(buildExtension({ folder })).rejects.toThrow("broken as it loads")
+  })
+})
+
+describe("checkKitVersion() (epic `epic-engine` T140)", () => {
+  test("the kit's version:  fine;  another:  the build fails, naming both", () => {
+    const folder = mkdtempSync(join(TEMP, "versions-"))
+    const kit = mkdtempSync(join(TEMP, "kit-"))
+    const versions = (extension: string, kitVersion: string) => {
+      writeFileSync(join(folder, "package.json"), JSON.stringify({ version: extension }))
+      writeFileSync(join(kit, "package.json"), JSON.stringify({ version: kitVersion }))
+    }
+    versions("0.8.18", "0.8.18")
+    expect(() => checkKitVersion({ folder, kit })).not.toThrow()
+    versions("0.3.0", "0.8.18")
+    expect(() => checkKitVersion({ folder, kit })).toThrow("is version 0.3.0, the kit 0.8.18")
   })
 })
 

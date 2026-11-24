@@ -12,6 +12,7 @@ import {
   ownKit,
   pageServerRoot,
   pageServerSettings,
+  peerRepos,
   settingsParts
 } from "spell/server/page/settings"
 
@@ -63,7 +64,17 @@ describe("pageServerSettings()", () => {
     expect(settingsParts(root).map((part) => part.dir)).toEqual([root, join(root, "ui"), join(root, "epic")])
   })
 
-  test("then each peer repos.json5 names (spell-brand), and each project the checkout's own file names", () => {
+  test("no peers (the kit's own repos.json5 today):  an empty list, and only the kit and its folders' parts", () => {
+    expect(peerRepos(root)).toEqual([])
+    expect(settingsParts(root).map((part) => part.dir)).toEqual([root, join(root, "ui"), join(root, "epic")])
+    const bare = kit()
+    put(bare, "repos.json5", "{}")
+    expect(peerRepos(bare)).toEqual([])
+    expect(settingsParts(bare).map((part) => part.dir)).toEqual([bare, join(bare, "ui"), join(bare, "epic")])
+    rmSync(bare, { recursive: true, force: true })
+  })
+
+  test("then each peer repos.json5 names, and each project the checkout's own file names", () => {
     const withPeers = kit()
     const peer = `${withPeers}-brand`
     const tester = `${withPeers}-tester`

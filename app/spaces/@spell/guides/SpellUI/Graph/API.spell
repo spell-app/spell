@@ -1,0 +1,42 @@
+"graph api" is a notebook page
+	<header level="1">
+		Graph
+		<header>A graph draws nodes joined by edges, laid out left to right. A node may hold a graph of its own, opened in place, in a modal, or in its stead.</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-graph" only="attributes"></>
+		</>
+	</>
+
+	<section label="Properties">
+		<html>
+			<ui-docs-api family="ui-graph" only="properties"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-graph" only="events"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-graph" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-graph" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-graph" only="texts"></>
+		</>
+	</>

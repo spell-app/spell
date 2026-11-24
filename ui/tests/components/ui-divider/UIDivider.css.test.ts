@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { dividerVocabulary } from "spell/ui/components/ui-divider/UIDivider.en"
@@ -50,7 +49,7 @@ describe("UIDivider.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = dividerRaw + colorsCSS
+    const css = dividerRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(dividerVocabulary)) expect(Sheets.covers(css, phrase), phrase).toBe(true)
   })
 })
@@ -62,7 +61,7 @@ describe("UIDivider.css source", () => {
 describe("UIDivider.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every divider in %s", (path) => {
     Sheets.adopt([...foundationCSS, dividerCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const dividers = root.querySelectorAll<HTMLElement>(".ui.divider")
     expect(dividers.length).toBeGreaterThan(0)
     for (const divider of dividers) {
@@ -75,7 +74,7 @@ describe("UIDivider.css examples", () => {
 
   it("draws a plain divider as one hairline with space around it", () => {
     Sheets.adopt([...foundationCSS, dividerCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const style = getComputedStyle(root.querySelector('.ui.divider[class="ui divider"]')!)
     expect(style.borderTopStyle).toBe("solid")
     expect(style.borderTopWidth).toBe("1px")
@@ -84,7 +83,7 @@ describe("UIDivider.css examples", () => {
 
   it("draws rules either side of horizontal text, and drops one when aligned", () => {
     Sheets.adopt([...foundationCSS, dividerCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const horizontal = root.querySelector<HTMLElement>(".ui.horizontal.divider:not([class*='aligned'])")!
     expect(getComputedStyle(horizontal).display).toBe("flex")
     const before = getComputedStyle(horizontal, "::before")
@@ -97,7 +96,7 @@ describe("UIDivider.css examples", () => {
 
   it("centres a vertical divider in its owner", () => {
     Sheets.adopt([...foundationCSS, dividerCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const vertical = root.querySelector<HTMLElement>(".ui.vertical.divider")!
     const owner = vertical.parentElement!.getBoundingClientRect()
     const box = vertical.getBoundingClientRect()
@@ -108,7 +107,7 @@ describe("UIDivider.css examples", () => {
 
   it("hides, fits, sections, clears and inverts", () => {
     Sheets.adopt([...foundationCSS, dividerCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     expect(style(".ui.hidden.divider").borderTopColor).toBe("rgba(0, 0, 0, 0)")
     expect(style(".ui.fitted.divider").marginTop).toBe("0px")
@@ -117,13 +116,13 @@ describe("UIDivider.css examples", () => {
     )
     expect(style(".ui.clearing.divider").clear).toBe("both")
     expect(style(".ui.inverted.divider").colorScheme).toBe("dark")
-    const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
+    const red = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
     expect(style(".ui.red.divider").borderTopColor).toBe(getComputedStyle(red).color)
   })
 
   it("scales by size;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, dividerCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     const ladder = ["mini", "tiny", "small", "large", "big", "huge", "massive"].map((name) =>
       size(`.ui.${name}.divider`)
@@ -140,7 +139,7 @@ describe("UIDivider.css examples", () => {
 describe("UIDivider.css tokens", () => {
   it("takes a public token from a wrapper or the divider itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, dividerCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-divider-margin: 20px"><div class="ui divider"></div></div>` +
         `<div class="ui divider" style="--ui-divider-line-width: 3px"></div>`
     )

@@ -256,7 +256,7 @@ export class SignInCheck {
     }
     for (const [page, file] of Object.entries(PAGES)) {
       if (page === MAIL_PAGE && this.caughtMail === "hidden") continue
-      router.get(page, guard.hostCheck, (_request, reply) => reply.set("Cache-Control", "no-store").sendFile(file))
+      router.get(page, guard.hostCheck, (_request, reply) => reply.noStore().sendFile(file))
     }
     return this
   }
@@ -492,7 +492,7 @@ export class SignInCheck {
       const url = new URL(pending?.back ?? "/", "http://here")
       url.searchParams.set(BACK_OUTCOME, outcome)
       if (why) url.searchParams.set(BACK_WHY, why)
-      reply.set("Cache-Control", "no-store").redirect(`${url.pathname}${url.search}${url.hash}`, 303)
+      reply.noStore().redirect(`${url.pathname}${url.search}${url.hash}`, 303)
     }
     if (!pending || pending.ends <= Date.now()) {
       return goBack("failed", "That sign-in ran out, or it's from before the server restarted:  try again.")
@@ -581,7 +581,7 @@ const COOKIE_RULES = "Path=/; HttpOnly; SameSite=Strict"
 
 /** Answer `value` as JSON, never cached. */
 function answer(reply: SRV.Reply, value: unknown): void {
-  reply.set("Cache-Control", "no-store").json(value)
+  reply.noStore().json(value)
 }
 
 /** SIDE EFFECT:  the reply sets `made`'s cookie;  returns who's signed in, as the page reads it. */

@@ -332,7 +332,7 @@
 		</>
 
 		<section label="Clearing Content" sticky="stack" collapsible dividing>
-			<example "Clearing Content" description="Row wrappers will automatically clear previous columns:  the next row starts on a line of its own, even when this one isn't full.  Here empty columns push the second one to the right (\[Left and Right](#variations-left-and-right)).">
+			<example "Clearing Content" description="Row wrappers will automatically clear previous columns:  the next row starts on a line of its own, even when this one isn't full.  Here empty columns push the second one to the right (\[Left and Right](#left-and-right)).">
 				<grid>
 					<row columns="4">
 						<column>
@@ -427,7 +427,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky="stack" collapsible dividing id="varying-grids-colored">
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example "Colored" description="To include a color that is not available in the default palette, set `--ui-color` on the row or column in your CSS.">
 				<grid equal-width align="center" padding="md">
 					<row>
@@ -548,7 +548,7 @@
 			</example>
 		</>
 
-		<section label="Stackable" sticky="stack" collapsible dividing id="responsive-grids-stackable">
+		<section label="Stackable" sticky="stack" collapsible dividing>
 			<example "Stackable">
 				<grid columns="4" stackable>
 					<column>
@@ -579,7 +579,7 @@
 			</example>
 		</>
 
-		<section label="Doubling" sticky="stack" collapsible dividing id="responsive-grids-doubling">
+		<section label="Doubling" sticky="stack" collapsible dividing>
 			<example "Doubling">
 				<grid>
 					<row columns="8" doubling>
@@ -732,7 +732,7 @@
 			</example>
 		</>
 
-		<section label="Divided" sticky="stack" collapsible dividing id="types-divided">
+		<section label="Divided" sticky="stack" collapsible dividing>
 			<example "Divided" description="A grid can have dividers between its columns.">
 				<grid columns="3" divided>
 					<row>
@@ -787,7 +787,7 @@
 			</example>
 		</>
 
-		<section label="Celled" sticky="stack" collapsible dividing id="types-celled">
+		<section label="Celled" sticky="stack" collapsible dividing>
 			<example "Celled" description="A grid can have rows divided into cells.">
 				<grid celled>
 					<row>
@@ -891,7 +891,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Left and Right" sticky="stack" collapsible dividing id="variations-left-and-right">
+		<section label="Left and Right" sticky="stack" collapsible dividing>
 			<example "Left and Right" description="A column has no `floated` any more:  an empty column between two others pushes them to the left and right edges of the row.">
 				<grid>
 					<column width="5">
@@ -905,7 +905,7 @@
 			</example>
 		</>
 
-		<section label="Column Width" sticky="stack" collapsible dividing id="variations-column-width">
+		<section label="Column Width" sticky="stack" collapsible dividing>
 			<example "Column Width" description="A column can vary in width taking up more than a single grid column.">
 				<grid>
 					<column width="4">
@@ -970,7 +970,7 @@
 			</example>
 		</>
 
-		<section label="Equal Width" sticky="stack" collapsible dividing id="variations-equal-width">
+		<section label="Equal Width" sticky="stack" collapsible dividing>
 			<example "Equal Width" description="A grid can automatically resize all elements to split the available width evenly.">
 				<grid equal-width>
 					<column>
@@ -1023,9 +1023,8 @@
 			</example>
 		</>
 
-		<!-- GAP I79:  a stretched row doesn't grow the `<ui-segment>`s inside its columns. -->
 		<section label="Stretched" sticky="stack" collapsible dividing>
-			<example "Stretched" description="A row can stretch its contents to take up the entire column height.">
+			<example "Stretched" description="A row can stretch its contents to take up the entire column height:  each column's segments grow to fill it.">
 				<grid columns="3" divided>
 					<row stretched>
 						<column>
@@ -1079,7 +1078,34 @@
 			</example>
 		</>
 
-		<section label="Padded" sticky="stack" collapsible dividing id="variations-padded">
+		<section label="Fluid height" sticky="stack" collapsible dividing>
+			<example "Fluid height" description="`height=\"fluid\"` on a grid takes what's left of its parent's height (here a stack 18em tall), and lays its rows top to bottom:  a row with `height=\"fluid\"` takes what the others leave.  A page does it with the whole window:  `home is a page, filling the window`.">
+				<stack height="18em" spacing="none">
+					<grid stretched height="fluid">
+						<row>
+							<column width="16">
+								<segment>A row as tall as what's in it</segment>
+							</column>
+						</row>
+						<row height="fluid">
+							<column width="10">
+								<segment height="fluid">
+									<text paragraph>The row below takes the rest of the height;  this segment fills its column, and scrolls what doesn't fit.</text>
+									<text paragraph>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</text>
+									<text paragraph>Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.</text>
+									<text paragraph>Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est.</text>
+								</segment>
+							</column>
+							<column width="6">
+								<segment>Stretched to the row's height</segment>
+							</column>
+						</row>
+					</grid>
+				</stack>
+			</example>
+		</>
+
+		<section label="Padded" sticky="stack" collapsible dividing>
 			<example "Padded" description="A grid can preserve its vertical and horizontal gutters on first and last columns  The following grid has vertical and horizontal gutters">
 				<divider/>
 				<grid columns="2" padding="md">
@@ -1160,7 +1186,7 @@
 			</example>
 		</>
 
-		<section label="Relaxed" sticky="stack" collapsible dividing id="variations-relaxed">
+		<section label="Relaxed" sticky="stack" collapsible dividing>
 			<example "Relaxed" description="A grid can increase its gutters to allow for more negative space.">
 				<grid columns="4" spacing="lg">
 					<column>
@@ -1258,7 +1284,7 @@
 			</example>
 		</>
 
-		<section label="Centered" sticky="stack" collapsible dividing id="variations-centered">
+		<section label="Centered" sticky="stack" collapsible dividing>
 			<example "Centered" description="A grid can have its columns centered.">
 				<grid columns="2" centered>
 					<column>
@@ -1293,7 +1319,7 @@
 			</example>
 		</>
 
-		<section label="Text Alignment" sticky="stack" collapsible dividing id="variations-text-alignment">
+		<section label="Text Alignment" sticky="stack" collapsible dividing>
 			<example "Text Alignment" description="A grid, row, or column can specify its text alignment.">
 				<grid columns="3" align="center">
 					<row>
@@ -1370,7 +1396,7 @@
 			</example>
 		</>
 
-		<section label="Vertical Alignment" sticky collapsible dividing id="variations-vertical-alignment">
+		<section label="Vertical Alignment" sticky collapsible dividing>
 			<example "Vertical Alignment" description="A grid, row, or column can specify its vertical alignment to have all its columns vertically centered.">
 				<grid columns="4" vertical-align="middle" centered>
 					<row>
@@ -1474,7 +1500,7 @@
 			</example>
 		</>
 
-		<section label="Reversed" sticky="stack" collapsible dividing id="responsive-variations-reversed">
+		<section label="Reversed" sticky="stack" collapsible dividing>
 			<example "Reversed" description="A grid or row can specify that its columns should reverse order at different device sizes">
 				<grid equal-width reversed="computer">
 					<row>
@@ -1554,7 +1580,7 @@
 			</example>
 		</>
 
-		<section label="Device Visibility" sticky collapsible dividing id="responsive-variations-device-visibility">
+		<section label="Device Visibility" sticky collapsible dividing>
 			<example "Device Visibility" description="A columns or row can appear only for a specific device, or screen sizes">
 				<grid>
 					<row columns="2" only="large">
@@ -1625,7 +1651,7 @@
 			</example>
 		</>
 
-		<section label="Responsive Width" sticky collapsible dividing id="responsive-variations-responsive-width">
+		<section label="Responsive Width" sticky collapsible dividing>
 			<example "Responsive Width" description="A column can specify a width for a specific device">
 				<grid>
 					<column width-mobile="16" width-tablet="8" width-computer="4">

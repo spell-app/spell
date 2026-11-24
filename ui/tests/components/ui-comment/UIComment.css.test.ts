@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { commentVocabulary } from "spell/ui/components/ui-comment/UIComment.en"
@@ -39,7 +38,7 @@ function adopt() {
 /** Render example `name`;  returns its root. */
 function example(name: string): HTMLElement {
   adopt()
-  return Fixture.render(`<div style="width: 1000px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
+  return Sheets.render(`<div style="width: 1000px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
 }
 
 /** The first comment list in the section whose `<h4>` says `title`. */
@@ -84,7 +83,7 @@ describe("UIComment.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = commentRaw + colorsCSS
+    const css = commentRaw + colorsSharedCSS
     for (const vocabulary of [commentsVocabulary, commentVocabulary])
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -98,7 +97,7 @@ describe("UIComment.css source", () => {
 describe("UIComment.css examples", () => {
   it.each(Object.keys(EXAMPLES))("lays out every visible comment in %s", (path) => {
     adopt()
-    const root = Fixture.render(`<div style="width: 1000px">${EXAMPLES[path]!}</div>`)
+    const root = Sheets.render(`<div style="width: 1000px">${EXAMPLES[path]!}</div>`)
     const comments = [...root.querySelectorAll<HTMLElement>(".ui.comments .comment")].filter(
       (comment) => !comment.closest(".collapsed")
     )
@@ -145,7 +144,7 @@ describe("UIComment.css examples", () => {
 describe("UIComment.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, commentCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-comments-max-width: 300px"><div class="ui comments"><div class="comment">x</div></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.comments")!).maxWidth).toBe("300px")

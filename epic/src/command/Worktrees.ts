@@ -4,6 +4,7 @@ import { basename, dirname, join, relative } from "node:path"
 
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
+import { PortBook } from "spell/server/PortBook"
 import { RealPath } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
@@ -12,7 +13,7 @@ import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { CodeHost, type CodeHostClient } from "spell/epic/config/CodeHost"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
-import { URGENT_STATES } from "spell/epic/list/EpicState"
+import { needsOwen } from "spell/epic/list/EpicState"
 import { PhaseStatuses } from "spell/epic/phases"
 
 import {
@@ -288,6 +289,7 @@ export class Worktrees {
    *   1. its servers stopped (`CheckoutServers.stop()`)
    *   2. `git worktree remove [--force]`:  git refuses a worktree with changes, unless `force`
    *   3. its saved-session link taken away, if it's one to main's (`SessionFolders.unlink()`), as the worktree hook does
+   *   4. the ports written down for its servers forgotten (`PortBook.forget()`)
    * - NOT its branch, unless `branches`:  the caller deletes it (`git branch -d`), as it would after
    *   `git worktree remove`
    * - refuses (`EpicCommandError`) the main checkout, a folder that isn't one of the repo's worktrees, and git's refusal
@@ -318,6 +320,8 @@ export class Worktrees {
     for (const { repo, main: clone, worktree } of found)
       lines.push(...Worktrees.removeOne(worktree, clone, { force }).map((line) => `${repo}:  ${line}`))
     lines.push(...Worktrees.removeOne(path, main, { force, sessions: this.main }))
+    // the ports written down for its servers are free again (`PortBook`, epic `epic-engine` P82)
+    new PortBook().forget(path)
     if (branches && branch && branch !== "(detached)") lines.push(Worktrees.deleteBranch(main, branch))
     return lines
   }
@@ -427,7 +431,7 @@ export class Worktrees {
   /**
    * Each worktree in the worktrees' folders:  `{ name, path, branch }`.
    * - the folders:  `.claude/worktrees/`, or beside the repo and the old place too (`EpicConfig.worktreesFolders`)
-   * - and each peer's own (`EpicConfig.peers`:  spell-brand's `../spell-brand.worktrees/`), `main` its checkout:
+   * - and each peer's own (`EpicConfig.peers`:  `../spell-x.worktrees/`), `main` its checkout:
    *   so `/worktrees` lists a peer's `/isolate` worktrees too
    * - `path` as git lists it:  an unrepaired worktree's old path, after a move behind a compat link, matches its
    *   folder all the same (`RealPath`, epic `epic-engine` I59)
@@ -436,7 +440,7 @@ export class Worktrees {
     const config = this.config
     // this repo's own:  `main` left out, it's `this.main`
     const own = Worktrees.namedIn(this.main, config.worktreesFolders).map(({ main: _, ...it }) => it)
-    // each PEER's (spell-brand's, beside the kit;  epic-engine's P49, Q50 D):  its own lone worktrees, in its own folder
+    // each PEER's (beside the kit;  epic-engine's P49, Q50 D):  its own lone worktrees, in its own folder
     const peers = config.peers
       .filter(({ main }) => existsSync(join(main, ".git")))
       .flatMap(({ main }) => Worktrees.namedIn(main, new EpicConfig(main).worktreesFolders))
@@ -465,9 +469,11 @@ export class Worktrees {
    */
   repoStates(name: string): RepoState[] {
     return this.config.repoCheckouts(name).map(({ repo, main, worktree }) => {
-      const base = new EpicConfig(main).baseBranch
+      const config = new EpicConfig(main)
+      const base = config.baseBranch
       const made = existsSync(join(worktree, ".git"))
-      const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${name}`], main).ok ? name : null
+      const named = config.branchOf(name)
+      const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${named}`], main).ok ? named : null
       const count = (range: string) => (branch ? Number(Git.run(["rev-list", "--count", range], main).out || 0) : 0)
       const dirty = made ? Git.run(["status", "--short"], worktree).out.split("\n").filter(Boolean) : []
       return {
@@ -476,8 +482,8 @@ export class Worktrees {
         made,
         branch,
         base,
-        ahead: count(`${base}..${name}`),
-        behind: count(`${name}..${base}`),
+        ahead: count(`${base}..${named}`),
+        behind: count(`${named}..${base}`),
         dirty
       }
     })
@@ -525,14 +531,15 @@ export class Worktrees {
     const main = this.main
     const config = this.config
     const worktree = config.worktreeFolder(name)
-    const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${name}`], main).ok ? name : null
+    const named = config.branchOf(name)
+    const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${named}`], main).ok ? named : null
     // a multi-repo top:  every repo's commits on branch `name` (epic `epic-engine` P10)
     const ahead = config.top
       ? this.repoStates(name).reduce((sum, state) => sum + state.ahead, 0)
       : branch
-        ? Number(Git.run(["rev-list", "--count", `${config.baseBranch}..${name}`], main).out || 0)
+        ? Number(Git.run(["rev-list", "--count", `${config.baseBranch}..${branch}`], main).out || 0)
         : 0
-    const reflog = branch ? Git.run(["reflog", "show", "--format=%H", `refs/heads/${name}`], main).out : ""
+    const reflog = branch ? Git.run(["reflog", "show", "--format=%H", `refs/heads/${branch}`], main).out : ""
     const moved = reflog.split("\n").filter(Boolean).length > 1
     const merged = !!branch && moved && ahead === 0
     const plan = this.planStatus(name, worktree)
@@ -691,7 +698,7 @@ export class Worktrees {
    * from its skeleton's markup, with no parsing library (`PlanFacts`).
    * - `phases`:  each `<epic-phase status>`
    * - `updated`, `future`, `standing`:  `<epic-page updated future standing>`
-   * - `urgent`:  the ids of the items that need Owen (`<epic-item state>`, `URGENT_STATES`:  red and orange chips)
+   * - `urgent`:  the ids of the items that need Owen (`<epic-item state>`, `needsOwen()`:  red and orange chips)
    * - a doc still in the old markup (one restored from an old backup) reads as empty:
    *   the `epic` tool refuses it until it's converted (epic `epic-components` P15)
    * - static:  one file, wherever it is
@@ -702,7 +709,7 @@ export class Worktrees {
     const attribute = (tag: string, name: string) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1]
     const page = tags("epic-page")[0] ?? ""
     const urgent = tags("epic-item")
-      .filter((tag) => (URGENT_STATES as readonly string[]).includes(attribute(tag, "state") ?? ""))
+      .filter((tag) => needsOwen(attribute(tag, "state"), attribute(tag, "status")))
       .map((tag) => attribute(tag, "id") ?? "")
       .filter(Boolean)
     return {
@@ -801,10 +808,15 @@ function repoLines(states: RepoState[]): string[] {
 /** `merge-main`'s report, for a person. */
 function mergeMainLines(report: MergeMainReport): string[] {
   const lines = mergeResultLines(report)
-  const { ditched = [], ditchedTo, baseCatchUp } = report
+  const { ditched = [], ditchedTo, baseCatchUp, leftAlone = [], aside, result } = report
+  // another agent's work in progress (epic `epic-engine` I406):  said only when the merge went on around it
+  const around = result === "up-to-date" || !leftAlone.length
   return [
     ...(baseCatchUp ? [baseCatchUp] : []),
     lines[0]!,
+    ...(around
+      ? []
+      : [`  left ${leftAlone.length} uncommitted file(s) alone${aside ? ", merging in a temporary worktree" : ""}`]),
     ...(ditched.length
       ? [
           `  moved ${ditched.length} generated file(s) aside, into ${ditchedTo}:`,

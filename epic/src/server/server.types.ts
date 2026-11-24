@@ -1,3 +1,6 @@
+import type { SRV } from "spell/server"
+import type { SiteTab } from "spell/server/site/site.types"
+
 /**
  * Types and constants of spell-epic's ONE page server per machine (`EpicServer`, epic `epic-eject` P7):
  * where it keeps its files, the URLs it serves, the repos it serves them for.
@@ -17,6 +20,12 @@ export const HOME_FOLDER = ".spell-epic"
 
 /** The env var that moves `HOME_FOLDER` (tests). */
 export const HOME_ENV = "SPELL_EPIC_HOME"
+
+/**
+ * The server keeper's hold file, in `HOME_FOLDER`:  `{ held, handsOff }`, the servers stopped by hand and the hands-off
+ * switch (`ServerKeeper`);  the command guard reads the switch too (`ServerGuard`).
+ */
+export const HOLD_FILE = "server-keeper.json"
 
 /** The registered repos, in `HOME_FOLDER`:  `RepoList`. */
 export const REPOS_FILE = "repos.json5"
@@ -240,3 +249,179 @@ export type AppStatus = {
  * - here, not in the extension's `docUrls`:  plain `tsx` reads the `vscode/` folder as CommonJS, and can't name its exports
  */
 export const SHOWN_TAB_TITLE = "Shown in VS Code"
+
+////////////////
+// ## The server keeper (epic `epic-engine` P82)
+////////////////
+
+/**
+ * How a server stands, as the keeper's last look found it (`ServerKeeper`):
+ * - `running`:  it answers
+ * - `starting`:  the keeper started it, and it doesn't answer yet
+ * - `stopped`:  not running, and that's fine:  stopped by hand, a worktree's unused, an editor with no page server
+ * - `down`:  it should be running and isn't:  the tab's red dot
+ */
+export type KeptServerState = "running" | "starting" | "stopped" | "down"
+
+/**
+ * One server the keeper keeps, a row of the Servers tab.
+ * - `id`:  `<repo>/<name>`, a worktree's `<repo>/<worktree>/<name>`
+ * - `repo`:  the repo it's for (`""`:  the hub's own);  `worktree`:  the worktree's name, a main checkout's none
+ * - `name`, `what`:  what it's called and what it's for
+ * - `checkout`:  the checkout it serves:  what the buttons send back (`POST /api/servers/<action>`)
+ * - `address`:  where it answers, while it does (a worktree's stopped one:  `port`, the one written down for it)
+ * - `why`:  a few words on its state:  why it's down, what the keeper just did
+ * - `since`:  when the keeper last started it;  `lastRequest`:  a worktree's last use
+ * - `canStart`:  whether Start and Restart apply;  `own`:  one of the repo's own servers (its `.epic/config.json5`)
+ */
+export type KeptServer = {
+  id: string
+  repo: string
+  worktree?: string
+  name: string
+  what: string
+  checkout: string
+  address?: string
+  port?: number
+  state: KeptServerState
+  why?: string
+  since?: string
+  lastRequest?: string
+  canStart: boolean
+  /** the buttons it takes, when not every one (main's editor:  Start and Restart, never Stop) */
+  actions?: ("start" | "stop" | "restart")[]
+  own?: boolean
+}
+
+/**
+ * Work that landed on the base branch, from its reflog (`ServerFacts.mergedIntoMain()`):  a merge, a pull or a commit
+ * that brought commits of its own;  never a move that brought none (a branch that only merged `main` into itself)
+ */
+export type MainMove = {
+  sha: string
+  /** when, ISO */
+  at: string
+  /** the branch merged in (`editor`);  `pull` for a pull;  none:  a commit made on the base branch itself */
+  branch?: string
+  /** how many commits of its own it brought, merges left out */
+  commits: number
+  /** the newest of those commits:  its subject */
+  subject: string
+  /** within the last `RECENT_MINUTES` */
+  isNew: boolean
+  /** its repo, once the tab lists two or more */
+  repo?: string
+}
+
+/**
+ * An epic's worktree, and what it holds that the base branch hasn't got (`ServerFacts.epicWorktrees()`):
+ * every running epic's, busy or idle
+ */
+export type EpicWorktree = {
+  epic: string
+  worktree: string
+  url: string
+  /** its branch's commits the base branch hasn't got */
+  ahead: number
+  /** the phase under way */
+  phase?: string
+  agents?: number
+  /** the turn it holds now (`Turns`):  `test`, `merge` */
+  turn?: string
+  /** its open issues, todos and questions, in words:  `3 issues, 1 todo open` */
+  open?: string
+  /** its repo, once the tab lists two or more */
+  repo?: string
+  /** when it was last worked on (`ServerFacts.lastWorked()`):  the tab lists the worktrees newest first by it */
+  worked?: WorktreeWorked
+}
+
+/** When a worktree was last worked on, and by what (`ServerFacts.lastWorked()`). */
+export type WorktreeWorked = {
+  /** ISO time */
+  at: string
+  /**
+   * its branch's newest commit, or a file changed since and not committed;  `page`:  git couldn't say (a worktree
+   * git no longer knows), so the epic's own last-worked day (`RunningEpic.worked`)
+   */
+  by: "commit" | "change" | "page"
+}
+
+/** A base branch's commits GitHub (`origin`) hasn't got (`ServerFacts.notOnGitHub()`). */
+export type NotOnGitHub = {
+  /** the base branch:  `main` */
+  base: string
+  count: number
+  /** its repo, once the tab lists two or more */
+  repo?: string
+}
+
+/** What the Servers tab says beside the servers (`ServerFacts`). */
+export type ServerFactsAnswer = {
+  mergedIntoMain: MainMove[]
+  epicWorktrees: EpicWorktree[]
+  notOnGitHub: NotOnGitHub[]
+}
+
+/**
+ * `GET /api/servers`:  every server, how often the keeper looks, the facts beside them, whether the page servers
+ * speak HTTPS (`https`, epic `epic-engine` T164) and whether the person said hands off (`handsOff`)
+ */
+export type ServersAnswer = ServerFactsAnswer & {
+  servers: KeptServer[]
+  lookSeconds: number
+  https?: HttpsStatus
+  /** the person is working on the servers themselves:  the keeper leaves main's alone (`ServerKeeper.isHandsOff`) */
+  handsOff?: boolean
+}
+
+/**
+ * Whether the page servers speak HTTPS (and HTTP/2), as the Servers tab draws it (`HttpsSwitch`, epic `epic-engine`
+ * T164):  from the page server's certificate's state (`SRV.LocalCertificate`), ONE for every page server of this Mac
+ * - `state`:  `on`;  `off` (no certificate, or no mkcert to make one);  `needs-trust` (made, not trusted);
+ *   `out-of-date` (expired, or missing a name)
+ * - `certificate`:  the certificate's own state, as `spell server certificate --check` says it
+ * - `words`:  what it means, for the card's tooltip;  `address`:  where browsers open the pages, while it's on
+ * - `canTurnOn`, `canTurnOff`:  which buttons apply;  `whyNot`:  why Turn on doesn't (no mkcert, or not a Mac)
+ */
+export type HttpsStatus = {
+  state: HttpsState
+  certificate: SRV.CertificateState
+  words: string
+  address?: string
+  canTurnOn: boolean
+  canTurnOff: boolean
+  whyNot?: string
+}
+
+/** `HttpsStatus.state`. */
+export type HttpsState = "on" | "off" | "needs-trust" | "out-of-date"
+
+/** `POST /api/servers/https`'s body:  which way to turn it. */
+export type HttpsTurn = { turn: "on" | "off" }
+
+/** Where the Servers tab turns HTTPS on and off:  under `SRV.KEEPER_API`, before its `/:action`. */
+export const HTTPS_API = "/api/servers/https"
+
+/** Where the tab's hands-off switch asks:  the keeper leaves main's servers alone while it's on (T164). */
+export const HANDS_OFF_API = "/api/servers/hands-off"
+
+/** `POST /api/servers/hands-off`'s body. */
+export type HandsOff = { on: boolean }
+
+/** Where main's Restart all asks:  every main page server and its editor restarted (epic `epic-engine` T164). */
+export const RESTART_ALL_API = "/api/servers/restart-all"
+
+/** Where the Servers tab's page is served, under every address (`serverRoutes`). */
+export const SERVERS_PAGE = "/_epic/servers/"
+
+/**
+ * The site header's Servers tab (epic `epic-engine` P82):  every project's servers, what just reached main, what
+ * waits;  its red dot from the keeper (`dot`, asked every 10 seconds)
+ */
+export const SERVERS_TAB: SiteTab = {
+  name: "Servers",
+  path: SERVERS_PAGE,
+  paths: ["^(?:/worktrees/[^/]+)?/_epic/servers/"],
+  dot: "/api/servers/dot"
+}

@@ -1,4 +1,5 @@
 import { scrollByRow, scrollEnds } from "spell/util/dom"
+import { pollWhileVisible } from "spell/util/polling"
 import { ColorScheme, PrefStore, type ColorSchemeName } from "spell/util/persist"
 import { escapeHTML } from "spell/util/string"
 import type { ServerConfig, ServerInfo } from "spell/server"
@@ -11,6 +12,8 @@ import { worktreeHref } from "spell/server/liveClient"
  * The fixed bar on top of every page of the site, with a tab to switch to each of its parts:
  * e.g. docs, epic pages, sagas, component sets, an app.
  * - The tabs are DATA (`SiteTab`):  this element names no site's parts (epic `repo-split` I4).
+ *   - a tab with a `dot` address wears a red dot while that address says so, asked every 10 seconds while the page
+ *     shows (`lookAtDots()`;  the Servers tab, epic `epic-engine` P82)
  *   - the page server's settings' (`"siteTabs"`), on the page as `SPELL_SERVER.siteTabs`;  none:  no tabs
  *   - the lit one:  `litTab()`
  * - In each page and template, right after `<body>`:  `<spell-site-header></spell-site-header>`.
@@ -121,6 +124,12 @@ export class SiteHeader extends HTMLElement {
   /** whether the bar was drawn around the page's theme control, without the light / dark button */
   private drawnWithThemeControl?: boolean
 
+  /** each tab's red dot, by its name, as its `dot` address last answered (`lookAtDots()`) */
+  private readonly dots = new Map<string, TabDot>()
+
+  /** stops asking the tabs' `dot` addresses, while connected */
+  private stopDots?: () => void
+
   connectedCallback(): void {
     ColorScheme.apply(ColorScheme.chosen())
     installPageStyle(this.docked)
@@ -133,6 +142,38 @@ export class SiteHeader extends HTMLElement {
     this.pageScheme.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })
     this.ownChildren.observe(this, { childList: true })
     if (!this.info && location.protocol.startsWith("http")) void this.ping()
+    if (location.protocol.startsWith("http") && this.tabs.some((tab) => tab.dot))
+      this.stopDots ??= pollWhileVisible(DOT_SECONDS, () => this.lookAtDots())
+  }
+
+  /**
+   * Ask each tab's `dot` address how it stands (`{ dot, why }`), and show or hide its red dot (epic `epic-engine`
+   * P82:  the Servers tab, while a server is down).  NEVER throws:  a tab that can't be asked shows none.
+   */
+  async lookAtDots(): Promise<void> {
+    for (const tab of this.tabs) {
+      if (!tab.dot) continue
+      let answer: TabDot = { dot: false }
+      try {
+        const response = await fetch(tab.dot, { cache: "no-store" })
+        if (response.ok) answer = (await response.json()) as TabDot
+      } catch {
+        // no answer:  no dot
+      }
+      this.dots.set(tab.name, answer)
+      this.drawDot(tab)
+    }
+  }
+
+  /** `tab`'s dot as `dots` says, on the drawn bar */
+  private drawDot(tab: SiteTab): void {
+    const link = this.shadowRoot?.querySelector<HTMLAnchorElement>(`a.tab[data-tab="${CSS.escape(tab.name)}"]`)
+    const dot = link?.querySelector<HTMLElement>(".dot")
+    if (!link || !dot) return
+    const shown = this.dots.get(tab.name)
+    dot.hidden = !shown?.dot
+    if (shown?.dot && shown.why) link.title = shown.why
+    else link.removeAttribute("title")
   }
 
   disconnectedCallback(): void {
@@ -142,6 +183,8 @@ export class SiteHeader extends HTMLElement {
     this.pageScheme.disconnect()
     this.ownChildren.disconnect()
     this.tabsResize.disconnect()
+    this.stopDots?.()
+    this.stopDots = undefined
   }
 
   /** a compact row inside the page's own chrome, not the fixed bar (the `docked` attribute) */
@@ -198,7 +241,8 @@ export class SiteHeader extends HTMLElement {
         const current = tab === active ? ` aria-current="page"` : ""
         // its own tab:  `target` in a browser;  `data-spell-open` tells the side bar's frame (`liveClient.ts`)
         const own = tab.ownTab ? ` target="spell-${escapeHTML(tab.name.toLowerCase())}" data-spell-open="browser"` : ""
-        return `<a class="tab" href="${escapeHTML(href)}"${current}${own}>${escapeHTML(tab.name)}</a>`
+        const dot = tab.dot ? `<span class="dot" part="dot" aria-label="${DOT_LABEL}" hidden></span>` : ""
+        return `<a class="tab" data-tab="${escapeHTML(tab.name)}" href="${escapeHTML(href)}"${current}${own}>${escapeHTML(tab.name)}${dot}</a>`
       })
       .join("")
     const checkout = this.info?.worktree ?? this.info?.branch
@@ -247,6 +291,7 @@ export class SiteHeader extends HTMLElement {
     const editButton = shadow.querySelector<HTMLButtonElement>(`[data-action="edit"]`)
     if (editButton) editButton.onclick = () => this.toggleEdit()
     this.wireScrollKeys()
+    for (const tab of this.tabs) if (tab.dot) this.drawDot(tab)
   }
 
   /**
@@ -347,6 +392,15 @@ const BRAND_NAME = "Spell Epic"
 const BRAND_TITLE = "Spell Epic home page"
 
 const SCROLL_BACK = "Scroll the tabs back"
+
+/** How often a tab's `dot` is asked, while the page shows, seconds:  as often as the server keeper looks. */
+const DOT_SECONDS = 10
+
+/** What a screen reader says of a red dot on a tab. */
+const DOT_LABEL = "Something here needs a look"
+
+/** What a tab's `dot` address answers. */
+type TabDot = { dot: boolean; why?: string }
 const SCROLL_ON = "More tabs"
 
 /** Edit mode on, as kept:  `1`, as it always was. */
@@ -466,6 +520,11 @@ nav { display: flex; gap: 2px; min-width: 0; }
 }
 .tabs[data-more~="start"] > .scroll[data-scroll="-1"], .tabs[data-more~="end"] > .scroll[data-scroll="1"] { display: grid; }
 .tab { padding: 7px 10px; border-radius: 999px; color: light-dark(#55555f, #a9a9b6); white-space: nowrap; }
+.tab .dot {
+  display: inline-block; width: 8px; height: 8px; margin-inline-start: 4px; border-radius: 50%;
+  vertical-align: 2px; background: light-dark(#d33a2c, #ff6b5e);
+}
+.tab .dot[hidden] { display: none; }
 .tab:hover { background: var(--ui-menu-hover-background, light-dark(#f0eef8, #2c2a38)); color: inherit; }
 .tab[aria-current="page"] {
   background: var(--ui-primary-background, light-dark(#e9e4ff, #33295e));

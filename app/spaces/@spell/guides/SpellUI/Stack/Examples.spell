@@ -13,8 +13,6 @@
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
 		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
 		  `.another.example`:  a second `<ui-example>` in the same section.
-		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
-		  it nests it and writes the ids (and fixes them after a title changes).
 		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
 		  shows in its code).
 	-->
@@ -82,6 +80,25 @@
 			</example>
 		</>
 
+		<section label="Fill the row" sticky="stack" collapsible dividing>
+			<example "Fill the row" description="In a row, a `fluid` child takes the room left:  a task's title field between its checkbox and its priority.">
+				<stack direction="horizontal" spacing="sm">
+					<checkbox aria-label="Done"/>
+					<input aria-label="Task" value="Write the tests" fluid/>
+					<label size="tiny" color="red">high</label>
+				</stack>
+			</example>
+			<example "Fill the row" description="A `fluid` stack does too:  a picture's details take the rest of the row, and wrap under it when the row is too narrow.">
+				<stack direction="horizontal" wrap align="start">
+					<icon name="image outline" size="massive"/>
+					<stack fluid spacing="sm">
+						<header level="4">Bulbasaur</header>
+						<text>A strange seed was planted on its back at birth.</text>
+					</stack>
+				</stack>
+			</example>
+		</>
+
 		<section label="Centred" sticky="stack" collapsible dividing>
 			<example "Centred" description="`align=\"center\"`:  a column's children centred across it.">
 				<stack align="center" spacing="sm">
@@ -89,6 +106,45 @@
 					<text>No messages yet</text>
 					<button size="small">Write one</button>
 				</stack>
+			</example>
+		</>
+
+		<section label="Stackable" sticky="stack" collapsible dividing>
+			<example "Stackable" description="`stackable=\"34em\"`:  a row that becomes a column when the room it's in is narrower than 34em;  bare `stackable`, a phone's width.  The room is the nearest size container around it, or the window, whichever is narrower.  An icon with `rotated=\"when stacked\"` turns a quarter while it's a column, so the arrows point down.  Narrow the window to see it.">
+				<stack direction="horizontal" align="center" spacing="sm" stackable="34em">
+					<card width="10em">
+						<content align="center">
+							<header>Bulbasaur</header>
+						</content>
+					</card>
+					<icon name="chevron right" size="large" rotated="when stacked"/>
+					<card width="10em">
+						<content align="center">
+							<header>Ivysaur</header>
+						</content>
+					</card>
+					<icon name="chevron right" size="large" rotated="when stacked"/>
+					<card width="10em">
+						<content align="center">
+							<header>Venusaur</header>
+						</content>
+					</card>
+				</stack>
+			</example>
+		</>
+
+		<section label="Widths" sticky="stack" collapsible dividing>
+			<example "Widths" description="Every element takes `width`, `min-width` and `max-width`, any CSS length:  its box's own width where it sits.  Here a `fluid` search grows into the room left, from 16em up to 26em;  a card keeps its 10em in a row.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels.">
+				<stack direction="horizontal" wrap align="center" justify="between">
+					<button size="big" appearance="tertiary">Logo</button>
+					<form fluid min-width="16em" max-width="26em">
+						<input name="search" icon="search" placeholder="Pikachu" aria-label="Find a Pokémon" fluid/>
+					</form>
+					<button color="yellow">Surprise me!</button>
+				</stack>
+			</example>
+			<example "Widths" description="`max-width`:  a bar that stops growing on a wide screen.">
+				<progress value="45" total="255" color="green" max-width="36em" label="Health:  45"/>
 			</example>
 		</>
 	</>

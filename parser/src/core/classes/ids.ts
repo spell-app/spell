@@ -4,7 +4,7 @@
  * - A program never declares it:  it's there on every thing, and on every list.
  * - Imports only `spell/util` and lodash:  `Thing.ts` and `List.ts` both import it.
  */
-import _ from "lodash"
+import { kebabCase } from "lodash-es"
 
 import { peekProp, type PropInfo } from "spell/util"
 
@@ -21,7 +21,7 @@ const ID_LENGTH = 8
  *   ids get saved, so they must differ from run to run, even when a seeded run repeats everything else.
  */
 export function newThingId(thing: object): string {
-  const kind = _.kebabCase(thing.constructor.name) || "thing"
+  const kind = kebabCase(thing.constructor.name) || "thing"
   return `${kind}-${randomBase36(ID_LENGTH)}`
 }
 
@@ -52,7 +52,7 @@ export const ID_PROP: PropInfo = {
 export const APP_ID_PROP: PropInfo = {
   type: "text",
   init(this: object) {
-    return _.kebabCase(this.constructor.name) || "app"
+    return kebabCase(this.constructor.name) || "app"
   }
 }
 

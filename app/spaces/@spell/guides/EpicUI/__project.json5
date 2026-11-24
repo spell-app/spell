@@ -1,0 +1,240 @@
+{
+  "title": "Epic UI",
+  "description": "Epic UI's pages as one site:  a notebook per <epic-*> element the epic pages are built from, each at its own address, listed in the side navigation by group",
+  "onHome": false,
+  "imports": [
+    {
+      "path": "/Home.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicActions.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicAnswer.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicAside.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicAsk.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicAwayLine.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicCard.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicCards.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicChange.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicChoiceRow.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicChoiceRows.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicChoices.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicChoicesBar.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicClarify.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicCode.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicCommentPane.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicCommit.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicEvent.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicFeatureSet.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicField.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicFocus.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicHiddenNote.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicItem.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicKickoff.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicLink.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicList.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicMark.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicMore.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicNetEffect.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicNote.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicOption.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicOriginal.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicOverview.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicPage.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicPageNoteHead.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicPhase.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicPicture.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicPills.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicPrompt.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicQuestion.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicReply.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicRun.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicRunRow.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicSection.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicSend.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicSendButtons.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicSort.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicStateFilter.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicStatus.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicSummary.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicTextBox.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicThread.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicThreads.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicUpdate.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicUpdated.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicVersion.spell",
+      "active": true
+    },
+    {
+      "path": "/main.page-layout.spell",
+      "active": true
+    },
+    {
+      "path": "/EpicUI.spell",
+      "active": true
+    }
+  ],
+  "spellVersion": "0.9.0"
+}

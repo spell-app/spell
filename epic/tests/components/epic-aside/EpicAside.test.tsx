@@ -121,3 +121,23 @@ describe("<epic-aside> heading, folded and open", () => {
     expect(button.getBoundingClientRect().top).toBeCloseTo(folded.button.top, 0)
   })
 })
+
+// epic `epic-engine` T120 (Owen, 2026-11-20):  no "Close this aside / ⌥-click:  fold everything inside" on hover
+describe("<epic-aside> fold button", () => {
+  test("no tooltip, folded or open;  still named by its heading's words", async () => {
+    const host = await ElementFixture.render(ASIDE)
+    const toggle = part(host, "toggle")
+    const facts = () => ({
+      tooltip: toggle.getAttribute("data-tooltip"),
+      title: toggle.getAttribute("title"),
+      ariaLabel: toggle.getAttribute("aria-label"),
+      name: toggle.textContent
+    })
+    const folded = facts()
+    toggle.click()
+    await ElementFixture.tick()
+    const named = { tooltip: null, title: null, ariaLabel: null, name: "Aside:  where it stood at kickoff, 2026-10-03" }
+    expect([folded, facts()]).toEqual([named, named])
+    await expectAccessible(host)
+  })
+})

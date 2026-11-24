@@ -54,7 +54,7 @@ describe("<ui-form> static render", () => {
       `<ui-form><form><ui-fields widths="equal"><ui-field required state="error">A</ui-field>` +
         `<ui-field disabled>B</ui-field></ui-fields></form></ui-form>`
     )
-    expect(html).toMatch(/<div [^>]*class="equal width fields"/)
+    expect(html).toMatch(/<div [^>]*class="equal width fields equal-width"/)
     expect(html).toMatch(/<div [^>]*class="error required field"[^>]*>A<\/div>/)
     expect(html).toMatch(/<div [^>]*class="disabled field"[^>]*inert/)
   })

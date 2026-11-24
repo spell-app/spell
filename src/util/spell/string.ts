@@ -3,10 +3,7 @@
  * - Parsers ask for the same few names over and over;  memoizing saves the work.
  * - No inflection (singular and plural) here:  that's each language's, `P.Inflector` in `spell/parser/parser`.
  */
-import lowerFirst from "lodash/lowerFirst"
-import toLower from "lodash/toLower"
-import upperFirst from "lodash/upperFirst"
-import words from "lodash/words"
+import { lowerFirst, toLower, upperFirst, words } from "lodash-es"
 
 // Export some lodash string methods.
 export { toLower, lowerFirst, upperFirst }

@@ -11,8 +11,8 @@
 
 			- Its text is the data, or `source` loads it from a file on the same site.
 			- `load` says when:  `eager` (at once), `visible` or `idle`.
-			- `depth` says how many levels start open, and `editable` lets people change it,
-			  each value in a control that fits it.
+			- `depth` says how many levels start open, `quotes="no"` drops the quotes round keys,
+			  and `no-header` hides the Copy and quotes buttons.
 			- `hidden` holds the data without showing it.
 			- An element that takes JSON reads a `<ui-json>` child by itself, and keeps it out of sight.
 			  `<ui-tree-diagram>` does, and follows it as it changes.
@@ -21,8 +21,34 @@
 			It works where it did, and inside a `<ui-json>` too.
 			Use one there when the JSON holds a `<`, which a page would read as a tag.
 
+			JSON as coloured text, with no folding, is `<ui-code language="json">`.
+
 			In Spell it's `<json>`, and its text is kept as written:
 			its `{` and `[` are JSON's, not Spell's.
+		</>
+	</>
+
+	<section label="Editing">
+		<markdown>
+			With `editable`, a double-click on a key or a value edits it, in a control that fits the value:
+
+			- a string:  a text field, and it stays a string
+			- a number:  a number field
+			- a date (`2026-11-18`) or a date and time (`2026-11-18T10:00:00Z`):  a date picker,
+			  and the new date is written the same way
+			- `true` or `false`:  a checkbox, kept as soon as it's clicked
+			- a key, or `null`:  a text field, read as JSON if it is, else as a string
+
+			Enter, or leaving the field, keeps the edit;  Escape drops it.
+			`value` changes, `ui-changed` says so, and the element is `dirty` until saved.
+
+			JSON can't say a string comes from a list.
+			`editors` can, by key, as a property:  a list makes a pick list, and a word names the control.
+
+			```js
+			const data = document.querySelector("ui-json")
+			data.editors = { direction: ["in", "out", "inout"], made: "date" }
+			```
 		</>
 	</>
 
@@ -41,6 +67,29 @@
 			data.value = { label: "New" }
 			```
 
+			Set `item` to show a thing:  its `data`, else the thing itself, becomes `value`.
+			So slotted as a tree's `detail`, it shows each pick's data with no code:  the tree sets its `item`.
+
+			A click on an object's or array's key, or on its closed line, opens it, as its toggle does;
+			a click on its key closes it again.
+
+			A click on something inside a closed line, such as a key or a nested `{ ... }`,
+			opens every level down to it, then scrolls to it and lights it for a moment.
+			A value inside a closed line is opened the same way:  a click on its own line then navigates.
+
+			A click on any other key or value sends `ui-navigating`, with where it is:
+			`path`, the keys from the top down, then `key`, `value` and `part` (`"key"` or `"value"`).
+			The page decides what it means, such as showing what a value names.
+
+			```js
+			data.addEventListener("ui-navigating", (event) => {
+			  const { path, value } = event.detail
+			  if (path.at(-1) === "id") showThing(value)
+			})
+			```
+
+			`copy()` puts the data on the clipboard as JSON, as the Copy button does, and sends `ui-copied`.
+
 			Text that isn't JSON shows why, logs one console warning, sends `ui-error` and sets `:state(error)`.
 			So does a file that won't load.
 		</>
@@ -49,6 +98,8 @@
 	<section label="Accessibility">
 		<markdown>
 			Each object's and array's toggle is a real button:  it says what it opens, and whether it's open.
+			Its key is a button too:  Enter or Space opens and closes it.
+			Each one is a Tab stop;  the arrow keys don't move between lines yet.
 			A hidden `<ui-json>`, or one a diagram reads, shows nothing, and screen readers pass over it.
 		</>
 	</>

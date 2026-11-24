@@ -4,6 +4,7 @@
 		<header>A modal displays content that temporarily blocks interactions with the main view of a
               site.</>
 	</>
+
 	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
 	<section label="Tokens">
 		<markdown>
@@ -42,7 +43,7 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-modal" playground>
-				<button type="button" class="ui button" commandfor="modal-types-standard-playground" command="--show">Show</>
+				<ui-button commandfor="modal-types-standard-playground" command="--show">Show</>
 				<ui-modal id="modal-types-standard-playground" closable>
 					<ui-header>Profile Picture</>
 					<ui-content>

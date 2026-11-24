@@ -4,10 +4,10 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E, UI } from "spell/ui/core"
 
 import { PlanDates } from "spell/epic/dates"
-import { NOBODY_LISTENING, ReviewClient, hasPick, picks, setLetter, type EditedOption } from "spell/epic/review"
+import { ReviewClient, hasPick, picks, setLetter, type EditedOption } from "spell/epic/review"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
 import { EpicAsk } from "spell/epic/components/epic-ask/EpicAsk"
-import { Fold, type FoldTips } from "spell/epic/components/epic-item/Fold"
+import { Fold } from "spell/epic/components/epic-item/Fold"
 import type { EpicItem } from "spell/epic/components/epic-item/EpicItem"
 // an answering option's comment box:  its barrel first, so it's defined wherever the option is
 import "spell/epic/components/epic-text-box"
@@ -219,11 +219,10 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     return host?.component as EpicAsk | undefined
   }
 
-  /** While connected, find its question again:  it may have moved. */
+  /** While connected, follow its question:  it may have moved, or its family load later (`EpicAsk.follow()`). */
   @E.whileConnected
-  protected findAsk() {
-    this.ask = EpicOption.askFor(this.domElement)
-    return undefined
+  protected followAsk() {
+    return EpicAsk.follow(EpicAsk.askOf(this.domElement), (ask) => (this.ask = ask))
   }
 
   ////////////////
@@ -428,7 +427,6 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
           className: TOGGLE,
           part: this.partForName("toggle"),
           controls: WAS_ID,
-          tips: { fold: this.translationForKey("foldWasTip"), unfold: this.translationForKey("unfoldWasTip") },
           label: <span class={WAS_TITLE}>{this.translationForKey("was")}</span>,
           clicks: true
         })}
@@ -451,12 +449,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
       <p class={DRAFT_LINE} part={this.partForName("change")}>
         {this.translationForKey(key())}
         <Show when={this.choices?.isReviewed}>
-          <button
-            type="button"
-            class={UNDO}
-            data-tooltip={this.translationForKey("undoTip")}
-            onClick={() => this.onUndo()}
-          >
+          <button type="button" class={UNDO} onClick={() => this.onUndo()}>
             {this.translationForKey("undo")}
           </button>
         </Show>
@@ -493,7 +486,6 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             className: TOGGLE,
             part: this.partForName("toggle"),
             controls: BODY_ID,
-            tips: this.foldTips,
             label: this.reviewTitle(),
             clicks: true
           })}
@@ -575,21 +567,6 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     )
   }
 
-  /** Its fold button's tooltips, naming its letter (`foldTipsOf()`). */
-  private readonly foldTips: FoldTips = EpicOption.foldTipsOf(this)
-
-  /** `option`'s fold button's tooltips:  getters, read as the button draws, so they follow its letter. */
-  private static foldTipsOf(option: EpicOption): FoldTips {
-    return {
-      get fold() {
-        return option.translationForKey("foldTip", { letter: option.shownLetter })
-      },
-      get unfold() {
-        return option.translationForKey("unfoldTip", { letter: option.shownLetter })
-      }
-    }
-  }
-
   /**
    * An epic page's option's header:  the fold toggle (its whole title, THE fold button:  `fold.button()`), the Choose
    * pill while reviewed.
@@ -610,7 +587,6 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             className: TOGGLE,
             part: this.partForName("toggle"),
             controls: BODY_ID,
-            tips: this.foldTips,
             label: this.reviewTitle(),
             clicks: true
           })}
@@ -659,7 +635,6 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
    * - picked:  `Chosen · not sent`, dashed green
    * - sent:  `Chosen · sent`, outlined green
    * - applied (its set's `chosen`):  `Chosen`, solid green, and a click does nothing
-   * - its tooltip says what a click does, and whether the pick has gone to Claude
    * - `pill`:  `<Show>`'s accessor, read in each binding:
    *   the callback's body runs once, so a value read there would never change
    */
@@ -672,26 +647,12 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
           part={this.partForName("choose")}
           aria-pressed={pill().picked ? "true" : "false"}
           aria-disabled={pill().applied ? "true" : undefined}
-          data-tooltip={this.pillTip(pill())}
           onClick={this.onChoose}
         >
           {this.translationForKey(pillLabel(pill()))}
         </button>
       </span>
     )
-  }
-
-  /**
-   * The pill's tooltip:  `Pick B`;  picked, `B is picked:  click to un-pick · sent` (or `not sent yet`);
-   * applied, `B is the chosen option`.
-   */
-  private pillTip(pill: PillState): string {
-    const letter = this.shownLetter
-    if (pill.applied) return this.translationForKey("tipApplied", { letter })
-    if (!pill.picked) return this.translationForKey("tipChoose", { letter })
-    const where = this.translationForKey(pill.sent ? "tipSent" : "tipNotSent")
-    const tip = `${this.translationForKey("tipChosen", { letter })} · ${where}`
-    return pill.sent && !pill.listening ? `${tip}.  ${NOBODY_LISTENING}` : tip
   }
 
   ////////////////

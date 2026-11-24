@@ -184,10 +184,10 @@ const commentsRoutes: RouteModule = {
         file = commentsPage(web.files, page)
       } catch (error) {
         if (!(error instanceof SRV.HttpError) || error.status !== 403) throw error
-        return reply.set("Cache-Control", "no-store").json({ page, takesComments: false, comments: [] })
+        return reply.noStore().json({ page, takesComments: false, comments: [] })
       }
       reply
-        .set("Cache-Control", "no-store")
+        .noStore()
         .json({ page, takesComments: true, comments: shown(commentsOf(file)), ...sendOf(root, page as string, file) })
     })
     router.post(PICTURE_API, guard.writeCheck, SRV.parseBodies({ limit: MAX_PICTURE_BODY }), async (request, reply) => {

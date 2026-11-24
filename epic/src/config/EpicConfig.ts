@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
+import { closeSync, existsSync, openSync, readdirSync, readFileSync, readSync, statSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 
 import JSON5 from "json5"
@@ -16,6 +16,8 @@ import { PeopleColors } from "./PeopleColors.ts"
 import { CodeHost, type CodeHostKind } from "./CodeHost.ts"
 import { Editor, EDITOR_IDS } from "./Editor.ts"
 import { VoiceColor } from "./VoiceColor.ts"
+// the badges' ONE rule:  plain data and one class, no imports but types, so plain node loads it
+import { BADGE_LIMITS, type BadgeLimits } from "spell/epic/components/epic-item/ItemBadge.ts"
 
 /****************
  * ### `EpicConfig`
@@ -56,6 +58,7 @@ import { VoiceColor } from "./VoiceColor.ts"
  *     (`SRV.checkoutOf()`), or are told by epics' route module (`PageServer.serveWorktrees()`).
  * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path (`spell/epic/config/EpicConfig`).
  * - Its position:  imports only node's own modules, the server's `checkout.ts` by its entry and `RealPath` beside it,
+ *   and `ItemBadge`'s defaults (types its only imports),
  *   so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
  * - A MULTI-REPO top (epic `epic-engine` P10, repo-split's Q9 A):  one repo holding others, its child repos.
  *   - The top repo's file names them (`"repos": "repos.json5"`).
@@ -92,13 +95,16 @@ export class EpicConfig {
     sharedFolders: ["epics", "sagas", "guides", "pages"],
     engineFolder: "",
     repoTemplates: "",
+    guidesFolder: "",
     app: { path: "/editor/", url: "", urlFile: "", start: "" },
+    servers: [],
     repos: "",
     voices: {},
     pageVoices: { readme: "readme", guide: "readme", code: "code", "epic-page": "code" },
     checkoutPatches: [],
     promptAck: true,
     freshHintMB: 8,
+    issueBadges: BADGE_LIMITS,
     editor: "",
     renamedRepos: {},
     colors: { people: {}, agents: {} },
@@ -379,7 +385,8 @@ export class EpicConfig {
 
   /**
    * The repos BESIDE this one that its repos file lists as PEERS (epic-engine's P49, Q48 A):
-   * `{ "name": "spell-brand", "path": "../spell-brand", "peer": true }` in the kit's `repos.json5`.
+   * `{ "name": "spell-x", "path": "../spell-x", "peer": true }` in a kit's `repos.json5`;  none in Spell's since
+   * epic `epic-engine` T124 dropped spell-brand, its only one:  an empty list.
    * - each one's MAIN checkout:  `path` (else `../<name>`), from this repo's main checkout;  one not there is left out
    * - read by the page server's `peerRepos()`, the one reader of them
    * - a project of its own, with its own install and its own worktrees (`<name>.worktrees/` beside it, Q50 D):
@@ -402,7 +409,7 @@ export class EpicConfig {
 
   /**
    * The KIT this repo is a peer of (epic-engine's P49, Q51 A):  the config of the folder its own file names as
-   * `"top"` (`{ "top": "../spell" }`, spell-brand's), from its main checkout;  `undefined` without one.
+   * `"top"` (`{ "top": "../spell" }`, a peer's), from its main checkout;  `undefined` without one.
    * - a peer takes its kit's epic folder, windows, window names, shared folders, session-folder links, engine and
    *   voices, for each key its own file leaves out (`kitFor()`);  its worktrees stay its OWN, `../<repo>.worktrees`
    *   beside it, and so do its install, base branch and app
@@ -484,7 +491,7 @@ export class EpicConfig {
    * - each folder right inside `worktree` whose `.git` is a FILE (a git worktree) of ANOTHER repo:  paired with that
    *   repo's main checkout by git (`checkoutOf()`, which `git worktree repair` keeps true after Q41's move to
    *   `~/www/spell.old/`);  a broken one (its git folder gone) is left out
-   * - `found: true`;  `peer: true` when its main checkout is one of `peers` (spell-brand's, before it moved out)
+   * - `found: true`;  `peer: true` when its main checkout is one of `peers` (from before it moved out)
    * - in folder-name order;  none when `worktree` isn't there
    * - why:  every walker of an epic's checkouts (merge-main, the merge, removal, status, `epic loc`, the checkout
    *   patches) then sees them with no change of its own;  each decides what an old one needs (`isCrossed()`)
@@ -669,6 +676,14 @@ export class EpicConfig {
   }
 
   /**
+   * The percentages this repo's item badges are worked out by (`issueBadges`, epic `epic-engine` P81;  Owen:
+   * "Other epic users will probably want to tune the percentage"):  `recheckAt`, `closeBelow`, `fixAbove`.
+   */
+  get issueBadges(): BadgeLimits {
+    return this.settings.issueBadges
+  }
+
+  /**
    * The editor the tools drive, VS Code or Cursor (`Editor`, epic `epic-friend` P16):  this machine's
    * (`$SPELL_EPIC_EDITOR`), else the window's, else the repo's `editor`, else VS Code
    */
@@ -750,6 +765,72 @@ export class EpicConfig {
   }
 
   /**
+   * the repo's OWN guides folder, as written:  a path from each checkout's root (`"guides"`, the kit's;
+   * epic `epic-engine` P79);  `""` (the default):  none, every guide is in the epic folder's `guides/`
+   * - its guides are versioned with the code:  a worktree's are its branch's, edited and merged like any file
+   * - a guide's address is its path from the checkout's root, so a folder named `guides` at the root keeps the
+   *   addresses the epic folder's guides have (`/guides/x.html`), and the page server serves the checkout's first
+   * - every tool finds guides in both places through `guideFoldersOf()`, the checkout's first
+   */
+  get guidesFolder(): string {
+    return this.settings.guidesFolder
+  }
+
+  /**
+   * Every folder checkout `root`'s guides are in, the CODE's first (epic `epic-engine` P79):
+   * - `<root>/<guidesFolder>`, when the repo names one and the checkout has it (`code: true`)
+   * - then the epic plugin's own guides, `guides/` in the engine's folder (`plugin: true`, `pluginGuides()`):  about
+   *   the epic tooling, not the repo, shipped with the plugin and read in VS Code's Epic Docs tab (T130)
+   * - then the epic folder's `guides/` (`<contentFolder>/guides`), when it's there
+   * - a guide in two (moved on a branch not merged yet, `epic guides move`):  the first is the one
+   *   (`guideFileOf()`);  every lister keeps the first of each page path
+   * - NEVER throws:  a config that won't read gives the plugin's and the epic folder's alone
+   */
+  static guideFoldersOf(root: string): GuideFolder[] {
+    const folders: GuideFolder[] = []
+    let written = ""
+    try {
+      written = EpicConfig.of(root).guidesFolder
+    } catch {
+      // a config that won't read:  no code guides
+    }
+    const code = written ? resolve(root, written) : undefined
+    if (code && existsSync(code)) folders.push({ folder: code, code: true, base: resolve(root) })
+    const plugin = EpicConfig.pluginGuides()
+    if (plugin && existsSync(plugin) && plugin !== code)
+      folders.push({ folder: plugin, code: false, plugin: true, base: dirname(plugin) })
+    const content = EpicConfig.contentOf(root)
+    const shared = join(content, "guides")
+    if (existsSync(shared) && shared !== code) folders.push({ folder: shared, code: false, base: content })
+    return folders
+  }
+
+  /**
+   * The epic plugin's own guides folder, absolute:  `guides/` in the engine's folder (`EngineFiles.root`;  the kit's
+   * `epic/guides/`, an install's `epic/guides/` beside its `dist/`);  epic `epic-engine` T130
+   * - its guides' page paths are from the engine's folder (`guides/plan-docs/plan-docs.html`), the addresses they had in
+   *   the epic folder, served there by the plugin's engine route (`"/guides/"`, its folder manifest)
+   * - `$SPELL_EPIC_PLUGIN_GUIDES` names another (`""`:  none), for tests:  their scratch repos see none of the real ones
+   */
+  static pluginGuides(): string | undefined {
+    const named = process.env.SPELL_EPIC_PLUGIN_GUIDES
+    if (named !== undefined) return named ? resolve(named) : undefined
+    return EngineFiles.path(PLUGIN_GUIDES)
+  }
+
+  /**
+   * The file guide page path `page` (`guides/solid/solid-2.html`, from the checkout's root or the epic folder:  the
+   * same) names in checkout `root`:  the code's copy first, else the epic folder's;  `undefined` when neither has it.
+   */
+  static guideFileOf(root: string, page: string): string | undefined {
+    for (const { base } of EpicConfig.guideFoldersOf(root)) {
+      const file = join(base, page)
+      if (existsSync(file)) return file
+    }
+    return undefined
+  }
+
+  /**
    * the folder the VS Code window files are in (`epic window`;  epic `epic-eject` P13):
    * each machine's own, never tracked
    * - package windows and the whole repo's (`windowFile()`), and the worktrees' in its `ongoing/`
@@ -788,6 +869,19 @@ export class EpicConfig {
    * - the epic server's `RepoApp` reads it, at each click
    */
   get app(): EpicApp | undefined {
+    return this.appSetting()
+  }
+
+  /**
+   * the repo's OWN servers, beside Spell's (`EpicServerSetting`, epic `epic-engine` P82):  what the server keeper
+   * watches, and starts when one has a `start`;  each `folder` absolute, from the main checkout
+   */
+  get servers(): EpicServerSetting[] {
+    return this.settings.servers.map((server) => ({ ...server, folder: resolve(this.main, server.folder ?? ".") }))
+  }
+
+  /** `app`'s value */
+  private appSetting(): EpicApp | undefined {
     const app = this.settings.app
     if (!app.url && !app.urlFile) return undefined
     return { ...app, urlFile: app.urlFile && resolve(this.main, app.urlFile) }
@@ -820,7 +914,49 @@ export class EpicConfig {
    */
   worktreeFolder(name: string): string {
     const olds = this.worktreesFolders.slice(1).map((folder) => join(folder, name))
-    return [this.newWorktreeFolder(name), ...olds].find((folder) => existsSync(folder)) ?? this.newWorktreeFolder(name)
+    const found = [this.newWorktreeFolder(name), ...olds].find((folder) => existsSync(folder))
+    if (found) return found
+    // a branch named apart from its epic (`branchOf()`, epic `epic-engine` I378):  its worktree, wherever git has it
+    const branch = this.branchOf(name)
+    const listed =
+      branch === name
+        ? undefined
+        : (Git.out(["worktree", "list", "--porcelain"], this.main) ?? "")
+            .split("\n\n")
+            .find((entry) => entry.split("\n").includes(`branch refs/heads/${branch}`))
+    return listed?.split("\n")[0]?.slice("worktree ".length) ?? this.newWorktreeFolder(name)
+  }
+
+  /**
+   * Epic `epic`'s git branch:  its epic page's `<epic-page branch>`, else its id (epic `epic-engine` I378).
+   * - THE one place every verb asks (merge, merge-main, worktree status, park ...):  never the id by itself
+   * - set apart from the id by `epic update <epic> --branch <name>`:
+   *   e.g. `from-project` keeps its id when its branch is renamed `from-console` (no customer names in branch names)
+   * - the id for no page, a future epic's (no `branch`), and one written `(detached)` or the base branch
+   *   (`epic create` in the main checkout wrote `main`), or one git has no branch for (a stale name)
+   * - reads only the page's first few KB, where `<epic-page>` starts:  no parsing library, so plain `node` loads it
+   * - NEVER throws
+   */
+  branchOf(epic: string): string {
+    const file = join(this.contentFolder, "epics", epic, `${epic}.plan.html`)
+    let head = ""
+    try {
+      const fd = openSync(file, "r")
+      try {
+        const buffer = Buffer.alloc(PAGE_HEAD_BYTES)
+        head = buffer.toString("utf8", 0, readSync(fd, buffer, 0, PAGE_HEAD_BYTES, 0))
+      } finally {
+        closeSync(fd)
+      }
+    } catch {
+      return epic
+    }
+    const page = /<epic-page\b[^>]*>/.exec(head)?.[0] ?? ""
+    const branch = /\sbranch="([^"]+)"/.exec(page)?.[1]
+    // `epic create` run in the main checkout wrote the base branch (epic-engine's own page said `main`):  not its branch
+    if (!branch || branch === epic || branch === "(detached)" || branch === this.baseBranch) return epic
+    // a stale name (a page made in another checkout, an old `worktree-<name>`):  only a branch git has counts
+    return Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${branch}`], this.main).ok ? branch : epic
   }
 
   /**
@@ -973,6 +1109,7 @@ export class EpicConfig {
       sharedFolders: this.sharedFolders.join(","),
       engineFolder: this.engineFolder ?? "",
       repoTemplates: this.repoTemplates,
+      guidesFolder: this.guidesFolder,
       windowsFolder: this.windowsFolder,
       "app.path": this.settings.app.path,
       "app.url": this.settings.app.url,
@@ -987,6 +1124,7 @@ export class EpicConfig {
       checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
       promptAck: this.promptAck,
       freshHintMB: this.freshHintMB,
+      ...Object.fromEntries(Object.entries(this.issueBadges).map(([key, value]) => [`issueBadges.${key}`, value])),
       editor: this.editor.id,
       renamedRepos: JSON.stringify(this.renamedRepos),
       colors: JSON.stringify(this.colors),
@@ -1203,6 +1341,7 @@ export class EpicConfig {
       sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file),
       engineFolder: valueOf(given, "engineFolder", defaults.engineFolder, file, "", { empty: true }),
       repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true }),
+      guidesFolder: valueOf(given, "guidesFolder", defaults.guidesFolder, file, "", { empty: true }),
       windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true }),
       repos: reposOf(given, defaults.repos, file),
       voices: namesTo(given, "voices", defaults.voices, file),
@@ -1210,11 +1349,13 @@ export class EpicConfig {
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
       freshHintMB: sizeOf(given, "freshHintMB", defaults.freshHintMB, file),
+      issueBadges: badgeLimitsOf(given, defaults.issueBadges, file),
       editor: editorOf(given, defaults.editor, file),
       renamedRepos: urlsTo(given, "renamedRepos", defaults.renamedRepos, file),
       colors: colorsOf(given, defaults.colors, file),
       top: valueOf(given, "top", defaults.top, file, "", { empty: true }),
       oldLayout: oldLayoutOf(given, defaults.oldLayout, file),
+      servers: serversOf(given, defaults.servers, file),
       app: {
         path: valueOf(app, "path", defaults.app.path, file, "app."),
         url: valueOf(app, "url", defaults.app.url, file, "app.", { empty: true }),
@@ -1263,11 +1404,24 @@ export type RepoCheckout = {
   top: boolean
   /** an OLD-LAYOUT child checkout found inside the epic's worktree, not one the repo lists (`foundCheckouts()`) */
   found?: boolean
-  /** a found checkout of one of the repo's `peers` (spell-brand's, in an old-layout worktree) */
+  /** a found checkout of one of the repo's `peers` (in an old-layout worktree) */
   peer?: boolean
 }
 
-/** One of `EpicConfig.peers`:  a repo beside this one (`spell-brand`), and its MAIN checkout, absolute. */
+/**
+ * One of `EpicConfig.guideFoldersOf()`:  a folder holding guides.
+ * - `folder`:  absolute
+ * - `code`:  the checkout's own (`guidesFolder`), versioned with the code
+ * - `plugin`:  the epic plugin's own (`EpicConfig.pluginGuides()`)
+ * - neither:  the epic folder's `guides/`
+ * - `base`:  what its guides' page paths are from:  the checkout's root, or the epic folder
+ */
+export type GuideFolder = { folder: string; code: boolean; plugin?: boolean; base: string }
+
+/** The epic plugin's guides folder, in the engine's folder (`EpicConfig.pluginGuides()`). */
+const PLUGIN_GUIDES = "guides"
+
+/** One of `EpicConfig.peers`:  a repo beside this one (`spell-x`), and its MAIN checkout, absolute. */
 export type EpicPeer = { name: string; main: string }
 
 /**
@@ -1357,6 +1511,9 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   I5);  `""` (the default):  no link, a repo that only runs `epic`
  * - `repoTemplates`:  the repo's own page templates, a folder from each checkout's root (`""`, none:  the default);
  *   listed beside the engine's (spell-epic's `templates/`, epic `epic-eject` T11), and found by name before them
+ * - `guidesFolder`:  the repo's own guides, a folder from each checkout's root (`"guides"`, the kit's;  `""`, none:
+ *   the default);  versioned with the code, and found before the epic folder's (`guideFoldersOf()`, epic `epic-engine`
+ *   P79)
  * - `windowsFolder`:  the VS Code window files' folder, relative to the main checkout (`epic window`, epic `epic-eject`
  *   P13);  the epic folder's `windows/` (`../my-app.epics/windows`);  `""` means it too
  *   - each machine's own, never tracked:  the epic repo git-ignores `windows/`
@@ -1380,6 +1537,9 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
  * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
  *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off
+ * - `issueBadges`:  the percentages the item badges are worked out by (`ItemBadge`, epic `epic-engine` P81):
+ *   `recheckAt` (doubt, this or more is rechecked first), `closeBelow` (care, under this is closed),
+ *   `fixAbove` (care, over this is fixed);  one left out takes its default, 50, 25 and 60
  * - `freshHintMB`:  the size, in MB, past which a session's transcript gets the one line suggesting
  *   `/epic fresh` (`FreshHint`, epic `epic-engine` T110);  `8` (the default);  `0`:  never
  * - `editor`:  the editor the tools drive when neither this machine (`$SPELL_EPIC_EDITOR`) nor the window says,
@@ -1394,7 +1554,7 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   per person and/or agent working on the project, set in epic project settings"), `EpicColors`;  `{ people: {},
  *   agents: {} }` (the default):  everyone in the shared person or agent colour
  *   - `epic init` doesn't write it;  `epic config colors` prints it
- * - `top`:  the KIT this repo is a PEER of, a folder from the main checkout (`"../spell"`, spell-brand's;
+ * - `top`:  the KIT this repo is a PEER of, a folder from the main checkout (`"../spell"`, a peer's;
  *   epic-engine's P49, Q51 A);  `""` (the default):  none
  *   - each key this file leaves out that a peer shares (the epic folder, windows ...) is the kit's (`kit`);
  *     its worktrees are its own, `../<repo>.worktrees` unless it says otherwise
@@ -1418,14 +1578,17 @@ export type EpicSettings = {
   sharedFolders: string[]
   engineFolder: string
   repoTemplates: string
+  guidesFolder: string
   windowsFolder: string
   app: EpicApp
+  servers: EpicServerSetting[]
   repos: string | string[]
   voices: Record<string, string>
   pageVoices: Record<string, string>
   checkoutPatches: CheckoutPatch[]
   promptAck: boolean
   freshHintMB: number
+  issueBadges: BadgeLimits
   editor: string
   renamedRepos: Record<string, string>
   colors: EpicColors
@@ -1481,6 +1644,18 @@ export type CheckoutPatch = { id: string; date: string; why: string; copy?: stri
 export type EpicApp = { path: string; url: string; urlFile: string; start: string }
 
 /**
+ * One of the repo's OWN servers (`EpicSettings.servers`, epic `epic-engine` P82):  a proxy server, say, which the
+ * server keeper watches beside Spell's own, on the main checkout only.
+ * - `name`:  what the Servers tab calls it, `proxy server`
+ * - `check`:  where it answers:  a URL (`http://127.0.0.1:8080/health`), or just a port (`8080`), up while something
+ *   listens there
+ * - `start`:  the command that starts it, run in the background;  none:  watched and shown, with no Start or Restart
+ * - `folder`:  where `start` runs, from the main checkout (default the checkout itself)
+ * - `what`:  a few words on what it's for, shown under its name
+ */
+export type EpicServerSetting = { name: string; check: string; start?: string; folder?: string; what?: string }
+
+/**
  * `EpicSettings.colors`:  a colour for each person, by the short name `epic whoami` prints, and each agent, by its id
  * (`codex`);  a CSS colour each.  The page's shape of it:  `ThreadFacts`' `VoiceColors`.
  */
@@ -1524,6 +1699,9 @@ function isInEngineCheckout(folder: string): boolean {
   return real === checkout || real.startsWith(`${checkout}${sep}`)
 }
 
+/** how much of an epic page `branchOf()` reads:  `<epic-page>` opens within its first lines */
+const PAGE_HEAD_BYTES = 8192
+
 /** The messages `warnOnce()` has written, this process. */
 const WARNED = new Set<string>()
 
@@ -1544,6 +1722,30 @@ function codeHostOf(given: Record<string, unknown>, fallback: CodeHostKind, file
   if (!CodeHost.isKind(value))
     throw new TypeError(`EpicConfig:  ${file}'s "codeHost" must be "github" or "gitlab", not ${JSON.stringify(value)}`)
   return value
+}
+
+/**
+ * `given.issueBadges`, the item badges' percentages;  one left out takes `fallback`'s (epic `epic-engine` P81).
+ * - throws `TypeError` naming the file and the key when one isn't 0 to 100, or `closeBelow` is over `fixAbove`
+ */
+function badgeLimitsOf(given: Record<string, unknown>, fallback: BadgeLimits, file: string): BadgeLimits {
+  const value = given.issueBadges
+  if (value === undefined) return fallback
+  const limits = { ...fallback }
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new TypeError(`EpicConfig:  ${file}'s "issueBadges" must be { recheckAt, closeBelow, fixAbove }`)
+  for (const key of Object.keys(fallback) as (keyof BadgeLimits)[]) {
+    const percent = (value as Record<string, unknown>)[key]
+    if (percent === undefined) continue
+    if (typeof percent !== "number" || !(percent >= 0 && percent <= 100))
+      throw new TypeError(
+        `EpicConfig:  ${file}'s "issueBadges.${key}" must be a percentage, 0 to 100, not ${JSON.stringify(percent)}`
+      )
+    limits[key] = percent
+  }
+  if (limits.closeBelow > limits.fixAbove)
+    throw new TypeError(`EpicConfig:  ${file}'s "issueBadges.closeBelow" must be no more than its "fixAbove"`)
+  return limits
 }
 
 /**
@@ -1683,6 +1885,39 @@ function patchesOf(given: Record<string, unknown>, fallback: CheckoutPatch[], fi
       fail(`:  "${patch.id}"'s "copy" must be a file from the repo's root, not ${JSON.stringify(patch.copy)}`)
     const { id, date, why, copy, run } = patch as CheckoutPatch
     return { id, date, why, ...(copy ? { copy } : {}), ...(run ? { run } : {}) }
+  })
+}
+
+/**
+ * `given.servers`, the repo's own servers (`EpicServerSetting`);  `fallback` when it's left out.
+ * - throws `TypeError` naming the file for anything else:  a server with no `name` or `check`, two of one name, a
+ *   `check` that's neither a URL nor a port
+ */
+function serversOf(given: Record<string, unknown>, fallback: EpicServerSetting[], file: string): EpicServerSetting[] {
+  const value = given.servers
+  if (value === undefined) return fallback
+  const fail = (why: string): never => {
+    throw new TypeError(`EpicConfig:  ${file}'s "servers" ${why}`)
+  }
+  if (!Array.isArray(value))
+    fail(`must be a list, [{ "name": ..., "check": ..., "start": ... }], not ${JSON.stringify(value)}`)
+  const names = new Set<string>()
+  return (value as unknown[]).map((each) => {
+    const server = (typeof each === "object" && each !== null ? each : {}) as Record<string, unknown>
+    const text = (key: string) => (typeof server[key] === "string" ? (server[key] as string).trim() : "")
+    const check = typeof server.check === "number" ? String(server.check) : text("check")
+    if (!text("name")) fail(`:  each needs a "name", not ${JSON.stringify(each)}`)
+    if (names.has(text("name"))) fail(`:  two servers are named "${text("name")}"`)
+    names.add(text("name"))
+    if (!/^\d+$/.test(check) && !/^https?:\/\//.test(check))
+      fail(`:  "${text("name")}"'s "check" must be a URL or a port, not ${JSON.stringify(server.check)}`)
+    return {
+      name: text("name"),
+      check,
+      ...(text("start") && { start: text("start") }),
+      ...(text("folder") && { folder: text("folder") }),
+      ...(text("what") && { what: text("what") })
+    }
   })
 }
 

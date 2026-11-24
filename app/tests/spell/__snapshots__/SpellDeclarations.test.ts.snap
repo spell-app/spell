@@ -93,7 +93,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
     "test_a_new_deck",
     "test_the_moves",
   ],
-  "spellVersion": "0.8.0",
+  "spellVersion": "0.9.0",
   "statements": [
     {
       "defined": "/Card.spell:0-1957",

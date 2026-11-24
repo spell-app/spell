@@ -281,7 +281,7 @@ It passes, as compatibility, not as the recommended setup.
 No smoke page runs any of them yet, so this page gives them no recipe.
 The contract above asks nothing of a framework but setting properties and listening for events,
 which is why they should work;  until a page checks one, treat it as untested.
-The docs site's [getting-started page](docs/getting-started.html) has a one-line binding for each, unchecked too.
+The Spell UI site's [Getting started page](../app/spaces/@spell/guides/SpellUI/GettingStarted.spell) has a one-line binding for each, unchecked too.
 
 ## Types:  your editor knows every tag, and Solid's JSX does too
 

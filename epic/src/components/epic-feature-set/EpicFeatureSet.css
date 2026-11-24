@@ -1,0 +1,70 @@
+/*
+ * `<epic-feature-set>` (`EpicFeatureSet.tsx`):  a Feature Set page's Reorder sections, and the dialog that reorders.
+ * - Spacing on a 4px grid.
+ * - The table and the item names are the page's:  `spell-doc.css`, "A Feature Set".
+ */
+
+@layer ui.components.epic-feature-set.types;
+
+@layer ui.components.epic-feature-set.types {
+  :host {
+    display: block;
+    margin-block: 12px;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+
+  .how-to {
+    margin: 0 0 16px 0;
+    color: var(--ui-text-muted, GrayText);
+  }
+  .how-to > p {
+    margin: 0;
+    line-height: 20px;
+  }
+  .list {
+    max-height: 56vh;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+  /* one line of buttons, the name and the title on its middle;  a long title wraps between them */
+  .entry {
+    display: grid;
+    grid-template-columns: auto 36px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 4px;
+    border-radius: 4px;
+  }
+  .entry + .entry {
+    border-top: 1px solid var(--ui-border-color, GrayText);
+  }
+  .entry.dragged {
+    background: var(--ui-highlight, Highlight);
+  }
+  .grip {
+    cursor: grab;
+    touch-action: none;
+  }
+  .name {
+    font: 600 0.85em / 1 var(--ui-font-family-mono, ui-monospace, monospace);
+  }
+  .title {
+    line-height: 20px;
+    overflow-wrap: break-word;
+  }
+  /* for screen readers alone */
+  .said {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

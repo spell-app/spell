@@ -4,6 +4,7 @@
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
               for.</>
 	</>
+
 	<!-- USAGE:  sources, privacy, events, script API, keyboard, accessibility, frameworks. -->
 	<section label="Using it">
 		<markdown>

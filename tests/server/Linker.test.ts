@@ -120,6 +120,12 @@ describe("Linker.link()", () => {
     expect(linked(`<a href="#x">${span}</a>`)).toBe(`<a href="#x">${span}</a>`)
   })
 
+  test("leaves a code span marked data-no-link as text, and doesn't report it (epic-engine I399)", () => {
+    const span = "<code data-no-link>packages/ui/tools/SiteCheck.ts</code>"
+    expect(link(`<p>${span} <code data-no-link>zz/missing.ts</code></p>`)).toMatchObject({ linked: 0, unresolved: [] })
+    expect(linked(`<p>${span}</p>`)).toBe(`<p>${span}</p>`)
+  })
+
   test("reports unresolved path-like spans, sorted, and leaves paths outside the repo as text", () => {
     const result = link("<code>zz/missing.ts</code> <code>nope.md</code> <code>word</code> <code>/etc/hosts</code>")
     expect(result.linked).toBe(0)
@@ -385,6 +391,46 @@ describe("Linker served folders", () => {
   test("reads its relative links from its address:  a link written from its file's folder lands elsewhere", () => {
     expect(served.rootPathFor("../../../docs/tools/pages.js", dir)).toBe(undefined)
     expect(served.rootPathFor("../x.ts", dir)).toBe("/srv/x.ts")
+  })
+})
+
+// epic `editor` P43:  the Spell UI site, a Spell site shown at `/components/ui/` with no file per page
+describe("Linker sites", () => {
+  /** A site at `/site` whose old pages were `/site/ui-<name>.html`:  the rule a folder hands in (Spell UI's `SpellUIGuide`). */
+  const SITE: SRV.LinkSite = {
+    address: "/site",
+    mendedPath(path) {
+      const old = /^\/site\/ui-([a-z-]+)\.html(.*)$/.exec(path)
+      return old ? `/site/${old[1]}${old[2]}` : undefined
+    }
+  }
+  const linker = new SRV.Linker(ROOT, { content: undefined, sites: [SITE] })
+
+  test("mends a link to a site's old page, a root path too, its hash and query kept;  under a worktree's address too", () => {
+    const { text, changes } = linker.rootLinks(
+      '<a href="/site/ui-button.html#api">b</a> <a href="/worktrees/w/site/ui-grid.html?x=1&amp;y=2">g</a> ' +
+        '<a href="/site/images/a.png">i</a> <a href="../../site/ui-menu.html">m</a>',
+      PAGE_DIR,
+      { mend: true }
+    )
+    expect(text).toBe(
+      '<a href="/site/button#api">b</a> <a href="/worktrees/w/site/grid?x=1&amp;y=2">g</a> ' +
+        '<a href="/site/images/a.png">i</a> <a href="/site/menu">m</a>'
+    )
+    expect(changes.map((change) => change.kind)).toEqual(["mended", "mended", "mended"])
+    expect(linker.mendedPath("/site/ui-tab.html")).toBe("/site/tab")
+  })
+
+  test("checks a site's page as found, with no file;  an old page's link is a problem, naming its address now", () => {
+    const page = (body: string) => `<html><head><title>t</title></head><body>${body}</body></html>`
+    expect(linker.check(page('<a href="/site/button/api" target="b">b</a>'), PAGE_DIR).problems).toEqual([])
+    expect(linker.check(page('<a href="/site/nope.png" target="n">n</a>'), PAGE_DIR).problems).toEqual([
+      "missing:  /site/nope.png"
+    ])
+    expect(linker.check(page('<a href="/site/ui-button.html" target="b">b</a>'), PAGE_DIR).problems).toEqual([
+      "old page:  /site/ui-button.html -- write /site/button",
+      "missing:  /site/ui-button.html"
+    ])
   })
 })
 

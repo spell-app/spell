@@ -417,7 +417,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * Compile project: cancel any in-flight parse/compile, then run `this.compiler` `TaskList`.
    * - `parser` is passed through as `parentScope`, same as `parse()`.
    * - `save: false` leaves our output in `outputFile.contents` WITHOUT writing it, e.g. `spell compile --stdout`.
+   * - `save: "later"` doesn't write it either, but remembers to:  `saveUnsavedOutput()` writes it, e.g. on the editor's
+   *   Save, so a compile as typing pauses sends nothing to the server (epic `solid-2-final` P9).
    * - `targets`:  compile to these, this run only, instead of our project file's -- see `targets`.
+   * - `compiledFor`:  who the running code is for, this run only -- see `compiledForThisRun`.
    * - With a compile cache installed (`compileCache`, the editor's), asks it first, on a project not parsed yet:
    *   - found:  takes what it holds and saves it as a compile would, without parsing or compiling a line
    *     (`compiledFrom` says `"cache"`)
@@ -428,23 +431,25 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   async compile(
     parser?: P.Scope,
-    { save = true, targets, cached = true }: { save?: boolean; targets?: string[]; cached?: boolean } = {}
+    {
+      save = true,
+      targets,
+      cached = true,
+      compiledFor = "editor"
+    }: { save?: SaveCompiled; targets?: string[]; cached?: boolean; compiledFor?: P.CompiledFor } = {}
   ): Promise<unknown> {
     this.parser.cancel()
     this.compiler.cancel()
     // text typed and not parsed yet (`takeText()`):  parsed first, so nothing compiles from an older parse
     this.updateWaitingText()
     // limited to some pages:  part of the program, so never saved or cached (`pagesInPlay`)
-    if (this.pagesInPlay) {
-      await this.load(undefined)
-      await Promise.all(this.spellFiles.map((file) => file.load(undefined)))
-      if (this.hasAlonePages) {
-        save = false
-        cached = false
-      }
+    if (await this.isLimitedToPages()) {
+      save = false
+      cached = false
     }
     this.saveCompiled = save
     this.targetsThisRun = targets
+    this.compiledForThisRun = compiledFor
     const run = ++this.compileRun
     const cache = parser || !cached ? undefined : SpellProject.compileCache
     // the key of what we're about to compile, worked out first:  the text may change while it compiles
@@ -478,17 +483,32 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * Is what we compile now only some of our pages (`pagesInPlay`)?
+   * - SIDE EFFECT:  loads every file first, when it could be.  A page is known by its text alone (`headFor()`),
+   *   and the page doesn't parse what the language worker compiles:  unloaded, none looked alone, so part of a site
+   *   was saved as all of it, and Run found no page to show (epic `editor` I293).
+   */
+  private async isLimitedToPages(): Promise<boolean> {
+    if (!this.pagesInPlay) return false
+    await this.load(undefined)
+    await Promise.all(this.spellFiles.map((file) => file.load(undefined)))
+    return this.hasAlonePages
+  }
+
+  /**
    * The compile cache every project's `compile()` asks first, if one is installed:  the editor installs one.
    * - None (the `spell` command, tests):  every compile compiles.
    */
   static compileCache: SP.CompileCache | undefined
 
   /**
-   * Where our last `compile()`'s output came from:  `"compile"`, or `"cache"`.
+   * Where our last `compile()`'s output came from:  `"compile"`, `"cache"`, or `"elsewhere"`.
    * - `"cache"`:  nothing parsed, so `scope` and each file's `match` are still to come, from a `parse()`.
+   * - `"elsewhere"`:  a compile of our very text somewhere else, the editor's language worker (`takeCompiled()`);
+   *   our own parse is our own, as it was.
    * - NOTE: plain field, as `saveCompiled`.
    */
-  compiledFrom: "compile" | "cache" | undefined
+  compiledFrom: "compile" | "cache" | "elsewhere" | undefined
 
   /** Counts our `compile()`s, so one that waited on the cache knows a later one took over. */
   private compileRun = 0
@@ -553,20 +573,94 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * Take `entry`, what a compile of our very text wrote somewhere else, as our compile's output, and save it as
+   * `compile()` would (`save`):  the editor's language worker compiles off the page's thread (epic `solid-2-final` P18).
+   * - Our own parse stays as it is:  only what a compile writes is taken (`takeCachedEntry()`), so `compiledFrom` says
+   *   `"elsewhere"`.
+   * - A `compile()` still waiting on the cache gives way to it, and it to a later compile.
+   * - Limited to some pages (`pagesInPlay`):  never saved or cached, as `compile()`'s isn't.
+   *   SIDE EFFECT:  every file is loaded first, to tell (`isLimitedToPages()`).
+   * - `cacheKey`:  the key of the text it was compiled from (`compileCacheKey()`, asked before the compile):  a clean
+   *   entry (`entry.clean`) is kept in the compile cache under it, as `compile()` keeps its own (epic `solid-2-final`
+   *   I57).  None:  nothing kept.
+   * - Returns what `saveOutput()` returns;  `undefined` when a later compile took over.
+   */
+  async takeCompiled(
+    entry: SP.CompiledEntry,
+    { save = true, cacheKey }: { save?: SaveCompiled; cacheKey?: string } = {}
+  ): Promise<unknown> {
+    const run = ++this.compileRun
+    const limited = await this.isLimitedToPages()
+    if (limited) save = false
+    if (run !== this.compileRun) return undefined
+    this.saveCompiled = save
+    this.targetsThisRun = undefined
+    this.takeCachedEntry(entry)
+    this.compiledFrom = "elsewhere"
+    // kept as compile() keeps its own, so a reload after an edit runs what's kept (epic `solid-2-final` I57)
+    const cache = SpellProject.compileCache
+    if (cache) {
+      cache.noteCompile(this, "compiled", this.spellFiles.length)
+      if (cacheKey && entry.clean && !limited) {
+        const { clean: _clean, ...kept } = entry
+        void cache.keep(cacheKey, kept).catch((error) => console.error("SpellProject.takeCompiled():", error))
+      }
+    }
+    return await this.saveOutput()
+  }
+
+  /**
+   * The compile cache's key for our text as it is NOW, for a compile done elsewhere (`takeCompiled()`'s `cacheKey`):
+   * worked out before asking, since our text may change while it compiles.
+   * - SIDE EFFECT:  this run is the editor's (`compiledForThisRun`), as `compile()`'s default is.
+   * - `undefined` with no cache installed, or when its key can't be worked out.  NEVER throws.
+   */
+  async compileCacheKey(): Promise<string | undefined> {
+    const cache = SpellProject.compileCache
+    if (!cache) return undefined
+    this.compiledForThisRun = "editor"
+    return await cache.keyFor(this).catch(() => undefined)
+  }
+
+  /**
    * Does the running `compile()` write `outputFile`?  Set by each `compile()`, read by `compiler`'s last task.
+   * - `"later"`:  not now, but `saveUnsavedOutput()` will -- see `compile()`.
    * - NOTE: plain field, not state:  it only steers one run.
    */
-  saveCompiled = true
+  saveCompiled: SaveCompiled = true
+
+  /**
+   * Did a compile with `save: "later"` write output we haven't saved yet?  `saveUnsavedOutput()` saves it.
+   * - NOTE: plain field, as `saveCompiled`.
+   */
+  hasUnsavedOutput = false
+
+  /**
+   * What each built file held when we last saved it:  `saveChanged()` skips one that holds the same again.
+   * - By file object, so a file we let go of is forgotten with it.
+   */
+  private savedTexts = new WeakMap<SP.AnySpellFile, string | undefined>()
 
   /** Targets the running `compile()` was asked for, instead of the project file's.  Plain field, as `saveCompiled`. */
   targetsThisRun: string[] | undefined
 
   /**
+   * Who the running `compile()`'s running code is for (`P.WriterOptions.compiledFor`):
+   * - `"editor"`, the default:  the editor's own compile, with each line's spell, `declaredAt` marks and headings
+   * - `"built"`:  a built site, the cloud, `spell compile`, without them (epic `solid-2-final` P11)
+   * - Only the running target's code (`SP.RUNNING_TARGET`):  another's, a library's `.lib.ts` say, keeps its comments.
+   * - Plain field, as `saveCompiled`.
+   */
+  compiledForThisRun: P.CompiledFor = "editor"
+
+  /**
    * Each place's deployment named `deployment`, from our project file's `places`, by the place's name as compiled code
    * names it:  `{ netbox: { at: "...", readOnly: true } }` (epic `data` P49).
    * - `spell run` and the page server both pick this way, by `SP.DEPLOYMENT_VARIABLE`.
-   * - A place that lists no such deployment runs as its line says.
-   * - throws `TypeError` for a deployment no place in the project file has:  a mistake, named
+   * - A place that lists no such deployment runs as its line says,
+   *   as long as some other place lists it:  a place with one server needs no deployments.
+   * - throws `SP.UnlistedDeploymentError` for a deployment no place in the project file has:
+   *   a mistake, named with the ones it does list, never read quietly (from-console J104)
    */
   deploymentsPicked(deployment: string): Record<string, PlaceDeployment> {
     return SpellProject.deploymentsIn(this.contents?.places, deployment, this.projectId)
@@ -584,7 +678,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * Each place's deployment named `deployment`, from `places`, a project file's:  see `deploymentsPicked()`.
    * - For a reader that has the project file but no project:  the page server.
-   * - throws `TypeError` for a deployment no place in it has
+   * - throws `SP.UnlistedDeploymentError` for a deployment no place in it has
    */
   static deploymentsIn(
     places: SP.ProjectManifestJSON5["places"],
@@ -595,9 +689,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       deployments[deployment] ? [[snakeCase(place), SpellProject.deploymentAsRun(deployment, deployments[deployment])] as const] : []
     )
     if (!picked.length) {
-      throw new TypeError(
-        `no place in ${projectId}'s project file has a deployment named "${deployment}":  list it under "places"`
-      )
+      const listed = [...new Set(Object.values(places ?? {}).flatMap((deployments) => Object.keys(deployments)))]
+      throw new SP.UnlistedDeploymentError(unlistedDeploymentText(projectId, deployment, listed), {
+        cause: { projectId, deployment, listed }
+      })
     }
     return Object.fromEntries(picked)
   }
@@ -766,6 +861,18 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * Our project file, loaded:  then the language pack of each file it names, past English, which loads on first use
+   * (epic `solid-2-final` P11).
+   * - So a project loaded can read its files:  `languages`, `SpellFile.language`.
+   * - Contents set by hand (a project made in the page) load theirs as they parse (`parser`).
+   */
+  override async getLoader(params: Parameters<JSON5File<SP.ProjectManifestJSON5>["getLoader"]>[0]) {
+    const contents = await super.getLoader(params)
+    await SP.Language.loadFor((contents?.imports ?? []).map(({ path }) => path))
+    return contents
+  }
+
+  /**
    * Return base `ProjectScope` for this project, given `parentScope`.
    * - Clones `parentScope`'s parser scoped to `this.path`, so rules added within project
    *   (e.g. custom types/macros) don't leak out to `parentScope` or sibling projects.
@@ -799,6 +906,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
             name: `Loading ${this.type}`,
             run: async (parentScope) => {
               await this.load(undefined)
+              // the packs our files are in, past English:  they load on first use (epic `solid-2-final` P11)
+              await SP.Language.loadFor(this.spellFiles.map((file) => file.file))
               // Keep our scope while `incremental` is good:  files' matches belong to it.
               if (this.needsFullParse) {
                 this.resetCompiled()
@@ -923,13 +1032,18 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                     target.writer instanceof P.JSWriter && target.can.run !== false
                       ? new P.SourceMarks(SpellProject.sourcePlaceOf, SpellProject.partPlaceOf)
                       : undefined
+                  // the running code alone is ever built without the editor's text:  see `compiledForThisRun`
+                  const options =
+                    target.name === SP.RUNNING_TARGET
+                      ? { ...this.writerOptions(), compiledFor: this.compiledForThisRun }
+                      : this.writerOptions()
                   const combine = () =>
                     SpellProject.combineCompiled(
                       parts,
                       target.writer,
                       header,
                       this.scope,
-                      this.writerOptions(),
+                      options,
                       this.mainFileIn(files)
                     )
                   const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
@@ -1034,22 +1148,55 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - The last step of a compile, and all a compile from the cache does (`compile()`).
    */
   async saveOutput(): Promise<unknown> {
-    if (!this.saveCompiled) return this.outputFile.contents
-    await this.declarationsFile.save(undefined)
+    if (this.saveCompiled === "later") this.hasUnsavedOutput = true
+    if (this.saveCompiled !== true) return this.outputFile.contents
+    return await this.writeOutput()
+  }
+
+  /**
+   * Save the output a compile with `save: "later"` left unsaved, if any:  the editor's Save (epic `solid-2-final` P9).
+   * - Only what changed since we last saved it (`saveChanged()`).
+   */
+  async saveUnsavedOutput(): Promise<void> {
+    if (!this.hasUnsavedOutput) return
+    await this.writeOutput()
+  }
+
+  /** Write our compile's output:  see `saveOutput()`.  Each file only if it changed since we last saved it. */
+  private async writeOutput(): Promise<unknown> {
+    this.hasUnsavedOutput = false
+    await this.saveChanged(this.declarationsFile)
     await this.writeTitleWords()
-    for (const wordsFile of this.wordsFiles) await wordsFile.save(undefined)
+    for (const wordsFile of this.wordsFiles) await this.saveChanged(wordsFile)
     for (const target of this.targets) {
       const map = this.sourceMapFileFor(target)
-      if (map.contents) await map.save(undefined)
+      if (map.contents) await this.saveChanged(map)
     }
     for (const target of this.targets.slice(1)) {
-      await this.outputFileFor(target).save(undefined)
-      for (const lang of this.wordsLanguages) await this.targetWordsFileFor(target, lang)?.save(undefined)
+      await this.saveChanged(this.outputFileFor(target))
+      for (const lang of this.wordsLanguages) {
+        const wordsFile = this.targetWordsFileFor(target, lang)
+        if (wordsFile) await this.saveChanged(wordsFile)
+      }
       const elementsFile = this.elementsFileFor(target)
-      if (elementsFile?.contents) await elementsFile.save(undefined)
+      if (elementsFile?.contents) await this.saveChanged(elementsFile)
       await this.saveAppFor(target)
     }
-    return await this.outputFile.save(undefined)
+    return await this.saveChanged(this.outputFile)
+  }
+
+  /**
+   * Save built file `file`, unless it holds what we last saved of it:  nothing changed, so nothing to send.
+   * - Returns what saving returns;  skipped, its contents.
+   * - NOTE: a file another program rewrote since keeps that copy, when ours is unchanged:
+   *   e.g. VS Code's language server compiles the same source to the same text.
+   */
+  private async saveChanged(file: SP.AnySpellFile): Promise<unknown> {
+    const text = file.contents
+    if (this.savedTexts.has(file) && this.savedTexts.get(file) === text) return text
+    const result = await file.save(undefined)
+    this.savedTexts.set(file, text)
+    return result
   }
 
   /**
@@ -1428,11 +1575,16 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   updatedContentsFor(file: SP.AnySpellFile): void {
     const { incremental } = this
+    // where an editor changed it since its last parse, for the text it has now:  see `takeText()`
+    const waiting = this.textSpans.get(file as SP.SpellFile)
+    this.textSpans.delete(file as SP.SpellFile)
     // a file that changed shape needs a new parser:  never carry lines from one shape's parse to the other's
     const flipped = file instanceof SP.SpellFile && this.changedShape(file)
     if (file instanceof SP.SpellFile && incremental?.has(file.path) && !incremental.isBroken && !flipped) {
       try {
-        const changed = incremental.update(file.path, file.parseText)
+        const text = file.parseText
+        const span = waiting && waiting.text === text ? waiting.span : undefined
+        const changed = incremental.update(file.path, text, span)
         changed.forEach((parse) => {
           const path = incremental.files.find((it) => it.parse === parse)!.path
           const changedFile = this.spellFiles.find((it) => it.path === path)
@@ -1474,15 +1626,58 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Until then `file.match` is the parse of its text before:  `compile()` and `parse()` parse what's waiting first.
    * - A file we don't parse (see `SpellFile.isActive`) just takes the text, as in `updateText()`.
    * - Does NOT mark `file` dirty or save it:  that's the editor's business.
+   * - `span`:  where the text changed (`P.EditedSpan`), if the editor knows, e.g. from CodeMirror's change set:
+   *   the spans over a pause make one, so the parse reads only around it (epic `solid-2-final` P9).
+   *   Text taken without one compares the texts whole, as before.
    */
-  takeText(file: SP.SpellFile, text: string): void {
+  takeText(file: SP.SpellFile, text: string, span?: P.EditedSpan): void {
+    // the span is from the text last parsed:  a take with none, or one of a file not waiting, can't be joined on to
+    const waiting = this.textSpans.get(file)
+    const joined =
+      span && file.isActive && (waiting || !this.textWaiting.has(file))
+        ? P.EditedSpan.joined(waiting?.span, span)
+        : undefined
+    if (joined) this.textSpans.set(file, { span: joined, text })
+    else this.textSpans.delete(file)
     if (file.contents !== text) file.contents = text
     if (file.isActive) this.textWaiting.add(file)
   }
 
-  /** Is any file's text waiting to be parsed?  See `takeText()`. */
+  /**
+   * Where each waiting file's text changed since its last parse, and the text that span leads to -- see `takeText()`.
+   * - Used only while the file's text is still that text:  anything else that set it makes the span useless.
+   * - NOTE: plain field, as `textWaiting`.
+   */
+  private textSpans = new Map<SP.SpellFile, { span: P.EditedSpan; text: string }>()
+
+  /**
+   * An editor holds `file`'s newest text, and hands it over (`takeText()`) when `handOver` is called:
+   * so a keystroke never makes the file's text one string (epic `solid-2-final` P9).
+   * - Called by `takeWaitingText()`:  before any parse or compile, and by whoever is about to read the file's
+   *   `contents`, e.g. to save it.
+   * - `handOver` MUST NOT throw.
+   */
+  textLater(file: SP.SpellFile, handOver: () => void): void {
+    this.textHolders.set(file, handOver)
+  }
+
+  /** Have every editor holding a file's newer text hand it over now -- see `textLater()`. */
+  takeWaitingText(): void {
+    if (!this.textHolders.size) return
+    const holders = [...this.textHolders.values()]
+    this.textHolders.clear()
+    for (const handOver of holders) handOver()
+  }
+
+  /**
+   * Who holds each file's newer text, not handed over yet -- see `textLater()`.
+   * - NOTE: plain field, as `textWaiting`.
+   */
+  private textHolders = new Map<SP.SpellFile, () => void>()
+
+  /** Is any file's text waiting to be parsed?  See `takeText()`, `textLater()`. */
   get isTextWaiting(): boolean {
-    return this.textWaiting.size > 0
+    return this.textWaiting.size > 0 || this.textHolders.size > 0
   }
 
   /**
@@ -1494,6 +1689,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    *   A crash there is left in `parseError`, NOT thrown.
    */
   async parseWaitingText(): Promise<SP.SpellFile[]> {
+    this.takeWaitingText()
     if (!this.textWaiting.size) return []
     const before = new Map(this.spellFiles.map((it) => [it, it.match]))
     this.updateWaitingText()
@@ -1503,6 +1699,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /** Re-parse the files whose text is waiting, as little as possible:  `updatedContentsFor()` each. */
   private updateWaitingText(): void {
+    this.takeWaitingText()
     const files = [...this.textWaiting]
     this.textWaiting.clear()
     for (const file of files) this.updatedContentsFor(file)
@@ -1532,6 +1729,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   onContentsUpdated(): void {
     // Which files we have, or their order, may have changed:  parse from scratch next time.
     this.incremental = undefined
+    this.textSpans.clear()
     const { manifest, files, imports, activeImports } = this
     void manifest
     void files
@@ -1766,16 +1964,21 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Else from the comments in its `outputFile`, for a project compiled before that file existed.
    * - `undefined` if neither has any.
    * - Fresh each time:  another project's compile may have changed them since we last looked.
+   * - SIDE EFFECT:  loads the language packs they're written in (`SP.Language.loadFor()`).
    */
   static async declarationsOf(project: SpellProject): Promise<SP.SpellDeclarationsData | undefined> {
     const { declarationsFile, outputFile } = project
     declarationsFile.cacheDuration = 0
     const json = await declarationsFile.load(undefined).catch(() => undefined)
-    const declarations = json && SP.SpellDeclarations.read(json)
-    if (declarations) return declarations
-    outputFile.cacheDuration = 0
-    const compiled = await outputFile.load(undefined).catch(() => undefined)
-    return compiled ? SP.SpellDeclarations.fromComments(compiled) : undefined
+    let declarations = json ? SP.SpellDeclarations.read(json) : undefined
+    if (!declarations) {
+      outputFile.cacheDuration = 0
+      const compiled = await outputFile.load(undefined).catch(() => undefined)
+      declarations = compiled ? SP.SpellDeclarations.fromComments(compiled) : undefined
+    }
+    // the packs they're written in, past English, which load on first use:  reading them asks those
+    if (declarations) await SP.Language.loadFor(SP.SpellDeclarations.languagesOf(declarations))
+    return declarations
   }
 
   /**
@@ -1957,3 +2160,27 @@ function optionalText(text: unknown): string | undefined {
 function definedOnly<T extends object>(props: T): T {
   return Object.fromEntries(Object.entries(props).filter(([, value]) => value !== undefined)) as T
 }
+
+/**
+ * What's said of a deployment no place in `projectId`'s file lists, in short lines:  what failed, why, and the fix.
+ * - `listed`:  the deployments it does list, the first named in the fix.
+ */
+function unlistedDeploymentText(projectId: string, deployment: string, listed: string[]): string {
+  return [
+    `Spell can't read the places in ${projectId}.`,
+    `It was told to use the deployment "${deployment}", but the project's settings file (${SP.PROJECT_FILE}) has no deployment by that name.`,
+    `(A deployment is one copy of a place's server, such as a test copy or the live one.  You pick one with ${SP.DEPLOYMENT_VARIABLE} when you start Spell.)`,
+    listed.length
+      ? `The file lists these:  ${listed.join(", ")}.  To use one, start Spell again with ${SP.DEPLOYMENT_VARIABLE}=${listed[0]} in front of the command.`
+      : `The file lists none yet.  To read each place as its line says, start Spell again without ${SP.DEPLOYMENT_VARIABLE}.`,
+    `Or open the settings file, find its "places" section, and add a deployment named "${deployment}" under a place there.`
+  ].join("\n")
+}
+
+/**
+ * Does a `compile()` write what it compiled -- see `SpellProject.compile()`:
+ * - `true`:  now, as its last step
+ * - `false`:  never, e.g. `spell compile --stdout`
+ * - `"later"`:  not now;  `saveUnsavedOutput()` does, e.g. on the editor's Save
+ */
+export type SaveCompiled = boolean | "later"

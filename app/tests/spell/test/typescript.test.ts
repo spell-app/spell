@@ -56,7 +56,8 @@ beforeAll(() => {
     ])
   )
   result = typecheck({ ...files, "Cards.sample.tsx": solidSample(), "Mistakes.tsx": MISTAKES }, { projects })
-}, 60_000)
+  // every fixture compiled, then one `tsc` over them:  ~30s alone, past a minute beside a full run
+}, 180_000)
 
 describe("fixture projects as TypeScript, checked by tsc", () => {
   test("core's own files check clean", () => {

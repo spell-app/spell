@@ -125,6 +125,9 @@ export class ReviewState {
    */
   readonly takenNote = (): InboxMark | undefined => this.read((client, id) => client.takenNoteOf(id))
 
+  /** What its step `step` printed, pasted under the step's command (a test's, epic `epic-engine` T165);  `""` for none. */
+  readonly outputOf = (step: number): string => this.read((client, id) => client.outputOf(id, step)) ?? ""
+
   /** Its saved draft, if any. */
   readonly draft = (): InboxDraft | undefined => this.read((client, id) => client.draftOf(id))
 

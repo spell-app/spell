@@ -4,6 +4,7 @@
 		<header>A group of items presents a set of site content for display, each an image beside its
               text.</>
 	</>
+
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
 	<section label="Attributes">
 		<html>

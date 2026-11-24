@@ -45,8 +45,9 @@ export class PullRequest {
    */
   async run(args: string[]): Promise<number> {
     const { positional, flags } = parseVerbArgs(args)
-    const name = positional[0]
-    if (!name) throw new EpicCommandError("epic pr:  name the branch:  epic pr <name>")
+    if (!positional[0]) throw new EpicCommandError("epic pr:  name the branch:  epic pr <name>")
+    // an epic's id names its branch (`branchOf()`):  `epic pr from-project` proposes `from-console` (I378)
+    const name = this.config.branchOf(positional[0])
     const { main } = this
     const base = this.config.baseBranch
     const { words } = this.host

@@ -55,11 +55,7 @@ export const epicCodeVocabulary = {
     { name: "code", description: "The `<ui-code>` that draws the code, highlighted, with its copy button." }
   ],
   states: [...PANEL_STATES],
-  texts: [
-    { key: "foldTip", text: "Close this code", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Open this code", description: "Tooltip of its fold button while folded." },
-    { key: "code", text: "Code", description: "The heading, without a title." }
-  ],
+  texts: [{ key: "code", text: "Code", description: "The heading, without a title." }],
   children: [
     {
       tag: "flow",

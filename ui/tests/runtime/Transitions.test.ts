@@ -25,6 +25,21 @@ afterAll(() => {
 })
 
 describe("Transitions.animate()", () => {
+  it("gives a box's shadow root the animations sheet first, once:  not a box on the page (solid-2-final P4)", async () => {
+    const added: Array<[ShadowRoot, string]> = []
+    const adopting = new Transitions({
+      browser: { isReducedMotion: false },
+      styles: { addInto: (root, name) => void added.push([root, name]) }
+    })
+    const host = Fixture.render(`<div></div>`)
+    const root = host.attachShadow({ mode: "open" })
+    root.adoptedStyleSheets = [sheet]
+    root.innerHTML = `<p>hi</p>`
+    await adopting.animate({ element: root.querySelector("p")!, name: "fade", direction: "in" })
+    await adopting.animate({ element: Fixture.render(`<p>page</p>`), name: "fade", direction: "in" })
+    expect(added).toEqual([[root, "animations"]])
+  })
+
   it("runs in:  un-hides, sets the attribute, resolves on animationend and cleans up", async () => {
     const element = Fixture.render(`<p hidden>hi</p>`)
     const done = transitions.animate({ element, name: "fade", direction: "in" })

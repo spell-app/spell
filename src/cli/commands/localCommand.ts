@@ -148,16 +148,18 @@ function pluginOnLines(plugin: MachineSwitch, kit: string): string[] {
       "  Nothing to do for its old background helpers:  they stop by themselves after each session's next turn."
     )
   } else lines.push("- Claude Code's epic plugin and its skills already used your checkout")
-  if (editor.some((change) => /installed/.test(change))) {
+  if (editor.some((change) => EXTENSION_INSTALLED.test(change))) {
     lines.push("- VS Code's epic extension is your checkout's now.  Reload each VS Code window to use it.")
-  } else if (editor.length)
+  } else if (editor.length && !plugin.missingExtension)
     lines.push(`- VS Code's epic extension didn't change:  ${editor[0]!.replace(EDITOR_CHANGE, "")}`)
   if (plugin.missingExtension) {
     lines.push(
-      "- VS Code still uses the epic extension it had:  your checkout hasn't built its own yet.",
-      "  To build it, type these in a terminal, then spell local on again:",
+      "- VS Code's add-on for epic pages is out of date.",
+      "  The new version of the add-on has to be built first.  That takes about a minute.",
+      "  Type each line below in this terminal, pressing Enter after each:",
       `    cd ${shortPath(join(kit, "epic"))}`,
-      "    yarn vscode:package"
+      "    yarn vscode:package",
+      "  When the build says DONE, type spell local on again to put the new version in VS Code."
     )
   }
   return lines
@@ -222,6 +224,9 @@ function startEpicServer(kit: string, machine: MachineTools): string {
 
 /** A change `epic plugin install` made to the editor's extension:  it names the editor first. */
 const EDITOR_CHANGE = /^(?:VS Code|Cursor):\s+/
+
+/** The change that says the editor took the extension;  NOT "... isn't installed", which names one it didn't. */
+const EXTENSION_INSTALLED = /:\s+extension \S+ \S+ installed/
 
 /** `amount` and `noun`, plural unless it's 1. */
 function count(amount: number, noun: string): string {

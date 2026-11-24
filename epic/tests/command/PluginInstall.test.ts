@@ -23,6 +23,7 @@ import { dirname, join } from "node:path"
 
 import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
+import { vsixAt } from "spell/cli/test/vsixAt"
 import { PluginInstall } from "spell/epic/command/PluginInstall"
 import { CodexHome } from "spell/epic/config/CodexHome"
 import { Editor } from "spell/epic/config/Editor"
@@ -271,6 +272,18 @@ describe("off macOS, and the VS Code extension (epic-friend P15)", () => {
       expect(withCode(() => undefined, new Editor("cursor")).install().changes).toEqual([
         `Cursor:  no cursor command, so ${join(vscode, "spell-epic.vsix")} isn't installed;  in Cursor:  Install from VSIX...`
       ])
+      // built before the last bump (epic-engine T140):  never installed, and nothing said once VS Code has the version
+      const vsix = vsixAt(join(vscode, "spell-epic.vsix"), "0.1.0")
+      calls.length = 0
+      listed = "spell-app.spell-epic@0.1.0\n"
+      expect(withCode().install().changes.at(-1)).toContain("Version 0.2.0 has to be built first")
+      listed = "spell-app.spell-epic@0.2.0\n"
+      expect(withCode().install().changes).toEqual([])
+      expect(calls.map((args) => args[0])).not.toContain("--install-extension")
+      // rebuilt at the version:  installed
+      vsixAt(vsix, "0.2.0")
+      listed = "spell-app.spell-epic@0.1.0\n"
+      expect(withCode().install().changes.at(-1)).toContain("extension spell-app.spell-epic 0.2.0 installed")
     } finally {
       rmSync(vscode, { recursive: true, force: true })
     }
@@ -383,7 +396,7 @@ function commandsOf(file: any): Record<string, string[]> {
 describe("the plugin's Codex hooks", () => {
   test("valid:  Codex's event names only, each command a hook script the plugin has, run from its root", () => {
     const file = JSON.parse(readFileSync(join(REAL, "hooks", "codex-hooks.json"), "utf8"))
-    expect(Object.keys(file.hooks).sort()).toEqual(["SessionStart", "Stop"])
+    expect(Object.keys(file.hooks).sort()).toEqual(["PreToolUse", "SessionStart", "Stop"])
     for (const command of Object.values(commandsOf(file)).flat()) {
       const [, script] = /^node "\$\{PLUGIN_ROOT\}\/(hooks\/[\w-]+\.mjs)" --codex-plugin$/.exec(command) ?? []
       expect(script, command).toBeDefined()
@@ -431,7 +444,7 @@ describe("installCodex()", () => {
     const report = codexInstaller().installCodex()
     const designer = join(codexHome, "agents", "epic-designer.toml")
     expect(report.changes).toEqual([
-      `${join(codexHome, "hooks.json")}:  the epic hooks (SessionStart, Stop), run from ${join(engine, "hooks")}`,
+      `${join(codexHome, "hooks.json")}:  the epic hooks (SessionStart, PreToolUse, Stop), run from ${join(engine, "hooks")}`,
       `Codex skills:  2 linked to ${join(engine, "skills")}:  epic, isolate`,
       `${designer}:  Codex's designer agent, from ${join(engine, "designer", "designer-agent.md")}`,
       `PATH:  ${join(bin, "epic")} links to ${join(engine, "bin", "epic")}`
@@ -450,6 +463,7 @@ describe("installCodex()", () => {
     expect(toml).toContain(`${engine}/skills/designer/SKILL.md`)
     expect(toml).not.toContain("CLAUDE_PLUGIN_ROOT")
     expect(commandsOf(codexHooks())).toEqual({
+      PreToolUse: [`node "${engine}/hooks/server-guard.mjs"`],
       SessionStart: [`node "${engine}/hooks/behind-main.mjs"`, `node "${engine}/hooks/sync-notice.mjs"`],
       Stop: [`node "${engine}/hooks/shared-commit.mjs"`]
     })
@@ -478,7 +492,7 @@ describe("installCodex()", () => {
     expect(file.description).toBe("mine")
     expect(commandsOf(file)).toEqual({
       Stop: ["say done", `node "${engine}/hooks/shared-commit.mjs"`],
-      PreToolUse: ["say done"],
+      PreToolUse: ["say done", `node "${engine}/hooks/server-guard.mjs"`],
       SessionStart: [`node "${engine}/hooks/behind-main.mjs"`, `node "${engine}/hooks/sync-notice.mjs"`]
     })
   })

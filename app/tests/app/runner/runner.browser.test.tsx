@@ -127,6 +127,32 @@ export let notes = new Notes()
 if (!core.isCarryingOver) notes.start()
 `
 
+/** The module compiled spell imports a code file by, for `call native`:  project `owen@spell/clip`'s `shout.ts`. */
+const SHOUT_MODULE = "@spell/native/owen@spell/clip/shout.ts"
+
+/** `shout.ts`'s javascript, its types taken out. */
+const SHOUT_JS = "export function shout(text) { return text.toUpperCase() }"
+
+/** A program that calls native code, as spell compiles `call native shout with "hello"`:  it prints `HELLO`. */
+const CALLS_NATIVE = `
+import { core } from "@spell/core"
+import { shout } from "${SHOUT_MODULE}"
+core.console.log(shout("hello"))
+`
+
+/** An app that draws what a code file says:  `shout "hi"`, `HI`. */
+const SHOUTER = `
+import { core, App, h } from "@spell/core"
+import { shout } from "${SHOUT_MODULE}"
+export class Shouter extends App {
+  draw() {
+    return h("p", { class: "shouted" }, () => shout("hi"))
+  }
+}
+export let shouter = new Shouter()
+shouter.start()
+`
+
 /** A program with no app:  it only prints. */
 const PRINTER = `
 import { core } from "@spell/core"
@@ -539,7 +565,7 @@ describe("compiled spell draws with Solid", () => {
     expect(cardsIn(host)[0]!.textContent).toBe("A")
   })
 
-  test('a getter that waits:  a "…" in its spot, its view held whole, the rest drawn;  later changes fill in (epic `language` P12)', async () => {
+  test('a getter that waits:  a "…" in its spot, its view held whole behind a spinner, the rest drawn;  later changes fill in (epic `language` P12)', async () => {
     const host = await mount(source(SLOW_VALUES, "Table"))
     const page = window as unknown as {
       slowTable: { moves: number; rank: number }
@@ -547,14 +573,16 @@ describe("compiled spell draws with Solid", () => {
     }
     const total = () => host.querySelector(".total")?.textContent
     const tileElement = () => host.querySelector("test-project-tile")
+    // a view held whole shows Spell UI's spinner, a value a "…" (epic `old-console-redo` T35)
+    const tileWaits = () => !!tileElement()!.shadowRoot!.querySelector("ui-loader")
     await waitFor(() => total() === "…" && !!tileElement())
-    expect(tileElement()!.shadowRoot!.textContent).toContain("…")
+    expect(tileWaits()).toBe(true)
     expect(host.querySelector(".moves")!.textContent).toBe("0")
 
     // each fills in when its own answer lands
     page.answerSlow("total", 10)
     await waitFor(() => total() === "11")
-    expect(tileElement()!.shadowRoot!.textContent).toContain("…")
+    expect(tileWaits()).toBe(true)
     page.answerSlow("face", "a")
     await waitFor(() => tileElement()!.shadowRoot!.querySelector(".tile")?.textContent === "A")
 
@@ -692,8 +720,10 @@ card.turnOver()
     played.shadowRoot!.querySelector<HTMLElement>("[part=back]")!.click()
     await waitFor(() => discards() > 1)
     // ... and they follow as the game plays:  the card played from the stock is face up, on the discards
-    await waitFor(() => played.getAttribute("direction") === "up")
-    await waitFor(() => played.getAttribute("pile") === "DiscardPile#discard-pile")
+    // - the discards draw an element of their own for it:  the stock's is let go as it leaves (epic `solid-2-final` I34)
+    const moved = () => host.querySelector(`test-project-discard-pile > [id="${played.id}"]`)
+    await waitFor(() => moved()?.getAttribute("direction") === "up")
+    await waitFor(() => moved()?.getAttribute("pile") === "DiscardPile#discard-pile")
   })
 
   test('a viewable list\'s frame:  its cards in its <children/>, a child written in="header" in its <children name="header"/>', async () => {
@@ -999,6 +1029,38 @@ card.turnOver()
   })
 })
 
+describe("<SpellAppRunner>, a program that calls native code (from-console J110)", () => {
+  test("each code file comes from its source's `nativeUrl`, and the program runs", async () => {
+    const asked: string[] = []
+    const nativeUrl = (module: string) => {
+      asked.push(module)
+      return `data:text/javascript,${encodeURIComponent(SHOUT_JS)}`
+    }
+    const host = await mount({ ...source(CALLS_NATIVE, "Shout"), nativeUrl }, { debug: "console" })
+    await waitFor(() => testCore && consoleText().includes("HELLO"), 10_000)
+    expect(asked).toEqual([SHOUT_MODULE])
+    expect(host.querySelector(".SpellAppToolbar .error")).toBeNull()
+  })
+
+  test("a recompile with an app running:  a code file changed since runs it again, with the new code (from-console I37)", async () => {
+    let shoutJs = SHOUT_JS
+    const nativeUrl = () => `data:text/javascript,${encodeURIComponent(shoutJs)}`
+    const { host, setSource } = await mountSettable({ ...source(SHOUTER, "Shouter"), nativeUrl })
+    await waitFor(() => host.querySelector(".shouted")?.textContent === "HI", 10_000)
+
+    // the code file edited and saved;  the program recompiled, as a live edit would take it
+    shoutJs = SHOUT_JS.replace("()", '() + "!"')
+    setSource({ ...source(`${SHOUTER}\n// edited`, "Shouter"), nativeUrl })
+    await waitFor(() => host.querySelector(".shouted")?.textContent === "HI!", 10_000)
+  })
+
+  test("a source with no `nativeUrl`:  it says it can't load the code file", async () => {
+    const host = await mount(source(CALLS_NATIVE, "Shout"))
+    const error = await waitFor(() => host.querySelector(".SpellAppToolbar .error"))
+    expect(error.textContent).toContain("calls code from shout.ts")
+  })
+})
+
 describe("<VSCodeRunner>", () => {
   test("a project that imports another:  it asks the extension for the import's javascript, and runs (counter-app)", async () => {
     const [program, counter] = await Promise.all([fixtureCompiled("counter-app"), fixtureCompiled("counter")])
@@ -1021,6 +1083,57 @@ describe("<VSCodeRunner>", () => {
     tellRunner({ type: "imported", projectId: COUNTER_LIBRARY, error: "Couldn't load project 'x'" })
     const error = await waitFor(() => host.querySelector(".VSCodeRunnerToolbar .error"))
     expect(error.textContent).toContain("Couldn't load project 'x'")
+  })
+
+  test("a program that calls native code:  it asks the extension for the code file's javascript, and runs (from-console J110)", async () => {
+    const { posted } = await mountVSCode()
+    await waitFor(() => posted.some(({ type }) => type === "ready"))
+    tellRunner({ type: "run", compiled: CALLS_NATIVE })
+    const asked = await waitFor(() => posted.find((message) => message.type === "loadNative"))
+    expect(asked).toEqual({ type: "loadNative", module: SHOUT_MODULE })
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: SHOUT_JS })
+    await waitFor(() => testCore && consoleText().includes("HELLO"), 10_000)
+    // a program with no app runs its tests next, on a runtime of their own:  it asks again, as each run does
+    await waitFor(() => posted.filter(({ type }) => type === "loadNative").length === 2)
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: SHOUT_JS })
+    await waitFor(() => posted.some(({ type }) => type === "testResults"))
+  })
+
+  test("Restart asks for the code file again:  an edit to it shows (from-console I37)", async () => {
+    const { host, posted } = await mountVSCode()
+    await waitFor(() => posted.some(({ type }) => type === "ready"))
+    const asked = () => posted.filter(({ type }) => type === "loadNative").length
+    tellRunner({ type: "run", compiled: CALLS_NATIVE })
+    await waitFor(() => asked() === 1)
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: SHOUT_JS })
+    await waitFor(() => testCore && consoleText().includes("HELLO"), 10_000)
+    // its tests, on a runtime of their own
+    await waitFor(() => asked() === 2)
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: SHOUT_JS })
+    await waitFor(() => posted.some(({ type }) => type === "testResults"))
+
+    host.querySelector<HTMLElement>(".VSCodeRunnerToolbar .restart")!.click()
+    await waitFor(() => posted.some(({ type }) => type === "restart"))
+    // the extension compiles, and sends the same program again
+    tellRunner({ type: "run", compiled: CALLS_NATIVE })
+    await waitFor(() => asked() === 3)
+    const edited = SHOUT_JS.replace("()", '() + "!"')
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: edited })
+    await waitFor(() => asked() === 4)
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: edited })
+    await waitFor(() => posted.filter(({ type }) => type === "testResults").length === 2)
+    expect(consoleText()).toContain("HELLO!")
+    // and Output shows it
+    await waitFor(() => host.querySelector(".RunnerConsole")?.textContent?.includes("HELLO!"))
+  })
+
+  test("a code file the extension couldn't load:  its reason, as the run's error", async () => {
+    const { host, posted } = await mountVSCode()
+    tellRunner({ type: "run", compiled: CALLS_NATIVE })
+    await waitFor(() => posted.some(({ type }) => type === "loadNative"))
+    tellRunner({ type: "native", module: SHOUT_MODULE, error: "Couldn't load shout.ts" })
+    const error = await waitFor(() => host.querySelector(".VSCodeRunnerToolbar .error"))
+    expect(error.textContent).toContain("Couldn't load shout.ts")
   })
 })
 
@@ -1140,6 +1253,24 @@ describe("<spell-viewer>", () => {
     expect(app.pushed).toBeUndefined()
     // nothing else to run:  waits for its editor again
     await waitFor(() => root.querySelector(".SpellAppError"))
+  })
+
+  test("a program that calls native code:  each code file from its project's server, as javascript (from-console J110)", async () => {
+    const realFetch = globalThis.fetch
+    const asked: string[] = []
+    // the page server's `?as=javascript`, stood in for:  the test server serves no `/spaces/`
+    const fetch = vi.spyOn(globalThis, "fetch").mockImplementation((input, init) => {
+      const url = String(input instanceof Request ? input.url : input)
+      if (!url.includes("?as=javascript")) return realFetch(input, init)
+      asked.push(new URL(url, location.href).pathname + new URL(url, location.href).search)
+      return Promise.resolve(new Response(SHOUT_JS, { headers: { "content-type": "text/javascript" } }))
+    })
+    cleanups.push(() => fetch.mockRestore())
+    const app = await mountApp(`<spell-viewer toolbar></spell-viewer>`)
+    app.run(compiled(CALLS_NATIVE))
+    await waitFor(() => testCore && consoleText().includes("HELLO"), 10_000)
+    expect(asked).toEqual(["/spaces/owen@spell/clip/shout.ts?as=javascript"])
+    expect(app.shadowRoot!.querySelector(".SpellAppToolbar .error")).toBeNull()
   })
 
   test("`restart()` runs pushed code afresh", async () => {
@@ -1430,6 +1561,9 @@ describe("<SpellAppRunner>, an app's widget defaults (`<ui-defaults>`)", () => {
   async function compiledApp(files: { path: string; contents: string }[], imports?: P.Scope) {
     await import("spell/app/spaces/models/spellUIPack")
     const { compiledSpellProject } = await import("spell/parser/spell/test/parseSpellProject")
+    const { SP } = await import("spell/parser/spell")
+    // as a project does before it parses:  a language past English loads on first use
+    await SP.Language.loadFor(files.map(({ path }) => path))
     const project = compiledSpellProject(files, { parentScope: imports })
     expect(project.code).not.toContain("PARSE ERROR")
     // a project with no imports compiles with `h` alone here:  the rest of `@spell/core`, as a compile writes it

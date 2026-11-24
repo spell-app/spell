@@ -1,5 +1,5 @@
 {
-  "description": "spell-epic's hooks for Codex (epic epic-friend P11):  each turn's end commits and syncs the shared plans (epic turn end), and a new session hears when its worktree is behind main or the last sync stopped on a conflict.  Codex's own file:  Claude Code's hooks.json names events Codex hasn't got.  epic plugin install --codex copies it into ~/.codex/hooks.json, ${PLUGIN_ROOT} made the kit's epic/ folder and --codex-plugin dropped:  with that flag (this file, run by the plugin) a script does nothing while the user file runs it, so the hooks never run twice",
+  "description": "spell-epic's hooks for Codex (epic epic-friend P11):  each turn's end commits and syncs the shared plans (epic turn end), a new session hears when its worktree is behind main or the last sync stopped on a conflict, and a shell command that would start, stop, restart or kill a main checkout's server is refused (the server guard, PreToolUse on Bash;  epic epic-engine P84).  Codex's own file:  Claude Code's hooks.json names events Codex hasn't got.  epic plugin install --codex copies it into ~/.codex/hooks.json, ${PLUGIN_ROOT} made the kit's epic/ folder and --codex-plugin dropped:  with that flag (this file, run by the plugin) a script does nothing while the user file runs it, so the hooks never run twice",
   "hooks": {
     "SessionStart": [
       {
@@ -12,6 +12,18 @@
           {
             "type": "command",
             "command": "node \"${PLUGIN_ROOT}/hooks/sync-notice.mjs\" --codex-plugin",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/server-guard.mjs\" --codex-plugin",
             "timeout": 10
           }
         ]

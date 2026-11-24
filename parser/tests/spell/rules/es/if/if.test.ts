@@ -4,7 +4,7 @@ import { SP } from "spell/parser/spell"
 import { core } from "spell/parser/core"
 
 describe("testing spell module if, in Spanish", () => {
-  unitTestModuleRules(SP.spanish.parser, "if", core.resetRuntime)
+  unitTestModuleRules(SP.Language.for("es").parser, "if", core.resetRuntime)
 
   // epic `language` I96
   describe("`devolver 0 de lo contrario`", () => {

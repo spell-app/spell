@@ -1,4 +1,6 @@
+import { existsSync } from "node:fs"
 import { readFile, stat } from "node:fs/promises"
+import { join } from "node:path"
 import { parse } from "parse5"
 
 import { SRV } from "spell/server"
@@ -71,7 +73,7 @@ export class PageEditor {
     const id = one(request.query.id)
     const range = id ? findById(source, id, one(request.query.parent)) : undefined
     const html = range ? sliceOf(source, range, Boolean(one(request.query.inner))) : source
-    reply.set("Cache-Control", "no-store").json({ path, etag, html })
+    reply.noStore().json({ path, etag, html })
   }
 
   /** answer `PUT` / `PATCH`:  `{ path, etag }`, the file's new `ETag` */
@@ -98,20 +100,34 @@ export class PageEditor {
       },
       { ifMatch: expected }
     )
-    reply.set("Cache-Control", "no-store").json({ path, etag })
+    reply.noStore().json({ path, etag })
   }
 
   /**
    * The file a request names in `?path=`:  one that `allowed` matches, or an `HttpError`.
    * - to `read`:  the checkout's, else the epic folder's, as the page server serves them
-   * - to `write`:  in the folder the `writable` folders are in (`SRV.FileOperations.writableRoot`)
+   * - to `write`:  in the folder the `writable` folders are in (`SRV.FileOperations.writableRoot`);  the checkout's
+   *   own file first, in a writable folder of its own (a guide moved into the code, epic `epic-engine` P79)
+   * - a WORKTREE's own file, by the path its page is told (`SRV.FileOperations.worktreeFileOf()`):  that worktree's,
+   *   to read and to write (epic `epic-engine` T132)
    */
   private pageFile(request: SRV.Request, allowed: RegExp, to: "read" | "write"): { path: string; file: string } {
     const asked = one(request.query.path)
     if (!asked) throw new SRV.HttpError(400, "?path= required, e.g. /pages/index.html")
     const path = asked.startsWith("/") ? asked : `/${asked}`
+    // a worktree's own file, its page served under `/worktrees/<w>/`:  read and written in that worktree (T132)
+    const inWorktree = this.files.worktreeFileOf(path)
+    if (inWorktree) {
+      if (!allowed.test(inWorktree)) throw new SRV.HttpError(400, `can't edit ${path}:  not a text file`)
+      if (!existsSync(inWorktree)) throw new SRV.HttpError(404, `no file ${path}`)
+      return { path, file: inWorktree }
+    }
     const { content, writableRoot } = this.files
-    const roots = to === "write" ? [writableRoot] : [this.root, ...(content ? [content] : [])]
+    // to write:  the checkout's own file first, when it's in one of its writable folders (a moved guide, P79)
+    const mine = join(this.root, path)
+    const own = to === "write" && existsSync(mine) && this.files.writable.some((folder) => SRV.isInside(folder, mine))
+    const roots =
+      to === "write" ? [...(own ? [this.root] : []), writableRoot] : [this.root, ...(content ? [content] : [])]
     let resolved!: SRV.Resolved
     for (const root of roots) {
       resolved = SRV.resolveInside(root, path, { index: false })

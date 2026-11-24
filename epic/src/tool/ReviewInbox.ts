@@ -319,6 +319,22 @@ export class ReviewInbox {
   }
 
   /**
+   * `update()` only if nobody holds the lock now (`SRV.FileLock.runOnce()`):  the inbox written, else `undefined`,
+   * nothing changed.
+   * - for a look that runs again soon (the epic hub's `InboxMonitor`):  NEVER blocks a server's thread, which a
+   *   `update()` there did while its own routes held the lock (epic `epic-engine` I463)
+   */
+  static updateIfFree(file: string, change: (inbox: ReviewInbox) => unknown): ReviewInbox | undefined {
+    const done = SRV.FileLock.runOnce(file, () => {
+      const inbox = ReviewInbox.read(file)
+      change(inbox)
+      inbox.writeTo(file)
+      return inbox
+    })
+    return done === SRV.FileLock.HELD ? undefined : done
+  }
+
+  /**
    * `update()` for a server:  waits for the lock with timers, so it keeps serving meanwhile.
    * - `change` runs synchronously, under the lock
    * - SIDE EFFECT:  writes `file` (or removes it:  `writeAsync()`)
@@ -1027,8 +1043,9 @@ export class ReviewInbox {
   /**
    * Is `mark` a revisit's note to TALK OVER, which Claude answers as a comment (epic `epic-engine` I200)?
    * - a plain revisit, later, with words
-   * - NOT one with a pick ("pick B, but ..."), Owen's comments in its text (I140:  they're threads already), or an
-   *   old picture apart from its words (`shot`):  those are talked over as before, their notes kept in the item
+   * - NOT one with a pick ("pick B, but ..."), Owen's comments in its text (I140:  they're threads already), an
+   *   old picture apart from its words (`shot`), or what a test's steps printed (`outputs`, T165):  those are talked
+   *   over as before, their notes kept in the item
    *   - pictures IN its words (epic `epic-engine` P75) go with them:  a comment draws them, labelled, as its own
    * - NOT a revisit now (Do Now):  a request an agent takes, not a thread
    */
@@ -1039,7 +1056,8 @@ export class ReviewInbox {
       !!mark.note?.trim() &&
       !hasPick(mark) &&
       !mark.comments?.length &&
-      !mark.shot
+      !mark.shot &&
+      !mark.outputs?.length
     )
   }
 
@@ -1196,6 +1214,8 @@ export class ReviewInbox {
    * - `todo`, `next`, `drop`, `skip`:  `note` trimmed, kept only when there is one
    * - a note box's mark (`revisit`, `todo`, `next`, `drop`, `skip`):  `shot` too, when given, the picture Owen pasted
    *   or dropped in the box (epic `epic-engine` P51):  `tests/j3-20261029-1432.png` (`NOTE_SHOT`)
+   * - those and `approve`:  `outputs` too, when given, what a manual test's steps printed, pasted under each step
+   *   (`toStepOutputs()`, epic `epic-engine` T165)
    * - `accept` (`<epic-stage-button>`, epic `epic-engine` P29):  `stage`, the stage it ends, one of
    *   `ACCEPT_STAGES`;  none:  a change mark's Accept (P30), `{ action: "accept" }`
    * - `reopen` (a change mark's Reopen, P30):  the action alone
@@ -1229,16 +1249,18 @@ export class ReviewInbox {
       if (typeof note !== "string") throw new InboxError("a revisit's note is text")
       const inline = toCommentIds((mark as Record<string, unknown>).comments)
       const shot = toNoteShot((mark as Record<string, unknown>).shot)
+      const outputs = toStepOutputs((mark as Record<string, unknown>).outputs)
       // its pick, in any set (`sets`, I227)
       if ((pick === undefined || pick === null) && !hasPick(mark as PickFields))
-        return { action, when: when as RevisitWhen, note: note.trim(), ...inline, ...shot }
+        return { action, when: when as RevisitWhen, note: note.trim(), ...inline, ...shot, ...outputs }
       return {
         action,
         when: when as RevisitWhen,
         note: note.trim(),
         ...toPickFields(mark as Record<string, unknown>),
         ...inline,
-        ...shot
+        ...shot,
+        ...outputs
       }
     }
     if (action === "pick") return { action, ...toPickFields(mark as Record<string, unknown>) }
@@ -1248,8 +1270,11 @@ export class ReviewInbox {
     if (action === "approve") {
       const inline = toCommentIds((mark as Record<string, unknown>).comments)
       const picked = carriedPick(mark as Record<string, unknown>)
-      if (!inline.comments || typeof note !== "string" || !note.trim()) return { action, ...inline, ...picked }
-      return { action, note: note.trim(), ...inline, ...picked }
+      // a test passed, with what its steps printed (epic `epic-engine` T165)
+      const outputs = toStepOutputs((mark as Record<string, unknown>).outputs)
+      if (!inline.comments || typeof note !== "string" || !note.trim())
+        return { action, ...inline, ...picked, ...outputs }
+      return { action, note: note.trim(), ...inline, ...picked, ...outputs }
     }
     if (action === "accept") {
       const { stage } = mark as Record<string, unknown>
@@ -1277,7 +1302,10 @@ export class ReviewInbox {
       const shot = toNoteShot((mark as Record<string, unknown>).shot)
       // a phase's Do this beside a pick in its Choices:  one mark (epic `epic-engine` I217)
       const picked = action === "todo" ? carriedPick(mark as Record<string, unknown>) : {}
-      return note.trim() ? { action, note: note.trim(), ...shot, ...picked } : { action, ...shot, ...picked }
+      const outputs = toStepOutputs((mark as Record<string, unknown>).outputs)
+      return note.trim()
+        ? { action, note: note.trim(), ...shot, ...picked, ...outputs }
+        : { action, ...shot, ...picked, ...outputs }
     }
     return { action }
   }
@@ -1488,12 +1516,14 @@ export type InboxMark = CheckedMark & { at: string }
  * - `to`:  a dragged phase's new place (`action: "move"`, epic `epic-engine` P34)
  * - `comments`:  a revisit's content, Owen's comments in its part's text (`c1` ...;  epic `epic-engine` I140);
  *   an approve's too, to fold in (I163)
+ * - `outputs`:  what a manual test's steps printed, pasted under each step's command (epic `epic-engine` T165)
  */
 export type CheckedMark = {
   action: MarkAction
   when?: RevisitWhen
   note?: string
   comments?: string[]
+  outputs?: StepOutput[]
   stage?: PageStage
   countdown?: boolean
   to?: number
@@ -2023,6 +2053,43 @@ function toNewItem({ kind, title, note = "", near }: Record<string, unknown>): C
     ...(note.trim() ? { note: note.trim() } : {}),
     ...(about ? { near: about } : {})
   }
+}
+
+/**
+ * What one step of a manual test printed, pasted in the box under its command (epic `epic-engine` T165):
+ * - `step`:  the step's number, 1 first, as its list counts it
+ * - `text`:  what the person pasted, as pasted (only its blank lines around it trimmed)
+ */
+export type StepOutput = { step: number; text: string }
+
+/** The most a step's pasted output holds, characters:  a long log, not a file. */
+const MAX_STEP_OUTPUT = 20_000
+
+/** The most steps a test's outputs hold. */
+const MAX_STEP_OUTPUTS = 50
+
+/**
+ * A mark's pasted outputs (`outputs`, epic `epic-engine` T165), checked:  `{ outputs }` by step, or `{}` when none.
+ * - empty texts dropped;  a step given twice keeps the last
+ * - an `InboxError` for anything but a list of `{ step, text }`, a step that isn't 1 or more, or a text too long
+ */
+function toStepOutputs(outputs: unknown): { outputs?: StepOutput[] } {
+  if (outputs === undefined || outputs === null) return {}
+  if (!Array.isArray(outputs) || outputs.length > MAX_STEP_OUTPUTS)
+    throw new InboxError(`a test's outputs are a list, ${MAX_STEP_OUTPUTS} at most:  [{ step, text }]`)
+  const byStep = new Map<number, string>()
+  for (const entry of outputs) {
+    const { step, text } = (entry ?? {}) as Record<string, unknown>
+    if (!Number.isInteger(step) || (step as number) < 1)
+      throw new InboxError(`a step's output names its step, 1 or more:  ${JSON.stringify(step)}`)
+    if (typeof text !== "string") throw new InboxError("a step's output is text")
+    if (text.length > MAX_STEP_OUTPUT) throw new InboxError(`a step's output:  ${MAX_STEP_OUTPUT} characters at most`)
+    const kept = text.replace(/^\s*\n/, "").trimEnd()
+    if (kept.trim()) byStep.set(step as number, kept)
+    else byStep.delete(step as number)
+  }
+  const list = [...byStep].sort(([a], [b]) => a - b).map(([step, text]) => ({ step, text }))
+  return list.length ? { outputs: list } : {}
 }
 
 /**

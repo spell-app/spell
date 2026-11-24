@@ -76,6 +76,9 @@ test("docViewFor():  details pages to Details, epic docs to Epic Docs, everythin
   equal(docViewFor("/epics/data/data.plan.html"), "review")
   equal(docViewFor(`${content}/sagas/spell/spell.saga.html`), "review")
   equal(docViewFor(`${content}/goals/old/old.goal.html`), "review")
+  // the Servers page:  Servers, under a worktree's address too (epic `epic-engine` T162)
+  equal(docViewFor("/_epic/servers/"), "servers")
+  equal(docViewFor("/worktrees/editor/_epic/servers/"), "servers")
   // details, review and choice pages:  Details (the choice page Owen lost, request r50)
   equal(docViewFor(`${content}/epics/data/details/data-words.html`), "details")
   equal(docViewFor(`${content}/pages/details/pick-layout.html`), "details")
@@ -300,13 +303,14 @@ test("title bars:  every tab's buttons, each a short plain tooltip, each answere
   )
 })
 
-test("three side-bar tabs:  Review (the Spell hat), Epic Docs (books on a shelf), Details;  Owen, 2026-11-19", () => {
+test("four side-bar tabs:  Review (the Spell hat), Epic Docs (books on a shelf), Servers (a server, between Epic Docs and Details:  T162, I449), Details;  Owen, 2026-11-19", () => {
   const { contributes } = MANIFEST
   deepEqual(
     contributes.viewsContainers.secondarySidebar!.map((each) => [each.title, each.icon]),
     [
       ["Review", "media/spell.svg"],
       ["Epic Docs", "$(library)"],
+      ["Servers", "$(server)"],
       ["Details", "$(comment-discussion)"]
     ]
   )
@@ -314,13 +318,14 @@ test("three side-bar tabs:  Review (the Spell hat), Epic Docs (books on a shelf)
   equal(existsSync(join(import.meta.dirname, "../../vscode/media/spell.svg")), true)
   deepEqual(
     Object.values(contributes.views).flatMap((views) => views.map((view) => view.id)),
-    ["spellEpic.reviewView", "spellEpic.docsView", "spellEpic.detailsView"]
+    ["spellEpic.reviewView", "spellEpic.docsView", "spellEpic.serversView", "spellEpic.detailsView"]
   )
   // NOT the first Epic Docs tab's id, nor its setting (epic `epic-engine` Q73):  a new view, with its own place
   const everything = JSON.stringify(contributes)
   equal(everything.includes("spellEpic.docView."), false)
   equal(contributes.configuration?.properties["spellEpic.docPreview.location"], undefined)
   // and the views the source makes are the manifest's, in its order
-  deepEqual(DOC_VIEWS, ["review", "details", "docs"])
-  for (const view of contributes.views["spell-epic-docs"]!) equal(DOC_VIEW_SOURCE.includes(`"${view.id}"`), true)
+  deepEqual(DOC_VIEWS, ["review", "servers", "details", "docs"])
+  for (const view of [...contributes.views["spell-epic-docs"]!, ...contributes.views["spell-epic-servers"]!])
+    equal(DOC_VIEW_SOURCE.includes(`"${view.id}"`), true)
 })

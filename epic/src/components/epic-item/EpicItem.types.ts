@@ -5,8 +5,9 @@
 
 import type { ReviewButtonSpec, ReviewColor, ReviewFill } from "spell/epic/components/epic-review/EpicReview.types"
 import { reopensCanceled } from "spell/epic/review/review.types"
+import type { EpicJSXAttributes } from "spell/epic/components/epic-page/EpicPage.types"
 
-import type { epicItemVocabulary } from "./EpicItem.en"
+import type { BadgeWord, epicItemVocabulary } from "./EpicItem.en"
 
 /** `epicItemVocabulary`'s type. */
 export type EpicItemVocabulary = typeof epicItemVocabulary
@@ -20,9 +21,11 @@ export const ITEM_STATES = [
   "attention",
   "replied",
   "requested",
+  "recheck",
   "progress",
   "handed",
   "open",
+  "someday",
   "scheduled",
   "recent",
   "handled",
@@ -38,6 +41,7 @@ export type ItemState = (typeof ITEM_STATES)[number]
  * `attention` (red), `replied` (orange:  their turn to pick or review), `requested` (light orange:  what they asked
  * for is finished, their turn to see it), and a phase's `waiting` (orange:  its plan waits for their Accept).
  * - what a section's count and its "only what needs you" filter take (`<epic-section>`)
+ * - NOT `recheck`, though it's light orange too:  a recheck waits on Claude (epic `epic-engine` Q82)
  */
 export const NEEDS_PERSON: ReadonlySet<string> = new Set(["attention", "replied", "requested", "waiting"])
 
@@ -158,6 +162,22 @@ export type LiveReview = {
   commentsReplied?: boolean
 }
 
+/** Where the person's mark on an item stands (`EpicItem.markStage`):  its id chip's ring. */
+export type MarkStage = "unsent" | "sent"
+
+/**
+ * How an item's chip and title look (`EpicItem.drawnLook`, epic `epic-engine` T145):
+ * - until Send, as before the person's mark:  while its counts already have the mark
+ */
+export type ItemLook = {
+  /** its colour */
+  state: ItemState
+  /** struck through */
+  canceled: boolean
+  /** the badge its line starts with (`ItemBadge`, epic `epic-engine` P81);  none on a page without badges */
+  badge?: BadgeWord
+}
+
 /** No live review:  outside a review, or a server render. */
 export const NO_LIVE_REVIEW: LiveReview = { workedOn: false, approved: false }
 
@@ -251,6 +271,17 @@ export class DrawnState {
 const RECENT_DAYS = 1
 const DAY_MS = 24 * 60 * 60 * 1000
 
+/**
+ * The fill a state's chip has of its own;  any other state's is solid (epic `epic-engine` T146:  solid says where the
+ * item stands now, so work under way is solid blue).
+ */
+export const STATE_FILLS: Partial<Record<ItemState, { color: ReviewColor; fill: "outline" | "dotted" }>> = {
+  // handed to Claude, not started
+  handed: { color: "blue", fill: "outline" },
+  // queued
+  scheduled: { color: "blue", fill: "dotted" }
+}
+
 /** `state`'s text key, for the id chip's tooltip. */
 export const STATE_TIP_KEYS = {
   attention: "stateAttention",
@@ -260,6 +291,8 @@ export const STATE_TIP_KEYS = {
   handed: "stateHanded",
   open: "stateOpen",
   scheduled: "stateScheduled",
+  recheck: "stateRecheck",
+  someday: "stateSomeday",
   recent: "stateRecent",
   handled: "stateHandled",
   quiet: "stateQuiet",
@@ -269,19 +302,26 @@ export const STATE_TIP_KEYS = {
 /** The review label's look:  `todo` blue (queued, not started), `deferred` grey, `reviewed` by state. */
 export type ReviewLook = "todo" | "deferred" | "recent" | "old"
 
-/** The review label on an item's line:  its words, look and tooltip. */
+/** The review label on an item's line:  its words and look;  no tooltip, its words are on it (epic `epic-engine` I370). */
 export type ReviewLabel = {
   /** what it says:  `to do`, `deferred`, `reviewed 10/6/26` */
   words: string
   /** its colour */
   look: ReviewLook
-  /** its tooltip:  the queued work, the date it was deferred */
-  tip?: string
 }
 
 ////////////////
 // ## Shadow markup
 ////////////////
+
+// the UPDATE label an item draws next to its id chip (epic `epic-engine` T149)
+declare module "@solidjs/web/types/jsx.js" {
+  namespace JSX {
+    interface IntrinsicElements {
+      "epic-update": EpicJSXAttributes
+    }
+  }
+}
 
 /** Class names inside the shadow root. */
 export const LINE = "line"
@@ -289,12 +329,20 @@ export const FOLD = "fold"
 export const TOGGLE = "toggle"
 export const CHIP = "chip"
 export const TITLE = "title"
+/** The word before the title (`TitlePrefix`:  `FIXED -`, epic `epic-engine` T143). */
+export const TITLE_PREFIX = "title-prefix"
+/** The badge before the title (`ItemBadge`, epic `epic-engine` P81). */
+export const BADGE = "badge"
+/** Its UPDATE label, after the badge, before the title (epic `epic-engine` T149). */
+export const UPDATE = "update"
 export const EXTRAS = "extras"
 /** The end of the line's first row:  the page's buttons, the item's marks and review buttons. */
 export const MARKS = "marks"
 /** Under them, a small line of its own:  its phase pill, `in P4` (epic `epic-engine` I348). */
 export const PHASE_ROW = "phase-row"
 export const GIT = "git"
+/** The git icon drawn as its phase's pill, `in P21` (`EpicItem.commitPill`, epic `epic-engine` I380). */
+export const COMMIT_PILL = "commit-pill"
 export const OVERNIGHT = "overnight"
 /** Class of a failed test's mark on its line (`failed`, epic `epic-engine` P4). */
 export const FAILED = "failed"
@@ -355,22 +403,19 @@ export const COMMITS_PROPERTY = "--epic-commits-display"
 ////////////////
 
 /**
- * Where Owen's answer on an item stands, as its id chip wears it (`EpicItem.chipMark`):
- * a colour and a fill, dashed or outlined;  none, and the chip is solid in its state's colour.
+ * Where Owen's answer on an item stands (`EpicItem.chipMark`), for its chip's tooltip and fill (`chipFill`):
+ * a colour and a fill, dashed or outlined;  none, and the chip has its state's own fill (`STATE_FILLS`).
+ * - DASHED is never drawn on the chip:  until Send it keeps its state's fill, a dotted ring round it (T145)
  * - his live mark:  NO colour, so the chip keeps its state's (Owen, 2026-10-11, J3 of `epic-workflow`:  the counts must
  *   match the chips;  2026-10-08 it wore the chosen button's colour), and the mark's fill
- * - answered, work still due (Owen, 2026-10-10):  outlined in blue, handed to Claude or Claude on it;
- *   a taken pick outlined green;  DOTTED blue, agreed and not started (`scheduled`, epic `epic-engine` P63)
+ * - a taken pick:  outlined green
  */
 export type ChipMark = {
   /** work Claude still owes:  blue, or a taken pick's green;  none for Owen's own mark (its state's colour) */
   color?: ReviewColor
   /** `dotted`:  agreed, not started (`scheduled`), as a scheduled phase's chip */
-  fill: Exclude<ReviewFill, "none"> | "dotted"
-  /**
-   * the chosen button's name (`approve`;  the note box's x, `boxSkip`), or a pick's letter, for the tooltip;
-   * none when work is still due
-   */
+  fill: Exclude<ReviewFill, "none">
+  /** the chosen button's name (`approve`;  the note box's x, `boxSkip`), or a pick's letter, for the tooltip */
   label?: ReviewButtonSpec["label"] | "boxSkip" | { pick: string }
 }
 
@@ -386,7 +431,10 @@ export function isTodo(id: string | undefined, limit: boolean | undefined): bool
 }
 
 /** A todo's statuses once it's finished:  nothing left to queue or drop (I296). */
-const FINISHED_TODO = /^(done|canceled)$/
+const FINISHED_STATUS = /^(done|canceled|decided)$/
+
+/** The states that wait for their check:  orange and light orange (T152). */
+const AWAITS_CHECK: ReadonlySet<string> = new Set(["replied", "requested"])
 
 /** An issue's id (`I3`):  of the calm ids (`CALM_ID`), the one whose open state draws the x (I299). */
 const ISSUE_ID = /^i\d+$/
@@ -397,13 +445,14 @@ const ISSUE_ID = /^i\d+$/
  * - `limit`:  its `limit` (a todo that's a limit draws an item's)
  * - `inPhase`:  it's already in a phase (`handled` or `taken-in`, its `in P52` pill):  a todo draws no plane
  *   (`todo-in-phase`, epic `epic-engine` I271)
- * - `status`:  its status;  a todo that's `done` or `canceled` draws Revisit and Saw it, never the x, which would
- *   drop it (`todo-done`, epic `epic-engine` I296)
+ * - `status`:  its status;  ANY item answered or finished draws Reopen alone (`finished`, epic `epic-engine` T152)
+ *   - but one waiting for their look (`state` orange or light orange), with their check pressed (`checked`), or
+ *     with an UPDATE label and no badge to say it (`updated`, I285:  Saw it is what clears the label):
+ *     Revisit and Saw it (`issue-done`;  a todo `todo-done`, I296, never the x, which would drop it)
  * - `fixed`:  an open issue or call Claude fixed, waiting for Owen:  Revisit, Accept the fix
  *   (`issue-fixed`, epic `epic-engine` I299, its plane gone with J231);  an open issue not fixed:  Do this, Revisit,
  *   the x (`issue-open`);  an open judgement call:  Do this, Revisit, Approve (`issue`)
- * - a FINISHED issue or call (done, canceled, decided):  Revisit and Saw it, no plane (`issue-done`, epic
- *   `epic-engine` J231);  its `in P20` pill stands under its buttons (I348)
+ * - a finished one's `in P20` pill is on its line (`EpicItem.pillOnLine`, T152)
  */
 export function buttonsForItem(
   id: string | undefined,
@@ -411,20 +460,46 @@ export function buttonsForItem(
     limit,
     inPhase,
     status,
-    fixed
-  }: { limit?: boolean; inPhase?: boolean; status?: string | null; fixed?: boolean } = {}
-): "todo" | "todo-in-phase" | "todo-done" | "issue" | "issue-open" | "issue-fixed" | "issue-done" | "item" {
-  if (isTodo(id, limit)) {
-    if (status && FINISHED_TODO.test(status)) return "todo-done"
-    return inPhase ? "todo-in-phase" : "todo"
+    fixed,
+    state,
+    checked,
+    updated
+  }: {
+    limit?: boolean
+    inPhase?: boolean
+    status?: string | null
+    fixed?: boolean
+    /** its colour, as drawn:  orange or light orange waits for their check */
+    state?: string | null
+    /** their check is pressed on it:  kept, to take back */
+    checked?: boolean
+    /** an UPDATE label is the only thing on it waiting for their look (a page with no badges):  Saw it clears it */
+    updated?: boolean
+  } = {}
+): ItemButtons {
+  const todo = isTodo(id, limit)
+  // answered or finished:  Reopen alone, unless it waits for their check (epic `epic-engine` T152)
+  if (status && FINISHED_STATUS.test(status)) {
+    if (!checked && !updated && !AWAITS_CHECK.has(state ?? "")) return "finished"
+    return todo ? "todo-done" : "issue-done"
   }
+  if (todo) return inPhase ? "todo-in-phase" : "todo"
   if (!CALM_ID.test(id ?? "")) return "item"
-  const open = !status || status === "open"
-  // finished:  no plane, nothing left to send (epic `epic-engine` J231)
-  if (!open) return "issue-done"
   if (fixed) return "issue-fixed"
   return ISSUE_ID.test(id ?? "") ? "issue-open" : "issue"
 }
 
+/** The review buttons an item may draw (`buttonsForItem()`). */
+export type ItemButtons =
+  | "todo"
+  | "todo-in-phase"
+  | "todo-done"
+  | "issue"
+  | "issue-open"
+  | "issue-fixed"
+  | "issue-done"
+  | "finished"
+  | "item"
+
 /** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */
-export const THREAD_ATTRIBUTES = ["chosen", "at", "done-at", "state", "from", "slot"]
+export const THREAD_ATTRIBUTES = ["chosen", "at", "done-at", "state", "from", "slot", "became", "unmerged"]

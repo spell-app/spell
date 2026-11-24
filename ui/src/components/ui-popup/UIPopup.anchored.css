@@ -30,13 +30,13 @@
      * Beside + top / bottom edge:  still beside, so the arrow moves along the edge instead
      * (ties the rules above, later).
      */
-    .ui[class*="left top"].top.popup::before,
-    .ui[class*="right top"].top.popup::before {
+    .ui.left-top.top.popup::before,
+    .ui.right-top.top.popup::before {
       top: auto;
       bottom: var(--_ui-popup-arrow-edge-distance);
     }
-    .ui[class*="left bottom"].bottom.popup::before,
-    .ui[class*="right bottom"].bottom.popup::before {
+    .ui.left-bottom.bottom.popup::before,
+    .ui.right-bottom.bottom.popup::before {
       top: var(--_ui-popup-arrow-edge-distance);
       bottom: auto;
     }
@@ -58,23 +58,23 @@
       right: var(--_ui-popup-arrow-offset);
       left: auto;
     }
-    .ui[class*="left top"].left.popup,
-    .ui[class*="left bottom"].left.popup {
+    .ui.left-top.left.popup,
+    .ui.left-bottom.left.popup {
       --_popup-arrow-shadow: -1px 1px 0 0 var(--_popup-arrow-edge);
       margin: 0 0 0 var(--_ui-popup-distance);
     }
-    .ui[class*="left top"].left.popup::before,
-    .ui[class*="left bottom"].left.popup::before {
+    .ui.left-top.left.popup::before,
+    .ui.left-bottom.left.popup::before {
       right: auto;
       left: var(--_ui-popup-arrow-offset);
     }
-    .ui[class*="right top"].right.popup,
-    .ui[class*="right bottom"].right.popup {
+    .ui.right-top.right.popup,
+    .ui.right-bottom.right.popup {
       --_popup-arrow-shadow: 1px -1px 0 0 var(--_popup-arrow-edge);
       margin: 0 var(--_ui-popup-distance) 0 0;
     }
-    .ui[class*="right top"].right.popup::before,
-    .ui[class*="right bottom"].right.popup::before {
+    .ui.right-top.right.popup::before,
+    .ui.right-bottom.right.popup::before {
       right: var(--_ui-popup-arrow-offset);
       left: auto;
     }

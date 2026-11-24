@@ -114,7 +114,7 @@
 						<radio invisible name="invisible-example" value="three" selected><text bold>Option Three</text><space/>I am chosen</radio>
 					</fields>
 				</form>
-				<message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (Fomantic's <text code>label class="ui purple button"</text>, or an orange message or teal segment label). The label is in the shadow root, so it can't take another component's classes.</message>
+				<message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (a purple button, or an orange message or teal segment label). The label is in the shadow root, so it can't take another component's classes.</message>
 			</example>
 		</>
 	</>

@@ -11,6 +11,7 @@ import { DataFile } from "spell/epic/data/DataFile"
 import { Markup } from "spell/epic/markup"
 import { PageStages, PhaseStatuses } from "spell/epic/phases"
 import { fromTemplate } from "spell/epic/tools/pages.js"
+import { CloseAllRule } from "spell/epic/components/epic-section/CloseAllRule"
 import {
   CardText,
   OPEN_KINDS,
@@ -38,6 +39,10 @@ import { EpicParts } from "./EpicParts"
 import { EpicTargets } from "./EpicTargets"
 import { FocusCommands } from "./FocusCommands"
 import { FreshCommands } from "./FreshCommands"
+import { BadgeCommands } from "./BadgeCommands"
+import { CloseAll } from "./CloseAll"
+import { Hush, type HushCall, type HushJudge } from "./Hush"
+import { ItemJudge } from "./ItemJudge"
 import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
 import { ItemPictures, type PastedReader } from "./ItemPictures"
@@ -52,12 +57,13 @@ import type { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { ReviewBackfill } from "./ReviewBackfill"
 import { ReviewInbox } from "./ReviewInbox"
-import { StaleFacts } from "./StaleFacts"
+import { StaleFacts, type StaleFactsOptions } from "./StaleFacts"
 import { StaleUnderway } from "./StaleUnderway"
 import { SagaCommands } from "./SagaCommands"
 import { SagaPage } from "./SagaPage"
 import { Sagas } from "./Sagas"
 import { TestCommands } from "./TestCommands"
+import { TitleReader } from "./TitleReader"
 
 /****************
  * ### `PlanDocCommands`
@@ -133,21 +139,60 @@ export class PlanDocCommands {
   readonly pastedReader: PastedReader | undefined
 
   /**
+   * decides which settled items `hush` greys (epic `epic-engine` T122):  default `claude -p` (`Hush`);  a test's gives
+   * its own;  STATIC for the object's life
+   */
+  readonly hushJudge: HushJudge | undefined
+
+  /** the `badges` command (epic `epic-engine` P81):  a page's item badges */
+  readonly badges: BadgeCommands
+
+  /**
+   * scores an item's care and doubt, as it's made on a page with badges and for `badges score` (epic `epic-engine` P81):
+   * default `claude -p` (`ItemJudge`);  a test's gives its own;  STATIC for the object's life
+   */
+  readonly itemJudge: ItemJudge
+
+  /**
+   * reads a new or changed title cold, for `add` and `rename` (epic `epic-engine` T123):  default `claude -p`
+   * (`TitleReader`);  a test's gives its own;  STATIC for the object's life
+   */
+  readonly titleReader: TitleReader
+
+  /**
    * - `files`:  the checkout's epic pages
    * - `sessionsOf`:  an epic's running sessions, for `migrate --notify`
    *   - the `spell` CLI gives it (`epicSessions()`)
    * - `phaseTimer`:  default the transcripts' (`WorkTime.ofPhase()`);  a test's gives its own
    * - `pastedReader`:  default the transcript's;  a test's gives its own
+   * - `hushJudge`:  default `claude -p`;  a test's gives its own
+   * - `titleReader`:  default `claude -p`, skipped under a test runner;  a test's gives its own
+   * - `itemJudge`:  the same
    */
   constructor({
     files = new PlanDocFiles(),
     sessionsOf,
     phaseTimer = (request) => new WorkTime().ofPhase(request).minutes,
-    pastedReader
-  }: { files?: PlanDocFiles; sessionsOf?: SessionFinder; phaseTimer?: PhaseTimer; pastedReader?: PastedReader } = {}) {
+    pastedReader,
+    hushJudge,
+    titleReader,
+    itemJudge
+  }: {
+    files?: PlanDocFiles
+    sessionsOf?: SessionFinder
+    phaseTimer?: PhaseTimer
+    pastedReader?: PastedReader
+    hushJudge?: HushJudge
+    titleReader?: TitleReader
+    itemJudge?: ItemJudge
+  } = {}) {
     this.files = files
     this.phaseTimer = phaseTimer
     this.pastedReader = pastedReader
+    this.hushJudge = hushJudge
+    this.titleReader = titleReader ?? new TitleReader({ warn: (line) => this.warn(line) })
+    this.itemJudge = itemJudge ?? new ItemJudge()
+    this.badges = new BadgeCommands(this)
     this.inbox = new InboxCommands(this)
     this.migrator = new MigrateCommands(this, sessionsOf)
     this.sagas = new SagaCommands(this)
@@ -188,7 +233,8 @@ export class PlanDocCommands {
       return this.bedtimeAll(name === "status" ? ["status", ...rest] : rest, flags)
     // `focus on | off | status | summary`:  every running epic at once (`FocusCommands`, epic `epic-engine` T93)
     if (command === "focus") return this.focus.run(positional.slice(1), flags)
-    // `fresh all | status | drop`:  every running epic session to a fresh one (`FreshCommands`, epic `epic-engine` T113)
+    // `fresh all [--pause] | status | drop | quiet | wait | cancel`:  every running epic session to a fresh one
+    // (`FreshCommands`, epic `epic-engine` T113;  its pause round, T139)
     if (command === "fresh") return this.fresh.run(positional.slice(1), flags)
     if (command === "backfill") return this.backfill(name, flags)
     if (command === "migrate") return this.migrator.run(positional.slice(1), flags)
@@ -199,6 +245,8 @@ export class PlanDocCommands {
     if (command === "test" && flags.all) return this.tests.all(flags)
     // `commits remap <map...> --repo <old repo>`:  every epic page's commits, not one page's (epic-engine's P49)
     if (command === "commits" && name === "remap") return this.remapCommits(rest, flags)
+    // `hush [<epic> | all]`:  this checkout's epic with no name, every open epic with `all` (epic `epic-engine` T122)
+    if (command === "hush") return this.hush(name, flags)
     if (!command || !name) return this.usage()
     if (command === "summaries") return this.printSummaries(positional.slice(1), summaryScope(flags))
     if (command === "owns")
@@ -211,6 +259,8 @@ export class PlanDocCommands {
     switch (command) {
       case "create":
         return this.create(name, file, flags)
+      case "close-all":
+        return this.closeAll(file, rest[0], flags)
       case "add-phase": {
         const { label, moved } = await this.edit(file, (plan) => {
           const before = phaseFlag(plan, flags.before, "--before")
@@ -306,6 +356,8 @@ export class PlanDocCommands {
         })
       case "change":
         return this.changeMarks(file, flags)
+      case "branch":
+        return this.edit(file, (plan) => plan.setBranch(need(rest[0], "a branch name")))
       case "standing":
         return this.edit(file, (plan) => {
           const value = rest[0] ?? "on"
@@ -346,8 +398,10 @@ export class PlanDocCommands {
       case "rename": {
         const target = need(rest[0], "a phase (P6) or an item id")
         const title = need(rest[1], "the new title")
-        // at most 30 plain words, read cold (epic `epic-engine` I321, I322)
-        ShortTitle.check(flags.html ? title.replace(/<[^>]*>/g, "") : title)
+        // at most 30 plain words (epic `epic-engine` I321, I322), and read cold by a fresh reader (T123)
+        const plain = flags.html ? title.replace(/<[^>]*>/g, "") : title
+        ShortTitle.check(plain)
+        if (!flags.titleOk) this.titleReader.check(plain, PHASE_REF.test(target) ? "phase" : "item")
         const renamed = await this.edit(file, (plan) => plan.renameEntry(target, title, { html: !!flags.html }))
         const links = renamed.links ? `;  ${renamed.links} link${renamed.links === 1 ? "" : "s"} rewritten` : ""
         this.print(`${renamed.label} · ${renamed.title} (was "${renamed.was}"${links})`)
@@ -363,8 +417,10 @@ export class PlanDocCommands {
         const [kind, title] = [need(rest[0], "a kind"), need(rest[1], "a title")]
         // a standing option set, in the Choices section (epic `epic-engine` P50)
         if (kind === "choices") return this.options.addStanding(file, title, flags)
-        // at most 30 plain words, read cold;  the rest in its details (epic `epic-engine` I321, I322)
+        // at most 30 plain words, the rest in its details (epic `epic-engine` I321, I322);  read cold by a fresh
+        // reader (T123), unless --title-ok
         ShortTitle.check(title)
+        if (!flags.titleOk) this.titleReader.check(title, kind)
         const words = stringFlag(flags.start)
         if (flags.start === true) throw new PlanDocError(`--start needs the person's words:  --start "<his words>"`)
         // the person's pictures (epic `epic-engine` T87):  `--picture <file>`, repeatable, then the ones pasted last
@@ -423,6 +479,8 @@ export class PlanDocCommands {
         return this.options.choose(file, rest, flags)
       case "option":
         return this.options.run(file, rest, flags)
+      case "badges":
+        return this.badges.run(name, file, rest, flags)
       case "commit":
         return this.commit(file, rest, flags)
       case "commits":
@@ -625,9 +683,30 @@ export class PlanDocCommands {
     return this.files.read(file)
   }
 
-  /** Change the doc at `file` under its lock, and write it:  `PlanDocFiles.edit()`. */
-  edit<T>(file: string, change: (plan: PlanDoc) => T, options?: { split?: boolean }): Promise<T> {
-    return this.files.edit(file, change, options)
+  /**
+   * Change the doc at `file` under its lock, and write it:  `PlanDocFiles.edit()`.
+   * - on a page with badges, the items the change made are judged after it, the lock let go (epic `epic-engine`
+   *   P81:  every way an item is created comes through here)
+   *   - no page without badges is ever scored
+   */
+  async edit<T>(file: string, change: (plan: PlanDoc) => T, options?: { split?: boolean }): Promise<T> {
+    let made: string[] = []
+    let epic = ""
+    const result = await this.files.edit(
+      file,
+      (plan) => {
+        const before = plan.badges.mode && new Set(plan.allItems.map((item) => item.id))
+        const changed = change(plan)
+        if (before) {
+          made = plan.allItems.flatMap((item) => (before.has(item.id) ? [] : item.id))
+          epic = plan.page.getAttribute("epic") ?? ""
+        }
+        return changed
+      },
+      options
+    )
+    if (made.length) await this.badges.judgeNew(epic, file, made)
+    return result
   }
 
   /**
@@ -944,7 +1023,10 @@ export class PlanDocCommands {
    *   - the spinner off
    *   - refused on an item with no underway card
    *   - an issue or judgement call Owen asked for with Do this is never closed by it:  `fixed`, below
+   *   - on an issue Claude found, it means `fixed` (epic `epic-engine` T143)
    * - `fixed`:  an issue or judgement call fixed, for Owen to review (epic `epic-engine` I232):  ORANGE, still open
+   *   - light orange from his own words (T143)
+   *   - an issue Claude found that he hadn't got to:  closed, grey, `FIXED - `, nothing for him (T143;  `SelfFix`)
    *   - its latest underway card turns green, the summary under it;  with no underway card, a Done card of the summary
    *   - his Accept the fix closes it;  his Revisit with a note sends it back, red (`PlanDoc.fixedForReview()`)
    *   - the spinner off
@@ -955,6 +1037,9 @@ export class PlanDocCommands {
    *   - the spinner off
    *   - `inbox apply` writes these itself for picks, todos and new items (Q19)
    *   - `done --filed "<what>"`, the older spelling, means `noted` too:  what was filed is a record
+   *   - REFUSED when it says the work is finished (`Fixed in <sha>`, `Done`, `Built`, `Merged`;  epic `epic-engine`
+   *     I452):  a Noted card turned the item red with its fix waiting, and nothing ever said `fixed`;
+   *     `StaleUnderway.refuseFinishedNote()` says what to run instead
    * - reading, summary:  HTML, as `updated` takes (plain text works as it is), or `--file <html>` for a long one
    *   - in short paragraphs or bullets (`CardText`, I339):  a blank line starts a paragraph, `- ` lines are bullets;
    *     a paragraph or bullet over `CardText.MOST_WORDS` words is refused
@@ -981,16 +1066,22 @@ export class PlanDocCommands {
       title = await this.edit(file, (plan) => plan.addStatus(id, need(text, "the reading (html)")))
     else if (state === "noted" || (state === "done" && filed !== undefined)) {
       const what = state === "noted" ? need(text, "what was recorded (html)") : String(filed)
+      StaleUnderway.refuseFinishedNote(id, what)
       title = await this.edit(file, (plan) => plan.noteStatus(id, what, { quiet }))
       said = "noted"
     } else if (state === "done") {
       const done = await this.edit(file, (plan) => plan.finishWork(id, text))
       title = done.title
-      if (done.closed) said = "done, closed"
+      if (done.closed) said = done.selfFixed ? SELF_FIXED_WORDS : "done, closed"
       if (done.fixed) said = FIXED_WORDS
     } else if (state === "fixed") {
-      title = await this.edit(file, (plan) => plan.fixedForReview(id, text))
-      said = FIXED_WORDS
+      let selfFixed = false
+      title = await this.edit(file, (plan) => {
+        const fixedTitle = plan.fixedForReview(id, text)
+        selfFixed = plan.item(id).hasAttribute("self-fixed")
+        return fixedTitle
+      })
+      said = selfFixed ? SELF_FIXED_WORDS : FIXED_WORDS
     } else if (state === "promised") {
       title = await this.edit(file, (plan) =>
         plan.promiseUnkept(id, need(text, "what was promised and never came (html)"))
@@ -1068,19 +1159,23 @@ export class PlanDocCommands {
    * nobody here;  in the epic's own worktree, when it has one, else the main checkout.
    */
   private printStale(name: string, file: string, json: boolean): void {
+    const report = new StaleFacts(this.staleOptions(name, this.read(file), file)).report()
+    this.print(json ? JSON.stringify(report, null, 2) : StaleFacts.lines(report).join("\n"))
+  }
+
+  /** What `StaleFacts` reads of epic `name`'s page `file`, read as `plan`:  its checkout, `main`, the inbox. */
+  staleOptions(name: string, plan: PlanDoc, file: string): StaleFactsOptions {
     const main = this.files.mainRoot()
     const where = this.files.epicCheckout(name, main)
-    const checkout = where === PlanDocFiles.MAIN_CHECKOUT ? main : resolve(main, where)
-    const report = new StaleFacts({
-      plan: this.read(file),
+    return {
+      plan,
       epic: name,
-      checkout,
+      checkout: where === PlanDocFiles.MAIN_CHECKOUT ? main : resolve(main, where),
       marked: PlanDocCommands.pendingMarks(file),
       main,
       file,
       epics: new Set(this.files.epicNames())
-    }).report()
-    this.print(json ? JSON.stringify(report, null, 2) : StaleFacts.lines(report).join("\n"))
+    }
   }
 
   /**
@@ -1104,6 +1199,71 @@ export class PlanDocCommands {
     }
     const lines = await this.edit(file, (plan) => tidy(plan).apply())
     if (lines.length || !flags.quiet) this.print(lines.length ? lines.join("\n") : `${name}:  nothing stale`)
+  }
+
+  /**
+   * `hush [<epic> | all] [--dryrun] [--json] [--model sonnet]` (`Hush`, epic `epic-engine` T122):  each epic's green,
+   * yellow and orange items settled 3 days ago or more, judged one by one, and those Owen almost certainly doesn't
+   * care about greyed, as his ✓ would.
+   * - no epic:  the epic of this checkout's worktree;  `all`:  every epic in progress
+   * - `--dryrun`:  the table only (id, colour, age, hush or keep, why);  nothing written
+   * - else ONE write of each page with something to grey, its log saying each and `Hush:  N greyed, M kept`
+   * - prints, per epic, the counts, then the table (`--dryrun`) or the kept ones with their why
+   */
+  private async hush(name: string | undefined, flags: Flags): Promise<void> {
+    const dry = Boolean(flags.dryrun ?? flags.dryRun)
+    const names = name === "all" ? this.openEpics() : [name ?? this.checkoutEpic()]
+    const hush = new Hush({ judge: this.hushJudge, model: stringFlag(flags.model) })
+    const report: { epic: string; calls: HushCall[]; greyed: number }[] = []
+    for (const epic of names) {
+      const file = this.files.findDoc(epic)
+      const skip = Hush.skipsOf(file)
+      const candidates = Hush.candidates(this.read(file), skip)
+      const calls = candidates.length ? hush.decide(epic, candidates) : []
+      const hushed = calls.filter((call) => call.hush)
+      const greyed = dry || !hushed.length ? 0 : (await this.edit(file, (plan) => Hush.apply(plan, calls, skip))).greyed
+      report.push({ epic, calls, greyed })
+      if (flags.json) continue
+      const kept = calls.filter((call) => !call.hush)
+      const counts = dry
+        ? `${calls.length} settled 3+ days:  ${hushed.length} to hush, ${kept.length} to keep (dry run:  nothing changed)`
+        : `Hush:  ${greyed} greyed, ${calls.length - greyed} kept`
+      const rows = dry ? Hush.table(calls) : Hush.table(kept)
+      this.print([`${epic}:  ${counts}`, ...rows].join("\n"))
+    }
+    if (flags.json) this.print(JSON.stringify(dry ? report.map(({ greyed: _, ...rest }) => rest) : report, null, 2))
+  }
+
+  /**
+   * `close-all <epic> <judgements | issues | todos> [--dryrun]` (`CloseAll`, epic `epic-engine` T158):  a section's Close
+   * all from the command line:  every DECIDED call, FIXED issue or DONE todo still waiting for his tick, closed as his
+   * ✓ would, in one write, kept for the page's Undo;  `--dryrun`:  the ids only
+   */
+  private async closeAll(file: string, section: string | undefined, flags: Flags): Promise<void> {
+    const kind = CloseAllRule.kindOf(section)
+    if (!kind) throw new PlanDocError("close-all:  which section?  judgements, issues or todos")
+    const ids = CloseAll.candidates(this.read(file), kind, Hush.skipsOf(file))
+    const listed = ids.map((id) => id.toUpperCase()).join(" ")
+    if (flags.dryrun ?? flags.dryRun) return this.print(`${ids.length} to close${ids.length ? `:  ${listed}` : ""}`)
+    const { closed, left } = ids.length
+      ? await CloseAll.run(file, this.files.root, kind, ids)
+      : { closed: [], left: [] }
+    this.print(`Close all:  ${closed.length} closed${left.length ? `, ${left.length} left` : ""}`)
+  }
+
+  /** The epics `hush all` goes through:  every one in progress. */
+  private openEpics(): string[] {
+    return this.files
+      .listEpics()
+      .filter((epic) => epic.status === "in progress")
+      .map((epic) => epic.name)
+  }
+
+  /** The epic of this checkout's worktree;  throws a `PlanDocError` when it's no epic's. */
+  private checkoutEpic(): string {
+    const name = EpicConfig.of(this.files.root).worktreeNameOf(this.files.root)
+    if (name && this.files.epicNames().includes(name)) return name
+    throw new PlanDocError("hush:  which epic?  this checkout is no epic's worktree:  epic hush <epic>, or all")
   }
 
   /**
@@ -1671,7 +1831,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    NOT for an answer's change:  --for q53 (or the ids the html
                                                    names, marked this pass) with change marks in the phase
                                                    writes nothing, "the change marks say it"
-  rename <name> <P6 | id> "New title" [--html]     retitle a phase or an item (a phase keeps its id);  links to
+  rename <name> <P6 | id> "New title" [--html] [--title-ok]
+                                                   retitle a phase or an item (a phase keeps its id);  links to
                                                    it that say the old title ("P6 · Old", "Old") say the new
                                                    one;  logged;  then
                                                    links-agree (stderr);  --html (last):  the title is HTML
@@ -1689,6 +1850,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    id, time, answer, the words replaced;  every edit does
                                                    too), list them, new first;
                                                    --for:  the item of the marks that name none
+  branch <name> <branch>                           the epic's git branch, when it isn't its id (<epic-page branch>):
+                                                   every verb that finds the branch asks EpicConfig.branchOf();
+                                                   logged (epic update <name> --branch <branch>)
   standing <name> [on|off]                         a standing epic:  open for good, each phase merging on its own,
                                                    never done (epic epic-workflow)
   request <name> <N> <rN> --from "..." --file path a request sent from another session, into phase N's Requests
@@ -1717,6 +1881,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    numbers, links and "P5 · Name" text follow (epic-engine P34);
                                                    numbers stay whole:  a phase moved is numbered by its place
   add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm] [--requested] [--loud]
+      [--title-ok]                                 the title read cold first by a fresh reader (T123):  a fail is
+                                                   refused with a rewrite;  --title-ok skips it
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
                                                    wouldn't surprise you, grey (a call) or yellow (an issue) rather than red;
@@ -1778,8 +1944,17 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    stale;  decides nothing (for /epic tidy)
   stale <name> --underway [--apply] [--hours n] [--json]
                                                    open items whose Underway card is older than n hours (3),
-                                                   nobody working them:  on main => fixed for review;  else a
+                                                   nobody working them:  on main => fixed;  else a
                                                    Stale card, once (--apply);  every turn's end runs it (T78)
+  badges <name> [list [--json] | trial | on | off | score [ids] [--model sonnet]
+      | set <ids> [--care 80] [--doubt 10] [--severe yes|no] [--your-call yes|no] [--why "..."]
+      | close <ids> [--as vanished|moot|duplicate|declined] [--why "..."]]
+                                                   item badges (P81):  each line starts with what happens next, from
+                                                   care and doubt;  off undoes them all;  a trial closes nothing
+  hush [<name> | all] [--dryrun] [--json] [--model sonnet]
+                                                   grey the green, yellow and orange items settled 3+ days ago Owen
+                                                   almost surely won't look at again (80%, a fresh claude -p judges
+                                                   each), as his check would;  --dryrun:  the table only (T122)
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it
   commit <name> <sha> --phase N | --item <id> "sentence"
@@ -1797,9 +1972,11 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   focus on [--why "..."] | off | status | summary [<name>] [--since <t>] [--json]
                                                    focus mode (/focus, /back):  on and off print a TELL: line for
                                                    each running epic session;  summary:  what happened since
-  fresh all | status | drop [<session id>] [--json]
+  fresh all [--pause] | status | drop [<session id>] | quiet | wait [--max <time>] | cancel [--json]
                                                    /epic fresh all:  every running epic session marked to go to
-                                                   a fresh session at its next clear moment;  TELL: lines
+                                                   a fresh session at its next clear moment;  TELL: lines;
+                                                   --pause:  each pauses and saves its agents first, says quiet,
+                                                   and all go only once every one is;  cancel calls that off
   prompt <name> "text" | --file path               set the prompt that started the plan ("" removes it)
   summary <name> [--json] [--all]                  open questions, issues, todos, limits, manual tests;  the next phase;
                                                    finished phases and grey items only counted, unless --all
@@ -1885,8 +2062,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    summary under it when there's something worth saying;  an
                                                    open issue or todo closes, as close does;  spinner off.
                                                    Refused with no underway card
-  status <name> <id> fixed ["html"]                an issue or judgement call fixed, for your review:  orange,
-                                                   still open;  Approve closes it.  A Do this's done means this too
+  status <name> <id> fixed ["html"]                an issue or judgement call fixed, for your review:  orange (light
+                                                   orange from your words), still open;  Approve closes it.  An issue
+                                                   Claude found that you hadn't got to:  closed, grey, "FIXED - ...".
+                                                   A Do this's done means this too, and done on an issue Claude found
   status <name> <id> promised "html"               /epic tidy:  it waits on finished work and what it promised never
                                                    came:  a "Promised, not delivered:" card, back on your list
   status <name> <id> noted "html"                  a STEP done, the item not finished:  your choice recorded,
@@ -1897,6 +2076,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    an underway card turns noted;  spinner off.  inbox apply
                                                    writes these for picks, todos and new items itself
                                                    (done --filed "html":  the older spelling, the same)
+                                                   NEVER finished work ("Fixed in <sha>", Done, Built, Merged:
+                                                   refused):  merged is fixed / done, waiting is underway
   original <name> <id> --file <html> [--as-of "YYYY-MM-DD HH:MM"]
                                                    put earlier text (from git) into an item's Original
                                                    Discussion:  as first written, or dated --as-of (when it was
@@ -1912,7 +2093,10 @@ const LOG_LABEL = "Log"
 const LOG_LAST = 20
 
 /** Flags that never take a value, so `epic summary --all seo` keeps `seo` as the epic. */
-const SWITCHES = ["all", "json"]
+const SWITCHES = ["all", "json", "dryrun", "dryRun", "titleOk", "pause"]
+
+/** A phase as `rename` takes it:  `P6`, `6`, `p6`. */
+const PHASE_REF = /^p?\d+$/i
 
 /** `summary`'s mark for a phase's status. */
 const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]", dropped: "[-]" }
@@ -2022,6 +2206,9 @@ function need(value: string | undefined, what: string): string {
 /** Where a usage error points:  the whole `USAGE` is long, and every error printing it buried the message. */
 /** What `epic update ... fixed` says it did. */
 const FIXED_WORDS = "fixed, for review"
+
+/** What `epic update ... fixed` or `done` says it did to an issue Claude found (`SelfFix`, T143). */
+const SELF_FIXED_WORDS = "fixed, grey, nothing for you to do"
 
 const USAGE_HINT = "`epic <verb> --help`;  a phase is `<epic>#P3` (or its name), an item `<epic>#J3`"
 

@@ -52,6 +52,8 @@ export type SsrOptions = CLI.GlobalOptions & {
   inlineCss?: boolean
   css?: string
   minify?: boolean
+  /** `--shadow-roots`:  the static render's shadow output, `page.shadow.html` and its `ui-sheets/` */
+  shadowRoots?: boolean
 }
 
 /**

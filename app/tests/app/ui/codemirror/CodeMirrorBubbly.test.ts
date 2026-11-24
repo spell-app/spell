@@ -2,7 +2,11 @@ import { describe, expect, test } from "vite-plus/test"
 import { codeFolding, foldEffect } from "@codemirror/language"
 import { EditorState } from "@codemirror/state"
 
+import { SP } from "spell/parser/spell"
 import { CodeMirrorBubbly } from "spell/app/app/ui/codemirror/CodeMirrorBubbly"
+import { CodeMirrorLanguage } from "spell/app/app/ui/codemirror/CodeMirrorLanguage"
+import type { LanguageClient } from "spell/app/app/ui/codemirror/LanguageClient"
+import type { LSP } from "spell/app/lsp"
 
 /**
  * `CodeMirrorBubbly`, Spell drawn bubbly in CodeMirror (epic `codemirror` P3):  what P3 adds -- a drawing's tags from the page's reading of markup, a head's description at its band's
@@ -203,6 +207,52 @@ describe("CodeMirrorBubbly's feet take no room (P7)", () => {
       // the end of the file:  the action's and the card's, from the last line itself
       { under: '\t\tsay "flipped"', placement: "end" }
     ])
+  })
+
+  test("typing steadily:  the worker's drawing of an earlier key marks the screen at once, moved along the keys since (J70)", () => {
+    const client = { answersOnPage: () => false } as unknown as LanguageClient
+    const file = { language: SP.Language.for("en") } as unknown as SP.SpellFile
+    const language = new CodeMirrorLanguage({
+      service: {} as LSP.SpellLanguageService,
+      client,
+      file,
+      parseNow: () => {}
+    })
+    const parsed = (version: number, text: string) => {
+      const { text: _text, ...drawing } = SP.BubblyLayout.of(text)
+      return { uri: "spell:/x", version, diagnostics: [], fixItStarts: [], folds: [], types: [], views: [], drawing }
+    }
+    /** What a layout marks of `state`'s text on screen, all of it:  each mark's text, through the edits since. */
+    const marked = (state: EditorState) => {
+      const laidOut = CodeMirrorBubbly.laidOutElsewhere(state, language.elsewhere)!
+      const back = laidOut.editsSince?.invertedDesc
+      const to = back ? back.mapPos(state.doc.length, 1) : state.doc.length
+      const marks = laidOut.marksIn!({ from: 0, to })
+      const moved = laidOut.editsSince ? marks.map(laidOut.editsSince) : marks
+      const texts: string[] = []
+      moved.between(
+        0,
+        state.doc.length,
+        (from, end) => void (end > from && texts.push(state.doc.sliceString(from, end)))
+      )
+      return { laidOut, texts }
+    }
+    const start = "a card is a thing\n\tits suit is a text\n"
+    const opened = EditorState.create({ doc: start })
+    language.tookParse(parsed(0, start) as LSP.LanguageParsed, opened.doc)
+    // a member typed and sent to the worker;  its parse comes after the next edit, a line above
+    const typed = opened.update({ changes: { from: start.length, insert: "\tits rank is a number\n" } }).state
+    const next = typed.update({ changes: { from: 0, insert: "-- note\n" } })
+    language.tookParse(parsed(1, typed.doc.toString()) as LSP.LanguageParsed, typed.doc, {
+      doc: next.state.doc,
+      changes: next.changes
+    })
+    const { laidOut, texts } = marked(next.state)
+    // only the marks are new:  the whole file's part waits for a drawing of this very text
+    expect(laidOut.keepsDecorations).toBe(true)
+    // the member's words marked, where they are now;  the note typed since, not yet
+    expect(texts).toContain("rank")
+    expect(texts.some((it) => it.includes("note"))).toBe(false)
   })
 
   test("no block widget, nothing with a height of its own:  every line one line tall", () => {

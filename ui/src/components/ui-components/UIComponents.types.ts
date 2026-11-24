@@ -42,6 +42,15 @@ export type ComponentPack = {
    * - None (a pack built before):  every family is swapped.
    */
   readonly families?: Readonly<Record<string, string>>
+  /**
+   * Import ONE family of the pack (a folder of `families`), which defines its tags (epic `solid-2-final` P7):
+   * a pack built as module chunks, a family each.
+   * - A page that loads families on first use (the docs bundle's `registerPack()`) hands these to `RootLoader.add()`
+   *   and defines the pack's tags early, instead of calling `define()`;  any other page calls `define()`, which
+   *   loads them all.
+   * - None (a pack built as one script):  `define()` only.
+   */
+  readonly loadFamily?: (folder: string) => Promise<unknown>
 }
 
 /**

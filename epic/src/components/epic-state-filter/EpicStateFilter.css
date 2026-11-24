@@ -58,6 +58,11 @@
     --_chip: var(--epic-state-replied, var(--ui-orange));
     --_chip-on: var(--epic-state-replied-on, var(--ui-orange-on));
   }
+  /* a recheck, Claude's turn to check again (epic `epic-engine` J335):  light orange, dark ink, a chip of its own */
+  .chip[data-color="lightOrange"] {
+    --_chip: var(--epic-state-requested, var(--ui-orange));
+    --_chip-on: var(--epic-state-requested-on, var(--ui-yellow-on));
+  }
   .chip[data-color="yellow"] {
     --_chip: var(--epic-state-open, var(--ui-yellow));
     --_chip-on: var(--epic-state-open-on, var(--ui-yellow-on));

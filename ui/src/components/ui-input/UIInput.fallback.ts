@@ -22,6 +22,7 @@ export class InputFallback extends E.NativeFallback<Vocabulary> {
   @E.proto static degraded = [
     "`icon` glyph and the `icon` / `label` / `action` slots",
     "corner labels",
+    "the clear button (`clearable`), a search field's magnifying glass, `shortcut` (its keys and their caps)",
     "`rules` (only the native constraints validate)",
     "`:state(invalid)`, form reset of the value, implicit (Enter) submission",
     "labels from `<label for>` (only `aria-label` / `placeholder` name the control)"

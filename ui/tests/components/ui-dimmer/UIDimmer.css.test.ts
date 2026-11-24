@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { dimmerVocabulary } from "spell/ui/components/ui-dimmer/UIDimmer.en"
@@ -33,7 +32,7 @@ const ALLOWED_IMPORTANT = 1
 /** Adopt the sheets and render example `name`. */
 function example(name: string): HTMLElement {
   Sheets.adopt([...foundationCSS, buttonCSS, segmentCSS, dimmerCSS])
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 /** The static dimmer in the segment whose first paragraph reads `text`. */
@@ -73,7 +72,7 @@ describe("UIDimmer.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = dimmerRaw + colorsCSS
+    const css = dimmerRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(dimmerVocabulary))
       expect(Sheets.covers(css, phrase), `${dimmerVocabulary.tag}: ${phrase}`).toBe(true)
     for (const shade of ["medium", "light", "very light"]) expect(Sheets.covers(css, shade), shade).toBe(true)
@@ -131,7 +130,7 @@ describe("UIDimmer.css examples", () => {
 describe("UIDimmer.css tokens", () => {
   it("one `--ui-dimmer-background` themes the dimmer AND the modal's backdrop", () => {
     Sheets.adopt([...foundationCSS, dimmerCSS, modalCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-dimmer-background: rgb(10 20 30 / 0.5)"><div class="dimmable">` +
         `<div class="ui active dimmer"></div></div><div class="ui modal"></div></div>`
     )

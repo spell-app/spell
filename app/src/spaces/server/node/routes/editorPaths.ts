@@ -38,3 +38,21 @@ export const WEBSOCKET_PREFIXES: readonly string[] = ["/api/rooms", "/api"]
 
 /** The header the page server's guard reads its write token from (`SRV.Guard`). */
 export const SERVER_TOKEN_HEADER = "x-server-token"
+
+/**
+ * Which of the editor's pages a browser opening `pathname` gets (epic `solid-2-final` P12):
+ * - `run.html`, the run page, for `/run/<project>...`:  the project running alone, with no editor in the page
+ * - `index.html`, the editor, for every other address
+ * - The built editor's server (`EditorServer.builtServer()`) and the dev server (`runPageInDev()`, the app's
+ *   `vite.config.ts`) both ask it, so they send the same page for an address.
+ * - Inside the editor, a switch to Run asks no server:  the editor's page stays, live edits and all.
+ */
+export function editorPageFor(pathname: string): EditorPage {
+  return RUN_ADDRESS.test(pathname) ? "run.html" : "index.html"
+}
+
+/** One of the editor's pages, a file at its build's root. */
+export type EditorPage = "index.html" | "run.html"
+
+/** A run page's address:  `/run/`, then a project's. */
+const RUN_ADDRESS = /^\/run\/[^/]/

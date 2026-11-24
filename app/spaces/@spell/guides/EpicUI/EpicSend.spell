@@ -1,0 +1,145 @@
+"epic send" is a notebook page
+	<header level="1">
+		&lt;epic-send&gt;
+		<header>A details page's Send: where the answer stands, and the round button that sends it.</>
+	</>
+
+	<text class="lede" paragraph>A details page's Send, in its sticky header: where the answer stands, then Send (<link target="src-spell-epic-src-docs-epic-send-buttons-html" link="/epic-send-buttons"><text code>&lt;epic-send-buttons&gt;</></>). It sends the whole page, partial answers too, as often as you like: the page never locks. No Auto Send countdown here (J142, only an epic page's header has one): only a press sends. Beside them, the draft's save: what's typed and not sent is kept beside the page, and comes back when the page reloads or is rewritten. After the button, who hears it: <text code>repo-split is listening</> while a session waits for the answer, else <text code>nobody is waiting yet</>. Send works either way.</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-send" link="/epic/src/components/epic-send/"><text title="epic/src/components/epic-send/" code>epic-send/</></> (epic <text code>epic-workflow</> P12; the draft P18; who hears it, epic <text code>epic-engine</> r6).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-send-epicsend-en-ts" link="/epic/src/components/epic-send/EpicSend.en.ts"><text title="epic/src/components/epic-send/EpicSend.en.ts" code>EpicSend.en.ts</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads. Off a details page's own address nothing is saved or sent: Send says so.</>
+		<html>
+			<epic-send></>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>details page · the header:</>
+		<markdown>
+			```html
+			<ui-sticky class="spell-h1"
+			  ><header class="spell-page-head"><h1>Pick a layout</h1><epic-send></epic-send></header></ui-sticky
+			>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<list bulleted>
+			<item>Once a page, in its sticky header (<text code>.spell-page-head</>), after the h1: it sits at the header's right.</>
+			<item>No children.</>
+			<item>On a details page it sends the page's bullhorn comments too: the comments draw no Send of their own there, and the words beside it count them, <text code>Sent · 2 comments to send</>.</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<text paragraph>None.</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-send::part(base)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>Its box: the line, then an error when there is one.</>
+				</>
+				<row>
+					<cell>
+						<text code>state</>
+					</>
+					<cell>Where the answer stands, in its colour: grey, blue (not sent), green (sent).</>
+				</>
+				<row>
+					<cell>
+						<text code>draft</>
+					</>
+					<cell>The draft's save (P18), muted: <text code>draft saved 14:04</>, <text code>draft from 14:04 put back</>; when the page server can't take it, on its own line under the rest, red and bold (P15: the browser still keeps it, and it tries again every 3s).</>
+				</>
+				<row>
+					<cell>
+						<text code>send</>
+					</>
+					<cell>Send (<text code>&lt;epic-send-buttons&gt;</>, epic <text code>epic-engine</> P20), by the fill rule: a grey outline with nothing to send, dashed blue with changes not sent, a blue outline once sent.</>
+				</>
+				<row>
+					<cell>
+						<text code>who</>
+					</>
+					<cell>Who hears a Send, muted, after the button (r6): <text code>repo-split is listening</> with a green dot (a session's <text code>epic ask wait</>), or <text code>nobody is waiting yet</>; the tooltip says more. None where the page can't ask (no page server).</>
+				</>
+				<row>
+					<cell>
+						<text code>error</>
+					</>
+					<cell>Why it couldn't send, under them.</>
+				</>
+				<row>
+					<cell>
+						<text code>notice</>
+					</>
+					<cell>Sent with nobody waiting, under them in orange: <text code>Saved: nobody is waiting yet; Claude reads it when it next looks.</> Gone once a session waits, or at the next send.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-send:state(pending)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>pending</>
+					</>
+					<cell>Something on the page isn't sent yet.</>
+				</>
+				<row>
+					<cell>
+						<text code>sent</>
+					</>
+					<cell>The page as sent.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>The line: <text code>Not sent</> (grey; blue with something on the page), <text code>Changes not sent</> (blue), <text code>Sent 10/8/26 14:34 · 5 of 17 decided</> (green; <text code>Sent 10/8/26 14:34</> on a page with no questions, only comment boxes and notes).</>
+			<item>Send by the fill rule: a grey outline with nothing to send, dashed blue with changes not sent, a blue outline once sent; never solid, since the page can't tell when Claude is done with it.</>
+			<item>The draft's save beside the line, muted (<text code>draft not saved yet</>, <text code>saving draft…</>, <text code>draft saved 14:04</>, <text code>draft from 14:04 put back</>). Saved to the page server as you type, half a second after each change, and kept in the browser at once. Gone once sent.</>
+			<item>After Send, who hears it, muted (epic <text code>epic-engine</> r6): <text code>repo-split is listening</> with a green dot while a session's <text code>epic ask wait</> (or <text code>ask show --wait</>) waits for the answer, else <text code>nobody is waiting yet</>. The page asks again every 30s: <text code>ask wait</> keeps a heartbeat in <text code>~/.spell-epic/asks/</>.</>
+			<item>Send works with nobody waiting too: the answer is saved beside the page, and an orange line says so, <text code>Saved: nobody is waiting yet; Claude reads it when it next looks.</></>
+			<item>A draft's save that failed, on its own line under them in red, bold, so the side bar's width never cuts it short (epic <text code>epic-engine</> P15): <text code>draft kept in this browser only: ...; trying again every 3s</>. It does try again, by itself: once the page server answers (a restart's new token too), it saves with no keystroke.</>
+			<item>Why it couldn't send, in red, under them.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic ask create</>: in the template's header.</>
+			<item>Older pages: the migration step <text code>answer-elements</>.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-19 against branch <ui-text code>epic-engine</> (r6): the tables are its vocabulary's (epic-send); the rest from its component and its stylesheet.</>
+		</>
+	</>

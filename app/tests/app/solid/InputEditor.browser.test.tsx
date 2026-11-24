@@ -195,11 +195,12 @@ describe("<FileTabs>", () => {
     // its words are its `label`:  a drafted file's pen's tip holds words too (I92)
     expect(tabs.map((tab) => tab.getAttribute("label"))).toEqual(["one.js", "two.js"])
     expect(tabs.map((tab) => tab.hasAttribute("selected"))).toEqual([true, false])
-    expect(tabs[0]!.querySelector(".NotSaved")!.hasAttribute("hidden")).toBe(true)
+    // an `<if>` draws only the branch that holds:  no dot at all while saved
+    expect(tabs[0]!.querySelector("ui-label[slot=badge]")).toBeNull()
 
     file.isDirty = true
     flush()
-    await vi.waitFor(() => expect(tabs[0]!.querySelector(".NotSaved")!.hasAttribute("hidden")).toBe(false))
+    await vi.waitFor(() => expect(tabs[0]!.querySelector("ui-label[slot=badge]")).not.toBeNull())
 
     tabs[1]!.click()
     expect(showEditor).toHaveBeenCalledWith("test-project/two.js")
@@ -229,10 +230,8 @@ describe("<FileTabs>", () => {
     expect(row.shadowRoot!.querySelector("[part~=all-items]")).toBeNull()
     // force:  an earlier test's right-click menu may still lie over the bar
     await userEvent.hover(tabs[1]!, { force: true })
-    expect(tabs.map((tab) => getComputedStyle(tab.querySelector(".CloseTab")!).visibility)).toEqual([
-      "hidden",
-      "hidden"
-    ])
+    // `closable="when-limited"`:  with nothing put away, no ✕ is drawn at all
+    expect(tabs.map((tab) => tab.shadowRoot!.querySelector("[part~=close]"))).toEqual([null, null])
   })
 
   test("the ✕ at the bar's far right hides the code, as the top bar's code icon does (T83)", async () => {
@@ -241,8 +240,9 @@ describe("<FileTabs>", () => {
     setEditor("file", file)
     const host = await mount(() => <FileTabs />)
     await tabsIn(host)
-    const hide = host.querySelector(".FileTabs > :not(ui-menu)")!.shadowRoot!.querySelector<HTMLElement>(".HideCode")!
-    expect(hide.getAttribute("title")).toBe("Hide the code")
+    const panel = host.querySelector(".FileTabs > :not(ui-menu)")!.shadowRoot!.querySelector("ui-panel")!
+    const hide = panel.shadowRoot!.querySelector<HTMLElement>("[part~=close]")!
+    expect(hide.getAttribute("aria-label")).toBe("Hide the code")
     expect(CodeShown.isClosed(file.project.path)).toBe(false)
     hide.click()
     flush()
@@ -289,8 +289,8 @@ describe("<FileTabs>", () => {
 
     test("a tab's ✕ shows in its file icon's place only while hovered, and the tab keeps its width (T82)", async () => {
       const { tab } = await manyTabs()
-      const close = (name: string) => tab(name).querySelector<HTMLElement>(".CloseTab")!
-      const fileIcon = (name: string) => tab(name).querySelector<HTMLElement>(".TabIcon > ui-icon:not(.CloseTab)")!
+      const close = (name: string) => tab(name).shadowRoot!.querySelector<HTMLElement>("[part~=close]")!
+      const fileIcon = (name: string) => tab(name).shadowRoot!.querySelector<HTMLElement>("[part~=icon] > .glyph")!
       const width = (name: string) => tab(name).getBoundingClientRect().width
       expect(getComputedStyle(close("one.js")).visibility).toBe("hidden")
       expect(close("one.js").getAttribute("title")).toBe("Close")
@@ -306,7 +306,7 @@ describe("<FileTabs>", () => {
 
     test("a ✕ closes a tab:  out of the bar, its file not shown;  picked again from the list, it's back", async () => {
       const { shown, tab, pick, showEditor } = await manyTabs()
-      tab("two.js").querySelector<HTMLElement>(".CloseTab")!.click()
+      tab("two.js").shadowRoot!.querySelector<HTMLElement>("[part~=close]")!.click()
       await vi.waitFor(() => expect(shown()).toEqual(["one.js", "file3.js"]))
       expect(showEditor).not.toHaveBeenCalled()
       expect(tab("one.js").hasAttribute("selected")).toBe(true)
@@ -317,13 +317,14 @@ describe("<FileTabs>", () => {
 
     test("closing the chosen tab shows its neighbour's file;  a middle click closes too", async () => {
       const { shown, tab, showEditor } = await manyTabs()
-      tab("one.js").querySelector<HTMLElement>(".CloseTab")!.click()
+      tab("one.js").shadowRoot!.querySelector<HTMLElement>("[part~=close]")!.click()
       expect(showEditor).toHaveBeenLastCalledWith("test-project/two.js")
       await vi.waitFor(() => expect(shown()).not.toContain("one.js"))
       await vi.waitFor(() => expect(tab("two.js").hasAttribute("selected")).toBe(true))
 
       expect(shown()).toEqual(["two.js", "file3.js"])
-      tab("file3.js").dispatchEvent(new MouseEvent("auxclick", { bubbles: true, composed: true, button: 1 }))
+      const box = tab("file3.js").shadowRoot!.querySelector("[part~=item]")!
+      box.dispatchEvent(new MouseEvent("auxclick", { bubbles: true, composed: true, button: 1 }))
       await vi.waitFor(() => expect(shown()).toEqual(["two.js"]))
     })
   })

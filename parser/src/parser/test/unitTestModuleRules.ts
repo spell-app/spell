@@ -12,8 +12,7 @@
  */
 
 import { describe, test, expect } from "vite-plus/test"
-import groupBy from "lodash/groupBy"
-import isEqual from "lodash/isEqual"
+import { groupBy, isEqual } from "lodash-es"
 
 import { showWhitespace } from "spell/util"
 

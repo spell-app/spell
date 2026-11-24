@@ -13,7 +13,7 @@
  * - Opened from disk (`file://`):  the same buttons explain how to start the server, and link to the page on it.
  * - Classic script, no imports:  `file://` pages can't load modules.  `window.SpellUI.UI` is the bundle's `UI`.
  * - The buttons follow the docs' rule:  pills with an icon and text, or circles with an icon and an `aria-label`;
- *   each with Spell UI's tooltip, a `data-tooltip`, after the standard delay
+ *   a circle's tooltip Spell UI's (`data-tooltip`), after the standard delay;  a pill none, its words are on it (I370)
  *   - `<ui-button>`s built as elements, never markup in strings (epic `epic-engine` P3);  before it, a `<ui-popup>`
  *     after each was its tooltip, against the docs' rule (`src/AGENTS.md`, TOOLTIPS)
  */
@@ -63,13 +63,12 @@
     const tools = el(
       "div",
       { class: "goals-page-tools" },
-      pill("talk", "comments", ["Talk"], `Talk ${NAME} through with Claude:  /goals ${BASE}`, true),
-      pill("thought", "comment dots", ["Thought"], `Jot a thought about ${NAME}, for Claude to digest later`),
+      pill("talk", "comments", ["Talk"], true),
+      pill("thought", "comment dots", ["Thought"]),
       pill(
         "update",
         "wand magic sparkles",
-        waiting ? ["Update ", el("span", { class: "goals-count" }, String(waiting))] : ["Update"],
-        `Have Claude work the new thoughts into ${NAME}:  /goals-update ${BASE}`
+        waiting ? ["Update ", el("span", { class: "goals-count" }, String(waiting))] : ["Update"]
       ),
       el("span", { class: "goals-tool-gap" }),
       circle("vscode", "up right from square", "Open in VS Code", "Show this page in VS Code, beside your code")
@@ -135,8 +134,8 @@
     }
   }
 
-  /** A pill button:  icon and `words` (text and elements), `tip` its tooltip. */
-  function pill(action, icon, words, tip, primary = false) {
+  /** A pill button:  icon and `words` (text and elements);  no tooltip, its words are on it (epic `epic-engine` I370). */
+  function pill(action, icon, words, primary = false) {
     const button = el(
       "ui-button",
       {
@@ -144,8 +143,7 @@
         appearance: primary ? "circular" : "circular basic",
         ...(primary ? { color: "primary" } : {}),
         size: "tiny",
-        icon,
-        "data-tooltip": tip
+        icon
       },
       ...words
     )

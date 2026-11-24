@@ -21,11 +21,14 @@
  *   - `sets`:  component sets, by id:  a page at `/components/<id>/` (`componentSet()`)
  *   - `paths`:  more pages, each a pattern (a `RegExp` source) on the page's path, e.g. `^/editor(/|$)`
  *   - `areas`:  docs areas, by folder name:  a page under `<area>/` (`docsArea()`)
+ * - `dot`:  an address the header asks every 10 seconds while the page shows, answering `{ dot, why }`:  a red dot
+ *   on the tab while `dot`, `why` its tooltip (the Servers tab:  a server down;  epic `epic-engine` P82)
  */
 export type SiteTab = {
   name: string
   path: string
   ownTab?: boolean
+  dot?: string
   sets?: string[]
   paths?: string[]
   areas?: string[]

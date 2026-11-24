@@ -39,7 +39,7 @@ export function toListener(handler: Handler, { onError }: ListenerOptions = {}) 
         error instanceof HttpError && error.body !== undefined
           ? error.body
           : { error: error instanceof Error ? error.message : JSON.stringify(error) }
-      reply.status(status).set("Cache-Control", "no-store").json(body)
+      reply.status(status).noStore().json(body)
     })
   }
 }

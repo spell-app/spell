@@ -1,7 +1,6 @@
 import { createEffect, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { Dragging } from "spell/util/Dragging"
 import type { E } from "spell/element"
 import { SP } from "spell/parser/spell"
 import type { UIToolbar } from "spell/ui/components/ui-toolbar"
@@ -31,24 +30,25 @@ import "./FileTabs.css"
  *   Duplicate, Rename, Delete, the app's actions, which the editor does (`editorSpellWithActions()`);
  *   the page's right click on the bar finds it.
  *   - The right click shows that file first, so its actions are about it.
- * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
- * - A tab dragged along the row moves its file there:  the project's file order, saved in its project file
- *   (`editor.moveFile()`;  Owen, epic `mockup`).
+ * - Too many for the row, it scrolls, however narrow:  never one dropdown (its `<ui-toolbar>`'s `scroll-only`).
+ * - A tab dragged along the row moves its file there (its `<ui-toolbar>`'s `reorderable`, `ui-item-dropped`):
+ *   the project's file order, saved in its project file (`editor.moveFile()`;  Owen, epic `mockup`).
  * - A button listing every file, at the bar's right end, while some files aren't tabs you can see:
  *   put away, or scrolled out of the row (its `max-visible`, `all-items-at-end`;  epic `editor` T82, T83);
  *   a file icon before its caret (`all-items-icon`, epic `editor` T76:  "The `More` dropdown is too subtle").
  * - A ✕ at the bar's far right hides the code, as the top bar's code icon does (`CodeShown`;  epic `editor` T83:
- *   "Add a close `x` to the far right of the file menu which hides the panel").
+ *   "Add a close `x` to the far right of the file menu which hides the panel"):  its panel's own `closable`,
+ *   heard here as `ui-dismissed` (T145).
  * - More than eight files:  the ones opened lately (its `max-visible`), the same ones after a reload,
  *   per project (its `remember`).
- *   - Then a tab's ✕ (the Spell's `close it`), or a middle click, closes it (epic `editor` T77):
- *     the ✕ shows in the tab's file icon's place while it's hovered, taking no room of its own (T82).
- *     the toolbar's `closeItem()` takes it out of the row, and the list still has it.
- *     Closing the chosen tab shows its neighbour's file.
+ *   - Then a tab's ✕, a middle click or Delete closes it (epic `editor` T77):  its `<ui-item closable="when-limited">`,
+ *     the ✕ in the tab's file icon's place while it's hovered, taking no room of its own (T82, T145).
+ *     The toolbar takes it out of the row, and the list still has it.
+ *     Closing the chosen tab chooses its neighbour, which shows its file.
  *   - No key closes one:  ⌘W is the browser's, closing the page's own tab.
  *   - A site's own file (`Dashboard.site.spell`, `SiteEdits.isRoutingOnly()`) is always a tab, beside the file
  *     showing (epic `editor` I188:  "have the `.site.spell` file open and the 'more files' button on the right").
- * - SEE:  its App UI components page, `app/docs/FileTabs.html` (`/components/app/FileTabs.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/file-tabs`.
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()
@@ -73,7 +73,6 @@ export function FileTabs() {
   const tipWords = tracked(() => ({
     note: appTexts.text("updatedInYourDraft"),
     discard: appTexts.text("discardChanges"),
-    close: appTexts.text("closeTab"),
     hide: appTexts.text("hideCode")
   }))
 
@@ -83,7 +82,6 @@ export function FileTabs() {
       if (!it || !loaded) return
       it.rememberAs = `file-tabs:${editor.project?.path ?? ""}`
       it.hideWords = words.hide
-      it.hideTheCode = () => CodeShown.set(editor.project?.path, false)
       const File = loaded.exports.File as new () => TabFile
       const known = new Map(it.files.getValues().map((file) => [file.path, file]))
       it.files.items = files.map((each) => {
@@ -96,13 +94,11 @@ export function FileTabs() {
         file.place = each.path === path ? "chosen" : "other"
         file.draftNote = words.note
         file.discardWords = words.discard
-        file.closeWords = words.close
-        // a click in the tab's tip (Discard changes), or on its ✕, is theirs alone:  it doesn't show the tab's file too
+        // a click in the tab's tip (Discard changes) is its own:  it doesn't show the tab's file too
         file.show = () => {
           if (!clickedInTip) editor.showEditor(file.path)
         }
         file.discard = () => void editor.discardDraftOf(file.path)
-        file.close = () => closeTab(file)
         return file
       })
       // a site's own file always a tab, once the tabs are drawn (I188)
@@ -113,23 +109,6 @@ export function FileTabs() {
 
   /** The bar's toolbar, holding the tabs:  in the view's shadow root, once drawn. */
   let tabRow: () => Element | undefined = () => undefined
-
-  /**
-   * Close `file`'s tab:  it leaves the bar, still in the list of every file (epic `editor` T77).
-   * - Only while some files are in the list alone, and never the last tab (`UIToolbar.closeItem()`).
-   * - The chosen one:  its neighbour's file shows in its place.
-   */
-  const closeTab = (file: TabFile) => {
-    const row = tabRow()
-    const files = bar()?.files.getValues() ?? []
-    const tabs = row ? [...row.children].filter((each) => each.localName === "ui-item") : []
-    const tab = tabs[files.indexOf(file)]
-    const toolbar = (row as E.DOMElement | undefined)?.component as UIToolbar | undefined
-    if (!tab || !toolbar) return
-    const inItsPlace = toolbar.closeItem(tab)
-    const next = inItsPlace && files[tabs.indexOf(inItsPlace)]
-    if (next) editor.showEditor(next.path)
-  }
 
   /** Keep the tab of the file at `path` in the row, without showing it (`UIToolbar.openItem()`). */
   const keepTab = (path: string) => {
@@ -142,9 +121,9 @@ export function FileTabs() {
   }
 
   /**
-   * Was the click going on now in a tab's tip (`<ui-popup>`) or on its ✕, not the tab itself?
+   * Was the click going on now in a tab's tip (`<ui-popup>`), not the tab itself?
    * Noted as it starts down the page.
-   * - They're inside the tab, so their click reaches it:  it neither shows the tab's file nor chooses the tab.
+   * - It's inside the tab, so its click reaches it:  it neither shows the tab's file nor chooses the tab.
    */
   let clickedInTip = false
   const noteClick = (event: MouseEvent) => {
@@ -168,42 +147,13 @@ export function FileTabs() {
     return file && { tab, tabs, files, file }
   }
 
-  // a tab dragged along the row:  its file moves to where it's dropped
-  const startDrag = (event: PointerEvent) => {
-    const pressed = event.button === 0 && tabOf(event)
-    if (!pressed) return
-    const { tab, tabs, files, file } = pressed
-    const from = tabs.indexOf(tab)
-    let target: { tab: HTMLElement; file: TabFile } | undefined
-    const mark = (next: typeof target) => {
-      target?.tab.removeAttribute(DROP_MARK)
-      target = next
-      if (target) target.tab.setAttribute(DROP_MARK, tabs.indexOf(target.tab) > from ? "after" : "before")
-    }
-    new Dragging(tab, event, {
-      carried: [tab],
-      follows: false,
-      placing: (x) => {
-        tab.setAttribute(DRAGGED, "")
-        // the tab under the pointer, among those showing (the ones over the row's limit aren't drawn)
-        const over = tabs.findIndex((each) => {
-          // a `<ui-item>` draws in its shadow, its own box empty
-          const box = (each.shadowRoot?.querySelector("[part~='item']") ?? each).getBoundingClientRect()
-          return box.width > 0 && x >= box.left && x < box.right
-        })
-        mark(over < 0 || over === from ? undefined : { tab: tabs[over], file: files[over] })
-      },
-      onDrop: () => {
-        const landed = target
-        mark(undefined)
-        tab.removeAttribute(DRAGGED)
-        if (landed) void editor.moveFile(file.path, landed.file.path)
-      },
-      onCancel: () => {
-        mark(undefined)
-        tab.removeAttribute(DRAGGED)
-      }
-    })
+  // a tab dragged along the row (`reorderable`):  its file moves to where it's dropped
+  const moveDropped = (event: CustomEvent<{ item: Element; target: Element }>) => {
+    const { item, target } = event.detail
+    const tabs = [...item.parentElement!.children].filter((each) => each.localName === "ui-item")
+    const files = bar()?.files.getValues() ?? []
+    const [file, landed] = [files[tabs.indexOf(item)], files[tabs.indexOf(target)]]
+    if (file && landed) void editor.moveFile(file.path, landed.path)
   }
 
   // a right click on a tab:  that file shown, so the Spell's menu there (its `<context-menu>`) is about it
@@ -212,22 +162,18 @@ export function FileTabs() {
     if (file) editor.showEditor(file.path)
   }
 
-  // a middle click on a tab closes it, as in VS Code and the browser's own tabs
-  const closeOnMiddleClick = (event: MouseEvent) => {
-    const file = event.button === 1 && tabOf(event)?.file
-    if (file) closeTab(file)
-  }
   return (
     <div
       class="FileTabs"
       ref={(div) => {
         div.addEventListener("click", noteClick, { capture: true })
         div.addEventListener("ui-choosing", keepChoice)
+        div.addEventListener("ui-item-dropped", moveDropped as EventListener)
+        // the bar's ✕, its panel's own (`closable`):  the code's column hides, as the top bar's code icon hides it (T83)
+        div.addEventListener("ui-dismissed", () => CodeShown.set(editor.project?.path, false))
         tabRow = () => div.querySelector(":scope > :not(ui-menu)")?.shadowRoot?.querySelector("ui-toolbar") ?? undefined
       }}
       onContextMenu={showTabFile}
-      onPointerDown={startDrag}
-      onAuxClick={closeOnMiddleClick}
     >
       {(() => {
         const loaded = spell()
@@ -252,14 +198,10 @@ type TabFile = EditorThing<
     draftNote: string
     /** Its tip's link:  "Discard changes", in the page's language. */
     discardWords: string
-    /** Its ✕'s tooltip:  "Close", in the page's language. */
-    closeWords: string
     /** Spell's `show it`, which the editor fills in. */
     show: () => void
     /** Spell's `discard it`, its tip's link:  your draft of it goes (`editor.discardDraftOf()`). */
     discard: () => void
-    /** Spell's `close it`, its ✕:  its tab leaves the bar (`closeTab()`). */
-    close: () => void
   }
 >
 
@@ -273,25 +215,13 @@ type FileTabBar = EditorThing<
     rememberAs: string
     /** The ✕'s tooltip:  "Hide the code", in the page's language. */
     hideWords: string
-    /** Spell's `hide the code`, the ✕ at the bar's far right:  the code's column hides (`CodeShown`). */
-    hideTheCode: () => void
   }
 >
 
-/** Is `event` in a tab's tip, the `<ui-popup>` by its pen, or on its ✕? */
+/** Is `event` in a tab's tip, the `<ui-popup>` by its pen? */
 function isInTip(event: Event): boolean {
-  return event
-    .composedPath()
-    .some((at) => (at as Element).localName === "ui-popup" || !!(at as Element).classList?.contains(CLOSE_TAB))
+  return event.composedPath().some((at) => (at as Element).localName === "ui-popup")
 }
-
-/** The class of a tab's ✕, in the Spell. */
-const CLOSE_TAB = "CloseTab"
-
-/** On a tab being dragged. */
-const DRAGGED = "dragged"
-/** On the tab a dragged one would land beside:  `before` or `after` it. */
-const DROP_MARK = "drop"
 
 /** What `<FileTabs>` shows of `editor`'s project:  its files, and the one shown. */
 export type ProjectFilesState = {

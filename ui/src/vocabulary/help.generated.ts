@@ -42,6 +42,8 @@ export const HELP_TABLE: Readonly<
       selected: "Chosen: the dropdown's value, the list's / menu's current item (`aria-current`).",
       padding: "Menu: `none`, no padding; `none-x` / `none-y` drop only the left and right, or top and bottom.",
       kind: "An item, a group `header` (dropdown, menu), or a `divider`: a line between two groups (dropdown, menu, toolbar; upright in a row).",
+      closable:
+        "A tab you can close: a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves; a middle click or Delete closes it too.",
       action:
         "PROPERTY: the action it draws and runs: `{ title, icon?, shortcut?, isEnabled, isSelected, run() }`, read live.",
       shortcut:
@@ -259,6 +261,8 @@ export const HELP_TABLE: Readonly<
       inverted: "For dark backgrounds: the dark scheme.",
       disabled: "Faded and inert; a link card loses its `link`.",
       loading: "Dimmed under a spinner, announced as busy.",
+      selected:
+        "The one chosen among its neighbours: its border the primary colour and its fill a touch of it, its text as the others'; `--ui-card-selected-border-color` and `--ui-card-selected-background` change them.",
       link: "Makes the whole card a link (`<a>`), going here.",
       target: "Link target, with `link`.",
       heading: "Shorthand: the header of a content block.",
@@ -413,6 +417,8 @@ export const HELP_TABLE: Readonly<
       image: "In a modal: an image beside the description (a flex row).",
       scrolling: "In a modal: a capped height that scrolls.",
       align: "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).",
+      markdown:
+        "Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.",
       "vertical-align": "In an item or a list: `top`, `middle` or `bottom` against the image or icon beside it."
     }
   },
@@ -815,6 +821,21 @@ export const HELP_TABLE: Readonly<
       corner: "Inside `<ui-icons>`: a small badge on a corner of the group; bare `corner` is bottom right."
     }
   },
+  "ui-icon-browser": {
+    description:
+      "An icon browser shows every icon of a pack, to search through: clicking one copies the name that draws it.",
+    empty: true,
+    attributes: {
+      pack: "The pack it starts on: `fa7-free` (the default), `fa7-brands` or `fomantic`.",
+      query:
+        "What it starts searching for: a name or what an icon shows (`mail` finds `envelope`, by Font Awesome's terms).",
+      address:
+        "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it; ahead of `query` and `pack`.",
+      pick: "A click picks the icon instead of copying its name: `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse).",
+      compact:
+        "Tighter, for a dialog: the search first, smaller tiles closer together, and no line about adding the pack to a page."
+    }
+  },
   "ui-icon-picker": {
     description: "An icon picker lets people choose an icon by searching for it and clicking its glyph.",
     empty: true,
@@ -934,6 +955,9 @@ export const HELP_TABLE: Readonly<
       accept: "`file`: accepted file types.",
       folder:
         "`file`: picks whole folders instead of files; `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).",
+      clearable: "Shows a clear button (an `x`) at its end while it has text; a click empties it.",
+      shortcut:
+        "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them: `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.",
       autocomplete: "Autofill hint, forwarded to the native input.",
       inputmode: "Virtual keyboard hint, forwarded to the native input.",
       rules:
@@ -957,7 +981,9 @@ export const HELP_TABLE: Readonly<
       disabled: "Can't be chosen or followed.",
       selected: "Chosen: the dropdown's value, the list's / menu's current item (`aria-current`).",
       padding: "Menu: `none`, no padding; `none-x` / `none-y` drop only the left and right, or top and bottom.",
-      kind: "An item, a group `header` (dropdown, menu), or a `divider`: a line between two groups (dropdown, menu, toolbar; upright in a row)."
+      kind: "An item, a group `header` (dropdown, menu), or a `divider`: a line between two groups (dropdown, menu, toolbar; upright in a row).",
+      closable:
+        "A tab you can close: a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves; a middle click or Delete closes it too."
     }
   },
   "ui-items": {
@@ -1314,7 +1340,10 @@ export const HELP_TABLE: Readonly<
       disabled: "Dimmed and inert; can't be closed or opened.",
       source:
         "URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open); same origin only.",
-      selector: "With `source`: a CSS selector; only its first match in the file becomes the content."
+      selector: "With `source`: a CSS selector; only its first match in the file becomes the content.",
+      closable:
+        "A ✕ at the far end of its bar, after its actions and chevron, light until hovered: a click sends `ui-dismissed`, and the page closes it (hides it, or the column it's in).",
+      "close-label": "With `closable`: the ✕'s name and tooltip, what closing it does (`Hide the code`)."
     }
   },
   "ui-placeholder": {
@@ -1680,6 +1709,7 @@ export const HELP_TABLE: Readonly<
       category: "Results in named groups (`category` of each result).",
       direction: "`horizontal`, with `category`: each group's name above its results, not beside them.",
       fluid: "Takes the full width of its container; so do the results.",
+      collapsed: "Starts as a search button; a click slides the field open, focused.",
       scrolling: "The results scroll after a fixed height.",
       resizable: "`scrolling`: people can resize the results vertically.",
       length: "How far the results go before they scroll: `very-short`, `short`, `long`, `very-long`.",
@@ -1689,11 +1719,15 @@ export const HELP_TABLE: Readonly<
       readonly: "Shows its value but can't be typed in, and the results never open; still focusable and submitted.",
       open: "The results are showing.",
       placeholder: "Placeholder text of the input.",
+      clearable:
+        "Shows a clear button (an `x`) in place of the magnifying glass while there's text; a click empties it.",
       value: "The input's text: the query, or a chosen result's title.",
       name: "Form field name: submits the input's text.",
       parameter:
         'Keep the value in the page\'s address, as this query parameter (`parameter="s"` => `?s=van+gogh`): each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.',
       required: "Form validation: the input can't be empty.",
+      shortcut:
+        "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them: `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.",
       url: "Remote results: a `UI.api` URL template with `{query}`, e.g.",
       "min-characters": "Characters to type before a search runs.",
       "max-results": "The most results shown (before categories); `0` for no limit.",
@@ -1918,6 +1952,8 @@ export const HELP_TABLE: Readonly<
       selected: "Chosen: the dropdown's value, the list's / menu's current item (`aria-current`).",
       padding: "Menu: `none`, no padding; `none-x` / `none-y` drop only the left and right, or top and bottom.",
       kind: "An item, a group `header` (dropdown, menu), or a `divider`: a line between two groups (dropdown, menu, toolbar; upright in a row).",
+      closable:
+        "A tab you can close: a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves; a middle click or Delete closes it too.",
       toggles:
         "What it shows and hides: the layout's `drawer` (its side navigation), or its `left` or `right` side bar."
     }
@@ -2377,11 +2413,15 @@ export const HELP_TABLE: Readonly<
       "show-keys": "Show each action's keys beside its title, as a menu does.",
       "scroll-first":
         "With `shrinkable`: once only its icons are left, they scroll with `‹` / `›`, no overflow button.",
+      "scroll-only":
+        "`scroll-first` that never stops: however narrow, its items scroll with `‹` / `›`, and it's never the dropdown.",
       "max-visible":
         "More items than this (a number; with none, 8): the row shows only the ones chosen lately, up to that many, and a button lists every item while some aren't in view.",
       remember: "With `max-visible`: a name to keep the row's items under, so they're the same after a reload.",
       "all-items-icon":
         "With `max-visible`: an icon before the caret of the button listing every item, saying what they are (a project's files: `file outline`).",
+      reorderable:
+        "Its items can be dragged along the row: the dragged one dimmed, a line where it would land, before or after the item under the pointer.",
       "all-items-at-end":
         "With `max-visible`: the button listing every item sits at the toolbar's far end, however few items show."
     }

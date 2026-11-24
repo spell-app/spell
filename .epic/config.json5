@@ -11,9 +11,9 @@
 {
   // No "repos":  ONE repo since epic `repo-split` P20, so an epic's worktree is ONE worktree of `spell` (spell-epic's
   // single-repo mode).  Until then it named `repos.json5`, the child repos, each with a worktree inside the kit's.
-  // - spell-brand, a project beside the kit, gets its own worktrees:  epic `epic-engine` P49 (its Q49).
   // The repos BESIDE the kit, its PEERS (epic `epic-engine` P49, Q48 A):  `repos.json5`'s `"peer": true` entries
-  // (spell-brand), each at `path` from here.  A peer is never part of an epic's worktree:  this list holds no other
+  // (none today:  spell-brand, the only one, was dropped in epic `epic-engine` T124), each at `path` from here;
+  // each gets its own worktrees (P49, its Q49).  A peer is never part of an epic's worktree:  this list holds no other
   // repo, so an epic's worktree is still the kit's alone (`epic config peers`).
   "repos": "repos.json5",
 
@@ -84,6 +84,19 @@
   // - Epic pages started before then record the old address (`repo`):  `EpicRepo` reads it as this repo's
   //   (epic `epic-engine` I150), so their sessions aren't told they're in the wrong repo.
   "renamedRepos": { "https://github.com/spell-app/spell-kit": "https://github.com/spell-app/spell" },
+
+  // The guides that ship with Spell (epic `epic-engine` P79):  the kit's `guides/`, versioned with the code, each one
+  // moved here from the epic repo's `guides/` (`epic guides move`) at the same path, so its address stays
+  // `/guides/<path>`.  The epic tools find a guide here first, then in the epic repo (`EpicConfig.guideFoldersOf()`).
+  "guidesFolder": "guides",
+
+  // The percentages an epic page's item badges are worked out by (epic `epic-engine` P81;  Owen:  "Other epic users
+  // will probably want to tune the percentage").  Each item is scored for care and doubt as it's created.
+  "issueBadges": {
+    "recheckAt": 50, // doubt:  this or more is rechecked first
+    "closeBelow": 25, // care:  under this is closed
+    "fixAbove": 60 // care:  over this is fixed
+  },
 
   // The epic engine:  the spell-epic child repo, already inside the top repo, so no link (`""`, epic-engine P10).
   "engineFolder": "",

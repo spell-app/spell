@@ -10,7 +10,8 @@ import { E } from "spell/ui/core"
  *   4. once even the icons don't fit (a button under `--ui-menu-item-min`, 34px):  the items fold into ONE overflow
  *      button, whose menu holds them all
  * - A `segmented` menu has two:  whole, else a dropdown (its overflow button showing the chosen item).
- *   - A toolbar's `scroll-first` puts one between them:  the row scrolls while it has `--ui-toolbar-scroll-min`.
+ *   - A toolbar's `scroll-first` puts one between them:  the row scrolls while it has `--ui-toolbar-scroll-min`;
+ *     its `scroll-only`, at any width, so it's never the dropdown.
  * - Plain DOM, no Solid, shaped like `SegmentedThumb`:  `<ui-menu>` hands it its box and a way to find its items,
  *   starts it, and hears each new answer (`onAnswer`).
  * - The maths are pure statics (`cap()`, `fit()`), tested on their own.
@@ -126,7 +127,8 @@ export class TitleFit {
     const titlesRoom = sizes.room - sizes.fixed.reduce((sum, width) => sum + width, 0)
     if (this.setup.isSegmented()) {
       if (TitleFit.cap(sizes.titles, titlesRoom) === undefined) return WHOLE
-      return this.setup.scrollsFirst?.() && sizes.room >= sizes.scrollMin ? WHOLE : OVERFLOW
+      const scrolls = this.setup.scrollsOnly?.() || sizes.room >= sizes.scrollMin
+      return this.setup.scrollsFirst?.() && scrolls ? WHOLE : OVERFLOW
     }
     const fitted = TitleFit.fit(sizes.titles, titlesRoom, sizes.titleMin, {
       widths: sizes.icons,
@@ -360,6 +362,8 @@ export type TitleFitSetup = {
   isSegmented: () => boolean
   /** a segmented menu scrolls while it has `--ui-toolbar-scroll-min`, rather than become a dropdown (`scroll-first`) */
   scrollsFirst?: () => boolean
+  /** with `scrollsFirst`, a segmented menu scrolls however narrow, never a dropdown (`scroll-only`) */
+  scrollsOnly?: () => boolean
   /**
    * room a smaller stage frees, which the whole look takes back:  a toolbar's list button, hidden while it's the
    * dropdown;  coming back to whole needs this much more, so the two looks never take turns (epic `editor` I189)

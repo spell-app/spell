@@ -51,6 +51,7 @@ import type { SiteHost } from "spell/parser/core/core.types"
 import {
   runCompiled,
   runLine as runLineOn,
+  runPageChunk as runPageChunkOn,
   appIsMounted,
   linkModule,
   unmountApp,
@@ -127,6 +128,15 @@ export function runApp(
   core.siteHost = siteHost
   core.projectFolder = options.projectId ? `/spaces/${encodeURI(options.projectId)}` : undefined
   return runCompiled(compiled, options)
+}
+
+/**
+ * Run one page's chunk of a built site on the program running in this copy, its page made as it's first shown
+ * (epic `solid-2-final` P13) -- see `runCompiled.ts`'s `runPageChunk()`.
+ * - `coreUrl` MUST be this copy's own URL, as for `runApp()`.
+ */
+export function runPageChunk(chunk: string, options: { coreUrl: string; name: string }): Promise<void> {
+  return runPageChunkOn(chunk, options)
 }
 
 /**

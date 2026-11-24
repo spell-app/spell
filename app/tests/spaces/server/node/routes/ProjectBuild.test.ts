@@ -74,7 +74,7 @@ describe("ProjectBuild", () => {
   })
   afterAll(() => rmSync(root, { recursive: true, force: true }))
 
-  test("start():  the checkout's OWN `spell` (the kit's), `compile --stale --all @spell/examples @spell/library`, in a process group of its own", () => {
+  test("start():  the checkout's OWN `spell` (the kit's), `compile --stale --all @spell/examples @spell/library @spell/guides`, in a process group of its own", () => {
     const { spawn } = spawnStub()
     new ProjectBuild({ root, spawn }).start()
     expect(spawn).toHaveBeenCalledWith(
@@ -85,7 +85,8 @@ describe("ProjectBuild", () => {
         "--stale",
         "--all",
         "@spell/examples",
-        "@spell/library"
+        "@spell/library",
+        "@spell/guides"
       ],
       expect.objectContaining({ cwd: root, detached: true })
     )

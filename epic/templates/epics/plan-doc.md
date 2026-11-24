@@ -61,11 +61,41 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   effect (A, recommended):`); each option may carry its own, inside its `<epic-option>`. Worded otherwise ("once
   fixed"): a plain `<p><b>Net effect (once fixed):</b></p>` and its list.
 
-- TITLES (the one full wording;  everything else points here):
-  - A title is at most 30 plain words saying what the item is.
-  - Before writing it, read it as the person will, hours later and cold:
-    nothing about a passing condition (a pid, "after the 4-line fix", "the turn was stuck").
-  - The rest goes in --details.
+- TITLES (the one full wording;  everything else points here), every kind of item (Q, J, T, I, M, D) and phase:
+  - A title is understood by a reader with NO context, hours later:  not following the work, not in this session.
+  - It says what changed, or what's wrong, effect first, in the person's words.
+  - It names things by what they see or type:  the page, the tab, the button, the command (`epic add`).
+    - Never an internal name:  no class, file or module names;  no "the pack", "the monitor", "the kit",
+      "the fork", "the poller";  no bare phase id as its lead ("P50:  ...").
+  - A change with no visible effect ends "Nothing you'd see."
+  - Nothing about a passing condition (a pid, "after the 4-line fix", "the turn was stuck").
+  - At most 30 words, one sentence (plus "Nothing you'd see.");  the rest goes in --details.
+  - A tag a skill tells you to end it with, saying which review found it, is a LABEL, not part of the title:
+    `(coherence)` (the coherence skill's), `(designer)` (the designer skill's).
+    - Both checks below judge the title without it, so it counts for no words and the reader never sees it.
+    - The list:  `ShortTitle.TAGS`;  a skill prescribing a new tag adds it there and here (epic `epic-engine` I385).
+  - Before and after (Owen, 2026-11-21, epic `epic-engine` T123):
+
+    ```text
+    The monitor is split in two: a tiny plain-JS poller, and a short look that runs the epic tool
+    =>  Each Claude session's background "listen for my Send" process now uses 48 MB instead of 188 MB.
+        Nothing you'd see.
+
+    P52: chips follow renumbering
+    =>  On an epic page, an item's commit chip keeps pointing at the right phase when phases are renumbered.
+
+    A top and its child repos count as one home for an epic
+    =>  An epic that touches several of Spell's folders counts as one epic, so a second session isn't wrongly
+        blocked from starting.
+    ```
+
+  - Why (Owen, 2026-11-21):  "`the pack`, `the monitor`, `the kit` -- it's impossible for me to read that and
+    understand what you're trying to say, unless I happen to be closely following the work."
+  - `epic add` and `epic update --title` hand each title to a fresh reader (`claude -p`, Sonnet, nothing of the
+    repo;  `TitleReader`):  a fail is refused with its reasons and a rewrite to use;  `--title-ok` keeps one on
+    purpose.  No `claude` on the `PATH` (CI, Codex), or a test run:  not read, one line on stderr says so.
+    - The reader passes unless a reader with no context would truly be lost;  its rewrite always fits the 30-word
+      rule, and a title that is its own rewrite, given back within the hour, passes unread (epic `epic-engine` I390).
   - Why (Owen, 2026-11-17, epic `epic-engine` I322):  "I'm looking at these things often hours after the issue came
     up, so sentences referring to some weird condition or issue that only obtained for a little while will be
     meaningless to me."  (I321 before:  3-10 words, 100 characters.)
@@ -122,6 +152,15 @@ A FUTURE epic (`/epic future <name>`, epic `epic-future`, 2026-10-07): an idea w
 - PLANNED by `new <name>` again (`/epic <name>`, "Reuse"): promoted where it is, the notice gone, the meta lines
   naming the branch and worktree; its prompt, decisions and review page stay. Its first phase (`add-phase`)
   plans it too
+
+The page's BRANCH (`<epic-page branch>`, epic `epic-engine` I378): the epic's git branch, its id unless it names
+another (`EpicConfig.branchOf()`, which every verb asks: merge, merge-main, worktree status, pr ...).
+
+- `epic update <name> --branch <branch>` sets it, for a branch renamed apart from its id (say epic `from-project`,
+  branch `from-console`: no customer names in branch names); its worktree is found by that branch when its folder
+  is named otherwise
+- one naming the base branch (`main`, written by `new` in the main checkout), or a branch git doesn't have (a stale
+  name), reads as the id
 
 The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning has got.
 
@@ -311,6 +350,9 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
       - a wait or a look between commands is a step of its own, between their blocks
       - the real names:  the extension's output channel is `Spell`, not "Spell Language Server"
       - nothing Claude can check itself:  CI (`gh run list`), a command's output, a page's markup are Claude's to check
+      - a step's COMMAND (a code block) gets a box under it on the page, "Paste what this command printed"
+        (`<epic-step-output>`, epic `epic-engine` T165):  one per step, numbered as the list counts, so a command whose
+        output the person should send is a step of its own;  nothing to write for it, the page reads the markup
   - Should:  what should happen;  `--should`
   - Example, optional:  a screenshot Claude took (`--example shot.png`, copied to `tests/<id>.png` beside the page)
     and / or a line of text
@@ -668,6 +710,10 @@ with the page's own marks, sent with Send like any other:
   picture. Left for the session: it closes the test when their note says it passed, else files an issue
   "M3 failed: <title>" holding their note and picture, linked both ways, the test left open.
 - The note box's ✕ (`skip`): `inbox apply` CANCELS it, "no longer applies";  a note says why.
+- What a step's command printed, pasted in the box under it (epic `epic-engine` T165): it rides in their mark as
+  `outputs` (`[{ step, text }]`), with their Approve, Revisit note or ✕;  pasted with no mark yet, it's a revisit of
+  its own, as a picture alone is. `wait` prints each one under the mark, "step 2 printed (pasted by the person):",
+  word for word: read it before you apply or close the test.
 - Left alone: still open;  nothing to press for "not now".
 - A test Claude checked itself and saw pass, Claude MAY close, with a Done card saying how and the picture
   (Q58): the one exception to "a manual test is the person's to close".

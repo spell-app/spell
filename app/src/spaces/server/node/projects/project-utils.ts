@@ -9,12 +9,14 @@
  */
 import { existsSync, readFileSync } from "fs"
 import { readFile, stat } from "fs/promises"
-import escapeRegExp from "lodash/escapeRegExp"
+import { escapeRegExp } from "lodash-es"
 import { basename, dirname, extname, relative, resolve, sep } from "path"
 
 import { findUp } from "spell/util/node/findUp"
 import { SRV } from "spell/server"
 import { json5Edited } from "spell/app/spaces/server/node/storage/json5"
+// a cycle of functions only, called after both have loaded
+import { setSpellVersion } from "./spellVersions"
 import environment from "spell/app/spaces/server/node/environment"
 
 import { SP } from "spell/parser/spell"
@@ -30,6 +32,9 @@ import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { DRAFT_FOLDER, ProjectDrafts, VERSIONS_FOLDER } from "./ProjectDrafts"
 import { ProjectRoles, type ProjectFileChange } from "./ProjectRoles"
 import type { ManifestJSON, ProjectFileJSON, ProjectIndexJSON } from "./server.types"
+
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
 
 // This machine's person, and their org's groups in spell.spaces, set before any route answers or any address is read
 thisMachinesPerson()
@@ -574,7 +579,7 @@ export const getIndex = async (
   )
 
   // return manifest and imports
-  const { title, version, exports, targets, listsStartAt, development, places } = importsFile
+  const { title, version, exports, targets, spellVersion, listsStartAt, development, places } = importsFile
   const buildFolder = buildFolderInBuild(projectId)
   // its names dictionaries, beside its project file:  so a compile asks for no other (epic `editor` I68)
   const namesLanguages = [...SP.Language.all.keys()].filter((lang) =>
@@ -587,6 +592,7 @@ export const getIndex = async (
     version,
     exports,
     targets,
+    spellVersion,
     listsStartAt,
     development,
     buildFolder,
@@ -720,12 +726,50 @@ export const request_getFile = async (request: Request, response: Response) => {
     if (draft !== undefined) return response.type(extname(location.serverPath) || "txt").send(draft)
     // what spell built from your drafts is yours, never the shared build (`ProjectDrafts`, "Your build")
     const yourBuilt = isBuiltFile(location) ? await drafts!.builtPathOf(location.filePath!) : undefined
-    await responseUtils.sendFile(response, yourBuilt ?? fileOrOldName(location.serverPath), { dotfiles: "allow" })
+    const builtPath = yourBuilt ?? fileOrOldName(location.serverPath)
+    // a built site's program cut into its pages' chunks, each loaded when its page first shows (epic `solid-2-final` P13)
+    if (isBuiltFile(location) && location.file?.endsWith(SP.COMPILED_JS_SUFFIX)) {
+      const { pages, page } = request.query
+      if (pages === PageChunkFiles.LAZY || typeof page === "string") {
+        const cut = await PageChunkFiles.of(builtPath)
+        const text = typeof page === "string" ? cut.pages.get(page) : cut.main
+        if (text === undefined)
+          return responseUtils.sendError(response, 404, new Error(`${location.path}:  no page ${page}`))
+        return response.type(".js").send(text)
+      }
+    }
+    await responseUtils.sendFile(response, builtPath, { dotfiles: "allow" })
   } catch (error) {
     // Can't send an error body once the file has started streaming -- the client sees a truncated response.
     if (response.headersSent) return
     responseUtils.sendError(response, 500, error as Error)
   }
+}
+
+/****************
+ * ### `PageChunkFiles`
+ * A built site's program, cut into its main chunk and a chunk per page alone in its file (`SP.PageChunks`,
+ * epic `solid-2-final` P13):  what `/spaces/<project>/<Project>.spell.js?pages=lazy` and `?page=<Class>` answer.
+ * - Cut once per built file, kept by its path while its time and size stay the same.
+ * - A program with no page alone in its file answers itself whole, with no mark:  the runner runs it as always.
+ ****************/
+export class PageChunkFiles {
+  /** The query that asks for the main chunk:  `?pages=lazy`. */
+  static readonly LAZY = "lazy"
+
+  /** `path`'s chunks:  cut now, or kept from the last time. */
+  static async of(path: string): Promise<ReturnType<typeof SP.PageChunks.split>> {
+    const { mtimeMs, size } = await stat(path)
+    const stamp = `${mtimeMs}:${size}`
+    const known = PageChunkFiles.cut.get(path)
+    if (known?.stamp === stamp) return known.chunks
+    const chunks = SP.PageChunks.split(await readFile(path, "utf8"))
+    PageChunkFiles.cut.set(path, { stamp, chunks })
+    return chunks
+  }
+
+  /** Each built file cut, by its path, with the time and size it was cut at. */
+  private static readonly cut = new Map<string, { stamp: string; chunks: ReturnType<typeof SP.PageChunks.split> }>()
 }
 
 /**
@@ -789,6 +833,9 @@ export const request_saveFile = respondWithJSON(async (request) => {
  *   (`@spell/test/...`)
  * - Never an example's or a guide's (`SPACES.isExampleProject()`, epic `mockup` T52):  an edit to one is your draft,
  *   which leaving it offers to keep as your own app, or (a manager of `@spell`) to publish into the example
+ * - Never one of the editor's own pieces (`SPACES.isEditorPieceProject()`, epic `editor` J73, I329):  the editor
+ *   you're using reads the published file, so an edit (typed, dragged, from the Inspector) is your draft, and only
+ *   Publish changes the running editor
  * - only where `editsBuiltins` (`environment.editsBuiltins`:  the built-ins are this checkout's own source)
  * - never `viaHouseSite`:  a save from elsewhere on the house network stays a draft (`isViaHouseSite()`)
  */
@@ -796,7 +843,9 @@ export function savesInPlace(
   projectId: string,
   { editsBuiltins, viaHouseSite }: { editsBuiltins: boolean; viaHouseSite: boolean }
 ): boolean {
-  if (!editsBuiltins || viaHouseSite || SPACES.isExampleProject(projectId)) return false
+  if (!editsBuiltins || viaHouseSite || SPACES.isExampleProject(projectId) || SPACES.isEditorPieceProject(projectId)) {
+    return false
+  }
   return projectId.startsWith(BUILT_IN_SPACE) && !projectId.startsWith(FROZEN_TEST_PROJECTS)
 }
 
@@ -827,10 +876,17 @@ export function isDraftable(location: SP.SpellLocation): boolean {
 // ## Project manipulation
 ////////////////
 
-/** Create project `projectId` by creating file at `filePath` (default `DEFAULT_FILE`) within it. */
+/**
+ * Create project `projectId` by creating file at `filePath` (default `DEFAULT_FILE`) within it.
+ * - Its project file says it's written for today's Spell, `spellVersion` (epic `language` P68):
+ *   unless that first file IS its project file, an imported project's, which keeps the version it says.
+ */
 export const createProject = async (projectId: string, filePath: string, contents: any) => {
   const location = SP.SpellLocation.getFileLocation(projectId, filePath || DEFAULT_FILE.filePath)
-  return await fileUtils.saveFile(location.serverPath, contents || DEFAULT_FILE.contents)
+  const saved = await fileUtils.saveFile(location.serverPath, contents || DEFAULT_FILE.contents)
+  // its file only names its Spell after its first file is there:  `getIndex()` lists that file
+  if (!SP.isProjectFile(location.file ?? "")) await setSpellVersion(projectId)
+  return saved
 }
 
 /**

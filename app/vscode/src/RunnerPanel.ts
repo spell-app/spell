@@ -10,10 +10,12 @@
  *   and shows each failed check in the editor, on its line:  `spell/testDiagnostics` -- see `showTestResults()`.
  * - Sends the compiled javascript of each project it imports, when the runner asks (`loadImport`):
  *   the server's `spell/compiledImport`.
+ * - Sends the javascript of each code file it calls (`call native`), when the runner asks (`loadNative`):
+ *   the server's `spell/codeFile`, which takes its types out.
  */
 import { existsSync, mkdirSync } from "fs"
 import JSON5 from "json5"
-import { resolve } from "path"
+import { resolve, sep } from "path"
 import * as vscode from "vscode"
 import type { Diagnostic, LanguageClient } from "vscode-languageclient/node"
 
@@ -23,6 +25,7 @@ import type { Diagnostic, LanguageClient } from "vscode-languageclient/node"
  * - Webview says `ready`, or Restart is pressed:  ask the server to compile.
  * - Every `spell/projectCompiled` for its project:  post `run` to the webview, with the javascript.
  * - Saving one of the project's spell files compiles too, unless `spell.compileOnSave` already does.
+ * - So does saving one of its code files (`call native`'s `clipboard.ts`):  the run asks for it afresh.
  * - `<Project>.spell.js` changing on disk runs it too, unless it has parse errors -- see `compiledChanged()`.
  * - A failed compile sends nothing, so the last good app keeps running.
  * - Runs the same javascript only ONCE, unless asked to -- a compile both notifies AND rewrites the file.
@@ -51,6 +54,8 @@ export class RunnerPanel {
   declare project: string
   /** One of the project's spell files, to name the project in requests. */
   declare uri: string
+  /** The project's folder, `ProjectInfo.folderUri`:  a code file saved inside it runs the project again. */
+  declare folderUri: string
   /** The project's `settings.json5`, beside its project file -- see `readSettings()`. */
   declare settingsUri: vscode.Uri
   /** The project's words, `<Project>.en.js`, beside its spell files, one per language -- see `sendWords()`. */
@@ -77,6 +82,7 @@ export class RunnerPanel {
     this.client = client
     this.project = info.project
     this.uri = uri
+    this.folderUri = info.folderUri
     this.settingsUri = vscode.Uri.joinPath(vscode.Uri.parse(info.folderUri), SETTINGS_FILE)
     this.wordsUris = info.wordsUris.map((uri) => vscode.Uri.parse(uri))
     const runner = vscode.Uri.file(resolve(repoRoot, "app/dist-runner"))
@@ -101,6 +107,7 @@ export class RunnerPanel {
       else if (message.type === "open") void RunnerPanel.open(message.href)
       else if (message.type === "setDescription") void this.setDescription(message)
       else if (message.type === "loadImport") void this.sendImport(message.projectId)
+      else if (message.type === "loadNative") void this.sendNative(message.module)
       else if (message.type === "testResults") void this.showTestResults(message.tests)
     })
     const watcher = RunnerPanel.watch(vscode.Uri.parse(info.compiledUri))
@@ -125,7 +132,8 @@ export class RunnerPanel {
       vscode.commands.registerCommand("spell.runTests", () => RunnerPanel.runTests(client, repoRoot)),
       // an edit may fix it, or move its line:  the next test run says
       vscode.workspace.onDidChangeTextDocument(({ document, contentChanges }) => {
-        if (RunnerPanel.isSpellDocument(document) && contentChanges.length) RunnerPanel.testDiagnostics.delete(document.uri)
+        if (RunnerPanel.isSpellDocument(document) && contentChanges.length)
+          RunnerPanel.testDiagnostics.delete(document.uri)
       }),
       client.onNotification("spell/projectCompiled", ({ project, compiled }: ProjectCompiled) => {
         const panel = RunnerPanel.panels.get(project)
@@ -180,14 +188,32 @@ export class RunnerPanel {
    * - its project's panel compiles, unless nothing else will -- `spell.compileOnSave` makes the server compile
    *   every save itself, and we hear `spell/projectCompiled` anyway
    * - every OTHER panel fetches fresh scopes:  it may be a file of a project it imports
+   * - a code file instead (`clipboard.ts`):  its project's panel compiles -- see `codeFileSaved()`
    */
   static async saved(client: LanguageClient, document: vscode.TextDocument): Promise<void> {
-    if (!RunnerPanel.isSpellDocument(document) || !RunnerPanel.panels.size) return
+    if (!RunnerPanel.panels.size) return
+    if (!RunnerPanel.isSpellDocument(document)) return RunnerPanel.codeFileSaved(document)
     const compileOnSave = vscode.workspace.getConfiguration("spell").get<boolean>("compileOnSave")
     const info = await client.sendRequest<ProjectInfo | null>("spell/project", { uri: document.uri.toString() })
     for (const panel of RunnerPanel.panels.values()) {
       if (panel.project !== info?.project) void panel.sendScopes()
       else if (!compileOnSave) void panel.compile()
+    }
+  }
+
+  /**
+   * `document` was saved, and isn't spell:  if it's a code file in a running project's folder, that project compiles,
+   * and the run that follows asks for the code file afresh (from-console I37).
+   * - The program's text is the same, so it runs again only because the compile forces it (`compile()`).
+   */
+  static codeFileSaved(document: vscode.TextDocument): void {
+    // its own compiled javascript, `Clip.spell.js`, is no code file
+    if (!CODE_FILE.test(document.uri.path) || document.uri.path.endsWith(".spell.js")) return
+    // by path on disk:  the server's URIs and VS Code's encode a name's `@` differently
+    const saved = document.uri.fsPath
+    for (const panel of RunnerPanel.panels.values()) {
+      const folder = vscode.Uri.parse(panel.folderUri).fsPath
+      if (saved.startsWith(folder.endsWith(sep) ? folder : folder + sep)) void panel.compile()
     }
   }
 
@@ -287,6 +313,26 @@ export class RunnerPanel {
     else this.post({ type: "imported", projectId, error: `Couldn't load project '${projectId}':  does it compile?` })
   }
 
+  /**
+   * Send the webview the javascript of the code file ours calls as `module` (`call native`),
+   * e.g. `@spell/native/owen@spell/clipboard/clipboard.ts`:  the language server's `spell/codeFile`, its types taken out.
+   * - Asked for on every run, so an edit to it shows on the next.
+   * - Can't:  sends why instead, which the runner shows as the run's error.
+   */
+  async sendNative(module: string): Promise<void> {
+    const params = { uri: this.uri, module }
+    const javascript = await this.client.sendRequest<string | null>("spell/codeFile", params).catch(() => null)
+    if (javascript !== null) this.post({ type: "native", module, javascript })
+    else {
+      const codeFile = module.slice(module.lastIndexOf("/") + 1)
+      this.post({
+        type: "native",
+        module,
+        error: `Couldn't load ${codeFile}:  is it there, and is it valid TypeScript?`
+      })
+    }
+  }
+
   /** Send the webview the project's live scope tree, from the server's `spell/scopes`, for its Type Explorer. */
   async sendScopes(): Promise<void> {
     const tree = await this.client.sendRequest<unknown>("spell/scopes", { uri: this.uri })
@@ -360,7 +406,9 @@ export class RunnerPanel {
   static async open(href: string): Promise<void> {
     const uri = vscode.Uri.parse(href)
     const line = Number(/^L(\d+)$/.exec(uri.fragment)?.[1] ?? 1) - 1
-    const column = vscode.window.visibleTextEditors.find(({ document }) => RunnerPanel.isSpellDocument(document))?.viewColumn
+    const column = vscode.window.visibleTextEditors.find(({ document }) =>
+      RunnerPanel.isSpellDocument(document)
+    )?.viewColumn
     await vscode.window.showTextDocument(uri.with({ fragment: "" }), {
       viewColumn: column ?? vscode.ViewColumn.One,
       selection: new vscode.Range(line, 0, line, 0)
@@ -432,6 +480,12 @@ export class RunnerPanel {
   }
 }
 
+/**
+ * A code file a spell project can call (`call native`), by its ending.
+ * - SEE:  spell's `NativeCode.languageOf()`, which the extension doesn't bundle:  keep the two the same.
+ */
+const CODE_FILE = /\.(m?[jt]s|py)$/
+
 /** Name of the set of diagnostics the tests' failed checks show in:  the Problems panel says it. */
 const TEST_DIAGNOSTICS = "spell tests"
 
@@ -471,6 +525,7 @@ type ToRunnerMessage =
   | { type: "run"; compiled: string; words?: string[]; runTests?: boolean }
   | { type: "runTests" }
   | { type: "imported"; projectId: string; compiled?: string; error?: string }
+  | { type: "native"; module: string; javascript?: string; error?: string }
   | { type: "scopes"; tree: unknown }
   | { type: "settings"; settings: ProjectSettings }
   | { type: "details"; path: string; details: unknown }
@@ -485,6 +540,7 @@ type FromRunnerMessage =
   | { type: "details"; path: string }
   | { type: "refreshScopes" }
   | { type: "loadImport"; projectId: string }
+  | { type: "loadNative"; module: string }
   | { type: "testResults"; tests: TestReport[] }
 
 /**

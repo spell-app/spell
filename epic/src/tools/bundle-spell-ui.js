@@ -1,59 +1,42 @@
 /**
- * Builds spell-ui from its CURRENT working tree (spell-ui, the workspace Node's resolver finds:  `UI_DIR`),
- * then bundles `_assets/spell-ui.entry.js` into `_assets/spell-ui.js`:  ONE minified classic script (IIFE),
- * because docs open from `file://`, where browsers refuse ES modules.
+ * Builds the docs pages' scripts in `_assets/`, from `epic/` (the page server runs it when they're stale:
+ * `spell bundle epic-docs`).  None is committed (epic `solid-2-final` P7):  each is git-ignored, built where it's served.
  *
- *   node tools/bundle-spell-ui.js [--skip-ui-build]
+ *   node src/tools/bundle-spell-ui.js [--comments | --data-pages]
  *
- * - `--skip-ui-build`:  reuse its `dist/` as is.
- * - `SPELL_UI_DIR` overrides where UI lives.
- * - UI build:  `yarn build` (`tsc && vite build`).
- *   If `tsc` fails on in-progress work, falls back to `vite build` alone, and says so.
- * - Exactly ONE Solid:  every `solid-js` / `@solidjs/*` import resolves from UI's root,
- *   so a linked package can't pick up its own `node_modules` copy.
- *   Checked against the metafile.
- * - No `import()` / `import.meta` may survive:
- *   - string-literal `import()`s (the runtime chunk, emoji data, Temporal polyfill) are inlined
- *   - `supported: { "dynamic-import": false }` turns any computed `import()` (an icon pack's `pack.js`)
- *     into a rejected promise
- * - Icons:  a classic script on `file://` can't load UI's icon packs.
- *   - So the SVGs in `ICONS` are read from UI's `fa7-free` pack at build time,
- *     and `UI.icons.register()`ed by the virtual `spell-ui:icons` module.
- *   - That module also `reset()`s the packs, so the default one is never requested.
- *   - Any other icon name draws nothing.
- * - Emoji names stay LAZY:
- *   UI's emoji data chunks (`dist/emoji/<set>/<letter>-<hash>.js`, both name sets) are NOT inlined.
- *   - Each is written as a classic script, `_assets/emoji/<set>/<letter>.js`,
- *     which a `<script>` tag loads on first use of a name in that chunk
- *     (`spell-ui:emoji` sets `EmojiData.chunkLoader`).
- *   - A page with no `<ui-emoji>` loads none.
- * - The source elements' ENGINES stay lazy the same way (`LAZY`):
- *   - `<ui-code>`'s highlight.js (with all its languages)
- *   - `<ui-markdown>`'s marked (and DOMPurify, only for `sanitized`)
- *   - `<ui-mermaid-diagram>`'s Mermaid (every kind of diagram, inlined:  a classic script can't split), and ELK,
- *     through its one door, `ElkEngine` (the Mermaid script holds a copy of its own:  no sharing between scripts)
- *   - NOT spell's colouring:  Spell UI holds nothing of spell (epic `repo-split` P2).  spell-app's page server adds
- *     `/element/spell-language.js` to the pages it serves, which registers `spell` with this bundle's `UI.code`;
- *     elsewhere (the epic server, `file://`) spell code shows plain (`repo-split` Q23 A).
+ * The DOCS BUNDLE:  `_assets/spell-ui.entry.js` into `_assets/spell-ui/` (`main.js` and its chunks), an ES module build
+ * from Spell UI's SOURCE, with Vite, on Spell UI's own settings (`baseConfig()`), as the Spell UI site's bundle is.
+ * - A page names `spell-ui.js`, a few lines of classic script, committed, which imports `spell-ui/main.js`:
+ *   no page was rewritten, and an older checkout's pages still load.
+ * - Code-split:  every family, the runtime, the source elements' engines (highlight.js, marked, Mermaid, ELK), emoji
+ *   names and the theme sheets are lazy chunks, loaded the first time a page needs them (the entry's header says how).
+ * - Built into a folder of this run's (`.spell-ui-building-<pid>`), then swapped in whole:  two runs at once (the page
+ *   server's, one by hand) never empty each other's (epic `epic-engine` I361).
+ * - A brotli copy beside each file (`brotliCopies()`):  the kit's servers send it as it is.
+ * - Exactly ONE Solid, and the kit's element layer once:  checked against what the build bundled (`checkOneCopy()`).
+ * - Icons:  the SVGs in `ICONS` are read from Spell UI's `fa7-free` pack at build time and `UI.icons.register()`ed by
+ *   the virtual `spell-ui:icons` module, which also `reset()`s the packs:  no page fetches an icon pack;  any other
+ *   icon name draws nothing.
+ * - Spell's colouring is NOT in it:  Spell UI holds nothing of spell (epic `repo-split` P2).  The kit's page server adds
+ *   the app's `/element/spell-language.js` to the pages it serves, which registers `spell` with this bundle's `UI.code`.
+ * - Until P7 it was ONE classic script (an IIFE) of every family, built from Spell UI's `dist/` (a `yarn build` there
+ *   first), with the engines and emoji names as classic scripts of their own (`lazy/`, `emoji/`), so a page opened from
+ *   `file://` worked:  pages are always served now (epic `epic-engine` P46).
  *
- *   - Each is built from UI's SOURCE into a classic script, `_assets/lazy/<name>.js`.
- *   - Their `dist/` chunks are stubbed out of the bundle,
- *     and `spell-ui:lazy` points UI's loader hooks (`CodeHighlighter.engineLoader` ...) at the scripts.
- *   - A page that shows no code loads none.
+ * The COMMENTS' own script (epic `epic-engine` P2, T3):  `_assets/spell-comments.js`.
  *
- * The COMMENTS' own script (epic `epic-engine` P2, T3):  `_assets/spell-comments.js`, built after `spell-ui.js`.
- *
- *   node tools/bundle-spell-ui.js --comments     (only it:  it needs no UI build)
+ *   node src/tools/bundle-spell-ui.js --comments     (only it)
  *
  * - Entry `_assets/spell-comments.entry.js`:  the docs runtime's comments (`spell-doc-comments.js`) for the pages that
  *   load Spell UI's site bundle instead of this one (Epic UI's)
  * - A classic script (IIFE) with NO Spell UI and no Solid in it, and no global of its own:  it runs beside the page's
  *   Spell UI, never with a second one (`checkNoSpellUI()`)
  *
- * The REFERENCE PAGES' own scripts (epic `coherence` C12;  "data pages" until epic `data` Q104), built after the comments':  each `_assets/<name>.entry.js` into
- * `_assets/<name>.js` (`DATA_PAGES`:  the commands page, the core reference, the syntax page)
+ * The REFERENCE PAGES' own scripts (epic `coherence` C12;  "data pages" until epic `data` Q104):  each
+ * `_assets/<name>.entry.js` into `_assets/<name>.js` (`DATA_PAGES`:  the commands page, the core reference, the syntax
+ * page)
  *
- *   node tools/bundle-spell-ui.js --data-pages     (only them:  they need no UI build)
+ *   node src/tools/bundle-spell-ui.js --data-pages     (only them)
  *
  * - each loads INSTEAD of `spell-ui.js`:  draws its tables, then adds `spell-ui.js` (`drawThenBoot()`)
  * - classic scripts (IIFE) with NO Spell UI and no Solid in them, as the comments' (`checkNoSpellUI()`):  the page's
@@ -62,17 +45,15 @@
  * - the same paths the pages always loaded (`/_epic/assets/commands.js` ...), so no page changes
  *
  * NOT the claude.ai design bundle (Claude Design's `components/bundle.js`, with the brand's elements):  spell-brand's
- * `yarn design:bundle` since epic `repo-split` P10 (Q32), whose resolver and checks are a copy of these.
+ * `yarn design:bundle` since epic `repo-split` P10 (Q32).
  */
 
 import { build } from "esbuild"
-import { spawnSync } from "node:child_process"
-import { createRequire } from "node:module"
-import { renameSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { Script } from "node:vm"
-import { gzipSync } from "node:zlib"
+import { brotliCompressSync, gzipSync } from "node:zlib"
 
 import { kb } from "spell/util/number.ts"
 import { RealPath } from "spell/server/RealPath"
@@ -82,22 +63,20 @@ import { packageDir } from "./packageDir.ts"
 
 /** `src`, the folder of the docs tools (`tools/`). */
 const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-/**
- * Spell UI, the `spell-ui` package:  spell-ui, where Node's resolver finds it from here (a workspace of the top
- * `spell` install, epic `epic-engine` P10;  `packageDir()`), unless `SPELL_UI_DIR` says otherwise;  by its REAL path.
- * - esbuild resolves UI's own imports (`dist/` chunk to chunk) to real paths:  had the entry's `spell-ui/*` gone
- *   through a link, the bundle held TWO of UI's modules (`core.js` ...), so two of `spell-element`'s
- *   `ShadowEvents`, and a `<ui-button>`'s page `onClick` ran twice (epic `epic-engine` I18:  Do Now called itself off)
- */
-const UI_DIR = RealPath.of(resolve(process.env.SPELL_UI_DIR ?? packageDir("spell-ui") ?? "spell-ui (not installed)"))
-/** spell-element, the `spell/element` package, by its real path:  its source must never be bundled. */
+/** Spell UI, the `spell-ui` workspace, where Node's resolver finds it from here (`packageDir()`), by its REAL path. */
+const UI_DIR = RealPath.of(resolve(packageDir("spell-ui") ?? "spell-ui (not installed)"))
+/** The kit's element layer, `spell/element`, by its real path:  bundled ONCE (`checkOneCopy()`). */
 const ELEMENT_DIR = packageDir("spell/element")
 const ASSETS = join(DOCS, "tools/_assets")
 
 const args = process.argv.slice(2)
 
+/** The docs bundle's entry. */
 const ENTRY = join(ASSETS, "spell-ui.entry.js")
-const OUTFILE = join(ASSETS, "spell-ui.js")
+/** The docs bundle's folder:  `main.js` and its chunks.  `spell-ui.js`, the classic script a page names, imports it. */
+const MODULES = join(ASSETS, "spell-ui")
+/** The docs bundle's entry module, in `MODULES`. */
+const MAIN = "main.js"
 /** Building ONLY the comments' own script (`--comments`). */
 const COMMENTS_ONLY = args.includes("--comments")
 /** The comments' own script:  its entry, and the classic script it's built into. */
@@ -107,18 +86,6 @@ const COMMENTS_OUT = join(ASSETS, "spell-comments.js")
 const DATA_PAGES_ONLY = args.includes("--data-pages")
 /** The reference pages' scripts, by name:  `_assets/<name>.entry.js` into `_assets/<name>.js`. */
 const DATA_PAGES = ["commands", "core-reference", "spell-syntax"]
-/**
- * What the runtime takes from UI's SOURCE, never `dist/` (`spellUiResolver()`):  the doc-only families' leaves (no lib
- * entry holds them), the pure types file they read, and the plain-DOM leaves of two families whose lib entries would
- * bring their elements (epic `ui-gaps` P14):
- * - the zoom's `ImageZoom`:  stateless, so the family's own copy beside it is harmless
- * - the table of contents' `TocIndex`, `HashLanding`, `PageOutline`:  what they keep page-wide (the landings, the
- *   shadow hosts) is on `globalThis`, so the family's own copy shares it
- */
-const UI_SOURCE_ONLY =
-  /^spell\/ui\/(docs-components\/.+|components\/components\.types|components\/ui-zoom\/ImageZoom|components\/ui-toc\/(TocIndex|HashLanding|PageOutline))$/
-/** Page behaviour, the RUNTIME's file;  bundled as an empty module while it doesn't exist yet. */
-const PAGE_RUNTIME = join(ASSETS, "spell-doc-runtime.js")
 
 /** UI's Font Awesome pack, where `ICONS`' files are read from. */
 const ICON_PACK = join(UI_DIR, "src/icons/icon-packs/fa7-free")
@@ -137,6 +104,7 @@ const ICONS = {
   "solid/circle-exclamation": ["circle exclamation", "warning circle"],
   "solid/circle-xmark": ["circle xmark", "times circle"],
   "solid/check": ["check", "checkmark"],
+  "solid/check-double": ["check double"], // a section's Close all (epic `epic-engine` T158)
   "solid/chevron-down": ["chevron down"],
   "solid/chevron-right": ["chevron right"],
   "solid/chevron-up": ["chevron up"], // a plan item's fold button (`spell-doc-runtime.js` `wireItemFolds()`)
@@ -224,6 +192,10 @@ const ICONS = {
   "solid/angles-up": ["angles up"],
   "solid/code": ["code"],
   // a wide-layout table's expand button (`spell-doc-runtime.js` `wireTableWidths()`):  wider, back into the column
+  "solid/arrows-up-down": ["arrows up down"], // a Feature Set's Reorder buttons
+  "solid/arrow-up": ["arrow up"], // its reorder dialog:  move up, move down, the handle to drag by
+  "solid/arrow-down": ["arrow down"],
+  "solid/grip-vertical": ["grip vertical"],
   "solid/arrows-left-right": ["arrows left right"],
   "solid/arrows-left-right-to-line": ["arrows left right to line"],
   // the Epics page's sort buttons (`spell-doc-runtime.js` `wireEpicSort()`):  A to Z, by date
@@ -256,6 +228,13 @@ const ICONS = {
   "solid/eraser": ["eraser"],
   "solid/circle-play": ["circle play"],
   "solid/circle-pause": ["circle pause"], // an epic's state:  paused (`spell/epic/list/EpicState`)
+  // the Servers tab's buttons (`servers-page.js`):  start, restart, stop
+  "solid/play": ["play"],
+  "solid/rotate-right": ["rotate right"],
+  "solid/stop": ["stop"],
+  // its secure link card's Turn on and Turn off (epic `epic-engine` T164)
+  "solid/lock": ["lock"],
+  "solid/unlock": ["unlock"],
   // an Epics card's star (`spell/epic/list/EpicCards`):  a favourite, or not;  the Favorites group's heading
   "solid/star": ["star"],
   "regular/star": ["star outline"],
@@ -272,83 +251,27 @@ const ICONS = {
 }
 
 /**
- * spell-epic's own names (`spell/epic/links`), which the docs runtime imports, and the kit's (`spell/util/persist`,
- * which the epic pages' stores import since epic `prefs-and-undo`, and its files import each other by):  found as
- * their source files.  esbuild adds no extension to a package's `exports`, so `spell/util/class` failed.
- * - NOT Spell UI's (`spell/ui/...`, a folder of the one package since epic `repo-split` P20):  its built `dist/`.
+ * spell-epic's own names (`spell/epic/links`), which the comments' and reference pages' scripts import, and the kit's
+ * (`spell/util/persist` ...):  found as their source files.  esbuild adds no extension to a package's `exports`, so
+ * `spell/util/class` failed.
+ * - NOT Spell UI's (`spell/ui/...`):  those scripts hold none of it (`checkNoSpellUI()`).
  * - No lookahead:  esbuild runs the filter as a Go regular expression, which has none,
  *   so "anything but `ui`" is spelled out (`u` alone, `u` then not `i`, `ui` then not `/`).
  */
 const SPELL_EPIC = /^spell(?:-epic)?(?:\/(?:[^u].*|u|u[^i].*|ui[^/].*))?$/
 
-/** Bare specifiers that MUST resolve from UI's root:  Solid, all subpaths. */
-const SOLID = /^(solid-js|@solidjs\/[\w-]+)(\/.*)?$/
-
-/** UI's emoji name data:  `<set>/<letter>.json`, written out as lazy classic scripts (`writeEmojiChunks()`). */
-const EMOJI_DATA = join(UI_DIR, "src/components/ui-emoji/data")
-
-/** Where the emoji chunk scripts go, and their URL relative to the bundle. */
-const EMOJI_OUT = join(ASSETS, "emoji")
-
-/** An emoji data chunk of UI's `dist/` (`emoji/cldr/a-UMC54g9e.js`), as imported by the emoji family. */
-const EMOJI_CHUNK = /(?:^|\/)emoji\/[\w-]+\/\w+-[\w-]+\.js$/
-
-/** Where the lazy engine scripts go, and their URL relative to the bundle. */
-const LAZY_OUT = join(ASSETS, "lazy")
-
 /**
- * The source elements' engines, each a lazy classic script `lazy/<name>.js` defining `global`:
- * - `source`:  UI SOURCE file it's built from (it MUST import nothing of UI's by value)
- * - `chunk`:  its chunk in UI's `dist/`, stubbed out of the bundle
- * - `hook`:  how `spell-ui:lazy` installs it
+ * The family folders the entry loads at once on every page (its `EVERY_PAGE`):  their modules make one chunk.
+ * - Keep the two lists in step;  a family in only one still works, as a chunk of its own.
  */
-const LAZY = [
-  {
-    name: "code-engine",
-    global: "__spellCodeEngine",
-    source: join(UI_DIR, "src/components/ui-code/CodeEngine.ts"),
-    chunk: /(?:^|\/)CodeEngine-[\w-]+\.js$/,
-    hook: `CodeHighlighter.engineLoader = () => lazy("code-engine", "__spellCodeEngine")`
-  },
-  {
-    name: "markdown-engine",
-    global: "__spellMarkdownEngine",
-    source: join(UI_DIR, "src/components/ui-markdown/MarkdownEngine.ts"),
-    chunk: /(?:^|\/)MarkdownEngine-[\w-]+\.js$/,
-    hook: `MarkdownRenderer.engineLoader = () => lazy("markdown-engine", "__spellMarkdownEngine")`
-  },
-  {
-    name: "markdown-sanitizer",
-    global: "__spellMarkdownSanitizer",
-    source: join(UI_DIR, "src/components/ui-markdown/MarkdownSanitizer.ts"),
-    chunk: /(?:^|\/)MarkdownSanitizer-[\w-]+\.js$/,
-    hook: `MarkdownRenderer.sanitizerLoader = () => lazy("markdown-sanitizer", "__spellMarkdownSanitizer")`
-  },
-  {
-    name: "mermaid-engine",
-    global: "__spellMermaidEngine",
-    source: join(UI_DIR, "src/components/ui-mermaid-diagram/MermaidEngine.ts"),
-    chunk: /(?:^|\/)MermaidEngine-[\w-]+\.js$/,
-    hook: `MermaidDrawer.engineLoader = () => lazy("mermaid-engine", "__spellMermaidEngine")`
-  },
-  {
-    name: "elk-engine",
-    global: "__spellElk",
-    // elkjs's own bundled build:  CommonJS, so the global is its constructor itself
-    source: createRequire(import.meta.url).resolve("elkjs/lib/elk.bundled.js", { paths: [UI_DIR] }),
-    chunk: /(?:^|\/)elk\.bundled-[\w-]+\.js$/,
-    hook: `ElkEngine.loader = () => lazy("elk-engine", "__spellElk").then((elk) => ({ default: elk.default ?? elk }))`
-  }
-]
+const EVERY_PAGE_FAMILIES =
+  /[\\/]ui[\\/]src[\\/]components[\\/](ui-section|ui-button|ui-icon|ui-label|ui-menu|ui-toolbar|ui-breadcrumbs|ui-divider|ui-dropdown|ui-popup|ui-sticky|ui-table|ui-theme-menu)[\\/]/
 
-if (!COMMENTS_ONLY && !DATA_PAGES_ONLY) {
-  if (!args.includes("--skip-ui-build")) buildUI()
-  writeEmojiChunks()
-  await writeLazyScripts()
-  const warnings = await bundle()
-  report(warnings)
-}
-if (!DATA_PAGES_ONLY) report(await bundleComments(), COMMENTS_OUT)
+/** A Solid package, by its folder under `node_modules`. */
+const SOLID = /^(solid-js|@solidjs\/[\w-]+)$/
+
+if (!COMMENTS_ONLY && !DATA_PAGES_ONLY) await bundle()
+if (!DATA_PAGES_ONLY) report(await bundleShared(COMMENTS_ENTRY, COMMENTS_OUT), COMMENTS_OUT)
 if (!COMMENTS_ONLY)
   for (const name of DATA_PAGES) {
     const out = join(ASSETS, `${name}.js`)
@@ -356,76 +279,143 @@ if (!COMMENTS_ONLY)
   }
 
 ////////////////
-// ## UI build
+// ## The docs bundle
 ////////////////
 
 /**
- * Builds UI from its working tree -- "latest UI" is whatever is checked out there.
- * - `yarn build` type-checks first;  in-progress UI work may not, so fall back to `vite build` rather than fail.
- */
-function buildUI() {
-  if (!existsSync(join(UI_DIR, "package.json"))) fail(`no UI checkout at ${UI_DIR} (set SPELL_UI_DIR)`)
-  if (run("yarn", ["build"], "build spell-ui (tsc + vite)", { allowFailure: true })) return
-  console.warn("!! UI's tsc failed:  building with `vite build` alone (the bundle may carry type errors)")
-  run("yarn", ["vite", "build"], "build spell-ui (vite only)")
-}
-
-/**
- * Runs `command` in UI's folder (or `cwd`), quietly;  prints its output only if it fails.
- * - Returns whether it succeeded;  exits unless `allowFailure`.
- */
-function run(command, commandArgs, label, { allowFailure = false, cwd = UI_DIR } = {}) {
-  console.log(`-- ${label}`)
-  const result = spawnSync(command, commandArgs, { cwd, encoding: "utf8", shell: false })
-  if (result.status === 0) return true
-  const output = `${result.stdout ?? ""}${result.stderr ?? ""}${result.error ?? ""}`.trim()
-  console.error(output.split("\n").slice(-40).join("\n"))
-  if (!allowFailure) fail(`${command} ${commandArgs.join(" ")} failed in ${cwd}`)
-  return false
-}
-
-////////////////
-// ## Bundle
-////////////////
-
-/**
- * Bundles the entry into `OUTFILE`, then checks the output is safe for a classic script on `file://`.
- * - Returns esbuild's warnings, as text.
+ * Builds the entry into `MODULES`, with Vite on Spell UI's `baseConfig()` (decorators BEFORE Solid, Solid's JSX,
+ * Lightning CSS, one Solid), then prints its sizes.
+ * - Built in a folder of this run's, then swapped in whole (`buildingFolder()`).
+ * - Stable names where they can be:  `main.js`;  every chunk `<name>-<hash>.js`.
+ * - `base: "./"`:  chunk URLs relative to the chunk importing them, so it works under `/_epic/assets/` and under a
+ *   worktree's address alike.
  */
 async function bundle() {
-  const dist = join(UI_DIR, "dist/index.js")
-  if (!existsSync(dist)) fail(`${relative(DOCS, dist)} is missing:  run without --skip-ui-build`)
-  mkdirSync(dirname(OUTFILE), { recursive: true })
-  const result = await build({
-    entryPoints: [ENTRY],
-    outfile: OUTFILE,
-    bundle: true,
-    format: "iife",
-    globalName: "SpellUI",
-    platform: "browser",
-    // UI targets current browsers only (anchor positioning, `light-dark()`):  lower nothing but `import()`
-    target: "esnext",
-    supported: { "dynamic-import": false },
-    // `BuiltInPacks.base` is only read to load a pack, and `spell-ui:icons` drops them all first
-    define: { "import.meta.url": "undefined" },
-    minify: true,
-    legalComments: "eof",
-    metafile: true,
-    logLevel: "silent",
-    // the docs runtime's own imports of spell-epic (`spell/epic/links` ...), as their source files
-    plugins: [spellUiResolver(), sourceNames(SPELL_EPIC)]
-  })
-  checkOneSolid(result.metafile)
-  checkEachFileOnce(result.metafile)
-  checkNoElementSource(result.metafile)
-  checkClassicScript()
-  return result.warnings.map((warning) => `${warning.location?.file ?? ""}: ${warning.text}`)
+  const [{ build: viteBuild }, { baseConfig }, { brotliCopies }] = await Promise.all([
+    import("vite-plus"),
+    import("spell/ui/vite.config.ts"),
+    import("spell/toolchain/brotliCopies")
+  ])
+  const building = buildingFolder()
+  rmSync(building, { recursive: true, force: true })
+  const base = baseConfig()
+  const started = performance.now()
+  const ids = []
+  try {
+    await viteBuild({
+      ...base,
+      configFile: false,
+      root: ASSETS,
+      base: "./",
+      publicDir: false,
+      logLevel: "warn",
+      plugins: [...(base.plugins ?? []), docsModules(ids), brotliCopies()],
+      build: {
+        outDir: building,
+        emptyOutDir: true,
+        sourcemap: false,
+        minify: true,
+        target: "esnext",
+        modulePreload: { polyfill: false },
+        reportCompressedSize: false,
+        // Mermaid and highlight.js's languages are big lazy chunks, loaded only when used
+        chunkSizeWarningLimit: 3000,
+        rolldownOptions: {
+          input: { main: ENTRY },
+          preserveEntrySignatures: "allow-extension",
+          // a family both loaded on first use and imported by another (`<ui-button>`) is common here, as on the site
+          checks: { ineffectiveDynamicImport: false, pluginTimings: false },
+          output: {
+            // custom element class names are read by dev-time warnings and the manifest (see Spell UI's `vite.config.ts`)
+            keepNames: true,
+            entryFileNames: "[name].js",
+            chunkFileNames: "[name]-[hash].js",
+            assetFileNames: "[name]-[hash][extname]",
+            // the families nearly every page draws (the entry's `EVERY_PAGE`, loaded at once), and what they share,
+            // in ONE chunk:  dozens of small ones were a round trip each on a slow network
+            codeSplitting: { groups: [{ name: "every-page", test: EVERY_PAGE_FAMILIES }] }
+          }
+        }
+      }
+    })
+    checkOneCopy(ids)
+    swapIn(building, MODULES)
+  } finally {
+    rmSync(building, { recursive: true, force: true })
+  }
+  reportFolder(MODULES, (performance.now() - started) / 1000)
 }
 
-/** Bundles the comments' own script, `COMMENTS_ENTRY` into `COMMENTS_OUT` (`bundleShared()`). */
-async function bundleComments() {
-  return bundleShared(COMMENTS_ENTRY, COMMENTS_OUT)
+/**
+ * `building` becomes `folder`, the old one gone.
+ * - Another run may swap its own in between the two steps (the page server's, one by hand):  then this one goes in
+ *   again, once, over that one (the same sources, so the same files).
+ */
+function swapIn(building, folder) {
+  for (let attempt = 0; ; attempt++) {
+    rmSync(folder, { recursive: true, force: true })
+    try {
+      renameSync(building, folder)
+      return
+    } catch (error) {
+      if (attempt || !["ENOTEMPTY", "EEXIST"].includes(error.code)) throw error
+    }
+  }
 }
+
+/**
+ * Where this run builds the docs bundle before swapping it in:  `_assets/.spell-ui-building-<pid>`.
+ * - its own per process, so a second run at the same time never touches it
+ * - a dot folder:  never a bundle's source (`spell/server` `Bundle`'s `SKIPPED`), so it starts no rebuild
+ */
+function buildingFolder() {
+  return join(ASSETS, `.spell-ui-building-${process.pid}`)
+}
+
+/**
+ * Vite plugin of the docs bundle's own modules:
+ * - `spell-ui:icons`:  the generated icon registrations (`iconsModule()`)
+ * - and it collects every module the build bundled into `ids`, for `checkOneCopy()`
+ */
+function docsModules(ids) {
+  const ICONS_ID = "\0spell-ui:icons"
+  return {
+    name: "spell-docs:modules",
+    enforce: "pre",
+    resolveId: (id) => (id === "spell-ui:icons" ? ICONS_ID : undefined),
+    load: (id) => (id === ICONS_ID ? iconsModule() : undefined),
+    generateBundle(_options, output) {
+      for (const chunk of Object.values(output)) if (chunk.type === "chunk") ids.push(...chunk.moduleIds)
+    }
+  }
+}
+
+/**
+ * Source of `spell-ui:icons`:  each of `ICONS`' SVG text, `UI.icons.register()`ed under each of its names.
+ * - Imports `UI` from `spell/ui/core`, so it runs BEFORE any family defines (and so upgrades) its elements.
+ * - Registers in the FIRST `UI.load()` callback:
+ *   every element `await`s that same promise before drawing an icon, so the names are in place first.
+ * - `reset()`:  drop every pack, so the default pack's index is never requested.
+ */
+function iconsModule() {
+  const icons = Object.entries(ICONS).map(([file, names]) => {
+    const path = join(ICON_PACK, `${file}.svg`)
+    if (!existsSync(path)) fail(`no icon ${relative(DOCS, path)}:  check ICONS against UI's fa7-free pack`)
+    return [names, readFileSync(path, "utf8")]
+  })
+  return [
+    `import { UI } from "spell/ui/core"`,
+    `const ICONS = ${JSON.stringify(icons)}`,
+    `UI.load().then((ui) => {`,
+    `  ui.icons.reset()`,
+    `  for (const [names, svg] of ICONS) for (const name of names) ui.icons.register(name, svg)`,
+    `})`
+  ].join("\n")
+}
+
+////////////////
+// ## The scripts beside the page's Spell UI
+////////////////
 
 /**
  * Bundles `entry` into `outfile`, a script that runs BESIDE the page's Spell UI (the comments', a reference page's), then
@@ -453,217 +443,42 @@ async function bundleShared(entry, outfile) {
   return result.warnings.map((warning) => `${warning.location?.file ?? ""}: ${warning.text}`)
 }
 
-/**
- * esbuild plugin wiring the entry to UI:
- * - `spell-ui` ~== `dist/index.js`, `ui/<entry>` ~== `dist/<entry>.js`,
- *   `spell/ui/components/ui-code` ~== `dist/ui-code.js`
- *   (mirrors UI's published `exports`, its `package.json`'s `publishConfig`)
- * - Solid imports resolve from UI's root (`SOLID`), whoever imports them
- * - `spell-ui:icons`:  the generated icon registrations (`iconsModule()`)
- * - the page runtime:  an empty module until its file exists
- * - the plain-DOM leaves the runtime lands links with (`<ui-toc>`'s `TocIndex`, `HashLanding`;  epic `coherence`
- *   P11), the doc-only families' leaves, and the pure types they read:  from UI's SOURCE (`UI_SOURCE_ONLY`), as UI's
- *   lib build holds neither the leaves alone nor `src/docs-components/`;  what they import of `spell/ui/util` is
- *   `dist/core.js`'s, the page's one copy
- */
-function spellUiResolver() {
-  return {
-    name: "spell-ui-resolver",
-    setup(pluginBuild) {
-      pluginBuild.onResolve({ filter: /^spell-ui:icons$/ }, () => ({ path: "icons", namespace: "spell-ui" }))
-      pluginBuild.onResolve({ filter: /^spell-ui:emoji$/ }, () => ({ path: "emoji", namespace: "spell-ui" }))
-      pluginBuild.onResolve({ filter: /^spell-ui:lazy$/ }, () => ({ path: "lazy", namespace: "spell-ui" }))
-      // the engines' `dist/` chunks:  never inlined (`spell-ui:lazy` loads them as scripts);  an empty stand-in
-      for (const { chunk } of LAZY) {
-        pluginBuild.onResolve({ filter: chunk }, () => ({ path: "lazy-chunk", namespace: "spell-ui" }))
-      }
-      // UI's emoji data chunks:  never inlined (`EmojiData.chunkLoader` loads them as scripts);  an empty stand-in
-      pluginBuild.onResolve({ filter: EMOJI_CHUNK }, () => ({ path: "emoji-chunk", namespace: "spell-ui" }))
-      pluginBuild.onLoad({ filter: /.*/, namespace: "spell-ui" }, (loaded) => {
-        if (loaded.path === "icons") return { contents: iconsModule(), resolveDir: ASSETS, loader: "js" }
-        if (loaded.path === "emoji") return { contents: emojiModule(), resolveDir: ASSETS, loader: "js" }
-        if (loaded.path === "emoji-chunk") return { contents: "export default {}", loader: "js" }
-        if (loaded.path === "lazy") return { contents: lazyModule(), resolveDir: ASSETS, loader: "js" }
-        if (loaded.path === "lazy-chunk") return { contents: "export {}", loader: "js" }
-        return { contents: "", loader: "js" }
-      })
-      pluginBuild.onResolve({ filter: UI_SOURCE_ONLY }, ({ path }) => ({
-        path: join(UI_DIR, "src", `${path.slice("spell/ui/".length)}.ts`)
-      }))
-      // every file of UI's `dist/` HAS side effects (each family defines its tags as it's imported):  its
-      // `package.json`'s `sideEffects` names only its `src/` files, so esbuild dropped the families `dist/` files import
-      // by relative path, and their tags stayed pending (epic `epic-engine` P29)
-      pluginBuild.onResolve({ filter: /^spell\/ui(\/.*)?$/ }, ({ path }) => ({
-        path: uiDistPath(path),
-        sideEffects: true
-      }))
-      pluginBuild.onResolve({ filter: /^\.\.?\// }, ({ path, importer, resolveDir }) => {
-        const file = resolve(resolveDir, path)
-        const inDist = importer.startsWith(join(UI_DIR, "dist")) && file.endsWith(".js") && existsSync(file)
-        return inDist ? { path: file, sideEffects: true } : undefined
-      })
-      pluginBuild.onResolve({ filter: SOLID }, async ({ path, kind, pluginData }) => {
-        if (pluginData?.fromUiRoot) return undefined
-        const resolved = await pluginBuild.resolve(path, { kind, resolveDir: UI_DIR, pluginData: { fromUiRoot: true } })
-        return resolved.errors.length ? { errors: resolved.errors } : { path: resolved.path }
-      })
-      pluginBuild.onResolve({ filter: /spell-doc-runtime\.js$/ }, ({ path, resolveDir }) => {
-        const file = resolve(resolveDir, path)
-        if (file === PAGE_RUNTIME && !existsSync(file)) {
-          console.warn(`!! ${relative(DOCS, file)} doesn't exist yet:  bundled as an empty module`)
-          return { path: "page-runtime", namespace: "spell-ui" }
-        }
-        return undefined
-      })
-    }
-  }
-}
-
-/**
- * File in UI's `dist/` for a `spell/ui[/...]` specifier:  a family's folder (`components/ui-code`) is its own file
- * (`dist/ui-code.js`), as UI's published `exports` have it.
- */
-function uiDistPath(specifier) {
-  const sub = specifier
-    .slice("spell/ui".length)
-    .replace(/^\//, "")
-    .replace(/^components\/(ui-[a-z-]+)$/, "$1")
-    // `spell/ui/util` is all in `core` (`src/core.ts` re-exports it), and has no file of its own
-    .replace(/^util$/, "core")
-  if (!sub) return join(UI_DIR, "dist/index.js")
-  return join(UI_DIR, "dist", `${sub}.js`)
-}
-
-/**
- * Source of `spell-ui:icons`:  each of `ICONS`' SVG text, `UI.icons.register()`ed under each of its names.
- * - Imports `UI` from `spell/ui/core` -- the same module `index.js` uses --
- *   so this runs BEFORE any family defines (and so upgrades) its elements.
- * - Registers in the FIRST `UI.load()` callback:
- *   every element `await`s that same promise before drawing an icon, so the names are in place first.
- * - `reset()`:  drop every pack, so the default pack's index is never requested (it can't load from `file://`).
- */
-function iconsModule() {
-  const icons = Object.entries(ICONS).map(([file, names]) => {
-    const path = join(ICON_PACK, `${file}.svg`)
-    if (!existsSync(path)) fail(`no icon ${relative(DOCS, path)}:  check ICONS against UI's fa7-free pack`)
-    return [names, readFileSync(path, "utf8")]
-  })
-  return [
-    `import { UI } from "spell/ui/core"`,
-    `const ICONS = ${JSON.stringify(icons)}`,
-    `UI.load().then((ui) => {`,
-    `  ui.icons.reset()`,
-    `  for (const [names, svg] of ICONS) for (const name of names) ui.icons.register(name, svg)`,
-    `})`
-  ].join("\n")
-}
-
-/**
- * Source of `bundleUrl(dir)`, shared by `spell-ui:emoji` and `spell-ui:lazy`:
- * the folder `dir` next to the bundle, or `null` where there's no URL to resolve against.
- * - NEVER throws while the bundle loads (epic `claude-design`, P1).
- *   An INLINED copy (a claude.ai design system's preview inlines it):
- *   - has `document.currentScript.src === ""`, so `??` wouldn't fall back
- *   - and its frame's `location.href` is `about:srcdoc`, which no relative URL resolves against
- * - `null`:  `new URL(x, null)` throws inside the loaders' promise executors, so a lazy script rejects instead
- * - a function, not a `const`:  the build runs from the top of this file, before a `const` down here is set
- */
-function baseUrlSource() {
-  return [
-    `function bundleUrl(dir) {`,
-    `  try {`,
-    `    return new URL(dir, document.currentScript?.src || location.href)`,
-    `  } catch {`,
-    `    return null`,
-    `  }`,
-    `}`
-  ].join("\n")
-}
-
-/**
- * Source of `spell-ui:emoji`:
- * `EmojiData.chunkLoader` loads a name chunk as the classic script `emoji/<set>/<letter>.js` next to the bundle,
- * which hands its names to `__spellEmojiChunk()`.
- * - The bundle's own URL (`document.currentScript`, read while it runs) locates the scripts, at any page depth.
- */
-function emojiModule() {
-  return [
-    `import { EmojiData } from "spell/ui/components/ui-emoji"`,
-    baseUrlSource(),
-    `const base = bundleUrl("emoji/")`,
-    `const waiting = new Map()`,
-    `globalThis.__spellEmojiChunk = (set, chunk, names) => waiting.get(set + "/" + chunk)?.(names)`,
-    `EmojiData.chunkLoader = (set, chunk) =>`,
-    `  new Promise((resolve, reject) => {`,
-    `    const id = set + "/" + chunk`,
-    `    const script = document.createElement("script")`,
-    `    waiting.set(id, (names) => { waiting.delete(id); resolve(names) })`,
-    `    script.src = new URL(id + ".js", base).href`,
-    `    script.onload = () => script.remove()`,
-    `    script.onerror = () => { waiting.delete(id); script.remove(); reject(new Error("no emoji chunk " + id)) }`,
-    `    document.head.append(script)`,
-    `  })`
-  ].join("\n")
-}
-
-/**
- * Writes every emoji name chunk of UI's data (`<set>/<letter>.json`) as `_assets/emoji/<set>/<letter>.js`:
- * a classic script handing its names to `__spellEmojiChunk()`.
- * The folder is emptied first, so a dropped chunk doesn't linger.
- */
-function writeEmojiChunks() {
-  rmSync(EMOJI_OUT, { recursive: true, force: true })
-  let files = 0
-  for (const set of readdirSync(EMOJI_DATA)) {
-    mkdirSync(join(EMOJI_OUT, set), { recursive: true })
-    for (const file of readdirSync(join(EMOJI_DATA, set)).filter((name) => name.endsWith(".json"))) {
-      const chunk = file.slice(0, -".json".length)
-      const names = JSON.parse(readFileSync(join(EMOJI_DATA, set, file), "utf8"))
-      const body = `__spellEmojiChunk(${JSON.stringify(set)}, ${JSON.stringify(chunk)}, ${JSON.stringify(names, null, 2)})\n`
-      writeFileSync(
-        join(EMOJI_OUT, set, `${chunk}.js`),
-        `// generated by tools/bundle-spell-ui.js:  edit UI's data\n${body}`
-      )
-      files++
-    }
-  }
-  console.log(`-- _assets/emoji/  ${files} lazy name chunks`)
-}
-
 ////////////////
 // ## Checks
 ////////////////
 
-/** Fails if two copies of a Solid package made it into the bundle, e.g. from a linked package's own `node_modules`. */
-function checkOneSolid(metafile) {
-  const copies = new Map()
-  for (const input of Object.keys(metafile.inputs)) {
-    const match = input.match(/node_modules\/((?:@[\w-]+\/)?[\w-]+)\//)
-    if (!match || !SOLID.test(match[1])) continue
-    const root = input.slice(0, match.index + match[0].length)
-    copies.set(match[1], new Set([...(copies.get(match[1]) ?? []), root]))
+/**
+ * Fails if the docs bundle holds two copies of a Solid package (a linked package's own `node_modules`), or of a file
+ * of the kit's element layer under two paths (a link's and its real one):  two Solids, two `UIComponent`s and
+ * `ShadowEvents`, and every event handled twice (epic `epic-engine` I18).
+ */
+function checkOneCopy(ids) {
+  const files = ids.filter((id) => id.startsWith("/")).map((id) => id.split("?")[0])
+  const solids = new Map()
+  for (const file of files) {
+    const match = file.match(/^(.*\/node_modules\/((?:@[\w-]+\/)?[\w-]+))\//)
+    if (!match || !SOLID.test(match[2])) continue
+    solids.set(match[2], new Set([...(solids.get(match[2]) ?? []), RealPath.of(match[1])]))
   }
-  for (const [name, roots] of copies) {
+  for (const [name, roots] of solids) {
     if (roots.size > 1) fail(`${name} bundled ${roots.size} times:\n  ${[...roots].join("\n  ")}`)
   }
-  if (!copies.has("solid-js")) fail("solid-js isn't in the bundle:  check the resolver")
+  if (!solids.has("solid-js")) fail("solid-js isn't in the docs bundle:  check its build")
+  const seen = new Map()
+  for (const file of new Set(files)) {
+    if (!existsSync(file)) continue
+    const real = RealPath.of(file)
+    const other = seen.get(real)
+    if (other && isInside(real, ELEMENT_DIR)) fail(`${real} bundled twice, as ${other} and ${file}`)
+    seen.set(real, file)
+  }
 }
 
 /**
- * Fails if spell-element's SOURCE made it into the bundle:  a second copy beside the one Spell UI's `dist/core.js`
- * carries, so two `UIComponent`s and two `ShadowEvents` (epic `epic-engine` P9).
+ * Fails if `outfile` (the comments' own script, a reference page's) took in any of Spell UI, the kit's element layer or
+ * Solid:  the page it runs on has its own, and two copies handle every event twice (epic `epic-engine` I18).
  */
-function checkNoElementSource(metafile) {
-  const sources = Object.keys(metafile.inputs).filter((input) => isInside(RealPath.of(resolve(input)), ELEMENT_DIR))
-  if (sources.length) fail(`spell-element bundled from its source, a second copy:\n  ${sources.join("\n  ")}`)
-}
-
-/**
- * Fails if `outfile` (the comments' own script, a reference page's) took in any of Spell UI, spell-element or Solid:  the
- * page it runs on has its own,
- * and two copies handle every event twice (epic `epic-engine` I18).
- */
-function checkNoSpellUI(metafile, outfile = COMMENTS_OUT) {
+function checkNoSpellUI(metafile, outfile) {
   const shared = Object.keys(metafile.inputs).filter(
     (input) =>
       [UI_DIR, ELEMENT_DIR].some((dir) => isInside(RealPath.of(resolve(input)), dir)) ||
@@ -673,31 +488,14 @@ function checkNoSpellUI(metafile, outfile = COMMENTS_OUT) {
 }
 
 /**
- * Fails if one file made it into the bundle under two paths (a link's and its real one):  two module instances, so two
- * of UI's `UIComponent`, `ShadowEvents` ... (epic `epic-engine` I18).
- */
-function checkEachFileOnce(metafile) {
-  const seen = new Map()
-  for (const input of Object.keys(metafile.inputs)) {
-    if (input.includes(":")) continue
-    const real = RealPath.of(resolve(input))
-    const other = seen.get(real)
-    if (other) fail(`${real} bundled twice, as ${other} and ${input}:  resolve both through its real path`)
-    seen.set(real, input)
-  }
-}
-
-/**
- * Fails if the output still needs ES module machinery a classic script on `file://` doesn't have.
+ * Fails if `file` needs ES module machinery a classic script doesn't have.
  * - A top-level `import` / `export`, or `import.meta`:  it won't PARSE as a classic script.
- *   Parsed, not searched, since the writers carry program text in their strings
- *   (the Python writer's `import os`, the page contract's `export function adopt`).
+ *   Parsed, not searched, since the writers carry program text in their strings.
  * - A runtime `import()` parses fine, and fails only once it runs, so that one is searched for:
  *   - esbuild always prints it as `import(`, no space
- *     (so a regex in the Python writer, `/^from spell_core import (.*)$/`, isn't one)
  *   - a call, not a METHOD called `import` (spell's parser has one:  `x.import(y)`, `import(...rules) {`)
  */
-function checkClassicScript(file = OUTFILE) {
+function checkClassicScript(file) {
   const code = readFileSync(file, "utf8")
   const problems = []
   try {
@@ -710,108 +508,26 @@ function checkClassicScript(file = OUTFILE) {
 }
 
 ////////////////
-// ## Lazy engines
-////////////////
-
-/**
- * Builds each of `LAZY` from UI's source into `_assets/lazy/<name>.js`:
- * a classic script (IIFE) defining its `global` as the module's exports, every `import()` inside it inlined.
- * - Sizes are printed;  each is checked like the bundle (no `import()` / `import.meta` may survive).
- */
-async function writeLazyScripts() {
-  // built beside it, and swapped in whole:  a run stopped halfway left only `code-engine.js`, so `<ui-markdown>`'s 404'd
-  // - in a folder of THIS run's (`lazyBuildingFolder()`):  two runs at once (a page server's rebuild, another by hand)
-  //   shared one, each emptying the other's, and the folder swapped in held only the last two engines;
-  //   with no `code-engine.js`, every `<epic-code>` 404'd (epic `epic-engine` I361)
-  const building = lazyBuildingFolder()
-  rmSync(building, { recursive: true, force: true })
-  mkdirSync(building, { recursive: true })
-  try {
-    await buildLazyScripts(building)
-    rmSync(LAZY_OUT, { recursive: true, force: true })
-    renameSync(building, LAZY_OUT)
-  } finally {
-    rmSync(building, { recursive: true, force: true })
-  }
-}
-
-/**
- * Where this run builds the lazy scripts before swapping them in:  `_assets/.lazy-building-<pid>`.
- * - its own per process, so a second run at the same time never touches it
- * - a dot folder:  never a bundle's source (`spell/server` `Bundle`'s `SKIPPED`), so it starts no rebuild
- */
-function lazyBuildingFolder() {
-  return join(dirname(LAZY_OUT), `.lazy-building-${process.pid}`)
-}
-
-/** Builds each of `LAZY` into `folder`, checked like the bundle, its size printed. */
-async function buildLazyScripts(folder) {
-  for (const { name, global, source } of LAZY) {
-    const outfile = join(folder, `${name}.js`)
-    await build({
-      entryPoints: [source],
-      outfile,
-      bundle: true,
-      format: "iife",
-      globalName: global,
-      platform: "browser",
-      target: "esnext",
-      supported: { "dynamic-import": false },
-      minify: true,
-      keepNames: true,
-      legalComments: "eof",
-      // Spell UI's own names in its source (`spell/ui/runtime/runtime.types`, each engine's `SourceError`), found as
-      // their files;  its `tsconfig.json` for the rest (JSX, decorators)
-      tsconfig: join(UI_DIR, "tsconfig.json"),
-      plugins: [sourceNames()],
-      logLevel: "silent"
-    })
-    checkClassicScript(outfile)
-    const code = readFileSync(outfile)
-    console.log(
-      `-- ${relative(DOCS, join(LAZY_OUT, `${name}.js`))}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`
-    )
-  }
-}
-
-/**
- * Source of `spell-ui:lazy`:  points UI's engine loaders at `lazy/<name>.js`,
- * loaded once as a classic script next to the bundle, resolving with the global it defines.
- * - The bundle's own URL (`document.currentScript`, read while it runs) locates the scripts, at any page depth.
- */
-function lazyModule() {
-  return [
-    `import { CodeHighlighter } from "spell/ui/components/ui-code"`,
-    `import { MarkdownRenderer } from "spell/ui/components/ui-markdown"`,
-    `import { ElkEngine, MermaidDrawer } from "spell/ui/components/ui-mermaid-diagram"`,
-    baseUrlSource(),
-    `const base = bundleUrl("lazy/")`,
-    `const loading = new Map()`,
-    `function lazy(name, global) {`,
-    `  if (!loading.has(name)) {`,
-    `    loading.set(name, new Promise((resolve, reject) => {`,
-    `      const script = document.createElement("script")`,
-    `      script.src = new URL(name + ".js", base).href`,
-    `      script.onload = () => (globalThis[global] ? resolve(globalThis[global]) : reject(new Error(name + " defined nothing")))`,
-    `      script.onerror = () => { loading.delete(name); script.remove(); reject(new Error("no lazy script " + name)) }`,
-    `      document.head.append(script)`,
-    `    }))`,
-    `  }`,
-    `  return loading.get(name)`,
-    `}`,
-    ...LAZY.map(({ hook }) => hook)
-  ].join("\n")
-}
-
-////////////////
 // ## Output
 ////////////////
 
-/** Prints a bundle's size (raw, gzip) and any esbuild warnings:  `file`, by default the main one. */
-function report(warnings, file = OUTFILE) {
+/** Prints a script's size (raw, gzip) and any esbuild warnings. */
+function report(warnings, file) {
   const code = readFileSync(file)
   console.log(`-- ${relative(DOCS, file)}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`)
   for (const warning of warnings) console.warn(`!! ${warning}`)
+}
+
+/** Prints the docs bundle's sizes:  its entry module, and every script in it, brotli. */
+function reportFolder(folder, seconds) {
+  const scripts = readdirSync(folder).filter((name) => name.endsWith(".js"))
+  const brotli = (name) => brotliCompressSync(readFileSync(join(folder, name))).length
+  const main = readFileSync(join(folder, MAIN))
+  const all = scripts.reduce((sum, name) => sum + statSync(join(folder, name)).size, 0)
+  console.log(
+    `-- ${relative(DOCS, join(folder, MAIN))}  ${kb(main.length)}  (brotli ${kb(brotli(MAIN))});  ` +
+      `${scripts.length} scripts, ${kb(all)} in all;  ${seconds.toFixed(1)}s`
+  )
 }
 
 /** Prints `message` and exits with an error. */

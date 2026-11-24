@@ -1,115 +1,89 @@
 /* GENERATED -- do not edit:  `spell pack build epics` */
 /**
- * The `epics` pack's script:  registers with the page's Spell UI, which adds the catalog and calls `define()`.
- * - `define()` imports every family barrel, which defines its tags:  inlined in the script, run only when called.
- * - `families`:  each family's sources' hash, so a page swapping in a rebuilt pack re-renders only what changed.
+ * The `epics` pack's script:  registers with the page's Spell UI, which adds the catalog, and loads its
+ * families (`epics/<family>.js`, ES modules beside the script) on first use, or all at once (`define()`).
+ * - `families`:  each family's sources' hash, so a page swapping in a rebuilt pack re-renders only what changed;
+ *   and its module's query, so a rebuilt family is a new module, an unchanged one the same
  */
 import { CATALOG } from "./epics.catalog"
 
-/** The docs bundle's global (`spell-ui.entry.js`). */
-const { SpellUI } = globalThis as unknown as { SpellUI: { registerPack(pack: object): void } }
+/** The page's Spell UI (the docs bundle's, the site's):  `loading` until the docs bundle has run (`spell-ui.js`). */
+const { SpellUI } = globalThis as unknown as {
+  SpellUI?: { registerPack?(pack: object): void; loading?: Promise<unknown> }
+}
 
-SpellUI.registerPack({
-  name: "epics",
-  prefix: "epic-",
-  catalog: CATALOG,
-  families: {
-    "epic-actions": "535ed882e9eb917a",
-    "epic-agents": "3662448f81f54e4a",
-    "epic-answer": "112b5e67f226a2d9",
-    "epic-aside": "19bec38004f8f096",
-    "epic-ask": "e4b7a0ddbcb3d806",
-    "epic-away-line": "af177a467ffb112c",
-    "epic-cards": "6c5d360f367414a3",
-    "epic-change": "dcd4fdd00fc6abb2",
-    "epic-choice-rows": "029739b4450c076b",
-    "epic-choices": "974f8d5c779cbb4f",
-    "epic-choices-bar": "af4a251702fbeb61",
-    "epic-clarify": "9adbd186200b850c",
-    "epic-code": "539fc5f776c8c609",
-    "epic-comment-pane": "b2e63a0cd959aca8",
-    "epic-commit": "fde5220dba11b16a",
-    "epic-event": "0f64879a113b6fd5",
-    "epic-focus": "9f549a13c3df807f",
-    "epic-item": "2619029a08995ef7",
-    "epic-kickoff": "3aa6f8714fd66ef5",
-    "epic-link": "97b5453cc297a798",
-    "epic-list": "0c0a6e7eaa108104",
-    "epic-mark": "73479f9b6d00e62a",
-    "epic-net-effect": "03f349e01596867c",
-    "epic-new-item": "d9ab030d42913c8c",
-    "epic-note": "1727bbdaa25127f6",
-    "epic-option-form": "5b1999bfb6fce74d",
-    "epic-original": "169cb3ca4f99c74b",
-    "epic-overview": "6e140febca39dae0",
-    "epic-page": "88acf45aec1657f6",
-    "epic-page-note-head": "461c78521c07688e",
-    "epic-phase": "93c14e34919cdfc6",
-    "epic-picture": "4fed2f804f60bf83",
-    "epic-pills": "ef2e3aad3f1f15ca",
-    "epic-prompt": "38c2bb580fb0bb7a",
-    "epic-question": "b70f599c156d0f22",
-    "epic-review": "735b454f80136a69",
-    "epic-run": "4363712a29f2c634",
-    "epic-run-row": "016e31d4d7b7f784",
-    "epic-section": "cb5c5f595573a063",
-    "epic-send": "1189c25de3d6a2c8",
-    "epic-send-buttons": "4898c31df94785e6",
-    "epic-state-filter": "a35da94fe5a9a150",
-    "epic-status": "1eb703a058480a6f",
-    "epic-summary": "243ab43577701978",
-    "epic-text-box": "232890fdda90bfce",
-    "epic-thread": "99d1506cbc3dbdac",
-    "epic-update": "ad614332c26e6c4a"
-  },
-  define: () =>
-    Promise.all([
-      import("../epic-actions"),
-      import("../epic-agents"),
-      import("../epic-answer"),
-      import("../epic-aside"),
-      import("../epic-ask"),
-      import("../epic-away-line"),
-      import("../epic-cards"),
-      import("../epic-change"),
-      import("../epic-choice-rows"),
-      import("../epic-choices"),
-      import("../epic-choices-bar"),
-      import("../epic-clarify"),
-      import("../epic-code"),
-      import("../epic-comment-pane"),
-      import("../epic-commit"),
-      import("../epic-event"),
-      import("../epic-focus"),
-      import("../epic-item"),
-      import("../epic-kickoff"),
-      import("../epic-link"),
-      import("../epic-list"),
-      import("../epic-mark"),
-      import("../epic-net-effect"),
-      import("../epic-new-item"),
-      import("../epic-note"),
-      import("../epic-option-form"),
-      import("../epic-original"),
-      import("../epic-overview"),
-      import("../epic-page"),
-      import("../epic-page-note-head"),
-      import("../epic-phase"),
-      import("../epic-picture"),
-      import("../epic-pills"),
-      import("../epic-prompt"),
-      import("../epic-question"),
-      import("../epic-review"),
-      import("../epic-run"),
-      import("../epic-run-row"),
-      import("../epic-section"),
-      import("../epic-send"),
-      import("../epic-send-buttons"),
-      import("../epic-state-filter"),
-      import("../epic-status"),
-      import("../epic-summary"),
-      import("../epic-text-box"),
-      import("../epic-thread"),
-      import("../epic-update")
-    ]).then(() => undefined)
-})
+/** This script's own address:  its families are beside it.  Read as it runs, while `currentScript` is set. */
+const BASE = document.currentScript instanceof HTMLScriptElement ? document.currentScript.src : location.href
+
+/** Each family folder => its sources' hash. */
+const FAMILIES: Record<string, string> = {
+  "epic-actions": "f38dfe5283677711",
+  "epic-agents": "6422ae3d9eae128b",
+  "epic-answer": "cb23b7323e1d3799",
+  "epic-aside": "4def50580b8837f7",
+  "epic-ask": "1dc1e060bd03ee1f",
+  "epic-away-line": "5b58ecbd53431599",
+  "epic-cards": "132ac820237e29bc",
+  "epic-change": "7beaedea0774c2f8",
+  "epic-choice-rows": "e569828992e728bf",
+  "epic-choices": "3521df39e7735d4f",
+  "epic-choices-bar": "72a711da5d7b14d5",
+  "epic-clarify": "30c92bcd9568a15c",
+  "epic-code": "b0c0ff3f46f7ff51",
+  "epic-comment-pane": "6015a58b6740aa00",
+  "epic-commit": "2e2cef719649c47f",
+  "epic-event": "659dd0e6c9cf88b8",
+  "epic-feature-set": "de7e0d6cdc1663b2",
+  "epic-focus": "1db3151878b2ca6e",
+  "epic-item": "2e1adb2b6d46a8fe",
+  "epic-kickoff": "4dda41720280a22a",
+  "epic-link": "87a84cda89a2e5cc",
+  "epic-list": "2c1562a6b9339db1",
+  "epic-mark": "a277f9ee3b253dce",
+  "epic-net-effect": "6be469a8b1bf6885",
+  "epic-new-item": "c15db96a0dbaab14",
+  "epic-note": "8c8aa1eeca0ef5fc",
+  "epic-option-form": "8fac8e375131b23d",
+  "epic-original": "95a607979c8e49f7",
+  "epic-overview": "cce80d8a1fbd9026",
+  "epic-page": "41d9d124a916b5d5",
+  "epic-page-note-head": "abe4b62148aa94ff",
+  "epic-phase": "9043b8116bdcf240",
+  "epic-picture": "7b99010827bf884a",
+  "epic-pills": "af9b5b0ef077b137",
+  "epic-prompt": "d2ee69188f1a6a0c",
+  "epic-question": "45d33739eb1eab20",
+  "epic-review": "802892d89ae172d5",
+  "epic-run": "fd28d1fceeb8428c",
+  "epic-run-row": "1e298d8de8826243",
+  "epic-section": "d3deb9bebf5a66f2",
+  "epic-send": "748f3034b0f91a34",
+  "epic-send-buttons": "17fc8fc1478e2290",
+  "epic-state-filter": "92b23c65f4f7c2fa",
+  "epic-status": "cc5a6b8cecd85d4e",
+  "epic-step-output": "2b8d113ee246634d",
+  "epic-summary": "646ae1405648e122",
+  "epic-text-box": "67ff5990d24fc897",
+  "epic-thread": "5fd12f841175515e",
+  "epic-update": "fb7dd700697f2d0b"
+}
+
+/** Import family `folder`'s module, which defines its tags. */
+function loadFamily(folder: string): Promise<unknown> {
+  const url = new URL(`./epics/${folder}.js?v=${FAMILIES[folder] ?? ""}`, BASE)
+  return import(/* @vite-ignore */ url.href)
+}
+
+function register() {
+  SpellUI!.registerPack!({
+    name: "epics",
+    prefix: "epic-",
+    catalog: CATALOG,
+    families: FAMILIES,
+    loadFamily,
+    define: () => Promise.all(Object.keys(FAMILIES).map(loadFamily)).then(() => undefined)
+  })
+}
+
+if (SpellUI?.registerPack) register()
+else void SpellUI?.loading?.then(register)

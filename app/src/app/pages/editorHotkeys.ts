@@ -80,6 +80,18 @@ export const EDITOR_HOTKEYS = {
     name: "shortcutShowShortcuts",
     where: "shortcutsNotTyping"
   },
+  // every icon, named, in a dialog:  a click copies its name (epic `editor` T158);  ⌥⌘G, "glyph", as ⌥⌘I is Chrome's
+  // developer tools and ⌥⌘G no browser's;  in the code too, so a name can be pasted where the caret was
+  showIcons: {
+    shortcut: "alt+mod+G",
+    run: () => {
+      import("spell/ui/components/ui-icon-browser")
+        .then(({ UIIconBrowser }) => UIIconBrowser.openInDialog())
+        .catch((error: unknown) => editor.showError(error))
+    },
+    group: "editing",
+    name: "shortcutShowIcons"
+  },
 
   ////////////////
   // ## What's selected in the app

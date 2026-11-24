@@ -15,6 +15,8 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 import { Inspector, type PartRow } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
+import { PartPlacing } from "./PartPlacing"
+import { PartSlots } from "./PartSlots"
 
 /**
  * What a person does to the app's parts as a whole, written into the program's source (epic `editor`, Add And Move):
@@ -353,6 +355,7 @@ export class PartEdits {
     const selected = Inspector.allSelected.map((part) => part.element).filter((each) => !!each) as Element[]
     const moving = selected.includes(element) ? selected : [element]
     if (!moving.every((each) => PartEdits.isWritten(each))) return false
+    loadSlotNames()
     PartEdits.dragging(element as HTMLElement, event, moving, (place) => PartEdits.move(moving, place))
     return true
   }
@@ -375,6 +378,9 @@ export class PartEdits {
     title: string
   ) {
     if (event.button !== 0) return
+    loadSlotNames()
+    // a drag from the rail puts down what a click there picked up (T153):  one part in hand at a time
+    PartPlacing.putDown()
     const ghost = document.createElement("div")
     ghost.className = "PaletteGhost"
     ghost.textContent = label
@@ -440,12 +446,16 @@ export class PartEdits {
    * - Over nothing written, in the app:  the end of the drawing, the whole app outlined.
    * - Over a site's layout pane (its menu, drawer, side bars, footer):  as over nothing, unless the pane is chosen
    *   (`placeableParts()`).
+   * - Over a part with empty slots, a modal with no `<actions>`:  they show as drop zones, and one under the pointer
+   *   is the place (`placeInZone()`, epic `editor` T150).
    */
-  private static placeAt(x: number, y: number, moving: readonly Element[]): ShownPlace | undefined {
+  static placeAt(x: number, y: number, moving: readonly Element[]): ShownPlace | undefined {
     const inTree = PartEdits.placeInTree(x, y, moving)
     if (inTree) return inTree
     const area = Inspector.area
     if (!area || !contains(area.getBoundingClientRect(), x, y)) return undefined
+    const inZone = PartEdits.placeInZone(area, x, y, moving)
+    if (inZone) return inZone
     let best: Element | undefined
     let bestSize = Infinity
     for (const { element } of PartEdits.placeableParts(area)) {
@@ -460,11 +470,95 @@ export class PartEdits {
     return place && { place, box: area.getBoundingClientRect(), mark: "inside" }
   }
 
+  /**
+   * The place in an empty slot's drop zone under (`x`, `y`), over `area`, the app (epic `editor` T150):
+   * the smallest part under the pointer with empty slots (`PartSlots.emptyOf()`) shows them, and the one under the
+   * pointer is the place;  `undefined` when the pointer isn't in one.
+   * - Never a part being moved, nor one that can't be changed.
+   */
+  private static placeInZone(
+    area: HTMLElement,
+    x: number,
+    y: number,
+    moving: readonly Element[]
+  ): ShownPlace | undefined {
+    // on a zone already shown:  it stays, though it may lie just outside its holder
+    const onShown = PartSlots.zoneAt(x, y)
+    if (onShown) {
+      const place = PartEdits.placeInSlot(onShown.holder, onShown.zone.part)
+      PartSlots.mark(place ? onShown.zone : undefined)
+      if (place) return { place, box: onShown.zone.box, mark: "inside" }
+    }
+    let holder: Element | undefined
+    let holderBox: DOMRect | undefined
+    let holderSize = Infinity
+    for (const { element } of PartEdits.placeableParts(area)) {
+      const box = boxOf(element)
+      if (!contains(box, x, y) || isInside(element, moving) || box.width * box.height >= holderSize) continue
+      if (!PartEdits.slotsOf(element).length) continue
+      holder = element
+      holderBox = box
+      holderSize = box.width * box.height
+    }
+    if (!holder || !holderBox) {
+      PartSlots.clear()
+      return undefined
+    }
+    PartSlots.show(holder, PartEdits.slotsOf(holder), holderBox)
+    const under = PartSlots.zoneAt(x, y)
+    const place = under && PartEdits.placeInSlot(under.holder, under.zone.part)
+    PartSlots.mark(place ? under.zone : undefined)
+    return place && { place, box: under.zone.box, mark: "inside" }
+  }
+
+  /**
+   * The empty slots of `element` that something could be dropped into:  none when it can't be changed, or its file's
+   * language has no name for them yet (`slotTagFor()`).
+   */
+  static slotsOf(element: Element): string[] {
+    const slots = PartSlots.emptyOf(element)
+    if (!slots.length) return slots
+    const written = PartEdits.writtenOf(element)
+    if ("reason" in written || !("tag" in written.element)) return []
+    const name = written.text.slice(written.element.start + 1, written.element.tag.nameEnd)
+    return slots.filter((part) => slotTagFor(part, name, languageOf(written.file)))
+  }
+
+  /**
+   * Where something dropped into `holder`'s empty slot `part` is written:  in a new tag of that slot, among the
+   * holder's parts in the order they're drawn (a header before its content, actions after);  `undefined` if it can't be.
+   */
+  static placeInSlot(holder: Element, part: string): FilePlace | undefined {
+    const written = PartEdits.writtenOf(holder)
+    if ("reason" in written || !("tag" in written.element)) return undefined
+    const name = written.text.slice(written.element.start + 1, written.element.tag.nameEnd)
+    const wrap = slotTagFor(part, name, languageOf(written.file))
+    if (!wrap) return undefined
+    // before the first part drawn after it;  a slot at the top, before whatever comes first
+    const children = [...holder.children].flatMap((child) => {
+      const one = PartEdits.writtenOf(child)
+      return "reason" in one || one.file !== written.file ? [] : [{ child, one }]
+    })
+    const later =
+      children.find(({ child }) => {
+        const other = PartSlots.partOf(child)
+        return other !== undefined && PartSlots.comesAfter(other, part)
+      }) ?? (PartSlots.isAtTop(part) ? children[0] : undefined)
+    if (later) return { file: written.file, opening: later.one.element.start, where: "before", wrap }
+    return { file: written.file, ...placeBy(written, "inside"), wrap }
+  }
+
   /** The place on the Views tree's row under (`x`, `y`):  the tree has no box of its own, only its rows do. */
   private static placeInTree(x: number, y: number, moving: readonly Element[]): ShownPlace | undefined {
     for (const row of [...document.querySelectorAll(`${TREE_SELECTOR} ui-tree-item`)].reverse()) {
       const element = PartEdits.rowParts.get(row)
       const line = row.shadowRoot?.querySelector(TREE_ROW_LINE)?.getBoundingClientRect()
+      const slot = PartEdits.slotRows.get(row)
+      if (slot && line && contains(line, x, y)) {
+        if (isInside(slot.holder, moving)) return undefined
+        const place = PartEdits.placeInSlot(slot.holder, slot.part)
+        return place && { place, box: line, mark: "inside" }
+      }
       if (!element || !line || !contains(line, x, y)) continue
       if (isInside(element, moving) || !PartEdits.isWritten(element)) return undefined
       return PartEdits.placeBeside(element, line, line.left, y, { inColumn: true })
@@ -474,6 +568,14 @@ export class PartEdits {
 
   /** The Views tree's row of each part:  `rememberRow()`. */
   private static rowParts = new WeakMap<Element, Element>()
+
+  /** The Views tree's rows for empty slots, and whose they are:  `rememberSlotRow()`. */
+  private static slotRows = new WeakMap<Element, { holder: Element; part: string }>()
+
+  /** `row` of the Views tree is `holder`'s empty slot `part`:  something dragged onto it goes there (T150). */
+  static rememberSlotRow(row: Element, holder: Element, part: string): void {
+    PartEdits.slotRows.set(row, { holder, part })
+  }
 
   /**
    * The Views tree's row showing `element`:  `undefined` when none is drawn (a closed row's parts, the Inspector shut).
@@ -528,11 +630,41 @@ export class PartEdits {
   /** Where a drop would land now. */
   private static lastPlace: FilePlace | undefined
 
+  /** Where a drop, or a part being placed (`PartPlacing`), would land now:  the place shown. */
+  static get placeShown(): FilePlace | undefined {
+    return PartEdits.lastPlace
+  }
+
+  /**
+   * The places a part being placed can go, in the order the arrow keys step through them (epic `editor` T153):
+   * after each part of the app that can be changed, in the order they're drawn, each as its drop line shows.
+   * - The first one before the app's first part, so the start can be reached too.
+   */
+  static keyPlaces(): ShownPlace[] {
+    const area = Inspector.area
+    if (!area) return []
+    const parts = PartEdits.placeableParts(area).filter(({ element }) => PartEdits.isWritten(element))
+    const places = parts.flatMap(({ element }) => {
+      const box = boxOf(element)
+      // just inside its far end:  `placeBeside()` reads that as after it
+      const shown = liesInRow(element)
+        ? PartEdits.placeBeside(element, box, box.right - 1, box.top + box.height / 2)
+        : PartEdits.placeBeside(element, box, box.left + box.width / 2, box.bottom - 1)
+      return shown ? [shown] : []
+    })
+    const first = parts[0]?.element
+    const before = first && PartEdits.placeBeside(first, boxOf(first), boxOf(first).left + 1, boxOf(first).top + 1)
+    return before ? [before, ...places] : places
+  }
+
   /** Show where a drop would land:  a line between things, or a ring round what it'd go in. */
-  private static showPlace(shown: ShownPlace | undefined): void {
+  static showPlace(shown: ShownPlace | undefined): void {
     PartEdits.lastPlace = shown?.place
     let marker = document.body.querySelector<HTMLElement>(`:scope > .${MARKER_CLASS}`)
-    if (!shown) return marker?.remove()
+    if (!shown) {
+      PartSlots.clear()
+      return marker?.remove()
+    }
     if (!marker) {
       marker = document.createElement("div")
       marker.className = MARKER_CLASS
@@ -625,7 +757,7 @@ export class PartEdits {
   }
 
   /**
-   * Every part under (`x`, `y`) in `area`, outermost first, each under the one it's inside:
+   * The parts under (`x`, `y`) in `area`, outermost first, each inside the one before it:
    * a right click's Inspect submenu (epic `editor` P31).
    * - What the browser draws there (`elementsFromPoint()`), into each shadow root the app draws in,
    *   and the parts round each of those (a part with no box of its own, `display: contents`, is still around it).
@@ -633,10 +765,11 @@ export class PartEdits {
    *   so the picture inside a card counts (`Inspector.isPart()`).
    * - Never the editor's own boxes (`EDITOR_OWN`), nor what's inside a Spell UI element's own shadow root:
    *   a button's icon is the button's.
-   * - Each part once.  Parts side by side under the same one (overlapping cards in a pile):  the one on top first.
-   *   - One in the very same box as another above it (the stock's cards, squarely stacked) is hidden by it:
-   *     left out, with what's inside it, so the stock lists its top card, not all 24 (epic `editor` P31).
-   * - `depth`:  how many of the others it's inside.
+   * - Only what's seen under the mouse (epic `editor` T160):  of parts side by side in the same one
+   *   (overlapping cards in a pile), the one on top, and what's inside IT;
+   *   a card it covers there is left out, with what's inside that, though its box reaches the mouse.
+   *   - So the stock lists its top card, not all 24 (P31), and a fanned column the card under the mouse alone.
+   * - `depth`:  how many of the others it's inside, its place in the list.
    */
   static partsAt(x: number, y: number, area: HTMLElement): PartRow[] {
     const order = new Map<Element, number>()
@@ -652,22 +785,16 @@ export class PartEdits {
       while (outer && outer !== area && !isAPart.has(outer)) outer = composedParentOf(outer)
       return outer && isAPart.has(outer) ? outer : undefined
     }
-    const inside = new Map<Element | undefined, Element[]>()
-    for (const part of parts) inside.set(outerOf(part), [...(inside.get(outerOf(part)) ?? []), part])
-    const rows: PartRow[] = []
-    const add = (outer: Element | undefined, depth: number) => {
-      const own = [...(inside.get(outer) ?? [])].sort((a, b) => order.get(a)! - order.get(b)!)
-      const shown: DOMRect[] = []
-      for (const part of own) {
-        // one squarely under another, the same box (the stock's cards):  hidden by it, so left out
-        const box = part.getBoundingClientRect()
-        if (box.width && shown.some((above) => isSameBox(above, box))) continue
-        shown.push(box)
-        rows.push({ element: part, depth })
-        add(part, depth + 1)
-      }
+    // each part's top-most part inside it, under the mouse:  the first reached from what's drawn on top
+    const topInside = new Map<Element | undefined, Element>()
+    for (const part of parts.sort((a, b) => order.get(a)! - order.get(b)!)) {
+      const outer = outerOf(part)
+      if (!topInside.has(outer)) topInside.set(outer, part)
     }
-    add(undefined, 0)
+    const rows: PartRow[] = []
+    for (let part = topInside.get(undefined); part; part = topInside.get(part)) {
+      rows.push({ element: part, depth: rows.length })
+    }
     return rows
   }
 
@@ -728,7 +855,7 @@ type WrittenPart = {
 type NotEditable = "partFromLoop" | "partNotWritten" | "partBusy"
 
 /** A place, and what shows it. */
-type ShownPlace = {
+export type ShownPlace = {
   /** the place */
   place: FilePlace
   /** the line, or the box round what it goes in */
@@ -825,6 +952,41 @@ function onlyTagIn(text: string, drawing: WrittenElement): WrittenElement | unde
   return only && !text.slice(only.end, drawing.bodyEnd).trim() ? only : undefined
 }
 
+/**
+ * The tag a slot `part` is written with, beside a holder written `<holderName`:  bare where it's bare (`modal` =>
+ * `actions`), else Spell UI's own (`ui-modal` => `ui-actions`);  in the file's `language` (`es-acciones`).
+ * - `undefined` for a language whose names haven't loaded yet (`loadSlotNames()`), or that has none for it.
+ */
+function slotTagFor(part: string, holderName: string, language: string): string | undefined {
+  const english = `ui-${part}`
+  const tag = language === "en" ? english : localTagOf(english, language)
+  if (!tag) return undefined
+  return holderName.includes("-") ? tag : tag.slice(tag.indexOf("-") + 1)
+}
+
+/** `tag`'s name in `language`, from the palette's snippets:  `ui-actions` => `es-acciones`. */
+function localTagOf(tag: string, language: string): string | undefined {
+  const definition = slotNames?.byTag(tag)
+  const snippet = definition && slotNames?.snippetIn(definition, language)
+  return snippet ? /^<([\w-]+)/.exec(snippet)?.[1] : undefined
+}
+
+/** Spell UI's components, for their names in other languages:  loaded as a drag starts (`loadSlotNames()`). */
+let slotNames: typeof import("spell/ui/components/ComponentDefinitions").ComponentDefinitions | undefined
+
+/** Load Spell UI's names for slots in other languages, once, as a drag starts.  NEVER throws. */
+function loadSlotNames(): void {
+  if (slotNames) return
+  import("spell/ui/components/ComponentDefinitions")
+    .then(({ ComponentDefinitions }) => (slotNames = ComponentDefinitions))
+    .catch((error) => console.error(error))
+}
+
+/** The language `file` is written in. */
+function languageOf(file: SP.AnySpellFile): string {
+  return file instanceof SP.SpellFile ? file.language.lang : "en"
+}
+
 /** The box `element` draws:  one with no box of its own (`display: contents`) is what's inside it, shadow root or not. */
 function boxOf(element: Element): DOMRect {
   const box = element.getBoundingClientRect()
@@ -887,16 +1049,6 @@ function drawnAt(root: Document | ShadowRoot, x: number, y: number, seen = new S
     const inner = element.shadowRoot && !element.localName.startsWith(UI_PREFIX) ? element.shadowRoot : undefined
     return [element, ...(inner ? drawnAt(inner, x, y, seen) : [])]
   })
-}
-
-/** Are `a` and `b` the same box, to within a pixel on each edge? */
-function isSameBox(a: DOMRect, b: DOMRect): boolean {
-  return (
-    Math.abs(a.left - b.left) <= 1 &&
-    Math.abs(a.top - b.top) <= 1 &&
-    Math.abs(a.right - b.right) <= 1 &&
-    Math.abs(a.bottom - b.bottom) <= 1
-  )
 }
 
 /** The element `element` is inside, across shadow roots:  its parent, else its shadow root's host. */

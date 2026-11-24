@@ -1,0 +1,140 @@
+{
+  "title": "App UI",
+  "description": "App UI's pages as one site:  a notebook per component of Spell's editor, each at its own address, listed in the side navigation by group",
+  "onHome": false,
+  "imports": [
+    {
+      "path": "/Home.spell",
+      "active": true
+    },
+    {
+      "path": "/Actions.spell",
+      "active": true
+    },
+    {
+      "path": "/AppAnatomyView.spell",
+      "active": true
+    },
+    {
+      "path": "/AppContainer.spell",
+      "active": true
+    },
+    {
+      "path": "/AppRoot.spell",
+      "active": true
+    },
+    {
+      "path": "/Chooser.spell",
+      "active": true
+    },
+    {
+      "path": "/Chrome.spell",
+      "active": true
+    },
+    {
+      "path": "/CodeMirrorEditor.spell",
+      "active": true
+    },
+    {
+      "path": "/ConsoleLines.spell",
+      "active": true
+    },
+    {
+      "path": "/ConsoleViewer.spell",
+      "active": true
+    },
+    {
+      "path": "/ErrorBoundary.spell",
+      "active": true
+    },
+    {
+      "path": "/ErrorNotice.spell",
+      "active": true
+    },
+    {
+      "path": "/FileEditor.spell",
+      "active": true
+    },
+    {
+      "path": "/FileTabs.spell",
+      "active": true
+    },
+    {
+      "path": "/InputEditor.spell",
+      "active": true
+    },
+    {
+      "path": "/Markdown.spell",
+      "active": true
+    },
+    {
+      "path": "/MenuBar.spell",
+      "active": true
+    },
+    {
+      "path": "/Notice.spell",
+      "active": true
+    },
+    {
+      "path": "/RunnerConsole.spell",
+      "active": true
+    },
+    {
+      "path": "/RunnerPane.spell",
+      "active": true
+    },
+    {
+      "path": "/ScopeDetailsPane.spell",
+      "active": true
+    },
+    {
+      "path": "/SpellCode.spell",
+      "active": true
+    },
+    {
+      "path": "/SpellEditor.spell",
+      "active": true
+    },
+    {
+      "path": "/SpellElement.spell",
+      "active": true
+    },
+    {
+      "path": "/SpellMarkdown.spell",
+      "active": true
+    },
+    {
+      "path": "/SpellReferencePage.spell",
+      "active": true
+    },
+    {
+      "path": "/SpellViewer.spell",
+      "active": true
+    },
+    {
+      "path": "/SpellPage.spell",
+      "active": true
+    },
+    {
+      "path": "/ThingExplorer.spell",
+      "active": true
+    },
+    {
+      "path": "/TreeViewer.spell",
+      "active": true
+    },
+    {
+      "path": "/TypeExplorer.spell",
+      "active": true
+    },
+    {
+      "path": "/main.page-layout.spell",
+      "active": true
+    },
+    {
+      "path": "/AppUI.spell",
+      "active": true
+    }
+  ],
+  "spellVersion": "0.9.0"
+}

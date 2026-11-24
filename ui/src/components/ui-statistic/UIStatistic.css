@@ -304,11 +304,11 @@
   }
 
   /* Floated */
-  .ui[class*="left floated"].statistic {
+  .ui.left-floated.statistic {
     float: left;
     margin: 0 var(--_ui-statistic-floated-distance) var(--_ui-statistic-row-spacing) 0;
   }
-  .ui[class*="right floated"].statistic {
+  .ui.right-floated.statistic {
     float: right;
     margin: 0 0 var(--_ui-statistic-row-spacing) var(--_ui-statistic-floated-distance);
   }

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { imageVocabulary } from "spell/ui/components/ui-image/UIImage.en"
@@ -62,7 +61,7 @@ describe("UIImage.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = imageRaw + colorsCSS
+    const css = imageRaw + colorsSharedCSS
     for (const vocabulary of [imageVocabulary, imagesVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -77,7 +76,7 @@ describe("UIImage.css source", () => {
 describe("UIImage.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every image in %s", (path) => {
     Sheets.adopt([...foundationCSS, imageCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const images = root.querySelectorAll<HTMLElement>(".ui.image")
     expect(images.length).toBeGreaterThan(0)
     for (const image of images) {
@@ -90,7 +89,7 @@ describe("UIImage.css examples", () => {
 
   it("draws a bare image as a block, a link as an inline box its picture fills", () => {
     Sheets.adopt([...foundationCSS, imageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     expect(getComputedStyle(root.querySelector("img.ui.image")!).display).toBe("block")
     const link = root.querySelector<HTMLElement>("a.ui.image")!
     expect(getComputedStyle(link).display).toBe("inline-block")
@@ -101,14 +100,14 @@ describe("UIImage.css examples", () => {
 
   it("hides hidden images and fades disabled ones", () => {
     Sheets.adopt([...foundationCSS, imageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     expect(getComputedStyle(root.querySelector(".ui.hidden.image")!).display).toBe("none")
     expect(parseFloat(getComputedStyle(root.querySelector(".ui.disabled.image")!).opacity)).toBeCloseTo(0.45, 2)
   })
 
   it("rounds, borders, crops and fills", () => {
     Sheets.adopt([...foundationCSS, imageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     const avatar = style("img.ui.avatar.image")
     expect(parseFloat(avatar.width)).toBeCloseTo(2 * parseFloat(avatar.fontSize))
@@ -132,7 +131,7 @@ describe("UIImage.css examples", () => {
 
   it("aligns, spaces and floats against the text", () => {
     Sheets.adopt([...foundationCSS, imageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const style = (selector: string) => getComputedStyle(root.querySelector(selector)!)
     expect(style(".ui.top.aligned.image").verticalAlign).toBe("top")
     expect(style(".ui.top.aligned.image").display).toBe("inline-block")
@@ -155,7 +154,7 @@ describe("UIImage.css examples", () => {
 
   it("sizes by Fomantic's width ladder, following --ui-font-size", () => {
     Sheets.adopt([...foundationCSS, imageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     // the Size wrapper (1200px) clamps to its column:  give it room
     root.style.width = "1300px"
     const width = (size: string) => root.querySelector(`.ui.${size}.image[class="ui ${size} image"]`)!.clientWidth
@@ -173,7 +172,7 @@ describe("UIImage.css examples", () => {
 describe("UIImage.css groups", () => {
   it("hands its children size, spacing and looks", () => {
     Sheets.adopt([...foundationCSS, imageCSS])
-    const root = Fixture.render(EXAMPLES["./examples/groups.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/groups.html"]!)
     const [sized, rounded, avatars, centered] = root.querySelectorAll<HTMLElement>(".ui.images")
     expect(getComputedStyle(sized!).display).toBe("flex")
     for (const child of sized!.children) {
@@ -202,7 +201,7 @@ describe("UIImage.css groups", () => {
 describe("UIImage.css groups beside the page's other sheets", () => {
   it("an `ui avatar images` group keeps its 2em avatars next to UIParts.css (whose bare `.avatar img` is a part's)", () => {
     Sheets.adopt([...foundationCSS, imageCSS, partsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/groups.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/groups.html"]!)
     const avatar = root.querySelector<HTMLElement>(".ui.avatar.images")!.firstElementChild as HTMLElement
     expect(avatar.clientWidth).toBe(Math.round(2 * parseFloat(getComputedStyle(avatar).fontSize)))
   })
@@ -215,7 +214,7 @@ describe("UIImage.css groups beside the page's other sheets", () => {
 describe("UIImage.css tokens", () => {
   it("takes a public token from a wrapper or the image itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, imageCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-image-rounded-radius: 20px"><img class="ui rounded image" src="${SQUARE}" alt=""></div>` +
         `<img class="ui bordered image" src="${SQUARE}" alt="" style="--ui-image-border: 3px solid red">`
     )
@@ -270,7 +269,7 @@ describe("UIImage.css in shadow roots", () => {
 
   it("spaces a floated image below unless its host is the last child", () => {
     Sheets.adopt(foundationCSS)
-    const parent = Fixture.render(`<div><span></span><span></span></div>`)
+    const parent = Sheets.render(`<div><span></span><span></span></div>`)
     const [a, b] = [...parent.children].map((host) => {
       Sheets.attach(host, `<img class="ui mini left floated image" src="${SQUARE}" alt="">`, sheets())
       return Sheets.inner(host)

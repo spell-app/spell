@@ -10,6 +10,7 @@
  * - `spell local [status | on [checkout] | off]`:  run your own checkout in a project that installs `spell` from npm,
  *   for you alone (epic `repo-split` T70;  `.spell/kit.json5`)
  * - `spell deps [check]`:  the lockfile's advisories and deprecated packages, before a push
+ * - `spell names [check]`:  the names on this machine's private list, in what a push or a publish would send
  * - `spell readme check | test | pictures [pages...]`:  every repo's README pages, checked, their examples run
  *   (epic `readme` P16), or their `html example` blocks pictured (epic `ui-gaps` P14)
  * - `spell map install | status | build | query | explain | uses`:  a map of every repo's code, and one of the
@@ -76,6 +77,14 @@ export default function kitCommands(spell: Command): void {
     .description("start the page server if needed, then print the web address that serves <file>")
     .argument("<file>", "a file of this checkout, or of the epic folder")
     .action(() => pageServer("url"))
+
+  passThrough(server.command("certificate"))
+    .description(
+      "make the page server's HTTPS certificate, and have this computer trust it (asks for the password once)"
+    )
+    .option("--check", "only say what's missing;  exit 1 until it's ready")
+    .option("--undo", "remove it:  the page server goes back to plain HTTP at its next start")
+    .action(() => pageServer("certificate"))
 
   passThrough(server.command("prune"))
     .description("stop the page and Vite servers whose checkout is gone, on any checkout")
@@ -175,6 +184,22 @@ export default function kitCommands(spell: Command): void {
     .option("--json", "print the report as JSON")
     .action((verb: string | undefined, options: CLI.DepsOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/depsCommand")).depsCommand(verb, options))
+    )
+
+  spell
+    .command("names")
+    .description(
+      "the names on your private list (~/.spell/private-names):  fail when what's about to leave this machine " +
+        "holds one -- its files, commit messages, branch names and pictures;  every push runs it"
+    )
+    .argument("[verb]", "check (default)")
+    .argument("[revisions...]", "what to check (default HEAD):  each one's files, and its commits not on a remote yet")
+    .option("--push <remote>", "check what a push to <remote> sends, as git's pre-push hook hands it on stdin")
+    .option("--json", "print the report as JSON")
+    .action((verb: string | undefined, revisions: string[], options: CLI.NamesOptions) =>
+      CLI.runCommand(async () =>
+        (await import("spell/cli/commands/namesCommand")).namesCommand(verb, revisions, options)
+      )
     )
 
   ////////////////

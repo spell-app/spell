@@ -1,0 +1,72 @@
+"spell markdown" is a notebook page
+	<header level="1">
+		&lt;spell-markdown&gt;
+		<header>Markdown drawn by spell's own engine, in ui-* elements.</>
+	</>
+
+	<text class="lede" paragraph>A <link target="src-packages-ui-docs-ui-markdown-html" link="/components/ui/markdown"><text code>&lt;ui-markdown&gt;</></> drawn by spell's markdown engine instead of marked: headers, lists, tables, alerts and tasks as Spell UI's own elements, plain or <text code>editable</>. Its spell blocks are coloured by spell's parser.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone showing markdown with spell in it, or changing spell's markdown engine</>
+		<item icon="play">Live: the real element, from the app's element build this page loads</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "1. Example" description="`editable`:  Write / Preview tabs, the preview drawn by spell's engine.">
+			<html>
+				<spell-markdown editable>
+					<script type="text/markdown">
+						# Try it
+
+						Type **markdown** here, then look at the _Preview_.
+
+						- [x] tables, task lists, alerts
+						- [ ] your text
+
+						> [!TIP]
+						> Alerts become messages.
+
+						```spell
+						a pile is a list of cards
+						```
+					</script>
+				</spell-markdown>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from <text code>/element/spell.pack.js</> (<text code>yarn build:element</> in <link target="src-spell-app" link="/"><text code>spell-app</></>), which this set's pages load.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item>Everything <text code>&lt;ui-markdown&gt;</> takes: inline text or a <text code>source</> file, <text code>sanitized</> (which keeps its <text code>ui-*</> elements), <text code>heading-offset</>, <text code>skip-title</>, <text code>headings</> and <text code>reveal()</>.</>
+			<item>Its engine is spell's (<text code>spell/parser/markdown</>, on the parser), a lazy chunk loaded with the first render.</>
+			<item>It loads <text code>&lt;spell-code&gt;</> too, so a <text code>spell</> code block is coloured.</>
+			<item>Compiled spell's own <text code>&lt;markdown&gt;</> blocks still draw with <text code>&lt;ui-markdown&gt;</>.</>
+		</>
+	</>
+
+	<section label="3. Attributes, events and texts">
+		<icon slot="icon" name="list check"/>
+		<text paragraph>Its own names; the rest are <link target="src-packages-ui-docs-ui-markdown-html" link="/components/ui/markdown"><text code>&lt;ui-markdown&gt;</></>'s, which it extends:</>
+		<html>
+			<ui-docs-api family="spell-markdown"></>
+		</>
+		<text class="meta" paragraph>From its vocabulary, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-components-spell-markdown-spellmarkdown-tsx" link="/src/app/components/spell-markdown/SpellMarkdown.tsx"><text title="src/app/components/spell-markdown/SpellMarkdown.tsx" code>SpellMarkdown.tsx</></>: its component, a <text code>UIMarkdown</> drawn by spell's engine</>
+			<item><link target="src-packages-app-components-spell-markdown-spellmarkdown-en-ts" link="/src/app/components/spell-markdown/SpellMarkdown.en.ts"><text title="src/app/components/spell-markdown/SpellMarkdown.en.ts" code>SpellMarkdown.en.ts</></>: what its vocabulary adds to <text code>&lt;ui-markdown&gt;</>'s</>
+			<item><link target="src-packages-app-components-spell-markdown-mdengine-ts" link="/src/app/components/spell-markdown/MDEngine.ts"><text title="src/app/components/spell-markdown/MDEngine.ts" code>MDEngine.ts</></>: spell's markdown engine, as <text code>&lt;ui-markdown&gt;</> asks for one</>
+			<item>Its build: <text code>yarn build:element</>, into <text code>dist-element/</>, served at <text code>/element/</></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-20 against branch <ui-text code>repo-split</>.</>
+		</>
+	</>

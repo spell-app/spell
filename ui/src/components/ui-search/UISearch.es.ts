@@ -21,12 +21,22 @@ export const searchEs = {
     "ignore-diacritics": "ignorar-acentos",
     "highlight-matches": "resaltar-coincidencias",
     "select-first-result": "seleccionar-primero",
-    "show-no-results": "mostrar-sin-resultados"
+    "show-no-results": "mostrar-sin-resultados",
+    shortcut: "atajo"
   },
-  events: { "ui-replied": "respondido" },
-  parts: { prompt: "indicacion", results: "resultados", result: "resultado", category: "categoria", name: "nombre" },
+  events: { "ui-replied": "respondido", "ui-toggled": "desplegado" },
+  parts: {
+    prompt: "indicacion",
+    results: "resultados",
+    result: "resultado",
+    category: "categoria",
+    name: "nombre",
+    opener: "abridor",
+    shortcut: "atajo"
+  },
   texts: {
     searchLabel: "Buscar",
+    searchClear: "Borrar la búsqueda",
     searchNoResultsHeader: "Sin resultados",
     searchNoResults: "La búsqueda no devolvió resultados",
     searchServerError: "Hubo un problema al consultar el servidor.",

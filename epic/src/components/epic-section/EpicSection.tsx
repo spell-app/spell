@@ -6,13 +6,14 @@ import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell/ui/core"
 
 import { PageStages, PhaseStatuses } from "spell/epic/phases"
-import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind, type TestsEntry } from "spell/epic/review"
+import { PageNotices, SUMMARY_ID, type NewItem, type NewKind, type TestsEntry } from "spell/epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
 import { NEW_KIND_LOOKS } from "spell/epic/components/epic-new-item/EpicNewItem.types"
 import { FOCUS_ASKED, type FocusAsk } from "spell/epic/components/epic-focus/EpicFocus.types"
 import { DrawnState, NEEDS_PERSON, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import type { ItemState } from "spell/epic/components/epic-item/EpicItem.types"
 import { ScrollAnchor } from "spell/epic/components/epic-item/ScrollAnchor"
 import {
   SHOW_ALL,
@@ -27,6 +28,7 @@ import { PhaseDrag } from "./PhaseDrag"
 import { phaseFields } from "./PhaseFields"
 import { PhaseState } from "./PhaseState"
 import { MARKED_SHOWS_AS, StateFilter, type ChipPick } from "./StateFilter"
+import { CloseAllRule, type CloseAllKind } from "./CloseAllRule"
 import { TestQueue } from "./TestQueue"
 import {
   CLOSED_STATUSES,
@@ -351,6 +353,22 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return marked.length ? new Set(marked.map((it) => it.item)) : NOTHING_MARKED
   })
 
+  /**
+   * The ids of the items its Close all closes (epic `epic-engine` T158;  `CloseAllRule`):  a Judgement calls section's
+   * DECIDED calls, an Issues section's FIXED issues, a Todos section's DONE todos, still waiting for his tick;  none
+   * for any other kind, or outside a review.
+   */
+  readonly closable = createMemo((): string[] => {
+    const kind = CloseAllRule.kindOf(this.kind)
+    const client = this.reviewState.client
+    if (!kind || !client || isServer) return []
+    return this.itemStates().flatMap(({ item, state }) => {
+      const live = this.reviewState.liveOf(item.id)
+      const commented = client.commentsIn(item.id).length > 0
+      return CloseAllRule.closes(kind, item, { state: state as ItemState, live, commented }) ? [item.id] : []
+    })
+  })
+
   /** Its items not marked in this pass:  what the state chips count and filter. */
   readonly unmarked = createMemo(() => this.itemStates().filter((it) => !this.marked().has(it.item)))
 
@@ -613,6 +631,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
                       <Show when={kind === "tests" && this.reviewState.reviewing() && this.testing()}>
                         {(testing) => this.testButton(testing)}
                       </Show>
+                      <Show when={this.reviewState.reviewing() && CloseAllRule.kindOf(kind)}>
+                        {(closes) => this.closeAllButton(closes())}
+                      </Show>
                       {this.filter()}
                       <Show when={this.reviewState.reviewing() && this.newKind()}>
                         {(newKind) => this.newButton(newKind())}
@@ -729,6 +750,91 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   }
 
   ////////////////
+  // ## Close all (epic `epic-engine` T158)
+  ////////////////
+
+  /**
+   * The Judgement calls, Issues and Todos sections' Close all, on their title while reviewed and one waits for his
+   * tick (Owen, 2026-11-23:  "1-click way to quickly e.g. close all "DECIDED" things in Js and "FIXED" in and "DONE" in
+   * todos";  on each section's own title row, his choice):  "Close 12 decided", green outlined.
+   * - a click closes them at once, no confirm (`closeAll()`, I462)
+   */
+  private closeAllButton(kind: CloseAllKind): JSX.Element {
+    const count = () => this.closable().length
+    const things = () => this.closeThings(kind, count())
+    return (
+      <Show when={count()}>
+        <ui-button
+          class={CLOSE_ALL_BUTTON}
+          part={this.partForName("close-all")}
+          color="green"
+          appearance="basic"
+          size="mini"
+          icon="check double"
+          data-tooltip={this.translationForKey("closeAllTip", { count: String(count()), things: things() })}
+          onClick={(event: MouseEvent) => {
+            // a title's tool:  not a click on the title, which would fold it
+            event.stopPropagation()
+            void this.closeAll(kind)
+          }}
+        >
+          {this.translationForKey("closeAll", {
+            count: String(count()),
+            state: this.translationForKey(CLOSE_STATE_WORDS[kind])
+          })}
+        </ui-button>
+      </Show>
+    )
+  }
+
+  /**
+   * Close all, pressed:  no confirm (epic `epic-engine` I462;  Owen:  "Don't show this"):  every one drawn grey at once,
+   * as his ✓ on each draws it, and closed by the page server in one edit (`ReviewClient.closeAll()`);  then a notice
+   * with Undo, which puts them back (`undoCloseAll()`).
+   * - only the ids counted now go:  the server closes those still closable, and says which it left
+   * - NEVER throws:  a failed post is the client's notice
+   */
+  @E.untracked
+  async closeAll(kind: CloseAllKind) {
+    const client = this.reviewState.client
+    const ids = this.closable()
+    if (!client || !ids.length) return
+    const count = (n: number) => ({ count: String(n), things: this.closeThings(kind, n) })
+    const answer = await client.closeAll(kind, ids)
+    if (!answer) return
+    const left = answer.left.length
+      ? `  ${this.translationForKey("closedAllLeft", { count: String(answer.left.length) })}`
+      : ""
+    const batch = answer.batch
+    PageNotices.show(`${this.translationForKey("closedAll", count(answer.closed.length))}${left}`, {
+      tone: "success",
+      ms: NOTICE_MS,
+      actions: batch
+        ? [
+            {
+              text: this.translationForKey("closeAllUndo"),
+              icon: "rotate left",
+              click: () => {
+                void client.undoCloseAll(batch).then((undone) => {
+                  if (undone)
+                    PageNotices.show(
+                      this.translationForKey("closeAllUndone", { count: String(undone.restored.length) })
+                    )
+                })
+              }
+            }
+          ]
+        : []
+    })
+  }
+
+  /** What Close all on section kind `kind` closes, `count` of them, in words:  `decided judgement calls`. */
+  private closeThings(kind: CloseAllKind, count: number): string {
+    const [one, many] = CLOSE_THING_WORDS[kind]
+    return this.translationForKey(count === 1 ? one : many)
+  }
+
+  ////////////////
   // ## Testing (epic `epic-engine` P51)
   ////////////////
 
@@ -785,14 +891,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             })
           : this.translationForKey("startTesting", { count: testing.open })
     }
-    const tip = () => {
-      const testing = state()
-      return testing.preparing
-        ? testing.queued
-          ? this.translationForKey("waitingTip", { why: this.reviewState.waitingWhy() })
-          : this.translationForKey("preparingTip")
-        : this.translationForKey(testing.prepared ? "focusTestsTip" : "startTestingTip")
-    }
     return (
       <ui-button
         class={START_TESTING}
@@ -802,7 +900,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         size="mini"
         icon={state().preparing ? "circle notch" : state().prepared ? "bullseye" : "flask"}
         data-busy={state().preparing ? "" : undefined}
-        data-tooltip={tip()}
         onClick={(event: MouseEvent) => {
           // a title's tool:  not a click on the title, which would fold it
           event.stopPropagation()
@@ -1084,7 +1181,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * The new items of one kind waiting to be made, each a card:
    * its icon, "Todo" or "Question", its title, its note, what it's about (a link), then Edit and Remove.
    * - the fill rule (decision Q20):  dashed until sent, outlined once sent
-   * - its tooltip says which, and that it waits for a review while nobody is listening
    * - draws nothing while none waits
    */
   private newItemList(kind: NewKind): JSX.Element {
@@ -1094,11 +1190,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         <ul class={NEW_LIST} part={this.partForName("new-list")}>
           <For each={items()} keyed={(it) => it.id}>
             {(it) => (
-              <li
-                class={NEW_CARD}
-                data-fill={this.isSent(it()) ? "outline" : "dashed"}
-                data-tooltip={this.cardTip(it())}
-              >
+              <li class={NEW_CARD} data-fill={this.isSent(it()) ? "outline" : "dashed"}>
                 <ui-icon name={NEW_KIND_LOOKS[it().kind].icon} />
                 <span class="what">{this.translationForKey(NEW_KIND_LOOKS[it().kind].label)}</span>
                 <span class="title">{it().title}</span>
@@ -1141,12 +1233,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** Has waiting `item` gone with a send? */
   private isSent(item: NewItem): boolean {
     return this.reviewState.client?.isSent(item) ?? false
-  }
-
-  /** A waiting card's tooltip:  how far it got;  nobody listening, that it waits for a review. */
-  private cardTip(item: NewItem): string {
-    const state = this.translationForKey(this.isSent(item) ? "newSent" : "newUnsent")
-    return this.reviewState.listening() ? state : `${state}.  ${NOBODY_LISTENING}`
   }
 
   /** Edit on a waiting card:  the section's `<epic-new-item>` opens its form on it. */
@@ -1415,6 +1501,26 @@ const FILTERED = "data-epic-filtered"
 
 /** Class of the Manual tests section's Start testing. */
 const START_TESTING = "start-testing"
+
+/** Class of a section's Close all button (`closeAllButton()`, T158). */
+const CLOSE_ALL_BUTTON = "close-all"
+
+/** How long Close all's notice, and its Undo, stays (ms):  longer than a plain notice, so there's time to undo. */
+const NOTICE_MS = 12_000
+
+/** Each Close all's finished word, a text key:  `Close 12 decided`. */
+const CLOSE_STATE_WORDS = {
+  judgements: "closeDecided",
+  issues: "closeFixed",
+  todos: "closeDone"
+} as const satisfies Record<CloseAllKind, string>
+
+/** Each Close all's things, one and several, text keys:  `decided judgement call(s)`. */
+const CLOSE_THING_WORDS = {
+  judgements: ["closeJudgementOne", "closeJudgements"],
+  issues: ["closeIssueOne", "closeIssues"],
+  todos: ["closeTodoOne", "closeTodos"]
+} as const satisfies Record<CloseAllKind, readonly [string, string]>
 
 /** Class of the Manual tests section's last line in a run across every epic. */
 const NEXT_EPIC = "next-epic"

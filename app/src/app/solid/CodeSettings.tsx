@@ -1,6 +1,6 @@
 import { createSignal, For } from "solid-js"
 
-import { editorPrefs } from "spell/app/app/editorPrefs"
+import { UPGRADE_ON_OPEN_PREF, editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import {
   CODE_POPUP_DEFAULTS,
@@ -20,7 +20,8 @@ import "./CodeSettings.css"
  * The code editor's settings, for its popups:  hover info, when suggestions show by themselves, their details, parameter hints,
  * pinned lines and the compiler's words in the hover;  and its look, bubbly or not (epic `language` P50),
  * and whether long lines wrap (epic `editor` I110:  the code pane and the Inspector's code alike);
- * and how long every popup on the page waits before it shows by itself (epic `codemirror` T19).
+ * and how long every popup on the page waits before it shows by itself (epic `codemirror` T19);
+ * and whether a project written for an older Spell is upgraded as it opens (epic `language` P68).
  * - Changed in the code pane's "..." menu, "Settings…", which shows `<CodeSettingsPanel>` over the code.
  * - Each change applies at once to every code editor on the page, and the browser remembers it
  *   (`spellEditor:codeHover` ...):  the editors follow `codeChoices`, which it sets (`showCodeChoices()`),
@@ -42,6 +43,21 @@ export class CodeSettings {
   /** Show the settings panel, or hide it. */
   static toggleShowing(show = !isShowing()): void {
     setShowing(show)
+  }
+
+  /**
+   * Is a project written for an older Spell upgraded as it opens, with no notice first (reactive)?
+   * - Not one of the editors' choices (`CodePopupChoices`):  the editor reads it as a project opens
+   *   (`editor.offerUpgrade()`, epic `language` P68).
+   */
+  static get upgradesOnOpen(): boolean {
+    return upgradesOnOpen()
+  }
+
+  /** Upgrade old Spell as a project opens, or not:  remembered (`UPGRADE_ON_OPEN_PREF`). */
+  static chooseUpgradeOnOpen(on: boolean): void {
+    editorPrefs.set(UPGRADE_ON_OPEN_PREF, on)
+    setUpgradesOnOpen(on)
   }
 
   /** Choose `value` for `key`:  remember it, and apply it to every editor now. */
@@ -96,6 +112,7 @@ let chosen: CodePopupChoices = {
 }
 const [choices, setChoices] = createSignal(chosen)
 const [isShowing, setShowing] = createSignal(false)
+const [upgradesOnOpen, setUpgradesOnOpen] = createSignal(editorPrefs.get(UPGRADE_ON_OPEN_PREF) === true)
 
 // the page's code editors start on what's chosen
 showCodeChoices(chosen)
@@ -103,7 +120,8 @@ showCodeChoices(chosen)
 /****************
  * ### `<CodeSettingsPanel>`
  * The code pane's settings, a small card over the code's top right corner:  `CodeSettings`' choices.
- * - Hover info, suggestions and the popup delay:  a select each;  the rest (`TOGGLES`):  a toggle each.
+ * - Hover info, suggestions and the popup delay:  a select each;  the rest (`TOGGLES`):  a toggle each;
+ *   then Upgrade old Spell when a project opens, a toggle too.
  * - Each change applies as it's made:  no Save.
  * - Its close button, or Escape, hides it.
  ****************/
@@ -191,6 +209,18 @@ export function CodeSettingsPanel() {
             </ui-field>
           )}
         </For>
+        <ui-field>
+          <ui-checkbox
+            appearance="toggle"
+            name="upgradeOnOpen"
+            selected={CodeSettings.upgradesOnOpen}
+            ref={on<{ selected: boolean }>("ui-changed", (event) =>
+              CodeSettings.chooseUpgradeOnOpen(event.detail.selected)
+            )}
+          >
+            {appTexts.text("codeUpgradeOnOpen")}
+          </ui-checkbox>
+        </ui-field>
       </ui-form>
     </div>
   )

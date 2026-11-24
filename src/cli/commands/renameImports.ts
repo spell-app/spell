@@ -184,7 +184,7 @@ export class ImportRenamer {
 
 /**
  * Run the rename over the nearest kit's checkout, the old child repos still inside it, and the repos beside it its
- * `repos.json5` lists by `path` (spell-brand);  prints each file it changed, and the sums.
+ * `repos.json5` lists by `path` (none today);  prints each file it changed, and the sums.
  * - Returns the reports, one per repo.
  */
 export function renameImportsCommand(kit: string, options: RenameImportsOptions = {}): RenameReport[] {
@@ -205,7 +205,7 @@ export function renameImportsCommand(kit: string, options: RenameImportsOptions 
 }
 
 /**
- * The repos to rename in:  the kit, each peer its `repos.json5` lists (`peerRepos()`, beside the kit:  spell-brand), and, in the old layout
+ * The repos to rename in:  the kit, each peer its `repos.json5` lists (`peerRepos()`, beside the kit:  none today), and, in the old layout
  * only, each child repo inside it (a folder of its own with a `.git`).
  * - The merged layout (a `<kit>/ui/package.json`) can still hold the old child repos' folders, git-ignored:
  *   they're left alone.

@@ -20,6 +20,7 @@
  *   |                   |         |                                       | beside the media (`UIParts.css`)             |
  *
  * - Sublayers come BEFORE the owners' (this sheet is adopted first), so an owner's item rules win.
+ * - `closable`:  `--ui-item-close-size` (the ✕'s size, 0.8em) and `--ui-item-close-opacity` (0.6, until hovered).
  */
 
 @layer ui.components.item.types, ui.components.item.content, ui.components.item.variations, ui.components.item.states;
@@ -117,5 +118,49 @@
     width: auto;
     height: 1em;
     fill: currentColor;
+  }
+}
+
+/*******************************
+          Closable
+*******************************/
+
+@layer ui.components.item.states {
+  /*
+   * `closable`:  the ✕ in the icon's place while the item is hovered, the icon hidden, the ✕ laid over it, so the item
+   * never grows or moves (the editor's file tabs:  epic `editor` T77, T82;  moved here by T145).
+   * - The ✕ a little smaller than the icon, light until it's hovered itself.
+   * - Laid over the icon, centred on it, not in a grid cell:  an owner's sheet comes later and sets the icon box's own
+   *   display.
+   */
+  .item > .icon.closable {
+    position: relative;
+  }
+  .item > .icon.closable > .glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .item > .icon.closable > .close {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    --_ui-item-close-size: var(--ui-item-close-size, 0.8em);
+    --_ui-item-close-opacity: var(--ui-item-close-opacity, 0.6);
+    visibility: hidden;
+    font-size: var(--_ui-item-close-size);
+    opacity: var(--_ui-item-close-opacity);
+    cursor: var(--ui-control-cursor, pointer);
+  }
+  .item:hover > .icon.closable > .glyph {
+    visibility: hidden;
+  }
+  .item:hover > .icon.closable > .close {
+    visibility: visible;
+  }
+  .item > .icon.closable > .close:hover {
+    opacity: 1;
   }
 }

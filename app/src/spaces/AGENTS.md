@@ -37,6 +37,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `elemental-spell` P7);  `<spell-viewer>` doesn't load it:  it never compiles
       - and an app's widget defaults, `<ui-defaults>`, in Spell UI's own names:
         [SpellUIDefaults.ts](models/SpellUIDefaults.ts) (epic `language` P29)
+    - [paletteTable.ts](models/paletteTable.ts):  the shape of the editor palette's groups, and their address.
+      The file itself is the editor's, [paletteGroups.json](../app/ui/paletteGroups.json) (epic `editor` J275):
+      [paletteRoutes.ts](server/node/routes/paletteRoutes.ts) finds it by its package name, to read and write,
+      and imports none of the app's code
     - [SpaceStorage.ts](models/SpaceStorage.ts) and [people.ts](models/people.ts):  types only, see "People"
   - [the node side](server/node/), node only:  imported by path (`spell/app/spaces/server/node/...`), never from the barrel
     - [environment.ts](server/node/environment.ts):  where everything is on disk (see "Projects" below)
@@ -153,6 +157,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - Never an example's or a guide's (`SPACES.isExampleProject()`, epic `mockup` T52):  opened as it is, your
           edits your draft;  leaving it asks to keep them as your own app (`duplicate/project`'s `withDraft`),
           drop them, or, a manager of `@spell`, publish them into the example.
+        - Never one of the editor's own pieces (`SPACES.isEditorPieceProject()`, epic `editor` J73, I329):  the editor
+          you're using reads the published file, so every edit to it is your draft, and only Publish changes it.
       - While you have drafts, what the editor compiles is YOUR build, `__draft/__build.<you>/`, served to you alone.
     - `POST /api/projects/keep-draft`:  your draft kept as a version of its own, never published (`keepDraft()`).
     - Publish writes the public files and zips the project into `versions/`;  neither folder is ever served.
@@ -835,6 +841,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       the NAME of its secret.  Nothing a page sends says where a secret goes.
     - In the deployment `SPELL_DEPLOYMENT` names, from the project file's `places`, as `spell run` picks it
       (`SP.SpellProject.deploymentsIn()`).
+      - A deployment the project file doesn't list:  that project's places are refused, never read as their lines say;
+        named as the page server starts, and every read refused, in `SP.UnlistedDeploymentError`'s words (from-console J104).
     - The secrets that aren't set, as the page server starts:  every project's declarations under `build/`.
     - Its test, end to end:  [ProjectPlaces.test.ts](../../tests/spaces/server/node/places/ProjectPlaces.test.ts).
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);
@@ -847,8 +855,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A request for a built file that isn't there (`/spaces/<project>/<project>.spell.js` ...)
     compiles its project first, then serves it (`projectBuild.builtFirst()`).
     - One compile per project at a time, waiting at most `COMPILE_WAIT_MS`.
-  - The route module starts `spell compile --stale --all @spell/examples @spell/library` as the page server starts,
-    in the background:  the demo pages and App UI's live examples run them.
+  - The route module starts `spell compile --stale --all @spell/examples @spell/library @spell/guides` as the page
+    server starts, in the background:  the demo pages, App UI's live examples and the Spell UI site
+    (`/components/ui/`) run them.
   - A child process, the checkout's own `spell compile`:  it compiles as the CLI does,
     and the page server keeps serving pages meanwhile.
 
@@ -861,6 +870,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - `SpellSessions`:  a game per visitor (a cookie), the program run once for each, on a core of its own.
   - A page per WebSocket:  the state down when it opens,
     then a patch after each message and at each pause (`core.before_pause`).
+  - One loop serves every visitor, so nothing may wait on it:  a program's saves are sent off it (epic `data` P62).
+    `saves_sent()` waits for them, as a visitor's last page closes and as the app stops (`app.after_serving`).
 - `page_html()`:  the page.
   - It loads the page side (app's `yarn build:page`, into `dist-page/`), and the program's drawing half.
   - `assets_folder()` finds the page side in the app's folder, or at `$SPELL_PAGE_ASSETS`.

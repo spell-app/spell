@@ -282,7 +282,10 @@ export function liveClient(scrollKey: string): void {
   // how long a hot reload waits for quiet after the last script changed, in ms:  a build writes many files
   const RELOAD_QUIET_MS = 500
   // every script the page fetched, as served paths (`servedPath()`):  `performance` drops entries past its buffer
+  // - and, once `scriptsLoaded()` first runs, its script tags'
   const fetched = new Set<string>()
+  // the page's script tags are in `fetched` (`scriptsLoaded()`)
+  let taggedRead = false
   // the same scripts, as the URL paths they were fetched at:  what `LIVE_VERSIONS` is asked of
   const fetchedUrls = new Set<string>()
   // the scripts changed since the last hot reload, as served paths:  offered to the page first (`hotReload()`)
@@ -443,7 +446,9 @@ export function liveClient(scrollKey: string): void {
       }
     }
     const address = servedPath(location.pathname, location.href, config!.worktreesPath)
-    const action = liveAction(path, { file: config!.file, scripts: scriptsLoaded(), address })
+    // the scripts only when it's a script that changed:  a burst of other changes walks nothing (epic `solid-2-final`
+    // P1:  every change in the kit made the editor scan ~400 scripts, 62% of its load on a phone)
+    const action = liveAction(path, { file: config!.file, scripts: scriptsLoaded, address })
     if (action === "page") updating = updating.then(() => updatePage(page)).catch(reloadQuietly)
     else if (action === "style") swapStyles(path)
     else if (action === "script") {
@@ -738,16 +743,19 @@ export function liveClient(scrollKey: string): void {
   /**
    * The scripts this page loaded from this server, as served paths (`servedPath()`):
    * its `<script src>` and `<link rel="modulepreload">` tags, and every script it fetched since (`watchFetches()`).
+   * - KEPT, not searched for on every change:  the tags are read once, on the first call;
+   *   every script fetched after is added as it's fetched (`watchFetches()`, whose resource entries include the tags')
    */
-  function scriptsLoaded(): string[] {
-    const found = new Set(fetched)
+  function scriptsLoaded(): Set<string> {
+    if (taggedRead) return fetched
+    taggedRead = true
     const tags = 'script[src], link[rel="modulepreload"][href]'
     for (const tag of document.querySelectorAll<HTMLScriptElement | HTMLLinkElement>(tags)) {
       const url = tag instanceof HTMLScriptElement ? tag.src : tag.href
       const path = servedPath(url, location.href, config!.worktreesPath)
-      if (path) found.add(path)
+      if (path) fetched.add(path)
     }
-    return [...found]
+    return fetched
   }
 
   /**
@@ -1350,16 +1358,17 @@ export type KeyPlace = { apple: boolean; field?: "text" | "rich" }
  * - `"ignore"`:  any other script (a repo tool)
  * - `"file"`:  anything else:  the page decides (`spell-server:changed`)
  * - `path` and `scripts` are served paths (`servedPath()`)
+ * - `scripts` may be a function:  called only when `path` is a script, so any other change walks no script list
  * - MUST stay self-contained:  `liveClientScript()` serves it beside `liveClient()`
  */
 export function liveAction(
   path: string,
-  { file, scripts, address }: { file: string; scripts: string[]; address?: string }
+  { file, scripts, address }: { file: string; scripts: Iterable<string> | (() => Iterable<string>); address?: string }
 ): LiveAction {
   if (path === file || (address && path === (address.endsWith("/") ? `${address}index.html` : address))) return "page"
   if (/\.css$/.test(path)) return "style"
   if (!/\.m?js$/.test(path)) return "file"
-  for (const script of scripts) {
+  for (const script of typeof scripts === "function" ? scripts() : scripts) {
     if (script.startsWith("/api/")) continue
     if (path.startsWith(script.slice(0, script.lastIndexOf("/") + 1))) return "script"
   }

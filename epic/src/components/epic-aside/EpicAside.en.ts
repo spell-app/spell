@@ -37,9 +37,6 @@ export const epicAsideVocabulary = {
   parts: [...PANEL_PARTS],
   states: [...PANEL_STATES],
   texts: [
-    { key: "foldTip", text: "Close this aside", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Open this aside", description: "Tooltip of its fold button while folded." },
-
     { key: "aside", text: "Aside", description: "The heading, without a title." },
     { key: "heading", text: "Aside:  {title}", description: "The heading, with a title." }
   ],

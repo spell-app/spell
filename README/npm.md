@@ -102,7 +102,9 @@ and needs no npm token:  npm trusts that one workflow by name.
 That's npm's [trusted publishing](https://docs.npmjs.com/trusted-publishers):
 nothing to keep in `~/.npmrc`, nothing that expires every 30 days.
 
-1. Bump `version` in the kit's `package.json`, and commit it to `main`:  the workflow never changes the version.
+1. Bump `version` in the kit's `package.json`, and in each manifest that follows it, in one commit on `main`:
+   each folder's, the two plugin manifests, and both VS Code extensions'.
+   The workflow never changes the version, and `yarn kit:test` names any manifest left behind.
 2. On GitHub, open the repo's Actions tab, pick "publish", and press "Run workflow" on `main`.
 3. Choose:
    - the tag:  `next` (the default) or `latest`
@@ -201,7 +203,7 @@ The workflow doesn't need one.
 | --- | --- | --- |
 | a pasted command with a `#` comment after it fails | zsh doesn't take `#` comments typed at its prompt | paste commands without their comments |
 | `npm publish dist-packs/x.tgz` goes looking for a GitHub repo | a path without `./` reads as `user/repo` | write `npm publish ./dist-packs/x.tgz` |
-| `You cannot publish over the previously published versions` | a version can never be reused, not even one only staged and never released | bump `version` in the kit's `package.json`, and publish again |
+| `You cannot publish over the previously published versions` | a version can never be reused, not even one only staged and never released | bump `version` ([step 1](#publishing-from-github)), and publish again |
 | the workflow's `npm publish` fails with `E422`, `repository.url ... expected to match` | with provenance, npm checks that the package names the repo that built it | the folder's `package.json` `repository` names `https://github.com/spell-app/spell`, with its folder as `directory` |
 | the workflow's `npm publish` asks for a login, or says it can't find a trusted publisher | the package's Trusted Publisher on npmjs.com doesn't match the run, or was dropped after 2 days unused | check its four settings (above), save it again, and run again within 2 days |
 | `spell-ui` or `spell-epic` fails to install | it was published before the `spell` it depends on | publish `spell` first;  `spell publish` does |

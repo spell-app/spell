@@ -26,6 +26,9 @@ import { SP } from "spell/parser/spell"
 import { DrawIt } from "spell/parser/spell/rules/classes"
 import { compiledSpellProject, parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
 
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
+
 /** One generated file:  its path from spell-parser's root, and its text. */
 export type BuiltInTemplateFile = { path: string; text: string }
 

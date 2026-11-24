@@ -104,6 +104,73 @@ export class SourceHomes {
     return undefined
   }
 
+  /**
+   * Where each of `names` lives for a thing made at `made` (if a line or tag made it) of `typeNames`:
+   * its making's line (`ofMaking()`) and its type's default (`ofDefault()`), the `spell/fieldHomes` request's answer.
+   * - Each home holds the text at its anchor as it was read (`seen`), so whoever uses it later can tell it's still
+   *   where it was:  the text may have changed since.
+   * - `behind`:  some home couldn't be read, the parse being behind the text for a moment:  ask again once it's parsed.
+   * - NEVER throws.
+   */
+  static fieldHomes(
+    files: readonly HomeFile[],
+    made: MadeAt | undefined,
+    typeNames: readonly string[],
+    names: readonly string[]
+  ): FieldHomes {
+    const homes: FieldHomes = { making: {}, start: {}, behind: false }
+    const file = made && files.find((each) => each.path === made.path)
+    const contentsOf = (path: string) => files.find((each) => each.path === path)?.contents ?? ""
+    for (const name of names) {
+      try {
+        const making = file && SourceHomes.ofMaking(file, made.offset, name)
+        if (file) homes.making[name] = making ? withSeen(making, file.contents) : null
+        const start = SourceHomes.ofDefault(files, typeNames, name)
+        homes.start[name] = start ? withSeen(start, contentsOf(start.file)) : null
+      } catch (ignored) {
+        // the parse is behind the text:  read again once it's parsed
+        homes.behind = true
+      }
+    }
+    return homes
+  }
+
+  /**
+   * Is `home` still where it was read, in `text`, its file's text now?  See `fieldHomes()`.
+   * - Its anchor is its whole line, past its indent:  the same words, still a whole line.
+   */
+  static isStill(home: Seen<FieldHome | MakingHome>, text: string): boolean {
+    const { start, end } = home.anchor
+    if (text.slice(start, end) !== home.seen) return false
+    return (end === text.length || text[end] === "\n") && (start === 0 || /[\s]/.test(text[start - 1]!))
+  }
+
+  /**
+   * `home` after `change` to its file, which is now `text`:  its spans shifted when they're after the change, grown
+   * or shrunk with it when they hold it, and the text it now sees.
+   * - How the Inspector's own edits keep the homes it wrote with (`FieldHomes.edited()`):  a dragged slider's
+   *   next write needs no new answer.
+   */
+  static moved<Home extends { anchor: TextSpan; seen: string; span?: TextSpan; removal?: TextSpan }>(
+    home: Home,
+    change: TextChange,
+    text: string
+  ): Home {
+    const anchor = movedSpan(home.anchor, change)
+    return {
+      ...home,
+      anchor,
+      ...(home.span && { span: movedSpan(home.span, change) }),
+      ...(home.removal && { removal: movedSpan(home.removal, change) }),
+      seen: text.slice(anchor.start, anchor.end)
+    }
+  }
+
+  /** Does `change` fall inside `span`, or touch its ends? */
+  static touches(span: TextSpan, change: TextChange): boolean {
+    return change.at <= span.end && change.at + change.removed >= span.start
+  }
+
   /** What a literal in the source says, as a value:  what a thing still holding its default holds. */
   static valueOfLiteral(text: string, style: LiteralStyle): unknown {
     if (style === "boolean") return BOOLEAN_TRUE.test(text)
@@ -257,9 +324,54 @@ export type MakingHome = {
   hasWith: boolean
 }
 
+/** One change to a file's text:  `removed` characters at `at` became `inserted` ones. */
+export type TextChange = {
+  /** where it starts */
+  at: number
+  /** how many characters it took out */
+  removed: number
+  /** how many it put in */
+  inserted: number
+}
+
+/** A home, with the text at its anchor as it was read:  `SourceHomes.isStill()`. */
+export type Seen<Home extends { anchor: TextSpan }> = Home & {
+  /** the text at its anchor when it was read */
+  seen: string
+}
+
+/**
+ * Where a thing's fields live, by field name, as `SourceHomes.fieldHomes()` reads them:  plain data, which crosses a
+ * worker's messages as it is.
+ */
+export type FieldHomes = {
+  /** on the line (or tag) that made it:  `null` where its making doesn't say it and can't;  absent with no making */
+  making: Record<string, Seen<OnMaking> | null>
+  /** its type's default:  `null` where no type here starts it */
+  start: Record<string, Seen<FileHome & { typeName: string }> | null>
+  /** some couldn't be read:  the parse was behind the text */
+  behind: boolean
+  /** the types its project has only one thing of (`solitaire is an app`):  the language service's answer adds them */
+  onlyTypes?: string[]
+}
+
 ////////////////
 // ## Helpers
 ////////////////
+
+/** `span` after `change`:  shifted when it's after it, grown or shrunk with it when it holds it. */
+function movedSpan(span: TextSpan, change: TextChange): TextSpan {
+  const delta = change.inserted - change.removed
+  const end = change.at + change.removed
+  if (span.end < change.at) return span
+  if (span.start > end) return { start: span.start + delta, end: span.end + delta }
+  return { start: Math.min(span.start, change.at), end: Math.max(span.end + delta, change.at + change.inserted) }
+}
+
+/** `home`, with the text at its anchor in `text`. */
+function withSeen<Home extends { anchor: TextSpan }>(home: Home, text: string): Seen<Home> {
+  return { ...home, seen: text.slice(home.anchor.start, home.anchor.end) }
+}
 
 /** The rules a home is read from, by name:  the same in every language. */
 const NEW_THING = "new_thing"

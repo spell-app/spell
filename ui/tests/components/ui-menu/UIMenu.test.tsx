@@ -98,10 +98,10 @@ describe("<ui-menu> classes", () => {
     ['appearance="link"', "ui link menu"],
     ['padding="none-x"', "ui horizontally fitted menu"],
     ['attach-to="both"', "ui attached menu"],
-    ['attach-to="top"', "ui top attached menu"],
-    ['fixed="bottom"', "ui bottom fixed menu"],
+    ['attach-to="top"', "ui top attached menu top-attached"],
+    ['fixed="bottom"', "ui bottom fixed menu bottom-fixed"],
     ['items="3"', "ui three item menu"],
-    ['items="equal"', "ui equal width menu"],
+    ['items="equal"', "ui equal width menu equal-width"],
     ["interactive", "ui menu"],
     ['appearance="segmented"', "ui segmented menu"],
     ['appearance="tabular"', "ui tabular menu"],
@@ -292,7 +292,8 @@ describe("<ui-menu> owner tokens reach the items", () => {
     const items = `<ui-item>A</ui-item><ui-item kind="divider" appearance="dashed"></ui-item><ui-item kind="divider"></ui-item><ui-item>B</ui-item>`
     const column = await menu('direction="vertical"', items)
     const [dashed, plain] = [styleOf(column.items[1]!), styleOf(column.items[2]!)]
-    expect([dashed.borderTopStyle, dashed.borderTopWidth, dashed.height]).toEqual(["dashed", "2px", "0px"])
+    // border-box:  its size is the line's alone
+    expect([dashed.borderTopStyle, dashed.borderTopWidth, dashed.height]).toEqual(["dashed", "2px", "2px"])
     expect(dashed.borderTopColor).not.toBe(plain.backgroundColor)
     expect(plain.borderTopStyle).toBe("none")
     const row = await menu("", items)
@@ -300,7 +301,7 @@ describe("<ui-menu> owner tokens reach the items", () => {
     expect([upright.borderInlineStartStyle, upright.borderInlineStartWidth, upright.width]).toEqual([
       "dashed",
       "2px",
-      "0px"
+      "2px"
     ])
   })
 
@@ -1002,7 +1003,7 @@ describe("<ui-menu> appearance, alignment, equal", () => {
 
   it('`items="3"` / `items="equal"` keep their count-based fill', async () => {
     const { root, items } = await bar('items="equal"', UNEVEN)
-    expect(root.className).toBe("ui equal width menu")
+    expect(root.className).toBe("ui equal width menu equal-width")
     expect(getComputedStyle(root).display).toBe("flex")
     expect(span(items)).toBeCloseTo(root.clientWidth, -0.5)
   })

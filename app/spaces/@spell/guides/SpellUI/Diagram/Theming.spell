@@ -11,7 +11,11 @@
 			root. Edit a value below to try it.
 		</>
 		<html>
-			<ui-docs-tokens family="ui-diagram" playground></>
+			<ui-docs-tokens family="ui-diagram" playground>
+				<ui-diagram remember="example-recipe-box">
+					<ui-json>&#123; "columns": \[ &#123; "groups": \[ &#123; "label": "Recipe Box", "color": "#047857", "lanes": \[ \[ &#123; "name": "Recipe", "note": "One dish, written down", "gap_before": 50, "fields": \[ "cuisine", "tags\[]", "method", "photos\[]", "notes\[]", "adapted_from", "replaces", "related_recipes\[]" ] &#125; ], \[ &#123; "name": "Cuisine", "note": "e.g. Thai, Basque" &#125;, &#123; "name": "Tag", "note": "Quick, vegetarian, spicy" &#125;, &#123; "name": "Method", "note": "Varies by cuisine", "fields": \["technique", "timer"] &#125;, &#123; "name": "Photo", "note": "Kept by a photo host", "fields": \["host / photo_id"] &#125;, &#123; "name": "Note", "note": "A cook's remark" &#125; ] ] &#125; ] &#125;, &#123; "groups": \[ &#123; "legend": true &#125;, &#123; "label": "Elsewhere", "color": "#6b7280", "gap_before": 60, "nodes": \[ &#123; "name": "Technique", "note": "Kitchen guide", "color": "#7c3aed" &#125;, &#123; "name": "Timer", "note": "Kitchen guide", "color": "#7c3aed" &#125;, &#123; "name": "Photo hosts", "note": "Outside services" &#125; ] &#125; ] &#125; ], "edges": \[ &#123; "from": "Recipe.cuisine", "to": "Cuisine" &#125;, &#123; "from": "Recipe.tags\[]", "to": "Tag" &#125;, &#123; "from": "Recipe.method", "to": "Method", "kind": "contains" &#125;, &#123; "from": "Recipe.photos\[]", "to": "Photo", "kind": "contains" &#125;, &#123; "from": "Recipe.notes\[]", "to": "Note", "kind": "contains" &#125;, &#123; "from": "Recipe.adapted_from", "to": "Recipe" &#125;, &#123; "from": "Recipe.replaces", "to": "Recipe" &#125;, &#123; "from": "Recipe.related_recipes\[]", "to": "Recipe" &#125;, &#123; "from": "Method.technique", "to": "Technique" &#125;, &#123; "from": "Method.timer", "to": "Timer" &#125;, &#123; "from": "Photo.host / photo_id", "to": "Photo hosts" &#125; ] &#125;</>
+				</>
+			</>
 		</>
 	</>
 

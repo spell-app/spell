@@ -13,8 +13,6 @@
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
 		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
 		  `.another.example`:  a second `<ui-example>` in the same section.
-		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
-		  it nests it and writes the ids (and fixes them after a title changes).
 		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
 		  shows in its code).
 	-->
@@ -34,6 +32,14 @@
 		<section label="Light / dark only" sticky="stack" collapsible dividing>
 			<example "Light / dark only" description="A sun or a moon alone:  `show=\"scheme\"`.  A click flips the page between light and dark.">
 				<theme-menu show="scheme"/>
+			</example>
+		</>
+
+		<section label="In a menu" sticky="stack" collapsible dividing>
+			<example "In a menu" description="The palette's panel alone, drawn in place:  `show=\"menu\"`.  For the body of a sub-menu in a menu of your own, which gives it its box;  `bench=\"none\"` leaves out Theme bench.">
+				<segment style="max-width: 15em">
+					<theme-menu show="menu" bench="none"/>
+				</segment>
 			</example>
 		</>
 	</>

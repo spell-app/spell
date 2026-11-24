@@ -3,11 +3,14 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSyn
 import { basename, join } from "node:path"
 
 import { waitUntilSync } from "spell/util/node/timing"
-import { waitUntil } from "spell/util/timing"
+import { after, waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
+import { Processes } from "spell/server/Processes"
+import { ClaudeHome } from "spell/epic/config/ClaudeHome"
 import { EpicHome } from "spell/epic/config/EpicHome"
 
 import { EXIT, EpicCommandError } from "./command.types"
+import { StallWatch, type WatchProps } from "./StallWatch"
 
 /****************
  * ### `Turns`
@@ -22,17 +25,28 @@ import { EXIT, EpicCommandError } from "./command.types"
  *   named by its time and pid;  the turn goes to the oldest live ticket, and a ticket whose process is gone is dropped.
  *   - Before I313 whoever looked first after the lock freed won, so an early waiter could lose to later ones.
  * - A holder is taken over at once when its process is gone, STOPPED (suspended) or a zombie (`holderState()`);
- *   a live one never is, however long it runs (J233):  its waiters wait, and say so.
+ *   a live one only once STALLED (below), never for how long it runs (J233, I400):  its waiters wait, and say so.
  * - HOW LONG IS USUAL:  every turn's run is written down (`turns/history.jsonl`);  usual is the median of its kind's
  *   last runs (`usual()`), else `DEFAULT_USUAL`.
- *   - past 3 times usual (`LONG`), `epic turns list` and its waiters say "longer than usual"
- *   - past 6 times usual (`STUCK`), its waiters give up, naming it:  the queue isn't moving
- *   - a waiter never gives up while the queue moves (I313:  a fixed 30 minutes made T83's and T84's waits give up
- *     behind a kit-wide `yarn review` that was still running)
+ *   - past 3 times usual (`LONG`), `epic turns list` and its waiters say "longer than usual":  words only
+ * - A waiter NEVER gives up on a live holder that isn't stalled, however long it runs;
+ *   only a `wait` it's handed ends its wait (`TakeProps`).
+ *   - I400:  a 5-15 minute `spell perf run` passed 6 times a usual ~30s test run, and its waiters gave up.
+ *   - I313:  a fixed 30 minutes made T83's and T84's waits give up behind a kit-wide `yarn review`.
  * - The same kind inside a turn runs straight away:  a turn's commands are told their kinds (`ENV`), so
  *   `epic turns run test -- yarn test` at the kit's root, whose folders' tests might queue again, never waits on itself.
  * - Kinds are open:  any lowercase word (`merge`, `test`, `build` ...).
+ * - A session may STOP ITS OWN runs (`stop()`, epic `epic-engine` T139:  a pause abandons its tests):
+ *   - its own:  the processes under that session's `claude` process, its agents' included;  never another session's
+ *   - NEVER a merge, nor a run with one inside it or around it:  a merge is left to finish
  * - A single test file (`yarn vitest run <file>`) takes no turn:  it's light, and an agent runs one often.
+ * - A STALLED command is stopped, freeing the turn (`StallWatch`, epic `epic-engine` I384):  no output and next to no
+ *   CPU over its whole process tree for the stall window (10 minutes;  `--stall <minutes>`, `SPELL_EPIC_TURN_STALL`,
+ *   `0` off), one line saying where it was;  `epic turns list` says "stalled" for a holder past it.
+ *   - Or no output at all for 3 times the window, however busy (I422:  a page stuck in a loop keeps its browser busy).
+ *   - Its output is piped through to watch it (colours kept when ours is a terminal:  `FORCE_COLOR`).
+ *   - A holder still quiet a minute past its window (`STALL_MARGIN`:  its own watch failed to stop it)
+ *     is taken over by its waiters, its tree stopped:  stalled is the only "stuck" for a live holder (I400).
  ****************/
 export class Turns {
   /** Run `epic turns <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
@@ -43,17 +57,27 @@ export class Turns {
       for (const line of Turns.listLines()) console.log(line)
       return EXIT.OK
     }
-    if (verb !== "run") throw new EpicCommandError(`unknown verb '${verb}':  epic turns run <kind> -- <command> | list`)
+    if (verb === "stop") return Turns.stopCommand(kind)
+    if (verb !== "run")
+      throw new EpicCommandError(`unknown verb '${verb}':  epic turns run <kind> -- <command> | stop <kind> | list`)
     const command = split === -1 ? [] : args.slice(split + 1)
-    if (!kind || !command.length) throw new EpicCommandError("usage:  epic turns run <kind> -- <command> [args...]")
-    return Turns.runCommand(kind, command)
+    if (!kind || !command.length)
+      throw new EpicCommandError("usage:  epic turns run <kind> [--stall <minutes>] -- <command> [args...]")
+    const head = split === -1 ? args : args.slice(0, split)
+    const stall = head.indexOf("--stall")
+    if (stall === -1) return Turns.runCommand(kind, command)
+    const minutes = Number(head[stall + 1])
+    if (!Number.isFinite(minutes) || minutes < 0)
+      throw new EpicCommandError(`epic turns:  --stall takes minutes (0:  off), not '${head[stall + 1] ?? ""}'`)
+    return Turns.runCommand(kind, command, { stallMs: minutes * 60_000 })
   }
 
   /**
    * Run `fn` holding the `kind` turn;  returns what it returns.
    * - `label`:  what the lock says it's for, in another waiter's message
    * - waits in line (`TurnQueue`), saying who it waits for, and again when that changes
-   * - throws `SRV.FileLockError` when the queue is stuck (`STUCK`), or after `props.wait` ms when given
+   * - waits while the holder lives and isn't stalled, however long;
+   *   throws `SRV.FileLockError` after `props.wait` ms, only when that's given
    */
   static take<T>(kind: string, label: string, fn: () => T, props: TakeProps = {}): T {
     if (Turns.inTurn(kind)) return fn()
@@ -89,23 +113,138 @@ export class Turns {
   /**
    * Run `command` (its words) holding the `kind` turn, its output straight through;  resolves to its exit code.
    * - the turn's kinds are in its environment (`ENV`):  the same kind inside runs straight away
+   * - stalled (`StallWatch`):  its tree stopped, one line saying so, `EXIT.ERRORS`;  `props.stallMs` the window
+   *   (default `stallWindow()`, `0` off), `props.watch` the watch's own (its tests')
    */
-  static runCommand(kind: string, command: string[], props: TakeProps = {}): Promise<number> {
+  static runCommand(kind: string, command: string[], props: RunProps = {}): Promise<number> {
     Turns.checkKind(kind)
+    const label = command.join(" ")
+    const stallMs = props.stallMs ?? Turns.stallWindow()
     return Turns.takeAsync(
       kind,
-      command.join(" "),
+      label,
       () =>
         new Promise<number>((done) => {
-          const child = spawn(command[0]!, command.slice(1), { stdio: "inherit", env: process.env })
+          const env = { ...process.env }
+          if (process.stdout.isTTY && env.FORCE_COLOR === undefined && env.NO_COLOR === undefined) env.FORCE_COLOR = "1"
+          const child = spawn(command[0]!, command.slice(1), { stdio: ["inherit", "pipe", "pipe"], env })
+          child.stdout?.pipe(process.stdout, { end: false })
+          child.stderr?.pipe(process.stderr, { end: false })
+          let stalled = false
+          const watch = new StallWatch({ stallMs })
+          const unwatch = stallMs
+            ? watch.watch(child, {
+                ...props.watch,
+                busy: () => Turns.writeBusy(kind, Date.now(), stallMs),
+                stalled: () => {
+                  stalled = true
+                  console.error(watch.stoppedLine(label))
+                }
+              })
+            : () => {}
+          if (stallMs) Turns.writeBusy(kind, Date.now(), stallMs)
           child.on("error", (error) => {
+            unwatch()
             console.error(`epic turns:  ${command[0]} won't start:  ${error.message}`)
             done(EXIT.ERRORS)
           })
-          child.on("exit", (code, signal) => done(code ?? (signal ? EXIT.ERRORS : EXIT.OK)))
+          child.on("exit", (code, signal) => {
+            unwatch()
+            rmSync(Turns.busyFile(kind), { force: true })
+            const finish = () => {
+              // a process it left running (a server) may hold the pipes:  they mustn't hold this one
+              child.stdout?.destroy()
+              child.stderr?.destroy()
+              done(stalled ? EXIT.ERRORS : (code ?? (signal ? EXIT.ERRORS : EXIT.OK)))
+            }
+            // its last output first:  the pipes close just after it exits, unless something holds them
+            const late = setTimeout(finish, 1_000)
+            child.on("close", () => {
+              clearTimeout(late)
+              finish()
+            })
+          })
         }),
       props
     )
+  }
+
+  /**
+   * The turn runs, held or waiting, of session `sessionId`:  those under its `claude` process.
+   * - `parents`:  each process's parent (a test's to stub);  a session no process runs:  `[]`
+   */
+  static runsOf(
+    sessionId: string | undefined,
+    { live = ClaudeHome.liveSessions(), parents = Processes.parents() }: OwnRunsProps = {}
+  ): OwnRun[] {
+    const roots = live.filter((session) => session.sessionId === sessionId).map(({ pid }) => pid)
+    if (!roots.length) return []
+    const held = Turns.held().flatMap(({ kind, holder: { pid, label } }): OwnRun[] =>
+      pid ? [{ kind, pid, label: label ?? "", waiting: false }] : []
+    )
+    const waiting = TurnQueue.kindsWaiting().flatMap((kind) =>
+      TurnQueue.ticketsOf(kind).map(({ pid, label }): OwnRun => ({ kind, pid, label, waiting: true }))
+    )
+    return [...waiting, ...held].filter(({ pid }) => !isGone(pid) && roots.some((root) => isUnder(pid, root, parents)))
+  }
+
+  /**
+   * Stop session `sessionId`'s own `kind` runs, waiters first, each with its whole process tree, and free its turn;
+   * resolves to what it stopped and what it left.
+   * - left:  a merge of that session's, and a run sharing a process tree with one:  a merge is never killed half way
+   * - throws for the `merge` kind
+   */
+  static async stop(
+    kind: string,
+    sessionId: string | undefined,
+    { graceMs = STOP_GRACE_MS, ...props }: OwnRunsProps & { graceMs?: number } = {}
+  ): Promise<{ stopped: OwnRun[]; left: OwnRun[] }> {
+    Turns.checkKind(kind)
+    if (kind === MERGE) throw new EpicCommandError("epic turns stop:  a merge is never stopped:  let it finish")
+    const parents = props.parents ?? Processes.parents()
+    const own = Turns.runsOf(sessionId, { ...props, parents })
+    const merges = own.filter((run) => run.kind === MERGE)
+    const stopped = own.filter(
+      (run) =>
+        run.kind === kind && !merges.some(({ pid }) => isUnder(pid, run.pid, parents) || isUnder(run.pid, pid, parents))
+    )
+    if (stopped.length) {
+      for (const { pid } of stopped) StallWatch.stop(pid, graceMs)
+      // the SIGKILL comes at the grace's end:  stay for it
+      await after(graceMs / 1000)
+      await waitUntil(() => stopped.every(({ pid }) => Turns.holderState(pid) !== "running"), { timeout: 2 })
+      const lock = new SRV.FileLock(join(Turns.folder(), kind))
+      const holder = lock.holder()
+      if (holder?.pid && stopped.some(({ pid }) => pid === holder.pid) && Turns.holderState(holder.pid) !== "running") {
+        rmSync(lock.lockFile, { force: true })
+        rmSync(Turns.busyFile(kind), { force: true })
+      }
+    }
+    return { stopped, left: own.filter((run) => !stopped.includes(run)) }
+  }
+
+  /** `stop <kind>`:  this session's own runs of it stopped, and what's left said. */
+  private static async stopCommand(kind: string | undefined): Promise<number> {
+    if (!kind) throw new EpicCommandError("usage:  epic turns stop <kind>:  this session's own runs of it (test)")
+    const me = process.env.CLAUDE_CODE_SESSION_ID
+    if (!ClaudeHome.liveSessions().some((session) => session.sessionId === me))
+      throw new EpicCommandError("epic turns stop:  can't tell which runs are this session's, so it stops none")
+    const { stopped, left } = await Turns.stop(kind, me)
+    for (const run of stopped) console.log(`stopped, abandoned:  ${runLine(run)}`)
+    if (!stopped.length) console.log(`none of this session's ${kind} runs to stop`)
+    for (const run of left) {
+      const merge = run.kind === MERGE ? " -- let it finish, and stop no agent until it has" : ""
+      console.log(`left running:  ${runLine(run)}${merge}`)
+    }
+    return EXIT.OK
+  }
+
+  /** The stall window, ms:  `SPELL_EPIC_TURN_STALL` (minutes;  `0` off), else `StallWatch.DEFAULT_MS`. */
+  static stallWindow(): number {
+    const minutes = Number(process.env[StallWatch.ENV])
+    return process.env[StallWatch.ENV] && Number.isFinite(minutes) && minutes >= 0
+      ? minutes * 60_000
+      : StallWatch.DEFAULT_MS
   }
 
   /** The turns taken now, by kind:  `{ kind, holder }` each, oldest first. */
@@ -154,7 +293,9 @@ export class Turns {
     const held = now - since.getTime()
     const usual = Turns.usual(kind)
     const long = held > usual * Turns.LONG ? ` -- longer than usual (${minutes(usual)})` : ""
-    return `${who}, for ${minutes(held)}${long}`
+    const quiet = pid ? Turns.quietFor(kind, pid, now) : undefined
+    const stalled = quiet === undefined ? "" : ` -- stalled (no output or CPU for ${minutes(quiet)})`
+    return `${who}, for ${minutes(held)}${long}${stalled}`
   }
 
   /**
@@ -204,6 +345,22 @@ export class Turns {
     return "running"
   }
 
+  /**
+   * How long `kind`'s holder `pid` has been quiet, ms, once past its stall window;  else `undefined`.
+   * - from `<kind>.busy`, which the holder's watch rewrites while it's busy:  `<pid> <last busy ms> <stall ms>`
+   */
+  static quietFor(kind: string, pid: number, now = Date.now()): number | undefined {
+    let words: string[]
+    try {
+      words = readFileSync(Turns.busyFile(kind), "utf8").trim().split(/\s+/)
+    } catch {
+      return undefined
+    }
+    const [holder, busy, stallMs] = words.map(Number)
+    if (holder !== pid || !busy || !stallMs) return undefined
+    return now - busy >= stallMs ? now - busy : undefined
+  }
+
   /** The turns' folder:  the epic home's `turns/`. */
   static folder(): string {
     return EpicHome.subfolder("turns")
@@ -212,8 +369,11 @@ export class Turns {
   /** A run past this many times usual is "longer than usual". */
   static readonly LONG = 3
 
-  /** A run past this many times usual has its waiters give up:  the queue is stuck. */
-  static readonly STUCK = 6
+  /**
+   * How far past its stall window a quiet holder is taken over by a waiter, ms:  a minute.
+   * - its own watch stops it within a look (15s at most) and the grace (10s):  past this, that watch is hung too
+   */
+  static readonly STALL_MARGIN = 60_000
 
   /**
    * Usual run times before 3 are written down, ms, by kind:  a guess on the long side, replaced by `history.jsonl`'s
@@ -266,6 +426,20 @@ export class Turns {
     else delete process.env[Turns.ENV]
   }
 
+  /** The file a holder's watch keeps its last busy time in. */
+  private static busyFile(kind: string): string {
+    return join(Turns.folder(), `${kind}.busy`)
+  }
+
+  /** Write down that this process's `kind` command was busy at `at`.  NEVER throws. */
+  private static writeBusy(kind: string, at: number, stallMs: number): void {
+    try {
+      writeFileSync(Turns.busyFile(kind), `${process.pid} ${at} ${stallMs}`)
+    } catch {
+      // best effort:  only `epic turns list` reads it
+    }
+  }
+
   /** Add `run` to `history.jsonl`, keeping its last 200 lines.  NEVER throws. */
   private static writeDown(run: TurnRun): void {
     try {
@@ -284,6 +458,12 @@ export class Turns {
   }
 }
 
+/** One of a session's turn runs (`Turns.runsOf()`):  held, or waiting for it. */
+export type OwnRun = { kind: string; pid: number; label: string; waiting: boolean }
+
+/** `Turns.runsOf()`'s options:  the running sessions and each process's parent, a test's to stub. */
+export type OwnRunsProps = { live?: { sessionId: string; pid: number }[]; parents?: Map<number, number> }
+
 /** What `Turns.holderState()` answers. */
 export type HolderState = "running" | "stopped" | "zombie" | "gone"
 
@@ -292,10 +472,20 @@ export type TurnRun = { kind: string; label: string; ms: number; at: string }
 
 /**
  * `Turns.take()` props.
- * - `wait`:  longest wait, ms;  by default none:  it waits while the queue moves, and gives up only when it's stuck
+ * - `wait`:  longest wait, ms;  by default none:  it waits while the holder lives and isn't stalled, however long
  * - `say`:  where the waiting lines go (default stderr)
  */
 export type TakeProps = { wait?: number; say?: (line: string) => void }
+
+/**
+ * `Turns.runCommand()` props:  `take()`'s, plus
+ * - `stallMs`:  the stall window, ms (`0` off;  default `Turns.stallWindow()`)
+ * - `watch`:  the stall watch's look interval, grace and CPU reader (its tests')
+ */
+export type RunProps = TakeProps & {
+  stallMs?: number
+  watch?: Pick<WatchProps, "every" | "graceMs" | "cpu">
+}
 
 /**
  * ### `TurnQueue`
@@ -311,7 +501,7 @@ class TurnQueue {
   /** what the lock says the turn is for */
   readonly label: string
 
-  /** how long to wait at most, seconds:  `props.wait`, else for ever (stuck ends it, `poll()`) */
+  /** how long to wait at most, seconds:  `props.wait`, else for ever */
   readonly waitSeconds: number
 
   private readonly kind: string
@@ -319,7 +509,6 @@ class TurnQueue {
   private ticket: string | undefined
   private toldHolder = ""
   private toldLong = false
-  private stuck: SRV.FileLockHolder | undefined
 
   constructor(kind: string, label: string, props: TakeProps) {
     Turns.checkKind(kind)
@@ -342,17 +531,12 @@ class TurnQueue {
 
   /**
    * One look:  the turn when our ticket is first and the lock is free;  `false` to look again.
-   * - throws `SRV.FileLockError` once the holder has run past `STUCK` times usual
+   * - NEVER gives up on a live holder, however long it's held (I400):  only a dead or stalled one is taken over
    */
   poll(): boolean {
     this.takeOverDead()
     if (this.isFirst() && this.lock.tryAcquire()) return true
     this.tell()
-    const holder = this.lock.holder()
-    if (holder && Date.now() - holder.since.getTime() > Turns.usual(this.kind) * Turns.STUCK) {
-      this.stuck = holder
-      throw this.timeout()
-    }
     return false
   }
 
@@ -362,12 +546,12 @@ class TurnQueue {
     this.ticket = undefined
   }
 
-  /** The error for giving up:  the queue stuck behind its holder, or `wait` run out. */
+  /** The error for giving up:  `wait` run out. */
   timeout(): SRV.FileLockError {
-    const holder = this.stuck ?? this.lock.holder()
+    const holder = this.lock.holder()
     const who = holder ? Turns.holderLine(holder, this.kind) : "nobody"
-    const why = this.stuck ? "stuck" : `not free in ${Math.round((this.waitSeconds * 1000) / 60_000)}m`
-    return new SRV.FileLockError(`epic turns:  the ${this.kind} turn is ${why}:  held by ${who}`)
+    const wait = Math.round((this.waitSeconds * 1000) / 60_000)
+    return new SRV.FileLockError(`epic turns:  the ${this.kind} turn is not free in ${wait}m:  held by ${who}`)
   }
 
   /** The kinds with anyone waiting. */
@@ -422,13 +606,22 @@ class TurnQueue {
     return TurnQueue.ticketsOf(this.kind)[0]?.file === this.ticket
   }
 
-  /** A holder whose process is gone, stopped or a zombie:  its lock removed at once, saying so. */
+  /**
+   * A holder whose process is gone, stopped or a zombie:  its lock removed at once, saying so.
+   * - and a live one still quiet `STALL_MARGIN` past its stall window (`Turns.quietFor()`):
+   *   its tree stopped too, as its own watch would have
+   */
   private takeOverDead(): void {
     const holder = this.lock.holder()
     if (!holder?.pid || holder.pid === process.pid) return
     const state = Turns.holderState(holder.pid)
-    if (state === "running") return
-    this.say(`epic turns:  the ${this.kind} turn's holder is ${state}:  taking it over (${Turns.holderLine(holder)})`)
+    // quiet past the window as of a margin ago:  past the window plus the margin now
+    const quiet =
+      state === "running" ? Turns.quietFor(this.kind, holder.pid, Date.now() - Turns.STALL_MARGIN) : undefined
+    if (state === "running" && quiet === undefined) return
+    const why = quiet === undefined ? state : `stalled (no output or CPU for ${minutes(quiet + Turns.STALL_MARGIN)})`
+    this.say(`epic turns:  the ${this.kind} turn's holder is ${why}:  taking it over (${Turns.holderLine(holder)})`)
+    if (quiet !== undefined) StallWatch.stop(holder.pid)
     rmSync(this.lock.lockFile, { force: true })
   }
 
@@ -451,6 +644,27 @@ class TurnQueue {
 
 /** A waiter's ticket (`TurnQueue.ticketsOf()`). */
 type Ticket = { file: string; at: number; pid: number; label: string }
+
+/** The kind of turn a merge takes:  never stopped. */
+const MERGE = "merge"
+
+/** SIGTERM to SIGKILL for a run its own session abandons:  shorter than a stall's, a pause is in a hurry. */
+const STOP_GRACE_MS = 3_000
+
+/** Whether process `pid` is `root` or runs under it, by `parents`. */
+function isUnder(pid: number, root: number, parents: Map<number, number>): boolean {
+  const seen = new Set<number>()
+  for (let at = pid; at > 1 && !seen.has(at); at = parents.get(at) ?? 0) {
+    if (at === root) return true
+    seen.add(at)
+  }
+  return false
+}
+
+/** A session's own run as a person reads it:  `test:  yarn test, pid 123 (waiting)`. */
+function runLine({ kind, label, pid, waiting }: OwnRun): string {
+  return `${kind}:  ${label || "someone"}, pid ${pid}${waiting ? " (waiting)" : ""}`
+}
 
 /** Whether process `pid` has ended:  `kill(pid, 0)` alone, cheap enough for every look at the line. */
 function isGone(pid: number): boolean {

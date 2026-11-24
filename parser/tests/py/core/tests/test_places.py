@@ -9,21 +9,30 @@
 """
 
 import asyncio
+import contextlib
+import http.client
 import json
+import subprocess
+import sys
 import threading
+import time
+import urllib.error
 from collections.abc import Iterator
 from datetime import UTC, date, datetime
+from email.message import Message
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from io import BytesIO
 from pathlib import Path
 from typing import Any, ClassVar
 
 import pytest
 
-from spell_core import Core, Place, PlaceError, Thing, h, prop
+from spell_core import Core, Place, PlaceError, Thing, h, place_kinds, prop
 from spell_core.calendar_settings import CalendarSettings
 from spell_core.core import using_core
-from spell_core.place_kinds import ServerPlace, device_file_for, place_behind
+from spell_core.place_kinds import Change, DeviceFile, ServerPlace, device_file_for, place_behind
 from spell_core.places import javascript_name, python_name
+from spell_core.run import run_program
 
 # The page server's write token, here.
 TOKEN = "places-token"
@@ -196,6 +205,508 @@ def test_a_type_kept_nowhere_says_so(program: Core) -> None:
 def test_the_device_file_is_named_for_the_program() -> None:
     assert device_file_for(Path("/x/TaskList.spell.py")) == Path("/x/TaskList.device.json")
     assert device_file_for(Path("/x/app.py")) == Path("/x/app.device.json")
+
+
+################
+# ## Writes off the loop
+################
+
+# How long the slow place takes over each send, in seconds.
+SLOW_SECONDS = 0.5
+
+
+class SlowFile(DeviceFile):
+    """A database on this device that's slow to take a save, as a far-off server is:  it lists what happened."""
+
+    def __init__(self, file: Path, happened: list[str]) -> None:
+        """The slow database kept in `file`, saying each save in `happened`."""
+        super().__init__(file)
+        self.happened = happened
+
+    def apply(self, changes: list[Change]) -> None:
+        """Take `changes`, `SLOW_SECONDS` later."""
+        time.sleep(SLOW_SECONDS)
+        super().apply(changes)
+        self.happened.append("saved")
+
+
+def test_one_coroutines_save_never_holds_up_another_on_the_loop(program: Core, tmp_path: Path) -> None:
+    happened: list[str] = []
+    program._places.behinds["this_device"] = SlowFile(tmp_path / "Notes.device.json", happened)
+
+    async def saves() -> None:
+        program.save_thing(DeviceNote(text="milk"))
+
+    async def plays() -> None:
+        happened.append("played")
+
+    async def both() -> None:
+        await asyncio.gather(saves(), plays())
+
+    asyncio.run(both())
+    assert happened == ["played", "saved"]
+
+
+class WatchedFile(DeviceFile):
+    """A database on this device that lists each send it took, and refuses any saving the text `no`."""
+
+    def __init__(self, file: Path) -> None:
+        """The database kept in `file`, sent nothing yet."""
+        super().__init__(file)
+        self.sends: list[list[Change]] = []
+
+    def apply(self, changes: list[Change]) -> None:
+        """Take `changes`, or refuse them all."""
+        if any(change.get("fields", {}).get("text") == "no" for change in changes):
+            raise PlaceError("that text isn't allowed", "refused")
+        super().apply(changes)
+        self.sends.append(changes)
+
+    @property
+    def texts_sent(self) -> list[list[str]]:
+        """Each send's texts, in order."""
+        return [[change["fields"]["text"] for change in send] for send in self.sends]
+
+
+@pytest.fixture
+def watched(program: Core, tmp_path: Path) -> WatchedFile:
+    """The program's database on this device, listing what it's sent."""
+    behind = WatchedFile(tmp_path / "Notes.device.json")
+    program._places.behinds["this_device"] = behind
+    return behind
+
+
+def test_changes_to_one_place_arrive_in_order(program: Core, watched: WatchedFile) -> None:
+    async def saves() -> None:
+        note = DeviceNote(text="one")
+        program.save_thing(note)
+        note.text = "two"
+        note.text = "three"
+
+    asyncio.run(saves())
+    assert [text for send in watched.texts_sent for text in send] == ["one", "two", "three"]
+
+
+def test_changes_made_during_a_send_wait_for_it(program: Core, tmp_path: Path) -> None:
+    happened: list[str] = []
+    program._places.behinds["this_device"] = SlowFile(tmp_path / "Notes.device.json", happened)
+
+    async def saves() -> list[str]:
+        note = DeviceNote(text="one")
+        program.save_thing(note)
+        await asyncio.sleep(SLOW_SECONDS / 5)
+        note.text = "two"
+        program.reload_saved()
+        return [it.text for it in await program.saved_things(DeviceNote)]
+
+    assert asyncio.run(saves()) == ["two"]
+    assert happened == ["saved", "saved"]
+
+
+def test_in_one_go_arrives_as_one_send_among_the_others(program: Core, watched: WatchedFile) -> None:
+    def two() -> None:
+        program.save_thing(DeviceNote(text="b"))
+        program.save_thing(DeviceNote(text="c"))
+
+    async def saves() -> None:
+        program.save_thing(DeviceNote(text="a"))
+        await program.in_one_go(two)
+        program.save_thing(DeviceNote(text="d"))
+
+    asyncio.run(saves())
+    assert watched.texts_sent == [["a"], ["b", "c"], ["d"]]
+
+
+def test_a_refused_in_one_go_still_raises(program: Core, watched: WatchedFile) -> None:
+    with pytest.raises(PlaceError, match="isn't allowed"):
+        asyncio.run(program.in_one_go(lambda: program.save_thing(DeviceNote(text="no"))))
+    assert watched.sends == []
+
+
+def test_a_read_right_after_a_save_sees_it(program: Core, watched: WatchedFile) -> None:
+    async def saves_and_reads() -> list[str]:
+        program.save_thing(DeviceNote(text="milk"))
+        program.reload_saved()
+        return [it.text for it in await program.saved_things(DeviceNote)]
+
+    assert asyncio.run(saves_and_reads()) == ["milk"]
+
+
+def test_a_drawing_right_after_a_save_sees_it(program: Core, watched: WatchedFile) -> None:
+    async def saves_and_draws() -> list[str]:
+        program.save_thing(DeviceNote(text="milk"))
+        program.reload_saved()
+        return [it.text for it in program.run_at_once(program.saved_things(DeviceNote))]
+
+    assert asyncio.run(saves_and_draws()) == ["milk"]
+
+
+def test_a_refused_save_is_one_line_and_the_next_still_goes(
+    program: Core, watched: WatchedFile, capsys: pytest.CaptureFixture[str]
+) -> None:
+    async def saves() -> None:
+        for text in ("one", "no", "two"):
+            program.save_thing(DeviceNote(text=text))
+
+    asyncio.run(saves())
+    assert watched.texts_sent == [["one"], ["two"]]
+    assert capsys.readouterr().err.splitlines() == ["Couldn't keep the change to DeviceNote:  that text isn't allowed"]
+
+
+def test_a_value_json_cant_hold_loses_only_its_own_save(
+    program: Core, watched: WatchedFile, capsys: pytest.CaptureFixture[str]
+) -> None:
+    async def saves() -> None:
+        program.save_thing(DeviceNote(text="one"))
+        odd = DeviceNote(text="odd")
+        odd._props["text"] = {1, 2}
+        program.save_thing(odd)
+
+    asyncio.run(saves())
+    assert watched.texts_sent == [["one"]]
+    assert "Couldn't keep the change to DeviceNote" in capsys.readouterr().err
+
+
+def test_a_sign_in_that_ended_loses_only_the_save_that_found_it(program: Core, tmp_path: Path) -> None:
+    class SignedOut(DeviceFile):
+        """A place whose sign-in has ended, as an atmosphere account's says it:  the next send signs in again."""
+
+        has_signed_in = False
+
+        def apply(self, changes: list[Change]) -> None:
+            """Refuse the first send, knowing none of it was kept."""
+            if not self.has_signed_in:
+                self.has_signed_in = True
+                over = PlaceError("the sign-in has ended")
+                over.has_kept_nothing = True
+                raise over
+            super().apply(changes)
+
+    program._places.behinds["this_device"] = SignedOut(tmp_path / "Notes.device.json")
+
+    async def saves() -> None:
+        for text in ("one", "two", "three"):
+            program.save_thing(DeviceNote(text=text))
+
+    asyncio.run(saves())
+    assert len(DeviceFile(tmp_path / "Notes.device.json").rows_now("device_notes")) == 3
+
+
+def test_with_no_loop_a_refused_save_still_raises(program: Core, watched: WatchedFile) -> None:
+    with pytest.raises(PlaceError, match="isn't allowed"):
+        program.save_thing(DeviceNote(text="no"))
+
+
+def test_the_loop_ending_waits_for_the_last_save(program: Core, tmp_path: Path) -> None:
+    happened: list[str] = []
+    program._places.behinds["this_device"] = SlowFile(tmp_path / "Notes.device.json", happened)
+
+    async def saves_and_ends() -> None:
+        note = DeviceNote(text="one")
+        program.save_thing(note)
+        await asyncio.sleep(SLOW_SECONDS / 5)
+        # made while the first is still being sent
+        note.text = "two"
+
+    # `asyncio.run()` cancels what's running as it ends:  the saves still go
+    asyncio.run(saves_and_ends())
+    assert happened == ["saved", "saved"]
+    assert DeviceFile(tmp_path / "Notes.device.json").rows_now("device_notes")[0]["text"] == "two"
+
+
+def test_two_cores_saving_to_one_device_file_keep_both(tmp_path: Path) -> None:
+    cores = [new_core(tmp_path) for _ in range(8)]
+
+    async def all_save() -> None:
+        for number, a_core in enumerate(cores):
+            with using_core(a_core):
+                a_core.save_thing(DeviceNote(text=f"note {number}"))
+        await asyncio.gather(*(a_core.saves_sent() for a_core in cores))
+
+    asyncio.run(all_save())
+    assert len(DeviceFile(tmp_path / "Notes.device.json").rows_now("device_notes")) == 8
+
+
+# A compiled program whose last step saves as it waits, its place slow:  it prints once it's sent.
+ENDING_PROGRAM = """\
+import asyncio
+import time
+
+from spell_core import Place, Thing, core, prop
+from spell_core.place_kinds import DeviceFile
+
+
+class Shelf(Place):
+    pass
+
+
+shelf = core.place(Shelf(), {"name": "shelf", "kind": "database on this device"})
+apply = DeviceFile.apply
+
+
+def slow_apply(self, changes):
+    time.sleep(0.5)
+    apply(self, changes)
+    print("saved", flush=True)
+
+
+DeviceFile.apply = slow_apply
+
+
+class Note(Thing):
+    saved_in = {"place": "shelf", "collection": "notes"}
+    text = prop(type="text")
+
+
+async def keep_a_note():
+    core.save_thing(Note(text="milk"))
+
+
+asyncio.run(keep_a_note())
+"""
+
+
+def test_a_program_ends_only_after_its_last_save(tmp_path: Path) -> None:
+    file = tmp_path / "Ending.spell.py"
+    file.write_text(ENDING_PROGRAM, encoding="utf-8")
+    ran = subprocess.run(
+        [sys.executable, "-m", "spell_core.run", str(file)], capture_output=True, text=True, timeout=30
+    )
+    assert (ran.returncode, ran.stdout) == (0, "saved\n")
+    assert "milk" in (tmp_path / "Ending.device.json").read_text(encoding="utf-8")
+
+
+class AnswerCutShort:
+    """A server's answer that can't be read:  a page of HTML, or `error` as it's read."""
+
+    def __init__(self, error: Exception | None) -> None:
+        """An answer of `<html>`, or one that raises `error`."""
+        self.error = error
+
+    def __enter__(self) -> "AnswerCutShort":
+        """The answer itself."""
+        return self
+
+    def __exit__(self, *raised: object) -> None:
+        """Nothing to close."""
+
+    def read(self) -> bytes:
+        """Its bytes, such as they are."""
+        if self.error:
+            raise self.error
+        return b"<html>"
+
+
+def requests_for_three_saves(
+    program: Core, behind: ServerPlace, monkeypatch: pytest.MonkeyPatch, answer: Any
+) -> list[list[str]]:
+    """Save a, b and c at once to `behind`, whose server gives `answer`:  the texts each request held."""
+    requests: list[list[str]] = []
+
+    def opened(request: Any) -> object:
+        requests.append([change["fields"]["text"] for change in json.loads(request.data)["changes"]])
+        if isinstance(answer, urllib.error.HTTPError):
+            raise answer
+        return answer
+
+    monkeypatch.setattr(place_kinds, "open_minding_limits", opened)
+    program._places.behinds["this_device"] = behind
+
+    async def saves() -> None:
+        for text in "abc":
+            program.save_thing(DeviceNote(text=text))
+
+    asyncio.run(saves())
+    return requests
+
+
+@pytest.mark.parametrize("error", [None, http.client.IncompleteRead(b"{")], ids=["garbled", "cut off"])
+@pytest.mark.parametrize(
+    ("kind", "requests"),
+    [("sheet", [["a", "b", "c"]]), ("data folder", [["a"], ["b"], ["c"]])],
+    ids=["sheet", "folder"],
+)
+def test_saves_whose_answer_cant_be_read_reach_the_server_once(
+    program: Core,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    error: Exception | None,
+    kind: str,
+    requests: list[list[str]],
+) -> None:
+    behind = ServerPlace(kind, "http://x.test/p", TOKEN)
+    assert requests_for_three_saves(program, behind, monkeypatch, AnswerCutShort(error)) == requests
+    lines = capsys.readouterr().err.splitlines()
+    assert len(lines) == 3
+    assert all("no answer" in line for line in lines)
+
+
+@pytest.mark.parametrize("error", [None, http.client.IncompleteRead(b"{")], ids=["garbled", "cut off"])
+def test_an_answer_that_cant_be_read_is_no_answer(monkeypatch: pytest.MonkeyPatch, error: Exception | None) -> None:
+    monkeypatch.setattr(place_kinds, "open_minding_limits", lambda request: AnswerCutShort(error))
+    with pytest.raises(PlaceError) as failed:
+        place_kinds.post_json("http://x.test/p/apply", {"changes": []}, {})
+    assert (failed.value.kind, failed.value.has_kept_nothing) == ("no answer", False)
+
+
+def test_a_refusal_cut_short_is_no_answer(monkeypatch: pytest.MonkeyPatch) -> None:
+    refusal = urllib.error.HTTPError("http://x.test/p", 403, "no", Message(), None)
+    monkeypatch.setattr(refusal, "read", AnswerCutShort(http.client.IncompleteRead(b"{")).read)
+
+    def opened(request: object) -> object:
+        raise refusal
+
+    monkeypatch.setattr(place_kinds, "open_minding_limits", opened)
+    with pytest.raises(PlaceError) as failed:
+        place_kinds.post_json("http://x.test/p/apply", {"changes": []}, {})
+    assert failed.value.kind == "no answer"
+
+
+def test_a_data_folders_refusal_is_never_sent_again(
+    program: Core, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    behind = ServerPlace("data folder", "http://x.test/p", TOKEN)
+    refusal = urllib.error.HTTPError("http://x.test/p", 422, "no", Message(), BytesIO(b'{"kind": "refused"}'))
+    # it keeps what came before a refusal, so each change is a request of its own
+    assert requests_for_three_saves(program, behind, monkeypatch, refusal) == [["a"], ["b"], ["c"]]
+
+
+def test_an_error_that_is_no_places_own_is_never_sent_again(
+    program: Core, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    sends: list[list[Change]] = []
+
+    class Breaks(DeviceFile):
+        """A place that breaks once it has been sent to."""
+
+        def apply(self, changes: list[Change]) -> None:
+            """Hear `changes`, then break."""
+            sends.append(changes)
+            raise RuntimeError("broke after it was sent")
+
+    program._places.behinds["this_device"] = Breaks(tmp_path / "Notes.device.json")
+
+    async def saves() -> None:
+        for text in "abc":
+            program.save_thing(DeviceNote(text=text))
+
+    asyncio.run(saves())
+    assert [len(send) for send in sends] == [3]
+    assert len(capsys.readouterr().err.splitlines()) == 3
+
+
+def test_a_canceled_in_one_go_still_sends_and_says_what_failed(
+    program: Core, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    happened: list[str] = []
+    program.place(Shelf(), {"name": "note_folder", "kind": "database on this device"})
+    program._places.behinds["this_device"] = SlowFile(tmp_path / "Notes.device.json", happened)
+    program._places.behinds["note_folder"] = WatchedFile(tmp_path / "Folder.device.json")
+
+    def both() -> None:
+        program.save_thing(DeviceNote(text="kept"))
+        program.save_thing(FolderNote(text="no"))
+
+    async def cancels() -> None:
+        waiting = asyncio.create_task(program.in_one_go(both))
+        # the second place has refused by now, and the first is still being sent
+        await asyncio.sleep(SLOW_SECONDS / 2)
+        waiting.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await waiting
+
+    asyncio.run(cancels())
+    assert happened == ["saved"]
+    assert capsys.readouterr().err.splitlines() == ["Couldn't keep the change to FolderNote:  that text isn't allowed"]
+
+
+def test_in_one_go_raises_the_first_failure_and_says_the_others(
+    program: Core, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    program.place(Shelf(), {"name": "note_folder", "kind": "database on this device"})
+    program._places.behinds["this_device"] = WatchedFile(tmp_path / "Notes.device.json")
+    program._places.behinds["note_folder"] = WatchedFile(tmp_path / "Folder.device.json")
+
+    def both() -> None:
+        program.save_thing(DeviceNote(text="no"))
+        program.save_thing(FolderNote(text="no"))
+
+    with pytest.raises(PlaceError, match="isn't allowed"):
+        asyncio.run(program.in_one_go(both))
+    assert capsys.readouterr().err.splitlines() == ["Couldn't keep the change to FolderNote:  that text isn't allowed"]
+
+
+# A program that runs a loop of its own, which ends without waiting for what's running on it.
+OWN_LOOP_PROGRAM = """\
+import asyncio
+
+from spell_core import Place, Thing, core, prop
+
+
+class Shelf(Place):
+    pass
+
+
+shelf = core.place(Shelf(), {"name": "shelf", "kind": "database on this device"})
+
+
+class Note(Thing):
+    saved_in = {"place": "shelf", "collection": "notes"}
+    text = prop(type="text")
+
+
+async def keep_a_note():
+    core.save_thing(Note(text="milk"))
+
+
+loop = asyncio.new_event_loop()
+loop.run_until_complete(keep_a_note())
+loop.close()
+"""
+
+
+def test_running_a_program_returns_only_once_its_saves_are_sent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    apply = DeviceFile.apply
+
+    def slow_apply(self: DeviceFile, changes: list[Change]) -> None:
+        time.sleep(SLOW_SECONDS)
+        apply(self, changes)
+
+    monkeypatch.setattr(DeviceFile, "apply", slow_apply)
+    file = tmp_path / "OwnLoop.spell.py"
+    file.write_text(OWN_LOOP_PROGRAM, encoding="utf-8")
+    with using_core(Core()):
+        run_program(file, seed=1)
+        # it ends by waiting for them itself:  nothing here waits
+        assert "milk" in (tmp_path / "OwnLoop.device.json").read_text(encoding="utf-8")
+
+
+class SlowOperation(DeviceFile):
+    """A place whose named operation is slow."""
+
+    def call(self, name: str, input: object) -> object:
+        """Answer `name`, `SLOW_SECONDS` later."""
+        time.sleep(SLOW_SECONDS)
+        return name
+
+
+def test_a_named_operation_never_holds_up_another_on_the_loop(program: Core, tmp_path: Path) -> None:
+    program._places.behinds["this_device"] = SlowOperation(tmp_path / "Notes.device.json")
+    happened: list[object] = []
+
+    async def calls() -> None:
+        happened.append(await program.call_place("this_device", "publish"))
+
+    async def plays() -> None:
+        happened.append("played")
+
+    async def both() -> None:
+        await asyncio.gather(calls(), plays())
+
+    asyncio.run(both())
+    assert happened == ["played", "publish"]
 
 
 ################

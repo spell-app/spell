@@ -12,7 +12,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `spell icon [query...]`:  find Spell UI's icons;  `--open` shows them in a browser
   - `spell ssr <pages...>`:  `ui-*` pages as plain HTML, through Spell UI's static render
   - `spell pack create | add | build | check`:  component packs, on the kit's pack tooling
-  - `spell design build | bundle | check | pull | changed | pushed | state`:  Spell's claude.ai design system
+  - `spell design build | pull | changed | pushed | state`:  Spell's claude.ai design system
   - They were spell-app's until epic `repo-split` P13, and are named as Owen named them then.
     - Before:  `spell icons`, `spell static`, `spell dev pack`, `spell dev design`
 - How the kit finds them:  the folder manifest's `"spell": { "commands": "./src/cli/commands.ts" }`
@@ -35,10 +35,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     so in an epic's worktree they work on the worktree's files (`CLI.findCheckout(CLI.KIT_MARKER)`).
   - `spell design`'s tools are scripts of other folders and repos, RUN, never imported (`CLI.runTool()`):
     - Spell UI's own [design-build.ts](../../scripts/design-build.ts)
-    - spell-brand's `design-bundle` / `design-check` (beside the kit)
     - the `epic/` folder's [design.js](../../../epic/src/tools/design.js)
-- `spell pack create <name>` makes `spell-<name>/` in the kit, a pack that is a repo of its own,
-  laid out as spell-brand is.
+- `spell pack create <name>` makes `spell-<name>/` in the kit, a pack that is a repo of its own.
   - From [templates/](templates/README.md);  the commands page gets the new repo's scripts.
   - It adds `spell-<name>` to the kit's `workspaces`, after its folders (`parser`, `ui`, `epic`, `app`):
     so the next `yarn install` takes it in, and it's one of `kitFolders()`, which `spell pack` searches too.

@@ -812,6 +812,7 @@ These guides need a checkout with the epic folder beside it, and the page server
 
 ## See also
 
+- The guide:  [How the Parser Works](../guides/precedence/precedence.html), in the kit's guides/ folder
 - [README-rulex](README-rulex.md):  the syntax every rule is written in, construct by construct;  the natural next page
 - [README-markdown](README-markdown.md):  the second language on the parser, built the way this page describes
 - [README-spell](README-spell.md):  Spell's twenty-two rule modules, its compiler, and its own recipe for a rule

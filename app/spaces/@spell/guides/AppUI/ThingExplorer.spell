@@ -1,0 +1,80 @@
+"thing explorer" is a notebook page
+	<header level="1">
+		ThingExplorer
+		<header>The things a running program has made, live, with their properties and actions.</>
+	</>
+
+	<text class="lede" paragraph>The "Thing Explorer" tab of a runner's debug pane: every thing the running program has made, as a tree on the left, and the picked thing's properties and actions on the right. It changes as the program runs, so you can watch a todo get done, or a card move.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the runners' debug pane, or reading its code</>
+		<item icon="play">Live: a real <text code>&lt;spell-viewer&gt;</>, its debug pane opened on this tab</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>The todos example, its debug pane open on "Thing Explorer": the pane under the app IS this component. Click a thing to see its details, then add a todo, or tick one, and watch the tree and the details change.</>
+		<example "1. Example" description="The todos example, its debug pane on the Thing Explorer tab.">
+			<html>
+				<spell-viewer project="@spell/examples/TaskList" toolbar debug="things" height="760px"></spell-viewer>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from the app's element build, which this set's pages load: <text code>/element/spell.pack.js</>. <link target="src-packages-app" link="/src/app/">The app package</> builds it with <text code>yarn build:element</>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Each runner draws one in its debug pane, on the program's own copy of the spell runtime, once it's loaded:</>
+		<text paragraph>SpellAppRunner.tsx · the Thing Explorer tab:</>
+		<markdown>
+			```typescript
+			/** The Thing Explorer, once the runtime's loaded. */
+			function things() {
+			  return (
+			    <Show when={loaded()} keyed>
+			      {(copy) => (
+			        <ThingExplorer
+			          things={copy.runtime.core.things}
+			          words={words()}
+			          state={thingsState}
+			          onStateChange={(state) => (thingsState = state)}
+			        />
+			      )}
+			    </Show>
+			  )
+			}
+			```
+		</>
+		<list bulleted>
+			<item><text code>things</> is the list of things the running program made, from ITS copy of the runtime, never the page's own: each <text code>&lt;spell-viewer&gt;</> on a page has its own things.</>
+			<item>The tree shows the program's top-level things first, then all of them: in the order they were made, under the heading whose code made them, or grouped by type. The buttons in its header switch.</>
+			<item>Properties and actions read in spell's words, like <text code>draw (a todos-app)</>, when the project's words file is there; else by name.</>
+			<item>An action that takes nothing has a play button, to do it now.</>
+			<item>It's live, piece by piece: a changed property redraws just its own value, and a new thing adds just its row.</>
+			<item><text code>state</> and <text code>onStateChange</> keep what's picked and open, so it comes back after a restart.</>
+			<item>Its tree's rows are <link target="src-packages-app-docs-typeexplorer-html" link="/type-explorer">TreeRow</>s, and its headings <link target="src-packages-app-docs-scopedetailspane-html" link="/scope-details-pane">SectionMarker</>s, shared with the <link target="src-packages-app-docs-typeexplorer-html" link="/type-explorer">TypeExplorer</>.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="ThingExplorer"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-thingexplorer-tsx" link="/src/app/solid/ThingExplorer.tsx"><text title="src/app/solid/ThingExplorer.tsx" code>ThingExplorer.tsx</></>: the component, and its props</>
+			<item><link target="src-packages-app-src-solid-thingexplorer-css" link="/src/app/solid/ThingExplorer.css"><text title="src/app/solid/ThingExplorer.css" code>ThingExplorer.css</></>: its look, on top of the Type Explorer's</>
+			<item>Its tests: <link target="src-tests-app-src-solid-thingexplorer-test-tsx" link="/tests/app/solid/ThingExplorer.test.tsx"><text title="tests/app/solid/ThingExplorer.test.tsx" code>ThingExplorer.test.tsx</></>, <link target="src-tests-app-src-solid-thingexplorer-browser-test-tsx" link="/tests/app/solid/ThingExplorer.browser.test.tsx"><text title="tests/app/solid/ThingExplorer.browser.test.tsx" code>ThingExplorer.browser.test.tsx</></></>
+			<item>Where the runners draw it: <link target="src-packages-app-src-runner-spellapprunner-tsx" link="/src/app/runner/SpellAppRunner.tsx"><text title="src/app/runner/SpellAppRunner.tsx" code>SpellAppRunner.tsx</></>, <link target="src-packages-app-src-runner-vscoderunner-tsx" link="/src/app/runner/VSCodeRunner.tsx"><text title="src/app/runner/VSCodeRunner.tsx" code>VSCodeRunner.tsx</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

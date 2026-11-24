@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { EDITOR, SERVING } from "./runningEditor"
 
 /**
- * The palette kept open, "Add a View" under the top bar, on a cold start (epic `editor` I255), in the running editor:
+ * The add bar down the editor's left edge (epic `editor` T151), on a cold start (I255), in the running editor:
  * - it never shows before the top bar's menus:  the editor's own Spell, which draws the bar, is held back here
  *   past the page's loading hero, so the race shows every time
  * - once the bar is drawn, it shows, fading and sliding in
@@ -15,25 +15,15 @@ import { EDITOR, SERVING } from "./runningEditor"
 
 /** How long the editor's Spell is held back:  past the hero's longest wait, 8 seconds (`PageLoading`). */
 const HELD_MSEC = 10_000
-/** The palette kept open, in the browser's preferences (`Palette`'s `palettePinned`). */
-const PINNED_KEY = "spellEditor:palettePinned"
-
-describe.skipIf(!SERVING)("the palette kept open, on a cold start", { timeout: 180_000 }, () => {
+describe.skipIf(!SERVING)("the add bar, on a cold start", { timeout: 180_000 }, () => {
   let browser: Browser
   let page: Page
-  /** What the page showed each frame, until the bar was drawn:  the strip and the hero. */
+  /** What the page showed each frame, until the bar was drawn:  the add bar (`strip`) and the hero. */
   let framesBeforeBar: { strip: boolean; hero: boolean }[] = []
 
   beforeAll(async () => {
     browser = await chromium.launch()
     const context = await browser.newContext({ viewport: { width: 1290, height: 900 } })
-    await context.addInitScript((key: string) => {
-      try {
-        localStorage.setItem(key, "true")
-      } catch {
-        // no storage:  the palette isn't kept open, and the test says so
-      }
-    }, PINNED_KEY)
     // the editor's Spell runs on the layout's copy of the runtime (`layoutSpell.ts`):  hold back its first module
     let isHeld = false
     await context.route(/\?layout-copy$/, async (route) => {
@@ -51,7 +41,7 @@ describe.skipIf(!SERVING)("the palette kept open, on a cold start", { timeout: 1
           const frames: { strip: boolean; hero: boolean }[] = []
           const look = () => {
             frames.push({
-              strip: !!document.querySelector(".PaletteStrip"),
+              strip: !!document.querySelector(".PaletteRailPlace"),
               hero: !!document.getElementById("PageLoading")
             })
             if (document.querySelector("ui-app-menu.AppMenu ui-item")) resolve(frames)
@@ -75,9 +65,9 @@ describe.skipIf(!SERVING)("the palette kept open, on a cold start", { timeout: 1
   })
 
   test("it shows once the bar is drawn, fading and sliding in", async () => {
-    await page.waitForSelector(".PaletteStrip", { timeout: 30_000 })
+    await page.waitForSelector(".PaletteRailPlace", { timeout: 30_000 })
     const strip = (await page.evaluate(() => {
-      const element = document.querySelector(".PaletteStrip")!
+      const element = document.querySelector(".PaletteRailPlace")!
       const bar = document.querySelector(".EditorBarPlace")!.getBoundingClientRect()
       return {
         isArriving: element.classList.contains("arriving"),
@@ -85,17 +75,17 @@ describe.skipIf(!SERVING)("the palette kept open, on a cold start", { timeout: 1
         isUnderTheBar: element.getBoundingClientRect().top >= bar.top
       }
     })) as { isArriving: boolean; animation: string; isUnderTheBar: boolean }
-    expect(strip).toEqual({ isArriving: true, animation: "palette-strip-arrives", isUnderTheBar: true })
+    expect(strip).toEqual({ isArriving: true, animation: "palette-rail-arrives", isUnderTheBar: true })
   })
 
   test("Run and back to Edit draw it again without its animation", async () => {
     await page.waitForTimeout(1000)
     await page.evaluate(`window.editor.showRunner()`)
-    await page.waitForFunction(`!document.querySelector(".PaletteStrip")`, undefined, { timeout: 10_000 })
+    await page.waitForFunction(`!document.querySelector(".PaletteRailPlace")`, undefined, { timeout: 10_000 })
     await page.evaluate(`window.editor.showEditor()`)
-    await page.waitForSelector(".PaletteStrip", { timeout: 10_000 })
+    await page.waitForSelector(".PaletteRailPlace", { timeout: 10_000 })
     const animation = await page.evaluate(() => {
-      const element = document.querySelector(".PaletteStrip")!
+      const element = document.querySelector(".PaletteRailPlace")!
       return { isArriving: element.classList.contains("arriving"), name: getComputedStyle(element).animationName }
     })
     expect(animation).toEqual({ isArriving: false, name: "none" })

@@ -1,0 +1,94 @@
+"spell editor" is a notebook page
+	<header level="1">
+		&lt;spell-editor&gt;
+		<header>Edits a spell project in any page, and runs it in the apps beside it.</>
+	</>
+
+	<text class="lede" paragraph>One tag puts the spell app's code editor in a page: a tab per file, CodeMirror, and a status line. It compiles as you type, and hands what it compiled to the <link target="src-packages-app-docs-spell-viewer-html" link="/spell-viewer"><text code>&lt;spell-viewer&gt;</></> elements beside it, which run it at once.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone putting an editable spell program in a page, or changing the editor</>
+		<item icon="play">Live: the real element, from the app's element build this page loads</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>The calculator example's code, beside the calculator it runs.</>
+		<message state="warning" size="small">
+			<text paragraph><text bold>Look, but don't edit.</> Typing here SAVES to the repo's Calculator example: every compile saves the files edited since, and so does Cmd+S.</>
+		</>
+		<example "1. Example" description="An editor linked to an app by the app's id:  each compile runs in it.">
+			<html>
+				<ui-grid columns="2" stackable>
+					<ui-column>
+						<spell-editor project="@spell/examples/calculator" app="#app-ui-calculator" height="360px"></spell-editor>
+					</ui-column>
+					<ui-column>
+						<spell-viewer id="app-ui-calculator" project="@spell/examples/calculator" toolbar></spell-viewer>
+					</ui-column>
+				</ui-grid>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from the app's element build, which this set's pages load: <text code>/element/spell.pack.js</>. <link target="src-packages-app" link="/src/app/">The app package</> builds it with <text code>yarn build:element</>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Link an editor to its apps from either side: the editor's <text code>app</> names them, or each app's <text code>editor</> names it. As the editor's demo page does:</>
+		<text paragraph>spell-editor.html · linked from the editor's side:</>
+		<markdown>
+			```html
+			<div class="side-by-side">
+			  <spell-editor project="@spell/examples/calculator" app="#calculator" height="420px"></spell-editor>
+			  <spell-viewer id="calculator" project="@spell/examples/calculator" toolbar></spell-viewer>
+			</div>
+			```
+		</>
+		<text paragraph>spell-editor.html · linked from the apps' side:</>
+		<markdown>
+			```html
+			<spell-editor id="tasks" project="@spell/examples/TaskList" height="360px"></spell-editor>
+			<div class="side-by-side">
+			  <spell-viewer editor="#tasks" toolbar></spell-viewer>
+			  <spell-viewer editor="#tasks" toolbar></spell-viewer>
+			</div>
+			```
+		</>
+		<list bulleted>
+			<item>What it edits: <text code>project</>, from the spell server, as <text code>&lt;spell-viewer&gt;</> takes it. <text code>file</> picks the file shown first; tabs show the others.</>
+			<item>Edits SAVE back to the project: every compile saves the files edited since, and Cmd+S saves.</>
+			<item>Or, with <text code>static</>: it reads the project from a static site's plain files, as <text code>spell app preview viewer --editor</> writes them, and saves nothing. Edits stay in the page until it reloads.</>
+			<item>It compiles as it opens the project, 2 seconds after typing stops, and at once on Cmd+Enter.</>
+			<item>After each compile with no parse errors, it sends <text code>spell-compiled</>, and each linked app runs what it made. An app added later gets its next compile.</>
+			<item>It compiles before CodeMirror loads, so its apps run straight away. CodeMirror and Spell's language service come after.</>
+			<item>Several on a page edit several projects. Two of one project share its files: typing in one shows in the other.</>
+			<item>Its script API: <text code>compile()</> and <text code>save()</>. Its <text code>compiled</> holds what it last compiled. A <text code>static</> one also has <text code>reset()</>, which puts its project back as the site wrote it.</>
+			<item>Its own words follow the closest <text code>lang</> around it, read each time it opens a project: so a page can show a Spanish example, in a Spanish editor, on an English page.</>
+			<item>A page loads it as it loads <link target="src-packages-app-docs-spell-viewer-html" link="/spell-viewer"><text code>&lt;spell-viewer&gt;</></>: by itself, or by the element pack.</>
+		</>
+	</>
+
+	<section label="3. Attributes, events and texts">
+		<icon slot="icon" name="list check"/>
+		<text paragraph>Its own names, then those every Spell UI element takes:</>
+		<html>
+			<ui-docs-api family="spell-editor"></>
+		</>
+		<text class="meta" paragraph>From its vocabulary, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-components-spell-editor-spelleditor-tsx" link="/src/app/components/spell-editor/SpellEditor.tsx"><text title="src/app/components/spell-editor/SpellEditor.tsx" code>SpellEditor.tsx</></>: its DOM element (the script API) and its component</>
+			<item><link target="src-packages-app-components-spell-editor-spelleditor-en-ts" link="/src/app/components/spell-editor/SpellEditor.en.ts"><text title="src/app/components/spell-editor/SpellEditor.en.ts" code>SpellEditor.en.ts</></>: its vocabulary, every name it uses</>
+			<item><link target="src-packages-app-src-spelleditor-spelleditorpane-tsx" link="/src/app/spellEditor/SpellEditorPane.tsx"><text title="src/app/spellEditor/SpellEditorPane.tsx" code>SpellEditorPane.tsx</></> and <link target="src-packages-app-src-spelleditor-spelleditorpane-css" link="/src/app/spellEditor/SpellEditorPane.css"><text title="src/app/spellEditor/SpellEditorPane.css" code>SpellEditorPane.css</></>: what it draws, the tabs, the editor and the status line</>
+			<item><link target="src-tests-app-src-spelleditor-spelleditor-browser-test-tsx" link="/tests/app/spellEditor/spellEditor.browser.test.tsx"><text title="tests/app/spellEditor/spellEditor.browser.test.tsx" code>spellEditor.browser.test.tsx</></>: its tests</>
+			<item>Its build: <text title="writes app/dist-element/" code>yarn build:element</>, served at <text code>/element/</>. Its demo: <text code>/demo/spell-editor.html</>, on the editor's server.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

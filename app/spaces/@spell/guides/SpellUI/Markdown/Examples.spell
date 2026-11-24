@@ -4,6 +4,7 @@
 		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
               own text or a file on this site.</>
 	</>
+
 	<!--
 		EXAMPLES:  ours only, no Fomantic page.  The old Astro page's examples (Types, Variations), restyled, plus the
 		vocabulary's `breaks` and `sanitized`.  File shown:  `site/examples/readme.md`.
@@ -65,10 +66,33 @@
 			</example>
 		</>
 
-		<section label="Editable" sticky="stack" collapsible dividing>
-			<example "Editable" description="`editable` adds Write / Preview tabs:  a text box, and its preview, drawn as the rest of the element draws.">
+		<section label="Editable in place" sticky="stack" collapsible dividing>
+			<example "Editable in place" description="`editable`:  ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell, and edit its markdown where it is, a formatting bar above it.  Enter keeps it, Tab moves on, Escape puts it back;  holding ⌥ outlines what can be edited.">
 				<html>
 					<ui-markdown editable>
+						<script type="text/markdown">
+							## Hold ⌥, then click
+
+							A paragraph with **bold** words and [a link](#examples-variations-editable-in-place).
+
+							- a list item
+							- another one
+
+							| Key       | Does                      |
+							| --------- | ------------------------- |
+							| Enter     | keeps it                  |
+							| Tab       | keeps it, and moves on    |
+							| Escape    | puts it back              |
+						</script>
+					</ui-markdown>
+				</html>
+			</example>
+		</>
+
+		<section label="Editable in tabs" sticky="stack" collapsible dividing>
+			<example "Editable in tabs" description="`editable=\"tabs\"` adds Write / Preview tabs:  a text box, and its preview, drawn as the rest of the element draws.">
+				<html>
+					<ui-markdown editable="tabs">
 						<script type="text/markdown">
 							# Try it
 
@@ -99,6 +123,16 @@
 					<ui-markdown sanitized>
 						<script type="text/markdown">Version **2** adds <ui-label size="mini" color="teal">include</ui-label> and <ui-label size="mini">code</ui-label>.</script>
 					</ui-markdown>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Sizing">
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example "Height" description="`max-height` caps the text, and what doesn't fit scrolls;  `resizable=\"height\"` lets people drag it.">
+				<html>
+					<ui-markdown max-height="8em" resizable="height">## What's new - Trees, tables and segments take a `height` - `resizable="height"` lets people drag one taller - `min-height` and `max-height` hold the drag Everything else is as it was.</ui-markdown>
 				</html>
 			</example>
 		</>

@@ -1,6 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
+import { Alignment } from "spell/test-helpers/Alignment"
 import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
@@ -30,6 +31,9 @@ blank is an app
 
 /** What a compile and redraw takes, at most. */
 const SETTLE_MS = 2500
+
+/** How long the mouse rests on an add bar button before its menu shows:  the page's hover delay, and some (T162). */
+const HOVER_OPENS_MS = 1500
 
 /** A part as it's drawn. */
 type Drawn = { tag: string; x: number; y: number; width: number; height: number }
@@ -229,6 +233,15 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await written()).toEqual(before)
   })
 
+  /** The words of the menu row that has the focus, inside its shadow root. */
+  const focusedRow = () =>
+    page.evaluate(() => {
+      let at = document.activeElement
+      while (at?.shadowRoot?.activeElement) at = at.shadowRoot.activeElement
+      const host = (at?.getRootNode() as ShadowRoot | undefined)?.host
+      return (host ?? at)?.textContent?.trim() ?? ""
+    })
+
   test("Delete, by click and by Enter, closes the menu, though it greys itself once it has run", async () => {
     const before = await written()
     for (const how of ["click", "Enter"] as const) {
@@ -237,7 +250,10 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       await page.waitForTimeout(500)
       if (how === "click") await page.locator('.PartMenu ui-action:has-text("Delete")').click()
       else {
-        for (let row = 0; row < 4; row++) await page.keyboard.press("ArrowDown")
+        // down the rows to Delete:  Inspect's come first (T160)
+        for (let row = 0; row < 8 && !(await focusedRow()).startsWith("Delete"); row++)
+          await page.keyboard.press("ArrowDown")
+        expect(await focusedRow()).toMatch(/^Delete/)
         await page.keyboard.press("Enter")
       }
       await page.waitForTimeout(SETTLE_MS)
@@ -268,7 +284,11 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.mouse.click(card!.x, card!.y, { button: "right" })
     await page.waitForTimeout(500)
     const rows = await menuRows(page)
+    // Inspect first, by the mouse;  Show in Code and Change This together at the bottom (T160)
     expect(rows.map((row) => row.title)).toEqual([
+      expect.stringMatching(/^Inspect /),
+      "Inspect Other Views",
+      "-",
       "Cut",
       "Copy",
       "Paste",
@@ -276,9 +296,6 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "Delete",
       "-",
       "Show in Code",
-      expect.stringMatching(/^Inspect /),
-      "Inspect Other Views",
-      "-",
       "Change This..."
     ])
     expect(rows.filter((row) => row.grey).map((row) => row.title)).toEqual([])
@@ -298,13 +315,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         const host = (at?.getRootNode() as ShadowRoot | undefined)?.host
         return (host ?? at)?.textContent?.trim() ?? ""
       })
-    expect(await focused()).toMatch(/^Cut/)
+    expect(await focused()).toMatch(/^Inspect (?!Other)/)
     await page.keyboard.press("ArrowDown")
-    expect(await focused()).toMatch(/^Copy/)
+    expect(await focused()).not.toMatch(/^Inspect (?!Other)/)
     await page.keyboard.press("Escape")
     await page.waitForTimeout(300)
     expect(await page.locator(".PartMenu").count()).toBe(0)
-    expect(await focused()).not.toMatch(/^Copy/)
+    expect(await focused()).not.toMatch(/^Inspect/)
   })
 
   test("Show in Code goes to the line;  Inspect opens the Inspector, with Inspect app off", async () => {
@@ -536,7 +553,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
-  test("in Edit, a part inside a program menu shows its items first, a thick line, then ours;  Run's is its own (I76)", async () => {
+  test("in Edit, a part inside a program menu shows its items under App Menu, between thick lines, below ours;  Run's is its own (I76, T160)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
     await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
@@ -572,24 +589,33 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
           ),
         selector
       )
-    // Solitaire's `<context-menu>`, then ours
+    // Solitaire's `<context-menu>`, as Run draws it
     const program = ["Auto Play", "Cheat", "Deal the Cards", "-"]
+    /** The program's rows in the part menu:  the four under its App Menu header. */
+    const programIn = (shown: string[]) => shown.slice(shown.indexOf("App Menu") + 1, shown.indexOf("App Menu") + 5)
+    // Inspect, ours, then Solitaire's `<context-menu>` under its header, then Show in Code and Change This (T160)
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(600)
     const shown = await rows(".PartMenu")
-    expect(shown.slice(0, 4)).toEqual(program)
-    expect(shown.slice(shown.indexOf("="))).toEqual([
-      "=",
+    expect(shown).toEqual([
+      expect.stringMatching(/^Inspect /),
+      "Inspect Other Views",
+      "-",
       "Cut",
       "Copy",
       "Paste",
       "Duplicate",
       "Delete",
+      "=",
+      "App Menu",
+      "Auto Play",
+      "Cheat",
+      "Deal the Cards",
       "-",
+      "Undo",
+      "Redo",
+      "=",
       "Show in Code",
-      expect.stringMatching(/^Inspect /),
-      "Inspect Other Views",
-      "-",
       "Change This..."
     ])
     const thickness = await other.evaluate(() => {
@@ -617,11 +643,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       })
     const before = await faceDown()
     // its row as drawn:  the host draws no box of its own
-    const cheat = await other.evaluate((index) => {
-      const row = document.querySelectorAll(".PartMenu :is(ui-action, ui-item)")[index]!
+    const cheat = await other.evaluate(() => {
+      const row = [...document.querySelectorAll(".PartMenu ui-menu > :is(ui-action, ui-item)")].find(
+        (each) => (each as { action?: { title: string } }).action?.title === "Cheat"
+      )!
       const { x, y, height } = row.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
       return { x, y, height }
-    }, program.indexOf("Cheat"))
+    })
     await other.mouse.click(cheat.x + 20, cheat.y + cheat.height / 2)
     await other.waitForTimeout(800)
     expect(await other.locator(".PartMenu").count()).toBe(0)
@@ -645,7 +673,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(box).toBeDefined()
     await other.mouse.click(box!.x + 40, box!.y + 10, { button: "right" })
     await other.waitForTimeout(600)
-    expect((await rows(".PartMenu")).slice(0, 4)).toEqual(program)
+    expect(programIn(await rows(".PartMenu"))).toEqual(program)
     await other.keyboard.press("Escape")
     await other.waitForTimeout(300)
 
@@ -763,7 +791,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
-  test("Inspect Card inspects the card;  Inspect Other Views lists every part under the mouse, which rings and selects (P31, Q37)", async () => {
+  test("Inspect Card inspects the card;  Inspect Other Views lists the parts seen under the mouse, which rings and selects (P31, Q37, T160)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
     await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
@@ -817,7 +845,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
     expect(await selected()).toEqual({ which: "card", count: 1, isOpen: true })
 
-    // Inspect Other Views:  every part under the mouse, outermost first, the card's picture inside it
+    // Inspect Other Views:  the parts seen under the mouse, outermost first, each inside the one before, flat (T160)
     await other.mouse.click(at.x, at.y, { button: "right" })
     await other.waitForTimeout(600)
     await inspectRow.locator("[part~=title]").first().hover()
@@ -826,19 +854,19 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const rows = await inspectRow.locator(":scope > ui-action").evaluateAll((actions) =>
       actions.map((action) => ({
         title: action.textContent!.trim(),
-        depth: Number((action as HTMLElement).style.getPropertyValue("--InspectRow-depth")),
-        ticked: action.getAttribute("selected") !== "false" && action.hasAttribute("selected")
+        // no tick, no indent:  a flat list (T160)
+        ticked: action.hasAttribute("selected") || action.hasAttribute("active"),
+        indent: getComputedStyle(action.shadowRoot!.querySelector("[part~=item]")!).paddingInlineStart
       }))
     )
-    const card = rows.findIndex((row) => row.ticked)
     expect(rows.length).toBeGreaterThanOrEqual(4)
-    expect(rows[0]!.depth).toBe(0)
-    expect(rows[card]!.title).toMatch(/^Card /)
-    // the pile round it (a column) just before it, a level out;  its picture after it, a level in
-    expect(rows[card - 1]!).toMatchObject({ title: expect.stringMatching(/^Column /), depth: rows[card]!.depth - 1 })
-    expect(rows[card + 1]!.depth).toBe(rows[card]!.depth + 1)
-    // a tree:  each row at most one level in from the row above
-    expect(rows.every((row, index) => index === 0 || row.depth <= rows[index - 1]!.depth + 1)).toBe(true)
+    expect(rows.some((row) => row.ticked)).toBe(false)
+    expect(new Set(rows.map((row) => row.indent)).size).toBe(1)
+    // one card, the one on top:  the cards it covers there are left out (T160)
+    expect(rows.filter((row) => row.title.startsWith('Card "')).length).toBe(1)
+    const card = rows.findIndex((row) => row.title.startsWith('Card "'))
+    // the pile round it (a column) just before it;  its picture after it
+    expect(rows[card - 1]!.title).toMatch(/^Column /)
 
     // pointing at the picture rings it;  choosing it selects it, and the properties card shows it
     const picture = inspectRow.locator(":scope > ui-action").nth(card + 1)
@@ -897,7 +925,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
-  test("in Edit, the game's own right-click menu comes first, a thick line, then the editor's (T120)", async () => {
+  test("in Edit, the game's own right-click menu is under App Menu, between thick lines, below the editor's (T120, T160)", async () => {
     const other = await context.newPage()
     await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
     await other.waitForSelector(".InspectAppButton", { state: "attached", timeout: 60_000 })
@@ -938,19 +966,23 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       await other.mouse.click(at.x, at.y, { button: "right" })
       await other.waitForTimeout(SETTLE_MS)
       const shown = await rows()
-      expect(shown.slice(0, 4)).toEqual(game)
-      expect(shown[4]).toMatch(/^Undo/)
-      expect(shown[5]).toMatch(/^Redo/)
-      expect(shown[6]).toBe("=====")
-      expect(shown.slice(7, 15).map((row) => row.replace(" (off)", ""))).toEqual([
+      // Inspect first, ours, the game's under App Menu between thick lines, then Show in Code and Change This (T160)
+      expect(shown[0]).toMatch(/^Inspect /)
+      const cut = shown.findIndex((row) => row.startsWith("Cut"))
+      expect(shown.slice(cut, cut + 5).map((row) => row.replace(" (off)", ""))).toEqual([
         "Cut",
         "Copy",
         "Paste",
         "Duplicate",
-        "Delete",
-        "---",
+        "Delete"
+      ])
+      expect(shown.slice(cut + 5, cut + 11)).toEqual(["=====", "App Menu", ...game])
+      expect(shown[cut + 11]).toMatch(/^Undo/)
+      expect(shown[cut + 12]).toMatch(/^Redo/)
+      expect(shown.slice(cut + 13).map((row) => row.replace(" (off)", ""))).toEqual([
+        "=====",
         "Show in Code",
-        expect.stringMatching(/^Inspect /)
+        "Change This..."
       ])
       await other.keyboard.press("Escape")
       await other.waitForTimeout(300)
@@ -960,12 +992,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(SETTLE_MS)
     const lines = await other.evaluate(() =>
-      [...document.querySelectorAll("ui-popup.PartMenu ui-action[kind=divider]")].map(
-        (divider) => getComputedStyle(divider.shadowRoot!.querySelector("[part~=item]")!).borderTopWidth
+      [...document.querySelectorAll("ui-popup.PartMenu ui-menu > ui-action[kind=divider]")].map(
+        (divider) =>
+          `${divider.matches("[appearance~=dashed]") ? "thick" : "thin"} ${getComputedStyle(divider.shadowRoot!.querySelector("[part~=item]")!).borderTopWidth}`
       )
     )
-    expect(lines[0]).toBe("2px")
-    expect(lines.slice(1).every((width) => width === "1px")).toBe(true)
+    expect(lines.filter((line) => line.startsWith("thick"))).toEqual(["thick 2px", "thick 2px"])
+    expect(lines.filter((line) => line.startsWith("thin")).every((line) => line === "thin 1px")).toBe(true)
 
     // Cheat runs in the program, as in Run:  the menu closes, and its Undo says so
     const cheat = await other.evaluate(() => {
@@ -980,7 +1013,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await other.locator("ui-popup.PartMenu").count()).toBe(0)
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(SETTLE_MS)
-    expect((await rows())[4]).toBe("Undo Cheat")
+    const after = await rows()
+    expect(after[after.indexOf("App Menu") + 5]).toBe("Undo Cheat")
     await other.keyboard.press("Escape")
     await other.close()
   })
@@ -995,7 +1029,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
-  test("the palette stays pinned across a reload;  pinning closes its popup, its topics are menus (I175, T80, T86, T87, T92, T99, T106)", async () => {
+  test("the add bar runs down the left edge in Edit, the app then the code across;  its groups open beside it, its stars stay (T151, T152)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
 
@@ -1026,175 +1060,170 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     })
     expect(modeBar).toEqual({ gaps: [16, 1, 1, 1, 16], words: "Add a View" })
 
-    await page.locator("#AddPartButton [part~=item]").click()
-    await page.waitForTimeout(600)
-    expect(await popupShows()).toBe(true)
-    await page.locator(".PalettePopup .PalettePin").click()
-    await page.waitForTimeout(600)
-    expect(await page.locator(".PaletteStrip").count()).toBe(1)
     expect(await popupShows()).toBe(false)
-    await page.reload()
-    await page.waitForSelector(".PaletteStrip .PaletteGroupName", { timeout: 60_000 })
-    await page.waitForTimeout(1000)
 
-    // its pin at its far left, Add a View in bold, each topic with its icon;  at 1290px wide, nothing scrolls (T86, T92)
-    await page.setViewportSize({ width: 1290, height: 800 })
-    await page.waitForTimeout(600)
-    const bar = () =>
+    // the add bar, the app, then the code at the far right (T151, Owen's B)
+    await page.waitForSelector(".PaletteRail ui-item.PaletteRailButton", { timeout: 60_000, state: "attached" })
+    await page.waitForTimeout(1000)
+    const across = () =>
       page.evaluate(() => {
-        const strip = document.querySelector(".PaletteStrip")!
-        const left = (el: Element | null | undefined) => el?.getBoundingClientRect().left ?? -1
-        const names = [...strip.querySelectorAll("ui-item.PaletteGroupName")]
+        const left = (selector: string) => document.querySelector(selector)?.getBoundingClientRect().left ?? -1
+        const rail = document.querySelector(".PaletteRail")!.getBoundingClientRect()
+        const buttons = [...document.querySelectorAll<HTMLElement>(".PaletteRail ui-item.PaletteRailButton")]
         return {
-          overflowing: strip.querySelector("ui-toolbar.PaletteStripGroups")!.matches(":state(overflowing)"),
-          pinFirst: left(strip.querySelector(".PalettePin")) < left(strip.querySelector(".PaletteStripLabel")),
-          label: strip.querySelector(".PaletteStripLabel")?.textContent,
-          bold: Number(getComputedStyle(strip.querySelector(".PaletteStripLabel")!).fontWeight) >= 700,
-          withIcons: names.every((name) => !!name.getAttribute("icon")),
-          closes: strip.querySelectorAll(".PaletteClose").length,
-          searchWidth: strip.querySelector(".PaletteStripSearch")!.getBoundingClientRect().width,
-          // centred, its content's width, 16px at its start and 4px past the search (T106, I252), the search right after the last name
-          ...(() => {
-            const box = strip.getBoundingClientRect()
-            const add = strip.querySelector(".PaletteStripAdd")!.getBoundingClientRect()
-            const end = strip.querySelector(".PaletteStripEnd")!.getBoundingClientRect()
-            return {
-              room: [Math.round(add.left - box.left), Math.round(box.right - end.right)],
-              centred: Math.abs(box.left - (innerWidth - box.right)) < 1,
-              searchAfterNames: Math.round(end.left - add.right)
-            }
-          })()
+          order: [left(".PaletteRail"), left(".AppPane"), left(".InputEditor")].every(
+            (at, index, all) => at >= 0 && (index === 0 || at > all[index - 1]!)
+          ),
+          railWidth: Math.round(rail.width),
+          // each button a 32px square, its icon centred in it
+          squares: buttons.every((button) => {
+            const box = (button.shadowRoot?.querySelector("[part~=item]") ?? button).getBoundingClientRect()
+            return Math.round(box.width) === 32 && Math.round(box.height) === 32
+          }),
+          centred: buttons.every((button) => {
+            const box = (button.shadowRoot?.querySelector("[part~=item]") ?? button).getBoundingClientRect()
+            const icon = button.shadowRoot?.querySelector("ui-icon, [part~=icon]")?.getBoundingClientRect()
+            if (!icon) return true
+            const middle = (a: number, b: number) => (a + b) / 2
+            return (
+              Math.abs(middle(icon.left, icon.right) - middle(box.left, box.right)) <= 0.5 &&
+              Math.abs(middle(icon.top, icon.bottom) - middle(box.top, box.bottom)) <= 0.5
+            )
+          }),
+          names: buttons.map((button) => button.getAttribute("aria-label") ?? ""),
+          // no tooltips:  a group's menu, opening as the mouse rests, names it (T162)
+          tooltips: buttons.some((button) => button.hasAttribute("data-tooltip")),
+          // a + atop, saying what it's for;  the buttons 4px apart (T162)
+          plus: !!document.querySelector(".PaletteRail .PaletteRailAdd ui-icon[name=plus]"),
+          touching: (() => {
+            const top = (button: Element) =>
+              button.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect().top
+            return (
+              Math.min(...buttons.slice(1).map((button, index) => Math.round(top(button) - top(buttons[index]!)))) ===
+              36
+            )
+          })(),
+          // docked to the window's left edge:  no room on its left, its left corners square (T162)
+          docked:
+            rail.left === 0 && getComputedStyle(document.querySelector(".PaletteRail")!).borderTopLeftRadius === "0px"
         }
       })
-    expect(await bar()).toMatchObject({
-      overflowing: false,
-      pinFirst: true,
-      label: "Add a View",
-      bold: true,
-      withIcons: true,
-      closes: 0,
-      room: [16, 4],
+    const laidOut = await across()
+    expect(laidOut).toMatchObject({
+      order: true,
+      railWidth: 40,
+      squares: true,
       centred: true,
-      searchAfterNames: 16
+      tooltips: false,
+      plus: true,
+      touching: true,
+      docked: true
     })
-    const idleWidth = (await bar()).searchWidth
-    await page.setViewportSize({ width: 1440, height: 800 })
+    // every row in it lined up (the kit's alignment check)
+    expect(Alignment.report(await Alignment.scanPage(page, { within: ".PaletteRailPlace" }))).toEqual([])
+    expect(laidOut.names).toContain("Layout")
 
-    // the pinned bar:  a topic's name opens its menu, every part filed there;  choosing one closes it (I176)
-    const menusOpen = () =>
+    // a group's button opens its parts beside the bar as the mouse rests on it (T162);  Escape closes it
+    const flyoutsOpen = () =>
       page.evaluate(
         () =>
-          [...document.querySelectorAll(".PaletteGroupPopup")].filter(
+          [...document.querySelectorAll(".PaletteFlyout")].filter(
             (menu) => (menu as HTMLElement & { visible?: boolean }).visible
           ).length
       )
-    await page.locator(".PaletteStrip .PaletteGroupName", { hasText: "Layout" }).click()
-    await page.waitForTimeout(600)
-    expect(await menusOpen()).toBe(1)
-    expect(await page.locator('.PaletteGroupPopup ui-tree-item[label="Grid"]').count()).toBe(1)
-    await page.keyboard.press("Escape")
-    await page.waitForTimeout(600)
-    expect(await menusOpen()).toBe(0)
+    await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Layout"] [part~=item]').hover()
+    await page.waitForTimeout(HOVER_OPENS_MS)
+    expect(await flyoutsOpen()).toBe(1)
+    const layout = page.locator('ui-popup.PaletteFlyout[aria-label="Layout"]')
+    expect(await layout.locator('ui-tree-item[label="Grid"]').count()).toBe(1)
+    // its search, a button beside its name until clicked (T162), keeps only the matches, by name, other names or
+    // description (Column's says it's a grid's)
+    const allRows = await layout.locator("ui-tree-item").count()
+    await layout.locator(".PaletteFlyoutSearch [part~=opener]").click()
+    await page.waitForTimeout(300)
+    expect(await layout.locator(".PaletteFlyoutSearch input").getAttribute("placeholder")).toBe("Search Layout")
+    await layout.locator(".PaletteFlyoutSearch input").fill("grid")
+    await page.waitForTimeout(400)
+    const gridRows = await layout
+      .locator("ui-tree-item")
+      .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
+    expect(gridRows).toContain("Grid")
+    expect(gridRows.length).toBeLessThan(allRows)
+    await layout.locator(".PaletteFlyoutSearch input").fill("")
+    await page.waitForTimeout(400)
 
-    // its search opens every topic with a match at once, each with only its matches, side by side (J140, revisited)
-    const matches = () =>
-      page.evaluate(() => {
-        const layer = document.querySelector(".PaletteMatches")!
-        if (!layer.matches(":popover-open")) return []
-        return [...layer.querySelectorAll<HTMLElement>(".PaletteMatchPanel")].map((panel) => {
-          const box = panel.getBoundingClientRect()
-          const labels = [...panel.querySelectorAll("ui-tree-item")].map((row) => row.getAttribute("label") ?? "")
-          const header = panel.querySelector<HTMLElement>(".PaletteMatchHeader")
-          const name = document.getElementById(panel.dataset.for ?? "")
-          return {
-            left: box.left,
-            right: box.right,
-            top: box.top,
-            bottom: box.bottom,
-            labels,
-            header: header?.textContent ?? "",
-            headerIcon: header?.querySelector("ui-icon")?.getAttribute("name") ?? "",
-            headerFirst: !!header && header === panel.firstElementChild,
-            headerFocusable: !!header && (header.tabIndex >= 0 || header.matches("ui-tree-item")),
-            groupName: name?.textContent?.trim() ?? "",
-            groupIcon: name?.getAttribute("icon") ?? ""
-          }
-        })
-      })
-    const search = page.locator(".PaletteStrip .PaletteStripSearch input")
-    await search.click()
-    await page.keyboard.type("butt", { delay: 30 })
-    await page.waitForTimeout(800)
-    // the field keeps its width typed in, with a ✕ inside it (T87)
-    expect((await bar()).searchWidth).toBe(idleWidth)
-    expect(await page.locator(".PaletteStrip .PaletteStripClear").count()).toBe(1)
-    const shown = await matches()
-    expect(shown.length).toBeGreaterThan(1)
-    expect(shown.flatMap(({ labels }) => labels)).toContain("Button")
-    // no topic with nothing to show;  none over another, none off the window
-    expect(shown.every(({ labels }) => labels.length > 0)).toBe(true)
-    // each headed by its topic's icon and name, a label, not a row (T99)
-    for (const one of shown) {
-      expect(one.headerFirst).toBe(true)
-      expect(one.headerFocusable).toBe(false)
-      expect(one.header).toBe(one.groupName)
-      expect(one.headerIcon).toBe(one.groupIcon)
-    }
-    expect(shown.map(({ header }) => header)).toContain("Actions")
-    const width = await page.evaluate(() => document.documentElement.clientWidth)
-    for (const [at, one] of shown.entries()) {
-      expect(one.left).toBeGreaterThanOrEqual(0)
-      expect(one.right).toBeLessThanOrEqual(width)
-      for (const other of shown.slice(at + 1)) {
-        const apart =
-          one.right <= other.left || other.right <= one.left || one.bottom <= other.top || other.bottom <= one.top
-        expect(apart).toBe(true)
-      }
-    }
-    // ↓ goes into the first match, past its header;  Escape there comes back to the field, and closes them
-    await page.keyboard.press("ArrowDown")
-    await page.waitForTimeout(200)
-    expect(await page.evaluate(() => document.activeElement?.localName)).toBe("ui-tree-item")
-    expect(await page.evaluate(() => document.activeElement?.getAttribute("label"))).toBe(shown[0]!.labels[0])
-    await page.keyboard.press("Escape")
+    // a part's star puts it atop the bar, starred;  a right click takes the star away (T152)
+    await layout.locator('ui-tree-item[label="Grid"]').locator("[part~=row]").first().hover()
+    // its icon alone, no tooltip (T162)
+    const star = layout.locator('ui-tree-item[label="Grid"] > ui-button.PaletteStar')
+    expect(await star.getAttribute("data-tooltip")).toBeNull()
+    await star.locator("[part~=button]").click()
     await page.waitForTimeout(400)
-    expect(await matches()).toEqual([])
-    expect(await page.evaluate(() => document.activeElement?.className)).toContain("PaletteStripSearch")
-    // typing opens them again;  Escape in the field closes them;  so does clearing it
-    await page.keyboard.type("o")
-    await page.waitForTimeout(600)
-    expect((await matches()).length).toBeGreaterThan(0)
+    expect(await page.locator(".PaletteRail ui-item.PaletteFavorite").count()).toBe(1)
     await page.keyboard.press("Escape")
-    await page.waitForTimeout(400)
-    expect(await matches()).toEqual([])
-    await search.fill("grid")
     await page.waitForTimeout(600)
-    expect((await matches()).length).toBeGreaterThan(0)
-    await search.fill("")
-    await page.waitForTimeout(600)
-    expect(await matches()).toEqual([])
-    // its ✕ empties it and closes them, and the field keeps the focus (T87)
-    await search.fill("grid")
-    await page.waitForTimeout(600)
-    await page.locator(".PaletteStrip .PaletteStripClear").click()
-    await page.waitForTimeout(600)
-    expect(await matches()).toEqual([])
-    expect(await search.inputValue()).toBe("")
-    expect(await page.evaluate(() => document.activeElement?.className)).toContain("PaletteStripSearch")
-    expect(await page.locator(".PaletteStrip .PaletteStripClear").count()).toBe(0)
-    // choosing a match closes them all (I176)
+    expect(await flyoutsOpen()).toBe(0)
+    // ... kept across a reload
+    await page.reload()
+    await page.waitForSelector(".PaletteRail ui-item.PaletteFavorite", { timeout: 60_000, state: "attached" })
+    // its click picks it up to place with the next click in the app (T153's `PartPlacing`), lit while it's picked up;
+    // Escape puts it down, nothing added
     const grids = ((await text()).match(/<(ui-)?grid\b/g) ?? []).length
-    await search.fill("grid")
-    await page.waitForTimeout(600)
-    await page.locator('.PaletteMatchPanel ui-tree-item[label="Grid"]').first().click()
-    await page.waitForTimeout(SETTLE_MS)
-    expect(await matches()).toEqual([])
-    expect(((await text()).match(/<(ui-)?grid\b/g) ?? []).length).toBe(grids + 1)
+    const isPicked = () =>
+      page.evaluate(() =>
+        (window as unknown as { PartPlacing: { isPicked(label: string): boolean } }).PartPlacing.isPicked("Grid")
+      )
+    await page.locator(".PaletteRail ui-item.PaletteFavorite [part~=item]").click()
+    await page.waitForTimeout(400)
+    expect(await isPicked()).toBe(true)
+    expect(await page.locator(".PaletteRail ui-item.PaletteFavorite[selected]").count()).toBe(1)
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(400)
+    expect(await isPicked()).toBe(false)
+    expect(((await text()).match(/<(ui-)?grid\b/g) ?? []).length).toBe(grids)
+    await page.locator(".PaletteRail ui-item.PaletteFavorite [part~=item]").click({ button: "right" })
+    await page.waitForTimeout(400)
+    expect(await page.locator(".PaletteRail ui-item.PaletteFavorite").count()).toBe(0)
 
-    // its pin unpins it (T92)
-    await page.locator(".PaletteStrip .PalettePin").click()
+    // Search looks through every group, each a row holding its matches;  choosing one closes it (I176) and picks it up
+    await page
+      .locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Search everything you can add"] [part~=item]')
+      .hover()
+    await page.waitForTimeout(HOVER_OPENS_MS)
+    const everything = page.locator('ui-popup.PaletteFlyout[aria-label="Search everything you can add"]')
+    await everything.locator(".PaletteFlyoutSearch input").fill("butt")
     await page.waitForTimeout(600)
-    expect(await page.locator(".PaletteStrip").count()).toBe(0)
+    expect(await everything.locator('ui-tree-item[label="Button"]').count()).toBeGreaterThan(0)
+    await everything.locator('ui-tree-item[label="Button"]').first().click()
+    await page.waitForTimeout(600)
+    expect(await flyoutsOpen()).toBe(0)
+    // ... picked up to place, as a starred one is;  put down again
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(400)
+
+    // a family's parts inside its main one (T162):  Statistics and Value inside Statistic, found by a search too
+    await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Data display"] [part~=item]').hover()
+    await page.waitForTimeout(HOVER_OPENS_MS)
+    const data = page.locator('ui-popup.PaletteFlyout[aria-label="Data display"]')
+    const inside = (outer: string) =>
+      data
+        .locator(`ui-tree-item[label="${outer}"] > ui-tree-item`)
+        .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
+    expect(await inside("Statistic")).toEqual(["Statistics", "Value"])
+    expect(await inside("Card")).toEqual(["Cards"])
+    await data.locator(".PaletteFlyoutSearch [part~=opener]").click()
+    await data.locator(".PaletteFlyoutSearch input").fill("value")
+    await page.waitForTimeout(400)
+    expect(await inside("Statistic")).toEqual(["Value"])
+    await page.keyboard.press("Escape")
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(400)
+
+    // in Run, it goes;  back in Edit, it's back
+    await page.evaluate(`window.editor.showRunner()`)
+    await page.waitForFunction(`!document.querySelector(".PaletteRailPlace")`, undefined, { timeout: 10_000 })
+    await page.evaluate(`window.editor.showEditor()`)
+    await page.waitForSelector(".PaletteRailPlace", { timeout: 30_000 })
   })
 
   test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180, I185)", async () => {

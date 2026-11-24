@@ -13,6 +13,7 @@ import { EXIT, EpicCommandError, flagName } from "spell/epic/command/command.typ
 import { EpicTools, type EpicToolName } from "spell/epic/command/EpicTools"
 import { FreshHint } from "spell/epic/command/FreshHint"
 import { Hub } from "spell/epic/command/Hub"
+import { Servers } from "spell/epic/command/Servers"
 import { LinesOfCode } from "spell/epic/command/LinesOfCode"
 import { Parking } from "spell/epic/command/Parking"
 import { PersonCommands } from "spell/epic/command/PersonCommands"
@@ -25,6 +26,7 @@ import { Requests } from "spell/epic/command/Requests"
 import { Sessions } from "spell/epic/command/Sessions"
 import { Shared } from "spell/epic/command/Shared"
 import { Stock } from "spell/epic/command/Stock"
+import { Guides } from "spell/epic/command/Guides"
 import { TurnEnd } from "spell/epic/command/TurnEnd"
 import { Turns } from "spell/epic/command/Turns"
 import { Upgrade } from "spell/epic/command/Upgrade"
@@ -260,6 +262,28 @@ export class EpicProgram {
         "names they mention still exist, commits since, later mentions;  decides nothing (for /epic tidy)",
       "epic stale seo --json"
     ).usage("<epic> [--json]")
+    this.page(
+      epic.command("hush"),
+      "grey the green, yellow and orange items settled 3+ days ago that you almost surely don't care about (80% sure, " +
+        "judged one by one by a fresh claude -p), as your check would;  no epic:  this worktree's;  all:  every open " +
+        "epic;  --dryrun:  the table only (for /epic hush)",
+      "epic hush epic-engine --dryrun"
+    ).usage("[<epic> | all] [--dryrun] [--json] [--model sonnet]")
+    this.page(
+      epic.command("close-all"),
+      "a section's Close all:  every DECIDED judgement call, FIXED issue or DONE todo still waiting for your tick, " +
+        "closed as your check would, in one write;  the page's Undo can put them back;  --dryrun:  the ids only",
+      "epic close-all epic-engine judgements --dryrun"
+    ).usage("<epic> <judgements | issues | todos> [--dryrun]")
+    this.page(
+      epic.command("badges"),
+      "item badges:  each line starts with what happens next (WILL FIX, YOUR CALL ...), from each item's care and " +
+        "doubt;  trial:  nothing closed;  off:  undo them all;  score:  judge the open items never scored, this epic's alone;  " +
+        "close-new yes:  with badges on, a new item its badge would grey closes as it's made",
+      "epic badges seo trial"
+    ).usage(
+      "<epic>[#<id>] [list [--json] | trial | on | off | score [ids] | set <ids> --care <n> --doubt <n> | close <ids> [--as <why>] | close-new yes|no]"
+    )
     this.page(
       epic.command("summaries"),
       "`summary --json` of each page, by path (worktrees' too), for /epics;  --all as summary's",
@@ -510,7 +534,8 @@ export class EpicProgram {
     this.group(
       epic.command("fresh"),
       "/epic fresh all:  every running epic session marked to go to a fresh session at its next clear moment;  " +
-        "TELL: lines for each, and which go now and which later;  one epic:  epic window fresh <epic>",
+        "TELL: lines for each, and which go now and which later;  --pause:  each pauses and saves its agents first;  " +
+        "one epic:  epic window fresh <epic>",
       (args) => EpicTools.planDoc(["fresh", ...args])
     )
     this.group(
@@ -552,6 +577,13 @@ export class EpicProgram {
         'list [--json] | set <epic> <saga> | set <epic> --none | create <id> "Title" --purpose "..." | page <id> | ...'
       )
       .addHelpText("after", SAGA_HELP)
+
+    this.group(
+      epic.command("guides"),
+      "guides moved into the code (the repo's guidesFolder):  where each one is, moving one there, pruning the epic " +
+        "folder's copies once main has them",
+      (args) => new Guides().run(args)
+    )
   }
 
   ////////////////
@@ -649,7 +681,10 @@ export class EpicProgram {
     return hub.run(args)
   }
 
-  /** `window`, `server`:  scripts passed through;  `hub`, `repo`:  the machine's epic server (`Hub`, `Repos`). */
+  /**
+   * `window`, `server`:  scripts passed through;  `servers`:  main's servers, asked of the keeper (`Servers`);
+   * `hub`, `repo`:  the machine's epic server (`Hub`, `Repos`).
+   */
   private addWindowVerbs(): void {
     const epic = this.epic
     epic.commandsGroup("Windows and the page server:")
@@ -670,6 +705,12 @@ export class EpicProgram {
           : args[0] === "start" && args.includes("--all")
             ? EpicTools.run("serve", ["server", "start", "all", ...args.slice(1).filter((arg) => arg !== "--all")])
             : EpicTools.run("server", args)
+    )
+    this.group(
+      epic.command("servers"),
+      "ask the server keeper to start, stop or restart a MAIN checkout's servers (page server, editor, a repo's own):  " +
+        "the one way, never by hand;  a worktree's own servers are its session's",
+      (args) => new Servers().run(args)
     )
     this.group(
       epic.command("hub"),
@@ -1393,9 +1434,9 @@ const UPDATE_HELP = `
 A phase (seo#P3):
   --symptom, --changes, --goal, --files, --verify <html>   its body ("" removes one)
   --estimate <time>                                       its estimate, e.g. 1-2h
-  --title "New name" [--html]                             rename it:  links that say the old name follow
+  --title "New name" [--html] [--title-ok]                rename it:  links that say the old name follow
 An item (seo#J3):
-  --title "New title" [--html]                            retitle it:  at most 30 plain words, read cold, as add's
+  --title "New title" [--html] [--title-ok]               retitle it:  read cold first, as add's;  --title-ok skips that
   --calm  /  --loud                                       not urgent  /  urgent (red);  a todo too, red as a reminder
   --failed I12  /  --failed off                           a manual test:  failed, filed as that issue ("failed -> I12"
                                                           on its line, a Noted card linking it, left open)  /  not;
@@ -1408,7 +1449,10 @@ word after the target, never with fields:
   done ["<summary>"]                                      the item's WORK finished:  that card green, the summary
                                                           under it;  an open issue or todo closes (as close does)
   fixed ["<what changed>"]                                an issue or judgement call fixed, for your review:  orange
-                                                          until Approve closes it;  a Do this's done means this too
+                                                          (light orange from your words) until Approve closes it;
+                                                          an issue Claude found that you hadn't got to:  grey by
+                                                          itself, "FIXED - <title>";  a Do this's done means this
+                                                          too, and done on an issue Claude found
   noted "<what>"                                          a STEP done, the item not finished:  your choice
                                                           recorded, an answer or details written:  a Noted card
   A card's text:  a short lead sentence, then short paragraphs or bullets, one idea each:
@@ -1452,9 +1496,13 @@ Prints the new item's id.  The letter after # is its kind:
 A todo (T) is work still to do;  --limit:  a limit to know about, not work.
 The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
 --calm (last):  a judgement call (grey) or issue (yellow) that wouldn't surprise you, rather than red.
-A title is at most 30 plain words saying what the item is.  Read it cold, as the person will hours later:  nothing
-about a passing condition (a pid, "after the 4-line fix").  The rest goes in --details.  One over 30 words, a "; "
-list, or two sentences is refused (epic-engine I322).
+A title is understood by a reader with no context:  what changed or what's wrong, effect first, named by what the
+person sees or types (a page, a button, a command), never an internal name;  no visible effect ends "Nothing you'd
+see."  At most 30 words;  the rest goes in --details (the rule:  plan-doc.md, "Rules", TITLES).
+One over 30 words, a "; " list, or two sentences is refused (epic-engine I322).  Then a fresh reader (claude -p,
+Sonnet) reads it cold:  a fail is refused with its reasons and a rewrite to use, exit 1 (T123).
+  --title-ok          keep the title as it is, unread:  a deliberate case
+  (no claude on the PATH, or a test run:  not read, one line on stderr says so)
 The person's pictures (T87), saved in pictures/ beside the page, shown after the item's words, deletable on the page:
   --picture <file>    a picture file;  repeat it for more
   --pasted <n>        the n pictures they pasted last into this session's chat (read from its transcript)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell/ui/styles"
+import { fallbackCSS, shadowFoundationCSS } from "spell/ui/styles"
 
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
@@ -52,7 +52,7 @@ describe("UIDocsSearch.css look", () => {
   }
 
   it("draws the brand's pill:  36px tall at 16px, fully round, a hairline", () => {
-    const host = Sheets.host(MARKUP, [...foundationCSS, searchCSS])
+    const host = Sheets.host(MARKUP, [...shadowFoundationCSS, ...fallbackCSS, searchCSS])
     const field = find(host, ".field")
     expect(field.getBoundingClientRect().height).toBe(36)
     const style = getComputedStyle(field)
@@ -61,7 +61,7 @@ describe("UIDocsSearch.css look", () => {
   })
 
   it("hides the card until it opens, then floats it under the pill:  a soft card, mono eyebrows, the active row filled", () => {
-    const host = Sheets.host(MARKUP, [...foundationCSS, searchCSS])
+    const host = Sheets.host(MARKUP, [...shadowFoundationCSS, ...fallbackCSS, searchCSS])
     const card = find(host, ".results")
     expect(card.getBoundingClientRect().height).toBe(0)
     card.showPopover()

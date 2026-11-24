@@ -1,10 +1,13 @@
 import chalk from "chalk"
 import { execFileSync } from "node:child_process"
-import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { basename, join } from "node:path"
 
 import { kb } from "spell/util/number"
 import { CLI } from "spell/cli"
+import { NameCheck, nameReportLines, PrivateNames } from "spell/cli/commands/names"
+import { SRV } from "spell/server"
 import { kitFolders } from "spell/server/kitFolders"
 import {
   PACKS_FOLDER,
@@ -32,6 +35,9 @@ import {
  * - Each one:  declarations rebuilt (`spell-types`, where a program lists them), then staged and packed into the
  *   kit's `dist-packs/` (git-ignored), its file list summed up and checked.
  * - ONE version for all:  the kit's `package.json` `version`.
+ * - And the private names (`spell names check`, epic `epic-engine` T153):  every file of each packed file, read back
+ *   out of it, pictures included;  a hit fails the publish.  No list on this machine (the publish workflow):  passes,
+ *   saying so.
  * - Then the scratch installs (`ScratchInstall`):  `spell` alone, then every package with its add-ons, outside the
  *   checkout, each tried out.  `--no-scratch` skips them (they need the network).
  * - `--dry-run`:  stops there;  publishes nothing.
@@ -61,6 +67,8 @@ export async function publishCommand(options: CLI.PublishOptions = {}): Promise<
   rmSync(packsDir, { recursive: true, force: true })
   mkdirSync(join(packsDir, STAGE_FOLDER), { recursive: true })
 
+  // read first:  a list it can't read stops the publish before any build
+  const names = new NameCheck({ names: PrivateNames.load() })
   const catalog = yarnCatalog(kit)
   const say = options.json ? () => {} : CLI.out
   const checks: PublishCheck[] = []
@@ -79,13 +87,13 @@ export async function publishCommand(options: CLI.PublishOptions = {}): Promise<
     )
   )
   for (const repo of [kitRepo, ...folders]) buildDeclarations(kit, repo)
-  for (const repo of [kitRepo, ...folders]) buildFiles(repo, say)
+  for (const repo of [kitRepo, ...folders]) buildFiles(kit, repo, say)
 
   for (const pkg of packages) {
     const built = await pkg.stage()
     const result = pkg.pack(packsDir)
     packed.push(result)
-    const own = pkg.checks(result)
+    const own = [...pkg.checks(result), privateNamesCheck(names, result)]
     checks.push(...own)
     say(packSummary(result, built))
     for (const check of own) say(checkLine(check))
@@ -192,18 +200,58 @@ function buildDeclarations(kit: string, repo: PublishedRepo): void {
  * - the app's `build`:  the editor, `app/dist/`, which an install serves (epic `repo-split` P26)
  * - epic's `vscode:package`:  its VS Code extension, `vscode/spell-epic.vsix`, git-ignored, so never stale
  *   (epic `epic-engine` I353;  `PluginPackage` checks its version)
+ * - then its `bundles`, built where git ignores them (epic's docs bundle and epics pack, epic `solid-2-final` P7):
+ *   `PackageBuild` ships what they wrote
  * - dry runs too:  their checks are of what a real publish would ship
  */
-function buildFiles(repo: PublishedRepo, say: (text: string) => void): void {
+function buildFiles(kit: string, repo: PublishedRepo, say: (text: string) => void): void {
   const script = repo.settings.build
-  if (!script) return
-  say(`${repo.name}:  yarn ${script}`)
+  if (script) {
+    say(`${repo.name}:  yarn ${script}`)
+    try {
+      execFileSync("yarn", [script], { cwd: repo.root, stdio: "pipe" })
+    } catch (error) {
+      const { stdout, stderr } = error as { stdout?: Buffer; stderr?: Buffer }
+      const output = `${stdout?.toString() ?? ""}${stderr?.toString() ?? ""}`
+      throw new CLI.CliError(`${repo.name}'s build failed (yarn ${script}):\n${output.slice(-2000)}`, CLI.EXIT.ERRORS)
+    }
+  }
+  const names = repo.settings.bundles ?? []
+  if (!names.length) return
+  say(`${repo.name}:  spell bundle ${names.join(" ")}`)
+  for (const bundle of SRV.Bundle.all(kit, names)) {
+    try {
+      bundle.build({ stdio: "pipe" })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      throw new CLI.CliError(`${repo.name}'s bundle ${bundle.name} failed:\n${message.slice(-2000)}`, CLI.EXIT.ERRORS)
+    }
+  }
+}
+
+/**
+ * The private names (`NameCheck`) in every file of `pkg`'s packed file, unpacked into a scratch folder:  exactly what
+ * npm would get.  Fails on a hit, and on a picture it couldn't read.
+ */
+export function privateNamesCheck(
+  names: NameCheck,
+  pkg: Pick<PackedPackage, "name" | "version" | "tgz">
+): PublishCheck {
+  const check = "no private names in its files and pictures"
+  if (names.names.isEmpty)
+    return { pkg: pkg.name, check, ok: true, detail: "not checked:  this machine has no list of private names" }
+  const unpacked = mkdtempSync(join(tmpdir(), "spell-names-"))
   try {
-    execFileSync("yarn", [script], { cwd: repo.root, stdio: "pipe" })
-  } catch (error) {
-    const { stdout, stderr } = error as { stdout?: Buffer; stderr?: Buffer }
-    const output = `${stdout?.toString() ?? ""}${stderr?.toString() ?? ""}`
-    throw new CLI.CliError(`${repo.name}'s build failed (yarn ${script}):\n${output.slice(-2000)}`, CLI.EXIT.ERRORS)
+    execFileSync("tar", ["-xzf", pkg.tgz, "-C", unpacked])
+    const report = names.folder(unpacked, `${pkg.name}@${pkg.version}`)
+    // a picture that wouldn't open on a Mac fails it;  off a Mac, the report says none were read
+    const failed = report.hits.length || (report.pictures.unread && !report.pictures.cantRead)
+    const detail = failed
+      ? nameReportLines(report, "the packed file").join("\n")
+      : `${report.pictures.read} pictures read`
+    return { pkg: pkg.name, check, ok: !failed, detail }
+  } finally {
+    rmSync(unpacked, { recursive: true, force: true })
   }
 }
 

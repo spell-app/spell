@@ -19,6 +19,9 @@ import { parseSpellProject } from "spell/parser/spell/test"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
 import { BubblyMarkup } from "spell/app/app/components/spell-code/BubblyMarkup"
 
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
+
 const outIndex = process.argv.indexOf("--out")
 const OUT = resolve(
   outIndex > 0
@@ -35,7 +38,6 @@ const DRAWINGS = [
   { id: "pile", label: "Pile", files: ["Solitaire/Pile.spell"] },
   { id: "deck", label: "Deck", files: ["Solitaire/Deck.spell"] },
   { id: "carta", label: "La carta, en español", files: ["Solitario/Carta.es.spell"], lang: "es" },
-  { id: "html-viewer", label: "HTML:  the spell-viewer demo", files: ["app/demo/spell-viewer.html"], html: true },
   { id: "html-editor", label: "HTML:  the spell-editor demo", files: ["app/demo/spell-editor.html"], html: true }
 ]
 

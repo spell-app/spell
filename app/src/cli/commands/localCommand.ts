@@ -158,26 +158,15 @@ export class LocalSite {
     const addresses = address?.length ? address : (server.settings.addresses ?? DEFAULT_ADDRESSES)
     const names = namesOf(addresses)
 
-    if (!server.certificateCovers(names)) {
-      mkdirSync(server.folder, { recursive: true })
-      this.tools.run("mkcert", ["-cert-file", server.certificate, "-key-file", server.key, ...names])
-    }
+    // the kit's certificate steps, the page server's too (epic `solid-2-final` P14):  its files are the site's
+    const certificate = new SRV.LocalCertificate({ folder: server.folder, names, file: "site", tools: this.tools })
+    if (!server.certificateCovers(names)) certificate.make()
     server.remember({ addresses, names })
 
-    const rootFile = this.rootCertificate()
-    const isTrusted = this.tools.succeeds("security", [
-      "verify-cert",
-      "-q",
-      "-L",
-      "-c",
-      server.certificate,
-      "-p",
-      "ssl",
-      "-s",
-      names[0]!
-    ])
-    if (!isTrusted) {
-      this.sudo(`Trusting the site's certificate on this Mac`, TRUST_COMMAND(rootFile))
+    const rootFile = this.rootCertificate(certificate)
+    if (!certificate.isTrusted) {
+      console.log(`Trusting the site's certificate on this Mac.  It may ask for this Mac's password.`)
+      certificate.trust()
     }
     // this Mac reaches itself, so the line is right whatever address the network gives it
     this.changeHosts(names, "127.0.0.1")
@@ -223,10 +212,10 @@ export class LocalSite {
   }
 
   /** The certificate authority's public file;  - throws `CliError` when mkcert names none */
-  private rootCertificate(): string {
-    const caRoot = this.tools.output("mkcert", ["-CAROOT"]).trim()
-    if (!caRoot) throw new CLI.CliError("mkcert didn't say where its certificates are:  run mkcert -CAROOT to see why")
-    return join(caRoot, "rootCA.pem")
+  private rootCertificate(certificate: SRV.LocalCertificate): string {
+    const file = certificate.authorityFile
+    if (!file) throw new CLI.CliError("mkcert didn't say where its certificates are:  run mkcert -CAROOT to see why")
+    return file
   }
 
   ////////////////
@@ -438,6 +427,8 @@ export type LocalTools = LocalSiteTools & {
   succeeds(command: string, args: string[]): boolean
   /** Run a program on this terminal, `input` its standard input.  - throws `CliError` when it fails, naming no input */
   run(command: string, args: string[], options?: { input?: string }): void
+  /** Run a program that asks in a window of its own (the Mac's password window):  the certificate's `ask`. */
+  ask: SRV.CertificateTools["ask"]
   /** Open in the default browser. */
   open(url: string): void
   /** This Mac's address on its network. */
@@ -471,18 +462,6 @@ const POSTFIX_SETTINGS = [
   "smtp_tls_security_level = encrypt",
   "smtp_tls_CAfile = /etc/ssl/cert.pem",
   "inet_interfaces = loopback-only"
-]
-
-/** The `sudo` arguments that make every program on this Mac trust `rootFile`. */
-const TRUST_COMMAND = (rootFile: string): string[] => [
-  "security",
-  "add-trusted-cert",
-  "-d",
-  "-r",
-  "trustRoot",
-  "-k",
-  "/Library/Keychains/System.keychain",
-  rootFile
 ]
 
 /** The message in a refusal's body, or the body itself. */
@@ -568,6 +547,7 @@ function macTools(): LocalTools {
         throw new CLI.CliError(`${command} ${args.join(" ")} didn't work${error ? `:  ${error.message}` : ""}`)
       }
     },
+    ask: SRV.certificateTools().ask,
     open: (url) => void SRV.openBrowser(url),
     lanAddress: () => lanAddressOf(networkInterfaces()),
     askSecret: (question) => CLI.askSecret(question),

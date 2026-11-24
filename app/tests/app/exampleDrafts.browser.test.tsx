@@ -137,7 +137,14 @@ describe("leaving an example with your draft (`editor.askAboutExample()`)", () =
 
   test("an edit AutoSave was still waiting to keep is kept first", async () => {
     drafts = []
-    const file = { isDirty: true, path: "@spell/examples/Counter/Counter.spell", save: vi.fn(async () => undefined) }
+    // its project takes what's typed into its files first (`takeWaitingText()`, epic `solid-2-final` P9)
+    const project = { takeWaitingText: vi.fn() }
+    const file = {
+      isDirty: true,
+      path: "@spell/examples/Counter/Counter.spell",
+      project,
+      save: vi.fn(async () => undefined)
+    }
     const asked = choose(undefined)
     await editor.leaveProject(example("@spell/examples/Counter", [file]))
     expect(file.save).toHaveBeenCalled()

@@ -36,6 +36,8 @@
  *   the toolbar shows, with a red badge, how many NEED OWEN (none:  no badge;  `countItems()`);
  *   an epic card section also gets state chips with counts, filtering its items (`wireItemFilters()`)
  * - scroll-follow:  the toolbar's button of the section being read is highlighted, and the address follows it
+ * - Back and Forward on a Feature Set put the reader where they were, folds and scroll (`spell-doc-back.js`,
+ *   epic `epic-engine` P80);  on any other page they land on the address's `#id`
  * - links to any id in `main` (a section, a heading, a plan item) land below the stuck titles,
  *   unfolding what hides it;  a `#hash` in another case than the page's id (`#T1` for `t1`) lands too
  * - SHORT ADDRESSES (`wireAddresses()`, epic `epic-workflow` P15):
@@ -83,6 +85,7 @@ import { clamp } from "spell/util/number"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { slug } from "spell/util/string"
 import { PagePatch } from "spell/server/site"
+import { backPlacesFor } from "./spell-doc-back.js"
 import { commentsOnPage, wireComments } from "./spell-doc-comments.js"
 import { editHtmlInPlace } from "./spell-doc-edit.js"
 import {
@@ -95,9 +98,13 @@ import {
   dropBlockAction,
   el,
   growField,
+  headCrumbs,
   noteToast,
   readJSON,
   restoreEpicFolds,
+  roomFor,
+  whenAttached,
+  widenTable,
   writeJSON
 } from "./spell-doc-helpers.js"
 import {
@@ -270,8 +277,11 @@ let foldWiring = null
 
 // still, from the first moment:  a page coming up draws its folds and marks as they ARE, never animating into them
 quietFor(QUIET_LOAD_MS)
+// a page that loads the bundle after it's parsed (the reference pages:  `core-reference.js` draws, then adds it) starts
+// once the bundle has run to its end:  a constant declared below `start()`'s callers (`LAZY_SCRIPT`) is still unset
+// while it runs, so starting at once threw (epic `epic-engine` T131)
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true })
-else void start()
+else queueMicrotask(() => void start())
 
 /**
  * QUIET (Owen, 2026-10-25:  "part of the reason the page continually flashes is that you are running animations when
@@ -300,12 +310,17 @@ async function start() {
   const main = document.querySelector("main.spell-doc-main") ?? document.querySelector("main")
   if (!main) return
   // where to land, read before anything scrolls:  scroll-follow rewrites the address as the page moves
-  const landing = { hash: hashId(), scroll: window.SPELL_SERVER?.takeScroll?.() }
+  const reloadedAt = window.SPELL_SERVER?.takeScroll?.()
+  // Back or Forward to a page that keeps places (a Feature Set):  opened as it was left
+  const back = backPlacesFor(main)
+  const arrived = reloadedAt === undefined ? back?.arrival() : undefined
+  back?.watch(isCollapsed)
+  const landing = { hash: hashId(), scroll: reloadedAt ?? arrived?.scroll }
   // a LIVE reload (the page's code changed) comes back as the reader left it:  every fold, and the scroll
-  const kept = takeKeptFolds(landing.scroll !== undefined)
+  const kept = takeKeptFolds(reloadedAt !== undefined) ?? arrived?.folds
   keepFoldsForReload(main)
   // and the field they were typing in (I291):  held from Auto Send until it's back
-  const keptField = takeKeptField(landing.scroll !== undefined)
+  const keptField = takeKeptField(reloadedAt !== undefined)
   keepFieldForReload()
   if (landing.scroll !== undefined) {
     // never the section the address names:  `<epic-*>` blocks follow the address's `#hash` by themselves as they
@@ -344,12 +359,12 @@ async function start() {
   const folds = wireFolds(main, outline, kept)
   addFoldAll(main, folds)
   const used = TAGS.filter((tag) => document.querySelector(tag))
-  await Promise.all(used.map((tag) => customElements.whenDefined(tag)))
+  await Promise.all(used.map((tag) => whenAttached(tag)))
   const sticky = trackStickyHeights(main, outline)
   const follow = followScroll(main, outline, rail)
   // before the anchors:  a short address into this page becomes a `#id` link they take
   wireAddresses()
-  const { jump, go, canGo } = wireAnchors(main, outline, sticky, follow, folds)
+  const { jump, go, canGo } = wireAnchors(main, outline, sticky, follow, folds, back)
   wirePaging(main)
   wireJumpKey(go, canGo)
   wireFilter(main)
@@ -385,7 +400,7 @@ async function start() {
  *   path) loads it by THAT source, and its root's load and this one are the same.
  * - No `<ui-root>` needed:  the pack defines its tags for the whole document.  Most guides have none.
  * - Async (a `<script>` added):  it never holds up the first paint, or `start()`.
- *   An element made before it registers upgrades as it does;  wait with `customElements.whenDefined()`.
+ *   An element made before it registers upgrades as it does;  wait with `whenAttached()` (the docs helpers).
  * - A pack that can't load (a page from `file://`):  a console warning, and the page goes on without.
  */
 function loadEpicsPack() {
@@ -396,16 +411,17 @@ function loadEpicsPack() {
 }
 
 /**
- * The page's head on ONE line, as an epic page's:  `DOCS / SPELL SYNTAX`, the crumbs then the title,
+ * The page's head on ONE line, as an epic page's:  `EPIC-ENGINE / SHIPPED GUIDES`, the crumbs then the title,
  * in the crumbs' own type, the title twice their size and bold (`spell-doc.css`, "The page's head on one line").
  * - Owen, 2026-10-13:  "Make the header changes in the other doc files"
  * - a copy of the page's breadcrumb (`.spell-crumbs`, before the sticky head) goes INTO the h1, before its text;
  *   `data-spell-added`, so a live update steps around it
+ *   - without its crumb to the home page, which the top bar already is (`headCrumbs()`, epic `epic-engine` T148)
  *   - its last section (the page itself) stays, emptied:  the title says its words;
  *     so the `/` before the title is the breadcrumb's own divider (epic `epic-engine` P3:  a `<span>` of ours before)
  * - the breadcrumb itself stays where it was, hidden (`<body class="spell-one-line-head">`):
  *   live updates still patch it, and the copy follows when the page reloads
- * - a page with no breadcrumb:  the title alone, in the same type
+ * - a page with no breadcrumb, or none but the home page's and its own:  the title alone, in the same type
  */
 function oneLineHead(main) {
   const h1 = main.querySelector(PAGE_TITLE)
@@ -413,7 +429,8 @@ function oneLineHead(main) {
   document.body.classList.add("spell-one-line-head")
   const crumbs = main.querySelector(":scope > ui-breadcrumbs.spell-crumbs")
   if (!crumbs || h1.querySelector(":scope > .spell-head-crumbs")) return
-  const trail = crumbs.cloneNode(true)
+  const trail = headCrumbs(crumbs)
+  if (!trail) return
   trail.classList.add("spell-head-crumbs")
   trail.dataset.spellAdded = ""
   trail.removeAttribute("id")
@@ -430,13 +447,15 @@ function oneLineHead(main) {
 /**
  * The READING TIME chip, right after the page's title (epic `epic-engine` P14, Q5):
  * `SOLID 2 · 48 min read`, a quiet `<ui-label>` (`spell-doc.css`, "The reading time chip").
- * - its tooltip:  the exact count, "8,749 words, 2,281 of them code" (`readingTime()`, `ReadingTime.js`)
+ * - no tooltip:  its words are on it (epic `epic-engine` I370);  the minutes from `readingTime()` (`ReadingTime.js`)
  * - every page with the docs head:  guides, the index pages, details and choice pages
  * - NOT an epic or saga page:  `<epic-page>` draws its own head, and its own chip, counting only what's SHOWN
  *   (`shownReadingTime()`;  J91, Owen:  "Count what's shown"):  its items' bodies wait in part files until opened
  * - recounted on every `spell-doc:updated`:  an edit saved, a section's body loaded
+ * - NOT a page that's a tool, not a read:  `<body data-spell-no-reading-time>` (the Servers tab's, epic `epic-engine` P82)
  */
 function wireReadingTime(main) {
+  if (document.body.hasAttribute("data-spell-no-reading-time")) return
   drawReadingTime(main)
   addEventListener("spell-doc:updated", () => drawReadingTime(main))
 }
@@ -448,17 +467,13 @@ function wireReadingTime(main) {
 function drawReadingTime(main) {
   const h1 = main.querySelector(PAGE_TITLE)
   if (!h1) return
-  const { words, code, minutes } = readingTime(main)
+  const { minutes } = readingTime(main)
   let chip = h1.querySelector(":scope > ui-label.spell-reading-time")
   if (!chip) {
     chip = el("ui-label", { class: "spell-reading-time", size: "tiny", appearance: "basic", "data-spell-added": true })
     h1.append(chip)
   }
-  const counted = code
-    ? `${words.toLocaleString()} words, ${code.toLocaleString()} of them code`
-    : `${words.toLocaleString()} words`
   if (chip.textContent !== `${minutes} min read`) chip.textContent = `${minutes} min read`
-  if (chip.dataset.tooltip !== counted) chip.dataset.tooltip = counted
 }
 
 /**
@@ -517,17 +532,7 @@ function wireTableWidths(main) {
       return alignBlockActions(row)
     }
     if (!parent.getClientRects().length) return
-    const room = roomFor(box, main)
-    // where the table starts in its column, read off the table itself with its own offset taken off:  its light-DOM
-    // parent is NOT where it's laid out when it's slotted (an `<epic-field>`'s table sits in the field's padded
-    // `.text` box), so measuring the parent put it 51px off, cut off at the phase's clipping edge (I315, r72)
-    box.style.removeProperty("margin-inline-start")
-    const start = `${room.left - box.getBoundingClientRect().left}px`
-    box.style.maxWidth = "none"
-    box.style.width = `${room.right - room.left}px`
-    box.style.marginInlineStart = start
-    row.style.width = box.style.width
-    row.style.marginInlineStart = start
+    widenTable(box, row, roomFor(box, main))
     alignBlockActions(row)
   }
   const flip = (box) => {
@@ -672,7 +677,7 @@ function fitTwoColumns(box) {
  *     no pointer, no ids, hidden from readers
  * - the line, below the titles stuck over the table (`tableLine()`)
  * - read only for the tables on screen (an IntersectionObserver), a frame at a time,
- *   on any scroll (the page's, or a table's sideways) or resize
+ *   on any scroll (the page's, or a table's sideways, in its shadow root too:  epic `epic-engine` P80) or resize
  * - tables a part's body or a live update adds later get theirs too (`eachTable()`)
  */
 function wireTableHeads(main) {
@@ -703,7 +708,19 @@ function wireTableHeads(main) {
       onScreen.delete(box)
     }
     for (const [box, pin] of pins) if (!onScreen.has(box)) pin.hidden = true
-    for (const box of onScreen) if (box.isConnected && !unpinnable.has(box)) place(box)
+    for (const box of onScreen) {
+      if (!box.isConnected || unpinnable.has(box)) continue
+      followSideways(box)
+      place(box)
+    }
+  }
+  // a `<ui-table>` scrolls in its shadow root, whose scroll events never reach the document
+  const followed = new WeakSet()
+  const followSideways = (box) => {
+    const root = box.shadowRoot
+    if (!root || followed.has(root)) return
+    followed.add(root)
+    root.addEventListener("scroll", () => redrawSoon(), { capture: true, passive: true })
   }
   const place = (box) => {
     const table = tableOf(box)
@@ -925,26 +942,6 @@ function tableKey(box, main) {
   return `${name}#${own}${nth > 1 ? `-${nth}` : ""}`
 }
 
-/**
- * How far a widened table `box` may run, as window x's `{ left, right }`:
- * `main`'s width less its gutter (`--spell-gutter`) on both sides,
- * cut to every ancestor between them that clips its overflow (`overflow-x` not `visible`), at its inner edges.
- * - up through slots and shadow roots:
- *   a table in an `<epic-*>` element's light DOM is laid out in its shadow root's boxes
- */
-function roomFor(box, main) {
-  const page = main.getBoundingClientRect()
-  const gutter = parseFloat(getComputedStyle(main).getPropertyValue("--spell-gutter")) || 16
-  const room = { left: page.left + gutter, right: page.right - gutter }
-  for (let el = layoutParent(box); el && el !== main; el = layoutParent(el)) {
-    if (getComputedStyle(el).overflowX === "visible") continue
-    const left = el.getBoundingClientRect().left + el.clientLeft
-    room.left = Math.max(room.left, left)
-    room.right = Math.min(room.right, left + el.clientWidth)
-  }
-  return room
-}
-
 /** How wide `roomFor()` lets `box` run. */
 function roomWidth(box, main) {
   const room = roomFor(box, main)
@@ -953,11 +950,6 @@ function roomWidth(box, main) {
 
 /** The least a widened table must gain on its column (px) for the expand button to show. */
 const MIN_WIDE_GAIN = 24
-
-/** The box `el` is laid out in:  its slot when it's slotted, else its parent, else its shadow root's host. */
-function layoutParent(el) {
-  return el.assignedSlot ?? el.parentElement ?? el.getRootNode().host ?? null
-}
 
 /**
  * The tables in `root`, each by its BOX:  its `<ui-table>` host, else the bare table.  Never a pinned header's copy
@@ -1046,6 +1038,7 @@ function land({ hash, scroll }, jump, follow) {
  *   - one scroll, and one more after `SETTLE_MS` only when nothing else had moved it, landed short
  *     (I23 of `epic-engine`:  1150 -> 671)
  * - the page may be too short for `top` at first:  it gets there as it grows
+ * - returns a function that lets go at once (a newer jump)
  */
 function holdScroll(top) {
   const reader = new AbortController()
@@ -1059,15 +1052,18 @@ function holdScroll(top) {
     else reader.abort()
   }
   hold()
+  return () => reader.abort()
 }
 
 /**
  * Resolves once an epic page's elements are defined and have drawn (their hosts' `ready`), so their
  * `contentsEntry` can be read;  after `EPIC_WAIT_MS` at most (a pack that won't load:  the page goes on without).
+ * - waits ONLY for the tags the page holds:  a family loads once one of its elements is made,
+ *   so on a page with no phases, waiting for `<epic-phase>` took all 5 seconds (epic `epic-engine` I408)
  */
 async function epicsDrawn(main) {
-  const tags = ["epic-page", ...EPIC_FOLDS.split(", ")]
-  const drawn = Promise.all(tags.map((tag) => customElements.whenDefined(tag))).then(() =>
+  const tags = ["epic-page", ...EPIC_FOLDS.split(", ")].filter((tag) => main.querySelector(tag))
+  const drawn = Promise.all(tags.map((tag) => whenAttached(tag))).then(() =>
     Promise.all(Array.from(main.querySelectorAll(EPIC_FOLDS), (host) => host.ready))
   )
   await Promise.race([drawn, new Promise((done) => setTimeout(done, EPIC_WAIT_MS))])
@@ -2848,7 +2844,8 @@ function h2HeightAbove(sticky) {
  *   - `go(id)`:  as a click on a link to `#id` (a history entry, then the jump), resolving once landed;
  *     `canGo(id)`:  is there one to land on
  */
-function wireAnchors(main, outline, sticky, follow, folds) {
+function wireAnchors(main, outline, sticky, follow, folds, back) {
+  let stopHolding
   const landing = HashLanding.forDocument(document).use({
     // the page has drawn already (`start()`)
     whenReady: () => Promise.resolve(),
@@ -2870,16 +2867,33 @@ function wireAnchors(main, outline, sticky, follow, folds) {
     event.preventDefault()
     go(id)
   })
-  addEventListener("popstate", () => jump(hashId()))
-  addEventListener("hashchange", () => jump(hashId()))
+  addEventListener("popstate", onHistory)
+  addEventListener("hashchange", onHistory)
   if (window.parent !== window) addEventListener("message", onMessage)
   return { jump, go, canGo: (id) => !!(targetIn(id) || hostHolding(main, id)) }
+
+  /** The history moved:  a place kept for this entry (`spell-doc-back.js`), else the address's `#id`. */
+  function onHistory() {
+    stopHolding?.()
+    if (back?.restore({ setFolded: putFoldBack, hold: (scroll) => (stopHolding = holdScroll(scroll)) })) return
+    void jump(hashId())
+  }
+
+  /** Fold or unfold `section` as it was, with no height animation:  the scroll put back reads its full height. */
+  function putFoldBack(section, isFolded) {
+    if (isCollapsed(section) === isFolded) return
+    const root = document.documentElement
+    root.setAttribute("data-spell-jumping", "")
+    setTimeout(() => root.removeAttribute("data-spell-jumping"), SETTLE_MS)
+    setCollapsed(section, isFolded)
+  }
 
   /**
    * Follow a same-page link to `id`:  a history entry (unless the address is there already), then the jump.
    * - Resolves once it has landed (`jump()`).
    */
   function go(id) {
+    stopHolding?.()
     if (hashId() !== id) {
       history.pushState(null, "", `#${id}`)
       dispatchEvent(new Event("spell-doc:scrolled-to"))
@@ -3449,13 +3463,7 @@ function wireNewEpic(main) {
   if (!ServerLink.isServed()) return
   const head = main.querySelector(".spell-page-head")
   if (!head || head.querySelector(".spell-new-epic")) return
-  // Spell UI's tooltip, after the standard delay (TOOLTIPS;  Owen, 2026-11-19, r80)
-  const tip = "Save an idea as a future epic"
-  const button = el(
-    "ui-button",
-    { appearance: "circular basic", size: "tiny", icon: "seedling", "data-tooltip": tip },
-    "New epic"
-  )
+  const button = el("ui-button", { appearance: "circular basic", size: "tiny", icon: "seedling" }, "New epic")
   button.addEventListener("click", openNewEpicBox)
   addHeadTool(head, el("span", { class: "spell-new-epic", "data-spell-added": true }, button), "page")
 }

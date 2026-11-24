@@ -29,7 +29,8 @@ import "./VSCodeRunner.css"
  * - Runs whatever the extension sends in a `run` message, on its OWN copy of the spell runtime -- see `loadRuntime()`.
  *   - One sent before that's loaded runs once it is.
  *   - Each run keeps the program's things, e.g. the game in progress:  only Restart starts afresh (see `run()`).
- * - A project it imports, e.g. `@spell/library/people`, it asks the extension for (`loadImport`), each run.
+ * - A project it imports, e.g. `@spell/library/people`, it asks the extension for (`loadImport`), each run;
+ *   so is each code file it calls (`call native`, `loadNative`), as javascript.
  * - Its Thing Explorer shows things' members in spell's words, from the words each `run` message brings:
  *   the project's `<Project>.en.js` (`SP.SpellWords`).
  *   - Their `messages` are what the core says as the program runs, e.g. its tests' lines, in its language.
@@ -72,8 +73,8 @@ export function VSCodeRunner(props: VSCodeRunnerProps) {
   let testCopy: Promise<LoadedRuntime> | undefined
   // who's waiting for which details -- see `loadDetails()`
   const detailsWaiting = new Map<string, Array<(details: LSP.ScopeDetails | null) => void>>()
-  // who's waiting for which imported project's javascript -- see `loadImport()`
-  const importsWaiting = new Map<string, Array<ImportWaiting>>()
+  // who's waiting for which imported project's or code file's javascript, by what was asked -- see `askFor()`
+  const waitingFor = new Map<string, Array<Waiting>>()
   // what the last `run` message sent, if it came before the runtime -- run once that's loaded
   let toRun: PendingRun | undefined
   // Restart was pressed:  the `run` it brings starts afresh, a new deal.
@@ -185,13 +186,9 @@ export function VSCodeRunner(props: VSCodeRunnerProps) {
       const waiting = detailsWaiting.get(data.path)
       detailsWaiting.delete(data.path)
       waiting?.forEach((resolve) => resolve(data.details))
-    } else if (data?.type === "imported") {
-      const waiting = importsWaiting.get(data.projectId)
-      importsWaiting.delete(data.projectId)
-      const { compiled, error } = data
-      waiting?.forEach(({ resolve, reject }) =>
-        compiled !== undefined ? resolve(compiled) : reject(new Error(error ?? `Couldn't load '${data.projectId}'`))
-      )
+    } else if (data?.type === "imported") answered(`loadImport ${data.projectId}`, data.projectId, data)
+    else if (data?.type === "native") {
+      answered(`loadNative ${data.module}`, data.module, { compiled: data.javascript, error: data.error })
     }
   }
 
@@ -206,7 +203,7 @@ export function VSCodeRunner(props: VSCodeRunnerProps) {
     const keepThings = !startAfresh
     startAfresh = false
     lastRun = pending
-    const options = { appRoot, coreUrl: copy.coreUrl, keepThings, loadImport, messages }
+    const options = { appRoot, coreUrl: copy.coreUrl, keepThings, loadImport, loadNative, messages }
     void copy.runtime.runApp(compiled, options).then((problem) => {
       setError(problem)
       const startedApp = copy.runtime.appIsMounted()
@@ -235,7 +232,7 @@ export function VSCodeRunner(props: VSCodeRunnerProps) {
     try {
       testCopy ??= loadRuntime(runtimeUrl)
       const tester = await testCopy
-      const options = { coreUrl: tester.coreUrl, loadImport, messages: ran.messages }
+      const options = { coreUrl: tester.coreUrl, loadImport, loadNative, messages: ran.messages }
       const tested = await tester.runtime.testApp(ran.compiled, options)
       if (sent !== testRuns) return
       showTestResults(copy.runtime.core.console, tested, tester.runtime.core)
@@ -293,12 +290,37 @@ export function VSCodeRunner(props: VSCodeRunnerProps) {
    * - Rejects with why, if the extension couldn't load it:  the run shows it as its error.
    */
   function loadImport(projectId: string): Promise<string> {
+    return askFor(`loadImport ${projectId}`, { type: "loadImport", projectId })
+  }
+
+  /**
+   * Javascript of the code file the program calls as `module` (`call native`, epic `from-console` P10),
+   * e.g. `@spell/native/owen@spell/clipboard/clipboard.ts`:  from the extension, which asks the language server
+   * (`spell/codeFile`) to take its types out.
+   * - Asked for afresh each run, so an edit to it shows on the next;  once, however many wait.
+   * - Rejects with why, if the extension couldn't load it:  the run shows it as its error.
+   */
+  function loadNative(module: string): Promise<string> {
+    return askFor(`loadNative ${module}`, { type: "loadNative", module })
+  }
+
+  /** Ask the extension for some javascript, with `message`:  once for everyone waiting on `key`. */
+  function askFor(key: string, message: FromRunnerMessage): Promise<string> {
     return new Promise((resolve, reject) => {
-      const waiting = importsWaiting.get(projectId) ?? []
+      const waiting = waitingFor.get(key) ?? []
       waiting.push({ resolve, reject })
-      importsWaiting.set(projectId, waiting)
-      if (waiting.length === 1) post({ type: "loadImport", projectId })
+      waitingFor.set(key, waiting)
+      if (waiting.length === 1) post(message)
     })
+  }
+
+  /** The extension answered `key`, for `what`:  its javascript, else why it couldn't load it. */
+  function answered(key: string, what: string, { compiled, error }: { compiled?: string; error?: string }) {
+    const waiting = waitingFor.get(key)
+    waitingFor.delete(key)
+    waiting?.forEach(({ resolve, reject }) =>
+      compiled !== undefined ? resolve(compiled) : reject(new Error(error ?? `Couldn't load '${what}'`))
+    )
   }
 
   /** Details of Type Explorer node or member `path`, from the extension -- asked for once, however many wait. */
@@ -328,8 +350,8 @@ type PendingRun = {
   runTests: boolean
 }
 
-/** A run waiting for an imported project's javascript -- see `loadImport()`. */
-type ImportWaiting = { resolve: (compiled: string) => void; reject: (error: Error) => void }
+/** A run waiting for an imported project's or a code file's javascript -- see `askFor()`. */
+type Waiting = { resolve: (compiled: string) => void; reject: (error: Error) => void }
 
 /** Props for `<VSCodeRunner>`. */
 export type VSCodeRunnerProps = {

@@ -69,8 +69,7 @@ export class EpicNote extends E.UIComponent<typeof epicNoteVocabulary> {
             {this.fold.button({
               controls: BODY_ID,
               labelledBy: this.title ? `${LABEL_ID} ${TITLE_ID}` : LABEL_ID,
-              part: this.partForName("toggle"),
-              tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
+              part: this.partForName("toggle")
             })}
           </Show>
           <span id={LABEL_ID} class={LABEL} part={this.partForName("label")}>

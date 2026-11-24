@@ -26,8 +26,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       (`as: "github"`, accented letters kept)
     - `withoutAccents(text, { keep })`, `escapeRegExp()`, `escapeHTML()`, `dedent()`, `indented(text, indent)`
   - `number.ts` -- `clamp()`, and `kb()`:  a size in KB, of 1024 bytes
+  - `hash.ts` -- `textHash()`, `stableHash()`:  a hash of text, or of any JSON value its keys in any order, the same in a
+    page and in node, synchronous (epic `solid-2-final` P15:  what names a drawing on the page server and in a page);
+    by file, in no barrel of Spell UI's
   - `LoadOnce.ts` -- a load per key, every caller the same promise, with a choice of what a failure does;
     `LoadOnce.abortable()` ends one caller's wait (Spell UI's and the places', moved down by epic `data`, J12)
+  - `MostRecent.ts` -- the most recent N things used, newest first, the oldest let go with a callback
+    (epic `solid-2-final` P10):  the editor's last projects kept whole;  the last pages drawn (P13)
   - `time.ts` -- LOCAL dates and times (epic `coherence` I5):  `localDate()`, `clockTime()`, `compactTime()`,
     `localTime()` / `localMinutes()` with the offset, `localMidnight()`
     - never `toISOString().slice(0, 10)` for a day:  that's the UTC date, tomorrow in California from 5pm
@@ -35,7 +40,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `toGamut()`), luminance, contrast;  one shape each (`Rgb`, `Oklch`), hex in and out
   - `timing.ts` -- when to run something (epic `coherence` P19, from `spell/element`, which re-exports it):
     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()` (`soonEvenHidden()`:  never held back in a hidden tab),
-    `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
+    `letBrowserIn()`, `after()`, `every()`, `whenIdle()` (the ONE idle wait, epic `solid-2-final` P13);
+    and waiting:  `waitUntil()`, `within()`
   - `polling.ts` -- `pollWhileVisible()`, on `every()`:  the ONE way to poll.  Taken by file, in no barrel
     - and `watchServerFiles()`, the ONE watch of every page, which refreshes:
       - when the page server says a file changed (`spell-server:changed`)

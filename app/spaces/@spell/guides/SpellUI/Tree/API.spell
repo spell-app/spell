@@ -17,6 +17,12 @@
 		</>
 	</>
 
+	<section label="Properties">
+		<html>
+			<ui-docs-api family="ui-tree" only="properties"></>
+		</>
+	</>
+
 	<section label="Events">
 		<html>
 			<ui-docs-api family="ui-tree" only="events"></>

@@ -1,0 +1,69 @@
+"file editor" is a notebook page
+	<header level="1">
+		FileEditor
+		<header>A CodeMirror editor on one Spell file at a time, kept in step with it.</>
+	</>
+
+	<text class="lede" paragraph>Where you type spell in the editor: a <link target="src-packages-app-docs-codemirroreditor-html" link="/code-mirror-editor">CodeMirrorEditor</> showing one file. What you type goes straight into the file, and a file loaded or reloaded shows in the editor.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or reading its code</>
+		<item icon="image">A picture, not live: it edits the editor's open file</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The editor's input pane, on the Solitaire example's cards: everything under the toolbar is a FileEditor on the open file.</>
+		<image src="/components/app/_images/InputEditor.png" alt="The input pane: a File dropdown and actions above a code editor showing Card.spell, coloured as spell" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The <link target="src-packages-app-docs-inputeditor-html" link="/input-editor">InputEditor</> draws one, once CodeMirror has loaded, and shows each file in it:</>
+		<text paragraph>InputEditor.tsx · the code pane's editor, shortened:</>
+		<markdown>
+			```typescript
+			<Loading fallback={<LazyCodeMirror.Loading />}>
+			  <LazyCodeMirror.FileEditor
+			    file={file()}
+			    hotkeys={EDITOR_HOTKEYS}
+			    onMount={didMount}
+			    onUpdate={editor.onInputUpdate}
+			    onUnmount={editor.onInputWillUnmount}
+			  />
+			</Loading>
+			```
+		</>
+		<list bulleted>
+			<item>It shows the file's CodeMirror state, which the app's <text code>FileStates</> keep in step with the file both ways.</>
+			<item>With no <text code>file</> yet, it says the editor's loading.</>
+			<item>A new <text code>file</> shows in the same view, and the last one's state is kept: its undo, folds, selection and scroll, so switching back finds it as it was left. No remount per file.</>
+			<item><text code>onMount</> hands out the editor, <text code>SpellCodeMirror</>, once it shows a file: the app follows its scrolling there, and its caret through <text code>onUpdate</>. Its keys are the page's, passed in as <text code>hotkeys</>.</>
+			<item>Only the editor's pages need CodeMirror, so it's loaded after the program has compiled and run: draw it through <text code>LazyCodeMirror</>, inside a <text code>&lt;Loading&gt;</>, never by importing it.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="FileEditor"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-app-src-app-solid-codemirror-fileeditor-tsx" link="/src/app/solid/codemirror/FileEditor.tsx"><text title="src/app/solid/codemirror/FileEditor.tsx" code>FileEditor.tsx</></>: the component, and its props</>
+			<item><link target="src-app-src-app-ui-codemirror-filestates-ts" link="/src/app/ui/codemirror/FileStates.ts"><text title="src/app/ui/codemirror/FileStates.ts" code>FileStates.ts</></>: a CodeMirror state per file, kept in step with it</>
+			<item><link target="src-app-src-app-solid-lazycodemirror-tsx" link="/src/app/solid/LazyCodeMirror.tsx"><text title="src/app/solid/LazyCodeMirror.tsx" code>LazyCodeMirror.tsx</></>: loads it once the program has run</>
+			<item><link target="src-tests-app-src-solid-inputeditor-browser-test-tsx" link="/tests/app/solid/InputEditor.browser.test.tsx"><text title="tests/app/solid/InputEditor.browser.test.tsx" code>InputEditor.browser.test.tsx</></>: its tests, through the input editor</>
+			<item>In the app's CodeMirror editors: <link target="src-app-src-app-solid-codemirror" link="/src/app/solid/codemirror/"><text title="src/app/solid/codemirror/" code>solid/codemirror</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-16 against branch <ui-text code>codemirror</>.</>
+		</>
+	</>

@@ -1,10 +1,12 @@
 /**
  * Every name `<epic-focus>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
- * - Pure data:  `import type` only.
+ * - Pure data:  `import type`, plus the badges' words (`<epic-item>`'s), data too.
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "spell/epic/definitions"
+
+import { BADGE_TEXTS } from "spell/epic/components/epic-item/EpicItem.en"
 
 /****************
  * ### `<epic-focus>`
@@ -59,6 +61,7 @@ export const epicFocusVocabulary = {
   ],
   states: [{ name: "open", description: "Showing." }],
   texts: [
+    ...BADGE_TEXTS,
     { key: "heading", text: "Focus mode", description: "The overlay's name." },
     { key: "phasesTab", text: "Phases" },
     { key: "questionsTab", text: "Questions" },
@@ -68,19 +71,12 @@ export const epicFocusVocabulary = {
     { key: "testsTab", text: "Tests" },
     { key: "tabsLabel", text: "Kinds of item", description: "The tabs' group, for a screen reader." },
     {
-      key: "tabTip",
-      text: "{tab}:  {count} to go",
-      description: "A tab's tooltip:  how many of its items show, by its chips."
-    },
-    {
       key: "where",
       text: "{at} of {total} · {tab} {atTab} of {inTab}",
       description: "Where you are:  overall, then in the tab."
     },
     { key: "back", text: "Back", description: "Back's words." },
-    { key: "backTip", text: "Previous item (←)", description: "Back's tooltip." },
     { key: "next", text: "Next", description: "Next's words." },
-    { key: "nextTip", text: "Next item (→)", description: "Next's tooltip." },
     {
       key: "nothing",
       text: "Nothing open to go through:  every item is done, decided or hidden by the chips.",

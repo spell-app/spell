@@ -38,14 +38,14 @@ describe("<ui-image> classes", () => {
     ['appearance="bordered rounded"', "ui bordered rounded image"],
     ['align="center" fluid', "ui centered fluid image"],
     ["inline disabled", "ui disabled inline image"],
-    ['floated="right"', "ui right floated image"],
+    ['floated="right"', "ui right floated image right-floated"],
     ['spacing="md"', "ui spaced image"],
-    ['spacing="left"', "ui left spaced image"],
-    ['vertical-align="middle"', "ui middle aligned image"],
+    ['spacing="left"', "ui left spaced image left-spaced"],
+    ['vertical-align="middle"', "ui middle aligned image middle-aligned"],
     ['background="yellow"', "ui yellow background image"],
     [
       'size="tiny" appearance="circular" floated="left" vertical-align="top"',
-      "ui tiny left floated circular top aligned image"
+      "ui tiny left floated circular top aligned image left-floated top-aligned"
     ]
   ])("<ui-image %s>", async (attributes, classes) => {
     const { root } = await image(`<ui-image src="${SRC}" alt="x" ${attributes}></ui-image>`)
@@ -170,7 +170,7 @@ describe("<ui-image aspect-ratio crop>", () => {
 
   it("`crop`'s class words, as Fomantic writes a variation", async () => {
     expect((await image(`<ui-image src="${SRC}" crop="top left"></ui-image>`)).root.className).toBe(
-      "ui top left cropped image"
+      "ui top left cropped image left-cropped top-left top-left-cropped"
     )
   })
 
@@ -197,7 +197,7 @@ describe("<ui-images>", () => {
     ["", "ui images"],
     ['size="tiny"', "ui tiny images"],
     ['avatar appearance="circular"', "ui avatar circular images"],
-    ['vertical-align="bottom"', "ui bottom aligned images"]
+    ['vertical-align="bottom"', "ui bottom aligned images bottom-aligned"]
   ])("<ui-images %s>", async (attributes, classes) => {
     const group = await ElementFixture.render<DOMElement>(`<ui-images ${attributes}></ui-images>`)
     const root = group.shadowRoot!.querySelector("[part~=group]")!

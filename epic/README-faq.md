@@ -110,8 +110,9 @@ They come from real trouble:  the papercuts and suspected-bugs logs, and the iss
 ### "the test turn is stuck"
 
 - Why:  one test run at a time per machine (`epic turns`);  another agent's run holds the turn, or died holding it.
-- Fix:  `epic turns` names who holds it and since when.
-  A live run:  wait.  A dead process:  the next run takes the turn over by itself.
+- Fix:  `epic turns` names who holds it, for how long, and whether it has stalled.
+  A live run:  wait, however long it takes;  a waiter never gives up on it.
+  A dead process, or a run with no output or CPU for 10 minutes:  the turn is taken over by itself.
 
 ### A merge is refused for uncommitted files
 
@@ -119,6 +120,10 @@ They come from real trouble:  the papercuts and suspected-bugs logs, and the iss
 - Fix:  commit or stash them in `main`.
   - Generated output (bundles, snapshots) it moves aside by itself, into `~/.spell-epic/ditched/`.
   - Up to 3 hand-made files:  `epic merge <epic> --ditch` moves them aside too.
+- In an epic's worktree, other agents' uncommitted files never hold a merge up (epic `epic-engine` I406):
+  only a file the merge itself changes does, named with the agent working on it.
+  - Fix:  that agent commits it, or you wait for it.
+  - The rest are left exactly as they are;  taking `main` in then runs in a temporary worktree.
 
 ### A worktree window didn't open, or the session didn't move
 

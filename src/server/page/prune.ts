@@ -65,7 +65,7 @@ export function orphanServers(processes: ServerProcess[], exists: (path: string)
   for (const server of processes) {
     const kind = kindOf(server.command)
     if (!kind) continue
-    const checkout = checkoutOf(server)
+    const checkout = serverCheckoutOf(server)
     if (!checkout || exists(checkout)) continue
     if (server.cwd && exists(server.cwd)) continue
     orphans.push({ ...server, kind, checkout })
@@ -81,8 +81,11 @@ export function kindOf(command: string): ServerKind | undefined {
   return undefined
 }
 
-/** The checkout `process` serves, from its command line, else its working folder. */
-function checkoutOf({ command, cwd }: ServerProcess): string | undefined {
+/**
+ * The checkout `process` serves, from its command line, else its working folder;  `undefined` when neither says.
+ * - also spell-epic's `ServerGuard`'s:  which checkout a process it might kill serves (epic `epic-engine` P84)
+ */
+export function serverCheckoutOf({ command, cwd }: ServerProcess): string | undefined {
   const root = /\s--root\s+(\S+)/.exec(command)?.[1]
   if (root) return root
   const script = /(\/\S+?)\/(?:packages|node_modules)\//.exec(command)?.[1]

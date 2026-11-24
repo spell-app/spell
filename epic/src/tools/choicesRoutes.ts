@@ -55,13 +55,13 @@ const choicesRoutes: RouteModule = {
     const api = new SRV.Router()
     api.get("/draft", (request, reply) => {
       const draft = readJson<ChoicesDraft>(draftFile(choicesPage(web.files, request.query.page)))
-      reply.set("Cache-Control", "no-store").json({ draft })
+      reply.noStore().json({ draft })
     })
     api.get("/answer", (request, reply) => {
       const answer = sentAnswer(
         readJson<ChoicesAnswer>(answerFile(choicesPage(web.files, request.query.page))) ?? undefined
       )
-      reply.set("Cache-Control", "no-store").json({ answer })
+      reply.noStore().json({ answer })
     })
     api.use(guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }))
     api.post("/draft", async (request, reply) => {

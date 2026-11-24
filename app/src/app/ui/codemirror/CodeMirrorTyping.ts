@@ -19,6 +19,7 @@ import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { hoverDelay } from "spell/app/app/ui/codePopups"
+import type { ParsedElsewhere } from "./CodeMirrorLanguage"
 import { FileStates } from "./FileStates"
 import { LspToCodeMirror } from "./LspToCodeMirror"
 
@@ -63,8 +64,15 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   so the editor and its tests decide alike;  this class is only the CodeMirror wiring.
  ****************/
 export class CodeMirrorTyping {
-  /** The helps, for a file in `lang`;  `fileOf()`:  the project file, whose parse says which tags are its views. */
-  static extension(fileOf: () => SP.SpellFile | undefined, lang = "en"): Extension {
+  /**
+   * The helps, for a file in `lang`;  `fileOf()`:  the project file, whose parse says which tags are its views.
+   * - `elsewhere`:  where the language worker parses it, its last parse says that instead (epic `solid-2-final` T36)
+   */
+  static extension(
+    fileOf: () => SP.SpellFile | undefined,
+    lang = "en",
+    elsewhere?: Pick<ParsedElsewhere, "isElsewhere" | "isType">
+  ): Extension {
     return [
       HAS_TYPING_HELPS.of(true),
       snapped,
@@ -85,7 +93,7 @@ export class CodeMirrorTyping {
         ])
       ),
       EditorView.inputHandler.of((view, from, to, text) =>
-        CodeMirrorTyping.typed(view, { from, to, text, lang, fileOf })
+        CodeMirrorTyping.typed(view, { from, to, text, lang, fileOf, elsewhere })
       ),
       EditorView.domEventHandlers({ paste: (event, view) => CodeMirrorTyping.pasting(event, view) }),
       EditorView.clipboardOutputFilter.of((text, state) => {
@@ -248,7 +256,7 @@ export class CodeMirrorTyping {
    * - `true` when the help wrote the key itself, with what it adds.
    */
   private static typed(view: EditorView, typing: Typing): boolean {
-    const { from, to, text, lang, fileOf } = typing
+    const { from, to, text, lang, fileOf, elsewhere } = typing
     const { state } = view
     if (from !== to || !/^.$/su.test(text) || state.selection.ranges.length > 1) return false
     const line = state.doc.lineAt(from)
@@ -270,7 +278,10 @@ export class CodeMirrorTyping {
     if (text !== " ") return false
     const tag = LSP.SpellTyping.tagBeforeSpace(lines, index, column)
     if (tag) {
-      const rest = LSP.CompletionShapes.spaceAfterTag(scopeOf(fileOf(), lang), tag)
+      const scope = scopeOf(fileOf(), lang)
+      const rest = elsewhere?.isElsewhere()
+        ? LSP.CompletionShapes.spaceAfterTag(scope, tag, elsewhere.isType)
+        : LSP.CompletionShapes.spaceAfterTag(scope, tag)
       view.dispatch({ changes: { from, insert: " " }, selection: { anchor: from + 1 }, userEvent: "input.type" })
       // the rest an undo step of its own:  a snippet's edit never joins the typing before it
       if (rest.insertText) {
@@ -522,6 +533,8 @@ type Typing = {
   lang: string
   /** the project file shown */
   fileOf: () => SP.SpellFile | undefined
+  /** where the language worker parses it, which of its tags name the program's types */
+  elsewhere?: Pick<ParsedElsewhere, "isElsewhere" | "isType"> | undefined
 }
 
 /** Does a state have these helps?  The right-click menu's Paste asks, through `paste()`. */

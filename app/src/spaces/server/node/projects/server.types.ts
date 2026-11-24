@@ -85,6 +85,11 @@ export type ProjectFileJSON = {
   /** Targets it compiles to, e.g. `["js/solid", "ts/solid"]` -- default `["js/solid"]`:  see `SP.TARGETS`. */
   targets?: string[]
   /**
+   * The Spell it was written for, e.g. `"0.9.0"`:  see `SP.ProjectManifestJSON5.spellVersion` (epic `language` P68).
+   * - Written when it's made, and by `spell upgrade`;  never by Project Settings.
+   */
+  spellVersion?: string
+  /**
    * Where its lists start counting:  `1` (the default), or `0` as javascript and Python do (epic `python-target` P2).
    * - Applied when compiling, on every target:  `card 0 of the deck` is its first card.
    * - Ordinal words don't follow it:  `the first card` is the first either way.
@@ -180,7 +185,7 @@ export type ManifestJSON = Record<string, ManifestEntryJSON>
  * - And for other project-file routes that return the updated index.
  * - `manifest` -- current on-disk manifest:  NOT persisted, always freshly computed from file system.
  * - `imports` -- import list, synced with `manifest` and persisted back to the project file when it changes.
- * - `title` / `version` / `exports` / `targets` / `listsStartAt` / `development` / `places` -- straight from the project file (`ProjectFileJSON`).
+ * - `title` / `version` / `exports` / `targets` / `spellVersion` / `listsStartAt` / `development` / `places` -- straight from the project file (`ProjectFileJSON`).
  * - `buildFolder` -- where its compiled output goes, inside the checkout's `build/`:  `project-utils.buildFolderInBuild()`.
  * - `namesLanguages` -- the languages it has a names dictionary in, beside its project file (`Solitaire.es.names.json5`);
  *   left out when none:  see `SP.ProjectManifestJSON5`.
@@ -192,6 +197,7 @@ export type ProjectIndexJSON = {
   version?: string
   exports?: string[]
   targets?: string[]
+  spellVersion?: string
   listsStartAt?: 0 | 1
   development?: ProjectDevelopmentJSON
   buildFolder?: string

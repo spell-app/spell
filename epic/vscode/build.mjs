@@ -8,12 +8,14 @@
  *   P14), found as their source files by the kit's `sourceNames()`, which `buildExtension()` bundles with:
  *   esbuild alone finds neither a name without its extension nor a folder's `index.ts`.
  * - Its own settings for every file it bundles, `tsconfig.json`.
+ * - Fails unless our `version` is the kit's, as Spell's language extension's build does (epic `epic-engine` T140).
  */
 import { resolve } from "node:path"
 
-import { buildExtension } from "spell/toolchain/buildExtension"
+import { buildExtension, checkKitVersion } from "spell/toolchain/buildExtension"
 
 const here = import.meta.dirname
+checkKitVersion({ folder: here, kit: resolve(here, "../..") })
 
 await buildExtension({
   folder: here,

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -63,7 +63,7 @@ describe("the home page's cards", () => {
       new Set(),
       SAGAS
     )
-    expect(cards.map((card) => card.title)).toEqual(["Guides", "Sagas", "Epic Pages", "Epic Documentation"])
+    expect(cards.map((card) => card.title)).toEqual(["Epics", "Sagas", "Guides", "Epic Documentation"])
     const count = Object.fromEntries(cards.map((card) => [card.id, card.count]))
     // by the Epics page's groups (epic `airplane` P8):  `c` has no phases yet, so it's planning
     expect(count.epics).toBe("1 active · 1 planning · 1 done")
@@ -189,13 +189,24 @@ describe("the list pages", () => {
     expect(listSection(guides, [], undefined, SAGAS)).toContain(`<p class="meta">No guides yet.</p>`)
   })
 
-  it("start from a skeleton:  site header, breadcrumb home, sticky title, the markers", () => {
+  it("start from a skeleton:  site header, its own breadcrumb, sticky title, the markers", () => {
     const html = skeleton(guides)
     expect(html).toContain(`<spell-site-header></spell-site-header>`)
-    expect(html).toContain(`<ui-breadcrumb link="/pages/index.html" target="_self">Spell Epic</ui-breadcrumb>`)
+    // no crumb to the home page:  the site header's Spell Epic is that link (epic `epic-engine` T148)
+    expect(html).not.toContain(`<ui-breadcrumb link=`)
+    expect(html).toContain(`<ui-breadcrumb selected>Guides</ui-breadcrumb>`)
     expect(html).toContain(`<h1>Guides</h1>`)
     expect(html.indexOf(START)).toBeLessThan(html.indexOf(END))
     expect(skeleton(LISTS.find((list) => list.id === "templates"))).toContain(`id="writing-docs"`)
+  })
+
+  it("name the Feature Set on the Templates page, with the command that makes one", () => {
+    const html = listSection(
+      LISTS.find((list) => list.id === "templates"),
+      []
+    )
+    expect(html).toContain("<ui-header>Feature Set Template</ui-header>")
+    expect(html).toContain("epic ask create &lt;slug&gt; --template feature-set --from &lt;data.json5&gt;")
   })
 
   it("carry the page notes Owen left in the list over when it's written again (epic airplane P3)", () => {
@@ -276,6 +287,44 @@ describe("the engine's Templates page (epic-engine I131)", () => {
       expect(readFileSync(file).equals(before)).toBe(true)
     } finally {
       rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
+describe("the Guides list page, guides in both places (epic-engine P79)", () => {
+  it("lists a guide in the checkout's own guides folder and one in the epic folder, a moved one once", () => {
+    const top = mkdtempSync(join(tmpdir(), "index-both-"))
+    const root = join(top, "repo")
+    const content = join(top, "repo.epics")
+    const guide = (title) =>
+      `<!doctype html>\n<html>\n  <head>\n    <title>${title}</title>\n    <meta name="description" content="${title}." />\n  </head>\n  <body>\n    <main><h1>${title}</h1></main>\n  </body>\n</html>\n`
+    try {
+      mkdirSync(join(root, ".epic"), { recursive: true })
+      mkdirSync(join(root, "guides", "moved"), { recursive: true })
+      mkdirSync(join(content, "guides", "moved"), { recursive: true })
+      mkdirSync(join(content, "epics"), { recursive: true })
+      mkdirSync(join(content, "pages"), { recursive: true })
+      writeFileSync(
+        join(root, ".epic", "config.json5"),
+        '{ "contentFolder": "../repo.epics", "guidesFolder": "guides" }'
+      )
+      writeFileSync(join(root, "guides", "moved", "moved.html"), guide("Moved Code Guide"))
+      // its copy still in the epic folder, until the branch merges
+      writeFileSync(join(content, "guides", "moved", "moved.html"), guide("Moved Old Copy"))
+      writeFileSync(join(content, "guides", "private.html"), guide("Private Guide"))
+      const run = spawnSync(process.execPath, [join(TOOLS, "index.js")], {
+        encoding: "utf8",
+        env: { ...process.env, EPIC_CHECKOUT: root }
+      })
+      expect(run.status, run.stderr).toBe(0)
+      const list = readFileSync(join(content, "guides", "index.html"), "utf8")
+      expect(list).toContain("/guides/moved/moved.html")
+      expect(list).toContain("Moved Code Guide")
+      expect(list).not.toContain("Moved Old Copy")
+      expect(list).toContain("<ui-meta>guides/private.html</ui-meta>")
+      expect(list.split("/guides/moved/moved.html").length - 1).toBe(1)
+    } finally {
+      rmSync(top, { recursive: true, force: true })
     }
   })
 })

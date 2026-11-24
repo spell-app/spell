@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Working with Agents</title>
+    <meta
+      name="description"
+      content="How Spell's coding agents are told what to do:  WWOD, the house style in the kit's agents/wwod/ (a hub, its spokes, and §21, the opt-in rule that the code is the spec), the AGENTS.md files and the order they're read in, citing and changing a rule, and the three logs."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="Tools" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Working with Agents</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Working with Agents</h1></header></ui-sticky
+        >
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>the end of the kit's CLAUDE.md · 5 lines</ui-title>
+          <ui-content>
+            <pre><code class="language-text">@AGENTS.md
+
+@agents/wwod/WWOD.md
+
+@agents/wwod/code-is-the-spec.md</code></pre>
+          </ui-content>
+        </ui-accordion>
+        <p class="lede">
+          Start Claude Code in the kit, and before you type a word, the agent has read the kit's
+          <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a> and the hub of WWOD, "What Would Owen
+          Do?", the house style every folder shares. Those rules name their reader: WWOD opens "Audience: AI coding
+          agents -- follow these over your defaults".
+        </p>
+        <p>
+          A rule can be pointed at exactly: <code>WWOD §5 › "Sentinel errors as control flow"</code> names one bullet,
+          and <code>spell wwod check</code> proves every citation like it still lands.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user"
+            >Written for: anyone about to read, cite, add or change a rule, or set up a project's agents with
+            them</ui-item
+          >
+          <ui-item icon="flask">Checked: 2026-11-21, every file and command against that day's code</ui-item>
+          <ui-item icon="book open"
+            >The reference beside it: <a href="/README/agents.md" target="src-readme-agents-md">the agents README</a>,
+            and WWOD's own
+            <a href="/agents/wwod/README.md" target="src-agents-wwod-readme-md"
+              ><code title="agents/wwod/README.md">README.md</code></a
+            ></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ui-statistics class="spell-stats" size="mini">
+            <ui-statistic value="21" label="sections"></ui-statistic>
+            <ui-statistic value="242" label="rules"></ui-statistic>
+            <ui-statistic value="12" label="files"></ui-statistic>
+          </ui-statistics>
+          <ul>
+            <li>
+              WWOD is a set of Markdown files an agent reads, not a linter. It lives in the kit's
+              <a href="/agents/wwod/" target="src-agents-wwod"><code>agents/wwod/</code></a
+              >, tracked with the code: edit it there.
+            </li>
+            <li>
+              A HUB every task needs (<code>WWOD.md</code>, §1-7), SPOKES read when the work touches their topic
+              (§8-20), and one rule a project opts in to, §21.
+            </li>
+            <li>
+              Spell opts in to §21: the code is the spec, so a test that disagrees with the code is rewritten to match
+              it.
+            </li>
+            <li>
+              One home per rule: house style in WWOD, what's about one folder in its
+              <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a
+              >, how Solid 2 works in the Solid 2 rules.
+            </li>
+            <li>
+              <code>spell wwod init</code> hands WWOD and the Solid 2 rules to another project's agents: they ship in
+              the npm <code>spell</code> package.
+            </li>
+            <li>Problems known and lived with go in three logs: code debt, suspected bugs, papercuts.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="2-files" label="2. The files" sticky collapsible dividing open="false">
+          <ui-section id="hub-and-spokes" label="Hub and spokes" sticky collapsible dividing open="false">
+            <p>
+              The hub's "Touching → Also read" table sends the agent on to a spoke, one file per topic. The § numbers
+              run on across all of them.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>file</th>
+                    <th>§</th>
+                    <th>about</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/WWOD.md" target="src-agents-wwod-wwod-md"
+                        ><code title="agents/wwod/WWOD.md">WWOD.md</code></a
+                      >, the hub
+                    </td>
+                    <td>1-7</td>
+                    <td>
+                      every task: working process, general style, naming, imports, errors, comments and docs, the
+                      anti-patterns
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/writing.md" target="src-agents-wwod-writing-md"
+                        ><code title="agents/wwod/writing.md">writing.md</code></a
+                      >
+                    </td>
+                    <td>6</td>
+                    <td>the long before / afters for docstrings, comments and docs</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/architecture.md" target="src-agents-wwod-architecture-md"
+                        ><code title="agents/wwod/architecture.md">architecture.md</code></a
+                      >
+                    </td>
+                    <td>8</td>
+                    <td>features, module layout, file names, barrels, namespaces</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/types.md" target="src-agents-wwod-types-md"
+                        ><code title="agents/wwod/types.md">types.md</code></a
+                      >
+                    </td>
+                    <td>9</td>
+                    <td>types, function signatures, helpers</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/server-env.md" target="src-agents-wwod-server-env-md"
+                        ><code title="agents/wwod/server-env.md">server-env.md</code></a
+                      >
+                    </td>
+                    <td>10-11</td>
+                    <td>server routes and APIs, environment, configuration</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/classes-state.md" target="src-agents-wwod-classes-state-md"
+                        ><code title="agents/wwod/classes-state.md">classes-state.md</code></a
+                      >
+                    </td>
+                    <td>12-16</td>
+                    <td>classes, decorators, state, <code>Loadable</code>, value objects, records</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/solid.md" target="src-agents-wwod-solid-md"
+                        ><code title="agents/wwod/solid.md">solid.md</code></a
+                      >
+                    </td>
+                    <td>17</td>
+                    <td>Solid components and JSX, on top of the Solid 2 rules</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/css.md" target="src-agents-wwod-css-md"
+                        ><code title="agents/wwod/css.md">css.md</code></a
+                      >
+                    </td>
+                    <td>18</td>
+                    <td>CSS and styling</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/logging.md" target="src-agents-wwod-logging-md"
+                        ><code title="agents/wwod/logging.md">logging.md</code></a
+                      >
+                    </td>
+                    <td>19</td>
+                    <td>logging and debug output</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/tests.md" target="src-agents-wwod-tests-md"
+                        ><code title="agents/wwod/tests.md">tests.md</code></a
+                      >
+                    </td>
+                    <td>20</td>
+                    <td>tests</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/agents/wwod/code-is-the-spec.md" target="src-agents-wwod-code-is-the-spec-md"
+                        ><code title="agents/wwod/code-is-the-spec.md">code-is-the-spec.md</code></a
+                      >
+                    </td>
+                    <td>21</td>
+                    <td>OPT-IN: the code is the spec; the opposite of test-first (TDD)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                The twelfth file is WWOD's <a href="/README.md" target="src-readme-md"><code>README.md</code></a
+                >: how the rules fit together, how to add one.
+              </li>
+              <li>
+                The Solid 2 rules sit beside it, in the kit's
+                <a href="/agents/solid/" target="src-agents-solid"><code>agents/solid/</code></a
+                >: Solid 2 as it is, pinned to rc.21.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="three-homes" label="Three homes for a rule" sticky collapsible dividing open="false">
+            <p>Every rule has exactly one home, picked by what it's about.</p>
+            <ul>
+              <li><b>WWOD</b>: house style, how we write any code in any folder. Naming, errors, classes, tests ...</li>
+              <li>
+                <b
+                  >An <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a></b
+                >: the kit's holds what's about the kit and across its folders; a big folder's, what's about it; a
+                sub-folder's, what's local to it.
+              </li>
+              <li>
+                <b>The Solid 2 rules</b>: how Solid 2 itself works, measured. The house style on top of it is WWOD §17.
+              </li>
+              <li>
+                Anywhere else a rule is needed, it's one line pointing home:
+                <code>SEE: WWOD §N › "title"</code>.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="how-agents-find-it" label="How agents find it" sticky collapsible dividing open="false">
+            <p>An agent reads from the general to the specific: the kit, the folder it works in, the task's rules.</p>
+            <ol>
+              <li>
+                The kit's <a href="/CLAUDE.md" target="src-claude-md"><code>CLAUDE.md</code></a
+                >, as every Claude Code session starts: it @-imports the next two and §21, then adds the Claude-only
+                rules.
+              </li>
+              <li>
+                The kit's <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a
+                >: the kit and what's across its folders. Codex reads it itself.
+              </li>
+              <li>
+                WWOD's hub, through <a href="/CLAUDE.md" target="src-claude-md"><code>CLAUDE.md</code></a
+                >.
+              </li>
+              <li>
+                A big folder's <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a
+                >, then its sub-folder's, when the session first works there.
+              </li>
+              <li>WWOD's spoke for the task, as the hub's table says, before writing.</li>
+              <li>The Solid 2 rules, IN FULL, before any Solid code: they're kept out of the imports, being long.</li>
+            </ol>
+            <ul>
+              <li>Only the first three load by themselves; the agent opens the rest when they tell it to.</li>
+              <li>
+                Every big folder has an <code>agents</code> link at its root to the kit's, made by every install, so its
+                rules can name
+                <a href="/agents/wwod/WWOD.md" target="src-agents-wwod-wwod-md"><code>agents/wwod/WWOD.md</code></a
+                >. The epic folder has none: in a plugin, a root
+                <a href="/agents/" target="src-agents"><code>agents/</code></a> loads as the plugin's agent types.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="3-citing" label="3. Citing and extending" sticky collapsible dividing open="false">
+          <ui-section id="citing-a-rule" label="Citing a rule" sticky collapsible dividing open="false">
+            <ul>
+              <li>A rule is a bullet with a bold title (or a <code>###</code> heading) under a numbered section.</li>
+              <li>
+                Cite it as <code>WWOD §N › "title"</code>; a whole section as <code>WWOD §18</code>. Inside WWOD, a bare
+                §5 means WWOD's.
+              </li>
+              <li>Renumbering is allowed: the check finds every citation it breaks.</li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>one whole rule, from §6 · 11 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-markdown">- **User-facing strings stay inline**, where they're used -- EXCEPT in code that speaks more than one language:
+  - Spell UI:  its vocabularies (`UIButton.en.ts`) and dictionaries (`UIButton.es.ts`)
+  - the editor app (`spell/app/app`):  every text it shows people is a key in `AppTexts.en.ts`,
+    read with `appTexts.text(key, params)`;  each other language is a LAZY `AppTexts.&lt;lang&gt;.ts` beside it,
+    with every key (its type says so)
+  - the language server (`spell/app/lsp`):  its labels are keys in `LspTexts.en.ts`,
+    read in the language of the FILE they're about (`LSP.LspTexts.of(scope)`)
+  - A sentence that names something takes it as a param (`{type}`, `{theType}`), never glued from pieces:
+    each language words it its own way.
+  - NOT:  a `MSG.ts` of every string in a package that speaks only English -- one more file to keep in step, for no
+    localization.</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+          <ui-section id="extending" label="Extending in a folder" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                An <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a> section that shares a WWOD
+                rule's name EXTENDS it. Its first line says so, "As WWOD §12, plus:", then gives only what's local.
+              </li>
+              <li>
+                Today 20 of the kit's <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a> files do
+                it, most for §4 (imports), §8 (the folder's namespace) and §12 (classes).
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="not-and-from" label="NOT: and From: lines" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>NOT:</code> under a rule records the option chosen AGAINST, with the why, so nobody proposes it
+                again: <code>#private</code>, a <code>MSG.ts</code> per package.
+              </li>
+              <li>
+                Each spoke opens with a <code>From:</code> line naming where its rules came from. Those lines cite the
+                ORIGINAL numbers, so the check skips them.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="spec" label="§21, the code is the spec" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The one rule a project chooses. In Spell the source is the spec: a test that disagrees with the code is
+                rewritten to match it, unless the code is obviously wrong.
+              </li>
+              <li>And the report names each test rewritten that way, with why the old expectation was wrong.</li>
+              <li>
+                It's the opposite of test-first, where a failing test comes first and the tests are the spec. So it's
+                its own file, read only by a project that opts in, and says so in its
+                <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a
+                >.
+              </li>
+              <li>
+                Without it, WWOD §1 says only that tests follow the project's own way. A project that says nothing: an
+                agent follows its tests as they are, and asks before rewriting one.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="4-changing" label="4. Changing a rule" sticky collapsible dividing open="false">
+          <ol>
+            <li>
+              Put it in the spoke for its topic, or in the hub if every task needs it, as a bullet with a bold title.
+            </li>
+            <li>A rule chosen against: a <code>NOT:</code> line under the winning rule, with the why.</li>
+            <li>Cite real code by its repo path, so an agent can read the example.</li>
+            <li>A new section is numbered after the last.</li>
+            <li>Then <code>spell wwod check</code>.</li>
+          </ol>
+          <ul>
+            <li>Move a rule, never copy it. Leave a <code>SEE:</code> line where it was.</li>
+            <li>Code that doesn't follow a new rule yet gets an entry in the code-debt log, not a silent rewrite.</li>
+          </ul>
+          <ui-section id="the-check" label="The check" sticky collapsible dividing open="false">
+            <p>
+              <code>spell wwod check</code> resolves every citation and backticked repo path in WWOD, every
+              <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a> and
+              <a href="/CLAUDE.md" target="src-claude-md"><code>CLAUDE.md</code></a
+              >, the Solid 2 rules and the skills, and exits 1 on a broken one.
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>spell wwod check, at the kit's root, its last line · 1 line</ui-title>
+              <ui-content>
+                <pre><code class="language-text">18 files, 21 sections, 242 rules, 112 problems</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                Every <code>WWOD §N</code> must name a section, and every <code>WWOD §N › "title"</code> a rule in it.
+              </li>
+              <li>A skill is checked for its citations only: its paths are relative to the skill.</li>
+              <li>
+                A new file that starts citing WWOD must be added to the check's list (<code>CITERS</code>, in
+                <a href="/src/cli/commands/wwod.ts" target="src-src-cli-commands-wwod-ts"
+                  ><code title="src/cli/commands/wwod.ts">wwod.ts</code></a
+                >), or the check never reads it, and never says so.
+              </li>
+              <li>
+                <b>Not yet:</b> over a hundred of WWOD's example lines still cite files by paths from before the repos
+                were one (<code>packages/...</code>), and the check lists each one.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="own-project" label="5. In your own project" sticky collapsible dividing open="false">
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>a project that installs spell · 1 line</ui-title>
+            <ui-content>
+              <pre><code class="language-sh">npx spell@next wwod init</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>
+              Three questions: WWOD, the Solid 2 rules, and §21. Then the rules' lines go in your
+              <a href="/CLAUDE.md" target="src-claude-md"><code>CLAUDE.md</code></a> (an <code>@</code> line each) and
+              <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a> (the same, in plain words).
+            </li>
+            <li>Each file's lines sit in one marked block: run it again to add or drop a rule.</li>
+            <li>
+              <code>--yes</code> with <code>--solid</code>, <code>--code-is-the-spec</code> or
+              <code>--no-wwod</code> asks nothing; <code>--dry-run</code> writes nothing.
+            </li>
+            <li>
+              The package ships <a href="/agents/wwod/" target="src-agents-wwod"><code>agents/wwod</code></a> and
+              <a href="/agents/solid/" target="src-agents-solid"><code>agents/solid</code></a> only: the logs and the
+              coherence catalog are Spell's own.
+            </li>
+            <li>
+              The edge: WWOD's examples cite Spell's own files; read them as illustrations. A rule in your own
+              <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a> wins where it disagrees.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="5-ledgers" label="6. The three logs" sticky collapsible dividing open="false">
+          <p>
+            Problems known and lived with go in three logs, each with a <code>## &lt;folder&gt;</code> section per
+            folder and its own rules in its header. WWOD §1 › "Record deviations and known issues; NEVER fix them
+            silently" sends agents there.
+          </p>
+          <ul>
+            <li>
+              <b>Code debt</b>: structural debt chosen not to fix yet, including code that doesn't follow a WWOD rule
+              yet.
+            </li>
+            <li><b>Suspected bugs</b>: looks like a bug, not sure yet.</li>
+            <li><b>Papercuts</b>: anything that slowed development down; check it first when tooling fails.</li>
+            <li>
+              They're Spell's own, kept in the epic folder, one copy for every checkout: the kit's
+              <a href="/agents/" target="src-agents"><code>agents/</code></a> holds links to them. Edit them at their
+              real path, never through the link.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="7-limits" label="7. Limits" sticky collapsible dividing open="false">
+          <ul>
+            <li><b>Rules, not a linter</b>: nothing but review holds code to most of them.</li>
+            <li><b>Stale example paths</b>: over a hundred, listed by <code>spell wwod check</code> (above).</li>
+            <li>
+              <b>The plugin is Claude Code's</b>: the Markdown works for any agent, but the skills and hooks around it
+              are Claude Code's for now.
+            </li>
+            <li>
+              <b>The rules are long</b>: about 19k tokens with the Solid 2 rules, which is why only the hub loads by
+              itself.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="10-sources" label="8. Where things are" sticky collapsible dividing open="false">
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>file or command</th>
+                  <th>what it is</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <a href="/agents/wwod/WWOD.md" target="src-agents-wwod-wwod-md"
+                      ><code title="agents/wwod/WWOD.md">WWOD.md</code></a
+                    >
+                  </td>
+                  <td>the hub, §1-7, and the table of spokes</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/agents/wwod/code-is-the-spec.md" target="src-agents-wwod-code-is-the-spec-md"
+                      ><code title="agents/wwod/code-is-the-spec.md">code-is-the-spec.md</code></a
+                    >
+                  </td>
+                  <td>§21, the opt-in rule</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/agents/solid/solid-2.md" target="src-agents-solid-solid-2-md"
+                      ><code title="agents/solid/solid-2.md">solid-2.md</code></a
+                    >
+                  </td>
+                  <td>the Solid 2 rules</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/AGENTS.md" target="src-agents-md"><code title="AGENTS.md">AGENTS.md</code></a
+                    >,
+                    <a href="/CLAUDE.md" target="src-claude-md"><code title="CLAUDE.md">CLAUDE.md</code></a>
+                  </td>
+                  <td>the kit's: what's about it, and the Claude-only rules</td>
+                </tr>
+                <tr>
+                  <td><code>spell wwod check</code>, <code>spell wwod init</code></td>
+                  <td>check every citation; hand the rules to another project</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/README/agents.md" target="src-readme-agents-md">The agents README</a>: the reading order, the
+              epic plugin, the skills and hooks, what's Claude-specific
+            </li>
+            <li>
+              <a href="/guides/vite-plus.html" target="src-guides-vite-plus-html">Working on Spell</a>: the checks the
+              finishing pass runs
+            </li>
+            <li>
+              <a href="/guides/solid/solid-2.html" target="src-guides-solid-solid-2-html">Solid 2 in Spell</a>: the
+              guide that explains the Solid 2 rules
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

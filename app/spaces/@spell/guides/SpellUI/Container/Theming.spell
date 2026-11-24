@@ -11,6 +11,10 @@
 			through a private alias, so nothing inside blocks them.
 
 			- The fixed widths are one token per breakpoint: `--ui-container-width-tablet`, `-computer`, `-large-monitor`.
+			- The `padding` steps: `--ui-container-lightly-padded` (`small`, 1em), `--ui-container-padded` (`md`, 1.5em),
+			  `--ui-container-very-padded` (`lg`, 3em).
+			- `inverted`'s surface and text: `--ui-container-inverted-background`, `--ui-container-inverted-color`.
+			- With `columns`, the grid's own tokens (`--ui-grid-*`) set its gutters.
 			- The `scrolling` heights too: `--ui-container-scrolling-height` (phones, 15em), then
 			  `--ui-container-scrolling-height-tablet` (18em), `-computer` (24em), `-widescreen` (30em).
 			- Never set the `--_ui-*` names: they're the sheet's private plumbing.

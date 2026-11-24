@@ -83,8 +83,6 @@ export const epicReplyVocabulary = {
     }
   ],
   texts: [
-    { key: "foldTip", text: "Close this reply", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Open this reply", description: "Tooltip of its fold button while folded." },
     { key: "re", text: "re: {re}", description: "What the reply is about, in its heading." },
     { key: "you", text: "You", description: "Who wrote it, in its heading:  the reader (`from` is their name)." },
     {
@@ -99,12 +97,7 @@ export const epicReplyVocabulary = {
       text: "{agent} ({person})",
       description: "Who wrote it, in its heading:  another person's session's agent (`agent`, `from`):  `Codex (Bob)`."
     },
-    { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until you've seen it." },
-    {
-      key: "newTip",
-      text: "New since you looked",
-      description: "The NEW tag's tooltip."
-    }
+    { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until you've seen it." }
   ],
   children: [{ tag: "flow", description: "The reply." }]
 } as const satisfies EpicVocabulary

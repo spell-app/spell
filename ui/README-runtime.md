@@ -451,8 +451,11 @@ The foundation is a set of sheets in [`src/styles/`](src/styles/), one per conce
 | `layers.css` | the layer order;  MUST come first in the page and in every shadow root | -- |
 | `reset.css` | box-sizing and margins for shadow markup, never the page | `ui.reset` |
 | `tokens.css` * | type, spacing, radii, borders, ink, shadows, motion, z-index, breakpoints | `ui.tokens` |
-| `colors.css` * | the palette, semantic colours, colour remaps and colour utilities | `ui.tokens`, `ui.utilities` |
-| `sizes.css` * | size ratios, size remaps, font-size and spacing utilities | `ui.tokens`, `ui.utilities` |
+| `colors.css` * | the palette and semantic colours | `ui.tokens` |
+| `colors.shared.css` * | colour remaps and colour utilities | `ui.tokens`, `ui.utilities` |
+| `sizes.css` * | size ratios | `ui.tokens` |
+| `sizes.shared.css` * | size remaps, font-size and spacing utilities | `ui.tokens`, `ui.utilities` |
+| `*.fallback.css` * | each token sheet's tokens again, for shadow roots on a page without them | `ui.tokens` |
 | `animations.css` | the transition catalogue | `ui.utilities` |
 | `utilities.css` | layout, text, theme and visibility utilities, for your markup and inside components | `ui.utilities` |
 | `typography.css` | page typography, opt-in with `class="ui-typography"` | `ui.base` |
@@ -463,8 +466,13 @@ The foundation is a set of sheets in [`src/styles/`](src/styles/), one per conce
 - \* Generated from [`styles.en.ts`](src/styles/styles.en.ts) by `yarn gen:styles`, and committed,
   so nobody using Spell UI needs a build step.
 - `spell/ui/styles` exports each sheet as text, plus the two lists the runtime adopts:
-  - `foundationCSS`:  for the page AND every shadow root
-  - `pageCSS`:  for the page only, which adds typography and the native-markup rules
+  - `foundationCSS`:  for the page
+  - `pageCSS`:  for the page too, which adds typography and the native-markup rules
+  - `shadowFoundationCSS`:  for every shadow root:  the foundation less the tokens themselves
+- The tokens are set on the page once, and reach every shadow root by inheritance:
+  a shadow root adopts none of `tokens.css`, `colors.css` or `sizes.css`, whose `:root` rules do nothing there.
+  - A shadow root on a page that never loaded them adopts their fallbacks instead (`fallbackCSS`):
+    the runtime checks the page once, not once per shadow root.
 - Each family adds its own sheet, in `ui.components.<name>`, split into four sub-layers:
   the layer order, and why nobody writes `!important`, are on [README-themes.md](README-themes.md).
 
@@ -563,10 +571,12 @@ The cost is the stylesheet, and most of it is the foundation:
 a page with one button gets 143 kB minified (20 kB gzipped), and the six tags above 259 kB (33 kB).
 
 Where it stops:
-- 55 of the 62 [families](README-components.md) render.
-  The other seven stay as they are, and are listed on stderr:
-  `ui-code`, `ui-markdown`, `ui-include`, `ui-panel`, `ui-property-editor`, `ui-tree-diagram`, and `ui-components`,
-  the pack loader.
+- 55 of the 97 [families](README-components.md) render, and `ui-item` lends its class to the ones that hold items.
+  The other 41 stay as they are, and are listed on stderr:
+  among them `ui-code`, `ui-markdown`, `ui-include`, `ui-panel`, `ui-property-editor`, `ui-tree-diagram`,
+  the newer layout and site families (`ui-stack`, `ui-toolbar`, `ui-page-layout`, `ui-site-nav` ...),
+  and `ui-components`, the pack loader.
+  - The list:  `StaticFamilies.CLASSES`, in [StaticFamilies.ssr.ts](src/static/StaticFamilies.ssr.ts).
 - What has no path without JavaScript stays as rendered:  tabs, and popups that open on hover.
 - The page mustn't load the elements as well:  they'd take the flattened markup for slotted content, and show it twice.
   That's why the render removes the scripts.

@@ -114,11 +114,6 @@ export const epicCardVocabulary = {
   texts: [
     { key: "planning", text: "planning", description: "In progress with no phases yet:  the mark's words." },
     { key: "away", text: "While you were out", description: "`away`:  the mark's words." },
-    {
-      key: "awayTip",
-      text: "Done while you were out",
-      description: "`away`:  the mark's tooltip."
-    },
     { key: "star", text: "Star {epic}", description: "The star's name, not starred." },
     { key: "unstar", text: "Unstar {epic}", description: "The star's name, starred." },
     {
@@ -136,7 +131,6 @@ export const epicCardVocabulary = {
       text: "Needs the page server",
       description: "The star's and the `...` menu's tooltip where they can't act:  opened from disk, or no write token."
     },
-    { key: "worked", text: "Last worked on {date}", description: "The day's tooltip:  the full date and time." },
     { key: "menu", text: "More for {epic}", description: "The `...` menu's name and tooltip." },
     { key: "resume", text: "Resume", description: "Menu:  its session, in its own VS Code window." },
     { key: "rename", text: "Rename Epic…", description: "Menu:  a new name." },

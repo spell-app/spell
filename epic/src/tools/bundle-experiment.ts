@@ -2,7 +2,7 @@
  * `yarn tsx src/tools/bundle-experiment.ts <entry.ts> [<out.js>]` (from spell-epic's root):  a guide's own live elements as
  * ONE classic script, built from a TypeScript entry in the guide's `experiments/` folder.
  *
- *     yarn tsx src/tools/bundle-experiment.ts ../spell.epics/guides/custom-elements/experiments/custom-elements.entry.ts
+ *     yarn tsx src/tools/bundle-experiment.ts ../guides/custom-elements/experiments/custom-elements.entry.ts
  *
  * - What it's for:  a page that teaches with WORKING elements of its own (the custom elements guide's
  *   `<ui-counter>`) loads the script right after `spell-ui.js`;  the elements it defines extend the page's own
@@ -11,6 +11,8 @@
  * - Built as a component pack's script is (`spell-pack build`, the kit's `ComponentPack`):
  *   - Vite, on Spell UI's `baseConfig()`:  decorators BEFORE Solid, Solid's JSX, Lightning CSS
  *   - one minified IIFE, banner first, saying how it was built
+ *   - run once the page's docs bundle has (`SpellUI.loading`):  that's an ES module now, which `spell-ui.js` imports, so
+ *     the page's `SpellUI.packModules` arrive after this script has run (epic `solid-2-final` P7)
  *   - every `PACK_MODULES` specifier (`solid-js`, `@solidjs/web`, `spell/element`, `spell/ui/core`, `spell/ui/forms`, `ImageZoom`)
  *     left external, read from `globalThis.SpellUI.packModules`:  the page's one Solid, spell-element and Spell UI core
  * - Unlike a pack:
@@ -116,7 +118,10 @@ async function bundle(entry: string, out: string) {
   // The banner goes on AFTER the build:  the minifier drops `output.banner`'s comment
   const command = `yarn tsx src/tools/bundle-experiment.ts ${relative(resolve(DOCS, ".."), entry)}`
   const banner = `/* GENERATED -- do not edit:  \`${command}\` (from spell-epic's root) */`
-  writeFileSync(out, `${banner}\n${readFileSync(out, "utf8")}`)
+  // run once the page's docs bundle has (`SpellUI.loading`, `spell-ui.js`):  an ES module since epic `solid-2-final` P7,
+  // it sets `SpellUI.packModules` after this classic script has run
+  const wait = "void (globalThis.SpellUI?.loading ?? Promise.resolve()).then(() => {"
+  writeFileSync(out, `${banner}\n${wait}\n${readFileSync(out, "utf8")}\n})\n`)
 }
 
 /**

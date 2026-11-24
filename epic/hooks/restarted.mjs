@@ -6,6 +6,8 @@
  * - The rules are the epic code's, `RestartWake` (`src/tool/RestartWake.ts`);  this hook is its thin caller.
  * - stdin `{ cwd, source, session_id, ... }`;  a line:  printed to stderr, exit 2, which wakes the session
  *   (the `asyncRewake` contract, as the inbox poller's hook);  none:  exit 0, silent
+ * - Paused agents don't count, and during a pause round (`epic fresh all --pause`, epic `epic-engine` T139) the line
+ *   says to save what was cut off, not resume it:  `RestartWake`'s rules too
  * - Every start:  a resume, a fresh start, a `/clear` alike;  `RestartWake` decides by the agents' times.
  * - Plain `node`:  `RestartWake.ts` loads with its types stripped.
  * - Exits 0 on any error:  never breaks a session's start.

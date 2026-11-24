@@ -1,9 +1,10 @@
-import { afterEach, describe, expect, test, vi } from "vite-plus/test"
+import { afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
+import { SP } from "spell/parser/spell"
 import { PropertyLayouts } from "spell/ui/property"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { Inspector, InspectorColumn, InspectorPane, isThing, itemsOf, uiReady } from "spell/app/app/solid"
@@ -21,6 +22,9 @@ afterEach(() => {
   Inspector.close()
   flush()
 })
+
+// the Inspector's views load the first time it opens (`Inspector.views`):  in before any test draws them
+beforeAll(() => Inspector.views.load())
 
 describe("Inspector.partFor()", () => {
   test("a Spell UI element:  itself, with its tag's attributes", async () => {
@@ -371,8 +375,8 @@ describe("the Code card (epic `debut` P28;  epic `editor`, Events In Code;  a ca
     const open = vi.spyOn(window, "open").mockReturnValue(null)
     cleanups.push(() => open.mockRestore())
     ;(buttons[0] as HTMLElement).click()
-    expect(open).toHaveBeenCalledWith(expect.stringMatching(/\/components\/ui\/ui-segment\.html$/), "spell-ui-docs")
-    expect(host.querySelector(".InspectorCard ui-icon.PanelClose.InspectorClose")).not.toBeNull()
+    expect(open).toHaveBeenCalledWith(expect.stringMatching(/\/components\/ui\/segment$/), "spell-ui-docs")
+    expect(host.querySelector(".InspectorCard")!.shadowRoot!.querySelector("[part~=close]")).not.toBeNull()
     // a program's own view:  no docs
     Inspector.select(view)
     flush()
@@ -430,12 +434,12 @@ describe("the cards", () => {
     flush()
     expect(titles()).toEqual([false, true, true])
     // no card is hidden on its own:  the one ✕ is the top card's Close, right of Inspect app, which hides the column (I186);
-    // beside its bar, a panel's ✕ as the file bar's is (T95)
-    const closes = host.querySelectorAll<HTMLElement>(".InspectorCard ui-icon[name=close]")
+    // the panel's own, last in its bar, as the file bar's is (T95, T145)
+    const closes = [...host.querySelectorAll(".InspectorCard")].flatMap((card) => [
+      ...card.shadowRoot!.querySelectorAll<HTMLElement>("[part~=close]")
+    ])
     expect(closes).toHaveLength(1)
-    expect(
-      closes[0]!.matches('[data-panel="properties"] > ui-toolbar[slot="actions"] ~ ui-icon.PanelClose[slot="actions"]')
-    ).toBe(true)
+    expect(closes[0]!.getRootNode()).toBe(host.querySelector('.InspectorCard[data-panel="properties"]')!.shadowRoot)
     // closed by it, then opened again:  every card, the folded one still folded
     closes[0]!.click()
     flush()
@@ -640,7 +644,9 @@ describe("things inside things", () => {
     expect(Inspector.thingLabel(new StockPile(), "", null)).toBe("Stock Pile")
   })
 
-  test('a thing named in its language\'s own word:  Spanish\'s `su "nombre" es ...` titles it `Carta "<nombre>"`', () => {
+  test('a thing named in its language\'s own word:  Spanish\'s `su "nombre" es ...` titles it `Carta "<nombre>"`', async () => {
+    // as opening a Spanish project does:  a language past English loads on first use
+    await SP.Language.loadFor(["es"])
     class Carta {}
     const carta = Object.assign(new Carta(), { nombre: "dama de espadas" })
     expect(Inspector.nameOf(carta, ["es"])).toBe("dama de espadas")

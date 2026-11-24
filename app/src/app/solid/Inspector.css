@@ -342,6 +342,11 @@ ui-property-group.InspectorUntitled:first-child::part(content) {
 ui-tree-item.InspectorHiddenRow::part(row) {
   color: var(--ui-text-muted);
 }
+/* a Views row for a part's empty slot (`<SlotItem>`, T150):  greyed, somewhere to drop something */
+ui-tree-item.InspectorSlotRow::part(row) {
+  color: var(--ui-text-muted);
+  font-style: italic;
+}
 /* each event, ability and action of the Code card (`<ui-section>`;  epic `editor` I109):
    its icon and words (or run button), then its code, in the file (`<CodeSlice>`);  always open, no chevron (I240) */
 ui-section.InspectorEvent {
@@ -712,7 +717,7 @@ ui-menu.InspectorTrail {
     background: color-mix(in oklab, var(--ui-text-muted) 45%, transparent);
   }
   /* the sheet's own Close, in its bar, puts it away:  no second one in its top card's header */
-  ui-icon.InspectorClose {
+  .InspectorCard::part(close) {
     display: none;
   }
   .InspectorSheetBar > ui-icon.InspectorSheetClose {

@@ -130,7 +130,7 @@ export class FocusCommands {
    * - only epics in progress:  a done one has nothing in flight
    * - `epic fresh all` asks it too (`FreshCommands`, epic `epic-engine` T113)
    */
-  async runningSessions(): Promise<{ others: EpicSession[]; self: EpicSession[] }> {
+  async runningSessions(): Promise<RunningSessions> {
     const finder = this.owner.migrator.sessionsOf
     if (!finder) throw new PlanDocError("focus:  needs the running sessions, which only the `epic` command can see")
     const me = process.env.CLAUDE_CODE_SESSION_ID
@@ -186,10 +186,7 @@ export class FocusCommands {
 
   /** The `TELL:` lines, and the session running this one when it's an epic's. */
   private printTell(tell: { session: string; line: string }[], self: EpicSession[], selfNote: string): void {
-    if (tell.length) {
-      this.owner.print("TELL:  send each running session its line (SendMessage:  this command can't send them itself)")
-      for (const { session, line } of tell) this.owner.print(`  to ${session}:  ${line}`)
-    }
+    for (const line of tellLines(tell)) this.owner.print(line)
     for (const { epic } of self) this.owner.print(`this session:  ${epic}:  ${selfNote}`)
     this.owner.print(`sessions to tell:  ${tell.length}`)
   }
@@ -199,6 +196,21 @@ export class FocusCommands {
 function stringOf(value: Flags[string]): string | undefined {
   return typeof value === "string" ? value : undefined
 }
+
+/**
+ * The `TELL:` lines of `tell`, each session with its own, for the skill to send;  none, no lines.
+ * - every command that tells the running sessions prints these:  `focus`, `fresh`
+ */
+export function tellLines(tell: { session: string; line: string }[]): string[] {
+  if (!tell.length) return []
+  return [
+    "TELL:  send each running session its line (SendMessage:  this command can't send them itself)",
+    ...tell.map(({ session, line }) => `  to ${session}:  ${line}`)
+  ]
+}
+
+/** The running epic sessions:  `others`, and `self`, the one running the command. */
+export type RunningSessions = { others: EpicSession[]; self: EpicSession[] }
 
 /** A running epic session:  its epic, and its address (`SendMessage`'s `to`). */
 export type EpicSession = { epic: string; session: string; sessionId: string }

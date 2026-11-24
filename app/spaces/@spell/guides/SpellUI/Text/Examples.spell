@@ -41,13 +41,13 @@
 			</example>
 		</>
 
-		<section label="Link" sticky="stack" collapsible dividing id="types-link">
+		<section label="Link" sticky="stack" collapsible dividing>
 			<example "Link" description="A text with a `link` is a link in running text:  a real link, which the keyboard reaches.  `target` opens it elsewhere, as a link's does.">
 				<segment>Read <text link="#examples-types-link">the guide</text> first, or open <text link="https://fomantic-ui.com" target="_blank">Fomantic's docs</text> in a new tab.</segment>
 			</example>
 		</>
 
-		<section label="Link tag" sticky="stack" collapsible dividing id="types-link-tag">
+		<section label="Link tag" sticky="stack" collapsible dividing>
 			<example "Link tag" description="`<ui-link>` is the same link as a tag of its own, for a drawing's sentence.  `disabled` fades it, and it's no longer a link.">
 				<segment>See <link link="#examples-types-link-tag">the pricing</link>, or the <link link="#examples-types-link-tag" disabled>archived pricing</link>.</segment>
 			</example>
@@ -63,8 +63,8 @@
 		</>
 
 		<section label="Letter styles" sticky="stack" collapsible dividing>
-			<example "Letter styles" description="Its faces are bare attributes, any together (`bold italic`), and so is its case (`all-caps`, `title-caps`):  each is drawn as its HTML element, so screen readers hear it.  `font` says the same (`font=\"bold italic\"`), as it does on every other element.">
-				<segment>It's <text bold>free</text>, <text italic>today</text> only. Run <text code>yarn review</text> first; <text highlight>nothing is saved</text> until then. <text strikethrough>Was 10</text> now 5. H<text subscript>2</text>O, E = mc<text superscript>2</text>, <text bold italic underline>all three</text>. <text all-caps>An eyebrow in capitals</text>, <text title-caps>a title in title case</text>.</segment>
+			<example "Letter styles" description="Its faces are bare attributes, any together (`bold italic`;  `heavy`, heavier than bold, for a poster's title), and so is its case (`all-caps`, `title-caps`):  each is drawn as its HTML element, so screen readers hear it.  `font` says the same (`font=\"bold italic\"`), as it does on every other element.">
+				<segment>It's <text bold>free</text>, <text heavy>really</text>, <text italic>today</text> only. Run <text code>yarn review</text> first; <text highlight>nothing is saved</text> until then. <text strikethrough>Was 10</text> now 5. H<text subscript>2</text>O, E = mc<text superscript>2</text>, <text bold italic underline>all three</text>. <text all-caps>An eyebrow in capitals</text>, <text title-caps>a title in title case</text>.</segment>
 			</example>
 		</>
 

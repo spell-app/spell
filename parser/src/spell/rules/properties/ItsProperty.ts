@@ -1,5 +1,6 @@
 import { NONE } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { MemberReadExpression } from "./MemberReadExpression"
 import { itsObject, type ItsMatchData } from "./properties.shared"
 
@@ -19,6 +20,7 @@ export class ItsProperty extends MemberReadExpression<"property", ItsMatchData> 
       const ownerType = (match.data.ownerType = scope.getType(itVar.datatype))
       match.data.member = ownerType?.getMember(`${match.groups.property.value}`)
       if (!match.data.member) MemberReadExpression.warnIfUndeclared(match, ownerType, match.groups.property)
+      SP.PlaceFieldMarks.warnIfGone(match, match.groups.property)
     }
     return match
   }

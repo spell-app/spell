@@ -15,7 +15,7 @@ function declarations(language?: string): SP.SpellDeclarationsData {
 
 describe("Spanish's messages:  what the core says to the person running a Spanish program", () => {
   test("every one of the core's, with the same placeholders", () => {
-    const spanish = SP.spanish.messages
+    const spanish = SP.Language.for("es").messages
     for (const [key, english] of Object.entries(CORE_MESSAGES)) {
       const message = spanish[key as CoreMessageKey]
       expect(message, key).toBeTruthy()
@@ -24,7 +24,7 @@ describe("Spanish's messages:  what the core says to the person running a Spanis
   })
 
   test("a Spanish project's words carry them;  an English one's carry none, as the core speaks English", () => {
-    expect(SP.SpellWords.of(declarations("es")).messages).toEqual(SP.spanish.messages)
+    expect(SP.SpellWords.of(declarations("es")).messages).toEqual(SP.Language.for("es").messages)
     expect(SP.SpellWords.of(declarations()).messages).toBeUndefined()
     expect(SP.SpellWords.of(declarations("en")).messages).toBeUndefined()
   })

@@ -567,7 +567,10 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
     return (
       <>
         <div
-          class={[INPUT_CLASS, { [UIT.FLUID]: this.fluid, [UIT.DISABLED]: this.isDisabled }]}
+          class={[
+            E.ClassBuilder.withPhrases(INPUT_CLASS),
+            { [UIT.FLUID]: this.fluid, [UIT.DISABLED]: this.isDisabled }
+          ]}
           part={this.partForName("input")}
           style={this.popover.anchorStyle}
         >
@@ -606,7 +609,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
         <div
           ref={(element) => (this.popup = element)}
           id={this.ids.popup}
-          class={`${POPUP_CLASS} ${this.position ?? DEFAULT_POSITION}`}
+          class={E.ClassBuilder.withPhrases(`${POPUP_CLASS} ${this.position ?? DEFAULT_POSITION}`)}
           style={this.popover.panelStyle}
           part={this.partForName("popup")}
           popover="manual"
@@ -682,7 +685,9 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
     return (
       <table
         ref={(element) => (this.grid = element)}
-        class={`${TABLE_CLASS} ${E.numberToWord(page().columns)} ${COLUMN_CLASS} ${page().mode}`}
+        class={E.ClassBuilder.withPhrases(
+          `${TABLE_CLASS} ${E.numberToWord(page().columns)} ${COLUMN_CLASS} ${page().mode}`
+        )}
         part={this.partForName("grid")}
         role="grid"
         aria-labelledby={this.calendarType === "time" ? undefined : this.ids.title}

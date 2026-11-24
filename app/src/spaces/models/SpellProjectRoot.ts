@@ -538,6 +538,29 @@ export class SpellProjectRoot extends JSON5File<SP.ProjectList> {
     project.contents = contents as SP.ProjectManifestJSON5
   }
 
+  /**
+   * Say in `project`'s file that it's written for today's Spell, `SP.SPELL_VERSION` (epic `language` P68):
+   * the editor's Upgrade, once it has rewritten the project's old forms (`editor.upgradeProject()`).
+   * - Not a setting a person edits:  Project Settings only shows it.
+   * - SIDE EFFECT:  `project.contents.spellVersion` takes what the file says now.
+   * - throws on a server error
+   */
+  async saveSpellVersion(project: SP.SpellProject): Promise<void> {
+    const die = getDier(this, `saving the Spell version of ${project.projectId}`, {})
+    let saved: { spellVersion?: string } = {}
+    try {
+      saved = await LoadableFile.fetch<{ spellVersion?: string }>({
+        url: `/api/projects/spellVersion/project`,
+        contents: { projectId: project.projectId },
+        requestFormat: SpellProjectRoot.REQUEST_FORMAT_JSON,
+        format: "json"
+      })
+    } catch (e) {
+      die(`Server error saving the Spell version of ${project.projectId}`, e)
+    }
+    project.contents = { ...project.contents, spellVersion: saved.spellVersion } as SP.ProjectManifestJSON5
+  }
+
   ////////////////
   // ## Debug
   ////////////////

@@ -50,5 +50,6 @@
       "MetMuseum.api.json5",
       "RestCountries.api.json5"
     ]
-  }
+  },
+  "spellVersion": "0.9.0"
 }

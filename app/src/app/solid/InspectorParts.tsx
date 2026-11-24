@@ -21,6 +21,7 @@ import type { TestResult } from "spell/parser/core"
 import { InspectorActions, type InspectorAction } from "./InspectorActions"
 import { enabledWhenInSource, escapeForRegExp, type WrittenEvent } from "./InspectorSource"
 import { PartEdits } from "./PartEdits"
+import { PartSlots } from "./PartSlots"
 import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 import { on } from "./on"
 
@@ -29,7 +30,7 @@ import "./CodeCard.css"
 /****************
  * ### `<InspectorCard>`
  * One of the Inspector's cards:  a pane (`<ui-panel appearance="pane">`), ONE bar over its body.
- * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`, then its `close`.
+ * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), then its `actions`, then its ✕ (`onClose`).
  * - The chevron folds the card to its bar, or unfolds it (`Inspector.toggleFolded()`), which remembers.
  * - No ✕:  a card isn't hidden on its own;  the top bar's Inspector button shows and hides the whole column
  *   (Owen, 2026-11-15, epic `editor` T78:  "no need to hide the sections of the inspector sidebar separately").
@@ -48,10 +49,12 @@ export function InspectorCard(props: {
   /** Its own buttons, at its bar's right:  `slot="right"`. */
   actions?: JSX.Element
   /**
-   * Its ✕, after the bar, as the file bar's is:  a panel's action beside the bar, not in it (`PanelClose`, T95),
-   * so its size and the room before it are the file bar's own.
+   * Its ✕, last in its bar, as the file bar's and the compiled code's:  the panel's own (`<ui-panel closable>`,
+   * T95, T145), named `closeLabel`;  what a click on it does.
    */
-  close?: JSX.Element
+  onClose?: () => void
+  /** Its ✕'s name and tooltip. */
+  closeLabel?: string
   /** The body's class. */
   class?: string
   /** The body. */
@@ -70,7 +73,10 @@ export function InspectorCard(props: {
       collapsible={props.locked ? undefined : ""}
       fold-icon="start"
       open={isFolded() ? "false" : undefined}
+      closable={props.onClose ? "" : undefined}
+      close-label={props.closeLabel}
       ref={(panel: HTMLElement) => {
+        on("ui-dismissed", () => props.onClose?.())(panel)
         // its own:  a row of a tree inside it sends these too
         on("ui-closing", (event) => {
           if (event.target === panel) setFolded(true)
@@ -84,7 +90,6 @@ export function InspectorCard(props: {
         {props.bar}
         {props.actions}
       </ui-toolbar>
-      {props.close}
       <Show when={!isFolded()}>
         <div class={["Inspector", "InspectorSection", props.class]}>{props.children}</div>
       </Show>
@@ -393,6 +398,11 @@ function PartItem(props: {
   }
   // a thing made as the program runs is a pill, as the Inspector shows it;  markup the program wrote stays words (Owen)
   const isThingRow = () => !!SpellElement.thingOf(props.node.element)
+  // its empty slots (T150), again as the parts inside it change:  one filled loses its row
+  const emptySlots = createMemo(() => {
+    void props.node.children
+    return PartEdits.slotsOf(props.node.element)
+  })
   // the row, set by its ref:  a ref callback has no owner, so the effect below lives here, not in it
   let row: Element | undefined
   // selected from elsewhere, a click in the code or the app:  its row comes into view,
@@ -432,14 +442,43 @@ function PartItem(props: {
         </span>
       </Show>
       <For each={hidden()}>{(thing) => <HiddenItem thing={thing} hiddenIn={props.hiddenIn} />}</For>
+      <For each={emptySlots().filter((part) => PartSlots.isAtTop(part))}>
+        {(part) => <SlotItem holder={props.node.element} part={part} />}
+      </For>
       <For each={props.node.children} keyed={(child) => child.element}>
         {(child) => (
           <PartItem node={child()} shown={props.shown} revealing={props.revealing} hiddenIn={props.hiddenIn} />
         )}
       </For>
+      <For each={emptySlots().filter((part) => !PartSlots.isAtTop(part))}>
+        {(part) => <SlotItem holder={props.node.element} part={part} />}
+      </For>
     </ui-tree-item>
   )
 }
+
+/**
+ * A row for one of a part's empty slots, a modal's `⟨actions⟩` (epic `editor` T150):  greyed, and somewhere to drop
+ * something, even when the part isn't drawn (a closed modal).
+ * - Where the part draws it:  a slot at its top (`⟨header⟩`) before the rows inside it, the rest after them.
+ * - Nothing to select:  a slot isn't a part until something is in it.
+ */
+function SlotItem(props: { holder: Element; part: string }): JSX.Element {
+  return (
+    <ui-tree-item
+      class="InspectorSlotRow"
+      icon={SLOT_ICON}
+      label={`${SLOT_OPEN}${props.part}${SLOT_CLOSE}`}
+      ref={(row: Element) => untrack(() => PartEdits.rememberSlotRow(row, props.holder, props.part))}
+    />
+  )
+}
+
+/** An empty slot's row's icon:  an empty box. */
+const SLOT_ICON = "square outline"
+
+/** The brackets round an empty slot's name, as the editor's tag pills draw them:  `⟨actions⟩`. */
+const [SLOT_OPEN, SLOT_CLOSE] = ["⟨", "⟩"]
 
 /**
  * A row of the tree:  its part, its key, and the parts inside it.

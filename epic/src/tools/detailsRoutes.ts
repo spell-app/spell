@@ -26,10 +26,12 @@
  *   (`epic ask wait`, `ask show --wait`), `{ since, seen }`, or `null` for none (epic `epic-engine` r6)
  *   - from the wait's heartbeat (`AskListeners`), dropped once stale:  the page asks again every 30s
  *   - the answer's POST answers it too:  the page says whether a session got it, or it waits for the next look
- * - `POST /api/docs/details/draft` `{ page, answers, comments, notes, labels, kept }` --
+ * - `POST /api/docs/details/draft` `{ page, saved, answers, comments, notes, labels, kept }` --
  *   save what's typed and not sent to `<slug>.draft.json5` beside the page (P18)
  *   - a moment after each change, and as the page goes away
  *   - wakes NOBODY:  `epic ask wait` watches the answer only
+ *   - `saved`:  when it was typed, not when it's posted (epic `epic-engine` I377):  a draft put back, or a save
+ *     tried again, is no newer.  None, or a time still to come:  now
  *   - `labels`:  every id the page's parts hold, with its title (`q1` -> `Q1 · Which layout?`),
  *     so text whose question is gone from a rewritten page is kept under its old title
  * - `GET /api/docs/details/draft?page=<path>` -- the draft, or `{ draft: null }`:
@@ -65,15 +67,15 @@ const detailsRoutes: RouteModule = {
     api.get("/answer", (request, reply) => {
       const file = detailsPage(web.files, request.query.page)
       const answer = sentAnswer(DataFile.read<DetailsAnswer>(answerFile(file)))
-      reply.set("Cache-Control", "no-store").json({ answer, listening: listeningOn(file) })
+      reply.noStore().json({ answer, listening: listeningOn(file) })
     })
     api.get("/listening", (request, reply) => {
       const file = detailsPage(web.files, request.query.page)
-      reply.set("Cache-Control", "no-store").json({ listening: listeningOn(file) })
+      reply.noStore().json({ listening: listeningOn(file) })
     })
     api.get("/draft", (request, reply) => {
       const draft = DataFile.read<DetailsDraft>(draftFile(detailsPage(web.files, request.query.page))) ?? null
-      reply.set("Cache-Control", "no-store").json({ draft })
+      reply.noStore().json({ draft })
     })
     api.use(guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }))
     api.post("/answer", async (request, reply) => {
@@ -90,11 +92,11 @@ const detailsRoutes: RouteModule = {
       reply.json({ ok: true, answer, listening })
     })
     api.post("/draft", async (request, reply) => {
-      const body = request.body as PostBody & { labels?: unknown }
+      const body = request.body as PostBody & { labels?: unknown; saved?: unknown }
       const file = detailsPage(web.files, body.page)
       const draft: DetailsDraft = {
         page: body.page as string,
-        saved: new Date().toISOString(),
+        saved: draftTime(body.saved),
         answers: toAnswers(body.answers),
         comments: toComments(body.comments),
         notes: typeof body.notes === "string" ? body.notes : "",
@@ -226,6 +228,15 @@ export async function saveData<T>(file: string, change: (before: T | undefined) 
 }
 
 /**
+ * When a draft was typed, as its page says (`saved`, ISO);  now for none, one it can't read, or one still to come.
+ */
+function draftTime(saved: unknown): string {
+  const now = Date.now()
+  const typed = typeof saved === "string" ? Date.parse(saved) : NaN
+  return new Date(typed <= now ? typed : now).toISOString()
+}
+
+/**
  * The keys of `now` that differ from `before`:  question ids (`q3`, `q3-more`), `comment:<section id>`, `notes`,
  * `kept`.
  * - nothing before:  every key with something in it
@@ -342,7 +353,7 @@ export type DetailsAnswer = {
 
 /**
  * A details page's `<slug>.draft.json5` (P18):  what's typed and not sent.
- * - `saved`:  when, ISO (the server's clock);  only a draft newer than the answer counts
+ * - `saved`:  when it was typed, ISO, NEVER later for being saved again;  only a draft newer than the answer counts
  * - `labels`:  every id the page's parts held, with its title
  * - `kept`:  as an answer's
  */

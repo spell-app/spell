@@ -40,7 +40,7 @@ import "./ThingExplorer.css"
  *   a runner's bundle would get the whole editor through it (`Actions.tsx`).
  *   - So its `<ui-*>` tags are the CALLER's to define:  the barrel or `./loadUI`.
  *   - Not imported here:  `spell-ui` can't load under node (`customElements`), and the `node` tests render this.
- * - SEE:  its App UI components page, `app/docs/ThingExplorer.html` (`/components/app/ThingExplorer.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/thing-explorer`.
  ****************/
 export function ThingExplorer(props: ThingExplorerProps) {
   const [state, setState] = createSignal<ThingExplorerState>(untrack(() => props.state) ?? {})

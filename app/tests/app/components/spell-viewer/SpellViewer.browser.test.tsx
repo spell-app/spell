@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
-import { flush } from "solid-js"
+import { OBSERVE, flush } from "solid-js"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { SpellCompiled } from "spell/app/app/runner/runner.types"
@@ -135,6 +135,20 @@ board.start()
     await waitFor(() => drawn()[0] === "T1")
     expect(drawn()).toEqual(["T1", "T1", "T1", "T2", '⚠ no Tableau named "9"'])
   })
+
+  test("a run reads its layout untracked:  no `STRICT_READ_UNTRACKED` (epic `editor` I291)", async () => {
+    const events = OBSERVE!.diagnostics.capture()
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    try {
+      const app = await mountApp(`<spell-viewer><floor-tableau id="T1"></floor-tableau></spell-viewer>`)
+      app.run({ projectId: "@spell/test/Floor", compiled: PILES } satisfies SpellCompiled)
+      await waitFor(() => app.firstElementChild?.shadowRoot?.textContent === "T1")
+      const untracked = events.stop().filter((event) => event.code === "STRICT_READ_UNTRACKED")
+      expect(untracked.map((event) => event.message)).toEqual([])
+    } finally {
+      warn.mockRestore()
+    }
+  })
 })
 
 describe("<spell-viewer>'s layout:  the spell in its markup (P9, Q11, Q12, Q18)", () => {
@@ -247,6 +261,9 @@ describe("<spell-viewer>'s layout:  the spell in its markup (P9, Q11, Q12, Q18)"
 
   test("a <spell> block's handlers are read by spell's own `on` rule:  Spanish's `al` and `cuando` too", async () => {
     const { LayoutSpell } = await import("spell/app/app/runner/LayoutSpell")
+    const { SP } = await import("spell/parser/spell")
+    // as the runner does for a Spanish program's layout (`LayoutSpell.loadLanguagesOf()`):  it loads on first use
+    await SP.Language.loadFor(["es"])
     expect(LayoutSpell.handlersIn("al carta elegida: imprimir 1\ncuando clic en carta\n  imprimir 2")).toEqual([
       { event: "carta-elegida", body: "imprimir 1" },
       { event: "clic-en-carta", body: "imprimir 2" }

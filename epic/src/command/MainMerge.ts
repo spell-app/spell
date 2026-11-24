@@ -1,6 +1,7 @@
 // spell ui rename: leave this file (its docstrings quote the renames merge-main makes, old names on purpose)
 import { spawnSync } from "node:child_process"
-import { existsSync, readFileSync, realpathSync } from "node:fs"
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { basename, dirname, join, matchesGlob, relative, resolve } from "node:path"
 
 import { findUp } from "spell/util/node/findUp"
@@ -80,6 +81,9 @@ const RENAME = ["node", KIT_PROGRAM, "ui", "rename", "--write"]
 /** The rename step's own commit, in each repo it changed. */
 const RENAME_MESSAGE = "merge-main:  old Spell UI names renamed (spell ui rename)"
 
+/** A merge made in a temporary worktree (`MainMerge.mergeAside()`):  the generated files it rebuilt, committed after. */
+const REGENERATED_MESSAGE = "merge-main:  generated files rebuilt from the merged source"
+
 /****************
  * ### `MainMerge`
  * `epic worktree merge-main`:  merge `main` into this checkout's branch,
@@ -104,6 +108,10 @@ const RENAME_MESSAGE = "merge-main:  old Spell UI names renamed (spell ui rename
  *   - a repo with neither Vitest nor Vite+:  its snapshot files are ordinary files, to resolve by hand if they conflict
  * - Any OTHER file in conflict stops it mid-merge:
  *   Claude resolves those, `git add`s them, and runs it again with `--continue`.
+ * - Uncommitted files never hold it up unless the merge changes one (epic `epic-engine` I406):
+ *   several agents share an epic's worktree, and one's work in progress kept every other's finished work off `main`.
+ *   - a file the merge changes:  refused, naming it and the agent claiming it
+ *   - any other:  left exactly as it is;  a real merge then runs in a temporary worktree (`mergeAside()`)
  * - A merge (or fast-forward) that changed a lockfile or a `package.json` runs the checkout's install command after it
  *   (`installAfter()`);  `epic merge` runs it the same way in the main checkout (epic `epic-engine` T89).
  * - Then, in a Spell kit, Spell UI's old names the branch still writes are renamed, and committed on their own
@@ -138,6 +146,12 @@ export class MainMerge {
   /** the running agent claiming a file:  a file one claims is never moved aside (`StrayFiles.checkClaims()`) */
   readonly claimOf: ClaimOf
 
+  /** what was uncommitted before the merge and left alone (`clearTheWay()`):  never staged, never renamed */
+  private leftAlone = new Set<string>()
+
+  /** the merge commit `run()` made;  `""`:  none yet */
+  private mergeCommit = ""
+
   /**
    * - `root`:  the checkout (a worktree, usually)
    * - `generators`:  default the checkout's own list (`generatorsOf()`)
@@ -169,32 +183,50 @@ export class MainMerge {
   }
 
   /**
-   * Move aside what a build or test run left uncommitted in `root` (`StrayFiles`), so the merge can start.
-   * - Why (Owen, 2026-10-25, epic `epic-engine` I124):  "if `people.lib.ts` etc are generated, YOU SHOULD DITCH THEM
-   *   AUTOMATICALLY"
-   * - into `ditched/<time>/<repo>/` in the epic home, never deleted
-   * - throws `EpicCommandError`, naming them, when someone's changes are among them:  nothing moved
-   * - and when a running agent claims one (`claimOf`, epic `epic-engine` T77):  it's still working on it
+   * Make way for a merge that changes `changing` (the files `main` changed since the branch last took it):
+   * - what's uncommitted in OTHER files is left alone, and listed (`leftAlone`):  several agents share a worktree, and
+   *   one's work in progress never holds up another's merge (epic `epic-engine` I406)
+   * - generated files among `changing` are moved aside (`StrayFiles`), into `ditched/<time>/<repo>/` in the epic home,
+   *   never deleted
+   *   - Why (Owen, 2026-10-25, epic `epic-engine` I124):  "if `people.lib.ts` etc are generated, YOU SHOULD DITCH THEM
+   *     AUTOMATICALLY"
+   * - throws `EpicCommandError`, naming each with the agent claiming it, when someone's changes are among `changing`:
+   *   the merge would write over them;  nothing moved
+   * - and when a running agent claims a generated one (`claimOf`, epic `epic-engine` T77):  it's still working on it
    */
-  private ditchStrays(): Pick<MergeMainReport, "ditched" | "ditchedTo"> {
-    const stray = new StrayFiles(this.root, this.generators)
-    const handMade = stray.handMade.filter((file) => file.tracked)
-    if (handMade.length) {
-      const list = handMade.map(({ path }) => `\n  ${path}`).join("")
-      throw new EpicCommandError(`merge-main:  uncommitted changes;  commit them first${list}`)
+  private clearTheWay(changing: ReadonlySet<string>): Pick<MergeMainReport, "ditched" | "ditchedTo" | "leftAlone"> {
+    const { root, generators, claimOf } = this
+    const touched = new StrayFiles(root, generators, changing)
+    if (touched.handMade.length) {
+      const list = touched.handMade.map(({ path }) => {
+        const claim = claimOf(path)
+        return `\n  ${path}${claim ? `:  ${claim.name} is changing it (${claim.claim})` : ""}`
+      })
+      throw new EpicCommandError(
+        "merge-main:  uncommitted changes in files the merge changes;  commit them first, or wait for the agent " +
+          `changing them;  nothing merged${list.join("")}`
+      )
     }
-    stray.checkClaims(this.claimOf, { ditch: false })
-    const folder = join(StrayFiles.folderFor(), basename(this.root))
-    return { ditched: stray.ditch({ folder, ditch: false }), ditchedTo: folder }
+    touched.checkClaims(claimOf, { ditch: false })
+    const folder = join(StrayFiles.folderFor(), basename(root))
+    const ditched = touched.generated.length ? touched.ditch({ folder, ditch: false }) : []
+    this.leftAlone = new Set(new StrayFiles(root, generators).files.map(({ path }) => path))
+    return {
+      ...(ditched.length ? { ditched, ditchedTo: folder } : {}),
+      ...(this.leftAlone.size ? { leftAlone: [...this.leftAlone] } : {})
+    }
   }
 
   /**
    * Merge the base branch into `root`'s branch;  what it did (`MergeMainReport`).
    * - `mode`:  `start` (default) merges;  `continue` finishes a merge it stopped on other conflicts
+   * - uncommitted files the merge doesn't change are left alone (`clearTheWay()`, epic `epic-engine` I406):
+   *   - a fast-forward goes on around them
+   *   - a real merge runs in a temporary worktree (`mergeAside()`), and the branch moves to it
    * - throws `EpicCommandError` for a merge that can't start or go on, saying what to do
    */
   run(mode: "start" | "continue" = "start"): MergeMainReport {
-    const { root, generators, snapshotUpdate } = this
+    const { root } = this
     const branch = Git.out(["branch", "--show-current"], root) ?? ""
     if (!branch) throw new EpicCommandError("merge-main:  not on a branch;  check out the worktree's branch first")
     // the branch merged in:  the repo's base branch (`.epic/config.json5`)
@@ -217,85 +249,27 @@ export class MainMerge {
     } else {
       if (merging)
         throw new EpicCommandError("merge-main:  a merge is in progress;  `--continue` it, or `git merge --abort`")
-      if (Git.out(["status", "--porcelain", "--untracked-files=no"], root)) Object.assign(report, this.ditchStrays())
       // nothing lands on a base branch that takes only pull requests:  it's only as new as what was pulled
       const config = EpicConfig.of(root)
       if (config.baseBranchProtected) report.baseCatchUp = BaseBranch.catchUp(config.main, upstream).line || undefined
       if (Git.run(["merge-base", "--is-ancestor", upstream, "HEAD"], root).ok)
         return { ...report, result: "up-to-date" }
+      // what the merge changes:  every file `main` changed since the branch last took it
+      const changing = new Set(Git.lines(["diff", "--name-only", "--no-renames", `HEAD...${upstream}`], root))
+      Object.assign(report, this.clearTheWay(changing))
       if (Git.run(["merge-base", "--is-ancestor", "HEAD", upstream], root).ok) {
         mustGit(root, ["merge", "--ff-only", upstream])
         return { ...report, result: "fast-forward", ...this.reinstall(before) }
       }
-      // Exits 1 on conflicts, which is fine:  MERGE_HEAD says it started
-      const merge = Git.run(
-        ["merge", "--no-commit", "--no-ff", "-m", `Merge ${upstream} into ${branch}`, upstream],
-        root
-      )
-      if (!Git.run(["rev-parse", "-q", "--verify", "MERGE_HEAD"], root).ok) {
-        throw new EpicCommandError(
-          `merge-main:  \`git merge ${upstream}\` failed:  ${merge.err || merge.out}`,
-          EXIT.ERRORS
-        )
-      }
+      if (this.leftAlone.size) return this.mergeAside(upstream, report, before)
+      startMerge(root, upstream, branch)
     }
 
-    ////////
-    // Generated output one side no longer commits (the page server's bundles, since 2026-10-07):
-    // a file `main` changed or in conflict, that the merged `.gitignore` ignores and ONE side's tree lacks,
-    // leaves the index, kept on disk.
-    // (A file both sides track, though ignored, stays.)
-    // ONLY `.gitignore`s, never this machine's `.git/info/exclude`:  a file listed there was untracked by every merge
-    // (the kit's `.ignore`, epic `epic-engine` P17, dropped from `main` twice);  `changedFiles()` reads both, as it
-    // only asks what's left uncommitted
-    const base = Git.out(["merge-base", "HEAD", "MERGE_HEAD"], root) ?? ""
-    const conflicted = Git.lines(["diff", "--name-only", "--diff-filter=U"], root)
-    const theirs = Git.lines(["diff", "--name-only", base, "MERGE_HEAD"], root)
-    const ignored = new Set(
-      Git.lines(["ls-files", "--cached", "--ignored", "--exclude-per-directory=.gitignore"], root)
-    )
-    const dropped = [...new Set([...conflicted, ...theirs])].filter((file) => ignored.has(file))
-    const [inOurs, inTheirs] = [inTree(root, "HEAD", dropped), inTree(root, "MERGE_HEAD", dropped)]
-    report.untracked = dropped.filter((file) => !(inOurs.has(file) && inTheirs.has(file))).sort()
-    if (report.untracked.length) mustGit(root, ["rm", "-q", "--cached", "--", ...report.untracked])
-    const unmerged = conflicted.filter((file) => !report.untracked.includes(file))
-
-    ////////
-    // What to regenerate:  every generated file conflicted or changed on both sides;
-    // anything else conflicted stops it
-    const ours = new Set(Git.lines(["diff", "--name-only", base, "HEAD"], root))
-    const touched = [...new Set([...unmerged, ...theirs.filter((file) => !report.untracked.includes(file))])]
-    const candidates = touched.filter((file) => unmerged.includes(file) || ours.has(file))
-    const plan = MainMerge.generatorsFor(candidates, generators, snapshotUpdate, root)
-    const planned = new Set(plan.flatMap((step) => step.files))
-    report.conflicts = unmerged.filter((file) => !planned.has(file))
+    const { unmerged, plan } = this.settle(root, report)
     if (report.conflicts.length) return { ...report, result: "conflicts" }
-
-    ////////
-    // Regenerate, in table order, staging what each one wrote
-    for (const { generator, files } of plan) {
-      for (const file of files) {
-        // Ours, without conflict markers, for a tool that reads its old output;
-        // the package managers read (and resolve) the markers
-        if (unmerged.includes(file) && !READS_CONFLICT_MARKERS.has(file))
-          Git.run(["checkout", "--ours", "--", file], root)
-      }
-      const run = spawnSync(generator.run[0], generator.run.slice(1), {
-        cwd: join(root, generator.cwd),
-        stdio: ["ignore", 2, 2]
-      })
-      if (run.status !== 0) {
-        throw new EpicCommandError(
-          `merge-main:  \`${generator.run.join(" ")}\` (in ${generator.cwd}) failed;  the merge is still in progress:  ` +
-            "fix it, then `epic worktree merge-main --continue`, or `git merge --abort`",
-          EXIT.ERRORS
-        )
-      }
-      const written = changedFiles(root).filter((file) => matchesAny(file, generator.outputs))
-      const staged = [...new Set([...files.filter((file) => unmerged.includes(file)), ...written])].sort()
-      if (staged.length) mustGit(root, ["add", "-A", "--", ...staged])
-      report.regenerated.push({ name: generator.name, files: staged })
-    }
+    const stopped =
+      "the merge is still in progress:  fix it, then `epic worktree merge-main --continue`, or `git merge --abort`"
+    this.regenerate({ where: root, plan, unmerged, report, stopped })
 
     ////////
     // Commit, then say what a person should look at
@@ -307,7 +281,143 @@ export class MainMerge {
     )
     report.unstaged = changedFiles(root)
     mustGit(root, ["commit", "--no-edit"])
+    this.mergeCommit = Git.out(["rev-parse", "HEAD"], root) ?? ""
     return { ...report, ...this.reinstall(before) }
+  }
+
+  /**
+   * `run()`'s merge when the worktree has uncommitted files the merge doesn't change (`leftAlone`, epic `epic-engine`
+   * I406):  merged in a TEMPORARY worktree, then the branch fast-forwarded to it here.
+   * - Why:  several agents share one worktree;  a merge in place would rewrite files under them while they work, and
+   *   a commit one made mid-merge would end it
+   * - the fast-forward touches only the files the merge changed, none of them uncommitted (`clearTheWay()`)
+   * - a generated file both sides changed is this branch's copy in the merge commit, then rebuilt HERE from the merged
+   *   source, where the packages are installed, and committed on its own (`REGENERATED_MESSAGE`)
+   *   - its rebuild reads the worktree as it is, others' uncommitted changes too;  an uncommitted file is never staged
+   * - throws `EpicCommandError` on a conflict:  a temporary worktree can't stop mid-merge for Claude to settle it;
+   *   once the uncommitted files are committed, the merge runs here and stops for it as usual
+   * - the temporary worktree is always removed
+   */
+  private mergeAside(upstream: string, report: MergeMainReport, before: string): MergeMainReport {
+    const { root, leftAlone } = this
+    const temp = mkdtempSync(join(tmpdir(), "merge-main-"))
+    mustGit(root, ["worktree", "add", "-q", "--detach", temp, "HEAD"])
+    let plan: GeneratorStep[] = []
+    try {
+      startMerge(temp, upstream, report.branch)
+      const settled = this.settle(temp, report)
+      plan = settled.plan
+      if (report.conflicts.length)
+        throw new EpicCommandError(
+          `merge-main:  taking ${upstream} in conflicts in ${report.conflicts.join(", ")}.  ` +
+            `This worktree has ${leftAlone.size} uncommitted file(s), so the merge ran in a temporary worktree, ` +
+            "which can't stop for conflicts:  once they're committed, merge-main again, and settle them here;  " +
+            "nothing merged"
+        )
+      // a generated file in conflict:  this branch's copy for now, rebuilt here once the branch has moved
+      if (settled.unmerged.length) {
+        mustGit(temp, ["checkout", "--ours", "--", ...settled.unmerged])
+        mustGit(temp, ["add", "--", ...settled.unmerged])
+      }
+      mustGit(temp, ["commit", "-q", "--no-edit"])
+      this.mergeCommit = Git.out(["rev-parse", "HEAD"], temp) ?? ""
+      const moved = Git.run(["merge", "--ff-only", "-q", this.mergeCommit], root)
+      if (!moved.ok)
+        throw new EpicCommandError(
+          `merge-main:  merged in a temporary worktree, but the branch couldn't move to it ` +
+            `(\`git merge --ff-only\`:  ${lastLine(moved.err)});  nothing merged:  run it again`,
+          EXIT.ERRORS
+        )
+      // what the merge untracked stays on disk, as a merge in place keeps it
+      for (const file of report.untracked)
+        if (!existsSync(join(root, file)) && existsSync(join(temp, file))) {
+          mkdirSync(dirname(join(root, file)), { recursive: true })
+          cpSync(join(temp, file), join(root, file))
+        }
+    } finally {
+      Git.run(["worktree", "remove", "--force", temp], root)
+      rmSync(temp, { recursive: true, force: true })
+      Git.run(["worktree", "prune"], root)
+    }
+
+    ////////
+    // Rebuild what both sides changed, here, and commit it by path:  nobody's uncommitted file goes in
+    const merged = this.mergeCommit
+    const stopped = `the merge is committed with this branch's copy of what it rebuilds:  fix it, run it, and commit its output`
+    const staged = this.regenerate({ where: root, plan, unmerged: [], report, stopped })
+    report.review = reviewSnapshots(root, staged, `${merged}^1`, `${merged}^2`)
+    if (staged.length) mustGit(root, ["commit", "-q", "-m", REGENERATED_MESSAGE, "--", ...staged])
+    report.unstaged = changedFiles(root).filter((file) => !leftAlone.has(file))
+    return { ...report, result: "merged", aside: true, ...this.reinstall(before) }
+  }
+
+  /**
+   * A merge started in `where`:  what's left to settle.
+   * - Generated output one side no longer commits (the page server's bundles, since 2026-10-07):
+   *   a file `main` changed or in conflict, that the merged `.gitignore` ignores and ONE side's tree lacks,
+   *   leaves the index, kept on disk (`report.untracked`).
+   *   (A file both sides track, though ignored, stays.)
+   *   ONLY `.gitignore`s, never this machine's `.git/info/exclude`:  a file listed there was untracked by every merge
+   *   (the kit's `.ignore`, epic `epic-engine` P17, dropped from `main` twice);  `changedFiles()` reads both, as it
+   *   only asks what's left uncommitted
+   * - What to regenerate (`plan`):  every generated file conflicted or changed on both sides;
+   *   anything else conflicted is in `report.conflicts`, and stops it
+   * - `unmerged`:  the files in conflict, less the untracked ones
+   */
+  private settle(where: string, report: MergeMainReport): { unmerged: string[]; plan: GeneratorStep[] } {
+    const { generators, snapshotUpdate } = this
+    const base = Git.out(["merge-base", "HEAD", "MERGE_HEAD"], where) ?? ""
+    const conflicted = Git.lines(["diff", "--name-only", "--diff-filter=U"], where)
+    const theirs = Git.lines(["diff", "--name-only", base, "MERGE_HEAD"], where)
+    const ignored = new Set(
+      Git.lines(["ls-files", "--cached", "--ignored", "--exclude-per-directory=.gitignore"], where)
+    )
+    const dropped = [...new Set([...conflicted, ...theirs])].filter((file) => ignored.has(file))
+    const [inOurs, inTheirs] = [inTree(where, "HEAD", dropped), inTree(where, "MERGE_HEAD", dropped)]
+    report.untracked = dropped.filter((file) => !(inOurs.has(file) && inTheirs.has(file))).sort()
+    if (report.untracked.length) mustGit(where, ["rm", "-q", "--cached", "--", ...report.untracked])
+    const unmerged = conflicted.filter((file) => !report.untracked.includes(file))
+
+    const ours = new Set(Git.lines(["diff", "--name-only", base, "HEAD"], where))
+    const touched = [...new Set([...unmerged, ...theirs.filter((file) => !report.untracked.includes(file))])]
+    const candidates = touched.filter((file) => unmerged.includes(file) || ours.has(file))
+    const plan = MainMerge.generatorsFor(candidates, generators, snapshotUpdate, where)
+    const planned = new Set(plan.flatMap((step) => step.files))
+    report.conflicts = unmerged.filter((file) => !planned.has(file))
+    return { unmerged, plan }
+  }
+
+  /**
+   * Run `plan`'s generators in `where`, in table order, staging what each one wrote (`report.regenerated`);
+   * the files staged, sorted.
+   * - `unmerged`:  files still in conflict there, put back to ours first for a tool that reads its old output
+   *   (the package managers read, and resolve, the markers themselves)
+   * - never stages a file left uncommitted before the merge (`leftAlone`):  someone else's work
+   * - throws `EpicCommandError` when one fails, `stopped` saying what state that leaves
+   */
+  private regenerate({ where, plan, unmerged, report, stopped }: RegenerateProps): string[] {
+    for (const { generator, files } of plan) {
+      for (const file of files) {
+        if (unmerged.includes(file) && !READS_CONFLICT_MARKERS.has(file))
+          Git.run(["checkout", "--ours", "--", file], where)
+      }
+      const run = spawnSync(generator.run[0]!, generator.run.slice(1), {
+        cwd: join(where, generator.cwd),
+        stdio: ["ignore", 2, 2]
+      })
+      if (run.status !== 0)
+        throw new EpicCommandError(
+          `merge-main:  \`${generator.run.join(" ")}\` (in ${generator.cwd}) failed;  ${stopped}`,
+          EXIT.ERRORS
+        )
+      const written = changedFiles(where).filter(
+        (file) => matchesAny(file, generator.outputs) && !this.leftAlone.has(file)
+      )
+      const staged = [...new Set([...files.filter((file) => unmerged.includes(file)), ...written])].sort()
+      if (staged.length) mustGit(where, ["add", "-A", "--", ...staged])
+      report.regenerated.push({ name: generator.name, files: staged })
+    }
+    return [...new Set(report.regenerated.flatMap((step) => step.files))].sort()
   }
 
   /** Install the merged packages when the merge changed them (`installAfter()`);  `before`:  `HEAD` before it. */
@@ -480,16 +590,18 @@ export class MainMerge {
   }
 
   /**
-   * The files the rename step reads:  what the merged branch differs from the base branch in (`HEAD^2..HEAD`).
-   * - left out:  deleted files, generated ones (the generators' outputs, snapshots), and anything reached through a
-   *   link out of the checkout:  the epic folder is NEVER touched
+   * The files the rename step reads:  what the merged branch differs from the base branch in (`<merge>^2..HEAD`).
+   * - left out:  deleted files, generated ones (the generators' outputs, snapshots), anything reached through a
+   *   link out of the checkout (the epic folder is NEVER touched), and what was uncommitted before (`leftAlone`):
+   *   another agent's work in progress
    */
   private renameFiles(): string[] {
     const { root, generators } = this
     const realRoot = realpathSync(root)
     const generated = generators.flatMap((generator) => generator.outputs)
-    return Git.lines(["diff", "--name-only", "--diff-filter=d", "HEAD^2", "HEAD"], root).filter((file) => {
-      if (isSnapshot(file) || matchesAny(file, generated)) return false
+    const merge = this.mergeCommit || "HEAD"
+    return Git.lines(["diff", "--name-only", "--diff-filter=d", `${merge}^2`, "HEAD"], root).filter((file) => {
+      if (isSnapshot(file) || matchesAny(file, generated) || this.leftAlone.has(file)) return false
       const path = join(root, file)
       return existsSync(path) && Boolean(pathInside(realRoot, realpathSync(path)))
     })
@@ -627,6 +739,18 @@ export class MainMerge {
 /** A command that updates the snapshots of `tests` (paths from their package), as words. */
 export type SnapshotUpdate = (tests: string[]) => string[]
 
+/** A generator `generatorsFor()` picked, with the files it covers. */
+type GeneratorStep = { generator: Generator; files: string[] }
+
+/** What `MainMerge.regenerate()` takes:  see it. */
+type RegenerateProps = {
+  where: string
+  plan: GeneratorStep[]
+  unmerged: string[]
+  report: MergeMainReport
+  stopped: string
+}
+
 /** What `new MainMerge()` takes:  see its constructor. */
 export type MainMergeProps = {
   root: string
@@ -688,17 +812,19 @@ function lastLine(text: string): string {
 }
 
 /**
- * Each regenerated snapshot's entries whose value NEITHER side of the merge had.
- * - reads `HEAD` and `MERGE_HEAD`, so call it before committing
+ * Each regenerated snapshot's entries whose value NEITHER side of the merge had, against what's staged.
+ * - `ours`, `theirs`:  the two sides;  default `HEAD` and `MERGE_HEAD`, so call it before committing
  */
-function reviewSnapshots(root: string, files: string[]): SnapshotReview[] {
+function reviewSnapshots(root: string, files: string[], ours = "HEAD", theirs = "MERGE_HEAD"): SnapshotReview[] {
   return files
     .filter(isSnapshot)
     .map((file) => {
-      const ours = MainMerge.snapshotEntries(Git.run(["show", `HEAD:${file}`], root).out)
-      const theirs = MainMerge.snapshotEntries(Git.run(["show", `MERGE_HEAD:${file}`], root).out)
-      const merged = MainMerge.snapshotEntries(Git.run(["show", `:${file}`], root).out)
-      const keys = [...merged].filter(([key, value]) => ours.get(key) !== value && theirs.get(key) !== value)
+      const [ourEntries, theirEntries, merged] = [`${ours}:${file}`, `${theirs}:${file}`, `:${file}`].map((rev) =>
+        MainMerge.snapshotEntries(Git.run(["show", rev], root).out)
+      )
+      const keys = [...merged!].filter(
+        ([key, value]) => ourEntries!.get(key) !== value && theirEntries!.get(key) !== value
+      )
       return { file, keys: keys.map(([key]) => key) }
     })
     .filter((review) => review.keys.length)
@@ -728,6 +854,17 @@ function inTree(root: string, rev: string, files: string[]): Set<string> {
 /** `file` matches one of `globs`. */
 function matchesAny(file: string, globs: string[]): boolean {
   return globs.some((glob) => matchesGlob(file, glob))
+}
+
+/**
+ * `git merge` of `upstream` into `where`'s checkout, stopped before committing (`MainMerge.run()`).
+ * - exits 1 on conflicts, which is fine:  MERGE_HEAD says it started
+ * - throws `EpicCommandError` with git's message when it didn't start
+ */
+function startMerge(where: string, upstream: string, branch: string): void {
+  const merge = Git.run(["merge", "--no-commit", "--no-ff", "-m", `Merge ${upstream} into ${branch}`, upstream], where)
+  if (!Git.run(["rev-parse", "-q", "--verify", "MERGE_HEAD"], where).ok)
+    throw new EpicCommandError(`merge-main:  \`git merge ${upstream}\` failed:  ${merge.err || merge.out}`, EXIT.ERRORS)
 }
 
 /** `git <args>`'s output;  throws a `EpicCommandError` with git's own message when it fails. */

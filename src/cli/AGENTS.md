@@ -64,11 +64,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       project's worktrees, for releases older than `kitFileAt()`
     - their tests hand in a stand-in `epic`, servers and `kill` (`LocalProbes`):  the real `epic` runner refuses
       under Vitest
+  - [vsix.ts](vsix.ts) -- `vsixVersion()`, `vsixIsStale()`:  which build a VS Code extension's `.vsix` is, read from
+    the file itself, for `spell publish`, `spell local` and `epic plugin install` (epic `epic-engine` T140)
+    - its tests' made-up `.vsix`:  [test/vsixAt.ts](test/vsixAt.ts)
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
   ```
-  server  bundle  commands  wwod  local  deps  readme  map  coherence  runbook  publish  epic  pony  (help is the program's own)
+  server  bundle  commands  wwod  local  deps  names  readme  map  coherence  runbook  publish  epic  pony  (help is the program's own)
   ```
 
 - `spell publish`'s work is a folder of its own, [publish/](publish/) (`spell/cli/publish`), with its own barrel:

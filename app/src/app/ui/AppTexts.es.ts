@@ -33,6 +33,22 @@ const APP_TEXTS_ES: AppTextPack = {
   restart: "Reiniciar",
   takesEffectOnRestart: "Esto se aplica al reiniciar",
   restartNoticeClose: "Cerrar",
+  upgradeNotice:
+    "Este proyecto se escribió para una versión anterior de Encanto.\n" +
+    "Algunas líneas usan una forma antigua de escribir Encanto.  Ahora funcionan, pero una versión futura no las entenderá.\n" +
+    "Actualizar reescribe esas líneas por ti.  Tu proyecto funciona igual que antes.\n" +
+    "¿Aún no?  Cierra este aviso:  no volverá a aparecer.  Cada línea antigua mostrará entonces un aviso con un botón Arreglarlo, para que las actualices una a una.",
+  upgrade: "Actualizar",
+  upgradeNoticeClose: "Cerrar",
+  upgraded:
+    "Tu proyecto ya va con Encanto {version}, la versión más nueva.\n" +
+    "El editor cambió {count} líneas de tu proyecto al estilo nuevo de Encanto {version}.\n" +
+    "Siguen haciendo lo mismo:  no tienes que hacer nada más.",
+  upgradedOne:
+    "Tu proyecto ya va con Encanto {version}, la versión más nueva.\n" +
+    "El editor cambió 1 línea de tu proyecto al estilo nuevo de Encanto {version}.\n" +
+    "Sigue haciendo lo mismo:  no tienes que hacer nada más.",
+  fixIt: "Arreglarlo",
   menuCode: "Código",
   emptyAppPrompt: "Arrastra algo aquí desde el menú +, o haz clic en uno para añadirlo.",
   modes: "Ejecutar, editar o depurar",
@@ -98,8 +114,12 @@ const APP_TEXTS_ES: AppTextPack = {
   paletteHint: "Haz clic o arrastra para añadir a la página",
   paletteMore: "{count} más",
   paletteAppViews: "Vistas de la app",
-  palettePin: "Mantener abierto",
-  paletteUnpin: "Desanclar",
+  paletteSearchAll: "Buscar entre todo lo que puedes añadir",
+  paletteSearchIn: "Buscar en {group}",
+  paletteStar: "Haz clic en la estrella para tener {part} arriba en la barra de añadir",
+  paletteUnstar: "Quitar la estrella a {part}",
+  paletteFavoriteTip:
+    "{part}:  haz clic aquí y luego en tu aplicación, donde lo quieras.  O arrástralo hasta allí.  Para quitarle la estrella, haz clic derecho.",
   paletteAddView: "Añadir una vista",
   paletteClearSearch: "Borrar la búsqueda",
   partStepAdd: "Añadir {part}",
@@ -124,7 +144,8 @@ const APP_TEXTS_ES: AppTextPack = {
   changeThisFinishing: "Terminando…",
   changeThisWorking: "Tu agente está trabajando en ello…",
   changeThisSeconds: "{seconds} s",
-  changeThisStalled: "Tu agente no empezó en un minuto,\nasí que se detuvo, y nada cambió.\nPulsa Enviar para probar otra vez.",
+  changeThisStalled:
+    "Tu agente no empezó en un minuto,\nasí que se detuvo, y nada cambió.\nPulsa Enviar para probar otra vez.",
   changeThisStart: "Arrancar Claude Code",
   changeThisNoClaude: "Claude Code no está en este ordenador,\nasí que nadie puede hacer este cambio todavía.",
   changeThisInstall: "Instalar Claude Code",
@@ -135,7 +156,8 @@ const APP_TEXTS_ES: AppTextPack = {
   changeThisDone: "Tu agente hizo el cambio.",
   changeThisNoChange: "Tu agente terminó,\npero ningún archivo cambió.\nPrueba a decir el cambio de otra forma.",
   changeThisFailed: "Tu agente no pudo hacerlo:\n{summary}",
-  changeThisStopped: "Tu agente se detuvo antes de terminar,\nasí que tu proyecto puede estar cambiado a medias.\nRevísalo antes de seguir.",
+  changeThisStopped:
+    "Tu agente se detuvo antes de terminar,\nasí que tu proyecto puede estar cambiado a medias.\nRevísalo antes de seguir.",
   changeThisRefused: "Cambiar esto solo funciona en el Mac donde corre Spell.",
   changeThisPicture: "Una imagen que va con el pedido",
   changeThisRemovePicture: "Quitar esta imagen",
@@ -143,6 +165,7 @@ const APP_TEXTS_ES: AppTextPack = {
   menuInspect: "Inspeccionar {type}",
   menuInspectParts: "Elige una de las partes bajo el ratón",
   menuInspectOtherViews: "Inspeccionar otras vistas",
+  menuAppMenu: "Menú de la app",
   partIsApp: "Es la aplicación misma:\nno se puede cortar, duplicar ni borrar.",
   partNothingCopied: "Aún no se ha copiado nada.",
   partNothingSelected: "No hay nada seleccionado.",
@@ -181,6 +204,7 @@ const APP_TEXTS_ES: AppTextPack = {
   codeCompilerWords: "Detalles del compilador en la información",
   codeBubbly: "Aspecto de burbujas",
   codeWrapLines: "Ajustar las líneas largas",
+  codeUpgradeOnOpen: "Actualizar el Encanto antiguo al abrir un proyecto",
   codePopupDelay: "Espera antes de mostrar la ayuda",
   codePopupDelayShort: "Corta:  0,4 segundos",
   codePopupDelayStandard: "Normal:  0,8 segundos",
@@ -230,7 +254,6 @@ const APP_TEXTS_ES: AppTextPack = {
   discardDraftTip: "Tira tus cambios.",
   updatedInYourDraft: "Actualizado en tu borrador.",
   discardChanges: "Descartar los cambios",
-  closeTab: "Cerrar",
   hideCode: "Ocultar el código",
   versions: "Versiones",
   deleteDraft: "Borrar el borrador",
@@ -350,6 +373,8 @@ const APP_TEXTS_ES: AppTextPack = {
   shortcutsWhileInspecting: "Solo mientras eliges una parte de la app",
   shortcutFind: "Buscar y reemplazar",
   shortcutShowShortcuts: "Mostrar los atajos de teclado",
+  shortcutShowIcons: "Mostrar todos los iconos, con sus nombres",
+  allIcons: "Todos los iconos…",
   shortcutChangeThis: "Pedir un cambio en lo seleccionado",
   shortcutFormat: "Dar formato al documento",
   shortcutExpandSelection: "Ampliar la selección",
@@ -607,6 +632,29 @@ const APP_TEXTS_ES: AppTextPack = {
   "themePage.epic": "Página de épica",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Cuaderno",
+  "palettePage.title": "Grupos del menú +",
+  "palettePage.hint":
+    "El menú + muestra en grupos los componentes que puedes añadir.\n" +
+    "Arrastra un componente a otro grupo, o a otro sitio de su grupo.\n" +
+    "Arrastra un grupo por su asa para moverlo.\n" +
+    'Los componentes de la última columna, "Fuera del menú +", no aparecen en el menú.\n' +
+    "Pulsa Guardar cuando termines.",
+  "palettePage.addGroup": "Añadir grupo",
+  "palettePage.save": "Guardar",
+  "palettePage.loading": "Cargando los grupos…",
+  "palettePage.unsaved": "Cambios sin guardar",
+  "palettePage.saved": "Guardado.  Recarga la pestaña del editor para ver los grupos nuevos en el menú +.",
+  "palettePage.noServer":
+    "No se pueden cargar los grupos.  Comprueba que Spell sigue en marcha en tu ordenador y recarga esta página.",
+  "palettePage.saveFailed": "No se pudo guardar:  {error}",
+  "palettePage.newGroup": "Grupo nuevo",
+  "palettePage.groupName": "Nombre del grupo",
+  "palettePage.groupIcon": "Icono del grupo {group} en el menú +",
+  "palettePage.removeGroup": "Quitar el grupo {group}.  Sus componentes siguen disponibles en Fuera del menú +.",
+  "palettePage.moveGroup": "Arrastra para mover el grupo {group}",
+  "palettePage.addDivider": "Dibujar una línea bajo el grupo {group} en la barra de añadir",
+  "palettePage.removeDivider": "Quitar la línea bajo el grupo {group} en la barra de añadir",
+  "palettePage.notOffered": "Fuera del menú +",
   inspectorEventHeading: "con {event}",
   inspectorActionOnlyWhen: "Solo cuando {condition}",
   inspectorActionNotWhen: "No cuando {condition}",
@@ -754,8 +802,6 @@ const APP_TEXTS_ES: AppTextPack = {
   editorNameOfType: "`{name}`, de `{type}`",
   editorTypeName: "`{type}`, el tipo entero",
   editorZonesWaiting: "Cada parte del editor se muestra aquí, en una zona propia, en cuanto su Encanto se ejecuta.",
-  editorZonesShow: "Mostrar",
-  editorZonesStandIn: "Del propio editor:  {part}",
   editorZonesCancel: "Cancelar",
   homeEditorLine: "Las piezas del propio editor, en Encanto:\ncambia una, publícala, y el editor que usas cambia.",
   homeNoGuides: "Las guías están en camino.",
@@ -964,6 +1010,8 @@ const APP_TEXTS_ES: AppTextPack = {
   listsStartAtLabel: "Las listas empiezan en",
   listsStartAtTip:
     "Cómo numeran tus listas sus elementos.\nEn 1, el primero es el número 1, como cuenta la gente.\nEn 0, es el número 0, como cuentan JavaScript y Python.",
+  writtenForSpell: "Escrito para Encanto {version}",
+  writtenForOlderSpell: "Escrito para una versión anterior de Encanto",
 
   ////////////////
   // ## The code editor's own words
@@ -1070,7 +1118,20 @@ const APP_TEXTS_ES: AppTextPack = {
   debugValues: "Lo que ha guardado hasta ahora",
   debugCalledFrom: "Cómo llegó aquí",
   debugNothing: "Nada todavía",
-  debugValueOf: "un {type}"
+  debugValueOf: "un {type}",
+  // las guías que vienen con Encanto (`<GuidesPage>`, epic `epic-engine` P79)
+  guidesTitle: "Guías",
+  guidesLede:
+    "Aprende a hacer apps con Encanto, y cómo funciona Encanto por dentro.\nLee primero las guías de Empieza aquí.\nPara encontrar lo demás, usa la búsqueda.",
+  guidesSearch: "Buscar en las guías",
+  guidesStartHere: "Empieza aquí",
+  guidesForProgrammers: "Para quienes programan Encanto",
+  guidesAll: "Todas las guías",
+  guidesChapterOf: "Un capítulo de {guide}.",
+  guidesMissing:
+    "No se pudieron abrir las guías.\nVienen con Encanto:  cierra la app y ábrela otra vez.\nSi no funciona, vuelve a instalar Encanto.",
+  guidesInTheEditor: "Guías que se abren en el editor",
+  guidesHomeLink: "Todas las guías"
 }
 
 /** Everything Spanish the app shows:  its own texts, then each web component's. */

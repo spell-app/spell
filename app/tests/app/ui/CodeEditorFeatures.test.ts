@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vite-plus/test"
-import { cpSync, mkdtempSync, readFileSync } from "fs"
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { resolve } from "path"
 import { pathToFileURL } from "url"
@@ -58,6 +58,35 @@ describe("CodeEditorFeatures", () => {
       const index = lines.findIndex((each) => each.includes(line))
       return { line: index, character: lines[index]!.indexOf(words, lines[index]!.indexOf(line)) + 1 }
     }
+  })
+
+  describe("Fix it:  the button on an old form's warning, its fix in one click (Owen's C3, epic `language` P68)", () => {
+    const dir = mkdtempSync(resolve(tmpdir(), "spell-code-fix-it-"))
+    mkdirSync(resolve(dir, "Cards"))
+    writeFileSync(resolve(dir, "Cards", "__project.json5"), '{ imports: [{ path: "/Cards.spell", active: true }] }\n')
+    const path = resolve(dir, "Cards", "Cards.spell")
+    const text = 'a card is a view where\n\tit has parts "front" and "back"\n\tto deal it\n\t\twait for: show it\n'
+    writeFileSync(path, text)
+    const uri = pathToFileURL(path).href
+    const workspace = new SpellDiskWorkspace()
+    const service = new LSP.SpellLanguageService(workspace)
+
+    test("each old form's warning has one, where its words start;  pressed, its line is the new way", async () => {
+      await workspace.update(uri, text)
+      const file = workspace.fileFor(uri)!
+      expect([...CodeEditorFeatures.fixItStarts(file)]).toEqual([text.indexOf("parts"), text.indexOf("wait for")])
+      const edit = CodeEditorFeatures.fixItAt(service, file, {
+        line: 1,
+        character: text.split("\n")[1]!.indexOf("parts")
+      })
+      expect(applied(text, edit!.changes![uri]!)).toBe(text.replace("parts", "slots"))
+    })
+
+    test("none where no old form is written", async () => {
+      await workspace.update(uri, text)
+      const file = workspace.fileFor(uri)!
+      expect(CodeEditorFeatures.fixItAt(service, file, { line: 0, character: 2 })).toBeUndefined()
+    })
   })
 
   describe("the hover's ⌥ rule", () => {

@@ -95,9 +95,11 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
    * The inner control's `title`, the browser's own tooltip:
    * an icon-only button (no text of its own) shows its name (`aria-label`) when pointed at.
    * - Not when the DOM element has a `title` (the page's, or `tooltip`'s):  that one shows already.
+   * - Nor a `data-tooltip`:  Spell UI's own tooltip shows instead, so the browser's would be a second one
+   *   (epic `editor` T164).
    */
   private get iconTooltip(): string | undefined {
-    if (this.hasText || this.attributes.title != null) return undefined
+    if (this.hasText || this.attributes.title != null || this.attributes["data-tooltip"] != null) return undefined
     return this.ariaLabel
   }
 

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -73,7 +73,7 @@ describe("UITable.css source", () => {
   })
 
   it("covers every class phrase the vocabulary can emit", () => {
-    const css = tableRaw + colorsCSS
+    const css = tableRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(tableVocabulary)) expect(covers(css, phrase), phrase).toBe(true)
   })
 })

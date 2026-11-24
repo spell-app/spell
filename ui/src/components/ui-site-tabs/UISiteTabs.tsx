@@ -206,12 +206,11 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
     return (
       <Show when={this.tabs.length}>
         <ui-toolbar
-          ref={[
-            (element: HTMLElement) => (this.menu = element),
-            (element: HTMLElement) =>
-              element.addEventListener("ui-choosing", ((event: CustomEvent<{ item: Element }>) =>
-                this.onChoosing(event)) as EventListener)
-          ]}
+          ref={(element: HTMLElement) => {
+            this.menu = element
+            // a ref, not `on-ui-choosing={f}`:  Solid's dev build would log `LOWERCASE_EVENT_ATTRIBUTE`
+            element.addEventListener("ui-choosing", (event) => this.onChoosing(event as CustomEvent))
+          }}
           exportparts={`menu: ${this.partForName("tabs")}`}
           appearance={this.isHeader ? HEADER_LOOK : SEGMENTED}
           align={this.isHeader ? undefined : FLUID}

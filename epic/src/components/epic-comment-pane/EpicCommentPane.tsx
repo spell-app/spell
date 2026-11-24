@@ -20,7 +20,8 @@ import { SAVED_MARK } from "spell/epic/components/epic-review/EpicReview.types"
  * - Owen DRAGS it by its header (not from a button there).
  * - Ivory, 8px inside on every side, lifted off the page by a shadow (Owen, 2026-10-10:  "make the modal bg beige so
  *   it stands out";  "reduce padding inside bullhorn frame to 8px");  no buttons below its text.
- * - Its header:  the bullhorn, the first words it's on (`headline`;  its tooltip `about`), the floppy once saved
+ * - Its header:  the bullhorn, the first words it's on (`headline`, no tooltip:  Owen reads and types beside it, epic
+ *   `epic-engine` I370), the floppy once saved
  *   (`saved`, red when `failed`;  Saved fades out 10 seconds later, `SavedMark.css`, epic `epic-engine` I269), the
  *   trash once saved (`deletable`), ×.
  * - Its field is slotted:  the comments' code saves what's typed, closes it (×, Escape, ⌘ Enter, the focus leaving),
@@ -59,7 +60,6 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
           ref={(header) => (this.header = header)}
           class={HEADER}
           part={this.partForName("header")}
-          data-tooltip={`${this.about ?? ""}\n${this.translationForKey("dragTip")}`}
           onPointerDown={this.onGrab}
           onPointerMove={this.onDrag}
           onPointerUp={this.onDrop}

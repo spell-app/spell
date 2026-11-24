@@ -175,8 +175,8 @@
 
 @layer ui.components.tab.variations {
   /* Attached:  the panes join the tab list edge to edge. */
-  .ui[class*="top attached"].tabs,
-  .ui[class*="bottom attached"].tabs {
+  .ui.top-attached.tabs,
+  .ui.bottom-attached.tabs {
     --_ui-tabs-pane-margin: 0;
   }
 

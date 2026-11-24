@@ -258,6 +258,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - One field of one thing, each with its own id, in the order made, shown at once, kept on this device.
     - Each tab keeps its own list:  [TabCopies](TabCopies.ts), a key and a held browser lock per tab;
       what a closed tab left is gathered on opening (epic `data` I4).
+    - `Places.waitingPlaceNames()`:  the places with changes waiting on this device that this page hasn't made yet,
+      so a program makes just those, at idle, and what the last visit left goes though nothing reads them
+      (epic `solid-2-final` P13).
     - No answer:  it resends with the same id.  The place says no:  dropped, put back, healed, one failure raised
       (`Places.onWriteFailed()`).
     - It sits on top of what's read (`replayOn()`), so you read your own writes.

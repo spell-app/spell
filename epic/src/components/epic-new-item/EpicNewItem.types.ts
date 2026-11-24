@@ -20,29 +20,26 @@ export const NEW_ITEM_KINDS = ["todo", "question", "issue", "test", "phase"] as 
  * - its words' keys:
  *   - `label`:  its name, on the form's kind button and on its waiting card
  *   - `add`:  on its section's button
- *   - `tip`:  the form's kind button's tooltip
  * - `section`:  the section it lands in;  `PageStages.TAKES_NEW` names the same ones, so an empty one keeps its button
  */
 export const NEW_KIND_LOOKS = {
-  todo: { icon: "list check", label: "newTodo", add: "addTodo", tip: "newTodoTip", section: "todos" },
+  todo: { icon: "list check", label: "newTodo", add: "addTodo", section: "todos" },
   question: {
     icon: "circle question",
     label: "newQuestion",
     add: "addQuestion",
-    tip: "newQuestionTip",
     section: "questions"
   },
-  issue: { icon: "bug", label: "newIssue", add: "addIssue", tip: "newIssueTip", section: "issues" },
-  test: { icon: "flask", label: "newTest", add: "addTest", tip: "newTestTip", section: "tests" },
+  issue: { icon: "bug", label: "newIssue", add: "addIssue", section: "issues" },
+  test: { icon: "flask", label: "newTest", add: "addTest", section: "tests" },
   // a phase (epic `epic-engine` P34):  its name and what it's for go to the session, which drafts it
-  phase: { icon: "layer group", label: "newPhase", add: "addPhase", tip: "newPhaseTip", section: "phases" }
+  phase: { icon: "layer group", label: "newPhase", add: "addPhase", section: "phases" }
 } as const satisfies Record<
   NewKind,
   {
     icon: string
     label: (typeof NEW_KIND_TEXTS)[number]["key"]
     add: (typeof NEW_ITEM_TEXTS)[number]["key"]
-    tip: (typeof NEW_ITEM_TEXTS)[number]["key"]
     section: NewSectionKind
   }
 >
@@ -109,29 +106,11 @@ export const NEW_ITEM_TEXTS = [
   { key: "newAdd", text: "Add", description: "The form's button:  a new one." },
   { key: "newSave", text: "Save", description: "The form's button:  one being changed." },
   { key: "newCancel", text: "Cancel", description: "The form's button:  closes it, nothing saved." },
-  { key: "newTodoTip", text: "A todo", description: "Kind button:  its tooltip." },
-  { key: "newQuestionTip", text: "A question", description: "Kind button:  its tooltip." },
-  { key: "newIssueTip", text: "An issue", description: "Kind button:  its tooltip." },
-  { key: "newTestTip", text: "A manual test", description: "Kind button:  its tooltip." },
-  {
-    key: "newPhaseTip",
-    text: "A phase:  Claude drafts it",
-    description: "Kind button:  its tooltip."
-  },
-  { key: "newAddTip", text: "Add it to the epic page", description: "The form's Add:  its tooltip." },
-  { key: "newSaveTip", text: "Save", description: "The form's Save:  its tooltip." },
-  { key: "newCancelTip", text: "Cancel", description: "The form's Cancel:  its tooltip." },
   { key: "newNeedsTitle", text: "Give it a title first", description: "Add pressed with no title." }
 ] as const
 
 /** The waiting cards' texts:  `<epic-section>`'s (a Todos or Questions section lists them). */
 export const NEW_LIST_TEXTS = [
-  { key: "newUnsent", text: "not sent yet:  Send hands it to Claude", description: "A pending new item, not sent." },
-  {
-    key: "newSent",
-    text: "sent:  Claude adds it at the next review",
-    description: "A pending new item, sent, not made yet."
-  },
   { key: "newAbout", text: "About {id}", description: "A pending new item's link to what it's about." },
   { key: "newEdit", text: "Edit", description: "A pending new item's button:  back into the form." },
   { key: "newRemove", text: "Remove", description: "A pending new item's button:  gone, never made." }

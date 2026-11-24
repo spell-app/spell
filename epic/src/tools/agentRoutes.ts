@@ -32,7 +32,7 @@ const agentRoutes: RouteModule = {
     const api = new SRV.Router()
     api.get("/", (request, reply) => {
       const list = AgentList.forPlanDoc(planDoc(web.files, request.query.page))
-      reply.set("Cache-Control", "no-store").json({ agents: list.agents })
+      reply.noStore().json({ agents: list.agents })
     })
     api.use(guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }))
     api.post("/redirect", async (request, reply) => {

@@ -57,8 +57,8 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  *     - The host calls `focusChosen()` as it opens the sub-menu.
  *     - ArrowLeft / ArrowRight / Escape in the list are left to the host (closing its sub-menu).
  *     - `:state(menu)`;  the rows take the host's text size.
- * - The theme bench is Spell UI's docs page, on the site `bench` names, else this page's own
- *   (a worktree's pages:  the worktree's bench);  `bench="none"`:  no row (the Spell editor draws its own).
+ * - The theme bench is the Spell UI site's Theme bench page (`/components/ui/theme-bench`),
+ *   on the site `bench` names, else this page's own (a worktree's pages:  the worktree's bench);  `bench="none"`:  no row (the Spell editor draws its own).
  *   - It's opened with the theme chosen in its address, so it opens as this page shows,
  *     and only the bench's page for this place on (`pages=epic`, `benchPageId`;  `BenchAddress.benchOn()`).
  * - The theme and scheme themselves are `ThemePreference`'s
@@ -189,8 +189,8 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   /**
    * The bench's page for the place this menu is on, shown alone as the bench opens (Owen:  "start with only the
    * section you came from visible ... Default to `app`"):  `bench-page`, else from this page's address.
-   * - an epic page (`/epics/`):  `epic`;  Spell UI's docs (`/components/`):  `ui`;  the Spell UI site's notebooks
-   *   (`/guides/SpellUI`):  `notebook`;  anywhere else:  `app`
+   * - an epic page (`/epics/`):  `epic`;  the Spell UI site on the page server, or another set's components pages
+   *   (`/components/`):  `ui`;  the Spell UI site in the editor (`/guides/SpellUI`):  `notebook`;  anywhere else:  `app`
    */
   get benchPageId(): string {
     const given = this.benchPageAttribute

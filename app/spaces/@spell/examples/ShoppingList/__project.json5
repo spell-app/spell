@@ -9,5 +9,6 @@
     { "path": "/AisleList.spell", "active": true },
     { "path": "/ShoppingList.spell", "active": true },
     { "path": "/styles.css", "active": true }
-  ]
+  ],
+  "spellVersion": "0.9.0"
 }

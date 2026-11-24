@@ -3,8 +3,15 @@ import { proto } from "spell/ui/util"
 import { after, type Prettify } from "spell/ui/util"
 import * as UIT from "spell/ui/components/components.types"
 
-import { CssDisplay, type AnimateOptions, type AnimationDirection, type AnimationName } from "./runtime.types"
+import {
+  ANIMATIONS_SHEET,
+  CssDisplay,
+  type AnimateOptions,
+  type AnimationDirection,
+  type AnimationName
+} from "./runtime.types"
 import type { Browser } from "./Browser"
+import type { Styles } from "./Styles"
 
 /****************
  * ### `Transitions`
@@ -21,6 +28,8 @@ import type { Browser } from "./Browser"
  *     (a `:host { display: block }` beats the UA `[hidden]` rule)
  * - Resolves `true` when the animation ends, `false` when interrupted by another `animate()` on the same element.
  *   - Starting an animation cancels the running one -- e.g. `in` while an `out` is mid-way.
+ * - A box inside a shadow root:  its root takes the animations sheet first (`Styles.addInto()`), the first time.
+ *   Most roots never animate, so most never adopt the sheet's 28 KB (epic `solid-2-final` P4).
  * - Never hangs:
  *   - resolves straight away when no animation applies (reduced motion, `animations.css` not loaded)
  *   - resolves after a fail-safe timeout if `animationend` never comes:
@@ -43,11 +52,14 @@ export class Transitions {
 
   /** `isReducedMotion` */
   private readonly browser: Pick<Browser, "isReducedMotion">
+  /** where a shadow root takes the animations, if anywhere */
+  private readonly styles: Pick<Styles, "addInto"> | undefined
   /** element -> its running animation */
   private readonly running = new WeakMap<Element, RunningAnimation>()
 
-  constructor({ browser }: TransitionsProps) {
+  constructor({ browser, styles }: TransitionsProps) {
     this.browser = browser
+    this.styles = styles
   }
 
   /**
@@ -63,6 +75,9 @@ export class Transitions {
       return Promise.resolve(true)
     }
     this.setOptions(element, options)
+    const root = element.getRootNode()
+    // a shadow root (nodeType 11, never `instanceof`:  the static render's nodes aren't the browser's)
+    if (root.nodeType === 11) this.styles?.addInto(root as ShadowRoot, ANIMATIONS_SHEET)
     const value = `${name} ${direction}`
     // same value again (e.g. repeated `shake`) -- remove and reflow so the animation restarts
     if (element.getAttribute(ANIMATION_ATTRIBUTE) === value) {
@@ -186,6 +201,8 @@ export class Transitions {
 export type TransitionsProps = {
   /** only `isReducedMotion` is read -- tests pass a stub */
   browser: Pick<Browser, "isReducedMotion">
+  /** the registry that gives a shadow root the animations sheet;  left out, nothing is adopted */
+  styles?: Pick<Styles, "addInto">
 }
 
 /** What `Transitions.animate()` takes:  the element, the animation and its direction, plus `AnimateOptions`. */

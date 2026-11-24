@@ -100,7 +100,8 @@ yarn start                          # the page server and editor from ~/www/spel
     each session's next turn.
   - VS Code's epic extension, from your checkout's `epic/vscode/spell-epic.vsix`, when VS Code has another version or
     an older build of it:  reload each VS Code window after.
-    Your checkout builds it with `yarn vscode:package` in its `epic/`;  until then, VS Code keeps its own.
+    Your checkout builds it with `yarn vscode:package` in its `epic/`, again after each version bump;
+    until then, VS Code keeps its own.
   - `~/.spell/local-plugin.json` records that `spell local` switched them, and which projects use them.
 - `spell local off` puts the plugin and its skills back on the project's npm copy once no project still runs a
   checkout, and only when `spell local on` switched them;  VS Code keeps the extension it has, never an older one put
@@ -251,7 +252,7 @@ Each folder hands it a list, named in the folder's own `package.json`:
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
   base["spell, the base<br/>server · bundle · commands · wwod · publish · pony · help"]
-  lang["spell-parser<br/>compile · lint · run · test ... thirteen in all"] --> base
+  lang["spell-parser<br/>compile · lint · run · test ... fourteen in all"] --> base
   ui["spell-ui<br/>icon · ssr · pack · design"] --> base
   epic["spell-epic<br/>voice check"] --> base
   app["spell-app<br/>app create · serve · vscode, projects"] --> base
@@ -310,6 +311,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
 | `spell wwod init` | asks which of the rules the `spell` package ships a project's agents should read, and writes them into its `CLAUDE.md` and `AGENTS.md` ([README/agents.md](agents.md#using-these-rules-in-your-own-project)) |
 | `spell deps [check]` | fails on a deprecated package, or a critical or high advisory not on `deps-known-open.json5`;  runs by itself before a push to `main` |
+| `spell names [check] [revisions...]` | fails when what's about to leave this machine names something on your private list, `~/.spell/private-names`:  files, commit messages, branch names, pictures;  runs by itself before every push, and in `spell publish` |
 | `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing;  a real one runs in the publish workflow, started from GitHub's Actions tab, with no npm token |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
 | `spell coherence score` | how coherent the code is:  each mechanism's copies left and its users, scored 0-100, and saved so it trends ([below](#scoring-coherence)) |
@@ -334,6 +336,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell server stop all` | the page server, then the app's editor too, even one left running, and the local site, which a plain stop leaves up |
 | `spell server status` | the running page server's details (JSON);  exit 1 when it isn't running |
 | `spell server url <file>` | starts the page server if needed, then prints the address that serves `<file>`, of this checkout or the epic folder |
+| `spell server certificate [--check] [--undo]` | makes the page server's HTTPS certificate with mkcert, and has this computer trust it (asks for the password once);  the page server then speaks HTTPS and HTTP/2 too, at its next start, on the same port ([README/server.md](server.md#https-and-http2-on-the-same-port)) |
 | `spell server prune [--dry-run]` | stops the page and Vite servers whose checkout is gone, on any checkout;  `--dry-run` only lists them |
 
 - The page server's own flags pass through, as typed:
@@ -361,6 +364,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell wwod init --here` | in a workspace, writes in the nearest folder with a `package.json`, not the workspace's root (asked, else the root) |
 | `spell wwod init --dry-run` | says what it would change, and writes nothing |
 | `spell deps --json` | the report as JSON |
+| `spell names check --push <remote>` | what git's pre-push hook hands it, on stdin |
 | `spell publish --dry-run` | everything but the publish:  build, pack, check, scratch install |
 | `spell publish --no-scratch` | skips the scratch install, which needs the network |
 | `spell publish --json` | the packed packages and every check as JSON |
@@ -612,7 +616,7 @@ spell runbook check netbox-demo
 
 ## spell-parser
 
-The language's thirteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
+The language's fourteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
 and check its language packs.
 They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `language` hook
 ([above](#each-folder-brings-its-own-commands));  the language packs' two are the exception, `spell-parser`'s own.
@@ -624,12 +628,13 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | Command | What it does |
 | --- | --- |
 | `spell compile [projects...]` | compiles each project to JavaScript, `<Project>.spell.js` in its build folder, plus its other targets, its declarations and its words;  a lone `.spell` file prints its JavaScript |
-| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  its warnings too (a page's `description-before-example`), which alone exit 0;  a project's editor pages (`*.editor.html`) too, against its types |
+| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  its warnings too (a page's `description-before-example`, each line still written the old way, `old-form`), which alone exit 0;  a project's editor pages (`*.editor.html`) too, against its types |
+| `spell upgrade [projects...]` | brings projects written for an older Spell up to date:  rewrites each line still written the old way (`parts` => `slots`, a `// x` note after a line's code moved under it as `-- x`), then writes the Spell it now matches into the project file, `spellVersion`;  the same rewrite as `spell lint --fix` |
 | `spell watch [projects...]` | recompiles on every save and shows a live list of errors, until `q` or `Ctrl-C` |
 | `spell format [projects...]` | tidies the whitespace of `.spell` files, as VS Code's Format Document does;  never in the frozen test projects |
 
 <details>
-<summary>Every option of compile, lint, watch and format</summary>
+<summary>Every option of compile, lint, upgrade, watch and format</summary>
 
 | Option | What it does |
 | --- | --- |
@@ -638,7 +643,9 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell compile --force` | recompiles the projects it imports too, even those already compiled |
 | `spell compile --stale` | only the projects that are out of date, and the same for what they import;  the rest say "up to date" |
 | `spell lint --json` | the errors as a JSON list |
-| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`);  a page's `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`;  a note after a line's code, `// x`, moved to the line under it, `-- x`;  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
+| `spell lint --fix` | puts right what it can:  each line still written the old way, as `spell upgrade` does (`parts` => `slots`;  a note after a line's code, `// x`, moved to the line under it, `-- x`), then the project file's `spellVersion`;  a page's `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`;  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
+| `spell upgrade --dry-run` | lists what it would change, and changes nothing |
+| `spell upgrade --json` | what it changed, as a JSON list |
 | `spell watch --check-only` | re-checks instead of recompiling:  writes nothing |
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
@@ -687,12 +694,13 @@ spell test @spell/examples/Solitaire 2>/dev/null
 <summary>Output</summary>
 
 ```text
-✓ test card setup  (19 checks)
-✓ test a new deck  (5 checks)
+✓ test card setup  (15 checks)
+✓ test card images  (10 checks)
 ✓ test piles  (8 checks)
+✓ test a new deck  (5 checks)
 ✓ test the moves  (11 checks)
 
-4 passed
+5 passed
 ```
 
 </details>
@@ -770,7 +778,7 @@ spell describe @spell/examples/Solitaire Card color
 
 ```text
 property color of Card
-app/spaces/@spell/examples/Solitaire/Card.spell:18
+app/spaces/@spell/examples/Solitaire/Card.spell:8
 
 Spell
     its "color" is one of red, black
@@ -828,6 +836,7 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 | `spell speedtest --by-module` | each test timed on its own too:  a table by module, then the rules that grew most |
 | `spell speedtest --baseline save` | saves this commit and its numbers as the baseline, in the command's `speedBaseline.json` |
 | `spell speedtest --budget 5` | times against the saved baseline, by module, and fails when the tests both sides have take over 5% longer |
+| `spell speedtest --pipeline` | times the editing pipeline instead:  Solitaire's cold parse, the incremental tests' four edits, a compile, startup, and one run of the compiled program;  with `--json`, `--baseline save` and `--budget 5` too |
 
 - A side's runs combine as the mean of their averages, the lowest min and the highest max.
   With 3 or more runs, one fluke (an average 25% over the median) is dropped.
@@ -843,6 +852,46 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
   before merging.
   - A run always times the baseline's commit again, beside this one, on the same machine:
     the numbers saved with it are only a record.
+- `--pipeline` times what the editor does as you type, each number the median of the runs:
+  - CPU time after a warm-up, as the rule tests are, except the program's run, which is a child process:  the clock's
+  - its baseline is `spell perf`'s (below), so `--budget` compares with the numbers saved there, not a commit
+
+</details>
+
+### Measuring speed and size
+
+| Command | What it does |
+| --- | --- |
+| `spell perf run` | measures the editor, a docs page, an epic page and run mode in a headless browser, on a desktop and an emulated phone, then prints the report;  about 5 minutes |
+| `spell perf report` | the last run's numbers beside the run before it and the baseline, "WORSE" past 10% |
+| `spell perf budget` | every bundle's size, brotli, against its budget and its ceiling;  exits 1 when one grew past its ceiling |
+| `spell perf budget --why <ids>` | for those budgets (or `all`):  what's in each file by where it's from, who loads it, and what's built in twice |
+
+<details>
+<summary>Every option of perf, and how it measures</summary>
+
+| Option | What it does |
+| --- | --- |
+| `spell perf run --full` | every measurement, 5 loads each:  load, leaks, huge lists (a 100,000-row table and tree scrolled on the docs page), typing, accessibility, listeners, style sheets, a CPU profile and the editing pipeline |
+| `spell perf run --page editor,docs` | which pages:  `editor`, `docs`, `epic`, `run` (the default);  also `site` (a built site on the run page), `cloud` (one program on a plain page) and `programs` (several on one page) |
+| `spell perf run --profile phone` | which profiles:  `desktop`, `phone`, `phonewide` (default `desktop` and `phone`) |
+| `spell perf run --steps load,typing` | which measurements (default `load`) |
+| `spell perf run --runs <count>` | cold loads per page and profile, medians reported (default 1, 5 with `--full`) |
+| `spell perf run --wait <minutes>` / `--force` | how long to wait for a quiet machine (default 10) / don't wait |
+| `spell perf run --baseline save` | this run is the baseline too, `perfBaseline.json` beside the command's code |
+| `spell perf run --https` | the editor build served over HTTPS and HTTP/2, with a throwaway certificate only the measuring browser trusts;  each load says how many files came by each protocol, and how long they waited to be sent |
+| `spell perf budget --tighten` | lowers each ceiling to the bundle's size now plus 2%:  after a change that shrank one |
+
+- The phone is Playwright's Pixel 7, its CPU slowed 4x and a 5G-like network (20ms, 50 Mbps down, 20 up);
+  `phonewide` is the same at 1280 x 800, where the editor shows its code pane.
+- The editor is a production build made into a temporary folder and served, its server paths passed on to the running
+  page server:  start it first (`spell server start`).  Nothing in the checkout changes:  its writes are refused.
+- A run waits for the machine's test turn (`epic turns run test`), then for a quiet machine (a 1-minute load under half
+  the CPUs).  Still busy, it runs anyway, and says so:  times are noisy then, bytes and counts aren't.
+- Each run is a dated file in `.perf-results/` at the kit's root, git-ignored.
+- The budgets are `app/perf-budgets.json5`, brotli KB:  each with what it should weigh and a CEILING, its size the day
+  it was set plus 2%.  CI runs `spell perf budget`, so a bundle can only get smaller;  two of them are numbers a run
+  measures in a browser, and are checked only after one.
 
 </details>
 
@@ -1306,7 +1355,7 @@ owen@spell       Projects       ...
 @spell/guides    Guides         ... projects
 @spell/sites     Sites          1 project
 @spell/library   Libraries      ... projects
-@spell/editor    The editor     ... projects
+@spell/editor    The editor     ...
 @spell/test      Test fixtures  ... projects
 ```
 
@@ -1666,6 +1715,7 @@ They're named in the command line's goals and the commands page's roadmap.
 
 ## See also
 
+- The guide:  [The `spell` Command](../guides/cli.html), in the kit's guides/ folder
 - [README.md](../README.md):  setup from zero, and the index of every page
 - [README/server.md](server.md):  what `spell server` and `spell app serve` start
 - [spell-epic's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md):  every `epic` verb, in full

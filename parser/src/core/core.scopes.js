@@ -546,13 +546,18 @@
       super: "type:Thing"
     },
     {
-      path: "type:Site", line: [6, 10],
+      path: "type:Site", line: [6, 13],
       super: "type:App",
       uri: "templates/Site.spell"
     },
     {
       path: "type:Site/property:current_address", line: [7, 8],
       name: "current address",
+      detail: "text",
+      uri: "templates/Site.spell"
+    },
+    {
+      path: "type:Site/property:loading", line: [11, 13],
       detail: "text",
       uri: "templates/Site.spell"
     },

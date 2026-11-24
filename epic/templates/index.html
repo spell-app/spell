@@ -12,7 +12,6 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html" target="_self">Spell Epic</ui-breadcrumb>
           <ui-breadcrumb selected>Templates</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
@@ -50,20 +49,6 @@
             <ui-card
               ><ui-content>
                 <ui-header
-                  ><a href="component-set-docs.html" target="src-templates-component-set-docs-html"
-                    >Epic UI and App UI Components Page Template</a
-                  ></ui-header
-                >
-                <ui-description
-                  >Template for a components page or components guide of a component set (Epic UI, App UI): Spell UI's
-                  page shape, the set's side column, live examples from its pack.</ui-description
-                >
-                <ui-meta>templates/component-set-docs.html</ui-meta>
-              </ui-content></ui-card
-            >
-            <ui-card
-              ><ui-content>
-                <ui-header
                   ><a href="details.html" target="src-templates-details-html">Details Page Template</a></ui-header
                 >
                 <ui-description
@@ -95,20 +80,6 @@
             <ui-card
               ><ui-content>
                 <ui-header
-                  ><a href="spell-ui-docs.html" target="src-templates-spell-ui-docs-html"
-                    >Spell UI Components Page Template</a
-                  ></ui-header
-                >
-                <ui-description
-                  >Template for a Spell UI components page (or components guide): Fomantic's docs layout in ui-* widgets
-                  -- nav, masthead, Examples / Usage / API / Theming tabs, an On this page rail.</ui-description
-                >
-                <ui-meta>templates/spell-ui-docs.html</ui-meta>
-              </ui-content></ui-card
-            >
-            <ui-card
-              ><ui-content>
-                <ui-header
                   ><a href="syntax-choices.html" target="src-templates-syntax-choices-html"
                     >Choice Page Template</a
                   ></ui-header
@@ -118,6 +89,15 @@
                   call.</ui-description
                 >
                 <ui-meta>templates/syntax-choices.html</ui-meta>
+              </ui-content></ui-card
+            >
+            <ui-card
+              ><ui-content>
+                <ui-header>Feature Set Template</ui-header>
+                <ui-description
+                  >Template for a Feature Set: a ranked list to pick from, answered on the page.</ui-description
+                >
+                <ui-meta>epic ask create &lt;slug&gt; --template feature-set --from &lt;data.json5&gt;</ui-meta>
               </ui-content></ui-card
             >
           </ui-cards>

@@ -19,28 +19,33 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   ask: [
     {
       name: "create",
-      usage: '<slug> [--title "..."] [--epic <epic>] [--description "..."] [--from <questions.json5>]',
+      usage:
+        '<slug> [--title "..."] [--epic <epic>] [--description "..."] [--template feature-set] [--from <questions.json5>]',
       description:
         "make a details page from the template, and print its path;  --epic:  in that epic's details/ (else a " +
-        "scratch page, swept after 14 days);  --from:  the whole page from a list of questions",
+        "scratch page, swept after 14 days);  --from:  the whole page from a list of questions;  " +
+        "--template feature-set:  a Feature Set, a ranked list to pick from, --from its sections and items",
       example: 'epic ask create pick-layout --epic seo --title "Pick a layout"',
       flags: {
         "--title <title>": "the page's title",
         "--epic <epic>": "in that epic's details/, kept;  else a scratch page, swept after 14 days",
         "--description <text>": "what the page asks, under its title",
-        "--from <questions.json5>": "the whole page, from a list of questions"
+        "--template <name>": "feature-set:  a ranked list to pick from, a table per section, from --from's data",
+        "--from <questions.json5>": "the whole page, from a list of questions (a Feature Set:  its sections and items)"
       }
     },
     {
       name: "round",
-      usage: '<page> [--title "..."] [--description "..."] [--from <questions.json5>]',
+      usage: '<page> [--title "..."] [--description "..."] [--template feature-set] [--from <questions.json5>]',
       description:
         "ask the same question again:  the ONE page rewritten in place (from --from, else left to edit), the round " +
-        "before folded at its bottom with what you sent;  never a second page (create refuses one)",
+        "before folded at its bottom with what you sent;  never a second page (create refuses one);  " +
+        "--template feature-set:  the page becomes a Feature Set, --from its sections and items",
       example: "epic ask round seo/pick-layout --from round2.json5",
       flags: {
         "--title <title>": "the page's title",
         "--description <text>": "what the page asks, under its title",
+        "--template <name>": "feature-set:  turns an ordinary page into a Feature Set, at the same address",
         "--from <questions.json5>": "the new round's questions;  none:  the page stays as it is, to edit"
       }
     },
@@ -315,9 +320,35 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "done",
-      usage: "<name>",
-      description: "an agent is back:  off the list",
+      usage: "<name> [--finished]",
+      description: "an agent is back:  off the list;  a paused one stays, unless --finished",
       example: "epic agents done docstrings",
+      flags: {
+        "--finished": "a paused agent whose whole task did finish:  off the list, what was saved dropped",
+        "--epic <epic>": "that epic's list (default this checkout's)"
+      }
+    },
+    {
+      name: "pause",
+      usage: '<name> --next "<step>" [--item <id>] [--tests "<runs>"]',
+      description:
+        "an agent is stopped:  saved so any session can start it again (task, item, claimed and uncommitted files, " +
+        "commits and whether merged, a merge left part way, the next step);  it keeps its claims",
+      example: 'epic agents pause docstrings --item T7 --next "the last two files, then the tests"',
+      flags: {
+        "--next <step>": "what it does next, in words",
+        "--item <id>": "the item or phase it's on (default:  the id in its task)",
+        "--tests <runs>": "the test runs abandoned, to run again",
+        "--epic <epic>": "that epic's list (default this checkout's)"
+      }
+    },
+    {
+      name: "resume",
+      usage: "<name>",
+      description:
+        "a paused agent starts again:  prints its brief and clears what was saved, so once only;  " +
+        "exit 1 while a pause is under way",
+      example: "epic agents resume docstrings",
       flags: {
         "--epic <epic>": "that epic's list (default this checkout's)"
       }
@@ -531,7 +562,9 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "status",
       usage: "[--json]",
-      description: "the sessions still waiting to go fresh (/epic fresh all), and why each waits (the default verb)",
+      description:
+        "the sessions still waiting to go fresh (/epic fresh all), and why each waits;  during a pause (all --pause), " +
+        "who is quiet and who is outstanding (the default verb)",
       example: "epic fresh status",
       flags: {
         "--json": "print them as JSON"
@@ -539,14 +572,46 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "all",
-      usage: "[--json]",
+      usage: "[--pause] [--json]",
       description:
         "/epic fresh all:  every running epic session marked to go to a fresh session at its next clear moment " +
         "(no agents running, no question waiting, no prompt in the last 5 minutes), this one last;  a TELL: line " +
         "for each, and which go now and which later",
       example: "epic fresh all",
       flags: {
+        "--pause":
+          "pause first:  each session stops and saves its agents, then reports back here;  " +
+          "run epic fresh all again, plain, once every one is quiet",
         "--json": "print the round, the lines and each session's state as JSON"
+      }
+    },
+    {
+      name: "quiet",
+      usage: "",
+      description:
+        "during a pause:  this session has saved its agents and runs nothing;  prints the line that reports back;  " +
+        "exit 1 while agents, tests or a merge of its own still run",
+      example: "epic fresh quiet",
+      flags: {}
+    },
+    {
+      name: "wait",
+      usage: "[--max <time>]",
+      description:
+        "during a pause:  wait until every session is quiet (exit 0);  when the time runs out, name who isn't " +
+        "(exit 2), skipping nobody;  no pause:  exit 3;  run it in the background",
+      example: "epic fresh wait",
+      flags: {
+        "--max <time>": "how long before it names who is outstanding (default 2m):  seconds, or 10m, 1h"
+      }
+    },
+    {
+      name: "cancel",
+      usage: "[--json]",
+      description: "call a pause off:  nobody goes fresh, and a TELL: line has each session restart its agents",
+      example: "epic fresh cancel",
+      flags: {
+        "--json": "print the lines as JSON"
       }
     },
     {
@@ -641,11 +706,12 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       description:
         "merge main into this checkout's branch, regenerating the generated files both sides changed;  exit 1 " +
         "on other conflicts:  resolve, git add, then --continue;  one merge at a time on the machine (epic turns), " +
-        "and never moving aside a file another running agent claims (epic agents claim)",
+        "never moving aside a file another running agent claims (epic agents claim);  uncommitted files it doesn't " +
+        "change are left alone, a merge then made in a temporary worktree",
       example: "epic worktree merge-main --as docstrings",
       flags: {
         "--continue": "go on, once the conflicts are resolved and added",
-        "--as <agent>": "the agent merging:  its own claimed files may be moved aside",
+        "--as <agent>": "the agent merging:  its own claimed generated files may be moved aside",
         "--json": "print what it did as JSON"
       }
     },
@@ -1081,6 +1147,40 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     }
   ],
+  servers: [
+    {
+      name: "restart",
+      usage: "<server> [--repo <name>]",
+      description:
+        "ask the server keeper to restart a main checkout's server:  page-server, editor (its page server restarts with it), or a repo's own by name",
+      example: "epic servers restart editor",
+      flags: { "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)" }
+    },
+    {
+      name: "start",
+      usage: "<server> [--repo <name>]",
+      description: "ask the server keeper to start a main checkout's server, one stopped by hand too",
+      example: "epic servers start page-server",
+      flags: { "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)" }
+    },
+    {
+      name: "stop",
+      usage: "<server> [--repo <name>]",
+      description: "ask the server keeper to stop a main checkout's server, and leave it stopped until a start",
+      example: "epic servers stop page-server",
+      flags: { "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)" }
+    },
+    {
+      name: "status",
+      usage: "[--repo <name>] [--json]",
+      description: "main's servers as the server keeper last saw them:  name, state, address, why",
+      example: "epic servers status",
+      flags: {
+        "--repo <name>": "the repo (default:  the one this checkout is of, else the hub's default)",
+        "--json": "print them as JSON"
+      }
+    }
+  ],
   hub: [
     {
       name: "serve",
@@ -1123,6 +1223,16 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       description: "JSON:  where it runs and what it serves;  exit 1 when it isn't running",
       example: "epic hub status",
       flags: {}
+    },
+    {
+      name: "kick",
+      usage: "",
+      description:
+        "ensure it runs, then have its server keeper look at every server now:  what each session's start runs (epic-engine P82)",
+      example: "epic hub kick",
+      flags: {
+        "--port <n>": "the port to try first"
+      }
     },
     {
       name: "url",
@@ -1173,18 +1283,90 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   turns: [
     {
       name: "run",
-      usage: "<kind> -- <command> [args...]",
+      usage: "<kind> [--stall <minutes>] -- <command> [args...]",
       description:
         "run a command in its turn:  one of each kind at a time on this machine (a full test run:  test);  " +
-        "waits, saying who has the turn;  epic merge and merge-main take the merge turn by themselves",
+        "waits, saying who has the turn;  epic merge and merge-main take the merge turn by themselves;  " +
+        "a command silent and idle (no output, next to no CPU in its whole process tree) for the stall window " +
+        "is stopped, saying where it was, and the turn freed (exit 1)",
       example: "epic turns run test -- yarn test",
+      flags: {
+        "--stall <minutes>": "the stall window:  10 by default (SPELL_EPIC_TURN_STALL sets it too);  0 never stops it"
+      }
+    },
+    {
+      name: "stop",
+      usage: "<kind>",
+      description:
+        "stop this session's own runs of that kind, held or waiting, and free the turn (tests abandoned for a pause);  " +
+        "never another session's, and never a merge",
+      example: "epic turns stop test",
       flags: {}
     },
     {
       name: "list",
       usage: "",
-      description: "the turns taken now:  each kind's holder, and since when (the default verb)",
+      description:
+        "the turns taken now:  each kind's holder, since when, and whether it's longer than usual or stalled " +
+        "(the default verb)",
       example: "epic turns list",
+      flags: {}
+    }
+  ],
+  guides: [
+    {
+      name: "list",
+      usage: "[--json]",
+      description:
+        "every guide and where it is:  code (the repo's guidesFolder), plugin (the epic plugin's own, epic/guides/), " +
+        "epic (the epic folder's guides/), or both (moved on a branch not merged yet);  the default verb",
+      example: "epic guides list",
+      flags: {
+        "--json": "print it as JSON"
+      }
+    },
+    {
+      name: "move",
+      usage: "<page | SAGA:/id>... [--plugin] [--dry-run]",
+      description:
+        "copy guides from the epic folder into the checkout's guides folder, at the same path, with their twins, " +
+        "pictures and experiments (not their comments), for the branch to commit;  the epic folder keeps its copy " +
+        "until the branch merges into main",
+      example: "epic guides move guides/data/data.html",
+      flags: {
+        "--plugin":
+          "into the epic plugin's own guides folder (epic/guides/) instead:  a guide about the epic tooling, shipped " +
+          "with the plugin and read in VS Code's Epic Docs tab",
+        "--dry-run": "copy nothing:  say what it would"
+      }
+    },
+    {
+      name: "prune",
+      usage: "[--dry-run]",
+      description:
+        "in the main checkout:  delete the epic folder's copy of every file main's guides folder tracks, so the " +
+        "code's is the one copy;  epic merge runs it after each merge",
+      example: "epic guides prune --dry-run",
+      flags: {
+        "--dry-run": "delete nothing:  say what it would"
+      }
+    },
+    {
+      name: "index",
+      usage: "",
+      description:
+        "write the shipped guides' list, guides.json5 in the guides folder, from each guide's metas (spell-audience, " +
+        "spell-topic, spell-start-here):  what the Spell app's Guides page reads",
+      example: "epic guides index",
+      flags: {}
+    },
+    {
+      name: "check",
+      usage: "",
+      description:
+        "check the shipped guides stand on their own:  no link into the epic repo, no command or file they name " +
+        "that isn't there, their list up to date;  exit 1 naming each problem",
+      example: "epic guides check",
       flags: {}
     }
   ],
@@ -1373,7 +1555,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  * - a docs tool or script passed through:
  *   `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`, `server`
  * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
- *   `hub` (`Hub`), `repo` (`Repos`), `turns` (`Turns`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
+ *   `servers` (`Servers`), `hub` (`Hub`), `repo` (`Repos`), `turns` (`Turns`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
  *   `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  * - the `epic` tool's, every epic at once:  `focus` (`FocusCommands`, epic `epic-engine` T93), `fresh`
@@ -1396,10 +1578,12 @@ export type GroupName =
   | "shared"
   | "window"
   | "server"
+  | "servers"
   | "hub"
   | "repos"
   | "turns"
   | "turn"
+  | "guides"
   | "skills"
   | "plugin"
   | "pages"
@@ -1476,9 +1660,28 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   stale: {
     "--json": "print them as JSON",
     "--underway": "the open items whose Underway card went stale, and whether their work is on main (T78)",
-    "--apply": "with --underway:  on main => fixed for review;  else a Stale card, once;  never closes anything",
+    "--apply":
+      "with --underway:  on main => fixed (grey if Claude found it, else for your review);  else a Stale card, once",
     "--hours <n>": "with --underway:  how old an Underway card must be (default 3)",
     "--quiet": "with --apply:  say nothing when nothing changed"
+  },
+  hush: {
+    "--dryrun": "print the table (id, colour, age, hush or keep, why) and change nothing",
+    "--json": "print the calls as JSON",
+    "--model <model>": "the judge's model (default sonnet)"
+  },
+  "close-all": {
+    "--dryrun": "print the ids it would close, and change nothing"
+  },
+  badges: {
+    "--json": "list:  print the scores, badges and what would close as JSON",
+    "--model <model>": "score:  the judge's model (default sonnet)",
+    "--care <n>": "set:  care, 0 to 100, how likely you want it",
+    "--doubt <n>": "set:  doubt, 0 to 100, how likely it's transient, done already or overtaken",
+    "--severe <yes|no>": "set:  an issue blocks or loses work;  a judgement call changes what you said",
+    "--your-call <yes|no>": "set:  only you can decide it, OK it or test it",
+    "--as <why>": "close:  what a recheck found:  vanished, moot, duplicate or declined",
+    "--why <text>": "set, close:  why, in one line"
   },
   summaries: { "--all": "every phase and grey item, as summary --all" },
   items: {
@@ -1523,6 +1726,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--estimate <time>": "a phase's estimate, e.g. 1-2h",
     "--title <title>": "a phase's or an item's new title:  links that say the old one follow",
     "--html": "the title is HTML",
+    "--title-ok": "with --title:  keep the new title as it is, not read cold first (T123)",
     "--calm": "an item not urgent:  a judgement call grey, an issue yellow",
     "--loud": "an item urgent (red) again;  a todo too, red as a reminder until you review it (T94)",
     "--requested":
@@ -1530,6 +1734,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--failed <issue>": 'a manual test failed, filed as that issue (I12):  "failed -> I12" on its line;  off:  not',
     "--standing [on|off]": "the page:  a standing epic, open for good, never done",
     "--no-standing": "the page:  not a standing epic",
+    "--branch <name>":
+      "the page:  the epic's git branch, when it isn't the epic's id (<epic-page branch>);  merge, merge-main, " +
+      "worktree status and pr use it",
     "--filed <what>": "a card:  done --filed is noted's older spelling"
   },
   updated: {
@@ -1556,6 +1763,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   // an epic page:  items
   add: {
     "--details <html>": "its details",
+    "--title-ok": "keep the title as it is, not read cold first (T123)",
     "--calm": "not urgent (a judgement call grey, an issue yellow):  it wouldn't surprise you",
     "--requested":
       "an issue or todo filed from the person's own words:  light orange once Claude closes it, until they review it",

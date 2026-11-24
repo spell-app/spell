@@ -140,11 +140,6 @@
       "summary": "A docs nav lists the site's pages and every component, A-Z or by topic, with search and favourites;  the current page is highlighted and scrolled into view.",
       "status": "done"
     },
-    "ui-docs-palette": {
-      "title": "Docs palette",
-      "summary": "A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save.",
-      "status": "done"
-    },
     "ui-docs-search": {
       "title": "Docs search",
       "summary": "A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere.",
@@ -203,7 +198,7 @@
     "ui-graph": {
       "title": "Graph",
       "summary": "A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.",
-      "status": "in-progress"
+      "status": "done"
     },
     "ui-grid": {
       "title": "Grid",
@@ -213,6 +208,11 @@
     "ui-icon": {
       "title": "Icon",
       "summary": "An icon is a glyph used to represent something else.",
+      "status": "done"
+    },
+    "ui-icon-browser": {
+      "title": "Icon Browser",
+      "summary": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.",
       "status": "done"
     },
     "ui-icon-picker": {
@@ -425,7 +425,7 @@
     "ui-property-editor": {
       "title": "Property Editor",
       "summary": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.",
-      "status": "in-progress"
+      "status": "done"
     },
     "ui-quote": {
       "title": "Quote",
@@ -465,7 +465,7 @@
     "ui-section": {
       "title": "Section",
       "summary": "A section is a titled block of content that can fold away and keep its title in view.",
-      "status": "in-progress"
+      "status": "done"
     },
     "ui-segment": {
       "title": "Segment",
@@ -635,7 +635,7 @@
     "ui-theme-editor": {
       "title": "Theme Editor",
       "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.",
-      "status": "in-progress"
+      "status": "done"
     },
     "ui-theme-menu": {
       "title": "Theme Menu",

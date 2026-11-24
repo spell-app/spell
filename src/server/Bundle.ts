@@ -13,7 +13,7 @@ import {
   writeFileSync
 } from "node:fs"
 import { dirname, join, posix, relative, resolve, sep } from "node:path"
-import { gzipSync } from "node:zlib"
+import { brotliCompressSync, constants as zlib, gzipSync } from "node:zlib"
 
 import { kb } from "spell/util/number"
 import { findUp } from "spell/util/node/findUp"
@@ -23,7 +23,7 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
 
 /**
  * One bundle of the checkout at `root` that is BUILT on demand, never committed (`SRV.BUNDLES`).
- * - The brand pages' and Spell UI's docs site's:  only the page server serves them.
+ * - Spell UI's docs site's:  only the page server serves it.
  * - Or a COMMITTED generated file (`spec.committed`;  epic `epic-engine` P54):  Spell UI's root catalog, the epics
  *   pack, spell-epic's docs bundle
  *   - rebuilt only in a WORKTREE (`buildsWhenStale`;  Owen, Q61:  "Only in a worktree"):  the main checkout's
@@ -34,15 +34,21 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
  *   - "never edited by hand":  so a merge rewriting it says nothing, unlike a bundle's "changed since"
  * - `check()`:  stale when
  *   - never built
- *   - its entry is missing, or newer than its build
+ *   - its entry is missing, or newer than its build and not what that build wrote
+ *     (built by hand from the same sources, it's the same bytes:  epic `epic-engine` I363)
+ *   - any file that build made is missing:  a lazy engine, a chunk, a script beside its folder (`missingFile()`;
+ *     epic `epic-engine` I364:  with only the entry looked for, a lost engine was never built again)
  *   - its sources' hash isn't the one its last build recorded (`SRV.BUNDLE_RECORD`, in its output folder)
- * - `build()`:  runs its build command, then records the hash
- * - The page server runs `spell bundle --stale` when it starts, so a page always loads a current build.
+ * - `build()`:  runs its build command, then records the hash, and every file it made
+ *   - builds of one bundle take turns, across processes (`inTurn()`):  an epic worktree has two page servers watching
+ *     it, its own and main's, and each builds what it finds stale.  `buildIfStale()` looks again on its turn,
+ *     so the second finds it current (epic `epic-engine` I363)
+ * - The page server runs `spell bundle --stale` once it listens, so a page always loads a current build.
  * - WHICH bundles:  the ones whose output folders the page server's settings name, `"bundles"`
  *   (every installed repo's `"pageServer"` part, merged:  `pageServerSettings()`), the list the page server reads too
  *   (`Bundle.specs()`)
  * - Its build scripts share their steps through it (`clearOutput()`, `linkBuiltInFiles()`, `sizeReport()`):
- *   Spell UI's site bundle and the brand's.
+ *   Spell UI's site bundle's.
  * - Knows no checkout's LAYOUT:  each bundle by its PACKAGE (`SRV.BUNDLES`), found through the checkout's
  *   `node_modules` wherever its repo is (epic `repo-split` P8);  imports no other package.
  */
@@ -58,7 +64,7 @@ export class Bundle {
     this.spec = spec
   }
 
-  /** the bundle's name, e.g. `brand` */
+  /** the bundle's name, e.g. `ui-site` */
   get name(): string {
     return this.spec.name
   }
@@ -81,12 +87,35 @@ export class Bundle {
   }
 
   /**
+   * everything its build writes, relative to the checkout, `/`-separated:
+   * its output folder, and what it writes beside it (`spec.generated`)
+   */
+  get outputs(): string[] {
+    const root = SRV.RealPath.of(this.root)
+    return this.writtenPaths().map((path) =>
+      relative(root, SRV.RealPath.of(join(this.packageDir, path)))
+        .split(sep)
+        .join("/")
+    )
+  }
+
+  /** `outputs`, as the spec spells them:  from its package's folder. */
+  private writtenPaths(): string[] {
+    return [...new Set([this.spec.output, ...(this.spec.generated ?? [])])]
+  }
+
+  /**
    * where its last build recorded its sources' hash:  in its output folder;  a committed one's in the install's
    * git-ignored cache (`node_modules/.cache/spell-bundles/<name>.json`)
    */
   get recordFile(): string {
     if (!this.spec.committed) return join(this.outputDir, SRV.BUNDLE_RECORD)
-    return join(installRoot(this.root), "node_modules", ".cache", "spell-bundles", `${this.name}.json`)
+    return join(this.cacheFolder, `${this.name}.json`)
+  }
+
+  /** the install's git-ignored folder for what's kept about its bundles, out of every build's way */
+  private get cacheFolder(): string {
+    return join(installRoot(this.root), "node_modules", ".cache", "spell-bundles")
   }
 
   /** Is the checkout a worktree (`SRV.checkoutOf()`), not the main checkout? */
@@ -124,7 +153,7 @@ export class Bundle {
 
   /**
    * The bundles of the checkout at `root`:  for each folder the page server's settings name in `"bundles"`
-   * (`pageServerSettings()`:  spell-ui's part names its site's, spell-brand's its pages'), in that order, the one of
+   * (`pageServerSettings()`:  spell-ui's part names its site's), in that order, the one of
    * `SRV.BUNDLES` that builds into it.
    * - ONE list, which the page server reads too (its `BundleBuild` waits on those folders)
    * - none without a list, as the page server
@@ -144,7 +173,7 @@ export class Bundle {
 
   /**
    * Package `name`'s folder, as the checkout at `root` finds it:  installed (`node_modules`), else one of the page
-   * server's settings parts by that name (a project beside the kit with its own install:  spell-brand, epic
+   * server's settings parts by that name (a project beside the kit with its own install, epic
    * `repo-split` P20);  `undefined` when neither has it.
    */
   static packageDirFor(name: string, root: string): string | undefined {
@@ -171,10 +200,13 @@ export class Bundle {
     if (!record) return { ...found, stale: "never built" }
     const entry = statSync(join(this.outputDir, this.spec.entry), { throwIfNoEntry: false })
     if (!entry) return { ...found, stale: `no ${this.spec.entry}` }
-    // written after its build:  something else wrote it, e.g. a merge of a branch that still commits the bundle
-    if (entry.mtimeMs > statSync(this.recordFile).mtimeMs)
+    // written after its build, and not the same bytes:  something else wrote it, e.g. a merge of a branch that still
+    // commits the bundle
+    if (entry.mtimeMs > statSync(this.recordFile).mtimeMs && record.entry !== this.entryHash())
       return { ...found, stale: `${this.spec.entry} changed since` }
     if (record.sources !== sources) return { ...found, stale: "built from older sources" }
+    const missing = this.missingFile(record)
+    if (missing) return { ...found, stale: `no ${missing}` }
     return found
   }
 
@@ -203,11 +235,59 @@ export class Bundle {
     return spawnSync(command!, args, { cwd: join(this.packageDir, this.spec.cwd), stdio: "ignore" }).status === 0
   }
 
-  /** Record `sources` as what its build is current with.  SIDE EFFECT:  writes `recordFile`, making its folder. */
+  /**
+   * Record `sources` as what its build is current with, and the files it made (not a committed one's:  its output
+   * folder holds sources too).
+   * - SIDE EFFECT:  writes `recordFile`, making its folder
+   */
   private writeRecord(sources: string): void {
-    const record: SRV.BundleRecord = { sources, built: new Date().toISOString() }
+    const record: SRV.BundleRecord = {
+      sources,
+      built: new Date().toISOString(),
+      ...(!this.spec.committed && { files: this.builtFiles(), entry: this.entryHash() })
+    }
     mkdirSync(dirname(this.recordFile), { recursive: true })
     writeFileSync(this.recordFile, `${JSON.stringify(record, null, 2)}\n`)
+  }
+
+  /** The hash of its entry's bytes as they stand;  `undefined` when it isn't there. */
+  private entryHash(): string | undefined {
+    const file = join(this.outputDir, this.spec.entry)
+    return existsSync(file) ? createHash("sha256").update(readFileSync(file)).digest("hex").slice(0, 16) : undefined
+  }
+
+  /**
+   * Is a file its build makes missing?  The quick half of `check()`, reading no source:  for a request to ask
+   * (`BundleBuild.repairIfMissing()`).
+   * - never built, or its record gone with its folder:  yes
+   * - never a committed one
+   */
+  get isIncomplete(): boolean {
+    if (this.spec.committed) return false
+    const record = this.record()
+    return !record || this.missingFile(record) !== undefined
+  }
+
+  /** The first file of `record`'s build, or its entry, that isn't there, from its package's folder;  else `undefined`. */
+  private missingFile({ files = [] }: SRV.BundleRecord): string | undefined {
+    const dir = this.packageDir
+    const entry = posix.join(this.spec.output, this.spec.entry)
+    return [entry, ...files].find((file) => !existsSync(join(dir, file)))
+  }
+
+  /**
+   * What a build made, as it stands right after one, from its package's folder:  every file and link under what it
+   * writes (`writtenPaths()`).
+   * - never dot files (the record), nor a folder another run was building in (`UNFINISHED`)
+   */
+  private builtFiles(): string[] {
+    const dir = this.packageDir
+    const files = this.writtenPaths().flatMap((path) => {
+      const stat = statSync(join(dir, path), { throwIfNoEntry: false })
+      if (!stat?.isDirectory()) return stat ? [path] : []
+      return filesUnder(join(dir, path), { links: "listed" }).map((file) => posix.join(path, file))
+    })
+    return [...new Set(files.filter((file) => !UNFINISHED.test(file)))]
   }
 
   /** Does it need a build?  `check()`, when the reason doesn't matter. */
@@ -216,12 +296,38 @@ export class Bundle {
   }
 
   /**
-   * Run its build, then record the sources' hash it started from.
+   * Run its build on its turn (`inTurn()`), then record the sources' hash it started from, and the files it made.
    * - `stdio`:  where the build's output goes (default:  this process's stderr, so a `--json` stdout stays clean)
    * - throws when the build fails;  it records nothing then, so the bundle stays stale
    * - SIDE EFFECT:  the build clears and rewrites `outputDir`
    */
-  build({ stdio = ["ignore", 2, 2] }: { stdio?: StdioOptions } = {}): SRV.BundleBuilt {
+  build(options: BuildOptions = {}): SRV.BundleBuilt {
+    return this.inTurn(() => this.runBuild(options))
+  }
+
+  /**
+   * `build()`, unless on its turn it's current:  another process built it from these sources meanwhile.
+   * - `undefined`:  nothing to build
+   * - throws as `build()`
+   */
+  buildIfStale(options: BuildOptions = {}): SRV.BundleBuilt | undefined {
+    return this.inTurn(() => (this.isStale ? this.runBuild(options) : undefined))
+  }
+
+  /**
+   * Run `work` when no other process is building this bundle.
+   * - the lock is in the install's cache:  a build empties its output folder
+   * - throws a `FileLockError` when another build holds it for `TURN_MS`
+   * - SIDE EFFECT:  makes the cache's folder
+   */
+  private inTurn<T>(work: () => T): T {
+    mkdirSync(this.cacheFolder, { recursive: true })
+    const options = { wait: TURN_MS, stale: TURN_MS, label: `spell bundle ${this.name}` }
+    return SRV.FileLock.run(join(this.cacheFolder, `${this.name}.build`), work, options)
+  }
+
+  /** `build()`'s work, on its turn. */
+  private runBuild({ stdio = ["ignore", 2, 2] }: BuildOptions): SRV.BundleBuilt {
     const sources = this.sourcesHash()
     const started = performance.now()
     const [command, ...args] = this.spec.run
@@ -364,27 +470,37 @@ export class Bundle {
   }
 
   /**
-   * DEPRECATED:  `linkBuiltInFiles()`, which links the sounds too.
-   * - Kept while spell-brand's build (`scripts/build.ts`, its own repo) still calls it.
+   * The lines that report the sizes of the bundle built in `folder`:  its eager files, the totals, the biggest lazy
+   * chunks;  raw, gzipped and brotli, in `kb()`.
+   * - eager and counted:  as `firstLoad()` says
    */
-  static linkIconPacks(folder: string): void {
-    Bundle.linkBuiltInFiles(folder)
+  static sizeReport({ name, folder, seconds, entries, only }: SRV.BundleSizeParams): string[] {
+    const { files: eager, lazy, all } = Bundle.firstLoad({ folder, entries, only })
+    return [
+      `${name} bundle (${seconds.toFixed(1)}s):  ${relative(process.cwd(), folder)}/`,
+      ...eager.slice(0, 4).map((size) => `  ${size.file.padEnd(28)} ${kb(size.raw).padStart(10)}  gz ${kb(size.gzip)}`),
+      `  eager ${kb(sum(eager, "raw"))} (gz ${kb(sum(eager, "gzip"))}, br ${kb(sum(eager, "brotli"))});  ` +
+        `all ${all.length} files ${kb(sum(all, "raw"))} (gz ${kb(sum(all, "gzip"))}), icon packs and sounds linked`,
+      `  biggest lazy:  ${lazy
+        .slice(0, 6)
+        .map((size) => `${size.file} ${kb(size.raw)}`)
+        .join(", ")}`
+    ]
   }
 
   /**
-   * The lines that report the sizes of the bundle built in `folder`:  its eager files, the totals, the biggest lazy
-   * chunks;  raw and gzipped, in `kb()`.
-   * - eager:  `entries` and every chunk a JS one imports STATICALLY, transitively (what a page loads before any
-   *   `import()`)
-   * - counted:  every file under `folder` but the linked built-in files and dot files (the build record), or only those `only`
-   *   matches
+   * What a page loads FIRST of the bundle built in `folder`, and the rest, each file sized raw, gzipped and brotli,
+   * the way a browser fetches them:  each file on its own (`sizesOf()`).
+   * - eager (`files`):  `entries` and every chunk a JS one imports STATICALLY, transitively (what a page loads before
+   *   any `import()`), biggest first;  `raw`, `gzip`, `brotli` are their sums
+   * - `lazy`:  every other file, biggest first;  `all`:  both
+   * - counted:  every file under `folder` but the linked built-in files and dot files (the build record), or only those
+   *   `only` matches
+   * - the ONE way a bundle is sized:  `sizeReport()`, and the app's size budgets (`spell perf budget`)
    */
-  static sizeReport({ name, folder, seconds, entries, only }: SRV.BundleSizeParams): string[] {
+  static firstLoad({ folder, entries, only }: Omit<SRV.BundleSizeParams, "name" | "seconds">): SRV.BundleLoad {
     const files = filesUnder(folder).filter((file) => !only || only.test(file))
-    const sizes = files.map((file) => {
-      const bytes = readFileSync(join(folder, file))
-      return { file, raw: bytes.length, gzip: gzipSync(bytes).length }
-    })
+    const sizes = files.map((file) => ({ file, ...Bundle.sizesOf(readFileSync(join(folder, file))) }))
     const eagerFiles = new Set<string>()
     for (const entry of entries) {
       if (entry.endsWith(".js")) staticGraph(folder, entry, eagerFiles)
@@ -392,17 +508,28 @@ export class Bundle {
     }
     const eager = sizes.filter((size) => eagerFiles.has(size.file)).sort((a, b) => b.raw - a.raw)
     const lazy = sizes.filter((size) => !eagerFiles.has(size.file)).sort((a, b) => b.raw - a.raw)
-    const sum = (list: readonly FileSize[], key: "raw" | "gzip") => list.reduce((total, size) => total + size[key], 0)
-    return [
-      `${name} bundle (${seconds.toFixed(1)}s):  ${relative(process.cwd(), folder)}/`,
-      ...eager.slice(0, 4).map((size) => `  ${size.file.padEnd(28)} ${kb(size.raw).padStart(10)}  gz ${kb(size.gzip)}`),
-      `  eager ${kb(sum(eager, "raw"))} (gz ${kb(sum(eager, "gzip"))});  all ${files.length} files ` +
-        `${kb(sum(sizes, "raw"))} (gz ${kb(sum(sizes, "gzip"))}), icon packs and sounds linked`,
-      `  biggest lazy:  ${lazy
-        .slice(0, 6)
-        .map((size) => `${size.file} ${kb(size.raw)}`)
-        .join(", ")}`
-    ]
+    return {
+      files: eager,
+      raw: sum(eager, "raw"),
+      gzip: sum(eager, "gzip"),
+      brotli: sum(eager, "brotli"),
+      lazy,
+      all: sizes
+    }
+  }
+
+  /**
+   * `bytes` raw, gzipped (level 9) and brotli (quality 11):  as a host that compresses its files ahead would send them.
+   * - brotli is the size budgets' unit (epic `solid-2-final` P1)
+   */
+  static sizesOf(bytes: Buffer): SRV.CompressedSizes {
+    return {
+      raw: bytes.length,
+      gzip: gzipSync(bytes, { level: 9 }).length,
+      brotli: brotliCompressSync(bytes, {
+        params: { [zlib.BROTLI_PARAM_QUALITY]: 11, [zlib.BROTLI_PARAM_SIZE_HINT]: bytes.length }
+      }).length
+    }
   }
 
   /** what its last build recorded;  `undefined` when never built, or unreadable */
@@ -416,7 +543,19 @@ export class Bundle {
 }
 
 /** Bump to make every bundle stale once, e.g. when what a build records changes. */
-const BUNDLE_FORMAT = "bundle 2"
+const BUNDLE_FORMAT = "bundle 3"
+
+/**
+ * The longest a build waits for another's, and a live one keeps its turn, in ms:  well past the slowest build.
+ * - a killed build's turn ends at once (`FileLock`:  its process is gone)
+ */
+const TURN_MS = 600_000
+
+/** A folder a build was still writing, or left when it was stopped (`ComponentPack`'s `epics.building-<pid>`):  no build's file. */
+const UNFINISHED = /\.building-\d+(\/|$)/
+
+/** `build()`'s options;  `stdio`:  where the build's output goes. */
+type BuildOptions = { stdio?: StdioOptions }
 
 /** The install's root above `from`:  the nearest folder up holding `yarn.lock`;  `from` itself without one. */
 function installRoot(from: string): string {
@@ -451,12 +590,17 @@ function isLink(file: string): boolean {
   }
 }
 
-/** Every file under `folder`, `/`-separated, relative:  never through a link (the icon packs, the sounds), nor a dot file. */
-function filesUnder(folder: string, prefix = ""): string[] {
+/**
+ * Every file under `folder`, `/`-separated, relative:  never through a link (the icon packs, the sounds), nor a dot
+ * file.
+ * - `links`:  `"listed"` names each link itself;  default `"skipped"`
+ */
+function filesUnder(folder: string, { links = "skipped" }: { links?: "skipped" | "listed" } = {}): string[] {
   return readdirSync(folder, { withFileTypes: true }).flatMap((entry) => {
-    if (entry.isSymbolicLink() || entry.name.startsWith(".")) return []
-    const name = `${prefix}${entry.name}`
-    return entry.isDirectory() ? filesUnder(join(folder, entry.name), `${name}/`) : [name]
+    if (entry.name.startsWith(".")) return []
+    if (entry.isSymbolicLink()) return links === "listed" ? [entry.name] : []
+    if (!entry.isDirectory()) return [entry.name]
+    return filesUnder(join(folder, entry.name), { links }).map((file) => `${entry.name}/${file}`)
   })
 }
 
@@ -470,5 +614,7 @@ function staticGraph(folder: string, entry: string, seen: Set<string>): void {
   }
 }
 
-/** One file's size, raw and gzipped, bytes. */
-type FileSize = { file: string; raw: number; gzip: number }
+/** The sum of `key` over `list`, bytes. */
+function sum(list: readonly SRV.FileSizes[], key: keyof SRV.CompressedSizes): number {
+  return list.reduce((total, size) => total + size[key], 0)
+}

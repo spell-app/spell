@@ -31,8 +31,8 @@
  * - Lazy, by `import()`:  families, the runtime, icon packs (`_assets/icon-packs/`), emoji names, `<ui-code>`'s and
  *   `<ui-markdown>`'s engines, the Temporal polyfill.
  * - `window.UI`:  the runtime (`UI.load()` works at once;  the rest after it), for poking in DevTools.
- * - `window.SiteData`:  the site's data reader, for a page's own script:
- *   the icon browser reads `__data/icons.json5` with `SiteData.json()` (JSON5, so a comment written into it reads too).
+ * - `window.SiteData`:  the site's data reader, for a page's own script (`SiteData.json()`:
+ *   JSON5, so a comment written into a data file reads too).
  * - `window.IconName`:  icon names and Spell UI's ONE icon search (`IconName.search()`), for the icon browser's page
  *   script, so it finds what `spell icon` and `<ui-icon-picker>` find.
  */

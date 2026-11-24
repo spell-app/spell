@@ -3,7 +3,6 @@ import { page } from "vite-plus/test/browser"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { tabsVocabulary } from "spell/ui/components/ui-tab/UITabs.en"
@@ -36,7 +35,7 @@ const ALLOWED_IMPORTANT = 0
 async function example(name: string): Promise<HTMLElement> {
   await resize(1000)
   Sheets.adopt([...foundationCSS, segmentCSS, menuCSS, tabCSS])
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 ////////////////
@@ -83,7 +82,7 @@ describe("UITab.css source", () => {
 describe("UITab.css examples", () => {
   it.each(Object.keys(EXAMPLES))("shows only the active pane in %s, and draws the tabs as menu items", (path) => {
     Sheets.adopt([...foundationCSS, segmentCSS, menuCSS, tabCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const panes = [...root.querySelectorAll<HTMLElement>(".ui.tab")]
     expect(panes.length).toBeGreaterThan(0)
     for (const pane of panes) {
@@ -127,7 +126,7 @@ describe("UITab.css examples", () => {
 
   it("takes a public token from a wrapper of the tab set (static markup)", () => {
     Sheets.adopt([...foundationCSS, segmentCSS, menuCSS, tabCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-tabs-pane-margin: 2em 0 0"><div class="ui tabs">` +
         `<div class="ui menu"><button class="active item">A</button></div>` +
         `<div class="ui active tab segment">A</div></div></div>`

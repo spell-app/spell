@@ -217,15 +217,14 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
             {this.fold.button({
               controls: BODY_ID,
               labelledBy: WHO_ID,
-              part: this.partForName("toggle"),
-              tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
+              part: this.partForName("toggle")
             })}
           </Show>
           <span id={WHO_ID} class={WHO} part={this.partForName("who")} data-initial={this.initial}>
             {this.who}
           </span>
           <Show when={this.isNew}>
-            <span class={NEW_TAG} part={this.partForName("new")} data-tooltip={this.translationForKey("newTip")}>
+            <span class={NEW_TAG} part={this.partForName("new")}>
               {this.translationForKey("new")}
             </span>
           </Show>

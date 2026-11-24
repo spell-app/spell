@@ -1,11 +1,10 @@
-import { spawnSync } from "node:child_process"
 import { readFileSync } from "node:fs"
-import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EXIT, EpicCommandError } from "spell/epic/command/command.types"
+import { ClaudePrint } from "spell/epic/command/ClaudePrint"
 
 /****************
  * ### `VoiceCheck`
@@ -130,21 +129,7 @@ export class VoiceCheck {
    * - throws `EpicCommandError` (exit 1) when there's none, or the run said it failed
    */
   static verdictFrom(stdout: string): VoiceVerdict {
-    let answer: { is_error?: boolean; result?: string; structured_output?: VoiceVerdict }
-    try {
-      answer = JSON.parse(stdout) as typeof answer
-    } catch {
-      throw new EpicCommandError(
-        `epic voice check:  the reader's answer isn't JSON:  ${stdout.slice(0, 200)}`,
-        EXIT.ERRORS
-      )
-    }
-    const verdict = answer.structured_output
-    if (answer.is_error || !verdict || typeof verdict.pass !== "boolean")
-      throw new EpicCommandError(
-        `epic voice check:  the reader gave no verdict:  ${(answer.result ?? "").slice(0, 200)}`,
-        EXIT.ERRORS
-      )
+    const verdict = ClaudePrint.answerFrom(stdout, LABEL, isVerdict)
     return { ...verdict, problems: verdict.problems ?? [] }
   }
 }
@@ -218,6 +203,9 @@ const DEFAULT_VOICE = "novice"
 /** The reader's model, by default:  a judgement of how text reads, so Sonnet over Haiku. */
 const DEFAULT_MODEL = "sonnet"
 
+/** The command, for the reader's errors. */
+const LABEL = "epic voice check"
+
 /** The longest a check may take, ms:  Sonnet took about 15s on a dialog's text (2026-11-17). */
 const READ_TIMEOUT_MS = 180_000
 
@@ -258,45 +246,25 @@ function readText(path: string): string {
   }
 }
 
+/** Is `answer` a verdict:  it says pass or fail, at least. */
+function isVerdict(answer: unknown): answer is VoiceVerdict {
+  return typeof (answer as VoiceVerdict | undefined)?.pass === "boolean"
+}
+
 /**
- * The default reader:  `claude -p`, as fresh as it gets.
- * - its own system prompt in place of Claude Code's, no tools, no MCP servers, no skills, no settings files, no
- *   hooks, no session saved, run from the temp folder (no `CLAUDE.md` to find)
+ * The default reader:  `claude -p`, as fresh as it gets (`ClaudePrint`).
  * - `EPIC_VOICE_CHECK` set, so anything of ours that runs anyway can tell
  */
 function claudeReader({ system, text, model, schema }: VoiceRequest): VoiceVerdict {
-  const args = [
-    "-p",
-    "--model",
+  const verdict = ClaudePrint.ask({
+    system,
+    text,
     model,
-    "--no-session-persistence",
-    "--settings",
-    '{"disableAllHooks":true}',
-    "--setting-sources",
-    "",
-    "--strict-mcp-config",
-    "--disable-slash-commands",
-    "--tools",
-    "",
-    "--exclude-dynamic-system-prompt-sections",
-    "--output-format",
-    "json",
-    "--json-schema",
-    JSON.stringify(schema),
-    "--system-prompt",
-    system
-  ]
-  const run = spawnSync("claude", args, {
-    input: text,
-    encoding: "utf8",
-    cwd: tmpdir(),
-    timeout: READ_TIMEOUT_MS,
-    maxBuffer: 16 * 1024 * 1024,
-    env: { ...process.env, EPIC_VOICE_CHECK: "1" }
+    schema,
+    label: LABEL,
+    marker: "EPIC_VOICE_CHECK",
+    timeoutMs: READ_TIMEOUT_MS,
+    isAnswer: isVerdict
   })
-  if (run.error)
-    throw new EpicCommandError(`epic voice check:  claude -p didn't run:  ${run.error.message}`, EXIT.ERRORS)
-  if (run.status !== 0 && !run.stdout)
-    throw new EpicCommandError(`epic voice check:  claude -p failed:  ${run.stderr.slice(0, 300)}`, EXIT.ERRORS)
-  return VoiceCheck.verdictFrom(run.stdout)
+  return { ...verdict, problems: verdict.problems ?? [] }
 }

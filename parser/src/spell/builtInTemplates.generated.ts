@@ -6,7 +6,7 @@ import type { SP } from "spell/parser/spell"
 export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.SpellDeclarationsData>> = {
   "two sided view": {
     en: {
-      spellVersion: "0.8.0",
+      spellVersion: "0.9.0",
       provides: ["TwoSidedView"],
       statements: [
         {
@@ -85,7 +85,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
       codeLines: [9, 12, 15, 21, 25, 29, 33, 39]
     },
     es: {
-      spellVersion: "0.8.0",
+      spellVersion: "0.9.0",
       languages: ["es"],
       provides: ["TwoSidedView"],
       statements: [
@@ -173,7 +173,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
   },
   site: {
     en: {
-      spellVersion: "0.8.0",
+      spellVersion: "0.9.0",
       provides: ["Site"],
       statements: [
         {
@@ -204,7 +204,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
       codeLines: [10, 14, 20, 26]
     },
     es: {
-      spellVersion: "0.8.0",
+      spellVersion: "0.9.0",
       languages: ["es"],
       provides: ["Site"],
       statements: [
@@ -242,7 +242,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
   },
   "page layout": {
     en: {
-      spellVersion: "0.8.0",
+      spellVersion: "0.9.0",
       provides: ["PageLayout"],
       statements: [
         {
@@ -259,7 +259,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
       codeLines: [14, 17]
     },
     es: {
-      spellVersion: "0.8.0",
+      spellVersion: "0.9.0",
       languages: ["es"],
       provides: ["PageLayout"],
       statements: [

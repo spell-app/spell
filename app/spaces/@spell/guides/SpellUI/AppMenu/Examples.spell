@@ -1,0 +1,56 @@
+"app-menu examples" is a notebook page
+	<header level="1">
+		App menu
+		<header>An app menu is an app's top bar, joined to the top of its window or page: a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons.</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="App menu" sticky="stack" collapsible dividing>
+			<example "App menu" description="An editor's bar:  the app's name and its menus at the start, its modes on the bar's centre, settings and the person at the end.">
+				<app-menu aria-label="Editor demo">
+					<item slot="start" icon="magic">
+						<text bold>My App</text>
+					</item>
+					<item slot="start">File</item>
+					<item slot="start">Edit</item>
+					<item slot="start">View</item>
+					<menu appearance="segmented" aria-label="Mode">
+						<item value="run" icon="play">Run</item>
+						<item value="edit" icon="pencil alternate" selected>Edit</item>
+					</menu>
+					<item slot="end" link="#settings" icon="cog" aria-label="Settings"/>
+					<item slot="end" link="#you" icon="user circle" aria-label="You"/>
+				</app-menu>
+			</example>
+		</>
+
+		<section label="Site bar" sticky="stack" collapsible dividing>
+			<example "Site bar" description="A site's bar:  a button that shows or hides the side bar, then where you are as a breadcrumb;  its icons and the person's avatar at the end.">
+				<app-menu aria-label="Site demo">
+					<item slot="start" link="#side-bar" icon="columns" aria-label="Show or hide the side bar"/>
+					<item slot="start">
+						<breadcrumbs aria-label="Where you are">
+							<breadcrumb link="#home">Home</breadcrumb>
+							<breadcrumb link="#guides">Guides</breadcrumb>
+							<breadcrumb selected>Getting started</breadcrumb>
+						</breadcrumbs>
+					</item>
+					<item slot="end" link="#notices" icon="bell" aria-label="Notices"/>
+					<item slot="end" link="#help" icon="circle question" aria-label="Help"/>
+					<avatar slot="end" link="#you" tooltip="You">O</avatar>
+				</app-menu>
+			</example>
+		</>
+	</>

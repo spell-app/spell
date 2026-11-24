@@ -22,7 +22,7 @@ import { Markdown } from "./Markdown"
  * - Click a breadcrumb to select it.
  * - Remounted per node `path` by `<TypeExplorer>` (a keyed `<Show>`),
  *   so what's expanded, or an edit, resets on selecting another node.
- * - SEE:  `app/docs/ScopeDetailsPane.html`, its App UI components page (`/components/app/ScopeDetailsPane.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/scope-details-pane`.
  ****************/
 export function ScopeDetailsPane(props: ScopeDetailsPaneProps) {
   return (

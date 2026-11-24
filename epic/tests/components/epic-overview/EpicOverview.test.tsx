@@ -143,7 +143,7 @@ describe("<epic-overview> ⌥-click", () => {
     const chevron = inner(host).shadowRoot!.querySelector('[part~="fold-icon"]')!
     expect(chevron.getBoundingClientRect().right).toBeLessThanOrEqual(button.getBoundingClientRect().left + 0.5)
     const toggle = inner(host).shadowRoot!.querySelector<HTMLButtonElement>('[part~="toggle"]')!
-    expect(toggle.title).toBe("Open this section\n⌥-click:  open everything inside")
+    expect(toggle.title).toBe("")
     toggle.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true }))
     const part = host.querySelector("epic-section")!
     const item = host.querySelector("epic-item")!

@@ -3,7 +3,6 @@ import { describe, expect, it } from "vite-plus/test"
 import { foundationCSS } from "spell/ui/styles"
 import { nextFrame } from "spell/ui/util"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { stickyVocabulary } from "spell/ui/components/ui-sticky/UISticky.en"
@@ -53,7 +52,7 @@ describe("UISticky.css source", () => {
 describe("UISticky.css examples", () => {
   it("sticks the rail's box at its offset as the frame scrolls", async () => {
     Sheets.adopt([...foundationCSS, stickyCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const sticky = root.querySelector<HTMLElement>(".ui.sticky:not(.pushing)")!
     const frame = sticky.closest<HTMLElement>("[role=region]")!
     expect(getComputedStyle(sticky).position).toBe("sticky")
@@ -65,7 +64,7 @@ describe("UISticky.css examples", () => {
 
   it("keeps a pushing box in view at the bottom edge", () => {
     Sheets.adopt([...foundationCSS, stickyCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const sticky = root.querySelector<HTMLElement>(".ui.pushing.sticky")!
     const frame = sticky.closest<HTMLElement>("[role=region]")!
     expect(getComputedStyle(sticky).bottom).toBe("0px")
@@ -75,7 +74,7 @@ describe("UISticky.css examples", () => {
 
   it("gives sentinels no height in the flow", () => {
     Sheets.adopt([...foundationCSS, stickyCSS])
-    const root = Fixture.render(`<div><div class="sentinel"></div><p style="margin: 0">x</p></div>`)
+    const root = Sheets.render(`<div><div class="sentinel"></div><p style="margin: 0">x</p></div>`)
     const sentinel = root.querySelector<HTMLElement>(".sentinel")!
     expect(sentinel.getBoundingClientRect().height).toBe(1)
     expect(root.querySelector("p")!.getBoundingClientRect().top).toBe(sentinel.getBoundingClientRect().top)
@@ -89,7 +88,7 @@ describe("UISticky.css examples", () => {
 describe("UISticky.css tokens", () => {
   it("takes a public token from a wrapper or the box itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, stickyCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-sticky-offset: 8px"><div class="ui sticky">A</div></div>` +
         `<div class="ui sticky" style="--ui-sticky-z-index: 7">B</div>`
     )

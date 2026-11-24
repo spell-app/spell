@@ -352,11 +352,11 @@
   .ten.fields {
     --_ui-fields-child-width: 10%;
   }
-  .fields[class*="equal width"] {
+  .fields.equal-width {
     --_ui-fields-child-width: 100%;
     --_ui-fields-child-flex: 1 1 auto;
   }
-  .ui[class*="equal width"].form {
+  .ui.equal-width.form {
     --_ui-form-equal-width: 1;
   }
   @container style(--_ui-form-equal-width: 1) {

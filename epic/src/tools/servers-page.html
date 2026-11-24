@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      The top bar's Servers tab (epic `epic-engine` P82, T162), and the Servers tab in VS Code's side bar:  every
+      project's servers as cards, under "main" and under each epic's worktree;  what just merged into main;  what waits.
+      - Served by `serverRoutes` at `/_epic/servers/`, on the epic hub and every page server;  the same page each time.
+      - Drawn by `servers-page.js` from `/api/servers`, the server keeper's, asked again every 10 seconds.
+      - Nothing folds, nothing numbered:  it's one short page to glance at (T162).
+      - Cards three a row at most, the name the link;  worktrees newest worked first (I449).
+      - Each card:  its address under its name, its state on the right, its buttons as icons under the state;  the lists
+        as rows in columns, the GitHub line their quiet last row (I451).
+      - Each card's state is one icon, its words its tooltip;  its buttons a tight group under it (I456).
+      - main's heading has Restart all at its right;  main's page server's lock, before its address, is the secure
+        link's switch (T164, I454, I456).
+    -->
+    <title>Servers</title>
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+    <style>
+      .spell-doc-main .servers-head {
+        margin: 24px 0 8px 0;
+      }
+      /* main's:  Restart all at the right of its heading */
+      .servers-head-tools {
+        display: flex;
+        align-items: center;
+      }
+      .servers-tools {
+        margin-left: auto;
+        font-size: 1rem;
+        font-weight: normal;
+      }
+      .servers-head a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .servers-name a {
+        text-decoration: none;
+      }
+      .servers-head a:hover,
+      .servers-name a:hover {
+        text-decoration: underline;
+      }
+      .spell-doc-main .servers-sub {
+        margin: 24px 0 4px 0;
+      }
+      /* at most three a row:  never narrower than 200px, so the side bar and a phone take fewer */
+      .servers-cards,
+      .servers-rows {
+        /* a tiny compact icon button:  its box, and the right margin every button has */
+        --servers-button-width: 18px;
+        --servers-button-margin: -4px;
+        --servers-lock-inset: -4.75px;
+      }
+      .servers-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(max(min(100%, 200px), calc((100% - 16px) / 3)), 1fr));
+        gap: 8px;
+        --ui-card-margin-block: 0;
+        --ui-card-content-padding: 8px 12px;
+      }
+      /*
+       * name and address on the left;  the state icon and, under it, its buttons on the right, right edges lined up
+       * (I456:  one icon, not a pill, so the name keeps its room)
+       */
+      .servers-card-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        justify-items: start;
+        gap: 4px 8px;
+      }
+      .servers-name,
+      .servers-address-words {
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .servers-name {
+        line-height: 24px;
+      }
+      /*
+       * as wide as a button and its margin, so its glyph, which has the same 4px right margin, is centred over the
+       * last button's
+       */
+      .servers-state {
+        justify-self: end;
+        display: flex;
+        justify-content: center;
+        width: calc(var(--servers-button-width) - var(--servers-button-margin));
+        margin: 0 var(--servers-button-margin) 0 0;
+        line-height: 24px;
+      }
+      /*
+       * the lock (or the secure link's switch), then the address:  the button's own right margin, and the icon's,
+       * are the gap
+       */
+      .servers-address {
+        display: flex;
+        align-items: center;
+        max-width: 100%;
+        min-width: 0;
+        font-family: var(--spell-mono);
+        font-size: 12px;
+        line-height: 24px;
+        color: var(--spell-muted);
+        font-variant-numeric: tabular-nums;
+        --ui-button-basic-border-width: 0px;
+      }
+      .servers-lock {
+        flex: none;
+      }
+      /* the switch's glyph on the name's left edge:  a button's glyph sits in from its box */
+      .servers-https {
+        flex: none;
+        margin: 0 0 0 var(--servers-lock-inset);
+      }
+      /* a tight group, each button its own 4px right margin apart;  the last button's box on the card's right edge */
+      .servers-actions {
+        display: flex;
+        justify-self: end;
+        margin: 0 var(--servers-button-margin) 0 0;
+        min-height: 24px;
+        --ui-button-basic-border-width: 0px;
+      }
+      /* in a row's last column too */
+      .servers-row .servers-actions {
+        margin: 0 var(--servers-button-margin) 0 0;
+      }
+      .servers-why-not {
+        display: inline-flex;
+      }
+      /* wraps whole, under the name, when the line is short */
+      .servers-age {
+        display: inline-block;
+        white-space: nowrap;
+        margin-left: 12px;
+        font-size: 0.875rem;
+        font-weight: normal;
+        color: var(--ui-text-muted, light-dark(#6b6b76, #a3a3ae));
+      }
+      .servers-quiet {
+        color: var(--spell-muted);
+      }
+      /*
+       * the rows of a list:  ONE grid, its columns shared by every row (each item and row a subgrid), so a tag, a count
+       * or a time lines up from row to row whatever its width;  nothing wraps
+       */
+      .servers-rows {
+        margin: 12px 0 0 0;
+        --ui-list-margin: 0;
+        --ui-list-item-display: grid;
+        --ui-list-item-padding-block: 4px;
+      }
+      .servers-rows::part(list) {
+        display: grid;
+        grid-template-columns: 8px auto minmax(0, 1fr) auto auto;
+        column-gap: 12px;
+      }
+      .servers-rows-plain::part(list) {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+      .servers-rows > ui-item::part(item),
+      .servers-row {
+        grid-column: 1 / -1;
+        grid-template-columns: subgrid;
+      }
+      .servers-row {
+        display: grid;
+        align-items: center;
+        min-height: 24px;
+      }
+      .servers-dot {
+        display: flex;
+        justify-content: center;
+      }
+      .servers-tag {
+        display: flex;
+        white-space: nowrap;
+      }
+      .servers-words {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .servers-count,
+      .servers-when {
+        justify-self: end;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+        color: var(--spell-muted);
+      }
+      /* narrow (the side bar, a phone):  the commit counts go, into the time's tooltip, so the words keep room */
+      @media (max-width: 520px) {
+        .servers-rows:not(.servers-rows-plain)::part(list) {
+          grid-template-columns: 8px auto minmax(0, 1fr) auto;
+        }
+        .servers-rows:not(.servers-rows-plain) .servers-count {
+          display: none;
+        }
+      }
+      .servers-row-quiet .servers-words {
+        color: var(--spell-muted);
+      }
+      .servers-loud {
+        font-weight: 600;
+        color: var(--ui-orange, light-dark(#c2410c, #fb923c));
+      }
+    </style>
+  </head>
+  <body class="spell-doc-page" data-spell-needs-server data-spell-no-reading-time>
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-sticky class="spell-h1">
+          <header class="spell-page-head">
+            <h1>Servers</h1>
+          </header>
+        </ui-sticky>
+        <div id="servers-problem"></div>
+        <div id="servers-page"></div>
+      </main>
+    </div>
+    <script type="module" src="/_epic/assets/servers-page.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

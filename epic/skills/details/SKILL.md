@@ -116,6 +116,31 @@ the page is the same for both agents.
      - `title`:  2-5 words
      - the summary:  one line;  everything longer in an `<epic-aside title="Details">` (it folds)
      - pick several:  `multiple` on the `<epic-ask>` (tick boxes);  else pick one (round ones)
+     - MANY short picks (a ranked list, each item Yes / No / Modify / Revisit):  `compact` on each `<epic-ask>`.
+       - Its options draw as ONE select, with a comment box beside it, not a card each.
+       - Write the options as usual:  their titles are the select's entries (`recommended` says so).
+       - The comment is its Other:  the answer reads `Q12 · ...:  N · No;  Comment:  too big for now`.
+       - Spec (`--from`):  `compact: true` on the question.
+     - A RANKED list to pick from (ideas, features, recommendations):  a FEATURE SET, below, not this by hand.
+     - Its chip is the number you mean:  its key's id (`q12`, `q12-priority` -> `Q12`), else its section's number
+       (`12 · Rename it`), else its section's place.
+       - Two questions in one section share it, a letter each:  `Q12 · a`, `Q12 · b`.
+       - `chip="..."` on the `<epic-ask>` writes it yourself.
+
+       ```html
+       <ui-section id="q12" label="12 · Rename the store" collapsible dividing>
+         <epic-ask compact name="q12">
+           <epic-question><p>What it does, one or two lines.</p></epic-question>
+           <epic-choices fixed>
+             <epic-option letter="Y" title="Yes" recommended></epic-option>
+             <epic-option letter="N" title="No"></epic-option>
+             <epic-option letter="M" title="Modify"></epic-option>
+             <epic-option letter="R" title="Revisit"></epic-option>
+           </epic-choices>
+         </epic-ask>
+         <epic-ask compact name="q12-priority">...</epic-ask>
+       </ui-section>
+       ```
      - The elements draw the rest:
        - each option, its tick box and a comment box
        - each question, an "Other" box and its state chip
@@ -129,6 +154,30 @@ the page is the same for both agents.
    `yarn vp fmt <its ABSOLUTE path>`, run from the plugin's own folder (`${CLAUDE_PLUGIN_ROOT}`), never your repo's root
    (no `vp` there:  skip this step)
    ([epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md), "Finishing a page", step 2).
+
+### A ranked list to pick from:  a Feature Set
+
+- `epic ask create <slug> --template feature-set --epic <name> --from <data.json5>`
+  - copy the starter data, ${CLAUDE_PLUGIN_ROOT}/src/tools/templates/feature-set.json5:
+    sections, each with its items, best first
+  - never edit the page by hand:  change the data
+- It's a table per section, three columns:  Item, Your pick, Facts.
+  - Your pick:  Yes / No / Modify / Revisit, a Priority (greyed by No), one comment box
+  - the person can reorder the sections, and the items in each
+- Names:  S2 is the second section, S2F3 its third item, as first made.
+  - Use them when you talk about an item, and link one as `<a href="#s2f3">S2F3</a>`.
+  - A name stays with its item while it's in its section, and is never used again.
+  - Moved to another section by a round, an item gets a new name there (S1F3 becomes S2F5), and no pick goes along:
+    tell the person both names, and set its `picked` from what they sent.
+- A source file's link carries its tab, so the side bar opens it in the editor:
+  `<a href="/src/util/string.ts" target="src-src-util-string-ts">`.
+- An ordinary details page that should be one:  `epic ask round <slug> --template feature-set --from <data.json5>`.
+  - the same address;  what they sent stays, as the round before
+  - the picks don't move over:  set each item's `picked` from what they sent
+- The next round:  `epic ask round <slug> --from <data.json5>`.
+  - an item keeps its name by its title:  give `id: "F3"` (a section:  `id: "S2"`) when you change the title
+    - only then:  an id on another item is refused
+  - the person's new order (`New order in S2:  S2F3, S2F1 ...` in the answer):  write the data in that order
 
 ### Asking the same question again:  a new ROUND, never a new page
 
@@ -241,11 +290,12 @@ Any page you name to the person (a details page, an epic page, any docs page):
 ## Commands (`epic ask ...`, from anywhere in the repo)
 
 ```
-new <slug> [--title "..."] [--epic <name>] [--description "..."] [--from <spec.json>]
+new <slug> [--title "..."] [--epic <name>] [--description "..."] [--template feature-set] [--from <spec.json>]
                                            a page from the template (or a spec);  prints its path
+                                           --template feature-set:  a ranked list to pick from, from its data
 show <page> [--wait] [--timeout 8h]        in this session's side bar (Chrome outside VS Code);  then wait
 wait <page> [--timeout 8h]                 until a NEW answer;  prints it, exit 0;  timeout:  exit 2
-round <page> [--title "..."] [--from <spec.json>]
+round <page> [--title "..."] [--template feature-set] [--from <spec.json>]
                                            the same question again:  the one page rewritten, the round before folded in
 answer <page> [--round <n>]                the answer already sent (exit 1:  none);  --round:  an earlier round's
 draft <page>                               what's typed and not sent (exit 1:  nothing);  read it before a rewrite

@@ -7,6 +7,7 @@ import { RUNTIME_KEY, type RuntimeGlobal } from "spell/ui/runtime/runtime.types"
 import * as UIT from "spell/ui/components/components.types"
 import { ClassBuilder } from "./ClassBuilder"
 import { RootSettings } from "./RootSettings"
+import { RootSheets } from "./RootSheets"
 
 /****************
  * ### `SpellUISettings`
@@ -18,7 +19,8 @@ import { RootSettings } from "./RootSettings"
  *   - `runtime`:  the page's `UI` runtime, lazy (`spell/ui/runtime`):  elements show once it has loaded
  *   - `words`:  `spell/ui/vocabulary` (`Vocabulary`, `SharedVocabulary`, `Converters`, `ValueSets`), `ClassBuilder`,
  *     and the runtime's `UI.vocabulary` and `UI.i18n`
- *   - `styles`, `focus`:  the runtime's `UI.styles`, `UI.focus`
+ *   - `styles`, `focus`:  the runtime's `UI.styles`, `UI.focus`;
+ *     each root takes the optional foundation sheets its family uses (`RootSheets`)
  *   - `motion`:  Fomantic's animations (`UIT.Animations`), run by `UI.transitions`;  `--ui-motion`
  *   - `warn`:  `Warnings.warn()`, `[spell-ui] ...`
  *   - `defaults`:  the attribute defaults each `<ui-root>` gives its subtree (`RootSettings.defaultsFor()`)
@@ -61,7 +63,7 @@ export class SpellUISettings {
     styles: {
       registerOnce: (sheets) => UI.styles.registerOnce(sheets),
       register: (name, css) => UI.styles.register(name, css),
-      adoptInto: (root, names) => UI.styles.adoptInto(root, names)
+      adoptInto: (root, names, vocabulary) => UI.styles.adoptInto(root, names, vocabulary && RootSheets.for(vocabulary))
     },
     focus: {
       moveOutOf: (container) => UI.focus.moveOutOf(container)

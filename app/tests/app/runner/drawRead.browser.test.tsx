@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
-import { createSignal, flush } from "solid-js"
+import { createSignal, flush, getOwner, type Owner } from "solid-js"
 import { render } from "@solidjs/web"
 import h from "@solidjs/h"
 
@@ -99,6 +99,17 @@ describe("<for>'s attributes, as core.drawRead() draws them", () => {
     const rows = [...box.querySelectorAll("ui-table > ui-row")]
     expect(rows.map((row) => row.hasAttribute("header"))).toEqual([true, false, false])
     expect(rows.map((row) => row.textContent)).toEqual(["Number", "1", "2"])
+  })
+
+  test("as=table:  the header row is made under the table's drawing, so it's let go with it (I34)", () => {
+    /** A row that notes the Solid owner it's made under:  what a Spell UI element is disposed with. */
+    class OwnedRow extends HTMLElement {
+      readonly owner: Owner | null = getOwner()
+    }
+    customElements.define("x-owned-row", OwnedRow)
+    drawn(rowsOf(2), { items: () => h("ui-table", {}, h("x-owned-row")) }, true)
+    const header = box.querySelector("ui-table > x-owned-row[header]") as OwnedRow
+    expect(!!header.owner).toBe(true)
   })
 
   test("as=table, paging=none:  the header row too (I88)", () => {

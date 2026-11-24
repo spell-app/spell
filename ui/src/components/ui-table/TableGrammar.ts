@@ -8,7 +8,8 @@ import { tableVocabulary } from "./UITable.en"
  *   (`attach-to`, `scrolling`, `overflowing`) with the noun `scroller` and no `ui`,
  *   e.g. `top attached short scrolling scroller`.
  *   - Not `resizable`:  the shared one, its state (`:state(resizable-height)`).
- *   Same grammar as the table, so `UITable.css` keys the scroller on the same phrases (`[class*="very short"]`).
+ *   Same grammar as the table, so `UITable.css` keys the scroller on the same phrases (`[class*="very short"]`):
+ *   Fomantic's class string, without the phrases' joined words (`ClassBuilder.withoutPhrases()`).
  * - Cell:  a `TableColumn`'s `textAlign` / `width` as Fomantic's cell classes (`right aligned four wide`).
  * - Plain functions of their input, no DOM.
  * - STATIC and instance-free on purpose:  nothing to hold but the one cached builder.
@@ -18,7 +19,7 @@ export class TableGrammar {
   static scroller(value: (name: string) => unknown): string {
     const input: Record<string, unknown> = {}
     for (const name of SCROLLER_ATTRIBUTES) input[name] = value(name)
-    return TableGrammar.builder.build(input)
+    return E.ClassBuilder.withoutPhrases(TableGrammar.builder.build(input))
   }
 
   /** Does the scroller scroll:  `scrolling` / `overflowing`, in any height? */

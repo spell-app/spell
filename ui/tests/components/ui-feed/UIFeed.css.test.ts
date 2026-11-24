@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { eventVocabulary } from "spell/ui/components/ui-feed/UIFeedEvent.en"
@@ -39,7 +38,7 @@ function adopt() {
 /** Render example `name`;  returns its root. */
 function example(name: string): HTMLElement {
   adopt()
-  return Fixture.render(`<div style="width: 800px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
+  return Sheets.render(`<div style="width: 800px">${EXAMPLES[`./examples/${name}.html`]!}</div>`)
 }
 
 /** The events of the first feed in the section whose `<h4>` says `title`. */
@@ -91,7 +90,7 @@ describe("UIFeed.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = feedRaw + colorsCSS
+    const css = feedRaw + colorsSharedCSS
     for (const vocabulary of [feedVocabulary, eventVocabulary])
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -105,7 +104,7 @@ describe("UIFeed.css source", () => {
 describe("UIFeed.css examples", () => {
   it.each(Object.keys(EXAMPLES))("lays out every event in %s", (path) => {
     adopt()
-    const root = Fixture.render(`<div style="width: 800px">${EXAMPLES[path]!}</div>`)
+    const root = Sheets.render(`<div style="width: 800px">${EXAMPLES[path]!}</div>`)
     const events = root.querySelectorAll<HTMLElement>(".ui.feed > .event")
     expect(events.length).toBeGreaterThan(0)
     for (const event of events) {
@@ -164,7 +163,7 @@ describe("UIFeed.css examples", () => {
 describe("UIFeed.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, feedCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-feed-event-padding: 10px"><div class="ui feed"><div class="event"><div class="content">x</div></div>` +
         `<div class="event"><div class="content">y</div></div></div></div>`
     )

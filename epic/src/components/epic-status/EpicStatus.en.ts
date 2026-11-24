@@ -121,9 +121,6 @@ export const epicStatusVocabulary = {
     { name: "thread-hidden", description: "The thread's head is folded:  hidden with the rest of the thread." }
   ],
   texts: [
-    { key: "foldTip", text: "Close this status card", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Open this status card", description: "Tooltip of its fold button while folded." },
-
     { key: "underway", text: "{who} • Underway", description: "The heading while Claude is on it." },
     { key: "done", text: "{who} • Done", description: "The heading once work was done." },
     { key: "noted", text: "{who} • Noted", description: "The heading once Claude recorded what you chose." },
@@ -131,11 +128,6 @@ export const epicStatusVocabulary = {
       key: "unmerged",
       text: "not on main yet",
       description: "After Done, while its work is on its epic's branch alone (`unmerged`, I273)."
-    },
-    {
-      key: "unmergedTip",
-      text: "Done on {branch}, not merged yet",
-      description: "That pill's tooltip."
     },
     {
       key: "agent",
@@ -156,11 +148,6 @@ export const epicStatusVocabulary = {
       key: "earlier",
       text: "your earlier comment",
       description: "After a drive-by's steps:  it's about a comment you made before answering."
-    },
-    {
-      key: "started",
-      text: "taken {date}",
-      description: "The date's tooltip once done or noted:  when Claude took the mark (`at`)."
     }
   ],
   children: [

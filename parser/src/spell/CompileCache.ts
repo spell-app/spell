@@ -52,7 +52,13 @@ export class CompileCache {
    */
   async keyFor(project: SP.SpellProject): Promise<string> {
     await project.load(undefined)
-    const parts: string[] = [KEY_FORMAT, settingsOf(project), project.targets.map((target) => target.name).join()]
+    const parts: string[] = [
+      KEY_FORMAT,
+      settingsOf(project),
+      project.targets.map((target) => target.name).join(),
+      // the editor's code keeps its text, a built site's doesn't:  two compiles
+      project.compiledForThisRun
+    ]
     for (const it of project.projectImports) {
       const imported = new SP.SpellProject(it.projectId)
       await imported.load(undefined)

@@ -132,9 +132,6 @@ export const epicChoicesVocabulary = {
     }
   ],
   texts: [
-    { key: "foldTip", text: "Fold the choices", description: "Tooltip of its fold button while open." },
-    { key: "unfoldTip", text: "Unfold the choices", description: "Tooltip of its fold button while folded." },
-
     { key: "choices", text: "Choices", description: "The answered question's options' heading." },
     {
       key: "chosen",
@@ -157,22 +154,7 @@ export const epicChoicesVocabulary = {
     // P50:  how it's answered, Add choice, the options you added, the folded lists
     { key: "pickOne", text: "Pick one", description: "The heading's switch, off:  one option at most." },
     { key: "pickAny", text: "Pick any", description: "The heading's switch, on (or its words):  several options." },
-    {
-      key: "switchToAnyTip",
-      text: "Allow several picks",
-      description: "The switch's tooltip while it's pick one."
-    },
-    {
-      key: "switchToOneTip",
-      text: "Back to one pick:  the newest stays",
-      description: "The switch's tooltip while it's pick any."
-    },
     { key: "addChoice", text: "Add choice", description: "The button under the cards." },
-    {
-      key: "addTip",
-      text: "Add your own option",
-      description: "Add choice's tooltip."
-    },
     { key: "newChoice", text: "New choice", description: "Add choice's form:  its heading." },
     { key: "add", text: "Add", description: "Add choice's form:  its Save button." },
     { key: "editNew", text: "Change your choice", description: "An added option's form:  its heading." },
@@ -180,8 +162,6 @@ export const epicChoicesVocabulary = {
     { key: "choose", text: "Choose", description: "An added option's pill." },
     { key: "chosenNotSent", text: "Chosen · not sent", description: "An added option's pill, picked, not sent." },
     { key: "chosenSent", text: "Chosen · sent", description: "An added option's pill, picked, sent." },
-    { key: "tipNewChoose", text: "Pick it", description: "An added option's pill's tooltip." },
-    { key: "tipNewPicked", text: "Yours, picked:  un-pick it", description: "... once picked." },
     {
       key: "addedNotSent",
       text: "Yours · not sent",
@@ -190,11 +170,8 @@ export const epicChoicesVocabulary = {
     { key: "addedSent", text: "Yours · sent", description: "Under an added option, once sent." },
     { key: "editTip", text: "Edit {letter}", description: "A card's pencil:  its tooltip and name." },
     { key: "removeTip", text: "Remove {letter}", description: "A card's ✕:  its tooltip and name." },
-    { key: "zoomTip", text: "Full size", description: "An option's picture:  its tooltip." },
     { key: "pickedList", text: "Picked ({count})", description: "A standing set's folded list of picked options." },
-    { key: "removedList", text: "Removed ({count})", description: "The folded list of removed options." },
-    { key: "foldListTip", text: "Fold the list", description: "A folded list's button, while open." },
-    { key: "unfoldListTip", text: "Unfold the list", description: "A folded list's button, while folded." }
+    { key: "removedList", text: "Removed ({count})", description: "The folded list of removed options." }
   ],
   children: [
     { tag: "epic-option", description: "The options, `A`, `B` ...;  a new standing set may have none yet." },

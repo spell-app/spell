@@ -91,7 +91,7 @@ A `.js` file is served as the file on disk, and so is a `.css`.
 
 - So what you debug in the browser is the file you wrote:  no source maps, no generated code in between.
 - Scripts arrive already built.
-  The bundles a page loads, such as Spell UI's docs site, are built by their own package's script, when they're
+  The bundles a page loads, such as Spell UI's site bundle, are built by their own package's script, when they're
   stale ([below](#bundles-built-on-demand-never-committed)).
 - The cost:  no TypeScript, since a `.ts` file goes out as `text/plain`, to read and not to run;
   and no module swapped in place.
@@ -223,11 +223,54 @@ the rest of `/api/` is the editor's:  spell-app's module is listed last, and see
   A page server with its own `--spaces` names both by them (`.spell-server.editor.<folder>-<hash>.json`):  one editor each.
 - Old addresses get no redirect:  they answer "not found".
 - The docs home comes from the epic folder, which someone new hasn't got:
-  start at `/components/ui/`, Spell UI's pages, which need nothing but the repo.
+  start at `/components/ui/`, the Spell UI site, which needs nothing but the repo.
 
 Each folder brings its own part:
 - the app folder's:  the editor, `/api/projects/`, Spell colouring, and the App/UI tab
 - the `epic/` folder's:  the epic folder itself, so the epic pages and the guides come from one of its modules
+
+### HTTPS and HTTP/2, on the same port
+
+Over plain HTTP a browser opens at most 6 connections to a server, so the editor's 85 first-load files wait their turn.
+HTTP/2 sends them all over one connection, and browsers speak it only over HTTPS.
+So the page server speaks both, on one port, once this computer trusts its certificate:
+
+```sh
+brew install mkcert
+brew install nss            # only if you use Firefox
+spell server certificate
+```
+
+- Or from the Servers tab, with no terminal:  the lock among the buttons of main's page server's card turns it on and
+  off, and a lock before a page server's address says it has it.
+  - Only the page servers speak HTTPS:  the editor (Vite) and the epic hub stay on plain HTTP.
+    The editor's HTTPS address is the house-network site's (`test.spell.app`, through Caddy), when it's set up.
+  - Turning on there, the Mac asks for the password in its own window, and trusts it for you alone (your login
+    keychain), where the command trusts it for the whole Mac.
+- Either way, the server keeper restarts main's page server by itself within a few seconds:  it watches the
+  certificate's files.  A worktree's page server takes it at its next start.
+
+- `spell server certificate` has mkcert make a certificate for `localhost`, `127.0.0.1` and `::1`, kept in
+  `~/.spell/localhost/`, and has this computer trust mkcert's own authority:  it asks for the password once, in the
+  terminal.
+  - `--check` only says what's missing, and exits 1 until it's ready.
+  - `--undo` deletes the certificate;  the authority stays trusted, since `spell space local setup` uses it too.
+- Each connection is handed on by its first byte:  a TLS hello to node's HTTP/2 server, anything else to the plain one.
+  - Browsers open `https://localhost:4747`:  `spell server url` prints it, and `spell server status` says `https`.
+  - The `spell` and `epic` tools keep `http://127.0.0.1:4747`:  node trusts no keychain.
+  - Websockets (live reload) upgrade on HTTP/1.1 over TLS, as on plain HTTP.
+- Without a trusted certificate nothing changes:  plain HTTP, and one line in the log saying how to turn HTTPS on.
+  - `spell server start` never makes or trusts one itself:  it often runs from a skill, with no terminal to ask in.
+    Only the command, or the Servers tab's card when someone presses it.
+  - Tests and CI never use one (`VITEST`, `CI`);  `SPELL_HTTPS=0` turns it off.
+- Which browsers it covers:
+  - Chrome, Safari and VS Code's side bar use the Mac's own list of trusted certificates:  nothing more to do.
+  - Firefox keeps a list of its own.  It needs NSS first, then the certificate again:  `brew install nss`, then
+    `spell server certificate`.  The command says so up front when Firefox is installed and NSS isn't;  `--check`
+    says whether Firefox trusts it too.  A Firefox never opened has no list yet:  open it once first.
+- Not yet over HTTPS:  the VS Code side bar and `epic pages link` (their tools check the address from node first),
+  and the editor's dev server (Vite), which Caddy's house-network site and the tests reach over plain HTTP.
+- The code:  `LocalCertificate`, and `WebServer`'s `certificate`;  the tab's card, spell-epic's `HttpsSwitch`.
 
 ## Five flows, a picture each
 
@@ -289,7 +332,9 @@ _A server older than its own code is restarted, so after a merge the next opener
 
 Cold, with every repo installed, the server answers in about a second and a half,
 because it loads eleven route modules before it listens;  with none to load, in about a quarter of a second.
-`ensure()` gives up after 15 s, and points at the log.
+`ensure()` waits as long as the server is still starting, however busy the machine.
+One that stops first is reported at once;  one still silent after 2 minutes is stopped.
+Both point at the log.
 
 "Older than its code" means older than the server's folder or its route modules' folders.
 Nothing restarts a server on its own:  the next opener does, and the open pages reload when they hear the new run.
@@ -514,7 +559,7 @@ In memory, a 75 KB guide takes about 110 ms the first time (most of it loading o
 
 ### Bundles built on demand, never committed
 
-Some bundles only the page server serves, like Spell UI's docs site.
+Some bundles only the page server serves, like Spell UI's site bundle, which the component sets' HTML pages load.
 Each is git-ignored, and built when it's stale:
 
 ```sh
@@ -541,27 +586,29 @@ Every Spell UI change deleted and re-added most of them, in every diff and every
 for (const bundle of SRV.Bundle.all(root)) if (bundle.isStale) bundle.build()
 ```
 
-- Stale:  never built, its entry missing or newer than its build, or its sources' hash changed.
-- `build()` runs the package's script, then records the hash in its output folder (`.bundle.json`).
+- Stale:  never built, any file its build made missing, its entry newer than its build, or its sources' hash changed.
+- `build()` runs the package's script, then records the hash and the files it made, in its output folder (`.bundle.json`).
 - Which bundles exist:  the settings' `bundles` list (spell-ui's part names `ui-site`'s);  how each is built:
   `BUNDLES`.
   Each is found by its package, through `node_modules`, wherever its repo is.
 - By hand:  `spell bundle [<name>...] [--stale]`, `spell bundle check [<name>...]`;  `--json` for either.
 - A new bundle:  a `BUNDLES` entry;  its output folder in the settings' `bundles` list, and in its repo's `.gitignore`.
 
-The page server builds the stale ones itself, as it starts
+The page server builds the stale ones itself, once it's listening
 ([BundleBuild.ts](../src/server/page/BundleBuild.ts)):
-- It runs `spell bundle --stale` as a child process, which rebuilds only a bundle whose sources changed.
+- It runs `spell bundle --stale` as a child process, which rebuilds only a bundle that's stale.
   A start with nothing changed builds nothing.
+  Two servers watching one worktree, its own and main's, build a change once:  the second waits for the first.
 - It runs the kit's OWN `spell`, as the kit's install finds it, never the one on your PATH:
   so a worktree's server builds with the worktree's code.
 - Its output goes to the server's log, each line starting `bundles:  `:
   each bundle it builds and what failed;  the rest only with `SPELL_DEBUG=server:bundles`.
-- A request for a bundle's file that isn't there yet waits for the build, up to two minutes.
+- A request for a bundle's file that isn't there waits for the build, up to two minutes,
+  and starts one if none runs and a bundle lost a file.
   Then it's answered as things stand:  a 404, if the file is still missing.
   A file that's there is served at once.
 - When the build ends, live reload reloads the pages that load the bundle.
-- Only this server's own bundles wait, for `GET` and `HEAD`;  a request under `/worktrees/<w>/` never does.
+- Only this server's own bundles wait, for `GET` and `HEAD`;  a worktree's own wait at its component sets' addresses.
   A build that fails is logged, and leaves the bundle stale until the next start.
 
 ### Data files
@@ -673,13 +720,14 @@ Spell UI's whole part:
 
 ```json
 "pageServer": {
-  "bundles": ["site/_assets"],
-  "componentSets": { "ui": { "name": "Spell UI", "dir": "docs", "assets": "site/_assets" } }
+  "bundles": ["src/components/ui-root", "site/_assets"],
+  "componentSets": { "ui": { "name": "Spell UI", "dir": "docs", "assets": "site/_assets", "sitePage": "index.html" } }
 }
 ```
 
 _From [spell-ui's package.json](https://github.com/spell-app/spell/blob/main/ui/package.json):
-its site bundle, built on demand, and its component set, at `/components/ui/`._
+its bundles, built on demand, and its component set, at `/components/ui/`, where one page (`sitePage`) answers every
+address with the Spell UI site._
 
 `pageServerSettings()` merges the parts as the server starts, in a fixed order:
 1. the kit's own:  none today
@@ -772,14 +820,16 @@ export default helloRoutes
 
 | Id | Name | Served at | Its pages | Whose part |
 | --- | --- | --- | --- | --- |
-| `ui` | Spell UI | `/components/ui/` | [spell-ui's docs/](https://github.com/spell-app/spell/tree/main/ui/docs) | spell-ui's |
-| `epics` | Epic UI | `/components/epics/` | [spell-epic's src/docs/](https://github.com/spell-app/spell/tree/main/epic/src/docs) | spell-epic's |
-| `app` | App UI | `/components/app/` | [spell-app's app/docs/](https://github.com/spell-app/spell/tree/main/app/app/docs) | spell-app's |
+| `ui` | Spell UI | `/components/ui/` | the Spell UI site, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/ui/docs/index.html) at every address under it (the set's `sitePage`) | spell-ui's |
+| `epics` | Epic UI | `/components/epics/` | Epic UI's guide, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/epic/src/docs/index.html) the same way | spell-epic's |
+| `app` | App UI | `/components/app/` | App UI's guide, a Spell guide, shown by [one page](https://github.com/spell-app/spell/blob/main/app/app/docs/index.html) the same way | spell-app's |
 
-- Every set's site bundle is Spell UI's, `ui/site/_assets`:
-  its pages load `site.js` and `site.css` from their own `_assets/`.
+- Every set's site bundle is Spell UI's, `ui/site/_assets`, laid over its folder at `_assets/`:
+  no set's pages load it since every set's guide became Spell.
   What's in it:  [Spell UI's site](https://github.com/spell-app/spell/blob/main/ui/README-site.md).
 - `/components/ui` without its slash redirects to `/components/ui/`, so the pages' relative links hold.
+- A link written for a set's old HTML pages (`/components/ui/ui-button.html`, `/components/app/MenuBar.html`) is
+  mended to its guide's address (`/components/ui/button`, `/components/app/menu-bar`) by the link mender.
 
 </details>
 
@@ -857,7 +907,7 @@ Spell UI's tools, spaces' API server and spell-epic's own server are built from 
 
 | Piece | What it does |
 | --- | --- |
-| `StaticHandler` | folders under URL prefixes (longest prefix wins), one laid over another;  dot files refused;  every answer `Cache-Control: no-store` with an ETag;  hooks to rewrite HTML or transform by extension |
+| `StaticHandler` | folders under URL prefixes (longest prefix wins), one laid over another;  dot files refused;  an ETag on every answer, and its `caching` setting:  `no-store` (a worktree's), or checked each time with "not modified" answers and hashed names kept a year (the main checkout's);  hooks to rewrite HTML or transform by extension |
 | `Router`, `Request`, `Reply` | the part of Express the app's API uses, with Express's names;  one difference:  `:name*` holds the whole rest of the path |
 | `LiveReload` | the websocket that tells pages a file changed;  its page-side client is served at `/api/server/live.js` |
 | `FolderWatch` | a folder watched for changes:  dot files, `node_modules`, lock files and editors' temp files skipped;  a burst reported once it's quiet, if asked |
@@ -1019,7 +1069,7 @@ What's left is a handful of facts the reference doesn't explain:
 | [scripts/favicon.ts](../scripts/favicon.ts) | `yarn favicon` |
 | [scripts/recipe-servers.ts](../scripts/recipe-servers.ts) | the recipe box demo's two fake servers |
 | [runs/](../src/server/runs/) | command runs:  `CommandRun`, and the files it shares with the page side ([runs.types.ts](../src/server/runs/runs.types.ts)) |
-| [Linker.ts](../src/server/Linker.ts), [format.ts](../src/server/format.ts), [Bundle.ts](../src/server/Bundle.ts), [DataFile.ts](../src/server/DataFile.ts), [contentFolder.ts](../src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`;  a build script's steps, `clearOutput()`, `linkBuiltInFiles()`, `sizeReport()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](../src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleSizeParams`, `BundleRecord`, `BUNDLES`) |
+| [Linker.ts](../src/server/Linker.ts), [format.ts](../src/server/format.ts), [Bundle.ts](../src/server/Bundle.ts), [DataFile.ts](../src/server/DataFile.ts), [contentFolder.ts](../src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`;  a build script's steps, `clearOutput()`, `linkBuiltInFiles()`, `sizeReport()`;  a bundle's first load sized raw, gzipped and brotli, `firstLoad()`, `sizesOf()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](../src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleSizeParams`, `BundleLoad`, `CompressedSizes`, `BundleRecord`, `BUNDLES`) |
 
 - Entries of their own, which plain `node` loads:
   `spell/server/checkout`, `/page/settings`, `/page/prune`, `/DataFile`, `/contentFolder`.
@@ -1041,7 +1091,6 @@ Tests (node), at the same paths under [tests/server/](../tests/server/):
 
 The docs site needs a checkout with the epic folder beside it, and this page server running.
 
-- The Page Server:  `/guides/server.html` (its endpoint names predate the `/api/` prefix:  this page's are current)
 - The Epic Repo, where the docs and epic pages live:  `/guides/shared-content.html`
 - The Python target:  `/guides/python-target.html`
 
@@ -1049,6 +1098,7 @@ The docs site needs a checkout with the epic folder beside it, and this page ser
 
 ## See also
 
+- The guide:  [The Page Server](../guides/server.html), in the kit's guides/ folder
 - [spell-app's README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md):  what the app's part adds,
   the editor and its API
 - [README/element.md](element.md):  the element framework, whose packs and component pages this server serves

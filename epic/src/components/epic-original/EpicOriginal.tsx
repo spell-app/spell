@@ -37,7 +37,6 @@ export class EpicOriginal extends E.UIComponent<typeof epicOriginalVocabulary> {
           className: TOGGLE,
           part: this.partForName("toggle"),
           controls: BODY_ID,
-          tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") },
           label: this.translationForKey("original"),
           clicks: true
         })}

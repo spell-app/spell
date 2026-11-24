@@ -192,3 +192,17 @@
 			</example>
 		</>
 	</>
+
+	<section label="Sizing">
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example "Height" description="`height` gives a `top` or `bottom` flyout its height;  `resizable=\"height\"` lets people drag it.">
+				<button commandfor="flyout-sizing-height" command="--show">Show</button>
+				<flyout id="flyout-sizing-height" position="bottom" height="14em" resizable="height" closable>
+					<header>Log</header>
+					<content>
+						<text paragraph>Drag the corner to make the flyout taller or shorter.</text>
+					</content>
+				</flyout>
+			</example>
+		</>
+	</>

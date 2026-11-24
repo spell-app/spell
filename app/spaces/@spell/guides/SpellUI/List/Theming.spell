@@ -40,7 +40,7 @@
 
 	<section label="Themes">
 		<markdown>
-			Each theme of the set (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes a list's colours and type through the
+			Each theme of the set (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix, Mockup) changes a list's colours and type through the
 			shared tokens.
 		</>
 	</>

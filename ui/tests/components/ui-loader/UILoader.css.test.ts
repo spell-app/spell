@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { loaderVocabulary } from "spell/ui/components/ui-loader/UILoader.en"
@@ -62,7 +61,7 @@ describe("UILoader.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = loaderRaw + colorsCSS
+    const css = loaderRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(loaderVocabulary))
       expect(Sheets.covers(css, phrase), `${loaderVocabulary.tag}: ${phrase}`).toBe(true)
     // `speed` is `kind: "valueOnly"` (value alone), which `classPhrases` skips.
@@ -77,7 +76,7 @@ describe("UILoader.css source", () => {
 describe("UILoader.css examples", () => {
   it.each(Object.keys(EXAMPLES))("draws every active loader in %s with a track and a turning arc", (path) => {
     Sheets.adopt([...foundationCSS, loaderCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const loaders = root.querySelectorAll<HTMLElement>(".ui.active.loader:not(.disabled)")
     expect(loaders.length).toBeGreaterThan(0)
     for (const loader of loaders) {
@@ -99,7 +98,7 @@ describe("UILoader.css examples", () => {
 
   it("centres a loader over its positioned container, and shows it only when active", () => {
     Sheets.adopt([...foundationCSS, loaderCSS])
-    const types = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const types = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const loader = types.querySelector<HTMLElement>('.ui.loader[class="ui active loader"]')!
     const box = loader.parentElement!.getBoundingClientRect()
     const rect = loader.getBoundingClientRect()
@@ -109,19 +108,19 @@ describe("UILoader.css examples", () => {
     const text = types.querySelector<HTMLElement>(".ui.text.loader")!
     expect(parseFloat(getComputedStyle(text).paddingTop)).toBeGreaterThan(32)
     expect(text.getBoundingClientRect().width).toBeGreaterThan(32)
-    const states = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const states = Sheets.render(EXAMPLES["./examples/states.html"]!)
     expect(getComputedStyle(states.querySelector(".ui.disabled.loader")!).display).toBe("none")
-    const idle = Fixture.render(`<div style="position: relative"><div class="ui loader"></div></div>`)
+    const idle = Sheets.render(`<div style="position: relative"><div class="ui loader"></div></div>`)
     expect(getComputedStyle(idle.firstElementChild!).display).toBe("none")
   })
 
   it("reverses and slows indeterminate loaders;  speeds scale the spin", () => {
     Sheets.adopt([...foundationCSS, loaderCSS])
-    const states = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const states = Sheets.render(EXAMPLES["./examples/states.html"]!)
     const indeterminate = getComputedStyle(states.querySelector(".ui.indeterminate.loader")!, "::after")
     expect(indeterminate.animationDirection).toBe("reverse")
     expect(indeterminate.animationDuration).toBe("1.2s")
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const [slow, normal, fast] = [...root.querySelectorAll(".ui-cluster")[0]!.children].map(
       (loader) => getComputedStyle(loader, "::after").animationDuration
     )
@@ -130,7 +129,7 @@ describe("UILoader.css examples", () => {
 
   it("inlines, centres, doubles and stretches", () => {
     Sheets.adopt([...foundationCSS, loaderCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const style = (selector: string, pseudo?: string) => getComputedStyle(root.querySelector(selector)!, pseudo)
     expect(style("p > .ui.inline.loader").display).toBe("inline-block")
     expect(style("p > .ui.inline.loader").position).toBe("relative")
@@ -152,8 +151,8 @@ describe("UILoader.css examples", () => {
 
   it("colours the arc by remap, and inverts on dark backgrounds", () => {
     Sheets.adopt([...foundationCSS, loaderCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
-    const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
+    const red = Sheets.render(`<span style="color: var(--ui-red)"></span>`)
     const arc = getComputedStyle(root.querySelector(".ui.red.loader:not(.inverted)")!, "::after")
     expect(arc.borderTopColor).toBe(getComputedStyle(red).color)
     const plain = getComputedStyle(root.querySelector('.ui.loader[class="ui active inline loader"]')!, "::after")
@@ -166,7 +165,7 @@ describe("UILoader.css examples", () => {
 
   it("scales by size;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, loaderCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => root.querySelector(selector)!.getBoundingClientRect().width
     const ladder = ["mini", "tiny", "small", "large", "big", "huge", "massive"].map((name) =>
       size(`.ui.${name}.loader:not(.text)`)
@@ -178,7 +177,7 @@ describe("UILoader.css examples", () => {
 
   it("shows and inverts a loader inside a dimmer (static coupling);  an inverted dimmer keeps it light", () => {
     Sheets.adopt([...foundationCSS, loaderCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div><div class="ui dimmer"><div class="ui loader"></div></div>` +
         `<div class="ui inverted dimmer"><div class="ui loader"></div></div></div>`
     )
@@ -197,7 +196,7 @@ describe("UILoader.css examples", () => {
 describe("UILoader.css tokens", () => {
   it("takes a public token from a wrapper or the loader itself (static markup)", () => {
     Sheets.adopt([...foundationCSS, loaderCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-loader-size: 40px"><div class="ui active inline loader"></div></div>` +
         `<div class="ui active inline loader" style="--ui-loader-line-width: 5px"></div>`
     )
@@ -213,7 +212,7 @@ describe("UILoader.css tokens", () => {
 describe("UILoader.css in a shadow root", () => {
   it("renders through a display: contents host, centred against a positioned ancestor outside the shadow", () => {
     Sheets.adopt(foundationCSS)
-    const box = Fixture.render(`<div style="position: relative; width: 300px; height: 200px"><span></span></div>`)
+    const box = Sheets.render(`<div style="position: relative; width: 300px; height: 200px"><span></span></div>`)
     const host = box.firstElementChild!
     Sheets.attach(host, `<div class="ui large red active text loader" part="loader"><slot></slot></div>`, sheets())
     host.textContent = "Loading"

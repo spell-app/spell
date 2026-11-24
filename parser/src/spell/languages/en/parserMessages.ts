@@ -141,6 +141,15 @@ export const PARSER_MESSAGES = {
   /** A line says where a key goes, and no line names one. */
   "key-goes-with-no-key":
     'This says where its key goes, and no line names one:  add "it is authenticated with the secret "COOKBOOK_KEY""',
+  /**
+   * A read of a place's field its Spell file marks gone, `-- APPARENTLY DELETED as of {date}` (epic `language` P68,
+   * Q82):  `{field}` its words, `{aType}` its type with its article, `{place}` the place.
+   */
+  "place-field-gone":
+    'This reads the "{field}" of {aType} from {place}, where your program gets its data.\nWhen {place} was looked at on {date}, it no longer had a "{field}" for {aType}.\nThis line may fail when you run it.  Check {place} for its new name, then use that instead of "{field}".',
+  /** As `place-field-gone`, when the same look found one new field, `{newField}`, of the same type of value. */
+  "place-field-renamed":
+    'This reads the "{field}" of {aType} from {place}, where your program gets its data.\nWhen {place} was looked at on {date}, it no longer had a "{field}" for {aType}, but it had a new "{newField}".\nThat is probably the same thing under a new name.\nThis line may fail when you run it.  Try changing "{field}" to "{newField}".',
   /** A place that can't announce what changed:  `{kind}`. */
   "place-cant-announce":
     "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"check it every 30 seconds\" under it",
@@ -332,7 +341,7 @@ export const PARSER_MESSAGES = {
   "say-when": 'Say "when:":  "if:" here stops working in a later release',
   /** A note after a line's code, `load its sound  // so it plays at once` (epic `language` T166). */
   "line-end-comment":
-    'A note after "//" at the end of a line will stop working in a later release.  Put it on the line under this one, starting with "--".',
+    'This note uses the old style:  it starts with "//" and sits after the code.  Notes now go on the line under the code, and start with "--".',
   /** `choose a card` with no `from`, for a type with no values of its own (epic `language` P66). */
   "choose-from-what":
     'This line doesn\'t say which {things} to choose from.  Name them after "from", like this:  choose {thing} from the {things}',
@@ -534,10 +543,18 @@ export const PARSER_MESSAGES = {
   /** A `<markdown>` block outside a type's outline. */
   "markdown-outside-outline":
     "A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown>",
-  /** One of spell's old words, `it has parts "front"`:  `{replacement}` is its new word. */
-  "retired-word": '"{words}" is now "{replacement}":  say "{replacement}" instead, or run `spell lint --fix`',
-  "retired-word-gone":
-    '"{words}" isn\'t needed any more, as spell waits by itself:  take it out, or run `spell lint --fix`',
+  /**
+   * One of spell's old words, `it has parts "front"`:  `{replacement}` is its new word -- one of Spell's old forms,
+   * `old-form-deprecated` (or `old-form-dropped`) after it (`SP.OldForms`, epic `language` P68).
+   */
+  "retired-word": 'This line uses the old word "{words}".  Spell now says "{replacement}".',
+  "retired-word-gone": 'This line uses "{words}", which Spell doesn\'t need now:  it waits by itself.',
+  /** After an old form's own words (`SP.OldForms.messageFor()`):  the Spell that changed it, and the one that drops it. */
+  "old-form-deprecated":
+    "Spell {deprecatedIn} changed this on {date}.  Your program still runs, but this line will give an error from Spell {droppedIn} on, so it's best to fix it now.",
+  /** After an old form's own words, once Spell has dropped it:  an error. */
+  "old-form-dropped":
+    "Spell {deprecatedIn} changed this on {date}, and from Spell {droppedIn} on it's an error.  Fix it to run your program.",
   /** A `<css>` block in a type that doesn't draw. */
   "css-not-a-view": 'Only a view has its own <css>:  "{type}" isn\'t a view:  say "a ... is a view"',
   /** A `<css>` block outside a type's outline. */

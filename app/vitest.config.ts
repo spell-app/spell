@@ -12,6 +12,12 @@ import { appConfig } from "./app/vite.shared.ts"
  */
 const BROWSER_TESTS = ["**/*.browser.test.{ts,tsx}"]
 
+/**
+ * How long a test in `spaces`, `lsp` or `spell` may take:  many parse or compile a whole project (Solitaire).
+ * - About 3s each on their own, past Vitest's 5s beside a full run on a busy machine (epic `solid-2-final` I1).
+ */
+const WHOLE_PROJECT_TIMEOUT = 20_000
+
 /** The app's tests, at the same paths as its code (`src/app/`). */
 const APP_TESTS = "tests/app"
 
@@ -21,6 +27,9 @@ const APP_TESTS = "tests/app"
  * - The usual `yarn test` leaves these out:  they take about 15 minutes;  `yarn test:integration` runs them.
  */
 const INTEGRATION_TESTS = ["pages/!(PageStories|RunSite|SiteBoard|SiteEdits|testProject).test.ts"]
+
+/** Every language loaded, before each node test file:  `tests/allLanguages.ts`. */
+const ALL_LANGUAGES = "tests/allLanguages.ts"
 
 /**
  * spell-app's Vitest config:  one project per folder of `src/`,
@@ -58,12 +67,17 @@ export default defineConfig({
     // fails a run that adds a folder to your real space, naming it;
     // builds the browser bundle again first when it's stale, for the tests that run a program in a browser
     globalSetup: ["tests/realSpaceCheck.ts", "tests/browserBundleCheck.ts"],
+    // every language loaded, for the node projects:  a browser loads Spanish on first use (epic `solid-2-final` P11)
+    setupFiles: [ALL_LANGUAGES],
     projects: [
-      { extends: true, test: { name: "spaces", dir: "tests/spaces", environment: "node" } },
-      { extends: true, test: { name: "lsp", dir: "tests/lsp" } },
+      {
+        extends: true,
+        test: { name: "spaces", dir: "tests/spaces", environment: "node", testTimeout: WHOLE_PROJECT_TIMEOUT }
+      },
+      { extends: true, test: { name: "lsp", dir: "tests/lsp", testTimeout: WHOLE_PROJECT_TIMEOUT } },
       ...appProjects(),
       { extends: true, test: { name: "cli", dir: "tests/cli" } },
-      { extends: true, test: { name: "spell", dir: "tests/spell" } },
+      { extends: true, test: { name: "spell", dir: "tests/spell", testTimeout: WHOLE_PROJECT_TIMEOUT } },
       { extends: true, test: { name: "vscode", dir: "tests/vscode", environment: "node" } },
       // the extension's elements help:  its own config, for a stand-in `vscode`
       "vscode/vitest.config.ts"
@@ -81,7 +95,8 @@ function appProjects(): TestProjectConfiguration[] {
         name: "app:node",
         dir: APP_TESTS,
         environment: "node",
-        exclude: [...configDefaults.exclude, ...BROWSER_TESTS, ...INTEGRATION_TESTS]
+        exclude: [...configDefaults.exclude, ...BROWSER_TESTS, ...INTEGRATION_TESTS],
+        setupFiles: [ALL_LANGUAGES]
       }
     },
     {
@@ -92,7 +107,8 @@ function appProjects(): TestProjectConfiguration[] {
         dir: APP_TESTS,
         environment: "node",
         include: INTEGRATION_TESTS,
-        fileParallelism: false
+        fileParallelism: false,
+        setupFiles: [ALL_LANGUAGES]
       }
     },
     {

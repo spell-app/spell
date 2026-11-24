@@ -19,5 +19,6 @@
     { "path": "/Checkers.spell", "active": true },
     { "path": "/Drawing.spell", "active": true },
     { "path": "/styles.css", "active": true }
-  ]
+  ],
+  "spellVersion": "0.9.0"
 }

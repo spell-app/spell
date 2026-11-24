@@ -344,10 +344,17 @@ export class GraphLayout {
   private static insideOf(level: Level): { x: number; y: number; width: number; height: number } {
     const xs: number[] = []
     const ys: number[] = []
-    for (const unit of level.units) xs.push(unit.x, unit.x + unit.width), ys.push(unit.y, unit.y + unit.height)
-    for (const edge of level.edges)
-      if (edge.fromPin === undefined && edge.toPin === undefined)
-        for (const point of edge.points) xs.push(point.x), ys.push(point.y)
+    for (const unit of level.units) {
+      xs.push(unit.x, unit.x + unit.width)
+      ys.push(unit.y, unit.y + unit.height)
+    }
+    for (const edge of level.edges) {
+      if (edge.fromPin !== undefined || edge.toPin !== undefined) continue
+      for (const point of edge.points) {
+        xs.push(point.x)
+        ys.push(point.y)
+      }
+    }
     if (!xs.length) return { x: 0, y: 0, width: level.width, height: level.height }
     const [x, y] = [Math.min(...xs), Math.min(...ys)]
     return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y }

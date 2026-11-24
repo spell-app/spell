@@ -35,6 +35,9 @@ export type RouteModule = {
  *   - optional:  a server serving the epic folder by itself has none (spell-epic's `EpicServer`),
  *     so call it as `serveContent?.(dir)`
  * - `addPageConfig`:  more fields for every page's `window.SPELL_SERVER` (`PageServer.addPageConfig()`)
+ * - `drawings`:  `drawings.add(drawer)` to draw a kind of item ahead, on the server (`SRV.Drawings`):
+ *   Spell UI's route module adds Mermaid's and highlight.js's, the app's adds Spell's
+ *   - optional:  a server that draws nothing ahead has none (spell-epic's `EpicServer`), so call it `drawings?.add()`
  * - `onListening`:  run `start` once the server listens -- `info.port` is set by then
  *   - e.g. to start a child process that needs the page server's port (`setup()` runs BEFORE it listens)
  * - `onStop`:  run `stop` when the server stops, e.g. to end a child process
@@ -51,6 +54,7 @@ export type RouteContext = {
   serveWorktrees: (...dirs: string[]) => void
   serveContent?: (dir: string) => void
   addPageConfig: (add: PageConfig) => void
+  drawings?: SRV.Drawings
   onListening: (start: () => unknown) => void
   onStop: (stop: () => unknown) => void
   addServerReport?: (report: ServerReport) => void
@@ -130,6 +134,8 @@ export type PageServerSettings = {
    * - e.g. the app's `spell-language.js`, which colours spell on the docs pages (epic `repo-split` Q23):
    *   the pages' own tooling (spell-epic) imports nothing of the app, the server's settings add it
    * - the server knows nothing of what they are:  the paths come from here
+   * - one a drawer `replaces` (`SRV.Drawer`) is left off a page whose items it takes are all drawn ahead:
+   *   `spell-language.js`, on a page whose spell the server drew (`SRV.Drawings.fill()`)
    */
   pageScripts?: PageScript[]
   /**
@@ -164,7 +170,8 @@ export type PageServerSettings = {
    * the most the server's caches on disk may take (`SRV.DiskCache`, in `~/.spell/cache`), e.g. `"200MB"`, `"1GB"`;
    * default 200 MB (epic `language` Q41)
    * - past it, a write drops the entries used least recently first
-   * - today one cache:  the app's compile cache, what the editor's projects compiled to (`/api/compiles`)
+   * - two caches:  the app's compile cache, what the editor's projects compiled to (`/api/compiles`);  and what's drawn
+   *   ahead, each drawer's (`SRV.Drawings`)
    * - a later part's wins:  the kit's says `"200MB"`, the epic repo's `page-server.json5` may say otherwise
    */
   cacheLimit?: string | number
@@ -196,11 +203,16 @@ export type PageScript = {
  *     (`SitePacks`) for the component packs a set's pages load, the epics pack, for the comments, on all of them
  *   - the other sets had a build of their own (its `sets/`), from epic `epic-workflow` P10 until epic
  *     `epic-engine` gave Spell UI's pages the packs too
+ * - `sitePage`:  for a set whose pages are ONE Spell site, the page in `dir` that shows it, e.g. Spell UI's
+ *   `index.html` (epic `editor` P43):  every address under the set with no file of its own and no `.` in its last
+ *   part (`/components/ui/button/api`) is answered with it, and the site shows its page there
+ *   (`componentSetSitePath()`);  none:  such an address is a 404, as any missing file
  */
 export type ComponentSetSetting = {
   readonly name: string
   readonly dir: string
   readonly assets: string
+  readonly sitePage?: string
 }
 
 /**

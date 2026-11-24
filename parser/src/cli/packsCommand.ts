@@ -26,6 +26,9 @@ import {
   type PackStub
 } from "spell/parser/spell/languages/packs"
 
+// every language pack, past English:  a node program reads them all (epic `solid-2-final` P11)
+import "spell/parser/spell/languages/all"
+
 /**
  * `spell translate check [lang]`:  print what each language's pack lacks, per file;  1 if anything does.
  * - `lang`:  one language, e.g. `es`;  none:  every pack but English

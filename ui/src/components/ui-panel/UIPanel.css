@@ -19,6 +19,7 @@
  *   floating by default.
  * - `--ui-panel-pane-background`, `-border-color`, `-filter`, `-header-background`:  a theme's glass for a window's pane.
  *   An app's own panes read them, and so Glass and Fruity need nothing in the app (the editor's `EditorTheme.css`).
+ * - `closable`'s ✕, last in the bar:  `--ui-panel-close-color`, `-hover-color`, `-end` (its room after it).
  * - A pane's SCROLL SHADES (below):  `--ui-panel-scroll-shade` (colour), `--ui-panel-scroll-shade-size` (height),
  *   `--ui-panel-scroll-shade-top` (how far under the bar the top one starts).
  * - Layers:  `ui.components.panel.*` are declared after the section's, so these rules win without
@@ -427,6 +428,43 @@
   :host(:state(more-above)) > .ui.pane.section.panel > .content > .top.scroll.shade,
   :host(:state(more-below)) > .ui.pane.section.panel > .content > .bottom.scroll.shade {
     opacity: 1;
+  }
+}
+
+@layer ui.components.panel.content {
+  /* `closable`:  its ✕, last in the bar, light until hovered or focused, then the text's colour, fading in
+     (the editor's panels' ✕:  epic `editor` T95, I233;  moved here by T145).
+     - Its box the glyph's own, so the bar's room ends at the drawn ✕;  `--ui-panel-close-end` (4px) after it.
+     - Its tooltip on the box around it:  a `<button>`'s own `title` would read its name twice. */
+  .ui.section.panel > .title > .dismiss {
+    --_ui-panel-close-color: var(--ui-panel-close-color, color-mix(in oklab, var(--ui-text-muted) 50%, transparent));
+    --_ui-panel-close-hover-color: var(--ui-panel-close-hover-color, var(--ui-text-color));
+    --_ui-panel-close-end: var(--ui-panel-close-end, 4px);
+    display: inline-flex;
+    flex: none;
+    align-self: center;
+    margin-inline: 0 var(--_ui-panel-close-end);
+  }
+  .ui.section.panel > .title > .dismiss > .close.icon {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--_ui-panel-close-color);
+    cursor: var(--ui-control-cursor, pointer);
+    transition: color var(--ui-duration-fast, 120ms) ease-out;
+  }
+  .ui.section.panel > .title > .dismiss > .close.icon:is(:hover, :focus-visible) {
+    color: var(--_ui-panel-close-hover-color);
+  }
+  /* its box the drawn ✕'s own width, so the bar's room ends at the ✕ itself */
+  .ui.section.panel > .title > .dismiss > .close.icon > svg {
+    width: auto;
+    height: 1em;
+    fill: currentColor;
   }
 }
 

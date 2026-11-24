@@ -432,7 +432,7 @@
       "name": "ui-action",
       "description": {
         "kind": "markdown",
-        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`, `badge`"
+        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`, `badge`\n\n**Events:**  `ui-closing`"
       },
       "attributes": [
         {
@@ -633,6 +633,13 @@
               "name": "divider"
             }
           ]
+        },
+        {
+          "name": "closable",
+          "description": {
+            "kind": "markdown",
+            "value": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.\n\nTakes:  text"
+          }
         },
         {
           "name": "shortcut",
@@ -6499,6 +6506,13 @@
           }
         },
         {
+          "name": "selected",
+          "description": {
+            "kind": "markdown",
+            "value": "The one chosen among its neighbours:  its border the primary colour and its fill a touch of it, its text as the others';  `--ui-card-selected-border-color` and `--ui-card-selected-background` change them.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "link",
           "description": {
             "kind": "markdown",
@@ -11751,6 +11765,13 @@
               "name": "justified"
             }
           ]
+        },
+        {
+          "name": "markdown",
+          "description": {
+            "kind": "markdown",
+            "value": "Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.  Without it, its content shows as written.\n\nTakes:  flag (present / absent)"
+          }
         },
         {
           "name": "vertical-align",
@@ -23730,6 +23751,393 @@
       ]
     },
     {
+      "name": "ui-icon-browser",
+      "description": {
+        "kind": "markdown",
+        "value": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.\n\nAlso known as:  icon gallery, icon list, icon finder, glyph browser, icon catalog, icon search.\n\n**Events:**  `ui-chosen`"
+      },
+      "attributes": [
+        {
+          "name": "pack",
+          "description": {
+            "kind": "markdown",
+            "value": "The pack it starts on:  `fa7-free` (the default), `fa7-brands` or `fomantic`.  Its buttons switch to another;  each is loaded on its own, so the page's own icons never change.\n\nTakes:  `fa7-free` · `fa7-brands` · `fomantic`\nDefault:  `fa7-free`"
+          },
+          "values": [
+            {
+              "name": "fa7-free"
+            },
+            {
+              "name": "fa7-brands"
+            },
+            {
+              "name": "fomantic"
+            }
+          ]
+        },
+        {
+          "name": "query",
+          "description": {
+            "kind": "markdown",
+            "value": "What it starts searching for:  a name or what an icon shows (`mail` finds `envelope`, by Font Awesome's terms).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "address",
+          "description": {
+            "kind": "markdown",
+            "value": "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it;  ahead of `query` and `pack`.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "pick",
+          "description": {
+            "kind": "markdown",
+            "value": "A click picks the icon instead of copying its name:  `ui-chosen` says which, for a page asking for one (`<ui-icon-picker>`'s Browse).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "compact",
+          "description": {
+            "kind": "markdown",
+            "value": "Tighter, for a dialog:  the search first, smaller tiles closer together, and no line about adding the pack to a page.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "error",
+          "description": {
+            "kind": "markdown",
+            "value": "Failed, with what went wrong if it says:  `error=\"The server didn't answer\"`.  By default the error look (an outline in the error colour), its words its tooltip, `aria-invalid` on a form control;  a pane (segment, segments, card, section, tab, form, popup) shows its error message and a Try again button in place of its content, or its `slot=\"error\"`.  Shared by every element;  a family may show it its own way (`elementSetup.error`).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "coin"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "heavy"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            },
+            {
+              "name": "all-caps"
+            },
+            {
+              "name": "title-caps"
+            },
+            {
+              "name": "headline"
+            },
+            {
+              "name": "subhead"
+            },
+            {
+              "name": "serif"
+            },
+            {
+              "name": "sans-serif"
+            },
+            {
+              "name": "typewriter"
+            }
+          ]
+        },
+        {
+          "name": "shadow",
+          "description": {
+            "kind": "markdown",
+            "value": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            },
+            {
+              "name": "positive"
+            },
+            {
+              "name": "negative"
+            }
+          ]
+        },
+        {
+          "name": "width",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-width",
+          "description": {
+            "kind": "markdown",
+            "value": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-width",
+          "description": {
+            "kind": "markdown",
+            "value": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
       "name": "ui-icon-picker",
       "description": {
         "kind": "markdown",
@@ -26209,7 +26617,7 @@
           "name": "icon",
           "description": {
             "kind": "markdown",
-            "value": "Icon name, drawn inside the field;  the root gets `icon`.\n\nTakes:  icon name"
+            "value": "Icon name, drawn inside the field;  the root gets `icon`.  A `type=\"search\"` field shows a magnifying glass at its start when it names none.\n\nTakes:  icon name"
           }
         },
         {
@@ -26369,6 +26777,20 @@
           "description": {
             "kind": "markdown",
             "value": "`file`:  picks whole folders instead of files;  `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "clearable",
+          "description": {
+            "kind": "markdown",
+            "value": "Shows a clear button (an `x`) at its end while it has text;  a click empties it.  On by default for `type=\"search\"`;  `clearable=\"false\"` turns it off there.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "shortcut",
+          "description": {
+            "kind": "markdown",
+            "value": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty;  the browser's own find gives way only while the field shows.\n\nTakes:  text"
           }
         },
         {
@@ -26728,7 +27150,7 @@
       "name": "ui-item",
       "description": {
         "kind": "markdown",
-        "value": "An item of a dropdown, list, menu or Items view.\n\nAlso known as:  list item, media object, row.\n\n**Slots:**  default, `icon`, `badge`"
+        "value": "An item of a dropdown, list, menu or Items view.\n\nAlso known as:  list item, media object, row.\n\n**Slots:**  default, `icon`, `badge`\n\n**Events:**  `ui-closing`"
       },
       "attributes": [
         {
@@ -26929,6 +27351,13 @@
               "name": "divider"
             }
           ]
+        },
+        {
+          "name": "closable",
+          "description": {
+            "kind": "markdown",
+            "value": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.\n\nTakes:  text"
+          }
         },
         {
           "name": "loading",
@@ -35955,7 +36384,7 @@
       "name": "ui-panel",
       "description": {
         "kind": "markdown",
-        "value": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`, `loading`, `error`\n\n**Events:**  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`"
+        "value": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.\n\n**Slots:**  default, `label`, `hint`, `icon`, `badge`, `actions`, `description`, `loading`, `error`\n\n**Events:**  `ui-retry`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`, `ui-dismissed`"
       },
       "attributes": [
         {
@@ -36331,6 +36760,20 @@
           "description": {
             "kind": "markdown",
             "value": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "closable",
+          "description": {
+            "kind": "markdown",
+            "value": "A ✕ at the far end of its bar, after its actions and chevron, light until hovered:  a click sends `ui-dismissed`, and the page closes it (hides it, or the column it's in).  It never folds the panel.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "close-label",
+          "description": {
+            "kind": "markdown",
+            "value": "With `closable`:  the ✕'s name and tooltip, what closing it does (`Hide the code`).  None:  `Close`.\n\nTakes:  text"
           }
         },
         {
@@ -46091,7 +46534,7 @@
       "name": "ui-search",
       "description": {
         "kind": "markdown",
-        "value": "A search module lets people query for results from a selection of data.\n\nAlso known as:  autocomplete, typeahead, search box, combobox, lookup.\n\n**Slots:**  `icon`\n\n**Events:**  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-replied`, `ui-opening`, `ui-closing`"
+        "value": "A search module lets people query for results from a selection of data.\n\nAlso known as:  autocomplete, typeahead, search box, combobox, lookup.\n\n**Slots:**  `icon`\n\n**Events:**  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-toggled`, `ui-replied`, `ui-opening`, `ui-closing`"
       },
       "attributes": [
         {
@@ -46151,6 +46594,13 @@
           "description": {
             "kind": "markdown",
             "value": "Takes the full width of its container;  so do the results.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "collapsed",
+          "description": {
+            "kind": "markdown",
+            "value": "Starts as a search button;  a click slides the field open, focused.  Escape, or leaving it empty, folds it back.  `:state(expanded)` and `ui-toggled` tell the page, to hide a title the field covers.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -46239,6 +46689,13 @@
           }
         },
         {
+          "name": "clearable",
+          "description": {
+            "kind": "markdown",
+            "value": "Shows a clear button (an `x`) in place of the magnifying glass while there's text;  a click empties it.  `clearable=\"false\"` turns it off.\n\nTakes:  flag (present / absent)\nDefault:  `true`"
+          }
+        },
+        {
           "name": "value",
           "description": {
             "kind": "markdown",
@@ -46264,6 +46721,13 @@
           "description": {
             "kind": "markdown",
             "value": "Form validation:  the input can't be empty.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "shortcut",
+          "description": {
+            "kind": "markdown",
+            "value": "Keys that jump into the field while it shows on screen, as `<ui-keys>` writes them:  `mod+F` is ⌘F on a Mac, Ctrl+F elsewhere.  Shown at its end while it's empty, its magnifying glass at its start;  the browser's own find gives way only while the field shows.\n\nTakes:  text"
           }
         },
         {
@@ -51973,7 +52437,7 @@
       "name": "ui-site-nav-button",
       "description": {
         "kind": "markdown",
-        "value": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu.\n\nAlso known as:  side bar button, drawer button, hamburger, menu button, navigation toggle, sidebar toggle.\n\n**Slots:**  default, `icon`, `badge`"
+        "value": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu.\n\nAlso known as:  side bar button, drawer button, hamburger, menu button, navigation toggle, sidebar toggle.\n\n**Slots:**  default, `icon`, `badge`\n\n**Events:**  `ui-closing`"
       },
       "attributes": [
         {
@@ -52174,6 +52638,13 @@
               "name": "divider"
             }
           ]
+        },
+        {
+          "name": "closable",
+          "description": {
+            "kind": "markdown",
+            "value": "A tab you can close:  a ✕ in its icon's place while it's hovered, taking no room of its own, so no tab grows or moves;  a middle click or Delete closes it too.  `when-limited`:  only while its toolbar has items put away (`max-visible`), so a closed one is still in the toolbar's list.  It sends `ui-closing`;  in a toolbar, unless that's cancelled, it leaves the row, and a chosen one's neighbour is chosen in its place.\n\nTakes:  text"
+          }
         },
         {
           "name": "toggles",
@@ -63800,7 +64271,7 @@
       "name": "ui-toolbar",
       "description": {
         "kind": "markdown",
-        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`, `ui-changed`, `ui-form-value`"
+        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`, `ui-changed`, `ui-form-value`, `ui-item-dropped`"
       },
       "attributes": [
         {
@@ -64255,6 +64726,13 @@
           }
         },
         {
+          "name": "scroll-only",
+          "description": {
+            "kind": "markdown",
+            "value": "`scroll-first` that never stops:  however narrow, its items scroll with `‹` / `›`, and it's never the dropdown.  For a row whose own button already lists every item (`max-visible`), such as a project's files.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "max-visible",
           "description": {
             "kind": "markdown",
@@ -64273,6 +64751,13 @@
           "description": {
             "kind": "markdown",
             "value": "With `max-visible`:  an icon before the caret of the button listing every item, saying what they are (a project's files:  `file outline`).  Without it, the button is the caret alone.\n\nTakes:  icon name"
+          }
+        },
+        {
+          "name": "reorderable",
+          "description": {
+            "kind": "markdown",
+            "value": "Its items can be dragged along the row:  the dragged one dimmed, a line where it would land, before or after the item under the pointer.  The drop sends `ui-item-dropped`;  the page puts it there (a project's files:  their order).  Escape puts it back.\n\nTakes:  flag (present / absent)"
           }
         },
         {

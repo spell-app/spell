@@ -11,7 +11,7 @@
 		work here as written.
 	-->
 	<section label="Types">
-		<message size="small">The icon set -- every icon with its name, by category, searchable -- is on the <link link="/icons" target="_blank">Icons</> page. Icons are Font Awesome 7 Free SVG files, one per icon, loaded on first use.</>
+		<message size="small">The icon set -- every icon with its name, by category, searchable -- is on the <link link="/icons">Icons</> page. Icons are Font Awesome 7 Free SVG files, one per icon, loaded on first use.</>
 
 		<section label="Icon" sticky="stack" collapsible dividing>
 			<example "Icon" description="An icon is a glyph used to represent something else.  `name` is its name in words;  solid is the default set.">
@@ -104,7 +104,7 @@
 			<example "Link" description="An icon can be formatted as a link.">
 				<icon name="close" appearance="link"/>
 				<icon name="help" appearance="link"/>
-				<message slot="description" size="small"><text code>appearance="link"</text> is only the look (dimmed until hovered, a pointer cursor). For interaction, wrap the icon in a real <text code>&lt;a&gt;</text> or <text code>&lt;button&gt;</text>.</message>
+				<message slot="description" size="small"><text code>appearance="link"</text> is only the look (dimmed until hovered, the cursor controls have). For interaction, wrap the icon in a real <text code>&lt;a&gt;</text> or <text code>&lt;button&gt;</text>.</message>
 			</example>
 		</>
 
@@ -116,7 +116,7 @@
 		</>
 
 		<section label="Rotated" sticky="stack" collapsible dividing>
-			<example "Rotated" description="An icon can be rotated:  `clockwise`, `counterclockwise`, or `halfway` (180°).">
+			<example "Rotated" description="An icon can be rotated:  `clockwise`, `counterclockwise`, or `halfway` (180°).  `when stacked` turns it a quarter only while the `stackable` stack it's in is a column, so an arrow points down:  see the stack's Stackable example.">
 				<icon name="cloud" rotated="clockwise"/>
 				<icon name="cloud" rotated="counterclockwise"/>
 				<icon name="cloud" rotated="halfway"/>

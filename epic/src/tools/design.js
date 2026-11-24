@@ -8,7 +8,7 @@
  *   - the one-file bundle and the site header added
  *   - prints what it couldn't carry
  * - `changed [--json]`:  which files of the built system differ from what was last pushed, and which were removed
- *   - the built system, from `spell design build` + spell-brand's `yarn design:bundle`:
+ *   - the built system, from `spell design build`:
  *     Spell UI's `build/design-system/project/` (`BUILT`)
  * - `pushed [--url <system link>]`:  record the built files as pushed (after the skill's publish)
  * - `state [--json]`:  the record:  the system's link, when it was pushed, how many files
@@ -29,7 +29,7 @@ import { packageDir } from "./packageDir.ts"
 import { CONTENT, ROOT, pageFile } from "./pages.js"
 
 /**
- * The built design system:  `spell design build` writes it, spell-brand's `yarn design:bundle` adds the bundle.
+ * The built design system:  `spell design build` writes it.
  * - Spell UI's `build/design-system/` (git-ignored), where the caller's checkout's install finds `spell-ui`
  *   (epic `repo-split` I27:  spell-app's old `packages/ui/` before)
  */
@@ -230,10 +230,7 @@ function writeState(state, file = stateFile()) {
  */
 export function hashTree(root) {
   if (!existsSync(join(root, "project")))
-    throw new Error(
-      `spell design:  nothing built in ${root}:  run \`spell design build\` first ` +
-        "(spell-brand's `yarn design:bundle` then adds the bundle)"
-    )
+    throw new Error(`spell design:  nothing built in ${root}:  run \`spell design build\` first`)
   const files = {}
   for (const file of walk(join(root, "project"))) {
     files[relative(root, file)] = createHash("sha256").update(readFileSync(file)).digest("hex")

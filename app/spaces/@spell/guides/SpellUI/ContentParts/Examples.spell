@@ -4,6 +4,7 @@
 		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
               messages share.</>
 	</>
+
 	<!--
 		EXAMPLES:  Fomantic's header page, section by section, in its order (Types, Content, States, Variations), plus our
 		extras (Fitted, Link), then the generic content parts (Parts), from the part sections of Fomantic's card, item,
@@ -267,6 +268,22 @@
 			<example "Fitted" description="A header can drop its padding.">
 				<header level="3" padding="none" block>Fitted block header</header>
 				<header level="3" block>Block header</header>
+			</example>
+		</>
+
+		<section label="Capitals" sticky="stack" collapsible dividing>
+			<example "Capitals" description="`font` changes a header's case, as it does a button's, a label's and any other element's:  `title-caps` capitalizes each word (names from a service that writes them all in small letters), `all-caps` every letter.">
+				<header level="3" font="title-caps">bulbasaur and ivysaur</header>
+				<header level="4" font="all-caps">an eyebrow</header>
+				<button font="title-caps">grass poison</button>
+				<label font="title-caps">overgrow</label>
+			</example>
+		</>
+
+		<section label="Poster" sticky="stack" collapsible dividing>
+			<example "Poster" description="`size=\"poster\"`:  bigger than `massive`, for a page's title.  It grows with the window, from 2.4 to 4 times the text around it, on tight lines.  `font=\"heavy\"` is heavier than `bold` (900), and `shadow` puts a hard shadow behind the letters, down and to the right, in a hue.  A button takes all three too:  a logo.">
+				<header size="poster" color="red" font="heavy">Bulbasaur</header>
+				<button appearance="tertiary" color="red" padding="none" size="poster" font="heavy" shadow="yellow">PokéSpell</button>
 			</example>
 		</>
 

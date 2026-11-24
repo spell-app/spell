@@ -1,4 +1,10 @@
-import { DiagnosticSeverity, type Diagnostic, type DocumentSymbol, type Range } from "vscode-languageserver"
+import {
+  DiagnosticSeverity,
+  SymbolKind,
+  type Diagnostic,
+  type DocumentSymbol,
+  type Range
+} from "vscode-languageserver-types"
 
 import type { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
@@ -43,11 +49,26 @@ export class HostNameCheck {
     })
   }
 
-  /** Every type `project` declares, by its words (`key()`), with the file it's in and its outline symbol. */
+  /**
+   * Every type `project` declares, by its words (`key()`), with the file it's in and its outline symbol.
+   * - A type declared inside another's section is in the outline under it (epic `editor` T155:  the editor's views
+   *   inside its app's), so each symbol's children are looked through too, for types only:
+   *   the app's property `editor bar` and its type `editor bar` share their words.
+   */
   private static typesIn(service: LSP.SpellLanguageService, project: SP.SpellProject) {
     const types = new Map<string, { file: SP.SpellFile; symbol: DocumentSymbol }>()
+    const addNested = (file: SP.SpellFile, symbols: DocumentSymbol[] | undefined) => {
+      for (const symbol of symbols ?? []) {
+        if (symbol.kind !== SymbolKind.Class) continue
+        types.set(HostNameCheck.key(symbol.name), { file, symbol })
+        addNested(file, symbol.children)
+      }
+    }
     for (const file of project.spellFiles) {
-      for (const symbol of service.documentSymbols(file)) types.set(HostNameCheck.key(symbol.name), { file, symbol })
+      for (const symbol of service.documentSymbols(file)) {
+        types.set(HostNameCheck.key(symbol.name), { file, symbol })
+        addNested(file, symbol.children)
+      }
     }
     return types
   }

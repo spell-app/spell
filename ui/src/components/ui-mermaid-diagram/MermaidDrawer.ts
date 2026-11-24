@@ -1,7 +1,9 @@
+import { stableHash } from "spell/util/hash"
 import { E } from "spell/ui/core"
 import {
   DarkTwins,
   DEFAULT_MERMAID_THEME,
+  MAY_NAME_ICON,
   MermaidLookNames,
   MermaidThemeNames,
   SpellDiagramSettings,
@@ -47,7 +49,8 @@ export class MermaidDrawer {
     const config: Record<string, unknown> = {
       look: MermaidLookNames[look] ?? MermaidLookNames.classic,
       handDrawnSeed: seed,
-      ...SpellDiagramSettings
+      // a copy:  Mermaid fills in the nested objects it's given as it draws
+      ...structuredClone(SpellDiagramSettings)
     }
     if (layout && layout !== AUTO) config.layout = layout
     if (name === DEFAULT_MERMAID_THEME) {
@@ -58,6 +61,16 @@ export class MermaidDrawer {
       config.darkMode = scheme === "dark"
     }
     return config
+  }
+
+  /**
+   * Might `text` name an icon (`fa:fa-car`, `icon: "pack:name"`, an architecture diagram's `(pack:name)`)?
+   * - Read without Mermaid:  a drawing the page server drew ahead has none, as its icons are the page's own packs.
+   * - Wide on purpose (`MAY_NAME_ICON`):  a yes only means the page draws it itself.  `MermaidEngine.iconsIn()`
+   *   finds the real ones.
+   */
+  static mayHaveIcons(text: string): boolean {
+    return MAY_NAME_ICON.test(text)
   }
 
   /** `theme` when it's one `theme` takes;  else `spell`, with a warning naming the ones it knows. */
@@ -96,6 +109,26 @@ export class MermaidDrawer {
     probe.style.color = ""
     probe.style.colorScheme = ""
     return variables
+  }
+
+  /**
+   * The text style of `document`'s `<body>`, as Mermaid measures a drawing's labels in it:  it draws in a box it adds
+   * there, so a label's width depends on the page's font, size and spacing.
+   * - Part of a drawing's `look` (`lookOf()`):  one drawn on the page server is shown only on a page whose text is
+   *   the same, or its labels could be cut short.
+   */
+  static bodyTextOf(document: Document): Record<string, string> {
+    const style = getComputedStyle(document.body)
+    return Object.fromEntries(BODY_TEXT.map((name) => [name, style.getPropertyValue(name)]))
+  }
+
+  /**
+   * What a drawing depends on besides its text and settings, as one hash:  Mermaid's settings (its colours, read from
+   * the page) and the page's text style (`bodyTextOf()`).
+   * - The page server's drawings carry it (`data.look`):  an element shows one only when its own is the same.
+   */
+  static lookOf(config: Record<string, unknown>, bodyText: Record<string, string>): string {
+    return stableHash({ config, bodyText })
   }
 
   /**
@@ -149,6 +182,9 @@ export type DrawSettings = {
   /** `seed`, for `hand-drawn` */
   seed: number
 }
+
+/** The `<body>` styles a label's size depends on (`MermaidDrawer.bodyTextOf()`). */
+const BODY_TEXT = ["font-family", "font-size", "font-weight", "line-height", "letter-spacing", "text-rendering"]
 
 /** `layout`'s value that leaves Mermaid's own choice. */
 const AUTO = "auto"

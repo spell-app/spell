@@ -25,7 +25,7 @@
  */
 import { lowerFirst, schemaOf, type PropInfo, type PropRule } from "spell/util"
 
-import { kindOf, type Kind } from "./checking"
+import { kindOf, type Kind } from "./kinds"
 import { fieldLineOf, LIST_ITEMS, oneOfWords, type SchemaField } from "./schemaWords"
 
 /** The Lexicon language's version, every document's `lexicon`. */

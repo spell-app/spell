@@ -1,6 +1,6 @@
 import type { ViewUpdate } from "@codemirror/view"
 
-import { $fetch, UIError, Observable, prop, setDebugGlobal, LoadableFile } from "spell/util"
+import { $fetch, UIError, Observable, prop, setDebugGlobal, LoadableFile, MostRecent } from "spell/util"
 import { watchServerFiles } from "spell/util/polling"
 import { after, type CancelablePromise } from "spell/util/timing"
 
@@ -13,15 +13,14 @@ import type { LSP } from "spell/app/lsp"
 import type { SpellRuntime } from "spell/app/app/runner"
 import type { TestRun } from "spell/app/app/runner/spellRuntime"
 import type * as UIT from "spell/app/app/ui/ui.types"
-import { EDITOR_PIECES } from "spell/app/app/ui/ui.types"
-import type { EditWay, SpellCodeMirror } from "spell/app/app/ui/codemirror"
+import type { EditWay, OldFormsFound, SpellCodeMirror } from "spell/app/app/ui/codemirror"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
 import { RunSite, runSite } from "spell/app/app/pages/RunSite"
 import { THEME_PAGE, siteEditorUrlFor } from "spell/app/app/pages/pages.types"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { editorPrefs } from "spell/app/app/editorPrefs"
+import { UPGRADE_ON_OPEN_PREF, editorPrefs } from "spell/app/app/editorPrefs"
 // Import directly, NOT through the runner barrel, which brings the runners
 import { wordsOfLanguages } from "spell/app/app/runner/words"
 // By file:  the runner barrel brings the runners themselves
@@ -270,6 +269,8 @@ export class EditorStore extends Observable {
       // the old app goes at once, never shown while this one loads (I254);  nor run again meanwhile, or drawn back
       comingProject = project
       appRuntime?.unmountApp()
+      // what its compiles as typing paused built, saved as it's left:  another project may import it
+      editor.project?.saveUnsavedOutput().catch((error: unknown) => console.error("couldn't save built files", error))
       // the one shown goes, if it was a start card's and not kept (epic `mockup` I42):  asked while this one loads
       void editor.leaveProject()
       editor.history.clear()
@@ -323,6 +324,8 @@ export class EditorStore extends Observable {
     // `<FileTabs>` reads both, and would list the old project's file among the new one's
     editor.project = project
     editor.file = file
+    // the projects shown before the last few drop their parse, keeping their text (epic `solid-2-final` P10)
+    keptWhole.use(project)
     await file.load(undefined)
     const pageCameIntoPlay = editor.bringIntoPlay(project, file)
     startingPoints.note(project.path, project.files)
@@ -565,11 +568,16 @@ export class EditorStore extends Observable {
 
   /**
    * Compile current `project` and, if compilation produced output, execute it.
+   * - `way`:  `"on purpose"` (the default:  Cmd-Enter, Restart, a menu) or `"as typing pauses"` (`compileAppSoon()`)
+   *   - on purpose:  the built files are saved, and the compiled program printed in the program's console
+   *   - as typing pauses:  neither (epic `solid-2-final` P9);  the program runs from what's in memory,
+   *     and Save writes the built files (`saveAll()`, `SpellProject.saveUnsavedOutput()`)
    * - SIDE EFFECT: clears `runtimeConsole()` and cancels any pending `compileAppSoon()` timer first.
    */
-  async compileApp(): Promise<void> {
+  async compileApp(way: CompileWay = "on purpose"): Promise<void> {
     const { project, file } = editor
     if (!project || !file) return
+    const onPurpose = way !== "as typing pauses"
 
     const output = (await editor.loadRuntime()).core.console
     output.clear()
@@ -577,7 +585,17 @@ export class EditorStore extends Observable {
       output.group(appTexts.text("consoleCompiling"), project)
 
       editor.clearCompileAppSoon()
-      await project.compile()
+      const save = onPurpose ? true : "later"
+      // off the page's thread, where the language worker has every edit (epic `solid-2-final` P18);  what it wrote is
+      // kept in the compile cache for a reload, under the key of the text it compiled:  only when nothing was typed
+      // while it compiled, so the key before and after agree (I57)
+      const keyBefore = editor.compileElsewhere ? await project.compileCacheKey() : undefined
+      const elsewhere = await editor.compileElsewhere?.(project)
+      const cacheKey = elsewhere && keyBefore && (await project.compileCacheKey()) === keyBefore ? keyBefore : undefined
+      if (elsewhere) await project.takeCompiled(elsewhere, { save, cacheKey })
+      else await project.compile(undefined, { save })
+      // its built text changed:  a program that imports it reads it again (`fetchCompiled()`)
+      forgetCompiled(project.projectId)
       // every file's loaded now, whichever was shown first
       startingPoints.note(project.path, project.files)
       editor.edits++
@@ -586,17 +604,22 @@ export class EditorStore extends Observable {
       if (project.compiledFrom === "cache") void editor.compileBehind(project)
       // the Types tab:  its tree follows the code, compiled or not
       else await editor.refreshScopes()
+      // written for an older Spell:  upgraded, or the notice offering it (epic `language` P68)
+      void editor.offerUpgrade(project).catch((error) => editor.showError(error))
       const { compiled } = project
 
       if (compiled) {
-        output.groupCollapsed(appTexts.text("consoleCompiledTo"))
-        const lines = compiled
-          .replace(/\t/g, "   ")
-          .split("\n")
-          .map((line, lineNum) => `${lineNum}`.padStart(4, " ") + `  ${line}`)
-          .join("\n")
-        output.log(lines)
-        output.groupEnd()
+        // the compiled-code pane shows it already:  printed whole only when asked for on purpose
+        if (onPurpose) {
+          output.groupCollapsed(appTexts.text("consoleCompiledTo"))
+          const lines = compiled
+            .replace(/\t/g, "   ")
+            .split("\n")
+            .map((line, lineNum) => `${lineNum}`.padStart(4, " ") + `  ${line}`)
+            .join("\n")
+          output.log(lines)
+          output.groupEnd()
+        }
 
         await editor.executeCompiledApp()
       }
@@ -660,11 +683,17 @@ export class EditorStore extends Observable {
     )
   }
 
-  /** Keep every edit still waiting for typing to pause (`keepEdit()`), e.g. as the page goes.  NEVER throws. */
+  /**
+   * Keep every edit still waiting for typing to pause (`keepEdit()`), e.g. as the page goes.  NEVER throws.
+   * - And what the compiles as typing paused built (`compileApp()`), best effort.
+   */
   keepWaitingEdits(): void {
     for (const [file, waiting] of waitingKeeps) {
       clearTimeout(waiting)
       editor.keepNow(file)
+    }
+    if (!isStaticBuild) {
+      editor.project?.saveUnsavedOutput().catch((error: unknown) => console.error("couldn't save built files", error))
     }
   }
 
@@ -678,6 +707,8 @@ export class EditorStore extends Observable {
   private keepNow(file: SP.AnySpellFile): void {
     waitingKeeps.delete(file)
     if (!file.isDirty) return
+    // the text typed, from the code editor holding it (`SpellProject.textLater()`)
+    file.project.takeWaitingText()
     void file
       .save(undefined)
       ?.then(() => editor.refreshDrafts())
@@ -751,7 +782,7 @@ export class EditorStore extends Observable {
    * - Its app pane shows each of its views in a zone (`<EditorZones>`, T63), not its app:  it runs as a layout.
    */
   isEditorPiece(project: SP.SpellProject | undefined): boolean {
-    return !!project?.path.startsWith(`${EDITOR_PIECES}/`)
+    return !!project && SPACES.isEditorPieceProject(project.path)
   }
 
   /** Is `project` a site of pages alone in their files, e.g. the Spell UI site?  It wears the docs look in Run. */
@@ -960,10 +991,16 @@ export class EditorStore extends Observable {
 
   /** Timer id for a pending `compileAppSoon()`, if any. */
   compileAppSoonTimer: ReturnType<typeof setTimeout> | undefined = undefined
-  /** Compile after `delay` seconds. */
+  /**
+   * Compile after `delay` seconds, as typing pauses:  nothing saved, the program not printed (`compileApp()`'s `way`).
+   * - NEVER throws:  a failure is shown.
+   */
   compileAppSoon(delay: number = 1): void {
     editor.clearCompileAppSoon()
-    editor.compileAppSoonTimer = setTimeout(editor.compileApp, delay * 1000)
+    editor.compileAppSoonTimer = setTimeout(
+      () => void editor.compileApp("as typing pauses").catch(editor.showError),
+      delay * 1000
+    )
   }
   /** Cancel pending `compileAppSoon()` timer, if any. */
   clearCompileAppSoon(): void {
@@ -1003,9 +1040,26 @@ export class EditorStore extends Observable {
   }
 
   /**
+   * The open project parsed on the page, for a console line to read in its scope (`runInConsole()`):
+   * where the language worker parses it, the page parses it only for that (epic `solid-2-final` T36), the first time
+   * in full, after that only what was typed since.
+   * - NEVER throws:  a parse that fails leaves Spell's own rules, and says why in devtools.
+   */
+  async parsedForConsole(): Promise<void> {
+    const { project } = editor
+    if (!project) return
+    try {
+      if (project.scope) await project.parseWaitingText()
+      else await project.parse()
+    } catch (error) {
+      console.error("editor.parsedForConsole():  couldn't parse", project.projectId, error)
+    }
+  }
+
+  /**
    * Run a line of Spell typed into the console on the running app, as the browser's console runs a line on its page
    * (the Spell Console, epic `editor` P32;  Q38):  the app's things are the running ones, kept, and what it changes stays.
-   * - Read as `spell repl` reads a line (`SP.parseLine()`), in the open project's scope:
+   * - Read as `spell repl` reads a line (`SP.parseLine()`), in the open project's scope (`parsedForConsole()`):
    *   its types, things and actions are known, and what earlier lines declared (`x is 3`, then `x + 4`).
    * - Logged on the program's console:  the line as typed, then its value, or why not, in red.
    * - Nothing running yet:  Spell's own rules alone, and only the runtime's names.
@@ -1017,6 +1071,7 @@ export class EditorStore extends Observable {
     const runtime = await editor.loadRuntime()
     const output = runtime.core.console
     output.typed(line)
+    await editor.parsedForConsole()
     const parsed = SP.parseLine(line, consoleScopeFor(editor.project), { commit: true })
     if (parsed.error !== undefined || parsed.compiled === undefined) {
       // nothing read at all:  the parser's "Doesn't parse as statement or expression" is its own words, not a reader's
@@ -1094,12 +1149,16 @@ export class EditorStore extends Observable {
    * Compile `project` again, taken from the compile cache, for what reads its parse and each file's compile:
    * the side bar, the Types tab, the code's marks, the compiled-code pane (`compiled`, `codeWithMapFor()`).
    * - Not from the cache, and saving nothing:  the running app keeps the cached program, which this compile matches.
+   * - In the language worker where it compiles the project (`compileElsewhere`, epic `solid-2-final` T36):
+   *   the page takes what it wrote, and parses nothing itself;  else on the page.
    * - A compile that fails still leaves a parse, so hover and go to definition work before the first edit (I127).
    * - NEVER throws:  a parse error shows on its line, as a compile's would;  anything else goes to devtools.
    */
   async compileBehind(project: SP.SpellProject): Promise<void> {
     try {
-      await project.compile(undefined, { save: false, cached: false })
+      const elsewhere = await editor.compileElsewhere?.(project)
+      if (elsewhere) await project.takeCompiled(elsewhere, { save: false })
+      else await project.compile(undefined, { save: false, cached: false })
     } catch (error) {
       console.error("editor.compileBehind():  couldn't compile", project.projectId, error)
       if (project.needsFullParse) {
@@ -1110,11 +1169,15 @@ export class EditorStore extends Observable {
     }
     editor.edits++
     await editor.refreshScopes()
+    void editor.offerUpgrade(project).catch((error) => editor.showError(error))
   }
 
   /**
    * Work out current `project`'s scope tree again, into `scopeTree`:  after each compile.
-   * - Parses the projects it imports compiled first, once each, to show their sources (see `LSP.ScopeExplorer`).
+   * - Asked of the code's language service (`spell/scopes`, `askLanguage`):  the language worker's where it parses
+   *   the project, so the page parses neither it nor what it imports for the Types tab (epic `solid-2-final` T36).
+   * - Else from the page's own parse:  the projects it imports compiled parsed first, once each, to show their sources
+   *   (see `LSP.ScopeExplorer`).
    * - NEVER throws:  a tree that can't be worked out keeps the last one, and says why in devtools.
    */
   async refreshScopes(): Promise<void> {
@@ -1122,6 +1185,13 @@ export class EditorStore extends Observable {
     const explorer = scopeExplorer
     if (!project || !explorer) return
     try {
+      const file = editor.languageFileOf(project)
+      if (editor.askLanguage && file) {
+        const tree = await editor.askLanguage(file, "spell/scopes", {})
+        // another project shown meanwhile, or its text changed as it asked:  the next refresh brings it
+        if (tree && project === editor.project) editor.scopeTree = tree
+        return
+      }
       // its class's static, through the instance:  `editor.ts` imports LSP's TYPES only, see `setScopeExplorer()`
       const { importedProjects } = explorer.constructor as typeof LSP.ScopeExplorer
       for (const imported of importedProjects(project)) {
@@ -1143,7 +1213,16 @@ export class EditorStore extends Observable {
    */
   scopeDetails = async (path: string): Promise<LSP.ScopeDetails | null> => {
     const { project } = editor
-    return project && scopeExplorer ? scopeExplorer.details(project, path) : null
+    if (!project || !scopeExplorer) return null
+    const file = editor.languageFileOf(project)
+    if (editor.askLanguage && file) return (await editor.askLanguage(file, "spell/scopeDetails", { path })) ?? null
+    return scopeExplorer.details(project, path)
+  }
+
+  /** The file of `project` its language service is asked about:  the one shown, else its first spell file. */
+  languageFileOf(project: SP.SpellProject): SP.SpellFile | undefined {
+    const { file } = editor
+    return file instanceof SP.SpellFile && file.project === project ? file : project.spellFiles[0]
   }
 
   /**
@@ -1394,6 +1473,7 @@ export class EditorStore extends Observable {
 
   /** Save each of `files` now, an edit AutoSave was waiting to keep among them. */
   private async saveFiles(files: SP.AnySpellFile[]): Promise<void> {
+    for (const project of new Set(files.map((file) => file.project))) project.takeWaitingText()
     for (const file of files) {
       editor.forgetWaitingKeep(file)
       await file.save(undefined)
@@ -1521,12 +1601,19 @@ export class EditorStore extends Observable {
    */
   async saveAll(): Promise<void> {
     const { file, project } = editor
+    // the text typed, from the code editor holding it (`SpellProject.textLater()`)
+    project?.takeWaitingText()
     const files = new Set(project?.files.filter((each) => each.isDirty))
     if (file) files.add(file)
     for (const each of files) {
       if (!each.isLoaded || editor.isLocked(each)) continue
       editor.forgetWaitingKeep(each)
       await each.save(undefined)
+    }
+    // what the compiles as typing paused built, kept in memory till now (`compileApp()`)
+    if (project && !isStaticBuild) {
+      await project.saveUnsavedOutput()
+      forgetCompiled(project.projectId)
     }
     await editor.saveSideBarEdits()
     await editor.refreshDrafts()
@@ -2346,10 +2433,19 @@ export class EditorStore extends Observable {
    * - The static build keeps the edit at once (`keepEdit()`).
    */
   onFileEdited(file: SP.AnySpellFile): void {
-    editor.edits++
+    // a spell file's typed text isn't in it yet:  the count moves when it is (`onFileTextTaken()`)
+    if (!(file instanceof SP.SpellFile)) editor.edits++
     editor.keepEdit(file)
     // by path:  cheap, and the same however the project was reached
     if (file.project.path === editor.project?.path) editor.compileAppSoon(EDIT_COMPILE_DELAY)
+  }
+
+  /**
+   * `file`'s typed text reached its `contents`, once the typing paused or something read it (`FileStates`):
+   * what follows `edits` reads it now (epic `solid-2-final` P9).
+   */
+  onFileTextTaken(_file: SP.SpellFile): void {
+    editor.edits++
   }
 
   /**
@@ -2431,6 +2527,33 @@ export class EditorStore extends Observable {
     | undefined = undefined
 
   /**
+   * Compiles a project off the page's thread, once the code editor's loaded:  the language worker's compile
+   * (`LanguageClient.compile()`, epic `solid-2-final` P18);  `undefined` where the page compiles it itself.
+   * See `LazyCodeMirror`.
+   */
+  compileElsewhere: ((project: SP.SpellProject) => Promise<SP.CompiledEntry | undefined>) | undefined = undefined
+
+  /**
+   * The old forms written in a file, asked of the language worker's parse once the code editor's loaded
+   * (`FileStates.oldForms()`, epic `solid-2-final` T36);  `undefined` where it can't say.  See `oldFormsIn()`.
+   */
+  oldFormsElsewhere: ((file: SP.SpellFile) => Promise<OldFormsFound | undefined>) | undefined = undefined
+
+  /**
+   * Asks the code's language service `method` about a file, once the code editor's loaded:  the language worker where it
+   * parses the file, else the page's own (`FileStates.ask()`, epic `solid-2-final` T36).
+   * - `undefined` when the file's text changed as it asked.
+   * - See `LazyCodeMirror`.
+   */
+  askLanguage:
+    | (<M extends LSP.LanguageMethod>(
+        file: SP.SpellFile,
+        method: M,
+        params: Omit<LSP.LanguageParams<M>, "textDocument">
+      ) => Promise<LSP.LanguageAnswer<M> | undefined>)
+    | undefined = undefined
+
+  /**
    * What's undone outside the code:  the side bar's changes and a notebook's -- see `EditorHistory`.
    * - Forgotten when another project opens:  its steps are about that project's files.
    */
@@ -2440,6 +2563,101 @@ export class EditorStore extends Observable {
     titleFor: (action, title) =>
       title ? appTexts.text(action === "undo" ? "undoStep" : "redoStep", { step: title }) : appTexts.text(action)
   })
+
+  ////////////////
+  // ## Upgrading old Spell
+  ////////////////
+
+  /**
+   * The project `<UpgradeNotice>` offers to upgrade, while it shows:  one written for an older Spell (epic `language`
+   * P68).  See `offerUpgrade()`.
+   */
+  @prop()
+  accessor upgradeOffered: SP.SpellProject | undefined
+
+  /**
+   * Offer to upgrade `project`, just parsed, if it's written for an older Spell and holds old forms
+   * (`SP.OldForms`, epic `language` P68):
+   * - Upgrade old Spell when a project opens on (Code Editor Settings…):  upgrade it now, then say what changed.
+   * - Off:  `<UpgradeNotice>`, ONCE per project, remembered in the browser (`UPGRADE_OFFERED_PREF`),
+   *   closed or not.
+   * - Looks once per project a page load, after its first parse:  `compileApp()` and `compileBehind()` call it.
+   * - Not Spell's own projects (`@spell/...`), upgraded with Spell itself;  never in the static build, which can't
+   *   write a project's file.
+   * - NEVER throws:  an upgrade that fails shows its error.
+   */
+  async offerUpgrade(project: SP.SpellProject): Promise<void> {
+    if (upgradeLooked.has(project.path) || project.compiledFrom === "cache") return
+    upgradeLooked.add(project.path)
+    if (isStaticBuild || project.path.startsWith(SPELLS_OWN_PROJECTS)) return
+    if (!SP.OldForms.isOlderSpell(project.contents?.spellVersion)) return
+    if (!(await editor.hasOldForms(project))) return
+    if (editorPrefs.get(UPGRADE_ON_OPEN_PREF) === true) return editor.upgradeProject(project)
+    const offered = editorPrefs.get<Record<string, true>>(UPGRADE_OFFERED_PREF) ?? {}
+    if (offered[project.path]) return
+    editorPrefs.set(UPGRADE_OFFERED_PREF, { ...offered, [project.path]: true })
+    editor.upgradeOffered = project
+  }
+
+  /**
+   * "Upgrade":  rewrite every old form in `project`'s files the new way, save them, then say in its project file that
+   * it matches today's Spell, and say what changed (epic `language` P68).
+   * - The same rewrite as `spell upgrade` and the language server's "Upgrade this file" (`SP.OldForms.uses()`'s edits),
+   *   asked of the language worker's parse where it parses the file (`oldFormsIn()`).
+   * - Each file through the code editor when it's loaded, one undo step in each, else straight into the file;
+   *   then saved, as Save does:  your draft, where the project keeps them.
+   * - NEVER throws:  a failure shows its error.
+   */
+  async upgradeProject(project = editor.upgradeOffered): Promise<void> {
+    editor.upgradeOffered = undefined
+    if (!project) return
+    try {
+      let count = 0
+      const changed: SP.SpellFile[] = []
+      for (const file of project.spellFiles) {
+        if (editor.isLocked(file)) continue
+        const found = await editor.oldFormsIn(file)
+        if (!found.count) continue
+        const { text } = found
+        const edits = found.edits.map(({ start, end, newText }) => ({
+          range: { start: SourceEdits.positionAt(text, start), end: SourceEdits.positionAt(text, end) },
+          newText
+        }))
+        if (!editor.codeEditorEdits?.(file, edits)) editor.takeText(file, SourceEdits.applied(text, edits))
+        changed.push(file)
+        count += found.count
+      }
+      await editor.saveFiles(changed)
+      await editor.refreshDrafts()
+      await new SPACES.SpellProjectRoot(new SP.SpellLocation(project.path).projectRoot!).saveSpellVersion(project)
+      const version = SP.OldForms.shortVersion(SP.SPELL_VERSION)
+      editor.showNotice(appTexts.text(count === 1 ? "upgradedOne" : "upgraded", { count, version }))
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /** Is any of `project`'s files written with an old form of Spell (`oldFormsIn()`)? */
+  async hasOldForms(project: SP.SpellProject): Promise<boolean> {
+    for (const file of project.spellFiles) if ((await editor.oldFormsIn(file)).count) return true
+    return false
+  }
+
+  /**
+   * The old forms of Spell written in `file`, with the text they're found in:  asked of the language worker's parse
+   * where it parses the file (`oldFormsElsewhere`), else read off the page's own (epic `solid-2-final` T36).
+   */
+  async oldFormsIn(file: SP.SpellFile): Promise<OldFormsFound> {
+    const elsewhere = await editor.oldFormsElsewhere?.(file)
+    if (elsewhere) return elsewhere
+    const uses = SP.OldForms.uses(file)
+    return { text: file.parseText, count: uses.length, edits: uses.flatMap((use) => use.edits) }
+  }
+
+  /** Close `<UpgradeNotice>` without upgrading:  it doesn't show again for its project. */
+  dismissUpgrade(): void {
+    editor.upgradeOffered = undefined
+  }
 
   ////////////////
   // ## UI
@@ -2551,6 +2769,40 @@ editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: true })
 /** How long typing pauses before AutoSave keeps an edit (`keepEdit()`), in milliseconds. */
 const KEEP_DELAY_MS = 2000
 
+/**
+ * The last projects shown, kept whole:  their parse, their compile and the parse's scope (epic `solid-2-final` P10).
+ * - An older one keeps its files' text, edits and all, and drops the rest (`forgetParseOf()`):
+ *   a project's parse is tens of MB, and an hour of visiting projects held every one.
+ * - Going back to one parses it again;  the compile cache runs it at once, as on a reload (`compileApp()`).
+ * - Three:  this one, and the two you'd go back and forth between.
+ */
+const keptWhole = new MostRecent<SP.SpellProject>(3, { onDropped: (project) => forgetParseOf(project) })
+
+/**
+ * `project` drops its parse, its compile and its scope, keeping its files' text:  it's no longer among `keptWhole`.
+ * - Not the project shown, nor one a project kept whole imports as source:  its files parse into that one's.
+ * - What's typed and still waiting goes into its files first (`takeWaitingText()`).
+ * - NEVER throws:  it's only memory.
+ */
+function forgetParseOf(project: SP.SpellProject): void {
+  if (project === editor.project) return
+  const isSourceOfKept = keptWhole.items.some((kept) =>
+    kept.projectImports.some((it) => it.source && it.projectId === project.projectId)
+  )
+  if (isSourceOfKept) return
+  try {
+    project.takeWaitingText()
+    project.incremental = undefined
+    project.compiledFrom = undefined
+    project.resetCompiled()
+    for (const file of project.files) if (file instanceof SP.SpellFile) file.resetCompiled()
+    // the Type Explorer's details of it read its parse too
+    scopeExplorer?.forget(project)
+  } catch (error) {
+    console.error(`couldn't forget the parse of ${project.path}`, error)
+  }
+}
+
 /** The projects `leaveProject()` is deciding about now, by path. */
 const leavingProjects = new Set<string>()
 
@@ -2565,6 +2817,17 @@ if (typeof window !== "undefined") window.addEventListener("pagehide", () => edi
 
 /** Where each file started, for Revert Changes in the public preview (`discardChanges()`). */
 const startingPoints = new StartingPoints()
+
+/**
+ * The preference that remembers which projects `<UpgradeNotice>` has offered to upgrade, by path:
+ * once each (`editor.offerUpgrade()`).
+ */
+const UPGRADE_OFFERED_PREF = "upgradeOffered"
+editorPrefs.declare(UPGRADE_OFFERED_PREF, { type: "object", default: {} })
+/** Where Spell's own projects are, the built-in groups:  `offerUpgrade()` leaves them alone. */
+const SPELLS_OWN_PROJECTS = "@spell/"
+/** Projects `offerUpgrade()` has looked at since the page loaded, by path:  it looks once each, after its first parse. */
+const upgradeLooked = new Set<string>()
 
 /** The preference that remembers a visitor has been told where their work is kept:  `editor.showKept()`. */
 const KEPT_NOTE_PREF = "toldKeptInBrowser"
@@ -2849,18 +3112,46 @@ export function runtimeUrl(): string {
  * its `<Project>.spell.js`, at `/spaces/<project>/<Project>.spell.js` (`SP.SpellUrls`).
  */
 async function fetchCompiled(projectId: string): Promise<string> {
+  const kept = compiledImports.get(projectId)
+  if (kept) return kept
   const { projectName } = new SP.SpellLocation(projectId)
   const url = SP.SpellUrls.fileUrl(SP.SpellLocation.join(projectId, `${projectName}${SP.COMPILED_JS_SUFFIX}`))
-  return $fetch<string>({ url, cache: "no-cache" })
+  const text = $fetch<string>({ url, cache: "no-cache" })
+  compiledImports.set(projectId, text)
+  // a failure isn't kept:  the next run asks again
+  text.catch(() => compiledImports.delete(projectId))
+  return text
 }
 
 /**
+ * Each imported project's compiled javascript, as `fetchCompiled()` last fetched it, by project id:
+ * a pause in typing re-runs the program without asking the server for imports that can't have changed
+ * (epic `solid-2-final` P9).
+ * - Forgotten when this editor compiles or saves that project (`forgetCompiled()`),
+ *   and all of it when the page comes back into focus:  another window or tab may have changed one.
+ */
+const compiledImports = new Map<string, Promise<string>>()
+
+/** Forget `fetchCompiled()`'s copy of project `projectId`:  it's been compiled again. */
+function forgetCompiled(projectId: string): void {
+  compiledImports.delete(projectId)
+}
+
+globalThis.window?.addEventListener("focus", () => compiledImports.clear())
+
+/**
  * Javascript of the code file a program imports as `module`, for `call native` (epic `from-console` P10):
- * `@spell/native/owen@spell/clipboard/clipboard.ts` => `/spaces/owen@spell/clipboard/clipboard.ts?as=javascript`,
- * which the page server answers with its types taken out.
+ * `@spell/native/owen@spell/clipboard/clipboard.ts` => `/spaces/owen@spell/clipboard/clipboard.ts?as=javascript`
+ * (`SP.SpellUrls.codeFileUrl()`), which the page server answers with its types taken out.
  * - Fetched afresh each run, so an edit to it shows on the next.
  */
 async function fetchCodeFile(module: string): Promise<string> {
-  const path = decodeURI(module.slice(SP.SPELL_NATIVE_MODULE.length))
-  return $fetch<string>({ url: `${SP.SpellUrls.fileUrl(path)}?as=javascript`, cache: "no-cache" })
+  return $fetch<string>({ url: SP.SpellUrls.codeFileUrl(module), cache: "no-cache" })
 }
+
+/**
+ * How a compile was asked for -- see `editor.compileApp()`:
+ * - `"on purpose"`:  Cmd-Enter, Restart, a menu;  saves the built files and prints the program
+ * - `"as typing pauses"`:  `compileAppSoon()`;  neither
+ */
+export type CompileWay = "on purpose" | "as typing pauses"

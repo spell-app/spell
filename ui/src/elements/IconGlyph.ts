@@ -11,6 +11,7 @@ import { derived, state } from "spell/element"
  * from -- its nearest `<ui-root icons>`'s, else the page's (`UI.icons`) -- shared by `<ui-icon>` and every component's
  * `icon` shorthand, close / delete icons and the like.
  * - Starts from a cached template when the runtime is already loaded, so a cached icon draws in the first frame.
+ * - Or through the packs it's handed (`packs`):  `<ui-icon-browser>` draws one pack's glyphs, whatever the page has.
  * - Reloads when the name changes, when the element is (re)connected (it may have moved under another root), and
  *   when any root's settings change (`RootSettings.generation`).
  * - A later request wins over an earlier, slower load.
@@ -32,14 +33,21 @@ export class IconGlyph {
   /** The icon name;  tracked. */
   private readonly name: Accessor<string | undefined>
 
+  /** The packs it draws from, when not the element's (`IconGlyphProps.packs`). */
+  private readonly packs?: E.IconPacks
+
   /** Request counter, so a slower earlier load can't win. */
   private request = 0
 
-  constructor({ owner, name }: IconGlyphProps) {
+  constructor({ owner, name, packs }: IconGlyphProps) {
     this.owner = owner
     this.name = name
+    this.packs = packs
     if (isServer) return
-    this.svgTemplate = untrack(() => IconGlyph.peek(owner.domElement, name()))
+    this.svgTemplate = untrack(() => {
+      const nameNow = name()
+      return packs && nameNow ? packs.peek(nameNow) : IconGlyph.peek(owner.domElement, nameNow)
+    })
     // stays explicit:  it reads its OWNER's members and a page-wide static, not this record's
     createEffect(
       () => ({ name: name(), connected: owner.isConnected, generation: E.RootSettings.generation }),
@@ -69,7 +77,7 @@ export class IconGlyph {
     const request = ++this.request
     const template = name
       ? await UI.load()
-          .then((ui) => IconGlyph.packsFor(this.owner.domElement, ui.icons).get(name))
+          .then((ui) => (this.packs ?? IconGlyph.packsFor(this.owner.domElement, ui.icons)).get(name))
           .catch(() => undefined)
       : undefined
     if (this.request === request) this.svgTemplate = template
@@ -132,6 +140,8 @@ export type IconGlyphProps = {
   owner: IconGlyphOwner
   /** the icon name, e.g. `xmark`;  `undefined` for none;  tracked */
   name: Accessor<string | undefined>
+  /** the packs to draw from, instead of the ones the element draws from (its nearest `<ui-root icons>`'s, else the page's) */
+  packs?: E.IconPacks
 }
 
 /** What an `IconGlyph` needs of the component drawing it. */

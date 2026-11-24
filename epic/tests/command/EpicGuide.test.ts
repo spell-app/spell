@@ -21,6 +21,8 @@ const TOPICS = [
   "done",
   "superpowers",
   "tidy",
+  "badges",
+  "hush",
   "claude-only-tools"
 ]
 

@@ -1,7 +1,7 @@
 /**
  * Tests of `Sagas`:  the shared list of sagas, in Owen's order (epic `epic-workflow` P15), on a scratch checkout.
  */
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -91,8 +91,30 @@ describe("Sagas guides", () => {
     writeFileSync(join(root, "guides/topic/topic.html"), page)
     writeFileSync(join(root, "guides/topic/experiments/x.html"), page)
     expect(new Sagas(root).guides()).toEqual([
-      { path: "guides/a.html", saga: "epics" },
-      { path: "guides/topic/topic.html", saga: null }
+      { path: "guides/a.html", file: join(root, "guides/a.html"), saga: "epics" },
+      { path: "guides/topic/topic.html", file: join(root, "guides/topic/topic.html"), saga: null }
     ])
+  })
+
+  test("guides in both places (epic-engine P79):  the checkout's own folder first, one of each page", () => {
+    const top = realpathSync(mkdtempSync(join(tmpdir(), "sagas-both-")))
+    const repo = join(top, "repo")
+    const content = join(top, "repo.epics")
+    mkdirSync(join(repo, ".epic"), { recursive: true })
+    mkdirSync(join(repo, "guides"), { recursive: true })
+    mkdirSync(join(content, "guides"), { recursive: true })
+    writeFileSync(join(repo, ".epic/config.json5"), '{ "contentFolder": "../repo.epics", "guidesFolder": "guides" }')
+    // moved, its branch not merged:  in both, the code's wins
+    writeFileSync(join(repo, "guides/moved.html"), Sagas.withSaga(page, "epics"))
+    writeFileSync(join(content, "guides/moved.html"), page)
+    writeFileSync(join(content, "guides/private.html"), page)
+    try {
+      expect(new Sagas(repo).guides()).toEqual([
+        { path: "guides/moved.html", file: join(repo, "guides/moved.html"), saga: "epics" },
+        { path: "guides/private.html", file: join(content, "guides/private.html"), saga: null }
+      ])
+    } finally {
+      rmSync(top, { recursive: true, force: true })
+    }
   })
 })

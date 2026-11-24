@@ -27,7 +27,8 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
 
 ```
 /designer guides/server.html                      a docs page
-/designer ui/docs/ui-button.html "the tabs"  a component set's page, a focus
+/designer http://127.0.0.1:4747/components/epics/epic-item "the tabs"  a page of Epic UI's guide, a focus
+/designer http://127.0.0.1:4747/components/ui/button  a page of the Spell UI site
 /designer http://127.0.0.1:4747/editor/            any URL
 ```
 
@@ -49,6 +50,9 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
    - which server:  a docs page comes from this checkout's page server, a component set's page at its address (the tool
      finds both);  a worktree's page as the person sees it:  `--base http://127.0.0.1:4747/worktrees/<w>`
    - its JSON's `problems` (console errors, a selector that matched nothing) are findings too
+   - among them, `misaligned in <shots>:  ...`:  a row with one item drawn more than half a pixel above or below the
+     rest, or a centred column with one left or right of its middle, measured by what's drawn (`Alignment`, epic `epic-engine` P83);  each is HIGH, T18's, fixed in the
+     component, never with page CSS;  a row meant to be uneven is marked `data-align="free: <why>"`
 3. Look at EVERY shot (`Read` on each PNG).
    - Reading one:  procedures.md, explain-interface's guide.  Sizes are ratios:  never report a px value from an image
      alone;  say "about twice the height of its content".
@@ -82,8 +86,8 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
          shot (the change tried in the page, shot, then undone), the rule it answers;  options "Do it" / "Leave it" /
          Other.
        - Each one also an issue on the epic page, calm unless it breaks one of the person's own asks:
-         `epic add <epic>#I "<what> (designer)" --details "..." --calm`;  its title at most 30 plain words, read
-         cold, the rest in `--details` (plan-doc.md's "Rules").
+         `epic add <epic>#I "<what> (designer)" --details "..." --calm`;  its title read by someone NOT following
+         the work, named by what they see, the rest in `--details` (plan-doc.md's "Rules", TITLES).
    - **The agent type**:  returns the ranked list to the session that asked;  it changes nothing itself.
 6. Learn (designer.md says so in its header):
    - The person gives design feedback, in any session:

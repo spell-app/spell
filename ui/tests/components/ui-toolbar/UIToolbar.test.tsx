@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vite-plus/test"
+import { describe, expect, it, vi } from "vite-plus/test"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -163,6 +163,13 @@ describe("<ui-toolbar> bar slots", () => {
       const { host } = await toolbar(150, FILES, `${LOOK} scroll-first`)
       await expect.poll(() => host.matches(":state(dropdown)")).toBe(true)
       expect(host.matches(":state(overflowing)")).toBe(false)
+    })
+
+    it("`scroll-only`:  however narrow, it scrolls, and it's never the dropdown", async () => {
+      const { host } = await toolbar(150, FILES, `${LOOK} scroll-only`)
+      await expect.poll(() => host.matches(":state(overflowing)")).toBe(true)
+      await ElementFixture.settle()
+      expect(host.matches(":state(dropdown)")).toBe(false)
     })
 
     it("with `max-visible`, at every width round the scroll room:  one look, never taking turns (epic `editor` I189)", async () => {
@@ -479,10 +486,149 @@ describe("<ui-toolbar> bar slots", () => {
       })
     })
 
+    describe('<ui-item closable="when-limited">', () => {
+      /** `count` tabs with an icon each, closable while some are put away;  the first chosen. */
+      const tabs = (count: number) =>
+        Array.from(
+          { length: count },
+          (_, index) =>
+            `<ui-item icon="file outline" closable="when-limited" ${index ? "" : "selected"}>F${index}</ui-item>`
+        ).join("")
+
+      /** A row of 5 such tabs, at most 3:  F0 chosen, F1 and F2 opened beside it. */
+      async function rowOfThree() {
+        const made = await toolbar(900, tabs(5), `${LOOK} max-visible="3"`)
+        const { host } = made
+        await expect.poll(() => host.matches(":state(limited)")).toBe(true)
+        const [, f1, f2] = host.querySelectorAll("ui-item")
+        host.component.openItem(f2!)
+        host.component.openItem(f1!)
+        await expect.poll(() => shown(host)).toEqual(["F0", "F1", "F2"])
+        return made
+      }
+
+      /** `item`'s ✕, its icon box and its item box. */
+      const partsOf = (item: Element) => {
+        const shadow = item.shadowRoot!
+        return {
+          close: shadow.querySelector<HTMLElement>("[part~=close]"),
+          icon: shadow.querySelector<HTMLElement>("[part~=icon]")!,
+          box: shadow.querySelector<HTMLElement>("[part~=item]")!
+        }
+      }
+
+      it("a ✕ in its icon's place only while some items are put away;  hidden until hovered, taking no room", async () => {
+        const few = await toolbar(900, tabs(3), `${LOOK} max-visible="3"`)
+        await ElementFixture.settle()
+        expect(partsOf(few.host.querySelector("ui-item")!).close).toBeNull()
+
+        const { host } = await toolbar(900, tabs(5), `${LOOK} max-visible="3"`)
+        await expect.poll(() => host.matches(":state(limited)")).toBe(true)
+        const first = host.querySelector("ui-item")!
+        await expect.poll(() => partsOf(first).close).not.toBeNull()
+        const { close, icon } = partsOf(first)
+        expect(getComputedStyle(close!).visibility).toBe("hidden")
+        const glyph = close!.getBoundingClientRect()
+        const box = icon.getBoundingClientRect()
+        // in the icon's cell:  inside its box, so the tab is no wider for it
+        expect(glyph.left).toBeGreaterThanOrEqual(box.left - 0.5)
+        expect(glyph.right).toBeLessThanOrEqual(box.right + 0.5)
+      })
+
+      it("a click on the ✕ sends `ui-closing`, then the tab leaves the row, its neighbour chosen in its place", async () => {
+        const { host } = await rowOfThree()
+        const first = host.querySelector("ui-item")!
+        await expect.poll(() => partsOf(first).close).not.toBeNull()
+        const closing: Event[] = []
+        host.addEventListener("ui-closing", (event) => closing.push(event))
+        partsOf(first).close!.click()
+        expect(closing).toHaveLength(1)
+        await expect.poll(() => first.hidden).toBe(true)
+        await expect.poll(() => host.querySelectorAll("ui-item")[1]!.hasAttribute("selected")).toBe(true)
+      })
+
+      it("`ui-closing` cancelled:  it stays;  a middle click and Delete close it too", async () => {
+        const { host } = await rowOfThree()
+        const [first, second] = [...host.querySelectorAll("ui-item")] as HTMLElement[]
+        await expect.poll(() => partsOf(first!).close).not.toBeNull()
+        const keep = (event: Event) => event.preventDefault()
+        host.addEventListener("ui-closing", keep)
+        partsOf(first!).close!.click()
+        await ElementFixture.settle()
+        expect(first!.hidden).toBe(false)
+        host.removeEventListener("ui-closing", keep)
+
+        partsOf(second!).box.dispatchEvent(new MouseEvent("auxclick", { button: 1, bubbles: true, composed: true }))
+        await expect.poll(() => second!.hidden).toBe(true)
+        partsOf(first!).box.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Delete", bubbles: true, composed: true })
+        )
+        await expect.poll(() => first!.hidden).toBe(true)
+      })
+    })
+
     it("no `max-visible`:  every item, however many", async () => {
       const { host } = await toolbar(300, items(20), LOOK)
       await ElementFixture.settle()
       expect(shown(host)).toHaveLength(20)
+    })
+  })
+
+  describe("reorderable", () => {
+    /** The item box of each of `host`'s items. */
+    const boxes = (host: Element) =>
+      [...host.querySelectorAll("ui-item")].map((item) => item.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!)
+
+    /** A pointer event at `x`, in the middle of `box`'s height. */
+    const pointer = (type: string, box: HTMLElement, x: number) =>
+      new PointerEvent(type, {
+        pointerId: 1,
+        button: 0,
+        buttons: 1,
+        clientX: x,
+        clientY: box.getBoundingClientRect().top + 5,
+        bubbles: true,
+        composed: true
+      })
+
+    it("dragging an item over another:  it dims, a line where it would land;  the drop sends `ui-item-dropped`", async () => {
+      const items = "<ui-item selected>One</ui-item><ui-item>Two</ui-item><ui-item>Three</ui-item>"
+      const { host } = await toolbar(600, items, 'appearance="segmented link header" tabs reorderable')
+      await ElementFixture.settle()
+      const [one, , three] = boxes(host)
+      const dropped: CustomEvent[] = []
+      host.addEventListener("ui-item-dropped", (event) => dropped.push(event as CustomEvent))
+      const start = one!.getBoundingClientRect().left + 5
+      const over = three!.getBoundingClientRect().left + 5
+      one!.dispatchEvent(pointer("pointerdown", one!, start))
+      window.dispatchEvent(pointer("pointermove", one!, start + 20))
+      window.dispatchEvent(pointer("pointermove", one!, over))
+      await ElementFixture.settle()
+      const [first, , last] = [...host.querySelectorAll("ui-item")]
+      expect(first!.matches(":state(dragged)")).toBe(true)
+      expect(last!.matches(":state(drop-after)")).toBe(true)
+      expect(getComputedStyle(one!).opacity).toBe("0.5")
+      window.dispatchEvent(pointer("pointerup", one!, over))
+      await ElementFixture.settle()
+      expect(dropped).toHaveLength(1)
+      expect(dropped[0]!.detail).toMatchObject({ item: first, target: last, place: "after" })
+      expect(first!.matches(":state(dragged)")).toBe(false)
+      expect(last!.matches(":state(drop-after)")).toBe(false)
+    })
+
+    it("without it, a drag sends nothing", async () => {
+      const items = "<ui-item selected>One</ui-item><ui-item>Two</ui-item>"
+      const { host } = await toolbar(600, items, 'appearance="segmented link header" tabs')
+      await ElementFixture.settle()
+      const [one, two] = boxes(host)
+      const dropped = vi.fn()
+      host.addEventListener("ui-item-dropped", dropped)
+      const start = one!.getBoundingClientRect().left + 5
+      one!.dispatchEvent(pointer("pointerdown", one!, start))
+      window.dispatchEvent(pointer("pointermove", one!, two!.getBoundingClientRect().left + 5))
+      window.dispatchEvent(pointer("pointerup", one!, two!.getBoundingClientRect().left + 5))
+      await ElementFixture.settle()
+      expect(dropped).not.toHaveBeenCalled()
     })
   })
 

@@ -98,7 +98,7 @@ describe("<ui-modal> classes", () => {
     ['appearance="basic"', "ui basic modal"],
     ["overlay fullscreen", "ui fullscreen overlay modal"],
     ["inverted scrolling", "ui inverted scrolling modal"],
-    ['vertical-align="top"', "ui top aligned modal"],
+    ['vertical-align="top"', "ui top aligned modal top-aligned"],
     ['vertical-align="middle"', "ui modal"]
   ])("<ui-modal %s>", async (attributes, classes) => {
     const { dialog } = await modal(`<ui-modal ${attributes}>x</ui-modal>`)

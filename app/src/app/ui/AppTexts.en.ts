@@ -27,6 +27,25 @@ export const APP_TEXTS = {
   restart: "Restart",
   takesEffectOnRestart: "This takes effect on restart",
   restartNoticeClose: "Close",
+  // a project written for an older Spell, as it opens (`<UpgradeNotice>`, epic `language` P68):  once per project
+  upgradeNotice:
+    "This project was written for an older version of Spell.\n" +
+    "Some lines use an older way of writing Spell.  They work now, but a future version won't understand them.\n" +
+    "Upgrade rewrites those lines for you.  Your project works the same as before.\n" +
+    "Not ready?  Close this notice:  it won't appear again.  Each older line will then show a warning with a Fix it button, so you can update them one at a time.",
+  upgrade: "Upgrade",
+  upgradeNoticeClose: "Close",
+  // once it's upgraded:  `{version}`, today's Spell, `0.9`;  `{count}`, how many lines changed
+  upgraded:
+    "Your project now matches Spell {version}, the newest version.\n" +
+    "The editor changed {count} lines in your project to Spell {version}'s new style.\n" +
+    "They still do the same thing:  there's nothing else for you to do.",
+  upgradedOne:
+    "Your project now matches Spell {version}, the newest version.\n" +
+    "The editor changed 1 line in your project to Spell {version}'s new style.\n" +
+    "It still does the same thing:  there's nothing else for you to do.",
+  // the button on an old line's warning, in the code's problem popup:  its fix, in one click (Owen's C3)
+  fixIt: "Fix it",
   menuCode: "Code",
   emptyAppPrompt: "Drag something here from the + menu, or click one there to add it.",
   modes: "Run, edit or debug",
@@ -93,8 +112,12 @@ export const APP_TEXTS = {
   paletteHint: "Click or drag to add to the page",
   paletteMore: "{count} more",
   paletteAppViews: "App views",
-  palettePin: "Keep this open",
-  paletteUnpin: "Unpin",
+  paletteSearchAll: "Search everything you can add",
+  paletteSearchIn: "Search {group}",
+  paletteStar: "Click the star to keep {part} at the top of the add bar",
+  paletteUnstar: "Take the star off {part}",
+  paletteFavoriteTip:
+    "{part}:  click it, then click in your app where you want it.  Or drag it there.  To unstar it, right-click it.",
   paletteAddView: "Add a View",
   paletteClearSearch: "Clear the search",
   partStepAdd: "Add {part}",
@@ -119,7 +142,8 @@ export const APP_TEXTS = {
   changeThisFinishing: "Finishing up…",
   changeThisWorking: "Your agent is working on it…",
   changeThisSeconds: "{seconds}s",
-  changeThisStalled: "Your agent didn't start on it within a minute,\nso it was stopped, and nothing changed.\nPress Send to try again.",
+  changeThisStalled:
+    "Your agent didn't start on it within a minute,\nso it was stopped, and nothing changed.\nPress Send to try again.",
   changeThisStart: "Start Claude Code",
   changeThisNoClaude: "Claude Code isn't on this computer,\nso nothing can make this change yet.",
   changeThisInstall: "Install Claude Code",
@@ -130,7 +154,8 @@ export const APP_TEXTS = {
   changeThisDone: "Your agent made the change.",
   changeThisNoChange: "Your agent finished,\nbut no file changed.\nTry saying the change another way.",
   changeThisFailed: "Your agent couldn't do that:\n{summary}",
-  changeThisStopped: "Your agent stopped before it was done,\nso your project may be only partly changed.\nCheck it before you go on.",
+  changeThisStopped:
+    "Your agent stopped before it was done,\nso your project may be only partly changed.\nCheck it before you go on.",
   changeThisRefused: "Change This only works on the Mac running Spell.",
   changeThisPicture: "A picture sent with it",
   changeThisRemovePicture: "Take this picture out",
@@ -138,6 +163,7 @@ export const APP_TEXTS = {
   menuInspect: "Inspect {type}",
   menuInspectParts: "Pick one of the parts under the mouse",
   menuInspectOtherViews: "Inspect Other Views",
+  menuAppMenu: "App Menu",
   partIsApp: "That's the app itself:\nit can't be cut, duplicated or deleted.",
   partNothingCopied: "Nothing's been copied yet.",
   partNothingSelected: "Nothing's selected.",
@@ -177,6 +203,8 @@ export const APP_TEXTS = {
   codeCompilerWords: "Compiler details in hover",
   codeBubbly: "Bubbly look",
   codeWrapLines: "Wrap long lines",
+  // upgrade a project written for an older Spell as it opens, with no notice first (epic `language` P68)
+  codeUpgradeOnOpen: "Upgrade old Spell when a project opens",
   codePopupDelay: "Delay before showing help",
   codePopupDelayShort: "Short:  0.4 seconds",
   codePopupDelayStandard: "Standard:  0.8 seconds",
@@ -226,7 +254,6 @@ export const APP_TEXTS = {
   discardDraftTip: "Throws your changes away.",
   updatedInYourDraft: "Updated in your draft.",
   discardChanges: "Discard changes",
-  closeTab: "Close",
   /** The file bar's ✕ at its far right, which hides the code (epic `editor` T83). */
   hideCode: "Hide the code",
   versions: "Versions",
@@ -358,6 +385,8 @@ export const APP_TEXTS = {
   // its rows the menus don't name
   shortcutFind: "Find and Replace",
   shortcutShowShortcuts: "Show Keyboard Shortcuts",
+  shortcutShowIcons: "Show All Icons, With Their Names",
+  allIcons: "All Icons…",
   shortcutChangeThis: "Ask for a Change to What's Selected",
   shortcutFormat: "Format Document",
   shortcutExpandSelection: "Expand Selection",
@@ -658,8 +687,6 @@ export const APP_TEXTS = {
   editorNameOfType: "`{name}`, of `{type}`",
   editorTypeName: "`{type}`, the whole type",
   editorZonesWaiting: "Each of the editor's parts shows here, in a zone of its own, once its Spell runs.",
-  editorZonesShow: "Show",
-  editorZonesStandIn: "The editor's own:  {part}",
   editorZonesCancel: "Cancel",
   homeEditorLine: "The editor's own pieces, in Spell:\nchange one, publish it, and the editor you're using changes.",
   homeNoGuides: "Guides are on their way.",
@@ -842,6 +869,32 @@ export const APP_TEXTS = {
   "themePage.epic": "Epic page",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Notebook",
+  // the palette groups page (`<PaletteGroupsPage>`, `/palette`):  the + menu's groups, to arrange and save (epic `editor` T81)
+  "palettePage.title": "Groups in the + menu",
+  "palettePage.hint":
+    "The + menu lists the components you can add, in groups.\n" +
+    "Drag a component into another group, or to a new spot in its own group.\n" +
+    "Drag a group by its handle to move it.\n" +
+    'Components in the last column, "Not in the + menu", stay out of the menu.\n' +
+    "Press Save when you're done.",
+  "palettePage.addGroup": "Add group",
+  "palettePage.save": "Save",
+  "palettePage.loading": "Loading the groups…",
+  "palettePage.unsaved": "Changes not saved yet",
+  "palettePage.saved": "Saved.  Reload the editor's tab to see the new groups in the + menu.",
+  "palettePage.noServer":
+    "Can't load the groups.  Check that Spell is still running on your computer, then reload this page.",
+  // `{error}` says why
+  "palettePage.saveFailed": "Couldn't save:  {error}",
+  "palettePage.newGroup": "New group",
+  "palettePage.groupName": "Group name",
+  // `{group}` is the group's name
+  "palettePage.groupIcon": "Icon for the {group} group in the + menu",
+  "palettePage.removeGroup": "Remove the {group} group.  Its components stay available under Not in the + menu.",
+  "palettePage.moveGroup": "Drag to move the {group} group",
+  "palettePage.addDivider": "Draw a line under the {group} group in the add bar",
+  "palettePage.removeDivider": "Take away the line under the {group} group in the add bar",
+  "palettePage.notOffered": "Not in the + menu",
   // an event's heading over its code (Owen:  "make label `on click`")
   inspectorEventHeading: "on {event}",
   // a dimmed action's tooltip:  `{condition}` is its `enabled when`, in its own words
@@ -1000,6 +1053,9 @@ export const APP_TEXTS = {
   listsStartAtLabel: "Lists start at",
   listsStartAtTip:
     "How your lists number their items.\nAt 1, the first item is number 1, the way people count.\nAt 0, it's number 0, the way JavaScript and Python count.",
+  // the Spell it's written for, read only (`SP.ProjectManifestJSON5.spellVersion`, epic `language` P68)
+  writtenForSpell: "Written for Spell {version}",
+  writtenForOlderSpell: "Written for an older version of Spell",
 
   ////////////////
   // ## The code editor's own words:  CodeMirror's (`CodeMirrorSetup`'s table), and its menu's
@@ -1110,7 +1166,20 @@ export const APP_TEXTS = {
   debugCalledFrom: "How it got here",
   debugNothing: "Nothing yet",
   // a value it can't show as text:  `{type}`, its kind
-  debugValueOf: "a {type}"
+  debugValueOf: "a {type}",
+  // the guides that ship with Spell (`<GuidesPage>`, epic `epic-engine` P79)
+  guidesTitle: "Guides",
+  guidesLede:
+    "Learn to build apps with Spell, and how Spell works inside.\nRead the guides under Start here first.\nTo find anything else, use the search box.",
+  guidesSearch: "Search the guides",
+  guidesStartHere: "Start here",
+  guidesForProgrammers: "For programmers working on Spell",
+  guidesAll: "All guides",
+  guidesChapterOf: "A chapter of {guide}.",
+  guidesMissing:
+    "The guides couldn't be opened.\nThey come with Spell, so try closing and opening the app again.\nIf that doesn't help, install Spell again.",
+  guidesInTheEditor: "Guides you open in the editor",
+  guidesHomeLink: "All guides"
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */

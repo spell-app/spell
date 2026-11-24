@@ -6,7 +6,6 @@ import {
   FoldingRangeKind,
   InsertTextFormat,
   MarkupKind,
-  SemanticTokensBuilder,
   SymbolKind,
   type CodeAction,
   type CompletionItem,
@@ -30,7 +29,7 @@ import {
   type TextEdit,
   type WorkspaceEdit,
   type WorkspaceSymbol
-} from "vscode-languageserver"
+} from "vscode-languageserver-types"
 
 import { withoutAccents } from "spell/util/string"
 import { P } from "spell/parser/parser"
@@ -38,6 +37,8 @@ import { MD, type InlineNode } from "spell/parser/markdown"
 import { SP } from "spell/parser/spell"
 import { BuiltInSounds } from "spell/ui/sounds"
 import { LSP } from "spell/app/lsp"
+import { SemanticTokensBuilder } from "./SemanticTokensBuilder"
+import { SourceHomes, type FieldHomes, type MadeAt } from "./SourceHomes"
 
 /**
  * Answers editor questions about parsed spell files, in Language Server Protocol shapes -- one method per request.
@@ -1229,6 +1230,14 @@ export class SpellLanguageService {
   }
 
   /**
+   * Where the innermost tag drawn around `position` is written, as the compiler stamps what it draws
+   * (`SP.SpellProject.partPlaceAt()`):  the Inspector selects what that tag draws.
+   */
+  partPlaceAt(file: SP.SpellFile, position: Position): P.SourcePlace | undefined {
+    return file.match && SP.SpellProject.partPlaceAt(file.match, this.offsetAt(file, position))
+  }
+
+  /**
    * Where the thing a word at `position` names was declared, when it names one a running program has:
    * a property or variable (`the stock`, `the deck`, `la reserva`), never a type, an action or a keyword.
    * - Its file and line, from 0:  the editor inspects what that line makes or draws (epic `editor` T64).
@@ -2376,7 +2385,10 @@ export class SpellLanguageService {
    * - Goes just above the top-level statement the line is in, as a method is only visible to lines AFTER it.
    * - See `methodSignatureFor()` for how the words become a signature.
    * - And "Make it code" / "Make it text" on the attribute value the caret is in (`codeOrText()`, epic `editor` T74).
-   * - And "Move the note below" on a line ending in an old `// ...` note (`lineEndNotesMoved()`, epic `language` T166).
+   * - And a fix for each of Spell's old forms on the lines, "Change "parts" to "slots"", "Move the note below" ...,
+   *   and "Upgrade this file", every one in it at once (`oldFormsFixed()`, epic `language` P68).
+   * - And "Change to ..." on a read of a place's field marked gone, to its likely new name (`placeFieldsRenamed()`,
+   *   epic `language` P68).
    */
   codeActions(file: SP.SpellFile, range: Range): CodeAction[] {
     if (!file.match) return []
@@ -2387,6 +2399,8 @@ export class SpellLanguageService {
     for (const error of SP.Block.getParseErrors(file.match) ?? []) {
       const { start, end } = error
       if (start === undefined || end === undefined || end < from || start > to) continue
+      // an old form past its drop version:  its own fix, below, never a method to define
+      if ((error.data as SP.OldFormData).oldForm) continue
       const lineStart = text.lastIndexOf("\n", start - 1) + 1
       const scope = this.scopeAt(file, start)
       // after a statement that parsed, from its start -- else only a WHOLE line
@@ -2413,38 +2427,193 @@ export class SpellLanguageService {
     }
     const switched = this.codeOrText(file, from)
     if (switched) actions.push(switched)
-    actions.push(...this.lineEndNotesMoved(file, from, to))
+    actions.push(...this.oldFormsFixed(file, from, to))
+    actions.push(...this.placeFieldsRenamed(file, from, to))
     return actions
   }
 
   /**
-   * "Move the note below" on each old line-end note, `// ...` after a line's code, on the lines `from` ... `to`:
-   * to the first line inside its line, `-- ...` (`SP.LineEndComments`, epic `language` T166).
-   * - A quick fix for the warning `BlockLine` notes on it, its diagnostic attached.
+   * A fix for each of Spell's old forms on the lines `from` ... `to`, then "Upgrade this file" (epic `language` P68):
+   * - "Change "parts" to "slots"", "Take out "wait for"", "Move the note below ..." -- each the quick fix for the
+   *   warning (or, once Spell drops it, the error) it noted, its diagnostic attached, and PREFERRED:
+   *   the editor's "Fix it" button and VS Code's quick-fix key apply it (Owen's C3).
+   * - "Upgrade this file to Spell 0.9":  every old form in the file at once, when there are any.
+   * - The edits are `SP.OldForms`', the same `spell lint --fix` and `spell upgrade` make.
    */
-  private lineEndNotesMoved(file: SP.SpellFile, from: number, to: number): CodeAction[] {
+  private oldFormsFixed(file: SP.SpellFile, from: number, to: number): CodeAction[] {
+    const uses = SP.OldForms.uses(file)
+    if (!uses.length) return []
     const text = file.parseText
     const lineStart = text.lastIndexOf("\n", from - 1) + 1
     const lineEnd = text.indexOf("\n", to) < 0 ? text.length : text.indexOf("\n", to)
-    const comments = SP.LineEndComments.in(file.match!.tokens).filter(
-      (comment) => comment.start >= lineStart && comment.start <= lineEnd
+    const actions = uses
+      .filter((use) => use.end >= lineStart && use.start <= lineEnd)
+      .map((use): CodeAction => {
+        const diagnostic = this.diagnostics(file).find(
+          (it) => it.severity !== DiagnosticSeverity.Information && this.offsetAt(file, it.range.start) === use.start
+        )
+        return {
+          title: this.oldFormFixTitle(file, use),
+          kind: CodeActionKind.QuickFix,
+          diagnostics: diagnostic ? [diagnostic] : undefined,
+          isPreferred: true,
+          edit: this.oldFormsEdit(file, [use])
+        }
+      })
+    if (!actions.length) return []
+    const version = SP.OldForms.shortVersion(SP.SPELL_VERSION)
+    actions.push({
+      title: LSP.LspTexts.of(this.scopeAt(file, from)).text("upgradeFile", { version }),
+      kind: CodeActionKind.QuickFix,
+      edit: this.oldFormsEdit(file, uses)
+    })
+    return actions
+  }
+
+  /**
+   * The scope explorer on this service, made the first time it's asked for:  the Types tab's tree and each node's
+   * details, the `spell/scopes` and `spell/scopeDetails` requests (epic `solid-2-final` T36).
+   * - One per service:  `details()` answers from the last `tree()` it worked out.
+   */
+  get scopes(): LSP.ScopeExplorer {
+    return (this.#scopes ??= new LSP.ScopeExplorer(this))
+  }
+
+  #scopes: LSP.ScopeExplorer | undefined
+
+  /**
+   * The scope tree `file`'s project parses in, for the Types tab:  the projects it imports compiled parsed first,
+   * once each, to show their sources (`LSP.ScopeExplorer.importedProjects()`).
+   * - throws what a parse throws
+   */
+  async scopeTree(file: SP.SpellFile): Promise<LSP.ScopeNode> {
+    for (const imported of LSP.ScopeExplorer.importedProjects(file.project)) {
+      if (this.#importsParsed.has(imported)) continue
+      await imported.parse()
+      this.#importsParsed.add(imported)
+    }
+    return this.scopes.tree(file.project)
+  }
+
+  /** The projects imported compiled that `scopeTree()` has parsed:  once each. */
+  #importsParsed = new WeakSet<SP.SpellProject>()
+
+  /**
+   * The code `file`'s project compiles to for `target` (`js/solid`, `ts/solid`, `py`), with its source map:
+   * the compiled-code pane's, from the last compile here (`SP.SpellProject.codeWithMapFor()`;  epic `solid-2-final` T36).
+   * - `error` when it can't be written:  NEVER throws.
+   *   - A project not compiled here, as one the editor opened from the compile cache:  its files' own compiles aren't
+   *     there, so what it wrote would be the program's head alone (11 lines of Solitaire's 749).
+   */
+  codeWithMap(file: SP.SpellFile, target: string): { code: string; map: P.SourceMapV3 } | { error: string } {
+    if (file.project.compiledFrom !== "compile") return { error: `${file.project.projectId} isn't compiled here` }
+    try {
+      return file.project.codeWithMapFor(target)
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : String(error) }
+    }
+  }
+
+  /**
+   * Where each of `names` lives for a thing made at `made` (none:  a widget or the runtime made it),
+   * of `typeNames`, read from this parse of `file`'s project:  the `spell/fieldHomes` request,
+   * the Inspector's value homes (epic `solid-2-final` T36).
+   * - With the types the project has only one thing of, `onlyTypes` (`InspectorWrites.isOneOfAKind()`).
+   * - NEVER throws:  see `SourceHomes.fieldHomes()`.
+   */
+  fieldHomes(
+    file: SP.SpellFile,
+    made: MadeAt | undefined,
+    typeNames: readonly string[],
+    names: readonly string[]
+  ): FieldHomes {
+    const files = file.project.spellFiles.flatMap((each) =>
+      each.contents === undefined
+        ? []
+        : [
+            {
+              path: SP.SpellLocation.filePathOf(each.path)?.replace(/^\//, "") ?? each.path,
+              contents: each.contents,
+              match: each.match
+            }
+          ]
     )
-    return comments.map((comment): CodeAction => {
-      const at = comment.start
-      const diagnostic = this.diagnostics(file).find(
-        (it) => it.severity === DiagnosticSeverity.Warning && this.offsetAt(file, it.range.start) === at
-      )
-      const edits = SP.LineEndComments.moved(text, comment).map(({ start, end, newText }) => ({
+    const variables = file.project.scope?.variables?.get() ?? []
+    const onlyTypes = variables.flatMap((variable) =>
+      variable.kind === "only" && typeof variable.datatype === "string" ? [variable.datatype] : []
+    )
+    return { ...SourceHomes.fieldHomes(files, made, typeNames, names), onlyTypes }
+  }
+
+  /**
+   * The old forms of Spell written in `file` (`SP.OldForms.uses()`), as one list of edits rewriting them all the new
+   * way, with how many there are:  the `spell/oldForms` request (epic `solid-2-final` T36).
+   */
+  oldForms(file: SP.SpellFile): { count: number; edits: SP.OldFormEdit[] } {
+    const uses = SP.OldForms.uses(file)
+    return { count: uses.length, edits: uses.flatMap((use) => use.edits) }
+  }
+
+  /**
+   * The fix for the old form at `position` in `file`, if one is written there:  its title and its edit.
+   * - What the language server's hover offers as its "Fix it" link, in VS Code (Owen's C3).
+   * - `null` where there's none.
+   */
+  oldFormFixAt(file: SP.SpellFile, position: Position): { title: string; edit: WorkspaceEdit } | null {
+    const offset = this.offsetAt(file, position)
+    const use = SP.OldForms.uses(file).find((it) => it.start <= offset && offset <= it.end)
+    return use ? { title: this.oldFormFixTitle(file, use), edit: this.oldFormsEdit(file, [use]) } : null
+  }
+
+  /** What the fix for `use`, an old form in `file`, is called:  `Change "parts" to "slots"`. */
+  private oldFormFixTitle(file: SP.SpellFile, use: SP.OldFormUse): string {
+    const texts = LSP.LspTexts.of(this.scopeAt(file, use.start))
+    if (use.form.id === "line-end-comment") return texts.text("moveLineEndNote")
+    const replacement = use.edits[0]?.newText
+    return replacement
+      ? texts.text("changeOldForm", { written: use.written.trim(), replacement })
+      : texts.text("takeOutOldForm", { written: use.written.trim() })
+  }
+
+  /** The edit rewriting `uses`, old forms in `file`, the new way. */
+  private oldFormsEdit(file: SP.SpellFile, uses: readonly SP.OldFormUse[]): WorkspaceEdit {
+    const edits = uses.flatMap((use) =>
+      use.edits.map(({ start, end, newText }) => ({
         range: { start: this.positionAt(file, start), end: this.positionAt(file, end) },
         newText
       }))
-      return {
-        title: LSP.LspTexts.of(this.scopeAt(file, at)).text("moveLineEndNote"),
-        kind: CodeActionKind.QuickFix,
-        diagnostics: diagnostic ? [diagnostic] : undefined,
-        isPreferred: true,
-        edit: { changes: { [this.addresses.uriFor(file)]: edits } }
-      }
+    )
+    return { changes: { [this.addresses.uriFor(file)]: edits } }
+  }
+
+  /**
+   * "Change to "owner"" on each read of a place's field marked gone, on the lines `from` ... `to`,
+   * when the same look found its likely new name (`SP.PlaceFieldMarks`, epic `language` P68, Q82).
+   * - A quick fix for the warning the read noted, its diagnostic attached.
+   * - Keeps the read's quotes:  `the "user" of the job` => `the "owner" of the job`.
+   */
+  private placeFieldsRenamed(file: SP.SpellFile, from: number, to: number): CodeAction[] {
+    const text = file.parseText
+    const lineStart = text.lastIndexOf("\n", from - 1) + 1
+    const lineEnd = text.indexOf("\n", to) < 0 ? text.length : text.indexOf("\n", to)
+    return SP.SpellWarnings.in(file.match!).flatMap(({ at }): CodeAction[] => {
+      const name = SP.PlaceFieldMarks.renameAt(at)
+      const { start, end } = at
+      if (!name || start === undefined || end === undefined || end < lineStart || start > lineEnd) return []
+      const range = this.rangeOf(file, at)!
+      const newText = text.startsWith('"', start) ? `"${name}"` : name
+      const diagnostic = this.diagnostics(file).find(
+        (it) => it.severity === DiagnosticSeverity.Warning && this.offsetAt(file, it.range.start) === start
+      )
+      return [
+        {
+          title: LSP.LspTexts.of(at.scope).text("changeToNewField", { name }),
+          kind: CodeActionKind.QuickFix,
+          diagnostics: diagnostic ? [diagnostic] : undefined,
+          isPreferred: true,
+          edit: { changes: { [this.addresses.uriFor(file)]: [{ range, newText }] } }
+        }
+      ]
     })
   }
 
@@ -3066,6 +3235,28 @@ export class SpellLanguageService {
       })
     }
     return uses
+  }
+
+  /**
+   * Where each line in `project` names site part `name` (`sitePartUses()`):  the file's path, and where `name` itself
+   * is written in its text, `start` to `end`, what a rename of the part replaces.
+   * - The site editor asks it of the language worker, which parses the project (`spell/sitePartUses`;  epic
+   *   `solid-2-final` I56):  the page holds no parse of it.
+   * - A use whose words don't hold `name` as written (a parse of older text) is left out.
+   */
+  static sitePartSpans(project: SP.SpellProject, name: string): LSP.SitePartSpan[] {
+    const spans: LSP.SitePartSpan[] = []
+    for (const { file, match } of SpellLanguageService.sitePartUses(project, name)) {
+      if (match.start === undefined || match.end === undefined) continue
+      const at = (file.contents ?? "").slice(match.start, match.end).indexOf(name)
+      if (at >= 0) spans.push({ path: file.path, start: match.start + at, end: match.start + at + name.length })
+    }
+    return spans
+  }
+
+  /** `sitePartSpans()` for `file`'s project:  the `spell/sitePartUses` request's answer. */
+  sitePartSpansFor(file: SP.SpellFile, name: string): LSP.SitePartSpan[] {
+    return SpellLanguageService.sitePartSpans(file.project, name)
   }
 
   /**

@@ -1,0 +1,79 @@
+/*
+ * A BADGE:  what happens next, first on an item's or a phase's line (epic `epic-engine` P81;  `ItemBadge`).
+ * - the colour of where it stands (`data-state`, the id chip's:  an item's states and a phase's)
+ * - GREY beside an id chip of that same colour (`data-echo`, T149;  Owen:  "grey label is OK for these");
+ *   where there's no chip beside it (a phase, a While you were out line), it keeps its colour
+ * - solid, but handed to Claude outlined and queued dotted, as the id chip
+ * - the shape of the UPDATE label it replaces:  18px tall, small capitals, square-ish
+ */
+
+@layer ui.components.epic-badge.types;
+
+@layer ui.components.epic-badge.types {
+  .badge {
+    --_epic-badge: var(--epic-state-open, var(--ui-yellow));
+    --_epic-badge-on: var(--epic-state-open-on, var(--ui-yellow-on));
+    display: inline-flex;
+    box-sizing: border-box;
+    align-items: center;
+    height: 18px;
+    padding: 0 6px;
+    margin-inline-end: 4px;
+    border-radius: 4px;
+    background: var(--_epic-badge);
+    color: var(--_epic-badge-on);
+    font: 700 10px/1 var(--epic-sans, var(--ui-font-family));
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    vertical-align: 1px;
+  }
+  .badge[data-state="attention"] {
+    --_epic-badge: var(--epic-state-attention, var(--ui-red));
+    --_epic-badge-on: var(--epic-state-attention-on, var(--ui-red-on));
+  }
+  .badge:is([data-state="replied"], [data-state="waiting"], [data-state="updated"]) {
+    --_epic-badge: var(--epic-state-replied, var(--ui-orange));
+    --_epic-badge-on: var(--epic-state-replied-on, var(--ui-orange-on));
+  }
+  /* light orange:  theirs to see, or Claude's to check again */
+  .badge:is([data-state="requested"], [data-state="recheck"]) {
+    --_epic-badge: var(--epic-state-requested, var(--ui-orange-background));
+    --_epic-badge-on: var(--epic-state-requested-on, var(--ui-yellow-on));
+  }
+  /* light yellow:  open, no hurry */
+  .badge[data-state="someday"] {
+    --_epic-badge: var(--epic-state-someday, var(--ui-yellow-background));
+    --_epic-badge-on: var(--epic-state-someday-on, var(--ui-yellow-on));
+  }
+  .badge:is([data-state="progress"], [data-state="handed"], [data-state="scheduled"]) {
+    --_epic-badge: var(--epic-state-progress, var(--ui-blue));
+    --_epic-badge-on: var(--epic-state-progress-on, var(--ui-blue-on));
+  }
+  .badge:is([data-state="handed"], [data-state="scheduled"]) {
+    border: 1.5px solid var(--_epic-badge);
+    background: transparent;
+    color: var(--ui-blue-text, var(--_epic-badge));
+  }
+  .badge[data-state="scheduled"] {
+    border-width: 2px;
+    border-style: dotted;
+    padding: 0 4px;
+  }
+  .badge[data-state="recent"] {
+    --_epic-badge: var(--epic-state-recent, var(--ui-green));
+    --_epic-badge-on: var(--epic-state-recent-on, var(--ui-green-on));
+  }
+  .badge:is([data-state="old"], [data-state="handled"], [data-state="quiet"], [data-state="paused"]) {
+    --_epic-badge: var(--epic-state-old, var(--ui-grey-background));
+    --_epic-badge-on: var(--epic-state-old-on, var(--ui-grey-text));
+  }
+  /* last:  its colour is the chip's beside it, which says it already;  one grey already keeps its quiet ink (closed) */
+  .badge[data-echo]:not([data-state="old"], [data-state="handled"], [data-state="quiet"], [data-state="paused"]) {
+    --_epic-badge: var(--epic-state-echo, var(--ui-grey-background));
+    --_epic-badge-on: var(--epic-state-echo-on, var(--ui-text-color));
+    padding: 0 6px;
+    border: 0;
+    background: var(--_epic-badge);
+    color: var(--_epic-badge-on);
+  }
+}

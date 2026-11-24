@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { labelVocabulary } from "spell/ui/components/ui-label/UILabel.en"
@@ -57,7 +56,7 @@ describe("UILabel.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = labelRaw + colorsCSS
+    const css = labelRaw + colorsSharedCSS
     for (const vocabulary of [labelVocabulary, labelsVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -72,7 +71,7 @@ describe("UILabel.css source", () => {
 describe("UILabel.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every label in %s", (path) => {
     Sheets.adopt([...foundationCSS, labelCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const labels = root.querySelectorAll<HTMLElement>(".ui.label")
     expect(labels.length).toBeGreaterThan(0)
     for (const label of labels) {
@@ -86,8 +85,8 @@ describe("UILabel.css examples", () => {
 
   it("fills colours from the resolved hue, and outlines basic ones", () => {
     Sheets.adopt([...foundationCSS, labelCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
-    const red = Fixture.render(`<span style="background-color: var(--ui-red); color: var(--ui-surface)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
+    const red = Sheets.render(`<span style="background-color: var(--ui-red); color: var(--ui-surface)"></span>`)
     const filled = getComputedStyle(root.querySelector(".ui.red.label:not(.basic, .circular)")!)
     expect(filled.backgroundColor).toBe(getComputedStyle(red).backgroundColor)
     const basic = getComputedStyle(root.querySelector(".ui.red.basic.label:not(.tag)")!)
@@ -100,7 +99,7 @@ describe("UILabel.css examples", () => {
 
   it("scales by size;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, labelCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     const ladder = ["mini", "tiny", "small", "large", "big", "huge", "massive"].map((name) => size(`.ui.${name}.label`))
     expect([...ladder].sort((a, b) => a - b)).toEqual(ladder)
@@ -109,7 +108,7 @@ describe("UILabel.css examples", () => {
 
   it("dims disabled labels and darkens active ones", () => {
     Sheets.adopt([...foundationCSS, labelCSS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     for (const label of root.querySelectorAll(".ui.disabled.label"))
       expect(parseFloat(getComputedStyle(label).opacity)).toBeCloseTo(0.45, 2)
     const active = getComputedStyle(root.querySelector(".ui.active.label")!).backgroundColor
@@ -119,7 +118,7 @@ describe("UILabel.css examples", () => {
 
   it("draws tags, pointing arrows and round badges with pseudo-elements and tokens", () => {
     Sheets.adopt([...foundationCSS, labelCSS])
-    const types = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const types = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const tag = types.querySelector(".ui.tag.label")!
     expect(getComputedStyle(tag, "::before").content).toBe('""')
     expect(getComputedStyle(tag, "::after").borderTopLeftRadius).toBe("50%")
@@ -127,7 +126,7 @@ describe("UILabel.css examples", () => {
     const pointing = types.querySelector(".ui.left.pointing.label, .ui[class*='left pointing'].label")!
     expect(getComputedStyle(pointing, "::before").content).toBe('""')
     expect(getComputedStyle(pointing, "::before").top).not.toBe("0px")
-    const variations = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const variations = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const badge = variations.querySelector<HTMLElement>(".ui.circular.label:not(.empty)")!.getBoundingClientRect()
     expect(badge.width).toBeCloseTo(badge.height, 0)
     const dot = variations.querySelector<HTMLElement>(".ui.empty.circular.label")!.getBoundingClientRect()
@@ -136,7 +135,7 @@ describe("UILabel.css examples", () => {
 
   it("pins corner and attached labels to their owner's edges", () => {
     Sheets.adopt([...foundationCSS, labelCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const corner = root.querySelector<HTMLElement>(".ui.red.corner.label")!
     const owner = corner.parentElement!.getBoundingClientRect()
     const box = corner.getBoundingClientRect()
@@ -150,7 +149,7 @@ describe("UILabel.css examples", () => {
 
   it("pins bottom CORNER attached labels to the bottom edge (I91)", () => {
     Sheets.adopt([...foundationCSS, labelCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div><div class="owner" style="position: relative; height: 200px">` +
         `<div class="ui bottom left attached label">L</div><div class="ui bottom right attached label">R</div></div></div>`
     )
@@ -162,13 +161,13 @@ describe("UILabel.css examples", () => {
 
   it("takes a public token from a wrapper (static markup)", () => {
     Sheets.adopt([...foundationCSS, labelCSS])
-    const root = Fixture.render(`<div style="--ui-label-radius: 12px"><div class="ui label">A</div></div>`)
+    const root = Sheets.render(`<div style="--ui-label-radius: 12px"><div class="ui label">A</div></div>`)
     expect(getComputedStyle(root.querySelector(".ui.label")!).borderTopLeftRadius).toBe("12px")
   })
 
   it("hands a group's look to its labels", () => {
     Sheets.adopt([...foundationCSS, labelCSS])
-    const root = Fixture.render(EXAMPLES["./examples/groups.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/groups.html"]!)
     const basic = getComputedStyle(root.querySelector(".ui.basic.labels > .label")!)
     expect(basic.borderTopWidth).toBe("1px")
     const tagged = root.querySelector(".ui.tag.labels > .label")!
@@ -187,7 +186,7 @@ describe("UILabel.css in shadow roots", () => {
   it("keeps the host out of layout and styles the inner root", () => {
     Sheets.adopt(foundationCSS)
     const host = Sheets.host(`<span class="ui teal label" part="label">New</span>`, [...foundationCSS, labelCSS])
-    const teal = Fixture.render(`<span style="background-color: var(--ui-teal)"></span>`)
+    const teal = Sheets.render(`<span style="background-color: var(--ui-teal)"></span>`)
     expect(getComputedStyle(host).display).toBe("contents")
     expect(getComputedStyle(Sheets.inner(host)).backgroundColor).toBe(getComputedStyle(teal).backgroundColor)
   })

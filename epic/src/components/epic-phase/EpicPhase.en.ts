@@ -10,6 +10,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell/epic/components/epic-item/Fold.types"
 // the review controls a phase draws, as `<epic-item>` does
+import { BADGE_TEXTS } from "spell/epic/components/epic-item/EpicItem.en"
 import { REVIEW_PARTS } from "spell/epic/components/epic-review/EpicReview.types"
 // the fold pieces every folding block shares
 import {
@@ -141,6 +142,13 @@ export const epicPhaseVocabulary = {
         "no attribute."
     },
     {
+      name: "badged",
+      kind: "boolean",
+      description:
+        "Its page has item badges (epic `epic-engine` P81):  its title starts with the badge of where it stands " +
+        "(YOUR CALL, QUEUED, UNDERWAY, HELD, DONE).  Written by the epic tool."
+    },
+    {
       name: "plan",
       kind: "enum",
       values: ["waiting", "accepted", "held"],
@@ -249,6 +257,7 @@ export const epicPhaseVocabulary = {
     }
   ],
   texts: [
+    ...BADGE_TEXTS,
     ...FOLD_TEXTS,
     // `status*`:  the review controls' `todo` is Make Todo
     {
@@ -296,11 +305,6 @@ export const epicPhaseVocabulary = {
       key: "unmerged",
       text: "not on main",
       description: "A done phase's pill while its work is on its epic's branch alone (`unmerged`, I273)."
-    },
-    {
-      key: "unmergedTip",
-      text: "Done on {branch}, not merged yet",
-      description: "That pill's tooltip."
     },
     {
       key: "spanTip",

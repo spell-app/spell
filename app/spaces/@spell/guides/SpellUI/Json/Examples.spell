@@ -4,18 +4,27 @@
 		<header>JSON data holds data in a page, as its text or from a file, and shows it as an outline that opens and closes.</>
 	</>
 
-	<!-- EXAMPLES:  the outline first, then data a tree diagram reads. -->
+	<!-- EXAMPLES:  the outline first, then data a diagram reads. -->
 	<section label="Types">
 		<section label="An outline" sticky="stack" collapsible dividing>
-			<example "An outline" description="The data is the element's text, drawn as an outline whose objects and arrays open and close.  Double-click a value to edit it.">
-				<json depth="2" editable>
-					{ "lamp": { "name": "desk", "watts": 60, "on": false, "bought": "2026-11-18" }, "tags": ["home", "office"] }
+			<example "An outline" description="Its text is the data, drawn as an outline.  The top level starts open;  a closed object or array sits on one line.  Click its toggle, its key or its line to open it, or something inside its line to open the way down to that;  Alt-click to open or close everything inside it.">
+				<json>
+					{ "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null,
+					  "tags": ["in", "test", "v2"], "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 },
+					  "notes": { "text": "A long string that goes on for a while, to show how a closed line is cut short" },
+					  "empty": {}, "none": [] }
 				</json>
 			</example>
 		</>
 
-		<section label="Its own text" sticky="stack" collapsible dividing>
-			<example "Its own text" description="The data is the element's text, its braces kept as written.  Inside a tree diagram it's the diagram's data, and doesn't show itself.">
+		<section label="From a file" sticky="stack" collapsible dividing>
+			<example "From a file" description="`source` loads the data from a file on this site:  here a board with 387 ports.  Its ports are one line until opened, then a closed line each.">
+				<json source="/components/ui/examples/json-ports.json"/>
+			</example>
+		</>
+
+		<section label="A diagram's data" sticky="stack" collapsible dividing>
+			<example "A diagram's data" description="Inside a diagram it's the diagram's data, and doesn't show:  the tree diagram reads the `<ui-json>` inside it.">
 				<tree-diagram>
 					<json>
 						{
@@ -27,20 +36,53 @@
 			</example>
 		</>
 
-		<section label="From a file" sticky="stack" collapsible dividing>
-			<example "From a file" description="`source` loads the data from a file on this site, and the tree diagram draws it once it arrives.">
-				<tree-diagram>
-					<json source="/components/ui/examples/tree-data.json"/>
-				</tree-diagram>
+		<section label="A script child" sticky="stack" collapsible dividing>
+			<example "A script child" description="A `<script type=\"application/json\">` inside it holds text the page must not read as markup, such as a `<`.">
+				<html>
+					<ui-json>
+						<script type="application/json">{ "label": "a < b", "children": [{ "label": "a" }, { "label": "b" }] }</script>
+					</ui-json>
+				</html>
 			</example>
 		</>
 	</>
 
 	<section label="Variations">
+		<section label="Depth" sticky="stack" collapsible dividing>
+			<example "Depth" description="`depth` says how many levels start open:  `3` here, and `0` closes everything.">
+				<json depth="3">{ "board": { "name": "demo", "parts": { "a1": { "kind": "switch", "on": false }, "b2": { "kind": "lamp", "watts": 60 } } } }</json>
+				<json depth="0" no-header>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]</json>
+			</example>
+		</>
+
+		<section label="No quotes" sticky="stack" collapsible dividing>
+			<example "No quotes" description="`quotes=\"no\"` shows keys without quotes, as JSON5 allows;  the header's quotes button does the same.  Copy always copies JSON.">
+				<json quotes="no">{ "name": "port-a", "two words": 2, "lanes": [0, 1, 2, 3] }</json>
+			</example>
+		</>
+
+		<section label="Editable" sticky="stack" collapsible dividing>
+			<example "Editable" description="`editable`:  double-click a key or value to edit it.  Each value gets a control that fits it:  a text field, a number field, a date picker, a checkbox.  Enter keeps the edit, Escape drops it.">
+				<json depth="2" editable>{ "lamp": { "name": "desk", "watts": 60, "on": false, "bought": "2026-11-18", "checked": "2026-11-18T10:00:00Z", "owner": null } }</json>
+			</example>
+		</>
+
 		<section label="Hidden" sticky="stack" collapsible dividing>
 			<example "Hidden" description="`hidden` holds the data without showing it, for script or another element to read.">
 				<json hidden>{ "kept": "out of sight" }</json>
 				<text color="grey" italic>Nothing shows:  the data is kept for script.</text>
+			</example>
+		</>
+	</>
+
+	<section label="Sizing">
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example "Height" description="`max-height` caps the outline, and what doesn't fit scrolls;  `resizable=\"height\"` lets people drag it.">
+				<json max-height="8em" resizable="height">
+					{ "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null,
+					  "tags": ["in", "test", "v2"], "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 },
+					  "notes": { "text": "A long string that goes on for a while" }, "empty": {}, "none": [] }
+				</json>
 			</example>
 		</>
 	</>

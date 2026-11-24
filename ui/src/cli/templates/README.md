@@ -4,7 +4,7 @@ The files Spell UI's `spell` commands write new files from.
 Today, only component packs use them:
 
 - `pack/repo/` -- a new pack, a repo of its own inside the kit, `spell-<name>/`:  `spell pack create <name> [--prefix x-]`
-  - laid out as spell-brand is:  `package.json` with its `"spellPack"`, its own alias table, `src/`, `components/`
+  - laid out as a pack repo is:  `package.json` with its `"spellPack"`, its own alias table, `src/`, `components/`
   - `pack/tests/` -- its first test, into the new repo's `tests/`
 - `pack/element/` -- one element in a pack, `src/components/<tag>/`:  `spell pack add <pack> <tag>`
   - `pack/element-tests/` -- its test, into the pack repo's `tests/components/<tag>/`

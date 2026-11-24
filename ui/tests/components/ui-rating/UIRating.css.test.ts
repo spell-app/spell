@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsCSS, colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { ratingVocabulary } from "spell/ui/components/ui-rating/UIRating.en"
@@ -57,7 +56,7 @@ describe("UIRating.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit, and the icon states", () => {
-    const css = ratingRaw + colorsCSS
+    const css = ratingRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(ratingVocabulary)) expect(Sheets.covers(css, phrase), phrase).toBe(true)
     for (const word of ["active", "partial", "selected", "fill"]) expect(Sheets.covers(css, word)).toBe(true)
   })
@@ -66,7 +65,7 @@ describe("UIRating.css source", () => {
 describe("UIRating.css examples", () => {
   it.each(Object.keys(EXAMPLES))("draws every icon in %s", (path) => {
     Sheets.adopt([...foundationCSS, colorsCSS, ratingCSS, NO_TRANSITIONS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const ratings = root.querySelectorAll<HTMLElement>(".ui.rating")
     expect(ratings.length).toBeGreaterThan(0)
     for (const rating of ratings) {
@@ -79,7 +78,7 @@ describe("UIRating.css examples", () => {
 
   it("colours filled icons from the remap, empty ones faint", () => {
     Sheets.adopt([...foundationCSS, colorsCSS, ratingCSS, NO_TRANSITIONS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const star = root.querySelector<HTMLElement>(".ui.yellow.rating")!
     const [active, , , empty] = star.querySelectorAll<HTMLElement>(".icon")
     expect(getComputedStyle(active!).color).toBe(probe("--ui-yellow", star))
@@ -88,7 +87,7 @@ describe("UIRating.css examples", () => {
 
   it("clips a partial icon's fill to `--full`", () => {
     Sheets.adopt([...foundationCSS, colorsCSS, ratingCSS, NO_TRANSITIONS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     const partial = root.querySelector<HTMLElement>(".partial.active.icon")!
     const fill = partial.querySelector(".fill")!
     expect(getComputedStyle(fill).clipPath).toBe("inset(0px 50% 0px 0px)")
@@ -98,14 +97,14 @@ describe("UIRating.css examples", () => {
 
   it("scales with `size`", () => {
     Sheets.adopt([...foundationCSS, colorsCSS, ratingCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const width = (selector: string) => parseFloat(getComputedStyle(root.querySelector(`${selector} .icon`)!).width)
     expect(width(".ui.massive.rating") / width(".ui.mini.rating")).toBeGreaterThan(3)
   })
 
   it("takes a public token from a wrapper (static markup)", () => {
     Sheets.adopt([...foundationCSS, colorsCSS, ratingCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-rating-icon-width: 40px"><div class="ui rating"><i class="active icon"></i></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".icon")!).width).toBe("40px")
@@ -113,7 +112,7 @@ describe("UIRating.css examples", () => {
 
   it("takes no pointer while disabled", () => {
     Sheets.adopt([...foundationCSS, colorsCSS, ratingCSS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     expect(getComputedStyle(root.querySelector(".ui.disabled.rating .icon")!).pointerEvents).toBe("none")
   })
 })

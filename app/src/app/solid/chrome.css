@@ -54,43 +54,6 @@ ui-item.spring::part(item) {
   flex: 1 1 auto;
 }
 
-/*
- * A panel's Close ✕ (epic `editor` T95, Owen:  "X's should be light still until hovered, consistent size and spacing"):
- * the file bar's, the Inspector card's, the compiled code's, ONE look.
- * - Its values are tokens, so a ✕ drawn in a view's shadow root (the file bar's, `SpellEditor.spell`'s `.HideCode`)
- *   reads the same ones:  this sheet can't reach in there.
- * - Light until hovered or focused, half the theme's muted ink;  then the text's, fading in (I233, Owen:
- *   "Make lighter when not hovered").
- * - 12px from its panel's right edge, to the drawn ✕:  the bar's 8px, then 4px of its own (I233, Owen:
- *   "too close to right edge";  8px since I213).
- * - The bar's own size, right after the button beside it, as the file bar's always was (3px between what's drawn).
- * - A panel's action beside its bar, not in it (`<InspectorCard close>`):  so the room before it is the same in each.
- */
-:root {
-  --spell-panel-close-color: color-mix(in oklab, var(--ui-text-muted) 50%, transparent);
-  --spell-panel-close-hover-color: var(--ui-text-color);
-  --spell-panel-close-gap: 0px;
-  --spell-panel-close-end: 4px;
-  --spell-panel-close-fade: 120ms ease-out;
-}
-ui-icon.PanelClose {
-  /* a box of its own (a `<ui-icon>` is `display: contents`):  its margin and its tooltip need one */
-  display: inline-flex;
-  /* its box the glyph's own, with no room after it for a label it hasn't:  so the bar's room ends at the drawn ✕
-     (epic `editor` I213;  that room and the glyph's own inset stood it 15px from the card's edge) */
-  --ui-icon-width: auto;
-  --ui-icon-distance: 0;
-  flex: none;
-  align-self: center;
-  margin-inline: var(--spell-panel-close-gap) var(--spell-panel-close-end);
-  color: var(--spell-panel-close-color);
-  transition: color var(--spell-panel-close-fade);
-  cursor: var(--ui-control-cursor, pointer);
-}
-ui-icon.PanelClose:is(:hover, :focus-visible, :focus-within) {
-  color: var(--spell-panel-close-hover-color);
-}
-
 /* An icon-only action (`<Action iconOnly>`):  a bare icon, a little bigger, its title a tooltip below it.
    - A box of its own:  a `<ui-icon>` is `display: contents`, which draws no tooltip;  centred in its bar. */
 ui-icon.IconAction {
@@ -121,7 +84,8 @@ ui-icon.IconAction {
 }
 /*
  * The top bar's and the Add View bar's tooltips (`barTooltip()`, epic `editor` I217), the palette's tip, a popup, among
- * them:  the same colours, after the page's hover pause (`--ui-hover-delay`, 800ms;  the palette's waited 2s until I217)
+ * them:  the same colours;  the tooltips after the page's tooltip pause (`--ui-tooltip-delay`, 1.5s, as long as the
+ * browser's own `title` tooltip;  epic `editor` T164), the popup after its hover pause (`--ui-hover-delay`, 800ms)
  */
 ui-item.ThemeMenu ui-theme-menu {
   --ui-popup-inverted-background: var(--spell-tooltip-background);

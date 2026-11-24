@@ -1,6 +1,21 @@
+import { createHash } from "node:crypto"
 import postcss, { AtRule, type ChildNode, type Container, type Document, type Rule } from "postcss"
 
-import { foundationCSS, nativeCSS, resetCSS, typographyCSS } from "spell/ui/styles"
+import {
+  animationsCSS,
+  colorsSharedCSS,
+  foundationCSS,
+  layersCSS,
+  nativeCSS,
+  resetCSS,
+  sizesSharedCSS,
+  typographyCSS,
+  utilitiesCSS
+} from "spell/ui/styles"
+import uiCSS from "spell/ui/styles/ui.css?inline"
+import { OPTIONAL_SHEETS, type OptionalSheetName } from "spell/ui/runtime/runtime.types"
+import { RootSheets } from "spell/ui/elements/RootSheets"
+import { E } from "spell/ui/core"
 
 import { SSR } from "spell/ui/static"
 // Import directly to avoid circular import:  the constants below the class read them
@@ -80,6 +95,84 @@ export class StaticStylesheet {
     }
     parts.push(LIST_ITEMS, HIDDEN)
     return parts.join("\n\n")
+  }
+
+  ////////////////
+  // ## The shadow output's sheets
+  //
+  // The shadow output (`StaticShadowRoots`) links the sheets each shadow root adopts in a browser, as files:
+  // the same text the runtime adopts (`Styles`), not rewritten.
+  ////////////////
+
+  /**
+   * The files of a root's sheets, in the order a browser adopts them (`Styles`' `adoptInto()`):
+   * 1. the foundation every root takes (layers, reset:  `FOUNDATION_FILE`)
+   * 2. the optional colour and size remaps and the animations, where its family takes them (`RootSheets`)
+   * 3. its own sheets, `sheetNames` (its component's `styleSheetNames`;  its family's when empty)
+   * 4. the utilities, where its family takes them
+   * - Each file's name carries a hash of its text (`ui-card.3f2a91c0.css`):  a changed sheet is a new address.
+   */
+  static shadowLinks(family: SSR.StaticFamily, sheetNames: readonly string[]): string[] {
+    const takes = new Set<OptionalSheetName>(RootSheets.for(family.definition.vocabulary))
+    const own = sheetNames.length ? sheetNames : Object.keys(family.Class.prototype.elementSetup.styleSheets)
+    const optional = (name: OptionalSheetName) => (takes.has(name) ? [name] : [])
+    const names = [
+      FOUNDATION_FILE,
+      ...optional(OPTIONAL_SHEETS.colors),
+      ...optional(OPTIONAL_SHEETS.sizes),
+      ...optional(OPTIONAL_SHEETS.animations),
+      ...own,
+      ...optional(OPTIONAL_SHEETS.utilities)
+    ]
+    const files = StaticStylesheet.shadowFiles()
+    return names.filter((name) => files.has(name)).map((name) => files.get(name)!.file)
+  }
+
+  /**
+   * Every file the shadow output may link, by its name:  its text.
+   * - The page's own sheet (`PAGE_FILE`, Spell UI's `ui.css`:  the tokens, typography and native markup, which reach
+   *   every shadow root by inheritance), the foundation's parts, and every defined family's sheets.
+   */
+  static shadowSheets(): Map<string, string> {
+    return new Map([...StaticStylesheet.shadowFiles().values()].map(({ file, css }) => [file, css]))
+  }
+
+  /** The page's own sheet's file:  what a shadow-output page links in its `<head>`. */
+  static get pageFile(): string {
+    return StaticStylesheet.shadowFiles().get(PAGE_FILE)!.file
+  }
+
+  /** Sheet name => its file and text, for `shadowLinks()` and `shadowSheets()`;  every defined family's. */
+  private static shadowFiles(): Map<string, { file: string; css: string }> {
+    const texts = new Map<string, string>([
+      [PAGE_FILE, uiCSS],
+      [FOUNDATION_FILE, `${layersCSS}\n${resetCSS}`],
+      [OPTIONAL_SHEETS.colors, colorsSharedCSS],
+      [OPTIONAL_SHEETS.sizes, sizesSharedCSS],
+      [OPTIONAL_SHEETS.animations, animationsCSS],
+      [OPTIONAL_SHEETS.utilities, utilitiesCSS]
+    ])
+    for (const { Class } of SSR.StaticRender.families.values()) {
+      for (const [name, css] of Object.entries(Class.prototype.elementSetup.styleSheets)) {
+        if (!texts.has(name)) texts.set(name, css)
+      }
+    }
+    const files = new Map<string, { file: string; css: string }>()
+    for (const [name, text] of texts) {
+      // a shadow root's sheets also select the custom states a server drawing writes as an attribute
+      const css = name === PAGE_FILE ? text : StaticStylesheet.withServerStates(text)
+      const hash = createHash("sha256").update(css).digest("hex").slice(0, 8)
+      files.set(name, { file: `${name.replace(/[^\w.-]/g, "-")}.${hash}.css`, css })
+    }
+    return files
+  }
+
+  /**
+   * `css` with each `:state(x)` also matching the attribute a server drawing writes the element's states into:
+   * `:is(:state(x), [data-ui-states~="x"])` (`UIComponent.SERVER_STATES`).
+   */
+  static withServerStates(css: string): string {
+    return css.replace(STATE, (state, name: string) => `:is(${state}, [${E.UIComponent.SERVER_STATES}~="${name}"])`)
   }
 
   /**
@@ -242,6 +335,15 @@ export class StaticStylesheet {
     return node.type === "atrule" && SCOPABLE_AT_RULES.has(node.name)
   }
 }
+
+/** A custom state in a selector, `:state(in-card)`, and its name. */
+const STATE = /:state\(([\w-]+)\)/g
+
+/** The shadow output's page sheet:  Spell UI's `ui.css`, which a page that loads no runtime links. */
+const PAGE_FILE = "ui"
+
+/** The shadow output's foundation file:  layers and reset, which every shadow root adopts first. */
+const FOUNDATION_FILE = "foundation"
 
 /** A moved rule's copy, and where the original sat (for its `@media` / `@container` ancestry). */
 type MovedRule = {

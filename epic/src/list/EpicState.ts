@@ -81,8 +81,24 @@ export const PAUSED_DAYS = 3
 /** An item's `state` that needs Owen:  `attention` (red:  needs you), `replied` (orange:  waiting for your pick). */
 export const URGENT_STATES = ["attention", "replied"] as const
 
-/** An epic page's items that need Owen (`URGENT_STATES`), for `querySelectorAll()`. */
-export const URGENT_SELECTOR = URGENT_STATES.map((state) => `epic-item[id][state="${state}"]`).join(", ")
+/**
+ * An epic page's items that need Owen, for `querySelectorAll()` (`needsOwen()`, as a selector):
+ * - red and orange (`URGENT_STATES`)
+ * - light orange while still OPEN:  a fix of what he asked for (epic `epic-engine` T143)
+ */
+export const URGENT_SELECTOR = [
+  ...URGENT_STATES.map((state) => `epic-item[id][state="${state}"]`),
+  'epic-item[id][state="requested"][status="open"]'
+].join(", ")
+
+/**
+ * Does an item in `state` and `status` need Owen?  `URGENT_SELECTOR`'s rule, for who reads a page's tags as text.
+ * - a light orange one only while open (T143):  one closed done is his to see, and holds nothing up
+ */
+export function needsOwen(state: string | undefined, status: string | undefined): boolean {
+  if (state === "requested") return status === "open"
+  return (URGENT_STATES as readonly string[]).includes(state ?? "")
+}
 
 /** How each state is drawn:  words, colour, icon. */
 const LOOKS: Record<EpicStateName, { words: string; color: EpicStateColor; icon: string }> = {

@@ -71,6 +71,8 @@ export class PropertyExpression extends MemberReadExpression<"property|each|arg|
     }
     // `the name of the character's friend`, when the name of the character has a friend too
     PossessiveProperty.warnIfEitherReading(scope, tokens, match)
+    // a field its place no longer seems to have (epic `language` P68)
+    SP.PlaceFieldMarks.warnIfGone(match, property)
     return match
   }
   getAST(match: P.MatchFor<this>) {

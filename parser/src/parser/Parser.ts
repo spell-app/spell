@@ -1,8 +1,6 @@
 // Spell "parser" class.
 //
-import isEqual from "lodash/isEqual"
-import groupBy from "lodash/groupBy"
-import sum from "lodash/sum"
+import { isEqual, groupBy, sum } from "lodash-es"
 
 import { Derivative, showWhitespace } from "spell/util"
 import { P } from "spell/parser/parser"

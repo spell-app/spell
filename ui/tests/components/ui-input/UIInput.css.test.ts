@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsCSS, colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { inputVocabulary } from "spell/ui/components/ui-input/UIInput.en"
@@ -62,7 +61,7 @@ describe("UIInput.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = inputRaw + colorsCSS
+    const css = inputRaw + colorsSharedCSS
     for (const vocabulary of [inputVocabulary, textareaVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)
@@ -79,7 +78,7 @@ describe("UIInput.css source", () => {
 describe("UIInput.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every input in %s", (path) => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const controls = root.querySelectorAll<HTMLElement>(".ui.input > :is(input, textarea)")
     expect(controls.length).toBeGreaterThan(0)
     for (const control of controls) {
@@ -92,7 +91,7 @@ describe("UIInput.css examples", () => {
 
   it("draws Fomantic's box:  padding, radius, focus border", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div class="ui input"><input aria-label="x"></div>`)
+    const root = Sheets.render(`<div class="ui input"><input aria-label="x"></div>`)
     const input = root.querySelector("input")!
     const style = getComputedStyle(input)
     const em = parseFloat(style.fontSize)
@@ -106,7 +105,7 @@ describe("UIInput.css examples", () => {
 
   it("makes room for the icon at the end, or the start with `left icon`", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const [right, left] = root.querySelectorAll<HTMLElement>(".ui.icon.input:not(.fluid)")
     const rightInput = getComputedStyle(right!.querySelector("input")!)
     expect(parseFloat(rightInput.paddingRight)).toBeGreaterThan(parseFloat(rightInput.paddingLeft))
@@ -118,7 +117,7 @@ describe("UIInput.css examples", () => {
 
   it("squares the seam of a joined label and action button", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const labeled = root.querySelector(".ui.labeled.input:not(.right, .corner)")!
     expect(getComputedStyle(labeled.querySelector(".label")!).borderTopRightRadius).toBe("0px")
     expect(getComputedStyle(labeled.querySelector("input")!).borderTopLeftRadius).toBe("0px")
@@ -130,15 +129,15 @@ describe("UIInput.css examples", () => {
 
   it("tints a stated input from its remap", () => {
     Sheets.adopt([...SHEETS, colorsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
-    const probe = Fixture.render(`<span style="background-color: var(--ui-error-background)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
+    const probe = Sheets.render(`<span style="background-color: var(--ui-error-background)"></span>`)
     const error = getComputedStyle(root.querySelector(".ui.error.input > input")!)
     expect(error.backgroundColor).toBe(getComputedStyle(probe).backgroundColor)
   })
 
   it("takes an owner field's resolved state tokens, which its own state beats", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div style="--_ui-field-state-background: rgb(1, 2, 3)">
+    const root = Sheets.render(`<div style="--_ui-field-state-background: rgb(1, 2, 3)">
       <div class="ui input"><input aria-label="a"></div><div class="ui info input"><input aria-label="b"></div></div>`)
     const [plain, own] = root.querySelectorAll("input")
     expect(getComputedStyle(plain!).backgroundColor).toBe("rgb(1, 2, 3)")
@@ -147,7 +146,7 @@ describe("UIInput.css examples", () => {
 
   it("takes a public token from a wrapper (static markup)", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-input-radius: 12px"><div class="ui input"><input aria-label="x"></div></div>`
     )
     expect(getComputedStyle(root.querySelector("input")!).borderTopLeftRadius).toBe("12px")
@@ -155,11 +154,11 @@ describe("UIInput.css examples", () => {
 
   it("scales with `size` and dims when disabled", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const mini = parseFloat(getComputedStyle(root.querySelector(".ui.mini.input")!).fontSize)
     const huge = parseFloat(getComputedStyle(root.querySelector(".ui.huge.input")!).fontSize)
     expect(huge / mini).toBeGreaterThan(2)
-    const states = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const states = Sheets.render(EXAMPLES["./examples/states.html"]!)
     expect(Number(getComputedStyle(states.querySelector(".ui.disabled.input")!).opacity)).toBeLessThan(1)
   })
 })

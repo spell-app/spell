@@ -75,7 +75,6 @@ export const epicAgentsVocabulary = {
     },
 
     { key: "agents", text: "Agents running", description: "The agents' popover, its name." },
-    { key: "agentStarted", text: "Started {time}", description: "An agent's age, its tooltip:  when it started." },
     { key: "agentYou", text: "You", description: "Who sent a redirect:  `You · 10:42 · told 10:43`." },
     { key: "agentTold", text: "told {time}", description: "A redirect a session passed on to the agent." },
     { key: "agentWaiting", text: "waiting for the session", description: "A redirect no session passed on yet." },

@@ -81,6 +81,16 @@ A merge that changed a lockfile or a `package.json` installs the packages in the
 its page server and editor, and says so;  a FAILED install leaves the merge in, and prints what to run by hand.
 After a restart, agents it started are gone:  start each again from its task, as the epic's running list
 (`epic agents`) names it.
+Not the ones it lists as `paused`:  they were saved for a fresh start.
+
+Agents paused for a fresh start (`epic fresh all --pause`):
+- picking the epic up, start each again once:  `epic agents resume <name>` prints its whole brief
+  (no background agents:  do that work here, one at a time)
+- while a pause is under way (`epic fresh status`), start nothing new;  asked to pause:
+  - drop your tests, finish a merge under way
+  - `epic agents pause <name> --item <id> --next "<next step>" --tests "<runs dropped>"` for each agent
+  - leave everyone's uncommitted files where they are
+- `epic fresh cancel` calls a pause off
 
 1. `epic phase <epic>#P3 active`, and say what you're doing:  `epic inbox status <epic> "Building P3"` (the page's step label turns, the words its tooltip).
 2. Check the accepted plan still fits.
@@ -94,8 +104,9 @@ After a restart, agents it started are gone:  start each again from its task, as
    Three or more steps for the person, with commands to type:  a runbook they start with one command,
    `spell runbook start <name>`, never a list in a reply (Spell's AGENTS.md, "Commands").
    Record as you go
-   (a title is at most 30 plain words saying what it is, read cold, hours later:
-   nothing about a passing condition;  the rest goes in --details;  the full rule:  plan-doc.md's "Rules"):
+   (a title is read by someone NOT following the work:  what changed or what's wrong, effect first, named by what the
+   person sees or types, never an internal name;  the rest goes in --details;  the rule:  plan-doc.md's "Rules",
+   TITLES;  `epic add` has a fresh reader check it):
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
      (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked;
      taken up at once:  `--requested --start "<their words>"`, so it shows blue, under way, never red as if it waited
@@ -137,15 +148,17 @@ The person marks items, leaves comments and presses Send on the epic page.
 Nothing reaches you until you look:
 - `epic inbox <epic>`:  what's waiting, sent or not.
 - `epic inbox wait <epic>`:  waits until they press Send, prints the work, and exits 0;
-  exit 2 after 55 minutes with nothing (`--timeout 2h` for longer).
+  exit 2, printing nothing, after 55 minutes with nothing (`--timeout 2h` for longer).
+  - Run it in the foreground.
+  - Claude Code never runs it in the background:  the epic hub listens for every Claude session, and wakes it at the
+    Send, or hands it the Send at its next tool call while it works (epic `epic-engine` T163).
   - While it waits, the page says so:  "Your Codex is listening".
   - Without it, the page says to ask you to run it.
 
 Then, for what it printed:
 0. Busy with other work when it came:  apply the quick marks now (`epic inbox apply <epic>`), put a Noted card on each
    heavy one (`epic update <epic>#I3 noted "Queued:  after <what you're on>"`), so they see it was heard, then finish
-   what you were on first.  An agent that can run a command in the background keeps `epic inbox wait <epic>` running
-   the whole time it works, armed again as it exits:  a Send then reaches it mid-work (epic `epic-engine` I286).
+   what you were on first.  Between steps, `epic inbox <epic>` says whether a new Send came meanwhile.
 1. `epic inbox status <epic> "Responding" --items <ids>`.
 2. Requests for now (Add Details, revisit now):  per item,
    `epic update <epic>#J3 underway "<what you take it to be>"`, write the answer
@@ -155,8 +168,10 @@ Then, for what it printed:
 3. Sent marks:  `epic inbox apply <epic>` lands approvals, picks and todos.
    Do this, on an issue or a judgement call:  NO todo;  it stays in the item, red, and `apply` prints your steps.
    Work in the item:  no proposed fix yet?  write one first, in its "Proposed fix" field;  then build it, commits named
-   `<epic> I3:  ...`.  Done:  `epic update <epic>#I3 fixed "<what changed>"` turns it orange, for the person to review;
+   `<epic> I3:  ...`.  Done:  `epic update <epic>#I3 fixed "<what changed>"` turns it orange (light orange, from their words), for the person to review;
    their Approve closes it.  Never `epic close` it yourself.
+   Committed but not merged yet:  keep it `underway` ("merging next");  commit, merge, THEN `fixed`.
+   Never a Noted "Fixed in <sha>":  it turns the item red, and the tool refuses it (I452).
    Every card (underway, done, fixed, noted):  a short lead sentence saying what happened, then short paragraphs or
    `- ` bullets, one idea each (`\n\n` between);  code names and numbers only where the reader needs them;
    the full story goes in the item's body (`epic details --append`).  The tool refuses a paragraph over 50 words.
@@ -167,7 +182,7 @@ Then, for what it printed:
    then `epic inbox done <epic>#C3 --file answer.html`.
    Words holding `![IMG2](<path>)` (or an older `![picture](<path>)`) are a picture they pasted, labelled:  `wait`
    prints each one's file under the words (`IMG2:  <file>`);  look at it first.  "IMG2" in their words means that one.
-5. `epic inbox status <epic> --clear`, then `epic inbox wait <epic>` again, unless they said stop.
+5. `epic inbox status <epic> --clear`, then `epic inbox wait <epic>` again (in the foreground), unless they said stop.
 
 ## turn -- End every turn
 
@@ -251,6 +266,35 @@ epic update <epic>#J3 promised "<what was promised, what's there instead>"   # w
   must pick:  the others still close.
 - Then say how many closed, how many noted, and each promised item with what's missing.
 
+## badges -- What each item's badge asks of you
+
+On a page with item badges, each line starts with what happens next.
+
+- URGENT, WILL FIX, WILL DO:  do it without asking, URGENT first.
+- YOUR CALL, AGAINST YOUR ASK:  wait for the person.  Never answer a question for them.
+- WILL RECHECK, WILL CLOSE:  check them when nothing else is waiting, then either:
+  - it's real:  `epic badges <epic>#I7 set --doubt 5 --why "..."`
+  - it isn't:  `epic badges <epic> close I7 --as vanished --why "..."` (or `moot`, `duplicate`, `declined`)
+- SOMEDAY, OPTIONAL:  nothing, unless asked.
+- SEE T38:  work that todo, not the item.
+- Never turn badges on, score or close on an epic you weren't asked to.
+- A new item closes by itself only once the person said yes to that too:  `epic badges <epic> close-new yes`.
+
+## hush -- Grey settled items the person won't look at again
+
+Only when the person asks (the skill's word:  `$epic hush`):  the epic skill's "17. Hush".
+Candidates:  drawn green, yellow or orange, nothing on them for 3 days;  never red, blue, open work, tests, questions,
+or anything with their mark, a thread or Claude's work on it.  A fresh `claude -p` judges each:  hush only if 80% sure.
+
+```sh
+epic hush <epic> --dryrun     # the table:  id, colour, age, hush or keep, why;  nothing changed
+epic hush <epic>              # once they say go:  each hushed item approved as their check would, logged
+epic hush all --dryrun        # every epic in progress
+```
+
+- Show the dry run's table first;  run it for real only when they say so.
+- Then say the counts per epic, and the kept items worth a look.
+
 ## claude-only-tools -- What Claude Code has, and what any agent does instead
 
 The epic skills lean on Claude Code's own tools.
@@ -264,10 +308,11 @@ Without them, every step still works:  each skill's "In Codex:" lines say it in 
 | background agents (`Agent`, `/bg`) | several items answered at once, the chat free meanwhile | Codex:  ask for sub-agents, one per item, and wait for them (Codex waits, so the chat isn't free);  else one at a time, in this session |
 | the designer, coherence and plan-check agents | a review by the plugin's own reviewer | Codex:  its custom agents `designer`, `coherence` and `plan-check`, which `epic plugin install --codex` writes into `~/.codex/agents/`;  else follow that skill's steps yourself |
 | messages to another session (`SendMessage`, `ListAgents`) | telling a running session to do something | print the line for the person to type into that session |
-| a background command (Bash `run_in_background`, `TaskStop`) | waiting on `epic ask wait` / `epic inbox wait` while the chat stays free | run it in the foreground and wait:  it ends when the person sends;  stop it with Ctrl-C |
+| a background command (Bash `run_in_background`, `TaskStop`) | waiting on `epic ask wait` while the chat stays free | run it in the foreground and wait:  it ends when the person sends;  stop it with Ctrl-C |
 | plan mode (`/comment`) | the person comments on a file in the plan tab | none:  take their notes in the chat, or open it as a guide with comments (`epic pages link <page> --show`) |
 | `${CLAUDE_PLUGIN_ROOT}` in a skill | the epic plugin's own folder, which Claude Code fills in | `epic guide --root` prints it:  read `${CLAUDE_PLUGIN_ROOT}` as that folder |
-| the inbox poller (its `Stop` hook) | wakes the session when the person sends | `epic inbox wait <epic>`, run yourself |
+| the pause before a fresh start (`epic fresh all --pause`) | every session saves its agents and reports back | can't start one:  it needs Claude Code's session messages;  `epic fresh status` and `cancel` work anywhere |
+| the epic hub's wake (the inbox poller's `Stop` hook, the `PostToolUse` hook) | wakes the session when the person sends, or hands it the Send at its next tool call | `epic inbox wait <epic>`, run yourself, in the foreground |
 | the end-of-turn hook | commits and syncs the plans | `epic turn end` (Codex's hook runs it too) |
 | `EnterWorktree` / `ExitWorktree` | moving the session into the epic's worktree | `epic worktree create <name>` (or `git worktree add`), then `cd "$(epic worktree path <epic>)"`;  leaving:  `cd` back to the main checkout |
 | the window moves (`epic window handoff`, `launch`) | the session in the epic's VS Code window | print `epic window open <name>` for the person to run, and carry on where you are |

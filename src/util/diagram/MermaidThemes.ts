@@ -85,6 +85,14 @@ export const MermaidLayouts = ["auto", "elk", "dagre", "cose-bilkent", "swimlane
 /** One value of `layout`. */
 export type MermaidLayout = (typeof MermaidLayouts)[number]
 
+/**
+ * Mermaid text that may name an icon (`fa:fa-car`, `icon: "pack:name"`, an architecture diagram's `(pack:name)`),
+ * read without Mermaid.
+ * - Wide on purpose:  a yes only means the page draws it itself, with the page's own icon packs;
+ *   no drawing ahead on the server (Spell UI's `MermaidDrawer.mayHaveIcons()`, `MermaidOnServer`).
+ */
+export const MAY_NAME_ICON = /\bfa[bklrs]?:fa-|\bicon\s*:|\([a-z0-9-]+:[a-z0-9-]+\)/i
+
 ////////////////
 // ## The Spell look
 ////////////////

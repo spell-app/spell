@@ -140,22 +140,44 @@ describe("Turns", () => {
     stopped.kill("SIGKILL")
   })
 
-  test("a live holder past STUCK times usual:  its waiter gives up, naming it;  never taken over", () => {
+  test("a busy holder 15 minutes in, 30 times a usual 30s run:  its waiter waits, and gets the turn (I400)", async () => {
     const holder = sleeper()
-    lockHeldBy("stuck", holder.pid!, "yarn review", Turns.DEFAULT_USUAL.other! * Turns.STUCK + 60_000)
-    expect(() => Turns.take("stuck", "mine", () => "ran", { say: () => {} })).toThrow(
-      /the stuck turn is stuck:  held by yarn review, pid \d+, for .* -- longer than usual/
+    const runs = [30_000, 30_000, 30_000].map((ms) => JSON.stringify({ kind: "perf", label: "x", ms, at: "" }))
+    mkdirSync(join(HOME, "turns"), { recursive: true })
+    writeFileSync(join(HOME, "turns", "history.jsonl"), `${runs.join("\n")}\n`, { flag: "a" })
+    expect(Turns.usual("perf")).toBe(30_000)
+    lockHeldBy("perf", holder.pid!, "spell perf run", 15 * 60_000)
+    // busy a moment ago:  not stalled
+    writeFileSync(join(HOME, "turns", "perf.busy"), `${holder.pid} ${Date.now() - 5_000} ${10 * 60_000}`)
+    const said: string[] = []
+    setTimeout(() => holder.kill(), 2_500)
+    expect(await Turns.takeAsync("perf", "yarn test", async () => "ran", { say: (line) => said.push(line) })).toBe(
+      "ran"
     )
-    expect(Turns.held().find((it) => it.kind === "stuck")?.holder.pid).toBe(holder.pid)
-    holder.kill()
+    expect(said.join("\n")).toMatch(/waiting for the perf turn:  spell perf run, pid \d+, for 15m -- longer than usual/)
+    // it ended (killed):  taken over as gone, never as stalled or stuck
+    expect(said.join("\n")).not.toMatch(/stalled|stuck/)
   })
 
-  test("a waiter doesn't give up while the line moves:  no fixed wait by default", async () => {
+  test("a live holder quiet a minute past its stall window is taken over, its tree stopped (I400)", async () => {
     const holder = sleeper()
-    lockHeldBy("moving", holder.pid!, "a long test run", 40 * 60_000)
-    setTimeout(() => holder.kill(), 1_500)
-    // held 40 minutes already (past the old 30-minute wait), but under STUCK:  it waits, and gets the turn
-    expect(await Turns.takeAsync("moving", "mine", async () => "ran", { say: () => {} })).toBe("ran")
+    lockHeldBy("hung", holder.pid!, "yarn test", 20 * 60_000)
+    writeFileSync(join(HOME, "turns", "hung.busy"), `${holder.pid} ${Date.now() - 12 * 60_000} ${10 * 60_000}`)
+    const said: string[] = []
+    expect(Turns.take("hung", "mine", () => "ran", { wait: 5_000, say: (line) => said.push(line) })).toBe("ran")
+    expect(said.join("\n")).toMatch(/holder is stalled \(no output or CPU for 12m\):  taking it over \(yarn test/)
+    await new Promise((done) => holder.once("exit", done))
+    expect(holder.signalCode).toBe("SIGTERM")
+  })
+
+  test("a holder just past its stall window is left to its own watch:  the waiter waits", () => {
+    const holder = sleeper()
+    lockHeldBy("watched", holder.pid!, "yarn test", 20 * 60_000)
+    writeFileSync(join(HOME, "turns", "watched.busy"), `${holder.pid} ${Date.now() - 10.5 * 60_000} ${10 * 60_000}`)
+    expect(() => Turns.take("watched", "mine", () => "ran", { wait: 1_500, say: () => {} })).toThrow(
+      /the watched turn is not free in 0m:  held by yarn test/
+    )
+    holder.kill()
   })
 
   test("listLines():  the holder, for how long, longer than usual, and the line", () => {
@@ -168,6 +190,74 @@ describe("Turns", () => {
     expect(lines).toMatch(/  waiting:  1\. epic merge seo, pid \d+, for 3m/)
     holder.kill()
     waiter.kill()
+  })
+
+  test("listLines():  a holder quiet past its stall window says stalled (I384)", () => {
+    const holder = sleeper()
+    lockHeldBy("quiet", holder.pid!, "yarn test", 15 * 60_000)
+    writeFileSync(join(HOME, "turns", "quiet.busy"), `${holder.pid} ${Date.now() - 12 * 60_000} ${10 * 60_000}`)
+    expect(Turns.listLines().join("\n")).toMatch(
+      /quiet:  yarn test, pid \d+, for 15m -- stalled \(no output or CPU for 12m\)/
+    )
+    holder.kill()
+  })
+
+  test("a holder whose process is gone is taken over at once, saying so", () => {
+    const dead = spawnSync(process.execPath, ["-e", "1"]).pid
+    lockHeldBy("dead", dead, "yarn test")
+    const said: string[] = []
+    expect(Turns.take("dead", "mine", () => "ran", { wait: 5_000, say: (line) => said.push(line) })).toBe("ran")
+    expect(said.join("\n")).toMatch(/holder is gone:  taking it over \(yarn test/)
+  })
+
+  test("stop():  a session's own test run and its tree;  NEVER another session's", async () => {
+    const child = `require("node:child_process").spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { stdio: "ignore" })`
+    const own = spawn(
+      process.execPath,
+      ["-e", `const under = ${child}; console.log(under.pid); setInterval(() => {}, 1000)`],
+      { stdio: ["ignore", "pipe", "ignore"] }
+    )
+    const others = sleeper()
+    try {
+      const under = Number(await new Promise((done) => own.stdout!.once("data", (data) => done(String(data)))))
+      lockHeldBy("test", own.pid!, "yarn test")
+      const ticket = ticketFor("test", others.pid!, "another session's", 1000)
+      const live = [{ sessionId: "mine", pid: 1000001 }]
+      const parents = new Map([[own.pid!, 1000001]])
+      expect(Turns.runsOf("mine", { live, parents })).toMatchObject([{ kind: "test", pid: own.pid }])
+      const { stopped } = await Turns.stop("test", "mine", { live, parents, graceMs: 300 })
+      expect(stopped.map((run) => run.pid)).toEqual([own.pid])
+      expect(existsSync(join(HOME, "turns", "test.lock"))).toBe(false)
+      expect(Turns.holderState(under)).not.toBe("running")
+      expect(Turns.holderState(others.pid!)).toBe("running")
+      rmSync(ticket, { force: true })
+    } finally {
+      own.kill("SIGKILL")
+      others.kill("SIGKILL")
+    }
+  })
+
+  test("stop():  a merge is NEVER stopped, nor a test run with one under it", async () => {
+    const [testing, merging] = [sleeper(), sleeper()]
+    try {
+      lockHeldBy("test", testing.pid!, "yarn test && epic merge")
+      lockHeldBy("merge", merging.pid!, "epic merge seo")
+      const live = [{ sessionId: "mine", pid: 1000001 }]
+      const parents = new Map([
+        [testing.pid!, 1000001],
+        [merging.pid!, testing.pid!]
+      ])
+      await expect(Turns.stop("merge", "mine", { live, parents })).rejects.toThrow(/never stopped/)
+      const { stopped, left } = await Turns.stop("test", "mine", { live, parents, graceMs: 100 })
+      expect(stopped).toEqual([])
+      expect(left.map((run) => run.kind).sort()).toEqual(["merge", "test"])
+      expect(Turns.holderState(testing.pid!)).toBe("running")
+      expect(Turns.holderState(merging.pid!)).toBe("running")
+    } finally {
+      testing.kill("SIGKILL")
+      merging.kill("SIGKILL")
+      for (const kind of ["test", "merge"]) rmSync(join(HOME, "turns", `${kind}.lock`), { force: true })
+    }
   })
 
   test("usual():  the median of a kind's last runs, written down as each turn ends", () => {
