@@ -134,6 +134,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | --- | --- | --- |
   | `spaceFolders.builtins` | `spaces/`:  the built-in groups and the test projects, `testFilesRoot` | `SPELL_BUILTINS_DIR` |
   | `spaceFolders.spaces`, `spellSpacesDir` | spell.spaces, beside the kit's main checkout | `SPELL_SPACES_DIR` |
+  | `moreSpaces` | more spaces folders served beside spell.spaces, each with the orgs it holds:  `~/.spell/more-spaces.json5`, `{ spaces: ["~/work/acme-app/spaces"] }`;  an address's org picks its folder (`spacesDirForOrg()`) | `SPELL_MORE_SPACES` |
   | `buildDir` | `build/` at the app folder's root | `SPELL_BUILD_DIR` |
   | `backupsDir` | every space's nightly backups (epic `atmosphere` P7):  `~/.spell/backups`, or a second disk | `SPELL_BACKUPS_DIR` |
   | `repoDir`, `packagesDir` | the app folder's root, `app/` (its `src/`, `spaces/` and build folder are there) | |
@@ -190,7 +191,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | the app folder's `tests/X` | `build/X` | |
   | the app folder's `X` | `build/X` | `build/spaces/@spell/examples/Solitaire/`, `build/spaces/@spell/test/fizzbuzz/` |
   | spell.spaces' `X` | `build/spell-spaces/X` | `build/spell-spaces/@spell/owen@/errors/` |
-  | another spaces folder's `X` (a project's, `--spaces` / `SPELL_SPACES_DIR`) | `build/spell-spaces.<folder>-<hash>/X`, its own (`spacesBuildDir()`) | `build/spell-spaces.my-app-1a2b3c4d/@acme/app/jobs/`:  two checkouts of a project never build over each other |
+  | another spaces folder's `X` (a project's, `--spaces` / `SPELL_SPACES_DIR`, or a more spaces folder) | `build/spell-spaces.<folder>-<hash>/X`, its own (`spacesBuildDir()`) | `build/spell-spaces.my-app-1a2b3c4d/@acme/app/jobs/`:  two checkouts of a project never build over each other |
   | another checkout's `app/spaces/X` or `app/tests/X` | THAT checkout's `build/...` | a worktree's example, opened by the main checkout's language server (epic `spanish` P21) |
   | anywhere else | beside the source | |
 

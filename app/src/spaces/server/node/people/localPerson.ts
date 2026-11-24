@@ -14,7 +14,13 @@ import {
   setLocalPerson,
   SPELL_ORG
 } from "spell/app/spaces/models/projectGroups"
-import { isSourceCheckout, repoDir, spellSpacesDir } from "spell/app/spaces/server/node/spellSpacesDir"
+import {
+  isSourceCheckout,
+  moreSpaces,
+  repoDir,
+  spellSpacesDir,
+  type MoreSpaces
+} from "spell/app/spaces/server/node/spellSpacesDir"
 
 /**
  * WHO IS AT THIS MACHINE, on the server (epic `repo-split` P27):  the person whose space its own projects are in,
@@ -31,7 +37,8 @@ import { isSourceCheckout, repoDir, spellSpacesDir } from "spell/app/spaces/serv
  *   - an install:  the project whose `package.json` is nearest where it was started (`INIT_CWD`, the folder `yarn`
  *     ran in;  else the process's own), e.g. `acme-spell`
  * - Read ONCE, the first time anything asks (`thisMachinesPerson()`), then set on spaces' models (`setLocalPerson()`),
- *   which every route reads;  so is the org's own groups' list in spell.spaces (`addOrgGroups()`).
+ *   which every route reads;  so is the org's own groups' list in spell.spaces (`addOrgGroups()`), and every org's in
+ *   the more spaces folders (`moreOrgGroups()`).
  * - Node only:  the browser asks `GET /api/people/local` (spaces' people routes).
  * - Owen, 2026-11-16:  "We need to get the `someone else is not owen@spell` working before we can release".
  */
@@ -62,7 +69,18 @@ export function thisMachinesPerson(): typeof localPerson {
   isNamed = !!id
   setLocalPerson({ id: id ?? "you", org })
   addOrgGroups(orgGroupsIn(spellSpacesDir, org))
+  addOrgGroups(moreOrgGroups())
   return localPerson
+}
+
+/**
+ * The org groups in the more spaces folders (`moreSpaces`, `~/.spell/more-spaces.json5`):  every org each holds,
+ * whatever this machine's person's org, `@acme/tools` for `<acme-app>/spaces/@acme/tools/`.
+ * - So `@acme/tools/dashboard` is a project of `@acme/tools`, not file `dashboard` of the org's programs (`@acme`),
+ *   on the server and, through `GET /api/people/local`'s `orgGroups`, in the browser and its language worker.
+ */
+export function moreOrgGroups(more: MoreSpaces[] = moreSpaces): string[] {
+  return more.flatMap(({ dir, orgs }) => orgs.flatMap((org) => orgGroupsIn(dir, org)))
 }
 
 /** What `GET /api/people/local` answers:  who's here, their org, its groups and people here, git's email. */

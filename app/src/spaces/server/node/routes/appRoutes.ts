@@ -223,7 +223,8 @@ async function editorUrl(file: string): Promise<string | undefined> {
  * `/spaces/<address>` (`SP.SpellUrls.fileUrl()`), e.g. `/spaces/owen@spell/errors/a.spell`.
  * - over the page server's live channel (`spell-server:changed`):
  *   the editor watches its open project's files by it (`editor.watchOpenFile()`)
- * - both of spaces' folders (`environment.spaceFolders`):  the built-ins, and spell.spaces
+ * - both of spaces' folders (`environment.spaceFolders`):  the built-ins, and spell.spaces;  and each more spaces
+ *   folder (`environment.moreSpaces`)
  * - never spaces' own names (`__data`, `__draft` ...):
  *   a program's rows and a person's drafts aren't a project's files,
  *   and the live rooms and data folders say their own changes
@@ -231,7 +232,12 @@ async function editorUrl(file: string): Promise<string | undefined> {
  */
 function watchSpaceFiles(live: SRV.LiveReload): () => void {
   const isProjectFile = (path: string) => !path.split("/").some(isSpaceName)
-  const watches = Object.entries(environment.spaceFolders).map(
+  const folders: Array<[string, string]> = [
+    ...Object.entries(environment.spaceFolders),
+    // the more spaces folders' too:  their addresses read as spell.spaces' do
+    ...environment.moreSpaces.map(({ dir }): [string, string] => ["spaces", dir])
+  ]
+  const watches = folders.map(
     ([base, dir]) =>
       new SRV.FolderWatch(dir, { only: isProjectFile, keepsAlive: false }, ([inside]) => {
         const place = SP.SpellUrls.placeForFolder(base as SP.SpaceFolderBase, inside!)

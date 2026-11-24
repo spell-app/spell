@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "path"
 // in plain node, so that import names its `.ts`.
 // The one finder of a package's folder (epic `coherence` P29)
 import { packageFolderFor } from "spell/toolchain/sourceNames"
-import { defaultSpellSpacesDir, isSourceCheckout, repoDir, spellSpacesDir } from "./spellSpacesDir.ts"
+import { defaultSpellSpacesDir, isSourceCheckout, moreSpaces, repoDir, spellSpacesDir } from "./spellSpacesDir.ts"
 
 /**
  * Where the app's build folder (`app/`) and the `@spell` space's projects (`spaces/`) are:
@@ -59,7 +59,7 @@ const staticDir = resolve(packagesDir, "app", "static")
  * The folder holding each `SP.SpaceFolderBase` (`SP.SpellUrls.folderFor()`):
  * - `builtins`:  `spaces/`, holding the `@spell` space's projects:  the built-in groups (`@spell/examples/` ...) and the
  *   frozen test projects, `@spell/test/` (spell-parser's `tests/spaces/` until epic `spanish` P18)
- * - `spaces`:  spell.spaces
+ * - `spaces`:  spell.spaces;  an org another spaces folder holds is there instead (`moreSpaces`, `spacesDirForOrg()`)
  * - `SPELL_BUILTINS_DIR` sets the first:
  *   so the server's contract test (`api.test.ts`) can point the server at a temporary copy, and never write into the repo.
  */
@@ -201,6 +201,12 @@ const environment = {
   coreDir,
   staticDir,
   spellSpacesDir,
+  /**
+   * More spaces folders served beside spell.spaces, each with the orgs it holds (`~/.spell/more-spaces.json5`,
+   * `SPELL_MORE_SPACES`):  a project's `spaces/`, so the kit's page server opens its projects with no second server.
+   * - an address's folder:  `spacesDirForOrg()`;  its build folder:  its own, `build/spell-spaces.<folder>-<hash>/`
+   */
+  moreSpaces,
   /** spell.spaces when `SPELL_SPACES_DIR` doesn't set it:  the kit's own, whose build folder is `build/spell-spaces/` */
   defaultSpellSpacesDir,
   signInDir,
