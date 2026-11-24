@@ -106,7 +106,11 @@
     background: none;
     box-shadow: none;
   }
+  /* its icon in the middle of its square, both ways:  a vertical menu's items lay out as a column, its icon on top */
   & ui-item.PaletteRailButton::part(item) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     justify-content: center;
     box-sizing: border-box;
     width: 32px;
@@ -114,6 +118,11 @@
     min-height: 32px;
     padding: 0;
     color: var(--ui-text-muted);
+  }
+  /* ... its box the glyph's own, with no line's room under it, so the glyph is what's centred */
+  & ui-item.PaletteRailButton::part(icon) {
+    display: flex;
+    margin: 0;
   }
   & ui-item.PaletteRailButton:hover::part(item),
   & ui-item.PaletteRailButton:focus-visible::part(item) {

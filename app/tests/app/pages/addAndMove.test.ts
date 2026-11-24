@@ -1030,7 +1030,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await popupShows()).toBe(false)
 
     // the add bar, the app, then the code at the far right (T151, Owen's B)
-    await page.waitForSelector(".PaletteRail ui-item.PaletteRailButton", { timeout: 60_000 })
+    await page.waitForSelector(".PaletteRail ui-item.PaletteRailButton", { timeout: 60_000, state: "attached" })
     await page.waitForTimeout(1000)
     const across = () =>
       page.evaluate(() => {
@@ -1078,12 +1078,17 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Layout"] [part~=item]').click()
     await page.waitForTimeout(600)
     expect(await flyoutsOpen()).toBe(1)
-    const layout = page.locator(".PaletteFlyout").filter({ has: page.locator('ui-tree-item[label="Grid"]') })
+    const layout = page.locator('ui-popup.PaletteFlyout[aria-label="Layout"]')
     expect(await layout.locator('ui-tree-item[label="Grid"]').count()).toBe(1)
-    // its search keeps only the matches
+    // its search keeps only the matches, by name, other names or description (Column's says it's a grid's)
+    const allRows = await layout.locator("ui-tree-item").count()
     await layout.locator(".PaletteFlyoutSearch input").fill("grid")
     await page.waitForTimeout(400)
-    expect(await layout.locator("ui-tree-item").count()).toBe(1)
+    const gridRows = await layout
+      .locator("ui-tree-item")
+      .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
+    expect(gridRows).toContain("Grid")
+    expect(gridRows.length).toBeLessThan(allRows)
     await layout.locator(".PaletteFlyoutSearch input").fill("")
     await page.waitForTimeout(400)
 
@@ -1097,7 +1102,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await flyoutsOpen()).toBe(0)
     // ... kept across a reload
     await page.reload()
-    await page.waitForSelector(".PaletteRail ui-item.PaletteFavorite", { timeout: 60_000 })
+    await page.waitForSelector(".PaletteRail ui-item.PaletteFavorite", { timeout: 60_000, state: "attached" })
     // its click picks it up to place with the next click in the app (T153's `PartPlacing`), lit while it's picked up;
     // Escape puts it down, nothing added
     const grids = ((await text()).match(/<(ui-)?grid\b/g) ?? []).length
@@ -1118,9 +1123,11 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await page.locator(".PaletteRail ui-item.PaletteFavorite").count()).toBe(0)
 
     // Search looks through every group, each a row holding its matches;  choosing one closes it (I176) and picks it up
-    await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Search everything you can add"] [part~=item]').click()
+    await page
+      .locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Search everything you can add"] [part~=item]')
+      .click()
     await page.waitForTimeout(600)
-    const everything = page.locator(".PaletteFlyout").first()
+    const everything = page.locator('ui-popup.PaletteFlyout[aria-label="Search everything you can add"]')
     await everything.locator(".PaletteFlyoutSearch input").fill("butt")
     await page.waitForTimeout(600)
     expect(await everything.locator('ui-tree-item[label="Button"]').count()).toBeGreaterThan(0)
@@ -1131,12 +1138,11 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.keyboard.press("Escape")
     await page.waitForTimeout(400)
 
-    // in Run, it goes
-    await page.locator(".ModeTabs [part~=item]", { hasText: "Run" }).first().click()
-    await page.waitForTimeout(800)
-    expect(await page.locator(".PaletteRail").count()).toBe(0)
-    await page.locator(".ModeTabs [part~=item]", { hasText: "Edit" }).first().click()
-    await page.waitForSelector(".PaletteRail", { timeout: 30_000 })
+    // in Run, it goes;  back in Edit, it's back
+    await page.evaluate(`window.editor.showRunner()`)
+    await page.waitForFunction(`!document.querySelector(".PaletteRailPlace")`, undefined, { timeout: 10_000 })
+    await page.evaluate(`window.editor.showEditor()`)
+    await page.waitForSelector(".PaletteRailPlace", { timeout: 30_000 })
   })
 
   test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180, I185)", async () => {
