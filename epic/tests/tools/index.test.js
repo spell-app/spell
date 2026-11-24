@@ -63,7 +63,7 @@ describe("the home page's cards", () => {
       new Set(),
       SAGAS
     )
-    expect(cards.map((card) => card.title)).toEqual(["Guides", "Sagas", "Epic Pages", "Epic Documentation"])
+    expect(cards.map((card) => card.title)).toEqual(["Epics", "Sagas", "Guides", "Epic Documentation"])
     const count = Object.fromEntries(cards.map((card) => [card.id, card.count]))
     // by the Epics page's groups (epic `airplane` P8):  `c` has no phases yet, so it's planning
     expect(count.epics).toBe("1 active · 1 planning · 1 done")
