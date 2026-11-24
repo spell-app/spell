@@ -830,8 +830,12 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - `CloseAll` (epic `epic-engine` T158):  a section's Close all, the person's own bulk ✓, no judge:  the Judgement
       calls, Issues and Todos sections' title button closes every DECIDED call, FIXED issue or DONE todo still waiting
       for their tick (`CloseAllRule`, `components/epic-section/`, the ONE rule the button counts by and the server
-      closes by), in one edit, kept for Undo as one record (`InstantUndo.keepBatch()`);  `POST close-all`,
-      `undo-close-all`;  `epic close-all <epic> <judgements | issues | todos> [--dryrun]`
+      closes by), in one edit, kept for Undo as one record (`InstantUndo.keepBatch()`), each item's own beside it;
+      `POST close-all`, `undo-close-all`;  `epic close-all <epic> <judgements | issues | todos> [--dryrun]`
+      - no confirm (epic `epic-engine` I462;  Owen:  "Don't show this"):  the page draws each one closed AT ONCE,
+        exactly as his ✓ on it draws (`ReviewClient.closeAll()`, `keepInstant()`:  held in view till Send, a second
+        click on its ✓ putting that one back), then posts;  one the server left, or all when the post failed, drawn
+        as before;  the notice after it has Undo for them all
     - `EpicTargets` (P15):  what a link to a saga, an epic, a phase or an item finds in a checkout
       - the page, the id, its title, what's broken (no saga, no page, no id, an epic under a saga it doesn't name)
       - read by:

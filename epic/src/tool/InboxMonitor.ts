@@ -108,9 +108,13 @@ export class InboxMonitor {
       const recheckMs = live.pid ? RECHECK_MS : Math.max(seen + SRV.Heartbeat.STALE_MS - now, 0) + STALE_MARGIN_MS
       return { watch: [], waiting: false, recheckMs }
     }
-    if (!live || older) {
-      ReviewInbox.update(epic.inbox, (box) => box.setListening(session.sessionId, undefined, monitor))
-    }
+    // never a blocking wait:  in the epic hub a wait here froze the hub, its own routes holding the lock (I463);
+    // held, the next look takes the listener's place
+    if (
+      (!live || older) &&
+      !ReviewInbox.updateIfFree(epic.inbox, (box) => box.setListening(session.sessionId, undefined, monitor))
+    )
+      return { watch: [epic.inbox], waiting: false, recheckMs: LOCK_RECHECK_MS }
     const guideSends = epic.guides.newSends
     const hasWork = inbox.hasWork || Boolean(guideSends)
     const waiting = hasWork || Boolean(inbox.reviewAsked)
@@ -286,6 +290,9 @@ const UNFOUND_RECHECK_MS = 30_000
 
 /** Past a heartbeat listener's going stale, ms, before looking again:  so it IS stale by then. */
 const STALE_MARGIN_MS = 1_000
+
+/** How long until the next look when the inbox's lock was held, ms:  a write of a moment, so soon. */
+const LOCK_RECHECK_MS = 1_000
 
 /** How many items `summaryOf()` names before counting the rest. */
 const SUMMARY_IDS = 6

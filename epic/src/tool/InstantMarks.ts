@@ -57,7 +57,8 @@ export class InstantMarks {
     const planned = applyAll(files.read(file))
     const results = planned.some((each) => each.applied) ? await files.edit(file, applyAll) : planned
     const cleared = results.filter((each) => each.applied || each.gone).map((each) => each.mark)
-    if (cleared.length) ReviewInbox.update(path, (box) => box.clearApplied(cleared))
+    // waits with timers, never blocking:  the page server's own routes may hold the lock meanwhile (I463)
+    if (cleared.length) await ReviewInbox.updateAsync(path, (box) => box.clearApplied(cleared))
     // kept, so a second click on the still-grey item can put each back (epic `epic-engine` T80)
     for (const each of results)
       if (each.applied && each.undo)

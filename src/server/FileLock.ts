@@ -14,6 +14,9 @@ import { FileLockError } from "./server.types.ts"
  *     for (`epic`'s page edits print it), instead of sitting silent
  * - or tries ONCE (`runOnce()`):  answers `"held"` when another holder has it, without waiting
  * - a lock older than `stale` ms (default 60s) is a crashed holder's, and is taken over
+ * - a BLOCKING wait (`run()`) for a lock this same process holds (`runAsync()`'s holder, awaiting) throws at once:
+ *   the thread it blocks is the one that would let go, so it could only time out, freezing the process meanwhile
+ *   (epic `epic-engine` I463:  the epic hub stood still 20s at a time, and a tick on an epic page bounced)
  * - the lock file holds its holder:  `<pid> <label>` (`holder()`);  a holder whose process is gone is stale at once,
  *   whatever its age, so a long `stale` (a merge, a test run) never waits on a crashed one
  * - writers that don't lock (VS Code, an agent's edit tool) aren't stopped:
@@ -112,6 +115,7 @@ export class FileLock {
 
   /** Run `fn` holding the lock;  BLOCKS the thread while waiting (`waitUntilSync()`), for sync scripts. */
   run<T>(fn: () => T): T {
+    if (this.isHeldHere()) throw this.heldHere()
     // Takes it when free, looking every 0.1s;  gives up after `wait`
     if (!waitUntilSync(this.attempt(), { timeout: this.wait / 1000 })) throw this.timeout()
     try {
@@ -144,6 +148,7 @@ export class FileLock {
       } finally {
         closeSync(fd)
       }
+      HELD_HERE.add(this.lockFile)
       return true
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
@@ -174,12 +179,34 @@ export class FileLock {
 
   /** Let go of the lock. */
   release(): void {
+    HELD_HERE.delete(this.lockFile)
     rmSync(this.lockFile, { force: true })
   }
 
   /** the error for a lock held too long, naming its holder when the lock file says */
   private timeout(): FileLockError {
     return new FileLockError(`${this.lockFile} held for ${this.wait / 1000}s${FileLock.byWhom(this.holder())}:  stuck?`)
+  }
+
+  /**
+   * Does this process hold the lock now, and not so long that it's stale (`stale`, which `tryAcquire()` takes over)?
+   * - so a blocking wait for it could only time out (`run()`)
+   */
+  private isHeldHere(): boolean {
+    if (!HELD_HERE.has(this.lockFile)) return false
+    const holder = this.holder()
+    if (holder?.pid === process.pid && !this.isStale(holder)) return true
+    // gone, taken over by another, or stale:  a wait may end
+    HELD_HERE.delete(this.lockFile)
+    return false
+  }
+
+  /** the error for a blocking wait on a lock this process holds itself (`run()`) */
+  private heldHere(): FileLockError {
+    return new FileLockError(
+      `${this.lockFile} is held by this process (pid ${process.pid}), awaiting:  a blocking wait would freeze it;  ` +
+        "use runAsync() or runOnce()"
+    )
   }
 
   /** ` by pid 123 (epic add seo#I ...), since 14:36:20`;  `""` when nobody holds it, or it wrote nothing. */
@@ -189,6 +216,9 @@ export class FileLock {
     return ` by pid ${holder.pid}${label}, since ${holder.since.toTimeString().slice(0, 8)}`
   }
 }
+
+/** The lock files this process holds now:  a blocking wait for one of them throws at once (`run()`). */
+const HELD_HERE = new Set<string>()
 
 /** Whether process `pid` is still running on this machine. */
 function isAlive(pid: number): boolean {

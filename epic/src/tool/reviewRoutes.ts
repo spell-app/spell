@@ -143,7 +143,7 @@ const reviewRoutes: RouteModule = {
       // an instant mark takes effect with no Send (epic `epic-engine` I268, I304):  a Read now, a ✓ or x once its
       // grace has passed, so a second click inside it takes it back
       if (mark && isInstantDue(id, mark)) {
-        await applyInstant(file, root)
+        if (!(await applyInstant(file, root))) instantLater(file, root, retryWait(1))
         reply.json(ReviewInbox.read(ReviewInbox.pathFor(file)).forPage())
       } else {
         if (mark && isInstant(id, mark)) instantLater(file, root, INSTANT_GRACE_MS)
@@ -266,27 +266,39 @@ function epicOf(file: string): string {
 }
 
 /**
- * SIDE EFFECT:  the instant marks due in epic page `file`'s inbox applied to the page now (`InstantMarks.applyNow()`).
- * - NEVER throws:  a failure is one line in the page server's log, and the marks wait for the page's next look
- *   (`GET inbox`), or `epic inbox apply`
+ * SIDE EFFECT:  the instant marks due in epic page `file`'s inbox applied to the page now (`InstantMarks.applyNow()`);
+ * whether it went.
+ * - NEVER throws:  a failure (the page's lock held by a long edit, say) is one line in the page server's log, and
+ *   `instantLater()` tries again by itself (epic `epic-engine` I463)
  */
-async function applyInstant(file: string, root: string): Promise<void> {
+async function applyInstant(file: string, root: string): Promise<boolean> {
   try {
     // loaded only now:  it brings `PlanDoc`, which no other review route needs
     const { InstantMarks } = await import("./InstantMarks")
     await InstantMarks.applyNow(file, root)
+    instantTries.delete(file)
+    return true
   } catch (error) {
-    console.error(`review:  an instant mark on ${file} waits:  ${(error as Error).message}`)
+    const tries = (instantTries.get(file) ?? 0) + 1
+    instantTries.set(file, tries)
+    if (tries === 1)
+      console.error(`review:  an instant mark on ${file} waits, trying again:  ${(error as Error).message}`)
+    return false
   }
 }
 
 /** Pages with an instant run waiting, so a burst of clicks makes one. */
 const instantWaiting = new Set<string>()
 
+/** Pages whose instant run failed, page -> how many times in a row:  the next try waits longer (`retryWait()`). */
+const instantTries = new Map<string, number>()
+
 /**
  * Apply page `file`'s due instant marks `wait` ms from now, in the background (`applyInstant()`).
  * - one waiting run per page:  it applies every mark due by then;  a mark made while it waited, not due yet, gets a
  *   run of its own after it
+ * - a run that failed tries again by itself, waiting longer each time (`retryWait()`), for as long as the marks stand:
+ *   a tick always lands, never handed back to the person (epic `epic-engine` I463;  Owen:  "This is lame -- just do it")
  * - its timer doesn't keep the server up (`unref()`)
  */
 function instantLater(file: string, root: string, wait: number): void {
@@ -295,16 +307,21 @@ function instantLater(file: string, root: string, wait: number): void {
   // a little past the grace, so the mark that set it is due
   const timer = setTimeout(
     () => {
-      void applyInstant(file, root).finally(() => {
+      void applyInstant(file, root).then((went) => {
         instantWaiting.delete(file)
-        const left = ReviewInbox.read(ReviewInbox.pathFor(file)).markList
-        if (left.some((mark) => isInstant(mark.id, mark) && !isInstantDue(mark.id, mark)))
-          instantLater(file, root, INSTANT_GRACE_MS)
+        const left = ReviewInbox.read(ReviewInbox.pathFor(file)).markList.filter((mark) => isInstant(mark.id, mark))
+        if (!went && left.length) instantLater(file, root, retryWait(instantTries.get(file) ?? 1))
+        else if (left.some((mark) => !isInstantDue(mark.id, mark))) instantLater(file, root, INSTANT_GRACE_MS)
       })
     },
     wait + (wait ? 50 : 0)
   )
   timer.unref?.()
+}
+
+/** How long to wait before try `tries` + 1 of a failed instant run, ms:  1s, 2s, 4s ... at most 30s. */
+function retryWait(tries: number): number {
+  return Math.min(1000 * 2 ** (tries - 1), 30_000)
 }
 
 /** Send:  every mark so far is sent;  whether anything was new to hand over (a Send with nothing new wakes nobody). */
@@ -338,11 +355,17 @@ async function itemOf(file: string, id: unknown): Promise<string> {
 /**
  * Change epic page `file`'s inbox with `change`, under its lock;
  * the inbox after, as the page reads it (`ReviewInbox.forPage()`).
- * - an `InboxError` (a bad mark, a bad action) is a 400
+ * - an `InboxError` (a bad mark, a bad action) is a 400;  its lock held too long, a 503 (busy:  the page tries again)
  */
 async function update(file: string, change: (inbox: ReviewInbox) => unknown): Promise<PageInbox> {
-  const inbox = await ReviewInbox.updateAsync(ReviewInbox.pathFor(file), (each) => asHttp(() => change(each)))
-  return inbox.forPage()
+  try {
+    const inbox = await ReviewInbox.updateAsync(ReviewInbox.pathFor(file), (each) => asHttp(() => change(each)))
+    return inbox.forPage()
+  } catch (error) {
+    // busy, not broken:  the page's link tries again by itself (`ServerLink.post()`, epic `epic-engine` I463)
+    if (error instanceof SRV.FileLockError) throw new SRV.HttpError(503, `the page is busy:  ${error.message}`)
+    throw error
+  }
 }
 
 /** `asHttp()` for async work:  an `InboxError` it rejects with becomes a 400. */

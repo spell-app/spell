@@ -1,6 +1,6 @@
 /**
  * Check a section's Close all in a real browser (epic `epic-engine` T158):  the Judgement calls, Issues and Todos
- * sections' title button on a reviewed epic page, its confirm, its notice and Undo.
+ * sections' title button on a reviewed epic page:  no confirm, the items drawn closed at once, its notice and Undo.
  *
  * Usage (from the `epic/` folder):
  *   node src/demo/check-close-all.mjs [outDir]
@@ -9,11 +9,12 @@
  * - the server:  a page server of its OWN (`DemoServer`), THIS checkout's pack and routes;  it wakes nobody
  * - checks:
  *   - "Close 2 decided" on Judgement calls (J3's mark leaves it out), "Close 2 fixed" on Issues, "Close 1 done" on Todos
- *   - a click asks first, naming how many;  OK closes both calls, grey;  the notice says so, with Undo
+ *   - a click asks nothing (epic `epic-engine` I462):  both calls drawn ticked at once, before the server answers,
+ *     the button gone;  then closed on the page;  the notice says so, with Undo
  *   - Undo puts them back, open to tick again;  the button counts 2 again
  *   - no page errors
  * - screenshots in outDir:  `close-all-light.png`, `close-all-dark.png`, `close-all-phone.png` (the Judgement calls
- *   title), `close-all-confirm.png`, `close-all-notice.png`
+ *   title), `close-all-at-once.png`, `close-all-notice.png`
  * - exits 1 on any miss
  * - re-runs itself under `tsx` (the page server is TypeScript)
  */
@@ -27,11 +28,15 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
 
 if (!process.env.CHECK_CLOSE_ALL_UNDER_TSX) {
-  const run = spawnSync(process.execPath, ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)], {
-    stdio: "inherit",
-    cwd: ROOT,
-    env: { ...process.env, CHECK_CLOSE_ALL_UNDER_TSX: "1", TSX_TSCONFIG_PATH: join(ROOT, "tsconfig.json") }
-  })
+  const run = spawnSync(
+    process.execPath,
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    {
+      stdio: "inherit",
+      cwd: ROOT,
+      env: { ...process.env, CHECK_CLOSE_ALL_UNDER_TSX: "1", TSX_TSCONFIG_PATH: join(ROOT, "tsconfig.json") }
+    }
+  )
   process.exit(run.status ?? 1)
 }
 
@@ -125,6 +130,14 @@ async function open(viewport, colorScheme = "light") {
   return page
 }
 
+/** Item `id`'s ✓ (Approve), its fill as drawn:  `none` when not pressed. */
+const approveFill = (page, id) =>
+  page.evaluate((item) => {
+    const root = document.getElementById(item)?.shadowRoot
+    const review = root?.querySelector("epic-review")?.shadowRoot
+    return (review ?? root)?.querySelector('ui-button[data-action="approve"]')?.dataset.fill ?? ""
+  }, id)
+
 /** A shot of section `id`'s title row. */
 async function shootTitle(page, id, name) {
   const box = await page.evaluate((section) => {
@@ -145,16 +158,31 @@ try {
   check((await words(page, "questions")) === "", "no Close all on Questions")
   await shootTitle(page, "judgements", "close-all-light.png")
 
-  // the click asks first
+  // no confirm (I462):  the click closes them, each drawn as his own ✓ draws it AT ONCE, before the server answers
+  // (its answer held back here a moment, so "at once" is told apart from "once the page updated")
+  let release
+  const held = new Promise((resolve) => (release = resolve))
+  await page.route("**/api/epics/review/close-all", async (route) => {
+    await held
+    await route.continue()
+  })
+  const before = await Promise.all(["j1", "j2"].map((id) => approveFill(page, id)))
+  check(
+    before.every((fill) => fill === "none"),
+    `J1 and J2 not ticked before (${before.join(", ")})`
+  )
   await page.evaluate(() =>
     document.querySelector("epic-section#judgements").shadowRoot.querySelector(".close-all").click()
   )
-  await page.waitForSelector("ui-modal[open], ui-modal:state(open)", { timeout: 5000 }).catch(() => undefined)
-  await page.waitForTimeout(600)
-  const asked = await page.getByText("Close 2 decided judgement calls?").count()
-  check(asked > 0, "the confirm names how many")
-  await page.screenshot({ path: join(outDir, "close-all-confirm.png") })
-  await page.getByText("Close them", { exact: true }).last().click()
+  await page.waitForTimeout(300)
+  check((await page.locator("ui-modal[open]").count()) === 0, "no confirm")
+  check(
+    (await Promise.all(["j1", "j2"].map((id) => approveFill(page, id)))).every((fill) => fill && fill !== "none"),
+    "J1 and J2 drawn ticked at once, as his ✓ on each"
+  )
+  check((await words(page, "judgements")) === "", "the button goes at once:  nothing left to close")
+  await page.screenshot({ path: join(outDir, "close-all-at-once.png") })
+  release()
   await page.waitForFunction(
     () => /Closed 2/.test(document.querySelector("[data-spell-notices]")?.shadowRoot?.textContent ?? ""),
     null,
@@ -169,28 +197,35 @@ try {
   )
   check(!after.item("j3").getAttribute("review-as"), "J3, with his mark on it, left alone")
   check(after.item("j4").getAttribute("status") === "open", "J4, still open, left alone")
-  await page.waitForFunction(
-    () => !document.querySelector("epic-section#judgements")?.shadowRoot?.querySelector(".close-all"),
-    null,
-    { timeout: 4000 }
-  ).catch(() => undefined)
+  await page
+    .waitForFunction(
+      () => !document.querySelector("epic-section#judgements")?.shadowRoot?.querySelector(".close-all"),
+      null,
+      { timeout: 4000 }
+    )
+    .catch(() => undefined)
   check((await words(page, "judgements")) === "", "the button goes once nothing is left to close")
 
   // Undo
   await page.evaluate(() =>
     document.querySelector("[data-spell-notices]").shadowRoot.querySelector("ui-button").click()
   )
-  await page.waitForFunction(
-    () => document.querySelector("epic-section#judgements")?.shadowRoot?.querySelector(".close-all"),
-    null,
-    { timeout: 10000 }
-  ).catch(() => undefined)
+  await page
+    .waitForFunction(
+      () => document.querySelector("epic-section#judgements")?.shadowRoot?.querySelector(".close-all"),
+      null,
+      { timeout: 10000 }
+    )
+    .catch(() => undefined)
   const undone = files.read(FILE)
   check(
     ["j1", "j2"].every((id) => !undone.item(id).getAttribute("review-as")),
     "Undo:  J1 and J2 back as they were"
   )
-  check((await words(page, "judgements")) === "Close 2 decided", `Undo:  the button back (${await words(page, "judgements")})`)
+  check(
+    (await words(page, "judgements")) === "Close 2 decided",
+    `Undo:  the button back (${await words(page, "judgements")})`
+  )
   await page.close()
 
   const dark = await open({ width: 1200, height: 900 }, "dark")

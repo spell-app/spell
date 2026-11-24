@@ -51,7 +51,7 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
      finds both);  a worktree's page as the person sees it:  `--base http://127.0.0.1:4747/worktrees/<w>`
    - its JSON's `problems` (console errors, a selector that matched nothing) are findings too
    - among them, `misaligned in <shots>:  ...`:  a row with one item drawn more than half a pixel above or below the
-     rest, measured by what's drawn (`Alignment`, epic `epic-engine` P83);  each is HIGH, T18's, fixed in the
+     rest, or a centred column with one left or right of its middle, measured by what's drawn (`Alignment`, epic `epic-engine` P83);  each is HIGH, T18's, fixed in the
      component, never with page CSS;  a row meant to be uneven is marked `data-align="free: <why>"`
 3. Look at EVERY shot (`Read` on each PNG).
    - Reading one:  procedures.md, explain-interface's guide.  Sizes are ratios:  never report a px value from an image

@@ -66,11 +66,20 @@ export class InstantUndo {
 
   /**
    * SIDE EFFECT:  a section's Close all on page `file` kept, so its Undo puts every item back (`CloseAll`, epic
-   * `epic-engine` T158):  ONE record, `batch`, holding each item's.
+   * `epic-engine` T158):  ONE record, `batch`, holding each item's, and each item's own beside it (I462).
    */
   static keepBatch(file: string, batch: string, items: readonly UndoRecord[]): void {
     const at = items[0]?.at ?? new Date().toISOString()
-    InstantUndo.keep(file, { ...EMPTY_BATCH, id: batch, did: `${items.length} closed at once`, at, items: [...items] })
+    const path = InstantUndo.pathFor(file)
+    const record = { ...EMPTY_BATCH, id: batch, did: `${items.length} closed at once`, at, items: [...items] }
+    // each item's own record too:  the page draws them as his ✓ on each, so a second click on one puts that one back
+    // (`undo()`, epic `epic-engine` I462)
+    const ids = new Set([batch, ...items.map((each) => each.id)])
+    SRV.FileLock.run(path, () => {
+      const records = InstantUndo.read(path).filter((each) => !ids.has(each.id))
+      records.push(...items, record)
+      DataFile.write(path, records.slice(-KEPT))
+    })
   }
 
   /**
@@ -150,8 +159,8 @@ const EMPTY_BATCH = {
   after: { attributes: {}, label: null }
 } as const
 
-/** How many applied instant marks a page keeps for undo. */
-const KEPT = 20
+/** How many applied instant marks a page keeps for undo:  a Close all keeps one per item it closed, and its own. */
+const KEPT = 200
 
 /** The attributes that say an item still stands as an instant mark left it:  any other change refuses an undo. */
 const WATCHED = ["status", "fixed", "self-fixed", "urgent", "review-as"] as const

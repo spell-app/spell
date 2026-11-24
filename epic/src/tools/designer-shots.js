@@ -14,9 +14,9 @@
  *   - each `--hover` / `--click`:  desk, the pointer over the selector's first shown match, or after clicking it (a
  *     menu, a popup, an open fold):  `desk-light-hover-1.png` ...
  * - prints a JSON summary on stdout (last thing written):  the URL, every shot's path, the page's console errors,
- *   any state it couldn't reach, and every row whose items don't line up
- * - each shot is scanned for rows whose items don't line up (`Alignment`, the kit's shared scan;  epic `epic-engine`
- *   P83):  a problem per kind of finding, naming the shots it showed in;  a reviewer calls each one HIGH
+ *   any state it couldn't reach, and every row or column whose items don't line up
+ * - each shot is scanned for rows and columns whose items don't line up (`Alignment`, the kit's shared scan;  epic
+ *   `epic-engine` P83, T166):  a problem per kind of finding, naming the shots it showed in;  a reviewer calls each one HIGH
  *   (`designer.md`, "Icons and text centred"), fixed in the component, or marked as meant (`data-align="free: <why>"`)
  * - NEVER Claude-in-Chrome:  headless only (Owen's standing rule)
  */

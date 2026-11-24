@@ -757,7 +757,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * The Judgement calls, Issues and Todos sections' Close all, on their title while reviewed and one waits for his
    * tick (Owen, 2026-11-23:  "1-click way to quickly e.g. close all "DECIDED" things in Js and "FIXED" in and "DONE" in
    * todos";  on each section's own title row, his choice):  "Close 12 decided", green outlined.
-   * - a click asks first, naming how many (`closeAll()`)
+   * - a click closes them at once, no confirm (`closeAll()`, I462)
    */
   private closeAllButton(kind: CloseAllKind): JSX.Element {
     const count = () => this.closable().length
@@ -788,8 +788,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   }
 
   /**
-   * Close all, pressed:  a confirm naming how many, then every one closed by the page server at once
-   * (`ReviewClient.closeAll()`), then a notice with Undo, which puts them back (`undoCloseAll()`).
+   * Close all, pressed:  no confirm (epic `epic-engine` I462;  Owen:  "Don't show this"):  every one drawn grey at once,
+   * as his ✓ on each draws it, and closed by the page server in one edit (`ReviewClient.closeAll()`);  then a notice
+   * with Undo, which puts them back (`undoCloseAll()`).
    * - only the ids counted now go:  the server closes those still closable, and says which it left
    * - NEVER throws:  a failed post is the client's notice
    */
@@ -799,14 +800,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     const ids = this.closable()
     if (!client || !ids.length) return
     const count = (n: number) => ({ count: String(n), things: this.closeThings(kind, n) })
-    const isSure = await UI.modals.confirm({
-      title: this.translationForKey("closeAllTitle", count(ids.length)),
-      message: this.translationForKey("closeAllAsk"),
-      okText: this.translationForKey("closeAllOk"),
-      okColor: "green",
-      cancelText: this.translationForKey("closeAllCancel")
-    })
-    if (!isSure) return
     const answer = await client.closeAll(kind, ids)
     if (!answer) return
     const left = answer.left.length
