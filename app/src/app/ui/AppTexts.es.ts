@@ -583,6 +583,8 @@ const APP_TEXTS_ES: AppTextPack = {
   anatomyFlatTip: "Esta parte oculta lo que pasa de sus bordes, así que lo de dentro no puede separarse de ella",
   anatomyFocusShortcut: "Muestra sola la capa elegida",
   anatomyBackShortcut: "Vuelve atrás, fuera de Anatomía",
+  previewShortcut: "Vista previa:  muestra solo la app, a pantalla completa",
+  previewHint: "Ahora solo se ve tu app.\nPulsa {key} para volver al editor.",
   shortcutsWhileAnatomy: "Solo mientras se ve Anatomía",
   anatomyHelp:
     "Anatomía separa tu app en capas, una por cada vista que dibuja.\nArrastra para girarla. Desplaza para acercar. Haz clic en una capa para elegirla, o doble clic para verla sola.\nMantén Opción para usar la app como siempre. Pulsa Esc para volver.",

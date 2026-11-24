@@ -147,6 +147,19 @@ export class SourceEdits {
   ////////////////
 
   /**
+   * Is `offset` inside the body of an element, rather than among a drawing's own lines?
+   * - Looks back from `offset` for a tag that opens before it and closes after it.
+   */
+  static isInsideElement(text: string, offset: number): boolean {
+    for (let at = text.lastIndexOf("<", offset - 1); at >= 0; at = text.lastIndexOf("<", at - 1)) {
+      if (!/^<[a-zA-Z]/.test(text.slice(at, at + 2))) continue
+      const element = SourceEdits.elementAt(text, at)
+      if (element && element.end > offset) return true
+    }
+    return false
+  }
+
+  /**
    * The whole element opening at `opening`, its closing tag and all:  `undefined` when no tag opens there, or it never closes.
    * - Spell's own closer, `</>`, closes whatever's open.
    */
@@ -315,8 +328,12 @@ export class SourceEdits {
   /**
    * `text` with each of `codes` written at `place`, in order, each on its own line.
    * - `starts`:  where each one starts in the new text.
+   * - A `{draw ...}` landing among a drawing's own lines, outside every tag, is written as the line `draw ...`:
+   *   braces are markup's, and Spell doesn't understand them there (epic `editor` I342, App views' Card).
    */
-  static writtenAll(text: string, place: ElementPlace, codes: readonly string[]): { text: string; starts: number[] } {
+  static writtenAll(text: string, place: ElementPlace, _codes: readonly string[]): { text: string; starts: number[] } {
+    const isAmongLines = !place.whole && place.where !== "inside" && !SourceEdits.isInsideElement(text, place.opening)
+    const codes = isAmongLines ? _codes.map((code) => code.replace(DRAW_IN_BRACES, "$1")) : _codes
     // runs of prose written together keep a blank line between them, as `written()` does
     const joiner = codes.some(isProse) ? `\n\n` : `\n`
     const indent =
@@ -518,6 +535,9 @@ function valueWritten(value: string, quote: WrittenAttribute["quote"]): string {
   if (quote === "bare" && BARE_VALUE.test(value)) return value
   return quoted(value, quote === "'" ? "'" : '"')
 }
+
+/** A drawing of something in braces, as markup writes it:  `{draw a new card}`, its line `draw a new card`. */
+const DRAW_IN_BRACES = /^\{(draw [^{}]*)\}$/
 
 /** A value an attribute may hold bare:  one word, no quote, brace, tag or `=` in it. */
 const BARE_VALUE = /^[^\s"'{}<>/=]+$/u
