@@ -279,9 +279,9 @@ export function ProjectBarMenu(): JSX.Element {
     deleteWords: appTexts.text("deleteProject", project()),
     duplicateWords: appTexts.text("duplicateProject", project()),
     onAServer: !isStaticBuild,
-    mayChangeProject: !isStaticBuild || editor.canChangeProject,
-    mayReset: !isStaticBuild || !editor.canChangeProject,
-    canPublish: editor.canPublish,
+    projectChangesAllowed: !isStaticBuild || editor.canChangeProject,
+    resetAllowed: !isStaticBuild || !editor.canChangeProject,
+    readyToPublish: editor.canPublish,
     drafted: editor.canDeleteDraft
   }))
   return (
@@ -372,9 +372,9 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     revertWords: appTexts.text("revertChanges"),
     autoSaving: editor.isAutoSaving,
     unsaved: editor.hasUnsavedEdits,
-    mayCreate: editor.mayCreate && (!isStaticBuild || editor.canChangeProject),
-    mayDesign: editor.mayDesign,
-    mayChangeProject: !isStaticBuild || editor.canChangeProject,
+    newFilesAllowed: editor.mayCreate && (!isStaticBuild || editor.canChangeProject),
+    draftsAllowed: editor.mayDesign,
+    projectChangesAllowed: !isStaticBuild || editor.canChangeProject,
     running: props.mode === "run",
     codeIsShowing: EditorMode.isEditing(props.mode) && !CodeShown.isClosed(editor.project?.path),
     compiledCodeIsShowing: EditorMode.isEditing(props.mode) && !!CodeOutputShown.target,

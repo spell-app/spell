@@ -368,13 +368,13 @@ function showEveryRow(core: ZoneCore): void {
   const project = { project: SAMPLE_PROJECT }
   const shown: Partial<Record<EditorMemberName<"SpellEditor", "value">, unknown>> = {
     onAServer: true,
-    mayCreate: true,
-    mayDesign: true,
-    mayChangeProject: true,
-    mayReset: true,
+    newFilesAllowed: true,
+    draftsAllowed: true,
+    projectChangesAllowed: true,
+    resetAllowed: true,
     fileChanged: true,
     drafted: true,
-    canPublish: true,
+    readyToPublish: true,
     revertWords: appTexts.text("revertChanges"),
     renameWords: appTexts.text("renameProject", project),
     deleteWords: appTexts.text("deleteProject", project),

@@ -5,6 +5,15 @@
 // The editor shows every title in the page's language.
 
 spell editor is an app
+	to draw it
+		// The editor:  its top bar over its panes.
+		// For now the editor draws these two itself, each in its place (`SpellEditor` in `SpellEditor.tsx`),
+		// with what has no Spell yet around them:  the add rail, the part menu, Change This and Follow Along.
+		<stack spacing="none" fluid>
+			{draw its editor bar}
+			{draw its editor layout}
+		</stack>
+
 	"editor bar" is a new editor bar
 	"editor layout" is a new editor layout
 	"file tab bar" is a new file tab bar
@@ -25,7 +34,7 @@ spell editor is an app
 		// The project has a draft:  Delete Draft puts every file back as published
 	its "auto saving" is yes or no
 		// AutoSave is on
-	its "can publish" is yes or no
+	its "ready to publish" is yes or no
 		// The project has a draft to publish
 	its "unsaved" is yes or no
 		// The project has edits not saved:  Save is ticked
@@ -56,13 +65,13 @@ spell editor is an app
 	// What changes which rows there are:  the editor keeps each in step
 	its "on a server" is yes or no
 		// The editor runs on Spell's page server, not the public preview:  drafts, versions and a project's settings are the server's
-	its "may create" is yes or no
+	its "new files allowed" is yes or no
 		// The person may make new files here
-	its "may design" is yes or no
+	its "drafts allowed" is yes or no
 		// The person may save drafts of the project's pages
-	its "may change project" is yes or no
+	its "project changes allowed" is yes or no
 		// The project may be renamed, deleted and its files duplicated:  in the public preview, a visitor's own only
-	its "may reset" is yes or no
+	its "reset allowed" is yes or no
 		// Reset to Saved forgets the edits:  in the public preview, a built-in project only
 
 	group "Titles That Follow"
@@ -87,7 +96,7 @@ spell editor is an app
 	to "duplicate project" with title "[its duplicate words]", icon "clone outline"
 	to "reset to saved" with title "Reset to Saved", icon "undo"
 	to "publish" with icon "paper plane outline"
-		enabled when its can publish is yes
+		enabled when its ready to publish is yes
 	to "versions" with icon "history"
 	to "delete draft" with icon "eraser"
 		enabled when its drafted is yes
@@ -151,326 +160,327 @@ spell editor is an app
 	to "clear console" with icon "ban"
 		disabled when its console empty is yes
 
-an "editor part" is a thing
-	// What the editor draws in a view's place for it:  a pane, a menu, a row it keeps in step itself.
-	// Its drawing is the editor's own, handed over in TypeScript (`EditorSpell.parts()`, `layoutSpell.ts`).
+	// Its views, its menus and the things they show, declared right here
+	an "editor part" is a thing
+		// What the editor draws in a view's place for it:  a pane, a menu, a row it keeps in step itself.
+		// Its drawing is the editor's own, handed over in TypeScript (`EditorSpell.parts()`, `layoutSpell.ts`).
 
-an "editor bar" is a view
-	// The editor's top bar, joined to the top of the window, with three sections:
-	// Spell's menu, the project's menu and the app's menus, then Run and Edit in the middle, then the tools and you.
-	// What's in each is still the editor's own, `EditorToolbar` in `SpellEditor.tsx`:  each is an editor part here, which draws itself.
-	its "spell menu" is an editor part
-		// Spell's menu:  its hat and name, opening the group's projects and Home
-	its "project menu" is an editor part
-		// The project's menu:  its name, opening the project menu
-	its "app menus" is an editor part
-		// File, Edit, View, Run and Help, each opening its menu
-	its "draft" is an editor part
-		// Draft, Publish and Discard, one pill, after Help, while you have drafts of the project
-	its "mode buttons" is an editor part
-		// Run and Edit, then in Edit the code's icon, the compiled code's, Inspect app, Anatomy and Add
-	its "tools" is an editor part
-		// Restart and the theme
-	its "you" is an editor part
-		// The person's own menu
+	an "editor bar" is a view
+		// The editor's top bar, joined to the top of the window, with three sections:
+		// Spell's menu, the project's menu and the app's menus, then Run and Edit in the middle, then the tools and you.
+		// What's in each is still the editor's own, `EditorToolbar` in `SpellEditor.tsx`:  each is an editor part here, which draws itself.
+		its "spell menu" is an editor part
+			// Spell's menu:  its hat and name, opening the group's projects and Home
+		its "project menu" is an editor part
+			// The project's menu:  its name, opening the project menu
+		its "app menus" is an editor part
+			// File, Edit, View, Run and Help, each opening its menu
+		its "draft" is an editor part
+			// Draft, Publish and Discard, one pill, after Help, while you have drafts of the project
+		its "mode buttons" is an editor part
+			// Run and Edit, then in Edit the code's icon, the compiled code's, Inspect app, Anatomy and Add
+		its "tools" is an editor part
+			// Restart and the theme
+		its "you" is an editor part
+			// The person's own menu
 
-	to draw it
-		<app-menu class="AppMenu tight EditorBar">
-			<menu slot="start" position="left" class="third side">
-				{draw its spell menu}
-				{draw its project menu}
-				{draw its app menus}
-				{draw its draft}
-				<item class="spring no-border"/>
-			</menu>
-			<menu position="left" class="third">
-				<item class="spring no-border"/>
-				{draw its mode buttons}
-				<item class="spring no-border"/>
-			</menu>
-			<menu slot="end" position="right" class="third side BarTools">
-				<item class="spring no-border"/>
-				<menu appearance="capsule">
-					{draw its tools}
+		to draw it
+			<app-menu class="AppMenu tight EditorBar">
+				<menu slot="start" position="left" class="third side">
+					{draw its spell menu}
+					{draw its project menu}
+					{draw its app menus}
+					{draw its draft}
+					<item class="spring no-border"/>
 				</menu>
-				{draw its you}
-			</menu>
-		</app-menu>
+				<menu position="left" class="third">
+					<item class="spring no-border"/>
+					{draw its mode buttons}
+					<item class="spring no-border"/>
+				</menu>
+				<menu slot="end" position="right" class="third side BarTools">
+					<item class="spring no-border"/>
+					<menu appearance="capsule">
+						{draw its tools}
+					</menu>
+					{draw its you}
+				</menu>
+			</app-menu>
 
-an "editor layout" is a view
-	// The editor's panes:  the code on the left, the Program panel under it, then the running app, and the Inspector at the far right while it's open (Owen, 2026-11-06).
-	// What's in each is still the editor's own, `SpellEditor` in `SpellEditor.tsx`:  each is an editor part here, which draws itself.
-	// The app takes every change of size (`grows`, its place across):  dragging the code's bar sizes the code, the app gives or takes the room, and the Inspector keeps its width.
-	// The code's column stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
-	its "code" is an editor part
-		// The file tabs and the code
-	its "program panel" is an editor part
-		// The program's output and compiled code, under the code
-	its "app" is an editor part
-		// The running program
-	its "inspector" is an editor part
-		// The Inspector, while it's open
-	its "columns" is text
-		// The sizes across, as they were last dragged
-	its "code rows" is text
-		// The sizes of the code and the Program panel
-	its "grows" is text
-		// The app's place across, which takes every change of size:  2 after the code, first without it
-	its "mode" is one of edit or run
-		it "is (mode)"
+	an "editor layout" is a view
+		// The editor's panes:  the code on the left, the Program panel under it, then the running app, and the Inspector at the far right while it's open (Owen, 2026-11-06).
+		// What's in each is still the editor's own, `SpellEditor` in `SpellEditor.tsx`:  each is an editor part here, which draws itself.
+		// The app takes every change of size (`grows`, its place across):  dragging the code's bar sizes the code, the app gives or takes the room, and the Inspector keeps its width.
+		// The code's column stays where it is when it isn't showing, hidden:  so nothing moves or redraws as the others come and go, and the running app keeps running.
+		its "code" is an editor part
+			// The file tabs and the code
+		its "program panel" is an editor part
+			// The program's output and compiled code, under the code
+		its "app" is an editor part
+			// The running program
+		its "inspector" is an editor part
+			// The Inspector, while it's open
+		its "columns" is text
+			// The sizes across, as they were last dragged
+		its "code rows" is text
+			// The sizes of the code and the Program panel
+		its "grows" is text
+			// The app's place across, which takes every change of size:  2 after the code, first without it
+		its "mode" is one of edit or run
+			it "is (mode)"
 
-	to draw it
-		<split-panel class="EditorColumns" columns={its columns} grows={its grows} resizable>
-			<split-panel class="EditorCode" rows={its code rows} resizable hidden={it is run}>
-				{draw its code}
-				{draw its program panel}
+		to draw it
+			<split-panel class="EditorColumns" columns={its columns} grows={its grows} resizable>
+				<split-panel class="EditorCode" rows={its code rows} resizable hidden={it is run}>
+					{draw its code}
+					{draw its program panel}
+				</split-panel>
+				{draw its app}
+				{draw its inspector}
 			</split-panel>
-			{draw its app}
-			{draw its inspector}
-		</split-panel>
 
-a "file" is a thing
-	// One of the project's files, as its tab shows it
-	its "name" is text
-	its "icon" is text
-	its "path" is text
-	its "status" is one of saved or changed or drafted
-		it "is (status)"
-	its "place" is one of chosen or other
-		it "is (place)"
-	its "draft note" is text
-		// What its pen's tip says, "Updated in your draft.", in the page's language:  the editor's own
-	its "discard words" is text
-		// The tip's link, "Discard changes", in the page's language:  the editor's own
-	to show it
-	to discard it
-		// Your draft of it goes, back to what's published:  the editor's own
+	a "file" is a thing
+		// One of the project's files, as its tab shows it
+		its "name" is text
+		its "icon" is text
+		its "path" is text
+		its "status" is one of saved or changed or drafted
+			it "is (status)"
+		its "place" is one of chosen or other
+			it "is (place)"
+		its "draft note" is text
+			// What its pen's tip says, "Updated in your draft.", in the page's language:  the editor's own
+		its "discard words" is text
+			// The tip's link, "Discard changes", in the page's language:  the editor's own
+		to show it
+		to discard it
+			// Your draft of it goes, back to what's published:  the editor's own
 
-a "file list" is a viewable list of files
-	// Every file of the project, a tab each:  a click shows it;  a right click shows it, and its menu
-	// Its ✕, in its file icon's place while hovered, closes its tab, only while some files are put away in the list:  the item's own `closable="when-limited"` (T77, T82, T145)
-	to draw each item
-		<item icon={the icon of the file} label={the name of the file} value={the path of the file} selected={the file is chosen} closable="when-limited" onClick={show the file}>
-			<context-menu>
-				<action "duplicate file"/>
-				<action "rename file"/>
-				<action "delete file"/>
-			</>
-			{the name of the file}
-			<if the file is changed><label slot="badge" circular empty color="orange" size="mini" /></if>
-			<if the file is drafted>
-				<span slot="badge" class="Drafted">
-					<icon name="fa7-free:pen-to-square" size="small" color="primary" />
-					<popup class="DraftTip" position="bottom center">
-						{the draft note of the file}
-						<button appearance="tertiary" color="primary" size="small" onClick={discard the file}>{the discard words of the file}</>
-					</popup>
-				</span>
-			</if>
-		</item>
-
-a "file tab bar" is a view
-	// Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
-	// Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
-	// With more files than fit the bar's limit, only the ones opened lately are tabs;  a file and a ▾ beside them list every file.
-	// The file and the ▾ show at the bar's right end only while some files aren't tabs you can see:  put away, or scrolled out of the row (T83, Owen:  "Don't need the 'more files' button when all of the tabs are visible").
-	// At its far right a ✕ hides the code, as the top bar's code icon does, which shows it again (T83).
-	// Then a tab hovered shows a ✕ in its file icon's place:  it closes the tab, the file still in the list, and picking it there opens it again (T77).  The ✕ takes no room of its own, so no tab grows or moves (T82).
-	// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14):  hovered, it says so, with a link that discards that file's draft (I92).
-	// A site's own file, `Dashboard.site.spell`, is always a tab;  and however narrow the bar, it's never one tab with a ▾ of its own:  the row scrolls (I188, its toolbar's `scroll-only`).
-	// Every look is Spell UI's own:  no CSS of its own (T145).
-	// The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
-	"files" is a new file list
-	its "remember as" is text
-		// What this project's open tabs are kept under, the editor's own
-	its "hide words" is text
-		// The ✕'s tooltip, "Hide the code", in the page's language:  the editor's own
-	to draw it
-		<panel appearance="pane" label="Files" closable close-label={its hide words}>
-			<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-only reorderable max-visible all-items-icon="file outline" all-items-at-end remember={its remember as} label="Files">
-				{draw each file in its files}
-			</toolbar>
-		</panel>
-
-a "home row" is a view
-	// The top of Spell's menu, over its projects:  Home, Spell UI's site, then About Spell (epic `editor` I114, `mockup` T55)
-	to draw it
-		<menu direction="vertical" size="small" class="SpellMenuHome" ticks>
-			<action "home"/>
-			<action "about spell"/>
-			<action "spell ui"/>
-			<divider/>
-		</menu>
-
-an "about box" is a view
-	// What Spell › About Spell… shows:  what Spell is, its version, and where to read more.
-	// Change what it says right here:  the editor shows it as it's drawn.
-	its "version" is text
-		// The editor's version, "0.8.9":  the editor's own
-	to draw it
-		<modal heading="About Spell" size="tiny" closable visible>
-			<content markdown>
-				Write programs in plain words, and see them run as you type.
-
-				Spell draws with Spell UI, and runs in your browser.
-			</content>
-			<actions>
-				<text color="grey">Version {its version}</text>
-				<button appearance="tertiary" link="https://github.com/spell-app/spell" target="_blank" icon="github">Source</button>
-				<button class="approve" color="primary">OK</button>
-			</actions>
-		</modal>
-
-a "version" is a thing
-	// One kept copy of the project, a row of Versions:  the editor's own
-	its "name" is text
-		// Its file's name on the server, "Solitaire.2026-11-03-091502.zip"
-	its "when" is text
-		// When it was kept, in the page's language:  "Nov 3, 2026, 9:15:02 AM";  a draft you kept says so
-	its "place" is one of chosen or other
-		it "is (place)"
-	to choose it
-		// It's the one Restore brings back
-
-a "version list" is a viewable list of versions
-	// The project's versions, newest first:  a click on one chooses it
-	to draw each item
-		<div><radio name="version" selected={the version is chosen} onClick={choose the version}>{the when of the version}</radio></div>
-
-a "versions box" is a view
-	// What the project menu's Versions shows:  the copies Spell keeps of the project, newest first, to bring one back as your draft.
-	// Change how it looks right here:  what it says is in the page's language, and what its buttons do is the editor's own.
-	"versions" is a new version list
-	its "heading" is text
-	its "message" is text
-	its "empty words" is text
-		// What it says with no versions yet
-	its "keep words" is text
-	its "cancel words" is text
-	its "restore words" is text
-	its "listing" is one of listed or empty
-		it "is (listing)"
-	its "keeping" is one of offered or busy or kept or hidden
-		// Save Current Changes:  shown while you have a draft or changes not saved;  greyed once they're kept
-		it "is (keeping)"
-	to restore it
-		// Restore:  the version chosen becomes your draft
-	to keep the changes
-		// Save Current Changes:  your draft is kept as an entry of the list, never published, and the box stays open
-	to draw it
-		<modal heading={its heading} size="tiny" closable visible>
-			<content>
-				<text paragraph>{its message}</text>
-				<if it is empty><text color="grey">{its empty words}</text></if>
-				<div>{draw each version in its versions}</div>
-			</content>
-			<actions>
-				<if it is not hidden>
-					<button class="KeepChanges" style="float: inline-start; margin-inline-start: 0" loading={it is busy} disabled={it is kept} onClick={keep the changes}>{its keep words}</button>
+	a "file list" is a viewable list of files
+		// Every file of the project, a tab each:  a click shows it;  a right click shows it, and its menu
+		// Its ✕, in its file icon's place while hovered, closes its tab, only while some files are put away in the list:  the item's own `closable="when-limited"` (T77, T82, T145)
+		to draw each item
+			<item icon={the icon of the file} label={the name of the file} value={the path of the file} selected={the file is chosen} closable="when-limited" onClick={show the file}>
+				<context-menu>
+					<action "duplicate file"/>
+					<action "rename file"/>
+					<action "delete file"/>
+				</>
+				{the name of the file}
+				<if the file is changed><label slot="badge" circular empty color="orange" size="mini" /></if>
+				<if the file is drafted>
+					<span slot="badge" class="Drafted">
+						<icon name="fa7-free:pen-to-square" size="small" color="primary" />
+						<popup class="DraftTip" position="bottom center">
+							{the draft note of the file}
+							<button appearance="tertiary" color="primary" size="small" onClick={discard the file}>{the discard words of the file}</>
+						</popup>
+					</span>
 				</if>
-				<button class="cancel">{its cancel words}</button>
-				<button class="approve" color="primary" disabled={it is empty} onClick={restore it}>{its restore words}</button>
-			</actions>
-		</modal>
+			</item>
 
-a "project menu" is a view
-	// The project's own menu, under its name before File:  what's about the whole project, not the file open (Owen, epic `mockup`)
-	its "theme" is an editor part
-		// Theme ›, the theme's fly-out:  the editor's own
-	to draw it
-		<menu direction="vertical" size="small" class="BarMenuItems" icon-column>
-			<if spell editor's may change project>
-				<action "rename project"/>
-				<action "delete project"/>
-			</if>
-			<action "duplicate project"/>
-			<if spell editor's may reset><action "reset to saved"/></if>
-			<if spell editor's on a server>
+	a "file tab bar" is a view
+		// Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
+		// Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
+		// With more files than fit the bar's limit, only the ones opened lately are tabs;  a file and a ▾ beside them list every file.
+		// The file and the ▾ show at the bar's right end only while some files aren't tabs you can see:  put away, or scrolled out of the row (T83, Owen:  "Don't need the 'more files' button when all of the tabs are visible").
+		// At its far right a ✕ hides the code, as the top bar's code icon does, which shows it again (T83).
+		// Then a tab hovered shows a ✕ in its file icon's place:  it closes the tab, the file still in the list, and picking it there opens it again (T77).  The ✕ takes no room of its own, so no tab grows or moves (T82).
+		// A click shows that file;  dragged along the row, it moves there, the project's file order.  A file with changes not saved shows a dot;  one you have a draft of, not published yet, a pen on a square, as 'Editing a Draft' shows (Owen, 2026-11-14):  hovered, it says so, with a link that discards that file's draft (I92).
+		// A site's own file, `Dashboard.site.spell`, is always a tab;  and however narrow the bar, it's never one tab with a ▾ of its own:  the row scrolls (I188, its toolbar's `scroll-only`).
+		// Every look is Spell UI's own:  no CSS of its own (T145).
+		// The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
+		"files" is a new file list
+		its "remember as" is text
+			// What this project's open tabs are kept under, the editor's own
+		its "hide words" is text
+			// The ✕'s tooltip, "Hide the code", in the page's language:  the editor's own
+		to draw it
+			<panel appearance="pane" label="Files" closable close-label={its hide words}>
+				<toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-only reorderable max-visible all-items-icon="file outline" all-items-at-end remember={its remember as} label="Files">
+					{draw each file in its files}
+				</toolbar>
+			</panel>
+
+	a "home row" is a view
+		// The top of Spell's menu, over its projects:  Home, Spell UI's site, then About Spell (epic `editor` I114, `mockup` T55)
+		to draw it
+			<menu direction="vertical" size="small" class="SpellMenuHome" ticks>
+				<action "home"/>
+				<action "about spell"/>
+				<action "spell ui"/>
 				<divider/>
-				<action "publish"/>
-				<action "versions"/>
-				<action "delete draft"/>
+			</menu>
+
+	an "about box" is a view
+		// What Spell › About Spell… shows:  what Spell is, its version, and where to read more.
+		// Change what it says right here:  the editor shows it as it's drawn.
+		its "version" is text
+			// The editor's version, "0.8.9":  the editor's own
+		to draw it
+			<modal heading="About Spell" size="tiny" closable visible>
+				<content markdown>
+					Write programs in plain words, and see them run as you type.
+
+					Spell draws with Spell UI, and runs in your browser.
+				</content>
+				<actions>
+					<text color="grey">Version {its version}</text>
+					<button appearance="tertiary" link="https://github.com/spell-app/spell" target="_blank" icon="github">Source</button>
+					<button class="approve" color="primary">OK</button>
+				</actions>
+			</modal>
+
+	a "version" is a thing
+		// One kept copy of the project, a row of Versions:  the editor's own
+		its "name" is text
+			// Its file's name on the server, "Solitaire.2026-11-03-091502.zip"
+		its "when" is text
+			// When it was kept, in the page's language:  "Nov 3, 2026, 9:15:02 AM";  a draft you kept says so
+		its "place" is one of chosen or other
+			it "is (place)"
+		to choose it
+			// It's the one Restore brings back
+
+	a "version list" is a viewable list of versions
+		// The project's versions, newest first:  a click on one chooses it
+		to draw each item
+			<div><radio name="version" selected={the version is chosen} onClick={choose the version}>{the when of the version}</radio></div>
+
+	a "versions box" is a view
+		// What the project menu's Versions shows:  the copies Spell keeps of the project, newest first, to bring one back as your draft.
+		// Change how it looks right here:  what it says is in the page's language, and what its buttons do is the editor's own.
+		"versions" is a new version list
+		its "heading" is text
+		its "message" is text
+		its "empty words" is text
+			// What it says with no versions yet
+		its "keep words" is text
+		its "cancel words" is text
+		its "restore words" is text
+		its "listing" is one of listed or empty
+			it "is (listing)"
+		its "keeping" is one of offered or busy or kept or hidden
+			// Save Current Changes:  shown while you have a draft or changes not saved;  greyed once they're kept
+			it "is (keeping)"
+		to restore it
+			// Restore:  the version chosen becomes your draft
+		to keep the changes
+			// Save Current Changes:  your draft is kept as an entry of the list, never published, and the box stays open
+		to draw it
+			<modal heading={its heading} size="tiny" closable visible>
+				<content>
+					<text paragraph>{its message}</text>
+					<if it is empty><text color="grey">{its empty words}</text></if>
+					<div>{draw each version in its versions}</div>
+				</content>
+				<actions>
+					<if it is not hidden>
+						<button class="KeepChanges" style="float: inline-start; margin-inline-start: 0" loading={it is busy} disabled={it is kept} onClick={keep the changes}>{its keep words}</button>
+					</if>
+					<button class="cancel">{its cancel words}</button>
+					<button class="approve" color="primary" disabled={it is empty} onClick={restore it}>{its restore words}</button>
+				</actions>
+			</modal>
+
+	a "project menu" is a view
+		// The project's own menu, under its name before File:  what's about the whole project, not the file open (Owen, epic `mockup`)
+		its "theme" is an editor part
+			// Theme ›, the theme's fly-out:  the editor's own
+		to draw it
+			<menu direction="vertical" size="small" class="BarMenuItems" icon-column>
+				<if spell editor's project changes allowed>
+					<action "rename project"/>
+					<action "delete project"/>
+				</if>
+				<action "duplicate project"/>
+				<if spell editor's reset allowed><action "reset to saved"/></if>
+				<if spell editor's on a server>
+					<divider/>
+					<action "publish"/>
+					<action "versions"/>
+					<action "delete draft"/>
+					<divider/>
+					<action "project settings"/>
+				</if>
 				<divider/>
-				<action "project settings"/>
-			</if>
-			<divider/>
-			<action "export project"/>
-			<action "import project"/>
-			<divider/>
-			{draw its theme}
-		</menu>
-
-a "bar menu" is a view
-	// One of the bar's menus, File, Edit, View or Run:  its title the bar's word for it, which opens it
-	its "title" is text
-
-a "file menu" is a bar menu
-	// File:  what's about the file open (Owen, epic `mockup`)
-	its title is "File"
-	to draw it
-		<menu direction="vertical" size="small" class="BarMenuItems" icon-column ticks>
-			<if spell editor's may create>
-				<action "new spell file"/>
-				<action "new css file"/>
+				<action "export project"/>
+				<action "import project"/>
 				<divider/>
-			</if>
-			<if spell editor's may design><action "save"/></if>
-			<action "revert changes"/>
-			<action "auto save"/>
-			<divider/>
-			<if spell editor's may change project><action "duplicate file"/></if>
-		</menu>
+				{draw its theme}
+			</menu>
 
-an "edit menu" is a bar menu
-	// Edit:  the code editor's Undo and Redo, what can be done to the selection, then Find
-	its title is "Edit"
-	its "undo" is an editor part
-		// Undo, its title the step it undoes:  the editor's own
-	its "redo" is an editor part
-		// Redo, likewise
-	its "part actions" is an editor part
-		// What can be done to the parts selected:  the editor's own
-	to draw it
-		<menu direction="vertical" size="small" class="BarMenuItems" icon-column>
-			{draw its undo}
-			{draw its redo}
-			<divider/>
-			{draw its part actions}
-			<divider/>
-			<action "find"/>
-			<divider/>
-			<action "code settings"/>
-		</menu>
+	a "bar menu" is a view
+		// One of the bar's menus, File, Edit, View or Run:  its title the bar's word for it, which opens it
+		its "title" is text
 
-a "view menu" is a bar menu
-	// View:  Run or Edit, then what shows, each ticked while it does
-	its title is "View"
-	to draw it
-		<menu direction="vertical" size="small" class="BarMenuItems" icon-column ticks>
-			<action "run mode"/>
-			<action "edit mode"/>
-			<action "site view"/>
-			<divider/>
-			<action "show code"/>
-			<action "show compiled code"/>
-			<action "show inspector"/>
-			<action "show anatomy"/>
-			<action "show program panel"/>
-			<divider/>
-			<action "show line numbers"/>
-			<action "soft wrap"/>
-		</menu>
+	a "file menu" is a bar menu
+		// File:  what's about the file open (Owen, epic `mockup`)
+		its title is "File"
+		to draw it
+			<menu direction="vertical" size="small" class="BarMenuItems" icon-column ticks>
+				<if spell editor's new files allowed>
+					<action "new spell file"/>
+					<action "new css file"/>
+					<divider/>
+				</if>
+				<if spell editor's drafts allowed><action "save"/></if>
+				<action "revert changes"/>
+				<action "auto save"/>
+				<divider/>
+				<if spell editor's project changes allowed><action "duplicate file"/></if>
+			</menu>
 
-a "run menu" is a bar menu
-	// Run:  the program, and what it printed
-	its title is "Run"
-	to draw it
-		<menu direction="vertical" size="small" class="BarMenuItems" icon-column>
-			<action "compile and run"/>
-			<action "restart"/>
-			<divider/>
-			<action "inspect app"/>
-			<action "stop inspecting"/>
-			<divider/>
-			<action "clear console"/>
-		</menu>
+	an "edit menu" is a bar menu
+		// Edit:  the code editor's Undo and Redo, what can be done to the selection, then Find
+		its title is "Edit"
+		its "undo" is an editor part
+			// Undo, its title the step it undoes:  the editor's own
+		its "redo" is an editor part
+			// Redo, likewise
+		its "part actions" is an editor part
+			// What can be done to the parts selected:  the editor's own
+		to draw it
+			<menu direction="vertical" size="small" class="BarMenuItems" icon-column>
+				{draw its undo}
+				{draw its redo}
+				<divider/>
+				{draw its part actions}
+				<divider/>
+				<action "find"/>
+				<divider/>
+				<action "code settings"/>
+			</menu>
+
+	a "view menu" is a bar menu
+		// View:  Run or Edit, then what shows, each ticked while it does
+		its title is "View"
+		to draw it
+			<menu direction="vertical" size="small" class="BarMenuItems" icon-column ticks>
+				<action "run mode"/>
+				<action "edit mode"/>
+				<action "site view"/>
+				<divider/>
+				<action "show code"/>
+				<action "show compiled code"/>
+				<action "show inspector"/>
+				<action "show anatomy"/>
+				<action "show program panel"/>
+				<divider/>
+				<action "show line numbers"/>
+				<action "soft wrap"/>
+			</menu>
+
+	a "run menu" is a bar menu
+		// Run:  the program, and what it printed
+		its title is "Run"
+		to draw it
+			<menu direction="vertical" size="small" class="BarMenuItems" icon-column>
+				<action "compile and run"/>
+				<action "restart"/>
+				<divider/>
+				<action "inspect app"/>
+				<action "stop inspecting"/>
+				<divider/>
+				<action "clear console"/>
+			</menu>
