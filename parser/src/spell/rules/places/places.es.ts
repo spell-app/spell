@@ -28,6 +28,7 @@ import { KeyGoesInHeader, OLD_KEY_GOES_IN_HEADER } from "./KeyGoesInHeader"
 import { KeyIfSet, OLD_KEY_IF_SET } from "./KeyIfSet"
 import { KeyIsSecret, OLD_KEY_IS_SECRET } from "./KeyIsSecret"
 import { TokenFrom, OLD_TOKEN_FROM } from "./TokenFrom"
+import { TokenRenewedAt } from "./TokenRenewedAt"
 import { DataIsPrivate } from "./DataIsPrivate"
 import { KeyWritten } from "./KeyWritten"
 import { ListsUnder } from "./ListsUnder"
@@ -494,6 +495,30 @@ placesEs.addRule(TokenFrom, {
             '  at: "https://acme.test",',
             '  keyNamed: "ACME_API_KEY",',
             '  tokenFrom: "https://auth.acme.test/api-keys/{key id}/token",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(TokenRenewedAt, {
+  syntax: "{type:subject_its} token se renueva en {address:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'acme es un servidor web en "https://acme.test"\n\tse autentica con el secreto "ACME_TOKEN"\n\tsu token se renueva en "/api/auth/refresh"',
+          [
+            "export class Acme extends Place {}",
+            "export const acme = core.place(new Acme(), {",
+            '  name: "acme",',
+            '  kind: "web server",',
+            '  at: "https://acme.test",',
+            '  keyNamed: "ACME_TOKEN",',
+            '  renewsAt: "/api/auth/refresh",',
             '  unclearNumbers: ","',
             "})"
           ]

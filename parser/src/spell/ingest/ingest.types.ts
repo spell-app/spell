@@ -218,6 +218,10 @@ export type Deployment = {
   tokenFrom?: string
   /** It takes no writes:  `--try-writes` and `spell place verify` refuse to write there. */
   readOnly?: boolean
+  /** The folder of its saved answers, under the project's folder unless it starts `/` or `~`:  see `SavedAnswers`. */
+  fixtures?: string
+  /** It reads only from its saved answers:  every path, or these and what's under them. */
+  offline?: boolean | string[]
 }
 
 /** What `PlaceIngest.verify()` is asked. */
@@ -226,6 +230,11 @@ export type VerifyAsk = {
   deployment?: string
   /** It may try a write of each kind:  never on a read only deployment. */
   triesWrites?: boolean
+  /**
+   * Save what it reads as the place's saved answers, scrubbed (`spell place verify --fixtures`):  into this folder,
+   * or `true` for its deployment's `fixtures`.  Under the project's folder unless it starts `/` or `~`.
+   */
+  savesAnswers?: string | true
 }
 
 /** What one run did. */
@@ -473,6 +482,7 @@ export type FieldKind =
   | "list of text"
   | "list of numbers"
   | "inside"
+  | "object"
   | "nothing"
 
 /** One field of a collection. */
@@ -509,6 +519,17 @@ export type FieldDescription = {
   isListInside?: boolean
   /** It holds what holds it, the same fields:  PokéAPI's chain's `evolves_to`, a list of chains. */
   isItsOwner?: boolean
+  /**
+   * Its schema doesn't fix its shape:  an object with any fields, an API's `meta` (`additionalProperties: true`).
+   * - Its type is `object`, written `its "meta" is an object`:  held whole, every key and what's inside, whatever its
+   *   rows hold;  never a thing of the keys rows show, which would drop the ones it doesn't name.
+   */
+  isFreeForm?: boolean
+  /**
+   * Its schema names some of its fields, `inside`, and lets it hold others too (`additionalProperties: true`):
+   * its type is an object type, `an "asset meta" is an object`, which keeps every key it's given, its known ones typed.
+   */
+  keepsEveryKey?: boolean
   /**
    * The unit its answer says it's in (epic `data` P33):  Open-Meteo's `"hourly_units": { "temperature_2m": "°C" }`.
    * - One of Spell's units (`°C`, `mm`, `km/h`), it's written as that measure:

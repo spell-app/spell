@@ -431,6 +431,12 @@ export default function languageCommands(spell: Command): void {
         "production -- default SPELL_DEPLOYMENT, else the first listed, else the place's own address"
     )
     .option("--try-writes", "try a write of each kind too:  never on a deployment marked read only")
+    .option(
+      "--fixtures [folder]",
+      "save what it reads as the place's saved answers, scrubbed of tokens, keys, cookies and emails, one file an " +
+        "address:  into this folder, else the deployment's \"fixtures\" -- read when its server can't be reached, or " +
+        "always on an offline deployment"
+    )
     .action((file: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeVerify(file, command.optsWithGlobals()))
     )

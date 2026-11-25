@@ -85,6 +85,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `keyFrom` can wait, for a key that's a token made from another:  [PlaceToken](PlaceToken.ts), the ONE token
       keeper (epic `data` P49), made again a minute before it runs out;  how a token is made is handed in, a token
       service's (`tokenServiceMint()`, `it is authenticated with a token from "..."`) or Google's (`GoogleToken`).
+      - Or a secret that IS a token, renewed before it runs out (`renews`, `its token is renewed at "..."`):  through
+        its server's refresh route (`tokenRefreshMint()`, the token as a Bearer), each new one handed to `save`;
+        `state()` says how it is (`TokenState`:  ok, expiring, expired, renew-failed, missing), never the token.
+  - [SavedAnswers](SavedAnswers.ts):  a web server's answers saved as files, one an address, for when it can't be
+    reached:  a deployment's `fixtures` folder, which the page server's `AuthenticatedPlaces` and `spell place verify`
+    read (always, on an `offline` one), and `spell place verify --fixtures` writes.  Only its words here:  where each
+    goes (`savedAnswerPath()`), a saved list answering a question (`answerFromSaved()`:  picked by a field its rows
+    hold, paged by `limit` and `offset`), and the scrub (`answerScrubber()`:  tokens, keys, cookies, emails).
   - [DeviceCopy](DeviceCopy.ts):  a copy, in the browser's database, of every answer a web place gives,
     only for a place whose line says `- keep a copy on this device` (epic `data` P36).
     - Fresh until the place's next check:  `WebPlace` answers from it with no request;  stale, at once, reading the

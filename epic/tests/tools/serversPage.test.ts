@@ -2,6 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import {
   addressLine,
+  editorChoices,
   firstClause,
   httpsToggle,
   stateLook,
@@ -144,5 +145,29 @@ describe("a card's line under its name (epic `epic-engine` T164)", () => {
       "Not running"
     )
     expect(addressLine(server("editor", "atmosphere", { state: "down", what: "the Spell app" }))).toBe("Not running")
+  })
+})
+
+describe("Show in the editor, at a checkout's heading", () => {
+  const editorSpaces = [
+    { repo: "acme-app", orgs: ["acme"], checkouts: [{ served: false }, { worktree: "fix", served: true }] },
+    { repo: "other", orgs: ["other"], checkouts: [{ served: true }] }
+  ]
+
+  test("editorChoices():  main's checkout of each repo, which one the editor shows", () => {
+    expect(editorChoices(editorSpaces, undefined)).toEqual([
+      { repo: "acme-app", served: false },
+      { repo: "other", served: true }
+    ])
+  })
+
+  test("editorChoices():  a worktree's, only in the repo that has it, and the epic's repo where it names one", () => {
+    expect(editorChoices(editorSpaces, "fix")).toEqual([{ repo: "acme-app", worktree: "fix", served: true }])
+    expect(editorChoices(editorSpaces, "fix", "other")).toEqual([])
+    expect(editorChoices(editorSpaces, "elsewhere")).toEqual([])
+  })
+
+  test("editorChoices():  none when the answer has no editorSpaces", () => {
+    expect(editorChoices(undefined, undefined)).toEqual([])
   })
 })

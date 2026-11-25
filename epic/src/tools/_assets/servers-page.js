@@ -17,10 +17,13 @@
  *   on the right as one icon, and under it its buttons, icons only, a tight group;  three a row at most, fewer as the
  *   page narrows (epic `epic-engine` I449, I451, I456).
  * - Built with `document.createElement()`, never markup in strings;  every control a `<ui-button>`.
+ * - Show in the editor, at the right of a checkout's heading (main's, or a worktree's), where its repo has projects of
+ *   its own (`answer.editorSpaces`, `editorChoices()`):  POSTs `/api/servers/editor-spaces`, `{ repo, worktree? }`,
+ *   so the editor at :3000 shows that checkout's projects;  the checkout it shows now says "In the editor" instead
  * - Start, Restart and Stop POST `/api/servers/<action>` with this page's write token (`SPELL_SERVER.token`);  the
  *   page server hands them on to the hub (`serverRoutes`).
  * - Plain DOM, no imports:  the page loads it as it is, beside the docs bundle;  so `ago()` is its own.
- *   - Its pure parts are exported for its tests (`worktreeOrder()`, `inCardOrder()`, `firstClause()`, `httpsToggle()`, `withSecureAddress()`,
+ *   - Its pure parts are exported for its tests (`worktreeOrder()`, `inCardOrder()`, `firstClause()`, `editorChoices()`, `httpsToggle()`, `withSecureAddress()`,
  *     `addressLine()`, `stateLook()`);  it starts only on its page.
  * - Its own timer, not the kit's `pollWhileVisible()`:  that's for bundled code, and this page has no bundle of its own;
  *   the same rule, by hand:  no look while the page is hidden, one as soon as it shows again.
@@ -119,6 +122,18 @@ const NOT_RUNNING = "Not running"
 /** Restart all's tooltip */
 const RESTART_ALL_TIP =
   "Restart the page server and the editor together, so both use your latest changes.\nYour pages reload by themselves."
+
+/** Show in the editor's words, its tooltip, and what the checkout the editor shows now says (novice voice, checked) */
+const SHOW_IN_EDITOR = "Show in the editor"
+const SHOW_IN_EDITOR_TIP = (name) =>
+  `Opens the projects from the ${name} copy in the editor, so you can try them out.\n` +
+  "The editor closes and opens again, which takes a moment.\n" +
+  "Save your work in the editor first, or you may lose changes you haven't saved."
+const IN_EDITOR = "In the editor"
+const IN_EDITOR_TIP = (name) => `The editor is showing the projects from the ${name} copy now.`
+const SHOW_FAILED = (name) => `Couldn't open ${name} in the editor`
+const SHOW_FAILED_AFTER =
+  "The editor still shows what it showed before.\nWait a moment and press Show in the editor again."
 
 /** How long Restart all spins:  about as long as a restart takes, ms */
 const RESTART_ALL_WAIT_MS = 5000
@@ -229,7 +244,10 @@ function draw(answer) {
     .replaceChildren(
       handsOffSwitch(Boolean(answer.handsOff)),
       ...(answer.handsOff ? [el("ui-message", { state: "warning", heading: "Hands off" }, HANDS_OFF_NOTICE)] : []),
-      heading("main", undefined, undefined, restartAllButton()),
+      heading("main", undefined, undefined, [
+        ...(editorButtons(answer.editorSpaces, undefined, undefined, named) ?? []),
+        restartAllButton()
+      ]),
       cards(onMain, named, answer.https),
       el("h3", { className: "servers-sub" }, "Merged into main recently"),
       mergedList(answer.mergedIntoMain ?? [], answer.notOnGitHub ?? [], named),
@@ -304,6 +322,71 @@ function restartAllButton() {
       sayProblem("Couldn't restart the servers", error.message)
     } finally {
       // the restart comes just after the answer:  the next looks show them coming back
+      setTimeout(() => button.removeAttribute("loading"), RESTART_ALL_WAIT_MS)
+      void look()
+    }
+  })
+  return button
+}
+
+/**
+ * The checkouts a heading offers to show in the editor (`ServersAnswer.editorSpaces`):  `worktree`'s, or main's (none
+ * given), of each repo that has one, `repo` only where the epic names it;  each `{ repo, worktree?, served }`;  pure,
+ * for the page's tests
+ */
+export function editorChoices(editorSpaces = [], worktree, repo) {
+  return editorSpaces.flatMap((spaces) => {
+    if (repo && spaces.repo !== repo) return []
+    const checkout = spaces.checkouts.find((each) => each.worktree === worktree)
+    return checkout ? [{ repo: spaces.repo, ...(worktree && { worktree }), served: checkout.served }] : []
+  })
+}
+
+/** a heading's Show in the editor buttons (`editorButton()`);  none:  `undefined`, so the heading has no tools */
+function editorButtons(editorSpaces, worktree, repo, named) {
+  const buttons = editorChoices(editorSpaces, worktree, repo).map((choice) => editorButton(choice, named))
+  return buttons.length ? buttons : undefined
+}
+
+/**
+ * a heading's Show in the editor (`editorChoices()`):  the editor at :3000 shows that checkout's projects, after the
+ * page servers restart;  the checkout it shows now:  "In the editor", a quiet label
+ * - `named`:  the page names repos, so the button says whose
+ */
+function editorButton(choice, named) {
+  const words = named ? `${choice.repo}:  ` : ""
+  const name = choice.worktree ?? "main"
+  if (choice.served)
+    return el(
+      "ui-label",
+      { className: "servers-in-editor", size: "tiny", appearance: "basic", "data-tooltip": IN_EDITOR_TIP(name) },
+      `${words}${IN_EDITOR}`
+    )
+  const button = el(
+    "ui-button",
+    {
+      className: "servers-show-in-editor",
+      size: "tiny",
+      appearance: "basic",
+      icon: "eye",
+      "data-tooltip": SHOW_IN_EDITOR_TIP(name)
+    },
+    `${words}${SHOW_IN_EDITOR}`
+  )
+  button.addEventListener("click", async () => {
+    button.setAttribute("loading", "")
+    try {
+      const response = await fetch("/api/servers/editor-spaces", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-server-token": window.SPELL_SERVER?.token ?? "" },
+        body: JSON.stringify({ repo: choice.repo, ...(choice.worktree && { worktree: choice.worktree }) })
+      })
+      const answer = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(answer.error ?? `The server answered ${response.status}.`)
+    } catch (error) {
+      sayProblem(SHOW_FAILED(name), `${error.message}\n${SHOW_FAILED_AFTER}`)
+    } finally {
+      // the page server restarts just after the answer:  the next looks show it back, this checkout in the editor
       setTimeout(() => button.removeAttribute("loading"), RESTART_ALL_WAIT_MS)
       void look()
     }
@@ -624,7 +707,12 @@ function worktreeGroups(answer, named) {
   return worktreeOrder(answer).flatMap(({ worktree, epic, servers }) => {
     const shown = worktreeCards(servers)
     return [
-      heading(`${WORKTREE} ${named && epic?.repo ? `${epic.repo} ` : ""}${worktree}`, epic?.url, workedWords(epic)),
+      heading(
+        `${WORKTREE} ${named && epic?.repo ? `${epic.repo} ` : ""}${worktree}`,
+        epic?.url,
+        workedWords(epic),
+        editorButtons(answer.editorSpaces, worktree, epic?.repo, named)
+      ),
       ...(shown.length ? [cards(shown, named)] : []),
       openStuff(epic)
     ].filter(Boolean)

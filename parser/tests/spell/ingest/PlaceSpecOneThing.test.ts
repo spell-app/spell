@@ -4,7 +4,7 @@
  * - Its description says nothing of the answer (`{}`):  an untyped list, till verify reads one object there.
  * - An object holding several lists is one thing, its lists its fields:  `{ nodes: [...], edges: [...] }`.
  * - A `GET` that makes a token is never read.
- * - A field verify reads that Spell can't say is left out, saying why:  a load average's `load_1min`.
+ * - A field verify reads whose words Spell can't say goes by the source's own name, kept:  a load average's `load_1min`.
  */
 import { describe, expect, test } from "vite-plus/test"
 
@@ -170,16 +170,22 @@ describe("one thing at its own address", () => {
     expect(files[0]!.errors).toEqual([])
   })
 
-  test("verify:  a field it read that Spell can't say is left out, saying why, and the file still compiles", async () => {
+  test("verify:  a field whose words Spell can't say goes by its own name, kept, and the file compiles", async () => {
     const { ingest, spell, description } = await ingestOf()
     await ingest.verify("Racks.api.spell")
     const { fields } = description().collections.loads!
     expect(fields.host!.leftOut).toBeUndefined()
-    expect(fields.load_1min!.leftOut).toMatch(/^Spell couldn't read its line/)
+    expect(fields.load_1min).toMatchObject({ words: "load_1min" })
+    expect(fields.load_1min!.leftOut).toBeUndefined()
     expect(spell()).toMatch(/^\tits "host" is text$/m)
+    expect(spell()).toMatch(/^\tits "load_1min" is a number, stored as "load_1min"$/m)
     expect(spell()).not.toMatch(/its "load \d/)
     const { files } = parseSpellProject([{ path: "/Racks.api.spell", contents: spell() }])
     expect(files[0]!.errors).toEqual([])
+    // verified again:  it keeps its own name, and nothing more is left out
+    await ingest.verify("Racks.api.spell")
+    expect(spell()).toMatch(/^\tits "load_1min" is a number, stored as "load_1min"$/m)
+    expect(description().collections.loads!.fields.load_1min!.leftOut).toBeUndefined()
   })
 
   test("Spanish:  the same place, and the file parses clean", async () => {

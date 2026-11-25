@@ -15,6 +15,8 @@
       - Each card's state is one icon, its words its tooltip;  its buttons a tight group under it (I456).
       - main's heading has Restart all at its right;  main's page server's lock, before its address, is the secure
         link's switch (T164, I454, I456).
+      - A checkout's heading has Show in the editor at its right, where its repo has projects of its own;  the one the
+        editor shows now says "In the editor".
     -->
     <title>Servers</title>
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
@@ -22,12 +24,18 @@
       .spell-doc-main .servers-head {
         margin: 24px 0 8px 0;
       }
-      /* main's:  Restart all at the right of its heading */
+      /* a heading's tools at its right:  main's Restart all, Show in the editor */
       .servers-head-tools {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
+        row-gap: 4px;
       }
+      /* main's and a worktree's Show in the editor, before Restart all */
       .servers-tools {
+        display: flex;
+        align-items: center;
+        gap: 4px;
         margin-left: auto;
         font-size: 1rem;
         font-weight: normal;
