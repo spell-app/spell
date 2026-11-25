@@ -17,7 +17,8 @@ import splitPanelCSS from "./UISplitPanel.css?inline"
  * - Each child is a pane, written anywhere:  `<ui-panel parent="its id">` joins it, as a section joins a section.
  *   - A child that draws no box of its own (`display: contents`:  `<ui-segment>`, `<ui-card>`, a view's `<slot>`) is
  *     given one, marked `data-split-box` (`giveBoxes()`):  else its size lands on nothing,
- *     and what's in it sits in the row as wide as its words.
+ *     and what's in it sits in the row as wide as its words.  One whose family loads after the panel is looked at
+ *     again once it's set up.
  *   - A child with `hidden` isn't a pane:  the others share its room, and nothing in it is redrawn.
  * - A pane is never moved or redrawn as panes come and go or bars drag:  the sizes are its inline `flex`,
  *   and its place is its inline `order`, between the bars'.  So a running program in one keeps running.
@@ -156,11 +157,27 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
    * SIDE EFFECT:  each pane that draws no box of its own (`display: contents`) marked `BOX_ATTRIBUTE`, which gives it
    * one (`UISplitPanel.css`):  so its inline `flex` sizes something, and a drag can measure it.
    * - once marked, always:  the box it's given makes it read as one
+   * - a pane of ours not set up yet (`ready`):  looked at again once it is.  Its family may load after the panel
+   *   sizes its panes (each family loads on first use), and until then it's no `display: contents`:  a `<ui-segment>`
+   *   pane kept no box, as wide as its words, the bar after the last pane.
    */
   private giveBoxes() {
-    for (const pane of this.panes)
-      if (!pane.hasAttribute(BOX_ATTRIBUTE) && getComputedStyle(pane).display === "contents")
-        pane.setAttribute(BOX_ATTRIBUTE, "")
+    for (const pane of this.panes) {
+      if (pane.hasAttribute(BOX_ATTRIBUTE)) continue
+      if (getComputedStyle(pane).display === "contents") pane.setAttribute(BOX_ATTRIBUTE, "")
+      else if (!LOOKED_AT_WHEN_READY.has(pane)) {
+        const { ready } = pane as Partial<E.DOMElement>
+        if (!ready) continue
+        LOOKED_AT_WHEN_READY.add(pane)
+        void ready.then(() => this.isConnected && this.boxesAgain())
+      }
+    }
+  }
+
+  /** A pane set itself up:  its box, if it draws none;  then the bars' places, measured with it. */
+  private boxesAgain() {
+    this.giveBoxes()
+    E.beforeNextPaint(() => this.findBarPlaces())
   }
 
   /** Read each bar's place from where the panes are now:  not on every move of a drag. */
@@ -469,6 +486,9 @@ type BarDrag = {
 const AUTO = "auto"
 /** The attribute an `auto` pane carries, for what it holds to lay out in it rather than over it. */
 const FIT_ATTRIBUTE = "data-split-fit"
+
+/** The panes `giveBoxes()` waits for to be set up (`ready`):  each once. */
+const LOOKED_AT_WHEN_READY = new WeakSet<HTMLElement>()
 
 /** Marks a pane that draws no box of its own, given one (`giveBoxes()`). */
 const BOX_ATTRIBUTE = "data-split-box"

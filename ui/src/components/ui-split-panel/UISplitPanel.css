@@ -8,10 +8,14 @@
  *   | `--ui-split-panel-bar-active-background` | a bar's fill as it's hovered or dragged |
  */
 @layer ui.components {
+  /*
+   * In a parent's column it fills what's left, and gives back what isn't:  `auto`, not `0`, so a column with no height
+   * of its own (a stack in a page that doesn't fill the window) gets the panes' own height, not 0px.
+   */
   :host {
     position: relative;
     display: flex;
-    flex: 1 1 0;
+    flex: 1 1 auto;
     box-sizing: border-box;
     min-width: 0;
     min-height: 0;
