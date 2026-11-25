@@ -21,6 +21,9 @@ import { projectSource } from "spell/app/app/components/spell-viewer/projectSour
 import "spell/app/app/solid/cellsBridge"
 // `<ui-root>`, which loads each Spell UI family the page draws as it appears:  never all of Spell UI
 import "spell/ui/components/ui-root"
+// a program's component packs (`<ui-components source>` in a page or its layout):  `SpellUI.registerPack()`, and the
+// modules a pack shares with the page, all of Spell UI loaded only once a pack registers
+import { PagePacks } from "spell/app/app/components/PagePacks"
 // the built-in types' scope pack, for the Type Explorer:  beside the build's chunks
 import builtInsUrl from "spell/parser/core/core.scopes.js?url"
 
@@ -39,6 +42,7 @@ import builtInsUrl from "spell/parser/core/core.scopes.js?url"
  *   - any other group, or an org (`/run/@acme`):  its page in the editor, `/@acme/org-spell`, never a file
  */
 AppTexts.namePageLanguage()
+PagePacks.share(() => import("spell/ui"))
 
 const root = document.getElementById("run-root")!
 const address = addressIn(location.pathname)

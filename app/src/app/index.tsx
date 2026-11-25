@@ -35,6 +35,7 @@ import "spell/app/app/solid/cellsBridge"
 // the page's own copy of spell's grammar loads on first use (a Spell Console line ...):  the worker holds the
 // editor's (epic `solid-2-final` P20)
 import "spell/parser/spell/grammarOnFirstUse"
+import { PagePacks } from "spell/app/app/components/PagePacks"
 
 // The static build (the public preview) reads its files from the build and keeps edits in the browser;
 // every other build has debug globals for hacking in the browser's console (`debug.ts`).
@@ -62,6 +63,10 @@ AppTexts.namePageLanguage()
 
 // This tab loaded again in Run (`/run/...`) stays the editor, never the run page:  BEFORE the router reads the address.
 keepEditorOnReload()
+// A program's component packs (`<ui-components source>` in a page or its layout), in the editor's Run as on the run
+// page:  `SpellUI.registerPack()`, and the modules a pack shares with the page, all of Spell UI loaded only once a
+// pack registers
+PagePacks.share(() => import("spell/ui"))
 
 // The dev server gone while the tab's out of sight:  reload once it's back, out of sight, not when the person returns.
 reloadOutOfSight(import.meta.hot)
