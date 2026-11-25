@@ -25,6 +25,9 @@ const LINES = [
   "\tits \"source\" is its meta's provenance",
   "\tits \"owner\" is its meta's owner",
   "\tits \"raw owner\" is its raw's owner",
+  '\tits "runner" is the "run_by" of its meta',
+  "\tits \"raw runner\" is its raw's \"run_by\"",
+  '\tits "checked" is the "checked_at" of its meta',
   "",
   'an "asset meta" is an object',
   '\tits "provenance" is text',
@@ -102,7 +105,7 @@ const ROWS = [
     id: "1",
     name: "warm up",
     meta: { provenance: "scan", checked_at: "2026-11-20T10:00:00Z", owner: "ada", deep: { a: { b: 1 } } },
-    raw: { owner: "ada", runs: [1, 2] },
+    raw: { owner: "ada", runs: [1, 2], run_by: "cy" },
     steps: [{ run_by: "ada", note: "first" }]
   },
   { id: "2", name: "cool down", meta: { provenance: "hand", extra_key: true }, raw: { owner: "bo" } }
@@ -131,7 +134,17 @@ describe("an object type", () => {
     expect(cool!.meta.owner).toBeUndefined()
     // what the page reads
     expect([warm!.source, warm!.owner, warm!.rawOwner]).toEqual(["scan", "ada", "ada"])
-    expect(warm!.raw).toEqual({ owner: "ada", runs: [1, 2] })
+    expect(warm!.raw).toEqual({ owner: "ada", runs: [1, 2], run_by: "cy" })
+  })
+
+  test("a key in quotes reads as written:  `the \"run_by\" of its meta`, `its raw's \"run_by\"`", async () => {
+    const [warm, cool] = await jobsIn(holding(ROWS))
+    ;(warm!.meta as Record<string, unknown>).run_by = "bo"
+    const read = (job: SC.Thing, field: string) => (job as unknown as Record<string, unknown>)[field]
+    expect([read(warm!, "runner"), read(warm!, "rawRunner")]).toEqual(["bo", "cy"])
+    expect(read(cool!, "runner")).toBeUndefined()
+    // a key its type declares, by its words:  that field, as it was read
+    expect(read(warm!, "checked")).toBeInstanceOf(Date)
   })
 
   test("written back whole:  every key it was sent", async () => {
