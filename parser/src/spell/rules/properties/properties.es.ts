@@ -26,6 +26,7 @@ import {
 } from "./ObjectLiteralProperty"
 import { Property } from "./Property"
 import { PropertyExpression } from "./PropertyExpression"
+import { QuotedKeyRead } from "./QuotedKeyRead"
 import { QuotedMember } from "./QuotedMember"
 
 /** Spanish's `properties` rules. */
@@ -296,10 +297,29 @@ propertiesEs.addRule(TheOwnProperty, {
   ]
 })
 
+// a key in quotes, read as written:  `el "run_by" de su meta`
+propertiesEs.addRule(QuotedKeyRead, {
+  syntax: "(el|la|los|las)? {key:text} (de|del) {expression:operand}",
+  tests: [
+    {
+      title: "una clave entre comillas, leída tal cual",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["un aparato es una cosa", "el aparato es un nuevo aparato"].join("\n"), "block")
+      },
+      tests: [
+        ['el "run_by" del aparato', "aparato.run_by"],
+        ['el "Display Title" del aparato', 'aparato["Display Title"]']
+      ]
+    }
+  ]
+})
+
 // NOTE:  no possessive:  English's `the character's name` is `el nombre del personaje`, which `property_expression` reads
 // packs: none PossessiveMark -- Spanish has no "'s"
 // packs: none PossessiveOwner -- Spanish has no "'s"
 // packs: none PossessiveProperty -- Spanish has no "the character's name":  "el nombre del personaje"
+// packs: none PossessiveQuotedKeyRead -- Spanish has no "its meta's \"run_by\"":  "el \"run_by\" de su meta"
 
 propertiesEs.addRule(ItsKnownProperty, {
   syntax: "(su|sus) {property:member_words}",

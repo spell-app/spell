@@ -183,7 +183,7 @@ describe("a thing inside a row is written back under the source's keys, never Sp
     const Job = warm!.constructor as new (props: object) => SC.Thing
     await core.saveThing(new Job({ name: "new", steps: [new Step({ runBy: "bo", remark: "fresh" })] }))
     await vi.waitFor(() => expect(place.sent).toHaveLength(1), { timeout: 3000 })
-    const [step] = place.sent[0]!.fields?.steps as Array<Record<string, unknown>>
+    const [step] = place.sent[0]!.fields!.steps as Array<Record<string, unknown>>
     expect(step).toMatchObject({ run_by: "bo", note: "fresh" })
     expect(Object.keys(step!)).not.toContain("runBy")
     expect(Object.keys(step!)).not.toContain("remark")
