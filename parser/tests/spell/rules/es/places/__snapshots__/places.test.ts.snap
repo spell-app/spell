@@ -80,6 +80,7 @@ exports[`testing spell module places, in Spanish > rule group specs > match snap
   "thing_by_id": "type|id",
   "thing_with_id": "type|id",
   "token_from": "type|address|name",
+  "token_renewed_at": "type|address",
   "total_of": "list",
   "type_verified": "state",
   "versions_in": "type|field",

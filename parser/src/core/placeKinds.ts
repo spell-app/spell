@@ -71,6 +71,8 @@ export type PlaceDetails = {
   servedAt?: string
   /** Where its key's token is made, from the secret `keyNamed`:  `it is authenticated with a token from "..."` (epic `data` P49). */
   tokenFrom?: string
+  /** Where its token is renewed, on a server side:  see `TokenRenewedAt`. */
+  renewsAt?: string
   /**
    * A file a person picks, with no address:  `a json file you pick`, `... on this device` (epic `editor` P41).
    * - Its kind says the format:  `file` is JSON, `sheet` CSV, `excel file` Excel.

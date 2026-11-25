@@ -8933,7 +8933,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 127,
+          "line": 129,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9530,6 +9530,32 @@
             },
             {
               "syntax": "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "TokenRenewedAt",
+          "ruleNames": ["token_renewed_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/TokenRenewedAt.ts",
+          "line": 13,
+          "purpose": "A place's secret is a token that renews itself, at its server's refresh route.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} token is renewed at {address:text}",
+              "example": "acme is a web server at \"https://acme.test\"\n\tit is authenticated with the secret \"ACME_TOKEN\"\n\tits token is renewed at \"/api/auth/refresh\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_TOKEN\",\n  renewsAt: \"/api/auth/refresh\"\n})"
+                },
+                "ts": {
+                  "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_TOKEN\",\n  renewsAt: \"/api/auth/refresh\"\n})"
+                },
+                "py": {
+                  "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"key_named\": \"ACME_TOKEN\",\n        \"renews_at\": \"/api/auth/refresh\",\n    },\n)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

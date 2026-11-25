@@ -181,18 +181,24 @@ export async function placeUpdate(
  * `spell place verify <file>`:  try the place described beside it against a running server (epic `data` P49).
  * Its exit code.
  * - The deployment:  `--deployment`, else `SPELL_DEPLOYMENT`, else the first the project's file lists.
+ * - `--fixtures [folder]`:  what it reads is saved as the place's saved answers, scrubbed.
  * - `EXIT.ERRORS` when anything failed, or it couldn't change a line for someone.
  * - throws `CliError` for whatever stopped it, having written nothing
  */
 export async function placeVerify(
   file: string,
-  { deployment = process.env.SPELL_DEPLOYMENT || undefined, tryWrites }: { deployment?: string; tryWrites?: boolean }
+  {
+    deployment = process.env.SPELL_DEPLOYMENT || undefined,
+    tryWrites,
+    fixtures
+  }: { deployment?: string; tryWrites?: boolean; fixtures?: string | boolean }
 ): Promise<number> {
   return stoppedAsCliError(async () => {
     const ingest = await ingestFor(false, describesSession(file))
     const result = await ingest.verify(file, {
       ...(deployment && { deployment }),
-      ...(tryWrites && { triesWrites: true })
+      ...(tryWrites && { triesWrites: true }),
+      ...(fixtures && { savesAnswers: fixtures })
     })
     const { description, descriptionPath, changes, couldntChange } = result
     CLI.out(`Verified ${description.about.name}, for ${file}.  Its description:  ${descriptionPath}`)
@@ -303,7 +309,10 @@ export function fetchWithFiles(fetch: typeof globalThis.fetch): typeof globalThi
 
 /** Its files, on disk. */
 export const diskFiles: IngestFiles = {
-  read: async (path) => (existsSync(path) ? readFileSync(path, "utf8") : undefined),
+  read: async (path) => {
+    const real = path.replace(/^~(?=\/|$)/, homedir())
+    return existsSync(real) ? readFileSync(real, "utf8") : undefined
+  },
   write: async (path, text) => writeFileSync(path, text),
   writeAway: async (path, text) => {
     const real = path.replace(/^~(?=\/|$)/, homedir())

@@ -44,6 +44,7 @@ const UTIL_NODE = ["spell/**/*.test.ts", "reactive/**/*.test.ts", "node/**/*.tes
 const PLACES_NODE = [
   "RestPlace.test.ts",
   "PlaceToken.test.ts",
+  "SavedAnswers.test.ts",
   "GraphPlace.test.ts",
   "SheetPlace.test.ts",
   "Workbook.test.ts",

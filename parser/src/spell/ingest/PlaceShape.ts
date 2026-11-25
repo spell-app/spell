@@ -199,6 +199,43 @@ export function fieldsOf(rows: ReadonlyArray<Record<string, unknown>>, depth = 0
   return fields
 }
 
+/**
+ * SIDE EFFECT:  a list no schema typed, its fields from rows, keeps each field any row read holds, though others don't
+ * (one inside a field too);  one every row read till now held empty (`nothing`) takes what its values are.
+ * - Ingest reads every row's fields so (`fieldsOf()`);  verify reads rows again, and adds what's new.
+ * - A list a schema typed says its own fields:  nothing changes.
+ * - Returns the fields it added or changed, by the source's names, `data.port`.
+ */
+export function fieldsSeenIn(collection: CollectionDescription, rows: ReadonlyArray<Record<string, unknown>>): string[] {
+  if (collection.schemaAt !== undefined || !rows.length || !Object.keys(collection.fields).length) return []
+  return withFieldsSeen(collection.fields, fieldsOf(rows))
+}
+
+/**
+ * SIDE EFFECT:  each field of `seen` that `fields` hasn't, added;  inside one they share too;  one `fields` read empty
+ * (`nothing`) takes what `seen` says it holds.  Returns the fields added or changed, by their names.
+ */
+function withFieldsSeen(
+  fields: Record<string, FieldDescription>,
+  seen: Readonly<Record<string, FieldDescription>>,
+  under = ""
+): string[] {
+  const changed: string[] = []
+  for (const [name, now] of Object.entries(seen)) {
+    const field = fields[name]
+    if (!field) {
+      fields[name] = now
+      changed.push(`${under}${name}`)
+    } else if (field.type === "nothing" && now.type !== "nothing") {
+      fields[name] = { ...now, words: field.words }
+      changed.push(`${under}${name}`)
+    } else if (field.inside && now.inside && !field.isSideBySide && !field.isByCode) {
+      changed.push(...withFieldsSeen(field.inside, now.inside, `${under}${name}.`))
+    }
+  }
+  return changed
+}
+
 /** A field naming the units of another's fields:  Open-Meteo's `hourly_units`, of its `hourly`. */
 const UNITS_FIELD = /^(.+?)[_ ]?units$/i
 

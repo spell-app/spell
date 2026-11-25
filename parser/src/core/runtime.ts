@@ -65,6 +65,17 @@ export type PlaceDeployment = {
   tokenFrom?: string
   /** It takes no writes. */
   readOnly?: boolean
+  /**
+   * The folder of its saved answers, under the project's folder unless it starts `/` or `~`:  what a read answers
+   * with when its server can't be reached (`spell place verify --fixtures` saves them).
+   * - Only a page server's reads, and verify's:  a page reads it through the page server.
+   */
+  fixtures?: string
+  /**
+   * It reads only from its saved answers, never its server:  `true` for every read, or the paths under its address
+   * that do, `["/api/reports"]`, each with what's under it.
+   */
+  offline?: boolean | string[]
 }
 
 /**
