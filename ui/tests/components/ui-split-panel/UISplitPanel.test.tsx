@@ -315,4 +315,19 @@ describe("<ui-split-panel>", () => {
     // side by side, their tops level:  a pane's segment keeps no margin
     expect(box(chosen).top).toBe(box(list).top)
   })
+
+  it("in a column with no height of its own:  as tall as its panes, not 0px", async () => {
+    const column = await ElementFixture.render(
+      `<div style="display: flex; flex-direction: column; width: 600px">` +
+        `<ui-split-panel columns="*,*"><div style="height: 120px">a list</div><div>what's chosen</div></ui-split-panel>` +
+        `</div>`
+    )
+    const host = column.querySelector("ui-split-panel")!
+    expect(Math.round(host.getBoundingClientRect().height)).toBe(120)
+    // a column with a height:  it still fills what's left, and gives back what doesn't fit
+    column.style.height = "300px"
+    expect(Math.round(host.getBoundingClientRect().height)).toBe(300)
+    column.style.height = "80px"
+    expect(Math.round(host.getBoundingClientRect().height)).toBe(80)
+  })
 })

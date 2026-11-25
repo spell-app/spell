@@ -10,6 +10,7 @@
 			Write your panes as children, and say how big each is in `columns` or `rows`.
 			- Sizes:  a comma list, `20%,*,380px`.  A number, `px` or `em` is fixed;  `%` is a share of what the fixed panes leave;  `*` shares what's left;  `auto` is as big as its content.
 			- `resizable` puts a bar between each two.  The panel doesn't remember what's dragged:  `ui-changed` hands you `sizes`, in the same form, to keep and give back.
+			- Its height:  in a column with a height (a `height="fluid"` stack, a page filling the window) it fills what's left of it;  in a column without one, it's as tall as its tallest pane.
 			- `hidden` on a child takes it out of the panes.  Nothing is moved or redrawn as panes come and go, so what's running in one keeps running.
 		</>
 		<markdown>
