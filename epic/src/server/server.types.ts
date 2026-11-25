@@ -375,7 +375,7 @@ export type ServersAnswer = ServerFactsAnswer & {
   handsOff?: boolean
   /**
    * each repo whose `spaces/` the kit's page server can serve, and which of its checkouts it serves now
-   * (`ServerKeeper.editorSpaces()`):  for a Show in the editor on the Servers page (not drawn yet)
+   * (`ServerKeeper.editorSpaces()`):  each checkout's Show in the editor on the Servers page
    */
   editorSpaces?: EditorSpaces[]
 }
