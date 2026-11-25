@@ -205,11 +205,11 @@ export class PlaceQuery {
 
   /** Add `rows` to what's been `seen`.  - throws `PlaceError` once that's over the ceiling */
   private countAgainstCeiling(rows: PlaceRow[], seen: PlaceCeiling): void {
-    const { rows: mostRows, bytes: maxSize } = { ...DEFAULT_CEILING, ...this.place.describe().ceiling }
+    const { rows: ceilingRows, bytes: ceilingBytes } = { ...DEFAULT_CEILING, ...this.place.describe().ceiling }
     seen.rows += rows.length
     for (const row of rows) seen.bytes += JSON.stringify(row).length
-    if (seen.rows <= mostRows && seen.bytes <= maxSize) return
-    const limit = seen.rows > mostRows ? `${mostRows} rows` : `${maxSize} bytes`
+    if (seen.rows <= ceilingRows && seen.bytes <= ceilingBytes) return
+    const limit = seen.rows > ceilingRows ? `${ceilingRows} rows` : `${ceilingBytes} bytes`
     throw new PlaceError(
       `PlaceQuery:  "${this.placeName}" can't do this read of "${this.collection}" itself, and doing it here stops at ${limit};  ask for less, or raise its \`ceiling\``,
       { cause: { kind: "over the ceiling" } }
