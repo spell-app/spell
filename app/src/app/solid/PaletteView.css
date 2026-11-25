@@ -177,7 +177,7 @@ ui-popup.PaletteFlyout .PaletteFlyoutFoot {
 
 /*
  * `<PlusPanel>`:  the whole add panel, out of the `+` (T174):  as wide as the add panel's columns, as tall as fits
- * under the bar's top;  its header row (what's under the mouse, the search) the `+`'s height, on the `+`'s fill
+ * from the `+` to 8px above the window's bottom, so the longer topics still fit a 1440 x 800 window (I185);  its header row (what's under the mouse, the search) the `+`'s height, on the `+`'s fill
  */
 ui-popup.BarMenuPopup.PalettePlus::part(popup) {
   width: auto;
@@ -185,10 +185,18 @@ ui-popup.BarMenuPopup.PalettePlus::part(popup) {
   overflow: visible;
   padding: 0;
 }
+ui-popup.PalettePlus {
+  /* from 1400px wide, the room beside the bar takes 7 columns, as the dialog's widest does:
+     so the longer topics fit an 800px window, which 6 under the top bar can't (T175) */
+  @media (width >= 1400px) {
+    --palette-width: 1300px;
+  }
+}
 .PalettePlus {
   & .PaletteBody {
     gap: 0;
-    max-height: calc(100dvh - 80px);
+    /* the `+`'s top, under the top bar, and 8px below */
+    max-height: calc(100dvh - 56px);
   }
   & .PaletteHead {
     box-sizing: border-box;
@@ -201,7 +209,7 @@ ui-popup.BarMenuPopup.PalettePlus::part(popup) {
     flex-basis: 240px;
   }
   & .PaletteGroups {
-    padding: 8px 12px 4px 12px;
+    padding: 4px 12px;
   }
 }
 

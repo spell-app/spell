@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onSettled } from "solid-js"
+import { For, Show, createSignal, onCleanup, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
@@ -52,7 +52,7 @@ import "./PaletteView.css"
  * - Marked as the rail (`RAIL_MARK`), its flyouts too:  a press on it is its own while a part is picked up.
  * - Slides in the first time it shows on a page, under a top bar already drawn (epic `editor` I255);  never again,
  *   switching modes or pages:  it stays where it was.
- * - Drawn on a blank app just made (`Palette.openOnArrival()`), it opens the add panel (`<PalettePanel>`).
+ * - Drawn on a blank app just made, or by ⌥⌘V in Run (`Palette.openOnArrival()`), it opens its `+` panel.
  * - Spell UI's own:  a vertical icon `<ui-menu>`, its buttons `<ui-item>`s, its flyouts `<ui-popup>`s.
  ****************/
 export function PaletteRail(): JSX.Element {
@@ -205,7 +205,8 @@ function RailFlyout(props: {
  *   Escape, a click elsewhere, a part added or dragged, or another of the bar's buttons pointed at closes it.
  * - The add bar's own Search button went with it (Owen:  "I think we can drop the search icon in this case"):
  *   this search looks through every part.
- * - The same menu shows in a dialog of its own for ⌥⌘V and View › Add a View… (`<PalettePanel>`).
+ * - ⌥⌘V and View › Add a View… open it too (`Palette.showPanel()`, epic `editor` T175);
+ *   with no add bar (Run, Design), the same menu in a dialog of its own (`<PalettePanel>`).
  */
 function PlusPanel(): JSX.Element {
   const [isOut, setOut] = createSignal(false)
@@ -213,6 +214,8 @@ function PlusPanel(): JSX.Element {
   let plus: HTMLElement | undefined
   /** The mouse resting on the `+`, before the panel opens. */
   let resting: CancelablePromise<unknown> | undefined
+  // ⌥⌘V and View › Add a View… open it while it's here, as a click on the `+` does (T175)
+  onCleanup(Palette.offerPlus(() => panel && plus && RailPanels.open(panel, plus)))
   return (
     <>
       <div
@@ -397,7 +400,8 @@ function FavoriteButton(props: { definition: ComponentDefinition }): JSX.Element
  * ### `<PalettePanel>`
  * The add panel, over the editor (epic `editor` T167:  "Shortcut key to bring up the Add View panel in a modal"):
  * the palette's menu, `<PaletteMenu>`, in a `<ui-modal>`.
- * - Opened by its key, ⌥⌘V, or View › Add a View…:  `Palette.showPanel()`, which mounts it and cleans up.
+ * - Opened by its key, ⌥⌘V, or View › Add a View…, where there's no add bar (Run, Design):
+ *   `Palette.showPanel()`, which mounts it and cleans up;  in Edit they open the `+` panel instead (T175).
  * - A click on a part adds it, a drag places it, as in the add bar's menus.
  * - Closes like every dialog:  its ✕, Escape, or a click beside it;
  *   and once a part is added, or a drag starts from it (`closesWithPalette`), so it lands on a page you can see.

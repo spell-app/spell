@@ -413,15 +413,19 @@ function watchEveryBrowser(): void {
   }
 }
 
+/** The add panel:  beside the add bar in Edit, out of its `+` (epic `editor` T175), else its dialog (T167). */
+export const ADD_PANEL = ":is(ui-popup.PalettePlus, ui-modal.PalettePanel)"
+
 /**
  * Open the add panel, View › Add a View… (epic `editor` T167):  a click, so it opens whatever has the keys;
  * its key, ⌥⌘V, is a page key, which an open popup (Inspect app's help) keeps from it.
+ * - In Edit it slides out of the add bar's `+` (T175):  `ADD_PANEL` finds it either way.
  * - Waits for its rows.
  */
 export async function openAddPanel(page: Page): Promise<void> {
   await page.locator("#ViewBarMenu [part~=item]").first().click()
   await page.getByText("Add a View…").first().click()
-  await page.waitForSelector("ui-modal.PalettePanel ui-tree-item", { state: "attached", timeout: 30_000 })
+  await page.waitForSelector(`${ADD_PANEL} ui-tree-item`, { state: "attached", timeout: 30_000 })
   await page.waitForTimeout(300)
 }
 

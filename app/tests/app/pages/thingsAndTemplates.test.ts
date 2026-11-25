@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING, openAddPanel } from "./runningEditor"
+import { EDITOR, SERVING, openAddPanel, ADD_PANEL } from "./runningEditor"
 
 /**
  * What took over from the Things and Templates tabs, on Solitaire (epic `editor`, Rethink Things Templates):
@@ -179,13 +179,13 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     await openAddPanel(page)
     await page.waitForTimeout(1500)
     const own = await page
-      .locator(".PalettePanel .ThisApp ui-tree-item")
+      .locator(`${ADD_PANEL} .ThisApp ui-tree-item`)
       .evaluateAll((rows) => rows.map((row) => row.getAttribute("label")))
     // Solitaire as it is now:  a tableau is a column, and its deck is drawn too (I62)
     expect(own).toEqual(["Card", "Card image", "Column", "Deck", "Discard pile", "Foundation", "Pile", "Stock pile"])
     const cards = () => page.evaluate(() => document.querySelectorAll("solitaire-card").length)
     const before = await cards()
-    await page.locator('.PalettePanel .ThisApp ui-tree-item[label="Card"]').click()
+    await page.locator(`${ADD_PANEL} .ThisApp ui-tree-item[label="Card"]`).click()
     await page.waitForTimeout(SETTLE_MS)
     expect(await cards()).toBe(before + 1)
     const written = await page.evaluate(() =>

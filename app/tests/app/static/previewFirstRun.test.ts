@@ -6,6 +6,9 @@ import path from "node:path"
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
+/** The add panel:  beside the add bar in Edit (epic `editor` T175), else its dialog (T167). */
+const ADD_PANEL = ":is(ui-popup.PalettePlus, ui-modal.PalettePanel)"
+
 /**
  * The public preview's first visit, as a person has it (epic `editor`, Build In Preview):
  * make an app from nothing on the real static build, with no server behind it.
@@ -99,7 +102,7 @@ describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.
 
     /** Drag `label` out of the palette, opening it if it isn't, to (`toX`, `toY`). */
     async function fromPalette(label: string, toX: number, toY: number): Promise<void> {
-      const row = page.locator(`.PalettePanel ui-tree-item[label="${label}"]`).first()
+      const row = page.locator(`${ADD_PANEL} ui-tree-item[label="${label}"]`).first()
       if (!(await row.isVisible())) {
         // the add panel, View › Add a View… (T167)
         await page.locator("#ViewBarMenu [part~=item]").first().click()
@@ -158,7 +161,7 @@ describe.runIf(!!process.env.PREVIEW_TEST && existsSync(path.join(BUILD, "index.
       await page.waitForSelector(".PaletteRail", { state: "attached", timeout: 60_000 })
       await page.waitForTimeout(SETTLE_MS)
       await shot("2-blank")
-      expect(await page.locator(".PalettePanel").first().isVisible()).toBe(true)
+      expect(await page.locator(ADD_PANEL).first().isVisible()).toBe(true)
       expect(await text()).toContain('<spell-app "my app">')
     })
 

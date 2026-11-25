@@ -1,7 +1,7 @@
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { CodeEditor, EDITOR, SERVING, openAddPanel } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING, openAddPanel, ADD_PANEL } from "./runningEditor"
 
 /**
  * Design mode (epic `editor` P37;  Q58, Q59, Q60, Q63):  Solitaire's `Card.spell` open in Design,
@@ -88,7 +88,7 @@ describe.skipIf(!SERVING)("Design mode", { timeout: 180_000 }, () => {
   async function dropFromPalette(label: string, toX: number, toY: number): Promise<void> {
     await openAddPanel(page)
     await page.waitForTimeout(800)
-    const row = (await page.locator(`.PalettePanel ui-tree-item[label="${label}"]`).first().boundingBox())!
+    const row = (await page.locator(`${ADD_PANEL} ui-tree-item[label="${label}"]`).first().boundingBox())!
     await page.mouse.move(row.x + 40, row.y + 10)
     await page.mouse.down()
     await page.mouse.move(row.x + 50, row.y + 20, { steps: 3 })

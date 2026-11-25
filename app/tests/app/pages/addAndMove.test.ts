@@ -2,7 +2,7 @@ import { chromium, type Browser, type BrowserContext, type Page } from "playwrig
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { Alignment } from "spell/test-helpers/Alignment"
-import { CodeEditor, EDITOR, SERVING, openAddPanel } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING, openAddPanel, ADD_PANEL } from "./runningEditor"
 
 /**
  * Adding, moving and removing parts from the running editor, by a real mouse and keys (epic `editor`, Add And Move).
@@ -95,7 +95,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   async function fromPalette(label: string, toX: number, toY: number): Promise<void> {
     await openAddPanel(page)
     await page.waitForTimeout(800)
-    const row = await page.locator(`.PalettePanel ui-tree-item[label="${label}"]`).first().boundingBox()
+    const row = await page.locator(`${ADD_PANEL} ui-tree-item[label="${label}"]`).first().boundingBox()
     await drag(row!.x + 40, row!.y + 10, toX, toY)
   }
 
@@ -1039,7 +1039,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
 
   test("the add bar runs down the left edge in Edit, the app then the code across;  its groups open beside it, its stars stay, its + opens everything (T151, T152, T173, T174)", async () => {
     const popupShows = () =>
-      page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePanel")?.visible)
+      page.evaluate((panel) => !!document.querySelector<HTMLElement & { visible?: boolean }>(panel)?.visible, ADD_PANEL)
 
     // the bar's Edit tab, then 16px to its icons (Inspect app, the code, the compiled code, Anatomy), 1px apart
     // (I250, C5;  Anatomy, P34;  T168's order);  no "+ Add a View" since T167:  ⌥⌘V opens the add panel
@@ -1262,36 +1262,39 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".PaletteRailPlace", { timeout: 30_000 })
   })
 
-  test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180, I185)", async () => {
+  test("the palette shows every part, with no scrolling, and closes once one is chosen (I174, I176, I180, I185, T175)", async () => {
     const popupShows = () =>
-      page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePanel")?.visible)
+      page.evaluate((panel) => !!document.querySelector<HTMLElement & { visible?: boolean }>(panel)?.visible, ADD_PANEL)
     await openAddPanel(page)
     await page.waitForTimeout(600)
     // no "N more":  what was behind it shows, under its topic
-    expect(await page.locator(".PalettePanel .PaletteMore").count()).toBe(0)
-    expect(await page.locator('.PalettePanel ui-tree-item[label="Grid"]').count()).toBe(1)
+    expect(await page.locator(`${ADD_PANEL} .PaletteMore`).count()).toBe(0)
+    expect(await page.locator(`${ADD_PANEL} ui-tree-item[label="Grid"]`).count()).toBe(1)
     // a group of buttons, ready-made;  everything fits, with no scrolling (I180):
-    // 6 columns at 1440px wide, rows 20px, so the palette table's longer topics fit an 800px window (I185)
-    expect(await page.locator('.PalettePanel ui-tree-item[label="Buttons"]').count()).toBe(1)
-    const fits = await page.evaluate(() => {
-      const groups = document.querySelector(".PalettePanel .PaletteGroups")!
+    // rows 20px, so the palette table's longer topics fit an 800px window (I185);  in Edit it's out of the add bar's
+    // `+` (T175), under the top bar, so it takes 7 columns at 1440px wide, where the dialog takes 6
+    expect(await page.locator(`${ADD_PANEL} ui-tree-item[label="Buttons"]`).count()).toBe(1)
+    const fits = await page.evaluate((panel) => {
+      const groups = document.querySelector(`${panel} .PaletteGroups`)!
       const columns = new Set(
-        [...document.querySelectorAll(".PalettePanel .PaletteGroup")].map((group) => group.getBoundingClientRect().x)
+        [...document.querySelectorAll(`${panel} .PaletteGroup`)].map((group) => group.getBoundingClientRect().x)
       )
       return { scrolls: groups.scrollHeight > groups.clientHeight + 1, columns: columns.size }
-    })
-    expect(fits).toEqual({ scrolls: false, columns: 6 })
-    await page.locator(".PalettePanel .PaletteSearch input").fill("grid")
+    }, ADD_PANEL)
+    expect(fits).toEqual({ scrolls: false, columns: 7 })
+    await page.locator(`${ADD_PANEL} .PaletteSearch input`).fill("grid")
     await page.waitForTimeout(600)
-    expect(await page.locator(".PalettePanel .PaletteGroup:not(.ThisApp) ui-tree-item").count()).toBeGreaterThan(0)
+    expect(await page.locator(`${ADD_PANEL} .PaletteGroup:not(.ThisApp) ui-tree-item`).count()).toBeGreaterThan(0)
     // Escape:  the first empties the search (T163), the next closes the panel
     await page.keyboard.press("Escape")
     await page.keyboard.press("Escape")
     await page.waitForTimeout(600)
     expect(await popupShows()).toBe(false)
-    // its key, ⌥⌘V, opens it too (T167)
+    // its key, ⌥⌘V, opens it too (T167):  in Edit, beside the add bar, as the `+` does (T175)
     await page.keyboard.press("Alt+ControlOrMeta+KeyV")
-    await page.waitForSelector("ui-modal.PalettePanel ui-tree-item", { state: "attached", timeout: 30_000 })
+    await page.waitForSelector("ui-popup.PalettePlus ui-tree-item", { state: "attached", timeout: 30_000 })
+    await page.waitForTimeout(400)
+    expect(await popupShows()).toBe(true)
     await page.keyboard.press("Escape")
     await page.waitForTimeout(600)
     expect(await popupShows()).toBe(false)

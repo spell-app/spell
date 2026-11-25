@@ -218,10 +218,10 @@ ui-popup.PaletteFlyout::part(popup) {
   }
 }
 /* its rows thinner, their icons further in:  the triangle's room kept, though it never shows (T162) */
-ui-popup.PaletteFlyout {
+ui-popup.PaletteFlyout:not(.PalettePlus) {
   --ui-tree-row-height: 24px;
 }
-ui-popup.PaletteFlyout .PaletteTree ui-tree-item::part(toggle) {
+ui-popup.PaletteFlyout:not(.PalettePlus) .PaletteTree ui-tree-item::part(toggle) {
   display: inline-flex;
   visibility: hidden;
 }

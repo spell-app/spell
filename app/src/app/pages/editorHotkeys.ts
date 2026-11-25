@@ -103,13 +103,15 @@ export const EDITOR_HOTKEYS = {
     group: "editing",
     name: "shortcutShowIcons"
   },
-  // the add panel over the editor (epic `editor` T167);  ⌥⌘V, "view", which no browser takes (Paste and Match Style is
-  // ⌥⇧⌘V);  in Run, it switches to Edit first;  in the code too, as the panel adds beside what's selected
+  // the add panel (epic `editor` T167):  in Edit, beside the add bar, as its `+` opens it (T175);  ⌥⌘V, "view", which no
+  // browser takes (Paste and Match Style is ⌥⇧⌘V);  in Run, it switches to Edit first, landing on the `+` panel once
+  // the add bar shows;  in the code too, as the panel adds beside what's selected
   addView: {
     shortcut: "alt+mod+V",
     run: () => {
-      if (isRunningNow()) EditorMode.show("edit")
-      void Palette.showPanel()
+      if (!isRunningNow()) return void Palette.showPanel()
+      EditorMode.show("edit")
+      Palette.openOnArrival()
     },
     inFields: true,
     group: "editing",
