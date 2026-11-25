@@ -108,6 +108,11 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
     return !!this.answer?.totalIsEstimate
   }
 
+  /** Where the last page is, beside an estimate:  see `ListAnswer.lastPage`. */
+  get lastPage(): ListAnswer["lastPage"] {
+    return this.answer?.lastPage
+  }
+
   /** Where the place stood when it answered. */
   get version(): string | undefined {
     return this.answer?.version

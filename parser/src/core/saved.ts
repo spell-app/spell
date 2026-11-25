@@ -66,6 +66,7 @@ import type { PlaceResult } from "spell/places/PlaceResult"
 import { personOnThisPage } from "spell/places/people"
 import {
   ANY_FIELD,
+  type ListAnswer,
   type ListQuery,
   type PersonHere,
   type Place as PlaceBehind,
@@ -1279,11 +1280,21 @@ class SavedRead {
 
   /**
    * How many the whole query matches, as the place counted it, once it's answered:  `undefined` when it didn't say,
-   * or said only an estimate (`ListAnswer.totalIsEstimate`), or left part of the query to the engine.
+   * or left part of the query to the engine.
+   * - It may be an estimate:  `totalIsEstimate`, and `lastPage` says where to count exactly.
    */
   get total(): number | undefined {
-    const { result } = this
-    return result && !result.totalIsEstimate ? result.total : undefined
+    return this.result?.total
+  }
+
+  /** `total` is an estimate, from a count of pages:  `ListAnswer.totalIsEstimate`. */
+  get totalIsEstimate(): boolean {
+    return !!this.result?.totalIsEstimate
+  }
+
+  /** Where the last page is, beside an estimate:  `ListAnswer.lastPage`. */
+  get lastPage(): ListAnswer["lastPage"] {
+    return this.result?.lastPage
   }
 
   /**
@@ -1572,7 +1583,10 @@ export const savedMethods = defineCoreModule({
    * How many things of `Class` match `query`:  what `the number of jobs where its status is "open"` compiles to, when
    * all of its `where` goes to the place (`NumberOfThingsWhere`).
    * - One row asked for, and the place's own count of them all read off its answer (`ListAnswer.total`).
-   * - A place that doesn't count them, or counts only roughly:  every one read, and counted here, as before.
+   * - A place that counts only roughly, by its pages:  its last page read, and its rows added to those before it
+   *   (`ListAnswer.lastPage`).
+   * - A place that doesn't count them, or whose last page can't be asked for straight, or comes back empty:  every one
+   *   read, and counted here, as before.
    * - Followed as any read is:  it's asked again as often as the place's line says.
    * - throws what the read threw
    */
@@ -1583,8 +1597,17 @@ export const savedMethods = defineCoreModule({
     const answering = read.firstPage()
     read.hold(answering)
     await answering
-    const { total } = read
-    if (total !== undefined) return total
+    const { total, totalIsEstimate, lastPage } = read
+    if (total !== undefined && !totalIsEstimate) return total
+    if (lastPage) {
+      const { at, size, rowsBefore } = lastPage
+      const last = program.readOf(Class as unknown as SavedClass, { ...withoutEmptySearch(query), page: { at, size } })
+      last.changes.read()
+      const reading = last.firstPage()
+      last.hold(reading)
+      const rows = core.itemCountOf(await reading)
+      if (rows > 0) return rowsBefore + rows
+    }
     return core.itemCountOf(await savedMethods.savedThings(Class, query))
   },
 

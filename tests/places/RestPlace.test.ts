@@ -1366,12 +1366,57 @@ describe("how many the whole query matches, as the server says (`ListAnswer.tota
   test("only how many pages:  an estimate, pages times the page size;  a page of one, exactly", async () => {
     const rough = await answering({ items: TWO, total_pages: 625 }).list("jobs", {}, {})
     expect(rough).toMatchObject({ total: 1250, totalIsEstimate: true })
+    // where its last page is, to count exactly:  the place's own `at`
+    expect(rough.lastPage).toEqual({ at: "1248", size: 2, rowsBefore: 1248 })
     const one = await answering({ items: [TWO[0]], total_pages: 1234 }).list("jobs", { page: { size: 1 } }, {})
     expect(one.total).toBe(1234)
     expect(one.totalIsEstimate).toBeUndefined()
   })
 
+  test("only how many pages, counting pages:  its last page's number;  by cursor:  none", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ items: TWO, total_pages: 5 }))
+    const numbered = new RestPlace({
+      url: "https://jobs.test",
+      allCollections: { rowsAt: "items" },
+      can: { page: "offset" },
+      pageNumbers: { first: 1 },
+      pageSize: 2
+    })
+    expect((await numbered.list("jobs", {}, {})).lastPage).toEqual({ at: "5", size: 2, rowsBefore: 8 })
+    const next = { Link: '<https://jobs.test/jobs?cursor=c2>; rel="next"' }
+    vi.stubGlobal("fetch", async () => Response.json({ items: TWO, total_pages: 5 }, { headers: next }))
+    const cursor = new RestPlace({
+      url: "https://jobs.test",
+      allCollections: { rowsAt: "items" },
+      can: { page: "cursor" }
+    })
+    const answer = await cursor.list("jobs", { page: { size: 2 } }, {})
+    expect(answer).toMatchObject({ total: 10, totalIsEstimate: true })
+    expect(answer.lastPage).toBeUndefined()
+  })
+
+  test("only how many pages, on a first page with none after:  its rows, exactly", async () => {
+    const answer = await answering({ items: [TWO[0]], total_pages: 1 }).list("jobs", {}, {})
+    expect(answer.total).toBe(1)
+    expect(answer.totalIsEstimate).toBeUndefined()
+  })
+
   test("none said:  none given", async () => {
     expect((await answering({ items: TWO }).list("jobs", {}, {})).total).toBeUndefined()
+  })
+
+  test("a total beside rows found deeper, at a nested `rowsAt`;  its top's first", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ data: { items: TWO, total: 77 }, meta: {} }))
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      allCollections: { rowsAt: "data.items" },
+      can: { page: "offset" },
+      pageSize: 2
+    })
+    expect((await place.list("jobs", {}, {})).total).toBe(77)
+    vi.stubGlobal("fetch", async () => Response.json({ data: { items: TWO, total_pages: 5 } }))
+    expect(await place.list("jobs", {}, {})).toMatchObject({ total: 10, totalIsEstimate: true })
+    vi.stubGlobal("fetch", async () => Response.json({ data: { items: TWO, total: 77 }, total: 80 }))
+    expect((await place.list("jobs", {}, {})).total).toBe(80)
   })
 })

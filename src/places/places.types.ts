@@ -572,6 +572,12 @@ export type ListAnswer = {
    * (`about 1,250`).  The last page alone says exactly.
    */
   totalIsEstimate?: true
+  /**
+   * Where the last page is, beside an estimate (`totalIsEstimate`):  the rows before it, and its own, are the exact
+   * number.  Read it with this `at` and `size` (`core.savedCount()`).
+   * - Left out:  there's no estimate, or its last page can't be asked for straight (a cursor's).
+   */
+  lastPage?: { at: string; size: number; rowsBefore: number }
   /** Where the place stood when it answered:  for `changesSince()`, and a change's `version`. */
   version?: string
   /** Which parts of the query it did itself. */

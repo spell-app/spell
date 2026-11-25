@@ -410,7 +410,17 @@ export class RestPlace extends WebPlace implements Place {
       withAsked(this.noted(collection, this.rowOf(collection, row)), askedValues)
     )
     if (query.under) this.noteReadUnder(collection, query.under, read)
-    const total = isOne ? undefined : totalIn(body, response, { rows: rows.length, size, isFirst: !at, nextPage })
+    const total = isOne
+      ? undefined
+      : totalIn(body, response, {
+          rowsAt,
+          rows: rows.length,
+          // told no count, a page is as long as the server makes it:  this first one, full
+          size: paging.sendsNoCount ? rows.length : size,
+          isFirst: !at,
+          nextPage,
+          lastPageOf: page === "offset" && !paging.pagesByLastId ? pageAt(paging) : undefined
+        })
     return {
       rows: read,
       ...(nextPage !== undefined && { nextPage }),
@@ -1118,30 +1128,86 @@ const TOTAL_HEADERS = ["X-Total-Count", "X-Total"]
 /**
  * How many the whole query matches, as an answer says (`ListAnswer.total`):  nothing when it doesn't.
  * - A total beside its rows, `{ items: [...], total: 1234 }`, or a count header, `X-Total-Count: 1234`.
+ * - Beside its rows wherever they are:  at its top, or beside a nested `rowsAt`'s,
+ *   `{ data: { items: [...], total: 1234 } }`.  Its top first.
  * - A `count`:  Django's is the total, but Arena-like servers' is this page's rows.  So only one that can't be this
  *   page's:  more than its rows, or a first page with nothing after it.
- * - Only how many pages:  its pages times its size, an estimate;  a page of one row, exactly.
+ * - Only how many pages:  its pages times its size, an estimate, and where its last page is, to count exactly;
+ *   a page of one row, or a first page with none after, exactly.
  */
 function totalIn(
   body: unknown,
   response: Response,
-  { rows, size, isFirst, nextPage }: { rows: number; size: number; isFirst: boolean; nextPage: string | undefined }
-): Pick<ListAnswer, "total" | "totalIsEstimate"> {
-  const counted = (value: unknown) =>
-    typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined
+  ask: TotalAsk
+): Pick<ListAnswer, "total" | "totalIsEstimate" | "lastPage"> {
   for (const header of TOTAL_HEADERS) {
     const said = response.headers.get(header)
     if (said !== null && /^\d+$/.test(said.trim())) return { total: Number(said) }
   }
-  if (!body || typeof body !== "object" || Array.isArray(body)) return {}
-  const fields = body as Record<string, unknown>
+  const { rowsAt } = ask
+  const holdsRowsAt = rowsAt?.includes(".") ? rowsAt.slice(0, rowsAt.lastIndexOf(".")) : undefined
+  const holders = holdsRowsAt === undefined ? [body] : [body, valueAt(body, holdsRowsAt)]
+  for (const holder of holders) {
+    const total = totalBeside(holder, ask)
+    if (total.total !== undefined) return total
+  }
+  return {}
+}
+
+/** What `totalIn()` looks at, besides the answer. */
+type TotalAsk = {
+  /** Where its rows are:  `RestCollection.rowsAt`. */
+  rowsAt: string | undefined
+  /** How many rows this page holds. */
+  rows: number
+  /** How many rows a page holds. */
+  size: number
+  /** This is the first page. */
+  isFirst: boolean
+  /** Where its next page is:  `undefined` for none. */
+  nextPage: string | undefined
+  /** Where the page that's this many pages in is, `0` the first:  `undefined` when it can't be asked for straight. */
+  lastPageOf: ((pagesBefore: number, size: number) => string) | undefined
+}
+
+/**
+ * Where the page this many pages in is, on a list paged by offset:  its number, or its first row's place.
+ * - SEE:  `nextPageOf()`, which steps from one page to the next the same way.
+ */
+function pageAt({ firstPageNumber }: Paging): (pagesBefore: number, size: number) => string {
+  return (pagesBefore, size) =>
+    firstPageNumber === undefined ? String(pagesBefore * size) : String(firstPageNumber + pagesBefore)
+}
+
+/**
+ * How many the whole query matches, as the fields of `holder`, beside its rows, say:  `totalIn()`.
+ * - Only how many pages, and more than one:  the estimate says where its last page is (`ListAnswer.lastPage`).
+ */
+function totalBeside(
+  holder: unknown,
+  { rows, size, isFirst, nextPage, lastPageOf }: TotalAsk
+): Pick<ListAnswer, "total" | "totalIsEstimate" | "lastPage"> {
+  if (!holder || typeof holder !== "object" || Array.isArray(holder)) return {}
+  const counted = (value: unknown) =>
+    typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined
+  const fields = holder as Record<string, unknown>
   const total = TOTAL_FIELDS.map((field) => counted(fields[field])).find((each) => each !== undefined)
   if (total !== undefined) return { total }
   const count = counted(fields.count)
   if (count !== undefined && (count > rows || (isFirst && nextPage === undefined))) return { total: count }
   const pages = PAGES_FIELDS.map((field) => counted(fields[field])).find((each) => each !== undefined)
   if (pages === undefined) return {}
-  return size === 1 ? { total: pages } : { total: pages * size, totalIsEstimate: true }
+  if (size === 1) return { total: pages }
+  if (isFirst && nextPage === undefined) return { total: rows }
+  const rowsBefore = (pages - 1) * size
+  return {
+    total: pages * size,
+    totalIsEstimate: true,
+    ...(lastPageOf &&
+      pages > 1 && {
+        lastPage: { at: lastPageOf(pages - 1, size), size, rowsBefore }
+      })
+  }
 }
 
 /** Is this one thing's row, not a list:  a plain object? */

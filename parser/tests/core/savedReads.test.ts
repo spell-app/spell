@@ -518,4 +518,43 @@ describe("the number of, counted by the place (`core.savedCount()`)", () => {
     const { Recipe } = program(place)
     expect(await core.savedCount(Recipe)).toBe(1)
   })
+
+  /**
+   * A place that says only how many pages of 2 there are, whatever size it's asked for:  an estimate, and where its
+   * last page is (`ListAnswer.lastPage`).  `pagesSaid` more than there are:  its last page is empty.
+   */
+  class PagesOnly extends CountingPlace {
+    pagesSaid: number | undefined
+
+    async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      this.requests.push([{ collection, query }])
+      const at = Number(query.page?.at ?? 0)
+      const ask = { ...query, page: { at: `${at}`, size: 2 } }
+      const answer = await MemoryPlace.prototype.list.call(this, collection, ask, context)
+      if (at) return answer
+      const all = await MemoryPlace.prototype.list.call(this, collection, { ...query, page: undefined }, context)
+      const pages = this.pagesSaid ?? Math.ceil(all.rows.length / 2)
+      const lastPage = { at: `${(pages - 1) * 2}`, size: 2, rowsBefore: (pages - 1) * 2 }
+      return { ...answer, total: pages * 2, totalIsEstimate: true, lastPage }
+    }
+  }
+
+  test("a place that counts only its pages:  its last page read, and its rows added to those before", async () => {
+    const place = filled(new PagesOnly({ capabilities: WITH_IDS }))
+    const { Recipe } = program(place)
+    for (const id of ["r2", "r3", "r4", "r5"]) {
+      await place.apply([{ kind: "insert", collection: "recipes", id, fields: { id, title: "Stew" } }])
+    }
+    place.requests = []
+    // 3 pages of 2:  about 6, and exactly 5
+    expect(await core.savedCount(Recipe)).toBe(5)
+    expect(place.requests.map(([ask]) => ask!.query.page)).toEqual([{ size: 1 }, { at: "4", size: 2 }])
+  })
+
+  test("its last page empty, the estimate wrong:  every one read, and counted here", async () => {
+    const place = filled(new PagesOnly({ capabilities: WITH_IDS }))
+    place.pagesSaid = 3
+    const { Recipe } = program(place)
+    expect(await core.savedCount(Recipe)).toBe(1)
+  })
 })
