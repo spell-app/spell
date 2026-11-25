@@ -1,7 +1,7 @@
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "fs"
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
-import { resolve } from "path"
-import { describe, test, expect } from "vite-plus/test"
+import { dirname, resolve } from "path"
+import { afterAll, describe, test, expect } from "vite-plus/test"
 
 import { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"
@@ -14,6 +14,7 @@ import {
   GUIDE_PROJECTS,
   fixtureFolder
 } from "spell/app/spaces/test"
+import { moreSpaces, spacesDirForOrg } from "spell/app/spaces/server/node/spellSpacesDir"
 
 /** What `arg` names, reduced to `kind` + id for comparing. */
 async function named(arg: string, cwd?: string) {
@@ -76,6 +77,48 @@ describe("resolveProject()", () => {
         kind: "file",
         id: GAME
       })
+    })
+  })
+
+  describe("a project in an org's group of a spaces folder:  that folder serves its org for the command", () => {
+    // a made-up org's spaces, as an app keeps them:  `<app>/spaces/@acme/tools/{dashboard,jobs}`
+    const temp = realpathSync(mkdtempSync(resolve(tmpdir(), "spell-cli-org-")))
+    const spaces = resolve(temp, "acme-app", "spaces")
+    const put = (path: string, text = "{}") => {
+      mkdirSync(dirname(resolve(spaces, path)), { recursive: true })
+      writeFileSync(resolve(spaces, path), text)
+    }
+    put(`@acme/tools/dashboard/${SP.PROJECT_FILE}`)
+    put("@acme/tools/dashboard/Board.spell", "print 1")
+    put(`@acme/tools/jobs/${SP.PROJECT_FILE}`)
+    afterAll(() => {
+      for (const each of moreSpaces) each.orgs = each.orgs.filter((org) => org !== "acme")
+      rmSync(temp, { recursive: true, force: true })
+    })
+
+    test("its folder is a project of the org's group, not a `@local` one", async () => {
+      expect(await named(resolve(spaces, "@acme/tools/dashboard"))).toEqual({
+        kind: "project",
+        id: "@acme/tools/dashboard"
+      })
+      expect(await named("Board.spell", resolve(spaces, "@acme/tools/dashboard"))).toEqual({
+        kind: "file",
+        id: "@acme/tools/dashboard/Board.spell"
+      })
+    })
+
+    test("so a project beside it is read by its address, as an import names it, from the same folder", async () => {
+      await named(resolve(spaces, "@acme/tools/dashboard"))
+      expect(spacesDirForOrg("acme")).toBe(spaces)
+      const jobs = new SP.SpellLocation("@acme/tools/jobs")
+      expect(jobs.isProjectPath).toBe(true)
+      expect(jobs.serverPath).toBe(resolve(spaces, "@acme/tools/jobs"))
+    })
+
+    test("Spell's own org is never served from a project's folder", async () => {
+      put(`@spell/tools/mine/${SP.PROJECT_FILE}`)
+      expect(await named(resolve(spaces, "@spell/tools/mine"))).toMatchObject({ id: "@local/tools/mine" })
+      expect(spacesDirForOrg("spell")).not.toBe(spaces)
     })
   })
 

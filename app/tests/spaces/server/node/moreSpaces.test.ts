@@ -4,7 +4,7 @@ import { delimiter, dirname, join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { SRV } from "spell/server"
-import { moreSpacesFrom, spacesDirForOrg } from "spell/app/spaces/server/node/spellSpacesDir"
+import { moreSpacesFrom, serveOrgFrom, spacesDirForOrg } from "spell/app/spaces/server/node/spellSpacesDir"
 import { moreOrgGroups } from "spell/app/spaces/server/node/people/localPerson"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 
@@ -99,5 +99,28 @@ describe("an org's spaces folder, groups and build folder", () => {
     expect(projectUtils.buildFolderFor("/spell.spaces/@spell/owen@/errors", folders)).toBe(
       "/repo/build/spell-spaces/@spell/owen@/errors"
     )
+  })
+})
+
+describe("serveOrgFrom():  an org served from a folder for the rest of the program, nothing written", () => {
+  test("in place of the folder that served it;  a folder already served takes it on beside its own", () => {
+    const more = moreSpacesFrom({ env: { SPELL_MORE_SPACES: [acme, beta].join(delimiter) } })
+    const other = join(temp, "other-app", "spaces")
+    expect(serveOrgFrom(other, "acme", more)).toBe(true)
+    expect(spacesDirForOrg("acme", more, "/spell.spaces")).toBe(other)
+    expect(more).toEqual([
+      { dir: acme, orgs: [] },
+      { dir: beta, orgs: ["beta"] },
+      { dir: other, orgs: ["acme"] }
+    ])
+    expect(serveOrgFrom(beta, "acme", more)).toBe(true)
+    expect(spacesDirForOrg("acme", more, "/spell.spaces")).toBe(beta)
+    expect(more[1]).toEqual({ dir: beta, orgs: ["beta", "acme"] })
+  })
+
+  test("never `@spell`", () => {
+    const more = moreSpacesFrom({ env: { SPELL_MORE_SPACES: acme } })
+    expect(serveOrgFrom(beta, "spell", more)).toBe(false)
+    expect(spacesDirForOrg("spell", more, "/spell.spaces")).toBe("/spell.spaces")
   })
 })

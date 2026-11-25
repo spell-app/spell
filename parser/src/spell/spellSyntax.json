@@ -2687,6 +2687,58 @@
           "aliases": ["expression"]
         },
         {
+          "className": "QuotedKeyRead",
+          "ruleNames": ["quoted_key_read"],
+          "internal": false,
+          "file": "src/spell/rules/properties/QuotedKeyRead.ts",
+          "line": 18,
+          "purpose": "`the \"run_by\" of its meta` ~== `meta.run_by`, a key read off a thing or an object by the key AS WRITTEN, in quotes.",
+          "syntaxes": [
+            {
+              "syntax": "the {key:text} of {expression:operand}",
+              "example": "the \"run_by\" of the gadget",
+              "outputs": {
+                "js": {
+                  "code": "gadget.run_by"
+                },
+                "ts": {
+                  "code": "gadget.run_by"
+                },
+                "py": {
+                  "code": "getattr(gadget, \"run_by\", None)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "PossessiveQuotedKeyRead",
+          "ruleNames": ["possessive_quoted_key_read"],
+          "internal": false,
+          "file": "src/spell/rules/properties/QuotedKeyRead.ts",
+          "line": 67,
+          "purpose": "`its meta's \"run_by\"` ~== `the \"run_by\" of its meta` (`QuotedKeyRead`).",
+          "syntaxes": [
+            {
+              "syntax": "{expression:possessive_owner} {possessive_mark} {key:text}",
+              "example": "the gadget's \"run_by\"",
+              "outputs": {
+                "js": {
+                  "code": "gadget.run_by"
+                },
+                "ts": {
+                  "code": "gadget.run_by"
+                },
+                "py": {
+                  "code": "getattr(gadget, \"run_by\", None)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "PossessiveProperty",
           "ruleNames": ["possessive_property"],
           "internal": false,
