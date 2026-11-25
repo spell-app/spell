@@ -26,7 +26,8 @@
  *     trip after the root asks for it, by when it's in the map.
  * - The code and markdown families join the map then too (`shareFamilies()`), as a pack's `define()` starts:
  *   the app's `<spell-code>` and `<spell-markdown>` extend them (`spell-ui-shared.js`, app's `vite.solid.config.ts`),
- *   so on App UI's pages they extend the page's own.
+ *   so on App UI's pages they extend the page's own.  So do the graph and tree families, which a pack's own elements
+ *   may extend (`PACK_MODULES`).
  */
 import * as solidH from "@solidjs/h"
 import * as solidWeb from "@solidjs/web"
@@ -68,12 +69,16 @@ function registerWithFamilies(pack: ComponentPack): void {
 
 /** Put the families a pack's elements may extend in `packModules`, by their keys. */
 async function shareFamilies(): Promise<void> {
-  const [code, markdown] = await Promise.all([
+  const [code, markdown, graph, tree] = await Promise.all([
     import("spell/ui/components/ui-code"),
-    import("spell/ui/components/ui-markdown")
+    import("spell/ui/components/ui-markdown"),
+    import("spell/ui/components/ui-graph"),
+    import("spell/ui/components/ui-tree")
   ])
   packModules["spell/ui/components/ui-code"] = code
   packModules["spell/ui/components/ui-markdown"] = markdown
+  packModules["spell/ui/components/ui-graph"] = graph
+  packModules["spell/ui/components/ui-tree"] = tree
 }
 
 const spellUI = (globalThis as { SpellUI?: object }).SpellUI

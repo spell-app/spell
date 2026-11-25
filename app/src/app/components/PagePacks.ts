@@ -50,7 +50,10 @@ export class PagePacks {
       "spell/ui/components/ui-zoom/ImageZoom": ui,
       "spell/ui/components/ui-code": ui,
       "spell/ui/components/ui-markdown": ui,
-      "spell/ui/components/ui-root": ui
+      "spell/ui/components/ui-root": ui,
+      // the families a pack's elements may extend (`PACK_MODULES`)
+      "spell/ui/components/ui-graph": ui,
+      "spell/ui/components/ui-tree": ui
     }
   }
 }

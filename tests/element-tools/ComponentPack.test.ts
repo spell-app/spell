@@ -283,6 +283,16 @@ describe("ComponentPack.withPageModules()", () => {
     )
   })
 
+  test("a family a pack's element extends (the graph's, the tree's) is the page's, as Solid is", () => {
+    const code =
+      `import{UIGraph as e}from"spell/ui/components/ui-graph";import{UITree as t}from"spell/ui/components/ui-tree";` +
+      `class n extends e{}class r extends t{}`
+    expect(ComponentPack.withPageModules(code, "one.js")).toBe(
+      `const{UIGraph:e}=${page("spell/ui/components/ui-graph")};const{UITree:t}=${page("spell/ui/components/ui-tree")};` +
+        `class n extends e{}class r extends t{}`
+    )
+  })
+
   test("unminified, with spaces, as Vite writes it without minifying", () => {
     const code = `import { createSignal, untrack as u } from "solid-js";\ncreateSignal(u)`
     expect(ComponentPack.withPageModules(code, "one.js")).toBe(
