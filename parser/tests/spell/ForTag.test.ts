@@ -97,7 +97,16 @@ describe("<for>", () => {
       `\t\t<for film in its films>\n\t\t\t<text>x</text>\n\t\t\t<failed><text>Lost</text></failed>\n\t\t</for>`
     )
     expect(errors).toEqual([])
+    // no `the error` in it:  no parameter
     expect(code).toContain("failed: () =>")
+  })
+
+  test("<failed> in a body reads the error:  the failure's words, as an element's <failed> does (I121)", () => {
+    const { code, errors } = compiled(
+      `\t\t<for film in its films>\n\t\t\t<text>x</text>\n\t\t\t<failed><text>Lost:  {the error}</text></failed>\n\t\t</for>`
+    )
+    expect(errors).toEqual([])
+    expect(code).toMatch(/failed: \(error\) =>[^]*"Lost:  ", \(\) => error/)
   })
 
   test("<loading> and <empty> in a body are slots too, each drawing what it holds (epic `data` T127)", () => {

@@ -127,8 +127,8 @@ export type ReadRiders = {
   waitingSay?: () => unknown
   /** `if there are none:`:  what shows when there's an answer, and nothing in it. */
   none?: () => Drawing
-  /** `if that fails:`:  what shows when it can't be read. */
-  failed?: () => Drawing
+  /** `if that fails:`:  what shows when it can't be read;  `the error` in it, the failure's words. */
+  failed?: (error: string) => Drawing
   /** `if that fails say "..."`:  the message that shows, Try again kept. */
   failedSay?: () => unknown
   /** `show them in:`:  the element the items go in, the loader and messages staying outside it. */
@@ -1982,7 +1982,9 @@ export const savedMethods = defineCoreModule({
     const whole = createComponent(Errored, {
       // Solid hands the error as an accessor:  read as it was, it said "function () { [native code] }"
       fallback: (error: () => unknown) =>
-        riders.failed ? riders.failed() : listFailed(error(), riders.failedSay ? `${riders.failedSay()}` : undefined),
+        riders.failed
+          ? riders.failed(whyOf(error()))
+          : listFailed(error(), riders.failedSay ? `${riders.failedSay()}` : undefined),
       get children() {
         return body()
       }

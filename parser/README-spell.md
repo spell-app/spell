@@ -1092,7 +1092,8 @@ a "counter" is a view
   - a `##` heading starts a section, sticky and foldable, as the docs pages' are
   - markup and `<example "...">` are drawn as written
   - `<if ...>`, `<otherwise>` and `<for ...>` pick and repeat what's drawn;
-    a `<for>` takes `loading=`, `empty=` and `as=`, or `<loading>`, `<empty>` and `<failed>` inside it
+    a `<for>` takes `loading=`, `empty=` and `as=`, or `<loading>`, `<empty>` and `<failed>` inside it;
+    inside `<failed>`, `the error` is what went wrong
   - an `<html>` block is markup as written;  a `<spell>` block, plain Spell
   - `<!-- ... -->` is a comment, anywhere
 - Its indentation ends it:  no closing tag.
@@ -1553,7 +1554,8 @@ recipe box is an app
 - Asking how many:  `if there are no recipes`, `if there are less than 2 recipes where it is quick`, anywhere a condition reads.
   - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
 - A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`;
-  `if that fails:` with lines under it draws them instead.
+  `if that fails:` with lines under it draws them instead, `the error` there the failure's words:
+  `<failed><text>{the error}</text></failed>`.
   - In an action, `if that fails:` runs under the line above it:  `set found to every recipe`, then `if that fails:`.
 - When a place is read:  a page reads only what it draws, as it draws it.  Spell never reads ahead.
   - Lists one drawing asks for at once go in one request, where the place can take several.
