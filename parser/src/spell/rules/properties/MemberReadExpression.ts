@@ -163,7 +163,9 @@ export class MemberReadExpression<
   static memberRead(match: P.Match): MemberRead | undefined {
     if (!(match.rule instanceof MemberReadExpression)) return undefined
     const { ownerType, member } = match.data as MemberData
-    const property = match.groups.property as P.Match
+    const property = match.groups.property as P.Match | undefined
+    // a key in quotes, read as written (`quoted_key_read`):  no member's words, so never a loose read of one
+    if (!property) return undefined
     const declaredOn = member?.scope instanceof P.TypeScope ? member.scope : undefined
     return { type: declaredOn ?? ownerType, property, member }
   }

@@ -299,7 +299,8 @@ propertiesEs.addRule(TheOwnProperty, {
 
 // a key in quotes, read as written:  `el "run_by" de su meta`
 propertiesEs.addRule(QuotedKeyRead, {
-  syntax: "(el|la|los|las)? {key:text} (de|del) {expression:operand}",
+  // its article always:  a bare `"x" de g` is text given to a call, `titulada "x" de g`
+  syntax: "(el|la|los|las) {key:text} (de|del) {expression:operand}",
   tests: [
     {
       title: "una clave entre comillas, leída tal cual",

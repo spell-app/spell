@@ -2752,7 +2752,7 @@
           "purpose": "`the \"run_by\" of its meta` ~== `meta.run_by`, a key read off a thing or an object by the key AS WRITTEN, in quotes.",
           "syntaxes": [
             {
-              "syntax": "(el|la|los|las)? {key:text} (de|del) {expression:operand}",
+              "syntax": "(el|la|los|las) {key:text} (de|del) {expression:operand}",
               "example": "el \"run_by\" del aparato",
               "outputs": {
                 "js": {
