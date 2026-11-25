@@ -12,6 +12,7 @@ import {
   savedPlaceOfMatch,
   searchesOf
 } from "spell/parser/spell/rules/places/places.shared"
+import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 
 /**
  * `every_thing` rule:  every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).
@@ -107,7 +108,7 @@ export class EveryThing extends SpellExpression<"type"> {
     const holds = () => {
       const asked = askedByOf(saved)
       if (asked.length) {
-        const said = where ? (handedPartsOf(where(), [])?.filter ?? []).map((part) => `${part.property.value}`) : []
+        const said = where ? (handedPartsOf(where(), [])?.filter ?? []).map(fieldOfPart) : []
         return !asked.every((field) => said.includes(field))
       }
       return isSearchedOnly(saved) && !(where && handedPartsOf(where(), searchesOf(saved)?.fields ?? [])?.search.length)
@@ -169,7 +170,7 @@ export class EveryThing extends SpellExpression<"type"> {
     if (predicate && !parts?.isWhole) return undefined
     const filters = filtersOf(saved)
     const filter = parts?.filter ?? []
-    if (!filter.every((part) => filters === "every field" || filters.includes(`${part.property.value}`))) {
+    if (!filter.every((part) => isFilteredBy(filters, part))) {
       return undefined
     }
     const properties: P.ASTObjectLiteralProperty[] = []
@@ -195,8 +196,7 @@ export class EveryThing extends SpellExpression<"type"> {
     // goes page by page and stops at that many, rather than reading every page to filter by it (epic `data` I55)
     const isPaged = first !== undefined && saved.placeType.placeKind === "web server"
     const filters = isPaged ? filtersOf(saved) : "every field"
-    const isTaken = (part: P.ASTObjectLiteralProperty) =>
-      filters === "every field" || filters.includes(`${part.property.value}`)
+    const isTaken = (part: P.ASTObjectLiteralProperty) => isFilteredBy(filters, part)
     const isWhole = !predicate || (!!parts?.isWhole && parts.filter.every(isTaken))
     const properties: P.ASTObjectLiteralProperty[] = []
     const { search = [] } = parts ?? {}
@@ -285,7 +285,7 @@ export class EveryThing extends SpellExpression<"type"> {
     const filters = filtersOf(saved)
     const staying = [
       ...parts.filter
-        .filter((part) => !(filters === "every field" || filters.includes(`${part.property.value}`)))
+        .filter((part) => !isFilteredBy(filters, part))
         .flatMap((part) => (part.value ? [part.value] : [])),
       ...parts.staying
     ]
@@ -449,6 +449,19 @@ function clauseText(node: P.ASTNode, predicate: P.ASTMethodDefinition): string {
 
 /** Each filter's value, by the clause it was said in:  `clauseText()`. */
 const CLAUSE_OF_VALUE = new WeakMap<P.ASTNode, P.ASTNode>()
+
+/**
+ * The field `part`, a part of a `where` handed to a place, is about, as the place's lines name it:  `sessionId` for
+ * `its session id is ...`, as `it filters by session-id` says it (epic `data` I65).  The part itself says `session_id`.
+ */
+function fieldOfPart(part: P.ASTObjectLiteralProperty): string {
+  return fieldNamed(`${part.property.value}`)
+}
+
+/** Does a list that filters by `filters` (`filtersOf()`) take `part` of a `where`? */
+function isFilteredBy(filters: "every field" | readonly string[], part: P.ASTObjectLiteralProperty): boolean {
+  return filters === "every field" || filters.includes(fieldOfPart(part))
+}
 
 /** The field every row a place holds has, its id. */
 const ID_FIELD = "id"

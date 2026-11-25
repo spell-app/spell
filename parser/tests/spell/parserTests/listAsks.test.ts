@@ -102,6 +102,40 @@ describe("a `where`, sent in parts", () => {
   })
 })
 
+describe("a field of two words its list filters by (epic `data` I65)", () => {
+  // `it filters by session-id` names the field `sessionId`;  `its session id is ...` says `session_id`:  the same field
+  test("sent, and no warning:  a value, a local, a page's property inside an `and`", () => {
+    const { errors, warnings, compiled: code } = compiled([
+      ...PLACE(
+        `every job where its session id is "s1"`,
+        `every job where its status is "open" and its session id is the picked's id`,
+        `every job where its status is "open" and its session id is the wanted session`
+      ),
+      `\tits "picked" is a job`,
+      `\tits "wanted session" is text`,
+      `\tits "by a local" is`,
+      `\t\tset wanted to its picked's id`,
+      `\t\treturn every job where its session id is wanted`
+    ])
+    expect(errors).toEqual([])
+    expect(warnings.join("\n")).not.toContain("can't be asked")
+    expect(code).toContain(`core.savedThings(Job, { filter: { sessionId: "s1" } })`)
+    expect(code).toContain(
+      `core.savedThings(Job, { filter: { status: "open", sessionId: (await core.answerOf(this, "picked"))?.id } })`
+    )
+    expect(code).toContain(`core.savedThings(Job, { filter: { status: "open", sessionId: this.wantedSession } })`)
+    expect(code).toContain(`core.savedThings(Job, { filter: { sessionId: wanted } })`)
+  })
+
+  test("counted by the server, and the first few asked for in one page", () => {
+    const { compiled: code } = compiled(
+      PLACE(`the number of jobs where its session id is "s1"`, `the first 8 jobs where its session id is "s1"`)
+    )
+    expect(code).toContain(`core.savedCount(Job, { filter: { sessionId: "s1" } })`)
+    expect(code).toContain(`core.savedThings(Job, { filter: { sessionId: "s1" }, page: { size: 8 } })`)
+  })
+})
+
 describe("the number of, counted by the server", () => {
   test("all of the `where` its list's:  one row asked for, and the server's own count", () => {
     const { errors, compiled: code } = compiled(PLACE(`the number of jobs where its status is "open"`))
@@ -117,6 +151,54 @@ describe("the number of, counted by the server", () => {
       expect(code).toContain("core.itemCountOf(")
     }
     expect(compiled(PLACE(`the number of notes where its status is "open"`)).compiled).not.toContain("savedCount")
+  })
+})
+
+describe("the number of, waited for (epic `data` I64)", () => {
+  // the server's count is an answer it waits for, as `every job` is:  never a Promise handed on
+  const SHELF = (...lines: string[]) =>
+    compiled([
+      ...PLACE().slice(0, 8),
+      `\t- job sessions live at "/api/sessions"`,
+      ...PLACE().slice(8, -1),
+      `a "job session" is a thing:`,
+      `\t- it is saved in acme`,
+      `a "shelf" is a view:`,
+      `\tits "counted" is a number`,
+      ...lines.map((line) => `\t${line}`)
+    ])
+
+  test("in a property:  a value that waits", () => {
+    const { errors, compiled: code } = SHELF(`its "held" is the number of jobs`)
+    expect(errors).toEqual([])
+    expect(code).toContain(`get held() { return core.waitedValue(this, "held", async () => {`)
+    expect(code).toContain("return await core.savedCount(Job)")
+  })
+
+  test("in a method's body:  the method waits for it", () => {
+    const { errors, compiled: code } = SHELF(`to count:`, `\tset its counted to the number of jobs`)
+    expect(errors).toEqual([])
+    expect(code).toContain("async count() {")
+    expect(code).toContain("this.counted = await core.savedCount(Job)")
+  })
+
+  test("in a drawing's attribute:  a waited value, as a read there is", () => {
+    const { errors, compiled: code } = SHELF(`to draw it:`, `\t<button title={the number of jobs}>Go</button>`)
+    expect(errors).toEqual([])
+    expect(code).toContain(`core.waitedValue(this, "the number of jobs", async () => await core.savedCount(Job))`)
+    expect(code).toContain("static drawsWaiting = true")
+  })
+
+  test("a type of two words, in the plural:  `the number of job sessions`, as `every job session`", () => {
+    const { errors, compiled: code } = SHELF(
+      `its "sessions" is the number of job sessions`,
+      `its "every session" is the number of every job session`,
+      `its "listed" is the job sessions`
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain(`get sessions() { return core.waitedValue(this, "sessions", async () => {`)
+    expect(code.match(/return await core\.savedCount\(JobSession\)/g)).toHaveLength(2)
+    expect(code).toContain("return await core.savedThings(JobSession)")
   })
 })
 
