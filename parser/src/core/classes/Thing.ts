@@ -53,6 +53,15 @@ export class Thing extends Eventful(Observable) {
   static publishedAs: string | boolean = false
 
   /**
+   * Does a thing of this class keep every key it's given, not only the fields it declares (epic `data`, an object type)?
+   * - Compiled from `an "asset meta" is an object`, as `static keepsEveryKey = true` on a `Thing`:  its own fields read
+   *   as they're declared (a date as a date), and any other key a row sends is kept as it came, on the thing itself, so
+   *   `its meta's owner` reads it;  written back whole, every key (`keptKeysOf()`).
+   * - Every other thing keeps only what it declares, or what's set on it.
+   */
+  static keepsEveryKey = false
+
+  /**
    * Make our method `name` an action:  ONE undo step, or one that can't be undone (epic `prefs-and-undo` P6).
    * - In a static block after the method:  `static { this.declareAction("turnOver", { undoneAs: "Turn Card" }) }`.
    * - Or `{ cantBeUndone: "clears history" }`, e.g. a new game -- see `ActionInfo`, `undoing.ts`.

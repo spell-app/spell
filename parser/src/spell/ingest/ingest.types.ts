@@ -526,6 +526,11 @@ export type FieldDescription = {
    */
   isFreeForm?: boolean
   /**
+   * Its schema names some of its fields, `inside`, and lets it hold others too (`additionalProperties: true`):
+   * its type is an object type, `an "asset meta" is an object`, which keeps every key it's given, its known ones typed.
+   */
+  keepsEveryKey?: boolean
+  /**
    * The unit its answer says it's in (epic `data` P33):  Open-Meteo's `"hourly_units": { "temperature_2m": "°C" }`.
    * - One of Spell's units (`°C`, `mm`, `km/h`), it's written as that measure:
    *   `its "temperature" is a temperature in °C`.

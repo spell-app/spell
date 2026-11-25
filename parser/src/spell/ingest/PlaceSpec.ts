@@ -672,6 +672,8 @@ export class PlaceSpec {
       words,
       type: "inside",
       ...said,
+      // named fields, and any others it likes:  an object type, keeping them all
+      ...(allowsOthers(this.resolved(inside)) && { keepsEveryKey: true }),
       inside: this.fieldsOf(inside, ref ?? `${at}/items`, depth + 1, next),
       ...(ref && LOCAL_REF.test(ref) && { insideSchemaAt: ref }),
       ...(isList && { isListInside: true })
@@ -696,12 +698,7 @@ export class PlaceSpec {
       })
     }
     if (Array.isArray(schema.type) || (schema.type !== undefined && schema.type !== "object")) return false
-    const more = schema.additionalProperties
-    return (
-      more === undefined ||
-      more === true ||
-      (!!more && typeof more === "object" && !Object.keys(more).length)
-    )
+    return schema.additionalProperties === undefined || allowsOthers(schema)
   }
 
   /** The properties of `schema`, its `allOf`s' merged. */
@@ -852,6 +849,12 @@ function plainSchema(schema: Schema): Schema {
     ...(hasConst && { enum: [schema.const] }),
     ...(hasExamples && { example: (schema.examples as unknown[])[0] })
   }
+}
+
+/** Does `schema` let an object hold fields it doesn't name, any value each:  `additionalProperties` `true` or `{}`? */
+function allowsOthers(schema: Schema | undefined): boolean {
+  const more = schema?.additionalProperties
+  return more === true || (!!more && typeof more === "object" && !Object.keys(more).length)
 }
 
 /** Is `schema` the one that says "nothing":  `{ type: "null" }`, `{ const: null }`, `{ enum: [null] }`? */

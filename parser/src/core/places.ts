@@ -102,7 +102,7 @@ import { BrowserCopy } from "spell/places/SaveQueue"
 
 import type { CoreMessageKey } from "./core.types"
 import { core, onPlaceWrite, whileReading, type PlaceWriteListener } from "./core"
-import { valueAsDeclared, valueAsWritten, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
+import { keepsKeyAsItCame, valueAsDeclared, valueAsWritten, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
 import { fieldsOf, hasSetter, isPlainObject, setField } from "./state"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -1242,7 +1242,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
    *   e.g. a JSON Schema's `{ "$ref": "#/definitions/Settings" }` (`isDeclared()`).
    */
   protected setRead(made: SpellObject, key: string, json: unknown): void {
-    if (isDeclared(made, key)) super.setRead(made, key, json)
+    if (isDeclared(made, key) || keepsKeyAsItCame(made, key)) super.setRead(made, key, json)
     else setProp(made, key, structuredClone(json))
   }
 

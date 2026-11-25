@@ -628,6 +628,7 @@ function typesInside(
       const held = types.get(words)
       if (held) {
         held.heldBy!.push({ owner, field })
+        if (field.keepsEveryKey) held.header = insideHeaderFor(words, true)
         continue
       }
       const lines = Object.entries(inside).flatMap(([name, about]) => {
@@ -641,13 +642,21 @@ function typesInside(
         const line = fieldLineFor(name, about, what)
         return [{ key: `inside:${words}:${about.words}`, text: line, note: noteFor(about, collections) }]
       })
-      const header = `${articled(words).replace(words, `"${words}"`)} is a thing`
+      const header = insideHeaderFor(words, !!field.keepsEveryKey)
       types.set(words, { collection, header, lines, isInside: true, insideFields: inside, heldBy: [{ owner, field }] })
       add(collection, words, inside)
     }
   }
   for (const [collection, { fields, type }] of shown) add(collection, type, fields)
   return [...types.values()]
+}
+
+/**
+ * A type inside a row's first line:  `a "thumbnail" is a thing`;  an object type, keeping every key it's given (its
+ * schema names some and lets it hold others), `an "asset meta" is an object`.
+ */
+function insideHeaderFor(words: string, keepsEveryKey: boolean): string {
+  return `${articled(words).replace(words, `"${words}"`)} is ${keepsEveryKey ? "an object" : "a thing"}`
 }
 
 /**

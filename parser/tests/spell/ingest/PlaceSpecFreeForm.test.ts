@@ -2,6 +2,8 @@
  * A field whose schema doesn't fix its shape, read from a made-up lab service's description:  its jobs' `meta`.
  * - Free-form (`additionalProperties: true`, `{}`, nothing said, or one of several objects):  `its "meta" is an object`,
  *   held whole, whatever keys its rows hold;  never a thing of the keys some rows show, which would drop the others.
+ * - Some fields named, and any others allowed (`additionalProperties: true`):  an object type, `a "provenance" is an
+ *   object` with its named fields, which keeps the rest.
  * - A map whose values its schema types, or one of several plain kinds:  left out, as before.
  * - A list no schema typed:  a field any row read holds is kept, though other rows don't hold it, inside a field too;
  *   one every row read held empty is text.
@@ -54,12 +56,19 @@ const DOCUMENT: OpenApiDocument = {
               { type: "null" }
             ]
           },
+          // its known fields, and any others:  an object type
+          provenance: { $ref: "#/components/schemas/Provenance" },
           // a map its schema types, each key its own:  left out
           labels: { type: "object", additionalProperties: { type: "string" } },
           // one of several plain kinds:  left out
           score: { anyOf: [{ type: "integer" }, { type: "string" }] }
         },
         required: ["id", "name"]
+      },
+      Provenance: {
+        type: "object",
+        properties: { source: { type: "string" }, checked_at: { type: "string", format: "date-time" } },
+        additionalProperties: true
       },
       ShelfPlacement: { type: "object", properties: { kind: { type: "string" }, shelf: { type: "string" } } },
       RackPlacement: { type: "object", properties: { kind: { type: "string" }, rack: { type: "string" } } }
@@ -69,13 +78,21 @@ const DOCUMENT: OpenApiDocument = {
 
 /** The lab's jobs:  each `meta` its own keys, one with a key the others lack, and more inside. */
 const JOBS = [
-  { id: "j1", name: "warm up", meta: { owner: "ada", runs: [1, 2] }, settings: { gain: 2 }, placement: null },
+  {
+    id: "j1",
+    name: "warm up",
+    meta: { owner: "ada", runs: [1, 2] },
+    settings: { gain: 2 },
+    placement: null,
+    provenance: { source: "scan", checked_at: "2026-11-20T10:00:00Z" }
+  },
   {
     id: "j2",
     name: "cool down",
     meta: { owner: "bo", extra_key: true, deep: { a: { b: 1 } } },
     settings: {},
-    placement: { kind: "shelf", shelf: "s1" }
+    placement: { kind: "shelf", shelf: "s1" },
+    provenance: { source: "hand", by: "bo" }
   }
 ]
 
@@ -196,6 +213,22 @@ describe("a free-form field", () => {
   test("Spanish:  the same place, and the file parses clean", async () => {
     const { spell } = await ingestOf("Lab.api.es.spell")
     expect(errorsOf(spell(), "/Lab.api.es.spell")).toEqual([])
+  })
+})
+
+describe("a field with known fields, that allows others", () => {
+  test("is an object type:  its known fields typed, the rest kept;  verify matches rows with keys of their own", async () => {
+    const { ingest, spell, description } = await ingestOf()
+    expect(description().collections.jobs!.fields.provenance).toMatchObject({ type: "inside", keepsEveryKey: true })
+    expect(spell()).toMatch(/^\tits "provenance" is a provenance$/m)
+    expect(spell()).toMatch(/^a "provenance" is an object\n\tits "source" is text\n\tits "checked at" is a date$/m)
+    // one that names its fields and allows no others stays a thing
+    expect(spell()).not.toMatch(/"(shelf placement|rack placement)" is an object/)
+    expect(errorsOf(spell())).toEqual([])
+    await ingest.verify("Lab.api.spell")
+    expect(description().collections.jobs!.state).toMatchObject({ is: "verified", rows: 2 })
+    expect(spell()).toMatch(/^a "provenance" is an object$/m)
+    expect(errorsOf(spell())).toEqual([])
   })
 })
 

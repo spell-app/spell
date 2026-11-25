@@ -306,9 +306,17 @@ a "recipe" is a thing
                   <code>state</code>.
                 </li>
                 <li>
-                  A field whose schema doesn't fix its shape (any keys it likes, an API's <code>meta</code>) is
-                  <code>its "meta" is an object</code>: held whole, every key a row sends, read as
-                  <code>the owner of its meta</code>.
+                  An object holds whatever keys it's given; an object type names the ones you know, and keeps the rest.
+                  <ul>
+                    <li>
+                      A field whose schema doesn't fix its shape (any keys it likes, a <code>meta</code>) is
+                      <code>its "meta" is an object</code>: held whole, read as <code>the owner of its meta</code>.
+                    </li>
+                    <li>
+                      One whose schema names some fields and allows others is an object type:
+                      <code>a "provenance" is an object</code>, its named fields under it, typed.
+                    </li>
+                  </ul>
                 </li>
                 <li>
                   A list its description doesn't type gets its fields from what verify reads: a field any row holds is

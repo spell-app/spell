@@ -133,15 +133,20 @@ export class CreateType extends TypeDeclaration<
     const { uiElement } = match.data
     const typeAST = P.matchAST<P.ASTTypeExpression>(type)
     const element = this.elementMember(match, typeAST, match.data.elementProject, match.data.elementName)
+    const isObjectType = CreateType.isObjectType(superType)
     const members = [
       ...(uiElement ? [CreateType.uiElementMember(match, typeAST, uiElement)] : []),
+      ...(isObjectType ? [CreateType.keepsEveryKeyMember(match, typeAST)] : []),
       ...(element ? [element] : []),
       ...CreateType.defaultGetters(match, typeAST)
     ]
     // a Spell UI element's view is a view, naming its element:  `extends View`, `static uiElement = "ui-tree"`
+    // an object type is a thing that keeps every key it's given:  `extends Thing`, `static keepsEveryKey = true`
     const superTypeAST = uiElement
       ? new P.ASTTypeExpression(superType, { raw: `${superType.raw}`, name: P.BUILT_IN_CLASS_NAMES.view! })
-      : P.matchAST<P.ASTTypeExpression>(superType)
+      : isObjectType
+        ? new P.ASTTypeExpression(superType, { raw: `${superType.raw}`, name: P.BUILT_IN_CLASS_NAMES.thing! })
+        : P.matchAST<P.ASTTypeExpression>(superType)
     return new P.ASTStatementGroup(match, {
       statements: [
         new P.ASTClassDeclaration(match, {
@@ -151,6 +156,21 @@ export class CreateType extends TypeDeclaration<
         })
       ]
     })
+  }
+
+  /**
+   * Is `superType` spell's `object`:  `an "asset meta" is an object`, an object type (epic `data`)?
+   * - Its known fields are declared on it, typed;  any other key it's given is kept as it came, and read off it with no
+   *   warning (`MemberReadExpression.knowsAllMembersOf()`).
+   * - JavaScript's own `Object` has no `declareProp()`:  it's built on `Thing` instead (`Thing.keepsEveryKey`).
+   */
+  static isObjectType(superType: P.Match): boolean {
+    return P.classCase(`${superType.value}`) === OBJECT_CLASS
+  }
+
+  /** `static keepsEveryKey = true`:  an object type's things keep every key they're given -- see `Thing.keepsEveryKey`. */
+  private static keepsEveryKeyMember(match: P.Match, type: P.ASTTypeExpression): P.ASTClassMember {
+    return new P.ASTStaticDefinition(match, { type, name: "keepsEveryKey", value: new P.ASTBooleanLiteral(match, true) })
   }
 
   /**
@@ -205,3 +225,6 @@ const APP_TYPE = "app"
 
 /** The word an app's element is named by, after its project's:  `<solitaire-app>`. */
 const APP_ELEMENT_NAME = "App"
+
+/** Spell's `object`, as compiled code names it. */
+const OBJECT_CLASS = "Object"
