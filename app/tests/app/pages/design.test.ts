@@ -76,10 +76,10 @@ describe.skipIf(!SERVING)("Design mode", { timeout: 180_000 }, () => {
   async function undo(): Promise<void> {
     // off the code, which takes ⌘Z for its own typing:  a closed menu hands the focus back to it
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
-    // a menu left open keeps the keys:  a click on Design's own heading closes it
+    // a menu left open keeps the keys:  a click on Design's own heading closes it, and leaves the mouse there,
+    // off the menus (never on the add bar down the left edge, whose groups open as the mouse rests:  T162)
     const heading = page.locator(".DesignSizesHeading")
     if (await heading.count()) await heading.click()
-    await page.mouse.move(5, 400)
     await page.keyboard.press("ControlOrMeta+z")
     await page.waitForTimeout(SETTLE_MS)
   }

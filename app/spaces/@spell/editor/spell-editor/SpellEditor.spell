@@ -145,6 +145,9 @@ spell editor is an app
 		selected when its anatomy showing is yes
 	to "show add panel" with title "Add a View…", icon "plus"
 		shortcut alt+meta+V
+	to "preview" with icon "expand"
+		// The app alone, full screen, with nothing of the editor round it:  the same key comes back
+		shortcut alt+meta+Enter
 	to "show line numbers" with title "Line Numbers", icon "list ol"
 		selected when its line numbers showing is yes
 	to "soft wrap" with title "Soft Wrap", icon "level down alternate"
@@ -456,13 +459,14 @@ spell editor is an app
 			</menu>
 
 	a "view menu" is a bar menu
-		// View:  Run or Edit, then Add a View…, which opens the add panel, then what shows, each ticked while it does
+		// View:  Run or Edit, then Preview, the app alone, then Add a View…, which opens the add panel, then what shows, each ticked while it does
 		its title is "View"
 		to draw it
 			<menu direction="vertical" size="small" class="BarMenuItems" icon-column ticks>
 				<action "run mode"/>
 				<action "edit mode"/>
 				<action "site view"/>
+				<action "preview"/>
 				<divider/>
 				<action "show add panel"/>
 				<divider/>

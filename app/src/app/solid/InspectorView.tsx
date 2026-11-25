@@ -1092,6 +1092,17 @@ function TypeField(props: { thing: object; member: ThingMember }): JSX.Element {
 
 /** A type's field's values as pills, `ace`, `2 ... 10`, `jack`:  to add, take away or type, written into its `one-of`. */
 function TypeChoicesField(props: { thing: object; member: ThingMember; values: string[] }): JSX.Element {
+  /** its dropdown, set by its ref */
+  let dropdown: (HTMLElement & { value?: unknown }) | undefined
+  // a list, as the property:  the attribute splits at spaces too, and `2 ... 10` is one value;
+  // made here, not in the ref:  a ref callback has no owner, so its effect would never be disposed (I338)
+  createEffect(
+    () => props.values,
+    (values) =>
+      queueMicrotask(() => {
+        if (dropdown) dropdown.value = [...values]
+      })
+  )
   return (
     <ui-property name={props.member.name} label={memberLabel(props.member)} class="InspectorTypeChoices">
       <ui-dropdown
@@ -1099,12 +1110,8 @@ function TypeChoicesField(props: { thing: object; member: ThingMember; values: s
         search=""
         allow-additions=""
         size="small"
-        ref={(dropdown: HTMLElement & { value?: unknown }) => {
-          // a list, as the property:  the attribute splits at spaces too, and `2 ... 10` is one value
-          createEffect(
-            () => props.values,
-            (values) => queueMicrotask(() => (dropdown.value = [...values]))
-          )
+        ref={(element: HTMLElement & { value?: unknown }) => {
+          dropdown = element
           on<{ value: unknown }>("ui-changed", (event) => {
             // its own write:  never the field's, which would set the running thing's value
             event.stopPropagation()
