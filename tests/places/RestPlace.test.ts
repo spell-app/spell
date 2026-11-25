@@ -1247,3 +1247,87 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
     ])
   })
 })
+
+describe("a list's own filters and sorts, under its line", () => {
+  afterEach(() => void vi.unstubAllGlobals())
+
+  /** A place whose `jobs` filter by status and sort as their server names it, and whose `notes` take nothing:  every address it asks. */
+  function asking() {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const place = new RestPlace({
+      url: "https://jobs.test",
+      collections: {
+        jobs: {
+          path: "/api/jobs{/id}",
+          asks: {
+            filter: ["status", "sessionId"],
+            sort: ["createdAt"],
+            sortedWith: "order_by",
+            sortOrders: [{ field: "createdAt", descending: true, as: "recency" }]
+          }
+        },
+        notes: { path: "/api/notes{/id}" }
+      },
+      namesLike: "snake"
+    })
+    return { place, asked }
+  }
+
+  test("each field the list filters by goes;  the rest is left, and the list says it didn't filter it all", async () => {
+    const { place, asked } = asking()
+    const whole = await place.list("jobs", { filter: { status: "open", sessionId: "s-1" } }, {})
+    expect(whole.handled.filter).toBe(true)
+    const part = await place.list("jobs", { filter: { status: "open", owner: "ana" } }, {})
+    expect(part.handled.filter).toBeUndefined()
+    await place.list("notes", { filter: { status: "open" } }, {})
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?status=open&session_id=s-1",
+      "https://jobs.test/api/jobs?status=open",
+      "https://jobs.test/api/notes"
+    ])
+  })
+
+  test("a sort it has a name for goes as that name, with the list's own question;  the other way round, by the field", async () => {
+    const { place, asked } = asking()
+    await place.list("jobs", { sort: [{ field: "createdAt", descending: true }] }, {})
+    await place.list("jobs", { sort: [{ field: "createdAt" }] }, {})
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?order_by=recency",
+      "https://jobs.test/api/jobs?order_by=created_at"
+    ])
+  })
+
+  test("what it would do is known before it's asked:  `takes()`", () => {
+    const { place } = asking()
+    expect(
+      place.takes("jobs", { filter: { status: "open" }, sort: [{ field: "createdAt", descending: true }] })
+    ).toEqual({ filter: true, sort: true })
+    expect(place.takes("jobs", { filter: { owner: "ana" } })).toEqual({})
+    expect(place.takes("notes", { filter: { status: "open" } })).toEqual({})
+  })
+
+  test("the engine sends the part a list takes, and checks the rest here, over what came back", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([
+        { id: "j-1", status: "open", owner: "ana" },
+        { id: "j-2", status: "open", owner: "bo" }
+      ])
+    })
+    const place = new RestPlace({ url: "https://jobs.test", collections: { jobs: { asks: { filter: ["status"] } } } })
+    const query = new PlaceQuery({
+      placeName: "jobs",
+      place,
+      collection: "jobs",
+      query: { filter: { status: "open", owner: "ana" } }
+    })
+    const answer = await query.answer(new AbortController().signal)
+    expect(answer.rows.map((row) => row.id)).toEqual(["j-1"])
+    expect(asked).toEqual(["https://jobs.test/jobs?status=open"])
+  })
+})

@@ -133,6 +133,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Nada puede hacerse de sí mismo:  "{name}" ya es una clase de cosa, así que llama a esta de otra forma',
   "where-looks-through":
     "Esto no se puede enviar al lugar, que solo busca valores exactos:  lee cada {type} y las revisa aquí, hasta un límite",
+  "where-stays-here":
+    'Al servidor no se le puede preguntar {clauses}, así que esto lee cada {type} y lo revisa aquí, lo que puede ser lento.  Pregúntale al servidor con "su {field} es ...", o termina la línea con ", filtrando aquí" si revisarlo aquí es lo que quieres',
+  "where-stays-here-no-filter":
+    'Al servidor no se le puede preguntar {clauses}, así que esto lee cada {type} y lo revisa aquí, lo que puede ser lento.  Para parar cuando haya suficientes, di cuántos quieres, como "los primeros 20 ... donde ...", o termina la línea con ", filtrando aquí" si revisarlo aquí es lo que quieres',
   "sort-key-waits":
     "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
   "rider-needs-a-line-above": "Esto va debajo de la línea a la que se refiere, como una lectura de un lugar",

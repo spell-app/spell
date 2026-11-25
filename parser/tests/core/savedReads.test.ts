@@ -375,3 +375,58 @@ describe("waitAfter():  a read that was only too soon (epic `data` I92)", () => 
     expect(waitAfter("Lost the signal", NOW)).toBeUndefined()
   })
 })
+
+describe("the first few that pass a `where` checked here", () => {
+  /** A place that answers two rows a page, asked or not, as a web server gives its own page size. */
+  class TwoAPage extends CountingPlace {
+    list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      return super.list(collection, { ...query, page: { at: query.page?.at ?? "0", size: 2 } }, context)
+    }
+  }
+
+  /** Six recipes, two of every three starting with "S". */
+  async function six() {
+    const place = new TwoAPage({ capabilities: WITH_IDS })
+    const titles = ["Soup", "Stew", "Curry", "Salad", "Sushi", "Tacos"]
+    await place.apply(
+      titles.map((title, at) => ({
+        kind: "insert" as const,
+        collection: "recipes",
+        id: `r${at}`,
+        fields: { id: `r${at}`, title }
+      }))
+    )
+    place.requests = []
+    return place
+  }
+
+  /** Is a recipe's title one starting with "S"? */
+  const startsWithS = (recipe: unknown) => `${(recipe as { title: string }).title}`.startsWith("S")
+
+  test("reads page by page, and stops as soon as there are enough", async () => {
+    const place = await six()
+    const { Recipe } = program(place)
+    const found = await core.savedThings(Recipe, {}, "looks through", { first: 3, where: startsWithS })
+    expect(found.items.map((recipe) => (recipe as InstanceType<typeof Recipe>).title)).toEqual([
+      "Soup",
+      "Stew",
+      "Salad"
+    ])
+    expect(place.requests).toHaveLength(2)
+  })
+
+  test("fewer than that there:  every page, and what passed", async () => {
+    const place = await six()
+    const { Recipe } = program(place)
+    const found = await core.savedThings(Recipe, {}, "looks through", { first: 9, where: startsWithS })
+    expect(found.items).toHaveLength(4)
+    expect(place.requests).toHaveLength(3)
+  })
+
+  test("a search for no text is no search", async () => {
+    const place = await six()
+    const { Recipe } = program(place)
+    await core.savedThings(Recipe, { search: { title: " " } })
+    expect(place.requests[0]![0]!.query).toEqual({ page: { at: "0", size: 2 } })
+  })
+})

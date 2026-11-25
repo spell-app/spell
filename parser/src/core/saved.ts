@@ -64,7 +64,13 @@ import type * as PlacesFolder from "spell/places"
 import type { Places } from "spell/places/Places"
 import type { PlaceResult } from "spell/places/PlaceResult"
 import { personOnThisPage } from "spell/places/people"
-import type { ListQuery, PersonHere, Place as PlaceBehind, PlaceRow } from "spell/places/places.types"
+import {
+  ANY_FIELD,
+  type ListQuery,
+  type PersonHere,
+  type Place as PlaceBehind,
+  type PlaceRow
+} from "spell/places/places.types"
 import type { PlaceRowsChange } from "spell/places/PendingChanges"
 
 import { compareSortKeys } from "./collection-other"
@@ -1065,6 +1071,27 @@ function savedInOf(Class: SavedClass): SavedIn {
   return savedIn
 }
 
+/** What `core.savedThings()` reads until:  the first `first` things that pass `where`. */
+export type ReadUntil<T> = {
+  /** How many it wants. */
+  first: number
+  /** The test each must pass:  a `where`'s. */
+  where: (thing: T, position: number, list: List) => unknown
+}
+
+/**
+ * `query`, without a search for no text:  every row holds no text (`ListQuery.search`).
+ * - Not a search of all of each thing (`ANY_FIELD`), which finds nothing then (`PlaceQuery.answer()`).
+ */
+function withoutEmptySearch(query: ListQuery): ListQuery {
+  const { search } = query
+  if (!search) return query
+  const kept = Object.entries(search).filter(([field, text]) => field === ANY_FIELD || `${text ?? ""}`.trim() !== "")
+  if (kept.length === Object.keys(search).length) return query
+  const { search: _search, ...rest } = query
+  return kept.length ? { ...rest, search: Object.fromEntries(kept) } : rest
+}
+
 /****************
  * ### `SavedRead`
  * One type and query read from its place, for however many computations read it.
@@ -1260,6 +1287,27 @@ class SavedRead {
     if (!this.answered && !this.query.sort?.length) this.readsPagesWhenDrawn = true
     await (this.answered ??= this.start())
     return this.list
+  }
+
+  /**
+   * The first `until.first` of its things that pass `until.where`, as a list of their own, once it has them:
+   * it reads page by page, checking each, and stops as soon as it has that many, or has no more pages.
+   * - In order first:  a sort it has to do here reads every page anyway (`firstPage()`).
+   * - throws what the read threw
+   */
+  async firstPassing({ first, where }: ReadUntil<unknown>): Promise<List> {
+    await this.firstPage()
+    const passing = () => (this.list.items as Thing[]).filter((thing, at) => where(thing, at, this.list))
+    for (let found = passing(); found.length < first && this.nextPage !== undefined; found = passing()) {
+      await (this.readingPage ??= this.readPage().finally(() => {
+        this.readingPage = undefined
+      }))
+    }
+    const list = core.newScratch(List) as List
+    whileReading(() => {
+      list.items = passing().slice(0, first)
+    })
+    return list
   }
 
   /** Every page it hasn't read yet. */
@@ -1485,17 +1533,26 @@ export const savedMethods = defineCoreModule({
    * - `query`:  what's handed to the place, which does what it says it can;  the engine the rest, up to its ceiling.
    * - `how`:  `"looks through"`, when a `where` goes through all of it here:  so it stops at the place's ceiling.
    *   `"as drawn"`, when all that's done with it is draw it:  so its later pages wait until they're near the view.
+   * - `until`:  only the first that pass its `where`, read page by page until there are that many, or no more pages:
+   *   `the first 8 jobs where it is long`, a `where` checked here (`EveryThing.savedAST()`).  A list of those alone.
+   * - A search for no text is no search:  `its name includes the search` with the box empty is every one.
+   *   Not a search of all of each thing (`ANY_FIELD`), which finds nothing then (`PlaceQuery`).
    * - throws what the read threw:  a `PlaceError`, for a read a place refused or couldn't answer
    */
   async savedThings<Class extends new () => unknown>(
     Class: Class,
     query: ListQuery = {},
-    how?: "looks through" | "as drawn"
+    how?: "looks through" | "as drawn",
+    until?: ReadUntil<InstanceType<Class>>
   ): Promise<List<InstanceType<Class>>> {
     const program = programPlaces()
-    const read = program.readOf(Class as unknown as SavedClass, query)
+    const read = program.readOf(Class as unknown as SavedClass, withoutEmptySearch(query))
     read.changes.read()
-    const answering = how === "as drawn" ? read.firstPage() : read.answer()
+    const answering = until
+      ? read.firstPassing(until as ReadUntil<unknown>)
+      : how === "as drawn"
+        ? read.firstPage()
+        : read.answer()
     read.hold(answering)
     const list = await answering
     if (how === "looks through") read.checkCeiling()

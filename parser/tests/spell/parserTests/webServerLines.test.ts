@@ -405,12 +405,15 @@ describe("a server that searches (epic `data` P26, T70)", () => {
     expect(warnings.join("\n")).not.toContain("looks through them here")
   })
 
-  test("a where on a field it doesn't search stays here, and says so", () => {
-    const lines = [...SEARCHING.slice(0, -1), `\treturn every move where its power is more than 3`]
-    const { compiled, warnings } = parseSpellProject([{ path: "/T.spell", contents: `${lines.join("\n")}\n` }])
+  test("a where on a field it doesn't search stays here, and says so, naming what stays", () => {
+    const lines = [...SEARCHING.slice(0, -1), `\treturn every move where its power is greater than 3`]
+    const { compiled, errors, warnings } = parseSpellProject([{ path: "/T.spell", contents: `${lines.join("\n")}\n` }])
       .files[0]!
+    expect(errors).toEqual([])
     expect(compiled).not.toContain("search: {")
-    expect(warnings.join("\n")).toContain("looks through them here")
+    expect(warnings.join("\n")).toContain(
+      `The server can't be asked "its power is greater than 3", so this reads every move and checks them here`
+    )
   })
 
   test("in Spanish too", () => {

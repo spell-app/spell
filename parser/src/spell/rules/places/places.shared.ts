@@ -182,6 +182,16 @@ export function searchesOf(saved: P.SavedPlace | undefined): { param: string; fi
 }
 
 /**
+ * The fields what's saved in `saved` is filtered by at its place:  `it filters by job-id`.
+ * - Its list's own line first, one step in under its `live at` line;  else its place's.
+ * - `undefined` when no line under its place says so.
+ */
+export function filtersOf(saved: P.SavedPlace | undefined): "every field" | string[] | undefined {
+  const details = placeLinesOf(saved)
+  return details?.collections?.[saved!.collection]?.filters ?? details?.filters
+}
+
+/**
  * Is what's saved in `saved` found only by name, with no list of them all?
  * - e.g. `wiki pages are found at "/page/summary/{name}"` (epic `data` P27)
  */

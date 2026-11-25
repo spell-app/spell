@@ -859,6 +859,13 @@ export type Place = {
    * - throws `PlaceError` for lines it can't honour
    */
   withLines?(lines: PlaceLines): Place
+  /**
+   * Which parts of `query` it would do itself, for `collection`:  for a place whose lists don't all take the same
+   * (a web server's list saying `it filters by job-id` under its own line).
+   * - What `list()` would say it `handled`, asked before it's asked, so `PlaceQuery` knows what's left to it.
+   * - Left out:  `describe()` says, for every list.
+   */
+  takes?(collection: string, query: ListQuery): ListHandled
   /** The rows of `collection` that `query` asks for. */
   list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer>
   /**

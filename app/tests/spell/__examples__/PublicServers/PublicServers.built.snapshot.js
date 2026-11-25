@@ -1409,7 +1409,12 @@ export class GithubPage extends Thing {
         items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "issues" })
       }),
       h("ui-header", { size: "medium" }, "Solid's pull requests"),
-      () => core.drawRead(async () => core.firstFew(core.filter(await core.savedThings(Issue, {}, "looks through"), (issue) => issue.pullRequest !== undefined), 6), (issue) => core.drawThing(issue), {
+      () => core.drawRead(async () => await core.savedThings(
+        Issue,
+        {},
+        "looks through",
+        { first: 6, where: (issue) => issue.pullRequest !== undefined }
+      ), (issue) => core.drawThing(issue), {
         waitingSay: () => "Asking GitHub",
         none: () => h("ui-text", { part: "issues" }, "No open pull requests."),
         items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "issues" })

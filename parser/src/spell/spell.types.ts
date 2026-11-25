@@ -7,6 +7,7 @@
  */
 
 import type { PropRule } from "spell/util"
+import type { SavedAsks } from "spell/places/SavedAnswers"
 import type { P } from "spell/parser/parser"
 import type { PlaceDeployment } from "spell/parser/core/runtime"
 import type { SpellLocation } from "./SpellLocation"
@@ -825,6 +826,8 @@ export type ServedPlace = {
    * - So a read only one refuses each, a `GET` too, as a `GET` may change things (a load).
    */
   writes?: string[]
+  /** What its lines call its search and sort questions, and the orders it names:  how its saved answers answer them. */
+  asks?: SavedAsks
 }
 
 /** Where a type is saved, as a project's declarations say it -- see `SpellDeclaration.savedIn`. */

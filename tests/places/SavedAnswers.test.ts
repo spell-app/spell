@@ -76,3 +76,31 @@ describe("saved answers", () => {
     expect(Object.keys(scrubbed as object)).toEqual([...Object.keys(scrubbed as object)].sort())
   })
 })
+
+describe("saved answers, searched and sorted as the page does it", () => {
+  const ROWS = JSON.stringify([
+    { id: 1, name: "zebra crossing", created_at: "2026-01-03" },
+    { id: 2, name: "Apple pie", created_at: "2026-01-01" },
+    { id: 3, name: "apple tart", created_at: "2026-01-02" }
+  ])
+  const ids = (text: string) => (JSON.parse(text) as { id: number }[]).map(({ id }) => id)
+
+  test("a search's text, in any field, capitals aside;  sorted capitals aside too, `apple` before `Zebra`", () => {
+    expect(ids(answerFromSaved(ROWS, new URLSearchParams("search=APPLE")))).toEqual([2, 3])
+    expect(ids(answerFromSaved(ROWS, new URLSearchParams("q=zebra")))).toEqual([1])
+    expect(ids(answerFromSaved(ROWS, new URLSearchParams("sort=name")))).toEqual([2, 3, 1])
+    expect(ids(answerFromSaved(ROWS, new URLSearchParams("sort=-name")))).toEqual([1, 3, 2])
+  })
+
+  test("by the place's own question names, and an order's own name", () => {
+    const asks = {
+      search: ["text"],
+      sort: ["sort", "order_by"],
+      orders: [{ as: "recency", field: "createdAt", descending: true }]
+    }
+    expect(ids(answerFromSaved(ROWS, new URLSearchParams("text=tart"), asks))).toEqual([3])
+    expect(ids(answerFromSaved(ROWS, new URLSearchParams("order_by=recency&limit=2&offset=0"), asks))).toEqual([1, 3])
+    // not its search's name:  a question no row has a field for, so only how it was asked
+    expect(answerFromSaved(ROWS, new URLSearchParams("search=tart"), asks)).toBe(ROWS)
+  })
+})

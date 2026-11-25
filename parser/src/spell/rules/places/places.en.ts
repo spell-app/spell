@@ -66,6 +66,7 @@ import { NextPageByNumber } from "./NextPageByNumber"
 import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
 import { SortsBy } from "./SortsBy"
+import { SortsAs } from "./SortsAs"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
 import { IsReadOnly } from "./IsReadOnly"
 import { WritesLike } from "./WritesLike"
@@ -917,6 +918,38 @@ places.addRule(SortsBy, {
             '  at: "https://cookbook.test",',
             '  sorts: ["title", "date"],',
             '  sortedWith: "order"',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(SortsAs, {
+  syntax:
+    "{type:subject_it} sorts ((descending:(newest|latest|highest|last) first)|(ascending:(oldest|earliest|lowest) first)) by {field:identifier} as {name:text} (,? with {param:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- it sorts newest first by created-at as "recency", with "order_by"\n\t- it sorts oldest first by created-at as "created_at"',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            '  sortedWith: "order_by",',
+            "  sortOrders: [{",
+            '    field: "createdAt",',
+            "    descending: true,",
+            '    as: "recency"',
+            "  }, {",
+            '    field: "createdAt",',
+            "    descending: false,",
+            '    as: "created_at"',
+            "  }]",
             "})"
           ]
         ]
@@ -1983,6 +2016,7 @@ places.addRule(EveryThingMatching, {
 places.addRule(FirstFewWhere, {
   syntax: "the first {number} {type:plural_type} (where:where|which|that|who) {inline_expression}?"
 })
+places.addRule(FirstFewWhere, { syntax: "the first {number} {type:plural_type}" })
 places.addRule(NumberOfThingsWhere, {
   syntax: "the number of {type:plural_type} (where:where|which|that|who) {inline_expression}?"
 })

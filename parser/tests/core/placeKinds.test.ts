@@ -101,6 +101,41 @@ describe("placeBehind(), a web server's collection paging its own way (epic `dat
   })
 })
 
+describe("placeBehind(), a web server's list saying what it takes, under its own line", () => {
+  afterEach(() => void vi.unstubAllGlobals())
+
+  test("its own filters and sorts win for it;  the place's lines for the rest", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const behind = webServerWith({
+      filters: ["title"],
+      sortOrders: [{ field: "title", descending: false, as: "by_title" }],
+      collections: {
+        recipes: { at: "/recipes" },
+        events: {
+          at: "/events",
+          filters: ["kind"],
+          sortedWith: "order_by",
+          sortOrders: [{ field: "created", descending: true, as: "recency" }]
+        }
+      }
+    })
+    await behind.list("recipes", { filter: { title: "Soup" }, sort: [{ field: "title" }] }, {})
+    await behind.list(
+      "events",
+      { filter: { kind: "x", title: "Soup" }, sort: [{ field: "created", descending: true }] },
+      {}
+    )
+    expect(asked).toEqual([
+      "https://cookbook.test/recipes?title=Soup&sort=by_title",
+      "https://cookbook.test/events?kind=x&order_by=recency"
+    ])
+  })
+})
+
 describe("placeBehind(), a data folder", () => {
   test("a project data folder's address is the page server's, and says what its server does", () => {
     const behind = folderAt("/api/places/spaces/owen@spell/recipes")

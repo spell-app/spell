@@ -5159,6 +5159,20 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ListCheckedHere",
+          "ruleNames": ["list_checked_here"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListCheckedHere.ts",
+          "line": 26,
+          "purpose": "A read of a place whose `where` is checked here, in the page, all of it: nothing of it is asked of the place.",
+          "syntaxes": [
+            {
+              "syntax": ",? checked here"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "EachItemWhere",
           "ruleNames": ["each_item_where"],
           "internal": false,
@@ -6432,7 +6446,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -6458,7 +6472,7 @@
           "ruleNames": ["every_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThingWhere.ts",
-          "line": 27,
+          "line": 48,
           "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
           "syntaxes": [
             {
@@ -6487,7 +6501,7 @@
           "ruleNames": ["first_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/FirstThingWhere.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "The first thing of a type that fits, or nothing: `every_thing_where`'s first.",
           "syntaxes": [
             {
@@ -8985,7 +8999,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 129,
+          "line": 143,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9140,11 +9154,14 @@
           "ruleNames": ["first_few_where"],
           "internal": false,
           "file": "src/spell/rules/places/FirstFewWhere.ts",
-          "line": 14,
+          "line": 17,
           "purpose": "A few of a type, by its plural (epic `data` P11).",
           "syntaxes": [
             {
               "syntax": "the first {number} {type:plural_type} (where:where|which|that|who) {inline_expression}?"
+            },
+            {
+              "syntax": "the first {number} {type:plural_type}"
             }
           ],
           "aliases": ["expression"]
@@ -9871,6 +9888,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SortsAs",
+          "ruleNames": ["sorts_as"],
+          "internal": false,
+          "file": "src/spell/rules/places/SortsAs.ts",
+          "line": 14,
+          "purpose": "An order a web server has a name of its own for, sent as its sort.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} sorts ((descending:(newest|latest|highest|last) first)|(ascending:(oldest|earliest|lowest) first)) by {field:identifier} as {name:text} (,? with {param:text})?",
+              "example": "cookbook is a web server at \"https://cookbook.test\"\n\t- it sorts newest first by created-at as \"recency\", with \"order_by\"\n\t- it sorts oldest first by created-at as \"created_at\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  sortedWith: \"order_by\",\n  sortOrders: [{\n    field: \"createdAt\",\n    descending: true,\n    as: \"recency\"\n  }, {\n    field: \"createdAt\",\n    descending: false,\n    as: \"created_at\"\n  }]\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  sortedWith: \"order_by\",\n  sortOrders: [{\n    field: \"createdAt\",\n    descending: true,\n    as: \"recency\"\n  }, {\n    field: \"createdAt\",\n    descending: false,\n    as: \"created_at\"\n  }]\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://cookbook.test\",\n        \"sorted_with\": \"order_by\",\n        \"sort_orders\": [\n            {\"field\": \"createdAt\", \"descending\": True, \"as_\": \"recency\"},\n            {\"field\": \"createdAt\", \"descending\": False, \"as_\": \"created_at\"},\n        ],\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "GivesFieldsNamedIn",
           "ruleNames": ["gives_fields_named_in"],
           "internal": false,
@@ -10461,7 +10504,7 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 30,
+          "line": 42,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {

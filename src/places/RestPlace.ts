@@ -7,6 +7,7 @@ import {
   MovedVersions,
   PlaceError,
   type ApplyAnswer,
+  type FieldAbility,
   type ListAnswer,
   type ListHandled,
   type ListQuery,
@@ -145,6 +146,8 @@ export class RestPlace extends WebPlace implements Place {
   private readonly namesLike: NameStyle | undefined
   /** The query parameter it searches with, and which of our fields it searches. */
   private readonly searches: RestSearch | undefined
+  /** The orders it has a name of its own for, for every list. */
+  private readonly sortOrders: readonly RestSortOrder[]
   /** Each collection's field names, made when it's first used. */
   private readonly fieldNames = new Map<string, FieldNames>()
   /** Fields a program named for a collection after it was made:  `addFields()`. */
@@ -164,11 +167,13 @@ export class RestPlace extends WebPlace implements Place {
     operations,
     namesLike,
     searches,
+    sortOrders = [],
     ...rest
   }: RestPlaceProps) {
     super(rest)
     this.namesLike = namesLike
     this.searches = searches
+    this.sortOrders = sortOrders
     this.operations = operations ?? {}
     this.collections = collections
     this.allCollections = allCollections
@@ -198,6 +203,13 @@ export class RestPlace extends WebPlace implements Place {
   /** What it can do. */
   describe(): PlaceCapabilities {
     return this.capabilities
+  }
+
+  /** Which parts of `query` it would do itself, for `collection`:  what `list()` would say it `handled`. */
+  takes(collection: string, query: ListQuery): ListHandled {
+    const handled: ListHandled = {}
+    this.paramsFor(collection, query, handled)
+    return handled
   }
 
   /**
@@ -533,10 +545,17 @@ export class RestPlace extends WebPlace implements Place {
     }
   }
 
-  /** The filter, sort and selection of `query` that it can do, as URL params.  Notes what it did in `handled`. */
+  /**
+   * The filter, search, sort and selection of `query` that it can do, as URL params.  Notes what it did in `handled`.
+   * - Each by what `collection` takes, said under its own line (`RestCollection.asks`), else by what the place takes.
+   * - A filter goes in parts:  each field it takes is sent, and `handled.filter` only when that's all of them.
+   *   The engine checks the rest over what comes back:  the server's narrowed it.
+   * - A sort it has a name for goes as that name (`RestSortOrder`):  `?order_by=recency`.
+   */
   private paramsFor(collection: string, query: ListQuery, handled: ListHandled): Record<string, unknown> {
     const { filter = {}, search = {}, sort = [], select } = query
-    const { filter: canFilter, sort: canSort, select: canSelect, idOf } = this.capabilities
+    const { select: canSelect, idOf } = this.capabilities
+    const { filter: canFilter, sort: canSort, sortParam, sortOrders } = this.asksOf(collection)
     const data: Record<string, unknown> = {}
     const filtering = Object.keys(filter)
     const { askedBy } = this.mappingOf(collection)
@@ -545,6 +564,9 @@ export class RestPlace extends WebPlace implements Place {
     if (filtering.length && (canDoAll(canFilter, filtering) || isAskedBy(askedBy, filtering))) {
       Object.assign(data, this.onTheWire(collection, filter))
       handled.filter = true
+    } else if (filtering.length) {
+      const taken = filtering.filter((field) => canDoAll(canFilter, [field]))
+      if (taken.length) Object.assign(data, this.onTheWire(collection, pickedFrom(filter, taken)))
     }
     // one parameter, so one field's text:  two at once stay the engine's
     const searching = Object.values(search)
@@ -553,7 +575,14 @@ export class RestPlace extends WebPlace implements Place {
       data[searches.param] = searching[0]
       handled.search = true
     }
-    if (
+    const named =
+      sort.length === 1
+        ? sortOrders.find(({ field, descending }) => field === sort[0]!.field && descending === !!sort[0]!.descending)
+        : undefined
+    if (named) {
+      data[sortParam] = named.as
+      handled.sort = true
+    } else if (
       sort.length &&
       canDoAll(
         canSort,
@@ -561,7 +590,7 @@ export class RestPlace extends WebPlace implements Place {
       )
     ) {
       const order = sort.map(({ field, descending }) => `${descending ? "-" : ""}${this.wireName(collection, field)}`)
-      data[this.params.sort] = order.join(",")
+      data[sortParam] = order.join(",")
       handled.sort = true
     }
     if (select && canDoAll(canSelect, select)) {
@@ -575,6 +604,25 @@ export class RestPlace extends WebPlace implements Place {
       handled.select = true
     }
     return data
+  }
+
+  /**
+   * What `collection` takes, filtering and sorting:  its own lines' (`RestCollection.asks`), else the place's.
+   * - Its own sort's question name, else the place's;  the orders it names, its own and then the place's.
+   */
+  private asksOf(collection: string): {
+    filter: FieldAbility
+    sort: FieldAbility
+    sortParam: string
+    sortOrders: readonly RestSortOrder[]
+  } {
+    const { asks } = this.mappingOf(collection)
+    return {
+      filter: asks?.filter ?? this.capabilities.filter,
+      sort: asks?.sort ?? this.capabilities.sort,
+      sortParam: asks?.sortedWith ?? this.params.sort,
+      sortOrders: [...(asks?.sortOrders ?? []), ...this.sortOrders]
+    }
   }
 
   /** Where a list of `collection` is asked for:  a search's own address, when it searched and has one (`RestSearch.at`). */
@@ -833,6 +881,38 @@ export type RestPlaceProps = WebPlaceProps & {
    * - Left out:  it doesn't, so a search reads every page, and the engine looks through them.
    */
   searches?: RestSearch
+  /**
+   * The orders it has a name of its own for, for every list:  a sort by that field, that way round, alone, is sent as
+   * that name, `?sort=recency` (`params.sort` names the question).
+   * - A list's own come first (`RestCollection.asks`).
+   */
+  sortOrders?: readonly RestSortOrder[]
+}
+
+/** An order a web server has a name of its own for:  `{ field: "createdAt", descending: true, as: "recency" }`. */
+export type RestSortOrder = {
+  /** The field it's in order of, by our name. */
+  field: string
+  /** Newest, highest or last first. */
+  descending: boolean
+  /** What it's called, sent as the sort. */
+  as: string
+}
+
+/**
+ * What one list takes, when it isn't what the place takes:  said one step in under its `live at` line,
+ * `it filters by job-id`, `it sorts by created-at with "order_by"`.
+ * - Each part left out:  the place's.
+ */
+export type RestAsks = {
+  /** Which fields it filters by itself. */
+  filter?: FieldAbility
+  /** Which fields it sorts by itself. */
+  sort?: FieldAbility
+  /** What it calls a sort:  its own question name. */
+  sortedWith?: string
+  /** The orders it has a name of its own for. */
+  sortOrders?: readonly RestSortOrder[]
 }
 
 /**
@@ -907,6 +987,8 @@ export type RestCollection = {
    * - `users are searched with "q" at "/search/users"`
    */
   searches?: RestSearch
+  /** What this list takes, filtering and sorting, when it isn't what the place takes:  see `RestAsks`. */
+  asks?: RestAsks
   /**
    * How this collection pages, when it isn't the place's way (epic `data` P56):
    * a FastAPI list asked with `?take=&skip=` beside lists asked with `?limit=&offset=`.
@@ -965,6 +1047,11 @@ function capitalized(text: string): string {
 /** Several things as a person lists them:  `a, b and c`. */
 function listed(items: readonly string[]): string {
   return items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : (items[0] ?? "")
+}
+
+/** `filter`, with only these `fields`. */
+function pickedFrom(filter: Record<string, unknown>, fields: readonly string[]): PlaceRow {
+  return Object.fromEntries(fields.map((field) => [field, filter[field]]))
 }
 
 /** The values of `filter` for the fields a list is asked for by (`RestCollection.askedBy`):  none, `undefined`. */

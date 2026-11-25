@@ -1662,7 +1662,7 @@ export class GithubPage extends Thing {
           items: () => <ui-cards columns="3" doubling={true} stackable={true} part="issues" />
         })}
         <ui-header size="medium">Solid's pull requests</ui-header>
-        {core.drawRead(async () => core.firstFew(core.filter(await core.savedThings(Issue, {}, "looks through"), (issue: Issue) => issue.pullRequest !== undefined), 6), (issue: Issue) => core.drawThing(issue), {
+        {core.drawRead(async () => await core.savedThings(Issue, {}, "looks through", { first: 6, where: (issue: Issue) => issue.pullRequest !== undefined }), (issue: Issue) => core.drawThing(issue), {
           waitingSay: () => "Asking GitHub",
           none: () => <ui-text part="issues">{"No open pull requests."}</ui-text>,
           items: () => <ui-cards columns="3" doubling={true} stackable={true} part="issues" />

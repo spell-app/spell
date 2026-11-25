@@ -96,6 +96,7 @@ import { NextPageByNumber } from "./NextPageByNumber"
 import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
 import { SortsBy } from "./SortsBy"
+import { SortsAs } from "./SortsAs"
 import { GivesFieldsNamedIn } from "./GivesFieldsNamedIn"
 import { IsReadOnly } from "./IsReadOnly"
 import { RowsIn } from "./RowsIn"
@@ -853,6 +854,35 @@ placesEs.addRule(SortsBy, {
             '  at: "https://recetario.test",',
             '  sorts: ["titulo", "fecha"],',
             '  sortedWith: "order",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(SortsAs, {
+  syntax:
+    "{type:subject_implied} ordena ((descending:de más reciente a más antiguo|de mas reciente a mas antiguo|de mayor a menor)|(ascending:de más antiguo a más reciente|de mas antiguo a mas reciente|de menor a mayor)) por {field:identifier} como {name:text} (,? con {param:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://recetario.test"\n\t- ordena de más reciente a más antiguo por creado-en como "recency", con "order_by"',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://recetario.test",',
+            '  sortedWith: "order_by",',
+            "  sortOrders: [{",
+            '    field: "creadoEn",',
+            "    descending: true,",
+            '    as: "recency"',
+            "  }],",
             '  unclearNumbers: ","',
             "})"
           ]
@@ -1785,6 +1815,7 @@ placesEs.addRule(EveryThingMatching, {
 placesEs.addRule(FirstFewWhere, {
   syntax: `(los|las) (primeros|primeras) {number} {type:plural_type} (where:donde|que) {inline_expression}?`
 })
+placesEs.addRule(FirstFewWhere, { syntax: `(los|las) (primeros|primeras) {number} {type:plural_type}` })
 placesEs.addRule(NumberOfThingsWhere, {
   syntax: "el número de {type:plural_type} (where:donde|que) {inline_expression}?"
 })

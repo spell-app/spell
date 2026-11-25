@@ -1,16 +1,37 @@
+import { proto, snakeCase } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { getWhereMethod, getWhereScope } from "spell/parser/spell/rules/lists/lists.shared"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import {
+  filtersOf,
   ownListAST,
   ownListOf,
   savedPlaceOfMatch,
   searchesOf,
   type OwnList
 } from "spell/parser/spell/rules/places/places.shared"
-import { canNeverBeTrue, EveryThing, handedFilterOf, handedSearchOf } from "./EveryThing"
+import { canNeverBeTrue, EveryThing, handedPartsOf } from "./EveryThing"
+
+/** What `, checked here` notes on the read it follows (`ListCheckedHere`):  nothing's asked of the place. */
+export type CheckedHereData = { checkedHere?: boolean }
+
+/** The fields a list of `saved` filters by, by its lines:  none for none said, or for every field. */
+function filterFieldsOf(saved: P.SavedPlace | undefined): readonly string[] {
+  const filters = filtersOf(saved)
+  return Array.isArray(filters) ? filters : []
+}
+
+/** A field's words, from its name:  `jobId` => `job id`. */
+function wordsOfName(field: string): string {
+  return snakeCase(field).replace(/_/g, " ")
+}
+
+/** Declared, so a subclass's `@proto` reads its own. */
+export interface EveryThingWhere {
+  stopsEarly: boolean
+}
 
 /** How far in a type's name can start:  Spanish's `todas las recetas donde`. */
 const WORDS_TO_THE_TYPE = 3
@@ -25,6 +46,9 @@ const WORDS_TO_THE_TYPE = 3
  * - Compiles to `core.filter(core.everyThing(Recipe), (recipe) => ...)`.
  */
 export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?: OwnList }> {
+  /** Does its read stop at the first that pass, and so warn of nothing it checks here:  `FirstThingWhere`'s. */
+  @proto static stopsEarly = false
+
   /** A list of the type, e.g. `list of recipes`:  as `every_thing`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return P.listOf(SP.typeName(`${match.groups.type.value}`))
@@ -51,7 +75,8 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
     // `every recipe` is of the type, whatever else is called `recipe`
     match.data.own = SP.singularIn(scope, words) === words ? undefined : ownListOf(scope, words)
     if (!match.data.own && !EveryThing.kindOf(type)) return undefined
-    EveryThingWhere.warnAboutWhere(match, type, () => this.predicateOf(match))
+    if (!this.stopsEarly) EveryThingWhere.warnAboutWhere(match, type, () => this.predicateOf(match))
+    else if (savedPlaceOfMatch(type)) EveryThing.refusedUnlessSearched(match, type, () => this.predicateOf(match))
     return match
   }
 
@@ -61,21 +86,42 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
   }
 
   /**
-   * SIDE EFFECT:  a warning, for a `where` on a saved type that can't go to its place:  it's done here, up to a ceiling.
+   * SIDE EFFECT:  a warning, for a `where` on a saved type that can't all go to its place:  it's done here, up to a ceiling.
+   * - A web server's list (epic `data`, the filters phase):  naming each clause its list can't be asked
+   *   (`EveryThing.clausesStayingIn()`), and how to ask it instead, `its job id is ...` on a field its list filters by,
+   *   or that `, checked here` says it's meant.
+   * - Any other place:  when none of it can go.
    * - None when a search can go instead (`it searches names with "search"`):  the server narrows what's read.
+   * - None after `, checked here` (`ListCheckedHere`):  it's what's wanted.
    * - `predicate`:  the test, made when the warnings are gathered.
    */
   static warnAboutWhere(match: P.Match, type: P.Match, predicate: () => P.ASTMethodDefinition): void {
     const { scope } = match
-    const message = SP.Language.of(scope).parserMessage("where-looks-through", {
-      type: SP.singularIn(scope, `${type.raw}`.trim())
-    })
+    const language = SP.Language.of(scope)
+    const words = `${type.raw}`.trim()
+    const isCheckedHere = () => !!(match.data as CheckedHereData).checkedHere
+    const isWebServer = () => savedPlaceOfMatch(type)?.placeType.placeKind === "web server"
+    const message = language.parserMessage("where-looks-through", { type: SP.singularIn(scope, words) })
     SP.SpellWarnings.noteIf(match, message, () => {
       const saved = savedPlaceOfMatch(type)
-      if (!saved) return false
-      const where = predicate()
-      return !handedFilterOf(where) && !handedSearchOf(where, searchesOf(saved)?.fields ?? []).length
+      if (!saved || isWebServer() || isCheckedHere()) return false
+      const parts = handedPartsOf(predicate(), searchesOf(saved)?.fields ?? [])
+      return !parts?.filter.length && !parts?.search.length
     })
+    const staying = () => EveryThing.clausesStayingIn(type, predicate())
+    const stays = () => {
+      const clauses = staying() ?? []
+      const [field] = filterFieldsOf(savedPlaceOfMatch(type))
+      const params = {
+        clauses: clauses.map((clause) => `"${clause}"`).join(", "),
+        type: SP.singularIn(scope, words),
+        types: P.pluralize(words)
+      }
+      return field === undefined
+        ? language.parserMessage("where-stays-here-no-filter", params)
+        : language.parserMessage("where-stays-here", { ...params, field: wordsOfName(field) })
+    }
+    SP.SpellWarnings.noteIf(match, stays, () => !isCheckedHere() && !!staying(), match, "where-stays-here")
     // given only to a search:  this `where` has to be one
     if (savedPlaceOfMatch(type)) EveryThing.refusedUnlessSearched(match, type, predicate)
     const never = SP.Language.of(scope).parserMessage("never-both")

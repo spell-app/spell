@@ -36,6 +36,8 @@ export type ImportedPlaceDetails = {
   searches?: ImportedPlaceSearch
   /** Nothing can be written to it, as far as the compiler can tell:  a sheet at a plain address, say. */
   readOnly?: boolean
+  /** The fields it filters by itself, for every list:  `it filters by cuisine`.  Left out:  none. */
+  filters?: "every field" | string[]
   /** What its lines say of each collection, by the name a type's `savedIn` knows it by:  only what's said. */
   collections?: Record<string, ImportedPlaceCollection>
 }
@@ -58,6 +60,8 @@ export type ImportedPlaceCollection = {
   searchedOnly?: boolean
   /** The fields it's asked for by, each a query parameter. */
   askedBy?: string[]
+  /** The fields this one filters by itself, said under its own line:  `it filters by job id`. */
+  filters?: "every field" | string[]
 }
 
 /** How a type's records are published, as `- it is published as "..."` says. */

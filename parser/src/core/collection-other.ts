@@ -7,6 +7,7 @@
  *   - For objects: use natural key order for position.
  * - TODO: collections for `words`, `lines`, etc?
  */
+import { textOrder } from "spell/util/string"
 import { core } from "./core"
 // Import directly, never through the barrel:
 // `spell/parser/core/model` loads this file, and must not load drawing (Solid)
@@ -52,7 +53,7 @@ export function compareSortKeys(one: unknown, other: unknown): number {
   }
   if (one === undefined || one === null) return other === undefined || other === null ? 0 : 1
   if (other === undefined || other === null) return -1
-  if (typeof one === "string" && typeof other === "string") return textOrder().compare(one, other)
+  if (typeof one === "string" && typeof other === "string") return programTextOrder().compare(one, other)
   if ((one as number) < (other as number)) return -1
   return (one as number) > (other as number) ? 1 : 0
 }
@@ -70,15 +71,9 @@ export class Descending {
   }
 }
 
-/** The order text sorts in, in each language, kept:  making one is slow. */
-const TEXT_ORDERS = new Map<string, Intl.Collator>()
-
-/** The order text sorts in, in the program's own language:  `ñ` after `n` in Spanish, case ignored. */
-function textOrder(): Intl.Collator {
-  const lang = core.message("language")
-  let order = TEXT_ORDERS.get(lang)
-  if (!order) TEXT_ORDERS.set(lang, (order = new Intl.Collator(lang, { sensitivity: "base" })))
-  return order
+/** The order text sorts in, in the program's own language:  `ñ` after `n` in Spanish, case ignored (`textOrder()`). */
+function programTextOrder(): Intl.Collator {
+  return textOrder(core.message("language"))
 }
 
 /** A list with guards, e.g. a `List` -- see `core.move()`, `List.moveHere()`. */

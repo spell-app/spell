@@ -1,3 +1,4 @@
+import { compareValues } from "spell/util/string"
 import { parseCsv } from "spell/places/csv"
 import { googleSheetCsvAddress, isPlaceServerAddress } from "spell/places/places.types"
 import { Workbook } from "spell/places/Workbook"
@@ -672,7 +673,7 @@ async function filtersOf({ rows }: CollectionLook, askFor: AskFor): Promise<Pick
 /** Which fields a list answers in order by, and what it calls a sort. */
 async function sortsOf({ rows }: CollectionLook, askFor: AskFor): Promise<Pick<ServerTakes, "sorts" | "sortedWith">> {
   const inOrder = (list: ReadonlyArray<Record<string, unknown>>, name: string) =>
-    list.every((row, at) => !at || compareValues(list[at - 1]![name], row[name]) <= 0)
+    list.every((row, at) => !at || compareOrder(list[at - 1]![name], row[name]) <= 0)
   const unsorted = fieldsToTry(rows).filter((name) => !inOrder(rows, name))
   const [first, ...more] = unsorted
   if (first === undefined) return {}
@@ -689,11 +690,11 @@ async function sortsOf({ rows }: CollectionLook, askFor: AskFor): Promise<Pick<S
   return {}
 }
 
-/** Which of two values comes first:  by number, or by words. */
-function compareValues(one: unknown, other: unknown): number {
+/** Which of two values comes first:  by number, or by words, in the one order text sorts in (`compareValues()`). */
+function compareOrder(one: unknown, other: unknown): number {
   return typeof one === "number" && typeof other === "number"
     ? one - other
-    : `${one as string}`.localeCompare(`${other as string}`)
+    : compareValues(`${one as string}`, `${other as string}`)
 }
 
 /** Which question names the fields it should give:  each row then holds only those. */

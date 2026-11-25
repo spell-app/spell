@@ -23,7 +23,7 @@ export type PlaceDetailValue = {
       paging?: PagingDetails
       /** It's ONE thing at its address, not a list:  see `OneThingAt`. */
       isOne?: boolean
-    }
+    } & ListAsks
   >
   keyNamed?: string
   /** Where its key's token is made, from the secret `keyNamed`:  see `TokenFrom` (epic `data` P49). */
@@ -63,6 +63,8 @@ export type PlaceDetailValue = {
   sorts?: "every field" | string[]
   /** What it calls a sort, when that isn't `sort`. */
   sortedWith?: string
+  /** The orders it has a name of its own for:  see `SortsAs`. */
+  sortOrders?: SortOrderName[]
   /** What it calls the fields it's asked for:  see `GivesFieldsNamedIn`. */
   fieldsNamedIn?: string
   /** The classes whose collections are read as the program starts, by name:  see `ReadOnStartup`. */
@@ -81,6 +83,18 @@ export type PlaceDetailValue = {
    */
   sheet?: SheetLines
 }
+
+/**
+ * One order a web server has a name of its own for, sent as its sort:  `it sorts newest first by created at as "recency"`.
+ * - `field`:  as compiled code names it;  `descending`:  newest, highest or last first.
+ */
+export type SortOrderName = { field: string; descending: boolean; as: string }
+
+/**
+ * What a place's lines say it's asked, for every list, or one step in under a list's line, for it alone (`CollectionAt`):
+ * its filters, sorts and search.
+ */
+export type ListAsks = Pick<PlaceDetailValue, "filters" | "sorts" | "sortedWith" | "sortOrders" | "searches">
 
 /** What the place's paging lines say:  for every collection, or one step in under a collection's line, for it alone. */
 export type PagingDetails = Pick<

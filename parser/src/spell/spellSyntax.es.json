@@ -5146,6 +5146,20 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ListCheckedHere",
+          "ruleNames": ["list_checked_here"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListCheckedHere.ts",
+          "line": 26,
+          "purpose": "A read of a place whose `where` is checked here, in the page, all of it: nothing of it is asked of the place.",
+          "syntaxes": [
+            {
+              "syntax": ",? filtrando aquí"
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "EachItemWhere",
           "ruleNames": ["each_item_where"],
           "internal": false,
@@ -6426,7 +6440,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -6452,7 +6466,7 @@
           "ruleNames": ["every_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThingWhere.ts",
-          "line": 27,
+          "line": 48,
           "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
           "syntaxes": [
             {
@@ -6481,7 +6495,7 @@
           "ruleNames": ["first_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/FirstThingWhere.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "The first thing of a type that fits, or nothing: `every_thing_where`'s first.",
           "syntaxes": [
             {
@@ -8935,7 +8949,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 129,
+          "line": 143,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9090,11 +9104,14 @@
           "ruleNames": ["first_few_where"],
           "internal": false,
           "file": "src/spell/rules/places/FirstFewWhere.ts",
-          "line": 14,
+          "line": 17,
           "purpose": "A few of a type, by its plural (epic `data` P11).",
           "syntaxes": [
             {
               "syntax": "(los|las) (primeros|primeras) {number} {type:plural_type} (where:donde|que) {inline_expression}?"
+            },
+            {
+              "syntax": "(los|las) (primeros|primeras) {number} {type:plural_type}"
             }
           ],
           "aliases": ["expression"]
@@ -9821,6 +9838,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SortsAs",
+          "ruleNames": ["sorts_as"],
+          "internal": false,
+          "file": "src/spell/rules/places/SortsAs.ts",
+          "line": 14,
+          "purpose": "An order a web server has a name of its own for, sent as its sort.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} ordena ((descending:de más reciente a más antiguo|de mas reciente a mas antiguo|de mayor a menor)|(ascending:de más antiguo a más reciente|de mas antiguo a mas reciente|de menor a mayor)) por {field:identifier} como {name:text} (,? con {param:text})?",
+              "example": "recetario es un servidor web en \"https://recetario.test\"\n\t- ordena de más reciente a más antiguo por creado-en como \"recency\", con \"order_by\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  sortedWith: \"order_by\",\n  sortOrders: [{\n    field: \"creadoEn\",\n    descending: true,\n    as: \"recency\"\n  }],\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  sortedWith: \"order_by\",\n  sortOrders: [{\n    field: \"creadoEn\",\n    descending: true,\n    as: \"recency\"\n  }],\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"sorted_with\": \"order_by\",\n        \"sort_orders\": [{\"field\": \"creadoEn\", \"descending\": True, \"as_\": \"recency\"}],\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "GivesFieldsNamedIn",
           "ruleNames": ["gives_fields_named_in"],
           "internal": false,
@@ -10411,7 +10454,7 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 30,
+          "line": 42,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
