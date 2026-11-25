@@ -207,8 +207,6 @@ ui-popup.BarMenuPopup.PalettePlus::part(popup) {
 
 /* the `+`, a button now (T174):  lit under the mouse, as the bar's other buttons are */
 .PaletteRail .PaletteRailAdd {
-  cursor: pointer;
-
   &:hover,
   &:focus-visible {
     color: var(--ui-text-color);
