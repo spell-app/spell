@@ -316,6 +316,11 @@ a "recipe" is a thing
                       One whose schema names some fields and allows others is an object type:
                       <code>a "provenance" is an object</code>, its named fields under it, typed.
                     </li>
+                    <li>
+                      What's inside a row is saved under the server's own keys: a field read as <code>checked_at</code>
+                      goes back as <code>checked_at</code>, never <code>checkedAt</code>; one whose line says
+                      <code>stored as "note"</code>, as <code>note</code>.
+                    </li>
                   </ul>
                 </li>
                 <li>
