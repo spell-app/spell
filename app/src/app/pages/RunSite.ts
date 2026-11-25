@@ -144,7 +144,7 @@ export class RunSite implements SiteHost {
    */
   listen(showAddress: (address: string) => void): void {
     this.showAddress = showAddress
-    if (!this.hearsHash) addEventListener("popstate", () => this.openHash())
+    if (!this.hearsHash) globalThis.addEventListener?.("popstate", () => this.openHash())
     this.hearsHash = true
     this.openHash()
   }
@@ -167,8 +167,9 @@ export class RunSite implements SiteHost {
 
   /** Open the dialog or sidebar the URL's hash names, in Run;  with none, the one open closes. */
   private openHash(): void {
-    if (editor.projectPage !== "runner") return
-    void this.site?.showPart?.(globalThis.location.hash.slice(1))
+    const hash = globalThis.location?.hash
+    if (editor.projectPage !== "runner" || hash === undefined) return
+    void this.site?.showPart?.(hash.slice(1))
   }
 
   /**

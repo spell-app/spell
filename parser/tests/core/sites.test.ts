@@ -140,6 +140,22 @@ class ShelfPage extends Page {
   }
 }
 
+/** A rack, by the text its address names:  a text parameter that can't be left out. */
+class RackPage extends Page {
+  static {
+    this.declareProp("rack", { type: "text" })
+  }
+  get rack() {
+    return this.getProp("rack") as string | undefined
+  }
+  set rack(value) {
+    this.setProp("rack", value)
+  }
+  draw(): Drawing {
+    return h("h1", null, () => `Rack ${this.rack ?? ""}`) as unknown as Drawing
+  }
+}
+
 /**
  * A site whose pages keep their tabs in their addresses:  its account's sections, its shelf's tab and view, a film's
  * page under the shelf listed before it, so it keeps `/shelf/films/<film>`.
@@ -148,7 +164,8 @@ class Library extends Site {
   static pages = [
     { name: "account page", page: "AccountPage", address: "/account/:section?", title: "Account", params: ["section"] },
     { name: "film page", page: "FilmPage", address: "/shelf/films/:film", params: ["film"] },
-    { name: "shelf page", page: "ShelfPage", address: "/shelf/:tab?/:view?", title: "Shelf", params: ["tab", "view"] }
+    { name: "shelf page", page: "ShelfPage", address: "/shelf/:tab?/:view?", title: "Shelf", params: ["tab", "view"] },
+    { name: "rack page", page: "RackPage", address: "/racks/:rack", params: ["rack"] }
   ]
   static dialogs = [{ name: "confirm order dialog", view: "SettingsDialog" }]
   static sidebars = [{ name: "film sidebar", view: "FilmSidebar" }]
@@ -332,6 +349,9 @@ describe("a running site", () => {
 
   /** What the site draws now, as text:  the layout shown, not the ones kept hidden, nor the style sheet. */
   async function shown(): Promise<string> {
+    await new Promise((resolve) => setTimeout(resolve))
+    core.flush()
+    // and what that drawing's changes wrote to the address, a moment after (`SiteBase.followParams()`)
     await new Promise((resolve) => setTimeout(resolve))
     core.flush()
     return element.querySelector(SHOWN)?.textContent ?? ""
@@ -914,6 +934,7 @@ describe("a running site", () => {
       account.section = "profile"
       shelf = new ShelfPage()
       shelf.tab = "books"
+      new RackPage()
       hope = new Film({ id: "a-new-hope", title: "A New Hope" })
       library = new Library()
       went = []
@@ -979,6 +1000,26 @@ describe("a running site", () => {
       expect(went.at(-1)).toEqual(["/shelf/books/grid", { keepScroll: true }])
       await library.showAddress("/shelf/magazines")
       expect(await shown()).toBe("Shelf magazines ")
+    })
+
+    test("a tab and its own tab changed together, as one pick:  one step in the history", async () => {
+      await library.showAddress("/shelf/books/grid")
+      await shown()
+      went.length = 0
+      shelf.tab = "magazines"
+      await Promise.resolve()
+      shelf.view = undefined
+      expect(await shown()).toBe("Shelf magazines ")
+      expect(went).toEqual([["/shelf/magazines", { keepScroll: true }]])
+    })
+
+    test("a text parameter that can't be left out, at another address:  drawn afresh, as before", async () => {
+      await library.showAddress("/racks/d16")
+      expect(await shown()).toBe("Rack d16")
+      const d16 = element.querySelector(".spell-site-page")
+      await library.showAddress("/racks/b16")
+      expect(await shown()).toBe("Rack b16")
+      expect(element.querySelector(".spell-site-page")).not.toBe(d16)
     })
 
     test("a page listed earlier keeps its address:  the film's page, not the shelf's tab and view", async () => {

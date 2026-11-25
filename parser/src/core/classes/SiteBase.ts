@@ -230,8 +230,9 @@ export class SiteBase extends App {
    *   the place its type is saved in (`core.savedThingWithId()`).
    * - A lookup that fails shows the error page.
    * - A parameter left out (`/settings/:section?` at `/settings`) sets its property back to its starting value.
-   * - The page shown at another address that differs only in its text parameters (Back from `/settings/team` to
-   *   `/settings/api-keys`):  its properties set, the page not drawn again (`sameDrawing()`).
+   * - The page shown at another address that differs only in its text parameters that may be left out, its tabs'
+   *   (Back from `/settings/team` to `/settings/api-keys`):  its properties set, the page not drawn again
+   *   (`sameDrawing()`).  One that differs in another (`/racks/b16` after `/racks/d16`) is drawn afresh, as before.
    * - The same address again does nothing, unless it showed no page:  a page made for it since shows
    *   (the editor's "Create it", epic `mockup` P4).
    * - NEVER throws:  what goes wrong is shown on the page.
@@ -314,7 +315,7 @@ export class SiteBase extends App {
 
   /**
    * Show page `showing` at `address`, whose parameters are `params`, in the same drawing, when only its text
-   * parameters differ:  each set (a parameter left out to its starting value), the drawing kept under the new address
+   * parameters that may be left out differ:  each set (a parameter left out to its starting value), the drawing kept under the new address
    * (`KeptPages.move()`).  Answers whether it did;  `false`:  `address` is drawn as any other is.
    */
   private sameDrawing(
@@ -327,7 +328,9 @@ export class SiteBase extends App {
     const record = page as unknown as Record<string, unknown>
     const shownAt = this.pageFor(showing.address)?.params ?? {}
     const changed = paramsOf(entry.address).filter((param) => shownAt[param] !== params[param])
-    if (!changed.every((param) => isTextParam(page, param))) return false
+    // a tab's:  a text parameter that may be left out;  another (a rack's `:picked`) is drawn afresh, as before
+    const tabs = new Set(optionalParamsOf(entry.address))
+    if (!changed.every((param) => tabs.has(param) && isTextParam(page, param))) return false
     for (const param of changed) record[propertyFor(param)] = param in params ? params[param] : starting[param]
     this.moveDrawing(showing.address, address)
     this.showNow({ ...showing, address })
@@ -357,39 +360,63 @@ export class SiteBase extends App {
     const record = page as unknown as Record<string, unknown>
     const starting = this.startingValues(page, entry)
     const optional = new Set(optionalParamsOf(entry.address))
+    let pending: ReturnType<typeof setTimeout> | undefined
     createRoot((dispose) => {
-      this.stopFollowing = dispose
+      this.stopFollowing = () => {
+        clearTimeout(pending)
+        dispose()
+      }
       createEffect(
         () => params.map((param) => record[propertyFor(param)]),
-        (values) => {
-          const current = this.getState<Showing>("showing")
-          if (current?.kind !== "page" || current.page !== page) return
-          const shownAt = this.pageFor(current.address)?.params ?? {}
-          const differs = params.some((param, at) => (shownAt[param] ?? starting[param] ?? "") !== (values[at] ?? ""))
-          if (!differs) return
-          // left out from the end while at its starting value
-          const filled: Record<string, unknown> = { ...shownAt }
-          params.forEach((param, at) => (filled[param] = values[at]))
-          const names = paramsOf(entry.address)
-          for (let at = names.length - 1; at >= 0; at--) {
-            const param = names[at]!
-            if (!optional.has(param) || (filled[param] !== starting[param] && filled[param] !== "")) break
-            filled[param] = undefined
-          }
-          let address: string
-          try {
-            address = filledPattern(entry.address, filled as Record<string, string | undefined>)
-          } catch {
-            return
-          }
-          if (address === current.address) return
-          this.moveDrawing(current.address, address)
-          this.setProp("currentAddress", address)
-          this.showNow({ ...current, address })
-          core.siteHost?.go(address, { keepScroll: true })
+        () => {
+          // written once the event that changed them is over:  a pick that sets a tab and starts its own tab afresh
+          // (two listeners, with a microtask checkpoint between them) is ONE step in the history
+          clearTimeout(pending)
+          pending = setTimeout(() => this.writeParams(page, entry, params, starting, optional))
         }
       )
     })
+  }
+
+  /**
+   * Write page `page`'s address as its text parameters `params` now are, `followParams()`'s:  through the host, a step
+   * in the history, the drawing kept;  nothing when it's its address already, or another page is shown.
+   */
+  private writeParams(
+    page: Page,
+    entry: SitePageEntry,
+    params: string[],
+    starting: Record<string, unknown>,
+    optional: Set<string>
+  ): void {
+    const record = page as unknown as Record<string, unknown>
+    const values = params.map((param) => record[propertyFor(param)])
+    const current = this.getState<Showing>("showing")
+    // another page shown since, or another site the program's now (a new run)
+    if (current?.kind !== "page" || current.page !== page || core.RUNTIME?.site !== this) return
+    const shownAt = this.pageFor(current.address)?.params ?? {}
+    const differs = params.some((param, at) => (shownAt[param] ?? starting[param] ?? "") !== (values[at] ?? ""))
+    if (!differs) return
+    // left out from the end while at its starting value
+    const filled: Record<string, unknown> = { ...shownAt }
+    params.forEach((param, at) => (filled[param] = values[at]))
+    const names = paramsOf(entry.address)
+    for (let at = names.length - 1; at >= 0; at--) {
+      const param = names[at]!
+      if (!optional.has(param) || (filled[param] !== starting[param] && filled[param] !== "")) break
+      filled[param] = undefined
+    }
+    let address: string
+    try {
+      address = filledPattern(entry.address, filled as Record<string, string | undefined>)
+    } catch {
+      return
+    }
+    if (address === current.address) return
+    this.moveDrawing(current.address, address)
+    this.setProp("currentAddress", address)
+    this.showNow({ ...current, address })
+    core.siteHost?.go(address, { keepScroll: true })
   }
 
   /** Lets go of what `followParams()` follows. */
