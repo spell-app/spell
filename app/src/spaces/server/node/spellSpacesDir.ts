@@ -96,3 +96,20 @@ export const moreSpaces: MoreSpaces[] = moreSpacesFrom()
 export function spacesDirForOrg(org: string, more: MoreSpaces[] = moreSpaces, spaces = spellSpacesDir): string {
   return more.find((each) => each.orgs.includes(org))?.dir ?? spaces
 }
+
+/**
+ * Serve org `org` from spaces folder `dir` for the rest of this program, in place of whichever folder served it:  `more`
+ * (`moreSpaces`) changed in place, so `spacesDirForOrg()` and every build folder read it at once.
+ * - For a command handed a project by its folder, `spell lint <spaces>/@acme/tools/dashboard`:  the folder it sits in
+ *   holds the projects it imports, `@acme/tools/jobs`, whatever spell.spaces or the more spaces file say.
+ * - Nothing written:  the more spaces file (`spell spaces use`) is the page server's, and stays as it was.
+ * - `@spell` is never served from elsewhere:  `false`, and nothing changed;  else `true`.
+ */
+export function serveOrgFrom(dir: string, org: string, more: MoreSpaces[] = moreSpaces): boolean {
+  if (org === "spell") return false
+  for (const each of more) each.orgs = each.orgs.filter((one) => one !== org)
+  const own = more.find((each) => each.dir === dir)
+  if (own) own.orgs.push(org)
+  else more.push({ dir, orgs: [org] })
+  return true
+}
