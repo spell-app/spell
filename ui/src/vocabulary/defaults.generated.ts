@@ -365,7 +365,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "image", kind: "keyOnly", group: "content" },
     { name: "scrolling", kind: "keyOnly", group: "layout" },
     { name: "align", kind: "textAlign", group: "layout", values: "alignments" },
-    { name: "markdown", kind: "keyOnly", group: "content" },
+    { name: "markdown", kind: "boolean", group: "content" },
     { name: "vertical-align", kind: "verticalAlign", group: "layout", values: "verticalAlignments" }
   ],
   "ui-date": [{ name: "datetime", kind: "string", group: "appearance" }],

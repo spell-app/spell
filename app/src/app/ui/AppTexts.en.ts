@@ -605,6 +605,10 @@ export const APP_TEXTS = {
   anatomyFlatTip: "This part hides anything past its edges, so what's inside it can't come apart from it",
   anatomyFocusShortcut: "Show the selected layer alone",
   anatomyBackShortcut: "Go back out of Anatomy",
+  // Preview (epic `editor` T172):  the app alone, full screen;  its row in Keyboard Shortcuts, then the toast going in,
+  // `{key}` its key as this computer writes it (⌥⌘Enter, Ctrl+Alt+Enter)
+  previewShortcut: "Preview:  show only the app, full screen",
+  previewHint: "Only your app is showing now.\nPress {key} to go back to the editor.",
   shortcutsWhileAnatomy: "Only while Anatomy shows",
   anatomyHelp:
     "Anatomy pulls your app apart into layers, one for each view it draws.\nDrag to turn it. Scroll to zoom. Click a layer to pick it, or double-click to show it alone.\nHold Option to play the app as usual. Press Esc to go back.",

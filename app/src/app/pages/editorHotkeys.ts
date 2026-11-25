@@ -10,6 +10,7 @@ import {
   Inspector,
   Palette,
   PartEdits,
+  Preview,
   uiReady,
   type PartAction
 } from "spell/app/app/solid"
@@ -244,6 +245,16 @@ export const EDITOR_HOTKEYS = {
     name: "anatomyFocusShortcut",
     where: "shortcutsWhileAnatomy"
   },
+  // Preview:  the app alone, full screen, to show someone (epic `editor` T172);  the same key comes back out.
+  // ⌥⌘Enter, which no browser takes (⌥⌘P is Chrome's Print with the system dialog);  in the code and fields too,
+  // as nothing types with it
+  preview: {
+    shortcut: "alt+mod+Enter",
+    run: () => Preview.toggle(),
+    inFields: true,
+    group: "running",
+    name: "previewShortcut"
+  },
   // Esc's own run is `stopInspecting`'s, which steps back out of Anatomy first:  one key, one handler
   anatomyBack: { shortcut: "Escape", group: "running", name: "anatomyBackShortcut", where: "shortcutsWhileAnatomy" },
 
@@ -298,7 +309,7 @@ export type Hotkey = {
   outsideCode?: boolean
   /** A key that's still the page's in a property editor's field:  Undo, where the field's change is a step. */
   inProperties?: boolean
-  /** A key that's the page's in any field too:  one no field types with, ⌥⌘V (the add panel). */
+  /** A key that's the page's in any field too:  one no field types with, ⌥⌘V (the add panel), ⌥⌘Enter (Preview). */
   inFields?: boolean
 }
 

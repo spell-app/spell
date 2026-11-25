@@ -23,6 +23,7 @@ import {
   DesignStage,
   InspectAppButton,
   PaletteRail,
+  Preview,
   CodeShown,
   ChangeThisBox,
   PartMenu,
@@ -94,6 +95,7 @@ const OUTPUT_ROOM = 440
  *   It's a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
  *   - On a phone, a sheet that slides up over the page as something's picked (epic `debut` P17, Q6).
+ * - Preview (⌥⌘Enter, epic `editor` T172):  Run with the top bar hidden too, the app alone, full screen (`Preview`).
  * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside the code (`editorHotkeys()`).
  * - SIDE EFFECT:  watches the open file for changes from outside while it's up (`editor.watchOpenFile()`).
  ****************/
@@ -102,6 +104,8 @@ export function SpellEditor(props: { mode: Mode }) {
   const mode = (): Mode => (isPhone() ? "run" : props.mode)
   const isRunning = () => mode() === "run"
   editorHotkeys(isRunning)
+  // Preview remembers the mode it came from, to come back to it
+  Preview.follow(mode)
   // a change to the open file from outside the editor:  read again, and taken as any edit
   onSettled(() => editor.watchOpenFile())
   // the code's column:  hidden in Run, and for a project with its code closed

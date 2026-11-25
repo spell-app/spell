@@ -21,13 +21,21 @@ const LINES = [
   '\tits "name" is text',
   '\tits "meta" is an asset meta',
   '\tits "raw" is an object',
+  '\tits "steps" is a list of steps',
   "\tits \"source\" is its meta's provenance",
   "\tits \"owner\" is its meta's owner",
   "\tits \"raw owner\" is its raw's owner",
+  '\tits "runner" is the "run_by" of its meta',
+  "\tits \"raw runner\" is its raw's \"run_by\"",
+  '\tits "checked" is the "checked_at" of its meta',
   "",
   'an "asset meta" is an object',
   '\tits "provenance" is text',
-  '\tits "checked at" is a date'
+  '\tits "checked at" is a date',
+  "",
+  'a "step" is a thing',
+  '\tits "run by" is text',
+  '\tits "remark" is text, stored as "note"'
 ]
 
 /** A place in memory that keeps every change it's sent. */
@@ -53,7 +61,7 @@ function run(code: string): Record<string, unknown> {
     .replace(/^import \{ (.*) \} from "(.*)"$/gm, (_line, names: string) => `const { ${names} } = __core`)
     .replace(/^export /gm, "")
   // oxlint-disable-next-line no-implied-eval -- running compiled spell, as a runner does, is the test
-  const namespace = new Function("__core", `const { core, Thing } = __core\n${body}\nreturn { ${exported.join(", ")} }`)(SC) as Record<string, unknown>
+  const namespace = new Function("__core", `const { core, Thing, List } = __core\n${body}\nreturn { ${exported.join(", ")} }`)(SC) as Record<string, unknown>
   core.things.addClasses(namespace)
   return namespace
 }
@@ -97,7 +105,8 @@ const ROWS = [
     id: "1",
     name: "warm up",
     meta: { provenance: "scan", checked_at: "2026-11-20T10:00:00Z", owner: "ada", deep: { a: { b: 1 } } },
-    raw: { owner: "ada", runs: [1, 2] }
+    raw: { owner: "ada", runs: [1, 2], run_by: "cy" },
+    steps: [{ run_by: "ada", note: "first" }]
   },
   { id: "2", name: "cool down", meta: { provenance: "hand", extra_key: true }, raw: { owner: "bo" } }
 ]
@@ -125,7 +134,17 @@ describe("an object type", () => {
     expect(cool!.meta.owner).toBeUndefined()
     // what the page reads
     expect([warm!.source, warm!.owner, warm!.rawOwner]).toEqual(["scan", "ada", "ada"])
-    expect(warm!.raw).toEqual({ owner: "ada", runs: [1, 2] })
+    expect(warm!.raw).toEqual({ owner: "ada", runs: [1, 2], run_by: "cy" })
+  })
+
+  test("a key in quotes reads as written:  `the \"run_by\" of its meta`, `its raw's \"run_by\"`", async () => {
+    const [warm, cool] = await jobsIn(holding(ROWS))
+    ;(warm!.meta as Record<string, unknown>).run_by = "bo"
+    const read = (job: SC.Thing, field: string) => (job as unknown as Record<string, unknown>)[field]
+    expect([read(warm!, "runner"), read(warm!, "rawRunner")]).toEqual(["bo", "cy"])
+    expect(read(cool!, "runner")).toBeUndefined()
+    // a key its type declares, by its words:  that field, as it was read
+    expect(read(warm!, "checked")).toBeInstanceOf(Date)
   })
 
   test("written back whole:  every key it was sent", async () => {
@@ -134,12 +153,48 @@ describe("an object type", () => {
     const Job = warm!.constructor as new (props: object) => SC.Thing
     await core.saveThing(new Job({ name: "copy", meta: warm!.meta }))
     await vi.waitFor(() => expect(place.sent).toHaveLength(1), { timeout: 3000 })
-    // every key:  a known field by its own name, a date as ISO text, the others as they came
+    // every key:  a known field under the key the row sent it under, a date as ISO text, the others as they came
     expect(place.sent[0]!.fields?.meta).toEqual({
       provenance: "scan",
-      checkedAt: "2026-11-20T10:00:00.000Z",
+      checked_at: "2026-11-20T10:00:00.000Z",
       owner: "ada",
       deep: { a: { b: 1 } }
     })
+  })
+})
+
+describe("a thing inside a row is written back under the source's keys, never Spell's names", () => {
+  test("each field under the key the row sent it under;  one `stored as` under that name", async () => {
+    const place = holding(ROWS)
+    const [warm] = await jobsIn(place)
+    const steps = (warm as unknown as { steps: SC.List }).steps
+    expect((steps.items[0] as Record<string, unknown>).runBy).toBe("ada")
+    expect((steps.items[0] as Record<string, unknown>).remark).toBe("first")
+    const Job = warm!.constructor as new (props: object) => SC.Thing
+    await core.saveThing(new Job({ name: "copy", steps }))
+    await vi.waitFor(() => expect(place.sent).toHaveLength(1), { timeout: 3000 })
+    expect(place.sent[0]!.fields?.steps).toEqual([{ run_by: "ada", note: "first" }])
+  })
+
+  test("a thing of that type made here writes the keys its type was read with", async () => {
+    const place = holding(ROWS)
+    const [warm] = await jobsIn(place)
+    const Step = core.things.classNamed("Step") as unknown as new (props: object) => SC.Thing
+    const Job = warm!.constructor as new (props: object) => SC.Thing
+    await core.saveThing(new Job({ name: "new", steps: [new Step({ runBy: "bo", remark: "fresh" })] }))
+    await vi.waitFor(() => expect(place.sent).toHaveLength(1), { timeout: 3000 })
+    const [step] = place.sent[0]!.fields!.steps as Array<Record<string, unknown>>
+    expect(step).toMatchObject({ run_by: "bo", note: "fresh" })
+    expect(Object.keys(step!)).not.toContain("runBy")
+    expect(Object.keys(step!)).not.toContain("remark")
+  })
+
+  test("a change to one field of it writes its owner's list, the field under the source's key", async () => {
+    const place = holding(ROWS)
+    const [warm] = await jobsIn(place)
+    const [step] = (warm as unknown as { steps: SC.List }).steps.items as Array<Record<string, unknown>>
+    step!.runBy = "cy"
+    await vi.waitFor(() => expect(place.sent.length).toBeGreaterThan(0), { timeout: 3000 })
+    expect(place.sent.at(-1)!.fields?.steps).toEqual([{ run_by: "cy", note: "first" }])
   })
 })

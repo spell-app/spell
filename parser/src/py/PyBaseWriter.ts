@@ -243,7 +243,9 @@ export class PyBaseWriter extends P.ProgramWriter {
     }
     const written = this.tight(node.object)
     const name = this.nameOf(node.property.value, "property")
-    if (!node.property.isLegalIdentifier) return `getattr(${written}, ${this.quoted(node.property.value)}, None)`
+    // a key read as written, `the "run_by" of its meta`:  that key, there or not
+    if (!node.property.isLegalIdentifier || node.property.asWritten)
+      return `getattr(${written}, ${this.quoted(node.property.value)}, None)`
     if (this.mayBeNothing(node.object) && !this.isSettingNow(node))
       return `getattr(${written}, ${this.quoted(name)}, None)`
     this.assertThere(node.object, written)

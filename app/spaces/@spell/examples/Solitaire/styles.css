@@ -48,11 +48,14 @@ solitaire-app {
   display: block;
   font-size: calc(100cqi / var(--card-width));
 }
-/* a card in no pile (one added to the table in the editor):  a column's usual width */
+/* a card in no pile (one added to the table in the editor):  a column's usual width, face up till it's turned */
 solitaire-card:not([layout] > *) {
   position: relative;
   display: inline-block;
   font-size: calc(6rem / var(--card-width));
+}
+solitaire-card:not([layout] > *):not([direction]) {
+  transform: perspective(3em) rotateY(0deg);
 }
 [layout] > *,
 solitaire-card,
