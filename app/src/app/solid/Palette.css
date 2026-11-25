@@ -70,7 +70,9 @@
 }
 
 /* The add bar down the editor's left edge, in Edit (epic `editor` T151):  a panel of its own, as narrow as its buttons,
-   beside the app;  room above and below it the page's (`--spell-page-padding`), the app's column its gap
+   beside the app;  room above and below it the panels' own, its edges in line with the app's in every theme
+   (`--spell-page-room-top`, `-bottom`;  I346:  `padding-block` took the page's three-value padding, so it had none),
+   the app's column its gap
    - docked to the window's left edge (T162):  no room on its left, its left corners square
    - a `+` atop, then a column of 32px buttons, 4px apart, each its icon alone, centred, 4px in from the panel's sides:
      40px across */
@@ -79,7 +81,7 @@
   display: flex;
   box-sizing: content-box;
   width: 40px;
-  padding-block: var(--spell-page-padding);
+  padding-block: var(--spell-page-room-top) var(--spell-page-room-bottom);
 
   /* its first showing on the page, under the top bar already drawn:  a short fade and slide in (I255) */
   &.arriving {

@@ -39,7 +39,10 @@
    */
   --spell-gap: 8px;
   --spell-window-room: var(--ui-panel-pane-window-room, 8px);
-  --spell-page-padding: var(--spell-gap) var(--spell-window-room) var(--spell-window-room);
+  /* the panels' room under the bar and above the window's bottom, on their own:  the add bar beside them takes them too */
+  --spell-page-room-top: var(--spell-gap);
+  --spell-page-room-bottom: var(--spell-window-room);
+  --spell-page-padding: var(--spell-page-room-top) var(--spell-window-room) var(--spell-page-room-bottom);
   /* a panel, and its header (a panel's menu) */
   --spell-pane-radius: var(--ui-panel-radius, var(--ui-radius-l));
   /* a panel's corners on a window edge:  the same, unless the theme attaches them */
@@ -100,7 +103,9 @@
 
 /* Spell:  white cards with soft shadows on the brand's pale page;  the bar has no fill or line */
 :root[data-spell-theme="spell"] {
-  --spell-page-padding: 16px 20px 20px;
+  --spell-page-room-top: 16px;
+  --spell-page-room-bottom: 20px;
+  --spell-page-padding: var(--spell-page-room-top) 20px var(--spell-page-room-bottom);
   --spell-gap: 16px;
   --ui-menu-header-bar-background: transparent;
   --ui-menu-header-bar-border: 1px solid transparent;
@@ -111,6 +116,8 @@
 
 /* Merlot:  flat panels joined by hairlines, edge to edge */
 :root[data-spell-theme="merlot"] {
+  --spell-page-room-top: 0;
+  --spell-page-room-bottom: 0;
   --spell-page-padding: 0;
   --spell-gap: 0;
   /* the bar a panel-coloured strip over its hairline, though Merlot's bars over a docs page are its page's colour (Q2) */
