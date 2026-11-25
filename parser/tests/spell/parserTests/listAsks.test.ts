@@ -125,6 +125,14 @@ describe("the first few", () => {
     expect(first.warnings.join("\n")).not.toContain("can't be asked")
   })
 
+  test("an exact value on a field it doesn't filter by stays here with `first`, so the read stops at 8 (I55)", () => {
+    const { warnings, compiled: code } = compiled(PLACE(`the first 8 jobs where its status is "open" and its kind is "x"`))
+    expect(code).toMatch(
+      /core\.savedThings\(\s*Job,\s*\{ filter: \{ status: "open" \} \},\s*"looks through",\s*\{ first: 8, where: \(job\) => job\.status === "open" && job\.kind === "x" \}\s*\)/
+    )
+    expect(warnings.join("\n")).not.toContain("can't be asked")
+  })
+
   test("a type kept in memory:  `the first 8 piles` is still nothing of its own", () => {
     const { errors } = compiled([`a pile is a thing`, `set x to the first 8 piles`])
     expect(errors).not.toEqual([])

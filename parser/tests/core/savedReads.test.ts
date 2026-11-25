@@ -430,3 +430,60 @@ describe("the first few that pass a `where` checked here", () => {
     expect(place.requests[0]![0]!.query).toEqual({ page: { at: "0", size: 2 } })
   })
 })
+
+describe("the first few, on a list that filters by only some of a `where` (epic `data` I55)", () => {
+  /** A list that filters by its notes only, two rows a page, as a web server's `it filters by notes` does. */
+  class NotesOnly extends CountingPlace {
+    takes(_collection: string, { filter = {} }: ListQuery) {
+      return { filter: Object.keys(filter).every((field) => field === "notes") }
+    }
+
+    async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      const { filter = {} } = query
+      const sent = "notes" in filter ? { filter: { notes: filter.notes } } : {}
+      this.requests.push([{ collection, query }])
+      const answer = await MemoryPlace.prototype.list.call(
+        this,
+        collection,
+        { ...query, ...sent, ...(!("notes" in filter) && { filter: undefined }), page: { at: query.page?.at ?? "0", size: 2 } },
+        context
+      )
+      return { ...answer, handled: { filter: Object.keys(filter).every((field) => field === "notes") } }
+    }
+  }
+
+  /** Ten recipes, every one "hot", every other a soup. */
+  async function ten() {
+    const place = new NotesOnly({ capabilities: { idOf: "id" } })
+    await place.apply(
+      Array.from({ length: 10 }, (_, at) => ({
+        kind: "insert" as const,
+        collection: "recipes",
+        id: `r${at}`,
+        fields: { id: `r${at}`, title: at % 2 ? "Stew" : "Soup", notes: "hot" }
+      }))
+    )
+    place.requests = []
+    return place
+  }
+
+  /** Is it a hot soup? */
+  const hotSoup = (recipe: unknown) => {
+    const { title, notes } = recipe as { title: string; notes: string }
+    return notes === "hot" && title === "Soup"
+  }
+
+  test("`the first 2 recipes where its notes is \"hot\" and its title is \"Soup\"`, as compiled:  page by page, and stops at 2", async () => {
+    const place = await ten()
+    const { Recipe } = program(place)
+    // the title, which it doesn't filter by, stays in the page (`EveryThing.savedAST()`)
+    const found = await core.savedThings(Recipe, { filter: { notes: "hot" } }, "looks through", {
+      first: 2,
+      where: hotSoup
+    })
+    expect(found.items).toHaveLength(2)
+    expect(place.requests).toHaveLength(2)
+    // what it filters by still goes to it
+    expect(place.requests[0]![0]!.query.filter).toMatchObject({ notes: "hot" })
+  })
+})

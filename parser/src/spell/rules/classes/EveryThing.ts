@@ -147,6 +147,8 @@ export class EveryThing extends SpellExpression<"type"> {
    *   - `its id is not nothing` is dropped:  every row a place holds has its id
    *   - the rest stays here, `core.filter()`, over what came back
    * - All of it handed over:  `first` goes too, as a page of that many.
+   *   - With `first`, a web server's `its X is` on a field its list doesn't filter by isn't handed over:  it stays
+   *     here, so the read stops at that many (epic `data` I55).  Without, it goes, and the place checks it.
    * - Some of it staying here, with `first`:  the read goes page by page, and stops once that many pass
    *   (`core.savedThings()`'s `until`);  without, it reads every page, up to the engine's ceiling.
    * - `checkedHere`:  nothing goes to the place, and every page is read (`ListCheckedHere`, `, checked here`).
@@ -159,9 +161,16 @@ export class EveryThing extends SpellExpression<"type"> {
     const saved = savedPlaceOfMatch(type)
     if (!saved) return undefined
     const parts = predicate && !checkedHere ? handedPartsOf(predicate, searchesOf(saved)?.fields ?? []) : undefined
-    const isWhole = !predicate || !!parts?.isWhole
+    // a web server's list sends only the fields it filters by:  with `first`, one it doesn't stays here, so the read
+    // goes page by page and stops at that many, rather than reading every page to filter by it (epic `data` I55)
+    const isPaged = first !== undefined && saved.placeType.placeKind === "web server"
+    const filters = isPaged ? filtersOf(saved) : "every field"
+    const isTaken = (part: P.ASTObjectLiteralProperty) =>
+      filters === "every field" || filters.includes(`${part.property.value}`)
+    const isWhole = !predicate || (!!parts?.isWhole && parts.filter.every(isTaken))
     const properties: P.ASTObjectLiteralProperty[] = []
-    const { filter = [], search = [] } = parts ?? {}
+    const { search = [] } = parts ?? {}
+    const filter = (parts?.filter ?? []).filter(isTaken)
     if (filter.length) {
       properties.push(queryProperty(match, "filter", new P.ASTObjectLiteral(match, { properties: filter })))
     }
