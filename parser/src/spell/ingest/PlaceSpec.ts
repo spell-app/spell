@@ -656,6 +656,8 @@ export class PlaceSpec {
       return { words, type: "inside", ...said, isItsOwner: true, ...(isList && { isListInside: true }) }
     if (!Object.keys(this.propertiesOf(inside)).length) {
       const resolvedInside = this.resolved(inside)
+      // its schema doesn't fix its shape, an API's `meta`:  an object, held whole, whatever keys it has
+      if (!isList && this.isFreeForm(resolvedInside)) return { words, type: "object", ...said, isFreeForm: true }
       const leftOut =
         resolvedInside?.additionalProperties !== undefined
           ? MAP_BY_NAME
@@ -674,6 +676,32 @@ export class PlaceSpec {
       ...(ref && LOCAL_REF.test(ref) && { insideSchemaAt: ref }),
       ...(isList && { isListInside: true })
     }
+  }
+
+  /**
+   * Does `schema` hold an object whose shape it doesn't fix (epic `data`, a free-form field):
+   * - no properties, and any others it likes:  no `additionalProperties`, `true` or `{}`;  FastAPI's `dict`, an API's `meta`
+   * - or one of several objects, each its own shape:  a `oneOf` of things, `placement` as a rack's or a shelf's
+   * - or nothing said at all, `{}`
+   * - NOT a map whose values its schema types, `additionalProperties: { type: "string" }`:  a map by name, left out
+   * - NOT one of several plain kinds, `anyOf: [{ type: "integer" }, { type: "string" }]`
+   */
+  private isFreeForm(schema: Schema | undefined): boolean {
+    if (!schema) return false
+    const kinds = schema.anyOf ?? schema.oneOf
+    if (kinds?.length) {
+      return kinds.every((each) => {
+        const kind = this.resolved(each)
+        return !!kind && (isNothing(kind) || kind.type === "object" || !!kind.properties || !!kind.allOf)
+      })
+    }
+    if (Array.isArray(schema.type) || (schema.type !== undefined && schema.type !== "object")) return false
+    const more = schema.additionalProperties
+    return (
+      more === undefined ||
+      more === true ||
+      (!!more && typeof more === "object" && !Object.keys(more).length)
+    )
   }
 
   /** The properties of `schema`, its `allOf`s' merged. */

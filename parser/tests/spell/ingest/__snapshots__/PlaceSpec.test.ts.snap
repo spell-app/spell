@@ -39,10 +39,12 @@ a "data source" is a thing
 	its "status" is a status
 	its "description" is text, with maximum length 200
 	its "sync interval" is a number
+	its "parameters" is an object
 	its "ignore rules" is text
 	its "owner" is an owner summary
 	its "comments" is text
 	its "tags" is a list of tag summaries
+	its "custom fields" is an object
 	its "created" is a date
 	its "last updated" is a date
 	its "last synced" is a date
@@ -59,6 +61,7 @@ a "job" is a thing
 	its "display" is text
 	its "object type" is text
 	its "object id" is a number
+	its "object" is an object
 	its "name" is required text, with maximum length 200
 	its "status" is a status
 	its "created" is a date
@@ -68,6 +71,7 @@ a "job" is a thing
 	its "completed" is a date
 	its "execution time" is text
 	its "user" is a user summary
+	its "data" is an object
 	its "error" is text
 	its "job id" is required text
 	its "queue name" is text, with maximum length 100
@@ -90,6 +94,7 @@ a "contact" is a thing
 	its "owner" is an owner summary
 	its "comments" is text
 	its "tags" is a list of tag summaries
+	its "custom fields" is an object
 	its "created" is a date
 	its "last updated" is a date
 
@@ -106,6 +111,7 @@ a "tenant group" is a thing
 	its "parent" is a tenant group
 	its "description" is text, with maximum length 200
 	its "tags" is a list of tag summaries
+	its "custom fields" is an object
 	its "created" is a date
 	its "last updated" is a date
 	its "tenant count" is a number
@@ -128,6 +134,7 @@ a "tenant" is a thing
 	its "owner" is an owner summary
 	its "comments" is text
 	its "tags" is a list of tag summaries
+	its "custom fields" is an object
 	its "created" is a date
 	its "last updated" is a date
 	its "circuit count" is a number
@@ -142,6 +149,7 @@ a "tenant" is a thing
 	its "cluster count" is a number
 
 a "kind" is a thing
+	its "value" is an object
 	its "label" is text
 
 a "status" is a thing

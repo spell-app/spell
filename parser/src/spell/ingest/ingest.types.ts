@@ -482,6 +482,7 @@ export type FieldKind =
   | "list of text"
   | "list of numbers"
   | "inside"
+  | "object"
   | "nothing"
 
 /** One field of a collection. */
@@ -518,6 +519,12 @@ export type FieldDescription = {
   isListInside?: boolean
   /** It holds what holds it, the same fields:  PokéAPI's chain's `evolves_to`, a list of chains. */
   isItsOwner?: boolean
+  /**
+   * Its schema doesn't fix its shape:  an object with any fields, an API's `meta` (`additionalProperties: true`).
+   * - Its type is `object`, written `its "meta" is an object`:  held whole, every key and what's inside, whatever its
+   *   rows hold;  never a thing of the keys rows show, which would drop the ones it doesn't name.
+   */
+  isFreeForm?: boolean
   /**
    * The unit its answer says it's in (epic `data` P33):  Open-Meteo's `"hourly_units": { "temperature_2m": "°C" }`.
    * - One of Spell's units (`°C`, `mm`, `km/h`), it's written as that measure:

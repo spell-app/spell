@@ -23,7 +23,11 @@ const SPELL_TYPES: Readonly<Partial<Record<FieldDescription["type"], string>>> =
   link: "text",
   "list of links": "a list of text",
   "list of text": "a list of text",
-  "list of numbers": "a list of numbers"
+  "list of numbers": "a list of numbers",
+  // a free-form field, an API's `meta`:  held whole, whatever keys it has
+  object: "an object",
+  // a field every row read holds, empty each time:  kept, as text, till a value says more (`fieldsSeenIn()`)
+  nothing: "text"
 }
 
 /** A one-file place, as a line says it:  the kind's `file` isn't a word Spell takes by itself (epic `language` P40). */
@@ -1089,6 +1093,8 @@ export function mergedSpell(
   const markOf = (is: "new" | "gone") => (marks ? PlaceWords.markFor(is, marks.date, marks.lang) : undefined)
   const lines = text.split("\n")
   const own = new Set(allLines(before).map((line) => line.text))
+  // what it wrote last time, in an older version's words too:  never a person's line
+  const wrote = new Set(written.map((line) => line.trim().replace(/^- /, "")))
   const placeAt = lines.findIndex((line) => sameHeader(line, before.header))
   if (placeAt < 0) {
     merge.couldnt.push(`The place's line isn't as it was written, so nothing under it was changed:  ${before.header}`)
@@ -1108,7 +1114,8 @@ export function mergedSpell(
     merge,
     own,
     usesOf,
-    markOf
+    markOf,
+    wrote
   })
   // each type, and a new one at the end
   for (const type of after.types) {
@@ -1130,7 +1137,7 @@ export function mergedSpell(
       merge.couldnt.push(`"${was.header}" isn't in the file as it was written, so its lines weren't changed.`)
       continue
     }
-    mergeBlock({ lines, blockAt, before: was.lines, after: type.lines, merge, own, usesOf, markOf })
+    mergeBlock({ lines, blockAt, before: was.lines, after: type.lines, merge, own, usesOf, markOf, wrote })
   }
   for (const type of before.types) {
     if (type.isInside || after.types.some((each) => isSameType(each, type))) continue
@@ -1223,6 +1230,8 @@ type BlockMerge = {
   usesOf: (words: string, own: ReadonlySet<string>) => boolean
   /** The mark for a line found new, or gone and kept:  `undefined`, none. */
   markOf: (is: "new" | "gone") => string | undefined
+  /** The lines it wrote last time, as the description keeps them:  never a person's. */
+  wrote: ReadonlySet<string>
 }
 
 /** The day a look was, and the file's language:  see `mergedSpell()`. */
@@ -1234,7 +1243,7 @@ export type MergeMarks = {
 }
 
 /** SIDE EFFECT:  one block's lines, added, changed and gone:  see `mergedSpell()`. */
-function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf }: BlockMerge): void {
+function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf, wrote }: BlockMerge): void {
   const wereBy = new Map(before.map((line) => [line.key, line.text]))
   for (const line of after) {
     const was = wereBy.get(line.key)
@@ -1242,6 +1251,12 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf 
     if (was === undefined) {
       // a person wrote it already, word for word:  nothing to add
       if (lineAt(lines, blockAt, line.text) >= 0) continue
+      // a person's line reads the same field already, in words of their own:  theirs wins, never a second beside it
+      const theirs = isFieldLine(line.text) ? personsLineFor(lines, blockAt, line.text, before, wrote) : undefined
+      if (theirs !== undefined) {
+        merge.couldnt.push(`It would add "${line.text}", but your line reads that field already, so yours stays:  ${theirs}`)
+        continue
+      }
       const mark = isFieldLine(line.text) ? markOf("new") : undefined
       lines.splice(endOfBlock(lines, blockAt), 0, ...fileLinesOf(line), ...(mark ? [`\t\t-- ${mark}`] : []))
       merge.changed.push(`Added:  ${line.text}`)
@@ -1286,6 +1301,42 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf 
         `Dropped your words for "${words ?? text}", as it's gone:  ${dropped.map((line) => line.trim()).join(" ")}`
       )
   }
+}
+
+/**
+ * The line a person wrote in the block at `blockAt` that reads the same field of the source as `text`, one the tool would
+ * add:  `undefined` for none.
+ * - The same field:  the same name in the source, by what it's `stored as`, else by its words, whatever their spacing
+ *   or case:  `its "meta" is text` reads what `its "meta" is an object` would.
+ * - A line the tool wrote there (`before`), or wrote last time (`written`, in an older version's words), is never a person's.
+ */
+function personsLineFor(
+  lines: readonly string[],
+  blockAt: number,
+  text: string,
+  before: readonly SpellLine[],
+  written: ReadonlySet<string>
+): string | undefined {
+  const field = sourceFieldOf(text)
+  if (field === undefined) return undefined
+  const wrote = new Set([...written, ...before.map((line) => line.text)])
+  const end = endOfBlock(lines, blockAt)
+  for (let at = blockAt + 1; at < end; at++) {
+    if (!/^\t[^\t]/.test(lines[at]!)) continue
+    const theirs = lines[at]!.trim().replace(/^- /, "")
+    if (isFieldLine(theirs) && !wrote.has(theirs) && sourceFieldOf(theirs) === field) return theirs
+  }
+  return undefined
+}
+
+/** The source's name for the field a field's line reads, in a form to compare:  its `stored as`, else its words. */
+function sourceFieldOf(line: string): string | undefined {
+  const name = /, (?:stored as|guardad[oa] como) "([^"]+)"/.exec(line)?.[1] ?? wordsIn(line)
+  return name
+    ?.replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[\s_-]+/g, " ")
+    .trim()
+    .toLowerCase()
 }
 
 /** Is `line` a field's line, `its "status" is ...`, in either language? */

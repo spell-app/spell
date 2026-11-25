@@ -70,7 +70,9 @@ describe("PlaceSpec", () => {
     expect(tenants.fields!.id!.isRequired).toBeUndefined()
     expect(tenants.fields!.created).toMatchObject({ type: "date", format: "date-time" })
     expect(tenants.fields!.group).toMatchObject({ type: "inside", schemaAt: "#/components/schemas/BriefTenantGroup" })
-    expect(tenants.fields!.custom_fields!.leftOut).toMatch(/map by name/)
+    // any fields it likes, `additionalProperties: {}`:  an object, held whole
+    expect(tenants.fields!.custom_fields).toMatchObject({ type: "object", isFreeForm: true })
+    expect(tenants.fields!.custom_fields!.leftOut).toBeUndefined()
   })
 
   test("writes and action routes come from the paths, each with its method and what it takes", () => {

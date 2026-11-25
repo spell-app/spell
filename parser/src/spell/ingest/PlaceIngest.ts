@@ -43,6 +43,7 @@ import {
   checkSecondsWithin,
   describeLook,
   fieldsOf,
+  fieldsSeenIn,
   fingerprintOf,
   idFieldOf,
   plainNameFor,
@@ -412,6 +413,9 @@ export class PlaceIngest {
         }
       )
       collection.state = state
+      // a list no schema typed:  a field any row read holds is kept, though others don't hold it
+      const seen = fieldsSeenIn(collection, rows)
+      if (seen.length) changes.push(`${name}:  fields its rows hold, new:  ${seen.join(", ")}.`)
       // each question it's asked for by, a field of its own:  `stacks are asked for by their owner-id`
       if (Object.keys(collection.fields).length)
         for (const param of Object.keys(collection.askedBy ?? {}))
@@ -1798,6 +1802,9 @@ function carryOver(description: PlaceDescription, old: PlaceDescription): boolea
       continue
     }
     const [oldName, oldCollection] = was
+    // no schema says its fields, and none were read now:  those its rows showed before stay (`fieldsSeenIn()`)
+    if (!Object.keys(collection.fields).length && collection.schemaAt === undefined)
+      collection.fields = structuredClone(oldCollection.fields)
     for (const [field, about] of Object.entries(collection.fields)) {
       const wasField = oldCollection.fields[field]
       if (!wasField) {
