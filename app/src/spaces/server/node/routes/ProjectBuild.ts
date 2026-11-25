@@ -31,6 +31,8 @@ import { appDir } from "spell/app/spaces/server/node/people/localPerson"
  *   - only a project that's there (it has a project file):  an unknown one 404s at once
  *   - a file that's there is served at once, even if its sources changed since:
  *     `start()` and `spell compile --stale` catch those
+ *   - a compile that ended without writing it says why (`failureOf()`):  its request answers with what the compile
+ *     said, not that the file isn't there (`projectUtils.buildFailures`, I50:  "ENOENT ... stat" hid "isn't a project")
  * - A child process, the checkout's OWN `spell` CLI, never this one:
  *   - it compiles exactly as `spell compile` does:  every target, the scope pack, the checks
  *   - the page server runs the API in its own process, and keeps serving pages while it compiles
@@ -71,6 +73,9 @@ export class ProjectBuild {
 
   /** the projects each run has compiled so far, as its lines say:  the startup build's, and each project's compile's */
   private compiled = { startup: [] as string[], byProject: new Map<string, string[]>() }
+
+  /** what each project's last compile said, by project id, when it ended without writing what was asked for */
+  private failures = new Map<string, string[]>()
 
   /** its lines in the server's log */
   readonly log = new SRV.ServerLog({ prefix: "projects" })
@@ -139,6 +144,14 @@ export class ProjectBuild {
     } finally {
       if (--waiting.requests === 0) this.waiting.delete(projectId)
     }
+  }
+
+  /**
+   * Why project `projectId`'s last compile wrote nothing:  what it said, its errors and how it ended, a line each;
+   * `undefined` when it wrote what was asked for, or hasn't run.
+   */
+  failureOf(projectId: string): string[] | undefined {
+    return this.failures.get(projectId)
   }
 
   /**
@@ -213,8 +226,12 @@ export class ProjectBuild {
     let compile = this.compiles.get(projectId)
     if (!compile) {
       const compiled: string[] = []
+      const said: string[] = []
       this.compiled.byProject.set(projectId, compiled)
-      compile = this.run(["compile", projectId], compiled)
+      compile = this.run(["compile", projectId], compiled, said).then(() => {
+        if (existsSync(file) || !said.length) this.failures.delete(projectId)
+        else this.failures.set(projectId, said)
+      })
       this.compiles.set(projectId, compile)
       void compile.then(() => {
         this.compiles.delete(projectId)
@@ -239,18 +256,23 @@ export class ProjectBuild {
       } catch {
         return next()
       }
-      if (projectUtils.isBuiltFile(location)) await this.untilBuilt(location)
+      if (projectUtils.isBuiltFile(location) && !(await this.untilBuilt(location))) {
+        const failure = this.failures.get(location.projectId)
+        if (failure)
+          projectUtils.buildFailures.set(request, `${location.projectId} didn't compile:  ${failure.join("\n")}`)
+      }
       next()
     }
   }
 
   /**
    * Run the CLI with `args`, in the checkout, logging its output;  resolves when it ends, however it ends.
-   * - SIDE EFFECT:  each project it says it compiled goes on the end of `compiled`, as it says so
+   * - SIDE EFFECT:  each project it says it compiled goes on the end of `compiled`, as it says so;  every other line
+   *   it says, but a warning or node's own notes, on the end of `said`, and how it ended when that's a failure
    * - a checkout without the CLI (a test's temp folder) runs nothing
    * - its own process group (`detached`), so `stop()` ends what it starts too
    */
-  private run(args: string[], compiled: string[] = []): Promise<void> {
+  private run(args: string[], compiled: string[] = [], said: string[] = []): Promise<void> {
     const cli = this.cli
     if (!cli || !existsSync(cli)) return Promise.resolve()
     // each run its own group, from its first line shown
@@ -276,6 +298,7 @@ export class ProjectBuild {
       createInterface({ input: stream }).on("line", (line) => {
         const project = COMPILED_LINE.exec(line)?.[1]
         if (project) compiled.push(project)
+        else if (line.trim() && !NOT_SAID.some((it) => it.test(line))) said.push(line.trim())
         this.log.childLine(line, COMPILE_LINES)
       })
     }
@@ -287,7 +310,10 @@ export class ProjectBuild {
       })
       child.once("exit", (code, signal) => {
         // 1:  a project had errors, listed above;  its files are written all the same
-        if (code !== 0 && code !== 1) this.log.error(`the compile failed (${signal ?? `exit ${code}`})`)
+        if (code !== 0 && code !== 1) {
+          this.log.error(`the compile failed (${signal ?? `exit ${code}`})`)
+          said.push(`the compile failed (${signal ?? `exit ${code}`})`)
+        }
         this.children.delete(child)
         done()
       })
@@ -305,6 +331,12 @@ const COMPILE_LINES: SRV.LineRule[] = [
   { line: /^\s+\S.*\bwarning:/, level: Logger.DEBUG },
   { line: /^✓ .* · wrote /, level: Logger.INFO, shown: (line) => line.replace(/ · wrote .*$/, "") }
 ]
+
+/**
+ * Lines of a compile's that never say why it failed:  a project up to date or compiled, a warning, node's own notes
+ * (`(node:123) [DEP0205] DeprecationWarning ...`).
+ */
+const NOT_SAID = [/^✓ /, /^\s+\S.*\bwarning:/, /^\(node:\d+\)/, /^\(Use `node /]
 
 /** A line of `spell compile`'s saying it compiled a project, and wrote its files:  `✓ <project>  ... · wrote ...`. */
 const COMPILED_LINE = /^✓ (\S+) .* · wrote /

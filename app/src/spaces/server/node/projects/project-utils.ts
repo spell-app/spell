@@ -7,7 +7,7 @@
  * - NOTE: loads spaces' barrel, so spell's project groups are registered (`SPACES.PROJECT_GROUPS`),
  *   and sets this machine's person and their org's groups (`thisMachinesPerson()`).
  */
-import { existsSync, readFileSync } from "fs"
+import { existsSync, readFileSync, readdirSync } from "fs"
 import { readFile, stat } from "fs/promises"
 import { escapeRegExp } from "lodash-es"
 import { basename, dirname, extname, relative, resolve, sep } from "path"
@@ -284,6 +284,30 @@ export function buildFolderInBuild(projectId: string): string | undefined {
   return relative(environment.buildDir, buildFolder).split(sep).join("/")
 }
 
+/**
+ * SIDE EFFECT:  throws a 404 (`SRV.HttpError`) when `folder`, project `projectId`'s, is a GROUP's folder:  it holds
+ * projects (a folder with a project file of its own), and has no project file itself.
+ * - Read as a project, `getIndex()` found none of its own files there, and wrote `DEFAULT_FILE` and a project file into
+ *   it:  the folder was a project from then on, its group gone, and every project in it unreachable by its address
+ *   (`@acme/tools/jobs` "isn't a project").  A page asking for a group's address as a project's did it.
+ * - A project's folder that holds projects of its own (it has a project file) is a project, as it always was.
+ */
+function refuseGroupFolder(projectId: string, folder: string): void {
+  if (hasProjectFile(folder) || !holdsProjects(folder)) return
+  throw new SRV.HttpError(404, `${projectId} is a group of projects, not a project:  its folder holds projects`)
+}
+
+/** Does `folder` hold a project:  a folder in it with a project file?  None when it isn't there. */
+function holdsProjects(folder: string): boolean {
+  try {
+    return readdirSync(folder, { withFileTypes: true }).some(
+      (entry) => entry.isDirectory() && hasProjectFile(resolve(folder, entry.name))
+    )
+  } catch {
+    return false
+  }
+}
+
 /** Default file created for a brand-new project, or when `getIndex()` finds a project with zero files. */
 const DEFAULT_FILE = {
   filePath: "/Untitled.spell",
@@ -500,12 +524,15 @@ export type GetIndexOptions = {
  *     The disk reader passes that (`installDiskFetch()`), so opening loose spell files in an editor or on the
  *     command line never writes a project file into their folder.
  * - HACKY: if project has zero manifest-worthy files, creates `DEFAULT_FILE` so there's always at least one.
+ * - NEVER a group's folder, one holding projects with no project file of its own (`refuseGroupFolder()`):  404, and
+ *   nothing written.
  */
 export const getIndex = async (
   projectId: string,
   { saving = "always", reading = "your drafts", person = thisMachinesPerson().address }: GetIndexOptions = {}
 ): Promise<ProjectIndexJSON> => {
   const location = SP.SpellLocation.getProjectLocation(projectId)
+  refuseGroupFolder(projectId, location.serverPath)
 
   // Get non-hidden files in project which the front-end knows how to deal with
   const ignoreFolder = (relativePath: string) => isFolderOutsideProject(location.serverPath, relativePath)
@@ -717,6 +744,12 @@ export function fileOrOldName(serverPath: string): string {
  *   that would send a JSON body on top of the file we already streamed.
  *   We catch by hand instead, so a rejection can't go unhandled and hang the client.
  */
+/**
+ * Why a request's built file isn't there, by request:  what its project's compile said (`ProjectBuild.builtFirst()`).
+ * - `request_getFile()` answers with it in place of the file system's "ENOENT ... stat" (I50).
+ */
+export const buildFailures = new WeakMap<Request, string>()
+
 export const request_getFile = async (request: Request, response: Response) => {
   let location: SP.SpellLocation
   try {
@@ -759,7 +792,8 @@ export const request_getFile = async (request: Request, response: Response) => {
   } catch (error) {
     // Can't send an error body once the file has started streaming -- the client sees a truncated response.
     if (response.headersSent) return
-    responseUtils.sendError(response, 500, error as Error)
+    const failure = (error as NodeJS.ErrnoException).code === "ENOENT" ? buildFailures.get(request) : undefined
+    responseUtils.sendError(response, 500, failure ? new Error(failure) : (error as Error))
   }
 }
 
@@ -899,6 +933,7 @@ export function isDraftable(location: SP.SpellLocation): boolean {
  *   unless that first file IS its project file, an imported project's, which keeps the version it says.
  */
 export const createProject = async (projectId: string, filePath: string, contents: any) => {
+  refuseGroupFolder(projectId, SP.SpellLocation.getProjectLocation(projectId).serverPath)
   const location = SP.SpellLocation.getFileLocation(projectId, filePath || DEFAULT_FILE.filePath)
   const saved = await fileUtils.saveFile(location.serverPath, contents || DEFAULT_FILE.contents)
   // its file only names its Spell after its first file is there:  `getIndex()` lists that file

@@ -1,5 +1,15 @@
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync
+} from "fs"
 import { tmpdir } from "os"
 import { dirname, resolve } from "path"
 
@@ -225,6 +235,27 @@ describe("project-utils", () => {
       "export default 1\n"
     )
     expect(existsSync(resolve(workspace, "Saved/Saved.spell.js"))).toBe(false)
+  })
+
+  // a group's folder read as a project got `Untitled.spell` and a project file, and its projects were lost
+  test("NEVER makes a group's folder a project:  one holding projects, with no project file, 404s, nothing written", async () => {
+    const inner = project("Shelved")
+    const shelf = resolve(workspace, "Shelf")
+    mkdirSync(shelf, { recursive: true })
+    renameSync(resolve(workspace, "Shelved"), resolve(shelf, "Shelved"))
+    const groupId = inner.replace(/\/Shelved$/, "/Shelf")
+
+    await expect(projectUtils.getIndex(groupId)).rejects.toMatchObject({ status: 404 })
+    await expect(projectUtils.createProject(groupId, "", "")).rejects.toMatchObject({ status: 404 })
+    expect(readdirSync(shelf)).toEqual(["Shelved"])
+  })
+
+  test("a project's folder holding a project of its own is still a project", async () => {
+    const outer = project("Outer")
+    const inner = project("Inner")
+    renameSync(resolve(workspace, "Inner"), resolve(workspace, "Outer", "Inner"))
+    expect(inner).not.toBe(outer)
+    expect(Object.keys((await projectUtils.getIndex(outer)).manifest)).toEqual([`${outer}/Outer.spell`])
   })
 
   test("a project's index says where its build folder is, inside the build folder:  no ../ (J33)", async () => {

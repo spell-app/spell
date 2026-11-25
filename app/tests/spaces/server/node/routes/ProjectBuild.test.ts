@@ -9,6 +9,7 @@ import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vit
 import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import { SP } from "spell/parser/spell"
 import { ProjectBuild } from "spell/app/spaces/server/node/routes/ProjectBuild"
+import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 
 ////////////////
 // ## Fakes
@@ -108,6 +109,38 @@ describe("ProjectBuild", () => {
     put(compiled.serverPath, "export {}\n")
     children[0]!.exit(0)
     expect(await Promise.all(waiting)).toEqual([true, true])
+  })
+
+  // I50:  a request for it said "ENOENT ... stat", and what the compile said was only in the server's log
+  test("a compile that writes nothing says why:  its lines, and how it ended;  its request answers with them", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn })
+    const request = { originalUrl: SP.SpellUrls.fileUrl(compiled.path) }
+    const next = vi.fn()
+    const serving = build.builtFirst()(request as never, {} as never, next)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+    children[0]!.stderr.write("(node:1) [DEP0205] DeprecationWarning:  register()\n")
+    children[0]!.stdout.write(`'${projectId}' isn't a project, a spell file or a project root\n`)
+    await new Promise((done) => setTimeout(done, 10))
+    children[0]!.exit(2)
+    await serving
+    const said = [`'${projectId}' isn't a project, a spell file or a project root`, "the compile failed (exit 2)"]
+    expect(build.failureOf(projectId)).toEqual(said)
+    expect(next).toHaveBeenCalledOnce()
+    expect(projectUtils.buildFailures.get(request as never)).toBe(`${projectId} didn't compile:  ${said.join("\n")}`)
+  })
+
+  test("a compile that writes it says nothing failed", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn })
+    const waiting = build.untilBuilt(compiled)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+    children[0]!.stdout.write("an error that the compile got past\n")
+    put(compiled.serverPath, "export {}\n")
+    await new Promise((done) => setTimeout(done, 10))
+    children[0]!.exit(1)
+    expect(await waiting).toBe(true)
+    expect(build.failureOf(projectId)).toBeUndefined()
   })
 
   test("a compile is told the page server's app (`SPELL_APP_DIR`), for its org's groups;  run in the checkout", async () => {
