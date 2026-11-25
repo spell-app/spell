@@ -3770,7 +3770,7 @@
           "ruleNames": ["list_count"],
           "internal": false,
           "file": "src/spell/rules/lists/ListCount.ts",
-          "line": 15,
+          "line": 18,
           "purpose": "Length of something KNOWN to be a list, without naming its items, e.g. `the number of card suits` => `core.itemCountOf(Card.Suits)`.",
           "syntaxes": [
             {
@@ -9171,7 +9171,7 @@
           "ruleNames": ["number_of_things_where"],
           "internal": false,
           "file": "src/spell/rules/places/NumberOfThingsWhere.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "How many of a type fit (epic `data` P11).",
           "syntaxes": [
             {
