@@ -445,7 +445,12 @@ describe("the first few, on a list that filters by only some of a `where` (epic 
       const answer = await MemoryPlace.prototype.list.call(
         this,
         collection,
-        { ...query, ...sent, ...(!("notes" in filter) && { filter: undefined }), page: { at: query.page?.at ?? "0", size: 2 } },
+        {
+          ...query,
+          ...sent,
+          ...(!("notes" in filter) && { filter: undefined }),
+          page: { at: query.page?.at ?? "0", size: 2 }
+        },
         context
       )
       return { ...answer, handled: { filter: Object.keys(filter).every((field) => field === "notes") } }
@@ -473,7 +478,7 @@ describe("the first few, on a list that filters by only some of a `where` (epic 
     return notes === "hot" && title === "Soup"
   }
 
-  test("`the first 2 recipes where its notes is \"hot\" and its title is \"Soup\"`, as compiled:  page by page, and stops at 2", async () => {
+  test('`the first 2 recipes where its notes is "hot" and its title is "Soup"`, as compiled:  page by page, and stops at 2', async () => {
     const place = await ten()
     const { Recipe } = program(place)
     // the title, which it doesn't filter by, stays in the page (`EveryThing.savedAST()`)

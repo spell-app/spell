@@ -210,3 +210,30 @@ describe("a place that moved (T77)", () => {
     expect(couldntChange.join("\n")).toMatch(/isn't as it was written/)
   })
 })
+
+describe("what each list takes, tried on each, for a place with no description", () => {
+  test("lists that take different questions each say their own under their line", async () => {
+    const recipes = kitchenServer()
+    const NOTES = [
+      { id: 1, text: "salt", author: "ana" },
+      { id: 2, text: "pepper", author: "bo" },
+      { id: 3, text: "lime", author: "ana" }
+    ]
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof URL ? input.href : (input as string)}`)
+      const answerWith = (body: unknown) => Response.json(body, { headers: { "access-control-allow-methods": "GET" } })
+      if (url.href === API) return answerWith({ recipes: `${API}/recipes`, notes: `${API}/notes` })
+      // its notes ignore every question
+      if (url.pathname === "/api/notes") return answerWith(NOTES)
+      return recipes.fetch(input)
+    }) as typeof globalThis.fetch
+    const { ingest } = ingestOn(fetch)
+    const { spell, description } = await ingest.add({ address: API, into: "/K.spell", name: "kitchen" })
+    expect(spell).toMatch(
+      /^\trecipes live at "\/recipes"\n\t\tit filters by title, cuisine and servings\n\t\tit sorts by title, cuisine and servings with "_sort"$/m
+    )
+    expect(spell).toMatch(/^\tnotes live at "\/notes"$/m)
+    expect(spell).not.toMatch(/^\tit filters by/m)
+    expect(description.spellCantSay.join("\n")).not.toMatch(/filter or sort/)
+  })
+})

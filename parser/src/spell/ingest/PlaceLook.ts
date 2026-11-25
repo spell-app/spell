@@ -9,6 +9,7 @@ import {
   type CollectionLook,
   type IngestAsk,
   type IngestFiles,
+  type ListTakes,
   type PagingSeen,
   type PlaceLook,
   type SearchSeen,
@@ -588,10 +589,18 @@ const OFFSET_PARAMS = [
   { limit: "limit", offset: "skip" }
 ]
 
+/** The most lists a look tries filters and sorts on, each its own (a place with no description of its own). */
+const MOST_LISTS_TRIED = 6
+
 /**
- * What the server does when it's asked, tried on its first plain list (epic `data` T162):  `undefined` if it does none of it.
+ * What the server does when it's asked (epic `data` T162):  `undefined` if it does none of it.
+ * - Filters and sorts tried on each plain list, its own, up to `MOST_LISTS_TRIED` and the reader's room:
+ *   - every list tried finding the same, and every plain list tried:  the place's, `it filters by cuisine`
+ *   - else each list's own, `CollectionLook.takes`, said under its `live at` line
+ * - The fields it gives, and how it pages, on the first:  a server does those one way.
  * - Reads only, as every look is, and few:  a server that ignores these answers as if it hadn't been asked.
  * - A list of a page or two's rows is enough to tell by.
+ * - SIDE EFFECT:  each list's own `takes`, when they differ.
  * - NEVER throws:  past the reader's limits, what's left of it just says nothing.
  */
 async function serverTakesOf(
@@ -599,7 +608,7 @@ async function serverTakesOf(
   read: readonly CollectionLook[],
   reader: PoliteReader
 ): Promise<ServerTakes | undefined> {
-  const list = read.find(
+  const lists = read.filter(
     ({ at, rows, searchedOnly, listsGive, answersOne, isCut }) =>
       rows.length >= 2 &&
       !IS_FOUND_BY_NAME.test(at) &&
@@ -609,24 +618,38 @@ async function serverTakesOf(
       !answersOne &&
       !isCut
   )
-  if (!list) return undefined
-  const url = `${place}${list.at}`
-  const askFor = async (query: string) => {
-    try {
-      const answer = await reader.read(`${url}?${query}`)
-      if (answer.status >= 400 || answer.isCut) return undefined
-      const body = jsonOf(answer.text)
-      return rowsIn(body)?.rows?.filter(isRow)
-    } catch {
-      // none of these is what the look's for:  past its limits, they just say nothing
-      return undefined
+  const [first] = lists
+  if (!first) return undefined
+  const askerOf = (list: CollectionLook): AskFor => {
+    const url = `${place}${list.at}`
+    return async (query: string) => {
+      try {
+        const answer = await reader.read(`${url}?${query}`)
+        if (answer.status >= 400 || answer.isCut) return undefined
+        const body = jsonOf(answer.text)
+        return rowsIn(body)?.rows?.filter(isRow)
+      } catch {
+        // none of these is what the look's for:  past its limits, they just say nothing
+        return undefined
+      }
     }
   }
+  const tried: Array<[CollectionLook, ListTakes]> = []
+  for (const list of lists.slice(0, MOST_LISTS_TRIED)) {
+    if (tried.length && !reader.hasRoom) break
+    const askFor = askerOf(list)
+    tried.push([list, { ...(await filtersOf(list, askFor)), ...(await sortsOf(list, askFor)) }])
+  }
+  const said = tried.map(([, takes]) => JSON.stringify(takes))
+  const isOneWay = tried.length === lists.length && new Set(said).size === 1
+  if (!isOneWay) {
+    for (const [list, takes] of tried) if (Object.keys(takes).length) list.takes = takes
+  }
+  const askFor = askerOf(first)
   const takes: ServerTakes = {
-    ...(await filtersOf(list, askFor)),
-    ...(await sortsOf(list, askFor)),
-    ...(await fieldsNamedOf(list, askFor)),
-    ...(list.paging === "none" && (await pagesAskedOf(list, askFor)))
+    ...(isOneWay && tried[0]![1]),
+    ...(await fieldsNamedOf(first, askFor)),
+    ...(first.paging === "none" && (await pagesAskedOf(first, askFor)))
   }
   return Object.keys(takes).length ? takes : undefined
 }
@@ -876,6 +899,35 @@ async function searchOf(url: string, look: CollectionLook, reader: PoliteReader)
       } catch (error) {
         if (error instanceof IngestStopped) throw error
       }
+    }
+  }
+  return undefined
+}
+
+/**
+ * The field a list's search question looks in, by trying it:  a word from a row's name or title, asked of `asking`
+ * (the list's address with that question and its page), answering rows that each hold it.
+ * - `undefined` when no word tried says:  it may look in all of each thing, or in a field no row shows.
+ * - Only reads;  a refusal or an answer it can't read says nothing.
+ * - throws `IngestStopped` past the reader's limits
+ */
+export async function searchedFieldOf(
+  rows: ReadonlyArray<Record<string, unknown>>,
+  asking: (word: string) => string,
+  reader: PoliteReader
+): Promise<string | undefined> {
+  const fields = [...SEARCHED_FIELDS, ...Object.keys(rows[0] ?? {}).filter((name) => /name|title/i.test(name))]
+  for (const field of [...new Set(fields)]) {
+    const word = wordToSearchFor(rows, field)
+    if (!word) continue
+    try {
+      const answer = await reader.read(asking(word))
+      if (answer.status >= 400 || answer.isCut) continue
+      const found = rowsIn(jsonOf(answer.text))?.rows?.filter(isRow) ?? []
+      const holdsIt = (row: Record<string, unknown>) => textIn(row[field]).toLowerCase().includes(word)
+      if (found.length && found.every(holdsIt)) return field
+    } catch (error) {
+      if (error instanceof IngestStopped) throw error
     }
   }
   return undefined

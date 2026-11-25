@@ -166,6 +166,7 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     ...(look.tag !== undefined && { tag: look.tag }),
     ...(look.operations && { operations: look.operations }),
     ...(look.pagesWith && { pagesWith: look.pagesWith }),
+    ...(look.takes && { takes: look.takes }),
     ...(look.isOne && { isOne: true }),
     // from the description only:  `spell place verify` tries it
     // no field said:  `untyped`, as a read fills it
@@ -206,7 +207,10 @@ export function fieldsOf(rows: ReadonlyArray<Record<string, unknown>>, depth = 0
  * - A list a schema typed says its own fields:  nothing changes.
  * - Returns the fields it added or changed, by the source's names, `data.port`.
  */
-export function fieldsSeenIn(collection: CollectionDescription, rows: ReadonlyArray<Record<string, unknown>>): string[] {
+export function fieldsSeenIn(
+  collection: CollectionDescription,
+  rows: ReadonlyArray<Record<string, unknown>>
+): string[] {
   if (collection.schemaAt !== undefined || !rows.length || !Object.keys(collection.fields).length) return []
   return withFieldsSeen(collection.fields, fieldsOf(rows))
 }

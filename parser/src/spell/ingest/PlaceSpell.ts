@@ -259,7 +259,11 @@ function allSpellPartsFor(
         text: `${collectionWords(description)} ${where} "${description.at}"`
       })
       // paging its own way, one step in under its line, wins for it (epic `data` P56)
-      if (kind === "web server") placeLines.push(...ownPagingLines(collection, description, placePages, placeSize))
+      if (kind === "web server") {
+        placeLines.push(...ownPagingLines(collection, description, placePages, placeSize))
+        // what it filters, sorts and searches by, one step in under its line too
+        placeLines.push(...ownTakesLines(collection, description))
+      }
     }
     if (searchedApart && description.searchedBy) {
       const at = searchAddressOf(description)
@@ -434,6 +438,49 @@ function ownPagingLines(
       ? [{ key: `size:${collection}`, text: `\tit gives up to ${pagesWith.most} at a time` }]
       : [])
   ]
+}
+
+/**
+ * The lines one step in under a list's `live at` line saying what it takes besides paging (`ListTakes`):
+ * - `it filters by job-id and session-id`
+ * - `it sorts by title and cuisine with "_sort"`, the fields a try saw it sort by
+ * - `it sorts newest first by created-at as "created_at", with "order_by"`, each order its sort question names, once
+ *   it's known which way round (a verify tries it);  an order naming no field has no line
+ * - `it searches names with "search"`, or `it searches everything with "search"` while no try found the field
+ * - Never a field Spell leaves out, as no line could name it.
+ */
+function ownTakesLines(collection: string, { takes, fields }: CollectionDescription): SpellLine[] {
+  if (!takes) return []
+  const shown = (name: string) => (fields[name] && !fields[name]!.leftOut ? fields[name] : undefined)
+  const wordsOf = (names: readonly string[]) => names.flatMap((name) => shown(name)?.words ?? [])
+  const lines: SpellLine[] = []
+  const { filters = [], sorts = [], sortedWith, orders = [], search } = takes
+  const filtered = wordsOf(filters)
+  if (filtered.length) {
+    lines.push({ key: `takes:${collection}:filters`, text: `\tit filters by ${fieldsInLine(filtered)}` })
+  }
+  const sorted = wordsOf(sorts)
+  if (sorted.length) {
+    const asked = sortedWith && sortedWith !== "sort" ? ` with "${sortedWith}"` : ""
+    lines.push({ key: `takes:${collection}:sorts`, text: `\tit sorts by ${fieldsInLine(sorted)}${asked}` })
+  }
+  for (const { as, field, descending } of orders) {
+    const about = field === undefined ? undefined : shown(field)
+    if (!about || descending === undefined) continue
+    const isDate = about.type === "date"
+    const way = descending ? (isDate ? "newest first" : "highest first") : isDate ? "oldest first" : "lowest first"
+    const asked = sortedWith && sortedWith !== "sort" ? `, with "${sortedWith}"` : ""
+    lines.push({
+      key: `takes:${collection}:order:${as}`,
+      text: `\tit sorts ${way} by ${fieldsInLine([about.words])} as "${as}"${asked}`
+    })
+  }
+  if (search) {
+    const about = search.field === undefined ? undefined : shown(search.field)
+    const what = about ? pluralWords(about.words).replace(/ /g, "-") : "everything"
+    lines.push({ key: `takes:${collection}:search`, text: `\tit searches ${what} with "${search.param}"` })
+  }
+  return lines
 }
 
 /**
@@ -1263,11 +1310,13 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf,
       // a person's line reads the same field already, in words of their own:  theirs wins, never a second beside it
       const theirs = isFieldLine(line.text) ? personsLineFor(lines, blockAt, line.text, before, wrote) : undefined
       if (theirs !== undefined) {
-        merge.couldnt.push(`It would add "${line.text}", but your line reads that field already, so yours stays:  ${theirs}`)
+        merge.couldnt.push(
+          `It would add "${line.text}", but your line reads that field already, so yours stays:  ${theirs}`
+        )
         continue
       }
       const mark = isFieldLine(line.text) ? markOf("new") : undefined
-      lines.splice(endOfBlock(lines, blockAt), 0, ...fileLinesOf(line), ...(mark ? [`\t\t-- ${mark}`] : []))
+      lines.splice(placeFor(lines, blockAt, line, after), 0, ...fileLinesOf(line), ...(mark ? [`\t\t-- ${mark}`] : []))
       merge.changed.push(`Added:  ${line.text}`)
       continue
     }
@@ -1389,6 +1438,29 @@ function lineAt(lines: readonly string[], blockAt: number, text: string): number
   // a line an older version bulleted, `- its "url" is text`, is the same line (epic `language` P46)
   for (let at = blockAt + 1; at < end; at++) if (lines[at]!.replace(/^\t- /, "\t") === `\t${text}`) return at
   return -1
+}
+
+/**
+ * Where a new line goes in the block at `blockAt`:  at its end;  one step in under another (`\tit filters by ...`),
+ * right after the line it's under (its `live at` line) and the lines under that already, so it stays that list's.
+ * - Its line not in the file:  at the block's end.
+ */
+function placeFor(lines: readonly string[], blockAt: number, line: SpellLine, after: readonly SpellLine[]): number {
+  const end = endOfBlock(lines, blockAt)
+  if (!line.text.startsWith("\t")) return end
+  // after the line before it in what's written now, under the same line, when that's in the file:  else its line's last
+  for (const before of after.slice(0, Math.max(after.indexOf(line), 0)).reverse()) {
+    const at = lineAt(lines, blockAt, before.text)
+    if (before.text.startsWith("\t") && at < 0) continue
+    if (at < 0) return end
+    let under = at + 1
+    const step = before.text.startsWith("\t") ? "\t\t\t" : "\t\t"
+    while (under < end && lines[under]!.startsWith(step)) under++
+    // its line:  after a person's words right under it, its first
+    if (!before.text.startsWith("\t")) while (under < end && /^\t\t(--|\/\/)/.test(lines[under]!)) under++
+    return under
+  }
+  return end
 }
 
 /** Just past the block's last indented line. */

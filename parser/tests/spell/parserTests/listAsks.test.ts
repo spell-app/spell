@@ -126,7 +126,9 @@ describe("the first few", () => {
   })
 
   test("an exact value on a field it doesn't filter by stays here with `first`, so the read stops at 8 (I55)", () => {
-    const { warnings, compiled: code } = compiled(PLACE(`the first 8 jobs where its status is "open" and its kind is "x"`))
+    const { warnings, compiled: code } = compiled(
+      PLACE(`the first 8 jobs where its status is "open" and its kind is "x"`)
+    )
     expect(code).toMatch(
       /core\.savedThings\(\s*Job,\s*\{ filter: \{ status: "open" \} \},\s*"looks through",\s*\{ first: 8, where: \(job\) => job\.status === "open" && job\.kind === "x" \}\s*\)/
     )
