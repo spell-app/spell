@@ -23,6 +23,8 @@ export function projectSource(projectId: string): SpellAppSource {
     importUrl: (id) => builtUrl(id, COMPILED_JS),
     // its code files' javascript, as the editor's runner reads them (`call native`, epic `from-console` P10)
     nativeUrl: (module) => SpellUrls.codeFileUrl(module),
+    // the component packs it draws with, beside their projects' compiled output
+    packUrl: (module) => SpellUrls.packUrl(module),
     importDeclarationsUrl: (id) => builtUrl(id, DECLARATIONS_JSON),
     wordsUrl: builtUrl(projectId, WORDS_JS),
     importWordsUrl: (id) => builtUrl(id, WORDS_JS),

@@ -36,6 +36,7 @@ import "spell/app/app/solid/cellsBridge"
 // editor's (epic `solid-2-final` P20)
 import "spell/parser/spell/grammarOnFirstUse"
 import { PagePacks } from "spell/app/app/components/PagePacks"
+import { PackHotSwap } from "spell/ui/hot"
 
 // The static build (the public preview) reads its files from the build and keeps edits in the browser;
 // every other build has debug globals for hacking in the browser's console (`debug.ts`).
@@ -67,6 +68,9 @@ keepEditorOnReload()
 // page:  `SpellUI.registerPack()`, and the modules a pack shares with the page, all of Spell UI loaded only once a
 // pack registers
 PagePacks.share(() => import("spell/ui"))
+// a rebuilt pack swaps into the open page, only its changed families re-rendered, no reload (a project's own
+// elements saved:  the page server rebuilds its pack):  before any pack defines its tags
+PackHotSwap.install()
 
 // The dev server gone while the tab's out of sight:  reload once it's back, out of sight, not when the person returns.
 reloadOutOfSight(import.meta.hot)

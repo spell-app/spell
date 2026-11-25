@@ -1,6 +1,6 @@
 import type * as SP from "./spell.types"
 // Import directly:  value-light, its imports are types
-import { SPELL_NATIVE_MODULE } from "./spell.types"
+import { SPELL_NATIVE_MODULE, SPELL_PACK_MODULE } from "./spell.types"
 import type { SpellLocation } from "./SpellLocation"
 // Import directly:  this file stays as light as `SpellSetup`, so `<spell-viewer>` can build URLs without the barrel
 import { SpellSetup } from "./SpellSetup"
@@ -70,6 +70,24 @@ export const SpellUrls = {
    */
   codeFileUrl(module: string): string {
     return `${SpellUrls.fileUrl(SpellUrls.codeFilePathFor(module))}?as=javascript`
+  },
+
+  /**
+   * The module a project's running code loads its component pack by (`SP.SPELL_PACK_MODULE`):
+   * `("acme/widgets", "widgets")` => `@spell/pack/acme/widgets/__pack/widgets.pack.js`.
+   */
+  packModuleFor(projectId: string, name: string): string {
+    return `${SPELL_PACK_MODULE}${encodeURI(projectId)}/${PACK_FOLDER}/${encodeURI(name)}${PACK_SCRIPT_SUFFIX}`
+  },
+
+  /**
+   * URL of the script of the component pack a program loads as `module`, beside its project's compiled output:
+   * `@spell/pack/acme/widgets/__pack/widgets.pack.js` => `/spaces/acme/widgets/__pack/widgets.pack.js`.
+   * - throws `TypeError` for a module that isn't a pack's
+   */
+  packUrl(module: string): string {
+    if (!module.startsWith(SPELL_PACK_MODULE)) throw new TypeError(`SpellUrls:  '${module}' isn't a pack's module`)
+    return SpellUrls.fileUrl(decodeURI(module.slice(SPELL_PACK_MODULE.length)))
   },
 
   /** URL of project `projectId`'s index:  `/api/projects/index/<address>`. */
@@ -246,3 +264,9 @@ function tailOf(url: string, prefixes: string[]): string {
   const prefix = prefixes.find((it) => path.startsWith(it))
   return prefix ? path.slice(prefix.length) : path
 }
+
+/** A project's pack's generated folder, beside its compiled output:  the kit's `ComponentPack`'s `PACK_FOLDER`, a copy. */
+const PACK_FOLDER = "__pack"
+
+/** End of a pack's script's name:  `widgets.pack.js` (the kit's `ComponentPack`). */
+const PACK_SCRIPT_SUFFIX = ".pack.js"

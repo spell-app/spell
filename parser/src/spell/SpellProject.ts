@@ -1069,12 +1069,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       options,
                       this.mainFileIn(files)
                     )
-                  const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
+                  const combined = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
+                  // the component packs it loads, its own and its imports':  the running code alone
+                  const marked = target.name === SP.RUNNING_TARGET ? this.withPackImports(combined) : combined
                   // each declaring statement's marker comes out, into our declarations -- see `SP.SpellDeclarations`
                   const split = SP.SpellDeclarations.split(marked, this.scope!, {
                     version,
                     exports,
-                    languages
+                    languages,
+                    packs: this.packModules
                   })
                   const { declarations } = split
                   let { code } = split
@@ -1260,7 +1263,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
         this.writerOptions(),
         this.mainFileIn(files)
       )
-      return SP.SpellDeclarations.stripComments(marked)
+      return SP.SpellDeclarations.stripComments(name === SP.RUNNING_TARGET ? this.withPackImports(marked) : marked)
     })
   }
 
@@ -1318,7 +1321,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
           this.mainFileIn(files)
         )
       )
-      return marks.extract(SP.SpellDeclarations.stripComments(marked), {
+      // the packs it loads, as its compile's:  a debugging run draws the same elements
+      const withPacks = this.withPackImports(marked)
+      return marks.extract(SP.SpellDeclarations.stripComments(withPacks), {
         file: this.outputFileFor(target).location.file,
         sources: this.sourceTexts,
         nameOf: SpellProject.sourceNameOf
@@ -1931,6 +1936,44 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     return [...this.sourceImportFiles, ...own]
   }
 
+  /** Our own elements, from our project file:  see `SP.ComponentPackJSON`;  `undefined` when it declares none. */
+  get componentPack(): SP.ComponentPackJSON | undefined {
+    const pack = this.contents?.componentPack
+    return pack && typeof pack.name === "string" && typeof pack.prefix === "string" ? pack : undefined
+  }
+
+  /**
+   * The module our running code loads our own component pack by (`SP.SPELL_PACK_MODULE`):
+   * `@spell/pack/acme/widgets/__pack/widgets.pack.js`;  `undefined` with none.
+   */
+  get packModule(): string | undefined {
+    const pack = this.componentPack
+    return pack && SP.SpellUrls.packModuleFor(this.projectId, pack.name)
+  }
+
+  /**
+   * Every component pack our running code loads, by module:  those of the projects we import (as their declarations
+   * list them, at any depth), deepest first, then our own;  each once.
+   * - So a page running us, or a project importing us, draws our elements, and theirs, whatever names it imports.
+   * - The imports' are known once `loadImportScope()` has run.
+   */
+  get packModules(): string[] {
+    return [...new Set([...this.importedPacks, ...(this.packModule ? [this.packModule] : [])])]
+  }
+
+  /** The packs of the projects we import, as `loadImportScope()` last read them:  see `packModules`. */
+  private importedPacks: string[] = []
+
+  /**
+   * `compiled`, our running code, with an `import {} from "@spell/pack/..."` for each of `packModules` first:
+   * a runner loads each before the program draws (`runCompiled()`'s `loadPack`).
+   * - Above everything, so no line below moves against another:  its marks still name their places.
+   */
+  withPackImports(compiled: string): string {
+    const lines = this.packModules.map((module) => `import {} from "${module}"\n`)
+    return lines.join("") + compiled
+  }
+
   /**
    * Other projects we import, from our project file:  entries naming a project, e.g. `@spell/library/people`.
    * - Kept out of `imports`:  they aren't files of ours.
@@ -1960,15 +2003,20 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * Import layer for our `projectImports`, under `parentScope`, or `parentScope` itself if we import none.
    * - A compiled import:  reads its `<Project>.declarations.json5`, fresh each time (`declarationsOf()`).
    * - A `source` import:  loads that project, so its files parse ahead of ours (`sourceImportFiles`).
+   * - SIDE EFFECT:  notes the component packs each one loads, for ours to load too (`packModules`).
    *   - It can't rename what it imports, e.g. `Card:Playingcard`:  its sources parse as they are.
    * - Throws `P.ParserError` if one can't be loaded, e.g. it's never been compiled.
    *   See `SP.SpellDeclarations.load()`.
    */
   async loadImportScope(parentScope: P.Scope): Promise<P.Scope> {
     const imports: SP.DeclarationsImport[] = []
+    const packs: string[] = []
+    this.importedPacks = packs
     for (const it of this.projectImports) {
       const project = new SP.SpellProject(it.projectId)
       await project.load(undefined)
+      // its own component pack, as its project file says now
+      const own = project.packModule
       if (it.source) {
         // its sources parse just as they are -- only a compiled import's declarations can be renamed
         const renaming = it.import?.find((pick) => pick.includes(":"))
@@ -1979,9 +2027,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
             params: { from: it.from }
           })
         }
+        if (own) packs.push(own)
         continue
       }
       const declarations = await SpellProject.declarationsOf(project)
+      // the packs it loads, the ones it imports deepest first, then its own
+      packs.push(...(declarations?.packs ?? []), ...(own ? [own] : []))
       if (!declarations) {
         throw new P.ParserError({
           message: `Can't import '${it.from}':  it has no compiled declarations -- compile it first.`,

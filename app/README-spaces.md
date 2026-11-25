@@ -303,6 +303,7 @@ in [server.types.ts](src/spaces/server/node/projects/server.types.ts)):
 | `exports` | the names it offers projects that import it | everything it declares |
 | `targets` | the languages it compiles to, besides JavaScript:  `["ts/solid"]`, `["py"]`, `["ts/lib"]` | `["js/solid"]` |
 | `listsStartAt` | where its lists start counting:  `1`, or `0` as JavaScript and Python do | `1` |
+| `componentPack` | its own custom elements, in its `components/` folder, built into a component pack with its compiled output and loaded wherever it, or a project importing it, runs:  `{ "name": "widgets", "prefix": "widget-" }` (`components`:  another folder);  the shape of a package's `"spellPack"` ([the editor's README](README-app.md), "A project's own elements") | none |
 | `development` | files for working on it, never compiled or listed:  `{ "apis": ["StarWars.api.json5"] }`, each server's description, which `spell place ingest` and `update` add | none |
 
 Each entry of `imports`:

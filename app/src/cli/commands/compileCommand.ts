@@ -8,6 +8,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { buildFolderFor } from "spell/app/spaces/server/node/projects/project-utils"
 import { BUILD_STEPS_VARIABLE, buildStepLine, type BuildStepName } from "spell/app/spaces/models/buildSteps"
+import { ProjectPack, type ProjectPackBuilt } from "spell/app/spaces/server/node/projects/ProjectPack"
 import { CLI } from "spell/app/cli"
 
 /**
@@ -30,6 +31,12 @@ import { CLI } from "spell/app/cli"
  *   and its Lexicon beside it, AT Protocol's schema language, `Person.lexicon.json` (epic `atmosphere` P10).
  * - The running code is a built site's (`compiledFor: "built"`, epic `solid-2-final` P11):
  *   no comments, no `declaredAt` marks, no headings, a third smaller.  The editor's own compile keeps them.
+ * - A project whose project file declares its own elements (`"componentPack": { "name", "prefix" }`, epic `netlists`
+ *   P22) gets its COMPONENT PACK built with its output, in `__pack/` beside it (`ProjectPack`):  only when the pack's
+ *   sources changed (or with `--force`), with the `--stale` run's up-to-date projects too;  a pack that fails to build
+ *   fails the project, saying why.
+ *   - `--pack`:  ONLY that, unminified, every time:  the page server's rebuild as one of its elements is saved
+ *     (`ProjectBuild.rebuildPack()`);  nothing compiled, its imports untouched.
  * - A `.spell` file:  prints its compiled javascript.  Writes nothing.
  * - Projects it imports that have never been compiled are compiled first -- see `CliSession.compileImports()`.
  *   `--force`:  ALL of them, even those already compiled.
@@ -61,6 +68,8 @@ export async function compileCommand(
     if (args.length) throw new CLI.CliError("--pages takes no projects:  it reads which on standard input")
     return await new CLI.SitePagesCompiler(session).serve()
   }
+  if (options.pack && (options.stdout || options.target))
+    throw new CLI.CliError("--pack builds only a project's component pack:  no target, nothing printed")
   const resolvedProjects = await session.projects(args)
   const status = new CLI.StatusReporter(session.isInteractive)
   // printed once `status` is done, so the two don't interleave
@@ -90,9 +99,11 @@ async function compileProject(
   project: SP.SpellProject,
   status: CLI.StatusReporter,
   output: string[],
-  { stdout, force, stale, target }: CLI.CompileOptions
+  { stdout, force, stale, target, pack }: CLI.CompileOptions
 ): Promise<boolean> {
   const row = status.start(project.projectId)
+  const projectFolder = new SP.SpellLocation(project.projectId).serverPath
+  if (pack) return packOnly(session, projectFolder, status, row)
   let targets: SP.Target[]
   let why: string | undefined
   let fingerprint: CLI.BuildFingerprint | undefined
@@ -101,8 +112,10 @@ async function compileProject(
     if (stale) {
       why = await CLI.staleBecause(project)
       if (!why) {
-        status.done(row, "ok", "up to date")
-        return true
+        // its spell is current;  its pack may not be
+        const built = await ProjectPack.build(projectFolder, { force })
+        status.done(row, built.built === "failed" ? "failed" : "ok", packNote(session, built) ?? "up to date")
+        return built.built !== "failed"
       }
     }
     sayStep("compiling", project)
@@ -138,9 +151,12 @@ async function compileProject(
   // its editor pages, each a module defining its <type-editor> (epic `property-editor` P7)
   const pages = stdout ? { wrote: [], notes: [] } : await new CLI.EditorPages(session, project).compile()
   wrote.push(...pages.wrote)
+  // its own elements, beside its output:  when their sources changed
+  const packBuilt: ProjectPackBuilt = stdout ? { built: "none" } : await ProjectPack.build(projectFolder, { force })
   const notes = [
     why,
     schemaProblem,
+    packNote(session, packBuilt),
     ...pages.notes,
     ...Object.entries(checked.counts).map(
       ([checker, count]) => count && `${count} ${checker} error${count === 1 ? "" : "s"}`
@@ -148,7 +164,31 @@ async function compileProject(
     wrote.length && `wrote ${wrote.map((path) => session.relative(path)).join(", ")}`
   ]
   const note = notes.filter(Boolean).join(" · ") || undefined
-  return !session.report(status, row, project, { note, details: checked.details }).length
+  const problems = session.report(status, row, project, { note, details: checked.details })
+  return !problems.length && packBuilt.built !== "failed"
+}
+
+/**
+ * `spell compile --pack`:  build only the component pack of the project in `projectFolder`, unminified, every time
+ * (`ProjectPack`).  Returns whether it built;  one with no pack says so, and fails.
+ */
+async function packOnly(
+  session: CLI.CliSession,
+  projectFolder: string,
+  status: CLI.StatusReporter,
+  row: CLI.StatusRow
+): Promise<boolean> {
+  const built = await ProjectPack.build(projectFolder, { force: true, forPage: true })
+  const ok = built.built === "built"
+  status.done(row, ok ? "ok" : "failed", packNote(session, built) ?? "its project file declares no componentPack")
+  return ok
+}
+
+/** What a compile says of the project's pack, as a note:  `undefined` for none, or one already current. */
+function packNote(session: CLI.CliSession, built: ProjectPackBuilt): string | undefined {
+  if (built.built === "built") return `built pack ${built.pack} (${built.tags} tags), ${session.relative(built.script)}`
+  if (built.built === "failed") return `pack ${built.pack ?? ""} didn't build:  ${built.problem}`
+  return undefined
 }
 
 /**

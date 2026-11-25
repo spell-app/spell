@@ -37,6 +37,11 @@ export default function languageCommands(spell: Command): void {
       "--pages",
       "keep running, compiling a site's frame and each page asked for on standard input, one by one:  the page server's"
     )
+    .option(
+      "--pack",
+      "build only each project's component pack (its project file's componentPack), unminified, as the page server " +
+        "does when one of its elements is saved"
+    )
     .addHelpText("after", PROJECT_HELP)
     .action((projects: string[], _options, command: Command) => language("compile", projects, command))
 

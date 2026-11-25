@@ -470,6 +470,12 @@ export type SpellAppSource = {
    * - None:  a program that calls one won't run, and says so (`runCompiled()`).
    */
   nativeUrl?: (module: string) => string
+  /**
+   * URL of the script of the component pack it loads as `module`:  a project's is its server's,
+   * `SpellUrls.packUrl()`, beside the project's compiled output.
+   * - None:  a program loading one runs without its elements, and says so (`runCompiled()`).
+   */
+  packUrl?: (module: string) => string
   /** URL of the declarations of project `projectId`, which it imports -- if it may have them. */
   importDeclarationsUrl?: (projectId: string) => string
   /**
@@ -667,13 +673,23 @@ async function runProgram(
         compiled.set(projectId, imported)
         return imported
       },
-      ...(source.nativeUrl && { loadNative: (module: string) => fetchText(source.nativeUrl!(module)) })
+      ...(source.nativeUrl && { loadNative: (module: string) => fetchText(source.nativeUrl!(module)) }),
+      // its component packs, onto this page:  once per page, however many programs load them (`PagePacks.load()`,
+      // which every page of ours puts on `SpellUI`:  this bundle takes Spell UI from the shared files, and can't import it)
+      ...(source.packUrl &&
+        pageLoadPack() && { loadPack: (module: string) => pageLoadPack()!(module, source.packUrl!(module)) })
     })
     if (lazy && !error) stopFetchingAhead.set(appRoot, lazy.fetchAheadIn(appRoot))
     return { error, hasApp: copy.runtime.appIsMounted(), compiled }
   } catch (problem) {
     return { error: messageOf(problem), hasApp: false, compiled }
   }
+}
+
+/** The page's `PagePacks.load()`, as `PagePacks.share()` leaves it on `globalThis.SpellUI`;  none on a page without. */
+function pageLoadPack(): ((module: string, scriptUrl: string) => Promise<unknown>) | undefined {
+  return (globalThis as { SpellUI?: { loadPack?: (module: string, scriptUrl: string) => Promise<unknown> } }).SpellUI
+    ?.loadPack
 }
 
 /** What stops fetching a built site's pages ahead, for the program drawn in each app root (`LazyPages`). */

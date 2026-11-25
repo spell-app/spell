@@ -69,9 +69,25 @@ const FAMILIES: Record<string, string> = {
   "epic-update": "9ec894799e1be5b0"
 }
 
-/** Import family `folder`'s module, which defines its tags. */
+/**
+ * Each family's versions this page imported, in order, by `<pack>/<family>`:  page-wide, so a rebuilt copy of this
+ * script (a swap) sees what the last one imported.
+ */
+const IMPORTED = ((globalThis as unknown as { __spellPackFamilies?: Record<string, string[]> }).__spellPackFamilies ??=
+  {})
+
+/**
+ * Import family `folder`'s module, which defines its tags.
+ * - Its query is its sources' hash, so an unchanged family is the module the page has;  a version the page had
+ *   BEFORE the last (an edit undone) gets a query of its own, or the browser would hand back that module, whose
+ *   `define()` ran long ago, and the page keep the newer one.
+ */
 function loadFamily(folder: string): Promise<unknown> {
-  const url = new URL(`./epics/${folder}.js?v=${FAMILIES[folder] ?? ""}`, BASE)
+  const hash = FAMILIES[folder] ?? ""
+  const seen = (IMPORTED[`epics/${folder}`] ??= [])
+  if (seen[seen.length - 1] !== hash) seen.push(hash)
+  const again = seen.indexOf(hash) < seen.length - 1 ? `-${seen.length}` : ""
+  const url = new URL(`./epics/${folder}.js?v=${hash}${again}`, BASE)
   return import(/* @vite-ignore */ url.href)
 }
 

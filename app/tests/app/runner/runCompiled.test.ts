@@ -1,6 +1,13 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { asFunction, linkModule, nativeImportsOf, projectImportsOf, startChanged } from "spell/app/app/runner"
+import {
+  asFunction,
+  linkModule,
+  nativeImportsOf,
+  packImportsOf,
+  projectImportsOf,
+  startChanged
+} from "spell/app/app/runner"
 
 const COMPILED = `/*! SPELL: PROJECT { spellVersion: "0.8.0" } */
 import { core, Thing, List, App } from "@spell/core"
@@ -62,6 +69,29 @@ describe("linkModule()", () => {
     )
     expect(linked).toContain(`import { copyText } from "blob:clip"`)
     expect(linked).toContain(`from "@spell/native/owen@spell/clipboard/shout.js"`)
+  })
+})
+
+describe("a program's component packs", () => {
+  const PACK = "@spell/pack/acme/widgets/__pack/widgets.pack.js"
+  const PROGRAM = `import {} from "${PACK}"
+import { core } from "@spell/core"
+import {} from "${PACK}"
+`
+
+  test("packImportsOf() lists each pack a program loads once, by module", () => {
+    expect(packImportsOf(PROGRAM)).toEqual([PACK])
+    expect(packImportsOf(COMPILED)).toEqual([])
+  })
+
+  test("linkModule() points each at one empty module, and asFunction() runs it as it does any import", () => {
+    const linked = linkModule(PROGRAM, "blob:core")
+    expect(linked).not.toContain("@spell/pack/")
+    const [empty] = [...linked.matchAll(/from "(blob:[^"]+)"/g)]
+      .map((match) => match[1])
+      .filter((url) => url !== "blob:core")
+    expect(linked.split(empty!).length - 1).toBe(2)
+    expect(asFunction(linked)?.imports).toEqual([empty, "blob:core"])
   })
 })
 

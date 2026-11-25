@@ -3,6 +3,9 @@
  * - Compiled spell `import`s `@spell/core`, and any projects it imports as `@spell/project/<projectId>`.
  *   - And the project's code files its Spell calls, `call native copyText`, as `@spell/native/<project>/clipboard.ts`
  *     (epic `from-console` P10):  a `blob:` URL each, of the javascript the runner's `loadNative()` hands back.
+ *   - And each component pack it draws with, a project's own elements, as `@spell/pack/<project>/__pack/x.pack.js`
+ *    :  loaded through the runner's `loadPack()` before it runs, the import pointed at an empty
+ *     module.
  *   - Compiled TypeScript's element classes also import `@spell/elements` (epic `drawable-thing` P10):
  *     the runtime exports that too.
  *   - We rewrite them onto URLs -- the runtime's own, and a `blob:` URL per project -- see `linkModule()`.
@@ -40,6 +43,12 @@ import { LiveEdit, type ProgramText } from "./LiveEdit"
  *   Without `loadNative`, a program which calls one won't run.
  *   - Asked for afresh on every run, and on every live edit:  a code file that changed runs the program again
  *     (`takeEdit()`), so the new code shows (from-console I37).
+ * - Each component pack it loads (`@spell/pack/...`) comes from `options.loadPack()`, before the program runs:
+ *   in the same walk, deepest first, so a pack a project it imports loads is in before that project's code runs.
+ *   - The page's ONE load of a pack (Spell UI's `ComponentPacks.load()`):  a second run, or a second program, asks
+ *     again and gets the same.
+ *   - Without `loadPack` (VS Code's runner), or a pack that won't load:  the program runs all the same, saying so on
+ *     its console;  only that pack's elements don't draw.
  * - `runTests`:  then the tests it didn't run itself, as `spell test` does.
  * - `projectId`:  its remembered props come back from its last run, read before it starts (`core.remember()`).
  * - SIDE EFFECT:  hands its top-level things to `core.things`, for the Thing Explorer --
@@ -186,6 +195,8 @@ async function runCompiledNow(compiled: string, options: RunCompiledOptions): Pr
       nativeTexts[module] = text
       natives[module] = blobUrl(text)
     }
+    // its component packs, after those of the projects it imports:  in before any of its code runs
+    for (const module of packImportsOf(source)) await loadPack(module, options)
     // the program itself carries its source map inline:  a `blob:` URL can't reach the map file beside it
     const stamped = !chain.length && options.placesFrom ? SourceMarks.stamped(source, options.placesFrom) : source
     const linkedSource = SourceMarks.inline(
@@ -284,6 +295,8 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
   const importIds = projectImportsOf(compiled)
   // a code file the last run didn't link:  it runs again, linking it
   if (nativeImportsOf(compiled).some((module) => !last.natives[module])) return undefined
+  // a component pack it hasn't loaded:  it runs again, loading it
+  if (packImportsOf(compiled).some((module) => !packsLoaded.has(module))) return undefined
   // one changed since:  it runs again too, as a live edit keeps the module it linked (from-console I37)
   if (await nativesChanged(last, options)) return undefined
   // each project it imports, read again and weighed as the program is:  deepest first (epic `editor`, Live Edit Everywhere)
@@ -618,6 +631,15 @@ export type RunCompiledOptions = {
    */
   loadNative?: (module: string) => Promise<string>
   /**
+   * Load the component pack the program draws with as `module`:
+   * `@spell/pack/acme/widgets/__pack/widgets.pack.js`, a project's own elements, onto the page, resolving once its
+   * tags are defined.
+   * - A page's is Spell UI's `ComponentPacks.load()` of the pack's script (`SP.SpellUrls.packUrl()`);  the editor's
+   *   dev server's, its source (`PagePacks.load()`).
+   * - None:  the program runs without its elements, and says so.
+   */
+  loadPack?: (module: string) => Promise<unknown>
+  /**
    * The program's project, e.g. `@spell/examples/solitaire`:  what its remembered props are kept under.
    * - Kept in the browser's storage, from run to run (`core.remember()`, epic `prefs-and-undo` P8):
    *   its app's `theme` at `@spell/examples/solitaire:theme`.
@@ -789,7 +811,10 @@ export function appIsMounted(): boolean {
  * `@spell/core` at `coreUrl`, and each `@spell/project/<projectId>` at `imports[projectId]`.
  * - `@spell/elements` at `coreUrl` too:  the runtime copy exports `SpellElement` (`spellRuntime.ts`).
  * - Each code file it calls, `@spell/native/...`, at `natives[module]`.
- * - Pure.  A project not in `imports`, or a code file not in `natives`, is left as it was.
+ * - Each component pack it loads, `@spell/pack/...`, at an empty module:  the pack is loaded first (`loadPack()`),
+ *   and a program reads nothing from it.
+ * - A project not in `imports`, or a code file not in `natives`, is left as it was.
+ * - Pure, but for the empty module's URL, made once.
  */
 export function linkModule(
   source: string,
@@ -803,7 +828,9 @@ export function linkModule(
       ? coreUrl
       : specifier.startsWith(NATIVE_MODULE)
         ? natives[specifier]
-        : imports[specifier.slice(PROJECT_MODULE.length)]
+        : specifier.startsWith(PACK_MODULE)
+          ? emptyModuleUrl()
+          : imports[specifier.slice(PROJECT_MODULE.length)]
     return url ? `${from}"${url}"` : whole
   })
 }
@@ -815,6 +842,62 @@ export function nativeImportsOf(source: string): string[] {
     .filter((specifier) => specifier.startsWith(NATIVE_MODULE))
   return [...new Set(modules)]
 }
+
+/**
+ * The component packs `source` loads, by module, each once, in order:
+ * `@spell/pack/acme/widgets/__pack/widgets.pack.js` (`SP.SPELL_PACK_MODULE`).
+ */
+export function packImportsOf(source: string): string[] {
+  const modules = [...source.matchAll(SPELL_IMPORT)]
+    .map(([, , specifier]) => specifier!)
+    .filter((specifier) => specifier.startsWith(PACK_MODULE))
+  return [...new Set(modules)]
+}
+
+/**
+ * Load component pack `module` through `options.loadPack()`, once per page:  a later run waits on the same load.
+ * - NEVER throws:  without `loadPack`, or a load that fails, the program's console says so, and it runs without that
+ *   pack's elements.
+ */
+async function loadPack(module: string, options: RunCompiledOptions): Promise<void> {
+  if (!options.loadPack) {
+    core.console.warn(`This runner can't load the component pack ${module}:  its elements won't draw.`)
+    return
+  }
+  let load = packLoads.get(module)
+  if (!load) {
+    load = options.loadPack(module).then(
+      () => {
+        packsLoaded.add(module)
+      },
+      (error: unknown) => {
+        // asked again on the next run:  the pack may be built by then
+        packLoads.delete(module)
+        console.error(error)
+        core.console.error(
+          `Couldn't load the component pack ${module}:  ${error instanceof Error ? error.message : error}`
+        )
+      }
+    )
+    packLoads.set(module, load)
+  }
+  await load
+}
+
+/** Each component pack's load, by module:  once per page, as the page's packs are (Spell UI's `ComponentPacks`). */
+const packLoads = new Map<string, Promise<void>>()
+
+/** The component packs loaded on this page, by module:  a live edit loading another runs afresh (`takeEdit()`). */
+const packsLoaded = new Set<string>()
+
+/** A `blob:` URL of an empty module, what a program's pack imports point at (`linkModule()`):  made once. */
+function emptyModuleUrl(): string {
+  emptyModule ??= blobUrl("export {}\n")
+  return emptyModule
+}
+
+/** `emptyModuleUrl()`'s, once made. */
+let emptyModule: string | undefined
 
 /** A code file's name, from the module it's imported as:  `clipboard.ts`. */
 function codeFileOf(module: string): string {
@@ -844,6 +927,12 @@ const PROJECT_MODULE = "@spell/project/"
  * - NOTE: a copy, NOT imported:  `spell/parser/spell` would pull the whole parser into the runner bundle.
  */
 const NATIVE_MODULE = "@spell/native/"
+
+/**
+ * Start of the specifier compiled spell loads a component pack by -- `SP.SPELL_PACK_MODULE`.
+ * - NOTE: a copy, NOT imported:  `spell/parser/spell` would pull the whole parser into the runner bundle.
+ */
+const PACK_MODULE = "@spell/pack/"
 
 /** The app's mount point, with the mounted app `App.start()` leaves on it. */
 type AppElement = HTMLElement & { spellRoot?: { app?: object; unmount(): void } }

@@ -14,7 +14,8 @@
  * - The keys are the import names themselves, as every repo's source writes them (epic `repo-split` P14, Q45):
  *   `spell/ui/core`, `spell/element`.
  * - Pages that offer them:  spell-epic's docs bundle (`spell-ui.entry.js`), the component sets' site build
- *   (Spell UI's `site/_src/SitePacks.ts`), and spell-app's element build (`app/vite.shared.ts`).
+ *   (Spell UI's `site/_src/SitePacks.ts`), and spell-app's pages (`PagePacks.ts`), the last two from Spell UI's
+ *   `PackModules`.
  * - `spell/element`:  what the pack's elements are written on (`E.UIComponent` ...).
  *   The page's is Spell UI's core module, which carries all of it, so a page has one (`packModules`).
  * - Any other Spell UI, `spell/element/...` or Solid import fails the build:
@@ -27,7 +28,9 @@
  *   never `UIGraph.en` (a file of the family, which no page shares).
  *   Offered by the site's packs (`SitePacks.ts`) and spell-app's pages (`PagePacks.ts`);  not yet by spell-epic's docs
  *   bundle, whose packs extend neither.
- * - Another one:  add it here AND to every page's `packModules` above.
+ * - Another one:  add it here AND to Spell UI's one list of what a page offers (`PackModules.HOLDERS`, which the site's
+ *   bundle and spell-app's pages fill theirs from;  its test checks every entry here is there), and to spell-epic's
+ *   docs bundle's map.
  */
 export const PACK_MODULES = [
   "solid-js",

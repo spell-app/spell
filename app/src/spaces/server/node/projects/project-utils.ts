@@ -13,6 +13,7 @@ import { escapeRegExp } from "lodash-es"
 import { basename, dirname, extname, relative, resolve, sep } from "path"
 
 import { findUp } from "spell/util/node/findUp"
+import { PACK_FOLDER } from "spell/element-tools/ComponentPack"
 import { SRV } from "spell/server"
 import { json5Edited } from "spell/app/spaces/server/node/storage/json5"
 // a cycle of functions only, called after both have loaded
@@ -65,6 +66,7 @@ SP.SpellLocation.useRegistry = false
  *   as defense in depth.
  * - A file spell BUILDS for its project, e.g. `Solitaire.spell.js`, is in the project's build folder,
  *   not beside its source:  see `isBuiltFile()` and `buildFolderFor()`.
+ *   - So is its component pack's, under `__pack/` (`isPackFile()`).
  *   So every reader asks for it by project and name, and this decides where it is on disk.
  */
 Object.defineProperty(SP.SpellLocation.prototype, "serverPath", {
@@ -72,7 +74,7 @@ Object.defineProperty(SP.SpellLocation.prototype, "serverPath", {
     const projectFolder = fileUtils.normalizePath(
       ...[serverPathForRoot(this.projectRoot), this.projectName].filter((segment): segment is string => !!segment)
     )
-    const path = [isBuiltFile(this) ? buildFolderFor(projectFolder) : projectFolder]
+    const path = [isBuiltFile(this) || isPackFile(this) ? buildFolderFor(projectFolder) : projectFolder]
     if (this.filePath) path.push(...this.filePath.split("/"))
     return fileUtils.normalizePath(...path.filter(Boolean))
   }
@@ -151,6 +153,20 @@ export function isBuiltFile(location: SP.SpellLocation): boolean {
   if (!projectName || !file || folder !== "/") return false
   return BUILT_SUFFIXES.some((suffix) => file === `${projectName}${suffix}`) || isWordsFileOf(file, projectName)
 }
+
+/**
+ * Is `location` a file of its project's COMPONENT PACK, as `spell compile` builds it:
+ * under `__pack/` at the top of the project, e.g. `/__pack/widgets.pack.js`, `/__pack/widgets/widget-card.js`?
+ * - In the project's build folder, beside its compiled output, as `isBuiltFile()`'s are:  `ProjectPack`.
+ * - A project's own `__pack/` folder, beside its source, is never read:  `__` names are spell's.
+ */
+export function isPackFile(location: SP.SpellLocation): boolean {
+  const { projectName, folder, file } = location
+  return !!projectName && !!file && !!folder?.startsWith(PACK_FOLDER_PATH)
+}
+
+/** Where a project's pack's files are, from the project:  `/__pack/` (the kit's `ComponentPack`'s `PACK_FOLDER`). */
+const PACK_FOLDER_PATH = `/${PACK_FOLDER}/`
 
 /**
  * Is `file` one of project `projectName`'s words files, in any language?
@@ -646,7 +662,8 @@ export const getIndex = async (
   )
 
   // return manifest and imports
-  const { title, version, exports, targets, spellVersion, listsStartAt, development, places } = importsFile
+  const { title, version, exports, targets, spellVersion, listsStartAt, development, places, componentPack } =
+    importsFile
   const buildFolder = buildFolderInBuild(projectId)
   // its names dictionaries, beside its project file:  so a compile asks for no other (epic `editor` I68)
   const namesLanguages = [...SP.Language.all.keys()].filter((lang) =>
@@ -664,7 +681,8 @@ export const getIndex = async (
     development,
     buildFolder,
     ...(namesLanguages.length > 0 && { namesLanguages }),
-    ...(places && { places })
+    ...(places && { places }),
+    ...(componentPack && { componentPack })
   }
 }
 

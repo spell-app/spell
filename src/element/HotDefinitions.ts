@@ -229,6 +229,9 @@ export class HotDefinitions {
    * A component sheet's `?inline` CSS changed:  re-register it by name (`UIButton.css` => `button`).
    * - The name is the file's, without `UI`, in kebab-case (`UITreeDiagram.css` => `tree-diagram`):
    *   elements register their sheets by that bare name (`elementSetup = { styleSheets: { button: buttonCSS } }`).
+   *   - A component pack's, with no `UI`, is its whole name, as its elements register it (`WidgetCard.css` =>
+   *     `widget-card`):  so a project's own elements take a saved sheet in the editor's dev server too (epic
+   *     `netlists` P22)
    * - A second sheet (`UIDimmer.page.css`) or a sheet registered under another name isn't matched:
    *   an edit to it shows after a page reload.
    * - The runtime's `styles.register()` replaces the rules of the sheet every shadow root already adopted:
@@ -237,7 +240,8 @@ export class HotDefinitions {
    *   (Spell UI's `UI.styles.registerOnce()` only registers names that are missing).
    */
   static updateStyle(this: void, id: string, css: string) {
-    const stem = /(?:^|\/)UI([A-Za-z0-9]+)\.css(?:\?|$)/.exec(id)?.[1]
+    const file = /(?:^|\/)([A-Z][A-Za-z0-9]*)\.css(?:\?|$)/.exec(id)?.[1]
+    const stem = file?.replace(/^UI(?=[A-Z0-9])/, "")
     if (!stem) return
     const name = stem.replace(/(?<=.)([A-Z])/g, "-$1").toLowerCase()
     HotDefinitions.whenRuntime(() => E.SpellSolid.settings.styles.register(name, css))

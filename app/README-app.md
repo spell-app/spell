@@ -226,6 +226,10 @@ It's an ES module, and `runCompiled()` ([runCompiled.ts](src/app/runner/runCompi
    - `@spell/core` at the runtime copy this host loaded
    - each other project it imports, `@spell/project/<address>`, at a `blob:` URL of that project's compiled file:
      fetched afresh once per run, deepest first, so a recompiled library shows at once
+   - each component pack it draws with, `@spell/pack/<address>/__pack/<name>.pack.js` (a project's own elements,
+     below), at an empty module:  the pack itself is loaded onto the page first, in the same walk, deepest first,
+     through the host's `loadPack` (Spell UI's `ComponentPacks.load()`, once per page), so its tags are defined before
+     the program draws
 4. It imports the program from a NEW `blob:` URL every time.
    The browser caches a module by its address:  the same one twice would hand back the old program, unrun.
 5. It hands the program's top-level things to `core.things`, for the Thing Explorer.
@@ -243,6 +247,33 @@ The edges:
 - Two projects that import each other stop the run:  `Projects import each other: ...`, naming the loop.
 - VS Code's runner asks its extension for each project the program imports, which asks the language server
   (`spell/compiledImport`):  that project's compiled file, compiled first if it has none yet.
+- **Not yet:**  VS Code's runner loads no component pack:  the program runs, says so on its console, and that
+  pack's elements don't draw.
+
+### A project's own elements:  its component pack
+
+A project may ship custom elements of its own:  its project file says so,
+`"componentPack": { "name": "widgets", "prefix": "widget-" }` ([the spaces README](README-spaces.md)), and its
+families are in its `components/` folder, written as any component pack's are (Spell UI's `AGENTS.md`, "Component
+packs").
+- Built with its compiled output, by `spell compile`:  `__pack/` beside `<Project>.spell.js` in the project's build
+  folder (`ProjectPack`, the kit's `ComponentPack`), only when its sources changed;  none of it committed.
+  - A page asking for a pack file that isn't there has its project compiled first (`ProjectBuild.builtFirst()`), so a
+    fresh checkout, or a page server just deployed, builds it on its first request;  a deploy needs only
+    `spell compile --stale`, and `spell app preview` copies it with the project's other built files.
+- Loaded wherever its project runs, and wherever a project importing it runs, at any depth:  its running code, and
+  every importer's, starts `import {} from "@spell/pack/..."` (the importers' from the declarations of what they
+  import), and the runner loads it (above).  The editor's App pane, the run page and `<spell-viewer>` all do.
+- Saved, it updates every open page using it, with no reload:
+  - the page server watches the spaces;  once a project's `components/` (or a file its elements import) has been
+    quiet a moment, it rebuilds that pack, unminified, one at a time per project (`spell compile --pack`, in the
+    child it compiles with), and its live reload says the pack's script changed
+  - the page (the editor's, the run page;  `PackHotSwap`) runs the rebuilt script in place:  only the families whose
+    sources changed are swapped in and re-render;  a new tag reloads the page once.  About four seconds.
+  - from Spell's own dev server (`yarn start:dev`), the editor loads the pack's SOURCE entry instead (`<name>.pack.ts`,
+    the same catalog and families), and Vite's hot replacement takes a save, the way Spell UI's own elements do:
+    about half a second (`projectPacksInDev()` in [the editor's Vite config](app/vite.config.ts));
+    `?packs=built` in the page's address loads the built script all the same
 
 ### Every program gets its own runtime
 

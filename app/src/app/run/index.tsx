@@ -24,6 +24,7 @@ import "spell/ui/components/ui-root"
 // a program's component packs (`<ui-components source>` in a page or its layout):  `SpellUI.registerPack()`, and the
 // modules a pack shares with the page, all of Spell UI loaded only once a pack registers
 import { PagePacks } from "spell/app/app/components/PagePacks"
+import { PackHotSwap } from "spell/ui/hot"
 // the built-in types' scope pack, for the Type Explorer:  beside the build's chunks
 import builtInsUrl from "spell/parser/core/core.scopes.js?url"
 
@@ -43,6 +44,9 @@ import builtInsUrl from "spell/parser/core/core.scopes.js?url"
  */
 AppTexts.namePageLanguage()
 PagePacks.share(() => import("spell/ui"))
+// a rebuilt pack swaps into the open page, only its changed families re-rendered, no reload (a project's own
+// elements saved:  the page server rebuilds its pack):  before any pack defines its tags
+PackHotSwap.install()
 
 const root = document.getElementById("run-root")!
 const address = addressIn(location.pathname)
@@ -84,6 +88,7 @@ async function start(): Promise<void> {
     )
     const themed = wearEditorsTheme()
     void showWhenWhole(root, themed)
+    void joinLiveChannelOnce()
   } else {
     // no project group holds it:  the editor's home page says so, and lists what there is
     location.replace(`/edit/${SpellUrls.encodeAddress(address)}`)
@@ -152,6 +157,24 @@ async function wearEditorsTheme(): Promise<void> {
     await ThemePreference.restore()
   } catch (error) {
     console.error("the run page couldn't wear the editor's theme", error)
+  }
+}
+
+/**
+ * Join the page server's live channel, as the editor does (`joinLiveChannel()`):  so a project's component pack,
+ * rebuilt as one of its elements is saved, swaps into the running program here (`PackHotSwap`).
+ * - Not in the read-only public build:  no page server behind it.
+ * - Loaded after the page draws:  the live client isn't the program's.
+ * - NEVER throws:  a failure is one line on the console, and the page runs on without it.
+ */
+async function joinLiveChannelOnce(): Promise<void> {
+  try {
+    const { isStaticBuild } = await import("spell/app/app/static/staticBuild")
+    if (isStaticBuild) return
+    const { joinLiveChannel } = await import("spell/server/liveClient")
+    joinLiveChannel()
+  } catch (error) {
+    console.error("the run page couldn't join the page server's live channel", error)
   }
 }
 
