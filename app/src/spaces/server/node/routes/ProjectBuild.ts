@@ -1,5 +1,5 @@
 import { spawn as nodeSpawn, type ChildProcess, type SpawnOptions } from "child_process"
-import { existsSync } from "fs"
+import { existsSync, readFileSync } from "fs"
 import { createRequire } from "module"
 import { dirname, join } from "path"
 import { createInterface } from "readline"
@@ -9,8 +9,10 @@ import { within } from "spell/util/timing"
 import { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
+import * as responseUtils from "spell/app/spaces/server/node/projects/response-utils"
 import { SP } from "spell/parser/spell"
-import { hasProjectFile } from "spell/parser/spell/node/projectFile"
+import { hasProjectFile, projectFileIn } from "spell/parser/spell/node/projectFile"
+import { parseJSON5 } from "spell/util"
 import { appDir } from "spell/app/spaces/server/node/people/localPerson"
 
 /**
@@ -38,6 +40,8 @@ import { appDir } from "spell/app/spaces/server/node/people/localPerson"
  * - Its output goes to the server's log, each line prefixed `projects:  ` (`SRV.ServerLog`, `server:projects`):
  *   - shown:  each project compiled, with how many warnings, and every error;  each run a group of its own
  *   - debug (`SPELL_DEBUG=server:projects`):  the command, the projects up to date, each warning, the files written
+ * - `progress()`:  how a compile a request waits for is coming along, for the page that's waiting to say so
+ *   (`GET /api/projects/building/<project>`):  a fresh checkout's first run of a big project takes a while.
  * - NEVER throws.
  */
 export class ProjectBuild {
@@ -56,8 +60,17 @@ export class ProjectBuild {
   /** the startup build, while it runs */
   private startup?: Promise<void>
 
+  /** the projects (or groups) the startup build compiles, `start()`'s */
+  private startupProjects: string[] = []
+
   /** each project's compile, by project id, while it runs */
   private compiles = new Map<string, Promise<void>>()
+
+  /** each project requests wait to see built, by project id:  since when, and how many requests -- see `progress()` */
+  private waiting = new Map<string, { since: number; requests: number }>()
+
+  /** the projects each run has compiled so far, as its lines say:  the startup build's, and each project's compile's */
+  private compiled = { startup: [] as string[], byProject: new Map<string, string[]>() }
 
   /** its lines in the server's log */
   readonly log = new SRV.ServerLog({ prefix: "projects" })
@@ -88,7 +101,9 @@ export class ProjectBuild {
    */
   start(projects: string[] = STARTUP_PROJECTS): this {
     if (this.startup) return this
-    const startup = this.run(["compile", "--stale", "--all", ...projects])
+    this.startupProjects = projects
+    this.compiled.startup = []
+    const startup = this.run(["compile", "--stale", "--all", ...projects], this.compiled.startup)
     this.startup = startup
     void startup.then(() => {
       if (this.startup === startup) this.startup = undefined
@@ -116,17 +131,95 @@ export class ProjectBuild {
     if (existsSync(file)) return true
     const { projectId } = location
     if (!hasProjectFile(SP.SpellLocation.getProjectLocation(projectId).serverPath)) return false
+    const waiting = this.waiting.get(projectId) ?? { since: Date.now(), requests: 0 }
+    waiting.requests++
+    this.waiting.set(projectId, waiting)
+    try {
+      return await this.compiledFor(location)
+    } finally {
+      if (--waiting.requests === 0) this.waiting.delete(projectId)
+    }
+  }
+
+  /**
+   * How project `projectId`'s compile is coming along, while a request waits for it -- `building: false` when none does.
+   * - `seconds`:  how long the first request has waited
+   * - `afterStartup`:  it waits for the startup build first, `start()`'s (Spell's own projects)
+   * - `compiled`:  the projects the compile it waits for has compiled so far, e.g. one it imports
+   */
+  progress(projectId: string): BuildProgress {
+    const waiting = this.waiting.get(projectId)
+    if (!waiting) return { building: false }
+    const ownCompile = this.compiles.has(projectId)
+    return {
+      building: true,
+      seconds: Math.floor((Date.now() - waiting.since) / 1000),
+      ...(!ownCompile && this.startup && { afterStartup: true }),
+      compiled: [
+        ...((ownCompile ? this.compiled.byProject.get(projectId) : this.startup && this.compiled.startup) || [])
+      ]
+    }
+  }
+
+  /**
+   * `GET /api/projects/building/<project>`'s handler:  `progress()`, as JSON.
+   * - The project's address as it arrived, still encoded (`SP.SpellUrls.projectIdFor()`);  400 when it names none.
+   * - Asked by a page while its request for a built file waits:  the runner's `buildProgress.ts`.
+   */
+  request_progress(): SRV.Handler {
+    return responseUtils.respondWithJSON(async (request) => {
+      let projectId: string
+      try {
+        projectId = SP.SpellUrls.projectIdFor(request.originalUrl.split(/[?#]/)[0]!)
+      } catch (error) {
+        throw new SRV.HttpError(400, `GET ${SP.SpellUrls.BUILDING}:  ${(error as Error).message}`)
+      }
+      return this.progress(projectId)
+    })
+  }
+
+  /**
+   * Does project `projectId` wait for the startup build:  is it, or does it import (at any depth), one it compiles?
+   * - Else its own compile starts at once (I120):  a project of another space's, e.g. an org's, waited a minute for
+   *   Spell's own examples and guides on a fresh checkout, and its request ran out of time before its compile began.
+   * - It does when its imports can't be read:  waiting is how it was.
+   */
+  needsStartup(projectId: string, seen = new Set<string>()): boolean {
+    const isStartup = (id: string) => this.startupProjects.some((it) => id === it || id.startsWith(`${it}/`))
+    if (isStartup(projectId)) return true
+    if (seen.has(projectId)) return false
+    seen.add(projectId)
+    try {
+      const file = projectFileIn(SP.SpellLocation.getProjectLocation(projectId).serverPath)
+      if (!file) return false
+      const { imports = [] } = parseJSON5(readFileSync(file, "utf8")) as { imports?: Array<{ path?: string }> }
+      // a project's own files start with `/`;  another project is named by its address
+      return imports.some(({ path }) => !!path && !path.startsWith("/") && this.needsStartup(path, seen))
+    } catch {
+      return true
+    }
+  }
+
+  /** `untilBuilt()`'s work, once it's known the file isn't there and its project is. */
+  private async compiledFor(location: SP.SpellLocation): Promise<boolean> {
+    const file = location.serverPath
+    const { projectId } = location
     const deadline = Date.now() + this.timeout
     const secondsLeft = () => Math.max(0, deadline - Date.now()) / 1000
-    if (this.startup) {
+    if (this.startup && this.needsStartup(projectId)) {
       await within(this.startup, secondsLeft())
       if (existsSync(file)) return true
     }
     let compile = this.compiles.get(projectId)
     if (!compile) {
-      compile = this.run(["compile", projectId])
+      const compiled: string[] = []
+      this.compiled.byProject.set(projectId, compiled)
+      compile = this.run(["compile", projectId], compiled)
       this.compiles.set(projectId, compile)
-      void compile.then(() => this.compiles.delete(projectId))
+      void compile.then(() => {
+        this.compiles.delete(projectId)
+        this.compiled.byProject.delete(projectId)
+      })
     }
     await within(compile, secondsLeft())
     return existsSync(file)
@@ -153,10 +246,11 @@ export class ProjectBuild {
 
   /**
    * Run the CLI with `args`, in the checkout, logging its output;  resolves when it ends, however it ends.
+   * - SIDE EFFECT:  each project it says it compiled goes on the end of `compiled`, as it says so
    * - a checkout without the CLI (a test's temp folder) runs nothing
    * - its own process group (`detached`), so `stop()` ends what it starts too
    */
-  private run(args: string[]): Promise<void> {
+  private run(args: string[], compiled: string[] = []): Promise<void> {
     const cli = this.cli
     if (!cli || !existsSync(cli)) return Promise.resolve()
     // each run its own group, from its first line shown
@@ -178,7 +272,12 @@ export class ProjectBuild {
     }
     this.children.add(child)
     for (const stream of [child.stdout, child.stderr]) {
-      if (stream) createInterface({ input: stream }).on("line", (line) => this.log.childLine(line, COMPILE_LINES))
+      if (!stream) continue
+      createInterface({ input: stream }).on("line", (line) => {
+        const project = COMPILED_LINE.exec(line)?.[1]
+        if (project) compiled.push(project)
+        this.log.childLine(line, COMPILE_LINES)
+      })
     }
     return new Promise((done) => {
       child.once("error", (error) => {
@@ -206,6 +305,12 @@ const COMPILE_LINES: SRV.LineRule[] = [
   { line: /^\s+\S.*\bwarning:/, level: Logger.DEBUG },
   { line: /^✓ .* · wrote /, level: Logger.INFO, shown: (line) => line.replace(/ · wrote .*$/, "") }
 ]
+
+/** A line of `spell compile`'s saying it compiled a project, and wrote its files:  `✓ <project>  ... · wrote ...`. */
+const COMPILED_LINE = /^✓ (\S+) .* · wrote /
+
+/** How a project's compile is coming along:  `progress()`'s answer, see `SP.BuildProgress`. */
+export type BuildProgress = SP.BuildProgress
 
 /** The built-in projects `start()` compiles:  what the demo pages and App UI's component pages run. */
 export const STARTUP_PROJECTS = ["@spell/examples", "@spell/library", "@spell/guides"]

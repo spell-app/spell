@@ -103,6 +103,11 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectTip: "Inspeccionar la app:  haz clic en una parte para elegirla",
   stopInspectingTip: "Dejar de inspeccionar",
   restartTip: "Reiniciar la app",
+  building:
+    "Compilando {name} para que se ejecute.  Una copia nueva de Spell compila cada programa la primera vez que se ejecuta, y tarda un rato.  Tiempo hasta ahora:  {seconds} s.  Aparece aquí cuando esté listo.",
+  buildingAfterStartup:
+    "Compilando primero los proyectos propios de Spell, y luego {name}.  Una copia nueva de Spell compila cada programa la primera vez que se ejecuta, y tarda un rato.  Tiempo hasta ahora:  {seconds} s.  {name} aparece aquí cuando esté listo.",
+  buildingDone: "Compilados hasta ahora:  {projects}.",
   youTip: "Editar tu nombre y tus correos",
   menuCut: "Cortar",
   menuCopy: "Copiar",

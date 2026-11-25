@@ -133,14 +133,41 @@ describe("ProjectBuild", () => {
     expect(spawn).not.toHaveBeenCalled()
   })
 
-  test("while the startup build runs:  waits for it, instead of compiling the project again", async () => {
+  test("while the startup build runs, for a project it compiles:  waits for it, instead of compiling the project again", async () => {
     const { spawn, children } = spawnStub()
-    const build = new ProjectBuild({ root, spawn }).start()
+    const build = new ProjectBuild({ root, spawn }).start([projectId])
     const waiting = build.untilBuilt(compiled)
     put(compiled.serverPath, "export {}\n")
     children[0]!.exit(0)
     expect(await waiting).toBe(true)
     expect(spawn).toHaveBeenCalledOnce()
+  })
+
+  test("...and for one that imports a project it compiles, at any depth", () => {
+    const build = new ProjectBuild({ root, spawn: spawnStub().spawn }).start(["@spell/library"])
+    expect(build.needsStartup("@spell/library/cards")).toBe(true)
+    expect(build.needsStartup(projectId)).toBe(false)
+    put(
+      join(projectFolder, SP.PROJECT_FILE),
+      JSON.stringify({ imports: [{ path: "/Built.spell" }, { path: "@spell/library/cards" }] })
+    )
+    try {
+      expect(build.needsStartup(projectId)).toBe(true)
+    } finally {
+      put(join(projectFolder, SP.PROJECT_FILE), JSON.stringify({ imports: [{ path: "/Built.spell", active: true }] }))
+    }
+  })
+
+  test("while the startup build runs, for a project that needs nothing of it:  compiles at once (I120)", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn }).start()
+    const waiting = build.untilBuilt(compiled)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2))
+    expect(spawn).toHaveBeenLastCalledWith(process.execPath, [build.cli, "compile", projectId], expect.anything())
+    put(compiled.serverPath, "export {}\n")
+    children[1]!.exit(0)
+    expect(await waiting).toBe(true)
+    children[0]!.exit(0)
   })
 
   test("a compile slower than `timeout`:  gives up, not there;  a request after waits on the same compile", async () => {
@@ -150,5 +177,38 @@ describe("ProjectBuild", () => {
     expect(await build.untilBuilt(compiled)).toBe(false)
     expect(spawn).toHaveBeenCalledOnce()
     children[0]!.exit(0)
+  })
+  test("progress():  nothing while no request waits;  while one does, how long, and each project the compile wrote", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn })
+    expect(build.progress(projectId)).toEqual({ building: false })
+    const waiting = build.untilBuilt(compiled)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+    expect(build.progress(projectId)).toEqual({ building: true, seconds: 0, compiled: [] })
+    children[0]!.stdout.write("✓ @acme/tools/api  (imported by Built)  never compiled · wrote build/api\n")
+    children[0]!.stdout.write("✓ @spell/library/cards  up to date\n")
+    await vi.waitFor(() => expect(build.progress(projectId).compiled).toEqual(["@acme/tools/api"]))
+    put(compiled.serverPath, "export {}\n")
+    children[0]!.exit(0)
+    await waiting
+    expect(build.progress(projectId)).toEqual({ building: false })
+  })
+
+  test("progress() while the startup build runs:  `afterStartup`, with what IT has compiled", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn }).start([projectId])
+    const waiting = build.untilBuilt(compiled)
+    children[0]!.stdout.write("✓ @spell/examples/Solitaire  never compiled · wrote build/solitaire\n")
+    await vi.waitFor(() =>
+      expect(build.progress(projectId)).toEqual({
+        building: true,
+        seconds: 0,
+        afterStartup: true,
+        compiled: ["@spell/examples/Solitaire"]
+      })
+    )
+    put(compiled.serverPath, "export {}\n")
+    children[0]!.exit(0)
+    expect(await waiting).toBe(true)
   })
 })

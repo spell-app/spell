@@ -87,6 +87,8 @@ api.delete("/projects/remove/file", projectUtils.request_deleteFile)
 api.get("/projects/index/*", projectUtils.request_getIndex)
 // every file of a project, pictures and its project file too:  what the project menu's Export zips
 api.get("/projects/files/*", projectUtils.request_getEveryFile)
+// how the compile a request for a project's built file waits for is coming along:  `ProjectBuild.progress()`
+api.get("/projects/building/*", projectBuild.request_progress())
 api.post("/projects/file/*", projectUtils.request_saveFile)
 
 // your drafts, Publish and versions:  see `projectUtils.request_getDrafts` ... and `ProjectDrafts` (epic `editor` P24)

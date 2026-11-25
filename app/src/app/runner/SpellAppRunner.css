@@ -69,6 +69,23 @@
   }
 }
 
+/* The page server compiling the program before it can send it:  said where the app will be (`<BuildingNotice>`). */
+.SpellAppBuilding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25em;
+  padding: 3em 1em;
+  text-align: center;
+  /* Spell UI's muted text, in its light or dark theme */
+  color: var(--ui-text-muted, rgba(0, 0, 0, 0.6));
+
+  & > p {
+    margin: 0;
+    max-width: 36em;
+  }
+}
+
 /* A program with no app, `fluid`:  its console on top, scrolling -- NOT as tall as all it's printed. */
 .SpellApp.fluid .RunnerSplitTop > .RunnerPane {
   max-height: var(--spell-app-console-height, 24em);
