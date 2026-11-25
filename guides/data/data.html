@@ -92,7 +92,9 @@ a "recipe" is a thing
 	it lives in family cookbook
 	its "title" is text
 	its "servings" is a number or "unknown"</ui-code>
-          <table>
+          <table
+            data-align="free:  a left-aligned table;  its short cells only look like a centred column at phone width"
+          >
             <thead>
               <tr>
                 <th>The line</th>
@@ -310,8 +312,8 @@ a "recipe" is a thing
                   <ul>
                     <li>
                       A field whose schema doesn't fix its shape (any keys it likes, a <code>meta</code>) is
-                      <code>its "meta" is an object</code>: held whole, read as <code>the owner of its meta</code>.
-                      A key words can't say is read in quotes, as written: <code>the "run_by" of its meta</code>, or
+                      <code>its "meta" is an object</code>: held whole, read as <code>the owner of its meta</code>. A
+                      key words can't say is read in quotes, as written: <code>the "run_by" of its meta</code>, or
                       <code>its meta's "run_by"</code>.
                     </li>
                     <li>
@@ -319,9 +321,9 @@ a "recipe" is a thing
                       <code>a "provenance" is an object</code>, its named fields under it, typed.
                     </li>
                     <li>
-                      What's inside a row is saved under the server's own keys: a field read as <code>checked_at</code>
-                      goes back as <code>checked_at</code>, never <code>checkedAt</code>; one whose line says
-                      <code>stored as "note"</code>, as <code>note</code>.
+                      What's inside a row is saved under the server's own keys: a field read as
+                      <code>checked_at</code> goes back as <code>checked_at</code>, never <code>checkedAt</code>; one
+                      whose line says <code>stored as "note"</code>, as <code>note</code>.
                     </li>
                   </ul>
                 </li>
@@ -466,6 +468,23 @@ a "recipe" is a thing
                 <td><code>it sorts by title and date</code>, <code>it sorts by every field</code></td>
                 <td>
                   sorts for itself; <code>with "order"</code> added when its question isn't called <code>sort</code>
+                </td>
+              </tr>
+              <tr>
+                <td><code>it sorts newest first by created-at as "recency"</code></td>
+                <td>
+                  has a name of its own for one order: <code>sorted by its created at, newest first</code> sends
+                  <code>?sort=recency</code> (or its <code>with "order_by"</code> question). A line each way round
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>jobs live at "/api/jobs"</code>, then one step in <code>it filters by status</code>,
+                  <code>it sorts by created-at with "order_by"</code>, <code>it searches names with "search"</code>
+                </td>
+                <td>
+                  says what that one list takes, when its lists don't all take the same; the list's own lines win for
+                  it, the place's for the rest
                 </td>
               </tr>
               <tr>
@@ -716,6 +735,41 @@ a "recipe" is a thing
               <code>all artworks matching the search</code>, <code>artworks which match the search</code>, or a
               <code>where</code>
               looking for text in a field the server searches. The program still checks what comes back.
+            </li>
+            <li>
+              What goes in the request, and what stays in the page:
+              <ul>
+                <li>
+                  A <code>where</code> goes in parts. Each <code>its X is ...</code> on a field the list filters by goes
+                  as <code>?x=...</code>, and a search with it; the rest is checked in the page, over what came back.
+                </li>
+                <li>
+                  <code>its id is not nothing</code> is dropped (every row has an id), and so is a search for no text:
+                  with the search box empty, it's every one.
+                </li>
+                <li>
+                  <code>the first 8 jobs</code> asks for one page of 8. With a <code>where</code> left to the page,
+                  <code>the first 8 jobs where ...</code> reads page by page and stops at 8 that pass;
+                  <code>the first job where ...</code> stops at one.
+                </li>
+                <li>
+                  <code>every job where ...</code> with a part left to the page reads every page, up to a limit, and the
+                  editor warns, naming what stays and what to say instead.
+                </li>
+                <li>
+                  To check it in the page on purpose (the server matches ids exactly, or the list is small), end the
+                  read with <code>, checked here</code> (Spanish <code>, filtrando aquí</code>): nothing goes to the
+                  server, and there's no warning.
+                </li>
+                <li>
+                  A sort goes to a list that sorts by that field, or has a name for that order; else it's done in the
+                  page, after reading every page.
+                </li>
+                <li>
+                  Text sorts one way everywhere: the page, a place that can't sort, saved answers and the ingest,
+                  capitals and accents aside (<code>apple</code> before <code>Zebra</code>).
+                </li>
+              </ul>
             </li>
             <li>
               A field a server names its things by (GitHub names a person by their <code>login</code>) is their id, and
