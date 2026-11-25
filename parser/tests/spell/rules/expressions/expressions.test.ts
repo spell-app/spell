@@ -256,6 +256,7 @@ describe("priority and precedence", () => {
         "time_of_day:  Priority.overridable",
         "times:  Precedence.product",
         "token_from:  Priority.declaration",
+        "token_renewed_at:  Priority.declaration",
         "total_of:  Priority.specific",
         "try_again:  Priority.overridable",
         "type_specifier_text_kind:  Priority.specific",

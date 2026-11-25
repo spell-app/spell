@@ -91,7 +91,8 @@ export const treeVocabulary = {
         '`appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  ' +
         "`{ id, kind?, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, " +
         "or a function run the first time the item opens, which may return a promise (a spinner shows until it " +
-        "comes).  Only the open path's columns are drawn.  " +
+        "comes).  Or written in the page, as plain JSON in a `<ui-json>` child (no `slot`), the same list with " +
+        "`children` as lists;  `items` set wins.  Only the open path's columns are drawn.  " +
         '`kind: "header"` makes an item the label line over the rows after it, up to the next header (its group), ' +
         'as `<ui-item kind="header">` is in a menu:  never picked, selected, counted or in `path`, skipped by the ' +
         "arrow keys, and kept by `filter` only while a row under it shows.  It draws its `label`, `icon` and `count` " +

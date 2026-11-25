@@ -7,7 +7,7 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the `spell/app/app/runner` barrel, which would pull in `runCompiled()`, and so `core`.
 import { SpellAppRunner } from "spell/app/app/runner/SpellAppRunner"
 import { projectSource } from "spell/app/app/components/spell-viewer/projectSource"
-import { RunSiteHost } from "./RunSiteHost"
+import { RunSiteHost, type OpenedFile } from "./RunSiteHost"
 
 import "./RunPage.css"
 
@@ -22,13 +22,14 @@ import "./RunPage.css"
  * - It runs what the spell server built of the project, as `<spell-viewer project>` does (`projectSource()`):
  *   the server compiles one whose built files are missing.
  * - The runner is `<spell-viewer>`'s, `<SpellAppRunner>`, its toolbar, console and explorers included.
- * - A site keeps its address in the page's:  `/run/<project>/films/4` (`RunSiteHost`).
+ * - A site keeps its address in the page's:  `/run/<project>/films/4` (`RunSiteHost`);  a page alone in its file is
+ *   named by the file too, `/run/<project>/home.spell`, the address the editor's Run gives it (`opened`).
  * - NEVER imports the editor, the parser or `spell/parser/core`:  `build.test.ts` pins what `run.html` loads.
  ****************/
 export function RunPage(props: RunPageProps): JSX.Element {
   const isPhone = phoneWidth()
   const editUrl = `/edit/${SpellUrls.encodeAddress(props.address)}`
-  const siteHost = new RunSiteHost(`/run/${SpellUrls.encodeAddress(props.projectId)}`)
+  const siteHost = new RunSiteHost(`/run/${SpellUrls.encodeAddress(props.projectId)}`, document, props.opened)
   return (
     <div class="RunPage">
       <div class="RunBar">
@@ -67,6 +68,8 @@ export type RunPageProps = {
   address: string
   /** The project it names:  `@spell/examples/StarWarsSite`. */
   projectId: string
+  /** The project's file the address names, and the pages it declares:  `/home.spell` (`OpenedFile.of()`). */
+  opened?: OpenedFile
   /** URL of `spell-runtime.js`, the program's `@spell/core`. */
   runtimeUrl: string
   /** URL of the built-in types' scope pack, `core.scopes.js`, for the Type Explorer. */

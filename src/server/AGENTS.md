@@ -211,13 +211,24 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       what the keeper runs
     - `refusedStart(server, checkout)` (epic `epic-engine` P84):  why a main checkout's server mustn't start now:  an
       agent's mark on the environment (`agentOf()`:  `CLAUDECODE`, `CODEX_THREAD_ID`, `SPELL_EPIC_AGENT`), no keeper's
-      mark (`SPELL_KEEPER_START`, `KEEPER_START_VARIABLE`), its parent not the keeper, not a worktree, not a test run;
+      mark (`SPELL_KEEPER_START`, `KEEPER_START_VARIABLE`), its parent not the keeper, not a worktree, not a test run,
+      and the agent's own process among its parents (`agentAbove()`:  `CLAUDE_PID`, a `claude` or `codex` program),
+      so a person's terminal that inherited the mark starts it;  `spell server local|start --force` sets the keeper's
+      mark, a person's way past it;
       the page server's `serve` / `local` asks it before it starts, the app's `vite.config.ts` as Vite starts in dev
       (but for a page server's own editor, which it hands its token:  `SPELL_SERVER_TOKEN`)
       - so `KeeperLink.ts` imports its peers WITH `.ts` (`./checkout.ts`, `./Heartbeat.ts`):  Vite loads the config's
         imports in plain `node`
     - this side names nothing of the keeper:  the server package imports no other
     - `/api/server` answers `lastRequest` and `pages` (open live sockets), for its idle stop of a worktree's server
+  - `MoreSpaces` -- the MORE SPACES FOLDERS the kit's page server serves beside spell.spaces, one per org:
+    `~/.spell/more-spaces.json5` (`SPELL_MORE_SPACES_FILE`), `{ spaces: ["~/work/acme-app/spaces"] }`, a folder or
+    `{ folder, orgs }` each;  any checkout's `spaces/`, a project's main or a worktree's, to see work before it's merged
+    - `moreSpacesInFile()` reads it, `servedSpaces()` says which folder serves each org (first come;  never `@spell`)
+    - `switchSpaces(folder, { org })` switches one, in place of the folder that served its orgs:  `spell spaces use`, and
+      the epic hub's `POST /api/servers/editor-spaces` (spell-epic's `ServerKeeper.showInEditor()`);  the caller
+      restarts the page server, which reads it as it starts (spell-app's `spellSpacesDir.ts`)
+    - node built-ins and json5 only:  spell-app's lightest module, which Vite's config loads, imports it
   - `Heartbeat` -- how a process WAITING on someone says it's there, one rule for whoever asks (epic `coherence` P28):
     - 90s without a beat, or its process gone, and it's gone (`isLive()`)
     - `hold(file, record)`:  `{ ...record, pid, seen }` written every 30s, the file removed however the process ends;
@@ -694,6 +705,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         nothing, as `DirectReads`' read through is
       - the secret from the environment, by its name;  a token made from it at its token service (`PlaceToken`);
         both scrubbed from every answer, and the place's own address made this one
+      - a token that renews itself (`its token is renewed at "..."`, `renewsAt`):  renewed at its refresh route in the
+        last hour (or quarter) of its life, kept with `SRV.Secrets.keep()`, and looked at every 5 minutes
+        (`keepRenewing()`, started by `placeRoutes.ts`), so it renews while nobody reads;  of the environment's and the
+        one kept, the one that lasts longer is sent
+      - each place's token's state at `/api/places/tokens` (`TOKENS_ROUTE`, `tokens()`), host-checked only, never a
+        token:  `ok`, `expiring`, `expired`, `renew-failed`, `missing`, its minutes left and a `fix` line
+      - SAVED ANSWERS (a deployment's `fixtures`, `spell/places/SavedAnswers`):  a `GET` its server won't answer (none,
+        a 5xx, a 401 or 403, a secret not set or run out) answered from its saved file, marked `SAVED_ANSWER_HEADER`;
+        an `offline` deployment (or path) reads them alone, and refuses a write
       - read only when its lines or its deployment say so:  a write refused, a graphql server's mutation too
       - a secret that isn't set:  refused in words naming it and the place, `PAGE_SERVER_ANSWER_HEADER` on the answer,
         which the page says;  and said as the server starts (`sayMissing()`), never a value

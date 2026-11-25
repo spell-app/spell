@@ -193,6 +193,52 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
   it("a checkout the hub doesn't serve:  404", async () => {
     await expect(keeper().act("start", join(folder, "elsewhere"))).rejects.toMatchObject({ status: 404 })
   })
+
+  describe("a project's spaces in the editor:  its main, or a worktree's", () => {
+    /** a project beside the kit, `@acme` in its `spaces/`, with worktree `fix`;  the keeper over both */
+    const withProject = () => {
+      const app = fakeMainCheckout(join(folder, "acme-app"))
+      mkdirSync(join(app, "spaces/@acme/tools/dash"), { recursive: true })
+      mkdirSync(join(app, ".epic"), { recursive: true })
+      writeFileSync(join(app, ".epic/config.json5"), `{ worktreesFolder: "../acme-app.worktrees" }\n`)
+      const fix = fakeWorktree(app, join(folder, "acme-app.worktrees", "fix"))
+      mkdirSync(join(fix, "spaces/@acme/tools/dash"), { recursive: true })
+      const project: Repo = {
+        name: "acme-app",
+        checkout: app,
+        content: join(folder, "a.epics"),
+        prefix: "/r/a/",
+        isDefault: false
+      }
+      const kept = new ServerKeeper({ home: join(folder, "home"), repos: [repo, project], control: servers.control })
+      return { app, fix, kept, file: join(folder, "more-spaces.json5") }
+    }
+
+    it("editorSpaces():  the project's checkouts, main first, none shown until one is", () => {
+      const { kept, file } = withProject()
+      expect(kept.editorSpaces(file)).toEqual([
+        { repo: "acme-app", orgs: ["acme"], checkouts: [{ served: false }, { worktree: "fix", served: false }] }
+      ])
+    })
+
+    it("showInEditor():  the worktree's spaces served in place of main's, and back;  one folder per org", () => {
+      const { app, fix, kept, file } = withProject()
+      expect(kept.showInEditor("acme-app", undefined, file)).toEqual(["acme"])
+      expect(kept.editorSpaces(file)[0]?.checkouts).toEqual([{ served: true }, { worktree: "fix", served: false }])
+      expect(kept.showInEditor("acme-app", "fix", file)).toEqual(["acme"])
+      expect(kept.editorSpaces(file)[0]?.checkouts).toEqual([{ served: false }, { worktree: "fix", served: true }])
+      expect(SRV.moreSpacesInFile(file)).toEqual([join(fix, "spaces")])
+      kept.showInEditor("acme-app", undefined, file)
+      expect(SRV.moreSpacesInFile(file)).toEqual([join(app, "spaces")])
+    })
+
+    it("showInEditor():  by name only:  an unknown project or worktree is 404, the kit itself too", () => {
+      const { kept, file } = withProject()
+      expect(() => kept.showInEditor("nobody", undefined, file)).toThrow(expect.objectContaining({ status: 404 }))
+      expect(() => kept.showInEditor("acme-app", "gone", file)).toThrow(expect.objectContaining({ status: 404 }))
+      expect(() => kept.showInEditor("kit", undefined, file)).toThrow(expect.objectContaining({ status: 404 }))
+    })
+  })
 })
 
 /** Page servers in memory:  which run, which are older than their code, what was asked. */

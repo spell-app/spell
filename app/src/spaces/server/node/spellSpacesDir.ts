@@ -1,14 +1,24 @@
-import { basename, dirname, join, resolve } from "path"
+import { basename, delimiter, dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
 
 // The server's checkout finder, node built-ins only:  the main checkout from any worktree.
 import { checkoutOf } from "spell/server/checkout"
+// the more spaces file's reader, node built-ins and json5 only
+import {
+  MORE_SPACES_FILE,
+  moreSpacesInFile,
+  servedSpaces,
+  type MoreSpaces
+} from "spell/server/MoreSpaces"
+
+export type { MoreSpaces }
 
 /**
  * Where this checkout is, and where spell.spaces is:  the part of `environment` that loads anywhere.
  * - Apart from `environment` because that file reads `import.meta.resolve`, which Vitest's global setup can't run:
  *   the check of the real space after a test run (`tests/realSpaceCheck.ts`) needs only this.
  * - NEVER imports anything of spell-app's.
+ * - Reads the MORE SPACES folders too (`moreSpaces`):  the orgs this machine serves from folders of their own.
  */
 
 /** spaces' folder, `src/spaces/`:  this file is in `src/spaces/server/node/`. */
@@ -48,3 +58,41 @@ export const spellSpacesDir = process.env.SPELL_SPACES_DIR
 
 /** spell.spaces when `SPELL_SPACES_DIR` doesn't set it:  beside the main checkout. */
 export const defaultSpellSpacesDir = resolve(dirname(mainRepoDir), "spell.spaces")
+
+////////////////
+// ## More spaces folders
+////////////////
+
+/**
+ * The more spaces folders this program serves, from `env` and the kit's file (`spell/server/MoreSpaces`:
+ * `~/.spell/more-spaces.json5`, which `spell spaces use <folder>` writes):  each folder, with the orgs served from it.
+ * - `SPELL_MORE_SPACES` overrides the file:  folders split by the path delimiter (`:`), empty for none.  Tests set it,
+ *   and never read the person's file (`VITEST`).
+ * - `kitOwn`:  are the spaces the kit's own spell.spaces?  Else the file isn't read:  a page server given `--spaces`
+ *   (`SPELL_SPACES_DIR`, `spell server local`) serves exactly that folder, as before.
+ * - NEVER throws.
+ */
+export function moreSpacesFrom({
+  env = process.env,
+  file = MORE_SPACES_FILE,
+  kitOwn = !env.SPELL_SPACES_DIR || resolve(env.SPELL_SPACES_DIR) === defaultSpellSpacesDir
+}: { env?: NodeJS.ProcessEnv; file?: string; kitOwn?: boolean } = {}): MoreSpaces[] {
+  const entries =
+    env.SPELL_MORE_SPACES !== undefined
+      ? env.SPELL_MORE_SPACES.split(delimiter).filter(Boolean)
+      : env.VITEST || !kitOwn
+        ? []
+        : moreSpacesInFile(file)
+  return servedSpaces(entries)
+}
+
+/** This program's more spaces folders, read once as it loads (`moreSpacesFrom()`). */
+export const moreSpaces: MoreSpaces[] = moreSpacesFrom()
+
+/**
+ * The ONE answer to "which spaces folder holds org `org`?":  the more spaces folder serving it, else spell.spaces.
+ * - `@acme` => `~/work/acme-app/spaces` when that folder serves `@acme/`
+ */
+export function spacesDirForOrg(org: string, more: MoreSpaces[] = moreSpaces, spaces = spellSpacesDir): string {
+  return more.find((each) => each.orgs.includes(org))?.dir ?? spaces
+}

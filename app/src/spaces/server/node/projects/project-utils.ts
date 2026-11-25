@@ -18,6 +18,7 @@ import { json5Edited } from "spell/app/spaces/server/node/storage/json5"
 // a cycle of functions only, called after both have loaded
 import { setSpellVersion } from "./spellVersions"
 import environment from "spell/app/spaces/server/node/environment"
+import { spacesDirForOrg, type MoreSpaces } from "spell/app/spaces/server/node/spellSpacesDir"
 
 import { SP } from "spell/parser/spell"
 import { hasProjectFile, projectFileFor } from "spell/parser/spell/node/projectFile"
@@ -84,6 +85,7 @@ Object.defineProperty(SP.SpellLocation.prototype, "serverPath", {
  *   its address's folder, under the folder `environment` names for its base.
  *   - `@spell/examples` => `spaces/@spell/examples`
  *   - `owen@spell` => `<spell-spaces>/@spell/owen@`
+ *   - an org another spaces folder holds (`environment.moreSpaces`):  there, `@acme/tools` => `<acme-app>/spaces/@acme/tools`
  * - Throws if `rootPath` isn't a known root, or its place has no folder.
  */
 export function serverPathForRoot(rootPath: SP.ProjectRootPath): string {
@@ -99,7 +101,12 @@ export function serverPathForRoot(rootPath: SP.ProjectRootPath): string {
 export function folderForPlace(place: string): string {
   const folder = SP.SpellUrls.folderFor(place)
   if (!folder) throw new TypeError(`folderForPlace('${place}'):  no folder for this place`)
-  return resolve(environment.spaceFolders[folder.base], ...folder.path.split("/"))
+  const [org = ""] = folder.path.split("/")
+  const base =
+    folder.base === "spaces"
+      ? spacesDirForOrg(org.slice(1), environment.moreSpaces, environment.spaceFolders.spaces)
+      : environment.spaceFolders[folder.base]
+  return resolve(base, ...folder.path.split("/"))
 }
 
 /**
@@ -167,6 +174,8 @@ const TARGET_WORDS = Object.values(SP.TARGETS).flatMap(({ wordsSuffix }) => {
  *   - the frozen test projects too:  `spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
  * - Under spell-spaces:  under the spaces' own build folder (`spacesBuildDir()`), so each checkout builds its own
  *   - `<spell-spaces>/@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
+ *   - a more spaces folder (`environment.moreSpaces`):  its own, as `--spaces` names it,
+ *     `<acme-app>/spaces/@acme/tools/jobs` => `build/spell-spaces.acme-app-1a2b3c4d/@acme/tools/jobs`
  *   - a project's spaces (`SPELL_SPACES_DIR`):  `<checkout>/spaces/@acme/app/jobs` =>
  *     `build/spell-spaces.checkout-1a2b3c4d/@acme/app/jobs`, so two checkouts of a project never build over each other
  * - In ANOTHER spell-app checkout (`checkoutHolding()`), e.g. a worktree's example opened by the main checkout's
@@ -183,7 +192,12 @@ export function buildFolderFor(projectFolder: string, folders: BuildFolders = en
   const mirrors: Array<[string | undefined, string]> = [
     [folders.repoDir && resolve(folders.repoDir, "tests"), folders.buildDir],
     [folders.packagesDir, folders.buildDir],
-    [folders.spellSpacesDir, spacesBuildDir(folders)]
+    [folders.spellSpacesDir, spacesBuildDir(folders)],
+    // each more spaces folder its own, as a page server given it with `--spaces` names it
+    ...(folders.moreSpaces ?? []).map(({ dir }): [string, string] => [
+      dir,
+      resolve(folders.buildDir, `${SPACES_BUILD}.${SRV.spacesTag(dir)}`)
+    ])
   ]
   for (const [from, to] of mirrors) {
     const inside = insidePath(from, projectFolder)
@@ -244,6 +258,8 @@ const SPELL_APP = "spell-app"
  * - `spellSpacesDir`:  spell-spaces, mirrored under its build folder (`spacesBuildDir()`)
  * - `defaultSpellSpacesDir`:  the kit's own spell.spaces, mirrored under `build/spell-spaces/`;  left out:
  *   `spellSpacesDir` is taken as the kit's own
+ * - `moreSpaces`:  more spaces folders served beside it, each mirrored under its own,
+ *   `build/spell-spaces.<folder>-<hash>/` (`SRV.spacesTag()`)
  */
 export type BuildFolders = {
   packagesDir: string
@@ -251,6 +267,7 @@ export type BuildFolders = {
   repoDir?: string
   spellSpacesDir?: string
   defaultSpellSpacesDir?: string
+  moreSpaces?: MoreSpaces[]
 }
 
 /**

@@ -51,6 +51,10 @@
   :host(:state(filtering)) ::slotted(:not([label], [slot])) {
     display: none;
   }
+  /* its data, a <ui-json> child (`JsonChild`):  read, never shown;  one in a named slot (`detail`) shows */
+  ::slotted(:is(ui-json, es-json):not([slot])) {
+    display: none;
+  }
 
   /*
    * `tools`:  a line of Spell UI's mini basic buttons above the rows, then the `tools` slot at its end;

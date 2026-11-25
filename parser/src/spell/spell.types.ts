@@ -816,6 +816,8 @@ export type ServedPlace = {
   keyGoes?: { header: string } | { inAddress: string }
   /** Where a token is made from its secret. */
   tokenFrom?: string
+  /** Where its secret, a token, is renewed before it runs out:  `its token is renewed at "..."`. */
+  renewsAt?: string
   /** It takes no writes. */
   readOnly?: boolean
   /**

@@ -1,4 +1,5 @@
 import { readdir, readFile } from "fs/promises"
+import { homedir } from "os"
 import { join, relative, resolve, sep } from "path"
 
 import { AUTHENTICATED_PLACES_PREFIX } from "spell/places/places.types"
@@ -22,7 +23,8 @@ const NOT_A_PROJECTS_BUILD = /(^|\/)__draft(\/|$)/
  * - Read from what each project compiled to, its declarations (`SP.DeclaredPlace.served`):  the place's address,
  *   kind, and the NAME of its secret.  The page server parses nothing, and a page can say none of it.
  * - Each place's deployment, picked as `spell run` picks it (`SP.SpellProject.deploymentsIn()`), by
- *   `SPELL_DEPLOYMENT`:  its address, its secret's name, read only or not.
+ *   `SPELL_DEPLOYMENT`:  its address, its secret's name, read only or not;  its saved answers' folder (`fixtures`,
+ *   under the project's folder unless it starts `/` or `~`) and whether it's `offline`.
  *   - A deployment its project file doesn't list:  every place of that project is REFUSED, in
  *     `SP.UnlistedDeploymentError`'s words, at startup and on every read (from-console J104).
  *     Never read as its line says:  that would read the wrong server quietly.
@@ -39,15 +41,19 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
   private readonly projectFileOf: (projectId: string) => Promise<Pick<SP.ProjectManifestJSON5, "places">>
   /** Projects whose file couldn't be read:  said once each. */
   private readonly saidUnreadable = new Set<string>()
+  /** A project's folder on disk, by its address. */
+  private readonly projectFolderOf: (projectId: string) => string
 
   constructor({
     from = process.env,
     buildDir = environment.buildDir,
-    projectFileOf = loadProjectFile
+    projectFileOf = loadProjectFile,
+    projectFolderOf = (projectId) => SP.SpellLocation.getProjectLocation(projectId).serverPath
   }: ProjectPlacesProps = {}) {
     this.from = from
     this.buildDir = buildDir
     this.projectFileOf = projectFileOf
+    this.projectFolderOf = projectFolderOf
   }
 
   /** The place a request's path names (`@acme/jobs/jobs/jobs/12`), from its project's declarations. */
@@ -91,9 +97,11 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
     if (!served.length) return []
     const project = projectId ?? projectIn(served[0]!.served.servedAt, served[0]!.name)
     const { deployments, refusal } = await this.deploymentsOf(project)
-    return served.map(({ name, served: { at, kind, keyNamed, keyGoes, tokenFrom, readOnly, writes } }) => {
+    return served.map(({ name, served: { at, kind, keyNamed, keyGoes, tokenFrom, renewsAt, readOnly, writes } }) => {
       const deployed = deployments[name]
       const token = deployed?.tokenFrom ?? tokenFrom
+      const fixtures = typeof deployed?.fixtures === "string" ? this.folderIn(project, deployed.fixtures) : undefined
+      const offline = deployed?.offline === true || Array.isArray(deployed?.offline) ? deployed.offline : undefined
       return {
         project,
         name,
@@ -102,11 +110,20 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
         keyNamed: deployed?.key ?? keyNamed,
         ...(keyGoes && { keyGoes }),
         ...(token !== undefined && { tokenFrom: token }),
+        ...(renewsAt !== undefined && { renewsAt }),
+        ...(fixtures !== undefined && { fixtures }),
+        ...(offline !== undefined && { offline }),
         ...((readOnly || deployed?.readOnly) && { readOnly: true }),
         ...(refusal !== undefined && { refusal }),
         ...(writes && { writes })
       }
     })
+  }
+
+  /** `folder`, whole:  under the project's own folder, unless it starts `/`, or `~` (your home). */
+  private folderIn(projectId: string, folder: string): string {
+    if (folder === "~" || folder.startsWith("~/")) return join(homedir(), folder.slice(1))
+    return resolve(this.projectFolderOf(projectId), folder)
   }
 
   /**
@@ -138,6 +155,8 @@ export type ProjectPlacesProps = {
   buildDir?: string
   /** Reads a project's file, by its address;  default from disk (`loadProjectFile()`). */
   projectFileOf?: (projectId: string) => Promise<Pick<SP.ProjectManifestJSON5, "places">>
+  /** A project's folder on disk, by its address:  where its saved answers' folder is found. */
+  projectFolderOf?: (projectId: string) => string
 }
 
 /** A project's places' deployments, picked by `SPELL_DEPLOYMENT`, or why none can be. */

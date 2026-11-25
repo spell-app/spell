@@ -204,6 +204,10 @@ export class Saver {
     for (const key of keysOf(thing)) {
       if (!(key in json) && key !== leaveOut) json[key] = this.write(getProp(thing, key), reference)
     }
+    // an object type's other keys, as they came (`Thing.keepsEveryKey`)
+    for (const [key, value] of keptKeysOf(thing)) {
+      if (!(key in json) && key !== leaveOut) json[key] = this.write(value, reference)
+    }
     // what it was made with and doesn't declare, e.g. a foundation's `symbol`:  as a page's state writes them
     for (const [key, field] of Object.entries(fieldsOf(thing))) {
       if (!(key in json)) json[key] = this.write(field, reference)
@@ -384,8 +388,12 @@ export class Loader {
     return made
   }
 
-  /** Set `made`'s `key` to `json` read back:  a property's list gets its items, else the value is set. */
+  /**
+   * Set `made`'s `key` to `json` read back:  a property's list gets its items, else the value is set.
+   * - A key an object type doesn't declare:  kept on it as it came (`Thing.keepsEveryKey`).
+   */
   protected setRead(made: SpellObject, key: string, json: unknown): void {
+    if (keepsKeyAsItCame(made, key)) return void ((made as unknown as Record<string, unknown>)[key] = structuredClone(json))
     const value = this.read(json)
     const current = Array.isArray(value) ? (made as unknown as Record<string, unknown>)[key] : undefined
     if (current instanceof List) current.items = value as unknown[]
@@ -520,6 +528,21 @@ function isSavedInFile(thing: SpellObject): boolean {
 /** A thing kept inside an entry's key, `"Card#ace"`:  always its type and id, whatever an entry's key says. */
 function insideRefOf(thing: SpellObject): string {
   return refText({ type: thing.constructor.name, id: thing.id })
+}
+
+/**
+ * Does `thing` keep `key` as it came, on itself:  its class keeps every key (`Thing.keepsEveryKey`) and declares no
+ * field `key`.
+ */
+export function keepsKeyAsItCame(thing: object, key: string): boolean {
+  const Class = thing.constructor as { keepsEveryKey?: boolean }
+  return Class.keepsEveryKey === true && !schemaOf(Class as never).info(key)
+}
+
+/** The keys a thing of an object type keeps as they came, and their values (`Thing.keepsEveryKey`):  none for any other. */
+export function keptKeysOf(thing: object): Array<[string, unknown]> {
+  if ((thing.constructor as { keepsEveryKey?: boolean }).keepsEveryKey !== true) return []
+  return Object.entries(thing).filter(([key]) => keepsKeyAsItCame(thing, key))
 }
 
 /** Is `value` text, a number, yes or no, or nothing:  a value to make a thing with, before its references? */

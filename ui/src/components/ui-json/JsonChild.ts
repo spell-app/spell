@@ -10,12 +10,17 @@ export const JSON_CHANGED = "ui-json-data-changed"
  * - STATIC, plain DOM, no Solid, no element:  by `localName`, as a static server render's children are linkedom elements.
  * - A `<ui-json>` before its family loads is read by its text;  once it's loaded, by its `value`,
  *   which a `source` file changes with no change in the page:  the reader listens for `JSON_CHANGED`.
- * - Knows nothing of who reads it:  `<ui-tree-diagram>` today.
+ * - A child in a named slot is SHOWN, not read:  `<ui-tree>`'s `<ui-json slot="detail">` draws the pick.
+ * - Knows nothing of who reads it:  `<ui-tree-diagram>`, `<ui-diagram>` and `<ui-tree>` today.
  ****************/
 export class JsonChild {
-  /** `domElement`'s first child holding JSON;  `undefined` without one.  Takes its language's tag too (`<es-json>`). */
+  /**
+   * `domElement`'s first child holding JSON, not in a named slot;  `undefined` without one.
+   * - Takes its language's tag too (`<es-json>`).
+   */
   static of(domElement: Element): Element | undefined {
     for (const child of domElement.children) {
+      if (child.hasAttribute("slot")) continue
       if (JsonChild.isJsonElement(child)) return child
       if (child.localName === "script" && child.getAttribute("type")?.trim() === "application/json") return child
     }

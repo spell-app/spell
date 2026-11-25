@@ -11,6 +11,8 @@
  *   - ONE base, ONE key, called `AIRTABLE_KEY`:  a program naming another is told so.  More takes a `PlaceServer` of your own.
  * - Its secrets:  the environment the page server started with, else the ones typed in once (`SRV.Secrets`).
  * - As the page server starts, each secret a place needs that isn't set is said, one line each, never a value.
+ * - Each place's token that renews itself is renewed while it runs (`keepRenewing()`), and how every place's token is
+ *   is at `/api/places/tokens` (`TOKENS_ROUTE`).
  * - Local only, as `Guard` is:  a hosted server is The Cloud's question.
  * - Node only.
  */
@@ -63,6 +65,8 @@ const placeRoutes: RouteModule = {
     await serveAirtableBase(context, secrets)
     // after every route module's setup:  the app's hands in its projects
     context.onListening(() => places.sayMissing())
+    // a token that renews itself renews while nobody reads:  looked at every 5 minutes
+    context.onListening(() => context.onStop(places.keepRenewing()))
   }
 }
 

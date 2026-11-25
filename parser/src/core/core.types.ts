@@ -527,8 +527,12 @@ export type SiteOverlayEntry = {
  * - None:  the site keeps its address itself, starting at `/`.
  */
 export type SiteHost = {
-  /** The address to show now, from the site's root:  `/films/4`. */
-  address(): string
+  /**
+   * The address to show now, from the site's root:  `/films/4`.
+   * - `site`:  the site asking, as it starts, for a host whose own address may name a page another way (the run page's
+   *   `/run/<project>/home.spell`, a page by its FILE):  its pages say which address that is.
+   */
+  address(site?: { allPages(): SitePageEntry[] }): string
   /** Go to `address`, as the site does when a page goes to another:  the host's own address follows. */
   go(address: string): void
   /**

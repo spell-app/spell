@@ -54,13 +54,23 @@ describe("KeeperLink.refusedStart():  main's servers refuse an agent's start (ep
   const link = new SRV.KeeperLink(join(folder, "server-keeper.json"))
   /** an agent's command:  Claude Code's mark, no test run's */
   const AGENT = { CLAUDECODE: "1" }
+  /** its parents:  the agent's own process above it */
+  const UNDER_AGENT: SRV.Lineage = [
+    { pid: 900, command: "/bin/zsh" },
+    { pid: 800, command: "/Users/x/.vscode/extensions/anthropic.claude-code/resources/native-binary/claude" }
+  ]
   afterAll(() => rmSync(folder, { recursive: true, force: true }))
 
   it("an agent starting main's page server or editor:  refused, naming the command to ask the keeper with", () => {
-    expect(link.refusedStart("page server", main, { env: AGENT, ppid: 1 })).toMatch(
-      /^page server:  not started\..*Claude Code ran this\.\nAsk the keeper instead:  epic servers start page-server/
+    expect(link.refusedStart("page server", main, { env: AGENT, ppid: 1, lineage: UNDER_AGENT })).toMatch(
+      /^page server:  not started\..*Claude Code ran this\.\nAsk the keeper instead:  epic servers start page-server --repo kit\n/
     )
-    expect(link.refusedStart("editor", main, { env: { CODEX_THREAD_ID: "t" }, ppid: 1 })).toContain(
+    expect(link.refusedStart("editor", main, {
+        env: { CODEX_THREAD_ID: "t" },
+        ppid: 1,
+        lineage: [{ pid: 700, command: "/opt/homebrew/bin/codex" }]
+      })
+    ).toContain(
       "epic servers start editor"
     )
   })
@@ -74,7 +84,30 @@ describe("KeeperLink.refusedStart():  main's servers refuse an agent's start (ep
     expect(link.refusedStart("editor", main, { env: { ...AGENT, VITEST: "true" }, ppid: 1 })).toBeUndefined()
     link.write({ pid: 4242, base: "http://127.0.0.1:1", token: "t" })
     expect(link.refusedStart("page server", main, { env: AGENT, ppid: 4242 })).toBeUndefined()
-    expect(link.refusedStart("page server", main, { env: AGENT, ppid: 4243 })).toBeDefined()
+    expect(link.refusedStart("page server", main, { env: AGENT, ppid: 4243, lineage: UNDER_AGENT })).toBeDefined()
+  })
+
+  it("a PERSON's terminal carrying the mark it inherited (a VS Code window an agent opened):  let through", () => {
+    const terminal: SRV.Lineage = [
+      { pid: 900, command: "/bin/zsh" },
+      { pid: 850, command: "/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper.app/Code Helper" },
+      { pid: 800, command: "/Applications/Visual Studio Code.app/Contents/MacOS/Code" }
+    ]
+    expect(link.refusedStart("page server", main, { env: AGENT, ppid: 900, lineage: terminal })).toBeUndefined()
+    // Claude Code's own process, by the pid it hands its commands, though its program is named otherwise
+    expect(
+      link.refusedStart("page server", main, { env: { ...AGENT, CLAUDE_PID: "850" }, ppid: 900, lineage: terminal })
+    ).toBeDefined()
+    // the processes can't be listed:  the mark alone, as before
+    expect(link.refusedStart("page server", main, { env: AGENT, ppid: 900, lineage: [] })).toBeDefined()
+    // `spell server local --force`:  the keeper's mark, set by the person
+    expect(
+      link.refusedStart("page server", main, {
+        env: { ...AGENT, [SRV.KEEPER_START_VARIABLE]: "1" },
+        ppid: 1,
+        lineage: UNDER_AGENT
+      })
+    ).toBeUndefined()
   })
 
   it("agentOf():  the agent's mark, or SPELL_EPIC_AGENT;  none for a person's own terminal", () => {

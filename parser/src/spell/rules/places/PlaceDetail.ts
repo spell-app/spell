@@ -28,6 +28,8 @@ export type PlaceDetailValue = {
   keyNamed?: string
   /** Where its key's token is made, from the secret `keyNamed`:  see `TokenFrom` (epic `data` P49). */
   tokenFrom?: string
+  /** Where its token is renewed, the token sent to get the next:  see `TokenRenewedAt`. */
+  renewsAt?: string
   /** Its real rows stay on this machine, in this folder:  see `DataIsPrivate` (epic `data` P49).  `""`:  the usual one. */
   privateDataIn?: string
   keyIfSet?: boolean

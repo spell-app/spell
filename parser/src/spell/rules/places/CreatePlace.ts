@@ -437,7 +437,7 @@ export class CreatePlace extends TypeDeclaration<
     const details = CreatePlace.detailsOf(match)
     const servedAt = CreatePlace.servedAtFor(match, details)
     if (!servedAt) return undefined
-    const { keyNamed, keyGoes, tokenFrom, operations } = details
+    const { keyNamed, keyGoes, tokenFrom, renewsAt, operations } = details
     const writes = [...new Set(Object.values(operations ?? {}))]
     return definedProps({
       servedAt,
@@ -446,6 +446,7 @@ export class CreatePlace extends TypeDeclaration<
       keyNamed: keyNamed!,
       keyGoes,
       tokenFrom,
+      renewsAt,
       readOnly: isPlaceTypeReadOnly(type) || undefined,
       writes: writes.length ? writes : undefined
     })

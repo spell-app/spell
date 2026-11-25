@@ -373,7 +373,28 @@ export type ServersAnswer = ServerFactsAnswer & {
   https?: HttpsStatus
   /** the person is working on the servers themselves:  the keeper leaves main's alone (`ServerKeeper.isHandsOff`) */
   handsOff?: boolean
+  /**
+   * each repo whose `spaces/` the kit's page server can serve, and which of its checkouts it serves now
+   * (`ServerKeeper.editorSpaces()`):  each checkout's Show in the editor on the Servers page
+   */
+  editorSpaces?: EditorSpaces[]
 }
+
+/**
+ * A repo whose projects live in its own `spaces/` folder (orgs of its own, `@acme/`), which the kit's page server
+ * serves beside spell.spaces from ONE of its checkouts at a time (`SRV.switchSpaces()`, `~/.spell/more-spaces.json5`):
+ * its main checkout, or an epic's worktree, to see work before it's merged.
+ */
+export type EditorSpaces = {
+  repo: string
+  /** the orgs its `spaces/` holds, `acme` */
+  orgs: string[]
+  /** each checkout with a `spaces/`:  main (no `worktree`) first, then its worktrees by name */
+  checkouts: Array<{ worktree?: string; served: boolean }>
+}
+
+/** `POST /api/servers/editor-spaces`, `{ repo, worktree? }`:  serve that checkout's `spaces/`, then restart the page server. */
+export const EDITOR_SPACES_API = "/api/servers/editor-spaces"
 
 /**
  * Whether the page servers speak HTTPS (and HTTP/2), as the Servers tab draws it (`HttpsSwitch`, epic `epic-engine`

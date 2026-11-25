@@ -139,6 +139,7 @@ export class MemberReadExpression<
   /**
    * Does spell know every member `type` has?  Only when the project declares it (no `stub` left),
    * and each of its super-types is the project's too, or spell's own (`Thing`, `List` ...), never an import.
+   * - Never an object type's:  it keeps every key it's given (`Thing.keepsEveryKey`).
    * - Reads the records as they are now:  a stub may be claimed after a read of it.
    */
   private static knowsAllMembersOf(type: P.TypeScope): boolean {
@@ -146,6 +147,8 @@ export class MemberReadExpression<
     const chain = type.chain()
     // a super-type it can't find:  unknown, so it might have anything
     if (chain.at(-1)!.superType) return false
+    // an object type, `an "asset meta" is an object`:  it may hold any key, as its row sends it
+    if (chain.some((each) => each.name === "Object")) return false
     return chain.every((each) => !each.stub && !(each.parentScope instanceof P.ImportScope))
   }
 

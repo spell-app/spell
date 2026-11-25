@@ -63,6 +63,11 @@
       "types": "./dist-types/src/server/checkout.d.ts",
       "default": "./src/server/checkout.ts"
     },
+    "./server/MoreSpaces": {
+      "spell-source": "./src/server/MoreSpaces.ts",
+      "types": "./dist-types/src/server/MoreSpaces.d.ts",
+      "default": "./src/server/MoreSpaces.ts"
+    },
     "./server/Git": {
       "spell-source": "./src/server/Git.ts",
       "types": "./dist-types/src/server/Git.d.ts",
