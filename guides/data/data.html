@@ -769,6 +769,17 @@ a "recipe" is a thing
                   Text sorts one way everywhere: the page, a place that can't sort, saved answers and the ingest,
                   capitals and accents aside (<code>apple</code> before <code>Zebra</code>).
                 </li>
+                <li>
+                  <code>the number of jobs where its status is "open"</code>, when the list filters by all of it, asks
+                  for one row and reads the server's own count (a <code>total</code> beside its rows, or a count
+                  header). A server that doesn't count, or a part left to the page: every one is read and counted.
+                </li>
+                <li>
+                  <code>spell place ingest</code> writes a list's own lines from its API description: each question
+                  named after a field of its rows is a filter, a sort question's values its orders, and its search
+                  question its search. <code>spell place verify</code> tries one filter on each list (one the server
+                  ignores is left off), which way each order goes, and which field the search looks in.
+                </li>
               </ul>
             </li>
             <li>
