@@ -622,16 +622,24 @@ function listRow({ plain, isNew, isQuiet, isLoud, tag, words, tip, count, when, 
  */
 function worktreeGroups(answer, named) {
   return worktreeOrder(answer).flatMap(({ worktree, epic, servers }) => {
-    const running = servers.filter((server) => server.state !== "stopped")
+    const shown = worktreeCards(servers)
     return [
       heading(`${WORKTREE} ${named && epic?.repo ? `${epic.repo} ` : ""}${worktree}`, epic?.url, workedWords(epic)),
-      ...(running.length ? [cards(running, named)] : []),
-      openStuff(
-        epic,
-        servers.filter((server) => server.state === "stopped")
-      )
+      ...(shown.length ? [cards(shown, named)] : []),
+      openStuff(epic)
     ].filter(Boolean)
   })
+}
+
+/**
+ * A worktree's cards:  every one of its servers while any of them runs, each with its own state;  none while none does
+ * - so a worktree with nothing running shows no "stopped" line, and one with its page server up shows its editor's
+ *   card too, stopped or not (epic `epic-engine` I465)
+ * - "runs":  anything but stopped (starting, or down, counts:  it's trying)
+ * - pure:  the page's tests call it
+ */
+export function worktreeCards(servers) {
+  return servers.some((server) => server.state !== "stopped") ? servers : []
 }
 
 /**
@@ -684,22 +692,12 @@ function workedWords(epic) {
 }
 
 /**
- * the worktree's rows, as the merged list:  each stopped server (its Start in the count's column), then what it holds
- * that main hasn't got:  its commits first, then its phase, items, agents, turn
+ * the worktree's rows, as the merged list:  what it holds that main hasn't got:  its commits first, then its phase,
+ * items, agents, turn
+ * - no row for a stopped server:  its card says so, or the worktree has none (`worktreeCards()`, I465)
  */
-function openStuff(epic, stopped) {
-  const rows = [
-    ...stopped.map((server) =>
-      listRow({
-        plain: true,
-        isQuiet: true,
-        words: `The ${server.name} is stopped`,
-        tip: server.why,
-        count: server.canStart ? el("span", { className: "servers-actions" }, actionButton(server, "start")) : undefined
-      })
-    ),
-    ...(epic ? openRows(epic) : [])
-  ]
+function openStuff(epic) {
+  const rows = epic ? openRows(epic) : []
   return rows.length ? rowList(rows, { plain: true }) : undefined
 }
 

@@ -4,9 +4,8 @@
    - its rows 20px tall, not a tree's 22px:  a topic stays whole in its column, so Owen's longer topics
      (Forms, Text, Layout) still fit a 1440 x 800 window without scrolling
    - and in a window no taller than 840px, less room between topics (epic `language` I182) */
-.PalettePopup {
+.PalettePanel {
   --palette-width: min(740px, 88vw);
-  --ui-popup-max-width: calc(var(--palette-width) + 40px);
   --ui-tree-row-height: 20px;
 
   @media (width >= 1280px) {

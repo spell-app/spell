@@ -931,7 +931,8 @@ export const HELP_TABLE: Readonly<
       disabled: "Can't be used; dimmed, left out of the form.",
       inverted: "For dark backgrounds.",
       readonly: "Shows its value but can't be edited; submitted with the form (unlike `disabled`).",
-      "icon-position": "`left` puts the icon at the start (`left icon`); default the end.",
+      "icon-position":
+        '`left` puts the icon at the start (`left icon`); default the end, but a `type="search"` field\'s is always at the start.',
       labeled:
         "Where the label sits: bare => before the field, `right` => after it, `corner` / `left corner` => folded over a corner.",
       action: "Joined buttons (slot `action`): bare => after the field, `left` => before it.",
@@ -1719,8 +1720,7 @@ export const HELP_TABLE: Readonly<
       readonly: "Shows its value but can't be typed in, and the results never open; still focusable and submitted.",
       open: "The results are showing.",
       placeholder: "Placeholder text of the input.",
-      clearable:
-        "Shows a clear button (an `x`) in place of the magnifying glass while there's text; a click empties it.",
+      clearable: "Shows a clear button (an `x`) at its end while there's text; a click empties it.",
       value: "The input's text: the query, or a chosen result's title.",
       name: "Form field name: submits the input's text.",
       parameter:

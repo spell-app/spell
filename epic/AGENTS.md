@@ -168,6 +168,8 @@ a folder of the kit `spell`.
         stopped by hand too, just after the answer (the call comes through main's page server);  the hands-off switch
         first on the page, a notice under it while it's on;  a card whose server isn't running says "Not running"
         under its name, never its description
+      - I465:  a worktree shows its servers' cards only while any of them runs, then every one, a stopped editor's
+        too;  nothing running, no cards and no "stopped" line
     - VS Code's side bar shows it in a tab of its own, Servers, between Epic Docs and Details
       ([README-vscode.md](README-vscode.md))
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App

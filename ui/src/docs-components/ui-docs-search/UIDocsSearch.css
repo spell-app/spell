@@ -7,7 +7,7 @@
  *   - `<div class="field" part="field">` (the pill, the card's anchor):
  *     - `<span class="glyph">` around its icon
  *     - `<input part="input">`
- *     - while there's text, a `<button class="clear">`
+ *     - while there's text, `<span class="clear" part="clear">` round the shared clear `x` (`F.ClearButton`)
  *     - `<span class="keys" part="keys">` round a `<ui-keys>` (shown while empty and not focused)
  *   - `<div class="results" part="results" popover>` (top layer, anchored under the pill):
  *     - `<div class="list" role=listbox>` of `<div class="group" part="group">`s,
@@ -157,24 +157,11 @@
   input::-webkit-search-decoration {
     appearance: none;
   }
+  /* the shared clear `x` (a mini basic `<ui-button>`), in the pill's row */
   .clear {
     flex: none;
-    display: inline-grid;
-    place-items: center;
-    width: 1.5em;
-    height: 1.5em;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--_ui-docs-search-subtle-color);
-    font-size: 0.875em;
-    cursor: pointer;
-  }
-  .clear:hover {
-    background: oklch(from var(--ui-text-color) l c h / 0.08);
-    color: var(--_ui-docs-search-color);
+    display: inline-flex;
+    align-items: center;
   }
   /* the shortcut's keys close together, so they read as ONE chord, not two presses (Owen, 2026-10-23) */
   .keys {

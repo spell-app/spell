@@ -209,7 +209,7 @@ describe("<ui-docs-search>", () => {
     field.addEventListener("ui-typed", (event) => values.push((event as CustomEvent<{ value: string }>).detail.value))
     await type(field, "b")
     await type(field, "bu")
-    find(field, ".clear").click()
+    find(field, ".clear ui-button").click()
     await settle(field)
     expect(values).toEqual(["b", "bu", ""])
     expect(input(field).value).toBe("")

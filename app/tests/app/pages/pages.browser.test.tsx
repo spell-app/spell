@@ -225,7 +225,7 @@ function keydown(target: EventTarget, init: KeyboardEventInit): KeyboardEvent {
 /**
  * Spy on every `editor` method `EDITOR_HOTKEYS` runs
  * - not the rest:  Esc stops inspecting;  Undo, Redo and the code's keys are the code editor's;
- *   Change This, the parts' keys, Anatomy and the debugger's run their own objects
+ *   Change This, the parts' keys, All Icons, the add panel (`Palette`), Anatomy and the debugger's run their own objects
  * - the list of names fails first when a shortcut is added, so a new `editor` method gets its spy here
  */
 function spyOnHotkeys() {
@@ -237,6 +237,8 @@ function spyOnHotkeys() {
     "redo",
     "find",
     "showShortcuts",
+    "showIcons",
+    "addView",
     "changeThis",
     "cutParts",
     "copyParts",

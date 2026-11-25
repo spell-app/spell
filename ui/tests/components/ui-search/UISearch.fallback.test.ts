@@ -37,7 +37,7 @@ describe("SearchFallback", () => {
     const input = prompt()
     const root = input.parentElement!.parentElement!
     expect(root.className).toBe("ui small fluid search")
-    expect(input.parentElement!.className).toBe("ui icon input")
+    expect(input.parentElement!.className).toBe("ui left icon input left-icon")
     expect(input.parentElement!.getAttribute("part")).toBe("input")
     expect(input.className).toBe("prompt")
     expect(input.type).toBe("search")

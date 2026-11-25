@@ -137,17 +137,17 @@ export function toggleCode() {
  * Design only for a project with something to design (`Design.canShow`, epic `editor` P37);
  * Site only for a project that declares a site (`EditorMode.hasSite`);
  * then, in Edit and Design, Inspect app (`inspect`), the code's icon, which shows the code or closes it,
- * the compiled code's (`compiled`), Anatomy (`anatomy`), then Add (`add`)
+ * the compiled code's (`compiled`), then Anatomy (`anatomy`)
  * (Owen:  "it should be part of the run|edit group";  T76:  "add a 'compiled code' button between `</>` and the
  * inspector";  2026-11-24, T168:  "button order should be:  inspect, spell code, JS, anatomy").
+ * - No Add a View here since epic `editor` T167:  ⌥⌘V or View › Add a View… opens the add panel (`<PalettePanel>`).
  * - The draft's pill is the bar's own part now, after Help (`<PublishDraft>`, T107).
  * - None of the icons is ever chosen, so the thumb stays on the mode:  each one's `aria-pressed` says whether it's on;
- *   Add's `aria-haspopup`, that it opens a menu.
+ *   a menu's opener says so with `aria-haspopup`.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
  * - `compiled`:  the compiled code's item (`<CompiledCodeButton>`), handed in as `inspect` is.
  * - `inspect`:  Inspect app's item (`<InspectAppButton item>`), handed in so this file needs nothing of the Inspector's.
  * - `anatomy`:  Anatomy's item (`<AnatomyButton>`), handed in as `inspect` is.
- * - `add`:  Add's item and its menu (`<AddPartButton>`), handed in as `inspect` is.
  * - A header's segmented menu (`appearance="segmented link header"`), inside the bar's own:
  *   its thumb slides to the mode chosen, the same look as every header's tabs.
  * - Not on a phone, which only runs (`chrome.css`).
@@ -157,7 +157,6 @@ export function ModeButtons(props: {
   compiled?: JSX.Element
   inspect?: JSX.Element
   anatomy?: JSX.Element
-  add?: JSX.Element
 }): JSX.Element {
   return (
     <ui-item class="ModeButtons">
@@ -167,7 +166,7 @@ export function ModeButtons(props: {
         class="ModeTabs"
         aria-label={appTexts.text("modes")}
         ref={on<{ item: Element }>("ui-choosing", (event) => {
-          // a toggle (Inspect app, the code's icon) is pressed, a menu's opener (Add) opens it, never chosen:
+          // a toggle (Inspect app, the code's icon) is pressed, a menu's opener opens it, never chosen:
           // the thumb stays on the mode
           const item = event.detail.item
           if (item.hasAttribute("aria-pressed") || item.hasAttribute("aria-haspopup")) event.preventDefault()
@@ -194,7 +193,6 @@ export function ModeButtons(props: {
           />
           {props.compiled}
           {props.anatomy}
-          {props.add}
         </Show>
       </ui-menu>
     </ui-item>

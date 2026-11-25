@@ -138,9 +138,6 @@ export const TRAIL = " › "
 /** The search box's icon (the default `fa7-free` pack). */
 export const SEARCH_ICON = "magnifying glass"
 
-/** The clear button's icon. */
-export const CLEAR_ICON = "xmark"
-
 /** Keys that focus the field from anywhere:  `/` (unless typing), and `K` with Cmd (Apple) or Ctrl. */
 export const SHORTCUT_KEYS = { slash: "/", palette: "k" } as const
 

@@ -58,8 +58,11 @@ export type SearchMessage = {
 // ## Class words:  shared by the component and its fallback
 ////////////////
 
-/** The class words of the box around the text field (`UIInput.css`). */
-export const INPUT = "ui icon input"
+/**
+ * The class words of the box around the text field (`UIInput.css`):  its magnifying glass at its start,
+ * as every search field's (Owen, 2026-11-24, epic `editor` T169);  written through `E.ClassBuilder.withPhrases()`.
+ */
+export const INPUT = "ui left icon input"
 
 /** The class word of the text `<input>` (`UISearch.css`):  Fomantic's `prompt`. */
 export const PROMPT = "prompt"

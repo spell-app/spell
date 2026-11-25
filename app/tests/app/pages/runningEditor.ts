@@ -414,6 +414,18 @@ function watchEveryBrowser(): void {
 }
 
 /**
+ * Open the add panel, View › Add a View… (epic `editor` T167):  a click, so it opens whatever has the keys;
+ * its key, ⌥⌘V, is a page key, which an open popup (Inspect app's help) keeps from it.
+ * - Waits for its rows.
+ */
+export async function openAddPanel(page: Page): Promise<void> {
+  await page.locator("#ViewBarMenu [part~=item]").first().click()
+  await page.getByText("Add a View…").first().click()
+  await page.waitForSelector("ui-modal.PalettePanel ui-tree-item", { state: "attached", timeout: 30_000 })
+  await page.waitForTimeout(300)
+}
+
+/**
  * What to say of the pages that stopped since last asked;  `undefined`:  none did.
  * - SIDE EFFECT:  forgets them, so each failure reports its own.
  */

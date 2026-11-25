@@ -24,7 +24,8 @@ import searchCSS from "./UISearch.css?inline"
  * The component behind `<ui-search>`:  a text field that suggests results as you type
  * (a combobox and its listbox, the APG's "list autocomplete").
  *
- * - Its shadow DOM:  a text `<input>` in Fomantic's `ui icon input`, and an anchor-positioned popover of results.
+ * - Its shadow DOM:  a text `<input>` in Fomantic's `ui left icon input` (its magnifying glass at its start,
+ *   as every search field's;  the clear `x` and a shortcut's keys at its end), and an anchor-positioned popover of results.
  *
  * - The results:  the `source` PROPERTY, searched here (`SearchMatcher`, Fomantic's matching),
  *   or the `url` template, asked through `UI.api` (`{query}`).
@@ -46,7 +47,7 @@ import searchCSS from "./UISearch.css?inline"
  * - The clear button (`F.ClearButton`):  an `x` in place of the magnifying glass while there's text
  *   (unless `clearable="false"`);  a click empties it, as Escape does, and puts the focus back in it.
  * - `shortcut="mod+F"`:  those keys focus it (and open a `collapsed` one) while it shows on screen
- *   (`F.FieldShortcut`);  `<ui-keys>` draws them at its end while it's empty, its magnifying glass at its start.
+ *   (`F.FieldShortcut`);  `<ui-keys>` draws them at its end while it's empty.
  * - `collapsed`:  a search button (`opener`) until clicked;  then the field slides open from it, focused.
  *   - Escape on the empty field, or leaving it empty, folds it back.
  *   - `:state(expanded)` follows it, and `ui-toggled` says so:
@@ -153,11 +154,6 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   /** Shows its `shortcut`'s keys:  while it's empty, and could take them. */
   get showsShortcut(): boolean {
     return !!this.shortcut && this.query === "" && !this.isDisabled
-  }
-
-  /** Its magnifying glass at its start:  a `collapsed` search's, where its button's was, or one showing keys. */
-  get hasStartIcon(): boolean {
-    return this.collapsed || !!this.shortcut
   }
 
   /** Its `shortcut` focuses it, while it shows:  listening only while it has one and is in the page. */
@@ -581,7 +577,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
         </Show>
         <div
           class={[
-            this.hasStartIcon ? E.ClassBuilder.withPhrases(LEFT_ICON_INPUT) : INPUT,
+            E.ClassBuilder.withPhrases(INPUT),
             { [LOADING]: this.isLoading, [UIT.FLUID]: this.fluid, [UIT.DISABLED]: this.isDisabled }
           ]}
           part={this.partForName("input")}
@@ -943,9 +939,6 @@ const CATEGORY_ID_INFIX = "-category-"
  * - NOTE: `active` (`UIT.ACTIVE`) === the HIGHLIGHTED result (and its category):  Fomantic's meaning.
  */
 const LOADING = "loading"
-
-/** Class words of the input box with its magnifying glass at its start (`hasStartIcon`). */
-const LEFT_ICON_INPUT = "ui left icon input"
 
 /** Class word of a `collapsed` search's button. */
 const OPENER = "opener"

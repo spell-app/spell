@@ -121,7 +121,7 @@ describe("<ui-search> markup", () => {
   it("renders the contract:  classes, the icon input, combobox ARIA, the anchor", async () => {
     const { root, input, results, status } = await search(`<ui-search placeholder="Fruit"></ui-search>`)
     expect(root.className).toBe("ui search")
-    expect(input.parentElement!.className).toBe("ui icon input")
+    expect(input.parentElement!.className).toBe("ui left icon input left-icon")
     expect(input.getAttribute("role")).toBe("combobox")
     expect(input.getAttribute("aria-autocomplete")).toBe("list")
     expect(input.getAttribute("aria-expanded")).toBe("false")
@@ -140,7 +140,7 @@ describe("<ui-search> markup", () => {
       `<ui-search size="large" category fluid align="right" loading aria-label="x"></ui-search>`
     )
     expect(root.className).toBe("ui large category fluid loading right aligned search right-aligned")
-    expect(input.parentElement!.className).toBe("ui icon input loading fluid")
+    expect(input.parentElement!.className).toBe("ui left icon input left-icon loading fluid")
     expect(input.getAttribute("aria-busy")).toBe("true")
   })
 
@@ -362,14 +362,14 @@ describe("<ui-search> clear button", () => {
   /** The clear button's box, if it shows. */
   const clearBox = (host: Element) => host.shadowRoot!.querySelector<HTMLElement>("[part~=clear]")
 
-  it("shows an `x` in place of the magnifying glass while there's text;  a click empties it", async () => {
+  it("shows an `x` at its end while there's text, its magnifying glass staying at its start;  a click empties it", async () => {
     const { host, input, results } = await search(`<ui-search aria-label="Fruit"></ui-search>`, FRUIT)
     const changed = record(host, "ui-changed")
     expect(clearBox(host)).toBeNull()
     await userEvent.type(input, "ban")
     await ElementFixture.settle()
     expect(results.matches(":popover-open")).toBe(true)
-    expect(getComputedStyle(host.shadowRoot!.querySelector("[part~=icon]")!).visibility).toBe("hidden")
+    expect(getComputedStyle(host.shadowRoot!.querySelector("[part~=icon]")!).visibility).toBe("visible")
     await userEvent.click(clearBox(host)!.querySelector("ui-button")!)
     await ElementFixture.settle()
     expect([host.value, input.value]).toEqual(["", ""])

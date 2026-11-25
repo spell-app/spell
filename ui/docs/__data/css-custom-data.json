@@ -11571,7 +11571,7 @@
       "name": "::part(clear)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-dropdown>`:  The clear button of a `clearable` dropdown.\n- `<ui-input>`:  The box of the clear button, at the field's end (`clearable`, while it has text).\n- `<ui-search>`:  The box of the clear button, in place of the icon while there's text."
+        "value": "Part of:\n\n- `<ui-dropdown>`:  The clear button of a `clearable` dropdown.\n- `<ui-icon-picker>`:  The search box's clear button, at its end while there's text.\n- `<ui-input>`:  The box of the clear button, at the field's end (`clearable`, while it has text).\n- `<ui-search>`:  The box of the clear button, at its end while there's text."
       }
     },
     {
@@ -12726,7 +12726,7 @@
       "name": "::part(search)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-dropdown>`:  The search `<input>`.\n- `<ui-icon-browser>`:  The search box, a `<ui-input type=search>`.\n- `<ui-icon-picker>`:  The search box at the panel's top (`<input type=search>`).\n- `<ui-search>`:  The root box (`ui search`):  where the `--ui-search-*` tokens are read."
+        "value": "Part of:\n\n- `<ui-dropdown>`:  The search `<input>`.\n- `<ui-icon-browser>`:  The search box, a `<ui-input type=search>`.\n- `<ui-icon-picker>`:  The search box at the panel's top (`<input type=search>`), in a `ui left icon input`:  its magnifying glass at its start, the clear `x` at its end, as every search field's.\n- `<ui-search>`:  The root box (`ui search`):  where the `--ui-search-*` tokens are read."
       }
     },
     {

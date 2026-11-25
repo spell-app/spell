@@ -30,7 +30,7 @@ import { defineCoreModule } from "./core.types"
 import { describedMethods, type ActionDescription } from "./described"
 import { chainOf, waitOf } from "./sending"
 import { ActionCanceled, runActing, type ActionInfo } from "./undoing"
-import { drawnMenuItemsOf, titleOfThing } from "./ui"
+import { drawnMenuItemsOf, keysGoToThePage, titleOfThing } from "./ui"
 
 /** The ways an action is run, for whoever listens:  a key, a click on a button or menu item, or code. */
 export type ActionWay = "key" | "click" | "menu" | "code"
@@ -334,8 +334,10 @@ export const actingMethods = defineCoreModule({
    * - `key`:  the key's name and the modifiers down with it, as a keyboard event has them.
    * - `isMac`:  `meta` in a shortcut is command on a Mac, control elsewhere (Q31).
    * - An action bound to the key but not enabled lets it go on to the next one (Q35).
+   * - None while the page takes the keys, the editor's Edit (`core._giveKeysToPage()`, epic `editor` T171).
    */
   runShortcut(focused: object | undefined, key: ShortcutKey, isMac = false): boolean {
+    if (keysGoToThePage()) return false
     for (const thing of chainOf(focused)) {
       for (const [name, description] of describedMethods.actionsOf(thing.constructor)) {
         if (!description.shortcuts?.some((shortcut) => shortcutMatches(shortcut, key, isMac))) continue
