@@ -375,8 +375,7 @@ export class WriterProject {
    *   its branches, as an element's children
    */
   protected noteDrawing(definition: P.ASTPropertyDefinition): void {
-    const isOwnFunction = (node: P.ASTNode) =>
-      node instanceof P.ASTMethodDefinition && !this.drawnFunctions.has(node)
+    const isOwnFunction = (node: P.ASTNode) => node instanceof P.ASTMethodDefinition && !this.drawnFunctions.has(node)
     const reads = (node: unknown): boolean => {
       if (Array.isArray(node)) return node.some(reads)
       if (!(node instanceof P.ASTNode) || isOwnFunction(node)) return false
@@ -484,9 +483,7 @@ export class WriterProject {
         if (seen.has(type) || !type.savedPlace()) continue
         seen.add(type)
         for (const variable of type.variables?.get() ?? []) {
-          forEachNode([variable.declaredBy?.current.AST], (node) => {
-            if (node instanceof P.ASTReactiveProperty && node.linksTo) this.waitingValues.add(node.property.value)
-          })
+          for (const name of linkedFieldsOf(variable.declaredBy?.current.AST)) this.waitingValues.add(name)
         }
       }
     }
@@ -1122,6 +1119,29 @@ const DRAWN_LOOPS = new Set(["drawEach", "drawRead"])
 
 /** `core`'s call that draws an if-chain inside markup, handed each condition and branch as a function. */
 const DRAW_IF = "drawIf"
+
+/**
+ * The fields declaring line `ast` declares that follow an address (`P.ASTReactiveProperty`'s `linksTo`), by name:
+ * see `noteLinkedElsewhere()`.
+ * - Kept per tree:  every file written alone asks again of the same lines, e.g. each declaration of a project's
+ *   scope pack (`ScopeExplorer`), so a big project's compile walked its API file's trees thousands of times.
+ *   A line's tree is made once (`Match.AST`), and a parse makes a new one.
+ */
+function linkedFieldsOf(ast: P.ASTNode | undefined): readonly string[] {
+  if (!ast) return []
+  let names = linkedFields.get(ast)
+  if (!names) {
+    const found: string[] = []
+    forEachNode([ast], (node) => {
+      if (node instanceof P.ASTReactiveProperty && node.linksTo) found.push(node.property.value)
+    })
+    linkedFields.set(ast, (names = found))
+  }
+  return names
+}
+
+/** Each declaring line's tree's fields that follow an address:  `linkedFieldsOf()`. */
+const linkedFields = new WeakMap<P.ASTNode, readonly string[]>()
 
 /** What `findWaiting()` calls a function a drawing draws with:  a name `DRAWING_NAME` knows, so it never waits. */
 const DRAWN_FUNCTION_NAME = "drawEach"

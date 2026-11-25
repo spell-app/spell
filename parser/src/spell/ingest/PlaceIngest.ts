@@ -288,7 +288,8 @@ export class PlaceIngest {
     // after the agent's names, as ingest's:  a new type, a list's or one inside a row, named apart from those beside it
     const others = await files.otherSpellBeside(file)
     const listsBefore = new Set(Object.values(old.collections).map(({ at }) => withoutEndSlash(at)))
-    awayFromTypesBeside(description, others, listsBefore)
+    const kept = typesKeptByHand((await files.read(file)) ?? "", old)
+    awayFromTypesBeside(description, [...others, kept], listsBefore)
     const shapeSame = (await fingerprintOf(description)) === old.about.fingerprint
     if (shapeSame) {
       description.canDo = old.canDo
@@ -446,10 +447,11 @@ export class PlaceIngest {
       if (seen) description.canDo.write = writeWordsFor(seen)
     }
     await this.keepPrivate(description, { address, collections: read, headers: {}, notes: [] }, file)
-    // the types its reads made, named apart from those beside it, as ingest's are;  its lists are the ones it had
+    // the types its reads made, named apart from those beside it, as ingest's are, and from a person's in the file;
+    // its lists are the ones it had
     const others = await files.otherSpellBeside(file)
     const lists = new Set(Object.values(description.collections).map(({ at }) => withoutEndSlash(at)))
-    awayFromTypesBeside(description, others, lists)
+    awayFromTypesBeside(description, [...others, typesKeptByHand(written, old)], lists)
     // a field its reads made that Spell can't read is left out, as ingest's and update's are:  a server's `load_1min`
     this.compileLeavingOut(description, file)
     description.about.fingerprint = await fingerprintOf(description)
@@ -1689,6 +1691,23 @@ function awayFromTypesBeside(
       noteApart(words, type)
     }
   }
+}
+
+/**
+ * The types a person keeps by hand in the place's own file, `text`, as a file of their own beside it would declare
+ * them, for `awayFromTypesBeside()`:  `a "state" is a thing`, one line each.
+ * - By hand:  declared in the file, but in none of the lines the description last wrote (`old.spell`), and no list's
+ *   own type (a list a person renamed in the file is still the place's:  `namesFromFile()`).
+ * - So a type a look or a verify's read adds is named apart from it, `lab state`, and the person's is never
+ *   written over:  before, the merge refused the whole run.
+ */
+function typesKeptByHand(text: string, old: PlaceDescription): string {
+  const written = new Set(Object.keys(PlaceWords.of((old.spell ?? []).join("\n")).types).map((type) => type.toLowerCase()))
+  const lists = new Set(Object.values(old.collections).map(({ type }) => type.toLowerCase()))
+  return Object.keys(PlaceWords.of(text).types)
+    .filter((type) => !written.has(type.toLowerCase()) && !lists.has(type.toLowerCase()))
+    .map((type) => `a "${type}" is a thing`)
+    .join("\n")
 }
 
 /**

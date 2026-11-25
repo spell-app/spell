@@ -101,6 +101,12 @@ export const APP_TEXTS = {
   inspectTip: "Inspect the App:  click a part to select it",
   stopInspectingTip: "Stop Inspecting",
   restartTip: "Restart the app",
+  // the page server compiling a program before it can send it, in the app's place (`<BuildingNotice>`)
+  building:
+    "Compiling {name} so it can run.  A new copy of Spell compiles each program the first time it runs, which takes a while.  Time so far:  {seconds}s.  It shows here when it's ready.",
+  buildingAfterStartup:
+    "Compiling Spell's built-in projects first, then {name}.  A new copy of Spell compiles each program the first time it runs, which takes a while.  Time so far:  {seconds}s.  {name} shows here when it's ready.",
+  buildingDone: "Compiled so far:  {projects}.",
   youTip: "Edit Your Name and Emails",
   menuCut: "Cut",
   menuCopy: "Copy",
@@ -599,6 +605,10 @@ export const APP_TEXTS = {
   anatomyFlatTip: "This part hides anything past its edges, so what's inside it can't come apart from it",
   anatomyFocusShortcut: "Show the selected layer alone",
   anatomyBackShortcut: "Go back out of Anatomy",
+  // Preview (epic `editor` T172):  the app alone, full screen;  its row in Keyboard Shortcuts, then the toast going in,
+  // `{key}` its key as this computer writes it (⌥⌘Enter, Ctrl+Alt+Enter)
+  previewShortcut: "Preview:  show only the app, full screen",
+  previewHint: "Only your app is showing now.\nPress {key} to go back to the editor.",
   shortcutsWhileAnatomy: "Only while Anatomy shows",
   anatomyHelp:
     "Anatomy pulls your app apart into layers, one for each view it draws.\nDrag to turn it. Scroll to zoom. Click a layer to pick it, or double-click to show it alone.\nHold Option to play the app as usual. Press Esc to go back.",

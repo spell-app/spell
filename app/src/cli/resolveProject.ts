@@ -22,6 +22,9 @@ import { findUp } from "spell/util/node/findUp"
 import { SP } from "spell/parser/spell"
 import { hasProjectFile } from "spell/parser/spell/node/projectFile"
 import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import { serveOrgFrom, spacesDirForOrg } from "spell/app/spaces/server/node/spellSpacesDir"
+import { orgGroupsIn } from "spell/app/spaces/server/node/people/localPerson"
+import { addOrgGroups } from "spell/app/spaces/models/projectGroups"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 import { CLI } from "spell/app/cli"
 
@@ -147,9 +150,11 @@ async function resolveDiskPath(arg: string, path: string): Promise<CLI.CliProjec
 
   // `locationForDiskPath()` falls back to a file's own folder, which loading would write a project file into
   const folder = isFolder ? path : dirname(path)
-  if (!projectDirAbove(folder)) {
+  const projectDir = projectDirAbove(folder)
+  if (!projectDir) {
     throw new CLI.CliError(`'${arg}' isn't in a spell project:  no ${SP.PROJECT_FILE} in ${folder} or above it`)
   }
+  serveSpacesHolding(projectDir)
   // it looks for a project file from a FILE's folder up, so hand it one in the folder
   const location = locationForDiskPath(isFolder ? resolve(path, SP.PROJECT_FILE) : path)
   if (!location) throw new CLI.CliError(`'${arg}' has a folder or file name spell can't use`)
@@ -157,6 +162,33 @@ async function resolveDiskPath(arg: string, path: string): Promise<CLI.CliProjec
   const project = new SP.SpellProject(location.projectId)
   if (isFolder || isManifest) return { kind: "project", arg, project }
   return { kind: "file", arg, file: new SP.SpellFile(location.path) }
+}
+
+/** An org's folder in a spaces folder, `@acme`. */
+const ORG_FOLDER = /^@([a-z][a-z0-9_]*)$/
+
+/** Orgs a project's folder never serves:  Spell's own (its groups are known), and an editor's local folders. */
+const NOT_SERVED = new Set(["spell", "local"])
+
+/** An org's group's folder, `tools`:  not a person's space (`alice@`), nor one of spaces' own (`__admin`). */
+const GROUP_FOLDER = /^[a-z][a-z0-9_-]*$/i
+
+/**
+ * A project in an org's group of a spaces folder, `<spaces>/@acme/tools/dashboard`:  that spaces folder serves
+ * `@acme` for this command, so it's `@acme/tools/dashboard`, and what it imports by address, `@acme/tools/jobs`,
+ * is read beside it (`serveOrgFrom()`).
+ * - Before, with no `SPELL_SPACES_DIR` naming that folder, it was `@local/tools/dashboard`, and its import of
+ *   `@acme/tools/jobs` was read as file `jobs` of org program `tools`:  "a file's name has a dot".
+ * - Anything else, e.g. a project in a folder of its own, is left as it was:  a `@local/<folder>` one.
+ */
+function serveSpacesHolding(projectDir: string): void {
+  const groupDir = dirname(projectDir)
+  const orgDir = dirname(groupDir)
+  const org = ORG_FOLDER.exec(basename(orgDir))?.[1]
+  if (!org || NOT_SERVED.has(org) || !GROUP_FOLDER.test(basename(groupDir))) return
+  const spaces = dirname(orgDir)
+  if (spacesDirForOrg(org) !== spaces) serveOrgFrom(spaces, org)
+  addOrgGroups(orgGroupsIn(spaces, org))
 }
 
 /** Nearest folder at or above `folder` holding a project file (`__project.json5`, or an old `project.json`), if any. */

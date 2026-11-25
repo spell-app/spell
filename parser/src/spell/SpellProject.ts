@@ -613,11 +613,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * The compile cache's key for our text as it is NOW, for a compile done elsewhere (`takeCompiled()`'s `cacheKey`):
    * worked out before asking, since our text may change while it compiles.
    * - SIDE EFFECT:  this run is the editor's (`compiledForThisRun`), as `compile()`'s default is.
+   * - SIDE EFFECT:  every editor holding a file's newer text hands it over first (`takeWaitingText()`):
+   *   the key is of the text as typed, which the compile elsewhere reads (epic `editor` I342:  a key of the text
+   *   before the last keys kept the edited program under the unedited text's key, so a fresh page ran the edit).
    * - `undefined` with no cache installed, or when its key can't be worked out.  NEVER throws.
    */
   async compileCacheKey(): Promise<string | undefined> {
     const cache = SpellProject.compileCache
     if (!cache) return undefined
+    this.takeWaitingText()
     this.compiledForThisRun = "editor"
     return await cache.keyFor(this).catch(() => undefined)
   }

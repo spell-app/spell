@@ -856,6 +856,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A request for a built file that isn't there (`/spaces/<project>/<project>.spell.js` ...)
     compiles its project first, then serves it (`projectBuild.builtFirst()`).
     - One compile per project at a time, waiting at most `COMPILE_WAIT_MS`.
+    - It waits for the startup build (below) only when its project is one of those, or imports one (`needsStartup()`).
+    - While it waits, `GET /api/projects/building/<project>` says how the compile is coming along
+      (`projectBuild.progress()`):  the runner shows it where the app will be (`app/runner/buildProgress.ts`).
   - The route module starts `spell compile --stale --all @spell/examples @spell/library @spell/guides` as the page
     server starts, in the background:  the demo pages, App UI's live examples and the Spell UI site
     (`/components/ui/`) run them.

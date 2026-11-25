@@ -13,6 +13,8 @@ import { LazyPages } from "./LazyPages"
 import { loadRuntime, type LoadedRuntime } from "./loadRuntime"
 import { ViewerSiteHost } from "./ViewerSiteHost"
 import { fetchJSON, fetchText } from "./fetchFresh"
+import { watchBuild } from "./buildProgress"
+import type { BuildProgress } from "spell/parser/spell/SpellUrls"
 import { languagesOf, mergedWords, wordsAt, wordsOfLanguages } from "./words"
 import {
   loadScopePack,
@@ -70,6 +72,8 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
   const [split, setSplit] = createSignal(untrack(() => props.fluid) ? DEFAULT_DEBUG_HEIGHT : DEFAULT_SPLIT)
   const [scopes, setScopes] = createSignal<ScopesSource>()
   const [words, setWords] = createSignal<SP.SpellWordsData>()
+  // the page server compiling the program before it can send it, e.g. on a fresh checkout:  said in the app's place
+  const [building, setBuilding] = createSignal<BuildProgress>()
   // the explorers' state, kept here so it outlives switching tabs:  each reads it once, as it mounts
   let explorerState: TypeExplorerState = {}
   let thingsState: ThingExplorerState = {}
@@ -92,6 +96,9 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
   // a layout in markup is the app's drawing:  shown through a slot, its `to draw` not drawn (epic `drawable-thing` P9)
   const appPane = (
     <div class={["SpellAppApp", { hidden: !hasApp() && !props.layout }]}>
+      <Show when={building()} keyed>
+        {(progress) => <BuildingNotice name={props.source.name} progress={progress} />}
+      </Show>
       <Show when={props.layout}>
         <slot />
       </Show>
@@ -224,6 +231,23 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
     if (layout) unslot = slotsFromIn(layout)
     const keepThings = how === "keep things" && isSameProgram(lastSource, source)
     lastSource = source
+    // fetched from a server that may compile it first:  say so while it does
+    const stopWatching =
+      source.compiled === undefined && source.projectId ? watchBuild(source.projectId, setBuilding) : undefined
+    try {
+      await runAfterItsWords(copy, source, layout, keepThings)
+    } finally {
+      stopWatching?.()
+    }
+  }
+
+  /** `run()`'s work, once it's ready:  its own words, then the program -- see `runProgram()`. */
+  async function runAfterItsWords(
+    copy: LoadedRuntime,
+    source: SpellAppSource,
+    layout: Element | undefined,
+    keepThings: boolean
+  ) {
     // its own words first:  their `messages` are what the core says as it runs, e.g. its tests' lines in Spanish
     // - awaited only when there are some to load:  else the last run's app goes at once, in the same tick, as before
     const own = source.words || !source.wordsUrl ? source.words : await ownWords(source)
@@ -300,6 +324,26 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       </Show>
     )
   }
+}
+
+/****************
+ * ### `<BuildingNotice>`
+ * What shows in the app's place while the page server compiles it before sending it (`SP.BuildProgress`):
+ * e.g. a fresh checkout's first run, which compiles the program and each project it imports.
+ * - How long it's taken so far, and the projects done, as the server says each one is.
+ ****************/
+function BuildingNotice(props: { name: string; progress: BuildProgress }) {
+  const params = () => ({ name: props.name, seconds: String(props.progress.seconds ?? 0) })
+  const done = () => (props.progress.compiled ?? []).map((id) => id.slice(id.lastIndexOf("/") + 1))
+  return (
+    <div class="SpellAppBuilding" role="status">
+      <ui-loader visible inline />
+      <p>{appTexts.text(props.progress.afterStartup ? "buildingAfterStartup" : "building", params())}</p>
+      <Show when={done().length}>
+        <p>{appTexts.text("buildingDone", { projects: done().join(", ") })}</p>
+      </Show>
+    </div>
+  )
 }
 
 /** Props for `<SpellAppRunner>`. */

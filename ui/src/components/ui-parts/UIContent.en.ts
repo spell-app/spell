@@ -44,7 +44,7 @@ export const contentVocabulary = {
     {
       name: "markdown",
       group: "content",
-      kind: "keyOnly",
+      kind: "boolean",
       description:
         "Reads its words as Markdown (`**bold**`, `_italic_`, lists, links, code), drawn as `<ui-markdown>` draws them.  Without it, its content shows as written."
     },

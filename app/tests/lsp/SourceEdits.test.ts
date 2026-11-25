@@ -388,6 +388,22 @@ describe("SourceEdits, on whole elements", () => {
     expect(text.startsWith("<text>More", starts[1]!)).toBe(true)
   })
 
+  test("a {draw ...} among a drawing's own lines is written as its line;  inside a tag it keeps its braces (editor I342)", () => {
+    const drawing = "to draw it\n\t<deck />\n\t<container>\n\t\t<column />\n\t</>\n"
+    const among = SourceEdits.writtenAll(drawing, { opening: at(drawing, "container"), where: "after" }, [
+      "{draw a new card}"
+    ])
+    // a line of words, as prose is:  a blank line before it
+    expect(among.text).toContain("\t</>\n\n\tdraw a new card\n")
+    expect(among.text.startsWith("draw a new card", among.starts[0]!)).toBe(true)
+    const inside = SourceEdits.writtenAll(drawing, { opening: at(drawing, "column"), where: "after" }, [
+      "{draw a new card}"
+    ])
+    expect(inside.text).toContain("\t\t<column />\n\t\t{draw a new card}\n")
+    expect(SourceEdits.isInsideElement(drawing, at(drawing, "column"))).toBe(true)
+    expect(SourceEdits.isInsideElement(drawing, at(drawing, "container"))).toBe(false)
+  })
+
   test("nothing goes inside itself", () => {
     const card = SourceEdits.elementAt(APP, at(APP, "ui-card"))!
     expect(() => SourceEdits.moved(APP, [card], { opening: at(APP, "ui-text"), where: "after" })).toThrow(TypeError)

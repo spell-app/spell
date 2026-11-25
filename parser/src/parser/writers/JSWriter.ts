@@ -129,10 +129,10 @@ export class JSWriter extends ProgramWriter {
 
   /**
    * Member `property`'s name, by our name (`nameOf()`) -- spell's as is when it isn't a legal identifier,
-   * for whoever writes it to quote:  `["$type"]`.
+   * for whoever writes it to quote:  `["$type"]`;  a key read as written too (`asWritten`):  `meta.run_by`.
    */
   propertyName(property: P.ASTPropertyLiteral): string {
-    return property.isLegalIdentifier ? this.nameOf(property.value) : property.value
+    return property.isLegalIdentifier && !property.asWritten ? this.nameOf(property.value) : property.value
   }
 
   /** Between each source file's code in a project's module:  a comment line -- see `ProgramWriter.fileSeparator`. */

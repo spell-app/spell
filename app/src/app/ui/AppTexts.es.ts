@@ -103,6 +103,11 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectTip: "Inspeccionar la app:  haz clic en una parte para elegirla",
   stopInspectingTip: "Dejar de inspeccionar",
   restartTip: "Reiniciar la app",
+  building:
+    "Compilando {name} para que se ejecute.  Una copia nueva de Spell compila cada programa la primera vez que se ejecuta, y tarda un rato.  Tiempo hasta ahora:  {seconds} s.  Aparece aquí cuando esté listo.",
+  buildingAfterStartup:
+    "Compilando primero los proyectos propios de Spell, y luego {name}.  Una copia nueva de Spell compila cada programa la primera vez que se ejecuta, y tarda un rato.  Tiempo hasta ahora:  {seconds} s.  {name} aparece aquí cuando esté listo.",
+  buildingDone: "Compilados hasta ahora:  {projects}.",
   youTip: "Editar tu nombre y tus correos",
   menuCut: "Cortar",
   menuCopy: "Copiar",
@@ -583,6 +588,8 @@ const APP_TEXTS_ES: AppTextPack = {
   anatomyFlatTip: "Esta parte oculta lo que pasa de sus bordes, así que lo de dentro no puede separarse de ella",
   anatomyFocusShortcut: "Muestra sola la capa elegida",
   anatomyBackShortcut: "Vuelve atrás, fuera de Anatomía",
+  previewShortcut: "Vista previa:  muestra solo la app, a pantalla completa",
+  previewHint: "Ahora solo se ve tu app.\nPulsa {key} para volver al editor.",
   shortcutsWhileAnatomy: "Solo mientras se ve Anatomía",
   anatomyHelp:
     "Anatomía separa tu app en capas, una por cada vista que dibuja.\nArrastra para girarla. Desplaza para acercar. Haz clic en una capa para elegirla, o doble clic para verla sola.\nMantén Opción para usar la app como siempre. Pulsa Esc para volver.",

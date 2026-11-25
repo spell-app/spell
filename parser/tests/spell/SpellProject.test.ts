@@ -182,4 +182,19 @@ describe("saving what a compile wrote", () => {
       SP.SpellProject.compileCache = undefined
     }
   })
+
+  test("the compile cache's key is of the text as typed:  an editor holding newer text hands it over first (editor I342)", async () => {
+    const { project } = compiledProject("KeyAsTyped")
+    const cache = SP.CompileCache.inMemory()
+    vi.spyOn(cache, "keyFor").mockResolvedValue("key")
+    SP.SpellProject.compileCache = cache
+    try {
+      let isHandedOver = false
+      project.textLater({} as SP.SpellFile, () => (isHandedOver = true))
+      expect(await project.compileCacheKey()).toBe("key")
+      expect(isHandedOver).toBe(true)
+    } finally {
+      SP.SpellProject.compileCache = undefined
+    }
+  })
 })

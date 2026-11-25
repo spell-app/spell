@@ -2682,6 +2682,16 @@
           "aliases": []
         },
         {
+          "className": "PossessiveQuotedKeyRead",
+          "ruleNames": [],
+          "internal": true,
+          "file": "src/spell/rules/properties/QuotedKeyRead.ts",
+          "line": 67,
+          "purpose": "`its meta's \"run_by\"` ~== `the \"run_by\" of its meta` (`QuotedKeyRead`).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
           "className": "PropertyExpression",
           "ruleNames": ["property_expression"],
           "internal": false,
@@ -2727,6 +2737,32 @@
                 },
                 "py": {
                   "code": "class Carta(Thing):\n    def jugar(self) -> None:\n        core.console.log(solitario.reserva)\n\ncore.describe_action(Carta, \"jugar\", {\"title\": \"Jugar Carta\", \"undone_as\": \"Jugar Carta\"})\n\nclass Pila(List):\n    item_type = Carta\n\nclass Solitario(App):\n    element_tag = \"syntax-block-app\"\n\n    reserva = prop(init=lambda: Pila(id=\"reserva\"), early=True)\n\nsolitario = Solitario()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "QuotedKeyRead",
+          "ruleNames": ["quoted_key_read"],
+          "internal": false,
+          "file": "src/spell/rules/properties/QuotedKeyRead.ts",
+          "line": 18,
+          "purpose": "`the \"run_by\" of its meta` ~== `meta.run_by`, a key read off a thing or an object by the key AS WRITTEN, in quotes.",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las) {key:text} (de|del) {expression:operand}",
+              "example": "el \"run_by\" del aparato",
+              "outputs": {
+                "js": {
+                  "code": "aparato.run_by"
+                },
+                "ts": {
+                  "code": "aparato.run_by"
+                },
+                "py": {
+                  "code": "getattr(aparato, \"run_by\", None)"
                 }
               }
             }

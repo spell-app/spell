@@ -28,6 +28,7 @@ import {
 import { Property } from "./Property"
 import { PropertyExpression } from "./PropertyExpression"
 import { QuotedMember } from "./QuotedMember"
+import { PossessiveQuotedKeyRead, QuotedKeyRead } from "./QuotedKeyRead"
 
 properties.addRule(Property)
 
@@ -324,6 +325,51 @@ properties.addRule(TheOwnProperty, {
 
 properties.addRule(PossessiveMark, { roles: { match: "name" } })
 properties.addRule(PossessiveOwner)
+
+properties.addRule(QuotedKeyRead, {
+  syntax: "the {key:text} of {expression:operand}",
+  tests: [
+    {
+      title: "a key in quotes, read as written;  one its type declares, by its name or words, that member",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a gadget is a thing",
+            'a gadget has a "checked at" as a date',
+            "a gadget has a raw as an object",
+            "the gadget is a new gadget"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ['the "run_by" of the gadget', "gadget.run_by"],
+        ['the "Display Title" of the gadget', 'gadget["Display Title"]'],
+        ['the "owner" of the raw of the gadget', "gadget.raw.owner"],
+        ['the "checked_at" of the gadget', "gadget.checkedAt"],
+        ['the "checked at" of the gadget', "gadget.checkedAt"]
+      ]
+    }
+  ]
+})
+
+properties.addRule(PossessiveQuotedKeyRead, {
+  syntax: "{expression:possessive_owner} {possessive_mark} {key:text}",
+  tests: [
+    {
+      title: "a key in quotes, read as written, after an `'s`",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a gadget is a thing", "a gadget has a raw as an object", "the gadget is a new gadget"].join("\n"), "block")
+      },
+      tests: [
+        ['the gadget\'s "run_by"', "gadget.run_by"],
+        ['the gadget\'s raw\'s "x-total"', 'gadget.raw["x-total"]']
+      ]
+    }
+  ]
+})
 
 // more tests:  `NameMeanings.test.ts`, inside an action
 properties.addRule(PossessiveProperty, {
