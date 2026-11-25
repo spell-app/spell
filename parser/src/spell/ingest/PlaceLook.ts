@@ -594,8 +594,9 @@ const MOST_LISTS_TRIED = 6
 
 /**
  * What the server does when it's asked (epic `data` T162):  `undefined` if it does none of it.
- * - Filters and sorts tried on each plain list, its own, up to `MOST_LISTS_TRIED` and the reader's room:
- *   - every list tried finding the same, and every plain list tried:  the place's, `it filters by cuisine`
+ * - Filters and sorts tried on each plain list, its own, up to `MOST_LISTS_TRIED` and the reader's room:  a list
+ *   whose tries ran out of room, past the first, isn't counted.
+ *   - every list tried finding the same, however many weren't tried:  the place's, `it filters by cuisine`
  *   - else each list's own, `CollectionLook.takes`, said under its `live at` line
  * - The fields it gives, and how it pages, on the first:  a server does those one way.
  * - Reads only, as every look is, and few:  a server that ignores these answers as if it hadn't been asked.
@@ -638,10 +639,14 @@ async function serverTakesOf(
   for (const list of lists.slice(0, MOST_LISTS_TRIED)) {
     if (tried.length && !reader.hasRoom) break
     const askFor = askerOf(list)
-    tried.push([list, { ...(await filtersOf(list, askFor)), ...(await sortsOf(list, askFor)) }])
+    const takes = { ...(await filtersOf(list, askFor)), ...(await sortsOf(list, askFor)) }
+    // tries the reader's room cut short find less than a list takes:  past the first, they'd disagree for nothing
+    if (tried.length && !reader.hasRoom) break
+    tried.push([list, takes])
   }
   const said = tried.map(([, takes]) => JSON.stringify(takes))
-  const isOneWay = tried.length === lists.length && new Set(said).size === 1
+  // every list tried agreeing, and none against:  the place's, as one try was before each list was tried
+  const isOneWay = new Set(said).size === 1
   if (!isOneWay) {
     for (const [list, takes] of tried) if (Object.keys(takes).length) list.takes = takes
   }

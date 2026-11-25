@@ -236,4 +236,21 @@ describe("what each list takes, tried on each, for a place with no description",
     expect(spell).not.toMatch(/^\tit filters by/m)
     expect(description.spellCantSay.join("\n")).not.toMatch(/filter or sort/)
   })
+
+  test("more lists than it tries, every one tried agreeing:  the place's own line, not each list's", async () => {
+    const recipes = kitchenServer()
+    const names = ["soups", "stews", "salads", "curries", "pies", "cakes", "breads", "sauces"]
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof URL ? input.href : (input as string)}`)
+      const answerWith = (body: unknown) => Response.json(body, { headers: { "access-control-allow-methods": "GET" } })
+      if (url.href === API) return answerWith(Object.fromEntries(names.map((name) => [name, `${API}/${name}`])))
+      // each list is the kitchen's recipes, under a name of its own
+      url.pathname = url.pathname.replace(/\/\w+$/, "/recipes")
+      return recipes.fetch(url)
+    }) as typeof globalThis.fetch
+    const { ingest } = ingestOn(fetch)
+    const { spell } = await ingest.add({ address: API, into: "/K.spell", name: "kitchen" })
+    expect(spell).toMatch(/^\tit filters by title, cuisine and servings$/m)
+    expect(spell).not.toMatch(/^\t\tit filters by/m)
+  })
 })
