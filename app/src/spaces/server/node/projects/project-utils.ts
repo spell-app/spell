@@ -657,6 +657,45 @@ export const request_getIndex = respondWithJSON(async (request) => {
 })
 
 /**
+ * The themes a site of project `projectId` may wear, by name:  each theme file's URL, `<name>.theme.json5` at the top
+ * of the project's folder, or of a project it imports (`/spaces/@acme/brand/harbor.theme.json5`).
+ * - Its own first, then each project it imports, in its project file's order, and theirs in turn:  the first of a
+ *   name wins.
+ * - An inactive import, one not there, or one met already, is passed over.
+ * - So a running site asks for no theme file that isn't there (`SiteThemes`):  the browser logs every 404.
+ * - Only what's on disk:  a theme file is never drafted.
+ */
+export async function themesOf(projectId: string, seen = new Set<string>()): Promise<Record<string, string>> {
+  if (seen.has(projectId)) return {}
+  seen.add(projectId)
+  const folder = SP.SpellLocation.getProjectLocation(projectId).serverPath
+  if (!existsSync(folder)) return {}
+  const themes: Record<string, string> = {}
+  for (const file of readdirSync(folder).sort()) {
+    if (!file.endsWith(THEME_SUFFIX)) continue
+    themes[file.slice(0, -THEME_SUFFIX.length)] = SP.SpellUrls.fileUrl(`${projectId}/${file}`)
+  }
+  const { imports } = await loadProjectFile(projectId)
+  for (const { path, active } of imports) {
+    if (active === false || !SP.SpellLocation.isAddress(path)) continue
+    for (const [name, url] of Object.entries(await themesOf(path, seen))) themes[name] ??= url
+  }
+  return themes
+}
+
+/** A theme file's suffix:  `harbor.theme.json5`. */
+const THEME_SUFFIX = ".theme.json5"
+
+/**
+ * `GET /api/projects/themes/<project>` -- the themes a site of the project may wear:  see `themesOf()`.
+ * - e.g. `/api/projects/themes/@acme/shop` => `{ "harbor": "/spaces/@acme/brand/harbor.theme.json5" }`
+ * - Failure:  500 if the place isn't a project's (`SP.SpellUrls.projectIdFor()`).
+ */
+export const request_getThemes = respondWithJSON(async (request) => {
+  return await themesOf(SP.SpellUrls.projectIdFor(tailOf(request, SP.SpellUrls.THEMES)))
+})
+
+/**
  * EVERY file of project `projectId`, as paths from it (`/Solitaire.spell`, `/__thumbnail.png`):  what Export zips.
  * - More than its index:  pictures and any other file, and its project file (`__project.json5`).
  * - Left out, as they're not the project's to move:

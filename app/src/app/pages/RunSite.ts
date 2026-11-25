@@ -176,7 +176,7 @@ export class RunSite implements SiteHost {
   /**
    * Theme `name`'s look for the running site alone (epic `mockup` P8):  its tokens as one block of declarations, worn
    * inline by the site's frame, so the editor around it keeps its own theme (`SiteThemes.tokens()`).
-   * - The project's own, `<name>.theme.json5` in `projectFolder`, else one of Spell UI's.
+   * - The project's own, `<name>.theme.json5` in `projectFolder` or a project it imports, else one of Spell UI's.
    *   - The project's own are then offered in the editor's theme menu, first (I36, `EditorTheme.offerProjectThemes()`).
    * - Rejects on a theme in neither.
    */

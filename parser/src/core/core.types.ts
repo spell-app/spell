@@ -561,7 +561,7 @@ export type SiteHost = {
    * (`--ui-*` tokens:  colours, fonts, line widths, corners), so every page, dialog and sidebar inside inherits them.
    * - What a site's `- its "theme" is "mockup"` asks for (epic `mockup` P8).
    * - `projectFolder`:  where the running program's files are (`core.projectFolder`), for a theme of its own,
-   *   `<name>.theme.json5` there;  none:  Spell UI's themes only.
+   *   `<name>.theme.json5` there or in a project it imports;  none:  Spell UI's themes only.
    * - None:  the site wears the page's theme.
    * - Rejects on a theme the host doesn't have.
    */

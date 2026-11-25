@@ -273,6 +273,36 @@ describe("project-utils", () => {
     expect(Object.keys(index.manifest)).not.toContain(expect.stringContaining("names.json5"))
   })
 
+  // a running site asks for no theme file that isn't there, and finds one in a project it imports
+  test("the themes a site may wear:  its project's own first, then each import's, theirs in turn;  an inactive one's not", async () => {
+    const brand = project("Brand")
+    const shop = project("Shop")
+    const unused = project("Unused")
+    const theme = (folder: string, name: string) =>
+      writeFileSync(resolve(workspace, folder, `${name}.theme.json5`), '{ "extends": "matrix" }\n')
+    theme("Brand", "harbor")
+    theme("Brand", "brand-night")
+    theme("Shop", "harbor")
+    theme("Unused", "unused")
+    expect(await projectUtils.themesOf(shop)).toEqual({ harbor: SP.SpellUrls.fileUrl(`${shop}/harbor.theme.json5`) })
+    writeFileSync(
+      resolve(workspace, "Shop", SP.PROJECT_FILE),
+      JSON.stringify({
+        imports: [
+          { path: "/Shop.spell", active: true },
+          { path: brand, active: true },
+          { path: unused, active: false },
+          { path: shop, active: true }
+        ]
+      })
+    )
+    expect(await projectUtils.themesOf(shop)).toEqual({
+      harbor: SP.SpellUrls.fileUrl(`${shop}/harbor.theme.json5`),
+      "brand-night": SP.SpellUrls.fileUrl(`${brand}/brand-night.theme.json5`)
+    })
+    expect(SP.SpellUrls.projectIdFor(SP.SpellUrls.themesUrl(shop))).toBe(shop)
+  })
+
   test("a property editor page is one of a project's files:  its index lists it (property-editor P6)", async () => {
     const projectId = project("Paged")
     await projectUtils.createFile(

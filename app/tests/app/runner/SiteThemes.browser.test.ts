@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vite-plus/test"
+import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { UI } from "spell/ui"
 import { SiteThemes } from "spell/app/app/runner/SiteThemes"
@@ -8,6 +8,8 @@ import { ViewerSiteHost } from "spell/app/app/runner/ViewerSiteHost"
  * A running site's theme, as its host gives it:  the project's own, `<name>.theme.json5` beside its Spell, else
  * one of Spell UI's.
  * - The projects:  `themedProject/` and `shadowingProject/`, beside this file, as the test server serves them.
+ * - A project on Spell's server (`/spaces/...`):  its server lists its theme files first, its imports' too, and only
+ *   those are asked for;  a stub answers the list here.
  */
 
 /** The fixture project's folder, as the test server serves it. */
@@ -66,6 +68,42 @@ describe("SiteThemes.tokens()", () => {
     await expect(missing).rejects.toThrow(/Spell UI has none of that name/)
     await expect(missing).rejects.toThrow(`no \`${PROJECT}/no-such-theme.theme.json5\``)
     await expect(SiteThemes.tokens("no-such-theme", undefined)).rejects.toThrow(/no project folder to look in/)
+  })
+})
+
+describe("SiteThemes.tokens(), for a project on Spell's server", () => {
+  /** A project on Spell's server:  its folder, as a running program has it. */
+  const SHOP = "/spaces/@test/shop"
+
+  afterEach(() => vi.restoreAllMocks())
+
+  /** Stub the server's list of `SHOP`'s theme files:  `themes`;  every URL asked for, back. */
+  function serverListing(themes: Record<string, string>): string[] {
+    const asked: string[] = []
+    const realFetch = globalThis.fetch.bind(globalThis)
+    vi.spyOn(globalThis, "fetch").mockImplementation((input, init) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
+      asked.push(url)
+      if (url.endsWith("/api/projects/themes/@test/shop")) return Promise.resolve(Response.json(themes))
+      return realFetch(input, init)
+    })
+    return asked
+  }
+
+  test("a theme an import has:  read from the file its server lists", async () => {
+    const asked = serverListing({ harbor: `${PROJECT}/harbor.theme.json5` })
+    const tokens = await SiteThemes.tokens("harbor", SHOP)
+    expect(tokens).toContain("--harbor-rail: #0a6f8f")
+    expect(asked.filter((url) => url.includes(".theme.json5"))).toEqual([`${PROJECT}/harbor.theme.json5`])
+  })
+
+  test("a name no project has (Spell UI's, or what one extends):  no file asked for, so no 404", async () => {
+    const asked = serverListing({})
+    expect(await SiteThemes.tokens("matrix", SHOP)).toContain("--matrix-accent")
+    expect(asked.filter((url) => url.includes(".theme.json5"))).toEqual([])
+    await expect(SiteThemes.tokens("no-such-theme", SHOP)).rejects.toThrow(
+      /neither the project nor a project it imports has `no-such-theme\.theme\.json5`/
+    )
   })
 })
 
