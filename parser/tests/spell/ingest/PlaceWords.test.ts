@@ -278,3 +278,24 @@ describe("mergedSpell(), the lines one step in under a list's line", () => {
     )
   })
 })
+
+describe("mergedSpell(), a new line after one two lists share", () => {
+  it("goes under its own list, after its own copy of that line", () => {
+    const header = 'acme is a web server at "https://acme.test"'
+    const parts = (search: boolean): SpellParts => ({
+      header,
+      placeLines: [
+        { key: "at:jobs", text: 'jobs live at "/api/jobs"' },
+        { key: "takes:jobs:filters", text: "\tit filters by status" },
+        { key: "at:runs", text: 'runs live at "/api/runs"' },
+        { key: "takes:runs:filters", text: "\tit filters by status" },
+        ...(search ? [{ key: "takes:runs:search", text: '\tit searches names with "q"' }] : [])
+      ],
+      types: []
+    })
+    const file = `${header}\n\tjobs live at "/api/jobs"\n\t\tit filters by status\n\truns live at "/api/runs"\n\t\tit filters by status\n`
+    expect(mergedSpell(file, parts(false), parts(true), () => false).text).toBe(
+      `${header}\n\tjobs live at "/api/jobs"\n\t\tit filters by status\n\truns live at "/api/runs"\n\t\tit filters by status\n\t\tit searches names with "q"\n`
+    )
+  })
+})

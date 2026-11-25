@@ -1471,7 +1471,7 @@ function placeFor(lines: readonly string[], blockAt: number, line: SpellLine, af
   if (!line.text.startsWith("\t")) return end
   // after the line before it in what's written now, under the same line, when that's in the file:  else its line's last
   for (const before of after.slice(0, Math.max(after.indexOf(line), 0)).reverse()) {
-    const at = lineAt(lines, blockAt, before.text)
+    const at = ownLineAt(lines, blockAt, before, after)
     if (before.text.startsWith("\t") && at < 0) continue
     if (at < 0) return end
     let under = at + 1
