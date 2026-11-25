@@ -275,6 +275,7 @@ export class EveryThing extends SpellExpression<"type"> {
    * - What the warning names (`where-stays-here`):  the clause as written, `its duration is over 5`.
    * - An `its X is ...` its list doesn't filter by, by the lines the compiler can see, stays too.
    * - A search it takes narrows the read:  none, then, as the server does the looking.
+   * - A field it's asked for by (`forecasts are asked for by their latitude and longitude`) goes, in its question.
    */
   static clausesStayingIn(type: P.Match, predicate: P.ASTMethodDefinition): string[] | undefined {
     const saved = savedPlaceOfMatch(type)
@@ -283,9 +284,11 @@ export class EveryThing extends SpellExpression<"type"> {
     if (!parts) return undefined
     if (parts.search.length) return undefined
     const filters = filtersOf(saved)
+    // what it's asked for by goes in its question, as a filter does
+    const asked = askedByOf(saved)
     const staying = [
       ...parts.filter
-        .filter((part) => !isFilteredBy(filters, part))
+        .filter((part) => !isFilteredBy(filters, part) && !asked.includes(fieldOfPart(part)))
         .flatMap((part) => (part.value ? [part.value] : [])),
       ...parts.staying
     ]

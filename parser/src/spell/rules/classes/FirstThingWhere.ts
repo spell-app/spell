@@ -1,6 +1,7 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { getWhereScope } from "spell/parser/spell/rules/lists/lists.shared"
 import { EveryThing } from "./EveryThing"
 import { EveryThingWhere } from "./EveryThingWhere"
 
@@ -19,6 +20,16 @@ export class FirstThingWhere extends EveryThingWhere {
   /** One of the type, e.g. `Recipe`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     return SP.typeName(`${match.groups.type.value}`)
+  }
+
+  /**
+   * Nested scope for the predicate:  `it` is one of the list it's the first of, so its fields are known --
+   * `its root component id` too, not `its root` (we are one thing, not the list).
+   */
+  getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
+    const { type } = match.groups
+    const thing = SP.typeName(`${type.value}`)
+    return getWhereScope(match, type, { datatype: P.listOf(thing) }, P.instanceCase(thing))
   }
 
   getAST(match: P.MatchFor<this>): P.ASTExpression {

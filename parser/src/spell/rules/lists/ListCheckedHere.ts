@@ -17,7 +17,8 @@ import { isItemScope } from "./lists.shared"
  * - e.g. `every job where its session id is the session's id, checked here`;  Spanish `, filtrando aquí`
  * - For when the place's own filter isn't what's meant:  it matches ids exactly, or capitals its own way;
  *   or the list is small, and one read beats many.
- * - So it reads every page, and its `where` warns of nothing (`EveryThingWhere.warnAboutWhere()`).
+ * - So it reads every page, and its `where` warns of nothing (`EveryThingWhere.warnAboutWhere()`);  after a sort
+ *   too, `, sorted by its title, checked here`, and after `there are ... where`.
  * - Compiles to the read made again with nothing handed over (`EveryThing.checkedHereAST()`):
  *   `core.filter(await core.savedThings(Job, {}, "looks through"), (job) => ...)`.
  * - After anything else, the list as it is:  a list in memory is always checked here.
@@ -26,6 +27,8 @@ import { isItemScope } from "./lists.shared"
 export class ListCheckedHere extends PostfixOperatorSuffix {
   @proto static precedence = Precedence.ternary
   @proto static datatype: P.Datatype | undefined = undefined
+  /** The same list:  `, sorted by its created at` after it knows its items. */
+  @proto static handsOnItsLeft = true
 
   /** Not inside a predicate or a key;  SIDE EFFECT:  the read it follows notes it, for its warnings. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
@@ -49,7 +52,8 @@ export class ListCheckedHere extends PostfixOperatorSuffix {
 
 /** The matches in `left`, a few steps down, of a read with a `where`:  what the suffix follows. */
 function readsIn(left: P.Match, depth = 3): P.Match[] {
-  if (/^(?:every_thing_where|first_few_where|first_thing_where)$/.test(left.rule.name ?? "")) return [left]
+  if (/^(?:every_thing_where|first_few_where|first_thing_where|there_are_things)$/.test(left.rule.name ?? ""))
+    return [left]
   if (!depth) return []
   return left.matched.flatMap((item) => (item instanceof P.Match ? readsIn(item, depth - 1) : []))
 }

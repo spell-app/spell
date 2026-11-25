@@ -43,7 +43,7 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
     while (rest.length) {
       const remaining = rest
       // what the suffix follows, when known -- see `SuffixLeft`
-      const left = CompoundExpression.suffixLeft(lhs, suffixes.at(-1))
+      const left = CompoundExpression.suffixLeft(lhs, suffixes)
       const parseSuffix = () => SuffixLeft.while(left, () => chain.rule.parse(scope, remaining))
       const suffix = expecting ? expecting.nested(parseSuffix) : parseSuffix()
       if (!suffix || CompoundExpression.precedenceOf(suffix) <= this.bound) break
@@ -248,11 +248,15 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
    * - The first suffix:  our operand, `lhs`.
    * - After `and` / `or`:  the operand after it, e.g. `the game` in `the card is face up and the game is red`.
    *   Every suffix which asks (a person's phrase) binds tighter than those, so that operand is its whole left side.
+   * - After a postfix that hands on what it follows (`handsOnItsLeft`, `, checked here`):  what that one followed.
    * - After anything else:  unknown, e.g. after `+` the left side is the sum so far.
    */
-  private static suffixLeft(lhs: P.Match, previous: P.Match | undefined): P.Match | undefined {
+  private static suffixLeft(lhs: P.Match, suffixes: readonly P.Match[]): P.Match | undefined {
+    const previous = suffixes.at(-1)
     if (!previous) return lhs
-    if (previous.rule instanceof PostfixOperatorSuffix) return undefined
+    if (previous.rule instanceof PostfixOperatorSuffix) {
+      return previous.rule.handsOnItsLeft ? CompoundExpression.suffixLeft(lhs, suffixes.slice(0, -1)) : undefined
+    }
     const precedence = CompoundExpression.precedenceOf(previous)
     if (precedence !== Precedence.and && precedence !== Precedence.or) return undefined
     return previous.groups.expression as P.Match | undefined

@@ -2993,11 +2993,13 @@ classesEs.addRule(FirstThingWhere, {
       tests: [
         [
           "la primera receta donde sus minutos es 5",
-          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)"
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)",
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta: Receta) => receta.minutos === 5), 0)"
         ],
         [
           "el primer receta que no es 5",
-          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta !== 5), 0)"
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta !== 5), 0)",
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta: Receta) => receta !== 5), 0)"
         ]
       ]
     }

@@ -28,8 +28,10 @@ const WEATHER = [
 describe("a collection asked for by a query", () => {
   test("its line says what it's asked for by, and a read that says each asks for it", () => {
     const read = `set found to every forecast where its latitude is 52.52 and its longitude is 13.41`
-    const { errors, compiled: code } = compiled([...WEATHER, read])
+    const { errors, warnings, compiled: code } = compiled([...WEATHER, read])
     expect(errors).toEqual([])
+    // what it's asked for by goes in its question:  nothing said to stay here
+    expect(warnings.join("\n")).not.toContain("can't be asked")
     expect(code).toContain(`askedBy: ["latitude", "longitude"]`)
     expect(code).toContain(`filter: { latitude: 52.52, longitude: 13.41 }`)
   })

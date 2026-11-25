@@ -102,6 +102,33 @@ describe("a `where`, sent in parts", () => {
   })
 })
 
+describe("`, checked here` beside a sort, after `there are`, and `the first X where`'s fields", () => {
+  test("before a sort or after it:  the sort's key knows the items, both sort here, and nothing's warned of", () => {
+    const sorted = `core.sortedBy(core.filter(await core.savedThings(Job, {}, "looks through"), (job) => job.kind !== "small"), (item) => item.sessionId)`
+    for (const read of [
+      `every job where its kind is not "small", checked here, sorted by its session id`,
+      `every job where its kind is not "small", sorted by its session id, checked here`
+    ]) {
+      const { errors, warnings, compiled: code } = compiled(PLACE(read))
+      expect(errors).toEqual([])
+      expect(warnings.join("\n")).not.toContain("can't be asked")
+      expect(code).toContain(sorted)
+    }
+  })
+
+  test("after `there are ... where`:  nothing's warned of", () => {
+    const where = `there are no jobs where its kind is not "small"`
+    expect(compiled(PLACE(where)).warnings.join("\n")).toContain(`can't be asked "its kind is not "small""`)
+    expect(compiled(PLACE(`${where}, checked here`)).warnings.join("\n")).not.toContain("can't be asked")
+  })
+
+  test("`the first X where`:  its `where` knows the thing's fields, a name of several words too", () => {
+    const { errors, compiled: code } = compiled(PLACE(`the first job where its session id is "s1" and its kind is "big"`))
+    expect(errors).toEqual([])
+    expect(code).toContain(`(job) => job.sessionId === "s1" && job.kind === "big"`)
+  })
+})
+
 describe("a field of two words its list filters by (epic `data` I65)", () => {
   // `it filters by session-id` names the field `sessionId`;  `its session id is ...` says `session_id`:  the same field
   test("sent, and no warning:  a value, a local, a page's property inside an `and`", () => {

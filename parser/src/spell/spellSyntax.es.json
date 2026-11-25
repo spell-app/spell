@@ -604,7 +604,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/expressions/PostfixOperatorSuffix.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "Base class for expression-suffix rules with no `rhs`, e.g. `is empty`, `is defined`, `exists`.",
           "syntaxes": [],
           "aliases": ["expression_suffix"]
@@ -5150,7 +5150,7 @@
           "ruleNames": ["list_checked_here"],
           "internal": false,
           "file": "src/spell/rules/lists/ListCheckedHere.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "A read of a place whose `where` is checked here, in the page, all of it: nothing of it is asked of the place.",
           "syntaxes": [
             {
@@ -6495,7 +6495,7 @@
           "ruleNames": ["first_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/FirstThingWhere.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "The first thing of a type that fits, or nothing: `every_thing_where`'s first.",
           "syntaxes": [
             {
@@ -6506,7 +6506,7 @@
                   "code": "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)"
                 },
                 "ts": {
-                  "code": "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)"
+                  "code": "core.getItemAt(core.filter(core.everyThing(Receta), (receta: Receta) => receta.minutos === 5), 0)"
                 },
                 "py": {
                   "code": "core.get_item_at(\n    core.filter(core.every_thing(Receta), lambda receta: receta.minutos == 5),\n    0,\n)"

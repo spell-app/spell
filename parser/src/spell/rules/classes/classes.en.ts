@@ -3301,11 +3301,13 @@ classes.addRule(FirstThingWhere, {
       tests: [
         [
           "the first suite record where its rank is 1",
-          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)",
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord: SuiteRecord) => suiterecord.rank === 1), 0)"
         ],
         [
           "the first suite record which is not 1",
-          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord !== 1), 0)"
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord !== 1), 0)",
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord: SuiteRecord) => suiterecord !== 1), 0)"
         ]
       ]
     }

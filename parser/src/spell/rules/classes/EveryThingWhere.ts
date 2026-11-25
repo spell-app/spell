@@ -137,7 +137,9 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
         args: [ownListAST(match, own), this.predicateOf(match)]
       })
     }
-    const handed = EveryThing.savedAST(match, type, { predicate: this.predicateOf(match) })
+    // `, checked here` may come after a sort:  the read is made checked here itself, so the sort is done here too
+    const checkedHere = !!(match.data as CheckedHereData).checkedHere
+    const handed = EveryThing.savedAST(match, type, { predicate: this.predicateOf(match), checkedHere })
     if (handed) return handed
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "filter",
