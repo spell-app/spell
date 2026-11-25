@@ -101,6 +101,59 @@ class GalaxyGuide extends Site {
   static sidebars = [{ name: "film sidebar", view: "FilmSidebar" }]
 }
 
+/** A page with sections, its tab bound to its `section`, a text parameter that may be left out. */
+class AccountPage extends Page {
+  static {
+    this.declareProp("section", { type: "text" })
+  }
+  get section() {
+    return this.getProp("section") as string | undefined
+  }
+  set section(value) {
+    this.setProp("section", value)
+  }
+  draw(): Drawing {
+    return h("h1", null, () => `Account ${this.section ?? ""}`) as unknown as Drawing
+  }
+}
+
+/** A page with two text parameters that may be left out:  a tab, and a view under it. */
+class ShelfPage extends Page {
+  static {
+    this.declareProp("tab", { type: "text" })
+    this.declareProp("view", { type: "text" })
+  }
+  get tab() {
+    return this.getProp("tab") as string | undefined
+  }
+  set tab(value) {
+    this.setProp("tab", value)
+  }
+  get view() {
+    return this.getProp("view") as string | undefined
+  }
+  set view(value) {
+    this.setProp("view", value)
+  }
+  draw(): Drawing {
+    return h("h1", null, () => `Shelf ${this.tab ?? ""} ${this.view ?? ""}`) as unknown as Drawing
+  }
+}
+
+/**
+ * A site whose pages keep their tabs in their addresses:  its account's sections, its shelf's tab and view, a film's
+ * page under the shelf listed before it, so it keeps `/shelf/films/<film>`.
+ */
+class Library extends Site {
+  static pages = [
+    { name: "account page", page: "AccountPage", address: "/account/:section?", title: "Account", params: ["section"] },
+    { name: "film page", page: "FilmPage", address: "/shelf/films/:film", params: ["film"] },
+    { name: "shelf page", page: "ShelfPage", address: "/shelf/:tab?/:view?", title: "Shelf", params: ["tab", "view"] }
+  ]
+  static dialogs = [{ name: "confirm order dialog", view: "SettingsDialog" }]
+  static sidebars = [{ name: "film sidebar", view: "FilmSidebar" }]
+}
+
 /** A page that wants its family as tabs (epic `mockup` T38):  `<site-tabs/>` above its header. */
 class TabbedPage extends Page {
   draw(): Drawing {
@@ -839,6 +892,127 @@ describe("a running site", () => {
       await site.showAddress("/films/a-new-hope")
       expect(await shown()).toBe("A New Hope")
       expect(element.querySelector(".spell-site-page")).toBe(hopes)
+    })
+  })
+
+  describe("a page's text parameters in its address (P22)", () => {
+    let library: Library
+    let account: AccountPage
+    let shelf: ShelfPage
+    let went: [string, unknown][]
+    let opened: string[]
+    let closed: number
+
+    beforeEach(() => {
+      core.resetRuntime()
+      core.things.addClass(Film)
+      core.things.addClass(SettingsDialog)
+      core.things.addClass(FilmSidebar)
+      new FilmPage()
+      account = new AccountPage()
+      // what its `when creating it` gives it:  its first tab
+      account.section = "profile"
+      shelf = new ShelfPage()
+      shelf.tab = "books"
+      hope = new Film({ id: "a-new-hope", title: "A New Hope" })
+      library = new Library()
+      went = []
+      opened = []
+      closed = 0
+      core.siteHost = {
+        address: () => "/",
+        go: (address, how) => went.push([address, how]),
+        listen: () => {},
+        partOpened: (hash) => opened.push(hash),
+        partClosed: () => closed++
+      }
+      dispose = render(() => core.drawThing(library) as never, element)
+    })
+
+    test("a page whose parameters may all be left out is listed, at its address without them", () => {
+      expect(library.navPages().map((page) => page.href)).toEqual(["/account", "/shelf"])
+      expect(library.addressOf("account page")).toBe("/account")
+      expect(library.addressOf("account page", { section: "billing" })).toBe("/account/billing")
+    })
+
+    test("its address left out:  its starting value;  with it:  the segment's text", async () => {
+      await library.showAddress("/account/billing")
+      expect(await shown()).toBe("Account billing")
+      await library.showAddress("/account")
+      expect(account.section).toBe("profile")
+      expect(await shown()).toBe("Account profile")
+      expect(library.navCurrent()).toBe("/account")
+    })
+
+    test("changed on the page:  the address written, a step in the history, the page not drawn again", async () => {
+      await library.showAddress("/account")
+      await shown()
+      const drawn = element.querySelector(".spell-site-page")
+      account.section = "team"
+      expect(await shown()).toBe("Account team")
+      expect(went).toEqual([["/account/team", { keepScroll: true }]])
+      expect(library.currentAddress).toBe("/account/team")
+      expect(element.querySelector(".spell-site-page")).toBe(drawn)
+      // back to its first tab:  its plain address
+      account.section = "profile"
+      await shown()
+      expect(went.at(-1)).toEqual(["/account", { keepScroll: true }])
+    })
+
+    test("Back and Forward set it back, the page not drawn again, nothing written", async () => {
+      await library.showAddress("/account/team")
+      await shown()
+      const drawn = element.querySelector(".spell-site-page")
+      await library.showAddress("/account/api-keys")
+      expect(await shown()).toBe("Account api-keys")
+      await library.showAddress("/account")
+      expect(await shown()).toBe("Account profile")
+      expect(element.querySelector(".spell-site-page")).toBe(drawn)
+      expect(went).toEqual([])
+    })
+
+    test("several in a row:  one left out before one that's filled is written at its starting value", async () => {
+      await library.showAddress("/shelf")
+      await shown()
+      shelf.view = "grid"
+      expect(await shown()).toBe("Shelf books grid")
+      expect(went.at(-1)).toEqual(["/shelf/books/grid", { keepScroll: true }])
+      await library.showAddress("/shelf/magazines")
+      expect(await shown()).toBe("Shelf magazines ")
+    })
+
+    test("a page listed earlier keeps its address:  the film's page, not the shelf's tab and view", async () => {
+      await library.showAddress("/shelf/films/a-new-hope")
+      expect(await shown()).toBe("A New Hope")
+    })
+
+    test("a dialog or sidebar opened:  its hash written, its thing's id after its name;  closed:  taken out", async () => {
+      await library.showAddress("/shelf")
+      core.showSitePart("confirm order dialog")
+      core.showSitePart("film sidebar", hope)
+      expect(opened).toEqual(["confirm-order", "film/a-new-hope"])
+      core.closeSitePart("film sidebar")
+      expect(closed).toBe(1)
+      // closed again:  nothing open, nothing to take out
+      core.closeSitePart("film sidebar")
+      expect(closed).toBe(1)
+    })
+
+    test("a hash naming one opens it, its thing looked up by its id;  none, it closes;  any other is a section", async () => {
+      await library.showAddress("/shelf")
+      expect(await library.showPart("film/a-new-hope")).toBe(true)
+      await shown()
+      expect(element.querySelector("ui-flyout")?.textContent).toBe("A New Hope")
+      // opened from the address:  nothing written
+      expect(opened).toEqual([])
+      expect(await library.showPart("")).toBe(true)
+      await shown()
+      expect(element.querySelector("ui-flyout")).toBeNull()
+      expect(closed).toBe(0)
+      expect(await library.showPart("Confirm-Order")).toBe(true)
+      await shown()
+      expect(element.querySelector("ui-modal")?.textContent).toBe("Settings")
+      expect(await library.showPart("credits")).toBe(false)
     })
   })
 

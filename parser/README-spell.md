@@ -961,6 +961,16 @@ galaxy guide is a site at "owen@spell/galaxy"
 ```
 
 - `:film` is the film page's own property (`it has a film`):  the address fills it with that film.
+- `:section?` may be left out, as Express writes it:  `it has a settings page at "/settings/:section?"`.
+  - `/settings` opens the page with its `section` at its starting value (what the page gives it, else empty);
+    `/settings/billing` with it `"billing"`.  Several may follow one another, `"/library/:tab?/:view?"`.
+  - A page listed earlier still wins:  `/library/books/:book`, listed before the library page, keeps
+    `/library/books/42` for itself.
+  - Its navigation lists the page at its address without them, `/settings`.
+- A TEXT parameter changed on the page writes the page's address, a step in the history:  tabs bound to the page's
+  `section`, as any form control is, put the tab picked in `/settings/billing`.  The page isn't drawn again (its other
+  tabs, scroll and typing stay), and Back and Forward pick the tab again.  A parameter naming a thing (`:film`) is
+  left to `go to`.
 - Every site lists a not found page and an error page.
 - A `:name` the page has no property for, or two pages at one address, is refused at its line.
 - A site wears a theme, named on its line:  `galaxy guide is a site with theme "mockup"`.
@@ -1041,6 +1051,16 @@ Every move names the page, never its address:
 | `show the settings dialog` | opens the dialog;  a sidebar opens the same way |
 | `close the review dialog` | closes it, from a button inside it |
 | `the address of the planet page for planet` | the text for a link |
+
+The dialog or sidebar open is kept in the address's hash, on every site:  its name without its last word, lower case
+with dashes, then the id of the thing it was opened for, if any.
+
+- `show the confirm order dialog for this order` => `/orders#confirm-order/1042`;  `show the customer sidebar for
+  this customer` => `/orders#customer/ada`.
+- Opening one writes it, a step in the history;  closing it (its buttons, the x, Escape) takes it out;  Back closes
+  it, Forward opens it again.
+- Opening the address opens it, its thing looked up by its id as a page's parameter is.
+- A hash that names no dialog or sidebar is a `#section` of the page to land on, as before.
 
 A page says what it must let people do before it's laid out, first in its own declaration:
 

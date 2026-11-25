@@ -1,4 +1,5 @@
-import type { SiteHost, SitePageEntry } from "spell/parser/core/core.types"
+import type { SiteHost, SiteParts } from "spell/parser/core/core.types"
+import { requiredParamsOf, filledPattern } from "spell/util/addressPattern"
 import { SiteThemes } from "spell/app/app/runner/SiteThemes"
 import { fetchJSON } from "spell/app/app/runner/fetchFresh"
 
@@ -15,7 +16,10 @@ import { fetchJSON } from "spell/app/app/runner/fetchFresh"
  *     the page's address, from the running site's pages as it starts (`address(site)`).
  *   - A file that declares no page (the site file) shows the site's `/`, as the editor's Run does.
  *   - The page's address stays as it was opened, until the site goes to another.
- * - A page the site goes to is a new address in the browser's history, so Back and Forward step through its pages.
+ * - A page the site goes to is a new address in the browser's history, so Back and Forward step through its pages;
+ *   a page's tab changed on it too (`go()`'s `keepScroll`), where it's scrolled to kept.
+ * - The dialog or sidebar open is in the hash, `#confirm-order/1042`, a step in the history (`partOpened()`):
+ *   closing it takes it out, Back closes it, and a page opened at it, or gone back to, opens it (`landOnHash()`).
  * - A link's `#section`, and one the page was opened or went back to, is landed on once it's drawn (`landOn()`),
  *   looked for in `root`:  where the site draws, a `<spell-viewer>`'s shadow root;  the document by default.
  * - Its theme as `<spell-viewer>`'s and the editor's Run give it (`SiteThemes`).
@@ -33,7 +37,7 @@ export class RunSiteHost implements SiteHost {
   private readonly opened?: OpenedFile
 
   /** The site running, once it asked for its address:  its pages say where a file's page is. */
-  private site?: SitePages
+  private site?: SiteParts
 
   constructor(base: string, root: ParentNode = document, opened?: OpenedFile) {
     this.base = base.replace(/\/+$/, "")
@@ -46,7 +50,7 @@ export class RunSiteHost implements SiteHost {
    * - A file's (`/home.spell`):  the address of the page it declares, alone, with no value to fill;  `/` for none.
    * - `site`:  the site asking, as it starts;  remembered, for Back and Forward to the file's address.
    */
-  address(site?: SitePages): string {
+  address(site?: SiteParts): string {
     if (site) this.site = site
     const { pathname } = location
     const rest = pathname.startsWith(this.base) ? pathname.slice(this.base.length) : ""
@@ -57,18 +61,54 @@ export class RunSiteHost implements SiteHost {
   /** The running site's address of the first page `file` declares with no value to fill:  `undefined` for none. */
   private addressOfFile(file: OpenedFile): string | undefined {
     const pages = this.site?.allPages() ?? []
-    return pages.find((entry) => !entry.params?.length && file.pages.includes(entry.page))?.address
+    const entry = pages.find(
+      (each) => !requiredParamsOf(each.address).length && file.pages.includes(each.page)
+    )
+    return entry && filledPattern(entry.address)
   }
 
   /**
    * Go to `address`:  a new entry in the page's history, unless it's there already;  the new page starts at its top,
    * as a page loaded does (a link's `#section` is landed on after, `landOn()`).
+   * - `keepScroll`:  the same page, a tab of it picked:  it stays where it's scrolled to.
    */
-  go(address: string): void {
+  go(address: string, { keepScroll = false }: { keepScroll?: boolean } = {}): void {
     const url = address === "/" ? this.base || "/" : `${this.base}${address}`
-    if (url === location.pathname) return
+    if (url === location.pathname && !location.hash) return
     history.pushState(null, "", url)
-    scrollTo(0, 0)
+    if (!keepScroll) scrollTo(0, 0)
+  }
+
+  /** A dialog or sidebar opened:  its `hash` in the page's address, a step in the history. */
+  partOpened(hash: string): void {
+    RunSiteHost.pushPart(hash)
+  }
+
+  /** The dialog or sidebar open closed:  its hash out of the page's address (`dropPart()`). */
+  partClosed(): void {
+    RunSiteHost.dropPart()
+  }
+
+  /**
+   * Put a dialog's or sidebar's `hash` in the page's address, a step in the history:  the ONE way, for this host and
+   * the editor's Run (`RunSite`).
+   */
+  static pushPart(hash: string): void {
+    if (location.hash === `#${hash}`) return
+    const { pathname, search } = location
+    history.pushState({ [PART]: hash }, "", `${pathname}${search}#${hash}`)
+  }
+
+  /**
+   * Take the hash of the dialog or sidebar that closed out of the page's address:  Back, when opening it was the step
+   * before (`pushPart()`), so the history keeps no step for it;  else the address replaced.
+   */
+  static dropPart(): void {
+    const { pathname, search, hash } = location
+    if (!hash) return
+    const opened = (history.state as Record<string, unknown> | null)?.[PART]
+    if (typeof opened === "string" && hash === `#${opened}`) history.back()
+    else history.replaceState(null, "", `${pathname}${search}`)
   }
 
   /**
@@ -92,10 +132,16 @@ export class RunSiteHost implements SiteHost {
   /** Scroll to section `id` of the page shown, once it's drawn (`RunSiteHost.landOnSection()`, in `root`). */
   landOn = (id: string): void => RunSiteHost.landOnSection(this.root, id)
 
-  /** Land on the section the page's address names, if any. */
+  /**
+   * Open the dialog or sidebar the page's address's hash names, `#confirm-order/1042`, else land on the section it
+   * names, if any;  with none, the dialog or sidebar open closes (`SiteParts.showPart()`).
+   */
   private landOnHash(): void {
-    const section = location.hash.slice(1)
-    if (section) this.landOn(safelyDecoded(section))
+    const hash = location.hash.slice(1)
+    const opened = this.site?.showPart?.(hash) ?? Promise.resolve(false)
+    void opened.then((named) => {
+      if (!named && hash && location.hash.slice(1) === hash) this.landOn(safelyDecoded(hash))
+    })
   }
 
   /** Theme `name`'s look for the site alone (`SiteThemes.tokens()`). */
@@ -137,8 +183,8 @@ export class RunSiteHost implements SiteHost {
   }
 }
 
-/** A running site, as far as its host needs it:  its pages. */
-type SitePages = { allPages(): SitePageEntry[] }
+/** Where `partOpened()` marks the step it adds to the history, by the hash it wrote. */
+const PART = "spellSitePart"
 
 /****************
  * ### `OpenedFile`
