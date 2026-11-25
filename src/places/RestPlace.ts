@@ -410,9 +410,11 @@ export class RestPlace extends WebPlace implements Place {
       withAsked(this.noted(collection, this.rowOf(collection, row)), askedValues)
     )
     if (query.under) this.noteReadUnder(collection, query.under, read)
+    const total = isOne ? undefined : totalIn(body, response, { rows: rows.length, size, isFirst: !at, nextPage })
     return {
       rows: read,
       ...(nextPage !== undefined && { nextPage }),
+      ...total,
       ...(kept.length < wanted.length && {
         notes: [
           `"${collection}" answered ${wanted.length} rows, and only the first ${mostRows} are kept:  ask for less, or raise its \`ceiling\``
@@ -1094,6 +1096,52 @@ function bracesFrom(template: string, address: string): Record<string, string> {
     else if (words[at] !== said[at]) break
   }
   return filled
+}
+
+/** The fields an answer says how many there are in all, beside its rows:  FastAPI's `total`, GitHub's `total_count`. */
+const TOTAL_FIELDS = [
+  "total",
+  "total_count",
+  "totalCount",
+  "total_results",
+  "totalResults",
+  "total_items",
+  "totalItems"
+]
+
+/** The fields an answer says how many pages there are in. */
+const PAGES_FIELDS = ["total_pages", "totalPages", "page_count", "pageCount", "num_pages", "pages"]
+
+/** The headers a server says how many there are in all in. */
+const TOTAL_HEADERS = ["X-Total-Count", "X-Total"]
+
+/**
+ * How many the whole query matches, as an answer says (`ListAnswer.total`):  nothing when it doesn't.
+ * - A total beside its rows, `{ items: [...], total: 1234 }`, or a count header, `X-Total-Count: 1234`.
+ * - A `count`:  Django's is the total, but Arena-like servers' is this page's rows.  So only one that can't be this
+ *   page's:  more than its rows, or a first page with nothing after it.
+ * - Only how many pages:  its pages times its size, an estimate;  a page of one row, exactly.
+ */
+function totalIn(
+  body: unknown,
+  response: Response,
+  { rows, size, isFirst, nextPage }: { rows: number; size: number; isFirst: boolean; nextPage: string | undefined }
+): Pick<ListAnswer, "total" | "totalIsEstimate"> {
+  const counted = (value: unknown) =>
+    typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined
+  for (const header of TOTAL_HEADERS) {
+    const said = response.headers.get(header)
+    if (said !== null && /^\d+$/.test(said.trim())) return { total: Number(said) }
+  }
+  if (!body || typeof body !== "object" || Array.isArray(body)) return {}
+  const fields = body as Record<string, unknown>
+  const total = TOTAL_FIELDS.map((field) => counted(fields[field])).find((each) => each !== undefined)
+  if (total !== undefined) return { total }
+  const count = counted(fields.count)
+  if (count !== undefined && (count > rows || (isFirst && nextPage === undefined))) return { total: count }
+  const pages = PAGES_FIELDS.map((field) => counted(fields[field])).find((each) => each !== undefined)
+  if (pages === undefined) return {}
+  return size === 1 ? { total: pages } : { total: pages * size, totalIsEstimate: true }
 }
 
 /** Is this one thing's row, not a list:  a plain object? */

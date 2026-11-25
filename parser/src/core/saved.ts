@@ -1278,6 +1278,15 @@ class SavedRead {
   }
 
   /**
+   * How many the whole query matches, as the place counted it, once it's answered:  `undefined` when it didn't say,
+   * or said only an estimate (`ListAnswer.totalIsEstimate`), or left part of the query to the engine.
+   */
+  get total(): number | undefined {
+    const { result } = this
+    return result && !result.totalIsEstimate ? result.total : undefined
+  }
+
+  /**
    * Its list, once it has its first page:  what only needs to draw it.
    * - The rest is read as it's drawn (`readNextPage()`), unless it has to be in order, here, first.
    * - throws what the read threw
@@ -1557,6 +1566,26 @@ export const savedMethods = defineCoreModule({
     const list = await answering
     if (how === "looks through") read.checkCeiling()
     return list as unknown as List<InstanceType<Class>>
+  },
+
+  /**
+   * How many things of `Class` match `query`:  what `the number of jobs where its status is "open"` compiles to, when
+   * all of its `where` goes to the place (`NumberOfThingsWhere`).
+   * - One row asked for, and the place's own count of them all read off its answer (`ListAnswer.total`).
+   * - A place that doesn't count them, or counts only roughly:  every one read, and counted here, as before.
+   * - Followed as any read is:  it's asked again as often as the place's line says.
+   * - throws what the read threw
+   */
+  async savedCount<Class extends new () => unknown>(Class: Class, query: ListQuery = {}): Promise<number> {
+    const program = programPlaces()
+    const read = program.readOf(Class as unknown as SavedClass, { ...withoutEmptySearch(query), page: { size: 1 } })
+    read.changes.read()
+    const answering = read.firstPage()
+    read.hold(answering)
+    await answering
+    const { total } = read
+    if (total !== undefined) return total
+    return core.itemCountOf(await savedMethods.savedThings(Class, query))
   },
 
   /** The thing at `place` in `Class`'s place's order, counting from 1, `-1` the last:  what `the first recipe` compiles to, for a saved type. */

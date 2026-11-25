@@ -1331,3 +1331,47 @@ describe("a list's own filters and sorts, under its line", () => {
     expect(asked).toEqual(["https://jobs.test/jobs?status=open"])
   })
 })
+
+describe("how many the whole query matches, as the server says (`ListAnswer.total`)", () => {
+  afterEach(() => void vi.unstubAllGlobals())
+
+  /** A place on a server answering `body` and `headers` to every read. */
+  function answering(body: unknown, headers: Record<string, string> = {}) {
+    vi.stubGlobal("fetch", async () => Response.json(body, { headers }))
+    return new RestPlace({
+      url: "https://jobs.test",
+      allCollections: { rowsAt: "items" },
+      can: { page: "offset" },
+      pageSize: 2
+    })
+  }
+
+  const TWO = [{ id: "a" }, { id: "b" }]
+
+  test("a total beside the rows, or a count header", async () => {
+    expect((await answering({ items: TWO, total: 1140 }).list("jobs", {}, {})).total).toBe(1140)
+    expect((await answering({ items: TWO, total_count: 9 }).list("jobs", {}, {})).total).toBe(9)
+    const header = await answering({ items: TWO }, { "X-Total-Count": "38161" }).list("jobs", {}, {})
+    expect(header).toMatchObject({ total: 38161 })
+    expect(header.totalIsEstimate).toBeUndefined()
+  })
+
+  test("a `count` only when it can't be this page's own:  more than its rows, or a first page with none after", async () => {
+    expect((await answering({ items: TWO, count: 50 }).list("jobs", {}, {})).total).toBe(50)
+    // a full page counting its own rows, with more after:  nothing said
+    expect((await answering({ items: TWO, count: 2 }).list("jobs", {}, {})).total).toBeUndefined()
+    expect((await answering({ items: [TWO[0]], count: 1 }).list("jobs", {}, {})).total).toBe(1)
+  })
+
+  test("only how many pages:  an estimate, pages times the page size;  a page of one, exactly", async () => {
+    const rough = await answering({ items: TWO, total_pages: 625 }).list("jobs", {}, {})
+    expect(rough).toMatchObject({ total: 1250, totalIsEstimate: true })
+    const one = await answering({ items: [TWO[0]], total_pages: 1234 }).list("jobs", { page: { size: 1 } }, {})
+    expect(one.total).toBe(1234)
+    expect(one.totalIsEstimate).toBeUndefined()
+  })
+
+  test("none said:  none given", async () => {
+    expect((await answering({ items: TWO }).list("jobs", {}, {})).total).toBeUndefined()
+  })
+})

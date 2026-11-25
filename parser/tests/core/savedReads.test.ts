@@ -492,3 +492,30 @@ describe("the first few, on a list that filters by only some of a `where` (epic 
     expect(place.requests[0]![0]!.query.filter).toMatchObject({ notes: "hot" })
   })
 })
+
+describe("the number of, counted by the place (`core.savedCount()`)", () => {
+  /** A place that says how many match, all of them, beside one page of rows:  as a web server's `total` does. */
+  class Counting extends CountingPlace {
+    async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+      const answer = await super.list(collection, query, context)
+      const all = await MemoryPlace.prototype.list.call(this, collection, { ...query, page: undefined }, context)
+      return { ...answer, total: all.rows.length }
+    }
+  }
+
+  test("one row asked for, and its count read", async () => {
+    const place = filled(new Counting({ capabilities: WITH_IDS }))
+    const { Recipe } = program(place)
+    await place.apply([{ kind: "insert", collection: "recipes", id: "r2", fields: { id: "r2", title: "Stew" } }])
+    place.requests = []
+    expect(await core.savedCount(Recipe, { filter: { title: "Stew" } })).toBe(1)
+    expect(await core.savedCount(Recipe)).toBe(2)
+    expect(place.requests.map(([ask]) => ask!.query.page)).toEqual([{ size: 1 }, { size: 1 }])
+  })
+
+  test("a place that doesn't count:  every one read, and counted here", async () => {
+    const place = filled(new CountingPlace({ capabilities: WITH_IDS }))
+    const { Recipe } = program(place)
+    expect(await core.savedCount(Recipe)).toBe(1)
+  })
+})

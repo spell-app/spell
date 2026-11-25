@@ -102,6 +102,24 @@ describe("a `where`, sent in parts", () => {
   })
 })
 
+describe("the number of, counted by the server", () => {
+  test("all of the `where` its list's:  one row asked for, and the server's own count", () => {
+    const { errors, compiled: code } = compiled(PLACE(`the number of jobs where its status is "open"`))
+    expect(errors).toEqual([])
+    expect(code).toContain(`core.savedCount(Job, { filter: { status: "open" } })`)
+    expect(compiled(PLACE(`the number of jobs where its id is not nothing`)).compiled).toContain("core.savedCount(Job)")
+  })
+
+  test("a part left to the page, or a list that filters by none of it:  every one read and counted, as before", () => {
+    for (const where of [`its status is "open" and its kind is "big"`, `its status is not "open"`]) {
+      const { compiled: code } = compiled(PLACE(`the number of jobs where ${where}`))
+      expect(code).not.toContain("savedCount")
+      expect(code).toContain("core.itemCountOf(")
+    }
+    expect(compiled(PLACE(`the number of notes where its status is "open"`)).compiled).not.toContain("savedCount")
+  })
+})
+
 describe("the first few", () => {
   test("`the first 8 jobs` parses, and asks for one page of 8", () => {
     const { errors, compiled: code } = compiled(PLACE(`the first 8 jobs`))

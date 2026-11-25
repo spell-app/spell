@@ -98,6 +98,16 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
     return this.answer?.nextPage
   }
 
+  /** How many the whole query matches, when the place said:  see `ListAnswer.total`. */
+  get total(): number | undefined {
+    return this.answer?.total
+  }
+
+  /** `total` is an estimate, from a count of pages:  see `ListAnswer.totalIsEstimate`. */
+  get totalIsEstimate(): boolean {
+    return !!this.answer?.totalIsEstimate
+  }
+
   /** Where the place stood when it answered. */
   get version(): string | undefined {
     return this.answer?.version

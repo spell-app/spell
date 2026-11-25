@@ -153,6 +153,36 @@ export class EveryThing extends SpellExpression<"type"> {
    *   (`core.savedThings()`'s `until`);  without, it reads every page, up to the engine's ceiling.
    * - `checkedHere`:  nothing goes to the place, and every page is read (`ListCheckedHere`, `, checked here`).
    */
+  /**
+   * How many there are of saved `type` that pass `predicate`, asked of its place, for `match`:
+   * `core.savedCount(Job, { filter: { status: "open" } })`, one row read and the server's own count of them all.
+   * - Only a web server's list, and only when all of the `where` goes to it, by the lines the compiler can see:
+   *   each `its X is` a field its list filters by.  Anything left to the page (a search too, which a server may
+   *   match more loosely than `includes`), and its count would be of rows the page then drops.
+   * - `undefined` otherwise:  every one is read and counted, as before.
+   */
+  static countAST(match: P.Match, type: P.Match, predicate?: P.ASTMethodDefinition): P.ASTExpression | undefined {
+    const saved = savedPlaceOfMatch(type)
+    if (!saved || saved.placeType.placeKind !== "web server") return undefined
+    const parts = predicate ? handedPartsOf(predicate, searchesOf(saved)?.fields ?? []) : undefined
+    // a search is checked here too, as the server may match more loosely:  its count could be too many
+    if (predicate && !parts?.isWhole) return undefined
+    const filters = filtersOf(saved)
+    const filter = parts?.filter ?? []
+    if (!filter.every((part) => filters === "every field" || filters.includes(`${part.property.value}`))) {
+      return undefined
+    }
+    const properties: P.ASTObjectLiteralProperty[] = []
+    if (filter.length) {
+      properties.push(queryProperty(match, "filter", new P.ASTObjectLiteral(match, { properties: filter })))
+    }
+    const query = new P.ASTObjectLiteral(match, { properties })
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "savedCount",
+      args: [P.matchAST<P.ASTTypeExpression>(type), ...(properties.length ? [query] : [])]
+    })
+  }
+
   static savedAST(
     match: P.Match,
     type: P.Match,
@@ -216,6 +246,17 @@ export class EveryThing extends SpellExpression<"type"> {
     }
     HANDED_READS.set(read, { type, ...(predicate && { predicate }), ...(first !== undefined && { first }) })
     return read
+  }
+
+  /**
+   * How many the read `savedAST()` made would read, counted by its place (`countAST()`):  `the number of jobs where
+   * its status is "open"`, `ListCount`'s.  `undefined` for anything else:  a read of the first few, or one the place
+   * doesn't do whole.
+   */
+  static countOfReadAST(match: P.Match, read: P.ASTNode): P.ASTExpression | undefined {
+    const made = HANDED_READS.get(read as P.ASTExpression)
+    if (!made || made.first !== undefined) return undefined
+    return EveryThing.countAST(match, made.type, made.predicate)
   }
 
   /**

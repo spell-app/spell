@@ -4,6 +4,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import { loopItemsInDrawing, readableInDrawing } from "spell/parser/spell/rules/places/places.shared"
+import { EveryThing } from "spell/parser/spell/rules/classes/EveryThing"
 
 /**
  * `list_count` rule:  length of something KNOWN to be a list, without naming its items,
@@ -11,6 +12,8 @@ import { loopItemsInDrawing, readableInDrawing } from "spell/parser/spell/rules/
  * - Rejects the match unless its datatype says it's a list, or a list type, e.g. `Deck`:
  *   else `the number of x` stays a property read, `x.number`.
  * - `Priority.mostSpecific`, as `list_length`, which wins when it names the items:  it's longer.
+ * - Of a read a web server's list does whole, `the number of jobs where its status is "open"`:  its count, one row
+ *   read (`EveryThing.countOfReadAST()`, `core.savedCount()`).
  */
 export class ListCount extends SpellExpression<"list", { loopItems?: string[] }> {
   @proto static priority = Priority.mostSpecific
@@ -25,10 +28,10 @@ export class ListCount extends SpellExpression<"list", { loopItems?: string[] }>
   }
   /** A count;  of a read of a place, in a drawing, as a value it can read:  `readableInDrawing()`. */
   getAST(match: P.MatchFor<this>): P.ASTExpression {
-    const count = new P.ASTCoreMethodInvocation(match, {
-      methodName: "itemCountOf",
-      args: [P.matchAST(match.groups.list)]
-    })
+    const list = P.matchAST(match.groups.list)
+    const count =
+      EveryThing.countOfReadAST(match, list) ??
+      new P.ASTCoreMethodInvocation(match, { methodName: "itemCountOf", args: [list] })
     return readableInDrawing(match, count, match.data.loopItems)
   }
 }

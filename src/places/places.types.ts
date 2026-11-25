@@ -559,6 +559,19 @@ export type ListAnswer = {
   rows: PlaceRow[]
   /** What to ask for next, as `PageAsk.at`:  to a reader, it means nothing else.  Left out:  this is the last page. */
   nextPage?: string
+  /**
+   * How many the whole query matches, every page of it, when the place says:  a web server's `total`, or its count
+   * header.  `1234`, beside the 50 rows of this page.
+   * - Only what the place did itself:  a filter or search left to the engine leaves it out, as the place's number
+   *   counts rows the engine would drop.
+   * - Left out:  the place didn't say.
+   */
+  total?: number
+  /**
+   * `total` is an estimate:  a server that says only how many pages there are, its pages times its page size
+   * (`about 1,250`).  The last page alone says exactly.
+   */
+  totalIsEstimate?: true
   /** Where the place stood when it answered:  for `changesSince()`, and a change's `version`. */
   version?: string
   /** Which parts of the query it did itself. */

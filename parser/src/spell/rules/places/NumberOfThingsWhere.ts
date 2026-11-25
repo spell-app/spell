@@ -12,7 +12,8 @@ import { loopItemsInDrawing, readableInDrawing } from "./places.shared"
  * `number_of_things_where` rule:  how many of a type fit (epic `data` P11).
  * - e.g. `the number of recipes where it is quick`
  * - `Priority.mostSpecific`:  it has to beat `the number of` of the read `recipes where it is quick`, which isn't a drawing's.
- * - Compiles to `core.itemCountOf(...)` over what `every recipe where ...` reads.
+ * - Compiles to `core.itemCountOf(...)` over what `every recipe where ...` reads;  on a web server whose list does all
+ *   of the `where` itself, `core.savedCount(...)`:  one row read, and the server's own count (`EveryThing.countAST()`).
  */
 export class NumberOfThingsWhere extends SpellExpression<"type|where|body?", { loopItems?: string[] }> {
   @proto static datatype: P.Datatype | undefined = "number"
@@ -33,6 +34,9 @@ export class NumberOfThingsWhere extends SpellExpression<"type|where|body?", { l
   getAST(match: P.MatchFor<this>): P.ASTExpression {
     const { type } = match.groups
     const predicate = getWhereMethod(match, type, this.getBody(match))
+    // a web server that does all of the `where` counts them itself:  one row asked for, its count read
+    const counted = EveryThing.countAST(match, type, predicate)
+    if (counted) return readableInDrawing(match, counted, match.data.loopItems)
     const list =
       EveryThing.savedAST(match, type, { predicate }) ??
       new P.ASTCoreMethodInvocation(match, {

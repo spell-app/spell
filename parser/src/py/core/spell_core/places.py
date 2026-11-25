@@ -683,6 +683,13 @@ class PlaceMethods:
             return things
         return self.first_few(self.filter(things, until["where"]), until["first"])  # type: ignore[attr-defined]
 
+    async def saved_count(self, cls: type, query: Mapping[str, Any] | None = None) -> int:
+        """How many things of `cls` match `query`:  `the number of notes where ...`, all of its `where` the place's.
+
+        - Python's places hold things whole, and say no count of their own:  every one, counted here.
+        """
+        return len((await self.saved_things(cls, query)).items)
+
     async def saved_thing_at(self, cls: type, place: int) -> Any:
         """The thing at `place` in `cls`'s place's order, from 1, `-1` the last:  `the first note`."""
         things = (await self.saved_things(cls)).items

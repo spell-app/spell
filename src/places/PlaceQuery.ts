@@ -109,6 +109,9 @@ export class PlaceQuery {
       rows: this.withSelection(sliced, handled),
       ...(isSlicing && end !== undefined && end < ordered.length && { nextPage: String(end) }),
       ...(first.version !== undefined && { version: first.version }),
+      // how many there are in all, as the place counted:  only when it did all the narrowing
+      ...(!isFiltering && first.total !== undefined && { total: first.total }),
+      ...(!isFiltering && first.totalIsEstimate && { totalIsEstimate: first.totalIsEstimate }),
       ...this.notesOn(first),
       handled
     }
