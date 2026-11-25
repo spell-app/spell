@@ -422,8 +422,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - `targets`:  compile to these, this run only, instead of our project file's -- see `targets`.
    * - `compiledFor`:  who the running code is for, this run only -- see `compiledForThisRun`.
    * - With a compile cache installed (`compileCache`, the editor's), asks it first, on a project not parsed yet:
-   *   - found:  takes what it holds and saves it as a compile would, without parsing or compiling a line
-   *     (`compiledFrom` says `"cache"`)
+   *   - found:  takes what it holds, without parsing or compiling a line (`compiledFrom` says `"cache"`), and saves
+   *     it as a compile would, behind the caller (`saveBehind()`):  so the program runs without waiting on the server
    *   - not found:  compiles, then keeps what a clean compile wrote, for next time
    *   - never with a `parser` passed in:  the cache's key can't vouch for a scope it didn't make
    *   - never with `cached: false`:  a compile behind a cache hit, for what reads the parse and each file's compile
@@ -465,7 +465,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
         for (const file of this.spellFiles) file.resetCompiled()
         this.takeCachedEntry(entry)
         cache.noteCompile(this, "cached")
-        return await this.saveOutput()
+        return this.saveBehind()
       }
     }
     if (run !== this.compileRun) return undefined
@@ -686,7 +686,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     projectId: string
   ): Record<string, PlaceDeployment> {
     const picked = Object.entries(places ?? {}).flatMap(([place, deployments]) =>
-      deployments[deployment] ? [[snakeCase(place), SpellProject.deploymentAsRun(deployment, deployments[deployment])] as const] : []
+      deployments[deployment]
+        ? [[snakeCase(place), SpellProject.deploymentAsRun(deployment, deployments[deployment])] as const]
+        : []
     )
     if (!picked.length) {
       const listed = [...new Set(Object.values(places ?? {}).flatMap((deployments) => Object.keys(deployments)))]
@@ -1151,6 +1153,23 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     if (this.saveCompiled === "later") this.hasUnsavedOutput = true
     if (this.saveCompiled !== true) return this.outputFile.contents
     return await this.writeOutput()
+  }
+
+  /**
+   * Save what a compile from the cache took (`compile()`) BEHIND the caller, not before it:  `saveOutput()`, not awaited.
+   * - The program runs from what we hold (`compiled`), so a page opened on a cached compile runs it at once:  before,
+   *   it waited on each built file sent to the server, one after another, before the program ran.
+   * - Returns our output file's contents, as a compile that doesn't save does.
+   * - What the server serves (another project importing ours, a run page) is its old copy until the save lands,
+   *   as it is while any compile runs.
+   * - NEVER throws:  a failed save is logged;  the next save sends it again (`saveChanged()` skips only what it saved).
+   */
+  private saveBehind(): unknown {
+    const contents = this.outputFile.contents
+    this.saveOutput().catch((error: unknown) =>
+      console.error("SpellProject.compile():  couldn't save built files", error)
+    )
+    return contents
   }
 
   /**
