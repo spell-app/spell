@@ -1066,7 +1066,8 @@ export class SiteBase extends App {
    */
   private drawShowingIn(kept: KeptPages): unknown {
     const showing = this.getState<Showing>("showing")
-    if (showing?.kind === "page" && showing.page.draw !== Thing.prototype.draw) return kept.drawingOf(showing.page, showing.address)
+    if (showing?.kind === "page" && showing.page.draw !== Thing.prototype.draw)
+      return kept.drawingOf(showing.page, showing.address)
     return made(this.drawShowing())
   }
 

@@ -61,9 +61,7 @@ export class RunSiteHost implements SiteHost {
   /** The running site's address of the first page `file` declares with no value to fill:  `undefined` for none. */
   private addressOfFile(file: OpenedFile): string | undefined {
     const pages = this.site?.allPages() ?? []
-    const entry = pages.find(
-      (each) => !requiredParamsOf(each.address).length && file.pages.includes(each.page)
-    )
+    const entry = pages.find((each) => !requiredParamsOf(each.address).length && file.pages.includes(each.page))
     return entry && filledPattern(entry.address)
   }
 

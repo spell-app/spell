@@ -69,27 +69,29 @@ export function filledPattern(
   params: Readonly<Record<string, string | number | boolean | null | undefined>> = {}
 ): string {
   let leftOut: string | undefined
-  return pattern
-    .split("/")
-    .flatMap((segment) => {
-      const param = PARAM.exec(segment)
-      if (!param) return [segment]
-      const value = params[param[1]!]
-      if (value === undefined || value === null || value === "") {
-        if (param[2] === "?") {
-          leftOut ??= param[1]
-          return []
+  return (
+    pattern
+      .split("/")
+      .flatMap((segment) => {
+        const param = PARAM.exec(segment)
+        if (!param) return [segment]
+        const value = params[param[1]!]
+        if (value === undefined || value === null || value === "") {
+          if (param[2] === "?") {
+            leftOut ??= param[1]
+            return []
+          }
+          throw new TypeError(`filledPattern():  no value for \`:${param[1]}\` in \`${pattern}\`;  pass one`)
         }
-        throw new TypeError(`filledPattern():  no value for \`:${param[1]}\` in \`${pattern}\`;  pass one`)
-      }
-      if (leftOut !== undefined)
-        throw new TypeError(
-          `filledPattern():  \`:${leftOut}\` left out before \`:${param[1]}\` in \`${pattern}\`;  give it a value`
-        )
-      const text = String(value)
-      return [param[2] === "*" ? text.split("/").map(encodeURIComponent).join("/") : encodeURIComponent(text)]
-    })
-    .join("/") || "/"
+        if (leftOut !== undefined)
+          throw new TypeError(
+            `filledPattern():  \`:${leftOut}\` left out before \`:${param[1]}\` in \`${pattern}\`;  give it a value`
+          )
+        const text = String(value)
+        return [param[2] === "*" ? text.split("/").map(encodeURIComponent).join("/") : encodeURIComponent(text)]
+      })
+      .join("/") || "/"
+  )
 }
 
 /** The parameters `pattern` names, in order:  `/films/:film/people/:person` => `film`, `person`. */

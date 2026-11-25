@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import {
-  compilePattern,
-  filledPattern,
-  optionalParamsOf,
-  paramsOf,
-  requiredParamsOf
-} from "spell/util/addressPattern"
+import { compilePattern, filledPattern, optionalParamsOf, paramsOf, requiredParamsOf } from "spell/util/addressPattern"
 
 describe("compilePattern()", () => {
   it("matches `:name` to one segment, decoded, any case, with or without a last `/`", () => {
