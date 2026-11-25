@@ -1,3 +1,46 @@
+<!-- Examples › Columns from data's tree:  the filter field's text filters it -->
+a "work tree" is a view
+	// What the filter field holds:  the tree's filter.  The form binds the field to it, by its name
+	its "search" is text
+	to draw it
+		<form value={it}>
+			<tree id="docs-tree-columns-data" appearance="columns" tools column-titles="Clients, Folders, Files" show="icon which count chevron" label="Work" style="height: 20em" filter={its search} path={["Acme Bakery", "Spring menu", "menu.pdf"]}>
+				<input slot="tools" name="search" icon="search" size="small" placeholder="Filter the whole tree" style="width: calc(100% - 2.5em)"/>
+				<json>
+					[
+						{ "id": "Acme Bakery", "label": "Acme Bakery", "icon": "building outline", "count": 3, "children": [
+							{ "id": "Spring menu", "label": "Spring menu", "icon": "folder", "children": [
+								{ "id": "menu.pdf", "label": "menu.pdf", "icon": "file outline" },
+								{ "id": "prices.csv", "label": "prices.csv", "icon": "file outline" },
+								{ "id": "croissant.jpg", "label": "croissant.jpg", "icon": "file outline" },
+								{ "id": "loaf.jpg", "label": "loaf.jpg", "icon": "file outline" }
+							] },
+							{ "id": "Website", "label": "Website", "icon": "folder", "children": [
+								{ "id": "home.html", "label": "home.html", "icon": "file outline" },
+								{ "id": "about.html", "label": "about.html", "icon": "file outline" }
+							] },
+							{ "id": "Archive", "label": "Archive", "icon": "folder", "which": "old", "count": 3, "children": [
+								{ "id": "2022.zip", "label": "2022.zip", "icon": "file outline" },
+								{ "id": "2023.zip", "label": "2023.zip", "icon": "file outline" },
+								{ "id": "2024.zip", "label": "2024.zip", "icon": "file outline" }
+							] }
+						] },
+						{ "id": "Harbor Books", "label": "Harbor Books", "icon": "building outline", "count": 1, "children": [
+							{ "id": "Catalogue", "label": "Catalogue", "icon": "folder", "children": [
+								{ "id": "autumn.pdf", "label": "autumn.pdf", "icon": "file outline" },
+								{ "id": "winter.pdf", "label": "winter.pdf", "icon": "file outline" }
+							] }
+						] },
+						{ "id": "Pine Studio", "label": "Pine Studio", "icon": "building outline", "count": 1, "children": [
+							{ "id": "Logo", "label": "Logo", "icon": "folder", "children": [
+								{ "id": "logo.svg", "label": "logo.svg", "icon": "file outline" }
+							] }
+						] }
+					]
+				</json>
+			</tree>
+		</form>
+
 "tree examples" is a notebook page
 	<header level="1">
 		Tree
@@ -67,11 +110,9 @@
 
 		<section label="Columns from data" sticky="stack" collapsible dividing>
 			<example "Columns from data" description="A big tree is given as data, in `items`:  only the open path's columns are drawn.">
-				<tree id="docs-tree-columns-data" appearance="columns" tools column-titles="Clients, Folders, Files" show="icon which count chevron" label="Work" style="height: 20em">
-					<input slot="tools" id="docs-tree-columns-filter" icon="search" size="small" placeholder="Filter the whole tree" style="width: calc(100% - 2.5em)"/>
-				</tree>
+				<work-tree/>
 				<list slot="description" bulleted>
-					<item>Each item's <text code>children</text> is a list, or a function run the first time it opens.  It may return a promise:  the column shows a spinner until it comes (Archive takes a second).</item>
+					<item>The rows are written right here, as JSON in a <text code>&lt;json&gt;</text> inside the tree:  each item's <text code>children</text> is its list of rows.  A script can set <text code>items</text> instead, where <text code>children</text> may also be a function, run the first time its item opens, that may return a promise:  the column shows a spinner until it comes.</item>
 					<item><text code>show</text> picks each row's parts, here with how many rows it holds.</item>
 					<item><text code>tools</text> adds Open 2 levels, Open 3 levels and Close all;  the <text code>tools</text> slot puts the filter field at the end of their line.</item>
 					<item><text code>filter</text> filters the last column on screen, and after its rows lists the matches elsewhere in the tree, at any depth:  type <text code>zip</text>, and click one to open the path to it.</item>
@@ -81,38 +122,42 @@
 
 		<section label="Grouped columns" sticky="stack" collapsible dividing>
 			<example "Grouped columns" description="A column's rows can sit in groups, each under a header that stays in view.">
-				<tree id="docs-tree-columns-groups" appearance="columns" groups="accordion" column-titles="Rooms, Things" show="icon count chevron" label="House, in groups" style="height: 16em" path={["Kitchen"]} items="[[
-					{ \"id\": \"Kitchen\", \"label\": \"Kitchen\", \"icon\": \"home\", \"children\": [[
-						{ \"id\": \"Kitchen furniture\", \"kind\": \"header\", \"label\": \"Furniture\" },
-						{ \"id\": \"Table\", \"label\": \"Table\", \"icon\": \"couch\" },
-						{ \"id\": \"Bench\", \"label\": \"Bench\", \"icon\": \"couch\" },
-						{ \"id\": \"Stool\", \"label\": \"Stool\", \"icon\": \"couch\" },
-						{ \"id\": \"Shelf\", \"label\": \"Shelf\", \"icon\": \"couch\" },
-						{ \"id\": \"Dresser\", \"label\": \"Dresser\", \"icon\": \"couch\" },
-						{ \"id\": \"Cupboard\", \"label\": \"Cupboard\", \"icon\": \"couch\" },
-						{ \"id\": \"Island\", \"label\": \"Island\", \"icon\": \"couch\" },
-						{ \"id\": \"Bin\", \"label\": \"Bin\", \"icon\": \"couch\" },
-						{ \"id\": \"Rack\", \"label\": \"Rack\", \"icon\": \"couch\" },
-						{ \"id\": \"Trolley\", \"label\": \"Trolley\", \"icon\": \"couch\" },
-						{ \"id\": \"Chair\", \"label\": \"Chair\", \"icon\": \"couch\" },
-						{ \"id\": \"Hooks\", \"label\": \"Hooks\", \"icon\": \"couch\" },
-						{ \"id\": \"Kitchen lights\", \"kind\": \"header\", \"label\": \"Lights\" },
-						{ \"id\": \"Pendant\", \"label\": \"Pendant\", \"icon\": \"lightbulb outline\" },
-						{ \"id\": \"Spotlights\", \"label\": \"Spotlights\", \"icon\": \"lightbulb outline\" },
-						{ \"id\": \"Under-cabinet strip\", \"label\": \"Under-cabinet strip\", \"icon\": \"lightbulb outline\" }
-					] },
-					{ \"id\": \"Study\", \"label\": \"Study\", \"icon\": \"home\", \"children\": [[
-						{ \"id\": \"Study furniture\", \"kind\": \"header\", \"label\": \"Furniture\" },
-						{ \"id\": \"Desk\", \"label\": \"Desk\", \"icon\": \"couch\" },
-						{ \"id\": \"Study chair\", \"label\": \"Chair\", \"icon\": \"couch\" },
-						{ \"id\": \"Bookcase\", \"label\": \"Bookcase\", \"icon\": \"couch\" },
-						{ \"id\": \"Study lights\", \"kind\": \"header\", \"label\": \"Lights\" },
-						{ \"id\": \"Desk lamp\", \"label\": \"Desk lamp\", \"icon\": \"lightbulb outline\" },
-						{ \"id\": \"Floor lamp\", \"label\": \"Floor lamp\", \"icon\": \"lightbulb outline\" }
-					] }
-				]"/>
+				<tree id="docs-tree-columns-groups" appearance="columns" groups="accordion" column-titles="Rooms, Things" show="icon count chevron" label="House, in groups" style="height: 16em" path={["Kitchen"]}>
+					<json>
+						[
+							{ "id": "Kitchen", "label": "Kitchen", "icon": "home", "children": [
+								{ "id": "Kitchen furniture", "kind": "header", "label": "Furniture" },
+								{ "id": "Table", "label": "Table", "icon": "couch" },
+								{ "id": "Bench", "label": "Bench", "icon": "couch" },
+								{ "id": "Stool", "label": "Stool", "icon": "couch" },
+								{ "id": "Shelf", "label": "Shelf", "icon": "couch" },
+								{ "id": "Dresser", "label": "Dresser", "icon": "couch" },
+								{ "id": "Cupboard", "label": "Cupboard", "icon": "couch" },
+								{ "id": "Island", "label": "Island", "icon": "couch" },
+								{ "id": "Bin", "label": "Bin", "icon": "couch" },
+								{ "id": "Rack", "label": "Rack", "icon": "couch" },
+								{ "id": "Trolley", "label": "Trolley", "icon": "couch" },
+								{ "id": "Chair", "label": "Chair", "icon": "couch" },
+								{ "id": "Hooks", "label": "Hooks", "icon": "couch" },
+								{ "id": "Kitchen lights", "kind": "header", "label": "Lights" },
+								{ "id": "Pendant", "label": "Pendant", "icon": "lightbulb outline" },
+								{ "id": "Spotlights", "label": "Spotlights", "icon": "lightbulb outline" },
+								{ "id": "Under-cabinet strip", "label": "Under-cabinet strip", "icon": "lightbulb outline" }
+							] },
+							{ "id": "Study", "label": "Study", "icon": "home", "children": [
+								{ "id": "Study furniture", "kind": "header", "label": "Furniture" },
+								{ "id": "Desk", "label": "Desk", "icon": "couch" },
+								{ "id": "Study chair", "label": "Chair", "icon": "couch" },
+								{ "id": "Bookcase", "label": "Bookcase", "icon": "couch" },
+								{ "id": "Study lights", "kind": "header", "label": "Lights" },
+								{ "id": "Desk lamp", "label": "Desk lamp", "icon": "lightbulb outline" },
+								{ "id": "Floor lamp", "label": "Floor lamp", "icon": "lightbulb outline" }
+							] }
+						]
+					</json>
+				</tree>
 				<list slot="description" bulleted>
-					<item>The tree's rows are written right here, as JSON in its <text code>items</text> attribute.  <text code>path</text> picks Kitchen to begin with.</item>
+					<item>The tree's rows are written right here, as plain JSON in a <text code>&lt;json&gt;</text> inside it.  <text code>path</text> picks Kitchen to begin with.</item>
 					<item>An item with <text code>kind: "header"</text> is a header:  the rows after it, up to the next header, are its group.  It shows how many rows its group holds.  It's never picked, and the arrow keys go past it.</item>
 					<item>With <text code>groups="accordion"</text>, one group is open at a time, the first to begin with.  Click a header, or press Enter or Space on it, to open its group.</item>
 					<item>Scroll a long group:  the headers stick, at the top of the column under the ones above, and at its bottom over the ones below.</item>
@@ -122,7 +167,36 @@
 
 		<section label="Deep paths" sticky="stack" collapsible dividing>
 			<example "Deep paths" description="When the open path is deeper than the tree is wide, the first columns narrow to strips.">
-				<tree id="docs-tree-columns-deep" appearance="columns" sticky-path column-titles="Parts" show="icon which count chevron" label="Parts" style="height: 15em"/>
+				<tree id="docs-tree-columns-deep" appearance="columns" sticky-path column-titles="Parts" show="icon which count chevron" label="Parts" style="height: 15em" path={["board", "radio", "front end", "mixer", "oscillator", "crystal"]}>
+					<json>
+						[
+							{ "id": "board", "label": "board", "which": "top", "icon": "microchip", "children": [
+								{ "id": "power", "label": "power", "which": "block", "icon": "microchip", "children": [
+									{ "id": "regulator", "label": "regulator", "which": "chip", "icon": "circle outline" },
+									{ "id": "fuse", "label": "fuse", "which": "part", "icon": "circle outline" }
+								] },
+								{ "id": "radio", "label": "radio", "which": "block", "icon": "microchip", "children": [
+									{ "id": "front end", "label": "front end", "which": "block", "icon": "microchip", "children": [
+										{ "id": "mixer", "label": "mixer", "which": "block", "icon": "microchip", "children": [
+											{ "id": "oscillator", "label": "oscillator", "which": "block", "icon": "microchip", "children": [
+												{ "id": "crystal", "label": "crystal", "which": "part", "icon": "circle outline" },
+												{ "id": "trim cap", "label": "trim cap", "which": "part", "icon": "circle outline" },
+												{ "id": "buffer", "label": "buffer", "which": "chip", "icon": "circle outline" }
+											] },
+											{ "id": "filter", "label": "filter", "which": "part", "icon": "circle outline" }
+										] },
+										{ "id": "amplifier", "label": "amplifier", "which": "chip", "icon": "circle outline" }
+									] },
+									{ "id": "antenna", "label": "antenna", "which": "part", "icon": "circle outline" }
+								] }
+							] },
+							{ "id": "enclosure", "label": "enclosure", "which": "top", "icon": "microchip", "children": [
+								{ "id": "lid", "label": "lid", "which": "part", "icon": "circle outline" },
+								{ "id": "base", "label": "base", "which": "part", "icon": "circle outline" }
+							] }
+						]
+					</json>
+				</tree>
 				<list slot="description" bulleted>
 					<item>Each strip shows only its pick's name, as few strips as it takes.</item>
 					<item>The last two columns never narrow, nor the selected row's:  <text code>narrow-before</text> says how many at the end stay wide.</item>
@@ -134,8 +208,56 @@
 
 		<section label="Column sizes" sticky="stack" collapsible dividing>
 			<example "Column sizes" description="`size` gives each column its width, by level, separated by commas;  the last one sizes every deeper column.  Each is px (`160` or `160px`), `em`, a percent of the tree's width, `auto` to fit the column to the rows it shows, or `*` for `--ui-tree-column-width`.  In the first tree the first column is 8em, the second 30%, and every one after fits its rows;  in the second, the first is 160px, and every one after takes the token's width.  A column you resize keeps your width instead.">
-				<tree id="docs-tree-columns-sized" appearance="columns" size="8em, 30%, auto" column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library" style="height: 12em"/>
-				<tree id="docs-tree-columns-sized-px" appearance="columns" size="160, *" column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library, in px" style="height: 12em; margin-top: 0.5em"/>
+				<tree id="docs-tree-columns-sized" appearance="columns" size="8em, 30%, auto" column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library" style="height: 12em" path={["Novels", "Middlemarch", "Miss Brooke"]}>
+					<json>
+						[
+							{ "id": "Novels", "label": "Novels", "icon": "book", "children": [
+								{ "id": "Moby-Dick", "label": "Moby-Dick", "which": "1851", "icon": "book", "children": [
+									{ "id": "Loomings", "label": "Loomings", "icon": "file alternate outline" },
+									{ "id": "The Carpet-Bag", "label": "The Carpet-Bag", "icon": "file alternate outline" },
+									{ "id": "The Spouter-Inn", "label": "The Spouter-Inn", "icon": "file alternate outline" }
+								] },
+								{ "id": "Middlemarch", "label": "Middlemarch", "which": "1871", "icon": "book", "children": [
+									{ "id": "Miss Brooke", "label": "Miss Brooke", "icon": "file alternate outline" },
+									{ "id": "Old and Young", "label": "Old and Young", "icon": "file alternate outline" },
+									{ "id": "Waiting for Death", "label": "Waiting for Death", "icon": "file alternate outline" },
+									{ "id": "Three Love Problems", "label": "Three Love Problems", "icon": "file alternate outline" }
+								] }
+							] },
+							{ "id": "Poems", "label": "Poems", "icon": "book", "children": [
+								{ "id": "Leaves of Grass", "label": "Leaves of Grass", "icon": "book", "children": [
+									{ "id": "Inscriptions", "label": "Inscriptions", "icon": "file alternate outline" },
+									{ "id": "Song of Myself", "label": "Song of Myself", "icon": "file alternate outline" }
+								] }
+							] }
+						]
+					</json>
+				</tree>
+				<tree id="docs-tree-columns-sized-px" appearance="columns" size="160, *" column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library, in px" style="height: 12em; margin-top: 0.5em" path={["Novels", "Middlemarch", "Miss Brooke"]}>
+					<json>
+						[
+							{ "id": "Novels", "label": "Novels", "icon": "book", "children": [
+								{ "id": "Moby-Dick", "label": "Moby-Dick", "which": "1851", "icon": "book", "children": [
+									{ "id": "Loomings", "label": "Loomings", "icon": "file alternate outline" },
+									{ "id": "The Carpet-Bag", "label": "The Carpet-Bag", "icon": "file alternate outline" },
+									{ "id": "The Spouter-Inn", "label": "The Spouter-Inn", "icon": "file alternate outline" }
+								] },
+								{ "id": "Middlemarch", "label": "Middlemarch", "which": "1871", "icon": "book", "children": [
+									{ "id": "Miss Brooke", "label": "Miss Brooke", "icon": "file alternate outline" },
+									{ "id": "Old and Young", "label": "Old and Young", "icon": "file alternate outline" },
+									{ "id": "Waiting for Death", "label": "Waiting for Death", "icon": "file alternate outline" },
+									{ "id": "Three Love Problems", "label": "Three Love Problems", "icon": "file alternate outline" }
+								] }
+							] },
+							{ "id": "Poems", "label": "Poems", "icon": "book", "children": [
+								{ "id": "Leaves of Grass", "label": "Leaves of Grass", "icon": "book", "children": [
+									{ "id": "Inscriptions", "label": "Inscriptions", "icon": "file alternate outline" },
+									{ "id": "Song of Myself", "label": "Song of Myself", "icon": "file alternate outline" }
+								] }
+							] }
+						]
+					</json>
+				</tree>
 			</example>
 		</>
 
@@ -143,6 +265,26 @@
 			<example "Detail pane" description="Pick a chapter, and the pane on the right shows more about it.">
 				<tree id="docs-tree-columns-detail" appearance="columns" sticky-detail column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library, with a detail pane" style="height: 15em">
 					<json slot="detail" depth="2"/>
+					<json>
+						[
+							{ "id": "Novels", "label": "Novels", "icon": "book", "data": {"shelf": "Novels", "books": 2}, "children": [
+								{ "id": "Moby-Dick", "label": "Moby-Dick", "which": "1851", "icon": "book", "data": {"title": "Moby-Dick", "year": 1851, "chapters": 3}, "children": [
+									{ "id": "Loomings", "label": "Loomings", "icon": "file alternate outline", "data": {"chapter": "Loomings", "pages": 8} },
+									{ "id": "The Carpet-Bag", "label": "The Carpet-Bag", "icon": "file alternate outline", "data": {"chapter": "The Carpet-Bag", "pages": 6} },
+									{ "id": "The Spouter-Inn", "label": "The Spouter-Inn", "icon": "file alternate outline", "data": {"chapter": "The Spouter-Inn", "pages": 14} }
+								] },
+								{ "id": "Middlemarch", "label": "Middlemarch", "which": "1871", "icon": "book", "data": {"title": "Middlemarch", "year": 1871, "chapters": 2}, "children": [
+									{ "id": "Miss Brooke", "label": "Miss Brooke", "icon": "file alternate outline", "data": {"chapter": "Miss Brooke", "pages": 22} },
+									{ "id": "Old and Young", "label": "Old and Young", "icon": "file alternate outline", "data": {"chapter": "Old and Young", "pages": 18} }
+								] }
+							] },
+							{ "id": "Poems", "label": "Poems", "icon": "book", "data": {"shelf": "Poems", "books": 1}, "children": [
+								{ "id": "Leaves of Grass", "label": "Leaves of Grass", "which": "1855", "icon": "book", "data": {"title": "Leaves of Grass", "year": 1855, "chapters": 1}, "children": [
+									{ "id": "Song of Myself", "label": "Song of Myself", "icon": "file alternate outline", "data": {"chapter": "Song of Myself", "pages": 52} }
+								] }
+							] }
+						]
+					</json>
 				</tree>
 				<list slot="description" bulleted>
 					<item>You choose what the pane shows by putting it in the tree's <text code>detail</text> slot, the spot kept for it.  Here it holds a <text code>&lt;ui-json&gt;</text>, which lists everything stored about the chapter.</item>

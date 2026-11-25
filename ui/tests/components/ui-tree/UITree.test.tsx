@@ -1105,6 +1105,63 @@ describe('<ui-tree appearance="columns"> from `items`', () => {
   })
 })
 
+describe('<ui-tree appearance="columns"> from a `<ui-json>` child', () => {
+  type TreeHost = HTMLElement & { items?: TreeItemData[]; path?: string[] }
+
+  const JSON_ROWS = `[
+    { "id": "acme", "label": "Acme", "children": [{ "id": "menu", "label": "Menu" }, { "id": "site", "label": "Site" }] },
+    { "id": "books", "label": "Books" }
+  ]`
+
+  async function jsonTree(inside: string): Promise<TreeHost> {
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" label="Work" style="height: 200px; width: 900px">${inside}</ui-tree>`
+    )) as TreeHost
+    await ElementFixture.settle()
+    return host
+  }
+
+  function columnLabels(host: Element): string[][] {
+    return [...host.shadowRoot!.querySelectorAll("ul.column")].map((column) =>
+      [...column.querySelectorAll(".column-row .words")].map((words) => words.textContent!)
+    )
+  }
+
+  it("draws its rows from the JSON written in the child, and hides the child", async () => {
+    const host = await jsonTree(`<ui-json>${JSON_ROWS}</ui-json>`)
+    expect(columnLabels(host)).toEqual([["Acme", "Books"]])
+    host.path = ["acme"]
+    await ElementFixture.settle()
+    expect(columnLabels(host)).toEqual([["Acme", "Books"], ["Menu", "Site"]])
+    expect(host.querySelector("ui-json")!.checkVisibility()).toBe(false)
+  })
+
+  it("`items` set wins over the child", async () => {
+    const host = await jsonTree(`<ui-json>${JSON_ROWS}</ui-json>`)
+    host.items = [{ id: "given", label: "Given" }]
+    await ElementFixture.settle()
+    expect(columnLabels(host)).toEqual([["Given"]])
+  })
+
+  it("draws again when the child's text changes", async () => {
+    const host = await jsonTree(`<ui-json>${JSON_ROWS}</ui-json>`)
+    host.querySelector("ui-json")!.textContent = `[{ "id": "new", "label": "New" }]`
+    await vi.waitFor(() => expect(columnLabels(host)).toEqual([["New"]]))
+  })
+
+  it("doesn't read a `<ui-json>` in a named slot:  the `detail` pane shows it", async () => {
+    const host = await jsonTree(`<ui-json slot="detail">${JSON_ROWS}</ui-json>`)
+    expect(host.shadowRoot!.querySelector("ul.column")).toBeNull()
+  })
+
+  it("invalid JSON draws no columns from data", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const host = await jsonTree(`<ui-json>[{ nope }]</ui-json>`)
+    expect(host.shadowRoot!.querySelector("ul.column")).toBeNull()
+    warn.mockRestore()
+  })
+})
+
 describe('<ui-tree appearance="columns"> remembered path and `detail` pane', () => {
   type TreeHost = HTMLElement & { items?: TreeItemData[]; path?: string[] }
   type DetailHost = HTMLElement & { item?: unknown }

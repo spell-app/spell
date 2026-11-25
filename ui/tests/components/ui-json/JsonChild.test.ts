@@ -17,6 +17,12 @@ describe("JsonChild.of()", () => {
     expect(JsonChild.of(Fixture.render(`<div><ui-json>1</ui-json></div>`))?.localName).toBe("ui-json")
     expect(JsonChild.of(Fixture.render(`<div><es-json>1</es-json></div>`))?.localName).toBe("es-json")
   })
+
+  test("skips a child in a named slot:  it's shown, not read", () => {
+    const host = Fixture.render(`<div><ui-json slot="detail">1</ui-json><ui-json>2</ui-json></div>`)
+    expect(JsonChild.textOf(host)).toBe("2")
+    expect(JsonChild.of(Fixture.render(`<div><ui-json slot="detail">1</ui-json></div>`))).toBeUndefined()
+  })
 })
 
 describe("JsonChild.valueOf()", () => {
