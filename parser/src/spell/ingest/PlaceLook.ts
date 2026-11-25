@@ -72,7 +72,7 @@ export type LookAsk = Pick<IngestAsk, "address" | "docs" | "collections" | "samp
   /** The names of what's in a folder on this disk:  see `IngestFiles.namesInFolder`. */
   namesInFolder?: IngestFiles["namesInFolder"]
   /** The most bytes it reads of a list's answer, by its address, when that's more than every answer's most. */
-  mostBytes?: Readonly<Record<string, number>>
+  maxSize?: Readonly<Record<string, number>>
 }
 
 /** The kinds it knows how to look at, and how:  a new kind adds a look here. */
@@ -239,7 +239,7 @@ async function lookAtWebServer({
   addListed,
   spec,
   reader,
-  mostBytes = {}
+  maxSize = {}
 }: LookAsk): Promise<PlaceLook> {
   // its description is the source:  every list, from the schemas, with no cap and no rows (epic `data` P49)
   if (spec) return lookAtSpec(address, spec, reader)
@@ -282,7 +282,7 @@ async function lookAtWebServer({
         ? await readFoundByName(place, name, at, samplesFor(name, samples, at), reader)
         : searchIn(at)
           ? await readSearched(place, name, at, reader)
-          : await readCollection(place, name, at, reader, { mostBytes: mostBytes[at] })
+          : await readCollection(place, name, at, reader, { maxSize: maxSize[at] })
       if (look.searchedOnly) {
         notes.push(
           `"${name}" answers only a search:  asked with none, it gave nothing, so its line says it's searched, and a program can't read every one.`
@@ -494,12 +494,12 @@ async function readCollection(
   name: string,
   at: string,
   reader: PoliteReader,
-  { isSearch = false, mostBytes }: { isSearch?: boolean; mostBytes?: number } = {}
+  { isSearch = false, maxSize }: { isSearch?: boolean; maxSize?: number } = {}
 ): Promise<CollectionLook> {
   const look: CollectionLook = { name, at, rows: [], paging: "none", pagesRead: 0, hasMore: false }
   let url: string | undefined = `${place}${at}`
   while (url && look.pagesRead < MOST_PAGES) {
-    const answer = await reader.read(url, { mostBytes })
+    const answer = await reader.read(url, { maxSize })
     refuseAnswer(url, answer)
     // a list of ids too long to read whole, the Met Museum's 500,000:  the ids it read are enough to look at
     const body = answer.isCut ? idsReadOf(answer.text) : jsonOf(answer.text)

@@ -1,7 +1,7 @@
 import { DatabasePlace } from "spell/util/persist/DatabasePlace"
 
 /** What one place keeps on a device, unless its line says otherwise:  `- keep a copy on this device`, 50 MB. */
-export const DEVICE_COPY_MOST_BYTES = 50_000_000
+export const DEVICE_COPY_MAX_SIZE = 50_000_000
 
 /** The database copies are kept in:  its own, so clearing preferences leaves them, and the other way round. */
 const DATABASE_NAME = "spell-device-copies"
@@ -33,7 +33,7 @@ const NO_STORE = /(?:^|,)\s*no-store\b/i
  * - Each copy is FRESH until the place's next check time (`freshFor()`):  `check it once a day at 5am`, `every 5 minutes`.
  *   - A server's longer `Cache-Control: max-age` wins;  its `no-store` keeps nothing.
  *   - `WebPlace` answers a fresh copy with no request, and a stale one at once, reading the server behind it.
- * - What it keeps has a size limit, `mostBytes`:
+ * - What it keeps has a size limit, `maxSize`:
  *   over it, it discards what was READ least recently, not what was written least recently.
  *   - Every read moves a copy's last-read time on.
  *   - The browser refusing room (a quota error) discards the same way, then tries again.
@@ -47,7 +47,7 @@ export class DeviceCopy {
   /** Whose copies these are:  the program and its place, `@owen/star-wars:star_wars`. */
   readonly scope: string
   /** The most it keeps, in bytes. */
-  readonly mostBytes: number
+  readonly maxSize: number
   /** How long a copy kept now is fresh for, in ms:  until the place's next check time. */
   private readonly freshFor: () => number
   /** Where it's kept. */
@@ -71,14 +71,14 @@ export class DeviceCopy {
 
   constructor({
     scope,
-    mostBytes = DEVICE_COPY_MOST_BYTES,
+    maxSize = DEVICE_COPY_MAX_SIZE,
     freshFor = () => 0,
     store = DeviceCopy.database,
     now = Date.now,
     person
   }: DeviceCopyProps) {
     this.scope = scope
-    this.mostBytes = mostBytes
+    this.maxSize = maxSize
     this.freshFor = freshFor
     this.store = store
     this.now = now
@@ -159,7 +159,7 @@ export class DeviceCopy {
 
   /**
    * Keep `answer` as the copy for `address`, fresh until the place's next check time.
-   * - Makes room first, discarding what was read least recently.  An answer bigger than `mostBytes` isn't kept.
+   * - Makes room first, discarding what was read least recently.  An answer bigger than `maxSize` isn't kept.
    * - The browser refusing room:  discards more, and tries again.
    * - NEVER throws:  see `kept()`.
    */
@@ -169,11 +169,11 @@ export class DeviceCopy {
     await this.open()
     const bytes = bytesOf(answer)
     this.notes.delete(address)
-    if (bytes > this.mostBytes) {
+    if (bytes > this.maxSize) {
       this.saveIndex()
       return
     }
-    await this.makeRoom(this.mostBytes - bytes)
+    await this.makeRoom(this.maxSize - bytes)
     const now = this.now()
     const person = this.person?.()
     for (let tries = 0; tries < ROOM_TRIES; tries++) {
@@ -324,8 +324,8 @@ export class DeviceCopy {
 export type DeviceCopyProps = {
   /** Whose copies these are:  the program and its place, so two programs' places of one name keep apart. */
   scope: string
-  /** The most it keeps, in bytes:  default `DEVICE_COPY_MOST_BYTES`, 50 MB. */
-  mostBytes?: number
+  /** The most it keeps, in bytes:  default `DEVICE_COPY_MAX_SIZE`, 50 MB. */
+  maxSize?: number
   /** How long a copy kept now is fresh for, in ms:  until the place's next check time.  Default 0:  stale at once. */
   freshFor?: () => number
   /** Where it's kept:  default the browser's database, `DeviceCopy.database`. */

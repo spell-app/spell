@@ -59,7 +59,7 @@ export function descriptionFromDisk({
 }: PlaceDescriptionOnDisk): PlaceDescription {
   const each = Object.entries(collections).map(([name, collection]) => [
     name,
-    withState({ ...allCollections, ...collection })
+    withState(withMaxSize({ ...allCollections, ...collection }))
   ])
   // the lines it wrote, each bare:  an older version bulleted them, `- its "url" is text` (epic `language` P46)
   const spell = rest.spell?.map((line) => line.replace(/^(\t*)- /, "$1"))
@@ -87,4 +87,16 @@ function withState(
   const { readThrough, ...rest } = collection
   if (!readThrough || rest.state) return rest
   return { ...rest, state: stateOfRead(readThrough, "") }
+}
+
+/**
+ * A collection as it's read, its older `mostBytes` as its `maxSize`:  a description written before the rename still
+ * gives its list the room it was given.
+ */
+function withMaxSize(
+  collection: Partial<CollectionDescription> & { mostBytes?: number }
+): Partial<CollectionDescription> & { readThrough?: ReadOfType } {
+  const { mostBytes, ...rest } = collection
+  if (mostBytes === undefined || rest.maxSize !== undefined) return rest
+  return { ...rest, maxSize: mostBytes }
 }

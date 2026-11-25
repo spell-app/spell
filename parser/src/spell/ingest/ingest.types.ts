@@ -707,11 +707,11 @@ export type CollectionDescription = {
   leftOut?: string
   /**
    * The most bytes verify and a look read of its one answer, when that's more than every other list's 2 MB:
-   * a list answered whole, too big for that, `mostBytes: 8000000`.
+   * a list answered whole, too big for that, `maxSize: 8000000`.
    * - Written by a person, in the description:  only verify and a look are held to a size;  a read through the Spell
    *   takes its answer whole.  Every look again keeps it.
    */
-  mostBytes?: number
+  maxSize?: number
   /**
    * Whether it was tried, and how it went (epic `data` P49):  a read through the Spell, or `spell place verify`.
    * - It was `readThrough`, which an older description still says:  read as this (`descriptionFromDisk()`).

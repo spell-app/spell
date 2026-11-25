@@ -246,15 +246,15 @@ export class PlaceIngest {
       (names ?? []).map((sample) => `${at}=${sample}`)
     )
     // a list a person gave more room to read is read with it again
-    const mostBytes = Object.fromEntries(
-      Object.values(old.collections).flatMap(({ at, mostBytes: most }) => (most === undefined ? [] : [[at, most]]))
+    const maxSize = Object.fromEntries(
+      Object.values(old.collections).flatMap(({ at, maxSize: most }) => (most === undefined ? [] : [[at, most]]))
     )
     const look = await lookAtPlace(kind, {
       address,
       reader,
       collections,
       addListed: !collectionsAsked,
-      mostBytes,
+      maxSize,
       ...withDefined({
         spec: specAt,
         docs: docsAt,
@@ -264,8 +264,8 @@ export class PlaceIngest {
     })
     const description = describeLook(look, { kind, name })
     for (const [each, collection] of Object.entries(description.collections)) {
-      const most = old.collections[each]?.mostBytes
-      if (most !== undefined) collection.mostBytes = most
+      const most = old.collections[each]?.maxSize
+      if (most !== undefined) collection.maxSize = most
     }
     leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
     if (keySecret) description.about.keySecret = keySecret
@@ -524,7 +524,7 @@ export class PlaceIngest {
     const url = urlAsking(answers ?? {})
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
-      answer = await reader.read(url, { mostBytes: collection.mostBytes })
+      answer = await reader.read(url, { maxSize: collection.maxSize })
     } catch (error) {
       if (error instanceof IngestStopped && !reader.hasRoom) throw error
       return failed(`it didn't answer:  ${messageOf(error).replaceAll(url, collection.at)}`)
@@ -612,7 +612,7 @@ export class PlaceIngest {
       const answers = answered([param])
       if (!answers) continue
       try {
-        const answer = await reader.read(urlAsking(answers), { mostBytes: collection.mostBytes })
+        const answer = await reader.read(urlAsking(answers), { maxSize: collection.maxSize })
         if (answer.status >= 400) continue
         collection.askedBy = { [param]: "" }
         return answer

@@ -513,7 +513,7 @@ class ProgramPlaces {
     if (copy) return copy
     copy = new this.folder!.DeviceCopy({
       scope: `${this.programName}:${name}`,
-      ...(typeof keptOnDevice === "number" && { mostBytes: keptOnDevice }),
+      ...(typeof keptOnDevice === "number" && { maxSize: keptOnDevice }),
       freshFor: () => (checkedAt ? msUntil(checkedAt) : (checkedEvery ?? 0) * 1000),
       // a key's, or a data folder's (whose lists are whoever's signed in's):  each person's apart
       ...((keyNamed !== undefined || details.kind === DATA_FOLDER_KIND) && { person: () => this.personNow.id })

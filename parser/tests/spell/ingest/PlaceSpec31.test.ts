@@ -431,10 +431,10 @@ describe("spell place verify, of a FastAPI service", () => {
     await ingest.verify("AcmeJobs.api.spell")
     const jobs = () => descriptions.get("AcmeJobs.api.json5")!.collections.jobs!
     expect(jobs().state).toMatchObject({ is: "failed", reason: expect.stringMatching(/too big to read whole/) })
-    jobs().mostBytes = 8_000_000
+    jobs().maxSize = 8_000_000
     await ingest.verify("AcmeJobs.api.spell")
     expect(jobs().state).toMatchObject({ is: "verified", rows: 12_000 })
-    expect(jobs().mostBytes).toBe(8_000_000)
+    expect(jobs().maxSize).toBe(8_000_000)
   })
 
   test("a list giving fewer than the place asks for says so under its own line, though it pages as the place does", async () => {
