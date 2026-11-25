@@ -1306,7 +1306,7 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf,
     if (was === line.text) continue
     if (was === undefined) {
       // a person wrote it already, word for word:  nothing to add
-      if (lineAt(lines, blockAt, line.text) >= 0) continue
+      if (ownLineAt(lines, blockAt, line, after) >= 0) continue
       // a person's line reads the same field already, in words of their own:  theirs wins, never a second beside it
       const theirs = isFieldLine(line.text) ? personsLineFor(lines, blockAt, line.text, before, wrote) : undefined
       if (theirs !== undefined) {
@@ -1320,7 +1320,7 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf,
       merge.changed.push(`Added:  ${line.text}`)
       continue
     }
-    const at = lineAt(lines, blockAt, was)
+    const at = ownLineAt(lines, blockAt, { key: line.key, text: was }, before)
     if (at < 0) {
       merge.couldnt.push(`It would say "${line.text}", but you've changed that line, so it stays as you wrote it.`)
       continue
@@ -1336,9 +1336,10 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf,
     merge.changed.push(`Changed:  ${line.text}`)
   }
   const nowKeys = new Set(after.map((line) => line.key))
-  for (const { key, text } of before) {
+  for (const gone of before) {
+    const { key, text } = gone
     if (nowKeys.has(key)) continue
-    const at = lineAt(lines, blockAt, text)
+    const at = ownLineAt(lines, blockAt, gone, before)
     if (at < 0) continue
     const words = wordsIn(text)
     if (words && usesOf(words, own)) {
@@ -1437,6 +1438,26 @@ function lineAt(lines: readonly string[], blockAt: number, text: string): number
   const end = endOfBlock(lines, blockAt)
   // a line an older version bulleted, `- its "url" is text`, is the same line (epic `language` P46)
   for (let at = blockAt + 1; at < end; at++) if (lines[at]!.replace(/^\t- /, "\t") === `\t${text}`) return at
+  return -1
+}
+
+/**
+ * Where `line` is in the block at `blockAt`, as `lineAt()`;  one step in under another (`\tit filters by ...`), only
+ * among the lines under its own (its list's `live at` line, the last line before it in `written` that isn't one step
+ * in):  the same words under another list are that list's.
+ */
+function ownLineAt(lines: readonly string[], blockAt: number, line: SpellLine, written: readonly SpellLine[]): number {
+  if (!line.text.startsWith("\t")) return lineAt(lines, blockAt, line.text)
+  const index = written.findIndex((each) => each.key === line.key)
+  const parent = written
+    .slice(0, Math.max(index, 0))
+    .reverse()
+    .find((each) => !each.text.startsWith("\t"))
+  const parentAt = parent ? lineAt(lines, blockAt, parent.text) : -1
+  if (parentAt < 0) return -1
+  for (let at = parentAt + 1; at < lines.length && lines[at]!.startsWith("\t\t"); at++) {
+    if (lines[at] === `\t${line.text}`) return at
+  }
   return -1
 }
 

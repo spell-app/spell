@@ -334,7 +334,7 @@ export class PlaceSpec {
    * (a list's own lines):  `undefined` for none.
    * - A question named as a field of its rows, asking one value (text, a number, yes or no;  never a list), is a
    *   filter:  `?job_id=` on jobs that each have a `job_id`.  One its rows don't have (`design_name`, `include_emulated`)
-   *   isn't:  nothing in a row says what it does.
+   *   isn't:  nothing in a row says what it does.  A list no schema typed keeps each, for a verify's read to say.
    * - A question naming its order (`order_by`), with the values it takes, is its orders:  each a field's name is in
    *   that field's order, which way round left for a verify to try;  one naming no field (`recency`) is said in the
    *   notes, for a person to say what it sorts by.
@@ -375,7 +375,9 @@ export class PlaceSpec {
         continue
       }
       const isOneValue = kinds.length > 0 && kinds.every((kind) => ONE_VALUE_KINDS.has(kind))
-      if (name in fields && isOneValue) (takes.filters ??= []).push(name)
+      // a list no schema typed may hold it:  kept, for a verify to try once a read gives its fields
+      const isUntyped = !Object.keys(fields).length
+      if ((isUntyped || name in fields) && isOneValue) (takes.filters ??= []).push(name)
     }
     return Object.keys(takes).length ? takes : undefined
   }

@@ -214,3 +214,67 @@ describe("PlaceWords.check(), for spell place check", () => {
     expect(check.unwritten).toEqual([])
   })
 })
+
+describe("mergedSpell(), the lines one step in under a list's line", () => {
+  const header = 'acme is a web server at "https://acme.test"'
+  const partsOf = (placeLines: SpellParts["placeLines"]): SpellParts => ({ header, placeLines, types: [] })
+  const lists = (jobs: string[], runs: string[]) =>
+    partsOf([
+      { key: "at:jobs", text: 'jobs live at "/api/jobs"' },
+      ...jobs.map((text, at) => ({ key: `takes:jobs:${at}`, text: `\t${text}` })),
+      { key: "at:runs", text: 'runs live at "/api/runs"' },
+      ...runs.map((text, at) => ({ key: `takes:runs:${at}`, text: `\t${text}` }))
+    ])
+  const unused = () => false
+
+  it("a new one goes under its own list, though another list says the same, and a person's words stay", () => {
+    const file = [
+      header,
+      '\tjobs live at "/api/jobs"',
+      "\t\tit filters by status",
+      "\t\t// by hand:  what its owner means",
+      "\t\tit filters by owner",
+      '\truns live at "/api/runs"',
+      ""
+    ].join("\n")
+    const before = lists(["it filters by status"], [])
+    const after = lists(["it filters by status", 'it searches names with "q"'], ["it filters by status"])
+    const { text } = mergedSpell(file, before, after, unused)
+    expect(text).toBe(
+      [
+        header,
+        '\tjobs live at "/api/jobs"',
+        "\t\tit filters by status",
+        '\t\tit searches names with "q"',
+        "\t\t// by hand:  what its owner means",
+        "\t\tit filters by owner",
+        '\truns live at "/api/runs"',
+        "\t\tit filters by status",
+        ""
+      ].join("\n")
+    )
+  })
+
+  it("a changed one changes under its own list only", () => {
+    const file = [
+      header,
+      '\tjobs live at "/api/jobs"',
+      "\t\tit filters by status",
+      '\truns live at "/api/runs"',
+      "\t\tit filters by status",
+      ""
+    ].join("\n")
+    const before = lists(["it filters by status"], ["it filters by status"])
+    const after = lists(["it filters by status"], ["it filters by team"])
+    expect(mergedSpell(file, before, after, unused).text).toBe(
+      [
+        header,
+        '\tjobs live at "/api/jobs"',
+        "\t\tit filters by status",
+        '\truns live at "/api/runs"',
+        "\t\tit filters by team",
+        ""
+      ].join("\n")
+    )
+  })
+})
