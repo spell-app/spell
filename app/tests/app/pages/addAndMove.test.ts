@@ -1037,7 +1037,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
-  test("the add bar runs down the left edge in Edit, the app then the code across;  its groups open beside it, its stars stay (T151, T152)", async () => {
+  test("the add bar runs down the left edge in Edit, the app then the code across;  its groups open beside it, its stars stay, its + opens everything (T151, T152, T173, T174)", async () => {
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePanel")?.visible)
 
@@ -1191,21 +1191,51 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForTimeout(400)
     expect(await page.locator(".PaletteRail ui-item.PaletteFavorite").count()).toBe(0)
 
-    // Search looks through every group, each a row holding its matches;  choosing one closes it (I176) and picks it up
-    await page
-      .locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Search everything you can add"] [part~=item]')
-      .hover()
+    // the `+` opens the whole add panel beside the bar as the mouse rests on it, in columns, the cursor in its search
+    // (T174);  its search looks through every part;  choosing one closes it (I176) and adds it
+    await page.locator(".PaletteRail .PaletteRailAdd").hover()
     await page.waitForTimeout(HOVER_OPENS_MS)
-    const everything = page.locator('ui-popup.PaletteFlyout[aria-label="Search everything you can add"]')
-    await everything.locator(".PaletteFlyoutSearch input").fill("butt")
+    const everything = page.locator("ui-popup.PalettePlus")
+    expect(await everything.evaluate((panel) => (panel as HTMLElement & { visible?: boolean }).visible)).toBe(true)
+    expect(await everything.locator(".PaletteGroup").count()).toBeGreaterThan(4)
+    const buttons = ((await text()).match(/<(ui-)?button\b/g) ?? []).length
+    await page.keyboard.type("butt")
     await page.waitForTimeout(600)
     expect(await everything.locator('ui-tree-item[label="Button"]').count()).toBeGreaterThan(0)
-    await everything.locator('ui-tree-item[label="Button"]').first().click()
+    await everything.locator('ui-tree-item[label="Button"]').first().locator("[part~=row]").first().click()
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await flyoutsOpen()).toBe(0)
+    expect(((await text()).match(/<(ui-)?button\b/g) ?? []).length).toBe(buttons + 1)
+
+    // ... a click opens it at once;  while it's out, pointing at a group's button opens that one at once, gliding there
+    // from the `+`, as one sub-panel (T173):  the button and its panel's header one fill, the panel at the bar's edge,
+    // its top the button's
+    await page.locator(".PaletteRail .PaletteRailAdd").click()
+    await page.waitForTimeout(400)
+    expect(await everything.evaluate((panel) => (panel as HTMLElement & { visible?: boolean }).visible)).toBe(true)
+    await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Layout"] [part~=item]').hover()
+    await page.waitForTimeout(400)
+    const joined = await page.evaluate(() => {
+      const button = document.querySelector('.PaletteRail ui-item.PaletteRailButton[aria-label="Layout"]')!
+      const item = button.shadowRoot!.querySelector("[part~=item]")!
+      const popup = document.querySelector('ui-popup.PaletteFlyout[aria-label="Layout"]')!
+      const panel = popup.shadowRoot!.querySelector("[part~=popup]")!.getBoundingClientRect()
+      const head = popup.querySelector(".PaletteFlyoutHead")!
+      const rail = document.querySelector(".PaletteRail")!.getBoundingClientRect()
+      return {
+        open: [...document.querySelectorAll(".PaletteFlyout")].filter(
+          (each) => (each as HTMLElement & { visible?: boolean }).visible
+        ).length,
+        lit: button.classList.contains("open"),
+        oneFill: getComputedStyle(item).backgroundColor === getComputedStyle(head).backgroundColor,
+        atEdge: Math.round(panel.left) === Math.round(rail.right),
+        sameTop: Math.round(panel.top) === Math.round(item.getBoundingClientRect().top)
+      }
+    })
+    expect(joined).toEqual({ open: 1, lit: true, oneFill: true, atEdge: true, sameTop: true })
+    await page.keyboard.press("Escape")
     await page.waitForTimeout(600)
     expect(await flyoutsOpen()).toBe(0)
-    // ... picked up to place, as a starred one is;  put down again
-    await page.keyboard.press("Escape")
-    await page.waitForTimeout(400)
 
     // a family's parts inside its main one (T162):  Statistics and Value inside Statistic, found by a search too
     await page.locator('.PaletteRail ui-item.PaletteRailButton[aria-label="Data display"] [part~=item]').hover()

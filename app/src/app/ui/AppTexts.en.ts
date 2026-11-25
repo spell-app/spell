@@ -112,7 +112,6 @@ export const APP_TEXTS = {
   paletteHint: "Click or drag to add to the page",
   paletteMore: "{count} more",
   paletteAppViews: "App views",
-  paletteSearchAll: "Search everything you can add",
   paletteSearchIn: "Search {group}",
   paletteStar: "Click the star to keep {part} at the top of the add bar",
   paletteUnstar: "Take the star off {part}",
