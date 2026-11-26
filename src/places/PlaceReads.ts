@@ -21,6 +21,13 @@ import type { ListAnswer, ListQuery, PlaceRow } from "./places.types"
  * - One per `Places`.
  ****************/
 export class PlaceReads {
+  /** How far the saves have got, as a read is asked:  `Places.saveMark`. */
+  private readonly saveMark: () => number
+
+  constructor({ saveMark = () => 0 }: PlaceReadsProps = {}) {
+    this.saveMark = saveMark
+  }
+
   /** Joins different lists asked in the same moment into one request, if the place can. */
   private readonly batch = new PlaceBatch()
   /** Each read's answer, by what it asks. */
@@ -40,7 +47,10 @@ export class PlaceReads {
    * - `wasAlreadyAnswered`:  it joined a read that had finished, so its rows may be old.
    * - `ask.isFresh`:  a read that had finished asks the place again;  one under way is fresh enough.
    */
-  answerFor(reader: PlaceResult, ask: PlaceReadAsk): { answer: Promise<ListAnswer>; wasAlreadyAnswered: boolean } {
+  answerFor(
+    reader: PlaceResult,
+    ask: PlaceReadAsk
+  ): { answer: Promise<ListAnswer>; wasAlreadyAnswered: boolean; askedAt: number } {
     this.supersedeOlderThan(reader)
     this.leaveRead(reader)
 
@@ -57,7 +67,11 @@ export class PlaceReads {
     const wasAlreadyAnswered = !isUnderWay && !isFresh && this.answers.has(asked)
     const started = read
     const answer = this.answers.get(asked, () => this.start(started, query), { fresh: isFresh && !isUnderWay })
-    return { answer: LoadOnce.abortable(answer, signal), wasAlreadyAnswered }
+    return {
+      answer: LoadOnce.abortable(answer, signal),
+      wasAlreadyAnswered,
+      askedAt: started.askedAt ?? this.saveMark()
+    }
   }
 
   /** `reader` made these rows of its read's answer:  what's kept once that read is released. */
@@ -98,6 +112,13 @@ export class PlaceReads {
     }
   }
 
+  /** Forget what's kept of `placeName`'s released reads that `isOutOfDate` says no longer stand:  their next reader asks again. */
+  forgetReleased(placeName: string, isOutOfDate: (kept: ReleasedRead) => boolean): void {
+    for (const [asked, kept] of [...this.released]) {
+      if (kept.placeName === placeName && isOutOfDate(kept)) this.released.delete(asked)
+    }
+  }
+
   /** Everyone reading from `placeName` now:  including one whose last read failed, as it's still waiting for rows. */
   readersOf(placeName: string): PlaceResult[] {
     return [...this.readOfReader].filter(([, read]) => read.placeName === placeName).map(([reader]) => reader)
@@ -112,6 +133,7 @@ export class PlaceReads {
     const placeQuery = new PlaceQuery({ ...query, batch: this.batch })
     const controller = new AbortController()
     read.controller = controller
+    read.askedAt = this.saveMark()
     const answer = placeQuery.answer(controller.signal)
     const onSettled = () => {
       if (read.controller === controller) read.controller = undefined
@@ -148,9 +170,9 @@ export class PlaceReads {
   }
 
   /** Keep what `read` found, dropping the oldest past `RELEASED_KEPT`. */
-  private keepReleased({ asked, placeName, rows, answer }: SharedRead): void {
+  private keepReleased({ asked, placeName, rows, answer, askedAt = this.saveMark() }: SharedRead): void {
     if (!rows || !answer) return
-    this.released.set(asked, { placeName, rows, answer })
+    this.released.set(asked, { placeName, rows, answer, askedAt })
     for (const oldest of this.released.keys()) {
       if (this.released.size <= RELEASED_KEPT) break
       this.released.delete(oldest)
@@ -181,6 +203,8 @@ type SharedRead = {
   answer?: Omit<ListAnswer, "rows">
   /** The rows a reader last made of that answer. */
   rows?: PlaceRow[]
+  /** How far the saves had got as its request was asked:  `Places.saveMark`. */
+  askedAt?: number
 }
 
 /** What's kept of a read nobody's reading any more. */
@@ -191,6 +215,14 @@ export type ReleasedRead = {
   rows: PlaceRow[]
   /** What the place said with them. */
   answer: Omit<ListAnswer, "rows">
+  /** How far the saves had got as it was asked:  a save since outranks its rows. */
+  askedAt: number
+}
+
+/** Constructor props of `PlaceReads`. */
+export type PlaceReadsProps = {
+  /** How far the saves have got now:  `Places.saveMark`.  Left out:  no saves are known. */
+  saveMark?: () => number
 }
 
 /** What a reader asks of `PlaceReads.answerFor()`. */

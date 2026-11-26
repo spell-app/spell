@@ -13,7 +13,14 @@ import { PlaceCache } from "./PlaceCache"
 import { PlaceHeal } from "./PlaceHeal"
 import { PlaceReads } from "./PlaceReads"
 import { PlaceResult, type PlaceResultProps } from "./PlaceResult"
-import { PlaceError, writeAnswerFor, type Place, type PlaceRow, type WhyNotWritable } from "./places.types"
+import {
+  PlaceError,
+  writeAnswerFor,
+  type ListHandled,
+  type Place,
+  type PlaceRow,
+  type WhyNotWritable
+} from "./places.types"
 import type { TabLocks } from "./TabCopies"
 
 /****************
@@ -29,11 +36,13 @@ export class Places {
   /** The ONE cache of rows, so a thing read from two lists is one row. */
   readonly cache = new PlaceCache()
   /** The reads people are waiting on or looking at, so readers of one list share one request. */
-  readonly reads = new PlaceReads()
+  readonly reads = new PlaceReads({ saveMark: () => this.saveMark })
   /** Fetch the latest, replay what's pending:  how anything gets back in step with a place. */
   readonly heal = new PlaceHeal({ places: this })
   /** Each place, by its name. */
   private places = new Map<string, Place>()
+  /** How many saves any place has confirmed:  see `saveMark`. */
+  private savesConfirmed = 0
   /** Each place's changes not yet confirmed, by its name. */
   private pending = new Map<string, PendingChanges>()
   /** Who shows rows, told as they change under them. */
@@ -285,6 +294,29 @@ export class Places {
   }
 
   /**
+   * Hear each save a place confirmed, for what shows a list it works out itself (epic `data` P51, Q5):
+   * a list on screen it filtered, searched or sorted is asked again once, as the save may move it.
+   * - Returns what stops it.
+   */
+  onSaved(listener: (saved: PlaceSaved) => void): () => void {
+    this.savedListeners.add(listener)
+    return () => this.savedListeners.delete(listener)
+  }
+
+  /**
+   * A place confirmed a save:  `PendingChanges` calls it.
+   * - A list read from it that's off screen, which it worked out itself, is out of date:  a reader coming back asks again,
+   *   rather than starting from those rows (`PlaceReads.forgetReleased()`).
+   * - Then whoever's listening hears (`onSaved()`).
+   */
+  tellSaved(saved: PlaceSaved): void {
+    this.reads.forgetReleased(saved.placeName, ({ answer }) => isWorkedOut(answer.handled))
+    for (const listener of this.savedListeners) listener(saved)
+  }
+  /** Who hears a confirmed save. */
+  private readonly savedListeners = new Set<(saved: PlaceSaved) => void>()
+
+  /**
    * Hear each write a place refused:  the one event a notice is shown from, anywhere in the app.
    * - Hears at once any raised before anyone listened.
    * - Returns what stops it.
@@ -345,6 +377,19 @@ export class Places {
   ////////////////
 
   /**
+   * A mark of how far the saves have got, any place's:  a read takes it as it's asked, and a save confirmed after it
+   * outranks what that read answers (`PendingChanges.replayOn()`'s `askedAt`;  epic `data` I143).
+   */
+  get saveMark(): number {
+    return this.savesConfirmed
+  }
+
+  /** A save was confirmed:  its mark, which every read asked from now on has seen. */
+  markSaved(): number {
+    return ++this.savesConfirmed
+  }
+
+  /**
    * A new reader's result, not yet started:  `load()` it, and `leave()` it when nothing shows it any more.
    * - Readers of one collection and query share one request.
    * - That read was released not long ago:  it starts with those rows, `"from an earlier visit"`;  `reload()` asks again.
@@ -355,7 +400,7 @@ export class Places {
     return untrackCells(() => {
       const result = new PlaceResult(props, { places: this })
       const earlier = this.reads.releasedFor(props)
-      if (earlier) result.showFromEarlierVisit(earlier.rows, earlier.answer)
+      if (earlier) result.showFromEarlierVisit(earlier.rows, earlier.answer, earlier.askedAt)
       return result
     })
   }
@@ -439,6 +484,22 @@ export class Places {
     if (!names.size) return undefined
     return { workedOut: true, canWrite: false, readsFrom: [...names], ...(declaredAt && { declaredAt }) }
   }
+}
+
+/**
+ * Did the place work these rows out itself:  a filter, a search or a sort it did (`ListAnswer.handled`)?
+ * - Then only the place can say where a save moves them:  the engine's own filter and sort hold only for what it did here.
+ */
+export function isWorkedOut(handled: ListHandled | undefined): boolean {
+  return !!(handled?.filter || handled?.search || handled?.sort)
+}
+
+/** A save a place confirmed:  `Places.onSaved()`. */
+export type PlaceSaved = {
+  /** The place's name. */
+  placeName: string
+  /** The collections it changed. */
+  collections: readonly string[]
 }
 
 /** Has anything read one of `target`'s cells? */

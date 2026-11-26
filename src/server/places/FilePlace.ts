@@ -110,7 +110,7 @@ export class FilePlace implements Place {
   /** What changed in `collection` since `token`, a list's `version`. */
   async changesSince(collection: string, token: string, context: PlaceContext = {}): Promise<ChangesAnswer> {
     const { rows } = await this.list(collection, {}, context)
-    return this.events.changesSince(collection, token) ?? { rows, removed: [], token: this.events.version }
+    return this.events.changesSince(collection, token) ?? { rows, removed: [], token: this.events.version, startsOver: true }
   }
 
   /** Tell `onEvent` of each change to `target`, by this place or on the disk.  Returns what stops it. */

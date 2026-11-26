@@ -254,7 +254,7 @@ export class AirtablePlace extends WebPlace implements Place {
   /** What changed in `collection` since `token`, found by comparing what's there now.  - throws as `list()` */
   async changesSince(collection: string, token: string, context: PlaceContext): Promise<ChangesAnswer> {
     const { rows } = await this.list(collection, {}, context)
-    return this.events.changesSince(collection, token) ?? { rows, removed: [], token: this.events.version }
+    return this.events.changesSince(collection, token) ?? { rows, removed: [], token: this.events.version, startsOver: true }
   }
 
   /** Tell `onEvent` of each change to `target`:  all the watchers share one poll, on `every()`.  Returns what stops it. */

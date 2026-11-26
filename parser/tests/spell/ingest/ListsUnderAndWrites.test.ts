@@ -148,7 +148,7 @@ describe("writes", () => {
     expect(plain.description.canDo.write).toMatch(/never tried/i)
 
     const { ingest, asked } = ingestOf()
-    const { description } = await ingest.add({
+    const { description, spell } = await ingest.add({
       address: API,
       kind: "web server",
       into: "/Typicode.api.spell",
@@ -160,9 +160,64 @@ describe("writes", () => {
       `PATCH ${API}/posts/1`,
       `DELETE ${API}/posts/101`
     ])
-    expect(description.about.triesWrites).toBe(true)
+    // each write's state, the one record of it (epic `data` I108, I111)
+    const { operations } = description.collections.posts!
+    const at = "2026-11-04T12:00:00.000Z"
+    expect(operations).toEqual({
+      add: { method: "POST", at: "/posts", state: { is: "verified", at, status: 201, keeps: false } },
+      change: { method: "PATCH", at: "/posts/{id}", state: { is: "verified", at, status: 200 } },
+      delete: { method: "DELETE", at: "/posts/{id}", state: { is: "verified", at, status: 200 } }
+    })
+    expect(description.collections.comments!.operations).toBeUndefined()
     expect(description.canDo.write).toBe(
-      "Yes:  it took a write of each kind, tried on posts (adding 201, changing 200, deleting 200).  It answers as if saved, and keeps nothing:  what was added, as 101, wasn't there when read again."
+      "Yes:  it took a write of each kind, tried on posts (adding 201, changing 200, deleting 200).  It answers as if saved, and keeps nothing:  what was added wasn't there when read again."
     )
+    // no line says which:  every write is there
+    expect(spell).not.toContain("enabled operations")
+  })
+
+  test("tried on each list named (epic `data` I108), and again on those when it looks again", async () => {
+    const { ingest, asked } = ingestOf()
+    await ingest.add({
+      address: API,
+      kind: "web server",
+      into: "/Typicode.api.spell",
+      collections: COLLECTIONS,
+      triesWrites: ["comments", "users"]
+    })
+    const writes = () => asked.filter(({ method }) => method !== "GET").map(({ method, url }) => `${method} ${url}`)
+    expect(writes()).toEqual([
+      `POST ${API}/comments`,
+      `PATCH ${API}/comments/1`,
+      `DELETE ${API}/comments/101`,
+      `POST ${API}/users`,
+      `PATCH ${API}/users/1`,
+      `DELETE ${API}/users/101`
+    ])
+    asked.length = 0
+    const { description } = await ingest.update("/Typicode.api.spell")
+    expect(writes()).toEqual([
+      `POST ${API}/comments`,
+      `PATCH ${API}/comments/1`,
+      `DELETE ${API}/comments/101`,
+      `POST ${API}/users`,
+      `PATCH ${API}/users/1`,
+      `DELETE ${API}/users/101`
+    ])
+    expect(description.canDo.write).toMatch(/^Yes:  it took a write of each kind, tried on comments \(.*\);  users \(/)
+  })
+
+  test("a list it doesn't have is refused, before anything is written", async () => {
+    const { ingest, asked } = ingestOf()
+    await expect(
+      ingest.add({
+        address: API,
+        kind: "web server",
+        into: "/Typicode.api.spell",
+        collections: COLLECTIONS,
+        triesWrites: ["albums"]
+      })
+    ).rejects.toThrow(/--try-writes names albums, which isn't among its collections:  posts, comments, users/)
+    expect(asked.filter(({ method }) => method !== "GET")).toEqual([])
   })
 })

@@ -74,6 +74,7 @@ import {
   type SortField
 } from "spell/places/places.types"
 import type { PlaceRowsChange } from "spell/places/PendingChanges"
+import type { PlaceSaved } from "spell/places/Places"
 
 import { SORT_WAYS, compareSortKeys, declaredFieldNamed, isPageSort, type PageSort } from "./collection-other"
 import { core, declaredClasses, declaredClassNamed, isWhileReading, whileReading } from "./core"
@@ -301,6 +302,7 @@ class ProgramPlaces {
     this.places = new folder.Places({ ...(keepPendingAs !== undefined && { keepPendingAs }) })
     this.things = new PlaceThings({ places: this.places, classNamed: (name) => this.classNamed(name) })
     this.places.onRows((change) => this.rowsChanged(change))
+    this.places.onSaved((saved) => this.savedHere(saved))
     let restoredSignIn = false
     for (const [name, { details }] of this.declared) {
       // a file a person picks shows its line as the program starts:  "Open a file", "Reopen" (epic `editor` P41)
@@ -1104,6 +1106,11 @@ class ProgramPlaces {
     for (const read of this.reads.values()) read.rowsChanged(change)
   }
 
+  /** A save of this page's was confirmed:  each read of that place it works out itself, on screen, asks again once (Q5). */
+  private savedHere({ placeName }: PlaceSaved): void {
+    for (const read of this.reads.values()) read.afterSave(placeName)
+  }
+
   /** `thing` left its place:  every read of its type lets it go. */
   thingRemoved(thing: Thing): void {
     for (const read of this.reads.values()) read.thingRemoved(thing)
@@ -1236,8 +1243,8 @@ class SavedRead {
    * - NOT `isIdle`, which the next reader clears:  a read given up on, then asked again, isn't the first one's answer.
    */
   private timesLeft = 0
-  /** It's asking again for what it left out:  what that brings is nobody's change. */
-  private isAskingWhole = false
+  /** What it's asking brings nobody's change:  it's asking again for what it left out, or after this page's own save. */
+  private isQuiet = false
 
   constructor(
     private readonly program: ProgramPlaces,
@@ -1288,10 +1295,15 @@ class SavedRead {
       }))
   }
 
-  /** The next page's things join the list.  - throws what the read threw */
+  /**
+   * The next page's things join the list, each once:  a thing already in it (announced, then on that page) stays where it is
+   * (epic `data` I152).  - throws what the read threw
+   */
   private async readPage(): Promise<void> {
     const things = await this.pagesAfter(this.pagesRead + 1)
-    this.fill(this.inOrder([...(this.list.items as Thing[]), ...things]))
+    const held = this.list.items as Thing[]
+    const known = new Set(held)
+    this.fill(this.inOrder([...held, ...things.filter((thing) => !known.has(thing))]))
   }
 
   /** Is a read of it under way, or has it its answer, with someone holding it? */
@@ -1349,13 +1361,13 @@ class SavedRead {
     this.stopPolling?.()
     this.result = undefined
     this.answered = undefined
-    this.isAskingWhole = true
+    this.isQuiet = true
     try {
       await this.answer()
     } catch (ignored) {
       // what's showing stays, and the next read says what's wrong
     } finally {
-      this.isAskingWhole = false
+      this.isQuiet = false
       old?.leave()
     }
   }
@@ -1491,7 +1503,7 @@ class SavedRead {
    */
   private async withOtherPages(result: PlaceResult, pages: number): Promise<Thing[]> {
     this.program.noteUnclearNumbers(this.Class, result)
-    const things = this.program.thingsOf(result, { quietly: this.isAskingWhole })
+    const things = this.program.thingsOf(result, { quietly: this.isQuiet })
     this.nextPage = this.query.page?.size === undefined ? result.nextPage : undefined
     this.pagesRead = 1
     things.push(...(await this.pagesAfter(pages)))
@@ -1504,7 +1516,7 @@ class SavedRead {
     while (this.nextPage !== undefined && this.pagesRead < pages) {
       const more = this.program.newResult(this.Class, { ...this.query, page: { at: this.nextPage } })
       await more.load()
-      things.push(...this.program.thingsOf(more, { quietly: this.isAskingWhole }))
+      things.push(...this.program.thingsOf(more, { quietly: this.isQuiet }))
       this.nextPage = more.nextPage
       this.pagesRead++
       more.leave()
@@ -1541,11 +1553,32 @@ class SavedRead {
   }
 
   /**
+   * A save to `placeName`, from this page, was confirmed:  a list its place works out itself (a filter, a search or a sort it
+   * did, `isWorkedOut()`) asks again once, as only the place can say where the save moves it (epic `data` P51, Q5).
+   * - Only while something shows it:  one nobody holds reads again when it's next held, as any does (`start()`).
+   * - Saves in the same moment ask once.
+   * - What it brings is this page's own doing, never someone else's change.
+   */
+  afterSave(placeName: string): void {
+    if (this.isIdle || !this.isHeld || this.isRefreshingAfterSave || !this.result) return
+    const folder = this.program.folderNow
+    if (!folder?.isWorkedOut(this.result.handled) || this.program.placeFor(this.Class).name !== placeName) return
+    this.isRefreshingAfterSave = true
+    setTimeout(() => {
+      this.isRefreshingAfterSave = false
+      void this.refresh({ isOwnSave: true })
+    }, 0)
+  }
+  /** A save's asking again is on its way:  `afterSave()`. */
+  private isRefreshingAfterSave = false
+
+  /**
    * Ask again.
    * - What failed tries again;  what's showing stays until the answer.
+   * - `isOwnSave`:  asked because of this page's own save, so what came or went is nobody else's doing.
    * - NEVER throws.
    */
-  async refresh(): Promise<void> {
+  async refresh({ isOwnSave = false }: { isOwnSave?: boolean } = {}): Promise<void> {
     const { result } = this
     if (!result) {
       // the first read failed:  a new one
@@ -1553,17 +1586,20 @@ class SavedRead {
       this.changes.changed()
       return
     }
+    if (isOwnSave) this.isQuiet = true
     try {
       await (this.answered = result.reload().then(() => undefined))
       const before = new Set(this.list.items as Thing[])
       const pages = this.readsPagesWhenDrawn ? this.pagesRead : Infinity
       const things = this.inOrder(await this.withOtherPages(result, pages))
-      this.noteJoinedAndLeft(before, things)
+      if (!isOwnSave) this.noteJoinedAndLeft(before, things)
       this.fill(things)
     } catch (ignored) {
       // what's showing stays, on a read that had an answer;  with none, the next read says what's wrong
       if (!this.list.items.length) this.changes.changed()
       else this.answered = Promise.resolve()
+    } finally {
+      if (isOwnSave) this.isQuiet = false
     }
   }
 
@@ -1597,16 +1633,22 @@ class SavedRead {
   }
 
   /**
-   * Does `fields` belong in this read?  Only its filter says:  a filter it can't see goes on the list after it.
+   * Does `fields` belong in this read?  Its filter, its search and its ids say:  a filter it can't see goes on the list after it.
    * - A field a row doesn't name can't say no:  a thing known already stays, until a row says it no longer fits.
    * - A list under one thing (`ListQuery.under`, a post's comments) takes only what it was answered with:
    *   nothing says which thing a new one is under, so it joins none of them (epic `data` P30).
+   * - A list of chosen ids takes only those;  a search, only a row holding its text, as the place's own search finds it
+   *   (`rowsHolding()`), so someone else's change lands only where it belongs (epic `data` I151).
    */
-  private takes(fields: PlaceRow, { isKnown = false }: { isKnown?: boolean } = {}): boolean {
-    if (this.query.under !== undefined && !isKnown) return false
+  private takes(fields: PlaceRow, { id, isKnown = false }: { id?: unknown; isKnown?: boolean } = {}): boolean {
+    const { under, ids, search, filter = {} } = this.query
+    if (under !== undefined && !isKnown) return false
+    if (ids && !ids.includes(String(id as string | number))) return false
+    const folder = this.program.folderNow
+    if (search && !isKnown && folder && !folder.rowsHolding([fields], search).length) return false
     // as the place's own filter does:  a sheet's "true" is yes, its empty cell no (`holdsFilterValue()`)
-    const holds = this.program.folderNow?.holdsFilterValue ?? ((held: unknown, value: unknown) => held === value)
-    return Object.entries(this.query.filter ?? {}).every(
+    const holds = folder?.holdsFilterValue ?? ((held: unknown, value: unknown) => held === value)
+    return Object.entries(filter).every(
       ([field, value]) => holds(fields[field], value) || (isKnown && !(field in fields))
     )
   }
@@ -1620,7 +1662,7 @@ class SavedRead {
     for (const row of rows) {
       if (row[idField] === undefined) continue
       const isKnown = kept.some((thing) => thing.id === row[idField])
-      if (!this.takes(row, { isKnown })) {
+      if (!this.takes(row, { id: row[idField], isKnown })) {
         const thing = kept.find((each) => each.id === row[idField])
         if (thing) left.add(thing)
         continue
@@ -1641,7 +1683,7 @@ class SavedRead {
   thingAdded(thing: Thing): void {
     if (!(thing instanceof this.Class) || this.list.items.includes(thing)) return
     const fields = thing as unknown as PlaceRow
-    if (this.takes(fields)) this.fill(this.inOrder([...(this.list.items as Thing[]), thing]))
+    if (this.takes(fields, { id: thing.id })) this.fill(this.inOrder([...(this.list.items as Thing[]), thing]))
   }
 
   /** `things`, in the order the query asks for. */

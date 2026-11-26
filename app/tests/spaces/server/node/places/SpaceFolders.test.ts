@@ -346,6 +346,27 @@ describe("SpaceFolders, a live room (epic `atmosphere` T38, from I8)", () => {
     expect(await joins("dee@spell")).toBe("refused")
     expect(await joins("cy@spell")).toBe("open")
   })
+
+  test("someone taken off the list stops hearing the room:  their connection closes, and they can't come back (I153)", async () => {
+    const GARDEN = "owen@spell/patch"
+    await folderAt(GARDEN).call(SPACE_MEMBER_OPERATIONS.add, { person: "matt@spell", role: "member" }, {})
+    const url = `ws://127.0.0.1:${port}${SPACE_ROOMS_PREFIX}/${GARDEN}/recipes?as=matt@spell`
+    const socket = new WebSocket(url, [`spell-token.${TOKEN}`])
+    await new Promise((resolve, reject) => {
+      socket.addEventListener("open", resolve)
+      socket.addEventListener("error", reject)
+    })
+    const closed = new Promise((resolve) => socket.addEventListener("close", resolve))
+    await folderAt(GARDEN).call(SPACE_MEMBER_OPERATIONS.remove, { person: "matt@spell" }, {})
+    await closed
+    const again = new WebSocket(url, [`spell-token.${TOKEN}`])
+    expect(
+      await new Promise((resolve) => {
+        again.addEventListener("open", () => (again.close(), resolve("open")))
+        again.addEventListener("error", () => resolve("refused"))
+      })
+    ).toBe("refused")
+  })
 })
 
 describe("SpaceFolders, a program's own data:  each row its maker's (epic `atmosphere` P1)", () => {

@@ -1180,7 +1180,7 @@ spell place update StarWars.api.spell
 | `--collections <paths>` | its collections' paths, comma-separated, for a source that doesn't list them.  `name=path` names one;  a name in braces is found by name, with no list (`"wiki pages=/page/summary/{name}"`);  one asked with a search is searched (`"books=/search.json?q=dune"`) |
 | `--samples <names>` | names to read a collection found by name by:  `Tatooine,Hoth`;  `name=sample` for one collection's own (`authors=OL79034A`) |
 | `--pictures <fields>` | fields holding a picture's id on another server, each `field=address` with braces where the id goes:  `"cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"`;  it checks one real picture first |
-| `--try-writes` | tries one add, change and delete, and says what each answered and whether the server keeps them:  only for a server that keeps nothing (JSONPlaceholder) or one you don't mind writing to |
+| `--try-writes [lists]` | tries one add, change and delete, on its first list or on each list named (`posts,comments`), and says what each answered and whether the server keeps them;  each write's state goes in its description:  only for a server that keeps nothing (JSONPlaceholder) or one you don't mind writing to |
 | `--no-ai` | asks no agent:  only what can be worked out from what comes back |
 
 `spell place update <file>` looks again at the place described beside the file:
