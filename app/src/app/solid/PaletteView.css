@@ -75,48 +75,37 @@
 }
 
 /*
- * The add bar's SUB-PANELS:  a group's (`<RailFlyout>`) and the whole add panel (`<PlusPanel>`), epic `editor` T173, T174.
+ * The add bar's SUB-PANELS:  a group's (`<RailFlyout>`), the whole add panel (`<PlusPanel>`) and a starred part's
+ * (`<FavoriteButton>`), epic `editor` T173, T174, T183.
  * - Each slides out of the bar from behind its edge, left to right:  it moves in as far as it's cut at the bar's edge,
  *   so its left edge never moves (`translate` and `clip-path` together, in one ease);  back the same way as it goes.
- * - It wears the bar's own surface, a panel's, not a popup's (`--PaletteRail-surface`):
- *   the panel's glass over the page's wallpaper, painted again under it, as the bar shows it;
- *   so it reads as the bar over an app of any colour (a blur of the app showed it through, green under Solitaire)
- * - Its button and its header row share one fill, `--PaletteRail-head-fill` (the add panel's topic bands, `Palette.css`), joined
- *   into one shape like a tab:  the panel starts at the bar's edge, its top at its button's, its top-left corner
- *   square, its shadow cut on that side;  the button's fill runs on over the 4px to the bar's edge.
+ * - It wears the top bar's menus' look (I367, Owen:  "This sidebar and menu should have the same color/appearance as
+ *   the spell menubar"):  their fill, edge, shadow, corners and blur, `BarMenuPopup`'s (`MenuBar.css`);  no arrow.
+ * - Its header row has the add panel's topic band fill (`--PaletteRail-head-fill`, `Palette.css`);  its button is lit
+ *   while it's out, with nothing joining the two (I367:  "Menu doesn't need the caret pointing to the sidebar").
  * - One opening where another was (`RailPanels`) glides there from it, up or down, as if the bar moved:  `.gliding`;
- *   the one it replaces goes at once (`.switching`).
+ *   its height grows or shrinks with it (I365);  the one it replaces goes at once (`.switching`).
  * - Reduced motion:  none of that moves.
  * - Restyled through its `popup` part, outside it:  a page's `::part()` rules beat the popup's own sheet.
  */
 :root {
-  --PaletteRail-surface:
-    linear-gradient(var(--spell-panel-wash, transparent), var(--spell-panel-wash, transparent)),
-    linear-gradient(var(--spell-pane-background, var(--ui-surface)), var(--spell-pane-background, var(--ui-surface))),
-    var(--ui-bar-wallpaper, linear-gradient(transparent, transparent)),
-    var(--ui-bar-wallpaper-color, var(--ui-background));
   /* how far the panel's shadow reaches past its sides, kept by its cut */
   --PaletteRail-shadow-room: 48px;
+}
+/* ... its shadow on its left too:  the `+` panel's is cut, as it touches the bar (I369) */
+ui-popup.PaletteFlyout {
+  --PaletteFlyout-cut-left: calc(var(--PaletteRail-shadow-room) * -1);
 }
 ui-popup.BarMenuPopup.PaletteFlyout::part(popup) {
   /* at the bar's edge, its top its button's:  no gap for an arrow */
   margin: 0 0 0 4px;
   padding: 0 0 4px 0;
-  border: 0;
-  border-radius: 0 var(--spell-pane-radius, 8px) var(--spell-pane-radius, 8px) var(--spell-pane-radius, 8px);
-  background: var(--PaletteRail-surface);
-  /* the wallpaper where the page has it, as the bar sees it */
-  background-attachment: fixed;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  box-shadow: var(--spell-pane-shadow, var(--ui-shadow-raised));
   opacity: 1;
   transform: none;
   translate: 0 0;
-  /* its shadow cut on its left, where it joins the bar */
   clip-path: inset(
     calc(var(--PaletteRail-shadow-room) * -1) calc(var(--PaletteRail-shadow-room) * -1)
-      calc(var(--PaletteRail-shadow-room) * -1) 0
+      calc(var(--PaletteRail-shadow-room) * -1) var(--PaletteFlyout-cut-left)
   );
   transition:
     translate var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out),
@@ -143,7 +132,7 @@ ui-popup.BarMenuPopup.PaletteFlyout:not(:popover-open)::part(popup) {
     translate: 0 var(--PaletteFlyout-glide, 0px);
     clip-path: inset(
       calc(var(--PaletteRail-shadow-room) * -1) calc(var(--PaletteRail-shadow-room) * -1)
-        calc(var(--PaletteRail-shadow-room) * -1) 0
+        calc(var(--PaletteRail-shadow-room) * -1) var(--PaletteFlyout-cut-left)
     );
   }
 }
@@ -160,18 +149,26 @@ ui-popup.BarMenuPopup.PaletteFlyout.switching::part(popup) {
   }
 }
 
-/* its foot, over the rows scrolled under it:  the same surface */
-ui-popup.PaletteFlyout .PaletteFlyoutFoot {
-  background: var(--PaletteRail-surface);
-  background-attachment: fixed;
+/* the add bar itself:  the top bar's fill and blur, over the page, as a panel's bar and the code's file tabs are
+   (I367;  `--spell-menu-bar-fill`, `-filter`, `spell.css`), not a panel's glass */
+.PaletteRailPlace > .SplitPane.PaletteRail::before,
+:root[data-spell-theme] .PaletteRailPlace > .SplitPane.PaletteRail::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--spell-menu-bar-fill);
+  -webkit-backdrop-filter: var(--spell-menu-bar-filter);
+  backdrop-filter: var(--spell-menu-bar-filter);
+  pointer-events: none;
 }
 
-/* the button whose panel is out:  the fill of the panel's header, running on to the bar's edge, its left corners round */
+/* the button whose panel is out:  lit with the panel's header's fill */
 .PaletteRail ui-item.PaletteRailButton.open::part(item),
 .PaletteRail .PaletteRailAdd.open {
-  border-radius: var(--ui-radius-sm, 6px) 0 0 var(--ui-radius-sm, 6px);
+  border-radius: var(--ui-radius-sm, 6px);
   background: var(--PaletteRail-head-fill);
-  box-shadow: 4px 0 0 var(--PaletteRail-head-fill);
   color: var(--ui-text-color);
 }
 
@@ -182,8 +179,19 @@ ui-popup.PaletteFlyout .PaletteFlyoutFoot {
 ui-popup.BarMenuPopup.PalettePlus::part(popup) {
   width: auto;
   max-height: none;
-  overflow: visible;
+  /* what's past its box while it glides to a new size is cut */
+  overflow: hidden;
   padding: 0;
+  /* touching the bar, its top-left corner square, as the bar's top-right is while it's out:  no gap between (I369) */
+  margin: 0;
+  border-start-start-radius: 0;
+}
+ui-popup.PalettePlus {
+  --PaletteFlyout-cut-left: 0px;
+}
+.PaletteRailPlace:has(.PaletteRailAdd.open) > .SplitPane.PaletteRail,
+:root[data-spell-theme] .PaletteRailPlace:has(.PaletteRailAdd.open) > .SplitPane.PaletteRail {
+  border-start-end-radius: 0;
 }
 ui-popup.PalettePlus {
   /* from 1400px wide, the room beside the bar takes 7 columns, as the dialog's widest does:
@@ -195,6 +203,9 @@ ui-popup.PalettePlus {
 .PalettePlus {
   & .PaletteBody {
     gap: 0;
+    /* as wide as its topics need, a 165px column each, 12px apart, and its 12px sides;  at most the palette's width,
+       at least room for its search (I369) */
+    width: max(440px, min(var(--palette-width), calc(var(--PaletteMenu-topics, 7) * 177px + 12px)));
     /* the `+`'s top, under the top bar, and 8px below */
     max-height: calc(100dvh - 56px);
   }
@@ -202,7 +213,6 @@ ui-popup.PalettePlus {
     box-sizing: border-box;
     height: 32px;
     padding: 0 4px 0 12px;
-    border-start-end-radius: var(--spell-pane-radius, 8px);
     background: var(--PaletteRail-head-fill);
   }
   & .PaletteSearch {
@@ -219,4 +229,37 @@ ui-popup.PalettePlus {
   &:focus-visible {
     color: var(--ui-text-color);
   }
+}
+
+/*
+ * A starred part's sub-panel (`<FavoriteButton>`, T183):  one row, its button's height, on its button's fill,
+ * "Add [icon] Text", as wide as its words;  a click picks the part up
+ */
+ui-popup.BarMenuPopup.PaletteFavoritePanel::part(popup) {
+  width: max-content;
+  padding: 0;
+}
+ui-popup.PaletteFavoritePanel ui-button.PaletteFavoriteAdd {
+  display: block;
+}
+ui-popup.PaletteFavoritePanel ui-button.PaletteFavoriteAdd::part(button) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  height: 32px;
+  min-height: 0;
+  margin: 0;
+  padding: 0 12px 0 8px;
+  border: 0;
+  border-radius: 0;
+  background: var(--PaletteRail-head-fill);
+  box-shadow: none;
+  color: var(--ui-text-color);
+  font-weight: var(--ui-font-weight-normal, 400);
+  white-space: nowrap;
+}
+ui-popup.PaletteFavoritePanel ui-button.PaletteFavoriteAdd:hover::part(button),
+ui-popup.PaletteFavoritePanel ui-button.PaletteFavoriteAdd:focus-visible::part(button) {
+  background: color-mix(in oklab, var(--ui-text-color) 12%, transparent);
 }

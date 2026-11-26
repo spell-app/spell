@@ -72,6 +72,17 @@ describe("Alignment", () => {
     expect(findings[0].offset).toBeCloseTo(-6, 0)
   })
 
+  test("words clamped to two lines are measured to the second line's baseline, not past it", () => {
+    // a tile beside a title and a description cut to two lines:  the words' capitals to baseline centred on the tile
+    const words =
+      `<span style="display: flex; flex-direction: column; font: 13px/18px sans-serif">` +
+      `<span>Title</span>` +
+      `<span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">` +
+      `${"many words ".repeat(40)}</span></span>`
+    Fixture.render(row(pill("T", "height: 40px") + words, "height: 80px; width: 240px"))
+    expect(scanFixture()).toEqual([])
+  })
+
   test("looks inside shadow roots and slots", () => {
     const host = Fixture.render(`<div id="host">${pill("slotted", "position: relative; top: 3px")}</div>`)
     host.attachShadow({ mode: "open" }).innerHTML = row(pill("own") + "<slot></slot>")

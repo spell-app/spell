@@ -75,6 +75,29 @@ test("look:  a Send leaves the session ONE note, its line;  taken, the same batc
   expect(notes.take("s1")).toBeUndefined()
 })
 
+test.each([
+  ["idle", "wakeQuietChat"],
+  ["busy", "passSendToBusy"]
+])("look:  a %s session's switch off in Bells & Whistles (%s):  no note, the Send waits", (status, key) => {
+  writeFileSync(
+    join(home, "sessions", `${process.pid}.json`),
+    JSON.stringify({ pid: process.pid, sessionId: "s1", cwd: root, name: "🚧 x", nameSource: "hook", status })
+  )
+  const asked: string[] = []
+  const each = new InboxHub({
+    sessions: new Sessions({ home }),
+    notes,
+    hearsHub: () => true,
+    now: () => clock,
+    isOn: (step) => (asked.push(step), step !== key)
+  })
+  look(each)
+  ReviewInbox.update(inboxFile, (box) => box.markSent())
+  look(each)
+  expect(asked).toContain(key)
+  expect(notes.take("s1")).toBeUndefined()
+})
+
 test("look:  the session took the work (its `wait --timeout 5`):  the note goes", () => {
   const each = hub()
   look(each)

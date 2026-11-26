@@ -45,6 +45,10 @@ To change one for yourself, write only that key:
 ```
 
 - `epic settings` prints each value and which file set it;  `epic settings <key>` one value;  `--json` for a script.
+- `epic settings <key> <value>` sets one in your own file.
+- Bells & Whistles, the epic page's gear:  an on / off switch for each step epic work runs by itself (reviews,
+  quick reads, test runs, doc rewrites), and a Token burn slider.  `epic settings bells` lists them;
+  `epic settings bells.designReview off` turns one off;  `epic settings bells.burn low` moves the slider.
 - A file that won't read, or a bad value in one, is said on stderr, and the layer below stands.
 
 | Key | Default | What it sets |

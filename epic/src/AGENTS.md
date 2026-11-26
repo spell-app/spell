@@ -413,6 +413,17 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - never throws:  a file that won't read or a bad value is logged once, and the layer below stands
       - `epic settings [<key>] [--json]`:  what's in force and which file set it
       - first key:  `away.finishedPhaseDays`, read by `PlanDocFiles.edit()` for "0. While you were out"
+      - ONE writer, `set()` / `setMany()` (epic `epic-engine` P86):  the developer's file only, under its lock
+        (`SRV.FileLock`), refusing a value of the wrong type;  `epic settings <key> <value>` (`Settings`) and the page
+        server's `/api/epics/settings` call it;  `$SPELL_SETTINGS_HOME` moves `~/.spell` (the tests' scratch one)
+      - BELLS & WHISTLES (P86), its `bells` group:  a switch per step epic work runs by itself, `bells.burn` (the Token
+        burn slider:  low, medium, high) and `bells.burnFlips` (switches flipped while it's down, a map);  the steps,
+        their groups, costs and importances are ONE table, `BellSteps` (`spell/epic/bells`, pure), with the one rule
+        (`BellSteps.stateOf()`);  `Bells` (`spell/epic/config/Bells`) reads it for node:  `Bells.isOn(key)` in each
+        step's own skip check (`TitleReader`'s `defaultSkipReason()`, `PromptAck`, `FreshHint`, `InboxHub`,
+        `ReviewStart`, `TurnEnd`, `MainMerge.renameOldNames()`, `CheckoutServers.atSessionStart()`, the behind-main
+        hook), `Bells.offLine(key)` the one line a skipped step leaves;  the skills ask `epic settings bells.<key>`
+        (the epic skill's "Bells & Whistles");  `epic skills check` fails a step nothing reads
     - `EpicHome` (epic `epic-friend` P1):  the epic tools' own folder, the ONE reader of where it is:
       `$SPELL_EPIC_HOME` (tests set it), else `~/.spell-epic`;  `folder()`, `subfolder(name)`
       - and who is at the keyboard:  `person()`, their SHORT NAME, kept in its `person.json5`, else their GitHub
@@ -610,7 +621,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - the hook:  [prompt-gate.mjs](../hooks/prompt-gate.mjs)
     - `PromptAck`:  the "On it:  ..." line that hook shows for a message sent while the session is busy, its summary
       Haiku's (`claude -p`, hooks off);  every prompt logged to `epic-prompts.log` in the checkout's git folder;
-      `promptAck` in the config turns it off (epic `epic-engine` P18)
+      Bells & Whistles' `bells.promptAck` turns it off (epic `epic-engine` P86;  the config's old `promptAck` still read)
       - plain `node` loads it by path, with `command.types.ts`
     - `VoiceCheck`:  `epic voice check`, a FRESH reader (`claude -p`, Sonnet, its own system prompt, no tools, MCP,
       skills, settings, hooks or session, run from the temp folder) checks a text against a voice, novice by default,
@@ -1615,6 +1626,12 @@ In `tools/`:
             run epic tidy"):  asks the epic's session to run `/epic tidy <epic>`, as the pill asks for a review
             (`ReviewClient.startReview("tidy")`), the notice saying what came of it;  its tooltip on its words, not the
             row (the menu focuses its first row as it opens);  not on a saga page
+          - last, BELLS & WHISTLES (epic `epic-engine` P86):  `<epic-bells>`, a `<ui-modal size="small">` drawn in the
+            page's shadow root, as Focus mode is:  the Token burn slider (`<ui-slider>`, Low / Medium / High, a
+            "Custom" label once a switch is flipped below High), then a section per group, each step's row a
+            `<ui-checkbox appearance="toggle">`, its bold title, one sentence and its cost (`<ui-label>`);  a DRAFT until
+            Save (`POST /api/epics/settings`, `ServerLink`), its ×, Escape and Cancel drop it;  Auto Send's row is the
+            page's own choice (`SendCountdown`);  [check-bells.mjs](demo/check-bells.mjs) checks it headless
           - then FOCUS MODE (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly
             walk through the open issues/questions/etc in a plan"):  `<epic-focus>`, drawn in the page's shadow root,
             never written in a page;  its Epic UI page, `/components/epics/epic-focus`

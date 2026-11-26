@@ -8,6 +8,7 @@ import { suggest } from "spell/util/string"
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
 import { EpicCheckout } from "spell/epic/command/EpicCheckout"
+import { Settings } from "spell/epic/command/Settings"
 import { EpicGuide } from "spell/epic/command/EpicGuide"
 import { EXIT, EpicCommandError, flagName } from "spell/epic/command/command.types"
 import { EpicTools, type EpicToolName } from "spell/epic/command/EpicTools"
@@ -34,7 +35,6 @@ import { VoiceCheck } from "spell/epic/command/VoiceCheck"
 import { Worktrees } from "spell/epic/command/Worktrees"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
-import { LayeredSettings } from "spell/epic/config/LayeredSettings"
 
 import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicGroups"
 
@@ -755,8 +755,11 @@ export class EpicProgram {
       .addHelpText("after", CONFIG_HELP)
 
     this.verb(epic.command("settings"), (args) => EpicProgram.settings(args))
-      .description("how the epic tooling behaves for you (epic_settings.json5):  each value and which file set it")
-      .usage("[<key>] [--json]")
+      .description(
+        "how the epic tooling behaves for you (epic_settings.json5):  each value and which file set it;  set one in your " +
+          "own file;  bells:  Bells & Whistles' steps, on or off now"
+      )
+      .usage("[<key> [<value>]] [--json]")
       .addHelpText("after", SETTINGS_HELP)
 
     this.verb(epic.command("voice"), (args) => EpicProgram.voice(args))
@@ -984,41 +987,9 @@ export class EpicProgram {
     return EXIT.OK
   }
 
-  /**
-   * `epic settings [<key>] [--json]`:  how the epic tooling behaves for you, its three layers merged
-   * (`LayeredSettings`, epic `epic-engine` I235).
-   * - `<key>`:  that value alone (`epic settings away.finishedPhaseDays`), for a skill
-   * - no key:  each value with the layer that set it, then the layers' files and what was wrong with them;
-   *   `--json`:  all of it
-   * - Returns 0.
-   * - Throws `EpicCommandError`:  exit 2 for an unknown key, listing the keys
-   * - static:  needs no tree
-   */
+  /** `epic settings [<key> [<value>]] [--json]`:  `Settings.run()` (epic `epic-engine` I235, P86). */
   static async settings(args: string[]): Promise<number> {
-    const json = args.includes("--json")
-    const [key] = args.filter((arg) => !arg.startsWith("--"))
-    const settings = LayeredSettings.read(EpicConfig.of(EpicCheckout.nearest({ marker: ".git" })).contentFolder)
-    const { entries, layers } = settings
-    if (key !== undefined) {
-      const entry = entries.find((each) => each.key === key)
-      if (!entry)
-        throw new EpicCommandError(
-          `epic settings ${key}?  no such key.  The keys:  ${entries.map((each) => each.key).join(", ")}`
-        )
-      process.stdout.write(json ? `${JSON.stringify(entry.value)}\n` : `${entry.value}\n`)
-      return EXIT.OK
-    }
-    if (json) {
-      process.stdout.write(`${JSON.stringify({ values: settings.values, entries, layers }, null, 2)}\n`)
-      return EXIT.OK
-    }
-    const lines = entries.map(({ key: name, value, source }) => `${name}:  ${value}  (${source})`)
-    for (const { name, file, found, problems } of layers) {
-      lines.push(`${name}:  ${file}${found ? "" : "  (none)"}`)
-      lines.push(...problems.map((problem) => `  ${problem}`))
-    }
-    process.stdout.write(`${lines.join("\n")}\n`)
-    return EXIT.OK
+    return Settings.run(args)
   }
 
   /**
@@ -1289,9 +1260,20 @@ Three files of the same name and shape, epic_settings.json5, merged key by key, 
 A file that won't read, or a bad value in one, is said on stderr, and the layer below stands.
 Where a repo keeps things is .epic/config.json5 (epic config), the same for everyone.
 
+<key> <value> sets it in YOUR file (~/.spell/epic_settings.json5), refusing a value of the wrong type.
+Bells & Whistles (the epic page's gear):  the steps epic work runs by itself, each with its own switch, and the
+Token burn slider (low, medium, high) that holds the costly ones off for now.
+  bells              every step, its cost, and whether it runs now (and why not)
+  bells.<key>        on, or off and why:  what a skill asks before the step
+  bells.<key> on|off your own switch;  while the slider is down, a flip for now (the slider reads custom)
+  bells.burn <level> the slider;  moving it clears the flips
+
 Examples:
   epic settings
   epic settings away.finishedPhaseDays
+  epic settings bells
+  epic settings bells.designReview off
+  epic settings bells.burn low
   epic settings --json`
 
 /** After `epic voice --help`. */

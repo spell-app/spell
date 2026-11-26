@@ -30,7 +30,7 @@ export class ItemJudge {
     this.ask = ask ?? claudeJudge
     this.model = model
     // a judge handed in always runs
-    this.skipReason = skipReason ?? (ask ? () => undefined : defaultSkipReason)
+    this.skipReason = skipReason ?? (ask ? () => undefined : () => defaultSkipReason("itemScoring"))
   }
 
   /**

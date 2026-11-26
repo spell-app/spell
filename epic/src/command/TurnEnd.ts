@@ -2,6 +2,7 @@ import { spawn, spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, openSync, statSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
+import { Bells } from "spell/epic/config/Bells.ts"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
@@ -50,11 +51,14 @@ export class TurnEnd {
    * End the turn:  commit the shared plans, and sync them (`Shared.sync()`).
    * - `lines`:  what to say;  none when nothing was committed and the sync found nothing to do
    * - in a repo not set up for epics, or with no epic repo yet:  nothing at all
+   * - Save the epic pages off in Bells & Whistles (`bells.savePages`, epic `epic-engine` P86):  one line saying so
    * - SIDE EFFECT:  git commits in the epic repo;  with `contentRemote`, a pull and a push
    */
   async end({ session }: { session?: string } = {}): Promise<TurnEndReport> {
     const dir = TurnEnd.contentRepoOf(this.checkout)
     if (!dir) return { commits: [], lines: [] }
+    if (!Bells.isOn("savePages", { cwd: this.checkout, content: dir }))
+      return { commits: [], lines: [Bells.offLine("savePages")] }
     const tidied = this.tidy(dir)
     const { Shared, syncLines } = await import("./Shared")
     const { commits, sync } = await new Shared({ checkout: this.checkout }).sync({ session, checkout: this.checkout })

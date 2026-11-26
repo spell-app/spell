@@ -389,6 +389,14 @@
   .ui.section > .title > .heading > .toggle > .fold.icon:dir(rtl) {
     rotate: calc(-1 * var(--_ui-section-fold-icon-rotate));
   }
+  /*
+   * The chevron's lines sit 1/16 of its box below the box's middle (Font Awesome's `chevron-down`):
+   * lifted back, so it lines up with the title's words, open or folded (I458).
+   */
+  .ui.section > .title > .heading > .toggle > .fold.icon svg,
+  .ui.section > .title > .fold.icon svg {
+    translate: 0 calc(var(--_ui-section-fold-icon-size) * -0.0625);
+  }
   .ui.section > .title > .heading > .toggle > .fold.icon svg {
     width: 100%;
     height: 100%;

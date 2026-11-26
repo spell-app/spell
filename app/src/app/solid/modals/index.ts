@@ -7,6 +7,7 @@
  * - `VersionsBox.tsx`:  `openVersions()`, the project menu's Versions, drawn by the editor's Spell (epic `editor` I115).
  * - `AppSnapshot.tsx`:  `openAppSnapshot()`, a project's card picture from its app as the person sets it up (epic `mockup` T47).
  * - `ShortcutsDialog.tsx`:  `openShortcuts()`, Help › Keyboard Shortcuts:  every key of `EDITOR_HOTKEYS` (epic `editor` P36).
+ * - `ServersDialog.tsx`:  `openServers()`, Help › Servers:  the server keeper's Servers page, framed (epic `editor` T185).
  * - `YouPanel.tsx`:  `openYouPanel()`;  `PublishClash.tsx`:  `openPublishClash()`.
  * - `modals.types.ts`:  their props (`AlertModalProps` ...), which `Actions`' `DialogActionProps` take too.
  * - A CHUNK PER DIALOG (epic `solid-2-final` P11):  each function here imports its dialog's file the first time it's
@@ -21,6 +22,7 @@ import type * as Chooser from "./Chooser"
 import type * as Dialogs from "./dialogs"
 import type * as PublishClash from "./PublishClash"
 import type * as ShortcutsDialog from "./ShortcutsDialog"
+import type * as ServersDialog from "./ServersDialog"
 import type * as VersionsBox from "./VersionsBox"
 import type * as YouPanel from "./YouPanel"
 
@@ -32,6 +34,7 @@ export type * from "./PublishClash"
 export type * from "./VersionsBox"
 export type * from "./AppSnapshot"
 export type * from "./ShortcutsDialog"
+export type * from "./ServersDialog"
 
 export const alert = onFirstUse(() => import("./dialogs"), "alert")
 export const confirm = onFirstUse(() => import("./dialogs"), "confirm")
@@ -46,6 +49,7 @@ export const openPublishClash = onFirstUse(() => import("./PublishClash"), "open
 export const openVersions = onFirstUse(() => import("./VersionsBox"), "openVersions")
 export const openAppSnapshot = onFirstUse(() => import("./AppSnapshot"), "openAppSnapshot")
 export const openShortcuts = onFirstUse(() => import("./ShortcutsDialog"), "openShortcuts")
+export const openServers = onFirstUse(() => import("./ServersDialog"), "openServers")
 
 /** The dialogs' modules, as `onFirstUse()` loads them:  for its types alone. */
 type DialogModules =
@@ -57,6 +61,7 @@ type DialogModules =
   | typeof VersionsBox
   | typeof AppSnapshot
   | typeof ShortcutsDialog
+  | typeof ServersDialog
 
 /**
  * Function `name` of the module `load()` imports, imported on its first call:  the same function, answering the same

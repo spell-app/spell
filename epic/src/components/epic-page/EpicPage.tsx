@@ -839,6 +839,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         <Show when={this.seeAlso.length}>{this.seeAlsoBox()}</Show>
         <slot />
         <Show when={this.review.reviewing()}>{this.focusMode()}</Show>
+        <epic-bells ref={(element: HTMLElement) => (this.bellsElement = element)} part={this.partForName("bells")} />
       </div>
     )
   }
@@ -1305,6 +1306,18 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
               </Show>
               {this.gearRow("autoSend", this.translationForKey("autoSend"), this.autoSendWords(this.autoSend))}
               {this.gearRow("theme", this.translationForKey("theme"), this.themeTitle)}
+              <button
+                type="button"
+                class={[GEAR_ROW, "bells-row"]}
+                part={this.partForName("gear-row")}
+                role="menuitem"
+                value={BELLS_ROW}
+                tabindex="-1"
+                onClick={() => this.openBells()}
+              >
+                <ui-icon name="bell" class="lead" aria-hidden="true" padding="none" />
+                <span class="name">{this.translationForKey("bells")}</span>
+              </button>
             </div>
             <div
               class={[GEAR_SUB, "auto-send"]}
@@ -1471,8 +1484,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (event.defaultPrevented) return
     const row = (event.target as Element).closest?.(`.${GEAR_ROW}`) as HTMLButtonElement | null
     if (!row) return
-    // Tidy's and Focus mode's rows open no sub-menu:  Enter and Space click them
-    if (event.key === "ArrowRight" && row.value !== FOCUS_ROW && row.value !== TIDY_ROW) {
+    // Tidy's, Focus mode's and Bells & Whistles' rows open no sub-menu:  Enter and Space click them
+    if (event.key === "ArrowRight" && !DIALOG_ROWS.includes(row.value)) {
       event.preventDefault()
       return this.openSub(row.value as GearSub)
     }
@@ -1531,6 +1544,22 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   private askTidy() {
     if (this.gearMenu) this.gearMenu.visible = false
     void this.review.client?.startReview("tidy")
+  }
+
+  /** Bells & Whistles' DOM element, as drawn. */
+  private bellsElement: (HTMLElement & { show?(): void; ready?: Promise<void> }) | undefined
+
+  /**
+   * The gear's Bells & Whistles (epic `epic-engine` P86):  its menu closes, the dialog opens.
+   * - NEVER throws:  a failure is one console line
+   */
+  @E.untracked
+  private openBells() {
+    if (this.gearMenu) this.gearMenu.visible = false
+    void E.DOMElement.whenAttached("epic-bells")
+      .then(() => this.bellsElement?.ready)
+      .then(() => this.bellsElement?.show?.())
+      .catch((failure: unknown) => console.error("EpicPage:  Bells & Whistles didn't open", failure))
   }
 
   /** The gear's Focus mode:  its menu closes, the overlay opens where it was left. */
@@ -1832,6 +1861,12 @@ const FOCUS_ROW = "focus"
 
 /** Tidy's row in the gear's menu, its `value`:  an action, no sub-menu (T168). */
 const TIDY_ROW = "tidy"
+
+/** The gear's Bells & Whistles row's `value` (epic `epic-engine` P86). */
+const BELLS_ROW = "bells"
+
+/** The gear's rows that open a dialog or ask Claude, not a sub-menu:  the right arrow leaves them be. */
+const DIALOG_ROWS: readonly string[] = [TIDY_ROW, FOCUS_ROW, BELLS_ROW]
 
 /** Each Auto Send choice's text key. */
 const AUTO_SEND_TEXTS = {

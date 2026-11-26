@@ -13,6 +13,8 @@
  * - `layeredHome()`:  its layout, everyone's with a person's own changes over it (epic `mockup` T51).
  * - `PALETTE_GROUPS_API`, `PaletteTable`:  the editor palette's groups, as saved (`paletteTable.ts`;
  *   the table itself, `paletteGroups.json`, is in the editor's folder, beside `PaletteGroups`).
+ * - `KEEPER_GLANCE_API`, `KeeperGlance`:  this machine's servers at a glance, for the editor's Help › Servers
+ *   (`keeperGlance.ts`, epic `editor` T185).
  * - `BuildStep`, `BUILD_STEP_EVENT`:  the steps of making a project ready to run, as the page server tells pages
  *   (epic `editor` P45).
  * - `SpaceStorage`:  where spaces' files are kept (a type;  the disk's is `spell/app/spaces/server/node/storage/DiskStorage`).
@@ -32,6 +34,7 @@ export * from "./projectArchive"
 export * from "./homeOrder"
 export * from "./homeLayout"
 export * from "./paletteTable"
+export * from "./keeperGlance"
 export * from "./buildSteps"
 export type * from "./SpaceStorage"
 export type * from "./people"

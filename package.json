@@ -1166,6 +1166,11 @@
       "types": "./epic/dist-types/src/markup/index.d.ts",
       "default": "./epic/src/markup/index.ts"
     },
+    "./epic/bells": {
+      "spell-source": "./epic/src/bells/index.ts",
+      "types": "./epic/dist-types/src/bells/index.d.ts",
+      "default": "./epic/src/bells/index.ts"
+    },
     "./epic/phases": {
       "spell-source": "./epic/src/phases/index.ts",
       "types": "./epic/dist-types/src/phases/index.d.ts",

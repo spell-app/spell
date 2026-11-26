@@ -97,8 +97,12 @@
      * orange is an AMBER on the pages, further from red than Spell UI's own orange (hue 48-52), which read as red in a
      * thin status circle (Owen, 2026-11-03, epic `epic-engine` I207:  "too close to red, couldn't tell it was different")
      */
-    --epic-state-replied: light-dark(oklch(0.71 0.18 58), oklch(0.79 0.16 62));
-    /* dark ink, as the comment above says:  a theme's white `--ui-orange-on` read 2.70:1 on it (epic `epic-engine` I435) */
+    /*
+     * one value in both schemes, light enough that its dark number reads (7.6:1),
+     * and clearly darker than the light orange below (epic `epic-engine` I479:  "still too dark, hard to read the text")
+     */
+    --epic-state-replied: oklch(0.76 0.17 60);
+    /* dark ink, as the comment above says:  a theme's white `--ui-orange-on` reads 2.24:1 on it (epic `epic-engine` I435) */
     --epic-state-replied-on: var(--ui-yellow-on);
     /* light orange:  what Owen asked for is finished, his turn to see it (`requested`, epic `epic-engine` P63) */
     --epic-state-requested: light-dark(oklch(0.86 0.1 66), oklch(0.89 0.08 68));

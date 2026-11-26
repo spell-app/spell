@@ -1,4 +1,4 @@
-import { Match, Show, Switch, omit } from "solid-js"
+import { Match, Show, Switch, omit, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import type { UIButtonAttributes } from "spell/ui/jsx"
@@ -9,6 +9,7 @@ import type * as Modals from "spell/app/app/solid/modals"
 import { barTooltip, tracked } from "spell/app/app/solid"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { PageViews } from "spell/app/app/pages/pageViews"
+import { ServersGlance } from "spell/app/app/solid/ServersGlance"
 import {
   EDITOR_HOTKEYS,
   runCodeEditorCommand,
@@ -192,6 +193,48 @@ export const Actions = {
       {...props}
     />
   ),
+  /**
+   * Help › Servers (epic `editor` T185):  whether this machine's servers are all up, as a dot after its title, and
+   * the server keeper's Servers page, in a dialog, on a click (`editor.showServers()`).
+   * - The dot:  green while all run, red while one is down, grey while the keeper doesn't say;  its words its tooltip
+   *   (`ServersGlance.words`), and its label for screen readers.
+   * - Asks the page server while it's drawn, every 10 seconds while the tab shows (`ServersGlance.follow()`).
+   * - Draws nothing where no keeper runs (a machine that only has an editor), nor in the static build.
+   */
+  showServers: (props: ActionProps) => {
+    onCleanup(ServersGlance.follow())
+    const words = () => {
+      const { key, count = 0 } = ServersGlance.words
+      return appTexts.text(key, { count })
+    }
+    return (
+      <Show when={ServersGlance.page}>
+        {(page) => (
+          <Action
+            title={
+              <>
+                {appTexts.text("servers")}
+                <ui-label
+                  slot="badge"
+                  class="ServersDot"
+                  appearance="circular"
+                  empty=""
+                  color={ServersGlance.color}
+                  aria-label={words()}
+                />
+              </>
+            }
+            icon="server"
+            data-tooltip={words()}
+            data-position="right center"
+            data-variation="small multiline"
+            onClick={() => editor.showServers(page())}
+            {...props}
+          />
+        )}
+      </Show>
+    )
+  },
   /**
    * The person, as their avatar:  their name's first letter in a circle, the "You" panel on a click.
    * - Drawn by its sheet (`.YouAvatar`, `chrome.css`) in the theme's primary colours, until people have pictures
@@ -459,6 +502,7 @@ export const Actions = {
  */
 const HIDDEN_IN_STATIC_BUILD = [
   "showHelp",
+  "showServers",
   "you",
   "showProjectSettings",
   "appSettings",

@@ -247,13 +247,20 @@ export const epicPageVocabulary = {
     },
     {
       name: "gear-row",
-      description: "A row of the gear's menu:  `Focus mode` (while reviewed), `Auto Send · 2 minutes`, `Theme · Paper`."
+      description:
+        "A row of the gear's menu:  `Focus mode` (while reviewed), `Auto Send · 2 minutes`, `Theme · Paper`, `Bells & Whistles`."
     },
     {
       name: "focus",
       description:
         "Focus mode (`<epic-focus>`, epic `epic-engine` P57), while the page is reviewed:  the full-screen overlay " +
         "that walks the open items one at a time, opened from the gear;  Send rides in its top bar while it's open."
+    },
+    {
+      name: "bells",
+      description:
+        "Bells & Whistles (`<epic-bells>`, epic `epic-engine` P86):  the dialog of steps epic work runs by itself, " +
+        "each with an on / off switch, and the Token burn slider;  opened from the gear."
     },
     {
       name: "auto-send",
@@ -378,6 +385,11 @@ export const epicPageVocabulary = {
       description: "The gear's row after Tidy while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
     },
     { key: "autoSend", text: "Auto Send", description: "The gear's Auto Send row, and its sub-menu's name." },
+    {
+      key: "bells",
+      text: "Bells & Whistles",
+      description: "The gear's last row (epic `epic-engine` P86):  opens the dialog of steps epic work runs by itself."
+    },
     { key: "theme", text: "Theme", description: "The gear's Theme row, and its sub-menu's name." },
     {
       key: "autoSendNow",

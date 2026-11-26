@@ -67,7 +67,8 @@ where the build stands and where you're needed are one glance up.
    while the plan is still being agreed, its stage (`OVERVIEW`, `PHASES`).
    It turns red when every phase is done but items still need you, and grey when the epic is paused,
    untouched for 3 days.
-   - Beside it:  the gear, with Focus mode (while the page is being reviewed), Auto Send and the page's theme.
+   - Beside it:  the gear, with Focus mode (while the page is being reviewed), Auto Send, the page's theme, and
+     Bells & Whistles:  a switch for each step Claude runs by itself, and a Token burn slider (Low, Medium, High).
    - In the header's middle:  Send (the paper plane), while the page is being reviewed.
      A press sends at once;  left alone, a ring round it drains, and it sends by itself.
      The gear picks the wait:  Immediately, 2 minutes (the default), 5 minutes or Off, remembered in this browser.

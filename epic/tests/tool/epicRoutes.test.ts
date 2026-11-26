@@ -11,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
+import { LayeredSettings } from "spell/epic/config/LayeredSettings"
 import epicRoutes, { FROM_PAGE, epicName, newEpic, setFavorite } from "spell/epic/tool/epicRoutes"
 
 const root = mkdtempSync(join(tmpdir(), "epic-routes-"))
@@ -164,5 +165,52 @@ describe("POST /api/epics/favorite", () => {
     expect((await star({ name: "../etc", favorite: true })).status).toBe(400)
     expect((await star({ name: "seo" })).status).toBe(400)
     expect((await star({ name: "seo", favorite: true }, "forged")).status).toBe(403)
+  })
+})
+
+describe("/api/epics/settings (Bells & Whistles, epic `epic-engine` P86)", () => {
+  let server: PageServer
+  let port: number
+
+  beforeAll(async () => {
+    server = new PageServer({ root })
+    await epicRoutes.setup({ ...server.routeContext(), content: root } as Parameters<typeof epicRoutes.setup>[0])
+    await server.start({ port: 0, routes: false, pidFile: false })
+    port = server.info.port
+  })
+
+  afterAll(async () => {
+    await server.stop()
+    rmSync(join(LayeredSettings.home(), ".spell"), { recursive: true, force: true })
+  })
+
+  /** POST `body` from a page this server served;  the status and the answer */
+  async function save(body: unknown) {
+    const answer = await ask(port, "POST", "/api/epics/settings", {
+      body: JSON.stringify(body),
+      headers: {
+        "content-type": "application/json",
+        "x-server-token": server.web.guard.token,
+        origin: `http://127.0.0.1:${port}`
+      }
+    })
+    return { status: answer.status, body: JSON.parse(answer.text) }
+  }
+
+  test("GET:  the bells group and each step as it runs now;  POST saves into your file, and answers the same", async () => {
+    const read = JSON.parse((await ask(port, "GET", "/api/epics/settings")).text)
+    expect(read.values.burn).toBe("high")
+    expect(read.view.steps.every((step: { on: boolean }) => step.on)).toBe(true)
+    const saved = await save({ values: { ...read.values, burn: "low", burnFlips: { titleCheck: true } } })
+    expect(saved.status).toBe(200)
+    expect(saved.body.view.shown).toBe("custom")
+    expect(LayeredSettings.read(root).values.bells.burn).toBe("low")
+  })
+
+  test("POST refuses no values, or one that won't do", async () => {
+    expect((await save({})).status).toBe(400)
+    const refused = await save({ values: { burn: "lots", burnFlips: {} } })
+    expect(refused.status).toBe(400)
+    expect(refused.body.error).toMatch(/one of low, medium, high/)
   })
 })

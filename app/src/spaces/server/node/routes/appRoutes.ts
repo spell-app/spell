@@ -18,6 +18,7 @@ import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
 import { isSpaceName } from "spell/app/spaces/models/spaceNames"
 import { PALETTE_GROUPS_API } from "spell/app/spaces/models/paletteTable"
+import { KEEPER_GLANCE_API } from "spell/app/spaces/models/keeperGlance"
 import { BUILD_STEP_EVENT } from "spell/app/spaces/models/buildSteps"
 import { isSourceCheckout } from "spell/app/spaces/server/node/spellSpacesDir"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
@@ -31,6 +32,7 @@ import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR, EditorServer } from "./EditorServer"
 import { LocalSiteServer } from "./LocalSiteServer"
 import { paletteRoutesFor } from "./paletteRoutes"
+import { keeperRoutesFor } from "./keeperRoutes"
 
 /**
  * Where the app reads the guides that ship with Spell (epic `epic-engine` P79):  `/api/guides/<path>`, a guide's path
@@ -61,6 +63,8 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *   - `/api/palette-groups` -- the editor palette's groups, as Owen arranged them (`paletteRoutes`, epic `editor` T81):
  *     the palette groups page (`/palette` on the editor) reads and saves them;  mounted before the rest of `/api`,
  *     with its own body parser, behind the same check of where a write comes from
+ *   - `/api/keeper/glance` -- this machine's servers at a glance, from the server keeper (`keeperRoutes`, epic `editor`
+ *     T185):  the editor's Help › Servers shows whether they're all up, and opens the keeper's Servers page
  *   - `/api/compiles/...` -- the compile cache (`compileCache`, `./api`), capped at the page server's `cacheLimit`
  *   - `/spaces/<project>/<file>` -- a project's file, by its URL (`spaceFiles`, `./api`):  how spell reads every file
  *   - `/api/places/spaces/<address>/...` -- every project data folder, by its address (`SpaceFolders`, epic `atmosphere` P1):
@@ -182,6 +186,8 @@ const appRoutes: RouteModule = {
     const { cacheLimit } = pageServerSettings(root)
     if (cacheLimit !== undefined) compileCache.limit = SRV.sizeInBytes(cacheLimit)
     router.use(PALETTE_GROUPS_API, refuseForeignOrigins, paletteRoutesFor())
+    // this machine's servers at a glance, the editor's Help › Servers (epic `editor` T185)
+    router.use(KEEPER_GLANCE_API, refuseForeignOrigins, keeperRoutesFor())
     // the guides that ship with Spell, read by the app's Guides page (epic `epic-engine` P79):  the installed
     // package's `guides/`, its list `guides.json5` and each page;  before `/api`, whose last answers every path
     router.use(new SRV.StaticHandler({ mounts: [{ prefix: GUIDES_API, dir: GUIDES_DIR }] }).handle)

@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "no
 import { join } from "node:path"
 
 // By package path, `.ts` and all:  the `UserPromptSubmit` hook loads this file with plain `node` (types stripped)
+import { Bells } from "spell/epic/config/Bells.ts"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
@@ -15,6 +16,7 @@ import { bareTitle } from "spell/epic/command/command.types.ts"
  * - A hint, never a move:  the person types `/epic fresh` when it suits them.
  * - Given when ALL of these hold (`line()`):
  *   - the transcript is a fair measure of what each turn re-reads:  its size on disk
+ *   - its switch on in Bells & Whistles, `bells.freshHint` (`Bells.isOn()`, epic `epic-engine` P86)
  *   - past the repo's `freshHintMB` (`.epic/config.json5`;  8 MB left out, `0` never)
  *   - in an epic's session:  its title names an epic page (`🚧 seo`), else its folder is an epic's worktree
  * - WHEN (Owen, 2026-11-19:  "ok to show it again at the end of a phase, significant chunk of work, after a merge"):
@@ -123,6 +125,7 @@ export class FreshHint {
     if (!sessionId || !SESSION_ID.test(sessionId) || !transcript || !cwd) return null
     const config = EpicConfig.of(cwd)
     if (!(config.freshHintMB > 0) || !existsSync(transcript)) return null
+    if (!Bells.isOn("freshHint", { cwd })) return null
     const megabytes = statSync(transcript).size / MEGABYTE
     if (megabytes < config.freshHintMB) return null
     const epic = FreshHint.epicOf(cwd, title)
