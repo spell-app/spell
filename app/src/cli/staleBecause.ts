@@ -1,8 +1,9 @@
-import { readdirSync, statSync } from "fs"
-import { basename, join, relative } from "path"
+import { createHash } from "crypto"
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "fs"
+import { basename, dirname, join, relative } from "path"
 
-import environment from "spell/app/spaces/server/node/environment"
-import { buildFolderFor } from "spell/app/spaces/server/node/projects/project-utils"
+import { compilerVersion } from "spell/app/spaces/server/node/projects/compilerCode"
+import { buildFolderFor, FINGERPRINT_SUFFIX } from "spell/app/spaces/server/node/projects/project-utils"
 import { SP } from "spell/parser/spell"
 import { projectFileFor } from "spell/parser/spell/node/projectFile"
 import { LSP } from "spell/app/lsp"
@@ -12,18 +13,22 @@ import { LEXICON_SUFFIX } from "./schemas"
  * Why `project`'s build is out of date, e.g. `"Card.spell changed since"`;  `undefined` when it's up to date.
  * - What `spell compile --stale` asks of each project, and of each project it imports.
  * - Out of date when one of the files it BUILDS is missing,
- *   or anything it's built FROM changed since the oldest of them.
+ *   or the TEXT of anything it's built FROM changed since (epic `editor` P45):
+ *   its fingerprint now differs from the one kept beside its build (`fingerprintOf()`, `writeFingerprint()`).
  * - The files it builds:
  *   - each target's output (`project.targets`), e.g. `Solitaire.spell.js`, `Solitaire.lib.ts`
  *   - its declarations and words, e.g. `Solitaire.declarations.json5`, `Solitaire.en.js`
  *   - a library's JSON Schemas, its build folder's `schemas/`
  *   - NOT its scope pack:  only a clean compile writes one, so a project with errors would never be up to date
- * - What it's built from:
- *   - its own files (its index's manifest) and its `project.json`
+ * - What it's built from, each a hash of its text:
+ *   - its own files (its index's manifest) and its project file
  *   - each project it imports:  that one's declarations, which parsing reads
- *     - one imported with `source: true`:  that one's files and `project.json`, as they compile into ours
- *   - spell itself, `COMPILER_SOURCES`:  after a change to the compiler, every project is out of date
- * - By modification time, as `make` does:  a file saved unchanged still counts as changed.
+ *     - one imported with `source: true`:  that one's files and project file, as they compile into ours
+ *   - Spell's compiler (`compilerVersion()`, the one the editor's compile cache keys by):
+ *     after a real change to it, every project is out of date
+ * - By text, not by date:  a file saved unchanged, or a checkout or merge that touched it, changes nothing.
+ *   - Before P45 it went by date, as `make` does:  a merge touching a parser file rebuilt all 63 built-in projects.
+ * - A build with no fingerprint, built before P45 (or by the editor, which writes none), is out of date once.
  * - SIDE EFFECT:  loads `project`, and any project it imports with `source: true`.
  */
 export async function staleBecause(project: SP.SpellProject): Promise<string | undefined> {
@@ -33,45 +38,71 @@ export async function staleBecause(project: SP.SpellProject): Promise<string | u
     project.declarationsFile,
     ...project.wordsFiles
   ].map((file) => file.location.serverPath)
-  const missing = built.find((path) => !modifiedAt(path))
+  const missing = built.find((path) => !existsSync(path))
   if (missing) return `no ${basename(missing)}`
   // a library's JSON Schemas, for VS Code, and its Lexicons (`CLI.writeSchemas()`):  built only by a compile
   if (project.targets.some(({ name }) => name === "ts/lib")) {
     const schemas = join(buildFolderFor(project.location.serverPath), "schemas")
-    if (!modifiedAt(schemas)) return "no JSON Schemas"
+    if (!existsSync(schemas)) return "no JSON Schemas"
     if (!readdirSync(schemas).some((file) => file.endsWith(LEXICON_SUFFIX))) return "no Lexicons"
   }
-  const builtAt = Math.min(...built.map((path) => modifiedAt(path)!))
-
-  for (const source of await sourcesOf(project)) {
-    if ((modifiedAt(source) ?? 0) > builtAt) return `${relative(project.location.serverPath, source)} changed since`
+  const kept = keptFingerprint(project)
+  if (!kept) return "no fingerprint of what it was built from"
+  const now = await fingerprintOf(project)
+  for (const path of new Set([...Object.keys(now.sources), ...Object.keys(kept.sources)])) {
+    if (now.sources[path] === kept.sources[path]) continue
+    if (!(path in kept.sources)) return `${path} is new since`
+    return path in now.sources ? `${path} changed since` : `${path} is gone since`
   }
-  for (const imported of LSP.ScopeExplorer.importedProjects(project)) {
-    const declarations = imported.declarationsFile.location.serverPath
-    if ((modifiedAt(declarations) ?? 0) > builtAt) return `${imported.projectId}'s declarations changed since`
+  for (const [projectId, declarations] of Object.entries(now.imports)) {
+    if (kept.imports[projectId] !== declarations) return `${projectId}'s declarations changed since`
   }
-  if (compilerChangedAt() > builtAt) return "spell's compiler changed since"
+  if (now.compiler !== kept.compiler) return "spell's compiler changed since"
   return undefined
 }
 
 /**
- * Spell's compiler:  what decides what a project builds to, as folders and files.
- * - the parser and its writers, spell's rules, Python's writers (spell-parser's), the language server's scope packs
- *   (this repo's)
- * - core's built-in types' declarations, which every project parses against
- * - NOT core's runtime:  compiled code imports it, so a change to it needs no rebuild
- * - spell-parser's by its packages' folders (`environment.packageFolder()`), never by a path into that repo
+ * What `project` is built from NOW, as hashes:  see `staleBecause()`.
+ * - Worked out BEFORE a compile, and written once it's done (`writeFingerprint()`):
+ *   an edit made while it compiles still counts as a change.
+ * - Its imports' declarations as they are:  `spell compile` compiles its imports first (`CliSession.compileImports()`).
+ * - SIDE EFFECT:  loads `project`, and any project it imports with `source: true`.
  */
-export const COMPILER_SOURCES = [
-  environment.packageFolder("spell/parser/parser"),
-  environment.srcDir,
-  join(environment.repoDir, "src", "lsp"),
-  environment.packageFolder("spell/parser/py"),
-  join(environment.packageFolder("spell/parser/core"), "core.declarations.json5")
-]
+export async function fingerprintOf(project: SP.SpellProject): Promise<BuildFingerprint> {
+  await project.load(undefined)
+  const sources: Record<string, string> = {}
+  for (const source of await sourcesOf(project)) {
+    sources[relative(project.location.serverPath, source)] = hashOfFile(source)
+  }
+  const imports: Record<string, string> = {}
+  for (const imported of LSP.ScopeExplorer.importedProjects(project)) {
+    imports[imported.projectId] = hashOfFile(imported.declarationsFile.location.serverPath)
+  }
+  return { compiler: compilerAtStart(), sources, imports }
+}
 
-/** Under `COMPILER_SOURCES`, but not the compiler:  Python's core (`spell_core`), its runtime, in py's `core/`. */
-const NOT_COMPILER = new Set([join(environment.packageFolder("spell/parser/py"), "core")])
+/**
+ * SIDE EFFECT:  writes `fingerprint` beside `project`'s build, `<Project>.fingerprint.json`:
+ * what `staleBecause()` compares with next time.
+ */
+export function writeFingerprint(project: SP.SpellProject, fingerprint: BuildFingerprint): void {
+  const file = fingerprintFileFor(project)
+  mkdirSync(dirname(file), { recursive: true })
+  writeFileSync(file, `${JSON.stringify(fingerprint, undefined, 2)}\n`)
+}
+
+/**
+ * What a project was built from, as hashes, kept beside its build (`<Project>.fingerprint.json`):
+ * see `staleBecause()`.
+ */
+export type BuildFingerprint = {
+  /** Spell's compiler:  `compilerVersion()` */
+  compiler: string
+  /** each of its own files, and a `source: true` import's, by its path from the project's folder:  its text's hash */
+  sources: Record<string, string>
+  /** each project it imports, by address:  its declarations' hash */
+  imports: Record<string, string>
+}
 
 ////////////////
 // ## Helpers
@@ -89,34 +120,34 @@ async function sourcesOf(project: SP.SpellProject): Promise<string[]> {
   return sources
 }
 
-/** When file `path` last changed, in ms;  `undefined` when it isn't there. */
-function modifiedAt(path: string): number | undefined {
-  return statSync(path, { throwIfNoEntry: false })?.mtimeMs
+/** Where `project`'s fingerprint is kept:  beside its declarations, in its build folder. */
+function fingerprintFileFor(project: SP.SpellProject): string {
+  const declarations = project.declarationsFile.location.serverPath
+  return declarations.slice(0, -SP.DECLARATIONS_JSON_SUFFIX.length) + FINGERPRINT_SUFFIX
 }
 
-/** When anything in `COMPILER_SOURCES` last changed, in ms:  worked out once per process. */
-function compilerChangedAt(): number {
-  return (compilerChanged ??= newestIn(COMPILER_SOURCES))
-}
-let compilerChanged: number | undefined
-
-/** When the newest file at or under `paths` last changed, in ms;  dot files and `node_modules` left out. */
-function newestIn(paths: string[]): number {
-  let newest = 0
-  for (const path of paths) walk(path)
-  return newest
-
-  /** fold `path`, or every file under it, into `newest` */
-  function walk(path: string): void {
-    const stat = statSync(path, { throwIfNoEntry: false })
-    if (!stat) return
-    if (!stat.isDirectory()) {
-      newest = Math.max(newest, stat.mtimeMs)
-      return
-    }
-    for (const entry of readdirSync(path, { withFileTypes: true })) {
-      if (entry.name.startsWith(".") || entry.name === "node_modules") continue
-      if (!NOT_COMPILER.has(join(path, entry.name))) walk(join(path, entry.name))
-    }
+/** `project`'s kept fingerprint;  `undefined` when there's none, or it can't be read. */
+function keptFingerprint(project: SP.SpellProject): BuildFingerprint | undefined {
+  try {
+    const kept = JSON.parse(readFileSync(fingerprintFileFor(project), "utf8")) as Partial<BuildFingerprint>
+    if (typeof kept.compiler !== "string" || !kept.sources || !kept.imports) return undefined
+    return kept as BuildFingerprint
+  } catch {
+    return undefined
   }
 }
+
+/** A hash of file `path`'s bytes;  `""` when it isn't there. */
+function hashOfFile(path: string): string {
+  if (!statSync(path, { throwIfNoEntry: false })?.isFile()) return ""
+  return createHash("sha1").update(readFileSync(path)).digest("hex")
+}
+
+/**
+ * The compiler's version, worked out once per process:  every project a run checks compares with the same one.
+ * - `compilerVersion()` itself checks the files again after a second, which a run of 63 projects needn't.
+ */
+function compilerAtStart(): string {
+  return (compiler ??= compilerVersion())
+}
+let compiler: string | undefined

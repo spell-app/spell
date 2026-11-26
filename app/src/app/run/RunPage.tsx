@@ -1,6 +1,8 @@
 import { Show, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+// Import directly, NOT through the `spell/server` barrel, which is the server's node code
+import { joinLiveChannel } from "spell/server/liveClient"
 // Import directly, NOT through the `spell/parser/spell` barrel, which would pull in the whole parser.
 import { SpellUrls } from "spell/parser/spell/SpellUrls"
 import { appTexts } from "spell/app/app/ui/AppTexts"
@@ -24,10 +26,13 @@ import "./RunPage.css"
  * - The runner is `<spell-viewer>`'s, `<SpellAppRunner>`, its toolbar, console and explorers included.
  * - A site keeps its address in the page's:  `/run/<project>/films/4` (`RunSiteHost`);  a page alone in its file is
  *   named by the file too, `/run/<project>/home.spell`, the address the editor's Run gives it (`opened`).
+ * - It joins the page server's live channel (`joinLiveChannel()`), as the editor does, through the editor's server:
+ *   the runner's waiting box hears each step of the project being made ready to run (epic `editor` P45).
  * - NEVER imports the editor, the parser or `spell/parser/core`:  `build.test.ts` pins what `run.html` loads.
  ****************/
 export function RunPage(props: RunPageProps): JSX.Element {
   const isPhone = phoneWidth()
+  joinLiveChannel()
   const editUrl = `/edit/${SpellUrls.encodeAddress(props.address)}`
   const siteHost = new RunSiteHost(`/run/${SpellUrls.encodeAddress(props.projectId)}`, document, props.opened)
   return (
@@ -57,6 +62,7 @@ export function RunPage(props: RunPageProps): JSX.Element {
         siteHost={() => siteHost}
         // a Type Explorer link:  its file, in the editor
         onOpen={(href) => location.assign(`/edit/${href.replace(/^spell:\//, "").replace(/#.*$/, "")}`)}
+        editUrl={editUrl}
       />
     </div>
   )

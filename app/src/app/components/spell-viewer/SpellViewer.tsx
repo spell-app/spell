@@ -22,7 +22,7 @@ import {
   type SpellAppSource
 } from "spell/app/app/runner/SpellAppRunner"
 import { spellViewerVocabulary } from "./SpellViewer.en"
-import { COMPILED_JS, DECLARATIONS_JSON, SCOPES_JS, WORDS_JS, projectSource } from "./projectSource"
+import { COMPILED_JS, DECLARATIONS_JSON, SCOPES_JS, WORDS_JS, editorUrlFor, projectSource } from "./projectSource"
 
 import "./SpellViewer.css"
 
@@ -352,6 +352,8 @@ export class SpellViewer extends UIRoot<typeof vocabulary> {
               siteHost={this.siteHost}
               onOpen={(href) => this.send("spell-exploring", { href })}
               onControls={(controls) => (this.controls = controls)}
+              // a project the server built, with mistakes:  its waiting box opens it in the editor
+              editUrl={source().projectId && !source().compiled ? editorUrlFor(source().projectId!) : undefined}
             />
           )}
         </Show>

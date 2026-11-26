@@ -95,15 +95,17 @@ function tempProject(name: string, source: string, suffix = SP.SPELL_SUFFIX): st
 
 /**
  * Run `spell ...args` from `cwd`, `input` on its stdin, and wait for it to end -- at most `TEST_TIMEOUT_MS`.
+ * - `env`:  more of its environment, over this process's
  * - throws if it's still running then, naming it and showing what it printed:  it's stopped (`SIGTERM`)
  * - Why the limit:  this waits SYNCHRONOUSLY, which vitest's test timeout can't interrupt.
  *   A run that never ends held the whole file, and so `yarn test`, with nothing reported, until CI was cancelled
  *   (epic `repo-split` I73).
  */
-function spell(args: string[], cwd = fixturePath(), input?: string) {
+function spell(args: string[], cwd = fixturePath(), input?: string, env?: Record<string, string>) {
   const { status, stdout, stderr, error } = spawnSync(process.execPath, [SPELL, ...args], {
     cwd,
     input,
+    ...(env && { env: { ...process.env, ...env } }),
     encoding: "utf8",
     timeout: TEST_TIMEOUT_MS
   })
@@ -869,7 +871,7 @@ describe("spell compile --force", () => {
 })
 
 describe("spell compile --stale", () => {
-  test("compiles only what's out of date:  never built, a source changed, or what it imports changed", () => {
+  test("compiles only what's out of date, by what's in its files:  never built, a source's text changed, what it imports changed, the compiler changed", () => {
     const lib = tempProject("StaleLib", "a widget is a thing\n")
     const app = resolve(TEMP, "StaleApp")
     mkdirSync(app)
@@ -888,17 +890,44 @@ describe("spell compile --stale", () => {
     expect(again).toMatch(/✓ @local\/\S+\/StaleApp {2}up to date\n/)
     expect(again).not.toContain("imported by")
 
-    // saved, even unchanged, counts as changed
+    // saved unchanged:  its text is the same, so it's up to date (epic `editor` P45;  by date, before, it was changed)
     writeFileSync(resolve(app, "StaleApp.spell"), "print a new widget\n")
+    expect(spell(["compile", ".", "--stale"], app).stderr).toMatch(/✓ @local\/\S+\/StaleApp {2}up to date\n/)
+
+    // its text changed
+    writeFileSync(resolve(app, "StaleApp.spell"), "print a new widget\nprint 2\n")
     const edited = spell(["compile", ".", "--stale"], app).stderr
     expect(edited).toMatch(/✓ @local\/\S+\/StaleApp {2}StaleApp\.spell changed since · wrote /)
     expect(edited).not.toContain("imported by")
 
-    // the import's rebuilt first, so its declarations are newer than the app's build
-    writeFileSync(resolve(lib, "StaleLib.spell"), "a widget is a thing\n")
+    // the import's rebuilt first, and its declarations changed with it
+    writeFileSync(resolve(lib, "StaleLib.spell"), "a widget is a thing\na gadget is a thing\n")
     const imported = spell(["compile", ".", "--stale"], app).stderr
     expect(imported).toMatch(/StaleLib {2}\(imported by StaleApp\) {2}StaleLib\.spell changed since · wrote /)
     expect(imported).toMatch(/✓ @local\/\S+\/StaleApp {2}@local\/\S+\/StaleLib's declarations changed since/)
+
+    // the compiler changed:  its fingerprint, kept beside the build, names another compiler
+    const fingerprint = resolve(app, "StaleApp.fingerprint.json")
+    const kept = JSON.parse(readFileSync(fingerprint, "utf8")) as { compiler: string }
+    writeFileSync(fingerprint, JSON.stringify({ ...kept, compiler: "an older compiler" }))
+    expect(spell(["compile", ".", "--stale"], app).stderr).toMatch(
+      /✓ @local\/\S+\/StaleApp {2}spell's compiler changed since · wrote /
+    )
+
+    // no fingerprint, built before them:  out of date once
+    rmSync(fingerprint)
+    expect(spell(["compile", ".", "--stale"], app).stderr).toMatch(
+      /StaleApp {2}no fingerprint of what it was built from/
+    )
+    expect(spell(["compile", ".", "--stale"], app).stderr).toMatch(/✓ @local\/\S+\/StaleApp {2}up to date\n/)
+  }, 120_000)
+
+  test("SPELL_COMPILE_STEPS=1:  prints each step it reaches, for the page server", () => {
+    const app = tempProject("StepsApp", "print 1\n")
+    const { stderr } = spell(["compile", "."], app, undefined, { SPELL_COMPILE_STEPS: "1" })
+    expect(stderr).toMatch(/^spell-step: compiling @local\/\S+\/StepsApp$/m)
+    expect(stderr).toMatch(/^spell-step: checking @local\/\S+\/StepsApp$/m)
+    expect(spell(["compile", "."], app).stderr).not.toContain("spell-step:")
   }, 60_000)
 
   test("with --stdout:  says they don't go together, exit 2", () => {

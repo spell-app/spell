@@ -148,8 +148,11 @@ export class CliSession {
       if (!why) continue
 
       const row = status?.start(`${imported.projectId}  (imported by ${project.projectName})`)
+      // what it's built from, kept beside its build for `--stale` (`CLI.staleBecause()`)
+      const fingerprint = await CLI.fingerprintOf(imported)
       // read by what imports it, never shown in an editor:  no editor text (`compiledFor`)
       await imported.compile(undefined, { compiledFor: "built" })
+      CLI.writeFingerprint(imported, fingerprint)
       const wrote = `wrote ${this.relative(imported.outputFile.location.serverPath)}`
       if (row) this.report(status!, row, imported, { note: `${why} · ${wrote}` })
     }

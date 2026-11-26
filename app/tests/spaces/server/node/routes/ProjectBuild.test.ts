@@ -8,6 +8,7 @@ import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vit
 
 import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import { SP } from "spell/parser/spell"
+import type { BuildStep } from "spell/app/spaces/models/buildSteps"
 import { ProjectBuild } from "spell/app/spaces/server/node/routes/ProjectBuild"
 
 ////////////////
@@ -63,6 +64,20 @@ describe("ProjectBuild", () => {
   // outside `packages/`:  its built files sit beside its source (`buildFolderFor()`)
   const projectId = locationForDiskPath(join(projectFolder, SP.PROJECT_FILE))!.projectId
   const compiled = SP.SpellLocation.getFileLocation(projectId, `Built${SP.COMPILED_JS_SUFFIX}`)
+  // one importing a library, which the startup compile builds
+  const importerFolder = join(root, "projects", "Importer")
+  put(
+    join(importerFolder, SP.PROJECT_FILE),
+    JSON.stringify({
+      imports: [
+        { path: "@spell/library/games", active: true },
+        { path: "/Importer.spell", active: true }
+      ]
+    })
+  )
+  put(join(importerFolder, "Importer.spell"), 'print "imports"\n')
+  const importerId = locationForDiskPath(join(importerFolder, SP.PROJECT_FILE))!.projectId
+  const importerCompiled = SP.SpellLocation.getFileLocation(importerId, `Importer${SP.COMPILED_JS_SUFFIX}`)
 
   beforeEach(() => {
     vi.spyOn(console, "log").mockImplementation(() => {})
@@ -71,25 +86,21 @@ describe("ProjectBuild", () => {
   afterEach(() => {
     vi.restoreAllMocks()
     rmSync(compiled.serverPath, { force: true })
+    rmSync(importerCompiled.serverPath, { force: true })
   })
   afterAll(() => rmSync(root, { recursive: true, force: true }))
 
-  test("start():  the checkout's OWN `spell` (the kit's), `compile --stale --all @spell/examples @spell/library @spell/guides`, in a process group of its own", () => {
+  test("start():  the checkout's OWN `spell` (the kit's), `compile --stale --all @spell/library`, the libraries alone, in a process group of its own", () => {
     const { spawn } = spawnStub()
     new ProjectBuild({ root, spawn }).start()
     expect(spawn).toHaveBeenCalledWith(
       process.execPath,
-      [
-        join(root, "node_modules/spell/bin/spell.mjs"),
-        "compile",
-        "--stale",
-        "--all",
-        "@spell/examples",
-        "@spell/library",
-        "@spell/guides"
-      ],
+      [join(root, "node_modules/spell/bin/spell.mjs"), "compile", "--stale", "--all", "@spell/library"],
       expect.objectContaining({ cwd: root, detached: true })
     )
+    // its steps aren't told:  no page waits on it
+    const [, , { env }] = spawn.mock.calls[0] as unknown as [string, string[], { env: Record<string, unknown> }]
+    expect(env.SPELL_COMPILE_STEPS).toBeUndefined()
   })
 
   test("a built file that's there:  at once, compiling nothing", async () => {
@@ -133,14 +144,63 @@ describe("ProjectBuild", () => {
     expect(spawn).not.toHaveBeenCalled()
   })
 
-  test("while the startup build runs:  waits for it, instead of compiling the project again", async () => {
+  test("while the startup compile runs (a slow one):  a project importing no library compiles AT ONCE, beside it", async () => {
     const { spawn, children } = spawnStub()
     const build = new ProjectBuild({ root, spawn }).start()
     const waiting = build.untilBuilt(compiled)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2))
+    expect(spawn).toHaveBeenLastCalledWith(process.execPath, [build.cli, "compile", projectId], expect.anything())
+    put(compiled.serverPath, "export {}\n")
+    children[1]!.exit(0)
+    // answered while the startup compile still runs
+    expect(await waiting).toBe(true)
+    children[0]!.exit(0)
+  })
+
+  test("while the startup compile runs:  a project importing a library waits for it first, then compiles", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn }).start()
+    const waiting = build.untilBuilt(importerCompiled)
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(spawn).toHaveBeenCalledOnce()
+    children[0]!.exit(0)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2))
+    expect(spawn).toHaveBeenLastCalledWith(process.execPath, [build.cli, "compile", importerId], expect.anything())
+    put(importerCompiled.serverPath, "export {}\n")
+    children[1]!.exit(0)
+    expect(await waiting).toBe(true)
+  })
+
+  test("each step of a request's compile is told:  reading, what `spell compile` says it reaches, then built", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn })
+    const steps: BuildStep[] = []
+    build.onStep((step) => steps.push(step))
+    const waiting = build.untilBuilt(compiled)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+    const [, , { env }] = spawn.mock.calls[0] as unknown as [string, string[], { env: Record<string, unknown> }]
+    expect(env.SPELL_COMPILE_STEPS).toBe("1")
+    children[0]!.stderr.write(`spell-step: compiling ${projectId}\n`)
+    children[0]!.stderr.write(`spell-step: checking ${projectId}\n`)
+    await vi.waitFor(() => expect(steps).toHaveLength(3))
     put(compiled.serverPath, "export {}\n")
     children[0]!.exit(0)
     expect(await waiting).toBe(true)
-    expect(spawn).toHaveBeenCalledOnce()
+    expect(steps.map((it) => it.step)).toEqual(["reading", "compiling", "checking", "built"])
+    expect(steps.every((it) => it.projectId === projectId)).toBe(true)
+  })
+
+  test("a compile with mistakes (exit 1):  `mistakes`, told at once", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn })
+    const steps: string[] = []
+    build.onStep(({ step }) => steps.push(step))
+    const waiting = build.untilBuilt(compiled)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+    put(compiled.serverPath, "export {}\n")
+    children[0]!.exit(1)
+    expect(await waiting).toBe(true)
+    expect(steps).toEqual(["reading", "mistakes"])
   })
 
   test("a compile slower than `timeout`:  gives up, not there;  a request after waits on the same compile", async () => {

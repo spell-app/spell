@@ -110,6 +110,12 @@ export function folderForPlace(place: string): string {
 }
 
 /**
+ * End of the name of a project's FINGERPRINT, beside its build:  what it was built from, as hashes
+ * (the cli's `staleBecause()`, epic `editor` P45), e.g. `Solitaire.fingerprint.json`.
+ */
+export const FINGERPRINT_SUFFIX = ".fingerprint.json"
+
+/**
  * Ends of the names of the files spell BUILDS for a project, which go in its build folder (`buildFolderFor()`):
  * only `<Project>` and one of these, at the top of the project, e.g. `Solitaire.spell.js`.
  * - Its words files are built too, in any language:  `isWordsFileOf()`.
@@ -126,7 +132,8 @@ const BUILT_SUFFIXES = [
   SP.SCOPES_JS_SUFFIX, // `Solitaire.scopes.js`, its scope pack
   SP.DECLARATIONS_JSON_SUFFIX, // `Solitaire.declarations.json5`, what it offers projects importing it
   `${SP.COMPILED_JS_SUFFIX}.map`, // `Solitaire.spell.js.map`, its source map (epic `elemental-spell` P14)
-  `${SP.COMPILED_TSX_SUFFIX}.map` // `Solitaire.spell.tsx.map`
+  `${SP.COMPILED_TSX_SUFFIX}.map`, // `Solitaire.spell.tsx.map`
+  FINGERPRINT_SUFFIX // `Solitaire.fingerprint.json`, what it was built from
 ]
 
 /**

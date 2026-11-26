@@ -18,6 +18,7 @@ import * as projectUtils from "spell/app/spaces/server/node/projects/project-uti
 import * as homeOrderRoutes from "spell/app/spaces/server/node/projects/homeOrderRoutes"
 import * as spellVersions from "spell/app/spaces/server/node/projects/spellVersions"
 import * as responseUtils from "spell/app/spaces/server/node/projects/response-utils"
+import { compilerVersion } from "spell/app/spaces/server/node/projects/compilerCode"
 import { ProjectBuild } from "./ProjectBuild"
 
 /** Router mounted at `/api` by `./cli.ts` and `./appRoutes.ts`:  `spell/server`'s Express-shaped `SRV.Router`. */
@@ -33,30 +34,13 @@ export const projectBuild = new ProjectBuild()
  * The compile cache (epic `language` P27):  what the editor's projects compiled to, kept on disk by what they were
  * compiled from (`SP.CompileCache`, the editor's `ServerCompileStore`), at `/api/compiles`.
  * - In `~/.spell/cache/compiles` (`environment.compileCacheDir`):  one for the machine.
- * - Its version is a hash of the compiler's code (`compilerCode()`):  a change to it starts an empty cache.
+ * - Its version is the compiler's (`compilerVersion()`, a hash of `COMPILER_CODE`):  a change to it starts an empty
+ *   cache.  The build folder's fingerprints use the same one (epic `editor` P45).
  */
 export const compileCache = new SRV.DiskCache({
   folder: environment.compileCacheDir,
-  version: SRV.codeVersion(compilerCode())
+  version: compilerVersion
 })
-
-/**
- * The code that decides what a project compiles to, for the compile cache's version:
- * - the parser folder:  the language, its writers, the core
- * - the kit's util, which the parser stands on
- * - spaces' models, which register Spell UI's names for drawings (`spellUIPack.ts`),
- *   and Spell UI's components and vocabularies those read
- * - More than it needs, on purpose:  a needless miss compiles again;  a missed change would serve stale output.
- */
-function compilerCode(): string[] {
-  return [
-    environment.packageFolder("spell/parser"),
-    environment.packageFolder("spell/util"),
-    environment.packageFolder("spell/app/spaces/models"),
-    environment.packageFolder("spell/ui/components"),
-    environment.packageFolder("spell/ui/vocabulary")
-  ]
-}
 
 api.use("/compiles", compileCache.router())
 
@@ -67,6 +51,8 @@ api.use("/compiles", compileCache.router())
 // working with projects:  each route's contract is on its `projectUtils.request_*` handler
 // A group's address (`@spell/examples`) holds `/`s:  `*` takes the rest of the path.
 api.get("/projects/list/*", projectUtils.request_getProjectList)
+// an org group's README, for its page (epic `editor` P47)
+api.get("/projects/readme/*", projectUtils.request_getGroupReadme)
 api.post("/projects/create/project", projectUtils.request_createProject)
 api.post("/projects/rename/project", projectUtils.request_renameApp)
 api.post("/projects/duplicate/project", projectUtils.request_duplicateApp)

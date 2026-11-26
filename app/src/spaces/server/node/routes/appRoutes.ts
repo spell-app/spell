@@ -18,6 +18,7 @@ import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
 import { isSpaceName } from "spell/app/spaces/models/spaceNames"
 import { PALETTE_GROUPS_API } from "spell/app/spaces/models/paletteTable"
+import { BUILD_STEP_EVENT } from "spell/app/spaces/models/buildSteps"
 import { isSourceCheckout } from "spell/app/spaces/server/node/spellSpacesDir"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
@@ -152,6 +153,9 @@ const appRoutes: RouteModule = {
     onStop(() => editor.stop())
     projectBuild.start()
     onStop(() => projectBuild.stop())
+    // each step of a project made ready to run, as a page asks for it:  every open page hears it, and the one waiting
+    // says it in words (the runner's waiting box, the editor's loading screen;  epic `editor` P45)
+    onStop(projectBuild.onStep((step) => live.send(BUILD_STEP_EVENT, step)))
     // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
     onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
     // a project file changed on disk (another window, an agent, git):  every open page hears it at its address,

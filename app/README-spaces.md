@@ -376,9 +376,13 @@ So however the page server starts, the "Editor" link works;  `SPELL_NO_EDITOR=1`
 BUILDS happen on demand ([ProjectBuild.ts](src/spaces/server/node/routes/ProjectBuild.ts)).
 Ask for a compiled file that isn't there yet, `/spaces/<project>/<project>.spell.js`, and its project compiles
 first, in a child process running the checkout's own `spell compile`, so the page server keeps serving meanwhile.
+- It starts at once, beside anything else compiling:  only a project that imports one of Spell's libraries waits
+  for the startup compile first, so two compiles never write the same library.
 - A request waits a minute at most;  then it gets a 404, and the compile carries on.
-- As the page server starts, `spell compile --stale --all @spell/examples @spell/library` runs in the background,
-  so the demo pages and App UI's live examples find their programs.
+- As the page server starts, `spell compile --stale --all @spell/library` runs in the background:  the libraries
+  alone, which other projects import.  Every example and guide compiles the first time a page asks for it.
+- While a page waits, it says what's happening:  each step is passed on to every open page, and the runner's box
+  over the app says it in words ("Reading your project…", "Getting it ready…", "Starting it…").
 - What it builds goes in spell-app's `build/` folder, mirroring each project's path, never committed:
   `build/spaces/@spell/examples/Solitaire/` holds that project's compiled program and its scope pack
   (`.scopes.js`, what the Type Explorer reads).

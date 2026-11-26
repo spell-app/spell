@@ -5,6 +5,8 @@ import type { LSP } from "spell/app/lsp"
 import type { SP } from "spell/parser/spell"
 import type { SiteHost } from "spell/parser/core/core.types"
 import type { ThingExplorerState, TypeExplorerState } from "spell/app/app/ui/ui.types"
+// Import directly, NOT through the `spell/app/spaces` barrel, which pulls in spell's parser
+import { BUILD_STEP_PAGE_EVENT, type BuildStep } from "spell/app/spaces/models/buildSteps"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the `spell/app/app/solid` barrel, which pulls in the editor
 import { TypeExplorer } from "spell/app/app/solid/TypeExplorer"
@@ -50,6 +52,13 @@ import "./SpellAppRunner.css"
  * - `debug` and `fluid` are read once, to start;  `runtimeUrl` once per copy loaded.
  * - Its `<ui-*>` tags are the caller's to define, with Fomantic's icon names:
  *   `<spell-viewer>` is a root that loads them as they appear;  the VS Code runner imports `spell/app/app/solid/loadUI`.
+ * - While a program it fetches is made ready on the server, a box over it says each step, in words
+ *   (`<ui-dimmer>` holding a `<ui-loader text>`;  epic `editor` P45):
+ *   - shown only after `WAIT_BOX_DELAY_MSEC`, so a program that's built already never flashes it
+ *   - "Reading your project…", then "Getting it ready…" as the page server says it compiles (`BUILD_STEP_PAGE_EVENT`),
+ *     then "Starting it…" once the page has it, until it draws or runs
+ *   - a project with mistakes that can't run:  says so, with a button opening it in the editor (`editUrl`)
+ *   - on the run page, whose app fills the page, it reads as a loading screen
  * - A site it runs keeps its own address, and wears its theme:  one of Spell UI's, or its project's own
  *   (`ViewerSiteHost`);  the run page's keeps it in the page's URL (`siteHost`).
  * - NEVER imports `spell/parser/core`:  it'd land in the bundle's shared chunk, so every app would share it.
@@ -70,6 +79,14 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
   const [split, setSplit] = createSignal(untrack(() => props.fluid) ? DEFAULT_DEBUG_HEIGHT : DEFAULT_SPLIT)
   const [scopes, setScopes] = createSignal<ScopesSource>()
   const [words, setWords] = createSignal<SP.SpellWordsData>()
+  // the waiting box (`startWaiting()`):  the step it says, and whether it shows yet
+  // - internal state, written as a run starts, which may be inside the effect that runs it (`ownedWrite`)
+  const [waiting, setWaiting] = createSignal<WaitingStep | undefined>(undefined, { ownedWrite: true })
+  const [waitShown, setWaitShown] = createSignal(false, { ownedWrite: true })
+  /** what shows the waiting box, once `WAIT_BOX_DELAY_MSEC` has gone by */
+  let waitTimer: ReturnType<typeof setTimeout> | undefined
+  /** the page server said this run's project has mistakes (`BuildStep`):  a run that then fails says so */
+  let hasMistakes = false
   // the explorers' state, kept here so it outlives switching tabs:  each reads it once, as it mounts
   let explorerState: TypeExplorerState = {}
   let thingsState: ThingExplorerState = {}
@@ -139,10 +156,32 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
     }
   )
 
-  // An app started AFTER the run finished, e.g. from a timer, shows once it draws.
+  // each step of a project the page server makes ready:  the waiting box says this run's project's
+  onSettled(() => {
+    const listener = (event: Event) => {
+      const { projectId, step } = (event as CustomEvent<BuildStep>).detail ?? {}
+      if (!projectId || projectId !== untrack(() => props.source.projectId)) return
+      if (step === "mistakes") hasMistakes = true
+      else if ((step === "compiling" || step === "checking") && waiting() === "reading") setWaiting("compiling")
+    }
+    addEventListener(BUILD_STEP_PAGE_EVENT, listener)
+    return () => {
+      removeEventListener(BUILD_STEP_PAGE_EVENT, listener)
+      clearTimeout(waitTimer)
+    }
+  })
+
+  // An app started AFTER the run finished, e.g. from a timer, shows once it draws;  so does one still starting.
   onSettled(() => {
     const observer = new MutationObserver(() => {
-      if (appRoot.childElementCount) setHasApp(true)
+      if (!appRoot.childElementCount) return
+      setHasApp(true)
+      // drawn:  the waiting box goes, though the program may still be starting (waiting on a sign-in, say)
+      if (waiting() === "starting") {
+        clearTimeout(waitTimer)
+        setWaiting(undefined)
+        setWaitShown(false)
+      }
     })
     observer.observe(appRoot, { childList: true })
     return () => observer.disconnect()
@@ -164,6 +203,7 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       <Show when={!props.toolbar && error()}>
         <div class="SpellAppError">{error()}</div>
       </Show>
+      <Show when={waitShown() && waiting()}>{(step) => <WaitingBox step={step()} editUrl={props.editUrl} />}</Show>
       <ui-split-panel
         class={["RunnerSplit", { byPixels: !!props.fluid }]}
         resizable
@@ -224,6 +264,8 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
     if (layout) unslot = slotsFromIn(layout)
     const keepThings = how === "keep things" && isSameProgram(lastSource, source)
     lastSource = source
+    // fetched from the server, which may have to make it first (its words too):  the waiting box, if it takes a while
+    if (source.compiled === undefined) startWaiting()
     // its own words first:  their `messages` are what the core says as it runs, e.g. its tests' lines in Spanish
     // - awaited only when there are some to load:  else the last run's app goes at once, in the same tick, as before
     const own = source.words || !source.wordsUrl ? source.words : await ownWords(source)
@@ -238,8 +280,12 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       layout: !!layout,
       keepThings,
       messages: own?.messages,
-      siteHost
+      siteHost,
+      onFetched: () => {
+        if (waiting()) setWaiting("starting")
+      }
     })
+    if (source === lastSource) stopWaiting(ran)
     compiledRef.current = ran.compiled
     setError(ran.error)
     setHasApp(ran.hasApp)
@@ -256,6 +302,29 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
     )
     // a newer source's run may have started meanwhile:  its words are its own
     if (source === lastSource) setWords(loaded)
+  }
+
+  /** Start the waiting box for a run's program:  it shows only once `WAIT_BOX_DELAY_MSEC` has gone by. */
+  function startWaiting() {
+    clearTimeout(waitTimer)
+    hasMistakes = false
+    setWaiting("reading")
+    waitTimer = setTimeout(() => setWaitShown(true), WAIT_BOX_DELAY_MSEC)
+  }
+
+  /**
+   * The run's done:  the waiting box goes;
+   * or, its project having mistakes and the run failing, it stays to say so, at once.
+   */
+  function stopWaiting(ran: Ran) {
+    clearTimeout(waitTimer)
+    if (ran.error && hasMistakes) {
+      setWaiting("mistakes")
+      setWaitShown(true)
+    } else {
+      setWaiting(undefined)
+      setWaitShown(false)
+    }
   }
 
   /** The Type Explorer, read-only, if there's a scope pack. */
@@ -335,6 +404,8 @@ export type SpellAppRunnerProps = {
   onOpen: (href: string) => void
   /** Hand over what the element can do to us, e.g. `restart()` -- every render. */
   onControls?: (controls: SpellAppControls) => void
+  /** Where the project opens in the editor:  the waiting box's button, when it has mistakes;  none, no button. */
+  editUrl?: string
 }
 
 /**
@@ -430,6 +501,61 @@ function SpellAppToolbar(props: SpellAppToolbarProps) {
   )
 }
 
+/****************
+ * ### `<WaitingBox>`
+ * The box over the app while its project is made ready to run:  a `<ui-dimmer>` holding a `<ui-loader>` with the
+ * step's words;  or, with mistakes, a line saying so and a button opening it in the editor.
+ ****************/
+function WaitingBox(props: WaitingBoxProps) {
+  return (
+    <ui-dimmer visible="" inverted="" class="SpellAppWaiting">
+      <Show
+        when={props.step === "mistakes"}
+        fallback={
+          <ui-loader visible="" text="">
+            {appTexts.text(WAITING_TEXTS[props.step as Exclude<WaitingStep, "mistakes">])}
+          </ui-loader>
+        }
+      >
+        <div class="SpellAppMistakes" role="alert">
+          <p>{appTexts.text("buildMistakes")}</p>
+          <Show when={props.editUrl}>
+            {(url) => (
+              <ui-button icon="pencil" onClick={() => location.assign(url())}>
+                {appTexts.text("buildMistakesOpen")}
+              </ui-button>
+            )}
+          </Show>
+        </div>
+      </Show>
+    </ui-dimmer>
+  )
+}
+
+/** Props for `<WaitingBox>`. */
+type WaitingBoxProps = {
+  /** The step it says. */
+  step: WaitingStep
+  /** Where the project opens in the editor, for its mistakes;  none, no button. */
+  editUrl?: string
+}
+
+/**
+ * What the waiting box says:  the page server's steps (`BuildStep`), then the page's own, starting it.
+ * - `compiling` stands for the server's `compiling` and `checking`:  "Getting it ready…" for both.
+ */
+type WaitingStep = "reading" | "compiling" | "starting" | "mistakes"
+
+/** The words of each step the waiting box shows with its spinner. */
+const WAITING_TEXTS: Record<Exclude<WaitingStep, "mistakes">, AppTextKey> = {
+  reading: "buildStepReading",
+  compiling: "buildStepCompiling",
+  starting: "buildStepStarting"
+}
+
+/** How long a run waits before its waiting box shows:  a program that's built already never flashes it. */
+const WAIT_BOX_DELAY_MSEC = 500
+
 /** Props for `<SpellAppToolbar>`. */
 type SpellAppToolbarProps = {
   /** App's name. */
@@ -452,6 +578,7 @@ type SpellAppToolbarProps = {
  * Run `source`'s program in runtime copy `copy`, drawing into `appRoot`:
  * fetched again, with each project it imports and each code file it calls (`call native`).
  * - Afresh, unless `keepThings`:  then the last run's things carry over (`runCompiled()`).
+ * - `onFetched`:  called once its own javascript is in hand, before it starts.
  * - NOTE: its own javascript is NOT fetched if it's in memory, `source.compiled` -- its imports still are.
  * - Answers how it went, and the compiled javascript it loaded, by project id --
  *   the program's own under `MAIN_PROJECT` -- for the Type Explorer's "Compiled Output".
@@ -464,13 +591,22 @@ async function runProgram(
     layout,
     keepThings,
     messages,
-    siteHost
-  }: { layout: boolean; keepThings: boolean; messages?: Record<string, string>; siteHost: SiteHost }
+    siteHost,
+    onFetched
+  }: {
+    layout: boolean
+    keepThings: boolean
+    messages?: Record<string, string>
+    siteHost: SiteHost
+    onFetched?: () => void
+  }
 ): Promise<Ran> {
   const compiled = new Map<string, string>()
   stopFetchingAhead.get(appRoot)?.()
   try {
     const text = source.compiled ?? (await fetchText(source.compiledUrl))
+    // the page has it:  what's left is starting it
+    onFetched?.()
     compiled.set(MAIN_PROJECT, text)
     // a built site's pages, each loaded the first time it's shown (epic `solid-2-final` P13)
     const lazy = source.compiled === undefined ? LazyPages.forProgram(text, source.compiledUrl, copy) : undefined

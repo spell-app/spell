@@ -7,6 +7,7 @@ import { describePyrightError, pyright } from "spell/parser/spell/node/pyright"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { buildFolderFor } from "spell/app/spaces/server/node/projects/project-utils"
+import { BUILD_STEPS_VARIABLE, buildStepLine, type BuildStepName } from "spell/app/spaces/models/buildSteps"
 import { CLI } from "spell/app/cli"
 
 /**
@@ -35,8 +36,12 @@ import { CLI } from "spell/app/cli"
  * - `--stale`:  only the projects whose build is missing or out of date, and the same for what they import.
  *   - the rest are listed as up to date
  *   - what counts:  `CLI.staleBecause()`
- *   - the page server runs it when it starts, for `@spell/examples` and `@spell/library`
- *     (`ProjectBuild`, in `spell/app/spaces`)
+ *   - the page server runs it when it starts, for `@spell/library` (`ProjectBuild`, in `spell/app/spaces`)
+ * - Each project's build gets a FINGERPRINT beside it, `<Project>.fingerprint.json`:  what it was built from, as hashes,
+ *   worked out before it compiles (`CLI.fingerprintOf()`, `CLI.writeFingerprint()`), which `--stale` compares with.
+ * - With `SPELL_COMPILE_STEPS=1` in its environment (`BUILD_STEPS_VARIABLE`), it prints each step it reaches on stderr,
+ *   `spell-step: compiling @spell/examples/Solitaire`:  the page server's compiles, which pass them on to the page
+ *   waiting (spaces' `ProjectBuild`, epic `editor` P45).
  * - Returns the exit code:  `EXIT.ERRORS` if anything had errors.
  *   Warnings, e.g. a property with no type (`SP.SpellWarnings`), are listed under the errors, never counted:
  *   a project with only warnings compiles clean, its scope pack too.
@@ -83,6 +88,7 @@ async function compileProject(
   const row = status.start(project.projectId)
   let targets: SP.Target[]
   let why: string | undefined
+  let fingerprint: CLI.BuildFingerprint | undefined
   try {
     await session.compileImports(project, status, { force, stale })
     if (stale) {
@@ -92,6 +98,9 @@ async function compileProject(
         return true
       }
     }
+    sayStep("compiling", project)
+    // what it's built from as it compiles:  an edit made meanwhile still counts as a change
+    if (!stdout) fingerprint = await CLI.fingerprintOf(project)
     // for a built site, the cloud, a page's `<spell-viewer>`:  none of the editor's text (epic `solid-2-final` P11)
     await project.compile(undefined, {
       save: !stdout,
@@ -99,6 +108,7 @@ async function compileProject(
       compiledFor: "built"
     })
     targets = project.targets
+    if (fingerprint) CLI.writeFingerprint(project, fingerprint)
   } catch (error) {
     status.done(row, "failed", error instanceof Error ? error.message : String(error))
     return false
@@ -111,6 +121,7 @@ async function compileProject(
   const wrote = stdout ? [] : files.map((file) => file.location.serverPath)
   // what it imports, beside it, for a target that imports them from there, e.g. Python's `cards.py`
   const imports = stdout ? {} : await writeImportsBeside(project, targets, wrote)
+  sayStep("checking", project)
   // a CLEAN compile writes its scope pack too, as the language server does
   if (!stdout && !session.problems(project).length) {
     wrote.push(await session.workspace.writeScopes(project, session.explorer))
@@ -131,6 +142,15 @@ async function compileProject(
   ]
   const note = notes.filter(Boolean).join(" · ") || undefined
   return !session.report(status, row, project, { note, details: checked.details }).length
+}
+
+/**
+ * SIDE EFFECT:  prints `step` of `project` on stderr, for the page server (`BUILD_STEPS_VARIABLE`);
+ * nothing in a person's run.
+ */
+function sayStep(step: BuildStepName, project: SP.SpellProject): void {
+  if (process.env[BUILD_STEPS_VARIABLE])
+    process.stderr.write(`${buildStepLine({ projectId: project.projectId, step })}\n`)
 }
 
 /**

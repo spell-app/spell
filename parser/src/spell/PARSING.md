@@ -2642,10 +2642,10 @@ sidebars any of them opens.
   - A project anywhere else keeps them beside its source:
     a temp `@local/<folder>` group, a VS Code workspace elsewhere.
   - Built when needed, so a fresh checkout or worktree needs nothing run by hand:
-    - the page server, as it starts:  the built-in projects that are out of date, in the background
-      - `@spell/examples` and `@spell/library`
-      - `spell compile --stale --all @spell/examples @spell/library`
-    - spaces' routes:  a request for a built file that isn't there compiles its project first, then serves it
+    - the page server, as it starts:  Spell's libraries that are out of date, in the background
+      - `@spell/library` alone (epic `editor` P45)
+      - `spell compile --stale --all @spell/library`
+    - spaces' routes:  a request for a built file that isn't there compiles its project at once, then serves it
       - e.g. `/spaces/<project>/<project>.spell.js`, `.scopes.js`, `.declarations.json5` ...
       - one compile per project at a time, a request waits at most a minute
     - Both are `ProjectBuild`, in the editor's server ([ProjectBuild.ts](../../../app/src/spaces/server/node/routes/ProjectBuild.ts)),
@@ -2654,10 +2654,11 @@ sidebars any of them opens.
       (`CliSession.compileImports()`).
     - By hand:  `spell compile --all <root>`.
     - Add `--stale` for only what's out of date (`CLI.staleBecause()`).
-      Out of date means something is newer than its build, or a built file is missing:
+      Out of date means a built file is missing, or the TEXT of something it's built from changed (its fingerprint,
+      `<Project>.fingerprint.json`, kept beside its build;  epic `editor` P45):
       - one of the project's files, or its project file
       - an import's declarations
-      - spell's compiler
+      - spell's compiler (the same version as the editor's compile cache)
   - Renaming a project deletes its build folder, and duplicating one doesn't copy it:
     its files are named for the old project, so the next compile writes the new one's (`renameApp()`, `duplicateApp()`).
     Deleting a project deletes it too.

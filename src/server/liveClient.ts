@@ -490,8 +490,11 @@ export function liveClient(scrollKey: string): void {
       }
       if (event === "change" && data.path)
         onChange(data.path, typeof data.html === "string" ? { html: data.html, etag: data.etag } : undefined)
-      // a person's pref saved (`PREF_SAVED_EVENT`, spell/util's persist types):  the page's own code follows it
-      if (event === "pref-saved") dispatchEvent(new CustomEvent("spell-server:pref-saved", { detail: data }))
+      // a route module's own event (`LiveReload.send()`):  handed on as `spell-server:<event>` on `window`,
+      // its data the detail, for the page's own code to follow, e.g. a person's pref saved (`PREF_SAVED_EVENT`,
+      // spell/util's persist types)
+      else if (event !== "change" && event !== "hello")
+        dispatchEvent(new CustomEvent(`spell-server:${event}`, { detail: data }))
       // the server's run, as it opens:  the first time, the page notes what its scripts hold (`rememberVersions()`);
       // another run than the one that served the page:  it restarted, maybe on new code (`adoptRestart()`)
       if (event === "hello" && config!.run && data.run && data.run !== config!.run) {

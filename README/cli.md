@@ -690,11 +690,14 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
   a project with only warnings compiles clean.
 - A line that doesn't parse doesn't stop the compile:  it compiles to a `PARSE ERROR` comment, and the compile exits 1.
 - `--stale` and `--stdout` together are refused:  one writes only what's out of date, the other writes nothing.
-- Out of date means a file it builds is missing, or one of these changed since its build (`CLI.staleBecause()`):
-  its files, its project file, an import's declarations, Spell's compiler.
+- Out of date means a file it builds is missing, or the TEXT of one of these changed since its build
+  (`CLI.staleBecause()`):  its files, its project file, an import's declarations, Spell's compiler.
+  - Each build keeps a fingerprint of them beside it, `<Project>.fingerprint.json`:  a file saved unchanged, or a
+    merge that touches the compiler without changing it, rebuilds nothing.
+  - A build from before the fingerprints counts as out of date once.
 - Nothing to run by hand in a fresh checkout:
-  the page server runs `spell compile --stale --all @spell/examples @spell/library` as it starts,
-  and the spaces routes compile a project whose built file is missing.
+  the page server runs `spell compile --stale --all @spell/library` as it starts, the libraries alone,
+  and the spaces routes compile a project the moment a page asks for a built file of it that's missing.
 - `watch` rebuilds a watched project when one it imports changes.
   - It watches each project's folder, its `.spell` files, CSS and project file;
     it ignores `*.spell.js` and `*.scopes.js`.

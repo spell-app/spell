@@ -207,7 +207,7 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
       - whole projects:  a project compiles as one module, so any edit compiles it all again
       - none installed (the `spell` command, tests):  every compile compiles
     - Built when needed:
-      - the page server compiles `@spell/examples` and `@spell/library` as it starts
+      - the page server compiles `@spell/library` as it starts
       - spaces' API compiles a project whose built file is missing
       - by hand:  `spell compile --stale`
   - A project lists the others it wants in `project.json`'s `"targets"`.

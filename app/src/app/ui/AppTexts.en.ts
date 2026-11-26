@@ -999,6 +999,13 @@ export const APP_TEXTS = {
   debug: "Debug",
   showConsole: "Show Console",
   hideConsole: "Hide Console",
+  // the box over an app while its project is made ready to run, and the editor's loading screen (epic `editor` P45):
+  // each step, as the page server says it reaches it (`BuildStep`);  Owen's words
+  buildStepReading: "Reading your project…",
+  buildStepCompiling: "Getting it ready…",
+  buildStepStarting: "Starting it…",
+  buildMistakes: "This app has mistakes, so it can't run yet.",
+  buildMistakesOpen: "Open it in the editor",
 
   ////////////////
   // ## `<spell-editor>`'s pane (`SpellEditorPane.tsx`, `SpellEditor.tsx`)

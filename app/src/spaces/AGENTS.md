@@ -504,8 +504,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `/api/compiles`:  the COMPILE CACHE (epic `language` P27), what the editor's projects compiled to
     (`SRV.DiskCache`, the editor's `ServerCompileStore`)
     - on disk in `~/.spell/cache/compiles` (`environment.compileCacheDir`;  `SPELL_CACHE_DIR` moves it)
-    - its version a hash of the compiler's code (`compilerCode()`):  the parser folder, util, our models, Spell UI's
-      components and vocabularies;  a change to any starts an empty cache
+    - its version the compiler's (`compilerVersion()`, a hash of `COMPILER_CODE`):  the parser folder, util, our
+      models, Spell UI's components and vocabularies, the language server's folder;  a change to any starts an empty
+      cache;  the build folder's fingerprints use the same one (epic `editor` P45)
     - capped at the page server's `cacheLimit` setting, 200 MB by default (the kit's `package.json`;  epic `language`
       Q41):  past it, the entries used least recently go first
 - [appRoutes.ts](server/node/routes/appRoutes.ts):  the app on the PAGE server.
@@ -854,11 +855,26 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - It BUILDS projects when needed ([ProjectBuild.ts](server/node/routes/ProjectBuild.ts)):
   their compiled output and scope packs are in `build/`, never committed (epic `people-and-orgs` P11).
   - A request for a built file that isn't there (`/spaces/<project>/<project>.spell.js` ...)
-    compiles its project first, then serves it (`projectBuild.builtFirst()`).
+    compiles its project AT ONCE, beside anything else compiling, then serves it (`projectBuild.builtFirst()`;
+    epic `editor` P45, Q89).
     - One compile per project at a time, waiting at most `COMPILE_WAIT_MS`.
-  - The route module starts `spell compile --stale --all @spell/examples @spell/library @spell/guides` as the page
-    server starts, in the background:  the demo pages, App UI's live examples and the Spell UI site
-    (`/components/ui/`) run them.
+    - Only a project importing one of Spell's libraries waits for the startup compile first:
+      two compiles never write one library at once.
+  - The route module starts `spell compile --stale --all @spell/library` as the page server starts, in the
+    background:  the libraries alone (Q88), which other projects import and VS Code reads the schemas of.
+    - Every example and guide compiles the first time a page asks for it:  the demo pages, App UI's live
+      examples, the Spell UI site (`/components/ui/`, about 14 s the first time).
+  - A build is out of date by what's in its files, never their dates (Q90):  a FINGERPRINT beside it,
+    `<Project>.fingerprint.json`, hashes its files, its imports' declarations and the compiler (the cli's
+    `staleBecause()`).
+    - The compiler's hash is the compile cache's version:  ONE list of its folders, `COMPILER_CODE`
+      ([compilerCode.ts](server/node/projects/compilerCode.ts)).
+    - A merge that doesn't really change the compiler rebuilds nothing.
+  - Each step of a request's compile is told to every open page (`projectBuild.onStep()`, the live channel's
+    `build-step`, `SPACES.BuildStep`):  `reading`, then `compiling` and `checking` as `spell compile` prints them
+    (`SPELL_COMPILE_STEPS=1`), then `built` or `mistakes`.
+    - The runner's waiting box says them (`<SpellAppRunner>`):  the run page and every `<spell-viewer>`.
+    - So does the editor's loading screen, which stays while one is under way (`PageLoading.step()`).
   - A child process, the checkout's own `spell compile`:  it compiles as the CLI does,
     and the page server keeps serving pages meanwhile.
 

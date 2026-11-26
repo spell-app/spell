@@ -31,6 +31,15 @@ export function projectSource(projectId: string): SpellAppSource {
   }
 }
 
+/**
+ * Where project `projectId` opens in the editor, from a page the page server serves (a guide's `<spell-viewer>`):
+ * `/editor/edit/<project>`, which the page server sends on to the editor (the app's route module, `/editor`).
+ * - The run page, which the editor's own server serves, opens `/edit/<project>` itself.
+ */
+export function editorUrlFor(projectId: string): string {
+  return `/editor/edit/${SpellUrls.encodeAddress(projectId)}`
+}
+
 /** Name of project `projectId`, e.g. `solitaire`:  its address's last part. */
 export function nameOf(projectId: string): string {
   return projectId.slice(projectId.lastIndexOf("/") + 1)

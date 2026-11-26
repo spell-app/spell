@@ -118,9 +118,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           - new observed attributes, and a new version of a family's DOM class, swap in too (`HotDefinitions`, I171)
           - a swap that fails after all asks `SPELL_SERVER.reload()`:  a quiet reload like any other (below)
       - anything else:  `spell-server:changed`, and the page decides
-    - A route module may send its own events to every page (`LiveReload.send()`):  the app's sends `pref-saved`
-      when a person's pref is saved (their theme, epic `debut` P21), which the live client hands on as
-      `spell-server:pref-saved` on `window` (the kit's `PREF_SAVED_EVENT` / `PREF_SAVED_PAGE_EVENT`).
+    - A route module may send its own events to every page (`LiveReload.send()`):
+      the live client hands each on as `spell-server:<event>` on `window`, its data the event's `detail`.
+      - the app's `pref-saved`, when a person's pref is saved (their theme, epic `debut` P21):
+        `spell-server:pref-saved` (the kit's `PREF_SAVED_EVENT` / `PREF_SAVED_PAGE_EVENT`)
+      - the app's `build-step`, each step of a project made ready to run (epic `editor` P45)
     - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`).
       A page from an earlier run (the server restarted:  every merge into main does it) does NOT reload by itself
       (epic `epic-engine` I293;  Owen:  "can we avoid reloading the epic pages when that happens?"):
@@ -543,7 +545,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Spell projects' compiled output (`build/`, never committed) is built the same way,
       but by the app's route module, not here.
       - [ProjectBuild](../../app/src/spaces/server/node/routes/ProjectBuild.ts), in spaces' routes,
-        runs `spell compile --stale --all @spell/examples @spell/library` as the page server starts.
+        runs `spell compile --stale --all @spell/library` as the page server starts.
       - The page server knows nothing of spell projects.
   - `spell/server/site/...` -- browser code:
     - the PAGE PATCHER, `PagePatch` (epic `epic-engine` P40):  the ONE way an edited page shows in place, for every

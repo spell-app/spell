@@ -10,6 +10,7 @@ import { uiReady } from "spell/app/app/solid/loadUI"
 import { SpellAppRunner, type SpellAppControls, type SpellAppSource } from "spell/app/app/runner/SpellAppRunner"
 import { VSCodeRunner } from "spell/app/app/runner/VSCodeRunner"
 import type { DOMSpellViewerElement } from "spell/app/app/components/spell-viewer"
+import { BUILD_STEP_PAGE_EVENT, type BuildStep } from "spell/app/spaces/models/buildSteps"
 
 /**
  * The Solid runners, in the browser:
@@ -1029,6 +1030,78 @@ card.turnOver()
   })
 })
 
+describe("<SpellAppRunner>'s waiting box, while the server makes its project ready (epic `editor` P45)", () => {
+  /** The program's fetch, held until the test answers it:  a slow build on the server. */
+  function slowBuild(): { answer: (response: Response) => void } {
+    const realFetch = globalThis.fetch
+    let answer!: (response: Response) => void
+    const held = new Promise<Response>((resolve) => (answer = resolve))
+    const fetch = vi.spyOn(globalThis, "fetch").mockImplementation((input, init) => {
+      const url = String(input instanceof Request ? input.url : input)
+      return url.includes("/slow/") ? held : realFetch(input, init)
+    })
+    cleanups.push(() => fetch.mockRestore())
+    return { answer }
+  }
+
+  /** The page server's step, as the live client hands it on. */
+  function serverSays(step: BuildStep["step"]) {
+    dispatchEvent(new CustomEvent<BuildStep>(BUILD_STEP_PAGE_EVENT, { detail: { projectId: SLOW_PROJECT, step } }))
+  }
+
+  /** A program the server builds as it's asked for. */
+  const slowSource: SpellAppSource = {
+    name: "Counter",
+    projectId: SLOW_PROJECT,
+    compiledUrl: "/slow/Counter.spell.js",
+    importUrl: (id) => `/nowhere/${id}`
+  }
+
+  /** The waiting box's words, `undefined` while there's none. */
+  function waitingText(host: HTMLElement): string | undefined {
+    return host.querySelector(".SpellAppWaiting")?.textContent?.trim()
+  }
+
+  test("shown after half a second, saying each step:  reading, getting it ready as the server compiles;  gone once it runs", async () => {
+    const { answer } = slowBuild()
+    const host = await mount(slowSource)
+    expect(waitingText(host)).toBeUndefined()
+    expect(await waitFor(() => waitingText(host))).toBe("Reading your project…")
+    expect(host.querySelector(".SpellAppWaiting ui-loader")).not.toBeNull()
+    serverSays("compiling")
+    expect(await waitFor(() => waitingText(host) === "Getting it ready…" && waitingText(host))).toBe(
+      "Getting it ready…"
+    )
+    serverSays("built")
+    answer(new Response(COUNTER, { headers: { "content-type": "text/javascript" } }))
+    await waitFor(() => host.querySelector("button.count"))
+    await waitFor(() => waitingText(host) === undefined)
+  })
+
+  test("a project built already never flashes it", async () => {
+    const { answer } = slowBuild()
+    answer(new Response(COUNTER, { headers: { "content-type": "text/javascript" } }))
+    const host = await mount(slowSource)
+    await waitFor(() => host.querySelector("button.count"))
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    expect(waitingText(host)).toBeUndefined()
+  })
+
+  test("a project with mistakes that can't run:  says so, with a button opening it in the editor", async () => {
+    const { answer } = slowBuild()
+    const host = await mount(slowSource, { editUrl: "/edit/@spell/test/Slow" })
+    await waitFor(() => waitingText(host))
+    serverSays("mistakes")
+    answer(new Response("not found", { status: 404 }))
+    await waitFor(() => waitingText(host)?.includes("mistakes"))
+    expect(host.querySelector(".SpellAppMistakes p")!.textContent).toBe("This app has mistakes, so it can't run yet.")
+    expect(host.querySelector(".SpellAppMistakes ui-button")!.textContent).toBe("Open it in the editor")
+  })
+})
+
+/** The project `<SpellAppRunner>`'s waiting box tests run. */
+const SLOW_PROJECT = "@spell/test/Slow"
+
 describe("<SpellAppRunner>, a program that calls native code (from-console J110)", () => {
   test("each code file comes from its source's `nativeUrl`, and the program runs", async () => {
     const asked: string[] = []
@@ -1428,15 +1501,19 @@ function compiled(program: string): SpellCompiled {
 }
 
 /** Render a `<SpellAppRunner>` of `source` in a fresh `<div>`;  unmounted after the test. */
-async function mount(source: SpellAppSource, { debug }: { debug?: "things" | "console" } = {}) {
-  return (await mountSettable(source, undefined, debug)).host
+async function mount(
+  source: SpellAppSource,
+  { debug, editUrl }: { debug?: "things" | "console"; editUrl?: string } = {}
+) {
+  return (await mountSettable(source, undefined, debug, editUrl)).host
 }
 
 /** Render a `<SpellAppRunner>` whose source can be changed. */
 async function mountSettable(
   first: SpellAppSource,
   onControls?: (controls: SpellAppControls) => void,
-  debug?: "things" | "console"
+  debug?: "things" | "console",
+  editUrl?: string
 ) {
   await uiReady
   const { createSignal } = await import("solid-js")
@@ -1458,6 +1535,7 @@ async function mountSettable(
           builtInsUrl="/nowhere.scopes.js"
           onOpen={() => {}}
           onControls={onControls}
+          editUrl={editUrl}
         />
       </ui-root>
     )

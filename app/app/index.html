@@ -157,6 +157,17 @@
         line-height: 1.2;
         animation: PageLoadingBreathe 1.6s ease-in-out infinite alternate;
       }
+      /* the step it's waiting on, under the line, quieter (`PageLoading.step()`) */
+      #PageLoading p.Step {
+        margin: calc(var(--line-size) * 0.8) 0 0;
+        font-size: calc(var(--line-size) * 0.6);
+        font-weight: 400;
+        opacity: 0.8;
+        animation: none;
+      }
+      #PageLoading p.Step[hidden] {
+        display: none;
+      }
       @keyframes PageLoadingBreathe {
         from {
           opacity: 0.55;
@@ -177,6 +188,8 @@
           <h1><span>Spell</span></h1>
           <p>All Magic, No Fuss!</p>
         </div>
+        <!-- the step a project it opens is waiting on, while one is under way (`PageLoading.step()`) -->
+        <p class="Step" hidden></p>
       </section>
     </div>
     <!-- Spell's name and the line in Spanish:  before any script of the app's has run, so no `AppTexts` yet -->

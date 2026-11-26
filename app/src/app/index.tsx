@@ -1,6 +1,9 @@
 import { createSignal, Show } from "solid-js"
 import { render } from "@solidjs/web"
 
+// Import directly, NOT through the `spell/server` barrel, which is the server's node code
+import { joinLiveChannel } from "spell/server/liveClient"
+
 // Import parser bits
 import "spell/parser/parser"
 import { editor } from "spell/app/app/editor"
@@ -22,6 +25,7 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
 import { ServerCompileStore } from "spell/app/app/ServerCompileStore"
 import { reloadOutOfSight } from "spell/app/app/reloadOutOfSight"
+import { stepsOnLoadingScreen } from "spell/app/app/solid/loadingSteps"
 
 // Solid follows spell cells:  BEFORE anything renders
 import "spell/app/app/solid/cellsBridge"
@@ -86,3 +90,10 @@ render(
 
 // The hero over the page goes once what holds it is ready:  the bar and the code, on the editor's pages.
 PageLoading.start()
+
+// While a project it opens waits on a build (an import not built yet), the hero says each step, and stays:
+// the page server tells them over its live channel (epic `editor` P45).  Not in the static build, which has none.
+if (!isStaticBuild) {
+  joinLiveChannel()
+  stepsOnLoadingScreen()
+}

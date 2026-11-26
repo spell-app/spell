@@ -953,6 +953,11 @@ const APP_TEXTS_ES: AppTextPack = {
   debug: "Depurar",
   showConsole: "Mostrar la consola",
   hideConsole: "Ocultar la consola",
+  buildStepReading: "Leyendo tu proyecto…",
+  buildStepCompiling: "Preparándolo…",
+  buildStepStarting: "Iniciándolo…",
+  buildMistakes: "Esta app tiene errores, así que todavía no puede funcionar.",
+  buildMistakesOpen: "Ábrela en el editor",
 
   ////////////////
   // ## `<spell-editor>`'s pane
