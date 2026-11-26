@@ -198,7 +198,32 @@ describe("files and folders dragged in from the desktop:  the drag lines, `file`
   test("a program's own `file` type wins, with a warning:  its own files, not the desktop's", () => {
     const { code, warnings } = dropArea(["- when a file is dropped on it:", "\tprint the file"], "a file is a thing\n")
     expect(code).toMatch(/whenFileDroppedOn\(file\)/)
-    expect(warnings).toEqual([expect.stringContaining('Your program makes its own kind of thing called "file"')])
+    expect(warnings).toEqual([
+      expect.stringContaining('Your program already uses the name "file" for something it makes')
+    ])
+  })
+
+  test("`can take a file when:` is `canTakeFile(file)`, the page's to ask as one is dropped;  never a card's `canTake()` (I167)", () => {
+    const { code } = dropArea([
+      "- can take a file when:",
+      "\tthe file's size is less than 100",
+      "- can take a folder when:",
+      "\tyes",
+      "- when a file is dropped on it:",
+      "\tprint the file"
+    ])
+    expect(code).toMatch(/canTakeFile\(file\) \{\s+file\.size < 100/)
+    expect(code).toMatch(/canTakeFolder\(folder\)/)
+    expect(code).not.toMatch(/canTake\(/)
+  })
+
+  test("in Spanish, `puede tomar un archivo cuando:` is `canTakeFile(archivo)`;  a program's own `file` type keeps `canTake()`", () => {
+    const contents = "una zona es una vista:\n\tpuede tomar un archivo cuando:\n\t\tsí\n"
+    const { files } = parseSpellProject([{ path: "/zona.es.spell", contents }])
+    expect(files[0]!.errors.map((error) => JSON.stringify(error))).toEqual([])
+    expect(normalized(files[0]!.compiled)).toMatch(/canTakeFile\(archivo\)/)
+    const own = dropArea(["- can take a file when:", "\tyes"], "a file is a thing\n")
+    expect(own.code).toMatch(/canTake\(file\)/)
   })
 })
 

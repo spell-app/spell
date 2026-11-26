@@ -330,7 +330,7 @@ export const PARSER_MESSAGES = {
    * the line is about the program's own things, never a file dragged in from the computer.
    */
   "own-file-type":
-    'Your program makes its own kind of thing called "{word}".  So this line reacts when one of those is dragged, not a file dragged in from your computer.  To take files from your computer, rename your own kind of thing.',
+    'Your program already uses the name "{word}" for something it makes.  So this line is about those, dragged inside your program, not files dragged in from your computer.  To take files from your computer, give the thing you made another name, like "my {word}".',
   /**
    * Old words that still read:  `{line}` is the new.
    * - An ability's, `- it can be dragged` for `it is draggable` (epic `debut` P27).

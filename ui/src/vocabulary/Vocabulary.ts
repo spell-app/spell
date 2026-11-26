@@ -275,6 +275,17 @@ export class Vocabulary {
   }
 
   /**
+   * Every page language's name for canonical `tag`'s event `event`:  `ui-uploading` of `ui-uploader` => `es-subiendo`.
+   * - From the dictionaries, so it answers before the component's family has loaded.
+   * - The canonical name isn't among them;  none with no page language.
+   */
+  localizedEventNames(tag: string, event: string): string[] {
+    return this.languages.map(({ prefix, dictionary }) =>
+      Vocabulary.eventName(event, prefix, dictionary.components?.[tag]?.events?.[event] ?? dictionary.events?.[event])
+    )
+  }
+
+  /**
    * One language's `Dictionary`, gathered from its parts:  `shared`, its names for every tag
    * (`components.es.ts`), and `tags`, each tag's own file (`UIButton.es.ts`).
    * - Static:  pure.

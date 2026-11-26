@@ -17,8 +17,15 @@ export const fileMethods = defineCoreModule({
    * The contents of `file`, read `as` text, JSON or binary:  what `the file as text` compiles to.
    * - `text`:  its text;  `json`:  its text read as JSON;  `binary`:  its bytes, a `Uint8Array`.
    * - throws a `TypeError` for something that isn't a file, and a `SyntaxError` for JSON that doesn't read
+   * - A file still being dragged (`when a file is dragged over it:`, `dragged out of it`, `while ...`) is only a
+   *   summary, how many and their kinds:  the browser hands the file over only once it's dropped (epic `language` I172).
    */
   async readFile(file: unknown, as: FileReading): Promise<unknown> {
+    if (isDragSummary(file)) {
+      throw new TypeError(
+        "core.readFile():  a file still being dragged can't be read:  the browser hands it over only once it's dropped;  read it in `when a file is dropped on it:`"
+      )
+    }
     if (!isBlob(file)) {
       throw new TypeError(`core.readFile():  ${describe(file)} isn't a file;  read a file a person picked or dropped`)
     }
@@ -32,6 +39,11 @@ Object.assign(core, fileMethods)
 /** Is `value` a file, or any other `Blob`? */
 function isBlob(value: unknown): value is Blob {
   return typeof Blob !== "undefined" && value instanceof Blob
+}
+
+/** Is `value` what the drag lines hand a program while files are dragged:  `{ count, kinds, via }`, no file? */
+function isDragSummary(value: unknown): boolean {
+  return typeof value === "object" && value !== null && "count" in value && "kinds" in value && !isBlob(value)
 }
 
 /** `value`, briefly, for an error. */
