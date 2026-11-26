@@ -375,7 +375,9 @@ export class Loader {
     // the file's own keys (`$type`, `$version`, `$schema` ...) are never props
     for (const [key, value] of Object.entries(entry)) {
       if (key.startsWith("$")) continue
-      if (isPlainValue(value)) plain[key] = valueAsDeclared(Class, key, value)
+      // text that came as an object or a list, a file's JSON:  its JSON text (`valueAsDeclared()`)
+      if (isPlainValue(value) || schemaOf(Class).info(key)?.type === "text")
+        plain[key] = valueAsDeclared(Class, key, value)
       else later[key] = value
     }
     const made = new Class(plain)
@@ -393,7 +395,8 @@ export class Loader {
    * - A key an object type doesn't declare:  kept on it as it came (`Thing.keepsEveryKey`).
    */
   protected setRead(made: SpellObject, key: string, json: unknown): void {
-    if (keepsKeyAsItCame(made, key)) return void ((made as unknown as Record<string, unknown>)[key] = structuredClone(json))
+    if (keepsKeyAsItCame(made, key))
+      return void ((made as unknown as Record<string, unknown>)[key] = structuredClone(json))
     const value = this.read(json)
     const current = Array.isArray(value) ? (made as unknown as Record<string, unknown>)[key] : undefined
     if (current instanceof List) current.items = value as unknown[]
@@ -584,11 +587,17 @@ function isReference(json: unknown): json is Record<string, unknown> {
  *   - one that came as text is written back as text (`valueAsWritten()`)
  * - yes or no (`choice`):  `true` or `false`, from a sheet's cell (epic `language` T65):
  *   `"true"`, `"yes"`, `"1"` are yes;  `"false"`, `"no"`, `"0"` and an empty cell are no;  any other text as it is
+ * - text the place sends as an object or a list, a file's JSON:  its JSON text, two spaces a level, so a page can
+ *   show it as it is;  written back as what it was (`valueAsWritten()`)
  * - else, and any other text:  `value`, as it is
  * - a `null` where a property's declared:  nothing, as that's how a row says it has none
  */
 export function valueAsDeclared(Class: SpellClass, key: string, value: unknown): unknown {
   if (value === null) return schemaOf(Class).info(key) ? undefined : value
+  if (typeof value === "object" && schemaOf(Class).info(key)?.type === "text") {
+    sentAsJson(Class).add(key)
+    return JSON.stringify(value, null, 2)
+  }
   if (typeof value !== "string") return value
   const info = schemaOf(Class).info(key)
   if (info?.type === "date") {
@@ -610,10 +619,18 @@ export function valueAsDeclared(Class: SpellClass, key: string, value: unknown):
  * `json`, what a program set `Class`'s `key` to, as its place wants it back:  the other way round from `valueAsDeclared()`.
  * - A number that came as text goes back as text, its mark the place's:  `1.5` as `"1,5"`, where it writes numbers that way.
  * - Nothing, where the property names its word for it (`or "unknown"`):  that word.
+ * - Text that came as an object or a list:  that again, its JSON read back;  text that isn't JSON any more, as it is.
  * - Anything else:  `json`, as it is.
  */
 export function valueAsWritten(Class: SpellClass, key: string, json: unknown): unknown {
   const info = schemaOf(Class).info(key)
+  if (info?.type === "text" && typeof json === "string" && SENT_AS_JSON.get(Class)?.has(key)) {
+    try {
+      return JSON.parse(json) as unknown
+    } catch {
+      return json
+    }
+  }
   if (info?.type !== "number") return json
   if (json === undefined || json === null) return info.nothingAs?.[0] ?? json
   if (typeof json !== "number" || !SENT_AS_TEXT.get(Class)?.has(key)) return json
@@ -647,6 +664,16 @@ const SENT_AS_TEXT = new WeakMap<Function, Set<string>>()
 
 /** The fields already warned about, `Recipe.servings`:  once each. */
 const WARNED_NOT_A_NUMBER = new Set<string>()
+
+/** Each type's text fields its place sent as an object or a list:  written back as that. */
+const SENT_AS_JSON = new WeakMap<Function, Set<string>>()
+
+/** `Class`'s text fields its place sent as an object or a list. */
+function sentAsJson(Class: SpellClass): Set<string> {
+  let fields = SENT_AS_JSON.get(Class)
+  if (!fields) SENT_AS_JSON.set(Class, (fields = new Set()))
+  return fields
+}
 
 /** `Class`'s fields its place sent as text. */
 function sentAsText(Class: SpellClass): Set<string> {
