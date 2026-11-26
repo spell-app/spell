@@ -389,7 +389,7 @@ export const epicPageVocabulary = {
       key: "askStatus",
       text: "Where are we?",
       description:
-        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174, Owen's order):  asks the " +
+        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174):  asks the " +
         "epic's session for a short status, `/wtf`."
     },
     {
@@ -403,7 +403,7 @@ export const epicPageVocabulary = {
       key: "askHush",
       text: "Hush settled items",
       description:
-        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174, Owen's order):  asks the " +
+        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174):  asks the " +
         "epic's session to run `/epic hush <epic>`."
     },
     {
@@ -417,7 +417,7 @@ export const epicPageVocabulary = {
       key: "askFresh",
       text: "Start fresh",
       description:
-        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174, Owen's order):  asks the " +
+        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174):  asks the " +
         "epic's session to run `/epic fresh`."
     },
     {
@@ -431,7 +431,7 @@ export const epicPageVocabulary = {
       key: "askPush",
       text: "Merge and push",
       description:
-        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174, Owen's order):  asks the " +
+        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174):  asks the " +
         "epic's session to merge its finished work into main and push main to GitHub;  the tooling home's only."
     },
     {
