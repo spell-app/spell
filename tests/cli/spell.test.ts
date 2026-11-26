@@ -43,7 +43,7 @@ describe("spell help", () => {
 
   test("one command, and a sub-command, by its path", () => {
     expect(spell(["help", "server"]).stdout).toMatch(/^Usage: spell server \[options\] \[command\]\n/)
-    expect(spell(["help", "server", "stop"]).stdout).toMatch(/^Usage: spell server stop \[options\] \[which\]\n/)
+    expect(spell(["help", "server", "stop"]).stdout).toMatch(/^Usage: spell server stop \[options\] \[server\]\n/)
   })
 
   test("spell publish's tag is next unless told otherwise:  a plain publish never moves latest (epic repo-split P22)", () => {
@@ -164,12 +164,14 @@ process.exit(3)
     expect(run(["status", "--root", "."], kit).args).toEqual(["status", "--root", "."])
   })
 
-  test("stop, and stop local:  the page server's stop;  another word is a usage error", () => {
+  test("stop, stop local and stop page-server:  the page server's stop;  another word names a server the keeper keeps", () => {
     expect(server(["stop"])).toMatchObject({ args: ["stop"] })
     expect(server(["stop", "local"])).toMatchObject({ args: ["stop"] })
+    expect(server(["stop", "page-server"])).toMatchObject({ args: ["stop"] })
+    // no keeper runs in a test:  a server only it knows can't be stopped
     const bogus = spell(["server", "stop", "bogus"], INSIDE)
     expect(bogus.status).toBe(2)
-    expect(bogus.stderr).toContain("local (default) or all")
+    expect(bogus.stderr).toContain("only the server keeper starts and stops it")
   })
 })
 

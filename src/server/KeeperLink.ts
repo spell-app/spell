@@ -10,9 +10,10 @@ import { Processes } from "./Processes.ts"
  * ### `KeeperLink`
  * How any program on this machine asks the SERVER KEEPER to start, stop or restart a main checkout's servers
  * (epic `epic-engine` P82):  only the keeper does that, so no worktree's session restarts main's page server by itself.
- * - The keeper:  one program per machine that keeps every project's servers up (the epic hub's `ServerKeeper`).
+ * - The keeper:  one program per machine that keeps every project's servers up (`ServerKeeper`, in
+ *   `spell/server/keeper`:  `spell keeper`'s own program, or the epic hub's until it hands over;  epic `editor` P48).
  *   This side names none of it:  it reads the keeper's record, `~/.spell/server-keeper.json` (`SPELL_KEEPER_FILE`
- *   names another:  the tests'), `{ pid, base, token }`, mode 0600
+ *   names another:  the tests'), `{ pid, base, token, keeper }`, mode 0600
  * - `ask()`:  POST `<base>/api/servers/<action>` with `{ checkout, server }`, the record's token;  `undefined` when no
  *   keeper runs, so the caller does it itself, as before
  * - Inside the keeper's own process, `ask()` answers `undefined` too:  the keeper does the work, never asks itself
@@ -25,8 +26,8 @@ export class KeeperLink {
   /** the keeper's record */
   readonly file: string
 
-  /** - `file`:  default `SPELL_KEEPER_FILE`, else `~/.spell/server-keeper.json` */
-  constructor(file = process.env[KEEPER_FILE_VARIABLE] ?? join(homedir(), ".spell", "server-keeper.json")) {
+  /** - `file`:  default `SPELL_KEEPER_FILE`, else `server-keeper.json` in the keeper's home (`keeperHome()`) */
+  constructor(file = process.env[KEEPER_FILE_VARIABLE] ?? join(keeperHome(), "server-keeper.json")) {
     this.file = resolve(file)
   }
 
@@ -129,9 +130,7 @@ export class KeeperLink {
   static agentAbove(env: Record<string, string | undefined>, lineage: Lineage): boolean {
     if (env.SPELL_EPIC_AGENT?.trim() || !lineage.length) return true
     const agentPid = Number(env.CLAUDE_PID) || undefined
-    return lineage.some(
-      ({ pid, command }) => pid === agentPid || AGENT_PROGRAMS.has(basename(command))
-    )
+    return lineage.some(({ pid, command }) => pid === agentPid || AGENT_PROGRAMS.has(basename(command)))
   }
 
   /**
@@ -161,8 +160,14 @@ export class KeeperLink {
   }
 }
 
-/** The keeper's record:  its process, its address, the token its writes need. */
-export type KeeperRecord = { pid: number; base: string; token: string }
+/**
+ * The keeper's record:  its process, its address, the token its writes need, and WHICH keeper wrote it.
+ * - `keeper`:  `spell` (`spell keeper start`'s own program) or `epic hub`;  none:  a hub on code from before
+ *   epic `editor` P48
+ * - a keeper that finds the record naming another live keeper stops keeping (`ServerKeeper`):  how one hands over to
+ *   the next with no gap
+ */
+export type KeeperRecord = { pid: number; base: string; token: string; keeper?: string }
 
 /**
  * What the keeper does to a server, when asked.
@@ -176,6 +181,17 @@ export type KeeperAnswer = { base?: string; port?: number; pid?: number; launche
 
 /** The keeper's calls, on its own server. */
 export const KEEPER_API = "/api/servers"
+
+/**
+ * The server keeper's home:  `SPELL_KEEPER_HOME`, else `~/.spell`:  its record, list, holds and log (epic `editor`
+ * P48);  a test or a scratch try points it at a folder of its own.
+ */
+export function keeperHome(): string {
+  return process.env[KEEPER_HOME_VARIABLE] || join(homedir(), ".spell")
+}
+
+/** The variable that moves the keeper's home (`keeperHome()`). */
+export const KEEPER_HOME_VARIABLE = "SPELL_KEEPER_HOME"
 
 /** The variable naming another keeper record (the tests'). */
 export const KEEPER_FILE_VARIABLE = "SPELL_KEEPER_FILE"

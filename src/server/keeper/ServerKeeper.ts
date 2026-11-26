@@ -1,79 +1,93 @@
 import { spawn } from "node:child_process"
-import { existsSync, mkdirSync, openSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
-import { join } from "node:path"
+import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
+import { basename, dirname, join } from "node:path"
 
 import { every } from "spell/util/timing"
 import { slug } from "spell/util/string"
 import { SRV, type Handler } from "spell/server"
-import { PageServer } from "spell/server/page"
+import { PageServer, pageServerSettings } from "spell/server/page"
 import { REPOS_FILE } from "spell/server/kitFolders"
 
-import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
-import { EpicConfig } from "spell/epic/config/EpicConfig"
-
 import { HttpsSwitch, afterAnswer } from "./HttpsSwitch"
-import { ServerFacts } from "./ServerFacts"
+import { KeeperList } from "./KeeperList"
 import {
   EDITOR_SPACES_API,
   HTTPS_API,
   RESTART_ALL_API,
   HANDS_OFF_API,
-  HOLD_FILE,
+  KEEPER_HOLDS_FILE,
+  KEEPER_SERVER_LOGS,
+  SPELL_KEEPER,
   type EditorSpaces,
   type HandsOff,
   type HttpsTurn,
+  type KeeperRepo,
+  type KeeperServer,
   type KeptServer,
   type KeptServerState,
-  type Repo,
-  type ServersAnswer
-} from "./server.types"
+  type KeptServersAnswer
+} from "./keeper.types"
 
 /****************
  * ### `ServerKeeper`
- * The SERVER KEEPER (epic `epic-engine` P82):  ONE program per machine, the epic hub, keeps every project's web
- * servers up on their main code, so none goes down when an epic closes, and no epic starts or stops main's by itself.
- * - It looks at every server every 10 seconds (`LOOK_SECONDS`), and at once when asked (`look()`, a session's start).
- * - Its servers, per repo the hub serves (`RepoList`):
- *   - the MAIN checkout's page server, in a Spell kit:  always on;  started when it's down, restarted when it runs older
- *     than its code (main moved:  `PageServer.ensureHere()`);  a stop asked for by hand (`spell server stop`) LEAVES it
- *     stopped, until Start
- *   - its editor:  it comes and goes with the page server (its child), so it's kept through it:  when the repo's
- *     settings say how the app starts (`EpicConfig.app.start`, the App tab's), an editor down under a running page
- *     server restarts the page server, at most once every `EDITOR_RETRY_MINUTES` (3);  its Start and Restart do the same;
- *     without a start command, it's only watched, with no buttons
- *   - the repo's OWN servers, from its `.epic/config.json5` (`servers`:  a proxy server, say):  watched, by a URL or a
- *     port;  started when down if it names a `start` command, else only shown
- *   - each WORKTREE's page server:  on demand (its first opener starts it), on the port written down for it
- *     (`SRV.PortBook`), and stopped after 30 minutes with no request and no page open (`IDLE_MINUTES`)
- *   - the hub itself, which serves the Servers tab
+ * The SERVER KEEPER:  ONE program per machine keeps every project's web servers up on their main code, so none goes
+ * down when a worktree closes, and nothing starts or stops main's by itself.
+ * - Spell's own since epic `editor` P48:  `spell keeper start` runs it as a program of its own (`KeeperProgram`);
+ *   the epic hub ran it before (epic `epic-engine` P82), and still does until it hands over (below, "Handing over")
+ * - It looks at every server every 10 seconds (`LOOK_SECONDS`), and at once when asked (`look()`).
+ * - What it keeps, for each main checkout it's handed (`repos`;  Spell's own:  its list, `KeeperList`):
+ *   - the main checkout's page server, in a Spell kit:  always on;  started when it's down, restarted when it runs
+ *     older than its code (main moved:  `PageServer.ensureHere()`);  a stop asked for by hand (`spell server stop`)
+ *     LEAVES it stopped, until Start
+ *   - its editor:  it comes and goes with the page server (its child), so it's kept through it:  when the page server
+ *     serves one (`editorKept`:  its settings run the app's routes), an editor down under a running page server
+ *     restarts the page server, at most once every `EDITOR_RETRY_MINUTES` (3);  its Start and Restart do the same;
+ *     else it's only watched, with no buttons
+ *   - the checkout's OWN servers (`serversOf`:  Spell's own, those `spell keeper add` registered;  the hub's, each
+ *     repo's `.epic/config.json5` `servers`):  watched, by a URL or a port;  started when down if one names a `start`
+ *     command, else only shown
+ *   - each WORKTREE's page server, found from git's own records (`<main>/.git/worktrees/`):  on demand (its first
+ *     opener starts it), on the port written down for it (`SRV.PortBook`), and stopped after 30 minutes with no
+ *     request and no page open (`IDLE_MINUTES`)
+ *   - itself, a row of its own (`self`)
  * - What it starts carries its mark (`SRV.KEEPER_START_VARIABLE`, epic `epic-engine` P84):  main's page server and
  *   editor refuse an agent's start without it (`SRV.KeeperLink.refusedStart()`)
  * - Asked by others through `SRV.KeeperLink`:  its record, `~/.spell/server-keeper.json`, names it, and
  *   `POST /api/servers/<start|stop|restart>` does it;  every main-checkout start, stop and restart of the page server
  *   comes here (`PageServer.ensure()`, `stop()`, `restart()`)
- * - The Servers tab's data:  `GET /api/servers` (`ServersAnswer`), `GET /api/servers/dot` (the tab's red dot)
+ * - HANDING OVER (epic `editor` P48):  the record says WHICH keeper wrote it (`name`:  `spell`, `epic hub`), and a
+ *   keeper that finds it naming another live keeper STEPS ASIDE:  it stops keeping, forwards what it's asked to the
+ *   one in charge, and takes the record back if that one goes;  so there's always one keeping, never two
+ *   - `start()` takes the record unless another kind of keeper holds it live (`takeOver` takes it anyway:
+ *     `spell keeper start`), so the epic hub's keeper leaves Spell's alone, and a fresh hub replaces an old one
+ *   - `onStepAside`:  what else happens then (Spell's program exits)
+ * - The Servers tab's data:  `GET /api/servers` (`KeptServersAnswer`, plus the hub's `moreAnswer`), `GET
+ *   /api/servers/dot` (the tab's red dot)
  * - HTTPS for the page servers, on and off from the tab (`https`, an `HttpsSwitch`;  epic `epic-engine` T164):
  *   `POST /api/servers/https`
  * - the page server's certificate WATCHED (T164):  each look compares its two files (`HttpsSwitch.filesStamp`) with the
  *   last;  made, made again or deleted (the tab's switch, or `spell server certificate` / `--undo` in a terminal),
  *   every main page server is restarted, so it takes HTTPS or drops it with no restart by hand
- * - HANDS OFF (T164):  a switch on the tab, kept in the hold file until turned off (`handsOff`):  while it's on, the
- *   keeper starts, stops and restarts nothing of main's by itself (no keep-alive, no editor restart, no repo's own
+ * - HANDS OFF (T164):  a switch on the tab, kept in the holds file until turned off (`handsOff`):  while it's on, the
+ *   keeper starts, stops and restarts nothing of main's by itself (no keep-alive, no editor restart, no checkout's own
  *   server, no certificate restart), but still looks and reports;  the person's own buttons still work.  Turned off,
  *   it looks at once:  what's down comes back, and a certificate changed meanwhile is taken up
  * - Restart all (T164):  `POST /api/servers/restart-all`, every main page server restarted, its editor with it, held
  *   ones too
- * - Its own code newer than its start (main moved under it):  it hands over to a fresh hub (`epic hub ensure`, run
- *   detached), so it keeps on the main code too
- * - What a stop by hand holds:  `<home>/server-keeper.json`, `{ held: [<server id>] }`
+ * - Its own code newer than its start (main moved under it):  `onStale`, which hands over to a fresh keeper
+ * - What a stop by hand holds:  `<home>/server-keeper-holds.json`, `{ held: [<server id>], handsOff }`;  carried over
+ *   once from `legacyHolds` (the epic home's `server-keeper.json`), and written there too while one is handed in, so
+ *   the epic tooling's command guard still reads the hands-off switch
+ * - NEVER imports the epic tooling:  what's the hub's is handed in (`repos`, `serversOf`, `editorKept`, `self`,
+ *   `moreAnswer`, `onStale`, `legacyHolds`)
  * - The page servers it's handed (`control`), the clock (`now`) and the HTTPS switch (`https`) are its tests' to change.
  ****************/
 export class ServerKeeper {
-  /** the epic home:  the hold file, the own servers' logs */
+  /** the keeper's home:  the holds file, the own servers' logs */
   readonly home: string
 
-  /** the repos the hub serves */
-  readonly repos: Repo[]
+  /** which keeper this is, in its record:  `spell`, `epic hub` */
+  readonly name: string
 
   /** how it starts, stops and asks a checkout's page server */
   readonly control: PageServerControl
@@ -102,56 +116,132 @@ export class ServerKeeper {
   /** the record `SRV.KeeperLink` reads */
   private readonly link = new SRV.KeeperLink()
 
-  /** called when the keeper's own code is newer than its start:  default, a fresh hub (`handOver()`) */
-  private readonly onStale: () => void
+  /** the main checkouts it keeps, asked afresh each look */
+  private readonly reposNow: () => KeeperRepo[]
+
+  /** a checkout's own servers */
+  private readonly serversOf: (repo: KeeperRepo) => KeeperServer[]
+
+  /** whether main checkout `checkout`'s editor is kept through its page server */
+  private readonly editorKept: (checkout: string) => boolean
+
+  /** its own row's name and words */
+  private readonly self: { id: string; name: string; what: string }
+
+  /** more for `GET /api/servers` (the hub's:  what merged into main, what waits) */
+  private readonly moreAnswer?: () => object
+
+  /** called when the keeper's own code is newer than its start */
+  private readonly onStale?: () => void
+
+  /** called when it steps aside for another keeper */
+  private readonly onStepAside?: (holder: SRV.KeeperRecord) => void
+
+  /** the epic home's old holds file:  carried over once, and kept in step */
+  private readonly legacyHolds?: string
 
   /** whether `onStale` ran */
   private handedOver = false
 
-  /** the hub's address, once `start()` has it */
+  /** its address and write token, once `start()` has them */
   private base?: string
+  private token?: string
+
+  /** the keeper in charge while this one stands aside, else `undefined` */
+  private holder?: SRV.KeeperRecord
 
   constructor({
-    home,
+    home = SRV.keeperHome(),
+    name = SPELL_KEEPER,
     repos,
+    serversOf,
+    editorKept = pageServerServesEditor,
+    self = SELF,
+    moreAnswer,
+    legacyHolds,
     control = PAGE_SERVERS,
     now = Date.now,
     onStale,
+    onStepAside,
     https
   }: {
-    home: string
-    repos: Repo[]
+    home?: string
+    name?: string
+    /** default:  the keeper's list (`KeeperList`), read each look */
+    repos?: KeeperRepo[] | (() => KeeperRepo[])
+    /** default:  the servers the keeper's list registers for the checkout */
+    serversOf?: (repo: KeeperRepo) => KeeperServer[]
+    editorKept?: (checkout: string) => boolean
+    self?: { id: string; name: string; what: string }
+    moreAnswer?: () => object
+    legacyHolds?: string
     control?: PageServerControl
     now?: () => number
     onStale?: () => void
+    onStepAside?: (holder: SRV.KeeperRecord) => void
     /** default:  the page servers' certificate, a turn asking for a look, which sees its files change */
     https?: HttpsSwitch
-  }) {
+  } = {}) {
     this.home = home
-    this.repos = repos
+    this.name = name
+    const list = new KeeperList({ home })
+    this.reposNow = typeof repos === "function" ? repos : repos ? () => repos : () => list.checkouts
+    this.serversOf = serversOf ?? ((repo) => list.serversOf(repo.checkout))
+    this.editorKept = editorKept
+    this.self = self
+    this.moreAnswer = moreAnswer
+    this.legacyHolds = legacyHolds
     this.control = control
     this.now = now
     this.https = https ?? new HttpsSwitch({ changed: () => this.look() })
-    this.onStale = onStale ?? (() => this.handOver())
+    this.onStale = onStale
+    this.onStepAside = onStepAside
+    this.carryHolds()
+  }
+
+  /** the main checkouts it keeps, now */
+  get repos(): KeeperRepo[] {
+    return this.reposNow()
+  }
+
+  /** whether another keeper is in charge, and this one only forwards (`holder`) */
+  get isAside(): boolean {
+    return this.holder !== undefined
   }
 
   /**
    * Start keeping:  write the record others ask it by, look now, then every `LOOK_SECONDS`.
-   * - `base`, `token`:  the hub's address and write token, for the record
-   * - `isStale`:  whether the hub's code is newer than its start, asked at most once a minute
+   * - `base`, `token`:  its address and write token, for the record
+   * - `isStale`:  whether its code is newer than its start, asked at most once a minute
+   * - `takeOver`:  take the record from whichever keeper holds it (`spell keeper start`);  else only from one of its
+   *   own kind, or none (above, "Handing over")
    */
-  start({ base, token, isStale }: { base: string; token: string; isStale?: () => boolean }): this {
+  start({
+    base,
+    token,
+    isStale,
+    takeOver = false
+  }: {
+    base: string
+    token: string
+    isStale?: () => boolean
+    takeOver?: boolean
+  }): this {
     this.base = base
-    this.link.write({ pid: process.pid, base, token })
+    this.token = token
+    const holder = this.link.running()
+    if (!holder || takeOver || (holder.keeper ?? UNNAMED_KEEPER) === this.name) this.takeRecord()
+    else this.standAside(holder)
     // what it starts carries its mark, so main's page server and editor know the keeper started them, though an
-    // agent's session started the hub (`SRV.KeeperLink.refusedStart()`, epic `epic-engine` P84)
+    // agent's session started it (`SRV.KeeperLink.refusedStart()`, epic `epic-engine` P84)
     process.env[SRV.KEEPER_START_VARIABLE] = "1"
     let staleAsked = 0
     const look = () => {
+      if (!this.isInCharge()) return
       // its own code, at most once a minute:  a walk of every code file
       const asksStale = this.now() - staleAsked >= STALE_LOOK_SECONDS * 1000
       if (asksStale) staleAsked = this.now()
-      if (asksStale && isStale?.() && !this.handedOver) {
+      if (asksStale && isStale?.() && !this.handedOver && this.onStale) {
         this.handedOver = true
         this.onStale()
       }
@@ -168,6 +258,44 @@ export class ServerKeeper {
   stop(): void {
     this.stopLooking?.()
     this.link.removeIfOurs()
+  }
+
+  ////////////////
+  // ## Handing over
+  ////////////////
+
+  /**
+   * Whether this keeper is in charge now, the record read again:  another live keeper's record, and it steps aside;
+   * none, or a dead one's, and it takes the record (back).  NEVER throws.
+   */
+  private isInCharge(): boolean {
+    const record = this.link.read()
+    if (record && record.pid !== process.pid && SRV.isProcessAlive(record.pid)) {
+      if (this.holder?.pid !== record.pid) this.standAside(record)
+      return false
+    }
+    if (!record || record.pid !== process.pid) {
+      if (this.holder) console.log(`server keeper (${this.name}):  the keeper in charge is gone;  keeping again`)
+      this.takeRecord()
+    }
+    return true
+  }
+
+  /** SIDE EFFECT:  the record written as this keeper's;  it's in charge */
+  private takeRecord(): void {
+    this.holder = undefined
+    if (this.base && this.token)
+      this.link.write({ pid: process.pid, base: this.base, token: this.token, keeper: this.name })
+  }
+
+  /** SIDE EFFECT:  `holder` is in charge:  this keeper keeps nothing, and forwards what it's asked */
+  private standAside(holder: SRV.KeeperRecord): void {
+    this.holder = holder
+    console.log(
+      `server keeper (${this.name}):  ${holder.keeper ?? UNNAMED_KEEPER}'s keeper (pid ${holder.pid}) is in charge;  ` +
+        "standing aside"
+    )
+    this.onStepAside?.(holder)
   }
 
   ////////////////
@@ -190,10 +318,11 @@ export class ServerKeeper {
     return [...this.rows.values()]
   }
 
-  /** the look itself */
+  /** the look itself;  standing aside, the rows of the keeper in charge */
   private async lookNow(): Promise<void> {
+    if (this.holder) return this.lookThroughHolder(this.holder)
     await this.watchCertificate()
-    const rows: KeptServer[] = [this.hubRow()]
+    const rows: KeptServer[] = [this.selfRow()]
     for (const repo of this.repos) {
       try {
         rows.push(...(await this.lookAtRepo(repo)))
@@ -204,14 +333,25 @@ export class ServerKeeper {
     this.rows = new Map(rows.map((row) => [row.id, row]))
   }
 
-  /** the hub's own row:  it answers, or this wouldn't run */
-  private hubRow(): KeptServer {
+  /** the rows the keeper in charge last saw, as its own `GET /api/servers` answers.  NEVER throws */
+  private async lookThroughHolder(holder: SRV.KeeperRecord): Promise<void> {
+    try {
+      const response = await fetch(`${holder.base}${SRV.KEEPER_API}`, { signal: AbortSignal.timeout(HOLDER_WAIT_MS) })
+      const answer = (await response.json()) as KeptServersAnswer
+      this.rows = new Map(answer.servers.map((row) => [row.id, row]))
+    } catch {
+      // it doesn't answer:  the rows as they were, until the record says who's in charge
+    }
+  }
+
+  /** its own row:  it answers, or this wouldn't run */
+  private selfRow(): KeptServer {
     const base = this.base
     return {
-      id: "hub",
+      id: this.self.id,
       repo: "",
-      name: "epic hub",
-      what: "the epic pages of every project, and this tab",
+      name: this.self.name,
+      what: this.self.what,
       checkout: this.home,
       address: base && `${base}/`,
       state: "running",
@@ -220,19 +360,19 @@ export class ServerKeeper {
   }
 
   /** `repo`'s servers:  its main page server and editor, its own, its worktrees' */
-  private async lookAtRepo(repo: Repo): Promise<KeptServer[]> {
+  private async lookAtRepo(repo: KeeperRepo): Promise<KeptServer[]> {
     const rows: KeptServer[] = []
     if (isKit(repo.checkout)) {
       const pageServer = await this.keepMainPageServer(repo)
       rows.push(pageServer, await this.keepMainEditor(repo, pageServer))
     }
-    for (const server of EpicConfig.of(repo.checkout).servers) rows.push(await this.keepOwnServer(repo, server))
+    for (const server of this.serversOf(repo)) rows.push(await this.keepOwnServer(repo, server))
     if (isKit(repo.checkout)) rows.push(...(await this.lookAtWorktrees(repo)))
     return rows
   }
 
   /** The main checkout's page server, kept up:  started when down, restarted when older than its code;  held:  left. */
-  private async keepMainPageServer(repo: Repo): Promise<KeptServer> {
+  private async keepMainPageServer(repo: KeeperRepo): Promise<KeptServer> {
     const id = idOf(repo, "page server")
     const row = this.row(id, repo, repo.checkout, "page server", "epic pages, guides, the app's calls")
     const handsOff = this.isHandsOff
@@ -262,7 +402,7 @@ export class ServerKeeper {
   }
 
   /** the editor's row:  up while its record's address answers;  it comes with the page server */
-  private editorRow(repo: Repo, checkout: string, worktree?: string): KeptServer {
+  private editorRow(repo: KeeperRepo, checkout: string, worktree?: string): KeptServer {
     const row = this.row(
       idOf(repo, "editor", worktree),
       repo,
@@ -277,15 +417,15 @@ export class ServerKeeper {
   }
 
   /**
-   * The main checkout's editor, kept through its page server, when the repo's settings say how the app starts:
+   * The main checkout's editor, kept through its page server, when that serves one (`editorKept`):
    * - down under a running page server:  the page server restarted, which brings it back;  tried again only after
    *   `EDITOR_RETRY_MINUTES`, so an editor that won't build never keeps main's pages restarting
    * - the page server stopped or down:  stopped too, it comes back with it
    * - started less than `EDITOR_WAIT_SECONDS` ago (the page server's restart):  starting, Vite may be building
    */
-  private async keepMainEditor(repo: Repo, pageServer: KeptServer): Promise<KeptServer> {
+  private async keepMainEditor(repo: KeeperRepo, pageServer: KeptServer): Promise<KeptServer> {
     const row = this.editorRow(repo, repo.checkout)
-    if (!EpicConfig.of(repo.checkout).app?.start) return row
+    if (!this.editorKept(repo.checkout)) return row
     const kept: KeptServer = { ...row, canStart: true, actions: ["start", "restart"] }
     if (row.state === "running") return kept
     if (pageServer.state !== "running") return { ...kept, state: "stopped", why: "It comes back with the page server." }
@@ -300,14 +440,14 @@ export class ServerKeeper {
   }
 
   /** the main page server restarted, so its editor starts with it.  SIDE EFFECT:  the editor's last start, now */
-  private async restartForEditor(repo: Repo): Promise<SRV.KeeperAnswer> {
+  private async restartForEditor(repo: KeeperRepo): Promise<SRV.KeeperAnswer> {
     this.lastStart.set(idOf(repo, "editor"), this.now())
     await this.control.stop(repo.checkout)
     return { ...(await this.control.ensure(repo.checkout)), state: "starting" }
   }
 
-  /** One of the repo's own servers (`EpicConfig.servers`), watched;  started when down, if it says how. */
-  private async keepOwnServer(repo: Repo, server: OwnServer): Promise<KeptServer> {
+  /** One of the checkout's own servers (`serversOf`), watched;  started when down, if it says how. */
+  private async keepOwnServer(repo: KeeperRepo, server: KeeperServer): Promise<KeptServer> {
     const id = idOf(repo, server.name)
     const row: KeptServer = {
       ...this.row(id, repo, repo.checkout, server.name, server.what ?? "", undefined),
@@ -325,7 +465,7 @@ export class ServerKeeper {
   }
 
   /** each worktree's page server and editor:  shown while it has one, stopped after `IDLE_MINUTES` unused */
-  private async lookAtWorktrees(repo: Repo): Promise<KeptServer[]> {
+  private async lookAtWorktrees(repo: KeeperRepo): Promise<KeptServer[]> {
     const rows: KeptServer[] = []
     const book = new SRV.PortBook()
     for (const [worktree, checkout] of worktreesOf(repo.checkout)) {
@@ -374,16 +514,21 @@ export class ServerKeeper {
    * - throws `SRV.HttpError` 404 for a server it doesn't keep, 400 for one it can't start
    */
   async act(action: SRV.KeeperAction, checkout: string, server = "page server"): Promise<SRV.KeeperAnswer> {
+    // standing aside:  the keeper in charge does it
+    if (this.holder) {
+      const answer = await this.link.ask(action, { checkout, server })
+      if (answer) return answer
+    }
     const { repo, worktree } = this.whereIs(checkout)
     const id = idOf(repo, server, worktree)
-    const own = worktree ? undefined : EpicConfig.of(repo.checkout).servers.find((each) => each.name === server)
+    const own = worktree ? undefined : this.serversOf(repo).find((each) => each.name === server)
     // only what the keeper starts by itself is held:  main's page server, the repo's own
     const holds = Boolean(own) || server === "page server"
     if (holds && action === "stop" && !worktree) this.hold(id, true)
     if (holds && action !== "stop") this.hold(id, false)
     let answer: SRV.KeeperAnswer
     if (own) answer = await this.actOnOwn(action, repo, own)
-    else if (server === "editor" && !worktree && action !== "stop" && EpicConfig.of(repo.checkout).app?.start)
+    else if (server === "editor" && !worktree && action !== "stop" && this.editorKept(repo.checkout))
       answer = await this.restartForEditor(repo)
     else if (server === "page server") answer = await this.actOnPageServer(action, worktree ? checkout : repo.checkout)
     else throw new SRV.HttpError(400, `the ${server} comes with the page server:  ${action} that instead`)
@@ -430,7 +575,7 @@ export class ServerKeeper {
   }
 
   /** one of the repo's own servers:  its pid isn't known, so a stop or restart stops what listens on its port */
-  private async actOnOwn(action: SRV.KeeperAction, repo: Repo, server: OwnServer): Promise<SRV.KeeperAnswer> {
+  private async actOnOwn(action: SRV.KeeperAction, repo: KeeperRepo, server: KeeperServer): Promise<SRV.KeeperAnswer> {
     if (!server.start && action !== "stop") throw new SRV.HttpError(400, `${server.name} has no start command`)
     if (action !== "start") await stopListener(server.check)
     if (action === "stop") return { state: "stopped" }
@@ -438,14 +583,18 @@ export class ServerKeeper {
     return { state: "starting" }
   }
 
-  /** the repo and worktree checkout `checkout` is;  a 404 for one the hub doesn't serve */
-  private whereIs(checkout: string): { repo: Repo; worktree?: string } {
-    for (const repo of this.repos) {
+  /** the repo and worktree checkout `checkout` is;  a 404 for one it doesn't keep */
+  private whereIs(checkout: string): { repo: KeeperRepo; worktree?: string } {
+    const repos = this.repos
+    for (const repo of repos) {
       if (SRV.RealPath.same(repo.checkout, checkout)) return { repo }
       for (const [worktree, folder] of worktreesOf(repo.checkout))
         if (SRV.RealPath.same(folder, checkout)) return { repo, worktree }
     }
-    throw new SRV.HttpError(404, `the server keeper keeps no servers of ${checkout}:  epic repos add <checkout>`)
+    throw new SRV.HttpError(
+      404,
+      `the server keeper keeps no servers of ${checkout}:  spell keeper add --checkout <its main checkout>`
+    )
   }
 
   ////////////////
@@ -454,7 +603,7 @@ export class ServerKeeper {
 
   /**
    * Its calls, on the hub's router:
-   * - `GET /api/servers`:  the Servers tab's data (`ServersAnswer`)
+   * - `GET /api/servers`:  the Servers tab's data (`KeptServersAnswer`, and `moreAnswer`'s)
    * - `GET /api/servers/dot`:  `{ dot, why }`, the tab's red dot:  a server that should be up is down
    * - `POST /api/servers/look`:  look now (a session's start)
    * - `POST /api/servers/https`, `{ turn: "on" | "off" }`:  HTTPS turned (`HttpsSwitch.turn()`), its status after
@@ -506,9 +655,10 @@ export class ServerKeeper {
    * - `file`:  the more spaces file;  tests hand their own
    */
   editorSpaces(file: string = SRV.MORE_SPACES_FILE): EditorSpaces[] {
-    if (!this.repos.some((repo) => isKit(repo.checkout))) return []
+    const repos = this.repos
+    if (!repos.some((repo) => isKit(repo.checkout))) return []
     const served = SRV.servedSpaces(SRV.moreSpacesInFile(file))
-    return this.repos.flatMap((repo): EditorSpaces[] => {
+    return repos.flatMap((repo): EditorSpaces[] => {
       if (isKit(repo.checkout)) return []
       const orgs = SRV.orgsIn(join(repo.checkout, SPACES)).filter((org) => org !== "spell")
       if (!orgs.length) return []
@@ -559,10 +709,11 @@ export class ServerKeeper {
   /** `GET /api/servers` */
   private onAsked: Handler = async (_request, reply) => {
     if (!this.rows.size) await this.look()
-    const answer: ServersAnswer = {
+    const answer: KeptServersAnswer = {
+      ...this.moreAnswer?.(),
       servers: this.servers(),
       lookSeconds: LOOK_SECONDS,
-      ...ServerFacts.of(this.repos),
+      keeper: this.holder?.keeper ?? this.name,
       https: this.https.status,
       ...(this.isHandsOff && { handsOff: true }),
       editorSpaces: this.editorSpaces()
@@ -597,7 +748,7 @@ export class ServerKeeper {
   /** a row's facts every look gives */
   private row(
     id: string,
-    repo: Repo,
+    repo: KeeperRepo,
     checkout: string,
     name: string,
     what: string,
@@ -621,10 +772,10 @@ export class ServerKeeper {
     return at !== undefined && this.now() - at < RETRY_SECONDS * 1000 && this.rows.get(id)?.state !== "running"
   }
 
-  /** start one of the repo's own servers in the background, its output in `<home>/servers/<repo>-<name>.log` */
-  private startOwn(repo: Repo, server: OwnServer): void {
+  /** start one of the checkout's own servers in the background, its output in `<home>/servers/<repo>-<name>.log` */
+  private startOwn(repo: KeeperRepo, server: KeeperServer): void {
     this.lastStart.set(idOf(repo, server.name), this.now())
-    const folder = join(this.home, LOGS)
+    const folder = join(this.home, KEEPER_SERVER_LOGS)
     mkdirSync(folder, { recursive: true })
     const out = openSync(join(folder, `${slug(`${repo.name}-${server.name}`, { as: "id" })}.log`), "a")
     const child = spawn(process.env.SHELL || "/bin/sh", ["-c", server.start!], {
@@ -636,9 +787,25 @@ export class ServerKeeper {
     child.unref()
   }
 
-  /** the hold file:  the ids held stopped by hand, and whether the person has said hands off */
+  /** the holds file */
+  private get holdsFile(): string {
+    return join(this.home, KEEPER_HOLDS_FILE)
+  }
+
+  /** the holds file:  the ids held stopped by hand, and whether the person has said hands off */
   private holds(): HoldFile {
-    return readJson<HoldFile>(join(this.home, HOLD_FILE)) ?? {}
+    return readJson<HoldFile>(this.holdsFile) ?? {}
+  }
+
+  /** SIDE EFFECT:  the epic home's old holds file carried over, once:  when there's none here yet.  NEVER throws */
+  private carryHolds(): void {
+    if (!this.legacyHolds || existsSync(this.holdsFile) || !existsSync(this.legacyHolds)) return
+    try {
+      mkdirSync(this.home, { recursive: true })
+      copyFileSync(this.legacyHolds, this.holdsFile)
+    } catch (error) {
+      console.error(`server keeper:  couldn't carry ${this.legacyHolds} over;  nothing held`, error)
+    }
   }
 
   /** the ids held stopped by hand */
@@ -671,21 +838,14 @@ export class ServerKeeper {
     this.writeHolds({ ...holds, held: [...held] })
   }
 
-  /** SIDE EFFECT:  the hold file written;  `handsOff` only while it's on */
+  /** SIDE EFFECT:  the holds file written, and the old one with it while one is handed in;  `handsOff` only while on */
   private writeHolds({ held = [], handsOff }: HoldFile): void {
-    mkdirSync(this.home, { recursive: true })
     const holds: HoldFile = { held, ...(handsOff && { handsOff }) }
-    writeFileSync(join(this.home, HOLD_FILE), `${JSON.stringify(holds, null, 2)}\n`)
-  }
-
-  /**
-   * a fresh hub, on the code now:  `epic hub ensure` on this hub's own port, detached;  it stops this one
-   * - its port named:  `ensure` on the default port would stop this one and start the next THERE (it did, in a test)
-   */
-  private handOver(): void {
-    const port = this.base ? new URL(this.base).port : undefined
-    const args = [EngineFiles.bin, "hub", "ensure", ...(port ? ["--port", port] : [])]
-    spawn(process.execPath, args, { detached: true, stdio: "ignore" }).unref()
+    for (const file of [this.holdsFile, this.legacyHolds]) {
+      if (!file) continue
+      mkdirSync(dirname(file), { recursive: true })
+      writeFileSync(file, `${JSON.stringify(holds, null, 2)}\n`)
+    }
   }
 }
 
@@ -696,8 +856,17 @@ export type PageServerControl = {
   stop: (checkout: string, options?: { restart?: boolean }) => Promise<boolean>
 }
 
-/** One of a repo's own servers, as `EpicConfig.servers` gives it. */
-type OwnServer = ReturnType<EpicConfig["servers"]["at"]> & {}
+/** Its own row, when it's handed none:  Spell's keeper. */
+const SELF = { id: "keeper", name: "server keeper", what: "keeps Spell's servers up" }
+
+/**
+ * The keeper a record names that says none:  the epic hub's, on code from before epic `editor` P48, wrote no name.
+ * - a plain word, not an import:  the kit names nothing of the epic tooling
+ */
+const UNNAMED_KEEPER = "epic hub"
+
+/** How long a keeper standing aside waits for the one in charge's rows, ms. */
+const HOLDER_WAIT_MS = 5_000
 
 /** The real page servers, never through the keeper (it IS the keeper):  `ensureHere()`, `stopHere()`. */
 const PAGE_SERVERS: PageServerControl = {
@@ -734,9 +903,6 @@ const ACTIONS: readonly SRV.KeeperAction[] = ["start", "stop", "restart"]
 /** The hold file:  `held`, the servers stopped by hand;  `handsOff`, while the person works on them themselves. */
 type HoldFile = { held?: string[]; handsOff?: boolean }
 
-/** The own servers' logs' folder, in the epic home. */
-const LOGS = "servers"
-
 /** A checkout's page server record. */
 const PAGE_SERVER_FILE = ".spell-server.json"
 
@@ -761,7 +927,7 @@ const EDITOR_DOWN =
 const STOP_WAIT_MS = 10_000
 
 /** a server's id:  `<repo>/<name>`, a worktree's `<repo>/<worktree>/<name>` */
-function idOf(repo: Repo, name: string, worktree?: string): string {
+function idOf(repo: KeeperRepo, name: string, worktree?: string): string {
   return [repo.name, worktree, name].filter(Boolean).join("/")
 }
 
@@ -773,16 +939,39 @@ function isKit(checkout: string): boolean {
   return existsSync(join(checkout, REPOS_FILE)) && existsSync(join(checkout, "src/server/page/cli.ts"))
 }
 
-/** the worktrees of main checkout `main`, each `[name, folder]` */
+/**
+ * the worktrees of main checkout `main`, each `[name, folder]`, from git's own records:  each
+ * `<main>/.git/worktrees/<id>/gitdir` names its folder's `.git`, as `git worktree list` reads them, with no `git` run
+ * - a folder that's gone (removed by hand, not pruned yet) is left out;  the name is the folder's
+ */
 function worktreesOf(main: string): [string, string][] {
+  const records = join(main, ".git", "worktrees")
+  if (!existsSync(records)) return []
   const found = new Map<string, string>()
-  for (const folder of EpicConfig.of(main).worktreesFolders) {
-    if (!existsSync(folder)) continue
-    for (const entry of readdirSync(folder, { withFileTypes: true }))
-      if (entry.isDirectory() && !entry.name.startsWith(".") && !found.has(entry.name))
-        found.set(entry.name, join(folder, entry.name))
+  for (const entry of readdirSync(records, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue
+    let folder: string
+    try {
+      folder = dirname(readFileSync(join(records, entry.name, "gitdir"), "utf8").trim())
+    } catch {
+      continue
+    }
+    const name = basename(folder)
+    if (existsSync(folder) && !found.has(name)) found.set(name, folder)
   }
   return [...found]
+}
+
+/**
+ * whether main checkout `checkout`'s page server serves an editor:  its settings run the app's routes, which start
+ * the editor (spell-app's `EditorServer`), as `spell server start all` reads them.  NEVER throws
+ */
+function pageServerServesEditor(checkout: string): boolean {
+  try {
+    return pageServerSettings(checkout).routes?.some((route) => route.includes("appRoutes")) ?? false
+  } catch {
+    return false
+  }
 }
 
 /** `check`'s address:  a URL as it is, a port as `http://127.0.0.1:<port>/` */

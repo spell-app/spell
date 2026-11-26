@@ -2,7 +2,7 @@ import { statSync } from "node:fs"
 
 import { SRV } from "spell/server"
 
-import type { HttpsState, HttpsStatus } from "./server.types"
+import type { HttpsState, HttpsStatus } from "./keeper.types"
 
 /****************
  * ### `HttpsSwitch`

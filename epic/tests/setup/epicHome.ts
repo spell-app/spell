@@ -45,4 +45,5 @@ process.env.SPELL_EPIC_PLUGIN_GUIDES = ""
 // and the server keeper's record and the worktrees' port book (`SRV.KeeperLink`, `SRV.PortBook`, epic `epic-engine`
 // P82):  a test's page server never asks the machine's keeper, nor takes a real worktree's port
 process.env.SPELL_KEEPER_FILE = join(home, "server-keeper.json")
+process.env.SPELL_KEEPER_HOME = join(home, "keeper")
 process.env.SPELL_PORTS_FILE = join(home, "server-ports.json")

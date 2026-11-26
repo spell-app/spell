@@ -1,4 +1,4 @@
-import type { SRV } from "spell/server"
+import type { KeptServersAnswer } from "spell/server/keeper/keeper.types"
 import type { SiteTab } from "spell/server/site/site.types"
 
 /**
@@ -22,8 +22,10 @@ export const HOME_FOLDER = ".spell-epic"
 export const HOME_ENV = "SPELL_EPIC_HOME"
 
 /**
- * The server keeper's hold file, in `HOME_FOLDER`:  `{ held, handsOff }`, the servers stopped by hand and the hands-off
- * switch (`ServerKeeper`);  the command guard reads the switch too (`ServerGuard`).
+ * The server keeper's OLD hold file, in `HOME_FOLDER`:  `{ held, handsOff }`, the servers stopped by hand and the
+ * hands-off switch;  the command guard reads the switch here (`ServerGuard`).
+ * - since epic `editor` P48 the keeper's own is `~/.spell/server-keeper-holds.json` (`spell/server/keeper`):  the
+ *   hub's keeper carried this one over once, and writes it too, until epic `epic-engine` moves the guard over
  */
 export const HOLD_FILE = "server-keeper.json"
 
@@ -255,43 +257,10 @@ export const SHOWN_TAB_TITLE = "Shown in VS Code"
 ////////////////
 
 /**
- * How a server stands, as the keeper's last look found it (`ServerKeeper`):
- * - `running`:  it answers
- * - `starting`:  the keeper started it, and it doesn't answer yet
- * - `stopped`:  not running, and that's fine:  stopped by hand, a worktree's unused, an editor with no page server
- * - `down`:  it should be running and isn't:  the tab's red dot
+ * The server keeper's own types:  Spell's since epic `editor` P48 (`spell/server/keeper`), named here too for the
+ * epic tooling's code that reads them.
  */
-export type KeptServerState = "running" | "starting" | "stopped" | "down"
-
-/**
- * One server the keeper keeps, a row of the Servers tab.
- * - `id`:  `<repo>/<name>`, a worktree's `<repo>/<worktree>/<name>`
- * - `repo`:  the repo it's for (`""`:  the hub's own);  `worktree`:  the worktree's name, a main checkout's none
- * - `name`, `what`:  what it's called and what it's for
- * - `checkout`:  the checkout it serves:  what the buttons send back (`POST /api/servers/<action>`)
- * - `address`:  where it answers, while it does (a worktree's stopped one:  `port`, the one written down for it)
- * - `why`:  a few words on its state:  why it's down, what the keeper just did
- * - `since`:  when the keeper last started it;  `lastRequest`:  a worktree's last use
- * - `canStart`:  whether Start and Restart apply;  `own`:  one of the repo's own servers (its `.epic/config.json5`)
- */
-export type KeptServer = {
-  id: string
-  repo: string
-  worktree?: string
-  name: string
-  what: string
-  checkout: string
-  address?: string
-  port?: number
-  state: KeptServerState
-  why?: string
-  since?: string
-  lastRequest?: string
-  canStart: boolean
-  /** the buttons it takes, when not every one (main's editor:  Start and Restart, never Stop) */
-  actions?: ("start" | "stop" | "restart")[]
-  own?: boolean
-}
+export type { KeptServer, KeptServerState, HttpsStatus, EditorSpaces } from "spell/server/keeper/keeper.types"
 
 /**
  * Work that landed on the base branch, from its reflog (`ServerFacts.mergedIntoMain()`):  a merge, a pull or a commit
@@ -364,74 +333,10 @@ export type ServerFactsAnswer = {
 }
 
 /**
- * `GET /api/servers`:  every server, how often the keeper looks, the facts beside them, whether the page servers
- * speak HTTPS (`https`, epic `epic-engine` T164) and whether the person said hands off (`handsOff`)
+ * `GET /api/servers` from the hub's keeper:  the keeper's own answer (`KeptServersAnswer`), and the facts beside the
+ * servers (`ServerFacts`).
  */
-export type ServersAnswer = ServerFactsAnswer & {
-  servers: KeptServer[]
-  lookSeconds: number
-  https?: HttpsStatus
-  /** the person is working on the servers themselves:  the keeper leaves main's alone (`ServerKeeper.isHandsOff`) */
-  handsOff?: boolean
-  /**
-   * each repo whose `spaces/` the kit's page server can serve, and which of its checkouts it serves now
-   * (`ServerKeeper.editorSpaces()`):  each checkout's Show in the editor on the Servers page
-   */
-  editorSpaces?: EditorSpaces[]
-}
-
-/**
- * A repo whose projects live in its own `spaces/` folder (orgs of its own, `@acme/`), which the kit's page server
- * serves beside spell.spaces from ONE of its checkouts at a time (`SRV.switchSpaces()`, `~/.spell/more-spaces.json5`):
- * its main checkout, or an epic's worktree, to see work before it's merged.
- */
-export type EditorSpaces = {
-  repo: string
-  /** the orgs its `spaces/` holds, `acme` */
-  orgs: string[]
-  /** each checkout with a `spaces/`:  main (no `worktree`) first, then its worktrees by name */
-  checkouts: Array<{ worktree?: string; served: boolean }>
-}
-
-/** `POST /api/servers/editor-spaces`, `{ repo, worktree? }`:  serve that checkout's `spaces/`, then restart the page server. */
-export const EDITOR_SPACES_API = "/api/servers/editor-spaces"
-
-/**
- * Whether the page servers speak HTTPS (and HTTP/2), as the Servers tab draws it (`HttpsSwitch`, epic `epic-engine`
- * T164):  from the page server's certificate's state (`SRV.LocalCertificate`), ONE for every page server of this Mac
- * - `state`:  `on`;  `off` (no certificate, or no mkcert to make one);  `needs-trust` (made, not trusted);
- *   `out-of-date` (expired, or missing a name)
- * - `certificate`:  the certificate's own state, as `spell server certificate --check` says it
- * - `words`:  what it means, for the card's tooltip;  `address`:  where browsers open the pages, while it's on
- * - `canTurnOn`, `canTurnOff`:  which buttons apply;  `whyNot`:  why Turn on doesn't (no mkcert, or not a Mac)
- */
-export type HttpsStatus = {
-  state: HttpsState
-  certificate: SRV.CertificateState
-  words: string
-  address?: string
-  canTurnOn: boolean
-  canTurnOff: boolean
-  whyNot?: string
-}
-
-/** `HttpsStatus.state`. */
-export type HttpsState = "on" | "off" | "needs-trust" | "out-of-date"
-
-/** `POST /api/servers/https`'s body:  which way to turn it. */
-export type HttpsTurn = { turn: "on" | "off" }
-
-/** Where the Servers tab turns HTTPS on and off:  under `SRV.KEEPER_API`, before its `/:action`. */
-export const HTTPS_API = "/api/servers/https"
-
-/** Where the tab's hands-off switch asks:  the keeper leaves main's servers alone while it's on (T164). */
-export const HANDS_OFF_API = "/api/servers/hands-off"
-
-/** `POST /api/servers/hands-off`'s body. */
-export type HandsOff = { on: boolean }
-
-/** Where main's Restart all asks:  every main page server and its editor restarted (epic `epic-engine` T164). */
-export const RESTART_ALL_API = "/api/servers/restart-all"
+export type ServersAnswer = ServerFactsAnswer & KeptServersAnswer
 
 /** Where the Servers tab's page is served, under every address (`serverRoutes`). */
 export const SERVERS_PAGE = "/_epic/servers/"

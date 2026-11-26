@@ -7,9 +7,13 @@ import { SRV } from "spell/server"
 import { fakeMainCheckout } from "spell/server/test/checkouts"
 import { ask, serveHandler } from "spell/server/test/serve"
 
-import { HttpsSwitch, RESTART_DELAY_MS } from "spell/epic/server/HttpsSwitch"
-import { ServerKeeper, type PageServerControl } from "spell/epic/server/ServerKeeper"
-import type { HttpsStatus } from "spell/epic/server/server.types"
+import {
+  HttpsSwitch,
+  RESTART_DELAY_MS,
+  ServerKeeper,
+  type HttpsStatus,
+  type PageServerControl
+} from "spell/server/keeper"
 
 /**
  * A page server's certificate on stand-ins (`SRV.CertificateTools` is the real one's seam):  its state as the test
@@ -205,8 +209,6 @@ describe("ServerKeeper:  the certificate watched, HTTPS turned, Restart all (epi
     mkdirSync(join(main, "src/server/page"), { recursive: true })
     writeFileSync(join(main, "repos.json5"), "{}\n")
     writeFileSync(join(main, "src/server/page/cli.ts"), "\n")
-    mkdirSync(join(main, ".epic"), { recursive: true })
-    writeFileSync(join(main, ".epic/config.json5"), `{ worktreesFolder: "../worktrees" }\n`)
     stops = []
     ensured = []
     const running = new Set<string>()
@@ -231,7 +233,7 @@ describe("ServerKeeper:  the certificate watched, HTTPS turned, Restart all (epi
       }
     }
     certificate = new FakeCertificate(folder)
-    const repo = { name: "kit", checkout: main, content: join(folder, "kit.epics"), prefix: "/r/kit/", isDefault: true }
+    const repo = { name: "kit", checkout: main }
     keeper = new ServerKeeper({
       home: join(folder, "home"),
       repos: [repo],

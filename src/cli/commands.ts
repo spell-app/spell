@@ -2,7 +2,9 @@
  * The kit's own `spell` commands (its `package.json`'s `"spell": { "commands" }`, epic `repo-split` Q33):  the repo
  * tools every checkout has, whatever else is installed.
  * - `spell server ...`:  this checkout's page server (`src/server/page/cli.ts`), and `start all` / `stop all`:  every
- *   web server of the checkout
+ *   web server of the checkout;  `start | stop | restart | status <server>` in a main checkout ask the server keeper
+ * - `spell keeper start | ensure | add | status | local`:  Spell's server keeper (`spell/server/keeper`, epic `editor`
+ *   P48)
  * - `spell bundle [names...]` / `spell bundle check`:  the bundles the page server serves, built on demand
  * - `spell commands [list|check]`:  every command against the commands page
  * - `spell wwod [check]`:  WWOD's citations and paths;  `spell wwod init`:  a project picks which of the rules its
@@ -37,6 +39,7 @@ import type { Command } from "commander"
 import { join } from "node:path"
 
 import { CLI } from "spell/cli"
+import type { KeeperOptions } from "spell/cli/commands/keeperCommand"
 
 export default function kitCommands(spell: Command): void {
   ////////////////
@@ -53,25 +56,58 @@ export default function kitCommands(spell: Command): void {
     .action(() => pageServer("local"))
 
   passThrough(server.command("start"))
-    .description("start the page server in the background if it isn't running, and print where it is (JSON)")
-    .argument("[all]", "all:  every web server of the checkout -- page server, the app's editor, Spell UI's site")
-    .action((all: string | undefined) =>
-      all === "all" ? CLI.runCommand(async () => (await serverCommand()).startAll()) : pageServer("start")
+    .description(
+      "start the page server in the background if it isn't running, and print where it is (JSON) -- " +
+        "<server>:  editor, or one the keeper keeps;  in a main checkout, through the server keeper"
+    )
+    .argument(
+      "[server]",
+      "all:  every web server of the checkout -- page server, the app's editor, Spell UI's site;  " +
+        "page-server (default), editor, or a name spell keeper add registered"
+    )
+    .action((which: string | undefined) =>
+      which === "all"
+        ? CLI.runCommand(async () => (await serverCommand()).startAll())
+        : isNamedServer(which)
+          ? CLI.runCommand(async () => (await serverCommand()).serverByName("start", which!))
+          : pageServer("start", PAGE_SERVER_WORDS)
     )
 
   passThrough(server.command("stop"))
-    .description("stop the page server -- all:  and the app's editor with it, even one left running")
-    .argument("[which]", "local (default):  the page server;  all:  every web server of the checkout")
-    // a flag first (`stop --spaces spaces`, a project's page server) names no `which`
+    .description(
+      "stop the page server -- all:  and the app's editor with it, even one left running;  " +
+        "in a main checkout, through the server keeper, which leaves it stopped until a start"
+    )
+    .argument("[server]", "local / page-server (default), all, editor, or a name spell keeper add registered")
+    // a flag first (`stop --spaces spaces`, a project's page server) names no server
     .action((which: string | undefined) =>
-      which === "all" || (which && which !== "local" && !which.startsWith("-"))
+      which === "all"
         ? CLI.runCommand(async () => (await serverCommand()).stopServers(which))
-        : pageServer("stop", ["local"])
+        : isNamedServer(which)
+          ? CLI.runCommand(async () => (await serverCommand()).serverByName("stop", which!))
+          : pageServer("stop", PAGE_SERVER_WORDS)
+    )
+
+  passThrough(server.command("restart"))
+    .description("restart a server on its code now -- in a main checkout, through the server keeper")
+    .argument("[server]", "page-server (default), editor, or a name spell keeper add registered")
+    .action((which: string | undefined) =>
+      CLI.runCommand(async () =>
+        (await serverCommand()).serverByName("restart", isNamedServer(which) ? which! : "page-server")
+      )
     )
 
   passThrough(server.command("status"))
-    .description("the running page server's details (JSON), or exit 1 when it isn't running")
-    .action(() => pageServer("status"))
+    .description(
+      "the running page server's details (JSON), or exit 1 when it isn't running -- " +
+        "<server>:  its line, as the server keeper last saw it"
+    )
+    .argument("[server]", "page-server (default:  its details), editor, or a name spell keeper add registered")
+    .action((which: string | undefined) =>
+      which && !which.startsWith("-")
+        ? CLI.runCommand(async () => (await serverCommand()).serverStatus(which))
+        : pageServer("status")
+    )
 
   passThrough(server.command("url"))
     .description("start the page server if needed, then print the web address that serves <file>")
@@ -90,6 +126,55 @@ export default function kitCommands(spell: Command): void {
     .description("stop the page and Vite servers whose checkout is gone, on any checkout")
     .option("--dry-run", "only list them")
     .action(() => pageServer("prune"))
+
+  ////////////////
+  // ## The server keeper
+  ////////////////
+
+  const keeper = spell
+    .command("keeper")
+    .description(
+      "Spell's server keeper:  ONE program per Mac that keeps every main checkout's page server and editor up, " +
+        "and the servers registered with it"
+    )
+    .addHelpText("after", KEEPER_HELP)
+
+  keeper
+    .command("start")
+    .description("run it in the background (its log ~/.spell/keeper.log), taking over from the keeper in charge")
+    .option("--here", "run this checkout's code, not the main checkout's (to try a branch)")
+    .option("--port <n>", "its port (default 4949, else any free one)")
+    .action((options: KeeperOptions) => keeperCommand("start", undefined, options))
+
+  keeper
+    .command("ensure")
+    .description("start it only if no keeper is running;  every spell command runs this, in the background")
+    .option("--take-over", "only Spell's own keeper counts:  take over from the epic hub's")
+    .option("--quiet", "print nothing")
+    .option("--here", "run this checkout's code, not the main checkout's (to try a branch)")
+    .action((options: KeeperOptions) => keeperCommand("ensure", undefined, options))
+
+  keeper
+    .command("add")
+    .description("register a server for it to watch (a proxy server, say), or --checkout alone:  a checkout to keep")
+    .argument("[name]", "the server's name, as its card and spell server start <name> say it")
+    .option("--check <url|port>", "how it's checked:  a URL that answers, or a port something listens on")
+    .option("--start <command>", "the shell command that starts it;  none:  only watched")
+    .option("--checkout <dir>", "the checkout it belongs to (default:  this one's main);  alone:  keep that checkout")
+    .option("--what <words>", "what it's for, a few words")
+    .action((name: string | undefined, options: KeeperOptions) => keeperCommand("add", name, options))
+
+  keeper
+    .command("status")
+    .description("the keeper running, and every server as its last look saw it -- exits 1 when none runs")
+    .option("--json", "print it as JSON")
+    .action((options: KeeperOptions) => keeperCommand("status", undefined, options))
+
+  keeper
+    .command("local")
+    .description("run it in this terminal, until Ctrl-C:  what start runs in the background")
+    .option("--port <n>", "its port (default 4949, else any free one)")
+    .action(async (options: KeeperOptions) => (await keeperWork()).runKeeperHere(options))
 
   ////////////////
   // ## Bundles
@@ -455,6 +540,30 @@ const RUNBOOK_HELP = `
 A runbook is a Markdown file, <name>.runbook.md, in a runbooks/ folder:  each ## heading a step.
 A step with an sh block runs it;  with an ask block, asks for a value (\`\`\`ask NAME secret hides it);
 with neither, it's done by hand.  How far you got:  ~/.spell/runbooks/.  Secrets:  ~/.spell/secrets/.`
+
+/** `spell keeper`'s verbs, its work loaded when one runs. */
+function keeperCommand(verb: string, name: string | undefined, options: KeeperOptions): Promise<never> {
+  return CLI.runCommand(async () => (await keeperWork()).keeperCommand(verb, name, options))
+}
+
+/** `keeperCommand.ts`, loaded when a `spell keeper` verb runs. */
+function keeperWork() {
+  return import("spell/cli/commands/keeperCommand")
+}
+
+/** After `spell keeper --help`'s verbs. */
+const KEEPER_HELP = `
+It keeps each main checkout in ~/.spell/keeper.json5 (a main checkout's spell server start adds it), its
+worktrees' page servers on demand, and the servers spell keeper add registers.  Asked through spell server
+start | stop | restart | status <server>.  Its record:  ~/.spell/server-keeper.json.`
+
+/** The page server's own names, as `spell server start | stop` take them:  handed on as no word at all. */
+const PAGE_SERVER_WORDS = ["local", "page-server", "page"]
+
+/** whether `which` names a server other than the page server:  not a flag, not one of its names */
+function isNamedServer(which: string | undefined): boolean {
+  return Boolean(which) && !which!.startsWith("-") && !PAGE_SERVER_WORDS.includes(which!)
+}
 
 /** `serverCommand.ts`, loaded when a `spell server` verb runs. */
 function serverCommand() {

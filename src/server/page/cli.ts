@@ -50,6 +50,7 @@ import {
   pruneReport,
   pruneServers
 } from "spell/server/page"
+import { KeeperList } from "spell/server/keeper/KeeperList"
 
 /** What `spell server certificate` says, for each state and step. */
 const CERTIFICATE_WORDS = {
@@ -163,6 +164,7 @@ async function main(args: string[]): Promise<void> {
     case "start":
     // hidden:  the old name, which spell-epic's `epic server ensure` still hands on (its verbs' renames wait)
     case "ensure":
+      keepFromNowOn(root)
       return print(await PageServer.ensure(root, port))
     case "stop":
       return console.log((await PageServer.stop(root, { port })) ? "stopped" : "not running")
@@ -284,4 +286,19 @@ function flag(args: string[], name: string): string | undefined {
 /** Print `value` as indented JSON. */
 function print(value: unknown): void {
   console.log(JSON.stringify(value, null, 2))
+}
+
+/**
+ * SIDE EFFECT:  a MAIN checkout's start puts it on Spell's server keeper's list (`KeeperList`, epic `editor` P48), so
+ * the keeper keeps its page server and editor up from now on;  a worktree's, one not in git (an npm install), a
+ * test's or CI's:  nothing.  NEVER throws
+ */
+function keepFromNowOn(root: string): void {
+  const where = SRV.checkoutOf(root)
+  if (process.env.VITEST || process.env.CI || !where || where.worktree !== undefined) return
+  try {
+    if (new KeeperList().addCheckout(root)) console.error(`server keeper:  keeping ${root}'s servers from now on`)
+  } catch (error) {
+    console.error("server keeper:  couldn't add this checkout to its list", error)
+  }
 }

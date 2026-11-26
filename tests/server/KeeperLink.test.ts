@@ -47,6 +47,33 @@ describe("KeeperLink:  asking the server keeper (epic `epic-engine` P82)", () =>
   })
 })
 
+describe("keeperHome():  the server keeper's folder (epic `editor` P48)", () => {
+  it("SPELL_KEEPER_HOME, else ~/.spell;  the record in it, unless SPELL_KEEPER_FILE names another;  it says which keeper", () => {
+    const before = { home: process.env.SPELL_KEEPER_HOME, file: process.env.SPELL_KEEPER_FILE }
+    try {
+      process.env.SPELL_KEEPER_HOME = "/scratch/keeper"
+      delete process.env.SPELL_KEEPER_FILE
+      expect(SRV.keeperHome()).toBe("/scratch/keeper")
+      expect(new SRV.KeeperLink().file).toBe("/scratch/keeper/server-keeper.json")
+    } finally {
+      for (const [variable, value] of [
+        ["SPELL_KEEPER_HOME", before.home],
+        ["SPELL_KEEPER_FILE", before.file]
+      ] as const)
+        if (value === undefined) delete process.env[variable]
+        else process.env[variable] = value
+    }
+    const folder = mkdtempSync(join(tmpdir(), "keeper-home-"))
+    try {
+      const link = new SRV.KeeperLink(join(folder, "server-keeper.json"))
+      link.write({ pid: process.ppid, base: "http://127.0.0.1:1", token: "t", keeper: "spell" })
+      expect(link.running()).toMatchObject({ keeper: "spell" })
+    } finally {
+      rmSync(folder, { recursive: true, force: true })
+    }
+  })
+})
+
 describe("KeeperLink.refusedStart():  main's servers refuse an agent's start (epic `epic-engine` P84)", () => {
   const folder = mkdtempSync(join(tmpdir(), "keeper-refuse-"))
   const main = fakeMainCheckout(join(folder, "kit"))
@@ -65,14 +92,13 @@ describe("KeeperLink.refusedStart():  main's servers refuse an agent's start (ep
     expect(link.refusedStart("page server", main, { env: AGENT, ppid: 1, lineage: UNDER_AGENT })).toMatch(
       /^page server:  not started\..*Claude Code ran this\.\nAsk the keeper instead:  epic servers start page-server --repo kit\n/
     )
-    expect(link.refusedStart("editor", main, {
+    expect(
+      link.refusedStart("editor", main, {
         env: { CODEX_THREAD_ID: "t" },
         ppid: 1,
         lineage: [{ pid: 700, command: "/opt/homebrew/bin/codex" }]
       })
-    ).toContain(
-      "epic servers start editor"
-    )
+    ).toContain("epic servers start editor")
   })
 
   it("let through:  the person's own terminal, a worktree's, the keeper's mark or its child, a test run", () => {

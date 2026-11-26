@@ -188,6 +188,11 @@
       "types": "./dist-types/src/server/page/index.d.ts",
       "default": "./src/server/page/index.ts"
     },
+    "./server/keeper": {
+      "spell-source": "./src/server/keeper/index.ts",
+      "types": "./dist-types/src/server/keeper/index.d.ts",
+      "default": "./src/server/keeper/index.ts"
+    },
     "./server/places": {
       "spell-source": "./src/server/places/index.ts",
       "types": "./dist-types/src/server/places/index.d.ts",

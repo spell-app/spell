@@ -2,18 +2,17 @@ import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSy
 import { createServer, type Server } from "node:net"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { afterEach, beforeEach, describe, expect, it } from "vite-plus/test"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
 import { SRV } from "spell/server"
 import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
-import { IDLE_MINUTES, ServerKeeper, type PageServerControl } from "spell/epic/server/ServerKeeper"
-import type { Repo } from "spell/epic/server/server.types"
+import { IDLE_MINUTES, KeeperList, ServerKeeper, type KeeperRepo, type PageServerControl } from "spell/server/keeper"
 
-describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82)", () => {
+describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82;  Spell's own since epic `editor` P48)", () => {
   let folder: string
   let main: string
-  let repo: Repo
+  let repo: KeeperRepo
   let servers: FakeServers
   let now: number
 
@@ -24,18 +23,22 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     mkdirSync(join(main, "src/server/page"), { recursive: true })
     writeFileSync(join(main, "repos.json5"), "{}\n")
     writeFileSync(join(main, "src/server/page/cli.ts"), "\n")
-    mkdirSync(join(main, ".epic"), { recursive: true })
-    writeFileSync(join(main, ".epic/config.json5"), `{ worktreesFolder: "../worktrees" }\n`)
-    repo = { name: "kit", checkout: main, content: join(folder, "kit.epics"), prefix: "/r/kit/", isDefault: true }
+    repo = { name: "kit", checkout: main }
     servers = new FakeServers()
     now = Date.parse("2026-11-23T12:00:00Z")
   })
 
   afterEach(() => rmSync(folder, { recursive: true, force: true }))
 
-  /** a keeper over `repo`, the fake page servers and the clock */
-  const keeper = () =>
-    new ServerKeeper({ home: join(folder, "home"), repos: [repo], control: servers.control, now: () => now })
+  /** a keeper over `repo` (its servers from the list in its home), the fake page servers and the clock */
+  const keeper = ({ editorKept = () => false }: { editorKept?: (checkout: string) => boolean } = {}) =>
+    new ServerKeeper({
+      home: join(folder, "home"),
+      repos: [repo],
+      control: servers.control,
+      now: () => now,
+      editorKept
+    })
 
   /** the row of `id` */
   const rowOf = (kept: ServerKeeper, id: string) => kept.servers().find((row) => row.id === id)
@@ -115,22 +118,24 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     const port = (holder.address() as { port: number }).port
     const marker = join(folder, "proxy-started")
     const nothingThere = await SRV.freePort()
-    writeFileSync(
-      join(main, ".epic/config.json5"),
-      JSON.stringify({
-        worktreesFolder: "../worktrees",
-        servers: [
-          { name: "proxy server", check: String(port), what: "the outside API" },
-          { name: "mail catcher", check: String(nothingThere), start: `touch ${JSON.stringify(marker)}` }
-        ]
-      })
-    )
+    // registered with `spell keeper add`, for this checkout
+    const list = new KeeperList({ home: join(folder, "home") })
+    list.addServer({ name: "proxy server", check: String(port), what: "the outside API", checkout: main })
+    list.addServer({
+      name: "mail catcher",
+      check: String(nothingThere),
+      start: `touch ${JSON.stringify(marker)}`,
+      checkout: main
+    })
+    // another checkout's:  not this one's
+    list.addServer({ name: "elsewhere", check: String(nothingThere), checkout: join(folder, "other") })
     servers.running.add(main)
     try {
       const kept = keeper()
       await kept.look()
       expect(rowOf(kept, "kit/proxy server")).toMatchObject({ state: "running", own: true, canStart: false })
       expect(rowOf(kept, "kit/mail catcher")).toMatchObject({ state: "starting", canStart: true })
+      expect(rowOf(kept, "kit/elsewhere")).toBeUndefined()
       await new Promise((done) => setTimeout(done, 300))
       expect(readFileSync(marker, "utf8")).toBe("")
       await new Promise<void>((done) => holder.close(() => done()))
@@ -142,16 +147,9 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     }
   })
 
-  it("main's editor, when the app says how it starts:  down under a running page server restarts it, then waits", async () => {
-    writeFileSync(
-      join(main, ".epic/config.json5"),
-      JSON.stringify({
-        worktreesFolder: "../worktrees",
-        app: { urlFile: ".spell-server.editor.json", start: "node bin/spell.mjs server start" }
-      })
-    )
+  it("main's editor, when its page server serves one:  down under a running page server restarts it, then waits", async () => {
     servers.running.add(main)
-    const kept = keeper()
+    const kept = keeper({ editorKept: () => true })
     await kept.look()
     expect(servers.stops).toEqual([{ checkout: main, restart: false }])
     expect(rowOf(kept, "kit/editor")).toMatchObject({
@@ -182,7 +180,7 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     expect(servers.stops).toHaveLength(2)
   })
 
-  it("main's editor with no start command:  only watched", async () => {
+  it("main's editor, when its page server serves none:  only watched", async () => {
     servers.running.add(main)
     const kept = keeper()
     await kept.look()
@@ -199,17 +197,9 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
     const withProject = () => {
       const app = fakeMainCheckout(join(folder, "acme-app"))
       mkdirSync(join(app, "spaces/@acme/tools/dash"), { recursive: true })
-      mkdirSync(join(app, ".epic"), { recursive: true })
-      writeFileSync(join(app, ".epic/config.json5"), `{ worktreesFolder: "../acme-app.worktrees" }\n`)
       const fix = fakeWorktree(app, join(folder, "acme-app.worktrees", "fix"))
       mkdirSync(join(fix, "spaces/@acme/tools/dash"), { recursive: true })
-      const project: Repo = {
-        name: "acme-app",
-        checkout: app,
-        content: join(folder, "a.epics"),
-        prefix: "/r/a/",
-        isDefault: false
-      }
+      const project: KeeperRepo = { name: "acme-app", checkout: app }
       const kept = new ServerKeeper({ home: join(folder, "home"), repos: [repo, project], control: servers.control })
       return { app, fix, kept, file: join(folder, "more-spaces.json5") }
     }
@@ -238,6 +228,131 @@ describe("ServerKeeper:  every project's servers kept up (epic `epic-engine` P82
       expect(() => kept.showInEditor("acme-app", "gone", file)).toThrow(expect.objectContaining({ status: 404 }))
       expect(() => kept.showInEditor("kit", undefined, file)).toThrow(expect.objectContaining({ status: 404 }))
     })
+  })
+})
+
+describe("ServerKeeper:  handing over, one keeper in charge (epic `editor` P48)", () => {
+  let folder: string
+  let record: string
+  let before: string | undefined
+
+  beforeEach(() => {
+    folder = realpathSync(mkdtempSync(join(tmpdir(), "keeper-handover-")))
+    record = join(folder, "server-keeper.json")
+    before = process.env[SRV.KEEPER_FILE_VARIABLE]
+    process.env[SRV.KEEPER_FILE_VARIABLE] = record
+    vi.useFakeTimers({ toFake: ["setInterval"] })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    if (before === undefined) delete process.env[SRV.KEEPER_FILE_VARIABLE]
+    else process.env[SRV.KEEPER_FILE_VARIABLE] = before
+    rmSync(folder, { recursive: true, force: true })
+  })
+
+  /** a keeper named `name`, keeping nothing, on fake page servers */
+  const keeperNamed = (name: string, options: { onStepAside?: () => void } = {}) =>
+    new ServerKeeper({ home: join(folder, "home"), name, repos: [], control: new FakeServers().control, ...options })
+
+  /** the record as written */
+  const read = () => new SRV.KeeperLink().read()
+
+  /** a record of a live keeper of another process (this one's parent), named `keeper` */
+  const otherKeeper = (keeper: string) =>
+    new SRV.KeeperLink().write({ pid: process.ppid, base: "http://127.0.0.1:9", token: "t", keeper })
+
+  it("no keeper:  it takes the record, naming itself", () => {
+    const kept = keeperNamed("spell").start({ base: "http://127.0.0.1:1", token: "a" })
+    expect(read()).toEqual({ pid: process.pid, base: "http://127.0.0.1:1", token: "a", keeper: "spell" })
+    expect(kept.isAside).toBe(false)
+    kept.stop()
+    expect(read()).toBeUndefined()
+  })
+
+  it("Spell's keeper live:  the epic hub's stands aside, keeps nothing, and leaves the record alone", () => {
+    otherKeeper("spell")
+    let asides = 0
+    const hub = keeperNamed("epic hub", { onStepAside: () => void asides++ }).start({ base: "http://h", token: "b" })
+    expect(hub.isAside).toBe(true)
+    expect(asides).toBe(1)
+    expect(read()).toMatchObject({ pid: process.ppid, keeper: "spell" })
+    hub.stop()
+    expect(read()).toMatchObject({ pid: process.ppid })
+  })
+
+  it("the one in charge gone:  the one standing aside takes the record back at its next look", () => {
+    otherKeeper("spell")
+    const hub = keeperNamed("epic hub").start({ base: "http://h", token: "b" })
+    expect(hub.isAside).toBe(true)
+    new SRV.KeeperLink().write({ pid: 2 ** 22 + 7, base: "http://gone", token: "x", keeper: "spell" })
+    vi.advanceTimersByTime(10_000)
+    expect(hub.isAside).toBe(false)
+    expect(read()).toMatchObject({ pid: process.pid, keeper: "epic hub" })
+    hub.stop()
+  })
+
+  it("takeOver (`spell keeper start`), or one of its own kind:  it takes the record;  the other steps aside", () => {
+    otherKeeper("epic hub")
+    const spell = keeperNamed("spell").start({ base: "http://s", token: "c", takeOver: true })
+    expect(spell.isAside).toBe(false)
+    expect(read()).toMatchObject({ pid: process.pid, keeper: "spell" })
+    spell.stop()
+    otherKeeper("epic hub")
+    const freshHub = keeperNamed("epic hub").start({ base: "http://h2", token: "d" })
+    expect(read()).toMatchObject({ pid: process.pid, keeper: "epic hub", base: "http://h2" })
+    freshHub.stop()
+  })
+
+  it("a record from before P48 names no keeper:  it's the epic hub's", () => {
+    new SRV.KeeperLink().write({ pid: process.ppid, base: "http://old", token: "e" })
+    const spell = keeperNamed("spell").start({ base: "http://s", token: "c" })
+    expect(spell.isAside).toBe(true)
+    spell.stop()
+  })
+
+  it("the holds:  carried over once from the epic home's old file, and written back there while it's handed in", async () => {
+    const legacy = join(folder, "epic-home", "server-keeper.json")
+    mkdirSync(join(folder, "epic-home"), { recursive: true })
+    writeFileSync(legacy, JSON.stringify({ held: ["kit/page server"], handsOff: true }))
+    const kept = new ServerKeeper({ home: join(folder, "home"), repos: [], legacyHolds: legacy })
+    expect(kept.isHandsOff).toBe(true)
+    expect(JSON.parse(readFileSync(join(folder, "home", "server-keeper-holds.json"), "utf8"))).toMatchObject({
+      held: ["kit/page server"]
+    })
+    await kept.setHandsOff(false)
+    expect(JSON.parse(readFileSync(legacy, "utf8"))).toEqual({ held: ["kit/page server"] })
+    // carried ONCE:  the old file changing again changes nothing here
+    writeFileSync(legacy, JSON.stringify({ handsOff: true }))
+    expect(new ServerKeeper({ home: join(folder, "home"), repos: [], legacyHolds: legacy }).isHandsOff).toBe(false)
+  })
+})
+
+describe("KeeperList:  what Spell's keeper keeps, `~/.spell/keeper.json5`", () => {
+  let folder: string
+
+  beforeEach(() => {
+    folder = realpathSync(mkdtempSync(join(tmpdir(), "keeper-list-")))
+  })
+
+  afterEach(() => rmSync(folder, { recursive: true, force: true }))
+
+  it("checkouts added once, by their folder's name;  servers by name per checkout, replaced, refused without a check", () => {
+    const list = new KeeperList({ home: join(folder, "home") })
+    expect(list.exists).toBe(false)
+    expect(list.checkouts).toEqual([])
+    expect(list.addCheckout(join(folder, "kit"))).toBe(true)
+    expect(list.addCheckout(join(folder, "kit"))).toBe(false)
+    expect(list.exists).toBe(true)
+    expect(list.checkouts).toEqual([{ name: "kit", checkout: join(folder, "kit") }])
+    list.addServer({ name: "proxy", check: "8080", checkout: join(folder, "kit") })
+    list.addServer({ name: "proxy", check: "8081", checkout: join(folder, "kit") })
+    list.addServer({ name: "proxy", check: "9000", checkout: join(folder, "work") })
+    expect(list.serversOf(join(folder, "kit"))).toEqual([
+      { name: "proxy", check: "8081", checkout: join(folder, "kit") }
+    ])
+    expect(list.serversOf()).toHaveLength(2)
+    expect(() => list.addServer({ name: "x", check: "" })).toThrow(TypeError)
   })
 })
 

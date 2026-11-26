@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process"
+import { spawn, spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, statSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
@@ -15,10 +15,12 @@ import {
   type PageConfig,
   type RouteModule
 } from "spell/server/page"
+import { ServerKeeper } from "spell/server/keeper"
 import type { SiteTab } from "spell/server/site/site.types"
 import { resolvedFile } from "spell/toolchain/sourceNames"
 
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 
@@ -26,12 +28,13 @@ import { packageDir } from "spell/epic/tools/packageDir"
 
 import { RepoApp } from "./RepoApp"
 import { RepoList } from "./RepoList"
-import { ServerKeeper } from "./ServerKeeper"
+import { ServerFacts } from "./ServerFacts"
 import {
   DEFAULT_EPIC_PORT,
   SERVERS_TAB,
   ENGINE_ROUTES,
   EPIC_UI,
+  HOLD_FILE,
   HOME_ENV,
   legacyEnginePath,
   LOG_FILE,
@@ -124,6 +127,10 @@ export class EpicServer {
   /**
    * the SERVER KEEPER (epic `epic-engine` P82):  every repo's web servers kept up, the Servers tab's data;
    * keeping once `start()` says so (`keep`)
+   * - Spell's since epic `editor` P48 (`spell/server/keeper`):  the hub hands it what's its own (the repos, their
+   *   `.epic/config.json5` servers and app, what merged into main, a fresh hub when its code changes);  it stands
+   *   aside while Spell's own keeper (`spell keeper start`) is in charge, forwarding to it
+   * - epic `epic-engine` takes it out of the hub at the switch-over (its request r99)
    */
   readonly keeper: ServerKeeper
 
@@ -224,13 +231,32 @@ export class EpicServer {
       if (app.repo === this.defaultRepo) app.route(router, "/")
     }
     RepoApp.routeStatus(router, this.apps)
-    this.keeper = new ServerKeeper({ home: this.home, repos: this.repos })
+    this.keeper = new ServerKeeper({
+      name: HUB_KEEPER,
+      repos: this.repos,
+      serversOf: (repo) => EpicConfig.of(repo.checkout).servers,
+      editorKept: (checkout) => Boolean(EpicConfig.of(checkout).app?.start),
+      self: HUB_ROW,
+      moreAnswer: () => ServerFacts.of(this.repos),
+      legacyHolds: join(this.home, HOLD_FILE),
+      onStale: () => this.handOver()
+    })
     this.keeper.route(router, this.web.guard)
     if (repo) {
       const writable = pageServerSettings(repo.checkout).writable ?? WRITABLE
       new PageEditor({ root: repo.content, writable }).route(router, this.web.guard)
       new SRV.FileOperations({ root: repo.content, writable }).route(router, this.web.guard)
     }
+  }
+
+  /**
+   * a fresh hub, on the code now:  `epic hub ensure` on this hub's own port, detached;  it stops this one
+   * - its port named:  `ensure` on the default port would stop this one and start the next THERE (it did, in a test)
+   */
+  private handOver(): void {
+    const port = this.info.port ? String(this.info.port) : undefined
+    const args = [EngineFiles.bin, "hub", "ensure", ...(port ? ["--port", port] : [])]
+    spawn(process.execPath, args, { detached: true, stdio: "ignore" }).unref()
   }
 
   /**
@@ -643,6 +669,12 @@ async function epicServerOn(port: number): Promise<EpicServerInfo | undefined> {
     return undefined
   }
 }
+
+/** The hub's keeper's name in the keeper's record (`SRV.KeeperRecord.keeper`). */
+const HUB_KEEPER = "epic hub"
+
+/** The hub's own row on the Servers tab. */
+const HUB_ROW = { id: "hub", name: "epic hub", what: "the epic pages of every project, and this tab" }
 
 /** The engine's folder, in a checkout or an npm install (`EngineFiles`). */
 const ENGINE_ROOT = EngineFiles.root

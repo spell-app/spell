@@ -56,11 +56,13 @@ const PLACES_NODE = [
 ]
 
 /**
- * The server keeper's record and the worktrees' port book, scratch files for the tests (epic `epic-engine` P82):
+ * The server keeper's record, home and the worktrees' port book, scratch files for the tests (epic `epic-engine` P82,
+ * epic `editor` P48):
  * a test's page server never asks the machine's keeper, nor takes a port written down for a real worktree
  */
 const NO_KEEPER = {
   SPELL_KEEPER_FILE: join(tmpdir(), `spell-tests-${process.pid}`, "server-keeper.json"),
+  SPELL_KEEPER_HOME: join(tmpdir(), `spell-tests-${process.pid}`, "keeper"),
   SPELL_PORTS_FILE: join(tmpdir(), `spell-tests-${process.pid}`, "server-ports.json")
 }
 

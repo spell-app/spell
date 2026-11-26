@@ -213,3 +213,85 @@ function stopEditor(root: string, pid: number | undefined, { withPageServer }: {
   }
   return "not running"
 }
+
+////////////////
+// ## A server by name:  `spell server start | stop | restart | status <server>`
+////////////////
+
+/**
+ * `spell server <action> <server>`:  one server of the kit's checkout, by name (epic `editor` P48):  `page-server`
+ * (or `page`), `editor`, or one registered with the server keeper (`spell keeper add`).
+ * - in a MAIN checkout:  asked of the server keeper (`SRV.KeeperLink.ask()`), as the Servers tab's buttons ask;
+ *   with none running, the page server and editor are started here as before, a registered one says to start it
+ * - in a WORKTREE:  done here, as always:  its editor comes and goes with its page server, so a start or restart of
+ *   it restarts the page server
+ * - the page server's own `start` / `stop` (no name) are `pageServer()`'s:  this is for the rest
+ * - throws `CliError` for a server the keeper doesn't keep, or a worktree's registered one
+ */
+export async function serverByName(action: SRV.KeeperAction, typed: string): Promise<number> {
+  const root = pageServerRoot(process.cwd())
+  const server = serverNamed(typed)
+  const where = SRV.checkoutOf(root)
+  if (where && where.worktree === undefined) {
+    const answer = await new SRV.KeeperLink().ask(action, { checkout: root, server })
+    if (answer) {
+      CLI.out(`${server}:  ${answer.state ?? "asked"}${answer.base ? `, at ${answer.base}/` : ""}`)
+      if (server === "editor" && action !== "stop")
+        CLI.out("(the editor comes back with its page server, which restarts)")
+      return CLI.EXIT.OK
+    }
+  }
+  return doItHere(action, server, root)
+}
+
+/** `server`'s `action` done in this process:  no keeper to ask, or a worktree's */
+async function doItHere(action: SRV.KeeperAction, server: string, root: string): Promise<number> {
+  if (server === "page server") {
+    if (action === "stop") CLI.out(`page server:  ${(await PageServer.stop(root)) ? "stopped" : "not running"}`)
+    else {
+      const running = action === "restart" ? await PageServer.restart(root) : await PageServer.ensure(root)
+      CLI.out(`page server:  ${running.launched ? "started" : "running"}, at ${running.base}/`)
+    }
+    return CLI.EXIT.OK
+  }
+  if (server === "editor") {
+    if (action === "stop") return stopServers("all")
+    const running = await PageServer.restart(root)
+    CLI.out(`editor:  starting, with the page server at ${running.base}/`)
+    return CLI.EXIT.OK
+  }
+  throw new CLI.CliError(
+    `${server}:  only the server keeper starts and stops it, and none is running:  spell keeper start, then try again`
+  )
+}
+
+/**
+ * `spell server status <server>`:  one server's line, as the server keeper last saw it (`spell keeper status` has
+ * them all);  exits 1 when it isn't running, or no keeper runs
+ */
+export async function serverStatus(typed: string): Promise<number> {
+  const root = pageServerRoot(process.cwd())
+  const server = serverNamed(typed)
+  const keeper = new SRV.KeeperLink().running()
+  if (!keeper) {
+    CLI.out("no server keeper is running:  spell keeper start")
+    return CLI.EXIT.ERRORS
+  }
+  const { keeperAnswer, statusLine } = await import("spell/cli/commands/keeperCommand")
+  const answer = await keeperAnswer(keeper)
+  const row = answer.servers.find((each) => each.name === server && SRV.RealPath.same(each.checkout, root))
+  if (!row) {
+    CLI.out(`${server}:  the server keeper keeps none here (${root})`)
+    return CLI.EXIT.ERRORS
+  }
+  CLI.out(statusLine(row))
+  return row.state === "running" ? CLI.EXIT.OK : CLI.EXIT.ERRORS
+}
+
+/** a server as typed (`page-server`, `page`, `editor`, a registered one's name) as the keeper names it */
+export function serverNamed(typed: string): string {
+  return PAGE_SERVER_NAMES.has(typed) ? "page server" : typed
+}
+
+/** What a page server may be typed as. */
+const PAGE_SERVER_NAMES = new Set(["page-server", "page", "page server", "pageserver", "local"])

@@ -12,13 +12,16 @@ export function fakeMainCheckout(main: string): string {
 
 /**
  * Make folder `folder` look like a worktree of main checkout `main`, as `git worktree add` leaves one:
- * its `.git` FILE pointing at `<main>/.git/worktrees/<name>`, whose `commondir` leads back to `<main>/.git`.
+ * its `.git` FILE pointing at `<main>/.git/worktrees/<name>`, whose `commondir` leads back to `<main>/.git`, and whose
+ * `gitdir` names the worktree's `.git`.
  * - `main` is made a main checkout too (`fakeMainCheckout()`);  returns `folder`
  */
 export function fakeWorktree(main: string, folder: string): string {
   const gitdir = join(fakeMainCheckout(main), ".git", "worktrees", basename(folder))
   mkdirSync(gitdir, { recursive: true })
   writeFileSync(join(gitdir, "commondir"), "../..\n")
+  // and back to the worktree, as git's own record says (`git worktree list` reads it;  the server keeper too)
+  writeFileSync(join(gitdir, "gitdir"), `${join(folder, ".git")}\n`)
   mkdirSync(folder, { recursive: true })
   writeFileSync(join(folder, ".git"), `gitdir: ${gitdir}\n`)
   return folder
