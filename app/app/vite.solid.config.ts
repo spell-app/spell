@@ -113,6 +113,9 @@ function sharedEntries(): Plugin {
     [SOLID_ENTRY]: [
       `export * from "solid-js"`,
       `export * from "@solidjs/web"`,
+      // both export it, by different paths (signals, `solid-js/internal`):  two `export *`s of one name cancel out,
+      // and the builds that import it from `spell-solid-shared.js` failed to load (Solid 2.0.4, epic `solid-2-final` P21)
+      `export { heldRead } from "solid-js"`,
       `export * from ${JSON.stringify(UI_CORE)}`,
       `export * from ${JSON.stringify(UI_ROOT)}`,
       // a root may load the docs elements too:  Spell UI's guide draws them (`DOCS_FAMILIES`)

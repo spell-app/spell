@@ -196,6 +196,24 @@ describe("runner builds", () => {
     }
   })
 
+  test("every name a build imports from `spell-solid-shared.js` is one it exports", () => {
+    // Solid 2.0.4's `solid-js` and `@solidjs/web` both export `heldRead`, by different paths:  two `export *`s of one
+    // name cancel out, so `spell-solid.js` dropped it, and `<spell-viewer>` failed to load (epic `solid-2-final` P21)
+    for (const dir of [element, runner]) {
+      const names = new Set(SHARED_NAMES.exec(readFileSync(join(dir, "spell-solid-shared.js"), "utf8"))![1]!.split(", "))
+      const missing = chunks(dir).flatMap((file) =>
+        [...readFileSync(join(dir, file), "utf8").matchAll(SHARED_IMPORT)].flatMap((match) =>
+          match[1]!
+            .split(",")
+            .map((name) => name.trim().split(/\s+as\s+/)[0]!)
+            .filter((name) => name && !names.has(name))
+            .map((name) => `${file}:  ${name}`)
+        )
+      )
+      expect(missing, dir).toEqual([])
+    }
+  })
+
   test("`spell-solid-shared.js` takes Solid and Spell UI's core from the page when it has them all", async () => {
     const text = readFileSync(join(element, "spell-solid-shared.js"), "utf8")
     // every name `spell-solid.js` exports (NOT imported here:  it defines `<ui-root>`, and node has no
@@ -444,6 +462,9 @@ const SPELL_EDITOR = /\/components\/spell-editor\/SpellEditor\.tsx$/
 
 /** In `spell-solid-shared.js`:  the names it exports. */
 const SHARED_NAMES = /^export const \{ (.+) \} = sharedModules$/m
+
+/** In a built file:  a static import from `spell-solid-shared.js`, its names. */
+const SHARED_IMPORT = /import\s*\{([^}]*)\}\s*from\s*"\.\/(?:\.\.\/)*spell-solid-shared\.js"/g
 
 /** In `spell-solid-shared.js`:  the specifiers it takes from a page (`SpellUI.packModules`' keys), as JSON. */
 const SHARED_SPECIFIERS = /^const specifiers = (.+)$/m
