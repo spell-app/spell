@@ -20,7 +20,7 @@ export const epicBellsVocabulary = {
   description:
     "Bells & Whistles (epic `epic-engine` P86):  a dialog over an epic page listing the steps epic work runs by " +
     "itself -- reviews by helpers, quick reads, test runs, doc rewrites, merges, waking a chat -- each with an on / off " +
-    "switch and its token cost under it, its title and one plain sentence, grouped by what it's for, the costliest first.  At the top, the Token burn " +
+    "switch and its token cost under it, its title and one short line, grouped by what it's for, the costliest first.  In its footer, the Token burn " +
     "slider (Low, Medium, High) turns off for now what isn't worth its cost at that level (a step that uses no tokens always runs);  a switch flipped while it's " +
     "down shows it as Custom.  Saved in the person's own epic settings, one set for every epic.  Drawn by " +
     "`<epic-page>` in its shadow root, opened from its header's gear, never written in a page.",
@@ -37,7 +37,7 @@ export const epicBellsVocabulary = {
   states: [{ name: "open", description: "Showing." }],
   texts: [
     { key: "heading", text: "Bells & Whistles", description: "The dialog's name, and the gear's row." },
-    { key: "lede", text: "Steps Claude runs on its own while it works on an epic. Turn off the ones you don't want." },
+    { key: "lede", text: "Steps Claude runs on its own while it works on an epic." },
     { key: "closeTip", text: "Close (Escape)", description: "The close button's tooltip." },
     { key: "cancel", text: "Cancel", description: "Closes it, keeping nothing changed." },
     { key: "save", text: "Save" },
@@ -91,219 +91,207 @@ export const epicBellsVocabulary = {
     { key: "reuseCheckPlan", text: "Reuse check on the plan" },
     {
       key: "reuseCheckPlanSentence",
-      text: "When an epic is first planned, a helper reads the project to find tools it already has, so the plan doesn't build them twice."
+      text: "A helper looks for tools the project already has, so the first plan doesn't build them twice."
     },
     { key: "reuseCheckPhases", text: "Reuse check on each phase plan" },
     {
       key: "reuseCheckPhasesSentence",
-      text: "When the step-by-step plans are written, a helper reads all of them against the project, looking for work that is already done somewhere."
+      text: "A helper checks each step-by-step plan for work the project already has."
     },
     { key: "pageEditHelper", text: "Helper for epic page edits" },
     {
       key: "pageEditHelperSentence",
-      text: "Bigger edits to the epic page are done by a helper in the background, so the chat stays free to answer you."
+      text: "A helper makes bigger epic page edits, so the chat stays free to answer you."
     },
     { key: "helpersBuild", text: "Helpers do the building" },
-    {
-      key: "helpersBuildSentence",
-      text: "Any task over a minute goes to a helper, so the chat can keep answering you while the work happens."
-    },
+    { key: "helpersBuildSentence", text: "Tasks over a minute go to helpers, so the chat keeps answering you." },
     { key: "restartHelpers", text: "Restart cut-off helpers" },
     {
       key: "restartHelpersSentence",
-      text: "If Claude restarts while helpers are working, it starts them again by itself, so their work isn't lost."
+      text: "If Claude restarts mid-job, it starts the unfinished helpers again, so no work is lost."
     },
     { key: "finalTidy", text: "Final tidy of new code" },
-    {
-      key: "finalTidySentence",
-      text: "When code is finished, Claude runs the checks once more and looks for common slips, like a typo copied from another file."
-    },
+    { key: "finalTidySentence", text: "A helper reads finished code once more, to catch small mistakes." },
     { key: "designReview", text: "Design review" },
     {
       key: "designReviewSentence",
-      text: "When a phase changes how a page looks, a helper takes screenshots of it and checks them against your project's design rules."
+      text: "A helper takes screenshots of changed pages and checks them against your design rules."
     },
     { key: "planCheck", text: "Plan check" },
     {
       key: "planCheckSentence",
-      text: "Before a phase is marked done, a helper compares what was built with the plan you agreed to."
+      text: "Before a phase is marked done, a helper compares what was built with the plan."
     },
     { key: "alignmentCheck", text: "Alignment check" },
     {
       key: "alignmentCheckSentence",
-      text: "A helper that changed a page measures it, to make sure its rows and edges line up, before it says it's finished."
+      text: "After a helper changes a page, it checks that the page's rows and edges line up."
     },
     { key: "handChecksFirst", text: "Claude tries hand checks first" },
     {
       key: "handChecksFirstSentence",
-      text: "Before asking you to try something by hand, Claude tries it itself, so you only get the checks it can't do."
+      text: "Claude tries hand checks itself first, so you only get the ones it can't do."
     },
     { key: "titleCheck", text: "Title check" },
     {
       key: "titleCheckSentence",
-      text: "Each new item's title is read by a second, separate Claude that knows nothing about the work, to make sure you'll understand it later."
+      text: "A fresh Claude with no background reads each new item's title, and flags one that's unclear."
     },
     { key: "plainWordsCheck", text: "Plain-words check" },
     {
       key: "plainWordsCheckSentence",
-      text: "Text you'll see in the product, like messages and help, is read by a separate Claude that flags jargon and long sentences."
+      text: "Another Claude flags hard words and long sentences in the messages your product shows."
     },
     { key: "itemScoring", text: "Item scoring" },
     {
       key: "itemScoringSentence",
-      text: "Each new item is scored by a separate Claude, so the page can show a small label saying how much it matters."
+      text: "Another Claude gives each new item a small label saying how much it matters."
     },
     { key: "changesInBold", text: "Changes in bold" },
     {
       key: "changesInBoldSentence",
-      text: "In replies, Claude puts in bold anything that has moved away from what you last asked for."
+      text: "Replies put in bold anything that has moved away from what you last asked for."
     },
     { key: "checksBeforeMerge", text: "Checks before work is added" },
     {
       key: "checksBeforeMergeSentence",
-      text: "Before a helper's finished work goes into your project, Claude runs its tests, small programs that confirm nothing stopped working."
+      text: "Before a helper's work is added to your project, its tests run to confirm nothing broke."
     },
     { key: "fullTestRun", text: "Full test run at the end" },
     {
       key: "fullTestRunSentence",
-      text: "After the last helper finishes, it runs every test in the project. This takes 10 to 25 minutes."
+      text: "After the last helper finishes, every test in the project runs (10 to 25 minutes)."
     },
     { key: "speedTest", text: "Speed test" },
     {
       key: "speedTestSentence",
-      text: "When Claude changes how Spell understands what you write, it times it before and after, so it doesn't get slower."
+      text: "When Claude changes how Spell understands your writing, it checks it didn't get slower."
     },
     { key: "editorAddOns", text: "Update your editor add-ons" },
     {
       key: "editorAddOnsSentence",
-      text: "Spell adds small extras to your code editor, the program where you write code. After they change, Claude remakes them so you get the newest ones."
+      text: "When Spell's add-ons for your code editor change, Claude rebuilds them for you."
     },
     { key: "editorWarnings", text: "Editor warning check" },
     {
       key: "editorWarningsSentence",
-      text: "After new work joins the Spell editor, Claude opens the editor and looks at the warnings it shows."
+      text: "After new work is added, Claude opens the Spell editor and looks at its warnings."
     },
     { key: "stopStuckTests", text: "Stop stuck test runs" },
     {
       key: "stopStuckTestsSentence",
-      text: "If the checks seem frozen and show no progress for a long time, Claude stops them instead of waiting for hours."
+      text: "Claude stops checks that show no progress for a long time, instead of waiting hours."
     },
     { key: "plainPhaseNotes", text: "Rewrite phase notes in plain words" },
     {
       key: "plainPhaseNotesSentence",
-      text: "After each phase, a helper rewrites what it changed so it's easy to read cold."
+      text: "After each phase, a helper rewrites what changed so it's easy to read later."
     },
     { key: "epicGuide", text: "Write the epic's guide" },
     {
       key: "epicGuideSentence",
-      text: "A helper writes the page that explains what the epic built, for someone using it later."
+      text: "A helper writes a page explaining what the epic built, for people using it later."
     },
     { key: "fixReadmes", text: "Fix the READMEs" },
     {
       key: "fixReadmesSentence",
-      text: "Helpers update the project's intro pages (called READMEs) wherever the new work made them wrong."
+      text: "Helpers update your project's welcome pages (called READMEs) when new work makes them wrong."
     },
     { key: "checkGuides", text: "Check the guides" },
     {
       key: "checkGuidesSentence",
-      text: "Claude looks for broken links and out-of-date pictures in your project's written guides, then fixes them."
+      text: "Claude finds and fixes broken links and out-of-date pictures in your guides."
     },
     { key: "changelog", text: "Keep the list of changes" },
     {
       key: "changelogSentence",
-      text: "Each time work joins your project, Claude adds a line to its changelog, the running list of what changed."
+      text: "Each time work is added, Claude writes a line in the changelog, the list of what changed."
     },
     { key: "mergeEachHelper", text: "Add each helper's work" },
-    {
-      key: "mergeEachHelperSentence",
-      text: "When a helper finishes and its checks pass, its work is added to your project right away."
-    },
+    { key: "mergeEachHelperSentence", text: "A helper's work is added to your project as soon as its checks pass." },
     { key: "mergeMain", text: "Bring in other changes" },
     {
       key: "mergeMainSentence",
-      text: "If your project changed while the epic was being built, Claude first folds those changes into the epic's work, so everything fits together."
+      text: "If your project changed meanwhile, Claude combines those changes with the epic's work."
     },
     { key: "remakeBuiltFiles", text: "Remake built files" },
     {
       key: "remakeBuiltFilesSentence",
-      text: "Some files are made automatically from other files. After new work is added, Claude makes them again, so they are never edited by hand."
+      text: "Files made from other files are remade after new work is added, never changed by hand."
     },
     { key: "renameOldNames", text: "Update old names" },
     {
       key: "renameOldNamesSentence",
-      text: "Claude renames some pieces of the new work so they match the naming in the rest of your project."
+      text: "Claude renames parts of the new work to match the names in the rest of your project."
     },
     { key: "installPackages", text: "Install what new work needs" },
     {
       key: "installPackagesSentence",
-      text: "When new work needs extra ready-made code from other people (called libraries), Claude installs it for you."
+      text: "When new work needs libraries (ready-made code from others), Claude installs them."
     },
     { key: "keepOwnEdits", text: "Keep your own edits" },
     {
       key: "keepOwnEditsSentence",
-      text: "Before adding work to your project, Claude first saves any edits you made there by hand, so none are lost."
+      text: "Before adding work, Claude saves any edits you made by hand, so none are lost."
     },
     { key: "savePages", text: "Save the epic pages" },
     {
       key: "savePagesSentence",
-      text: "After each reply, Claude saves a snapshot of every epic page, so you can go back to an earlier version."
+      text: "After each reply, every epic page is saved, so you can go back to an earlier version."
     },
     { key: "clearStuckItems", text: "Clear stuck items" },
     {
       key: "clearStuckItemsSentence",
-      text: 'If an item shows "in progress" but nothing is working on it, Claude moves it back to the waiting list.'
+      text: 'If an item says "in progress" but nothing works on it, Claude moves it back to waiting.'
     },
     { key: "freshHint", text: "Hint to start fresh" },
     {
       key: "freshHintSentence",
-      text: "When a chat gets very long, Claude suggests handing the epic to a new chat, which costs less to keep going."
+      text: "When a chat gets very long, Claude suggests moving to a new one, which costs less."
     },
     { key: "itemRequests", text: "Answer your requests on an item" },
     {
       key: "itemRequestsSentence",
-      text: "Each item on an epic page has Add Details and Clarify buttons. When you press one, a helper writes the answer."
+      text: "When you press an item's Add Details or Clarify button, a helper writes the answer."
     },
     { key: "promptAck", text: "Quick reply while busy" },
     {
       key: "promptAckSentence",
-      text: "When you write while Claude is in the middle of something, it answers at once in one line, saying it saw your message."
+      text: "If you write while Claude is busy, it says at once, in one line, that it saw it."
     },
     { key: "autoSend", text: "Auto Send" },
     {
       key: "autoSendSentence",
-      text: "Two minutes after you stop changing the epic page, your changes go to Claude on their own, so you don't need to press Send."
+      text: "Two minutes after you stop editing the page, your changes are sent to Claude, no Send needed."
     },
     { key: "openChat", text: "Open a chat when no one is listening" },
-    {
-      key: "openChatSentence",
-      text: "If you press Send and no chat is open for that epic, a new one starts to handle it."
-    },
+    { key: "openChatSentence", text: "If you press Send and no chat is open for that epic, a new one starts." },
     { key: "wakeQuietChat", text: "Wake a quiet chat" },
-    { key: "wakeQuietChatSentence", text: "If you press Send while that epic's chat is waiting, your Send wakes it." },
+    {
+      key: "wakeQuietChatSentence",
+      text: "If you press Send while that epic's chat is idle, your Send starts it answering."
+    },
     { key: "passSendToBusy", text: "Pass a Send to a busy chat" },
     {
       key: "passSendToBusySentence",
-      text: "If you press Send while that epic's chat is working, it reads your Send at its next step."
+      text: "If you press Send while that epic's chat is working, it reads it at its next step."
     },
     { key: "watchAgentNotes", text: "Watch for notes to helpers" },
     {
       key: "watchAgentNotesSentence",
-      text: "While helpers are working, Claude keeps watching for notes you leave to change what they're doing."
+      text: "While helpers work, Claude watches for notes you leave to change what they do."
     },
     { key: "watchSends", text: "Watch for your Sends" },
-    {
-      key: "watchSendsSentence",
-      text: "Claude looks for new messages from you every 2 seconds, so it answers quickly."
-    },
+    { key: "watchSendsSentence", text: "Claude looks for your new messages every 2 seconds, so it answers quickly." },
     { key: "refreshPages", text: "Refresh changed pages" },
     {
       key: "refreshPagesSentence",
-      text: "When the code behind a page changes, Claude remakes the page, so you see the change."
+      text: "When the code behind a page changes, the page is remade, so you see the change."
     },
     { key: "closeLeftovers", text: "Close leftover programs" },
     {
       key: "closeLeftoversSentence",
-      text: "Once an hour, Claude closes background programs still running after their work is finished or deleted."
+      text: "Once an hour, Claude closes programs still running after their work has finished."
     },
     { key: "startNotices", text: "Notices at start" },
     { key: "startNoticesSentence", text: "When a chat starts, it shows short notices about anything you need to know." }

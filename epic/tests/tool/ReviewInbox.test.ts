@@ -1255,3 +1255,27 @@ describe("isInstant()", () => {
     expect(inbox.unsentMarks.map((mark) => mark.id)).toEqual(["i2"])
   })
 })
+
+// epic `epic-engine` T168, T174
+describe("ReviewInbox gear asks", () => {
+  test("asked, pressed again (one ask, the newer time), started;  the oldest first;  an inbox with one isn't empty", () => {
+    const inbox = new ReviewInbox()
+    inbox.askFromGear("push", "2026-11-26T10:00:00.000-05:00")
+    inbox.askFromGear("hush", "2026-11-26T10:01:00.000-05:00")
+    inbox.askFromGear("push", "2026-11-26T10:02:00.000-05:00")
+    expect(inbox.gearAsks).toEqual({ push: "2026-11-26T10:02:00.000-05:00", hush: "2026-11-26T10:01:00.000-05:00" })
+    expect(inbox.firstAsk).toBe("hush")
+    expect(inbox.isEmpty).toBe(false)
+    expect(inbox.askStarted("hush")).toBe(true)
+    expect(inbox.askStarted("hush")).toBe(false)
+    expect(inbox.askStarted("push")).toBe(true)
+    expect([inbox.firstAsk, inbox.isEmpty]).toEqual([undefined, true])
+  })
+
+  test("an older file's tidyAsked is read as the gear's tidy, and never written back", () => {
+    const inbox = new ReviewInbox({ tidyAsked: "2026-11-26T10:00:00.000-05:00" })
+    expect(inbox.gearAsks).toEqual({ tidy: "2026-11-26T10:00:00.000-05:00" })
+    expect("tidyAsked" in inbox.toRecord()).toBe(false)
+    expect(new ReviewInbox({ tidyAsked: null }).gearAsks).toEqual({})
+  })
+})

@@ -1,4 +1,4 @@
-import { decodeHTMLStrict } from "entities"
+import { P } from "spell/parser/parser"
 
 // Import directly to avoid circular import:  read at module evaluation, for `HTML_TAG`
 import { CLOSETAG, OPENTAG } from "spell/parser/markdown/blocks/blocks.types"
@@ -36,12 +36,14 @@ const ENTITY_OR_ESCAPED_CHAR = new RegExp(`\\\\${ESCAPABLE}|${ENTITY}`, "gi")
 
 /** `text` with backslash escapes and entities resolved:  `\*` => `*`, `&amp;` => `&`. */
 export function unescapeString(text: string) {
-  return text.replace(ENTITY_OR_ESCAPED_CHAR, (match) => (match[0] === "\\" ? match.slice(1) : decodeHTMLStrict(match)))
+  return text.replace(ENTITY_OR_ESCAPED_CHAR, (match) =>
+    match[0] === "\\" ? match.slice(1) : P.HTMLEntities.decode(match)
+  )
 }
 
 /** Decode one entity / numeric reference;  an unknown one stays as it is. */
 export function decodeEntity(entity: string) {
-  return decodeHTMLStrict(entity)
+  return P.HTMLEntities.decode(entity)
 }
 
 /** Unicode punctuation, as emphasis flanking counts it:  ASCII punctuation plus Unicode `P*`. */

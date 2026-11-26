@@ -65,6 +65,53 @@ describe("CloseAll.candidates()", () => {
   })
 })
 
+// epic `epic-engine` I487:  "The 'Close' in the Issues header should close done items as well"
+describe("Close all on DONE issues and FIXED todos too", () => {
+  beforeEach(() => {
+    plan.addItem("issue", "Done issue")
+    plan.setItem("i3", "done")
+  })
+
+  test("a done issue waiting for his tick is closed with the fixed ones", () => {
+    expect(drawn("i3")).not.toBe("old")
+    expect(CloseAll.candidates(plan, "issues")).toEqual(["i1", "i3"])
+    const { closed } = CloseAll.apply(plan, "issues", ["i1", "i3"])
+    expect(closed.map((each) => each.id)).toEqual(["i1", "i3"])
+    expect(drawn("i3")).toBe("old")
+  })
+
+  test("each item's finished word, and the button's counts in the section's order", () => {
+    expect(CloseAllRule.wordOf("issues", plan.item("i1"))).toBe("fixed")
+    expect(CloseAllRule.wordOf("issues", plan.item("i3"))).toBe("done")
+    expect(CloseAllRule.wordOf("issues", plan.item("i2"))).toBeUndefined()
+    expect(CloseAllRule.wordOf("todos", plan.item("t1"))).toBe("done")
+    expect(CloseAllRule.wordOf("judgements", plan.item("j1"))).toBe("decided")
+    const items = [{ word: "done" as const }, { word: "fixed" as const }, { word: "done" as const }]
+    expect(CloseAllRule.wordsIn("issues", items)).toEqual([
+      ["fixed", 1],
+      ["done", 2]
+    ])
+    expect(CloseAllRule.wordsIn("todos", items)).toEqual([
+      ["done", 2],
+      ["fixed", 1]
+    ])
+  })
+
+  test("on a page with badges, DONE and FIXED both count in Issues;  YOUR CALL never", () => {
+    const item = plan.item("i2")
+    const look = { state: "replied" as const, live: NO_LIVE_REVIEW, commented: false }
+    for (const [badge, closes] of [
+      ["done", true],
+      ["fixed", true],
+      ["yourCall", false],
+      ["decided", false]
+    ] as const) {
+      item.setAttribute("badge", badge)
+      expect(CloseAllRule.closes("issues", item, look)).toBe(closes)
+    }
+  })
+})
+
 describe("CloseAllRule", () => {
   test("on a page with badges, only the finished word counts", () => {
     const item = plan.item("j2")

@@ -229,6 +229,29 @@ export const ENTRYPOINT_PLACES: Record<string, string> = {
 export const TITLE_ICONS = { active: "🚧", future: "📅", done: "✅", errors: "🚨", paused: "⏸️" } as const
 
 /**
+ * A SUPERSEDED epic session's title (epic `epic-engine` T175):  `🗄️ <epic> (replaced)`, the old session a
+ * `/epic fresh` handed its epic on from (`epic session retire`, and the fresh handoff itself).
+ * - NOT one of `TITLE_ICONS`, on purpose:  `bareTitle()` leaves it whole, so it never reads as the epic's name, and
+ *   nothing that finds an epic's session by its title (`🚧 <epic>`) takes it for the live one
+ * - the words say it too, so a reader of the panel's list needs no legend
+ */
+export const SUPERSEDED = { icon: "🗄️", words: "(replaced)" } as const
+
+/** Epic `epic`'s superseded-session title:  `🗄️ seo (replaced)`. */
+export function supersededTitle(epic: string): string {
+  return `${SUPERSEDED.icon} ${epic} ${SUPERSEDED.words}`
+}
+
+/**
+ * Whether `title` is a superseded session's (`supersededTitle()`):  its icon first, or its words last.
+ * - every finder of an epic's sessions asks it first, and leaves such a session out
+ */
+export function isSupersededTitle(title: string | null | undefined): boolean {
+  const trimmed = (title ?? "").trim()
+  return trimmed.startsWith(SUPERSEDED.icon) || trimmed.endsWith(SUPERSEDED.words)
+}
+
+/**
  * The STAGED DEMO (epic `epic-engine` P77):  `/epic demo` runs a demo epic from pre-written text (`StagedDemo`).
  * - `epic`:  the demo epic's id, and the word after `/epic` that starts it
  * - `folder`:  where its step files are, in the epic folder;  the prompt gate treats `/epic demo` as the demo only

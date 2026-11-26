@@ -229,6 +229,74 @@ describe("title <title>:  titled only when the tab shows it", () => {
   })
 })
 
+describe("retirees():  each epic's superseded sessions (T175)", () => {
+  const DAY = 24 * 60 * 60_000
+  const NOW = Date.parse("2026-11-26T12:00:00Z")
+  const isEpic = (name: string) => ["seo", "editor"].includes(name)
+  const session = (id: string, title: string, daysAgo: number, running = false) => ({
+    id,
+    title,
+    last: NOW - daysAgo * DAY,
+    running
+  })
+
+  test("the newest kept, the older retired, newest first", () => {
+    const plans = Sessions.retirees([session("s1", "🚧 seo", 5), session("s3", "🚧 seo", 1), session("s2", "seo", 3)], {
+      isEpic,
+      now: NOW
+    })
+    expect(plans).toEqual([
+      {
+        epic: "seo",
+        keep: [{ id: "s3", why: "newest" }],
+        retire: [session("s2", "seo", 3), session("s1", "🚧 seo", 5)]
+      }
+    ])
+  })
+
+  test("a running session is NEVER retired, however old;  the newest is kept beside it", () => {
+    const [plan] = Sessions.retirees(
+      [session("old", "🚧 seo", 9, true), session("new", "🚧 seo", 1), session("mid", "🚧 seo", 4)],
+      { isEpic, now: NOW }
+    )
+    expect(plan!.keep).toEqual([
+      { id: "new", why: "newest" },
+      { id: "old", why: "running" }
+    ])
+    expect(plan!.retire.map((it) => it.id)).toEqual(["mid"])
+  })
+
+  test("one used in the last 10 minutes is kept:  it may be starting", () => {
+    const recent = { id: "r", title: "🚧 seo", last: NOW - 5 * 60_000, running: false }
+    const [plan] = Sessions.retirees([recent, session("n", "🚧 seo", 0)], { isEpic, now: NOW })
+    expect(plan).toBeUndefined()
+  })
+
+  test("left out:  one session alone, other icons, other words, names with no epic page, the retired", () => {
+    const plans = Sessions.retirees(
+      [
+        session("a", "🚧 editor", 1),
+        session("b", "✅ editor", 5),
+        session("c", "editor review", 5),
+        session("d", "🗄️ editor (replaced)", 5),
+        session("e", "🚧 notes", 1),
+        session("f", "🚧 notes", 5),
+        session("g", "", 5)
+      ],
+      { isEpic, now: NOW }
+    )
+    expect(plans).toEqual([])
+  })
+
+  test("a session listed twice (two folders) is one, its latest use kept", () => {
+    const plans = Sessions.retirees([session("x", "🚧 seo", 6), session("x", "🚧 seo", 0), session("y", "🚧 seo", 2)], {
+      isEpic,
+      now: NOW
+    })
+    expect(plans).toEqual([{ epic: "seo", keep: [{ id: "x", why: "newest" }], retire: [session("y", "🚧 seo", 2)] }])
+  })
+})
+
 /** Write transcript `<id>.jsonl` of `entries` into project folder `slug`. */
 function transcript(slug: string, id: string, entries: object[]) {
   mkdirSync(join(HOME, "projects", slug), { recursive: true })

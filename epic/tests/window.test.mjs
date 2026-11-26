@@ -77,6 +77,7 @@ const {
   worktreeOf
 } = await import("spell/epic/window.mjs")
 const { Processes } = await import("spell/server/Processes")
+const { SessionFolders } = await import("spell/epic/config/SessionFolders.ts")
 
 /** The temp registry folder:  spell-epic's bridges' (`Window.registry`). */
 const dir = mkdtempSync(join(tmpdir(), "spell-windows-"))
@@ -757,7 +758,8 @@ test("fresh():  a NEW session in this window, /epic resume typed in;  refused wh
       remove: null,
       show: null,
       prompt: `/epic resume ${epic}`,
-      fresh: true
+      fresh: true,
+      epic
     }
     assert.deepEqual(JSON.parse(readFileSync(Window.handoffFile(SESSION), "utf8")), record)
     // paused for epic fresh all --pause (T139):  refused while the round is on, in a scratch epic home;  after, not
@@ -803,12 +805,25 @@ test("resume():  a fresh record opens a NEW session in its own window, then clos
   try {
     const record = { sessionId: SESSION, to: null, from: sleeper.pid, close: "tab", prompt: "/epic resume seo" }
     const fresh = { ...record, fresh: true }
+    // the old session's transcript, still titled for the epic
+    const saved = join(claudeHome, "projects", "-fresh")
+    mkdirSync(saved, { recursive: true })
+    writeFileSync(
+      join(saved, `${SESSION}.jsonl`),
+      `${JSON.stringify({ type: "custom-title", customTitle: "🚧 seo" })}\n`
+    )
     assert.deepEqual(await Window.resume(fresh, ["🚧 seo"]), {
       opened: true,
       closed: true,
       matches: undefined,
-      shown: undefined
+      shown: undefined,
+      retired: true
     })
+    // its tab closed, the old session is titled superseded (T175):  in its transcript, and queued for a resume
+    assert.equal(SessionFolders.customTitle(SESSION, claudeHome), "🗄️ seo (replaced)")
+    assert.equal(readFileSync(join(claudeHome, "session-titles", SESSION), "utf8"), "🗄️ seo (replaced)")
+    rmSync(saved, { recursive: true, force: true })
+    rmSync(join(claudeHome, "session-titles", SESSION), { force: true })
     assert.deepEqual(seen.splice(0), [
       ["/open-session", { prompt: "/epic resume seo" }],
       ["/close-session-tab", { titles: ["🚧 seo"] }]
@@ -979,6 +994,8 @@ test("titledFor():  the epic's name, without the icon, or as a whole word in the
   assert.equal(titledFor("epic-eject review", "epic-eject"), true)
   assert.equal(titledFor("epic-eject-2", "epic-eject"), false)
   assert.equal(titledFor("try-layout", "epic-eject"), false)
+  // a session an /epic fresh replaced (T175):  never the epic's
+  assert.equal(titledFor("🗄️ epic-eject (replaced)", "epic-eject"), false)
   assert.equal(titledFor("", "epic-eject"), false)
 })
 

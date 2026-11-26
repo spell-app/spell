@@ -37,6 +37,7 @@ import {
 } from "spell/app/app/layout/layoutSpell"
 import type { EditorMemberName } from "spell/app/app/layout/editorNames"
 import { uiReady } from "spell/app/app/solid/loadUI"
+import { BarPanels, type BarPanel } from "./BarPanels"
 
 import "./MenuBar.css"
 
@@ -59,11 +60,18 @@ import "./MenuBar.css"
  *   - The fly-out is as wide as its widest item, ticks what's on when an item is on or off, and takes the popup's
  *     look (`MenuBar.css`, `ui-submenu::part(flyout)`).
  * - Choosing an action closes the menu, in a fly-out too;  so does a click elsewhere, or Esc (the popup's own).
+ * - The menu slides down from under the bar, with no arrow (`MenuBar.css`;  epic `editor` T187).
+ *   - The mouse onto another menu's name while one is open opens that one at once, gliding there sideways
+ *     (`TOP_BAR_PANELS`), as a Mac's menu bar does:  a mouse's only, as a tap's click would close it again.
  ****************/
 export function BarMenu(props: BarMenuProps): JSX.Element {
-  let popup: (HTMLElement & { visible?: boolean }) | undefined
+  let popup: BarPanel | undefined
+  let button: HTMLElement | undefined
   const close = () => {
     if (popup) popup.visible = false
+  }
+  const pointedAt = (event: PointerEvent) => {
+    if (event.pointerType === "mouse" && popup && button) TOP_BAR_PANELS.pointedAt(popup, button)
   }
   return (
     <>
@@ -73,6 +81,8 @@ export function BarMenu(props: BarMenuProps): JSX.Element {
         class={["BarMenu", props.class]}
         aria-haspopup="menu"
         aria-label={props.name}
+        ref={(element: HTMLElement) => (button = element)}
+        onPointerEnter={pointedAt}
       >
         {props.label}
       </ui-item>
@@ -82,7 +92,10 @@ export function BarMenu(props: BarMenuProps): JSX.Element {
         position="bottom left"
         class="BarMenuPopup"
         aria-label={props.name}
-        ref={(element: HTMLElement) => (popup = element)}
+        ref={(element: BarPanel) => {
+          popup = element
+          TOP_BAR_PANELS.follow(element, () => button)
+        }}
       >
         <div class="BarMenuPanel" onClick={(event) => closeOnAction(event, close)}>
           {props.panel ? (
@@ -124,6 +137,12 @@ export type BarMenuProps = {
    */
   panel?: () => JSX.Element
 }
+
+/**
+ * The top bar's menus, as one:  one opening while another is out glides there from it, sideways, growing or shrinking
+ * to its own size (`MenuBar.css`, `--BarMenu-glide`;  epic `editor` T187), as the add bar's sub-panels glide up and down.
+ */
+const TOP_BAR_PANELS = new BarPanels({ along: "x", glideToken: "--BarMenu-glide", grows: "size", reopensWithinMs: 0 })
 
 /**
  * A click in a menu's panel:  an action chosen closes it.

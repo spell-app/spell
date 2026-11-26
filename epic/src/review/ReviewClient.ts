@@ -50,6 +50,7 @@ import {
   type ReviewClientOptions,
   type Running,
   type StartAnswer,
+  type PageAsk,
   type TestsEntry,
   type CloseAllAnswer,
   idsOf,
@@ -104,6 +105,9 @@ export class ReviewClient extends PageStore {
 
   /** Served with a token, and the inbox answered:  the controls show. */
   reviewing = false
+
+  /** The page's epic is the tooling home (`epic home`):  the gear shows Merge and push (epic `epic-engine` T174). */
+  isHome = false
 
   /** Why the last write failed, in words:  for a caller that writes `quiet`. */
   lastWriteError = ""
@@ -253,7 +257,24 @@ export class ReviewClient extends PageStore {
     // a note being written reopens where it was, from any address
     for (const id of Object.keys(this.inbox.drafts)) this.boxes.add(id)
     this.changed()
+    void this.loadHome()
     return true
+  }
+
+  /**
+   * Ask the page server once whether the page's epic is the tooling home (`GET /api/epics/review/home`):
+   * `isHome`, for the gear's Merge and push (epic `epic-engine` T174).
+   * - NEVER throws:  no answer leaves it `false`
+   */
+  private async loadHome() {
+    try {
+      const reply = await this.link.getForPage<{ home?: unknown }>(`${REVIEW_API}/home`)
+      if (reply?.home !== true) return
+      this.isHome = true
+      this.changed()
+    } catch {
+      // an older page server has no such route:  no Merge and push
+    }
   }
 
   /**
@@ -1233,13 +1254,14 @@ export class ReviewClient extends PageStore {
   /**
    * "Start a review" (epic `airplane` P12):  ask the page server to type `/epic review <epic>` into the ONE running
    * Claude session titled for the epic (`POST /api/epics/review/start`);  says what came of it (a notice).
-   * - `ask` `tidy`:  the gear's Tidy (epic `epic-engine` T168), `/epic tidy <epic>` the same way
+   * - `ask`:  one of the gear's asks the same way (`PageAsk`):  Tidy (epic `epic-engine` T168), Where are we?, Hush
+   *   settled items, Start fresh, Merge and push (T174)
    * - its answer, or `undefined` when the server couldn't be asked (the notice says why)
    * - NEVER throws
    */
-  async startReview(ask: "review" | "tidy" = "review"): Promise<StartAnswer | undefined> {
+  async startReview(ask: PageAsk = "review"): Promise<StartAnswer | undefined> {
     try {
-      const body = ask === "tidy" ? { page: this.options.page, ask } : { page: this.options.page }
+      const body = ask === "review" ? { page: this.options.page } : { page: this.options.page, ask }
       const answer = (await this.link.post(`${REVIEW_API}/start`, body)) as StartAnswer
       this.notify(answer.message)
       return answer

@@ -101,8 +101,9 @@
       // language service.  Its budget is the lazy pieces' ceiling it breaks;  that ceiling still counts it too.
       // P19 layout B:  386.9 => 372.8 KB, the TypeScript and Python writers loading on first use
       // P20:  372.8 => 368.8 KB, and counted whole (`lazy whole`), with any chunk it imports up front
+      // I64:  368.8 => 350 KB, HTML's entity table on first use, semver's functions one by one, no lodash `omit()`
       budget: 351,
-      ceiling: 376,
+      ceiling: 357,
       build: "editor",
       entries: ["index.html"],
       only: "languageWorker-[^/]*\\.js$",

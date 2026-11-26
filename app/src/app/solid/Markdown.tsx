@@ -42,8 +42,11 @@ export type MarkdownProps = {
 /** `spell/parser/markdown`'s `MD`, imported once, on first use. */
 let markdown: Promise<typeof MD> | undefined
 
-/** Load `spell/parser/markdown` (once). */
+/** Load `spell/parser/markdown` (once), with HTML's entity table (`P.HTMLEntities.load()`). */
 function loadMarkdown() {
-  markdown ??= import("spell/parser/markdown").then((module) => module.MD)
+  markdown ??= Promise.all([
+    import("spell/parser/markdown"),
+    import("spell/parser/parser").then((module) => module.P.HTMLEntities.load())
+  ]).then(([module]) => module.MD)
   return markdown
 }

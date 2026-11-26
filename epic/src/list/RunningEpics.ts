@@ -11,6 +11,7 @@ import { PhaseStatuses } from "spell/epic/phases"
 import { SRV } from "spell/server"
 
 import type { EpicBadges } from "spell/epic/components/epic-pills/EpicPills.types"
+import { isSupersededTitle } from "spell/epic/command/command.types"
 import { AgentList } from "spell/epic/tools/AgentList"
 import { planDocIn } from "spell/epic/tools/pages.js"
 import {
@@ -283,6 +284,8 @@ export class RunningEpics {
     const names = new Set<string>()
     for (const session of this.liveSessions()) {
       if (which === "busy" && session.status !== BUSY) continue
+      // an old session a `/epic fresh` replaced, typed into again, runs for no epic (T175)
+      if (isSupersededTitle(session.title)) continue
       // by real paths:  a session started before a move behind a compat link keeps the old spelling (I59)
       const inside = this.worktrees.map((each) => RealPath.from(each, session.cwd)).find(Boolean)
       if (inside) names.add(inside.split("/")[0]!)
@@ -339,8 +342,11 @@ export function sessionsTitledFor(epic: string, sessions: TitledSession[]): Titl
 /**
  * Whether session title `title` names epic `epic`:  its title without its icon IS the name (`🚧 airplane`),
  * or holds it as a whole word (`airplane review`;  never `airplane-mode`).
+ * - never a superseded session's (`🗄️ airplane (replaced)`, `isSupersededTitle()`;  epic `epic-engine` T175):
+ *   the epic's live session is a newer one
  */
 export function titleNames(title: string, epic: string): boolean {
+  if (isSupersededTitle(title)) return false
   const bare = bareTitle(title).toLowerCase()
   const name = epic.toLowerCase()
   if (!name || !bare) return false

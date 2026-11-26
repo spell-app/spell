@@ -1,5 +1,4 @@
 import { isNode } from "browser-or-node"
-import { omit } from "lodash-es"
 
 import { Assertable } from "spell/util"
 import { P } from "spell/parser/parser"
@@ -400,10 +399,9 @@ export class Match<
   /** DEBUG: Call this when printing to the console to eliminate the big bits in node. */
   toPrint() {
     if (!isNode) return this
-    return {
-      rule: this.rule.name,
-      ...omit(this, ["rule", "scope"])
-    }
+    // a spread, not lodash's `omit()`, which brings its deep clone into the language worker (epic `solid-2-final` I64)
+    const { rule, scope: _scope, ...rest } = this
+    return { rule: rule.name, ...rest }
   }
 
   /** DEBUG: convert to JSON. */

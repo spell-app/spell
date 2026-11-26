@@ -287,6 +287,21 @@ export class ClaudeHome {
     }
     return newest?.path
   }
+  /**
+   * EVERY copy of session `id`'s transcript, `<projects>/<any folder>/<id>.jsonl`, each real file once;  `[]` for none.
+   * - a session that moved has one in each folder it worked in:  a title written to only one of them may not be the
+   *   one the panel reads
+   */
+  static transcriptCopies(id: string, home = ClaudeHome.home()): string[] {
+    const projects = ClaudeHome.projects(home)
+    if (!existsSync(projects)) return []
+    const seen = new Map<string, string>()
+    for (const dir of readdirSync(projects)) {
+      const path = join(projects, dir, `${id}.jsonl`)
+      if (existsSync(path)) seen.set(RealPath.of(path), seen.get(RealPath.of(path)) ?? path)
+    }
+    return [...seen.values()]
+  }
 }
 
 /**

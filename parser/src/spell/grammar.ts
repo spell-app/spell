@@ -18,7 +18,7 @@
  * - Types only from `./rules`:  importing its code would bring the grammar back into every page.
  */
 import { LoadOnce } from "spell/util"
-import type { P } from "spell/parser/parser"
+import { P } from "spell/parser/parser"
 
 import type * as Rules from "./rules"
 
@@ -139,13 +139,16 @@ export function hasGrammar(): boolean {
 
 /**
  * Load the grammar, if it isn't here yet:  the rules and English's parser, as their own chunk in a browser.
+ * - And HTML's entity table (`P.HTMLEntities.load()`), even when the grammar came up front.
  * - How:  what `grammarLoadsWith()` was handed (`spell/parser/spell/grammarOnFirstUse`).
  * - Every caller gets the same load (`LoadOnce`);  once it's in, it costs nothing.
  * - throws what the load threw:  a page that can't fetch its chunk
  * - throws a `TypeError` where nothing said how to load it
  */
 export async function loadGrammar(): Promise<void> {
-  if (installed) return
+  // HTML's entity table, which a drawing's text decodes with, loads beside it (epic `solid-2-final` I64)
+  const entities = P.HTMLEntities.load()
+  if (installed) return await entities
   const load = loader
   if (!load) {
     throw new TypeError(
@@ -153,7 +156,7 @@ export async function loadGrammar(): Promise<void> {
         'or "spell/parser/spell/languages/en" up front'
     )
   }
-  await grammarLoads.get("en", load)
+  await Promise.all([grammarLoads.get("en", load), entities])
 }
 
 /**
