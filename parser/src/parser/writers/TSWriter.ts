@@ -1143,6 +1143,7 @@ export class TSWriter extends JSWriter {
     "joinOurTag",
     "keepAgreeing",
     "keepNewPropertiesAgreeing",
+    "keepsItsBox",
     "keepThingAndElementAgreeing",
     "lastOver",
     "laysOutAsDrawing",
