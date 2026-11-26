@@ -6,6 +6,7 @@ import { escapeRegExp } from "spell/util/string"
 import { SRV, type Handler, type ServedFile, type ServerInfo } from "spell/server"
 import { LOADED_CODE_VARIABLE } from "spell/server/LoadedCode"
 import type { SiteTab } from "spell/server/site/site.types"
+import { KeeperList } from "spell/server/keeper/KeeperList"
 import {
   BundleBuild,
   COMPONENTS_PREFIX,
@@ -26,6 +27,36 @@ import {
   type RouteModule,
   type ServerReport
 } from "spell/server/page"
+
+/**
+ * The org repos whose worktrees main's page server at `root` reaches by name (`PageServer.namedWorktrees()`):  each
+ * main checkout the server keeper keeps that isn't this kit, and each one whose spaces the editor shows.  NEVER throws
+ */
+function orgReposKnown(root: string): string[] {
+  const kit = SRV.checkoutOf(root)?.main ?? root
+  const repos = new Set<string>()
+  try {
+    for (const { checkout } of new KeeperList().checkouts) repos.add(SRV.checkoutOf(checkout)?.main ?? checkout)
+    for (const { dir } of SRV.servedSpaces(SRV.moreSpacesInFile())) {
+      const main = SRV.checkoutOf(dir)?.main
+      if (main) repos.add(main)
+    }
+  } catch (ignored) {
+    console.error("page server:  couldn't read which org repos to reach by name", ignored)
+  }
+  repos.delete(kit)
+  return [...repos].filter((repo) => !SRV.RealPath.same(repo, kit))
+}
+
+/**
+ * The spaces folder of an org repo's checkout:  the checkout itself when it holds an org's folder (`@acme/`), else its
+ * `spaces/` when that does;  `undefined`:  neither (the app's `orgRepoSpaces()`, read the same way)
+ */
+export function orgSpacesOf(checkout: string): string | undefined {
+  if (SRV.orgsIn(checkout).length) return resolve(checkout)
+  const spaces = join(checkout, "spaces")
+  return SRV.orgsIn(spaces).length ? resolve(spaces) : undefined
+}
 
 /** How often a page server speaking HTTPS looks at its certificate's file, ms (`watchCertificate()`). */
 const CERTIFICATE_LOOK_MS = 5_000
@@ -341,7 +372,7 @@ export class PageServer {
   private routeNames(settings: PageServerSettings): void {
     const names = new SRV.HostRoutes({
       worktrees: () => PageServer.namedWorktrees(this.root),
-      start: (checkout) => PageServer.startByName(checkout),
+      start: (worktree) => PageServer.startByName(worktree, this.root),
       ...(settings.uiScript && { uiScript: settings.uiScript }),
       mainServes: (path) => this.engineRoutes.some(([route]) => path.startsWith(route))
     })
@@ -351,15 +382,36 @@ export class PageServer {
   }
 
   /**
-   * The worktrees reached by name through main checkout `root`'s page server:  its own, from git's records
-   * (`SRV.worktreesOf()`)
+   * The worktrees reached by name through main checkout `root`'s page server, from git's records
+   * (`SRV.worktreesOf()`):
+   * - its own
+   * - then each org repo's that holds an org's projects (`orgSpacesOf()`), each served by a page server of this kit
+   *   for its own spaces, its records here (epic `editor` P49, Q101):  the org repos the server keeper keeps
+   *   (`KeeperList`) and those whose spaces the editor shows (`SRV.moreSpacesInFile()`)
+   * - NEVER throws
    */
-  static namedWorktrees(root: string): [string, string][] {
-    return SRV.worktreesOf(SRV.checkoutOf(root)?.main ?? root)
+  static namedWorktrees(
+    root: string,
+    { orgRepos = orgReposKnown(root) }: { orgRepos?: string[] } = {}
+  ): SRV.NamedCheckout[] {
+    const main = SRV.checkoutOf(root)?.main ?? root
+    const own = SRV.worktreesOf(main).map(([worktree, checkout]) => ({ worktree, checkout }))
+    const orgs = orgRepos.flatMap((repo) =>
+      SRV.worktreesOf(repo).flatMap(([worktree, checkout]) => {
+        const spaces = orgSpacesOf(checkout)
+        return spaces ? [{ worktree, checkout, records: resolve(root), spaces }] : []
+      })
+    )
+    return [...own, ...orgs]
   }
 
-  /** Start worktree `checkout`'s page server, as a request by name asks:  through the server keeper, else here. */
-  static async startByName(checkout: string): Promise<unknown> {
+  /**
+   * Start a worktree's page server, as a request by name asks:  Spell's through the server keeper, else here;  an org
+   * repo's, a page server of this kit (`root`) for its spaces, here
+   */
+  static async startByName(worktree: SRV.NamedCheckout, root: string): Promise<unknown> {
+    if (worktree.spaces) return PageServer.ensureHere(root, DEFAULT_PORT, worktree.spaces)
+    const { checkout } = worktree
     const kept = await new SRV.KeeperLink().ask("start", { checkout, server: "page server" })
     return kept ?? PageServer.ensure(checkout)
   }
@@ -482,8 +534,13 @@ export class PageServer {
    * `ensure()` in this process, never asking the server keeper:  what the keeper itself runs.
    * - a WORKTREE's:  on the port written down for it (`SRV.PortBook`, epic `epic-engine` P82), the same at every
    *   start, and its editor on its own (`SPELL_EDITOR_PORT`)
+   * - `spaces`:  the spaces it serves (default `SPELL_SPACES_DIR`):  an org repo's worktree's, reached by name
    */
-  static async ensureHere(_root: string, port = DEFAULT_PORT): Promise<SRV.RunningServer & { launched: boolean }> {
+  static async ensureHere(
+    _root: string,
+    port = DEFAULT_PORT,
+    spaces: string | undefined = process.env.SPELL_SPACES_DIR
+  ): Promise<SRV.RunningServer & { launched: boolean }> {
     const root = kitRootOf(_root)
     // its code:  the server's folder, and the whole `src/` each route module is in;  a server older than them restarts
     // (I5 of `skillz`).  The whole `src/`, not the route's folder (epic `epic-engine` I219):  a route imports far
@@ -494,7 +551,7 @@ export class PageServer {
     // ran its Router over main's route modules, and every `/api` answered 500 "handler is not a function"
     const code = PageServer.codeFor(root)
     // the spaces it serves name its record:  the new server is told them too
-    const pidFile = SRV.PidFile.forPageServer(root)
+    const pidFile = SRV.PidFile.forPageServer(root, spaces)
     const booked = await PageServer.bookedPorts(root, port, pidFile.spaces)
     return pidFile.ensure({
       command: [
@@ -526,14 +583,19 @@ export class PageServer {
 
   /**
    * The ports written down for worktree `root`'s page server and editor (`SRV.PortBook`), when it's asked for the
-   * usual port (`portFor()` gives it none);  else `undefined`:  the main checkout's, a project's, a port given by hand
+   * usual port (`portFor()` gives it none);  else `undefined`:  the main checkout's, a port given by hand
+   * - a page server for `spaces` in a WORKTREE of a project (an org repo's):  that worktree's, so it's reached by
+   *   name at the same port every time (epic `editor` P49);  a project's main checkout's:  any free port, as before
    */
   static async bookedPorts(
-    root: string,
+    _root: string,
     port: number,
     spaces?: string
   ): Promise<{ port: number; editor: number } | undefined> {
-    if (port !== DEFAULT_PORT || spaces !== undefined || portFor(root, port, spaces) !== 0) return undefined
+    const project = spaces === undefined ? undefined : SRV.checkoutOf(spaces)
+    if (spaces !== undefined && !project?.worktree) return undefined
+    const root = project?.root ?? _root
+    if (port !== DEFAULT_PORT || (!project && portFor(root, port, spaces) !== 0)) return undefined
     const book = new SRV.PortBook()
     const isNew = book.portsOf(root)["page server"] === undefined
     const booked = { port: await book.portFor(root), editor: await book.portFor(root, "editor") }

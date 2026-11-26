@@ -49,13 +49,13 @@ describe("HostRoutes:  one address per worktree, through main's port (epic `edit
     const engine = join(folder, "epic-engine")
     const names = new SRV.HostRoutes({
       worktrees: () => [
-        ["seo", seo],
-        ["epic-engine", engine]
+        { worktree: "seo", checkout: seo },
+        { worktree: "epic-engine", checkout: engine }
       ],
       book,
       waitMs,
       mainServes: (path) => path.startsWith("/_epic/assets/"),
-      start: async (checkout) => {
+      start: async ({ checkout }) => {
         started.push(checkout)
         const ports = book.portsOf(checkout)
         await standIn(ports["page server"]!, `${checkout} page server`)

@@ -26,14 +26,15 @@ import { Request } from "./Request"
  * - every `*.localhost` name reaches this machine only (browsers resolve them to loopback), so letting them in
  *   (`isNamedHost()`, the guard's `allowHosts()`) opens nothing to another machine
  * - a page's own same-origin writes go on as the worktree's server's own origin, so its guard takes them
+ * - an org's repo's worktrees too (`NamedCheckout.spaces`):  each runs a page server of the kit's for its own spaces
  * - knows no keeper, no page server, no git:  the worktrees and how to start one are handed in
  ****************/
 export class HostRoutes {
-  /** the worktrees reached by name, `[name, checkout]`, asked afresh each time */
-  readonly worktrees: () => [string, string][]
+  /** the worktrees reached by name, asked afresh each time */
+  readonly worktrees: () => NamedCheckout[]
 
-  /** start checkout `checkout`'s page server (its editor comes with it);  resolves once asked */
-  readonly start: (checkout: string) => Promise<unknown>
+  /** start a worktree's page server (its editor comes with it);  resolves once asked */
+  readonly start: (worktree: NamedCheckout) => Promise<unknown>
 
   /** where a worktree's ports are written down */
   readonly book: PortBook
@@ -58,8 +59,8 @@ export class HostRoutes {
     waitMs = START_WAIT_MS,
     mainServes = () => false
   }: {
-    worktrees: () => [string, string][]
-    start: (checkout: string) => Promise<unknown>
+    worktrees: () => NamedCheckout[]
+    start: (worktree: NamedCheckout) => Promise<unknown>
     book?: PortBook
     uiScript?: string
     waitMs?: number
@@ -83,18 +84,19 @@ export class HostRoutes {
   /** whether `host` is a name this answers (the guard's `allowHosts()`):  any `<name>.localhost`, with a port or not */
   static isNamedHost = (host: string): boolean => NAMED_HOST.test(host)
 
-  /** the checkout named `name`, else `undefined` */
-  checkoutNamed(name: string): string | undefined {
-    return this.worktrees().find(([worktree]) => hostNameOf(worktree) === name)?.[1]
+  /** the worktree named `name` (the first, when two repos' share it), else `undefined` */
+  checkoutNamed(name: string): NamedCheckout | undefined {
+    return this.worktrees().find(({ worktree }) => hostNameOf(worktree) === name)
   }
 
   /** every worktree, its addresses and whether its page server answers:  `NAMES_API`'s answer.  NEVER throws */
   async names(port: number, secure: boolean): Promise<NamedWorktree[]> {
     const scheme = secure ? "https" : "http"
     return Promise.all(
-      this.worktrees().map(async ([worktree, checkout]) => {
+      this.worktrees().map(async (each) => {
+        const { worktree } = each
         const name = hostNameOf(worktree)
-        const booked = this.portOf(checkout, false)
+        const booked = this.portOf(each, false)
         return {
           name,
           worktree,
@@ -149,7 +151,7 @@ export class HostRoutes {
    * - `wait`:  waited for, at most `waitMs`;  `undefined` if it didn't come
    * - else `undefined` at once:  the caller shows that it's starting
    */
-  async targetOf(checkout: string, isEditor: boolean, { wait }: { wait: boolean }): Promise<number | undefined> {
+  async targetOf(checkout: NamedCheckout, isEditor: boolean, { wait }: { wait: boolean }): Promise<number | undefined> {
     const answering = async () => {
       const port = this.portOf(checkout, isEditor)
       return port !== undefined && (await isAnswering(port)) ? port : undefined
@@ -170,19 +172,21 @@ export class HostRoutes {
   /**
    * the port a worktree's page server (or editor) keeps:  the one written down for it (`PortBook`), else the one its
    * record names (a server started before the book, on any free port)
+   * - an org's worktree's records are the kit's, named by its spaces (`PidFile.forPageServer()`)
    */
-  portOf(checkout: string, isEditor: boolean): number | undefined {
+  portOf({ checkout, records = checkout, spaces }: NamedCheckout, isEditor: boolean): number | undefined {
     const booked = this.book.portsOf(checkout)[isEditor ? "editor" : "page server"]
     if (booked !== undefined) return booked
-    if (!isEditor) return PidFile.forPageServer(checkout).read()?.port
-    const address = editorAddressOf(checkout)
+    if (!isEditor) return PidFile.forPageServer(records, spaces).read()?.port
+    const address = editorAddressOf(records, spaces && PidFile.forPageServer(records, spaces).spaces)
     return address ? Number(new URL(address).port) || undefined : undefined
   }
 
   /** its start asked for, once while one is under way.  NEVER throws:  a failed start is logged */
-  private startOnce(checkout: string): void {
+  private startOnce(worktree: NamedCheckout): void {
+    const { checkout } = worktree
     if (this.starting.has(checkout)) return
-    const started = this.start(checkout)
+    const started = this.start(worktree)
       .catch((error: unknown) => console.error(`page server:  couldn't start ${checkout}'s servers by name:`, error))
       .finally(() => this.starting.delete(checkout))
     this.starting.set(checkout, started)
@@ -204,6 +208,12 @@ export class HostRoutes {
       .send(page)
   }
 }
+
+/**
+ * A worktree reached by name:  its name, its folder, and, for an org's repo's, where its page server's records are
+ * (the kit's main checkout, `records`) and the spaces it serves (`spaces`)
+ */
+export type NamedCheckout = { worktree: string; checkout: string; records?: string; spaces?: string }
 
 /** A worktree as the names page lists it (`NAMES_API`). */
 export type NamedWorktree = { name: string; worktree: string; address: string; editor: string; running: boolean }
