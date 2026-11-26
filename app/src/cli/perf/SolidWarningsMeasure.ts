@@ -208,11 +208,13 @@ export class SolidWarningsMeasure {
     await this.pause(300)
   }
 
-  /** The + palette, opened and closed. */
+  /** The add panel, View › Add a View… (epic `editor` T167), opened and closed, as the page tests' `openAddPanel()`. */
   private async palette() {
-    await this.clickItem(".ModeTabs .AddPartButton")
+    await this.page.locator("#ViewBarMenu [part~=item]").first().click({ timeout: 5000 })
+    await this.page.getByText("Add a View…").first().click({ timeout: 5000 })
+    await this.page.waitForSelector(`${ADD_PANEL} ui-tree-item`, { state: "attached", timeout: 30_000 })
     await this.pause(1000)
-    check(await this.page.locator(".PalettePopup:not([hidden]) .PaletteGroup").count(), "the + palette showed nothing")
+    check(await this.page.locator(`${ADD_PANEL} ui-tree-item`).count(), "the add panel showed nothing")
     await this.page.keyboard.press("Escape")
     await this.pause(400)
   }
@@ -278,11 +280,14 @@ export class SolidWarningsMeasure {
   /** Run mode, then Edit mode again. */
   private async runMode() {
     const { page } = this
-    const selected = () => page.locator(".ModeTabs > ui-item[selected]").first().getAttribute("title")
-    await page.locator(".ModeTabs > ui-item[title=Run]").first().click({ timeout: 3000 })
+    // a mode's tab says its name in its text (`.ModeText`), the one showing `selected`
+    const selected = async () =>
+      (await page.locator(".ModeTabs > ui-item[selected] .ModeText").first().textContent())?.trim()
+    const tab = (name: string) => page.locator(".ModeTabs > ui-item").filter({ hasText: name }).first()
+    await tab("Run").locator("[part~=item]").click({ timeout: 3000 })
     await this.pause(2500)
     check((await selected()) === "Run", `Run mode didn't take (selected:  ${await selected()})`)
-    await page.locator(".ModeTabs > ui-item[title=Edit]").first().click({ timeout: 3000 })
+    await tab("Edit").locator("[part~=item]").click({ timeout: 3000 })
     await this.pause(2000)
     check((await selected()) === "Edit", `Edit mode didn't come back (selected:  ${await selected()})`)
   }
@@ -406,6 +411,9 @@ const EDITOR_RECORD = ".spell-server.editor.json"
 
 /** the projects it walks:  its id in the address, and the file to open, if not its first */
 const PROJECTS: [string, string?][] = [["Solitaire", "Card.spell"], ["TaskList"], ["calculator"]]
+
+/** the add panel, in either of its shapes (the page tests' `ADD_PANEL`) */
+const ADD_PANEL = ":is(ui-popup.PalettePlus, ui-modal.PalettePanel)"
 
 /** a line of the code pane */
 const CODE_LINE = ".InputEditor .cm-editor .cm-line"

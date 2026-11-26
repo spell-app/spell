@@ -924,10 +924,11 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 
 | Option | What it does |
 | --- | --- |
-| `spell perf run --full` | every measurement, 5 loads each:  load, leaks, huge lists (a 100,000-row table and tree scrolled on the docs page), typing, accessibility, listeners, style sheets, a CPU profile and the editing pipeline |
+| `spell perf run --full` | every measurement, 5 loads each:  load, leaks, huge lists (a 100,000-row table and tree scrolled on the docs page), typing, accessibility, listeners, style sheets, a CPU profile, the editing pipeline, and Solid's warnings in the running editor |
 | `spell perf run --page editor,docs` | which pages:  `editor`, `docs`, `epic`, `run` (the default);  also `site` (a built site on the run page), `cloud` (one program on a plain page) and `programs` (several on one page) |
 | `spell perf run --profile phone` | which profiles:  `desktop`, `phone`, `phonewide` (default `desktop` and `phone`) |
 | `spell perf run --steps load,typing` | which measurements (default `load`) |
+| `spell perf run --steps warnings --page editor` | Solid's dev warnings while it walks this checkout's RUNNING editor (dev mode, `spell server start`) through three projects:  the code, the Inspector, the palette, every menu, the compiled code, typing, Run mode;  writes refused, a step it can't run a failure |
 | `spell perf run --runs <count>` | cold loads per page and profile, medians reported (default 1, 5 with `--full`) |
 | `spell perf run --wait <minutes>` / `--force` | how long to wait for a quiet machine (default 10) / don't wait |
 | `spell perf run --baseline save` | this run is the baseline too, `perfBaseline.json` beside the command's code |

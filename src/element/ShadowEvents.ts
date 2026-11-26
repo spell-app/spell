@@ -155,7 +155,11 @@ export class ShadowEvents {
     Object.defineProperties(root, {
       addEventListener: {
         configurable: true,
-        value(type: string, listener: EventListenerOrEventListenerObject | null, options?: AddEventListenerOptions) {
+        value(
+          type: string,
+          listener: EventListenerOrEventListenerObject | null,
+          options?: boolean | AddEventListenerOptions
+        ) {
           const capture = options === true
           if (typeof listener !== "function" || (options !== undefined && !capture) || !DelegatedEvents.has(type)) {
             return add.call(root, type, listener!, options)
@@ -169,7 +173,11 @@ export class ShadowEvents {
       },
       removeEventListener: {
         configurable: true,
-        value(type: string, listener: EventListenerOrEventListenerObject | null, options?: EventListenerOptions) {
+        value(
+          type: string,
+          listener: EventListenerOrEventListenerObject | null,
+          options?: boolean | EventListenerOptions
+        ) {
           const wrapper = options === undefined ? wrappers.get(listener as EventListener) : undefined
           if (solids.get(type) === listener) solids.delete(type)
           return remove.call(root, type, wrapper ?? listener!, options)
