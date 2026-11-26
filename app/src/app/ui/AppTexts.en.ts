@@ -389,6 +389,15 @@ export const APP_TEXTS = {
   shortcutShowShortcuts: "Show Keyboard Shortcuts",
   shortcutShowIcons: "Show All Icons, With Their Names",
   allIcons: "All Icons…",
+  // Help › Servers (epic `editor` T185):  the item, its dot's words (`ServersGlance.words`), and its dialog's title;
+  // `{count}`, how many servers aren't running
+  servers: "Servers…",
+  serversAllRunning: "All of Spell's background servers are running.",
+  serversOneDown: "One of Spell's background servers has stopped.\nClick to see which one, and start it again.",
+  serversSomeDown:
+    "{count} of Spell's background servers have stopped.\nClick to see which ones, and start them again.",
+  serversUnknown: "Spell can't check its background servers right now.\nClick to see them.",
+  serversTitle: "Servers",
   shortcutChangeThis: "Ask for a Change to What's Selected",
   shortcutFormat: "Format Document",
   shortcutExpandSelection: "Expand Selection",

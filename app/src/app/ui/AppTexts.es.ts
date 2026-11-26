@@ -377,6 +377,14 @@ const APP_TEXTS_ES: AppTextPack = {
   shortcutShowShortcuts: "Mostrar los atajos de teclado",
   shortcutShowIcons: "Mostrar todos los iconos, con sus nombres",
   allIcons: "Todos los iconos…",
+  servers: "Servidores…",
+  serversAllRunning: "Todos los servidores de Spell en segundo plano están funcionando.",
+  serversOneDown:
+    "Uno de los servidores de Spell en segundo plano se ha parado.\nHaz clic para ver cuál, y volver a ponerlo en marcha.",
+  serversSomeDown:
+    "{count} de los servidores de Spell en segundo plano se han parado.\nHaz clic para ver cuáles, y volver a ponerlos en marcha.",
+  serversUnknown: "Spell no puede comprobar ahora sus servidores en segundo plano.\nHaz clic para verlos.",
+  serversTitle: "Servidores",
   shortcutChangeThis: "Pedir un cambio en lo seleccionado",
   shortcutFormat: "Dar formato al documento",
   shortcutExpandSelection: "Ampliar la selección",
