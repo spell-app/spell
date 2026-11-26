@@ -2,6 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import {
   MemoryPlace,
+  PlaceBatch,
   PlaceQuery,
   type ListAnswer,
   type ListQuery,
@@ -363,5 +364,55 @@ describe("a sort its place has a name for, left to the engine", () => {
     }
     const answer = await answerOf(named, { sort: [{ field: "completion" }] })
     expect(answer.rows.map(({ id }) => id)).toEqual(["m-2", "m-3", "m-1"])
+  })
+})
+
+describe("PlaceQuery.answer(), things by id (epic data P57)", () => {
+  test("a thing past the first page is found, on a place that can't look things up (I147)", async () => {
+    const place = new PagedPlace(RECIPES, 2)
+    const answer = await answerOf(place, { ids: ["r-4"] })
+    expect(idsOf(answer)).toEqual(["r-4"])
+    // the pages up to it, and no further
+    expect(place.asks.map((ask) => ask.page?.at)).toEqual([undefined, "2"])
+  })
+
+  test("the fields wanted go with the ids, to a place that looks things up (I148)", async () => {
+    const asked: unknown[] = []
+    const place = memoryPlace({})
+    const getMany = place.getMany.bind(place)
+    place.getMany = (collection, ids, context) => {
+      asked.push(context.select)
+      return getMany(collection, ids, context)
+    }
+    await answerOf(place, { ids: ["r-1"], select: ["title"] })
+    expect(asked).toEqual([["title"]])
+  })
+
+  test("ids asked in the same moment are one request, each reader getting its own", async () => {
+    const place = memoryPlace({})
+    let requests = 0
+    const getMany = place.getMany.bind(place)
+    place.getMany = (collection, ids, context) => {
+      requests++
+      return getMany(collection, ids, context)
+    }
+    const batch = new PlaceBatch()
+    const signal = new AbortController().signal
+    const answers = await Promise.all(
+      ["r-1", "r-3", "r-5"].map((id) =>
+        new PlaceQuery({ placeName: "cookbook", place, collection: "recipes", query: { ids: [id] }, batch }).answer(
+          signal
+        )
+      )
+    )
+    expect(answers.map(idsOf)).toEqual([["r-1"], ["r-3"], ["r-5"]])
+    expect(requests).toBe(1)
+  })
+})
+
+describe("PlaceQuery's ceiling (epic data P57, I11)", () => {
+  test("counts every page it walks, past the first", async () => {
+    const place = new PagedPlace(RECIPES, 2, { ceiling: { rows: 3 } })
+    await expect(answerOf(place, { filter: { kind: "hot" } })).rejects.toThrow(/stops at 3 rows/)
   })
 })

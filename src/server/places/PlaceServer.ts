@@ -14,7 +14,10 @@ import {
 } from "spell/places/places.types"
 import { SRV } from "spell/server"
 
+import { pagesOfList } from "spell/places/pagesOf"
+
 import { PlaceKeys } from "./PlaceKeys"
+import { ServerPages } from "./ServerPages"
 import { TAKEN_DOWN_STATUS } from "./takenDown"
 
 /** The biggest request:  a big batch of changes. */
@@ -55,6 +58,8 @@ const STATUS_OF_KIND: Record<PlaceErrorKind, number> = {
  * - Asked to make changes one at a time (`apply` with `oneAtATime`, epic `data` J304):  a failure says how many came
  *   before it (`kept`), so the asker sends again only what it never tried.  A Python program's saves to a data folder.
  * - Each read stops as the asker hangs up.
+ * - A list of a place that can't page (a sheet, a folder) is answered a page at a time (`ServerPages`, epic `data` P57):
+ *   read whole once, its pages then asked as a page needs them, each with a `nextPage` that names that read.
  * - A place may be OPENED by its name, as it's first asked for, rather than listed (`open`):  a name then holds `/`s,
  *   an address, `/api/places/spaces/owen@spell/recipes/list` (the app's project data folders, epic `atmosphere` P1).
  * - Who's asking (`identityOf`) goes to the place as `PlaceContext.identity`:  what decides what they own.
@@ -81,6 +86,8 @@ export class PlaceServer {
   private readonly identityOf: PlaceServerProps["identityOf"]
   /** A credential to read a place direct. */
   private readonly credentialFor: PlaceServerProps["credentialFor"]
+  /** Lists of a place that can't page, answered a page at a time. */
+  private readonly pages = new ServerPages()
 
   constructor({
     places = {},
@@ -152,10 +159,16 @@ export class PlaceServer {
   // ## Each request
   ////////////////
 
-  /** `POST list`:  `{ collection, query }` => a `ListAnswer`, and `versions`, each thing's version by id. */
-  private async list({ place, body, context }: PlaceAsk): Promise<object> {
+  /**
+   * `POST list`:  `{ collection, query }` => a `ListAnswer`, and `versions`, each thing's version by id.
+   * - One page at a time, for a place that can't page itself (`ServerPages`).
+   */
+  private async list({ place, placeName, body, context }: PlaceAsk): Promise<object> {
     const { collection, query = {} } = body as { collection?: string; query?: ListQuery }
-    const answer = await place.list(this.collectionOrDie(collection), query, context)
+    const named = this.collectionOrDie(collection)
+    const answer =
+      (await this.pages.answerFor({ place, placeName, collection: named, query, context })) ??
+      (await place.list(named, query, context))
     // after the list:  a sheet says what it holds once its columns are read
     const { timesHeld } = place.describe()
     return { ...answer, ...(timesHeld && { timesHeld }), versions: this.versionsOf(place, collection!, answer.rows) }
@@ -168,10 +181,25 @@ export class PlaceServer {
     const named = this.collectionOrDie(collection)
     const rows = place.getMany
       ? await place.getMany(named, ids, { ...context, ...(select && { select }) })
-      : (await place.list(named, {}, context)).rows.filter((row) =>
-          ids.includes(idOfRow(row, place.describe().idOf) ?? "")
-        )
+      : await this.rowsWithIds(place, named, ids, context)
     return { rows, versions: this.versionsOf(place, named, rows) }
+  }
+
+  /** `ids`' rows, looked for page by page in a place that can't look them up:  past its first page too (epic `data` I147). */
+  private async rowsWithIds(
+    place: Place,
+    collection: string,
+    ids: readonly string[],
+    context: PlaceContext
+  ): Promise<PlaceRow[]> {
+    const left = new Set(ids)
+    const rows: PlaceRow[] = []
+    const { idOf } = place.describe()
+    for await (const { rows: page } of pagesOfList(place, collection, {}, context)) {
+      for (const row of page) if (left.delete(idOfRow(row, idOf) ?? "")) rows.push(row)
+      if (!left.size) break
+    }
+    return rows
   }
 
   /**

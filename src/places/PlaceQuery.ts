@@ -1,21 +1,19 @@
 import { compareValues } from "spell/util/string"
 import type { PlaceBatch } from "./PlaceBatch"
+import { ReadCeiling, pagesOf, type PageReader } from "./pagesOf"
 import {
   ANY_FIELD,
-  PlaceError,
   canDoAll,
   idOfRow,
   type ListAnswer,
   type ListHandled,
   type ListQuery,
   type Place,
-  type PlaceCeiling,
   type PlaceRow,
   type SortField
 } from "./places.types"
 
-/** How much the engine loads in the browser for a place that doesn't say otherwise (`PlaceCapabilities.ceiling`). */
-export const DEFAULT_CEILING: PlaceCeiling = { rows: 50_000, bytes: 50 * 1024 * 1024 }
+export { DEFAULT_CEILING } from "./pagesOf"
 
 /****************
  * ### `PlaceQuery`
@@ -31,7 +29,9 @@ export const DEFAULT_CEILING: PlaceCeiling = { rows: 50_000, bytes: 50 * 1024 * 
  * - The ceiling is `PlaceCapabilities.ceiling`, over `DEFAULT_CEILING`:  past it, a `PlaceError` naming the place.
  * - A row keeps its id field through `select`:  it's what makes it one row, in `PlaceCache`.
  * - Rows with no id:  it says so on every answer (`ListAnswer.notes`).
- * - `ids`:  only those rows, asked for one by one where the place can (`Place.getMany()`), else picked from the whole list.
+ * - `ids`:  only those rows, asked for where the place can (`Place.getMany()`, joined with other ids asked in the same
+ *   moment:  `PlaceBatch.getMany()`), with the fields selected;  else picked from its pages, read until every one's found.
+ * - Its pages are `pagesOf()`'s, each counted against the ceiling as it comes.
  * - Stops between pages when `signal` aborts, even for a place that ignores it.
  * - Knows nothing of readers or the cache:  `PlaceReads` runs one of these per request.
  ****************/
@@ -92,14 +92,11 @@ export class PlaceQuery {
     }
 
     ////// Every page it needs, each filtered as it comes
-    const seen = { rows: 0, bytes: 0 }
     const rows: PlaceRow[] = []
-    for (let answer = first; ; answer = await this.list({ ...this.ask, page: { at: answer.nextPage! } }, signal)) {
-      this.countAgainstCeiling(answer.rows, seen)
+    for await (const answer of this.pagesFrom(first, this.ask, signal)) {
       for (const row of isFiltering ? this.rowsLeft(answer.rows, handled) : answer.rows) rows.push(row)
       // with no sort left, the first rows we've got are the first rows there are
-      const hasEnough = !isSorting && end !== undefined && rows.length > end
-      if (!answer.nextPage || hasEnough) break
+      if (!isSorting && end !== undefined && rows.length > end) break
     }
 
     ////// What's left of the query
@@ -118,21 +115,55 @@ export class PlaceQuery {
     }
   }
 
-  /** Only the rows with `ids`, however the place can find them.  - throws as `answer()` does */
+  /**
+   * `first`, then the place's pages after it, as `ask` asks for them, each counted against the ceiling:  `pagesOf()`.
+   * - Stops between pages once `signal` aborts, or the reader breaks off.
+   */
+  private async *pagesFrom(first: ListAnswer, ask: ListQuery, signal: AbortSignal): AsyncGenerator<ListAnswer, void> {
+    const { placeName, place, collection } = this
+    const ceiling = new ReadCeiling({ placeName, collection, place })
+    ceiling.count(first.rows)
+    yield first
+    if (first.nextPage === undefined) return
+    const read: PageReader<ListAnswer> = (at, pageSignal) =>
+      this.list({ ...ask, page: { ...ask.page, at } }, pageSignal)
+    yield* pagesOf(read, { after: first.nextPage, signal, ceiling })
+  }
+
+  /**
+   * Only the rows with `ids`, however the place can find them, with only the fields selected.
+   * - A place that looks things up (`getMany()`) is asked for them, with ids other reads ask for in the same moment
+   *   (`PlaceBatch.getMany()`), and the fields selected, for a place that can leave the rest out (epic `data` I148).
+   * - Else its pages are read until every id is found, or there are no more:  a thing past the first page is found
+   *   too (epic `data` I147).
+   * - throws as `answer()` does
+   */
   private async rowsWithIds(ids: readonly string[], signal: AbortSignal): Promise<ListAnswer> {
     const { place, placeName, collection, batch } = this
+    const { select } = this.query
     if (place.getMany) {
-      const rows = await place.getMany(collection, ids, { signal })
+      const context = { signal, ...(select && { select }) }
+      const rows = batch
+        ? await batch.getMany(place, collection, ids, context)
+        : await place.getMany(collection, ids, context)
       signal.throwIfAborted()
       return { rows, handled: {} }
     }
     const { ids: _ids, ...rest } = this.query
-    const whole = await new PlaceQuery({ placeName, place, collection, query: rest, ...(batch && { batch }) }).answer(
-      signal
-    )
+    const lookingIn = new PlaceQuery({ placeName, place, collection, query: rest, ...(batch && { batch }) })
+    const first = await lookingIn.answer(signal)
     const { idOf } = place.describe()
-    const wanted = new Set(ids)
-    return { ...whole, rows: whole.rows.filter((row) => wanted.has(`${idOfRow(row, idOf)}`)) }
+    const left = new Set(ids)
+    const rows: PlaceRow[] = []
+    for await (const answer of lookingIn.pagesFrom(first, lookingIn.ask, signal)) {
+      for (const row of answer.rows) {
+        const id = `${idOfRow(row, idOf)}`
+        if (left.delete(id)) rows.push(row)
+      }
+      if (!left.size) break
+    }
+    const { nextPage: _nextPage, ...whole } = first
+    return { ...whole, rows: lookingIn.withSelection(rows, first.handled) }
   }
 
   /** What `answer` said about its rows, and, for rows with no id, that they share no identity:  the same for every place. */
@@ -202,19 +233,6 @@ export class PlaceQuery {
     const { idOf } = this.place.describe()
     const fields = idOf === undefined ? select : [...select, idOf]
     return rows.map((row) => rowWithFields(row, fields))
-  }
-
-  /** Add `rows` to what's been `seen`.  - throws `PlaceError` once that's over the ceiling */
-  private countAgainstCeiling(rows: PlaceRow[], seen: PlaceCeiling): void {
-    const { rows: ceilingRows, bytes: ceilingBytes } = { ...DEFAULT_CEILING, ...this.place.describe().ceiling }
-    seen.rows += rows.length
-    for (const row of rows) seen.bytes += JSON.stringify(row).length
-    if (seen.rows <= ceilingRows && seen.bytes <= ceilingBytes) return
-    const limit = seen.rows > ceilingRows ? `${ceilingRows} rows` : `${ceilingBytes} bytes`
-    throw new PlaceError(
-      `PlaceQuery:  "${this.placeName}" can't do this read of "${this.collection}" itself, and doing it here stops at ${limit};  ask for less, or raise its \`ceiling\``,
-      { cause: { kind: "over the ceiling" } }
-    )
   }
 }
 

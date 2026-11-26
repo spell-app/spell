@@ -561,3 +561,69 @@ describe("keys", () => {
     expect(keys.keyNamed("OTHER")).toBeUndefined()
   })
 })
+
+describe("PlaceServer, a list a page at a time (epic data P57)", () => {
+  /** 250 recipes in a place that can't page, served:  a sheet's shape. */
+  async function bigSheet() {
+    const recipes = Array.from({ length: 250 }, (_, index) => ({ id: `r-${index}`, title: `Recipe ${index}` }))
+    const place = new MemoryPlace({ capabilities: { page: "none" }, collections: { recipes } })
+    let lists = 0
+    const list = place.list.bind(place)
+    place.list = (collection, query, context) => {
+      lists++
+      return list(collection, query, context)
+    }
+    const served = await placeServer({ recipes: place })
+    return { ...served, place, lists: () => lists }
+  }
+
+  test("the first page is the first 100 rows, and says where the next is", async () => {
+    const { remote } = await bigSheet()
+    const first = await remote.list("recipes", {}, {})
+    expect(first.rows).toHaveLength(100)
+    expect(first.rows[0]!.id).toBe("r-0")
+    expect(first.total).toBe(250)
+    expect(first.nextPage).toBeDefined()
+    const second = await remote.list("recipes", { page: { at: first.nextPage! } }, {})
+    expect(second.rows[0]!.id).toBe("r-100")
+    const third = await remote.list("recipes", { page: { at: second.nextPage! } }, {})
+    expect(third.rows).toHaveLength(50)
+    expect(third.nextPage).toBeUndefined()
+  })
+
+  test("its later pages come from the one read:  a row added between two pages shows once", async () => {
+    const { remote, place, lists } = await bigSheet()
+    const first = await remote.list("recipes", {}, {})
+    await place.apply([{ kind: "insert", collection: "recipes", id: "r-new", fields: { title: "Soup" } }], {})
+    const second = await remote.list("recipes", { page: { at: first.nextPage! } }, {})
+    expect(second.rows.map((row) => row.id)).not.toContain("r-new")
+    expect(lists()).toBe(1)
+  })
+
+  test("a page whose read is gone reads again, from where it got to", async () => {
+    const { remote, lists } = await bigSheet()
+    const page = await remote.list("recipes", { page: { at: "r999:200" } }, {})
+    expect(page.rows[0]!.id).toBe("r-200")
+    expect(lists()).toBe(1)
+  })
+
+  test("a thing past the first page is found by its id (I147)", async () => {
+    const { port, place } = await bigSheet()
+    // a place that can't look things up:  a sheet
+    ;(place as { getMany?: unknown }).getMany = undefined
+    const answer = await posted(port, "/api/places/recipes/getMany", { collection: "recipes", ids: ["r-220"] })
+    expect(JSON.parse(answer.text).rows.map((row: { id: string }) => row.id)).toEqual(["r-220"])
+  })
+
+  test("the program's read through a PlaceQuery gets every row, page after page", async () => {
+    const { remote } = await bigSheet()
+    const places = new Places().add("cookbook", remote)
+    const result = places.read({
+      placeName: "cookbook",
+      collection: "recipes",
+      query: { filter: { title: "Recipe 240" } }
+    })
+    await result.load()
+    expect(result.contents?.map((row) => row.id)).toEqual(["r-240"])
+  })
+})
