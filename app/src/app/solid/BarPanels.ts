@@ -13,6 +13,11 @@ import { afterSolidUpdate } from "spell/util/timing"
  *     moving down";  T187:  the top bar's menus "look like they come from under the bar".
  * - The same just after one went (the bar's `reopensWithinMs`):  the mouse crossing a gap.
  * - Otherwise a panel slides out from behind the bar:  the sheet's own `@starting-style`.
+ * - A bar that `fadesRows` (the add bar's, epic `editor` I373):  the new one's rows fade in as its box glides and grows,
+ *   in the same time and ease, so the rows arrive with the box rather than snapping in while it still resizes (Owen:
+ *   "seems like the menu height is animating at a different pace than the items?  Maybe cross-fade the list items?").
+ *   - Not a true cross-fade, the old rows fading under the new:  two of a bar's popups never show at once (a hover
+ *     popup is the browser's `hint` popover, and opening one closes the other), so the old one goes as the new one shows.
  * - The bar's sheet draws all of it;  this only says which panel is out, and where a glide starts.
  * - One per bar, never shared:  the add bar's and the top bar's don't glide into each other.
  ****************/
@@ -44,13 +49,13 @@ export class BarPanels {
         panel.classList.remove(SWITCHING)
         if (button) this.shown = { panel, button }
         // the one it replaces goes only now:  a panel opening for the first time takes a moment to draw
-        const leaving = this.leaving
+        const leaving = this.leaving === panel ? undefined : this.leaving
         this.leaving = undefined
-        if (leaving && leaving !== panel) leaving.visible = false
+        if (leaving) leaving.visible = false
         // its size from the last one's, as it glides (I365):  measured once it shows, before it's painted
-        const from = this.sizeFrom
+        const from = this.sizeFrom?.panel === panel ? this.sizeFrom : undefined
         this.sizeFrom = undefined
-        if (from?.panel === panel) afterSolidUpdate(() => this.growFrom(panel, from.size))
+        if (from) afterSolidUpdate(() => this.growFrom(panel, from.size))
         return
       }
       panel.classList.remove(GLIDING)
@@ -99,6 +104,11 @@ export class BarPanels {
   private growFrom(panel: BarPanel, size: Size): void {
     const own = boxOf(panel)?.getBoundingClientRect()
     if (!own?.height || !size.height) return
+    // its rows arriving with it (I373)
+    if (this.options.fadesRows && !isReducedMotion()) {
+      for (const child of panel.children)
+        (child as HTMLElement).animate([{ opacity: 0 }, { opacity: 1 }], glideTiming(panel))
+    }
     if (this.options.grows === "height") {
       if (Math.abs(own.height - size.height) < 1) return
       this.glideBox(panel, [{ height: `${size.height}px` }, { height: `${own.height}px` }])
@@ -128,10 +138,8 @@ export class BarPanels {
   private glideBox(panel: BarPanel, keyframes: Keyframe[]): void {
     const box = boxOf(panel)
     if (!box || isReducedMotion()) return
-    const seconds = cssSecondsFor(panel, "--ui-duration-normal") ?? DEFAULT_GLIDE_SECONDS
-    const easing = getComputedStyle(panel).getPropertyValue("--ui-ease-out").trim() || "ease-out"
     const cutting = keyframes.map((keyframe) => ({ ...keyframe, minWidth: "0px", overflow: "hidden" }))
-    box.animate(cutting, { duration: seconds * 1000, easing })
+    box.animate(cutting, glideTiming(panel))
   }
 
   /** The panel out, else the one that went within the bar's `reopensWithinMs`. */
@@ -153,6 +161,8 @@ export type BarPanelsOptions = {
    * - `size`:  the top bar's menus, each as wide as its longest row
    */
   grows: "height" | "size"
+  /** A gliding panel's rows fade in as it glides and grows (the add bar's;  epic `editor` I373).  Default:  `false`. */
+  fadesRows?: boolean
   /**
    * How soon after a panel goes another still opens at once, gliding from it, in ms:
    * - the add bar's 300:  the mouse crossing to the next button, as its panels open on hover anyway
@@ -177,6 +187,13 @@ function startOf(button: Element, along: BarPanelsOptions["along"]): number {
   if (own.height) return own[side]
   const drawn = [...(button.shadowRoot?.children ?? [])].find((child) => child.getBoundingClientRect().height)
   return drawn?.getBoundingClientRect()[side] ?? own[side]
+}
+
+/** A glide's time and ease, the page's (`--ui-duration-normal`, `--ui-ease-out`):  the sheet's slide and glide use them too. */
+function glideTiming(panel: BarPanel): KeyframeAnimationOptions {
+  const seconds = cssSecondsFor(panel, "--ui-duration-normal") ?? DEFAULT_GLIDE_SECONDS
+  const easing = getComputedStyle(panel).getPropertyValue("--ui-ease-out").trim() || "ease-out"
+  return { duration: seconds * 1000, easing }
 }
 
 /** A panel's box, its `popup` part:  what slides, glides and grows. */

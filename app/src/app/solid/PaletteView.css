@@ -20,24 +20,16 @@
   }
 }
 
-/* ... at the foot of an add bar's menu, staying there as its parts scroll under it */
-.PaletteFlyoutFoot {
-  position: sticky;
-  inset-block-end: -4px;
-  padding: 8px 8px 4px 8px;
-  margin-block-end: -4px;
-  /* a hairline above it, drawn as a shadow, as the editor's surfaces part */
-  box-shadow: 0 -1px 0 var(--ui-border-color, rgb(0 0 0 / 0.1));
-  background: var(--ui-popup-background, var(--ui-surface));
+/* ... right under an add bar menu's header, as little room above and below as reads (epic `editor` I373;  its foot until
+   then):  two lines at most, its box always that tall, so the rows under it never move as it changes */
+.PaletteFlyoutAbout {
+  padding: 4px 8px 0 8px;
   color: var(--ui-text-muted);
   font-size: 12px;
 
-  /* three lines here:  the menu is narrow */
+  /* its first line at the top of its box, under the header:  the second line's room is below it */
   & .PartAbout {
-    block-size: 48px;
-  }
-  & .PartAboutText {
-    -webkit-line-clamp: 3;
+    align-items: flex-start;
   }
 }
 
@@ -94,11 +86,17 @@
 }
 /* ... its shadow on its left too:  the `+` panel's is cut, as it touches the bar (I369) */
 ui-popup.PaletteFlyout {
-  --PaletteFlyout-cut-left: calc(var(--PaletteRail-shadow-room) * -1);
+  --PaletteFlyout-cut-left: 0px;
 }
 ui-popup.BarMenuPopup.PaletteFlyout::part(popup) {
   /* at the bar's edge, its top its button's:  no gap for an arrow */
+  /* part of the bar (I373, Owen:  "square corners on the left side and no border"):  touching its edge, no border, its
+     left corners square, its shadow cut on that side;  the top bar's menus' fill and shadow kept (I367) */
+  /* its button 4px in from the bar's edge:  so it starts at the edge */
   margin: 0 0 0 4px;
+  border: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
   padding: 0 0 4px 0;
   opacity: 1;
   transform: none;
@@ -182,13 +180,8 @@ ui-popup.BarMenuPopup.PalettePlus::part(popup) {
   /* what's past its box while it glides to a new size is cut */
   overflow: hidden;
   padding: 0;
-  /* touching the bar, its top-left corner square, as the bar's top-right is while it's out:  no gap between (I369) */
-  margin: 0;
-  border-start-start-radius: 0;
 }
-ui-popup.PalettePlus {
-  --PaletteFlyout-cut-left: 0px;
-}
+/* ... touching the bar at its top, as every menu does (I373):  the bar's top-right corner square too, no gap (I369) */
 .PaletteRailPlace:has(.PaletteRailAdd.open) > .SplitPane.PaletteRail,
 :root[data-spell-theme] .PaletteRailPlace:has(.PaletteRailAdd.open) > .SplitPane.PaletteRail {
   border-start-end-radius: 0;
