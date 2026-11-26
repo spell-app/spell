@@ -155,6 +155,10 @@ then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is
   - [`Fixture`](../test-helpers/Fixture.ts):  render HTML into the live document, removed when the test ends
   - [`ElementFixture`](../test-helpers/ElementFixture.ts):  render, wait for every element's `ready`, `flush()`;
     `breakRender()`, a forced render failure
+  - [`SolidDiagnostics`](../test-helpers/SolidDiagnostics.ts):  a test fails on a Solid warning, or on more re-runs
+    than its budget (Solid's `@solidjs/diagnostics`, a dev dependency;  epic `solid-2-final` P22)
+    - [`watchSolid.ts`](../test-helpers/watchSolid.ts), in a project's `setupFiles`, watches every test:
+      the element project's, Spell UI's, the app's browser tests
   - [`A11y`](../test-helpers/A11y.ts):  axe on a live element (`expectAccessible()`), and WCAG contrast
   - [`Viewport`](../test-helpers/Viewport.ts):  resize the test iframe for one test
   - [`Alignment`](../test-helpers/Alignment.ts):  every row on a page with an item drawn more than half a pixel off

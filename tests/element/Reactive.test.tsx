@@ -4,6 +4,7 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { E, type ComponentVocabulary, type Dictionary, type DOMElement, type UIComponentClass } from "spell/element"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 
 /**
  * The reactive members (`Reactive`):  `@state` and `@derived` on any class, then the component side --
@@ -158,6 +159,8 @@ describe("Reactive:  @state", () => {
 
 describe("Reactive:  writes in an owned scope", () => {
   it("never throw:  the record is written at once, the notification a microtask later", async () => {
+    // the write Solid refuses is tried first, and reported, before it waits for the microtask
+    SolidDiagnostics.allowInThisTest("REACTIVE_WRITE_IN_OWNED_SCOPE")
     const basket = new Basket()
     const host = document.createElement("div")
     const unmount = render(() => <span>{basket.discount}</span>, host)

@@ -493,6 +493,14 @@ h(Picker, { onPick: () => go() }) // WRONG:  becomes a getter, passes go()'s res
     `app/AGENTS.md` "Overview".
   - `app`'s component tests `render()` from `@solidjs/web` into a fixture and `await uiReady` for the `<ui-*>` tags.
     `@solidjs/testing-library@next` (1.0.0-beta.3) exists but isn't installed.
+- Solid's warnings fail a test:  `SolidDiagnostics` (`spell/test-helpers/SolidDiagnostics`, on Solid's
+  `@solidjs/diagnostics`, a dev dependency;  epic `solid-2-final` P22).
+  - the element, Spell UI and app browser projects watch EVERY test (`spell/test-helpers/watchSolid.ts` in their
+    `setupFiles`):  a warning fails it with its code, where, Solid's fix and its docs page
+  - a test that warns on purpose says so:  `SolidDiagnostics.allowInThisTest("LOWERCASE_EVENT_ATTRIBUTE")`
+  - one mistake in steps that may warn of others:  `await SolidDiagnostics.expectNone(steps, { only: [code] })`
+  - re-run budgets:  `await SolidDiagnostics.expectRerunBudget(steps, max)` (a `<ui-input>` keystroke, a Solitaire move)
+  - never read `OBSERVE.diagnostics` in a test yourself
 - Reactive semantics this repo depends on are pinned as vitest cases:  `util`'s `src/reactive/cells.test.ts` and
   `decorators.test.ts` (cells, no Solid), `app`'s `src/solid/cellsBridge.browser.test.tsx` (Solid's client build:
   staging, holds, the bridge), `core`'s `drawing.test.ts` and `app`'s `src/runner/runner.browser.test.tsx` (compiled
@@ -541,6 +549,11 @@ expect(button.textContent).toBe("Clicks: 1")
   guide;  hoisted to the kit's root `node_modules`).
   - the same codes as data:  `solid-js`'s `diagnostics.json`;  and in `cheatsheet.html`
   - the dev console message links the code's page on docs.solidjs.com
+- "Why did this re-run?" in the running editor:  its dev server answers at `/__solid/diagnostics`
+  (the Solid plugin's `diagnostics`, `vite dev` only;  epic `solid-2-final` P22), once the editor's page is open.
+  - `curl -X POST <editor>/__solid/diagnostics -d '{"method":"begin"}'`, do the thing in the page, then
+    `{"method":"whyDidRun","params":{"name":"<scope>"}}`, `{"method":"costs"}`, `{"method":"end"}`
+  - how an agent works with it:  `node_modules/@solidjs/diagnostics/skills/agent-loops/SKILL.md`
 - `PRIMITIVE_IN_EFFECT_CALLBACK` thrown from a `connectedCallback()` or a prop read:
   SEE "Effects" above (rc.17).
 - Nothing updates after an error:  the scheduler halted -- find the first thrown error, not the last symptom.

@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vite-plus/test"
+import { beforeEach, describe, expect, it } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import type { TableColumn, TableEditDetail, TableRow } from "spell/ui/components/components.types"
 import type { DOMElement } from "spell/element"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 
 import "spell/ui/components/ui-table"
 
@@ -199,6 +200,9 @@ describe("<ui-table editable>", () => {
 })
 
 describe("<ui-table editable>, long", () => {
+  // thousands of rows, each reading one shared value:  Solid warns `HUGE_FAN_OUT` (the code-debt log, "## ui")
+  beforeEach(() => SolidDiagnostics.allowInThisTest("HUGE_FAN_OUT"))
+
   /** 10,000 rows of `{ film, stars }`, in a scrolling table. */
   async function longTable() {
     const host = await ElementFixture.render<TableDOMElement>(`<ui-table editable celled scrolling></ui-table>`)

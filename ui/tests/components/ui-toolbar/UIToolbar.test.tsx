@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vite-plus/test"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 import type { DOMElement } from "spell/element"
 import type { UIToolbar } from "spell/ui/components/ui-toolbar"
 import { UIMenu } from "spell/ui/components/ui-menu"
@@ -368,6 +369,8 @@ describe("<ui-toolbar> bar slots", () => {
     })
 
     it("a list too long for the window:  its rows in columns, top to bottom, the chosen one ticked (epic `editor` T84)", async () => {
+      // thousands of rows, each reading one shared value:  Solid warns `HUGE_FAN_OUT` (the code-debt log, "## ui")
+      SolidDiagnostics.allowInThisTest("HUGE_FAN_OUT")
       const { host } = await toolbar(600, items(120), `${LOOK} max-visible="3"`)
       await expect.poll(() => listButton(host)).not.toBeNull()
       listButton(host)!.click()

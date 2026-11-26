@@ -13,7 +13,11 @@ import type { MD } from "spell/parser/markdown"
  * - SEE:  its page in App UI's guide, `/components/app/markdown`.
  ****************/
 export function Markdown(props: MarkdownProps) {
-  const html = createMemo(async () => (await loadMarkdown()).toHTML(props.text))
+  // `text` read before the `await`:  read after it, a new text wouldn't draw again (`UNTRACKED_READ_AFTER_AWAIT`)
+  const html = createMemo(async () => {
+    const text = props.text
+    return (await loadMarkdown()).toHTML(text)
+  })
   return (
     <Loading fallback={<div class={["Markdown", props.class]}>{props.text}</div>}>
       <div class={["Markdown", props.class]} innerHTML={html()} onClick={(event) => open(event)} />

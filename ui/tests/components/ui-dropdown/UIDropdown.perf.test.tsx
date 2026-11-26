@@ -3,6 +3,7 @@ import { commands } from "vite-plus/test/browser"
 import { flush } from "solid-js"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 import { PerfRun } from "spell/ui/test-helpers/PerfRun"
 
 import "spell/ui/components/ui-dropdown"
@@ -19,6 +20,8 @@ const SOLID_SETTLE = { settle: () => flush() }
  *   terminal), for `yarn report`.
  */
 it("filters 1000 options in under a frame per keystroke (PerfRun)", async () => {
+  // thousands of rows, each reading one shared value:  Solid warns `HUGE_FAN_OUT` (the code-debt log, "## ui")
+  SolidDiagnostics.allowInThisTest("HUGE_FAN_OUT")
   const host = await ElementFixture.render(`<ui-dropdown search selection placeholder="Search"></ui-dropdown>`)
   const result = await PerfRun.run(host as Parameters<typeof PerfRun.run>[0], SOLID_SETTLE)
   await PerfRun.save(

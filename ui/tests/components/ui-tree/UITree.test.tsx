@@ -1,9 +1,9 @@
-import { OBSERVE } from "solid-js"
 import { describe, expect, it, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 import { UITree, UITreeItem, type TreeItemData } from "spell/ui/components/ui-tree"
 
 /** A subclass that classes its rows from `items` by `which`:  `<x-classed-tree>`. */
@@ -961,12 +961,14 @@ describe('<ui-tree appearance="columns"> from `items`', () => {
 
   it("runs a `children` function inside the path line's work with no reactive write there", async () => {
     // Solid's dev build reports a write inside a computation as `REACTIVE_WRITE_IN_OWNED_SCOPE`
-    const capture = OBSERVE!.diagnostics.capture()
     const host = await dataTree("sticky-path")
-    await pick(host, "acme")
-    await pick(host, "empty")
-    const codes = capture.stop().map((event) => event.code)
-    expect(codes).not.toContain("REACTIVE_WRITE_IN_OWNED_SCOPE")
+    await SolidDiagnostics.expectNone(
+      async () => {
+        await pick(host, "acme")
+        await pick(host, "empty")
+      },
+      { only: ["REACTIVE_WRITE_IN_OWNED_SCOPE"] }
+    )
     expect(dataRow(host, "empty").querySelector(".chevron")).toBeNull()
     await pick(host, "acme")
     expect(columnLabels(host)[1]).toEqual(["Menu", "Site"])

@@ -4,6 +4,7 @@ import { onTestFinished, describe, expect, test } from "vite-plus/test"
 
 import { UIComponent, type AttributeSpec, type ComponentVocabulary, type UIComponentClass } from "spell/element"
 import { RichAttributes } from "spell/element/RichAttributes"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 
 /**
  * `RichAttributes`:  a function or an object given to a dashed tag's attribute, as Solid hands a plain JSX prop.
@@ -140,6 +141,8 @@ describe("RichAttributes, plain calls", () => {
 
 describe("RichAttributes from Solid JSX", () => {
   test("plain props on a defined element:  on-ui-changed, an object, text;  each follows its signal", () => {
+    // Solid warns of `on-ui-changed` once per page, harmless on our elements (the Solid 2 rules, "Events")
+    SolidDiagnostics.allowInThisTest("LOWERCASE_EVENT_ATTRIBUTE")
     defineOnce(JSX_TAG)
     const heard: string[] = []
     const [items, setItems] = createSignal<unknown[]>([1])

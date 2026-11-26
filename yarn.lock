@@ -1825,6 +1825,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@solidjs/diagnostics@npm:2.0.4":
+  version: 2.0.4
+  resolution: "@solidjs/diagnostics@npm:2.0.4"
+  dependencies:
+    "@solidjs/signals": "npm:^2.0.4"
+  peerDependencies:
+    "@solidjs/web": ^2.0.4
+    solid-js: ^2.0.4
+    vitest: ">=2.0.0"
+  peerDependenciesMeta:
+    vitest:
+      optional: true
+  checksum: 10c0/06934ee9a6768e062f1578eb9c8251e90a4b29acfb74c7f86f2de1e6ace8bafe0c888eaebc76609e206ce3c12fb9349e8801a7bbae01f55c2be8fe1aaa374420
+  languageName: node
+  linkType: hard
+
 "@solidjs/h@npm:2.0.3":
   version: 2.0.3
   resolution: "@solidjs/h@npm:2.0.3"
@@ -6143,6 +6159,7 @@ __metadata:
     "@lezer/highlight": "npm:^1.2.5"
     "@playwright/test": "npm:1.63.0"
     "@solidjs/compiler": "npm:2.0.3"
+    "@solidjs/diagnostics": "npm:2.0.4"
     "@solidjs/h": "npm:2.0.3"
     "@solidjs/router": "npm:2.0.1"
     "@solidjs/vite-plugin": "npm:3.0.1"

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
-import { OBSERVE, flush } from "solid-js"
+import { flush } from "solid-js"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 import type { SpellCompiled } from "spell/app/app/runner/runner.types"
 import type { DOMSpellViewerElement } from "spell/app/app/components/spell-viewer"
 import type { P } from "spell/parser/parser"
@@ -137,17 +138,14 @@ board.start()
   })
 
   test("a run reads its layout untracked:  no `STRICT_READ_UNTRACKED` (epic `editor` I291)", async () => {
-    const events = OBSERVE!.diagnostics.capture()
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-    try {
-      const app = await mountApp(`<spell-viewer><floor-tableau id="T1"></floor-tableau></spell-viewer>`)
-      app.run({ projectId: "@spell/test/Floor", compiled: PILES } satisfies SpellCompiled)
-      await waitFor(() => app.firstElementChild?.shadowRoot?.textContent === "T1")
-      const untracked = events.stop().filter((event) => event.code === "STRICT_READ_UNTRACKED")
-      expect(untracked.map((event) => event.message)).toEqual([])
-    } finally {
-      warn.mockRestore()
-    }
+    await SolidDiagnostics.expectNone(
+      async () => {
+        const app = await mountApp(`<spell-viewer><floor-tableau id="T1"></floor-tableau></spell-viewer>`)
+        app.run({ projectId: "@spell/test/Floor", compiled: PILES } satisfies SpellCompiled)
+        await waitFor(() => app.firstElementChild?.shadowRoot?.textContent === "T1")
+      },
+      { only: ["STRICT_READ_UNTRACKED"] }
+    )
   })
 })
 

@@ -1,6 +1,5 @@
 import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
-import { OBSERVE } from "solid-js"
 
 import { UI } from "spell/ui/runtime"
 import { UIT } from "spell/ui/core"
@@ -8,6 +7,7 @@ import { foundationCSS } from "spell/ui/styles"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 import { SavedTheme, type DOMThemeEditorElement, type UIThemeEditor } from "spell/ui/components/ui-theme-editor"
 import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEditor.types"
 
@@ -128,15 +128,7 @@ afterEach(async () => {
 // First in the file:  Solid's dev build warns once per attribute name on a page, so a later test would see none
 describe("<ui-theme-editor> and Solid", () => {
   it("hears its controls' `ui-*` events by a ref:  no `LOWERCASE_EVENT_ATTRIBUTE`", async () => {
-    const events = OBSERVE!.diagnostics.capture()
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-    try {
-      await editor()
-      const named = events.stop().filter((event) => event.code === "LOWERCASE_EVENT_ATTRIBUTE")
-      expect(named.map((event) => event.message)).toEqual([])
-    } finally {
-      warn.mockRestore()
-    }
+    await SolidDiagnostics.expectNone(() => editor(), { only: ["LOWERCASE_EVENT_ATTRIBUTE"] })
   })
 })
 

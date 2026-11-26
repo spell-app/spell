@@ -657,6 +657,19 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - a copy:  the editor epic's `alignment.ts` (`app/tests/app/pages/`, its I327), on its branch:  its test moves onto
     the scan as it merges
 
+### Solid's warnings in a test
+
+- **It is:**  `SolidDiagnostics` (`spell/test-helpers/SolidDiagnostics`, on Solid's `@solidjs/diagnostics`;  epic
+  `solid-2-final` P22):  a test fails on a Solid dev warning, with its code, where and Solid's fix;  or on more re-runs
+  than its budget
+  - `watchSolid.ts` in a project's `setupFiles` watches every test:  the element, Spell UI and app browser projects
+- **Use it when:**  a test is about a Solid warning, or about how much one change re-runs.
+- **Flag:**  `OBSERVE!?\.diagnostics`
+- **Score:**  `OBSERVE!?\.diagnostics` · home `src/test-helpers/SolidDiagnostics.ts`
+- **Copies:**  `--`
+  - Seven tests read Solid's channel themselves until P22, which moved them onto it.
+  - Outside the tests, a page's Solid warnings are `BrowserPage`'s one probe (above), not a second watcher.
+
 ### The page server, from an epic page
 
 - **It is:**  `ServerLink` (`epic/src/review/ServerLink.ts`):  the page's token, a stale token's retry,

@@ -156,7 +156,7 @@ function browserProject({
       dir: TESTS,
       include,
       exclude: [...configDefaults.exclude, ...exclude],
-      setupFiles: ["./src/test-helpers/setup.ts"],
+      setupFiles: ["./src/test-helpers/setup.ts", "spell/test-helpers/watchSolid.ts"],
       // a guard:  an element bug that halts rendering must fail its test, not hang the run
       testTimeout: 10_000,
       // Test files of one browser run in parallel iframes of ONE page, which has ONE focus:

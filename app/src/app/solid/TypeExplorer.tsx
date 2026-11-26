@@ -145,9 +145,13 @@ export function TypeExplorer(props: TypeExplorerProps) {
     return tree && cacheFor(tree).get(path)
   }
 
-  /** Ask for the details of `path`, once per tree -- they show when they come. */
+  /**
+   * Ask for the details of `path`, once per tree -- they show when they come.
+   * - Called from an effect's apply (`ScopeDetailsPane`), so the tree is a snapshot on purpose:
+   *   a new tree empties `detailsFor()`, which asks again.
+   */
   function load(path: string) {
-    const tree = currentTree()
+    const tree = untrack(currentTree)
     if (!tree) return
     const cache = cacheFor(tree)
     if (cache.has(path)) return

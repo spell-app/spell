@@ -648,7 +648,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
       )
     }
     return (
-      <For each={this.cells.slice(row.start, row.end)}>{(choice, index) => this.cell(choice, row.start + index())}</For>
+      <For each={this.cells.slice(row.start, row.end)}>{(choice, index) => this.cell(choice, () => row.start + index())}</For>
     )
   }
 
@@ -657,23 +657,27 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     return group.label ?? this.translationForKey("otherIcons")
   }
 
-  /** Cell `cell`:  a glyph, its name its tooltip;  or "none", a circle with a slash. */
-  private cell(choice: IconChoice, cell: number): JSX.Element {
+  /**
+   * The cell for `choice`:  a glyph, its name its tooltip;  or "none", a circle with a slash.
+   * - `cell`, its place in the grid, is read where it's used:  `<For>` gives it as an accessor, and a read here
+   *   would never follow it (`STRICT_READ_UNTRACKED`)
+   */
+  private cell(choice: IconChoice, cell: () => number): JSX.Element {
     const isNone = choice === NONE_CELL
     const name = isNone ? this.translationForKey("noIcon") : choice.name
     const glyph = isNone ? undefined : new E.IconGlyph({ owner: this, name: () => choice.name })
     const isChosen = () => (isNone ? !this.iconName : !!this.iconName && choice.names.includes(this.iconName))
     return (
       <div
-        id={this.cellId(cell)}
-        class={[CELL, { [NONE]: isNone, [UIT.ACTIVE]: isChosen(), [UIT.SELECTED]: this.highlighted.index === cell }]}
+        id={this.cellId(cell())}
+        class={[CELL, { [NONE]: isNone, [UIT.ACTIVE]: isChosen(), [UIT.SELECTED]: this.highlighted.index === cell() }]}
         part={this.partForName("cell")}
         role="option"
         aria-selected={isChosen() ? "true" : "false"}
         aria-label={name}
         title={name}
         onClick={(event) => this.choose(isNone ? "" : choice.name, event)}
-        onPointerMove={() => this.hover(cell)}
+        onPointerMove={() => this.hover(cell())}
       >
         {glyph ? glyph.svg : UIIconPicker.noneGlyph()}
       </div>

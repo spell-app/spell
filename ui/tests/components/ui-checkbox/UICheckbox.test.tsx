@@ -1,13 +1,12 @@
-import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
+import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
-import { OBSERVE } from "solid-js"
-import { attribution } from "solid-js/attribution"
 
 import { E } from "spell/ui/core"
 import type { DOMFormControl } from "spell/ui/elements"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 
 import { UICheckbox } from "spell/ui/components/ui-checkbox"
 
@@ -393,24 +392,17 @@ describe("<ui-radio> groups", () => {
   })
 
   it("renders its tab stops consistently:  no `EFFECT_RELAY_TEAR` (a frame against stale membership)", async () => {
-    // the relay detector lives in Solid's attribution engine (dev only)
-    attribution.enable()
-    const events = OBSERVE!.diagnostics.capture()
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-    const info = vi.spyOn(console, "info").mockImplementation(() => {})
-    try {
-      const form = await ElementFixture.render<HTMLFormElement>(GROUP)
-      await ElementFixture.tick()
-      const radios = [...form.querySelectorAll<Check>("ui-radio[name=size]")]
-      radios[2]!.selected = true
-      await ElementFixture.tick()
-      const tears = events.stop().filter((event) => event.code === "EFFECT_RELAY_TEAR")
-      expect(tears.map((event) => event.message)).toEqual([])
-    } finally {
-      attribution.disable()
-      warn.mockRestore()
-      info.mockRestore()
-    }
+    // the relay detector lives in Solid's attribution engine (dev only), which the capture turns on
+    await SolidDiagnostics.expectNone(
+      async () => {
+        const form = await ElementFixture.render<HTMLFormElement>(GROUP)
+        await ElementFixture.tick()
+        const radios = [...form.querySelectorAll<Check>("ui-radio[name=size]")]
+        radios[2]!.selected = true
+        await ElementFixture.tick()
+      },
+      { only: ["EFFECT_RELAY_TEAR"] }
+    )
   })
 
   it("has one tab stop:  the chosen radio, else the first enabled one", async () => {

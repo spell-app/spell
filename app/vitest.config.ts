@@ -119,7 +119,7 @@ function appProjects(): TestProjectConfiguration[] {
         dir: APP_TESTS,
         include: BROWSER_TESTS,
         // Spell UI's core first, as a page has it:  its settings for `spell/element`;  then spell's grammar
-        setupFiles: ["spell/ui/test-helpers/setup.ts", "tests/grammar.ts"],
+        setupFiles: ["spell/ui/test-helpers/setup.ts", "spell/test-helpers/watchSolid.ts", "tests/grammar.ts"],
         // chromium, animations off (the kit's `browserMode()`, every repo's)
         browser: browserMode(playwright)
       }

@@ -51,6 +51,10 @@ export const TOP_REPO = (() => {
  * - `ruleTestsOutOfBuilds()` first:  a BUILD ships each grammar rule with its first example only, not its tests.
  * - `standardDecorators()` BEFORE the Solid plugin:  both are `enforce: "pre"`,
  *   and the Solid compiler must see decorator-free code.
+ * - The Solid plugin's `diagnostics`:  under `vite dev` only (never a build or a test), the running editor answers
+ *   "why did this re-run?" at `/__solid/diagnostics` (epic `solid-2-final` P22;  the Solid 2 rules, "When something breaks").
+ *   - On by hand:  it turns on by itself only where the nearest `package.json` lists `@solidjs/diagnostics`,
+ *     and the kit's does, not this folder's.
  * - `compiledSpell()`:  every config, so a test or a build that reaches `<FileTabs>` reads its `.spell`.
  * - `brotliCopies()`:  a BUILD writes a brotli copy beside each text file it writes (`x.js.br`), which the kit's
  *   servers send as is to a browser that takes brotli (epic `solid-2-final` P2)
@@ -66,7 +70,7 @@ export function appConfig({ builtInFiles }: { builtInFiles?: boolean } = {}) {
     ruleTestsOutOfBuilds(),
     standardDecorators(),
     packageVersion(import.meta.dirname),
-    solid({ exclude: [NOT_SOLID_SOURCE] }),
+    solid({ exclude: [NOT_SOLID_SOURCE], diagnostics: true }),
     compiledSpell(),
     cssBuildTarget(),
     brotliCopies()

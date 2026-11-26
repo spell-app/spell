@@ -6,6 +6,7 @@ import type { DOMFormControl } from "spell/ui/elements"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 import { Alignment } from "spell/test-helpers/Alignment"
 
 import "spell/ui/components/ui-input"
@@ -156,6 +157,17 @@ describe("<ui-input> value", () => {
     expect(host.value).toBe("Ada")
     control.blur()
     expect(changes).toEqual([expect.objectContaining({ value: "Ada" })])
+  })
+
+  it("a keystroke re-runs no more than it did:  12 computations, the value's effects and the input's binding", async () => {
+    const { control } = await input(`<ui-input aria-label="Name"></ui-input>`)
+    await userEvent.type(control, "A")
+    await ElementFixture.settle()
+    // measured 12 (2026-11-26, Solid 2.0.4):  five `@onChange` methods, each its memo and its effect, then the input
+    await SolidDiagnostics.expectRerunBudget(async () => {
+      await userEvent.type(control, "b")
+      await ElementFixture.settle()
+    }, 12)
   })
 
   it("keeps the host's value when a ui-input handler re-sets it", async () => {

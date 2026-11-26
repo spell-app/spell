@@ -1428,6 +1428,7 @@
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@playwright/test": "1.63.0",
     "@solidjs/compiler": "2.0.3",
+    "@solidjs/diagnostics": "2.0.4",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^22.20.4",

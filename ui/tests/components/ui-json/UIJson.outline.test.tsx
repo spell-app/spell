@@ -1,7 +1,7 @@
-import { OBSERVE } from "solid-js"
 import { describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 import type { DOMJsonElement, JsonNavigateDetail } from "spell/ui/components/ui-json"
 
 import "spell/ui/components/ui-json"
@@ -110,12 +110,14 @@ describe("<ui-json> outline", () => {
     const copied = vi.fn()
     element.addEventListener("ui-copied", copied)
     // Solid's dev build reports a write inside a computation as `REACTIVE_WRITE_IN_OWNED_SCOPE`
-    const capture = OBSERVE!.diagnostics.capture()
-    element.shadowRoot!.querySelector<HTMLElement>("ui-button.copy")!.click()
-    await vi.waitFor(() => expect(copied).toHaveBeenCalled())
-    await ElementFixture.settle()
-    const codes = capture.stop().map((event) => event.code)
-    expect(codes).not.toContain("REACTIVE_WRITE_IN_OWNED_SCOPE")
+    await SolidDiagnostics.expectNone(
+      async () => {
+        element.shadowRoot!.querySelector<HTMLElement>("ui-button.copy")!.click()
+        await vi.waitFor(() => expect(copied).toHaveBeenCalled())
+        await ElementFixture.settle()
+      },
+      { only: ["REACTIVE_WRITE_IN_OWNED_SCOPE"] }
+    )
     // the inner button's name follows the change, the write told a moment later
     const copy = element.shadowRoot!.querySelector("ui-button.copy")!
     expect(copy.shadowRoot!.querySelector("button")!.getAttribute("aria-label")).toBe("Copied")

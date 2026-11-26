@@ -185,11 +185,14 @@ function GuideBody(props: { path: string; hash: string }) {
     return read
   })
   let article: HTMLElement | undefined
-  // once the body is in:  its chapter (`#views`) opened and scrolled to
+  // once the body is in:  its chapter (`#views`) opened and scrolled to;  the hash read here, so a new one scrolls too
   createEffect(
-    () => body(),
     () => {
-      if (article) scrollToHash(article, props.hash)
+      body()
+      return props.hash
+    },
+    (hash) => {
+      if (article) scrollToHash(article, hash)
     }
   )
   return (

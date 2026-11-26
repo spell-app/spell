@@ -106,8 +106,8 @@ export default defineConfig({
           name: "element",
           dir: testsOf("element"),
           include: ["**/*.test.{ts,tsx}"],
-          // the stand-in settings, installed before every test file
-          setupFiles: [resolve(KIT, "src/test-helpers/TestSettings.ts")],
+          // the stand-in settings, installed before every test file;  then every test fails if Solid warns in it
+          setupFiles: [resolve(KIT, "src/test-helpers/TestSettings.ts"), resolve(KIT, "src/test-helpers/watchSolid.ts")],
           // a guard:  an element bug that halts rendering must fail its test, not hang the run
           testTimeout: 10_000,
           browser: browserMode(playwright)

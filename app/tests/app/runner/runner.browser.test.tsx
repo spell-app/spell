@@ -5,6 +5,7 @@ import { render } from "@solidjs/web"
 
 import type { P } from "spell/parser/parser"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 import type { FromRunnerMessage, SpellCompiled, ToRunnerMessage } from "spell/app/app/runner/runner.types"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import { SpellAppRunner, type SpellAppControls, type SpellAppSource } from "spell/app/app/runner/SpellAppRunner"
@@ -725,6 +726,20 @@ card.turnOver()
     const moved = () => host.querySelector(`test-project-discard-pile > [id="${played.id}"]`)
     await waitFor(() => moved()?.getAttribute("direction") === "up")
     await waitFor(() => moved()?.getAttribute("pile") === "DiscardPile#discard-pile")
+  })
+
+  test("a `Solitaire` move re-runs no more than it did:  the stock's card onto the discards, about 110 computations", async () => {
+    const host = await mount(await solitaireSource())
+    await waitFor(() => dealtAndPlayed(host), 10_000)
+    await ElementFixture.settle(host)
+    const discards = () => host.querySelector("test-project-discard-pile")!.children.length
+    const card = host.querySelector("test-project-stock-pile")!.lastElementChild as HTMLElement
+    // measured 109 to 110 (2026-11-26, Solid 2.0.4):  a change that makes every move re-run more fails here
+    await SolidDiagnostics.expectRerunBudget(async () => {
+      card.shadowRoot!.querySelector<HTMLElement>("[part=back]")!.click()
+      await waitFor(() => discards() > 1)
+      await ElementFixture.settle(host)
+    }, MOVE_RERUNS)
   })
 
   describe("a card dragged in Solitaire, and in Solitario, sends the page its drag events (epic `language` I171)", () => {
@@ -1560,6 +1575,9 @@ function dealtAndPlayed(host: HTMLElement): boolean {
     host.querySelector("test-project-discard-pile")?.children.length === 1
   )
 }
+
+/** The most computations one `Solitaire` move may re-run:  the 110 measured, and two for a slow frame's extra one. */
+const MOVE_RERUNS = 112
 
 /** What an empty foundation shows, in Solitaire's compiled javascript, and an edit of it. */
 const PLACEHOLDER = '"prop:suit": () => this.suit, part: "placeholder" })'

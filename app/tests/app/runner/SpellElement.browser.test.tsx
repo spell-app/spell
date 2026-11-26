@@ -8,6 +8,7 @@ import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { E } from "spell/ui/core"
 import { RootLoader } from "spell/ui/components/ui-root"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { SolidDiagnostics } from "spell/test-helpers/SolidDiagnostics"
 import { spanishMessages } from "spell/parser/spell/languages/es/messages"
 import { installSpellElements, SpellElement } from "spell/app/app/runner/SpellElement"
 
@@ -103,6 +104,8 @@ describe("SpellElement", () => {
   })
 
   test("a live value holding a listener reaches the element's own event (Star Wars' modal)", async () => {
+    // compiled spell hands `on-ui-closed` a function, as Solid warns of once per page:  harmless on our elements
+    SolidDiagnostics.allowInThisTest("LOWERCASE_EVENT_ATTRIBUTE")
     let closed = 0
     class Crawl extends View {
       draw(): ReturnType<View["draw"]> {
