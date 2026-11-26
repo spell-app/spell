@@ -154,6 +154,84 @@ describe("a read sorted by a sort a page holds", () => {
   })
 })
 
+describe("a table a <for> draws, showing the sort a page holds", () => {
+  /** `<for ... as="table" sortable sort="the order">`, drawn:  its table, its header row's cells, and what was asked. */
+  async function drawnTable() {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      const url = new URL(`${input instanceof Request ? input.url : input}`)
+      asked.push(`${url.pathname}${url.search}`)
+      const recency = url.searchParams.get("order_by") === "recency"
+      return Response.json(recency ? [...ROWS].sort((a, b) => b.end_time - a.end_time) : ROWS)
+    })
+    core.resetRuntime()
+    const contents = `${SERVER}
+a "lab screen" is a view
+	its "order" is a sort:  name
+	its "rows" is every measurement sorted by the order
+	to draw it
+		<for measurement in its rows as="table" sortable sort="the order">
+			<cell "Name" sort="name" align="right"><text>{its name};</text></cell>
+			<cell "Ended" sort="end time" span="2" vertical-align="top"><text>{its end time}</text></cell>
+			<cell "Notes"><text>-</text></cell>
+		</for>
+
+set screen to a new lab screen
+`
+    const { screen } = runSpellFiles([{ path: "/T.spell", contents }], { registered: true })("screen") as {
+      screen: { order: unknown }
+    }
+    const app = page.document.createElement("div")
+    page.document.body.appendChild(app)
+    const stop = listenForTableSorts(app as unknown as HTMLElement)
+    const dispose = render(() => core.drawThing(screen) as never, app)
+    await settled()
+    const table = app.querySelector("ui-table") as unknown as HTMLElement & { sort?: unknown }
+    const heads = [...app.querySelectorAll("ui-table > [data-header-row] > ui-cell")]
+    const names = () =>
+      [...app.querySelectorAll("ui-table > ui-row:not([data-header-row]) > ui-cell:first-child")].map((cell) =>
+        cell.textContent?.trim()
+      )
+    return { screen, table, heads, names, asked, dispose: () => (stop(), dispose(), app.remove()) }
+  }
+
+  test("its header cells carry each column's sort, span and alignment", async () => {
+    const { heads, dispose } = await drawnTable()
+    try {
+      expect(heads.map((head) => head.textContent)).toEqual(["Name", "Ended", "Notes"])
+      expect(heads.map((head) => head.getAttribute("sort"))).toEqual(["name", "end time", null])
+      expect(heads[0]!.getAttribute("align")).toBe("right")
+      expect(heads[1]!.getAttribute("span")).toBe("2")
+      expect(heads[1]!.getAttribute("vertical-align")).toBe("top")
+    } finally {
+      dispose()
+    }
+  })
+
+  test("a header click asks for its column's sort:  written into the page, and the read asks again", async () => {
+    const { screen, table, heads, names, asked, dispose } = await drawnTable()
+    // what Spell UI's table sends as a header is clicked:  its `sort`, else its `data-key` (`TableSort.key()`)
+    const click = (head: Element) => {
+      const key = head.getAttribute("sort") ?? head.getAttribute("data-key") ?? undefined
+      const event = new page.CustomEvent("ui-sorting", { detail: { key }, bubbles: true, cancelable: true })
+      table.dispatchEvent(event)
+      return event
+    }
+    try {
+      expect(names()).toEqual(["alpha;", "bravo;", "charlie;", "delta;"])
+      const reads = asked.length
+      expect(click(heads[1]!).defaultPrevented).toBe(true)
+      // the server sorts by end time newest first only (its `completion`):  that way round first
+      expect(screen.order).toEqual({ by: "end time", descending: true })
+      await settled()
+      expect(asked.slice(reads)).toEqual(["/measurements?order_by=recency"])
+      expect(names()).toEqual(["delta;", "charlie;", "alpha;", "bravo;"])
+    } finally {
+      dispose()
+    }
+  })
+})
+
 describe("a sort a page holds, by itself", () => {
   test("`core.sort()`:  frozen, smallest first unless it says", () => {
     expect(core.sort("name")).toEqual({ by: "name", descending: false })

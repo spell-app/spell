@@ -2189,6 +2189,9 @@ export const savedMethods = defineCoreModule({
         row.remove()
         keepHeaderRow(row, around!, items)
         around!.addEventListener(TABLE_SORTING, (event) => {
+          // a table showing a sort a page holds (`sort="the order"`):  the page's sort is set (`listenForTableSorts()`),
+          // and the read sorted by it asks again
+          if (isPageSort((around as { sort?: unknown }).sort)) return
           const { key, direction } = (event as CustomEvent<TableSorting>).detail
           const base = current() as object
           MORE_PAGES.get(base)
@@ -2328,7 +2331,11 @@ function keepHeaderRow(row: Element, table: Element, items: () => readonly unkno
   )
 }
 
-/** A header row like `row`, a heading cell for each of `named`, the cells of a first row that name their column. */
+/**
+ * A header row like `row`, a heading cell for each of `named`, the cells of a first row that name their column.
+ * - Each carries what its cell says of its column, in whatever language it's drawn in:  the sort its head asks for
+ *   (`<cell "Name" sort="name">`), how many columns it covers, how it's aligned -- every attribute but its name and id.
+ */
 function headerRowOf(row: Element, named: Element[]): Element {
   const header = row.cloneNode(false) as Element
   header.setAttribute("header", "")
@@ -2336,9 +2343,10 @@ function headerRowOf(row: Element, named: Element[]): Element {
   for (const cell of named) {
     const title = document.createElement(cell.localName)
     title.textContent = cell.getAttribute(COLUMN_NAME)
+    for (const { name, value } of [...cell.attributes]) {
+      if (name !== COLUMN_NAME && name !== "id") title.setAttribute(name, value)
+    }
     title.setAttribute(COLUMN_KEY, cell.getAttribute(COLUMN_NAME)!)
-    const align = cell.getAttribute("align")
-    if (align) title.setAttribute("align", align)
     header.append(title)
   }
   return header
