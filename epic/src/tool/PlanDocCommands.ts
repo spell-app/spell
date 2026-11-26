@@ -1157,8 +1157,12 @@ export class PlanDocCommands {
   /**
    * `stale <name> [--json]`:  the facts for judging which open items have gone stale (`StaleFacts`), decided by
    * nobody here;  in the epic's own worktree, when it has one, else the main checkout.
+   * - SIDE EFFECT:  a tidy asked for from the page's gear has started (`ReviewInbox.tidyStarted()`, epic `epic-engine`
+   *   T168):  this is `/epic tidy`'s first step
    */
   private printStale(name: string, file: string, json: boolean): void {
+    const inboxFile = ReviewInbox.pathFor(file)
+    if (ReviewInbox.read(inboxFile).tidyAsked) ReviewInbox.update(inboxFile, (inbox) => inbox.tidyStarted())
     const report = new StaleFacts(this.staleOptions(name, this.read(file), file)).report()
     this.print(json ? JSON.stringify(report, null, 2) : StaleFacts.lines(report).join("\n"))
   }

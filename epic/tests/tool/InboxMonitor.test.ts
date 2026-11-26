@@ -161,6 +161,25 @@ test("check:  a review asked for from the page is waiting, its own line;  gone o
   expect(ReviewInbox.read(inboxFile).reviewAsked).toBeNull()
 })
 
+// epic `epic-engine` T168:  the gear's Tidy asks the same way;  `epic stale`, the tidy's first step, clears it
+test("check:  a tidy asked for from the gear is waiting, its own line;  gone once the tidy starts", () => {
+  const each = monitor()
+  each.check(MONITOR)
+  ReviewInbox.update(inboxFile, (box) => box.askTidy())
+  const found = each.check(MONITOR)
+  expect(found).toMatchObject({ waiting: true, notice: InboxMonitor.tidyNotice("x") })
+  expect(found.batch).toContain("tidy=")
+  expect(InboxMonitor.tidyNotice("x")).toContain("/epic tidy x")
+  // a review asked for too:  its line first
+  ReviewInbox.update(inboxFile, (box) => box.askReview())
+  expect(each.check(MONITOR)).toMatchObject({ notice: InboxMonitor.askNotice("x") })
+  ReviewInbox.update(inboxFile, (box) => {
+    box.setListening("s1")
+    expect(box.tidyStarted()).toBe(true)
+  })
+  expect(ReviewInbox.read(inboxFile).tidyAsked).toBeNull()
+})
+
 test("check:  a review asked AND work sent:  the work's line, which takes the session to its review anyway", () => {
   const each = monitor()
   each.check(MONITOR)

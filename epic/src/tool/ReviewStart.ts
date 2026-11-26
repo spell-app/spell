@@ -17,6 +17,8 @@
  *     open.  Your prompt was not applied").  The bridge sees the tab first and types nothing (`typed: false`):
  *     the page says so, and the command is on the clipboard (`tab-open`).
  * - None, or several:  sends nothing, and says which sessions it found.
+ * - The gear's Tidy (epic `epic-engine` T168) starts `/epic tidy <epic>` the same way (`start(epic, planDoc, "tidy")`):
+ *   asked through the inbox (`ReviewInbox.askTidy()`), else typed into the session's tab.
  *
  * Waking (epic `epic-workflow` P16):  Send, Review Now or Do Now pressed while NO session listens, `changeAndWake()`.
  * - The page server wakes the epic inside that request:  no process runs while Owen isn't working.
@@ -125,6 +127,12 @@ export type WakeResult = {
 /** A Send's or Do Now's answer once the epic may have been woken:  the inbox, plus what the wake did. */
 export type WokenInbox = PageInbox & { wake: WakeResult | null }
 
+/** What the page asks the epic's session to start:  a review (the pill), or a tidy (the gear's Tidy, T168). */
+export type PageAsk = "review" | "tidy"
+
+/** What each ask is, in a notice:  `Asked 🚧 seo to start the review`. */
+const ASK_WORDS: Record<PageAsk, string> = { review: "start the review", tidy: "tidy the epic page" }
+
 /** What a `ReviewStart` may be given in place of the real world:  tests. */
 export type ReviewStartOptions = {
   /** start `epic window launch` with `args`, in folder `cwd`, and let it run;  default:  detached `node` */
@@ -164,12 +172,12 @@ export class ReviewStart {
   }
 
   /**
-   * Start `/epic review <epic>` in the session titled for `epic`, or say why not.
+   * Start `/epic review <epic>` (or, `ask` `tidy`, `/epic tidy <epic>`) in the session titled for `epic`, or say why not.
    * - `planDoc`:  the epic's page, whose inbox asks the session's poller (I144);  none:  never asked that way
-   * - SIDE EFFECT:  writes the inbox's `reviewAsked`, or types into the session's tab
+   * - SIDE EFFECT:  writes the inbox's `reviewAsked` (`tidyAsked`), or types into the session's tab
    */
-  async start(epic: string, planDoc?: string): Promise<StartResult> {
-    const command = ReviewStart.commandFor(epic)
+  async start(epic: string, planDoc?: string, ask: PageAsk = "review"): Promise<StartResult> {
+    const command = ask === "tidy" ? ReviewStart.tidyCommandFor(epic) : ReviewStart.commandFor(epic)
     const found = this.sessionsOf(epic)
     const titles = found.map((session) => session.title)
     if (!found.length) {
@@ -184,13 +192,15 @@ export class ReviewStart {
     const session = found[0]!
     const busy = session.status && session.status !== "idle" ? "  It starts once its turn ends." : ""
     if (planDoc && this.willHear(session)) {
-      await ReviewInbox.updateAsync(ReviewInbox.pathFor(planDoc), (inbox) => inbox.askReview())
+      await ReviewInbox.updateAsync(ReviewInbox.pathFor(planDoc), (inbox) =>
+        ask === "tidy" ? inbox.askTidy() : inbox.askReview()
+      )
       const when = this.pollerOf(session.pid) ? `in a few seconds, nothing typed.${busy}` : WHEN_TURN_ENDS
       return {
         state: "asked",
         command,
         sessions: titles,
-        message: `Asked ${session.title} to start the review:  its inbox poller wakes it ${when}`
+        message: `Asked ${session.title} to ${ASK_WORDS[ask]}:  its inbox poller wakes it ${when}`
       }
     }
     const window = this.windowOf(session.pid)
@@ -506,6 +516,11 @@ export class ReviewStart {
   /** The command a review starts with:  `/epic review <epic>`. */
   static commandFor(epic: string): string {
     return `/epic review ${epic}`
+  }
+
+  /** The command the gear's Tidy starts (T168):  `/epic tidy <epic>`. */
+  static tidyCommandFor(epic: string): string {
+    return `/epic tidy ${epic}`
   }
 
   /** The inbox poller running for session process `pid` (or the test's word for it), else `undefined`. */

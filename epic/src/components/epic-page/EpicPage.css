@@ -527,9 +527,19 @@
   .gear-row .name {
     flex: none;
   }
-  /* Focus mode's row (P57):  its icon before its name, in the ticks' column */
+  /* Tidy's icon and name, one box for its tooltip (T168):  laid out as the row's own */
+  .gear-row .tidy-words {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 6px;
+  }
+  /* Tidy's and Focus mode's rows (T168, P57):  the icon before the name, centred in a column of its own, so both
+     names start at one line whatever the glyph's width (an icon draws as `display: contents` by itself) */
   .gear-row .lead {
+    display: inline-flex;
     flex: none;
+    justify-content: center;
     width: 1em;
     color: var(--epic-muted);
   }

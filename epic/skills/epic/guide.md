@@ -241,7 +241,7 @@ The whole story, for people:  the epic plugin's README-superpowers.md (`epic gui
 
 ## tidy -- Close what other work made obsolete
 
-Only when the person asks (the skill's word:  `$epic tidy`).
+Only when the person asks (the skill's word:  `$epic tidy`, or Tidy in the epic page's gear:  its `📬` line says so).
 Its mechanical half runs by itself at every turn's end (`epic turn end`):  `epic stale <epic> --underway --apply`,
 stale Underway items whose work is on main turned orange for review, the rest given a `Stale:` card (the epic skill's
 "14. Tidy").
@@ -264,7 +264,9 @@ epic update <epic>#J3 promised "<what was promised, what's there instead>"   # w
 - An item waiting on a phase that's done (`waitsOnDone`) whose promised thing never came:  `promised`, never closed.
 - `--why` is plain text, and refuses questions, tests, and anything the person wants, asked for lately, is reviewing, or
   must pick:  the others still close.
-- Then say how many closed, how many noted, and each promised item with what's missing.
+- With item badges on:  recheck every open item badged WILL RECHECK or WILL CLOSE too (`epic badges <epic> list`), each as
+  the `badges` topic says, its `Rechecking:  ...` card first.
+- Then say how many closed, how many noted, each promised item with what's missing, and the rechecks' counts.
 
 ## badges -- What each item's badge asks of you
 
@@ -272,9 +274,11 @@ On a page with item badges, each line starts with what happens next.
 
 - URGENT, WILL FIX, WILL DO:  do it without asking, URGENT first.
 - YOUR CALL, AGAINST YOUR ASK:  wait for the person.  Never answer a question for them.
-- WILL RECHECK, WILL CLOSE:  check them when nothing else is waiting, then either:
+- WILL RECHECK, WILL CLOSE:  check them when nothing else is waiting, and all at once on a tidy;  put an Underway card on
+  first (`epic update <epic>#I7 underway "Rechecking:  ..."`), then either:
   - it's real:  `epic badges <epic>#I7 set --doubt 5 --why "..."`
   - it isn't:  `epic badges <epic> close I7 --as vanished --why "..."` (or `moot`, `duplicate`, `declined`)
+  - the person's own (`close` refuses):  `epic badges <epic>#I7 set --your-call yes`, and say what you found
 - SOMEDAY, OPTIONAL:  nothing, unless asked.
 - SEE T38:  work that todo, not the item.
 - Never turn badges on, score or close on an epic you weren't asked to.

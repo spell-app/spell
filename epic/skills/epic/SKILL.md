@@ -1116,6 +1116,8 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
       the foreground when there's nothing else to do
   - `📬 <epic>:  the person pressed "start review" ...`:  they asked for a review from the page;  start one, `/epic review
     <epic>` (this section), as if they'd typed it
+  - `📬 <epic>:  the person pressed Tidy ...`:  the page gear's Tidy (epic `epic-engine` T168);  run `/epic tidy <epic>`
+    ("14. Tidy"), as if they'd typed it
 - Mechanical marks:  at once.
 - Add Details and "revisit now":  by background agents ("The session answers;  agents build").
   - In Codex:  a Codex sub-agent each, waited for;  or answered here, one at a time.
@@ -1883,6 +1885,10 @@ Close the open judgement calls, issues and todos that other work has made obsole
 (epic `epic-engine` Q69;  "mark as done any that have been obviated by other changes").
 No `<epic>`:  this session's epic.
 Only when the person (or that epic's session) asks:  it never starts by itself.
+- Their ask:  `/epic tidy`, or Tidy in the epic page's gear (epic `epic-engine` T168), which reaches the session as
+  `📬 <epic>:  the person pressed Tidy ...` ("7. Review");  no session listening, the page types `/epic tidy <epic>`
+  into its tab, as it does `/epic review`.
+- It also RECHECKS every open item badged WILL RECHECK or WILL CLOSE (step 2b), so one press does both.
 
 Its mechanical half runs BY ITSELF at the end of every turn (epic `epic-engine` T78;  Owen, 2026-11-15:  "we need an
 'end of turn' action to go through the open/underway issues and clean things up"):
@@ -1898,6 +1904,8 @@ Its mechanical half runs BY ITSELF at the end of every turn (epic `epic-engine` 
   with a reason (below)
 
 1. Get the facts:  `epic stale <epic> --json` (scratchpad file).
+   - It also marks a Tidy asked for from the page as started (the inbox's `tidyAsked`), so its `📬` line isn't said
+     again.
    - One entry per open call, issue, todo and limit:  age from when it was written, its phase and whether that's done,
      the files and code names it mentions and whether they still exist (in its worktree or on `main`;  only what
      git's history has can be gone), commits since it was written, commits naming it, later items and phases that
@@ -1949,8 +1957,16 @@ Its mechanical half runs BY ITSELF at the end of every turn (epic `epic-engine` 
      - A `limit` (a todo that only notes something) is obsolete when the limit no longer holds, and not before.
      - Near-identical follow-ups are judged together:  both close or neither (mockup T17 was closed, its twin T25 left).
    - A refusal from `epic close` (exit 1, one line per id, the others closed):  leave that item as it is.
+2b. On a page with item badges (`<epic-page badges>`):  RECHECK every open item badged WILL RECHECK or WILL CLOSE
+   (`epic badges <epic> list`), in the same background agents, batches of ids beside the stale ones (still 5 in all).
+   - Each one as "18. Item badges" says:  a `Rechecking:  ...` Underway card first, then real (`epic badges ... set`),
+     not (`epic badges <epic> close <id> --as vanished | moot | duplicate | declined --why ...`), or theirs
+     (`--your-call yes`, and what was found in the reply).
+   - An item in both lists:  the recheck decides it;  never closed twice.
+   - In Codex:  the same sub-agents as step 2, or the rechecks one at a time, here.
 3. Reply:  how many closed, how many left noted, how many left alone, every "promised, not delivered" by id with what's
-   missing (the person decides those), and the epic page's link pair.
+   missing (the person decides those);  the rechecks:  how many found real, closed (by `--as`), and left for their
+   call;  and the epic page's link pair.
 
 ## 15. Staged demo:  `/epic demo`
 
@@ -2172,7 +2188,8 @@ The engine only stores judgements and draws them:  it starts no work.  These are
 - `URGENT`, `WILL FIX`, `WILL DO`:  do it without asking.  URGENT first, then WILL FIX, then WILL DO.
   - Take it up as any item (an Underway card, an agent), and report it as usual (`fixed`, `done`).
 - `YOUR CALL`, `AGAINST YOUR ASK`:  WAIT on the person.  Never decide it, and never answer a question for them.
-- `WILL RECHECK`, `WILL CLOSE`:  check them in IDLE time, when nothing above is waiting.
+- `WILL RECHECK`, `WILL CLOSE`:  check them in IDLE time, when nothing above is waiting, and all at once on every tidy
+  ("14. Tidy", step 2b;  the page gear's Tidy asks for one).
   - Put a card on it first (`epic update <epic>#I7 underway "Rechecking:  ..."`):  it reads RECHECKING.
   - Then one of:
     - it's real:  `epic badges <epic>#I7 set --doubt 5 [--care 80] --why "..."`, and the card noted

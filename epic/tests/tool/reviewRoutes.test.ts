@@ -450,6 +450,14 @@ describe("start, and waking the epic", () => {
     }
   })
 
+  // epic `epic-engine` T168
+  test("the gear's Tidy (ask: tidy):  /epic tidy typed into the one session's tab", async () => {
+    sessions(["🚧 big", process.pid])
+    const got = await post("start", { page: PLAN_URL, ask: "tidy" })
+    expect(got.body).toMatchObject({ state: "sent", command: "/epic tidy big" })
+    expect(asked[0]?.[1]).toMatchObject({ prompt: "/epic tidy big" })
+  })
+
   test("none:  nothing sent, and says so", async () => {
     sessions(["🚧 other", process.pid], ["bigger things", process.ppid])
     const got = await post("start", { page: PLAN_URL })

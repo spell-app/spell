@@ -76,6 +76,7 @@
  *   asks the ONE running Claude session titled for the epic through its inbox poller (epic `epic-engine` I144), else
  *   types `/epic review <epic>` into its tab;
  *   none or several:  sends nothing, says which it found (`ReviewStart`);  answers its `StartResult`, not the inbox
+ *   - `{ page, ask: "tidy" }`:  the gear's Tidy (epic `epic-engine` T168), `/epic tidy <epic>` the same way
  * - writes:  under the inbox's lock, atomic (`ReviewInbox.updateAsync()`);
  *   each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
  * - Loaded by the page server under `tsx` (`PageServer.loadRoutes()`), with `packages/server/tsconfig.json`'s aliases.
@@ -231,9 +232,10 @@ const reviewRoutes: RouteModule = {
       reply.json(await new ReviewStart(root).changeAndWake(file, epicOf(file), send))
     })
     api.post("/start", async (request, reply) => {
-      const body = request.body as { page?: unknown }
+      const body = request.body as { page?: unknown; ask?: unknown }
       const file = planDoc(web.files, body.page)
-      reply.json(await new ReviewStart(root).start(epicOf(file), file))
+      const ask = body.ask === "tidy" ? "tidy" : "review"
+      reply.json(await new ReviewStart(root).start(epicOf(file), file, ask))
     })
     router.use(API, api)
   }

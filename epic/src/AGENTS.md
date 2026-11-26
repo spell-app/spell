@@ -760,6 +760,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         unless another listener holds it
       - says what's waiting, the `📬` line to print, its `batch`, which files to watch, and when to look again
       - "start review" asked for (`reviewAsked`):  waiting too, its line asking for `/epic review` (I144)
+      - the gear's Tidy (`tidyAsked`, epic `epic-engine` T168):  the same, its line asking for `/epic tidy`
     - `InboxPoller`:  the poller itself (epic `epic-engine` P19), run by [listen.mjs](../monitors/listen.mjs)
       - [InboxPoller.mjs](tool/InboxPoller.mjs)
       - started by the plugin's `Stop` hook at each turn's end, in every session (`--hook`, `asyncRewake`):  it prints
@@ -1605,7 +1606,11 @@ In `tools/`:
             and "Theme · Paper" (Spell UI's `<ui-theme-menu show="menu" bench="none">`)
           - each sub-menu to the left of its row, under it when narrow;  the arrow keys, Enter, Space and Escape
             move through them
-          - while reviewed, FOCUS MODE first (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly
+          - while reviewed, TIDY first (epic `epic-engine` T168;  Owen:  "In the gear menu, add an entry at the top to
+            run epic tidy"):  asks the epic's session to run `/epic tidy <epic>`, as the pill asks for a review
+            (`ReviewClient.startReview("tidy")`), the notice saying what came of it;  its tooltip on its words, not the
+            row (the menu focuses its first row as it opens);  not on a saga page
+          - then FOCUS MODE (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly
             walk through the open issues/questions/etc in a plan"):  `<epic-focus>`, drawn in the page's shadow root,
             never written in a page;  its Epic UI page, `/components/epics/epic-focus`
             - Spell UI's `<ui-modal fullscreen overlay>`, Escape and its × close it
@@ -2241,6 +2246,9 @@ the epic page shown in both tabs).
   - `reviewAsked`:  "start review" pressed while the session's poller runs (epic `epic-engine` I144):  the poller's
     next look prints a `📬` line asking for `/epic review`, which wakes the session;  nothing typed.
     Gone once the session's own `epic inbox watch` listens.
+  - `tidyAsked`:  Tidy pressed in the page's gear (epic `epic-engine` T168), asked the same way (`POST
+    /api/epics/review/start` with `ask: "tidy"`;  no poller, `/epic tidy <epic>` typed into the session's tab):  its
+    `📬` line asks for `/epic tidy`.  Gone once the tidy starts:  its first step, `epic stale <epic>`, clears it.
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
     - Send with nobody listening wakes it, inside the request:
       its session's poller told (`told`:  it hears the Send itself), `/epic review <epic>` typed into its session, or

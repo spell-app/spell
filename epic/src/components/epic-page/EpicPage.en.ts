@@ -359,9 +359,23 @@ export const epicPageVocabulary = {
     { key: "bedtime", text: "Bedtime {phases}", description: "The bedtime label:  a `/bedtime` run is on." },
     { key: "gearTip", text: "Settings", description: "The header's gear:  its tooltip, and its menu's name." },
     {
+      key: "tidy",
+      text: "Tidy",
+      description:
+        "The gear's first row while the page is reviewed (epic `epic-engine` T168):  asks the epic's session to run " +
+        "`/epic tidy <epic>`."
+    },
+    {
+      key: "tidyTip",
+      text:
+        "Click to have Claude close the to-dos and issues that are already done, and look again at each one marked " +
+        "WILL RECHECK.",
+      description: "The gear's Tidy row:  its tooltip (checked with `epic voice check`)."
+    },
+    {
       key: "focusMode",
       text: "Focus mode",
-      description: "The gear's first row while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
+      description: "The gear's row after Tidy while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
     },
     { key: "autoSend", text: "Auto Send", description: "The gear's Auto Send row, and its sub-menu's name." },
     { key: "theme", text: "Theme", description: "The gear's Theme row, and its sub-menu's name." },
