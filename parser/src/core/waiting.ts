@@ -13,7 +13,7 @@
  * - `core.answerOf()`:  what an action reads it with, waiting for the answer.
  *   - Solid's own `resolve()` gives the OLD answer just after a write, so it's not used:
  *     it brings the writes in, reads, then waits for the latest promise (P8).
- * - Loads Solid:  NEVER imported by `core/model`.  A library's getter is a plain async getter (`P.LibraryWriter`).
+ * - Loads Solid:  NEVER imported by `core/model`.  A library's getter is a plain async getter (`LibraryWriter`).
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 

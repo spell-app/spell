@@ -13,7 +13,7 @@ import {
 } from "spell/app/spaces/test"
 
 /**
- * Every fixture project compiled as TypeScript (the `ts/solid` target, `P.TSWriter`), checked by `tsc` against
+ * Every fixture project compiled as TypeScript (the `ts/solid` target, `TSWriter`), checked by `tsc` against
  * `@spell/core`'s own types -- see `typecheck()` -- what it reports, against
  * `<Project>.snapshot.tsc.txt`, with its other snapshots (`snapshotPath()`).
  * - So every place the typed output falls short shows, as a line of that file:  a change is a diff to read.

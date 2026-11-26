@@ -82,7 +82,7 @@ const NAMED_TAGS: Readonly<Record<string, { title?: string }>> = {
  * - `P.JSXElementToken` does all the tokenizing.
  *   `parse()` re-parses each attribute / child token through `jsxAttribute` / `jsxChild`,
  *   falling back to `parse_error` for a child that doesn't parse.
- * - Compiles to `h(tag, props, ...children)` in javascript, JSX in TypeScript:  see `P.JSWriter`, `P.TSWriter`.
+ * - Compiles to `h(tag, props, ...children)` in javascript, JSX in TypeScript:  see `P.JSWriter`, `TSWriter`.
  *   - Both write the page's own attribute names, decided when it compiles (`attributeName()`):
  *     `className` => `class`, `colSpan` => `colspan`.
  *   - On a `ui-*` tag, a value that can change and may hold an object is a property, `prop:value`;

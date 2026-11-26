@@ -1,6 +1,6 @@
 import { defineConfig } from "vite"
 
-import { appConfig, sharedSolid } from "./vite.shared.ts"
+import { appConfig, sharedFiles } from "./vite.shared.ts"
 
 /**
  * Build the runner bundle for the VS Code extension's "Run Project" webview:
@@ -11,7 +11,7 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
  * - What both use goes in ONE shared chunk.
  *   - `core` MUST stay in `spell-runtime.js` alone -- pinned by `element.build.test.ts`.
  *   - As `vite.element.config.ts`, which builds `<spell-viewer>`.
- * - Solid and `spell-ui` come from `spell-solid.js` / `spell-ui.js` beside it (`sharedSolid()`), as in
+ * - Solid and `spell-ui` come from `spell-solid.js` / `spell-ui.js` beside it (`sharedFiles()`), as in
  *   `dist-element/`:  one layout, one pin.
  * - Lato is NOT bundled:  the webview loads it straight from `static/`.
  * - Plugins, dedupe and CSS:  `appConfig()`, as `vite.config.ts`.  `keepNames` MUST stay on --
@@ -20,7 +20,7 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
 const shared = appConfig()
 export default defineConfig({
   ...shared,
-  plugins: [...shared.plugins, sharedSolid()],
+  plugins: [...shared.plugins, sharedFiles()],
   build: {
     chunkSizeWarningLimit: 1000,
     outDir: "dist-runner",

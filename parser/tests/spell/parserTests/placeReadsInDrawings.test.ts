@@ -3,6 +3,7 @@ import { Script } from "node:vm"
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
@@ -37,7 +38,7 @@ function compiled(drawing: string) {
   // syntax only:  an `await` in a plain arrow function fails here, as it fails in a page
   new Script(shelf.compiled.replace(/^export /gm, ""))
   const asts = files.map(({ match }) => match?.AST as P.ASTStatementGroup)
-  return { code: shelf.compiled, typescript: SP.SpellProject.combineCompiled(asts, P.TSWriter.instance, "", scope) }
+  return { code: shelf.compiled, typescript: SP.SpellProject.combineCompiled(asts, TSWriter.instance, "", scope) }
 }
 
 describe("a read of a place, right in a drawing", () => {

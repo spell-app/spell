@@ -113,7 +113,7 @@ export class RunSiteHost implements SiteHost {
    *   then waits for the section:  a page draws a moment after it's shown.
    * - Lands once more when late layout has moved it, unless the reader has scrolled since.
    * - NOT Spell UI's `HashLanding`:  `<spell-viewer>`'s bundle takes Spell UI only from the page's shared files
-   *   (`sharedSolid()`), and they don't hold it;  and it scrolls only the window, which the editor's Run doesn't.
+   *   (`sharedFiles()`), and they don't hold it;  and it scrolls only the window, which the editor's Run doesn't.
    * - NEVER throws:  a section that never comes, or one the page doesn't have, is left alone.
    */
   static landOnSection(root: ParentNode, id: string): void {

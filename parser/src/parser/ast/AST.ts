@@ -1,7 +1,7 @@
 /**
  * AST classes.  These do not necessarily correspond do anyone else's AST.
  * - They hold what was parsed;  a target's WRITER turns them into code:
- *   `P.JSWriter` for javascript, which `compile()` calls, and `P.TSWriter` for TypeScript.
+ *   `P.JSWriter` for javascript, which `compile()` calls, and `TSWriter` for TypeScript.
  * - NEVER write output here.
  */
 

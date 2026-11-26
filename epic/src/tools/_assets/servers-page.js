@@ -119,6 +119,9 @@ const HANDS_OFF_NOTICE =
 /** What a card says under its name while its server isn't running (Owen, T164:  its description wasn't helpful) */
 const NOT_RUNNING = "Not running"
 
+/** what the page says where the worktrees go, while none is active (epic `epic-engine` J369) */
+const NO_ACTIVE_WORKTREES = "No worktrees are in use right now."
+
 /** Restart all's tooltip */
 const RESTART_ALL_TIP =
   "Restart the page server and the editor together, so both use your latest changes.\nYour pages reload by themselves."
@@ -698,13 +701,16 @@ function listRow({ plain, isNew, isQuiet, isLoud, tag, words, tip, count, when, 
 }
 
 /**
- * each epic's worktree:  its heading, its servers' cards, then what it holds that main hasn't got
- * - every worktree a server or a running epic names, busy or idle
+ * each ACTIVE worktree:  its heading, its servers' cards, then what it holds that main hasn't got
+ * - only the active ones (`isActiveWorktree()`);  the rest hidden, and none active, one calm line (epic `epic-engine`
+ *   J369:  "inactive ones should be hidden")
  * - in the order the keeper sends them, the one worked on last first (`ServerFacts.newestFirst()`, epic `epic-engine`
  *   I449);  a worktree only a server names, after them, by name
  */
 function worktreeGroups(answer, named) {
-  return worktreeOrder(answer).flatMap(({ worktree, epic, servers }) => {
+  const active = worktreeOrder(answer).filter(isActiveWorktree)
+  if (!active.length) return [el("p", { className: "servers-quiet" }, NO_ACTIVE_WORKTREES)]
+  return active.flatMap(({ worktree, epic, servers }) => {
     const shown = worktreeCards(servers)
     return [
       heading(
@@ -717,6 +723,19 @@ function worktreeGroups(answer, named) {
       openStuff(epic)
     ].filter(Boolean)
   })
+}
+
+/**
+ * Whether the page lists a worktree (`worktreeOrder()`'s group):  something is going on in it now
+ * - any of its servers runs (starting, or down, counts:  as `worktreeCards()`)
+ * - a Claude session runs for its epic (`session`), its agents work (`agents`), it holds a turn (`turn`), or a
+ *   phase is under way (`phase`)
+ * - NOT commits waiting to merge alone:  a worktree untouched for weeks may hold hundreds
+ * - pure:  the page's tests call it
+ */
+export function isActiveWorktree({ epic, servers }) {
+  if (worktreeCards(servers).length) return true
+  return Boolean(epic && (epic.session || epic.agents || epic.turn || epic.phase))
 }
 
 /**

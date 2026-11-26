@@ -2,6 +2,7 @@ import { describe, test, expect } from "vite-plus/test"
 
 import { describeTypecheckError, typecheck } from "spell/parser/spell/node/typecheck"
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 import { loadFixtureProject } from "spell/app/spaces/test"
@@ -26,7 +27,7 @@ describe("a writer's naming map", () => {
 
   test.each([
     ["javascript", () => new P.JSWriter()],
-    ["TypeScript", () => new P.TSWriter()]
+    ["TypeScript", () => new TSWriter()]
   ])("%s, types in snake_case:  no type's PascalCase name is left in the code", (_language, makeWriter) => {
     // only code counts, and the text the runtime reads as a type's name (`type: "Card"`):
     // comments and other text say what they like (a heading, a class attribute)
@@ -49,7 +50,7 @@ describe("a writer's naming map", () => {
   // `tsc` checks compiled spell against the app's types
   test("TypeScript, types in SCREAMING_SNAKE_CASE:  tsc says what it says of Solitaire's usual names", () => {
     const errorsIn = (typeCase: P.NameCase) => {
-      const { errors } = typecheck({ "Solitaire.tsx": typedIn(typeCase, new P.TSWriter()) })
+      const { errors } = typecheck({ "Solitaire.tsx": typedIn(typeCase, new TSWriter()) })
       // by what's wrong, not where:  the two name the same lists, `List<Pile>` and `List<PILE>`
       return errors["Solitaire.tsx"]!.map((error) =>
         describeTypecheckError(error)

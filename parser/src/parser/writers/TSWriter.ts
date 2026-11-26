@@ -61,8 +61,17 @@ import { forEachNode, listNamedBy, type TSUndeclared, type WriterProject } from 
  * - Checked by `tsc` against `@spell/core`'s types:  see spell-app's `typescript.test.ts`, on the frozen test projects.
  ****************/
 export class TSWriter extends JSWriter {
-  /** The one `ts/solid` starts from:  it knows no project -- see `forProject()`. */
-  static readonly instance = new TSWriter()
+  /**
+   * The one `ts/solid` starts from:  it knows no project -- see `forProject()`.
+   * - Made the first time it's asked for, not as the file loads:  so a bundle that reaches the parser's barrel but never
+   *   writes TypeScript (the editor's language worker) drops this file (epic `solid-2-final` P19).
+   */
+  static get instance(): TSWriter {
+    return (TSWriter.made ??= new TSWriter())
+  }
+
+  /** `instance`, once made. */
+  private static made: TSWriter | undefined
 
   /** What a type spell doesn't know is written as:  `any`, marked. */
   static UNKNOWN = "any /* spell: type unknown */"
@@ -1035,7 +1044,7 @@ export class TSWriter extends JSWriter {
    * - Its own property `thing`, too.
    * - Pinned by app's `SpellElement.browser.test.tsx`:  every member an element has is here.
    */
-  static readonly ELEMENT_MEMBERS = new Set<string>([
+  static readonly ELEMENT_MEMBERS = /* @__PURE__ */ new Set<string>([
     "$",
     "adoptProjectStyles",
     "adoptStyleSheets",

@@ -145,7 +145,7 @@ and in the app's build folder, `app/` at the app folder's root.
       - `spell-solid.js` puts one there first, on a page with none (`PagePacks`, in `components/`;  epic `editor` P44):
         so a Spell page's `<ui-components source>` loads a component pack (a guide's `<epic-*>` examples);  the first
         pack fills `SpellUI.packModules` from these two files, then waits for all of Spell UI, as the site bundle does
-    - The element / editor / runner builds import them through `sharedSolid()` (`vite.shared.ts`),
+    - The element / editor / runner builds import them through `sharedFiles()` (`vite.shared.ts`),
       never bundling their own.
     - They take Solid and the core through `spell-solid-shared.js`:
       - the page's own, when it has them (a docs page's `SpellUI.packModules`)

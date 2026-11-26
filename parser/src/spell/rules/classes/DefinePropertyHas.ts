@@ -455,7 +455,7 @@ export class DefinePropertyHas extends SpellStatement<
       // both of which return a `TypeExpression`.
       // Not statically provable:  `type_specifier`'s `getAST()` can only be typed as returning `ASTNode` in general.
       const typeExpression = specifier as P.ASTTypeExpression
-      // a type's name as text, so a writer can read the type:  `P.TSWriter` types the property from it.
+      // a type's name as text, so a writer can read the type:  `TSWriter` types the property from it.
       // Checked at runtime by its class's name:  see `P.ASTTypeExpression.runtimeName`.
       check.addProp("type", new P.ASTTypeNameLiteral(match, { value: typeExpression.runtimeName, quote: "'" }))
       // where it starts:  `a number starting at 0`, made once per instance

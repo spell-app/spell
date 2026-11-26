@@ -5,6 +5,7 @@ import { join, resolve } from "path"
 import { describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject, runSpellFiles } from "spell/parser/spell/test"
@@ -95,7 +96,7 @@ describe("the X of nothing is nothing", () => {
   })
 
   test("TypeScript reads through it with ?. too", () => {
-    const code = compiled("/Pets.spell", EN, P.TSWriter.instance)
+    const code = compiled("/Pets.spell", EN, TSWriter.instance)
     expect(code).toContain("this.owner?.name")
     expect(code).toContain("rex.owner?.name")
   })
@@ -125,13 +126,13 @@ describe("the X of nothing is nothing", () => {
       '\t- its "person" is the user whose id is 1',
       '\t- its "who" is the name of its person'
     ]
-    for (const writer of [P.JSWriter.instance, P.TSWriter.instance]) {
+    for (const writer of [P.JSWriter.instance, TSWriter.instance]) {
       expect(compiled("/Page.spell", lines, writer)).toMatch(/this\.person\?\.name/)
     }
   })
 
   describe("a read a check just before it found there is read with a plain . (T121)", () => {
-    for (const writer of [P.JSWriter.instance, P.TSWriter.instance]) {
+    for (const writer of [P.JSWriter.instance, TSWriter.instance]) {
       test(writer.constructor.name, () => {
         const code = compiled("/Pets.spell", CHECKED, writer)
         expect(code).toContain('return this.owner !== undefined && this.owner.name === "Ana"')

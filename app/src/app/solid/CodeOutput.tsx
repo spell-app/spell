@@ -222,6 +222,8 @@ async function writtenFor(
   // the worker's, where it compiled the project;  a project it hasn't compiled is written from the page's parse
   if (answer && !("error" in answer)) return answer
   try {
+    // a writer past javascript's loads the first time it's asked for
+    await SP.loadTarget(target)
     return project.codeWithMapFor(target)
   } catch (error) {
     return { code: `${comment} ${error instanceof Error ? error.message : String(error)}\n` }

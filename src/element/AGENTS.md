@@ -203,7 +203,7 @@ As WWOD §4, plus:
   - `spell/element/drawnWindow`:  a long list, drawn as you scroll, for the parser's core and Spell UI's `<ui-tree>`
     and `<ui-table>`
     - Bundled by whoever draws with it, a copy each:  it holds nothing a page must share,
-      so the app's element builds bundle it (`BUNDLED_ELEMENT_LEAVES`, [the app's shared build](../../app/app/vite.shared.ts))
+      so the app's element builds bundle it (`WHAT_BUILDS_SHARE`, [the app's shared build](../../app/app/vite.shared.ts))
   - `spell/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path;
     Spell UI's `PackHotSwap` (its `spell/ui/hot` entry) imports it
 - The element tools and the `spell-pack` bin are node only:

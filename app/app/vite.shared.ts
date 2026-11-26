@@ -204,7 +204,7 @@ export const SHARED_SOLID = {
   families: "spell-ui-shared.js"
 } as const
 
-/** Prefix of the external ids `sharedSolid()` gives `SHARED_SOLID`'s files, until `output.paths` writes them out. */
+/** Prefix of the external ids `sharedFiles()` gives `SHARED_SOLID`'s files, until `output.paths` writes them out. */
 const SHARED_ID = "spell-shared-solid:"
 
 /**
@@ -239,39 +239,85 @@ const DRAWN_FAMILIES = [
 ].map((family) => `spell/ui/components/${family}`)
 
 /**
- * Specifiers another bundle takes from `SHARED_SOLID`'s files.
- * - Only those our code imports:
- *   `solid-js/internal` (from `@solidjs/web`) and `@solidjs/signals` (from `solid-js`) stay INSIDE `spell-solid.js`.
- * - `spell/ui/core` and `spell/ui/components/ui-root` are in `spell-solid.js`, not `spell-ui.js`:
- *   `<spell-viewer>` and `<spell-editor>` define themselves on them as their scripts run, before the rest of `ui` loads.
- * - The code and markdown families come through `spell-solid-shared.js`'s partner, `spell-ui-shared.js`
- *   (`SHARED_FAMILIES`, `DRAWN_FAMILIES`).
- * - Each through `spell-solid-shared.js`:  the page's copy when it has one (`SHARED_SPECIFIERS`).
- * - `@solidjs/h` (compiled spell's, in `spell-runtime.js`) has only a default export:
- *   `sharedSolid()` imports it through a module of its own (`SHARED_H`).
+ * WHAT OUR BUILDS SHARE, the ONE table (epic `solid-2-final` P19):  each import name, and the file beside a build it
+ * comes from instead of being bundled into it, or `"bundled"` where every build keeps its own copy.
+ * - `sharedFiles()` reads it, the one rule for every build that shares (below).
+ * - `spell-solid-shared.js`:  Solid, `spell/element`, Spell UI's element core and its root family, from the page's
+ *   copy when it has one (`SHARED_SPECIFIERS`), else `spell-solid.js`'s.
+ *   - Only those our code imports:  `solid-js/internal` (from `@solidjs/web`) and `@solidjs/signals` (from `solid-js`)
+ *     stay INSIDE `spell-solid.js`.
+ *   - `spell/ui/core` and `spell/ui/components/ui-root` are in `spell-solid.js`, not `spell-ui.js`:
+ *     `<spell-viewer>` and `<spell-editor>` define themselves on them as their scripts run, before the rest of `ui` loads.
+ *   - `spell/element` BEFORE `spell/ui/core`:  `spell/ui/core` carries all of it, and its `E` holds every name
+ *     spell-element's does.
+ *   - `@solidjs/h` (compiled spell's, in `spell-runtime.js`) has only a default export:
+ *     `sharedFiles()` imports it through a module of its own (`SHARED_H`).
+ * - `spell-ui.js`:  `spell-ui`'s barrel, which the app imports LAZILY (`loadUI.ts`).
+ * - `spell-ui-shared.js`:  the families `<spell-code>` and `<spell-markdown>` extend (`SHARED_FAMILIES`), and those
+ *   spell's markdown engine draws with (`DRAWN_FAMILIES`).
+ * - `spell-grammar.js`:  spell's grammar, the parser's barrel and spell's, for `<spell-viewer>`'s build only
+ *   (`sharedFiles({ grammar: true })`, epic `solid-2-final` P11):  `vite.code.config.ts` builds it once
+ *   (`src/app/spellGrammar.ts`), for `<spell-code>`'s colours and a layout's spell (`LayoutSpell.js`).
+ *   - Only `LayoutSpell`'s imports of it are values, and the runner loads it lazily, so nothing up front loads the
+ *     grammar (`element.build.test.ts` checks).
+ *   - A deep import (`spell/parser/spell/SpellUrls`) stays bundled:  the viewer's up-front pieces use a few,
+ *     and a second copy of each is a few small modules.
+ * - `"bundled"`:  plain modules that hold no state a page must share, so each build keeps its own copy:
+ *   - `ui`'s generated tables (`spell/ui/vocabulary/partsOfSpeech.generated`, which the bubbly look reads)
+ *   - the built-in sounds' names (`spell/ui/sounds`, which the language service lists;  epic `mockup` P28):
+ *     where their FILES are is the page's runtime's to say (`UI.sounds`), never this copy's
+ *   - `drawnWindow`, every long list's drawing, which the parser's core draws with:
+ *     it imports only Solid and util's generic files, which come from the shared files as usual
+ *   - `SkeletonText` and `SkeletonShapes`:  a skeleton's text read, and the shapes it's drawn with, pure data
+ *   - `DroppedFiles`, the uploader's reading of a desktop drop, which a view that takes files reads too
+ *     (epic `language` P67)
+ *   - the theme tree, which a site's own theme is checked and built with (`SiteThemes`, I36):  `ThemeTokens` reads
+ *     every theme and palette file (a lazy chunk each), `ThemeFile` works one out, `styles.en` is the tree itself
+ *   - `SpellUIGuide`, where the Spell UI site is (epic `editor` P43):  spell's project groups name its project
+ * - Any other Solid / `ui` / `spell/element` name (`solid-js/store`, `spell/ui/runtime`) is a build ERROR
+ *   (`SOLID_FAMILY`):  add it here, and to what `vite.solid.config.ts` exports, or the shared files won't have its names.
  */
-const FROM_SHARED_SOLID = new Map<string, string>([
-  ["solid-js", SHARED_SOLID.shared],
-  ["@solidjs/web", SHARED_SOLID.shared],
-  ["@solidjs/h", SHARED_SOLID.shared],
-  // spell-element, which `<spell-viewer>` and `<spell-editor>` are written on:  `spell/ui/core` carries all of it, and
-  // its `E` holds every name spell-element's does, so it comes BEFORE `spell/ui/core` (a page's module,
-  // `spell-solid-shared.js`)
-  ["spell/element", SHARED_SOLID.shared],
-  ["spell/ui/core", SHARED_SOLID.shared],
-  ["spell/ui/components/ui-root", SHARED_SOLID.shared],
-  ["spell/ui", SHARED_SOLID.ui],
-  // the families `<spell-code>` and `<spell-markdown>` extend, and those spell's markdown engine draws with
-  ...[...Object.keys(SHARED_FAMILIES), ...DRAWN_FAMILIES].map((id) => [id, SHARED_SOLID.families] as const)
-])
+const WHAT_BUILDS_SHARE: readonly SharedRow[] = [
+  {
+    from: SHARED_SOLID.shared,
+    names: ["solid-js", "@solidjs/web", "@solidjs/h", "spell/element", "spell/ui/core", "spell/ui/components/ui-root"]
+  },
+  { from: SHARED_SOLID.ui, names: ["spell/ui"] },
+  { from: SHARED_SOLID.families, names: [...Object.keys(SHARED_FAMILIES), ...DRAWN_FAMILIES] },
+  { from: "spell-grammar.js", names: ["spell/parser/parser", "spell/parser/spell"], only: "grammar" },
+  {
+    from: "bundled",
+    names: [
+      /^spell\/ui\/(.+\.generated|sounds)$/,
+      "spell/element/drawnWindow",
+      "spell/element/SkeletonText",
+      "spell/element/SkeletonShapes",
+      "spell/ui/util/SpellUIGuide",
+      "spell/ui/components/ui-uploader/DroppedFiles",
+      "spell/ui/components/ui-theme-editor/ThemeTokens",
+      "spell/ui/styles/ThemeFile",
+      "spell/ui/styles/styles.en"
+    ]
+  }
+]
+
+/** One row of `WHAT_BUILDS_SHARE`. */
+type SharedRow = {
+  /** the file beside the build these come from, or `"bundled"`:  each build its own copy */
+  from: string
+  /** their import names, or a pattern of them */
+  names: readonly (string | RegExp)[]
+  /** shared only by a build that asks for it (`sharedFiles({ grammar: true })`);  every other bundles them */
+  only?: "grammar"
+}
 
 /**
  * The specifiers `spell-solid-shared.js` takes from the page when the page has them all:
  * keys of `globalThis.SpellUI.packModules`, the docs bundle's (`epic/src/tools/_assets/spell-ui.entry.js`).
  */
-export const SHARED_SPECIFIERS = [...FROM_SHARED_SOLID]
-  .filter(([, file]) => file === SHARED_SOLID.shared)
-  .map(([id]) => id)
+export const SHARED_SPECIFIERS = WHAT_BUILDS_SHARE.filter(({ from }) => from === SHARED_SOLID.shared).flatMap(
+  ({ names }) => names as string[]
+)
 
 /** Solid's hyperscript, `h()`:  what compiled spell draws with, through `core`'s export (epic `output-targets` P20). */
 const H_PACKAGE = "@solidjs/h"
@@ -284,88 +330,70 @@ const H_PACKAGE = "@solidjs/h"
  */
 export const SHARED_DEFAULTS: Readonly<Record<string, string>> = { [H_PACKAGE]: "h" }
 
-/** Virtual module `sharedSolid()` resolves `H_PACKAGE` to:  `spell-solid-shared.js`'s `h`, as a default export. */
+/** Virtual module `sharedFiles()` resolves `H_PACKAGE` to:  `spell-solid-shared.js`'s `h`, as a default export. */
 const SHARED_H = "\0spell-shared-h"
 
-/**
- * `ui`'s plain DATA, tables with no Solid in them:  bundled where it's used, as any plain module is.
- * - its generated tables (`spell/ui/vocabulary/partsOfSpeech.generated`, which the bubbly look reads)
- * - the built-in sounds' names (`spell/ui/sounds`, which the language service lists;  epic `mockup` P28):
- *   where their FILES are is the page's runtime's to say (`UI.sounds`), never this copy's
- */
-const UI_DATA = /^spell\/ui\/(.+\.generated|sounds)$/
-
-/**
- * `spell/element`'s leaves that hold no state a page must share,
- * so each build bundles its own copy, as any plain module is.
- * - `drawnWindow`, every long list's drawing, which the parser's core draws with.
- *   It imports only Solid and util's generic files, which come from the shared files as usual.
- * - `SkeletonText` and `SkeletonShapes`:  a skeleton's text read, and the shapes it's drawn with, pure data.
- *   The language reads the text (`loading="skeleton ..."`), and the core draws the shapes.
- */
-const BUNDLED_ELEMENT_LEAVES = new Set([
-  "spell/element/drawnWindow",
-  "spell/element/SkeletonText",
-  "spell/element/SkeletonShapes"
-])
-
-/**
- * Spell UI's leaves that are plain DOM, with no element and no state a page must share:  bundled, as `UI_DATA` is.
- * - `DroppedFiles`, the uploader's reading of a desktop drop, which a view that takes files reads too (epic `language` P67).
- * - The theme tree, which a site's own theme is checked and built with (`SiteThemes`, I36):  `ThemeTokens` reads every
- *   theme and palette file (a lazy chunk each), `ThemeFile` works one out, `styles.en` is the tree itself.
- * - `SpellUIGuide`, where the Spell UI site is (epic `editor` P43):  spell's project groups name its project.  No imports.
- */
-const BUNDLED_UI_LEAVES = new Set([
-  "spell/ui/util/SpellUIGuide",
-  "spell/ui/components/ui-uploader/DroppedFiles",
-  "spell/ui/components/ui-theme-editor/ThemeTokens",
-  "spell/ui/styles/ThemeFile",
-  "spell/ui/styles/styles.en"
-])
-
-/** Any other import from Solid's or `ui`'s packages:  `sharedSolid()` refuses it, as the shared files may lack it. */
+/** Any other import from Solid's or `ui`'s packages:  `sharedFiles()` refuses it, as the shared files may lack it. */
 const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)/
 
 /**
- * For a build that takes Solid and `spell-ui` from `SHARED_SOLID`'s files beside it, instead of bundling its own:
- * `vite.element.config.ts`, `vite.runner.config.ts`, `vite.code.config.ts` (`<spell-editor>` too).
- * - Such an import resolves to an EXTERNAL id, which `output.paths` writes as `./spell-solid-shared.js` /
- *   `./spell-ui.js`:  relative.
+ * Where `source` comes from in a build, by `WHAT_BUILDS_SHARE`:  a shared file's name, `"bundled"`, or `undefined` for a
+ * name the table doesn't have.
+ * - `grammar`:  the build shares the grammar too;  else that row's names are bundled.
+ */
+function sharedFileFor(source: string, { grammar }: SharedFilesOptions): string | undefined {
+  for (const { from, names, only } of WHAT_BUILDS_SHARE) {
+    if (!names.some((name) => (typeof name === "string" ? name === source : name.test(source)))) continue
+    return only === "grammar" && !grammar ? "bundled" : from
+  }
+  return undefined
+}
+
+/**
+ * The ONE rule for a build that takes what `WHAT_BUILDS_SHARE` names from the files beside it, instead of bundling its
+ * own:  `vite.element.config.ts`, `vite.runner.config.ts`, `vite.code.config.ts` (`<spell-editor>` too),
+ * `vite.page.config.ts`.
+ * - Such an import resolves to an EXTERNAL id, which `output.paths` writes as `./spell-solid-shared.js` ...:  relative.
  *   So every chunk that imports one MUST sit at the output folder's top level (ours do:  fixed names, no folders).
  * - Static and dynamic imports alike:  `import("spell/ui")` becomes `import("./spell-ui.js")`, still on demand.
  * - Side-effect imports too:  `import "spell/ui/components/ui-table"` becomes `import "./spell-ui-shared.js"`.
- * - Looked up by the import name itself, the key of the maps above and of a page's `SpellUI.packModules`
+ * - Looked up by the import name itself, the key of the table and of a page's `SpellUI.packModules`
  *   (`SHARED_SPECIFIERS`;  epic `repo-split` P14, Q45).
- * - `ui`'s generated data (`UI_DATA`) is bundled, as it holds no Solid;  so are `BUNDLED_ELEMENT_LEAVES` and `BUNDLED_UI_LEAVES`.
- * - Any other Solid / `ui` specifier (`solid-js/store`, `spell/ui/runtime`) is a build ERROR:
- *   add it to `FROM_SHARED_SOLID` and to what `vite.solid.config.ts` exports, or the shared files won't have its names.
+ * - Any other Solid / `ui` specifier is a build ERROR (`SOLID_FAMILY`).
  * - Type-only imports (`@solidjs/web/types/jsx.js`) are gone before this runs.
  * - `enforce: "pre"`:  before Vite's resolver, which would resolve `spell/ui/core` to its source.
  */
-export function sharedSolid(): Plugin {
+export function sharedFiles(options: SharedFilesOptions = {}): Plugin {
   return {
-    name: "spell-shared-solid",
+    name: "spell-shared-files",
     apply: "build",
     enforce: "pre",
     resolveId(source) {
       if (source === H_PACKAGE) return SHARED_H
-      // by its import name, the key a page's `packModules` offers it under too
-      const file = FROM_SHARED_SOLID.get(source)
-      if (file) return { id: `${SHARED_ID}${file}`, external: true }
       if (source.startsWith(SHARED_ID)) return { id: source, external: true }
-      if (UI_DATA.test(source) || BUNDLED_ELEMENT_LEAVES.has(source) || BUNDLED_UI_LEAVES.has(source)) return null
+      const file = sharedFileFor(source, options)
+      if (file === "bundled") return null
+      if (file) return { id: `${SHARED_ID}${file}`, external: true }
       if (SOLID_FAMILY.test(source)) {
-        this.error(`"${source}" can't come from ${Object.values(SHARED_SOLID).join(" / ")}:  see sharedSolid()`)
+        this.error(`"${source}" can't come from ${Object.values(SHARED_SOLID).join(" / ")}:  see WHAT_BUILDS_SHARE`)
       }
       return null
     },
     // `@solidjs/h` has only a DEFAULT export, which `spell-solid-shared.js` re-exports as `h`
     load: (id) => (id === SHARED_H ? `export { h as default } from "${SHARED_ID}${SHARED_SOLID.shared}"` : null),
-    outputOptions(options) {
-      return { ...options, paths: (id: string) => (id.startsWith(SHARED_ID) ? `./${id.slice(SHARED_ID.length)}` : id) }
+    outputOptions(outputOptions) {
+      return {
+        ...outputOptions,
+        paths: (id: string) => (id.startsWith(SHARED_ID) ? `./${id.slice(SHARED_ID.length)}` : id)
+      }
     }
   }
+}
+
+/** `sharedFiles(options)`. */
+export type SharedFilesOptions = {
+  /** take spell's grammar from `spell-grammar.js` too (`<spell-viewer>`'s build);  default:  bundle it */
+  grammar?: boolean
 }
 
 ////////////////

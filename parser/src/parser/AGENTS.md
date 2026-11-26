@@ -55,18 +55,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - tidy, as the TypeScript writer:  `const`, double quotes, no extra parentheses or braces
     - It reads the whole project first, to know what each value is:
       `P.WriterProject`, through `forProject()`.
-  - `P.TSWriter`:  TypeScript on Solid, for `<Project>.spell.tsx`
+  - `TSWriter`:  TypeScript on Solid, for `<Project>.spell.tsx`
     - It extends `P.JSWriter`, adding only what's TypeScript's own:
       - real JSX, decorators, the types spell knows
       - `!` where `?.` can't go
       - each view type's element class (epic `drawable-thing` P10).
         - e.g. `class CardElement extends SpellElement<Card>`, its base imported from `@spell/elements`
         - Written by `elementClassFor()`.
-  - `P.LibraryWriter` (epic `people-and-orgs`):
+  - `LibraryWriter` (epic `people-and-orgs`):
     a project's classes alone, as a TypeScript LIBRARY other code imports
-    - The `ts/lib` target:  `P.TSWriter`, minus the program's top-level steps, its core `spell/parser/core/model`.
+    - The `ts/lib` target:  `TSWriter`, minus the program's top-level steps, its core `spell/parser/core/model`.
     - One file, `<Project>.lib.ts`, its own types:  no `.d.ts` beside it.
-    - `P.isDeclaration()` says what's kept:  classes, what's added to them, comments.
+    - `isDeclaration()` says what's kept:  classes, what's added to them, comments.
       Python's page writer keeps the same.
   - Python's writers are `spell/parser/py`'s ([py's AGENTS.md](../py/AGENTS.md)), built on these:
     - `PY.PyWriter`, on `P.ProgramWriter`

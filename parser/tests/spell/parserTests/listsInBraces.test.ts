@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
@@ -31,7 +32,7 @@ describe("a list in braces", () => {
   })
 
   test("TypeScript:  the same", () => {
-    const code = written(P.TSWriter.instance)
+    const code = written(TSWriter.instance)
     expect(code).toContain("{core.listShown(this.names)}")
     expect(code).not.toContain("core.listShown(this.title)")
   })

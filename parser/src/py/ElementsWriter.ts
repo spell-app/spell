@@ -1,4 +1,6 @@
 import { P } from "spell/parser/parser"
+// Import directly:  the parser's barrel leaves the TypeScript writers out, so a bundle that never writes TypeScript drops them
+import { isDeclaration } from "spell/parser/parser/writers/LibraryWriter"
 
 const { unwrapped } = P.jsShapes
 
@@ -83,7 +85,7 @@ export class ElementsWriter extends P.JSWriter {
       } else if (statement instanceof P.ASTTypeDescription && statement.describes === "timer") {
         // a timer runs in Python, never on the page:  it'd run its steps twice
         continue
-      } else if (P.isDeclaration(statement) || isDefaults(statement) || statement instanceof P.ASTTypeDescription) {
+      } else if (isDeclaration(statement) || isDefaults(statement) || statement instanceof P.ASTTypeDescription) {
         kept.push(statement)
       } else if (statement instanceof P.ASTMethodDefinition && statement.methodName) {
         this.standIns.add(statement)

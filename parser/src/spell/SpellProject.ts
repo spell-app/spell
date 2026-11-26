@@ -1,6 +1,5 @@
 import { JSON5File, TaskList, Task, getDier, snakeCase } from "spell/util"
 import { P } from "spell/parser/parser"
-import { PY } from "spell/parser/py"
 // Import directly, NOT through the `spell/parser/core` barrel:  a project MUST NOT load `core` itself --
 // each runner runs its own copy.  See `spellRuntime.ts`.
 import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell/parser/core/core.types"
@@ -825,7 +824,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       ({ module, names }) => module.startsWith(SP.SPELL_PROJECT_MODULE) && names.length
     )
     return Object.fromEntries(
-      imports.map(({ module }) => [module, `${PY.PyWriter.projectModule(module)}${target.elementsSuffix}`])
+      imports.map(({ module }) => [module, `${SP.python().PyWriter.projectModule(module)}${target.elementsSuffix}`])
     )
   }
 
@@ -844,7 +843,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     } catch {
       there = undefined
     }
-    if (!PY.isUneditedApp(there)) return
+    if (!SP.python().isUneditedApp(there)) return
     appFile.contents = text
     await appFile.save(undefined)
   }
@@ -988,8 +987,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
           new Task({
             name: "Combining output",
             // our language in play:  the writers make words singular and plural by its rules
-            run: async (allCompiled) =>
-              this.scope!.parser!.inPlay(() => {
+            run: async (allCompiled) => {
+              // every target's writer past javascript's loads on first use (`SP.loadTarget()`)
+              await SP.loadTargets(this.targets)
+              return this.scope!.parser!.inPlay(() => {
                 // each `.spell` file as its AST, so a class gets its members from every file
                 const files = this.filesInPlay
                 const parts = files.map((file, index) =>
@@ -1090,7 +1091,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                   // the drawing half, `Solitaire.elements.spell.js`
                   const elementsFile = this.elementsFileFor(target)
                   if (elementsFile && SpellProject.draws(parts)) {
-                    const writer = PY.ElementsWriter.instance
+                    const writer = SP.python().ElementsWriter.instance
                     const elements = SpellProject.combineCompiled(
                       parts,
                       writer,
@@ -1109,7 +1110,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       const name = this.projectName ?? this.projectId
                       this.appTexts.set(
                         target.name,
-                        PY.quartApp({
+                        SP.python().quartApp({
                           projectName: name,
                           program: `${name}${target.suffix}`,
                           elements: `${name}${target.elementsSuffix}`,
@@ -1134,6 +1135,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                 }
                 return this.compiled
               })
+            }
           }),
           new Task({
             name: "Saving compiled output",

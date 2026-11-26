@@ -205,8 +205,10 @@ function CodeMirrorTest(props: { project: SP.SpellProject }) {
         <Show when={`${fileName() === EDITOR_PAGE ? "Card.spell" : fileName()}:${target()}`} keyed>
           {(shown) => {
             const [name, language] = shown.split(":") as [string, CompiledLanguage]
-            const text = compiledOf(spellFileOf(name), language)
-            return <Sides codemirror={<CodeMirrorCompiled text={text} language={language} />} />
+            // its writer, past javascript's, loads the first time it's shown
+            const [text, setText] = createSignal("")
+            void compiledOf(spellFileOf(name), language).then(setText, (error: unknown) => console.error(error))
+            return <Sides codemirror={<CodeMirrorCompiled text={text()} language={language} />} />
           }}
         </Show>
       </Show>
@@ -338,7 +340,7 @@ function clashOf(file: SP.SpellFile): Clash {
 }
 
 /** `file` compiled to `language`, as the editor's compiled-code pane shows it. */
-function compiledOf(file: SP.SpellFile, language: CompiledLanguage): string {
+function compiledOf(file: SP.SpellFile, language: CompiledLanguage): Promise<string> {
   return SpellCodeMirror.service.compiled(file, COMPILED_TARGETS[language])
 }
 

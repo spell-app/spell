@@ -18,7 +18,7 @@ export const LIBRARY_CORE_MODULE = "spell/parser/core/model"
  * Writes a project as a LIBRARY:  its classes as ONE TypeScript module, for other code to import.
  * - e.g. `import { Person } from "./People.lib.ts"`
  * - the `ts/lib` target (epic `people-and-orgs` P3)
- * - As `P.TSWriter`, with:
+ * - As `TSWriter`, with:
  *   - its classes as they are:  their properties, getters, methods, statics, with the types spell knows
  *   - its top-level functions, as they are
  *   - the program's top-level STEPS left out:  headings, tests, `print`, the things it makes
@@ -36,8 +36,13 @@ export class LibraryWriter extends TSWriter {
     return false
   }
 
-  /** The writer with no project. */
-  static readonly instance = new LibraryWriter()
+  /** The writer with no project, made the first time it's asked for (as `TSWriter.instance`). */
+  static override get instance(): LibraryWriter {
+    return (LibraryWriter.library ??= new LibraryWriter())
+  }
+
+  /** `instance`, once made. */
+  private static library: LibraryWriter | undefined
 
   /** A library's core holds no Solid:  a getter that waits is plain async, and so is one over it. */
   protected readsThroughSolid = false

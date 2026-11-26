@@ -1,7 +1,7 @@
 import { P } from "spell/parser/parser"
 
 /**
- * What the javascript writers (`P.JSWriter`, `P.TSWriter`) read off a spell tree:  pure helpers, nothing written.
+ * What the javascript writers (`P.JSWriter`, `TSWriter`) read off a spell tree:  pure helpers, nothing written.
  * - What a node is (`isCoreCall()`, `isTight()` ...)
  * - What a datatype is, as `JSWriter.kindOf()` says it
  * - The `core` helpers both writers say their own way

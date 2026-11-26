@@ -20,7 +20,8 @@ import { existsSync, readFileSync } from "fs"
 import { resolve } from "path"
 
 import { snakeCase } from "spell/util"
-import { P } from "spell/parser/parser"
+// Import directly:  the parser's barrel leaves the TypeScript writers out, so a bundle that never writes TypeScript drops them
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
 import { DrawIt } from "spell/parser/spell/rules/classes"
@@ -96,7 +97,7 @@ function compileTemplate(className: string, lang: string) {
     throw new Error(`Built-in template ${path} doesn't compile:  ${file?.errors.join(";  ") ?? "nothing parsed"}`)
   }
   const parser = file.scope.parser!
-  const typescript = parser.inPlay(() => (P.TSWriter.instance.writeMatch(file.match!) as string | undefined) ?? "")
+  const typescript = parser.inPlay(() => (TSWriter.instance.writeMatch(file.match!) as string | undefined) ?? "")
   const python = parser.inPlay(() => (PY.PyWriter.instance.writeMatch(file.match!) as string | undefined) ?? "")
   return { declarations, typescript, python }
 }

@@ -3,7 +3,7 @@ import { eventKey, isCoreCall, textValue, unwrapped } from "./jsShapes"
 
 /****************
  * ### `WriterProject`
- * What a javascript writer (`P.JSWriter`, `P.TSWriter`) must know about a whole project
+ * What a javascript writer (`P.JSWriter`, `TSWriter`) must know about a whole project
  * BEFORE it writes any of it:
  * - what each value is
  * - which variables are set again
@@ -375,8 +375,7 @@ export class WriterProject {
    *   its branches, as an element's children
    */
   protected noteDrawing(definition: P.ASTPropertyDefinition): void {
-    const isOwnFunction = (node: P.ASTNode) =>
-      node instanceof P.ASTMethodDefinition && !this.drawnFunctions.has(node)
+    const isOwnFunction = (node: P.ASTNode) => node instanceof P.ASTMethodDefinition && !this.drawnFunctions.has(node)
     const reads = (node: unknown): boolean => {
       if (Array.isArray(node)) return node.some(reads)
       if (!(node instanceof P.ASTNode) || isOwnFunction(node)) return false

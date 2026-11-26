@@ -20,6 +20,9 @@ import {
   type TestProjectName
 } from "spell/app/spaces/test"
 
+// every target's writer, past javascript's, loads on first use
+await SP.loadTargets(Object.keys(SP.TARGETS))
+
 /**
  * An incremental parse after an edit MUST give what a full parse of the edited files gives (epic `language` P58):
  * - every built-in example and every library project, against what it imports

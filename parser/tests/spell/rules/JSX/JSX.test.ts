@@ -6,6 +6,9 @@ import { SP, spellParser } from "spell/parser/spell"
 import { core } from "spell/parser/core"
 import type { JSXMatchData } from "spell/parser/spell/rules/JSX/JSX.shared"
 
+// every target's writer, past javascript's, loads on first use
+await SP.loadTargets(Object.keys(SP.TARGETS))
+
 describe("testing spell module JSX", () => {
   unitTestModuleRules(spellParser, "JSX", core.resetRuntime)
 
@@ -212,7 +215,9 @@ describe("an if-chain inside markup:  only the branch that holds is drawn", () =
 
   test("an `<otherwise if>` is a condition and a branch;  a chain with no `<otherwise>` ends on its last branch", () => {
     const lines = [...TASK.slice(0, 5), "\t\t\t<if its done is yes>A<otherwise if its title is empty>B</>", "\t\t</p>"]
-    expect(oneLine(drawOf(lines))).toContain('core.drawIf( () => this.done, () => ["A"], () => !this.title, () => ["B"] )')
+    expect(oneLine(drawOf(lines))).toContain(
+      'core.drawIf( () => this.done, () => ["A"], () => !this.title, () => ["B"] )'
+    )
   })
 
   test("what's after the chain, and a second chain, are the element's own", () => {

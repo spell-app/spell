@@ -405,7 +405,7 @@ export type SpeedTestResults = Omit<TestResults, "time"> & {
  * A single rule test:  an `[input, js, ts?]` tuple, or an object with the same, `{ input, js, ts }`.
  * - `input`:  what's parsed, as the block's `compileAs` rule;  an array is its lines.
  * - `js`:  what the javascript writer writes for it, `P.JSWriter`;  `undefined` if it mustn't parse.
- * - `ts`:  what the TypeScript writer writes, `P.TSWriter` -- left out where it's the same as `js`.
+ * - `ts`:  what the TypeScript writer writes, `TSWriter` -- left out where it's the same as `js`.
  *   `BLESS_RULE_TESTS=1` writes it in:  see `unitTestModuleRules()`.
  * - `js` / `ts` as an array:  its lines.
  */

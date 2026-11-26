@@ -3,7 +3,7 @@
  * - A rule's tests are registered with it:  `parser.addRule(RuleClass, { syntax, tests })`.
  *   Each test is `[input, js, ts?]` or `{ input, js, ts }`:  see `P.RuleTest`.
  * - Call `unitTestModuleRules(parser, <moduleName>)` to test all rules in that module.
- * - Each input is parsed once, then written by BOTH writers:  javascript (`P.JSWriter`) and TypeScript (`P.TSWriter`).
+ * - Each input is parsed once, then written by BOTH writers:  javascript (`P.JSWriter`) and TypeScript (`TSWriter`).
  *   A test without `ts` expects the same TypeScript as javascript.
  * - Blessing:  `BLESS_RULE_TESTS=1` writes what each writer wrote into each test's `js` and `ts`, in the source.
  *   - Then `vp fmt` tidies it, e.g. `yarn test:rules:bless` in spell.
@@ -17,6 +17,8 @@ import { groupBy, isEqual } from "lodash-es"
 import { showWhitespace } from "spell/util"
 
 import { P } from "spell/parser/parser"
+// Import directly:  the parser's barrel leaves the TypeScript writers out, so a bundle that never writes TypeScript drops them
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 // Import type only:  loaded only when blessing, as it reads and writes files
 import type { BlessedTest } from "./RuleTestSource"
 
@@ -197,7 +199,7 @@ export function unitTestModuleRules(parser: P.Parser, moduleName: string, initia
     const parsed = match
     return {
       js: written(() => P.JSWriter.instance.writeMatch(parsed)),
-      ts: written(() => P.TSWriter.instance.writeMatch(parsed))
+      ts: written(() => TSWriter.instance.writeMatch(parsed))
     }
   }
 }

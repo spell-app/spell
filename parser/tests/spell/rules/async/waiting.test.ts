@@ -4,6 +4,9 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 
+// every target's writer, past javascript's, loads on first use
+await SP.loadTargets(Object.keys(SP.TARGETS))
+
 /**
  * What waits, with no word in the source (epic `language` P9):  `P.WriterProject.findWaiting()`, for every target.
  * - Each row:  a project's action, what javascript writes, and what Python writes.

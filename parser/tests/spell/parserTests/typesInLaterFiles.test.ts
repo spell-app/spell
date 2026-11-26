@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { TSWriter } from "spell/parser/parser/writers/TSWriter"
 import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject, registerTestComponentPack, runSpellFiles } from "spell/parser/spell/test"
@@ -47,7 +48,7 @@ describe("a type in a later file", () => {
 
   test.each([
     ["javascript", P.JSWriter.instance, "class BookPage", "shelf = new Shelf()"],
-    ["TypeScript", P.TSWriter.instance, "class BookPage", "shelf = new Shelf()"],
+    ["TypeScript", TSWriter.instance, "class BookPage", "shelf = new Shelf()"],
     ["Python", PY.PyWriter.instance, "class BookPage", "shelf = Shelf()"]
   ])("%s:  the class comes before what's made from it", (_name, writer, declared, made) => {
     const code = written(writer)

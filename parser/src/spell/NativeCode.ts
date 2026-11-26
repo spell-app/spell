@@ -1,5 +1,6 @@
 import { P } from "spell/parser/parser"
-import { PY } from "spell/parser/py"
+// Import directly:  through `PY` it bundles Python's writers into every program that parses, the language worker too
+import { pyFunctionsOf, pyNativeName } from "spell/parser/py/pyFunctions"
 import { SP } from "spell/parser/spell"
 
 /****************
@@ -20,7 +21,7 @@ import { SP } from "spell/parser/spell"
  *   - `clipboard.py` for Python, its names in Python's case (`copy_text`)
  *   - So ONE `NativeCode` holds every version of `clipboard`, by language (`versions`).
  * - What each file exports is READ, not guessed:
- *   - Python:  its top-level `def` and `async def` lines (`PY.pyFunctionsOf()`)
+ *   - Python:  its top-level `def` and `async def` lines (`pyFunctionsOf()`)
  *   - TypeScript and javascript:  in node, the kit's TypeScript reader (`spell/parser/spell/node/nativeExports`,
  *     which a node program loads);  in a browser, its `export function` and `export const` lines
  *     (`readers.js`, the default)
@@ -68,7 +69,7 @@ export class NativeCode {
    * - Python's by its name in Python's case, `copy_text`.
    */
   functionIn(language: P.NativeLanguage, name: string): NativeFunction | undefined {
-    const wanted = language === "py" ? PY.PyBaseWriter.nativeName(name) : name
+    const wanted = language === "py" ? pyNativeName(name) : name
     return this.versions[language]?.functions.find((it) => it.name === wanted)
   }
 
@@ -142,7 +143,7 @@ export class NativeCode {
    */
   static readers: Record<P.NativeLanguage, (path: string, text: string) => NativeFunction[]> = {
     js: (_path, text) => exportedFunctionsOf(text),
-    py: (_path, text) => PY.pyFunctionsOf(text)
+    py: (_path, text) => pyFunctionsOf(text)
   }
 
   /**
@@ -260,7 +261,7 @@ export class NativeCode {
       if (!(node instanceof P.ASTNativeCall)) return
       const module = node.modules[language]
       if (!module) return
-      const name = language === "py" ? PY.PyBaseWriter.nativeName(node.methodName) : node.methodName
+      const name = language === "py" ? pyNativeName(node.methodName) : node.methodName
       if (!byModule.has(module)) byModule.set(module, new Set())
       byModule.get(module)!.add(name)
     })
@@ -291,7 +292,7 @@ export class NativeCode {
       } else if (!node.modules[language]) {
         refusal = `${name} has no ${LANGUAGE_NAMES[language]} version:  add ${codeFile}${ending}, beside ${codeFile}'s other code.`
       } else if (node.waitsIn[language] === undefined) {
-        const written = language === "py" ? PY.PyBaseWriter.nativeName(name) : name
+        const written = language === "py" ? pyNativeName(name) : name
         refusal = `${codeFile}'s ${LANGUAGE_NAMES[language]} version has no ${written}:  add it there.`
       }
     })
@@ -304,7 +305,7 @@ export class NativeCode {
     const natives = new Map<string, P.ASTNativeCall>()
     P.forEachNode(files, (node) => {
       if (!(node instanceof P.ASTNativeCall) || !node.modules[language]) return
-      natives.set(language === "py" ? PY.PyBaseWriter.nativeName(node.methodName) : node.methodName, node)
+      natives.set(language === "py" ? pyNativeName(node.methodName) : node.methodName, node)
     })
     if (!natives.size) return undefined
     let clash: string | undefined

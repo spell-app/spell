@@ -1050,14 +1050,14 @@ describe("SpellLanguageService", () => {
         const uri = pathToFileURL(resolve(dir, "Solitaire", name)).href
         const file = workspace.fileFor(uri)!
         const original = file.contents!
-        const compiled = withoutPositions(service.compiled(file))
+        const compiled = withoutPositions(await service.compiled(file))
         const formatted = applyEdits(original, service.formatting(file, tabs))
-        await withText(uri, original, formatted, () => {
+        await withText(uri, original, formatted, async () => {
           expect(errorsIn(service, file), name).toEqual([])
           // Blank lines compile as they're written, and one with a tab on it belongs to the block it's indented
           // into -- so without the tab, a blank line can move in the javascript.  The code itself can't change.
           // Nor can its comments, but those that echo a statement as written:  formatting tidies them too.
-          expect(withoutEchoes(withoutPositions(service.compiled(file))), name).toBe(withoutEchoes(compiled))
+          expect(withoutEchoes(withoutPositions(await service.compiled(file))), name).toBe(withoutEchoes(compiled))
           expect(service.formatting(file, tabs), name).toEqual([])
         })
       }
@@ -1142,26 +1142,26 @@ describe("SpellLanguageService", () => {
     ).toBeNull()
   })
 
-  test("custom requests:  compiled TypeScript, by the `ts/solid` target's writer", () => {
-    const compiled = service.compiled(card, "ts")
+  test("custom requests:  compiled TypeScript, by the `ts/solid` target's writer", async () => {
+    const compiled = await service.compiled(card, "ts")
     expect(compiled).toBe(LSP.SpellLanguageService.compileQuietly(card.match!, SP.targetFor("ts/solid").writer))
     expect(compiled).toContain("export class Card extends TwoSidedView {\n")
     // TypeScript's own:  a decorated, typed property
     expect(compiled).toMatch(/@prop\(.*\)\n\s*accessor \w+!?: /)
-    expect(compiled).not.toBe(service.compiled(card, "js"))
+    expect(compiled).not.toBe(await service.compiled(card, "js"))
   })
 
-  test("custom requests:  compiled Python, by the `py` target's writer", () => {
-    const compiled = service.compiled(card, "py")
+  test("custom requests:  compiled Python, by the `py` target's writer", async () => {
+    const compiled = await service.compiled(card, "py")
     expect(compiled).toBe(LSP.SpellLanguageService.compileQuietly(card.match!, SP.targetFor("py").writer))
     expect(compiled).toContain("class Card(TwoSidedView):\n")
     // the declaration markers are for the declarations file, not for people
     expect(compiled).not.toContain("SPELL: DECLARES")
   })
 
-  test("custom requests:  a file that can't be compiled says why, naming its target", () => {
+  test("custom requests:  a file that can't be compiled says why, naming its target", async () => {
     const unparsed = Object.create(card, { match: { value: undefined } }) as SP.SpellFile
-    expect(service.compiled(unparsed, "ts")).toBe("// Card.spell hasn't been parsed")
+    expect(await service.compiled(unparsed, "ts")).toBe("// Card.spell hasn't been parsed")
     const throws = Object.create(card, {
       match: {
         value: {
@@ -1172,15 +1172,15 @@ describe("SpellLanguageService", () => {
         }
       }
     }) as SP.SpellFile
-    expect(service.compiled(throws, "ts")).toBe("// Card.spell couldn't be compiled to ts/solid")
-    expect(service.compiled(throws)).toBe("// Card.spell couldn't be compiled to js/solid")
+    expect(await service.compiled(throws, "ts")).toBe("// Card.spell couldn't be compiled to ts/solid")
+    expect(await service.compiled(throws)).toBe("// Card.spell couldn't be compiled to js/solid")
     // in its language's comments
-    expect(service.compiled(throws, "py")).toBe("# Card.spell couldn't be compiled to py")
+    expect(await service.compiled(throws, "py")).toBe("# Card.spell couldn't be compiled to py")
   })
 
-  test("custom requests:  compiled javascript, and the project's files", () => {
-    expect(service.compiled(card)).toContain("export class Card extends TwoSidedView {\n")
-    expect(service.compiled(card)).toBe(service.compiled(card, "js"))
+  test("custom requests:  compiled javascript, and the project's files", async () => {
+    expect(await service.compiled(card)).toContain("export class Card extends TwoSidedView {\n")
+    expect(await service.compiled(card)).toBe(await service.compiled(card, "js"))
     expect(service.projectInfo(card).files.map(({ file, errors }) => `${file} ${errors}`)).toEqual([
       "Card.spell 0",
       "Deck.spell 0",

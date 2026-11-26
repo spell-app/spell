@@ -5,6 +5,9 @@ import { SP } from "spell/parser/spell"
 import { parseSpellProject, type SpellSourceFile } from "spell/parser/spell/test"
 import "spell/app/spaces"
 
+// every target's writer, past javascript's, loads on first use
+await SP.loadTargets(Object.keys(SP.TARGETS))
+
 /**
  * A tag's quoted word on Spell UI's real tags (epic `language` P38):
  * each short form compiles to exactly what its long form does, on every target, in both languages.

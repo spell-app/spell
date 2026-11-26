@@ -64,7 +64,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  * - `spell-ui-shared.js`, what `<spell-code>` and `<spell-markdown>` import Spell UI's code and markdown families from
  *   (`SHARED_FAMILIES`):  the page's, on the same condition, else `spell-ui.js`'s (`sharedPage()`).
  * - The other builds mark those packages external and import these files instead --
- *   `sharedSolid()` in `vite.shared.ts`, which also lists what they may import.
+ *   `sharedFiles()` in `vite.shared.ts`, which also lists what they may import.
  * - Icon packs and sounds (`appConfig({ builtInFiles })`):  beside the chunks holding `BuiltInPacks` and
  *   `BuiltInSounds`, wherever they land.
  * - Fixed entry names, no hashes:  the other bundles name them.
@@ -118,7 +118,7 @@ function sharedEntries(): Plugin {
       // a root may load the docs elements too:  Spell UI's guide draws them (`DOCS_FAMILIES`)
       `import { DocsFamilies } from ${JSON.stringify(DOCS_FAMILIES)}`,
       `DocsFamilies.add()`,
-      // what `core` draws compiled spell with:  `sharedSolid()` hands it to `spell-runtime.js`
+      // what `core` draws compiled spell with:  `sharedFiles()` hands it to `spell-runtime.js`
       `export { default as h } from "@solidjs/h"`,
       `export const loadSpellUI = () => import(${JSON.stringify(UI_ENTRY)})`,
       // a component pack in a page with only our bundles (`<ui-components source>` in a Spell page):  `PagePacks`

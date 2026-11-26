@@ -1,6 +1,6 @@
 import { defineConfig } from "vite"
 
-import { appConfig, sharedSolid } from "./vite.shared.ts"
+import { appConfig, sharedFiles } from "./vite.shared.ts"
 
 /**
  * Build the page side of a program running elsewhere,
@@ -9,7 +9,7 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
  *   after `vite.solid.config.ts --outDir dist-page` (which empties the folder).
  * - One entry, to a FIXED name, so a page's import map can name it:
  *   `spell-page.js`, the page's `@spell/core` -- see `src/app/runner/spellPage.ts`.
- * - Solid and `spell-ui` come from `spell-solid.js` / `spell-ui.js` beside it (`sharedSolid()`),
+ * - Solid and `spell-ui` come from `spell-solid.js` / `spell-ui.js` beside it (`sharedFiles()`),
  *   as in `dist-runner/`.
  * - `static/` is copied in, so Lato sits beside it, for the page to link.
  * - Plugins, dedupe and CSS:  `appConfig()`, as `vite.config.ts`.
@@ -18,7 +18,7 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
 const shared = appConfig()
 export default defineConfig({
   ...shared,
-  plugins: [...shared.plugins, sharedSolid()],
+  plugins: [...shared.plugins, sharedFiles()],
   base: "./",
   publicDir: "static",
   build: {

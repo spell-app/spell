@@ -165,7 +165,11 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
   its file (epic `solid-2-final` P13), by its text alone:  the page server cuts a built file as it serves it
   (`?pages=lazy`, `?page=<Class>`), and the runner's `LazyPages` loads each page as it's first shown.
 - [targets.ts](targets.ts):  the TARGETS spell compiles to, `SP.TARGETS`.
-  Each is a language, the runtime its code runs on, and the writer that writes it:
+  Each is a language, the runtime its code runs on, and the writer that writes it.
+  - Only `js/solid`'s writer is there from the start;  every other target's loads on first use (epic `solid-2-final`
+    P19):  `await SP.loadTarget(name)` before reading its `writer`, which throws till then.
+    `SpellProject`'s compile loads its targets itself, and `SP.python()` is Python's page and app once `py` has loaded.
+    So a program that only parses (the editor's language worker) never downloads the TypeScript and Python writers.
   - `js/solid`:  ALWAYS compiled, as the editor, the runners and `spell run` run it
   - `ts/solid`:  TypeScript on Solid, checked by `tsc`
   - `py`:  Python on `spell_core`, checked by pyright
