@@ -685,6 +685,8 @@ export const APP_TEXTS = {
   tryAnExample: "Try an example",
   readFirstSpell: "Read your first spell",
   homeExampleCaption: "From Solitaire's Card.spell",
+  homeHideIntro: "Hide the introduction",
+  homeShowIntro: "Show the introduction",
   homeExampleAlt:
     "A playing card, in Spell:  a card is a draggable two sided view;  its rank is one of ace, 2 ... 10, jack, queen, king;  its suit is one of clubs, diamonds, hearts or spades;  its color is red or black;  it is a face card if its rank is jack, queen or king;  it is a number card if it is not a face card",
   homeExamplesLine: "Open one, change it, make it yours.",

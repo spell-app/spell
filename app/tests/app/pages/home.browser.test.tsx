@@ -9,6 +9,7 @@ import { editor } from "spell/app/app/editor"
 import { uiReady } from "spell/app/app/solid"
 import { ProjectChooser } from "spell/app/app/pages/ProjectChooser"
 import { HomeArrangement } from "spell/app/app/pages/HomeArrangement"
+import { HomeFolds } from "spell/app/app/pages/HomeFolds"
 
 /**
  * The home page's rows, in the browser (epic `mockup` I40):
@@ -20,6 +21,7 @@ import { HomeArrangement } from "spell/app/app/pages/HomeArrangement"
  * - a "..." menu on each of your own projects' cards, and nobody else's (T47);  each item the editor's action on THAT
  *   project, never opening it
  * - The footer (T55):  Spell UI's site, opened in the editor.
+ * - The hero's ✕ and each section's fold, remembered across reloads (epic `editor` T186)
  * - "Rearrange Home Screen" (T51):  only then do cards and sections drag, and their words change where they are;
  *   with no server here, a person's own changes, on this device, with Reset to Default
  *
@@ -73,6 +75,7 @@ afterEach(() => {
   for (const cleanup of cleanups.splice(0).reverse()) cleanup()
   HomeArrangement.reset()
   HomeArrangement.rearrange(false)
+  HomeFolds.reset()
   flush()
 })
 
@@ -134,11 +137,11 @@ describe("the home page's rows", () => {
     expect(cardsIn(host, "org-acme")).toEqual(["Dashboard"])
     expect([...host.querySelectorAll("#org-acme .subhead")].map((title) => title.textContent)).toEqual(["Tools"])
     expect(host.querySelector("#org-acme .subhead a")?.getAttribute("href")).toBe("/@acme/tools")
-    expect(host.querySelector("#org-acme h2 a")?.getAttribute("href")).toBe("/@acme")
-    expect(host.querySelector("#org-acme h2 .line")?.textContent?.trim()).toBe("For everyone at @acme.")
+    expect(host.querySelector("#org-acme .SectionTitle a")?.getAttribute("href")).toBe("/@acme")
+    expect(host.querySelector("#org-acme .SectionTitle .line")?.textContent?.trim()).toBe("For everyone at @acme.")
     // the group's own org, never yours
-    expect(host.querySelector("#org-beta h2 .line")?.textContent?.trim()).toBe("For everyone at @beta.")
-    expect(host.querySelector("#org-acme h2 .line ui-icon")?.getAttribute("name")).toBe("users")
+    expect(host.querySelector("#org-beta .SectionTitle .line")?.textContent?.trim()).toBe("For everyone at @beta.")
+    expect(host.querySelector("#org-acme .SectionTitle .line ui-icon")?.getAttribute("name")).toBe("users")
   })
 
   test("the examples:  ONE set in Spell's order, no line over a kind of them (I48);  each card its description's first phrase", async () => {
@@ -153,7 +156,7 @@ describe("the home page's rows", () => {
   test('the Spanish examples and guides:  their own section, "En español", out of the English ones (I46)', async () => {
     const host = await mountHome()
     expect(cardsIn(host, "examples")).toEqual(["Calculator", "Weather", "Solitaire"])
-    expect(host.querySelector("#spanish h2")?.textContent).toMatch(/^En español\./)
+    expect(host.querySelector("#spanish .SectionTitle")?.textContent).toMatch(/^En español\./)
     // the examples, then the guides, each under its line;  Lista de tareas hidden, as Task List is
     expect(cardsIn(host, "spanish")).toEqual(["Calculadora", "Solitario", "Cómo funciona Solitario"])
     const lines = [...host.querySelectorAll("#spanish .subhead")].map((line) => line.textContent)
@@ -167,7 +170,7 @@ describe('a card\'s "..." menu (T47)', () => {
     const host = await mountHome()
     const menus = host.querySelectorAll("ui-dropdown.CardMenu")
     expect(menus.length).toBe(1)
-    expect(menus[0]!.closest("section")?.id).toBe("projects")
+    expect(menus[0]!.closest(".ProjectCards")?.id).toBe("projects")
     expect(menus[0]!.getAttribute("aria-label")).toBe("Project actions")
     const items = [...menus[0]!.querySelectorAll("ui-item")].map((item) =>
       item.getAttribute("kind") === "divider" ? "-" : item.textContent?.trim()
@@ -225,9 +228,9 @@ describe("Rearrange Home Screen (T51)", () => {
     expect(host.querySelector(".RearrangeBar .how")?.textContent).toMatch(/Only you see what you change here/)
     expect(host.querySelectorAll("#start .TileCard[draggable='true']").length).toBe(4)
     expect(host.querySelectorAll("#examples .TileCard[draggable='true']").length).toBe(3)
-    expect(host.querySelector("#examples > header[draggable='true']")).not.toBeNull()
+    expect(host.querySelector("#examples > .SectionTitle[draggable='true']")).not.toBeNull()
     expect(host.querySelectorAll("#examples .TileCard .EditableText").length).toBe(6)
-    expect(host.querySelector("#examples header .EditableText")?.textContent).toBe("Examples")
+    expect(host.querySelector("#examples .SectionTitle .EditableText")?.textContent).toBe("Examples")
     // a card's not a link while it's rearranged:  a click lands in its text
     expect(host.querySelector("#examples a.TileCard")).toBeNull()
     clickButton(host, "Done")
@@ -256,9 +259,9 @@ describe("Rearrange Home Screen (T51)", () => {
     type(line, "x".repeat(SPACES.CARD_LINE_LENGTH + 1), "Enter")
     expect(line.classList.contains("too-long")).toBe(true)
     expect(line.title).toMatch(/Longer than a card shows whole/)
-    type(host.querySelector<HTMLElement>("#guides header .EditableText")!, "Read these", "Enter")
+    type(host.querySelector<HTMLElement>("#guides .SectionTitle .EditableText")!, "Read these", "Enter")
     clickButton(host, "Done")
-    expect(host.querySelector("#guides h2")?.textContent).toMatch(/^Read these\./)
+    expect(host.querySelector("#guides .SectionTitle")?.textContent).toMatch(/^Read these\./)
   })
 
   test("a card dragged onto another moves there;  a section by its header;  nothing moves while it's off", async () => {
@@ -268,8 +271,64 @@ describe("Rearrange Home Screen (T51)", () => {
     await rearrange(host)
     drag(cardIn(host, "start", 0), cardIn(host, "start", 2))
     expect(cardsIn(host, "start")).toEqual(["To-do list", "Converter", "Counter", "Blank"])
-    drag(host.querySelector<HTMLElement>("#guides > header")!, host.querySelector<HTMLElement>("#start")!)
+    drag(host.querySelector<HTMLElement>("#guides > .SectionTitle")!, host.querySelector<HTMLElement>("#start")!)
     expect(rowIds(host)).toEqual(["guides", "start", "examples", "spanish"])
+  })
+})
+
+describe("the hero's ✕ and the sections' folds, kept across reloads (epic `editor` T186)", () => {
+  test("the ✕ hides the hero;  a reload keeps it hidden;  Show the introduction, at the foot, brings it back", async () => {
+    let host = await mountHome()
+    expect(host.querySelector(".Hero")).not.toBeNull()
+    expect(host.querySelector(".HomeFooter .ShowIntro")).toBeNull()
+    const close = host.querySelector<HTMLElement>(".Hero ui-button.HeroClose")!
+    expect(close.getAttribute("aria-label")).toBe("Hide the introduction")
+    close.click()
+    flush()
+    expect(host.querySelector(".Hero")).toBeNull()
+    expect(localStorage.getItem("spellEditor:homeHeroHidden")).toBe("true")
+    // the sections stay, in their order
+    expect(rowIds(host)).toEqual(["start", "examples", "guides", "spanish"])
+    host = await reloadHome()
+    expect(host.querySelector(".Hero")).toBeNull()
+    clickButton(host, "Show the introduction")
+    expect(host.querySelector(".Hero")).not.toBeNull()
+    expect(host.querySelector(".HomeFooter .ShowIntro")).toBeNull()
+    host = await reloadHome()
+    expect(host.querySelector(".Hero")).not.toBeNull()
+  })
+
+  test("each section folds by its title;  a reload keeps it folded;  unfolded, it's open again", async () => {
+    let host = await mountHome()
+    for (const id of ["start", "examples", "guides", "spanish"]) {
+      expect(sectionIn(host, id).getAttribute("collapsible"), id).not.toBe("false")
+      expect(isOpen(sectionIn(host, id)), id).toBe(true)
+    }
+    await toggle(host, "examples")
+    await toggle(host, "spanish")
+    expect(isOpen(sectionIn(host, "examples"))).toBe(false)
+    expect(isOpen(sectionIn(host, "spanish"))).toBe(false)
+    expect(isOpen(sectionIn(host, "start"))).toBe(true)
+    expect(JSON.parse(localStorage.getItem("spellEditor:homeFolded") ?? "[]")).toEqual(["examples", "spanish"])
+    host = await reloadHome()
+    expect(isOpen(sectionIn(host, "examples"))).toBe(false)
+    expect(isOpen(sectionIn(host, "spanish"))).toBe(false)
+    await toggle(host, "examples")
+    expect(isOpen(sectionIn(host, "examples"))).toBe(true)
+    host = await reloadHome()
+    expect(isOpen(sectionIn(host, "examples"))).toBe(true)
+    expect(isOpen(sectionIn(host, "spanish"))).toBe(false)
+  })
+
+  test("while the page is rearranged, every section is open and doesn't fold;  Done folds it back as it was", async () => {
+    const host = await mountHome()
+    await toggle(host, "examples")
+    await rearrange(host)
+    expect(isOpen(sectionIn(host, "examples"))).toBe(true)
+    expect(sectionIn(host, "examples").shadowRoot?.querySelector("button.toggle")).toBeNull()
+    clickButton(host, "Done")
+    await ElementFixture.settle(host)
+    expect(isOpen(sectionIn(host, "examples"))).toBe(false)
   })
 })
 
@@ -341,6 +400,30 @@ function drag(from: HTMLElement, onto: HTMLElement) {
   flush()
 }
 
+/** Section `id`'s `<ui-section>`. */
+function sectionIn(host: HTMLElement, id: string): HTMLElement {
+  return host.querySelector<HTMLElement>(`#${id}`)!
+}
+
+/** Is `section` open:  its content showing? */
+function isOpen(section: HTMLElement): boolean {
+  const content = section.shadowRoot?.querySelector("[part~='content']")
+  return !!content && !content.hasAttribute("hidden")
+}
+
+/** Click section `id`'s fold button, as a person would. */
+async function toggle(host: HTMLElement, id: string) {
+  sectionIn(host, id).shadowRoot!.querySelector<HTMLElement>("button.toggle")!.click()
+  flush()
+  await ElementFixture.settle(host)
+}
+
+/** Take the home page away, and draw it again:  what a reload keeps is what the browser's storage holds. */
+async function reloadHome(): Promise<HTMLElement> {
+  for (const cleanup of cleanups.splice(1).reverse()) cleanup()
+  return mountHome()
+}
+
 /** Draw the home page alone;  resolves once its groups have loaded and its `<ui-*>` are ready. */
 async function mountHome(): Promise<HTMLElement> {
   await uiReady
@@ -360,7 +443,7 @@ async function mountHome(): Promise<HTMLElement> {
 
 /** The page's rows under the hero, by id. */
 function rowIds(host: HTMLElement): string[] {
-  return [...host.querySelectorAll(".Hero ~ section.ProjectCards")].map((section) => section.id)
+  return [...host.querySelectorAll(".Home > .ProjectCards")].map((section) => section.id)
 }
 
 /** The titles of row `id`'s cards, in order. */

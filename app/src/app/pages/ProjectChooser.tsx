@@ -17,6 +17,7 @@ import {
   Inspector,
   MoreMenu,
   Palette,
+  on,
   openProject,
   trackProjectRoot,
   type ProjectRootState
@@ -26,6 +27,7 @@ import { readGuideList, startHereLine } from "./GuideList"
 import { navigate } from "./navigation"
 import { EditableText } from "./EditableText"
 import { HomeArrangement } from "./HomeArrangement"
+import { HomeFolds } from "./HomeFolds"
 import { EmptyCard, TileCard, type TileCardDrag, type TileCardEdit } from "./TileCard"
 // the hero's picture:  Solitaire's Card.spell, as spell.app shows it
 import cardExample from "./card-example.png"
@@ -64,6 +66,8 @@ import "./ProjectChooser.css"
  * - A guide opens in the editor, as an example does:  its prose is the comments in its spell file (epic `debut` Q18).
  * - Every route the others don't take (`routes.tsx`).
  * - Its look follows the editor's theme:  the hero and cards are tokens (`ProjectChooser.css`).
+ * - The hero hides by its ✕, and comes back from "Show the introduction" at the page's foot;
+ *   each section folds by its chevron;  both remembered across reloads (`HomeFolds`, epic `editor` T186).
  ****************/
 export function ProjectChooser() {
   const { projects, examples, library, guides, editorPieces } = SPACES.SpellProjectRoot
@@ -84,7 +88,9 @@ export function ProjectChooser() {
       <ChooserToolbar />
       <div class={["Home", { rearranging: HomeArrangement.isRearranging }]}>
         <RearrangeBar />
-        <Hero examples={exampleList()} guides={guideList()} />
+        <Show when={!HomeFolds.isHeroHidden}>
+          <Hero examples={exampleList()} guides={guideList()} />
+        </Show>
         <For each={sections()}>{(section) => sectionFor(section)}</For>
         <HomeFooter />
       </div>
@@ -225,6 +231,7 @@ export function OrgSection(props: { org: string }) {
  * - The picture:  the start of Solitaire's Card.spell, drawn in the editor's bubbly look,
  *   spell.app's own example (`card-example.png`, 1042 x 430, shown at half size;  epic `repo-split` T64).
  * - Wide and short, so it sits under the words, not beside them.
+ * - A ✕ in its top right corner hides it, remembered (`HomeFolds`);  the page's foot brings it back (epic `editor` T186).
  ****************/
 function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
   // the first English example the home page shows a card for, the Calculator
@@ -235,6 +242,15 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
     cardsOf({ projectRoot: SPACES.SpellProjectRoot.guides, language: ENGLISH }, props.guides)[0]?.path
   return (
     <section class="Hero">
+      <ui-button
+        class="HeroClose"
+        size="mini"
+        appearance="basic"
+        icon="close"
+        aria-label={appTexts.text("homeHideIntro")}
+        data-tooltip={appTexts.text("homeHideIntro")}
+        onClick={() => HomeFolds.hideHero(true)}
+      />
       <div class="pitch">
         <span class="eyebrow">{appTexts.text("homeEyebrow")}</span>
         <h1>{appTexts.text("homeTitle")}</h1>
@@ -399,7 +415,10 @@ function HomeGuides(props: { drag?: TileCardDrag }) {
 /****************
  * ### `<HomeSection>`
  * One section of the landing page:  its title and quiet line, its buttons on the right, then its cards in a grid.
- * - `drag`:  moving the whole section by its header, among the page's, while it's rearranged;
+ * - A `<ui-section>` that folds by the chevron before its title, folded or not remembered by its id
+ *   across reloads (`HomeFolds`;  Owen, epic `editor` T186).
+ *   - Not while the page is rearranged:  every section open, its title typed in where it is.
+ * - `drag`:  moving the whole section by its title, among the page's, while it's rearranged;
  *   none:  it stays put.
  * - Its header and line as changed in this language (`HomeArrangement`), typed in where they are while it's rearranged.
  * - The shape every section shares:  the ways to start, a group's cards, a language's.
@@ -420,53 +439,75 @@ export function HomeSection(props: {
   const key = () => SPACES.homeTextKey({ section: props.id, lang: appTexts.lang })
   const heading = () => HomeArrangement.textFor(key()).title ?? props.heading
   const line = () => HomeArrangement.textFor(key()).line ?? props.line ?? ""
+  const folds = () => !HomeArrangement.isRearranging
   return (
-    <section
+    <ui-section
       id={props.id}
       class={["ProjectCards", { small: !!props.small }, sectionDragClasses(props.drag)]}
+      level="2"
+      appearance="basic"
+      collapsible={folds()}
+      open={folds() && HomeFolds.isFolded(props.id) ? "false" : undefined}
+      ref={(section: HTMLElement) => {
+        // its own:  a section inside it would send these too
+        on("ui-closing", (event) => {
+          if (event.target === section) HomeFolds.fold(props.id, true)
+        })(section)
+        on("ui-opening", (event) => {
+          if (event.target === section) HomeFolds.fold(props.id, false)
+        })(section)
+      }}
       {...sectionDropHandlers(() => props.drag)}
     >
-      <header
+      <span
+        slot="label"
+        class="SectionTitle"
         draggable={props.drag && !HomeArrangement.isEditingText ? "true" : undefined}
         {...sectionGrabHandlers(() => props.drag)}
       >
         <Show
           when={HomeArrangement.isRearranging}
           fallback={
-            <h2>
-              <Show when={props.href} fallback={heading()}>
-                {(href) => <PageLink href={href()}>{heading()}</PageLink>}
-              </Show>
-              .{" "}
+            <>
+              <span class="heading">
+                <Show when={props.href} fallback={heading()}>
+                  {(href) => <PageLink href={href()}>{heading()}</PageLink>}
+                </Show>
+                .
+              </span>{" "}
               <span class="line">
                 <Show when={props.lineIcon}>
                   <ui-icon name={props.lineIcon} />{" "}
                 </Show>
                 {line()}
               </span>
-            </h2>
+            </>
           }
         >
-          <h2>
+          <span class="heading">
             <EditableText
               value={heading()}
               label={appTexts.text("homeSectionHeader")}
               onSave={(text) => HomeArrangement.saveText(key(), { title: text })}
             />
-            .{" "}
-            <EditableText
-              class="line"
-              value={line()}
-              label={appTexts.text("homeSectionLine")}
-              placeholder={appTexts.text("homeSectionLine")}
-              onSave={(text) => HomeArrangement.saveText(key(), { line: text })}
-            />
-          </h2>
+            .
+          </span>{" "}
+          <EditableText
+            class="line"
+            value={line()}
+            label={appTexts.text("homeSectionLine")}
+            placeholder={appTexts.text("homeSectionLine")}
+            onSave={(text) => HomeArrangement.saveText(key(), { line: text })}
+          />
         </Show>
-        {props.actions}
-      </header>
+      </span>
+      <Show when={props.actions}>
+        <span slot="actions" class="SectionActions">
+          {props.actions}
+        </span>
+      </Show>
       <div class="cards">{props.children}</div>
-    </section>
+    </ui-section>
   )
 }
 
@@ -1086,6 +1127,7 @@ function RearrangeBar() {
  * ### `<HomeFooter>`
  * The home page's foot, quiet:  Spell UI's site on the left, "Rearrange Home Screen" on the right
  * (Owen, 2026-11-17, epic `mockup` T55:  "make a link to SpellUI in the Home page somewhere (footer?)").
+ * - While the hero is hidden, "Show the introduction" beside it, which brings it back (`HomeFolds`, epic `editor` T186).
  * - The link opens the site in the editor, at its home page, as the Spell menu's Spell UI does
  *   (`editor.showSpellUI()`);  its address is the editor's, so a new tab works too.
  * - On a narrow window, one under the other, centred.
@@ -1105,7 +1147,20 @@ function HomeFooter() {
         <span class="name">{appTexts.text("spellUI")}</span>
         <span class="line">{appTexts.text("homeSpellUILine")}</span>
       </a>
-      <RearrangeButton />
+      <span class="FootButtons">
+        <Show when={HomeFolds.isHeroHidden}>
+          <ui-button
+            class="ShowIntro"
+            appearance="basic"
+            size="small"
+            icon="info circle"
+            onClick={() => HomeFolds.hideHero(false)}
+          >
+            {appTexts.text("homeShowIntro")}
+          </ui-button>
+        </Show>
+        <RearrangeButton />
+      </span>
     </footer>
   )
 }

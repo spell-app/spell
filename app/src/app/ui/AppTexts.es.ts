@@ -797,6 +797,8 @@ const APP_TEXTS_ES: AppTextPack = {
   tryAnExample: "Prueba un ejemplo",
   readFirstSpell: "Lee tu primer spell",
   homeExampleCaption: "Del Card.spell del Solitario",
+  homeHideIntro: "Ocultar la introducción",
+  homeShowIntro: "Mostrar la introducción",
   homeExampleAlt:
     "Una carta de la baraja, en Spell:  una carta es una vista arrastrable de dos caras;  su valor es as, 2 ... 10, jota, reina o rey;  su palo es tréboles, diamantes, corazones o picas;  su color es rojo o negro;  es una figura si su valor es jota, reina o rey;  es una carta de número si no es una figura",
   homeExamplesLine: "Abre uno, cámbialo, hazlo tuyo.",
