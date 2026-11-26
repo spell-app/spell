@@ -547,6 +547,34 @@ describe("PendingChanges, reading your own write", () => {
     reading.leave()
   })
 
+  test("a read asked before a save, answering after it's confirmed, doesn't take it back (I143)", async () => {
+    const { places, pending, place } = cookbook()
+    // a slow read:  what the place held as it was asked, answered later
+    let answer = () => {}
+    const list = place.list.bind(place)
+    place.list = async (...args) => {
+      const answered = await list(...args)
+      await new Promise<void>((done) => (answer = done))
+      return answered
+    }
+    const reading = places.read({ placeName: "cookbook", collection: "recipes", type: "Recipe" })
+    const loading = reading.load()
+    await vi.waitFor(() => expect(answer).not.toBe(undefined))
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    pending.setField(titleWrite("Stew", "Soup"))
+    await allSent(pending)
+    answer()
+    await loading
+    expect(reading.contents![0]!.title).toBe("Stew")
+    expect(places.cache.rowFor("Recipe", "r-1")!.title).toBe("Stew")
+    // a read asked after the save is the place's word
+    place.list = list
+    await place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Broth" } }])
+    await reading.reload()
+    expect(reading.contents![0]!.title).toBe("Broth")
+    reading.leave()
+  })
+
   test("a new thing shows in a list, a deleted one doesn't, and a filter still holds", () => {
     const { pending } = cookbook({}, { wait: 10_000 })
     const rows = [

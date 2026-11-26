@@ -29,11 +29,13 @@ export class Places {
   /** The ONE cache of rows, so a thing read from two lists is one row. */
   readonly cache = new PlaceCache()
   /** The reads people are waiting on or looking at, so readers of one list share one request. */
-  readonly reads = new PlaceReads()
+  readonly reads = new PlaceReads({ saveMark: () => this.saveMark })
   /** Fetch the latest, replay what's pending:  how anything gets back in step with a place. */
   readonly heal = new PlaceHeal({ places: this })
   /** Each place, by its name. */
   private places = new Map<string, Place>()
+  /** How many saves any place has confirmed:  see `saveMark`. */
+  private savesConfirmed = 0
   /** Each place's changes not yet confirmed, by its name. */
   private pending = new Map<string, PendingChanges>()
   /** Who shows rows, told as they change under them. */
@@ -345,6 +347,19 @@ export class Places {
   ////////////////
 
   /**
+   * A mark of how far the saves have got, any place's:  a read takes it as it's asked, and a save confirmed after it
+   * outranks what that read answers (`PendingChanges.replayOn()`'s `askedAt`;  epic `data` I143).
+   */
+  get saveMark(): number {
+    return this.savesConfirmed
+  }
+
+  /** A save was confirmed:  its mark, which every read asked from now on has seen. */
+  markSaved(): number {
+    return ++this.savesConfirmed
+  }
+
+  /**
    * A new reader's result, not yet started:  `load()` it, and `leave()` it when nothing shows it any more.
    * - Readers of one collection and query share one request.
    * - That read was released not long ago:  it starts with those rows, `"from an earlier visit"`;  `reload()` asks again.
@@ -355,7 +370,7 @@ export class Places {
     return untrackCells(() => {
       const result = new PlaceResult(props, { places: this })
       const earlier = this.reads.releasedFor(props)
-      if (earlier) result.showFromEarlierVisit(earlier.rows, earlier.answer)
+      if (earlier) result.showFromEarlierVisit(earlier.rows, earlier.answer, earlier.askedAt)
       return result
     })
   }
