@@ -38,7 +38,7 @@ import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
  * - Scrolling:  `scrolling` and `overflowing` cap the scroller's height.
  *   It then scrolls, and is a focusable, named region
  *   (the DOM element's `aria-label`, else the `<caption>`, else the translated `label`).
- *   - A table that doesn't stack (`unstackable`, `stack-by="none"`, or too wide for the stacking breakpoint)
+ *   - A table that doesn't stack (not `stackable`, or wider than its stacking breakpoint)
  *     and is wider than its box scrolls SIDEWAYS in the scroller, its height uncapped:
  *     the same focusable, named region, never the page (`isTooWide`, measured).
  *   - A stacked table always fits its box, so it never does.

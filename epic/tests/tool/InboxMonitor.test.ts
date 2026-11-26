@@ -49,6 +49,14 @@ test("epicOf:  the epic the session's title names;  none for a title or folder n
   expect(each.epicOf({ ...SESSION, name: "" })).toBeUndefined()
 })
 
+// epic `epic-engine` I488:  the session an `/epic fresh` replaced listens to nothing, its worktree's epic included
+test("epicOf:  a replaced session (🗄️ x (replaced)) has no epic;  its look leaves the listener's place alone", () => {
+  const replaced = { ...SESSION, name: "🗄️ x (replaced)" }
+  expect(monitor(replaced).epicOf(replaced)).toBeUndefined()
+  expect(monitor(replaced).check(MONITOR)).toMatchObject({ waiting: false })
+  expect(ReviewInbox.read(inboxFile).listening).toBeNull()
+})
+
 /** The poller's process:  this one, alive. */
 const MONITOR = { monitor: process.pid }
 

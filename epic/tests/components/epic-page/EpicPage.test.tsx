@@ -490,9 +490,13 @@ class FakeRoutes {
     doing: null
   }
   posts: [string, Record<string, unknown>][] = []
+  /** the page's epic is the tooling home (`GET home`, T174) */
+  home = false
 
   readonly fetch = vi.fn(async (input: string, init?: RequestInit): Promise<Response> => {
     const route = input.replace("/api/epics/review/", "").replace(/\?.*/, "")
+    if (route === "home")
+      return new Response(JSON.stringify({ home: this.home }), { headers: { "content-type": "application/json" } })
     if (route !== "inbox") {
       const body = JSON.parse(init!.body as string) as Record<string, unknown>
       this.posts.push([route, body])
@@ -511,9 +515,9 @@ class FakeRoutes {
         const at = new Date().toISOString()
         this.inbox.marks.new1 = { ...(body.entry as object), action: "new", at } as Inbox["marks"][string]
       }
-      // the pill's start, and the gear's Tidy (T168):  a `StartAnswer`, not the inbox
+      // the pill's start, and the gear's asks (T168, T174):  a `StartAnswer`, not the inbox
       if (route === "start") {
-        const command = `/epic ${body.ask === "tidy" ? "tidy" : "review"} demo`
+        const command = `/epic ${typeof body.ask === "string" ? body.ask : "review"} demo`
         const answer = { state: "asked", command, sessions: ["🚧 demo"], message: `Asked 🚧 demo:  ${command}` }
         return new Response(JSON.stringify(answer), { headers: { "content-type": "application/json" } })
       }
@@ -1478,8 +1482,9 @@ describe("<epic-page> the header (P53)", () => {
   })
 
   /** A reviewed page, a mark unsent, Auto Send `choice`, `width` px wide. */
-  async function reviewedPage(choice: "now" | "2m" | "5m" | "off", width = 1000) {
+  async function reviewedPage(choice: "now" | "2m" | "5m" | "off", width = 1000, { home = false } = {}) {
     const routes = new FakeRoutes()
+    routes.home = home
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     routes.inbox.marks = { q1: { action: "todo", at } }
@@ -1542,11 +1547,9 @@ describe("<epic-page> the header (P53)", () => {
   /** The gear's menu:  the button, the popup, its rows' words. */
   function gear(host: Element) {
     const shadow = host.shadowRoot!
-    // the settings' rows;  the dialogs' (Tidy, Bells & Whistles, Focus mode) apart (P57, T173)
+    // the settings' rows;  the asks' and the dialogs' apart (P57, T173, T174)
     const rows = () =>
-      Array.from(
-        shadow.querySelectorAll<HTMLButtonElement>('[part~="gear-row"]:not(.focus-row, .tidy-row, .bells-row)')
-      )
+      Array.from(shadow.querySelectorAll<HTMLButtonElement>('[part~="gear-row"]:not(.focus-row, .ask-row, .bells-row)'))
     return {
       button: shadow.querySelector<HTMLButtonElement>('[part~="gear"]')!,
       focusRow: () => shadow.querySelector<HTMLButtonElement>(".focus-row"),
@@ -1620,7 +1623,7 @@ describe("<epic-page> the header (P53)", () => {
 
   // epic `epic-engine` P57 (Owen, 2026-10-30:  "In the page 'Gear' menu add option 'Focus Mode'")
   // epic `epic-engine` T168 (Owen:  "In the gear menu, add an entry at the top to run epic tidy")
-  test("the gear's Tidy, first while reviewed:  asks the epic's session for /epic tidy, the menu closing", async () => {
+  test("the gear's Tidy, while reviewed:  asks the epic's session for /epic tidy, the menu closing", async () => {
     const { host, routes } = await reviewedPage("off")
     const it = gear(host)
     const notices: string[] = []
@@ -1628,7 +1631,7 @@ describe("<epic-page> the header (P53)", () => {
     it.button.click()
     await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
     const row = it.tidyRow()!
-    expect([row.textContent, row.parentElement!.firstElementChild]).toEqual(["Tidy", row])
+    expect(row.textContent).toBe("Tidy")
     expect(row.querySelector<HTMLElement>("[data-tooltip]")!.dataset.tooltip).toMatch(/WILL RECHECK/)
     // its words start on the same line as Focus mode's, its icon in the same column
     const lead = (each: Element) => each.querySelector(".lead")!.getBoundingClientRect().left
@@ -1648,9 +1651,20 @@ describe("<epic-page> the header (P53)", () => {
     it.button.click()
     await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
     const row = it.focusRow()!
-    // Owen's order (T173):  Tidy, Bells & Whistles, Focus mode, a divider, Auto Send, Theme
+    // Owen's order (T174), not the tooling home:  no Merge and push
     const order = Array.from(row.parentElement!.children, (child) => child.getAttribute("value") ?? child.localName)
-    expect(order).toEqual(["tidy", "bells", "focus", "ui-divider", "autoSend", "theme"])
+    expect(order).toEqual([
+      "status",
+      "bells",
+      "focus",
+      "ui-divider",
+      "tidy",
+      "hush",
+      "fresh",
+      "ui-divider",
+      "autoSend",
+      "theme"
+    ])
     expect(row.textContent).toBe("Focus mode")
     row.click()
     const focus = host.shadowRoot!.querySelector<HTMLElement & { open: boolean; close(): void }>("epic-focus")!
@@ -1664,11 +1678,64 @@ describe("<epic-page> the header (P53)", () => {
     expect(focus.querySelector('[slot="send"]')).toBeNull()
   })
 
+  // epic `epic-engine` T174 (Owen picked all four;  his order, 2026-11-26)
+  test("the gear's asks:  each row asks the session for its command;  icons in one column;  Merge and push on the home epic only", async () => {
+    const { host, routes } = await reviewedPage("off", 1000, { home: true })
+    const it = gear(host)
+    it.button.click()
+    await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
+    const shadow = host.shadowRoot!
+    await vi.waitFor(() => expect(shadow.querySelector(".push-row")).not.toBeNull())
+    const rows = shadow.querySelector(".push-row")!.parentElement!
+    const order = Array.from(rows.children, (child) => child.getAttribute("value") ?? child.localName)
+    expect(order).toEqual([
+      "status",
+      "bells",
+      "focus",
+      "push",
+      "ui-divider",
+      "tidy",
+      "hush",
+      "fresh",
+      "ui-divider",
+      "autoSend",
+      "theme"
+    ])
+    const icons = Array.from(rows.querySelectorAll(".lead"))
+    expect(icons.map((icon) => icon.getAttribute("name"))).toEqual([
+      "compass",
+      "bell",
+      "bullseye",
+      "cloud arrow up",
+      "broom",
+      "eye slash",
+      "seedling"
+    ])
+    // every icon in one column, every name on one line
+    const lefts = (selector: string) =>
+      new Set(Array.from(rows.querySelectorAll(selector), (each) => Math.round(each.getBoundingClientRect().left)))
+    expect([lefts(".lead").size, lefts(".lead + .name").size]).toEqual([1, 1])
+    const words = ["Where are we?", "Merge and push", "Tidy", "Hush settled items", "Start fresh"]
+    const asks = ["status", "push", "tidy", "hush", "fresh"]
+    for (const [index, ask] of asks.entries()) {
+      const row = shadow.querySelector<HTMLButtonElement>(`.${ask}-row`)!
+      expect(row.textContent).toBe(words[index])
+      expect(row.querySelector<HTMLElement>("[data-tooltip]")!.dataset.tooltip).toMatch(/^Click to have/)
+      it.button.click()
+      await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
+      row.click()
+      await vi.waitFor(() =>
+        expect(routes.posts.at(-1)).toEqual(["start", { page: "/epics/demo/demo.plan.html", ask }])
+      )
+      await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(false))
+    }
+  })
+
   test("not reviewed:  no Focus mode, in the gear or the page", async () => {
     await adoptClient(new FakeRoutes(), { served: false })
     const host = await render(page("", ["todo"]))
     expect(host.shadowRoot!.querySelector(".focus-row")).toBeNull()
-    expect(host.shadowRoot!.querySelector(".tidy-row")).toBeNull()
+    expect(host.shadowRoot!.querySelector(".ask-row")).toBeNull()
     expect(host.shadowRoot!.querySelector("epic-focus")).toBeNull()
   })
 

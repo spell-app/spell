@@ -369,8 +369,8 @@ export const epicPageVocabulary = {
       key: "tidy",
       text: "Tidy",
       description:
-        "The gear's first row while the page is reviewed (epic `epic-engine` T168):  asks the epic's session to run " +
-        "`/epic tidy <epic>`."
+        "The gear's first row after its first divider while the page is reviewed (epic `epic-engine` T168, T174):  " +
+        "asks the epic's session to run `/epic tidy <epic>`."
     },
     {
       key: "tidyTip",
@@ -382,13 +382,14 @@ export const epicPageVocabulary = {
     {
       key: "focusMode",
       text: "Focus mode",
-      description: "The gear's row after Tidy while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
+      description:
+        "The gear's row after Bells & Whistles while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
     },
     {
       key: "askStatus",
       text: "Where are we?",
       description:
-        "The gear's row after Focus mode's divider while the page is reviewed (epic `epic-engine` T174):  asks the " +
+        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174):  asks the " +
         "epic's session for a short status, `/wtf`."
     },
     {
@@ -402,7 +403,7 @@ export const epicPageVocabulary = {
       key: "askHush",
       text: "Hush settled items",
       description:
-        "The gear's row after Focus mode's divider while the page is reviewed (epic `epic-engine` T174):  asks the " +
+        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174):  asks the " +
         "epic's session to run `/epic hush <epic>`."
     },
     {
@@ -416,7 +417,7 @@ export const epicPageVocabulary = {
       key: "askFresh",
       text: "Start fresh",
       description:
-        "The gear's row after Focus mode's divider while the page is reviewed (epic `epic-engine` T174):  asks the " +
+        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174):  asks the " +
         "epic's session to run `/epic fresh`."
     },
     {
@@ -430,7 +431,7 @@ export const epicPageVocabulary = {
       key: "askPush",
       text: "Merge and push",
       description:
-        "The gear's row after Focus mode's divider while the page is reviewed (epic `epic-engine` T174):  asks the " +
+        "One of the gear's rows while the page is reviewed (epic `epic-engine` T174):  asks the " +
         "epic's session to merge its finished work into main and push main to GitHub;  the tooling home's only."
     },
     {
@@ -445,7 +446,9 @@ export const epicPageVocabulary = {
     {
       key: "bells",
       text: "Bells & Whistles",
-      description: "The gear's last row (epic `epic-engine` P86):  opens the dialog of steps epic work runs by itself."
+      description:
+        "The gear's row after Where are we? (epic `epic-engine` P86, T174):  opens the dialog of steps epic work runs " +
+        "by itself."
     },
     { key: "theme", text: "Theme", description: "The gear's Theme row, and its sub-menu's name." },
     {

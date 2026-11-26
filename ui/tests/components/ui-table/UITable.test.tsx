@@ -108,7 +108,8 @@ describe("<ui-table> classes, mirrored onto the table", () => {
     ['align="center"', "ui center aligned table"],
     ['attach-to="top"', "ui top attached table"],
     ['stackable="tablet"', "ui tablet stackable table"],
-    ["unstackable", "ui unstackable table"],
+    // an old word that draws nothing now (epic `epic-engine` T176)
+    ["unstackable", "ui table"],
     ['scrolling="very short"', "ui very short scrolling table"],
     ['overflowing="long"', "ui long overflowing table"],
     ['stuck="head first"', "ui head stuck first stuck table"],
@@ -158,7 +159,7 @@ describe("<ui-table> classes, mirrored onto the table", () => {
     const texts = (rules: CSSRuleList): string[] =>
       Array.from(rules).flatMap((rule) => [
         rule instanceof CSSStyleRule ? rule.selectorText : "",
-        ..."cssRules" in rule ? texts((rule as CSSGroupingRule).cssRules) : []
+        ...("cssRules" in rule ? texts((rule as CSSGroupingRule).cssRules) : [])
       ])
     const page = texts(UI.styles.sheet("table:page")!.cssRules)
     expect(page.some((selector) => selector.includes(".ui.table"))).toBe(true)
@@ -215,8 +216,8 @@ describe("<ui-table> shadow markup", () => {
   it("scrolls SIDEWAYS in its own box, height uncapped, while it doesn't stack and is too wide;  never the page", async () => {
     const wide = `<tbody><tr><td style="white-space: nowrap">${"wide ".repeat(80)}</td><td>1</td></tr></tbody>`
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style="width: 300px"><ui-table unstackable><table aria-label="Wide">${HEAD}${wide}</table>` +
-        `</ui-table><ui-table unstackable><table>${HEAD}${BODY}</table></ui-table></div>`
+      `<div style="width: 300px"><ui-table><table aria-label="Wide">${HEAD}${wide}</table>` +
+        `</ui-table><ui-table><table>${HEAD}${BODY}</table></ui-table></div>`
     )
     await settle()
     const [tooWide, fits] = [...wrapper.querySelectorAll("ui-table")].map(scroller)
@@ -245,7 +246,7 @@ describe("<ui-table> shadow markup", () => {
 
   it("never scrolls sideways while it STACKS:  a stacked table fits its box", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style="width: 300px"><ui-table stack-by="container"><table>${HEAD}${BODY}</table></ui-table></div>`
+      `<div style="width: 300px"><ui-table stackable stack-by="container"><table>${HEAD}${BODY}</table></ui-table></div>`
     )
     await settle()
     expect(getComputedStyle(wrapper.querySelector("td")!).display).toBe("block")
@@ -266,7 +267,7 @@ describe("<ui-table> shadow markup", () => {
 
   it("stacks by the VIEWPORT, as in Fomantic, however wide or narrow its own column is", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style="width: ${NARROW}px"><ui-table><table>${HEAD}${BODY}</table></ui-table></div>`
+      `<div style="width: ${NARROW}px"><ui-table stackable><table>${HEAD}${BODY}</table></ui-table></div>`
     )
     await settle()
     const cell = wrapper.querySelector("td")!
@@ -279,8 +280,8 @@ describe("<ui-table> shadow markup", () => {
 
   it('stacks by its own width with `stack-by="container"`, and the attribute beats the token', async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style="width: 500px"><ui-table stack-by="container"><table>${HEAD}${BODY}</table></ui-table>` +
-        `<div style="--ui-table-stack-by: container"><ui-table stack-by="viewport"><table>${HEAD}${BODY}</table>` +
+      `<div style="width: 500px"><ui-table stackable stack-by="container"><table>${HEAD}${BODY}</table></ui-table>` +
+        `<div style="--ui-table-stack-by: container"><ui-table stackable stack-by="viewport"><table>${HEAD}${BODY}</table>` +
         `</ui-table></div></div>`
     )
     await settle()
@@ -294,8 +295,8 @@ describe("<ui-table> shadow markup", () => {
 
   it("follows the page-wide `--ui-stack-with` when it has neither `stack-by` nor its own token", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style="width: 500px; --ui-stack-with: container"><ui-table><table>${HEAD}${BODY}</table></ui-table>` +
-        `<ui-table stack-by="viewport"><table>${HEAD}${BODY}</table></ui-table></div>`
+      `<div style="width: 500px; --ui-stack-with: container"><ui-table stackable><table>${HEAD}${BODY}</table></ui-table>` +
+        `<ui-table stackable stack-by="viewport"><table>${HEAD}${BODY}</table></ui-table></div>`
     )
     await settle()
     const [token, own] = wrapper.querySelectorAll("table")
@@ -308,34 +309,40 @@ describe("<ui-table> shadow markup", () => {
 
   it("stacks by its own width when `--ui-table-stack-by: container` opts in", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style="width: 500px; --ui-table-stack-by: container"><ui-table><table>${HEAD}${BODY}</table></ui-table>` +
-        `<ui-table unstackable><table>${HEAD}${BODY}</table></ui-table></div>`
+      `<div style="width: 500px; --ui-table-stack-by: container"><ui-table stackable><table>${HEAD}${BODY}</table></ui-table>` +
+        `<ui-table><table>${HEAD}${BODY}</table></ui-table></div>`
     )
     await settle()
-    const [stacking, unstackable] = wrapper.querySelectorAll("table")
+    const [stacking, notStackable] = wrapper.querySelectorAll("table")
     expect(getComputedStyle(stacking!.querySelector("td")!).display).toBe("block")
-    expect(getComputedStyle(unstackable!.querySelector("td")!).display).toBe("table-cell")
+    expect(getComputedStyle(notStackable!.querySelector("td")!).display).toBe("table-cell")
     wrapper.style.width = "900px"
     await Viewport.frame()
     expect(getComputedStyle(stacking!.querySelector("td")!).display).toBe("table-cell")
   })
 
-  it('never stacks with `stack-by="none"` or `--ui-table-stack-by: none`;  `stack-by` still beats the token', async () => {
+  it("never stacks without `stackable`, whatever `stack-by`, the token or the old `unstackable` say", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style="width: 300px"><ui-table stack-by="none" stackable="tablet"><table>${HEAD}${BODY}</table></ui-table>` +
-        `<div style="--ui-table-stack-by: none"><ui-table><table>${HEAD}${BODY}</table></ui-table>` +
-        `<ui-table stackable="tablet"><table>${HEAD}${BODY}</table></ui-table>` +
+      `<div style="width: 300px"><ui-table><table>${HEAD}${BODY}</table></ui-table>` +
+        `<ui-table unstackable><table>${HEAD}${BODY}</table></ui-table>` +
         `<ui-table stack-by="container"><table>${HEAD}${BODY}</table></ui-table>` +
-        `<ui-table stack-by="viewport"><table>${HEAD}${BODY}</table></ui-table></div></div>`
+        `<div style="--ui-table-stack-by: container"><ui-table><table>${HEAD}${BODY}</table></ui-table></div>` +
+        `<ui-table stackable="tablet"><table>${HEAD}${BODY}</table></ui-table>` +
+        `<ui-table stackable stack-by="container"><table>${HEAD}${BODY}</table></ui-table></div>`
     )
     await settle()
     await page.viewport(500, 900)
     await Viewport.frame()
-    const [attribute, token, tablet, container, viewport] = [...wrapper.querySelectorAll("table")].map(
+    const [plain, unstackable, stackBy, token, tablet, container] = [...wrapper.querySelectorAll("table")].map(
       (element) => getComputedStyle(element.querySelector("td")!).display
     )
-    expect({ attribute, token, tablet }).toEqual({ attribute: "table-cell", token: "table-cell", tablet: "table-cell" })
-    expect({ container, viewport }).toEqual({ container: "block", viewport: "block" })
+    expect({ plain, unstackable, stackBy, token }).toEqual({
+      plain: "table-cell",
+      unstackable: "table-cell",
+      stackBy: "table-cell",
+      token: "table-cell"
+    })
+    expect({ tablet, container }).toEqual({ tablet: "block", container: "block" })
   })
 })
 

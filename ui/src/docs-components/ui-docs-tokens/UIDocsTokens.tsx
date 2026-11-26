@@ -32,7 +32,7 @@ import tokensCSS from "./UIDocsTokens.css?inline"
  *   - An empty input removes the token.
  * - Events:  the inner `<ui-input>`s' `ui-input` / `ui-changed` stop here;
  *   the element's own `ui-input` (`{ token, value }`) and `ui-reset` (`{ tokens }`) say what the playground did.
- * - NEVER stacks (the sheet sets `--ui-table-stack-by: none` on the DOM element;  epic `debut` J64):
+ * - NEVER stacks (its tables aren't `stackable`;  epic `debut` J64):
  *   too wide for its column (phone width), a table scrolls sideways in `<ui-table>`'s own scroller, a focusable region.
  * - Sheets:  `UITable.css` is adopted HERE too:
  *   `<ui-table>` styles its light-DOM `<table>` with a PAGE sheet,

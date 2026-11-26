@@ -10,6 +10,7 @@ import { PlanDates } from "spell/epic/dates"
 import { PageStages, PhaseIds, PhaseStatuses, type PageStage } from "spell/epic/phases"
 import {
   AUTO_SEND_CHOICES,
+  GEAR_ASKS,
   NOBODY_LISTENING,
   SAGA_PREFIX,
   SendCountdown,
@@ -18,6 +19,7 @@ import {
   isHeld,
   isImmediate,
   type AutoSend,
+  type GearAsk,
   type InboxListener
 } from "spell/epic/review"
 // the page's view of the review inbox, as the review controls':  its file, not `epic-review`'s barrel
@@ -192,9 +194,11 @@ import crumbsCSS from "./Crumbs.css?inline"
  *   - in the shadow root:  not a section, so the rail and counts never see it
  * - THE GEAR (epic `epic-engine` P53, `gear()`), at the header's right:  Auto Send and Theme, each a sub-menu.
  *   No page-wide git toggle since:  the Log lists every commit (P52), each phase and item shows its own.
- *   - while reviewed, Tidy first (epic `epic-engine` T168):  asks the epic's session to run `/epic tidy <epic>`
- *     (`askTidy()`);  not on a saga page
- *   - then Focus mode (P57):  it opens the overlay
+ *   - while reviewed, in Owen's order (epic `epic-engine` T174):  Where are we?, Bells & Whistles, Focus mode (P57:  it
+ *     opens the overlay), Merge and push (the tooling home only);  a divider;  Tidy (T168), Hush settled items, Start
+ *     fresh;  a divider;  Auto Send, Theme
+ *   - each row but the dialogs' and the sub-menus' ASKS the epic's session to do something (`askRow()`):  `/wtf`,
+ *     `/epic tidy <epic>` ...;  not on a saga page
  * - FOCUS MODE (epic `epic-engine` P57, `<epic-focus>`), while the page is reviewed:  a full-screen overlay walking
  *   the open items one at a time, drawn here, opened from the gear or asked for by a block (`epic-focus-asked`:  the
  *   Manual tests section's Start testing, decision Q65)
@@ -1235,8 +1239,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The header's GEAR, where the git toggle was (Owen, 2026-10-29:  "Turning it off could be from a gear menu in the
    * epic page header which replaces this"):  a round icon button opening a small menu of SETTINGS
-   * - in Owen's order (T173):  Tidy, Bells & Whistles, Focus mode (each a dialog), a divider, then Auto Send and Theme,
-   *   each opening a sub-menu beside it
+   * - in Owen's order (T174, 2026-11-26):  Where are we?, Bells & Whistles, Focus mode, Merge and push (the tooling home
+   *   only);  a divider;  Tidy, Hush settled items, Start fresh;  a divider;  Auto Send and Theme, each opening a
+   *   sub-menu beside it
+   *   - the asks (Where are we?, Merge and push, Tidy, Hush, Start fresh) only while reviewed, never on a saga page:
+   *     `askRow()`
    * - Auto Send · 2 minutes (Owen's comment C8, J160):  Immediately, 2 minutes, 5 minutes, then Off under a divider;
    *   the chosen one ticked (`SendCountdown.choose()`, remembered in this browser for every page)
    * - Theme · Paper (Owen's comment C9, J162):  Spell UI's own theme menu in its menu mode (`<ui-theme-menu
@@ -1272,25 +1279,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         >
           <div class="gear-panel">
             <div class={GEAR_ROWS} role="menu" aria-label={this.translationForKey("gearTip")} onKeyDown={this.onRowKey}>
-              <Show when={this.review.reviewing() && !this.isSaga}>
-                <button
-                  type="button"
-                  class={[GEAR_ROW, "tidy-row"]}
-                  part={this.partForName("gear-row")}
-                  role="menuitem"
-                  value={TIDY_ROW}
-                  tabindex="-1"
-                  aria-description={this.translationForKey("tidyTip")}
-                  onClick={() => this.askTidy()}
-                >
-                  {/* the tooltip on its words, not the row:  the menu focuses its first row as it opens, and a tooltip
-                      shown on that focus covered the rows under it */}
-                  <span class="tidy-words" data-tooltip={this.translationForKey("tidyTip")}>
-                    <ui-icon name="broom" class="lead" aria-hidden="true" padding="none" />
-                    <span class="name">{this.translationForKey("tidy")}</span>
-                  </span>
-                </button>
-              </Show>
+              {/* Owen's order (2026-11-26, T174):  the status and the dialogs;  the epic's chores;  the settings */}
+              <Show when={this.canAsk}>{this.askRow("status", "compass", "askStatus")}</Show>
               <button
                 type="button"
                 class={[GEAR_ROW, "bells-row"]}
@@ -1317,7 +1307,13 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   <span class="name">{this.translationForKey("focusMode")}</span>
                 </button>
               </Show>
-              {/* the dialogs above, the sub-menus below (Owen, 2026-11-26, T173) */}
+              <Show when={this.canAsk && this.review.isHome()}>{this.askRow("push", "cloud arrow up", "askPush")}</Show>
+              <Show when={this.canAsk}>
+                <ui-divider class="gear-divider" padding="none" />
+                {this.askRow("tidy", "broom", "tidy")}
+                {this.askRow("hush", "eye slash", "askHush")}
+                {this.askRow("fresh", "seedling", "askFresh")}
+              </Show>
               <ui-divider class="gear-divider" padding="none" />
               {this.gearRow("autoSend", this.translationForKey("autoSend"), this.autoSendWords(this.autoSend))}
               {this.gearRow("theme", this.translationForKey("theme"), this.themeTitle)}
@@ -1366,6 +1362,40 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           </div>
         </ui-popup>
       </>
+    )
+  }
+
+  /** The gear's rows that ask the epic's session to do something show:  while reviewed, never on a saga page. */
+  private get canAsk(): boolean {
+    return this.review.reviewing() && !this.isSaga
+  }
+
+  /**
+   * One of the gear's rows that ASK the epic's session to do something (`GearAsk`):  Tidy (epic `epic-engine` T168),
+   * Where are we?, Hush settled items, Start fresh, Merge and push (T174);  its icon in the column the other rows'
+   * share, its tooltip (`<key>Tip`, or Tidy's `tidyTip`) on its words.
+   * - a click:  the menu closes, and the session is asked (`askSession()`)
+   */
+  private askRow(ask: GearAsk, icon: string, key: AskKey): JSX.Element {
+    const tip = this.translationForKey(`${key}Tip`)
+    return (
+      <button
+        type="button"
+        class={[GEAR_ROW, "ask-row", `${ask}-row`]}
+        part={this.partForName("gear-row")}
+        role="menuitem"
+        value={ask}
+        tabindex="-1"
+        aria-description={tip}
+        onClick={() => this.askSession(ask)}
+      >
+        {/* the tooltip on its words, not the row:  the menu focuses its first row as it opens, and a tooltip shown on
+            that focus covered the rows under it */}
+        <span class="ask-words" data-tooltip={tip}>
+          <ui-icon name={icon} class="lead" aria-hidden="true" padding="none" />
+          <span class="name">{this.translationForKey(key)}</span>
+        </span>
+      </button>
     )
   }
 
@@ -1540,13 +1570,13 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * The gear's Tidy (epic `epic-engine` T168):  its menu closes, and the epic's session is asked to run
-   * `/epic tidy <epic>`, as the pill asks for a review (`ReviewClient.startReview()`);  its notice says what came of it.
+   * One of the gear's asks (`askRow()`):  its menu closes, and the epic's session is asked for it (`/epic tidy <epic>`,
+   * `/wtf` ...), as the pill asks for a review (`ReviewClient.startReview()`);  its notice says what came of it.
    */
   @E.untracked
-  private askTidy() {
+  private askSession(ask: GearAsk) {
     if (this.gearMenu) this.gearMenu.visible = false
-    void this.review.client?.startReview("tidy")
+    void this.review.client?.startReview(ask)
   }
 
   /** Bells & Whistles' DOM element, as drawn. */
@@ -1862,14 +1892,14 @@ const GEAR_ID = "gear"
 /** Focus mode's row in the gear's menu, its `value`:  an action, no sub-menu. */
 const FOCUS_ROW = "focus"
 
-/** Tidy's row in the gear's menu, its `value`:  an action, no sub-menu (T168). */
-const TIDY_ROW = "tidy"
-
 /** The gear's Bells & Whistles row's `value` (epic `epic-engine` P86). */
 const BELLS_ROW = "bells"
 
 /** The gear's rows that open a dialog or ask Claude, not a sub-menu:  the right arrow leaves them be. */
-const DIALOG_ROWS: readonly string[] = [TIDY_ROW, FOCUS_ROW, BELLS_ROW]
+const DIALOG_ROWS: readonly string[] = [...GEAR_ASKS, FOCUS_ROW, BELLS_ROW]
+
+/** The text key of each gear ask's row;  its tooltip's is `<key>Tip`. */
+type AskKey = "tidy" | "askStatus" | "askHush" | "askFresh" | "askPush"
 
 /** Each Auto Send choice's text key. */
 const AUTO_SEND_TEXTS = {

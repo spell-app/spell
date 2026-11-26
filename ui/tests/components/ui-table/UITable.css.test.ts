@@ -236,14 +236,18 @@ describe("UITable.css on class-grammar examples", () => {
     expect(button.borderTopStyle).toBe("none")
   })
 
-  it("stacks rows on a narrow VIEWPORT (static markup), unless unstackable", async () => {
+  it("stacks rows on a narrow VIEWPORT (static markup) only when `stackable`", async () => {
     await page.viewport(MOBILE.width, MOBILE.height)
     Sheets.adopt([...foundationCSS, tableCSS])
     const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
     const cell = (selector: string) => getComputedStyle(root.querySelector(`${selector} tbody td`)!)
     expect(cell(".ui.stackable.table").display).toBe("block")
     expect(cell(".ui[class*='tablet stackable'].table").display).toBe("block")
-    expect(cell(".ui.unstackable.table").display).toBe("table-cell")
+    // every other table stays a table (epic `epic-engine` T176:  stacking is opt-in)
+    const stacked = [...root.querySelectorAll(".ui.table:not(.stackable) > tbody > tr > td:first-child")].filter(
+      (td) => getComputedStyle(td).display === "block"
+    )
+    expect(stacked).toEqual([])
     expect(cell(".ui.celled.table:not(.sortable)").borderLeftStyle).toBe("none")
   })
 

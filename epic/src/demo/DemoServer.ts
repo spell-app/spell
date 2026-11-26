@@ -8,6 +8,7 @@ import type { SRV } from "spell/server"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicServer } from "spell/epic/server/EpicServer"
+import type { PageAsk } from "spell/epic/review/review.types"
 import { repoPrefixFor } from "spell/epic/server/server.types"
 import { ReviewStart, type StartResult, type WakeResult } from "spell/epic/tool/ReviewStart"
 
@@ -41,7 +42,8 @@ import { ReviewStart, type StartResult, type WakeResult } from "spell/epic/tool/
  * - NOTHING outside the check is touched:
  *   - a wake (Send or its countdown with nobody listening) never types into a window, opens a session or
  *     launches one:  `ReviewStart`'s `wake()` is stubbed, recording the epic in `wakes`, and answering what a
- *     machine with no VS Code window would (`no-vscode`);  the review pill's `start()` likewise (`starts`)
+ *     machine with no VS Code window would (`no-vscode`);  the review pill's `start()` likewise (`starts`:  the epic, and
+ *     `:<ask>` for a gear ask, `demo:tidy`)
  *   - a DOCS page's wake (`wakeFor()`) too, before it claims the wake in the epic's inbox:  the comments routes find
  *     a docs page's epic through this checkout's REAL epic folder (its owner, or the standing `feedback`, epic
  *     `epic-engine` T9), whose inbox a check must never write
@@ -130,9 +132,9 @@ export class DemoServer {
     ReviewStart.prototype.wakeFor = async function (this: ReviewStart, _planDoc: string, epic: string) {
       return this.wake(epic)
     }
-    ReviewStart.prototype.start = async (epic: string): Promise<StartResult> => {
-      starts.push(epic)
-      const command = ReviewStart.commandFor(epic)
+    ReviewStart.prototype.start = async (epic: string, _planDoc?: string, ask?: PageAsk): Promise<StartResult> => {
+      starts.push(!ask || ask === "review" ? epic : `${epic}:${ask}`)
+      const command = ReviewStart.commandFor(epic, ask)
       return { state: "none", command, sessions: [], message: `Nothing started (a demo check)` }
     }
     const restore = () => {

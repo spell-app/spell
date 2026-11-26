@@ -28,11 +28,6 @@
 @layer ui.components.docs-tokens.types {
   :host {
     display: block;
-    /*
-     * Its tables NEVER stack, whatever the page says (`--ui-stack-with`):  too wide for their column,
-     * they scroll sideways in `<ui-table>`'s own scroller.  The table's own region token, as a page would set it.
-     */
-    --ui-table-stack-by: none;
   }
 
   .ui.tokens {
