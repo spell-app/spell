@@ -151,7 +151,8 @@ class FakeStatusBarItem {
 
   constructor(
     readonly id: string,
-    readonly alignment: StatusBarAlignment
+    readonly alignment: StatusBarAlignment,
+    readonly priority?: number
   ) {}
 
   show(): void {
@@ -223,8 +224,8 @@ export const languages = {
 
 export const window = {
   createOutputChannel: (name: string) => new FakeLogOutputChannel(name),
-  createStatusBarItem(id: string, alignment = StatusBarAlignment.Left) {
-    const item = new FakeStatusBarItem(id, alignment)
+  createStatusBarItem(id: string, alignment = StatusBarAlignment.Left, priority?: number) {
+    const item = new FakeStatusBarItem(id, alignment, priority)
     statusBarItems.push(item)
     return item
   }
