@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url"
 import { afterEach, beforeEach, expect, test } from "vite-plus/test"
 
 import { Git } from "spell/server/Git"
+import { FreshAll } from "spell/epic/command/FreshAll"
 import { FreshPause } from "spell/epic/command/FreshPause"
 import { AgentList } from "spell/epic/tools/AgentList"
 import { AgentPause } from "spell/epic/tools/AgentPause"
@@ -56,6 +57,7 @@ beforeEach(() => {
 })
 afterEach(() => {
   FreshPause.end()
+  FreshAll.drop(OLD_SESSION)
   rmSync(scratch, { recursive: true, force: true })
 })
 
@@ -152,4 +154,21 @@ test("the command:  nothing starts during a round;  after it, resumed once", () 
   expect(resumed.status).toBe(0)
   expect(resumed.stdout).toContain("next step:  finish it")
   expect(epic(NEW_SESSION, "resume", "mine").status).toBe(1)
+}, 60_000)
+
+test("a fresh waiting for its agents (T172):  nothing new starts;  the last one done says go fresh now", () => {
+  const epic = (...args: string[]) =>
+    spawnSync(process.execPath, [EPIC, "agents", ...args], {
+      cwd: worktree,
+      encoding: "utf8",
+      env: { ...process.env, EPIC_CHECKOUT: worktree, CLAUDE_CODE_SESSION_ID: OLD_SESSION }
+    })
+  expect(epic("add", "mine", "fix it").status).toBe(0)
+  FreshAll.markSolo(OLD_SESSION, "seo")
+  const held = epic("add", "more", "new work")
+  expect(held.status).toBe(1)
+  expect(held.stderr).toMatch(/goes fresh once seo's agents are done.*after the fresh/)
+  const done = epic("done", "mine")
+  expect(done.status).toBe(0)
+  expect(done.stdout).toMatch(/seo's agents are done and this session is clear:  go fresh now/)
 }, 60_000)

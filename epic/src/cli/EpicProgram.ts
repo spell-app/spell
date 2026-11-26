@@ -537,7 +537,7 @@ export class EpicProgram {
       epic.command("fresh"),
       "/epic fresh all:  every running epic session marked to go to a fresh session at its next clear moment;  " +
         "TELL: lines for each, and which go now and which later;  --pause:  each pauses and saves its agents first;  " +
-        "one epic:  epic window fresh <epic>",
+        "one epic:  epic window fresh <epic>, or later <epic> once its agents are done",
       (args) => EpicTools.planDoc(["fresh", ...args])
     )
     this.group(

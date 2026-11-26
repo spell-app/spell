@@ -37,11 +37,16 @@
  *   - `resume <name>`:  paused no more, its brief printed to start it again;  once, and never during a round
  *   - `add` and `resume` exit 1 while a round holds the epic:  a paused session starts no new work
  *   - `done` of a paused one exits 1 (`--finished`:  its whole task really is done)
+ * - A FRESH WAITING for this session's agents (`epic fresh later`, epic `epic-engine` T172):
+ *   - `add` exits 1:  new work waits for the fresh session (`epic queue <epic> <id> "after the fresh"`)
+ *   - `done` of the last one says to go fresh now (`FreshAll.afterAgent()`), or why it still waits
  * - `--epic <name>`, any verb:  that epic's list, e.g. from the main checkout;  default:  the worktree's epic, if any
  * - Which checkout:  the one this file is in, which `epic` picks from the current folder (`EpicTools.run()`)
  */
 import { waitUntil } from "spell/util/timing"
+import { ClaudeHome } from "spell/epic/config/ClaudeHome"
 import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
+import { AFTER_FRESH, FreshAll } from "spell/epic/command/FreshAll"
 import { FreshPause } from "spell/epic/command/FreshPause"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
@@ -84,6 +89,9 @@ async function run(
     if (verb === "pause") return pauseAgent(list, name, flags)
     if (verb === "resume") return resumeAgent(list, name)
     if (verb === "add" && FreshPause.holds(list.epic, process.env.CLAUDE_CODE_SESSION_ID)) return heldByPause()
+    if (verb === "add" && list.epic && FreshAll.pending(process.env.CLAUDE_CODE_SESSION_ID)?.solo) {
+      return heldByFresh(list.epic)
+    }
     if (verb === "add") console.log(list.add(name, task!, { status, taskId, files }).name)
     else if (verb === "claim") {
       if (!task) return usage()
@@ -94,6 +102,7 @@ async function run(
       const already = list.agents.some((agent) => agent.name === list.fullName(name)) ? undefined : list.doneSaid(name)
       if (already) console.log(`${list.fullName(name)} was marked done already:  ${already}`)
       else await recordTook(list, list.done(name, { finished: Boolean(flags.finished) }))
+      freshAfterDone(list.epic)
     } else if (verb === "told") list.told(name)
     else return usage()
     return 0
@@ -188,6 +197,33 @@ function lastStanding(list: AgentList, name: string): number {
   console.log(`${others.length} other agent(s) still running (${list.prefix}):  the last of them runs the full suite`)
   for (const agent of others) console.log(`  ${agentLine(agent)}`)
   return 1
+}
+
+/** `add` while this session waits to go fresh (T172):  exit 1, saying where new work goes. */
+function heldByFresh(epic: string): number {
+  console.error(
+    `epic agents:  this session goes fresh once ${epic}'s agents are done:  no agent starts meanwhile;  ` +
+      `queue the work for the fresh session (\`epic queue ${epic} <id> "${AFTER_FRESH}"\`), ` +
+      "or call the fresh off (`epic fresh drop`)"
+  )
+  return 1
+}
+
+/**
+ * After an agent of epic `epic` is done:  this session waiting to go fresh (`epic fresh later`, T172) is told to go now,
+ * or why it still waits (`FreshAll.afterAgent()`);  nothing when no fresh waits.  NEVER throws.
+ */
+function freshAfterDone(epic: string | undefined): void {
+  try {
+    const sessionId = process.env.CLAUDE_CODE_SESSION_ID
+    const transcript = sessionId ? ClaudeHome.transcriptOf(sessionId) : undefined
+    const next = FreshAll.afterAgent(sessionId, epic, { transcript, cwd: ROOT })
+    if (!next) return
+    if ("go" in next) console.log(next.go)
+    else console.log(`the fresh still waits:  ${next.wait};  the end-of-turn hook wakes this session once it's clear`)
+  } catch (error) {
+    console.error(`epic agents done:  ${error instanceof Error ? error.message : String(error)}`)
+  }
 }
 
 /**

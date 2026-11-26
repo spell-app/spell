@@ -4,6 +4,9 @@
  * pending by `epic fresh all` is woken at its first CLEAR MOMENT, to run `/epic fresh`.
  * - stdin `{ session_id, transcript_path, cwd, ... }`.
  * - Not pending (every other turn):  exits 0 at once.
+ * - Also ONE session's `/epic fresh` waiting for its agents (`epic fresh later`, epic `epic-engine` T172):  the same
+ *   mark (`solo`), the same wait;  the fallback that wakes an idle session once its last agent is done, when the agent's
+ *   own notice and `epic agents done` didn't
  * - During `epic fresh all --pause` (epic `epic-engine` T139) nobody is pending;  after it, paused agents don't count
  *   as running.
  * - Pending:  waits in the background (`FreshAll.waitForClear()`) until the session is clear:  no agents of its epic
