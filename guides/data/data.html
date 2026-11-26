@@ -465,6 +465,14 @@ a "recipe" is a thing
                 </td>
               </tr>
               <tr>
+                <td><code>jobs can be filtered by any field, with "field" and "value"</code></td>
+                <td>
+                  one step in under its list's line: the field and the value go as two questions,
+                  <code>every job where its status is "open"</code> sends <code>?field=status&amp;value=open</code>.
+                  One field at a time; the rest of a <code>where</code> is checked on the Spell server
+                </td>
+              </tr>
+              <tr>
                 <td><code>it sorts by title and date</code>, <code>it sorts by every field</code></td>
                 <td>
                   sorts for itself; <code>with "order"</code> added when its question isn't called <code>sort</code>

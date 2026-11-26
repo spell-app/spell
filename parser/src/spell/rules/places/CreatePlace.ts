@@ -618,6 +618,7 @@ function mergeDetail(
       paging,
       isOne,
       filters,
+      filteredWith,
       sorts,
       sortedWith,
       sortOrders: orders,
@@ -627,6 +628,7 @@ function mergeDetail(
     const held = ((into.collections ??= {})[name] ??= {})
     if (searches) held.searches = searches
     if (filters) held.filters = filters
+    if (filteredWith) held.filteredWith = filteredWith
     if (sorts) held.sorts = sorts
     if (sortedWith !== undefined) held.sortedWith = sortedWith
     if (orders) held.sortOrders = [...(held.sortOrders ?? []), ...orders]

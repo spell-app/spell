@@ -570,12 +570,24 @@ export class RestPlace extends WebPlace implements Place {
     const { filter = {}, search = {}, sort = [], select } = query
     const { select: canSelect, idOf } = this.capabilities
     const { filter: canFilter, sort: canSort, sortParam, sortOrders, sortDirections } = this.asksOf(collection)
+    const { filteredWith } = this.mappingOf(collection).asks ?? {}
     const data: Record<string, unknown> = {}
     const filtering = Object.keys(filter)
     const { askedBy } = this.mappingOf(collection)
     // what it's asked for by goes as the query:
     // the server's answer is the one for those values, whatever it says it holds
-    if (filtering.length && (canDoAll(canFilter, filtering) || isAskedBy(askedBy, filtering))) {
+    if (filteredWith && filtering.length && !isAskedBy(askedBy, filtering)) {
+      // a field and its value, two questions:  one field at a time, the rest the engine's
+      const taken = filtering.find((field) => canDoAll(canFilter, [field]))
+      if (taken !== undefined) {
+        const [sent] = Object.entries(this.onTheWire(collection, pickedFrom(filter, [taken])))
+        if (sent) {
+          data[filteredWith.field] = sent[0]
+          data[filteredWith.value] = sent[1]
+        }
+        if (filtering.length === 1) handled.filter = true
+      }
+    } else if (filtering.length && (canDoAll(canFilter, filtering) || isAskedBy(askedBy, filtering))) {
       Object.assign(data, this.onTheWire(collection, filter))
       handled.filter = true
     } else if (filtering.length) {
@@ -972,6 +984,12 @@ function namedSortFor(orders: readonly RestSortOrder[], asked: SortField): RestS
 export type RestAsks = {
   /** Which fields it filters by itself. */
   filter?: FieldAbility
+  /**
+   * What it calls a filter's field and its value, asked as two questions:  `{ field: "field", value: "value" }`, said
+   * `jobs can be filtered by any field, with "field" and "value"`, sends `?field=status&value=open`.
+   * - One field at a time:  the rest of a filter is the engine's.
+   */
+  filteredWith?: { field: string; value: string }
   /** Which fields it sorts by itself. */
   sort?: FieldAbility
   /** What it calls a sort:  its own question name. */

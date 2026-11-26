@@ -141,6 +141,11 @@ export type PlaceDetails = {
   pageSizeAskedWith?: string
   /** Which fields a web server filters by itself:  `it filters by cuisine and rating`.  Left out:  none. */
   filters?: "every field" | readonly string[]
+  /**
+   * What a web server's list calls a filter's field and value, asked as two questions:
+   * `jobs can be filtered by any field, with "field" and "value"`.  SEE:  `RestAsks.filteredWith`
+   */
+  filteredWith?: { field: string; value: string }
   /** Which fields a web server sorts by itself:  `it sorts by title and date`.  Left out:  none. */
   sorts?: "every field" | readonly string[]
   /** What a web server calls a sort, when that isn't `sort`:  `it sorts by date with "order"`. */
@@ -209,7 +214,7 @@ export type PlaceDetails = {
  */
 export type ListAsks = Pick<
   PlaceDetails,
-  "filters" | "sorts" | "sortedWith" | "sortOrders" | "sortDirections" | "searches"
+  "filters" | "filteredWith" | "sorts" | "sortedWith" | "sortOrders" | "sortDirections" | "searches"
 >
 
 /** What the place's paging lines say:  for every collection, or for one alone, under its `live at` line. */
@@ -672,9 +677,10 @@ function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDeta
  * What one list is asked, its own way, from the lines under its `live at` line:  `RestPlace`'s `RestCollection.asks`.
  * - Nothing for a list whose lines say none of it:  the place's lines hold.
  */
-function restAsksOf({ filters, sorts, sortedWith, sortOrders, sortDirections }: Omit<ListAsks, "searches">) {
+function restAsksOf({ filters, filteredWith, sorts, sortedWith, sortOrders, sortDirections }: Omit<ListAsks, "searches">) {
   const asks = {
     ...(filters && { filter: filters }),
+    ...(filteredWith && { filteredWith }),
     ...(sorts && { sort: sorts }),
     ...(sortedWith !== undefined && { sortedWith }),
     ...(sortOrders && { sortOrders }),

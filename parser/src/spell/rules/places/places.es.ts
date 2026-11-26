@@ -95,6 +95,7 @@ import { NextPageByOffset } from "./NextPageByOffset"
 import { NextPageByNumber } from "./NextPageByNumber"
 import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
+import { FiltersByAnyField } from "./FiltersByAnyField"
 import { SortsBy } from "./SortsBy"
 import { NamedSort, NamedSortField, NamedSorts } from "./NamedSorts"
 import { SortsWith } from "./SortsWith"
@@ -831,6 +832,33 @@ placesEs.addRule(FiltersBy, {
             '  kind: "web server",',
             '  at: "https://recetario.test",',
             '  filters: ["cocina", "tiempo"],',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(FiltersByAnyField, {
+  syntax: `${THE}? {collection:plural_type} se pueden filtrar por cualquier campo ,? con {field:text} y {value:text}`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'recetario es un servidor web en "https://recetario.test"\n\t- las recetas están en "/api/recipes"\n\t\t- las recetas se pueden filtrar por cualquier campo, con "field" y "value"',
+          [
+            "export class Recetario extends Place {}",
+            "export const recetario = core.place(new Recetario(), {",
+            '  name: "recetario",',
+            '  kind: "web server",',
+            '  at: "https://recetario.test",',
+            "  collections: { recetas: {",
+            '    at: "/api/recipes",',
+            '    filters: "every field",',
+            '    filteredWith: { field: "field", value: "value" }',
+            "  } },",
             '  unclearNumbers: ","',
             "})"
           ]

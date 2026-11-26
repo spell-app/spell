@@ -9013,7 +9013,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 154,
+          "line": 156,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9873,6 +9873,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "FiltersByAnyField",
+          "ruleNames": ["filters_by_any_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/FiltersByAnyField.ts",
+          "line": 15,
+          "purpose": "A web server's list filters by any field, asked the field and the value as two questions.",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} can be filtered by any field ,? with {field:text} and {value:text}",
+              "example": "cookbook is a web server at \"https://cookbook.test\"\n\t- recipes live at \"/api/recipes\"\n\t\t- recipes can be filtered by any field, with \"field\" and \"value\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    at: \"/api/recipes\",\n    filters: \"every field\",\n    filteredWith: { field: \"field\", value: \"value\" }\n  } }\n})"
+                },
+                "ts": {
+                  "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://cookbook.test\",\n  collections: { recipes: {\n    at: \"/api/recipes\",\n    filters: \"every field\",\n    filteredWith: { field: \"field\", value: \"value\" }\n  } }\n})"
+                },
+                "py": {
+                  "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://cookbook.test\",\n        \"collections\": {\n            \"recipes\": {\n                \"at\": \"/api/recipes\",\n                \"filters\": \"every field\",\n                \"filtered_with\": {\"field\": \"field\", \"value\": \"value\"},\n            },\n        },\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "SortsBy",
           "ruleNames": ["sorts_by"],
           "internal": false,
@@ -10544,7 +10570,7 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 43,
+          "line": 44,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {

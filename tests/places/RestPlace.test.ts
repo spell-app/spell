@@ -1388,6 +1388,18 @@ describe("a list's own filters and sorts, under its line", () => {
     expect(asked).toEqual(["https://jobs.test/api/jobs?sort=name", "https://jobs.test/api/jobs?sort=recency"])
   })
 
+  test("filtered by any field, with a field and a value:  one field at a time, the rest the engine's", async () => {
+    const { place, asked } = sortingBy({ filter: "every field", filteredWith: { field: "field", value: "value" } })
+    const one = await place.list("jobs", { filter: { status: "open" } }, {})
+    expect(one.handled.filter).toBe(true)
+    const two = await place.list("jobs", { filter: { createdAt: "2026-01-01", status: "open" } }, {})
+    expect(two.handled.filter).toBeUndefined()
+    expect(asked).toEqual([
+      "https://jobs.test/api/jobs?field=status&value=open",
+      "https://jobs.test/api/jobs?field=created_at&value=2026-01-01"
+    ])
+  })
+
   test("what it would do is known before it's asked:  `takes()`", () => {
     const { place } = asking()
     expect(

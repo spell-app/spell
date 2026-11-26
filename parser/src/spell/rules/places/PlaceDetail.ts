@@ -59,6 +59,8 @@ export type PlaceDetailValue = {
   pageSizeAskedWith?: string
   /** Which fields it filters by itself:  see `FiltersBy`. */
   filters?: "every field" | string[]
+  /** What it calls a filter's field and value, asked as two questions:  see `FiltersByAnyField`. */
+  filteredWith?: { field: string; value: string }
   /** Which fields it sorts by itself:  see `SortsBy`. */
   sorts?: "every field" | string[]
   /** What it calls a sort, when that isn't `sort`. */
@@ -104,7 +106,7 @@ export type SortDirections = { param: string; descending?: string; ascending?: s
  */
 export type ListAsks = Pick<
   PlaceDetailValue,
-  "filters" | "sorts" | "sortedWith" | "sortOrders" | "sortDirections" | "searches"
+  "filters" | "filteredWith" | "sorts" | "sortedWith" | "sortOrders" | "sortDirections" | "searches"
 >
 
 /** What the place's paging lines say:  for every collection, or one step in under a collection's line, for it alone. */

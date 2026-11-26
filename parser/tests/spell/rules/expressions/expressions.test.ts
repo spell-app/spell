@@ -110,6 +110,7 @@ describe("priority and precedence", () => {
         "field_called:  Priority.declaration",
         "file_upload_handler:  Priority.specific",
         "filters_by:  Priority.declaration",
+        "filters_by_any_field:  Priority.declaration",
         "gives_fields_named_in:  Priority.declaration",
         "gt_lt:  Precedence.comparison",
         "has_slots:  Priority.declaration",

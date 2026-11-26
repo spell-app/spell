@@ -398,3 +398,48 @@ describe("`, sorted here`", () => {
     expect(code).toContain(`core.savedThings(Trabajo, { sort: [{ field: "nombre" }] }`)
   })
 })
+
+describe("a list filtered by any field, with a field and a value", () => {
+  const lines = (read: string) => [
+    `acme is a web server at "https://acme.test":`,
+    `\t- jobs live at "/api/jobs"`,
+    `\t\t- jobs can be filtered by any field, with "field" and "value"`,
+    `a "job" is a thing:`,
+    `\t- it is saved in acme`,
+    `\t- its "status" is text`,
+    `jobs page is an app:`,
+    `\t- its "rows" is ${read}`
+  ]
+
+  test("compiles to the list's filters and filteredWith;  a where goes to it, no error", () => {
+    const { errors, compiled: code } = compiled(lines(`every job where its status is "open"`))
+    expect(errors).toEqual([])
+    expect(code).toMatch(/filters: "every field",\s*filteredWith: \{ field: "field", value: "value" \}/)
+    expect(code).toContain(`core.savedThings(Job, { filter: { status: "open" } }`)
+  })
+
+  test("Spanish:  `los trabajos se pueden filtrar por cualquier campo, con \"field\" y \"value\"`", () => {
+    const { errors, compiled: code } = compiled(
+      [
+        `acme es un servidor web en "https://acme.test"`,
+        `\t- los trabajos están en "/api/jobs"`,
+        `\t\t- los trabajos se pueden filtrar por cualquier campo, con "field" y "value"`,
+        `un "trabajo" es una cosa:`,
+        `\t- se guarda en acme`,
+        `\t- su "estado" es texto`,
+        `poner x a cada trabajo donde su estado es "abierto"`
+      ],
+      "/A.es.spell"
+    )
+    expect(errors).toEqual([])
+    expect(code).toMatch(/filteredWith: \{ field: "field", value: "value" \}/)
+  })
+
+  test("a sort opted in on one line doesn't opt in another", () => {
+    const { errors } = compiled([
+      ...lines(`every job, sorted by its status, sorted here`),
+      `\t- its "more" is every job, sorted by its status`
+    ])
+    expect(errors).toHaveLength(1)
+  })
+})

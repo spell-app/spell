@@ -18,6 +18,7 @@ const PAGING_DETAILS: ReadonlySet<string> = new Set<keyof PagingDetails>([
 /** What a place's lines say of what it's asked, which a collection's own may say for it alone:  see `CollectionAt`. */
 const ASK_DETAILS: ReadonlySet<string> = new Set<keyof ListAsks>([
   "filters",
+  "filteredWith",
   "sorts",
   "sortedWith",
   "sortOrders",

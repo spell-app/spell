@@ -65,6 +65,7 @@ import { NextPageByOffset } from "./NextPageByOffset"
 import { NextPageByNumber } from "./NextPageByNumber"
 import { NextPageByLastId } from "./NextPageByLastId"
 import { FiltersBy } from "./FiltersBy"
+import { FiltersByAnyField } from "./FiltersByAnyField"
 import { SortsBy } from "./SortsBy"
 import { NamedSort, NamedSortField, NamedSorts } from "./NamedSorts"
 import { SortsWith } from "./SortsWith"
@@ -896,6 +897,32 @@ places.addRule(FiltersBy, {
             '  kind: "web server",',
             '  at: "https://cookbook.test",',
             '  filters: ["cuisine", "cookTime"]',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+places.addRule(FiltersByAnyField, {
+  syntax: '{collection:plural_type} can be filtered by any field ,? with {field:text} and {value:text}',
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          'cookbook is a web server at "https://cookbook.test"\n\t- recipes live at "/api/recipes"\n\t\t- recipes can be filtered by any field, with "field" and "value"',
+          [
+            "export class Cookbook extends Place {}",
+            "export const cookbook = core.place(new Cookbook(), {",
+            '  name: "cookbook",',
+            '  kind: "web server",',
+            '  at: "https://cookbook.test",',
+            "  collections: { recipes: {",
+            '    at: "/api/recipes",',
+            '    filters: "every field",',
+            '    filteredWith: { field: "field", value: "value" }',
+            "  } }",
             "})"
           ]
         ]

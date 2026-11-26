@@ -21,6 +21,7 @@ exports[`testing spell module places, in Spanish > rule group specs > match snap
   "every_thing_matching": "type|words",
   "field_called": "property|owner|name",
   "filters_by": "type|fields?",
+  "filters_by_any_field": "collection|field|value",
   "first_few_where": "number|type|where?|body?",
   "gives_fields_named_in": "type|param",
   "id_column": "type|column",

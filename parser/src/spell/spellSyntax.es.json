@@ -8963,7 +8963,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 154,
+          "line": 156,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9823,6 +9823,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "FiltersByAnyField",
+          "ruleNames": ["filters_by_any_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/FiltersByAnyField.ts",
+          "line": 15,
+          "purpose": "A web server's list filters by any field, asked the field and the value as two questions.",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las)? {collection:plural_type} se pueden filtrar por cualquier campo ,? con {field:text} y {value:text}",
+              "example": "recetario es un servidor web en \"https://recetario.test\"\n\t- las recetas están en \"/api/recipes\"\n\t\t- las recetas se pueden filtrar por cualquier campo, con \"field\" y \"value\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  collections: { recetas: {\n    at: \"/api/recipes\",\n    filters: \"every field\",\n    filteredWith: { field: \"field\", value: \"value\" }\n  } },\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://recetario.test\",\n  collections: { recetas: {\n    at: \"/api/recipes\",\n    filters: \"every field\",\n    filteredWith: { field: \"field\", value: \"value\" }\n  } },\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://recetario.test\",\n        \"collections\": {\n            \"recetas\": {\n                \"at\": \"/api/recipes\",\n                \"filters\": \"every field\",\n                \"filtered_with\": {\"field\": \"field\", \"value\": \"value\"},\n            },\n        },\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "SortsBy",
           "ruleNames": ["sorts_by"],
           "internal": false,
@@ -10494,7 +10520,7 @@
           "ruleNames": ["collection_at"],
           "internal": false,
           "file": "src/spell/rules/places/CollectionAt.ts",
-          "line": 43,
+          "line": 44,
           "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
           "syntaxes": [
             {
