@@ -13,7 +13,8 @@
 import { upperFirst } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import { Synonyms } from "spell/parser/spell/rules/expressions"
+// Import directly, not the expressions' barrel, which would bring the grammar into every page
+import { Synonyms } from "spell/parser/spell/rules/expressions/Synonyms"
 
 /**
  * Notes warnings on matches while parsing, and gathers a file's back up.

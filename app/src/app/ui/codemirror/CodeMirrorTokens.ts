@@ -54,7 +54,9 @@ export class CodeMirrorTokens {
       {
         isAwaitingParse: () =>
           elsewhere?.isElsewhere() ? !elsewhere.hasParsed() : CodeMirrorRelayout.isUnparsed(fileOf()),
-        isParseOnItsWay: (state) => !!elsewhere?.isElsewhere() && !elsewhere.coloursOf(state.doc)
+        isParseOnItsWay: (state) => !!elsewhere?.isElsewhere() && !elsewhere.coloursOf(state.doc),
+        // coloured on the page:  its grammar loads on first use (epic `solid-2-final` P20)
+        waitFor: () => (elsewhere?.isElsewhere() || SP.hasGrammar() ? undefined : SP.loadGrammar())
       }
     )
   }
@@ -74,6 +76,8 @@ export class CodeMirrorTokens {
     try {
       const exact = elsewhere?.coloursOf(state.doc)
       const behind = elsewhere && !exact ? elsewhere.behindOf(state.doc) : undefined
+      // the grammar, still loading:  plain till it comes (`waitFor`)
+      if (!elsewhere && !SP.hasGrammar()) return Decoration.none
       const spans = elsewhere ? (exact ?? behind?.colours) : CodeMirrorTokens.spansOf(state.doc.toString(), within)
       if (!spans) return Decoration.none
       const marks = spans.flatMap(({ start, end, kind }) => {

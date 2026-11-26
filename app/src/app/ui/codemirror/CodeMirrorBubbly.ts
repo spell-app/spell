@@ -89,7 +89,9 @@ export class CodeMirrorBubbly {
           },
           drawnAtOnce: (decorations, transaction) =>
             blankLinesDrawn(decorations, transaction, sliceOf(transaction.state)?.hiddenIndent),
-          marksTyped: marksTyped
+          marksTyped: marksTyped,
+          // laid out on the page:  its grammar loads on first use (epic `solid-2-final` P20)
+          waitFor: () => (elsewhere?.isElsewhere() || SP.hasGrammar() ? undefined : SP.loadGrammar())
         }
       ),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
@@ -110,6 +112,7 @@ export class CodeMirrorBubbly {
    * - NEVER throws:  `Decoration.none` when the layout fails.
    */
   static decorationsOf(state: EditorState, within?: SP.SpellFile, slice?: Slice): DecorationSet {
+    if (!SP.hasGrammar()) return Decoration.none
     try {
       return new BubblyDecorations(state, drawingOf(state, within), {
         isView: (tag) => isViewTag(within, tag),
@@ -129,6 +132,8 @@ export class CodeMirrorBubbly {
    * - NEVER throws:  no decorations when the layout fails, and no marks when a region's marks fail.
    */
   static laidOutOf(state: EditorState, within?: SP.SpellFile, slice?: Slice): LaidOut {
+    // the grammar, still loading:  plain till it comes (`waitFor`)
+    if (!SP.hasGrammar()) return { decorations: Decoration.none }
     try {
       return CodeMirrorBubbly.laidOutFrom(state, drawingOf(state, within), (tag) => isViewTag(within, tag), slice)
     } catch (error) {

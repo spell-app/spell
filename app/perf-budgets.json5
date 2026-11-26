@@ -13,7 +13,8 @@
       name: "The editor's first screen, JavaScript",
       budget: 400,
       // Smaller Built Code (epic solid-2-final P11):  854 => 741 KB, Spanish, the dialogs and the pages on first use
-      ceiling: 756,
+      // Editor Page Without Its Own Language (P20):  720 => 527 KB, spell's grammar and the language service on first use
+      ceiling: 538,
       build: "editor",
       entries: ["index.html"],
       only: "\\.js$"
@@ -22,8 +23,8 @@
       id: "editor-first-all",
       name: "The editor's first screen, everything",
       budget: 500,
-      // P11:  872 => 754 KB
-      ceiling: 769,
+      // P11:  872 => 754 KB;  P20:  734 => 541 KB
+      ceiling: 552,
       build: "editor",
       entries: ["index.html"]
     },
@@ -99,12 +100,13 @@
       // Review Chunking (epic solid-2-final P19):  410 KB, the worker's own copy of the grammar, the parser and the
       // language service.  Its budget is the lazy pieces' ceiling it breaks;  that ceiling still counts it too.
       // P19 layout B:  386.9 => 372.8 KB, the TypeScript and Python writers loading on first use
+      // P20:  372.8 => 368.8 KB, and counted whole (`lazy whole`), with any chunk it imports up front
       budget: 351,
-      ceiling: 381,
+      ceiling: 376,
       build: "editor",
       entries: ["index.html"],
       only: "languageWorker-[^/]*\\.js$",
-      measure: "lazy"
+      measure: "lazy whole"
     },
     {
       id: "site-page",

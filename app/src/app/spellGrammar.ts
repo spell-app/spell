@@ -11,3 +11,6 @@
  */
 export { P } from "spell/parser/parser"
 export { SP } from "spell/parser/spell"
+
+// the grammar itself, with English's pack:  the barrel alone holds none (epic `solid-2-final` P20)
+import "spell/parser/spell/languages/en"

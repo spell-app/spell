@@ -12,6 +12,8 @@
 import { P } from "spell/parser/parser"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { englishInflector } from "spell/parser/spell/languages/en/inflector"
+// Import directly:  the barrel's live bindings are set from here, as the grammar loads
+import { installGrammar } from "spell/parser/spell/grammar"
 
 // Structural rule classes, registered directly below.
 import { Block, type DocComment } from "./Block"
@@ -48,7 +50,7 @@ import { _async } from "./async"
 import { draw } from "./draw"
 import { tests } from "./tests"
 import { places } from "./places"
-import { sites } from "./sites"
+import { sites, ShowSitePart, SiteAddressOf } from "./sites"
 
 // Each module's rules in English:  its syntax and tests, registered in the modules' order (epic `spanish` P3).
 import "./core/core.en"
@@ -121,7 +123,7 @@ export { spellTagsIn, type SpellTag, ActionButton, isBareComponentName, SpellJSX
 /** Export so editors can show a type's `<markdown>` description where its docstring shows -- e.g. hover. */
 export { MarkdownDescription }
 // a site's lines naming its parts, for an editor's rename (epic `mockup` P6)
-export { ShowSitePart, SiteAddressOf } from "./sites"
+export { ShowSitePart, SiteAddressOf }
 /**
  * Export so a `<spell-viewer>` layout's `<markdown>` splits its holes as a drawing's does
  * -- see `MarkdownBlock.partsOf()`.
@@ -161,3 +163,24 @@ spellParser.import(
   sites,
   JSX
 )
+
+// Hand the barrel its live bindings:  `SP.spellParser`, `SP.Block` ... are these from now on (epic `solid-2-final` P20)
+installGrammar({
+  spellParser,
+  ParseError,
+  parseExpression,
+  commitStatement,
+  SpellStatement,
+  Block,
+  BlockLine,
+  Negatable,
+  spellTagsIn,
+  ActionButton,
+  SpellJSX,
+  isBareComponentName,
+  MarkdownDescription,
+  MarkdownBlock,
+  ShowSitePart,
+  SiteAddressOf,
+  MemberReadExpression
+})

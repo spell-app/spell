@@ -694,7 +694,9 @@ export class CodeMirrorLanguage {
   private accentFixes(): Extension {
     return ViewPlugin.define((view) => ({
       update: (update: ViewUpdate) => {
-        if (!LSP.SpellKeywords.of(this.file.language).hasAccentFixes) return
+        // a pack with no parser here yet is English, whose comes with the grammar (`SP.loadGrammar()`):  no accent fixes
+        const { language } = this.file
+        if (!language.hasParser || !LSP.SpellKeywords.of(language).hasAccentFixes) return
         for (const transaction of update.transactions) {
           // a key typed, or Enter (CodeMirror's new line is a plain `input`)
           if (!transaction.isUserEvent("input.type") && transaction.annotation(Transaction.userEvent) !== "input")

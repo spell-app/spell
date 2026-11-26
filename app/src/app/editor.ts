@@ -1147,6 +1147,8 @@ export class EditorStore extends Observable {
     const runtime = await editor.loadRuntime()
     const output = runtime.core.console
     output.typed(line)
+    // the page's own copy of the grammar, on this first use:  the worker holds the editor's (epic `solid-2-final` P20)
+    await SP.loadGrammar()
     await editor.parsedForConsole()
     const parsed = SP.parseLine(line, consoleScopeFor(editor.project), { commit: true })
     if (parsed.error !== undefined || parsed.compiled === undefined) {
@@ -2620,9 +2622,10 @@ export class EditorStore extends Observable {
     | undefined = undefined
 
   /**
-   * Compiles a project off the page's thread, once the code editor's loaded:  the language worker's compile
-   * (`LanguageClient.compile()`, epic `solid-2-final` P18);  `undefined` where the page compiles it itself.
-   * See `LazyCodeMirror`.
+   * Compiles a project off the page's thread:  the language worker's compile (`LanguageClient.compile()`, epic
+   * `solid-2-final` P18), from the first compile on, so the page needs no grammar to run a project (P20, I59).
+   * - Set by `index.tsx` as the editor starts;  `undefined` where the page compiles it itself (the static build).
+   * - Its answer `undefined`:  a project the worker can't load, which the page compiles, its grammar loaded then.
    */
   compileElsewhere: ((project: SP.SpellProject) => Promise<SP.CompiledEntry | undefined>) | undefined = undefined
 

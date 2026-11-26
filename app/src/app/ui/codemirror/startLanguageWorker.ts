@@ -1,6 +1,6 @@
 /**
  * Start the editor's language worker (`languageWorker.ts`, epic `solid-2-final` P18).
- * - Its own file, NOT in the CodeMirror folder's barrel:  only the editor app imports it (`LazyCodeMirror`),
+ * - Its own file, NOT in the CodeMirror folder's barrel:  only the editor app imports it (`editorLanguage()`),
  *   so `<spell-editor>`'s build bundles no worker (`element.build.test.ts`).
  */
 export function startLanguageWorker(): Worker {

@@ -284,7 +284,13 @@ const WHAT_BUILDS_SHARE: readonly SharedRow[] = [
   },
   { from: SHARED_SOLID.ui, names: ["spell/ui"] },
   { from: SHARED_SOLID.families, names: [...Object.keys(SHARED_FAMILIES), ...DRAWN_FAMILIES] },
-  { from: "spell-grammar.js", names: ["spell/parser/parser", "spell/parser/spell"], only: "grammar" },
+  {
+    from: "spell-grammar.js",
+    // and the grammar's own entry, which a page that loads it on first use imports (`grammarOnFirstUse`, epic
+    // `solid-2-final` P20):  `spell-grammar.js` loads it up front, so taking that file is taking the grammar
+    names: ["spell/parser/parser", "spell/parser/spell", "spell/parser/spell/languages/en"],
+    only: "grammar"
+  },
   {
     from: "bundled",
     names: [

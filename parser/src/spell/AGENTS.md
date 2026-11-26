@@ -274,6 +274,17 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
     (see "Creating docs").
 - [The barrel](index.ts) is loaded in browsers AND the editor's server, in spaces (WWOD §8 › "Barrels").
   - It imports `spell/parser/core`'s TYPES only, never its code.
+  - It holds NO GRAMMAR (epic `solid-2-final` P20):  what holds a project (its files, addresses, names, project file,
+    compile cache, English's words) is there;  the rules and `spellParser` are [grammar.ts](grammar.ts)'s live bindings,
+    set as the grammar loads.  So the editor's page holds a project, and its worker parses it.
+    - On first use:  `await SP.loadGrammar()`.  `SpellProject`'s parse and compile, and `SP.Language.load()`, do it
+      themselves;  `SP.hasGrammar()` says whether it's here.
+    - Up front, a side-effect import:  `spell/parser/spell/languages/all` (node programs, the tests' setup), or
+      `spell/parser/spell/languages/en` (the editor's language worker, the element builds' `spell-grammar.js`).
+    - Before then `SP.spellParser`, `SP.Block` ... throw, saying so;  so does English's `parser`
+      (`SP.Language.hasParser`).  English's pack itself, its words and messages, is always there (`languages/en/english.ts`).
+    - What reads tokens alone needs none:  `SP.Language.tokensReader()`, a rule-less parser of the pack's words
+      (`PG.PageView`);  a page's alone head (`SpellProject.headFor()`), from its text.
 
 ## How parsing works
 

@@ -77,7 +77,9 @@ async function highlighterFor(lang: string): Promise<Omit<E.CodeLanguage, "load"
   const [{ SP }, { BubblyHtml }, { default: styles }] = await Promise.all([
     import("spell/parser/spell"),
     import("./BubblyHtml"),
-    import("./bubbly.css?inline")
+    import("./bubbly.css?inline"),
+    // so its grammar loads on first use, as the pack loads (epic `solid-2-final` P20)
+    import("spell/parser/spell/grammarOnFirstUse")
   ])
   // a language past English loads on first use:  Spanish only for a page showing ```spell/es
   const { parser } = await SP.Language.load(lang)

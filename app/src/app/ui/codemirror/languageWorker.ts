@@ -9,6 +9,8 @@
  *   the page's person and their org's own groups come first, in a `groups` message.
  * - Its position in the import graph:  an entry of its own, made by `new Worker(new URL(...))`:
  *   the parser, spaces' models and the language service;  NEVER the editor, Solid or CodeMirror.
+ * - It holds the editor's ONE grammar, up front (`spell/parser/spell/languages/en`):  the page's copy of the language
+ *   loads only on first use (epic `solid-2-final` P20).
  */
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -16,6 +18,9 @@ import { SPACES } from "spell/app/spaces"
 import { LSP } from "spell/app/lsp"
 import { CodeColours } from "spell/app/app/ui/CodeColours"
 import { plainError, type LanguageWorkerMessage, type LanguageWorkerReply } from "./LanguageClient"
+
+// the grammar, with English's pack:  everything here parses
+import "spell/parser/spell/languages/en"
 
 // each open file's problems and look, after each parse that changes them
 // and each project it can't load, which the page answers for itself

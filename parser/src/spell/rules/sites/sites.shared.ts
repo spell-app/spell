@@ -1,6 +1,7 @@
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import { Wording } from "spell/parser/spell/rules/expressions"
+// Import directly, not the expressions' barrel:  `SpellProject` reads this file, and must not bring the grammar
+import { Wording } from "spell/parser/spell/rules/expressions/Wording"
 
 /**
  * One page of a site, as its line says it, and as the site's class lists it (`static pages`).

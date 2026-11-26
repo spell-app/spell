@@ -1,5 +1,5 @@
 import { SP } from "spell/parser/spell"
-import { LSP } from "spell/app/lsp"
+import type { LSP } from "spell/app/lsp"
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
@@ -344,6 +344,8 @@ export class SiteWrites {
       if (answer) return answer
     }
     await editor.parsedForConsole()
+    // the language service on first use:  it's no part of the editor's first screen (epic `solid-2-final` P20)
+    const { LSP } = await import("spell/app/lsp")
     return editor.project ? LSP.SpellLanguageService.sitePartSpans(editor.project, name) : []
   }
 

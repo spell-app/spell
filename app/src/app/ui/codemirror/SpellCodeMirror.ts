@@ -78,9 +78,7 @@ export class SpellCodeMirror implements CodeEditorHandle {
   static get states(): FileStates {
     SpellCodeMirror._states ??= new FileStates({
       service: SpellCodeMirror.service,
-      client: SpellCodeMirror.languageWorker
-        ? LanguageClient.inWorker(SpellCodeMirror.service, SpellCodeMirror.languageWorker())
-        : LanguageClient.inThread(SpellCodeMirror.service),
+      client: SpellCodeMirror.client ?? LanguageClient.inThread(SpellCodeMirror.service),
       onEdit: (file) => {
         for (const listener of SpellCodeMirror.editListeners) listener(file)
       },
@@ -93,13 +91,23 @@ export class SpellCodeMirror implements CodeEditorHandle {
   private static _states: FileStates | undefined
 
   /**
-   * What starts the editor's language worker, which then answers what a person asks of the code
-   * (suggestions, hovers, Go to Definition ...) off the page's thread (epic `solid-2-final` P18).
-   * - Set by the editor app before the first editor is made, to what starts it (`startLanguageWorker()`),
-   *   where a worker can load the projects itself:
-   *   not in the static build, nor in `<spell-editor>`, nor in a test, which ask the page's own service.
+   * What answers what a person asks of the code, when it isn't the page's own service:  the editor's language worker,
+   * its suggestions, hovers, Go to Definition ... off the page's thread (epic `solid-2-final` P18).
+   * - Handed in by the editor app before the first editor is made (`useLanguage()`), where a worker can load the
+   *   projects itself:  not in the static build, nor in `<spell-editor>`, nor in a test, which ask the page's own
+   *   service.
    */
-  static languageWorker: (() => Worker) | undefined
+  private static client: LanguageClient | undefined
+
+  /**
+   * Ask `client`, falling back on `service`, from now on:  the editor app's one language client, made as it starts so
+   * its compiles are the worker's before any code editor loads (`editorLanguage()`, epic `solid-2-final` P20).
+   * - MUST come before the first editor is made:  the file states take the client they find then.
+   */
+  static useLanguage({ service, client }: { service: LSP.SpellLanguageService; client: LanguageClient }): void {
+    SpellCodeMirror._service = service
+    SpellCodeMirror.client = client
+  }
 
   /**
    * Hear each edit of a file's state, once it's gone into the file, e.g. to compile or save soon.

@@ -13,6 +13,10 @@ import {
   LAYOUT_WHOLE_HOLE as WHOLE_HOLE
 } from "./runner.types"
 
+// the grammar, loaded before a layout's spell compiles (`loadLanguagesOf()`):  `spell-grammar.js`'s, beside
+// `<spell-viewer>`;  the editor's page's own (epic `solid-2-final` P20)
+import "spell/parser/spell/grammarOnFirstUse"
+
 /****************
  * ### `LayoutSpell`
  * The spell written in a `<spell-viewer>`'s layout, compiled in the page against its program (epic `drawable-thing` P9):
@@ -73,10 +77,12 @@ export class LayoutSpell {
   private markdownTexts = new WeakSet<Text>()
 
   /**
-   * Load the language packs `declarations`, a program's, are written in, past English:  they load on first use
-   * (epic `solid-2-final` P11).  Before `new LayoutSpell()` for a program in Spanish, Solitario.
+   * Load spell's grammar, and the language packs `declarations`, a program's, are written in, past English:  they
+   * load on first use (epic `solid-2-final` P11, P20).  Before `new LayoutSpell()`.
    */
   static async loadLanguagesOf(declarations: unknown): Promise<void> {
+    // spell's grammar first, on a page that loads it on first use (epic `solid-2-final` P20)
+    await SP.loadGrammar()
     const data = SP.SpellDeclarations.read(JSON.stringify(declarations))
     if (data) await SP.Language.loadFor(SP.SpellDeclarations.languagesOf(data))
   }

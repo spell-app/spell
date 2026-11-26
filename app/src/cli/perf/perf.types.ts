@@ -259,7 +259,8 @@ export type PerfBaselineNumbers = { numbers: Record<string, number>; when?: stri
  *     already on disk, from the kit's root (`ui/site/_assets`)
  *     - `entries`:  what a page loads first, from that folder;  an `.html` file's scripts, preloads and stylesheets;
  *       `only`:  count only the files this matches (`\\.js$`)
- *     - `measure`:  `eager` (default:  what a page loads first), or `lazy` (the biggest single file it may load later)
+ *     - `measure`:  `eager` (default:  what a page loads first), `lazy` (the biggest single file it may load later),
+ *       or `lazy whole` (that file and every one it imports up front, which load with it:  the language worker)
  *   - `run`:  a number `spell perf run` measured in a browser (`load editor/desktop brotliLoaded`), from the last run
  */
 export type BudgetEntry = {
@@ -271,7 +272,7 @@ export type BudgetEntry = {
   folder?: string
   entries?: string[]
   only?: string
-  measure?: "eager" | "lazy"
+  measure?: "eager" | "lazy" | "lazy whole"
   run?: string
 }
 

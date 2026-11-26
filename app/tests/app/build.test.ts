@@ -89,10 +89,14 @@ describe("production build", () => {
           !LANGUAGE_WORKER.test(file) && sources(join(assets, file)).some((source) => BUILT_IN_SOUNDS.test(source))
       )
       expect(soundCode).toHaveLength(1)
-      // the language worker:  its own bundle, the parser in it, rule names kept as the page's are
+      // the language worker:  its own bundle, the parser in it or in the grammar's chunks it imports (epic
+      // `solid-2-final` P20), rule names kept as the page's are
       const worker = files.find((file) => LANGUAGE_WORKER.test(file))
       expect(worker).toBeDefined()
-      expect(readFileSync(join(assets, worker!), "utf8")).toMatch(
+      const workerJs = [worker!, ...importedChunks(assets, worker!, "static")]
+        .map((file) => readFileSync(join(assets, file), "utf8"))
+        .join("\n")
+      expect(workerJs).toMatch(
         new RegExp(String.raw`\b${RULE}\s*=\s*class\b|\bclass ${RULE}\b|\([\w$]+,\s*[\`"']${RULE}[\`"']\)`)
       )
       expect(existsSync(join(assets, dirname(soundCode[0]!), "sound-library", "card-slide.ogg"))).toBe(true)
@@ -126,6 +130,30 @@ describe("production build", () => {
       .flatMap((file) => sources(join(outDir, "assets", file)))
       .filter((source) => ON_FIRST_USE.test(source))
     expect(built.length).toBeGreaterThanOrEqual(8)
+  })
+
+  /**
+   * The editor page holds no grammar up front (epic `solid-2-final` P20):  the worker holds the editor's.
+   * - The page's copy is ONE lazy chunk, loaded on first use (`SP.loadGrammar()`:  a Spell Console line, a project
+   *   the worker can't load);  the worker's is its own build's.
+   */
+  test("the editor's first screen holds no grammar:  one lazy copy, and the worker its own", () => {
+    const html = readFileSync(join(outDir, "index.html"), "utf8")
+    const entries = [
+      ...html.matchAll(/<(?:script[^>]*type="module"[^>]*src|link[^>]*rel="modulepreload"[^>]*href)="\/([^"]+\.js)"/g)
+    ].map(([, file]) => file!)
+    const eager = new Set(entries.flatMap((entry) => [entry, ...importedChunks(outDir, entry, "static")]))
+    const holding = (files: Iterable<string>) =>
+      [...files].filter((file) => sources(join(outDir, file)).some((source) => SPELL_RULES.test(source)))
+    expect(holding(eager)).toEqual([])
+    // built, and loaded later
+    const later = new Set(entries.flatMap((entry) => importedChunks(outDir, entry)))
+    expect(holding(later)).toHaveLength(1)
+    // the worker's copy:  in its own file, or the chunks it imports up front
+    const assets = join(outDir, "assets")
+    const worker = readdirSync(assets).find((file) => LANGUAGE_WORKER.test(file))!
+    const workerFiles = [worker, ...importedChunks(assets, worker, "static")].map((file) => `assets/${file}`)
+    expect(holding(workerFiles).length).toBeGreaterThan(0)
   })
 
   test("the run page, `run.html`, loads no editor:  no CodeMirror, Inspector, language service or parser", () => {
@@ -309,6 +337,13 @@ function importsOf(source: string): string[] {
 }
 
 /** What a runtime keeps per copy, as it appears in a sourcemap's `sources`:  `PER_COPY` in `vite.config.ts`. */
+/**
+ * Spell's grammar, as it appears in a sourcemap's `sources`:  the rules' English registrations and their assembly
+ * (`rules/index.ts`).
+ * - NOT every file of the rules' folder:  the barrel reads two word-rule classes (`Wording`, `Synonyms`) by their files.
+ */
+const SPELL_RULES = /\/parser\/src\/spell\/rules\/(index|.*\.en)\.ts$/
+
 const PER_COPY = /\/(parser\/src\/core|app\/src\/app\/runner)\//
 
 /** What the editor loads on first use, as it appears in a sourcemap's `sources`:  the views a `LazyPiece` loads, the CSS service. */

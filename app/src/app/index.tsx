@@ -25,12 +25,16 @@ import { Routes } from "spell/app/app/pages/routes"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
 import { ServerCompileStore } from "spell/app/app/ServerCompileStore"
+import type { EditorLanguage } from "spell/app/app/ui/codemirror/editorLanguage"
 import { reloadOutOfSight } from "spell/app/app/reloadOutOfSight"
 import { keepEditorOnReload } from "spell/app/app/editorTab"
 import { stepsOnLoadingScreen } from "spell/app/app/solid/loadingSteps"
 
 // Solid follows spell cells:  BEFORE anything renders
 import "spell/app/app/solid/cellsBridge"
+// the page's own copy of spell's grammar loads on first use (a Spell Console line ...):  the worker holds the
+// editor's (epic `solid-2-final` P20)
+import "spell/parser/spell/grammarOnFirstUse"
 
 // The static build (the public preview) reads its files from the build and keeps edits in the browser;
 // every other build has debug globals for hacking in the browser's console (`debug.ts`).
@@ -40,6 +44,17 @@ else void import("./debug").catch((error) => console.error("debug globals:", err
 // A project that hasn't changed since it last compiled isn't compiled again:  its output is in the page server's
 // compile cache (epic `language` P27).  Not in the static build, which has no page server.
 if (!isStaticBuild) ServerCompileStore.install()
+
+// A project's compile is the language worker's, from the first, in Run too:  the page downloads no grammar to compile it
+// (epic `solid-2-final` P20, I59).  The worker starts on the first compile;  CodeMirror's editors ask the same one.
+// Not in the static build, which has no server for the worker to load projects from.
+if (!isStaticBuild && typeof Worker !== "undefined") {
+  let language: Promise<EditorLanguage> | undefined
+  editor.compileElsewhere = async (project) => {
+    language ??= import("spell/app/app/ui/codemirror/editorLanguage").then(({ editorLanguage }) => editorLanguage())
+    return (await language).client.compile(project)
+  }
+}
 
 // The editor speaks the page's language:  the browser's, when `index.html` names none.
 // BEFORE anything draws, so `<ui-root>` loads Spell UI's words in it too.

@@ -183,19 +183,42 @@ class WorkerClient extends LanguageClient {
   }
 
   async compile(project: SP.SpellProject): Promise<SP.CompiledEntry | undefined> {
-    if (this.answersOnPage(project) || !this.openProjects.has(project.projectId)) return undefined
+    if (this.answersOnPage(project)) return undefined
     const id = ++this.lastId
     try {
+      // no code editor has its files open (Run, or before CodeMirror loads):  the page's text of each goes with it,
+      // so the worker compiles what the page holds, its edits from the side bar too (epic `solid-2-final` P20, I59)
+      const texts = this.openProjects.has(project.projectId) ? undefined : await this.textsOf(project)
       return await new Promise<SP.CompiledEntry>((resolve, reject) => {
         const again = () => reject(new Error("the language worker stopped"))
         this.waiting.set(id, { resolve: resolve as (answer: unknown) => void, reject, again })
         const pagesInPlay = project.pagesInPlay && [...project.pagesInPlay]
-        this.post({ kind: "compile", id, projectId: project.projectId, ...(pagesInPlay && { pagesInPlay }) })
+        this.post({
+          kind: "compile",
+          id,
+          projectId: project.projectId,
+          ...(pagesInPlay && { pagesInPlay }),
+          ...(texts && { texts })
+        })
       })
     } catch (error) {
       console.info(`the language worker couldn't compile ${project.projectId}:  the page compiles it`, error)
       return undefined
     }
+  }
+
+  /**
+   * Each of `project`'s spell files as the page holds it, by address, loading them first:  for a compile of a project
+   * no code editor has open (`compile()`), whose edits came as no changes.
+   * - throws what loading a file throws
+   */
+  private async textsOf(project: SP.SpellProject): Promise<Record<string, string>> {
+    await project.load(undefined)
+    await Promise.all(project.spellFiles.map((file) => file.load(undefined)))
+    const texts: Record<string, string> = {}
+    for (const file of project.spellFiles)
+      if (file.contents !== undefined) texts[LanguageClient.uriOf(file)] = file.contents
+    return texts
   }
 
   opened(file: SP.SpellFile, text: string): void {

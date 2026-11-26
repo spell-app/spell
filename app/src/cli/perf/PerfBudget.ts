@@ -157,9 +157,9 @@ export class PerfBudget {
     )
     const only = entry.only ? new RegExp(entry.only) : undefined
     const load = SRV.Bundle.firstLoad({ folder, entries, only })
-    const isLazy = entry.measure === "lazy"
+    const isLazy = entry.measure === "lazy" || entry.measure === "lazy whole"
     const eager = load.files.filter((file) => file.file.endsWith(".js"))
-    const counted = isLazy ? load.lazy.filter((file) => file.file.endsWith(".js")).slice(0, 1) : eager
+    const counted = isLazy ? PerfBudget.lazyCounted(entry, folder, load) : eager
     const contents = new SRV.BundleContents(folder, { root, builtAt })
     const lines: string[] = []
     for (const size of [...counted].sort((a, b) => b.brotli - a.brotli).slice(0, FILES_SHOWN)) {
@@ -227,7 +227,7 @@ export class PerfBudget {
 
   /**
    * `entry`'s size in `folder`, brotli bytes:  its first load (`SRV.Bundle.firstLoad()`), or its biggest lazy file
-   * (`measure: "lazy"`).
+   * (`measure: "lazy"`), or that file with what it imports up front (`"lazy whole"`).
    * - an `.html` entry stands for what it loads:  its scripts, module preloads and stylesheets
    */
   static sizeOf(entry: BudgetEntry, folder: string): number {
@@ -237,7 +237,24 @@ export class PerfBudget {
     const only = entry.only ? new RegExp(entry.only) : undefined
     const load = SRV.Bundle.firstLoad({ folder, entries, only })
     if (entry.measure === "lazy") return Math.max(0, ...load.lazy.map((file) => file.brotli))
+    if (entry.measure === "lazy whole") {
+      return PerfBudget.lazyCounted(entry, folder, load).reduce((total, file) => total + file.brotli, 0)
+    }
     return load.brotli
+  }
+
+  /**
+   * The files a lazy `entry` counts, from `load`, its first load in `folder`:
+   * - `lazy`:  its biggest lazy script
+   * - `lazy whole`:  that script and every one it imports up front, which load with it, wherever they're split
+   *   (the editor's language worker, its grammar in chunks of its own since epic `solid-2-final` P20)
+   */
+  private static lazyCounted(entry: BudgetEntry, folder: string, load: SRV.BundleLoad): SRV.FileSizes[] {
+    const scripts = load.lazy.filter((file) => file.file.endsWith(".js"))
+    const biggest = [...scripts].sort((a, b) => b.brotli - a.brotli)[0]
+    if (!biggest || entry.measure !== "lazy whole") return scripts.slice(0, 1)
+    const whole = SRV.Bundle.firstLoad({ folder, entries: [biggest.file] })
+    return whole.files.filter((file) => file.file.endsWith(".js"))
   }
 
   /** What the page `html` loads first, from its folder:  its scripts, module preloads and stylesheets. */
