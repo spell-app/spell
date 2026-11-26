@@ -34,6 +34,7 @@ import {
   Referee,
   takenDownError,
   type FileBytes,
+  type FolderOperation,
   type PlaceCredentialMade
 } from "spell/server/places"
 import { ReadCredentials, type Mailer } from "spell/server/signIn"
@@ -298,7 +299,13 @@ export class SpaceFolders {
     this.queueFile = queueFile
     this.people = people
     this.personFor = personFor
-    this.orgRoles = new OrgRoles({ people, onChange: (org) => this.lists.follow(org) })
+    this.orgRoles = new OrgRoles({
+      people,
+      onChange: (org) => {
+        this.checkRoomsIn((address) => orgOfAccount(address.split("/")[0] ?? "") === org)
+        return this.lists.follow(org)
+      }
+    })
     this.lists = new MemberLists({
       people,
       orgRoles: this.orgRoles,
@@ -547,7 +554,11 @@ export class SpaceFolders {
               changeOrDie: updates ? this.mail!.checkFor(address, changeOrDie) : changeOrDie,
               signUpOrDie: sheets!.signUpOrDie
             },
-            operations: { ...members.operations, ...projections?.operations, ...sheets?.operations }
+            operations: {
+              ...this.checkingRoomsAfter(address, members.operations),
+              ...projections?.operations,
+              ...sheets?.operations
+            }
           }
         : { mayChangeAnyRow: (who: string) => members.keeps(who) }),
       limits: SPACE_LIMITS,
@@ -628,6 +639,36 @@ export class SpaceFolders {
       })
     }
     return { cookie: this.reads.cookieFor(address, identity ?? ANYONE), readsAt: this.reads.readsAt(address) }
+  }
+
+  /**
+   * `operations`, each asking the rooms of the space at `address` who may stay once it's done:  its member list's,
+   * so someone taken off it stops hearing its live rooms at once (epic `data` I153).
+   */
+  private checkingRoomsAfter(
+    address: string,
+    operations: Record<string, FolderOperation>
+  ): Record<string, FolderOperation> {
+    const checking = Object.entries(operations).map(([name, operation]): [string, FolderOperation] => [
+      name,
+      async (input, context) => {
+        const result = await operation(input, context)
+        this.checkRoomsIn((at) => at === address)
+        return result
+      }
+    ])
+    return Object.fromEntries(checking)
+  }
+
+  /**
+   * Each open room of a space whose address `isIn` says, asks who may stay (`Referee.checkWhoMayStay()`).
+   * - NEVER throws:  a room that failed to open has nobody in it.
+   */
+  private checkRoomsIn(isIn: (address: string) => boolean): void {
+    for (const [key, room] of this.rooms) {
+      if (!isIn(key.slice(0, key.indexOf("\n")))) continue
+      void room.then((referee) => referee.checkWhoMayStay()).catch(() => {})
+    }
   }
 
   /** Stop every folder's watching:  for a test, or the page server stopping.  The next ask opens each again. */
@@ -808,7 +849,9 @@ export class SpaceFolders {
           collections: { [collection]: {} },
           guard,
           ...(signIn && { signIn }),
-          identityOf: this.personFor
+          identityOf: this.personFor,
+          // asked again after joining, so someone taken off the list or a space taken down stops hearing it (I153)
+          mayStay: (identity) => this.mayReadSpace(address, identity)
         }).open()
       )
       this.rooms.set(key, room)

@@ -37,6 +37,12 @@ const TOUCHED_MOST = 200
 /** The store the browser's copy of pending changes is kept in. */
 const PENDING_STORE = "spell-pending-changes"
 
+/** How long a save outranks a read asked before it:  `PendingChanges.noteSaved()`. */
+const SAVES_KEPT_MS = 120_000
+
+/** The most saves kept for that, the newest. */
+const SAVES_KEPT = 500
+
 /**
  * One change made and not yet confirmed:  a `PlaceChange`, plus what it takes to put it back or replay it.
  * - JSON all the way down, as it's kept in the browser.
@@ -200,6 +206,8 @@ export class PendingChanges {
 
   /** Every change not yet confirmed, oldest first. */
   private pending: PendingChange[] = []
+  /** What was saved lately, oldest first:  each outranks a read asked before it (`replayOn()`'s `askedAt`). */
+  private justSaved: SavedChange[] = []
   /** The `changeId`s on their way, waiting for an answer. */
   private readonly onTheirWay = new Set<string>()
   /** The groups still open. */
@@ -604,10 +612,25 @@ export class PendingChanges {
    * `rows`, as `collection` reads with what's pending on top:  new rows added, deleted ones gone, each field as written.
    * - Rows it changes are copies:  a read's answer is shared.
    * - `query`:  what asked for them, so a row a change moves in or out of its filter does.
-   * - Nothing pending there:  `rows` itself.
+   * - `askedAt`:  how far the saves had got when `rows` were asked (`Places.saveMark`):  what was saved since goes on
+   *   them first, so an answer from before a save doesn't take it back once it's no longer pending (epic `data` I143).
+   *   Left out:  `rows` are new.
+   * - Nothing pending there, nor saved since:  `rows` itself.
    */
-  replayOn(collection: string, rows: PlaceRow[], query: Pick<ListQuery, "filter" | "sort"> = {}): PlaceRow[] {
-    const here = this.pending.filter((change) => change.collection === collection)
+  replayOn(
+    collection: string,
+    rows: PlaceRow[],
+    query: Pick<ListQuery, "filter" | "sort"> = {},
+    askedAt?: number
+  ): PlaceRow[] {
+    const savedSince =
+      askedAt === undefined
+        ? []
+        : this.justSaved.filter(({ change, mark }) => mark > askedAt && change.collection === collection)
+    const here = [
+      ...savedSince.map(({ change }) => change),
+      ...this.pending.filter((change) => change.collection === collection)
+    ]
     if (!here.length) return rows
     const { idField } = this
     const replayed = new Map(rows.map((row, index) => [idOfRow(row, idField) ?? `row ${index}`, row]))
@@ -857,6 +880,13 @@ export class PendingChanges {
     const written = batch.filter(({ kind }) => kind !== "delete")
     const isByChange = rows.length === written.length
     const renamed = isByChange ? this.renameMade(written, rows) : []
+    this.noteSaved(batch, renamed)
+    if (!this.placeAside) {
+      this.places.tellSaved({
+        placeName: this.placeName,
+        collections: [...new Set(batch.map(({ collection }) => collection))]
+      })
+    }
     const { idField } = this
     const place = this.placeNow
     for (const change of written) {
@@ -897,6 +927,23 @@ export class PendingChanges {
         }
       }
     }
+  }
+
+  /**
+   * `batch` is saved:  it outranks a read asked before now, for a while (`replayOn()`'s `askedAt`;  epic `data` I143).
+   * - Under its new id, where the place made one.
+   * - Not an addition or a list's items, which only the place can say the sum of:  its value is the place's answer.
+   * - Kept `SAVES_KEPT_MS`, and the newest `SAVES_KEPT` at most:  a read asked before a save answers well within that.
+   */
+  private noteSaved(batch: readonly PendingChange[], renamed: readonly { from: string; to: string }[]): void {
+    const mark = this.places.markSaved()
+    const now = Date.now()
+    for (const change of batch) {
+      if (change.adds || change.list) continue
+      const id = renamed.find(({ from }) => from === change.id)?.to ?? change.id
+      this.justSaved.push({ change: { ...change, id }, mark, at: now })
+    }
+    this.justSaved = this.justSaved.filter(({ at }) => now - at < SAVES_KEPT_MS).slice(-SAVES_KEPT)
   }
 
   /** Each thing in `written` whose id the place chose:  what's still pending of it now goes by that id. */
@@ -1039,6 +1086,16 @@ export class PendingChanges {
   }
 }
 
+/** A change the place took, kept a while so a read asked before it can't take it back:  `PendingChanges.noteSaved()`. */
+type SavedChange = {
+  /** The change, by the id the place gave it. */
+  change: PendingChange
+  /** `Places.saveMark` once it was saved. */
+  mark: number
+  /** When, by the clock:  what it's dropped by. */
+  at: number
+}
+
 /** Constructor props of a `PendingChanges`. */
 export type PendingChangesProps = {
   /** The place's name. */
@@ -1093,4 +1150,3 @@ function refusal(message: string): PlaceError {
 function isSameValue(one: unknown, other: unknown): boolean {
   return one === other || JSON.stringify(one) === JSON.stringify(other)
 }
-

@@ -624,6 +624,20 @@ describe("RestPlace.apply()", () => {
     expect(remove).toMatchObject({ method: "DELETE", path: "/recipes/r-1" })
   })
 
+  test("a thing added here goes with no id, and takes the one the server made (I62)", async () => {
+    const { box, places, pending, allSent } = await engine()
+    const renamed: { from: string; to: string }[] = []
+    places.onRows((change) => renamed.push(...(change.renamed ?? [])))
+    pending.insert({ collection: "recipes", type: "Recipe", id: "recipe-vrkwtpbx", fields: { title: "Stew" } })
+    await allSent()
+    const [insert] = box.asks
+    expect(insert).toMatchObject({ method: "POST", path: "/recipes" })
+    expect(insert!.body).toEqual({ name: "Stew" })
+    expect(renamed).toHaveLength(1)
+    expect(renamed[0]!.from).toBe("recipe-vrkwtpbx")
+    expect(box.recipes.get(renamed[0]!.to)!.name).toBe("Stew")
+  })
+
   test("a change sent again makes one thing, on a server that remembers ids", async () => {
     const { place, box } = await served()
     const change = {

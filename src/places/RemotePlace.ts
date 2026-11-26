@@ -375,12 +375,15 @@ function isWholeList({ nextPage, version, handled }: ListAnswer): boolean {
  * `was`, with `changes` on it:  each row changed put in its place (a new one at the end), each one removed left out,
  * and the version the changes were read at.
  * - A changed row's version isn't said with it:  it's dropped, so a change made from it isn't checked against an old one.
+ * - `startsOver`:  the server didn't know `was`'s version, and sent the whole list:  it replaces `was`, so a row
+ *   removed meanwhile goes too (epic `data` I145).
  */
 function withChanges(
   was: KeptList,
-  { rows, removed, token }: ChangesAnswer,
+  { rows, removed, token, startsOver }: ChangesAnswer,
   idOf: PlaceCapabilities["idOf"]
 ): KeptList {
+  if (startsOver) return { ...was, rows, version: token, versions: {} }
   const gone = new Set(removed)
   const changed = new Map(rows.map((row) => [idOfRow(row, idOf), row] as const))
   const versions = { ...was.versions }

@@ -1,7 +1,8 @@
-import type { SiteHost, SiteParts } from "spell/parser/core/core.types"
+import type { SiteHost, SiteParts, TabIcon } from "spell/parser/core/core.types"
 import { requiredParamsOf, filledPattern } from "spell/util/addressPattern"
 import { SiteThemes } from "spell/app/app/runner/SiteThemes"
 import { fetchJSON } from "spell/app/app/runner/fetchFresh"
+import type { TabIcons } from "./TabIcons"
 
 /****************
  * ### `RunSiteHost`
@@ -23,6 +24,8 @@ import { fetchJSON } from "spell/app/app/runner/fetchFresh"
  * - A link's `#section`, and one the page was opened or went back to, is landed on once it's drawn (`landOn()`),
  *   looked for in `root`:  where the site draws, a `<spell-viewer>`'s shadow root;  the document by default.
  * - Its theme as `<spell-viewer>`'s and the editor's Run give it (`SiteThemes`).
+ * - The app's icon on the browser tab, while it runs (`showIcon()`, epic `editor` P50):  only when handed `tabIcons`,
+ *   the run page's;  a `<spell-viewer>` leaves the tab of the page it's on alone.
  * - The editor's own is `RunSite` (`spell/app/app/pages/RunSite`), which knows the editor's files and selection;
  *   this one knows only the address, so the run page loads no parser.
  ****************/
@@ -39,10 +42,19 @@ export class RunSiteHost implements SiteHost {
   /** The site running, once it asked for its address:  its pages say where a file's page is. */
   private site?: SiteParts
 
-  constructor(base: string, root: ParentNode = document, opened?: OpenedFile) {
+  /** What shows the app's icon on the browser tab:  the run page's;  none, the tab is left alone. */
+  private readonly tabIcons?: TabIcons
+
+  constructor(base: string, root: ParentNode = document, opened?: OpenedFile, { tabIcons }: RunSiteHostOptions = {}) {
     this.base = base.replace(/\/+$/, "")
     this.root = root
     this.opened = opened
+    this.tabIcons = tabIcons
+  }
+
+  /** The running app's icon on the browser tab;  `undefined`, the page's own (`TabIcons`). */
+  showIcon(icon: TabIcon | undefined): void {
+    this.tabIcons?.show(icon)
   }
 
   /**
@@ -218,6 +230,12 @@ export const OpenedFile = {
       .filter((statement) => statement.superType === "Page" && statement.defined?.startsWith(`${path}:`))
       .flatMap((statement) => (statement.type ? [statement.type] : []))
   }
+}
+
+/** What else a `RunSiteHost` may be handed. */
+export type RunSiteHostOptions = {
+  /** What shows the running app's icon on the browser tab:  the run page's;  none, the tab is left alone. */
+  tabIcons?: TabIcons
 }
 
 /** What `OpenedFile` reads of a project's declarations:  each statement's type, its super type and where it is. */

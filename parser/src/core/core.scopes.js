@@ -261,6 +261,17 @@
       ]
     },
     {
+      path: "type:App/property:icon",
+      detail: "text",
+      description: "The icon its browser tab shows while it runs:  an icon's name, `rocket`, or a picture, `static/icon.png`.\n- An icon's name is drawn in its `icon color`;  a picture keeps its own colours.\n- When it stops, the tab shows its own icon again.\n- Say it in its body:  `its icon is \"rocket\"`."
+    },
+    {
+      path: "type:App/property:icon_color",
+      name: "icon color",
+      detail: "text",
+      description: "The colour its tab's icon is drawn in, when its `icon` is an icon's name:  `green`, `red` ...\n- Say it in its body:  `its icon color is \"green\"`."
+    },
+    {
       path: "type:View",
       super: "type:Thing",
       description: "A thing drawn as its own custom element -- `a card is a view` makes a card that is one.\n- Everything a thing has.\n- Its tag starts with the project's or library's name, made singular:  `<solitaire-card>` in a solitaire app.\n- ONE drawing, its `to draw it`:  a card face down checks its own direction there.\n\n```spell\na card is a view where:\n  - its rank is a number\n  - to \"draw it\": <div>{its rank}</div>\n```",

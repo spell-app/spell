@@ -33,9 +33,11 @@ export class PlaceHeal {
       const place = this.places.placeForOrDie(placeName)
       const { idOf } = place.describe()
       if (idOf === undefined) return false
+      // a save confirmed while this was asked outranks its answer (epic `data` I143)
+      const askedAt = this.places.saveMark
       const answered = await this.latestRows(place, collection, ids)
       const pending = this.places.pendingFor(placeName)
-      const rows = pending.replayOn(collection, answered)
+      const rows = pending.replayOn(collection, answered, {}, askedAt)
       const held = new Set(rows.map((row) => idOfRow(row, idOf)))
       const removed = (ids ?? []).filter((id) => !held.has(id))
       this.keep(placeName, type, rows, idOf)

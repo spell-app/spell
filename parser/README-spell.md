@@ -978,6 +978,13 @@ galaxy guide is a site at "owen@spell/galaxy"
     ([Spell UI's themes page](https://github.com/spell-app/spell/blob/main/ui/README-themes.md#6-a-projects-own-theme)).
   - Its line takes its own values the way a type's does, several joined by commas.
   - `its "theme" is "mockup"`, under the site, says the same.
+- An app, a site too, shows its own icon on the browser tab while it runs:  `its icon is "rocket"`, under it.
+  - An icon's name, as `<icon "rocket" />` names one, drawn in `its icon color is "green"`:
+    one of Spell UI's colours, or any CSS colour.
+  - Or a picture, a file of the project:  `its icon is "static/icon.png"`.
+  - On a site's line too:  `galaxy guide is a site with icon "rocket"`.
+  - The run page and the editor's Run show it, and their own icon again when it stops;
+    `<spell-viewer>` and VS Code leave their tab alone.
 - A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own:
 
 ```spell

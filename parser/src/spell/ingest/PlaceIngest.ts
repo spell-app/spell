@@ -1,5 +1,6 @@
 import type { KeyGoes } from "spell/places/keyGoes"
 import { compareValues } from "spell/util/string"
+import { localDate } from "spell/util/time"
 import { ANY_FIELD, isPlaceServerAddress } from "spell/places/places.types"
 import { tokenServiceMint } from "spell/places/PlaceToken"
 import {
@@ -27,7 +28,8 @@ import {
   type PlaceDescription,
   type PlaceLook,
   type PlaceState,
-  type VerifyAsk
+  type VerifyAsk,
+  type WritesAsked
 } from "./ingest.types"
 import { descriptionFromDisk, descriptionOnDisk, stateOfRead } from "./PlaceOnDisk"
 import { agentRead, isUniqueIn, renameCollections } from "./PlaceReading"
@@ -56,6 +58,7 @@ import { MAKES_A_TOKEN } from "./PlaceSpec"
 import { partsInLanguageOf } from "./PlaceInLanguage"
 import { PlaceWords } from "./PlaceWords"
 import {
+  collectionWords,
   isSearchedApart,
   KINDS_WITH_KEY_LINES,
   mergedSpell,
@@ -72,7 +75,7 @@ import {
   type WrittenLine
 } from "./PlaceSpell"
 import { keptHeaders, PoliteReader, sessionEnded } from "./PoliteReader"
-import { writesTried, writeWordsFor } from "./WritesTried"
+import { canTryWrites, writesSaid, writesTriedBefore, writesTriedOn, writeWordsFor, type WriteTry } from "./WritesTried"
 
 /** How many times it leaves out a line Spell can't read, and tries again. */
 const MOST_COMPILES = 12
@@ -191,11 +194,12 @@ export class PlaceIngest {
     if (look.specAt) noteFromSpec(description)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.notePictures(description, ask.pictures, reader)
-    if (ask.triesWrites) await this.noteWrites(description, look, reader)
+    if (ask.triesWrites) await this.tryWrites(description, look.address, look.collections, reader, ask.triesWrites)
     leaveOutCopies(description, (await files.otherDescriptionsBeside?.(file)) ?? [])
     await this.readWithAgent(description, look, { keepName: !!ask.name })
     // after the agent's names, which may be the bare ones another file beside it declares
     awayFromTypesBeside(description, await files.otherSpellBeside(file))
+    refuseNameOfAList(description)
     await this.keepPrivate(description, look, file)
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
@@ -295,13 +299,17 @@ export class PlaceIngest {
     const listsBefore = new Set(Object.values(old.collections).map(({ at }) => withoutEndSlash(at)))
     const kept = typesKeptByHand((await files.read(file)) ?? "", old)
     awayFromTypesBeside(description, [...others, kept], listsBefore)
+    refuseNameOfAList(description)
     const shapeSame = (await fingerprintOf(description)) === old.about.fingerprint
     if (shapeSame) {
       description.canDo = old.canDo
       description.about.readBy = old.about.readBy
       if (old.checkEverySeconds !== undefined) description.checkEverySeconds = old.checkEverySeconds
     }
-    if (old.about.triesWrites) await this.noteWrites(description, look, reader)
+    // the lists it tried writes on before, tried again;  a description from before P54 said only that it did, on its first
+    const triedBefore = writesTriedBefore(old)
+    const tries = triedBefore.length ? triedBefore : (old.about as { triesWrites?: boolean }).triesWrites || undefined
+    if (tries) await this.tryWrites(description, look.address, look.collections, reader, tries)
     await this.keepPrivate(description, look, file)
     // a line of the new look's that Spell can't read is left out, as the first look's was:  GitHub's reactions' `+1`
     this.compileLeavingOut(description, file)
@@ -453,10 +461,16 @@ export class PlaceIngest {
       }
     }
     // only because the person said it may, and never on a read only deployment (above)
-    if (triesWrites) {
-      const seen = await writesTried(address, read, reader)
-      if (seen) description.canDo.write = writeWordsFor(seen)
+    if (triesWrites)
+      changes.push(...(await this.tryWrites(description, address, read, reader, triesWrites, deployment?.name)))
+    // what it read, said as any look says it (epic `data` I138):  its description's "never read yet" is past
+    const shown = Object.values(description.collections).filter(({ leftOut }) => !leftOut)
+    const verified = shown.filter(({ state }) => state?.is === "verified").length
+    if (verified) {
+      description.canDo.read = `Yes:  verify read ${verified} of its ${shown.length} lists.`
+      description.notes = description.notes.filter((note) => note !== FROM_SPEC_ONLY)
     }
+    description.spellCantSay = whatSpellCantSay(description)
     await this.keepPrivate(description, { address, collections: read, headers: {}, notes: [] }, file)
     // the types its reads made, named apart from those beside it, as ingest's are, and from a person's in the file;
     // its lists are the ones it had
@@ -1017,16 +1031,54 @@ export class PlaceIngest {
   }
 
   /**
-   * SIDE EFFECT:  `description` says what a write of each kind answered, and whether the server keeps them
-   * (epic `data` P30):  only because the person said it may, `--try-writes` (`writesTried()`).
-   * - NEVER throws, but `IngestStopped` past the reader's limits.
+   * SIDE EFFECT:  a write of each kind tried on the lists `asked` names, each write's `state` saying how it went, and
+   * `canDo.write` what they answered (epic `data` P30, I108):  only because the person said it may, `--try-writes`.
+   * - `place`:  the address it's tried at, a deployment's in `verify()`
+   * - `asked`:  `true`, the first list it read that can take them;  else each collection named.
+   * - `looks`:  what it read of each list, the rows the writes copy.
+   * - Lines for the person, a list each:  `posts:  adding 201, changing 200, deleting 200.`
+   * - throws `IngestStopped` for a name that isn't one of its collections;  else NEVER, but past the reader's limits
    */
-  private async noteWrites(description: PlaceDescription, look: PlaceLook, reader: PoliteReader): Promise<void> {
-    description.about.triesWrites = true
-    if (description.about.kind !== "web server") return
+  private async tryWrites(
+    description: PlaceDescription,
+    place: string,
+    looks: readonly CollectionLook[],
+    reader: PoliteReader,
+    asked: WritesAsked,
+    deployment?: string
+  ): Promise<string[]> {
+    if (description.about.kind !== "web server") return []
+    const { collections } = description
+    const lookOf = ({ at }: CollectionDescription) =>
+      looks.find((look) => withoutEndSlash(look.at) === withoutEndSlash(at))
+    const unknown = asked === true ? [] : asked.filter((name) => !collections[name])
+    if (unknown.length) {
+      throw new IngestStopped(
+        `--try-writes names ${unknown.join(", ")}, which ${unknown.length > 1 ? "aren't" : "isn't"} among its collections:  ${Object.keys(collections).join(", ")}`
+      )
+    }
+    const named =
+      asked === true
+        ? Object.keys(collections)
+            .filter((name) => canTryWrites(lookOf(collections[name]!), collections[name]!))
+            .slice(0, 1)
+        : asked
     this.say("Trying a write of each kind, as asked ...")
-    const seen = await writesTried(look.address, look.collections, reader)
-    if (seen) description.canDo.write = writeWordsFor(seen)
+    const tried: WriteTry = { at: this.nowISO(), ...(deployment !== undefined && { deployment }) }
+    const said: string[] = []
+    for (const name of named) {
+      const collection = collections[name]!
+      const look = lookOf(collection)
+      if (!canTryWrites(look, collection)) {
+        said.push(`${name}:  no write tried -- it read no row with an id to copy, or it offers none.`)
+        continue
+      }
+      reader.startAgain()
+      await writesTriedOn(place, look!, collection, reader, tried)
+      said.push(`${name}:  ${writesSaid(collection)}.`)
+    }
+    description.canDo.write = writeWordsFor(description) ?? description.canDo.write
+    return said
   }
 
   /**
@@ -1299,7 +1351,7 @@ export class PlaceIngest {
 
   /** SIDE EFFECT:  `description` is finished:  when it was looked at, its fingerprint, what Spell can't say, its Spell. */
   private async finish(description: PlaceDescription): Promise<void> {
-    description.about.lookedAt = (this.settings.now?.() ?? new Date()).toISOString()
+    description.about.lookedAt = this.nowISO()
     description.about.fingerprint = await fingerprintOf(description)
     description.spellCantSay = whatSpellCantSay(description)
     description.spell = spellTextOf(spellPartsFor(description)).trimEnd().split("\n")
@@ -1312,14 +1364,22 @@ export class PlaceIngest {
     await files.listInProject?.(file, path)
   }
 
-  /** The day it looks, and `file`'s language:  the dated marks a later look writes (`mergedSpell()`, epic `data` P53). */
+  /**
+   * The day it looks, and `file`'s language:  the dated marks a later look writes (`mergedSpell()`, epic `data` P53).
+   * - the LOCAL day, where the person is:  the UTC one is a day ahead in the evening (epic `data` I139)
+   */
   private marksFor(file: string): MergeMarks {
-    return { date: this.nowISO().slice(0, 10), lang: SP.Language.forFile(file).lang }
+    return { date: localDate(this.now()), lang: SP.Language.forFile(file).lang }
   }
 
   /** What time it is, in ISO:  a test's clock. */
   private nowISO(): string {
-    return (this.settings.now?.() ?? new Date()).toISOString()
+    return this.now().toISOString()
+  }
+
+  /** What time it is:  a test's clock. */
+  private now(): Date {
+    return this.settings.now?.() ?? new Date()
   }
 
   /** Say how it's going. */
@@ -1379,6 +1439,24 @@ function refuseSecondServer(file: string, existing: string): void {
 ////////////////
 // ## Helpers
 ////////////////
+
+/**
+ * A place named as one of its lists, or a list's things, is refused (epic `data` I77):  `countries` holding countries,
+ * whose Spell reads `countries live at ...` as the place, not a list, so nothing reads through it.
+ * - throws `IngestStopped`, saying the names meet and how to name it otherwise;  else NEVER
+ */
+function refuseNameOfAList({ about, collections }: PlaceDescription): void {
+  const named = about.name.toLowerCase()
+  const met = Object.entries(collections).find(
+    ([key, collection]) =>
+      !collection.leftOut &&
+      [key, collection.type, collectionWords(collection)].some((words) => words.toLowerCase() === named)
+  )
+  if (!met) return
+  throw new IngestStopped(
+    `the place's name, "${about.name}", is its ${met[0]} list's too, so Spell can't tell them apart and nothing was written:  name the place something else with --name`
+  )
+}
 
 /**
  * A read only deployment takes no writes:  the ONE check, for `--try-writes` and `verify`'s, beside `noteWrites()`
@@ -2131,10 +2209,12 @@ function writtenOf(parts: SpellParts, written: readonly string[] | undefined): S
  */
 function noteFromSpec(description: PlaceDescription): void {
   description.canDo.read = "Its description says so:  never read yet."
-  description.notes.push(
-    "Read from its OpenAPI description only:  every list, write and action route is unverified until `spell place verify` tries it against a running server."
-  )
+  description.notes.push(FROM_SPEC_ONLY)
 }
+
+/** What a place read from its description alone says, till `verify()` reads it. */
+const FROM_SPEC_ONLY =
+  "Read from its OpenAPI description only:  every list, write and action route is unverified until `spell place verify` tries it against a running server."
 
 /**
  * SIDE EFFECT:  what it was asked to say of the place stays, on `description`'s `about`:  read only, rows at a time,
