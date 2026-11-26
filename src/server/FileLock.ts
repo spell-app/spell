@@ -9,7 +9,11 @@ import { FileLockError } from "./server.types.ts"
  * A lock on one file, held as `<file>.lock`, so tools that write the same file take turns:
  * the page server's page edits, `epic`, the app's saves.
  * - created with `open(wx)`:  atomic, so exactly one holder
- * - waits up to `wait` ms (default 20s), then throws a `FileLockError` naming the holder (its pid and label)
+ * - waits while the lock changes hands, and up to `wait` ms (default 20s) on any ONE holder, then throws a
+ *   `FileLockError` naming the holder (its pid and label)
+ *   - so a line of writers behind a slow one all get their turn:  only a holder that keeps it `wait` ms is stuck
+ *     (epic `epic-engine` I491:  eight writers making four edits each on a big epic page waited up to 87s, each
+ *     holder about 3s;  counted from the start, the later ones gave up while the line was still moving)
  *   - `tell`:  called ONCE with the holder after `tellAfter` ms (default 5s) of waiting, so a caller can say who it waits
  *     for (`epic`'s page edits print it), instead of sitting silent
  * - or tries ONCE (`runOnce()`):  answers `"held"` when another holder has it, without waiting
@@ -35,7 +39,7 @@ export class FileLock {
   /** the lock's own file, `<file>.lock` */
   readonly lockFile: string
 
-  /** longest wait for the lock, ms */
+  /** longest wait on ONE holder of the lock, ms:  the wait goes on while it changes hands */
   readonly wait: number
 
   /** age at which a lock is a dead holder's, ms */
@@ -116,8 +120,8 @@ export class FileLock {
   /** Run `fn` holding the lock;  BLOCKS the thread while waiting (`waitUntilSync()`), for sync scripts. */
   run<T>(fn: () => T): T {
     if (this.isHeldHere()) throw this.heldHere()
-    // Takes it when free, looking every 0.1s;  gives up after `wait`
-    if (!waitUntilSync(this.attempt(), { timeout: this.wait / 1000 })) throw this.timeout()
+    // Takes it when free, looking every 0.1s;  gives up after `wait` on one holder
+    if (waitUntilSync(this.attempt(), { timeout: Number.POSITIVE_INFINITY }) === STUCK) throw this.timeout()
     try {
       return fn()
     } finally {
@@ -127,8 +131,9 @@ export class FileLock {
 
   /** Run async `fn` holding the lock;  waits with timers, so a server keeps serving meanwhile. */
   async runAsync<T>(fn: () => Promise<T>): Promise<T> {
-    // Takes it when free, looking every 0.05s;  gives up after `wait`
-    if (!(await waitUntil(this.attempt(), { timeout: this.wait / 1000, every: 0.05 }))) throw this.timeout()
+    // Takes it when free, looking every 0.05s;  gives up after `wait` on one holder
+    const taken = await waitUntil(this.attempt(), { timeout: Number.POSITIVE_INFINITY, every: 0.05 })
+    if (taken === STUCK) throw this.timeout()
     try {
       return await fn()
     } finally {
@@ -163,17 +168,32 @@ export class FileLock {
     return Date.now() - holder.since.getTime() > this.stale || (holder.pid > 0 && !isAlive(holder.pid))
   }
 
-  /** One try at the lock per call (`tryAcquire()`), telling `tell` the holder once `tellAfter` ms have gone by. */
-  private attempt(): () => boolean {
+  /**
+   * One try at the lock per call (`tryAcquire()`):  `TAKEN`, `STUCK` once one holder has kept it `wait` ms, else
+   * `false` to look again.
+   * - the clock starts again each time the lock changes hands (another pid, or a new `since`)
+   * - tells `tell` the holder once `tellAfter` ms have gone by, from the first try
+   */
+  private attempt(): () => typeof TAKEN | typeof STUCK | false {
     const started = Date.now()
     let told = !this.tell
+    let holderKey = ""
+    let holderSeen = started
     return () => {
-      if (this.tryAcquire()) return true
-      if (!told && Date.now() - started >= this.tellAfter) {
-        told = true
-        this.tell!(this.holder())
+      if (this.tryAcquire()) return TAKEN
+      const now = Date.now()
+      const holder = this.holder()
+      // between two holders (nobody there):  the last one's clock stands
+      const key = holder ? `${holder.pid} ${holder.since.getTime()}` : holderKey
+      if (key !== holderKey) {
+        holderKey = key
+        holderSeen = now
       }
-      return false
+      if (!told && now - started >= this.tellAfter) {
+        told = true
+        this.tell!(holder)
+      }
+      return now - holderSeen >= this.wait ? STUCK : false
     }
   }
 
@@ -217,6 +237,12 @@ export class FileLock {
   }
 }
 
+/** What `attempt()` answers once it holds the lock. */
+const TAKEN = "taken"
+
+/** What `attempt()` answers once one holder has kept the lock `wait` ms:  the wait gives up. */
+const STUCK = "stuck"
+
 /** The lock files this process holds now:  a blocking wait for one of them throws at once (`run()`). */
 const HELD_HERE = new Set<string>()
 
@@ -233,7 +259,7 @@ function isAlive(pid: number): boolean {
 
 /**
  * `new FileLock()` props.
- * - `wait`:  longest wait, ms
+ * - `wait`:  longest wait on one holder, ms;  the wait goes on while the lock changes hands
  * - `stale`:  age at which a lock is taken over, ms
  * - `label`:  what the lock file says about its holder, after its pid (`holder()`)
  * - `tell`:  called once with the holder after `tellAfter` ms (default 5s) of waiting

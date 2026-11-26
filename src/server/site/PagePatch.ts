@@ -21,6 +21,8 @@
  * How a node is matched (Owen, comment M1 on P40):
  * - a node with a KEY (an element's `id`) matches the node with that key, wherever it moved
  * - a node with none is matched by its PLACE:  its kind and its index among its same-kind siblings
+ *   - a node whose key only one tree has counts as none, but matched by place to a node with ANOTHER key, it's
+ *     replaced, never morphed into it:  an id is what a thing is (`q4` is never `q19`;  epic `epic-engine` I492)
  *   - same-kind siblings that didn't change are lined up first (the longest run in common), then the rest by place:
  *     so a paragraph added at the top of a section is one insert, not every paragraph's text moving down
  * - every step names its node by an ADDRESS from the OLD tree, xpath-ish, from its nearest keyed ancestor:
@@ -582,7 +584,8 @@ class Planner<N extends object> {
       kind !== tree.kind(was) ||
       rules.replacedWhole?.(was) ||
       rules.replacedWhole?.(now) ||
-      rules.mustReplace?.(was, now)
+      rules.mustReplace?.(was, now) ||
+      this.isRenamed(was, now)
     ) {
       this.steps.push({ op: "replace", target: address, node: now })
       return
@@ -760,6 +763,17 @@ class Planner<N extends object> {
   }
 
   /** `node`'s key, when it matches by it:  once in each tree. */
+  /**
+   * Did `was` become another thing:  each has its own key, and they differ (a question `q4` where `q19` is now)?
+   * - matched by place (neither key is in both trees), it's REPLACED, never morphed:  morphed, the live element
+   *   stayed, holding what the reader typed for `q4`, and showed it as `q19`'s (epic `epic-engine` I492)
+   */
+  private isRenamed(was: N, now: N): boolean {
+    const before = this.tree.key(was)
+    const after = this.tree.key(now)
+    return before !== undefined && after !== undefined && before !== after
+  }
+
   private keyOf(node: N): string | undefined {
     const key = this.tree.key(node)
     return key !== undefined && this.keys.has(key) ? key : undefined

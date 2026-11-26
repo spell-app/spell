@@ -4,7 +4,7 @@ import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { after } from "spell/util/timing"
-import type { SRV } from "spell/server"
+import { SRV } from "spell/server"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicServer } from "spell/epic/server/EpicServer"
@@ -29,6 +29,9 @@ import { ReviewStart, type StartResult, type WakeResult } from "spell/epic/tool/
  *     so its links (`../../guides/...`) lead where a real page's do
  *   - the real epic folder's other folders (`guides`, `pages`, `brand` ...) are served beside the copies, at
  *     their own prefixes (`/guides/` ...):  NEVER its `epics`
+ *   - the guides that ship with the code first, at `/guides/` (`EpicConfig.guideFoldersOf()`, the checkout's own
+ *     `guides/` and the plugin's), as the real page server serves them (epic `epic-engine` I495:
+ *     `guides/solid/solid-2.html` left the epic folder for the kit's `guides/`, and the fold check found no page)
  *     - mounted, not linked into `content`:  a link there would put the real pages under `src/`, for `tsc` and the
  *       linter to walk
  *   - the route modules are this checkout's, set up for it (`EpicServer`'s `ROUTE_MODULES`)
@@ -154,6 +157,7 @@ export class DemoServer {
       epicUi
     })
     for (const mount of mounts) made.web.files.mount(mount)
+    for (const dir of shippedGuides()) made.web.files.mount({ prefix: "/guides/", dir })
     for (const [name, dir] of sharedFolders()) made.web.files.mount({ prefix: `/${name}/`, dir })
     const server = await made.start({ port, pidFile: false, bundles: false, watchCode: false })
     // the copies a check just wrote:  macOS reports them to the new watcher late, and live reload would reload a page
@@ -175,6 +179,17 @@ const SETTLE_MS = 1000
 
 /** This checkout:  `src/demo/` is two folders down. */
 const ENGINE = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
+
+/**
+ * The folders of the guides that ship with the code, the checkout's first:  each one's `guides/` folder
+ * (`EpicConfig.guideFoldersOf()`, but the epic folder's, which `sharedFolders()` serves).
+ */
+function shippedGuides(): string[] {
+  const checkout = SRV.Git.out(["rev-parse", "--show-toplevel"], ENGINE) || ENGINE
+  return EpicConfig.guideFoldersOf(checkout)
+    .filter((guides) => guides.code || guides.plugin)
+    .map(({ folder }) => folder)
+}
 
 /**
  * The real epic folder's folders, as `[name, folder]`:  every one but `epics` (the copies') and the hidden ones,
