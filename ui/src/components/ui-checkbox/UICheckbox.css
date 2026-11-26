@@ -105,7 +105,8 @@
     --_ui-checkbox-slider-line-hover: var(--ui-checkbox-slider-line-hover, oklch(from var(--ui-ink) l c h / 0.15));
     --_ui-checkbox-slider-line-on: var(--ui-checkbox-slider-line-on, var(--ui-text-muted));
     --_ui-checkbox-slider-label-color: var(--ui-checkbox-slider-label-color, var(--ui-text-unselected));
-    --_ui-checkbox-toggle-width: var(--ui-checkbox-toggle-width, 3.5em);
+    /* The toggle's lane:  about twice its handle, as the platforms' own switches (Fomantic's is 3.5em). */
+    --_ui-checkbox-toggle-width: var(--ui-checkbox-toggle-width, 2.75em);
     --_ui-checkbox-toggle-handle: var(--ui-checkbox-toggle-handle, 1.5em);
     --_ui-checkbox-toggle-lane: var(--ui-checkbox-toggle-lane, oklch(from var(--ui-ink) l c h / 0.05));
     --_ui-checkbox-toggle-lane-hover: var(--ui-checkbox-toggle-lane-hover, oklch(from var(--ui-ink) l c h / 0.15));

@@ -1,11 +1,13 @@
 /*
  * `<epic-bells>` (`EpicBells.tsx`):  Bells & Whistles, a dialog over an epic page.
- * - Inside Spell UI's `<ui-modal>`:  one column -- its heading and ×, a lede, the Token burn slider, the groups'
- *   rows scrolling, Cancel / Save at the bottom.
+ * - Inside Spell UI's `<ui-modal>`:  one column -- its heading and ×, a lede, the groups' rows scrolling, then the
+ *   footer:  the Token burn slider at the left, Cancel / Save at the right (T173).
+ * - It fills the window less 20px on every side, at every size (T173:  "Dialog should always fill the pane vertically
+ *   and horizontally, w/20px margin"):  the modal's box set through its part, `::part(modal)`.
  * - Colours are the page's (`--epic-*`, declared by `<epic-page>` above it), Spell UI's without a page.
  * - Spacing on a 4px grid.
  * - Public tokens (`--epic-bells-*`) are never declared here:  read through private aliases.
- *   - none yet:  its width is the modal's own (`size="small"`)
+ *   - none yet
  */
 
 @layer ui.components.epic-bells.types, ui.components.epic-bells.content;
@@ -24,6 +26,15 @@
     --ui-modal-padding: 0;
   }
 
+  /* the window less 20px each side:  the box itself, so its own scroll never shows;  only the rows scroll */
+  .bells-modal::part(modal) {
+    width: calc(100% - 40px);
+    max-width: none;
+    height: calc(100% - 40px);
+    max-height: none;
+    overflow: hidden;
+  }
+
   .bells {
     /* the page's colours (`<epic-page>` declares them);  Spell UI's, and its text mixed down, without one */
     --_epic-bells-ink: var(--epic-ink, var(--ui-text-color, CanvasText));
@@ -35,7 +46,6 @@
       --epic-rule,
       var(--ui-border-color, color-mix(in oklab, var(--_epic-bells-ink) 12%, transparent))
     );
-    --_epic-bells-band: color-mix(in oklab, var(--_epic-bells-ink) 4%, transparent);
     /* the switch column:  as wide as the widest badge ("timesaver") */
     --_epic-bells-side: 64px;
 
@@ -43,7 +53,7 @@
     flex-direction: column;
     box-sizing: border-box;
     width: 100%;
-    max-height: min(85dvh, 880px);
+    height: 100%;
     min-width: 0;
     overflow: hidden;
     color: var(--_epic-bells-ink);
@@ -69,18 +79,19 @@
     color: var(--_epic-bells-muted);
   }
 
-  /* the slider's band, ONE row (T171:  "Make this panel smaller"):  its name (and Custom) left, the slider right;
+  /* the slider, the footer's left (T173):  its name (and Custom), then the slider, centred on the name's line;
      a note, only while there is one, on a row of its own under them */
   .burn {
     display: flex;
+    flex: 1;
     flex-wrap: wrap;
     align-items: center;
     column-gap: 16px;
     row-gap: 4px;
-    margin: 12px 20px 0;
-    padding: 4px 16px;
-    border-radius: 8px;
-    background: var(--_epic-bells-band);
+    min-width: 0;
+    max-width: 420px;
+    margin-inline-end: auto;
+    padding-inline-end: 16px;
   }
 
   .burn-head {
@@ -96,7 +107,7 @@
 
   .burn-slider {
     flex: 1;
-    min-width: 120px;
+    min-width: 140px;
     margin-inline: 8px;
   }
 
@@ -169,6 +180,8 @@
 
   .actions {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: flex-end;
     gap: 8px;
     padding: 12px 20px 16px;
@@ -179,9 +192,17 @@
     .head {
       padding-left: 16px;
     }
-    .lede,
-    .burn {
+    .lede {
       margin-inline: 16px;
+    }
+    /* the slider on a row of its own, the buttons under it at the right */
+    .burn {
+      flex-basis: 100%;
+      max-width: none;
+      padding-inline-end: 0;
+    }
+    .burn-slider {
+      min-width: 112px;
     }
     .scroller,
     .actions {

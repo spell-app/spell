@@ -1,4 +1,19 @@
-import { existsSync, lstatSync, mkdirSync, readdirSync, rmdirSync, unlinkSync, writeFileSync } from "node:fs"
+import {
+  appendFileSync,
+  closeSync,
+  existsSync,
+  fstatSync,
+  lstatSync,
+  mkdirSync,
+  openSync,
+  readSync,
+  readdirSync,
+  rmdirSync,
+  statSync,
+  unlinkSync,
+  utimesSync,
+  writeFileSync
+} from "node:fs"
 import { join } from "node:path"
 
 import { Links } from "spell/server/Links"
@@ -136,6 +151,40 @@ export class SessionFolders {
   }
 
   /**
+   * Title session `id` `title` NOW, in its saved transcript:  a `custom-title` line appended to every copy
+   * (`ClaudeHome.transcriptCopies()`), the line `/rename` writes;  returns the files written.
+   * - and Claude Code's own copy beside each, `<id>/custom-title.json`, when its folder is there:  it wins over the
+   *   transcript's lines (`Sessions.summarize()` reads it so)
+   * - the ONE writer of a title for a session that ISN'T running (epic `epic-engine` T175:  `epic session retire`, the
+   *   fresh handoff once the old session's process is gone):  a queued title (`requeueTitle()`, `Sessions.queueTitle()`)
+   *   waits for a prompt that may never come
+   * - NEVER for a running session:  Claude Code writes its own title again before each reply, over this one
+   * - each file keeps its modified time, so the panel's list and `epic session list` keep their order
+   * - SIDE EFFECT:  appends to the transcripts;  throws if one can't be written
+   */
+  static writeTitle(id: string, title: string, home = ClaudeHome.home()): string[] {
+    if (!/^[\w-]+$/.test(id)) return []
+    const line = `${JSON.stringify({ type: "custom-title", customTitle: title, sessionId: id })}\n`
+    const written: string[] = []
+    for (const path of ClaudeHome.transcriptCopies(id, home)) {
+      const { atime, mtime } = statSync(path)
+      // a transcript that doesn't end its last line:  the title on a line of its own all the same
+      const ends = readTail(path).endsWith("\n")
+      appendFileSync(path, ends ? line : `\n${line}`)
+      utimesSync(path, atime, mtime)
+      written.push(path)
+      // Claude Code's own copy of the title, beside the transcript, which wins over its lines
+      const folder = path.replace(/\.jsonl$/, "")
+      if (!existsSync(folder)) continue
+      const times = statSync(folder)
+      writeFileSync(join(folder, TITLE_SIDECAR), JSON.stringify({ customTitle: title }))
+      utimesSync(folder, times.atime, times.mtime)
+      written.push(join(folder, TITLE_SIDECAR))
+    }
+    return written
+  }
+
+  /**
    * Queue session `id`'s own title (`customTitle()`) for its next prompt, unless another title is queued:
    * `<home>/session-titles/<id>` (`ClaudeHome.titlesFolder()`), which the `UserPromptSubmit` hook
    * `~/.claude/hooks/session-title.mjs` applies.
@@ -153,6 +202,23 @@ export class SessionFolders {
     mkdirSync(titles, { recursive: true })
     writeFileSync(file, title)
     return title
+  }
+}
+
+/** Claude Code's copy of a session's title, in the folder beside its transcript (`<id>/`). */
+const TITLE_SIDECAR = "custom-title.json"
+
+/** The last byte of file `path`, as text;  `""` for an empty file. */
+function readTail(path: string): string {
+  const fd = openSync(path, "r")
+  try {
+    const size = fstatSync(fd).size
+    if (!size) return ""
+    const byte = Buffer.alloc(1)
+    readSync(fd, byte, 0, 1, size - 1)
+    return byte.toString("utf8")
+  } finally {
+    closeSync(fd)
   }
 }
 

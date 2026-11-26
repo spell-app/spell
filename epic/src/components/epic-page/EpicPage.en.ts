@@ -384,6 +384,63 @@ export const epicPageVocabulary = {
       text: "Focus mode",
       description: "The gear's row after Tidy while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
     },
+    {
+      key: "askStatus",
+      text: "Where are we?",
+      description:
+        "The gear's row after Focus mode's divider while the page is reviewed (epic `epic-engine` T174):  asks the " +
+        "epic's session for a short status, `/wtf`."
+    },
+    {
+      key: "askStatusTip",
+      text:
+        "Click to have Claude tell you, in its tab, what it is working on, what has finished, and what is waiting " +
+        "for you.",
+      description: "The gear's Where are we? row:  its tooltip (checked with `epic voice check`)."
+    },
+    {
+      key: "askHush",
+      text: "Hush settled items",
+      description:
+        "The gear's row after Focus mode's divider while the page is reviewed (epic `epic-engine` T174):  asks the " +
+        "epic's session to run `/epic hush <epic>`."
+    },
+    {
+      key: "askHushTip",
+      text:
+        "Click to have Claude list the finished items you probably do not need to look at again.  It asks before " +
+        "fading them, and they stay on the page.",
+      description: "The gear's Hush settled items row:  its tooltip (checked with `epic voice check`)."
+    },
+    {
+      key: "askFresh",
+      text: "Start fresh",
+      description:
+        "The gear's row after Focus mode's divider while the page is reviewed (epic `epic-engine` T174):  asks the " +
+        "epic's session to run `/epic fresh`."
+    },
+    {
+      key: "askFreshTip",
+      text:
+        "Click to have a new Claude take this project on in a new chat, starting from this page.  It first waits " +
+        "for any other Claudes you started to finish.  Then it closes the old Claude tab.",
+      description: "The gear's Start fresh row:  its tooltip (checked with `epic voice check`)."
+    },
+    {
+      key: "askPush",
+      text: "Merge and push",
+      description:
+        "The gear's row after Focus mode's divider while the page is reviewed (epic `epic-engine` T174):  asks the " +
+        "epic's session to merge its finished work into main and push main to GitHub;  the tooling home's only."
+    },
+    {
+      key: "askPushTip",
+      text:
+        "Click to have Claude add its finished changes to the main version of your project, then upload that " +
+        "version to GitHub, a website that keeps your code online.  Claude does not ask first:  click only when " +
+        "you are ready for your work to be uploaded.",
+      description: "The gear's Merge and push row:  its tooltip (checked with `epic voice check`)."
+    },
     { key: "autoSend", text: "Auto Send", description: "The gear's Auto Send row, and its sub-menu's name." },
     {
       key: "bells",

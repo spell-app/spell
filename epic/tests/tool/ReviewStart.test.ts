@@ -302,8 +302,39 @@ test("start tidy:  the gear's Tidy asks through the inbox the same way, for /epi
       "Asked 🚧 big to tidy the epic page:  its inbox poller wakes it in a few seconds, nothing typed."
     )
     const inbox = ReviewInbox.read(ReviewInbox.pathFor(planDoc))
-    expect([inbox.tidyAsked, inbox.reviewAsked]).toEqual([expect.any(String), null])
+    expect([inbox.gearAsks.tidy, inbox.reviewAsked]).toEqual([expect.any(String), null])
   })
+})
+
+// epic `epic-engine` T174
+test("start, the gear's other asks:  each through the inbox, its own words and command", async () => {
+  await withBigSession(async (_id, planDoc) => {
+    pollers.set(process.pid, 4242)
+    const said = []
+    for (const ask of ["status", "hush", "fresh", "push"] as const) {
+      const start = await starter().start("big", planDoc, ask)
+      said.push([start.state, start.command, start.message.split(":")[0]])
+    }
+    expect(said).toEqual([
+      ["asked", "/wtf", "Asked 🚧 big to say where things are"],
+      ["asked", "/epic hush big", "Asked 🚧 big to hush the settled items"],
+      ["asked", "/epic fresh", "Asked 🚧 big to start fresh"],
+      ["asked", ReviewStart.commandFor("big", "push"), "Asked 🚧 big to merge and push"]
+    ])
+    expect(Object.keys(ReviewInbox.read(ReviewInbox.pathFor(planDoc)).gearAsks).sort()).toEqual([
+      "fresh",
+      "hush",
+      "push",
+      "status"
+    ])
+  })
+})
+
+test("commandFor push:  a prompt that says what to do, as no skill has a word for it", () => {
+  const command = ReviewStart.commandFor("big", "push")
+  expect(command).toMatch(/^Merge and push/)
+  expect(command).toContain("epic merge big")
+  expect(command).toContain("git push origin main")
 })
 
 test("start:  its tab open already (the bridge types nothing):  says so plainly, never that it typed", async () => {

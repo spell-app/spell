@@ -1,7 +1,9 @@
 /**
  * Check BELLS & WHISTLES (`<epic-bells>`, epic `epic-engine` P86) in a real browser, on a copy of a real epic page:
  * opened from the header's gear, the Token burn slider setting the switches, a hand flip showing Custom, Escape
- * dropping the draft, Save keeping it, at 1200 and 390px, light and dark;  rows lined up;  screenshots to look at.
+ * dropping the draft, Save keeping it, at 1200x800, 390x700 and a short 1200x500, light and dark;  rows lined up;
+ * the dialog 20px from every edge of the window, Token burn in its footer at the left, no tick marks;  how many step
+ * lines wrap;  screenshots to look at.
  *
  * Usage (from the `epic/` folder):
  *   node src/demo/check-bells.mjs [--doc <name>] [outDir]
@@ -49,6 +51,14 @@ const args = process.argv.slice(2)
 const from = args.includes("--doc") ? args[args.indexOf("--doc") + 1] : "epic-engine"
 const out = args.find((arg, index) => !arg.startsWith("--") && args[index - 1] !== "--doc") ?? CONTENT
 const SAMPLE = "bells-sample"
+/** The windows it looks at:  a desktop, a phone, a short desktop (T173). */
+const SIZES = [
+  [1200, 800],
+  [390, 700],
+  [1200, 500]
+]
+/** How far the dialog sits from each edge of the window (T173). */
+const EDGE = 20
 const problems = []
 const summary = { from, shots: [] }
 
@@ -61,7 +71,7 @@ const url = `${server.base}/epics/${SAMPLE}/${SAMPLE}.plan.html`
 summary.url = url
 const browser = await BrowserPage.launch()
 try {
-  for (const width of [1200, 390]) for (const scheme of ["light", "dark"]) await look(width, scheme)
+  for (const [width, height] of SIZES) for (const scheme of ["light", "dark"]) await look(width, height, scheme)
 } catch (error) {
   problems.push(`threw:  ${error.stack ?? error}`)
 } finally {
@@ -74,12 +84,13 @@ if (problems.length) {
   process.exit(1)
 }
 
-/** At `width`, in `scheme`:  open it from the gear;  the slider, a flip, Escape, Save;  measure, shoot. */
-async function look(width, scheme) {
+/** At `width` x `height`, in `scheme`:  open it from the gear;  the slider, a flip, Escape, Save;  measure, shoot. */
+async function look(width, height, scheme) {
   const logs = []
-  const where = `${width} ${scheme}`
+  const size = `${width}x${height}`
+  const where = `${size} ${scheme}`
   const page = await BrowserPage.newPage(browser, {
-    viewport: { width, height: width > 600 ? 900 : 844 },
+    viewport: { width, height },
     colorScheme: scheme,
     context: { deviceScaleFactor: 2, reducedMotion: "reduce" },
     ignore: /Failed to load resource/,
@@ -90,11 +101,11 @@ async function look(width, scheme) {
   await page.waitForFunction(() => bellsEl(), null, { timeout: 15_000 }).catch(() => problems.push(`${where}:  no <epic-bells>`))
   await openFromGear(page, where)
   await measure(page, where, "opened")
-  await shot(page, `bells-${width}-${scheme}.png`)
+  await shot(page, `bells-${size}-${scheme}.png`)
   // the last group, Background programs:  its steps by cost, the timesaver last (T171)
   await page.evaluate(() => bellsRoot().querySelector(".group:last-of-type").scrollIntoView({ block: "end" }))
   await page.waitForTimeout(200)
-  await shot(page, `bells-background-${width}-${scheme}.png`)
+  await shot(page, `bells-background-${size}-${scheme}.png`)
   await page.evaluate(() => bellsRoot().querySelector(".scroller").scrollTo(0, 0))
 
   // the slider to Low, by its keys:  the switches follow at once
@@ -103,7 +114,7 @@ async function look(width, scheme) {
   await page.waitForTimeout(300)
   const low = await page.evaluate(() => ({ shown: shown(), design: isOn("designReview"), stuck: isOn("stopStuckTests") }))
   if (low.shown !== "low" || low.design || !low.stuck) problems.push(`${where}:  the slider at Low:  ${JSON.stringify(low)}`)
-  await shot(page, `bells-low-${width}-${scheme}.png`)
+  await shot(page, `bells-low-${size}-${scheme}.png`)
 
   // a hand flip below High:  Custom
   await page.evaluate(() => rowOf("designReview").querySelector("ui-checkbox").click())
@@ -111,7 +122,7 @@ async function look(width, scheme) {
   const custom = await page.evaluate(() => ({ shown: shown(), design: isOn("designReview") }))
   if (custom.shown !== "custom" || !custom.design) problems.push(`${where}:  a flip at Low:  ${JSON.stringify(custom)}`)
   await measure(page, where, "custom")
-  await shot(page, `bells-custom-${width}-${scheme}.png`)
+  await shot(page, `bells-custom-${size}-${scheme}.png`)
 
   // Escape drops the draft:  open again, High as saved
   await page.keyboard.press("Escape")
@@ -209,7 +220,39 @@ async function measure(page, where, when) {
     const slider = burn.querySelector("ui-slider").getBoundingClientRect()
     const band = burn.getBoundingClientRect()
     const box = bellsRoot().querySelector(".bells").getBoundingClientRect()
+    // the dialog's own box, in the modal's shadow root
+    const dialog = bellsRoot().querySelector("ui-modal").shadowRoot.querySelector("dialog").getBoundingClientRect()
+    const edges = {
+      top: +dialog.top.toFixed(1),
+      right: +(innerWidth - dialog.right).toFixed(1),
+      bottom: +(innerHeight - dialog.bottom).toFixed(1),
+      left: +dialog.left.toFixed(1)
+    }
+    // Token burn in the footer, at its left, before Cancel and Save
+    const actions = bellsRoot().querySelector(".actions")
+    const cancel = actions.querySelector(".cancel").getBoundingClientRect()
+    const inFooter = burn.parentElement === actions && band.left - actions.getBoundingClientRect().left < 24
+    const leftOfButtons = band.right <= cancel.left + 0.5 || band.bottom <= cancel.top + 0.5
+    // no tick marks:  the slider not ticked, its labels drawing nothing after them
+    const sliderBox = burn.querySelector("ui-slider").shadowRoot.querySelector(".ui.slider")
+    const ticks = [...sliderBox.querySelectorAll(".label")].filter((label) => {
+      const after = getComputedStyle(label, "::after")
+      return after.content !== "none" && parseFloat(after.width) > 0 && parseFloat(after.height) > 0
+    }).length
+    const track = sliderBox.querySelector(".track, .inner")?.getBoundingClientRect()
+    // how many step lines wrap to 2+ lines
+    const wrapped = []
+    for (const sentence of bellsRoot().querySelectorAll(".sentence")) {
+      const range = document.createRange()
+      range.selectNodeContents(sentence)
+      const lines = new Set([...range.getClientRects()].map((rect) => Math.round(rect.top)))
+      if (lines.size > 1) wrapped.push(sentence.closest(".row").dataset.step)
+    }
     return {
+      edges,
+      footer: { inFooter, leftOfButtons, ticks, ticked: sliderBox.classList.contains("ticked") },
+      trackMidToNameMid: track ? +(track.top + track.height / 2 - (name.top + name.height / 2)).toFixed(1) : undefined,
+      wrapped,
       rows: rows.length,
       off,
       centres: [...centres],
@@ -233,6 +276,13 @@ async function measure(page, where, when) {
   if (found.burn.line) problems.push(`${where} ${when}:  a line under the slider`)
   if (found.burn.custom !== (found.burn.shown === "custom")) problems.push(`${where} ${when}:  the Custom chip:  ${JSON.stringify(found.burn)}`)
   if (found.wide || found.scrollX > 0) problems.push(`${where} ${when}:  wider than the window`)
+  if (Object.values(found.edges).some((edge) => Math.abs(edge - EDGE) > 1))
+    problems.push(`${where} ${when}:  the dialog isn't ${EDGE}px from every edge:  ${JSON.stringify(found.edges)}`)
+  if (!found.footer.inFooter || !found.footer.leftOfButtons)
+    problems.push(`${where} ${when}:  Token burn not in the footer at the left:  ${JSON.stringify(found.footer)}`)
+  if (found.footer.ticks || found.footer.ticked) problems.push(`${where} ${when}:  the slider has tick marks`)
+  if (Math.abs(found.burn.nameMidToSliderMid) > 1.5)
+    problems.push(`${where} ${when}:  the slider isn't centred on Token burn:  ${found.burn.nameMidToSliderMid}`)
   summary[`${where} ${when}`] = found
 }
 

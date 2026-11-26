@@ -27,7 +27,7 @@ from typing import Any, ClassVar
 
 import pytest
 
-from spell_core import Core, Place, PlaceError, Thing, h, place_kinds, prop
+from spell_core import Core, Place, PlaceError, Thing, h, place_kinds, places, prop
 from spell_core.calendar_settings import CalendarSettings
 from spell_core.core import using_core
 from spell_core.place_kinds import Change, DeviceFile, ServerPlace, device_file_for, place_behind
@@ -341,6 +341,59 @@ def test_a_drawing_right_after_a_save_sees_it(program: Core, watched: WatchedFil
     assert asyncio.run(saves_and_draws()) == ["milk"]
 
 
+def test_a_drawing_never_waits_for_a_save_on_its_way(program: Core, tmp_path: Path) -> None:
+    happened: list[str] = []
+    program._places.behinds["this_device"] = SlowFile(tmp_path / "Notes.device.json", happened)
+
+    async def other_visitor() -> float:
+        longest = 0.0
+        for _ in range(10):
+            started = time.monotonic()
+            await asyncio.sleep(0.02)
+            longest = max(longest, time.monotonic() - started)
+        return longest
+
+    async def saves_and_draws() -> list[str]:
+        kept = DeviceNote(text="milk")
+        program.save_thing(kept)
+        await asyncio.sleep(0.05)
+        # under way, then waiting behind it:  a change, a new one, and one gone
+        kept.text = "oat milk"
+        program.save_thing(DeviceNote(text="eggs"))
+        gone = DeviceNote(text="jam")
+        program.save_thing(gone)
+        program.remove_saved(gone)
+        program.reload_saved()
+        drawn = [it.text for it in program.run_at_once(program.saved_things(DeviceNote))]
+        happened.append("drawn")
+        return drawn
+
+    async def both() -> tuple[float, list[str]]:
+        return await asyncio.gather(other_visitor(), saves_and_draws())
+
+    longest, drawn = asyncio.run(both())
+    # drawn before the first save was kept, with every save on its way laid over what the file has
+    assert drawn == ["oat milk", "eggs"]
+    assert happened[0] == "drawn"
+    assert longest < SLOW_SECONDS / 2
+
+
+def test_laid_over_is_what_the_rows_will_be() -> None:
+    rows = [{"id": "a", "text": "milk", "stars": 1}, {"id": "b", "text": "eggs"}]
+    changes: list[Change] = [
+        {"kind": "update", "collection": "notes", "id": "a", "fields": {"stars": 2}},
+        {"kind": "delete", "collection": "notes", "id": "b"},
+        {"kind": "insert", "collection": "notes", "id": "c", "fields": {"text": "jam"}},
+        {"kind": "update", "collection": "notes", "id": "nowhere", "fields": {"text": "?"}},
+        {"kind": "insert", "collection": "other", "id": "d", "fields": {}},
+    ]
+    assert places.laid_over(rows, changes, "notes") == [
+        {"id": "a", "text": "milk", "stars": 2},
+        {"id": "c", "text": "jam"},
+    ]
+    assert rows[0] == {"id": "a", "text": "milk", "stars": 1}
+
+
 def test_a_refused_save_is_one_line_and_the_next_still_goes(
     program: Core, watched: WatchedFile, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -523,7 +576,7 @@ def requests_for_three_saves(
 @pytest.mark.parametrize("error", [None, http.client.IncompleteRead(b"{")], ids=["garbled", "cut off"])
 @pytest.mark.parametrize(
     ("kind", "requests"),
-    [("sheet", [["a", "b", "c"]]), ("data folder", [["a"], ["b"], ["c"]])],
+    [("sheet", [["a", "b", "c"]]), ("data folder", [["a", "b", "c"]])],
     ids=["sheet", "folder"],
 )
 def test_saves_whose_answer_cant_be_read_reach_the_server_once(
@@ -567,8 +620,51 @@ def test_a_data_folders_refusal_is_never_sent_again(
 ) -> None:
     behind = ServerPlace("data folder", "http://x.test/p", TOKEN)
     refusal = urllib.error.HTTPError("http://x.test/p", 422, "no", Message(), BytesIO(b'{"kind": "refused"}'))
-    # it keeps what came before a refusal, so each change is a request of its own
-    assert requests_for_three_saves(program, behind, monkeypatch, refusal) == [["a"], ["b"], ["c"]]
+    # one request;  it doesn't say what it kept, so none goes again, and each is said
+    assert requests_for_three_saves(program, behind, monkeypatch, refusal) == [["a", "b", "c"]]
+    assert len(capsys.readouterr().err.splitlines()) == 3
+
+
+def test_a_data_folder_sends_again_only_what_it_never_tried(
+    program: Core, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    requests: list[dict[str, Any]] = []
+    kept = [b'{"kind": "refused", "kept": 1}']
+
+    def opened(request: Any) -> object:
+        requests.append(json.loads(request.data))
+        if kept:
+            raise urllib.error.HTTPError("http://x.test/p", 422, "no", Message(), BytesIO(kept.pop()))
+        return AnswerOf(b'{"rows": []}')
+
+    monkeypatch.setattr(place_kinds, "open_minding_limits", opened)
+    program._places.behinds["this_device"] = ServerPlace("data folder", "http://x.test/p", TOKEN)
+
+    async def saves() -> None:
+        for text in "abc":
+            program.save_thing(DeviceNote(text=text))
+
+    asyncio.run(saves())
+    # a kept, b refused, c never tried:  c alone goes again, by the same change id
+    assert [[change["fields"]["text"] for change in body["changes"]] for body in requests] == [["a", "b", "c"], ["c"]]
+    assert all(body["oneAtATime"] for body in requests)
+    assert requests[1]["changes"][0]["changeId"] == requests[0]["changes"][2]["changeId"]
+    lines = capsys.readouterr().err.splitlines()
+    assert len(lines) == 1
+    assert "DeviceNote" in lines[0]
+
+
+class AnswerOf(AnswerCutShort):
+    """A server's answer of `text`."""
+
+    def __init__(self, text: bytes) -> None:
+        """An answer of `text`."""
+        super().__init__(None)
+        self.text = text
+
+    def read(self) -> bytes:
+        """Its bytes."""
+        return self.text
 
 
 def test_an_error_that_is_no_places_own_is_never_sent_again(
@@ -793,6 +889,8 @@ def test_a_data_folder_is_read_and_written_through_the_page_server(page_server: 
         note.stars = 5
     insert, update = FakePlaceServer.asked
     assert insert["address"] == "/api/places/spaces/@x/n/__data/notes"
+    # each change goes with an id of its own, which the page server makes once
+    assert [change.pop("changeId").startswith("py-") for change in insert["changes"] + update["changes"]] == [True] * 2
     assert insert["changes"] == [
         {"kind": "insert", "collection": "folder_notes", "id": note.id, "fields": {"text": "milk", "stars": 2}}
     ]

@@ -572,6 +572,10 @@
   .gear-sub .choice.checked .tick {
     visibility: visible;
   }
+  /* the dialogs' rows above it, the sub-menus' below (T173) */
+  .gear-divider::part(divider) {
+    margin: 4px 8px;
+  }
   .gear-sub .divider {
     margin: 4px 8px;
     border-top: 1px solid var(--epic-rule);

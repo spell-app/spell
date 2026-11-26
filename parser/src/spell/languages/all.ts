@@ -5,5 +5,7 @@
  *   `await SP.loadGrammar()` before parsing, `await SP.Language.loadFor(files)` before reading another language.
  * - A side-effect import:  `import "spell/parser/spell/languages/all"`.  The barrel never imports it.
  */
+// HTML's whole entity table, which a browser loads on first use
+import "spell/parser/parser/htmlEntitiesUpFront"
 import "spell/parser/spell/languages/en"
 import "spell/parser/spell/languages/es"

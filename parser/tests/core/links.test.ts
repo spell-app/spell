@@ -11,7 +11,7 @@ import { afterEach, beforeAll, describe, expect, test } from "vite-plus/test"
 import { bridgeSolid } from "spell/util"
 import { core, h, Place, Thing } from "spell/parser/core"
 import type { Drawing } from "spell/parser/core/drawing"
-import { MemoryPlace, type PlaceRow, type SelectingContext } from "spell/places"
+import { MemoryPlace, type PersonHere, type PlaceRow, type PlaceSignIn, type SelectingContext } from "spell/places"
 
 /** A place in memory that holds each answer until the test lets it go:  as a slow server would. */
 class SlowPlace extends MemoryPlace {
@@ -194,4 +194,75 @@ describe("a link, drawn", () => {
       expect(again.shown()).toBe("Tatooine > end")
     })
   }
+})
+
+// epic `data` I157:  what a link found was the last person's, found or not
+describe("a link, after someone else signs in", () => {
+  /** A place in memory where each person sees only their own planets, signed in by `signInAs()`. */
+  class PrivatePlace extends MemoryPlace {
+    /** Each person's planets, by their id. */
+    seenBy: Record<string, readonly string[]> = { ana: ["tatooine"], ben: ["hoth"] }
+    /** Hears who's signed in changing. */
+    private listeners = new Set<() => void>()
+    /** Its sign-in:  Ana, until `signInAs()`. */
+    readonly signIn: PlaceSignIn & { person: PersonHere } = {
+      status: "signed in",
+      account: "Spell account",
+      person: { id: "ana", name: "Ana", page: "" },
+      signIn: async () => {},
+      signOut: async () => {},
+      onChange: (listener: () => void) => {
+        this.listeners.add(listener)
+        return () => this.listeners.delete(listener)
+      }
+    }
+
+    async getMany(collection: string, ids: readonly string[], context: SelectingContext = {}): Promise<PlaceRow[]> {
+      const seen = this.seenBy[this.signIn.person.id] ?? []
+      return (await super.getMany(collection, ids, context)).filter((row) => seen.includes(row.id as string))
+    }
+
+    /** SIDE EFFECT:  `id` is signed in now, and whoever listens hears it. */
+    signInAs(id: string): void {
+      this.signIn.person = { id, name: id, page: "" }
+      for (const listener of this.listeners) listener()
+    }
+  }
+
+  test("each link shows what the new person finds:  the last one's thing goes, and a nothing becomes theirs", async () => {
+    const stars = new PrivatePlace({
+      collections: {
+        planets: [
+          { id: "tatooine", name: "Tatooine" },
+          { id: "hoth", name: "Hoth" }
+        ]
+      }
+    })
+    const { Person } = program(stars as unknown as SlowPlace)
+    const luke = draw(new Person({ homeworld: "tatooine" }))
+    const han = draw(new Person({ homeworld: "hoth" }))
+    leaving.push(luke.leave, han.leave)
+    await settled()
+    expect([luke.shown(), han.shown()]).toEqual(["Tatooine", ""])
+
+    stars.signInAs("ben")
+    await settled()
+    expect([luke.shown(), han.shown()]).toEqual(["", "Hoth"])
+  })
+
+  test("a link drawn afresh after the change asks again, rather than taking the last person's thing", async () => {
+    const stars = new PrivatePlace({ collections: { planets: [{ id: "tatooine", name: "Tatooine" }] } })
+    const { Person } = program(stars as unknown as SlowPlace)
+    const first = draw(new Person({ homeworld: "tatooine" }))
+    await settled()
+    expect(first.shown()).toBe("Tatooine")
+    first.leave()
+
+    stars.signInAs("ben")
+    await settled()
+    const again = draw(new Person({ homeworld: "tatooine" }))
+    leaving.push(again.leave)
+    await settled()
+    expect(again.shown()).toBe("")
+  })
 })

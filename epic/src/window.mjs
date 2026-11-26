@@ -205,7 +205,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from "node:pat
 import { escapeRegExp } from "spell/util/string.ts"
 import { findUp } from "spell/util/node/findUp"
 import { after, waitUntil } from "spell/util/timing.ts"
-import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
+import { isSupersededTitle, parseVerbArgs, stringFlag, supersededTitle } from "spell/epic/command/command.types.ts"
 import { checkoutOf } from "spell/server/checkout"
 import { isProcessAlive } from "spell/server/Heartbeat"
 import { Processes } from "spell/server/Processes"
@@ -329,6 +329,9 @@ const REQUEST_TIMEOUT = 10_000
 
 /** How long `resume` waits for a worktree's window to start, in msec. */
 const WINDOW_START_TIMEOUT = 60_000
+
+/** How long `retireFresh()` waits for the old session's process to end before writing its title:  30 seconds. */
+const RETIRE_WAIT = 30_000
 
 /** A Claude Code session id:  a uuid. */
 const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -829,6 +832,8 @@ export class Window {
    * The live Claude Code sessions of epic `name`, for `launchPlan()`:
    * `{ sessionId, title, self, inWindow, window }` each.
    * - a session of the epic:  titled for it (`titledFor()`), or working in its worktree
+   *   - never a superseded one (`🗄️ <epic> (replaced)`, epic `epic-engine` T175), typed into again:  a newer one is the
+   *     epic's
    * - `self`:  the session running this (`$CLAUDE_CODE_SESSION_ID`)
    * - `inWindow`:  it runs in window `open` (a registry entry, or `null`), the epic's
    * - `window`:  the registry entry of the window it runs in, the nearest of its ancestors with one;
@@ -840,6 +845,7 @@ export class Window {
     const processes = Processes.table()
     return liveSessions()
       .filter(({ title, cwd }) => {
+        if (isSupersededTitle(title)) return false
         const at = cwd ? real(cwd) : ""
         return titledFor(title, name) || pathInside(worktree, at) !== undefined
       })
@@ -964,7 +970,8 @@ export class Window {
       remove: null,
       show: null,
       prompt: `/epic resume ${epic}`,
-      fresh: true
+      fresh: true,
+      epic
     }
     mkdirSync(Window.handoffs, { recursive: true, mode: 0o700 })
     writeFileSync(Window.handoffFile(sessionId), `${JSON.stringify(handoff, null, 2)}\n`, { mode: 0o600 })
@@ -1068,15 +1075,46 @@ export class Window {
    * the old session's tab there closed by `titles`;  returns what happened, as `resume()`.
    * - the new tab is opened first, so the window is never left without one
    * - its prompt is typed, not sent:  the new tab has no title of its own yet, so it never matches the old one's
+   * - its tab closed, the OLD session is titled superseded, `🗄️ <epic> (replaced)` (`retireFresh()`;  epic
+   *   `epic-engine` T175):  `retired` says whether it was
    * - `from` gone:  throws, nothing opened
    */
-  static async resumeFresh({ from, prompt }, titles) {
+  static async resumeFresh({ sessionId, from, prompt, epic }, titles) {
     const window = from ? Window.entries().get(Number(from)) : undefined
     if (!window) throw new Error(`window ${from} is gone:  no new session opened`)
     await Window.request("open-session", prompt ? { prompt } : {}, window)
     if (!titles.length) return { opened: true, closed: false, matches: undefined, shown: undefined }
     const { closed, matches } = await Window.request("close-session-tab", { titles }, window)
-    return { opened: true, closed, matches, shown: undefined }
+    const name = epic ?? prompt?.match(/^\/epic resume (\S+)/)?.[1]
+    const retired = closed && name ? await Window.retireFresh(sessionId, name) : false
+    return { opened: true, closed, matches, shown: undefined, retired }
+  }
+
+  /**
+   * Title session `sessionId`, the one a `/epic fresh` just left, `🗄️ <epic> (replaced)` (`supersededTitle()`;  epic
+   * `epic-engine` T175);  resolves to whether it was written.
+   * - by the order it's done in, AFTER its tab closed:  that tab was found by its old title
+   * - queued for its next prompt or resume at once (`session-titles/<id>`), so a resume keeps it
+   * - written into its transcript once its process is gone (`SessionFolders.writeTitle()`, waiting up to
+   *   `RETIRE_WAIT`):  while it runs, Claude Code writes its own title again over it
+   *   - still running then:  only queued, `false`;  `epic session retire` finishes it later
+   * - NEVER throws:  a session left `🚧 <epic>` is only untidy
+   */
+  static async retireFresh(sessionId, epic) {
+    try {
+      const title = supersededTitle(epic)
+      const home = ClaudeHome.home()
+      const titles = ClaudeHome.titlesFolder(home)
+      mkdirSync(titles, { recursive: true })
+      writeFileSync(join(titles, sessionId), title)
+      const isLive = () => ClaudeHome.liveSessions({ home }).some((record) => record.sessionId === sessionId)
+      const gone = await waitUntil(() => !isLive(), { timeout: RETIRE_WAIT / 1000, every: 0.5 })
+      if (!gone) return false
+      return SessionFolders.writeTitle(sessionId, title, home).length > 0
+    } catch (error) {
+      console.error(`window:  ${sessionId} not titled superseded:  ${error.message}`)
+      return false
+    }
   }
 
   /**
@@ -1986,8 +2024,10 @@ function liveSessions() {
  * Whether session title `title` names epic `name`:
  * without its icon it IS the name (`🚧 seo`), or holds it as a whole word (`seo review`;  never `seo-pages`).
  * - the same rule as `titleNames()` in `spell-epic` (`RunningEpics`), which this plain script can't import
+ * - never a superseded session's (`isSupersededTitle()`, epic `epic-engine` T175)
  */
 export function titledFor(title, name) {
+  if (isSupersededTitle(title)) return false
   const bare = title
     .replace(/^[^\p{L}\p{N}]+/u, "")
     .trim()

@@ -902,12 +902,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       module: this.path,
       ...(this.contents?.packs ? { packs: this.contents.packs } : {})
     } as P.ParserProps)
-    return new P.ProjectScope({
+    const scope = new P.ProjectScope({
       name: this.projectName,
       path: this.path,
       parser,
       parentScope
     })
+    // a line may warn about what a target can't do (`SP.SpellWarnings.noteFilesNotInPython()`)
+    SP.SpellWarnings.compilesTo(scope, this.contents?.targets ?? [])
+    return scope
   }
 
   /**

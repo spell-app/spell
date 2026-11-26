@@ -3,7 +3,7 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { BellSteps, type BellsValues } from "spell/epic/bells"
+import { BellSteps, type BellsValues, type BurnLevel } from "spell/epic/bells"
 import { epicBellsVocabulary } from "spell/epic/components/epic-bells/EpicBells.en"
 
 const textOf = (key: string) => epicBellsVocabulary.texts.find((text) => text.key === key)?.text
@@ -61,16 +61,28 @@ describe("BellSteps", () => {
     expect(BellSteps.stateOf(values, "designReview")).toEqual({ on: false, why: "switch" })
   })
 
-  test("Medium:  cheap steps and timesavers, medium ones that matter, high ones only if they're a must", () => {
+  test("Medium:  holds off every nice-to-have and every high-cost step that isn't a must;  9 of 28 (T173)", () => {
     const values = BellSteps.withBurn(BellSteps.defaults(), "medium")
     const on = (key: string) => BellSteps.stateOf(values, key).on
-    expect(on("titleCheck")).toBe(true) // low
+    expect(on("titleCheck")).toBe(true) // low, useful
     expect(on("freshHint")).toBe(true) // timesaver
+    expect(on("itemScoring")).toBe(false) // low, nice to have
     expect(on("planCheck")).toBe(true) // medium, useful
     expect(on("alignmentCheck")).toBe(false) // medium, nice to have
     expect(on("helpersBuild")).toBe(true) // high, must-have
     expect(on("designReview")).toBe(false) // high, useful
     expect(BellSteps.stateOf(values, "designReview")).toEqual({ on: false, why: "burn" })
+    expect(offAt("medium")).toEqual([
+      "reuseCheckPhases",
+      "designReview",
+      "alignmentCheck",
+      "itemScoring",
+      "editorWarnings",
+      "plainPhaseNotes",
+      "fixReadmes",
+      "checkGuides",
+      "promptAck"
+    ])
   })
 
   test("a step that uses no tokens runs at every level, unless your own switch is off", () => {
@@ -83,17 +95,23 @@ describe("BellSteps", () => {
     expect(BellSteps.stateOf(off, "startNotices")).toEqual({ on: false, why: "switch" })
   })
 
-  test("Low:  timesavers, the steps that use no tokens, and the cheap must-haves only", () => {
+  test("Low:  timesavers, the steps that use no tokens, and the must-haves that aren't high-cost;  21 of 28 off (T173)", () => {
     const values = BellSteps.withBurn(BellSteps.defaults(), "low")
     const on = BellSteps.STEPS.filter((step) => !step.inBrowser && BellSteps.stateOf(values, step.key).on)
     expect(
       on.every(
         (step) =>
-          step.cost === "timesaver" || step.cost === "none" || (step.cost === "low" && step.importance === "mustHave")
+          step.cost === "timesaver" || step.cost === "none" || (step.cost !== "high" && step.importance === "mustHave")
       )
     ).toBe(true)
-    expect(on.map((step) => step.key)).toContain("stopStuckTests")
-    expect(on.map((step) => step.key)).not.toContain("titleCheck")
+    const keys = on.map((step) => step.key)
+    expect(keys).toContain("stopStuckTests")
+    // Send still reaches a chat
+    expect(keys).toContain("openChat")
+    expect(keys).toContain("wakeQuietChat")
+    expect(keys).not.toContain("titleCheck")
+    expect(keys).not.toContain("helpersBuild")
+    expect(offAt("low")).toHaveLength(21)
   })
 
   test("your own switch off stays off at every level", () => {
@@ -131,3 +149,11 @@ describe("BellSteps", () => {
     expect(BellSteps.stateOf(values, "noSuchStep").on).toBe(true)
   })
 })
+
+/** The steps that use tokens the slider at `level` holds off, in the table's order. */
+function offAt(level: BurnLevel): string[] {
+  const values = BellSteps.withBurn(BellSteps.defaults(), level)
+  return BellSteps.SETTINGS_STEPS.filter(
+    (step) => step.cost !== "none" && step.cost !== "timesaver" && !BellSteps.stateOf(values, step.key).on
+  ).map((step) => step.key)
+}

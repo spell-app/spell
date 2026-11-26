@@ -1,6 +1,6 @@
 // Spell "parser" class.
 //
-import { isEqual, groupBy, sum } from "lodash-es"
+import { isEqual, sum } from "lodash-es"
 
 import { Derivative, showWhitespace } from "spell/util"
 import { P } from "spell/parser/parser"
@@ -755,7 +755,11 @@ export class Parser extends Derivative {
     // Get all of the testable rules in this parser.
     const testable = this.rules._testable_
     let rules: P.Rule[] | undefined = testable instanceof P.Group ? testable.rules : testable ? [testable] : undefined
-    if (moduleName && rules) rules = groupBy(rules, "module")[moduleName]
+    if (moduleName && rules) {
+      // by hand, not lodash's `groupBy()`:  2.6 KB brotli in the language worker with `omit()` (epic `solid-2-final` I64)
+      const inModule = rules.filter((rule) => rule.module === moduleName)
+      rules = inModule.length ? inModule : undefined
+    }
     if (!rules) {
       if (debug) console.debug("no testable rules found")
     } else {

@@ -1,5 +1,8 @@
 import JSON5 from "json5"
-import semver from "semver"
+// semver's functions one by one:  its whole barrel is 6.7 KB brotli in the language worker (epic `solid-2-final` I64)
+import major from "semver/functions/major"
+import satisfies from "semver/functions/satisfies"
+import valid from "semver/functions/valid"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -784,10 +787,10 @@ export class SpellDeclarations {
   /** Throws unless `declarations` suit this compiler, and the importer's `range`, if any. */
   private static checkVersions(from: string, declarations: SP.SpellDeclarationsData, range: string | undefined) {
     const { spellVersion, version } = declarations
-    if (!semver.valid(spellVersion) || semver.major(spellVersion) !== semver.major(SP.SPELL_VERSION)) {
+    if (!valid(spellVersion) || major(spellVersion) !== major(SP.SPELL_VERSION)) {
       SpellDeclarations.fail(from, `it was compiled by spell ${spellVersion}, this is spell ${SP.SPELL_VERSION}`)
     }
-    if (range && !(version && semver.satisfies(version, range))) {
+    if (range && !(version && satisfies(version, range))) {
       SpellDeclarations.fail(from, `its version ${version ?? "(none)"} isn't '${range}'`)
     }
   }

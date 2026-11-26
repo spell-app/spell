@@ -1,5 +1,3 @@
-import { decodeHTMLStrict } from "entities"
-
 import { dedent, proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -33,7 +31,7 @@ export class SpellJSXText extends P.TokenType<never, { fillIns?: FillInParts }> 
     if (fillIns === null) return undefined
     SpellJSXText.warnOfStatements(match, token.value)
     if (fillIns) {
-      match.data.fillIns = fillIns.map((part) => (typeof part === "string" ? decodeHTMLStrict(part) : part))
+      match.data.fillIns = fillIns.map((part) => (typeof part === "string" ? P.HTMLEntities.decode(part) : part))
       noteFillInWarnings(match, fillIns)
     }
     return match
@@ -57,7 +55,7 @@ export class SpellJSXText extends P.TokenType<never, { fillIns?: FillInParts }> 
     // a `<script>`'s or `<style>`'s text:  its lines kept, their shared indent and the blank ones at either end dropped
     if (token instanceof P.JSXRawTextToken)
       return dedent(value) ? new P.ASTJSXText(match, { value: dedent(value) }) : undefined
-    const text = decodeHTMLStrict(jsxText(value))
+    const text = P.HTMLEntities.decode(jsxText(value))
     // Blank text has nothing to render -- return `undefined` for "no AST" (`Rule.getAST()`'s return
     // type already permits this; `Match.AST` treats a falsy return as "no AST").
     if (!text) return undefined

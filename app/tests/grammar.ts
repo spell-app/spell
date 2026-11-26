@@ -5,4 +5,5 @@
  * - The `app:browser` project's `setupFiles` (`vitest.config.ts`);  the node projects load every language instead
  *   (`allLanguages.ts`).
  */
+import "spell/parser/parser/htmlEntitiesUpFront"
 import "spell/parser/spell/languages/en"
