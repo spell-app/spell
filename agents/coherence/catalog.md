@@ -440,7 +440,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - Fine:  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing
   - the epic pages:  about a dozen reads checking `response.ok` themselves (sweep 1, epic-pages #1)
   - `--` in the app since epic `coherence` P14:  its runner and `editor.ts` ask `$fetch()` for `cache: "no-cache"`
-  - NOT Spell UI:  `$fetch()` brings lodash and query-string into its bundles;  it has `fetchOk()` / `fetchText()`
+  - NOT Spell UI:  `$fetch()` brings lodash into its bundles;  it has `fetchOk()` / `fetchText()`
     instead ("In Spell UI", below)
 
 ### Data that lives somewhere else:  a server, a folder, a sheet, a room

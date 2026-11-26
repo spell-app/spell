@@ -10,7 +10,7 @@
  * - PERSIST (`./persist`):  what an app keeps for people --
  *   preferences across visits (`PrefStore` and the places it keeps them), and an undo history (`UndoStack`).
  *   Generic too:  Spell UI imports the pref store by file (`spell/util/persist/PrefStore`).
- * - SPELL'S (`./spell`, flattened in LAST):  lodash, `chalk`, `pluralize`, fetch, tasks.
+ * - SPELL'S (`./spell`, flattened in LAST):  lodash, `pluralize`, fetch, tasks.
  *   - NEVER import them from `ui`:
  *     `ui`'s `src/util/index.ts` imports the generic files one by one (`spell/util/class` ...), never this barrel,
  *     so none of it lands in `ui`'s bundles or published declarations.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { parseJSON5 } from "spell/util/spell/json"
+import { parseJSON5 } from "spell/util/spell/parseJSON5"
 import { ThemeFile, type ThemeFileSet } from "spell/ui/styles/ThemeFile"
 import type { ThemeData } from "spell/ui/styles/styles.types"
 

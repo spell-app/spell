@@ -1,4 +1,5 @@
-import { JSON5File, LoadableFile, getDier, KnownFormat, parseJSON5 } from "spell/util"
+import { JSON5File, LoadableFile, getDier, KnownFormat } from "spell/util"
+import { parseJSON5 } from "spell/util/spell/parseJSON5"
 import { after } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 

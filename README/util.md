@@ -453,7 +453,7 @@ On an `Observable` (every compiled `Thing` and `List` is one), `card.suit = "sta
 
 Everything above could ship in any app.
 This layer is Spell's:  what the language, the editor and the tools share, flattened into the barrel last.
-It has dependencies (lodash, `chalk`, `pluralize`, `query-string`, `json5` and two small shims),
+It has dependencies (lodash, `pluralize`, `json5` and two small shims),
 which is why Spell UI never imports it.
 
 ### `$fetch()` and `die()`:  a failure you can catch by name
@@ -626,7 +626,7 @@ And when you're in there:
 | [reactive/](../src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records:  `getProp()` / `setProp()`, `getState()` / `setState()`, `reactiveObject()`, `typedJSON()`), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
 | [persist/](../src/util/persist/) | what an app keeps for people:  `PrefStore`, and where it keeps them, `PrefPlace` (the quick `StoragePlace`, over the browser's storage or a `MemoryStorage`;  the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`);  `UndoStack`;  `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`);  `persist.types.ts` (the server's protocol too) |
 | places/ | *(none -- [spell/places](../src/places/), a folder of its own since epic `data` P39)* |
-| [`spell/`](../src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `view` (`elementTagFor()`, `viewAttributeFor()`), `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
+| [`spell/`](../src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `view` (`elementTagFor()`, `viewAttributeFor()`), `json` (`parseJSON()`, `readJSON5()`:  JSON5 with its reader loaded on first use), `parseJSON5` (by file, in no barrel:  synchronous, for node and the editor), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
 | [node/json5.ts](../src/util/node/json5.ts) | JSON5 written with its comments kept (node only) |
 | [vitest.config.ts](../vitest.config.ts) | the kit's tests:  util's two projects, `util` (a browser) and `util:node` |
 

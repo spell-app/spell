@@ -1,4 +1,4 @@
-import { $fetch, parseJSON5 } from "spell/util"
+import { $fetch, readJSON5 } from "spell/util"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 
 /**
@@ -22,7 +22,7 @@ export type GuideList = { guides: ShippedGuide[]; startHere: StartHere[] }
 /** The shipped guides' list;  throws `$fetch()`'s error when the package has none. */
 export async function readGuideList(): Promise<GuideList> {
   const text = await $fetch<string>({ url: `${GUIDES_API}/guides.json5`, cache: "no-cache" })
-  return parseJSON5(text, "guides.json5") as GuideList
+  return (await readJSON5(text, "guides.json5")) as GuideList
 }
 
 /**

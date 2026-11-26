@@ -1,5 +1,5 @@
 import { MissingResourceError } from "spell/util/spell/ResponseErrors"
-import { parseJSON5 } from "spell/util/spell/json"
+import { readJSON5 } from "spell/util/spell/json"
 import type { ThemeData } from "spell/ui/styles/styles.types"
 import { fetchText } from "./fetchFresh"
 
@@ -111,7 +111,7 @@ export class SiteThemes {
     const url = projectFolder ? `${projectFolder}/${fileName}` : undefined
     const text = url ? await SiteThemes.fileText(url) : undefined
     if (projectFolder && text !== undefined) {
-      const data = parseJSON5(text, fileName) as ThemeData
+      const data = (await readJSON5(text, fileName)) as ThemeData
       return SiteThemes.defineFromProject(name, data, projectFolder, seen)
     }
     if (UI.themes.isBuiltIn(name)) return name

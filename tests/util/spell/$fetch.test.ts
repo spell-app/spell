@@ -63,6 +63,21 @@ describe("$fetch()", () => {
     expect([reply, calls[0]![0], calls[0]![1].cache]).toEqual([{ answer: 1 }, "/api?page=%2Fa%20b.html", "no-store"])
   })
 
+  test("reads a `json5` answer, loading the reader on first use", async () => {
+    const fetcher = (async () => new Response("{ a: 1, // one\n}", { status: 200 })) as unknown as typeof fetch
+    expect(await $fetch({ url: "/x.json5", format: "json5", fetch: fetcher })).toEqual({ a: 1 })
+  })
+
+  test("writes an object query with its keys sorted", async () => {
+    const calls: string[] = []
+    const fetcher = (async (url: string) => {
+      calls.push(url)
+      return new Response("", { status: 200 })
+    }) as unknown as typeof fetch
+    await $fetch({ url: "/api", query: { b: 2, a: ["x", "y"], none: undefined }, fetch: fetcher })
+    expect(calls).toEqual(["/api?a=x&a=y&b=2"])
+  })
+
   test("answers `defaultContents` for a 404, and throws `MissingResourceError` without it", async () => {
     const fetcher = (async () => new Response("gone", { status: 404 })) as unknown as typeof fetch
     expect(await $fetch({ url: "/x", format: "json", defaultContents: null, fetch: fetcher })).toBe(null)

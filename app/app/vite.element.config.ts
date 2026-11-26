@@ -63,8 +63,15 @@ export default defineConfig({
         assetFileNames: (asset) =>
           asset.names?.some((name) => name.endsWith(".css")) ? "spell-app.css" : "[name][extname]",
         keepNames: true,
-        // everything both entries load up front, in ONE chunk with a name that says so -- NOT e.g. `Button.js`
-        codeSplitting: { groups: [{ name: sharedUpFront(), debugName: "spell-shared" }] }
+        codeSplitting: {
+          groups: [
+            // everything both entries load up front, in ONE chunk with a name that says so -- NOT e.g. `Button.js`
+            { name: sharedUpFront(), debugName: "spell-shared" },
+            // `json5`, only ever loaded on first use (`readJSON5()`, the theme editor):  a file of its own, or Rolldown
+            // merges it into a chunk the viewer loads up front (`spell-viewer2.js`, epic `solid-2-final` I65)
+            { name: "json5", test: /[\\/]node_modules[\\/]json5[\\/]/ }
+          ]
+        }
       }
     }
   },

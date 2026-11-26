@@ -6,7 +6,7 @@
  *   they're worked out when shown, from the project's sources and compiled output, if we can have them.
  *   See `ScopesSourceHooks`.
  */
-import JSON5 from "json5"
+import type JSON5 from "json5"
 
 import { escapeRegExp } from "spell/util/string"
 
@@ -115,9 +115,12 @@ export function scopesFromPacks(packs: ScopePack[], hooks: ScopesSourceHooks = {
     if (!found) {
       const compiled = hooks.loadCompiled?.(projectId).catch(() => undefined) ?? Promise.resolve(undefined)
       const declared = hooks.loadDeclarations?.(projectId).catch(() => undefined) ?? Promise.resolve(undefined)
-      found = Promise.all([compiled, declared]).then(([text, declarations]) => {
+      found = Promise.all([compiled, declared]).then(async ([text, declarations]) => {
         if (!text) return []
-        return declarations?.codeLines ? declaredCode(text, declarations) : compiledMarkers(text)
+        if (declarations?.codeLines) return declaredCode(text, declarations)
+        // loaded only now:  a page that never opens a scope's code never downloads it
+        const { default: json5 } = await import("json5")
+        return compiledMarkers(text, json5)
       })
       markers.set(projectId, found)
     }
@@ -195,11 +198,12 @@ type CompiledMarker = {
  * - A marker says:
  *   - which file its statement's in, as `defined: "/Card.spell:70-87"`
  *   - what it declares, as `SP.SpellDeclaration` props, e.g. `property: "suit", of: "Card"` (see `declaredPaths()`)
+ * - `json5`:  the `json5` package, which reads each marker, loaded by the caller on first use
  */
-function compiledMarkers(compiled: string): CompiledMarker[] {
+function compiledMarkers(compiled: string, json5: typeof JSON5): CompiledMarker[] {
   const found = [...compiled.matchAll(DECLARES)].map((match) => ({ match, indent: indentAt(compiled, match.index) }))
   return found.flatMap(({ match, indent }, index) => {
-    const declaration = parseMarker(match[0])
+    const declaration = parseMarker(match[0], json5)
     const defined = typeof declaration?.defined === "string" && /^(.+):\d+-\d+$/.exec(declaration.defined)
     if (!declaration || !defined) return []
     const from = match.index + match[0].length
@@ -256,9 +260,9 @@ function isLastOwnerOf(declared: string, owner: string | undefined): boolean {
 }
 
 /** What marker `comment` says its statement declared -- `undefined` if it can't be read. */
-function parseMarker(comment: string): MarkerDeclaration | undefined {
+function parseMarker(comment: string, json5: typeof JSON5): MarkerDeclaration | undefined {
   try {
-    return JSON5.parse<MarkerDeclaration>(comment.slice(comment.indexOf("{"), comment.lastIndexOf("}") + 1))
+    return json5.parse<MarkerDeclaration>(comment.slice(comment.indexOf("{"), comment.lastIndexOf("}") + 1))
   } catch {
     return undefined
   }

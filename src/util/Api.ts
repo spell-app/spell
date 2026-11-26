@@ -2,6 +2,7 @@ import {
   answerOf,
   ApiError,
   fetchOk,
+  queryText,
   type ApiRequest,
   type ApiResponseType,
   type ApiUrlData,
@@ -132,13 +133,7 @@ export class Api {
   /** Append plain-object `data` to `url` as query parameters;  arrays repeat the key, `null` / `undefined` skip. */
   private withQuery(url: string, data: unknown): string {
     if (!this.isPlainObject(data)) return url
-    const params = new URLSearchParams()
-    for (const [name, value] of Object.entries(data)) {
-      for (const each of Array.isArray(value) ? value : [value]) {
-        if (each !== undefined && each !== null) params.append(name, String(each))
-      }
-    }
-    const query = params.toString()
+    const query = queryText(data)
     if (!query) return url
     return url + (url.includes("?") ? "&" : "?") + query
   }
