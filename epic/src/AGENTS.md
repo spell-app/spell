@@ -776,7 +776,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         unless another listener holds it
       - says what's waiting, the `📬` line to print, its `batch`, which files to watch, and when to look again
       - "start review" asked for (`reviewAsked`):  waiting too, its line asking for `/epic review` (I144)
-      - the gear's Tidy (`tidyAsked`, epic `epic-engine` T168):  the same, its line asking for `/epic tidy`
+      - the gear's asks (`gearAsks`, epic `epic-engine` T168, T174):  the same, each its own line (`/epic tidy`, `/wtf`,
+        `/epic hush`, `/epic fresh`, Merge and push's steps), said once, the oldest first
     - `InboxPoller`:  the poller itself (epic `epic-engine` P19), run by [listen.mjs](../monitors/listen.mjs)
       - [InboxPoller.mjs](tool/InboxPoller.mjs)
       - started by the plugin's `Stop` hook at each turn's end, in every session (`--hook`, `asyncRewake`):  it prints
@@ -1622,21 +1623,31 @@ In `tools/`:
             and "Theme · Paper" (Spell UI's `<ui-theme-menu show="menu" bench="none">`)
           - each sub-menu to the left of its row, under it when narrow;  the arrow keys, Enter, Space and Escape
             move through them
-          - while reviewed, TIDY first (epic `epic-engine` T168;  Owen:  "In the gear menu, add an entry at the top to
-            run epic tidy"):  asks the epic's session to run `/epic tidy <epic>`, as the pill asks for a review
-            (`ReviewClient.startReview("tidy")`), the notice saying what came of it;  its tooltip on its words, not the
-            row (the menu focuses its first row as it opens);  not on a saga page
-          - second, after Tidy, BELLS & WHISTLES (epic `epic-engine` P86;  T173:  Tidy, Bells & Whistles, Focus mode, a
-            `<ui-divider>`, Auto Send, Theme):  `<epic-bells>`, a `<ui-modal>` drawn in the page's shadow
+          - in Owen's order (epic `epic-engine` T174, 2026-11-26):  Where are we?, Bells & Whistles, Focus mode, Merge
+            and push (the tooling home only);  a `<ui-divider>`;  Tidy, Hush settled items, Start fresh;  a divider;
+            Auto Send, Theme
+          - the ASKS, while reviewed, never on a saga page (`askRow()`):  each asks the epic's session for something,
+            as the pill asks for a review (`ReviewClient.startReview(ask)`), the notice saying what came of it;  each
+            tooltip on its words, not the row (the menu focuses its first row as it opens), in the novice voice
+            - Where are we? (T174):  a short status, `/wtf`;  the compass
+            - Merge and push (T174):  only on the tooling home's page (`ReviewClient.isHome`, `GET home`):  finished
+              work merged into `main` and `main` pushed;  pressing it is the go-ahead;  the cloud with an arrow up
+            - TIDY (T168;  Owen:  "In the gear menu, add an entry at the top to run epic tidy"):  `/epic tidy <epic>`;
+              the broom
+            - Hush settled items (T174):  `/epic hush <epic>`, its dry run first;  the eye slashed
+            - Start fresh (T174):  `/epic fresh`, which waits for running agents;  the seedling
+            - [check-gear-asks.mjs](demo/check-gear-asks.mjs) checks them headless:  the order, every icon drawn in one
+              column, each ask asked
+          - BELLS & WHISTLES (epic `epic-engine` P86, T173):  `<epic-bells>`, a `<ui-modal>` drawn in the page's shadow
             root, as Focus mode is, filling the window less 20px a side (T173):  a section
             per group, its steps by cost (`BellSteps.COST_ORDER`:  high, medium, low, none, timesaver;  T171), each step's
             row a `<ui-checkbox appearance="toggle">` with its cost (`<ui-label>`) under it, in one column, then its bold
             title and one short line;  in its footer, the Token burn slider at the left (its name, then a `<ui-slider>`, Low /
             Medium / High, no ticks;  a "Custom" chip by the name only once a switch is flipped below High), Cancel / Save
-            at the right (T173);  its gear row has a bell, beside Tidy's broom (both in the docs bundle's icons);  a DRAFT until
+            at the right (T173);  its gear row has a bell (each row's icon in the docs bundle's icons);  a DRAFT until
             Save (`POST /api/epics/settings`, `ServerLink`), its ×, Escape and Cancel drop it;  Auto Send's row is the
             page's own choice (`SendCountdown`);  [check-bells.mjs](demo/check-bells.mjs) checks it headless
-          - then FOCUS MODE (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly
+          - FOCUS MODE (epic `epic-engine` P57;  2026-10-30:  "a mode where I can quickly
             walk through the open issues/questions/etc in a plan"):  `<epic-focus>`, drawn in the page's shadow root,
             never written in a page;  its Epic UI page, `/components/epics/epic-focus`
             - Spell UI's `<ui-modal fullscreen overlay>`, Escape and its × close it
@@ -1794,9 +1805,9 @@ In `tools/`:
       - 2026-10-19, on a table drawn at the side bar's width as its header cells,
         then each row's cells one under another:  "I hate it"
       - too wide for its column, it scrolls sideways in its own box, never the page
-      - `spell-doc.css` holds every `<ui-table>` unstacked whatever its markup ("NO table ever STACKS")
-        - a table that asks to stack (`stackable`, `stack-by`) still does:  a demo of stacking
-        - by Spell UI's public token, `--ui-table-stack-by: none` (epic `epic-engine` I40;  spell-app 3d7061910)
+      - Spell UI's `<ui-table>` stacks only with `stackable` (epic `epic-engine` T176), so no table on a page stacks
+        unless it asks to;  `unstackable` is an old word now that does nothing, kept on pages that write it
+        - `spell-doc.css` held them unstacked with the token `--ui-table-stack-by: none` until then (I40)
       - the migration step adds the word to a page's tables (`components-not-markup`),
         and the epic tool's way in to what it's handed (`IncomingHtml`)
     - never a bare `<table>`:  the migration step `components-not-markup` wraps one (see "Scripts")
@@ -2275,9 +2286,12 @@ the epic page shown in both tabs).
   - `reviewAsked`:  "start review" pressed while the session's poller runs (epic `epic-engine` I144):  the poller's
     next look prints a `📬` line asking for `/epic review`, which wakes the session;  nothing typed.
     Gone once the session's own `epic inbox watch` listens.
-  - `tidyAsked`:  Tidy pressed in the page's gear (epic `epic-engine` T168), asked the same way (`POST
-    /api/epics/review/start` with `ask: "tidy"`;  no poller, `/epic tidy <epic>` typed into the session's tab):  its
-    `📬` line asks for `/epic tidy`.  Gone once the tidy starts:  its first step, `epic stale <epic>`, clears it.
+  - `gearAsks`:  what was pressed in the page's gear (`GEAR_ASKS`), each to when:  Tidy (epic `epic-engine` T168),
+    Where are we?, Hush settled items, Start fresh, Merge and push (T174), asked the same way (`POST
+    /api/epics/review/start` with `ask`;  no poller, its command typed into the session's tab, `ReviewStart.commandFor()`)
+    - each its own `📬` line (`InboxMonitor.gearNotice()`), said once, the oldest first, then gone;  a tidy's first
+      step, `epic stale <epic>`, clears its own too
+    - an older file's `tidyAsked` is read as `gearAsks.tidy`
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
     - Send with nobody listening wakes it, inside the request:
       its session's poller told (`told`:  it hears the Send itself), `/epic review <epic>` typed into its session, or
@@ -2300,7 +2314,10 @@ the epic page shown in both tabs).
     - `POST send { page, now? }`:  `now: true` is Auto Send's send, when its countdown runs out (Review Now's, before
       epic `epic-engine` P20;  the header's ring since P53), every revisit waiting asked now too (`reviewNow()`)
     - `send` and `now` answer `wake` too:  what waking the epic did (`WakeResult`), `null` while a session listens
-    - `POST start { page }`:  the pill's click (`StartResult`):  the epic's session asked through its inbox poller
+    - `GET home?page=`:  `{ home }`, the page's epic the tooling home (`epic home`):  the gear's Merge and push shows
+      (epic `epic-engine` T174)
+    - `POST start { page, ask? }`:  the pill's click, or a gear ask (`tidy`, `status`, `hush`, `fresh`, `push`;  `push`
+      the tooling home's only, else 403;  T168, T174) (`StartResult`):  the epic's session asked through its inbox poller
       (`asked`), else `/epic review <epic>` typed into its tab (`sent`);  its tab open already, VS Code would refuse
       ("Session is already open"), so the bridge types nothing and the answer says so (`tab-open`;  I144)
     - `POST new { page, id?, entry | null }`:  a new item from the page;  no `id`:  the next free key

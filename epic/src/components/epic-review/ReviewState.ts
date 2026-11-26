@@ -70,6 +70,9 @@ export class ReviewState {
   /** The page is being reviewed:  the controls show.  The page's, so read with or without an id. */
   readonly reviewing = (): boolean => this.readPage((client) => client.reviewing) ?? false
 
+  /** The page's epic is the tooling home (`epic home`):  the gear shows Merge and push (epic `epic-engine` T174). */
+  readonly isHome = (): boolean => this.readPage((client) => client.isHome) ?? false
+
   /**
    * What the listening session is doing now (`epic inbox status`, epic `epic-engine` P35);  `null` for nothing.
    * The page's, so read with or without an id.

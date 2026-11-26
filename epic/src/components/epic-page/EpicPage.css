@@ -531,15 +531,16 @@
   .gear-row .name {
     flex: none;
   }
-  /* Tidy's icon and name, one box for its tooltip (T168):  laid out as the row's own */
-  .gear-row .tidy-words {
+  /* an ask's icon and name, one box for its tooltip (T168, T174):  laid out as the row's own */
+  .gear-row .ask-words {
     display: flex;
     flex: 1 1 auto;
     align-items: center;
     gap: 6px;
   }
-  /* Tidy's and Focus mode's rows (T168, P57):  the icon before the name, centred in a column of its own, so both
-     names start at one line whatever the glyph's width (an icon draws as `display: contents` by itself) */
+  /* the icon rows (the asks, Bells & Whistles, Focus mode;  T168, T174, P57):  the icon before the name, centred in
+     a column of its own, so every name starts at one line whatever the glyph's width
+     (an icon draws as `display: contents` by itself) */
   .gear-row .lead {
     display: inline-flex;
     flex: none;
@@ -572,7 +573,7 @@
   .gear-sub .choice.checked .tick {
     visibility: visible;
   }
-  /* the dialogs' rows above it, the sub-menus' below (T173) */
+  /* between the gear's groups (T173, T174) */
   .gear-divider::part(divider) {
     margin: 4px 8px;
   }
