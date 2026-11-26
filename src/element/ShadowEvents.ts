@@ -55,6 +55,13 @@ import { DelegatedEvents, getDelegatedRoot, registerDelegatedRoot, unregisterDel
  *     but an outer container still drops an event from inside a shadow root (`contains()` stops there),
  *     which is why the bridge stays
  *   - If Solid itself adds a container's listener only for the kinds used inside it, the holding goes
+ * - REJECTED (epic `solid-2-final` P22, Q22 part 2):  ONE listener per kind for the whole page, under a `<ui-root>`,
+ *   each render root an OWNER of the root's container (`registerDelegatedContainer(root, renderRoot)`).
+ *   - It cut 1,000 delegated listeners to 4 on 250 elements with handlers, but every test here run that way failed three:
+ *     - an event that isn't composed, sent inside a shadow root, never reached the page's listener
+ *     - a handler's `stopPropagation()` no longer stopped a page listener on the host:  Solid ran at the top, last
+ *     - handlers above a Solid `render()` inside a shadow root were dropped (the outer `contains()` again)
+ *   - Its details page:  `epics/solid-2-final/details/element-base.html`, "One listener for the whole page".
  * - STATIC and instance-free:  one set of bridged roots per page.
  * - Began as solid-element's fix 10 (numbered in its old `UPSTREAM.md`),
  *   moved here as is (epic `spell-element`, Q10).
