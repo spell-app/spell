@@ -261,6 +261,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - who beats:  a command run's wait, `epic ask wait`, `epic inbox wait`, `spell app changes wait`
     - beside it, the ONE process check:  `isProcessAlive(pid)`, `endProcess(pid, wait)` (`PidFile` re-exports them)
     - plain `node` loads it by its own name, `spell/server/Heartbeat`
+  - `CheckoutUse` -- a worktree marked IN USE by a program working in it (epic `epic-engine` I459):  a beat of its own
+    (`Heartbeat.hold()`), `~/.spell/in-use/<pid>-<n>.json`, `{ checkout, why }`;  the keeper never stops a marked
+    worktree's servers as unused
+    - who marks:  spell-epic's `Turns`, while an `epic turns` command waits in line or runs (a 30-minute wait in the
+      test line lost the editor its app tests needed)
   - `ServerLog` -- the page server's log (epic `epic-engine` T118):  a `Logger` (`spell/util/spell/Logger`, by file)
     whose lines a person reads in `.spell-server.log`
     - one per part, its prefix starting each line (`page server`, `bundles`, `projects`), its `SPELL_DEBUG`
@@ -390,7 +395,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
   - `spell/server/keeper` -- Spell's SERVER KEEPER (epic `editor` P48;  the epic hub's `ServerKeeper` before):
     - `ServerKeeper`:  every main checkout's page server kept up on main's code, its editor through it, each worktree's
-      page server stopped after 30 minutes unused, the servers registered with it watched and started;  a look every
+      page server stopped after 30 minutes unused (never while `CheckoutUse` marks it in use), the servers registered with it watched and started;  a look every
       10 seconds;  its calls, `/api/servers/...` (the Servers tab's);  HTTPS (`HttpsSwitch`), hands off, Restart all
     - `KeeperList`:  what Spell's keeper keeps, `~/.spell/keeper.json5`:  main checkouts (`spell server start` in one
       adds it) and registered servers (`spell keeper add`);  worktrees come from git's own records, never a list

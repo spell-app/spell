@@ -916,6 +916,7 @@ Spell UI's tools, spaces' API server and spell-epic's own server are built from 
 | `FileOperations` | save, create, rename, duplicate, delete:  under the lock, written all at once (a temp file, then a rename) |
 | `PidFile` | a background server's `.spell-server.json`:  status, ensure, stop (which waits for the process to end, so the port is free) |
 | `Heartbeat` | a waiting process says it's there:  a beat every 30 s, gone 90 s after the last one or once its process ends;  and `isProcessAlive(pid)`, the one process check |
+| `CheckoutUse` | a worktree marked in use by a program working in it (`epic turns`, while waiting or running), so the server keeper never stops its servers as unused |
 | `ports` | `isFree()`, `freePort()`, `listenPreferred()` |
 | openers | a browser, a new window, or a Chrome tab reused by its address |
 | `resolveInside()` | the one path check:  a URL path to a file under a root, never outside it |

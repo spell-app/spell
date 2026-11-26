@@ -116,7 +116,8 @@ a folder of the kit `spell`.
   - every 10 seconds the hub looks:  a repo's settings changed, it registers again;  its own code changed, it hands over
     to a fresh hub on its port
   - the keeper keeps every main page server up on main's code, each worktree's page server stopped after 30 minutes
-    unused, main's editor through its page server, and the registered servers watched and started;  it looks every 10
+    unused (never while an `epic turns` command waits or runs there:  `Turns` marks it in use, `SRV.CheckoutUse`,
+    I459), main's editor through its page server, and the registered servers watched and started;  it looks every 10
     seconds, and when a session starts (the `SessionStart` hook [server-keeper.mjs](hooks/server-keeper.mjs) runs
     `spell keeper ensure --take-over --quiet`;  `epic hub kick` asks it to look)
   - the ONLY one that starts, stops or restarts a main checkout's page server:  the kit's `PageServer.ensure()`,
