@@ -627,6 +627,10 @@ export class Tableau extends Pile {
   the TypeScript target writes that element out as a class, `CardElement`
   ([README-targets](README-targets.md#the-card-line-by-line)).
 - `draw each card in the deck` draws each in turn:  `core.drawItems(deck)`.
+- A view drawing one element sits in the layout around it as if that element were written there:
+  `<space width="50%" />` in a view, in a row, is half the row.
+  - A view that keeps a box of its own (it draws several elements, or can be dragged or selected) shares a row it's in:
+    it grows to the room the rest of the row leaves, so `width="50%"` inside it is half of that room.
 - A thing has ONE drawing, its `to draw it`:  a card face down checks its own direction there,
   in the two sided view it's built on ([Solitaire's Card.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spell), below).
   - In an outline, `to "draw it":` takes markup as its body, no `return` needed;
