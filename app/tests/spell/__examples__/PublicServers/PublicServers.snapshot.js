@@ -1949,13 +1949,23 @@ export class GithubPage extends Thing {
     // Solid's newest issues and pull requests, told apart:  GitHub lists both as issues, and only a pull request has a pull request
     return h("ui-stack", { spacing: "sm", part: "issues" },
       h("ui-header", { size: "medium" }, "Solid's issues"),
-      () => core.drawRead(async () => await core.savedThings(Issue, { filter: { pullRequest: undefined }, page: { size: 6 } }, "as drawn"), (issue) => core.drawThing(issue), {
+      () => core.drawRead(async () => await core.savedThings(
+        Issue,
+        {},
+        "looks through",
+        { first: 6, where: (issue) => issue.pullRequest === undefined }
+      ), (issue) => core.drawThing(issue), {
         waitingSay: () => "Asking GitHub",
         none: () => h("ui-text", { part: "issues" }, "No open issues."),
         items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "issues" })
       }),
       h("ui-header", { size: "medium" }, "Solid's pull requests"),
-      () => core.drawRead(async () => core.firstFew(core.filter(await core.savedThings(Issue, {}, "looks through"), (issue) => issue.pullRequest !== undefined), 6), (issue) => core.drawThing(issue), {
+      () => core.drawRead(async () => await core.savedThings(
+        Issue,
+        {},
+        "looks through",
+        { first: 6, where: (issue) => issue.pullRequest !== undefined }
+      ), (issue) => core.drawThing(issue), {
         waitingSay: () => "Asking GitHub",
         none: () => h("ui-text", { part: "issues" }, "No open pull requests."),
         items: () => h("ui-cards", { columns: "3", doubling: true, stackable: true, part: "issues" })
@@ -2733,22 +2743,22 @@ core.heading("JSONPlaceholder:  posts and their comments, people, and their todo
 
 export class Post extends Thing {
   // - its "user id" is a number
-  static { this.declareProp("userId", { type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1269, end: 1294 } }) }
+  static { this.declareProp("userId", { type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1293, end: 1318 } }) }
   get userId() { return this.getProp("userId") }
   set userId(value) { this.setProp("userId", value) }
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1296, end: 1315 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1320, end: 1339 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "body" is text
-  static { this.declareProp("body", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1317, end: 1335 } }) }
+  static { this.declareProp("body", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1341, end: 1359 } }) }
   get body() { return this.getProp("body") }
   set body(value) { this.setProp("body", value) }
 
   // - its "comments" is a list of comments
-  static { this.declareProp("comments", { itemType: "Comment", init: () => new List({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1337, end: 1373 } }) }
+  static { this.declareProp("comments", { itemType: "Comment", init: () => new List({ instanceType: "Comment" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1361, end: 1397 } }) }
   get comments() { return core.linked(this, "comments", Comment) }
   set comments(value) { this.setProp("comments", value) }
 
@@ -2766,34 +2776,34 @@ export class Post extends Thing {
     times: ["created", "modified"], select: ["userId", "title", "body", "comments"] }
 
   // - it lives in jsonplaceholder
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1240, end: 1267 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1264, end: 1291 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in jsonplaceholder
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1240, end: 1267 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1264, end: 1291 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class Comment extends Thing {
   // - its "post id" is a number
-  static { this.declareProp("postId", { type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1428, end: 1453 } }) }
+  static { this.declareProp("postId", { type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1452, end: 1477 } }) }
   get postId() { return this.getProp("postId") }
   set postId(value) { this.setProp("postId", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1455, end: 1473 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1479, end: 1497 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "email" is text
-  static { this.declareProp("email", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1475, end: 1494 } }) }
+  static { this.declareProp("email", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1499, end: 1518 } }) }
   get email() { return this.getProp("email") }
   set email(value) { this.setProp("email", value) }
 
   // - its "body" is text
-  static { this.declareProp("body", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1496, end: 1514 } }) }
+  static { this.declareProp("body", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1520, end: 1538 } }) }
   get body() { return this.getProp("body") }
   set body(value) { this.setProp("body", value) }
 
@@ -2812,59 +2822,59 @@ export class Comment extends Thing {
     times: ["created", "modified"], select: ["name", "email", "body"] }
 
   // - it lives in jsonplaceholder
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1399, end: 1426 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1423, end: 1450 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in jsonplaceholder
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1399, end: 1426 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1423, end: 1450 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class JsonplaceholderUser extends Thing {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1582, end: 1600 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1606, end: 1624 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "username" is text
-  static { this.declareProp("username", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1602, end: 1624 } }) }
+  static { this.declareProp("username", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1626, end: 1648 } }) }
   get username() { return this.getProp("username") }
   set username(value) { this.setProp("username", value) }
 
   // - its "email" is text
-  static { this.declareProp("email", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1626, end: 1645 } }) }
+  static { this.declareProp("email", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1650, end: 1669 } }) }
   get email() { return this.getProp("email") }
   set email(value) { this.setProp("email", value) }
 
   // - its "address" is an address
-  static { this.declareProp("address", { type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1647, end: 1674 } }) }
+  static { this.declareProp("address", { type: "Address", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1671, end: 1698 } }) }
   get address() { return this.getProp("address") }
   set address(value) { this.setProp("address", value) }
 
   // - its "phone" is text
-  static { this.declareProp("phone", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1676, end: 1695 } }) }
+  static { this.declareProp("phone", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1700, end: 1719 } }) }
   get phone() { return this.getProp("phone") }
   set phone(value) { this.setProp("phone", value) }
 
   // - its "website" is text
-  static { this.declareProp("website", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1697, end: 1718 } }) }
+  static { this.declareProp("website", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1721, end: 1742 } }) }
   get website() { return this.getProp("website") }
   set website(value) { this.setProp("website", value) }
 
   // - its "company" is a company
-  static { this.declareProp("company", { type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1720, end: 1746 } }) }
+  static { this.declareProp("company", { type: "Company", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1744, end: 1770 } }) }
   get company() { return this.getProp("company") }
   set company(value) { this.setProp("company", value) }
 
   // - its "posts" is a list of posts
-  static { this.declareProp("posts", { itemType: "Post", init: () => new List({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1748, end: 1778 } }) }
+  static { this.declareProp("posts", { itemType: "Post", init: () => new List({ instanceType: "Post" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1772, end: 1802 } }) }
   get posts() { return core.linked(this, "posts", Post) }
   set posts(value) { this.setProp("posts", value) }
 
   // - its "todos" is a list of todos
-  static { this.declareProp("todos", { itemType: "Todo", init: () => new List({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1780, end: 1810 } }) }
+  static { this.declareProp("todos", { itemType: "Todo", init: () => new List({ instanceType: "Todo" }), declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1804, end: 1834 } }) }
   get todos() { return core.linked(this, "todos", Todo) }
   set todos(value) { this.setProp("todos", value) }
 
@@ -2874,29 +2884,29 @@ export class JsonplaceholderUser extends Thing {
     times: ["created", "modified"], select: ["name", "email", "posts", "todos"] }
 
   // - it lives in jsonplaceholder
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1553, end: 1580 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1577, end: 1604 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in jsonplaceholder
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1553, end: 1580 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1577, end: 1604 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class Todo extends Thing {
   // - its "user id" is a number
-  static { this.declareProp("userId", { type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1862, end: 1887 } }) }
+  static { this.declareProp("userId", { type: "number", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1886, end: 1911 } }) }
   get userId() { return this.getProp("userId") }
   set userId(value) { this.setProp("userId", value) }
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1889, end: 1908 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1913, end: 1932 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "completed" is yes or no
-  static { this.declareProp("completed", { type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1910, end: 1938 } }) }
+  static { this.declareProp("completed", { type: "choice", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1934, end: 1962 } }) }
   get completed() { return this.getProp("completed") }
   set completed(value) { this.setProp("completed", value) }
 
@@ -2924,12 +2934,12 @@ export class Todo extends Thing {
   }
 
   // - it lives in jsonplaceholder
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1833, end: 1860 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1857, end: 1884 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in jsonplaceholder
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1833, end: 1860 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/JSONPlaceholder.api.spell", start: 1857, end: 1884 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -3001,7 +3011,7 @@ export const jsonplaceholder = core.place(new Jsonplaceholder(), {
     posts: { at: "/posts" },
     comments: { at: "/comments" },
     jsonplaceholderUsers: { at: "/users" },
-    todos: { at: "/todos" }
+    todos: { filters: ["userId"], at: "/todos" }
   },
   listsUnder: { posts: { comments: "/posts/{id}/comments" }, jsonplaceholderUsers: { posts: "/users/{id}/posts", todos: "/users/{id}/todos" } }
 })
@@ -4280,9 +4290,9 @@ export class RestCountriesPage extends Thing {
   }
 
   /** The region's, looked through here:  REST Countries sends every one at once */
-  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spell", start: 719, end: 811 }, readsFrom: ["rest_countries"] }) }
+  static { this.declareProp("countries", { declaredAt: { path: "/RestCountries.spell", start: 719, end: 826 }, readsFrom: ["rest_countries"] }) }
   get countries() { return core.waitedValue(this, "countries", async () => {
-    return core.sortedBy(await core.savedThings(Country, { filter: { region: this.region } }), (item) => item.name?.common)
+    return core.sortedBy(core.filter(await core.savedThings(Country, {}, "looks through"), (country) => country.region === this.region), (item) => item.name?.common)
   }, () => [this.region]) }
 
   pickRegionRegion(region) {

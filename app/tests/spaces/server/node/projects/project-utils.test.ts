@@ -1,5 +1,15 @@
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync
+} from "fs"
 import { tmpdir } from "os"
 import { dirname, resolve } from "path"
 
@@ -227,6 +237,27 @@ describe("project-utils", () => {
     expect(existsSync(resolve(workspace, "Saved/Saved.spell.js"))).toBe(false)
   })
 
+  // a group's folder read as a project got `Untitled.spell` and a project file, and its projects were lost
+  test("NEVER makes a group's folder a project:  one holding projects, with no project file, 404s, nothing written", async () => {
+    const inner = project("Shelved")
+    const shelf = resolve(workspace, "Shelf")
+    mkdirSync(shelf, { recursive: true })
+    renameSync(resolve(workspace, "Shelved"), resolve(shelf, "Shelved"))
+    const groupId = inner.replace(/\/Shelved$/, "/Shelf")
+
+    await expect(projectUtils.getIndex(groupId)).rejects.toMatchObject({ status: 404 })
+    await expect(projectUtils.createProject(groupId, "", "")).rejects.toMatchObject({ status: 404 })
+    expect(readdirSync(shelf)).toEqual(["Shelved"])
+  })
+
+  test("a project's folder holding a project of its own is still a project", async () => {
+    const outer = project("Outer")
+    const inner = project("Inner")
+    renameSync(resolve(workspace, "Inner"), resolve(workspace, "Outer", "Inner"))
+    expect(inner).not.toBe(outer)
+    expect(Object.keys((await projectUtils.getIndex(outer)).manifest)).toEqual([`${outer}/Outer.spell`])
+  })
+
   test("a project's index says where its build folder is, inside the build folder:  no ../ (J33)", async () => {
     const projectId = project("Indexed")
     expect((await projectUtils.getIndex(projectId)).buildFolder).toBe("build-test-projects/Indexed")
@@ -240,6 +271,36 @@ describe("project-utils", () => {
     const index = await projectUtils.getIndex(projectId)
     expect(index.namesLanguages).toEqual(["es"])
     expect(Object.keys(index.manifest)).not.toContain(expect.stringContaining("names.json5"))
+  })
+
+  // a running site asks for no theme file that isn't there, and finds one in a project it imports
+  test("the themes a site may wear:  its project's own first, then each import's, theirs in turn;  an inactive one's not", async () => {
+    const brand = project("Brand")
+    const shop = project("Shop")
+    const unused = project("Unused")
+    const theme = (folder: string, name: string) =>
+      writeFileSync(resolve(workspace, folder, `${name}.theme.json5`), '{ "extends": "matrix" }\n')
+    theme("Brand", "harbor")
+    theme("Brand", "brand-night")
+    theme("Shop", "harbor")
+    theme("Unused", "unused")
+    expect(await projectUtils.themesOf(shop)).toEqual({ harbor: SP.SpellUrls.fileUrl(`${shop}/harbor.theme.json5`) })
+    writeFileSync(
+      resolve(workspace, "Shop", SP.PROJECT_FILE),
+      JSON.stringify({
+        imports: [
+          { path: "/Shop.spell", active: true },
+          { path: brand, active: true },
+          { path: unused, active: false },
+          { path: shop, active: true }
+        ]
+      })
+    )
+    expect(await projectUtils.themesOf(shop)).toEqual({
+      harbor: SP.SpellUrls.fileUrl(`${shop}/harbor.theme.json5`),
+      "brand-night": SP.SpellUrls.fileUrl(`${brand}/brand-night.theme.json5`)
+    })
+    expect(SP.SpellUrls.projectIdFor(SP.SpellUrls.themesUrl(shop))).toBe(shop)
   })
 
   test("a property editor page is one of a project's files:  its index lists it (property-editor P6)", async () => {

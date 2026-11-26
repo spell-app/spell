@@ -1039,6 +1039,18 @@ describe("core.sortedBy()", () => {
   })
 })
 
+describe("core.sortedByInTurn():  a sort whose key waits", () => {
+  test("waits for each key, then sorts as `sortedBy()` does", async () => {
+    const items = [{ name: "pear" }, { name: "Fig" }, { name: "apple" }]
+    const key = async (item: unknown) => {
+      await Promise.resolve()
+      return (item as { name: string }).name
+    }
+    expect(await core.sortedByInTurn(items, key)).toEqual([{ name: "apple" }, { name: "Fig" }, { name: "pear" }])
+    expect(await core.sortedByInTurn(["b", "A", "c"], async (word) => core.descending(word))).toEqual(["c", "b", "A"])
+  })
+})
+
 describe("core.mapToList()", () => {
   test("each item's answer, in a new plain list, in order", () => {
     const pile = new Pile()

@@ -887,8 +887,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     compiles its project AT ONCE, beside anything else compiling, then serves it (`projectBuild.builtFirst()`;
     epic `editor` P45, Q89).
     - One compile per project at a time, waiting at most `COMPILE_WAIT_MS`.
-    - Only a project importing one of Spell's libraries, itself or through another project, waits for the startup
-      compile first:  two compiles never write one library at once.
+    - Only a library itself, or a project importing one, itself or through another project, waits for the startup
+      compile first (`needsStartup()`):  two compiles never write one library at once.
+    - While it waits, `GET /api/projects/building/<project>` says how the compile is coming along
+      (`projectBuild.progress()`):  how long so far, and each project it's compiled;  the runner's waiting box says
+      it ([buildProgress.ts](../app/runner/buildProgress.ts)).
+    - A compile that wrote nothing says why:  the request answers with what the compile said
+      (`projectBuild.failureOf()`), not "ENOENT".
   - The route module starts `spell compile --stale --all @spell/library` as the page server starts, in the
     background:  the libraries alone (Q88), which other projects import and VS Code reads the schemas of.
     - Every example and guide compiles the first time a page asks for it:  the demo pages, App UI's live

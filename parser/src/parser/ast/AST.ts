@@ -502,10 +502,15 @@ export class ASTTripleBackTickExpression extends ASTExpression {
  *  - `value` is normalized property name.  Inferred from `match` if not given.
  *  - `raw` (optional) is input property name.
  */
-export type ASTPropertyLiteralProps = Prettify<{ value?: string; raw?: string }>
+/**
+ * - `asWritten`:  the key as the program wrote it, never renamed to the output language's name for it:  `run_by`,
+ *   read off an object by its key in quotes (`quoted_key_read`).
+ */
+export type ASTPropertyLiteralProps = Prettify<{ value?: string; raw?: string; asWritten?: boolean }>
 
 export class ASTPropertyLiteral extends ASTLiteral {
   declare value: string
+  declare asWritten?: boolean
   /** Constructor also accepts a bare `string` as shorthand for `{ value }`. */
   constructor(match: P.AnyMatch, props?: string | ASTPropertyLiteralProps) {
     if (typeof props === "string") props = { value: props }
@@ -2420,6 +2425,8 @@ export const CORE_CALLS_THAT_WAIT = new Set([
   "choose",
   "chooseColor",
   "savedThings",
+  "savedThingsSortedBy",
+  "savedCount",
   "savedThingAt",
   "savedThingWithId",
   "savedThingOrMissing",

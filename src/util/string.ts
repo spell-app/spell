@@ -1,6 +1,6 @@
 /**
  * String helpers:  attribute <-> property case, Fomantic's number words, "did you mean",
- * slugs and accents, escaping (regular expressions, HTML), and indents.
+ * slugs and accents, the order text sorts in, escaping (regular expressions, HTML), and indents.
  * - Standalone:  no imports, so plain `node` loads it too (`spell/util/string.ts`).
  * - Case conversion is hand-rolled rather than lodash's `kebabCase` / `camelCase`:  lodash splits on digits
  *   (`"h1"` => `"h-1"`), which breaks round-tripping `activeIndex` <-> `active-index` for attribute names.
@@ -214,6 +214,35 @@ export function commaList(text: string | null | undefined): string[] {
     .split(",")
     .map((entry) => entry.trim())
     .filter(Boolean)
+}
+
+////////////////
+// ## Order
+////////////////
+
+/** The order text sorts in, by language:  kept, as making one is slow.  `""`:  the runtime's own. */
+const TEXT_ORDERS = new Map<string, Intl.Collator>()
+
+/**
+ * The order text sorts in, in `language` (`es`, `en`):  capitals and accents aside, `apple` before `Zebra`,
+ * and `ñ` after `n` in Spanish.
+ * - ONE order for a page's sort, a place's engine, saved answers and the ingest, so they never disagree.
+ * - Left out:  the runtime's own language.
+ */
+export function textOrder(language = ""): Intl.Collator {
+  let order = TEXT_ORDERS.get(language)
+  if (!order) TEXT_ORDERS.set(language, (order = new Intl.Collator(language || undefined, { sensitivity: "base" })))
+  return order
+}
+
+/**
+ * Which of two values comes first, as a list sorts them:  text in `textOrder()`, numbers by size, anything else as
+ * javascript's `<` has it.  `0` when neither does.
+ */
+export function compareValues(one: unknown, other: unknown, language?: string): number {
+  if (typeof one === "string" && typeof other === "string") return textOrder(language).compare(one, other)
+  if ((one as number) < (other as number)) return -1
+  return (one as number) > (other as number) ? 1 : 0
 }
 
 ////////////////

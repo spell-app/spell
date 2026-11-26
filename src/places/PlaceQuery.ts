@@ -1,3 +1,4 @@
+import { compareValues } from "spell/util/string"
 import type { PlaceBatch } from "./PlaceBatch"
 import {
   ANY_FIELD,
@@ -22,8 +23,9 @@ export const DEFAULT_CEILING: PlaceCeiling = { rows: 50_000, bytes: 50 * 1024 * 
  * - The place is asked first, and its answer's `handled` says what's left.
  *   - Only `select` left:  the fields nobody asked for are hidden, and the place's own paging stands.
  *   - A filter, a search or a sort left:  it loads the place's pages here, up to a ceiling, then filters, sorts and slices them.
- * - What it expects to do comes from `describe()`, so what it asks the place holds what it'll need:
- *   a place that can't filter is asked for whole rows, with no page of its own.
+ * - What it expects to do comes from the list (`Place.takes()`), else `describe()`, so what it asks the place holds what
+ *   it'll need:  a place that can't filter is asked for whole rows, with no page of its own.
+ *   - A list that takes part of a filter is sent that part, and the rest is checked here, over what came back.
  *   - Then `nextPage` is a place in the filtered list, not the place's own cursor:  a reader only hands it back, and the
  *     place's own cursors stay in here, walking its pages (a cursor-paged API fits).
  * - The ceiling is `PlaceCapabilities.ceiling`, over `DEFAULT_CEILING`:  past it, a `PlaceError` naming the place.
@@ -101,12 +103,16 @@ export class PlaceQuery {
     }
 
     ////// What's left of the query
-    const ordered = isSorting ? rowsInOrder(rows, sort) : rows
+    // a sort its list has a name for, done here:  by its field (`Place.sortFieldsOf()`)
+    const ordered = isSorting ? rowsInOrder(rows, this.place.sortFieldsOf?.(this.collection, sort) ?? sort) : rows
     const sliced = isSlicing ? ordered.slice(start, end) : ordered
     return {
       rows: this.withSelection(sliced, handled),
       ...(isSlicing && end !== undefined && end < ordered.length && { nextPage: String(end) }),
       ...(first.version !== undefined && { version: first.version }),
+      // how many there are in all, as the place counted:  only when it did all the narrowing
+      ...(!isFiltering && first.total !== undefined && { total: first.total }),
+      ...(!isFiltering && first.totalIsEstimate && { totalIsEstimate: first.totalIsEstimate }),
       ...this.notesOn(first),
       handled
     }
@@ -154,14 +160,9 @@ export class PlaceQuery {
 
   /** What to ask the place for `query`:  see the class. */
   private askFor(query: ListQuery): ListQuery {
-    const { filter = {}, search = {}, sort = [], select, page } = query
-    const { filter: canFilter, search: canSearch = "none", sort: canSort, page: pageKind } = this.place.describe()
-    const fields = sort.map(({ field }) => field)
-    const isLeftToUs =
-      !canDoAll(canFilter, Object.keys(filter)) ||
-      !canDoAll(canSearch, Object.keys(search)) ||
-      !canDoAll(canSort, fields)
-    if (isLeftToUs && (select || page)) {
+    const { select, page } = query
+    const { page: pageKind } = this.place.describe()
+    if (this.isLeftToUs(query) && (select || page)) {
       const { select: _select, page: _page, ...whole } = query
       return whole
     }
@@ -170,6 +171,28 @@ export class PlaceQuery {
       return unpaged
     }
     return query
+  }
+
+  /**
+   * Will a filter, a search or a sort of `query` be left to us?
+   * - Asked of the list itself, where the place says per list (`Place.takes()`);  else what `describe()` says.
+   */
+  private isLeftToUs(query: ListQuery): boolean {
+    const { filter = {}, search = {}, sort = [] } = query
+    const isAsked = { filter: !!Object.keys(filter).length, search: !!Object.keys(search).length, sort: !!sort.length }
+    if (this.place.takes) {
+      const takes = this.place.takes(this.collection, query)
+      return (isAsked.filter && !takes.filter) || (isAsked.search && !takes.search) || (isAsked.sort && !takes.sort)
+    }
+    const { filter: canFilter, search: canSearch = "none", sort: canSort } = this.place.describe()
+    return (
+      !canDoAll(canFilter, Object.keys(filter)) ||
+      !canDoAll(canSearch, Object.keys(search)) ||
+      !canDoAll(
+        canSort,
+        sort.map(({ field }) => field)
+      )
+    )
   }
 
   /** `rows`, with only the fields asked for and their id:  as they are if the place did it, or nobody asked. */
@@ -183,11 +206,11 @@ export class PlaceQuery {
 
   /** Add `rows` to what's been `seen`.  - throws `PlaceError` once that's over the ceiling */
   private countAgainstCeiling(rows: PlaceRow[], seen: PlaceCeiling): void {
-    const { rows: mostRows, bytes: mostBytes } = { ...DEFAULT_CEILING, ...this.place.describe().ceiling }
+    const { rows: ceilingRows, bytes: ceilingBytes } = { ...DEFAULT_CEILING, ...this.place.describe().ceiling }
     seen.rows += rows.length
     for (const row of rows) seen.bytes += JSON.stringify(row).length
-    if (seen.rows <= mostRows && seen.bytes <= mostBytes) return
-    const limit = seen.rows > mostRows ? `${mostRows} rows` : `${mostBytes} bytes`
+    if (seen.rows <= ceilingRows && seen.bytes <= ceilingBytes) return
+    const limit = seen.rows > ceilingRows ? `${ceilingRows} rows` : `${ceilingBytes} bytes`
     throw new PlaceError(
       `PlaceQuery:  "${this.placeName}" can't do this read of "${this.collection}" itself, and doing it here stops at ${limit};  ask for less, or raise its \`ceiling\``,
       { cause: { kind: "over the ceiling" } }
@@ -263,7 +286,10 @@ export function holdsFilterValue(held: unknown, value: unknown): boolean {
   return false
 }
 
-/** A copy of `rows`, in the order `sort` says:  the first field first. */
+/**
+ * A copy of `rows`, in the order `sort` says:  the first field first.
+ * - Text in the one order a page sorts in too (`compareValues()`):  capitals and accents aside, `apple` before `Zebra`.
+ */
 export function rowsInOrder(rows: PlaceRow[], sort: readonly SortField[]): PlaceRow[] {
   return [...rows].sort((one, other) => {
     for (const { field, descending } of sort) {
@@ -285,10 +311,4 @@ function isNothing(value: unknown): boolean {
 /** `row` with only these `fields`, the ones it has:  its values aren't copied. */
 export function rowWithFields(row: PlaceRow, fields: readonly string[]): PlaceRow {
   return Object.fromEntries(fields.filter((field) => field in row).map((field) => [field, row[field]]))
-}
-
-/** Which of two values, both something, comes first. */
-function compareValues(one: unknown, other: unknown): number {
-  if (one === other || isNothing(one)) return 0
-  return (one as string) < (other as string) ? -1 : 1
 }

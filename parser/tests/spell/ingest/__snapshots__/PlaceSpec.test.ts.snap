@@ -6,10 +6,17 @@ exports[`spell place ingest --spec > writes the whole place from the description
 	it writes names like "display_url"
 	background tasks live at "/api/core/background-tasks/"
 	data sources live at "/api/core/data-sources/"
+		it filters by enabled
+		it searches everything with "q"
 	jobs live at "/api/core/jobs/"
+		it filters by completed, created, execution-time, job-id, queue-name, scheduled and started
+		it searches everything with "q"
 	contacts live at "/api/tenancy/contacts/"
+		it searches everything with "q"
 	tenant groups live at "/api/tenancy/tenant-groups/"
+		it searches everything with "q"
 	tenants live at "/api/tenancy/tenants/"
+		it searches everything with "q"
 	to enqueue a background task is at "/api/core/background-tasks/{id}/enqueue/"
 	to requeue a background task is at "/api/core/background-tasks/{id}/requeue/"
 	to stop a background task is at "/api/core/background-tasks/{id}/stop/"

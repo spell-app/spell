@@ -526,15 +526,31 @@ export type SiteOverlayEntry = {
  * - The editor's Run:  its own URL, `/run/<project>/films/4`, so the browser's back and forward work.
  * - None:  the site keeps its address itself, starting at `/`.
  */
+/**
+ * A running site, as its host sees it:  its pages, and what opens the dialog or sidebar an address's hash names
+ * (`SiteBase.showPart()`:  `false` when it names none, a `#section` to land on).
+ */
+export type SiteParts = { allPages(): SitePageEntry[]; showPart?(hash: string): Promise<boolean> }
+
 export type SiteHost = {
   /**
    * The address to show now, from the site's root:  `/films/4`.
    * - `site`:  the site asking, as it starts, for a host whose own address may name a page another way (the run page's
    *   `/run/<project>/home.spell`, a page by its FILE):  its pages say which address that is.
    */
-  address(site?: { allPages(): SitePageEntry[] }): string
-  /** Go to `address`, as the site does when a page goes to another:  the host's own address follows. */
-  go(address: string): void
+  address(site?: SiteParts): string
+  /**
+   * Go to `address`, as the site does when a page goes to another:  the host's own address follows.
+   * - `keepScroll`:  the same page, its text parameter changed on it (its tabs):  where it's scrolled to stays.
+   */
+  go(address: string, how?: { keepScroll?: boolean }): void
+  /**
+   * A dialog or sidebar opened:  `hash`, `confirm-order/1042`, goes in the host's address, a step in the history
+   * (`SiteBase.openOverlay()`).
+   */
+  partOpened?(hash: string): void
+  /** The dialog or sidebar open closed, by the person or the program:  its hash goes from the host's address. */
+  partClosed?(): void
   /**
    * Page class `className` is about to show:  a host that compiles pages one at a time brings it in now.
    * - Answers whether the site should show it:  `false` where another page is shown instead (a page open in Edit).
@@ -548,7 +564,8 @@ export type SiteHost = {
   landOn?(id: string): void
   /**
    * Call `showAddress` whenever the host's address changes by itself:  back, forward, typed in.
-   * - What it returns resolves once that page is shown:  the host lands on the address's `#section` then.
+   * - What it returns resolves once that page is shown:  the host lands on the address's `#section` then, or opens
+   *   the dialog or sidebar it names (`SiteParts.showPart()`).
    */
   listen(showAddress: (address: string) => Promise<void> | void): void
   /**
@@ -561,7 +578,7 @@ export type SiteHost = {
    * (`--ui-*` tokens:  colours, fonts, line widths, corners), so every page, dialog and sidebar inside inherits them.
    * - What a site's `- its "theme" is "mockup"` asks for (epic `mockup` P8).
    * - `projectFolder`:  where the running program's files are (`core.projectFolder`), for a theme of its own,
-   *   `<name>.theme.json5` there;  none:  Spell UI's themes only.
+   *   `<name>.theme.json5` there or in a project it imports;  none:  Spell UI's themes only.
    * - None:  the site wears the page's theme.
    * - Rejects on a theme the host doesn't have.
    */

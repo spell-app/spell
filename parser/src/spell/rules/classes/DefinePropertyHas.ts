@@ -10,7 +10,9 @@ import {
   MustRule,
   OutlineSpecifierEnum,
   OutlineSpecifierMedia,
+  OutlineSpecifierSort,
   OutlineSpecifierList,
+  OutlineSpecifierYesNoOrNothing,
   PropertyBodyMust,
   QuotedPropertyFormula,
   TypeSpecifierEnum,
@@ -439,6 +441,10 @@ export class DefinePropertyHas extends SpellStatement<
       initializer = OutlineSpecifierMedia.madeAs(match.groups.specifier, `${property.raw ?? property.value}`)
       early = true
     }
+    // a sort a page holds, and where it starts:  `its "order" is a sort:  completion, newest first`
+    else if (match.groups.specifier?.is(OutlineSpecifierSort)) {
+      initializer = P.asAST<P.ASTExpression>(match.groups.specifier.AST)
+    }
     // a value kind, e.g. `a suit`:  one of its list, e.g. `Deck.Suits` -- its values are plain text.  Read when set:
     // the list's class names ours (`static instanceType = Card`), so one of the two is defined second
     else if (match.data.valueType?.valueKind) {
@@ -458,6 +464,9 @@ export class DefinePropertyHas extends SpellStatement<
       // a type's name as text, so a writer can read the type:  `TSWriter` types the property from it.
       // Checked at runtime by its class's name:  see `P.ASTTypeExpression.runtimeName`.
       check.addProp("type", new P.ASTTypeNameLiteral(match, { value: typeExpression.runtimeName, quote: "'" }))
+      // a yes or no that can be nothing:  unset, it reads as nothing, not no (`PropInfo.orNothing`)
+      if (match.groups.specifier?.is(OutlineSpecifierYesNoOrNothing))
+        check.addProp("orNothing", new P.ASTBooleanLiteral(match, true))
       // where it starts:  `a number starting at 0`, made once per instance
       initializer = (match.groups.specifier?.groups as { start?: P.Match } | undefined)?.start?.AST as
         | P.ASTExpression

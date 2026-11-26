@@ -12,6 +12,7 @@ import type { BuildStep } from "spell/app/spaces/models/buildSteps"
 import { compilerVersion } from "spell/app/spaces/server/node/projects/compilerCode"
 import { SitePages, sourceHashOf, type FramePrint } from "spell/app/spaces/server/node/projects/SitePages"
 import { ProjectBuild } from "spell/app/spaces/server/node/routes/ProjectBuild"
+import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 
 ////////////////
 // ## Fakes
@@ -139,6 +140,38 @@ describe("ProjectBuild", () => {
     expect(await Promise.all(waiting)).toEqual([true, true])
   })
 
+  // I50:  a request for it said "ENOENT ... stat", and what the compile said was only in the server's log
+  test("a compile that writes nothing says why:  its lines, and how it ended;  its request answers with them", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn })
+    const request = { originalUrl: SP.SpellUrls.fileUrl(compiled.path), query: {} }
+    const next = vi.fn()
+    const serving = build.builtFirst()(request as never, {} as never, next)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+    children[0]!.stderr.write("(node:1) [DEP0205] DeprecationWarning:  register()\n")
+    children[0]!.stdout.write(`'${projectId}' isn't a project, a spell file or a project root\n`)
+    await new Promise((done) => setTimeout(done, 10))
+    children[0]!.exit(2)
+    await serving
+    const said = [`'${projectId}' isn't a project, a spell file or a project root`, "the compile failed (exit 2)"]
+    expect(build.failureOf(projectId)).toEqual(said)
+    expect(next).toHaveBeenCalledOnce()
+    expect(projectUtils.buildFailures.get(request as never)).toBe(`${projectId} didn't compile:  ${said.join("\n")}`)
+  })
+
+  test("a compile that writes it says nothing failed", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn })
+    const waiting = build.untilBuilt(compiled)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+    children[0]!.stdout.write("an error that the compile got past\n")
+    put(compiled.serverPath, "export {}\n")
+    await new Promise((done) => setTimeout(done, 10))
+    children[0]!.exit(1)
+    expect(await waiting).toBe(true)
+    expect(build.failureOf(projectId)).toBeUndefined()
+  })
+
   test("a compile is told the page server's app (`SPELL_APP_DIR`), for its org's groups;  run in the checkout", async () => {
     const { spawn, children } = spawnStub()
     const app = join(root, "acme-app")
@@ -173,6 +206,16 @@ describe("ProjectBuild", () => {
     // answered while the startup compile still runs
     expect(await waiting).toBe(true)
     children[0]!.exit(0)
+  })
+
+  test("while the startup build runs, for a project it compiles:  waits for it, instead of compiling the project again", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn, warmsSites: false }).start([projectId])
+    const waiting = build.untilBuilt(compiled)
+    put(compiled.serverPath, "export {}\n")
+    children[0]!.exit(0)
+    expect(await waiting).toBe(true)
+    expect(spawn).toHaveBeenCalledOnce()
   })
 
   test("while the startup compile runs:  a project importing a library waits for it first, then compiles", async () => {
@@ -236,6 +279,21 @@ describe("ProjectBuild", () => {
     expect(steps).toEqual(["reading", "mistakes"])
   })
 
+  test("...and for one that imports a project it compiles, at any depth", () => {
+    const build = new ProjectBuild({ root, spawn: spawnStub().spawn }).start(["@spell/library"])
+    expect(build.needsStartup("@spell/library/cards")).toBe(true)
+    expect(build.needsStartup(projectId)).toBe(false)
+    put(
+      join(projectFolder, SP.PROJECT_FILE),
+      JSON.stringify({ imports: [{ path: "/Built.spell" }, { path: "@spell/library/cards" }] })
+    )
+    try {
+      expect(build.needsStartup(projectId)).toBe(true)
+    } finally {
+      put(join(projectFolder, SP.PROJECT_FILE), JSON.stringify({ imports: [{ path: "/Built.spell", active: true }] }))
+    }
+  })
+
   test("a compile slower than `timeout`:  gives up, not there;  a request after waits on the same compile", async () => {
     const { spawn, children } = spawnStub()
     const build = new ProjectBuild({ root, spawn, timeout: 20 })
@@ -243,6 +301,40 @@ describe("ProjectBuild", () => {
     expect(await build.untilBuilt(compiled)).toBe(false)
     expect(spawn).toHaveBeenCalledOnce()
     children[0]!.exit(0)
+  })
+
+  test("progress():  nothing while no request waits;  while one does, how long, and each project the compile wrote", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn })
+    expect(build.progress(projectId)).toEqual({ building: false })
+    const waiting = build.untilBuilt(compiled)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce())
+    expect(build.progress(projectId)).toEqual({ building: true, seconds: 0, compiled: [] })
+    children[0]!.stdout.write("✓ @acme/tools/api  (imported by Built)  never compiled · wrote build/api\n")
+    children[0]!.stdout.write("✓ @spell/library/cards  up to date\n")
+    await vi.waitFor(() => expect(build.progress(projectId).compiled).toEqual(["@acme/tools/api"]))
+    put(compiled.serverPath, "export {}\n")
+    children[0]!.exit(0)
+    await waiting
+    expect(build.progress(projectId)).toEqual({ building: false })
+  })
+
+  test("progress() while the startup build runs:  `afterStartup`, with what IT has compiled", async () => {
+    const { spawn, children } = spawnStub()
+    const build = new ProjectBuild({ root, spawn, warmsSites: false }).start([projectId])
+    const waiting = build.untilBuilt(compiled)
+    children[0]!.stdout.write("✓ @spell/examples/Solitaire  never compiled · wrote build/solitaire\n")
+    await vi.waitFor(() =>
+      expect(build.progress(projectId)).toEqual({
+        building: true,
+        seconds: 0,
+        afterStartup: true,
+        compiled: ["@spell/examples/Solitaire"]
+      })
+    )
+    put(compiled.serverPath, "export {}\n")
+    children[0]!.exit(0)
+    expect(await waiting).toBe(true)
   })
 
   ////////////////

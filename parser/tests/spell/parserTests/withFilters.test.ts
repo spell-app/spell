@@ -64,7 +64,7 @@ describe("a read with `with`", () => {
     expect(made.compiled).toContain('core.savedThings(Favourite, { filter: { address: address, shortName: "x" } })')
   })
 
-  it("a `where` after them, for anything else", () => {
+  it("a `where` after them, for anything else:  what's the same goes to the place, the rest is checked here", () => {
     const made = compiled(
       "/Test.spell",
       FAVOURITES,
@@ -72,7 +72,7 @@ describe("a read with `with`", () => {
     )
     expect(made.errors).toEqual([])
     expect(made.compiled).toContain(
-      'core.filter(await core.savedThings(Favourite, {}, "looks through"), (favourite) => favourite.address === address && core.startsWith(favourite.name, "P"))'
+      'core.filter(await core.savedThings(Favourite, { filter: { address: address } }, "looks through"), (favourite) => favourite.address === address && core.startsWith(favourite.name, "P"))'
     )
   })
 
@@ -133,7 +133,8 @@ my box is an app:
         ((await core.answerOf(box, "allOfThem")) as { items: Array<{ name: string }> }).items.map(({ name }) => name)
       await box.addThree()
       await settled()
-      expect(await namesOf()).toEqual(["Pikachu", "Raichu", "blah"])
+      // capitals aside, as a page sorts text
+      expect(await namesOf()).toEqual(["blah", "Pikachu", "Raichu"])
       await box.dropNamed()
       await settled()
       await core.reloadSaved()

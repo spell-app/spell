@@ -629,12 +629,25 @@ export type TableSortDirection = "ascending" | "descending"
 export type TableSortDetail = {
   /** column index (0-based, counting `colspan`s) */
   column: number
-  /** data mode:  the column's `key`;  slotted:  the header's `data-key`, if any */
+  /** data mode:  the column's `key`;  slotted:  the header's `sort`, else its `data-key`, if any */
   key?: string
   /** direction it's ABOUT to sort in:  flipped for the sorted column, else `ascending` */
   direction: TableSortDirection
+  /** with the table's `sort`:  the sort it's ABOUT to hold, `key` and `direction` together */
+  sort?: TableSortValue
   /** click / key event on the header */
   originalEvent?: Event
+}
+
+/**
+ * A `<ui-table>`'s `sort`:  what its rows are sorted by, a name or a field (a header's `sort`), and which way.
+ * - The page's own:  a Spell page's sort (`its "order" is a sort:  completion, newest first`), shown and set by the table.
+ */
+export type TableSortValue = {
+  /** the sort's name, or a field:  the `sort` of the header it shows as sorted */
+  by: string
+  /** largest first;  left out, smallest first */
+  descending?: boolean
 }
 
 /** One column of `<ui-table>`'s data mode (`columnDefs`). */

@@ -101,6 +101,12 @@ export const APP_TEXTS = {
   inspectTip: "Inspect the App:  click a part to select it",
   stopInspectingTip: "Stop Inspecting",
   restartTip: "Restart the app",
+  // the page server compiling a program before it can send it:  the waiting box's words (`waitingWords()`)
+  building:
+    "Compiling {name} so it can run.  A new copy of Spell compiles each program the first time it runs, which takes a while.  Time so far:  {seconds}s.  It shows here when it's ready.",
+  buildingAfterStartup:
+    "Compiling Spell's built-in projects first, then {name}.  A new copy of Spell compiles each program the first time it runs, which takes a while.  Time so far:  {seconds}s.  {name} shows here when it's ready.",
+  buildingDone: "Compiled so far:  {projects}.",
   youTip: "Edit Your Name and Emails",
   menuCut: "Cut",
   menuCopy: "Copy",

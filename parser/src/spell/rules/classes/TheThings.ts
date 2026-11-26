@@ -19,12 +19,15 @@ export class TheThings extends EveryThing {
   /**
    * Quick test:  a known type's plural, up to two words in -- `the X` starts most lines' expressions, and a word alone can.
    * - `the` is checked by our syntax's own quick test:  the language's word, whatever it is.
+   * - A plural word, and a type's name near:  one of several words too, `job sessions` (epic `data` I64).
    */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
     if (super.test(scope, tokens, start) === false) return false
     for (let index = start; index < start + WORDS_TO_THE_PLURAL && tokens[index]; index++) {
       const words = `${tokens[index]!.value}`
-      if (tokens[index] instanceof P.WordToken && scope.getType(words) && words === P.pluralize(words)) return true
+      if (tokens[index] instanceof P.WordToken && words === P.pluralize(words)) {
+        return EveryThing.typeNear(scope, tokens, start, WORDS_TO_THE_PLURAL)
+      }
     }
     return false
   }

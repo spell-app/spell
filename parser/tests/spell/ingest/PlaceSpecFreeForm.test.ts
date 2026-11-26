@@ -260,6 +260,39 @@ describe("a field only some rows hold, in a list no schema typed", () => {
   })
 })
 
+describe("a type a person keeps in the place's own file", () => {
+  /** The file with a type of the person's own, `a "datum" is a thing`, the name verify would give `data`'s rows. */
+  const withOwnDatum = (text: string) => `${text.trimEnd()}\n\na "datum" is a thing\n\t// By hand\n\tits "reading" is a number\n`
+
+  test("verify names a type its reads add apart from it, keeps it as it was, and writes", async () => {
+    const { ingest, texts, spell } = await ingestOf()
+    texts.set("Lab.api.spell", withOwnDatum(spell()))
+    const result = await ingest.verify("Lab.api.spell")
+    expect(result.wrote).toBe(true)
+    expect(spell()).toMatch(/^\tits "data" is a lab datum$/m)
+    expect(spell()).toMatch(/^a "lab datum" is a thing$/m)
+    expect(spell()).toMatch(/^a "datum" is a thing\n\t\/\/ By hand\n\tits "reading" is a number$/m)
+    expect(spell().match(/^a "datum" is a thing$/gm)).toHaveLength(1)
+    expect(errorsOf(spell())).toEqual([])
+  })
+
+  test("update does the same, and a type the place's lines wrote is never taken for a person's", async () => {
+    const { ingest, spell } = await ingestOf()
+    await ingest.verify("Lab.api.spell")
+    // `datum` is the place's now:  update keeps its name
+    await ingest.update("Lab.api.spell")
+    expect(spell()).toMatch(/^\tits "data" is a datum$/m)
+    const other = await ingestOf()
+    other.texts.set("Lab.api.spell", withOwnDatum(other.spell()))
+    other.later()
+    await other.ingest.verify("Lab.api.spell")
+    await other.ingest.update("Lab.api.spell")
+    expect(other.spell()).toMatch(/^\tits "data" is a lab datum$/m)
+    expect(other.spell().match(/^a "datum" is a thing$/gm)).toHaveLength(1)
+    expect(errorsOf(other.spell())).toEqual([])
+  })
+})
+
 describe("a line a person wrote for a field", () => {
   test("update and verify keep it, and add no second line for that field beside it", async () => {
     const { ingest, texts, spell, description } = await ingestOf()

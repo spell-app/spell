@@ -27,6 +27,14 @@ describe("compilePattern()", () => {
     expect(SRV.compilePattern("/files/*")("/files")).toEqual({ "0": "" })
   })
 
+  it("matches `:name?` with its segment or without it, as Express does", () => {
+    const match = SRV.compilePattern("/library/:tab?/:view?")
+    expect(match("/library")).toEqual({})
+    expect(match("/library/books")).toEqual({ tab: "books" })
+    expect(match("/library/books/grid/")).toEqual({ tab: "books", view: "grid" })
+    expect(match("/library/books/grid/more")).toBeUndefined()
+  })
+
   it("throws a 400 on bad encoding", () => {
     expect(() => SRV.compilePattern("/:x")("/%E0%A4%A")).toThrow(SRV.HttpError)
   })

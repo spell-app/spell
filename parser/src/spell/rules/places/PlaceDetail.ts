@@ -23,7 +23,7 @@ export type PlaceDetailValue = {
       paging?: PagingDetails
       /** It's ONE thing at its address, not a list:  see `OneThingAt`. */
       isOne?: boolean
-    }
+    } & ListAsks
   >
   keyNamed?: string
   /** Where its key's token is made, from the secret `keyNamed`:  see `TokenFrom` (epic `data` P49). */
@@ -59,10 +59,16 @@ export type PlaceDetailValue = {
   pageSizeAskedWith?: string
   /** Which fields it filters by itself:  see `FiltersBy`. */
   filters?: "every field" | string[]
+  /** What it calls a filter's field and value, asked as two questions:  see `FiltersByAnyField`. */
+  filteredWith?: { field: string; value: string }
   /** Which fields it sorts by itself:  see `SortsBy`. */
   sorts?: "every field" | string[]
   /** What it calls a sort, when that isn't `sort`. */
   sortedWith?: string
+  /** The sorts it has names of its own for:  see `NamedSorts`. */
+  sortOrders?: SortOrderName[]
+  /** How it's asked which way round a sort by any field goes:  see `SortsByAnyField`. */
+  sortDirections?: SortDirections
   /** What it calls the fields it's asked for:  see `GivesFieldsNamedIn`. */
   fieldsNamedIn?: string
   /** The classes whose collections are read as the program starts, by name:  see `ReadOnStartup`. */
@@ -81,6 +87,27 @@ export type PlaceDetailValue = {
    */
   sheet?: SheetLines
 }
+
+/**
+ * One sort a web server's list has a name of its own for, sent as its sort:  `- "completion" as "recency", by end time`.
+ * - `name` and `field`:  as compiled code names them.  The server sorts it newest first only (`NamedSorts`).
+ */
+export type SortOrderName = { name: string; as: string; field: string }
+
+/**
+ * How a web server's list is asked which way round its sort goes, in a question of its own:
+ * `- newest first with "order" as "desc"` (`SortsByAnyField`).  A way round left out isn't the server's.
+ */
+export type SortDirections = { param: string; descending?: string; ascending?: string }
+
+/**
+ * What a place's lines say it's asked, for every list, or one step in under a list's line, for it alone (`CollectionAt`):
+ * its filters, sorts and search.
+ */
+export type ListAsks = Pick<
+  PlaceDetailValue,
+  "filters" | "filteredWith" | "sorts" | "sortedWith" | "sortOrders" | "sortDirections" | "searches"
+>
 
 /** What the place's paging lines say:  for every collection, or one step in under a collection's line, for it alone. */
 export type PagingDetails = Pick<

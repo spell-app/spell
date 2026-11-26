@@ -30,8 +30,12 @@ import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
 import { ListItemsIn } from "./ListItemsIn"
 import { ListSortedBy } from "./ListSortedBy"
+import { ListFilteredHere } from "./ListFilteredHere"
+import { ListSortedHere } from "./ListSortedHere"
+import { CountRoughly } from "./CountRoughly"
 import { SortKeyField } from "./SortKeyField"
 import { SortKeyOrder } from "./SortKeyOrder"
+import { SORT_ORDER_WORDS } from "./sortOrderWords"
 import { AddNewThing } from "./AddNewThing"
 import { EachInStatement } from "./EachInStatement"
 import { PluralCallStatement } from "./PluralCallStatement"
@@ -764,8 +768,7 @@ listsEs.addRule(SortKeyField, {
 })
 
 listsEs.addRule(SortKeyOrder, {
-  syntax:
-    ",? ((descending:al revés|al reves|de mayor a menor|de más reciente a más antiguo|de mas reciente a mas antiguo|en orden inverso|z-a)|(ascending:a-z|de menor a mayor|de más antiguo a más reciente|de mas antiguo a mas reciente))",
+  syntax: `,? ${SORT_ORDER_WORDS.es}`,
   tests: [
     {
       compileAs: "expression",
@@ -808,6 +811,18 @@ listsEs.addRule(ListSortedBy, {
     }
   ]
 })
+
+// según un orden que guarda la página:  `las primeras 50 mediciones ordenadas según el orden` -- only a sort a page holds
+listsEs.addRule(ListSortedBy, {
+  roles: { match: "value" },
+  syntax: ",? (ordenado|ordenada|ordenados|ordenadas) (bySort:según|segun) {inline_expression}?"
+})
+
+listsEs.addRule(ListFilteredHere, { roles: { match: "value" }, syntax: ",? filtrado aquí" })
+
+listsEs.addRule(ListSortedHere, { roles: { match: "value" }, syntax: ",? ordenado aquí" })
+
+listsEs.addRule(CountRoughly, { roles: { match: "value" }, syntax: ",? más o menos" })
 
 listsEs.addRule(ListMembershipTest, {
   syntax: "{operator:has_or_has_no} {arg:plural_identifier} (where:donde|que) {inline_expression}?",

@@ -59,7 +59,7 @@ export type PlaceDetails = {
       paging?: PagingDetails
       /** It's ONE thing at its address, not a list:  `the server status lives at "/api/status"`. */
       isOne?: boolean
-    }
+    } & ListAsks
   >
   /** The NAME of the key it needs:  never the key. */
   keyNamed?: string
@@ -141,10 +141,25 @@ export type PlaceDetails = {
   pageSizeAskedWith?: string
   /** Which fields a web server filters by itself:  `it filters by cuisine and rating`.  Left out:  none. */
   filters?: "every field" | readonly string[]
+  /**
+   * What a web server's list calls a filter's field and value, asked as two questions:
+   * `jobs can be filtered by any field, with "field" and "value"`.  SEE:  `RestAsks.filteredWith`
+   */
+  filteredWith?: { field: string; value: string }
   /** Which fields a web server sorts by itself:  `it sorts by title and date`.  Left out:  none. */
   sorts?: "every field" | readonly string[]
   /** What a web server calls a sort, when that isn't `sort`:  `it sorts by date with "order"`. */
   sortedWith?: string
+  /**
+   * The sorts a web server's list has names of its own for, sent as its sort:  `- "completion" as "recency", by end time`.
+   * - SEE:  `RestPlaceProps.sortOrders`
+   */
+  sortOrders?: readonly { name: string; as: string; field: string; descending?: boolean }[]
+  /**
+   * How a web server's list is asked which way round a sort by any field goes:  `- newest first with "order" as "desc"`.
+   * - SEE:  `RestAsks.sortDirections`
+   */
+  sortDirections?: { param: string; descending?: string; ascending?: string }
   /** What a web server calls the fields it's asked for:  `it gives only the fields named in "fields"`. */
   fieldsNamedIn?: string
   /** It takes no writes:  `it is read only`. */
@@ -192,6 +207,15 @@ export type PlaceDetails = {
    */
   readOnStartup?: readonly string[]
 }
+
+/**
+ * What a web server's lines say it's asked, for every list, or one step in under a list's `live at` line, for it alone:
+ * `it filters by job-id`, `it sorts by created-at with "order_by"`, `it searches names with "search"`.
+ */
+export type ListAsks = Pick<
+  PlaceDetails,
+  "filters" | "filteredWith" | "sorts" | "sortedWith" | "sortOrders" | "sortDirections" | "searches"
+>
 
 /** What the place's paging lines say:  for every collection, or for one alone, under its `live at` line. */
 export type PagingDetails = Pick<
@@ -285,6 +309,9 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       collections: restCollections(details, collection, storedAsIn(Class)),
       ...(details.namesLike !== undefined && { namesLike: folder.nameStyleLike(details.namesLike) }),
       ...(details.searches && { searches: details.searches }),
+      ...(details.sortOrders && { sortOrders: details.sortOrders }),
+      ...(details.sortDirections && { sortDirections: details.sortDirections }),
+      ...(details.filteredWith && { filteredWith: details.filteredWith }),
       ...restLinesForEveryCollection(details),
       ...restAbilitiesIn(details),
       ...(details.pageSize !== undefined && { pageSize: details.pageSize }),
@@ -602,7 +629,7 @@ function pathTemplateOf(at: string): string {
 function restCollections({ collections = {} }: PlaceDetails, collection: string, storedAs: Record<string, string>) {
   const named = { ...collections, [collection]: { ...collections[collection] } }
   return Object.fromEntries(
-    Object.entries(named).map(([name, { at, fields, pictures, askedBy, searches, paging, isOne }]) => {
+    Object.entries(named).map(([name, { at, fields, pictures, askedBy, searches, paging, isOne, ...asked }]) => {
       const all = name === collection ? { ...fields, ...storedAs } : fields
       return [
         name,
@@ -614,6 +641,7 @@ function restCollections({ collections = {} }: PlaceDetails, collection: string,
           ...(searches && { searches }),
           ...(paging?.nextPageIn !== undefined && { nextAt: paging.nextPageIn }),
           ...(paging && { paging: restPagingOf(paging) }),
+          ...restAsksOf(asked),
           ...(isOne && { isOne })
         }
       ]
@@ -645,6 +673,22 @@ function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDeta
       ...(nextPageIn !== undefined && { nextAt: nextPageIn })
     }
   }
+}
+
+/**
+ * What one list is asked, its own way, from the lines under its `live at` line:  `RestPlace`'s `RestCollection.asks`.
+ * - Nothing for a list whose lines say none of it:  the place's lines hold.
+ */
+function restAsksOf({ filters, filteredWith, sorts, sortedWith, sortOrders, sortDirections }: Omit<ListAsks, "searches">) {
+  const asks = {
+    ...(filters && { filter: filters }),
+    ...(filteredWith && { filteredWith }),
+    ...(sorts && { sort: sorts }),
+    ...(sortedWith !== undefined && { sortedWith }),
+    ...(sortOrders && { sortOrders }),
+    ...(sortDirections && { sortDirections })
+  }
+  return Object.keys(asks).length ? { asks } : {}
 }
 
 /**

@@ -159,6 +159,13 @@ describe("adding a source", () => {
     })
     expect(back.collections.people!.idField).toBe("name")
     expect(back.collections.planets!.idField).toBe("url")
+    // a list's bigger read allowance, by its older name, is read as its `maxSize`
+    const older = descriptionFromDisk({
+      ...onDisk,
+      collections: { ...onDisk.collections, people: { ...onDisk.collections.people, mostBytes: 8_000_000 } as never }
+    })
+    expect(older.collections.people!.maxSize).toBe(8_000_000)
+    expect(older.collections.people).not.toHaveProperty("mostBytes")
   })
 
   test("a field every row sent the same no, 0 or empty is filled;  one sent as nothing isn't (epic `data` I53)", async () => {

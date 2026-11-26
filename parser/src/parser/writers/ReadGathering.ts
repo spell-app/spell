@@ -14,8 +14,11 @@ const FORM_TAG = "ui-form"
 /** `core`'s calls that read a saved type from its place. */
 const SAVED_READS = new Set(["savedThings", "savedThingAt", "savedThingWithId"])
 
+/** `core`'s reads of a saved type sorted by a sort a page holds:  `core.savedThingsSortedBy(sort, Recipe, ...)`. */
+const SORTED_READ = "savedThingsSortedBy"
+
 /** `core`'s calls whose first value is a list, and whose answer is a list of the same things. */
-const SAME_ITEMS = new Set(["filter", "sortedBy", "firstFew", "reversed", "filterInTurn"])
+const SAME_ITEMS = new Set(["filter", "sortedBy", "sortedByValue", "firstFew", "reversed", "filterInTurn", "sortedByInTurn"])
 
 /** `core`'s calls after which a thing's whole row must be here:  undo puts it back, or it's written again. */
 const NEEDS_WHOLE_ROW = new Set(["removeSaved", "saveThing", "draftOf"])
@@ -377,6 +380,7 @@ export class ReadGathering {
     const args = (node as P.ASTScopedMethodInvocation).args?.args ?? []
     if (methodName === "on") this.noteListener(args[0], node)
     if (SAVED_READS.has(methodName)) this.noteSavedRead(args, facts)
+    else if (methodName === SORTED_READ) this.noteSavedRead(args.slice(1), facts)
     else if (NEEDS_WHOLE_ROW.has(methodName)) this.noteWholeRow(node, args, at)
     else if (methodName === SENDS_WHOLE_ROW.call && args[SENDS_WHOLE_ROW.argument]) {
       this.noteWholeRow(node, args.slice(SENDS_WHOLE_ROW.argument), at)
@@ -556,8 +560,9 @@ export class ReadGathering {
     if (isCoreCall(inner)) {
       const { methodName, args } = inner as P.ASTScopedMethodInvocation
       const first = args?.args?.[0]
-      if (methodName === "savedThings" || methodName === "everyThing") {
-        const type = first && unwrapped(first)
+      if (methodName === "savedThings" || methodName === "everyThing" || methodName === SORTED_READ) {
+        const typeArg = methodName === SORTED_READ ? args?.args?.[1] : first
+        const type = typeArg && unwrapped(typeArg)
         if (type instanceof P.ASTTypeExpression) return { item: type.name }
       }
       if (methodName === "savedThingAt" || methodName === "savedThingWithId" || methodName === "thingAtPlace") {

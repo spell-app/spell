@@ -4,7 +4,7 @@ import { lookOfWords } from "spell/parser/core/looks"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawIt, DrawnLines, OutlineSpecifierMedia } from "spell/parser/spell/rules/classes"
+import { DrawIt, DrawnLines, OutlineSpecifierMedia, OutlineSpecifierSort } from "spell/parser/spell/rules/classes"
 import { SpellConstant } from "spell/parser/spell/rules/constants"
 import { QuotedMember } from "spell/parser/spell/rules/properties"
 import { ParseError } from "spell/parser/spell/rules/ParseError"
@@ -34,6 +34,10 @@ import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSXContent } from "./SpellJSXContent"
 
+/** The table's tag:  `sort="the order"` shows and sets a sort a page holds. */
+const TABLE_TAG = "ui-table"
+/** The table's attribute naming the sort a page holds that it shows:  `sort`, in every language. */
+const PAGE_SORT_ATTRIBUTE = "sort"
 /** The tag of a form:  bound to a thing, its fields write to it. */
 const FORM_TAG = "ui-form"
 /** The attribute naming what a form is bound to. */
@@ -265,6 +269,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     match.data.attributes = SpellJSX.attributesOf(match, element)?.map((attr) =>
       scope.parser?.parse(attr, "jsxAttribute", scope)
     )
+    // a table showing a sort a page holds, `<table sortable sort="the order">`:  a header click sets it
+    match.data.pageSort = SpellJSX.pageSortOf(scope, match, element)
     // a view declared where it's drawn (Q52):  `<column "C1"/>` ~== `"C1" is a new column`
     const view = SpellJSX.viewDeclaredBy(scope, match, element)
     if (view) match.data.declares = SpellJSX.saysHidden(match) ? { ...view, hidden: true } : view
@@ -317,6 +323,70 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       return [...(attributes ?? []), id]
     }
     return [...(attributes ?? []), id, new P.JSXAttributeToken({ name: named, start, value, raw })]
+  }
+
+  ////////////////
+  // ## A table showing a sort a page holds
+  ////////////////
+
+  /**
+   * A table's `sort="the order"`, naming a sort a page holds (`its "order" is a sort:  ...`):  the attribute's place,
+   * and the property it names -- `undefined` for any other tag, or a table with no quoted `sort`.
+   * - The table shows it, and a header click sets it (`<cell sort="completion">`;  `listenForTableSorts()`), so it
+   *   must be a property, of the page or of the thing drawn:  anything else is an error.
+   * - Its name is `sort` in every language:  Spell UI's table takes it so.
+   * - A lookup:  call it WHILE PARSING;  whether it holds a sort is asked as it compiles (`withPageSort()`), so it may be
+   *   declared further down.
+   */
+  private static pageSortOf(
+    scope: P.Scope,
+    match: P.MatchFor<SpellJSX>,
+    element: P.JSXElementToken
+  ): JSXMatchData["pageSort"] {
+    if (SpellJSX.canonicalTagOf(scope, match.data.tagName) !== TABLE_TAG) return undefined
+    const index = element.attributes?.findIndex(
+      (each) => each.name === PAGE_SORT_ATTRIBUTE && each.value instanceof P.TextToken
+    )
+    if (index === undefined || index < 0) return undefined
+    const attribute = element.attributes![index]!
+    const words = (attribute.value as P.TextToken).innerText
+    const value = scope.parse(words, "expression")
+    const message = SP.Language.of(scope).parserMessage("table-sort-not-a-sort", { words })
+    if (!value || value.inputText.length !== words.length) {
+      match.data.error ??= SP.spellParser.createParseError(scope, [attribute], message)
+      return undefined
+    }
+    SP.SpellWarnings.refuseIf(match, message, () => !SpellJSX.isPageSort(value))
+    return { index, value }
+  }
+
+  /** Does `value` read a property holding a sort a page holds:  `the order`, `its order`? */
+  private static isPageSort(value: P.Match): boolean {
+    return OutlineSpecifierSort.holdsASort(value) && value.AST instanceof P.ASTPropertyExpression
+  }
+
+  /**
+   * `attrs` with the table's `sort` showing the sort a page holds:  `"prop:sort": () => core.sortShown(this, "order")`,
+   * which remembers where it lives for a header click to set (`core.sortShown()`).
+   * - What names no sort was refused as it was read (`pageSortOf()`).
+   */
+  private static withPageSort(
+    match: P.MatchFor<SpellJSX>,
+    { index, value }: NonNullable<JSXMatchData["pageSort"]>,
+    attrs: P.ASTJSXAttribute[] | undefined
+  ): P.ASTJSXAttribute[] | undefined {
+    if (!SpellJSX.isPageSort(value)) return attrs
+    const read = value.AST as P.ASTPropertyExpression
+    const shown = new P.ASTCoreMethodInvocation(match, {
+      methodName: "sortShown",
+      args: [
+        read.object as P.ASTExpression,
+        // as compiled code names it:  `measurement order` is `measurementOrder`
+        new P.ASTStringLiteral(match, { value: JSON.stringify(P.JSWriter.instance.nameOf(`${read.property.value}`)) })
+      ]
+    })
+    const sort = new P.ASTJSXAttribute(match, { name: PAGE_SORT_ATTRIBUTE, value: shown })
+    return attrs?.map((attr, at) => (at === index ? sort : attr))
   }
 
   ////////////////
@@ -560,6 +630,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const tagName =
       laterView && view ? laterView.tag : (match.data.tagName ?? (match.matched[0] as P.JSXElementToken).tagName)
     let attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
+    if (match.data.pageSort) attrs = SpellJSX.withPageSort(match, match.data.pageSort, attrs)
     // a later type that's no view after all:  its quoted word, last, is no id (`noteUnreadable()` says so)
     if (laterView && !view && (match.matched[0] as P.JSXElementToken).quotedWord) attrs = attrs?.slice(0, -1)
     // a view this tag declares (Q52):  its attributes are the new thing's starting values, so the element has its id alone

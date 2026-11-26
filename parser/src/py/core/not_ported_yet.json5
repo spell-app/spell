@@ -2,6 +2,14 @@
   "about": "What spell_core doesn't have yet of the core's method list (src/core/core.declarations.json5), by the JavaScript name, grouped by why.  Read by tests/py/core/tests/test_core_declarations.py, and by the core reference page (guides/targets/core-reference.html).  Take a name out as it's ported.",
   "groups": [
     {
+      "why": "A sort a page holds, and a table that sets it:  a page's own sort, a read sorted by it, and a table's header click;  Python's pages and places come later",
+      "names": ["sort", "sortedByValue", "sortShown", "nextSort", "savedThingsSortedBy"]
+    },
+    {
+      "why": "A sort whose key waits:  every key answered, then sorted;  Python's keys never wait",
+      "names": ["sortedByInTurn"]
+    },
+    {
       "why": "The steps around a server's action (epic data P50):  before, while, around and when it fails, the app's own for every server call, and an id read first;  Python's places call no server's actions yet",
       "names": ["addActionHook", "addServerFailureStep", "passTheError", "errorIs", "savedThingOrMissing"]
     },
