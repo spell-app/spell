@@ -1,4 +1,4 @@
-import { For } from "solid-js"
+import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
@@ -39,9 +39,11 @@ export class DOMEpicBellsElement extends E.DOMElement<EpicBells> {
  * all of the things that are expensive / that someone might want to turn off and let's make a modal in the epic doc
  * gear menu to turn them on and off").
  * - Spell UI's `<ui-modal>`:  the browser's top layer;  its ×, Escape and Cancel drop what wasn't saved, Save keeps it
- * - TOKEN BURN, at the top:  a three-stop `<ui-slider>` (Low, Medium, High) that sets the switches below at once
- *   (`BellSteps.withBurn()`);  a switch flipped while it's down shows it as Custom (`BellSteps.burnShown()`)
- * - a section per group, in `BellSteps.GROUPS`' order;  each row a toggle, the bold title, one sentence and the cost
+ * - TOKEN BURN, at the top, ONE row:  its name, then a three-stop `<ui-slider>` (Low, Medium, High) that sets the
+ *   switches below at once (`BellSteps.withBurn()`);  a switch flipped while it's down shows a Custom chip beside its
+ *   name (`BellSteps.burnShown()`), the only time it has one:  the slider shows the level itself (T171)
+ * - a section per group, in `BellSteps.STEPS`' order (by cost, the costliest first);  each row a toggle with its cost
+ *   badge under it, in one column, then the bold title and one sentence, the full width left (T171)
  * - every rule is `BellSteps`':  this draws a DRAFT of the settings' `bells` group and asks it
  * - read and saved through the page server (`GET` / `POST /api/epics/settings`, `ServerLink`):  the person's own
  *   epic settings, one set for every epic
@@ -72,7 +74,7 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
   /** Auto Send as changed here, not saved yet. */
   @E.state accessor autoSend: AutoSend = DEFAULT_AUTO_SEND
 
-  /** What's said under the slider:  loading, or why a save failed. */
+  /** What's said under the slider:  loading, or why a save failed;  else nothing. */
   @E.state accessor note = ""
 
   /** A save is on its way. */
@@ -239,15 +241,25 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
     )
   }
 
-  /** The Token burn slider:  its name and what it reads, the three stops, a line saying what the level does. */
+  /**
+   * The Token burn slider, one row:  its name (and Custom, once a switch was flipped below High), the three stops;
+   * under them only a note (loading, a refused save).
+   */
   private burn(): JSX.Element {
     return (
-      <div class="burn" part={this.partForName("burn")}>
+      <div class="burn" part={this.partForName("burn")} data-shown={this.shown}>
         <div class="burn-head">
           <span class="burn-name">{this.translationForKey("burn")}</span>
-          <ui-label class="burn-shown" size="small" color={this.shown === "custom" ? "orange" : "blue"}>
-            {this.translationForKey(this.shown)}
-          </ui-label>
+          <Show when={this.shown === "custom"}>
+            <ui-label
+              class="burn-custom"
+              size="mini"
+              color="orange"
+              data-tooltip={this.translationForKey("customLine")}
+            >
+              {this.translationForKey("custom")}
+            </ui-label>
+          </Show>
         </div>
         <ui-slider
           class="burn-slider"
@@ -265,7 +277,9 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
               this.moveBurn(event.detail.value)) as EventListener)
           }
         />
-        <p class="burn-line">{this.note || this.words(`${this.shown}Line`)}</p>
+        <Show when={this.note}>
+          <p class="burn-note">{this.note}</p>
+        </Show>
       </div>
     )
   }
@@ -280,37 +294,39 @@ export class EpicBells extends E.UIComponent<EpicBellsVocabulary> {
     )
   }
 
-  /** A step's row:  its switch, bold title, sentence and cost. */
+  /** A step's row:  its switch with its cost under it, then its bold title and sentence. */
   private row(step: BellStep): JSX.Element {
     return (
       <div class="row" part={this.partForName("row")} data-step={step.key}>
-        <ui-checkbox
-          class="switch"
-          appearance="toggle"
-          padding="none"
-          selected={this.isOn(step) ? "" : undefined}
-          disabled={this.draft || step.inBrowser ? undefined : ""}
-          aria-label={this.words(step.key)}
-          data-tooltip={this.tipOf(step)}
-          ref={(box: HTMLElement) =>
-            box.addEventListener("ui-changed", ((event: CustomEvent<{ selected: boolean }>) =>
-              this.flip(step, event.detail.selected)) as EventListener)
-          }
-        />
+        <div class="side">
+          <ui-checkbox
+            class="switch"
+            appearance="toggle"
+            padding="none"
+            selected={this.isOn(step) ? "" : undefined}
+            disabled={this.draft || step.inBrowser ? undefined : ""}
+            aria-label={this.words(step.key)}
+            data-tooltip={this.tipOf(step)}
+            ref={(box: HTMLElement) =>
+              box.addEventListener("ui-changed", ((event: CustomEvent<{ selected: boolean }>) =>
+                this.flip(step, event.detail.selected)) as EventListener)
+            }
+          />
+          <ui-label
+            class={["cost", step.cost]}
+            part={this.partForName("cost")}
+            size="mini"
+            appearance="basic"
+            color={COST_COLORS[step.cost]}
+            data-tooltip={this.translationForKey("costTip")}
+          >
+            {this.translationForKey(COST_TEXTS[step.cost])}
+          </ui-label>
+        </div>
         <div class="words">
           <b class="title">{this.words(step.key)}</b>
           <span class="sentence">{this.words(`${step.key}Sentence`)}</span>
         </div>
-        <ui-label
-          class={["cost", step.cost]}
-          part={this.partForName("cost")}
-          size="mini"
-          appearance="basic"
-          color={COST_COLORS[step.cost]}
-          data-tooltip={this.translationForKey("costTip")}
-        >
-          {this.translationForKey(COST_TEXTS[step.cost])}
-        </ui-label>
       </div>
     )
   }
@@ -335,8 +351,9 @@ const COST_TEXTS = {
   high: "costHigh",
   medium: "costMedium",
   low: "costLow",
+  none: "costNone",
   timesaver: "costTimesaver"
 } as const
 
-/** Each cost's badge colour. */
-const COST_COLORS = { high: "red", medium: "orange", low: "grey", timesaver: "green" } as const
+/** Each cost's badge colour;  `none` the plain label, quieter than `low`'s grey. */
+const COST_COLORS = { high: "red", medium: "orange", low: "grey", none: undefined, timesaver: "green" } as const

@@ -177,7 +177,8 @@
  * - `fresh <epic> [--force]`:  hand epic `<epic>` to a NEW session in THIS window when this turn ends, `/epic resume
  *   <epic>` typed into its tab, this session's tab closed (`/epic fresh`, epic `epic-engine` T110)
  *   - why:  a long session re-reads its whole transcript every turn;  a new one starts from the epic page
- *   - refused while the epic's agents run (`epic agents`):  closing the tab would cut them off;  `--force` anyway
+ *   - refused while the epic's agents run (`epic agents`):  closing the tab would cut them off;  `--force` anyway;
+ *     `epic fresh later <epic>` waits for them, then goes by itself (T172)
  *   - the same record and end-of-turn hook as `handoff`, marked `fresh`
  *   - refused while `epic fresh all --pause` is pausing that epic (`FreshPause`, T139), unless `--force`
  *   - ends this session's wait for a clear moment, when `/epic fresh all` marked it (`FreshAll.drop()`, T113)
@@ -950,7 +951,7 @@ export class Window {
     if (running.length) {
       throw new Error(
         `${epic}'s agents are still running, and closing this tab would cut them off:  ${running.join(", ")};  ` +
-          "wait for them (`epic agents`), or `--force`"
+          `wait for them:  \`epic fresh later ${epic}\` goes fresh by itself once they're done;  or \`--force\``
       )
     }
     const from = Window.current()

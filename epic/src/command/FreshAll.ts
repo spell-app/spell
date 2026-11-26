@@ -32,6 +32,13 @@ import { Transcript } from "spell/epic/config/Transcript.ts"
  * - Wakes a session at most once per `WAKE_GAP_MS` (`woken`):  a refused `epic window fresh` never loops
  * - After a pause round (`FreshPause`, epic `epic-engine` T139) the marks are `paused`:  the agents each session saved
  *   don't count as running, and wait for the fresh session
+ * - ONE session's fresh, waiting for its agents (`solo`, epic `epic-engine` T172;  Owen, 2026-11-26:  "if agents are
+ *   running when I ask, it automatically does the epic fresh when the agents are complete"):
+ *   - `epic fresh later <epic>` marks it (`markSolo()`), a round of its own, so it waits for nobody else
+ *   - the same clear moment, the same hook:  the last agent's `epic agents done` says so first (`goLine()`), the hook
+ *     wakes the session if it's idle
+ *   - meanwhile the session starts no new work (`epic agents add` refuses);  what the person asks for goes on the
+ *     POST-FRESH LIST:  items queued with work `AFTER_FRESH`, which the new session takes up first ("8. Resume")
  * - Its position:  node's own modules, `json5`, and the epic config, home and transcript readers, by their `.ts` names
  *   (plain `node`);  NEVER the sessions finder, which needs `tsx`
  * - STATIC:  the marks are the machine's.  A test points the epic home elsewhere (`$SPELL_EPIC_HOME`).
@@ -63,6 +70,18 @@ export class FreshAll {
     mkdirSync(FreshAll.folder(), { recursive: true })
     writeFileSync(FreshAll.fileOf(sessionId), `${JSON.stringify(mark, null, 2)}\n`)
     return mark
+  }
+
+  /**
+   * Mark session `sessionId` to go fresh, alone, once epic `epic`'s agents are done (`epic fresh later`, T172).
+   * - `self`, so its own `/epic fresh` prompt doesn't hold it back;  a round of its own, so it waits for no other session
+   */
+  static markSolo(sessionId: string, epic: string, now = Date.now()): FreshMark {
+    const round = `solo:${sessionId}@${new Date(now).toISOString()}`
+    const mark = FreshAll.mark(sessionId, epic, { self: true, round, now })
+    const solo = { ...mark, solo: true }
+    writeFileSync(FreshAll.fileOf(sessionId), `${JSON.stringify(solo, null, 2)}\n`)
+    return solo
   }
 
   /** Session `sessionId`'s mark, or `undefined` when it's not pending.  NEVER throws. */
@@ -189,6 +208,14 @@ export class FreshAll {
 
   /** The line that wakes a session at its clear moment, for Claude. */
   static wakeLine(mark: FreshMark): string {
+    if (mark.solo) {
+      return (
+        `/epic fresh:  ${mark.epic}'s agents are done and this session is clear:  go fresh now, the epic skill's ` +
+        `"16. Fresh", steps 2-4 (the post-fresh list stays queued for the new session);  ` +
+        "refused (no window ...):  `epic fresh drop`, say why in one line, and take up the post-fresh list yourself " +
+        `(\`epic fresh queued ${mark.epic}\`).`
+      )
+    }
     const paused = mark.paused ? "  Its paused agents stay saved:  don't restart them, the new session does." : ""
     return (
       `/epic fresh all:  this session is clear now (no agents running, nothing waiting on the person, no prompt from ` +
@@ -262,6 +289,25 @@ export class FreshAll {
     return Boolean(words) && (!words.startsWith("<") || words.includes("<command-name>"))
   }
 
+  /**
+   * After an agent of epic `epic` is done (`epic agents done`):  what session `sessionId`, waiting to go fresh alone
+   * (`markSolo()`), does now (T172).
+   * - `undefined`:  no solo fresh of that epic is waiting
+   * - `{ go }`:  clear now:  the line saying to go fresh (`wakeLine()`)
+   * - `{ wait }`:  still not clear, and why;  the end-of-turn hook wakes it when it is
+   * - NEVER throws
+   */
+  static afterAgent(
+    sessionId: string | undefined,
+    epic: string | undefined,
+    { transcript, cwd, now = Date.now() }: { transcript?: string; cwd?: string; now?: number } = {}
+  ): { go: string } | { wait: string } | undefined {
+    const mark = FreshAll.pending(sessionId)
+    if (!mark?.solo || !epic || mark.epic !== epic) return undefined
+    const why = FreshAll.whyNot(sessionId!, mark, { transcript, cwd, now })
+    return why ? { wait: why } : { go: FreshAll.wakeLine(mark) }
+  }
+
   /** Whether a question waits on the person in transcript text `text`. */
   private static questionIn(text: string | undefined): boolean {
     return Boolean(text && Transcript.pendingQuestion(text))
@@ -297,7 +343,12 @@ export type FreshMark = {
   paused?: boolean
   /** when the hook last woke it, ISO */
   woken?: string
+  /** ONE session's `/epic fresh`, waiting for its own agents (`epic fresh later`, T172), not a `fresh all` round's */
+  solo?: boolean
 }
+
+/** The work of an item on the POST-FRESH LIST (`epic queue <epic> <id> "after the fresh"`):  the new session's first. */
+export const AFTER_FRESH = "after the fresh"
 
 /** What `FreshAll.waitForClear()` takes:  the `Stop` hook's input, and the test's stubs. */
 export type FreshWait = {
