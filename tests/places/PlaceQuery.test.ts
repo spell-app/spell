@@ -381,7 +381,7 @@ describe("PlaceQuery.answer(), things by id (epic data P57)", () => {
     const place = memoryPlace({})
     const getMany = place.getMany.bind(place)
     place.getMany = (collection, ids, context) => {
-      asked.push(context.select)
+      asked.push(context?.select)
       return getMany(collection, ids, context)
     }
     await answerOf(place, { ids: ["r-1"], select: ["title"] })
