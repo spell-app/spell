@@ -53,6 +53,11 @@ class App(View):
     """
 
     id = AppIdProp()
+    # the icon its browser tab shows while it runs, e.g. "rocket" or "static/icon.png" (epic `editor` P50);
+    # only a page shows it:  Python's core keeps it, for the page's mirror
+    icon = prop()
+    # the colour an icon's name is drawn in, e.g. "green"
+    icon_color = prop()
 
     def __init__(self, *args: Any, **props: Any) -> None:
         """SIDE EFFECT:  the running program's first app is its app, `core.RUNTIME.app`:  see `core.send()`."""

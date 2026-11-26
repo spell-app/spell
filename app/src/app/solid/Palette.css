@@ -217,13 +217,10 @@ ui-popup.PaletteFlyout::part(popup) {
     inset-inline-start: 8px;
   }
 }
-/* its rows thinner, their icons further in:  the triangle's room kept, though it never shows (T162) */
+/* its rows thinner;  no room kept for a triangle that never shows, so its icons sit near its left edge, a family's
+   parts one step in (epic `editor` I373, Owen:  "Don't need as much padding on the left side";  T162 kept it) */
 ui-popup.PaletteFlyout:not(.PalettePlus) {
   --ui-tree-row-height: 24px;
-}
-ui-popup.PaletteFlyout:not(.PalettePlus) .PaletteTree ui-tree-item::part(toggle) {
-  display: inline-flex;
-  visibility: hidden;
 }
 
 /* a row's star (epic `editor` T152):  shown while its row is hovered or focused, always on a starred one, in the

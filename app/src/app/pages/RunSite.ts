@@ -1,9 +1,10 @@
 import { SP } from "spell/parser/spell"
-import type { SiteHost, SiteParts } from "spell/parser/core/core.types"
+import type { SiteHost, SiteParts, TabIcon } from "spell/parser/core/core.types"
 import { filledPattern, requiredParamsOf } from "spell/util/addressPattern"
 import { editor, type RunningSitePage } from "spell/app/app/editor"
 import { SiteThemes } from "spell/app/app/runner/SiteThemes"
 import { RunSiteHost } from "spell/app/app/run/RunSiteHost"
+import type { TabIcons } from "spell/app/app/run/TabIcons"
 import { navigate } from "./navigation"
 import { SiteWrites } from "./SiteWrites"
 
@@ -19,6 +20,8 @@ import { SiteWrites } from "./SiteWrites"
  *   the route hears every change of the URL, and tells the site (`heard()`, from `followRoute()`).
  * - The dialog or sidebar open is in the URL's hash, as on the run page (`RunSiteHost.pushPart()`):  a URL with it,
  *   and Back and Forward to one, open it (`openHash()`).
+ * - The running app's icon on the browser tab, while it runs, the editor's hat again when it stops (`showIcon()`,
+ *   epic `editor` P50):  a site's or any app's, as every run's host is this one.
  * - While designing, a site's not found page offers to make the page:
  *   `createPage()`, one step of the editor's history.
  * - The core's `SiteHost`, handed to each run (`editor.executeCompiledApp()`):  no Solid, as `editor.ts` uses it.
@@ -224,6 +227,18 @@ export class RunSite implements SiteHost {
     }
     return tokens
   }
+
+  /** The running app's icon on the browser tab;  `undefined`, the editor's own (`TabIcons`). */
+  showIcon = (icon: TabIcon | undefined): void => {
+    // a dynamic `import()`:  `TabIcons` draws with Spell UI's icons, and `editor.ts` stays free of Spell UI
+    import("spell/app/app/run/TabIcons").then(
+      ({ TabIcons }) => (this.tabIcons ??= new TabIcons(document)).show(icon),
+      (error: unknown) => console.warn("RunSite:  can't show the app's icon on the tab", error)
+    )
+  }
+
+  /** What shows the running app's icon on the tab:  made the first time one asks. */
+  private tabIcons?: TabIcons
 
   /** The editor's Run URL of a site's `address`, in project `projectPath`:  `/run/<project>/films/4`. */
   static runUrlFor(projectPath: string, address: string): string {

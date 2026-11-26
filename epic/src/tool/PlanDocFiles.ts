@@ -1042,6 +1042,8 @@ export type EpicStatus = (typeof EPIC_STATUSES)[number]
  * - Why:  edits queued behind a slow one failed at 20s ("held for 20s:  stuck?") while it was still working, the lock
  *   gone a moment later;  each edit took up to 40s then (a migration walking the whole page per field)
  * - a running edit is never taken over while others may still wait for it;  a crashed one's (its pid gone) at once
+ * - the two minutes are on ONE holder (`SRV.FileLock`'s `wait`, epic `epic-engine` I491):  a line of edits waits
+ *   as long as the lock keeps changing hands, so eight writers making four edits each all land
  */
 function lockedPage<T>(file: string, fn: () => Promise<T>): Promise<T> {
   return SRV.FileLock.runAsync(file, fn, {

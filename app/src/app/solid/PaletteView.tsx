@@ -8,6 +8,7 @@ import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { hoverDelay } from "spell/app/app/ui/codePopups"
 import { BarPanels, type BarPanel } from "./BarPanels"
+import { barTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { on } from "./on"
 import { PartEdits } from "./PartEdits"
@@ -122,7 +123,7 @@ function flyoutId(group: PaletteGroup): string {
  * - The panel:  `name` atop, a search button beside it (T162), then `rows`, handed the words typed (lowercase);
  *   - the search button slides the field open over the name, "Search <group>" (`<ui-search collapsed>`);
  *     ⌘F jumps into it (T166)
- *   - at its foot, what the part under the mouse is (`<PartAbout>`, epic `editor` T165)
+ *   - right under its header, what the part under the mouse is (`<PartAbout>`, epic `editor` T165;  at its foot until I373)
  *   - its header and the button share one fill while it's out (T173, I367)
  * - Choosing a row, or dragging one, closes it (`Palette.closeMenus()`).
  */
@@ -176,12 +177,12 @@ function RailFlyout(props: {
             ref={on<{ value: string }>("ui-changed", (event) => setFilter(event.detail.value))}
           />
         </div>
+        <div class="PaletteFlyoutAbout">
+          <PartAbout />
+        </div>
         <ui-tree class="PaletteTree" label={props.name} ref={treeChoosesRows}>
           {props.children(words)}
         </ui-tree>
-        <div class="PaletteFlyoutFoot">
-          <PartAbout />
-        </div>
       </ui-popup>
     </>
   )
@@ -288,7 +289,9 @@ const RailPanels = new BarPanels({
   along: "y",
   glideToken: "--PaletteFlyout-glide",
   grows: "height",
-  reopensWithinMs: 300
+  reopensWithinMs: 300,
+  // one motion:  a gliding menu's rows fade in with its box (I373)
+  fadesRows: true
 })
 
 /**
@@ -566,7 +569,7 @@ const NEW_VIEW_ICON = "plus square outline"
  * - `picksUp`, in the add bar's flyouts:  a click (or Enter) picks it up instead, to put in the app with the next click
  *   (`PartPlacing`, epic `editor` T153);  in the top bar's popup it's added at once.
  * - Its star, at its end, stars it, or takes its star away (epic `editor` T152):  shown while the row is hovered or
- *   focused, and always on a starred one;  no tooltip, people know a star (T165);  its icon alone, no box, only its colour changing under the mouse (T162).
+ *   focused, and always on a starred one;  Spell UI's tooltip says what it does (I373;  none from T165 until then);  its icon alone, no box, only its colour changing under the mouse (T162).
  * - No tooltip of its description either:  the menu's own field shows it while the row is hovered (`<PartAbout>`).
  * - `children`:  its family's rows, inside it (`<PartRows>`), shown while `isOpen`.
  */
@@ -597,6 +600,8 @@ function PaletteRow(props: {
         icon={isStarred() ? "star" : "star outline"}
         aria-pressed={isStarred() ? "true" : "false"}
         aria-label={starText()}
+        // Spell UI's tooltip, never the browser's title (I373):  an icon-only button shows its label as one otherwise
+        {...barTooltip(starText())}
         onPointerDown={(event: PointerEvent) => event.stopPropagation()}
         onClick={(event: MouseEvent) => {
           event.stopPropagation()

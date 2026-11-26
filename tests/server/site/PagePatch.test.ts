@@ -115,6 +115,15 @@ describe("PagePatch.plan():  the DOM", () => {
     ).toEqual([{ op: "text", target: "/ui-section[1]/span[1]/text()[1]", text: "New", from: "Old" }])
   })
 
+  it("replaces a node whose key changed, never morphs it:  a new round's q19 is no q4 (I492)", () => {
+    const before = `<ui-section id="q1"><epic-ask></epic-ask></ui-section><ui-section id="q4"><epic-ask></epic-ask></ui-section>`
+    const after = `<ui-section id="q16"><epic-ask></epic-ask></ui-section><ui-section id="q19"><epic-ask></epic-ask></ui-section>`
+    expect(brief(steps(before, after))).toEqual([
+      { op: "replace", target: "#q1", node: `<ui-section id="q16"><epic-ask></epic-ask></ui-section>` },
+      { op: "replace", target: "#q4", node: `<ui-section id="q19"><epic-ask></epic-ask></ui-section>` }
+    ])
+  })
+
   it("treats a key found twice as no key", () => {
     expect(steps(`<p id="d">one</p><p id="d">two</p>`, `<p id="d">one</p><p id="d">TWO</p>`)).toEqual([
       { op: "text", target: "/p[2]/text()[1]", text: "TWO", from: "two" }
