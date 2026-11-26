@@ -27,8 +27,10 @@ const DESCRIPTION_BEFORE_EXAMPLE = "description-before-example"
  *   - each of Spell's old forms, e.g. `parts` => `slots`, a note after a line's code, `// ...`, moved to the line
  *     under it, `-- ...` -- see `fixOldForms()`;  then the project's file names the Spell it now matches
  *   - a `.spell` file's HTML habits, e.g. `<ui-button>` => `<button>` -- see `fixHtmlHabits()`
- *   - a `.spell` page's old spellings, e.g. `<spell-notebook "x">` => `<spell-page "x" notebook>` --
- *     see `fixPageHabits()`
+ *   - a `.spell` page's old habits:  a description written as a `<text>` before its example, moved into its
+ *     `description` -- see `fixPageHabits()`
+ *   - NOT a page in the old tag form, `<page "x" notebook>`:  it no longer reads, and nothing rewrites it plain
+ *     (epic `language` T95)
  *   - each editor page
  *   - What it can't put right is still an error.
  * - A `.spell` file's HTML habit it can't put right, `on-click=`, is an error -- see `htmlHabitsIn()`.

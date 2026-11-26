@@ -51,8 +51,8 @@ export default function languageCommands(spell: Command): void {
     .option(
       "--fix",
       "put right what it can:  Spell's old forms (parts => slots, a note after a line's code moved to the line " +
-        "under it, // x => -- x), then the project file's spellVersion;  old spellings in a page " +
-        "(<notebook> => <page notebook>, a description before an example => its description=), " +
+        "under it, // x => -- x), then the project file's spellVersion;  a page's description before an example " +
+        "(=> its description=), " +
         "and the editor pages (gone properties, new ones, controls that don't fit)"
     )
     .addHelpText("after", PROJECT_HELP)
