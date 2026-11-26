@@ -223,14 +223,14 @@ export class FolderPlace extends ChunkedPlace {
     }
   }
 
-  /** What changed in `collection` since `token`, a list's `version`:  a token from another run answers with every thing. */
+  /** What changed in `collection` since `token`, a list's `version`:  a token it doesn't know answers with every thing, `startsOver`. */
   async changesSince(collection: string, token: string, context: PlaceContext = {}): Promise<ChangesAnswer> {
     await this.mayReadOrDie(context)
     const down = await this.inStepUnlessDown(collection, context)
     const known = this.events.changesSince(collection, token)
     if (known) return { ...known, rows: this.withoutTakenDown(down, collection, known.rows) }
     const rows = this.withoutTakenDown(down, collection, await this.allRows(collection, context))
-    return { rows, removed: [], token: this.events.version }
+    return { rows, removed: [], token: this.events.version, startsOver: true }
   }
 
   /** Tell `onEvent` of each change to `target`, by this place or on the disk.  Returns what stops it. */

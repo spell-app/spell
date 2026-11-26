@@ -807,6 +807,11 @@ export type ChangesAnswer = {
   removed: string[]
   /** What to ask from next. */
   token: string
+  /**
+   * The token wasn't one the place knows (another run, or older than what it keeps):  `rows` are the whole list now,
+   * to put in place of what's kept, and `removed` says nothing (epic `data` I145).
+   */
+  startsOver?: true
 }
 
 /** What's being asked about one write:  each part left out means "any". */

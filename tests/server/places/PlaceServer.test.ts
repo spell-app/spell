@@ -306,6 +306,34 @@ describe("PlaceServer and RemotePlace", () => {
     expect((await remote.list("posts", {}, {})).rows).toEqual([{ id: "a" }])
   })
 
+  test("kept on this device, a list read again by a server that doesn't know its version loses what's gone (I145)", async () => {
+    const root = newFolder()
+    const folder = () =>
+      new FolderPlace({ storage: new ChunkFiles({ root }), format: new JsonChunks({ summaries: "every field" }) })
+    const before = folder()
+    await before.apply(
+      [
+        { kind: "insert", collection: "posts", id: "a", fields: { text: "first" } },
+        { kind: "insert", collection: "posts", id: "b", fields: { text: "second" } }
+      ],
+      {}
+    )
+    const store = new MemoryCopies()
+    const pageOn = (port: number) =>
+      new RemotePlace({
+        url: `http://127.0.0.1:${port}/api/places/posts`,
+        token: TOKEN,
+        deviceCopy: new DeviceCopy({ scope: "test:feed", store })
+      })
+    const { port } = await placeServer({ posts: before })
+    expect((await pageOn(port).list("posts", {}, {})).rows.map((row) => row.id)).toEqual(["a", "b"])
+    // the server restarts, and while it's down someone removes b
+    const after = folder()
+    await after.apply([{ kind: "delete", collection: "posts", id: "b" }], {})
+    const restarted = await placeServer({ posts: folder() })
+    expect((await pageOn(restarted.port).list("posts", {}, {})).rows.map((row) => row.id)).toEqual(["a"])
+  })
+
   test("a place's operations go through `call()`", async () => {
     const memory = new MemoryPlace({ operations: { twice: (input) => (input as number) * 2 } })
     const { remote } = await placeServer({ n: memory })
