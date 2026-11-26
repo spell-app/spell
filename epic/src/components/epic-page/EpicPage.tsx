@@ -296,6 +296,16 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   // ## Derived state
   ////////////////
 
+  /**
+   * The text for `key`, for the derived labels below:  empty until the runtime's texts are there (`isReady`),
+   * then read again.
+   * - Why:  they're memos made with the component, so they run before its first render;  Solid 2.0.4 runs one again
+   *   as the layout changes, unread, and the runtime's texts (`UI.i18n`) throw until it has loaded.
+   */
+  private labelText(key: E.TextKey<EpicPageVocabulary>, params?: Record<string, string | number>): string {
+    return this.isReady ? this.translationForKey(key, params) : ""
+  }
+
   /** The phases below, read again on every layout change:  each numbered by its place (P15:  never by its id). */
   readonly phases = createMemo((): PhaseLine[] => {
     this.signals.layout.get()
@@ -312,7 +322,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (this.isSaga) return undefined
     const phases = this.phases()
     if (!phases.length) {
-      return this.future ? { color: "grey", icon: "seedling", words: this.translationForKey("future") } : undefined
+      return this.future ? { color: "grey", icon: "seedling", words: this.labelText("future") } : undefined
     }
     // every phase under way, two at once too (Owen, 2026-10-24:  P26 and P28 side by side, the header said only P26)
     const active = phases.filter((phase) => phase.status === ACTIVE)
@@ -325,11 +335,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     // the next:  the first not finished (a dropped phase is never next:  I228)
     const next = phases.find((phase) => !PhaseStatuses.isFinished(phase.status))
     // a standing epic is never done:  it waits for the next request (epic `epic-workflow`)
-    if (!next && this.standing)
-      return { color: "blue", icon: "arrows rotate", words: this.translationForKey("standing") }
-    if (!next) return { color: "green", icon: "check", words: this.translationForKey("done") }
+    if (!next && this.standing) return { color: "blue", icon: "arrows rotate", words: this.labelText("standing") }
+    if (!next) return { color: "green", icon: "check", words: this.labelText("done") }
     // the row's to-do circle (`EpicPhase`'s `todo` icon):  the same icon as the phase it names
-    return this.phaseLabel(next, "grey", "circle outline", this.translationForKey("next"))
+    return this.phaseLabel(next, "grey", "circle outline", this.labelText("next"))
   })
 
   /** Does the doc still hold its old crumbs before the page (`OLD_CRUMBS`)?  Then it draws none of its own. */
@@ -400,7 +409,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (!waiting.length) return undefined
     const marked = waiting.every((phase) => !!client.markOf(phase.id))
     const phases = waiting.map((phase) => PhaseIds.labelOf(phase)).join(", ")
-    const tip = this.translationForKey(waiting.length === 1 ? "plansWaitOne" : "plansWaitMany", {
+    const tip = this.labelText(waiting.length === 1 ? "plansWaitOne" : "plansWaitMany", {
       count: waiting.length,
       phases
     })
@@ -421,8 +430,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       return {
         color: "grey",
         icon: "route",
-        words: this.translationForKey(texts.step),
-        tip: this.translationForKey(texts.stepTip)
+        words: this.labelText(texts.step),
+        tip: this.labelText(texts.stepTip)
       }
     }
     const label = this.phaseStep()
@@ -468,7 +477,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const tip = this.step()?.tip ?? this.step()?.words
     const doing = this.review.doing()
     if (!doing?.text) return tip
-    const line = this.translationForKey("stepDoing", { doing: doing.text })
+    const line = this.labelText("stepDoing", { doing: doing.text })
     return tip ? `${tip}\n${line}` : line
   })
 
@@ -513,8 +522,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const viewer = ThreadFacts.viewer()
     const mine = !person || !viewer || person.toLowerCase() === viewer.toLowerCase()
     const params = { agent: ThreadFacts.agentLabel(agent), person: person ?? "" }
-    if (state === "listening") return this.translationForKey(mine ? "listeningMine" : "listeningOf", params)
-    return this.translationForKey(mine ? "idleMine" : "idleOf", params)
+    if (state === "listening") return this.labelText(mine ? "listeningMine" : "listeningOf", params)
+    return this.labelText(mine ? "idleMine" : "idleOf", params)
   }
 
   /**

@@ -306,7 +306,8 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       messages: own?.messages,
       siteHost,
       onFetched: () => {
-        if (waiting()) setWaiting("starting")
+        // may run at once, inside the effect's second function that ran this:  what the box says now, not a read to follow
+        if (untrack(waiting)) setWaiting("starting")
       }
     })
     if (source === lastSource) stopWaiting(ran)
