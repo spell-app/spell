@@ -20,8 +20,8 @@ export const epicBellsVocabulary = {
   description:
     "Bells & Whistles (epic `epic-engine` P86):  a dialog over an epic page listing the steps epic work runs by " +
     "itself -- reviews by helpers, quick reads, test runs, doc rewrites, merges, waking a chat -- each with an on / off " +
-    "switch, its title, one plain sentence and its token cost, grouped by what it's for.  At the top, the Token burn " +
-    "slider (Low, Medium, High) turns off for now what isn't worth its cost at that level;  a switch flipped while it's " +
+    "switch and its token cost under it, its title and one plain sentence, grouped by what it's for, the costliest first.  At the top, the Token burn " +
+    "slider (Low, Medium, High) turns off for now what isn't worth its cost at that level (a step that uses no tokens always runs);  a switch flipped while it's " +
     "down shows it as Custom.  Saved in the person's own epic settings, one set for every epic.  Drawn by " +
     "`<epic-page>` in its shadow root, opened from its header's gear, never written in a page.",
   attributes: [],
@@ -31,7 +31,7 @@ export const epicBellsVocabulary = {
     { name: "base", description: "The `<ui-modal>`." },
     { name: "burn", description: "The Token burn slider and its line." },
     { name: "group", description: "A group's section." },
-    { name: "row", description: "A step's row:  its switch, title, sentence and cost." },
+    { name: "row", description: "A step's row:  its switch with its cost under it, its title and sentence." },
     { name: "cost", description: "A step's cost badge." }
   ],
   states: [{ name: "open", description: "Showing." }],
@@ -47,12 +47,10 @@ export const epicBellsVocabulary = {
     { key: "high", text: "High" },
     { key: "custom", text: "Custom", description: "The slider's word once a switch was flipped while it's down." },
     {
-      key: "lowLine",
-      text: "Spends as little of your Claude allowance as it can. Only steps that save more than they cost, and a few cheap ones you need, run."
+      key: "customLine",
+      text: "You changed some switches yourself. Moving the slider resets them to that level.",
+      description: "The Custom chip's tooltip."
     },
-    { key: "mediumLine", text: "Cheap steps run. Costly steps run only when they are very important." },
-    { key: "highLine", text: "Every step you have switched on runs." },
-    { key: "customLine", text: "You changed some switches yourself. Moving the slider resets them to that level." },
     {
       key: "heldOff",
       text: "Turned off by the Token burn slider. Move the slider up to turn it back on.",
@@ -66,6 +64,7 @@ export const epicBellsVocabulary = {
     { key: "costHigh", text: "high" },
     { key: "costMedium", text: "medium" },
     { key: "costLow", text: "low" },
+    { key: "costNone", text: "none", description: "A step that uses no Claude tokens, only a little computer time." },
     { key: "costTimesaver", text: "timesaver" },
     {
       key: "costTip",

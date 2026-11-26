@@ -13,12 +13,39 @@
  * - The slider is for NOW (judgement call J390):  below High it holds off what isn't worth its cost at that level;
  *   a switch flipped while it's down is kept apart (`bells.burnFlips`), and the slider then reads Custom;  moving the
  *   slider clears those flips, and at High your own switches are back.
+ *   - a step that costs no tokens (`none`) or saves more than it costs (`timesaver`) runs at every level, unless your
+ *     own switch is off (T171)
+ * - Each group lists its steps by cost, the costliest first and the timesavers last (`COST_ORDER`, T171).
  * - Pure, node-safe at import:  the dialog, the node readers and the settings reader all import it;  plain `node`
  *   loads it by its own name (`spell/epic/bells/BellSteps.ts`).
  ****************/
 export class BellSteps {
-  /** Every step, in the dialog's order:  by group, as the goal's table lists them. */
-  static readonly STEPS: readonly BellStep[] = [
+  /** The groups, in the dialog's order. */
+  static readonly GROUPS: readonly BellGroup[] = [
+    "planning",
+    "building",
+    "reviewing",
+    "words",
+    "testing",
+    "docs",
+    "adding",
+    "tidying",
+    "listening",
+    "background"
+  ]
+
+  /**
+   * The costs, in the order a group lists its steps (T171;  Owen, 2026-11-26:  "Lists should be sorted by usage,
+   * timesaver should be at the bottom"):  the costliest first, the timesavers last.
+   */
+  static readonly COST_ORDER: readonly BellCost[] = ["high", "medium", "low", "none", "timesaver"]
+
+  /**
+   * Every step, in the dialog's order:  by group (`GROUPS`), and in each group by cost (`COST_ORDER`).
+   * - the ONE order the dialog, `epic settings bells` and the epic skill's table follow
+   * - within one cost, the order written below
+   */
+  static readonly STEPS: readonly BellStep[] = BellSteps.inOrder([
     // planning
     { key: "reuseCheckPlan", group: "planning", cost: "medium", importance: "useful" },
     { key: "reuseCheckPhases", group: "planning", cost: "high", importance: "useful" },
@@ -36,12 +63,12 @@ export class BellSteps {
     { key: "titleCheck", group: "words", cost: "low", importance: "useful" },
     { key: "plainWordsCheck", group: "words", cost: "low", importance: "useful" },
     { key: "itemScoring", group: "words", cost: "low", importance: "niceToHave" },
-    { key: "changesInBold", group: "words", cost: "low", importance: "mustHave" },
+    { key: "changesInBold", group: "words", cost: "none", importance: "mustHave" },
     // testing
     { key: "checksBeforeMerge", group: "testing", cost: "low", importance: "mustHave" },
     { key: "fullTestRun", group: "testing", cost: "medium", importance: "useful" },
     { key: "speedTest", group: "testing", cost: "low", importance: "useful" },
-    { key: "editorAddOns", group: "testing", cost: "low", importance: "mustHave" },
+    { key: "editorAddOns", group: "testing", cost: "none", importance: "mustHave" },
     { key: "editorWarnings", group: "testing", cost: "medium", importance: "niceToHave" },
     { key: "stopStuckTests", group: "testing", cost: "timesaver", importance: "mustHave" },
     // docs
@@ -51,14 +78,14 @@ export class BellSteps {
     { key: "checkGuides", group: "docs", cost: "low", importance: "niceToHave" },
     { key: "changelog", group: "docs", cost: "low", importance: "mustHave" },
     // adding work to your project
-    { key: "mergeEachHelper", group: "adding", cost: "low", importance: "mustHave" },
-    { key: "mergeMain", group: "adding", cost: "low", importance: "mustHave" },
-    { key: "remakeBuiltFiles", group: "adding", cost: "low", importance: "mustHave" },
-    { key: "renameOldNames", group: "adding", cost: "low", importance: "useful" },
-    { key: "installPackages", group: "adding", cost: "low", importance: "mustHave" },
+    { key: "mergeEachHelper", group: "adding", cost: "none", importance: "mustHave" },
+    { key: "mergeMain", group: "adding", cost: "none", importance: "mustHave" },
+    { key: "remakeBuiltFiles", group: "adding", cost: "none", importance: "mustHave" },
+    { key: "renameOldNames", group: "adding", cost: "none", importance: "useful" },
+    { key: "installPackages", group: "adding", cost: "none", importance: "mustHave" },
     { key: "keepOwnEdits", group: "adding", cost: "low", importance: "mustHave" },
     // tidying
-    { key: "savePages", group: "tidying", cost: "low", importance: "mustHave" },
+    { key: "savePages", group: "tidying", cost: "none", importance: "mustHave" },
     { key: "clearStuckItems", group: "tidying", cost: "low", importance: "useful" },
     { key: "freshHint", group: "tidying", cost: "timesaver", importance: "mustHave" },
     // listening and waking
@@ -68,28 +95,14 @@ export class BellSteps {
     { key: "autoSend", group: "listening", cost: "medium", importance: "useful", inBrowser: true },
     { key: "openChat", group: "listening", cost: "medium", importance: "mustHave" },
     { key: "wakeQuietChat", group: "listening", cost: "medium", importance: "mustHave" },
-    { key: "passSendToBusy", group: "listening", cost: "low", importance: "mustHave" },
-    { key: "watchAgentNotes", group: "listening", cost: "low", importance: "useful" },
+    { key: "passSendToBusy", group: "listening", cost: "none", importance: "mustHave" },
+    { key: "watchAgentNotes", group: "listening", cost: "none", importance: "useful" },
     // background programs
-    { key: "watchSends", group: "background", cost: "low", importance: "mustHave" },
-    { key: "refreshPages", group: "background", cost: "low", importance: "mustHave" },
+    { key: "watchSends", group: "background", cost: "none", importance: "mustHave" },
+    { key: "refreshPages", group: "background", cost: "none", importance: "mustHave" },
     { key: "closeLeftovers", group: "background", cost: "timesaver", importance: "mustHave" },
-    { key: "startNotices", group: "background", cost: "low", importance: "useful" }
-  ]
-
-  /** The groups, in the dialog's order. */
-  static readonly GROUPS: readonly BellGroup[] = [
-    "planning",
-    "building",
-    "reviewing",
-    "words",
-    "testing",
-    "docs",
-    "adding",
-    "tidying",
-    "listening",
-    "background"
-  ]
+    { key: "startNotices", group: "background", cost: "none", importance: "useful" }
+  ])
 
   /** The slider's stops, lowest first. */
   static readonly BURN_LEVELS: readonly BurnLevel[] = ["low", "medium", "high"]
@@ -97,6 +110,13 @@ export class BellSteps {
   /** The steps the settings keep a switch for:  every one but those kept in the browser (Auto Send). */
   static get SETTINGS_STEPS(): readonly BellStep[] {
     return BellSteps.STEPS.filter((step) => !step.inBrowser)
+  }
+
+  /** `steps` by group, then by cost, each group's own order kept within a cost (a stable sort). */
+  static inOrder(steps: readonly BellStep[]): BellStep[] {
+    const rank = (step: BellStep) =>
+      BellSteps.GROUPS.indexOf(step.group) * BellSteps.COST_ORDER.length + BellSteps.COST_ORDER.indexOf(step.cost)
+    return [...steps].sort((a, b) => rank(a) - rank(b))
   }
 
   /** Step `key`, or `undefined` for a key the table hasn't got. */
@@ -109,9 +129,13 @@ export class BellSteps {
     return BellSteps.BURN_LEVELS.includes(level as BurnLevel)
   }
 
-  /** Does the slider at `level` let step `step` run, your own switch aside?  High lets everything run. */
+  /**
+   * Does the slider at `level` let step `step` run, your own switch aside?
+   * - High lets everything run
+   * - a step that costs no Claude tokens (`none`) or saves more than it costs (`timesaver`) runs at every level
+   */
   static burnAllows(step: BellStep, level: BurnLevel): boolean {
-    if (level === "high" || step.cost === "timesaver") return true
+    if (level === "high" || step.cost === "none" || step.cost === "timesaver") return true
     if (level === "low") return step.cost === "low" && step.importance === "mustHave"
     // medium
     if (step.cost === "low") return true
@@ -174,8 +198,14 @@ export type BellGroup =
   | "listening"
   | "background"
 
-/** Roughly how much of your Claude use a step takes;  `timesaver` saves more than it costs. */
-export type BellCost = "high" | "medium" | "low" | "timesaver"
+/**
+ * Roughly how much of your Claude use a step takes:
+ * - `high`, `medium`:  a helper (an agent), or a long stretch of Claude's turn
+ * - `low`:  a small Claude call each time it runs (the title check on every new item)
+ * - `none`:  no Claude tokens at all, only a little of the computer's time (saving the epic pages, merging `main`)
+ * - `timesaver`:  saves more than it costs
+ */
+export type BellCost = "high" | "medium" | "low" | "none" | "timesaver"
 
 /** How much you lose without it. */
 export type BellImportance = "mustHave" | "useful" | "niceToHave"
