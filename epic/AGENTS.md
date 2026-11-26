@@ -86,11 +86,14 @@ a folder of the kit `spell`.
   four of the same scripts, and the Codex manifest beside Claude Code's ([.codex-plugin/](.codex-plugin/plugin.json)).
   - Codex's file passes each script `--codex-plugin`:  started so, a script stands down while Codex's own
     `~/.codex/hooks.json` runs it (`CodexHome.skipPluginHook()`), so they never run twice (J37).
-  - The SERVER GUARD (epic `epic-engine` P84), `PreToolUse` on Bash in both files:  [server-guard.mjs](hooks/server-guard.mjs)
-    runs `ServerGuard` ([ServerGuard.ts](src/server/ServerGuard.ts)) on each command an agent is about to run, and
-    answers "deny" for one that would start, stop, restart or kill a MAIN checkout's server (the hub's repos), naming
-    `epic servers ...` instead;  a worktree's servers, reading (`ps`, `lsof`, `curl`) and hands off go through;  it
-    fails open
+  - The SERVER GUARD (epic `epic-engine` P84, narrowed in P85), `PreToolUse` on Bash in both files:
+    [server-guard.mjs](hooks/server-guard.mjs) runs `ServerGuard` ([ServerGuard.ts](src/server/ServerGuard.ts)) on each
+    command an agent is about to run, and answers "deny" for a kill that would reach a MAIN checkout's page server,
+    editor or hub, or main's editor started by hand (`vite`, `vp dev`, `yarn start`, `yarn start:dev`, `spell app
+    serve`), naming `spell server ...` instead;  main's checkouts are those Spell's keeper keeps (`~/.spell/keeper.json5`)
+    and the hub serves, hands off is the keeper's (`~/.spell/server-keeper-holds.json`);  `spell server ...`,
+    `spell keeper ...`, `epic server(s) ...`, `epic hub stop`, a worktree's servers, reading (`ps`, `lsof`, `curl`) and
+    hands off go through;  it fails open
     - the person's `!` commands never reach it:  they're typed into the chat, not a tool call (kept in a transcript
       as `<bash-input>`)
   - Every hook exits 0 whatever happens.
@@ -103,32 +106,26 @@ a folder of the kit `spell`.
 - Removing a worktree stops its page and vite servers FIRST (`CheckoutServers`, epic `epic-engine` I53):
   - `epic worktree remove <name>`, never a bare `git worktree remove`, in the skills and anything new
   - the worktree hook and `epic worktree move` do it themselves;  the session-start hook stops the rest, hourly
-- The epic server, the hub, is also the SERVER KEEPER (epic `epic-engine` P82;  [ServerKeeper.ts](../src/server/keeper/ServerKeeper.ts),
-  the kit's since epic `editor` P48, which the hub hands its repos, their settings and its facts;  it stands aside while
-  Spell's own keeper, `spell keeper start`, is in charge, until epic `epic-engine` P85 takes it out of the hub):
-  - every repo's main page server kept up on main's code, each worktree's page server stopped after 30 minutes unused,
-    and the repo's own servers (its `.epic/config.json5`'s `servers`:  a name, a URL or port to check, and a `start`
-    command if it wants Start and Restart) watched and started
-  - main's editor kept through its page server, when the repo's `app` names a `start`:  down, the page server is
-    restarted (at most every 3 minutes), and its Start and Restart do the same;  else only watched
-    - the page server itself starts a vite that ends by itself again within seconds (`EditorServer.relaunchSoon()`,
-      at most 3 times an hour), and stops every other vite of its checkout first, so a checkout has ONE editor:  main's
-      on 3000 (a worktree's vite found there stopped), a worktree's on its booked port, on 127.0.0.1 (epic
-      `epic-engine` I455)
-  - what waits for main, for each repo the hub serves:  what merged into main lately (each branch that brought commits
-    of its own, never one that only merged main into itself), each epic worktree's commits not merged, phase, open
-    issues, todos and questions, busy or idle
-  - it looks every 10 seconds, and when a session starts (the `SessionStart` hook
-    [server-keeper.mjs](hooks/server-keeper.mjs) runs `epic hub kick`)
+- The SERVER KEEPER is Spell's (epic `editor` P48, [ServerKeeper.ts](../src/server/keeper/ServerKeeper.ts),
+  `spell keeper ...`);  the epic hub ran it until epic `epic-engine` P85, and now only feeds it:
+  - as the hub starts ([SpellKeeper.ts](src/server/SpellKeeper.ts)):  each repo it serves is put on the keeper's list
+    (`~/.spell/keeper.json5`, as `spell keeper add --checkout` would), with the repo's own servers (its
+    `.epic/config.json5`'s `servers`:  a name, a URL or port to check, and a `start` command if it wants Start and
+    Restart) and the hub itself (checked at `:4848/api/server`, started with `epic hub ensure`, so the keeper brings it
+    back);  nothing is written when nothing changed;  then `spell keeper ensure --take-over`, detached
+  - every 10 seconds the hub looks:  a repo's settings changed, it registers again;  its own code changed, it hands over
+    to a fresh hub on its port
+  - the keeper keeps every main page server up on main's code, each worktree's page server stopped after 30 minutes
+    unused, main's editor through its page server, and the registered servers watched and started;  it looks every 10
+    seconds, and when a session starts (the `SessionStart` hook [server-keeper.mjs](hooks/server-keeper.mjs) runs
+    `spell keeper ensure --take-over --quiet`;  `epic hub kick` asks it to look)
   - the ONLY one that starts, stops or restarts a main checkout's page server:  the kit's `PageServer.ensure()`,
     `stop()` and `restart()` ask it (`SRV.KeeperLink`, its record `~/.spell/server-keeper.json`)
-    - agents ask it with `epic servers start|stop|restart|status <server> [--repo <name>]` ([Servers.ts](src/command/Servers.ts);
-      epic `epic-engine` P84), the calls the Servers tab's buttons make;  the guard above refuses the other ways
+    - agents ask it with `spell server start|stop|restart|status <server>`;  `epic servers ...` is another name for it
+      ([Servers.ts](src/command/Servers.ts), `--repo <name>` picking the checkout);  the guard above refuses a kill
     - what it starts carries its mark (`SPELL_KEEPER_START`), so main's page server and editor, which refuse an
       agent's start (`SRV.KeeperLink.refusedStart()`), know it was the keeper
-  - a stop by hand is held until Start (`~/.spell/server-keeper-holds.json` since epic `editor` P48, kept in step with
-    the old `~/.spell-epic/server-keeper.json`, which the command guard still reads);  its own code changing, it hands over to a
-    fresh hub on its port
+  - a stop by hand is held until Start (`~/.spell/server-keeper-holds.json`)
   - the page server's certificate WATCHED (epic `epic-engine` T164):  each look compares its two files
     (`~/.spell/localhost/`, `HttpsSwitch.filesStamp`) with the last;  made, made again or deleted (the tab's card, or
     `spell server certificate` / `--undo` in a terminal), every main page server not held stopped is restarted, so it
@@ -139,18 +136,24 @@ a folder of the kit `spell`.
     own buttons and Restart all still work;  turned off, it looks at once:  what's down comes back, a certificate
     changed meanwhile is taken up
   - the top bar's Servers tab ([serverRoutes.ts](src/server/serverRoutes.ts), its page
-    [servers-page.html](src/tools/servers-page.html)):  `GET /api/servers`, `/api/servers/dot`, `POST
+    [servers-page.html](src/tools/servers-page.html)):  `GET /api/servers`, `/api/servers/dot`, `/api/servers/log`, `POST
     /api/servers/<start|stop|restart>`, `POST /api/servers/https` (`{ turn }`), `POST /api/servers/hands-off` (`{ on }`),
-    `POST /api/servers/restart-all`;
-    what just merged into main and what waits:  `ServerFacts`, no Claude call
+    `POST /api/servers/restart-all`, every one passed on to the keeper in charge, on the hub and a checkout's page
+    server alike (epic `epic-engine` P85);  beside its `GET /api/servers` answer, what's the epic tooling's own:  what
+    just merged into main and what waits (`ServerFacts`, no Claude call), and `keeperPage`, the Spell Servers page's
+    address
+    - SPELL'S SERVERS PAGE (epic `editor` P49) is the tab's cards since P85:  framed under main's heading, made once,
+      as tall as the page inside says, light or dark as the tab is;  main's heading keeps the secure link's lock,
+      Show in the editor and Restart all;  below it what merged into main and each active worktree's open work;  the
+      tab's own cards (below) only when the answer names no `keeperPage`
     - the page (epic `epic-engine` T162):  nothing folds;  "main" and its servers as cards, what merged into main
       lately, main's commits not on GitHub, then each epic's worktree (`⎇ <name>`):  its servers' cards, what it
       hasn't merged
       - I449:  cards three a row at most, the name the link, page server, editor, hub, then a repo's own;  the
         worktrees newest worked on first (its last commit, or a file changed since), "last commit 3 weeks ago" beside each
       - I451:  each card's address under its name, its state on the right, and under the state its buttons as icons
-        (restart, stop;  start when stopped);  one a server can't take drawn disabled, its tooltip saying why (the hub
-        keeps the rest, so it never stops;  an editor goes with its page server);  what merged into main, and each
+        (restart, stop;  start when stopped);  one a server can't take drawn disabled, its tooltip saying why (an editor
+        goes with its page server);  what merged into main, and each
         worktree's open work, as rows in columns, nothing wrapping, the GitHub line their quiet last row
       - I456:  the state is ONE icon on the right of the name, its words the tooltip ("Running", "Down:  <why>"):  a
         green circle check, a red triangle, a grey circle while stopped, a turning blue notch while starting;  under
@@ -173,7 +176,8 @@ a folder of the kit `spell`.
         under its name, never its description
       - I465:  a worktree shows its servers' cards only while any of them runs, then every one, a stopped editor's
         too;  nothing running, no cards and no "stopped" line;  only ACTIVE worktrees listed (J369):  a server not
-        stopped, a session, agents, a turn or a phase under way, never commits alone;  none, one calm line
+        stopped, a session BUSY on it (mid-turn, not merely open), agents, a turn or a phase under way, never commits
+        alone;  none, one calm line
     - VS Code's side bar shows it in a tab of its own, Servers, between Epic Docs and Details
       ([README-vscode.md](README-vscode.md))
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App

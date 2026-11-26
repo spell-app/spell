@@ -201,7 +201,7 @@ The turn after step 6, whatever the person sends (`continue`, typed in by the mo
    - With `installOnCreate` on, the worktree hook already ran it, before the window opened (I2).
    - It prints an empty line (a repo with nothing to install, as `epic init` finds it):  skip this step.
    - The worktree's own servers are this session's to start (`spell server start all`, from the worktree);
-     main's never are, by hand:  `epic servers start|stop|restart <server>` asks the keeper (epic `epic-engine` P84).
+     main's never are, by hand:  `spell server start|stop|restart <server>` asks Spell's keeper (epic `epic-engine` P85).
 3. Title the session again, whatever it seems to be:  `epic session title --force "🚧 <name>"` ("Session name" below).
    - A session reopened in a new window may show Claude's own title, though its transcript has its name (epic
      `epic-engine` r2).  The move queued it already, for the `continue` it typed;  this costs nothing.

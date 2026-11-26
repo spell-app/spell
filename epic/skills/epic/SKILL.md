@@ -575,10 +575,12 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
     description;  then AT ONCE `epic agents set <name> --task-id <the agent's id>`, the id from the `Agent` result
     (what resumes it after a restart, "After a restart" below);  `epic agents done <name>` when it's back
   - In Codex:  no background agents:  do it here, one item at a time, and check `epic inbox <epic>` between steps.
-- MAIN'S SERVERS (epic `epic-engine` P84):  the session and its agents never start, stop, restart or kill a main
-  checkout's servers (page server, editor, hub, a repo's own) by hand:  `epic servers start|stop|restart <server>`
-  asks the keeper, or the person's Servers tab;  a worktree's own servers are its session's.  Every brief says so.
-  - The plugin's command guard refuses such a command and names the one to run instead (`server-guard.mjs`,
+- MAIN'S SERVERS (epic `epic-engine` P84, P85):  the session and its agents never start, stop, restart or kill a main
+  checkout's servers (page server, editor, hub, a repo's own) by hand:  `spell server start|stop|restart <server>`
+  asks Spell's keeper (`epic servers ...` is another name for it), or the person's Servers tab;  a worktree's own
+  servers are its session's.  Every brief says so.
+  - The plugin's command guard refuses a kill of main's servers, and main's editor started by hand, and names the
+    one to run instead (`server-guard.mjs`,
     `ServerGuard`), and main's page server and editor refuse an agent's start the keeper didn't make
     (`SRV.KeeperLink.refusedStart()`).
   - In Codex:  the same;  its `PreToolUse` hook runs the guard once installed (`epic plugin install --codex`).

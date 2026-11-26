@@ -111,8 +111,8 @@ The task, word for word:
   plan-doc.md's "Rules", TITLES)
   (`--calm` unless it would surprise them:  the epic skill's "5. Each phase", step 2);  else in your report.  A choice you can't make safely (it would delete or
   overwrite work, publish anything, or change what the task means):  stop there, and make it your report's question.
-- Main's servers (epic `epic-engine` P84):  never start, stop, restart or kill a main checkout's servers (page server,
-  editor, hub, a repo's own):  ask the keeper with `epic servers start|stop|restart <server>`, or leave it to the
+- Main's servers (epic `epic-engine` P84, P85):  never start, stop, restart or kill a main checkout's servers (page
+  server, editor, hub, a repo's own) by hand:  ask Spell's keeper with `spell server start|stop|restart <server>`, or leave it to the
   person's Servers tab.  A worktree's own servers are yours.
 - Other running agents:  `epic agents list`.  Claim the files you'll change first, `epic agents claim <full name>
   <path...>` (a file, a folder or a glob);  it refuses one another agent has, naming it:  leave that file alone.

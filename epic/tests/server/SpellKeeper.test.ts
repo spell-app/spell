@@ -51,6 +51,12 @@ describe("SpellKeeper:  the hub hands its repos to Spell's server keeper (epic `
     expect(list.serversOf(kit.checkout)[0]?.start).toMatch(/hub ensure$/)
   })
 
+  it("register():  a checkout that's gone is left out", () => {
+    const gone = { ...work, name: "gone", checkout: join(folder, "gone") }
+    expect(new SpellKeeper({ list }).register([gone])).toBe(0)
+    expect(list.exists).toBe(false)
+  })
+
   it("register() again:  nothing new, nothing changed;  a changed server is written over", () => {
     const keeper = new SpellKeeper({ list })
     keeper.register([kit, work])

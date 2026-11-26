@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process"
-import { statSync } from "node:fs"
+import { existsSync, statSync } from "node:fs"
 import { join } from "node:path"
 
 import { CLI } from "spell/cli"
@@ -18,6 +18,7 @@ import { DEFAULT_EPIC_PORT, type Repo } from "./server.types"
  *   and each of its own servers (its `.epic/config.json5` `servers`:  a work project's proxy server, say) a server it
  *   watches and starts (`spell keeper add <name> --check ...`);  the hub itself too, as one of the default repo's, so
  *   the keeper brings it back when it's down
+ *   - a checkout that's gone is left out
  *   - written to the keeper's list (`KeeperList`, `~/.spell/keeper.json5`) the way `spell keeper add` writes it, but
  *     in this process:  a server already there as it is changes nothing, and nothing is written
  * - `ensure()`:  `spell keeper ensure --take-over --quiet`, detached:  Spell's keeper started, taking over from a
@@ -41,6 +42,8 @@ export class SpellKeeper {
   register(repos: Repo[], { hub = DEFAULT_EPIC_PORT }: { hub?: number } = {}): number {
     let changed = 0
     for (const repo of repos) {
+      // a checkout that's gone (a try-out in a temporary folder):  nothing to keep
+      if (!existsSync(repo.checkout)) continue
       try {
         if (this.list.addCheckout(repo.checkout, repo.name)) changed++
         const servers: KeeperServer[] = EpicConfig.of(repo.checkout).servers.map((server) => ({
@@ -73,6 +76,8 @@ export class SpellKeeper {
   static settingsStamp(repos: Repo[]): number {
     let newest = 0
     for (const repo of repos) {
+      // a checkout that's gone (a try-out in a temporary folder):  nothing to keep
+      if (!existsSync(repo.checkout)) continue
       try {
         newest = Math.max(newest, statSync(join(repo.checkout, SETTINGS_FILE)).mtimeMs)
       } catch {

@@ -353,20 +353,21 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - It's Spell's since epic `editor` P48, the kit's [spell/server/keeper](src/server/keeper/index.ts):
     `spell keeper start | ensure | add | status`, its list `~/.spell/keeper.json5` (each main checkout's
     `spell server start` adds it;  `spell keeper add` registers a project's own server), its worktrees from git.
-  - The epic hub still runs it until epic `epic-engine` hands over (its P85, request r99:  the hub runs
-    `spell keeper ensure --take-over`);  the record (`~/.spell/server-keeper.json`) names which keeper wrote it, and a
-    keeper that finds another live one in charge stands aside, so one is always keeping.
+  - The epic hub ran it until epic `epic-engine` P85:  now the hub hands it its repos, their own servers and itself
+    (`spell keeper add`'s list), and runs `spell keeper ensure --take-over`;  the record (`~/.spell/server-keeper.json`)
+    names which keeper wrote it, and a keeper that finds another live one in charge stands aside, so one is always
+    keeping.
   - Every session's start makes sure it runs, and has it look at once;  it looks again every 10 seconds.
   - `spell server start | stop`, `epic merge`'s restart, the side bar's Restart Page Server and `/airplane` ask it
     (`SRV.KeeperLink`);  `spell server stop` in the main checkout leaves it stopped until Start.
-  - **An agent never starts, stops, restarts or kills a main checkout's servers by hand:  `epic servers
-    start|stop|restart|status <server>` asks the keeper** (epic `epic-engine` P84).  Enforced twice:
-    - `spell server start | stop | restart | status <server>` asks it the same way (epic `editor` P48):  `page-server`,
-      `editor`, or a registered one;  the guard lets it through once epic `epic-engine` P85 lands, and `epic servers`
-      becomes another name for it
+  - **An agent never kills a main checkout's servers, nor starts main's editor by hand:  `spell server
+    start|stop|restart|status <server>` asks the keeper** (`page-server`, `editor`, or a registered one;  epic `editor`
+    P48;  `epic servers ...` is another name for it since epic `epic-engine` P85).  Enforced twice:
     - the COMMAND GUARD, the epic plugin's `PreToolUse` hook on Bash (`server-guard.mjs`, `ServerGuard`), Claude Code's
-      and Codex's:  such a command is refused, naming the `epic servers` command to run instead;  let through while
-      the Servers tab's hands-off switch is on
+      and Codex's:  a kill reaching main's page server, editor or hub, and main's editor started by hand (`vite`,
+      `vp dev`, `yarn start`, `yarn start:dev`, `spell app serve`), are refused, naming the `spell server` command to
+      run instead;  `spell server ...`, `spell keeper ...` and `epic hub stop` go through;  let through while the
+      Servers tab's hands-off switch is on
     - the SERVERS THEMSELVES:  main's page server and editor stop at once when an agent's command starts them and the
       keeper didn't (`SRV.KeeperLink.refusedStart()`:  the agent's mark, `CLAUDECODE` / `CODEX_THREAD_ID`, with no
       `SPELL_KEEPER_START`, and the agent's own process among its parents:  a person's terminal can inherit the
