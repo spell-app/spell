@@ -120,7 +120,8 @@ export type RoomMember = {
  *   - A page running what isn't that is told to reload, and what it sends is "no answer":  kept there, not lost, for after.
  *   - A page that says no version:  never out of date.
  * - WHO MAY STAY (`mayStay`, epic `data` I153):  whether a page may still read the room is asked again, not only as it
- *   joins:  every `ROOM_RECHECK_SECONDS`, and at once when its host says the members changed (`checkWhoMayStay()`).
+ *   joins:  every `ROOM_RECHECK_SECONDS` (a takedown, made in another process, is found so), and at once when its
+ *   host says the members changed (`checkWhoMayStay()`).
  *   A page that may not is let go, its socket closed;  coming back, it's refused as it joins.
  * - NOT `StateMirror` (`spell/parser/core/state`), which it doesn't grow from:  see the docstring there.
  * - Node only.  Knows nothing of what a place is, or of Things.
@@ -227,7 +228,9 @@ export class Referee {
   /**
    * Ask again whether each page here may still read the room (`mayStay`), and let go of those that may not:
    * their connection closes (epic `data` I153).
-   * - Its host calls it as members change, or a space is taken down;  it runs by itself every `ROOM_RECHECK_SECONDS`.
+   * - Its host calls it as members change;  it runs by itself every `ROOM_RECHECK_SECONDS`, which is what finds a
+   *   takedown, made by a Spell admin's command in another process.
+   * - Only a page that came by a socket is let go:  one that joined through `join()` alone has nothing to close.
    * - Returns how many it let go.
    * - NEVER throws:  a check that fails keeps the page, and is logged.
    */
