@@ -1044,6 +1044,13 @@ a "recipe" is a thing
             </li>
             <li>A number or date the server didn't send is nothing, not 0.</li>
             <li>
+              A yes or no the server sent as <code>null</code>, or didn't send, is no. When <code>null</code> means
+              "not decided yet", say <code>its "passed" is yes, no or nothing</code> (Spanish
+              <code>sí, no o nada</code>): then it's nothing, <code>its passed is no</code> is only a real no, and
+              <code>its passed is nothing</code> is the rest. The ingest writes it for a yes or no its description
+              says can be null.
+            </li>
+            <li>
               A date shows the way its text says: <code>{its created as a date and time}</code> is
               <code>Nov 7, 2026, 9:14 AM</code> (Spanish <code>como fecha y hora</code>).
             </li>

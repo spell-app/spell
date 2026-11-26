@@ -6,6 +6,10 @@
       "names": ["sort", "sortedByValue", "sortShown", "nextSort", "savedThingsSortedBy"]
     },
     {
+      "why": "A sort whose key waits:  every key answered, then sorted;  Python's keys never wait",
+      "names": ["sortedByInTurn"]
+    },
+    {
       "why": "The steps around a server's action (epic data P50):  before, while, around and when it fails, the app's own for every server call, and an id read first;  Python's places call no server's actions yet",
       "names": ["addActionHook", "addServerFailureStep", "passTheError", "errorIs", "savedThingOrMissing"]
     },

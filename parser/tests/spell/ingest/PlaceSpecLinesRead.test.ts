@@ -50,6 +50,8 @@ const DOCUMENT: OpenApiDocument = {
           loaf_id: { type: "string" },
           is_sliced: { type: "boolean" },
           has_seeds: { type: "boolean" },
+          is_burnt: { anyOf: [{ type: "boolean" }, { type: "null" }] },
+          proved: { type: ["boolean", "null"] },
           state: { type: "string", enum: ["rising", "baked", "sold"] },
           zip_1: { type: "string", maxLength: 10 },
           extras: { $ref: "#/components/schemas/LoafExtras" },
@@ -154,6 +156,14 @@ describe("each kind of line the ingest writes", () => {
     const { spell } = await ingestOf()
     expect(spell()).toMatch(/^\tits "state" as one of rising, baked or sold$/m)
     expect(spell()).not.toMatch(/loaf state/)
+  })
+
+  test("a yes or no its schema says can be null is `yes, no or nothing`, so a null isn't read as no", async () => {
+    const { spell } = await ingestOf()
+    // FastAPI's `bool | None`, and a type list with "null" in it
+    expect(spell()).toMatch(/^\tits "burnt" is yes, no or nothing, stored as "is_burnt"$/m)
+    expect(spell()).toMatch(/^\tits "proved" is yes, no or nothing$/m)
+    expect(errorsOf(spell())).toEqual([])
   })
 
   test("a length is said after its stored-as, the order Spell reads them in", async () => {

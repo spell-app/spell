@@ -101,6 +101,7 @@ def prop(
     early: bool = False,
     rules: Sequence[PropRule] | None = None,
     stored_as: str | None = None,
+    or_nothing: bool = False,
 ) -> "Prop":
     """Declare a property of a thing or a list, in its class body:  `rank = prop(one_of=RANKS)`.
 
@@ -123,13 +124,14 @@ def prop(
       - e.g. `[{"type": "empty"}]` for `- its title must not be empty`
       - a value that breaks one warns, as a wrong type does (`prop_rules.py`)
     - `stored_as`:  what a row calls it, when that isn't its name:  a saved time, `creado`'s `created` (epic data T57)
+    - `or_nothing`:  unset, it reads as nothing (`None`), not its type's default:  `its "passed" is yes, no or nothing`
     - throws `TypeError` for a list, dict or set `default`:
       every thing would share that one object.  Pass `init=list` instead.
     """
     if isinstance(default, SHARED_DEFAULTS):
         kind = builtins.type(default).__name__
         raise TypeError(f"prop():  a {kind} default would be shared by every instance;  pass init={kind} instead")
-    return Prop(_type_name(type), one_of, default, init, _type_name(item_type), early, rules, stored_as)
+    return Prop(_type_name(type), one_of, default, init, _type_name(item_type), early, rules, stored_as, or_nothing)
 
 
 def _type_name(type: str | builtins.type | None) -> str | None:
@@ -155,6 +157,7 @@ class Prop:
         early: bool = False,
         rules: Sequence[PropRule] | None = None,
         stored_as: str | None = None,
+        or_nothing: bool = False,
     ) -> None:
         """A property with what `prop()` was told:  its name comes when its class is made (`__set_name__()`)."""
         # its name in the class body, e.g. `rank`
@@ -175,6 +178,8 @@ class Prop:
         self.rules: list[PropRule] = list(rules or ())
         # what a row calls it, when that isn't its name
         self.stored_as = stored_as
+        # unset, it reads as nothing, not its type's default:  a yes or no that can be nothing
+        self.or_nothing = or_nothing
 
     def __set_name__(self, owner: type, name: str) -> None:
         """Python tells us our name as the class is made:  `rank = prop(...)` is `rank`."""
@@ -205,6 +210,8 @@ class Prop:
         """
         if self.default is not None:
             return self.default
+        if self.or_nothing:
+            return None
         choices = self._one_of() if callable(self._one_of) else self._one_of
         if choices:
             return choices[0]

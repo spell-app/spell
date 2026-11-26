@@ -960,6 +960,8 @@ function typeWordsFor(
   const { type, linksTo, inside, isListInside, isItsOwner, isNamedLink, pictureAt, unit } = about
   // its picture's address, built as it's read
   if (pictureAt) return "text"
+  // a yes or no its schema says can be `null`:  nothing then, not no
+  if (type === "yes or no" && about.canBeNothing) return "yes, no or nothing"
   // a number in a unit Spell knows:  a measure, shown in the reader's own units
   const measure = type === "number" && unit !== undefined ? measureIn(unit) : undefined
   if (measure) return measure

@@ -474,6 +474,7 @@ export class JSWriter extends ProgramWriter {
    * - else `===` / `!==`, by `OPERATORS`:  spell knows what each side is, so `is` means the same thing exactly
    *   (Owen, 2026-10-23, epic `spanish` P28:  "I think we can move to `===` for is now that we have types");
    *   it was a forgiving `==` where the two sides' kinds weren't known alike, `"2"` was `2`
+   *   - one that can be nothing (`yes, no or nothing`) compared to no:  `=== false` / `!== false`, as nothing isn't no
    * - nothing is `undefined`:  `=== undefined` / `!== undefined`
    */
   comparison(node: P.ASTInfixExpression): string | undefined {
@@ -483,6 +484,7 @@ export class JSWriter extends ProgramWriter {
     const [value, boolean] = unwrapped(rhs) instanceof P.ASTBooleanLiteral ? [lhs, rhs] : [rhs, lhs]
     const yesOrNo = unwrapped(boolean)
     if (yesOrNo instanceof P.ASTBooleanLiteral && this.kindOf(value) === "choice") {
+      if (!yesOrNo.value && this.canBeNothing(value)) return `${this.tight(value)} ${isNot ? "!==" : "==="} false`
       return yesOrNo.value !== isNot ? this.bare(value) : `!${this.tight(value)}`
     }
     return undefined

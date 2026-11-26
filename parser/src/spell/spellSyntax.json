@@ -7460,7 +7460,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 74,
+          "line": 75,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
@@ -7757,6 +7757,32 @@
             {
               "syntax": "either? (yes or no|true or false)",
               "example": "yes or no",
+              "outputs": {
+                "js": {
+                  "code": "choice"
+                },
+                "ts": {
+                  "code": "choice"
+                },
+                "py": {
+                  "code": "choice"
+                }
+              }
+            }
+          ],
+          "aliases": ["outline_specifier"]
+        },
+        {
+          "className": "OutlineSpecifierYesNoOrNothing",
+          "ruleNames": ["outline_specifier_yes_no_or_nothing"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierYesNoOrNothing.ts",
+          "line": 12,
+          "purpose": "`yes, no or nothing` (Spanish `sí, no o nada`) -- a yes or no that can be nothing: `its \"passed\" is yes, no or nothing`, for a field a server leaves `null` until it's decided.",
+          "syntaxes": [
+            {
+              "syntax": "yes , no or nothing",
+              "example": "yes, no or nothing",
               "outputs": {
                 "js": {
                   "code": "choice"
