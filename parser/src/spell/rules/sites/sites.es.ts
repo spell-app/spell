@@ -4,6 +4,7 @@
  */
 import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 import { DefineGroup } from "spell/parser/spell/rules/classes"
+import { BOARD_COLORS, colorWordsSyntax } from "spell/parser/spell/rules/UI/UI.shared"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { CreateSite } from "./CreateSite"
 import { SiteOverlay } from "./SiteOverlay"
@@ -44,16 +45,9 @@ sitesEs.addRule(Wording.specialize({ ruleName: "site_page_state", meanings: ["ol
 })
 
 // el color de la tarjeta de una parte en el tablero del editor, uno de los de Spell UI
-sitesEs.addRule(
-  Wording.specialize({
-    ruleName: "site_card_color",
-    meanings: ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"]
-  }),
-  {
-    syntax:
-      "((red:rojo)|(orange:naranja)|(yellow:amarillo)|(olive:oliva)|(green:verde)|(teal:turquesa)|(blue:azul)|(violet:violeta)|(purple:morado)|(pink:rosa)|(brown:marrón)|(brown:marron)|(grey:gris))"
-  }
-)
+sitesEs.addRule(Wording.specialize({ ruleName: "site_card_color", meanings: BOARD_COLORS }), {
+  syntax: colorWordsSyntax("es", BOARD_COLORS)
+})
 
 // un grupo de las partes de un sitio, su sección del tablero del editor en un color (epic `language` T112):
 // `grupo "Hardware", color amarillo`, `grupo "Hardware" con color amarillo`, o como la línea de una parte, `, de color amarillo`
