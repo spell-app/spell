@@ -117,6 +117,7 @@ export const APP_TEXTS = {
   paletteUnstar: "Take the star off {part}",
   paletteFavoriteTip:
     "{part}:  click it, then click in your app where you want it.  Or drag it there.  To unstar it, right-click it.",
+  paletteAddPart: "Add {part}",
   paletteAddView: "Add a View",
   paletteClearSearch: "Clear the search",
   partStepAdd: "Add {part}",
@@ -388,6 +389,15 @@ export const APP_TEXTS = {
   shortcutShowShortcuts: "Show Keyboard Shortcuts",
   shortcutShowIcons: "Show All Icons, With Their Names",
   allIcons: "All Icons…",
+  // Help › Servers (epic `editor` T185):  the item, its dot's words (`ServersGlance.words`), and its dialog's title;
+  // `{count}`, how many servers aren't running
+  servers: "Servers…",
+  serversAllRunning: "All of Spell's background servers are running.",
+  serversOneDown: "One of Spell's background servers has stopped.\nClick to see which one, and start it again.",
+  serversSomeDown:
+    "{count} of Spell's background servers have stopped.\nClick to see which ones, and start them again.",
+  serversUnknown: "Spell can't check its background servers right now.\nClick to see them.",
+  serversTitle: "Servers",
   shortcutChangeThis: "Ask for a Change to What's Selected",
   shortcutFormat: "Format Document",
   shortcutExpandSelection: "Expand Selection",
@@ -675,6 +685,8 @@ export const APP_TEXTS = {
   tryAnExample: "Try an example",
   readFirstSpell: "Read your first spell",
   homeExampleCaption: "From Solitaire's Card.spell",
+  homeHideIntro: "Hide the introduction",
+  homeShowIntro: "Show the introduction",
   homeExampleAlt:
     "A playing card, in Spell:  a card is a draggable two sided view;  its rank is one of ace, 2 ... 10, jack, queen, king;  its suit is one of clubs, diamonds, hearts or spades;  its color is red or black;  it is a face card if its rank is jack, queen or king;  it is a number card if it is not a face card",
   homeExamplesLine: "Open one, change it, make it yours.",

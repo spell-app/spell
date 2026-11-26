@@ -193,6 +193,16 @@ export class EditorStore extends Observable {
       .catch((error: unknown) => editor.showError(error))
   }
   /**
+   * Show the Servers dialog (`openServers()`, epic `editor` T185):  the server keeper's Spell Servers page at `page`,
+   * framed;  Help › Servers, which knows the page's address (`ServersGlance.page`).
+   * - NEVER throws:  an error loading the dialog shows as the editor's error.
+   */
+  showServers(page: string): void {
+    void dialogs()
+      .then((modals) => modals.openServers({ page }))
+      .catch((error: unknown) => editor.showError(error))
+  }
+  /**
    * Show the "You" panel (`openYouPanel()`, epic `people-and-orgs` P9):
    * this machine's person to change, and their orgs.
    * - Save writes their `__me.json5`.

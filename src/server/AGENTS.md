@@ -422,7 +422,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       page server is down ([servers.html](keeper/servers.html), [servers.js](keeper/servers.js));  a card per server
       (each row's `started`, `building`), its last 50 log lines (`GET /api/servers/log?id=`, `lastLines()`), Restart;
       Spell UI from the first kit's `"uiScript"` and engine routes, served by the keeper as files (`uiFiles()`), a
-      plain table without;  in a frame (the epic tooling's Servers tab, epic `epic-engine` P85) it hides its title,
+      plain table without;  in a frame (the epic tooling's Servers tab, epic `epic-engine` P85;  the editor's Help › Servers,
+      epic `editor` T185, which finds it through the app's `/api/keeper/glance`) it hides its title,
       takes the scheme the page around it names (`?scheme=light|dark`) and posts its height (`spellServersHeight`);  `spell server status --watch` draws
       the same rows in a terminal (`spell/cli/commands/serverWatch`)
   - `spell/server/page/...` -- the page server, the KIT's (one per kit:  the main one, each worktree's):

@@ -2,12 +2,12 @@ import { For, Show, createSignal, onCleanup, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { kebabCase, upperFirst } from "spell/util"
-import { after, type CancelablePromise } from "spell/util/timing"
+import { cssSecondsFor } from "spell/util/dom"
+import { after, afterSolidUpdate, type CancelablePromise } from "spell/util/timing"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { hoverDelay } from "spell/app/app/ui/codePopups"
-import { barTooltip, type BarTooltip } from "./chrome"
 import { Inspector } from "./Inspector"
 import { on } from "./on"
 import { PartEdits } from "./PartEdits"
@@ -45,8 +45,8 @@ import "./PaletteView.css"
  *   once the mouse rests on it (T162):  a search over them at its top, then each by name, a family's parts inside
  *   its main one.  A click on one picks it up, to put in the app with the next
  *   click (`PartPlacing`, T153);  a drag places it;  its star stars it.
- * - What a button opens slides out of the bar, from behind it, on the bar's own surface:
- *   a SUB-PANEL, the button and the panel's header one shape (`RailPanels`, T173).
+ * - What a button opens slides out of the bar, from behind it:  a SUB-PANEL (`RailPanels`, T173), in the top bar's
+ *   menus' look, the button lit while it's out (I367);  the bar itself wears the top bar's fill and blur.
  *   - While one is out, pointing at another button opens its panel at once, gliding there from the last.
  * - A starred part's button picks it up the same way;  a drag places it;  a right click takes its star away.
  * - Marked as the rail (`RAIL_MARK`), its flyouts too:  a press on it is its own while a part is picked up.
@@ -111,11 +111,6 @@ function flyoutId(group: PaletteGroup): string {
   return `${FLYOUT_ID}${kebabCase(group.title ?? group.topic ?? "")}`
 }
 
-/** An add bar button's tooltip:  to the bar's right, as the top bar's are under it. */
-function railTooltip(text: string): BarTooltip {
-  return { ...barTooltip(text), "data-position": "right center" }
-}
-
 /**
  * ### `<RailFlyout>`
  * One button of the add bar, and the sub-panel it opens beside the bar.
@@ -128,7 +123,7 @@ function railTooltip(text: string): BarTooltip {
  *   - the search button slides the field open over the name, "Search <group>" (`<ui-search collapsed>`);
  *     ⌘F jumps into it (T166)
  *   - at its foot, what the part under the mouse is (`<PartAbout>`, epic `editor` T165)
- *   - its header and the button share one fill while it's out:  one shape (T173)
+ *   - its header and the button share one fill while it's out (T173, I367)
  * - Choosing a row, or dragging one, closes it (`Palette.closeMenus()`).
  */
 function RailFlyout(props: {
@@ -216,6 +211,21 @@ function PlusPanel(): JSX.Element {
   let resting: CancelablePromise<unknown> | undefined
   // ⌥⌘V and View › Add a View… open it while it's here, as a click on the `+` does (T175)
   onCleanup(Palette.offerPlus(() => panel && plus && RailPanels.open(panel, plus)))
+  // thinner or wider, shorter or taller, as its search changes what it shows:  it glides to its new size (I369)
+  onSettled(() => {
+    const body = panel?.querySelector(".PaletteBody")
+    if (!body || !panel) return
+    const box = panel
+    let last: { width: number; height: number } | undefined
+    const sizes = new ResizeObserver(() => {
+      const { width, height } = body.getBoundingClientRect()
+      const now = width && height ? { width, height } : undefined
+      if (last && now && isOut()) RailPanels.resize(box, last, now)
+      last = now
+    })
+    sizes.observe(body)
+    return () => sizes.disconnect()
+  })
   return (
     <>
       <div
@@ -260,11 +270,14 @@ function PlusPanel(): JSX.Element {
         }}
         {...{ [RAIL_MARK]: "" }}
       >
-        <PaletteMenu />
+        <PaletteMenu picksUp />
       </ui-popup>
     </>
   )
 }
+
+/** A box's size, in px. */
+type Size = { width: number; height: number }
 
 /** One of the add bar's sub-panels:  a `<ui-popup>`, shown and hidden by `visible`. */
 type RailPanel = HTMLElement & { visible?: boolean }
@@ -283,6 +296,9 @@ type RailPanel = HTMLElement & { visible?: boolean }
 class RailPanels {
   /** The panel out, and the button it's out of. */
   private static shown: { panel: RailPanel; button: HTMLElement } | undefined
+
+  /** The height a gliding panel starts at:  the last one's (I365). */
+  private static heightFrom: { panel: RailPanel; height: number } | undefined
 
   /** The panel to go once the one replacing it opens. */
   private static leaving: RailPanel | undefined
@@ -306,6 +322,10 @@ class RailPanels {
         const leaving = RailPanels.leaving
         RailPanels.leaving = undefined
         if (leaving && leaving !== panel) leaving.visible = false
+        // its height from the last one's, as it glides (I365):  measured once it shows, before it's painted
+        const from = RailPanels.heightFrom
+        RailPanels.heightFrom = undefined
+        if (from?.panel === panel) afterSolidUpdate(() => RailPanels.growFrom(panel, from.height))
         return
       }
       panel.classList.remove(GLIDING)
@@ -337,8 +357,44 @@ class RailPanels {
       const glide = topOf(last.button) - topOf(button)
       panel.style.setProperty(GLIDE_TOKEN, `${Math.round(glide)}px`)
       panel.classList.add(GLIDING)
+      RailPanels.heightFrom = { panel, height: boxOf(last.panel)?.getBoundingClientRect().height ?? 0 }
     }
     panel.visible = true
+  }
+
+  /**
+   * Grow or shrink `panel` from `height` to its own, as it glides into place (epic `editor` I365, Owen:  "the open menu
+   * jumps in height as I hover over the other tabs in the sidebar, feels janky").
+   * - In the glide's time and ease (`--ui-duration-normal`, `--ui-ease-out`), so the two read as one move.
+   * - Its box cuts what's past its height meanwhile, its foot staying at its bottom.
+   * - Reduced motion:  none.
+   */
+  private static growFrom(panel: RailPanel, height: number): void {
+    const own = boxOf(panel)?.getBoundingClientRect().height ?? 0
+    if (!height || !own || Math.abs(own - height) < 1) return
+    RailPanels.glideBox(panel, [{ height: `${height}px` }, { height: `${own}px` }])
+  }
+
+  /**
+   * Glide `panel` from size `from` to `to`, as what's in it changes (the `+` panel's search;  epic `editor` I369, Owen:
+   * "The menu should animate thinner/wider as I type in the search box"):  its box cuts what's past it meanwhile.
+   * - Reduced motion:  none.
+   */
+  static resize(panel: RailPanel, from: Size, to: Size): void {
+    if (Math.abs(from.width - to.width) < 1 && Math.abs(from.height - to.height) < 1) return
+    RailPanels.glideBox(panel, [
+      { width: `${from.width}px`, height: `${from.height}px` },
+      { width: `${to.width}px`, height: `${to.height}px` }
+    ])
+  }
+
+  /** Run `keyframes` on `panel`'s box, in the glide's time and ease;  nothing with reduced motion. */
+  private static glideBox(panel: RailPanel, keyframes: Keyframe[]): void {
+    const box = boxOf(panel)
+    if (!box || REDUCED_MOTION.matches) return
+    const seconds = cssSecondsFor(panel, "--ui-duration-normal") ?? DEFAULT_GLIDE_SECONDS
+    const easing = getComputedStyle(panel).getPropertyValue("--ui-ease-out").trim() || "ease-out"
+    box.animate(keyframes, { duration: seconds * 1000, easing })
   }
 
   /** The panel out, else the one that went within `REOPENS_WITHIN_MS`. */
@@ -359,6 +415,17 @@ function topOf(button: Element): number {
   return drawn?.getBoundingClientRect().top ?? own.top
 }
 
+/** A panel's box, its `popup` part:  what slides, glides and grows. */
+function boxOf(panel: RailPanel): HTMLElement | undefined {
+  return panel.shadowRoot?.querySelector<HTMLElement>("[part~=popup]") ?? undefined
+}
+
+/** The person asks for less motion:  a panel's height doesn't glide (its slide and glide are the sheet's). */
+const REDUCED_MOTION = matchMedia("(prefers-reduced-motion: reduce)")
+
+/** A glide's time when the page says none:  Spell UI's normal duration. */
+const DEFAULT_GLIDE_SECONDS = 0.2
+
 /** A panel opening where another was:  it glides from there (`PaletteView.css`). */
 const GLIDING = "gliding"
 
@@ -372,29 +439,85 @@ const GLIDE_TOKEN = "--PaletteFlyout-glide"
 const REOPENS_WITHIN_MS = 300
 
 /**
- * A starred part's button in the add bar (epic `editor` T152):  a click picks it up to place with the next click in
- * the app (`PartPlacing`, T153), a drag places it, a right click takes its star away.
+ * ### `<FavoriteButton>`
+ * A starred part's button in the add bar (epic `editor` T152), and the small sub-panel it opens beside the bar:
+ * "Add [its icon] Text" (T183, Owen:  "It should feel like part of the same animation as the menus coming up").
+ * - The panel slides out as a group's menu does, in the same look, the button lit (`RailPanels`):
+ *   once the mouse rests on the button, at once on a click, or while another panel is out, gliding there.
+ * - A click on the panel picks the part up to place with the next click in the app (`PartPlacing`, T153),
+ *   as a click on the button itself did before;  its words say so to a screen reader (`paletteFavoriteTip`).
+ * - A drag from the button or the panel places it;  a right click on the button takes its star away.
+ * - The button is lit while its part is picked up.
  */
 function FavoriteButton(props: { definition: ComponentDefinition }): JSX.Element {
   // lit while it's the part picked up to place
   const [isPicked, setPicked] = createSignal(false)
+  const [isOut, setOut] = createSignal(false)
   onSettled(() => PartPlacing.watch(() => setPicked(PartPlacing.isPicked(props.definition.name))))
+  const id = () => `${FLYOUT_ID}star-${kebabCase(props.definition.tag)}`
+  let panel: RailPanel | undefined
+  let button: HTMLElement | undefined
   return (
-    <ui-item
-      class={["PaletteRailButton", "PaletteFavorite"]}
-      icon={props.definition.icon ?? GROUP_ICON}
-      selected={isPicked()}
-      aria-label={props.definition.name}
-      {...railTooltip(appTexts.text("paletteFavoriteTip", { part: props.definition.name }))}
-      onClick={(event: MouseEvent) => pickUp(props.definition, event)}
-      onContextMenu={(event: MouseEvent) => {
-        event.preventDefault()
-        Palette.toggleFavorite(props.definition)
-      }}
-      ref={(element: Element) => startsDrag(element, props.definition)}
-    />
+    <>
+      <ui-item
+        id={id()}
+        class={["PaletteRailButton", "PaletteFavorite", { open: isOut() }]}
+        icon={props.definition.icon ?? GROUP_ICON}
+        selected={isPicked()}
+        aria-haspopup="menu"
+        aria-label={props.definition.name}
+        ref={(element: HTMLElement) => {
+          button = element
+          startsDrag(element, props.definition)
+        }}
+        onPointerEnter={() => panel && button && RailPanels.pointedAt(panel, button)}
+        onClick={() => panel && button && RailPanels.open(panel, button)}
+        onContextMenu={(event: MouseEvent) => {
+          event.preventDefault()
+          Palette.toggleFavorite(props.definition)
+        }}
+      />
+      <ui-popup
+        for={id()}
+        open-on="hover"
+        position="right top"
+        class={["BarMenuPopup", "PaletteFlyout", "PaletteFavoritePanel"]}
+        aria-label={props.definition.name}
+        ref={(popup: RailPanel) => {
+          panel = popup
+          closesWithPalette(popup)
+          RailPanels.follow(popup, () => button, setOut)
+        }}
+        {...{ [RAIL_MARK]: "" }}
+      >
+        <ui-button
+          class="PaletteFavoriteAdd"
+          appearance="basic"
+          aria-description={appTexts.text("paletteFavoriteTip", { part: props.definition.name })}
+          ref={(add: Element) => startsDrag(add, props.definition)}
+          onClick={(event: MouseEvent) => pickUp(props.definition, event)}
+        >
+          {addWords()[0]}
+          <ui-icon name={props.definition.icon ?? GROUP_ICON} />
+          {props.definition.name}
+          {addWords()[1]}
+        </ui-button>
+      </ui-popup>
+    </>
   )
 }
+
+/**
+ * The words round a part's icon and name, "Add" and nothing, in the editor's language (`paletteAddPart`;  reactive):
+ * the sentence is the language's own, the icon and name going where its `{part}` is.
+ */
+function addWords(): [string, string] {
+  const [before = "", after = ""] = appTexts.text("paletteAddPart", { part: PART_MARK }).split(PART_MARK)
+  return [before, after]
+}
+
+/** Where a part's icon and name go in `paletteAddPart`'s words:  a character no language writes. */
+const PART_MARK = "\u0000"
 
 /****************
  * ### `<PalettePanel>`
@@ -430,14 +553,18 @@ export function PalettePanel(props: { onClose: () => void }): JSX.Element {
  * - Every group shows everything in it, as the palette's table orders it (`ui/paletteGroups.json`;  epic `editor` I174, T81).
  * - A search looks through all of them, by name, other names and description:  ⌘F jumps into it (epic `editor` T166).
  * - Its header's words say what the part under the mouse is, else how to add one (`<PartAbout>`, epic `editor` T165).
+ * - `picksUp`, out of the add bar's `+`:  a click on a part picks it up to place with the next click in the app, as in
+ *   the add bar's other menus (`PartPlacing`, T153;  epic `editor` I369);  in the dialog it's added at once.
  */
-export function PaletteMenu(): JSX.Element {
+export function PaletteMenu(props: PaletteMenuProps): JSX.Element {
   const [filter, setFilter] = createSignal("")
   const words = () => filter().trim().toLowerCase()
+  /** How many topics show, for the `+` panel to be as wide as they need (I369). */
+  const topics = () => groupsMatching(words()).length + (thisGroupMatches(words()) ? 1 : 0)
   /** Its first group's name:  This page on a page that draws its body, else App views. */
   const thisGroup = () => (Palette.isPageShown ? "thisPage" : "paletteAppViews")
   return (
-    <div class="PaletteBody">
+    <div class="PaletteBody" style={{ "--PaletteMenu-topics": topics() }}>
       <div class="PaletteHead">
         <PartAbout class="PaletteHint" />
         <ui-input
@@ -465,7 +592,9 @@ export function PaletteMenu(): JSX.Element {
               <section class="PaletteGroup">
                 <h4>{upperFirst(groupName(group))}</h4>
                 <ui-tree class="PaletteTree" label={groupName(group)} ref={treeChoosesRows}>
-                  <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
+                  <For each={group.parts}>
+                    {(definition) => <PaletteRow definition={definition} picksUp={props.picksUp} />}
+                  </For>
                 </ui-tree>
               </section>
             )}
@@ -474,6 +603,12 @@ export function PaletteMenu(): JSX.Element {
       </div>
     </div>
   )
+}
+
+/** Props for `<PaletteMenu>`. */
+export type PaletteMenuProps = {
+  /** a click on a part picks it up to place, rather than adding it at once.  Default:  `false`. */
+  picksUp?: boolean
 }
 
 /**

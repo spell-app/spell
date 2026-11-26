@@ -169,7 +169,9 @@ describe.skipIf(!SERVING)("placing in a site with a layout", { timeout: 180_000 
     expect(await linesOf("<container>")).not.toContain(BUTTON)
   })
 
-  test("a click with nothing selected adds to the page, selected and scrolled into view", async () => {
+  // SKIPPED until epic `editor` J368 is decided:  in Edit a click in the add panel picks the part up (I369), so nothing
+  // adds beside what's selected there any more
+  test.skip("a click with nothing selected adds to the page, selected and scrolled into view", async () => {
     await letGo()
     await clickButton()
     const lines = await linesOf("<container>")
@@ -183,7 +185,9 @@ describe.skipIf(!SERVING)("placing in a site with a layout", { timeout: 180_000 
     await undo()
   })
 
-  test("with the footer picked, a click adds to the footer, and it's drawn at once", async () => {
+  // SKIPPED until epic `editor` J368 is decided:  in Edit a click in the add panel picks the part up (I369), so nothing
+  // adds beside what's selected there any more
+  test.skip("with the footer picked, a click adds to the footer, and it's drawn at once", async () => {
     await page.evaluate(() => {
       const footer = document.querySelector('.AppPaneBody div[slot="footer"] ui-text')
       ;(window as unknown as { Inspector: { select(element: Element | null): void } }).Inspector.select(footer)
@@ -195,7 +199,9 @@ describe.skipIf(!SERVING)("placing in a site with a layout", { timeout: 180_000 
     await undo()
   })
 
-  test("what's added but draws nothing to see is still picked, and a notice says so", async () => {
+  // SKIPPED until epic `editor` J368 is decided:  in Edit a click in the add panel picks the part up (I369), so nothing
+  // adds beside what's selected there any more
+  test.skip("what's added but draws nothing to see is still picked, and a notice says so", async () => {
     await letGo()
     await page.evaluate(() => ((window as unknown as { editor: { notice?: string } }).editor.notice = undefined))
     await openPalette()

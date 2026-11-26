@@ -44,6 +44,7 @@
  * - The picture as spell.app shows it:  521px wide at most, on white, 4px in, 16px corners, the page's shadow.
  */
 .Home .Hero {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -51,6 +52,13 @@
   gap: 36px;
   padding: 44px;
   border-radius: calc(var(--Home-radius) + 12px);
+
+  /* its ✕, in its top right corner, a step in from the rounding (epic `editor` T186) */
+  .HeroClose {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
 
   /* no lone word on a line of its own */
   h1,
@@ -151,26 +159,36 @@
   }
 }
 
+/* a section, a `<ui-section>` folding by the chevron before its title (`<HomeSection>`, epic `editor` T186) */
 .Home .ProjectCards {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: block;
   scroll-margin-top: 16px;
 
-  header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 0 4px;
+  &::part(section) {
+    margin: 0;
   }
-  h2 {
+  &::part(title) {
+    align-items: baseline;
+    gap: 12px;
+    padding: 0 4px;
+  }
+  &::part(heading) {
     margin: 0;
     font-family: var(--ui-font-family-heading);
     font-size: 22px;
     font-weight: var(--ui-font-weight-bold);
     letter-spacing: -0.01em;
+  }
+  /* its title's words, the heading then its quiet line:  a line box no taller than they are,
+     so the chevron before them sits on their middle */
+  .SectionTitle {
+    line-height: 1.2;
+  }
+  /* the cards' shadows show past its edges:  it clips its content, to fold it smoothly */
+  &::part(content) {
+    padding: 12px 0 0 0;
+    overflow: clip;
+    overflow-clip-margin: 40px;
   }
   .line {
     font-family: var(--Home-serif);
@@ -195,7 +213,7 @@
   }
   /* a section moved by its header among the page's, while the page is rearranged (epic `mockup` T51):
      the one moving faint, where it would land marked, as a card dragged among its row is (`TileCard.css`) */
-  &.grabbable > header {
+  &.grabbable .SectionTitle {
     cursor: grab;
   }
   &.dragging {
@@ -259,7 +277,8 @@
     color: var(--ui-text-muted);
   }
 }
-.Home .RearrangeFoot {
+.Home .RearrangeFoot,
+.Home .ShowIntro {
   opacity: 0.8;
 }
 
@@ -299,6 +318,13 @@
     &:focus-visible .name {
       text-decoration: underline;
     }
+  }
+
+  /* Show the introduction (while the hero's hidden) and Rearrange Home Screen, side by side */
+  .FootButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
   @media (--ui-mobile) {

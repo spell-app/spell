@@ -119,6 +119,7 @@ const APP_TEXTS_ES: AppTextPack = {
   paletteUnstar: "Quitar la estrella a {part}",
   paletteFavoriteTip:
     "{part}:  haz clic aquí y luego en tu aplicación, donde lo quieras.  O arrástralo hasta allí.  Para quitarle la estrella, haz clic derecho.",
+  paletteAddPart: "Añadir {part}",
   paletteAddView: "Añadir una vista",
   paletteClearSearch: "Borrar la búsqueda",
   partStepAdd: "Añadir {part}",
@@ -376,6 +377,14 @@ const APP_TEXTS_ES: AppTextPack = {
   shortcutShowShortcuts: "Mostrar los atajos de teclado",
   shortcutShowIcons: "Mostrar todos los iconos, con sus nombres",
   allIcons: "Todos los iconos…",
+  servers: "Servidores…",
+  serversAllRunning: "Todos los servidores de Spell en segundo plano están funcionando.",
+  serversOneDown:
+    "Uno de los servidores de Spell en segundo plano se ha parado.\nHaz clic para ver cuál, y volver a ponerlo en marcha.",
+  serversSomeDown:
+    "{count} de los servidores de Spell en segundo plano se han parado.\nHaz clic para ver cuáles, y volver a ponerlos en marcha.",
+  serversUnknown: "Spell no puede comprobar ahora sus servidores en segundo plano.\nHaz clic para verlos.",
+  serversTitle: "Servidores",
   shortcutChangeThis: "Pedir un cambio en lo seleccionado",
   shortcutFormat: "Dar formato al documento",
   shortcutExpandSelection: "Ampliar la selección",
@@ -788,6 +797,8 @@ const APP_TEXTS_ES: AppTextPack = {
   tryAnExample: "Prueba un ejemplo",
   readFirstSpell: "Lee tu primer spell",
   homeExampleCaption: "Del Card.spell del Solitario",
+  homeHideIntro: "Ocultar la introducción",
+  homeShowIntro: "Mostrar la introducción",
   homeExampleAlt:
     "Una carta de la baraja, en Spell:  una carta es una vista arrastrable de dos caras;  su valor es as, 2 ... 10, jota, reina o rey;  su palo es tréboles, diamantes, corazones o picas;  su color es rojo o negro;  es una figura si su valor es jota, reina o rey;  es una carta de número si no es una figura",
   homeExamplesLine: "Abre uno, cámbialo, hazlo tuyo.",

@@ -1037,7 +1037,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForSelector(".InputEditor .cm-editor", { timeout: 30_000 })
   })
 
-  test("the add bar runs down the left edge in Edit, the app then the code across;  its groups open beside it, its stars stay, its + opens everything (T151, T152, T173, T174)", async () => {
+  test("the add bar runs down the left edge in Edit, the app then the code across;  its groups open beside it, its stars stay, its + opens everything (T151, T152, T173, T174, T183, I365, I367, I369)", async () => {
     const popupShows = () =>
       page.evaluate((panel) => !!document.querySelector<HTMLElement & { visible?: boolean }>(panel)?.visible, ADD_PANEL)
 
@@ -1179,7 +1179,12 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       page.evaluate(() =>
         (window as unknown as { PartPlacing: { isPicked(label: string): boolean } }).PartPlacing.isPicked("Grid")
       )
+    // ... through its own sub-panel, "Add [icon] Grid", out of the bar as a group's menu is (T183)
     await page.locator(".PaletteRail ui-item.PaletteFavorite [part~=item]").click()
+    await page.waitForTimeout(400)
+    const addGrid = page.locator("ui-popup.PaletteFavoritePanel ui-button.PaletteFavoriteAdd")
+    expect((await addGrid.textContent())?.replace(/\s+/g, " ").trim()).toBe("Add Grid")
+    await addGrid.locator("[part~=button]").click()
     await page.waitForTimeout(400)
     expect(await isPicked()).toBe(true)
     expect(await page.locator(".PaletteRail ui-item.PaletteFavorite[selected]").count()).toBe(1)
@@ -1192,24 +1197,34 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await page.locator(".PaletteRail ui-item.PaletteFavorite").count()).toBe(0)
 
     // the `+` opens the whole add panel beside the bar as the mouse rests on it, in columns, the cursor in its search
-    // (T174);  its search looks through every part;  choosing one closes it (I176) and adds it
+    // (T174);  its search looks through every part, the panel growing thinner as fewer topics match (I369);
+    // choosing one closes it (I176) and picks it up to place with the next click in the app, as the group menus do (I369)
     await page.locator(".PaletteRail .PaletteRailAdd").hover()
     await page.waitForTimeout(HOVER_OPENS_MS)
     const everything = page.locator("ui-popup.PalettePlus")
     expect(await everything.evaluate((panel) => (panel as HTMLElement & { visible?: boolean }).visible)).toBe(true)
     expect(await everything.locator(".PaletteGroup").count()).toBeGreaterThan(4)
-    const buttons = ((await text()).match(/<(ui-)?button\b/g) ?? []).length
+    const panelWidth = () =>
+      everything.evaluate((panel) => panel.shadowRoot!.querySelector("[part~=popup]")!.getBoundingClientRect().width)
+    const wide = await panelWidth()
     await page.keyboard.type("butt")
-    await page.waitForTimeout(600)
+    await page.waitForTimeout(800)
+    expect(await panelWidth()).toBeLessThan(wide)
     expect(await everything.locator('ui-tree-item[label="Button"]').count()).toBeGreaterThan(0)
     await everything.locator('ui-tree-item[label="Button"]').first().locator("[part~=row]").first().click()
-    await page.waitForTimeout(SETTLE_MS)
+    await page.waitForTimeout(600)
     expect(await flyoutsOpen()).toBe(0)
-    expect(((await text()).match(/<(ui-)?button\b/g) ?? []).length).toBe(buttons + 1)
+    expect(
+      await page.evaluate(() =>
+        (window as unknown as { PartPlacing: { isPicked(label: string): boolean } }).PartPlacing.isPicked("Button")
+      )
+    ).toBe(true)
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(400)
 
     // ... a click opens it at once;  while it's out, pointing at a group's button opens that one at once, gliding there
-    // from the `+`, as one sub-panel (T173):  the button and its panel's header one fill, the panel at the bar's edge,
-    // its top the button's
+    // from the `+`, as one sub-panel (T173), its height with it (I365):  the button lit with its panel's header's fill
+    // (I367), the panel at the bar's edge, its top the button's
     await page.locator(".PaletteRail .PaletteRailAdd").click()
     await page.waitForTimeout(400)
     expect(await everything.evaluate((panel) => (panel as HTMLElement & { visible?: boolean }).visible)).toBe(true)

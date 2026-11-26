@@ -350,10 +350,11 @@ function ThemeItems(): JSX.Element {
  *   P34), Program Panel, ─,
  *   Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
- * - Help:  Keyboard Shortcuts (epic `editor` P36), All Icons (T158), ─,
+ * - Help:  Keyboard Shortcuts (epic `editor` P36), All Icons (T158), Servers… (T185:  a dot saying whether this
+ *   machine's servers are all up, the server keeper's Servers page in a dialog;  only where a keeper runs), ─,
  *   the editor's tours and Tours… (`<TourMenuItems>`, epic `editor` P40),
  *   ─, then Help, which does nothing yet;  the editor's own, not the Spell's.
- *   - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there.
+ *   - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help and Servers draw nothing there.
  * - `mode`:  the page's, ticked in View.
  * - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows.
  ****************/
@@ -392,6 +393,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     <>
       <Actions.showShortcuts menu />
       <Actions.showIcons menu />
+      <Actions.showServers menu />
       <ui-divider />
       <TourMenuItems />
       <ui-divider />
